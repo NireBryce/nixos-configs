@@ -39,11 +39,11 @@
       neededForBoot = true;
     };
 
-  fileSystems."/etc/nixos" =
-    { device = "/var/log/persist/etc/nixos";
-      fsType = "none";
-      options = [ "bind" ];
-    };
+  # fileSystems."/etc/nixos" =
+  #   { device = "/var/log/persist/etc/nixos";
+  #     fsType = "none";
+  #     options = [ "bind" ];
+  #   };
 
   fileSystems."/home" =
     { device = "/dev/disk/by-uuid/be5e15ea-5012-47c8-8d63-fcb26fb5f23c";
