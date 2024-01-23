@@ -174,7 +174,7 @@ in
 
 # services
   services.syncthing = {
-    ensble = true;
+    enable = true;
     dataDir = "/home/elly/syncthing";
     openDefaultPorts = true;
     configDir = "/home/elly/.config/syncthing";
@@ -197,7 +197,7 @@ in
           path = "/home/elly/code";
           devices = [ "nire-galatea" ];
           versioning = {
-            tyoe = "staggered";
+            type = "staggered";
             params = { 
               cleanInterval = "3600";
               maxAge = "15768000";
@@ -206,8 +206,8 @@ in
         };  
         "sync" = {
           path = "/home/elly/sync";
-          devices = { "nire-galatea" };
-          versioning { 
+          devices = [ "nire-galatea" ];
+          versioning = { 
             type = "simple";
             params = { keep = 5; };
           };
