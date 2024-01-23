@@ -197,7 +197,9 @@ in
       folders = { 
         "code" = { 
           path = "/home/elly/code";
-          devices = [ "nire-galatea" ];
+          devices = [ "nire-tenacity" 
+                      "nire-durandal" 
+                      "nire-lysithea" ];
           versioning = {
             type = "staggered";
             params = { 
@@ -208,7 +210,12 @@ in
         };  
         "sync" = {
           path = "/home/elly/sync";
-          devices = [ "nire-galatea" ];
+          devices = [ "nire-tenacity"
+                      "nire-iona"
+                      "nire-lysithea"
+                      "nire-sif"
+                      "nire-durandal" ];
+                      
           versioning = { 
             type = "simple";
             params = { keep = 5; };
