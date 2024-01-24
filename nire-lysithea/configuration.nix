@@ -231,7 +231,14 @@ in
    '';
   };
 
-# Erase the root at boot 1q
+
+sops.secrets.tailscale.key = {
+  sopsFile = ./secrets.yml
+};
+
+
+
+# Erase the root at boot
     boot.initrd = {
       enable = true;
       supportedFilesystems = [ "btrfs" ];
