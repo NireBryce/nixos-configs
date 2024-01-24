@@ -13,6 +13,8 @@ in
       "${impermanence}/nixos.nix"
       # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      ../../modules/sops.nix
+      outputs.nixosModules.tailscale-autoconnect
     ];
     
   # TODO: variablize
