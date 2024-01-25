@@ -233,7 +233,7 @@ in
 
 
 sops.secrets.tailscale.key = {
-  sopsFile = ./secrets.yml
+  sopsFile = ./secrets.yml;
 };
 
 
