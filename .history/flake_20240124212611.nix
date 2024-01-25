@@ -36,8 +36,8 @@
 
     nixosConfigurations = { # (3)
       nire-lysithea = nixpkgs.lib.nixosSystem { # (4)
-        packages = nixpkgs.legacyPackages.x86_64-linux; # (5)
-        specialArgs = inputs; # forward inputs to modules
+      `packages = nixpkgs.legacyPackages.x86_64-linux; # (5)
+      specialArgs = inputs; # forward inputs to modules
 # Change this when you change host.
         modules = [
           ./nire-lysithea
