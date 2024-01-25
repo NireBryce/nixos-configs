@@ -11,6 +11,7 @@
     sops-nix = { 
       url = "github:mic92/sops-nic";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs-stable.follows = "nixpkgs";
       # What's up with this follows? sops-nix already depends on nixpkgs, 
       # but it might use a different revision than ours. Making it use our 
       # own has several advantages:
@@ -31,12 +32,13 @@
   #
   # inputs: inputs.nixpkgs
   outputs = { nixpkgs, ... }@inputs: { # (2)
+    nixModules = import ./modules/nixos
     nixosConfigurations = { # (3)
       server = nixpkgs.lib.nixosSystem { # (4)
         packages = nixpkgs.legacyPackages.x86_64-linux; # (5)
         specialArgs = inputs; # forward inputs to modules
         modules = [
-          ./configuration.Nix
+          ./nire-lysithea
         ];
       };
     };

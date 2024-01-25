@@ -126,8 +126,8 @@ in
                       ];
     allowedTCPPortRanges = [  
                             {  # kde-connect TCP
-                               from = 1714;
-                               to   = 1764;    
+                              from = 1714;
+                              to   = 1764;    
                             }
                            ];
     allowedUDPPorts = [                            
@@ -144,17 +144,17 @@ in
 
 # shells
   environment.shells = [ 
-                         pkgs.zsh
-                         pkgs.bash
+                          pkgs.zsh
+                          pkgs.bash
                        ];
   
 
   # List services that you want to enable:
 
-  # Copy the NixOS configuration file and link it from the resulting system
+# # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you
   # accidentally delete configuration.nix.
-  system.copySystemConfiguration = true;
+  # system.copySystemConfiguration = true;
 
   # This option defines the first version of NixOS you have installed on this particular machine,
   # and is used to maintain compatibility with application data (e.g. databases) created on older NixOS versions.
@@ -217,141 +217,6 @@ in
       };
     };
   };
-  services.openssh = {
-   enable = true;
-   passwordAuthentication = false;
-   allowSFTP = false; # Don't set this if you need sftp
-   challengeResponseAuthentication = false;
-   extraConfig = ''
-     AllowTcpForwarding yes
-     X11Forwarding no
-     AllowAgentForwarding no
-     AllowStreamLocalForwarding no
-     AuthenticationMethods publickey
-   '';
-  };
-
-
-sops.secrets.tailscale.key = {
-  sopsFile = ./secrets.yml;
-};
-
-
-
-# Erase the root at boot
-    boot.initrd = {
-      enable = true;
-      supportedFilesystems = [ "btrfs" ];
-
-      systemd.services.restore-root = {
-        description = "Rollback btrfs rootfs";
-        wantedBy = [ "initrd.target" ];
-        requires = [
-          # TODO: variablize
-          "dev-nvme0n1p3"
-        ];
-        after = [
-          "dev-nvme0n1p3"
-          "systemd-cryptsetup@${config.networking.hostName}.service"
-        ];
-        before = [ "sysroot.mount" ];
-        unitConfig.DefaultDependencies = "no";
-        serviceConfig.Type = "oneshot";
-        script = ''
-          mkdir -p /mnt
-
-          # We first mount the btrfs root to /mnt
-          # so we can manipulate btrfs subvolumes.
-          mount -o subvol=/ /dev/nvme0n1p3 /mnt
-
-          # While we're tempted to just delete /root and create
-          # a new snapshot from /root-blank, /root is already
-          # populated at this point with a number of subvolumes,
-          # which makes `btrfs subvolume delete` fail.
-          # So, we remove them first.
-          #
-          # /root contains subvolumes:
-          # - /root/var/lib/portables
-          # - /root/var/lib/machines
-          #
-          # I suspect these are related to systemd-nspawn, but
-          # since I don't use it I'm not 100% sure.
-          # Anyhow, deleting these subvolumes hasn't resulted
-          # in any issues so far, except for fairly
-          # benign-looking errors from systemd-tmpfiles.
-          btrfs subvolume list -o /mnt/root |
-          cut -f9 -d' ' |
-          while read subvolume; do
-            echo "deleting /$subvolume subvolume..."
-            btrfs subvolume delete "/mnt/$subvolume"
-          done &&
-          echo "deleting /root subvolume..." &&
-          btrfs subvolume delete /mnt/root
-
-          echo "restoring blank /root subvolume..."
-          btrfs subvolume snapshot /mnt/root-blank /mnt/root
-
-          # Once we're done rolling back to a blank snapshot,
-          # we can unmount /mnt and continue on the boot process.
-          umount /mnt
-        '';
-      };
-    };
-
-  # console = {
-  #   font = "Lat2-Terminus16";
-  #   keyMap = "us";
-  #   useXkbConfig = true; # use xkb.options in tty.
-  # };
-
-# Sound.
-  # TODO: Variablize
-  # sound.enable = true;
-  # hardware.pulseaudio.enable = true;
-# Touchpad
-  # TODO: variablize 
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.xserver.libinput.enable = true;
-
-# Configure keymap in X11
-  # services.xserver.xkb.layout = "us";
-  # services.xserver.xkb.options = "eurosign:e,caps:escape";
-
-# Enable CUPS to print documents.
-  # services.printing.enable = true;
-
-  # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
-
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # reset / at each boot
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
-
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
-
-
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-}
-
-
-
-
-
-
-
-
-
 
 
 
