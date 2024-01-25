@@ -32,17 +32,17 @@
   #
   # inputs: inputs.nixpkgs
   outputs = { nixpkgs, ... }@inputs: { # (2)
-    nixosModules = import ./modules/nixos;
+    nixModules = import ./modules/nixos;
 
     nixosConfigurations = { # (3)
       server = nixpkgs.lib.nixosSystem { # (4)
         packages = nixpkgs.legacyPackages.x86_64-linux; # (5)
         specialArgs = inputs; # forward inputs to modules
-# Change this when you change host.
         modules = [
           ./nire-lysithea
         ];
       };
     };
+    nixosModules = import ./modules/nixos;
   };
 }

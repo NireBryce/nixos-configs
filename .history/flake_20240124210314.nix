@@ -32,6 +32,7 @@
   #
   # inputs: inputs.nixpkgs
   outputs = { nixpkgs, ... }@inputs: { # (2)
+    nixModules = import ./modules/nixos;
     nixosModules = import ./modules/nixos;
 
     nixosConfigurations = { # (3)
