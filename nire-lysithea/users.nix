@@ -18,5 +18,5 @@
 
       passwordFile = "/persist/passwords/elly";
     };
-  }
+  };
 }
