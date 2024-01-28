@@ -9,6 +9,8 @@
     impermanence.nixosModule
   ];
 
+  
+
 # Impermanence
   # filesystems
   fileSystems."/".options = [ "compress=zstd" "noatime" ];
@@ -92,9 +94,10 @@ boot.initrd = {
       umount /mnt
     '';
   };
-security.sudo.extraConfig = ''
-  # rollback results in sudo lectures after each reboot
-  Defaults lecture = never
-'';
+  };
+  security.sudo.extraConfig = ''
+    # rollback results in sudo lectures after each reboot
+    Defaults lecture = never
+  '';
 
-};
+}

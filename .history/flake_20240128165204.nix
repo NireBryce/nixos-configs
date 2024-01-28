@@ -34,8 +34,11 @@
   outputs = { nixpkgs, ... }@inputs: { # (2)
     nixosModules = import ./modules/nixos;
 
-    nixosConfigurations."nire-lysithea" = nixpkgs.lib.nixosSystem rec { # (3)
-    #  server = nixpkgs.lib.nixosSystem { # (4)
+    nixosConfigurations = { # (3)
+      server = nixpkgs.lib.nixosSystem { # (4)
+        packages = forAllSystems (system:
+          let pkgs = nixpkgs.legacyPackages.${system}; # (5)
+          in import ./nire-lysithea/pkgs { inherit pkgs }
         # packages = nixpkgs.legacyPackages.x86_64-linux;
         specialArgs = inputs; # forward inputs to modules
 # Change this when you change host.
@@ -44,5 +47,5 @@
         ];
       };
     };
-  }
-
+  };
+}

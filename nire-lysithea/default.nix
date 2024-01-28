@@ -33,9 +33,9 @@ in
   i18n.defaultLocale = "en_US.UTF-8";
 
 # Sops secret keys
-  sops.secrets.tailscale.key = {
-    sopsFile = ./secrets.yml;
-  };
+  # sops.secrets.tailscale.key = {
+  #   sopsFile = ../common/secrets.yml;
+  # };
 
 # system packages
   # List packages installed in system profile. To search, run:
@@ -58,9 +58,11 @@ in
 # SSH
   services.openssh = {
     enable = true;
-    passwordAuthentication = false;
+    settings.PasswordAuthentication = false;
+    settings.KbdInteractiveAuthentication = false;
     allowSFTP = false; # Don't set this if you need sftp
-    challengeResponseAuthentication = false;
+    # challengeResponseAuthentication = false;
+    
     extraConfig = ''
       AllowTcpForwarding yes
       X11Forwarding no
