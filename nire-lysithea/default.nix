@@ -8,7 +8,6 @@ in
   [ 
     ../common
     ./hardware-configuration.nix
-    ./impermanence.nix
     ./graphical-environment.nix
     ./syncthing.nix
     ./sops.nix

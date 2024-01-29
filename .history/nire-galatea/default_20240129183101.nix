@@ -8,17 +8,16 @@ in
   [ 
     ../common
     ./hardware-configuration.nix
-    ./impermanence.nix
     ./graphical-environment.nix
     ./syncthing.nix
     ./sops.nix
-    ./lysithea-users.nix
+    ./galatea-users.nix
   ];
   
   
 
 # hostname
-  networking.hostName = "nire-lysithea"; 
+  networking.hostName = "nire-galatea"; 
 
 # Sops secret keys
   # sops.secrets.tailscale.key = {

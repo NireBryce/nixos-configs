@@ -9,6 +9,8 @@
     # need to make this not bound to a particular partition scheme
     # ./impermanence.nix
     ./users.nix
+    ./ssh.nix
+    ./impermanence
   ];
 
   # Use the systemd-boot EFI boot loader.
@@ -48,23 +50,36 @@
                           pkgs.bash
                        ];
   
-# SSH
-  services.openssh = {
+
+  
+  # Firewall
+  networking.firewall = {
     enable = true;
-    settings.PasswordAuthentication = false;
-    settings.KbdInteractiveAuthentication = false;
-    allowSFTP = false; # Don't set this if you need sftp
-    # challengeResponseAuthentication = false;
-    
-    extraConfig = ''
-      AllowTcpForwarding yes
-      X11Forwarding no
-      AllowAgentForwarding no
-      AllowStreamLocalForwarding no
-      AuthenticationMethods publickey
-    '';
+    allowedTCPPorts = [          
+                        22 # ssh
+                      ];
+    allowedTCPPortRanges = [  
+                            {  # kde-connect TCP
+                              from = 1714;
+                              to   = 1764;    
+                            }
+                           ];
+    allowedUDPPorts = [                            
+                        
+                      ];
+    allowedUDPPortRanges = [
+                            { # kde-connect UDP 
+                              from = 1714;
+                              to   = 1764;
+                            }   
+                           ];
   };
 
+  # console = {
+  #   font = "Lat2-Terminus16";
+  #   keyMap = "us";
+  #   useXkbConfig = true; # use xkb.options in tty.
+  # };
 
 
 
