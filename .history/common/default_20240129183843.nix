@@ -10,7 +10,7 @@
     # ./impermanence.nix
     ./users.nix
     ./ssh.nix
-    ./impermanence.ni x
+    ./impermanence.nix
   ];
 
   # Use the systemd-boot EFI boot loader.
