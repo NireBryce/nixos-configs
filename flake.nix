@@ -42,7 +42,7 @@
         modules = [
           ./nire-lysithea
         ];
-      };
+    };
    nixosConfigurations."nire-galatea" = nixpkgs.lib.nixosSystem rec { # (3)
     #  server = nixpkgs.lib.nixosSystem { # (4)
         # packages = nixpkgs.legacyPackages.x86_64-linux;
@@ -51,8 +51,7 @@
         modules = [
           ./nire-galatea
         ];
-      };
-
     };
-  }
+  };
+}
 

@@ -20,7 +20,7 @@ in
   boot.loader.efi.canTouchEfiVariables = true;
   
 # hostname
-  networking.hostName = "nire-lysithea"; 
+  networking.hostName = "nire-galatea"; 
 
 # wifi manager options.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
