@@ -16,4 +16,3 @@
       AuthenticationMethods publickey
     '';
   };
-};
