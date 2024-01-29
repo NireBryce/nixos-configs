@@ -1,0 +1,13 @@
+keys:
+  - &nire-lysithea age1ss0jcxey4982tdu9lya27wvy4wvzv59t2a9g9w4x57nzpjyrr93q0ljccy
+  - &nire-galatea #TODO: FIXME
+creation_rules:
+  - path_regex: ./common/secrets.yaml$
+    key_groups:
+      - age:
+          - *nire-lysithea
+          - *nire-galatea
+  - path_regex: ./common/secrets.yaml$
+    key_groups:
+      - age:
+          - *nire-lysithea

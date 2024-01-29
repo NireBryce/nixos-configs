@@ -14,10 +14,6 @@
         micro
         git
       ];
-      # TODO: variablize sshkey
-      openssh.authorizedKeys.keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICg98bz8ZEsVJSQ/AY3ReGHUo1DGJnAMJtNPDHKiRy99 elly" ];
-
-      hashedPasswordFile = "/persist/passwords/user";
     };
   };
 }

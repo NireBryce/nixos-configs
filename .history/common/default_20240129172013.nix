@@ -9,7 +9,6 @@
     # need to make this not bound to a particular partition scheme
     # ./impermanence.nix
     ./users.nix
-    ./ssh.nix
   ];
 
   # Use the systemd-boot EFI boot loader.
@@ -29,8 +28,8 @@
   
   # i18n
   i18n.defaultLocale = "en_US.UTF-8";
-  
-# system packages
+
+  # system packages
   # List packages installed in system profile. To search, run:
   # $ nix search <package name>
   environment.systemPackages = with pkgs; [
@@ -42,43 +41,9 @@
     bash
     zsh
   ];
-  
-# shells
-  environment.shells = [ 
-                          pkgs.zsh
-                          pkgs.bash
-                       ];
-  
 
-  
-  # Firewall
-  networking.firewall = {
-    enable = true;
-    allowedTCPPorts = [          
-                        22 # ssh
-                      ];
-    allowedTCPPortRanges = [  
-                            {  # kde-connect TCP
-                              from = 1714;
-                              to   = 1764;    
-                            }
-                           ];
-    allowedUDPPorts = [                            
-                        
-                      ];
-    allowedUDPPortRanges = [
-                            { # kde-connect UDP 
-                              from = 1714;
-                              to   = 1764;
-                            }   
-                           ];
-  };
 
-  # console = {
-  #   font = "Lat2-Terminus16";
-  #   keyMap = "us";
-  #   useXkbConfig = true; # use xkb.options in tty.
-  # };
+
 
 
 

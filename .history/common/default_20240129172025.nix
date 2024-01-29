@@ -9,7 +9,6 @@
     # need to make this not bound to a particular partition scheme
     # ./impermanence.nix
     ./users.nix
-    ./ssh.nix
   ];
 
   # Use the systemd-boot EFI boot loader.
@@ -42,43 +41,11 @@
     bash
     zsh
   ];
-  
-# shells
-  environment.shells = [ 
-                          pkgs.zsh
-                          pkgs.bash
-                       ];
-  
 
   
-  # Firewall
-  networking.firewall = {
-    enable = true;
-    allowedTCPPorts = [          
-                        22 # ssh
-                      ];
-    allowedTCPPortRanges = [  
-                            {  # kde-connect TCP
-                              from = 1714;
-                              to   = 1764;    
-                            }
-                           ];
-    allowedUDPPorts = [                            
-                        
-                      ];
-    allowedUDPPortRanges = [
-                            { # kde-connect UDP 
-                              from = 1714;
-                              to   = 1764;
-                            }   
-                           ];
-  };
 
-  # console = {
-  #   font = "Lat2-Terminus16";
-  #   keyMap = "us";
-  #   useXkbConfig = true; # use xkb.options in tty.
-  # };
+
+
 
 
 

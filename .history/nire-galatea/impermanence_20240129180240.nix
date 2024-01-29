@@ -52,7 +52,6 @@ boot.initrd = {
     after = [
     # Figure out how to make this use the hostname
       # "dev-nvme0n1p3"
-      /dev/mapper/enc
       "systemd-cryptsetup@${config.networking.hostName}.service"
     ];
     before = [ "sysroot.mount" ];

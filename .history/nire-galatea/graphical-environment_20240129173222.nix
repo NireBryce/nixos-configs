@@ -7,5 +7,5 @@
 # Enable the GNOME Desktop Environment.
   #TODO: variablize so it's a choice of DM and WM
   services.xserver.displayManager.sddm.enable = true;
-  services.xserver.desktopManager.plasma5.enable = true;
+  services.xserver.desktopManager.gnome.enable = true;
 }
