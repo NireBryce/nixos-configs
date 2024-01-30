@@ -9,7 +9,7 @@ in
     ../common
     ./hardware-configuration.nix
     ./graphical-environment.nix
-    # ./syncthing.nix
+    ./syncthing.nix
     ./sops.nix
     ./galatea-users.nix
   ];
