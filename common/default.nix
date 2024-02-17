@@ -43,7 +43,8 @@
     bash
     zsh
   ];
-  
+
+  programs.nix-ld.enable = true;
 # shells
   environment.shells = [ 
                           pkgs.zsh
