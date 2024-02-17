@@ -19,6 +19,8 @@ in
 # hostname
   networking.hostName = "nire-galatea"; 
 
+# required for vscode-remote
+  programs.nix-ld.enable = true;
 # Sops secret keys
   # sops.secrets.tailscale.key = {
   #   sopsFile = ../common/secrets.yml;
