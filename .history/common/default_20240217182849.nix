@@ -44,9 +44,8 @@
     zsh
   ];
 
-# Needed for VSCode remote connection
   programs.nix-ld.enable = true;
-
+  
 # shells
   environment.shells = [ 
                           pkgs.zsh
