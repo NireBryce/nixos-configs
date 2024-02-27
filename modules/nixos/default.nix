@@ -1,3 +1,3 @@
 { 
-  tailsccale.autoconnect = import ./tailscale-autoconnect.nix;
+  tailscale.autoconnect = import ./tailscale-autoconnect.nix;
 }
