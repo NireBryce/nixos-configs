@@ -5,7 +5,8 @@
  
 # what is consumed (previously provided by channels and fetchTarball)
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11"; # (1)
+    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11"; # (1)
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; # (1)
     impermanence.url = "github:Nix-community/impermanence";
   # secret management
     sops-nix = { 
@@ -33,6 +34,13 @@
   # inputs: inputs.nixpkgs
   outputs = { nixpkgs, ... }@inputs: { # (2)
     nixosModules = import ./modules/nixos;
+
+	nixosConfigurations."nire-durandal" = nixpkgs.lib.nixosSystem rec {
+		specialArgs = inputs;
+		modules = [
+			./nire-durandal
+		];
+	};
 
     nixosConfigurations."nire-lysithea" = nixpkgs.lib.nixosSystem rec { # (3)
     #  server = nixpkgs.lib.nixosSystem { # (4)

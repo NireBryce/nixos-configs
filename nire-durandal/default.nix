@@ -17,7 +17,7 @@ in
   
 
 # hostname
-  networking.hostName = "nire-lysithea"; 
+  networking.hostName = "nire-durandal"; 
 
 # Sops secret keys
   # sops.secrets.tailscale.key = {
