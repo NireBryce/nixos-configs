@@ -30,6 +30,8 @@
   
   # i18n
   i18n.defaultLocale = "en_US.UTF-8";
+
+  programs.kdeconnect.enable;
   
 # system packages
   # List packages installed in system profile. To search, run:
