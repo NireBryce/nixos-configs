@@ -7,7 +7,6 @@
   imports = [
     # ./acme.nix
     # need to make this not bound to a particular partition scheme
-    # ./impermanence.nix
     ./users.nix
     ./ssh.nix
     ./impermanence.nix
@@ -16,7 +15,7 @@
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  
+  # boot.loader.efi.efiSysMountPoint = "/boot";  
   # wifi manager options.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
   networking.networkmanager.enable = true;  # Needs to be 'true' for KDE networking

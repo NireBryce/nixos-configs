@@ -13,14 +13,14 @@
       url = "github:mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.nixpkgs-stable.follows = "nixpkgs";
-      # What's up with this follows? sops-nix already depends on nixpkgs, 
+      # What\'s up with this follows? sops-nix already depends on nixpkgs, 
       # but it might use a different revision than ours. Making it use our 
       # own has several advantages:
       # - improve consistency
       # - reduce number of evaluations needed
       # 
       # And how do we know if a package has inputs that need to be redirected? 
-      # That's the neat thing, we don't. Either we have to look at the upstream 
+      # That\'s the neat thing, we don\'t. Either we have to look at the upstream 
       # flake.nix, or we can call nix flake info and get a graph
     };
   };
@@ -35,13 +35,13 @@
   outputs = { nixpkgs, ... }@inputs: { # (2)
     nixosModules = import ./modules/nixos;
 
-	nixosConfigurations."nire-durandal" = nixpkgs.lib.nixosSystem rec {
-		specialArgs = inputs;
-		modules = [
-			./nire-durandal
-		];
-	};
 
+	nixosConfigurations."nire-durandal" = nixpkgs.lib.nixosSystem rec {
+	  specialArgs = inputs;
+	  modules = [
+       ./nire-durandal
+      ];
+	};
     nixosConfigurations."nire-lysithea" = nixpkgs.lib.nixosSystem rec { # (3)
     #  server = nixpkgs.lib.nixosSystem { # (4)
         # packages = nixpkgs.legacyPackages.x86_64-linux;
