@@ -49,6 +49,8 @@
     git
     bash
     zsh
+    stdenv
+    gcc
   ];
 
 # Needed for VSCode remote connection
