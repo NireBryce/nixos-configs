@@ -7,6 +7,7 @@ in
   imports = 
   [ 
     ../common
+    ../specialized
     ./hardware-configuration.nix
     ./graphical-environment.nix
     # ./syncthing.nix
