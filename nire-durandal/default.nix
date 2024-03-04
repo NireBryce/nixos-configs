@@ -20,46 +20,9 @@ in
 # hostname
   networking.hostName = "nire-durandal"; 
 
-# Sops secret keys
-  # sops.secrets.tailscale.key = {
-  #   sopsFile = ../common/secrets.yml;
-  # };
+# mouse (for piper)
+  services.ratbagd.enable = true;
 
-  # console = {
-  #   font = "Lat2-Terminus16";
-  #   keyMap = "us";
-  #   useXkbConfig = true; # use xkb.options in tty.
-  # };
-
-  # # Sound.
-  # # TODO: Variablize
-  # sound.enable = true;
-  # hardware.pulseaudio.enable = true;
-  # Touchpad
-  # # TODO: variablize 
-  # # Enable touchpad support (enabled default in most desktopManager).
-  # services.xserver.libinput.enable = true;
-
-  # # Configure keymap in X11
-  # services.xserver.xkb.layout = "us";
-  # services.xserver.xkb.options = "eurosign:e,caps:escape";
-
-  # # Enable CUPS to print documents.
-  # services.printing.enable = true;
-
-
-  # # Some programs need SUID wrappers, can be configured further or are
-  # # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
-
-
-  # # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # This option defines the first version of NixOS you have installed on this particular machine,
   # and is used to maintain compatibility with application data (e.g. databases) created on older NixOS versions.
