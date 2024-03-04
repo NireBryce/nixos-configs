@@ -32,6 +32,11 @@
   i18n.defaultLocale = "en_US.UTF-8";
 
   programs.kdeconnect.enable = true;
+
+  # bluetooth
+  hardware.bluetooth.enable = true;
+  hardware.bluetooth.powerOnBoot = true;
+  services.blueman.enable = true;
   
 # system packages
   # List packages installed in system profile. To search, run:
