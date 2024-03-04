@@ -21,6 +21,7 @@
   networking.networkmanager.enable = true;  # Needs to be 'true' for KDE networking
   
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nixpkgs.config.allowUnfree = true;
   
   environment.etc.machine-id.source = /persist/etc/machine-id;
   
