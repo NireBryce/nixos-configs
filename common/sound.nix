@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 {
   # Remove sound.enable or set it to false if you had it set previously, as sound.enable is only meant for ALSA-based configurations
   
