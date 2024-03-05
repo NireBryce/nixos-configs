@@ -26,7 +26,7 @@
   environment.persistence."/persist" = {
     directories = [
       "/etc/nixos"
-      "/var/log"
+      # "/var/log"
       "/var/lib/bluetooth"
       "/var/lib/nixos"
       "/var/lib/systemd/coredump"
