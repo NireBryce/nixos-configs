@@ -8,7 +8,7 @@
     elly = {
       isNormalUser = true;
       extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
-      packages = with pkgs; [
+      packages = with pkgs; [ # Otherwise configured via fleek/home-manager
         firefox
         tree
         micro

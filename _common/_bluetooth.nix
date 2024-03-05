@@ -8,7 +8,8 @@ let
   cfg = config.hardware.bluetooth;
 in
 {
-  
+  hardware.bluetooth.powerOnBoot = true;
+  # services.blueman.enable = true;
   hardware.bluetooth.enable = mkDefault true;
   hardware.bluetooth.settings = {
     General = {

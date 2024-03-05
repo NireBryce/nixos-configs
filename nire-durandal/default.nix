@@ -9,7 +9,7 @@ in
     ./hardware-configuration.nix
     ./_durandal-users.nix
     ../_common
-    ../_specialized/_amd
+    ../_specialized/_gpu/_amdgpu.nix
     ../_specialized/_gui
     ../_specialized/_mouse
     # ../_common/_secrets

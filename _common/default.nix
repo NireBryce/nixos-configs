@@ -11,6 +11,7 @@
     ./_bluetooth.nix
     ./_impermanence.nix
     ./_users.nix
+    ./_firewall.nix
     ./_sound.nix
     ./_ssh.nix
     ./_users.nix
@@ -35,12 +36,9 @@
   # i18n
   i18n.defaultLocale = "en_US.UTF-8";
 
-  programs.kdeconnect.enable = true;
+  # programs.kdeconnect.enable = true;
 
-  # bluetooth
-  hardware.bluetooth.enable = true;
-  hardware.bluetooth.powerOnBoot = true;
-  # services.blueman.enable = true;
+
   
 # system packages
   # List packages installed in system profile. To search, run:
@@ -55,11 +53,6 @@
     zsh
     stdenv
     gcc
-    # pkgs.kdePackages.kdeconnect-kde
-    # pkgs.kdePackages.plasma-pa
-    # pkgs.kdePackages.baloo
-    # pkgs.kdePackages.baloo-widgets
-    # pulseaudio    
   ];
 
 # Needed for VSCode remote connection
@@ -73,28 +66,7 @@
   
 
   
-  # Firewall
-  networking.firewall = {
-    enable = true;
-    allowedTCPPorts = [          
-                        22 # ssh
-                      ];
-    allowedTCPPortRanges = [  
-                            {  # kde-connect TCP
-                              from = 1714;
-                              to   = 1764;    
-                            }
-                           ];
-    allowedUDPPorts = [                            
-                        
-                      ];
-    allowedUDPPortRanges = [
-                            { # kde-connect UDP 
-                              from = 1714;
-                              to   = 1764;
-                            }   
-                           ];
-  };
+
 
   # console = {
   #   font = "Lat2-Terminus16";
