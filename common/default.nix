@@ -51,11 +51,11 @@
     zsh
     stdenv
     gcc
-    pkgs.kdePackages.kdeconnect-kde
-    pkgs.kdePackages.plasma-pa
-    pkgs.kdePackages.baloo
-    pkgs.kdePackages.baloo-widgets
-    pulseaudio    
+    # pkgs.kdePackages.kdeconnect-kde
+    # pkgs.kdePackages.plasma-pa
+    # pkgs.kdePackages.baloo
+    # pkgs.kdePackages.baloo-widgets
+    # pulseaudio    
   ];
 
 # Needed for VSCode remote connection
