@@ -4,6 +4,8 @@
   
   # rtkit is optional but recommended
   security.rtkit.enable = true;
+  hardware.pulseaudio.enable = mkForce false;
+  
   services.pipewire = {
     enable = true;
     wireplumber.enable = true;
@@ -14,8 +16,17 @@
     #jack.enable = true;
   };
 
+  # from https://github.com/jpas/etc-nixos/blob/365e5301e559af29eafec7f7c391f1c84b6c6477/profiles/hardware/sound.nix#L18
+  systemd.user.services.pipewire-pulse = {
+    bindsTo = [ "pipewire.service" ];
+    after = [ "pipewire.service" ];
+  };
+  hardware.opengl = {
+    extraPackages = [ pkgs.pipewire ];
+  };
+
   # Recent fix for pipewire-pulse breakage
-  systemd.user.services.pipewire-pulse.path = [ pkgs.pulseaudio ];
+  # systemd.user.services.pipewire-pulse.path = [ pkgs.pulseaudio ];
 
   sound.enable = false;
   services.pipewire.wireplumber.configPackages = [
