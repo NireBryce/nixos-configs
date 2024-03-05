@@ -11,7 +11,8 @@
     ./users.nix
     ./ssh.nix
     ./sound.nix
-    ./tailscale.nix
+    ./bluetooth.nix
+    # ./tailscale.nix
   ];
 
   # Use the systemd-boot EFI boot loader.
@@ -38,7 +39,7 @@
   # bluetooth
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
-  services.blueman.enable = true;
+  # services.blueman.enable = true;
   
 # system packages
   # List packages installed in system profile. To search, run:
@@ -54,7 +55,7 @@
     stdenv
     gcc
     # pkgs.kdePackages.kdeconnect-kde
-    pkgs.kdePackages.plasma-pa
+    # pkgs.kdePackages.plasma-pa
     # pkgs.kdePackages.baloo
     # pkgs.kdePackages.baloo-widgets
     # pulseaudio    

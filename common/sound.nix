@@ -6,7 +6,7 @@
   security.rtkit.enable = true;
   # hardware.pulseaudio.enable = mkForce false;
   
-  sound.enable = false;
+  # sound.enable = false;
   services.pipewire = {
     enable = true;
     wireplumber.enable = true;

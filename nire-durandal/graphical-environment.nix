@@ -7,7 +7,7 @@
 # Enable the GNOME Desktop Environment.
   #TODO: variablize so it's a choice of DM and WM
   services.xserver.displayManager.sddm.wayland.enable = true;
-  services.xserver.desktopManager.plasma5.enable = true;
+  services.xserver.desktopManager.plasma6.enable = true;
 
 
   services.xserver.displayManager.defaultSession = "plasmawayland"; # Plasma 5
