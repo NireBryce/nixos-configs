@@ -13,7 +13,11 @@
     # If you want to use JACK applications, uncomment this
     #jack.enable = true;
   };
-  
+
+  # Recent fix for pipewire-pulse breakage
+  systemd.user.services.pipewire-pulse.path = [ pkgs.pulseaudio ];
+
+  sound.enable = false;
   services.pipewire.wireplumber.configPackages = [
     (pkgs.writeTextDir "wireplumber/bluetooth.lua.d/51-bluez-config.lua" ''
     bluez_monitor.properties = { 
