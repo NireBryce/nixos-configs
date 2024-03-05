@@ -1,8 +1,7 @@
 # copied from https://guekka.github.io/nixos-server-2/ almost verbatim
 # many of the comments are straight from the post
  
- 
-# what is consumed (previously provided by channels and fetchTarball)
+{ 
   inputs = {
     # nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11"; # (1)
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; # (1)
@@ -31,37 +30,30 @@
   #
   # inputs: inputs.nixpkgs
 
-# what will be produced (i.e. the build)
   outputs = { nixpkgs, ... }@inputs: { # (2)
     nixosModules = import ./modules/nixos;
 
     nixosConfigurations."nire-durandal" = nixpkgs.lib.nixosSystem {
-    server = nixpkgs.lib.nixosSystem {
       specialArgs = inputs;
       packages = nixpkgs.legacyPackages.${system};
       modules = [
         ./nire-durandal
       ];
     };
-  };
 
     nixosConfigurations."nire-lysithea" = nixpkgs.lib.nixosSystem { # (3)
-      server = nixpkgs.lib.nixosSystem { # (4)
-        packages = nixpkgs.legacyPackages.${system};
-        specialArgs = inputs; # forward inputs to modules
-        modules = [
-          ./nire-lysithea
-        ];
-      };
+      packages = nixpkgs.legacyPackages.${system};
+      specialArgs = inputs; # forward inputs to modules
+      modules = [
+        ./nire-lysithea
+      ];
     };
    nixosConfigurations."nire-galatea" = nixpkgs.lib.nixosSystem { # (3)
-     server = nixpkgs.lib.nixosSystem { # (4)
-       packages = nixpkgs.legacyPackages.${system};
-         specialArgs = inputs; # forward inputs to modules
-           modules = [
-           ./nire-galatea
-         ];
-       };
-     };
+    packages = nixpkgs.legacyPackages.${system};
+    specialArgs = inputs; # forward inputs to modules
+    modules = [
+      ./nire-galatea
+    ];
+  };
 }
 
