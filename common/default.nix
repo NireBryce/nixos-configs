@@ -7,9 +7,9 @@
   imports = [
     # ./acme.nix
     # need to make this not bound to a particular partition scheme
+    ./impermanence.nix
     ./users.nix
     ./ssh.nix
-    ./impermanence.nix
   ];
 
   # Use the systemd-boot EFI boot loader.

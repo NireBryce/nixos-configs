@@ -1,4 +1,3 @@
-{
 # copied from https://guekka.github.io/nixos-server-2/ almost verbatim
 # many of the comments are straight from the post
  
@@ -26,38 +25,43 @@
   };
 
 
-# what will be produced (i.e. the build)
   # { nixpkgs, ... }@inputs: nixpkgs
   #
   # is the same as:
   #
   # inputs: inputs.nixpkgs
+
+# what will be produced (i.e. the build)
   outputs = { nixpkgs, ... }@inputs: { # (2)
     nixosModules = import ./modules/nixos;
 
-    nixosConfigurations."nire-durandal" = nixpkgs.lib.nixosSystem rec {
+    nixosConfigurations."nire-durandal" = nixpkgs.lib.nixosSystem {
+    server = nixpkgs.lib.nixosSystem {
       specialArgs = inputs;
+      packages = nixpkgs.legacyPackages.${system};
       modules = [
         ./nire-durandal
       ];
     };
+  };
 
-    nixosConfigurations."nire-lysithea" = nixpkgs.lib.nixosSystem rec { # (3)
-    #  server = nixpkgs.lib.nixosSystem { # (4)
-        # packages = nixpkgs.legacyPackages.x86_64-linux;
+    nixosConfigurations."nire-lysithea" = nixpkgs.lib.nixosSystem { # (3)
+      server = nixpkgs.lib.nixosSystem { # (4)
+        packages = nixpkgs.legacyPackages.${system};
         specialArgs = inputs; # forward inputs to modules
         modules = [
           ./nire-lysithea
         ];
+      };
     };
-   nixosConfigurations."nire-galatea" = nixpkgs.lib.nixosSystem rec { # (3)
-    #  server = nixpkgs.lib.nixosSystem { # (4)
-        # packages = nixpkgs.legacyPackages.x86_64-linux;
-        specialArgs = inputs; # forward inputs to modules
-        modules = [
-          ./nire-galatea
-        ];
-    };
-  };
+   nixosConfigurations."nire-galatea" = nixpkgs.lib.nixosSystem { # (3)
+     server = nixpkgs.lib.nixosSystem { # (4)
+       packages = nixpkgs.legacyPackages.${system};
+         specialArgs = inputs; # forward inputs to modules
+           modules = [
+           ./nire-galatea
+         ];
+       };
+     };
 }
 
