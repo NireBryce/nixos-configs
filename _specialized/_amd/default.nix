@@ -5,6 +5,6 @@
 }:
 { 
   imports = [
-    ./steam.nix
+    ./_amdgpu.nix
   ];
 }

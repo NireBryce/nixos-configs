@@ -6,11 +6,11 @@ in
 { 
   imports = 
   [ 
-    ../common
+    ../_common
     ./hardware-configuration.nix
     ./graphical-environment.nix
-    ./syncthing.nix
-    ./sops.nix
+    ../_common/_sync-services
+    ../_common/_secrets
     ./galatea-users.nix
   ];
   
@@ -23,7 +23,7 @@ in
   # programs.nix-ld.enable = true;
 # Sops secret keys
   # sops.secrets.tailscale.key = {
-  #   sopsFile = ../common/secrets.yml;
+  #   sopsFile = ../_common/secrets.yml;
   # };
 
   # console = {

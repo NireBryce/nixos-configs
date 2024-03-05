@@ -5,14 +5,13 @@
 }:
 { 
   imports = [
-    # ./acme.nix
     # need to make this not bound to a particular partition scheme
-    ./impermanence.nix
-    ./users.nix
-    ./ssh.nix
-    ./sound.nix
-    ./bluetooth.nix
-    # ./tailscale.nix
+    ./_secrets
+    ./_impermanence.nix
+    ./_users.nix
+    ./_ssh.nix
+    ./_sound.nix
+    ./_bluetooth.nix
   ];
 
   # Use the systemd-boot EFI boot loader.

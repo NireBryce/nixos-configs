@@ -54,11 +54,11 @@
       wantedBy = [ "initrd.target" ];
       requires = [
         # TODO: variablize
-        /dev/mapper/enc
+        "/dev/mapper/enc"
       ];
       after = [
       # Figure out how to make this use the hostname
-        /dev/mapper/enc
+        "/dev/mapper/enc"
         "systemd-cryptsetup@${config.networking.hostName}.service"
       ];
       before = [ "sysroot.mount" ];

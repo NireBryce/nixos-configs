@@ -6,13 +6,14 @@ in
 { 
   imports = 
   [ 
-    ../common
-    ../specialized
     ./hardware-configuration.nix
-    ./graphical-environment.nix
-    # ./syncthing.nix
-    ./sops.nix
-    ./durandal-users.nix
+    ../_common
+    ../_specialized
+    ../_specialized/_amd
+    ../_specialized/_mouse
+    ./_durandal-users.nix
+    ../_common/_secrets
+    ../_common/_sync-services
   ];
   
   
@@ -20,8 +21,7 @@ in
 # hostname
   networking.hostName = "nire-durandal"; 
 
-# mouse (for piper)
-  services.ratbagd.enable = true;    
+  
 
   # This option defines the first version of NixOS you have installed on this particular machine,
   # and is used to maintain compatibility with application data (e.g. databases) created on older NixOS versions.
