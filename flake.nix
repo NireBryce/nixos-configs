@@ -34,22 +34,22 @@
     nixosModules = import ./modules/nixos;
 
     nixosConfigurations."nire-durandal" = nixpkgs.lib.nixosSystem {
+      # packages = nixpkgs.legacyPackages.x86_64-linux;
       specialArgs = inputs;
-      packages = nixpkgs.legacyPackages.${system};
       modules = [
         ./nire-durandal
       ];
     };
 
     nixosConfigurations."nire-lysithea" = nixpkgs.lib.nixosSystem { # (3)
-      packages = nixpkgs.legacyPackages.${system};
+      # packages = nixpkgs.legacyPackages.x86_64-linux;
       specialArgs = inputs; # forward inputs to modules
       modules = [
         ./nire-lysithea
       ];
     };
     nixosConfigurations."nire-galatea" = nixpkgs.lib.nixosSystem { # (3)
-      packages = nixpkgs.legacyPackages.${system};
+      # packages = nixpkgs.legacyPackages.x86_64-linux;
       specialArgs = inputs; # forward inputs to modules
       modules = [
         ./nire-galatea
