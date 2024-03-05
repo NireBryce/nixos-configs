@@ -7,11 +7,13 @@
   imports = [
     # need to make this not bound to a particular partition scheme
     ./_secrets
+    ./_services
+    ./_bluetooth.nix
     ./_impermanence.nix
     ./_users.nix
-    ./_ssh.nix
     ./_sound.nix
-    ./_bluetooth.nix
+    ./_ssh.nix
+    ./_users.nix
   ];
 
   # Use the systemd-boot EFI boot loader.

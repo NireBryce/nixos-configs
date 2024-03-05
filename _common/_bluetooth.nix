@@ -8,6 +8,7 @@ let
   cfg = config.hardware.bluetooth;
 in
 {
+  
   hardware.bluetooth.enable = mkDefault true;
   hardware.bluetooth.settings = {
     General = {

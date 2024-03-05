@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 {
   boot.initrd.kernelModules = [ "amdgpu" ];
   hardware.opengl.extraPackages = with pkgs; [
@@ -8,7 +8,7 @@
   hardware.opengl.extraPackages32 = with pkgs; [
     driversi686Linux.amdvlk
   ];
-  environment.systemPackages = [
-    pkgs.amf-headers
+  environment.systemPackages = with pkgs; [
+    amf-headers
   ];
 }

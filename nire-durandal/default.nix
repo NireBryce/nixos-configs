@@ -7,13 +7,13 @@ in
   imports = 
   [ 
     ./hardware-configuration.nix
-    ../_common
-    ../_specialized
-    ../_specialized/_amd
-    ../_specialized/_mouse
     ./_durandal-users.nix
-    ../_common/_secrets
-    ../_common/_sync-services
+    ../_common
+    ../_specialized/_amd
+    ../_specialized/_gui
+    ../_specialized/_mouse
+    # ../_common/_secrets
+    # ../_common/_services
   ];
   
   
