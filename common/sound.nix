@@ -25,9 +25,17 @@
     extraPackages = [ pkgs.pipewire ];
   };
 
+
+  # from https://github.com/PaulGrandperrin/nix-systems/blob/17fcd927fd37508cd8222b5784f38451e33c85de/nixosModules/shared/desktop.nix#L123
+  systemd.user.services.pipewire-pulse.path = [ pkgs.pulseaudio ]; # HACK waiting for #165125
+  
+  
+
+
   # Recent fix for pipewire-pulse breakage
   # systemd.user.services.pipewire-pulse.path = [ pkgs.pulseaudio ];
 
+  hardware.bluetooth.package = pkgs.bluez5-experimental;
   sound.enable = false;
   services.pipewire.wireplumber.configPackages = [
     (pkgs.writeTextDir "wireplumber/bluetooth.lua.d/51-bluez-config.lua" ''
