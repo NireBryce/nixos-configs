@@ -3,7 +3,6 @@
 { 
   config,
   pkgs,
-  lib,
   outputs,
   ...
 }: {
@@ -14,7 +13,7 @@
 
     authkeyFile = config.sops.secrets.tailscale_key.path;
     loginServer = "https://login.tailscale.com";
-    advertiseExitNode = lib.mkDefault true;
+    advertiseExitNode = false;
   };
 
   sops.secrets.tailscale_key = {
