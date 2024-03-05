@@ -30,7 +30,7 @@
   #
   # inputs: inputs.nixpkgs
 
-  outputs = { nixpkgs, ... }@inputs: { # (2)
+  outputs = { nixpkgs, ... }@inputs: {
     nixosModules = import ./modules/nixos;
 
     nixosConfigurations."nire-durandal" = nixpkgs.lib.nixosSystem {
@@ -48,12 +48,13 @@
         ./nire-lysithea
       ];
     };
-   nixosConfigurations."nire-galatea" = nixpkgs.lib.nixosSystem { # (3)
-    packages = nixpkgs.legacyPackages.${system};
-    specialArgs = inputs; # forward inputs to modules
-    modules = [
-      ./nire-galatea
-    ];
+    nixosConfigurations."nire-galatea" = nixpkgs.lib.nixosSystem { # (3)
+      packages = nixpkgs.legacyPackages.${system};
+      specialArgs = inputs; # forward inputs to modules
+      modules = [
+        ./nire-galatea
+      ];
+    };
   };
 }
 
