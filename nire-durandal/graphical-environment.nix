@@ -9,6 +9,10 @@
   services.xserver.displayManager.sddm.wayland.enable = true;
   services.xserver.desktopManager.plasma5.enable = true;
 
+
+  services.xserver.displayManager.defaultSession = "plasmawayland"; # Plasma 5
+  # services.xserver.displayManager.defaultSession = "plasma"; # plasma 6
+  
 # make GTK apps obey theme settings
  programs.dconf.enable = true;
 

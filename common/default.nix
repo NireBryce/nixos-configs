@@ -10,6 +10,8 @@
     ./impermanence.nix
     ./users.nix
     ./ssh.nix
+    ./sound.nix
+    ./tailscale.nix
   ];
 
   # Use the systemd-boot EFI boot loader.
