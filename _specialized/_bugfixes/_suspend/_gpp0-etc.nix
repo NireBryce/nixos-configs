@@ -31,17 +31,16 @@
       serviceConfig.Type = "oneshot";
       serviceConfig.ExecStart = "echo GPP8 >> /proc/acpi/wakeup";
   };
+
+  _bugfix-suspend-gpp0-gpp8 = pkgs.writeScriptBin "_bugfix-suspend-gpp0-gpp8" ''
+     #!${pkgs.bash}/bin/bash
+     ${pkgs.sh}/bin/sh -c "echo GPP8 > /proc/acpi/wakeup && echo gpp8 > /proc/acpi/wakeup"  ; # might need to be single caret
+   '';
+
+
+  # from zenstates code comments
+  before-sleep = pkgs.writeScriptBin "before-sleep" ''
+     #!${pkgs.bash}/bin/bash
+     ${pkgs.zenstates}/bin/zenstates --c6-disable
+  '';
 }
-
-_bugfix-suspend-gpp0-gpp8 = pkgs.writeScript "_bugfix-suspend-gpp0-gpp8" ''
-   #!${pkgs.bash}/bin/bash
-   ${pkgs.sh}/bin/sh -c "echo GPP8 > /proc/acpi/wakeup && echo gpp8 > /proc/acpi/wakeup"  ; # might need to be single caret
-   ${pkgs.echo}/bin/echo 
- '';
-
-
-# from zenstates code comments
-before-sleep = pkgs.writeScript "before-sleep" ''
-   #!${pkgs.bash}/bin/bash
-   ${pkgs.zenstates}/bin/zenstates --c6-disable
- '';
