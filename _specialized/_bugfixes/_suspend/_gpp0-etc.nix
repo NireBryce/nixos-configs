@@ -18,7 +18,7 @@
       before = [ "basic.target" ];
       unitConfig.DefaultDependencies = "no";
       serviceConfig.Type = "oneshot";
-      script = '' ExecStart=/run/current-system/sw/bin/zenstates --c6-disable '';
+      script = '' ExecStart="zenstates --c6-disable" '';
   };
 
 # Gigabyte b550 sleep bug
@@ -29,7 +29,7 @@
       description = "_BUGFIX-suspend (GPP0)";
       wantedBy = [ "multi-user.target" ];
       serviceConfig.Type = "oneshot";
-      script = '' ExecStart=/run/current-system/sw/bin/sh -c "/run/current-system/sw/bin/echo GPP0 > /proc/acpi/wakeup" '';
+      script = '' ExecStart="echo GPP0 > /proc/acpi/wakeup" '';
   };
   
   # https://www.reddit.com/r/archlinux/comments/11urtla/systemctl_suspend_hibernate_and_hybridsleep_all/
@@ -38,6 +38,6 @@
       description = "_BUGFIX-suspend (GPP8)";
       wantedBy = [ "multi-user.target" ];
       serviceConfig.Type = "oneshot";
-      script = '' ExecStart=/run/current-system/sw/bin/sh -c "/run/current-system/sw/bin/echo GPP8 > /proc/acpi/wakeup" '';
+      script = '' ExecStart="echo GPP8 > /proc/acpi/wakeup" '';
   };
 }
