@@ -1,4 +1,4 @@
-
+57362u
 { pkgs, lib, ... } :
 
 {
@@ -46,7 +46,7 @@
   #     script = "echo GPP8 > /proc/acpi/wakeup && echo GPP8 > /proc/acpi/wakeup";
   # };
 
-  systemd.services.fixSuspend = {
+  systemd.services.bugfixSuspend-GPP0 = {
       enable = true;
       description = "Fix immediate wakeup on suspend/hibernate";
       unitConfig = {
@@ -60,6 +60,18 @@
     };
 
 
+  systemd.services.bugfixSuspend-GPP8 = {
+      enable = true;
+      description = "Fix immediate wakeup on suspend/hibernate";
+      unitConfig = {
+        Type = "oneshot";
+      };
+      serviceConfig = {
+        User = "root";
+        ExecStart = "-${pkgs.bash}/bin/bash -c \"echo GPP8 > /proc/acpi/wakeup\"";
+      };
+      wantedBy = ["multi-user.target"];
+    };
 
 
 
