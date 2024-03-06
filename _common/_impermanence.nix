@@ -20,6 +20,7 @@
   fileSystems."/persist".neededForBoot = true;
   fileSystems."/var/log".options = [ "compress=zstd" "noatime" ];
   fileSystems."/var/log".neededForBoot = true;
+  
 
 # configure impermanence
   # TODO: variablize
