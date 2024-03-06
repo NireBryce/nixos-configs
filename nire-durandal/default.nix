@@ -12,6 +12,7 @@ in
     ../_specialized/_gpu/_amdgpu.nix
     ../_specialized/_gui
     ../_specialized/_mouse
+    ../_specialized/_bugfixes/_suspend/_gpp0-etc.nix
     # ../_common/_secrets
     # ../_common/_services
   ];
