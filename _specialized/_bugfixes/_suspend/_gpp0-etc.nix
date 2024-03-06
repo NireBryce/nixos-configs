@@ -58,7 +58,6 @@
       };
       wantedBy = ["multi-user.target"];
     };
-  };
 
 
 
