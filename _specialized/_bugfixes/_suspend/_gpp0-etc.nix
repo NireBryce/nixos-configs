@@ -1,5 +1,5 @@
 
-{ pkgs, ... } :
+{ pkgs, lib, ... } :
 
 {
   environment.systemPackages = with pkgs; [ zenstates ];
@@ -38,12 +38,31 @@
   # 
   # https://www.reddit.com/r/archlinux/comments/11urtla/systemctl_suspend_hibernate_and_hybridsleep_all/
   # gpp8 too.  potentially PXTH
-  systemd.services.fix-suspend-gpp0-gpp8 = {
-      description = "_BUGFIX-suspend (GPP0, GPP8)";
-      wantedBy = [ "multi-user.target" ];
-      serviceConfig.Type = "oneshot";
-      # serviceConfig.ExecStart = "${_bugfix-suspend-gpp}";
-      script = "echo GPP8 > /proc/acpi/wakeup && echo GPP8 > /proc/acpi/wakeup";
-  };
+  # systemd.services.fix-suspend-gpp0-gpp8 = {
+  #     description = "_BUGFIX-suspend (GPP0, GPP8)";
+  #     wantedBy = [ "multi-user.target" ];
+  #     serviceConfig.Type = "oneshot";
+  #     # serviceConfig.ExecStart = "${_bugfix-suspend-gpp}";
+  #     script = "echo GPP8 > /proc/acpi/wakeup && echo GPP8 > /proc/acpi/wakeup";
+  # };
+
+  powerManagement.powerDownCommands = ''
+    set +e
+
+    # https://github.com/nmasur/dotfiles/blob/b39cda6b84ec0f28a670156e62f0946ab2dc027d/modules/nixos/hardware/sleep.nix#L13
+    echo GPP0 | ${pkgs.doas}/bin/doas tee /proc/acpi/wakeup
+    echo GPP8 | ${pkgs.doas}/bin/doas tee /proc/acpi/wakeup
+
+    sleep 2
+
+    set -e
+  ''y:
+
+  services.udev.extraRules = ''
+        ACTION=="add", SUBSYSTEM=="usb", DRIVER=="usb", ATTR{power/wakeup}="disabled"
+        ACTION=="add", SUBSYSTEM=="i2c", ATTR{power/wakeup}="disabled"
+      '';
+  
+    
 
 }

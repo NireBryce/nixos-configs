@@ -39,6 +39,7 @@
   # programs.kdeconnect.enable = true;
 
 
+services.fwupd.enable = true;
   
 # system packages
   # List packages installed in system profile. To search, run:
