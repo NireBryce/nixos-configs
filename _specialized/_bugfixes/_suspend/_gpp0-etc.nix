@@ -16,7 +16,7 @@
   #      ${pkgs.zenstates}/bin/zenstates --c6-disable
   #   '';
   
-  systemd.services.before-sleep = {
+  config.systemd.services.before-sleep = {
       description = "_BUGFIX-suspend (Ryzen disable c6 suspend)";
       wantedBy = [ "sleep.target" "hibernate.target" ];
       before = [ "sleep.target" ];
@@ -46,22 +46,40 @@
   #     script = "echo GPP8 > /proc/acpi/wakeup && echo GPP8 > /proc/acpi/wakeup";
   # };
 
-  powerManagement.powerDownCommands = ''
-    set +e
+  config.systemd.services.fixSuspend = {
+      enable = true;
+      description = "Fix immediate wakeup on suspend/hibernate";
+      unitConfig = {
+        Type = "oneshot";
+      };
+      serviceConfig = {
+        User = "root";
+        ExecStart = "-${pkgs.bash}/bin/bash -c \"echo GPP0 > /proc/acpi/wakeup\"";
+      };
+      wantedBy = ["multi-user.target"];
+    };
+  };
 
-    # https://github.com/nmasur/dotfiles/blob/b39cda6b84ec0f28a670156e62f0946ab2dc027d/modules/nixos/hardware/sleep.nix#L13
-    echo GPP0 | ${pkgs.doas}/bin/doas tee /proc/acpi/wakeup
-    echo GPP8 | ${pkgs.doas}/bin/doas tee /proc/acpi/wakeup
 
-    sleep 2
 
-    set -e
-  ''y:
 
-  services.udev.extraRules = ''
-        ACTION=="add", SUBSYSTEM=="usb", DRIVER=="usb", ATTR{power/wakeup}="disabled"
-        ACTION=="add", SUBSYSTEM=="i2c", ATTR{power/wakeup}="disabled"
-      '';
+
+#   # https://github.com/nmasur/dotfiles/blob/b39cda6b84ec0f28a670156e62f0946ab2dc027d/modules/nixos/hardware/sleep.nix#L13
+#   powerManagement.powerDownCommands = ''
+#     set +e
+# 
+#     echo GPP0 | ${pkgs.doas}/bin/doas tee /proc/acpi/wakeup
+#     echo GPP8 | ${pkgs.doas}/bin/doas tee /proc/acpi/wakeup
+# 
+#     sleep 2
+# 
+#     set -e
+#   ''y:
+# 
+#   services.udev.extraRules = ''
+#         ACTION=="add", SUBSYSTEM=="usb", DRIVER=="usb", ATTR{power/wakeup}="disabled"
+#         ACTION=="add", SUBSYSTEM=="i2c", ATTR{power/wakeup}="disabled"
+#       '';
   
     
 
