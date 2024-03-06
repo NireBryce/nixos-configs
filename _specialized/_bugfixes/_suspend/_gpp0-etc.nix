@@ -4,21 +4,12 @@
 {
   environment.systemPackages = with pkgs; [ zenstates ];
   # - https://forum.manjaro.org/t/system-do-not-wake-up-after-suspend/76681/2
-  systemd.services.fix-suspend-ryzen-c6 = {
+  systemd.services.before-sleep = {
       description = "_BUGFIX-suspend (Ryzen disable c6 suspend)";
-      wantedBy = [ "basic.target" "suspend.target" "hibernate.target" ];
-      requires = [
-        # TODO: variablize
-        
-      ];
-      after = [
-      # Figure out how to make this use the hostname
-        "sysinit.target" "local-fs.target" "suspend.target" "hibernate.target"
-      ];
-      before = [ "basic.target" ];
-      unitConfig.DefaultDependencies = "no";
+      wantedBy = [ "sleep.target" "hibernate.target" ];
+      before = [ "sleep.target" ];
       serviceConfig.Type = "oneshot";
-      script = '' ExecStart="zenstates --c6-disable" '';
+      serviceConfig.ExecStart="zenstates --c6-disable";
   };
 
 # Gigabyte b550 sleep bug
@@ -29,7 +20,7 @@
       description = "_BUGFIX-suspend (GPP0)";
       wantedBy = [ "multi-user.target" ];
       serviceConfig.Type = "oneshot";
-      script = '' ExecStart="echo GPP0 > /proc/acpi/wakeup" '';
+      serviceConfig.ExecStart ="echo GPP0 >> /proc/acpi/wakeup";
   };
   
   # https://www.reddit.com/r/archlinux/comments/11urtla/systemctl_suspend_hibernate_and_hybridsleep_all/
@@ -38,6 +29,19 @@
       description = "_BUGFIX-suspend (GPP8)";
       wantedBy = [ "multi-user.target" ];
       serviceConfig.Type = "oneshot";
-      script = '' ExecStart="echo GPP8 > /proc/acpi/wakeup" '';
+      serviceConfig.ExecStart = "echo GPP8 >> /proc/acpi/wakeup";
   };
 }
+
+_bugfix-suspend-gpp0-gpp8 = pkgs.writeScript "_bugfix-suspend-gpp0-gpp8" ''
+   #!${pkgs.bash}/bin/bash
+   ${pkgs.sh}/bin/sh -c "echo GPP8 > /proc/acpi/wakeup && echo gpp8 > /proc/acpi/wakeup"  ; # might need to be single caret
+   ${pkgs.echo}/bin/echo 
+ '';
+
+
+# from zenstates code comments
+before-sleep = pkgs.writeScript "before-sleep" ''
+   #!${pkgs.bash}/bin/bash
+   ${pkgs.zenstates}/bin/zenstates --c6-disable
+ '';
