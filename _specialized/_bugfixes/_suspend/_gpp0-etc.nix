@@ -42,7 +42,7 @@
       description = "_BUGFIX-suspend (GPP0, GPP8)";
       wantedBy = [ "multi-user.target" ];
       serviceConfig.Type = "oneshot";
-      serviceConfig.ExecStart = "${_bugfix-suspend-gpp}";
+      # serviceConfig.ExecStart = "${_bugfix-suspend-gpp}";
       serviceConfig.ExecStart = "echo GPP8 > /proc/acpi/wakeup && echo gpp8 > /proc/acpi/wakeup";
   };
 
