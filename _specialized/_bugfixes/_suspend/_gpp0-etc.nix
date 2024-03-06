@@ -16,7 +16,7 @@
   #      ${pkgs.zenstates}/bin/zenstates --c6-disable
   #   '';
   
-  config.systemd.services.before-sleep = {
+  systemd.services.before-sleep = {
       description = "_BUGFIX-suspend (Ryzen disable c6 suspend)";
       wantedBy = [ "sleep.target" "hibernate.target" ];
       before = [ "sleep.target" ];
@@ -46,7 +46,7 @@
   #     script = "echo GPP8 > /proc/acpi/wakeup && echo GPP8 > /proc/acpi/wakeup";
   # };
 
-  config.systemd.services.fixSuspend = {
+  systemd.services.fixSuspend = {
       enable = true;
       description = "Fix immediate wakeup on suspend/hibernate";
       unitConfig = {
