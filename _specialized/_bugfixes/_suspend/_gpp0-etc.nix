@@ -53,7 +53,8 @@
       };
       serviceConfig = {
         User = "root";
-        ExecStart = "-${pkgs.bash}/bin/bash -c \"echo GPP0 > /proc/acpi/wakeup\"";
+        # /u/Demotay https://www.reddit.com/r/gigabyte/comments/p5ewjn/comment/ksbm0mb/
+        ExecStart = "-${pkgs.bash}/bin/bash -c 'if grep 'GPP0' /proc/acpi/wakeup | grep -q 'enabled'; then echo 'GPP0' > /proc/acpi/wakeup; fi'";
       };
       wantedBy = ["multi-user.target"];
     };
@@ -67,30 +68,28 @@
       };
       serviceConfig = {
         User = "root";
-        ExecStart = "-${pkgs.bash}/bin/bash -c \"echo GPP8 > /proc/acpi/wakeup\"";
+        # modification from https://www.reddit.com/r/gigabyte/comments/p5ewjn/comment/ksbm0mb/ /u/Demotay
+        ExecStart = "-${pkgs.bash}/bin/bash -c 'if grep 'GPP8' /proc/acpi/wakeup | grep -q 'enabled'; then echo 'GPP8' > /proc/acpi/wakeup; fi'";
       };
       wantedBy = ["multi-user.target"];
     };
 
 
 
-#   # https://github.com/nmasur/dotfiles/blob/b39cda6b84ec0f28a670156e62f0946ab2dc027d/modules/nixos/hardware/sleep.nix#L13
-#   powerManagement.powerDownCommands = ''
-#     set +e
-# 
-#     echo GPP0 | ${pkgs.doas}/bin/doas tee /proc/acpi/wakeup
-#     echo GPP8 | ${pkgs.doas}/bin/doas tee /proc/acpi/wakeup
-# 
-#     sleep 2
-# 
-#     set -e
-#   ''y:
-# 
-#   services.udev.extraRules = ''
-#         ACTION=="add", SUBSYSTEM=="usb", DRIVER=="usb", ATTR{power/wakeup}="disabled"
-#         ACTION=="add", SUBSYSTEM=="i2c", ATTR{power/wakeup}="disabled"
-#       '';
-  
-    
+
 
 }
+
+# Credits:
+# https://www.reddit.com/r/gigabyte/comments/p5ewjn/b550i_pro_ax_f13_bios_sleep_issue_on_linux/
+# https://www.reddit.com/r/archlinux/comments/11urtla/systemctl_suspend_hibernate_and_hybridsleep_all/
+# https://forum.manjaro.org/t/system-do-not-wake-up-after-suspend/76681/2
+# 
+
+
+
+
+
+
+
+
