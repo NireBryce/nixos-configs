@@ -9,7 +9,7 @@
       };
       serviceConfig = {
         User            = "root";                                                        # root may not be necessary
-        ExecStart       = "-${pkgs.bash}/bin/bash -c 'echo 'GPP8' > /proc/acpi/wakeup'"; # (1)
+        ExecStart       = "-${pkgs.bash}/bin/bash -c 'if grep 'GPP0' /proc/acpi/wakeup | grep -q 'enabled'; then echo 'GPP0' > /proc/acpi/wakeup; fi'"; # (1)
 
         # required to not toggle when `nixos-rebuild switch` is ran
         RemainAfterExit = "yes";                                                         # (2) 
@@ -26,7 +26,7 @@
       };
       serviceConfig = {
         User            = "root";
-        ExecStart       = "-${pkgs.bash}/bin/bash -c 'echo 'GPP8' > /proc/acpi/wakeup'"; # (1)
+        ExecStart       = "-${pkgs.bash}/bin/bash -c 'if grep 'GPP8' /proc/acpi/wakeup | grep -q 'enabled'; then echo 'GPP8' > /proc/acpi/wakeup; fi'"; # (1)
         RemainAfterExit = "yes";                                                         # (2)
       };
       wantedBy = ["multi-user.target"];
