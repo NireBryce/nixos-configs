@@ -36,7 +36,7 @@
   # i18n
   i18n.defaultLocale = "en_US.UTF-8";
 
-  # programs.kdeconnect.enable = true;
+  programs.kdeconnect.enable = true;
 
 
 services.fwupd.enable = true;
