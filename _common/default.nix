@@ -60,8 +60,7 @@ services.fwupd.enable = true;
   programs.nix-ld.enable = true;
 
 # shells
-  environment.shells = [ 
-                          pkgs.zsh
+  environment.shells = [
                           pkgs.bash
                        ];
   

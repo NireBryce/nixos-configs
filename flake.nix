@@ -57,4 +57,13 @@
     };
   };
 }
+################################################################################
+# NOTE FOR ZSH
+# https://www.reddit.com/r/NixOS/comments/1539s44/using_flakes_for_configurationnix/
+# https://stackoverflow.com/questions/12303805/oh-my-zsh-hash-pound-symbol-bad-pattern-or-match-not-found/57380936#57380936
+# this fixes nix-flakes
+#   disable -p '#'
+# otherwise `nixos-rebuild --flake .#hostname` will not get evaluated correctly.
+################################################################################
+
 
