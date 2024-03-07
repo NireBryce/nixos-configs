@@ -24,56 +24,55 @@
 #
 # Let’s declare all the options first.
 { config, lib, pkgs, ... }:
-{
-  with lib; let
-    cfg = config.services.tailscaleAutoconnect; 
-  in {
-    options.services.tailscaleAutoconnect = {
-      enable = mkEnableOption "tailscaleAutoconnect";
-      authkeyFile = mkOption {
-        type = types.str;
-        description = "The authkey to use for authentication with Tailscale";
-      };
-
-      loginServer = mkOption {
-        type = types.str;
-        default = "";
-        description = "The login server to use for authentication with Tailscale";
-      };
-
-      advertiseExitNode = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Whether to advertise this node as an exit node";
-      };
-
-      exitNode = mkOption {
-        type = types.str;
-        default = "";
-        description = "The exit node to use for this node";
-      };
-
-      exitNodeAllowLanAccess = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Whether to allow LAN access to this node";
-      };
+with lib; let
+  cfg = config.services.tailscaleAutoconnect; 
+in {
+  options.services.tailscaleAutoconnect = {
+    enable = mkEnableOption "tailscaleAutoconnect";
+    authkeyFile = mkOption {
+      type = types.str;
+      description = "The authkey to use for authentication with Tailscale";
     };
 
-    config = mkIf cfg.enable {
-      assertions = [
-        {
-          assertion = cfg.authkeyFile != "";
-          message = "authkeyFile must be set";
-        }
-        {
-          assertion = cfg.exitNodeAllowLanAccess -> cfg.exitNode != "";
-          message = "exitNodeAllowLanAccess must be false if exitNode is not set";
-        }
-        {
-          assertion = cfg.advertiseExitNode -> cfg.exitNode == "";d
-          message = "advertiseExitNode must be false if exitNode is set";
-        }
+    loginServer = mkOption {
+      type = types.str;
+      default = "";
+      description = "The login server to use for authentication with Tailscale";
+    };
+
+    advertiseExitNode = mkOption {
+      type = types.bool;
+      default = false;
+      description = "Whether to advertise this node as an exit node";
+    };
+
+    exitNode = mkOption {
+      type = types.str;
+      default = "";
+      description = "The exit node to use for this node";
+    };
+
+    exitNodeAllowLanAccess = mkOption {
+      type = types.bool;
+      default = false;
+      description = "Whether to allow LAN access to this node";
+    };
+  };
+
+  config = mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = cfg.authkeyFile != "";
+        message = "authkeyFile must be set";
+      }
+      {
+        assertion = cfg.exitNodeAllowLanAccess -> cfg.exitNode != "";
+        message = "exitNodeAllowLanAccess must be false if exitNode is not set";
+      }
+      {
+        assertion = cfg.advertiseExitNode -> cfg.exitNode == "";
+        message = "advertiseExitNode must be false if exitNode is set";
+      }
     ];
     systemd.services.tailscale-autoconnect = {
       description = "Automatic connection to Tailscale";
@@ -121,7 +120,6 @@
       enable = true;
       useRoutingFeatures = if cfg.advertiseExitNode then "server" else "client";
     };
-
   };
 }
 
