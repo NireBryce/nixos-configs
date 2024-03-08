@@ -77,9 +77,9 @@ in
    *  
    * and ./_common
    * 
-   * The next post is in ._/common/default.nix
+   * The next step would be ._/common/default.nix
    * 
-   * If you're lost and don't know what called this, look at `../flake.nix`
+   * If you're lost and don't know what called this, look at `../flake.nix`, as that's the entrypoint.
    */
 
 
