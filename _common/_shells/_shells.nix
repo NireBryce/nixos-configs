@@ -1,10 +1,9 @@
 { pkgs, ...}:
 {
   # programs._.enable = true;
-  programs = [
-    zsh
-    bash
-  ];
+  programs.zsh.enable = true;
+  programs.bash.enable = true;
+  
   # shells
   environment = {
     shells = with pkgs; [
@@ -17,6 +16,8 @@
     keyMap = "us";
     # useXkbConfig = true; # use xkb.options in tty.
   };
+
+users.users.elly.shell = pkgs.zsh;
 }
 
 

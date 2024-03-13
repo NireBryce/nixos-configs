@@ -8,8 +8,7 @@
     elly = {
       isNormalUser = true;
       extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
-      shell = pkgs.zsh;
-      packages = with pkgs; [ # Otherwise configured via fleek/home-manager
+      packages = with pkgs; [ # these are needed for me to bootstrap, otherwise configured via fleek/home-manager
         firefox
         git
         micro

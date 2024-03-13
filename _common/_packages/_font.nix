@@ -1,10 +1,10 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
   fonts.packages = with pkgs; [
     (nerdfonts.override { 
       fonts = [ 
-        "FiraCode" "DroidSansMono" "Iosevka" "JetBrainsMono" "monofur" ]; 
+        "FiraCode" "DroidSansMono" "Iosevka" "JetBrainsMono" ]; 
       }
     )
   ];

@@ -6,7 +6,7 @@
     settings.PasswordAuthentication = false;
     settings.KbdInteractiveAuthentication = false;
     allowSFTP = false; # Don't set this if you need sftp
-    challengeResponseAuthentication = false;
+    # challengeResponseAuthentication = false; # folded into settings.KbdInteractiveAuthentication
     
     extraConfig = ''
       AllowTcpForwarding yes
