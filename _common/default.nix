@@ -8,12 +8,14 @@
     # need to make this not bound to a particular partition scheme
     ./_bluetooth
     ./_boot
-    ./_networking
     ./_filesystem
-    ./_sound.nix
-    ./_ssh.nix
-    ./_sys_packages.nix
-    ./_users.nix
+    ./_networking
+    ./_secrets
+    ./_services
+    ./_sound
+    ./_ssh
+    ./_packages.nix
+    ./_users
   ];
 
 }

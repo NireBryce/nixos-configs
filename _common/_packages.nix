@@ -14,8 +14,8 @@
     zsh
     zoxide
   ];
-  # Needed for VSCode remote connection
-  programs.nix-ld.enable = true;
+
+  programs.nix-ld.enable = true;  # Needed for VSCode remote connection
 
   programs.kdeconnect.enable = true;
 
@@ -23,9 +23,9 @@
 
 
   # shells
-  environment.shells = [
-                          pkgs.bash
-                          pkgs.zsh
+  environment.shells = with pkgs; [
+                          bash
+                          zsh
                        ];
 
   # console = {
