@@ -18,7 +18,7 @@
       driversi686Linux.amdvlk
     ];
 
-  }
+  };
   environment.systemPackages = with pkgs; [
     amf-headers
   ];
