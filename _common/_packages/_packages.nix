@@ -13,13 +13,12 @@
     wget
     zoxide
   ];
-  programs.zsh.enable = true;
-  
+  services.fwupd.enable = true;
+
   programs.nix-ld.enable = true;  # Needed for VSCode remote connection
 
   programs.kdeconnect.enable = true;
 
-  services.fwupd.enable = true;
 
 
   # shells
@@ -28,11 +27,7 @@
                           zsh
                        ];
 
-  # console = {
-  #   font = "Lat2-Terminus16";
-  #   keyMap = "us";
-  #   useXkbConfig = true; # use xkb.options in tty.
-  # };
+  
 }
 
 

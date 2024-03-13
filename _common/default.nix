@@ -14,8 +14,8 @@
     ./_services
     ./_sound
     ./_ssh
-    ./_packages.nix
     ./_users
+    ./_packages.nix
   ];
 
 }

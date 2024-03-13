@@ -6,12 +6,17 @@ in
 { 
   imports = [ 
     # I use a _ to prefix my modules. filters for everything but default.nix
-    ./hardware-configuration.nix
+    ./hardware-configuration.nix # always need this
     ./_durandal-users.nix
-    ../_common
+    ../_common  # I try to keep non-CLI things out of this, so it can still be deployed to servers
     ../_specialized/_gpu/_amdgpu.nix
     ../_specialized/_gui
     ../_specialized/_mouse
+    ../_specialized/_sound
+    ../_specialized/_bluetooth
+    
+
+    # fixes
     ../_specialized/_bugfixes/_suspend/_gpp0-etc.nix
   ];
   # hostname
@@ -78,6 +83,10 @@ in
    * and ./_common
    * 
    * The next step would be ._/common/default.nix
+   * 
+   * I probably won't write more in these for awhile, but hopefully that gets you started
+   * 
+   * for flakes, you don't need configuration.nix, as you can see.  it's just a convention.
    * 
    * If you're lost and don't know what called this, look at `../flake.nix`, as that's the entrypoint.
    */
