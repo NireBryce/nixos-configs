@@ -6,10 +6,6 @@
 }: 
 
 {
-  imports = [
-    impermanence.nixosModule
-  ];
-
   boot.initrd.postResumeCommands = lib.mkAfter ''
       mkdir -p /mnt
     # We first mount the btrfs root to /mnt
