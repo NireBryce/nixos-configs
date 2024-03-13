@@ -11,7 +11,7 @@ in
 
     # nix generated
       ./hardware-configuration.nix
-      ./durandal.stateVersion.nix
+      ./stateVersion.nix
     
     # machine-specific
       ./_durandal-users.nix

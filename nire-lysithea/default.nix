@@ -8,10 +8,10 @@ in
   [ 
     # nix generated
       ./hardware-configuration.nix
-      ./durandal.stateVersion.nix
+      ./stateVersion.nix
     
     # machine-specific
-      ./_durandal-users.nix
+      ./_lysithea-users.nix
     
     # shared modules
       ../_common  # I try to keep non-CLI things out of this, so it can still be deployed to servers

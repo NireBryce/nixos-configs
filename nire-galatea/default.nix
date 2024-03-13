@@ -8,10 +8,10 @@ in
   [ 
     # Nix-generated
       ./hardware-configuration.nix
-      ./galatea.stateVersion.nix
+      ./stateVersion.nix
 
     # Machine-specific
-      ./galatea-users.nix
+      ./_galatea-users.nix
 
     # shared modules
       ../_common
