@@ -1,26 +1,14 @@
 {
   config,
   pkgs,
-  impermanence,
   lib,
   ...
 }: 
+
 {
   imports = [
     impermanence.nixosModule
   ];
-
-  
-
-# Impermanence
-  # filesystems
-  fileSystems."/".options = [ "compress=zstd" "noatime" ];
-  fileSystems."/home".options = [ "compess=zstd" ];
-  fileSystems."/nix".options = [ "compress=zstd" "noatime" ];
-  fileSystems."/persist".options = [ "compress=zstd" "noatime" ];
-  fileSystems."/persist".neededForBoot = true;
-  fileSystems."/var/log".options = [ "compress=zstd" "noatime" ];
-  fileSystems."/var/log".neededForBoot = true;
 
   boot.initrd.postResumeCommands = lib.mkAfter ''
       mkdir -p /mnt
@@ -58,31 +46,6 @@
     # Once we\'re done rolling back to a blank snapshot,
     # we can unmount /mnt and continue on the boot process.
         umount /mnt
-  '';
-# configure impermanence
-  # TODO: variablize
-  environment.persistence."/persist" = {
-    directories = [
-      # "/etc/nixos" # no longer needed with the flake.
-      "/var/lib/bluetooth"
-      "/var/lib/nixos"
-      "/var/lib/systemd/coredump"
-      "/etc/NetworkManager/system-connections"
-      # { directory = "/var/lib/colord"; user = "colord"; group = "colord"; mode = "u=rwx,g=rx,o="; }
-      
-    ];
-    files = [
-      "/etc/machine-id"
-      "/etc/ssh/ssh_host_ed25519_key"
-      "/etc/ssh/ssh_host_ed25519_key.pub"
-      "/etc/ssh/ssh_host_rsa_key"
-      "/etc/ssh/ssh_host_rsa_key.pub"
-      # { file = "/var/keys/secret_file"; parentDirectory = { mode = "u=rwx,g=,o="; }; }
-    ];
-  };
-  security.sudo.extraConfig = ''
-    # rollback results in sudo lectures after each reboot
-    Defaults lecture = never
   '';
 
 }

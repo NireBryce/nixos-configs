@@ -13,7 +13,6 @@
     wget
     zsh
     zoxide
-    csvkit
   ];
   # Needed for VSCode remote connection
   programs.nix-ld.enable = true;
