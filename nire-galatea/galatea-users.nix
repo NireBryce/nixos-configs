@@ -7,7 +7,7 @@
                                       ''ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL0sEOPmravXojxuKqN3XwplTbuz2p36UDTxmUthktnX elly@durandal''
                                       ''ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILk2lST7kOSRlanAKhl42b9IQib1hzrbxlR5pve/X37D elly@nire-lysithea''
                                     ];
-      hashedPasswordFile = "/persist/passwords/elly";
+      hashedPasswordFile = "/persist/passwords/elly"; # May mistakenly be /persist/passwords/user and need fixing
     };
 
 }
