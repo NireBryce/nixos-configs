@@ -1,3 +1,4 @@
+# Bluetooth sound module
 { 
   pkgs, 
   ...

@@ -1,8 +1,3 @@
-{
-  configs,
-  pkgs,
-  ...
-}:
 { 
   imports = [
 # Don't forget to comment/uncomment the name when you enable/disable

@@ -1,3 +1,4 @@
+# AMDGPU
 { pkgs, ... }:
 {
   boot.initrd.kernelModules = [ "amdgpu" ];

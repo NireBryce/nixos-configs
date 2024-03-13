@@ -1,5 +1,9 @@
 { pkgs, ...}:
+# user packages are managed by fleek (a home-manager frontend) and are in a 
+# different repo
+
 {
+
   # List packages installed in system profile. To search, run:
   # $ nix search <package name>
   environment.systemPackages = with pkgs; [

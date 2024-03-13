@@ -1,6 +1,10 @@
-{ ... }:
 # This is where the boot options live, along with other things that need to be set near then
+{ ... }:
 {
+  imports = [ 
+    ./_delete-root.nix
+  ];
+
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;

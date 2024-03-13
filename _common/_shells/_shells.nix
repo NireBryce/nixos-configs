@@ -5,7 +5,6 @@
     zsh
     bash
   ];
-
   # shells
   environment = {
     shells = with pkgs; [

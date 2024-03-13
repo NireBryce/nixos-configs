@@ -6,16 +6,14 @@
 { 
   imports = [
     # need to make this not bound to a particular partition scheme
-    ./_bluetooth
     ./_boot
     ./_filesystem
     ./_networking
+    ./_packages
     ./_secrets
     ./_services
-    ./_sound
     ./_ssh
     ./_users
-    ./_packages.nix
   ];
 
 }

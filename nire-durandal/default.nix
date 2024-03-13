@@ -4,32 +4,40 @@ let
   impermanence = builtins.fetchTarball "https://github.com/nix-community/impermanence/archive/master.tar.gz";
 in
 { 
-  imports = [ 
-    # I use a _ to prefix my modules. filters for everything but default.nix
-    ./hardware-configuration.nix # always need this
-    ./_durandal-users.nix
-    ../_common  # I try to keep non-CLI things out of this, so it can still be deployed to servers
-    ../_specialized/_gpu/_amdgpu.nix
-    ../_specialized/_gui
-    ../_specialized/_mouse
-    ../_specialized/_sound
-    ../_specialized/_bluetooth
-    
-
-    # fixes
-    ../_specialized/_bugfixes/_suspend/_gpp0-etc.nix
-  ];
   # hostname
     networking.hostName = "nire-durandal"; 
-  # system
-    # don't change this
-    # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
-    system.stateVersion = "23.11"; # Did you read the comment?
-}
-  # Let's try something: I found a lot of my nix configs from other people, but
-  # had to scour for their blogs.  Let's just do this
+  
+  imports = [ 
 
-  /* At it's heart I think the power of nixos is easier to understand if you 
+    # nix generated
+      ./hardware-configuration.nix
+      ./durandal.stateVersion.nix
+    
+    # machine-specific
+      ./_durandal-users.nix
+    
+    # shared modules
+      ../_common  # I try to keep non-CLI things out of this, so it can still be deployed to servers
+      ../_specialized/_bluetooth
+      ../_specialized/_gpu/_amdgpu.nix
+      ../_specialized/_gui
+      ../_specialized/_mouse
+      ../_specialized/_sound
+
+    # fixes
+      ../_bugfixes/_suspend/_b550m-gpp0-etc.nix
+
+  ];
+  
+
+
+
+}
+
+  /* Let's try something: I found a lot of my nix configs from other people, but
+   * had to scour for their blogs.  Let's just do this:
+   *
+   * At it's heart I think the power of nixos is easier to understand if you 
    * think of these as straight up config files from any other shell rc or 
    * vim config or whatever.
    * 

@@ -1,12 +1,12 @@
+# Pipewire config, including pulse and alsa compatability
+  # Remove sound.enable or set it to false if you had it set previously, as sound.enable is only meant for ALSA-based configurations
 { pkgs, ... }:
 {
-  # Remove sound.enable or set it to false if you had it set previously, as sound.enable is only meant for ALSA-based configurations
   
   # rtkit is optional but recommended
   security.rtkit.enable = true;
-  # hardware.pulseaudio.enable = mkForce false;
   
-  # sound.enable = false;
+  
   services.pipewire = {
     enable = true;
     wireplumber.enable = true;
@@ -36,3 +36,7 @@
 
   
 }
+
+
+# sound.enable = true; # ALSA-based sound
+# hardware.pulseaudio.enable = mkForce false;
