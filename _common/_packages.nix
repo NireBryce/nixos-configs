@@ -11,10 +11,10 @@
     micro # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     stdenv
     wget
-    zsh
     zoxide
   ];
-
+  programs.zsh.enable = true;
+  
   programs.nix-ld.enable = true;  # Needed for VSCode remote connection
 
   programs.kdeconnect.enable = true;
