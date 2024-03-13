@@ -13,6 +13,7 @@
 
 # configure impermanence
   # TODO: variablize
+  environment.etc.machine-id.source = /persist/etc/machine-id;
   environment.persistence."/persist" = {
     directories = [
       # "/etc/nixos" # no longer needed with the flake.
@@ -24,7 +25,7 @@
       
     ];
     files = [
-      "/etc/machine-id"
+      # "/etc/machine-id"
       "/etc/ssh/ssh_host_ed25519_key"
       "/etc/ssh/ssh_host_ed25519_key.pub"
       "/etc/ssh/ssh_host_rsa_key"

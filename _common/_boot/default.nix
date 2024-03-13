@@ -13,8 +13,6 @@
   networking.networkmanager.enable = true;  # Needs to be 'true' for KDE networking
   nixpkgs.config.allowUnfree = true;
   
-  environment.etc.machine-id.source = /persist/etc/machine-id;
-  
   # Set time zone.
   time.timeZone = "America/New_York";
   
