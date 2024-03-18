@@ -14,42 +14,42 @@
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/b63969da-2382-4f52-9a22-1a972878c86b";
-      fsType = "btrfs";
+    { device  = "/dev/disk/by-uuid/b63969da-2382-4f52-9a22-1a972878c86b";
+      fsType  = "btrfs";
       options = [ "subvol=root" "compress=zstd" "noatime"];
     };
 
   boot.initrd.luks.devices."enc".device = "/dev/disk/by-uuid/a84ab778-95b6-4a48-9b52-aaa784fc5fa5";
 
   fileSystems."/home" =
-    { device = "/dev/disk/by-uuid/b63969da-2382-4f52-9a22-1a972878c86b";
-      fsType = "btrfs";
+    { device  = "/dev/disk/by-uuid/b63969da-2382-4f52-9a22-1a972878c86b";
+      fsType  = "btrfs";
       options = [ "subvol=home" "compress=zstd" ];
     };
 
-  fileSystems."/nix" =
-    { device = "/dev/disk/by-uuid/b63969da-2382-4f52-9a22-1a972878c86b";
-      fsType = "btrfs";
+  fileSystems."/nix"    =
+    { device  = "/dev/disk/by-uuid/b63969da-2382-4f52-9a22-1a972878c86b";
+      fsType  = "btrfs";
       options = [ "subvol=nix" "compress=zstd" "noatime" ];
     };
 
-  fileSystems."/persist" =
-    { device = "/dev/disk/by-uuid/b63969da-2382-4f52-9a22-1a972878c86b";
-      fsType = "btrfs";
+  fileSystems."/persist"  =
+    { device  = "/dev/disk/by-uuid/b63969da-2382-4f52-9a22-1a972878c86b";
+      fsType  = "btrfs";
       options = [ "subvol=persist" "compress=zstd" "noatime" ];
       neededForBoot = true;
     };
 
-  fileSystems."/var/log" =
-    { device = "/dev/disk/by-uuid/b63969da-2382-4f52-9a22-1a972878c86b";
-      fsType = "btrfs";
+  fileSystems."/var/log"  =
+    { device  = "/dev/disk/by-uuid/b63969da-2382-4f52-9a22-1a972878c86b";
+      fsType  = "btrfs";
       options = [ "subvol=log" "compress=zstd" "noatime" ];
       neededForBoot = true;
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/98FA-2117";
-      fsType = "vfat";
+    { device  = "/dev/disk/by-uuid/98FA-2117";
+      fsType  = "vfat";
     };
 
   swapDevices =
