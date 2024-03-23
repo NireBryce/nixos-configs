@@ -10,14 +10,11 @@ in
       ./hardware-configuration.nix
       ./stateVersion.nix
 
-    # Machine-specific
-      ./_galatea-users.nix
-
     # shared modules
       ../_common
-      ../_specialized/_bluetooth
+      ../_specialized
       ../_specialized/_gui
-      ../_specialized/_sound
+      
       #TODO: ../specialized/_gpu/_intel.nix
       #TODO: ../specialized/_mouse/trackpoint.nix
       

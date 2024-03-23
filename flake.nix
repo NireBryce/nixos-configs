@@ -34,19 +34,11 @@
   # inputs: inputs.nixpkgs
 
   outputs = { nixpkgs, ... }@inputs: {
-    nixosModules = import ./modules/nixos;
-
+    nixosModules = import ./_common/_modules;
     nixosConfigurations."nire-durandal" = nixpkgs.lib.nixosSystem {
       specialArgs = inputs;
       modules = [
         ./nire-durandal
-        # shared modules
-          ./_common  # I try to keep non-CLI things out of this, so it can still be deployed to servers
-          ./_specialized
-          ./_specialized/_gpu/_amdgpu.nix
-          ./_specialized/_mouse/_logitech_gaming.nix
-        # fixes
-          ./_bugfixes/_suspend/_b550m-gpp0-etc.nix
       ];
       # packages = nixpkgs.legacyPackages.x86_64-linux;
     };

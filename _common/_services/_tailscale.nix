@@ -6,8 +6,8 @@
   outputs,
   ...
 }: {
-  imports = [outputs.nixosModules.tailscale-autoconnect];
-
+  # imports = [outputs.nixosModules.tailscale-autoconnect];
+  imports = [ ../_modules/tailscale-autoconnect.nix ];
   services.tailscaleAutoconnect = {
     enable = true;
 
@@ -17,7 +17,7 @@
   };
 
   sops.secrets.tailscale_key = {
-    sopsFile =  ../secrets.yaml; 
+    sopsFile =  ../_secrets/secrets.yaml; 
   };
 
   environment.persistence = {
