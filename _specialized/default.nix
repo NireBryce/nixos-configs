@@ -4,5 +4,5 @@
     ./_bluetooth
     ./_gui
     ./_sound
-  ]
+  ];
 }
