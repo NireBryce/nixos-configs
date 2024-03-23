@@ -14,6 +14,7 @@ in
       ./stateVersion.nix
   ];
   
+  sopsPath = ./secrets.yaml;
 
 
 

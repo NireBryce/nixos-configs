@@ -17,7 +17,9 @@
   };
 
   sops.secrets.tailscale_key = {
-    sopsFile = ./secrets.yaml;
+    sopsFile =   sopsPath; 
+    # TODO: this needs fixing, need to figure out how to do it per-host
+    # Unless it's this simple
   };
 
   environment.persistence = {
