@@ -6,7 +6,7 @@
                                       ''ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKLrl5HoGmaeht/D6J/uZWyhpB04huXARmgoKJABuOw6 elly@nire-galatea''
                                       ''ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII/CCC9LRJdjqLqq5t1a0wN1cbw2fmxs2Yxi1grl/nRw elly@nire-sif''
                                     ];
-      hashedPasswordFile = "/persist/passwords/user";
+      hashedPasswordFile = "/persist/passwords/elly";
     };
 
 }
