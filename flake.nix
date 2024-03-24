@@ -36,27 +36,24 @@
   outputs = { nixpkgs, ... }@inputs: {
     nixosModules = import ./_common/_modules;
     nixosConfigurations."nire-durandal" = nixpkgs.lib.nixosSystem {
-      specialArgs = inputs;
+      specialArgs = inputs; # forward inputs to modules
       modules = [
         ./nire-durandal
       ];
-      # packages = nixpkgs.legacyPackages.x86_64-linux;
     };
 
     nixosConfigurations."nire-lysithea" = nixpkgs.lib.nixosSystem { # (3)
-      specialArgs = inputs; # forward inputs to modules
+      specialArgs = inputs; 
       modules = [
         ./nire-lysithea
 
       ];
-      # packages = nixpkgs.legacyPackages.x86_64-linux;
     };
     nixosConfigurations."nire-galatea" = nixpkgs.lib.nixosSystem { # (3)
-      specialArgs = inputs; # forward inputs to modules
+      specialArgs = inputs; 
       modules = [
         ./nire-galatea
       ];
-      # packages = nixpkgs.legacyPackages.x86_64-linux;
     };
   };
 }
@@ -136,3 +133,5 @@
    * If you're lost and don't know what called this, look at `../flake.nix`, as that's the entrypoint.
    */
 
+
+# packages = nixpkgs.legacyPackages.x86_64-linux;
