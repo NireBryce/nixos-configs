@@ -5,7 +5,7 @@
     enable = true;
     allowedTCPPorts = [
     22 # ssh
-                      ];
+    ];
     allowedTCPPortRanges = [  
                             {  # kde-connect TCP
                               from = 1714;
