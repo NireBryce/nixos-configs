@@ -3,8 +3,8 @@
   # Firewall
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [          
-                        22 # ssh
+    allowedTCPPorts = [
+    22 # ssh
                       ];
     allowedTCPPortRanges = [  
                             {  # kde-connect TCP

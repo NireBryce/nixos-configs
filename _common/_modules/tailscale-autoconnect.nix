@@ -1,28 +1,5 @@
 # From https://guekka.github.io/nixos-server-2/
-# { config, lib, pkgs, ... }:
-# {
-#   with lib; let
-#     cfg = config.services.tailscaleAutoconnect; 
-#   in {
-#     options = {
-#       services.tailscaleAutoconnect = {
-#         enable = mkEnableOption "tailscaleAutoconnect";
-#       };
-#     };
 
-#     config = mkIf cfg.services.tailscaleAutoconnect.enable {
-#       # ...
-#     };
-#   };
-# }
-# This is the basic structure of a module. We declare an option, and then we use 
-# it to conditionally change the configuration. So:
-#
-#  - What we write in options is the option declaration
-#  - What we write in config is the consequence of the option being enabled, 
-#    the configuration change
-#
-# Let’s declare all the options first.
 { config, lib, pkgs, ... }:
 with lib; let
   cfg = config.services.tailscaleAutoconnect; 
@@ -122,47 +99,4 @@ in {
     };
   };
 }
-
-# First, the assertions. They’re here to make sure that the user doesn’t make 
-# any mistake when configuring the module. For example, a user cannot both 
-# advertise an exit node and set an exit node. Then, the service. We’re using 
-# systemd to run a script that will connect to Tailscale. The after, wants and 
-# wantedBy options make the script run after the network is up and after 
-# Tailscale daemon is started. The Type option is here to make sure that the
-# script is run only once. The script itself is a bit long, but it’s just 
-# a bunch of bash commands. 
-# 
-# It’s pretty straightforward. First, we wait for the 
-# Tailscale daemon to settle. Then, we check if we’re already authenticated. 
-# If we are, we exit. Otherwise, we authenticate. Finally, we connect 
-# to Tailscale. We have to do it in two steps because some options are only 
-# available after authentication.
-# 
-# At the end, we configure the firewall to allow Tailscale traffic, and we enable the Tailscale service.
-#
-# Now, an example of how to use this module:
-#
-# # in <host>/tailscale.nix
-# { outputs, ...}:
-# {
-#   imports = [
-#     outputs.nixosModules.tailscale-autoconnect
-#   ];
-
-#   services.tailscaleAutoconnect = {
-#     enable = true;
-#     authkeyFile = config.sops.secrets.tailscale_key.path;
-#     loginServer = "https://login.tailscale.com";
-#     exitNode = "some-node-id";
-#     exitNodeAllowLanAccess = true;
-#   };
-
-#   sops.secrets.tailscale_key = {
-#     sopsFile = ./secrets.yaml;
-#   };
-
-#   environment.persistence = {
-#     "/persist".directories = ["/var/lib/tailscale"];
-#   };
-# }
 
