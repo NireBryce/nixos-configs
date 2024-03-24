@@ -1,4 +1,4 @@
-{ pkgs, lib, ... } :
+{ pkgs, ... } :
 
 {
   systemd.services.one-mix-3-disable-flaky-lid-sensor = {
