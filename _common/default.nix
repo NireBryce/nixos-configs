@@ -10,4 +10,6 @@
     ./_users
   ];
 
+  hardware.keyboard.zsa.enable = true;
+
 }
