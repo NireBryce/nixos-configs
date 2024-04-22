@@ -1,7 +1,8 @@
 { 
   imports = [
-    # need to make this not bound to a particular partition scheme
     ./_font.nix
+    ./_linux-crisis-utilities.nix
+    ./_nix-helper.nix
     ./_packages.nix
   ];
 
