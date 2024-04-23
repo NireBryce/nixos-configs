@@ -7,12 +7,12 @@
 
   # Enable the KDE Desktop Environment and set wayland.
     #TODO: variablize so it's a choice of DM and WM
-    services.xserver.displayManager.sddm.wayland.enable = true;
+    services.displayManager.sddm.wayland.enable = true;
     services.desktopManager.plasma6.enable = true;
 
 
-    # services.xserver.displayManager.defaultSession = "plasmawayland"; # Plasma 5
-    services.xserver.displayManager.defaultSession = "plasma"; # plasma 6
+    # services.displayManager.defaultSession = "plasmawayland"; # Plasma 5
+    services.displayManager.defaultSession = "plasma"; # plasma 6
     
   # make GTK apps obey theme settings
     #TODO: this only half works 
