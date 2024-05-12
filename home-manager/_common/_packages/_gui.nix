@@ -1,57 +1,63 @@
-{pkgs, ...}:
+{pkgs, lib, config, ...}:
 {
-  fonts.fontconfig.enable = true; 
+  options = {
+    _gui.enable = lib.mkEnableOption "Enables GUI packages";
+  };
+  config = lib.mkIf config._gui.enable {
 
-  home.packages = with pkgs; [
-    (nerdfonts.override { fonts = [ "FiraCode" ]; })
+    fonts.fontconfig.enable = true; 
 
-    # browsers
-      kdePackages.konqueror   
+    home.packages = with pkgs; [
+      (nerdfonts.override { fonts = [ "FiraCode" ]; })
 
-    # comms
-      cinny-desktop           # matrix client
-      telegram-desktop
-      discord
-      wire-desktop
-      signal-desktop
-      keybase-gui
-      keybase
-      zoom-us
+      # browsers
+        kdePackages.konqueror   
 
-    # text input
-      emote
-        
-    # remote
-      input-leap
-        
-    # media
-      vlc                     # video player
+      # comms
+        cinny-desktop           # matrix client
+        telegram-desktop
+        discord
+        wire-desktop
+        signal-desktop
+        keybase-gui
+        keybase
+        zoom-us
 
-    # sound
-      qpwgraph                # sound mixer
+      # text input
+        emote
+          
+      # remote
+        input-leap
+          
+      # media
+        vlc                     # video player
 
-    # image editing
-      gimp                    # image editor
+      # sound
+        qpwgraph                # sound mixer
 
-    # keyboard config
-      qmk                     # qmk keyboard manager https://github.com/qmk/qmk_firmware
+      # image editing
+        gimp                    # image editor
 
-    # gui system utilities
-      vulkan-tools
-      glxinfo
-      clinfo
+      # keyboard config
+        qmk                     # qmk keyboard manager https://github.com/qmk/qmk_firmware
 
-    # dev
-      vscode-fhs              # vscode
-      github-desktop          # github-desktop
+      # gui system utilities
+        vulkan-tools
+        glxinfo
+        clinfo
 
-    # productivity
-      obsidian
-      libreoffice-qt          # office
+      # dev
+        vscode-fhs              # vscode
+        github-desktop          # github-desktop
+
+      # productivity
+        obsidian
+        libreoffice-qt          # office
+      
+      # terminal
+        kitty
+        kitty-img
     
-    # terminal
-      kitty
-      kitty-img
-  
-  ];
+    ];
+  };
 }
