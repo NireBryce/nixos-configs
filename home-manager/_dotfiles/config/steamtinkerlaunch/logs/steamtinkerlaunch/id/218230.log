@@ -1,0 +1,254 @@
+Thu Feb 29 20:08:34 EST 2024 INFO - initAID - Set AID from STEAM_COMPAT_APP_ID to '218230'
+Thu Feb 29 20:08:34 EST 2024 INFO - initAID - Set OSCDP to STEAM_COMPAT_DATA_PATH '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/compatdata/218230'
+Thu Feb 29 20:08:34 EST 2024 INFO - loadLangFile - Language from command line is 'english'
+Thu Feb 29 20:08:35 EST 2024 INFO - loadLangFile - SYSTEMSTLCFGDIR is '/usr/share/steamtinkerlaunch'
+Thu Feb 29 20:08:35 EST 2024 INFO - loadLangFile - Command line language 'english' is no file - trying to find its absolute path
+Thu Feb 29 20:08:35 EST 2024 INFO - loadLangFile - Loading found system wide /usr/share/steamtinkerlaunch/lang//english.txt
+Thu Feb 29 20:08:35 EST 2024 INFO - getCurrentCommandline - No Proton in command line arguments 'waitforexitandrun /home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2/LaunchPad.exe Updates:enable=0 Updates:PatchSelf=1 campaignID=1063272 promoID=146 launchPoint=steam launchArgs=STEAM_ENABLED=1 --no-gui'
+Thu Feb 29 20:08:35 EST 2024 INFO - saveOrgVars - Storing some original variables to restore them later
+Thu Feb 29 08:08:36 PM EST 2024 INFO - emptyVars - Emptied some original variables as they slowdown several system calls when started from steam
+Thu Feb 29 08:08:36 PM EST 2024 INFO - emptyVars - Set $PATH to '/home/elly/.nix-profile/bin:/home/elly/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/home/elly/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/var/lib/flatpak/exports/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/usr/lib/rustup/bin:/var/lib/snapd/snap/bin:'
+Thu Feb 29 08:08:36 PM EST 2024 START - ######### Initializing Game Launch 218230 using SteamTinkerLaunch v12.12 #########
+Thu Feb 29 08:08:36 PM EST 2024 INFO - main - Starting with a clean log
+Thu Feb 29 08:08:36 PM EST 2024 INFO - main - Start creating default configs
+Thu Feb 29 08:08:36 PM EST 2024 INFO - createDefaultCfgs - START
+Thu Feb 29 08:08:36 PM EST 2024 INFO - loadLanguage - First load the default language 'english' to make sure all variables are filled
+Thu Feb 29 08:08:36 PM EST 2024 INFO - loadLangFile - Language from command line is 'english'
+Thu Feb 29 08:08:36 PM EST 2024 INFO - loadLangFile - GLOBALSTLLANGDIR is '/usr/share/steamtinkerlaunch/lang'
+Thu Feb 29 08:08:36 PM EST 2024 INFO - loadLangFile - Command line language 'english' is no file - trying to find its absolute path
+Thu Feb 29 08:08:36 PM EST 2024 INFO - loadLangFile - Loading found system wide /usr/share/steamtinkerlaunch/lang/english.txt
+Thu Feb 29 08:08:36 PM EST 2024 INFO - loadLanguage - Loading STLLANG from '/home/elly/.config/steamtinkerlaunch/global.conf'
+Thu Feb 29 08:08:36 PM EST 2024 INFO - loadLanguage - STLLANG from '/home/elly/.config/steamtinkerlaunch/global.conf' is 'english'
+Thu Feb 29 08:08:36 PM EST 2024 INFO - createDefaultCfgs - setSteamPaths:
+Thu Feb 29 08:08:36 PM EST 2024 INFO - setSteamPaths - Reading Steam Path variables from '/dev/shm/steamtinkerlaunch/steampaths.txt'
+Thu Feb 29 08:08:36 PM EST 2024 INFO - getGameOS - Starting game OS detection
+Thu Feb 29 08:08:36 PM EST 2024 INFO - getGameOS - Making some checks on '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2/LaunchPad.exe' to determine the OS version of the game
+Thu Feb 29 08:08:36 PM EST 2024 INFO - getGameOS - Looks like this is a Windows game!
+Thu Feb 29 08:08:36 PM EST 2024 INFO - setWin - 'LaunchPad' determined to be a Windows Game
+Thu Feb 29 08:08:36 PM EST 2024 INFO - createDefaultCfgs - createProtonList:
+Thu Feb 29 08:08:36 PM EST 2024 INFO - createDefaultCfgs - createProtonList end
+Thu Feb 29 08:08:36 PM EST 2024 INFO - listAllSettingsEntries - '/dev/shm/steamtinkerlaunch/setentries.txt' already exists - nothing to do
+Thu Feb 29 08:08:36 PM EST 2024 INFO - createDefaultCfgs - STOP
+Thu Feb 29 08:08:36 PM EST 2024 SKIP - listSteamLibraries - not recreating already available '/dev/shm/steamtinkerlaunch/SteamLibraries.txt'
+Thu Feb 29 08:08:36 PM EST 2024 WARN - setSteamLibraryPaths - Library folder '/home/elly/storages/2tb_nvme_1/SteamLibrary/steamapps' does not seem to be a valid directory, even though this comes from Steam itself - Ignoring, but please report if this is invalid or causes issues
+Thu Feb 29 08:08:36 PM EST 2024 INFO - setSteamLibraryPaths - STEAM_COMPAT_LIBRARY_PATHS set to '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps:/home/elly/.local/share/Steam/steamapps'
+Thu Feb 29 08:08:36 PM EST 2024 INFO - setSteamLibraryPaths - STEAM_COMPAT_MOUNTS set to '/home/elly/.local/share/Steam/steamapps/common/Steamworks Shared:/home/elly/.local/share/Steam/steamapps/common/Proton BattlEye Runtime:/home/elly/.local/share/Steam/steamapps/common/SteamLinuxRuntime_sniper:/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/SteamLinuxRuntime_sniper:/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/SteamLinuxRuntime_soldier'
+Thu Feb 29 08:08:36 PM EST 2024 INFO - setSteamLibraryPaths - STEAM_COMPAT_TOOL_PATHS set to '/home/elly/.local/share/Steam/steamapps/common/SteamLinuxRuntime_sniper:/home/elly/.local/share/Steam/steamapps/common/Steamworks Shared:/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/SteamLinuxRuntime_sniper:/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/SteamLinuxRuntime_soldier'
+Thu Feb 29 08:08:36 PM EST 2024 INFO - main - Checking internal dependencies:
+Thu Feb 29 08:08:36 PM EST 2024 INFO - setAwkBin - Found 'gawk' as an 'awk' variant. It should work without any issues, because 'gawk' was tested completely
+Thu Feb 29 08:08:36 PM EST 2024 INFO - checkIntDeps - Result of version check for yad binary '/usr/bin/yad' is '13.0'
+Thu Feb 29 08:08:36 PM EST 2024 INFO - main - Initializing first Proton:
+Thu Feb 29 08:08:36 PM EST 2024 INFO - initOldProtonArr - Creating an initial array with available Proton versions using the file '/dev/shm/steamtinkerlaunch/ProtonCSV.txt' which was created during a previous run
+Thu Feb 29 08:08:36 PM EST 2024 INFO - initFirstProton - Initializing Proton
+Thu Feb 29 08:08:36 PM EST 2024 INFO - initFirstProton - Initial Proton version 'FIRSTUSEPROTON' from '/home/elly/.config/steamtinkerlaunch/default_template.conf' is 'proton-8.0-5c'
+Thu Feb 29 08:08:36 PM EST 2024 INFO - main - Initializing default window resolution
+Thu Feb 29 08:08:36 PM EST 2024 INFO - setInitWinXY - Using '2880x1620' from config '/dev/shm/steamtinkerlaunch/defres.txt'
+Thu Feb 29 08:08:36 PM EST 2024 INFO - main - Welcome to SteamTinkerLaunch
+Thu Feb 29 08:08:36 PM EST 2024 INFO - removeEmptyFiles - Removing empty files from '/home/elly/.config/steamtinkerlaunch/games/appinfo'
+Thu Feb 29 08:08:36 PM EST 2024 INFO - removeEmptyFiles - Removing empty files from '/home/elly/.config/steamtinkerlaunch/games/header'
+Thu Feb 29 08:08:36 PM EST 2024 INFO - main - Checking command line: incoming arguments 'waitforexitandrun /home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2/LaunchPad.exe Updates:enable=0 Updates:PatchSelf=1 campaignID=1063272 promoID=146 launchPoint=steam launchArgs=STEAM_ENABLED=1 --no-gui'
+Thu Feb 29 08:08:36 PM EST 2024 SKIP - getGameOS - ISGAME is already set to '2' - nothing to determine
+Thu Feb 29 08:08:36 PM EST 2024 INFO - linkLog - Symlink '/home/elly/.config/steamtinkerlaunch/logs/steamtinkerlaunch/title/PlanetSide 2.log' already exists
+Thu Feb 29 08:08:36 PM EST 2024 START - ######### Game Launch: PlanetSide 2 (218230) #########
+Thu Feb 29 08:08:36 PM EST 2024 INFO - prepareLaunch - Game launch args '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2/LaunchPad.exe'
+Thu Feb 29 08:08:36 PM EST 2024 INFO - prepareLaunch - Gamedir '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2'
+Thu Feb 29 08:08:36 PM EST 2024 INFO - prepareLaunch - Proton wineprefix '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/compatdata/218230/pfx'
+Thu Feb 29 08:08:36 PM EST 2024 INFO - prepareLaunch -------------------
+Thu Feb 29 08:08:36 PM EST 2024 INFO - prepareLaunch - CreateGameCfg:
+Thu Feb 29 08:08:36 PM EST 2024 SKIP - updateConfigFile - Config file '/home/elly/.config/steamtinkerlaunch/gamecfgs/id/218230.conf' already at version 'v12.12'
+Thu Feb 29 08:08:36 PM EST 2024 INFO - linkGameCfg - Symlink '/home/elly/.config/steamtinkerlaunch/gamecfgs/title/PlanetSide 2.conf' already exists
+Thu Feb 29 08:08:36 PM EST 2024 INFO - prepareLaunch - First LoadCfg: /home/elly/.config/steamtinkerlaunch/gamecfgs/id/218230.conf
+Thu Feb 29 08:08:36 PM EST 2024 INFO - loadCfg - '/home/elly/.config/steamtinkerlaunch/gamecfgs/id/218230.conf' START
+Thu Feb 29 08:08:36 PM EST 2024 INFO - loadCfg - Loading game config '/home/elly/.config/steamtinkerlaunch/gamecfgs/id/218230.conf'
+Thu Feb 29 08:08:36 PM EST 2024 INFO - migrateCfgOption - File '/home/elly/.config/steamtinkerlaunch/dxvk/218230.conf' does not exist - nothing to do
+Thu Feb 29 08:08:36 PM EST 2024 INFO - loadCfg - '/home/elly/.config/steamtinkerlaunch/gamecfgs/id/218230.conf' STOP
+Thu Feb 29 08:08:37 PM EST 2024 SKIP - autoBumpReShade - '5.4.2' is the latest version of 'ReShade' - not updating
+Thu Feb 29 08:08:37 PM EST 2024 INFO - prepareLaunch - Initial Proton version from the game config: 'proton-8.0-5c'
+Thu Feb 29 08:08:37 PM EST 2024 INFO - prepareLaunch - Initializing internal Proton Vars for 'proton-8.0-5c' using setNewProtVars
+Thu Feb 29 08:08:37 PM EST 2024 INFO - setNewProtVars - Setting new Proton Variables based on '/home/elly/.local/share/Steam/steamapps/common/Proton 8.0/proton'
+Thu Feb 29 08:08:37 PM EST 2024 INFO - setNewProtVars - Continuing with RUNPROTON='/home/elly/.local/share/Steam/steamapps/common/Proton 8.0/proton'
+Thu Feb 29 08:08:37 PM EST 2024 INFO - setRunWineServer - Initiated from 'setNewProtVars'
+Thu Feb 29 08:08:37 PM EST 2024 INFO - setRunWineServer - Set the wine binary for proton in path '/home/elly/.local/share/Steam/steamapps/common/Proton 8.0/proton'
+Thu Feb 29 08:08:37 PM EST 2024 INFO - setRunWineServer - to '/home/elly/.local/share/Steam/steamapps/common/Proton 8.0/dist/bin/wine'
+Thu Feb 29 08:08:37 PM EST 2024 INFO - setRunWineServer - and wineserver to '/home/elly/.local/share/Steam/steamapps/common/Proton 8.0/dist/bin/wineserver'
+Thu Feb 29 08:08:37 PM EST 2024 INFO - prepareLaunch - OpenTrayIcon:
+Thu Feb 29 08:08:37 PM EST 2024 INFO - autoCollectionSettings - Searching collections for game '218230' in '/home/elly/.local/share/Steam/userdata/21602253/7/remote/sharedconfig.vdf'
+Thu Feb 29 08:08:37 PM EST 2024 SKIP - autoCollectionSettings - Global Config '' not found - skipping
+Thu Feb 29 08:08:37 PM EST 2024 SKIP - autoCollectionSettings - Collections Directory Config '' not found - skipping
+Thu Feb 29 08:08:37 PM EST 2024 INFO - setFullGameExePath - User did not enable 'CUSTOMCMDRESHADE' - Using the game's exe directroy as the ReShade installation directory
+Thu Feb 29 08:08:37 PM EST 2024 INFO - setShaderDest - Determining Shader destination directory SHADDESTDIR
+Thu Feb 29 08:08:37 PM EST 2024 INFO - setShaderDest - Using variable ABSGAMEEXEPATH for Shader destination directory '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2'
+Thu Feb 29 08:08:37 PM EST 2024 INFO - setShaderDest - Using Shader destination directory '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2'
+Thu Feb 29 08:08:37 PM EST 2024 INFO - setShaderDest - Shader destination directory is '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2'
+Thu Feb 29 08:08:37 PM EST 2024 INFO - setFullGameExePath - Using SHADDESTDIR '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2' for 'SHADDESTDIR'
+Thu Feb 29 08:08:37 PM EST 2024 INFO - openTrayIcon - Opening trayIcon:
+Thu Feb 29 08:08:37 PM EST 2024 INFO - prepareLaunch - sortGameArgs:
+Thu Feb 29 08:08:37 PM EST 2024 SKIP - sortGameArgs - Sorting the game arguments is disabled
+Thu Feb 29 08:08:37 PM EST 2024 INFO - prepareLaunch - AskSettings:
+Thu Feb 29 08:08:37 PM EST 2024 INFO - askSettings - Using game specific requester timeout '2'
+Thu Feb 29 08:08:37 PM EST 2024 INFO - askSettings - Opening Requester with timeout '2'
+Thu Feb 29 08:08:37 PM EST 2024 INFO - getGameTextFiles - Searching for at least one editable textfile in '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/compatdata/218230/pfx/drive_c/users/steamuser'
+Thu Feb 29 08:08:37 PM EST 2024 INFO - getRes - Detected screen resolution '3840x2160'
+Thu Feb 29 08:08:37 PM EST 2024 INFO - pollWinRes - Using GEOM '--geometry=2880x1620+0+0' from '/home/elly/.config/steamtinkerlaunch/guicfgs/3840x2160/218230/SteamTinkerLaunch-OpenSettings.conf'
+Thu Feb 29 08:08:37 PM EST 2024 INFO - updateWinRes - Starting resolution-poll for '/home/elly/.config/steamtinkerlaunch/guicfgs/3840x2160/218230/SteamTinkerLaunch-OpenSettings.conf' with incoming '2880x1620'
+Thu Feb 29 08:08:37 PM EST 2024 INFO - setShowPic - Determining game picture
+Thu Feb 29 08:08:37 PM EST 2024 INFO - setShowPic - Using '/home/elly/.config/steamtinkerlaunch/games/header/218230.jpg' as game picture
+Thu Feb 29 08:08:37 PM EST 2024 INFO - updateWinRes - Waiting for Window 'SteamTinkerLaunch-OpenSettings'
+Thu Feb 29 08:08:37 PM EST 2024 WARN - prepareSteamDeckCompatInfo - Can't get Steam Deck compatibility information because 'jq' is not installed
+Thu Feb 29 08:08:37 PM EST 2024 INFO - askSettings - Could not retrieve Steam Deck compatibility rating, defaulting to Unknown - Maybe 'jq' is missing or we are offline?
+Thu Feb 29 08:08:37 PM EST 2024 INFO - askSettings - Steam Deck compatibility rating string is '<b>Steam Deck Compatibility:</b> '
+Thu Feb 29 08:08:37 PM EST 2024 INFO - askSettings - Preparing to show Wait Requester
+Thu Feb 29 08:08:38 PM EST 2024 INFO - updateWinRes - Waiting for Window 'SteamTinkerLaunch-OpenSettings'
+Thu Feb 29 08:08:39 PM EST 2024 INFO - updateWinRes - Waiting for Window 'SteamTinkerLaunch-OpenSettings'
+Thu Feb 29 08:08:40 PM EST 2024 SKIP - updateWinRes - Timeout waiting for Window 'SteamTinkerLaunch-OpenSettings'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - askSettings - TIMEOUT - Starting game without opening the Settings Menu
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - Second LoadCfg after menus: /home/elly/.config/steamtinkerlaunch/gamecfgs/id/218230.conf
+Thu Feb 29 08:08:41 PM EST 2024 INFO - loadCfg - '/home/elly/.config/steamtinkerlaunch/gamecfgs/id/218230.conf' START
+Thu Feb 29 08:08:41 PM EST 2024 INFO - loadCfg - Loading game config '/home/elly/.config/steamtinkerlaunch/gamecfgs/id/218230.conf'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - migrateCfgOption - File '/home/elly/.config/steamtinkerlaunch/dxvk/218230.conf' does not exist - nothing to do
+Thu Feb 29 08:08:41 PM EST 2024 INFO - loadCfg - '/home/elly/.config/steamtinkerlaunch/gamecfgs/id/218230.conf' STOP
+Thu Feb 29 08:08:41 PM EST 2024 INFO - setDxvkVars - Exporting variable 'DXVK_FRAME_RATE=none' to limit game framerate
+Thu Feb 29 08:08:41 PM EST 2024 INFO - autoCollectionSettings - Searching collections for game '218230' in '/home/elly/.local/share/Steam/userdata/21602253/7/remote/sharedconfig.vdf'
+Thu Feb 29 08:08:41 PM EST 2024 SKIP - autoCollectionSettings - Global Config '' not found - skipping
+Thu Feb 29 08:08:41 PM EST 2024 SKIP - autoCollectionSettings - Collections Directory Config '' not found - skipping
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - sortGameArgs again, in case something changed above:
+Thu Feb 29 08:08:41 PM EST 2024 SKIP - sortGameArgs - Sorting the game arguments is disabled
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - symlinkSteamUser:
+Thu Feb 29 08:08:41 PM EST 2024 SKIP - symlinkSteamUser - Symlinking steamuser is disabled - Checking if a symlink needs to be reverted
+Thu Feb 29 08:08:41 PM EST 2024 SKIP - symlinkSteamUser - '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/compatdata/218230/pfx/drive_c/users/steamuser' is no symlink - nothing to do
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - restoreSteamUser:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - restoreSteamUser - Using configured value 'none' for RESTORESTEAMUSER
+Thu Feb 29 08:08:41 PM EST 2024 INFO - restoreSteamUser - Restoration of steamuser data is disabled with RESTORESTEAMUSER being 'none
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - prepareProton:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - setLinGameVals :
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - CheckTweakLaunch:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - checkXliveless:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - chooseWinetricks:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - checkExtDeps:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - checkExtDeps done
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - setWineVars:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - CheckWinetricksLaunch:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - CheckWineCfgLaunch:
+Thu Feb 29 08:08:41 PM EST 2024 WARN - checkWineCfgLaunch - Function was called but RUN_WINECFG ('0') was not enabled - skipping
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - CustomRegs:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - TogWindows:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - StateSteamWebHelper:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - InstallReshade:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - installDepth3DReshade:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - checkReshade:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - autoCollectionSettings - Searching collections for game '218230' in '/home/elly/.local/share/Steam/userdata/21602253/7/remote/sharedconfig.vdf'
+Thu Feb 29 08:08:41 PM EST 2024 SKIP - autoCollectionSettings - Global Config '' not found - skipping
+Thu Feb 29 08:08:41 PM EST 2024 SKIP - autoCollectionSettings - Collections Directory Config '' not found - skipping
+Thu Feb 29 08:08:41 PM EST 2024 INFO - setFullGameExePath - User did not enable 'CUSTOMCMDRESHADE' - Using the game's exe directroy as the ReShade installation directory
+Thu Feb 29 08:08:41 PM EST 2024 INFO - setFullGameExePath - Using SHADDESTDIR '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2' for 'SHADDESTDIR'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - useSpecialK:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - setFullGameExePath - User did not enable 'CUSTOMCMDRESHADE' - Using the game's exe directroy as the ReShade installation directory
+Thu Feb 29 08:08:41 PM EST 2024 INFO - setFullGameExePath - Using SHADDESTDIR '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2' for 'SPEKDDIR'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - configureGeoElf:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - setFullGameExePath - User did not enable 'CUSTOMCMDRESHADE' - Using the game's exe directroy as the ReShade installation directory
+Thu Feb 29 08:08:41 PM EST 2024 INFO - setFullGameExePath - Using SHADDESTDIR '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2' for 'GEOELFDDIR'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - ChooseShaders:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - UseNyrnaz:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - UseReplay:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - CheckSBSVRLaunch:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - checkMO2:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - setNewRes:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - getRes - Detected screen resolution '3840x2160'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - customUserScriptStart:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - redirectSCDP:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - redirectSCDP - Using Proton version with minor version fix '8.0-5c' for compatdata directory name
+Thu Feb 29 08:08:41 PM EST 2024 INFO - redirectSCDP - Using regular compatdata '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/compatdata/218230'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - checkIGCSInjector:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - checkOpenVRFSR:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - CheckFWS:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - loadCustomVars - Empty global config '/home/elly/.config/steamtinkerlaunch/gamecfgs/customvars/global-custom-vars.conf' for user defined custom variables not loaded
+Thu Feb 29 08:08:41 PM EST 2024 INFO - loadCustomVars - Empty game-specific config '/home/elly/.config/steamtinkerlaunch/gamecfgs/customvars/218230.conf' for user defined custom variables not loaded
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - CheckCustomLaunch:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - checkCustomLaunch - USECUSTOMCMD is set to '1' - trying to start custom program '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/compatdata/218230/pfx/drive_c/Program Files (x86)/Recursion/RecursionTracker/RTST.exe'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - checkCustomLaunch - FORK_CUSTOMCMD is set to 1 - forking the custom program in background and continue
+Thu Feb 29 08:08:41 PM EST 2024 INFO - launchCustomProg - '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/compatdata/218230/pfx/drive_c/Program Files (x86)/Recursion/RecursionTracker/RTST.exe' found
+Thu Feb 29 08:08:41 PM EST 2024 INFO - launchCustomProg - Changed pwd into the custom directory '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/compatdata/218230/pfx/drive_c/Program Files (x86)/Recursion/RecursionTracker'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - launchCustomProg - '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/compatdata/218230/pfx/drive_c/Program Files (x86)/Recursion/RecursionTracker/RTST.exe' seems to be a MS Windows program - starting through proton
+Thu Feb 29 08:08:41 PM EST 2024 INFO - launchCustomProg - '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/compatdata/218230/pfx/drive_c/Program Files (x86)/Recursion/RecursionTracker/RTST.exe' seems to be a MS gui program - starting regularly
+Thu Feb 29 08:08:41 PM EST 2024 INFO - launchCustomProg - FORK_CUSTOMCMD is set to 1 - forking the custom program in background and continue
+Thu Feb 29 08:08:41 PM EST 2024 INFO - setRunProtonFromUseProton - Setting ORUNPROTON to '/home/elly/.local/share/Steam/steamapps/common/Proton 8.0/proton'
+Thu Feb 29 08:08:41 PM EST 2024 SKIP - setRunProtonFromUseProton - RUNPROTON '/home/elly/.local/share/Steam/steamapps/common/Proton 8.0/proton' hasn't changed
+Thu Feb 29 08:08:41 PM EST 2024 INFO - extProtonRun - Continuing with RUNPROTON='/home/elly/.local/share/Steam/steamapps/common/Proton 8.0/proton'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - extProtonRun - No external program args here it seems
+Thu Feb 29 08:08:41 PM EST 2024 INFO - extProtonRun - Starting '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/compatdata/218230/pfx/drive_c/Program Files (x86)/Recursion/RecursionTracker/RTST.exe' forked into the background
+Thu Feb 29 08:08:41 PM EST 2024 INFO - restoreOrgVars - Restoring previously cleared Variables
+Thu Feb 29 08:08:41 PM EST 2024 INFO - launchCustomProg - Changing pwd into previous directory
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - checkUUUPatchLaunch:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - CheckStraceLaunch:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - CheckNetMonLaunch:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - checkWDIB:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - checkPulse:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - checkSteamAppIDFile:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - checkSteamAppIDFile - STEAMAPPIDFILE is disabled and there's no '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2/steam_appid.txt' - nothing to do
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - setCompatDataTitle:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - setCompatDataTitle - Symlink /home/elly/.config/steamtinkerlaunch/compatdata/PlanetSide 2 already exists
+Thu Feb 29 08:08:41 PM EST 2024 INFO - setCompatDataTitle - Symlink '/home/elly/.config/steamtinkerlaunch/compatdata/PlanetSide 2' already points to the correct directory '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/compatdata/218230'
+Thu Feb 29 08:08:41 PM EST 2024 SKIP - delayGameForCustomLaunch - Nothing to do
+Thu Feb 29 08:08:41 PM EST 2024 INFO - prepareLaunch - launchSteamGame:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - launchSteamGame - Initial game command is 'waitforexitandrun /home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2/LaunchPad.exe Updates:enable=0 Updates:PatchSelf=1 campaignID=1063272 promoID=146 launchPoint=steam launchArgs=STEAM_ENABLED=1 --no-gui'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - setSLRReap - No SLR provided from command line, attempting to fetch required SLR from current compatibility tool's 'toolmanifest.vdf'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - getRequireToolAppidPath - Found tool manifest at '/home/elly/.local/share/Steam/steamapps/common/Proton 8.0/toolmanifest.vdf', attempting to get 'require_tool_appid' value...
+Thu Feb 29 08:08:41 PM EST 2024 INFO - getRequireToolAppidPath - Got 'require_tool_appid' from '/home/elly/.local/share/Steam/steamapps/common/Proton 8.0/toolmanifest.vdf' ('1628350') - Returning path to tool
+Thu Feb 29 08:08:41 PM EST 2024 INFO - getGameDir - Found matching App Manifest file for presumed entered AppID '1628350' - Manifest file is '/home/elly/.local/share/Steam/steamapps/appmanifest_1628350.acf'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - setSLRReap - '/home/elly/.local/share/Steam/steamapps/common/SteamLinuxRuntime_sniper' exists - Path gotten from specified AppID looks valid
+Thu Feb 29 08:08:41 PM EST 2024 INFO - setSLRReap - Building Steam Linux Runtime command for Proton game
+Thu Feb 29 08:08:41 PM EST 2024 INFO - setSLRReap - Adding SLR '/home/elly/.local/share/Steam/steamapps/common/SteamLinuxRuntime_sniper/_v2-entry-point --verb=waitforexitandrun --' to the launch command
+Thu Feb 29 08:08:41 PM EST 2024 INFO - gameArgs - Combined final game command line arguments: 'Updates:enable=0 Updates:PatchSelf=1 campaignID=1063272 promoID=146 launchPoint=steam launchArgs=STEAM_ENABLED=1 --no-gui'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - launchSteamGame - Preparing proton command
+Thu Feb 29 08:08:41 PM EST 2024 INFO - setProtonCmd - Proton override enabled, so checking if it needs updated
+Thu Feb 29 08:08:41 PM EST 2024 INFO - setRunProtonFromUseProton - Setting ORUNPROTON to '/home/elly/.local/share/Steam/steamapps/common/Proton 8.0/proton'
+Thu Feb 29 08:08:41 PM EST 2024 SKIP - setRunProtonFromUseProton - RUNPROTON '/home/elly/.local/share/Steam/steamapps/common/Proton 8.0/proton' hasn't changed
+Thu Feb 29 08:08:41 PM EST 2024 SKIP - fixSymlinks - Fixing Symlinks is not enabled
+Thu Feb 29 08:08:41 PM EST 2024 SKIP - unSymlink - Unsymlinking is not enabled
+Thu Feb 29 08:08:41 PM EST 2024 INFO - setProtonCmd - Prepending Proton 'proton-8.0-5c' (='/home/elly/.local/share/Steam/steamapps/common/Proton 8.0/proton') to the command line '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2/LaunchPad.exe'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - setProtonCmd - UPDATED game start command is: /home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2/LaunchPad.exe
+Thu Feb 29 08:08:41 PM EST 2024 INFO - setProtonCmd - Starting 'PlanetSide 2 (218230)' with Proton: 'proton-8.0-5c'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - launchSteamGame - Original incoming start command: 'waitforexitandrun /home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2/LaunchPad.exe Updates:enable=0 Updates:PatchSelf=1 campaignID=1063272 promoID=146 launchPoint=steam launchArgs=STEAM_ENABLED=1 --no-gui'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - launchSteamGame - Final outgoing start command: '/home/elly/.local/share/Steam/steamapps/common/SteamLinuxRuntime_sniper/_v2-entry-point --verb=waitforexitandrun -- /home/elly/.local/share/Steam/steamapps/common/Proton 8.0/proton waitforexitandrun /home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2/LaunchPad.exe Updates:enable=0 Updates:PatchSelf=1 campaignID=1063272 promoID=146 launchPoint=steam launchArgs=STEAM_ENABLED=1 --no-gui'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - loadCfg - '/home/elly/.config/steamtinkerlaunch/meta/id/general/218230.conf' START
+Thu Feb 29 08:08:41 PM EST 2024 INFO - loadCfg - '/home/elly/.config/steamtinkerlaunch/meta/id/general/218230.conf' STOP
+Thu Feb 29 08:08:41 PM EST 2024 INFO - startGame - Getting the Game Window name:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - getGameWindowName - No gamewindow name stored in metadata '/home/elly/.config/steamtinkerlaunch/meta/id/general/218230.conf' yet. Trying to find it now
+Thu Feb 29 08:08:41 PM EST 2024 INFO - startGame - Full start command is '/home/elly/.local/share/Steam/steamapps/common/SteamLinuxRuntime_sniper/_v2-entry-point --verb=waitforexitandrun -- /home/elly/.local/share/Steam/steamapps/common/Proton 8.0/proton waitforexitandrun /home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2/LaunchPad.exe Updates:enable=0 Updates:PatchSelf=1 campaignID=1063272 promoID=146 launchPoint=steam launchArgs=STEAM_ENABLED=1 --no-gui'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - startGame - Rebuilding STEAM_COMPAT_TOOL_PATHS variable:
+Thu Feb 29 08:08:41 PM EST 2024 INFO - startGame - Adding RUNPROTON '/home/elly/.local/share/Steam/steamapps/common/Proton 8.0'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - startGame - Adding '' because USESLR is enabled
+Thu Feb 29 08:08:41 PM EST 2024 INFO - startGame - Result: Set STEAM_COMPAT_TOOL_PATHS from '/home/elly/.local/share/Steam/steamapps/common/SteamLinuxRuntime_sniper:/home/elly/.local/share/Steam/steamapps/common/Steamworks Shared:/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/SteamLinuxRuntime_sniper:/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/SteamLinuxRuntime_soldier' to '/home/elly/.local/share/Steam/steamapps/common/Proton 8.0:'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - startGame - ## ORIGINAL INCOMING LAUNCH COMMAND: 'waitforexitandrun /home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2/LaunchPad.exe Updates:enable=0 Updates:PatchSelf=1 campaignID=1063272 promoID=146 launchPoint=steam launchArgs=STEAM_ENABLED=1 --no-gui'
+Thu Feb 29 08:08:41 PM EST 2024 WAIT - getGameWindowPID - Sec 0/20 Game Window with pwd '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2' not yet in front
+Thu Feb 29 08:08:41 PM EST 2024 INFO - startGame - ## STL LAUNCH COMMAND: '/home/elly/.local/share/Steam/steamapps/common/SteamLinuxRuntime_sniper/_v2-entry-point --verb=waitforexitandrun -- /home/elly/.local/share/Steam/steamapps/common/Proton 8.0/proton waitforexitandrun /home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2/LaunchPad.exe Updates:enable=0 Updates:PatchSelf=1 campaignID=1063272 promoID=146 launchPoint=steam launchArgs=STEAM_ENABLED=1 --no-gui'
+Thu Feb 29 08:08:41 PM EST 2024 INFO - startGame - ## GAMESTART HERE ###
+Thu Feb 29 08:08:41 PM EST 2024 INFO - restoreOrgVars - Restoring previously cleared Variables
+Thu Feb 29 08:08:42 PM EST 2024 WAIT - getGameWindowPID - Sec 1/20 Game Window with pwd '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2' not yet in front
+Thu Feb 29 08:08:43 PM EST 2024 WAIT - getGameWindowPID - Sec 2/20 Game Window with pwd '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2' not yet in front
+Thu Feb 29 08:08:44 PM EST 2024 WAIT - getGameWindowPID - Sec 3/20 Game Window with pwd '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2' not yet in front
+Thu Feb 29 08:08:45 PM EST 2024 WAIT - getGameWindowPID - Sec 4/20 Game Window with pwd '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2' not yet in front
+Thu Feb 29 08:08:46 PM EST 2024 WAIT - getGameWindowPID - Found PID '795946' for game executable 'GE' 'LaunchPad' - leaving loop
+Thu Feb 29 08:08:46 PM EST 2024 INFO - getGameWindowPID - Found PID '795946' for running exe '/home/elly/.local/share/Steam/steamapps/common/Proton 8.0/dist/bin/wine-preloader'
+Thu Feb 29 08:08:46 PM EST 2024 INFO - getGameWindowName - Found valid game window PID '795946'
+Thu Feb 29 08:08:46 PM EST 2024 INFO - getGameWinXIDFromPid - Found a controllable windowid
+Thu Feb 29 08:08:46 PM EST 2024 INFO - getGameWinXIDFromPid Found window id 0x1ea00003 for 'LaunchPad' running with PID '795946'
+Thu Feb 29 08:08:46 PM EST 2024 INFO - getGameWindowName - Found game window XID '513802243'
+Thu Feb 29 09:59:20 PM EST 2024 INFO - startGame - Symlink '/home/elly/.config/steamtinkerlaunch/logs/gamelaunch/title/PlanetSide 2.log' already exists
+Thu Feb 29 09:59:20 PM EST 2024 ERROR - startGame - Could not determine pid of '/home/elly/.local/share/Steam/steamapps/common/Proton 8.0/dist/bin/wineserver'
+Thu Feb 29 09:59:20 PM EST 2024 INFO - startGame - ## GAMESTOP after '6639' seconds playtime
+Thu Feb 29 09:59:20 PM EST 2024 STOP - ######### SteamTinkerLaunch v12.12 #########
+Thu Feb 29 09:59:20 PM EST 2024 STOP - ######### CLEANUP #########
+Thu Feb 29 09:59:20 PM EST 2024 INFO - closeSTL - closing STL
+Thu Feb 29 09:59:20 PM EST 2024 INFO - updateConfigEntry - Emptying 'CUSTOMCMD' for '/home/elly/.config/steamtinkerlaunch/default_template.conf'
+Thu Feb 29 09:59:20 PM EST 2024 INFO - updateConfigEntry - Option 'CUSTOMCMD' is updated with the new value 'echo' in config 'default_template.conf'
+Thu Feb 29 09:59:20 PM EST 2024 INFO - closeSTL - Creating '/dev/shm/steamtinkerlaunch/steamtinkerlaunch-closing.tmp'
+Thu Feb 29 09:59:20 PM EST 2024 INFO - checkPlayTime - Playtime '6639' was longer than CRASHGUESS '60', not opening the requester
+Thu Feb 29 09:59:20 PM EST 2024 INFO - closeSTL - Game 'PlanetSide 2 (218230)' exited - cleaning up custom processes if necessary
+Thu Feb 29 09:59:20 PM EST 2024 INFO - closeTrayIcon - Closing TrayIcon '794753'
+Thu Feb 29 09:59:21 PM EST 2024 INFO - closeSTL - Removing '/dev/shm/steamtinkerlaunch/steamtinkerlaunch-closing.tmp'
+Thu Feb 29 09:59:21 PM EST 2024 STOP - ######### closeSTL SteamTinkerLaunch v12.12 #########
+Thu Feb 29 09:59:21 PM EST 2024 INFO - writeLastRun - Recreating /home/elly/.config/steamtinkerlaunch/logs/steamtinkerlaunch/lastrun.txt
+Thu Feb 29 09:59:21 PM EST 2024 INFO - storeMetaData - Saving metadata for game 'PlanetSide 2 (218230)'
+Thu Feb 29 09:59:21 PM EST 2024 INFO - getArch - Architecture for '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2/LaunchPad.exe' is 32bit
+Thu Feb 29 09:59:21 PM EST 2024 INFO - storeMetaData - Symlink '/home/elly/.config/steamtinkerlaunch/meta/eval/title/evaluatorscript_PlanetSide 2.vdf' already exists

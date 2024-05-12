@@ -7,6 +7,7 @@
     # nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11"; 
   # Unstable
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; 
+    home-manager-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
   # Impermanence
     impermanence.url = "github:Nix-community/impermanence";
   # secret management
@@ -17,7 +18,7 @@
     };
   # Home Manager
     home-manager = {
-      url = "github:nix-community/home-manager/release-23.11";
+      url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
       # The `follows` keyword in inputs is used for inheritance.
       # Here, `inputs.nixpkgs` of home-manager is kept consistent with
@@ -46,7 +47,12 @@
       ];
     };
     homeConfigurations."elly@nire-durandal" = home-manager.lib.homeManagerConfiguration {
-      pkgs = nixpkgs; # Home-manager requires 'pkgs' instance
+      pkgs = import nixpkgs { # Home manger requires a pkgs instance
+        system = "x86_64-linux";
+        config ={
+          allowUnfree = true;
+        };
+      };
       extraSpecialArgs = { inherit inputs; }; # Pass flake inputs to our config
       modules = [
         ./home-manager/home.nix 
@@ -56,7 +62,6 @@
         ./home-manager/aliases.nix
         ./home-manager/programs.nix
         # Host Specific configs
-        ./home-manager/nire-durandal/elly.nix
         ./home-manager/nire-durandal/custom.nix
       ];
     };
@@ -80,8 +85,6 @@
           ./home-manager/aliases.nix
           ./home-manager/programs.nix
           # Host Specific configs
-          ./home-manager/nire-durandal/elly.nix
-          ./home-manager/nire-durandal/custom.nix
           ./home-manager/nire-lysithea/elly.nix
           ./home-manager/nire-lysithea/custom.nix
         ];
@@ -105,7 +108,7 @@
         ./home-manager/aliases.nix
         ./home-manager/programs.nix
         # Host Specific configs
-        ./home-manager/nire-galatea/elly.nix
+        ./home-manager/_common/_elly.nix
         ./home-manager/nire-galatea/custom.nix
       ];
     };

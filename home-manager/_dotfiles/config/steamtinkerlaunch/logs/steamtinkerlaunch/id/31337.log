@@ -1,0 +1,50 @@
+Tue Feb 20 07:48:13 PM EST 2024 INFO - initAID - Set AID from STEAM_COMPAT_APP_ID to '0'
+Tue Feb 20 07:48:13 PM EST 2024 INFO - initAID - Set AID to PLACEHOLDERAID '31337'
+Tue Feb 20 07:48:13 PM EST 2024 INFO - initAID - Set OSCDP to STEAM_COMPAT_DATA_PATH '/home/elly/.local/share/Steam/steamapps/compatdata/0'
+Tue Feb 20 07:48:13 PM EST 2024 INFO - loadLangFile - Language from command line is 'english'
+Tue Feb 20 07:48:13 PM EST 2024 INFO - loadLangFile - SYSTEMSTLCFGDIR is '/usr/share/steamtinkerlaunch'
+Tue Feb 20 07:48:13 PM EST 2024 INFO - loadLangFile - Command line language 'english' is no file - trying to find its absolute path
+Tue Feb 20 07:48:13 PM EST 2024 INFO - loadLangFile - Loading found system wide /usr/share/steamtinkerlaunch/lang//english.txt
+Tue Feb 20 07:48:13 PM EST 2024 INFO - getCurrentCommandline - No Proton in command line arguments 'run /home/elly/.local/share/Steam/ubuntu12_32/../bin/d3ddriverquery64.exe -d3d12'
+Tue Feb 20 07:48:13 PM EST 2024 INFO - saveOrgVars - Storing some original variables to restore them later
+Tue Feb 20 07:48:13 PM EST 2024 INFO - emptyVars - Emptied some original variables as they slowdown several system calls when started from steam
+Tue Feb 20 07:48:13 PM EST 2024 INFO - emptyVars - Set $PATH to '/home/elly/.nix-profile/bin:/home/elly/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/home/elly/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/var/lib/flatpak/exports/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/usr/lib/rustup/bin:/var/lib/snapd/snap/bin:'
+Tue Feb 20 07:48:13 PM EST 2024 START - ######### Initializing Game Launch 31337 using SteamTinkerLaunch v12.12 #########
+Tue Feb 20 07:48:13 PM EST 2024 INFO - main - Starting with a clean log
+Tue Feb 20 07:48:13 PM EST 2024 INFO - main - Start creating default configs
+Tue Feb 20 07:48:13 PM EST 2024 INFO - createDefaultCfgs - START
+Tue Feb 20 07:48:13 PM EST 2024 INFO - loadLanguage - First load the default language 'english' to make sure all variables are filled
+Tue Feb 20 07:48:13 PM EST 2024 INFO - loadLangFile - Language from command line is 'english'
+Tue Feb 20 07:48:13 PM EST 2024 INFO - loadLangFile - GLOBALSTLLANGDIR is '/usr/share/steamtinkerlaunch/lang'
+Tue Feb 20 07:48:13 PM EST 2024 INFO - loadLangFile - Command line language 'english' is no file - trying to find its absolute path
+Tue Feb 20 07:48:13 PM EST 2024 INFO - loadLangFile - Loading found system wide /usr/share/steamtinkerlaunch/lang/english.txt
+Tue Feb 20 07:48:14 PM EST 2024 INFO - loadLanguage - Loading STLLANG from '/home/elly/.config/steamtinkerlaunch/global.conf'
+Tue Feb 20 07:48:14 PM EST 2024 INFO - loadLanguage - STLLANG from '/home/elly/.config/steamtinkerlaunch/global.conf' is 'english'
+Tue Feb 20 07:48:14 PM EST 2024 INFO - createDefaultCfgs - setSteamPaths:
+Tue Feb 20 07:48:14 PM EST 2024 INFO - setSteamPaths - Reading Steam Path variables from '/dev/shm/steamtinkerlaunch/steampaths.txt'
+Tue Feb 20 07:48:14 PM EST 2024 INFO - getGameOS - Starting game OS detection
+Tue Feb 20 07:48:14 PM EST 2024 WARN - getGameOS - Could not extract the full game binary path from the incoming game launch command, so assuming this is a Windows game!
+Tue Feb 20 07:48:14 PM EST 2024 INFO - setWin - '' determined to be a Windows Game
+Tue Feb 20 07:48:14 PM EST 2024 INFO - createDefaultCfgs - createProtonList:
+Tue Feb 20 07:48:14 PM EST 2024 INFO - createDefaultCfgs - createProtonList end
+Tue Feb 20 07:48:14 PM EST 2024 INFO - listAllSettingsEntries - '/dev/shm/steamtinkerlaunch/setentries.txt' already exists - nothing to do
+Tue Feb 20 07:48:14 PM EST 2024 INFO - createDefaultCfgs - STOP
+Tue Feb 20 07:48:14 PM EST 2024 SKIP - listSteamLibraries - not recreating already available '/dev/shm/steamtinkerlaunch/SteamLibraries.txt'
+Tue Feb 20 07:48:14 PM EST 2024 WARN - setSteamLibraryPaths - Library folder '/home/elly/storages/2tb_nvme_1/SteamLibrary/steamapps' does not seem to be a valid directory, even though this comes from Steam itself - Ignoring, but please report if this is invalid or causes issues
+Tue Feb 20 07:48:14 PM EST 2024 WARN - setSteamLibraryPaths - Library folder '/home/elly/storages/2tb_nvme/SteamLibrary/steamapps' does not seem to be a valid directory, even though this comes from Steam itself - Ignoring, but please report if this is invalid or causes issues
+Tue Feb 20 07:48:14 PM EST 2024 INFO - setSteamLibraryPaths - STEAM_COMPAT_LIBRARY_PATHS set to '/home/elly/.local/share/Steam/steamapps'
+Tue Feb 20 07:48:14 PM EST 2024 INFO - setSteamLibraryPaths - STEAM_COMPAT_MOUNTS set to '/home/elly/.local/share/Steam/steamapps/common/Proton 8.0:/home/elly/.local/share/Steam/steamapps/common/SteamLinuxRuntime_sniper:/home/elly/.local/share/Steam/steamapps/common/Steamworks Shared'
+Tue Feb 20 07:48:14 PM EST 2024 INFO - setSteamLibraryPaths - STEAM_COMPAT_TOOL_PATHS set to '/home/elly/.local/share/Steam/steamapps/common/SteamLinuxRuntime_sniper:/home/elly/.local/share/Steam/steamapps/common/Steamworks Shared'
+Tue Feb 20 07:48:14 PM EST 2024 INFO - main - Checking internal dependencies:
+Tue Feb 20 07:48:14 PM EST 2024 INFO - setAwkBin - Found 'gawk' as an 'awk' variant. It should work without any issues, because 'gawk' was tested completely
+Tue Feb 20 07:48:14 PM EST 2024 INFO - checkIntDeps - Result of version check for yad binary '/usr/bin/yad' is '13.0'
+Tue Feb 20 07:48:14 PM EST 2024 INFO - main - Initializing first Proton:
+Tue Feb 20 07:48:14 PM EST 2024 INFO - initOldProtonArr - Creating an initial array with available Proton versions using the file '/dev/shm/steamtinkerlaunch/ProtonCSV.txt' which was created during a previous run
+Tue Feb 20 07:48:14 PM EST 2024 INFO - initFirstProton - Initializing Proton
+Tue Feb 20 07:48:14 PM EST 2024 INFO - initFirstProton - Initial Proton version 'FIRSTUSEPROTON' from '/home/elly/.config/steamtinkerlaunch/default_template.conf' is 'proton-8.0-5c'
+Tue Feb 20 07:48:14 PM EST 2024 INFO - main - Initializing default window resolution
+Tue Feb 20 07:48:14 PM EST 2024 INFO - setInitWinXY - Using '2880x1620' from config '/dev/shm/steamtinkerlaunch/defres.txt'
+Tue Feb 20 07:48:14 PM EST 2024 INFO - main - Welcome to SteamTinkerLaunch
+Tue Feb 20 07:48:14 PM EST 2024 INFO - removeEmptyFiles - Removing empty files from '/home/elly/.config/steamtinkerlaunch/games/appinfo'
+Tue Feb 20 07:48:14 PM EST 2024 INFO - removeEmptyFiles - Removing empty files from '/home/elly/.config/steamtinkerlaunch/games/header'
+Tue Feb 20 07:48:14 PM EST 2024 INFO - main - Checking command line: incoming arguments 'run /home/elly/.local/share/Steam/ubuntu12_32/../bin/d3ddriverquery64.exe -d3d12'

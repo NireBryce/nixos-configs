@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=PlanetSide 2
+Comment=Play this game on Steam
+Exec=steam steam://rungameid/218230
+Icon=/home/elly/.config/steamtinkerlaunch/games/header/218230.jpg
+Terminal=false
+Type=Application
+Categories=Game;

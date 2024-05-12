@@ -1,0 +1,6 @@
+RUNPROTON="/home/elly/.local/share/Steam/steamapps/common/Proton 8.0/proton"
+RUNWINE="/home/elly/.local/share/Steam/steamapps/common/Proton 8.0/dist/bin/wine"
+PROTONVERSION="proton-8.0-5c"
+PREVAID="218230"
+PREVGAME="PlanetSide 2"
+PREVABSGAMEEXEPATH="/home/elly/storages/2tb_nvme/SteamLibrary/steamapps/common/PlanetSide 2/LaunchPad.exe"

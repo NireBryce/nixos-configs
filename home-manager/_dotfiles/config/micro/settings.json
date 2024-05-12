@@ -1,0 +1,18 @@
+{
+    "autoclose": false,
+    "autosu": true,
+    "colorscheme": "dukeubuntu-tc",
+    "diffgutter": true,
+    "eofnewline": false,
+    "fastdirty": true,
+    "ignorecase": false,
+    "keymenu": true,
+    "mkparents": true,
+    "pluginchannels": [
+        "https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"
+    ],
+    "pluginrepos": [],
+    "savehistory": false,
+    "tabsize": 2,
+    "tabstospaces": true
+}

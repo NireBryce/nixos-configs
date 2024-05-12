@@ -1,0 +1,34 @@
+<!DOCTYPE patchbay>
+<patchbay name="qwpgraph_config_xm1004" version="0.6.2">
+ <items>
+  <item node-type="pipewire" port-type="pipewire-audio">
+   <output node="Starship/Matisse HD Audio Controller Analog Stereo" port="ALC897 Analog:capture_FL"/>
+   <input node="WH-1000XM4" port="WH-1000XM4:playback_FL"/>
+  </item>
+  <item node-type="pipewire" port-type="pipewire-audio">
+   <output node="TeamSpeak" port="TeamSpeak:output_FR"/>
+   <input node="WH-1000XM4" port="WH-1000XM4:playback_FR"/>
+  </item>
+  <item node-type="pipewire" port-type="pipewire-audio">
+   <output node="Scarlett Solo USB Input 1 Mic" port="Scarlett Solo USB:capture_MONO"/>
+   <input node="WH-1000XM4" port="WH-1000XM4:playback_FL"/>
+  </item>
+  <item node-type="pipewire" port-type="pipewire-audio">
+   <output node="Starship/Matisse HD Audio Controller Analog Stereo" port="ALC897 Analog:capture_FR"/>
+   <input node="WH-1000XM4" port="WH-1000XM4:playback_FR"/>
+  </item>
+  <item node-type="pipewire" port-type="pipewire-audio">
+   <output node="Scarlett Solo USB Input 1 Mic" port="Scarlett Solo USB:capture_MONO"/>
+   <input node="WH-1000XM4" port="WH-1000XM4:playback_FR"/>
+  </item>
+  <item node-type="pipewire" port-type="pipewire-audio">
+   <output node="Scarlett Solo USB Input 1 Mic" port="Scarlett Solo USB:capture_MONO"/>
+   <input node="TeamSpeak" port="TeamSpeak:input_MONO"/>
+  </item>
+  <item node-type="pipewire" port-type="pipewire-audio">
+   <output node="TeamSpeak" port="TeamSpeak:output_FL"/>
+   <input node="WH-1000XM4" port="WH-1000XM4:playback_FL"/>
+  </item>
+ </items>
+</patchbay>
+
