@@ -1,6 +1,7 @@
 # Graphical environment settings including window manager
 { ... }:
 {
+
   # Enable the X11 windowing system.
     #TODO: x11/wayland switch
     services.xserver.enable = true;
