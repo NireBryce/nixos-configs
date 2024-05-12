@@ -42,7 +42,7 @@
       specialArgs = inputs; # forward inputs to modules
       modules = [
         ./nire-durandal
-        ./home-manager-stopgap.nix
+        # ./home-manager-stopgap.nix
       ];
     };
     homeConfigurations."elly@nire-durandal" = home-manager.lib.homeManagerConfiguration {
@@ -66,7 +66,7 @@
       system = "x86_64-linux";
       modules = [
         ./nire-lysithea
-        ./home-manager-stopgap.nix
+        # ./home-manager-stopgap.nix
       ];
     };
     homeConfigurations."elly@nire-lysithea" = home-manager.lib.homeManagerConfiguration {
@@ -91,7 +91,7 @@
       system = "x86_64-linux";
       modules = [
         ./nire-galatea
-        ./home-manager-stopgap.nix
+        #./home-manager-stopgap.nix
       ];
     };
     homeConfigurations."elly@nire-galatea" = home-manager.lib.homeManagerConfiguration {
