@@ -46,7 +46,7 @@
       ];
     };
     homeConfigurations."elly@nire-durandal" = home-manager.lib.homeManagerConfiguration {
-      pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
+      pkgs = nixpkgs; # Home-manager requires 'pkgs' instance
       extraSpecialArgs = { inherit inputs; }; # Pass flake inputs to our config
       modules = [
         ./home-manager/home.nix 
@@ -70,7 +70,7 @@
       ];
     };
     homeConfigurations."elly@nire-lysithea" = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
+        pkgs = nixpkgs; # Home-manager requires 'pkgs' instance
         extraSpecialArgs = { inherit inputs; }; # Pass flake inputs to our config
         modules = [
           ./home-manager/home.nix 
@@ -85,7 +85,7 @@
           ./home-manager/nire-lysithea/elly.nix
           ./home-manager/nire-lysithea/custom.nix
         ];
-      };
+    };
     nixosConfigurations."nire-galatea" = nixpkgs.lib.nixosSystem { # (3)
       specialArgs = inputs; 
       system = "x86_64-linux";
@@ -95,7 +95,7 @@
       ];
     };
     homeConfigurations."elly@nire-galatea" = home-manager.lib.homeManagerConfiguration {
-      pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
+      pkgs = nixpkgs; # Home-manager requires 'pkgs' instance
       extraSpecialArgs = { inherit inputs; }; # Pass flake inputs to our config
       modules = [
         ./home-manager/home.nix 
