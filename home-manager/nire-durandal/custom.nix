@@ -22,5 +22,7 @@
 	_zsh.enable = true;
 	_wayland.enable = true;
 
+	# TODO: home manager broke, so I had to use `nix-shell -p home-manager` to bootstrap
+
 
 }
