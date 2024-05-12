@@ -1,6 +1,12 @@
+{config, lib, ...}:
 {
-  # TODO: mkEnable, mkIf zsh enabled
-  programs.zsh.zsh-abbr.abbreviations = {
+  # TODO: move this into graphical even though the clipboard is technically for CLI things
+  options = {
+    _zsh-abbr.enable = lib.mkEnableOption "Enables zsh-abbr abbreviations";
+  };
+  config = lib.mkIf config._zsh-abbr.enable {
+    # TODO: mkEnable, mkIf zsh enabled
+    programs.zsh.zsh-abbr.abbreviations = {
       # ! WARN: unsure how globals work here
       # for now they're declared in the zsh config
       # but that's not declarative -- it saves them to abbr
@@ -35,4 +41,5 @@
       "zsh-keymap"="bindkey";
       "nosrbd-d"="git add . && sudo nixos-rebuild test --flake .#nire-durandal";
     };
+  };
 }

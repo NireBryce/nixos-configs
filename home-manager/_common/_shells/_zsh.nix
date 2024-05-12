@@ -1,15 +1,18 @@
 { lib, config, pkgs, ... }: 
 {
-  # TODO: mkEnable, mkIf zsh enabled
+  # TODO: mkDefault
   options = {
     _zsh.enable = lib.mkEnableOption "Enables zsh";
   };
   config = lib.mkIf config._zsh.enable {
+    # enable zsh-abbr if zsh is enabled
+      _zsh-abbr.enable = true; 
+
     # Added from Fleek (now deprecated), figure out what they do.
-    programs.zsh.profileExtra = ''
-      [ -r ~/.nix-profile/etc/profile.d/nix.sh ] && source  ~/.nix-profile/etc/profile.d/nix.sh
-      export XCURSOR_PATH=$XCURSOR_PATH:/usr/share/icons:~/.local/share/icons:~/.icons:~/.nix-profile/share/icons
-    '';
+      programs.zsh.profileExtra = ''
+        [ -r ~/.nix-profile/etc/profile.d/nix.sh ] && source  ~/.nix-profile/etc/profile.d/nix.sh
+        export XCURSOR_PATH=$XCURSOR_PATH:/usr/share/icons:~/.local/share/icons:~/.icons:~/.nix-profile/share/icons
+      '';
 
     # Notes:
       # If you get `zsh side` errors, delete ~/.zcompdump and ~/.config/zsh/.zcompdump and run `zi update`

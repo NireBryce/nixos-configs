@@ -1,9 +1,9 @@
-{pkgs, config, lib ...}:
+{pkgs, config, lib, ...}:
 {
   # TODO: move this into graphical even though the clipboard is technically for CLI things
   options = {
     _wayland.enable = lib.mkEnableOption "Enables Wayland packages";
-  }
+  };
   config = lib.mkIf config._wayland.enable {
     home.packages = with pkgs; [
     # Wayland
