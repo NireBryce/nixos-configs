@@ -33,7 +33,7 @@
   # is the same as:
   # inputs: inputs.nixpkgs
 
-  outputs = { nixpkgs, home-manager, ... }@inputs: {
+  outputs = { self, nixpkgs, home-manager, ... }@inputs: {
 
     nixosModules = import ./_common/_modules;
     system = "x86_64-linux";
@@ -43,8 +43,23 @@
       modules = [
         ./nire-durandal
         ./home-manager-stopgap.nix
-        ];
-      };
+      ];
+    };
+    homeConfigurations."elly@nire-durandal" = home-manager.lib.homeManagerConfiguration {
+      pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
+      extraSpecialArgs = { inherit inputs; }; # Pass flake inputs to our config
+      modules = [
+        ./home-manager/home.nix 
+        ./home-manager/path.nix
+        ./home-manager/shell.nix
+        ./home-manager/user.nix
+        ./home-manager/aliases.nix
+        ./home-manager/programs.nix
+        # Host Specific configs
+        ./home-manager/nire-durandal/elly.nix
+        ./home-manager/nire-durandal/custom.nix
+      ];
+    };
 
     nixosConfigurations."nire-lysithea" = nixpkgs.lib.nixosSystem { # (3)
       specialArgs = inputs; 
@@ -52,16 +67,46 @@
       modules = [
         ./nire-lysithea
         ./home-manager-stopgap.nix
-
-
       ];
     };
+    homeConfigurations."elly@nire-lysithea" = home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
+        extraSpecialArgs = { inherit inputs; }; # Pass flake inputs to our config
+        modules = [
+          ./home-manager/home.nix 
+          ./home-manager/path.nix
+          ./home-manager/shell.nix
+          ./home-manager/user.nix
+          ./home-manager/aliases.nix
+          ./home-manager/programs.nix
+          # Host Specific configs
+          ./home-manager/nire-durandal/elly.nix
+          ./home-manager/nire-durandal/custom.nix
+          ./home-manager/nire-lysithea/elly.nix
+          ./home-manager/nire-lysithea/custom.nix
+        ];
+      };
     nixosConfigurations."nire-galatea" = nixpkgs.lib.nixosSystem { # (3)
       specialArgs = inputs; 
       system = "x86_64-linux";
       modules = [
         ./nire-galatea
         ./home-manager-stopgap.nix
+      ];
+    };
+    homeConfigurations."elly@nire-galatea" = home-manager.lib.homeManagerConfiguration {
+      pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
+      extraSpecialArgs = { inherit inputs; }; # Pass flake inputs to our config
+      modules = [
+        ./home-manager/home.nix 
+        ./home-manager/path.nix
+        ./home-manager/shell.nix
+        ./home-manager/user.nix
+        ./home-manager/aliases.nix
+        ./home-manager/programs.nix
+        # Host Specific configs
+        ./home-manager/nire-galatea/elly.nix
+        ./home-manager/nire-galatea/custom.nix
       ];
     };
   };
@@ -74,5 +119,3 @@
 #   disable -p '#'
 # otherwise `nixos-rebuild --flake .#hostname` will not get evaluated correctly.
 ################################################################################
-
-
