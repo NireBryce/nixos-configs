@@ -1,7 +1,7 @@
 {pkgs, ...}:
 {
   home.packages = with pkgs; [
-  
+  # TODO: mkIf and mkEnable, have it be essential vs optional
   # editors
     nano                      # text editor
     nanorc                    # nano syntax highlighting

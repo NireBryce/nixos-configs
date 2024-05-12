@@ -1,4 +1,5 @@
-{ pkgs, misc, ... }: {
+{ ... }: {
+    # TODO: split into elly and git
     home.username = "elly";
     home.homeDirectory = "/home/elly";
     programs.git = {

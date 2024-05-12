@@ -1,5 +1,6 @@
 {pkgs, lib, config, ...}:
 {
+  #TODO: maybe sort into base and optional 
   options = {
     _gui.enable = lib.mkEnableOption "Enables GUI packages";
   };

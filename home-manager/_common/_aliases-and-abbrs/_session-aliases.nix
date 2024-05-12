@@ -1,5 +1,6 @@
 { ... }:
 {
+  # TODO: historical
   home.shellAliases = { 
     "apply-nire-durandal" = "nix run --impure home-manager/master -- -b bak switch --flake .#elly@nire-durandal";
     

@@ -1,6 +1,7 @@
 {...}:
 
 { # TODO: split this out into where they're installed.
+  # TODO: mkEnable, mkIf, for the things that need to be toggled,  less important here because who cares about hanging dotfiles in .config though.
   home.file = {
   "./.bash_logout".source              = config/.bash_logout;
   "./.bash_profile".source             = config/.bash_profile;

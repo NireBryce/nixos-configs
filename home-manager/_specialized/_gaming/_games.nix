@@ -1,4 +1,5 @@
 { pkgs, misc, ... }: {
+  # TODO: lib.mkIf lib.mkEnable games
   home.packages = with pkgs; [
     # game launchers
     lutris

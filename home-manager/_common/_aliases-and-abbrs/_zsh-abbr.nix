@@ -1,4 +1,5 @@
 {
+  # TODO: mkEnable, mkIf zsh enabled
   programs.zsh.zsh-abbr.abbreviations = {
       # ! WARN: unsure how globals work here
       # for now they're declared in the zsh config
