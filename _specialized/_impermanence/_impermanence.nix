@@ -1,4 +1,4 @@
-{
+{ 
   impermanence,
   ...
 }: 
@@ -9,7 +9,7 @@
   ];
 
 # configure impermanence
-  # TODO: variablize
+  # TODO: modularize this better
   environment.etc.machine-id.source = /persist/etc/machine-id;
   environment.persistence."/persist" = {
     directories = [
@@ -34,5 +34,4 @@
     # impermanence-style wiping root results in sudo lectures after each reboot
     Defaults lecture = never
   '';
-
 }

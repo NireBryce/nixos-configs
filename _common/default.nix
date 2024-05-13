@@ -1,16 +1,20 @@
+{ lib }:
 { 
   imports = [
     ./_boot
-    ./_filesystem
+    ./_locale
     ./_networking
+    ./_nix
     ./_packages
     ./_secrets
     ./_services
+    ./_shells
     ./_ssh
     ./_users
   ];
 
-  hardware.keyboard.zsa.enable = true;
+
+  
 
 }
 

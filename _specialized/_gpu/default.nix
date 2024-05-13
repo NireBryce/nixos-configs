@@ -1,6 +1,7 @@
 { lib }:
-{
+{ 
   imports = [
-    ./_bluetooth.nix
+    ./_amdgpu.nix
   ];
+
 }

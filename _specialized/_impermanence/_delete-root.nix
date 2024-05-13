@@ -1,7 +1,4 @@
-{
-  lib,
-  ...
-}: 
+{ lib }: 
 
 {
   boot.initrd.postResumeCommands = lib.mkAfter ''
@@ -41,5 +38,4 @@
     # we can unmount /mnt and continue on the boot process.
         umount /mnt
   '';
-
 }

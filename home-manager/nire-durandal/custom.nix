@@ -16,11 +16,11 @@
 	];
 	# TODO: these should be in their own module as `mkDefault true` too
 	# TODO: Also consider merging things instead of having _common now that you can toggle 
-  _gui.enable = true;
-	_kde.enable = true;
-	_sound.enable = true;
-	_zsh.enable = true;
-	_wayland.enable = true;
+  _gui.enable       = true;
+	_kde.enable       = true;
+	_sound.enable     = true;
+	_zsh.enable       = true;
+	_wayland.enable   = true;
 
 	# TODO: home manager broke, so I had to use `nix-shell -p home-manager` to bootstrap
 

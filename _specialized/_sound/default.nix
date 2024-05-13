@@ -1,8 +1,12 @@
+{ lib, config, ...}:
 { 
-  imports = [
-    # need to make this not bound to a particular partition scheme
-    ./_bluetooth-sound.nix
-    ./_pipewire.nix
-  ];
-
+  options = {
+    _sound.enable = lib.mkEnableOption "Enables sound settings";
+  };
+  config = lib.mkIf config._sound.enable {  
+    imports = [ 
+      ./_bluetooth-sound.nix
+      ./_pipewire.nix
+    ];
+  };
 }
