@@ -1,9 +1,8 @@
 { pkgs, ...}:
 {
   # console.font = "FiraCode";
-  # programs._.enable = true;
   programs.zsh.enable = true;
-  programs.bash.enable = true;
+
   
   # shells
   environment = {
@@ -16,7 +15,7 @@
   console = {
     keyMap = "us";
     # useXkbConfig = true; # use xkb.options in tty.
-    console.font = "FiraCode Nerd Font Mono";
+    font = "Lat2-Terminus16";
   };
 
 users.users.elly.shell = pkgs.zsh;

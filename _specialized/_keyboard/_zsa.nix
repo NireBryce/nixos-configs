@@ -1,4 +1,4 @@
-{lib, config}:
+{lib, config, ...}:
 {
   options = {
     _zsa.enable = lib.mkEnableOption "Enables ZSA keyboard support";

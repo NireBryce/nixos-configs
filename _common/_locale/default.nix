@@ -1,6 +1,6 @@
 {
   imports = [
-    ./_locale.nix
+    ./_charset.nix
     ./_timezone.nix
   ];
 }
