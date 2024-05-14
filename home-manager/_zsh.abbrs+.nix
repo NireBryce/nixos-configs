@@ -2,9 +2,9 @@
 {
   # TODO: move this into graphical even though the clipboard is technically for CLI things
   options = {
-    _zsh-abbr.enable = lib.mkEnableOption "Enables zsh-abbr abbreviations";
+    _hm-zsh-abbr.enable = lib.mkEnableOption "Enables zsh-abbr abbreviations";
   };
-  config = lib.mkIf config._zsh-abbr.enable {
+  config = lib.mkIf config._hm-zsh-abbr.enable {
     # TODO: mkEnable, mkIf zsh enabled
     programs.zsh.zsh-abbr.abbreviations = {
       # ! WARN: unsure how globals work here

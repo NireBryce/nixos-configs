@@ -2,9 +2,9 @@
 {
   # TODO: move this into graphical even though the clipboard is technically for CLI things
   options = {
-    _wayland.enable = lib.mkEnableOption "Enables Wayland packages";
+    _hm-wayland.enable = lib.mkEnableOption "Enables Wayland packages";
   };
-  config = lib.mkIf config._wayland.enable {
+  config = lib.mkIf config._hm-wayland.enable {
     home.packages = with pkgs; [
     # Wayland
       wl-clipboard-x11          # clipboard in wayland

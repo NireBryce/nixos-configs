@@ -2,9 +2,9 @@
 {
   #TODO: maybe sort into base and optional 
   options = {
-    _gui.enable = lib.mkEnableOption "Enables GUI packages";
+    _hm-gui.enable = lib.mkEnableOption "Enables GUI packages";
   };
-  config = lib.mkIf config._gui.enable {
+  config = lib.mkIf config._hm-gui.enable {
 
     fonts.fontconfig.enable = true; 
 

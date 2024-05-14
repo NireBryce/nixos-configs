@@ -1,8 +1,8 @@
 { pkgs, lib, config, ... }: {
   options = {
-    _kde.enable = lib.mkEnableOption "Enables KDE packages";
+    _hm-kde.enable = lib.mkEnableOption "Enables KDE packages";
   };
-  config = lib.mkIf config._kde.enable {
+  config = lib.mkIf config._hm-kde.enable {
     home.packages = with pkgs; [
 
   # kde utilities just in case they aren't in nixOS' metapackage

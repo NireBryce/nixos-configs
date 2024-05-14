@@ -2,11 +2,11 @@
 {
   # TODO: mkDefault
   options = {
-    _zsh.enable = lib.mkEnableOption "Enables zsh";
+    _hm-zsh.enable = lib.mkEnableOption "Enables zsh";
   };
-  config = lib.mkIf config._zsh.enable {
+  config = lib.mkIf config._hm-zsh.enable {
     # enable zsh-abbr if zsh is enabled
-      _zsh-abbr.enable = true; 
+      # _zsh-abbr.enable = true; 
 
     # Added from Fleek (now deprecated), figure out what they do.
       programs.zsh.profileExtra = ''

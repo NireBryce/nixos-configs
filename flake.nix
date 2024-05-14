@@ -56,13 +56,10 @@
       extraSpecialArgs = { inherit inputs; }; # Pass flake inputs to our config
       modules = [
         ./home-manager/home.nix 
-        ./home-manager/path.nix
-        ./home-manager/shell.nix
-        ./home-manager/user.nix
-        ./home-manager/aliases.nix
-        ./home-manager/programs.nix
+
+
         # Host Specific configs
-        ./home-manager/nire-durandal/custom.nix
+        ./home-manager/nire-durandal/_hm.nire-durandal.nix
       ];
     };
 
@@ -79,13 +76,10 @@
         extraSpecialArgs = { inherit inputs; }; # Pass flake inputs to our config
         modules = [
           ./home-manager/home.nix 
-          ./home-manager/path.nix
-          ./home-manager/shell.nix
-          ./home-manager/user.nix
-          ./home-manager/aliases.nix
-          ./home-manager/programs.nix
+  
+  
+
           # Host Specific configs
-          ./home-manager/nire-lysithea/elly.nix
           ./home-manager/nire-lysithea/custom.nix
         ];
     };
@@ -102,13 +96,9 @@
       extraSpecialArgs = { inherit inputs; }; # Pass flake inputs to our config
       modules = [
         ./home-manager/home.nix 
-        ./home-manager/path.nix
-        ./home-manager/shell.nix
-        ./home-manager/user.nix
-        ./home-manager/aliases.nix
-        ./home-manager/programs.nix
+
+
         # Host Specific configs
-        ./home-manager/_common/_elly.nix
         ./home-manager/nire-galatea/custom.nix
       ];
     };

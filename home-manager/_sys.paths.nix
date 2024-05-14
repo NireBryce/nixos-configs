@@ -1,4 +1,4 @@
-{ pkgs, misc, ... }: {
+{  ... }: {
  home.sessionPath = [ 
     "/usr/local"
     "/usr/bin"

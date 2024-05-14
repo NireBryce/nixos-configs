@@ -34,4 +34,6 @@
     _delete-root.enable =  true;
     _system-partitions.enable =  true;
     
+# Home manager stuff
+  _sound.enable = true;
 }
