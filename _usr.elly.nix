@@ -1,5 +1,6 @@
 { pkgs, ... }:
 {
+  # TODO: make this togglable
 # User
   users.mutableUsers = false;
   users.users = { 

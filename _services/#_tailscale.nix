@@ -1,7 +1,7 @@
 # in <host>/tailscale.nix
 # from https://guekka.github.io/nixos-server-2/
 { 
-  config, outputs, pkgs,
+  config,
   ...
 }: {
   # imports = [outputs.nixosModules.tailscale-autoconnect];

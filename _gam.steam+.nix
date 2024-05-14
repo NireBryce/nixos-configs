@@ -13,3 +13,5 @@
     }; 
   };
 }
+
+# TODO: move steam app settngs for fhs here

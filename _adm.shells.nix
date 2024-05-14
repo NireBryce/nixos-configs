@@ -22,5 +22,3 @@ users.users.elly.shell = pkgs.zsh;
 }
 
 
-/* non-system apps are handled through fleek, my config there is at nirebryce/fleek
- */

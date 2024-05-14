@@ -1,7 +1,0 @@
-{ 
-  imports = [
-    ./_shells.nix
-  ];
-
-
-}
