@@ -40,23 +40,23 @@
     # ./_services
   ];
 
-  # TODO: Documentation
+  # TODO: Documentation, and make these switches different
   _wifi.enable = lib.mkDefault true;
   _firewall.enable = lib.mkDefault true;
 
-  _amdgpu.enable = lib.mkDefault false;
+  _amdgpu.enable = lib.mkDefault true;
   
-  _steam.enable = lib.mkDefault false;
+  _steam.enable = lib.mkDefault true;
   
-  _logitech.enable = lib.mkDefault false;
+  _logitech.enable = lib.mkDefault true;
   
-  _bluetooth.enable = lib.mkDefault false;
+  _bluetooth.enable = lib.mkDefault true;
   
-  _zsa.enable = lib.mkDefault false;
+  _zsa.enable = lib.mkDefault true;
 
-  _impermanence.enable = lib.mkDefault false;
-    _delete-root.enable = lib.mkDefault false;
-    _system-partitions.enable = lib.mkDefault false;
+  _impermanence.enable = lib.mkDefault true;
+    _delete-root.enable = lib.mkDefault true;
+    _system-partitions.enable = lib.mkDefault true;
 
   # TODO: headless module that sets these falsefor headless machines
   _gui.enable = lib.mkDefault true;

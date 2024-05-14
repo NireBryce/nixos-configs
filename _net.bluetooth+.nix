@@ -7,14 +7,14 @@
     _bluetooth.enable = lib.mkEnableOption "Enables bluetooth settings";
   };
   config = lib.mkIf config._bluetooth.enable {
-    hardware.bluetooth.powerOnBoot = lib.mkDefault true;
+    hardware.bluetooth.powerOnBoot = true;
     # services.blueman.enable = true;
-    hardware.bluetooth.enable = lib.mkDefault true;
+    hardware.bluetooth.enable =  true;
     hardware.bluetooth.settings = {
       General = {
-        FastConnectable = lib.mkDefault true;
-        DiscoverableTimeout = lib.mkDefault 60; # seconds
-        PairableTimeout = lib.mkDefault 60; # seconds
+        FastConnectable = true;
+        DiscoverableTimeout =  60; # seconds
+        PairableTimeout = 60; # seconds
       };
     };
   };
