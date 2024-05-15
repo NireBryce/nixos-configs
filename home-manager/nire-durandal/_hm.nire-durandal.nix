@@ -37,9 +37,13 @@
 	_hm-wayland.enable   = true;
 	_hm-kde.enable       = true;	
 	_hm-gaming.enable    = true;
+	# TODO: move option declarations into top-level config
+
+	# TODO: uncomment the mkifs
 
 
-	# TODO: home manager broke, so I had to use `nix-shell -p home-manager` to bootstrap
+	# REMINDER: home manager broke, so I had to use `nix-shell -p home-manager` to bootstrap
+	
 
 
 }

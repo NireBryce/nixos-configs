@@ -4,7 +4,7 @@
   options = {
     _amdgpu.enable = lib.mkEnableOption "Enables AMDGPU settings";
   };
-  config = lib.mkIf config._amdgpu.enable {
+  # config = lib.mkIf config._amdgpu.enable {
     boot.initrd.kernelModules = [ "amdgpu" ];
 
     hardware.opengl = {
@@ -26,5 +26,5 @@
     environment.systemPackages = with pkgs; [
       amf-headers
     ];
-  };
+  # };
 }
