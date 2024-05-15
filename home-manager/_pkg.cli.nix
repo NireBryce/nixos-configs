@@ -112,6 +112,7 @@
     nix-du                    # nix-store analysis
     nix-output-monitor        # 
     nix-tree                  # view dependency graph
+    alejandra                 # nix formatter
   # file transfer
     magic-wormhole-rs         # transfer arbitrary files easy and encrypted
   

@@ -43,9 +43,10 @@
         qmk                     # qmk keyboard manager https://github.com/qmk/qmk_firmware
 
       # gui system utilities
-        # vulkan-tools
+        vulkan-tools
         glxinfo
         clinfo
+        amdgpu_top
 
       # dev
         vscode-fhs              # vscode

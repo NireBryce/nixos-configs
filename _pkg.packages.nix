@@ -18,6 +18,7 @@
     zoxide
     nix-output-monitor # https://github.com/maralorn/nix-output-monitor
     nh # https://github.com/viperML/nh
+    linuxHeaders
   ];
   services.fwupd.enable = true;
 
