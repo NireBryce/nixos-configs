@@ -1,8 +1,4 @@
-{
-  pkgs,
-  lib,
-  ...
-}: {
+{ ... }: {
   imports = [
     # Users
     # ../_usr.elly.nix # modularize this later
@@ -31,15 +27,19 @@
   #     modDirVersion = "6.6.27";
   #   };
   # });
-  
-  # TODO: module
+
+  # TODO: turn into its own module
   musnix = {
     enable = true;
     kernel.realtime = true;
-    das_watchdog.enable = true; # starts the das watchdog which ensures realtime processes don't hang the machine
+    das_watchdog.enable =
+      true; # starts the das watchdog which ensures realtime processes don't hang the machine
   };
 
-  users.users.elly.extraGroups = ["audio"];
+  # TODO: stylix theme config also in it's own module
+  # https://danth.github.io/stylix/configuration.html
+
+  users.users.elly.extraGroups = [ "audio" ];
 
   _gui.enable = true;
   _amdgpu.enable = true;

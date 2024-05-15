@@ -6,24 +6,24 @@
     # nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
     # Unstable
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    home-manager-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+
     # Impermanence
     impermanence.url = "github:Nix-community/impermanence";
+
     # secret management
-    sops-nix = {
-      url = "github:mic92/sops-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.nixpkgs-stable.follows = "nixpkgs";
-    };
+    sops-nix.url = "github:mic92/sops-nix";
+    sops-nix.inputs.nixpkgs.follows = "nixpkgs";
+    sops-nix.inputs.nixpkgs-stable.follows = "nixpkgs";
+
     # Home Manager
-    home-manager = {
-      url = "github:nix-community/home-manager/master";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    home-manager.url = "github:nix-community/home-manager/master";
+    home-manager-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
     # Musnix
-    musnix = {
-      url = "github:musnix/musnix";
-    };
+    musnix.url = "github:musnix/musnix";
+    stylix.url = "github:danth/stylix";
+    
   };
 
   # { nixpkgs, ... }@inputs: nixpkgs
@@ -35,6 +35,7 @@
     nixpkgs,
     home-manager,
     musnix,
+    stylix,
     ...
   } @ inputs: {
     nixosModules = import ./_common/_modules;
@@ -44,6 +45,7 @@
       specialArgs = inputs; # forward inputs to modules
       modules = [
         ./nire-durandal
+        stylix.nixosModules.stylix
         inputs.musnix.nixosModules.musnix
         # ./home-manager-stopgap.nix
       ];

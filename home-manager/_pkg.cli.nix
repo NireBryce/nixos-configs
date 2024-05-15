@@ -113,7 +113,6 @@
     nix-output-monitor        # 
     nix-tree                  # view dependency graph
     nixfmt                    # format nix code
-    stylix                    # color-theme your system
     nix-health                # check nix issues
     comma                     # like nix-shell -p but faster, run things by prefixing with , without installing them
     deadnix                   # scan for dead nix code
@@ -123,8 +122,6 @@
     nvd                       # nix package version diff
     statix                    # antipattern linter
     
-
-
 
     # Things to look into:
       # MyNixOS
