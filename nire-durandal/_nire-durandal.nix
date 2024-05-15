@@ -1,8 +1,8 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   imports = [
     # Users
-    ../_usr.elly.nix
+    # ../_usr.elly.nix # modularize this later
     
     # nix generated
     ./hardware-configuration.nix
@@ -17,7 +17,7 @@
   ];
   # hostname
   networking.hostName = "nire-durandal"; 
-  boot.kernelPackages = pkgs.linuxPackages_6_8;
+  # boot.kernelPackages = lib.mkForce pkgs.linuxPackages_latest;
   
   _gui.enable =  true;
   _amdgpu.enable =  true;

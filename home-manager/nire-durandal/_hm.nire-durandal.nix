@@ -4,27 +4,7 @@
 	imports = [
 		# We split off configs that we might have to remove from specific machines
 		# TODO: move these into flake?
-    ../_dotfiles
-		../_cfg.fzf.nix
-		../_cfg.home-manager.nix
-		../_cfg.micro.nix
-		../_pkg.cli.nix
-    ../_pkg.gaming+.nix
-		../_pkg.gui+.nix
-		../_pkg.wayland+.nix
-		../_snd.sound+.nix
-		../_sys.paths.nix
-		../_sys.session-variables.nix
-		../_usr.elly.nix
-		../_wm.kde+.nix
-		../_zsh.abbrs+.nix
-		../_zsh.aliases.nix
-		../_zsh.zsh+.nix
-		
-		
-
-    ../_dev
-
+		../__def.common.nix
 		# Enables middle mouse scrolling instead of paste in kde
 		./_bugfixes/_kde-middle-mouse-scroll.nix
 	];

@@ -1,40 +1,21 @@
 {lib, ...}:
 { 
+  #TODO: document `+` notation for if it has a .enable toggle
+  #TODO: also document .. notation for 'default.nix' style behavior in a flat directory
   imports = [
-    # _adm admin
-      ./_adm.boot.nix
-      ./_adm.locale.nix
-      ./_adm.shells.nix
-    # _gam games
-      ./_gam.steam+.nix
-    # _gpu gpu
-      ./_gpu.amdgpu+.nix
-    # _gui gui
-      ./_gui.gui+.nix
-    # _ipr impermanence
-      ./_ipr._impermanence+.nix
-      ./_ipr.delete-root+.nix
-      ./_ipr.system-partitions+.nix
-    # _kb keyboard
-      ./_kb.zsa+.nix
-    # _mou mouse
-      ./_mou.logitech+.nix
-    # _net network
-      ./_net.bluetooth+.nix
-      ./_net.firewall+.nix
-      ./_net.sshd.nix
-      ./_net.wifi+.nix  # TODO: document `+` notation for if it has a .enable toggle
-    # _nix nix
-      ./_nix.nix-settings.nix
-    # _pkg packages
-      ./_pkg._packages.nix
-      ./_pkg.font.nix
-      ./_pkg.linux-crisis-utilities.nix
-    # _sec secrets
-    # _snd sound
-      ./_sec.sops.nix
-      ./_snd.pipewire-bt+.nix
-      ./_snd.pipewire+.nix
+      ./_adm..nix # admin
+      ./_gam..nix # games
+      ./_gpu..nix # gpu
+      ./_gui..nix # gui
+      ./_ipr..nix # impermanence 
+      ./_kb..nix  # keyboard
+      ./_mou..nix # mouse
+      ./_net..nix # network
+      ./_nix..nix # nix settings
+      ./_pkg..nix # packages
+      ./_usr..nix # user
+      ./_sec..nix # secrets
+      ./_snd..nix # sound
 
     
     # ./_services

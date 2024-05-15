@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   # TODO: make this togglable
 # User
@@ -6,7 +6,8 @@
   users.users = { 
     elly = {
       isNormalUser = true;
-      extraGroups = [ "wheel" ]; # Enable ‘sudo’.
+      extraGroups = [ "wheel" ]; # Enable ‘sudo’
+      # group = "elly";
       packages = with pkgs; [ 
       #####
       # these are bootstrap/in case something goes wrong.
@@ -27,5 +28,6 @@
     ];
       hashedPasswordFile = "/persist/passwords/elly";
     };
+    # groups.elly = { };
   };
 }

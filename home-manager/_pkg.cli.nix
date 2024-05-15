@@ -95,6 +95,7 @@
     sysstat                   # system stats
     topgrade                  # upgrade all the things
     usbutils                  # lsusb
+    hyfetch                   # neofetch replacement
 
   # cpu
     auto-cpufreq              # https://github.com/AdnanHodzic/auto-cpufreq
@@ -104,16 +105,13 @@
   # remote
     mosh                      # ssh but better
 
-  # Wayland
-    wl-clipboard-x11          # clipboard in wayland
-    wl-clipboard              # clipboard in wayland
-
 
   # nix
     manix # nix man pages
     nix-zsh-completions       # nix shell completions
     nix-du                    # nix-store analysis
     nix-output-monitor        # 
+    nix-tree                  # view dependency graph
   # file transfer
     magic-wormhole-rs         # transfer arbitrary files easy and encrypted
   

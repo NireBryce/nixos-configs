@@ -6,7 +6,6 @@
   };
   config = lib.mkIf config._amdgpu.enable {
     boot.initrd.kernelModules = [ "amdgpu" ];
-
     hardware.opengl = {
       # Radv - Open source vulkan driver from freedesktop
       driSupport      = true;
@@ -25,6 +24,7 @@
     
     environment.systemPackages = with pkgs; [
       amf-headers
+      mesa
     ];
   };
 }

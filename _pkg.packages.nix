@@ -44,6 +44,3 @@
   
 }
 
-
-/* non-system apps are handled through fleek, my config there is at nirebryce/fleek
- */
