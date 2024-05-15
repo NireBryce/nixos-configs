@@ -21,16 +21,24 @@
   networking.hostName = "nire-durandal";
   # boot.kernelPackages = pkgs.linuxPackagesFor (pkgs.linux_6_6.override {argsOverride = {version = "6.6.27";};});
   # boot.kernelPackages = lib.mkForce pkgs.linuxKernel.kernels.linux_6_6;
-  boot.kernelPackages = pkgs.linuxPackagesFor (pkgs.linux_6_6.override {
-    argsOverride = rec {
-      src = pkgs.fetchurl {
-        url = "mirror://kernel/linux/kernel/v6.x/linux-${version}.tar.xz";
-        sha256 = "Y55QBg48jyPtAXyxDP6sxrqI/1WDgSu3aFm0zGoSgpE=";
-      };
-      version = "6.6.27";
-      modDirVersion = "6.6.27";
-    };
-  });
+  # boot.kernelPackages = pkgs.linuxPackagesFor (pkgs.linux_6_6.override {
+  #   argsOverride = rec {
+  #     src = pkgs.fetchurl {
+  #       url = "mirror://kernel/linux/kernel/v6.x/linux-${version}.tar.xz";
+  #       sha256 = "Y55QBg48jyPtAXyxDP6sxrqI/1WDgSu3aFm0zGoSgpE=";
+  #     };
+  #     version = "6.6.27";
+  #     modDirVersion = "6.6.27";
+  #   };
+  # });
+  
+  # TODO: module
+  musnix = {
+    enable = true;
+    boot.kernel.realtime = true;
+  };
+
+  users.users.elly.extraGroups = ["audio"];
 
   _gui.enable = true;
   _amdgpu.enable = true;

@@ -112,7 +112,37 @@
     nix-du                    # nix-store analysis
     nix-output-monitor        # 
     nix-tree                  # view dependency graph
-    alejandra                 # nix formatter
+    nixfmt                    # format nix code
+    stylix                    # color-theme your system
+    nix-health                # check nix issues
+    comma                     # like nix-shell -p but faster, run things by prefixing with , without installing them
+    deadnix                   # scan for dead nix code
+    nix-diff                  # diff nix code
+    nix-init                  # generate nix packages from URLs
+    nurl                      # generate nix fetcher calls from repository URLs
+    nvd                       # nix package version diff
+    statix                    # antipattern linter
+    
+
+
+
+    # Things to look into:
+      # MyNixOS
+      # nixpkgs-wayland
+      # nix-direnv
+      # haumea                # nix configuration tool that allows you to just use the filesystem instead of imports 
+      # flakelight            # less flake boilerplate
+      # flake-utils
+      # flake-utils-plus
+      # flake-parts           # module system for flakes
+      # devshell              # like virtualenv
+      # devbox                # isolated development shells, maybe like the above
+      # devenv                # same
+      # nixos-shell           # easy VMs
+      # nix-index             # quickly locate packages providing a certain file
+      # nix-prefetch          # determine hash of fixed-output derivations such as package source
+
+
   # file transfer
     magic-wormhole-rs         # transfer arbitrary files easy and encrypted
   

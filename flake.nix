@@ -19,10 +19,10 @@
     home-manager = {
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
-      # The `follows` keyword in inputs is used for inheritance.
-      # Here, `inputs.nixpkgs` of home-manager is kept consistent with
-      # the `inputs.nixpkgs` of the current flake,
-      # to avoid problems caused by different versions of nixpkgs.
+    };
+    # Musnix
+    musnix = {
+      url = "github:musnix/musnix";
     };
   };
 
@@ -34,6 +34,7 @@
     self,
     nixpkgs,
     home-manager,
+    musnix,
     ...
   } @ inputs: {
     nixosModules = import ./_common/_modules;
@@ -43,6 +44,7 @@
       specialArgs = inputs; # forward inputs to modules
       modules = [
         ./nire-durandal
+        inputs.musnix.nixosModules.musnix
         # ./home-manager-stopgap.nix
       ];
     };

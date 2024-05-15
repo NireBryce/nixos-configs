@@ -1,9 +1,7 @@
-{ pkgs, ...}:
-# user packages are managed by fleek (a home-manager frontend) and are in a 
+{pkgs, ...}:
+# user packages are managed by fleek (a home-manager frontend) and are in a
 # different repo
-
 {
-
   # List packages installed in system profile. To search, run:
   # $ nix search <package name>
   environment.systemPackages = with pkgs; [
@@ -22,7 +20,7 @@
   ];
   services.fwupd.enable = true;
 
-  programs.nix-ld.enable = true;  # Needed for VSCode remote connection
+  programs.nix-ld.enable = true; # Needed for VSCode remote connection
 
   programs.kdeconnect.enable = true;
 
@@ -34,14 +32,9 @@
     flake = "/home/elly/nixos";
   };
 
-
-
   # shells
   environment.shells = with pkgs; [
-                          bash
-                          zsh
-                       ];
-
-  
+    bash
+    zsh
+  ];
 }
-

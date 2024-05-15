@@ -146,4 +146,5 @@ ex ()
 
 
 # switch to our actual shell
-zsh
+# zsh
+# TODO: May need to replace this
