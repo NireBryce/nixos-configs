@@ -5,7 +5,7 @@
     _gui.enable = lib.mkEnableOption "Enables GUI settings";
   };
   
-  # config = lib.mkIf config._gui.enable {
+  config = lib.mkIf config._gui.enable {
     # Enable the windowing system.
     services.xserver.enable = true;
     
@@ -22,5 +22,5 @@
     
     # make GTK apps obey theme settings
     programs.dconf.enable = true;
-  # };
+  };
 }

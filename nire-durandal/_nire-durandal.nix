@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 {
   imports = [
     # Users
@@ -17,6 +17,7 @@
   ];
   # hostname
   networking.hostName = "nire-durandal"; 
+  boot.kernelPackages = pkgs.linuxPackages_6_8;
   
   _gui.enable =  true;
   _amdgpu.enable =  true;

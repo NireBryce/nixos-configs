@@ -9,6 +9,7 @@
 		../_cfg.home-manager.nix
 		../_cfg.micro.nix
 		../_pkg.cli.nix
+    ../_pkg.gaming+.nix
 		../_pkg.gui+.nix
 		../_pkg.wayland+.nix
 		../_snd.sound+.nix
@@ -19,7 +20,6 @@
 		../_zsh.abbrs+.nix
 		../_zsh.aliases.nix
 		../_zsh.zsh+.nix
-    ../_pkg.gaming+.nix
 		
 		
 

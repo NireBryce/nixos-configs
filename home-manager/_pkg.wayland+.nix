@@ -4,7 +4,7 @@
   options = {
     _hm-wayland.enable = lib.mkEnableOption "Enables Wayland packages";
   };
-  # config = lib.mkIf config._hm-wayland.enable {
+  config = lib.mkIf config._hm-wayland.enable {
     home.packages = with pkgs; [
     # Wayland
       wl-clipboard-x11          # clipboard in wayland
@@ -12,5 +12,5 @@
       wayland-utils
       egl-wayland               # iirc this leads to better game performance but idr.  wine might need it
     ];
-  # };
+  };
 }
