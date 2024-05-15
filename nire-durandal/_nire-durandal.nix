@@ -35,7 +35,8 @@
   # TODO: module
   musnix = {
     enable = true;
-    boot.kernel.realtime = true;
+    kernel.realtime = true;
+    das_watchdog.enable = true; # starts the das watchdog which ensures realtime processes don't hang the machine
   };
 
   users.users.elly.extraGroups = ["audio"];
