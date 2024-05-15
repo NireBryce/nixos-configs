@@ -9,7 +9,7 @@
     ./stateVersion.nix
 
     # _def defaults
-    ./__def.common.nix
+    ../__def.common.nix
 
 
     # fixes
@@ -33,7 +33,5 @@
   _impermanence.enable =  true;
     _delete-root.enable =  true;
     _system-partitions.enable =  true;
-    
-# Home manager stuff
-  _sound.enable = true;
+
 }
