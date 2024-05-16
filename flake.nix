@@ -22,6 +22,8 @@
 
     # Musnix
     musnix.url = "github:musnix/musnix";
+
+    #Stylix
     stylix.url = "github:danth/stylix";
     
   };
@@ -45,7 +47,7 @@
       specialArgs = inputs; # forward inputs to modules
       modules = [
         ./nire-durandal
-        stylix.nixosModules.stylix
+        # inputs.stylix.nixosModules.stylix # fix this for theming
         inputs.musnix.nixosModules.musnix
         # ./home-manager-stopgap.nix
       ];
