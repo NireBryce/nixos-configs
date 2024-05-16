@@ -8,7 +8,7 @@
     ./stateVersion.nix
 
     # _def defaults
-    ../../system/__def.common.nix
+    # ../../system/__def.common.nix
 
     # fixes
     ../../system/_bugfixes/_suspend/_b550m-gpp0-etc.nix

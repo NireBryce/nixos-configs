@@ -1,4 +1,6 @@
 { pkgs, ...}:
+
+# Add mkEnableOption toggles
 {
   # console.font = "FiraCode";
   programs.zsh.enable = true;

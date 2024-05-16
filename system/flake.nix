@@ -46,18 +46,18 @@
     haumea,
     ...
   } @ inputs: {
-    lib = haumea.lib.load {
-      src = ./src;
-      inputs = {
-        inherit (nixpkgs) lib;
-      };
+    # lib = haumea.lib.load {
+    #   src = ./config;
+    #   inputs = {
+    #     inherit (nixpkgs) lib;
+    #   };
     nixosModules = import ./_common/_modules;
     system = "x86_64-linux";
 
     nixosConfigurations."nire-durandal" = nixpkgs.lib.nixosSystem {
       specialArgs = inputs; # forward inputs to modules
       modules = [
-        ./src/nire-durandal
+        ./hosts/nire-durandal
         # inputs.stylix.nixosModules.stylix # fix this for theming
         inputs.musnix.nixosModules.musnix
         # ./home-manager-stopgap.nix
