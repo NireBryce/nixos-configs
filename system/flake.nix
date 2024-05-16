@@ -23,8 +23,13 @@
     # Musnix
     musnix.url = "github:musnix/musnix";
 
-    #Stylix
+    #Stylix (needs config still, commented out at calls)
     stylix.url = "github:danth/stylix";
+
+    # Haumea (Folder structure for imports)
+    haumea.url = "github:nix-community/haumea";
+    haumea.inputs.nixpkgs.follows = "nixpkgs";
+
     
   };
 
@@ -38,15 +43,21 @@
     home-manager,
     musnix,
     stylix,
+    haumea,
     ...
   } @ inputs: {
+    lib = haumea.lib.load {
+      src = ./src;
+      inputs = {
+        inherit (nixpkgs) lib;
+      };
     nixosModules = import ./_common/_modules;
     system = "x86_64-linux";
 
     nixosConfigurations."nire-durandal" = nixpkgs.lib.nixosSystem {
       specialArgs = inputs; # forward inputs to modules
       modules = [
-        ./nire-durandal
+        ./src/nire-durandal
         # inputs.stylix.nixosModules.stylix # fix this for theming
         inputs.musnix.nixosModules.musnix
         # ./home-manager-stopgap.nix

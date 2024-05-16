@@ -8,10 +8,10 @@
     ./stateVersion.nix
 
     # _def defaults
-    ../__def.common.nix
+    ../../system/__def.common.nix
 
     # fixes
-    ../_bugfixes/_suspend/_b550m-gpp0-etc.nix
+    ../../system/_bugfixes/_suspend/_b550m-gpp0-etc.nix
   ];
   # hostname
   networking.hostName = "nire-durandal";
