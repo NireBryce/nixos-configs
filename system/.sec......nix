@@ -1,5 +1,5 @@
 {
   imports = [ 
-    ./_sec.sops.nix
+    ./.sec.sops.nix
   ];
 }

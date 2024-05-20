@@ -15,7 +15,7 @@
   };
 
   sops.secrets.tailscale_key = {
-    sopsFile =  ../_secrets/secrets.yaml; 
+    sopsFile =  ../.secrets/secrets.yaml; 
   };
 
   environment.persistence = {

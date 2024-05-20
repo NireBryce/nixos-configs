@@ -8,7 +8,7 @@
   };
   config = lib.mkIf config._bluetooth.enable {
     hardware.bluetooth.powerOnBoot = true;
-    services.blueman.enable = true; #TODO may need to disable
+    # services.blueman.enable = true; #TODO may need to disable
     hardware.bluetooth.enable =  true;
     hardware.bluetooth.settings = {
       General = {

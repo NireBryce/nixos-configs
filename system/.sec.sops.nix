@@ -11,7 +11,7 @@ in
 
   sops = {
     age.sshKeyPaths = map getKeyPath keys;
-    defaultSopsFile = ./_sec.secrets.yaml;
+    defaultSopsFile = ./.sec.secrets.yaml;
 
   };
 }

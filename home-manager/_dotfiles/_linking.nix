@@ -14,7 +14,7 @@
   "./.config/sway".source              = config/sway;
   "./.config/zellij".source            = config/zellij;
   "./.config/zsh".source               = config/zsh;
-  "./.config/zsh/.zshrc".source        = config/zsh/.zshrc;
+  # "./.config/zsh/.zshrc".source        = config/zsh/.zshrc;
   "./.gitconfig".source                = config/.gitconfig;
   "./.p10k.zsh".source                 = config/zsh-powerlevel10k/.p10k.zsh;
   "./.profile".source                  = config/.profile;
@@ -23,7 +23,7 @@
   "./.zlogout".source                  = config/zsh/.zlogout;
   "./.zprofile".source                 = config/zsh/.zprofile;
   "./.zshenv".source                   = config/zsh/.zshenv;
-  "./.zshrc".source                    = config/zsh/.zshrc;
+  # "./.zshrc".source                    = config/zsh/.zshrc;
   # "./.config/zsh-abbr".source        = config/zsh-abbr;
   # "./.config/zsh-powerlevel10k/.p10k.zsh".source = config/zsh-powerlevel10k/.p10k.zsh;
   };

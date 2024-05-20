@@ -1,7 +1,7 @@
 { lib, ... }:
 {
   imports = [
-    ./_kb.zsa+.nix
+    ./.kb.zsa+.nix
   ];
   _zsa.enable = lib.mkDefault true;
 }

@@ -1,13 +1,12 @@
 { lib, ... }:
 {
   imports = [ 
-    ./_net.bluetooth+.nix
-    ./_net.firewall+.nix
-    ./_net.sshd.nix
-    ./_net.wifi+.nix
+    ./.net.bluetooth+.nix
+    ./.net.firewall+.nix
+    ./.net.sshd.nix
+    ./.net.wifi+.nix
   ];
   _wifi.enable = lib.mkDefault true;
   _firewall.enable = lib.mkDefault true;
-  _sshd.enable = lib.mkDefault true;
   _bluetooth.enable = lib.mkDefault true;
 }

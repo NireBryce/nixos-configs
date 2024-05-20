@@ -4,7 +4,7 @@
     _usr-elly.enable = lib.mkEnableOption "Enables elly user";
   };
   # TODO: make this togglable
-  config = lib.mkIf config._elly.enable {
+  config = lib.mkIf config._usr-elly.enable {
     # User
     users.mutableUsers = false;
     users.users = { 

@@ -30,6 +30,7 @@
 
       # Steam
       steamtinkerlaunch
+        yad                     # required for steamtinkerlaunch
 
       # video
       # TODO: check if these can be moved to nix config steam

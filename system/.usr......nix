@@ -1,7 +1,7 @@
 { lib, ... }:
 {
   imports = [
-    ./_usr.elly.nix
+    ./.usr.elly.nix
    ];
   _usr-elly.enable = lib.mkDefault true;
 }

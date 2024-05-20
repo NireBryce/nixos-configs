@@ -46,11 +46,12 @@
     haumea,
     ...
   } @ inputs: {
-    # lib = haumea.lib.load {
-    #   src = ./config;
-    #   inputs = {
-    #     inherit (nixpkgs) lib;
-    #   };
+    lib = haumea.lib.load {
+      src = ./config;
+      inputs = {
+        inherit (nixpkgs) lib;
+      };
+    };
     nixosModules = import ./_common/_modules;
     system = "x86_64-linux";
 

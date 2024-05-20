@@ -1,4 +1,5 @@
 #! /usr/bin/env zsh
+
 # Enable Powerlevel10k instant prompt. 
   # Should stay close to the top of ~/.zshrc.
   # Initialization code that may require console input (password prompts, [y/n]
@@ -6,25 +7,12 @@
     if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
       source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
     fi
+  
 # other head-of-file stuff
-  #MAGIC: no idea but zsh wants it
-  typeset -U path cdpath fpath manpath
 
-  #MAGIC: needed for nix
-  for profile in ${(z)NIX_PROFILES}; do
-    fpath+=($profile/share/zsh/site-functions $profile/share/zsh/$ZSH_VERSION/functions $profile/share/zsh/vendor-completions)
-  done
 
-# Zi
-  # zi install
-    if [[ ! -d "$HOME/.zi" ]]; then
-      sh -c "$(curl -fsSL get.zshell.dev)" -- -a loader
-    fi
 
-  # zi bootstrap
-    if [[ -r "${XDG_CONFIG_HOME:-${HOME}/.config}/zi/init.zsh" ]]; then
-      source "${XDG_CONFIG_HOME:-${HOME}/.config}/zi/init.zsh" && zzinit
-    fi
+
 
 # initial defaults from other sources (zsh4humans, prezto, manjaro)   
     source "${HOME}/.config/zsh/initial-bindings.zsh"
