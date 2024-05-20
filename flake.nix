@@ -1,5 +1,3 @@
-# copied from https://guekka.github.io/nixos-server-2/ almost verbatim
-# many of the comments are straight from the post
 {
   inputs = {
     # 23.11
@@ -23,12 +21,12 @@
     # Musnix
     musnix.url = "github:musnix/musnix";
 
-    #Stylix (needs config still, commented out at calls)
-    stylix.url = "github:danth/stylix";
+    #Stylix
+    # stylix.url = "github:danth/stylix";
 
     # Haumea (Folder structure for imports)
-    haumea.url = "github:nix-community/haumea";
-    haumea.inputs.nixpkgs.follows = "nixpkgs";
+    # haumea.url = "github:nix-community/haumea";
+    # haumea.inputs.nixpkgs.follows = "nixpkgs";
 
     
   };
@@ -42,53 +40,42 @@
     nixpkgs,
     home-manager,
     musnix,
-    stylix,
-    haumea,
     ...
   } @ inputs: {
-    lib = haumea.lib.load {
-      src = ./config;
-      inputs = {
-        inherit (nixpkgs) lib;
-      };
-    };
-    nixosModules = import ./_common/_modules;
+    nixosModules = import ./_common/_modules;   # modules I didn't write
     system = "x86_64-linux";
 
+  # nire-durandal
+  # `sudo nixos-rebuild switch --flake .#nire-durandal`
     nixosConfigurations."nire-durandal" = nixpkgs.lib.nixosSystem {
-      specialArgs = inputs; # forward inputs to modules
+      specialArgs = inputs; # forward inputs defined above to modules defined immediately below
       modules = [
         ./hosts/nire-durandal
-        # inputs.stylix.nixosModules.stylix # fix this for theming
         inputs.musnix.nixosModules.musnix
-        # ./home-manager-stopgap.nix
+        # inputs.stylix.nixosModules.stylix
       ];
     };
+  # `home-manager switch --flake .#elly@nire-durandal`
     homeConfigurations."elly@nire-durandal" = home-manager.lib.homeManagerConfiguration {
       pkgs = import nixpkgs {
         # Home manger requires a pkgs instance
         system = "x86_64-linux";
-        config = {
-          allowUnfree = true;
-        };
+        config = { allowUnfree = true; };
       };
       extraSpecialArgs = {inherit inputs;}; # Pass flake inputs to our config
       modules = [
         ./home-manager/home.nix
         ./home-manager/nire-durandal
-
-        # Host Specific configs
-        ./home-manager/nire-durandal/_hm.nire-durandal.nix
       ];
     };
 
+  # nire-lysithea
     nixosConfigurations."nire-lysithea" = nixpkgs.lib.nixosSystem {
       # (3)
       specialArgs = inputs;
       system = "x86_64-linux";
       modules = [
         ./nire-lysithea
-        # ./home-manager-stopgap.nix
       ];
     };
     homeConfigurations."elly@nire-lysithea" = home-manager.lib.homeManagerConfiguration {
@@ -96,18 +83,17 @@
       extraSpecialArgs = {inherit inputs;}; # Pass flake inputs to our config
       modules = [
         ./home-manager/home.nix
-
-        # Host Specific configs
-        ./home-manager/nire-lysithea/custom.nix
+        ./home-manager/nire-lysithea
       ];
     };
+
+  # nire-galatea
     nixosConfigurations."nire-galatea" = nixpkgs.lib.nixosSystem {
       # (3)
       specialArgs = inputs;
       system = "x86_64-linux";
       modules = [
         ./nire-galatea
-        #./home-manager-stopgap.nix
       ];
     };
     homeConfigurations."elly@nire-galatea" = home-manager.lib.homeManagerConfiguration {
@@ -115,13 +101,16 @@
       extraSpecialArgs = {inherit inputs;}; # Pass flake inputs to our config
       modules = [
         ./home-manager/home.nix
-
-        # Host Specific configs
-        ./home-manager/nire-galatea/custom.nix
+        ./home-manager/nire-galatea
       ];
     };
   };
 }
+
+
+
+
+
 ################################################################################
 # NOTE FOR ZSH
 # https://www.reddit.com/r/NixOS/comments/1539s44/using_flakes_for_configurationnix/
