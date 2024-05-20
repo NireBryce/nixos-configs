@@ -18,6 +18,10 @@
     home-manager-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
+    # NixOS-Hardware (for machine-specific fixes)
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    nixos-hardware-b550-stopgap.url = "github:NixOS/nixos-hardware/master/gigabyte";  # TODO: fix flake.nix on nixos-hardware 
+
     # Musnix
     musnix.url = "github:musnix/musnix";
 
@@ -27,6 +31,7 @@
     # Haumea (Folder structure for imports)
     # haumea.url = "github:nix-community/haumea";
     # haumea.inputs.nixpkgs.follows = "nixpkgs";
+
 
     
   };
@@ -39,6 +44,8 @@
     self,
     nixpkgs,
     home-manager,
+    nixos-hardware,
+    nixos-hardware-b550-stopgap, # TODO: fix flake.nix on nixos-hardware repo
     musnix,
     ...
   } @ inputs: {
@@ -52,6 +59,7 @@
       modules = [
         ./hosts/nire-durandal
         inputs.musnix.nixosModules.musnix
+        inputs.nixos-hardware.nixosModules.b550 # TODO: fix flake on nixos-hardware repo
         # inputs.stylix.nixosModules.stylix
       ];
     };
