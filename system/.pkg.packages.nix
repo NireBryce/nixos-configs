@@ -14,7 +14,7 @@
     stdenv
     wget
     zoxide
-    rg
+    ripgrep
     nix-output-monitor # https://github.com/maralorn/nix-output-monitor
     nh # https://github.com/viperML/nh
     linuxHeaders
@@ -24,6 +24,8 @@
   programs.nix-ld.enable = true; # Needed for VSCode remote connection
 
   programs.kdeconnect.enable = true;
+
+  programs.xwayland.enable = true;
 
   # https://github.com/viperML/nh
   programs.nh = {

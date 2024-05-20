@@ -1,11 +1,14 @@
-{ lib, pkgs, ... }: {
+{ inputs, pkgs, ... }: {
   imports = [
     # Users
     # ../.usr.elly.nix # modularize this later
+    inputs.hardware.nixosModules.common-cpu-amd
+    inputs.hardware.nixosModules.common-gpu-amd
 
     # nix generated
     ./hardware-configuration.nix
     ./stateVersion.nix
+    
 
     # _def defaults
     ../../system/._def.common.nix
@@ -43,16 +46,14 @@
         modDirVersion = "6.6.23";
       };
     });
-    
-
-    das_watchdog.enable =
-      true; # starts the das watchdog which ensures realtime processes don't hang the machine
+    das_watchdog.enable = true; # starts the das watchdog which ensures realtime processes don't hang the machine
   };
 
   # TODO: stylix theme config also in it's own module
   # https://danth.github.io/stylix/configuration.htmloverride {argsOverride = {version = "6.6.27";};
 
   users.users.elly.extraGroups = [ "audio" ];
+  amdgpu.amdvlk = true;
 
   _gui.enable = true;
   _amdgpu.enable = true;
