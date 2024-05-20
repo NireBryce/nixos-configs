@@ -72,7 +72,7 @@
         source $HOME/.config/zsh/011-nix-fpath.zsh          # tells zsh where nix lives
         autoload -U add-zsh-hook                            # TODO: Magic, no idea.
         zmodload zsh/terminfo                               # load terminfo
-        WORDCHARS='*?[]~=&;!#$%^(){}<>';                    # Don't consider certain characters part of the word
+        WORDCHARS='*?[]~=&;!#$%^(){}<>';                    # Dont consider certain characters part of the word
       '';
       
       initExtraBeforeCompInit = ''
@@ -80,7 +80,7 @@
         source $HOME/.config/zsh/zi-plugins.zsh             # Zi plugins
         [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh        # Load p10k theme
         zicompinit                                          # zi cleanup
-        # autoload -Uz compinit                               # TODO: break glass in case nix doesn't do this
+        # autoload -Uz compinit                               # TODO: break glass in case nix doesnt do this
       '';
       initExtra = ''
         source $HOME/.config/zsh/021-atuin.zsh              # Atuin
