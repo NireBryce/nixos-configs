@@ -6,16 +6,17 @@
 }: 
 
 {
-  options = {
-    _impermanence.enable = lib.mkEnableOption "Enables impermanence";
-  };
+  # options = {
+  #   _impermanence.enable = lib.mkEnableOption "Enables impermanence";
+  # };
 
   imports = [
     impermanence.nixosModule
   ];
-  # TODO: remove belt and suspenders once you verify it works by just setting `config = lib.mkif config._impermanence.enable`
-  config = lib.mkIf config._impermanence.enable {
-    # TODO: modularize this better
+
+  # TODO: Make impermanence togglable again
+   
+  # config.ipr._impermanence = lib.mkIf config._impermanence.enable {
     environment.etc.machine-id.source = /persist/etc/machine-id;
     environment.persistence."/persist" = {
       directories = [
@@ -40,5 +41,5 @@
       # impermanence-style wiping root results in sudo lectures after each reboot
       Defaults lecture = never
     '';
-  };
+  # };
 }

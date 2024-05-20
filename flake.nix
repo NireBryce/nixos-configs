@@ -36,10 +36,6 @@
     
   };
 
-  # { nixpkgs, ... }@inputs: nixpkgs
-  # is the same as:
-  # inputs: inputs.nixpkgs
-
   outputs = {
     self,
     nixpkgs,
@@ -49,16 +45,26 @@
     # nixos-hardware-b550-stopgap, # TODO: fix flake.nix on nixos-hardware repo
     musnix,
     ...
-  } @ inputs: {
+  } @ inputs: 
+  let
+    inherit (self) outputs;
+  
+  in
+  {
     
-                                                # Reusable nixos modules you might want to export
+       
+    
+    # Reusable nixos modules you might want to export
     nixosModules = import ./_common/_modules;   # These are usually stuff you would upstream into nixpkgs
+    # homeManagerModules = import ./modules/home-manager
+
     overlays     = import ./overlays {inherit inputs;};
+    hardware     = import nixos-hardware;
 
   # nire-durandal
   # `sudo nixos-rebuild switch --flake .#nire-durandal`
     nixosConfigurations."nire-durandal"     = nixpkgs.lib.nixosSystem {
-      specialArgs = inputs; # forward inputs defined above to modules defined immediately below
+      specialArgs = inputs;     # send inputs to modules
       system      = "x86_64-linux";
       modules     = [
         ./_hosts/nire-durandal
@@ -73,7 +79,7 @@
         system = "x86_64-linux";
         config = { allowUnfree = true; };
       };
-      extraSpecialArgs  = {inherit inputs;};        # Pass flake inputs to our config
+      extraSpecialArgs  = inputs;        # Pass flake inputs to our config
       modules           = [
         ./home-manager/home.nix
         ./home-manager/nire-durandal

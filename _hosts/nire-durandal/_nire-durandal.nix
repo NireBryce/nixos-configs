@@ -1,9 +1,9 @@
-{ inputs, pkgs, ... }: {
+{ nixos-hardware, lib, config, pkgs, ... }: {
   imports = [
+    nixos-hardware.nixosModules.common-cpu-amd
+    nixos-hardware.nixosModules.common-gpu-amd
     # Users
     # ../.usr.elly.nix # modularize this later
-    inputs.hardware.nixosModules.common-cpu-amd
-    inputs.hardware.nixosModules.common-gpu-amd
 
     # nix generated
     ./hardware-configuration.nix
@@ -53,7 +53,8 @@
   # https://danth.github.io/stylix/configuration.htmloverride {argsOverride = {version = "6.6.27";};
 
   users.users.elly.extraGroups = [ "audio" ];
-  amdgpu.amdvlk = true;
+
+  hardware.amdgpu.amdvlk = false;
 
   _gui.enable = true;
   _amdgpu.enable = true;
@@ -67,7 +68,7 @@
   _zsa.enable = true;
   _logitech.enable = true;
 
-  _impermanence.enable = true;
+  # _impermanence.enable = true;
   _delete-root.enable = true;
   _system-partitions.enable = true;
 }
