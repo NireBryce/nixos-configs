@@ -36,16 +36,16 @@
   musnix = {
     enable = true;
     kernel.realtime = true;
-    kernel.packages =  pkgs.linuxPackagesFor (pkgs.linux_6_6.override {
-      argsOverride = rec {
-        src = pkgs.fetchurl {
-          url = "mirror://kernel/linux/kernel/v6.x/linux-${version}.tar.xz";
-          sha256 = "IA/RGcue8GvO3NtSvgC6RDFj6rFUKVxYMf7ZoSIRqLk=";
-        };
-        version = "6.6.23";
-        modDirVersion = "6.6.23";
-      };
-    });
+    # kernel.packages =  pkgs.linuxPackagesFor (pkgs.linux_6_6.override {
+    #   argsOverride = rec {
+    #     src = pkgs.fetchurl {
+    #       url = "mirror://kernel/linux/kernel/v6.x/linux-${version}.tar.xz";
+    #       sha256 = "IA/RGcue8GvO3NtSvgC6RDFj6rFUKVxYMf7ZoSIRqLk=";
+    #     };
+    #     version = "6.6.23";
+    #     modDirVersion = "6.6.23";
+    #   };
+    # });
     das_watchdog.enable = true; # starts the das watchdog which ensures realtime processes don't hang the machine
   };
 
@@ -54,7 +54,7 @@
 
   users.users.elly.extraGroups = [ "audio" ];
 
-  hardware.amdgpu.amdvlk = false;
+  hardware.amdgpu.amdvlk = true;
 
   _gui.enable = true;
   _amdgpu.enable = true;

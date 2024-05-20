@@ -29,7 +29,7 @@
       obs-studio
 
       # Steam
-      steamtinkerlaunch
+        steamtinkerlaunch
         yad                     # required for steamtinkerlaunch
 
       # video
