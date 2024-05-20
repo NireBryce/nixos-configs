@@ -68,6 +68,5 @@
     zi light 3v1n0/zsh-bash-completions-fallback                            # https://github.com/3v1n0/zsh-bash-completions-fallback
     zi light clarketm/zsh-completions                                       # https://github.com/clarketm/zsh-completions
     
-  # Search for and build completions
-    source $HOME/.zi/plugins/RobSis---zsh-completion-generator/zsh-completion-generator.plugin.zsh
+
 

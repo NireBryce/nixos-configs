@@ -52,13 +52,7 @@
         _ZO_CMD_PREFIX="x";
       };
 
-      shellAliases = {
-        ll = "ls -l";
-        cp = "cp -i";                              # Confirm before overwriting something
-        cd = "x";                                  # Empty oneletter for zoxide to not interfere with zi
-        exa = "eza --icons=always";
-        ls = "eza --icons=always --header --group-directories-first";
-      };
+
 
       # .zshrc
       initExtraFirst = ''
@@ -66,7 +60,7 @@
         #################PASSWORD ENTRY/CONFIRM DIALOGS GO ABOVE##############################
         source $HOME/.config/zsh/010-p10k.zsh               # Powerlevel10k instant prompt.  input above, else below
         source $HOME/.config/zsh/initial-bindings.zsh       # keybindings from various configs
-        source $HOME/.config/zsh/initial-setopts.zsh'       # setopts from the same
+        source $HOME/.config/zsh/initial-setopts.zsh        # setopts from the same
         source $HOME/.config/zsh/initial-zstyle.zsh         # zstyle opts from the same
         typeset -U path cdpath fpath manpath                # TODO: magic, no idea what it does
         source $HOME/.config/zsh/011-nix-fpath.zsh          # tells zsh where nix lives
@@ -80,14 +74,23 @@
         source $HOME/.config/zsh/zi-plugins.zsh             # Zi plugins
         [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh        # Load p10k theme
         zicompinit                                          # zi cleanup
-        # autoload -Uz compinit                               # TODO: break glass in case nix doesnt do this
+        autoload -Uz compinit                             # break glass if zsh breaks  
+        # compinit
       '';
+      completionInit = ''autoload -U compinit && compinit -i'';
       initExtra = ''
         source $HOME/.config/zsh/021-atuin.zsh              # Atuin
-        source $HOME/.config/zsh/040-free-zellij-keys       # Free up bindings for zellij
+        source $HOME/.config/zsh/040-free-zellij-keys.zsh   # Free up bindings for zellij
         disable -p '#'                                      # Necessary to run flakes, otherwise # gets expanded
       '';
-   };
+      shellAliases = {
+        ll  ="ls -l";
+        cp  ="cp -i";                                       # Confirm before overwriting something
+        cd  = "x";                                          # Empty oneletter for zoxide to not interfere with zi
+        exa = "eza --icons=always";                         # back compat for one of the tools
+        ls  = "eza --icons=always --header --group-directories-first";
+      };
+    };
   };
 }
   # old code
