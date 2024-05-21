@@ -18,7 +18,7 @@
   ];
   # hostname
   networking.hostName = "nire-durandal";
-  boot.kernelPackages = pkgs.linux_6_9;
+  boot.kernelPackages = pkgs.linuxPackages_6_9;
   # boot.kernelPackages = pkgs.linux_6_6.override { argsOverride = { version = "6.6.23"; }; };
   # boot.kernelPackages = lib.mkForce pkgs.linuxPackagesFor (pkgs.linux_6_6.override {argsOverride = {version = "6.6.27";};});
   # boot.kernelPackages = lib.mkForce pkgs.linuxKernel.kernels.linux_6_6;
