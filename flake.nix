@@ -46,19 +46,15 @@
     musnix,
     ...
   } @ inputs: 
-  let
-    inherit (self) outputs;
-  
-  in
   {
     
        
     
     # Reusable nixos modules you might want to export
-    nixosModules = import ./_common/_modules;   # These are usually stuff you would upstream into nixpkgs
+    nixosModules = import ./system/_modules;   # These are usually stuff you would upstream into nixpkgs
     # homeManagerModules = import ./modules/home-manager
 
-    overlays     = import ./overlays {inherit inputs;};
+    overlays     = import ./_overlays {inherit inputs;};
     hardware     = import nixos-hardware;
 
   # nire-durandal
