@@ -14,7 +14,7 @@
       
       # browsers                  # browsers
         kdePackages.konqueror       # one of the best `info` file pagers
-                                    # firefox is installed as a system package.
+        firefox                     # firefox is installed as a system package.  this might not work.
       # comms                     # comms
         cinny-desktop               # matrix client
         telegram-desktop            # telegram (unsecure)

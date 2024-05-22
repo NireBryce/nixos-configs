@@ -29,6 +29,7 @@
       zellij.enableZshIntegration = true;
       # zoxide.enableZshIntegration = true; # done in zsh config
       broot.enableZshIntegration = true;
+      nix-index.enableZshIntegration = true;
     };
 
     home.packages = with pkgs; [ # Things needed for my .zshrc
@@ -45,7 +46,7 @@
       autocd = false;
       enableVteIntegration = true;
       autosuggestion.enable = true;
-      enableCompletion = false;    # Already enabled in .zshrc, this makes it do it twice.
+      enableCompletion = true;    # Already enabled in .zshrc, this makes it do it twice.
       zsh-abbr.enable = true;
       
       localVariables = {
@@ -74,7 +75,7 @@
         source $HOME/.config/zsh/zi-plugins.zsh             # Zi plugins
         [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh        # Load p10k theme
         zicompinit                                          # zi cleanup
-        autoload -Uz compinit                             # break glass if zsh breaks  
+        # autoload -Uz compinit                             # break glass if zsh breaks  
         # compinit
       '';
       completionInit = ''autoload -U compinit && compinit -i'';

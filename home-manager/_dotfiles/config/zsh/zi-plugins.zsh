@@ -1,7 +1,7 @@
 # ZI PACKAGE/PLUGIN MANAGEMENT
 
     # completions from --help
-    source "${HOME}/.zi/plugins/RobSis---zsh-completion-generator/zsh-completion-generator.plugin.zsh" 
+    # source "${HOME}/.zi/plugins/RobSis---zsh-completion-generator/zsh-completion-generator.plugin.zsh" 
 
 # Install packages
   # fzf plugins

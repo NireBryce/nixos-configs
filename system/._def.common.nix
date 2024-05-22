@@ -21,6 +21,10 @@
     # ./_services
   ];
 
+  environment.pathsToLink = [ # This determines what to add to /run/current-system/sw, generally defined elsewhere
+    
+  ];
+
   # TODO: Documentation, and make these switches different
   _wifi.enable = lib.mkDefault true;
   _firewall.enable = lib.mkDefault true;
