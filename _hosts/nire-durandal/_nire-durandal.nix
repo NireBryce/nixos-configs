@@ -18,36 +18,13 @@
   ];
   # hostname
   networking.hostName = "nire-durandal";
-  boot.kernelPackages = pkgs.linuxPackages_6_9;
-  # boot.kernelPackages = pkgs.linux_6_6.override { argsOverride = { version = "6.6.23"; }; };
-  # boot.kernelPackages = lib.mkForce pkgs.linuxPackagesFor (pkgs.linux_6_6.override {argsOverride = {version = "6.6.27";};});
-  # boot.kernelPackages = lib.mkForce pkgs.linuxKernel.kernels.linux_6_6;
-  # boot.kernelPackages = pkgs.linuxPackagesFor (pkgs.linux_6_6.override {
-  #   argsOverride = rec {
-  #     src = pkgs.fetchurl {
-  #       url = "mirror://kernel/linux/kernel/v6.x/linux-${version}.tar.xz";
-  #       sha256 = "IA/RGcue8GvO3NtSvgC6RDFj6rFUKVxYMf7ZoSIRqLk=";
-  #     };
-  #     version = "6.6.23";
-  #     modDirVersion = "6.6.23";
-  #   };
-  # });
+
 
   # TODO: turn into its own module
   musnix = {
     enable = true;
     kernel.realtime = false;
-    # kernel.packages =  pkgs.linuxPackagesFor (pkgs.linux_6_6.override {
-    #   argsOverride = rec {
-    #     src = pkgs.fetchurl {
-    #       url = "mirror://kernel/linux/kernel/v6.x/linux-${version}.tar.xz";
-    #       sha256 = "IA/RGcue8GvO3NtSvgC6RDFj6rFUKVxYMf7ZoSIRqLk=";
-    #     };
-    #     version = "6.6.23";
-    #     modDirVersion = "6.6.23";
-    #   };
-    # });
-    das_watchdog.enable = true; # starts the das watchdog which ensures realtime processes don't hang the machine
+    # das_watchdog.enable = true; # starts the das watchdog which ensures realtime processes don't hang the machine
   };
 
   # TODO: stylix theme config also in it's own module
@@ -55,7 +32,7 @@
 
   users.users.elly.extraGroups = [ "audio" ];
 
-  hardware.amdgpu.amdvlk = true;
+  hardware.amdgpu.amdvlk = false;
 
   _gui.enable = true;
   _amdgpu.enable = true;
@@ -73,4 +50,31 @@
   _delete-root.enable = true;
   _system-partitions.enable = true;
 }
-# TODO: figure out how to make this boot with 6.6.23
+
+# ways of overriding kernel
+  # boot.kernelPackages = pkgs.linuxPackages_6_9;
+  # boot.kernelPackages = pkgs.linux_6_6.override { argsOverride = { version = "6.6.23"; }; };
+  # boot.kernelPackages = lib.mkForce pkgs.linuxPackagesFor (pkgs.linux_6_6.override {argsOverride = {version = "6.6.27";};});
+  # boot.kernelPackages = lib.mkForce pkgs.linuxKernel.kernels.linux_6_6;
+  # boot.kernelPackages = pkgs.linuxPackagesFor (pkgs.linux_6_6.override {
+  #   argsOverride = rec {
+  #     src = pkgs.fetchurl {
+  #       url = "mirror://kernel/linux/kernel/v6.x/linux-${version}.tar.xz";
+  #       sha256 = "IA/RGcue8GvO3NtSvgC6RDFj6rFUKVxYMf7ZoSIRqLk=";
+  #     };
+  #     version = "6.6.23";
+  #     modDirVersion = "6.6.23";
+  #   };
+  # });
+
+  # musnix:
+    # musnix.kernel.packages =  pkgs.linuxPackagesFor (pkgs.linux_6_6.override {
+    #   argsOverride = rec {
+    #     src = pkgs.fetchurl {
+    #       url = "mirror://kernel/linux/kernel/v6.x/linux-${version}.tar.xz";
+    #       sha256 = "IA/RGcue8GvO3NtSvgC6RDFj6rFUKVxYMf7ZoSIRqLk=";
+    #     };
+    #     version = "6.6.23";
+    #     modDirVersion = "6.6.23";
+    #   };
+    # });
