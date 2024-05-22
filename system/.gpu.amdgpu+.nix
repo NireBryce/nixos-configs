@@ -14,7 +14,7 @@
     ];
 
 
-  ### Everything below this is in nixos-hardware ###
+  ### Everything below this is in nixos-hardware already ###
   
   #   boot.initrd.kernelModules = [ "amdgpu" ];
   #   environment.variables.AMD_VULKAN_ICD = "RADV"; # force RADV
