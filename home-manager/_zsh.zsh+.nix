@@ -76,9 +76,9 @@
         [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh        # Load p10k theme
         zicompinit                                          # zi cleanup
         autoload -Uz compinit
-        for dump in ~/.zcompdump(N.mh+24); do
-          compinit
-        done
+        # for dump in ~/.zcompdump(N.mh+24); do
+        #   compinit
+        # done
         compinit -C
       '';
       initExtra = ''
