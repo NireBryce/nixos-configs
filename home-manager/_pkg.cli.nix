@@ -74,6 +74,7 @@
     zoxide                    # smarter cd
     file                      # 
     which                     # 
+    moar                      # better pager
     
 
 

@@ -46,7 +46,7 @@
       autocd = false;
       enableVteIntegration = true;
       autosuggestion.enable = true;
-      enableCompletion = true;    # Already enabled in .zshrc, this makes it do it twice.
+      enableCompletion = false;    # enabled through config, removing one compinit call.
       zsh-abbr.enable = true;
       
       localVariables = {
@@ -75,10 +75,12 @@
         source $HOME/.config/zsh/zi-plugins.zsh             # Zi plugins
         [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh        # Load p10k theme
         zicompinit                                          # zi cleanup
-        # autoload -Uz compinit                             # break glass if zsh breaks  
-        # compinit
+        autoload -Uz compinit
+        for dump in ~/.zcompdump(N.mh+24); do
+          compinit
+        done
+        compinit -C
       '';
-      completionInit = ''autoload -U compinit && compinit -i'';
       initExtra = ''
         source $HOME/.config/zsh/021-atuin.zsh              # Atuin
         source $HOME/.config/zsh/040-free-zellij-keys.zsh   # Free up bindings for zellij

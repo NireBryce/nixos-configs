@@ -116,6 +116,7 @@
         jc                          # jc converts the output of many commands, file-types, and strings to JSON or YAML
         jq                          # json query https://github.com/stedolan/jq
         mc                          # midnight commander TUI file manager
+        moar                        # better pager
         nnn                         # TUI file manager
         ripgrep                     # `rg` grep replacement
         tree                        # necessary for some zi things

@@ -13,6 +13,7 @@
 
       # browsers
         kdePackages.konqueror   
+        firefox
 
       # comms
         cinny-desktop           # matrix client
