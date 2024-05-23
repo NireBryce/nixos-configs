@@ -3,8 +3,8 @@
 # Admin metapackage
 {
   imports = [
-    ./.adm.shells.nix
-    ./.adm.sshd.nix
+    ./_adm.shells.nix
+    ./_adm.sshd.nix
   ];
 
   # Locale

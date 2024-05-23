@@ -4,8 +4,9 @@
   users.mutableUsers = false;
   users.users = { 
     elly = {
+      shell = pkgs.zsh;
       isNormalUser = true;
-      extraGroups = [ "wheel" ]; # Enable ‘sudo’
+      extraGroups = [ "wheel" "audio" ]; # Enable ‘sudo’ and deeper audio access
       # group = "elly";
       packages = with pkgs; [ 
       #####
@@ -17,7 +18,6 @@
         micro
         tree
       ];
-    users.users.elly.shell = pkgs.zsh;
     openssh.authorizedKeys.keys = [ 
       ''ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILk2lST7kOSRlanAKhl42b9IQib1hzrbxlR5pve/X37D elly@nire-lysithea'' 
       ''ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL0sEOPmravXojxuKqN3XwplTbuz2p36UDTxmUthktnX elly@durandal''

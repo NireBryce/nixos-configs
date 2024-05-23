@@ -3,8 +3,7 @@
 # system packages metapackage
 {
   imports = [ 
-    ./.pkg.packages.nix
-    ./.pkg.linux-crisis-utilities.nix
+    ./_pkg.linux-crisis-utilities.nix
   ];
 
   services.fwupd.enable = true;         # fwupd

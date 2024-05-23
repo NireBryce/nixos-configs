@@ -2,8 +2,8 @@
   imports = [
     ./_dev
     ./_dotfiles
+    ./_pkg......nix
     ./_sys......nix # system
-    ./_usr......nix # user
     ./_wm......nix  # window manager
     ./_zsh......nix # zsh
   ];

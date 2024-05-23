@@ -33,9 +33,6 @@
   hardware.opengl = {
     extraPackages = [ pkgs.pipewire ];
   };
-  environment.packages = with pkgs; [
-    wireplumber                             # The 'enable' up there should work, but just in case.
-  ];
 }
 
   

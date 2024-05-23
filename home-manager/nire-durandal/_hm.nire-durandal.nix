@@ -4,7 +4,6 @@
 	imports = [
 		# We split off configs that we might have to remove from specific machines
 		# TODO: move these into flake?
-		./_installed-packages.nix
 		./hm-stateVersion.nix
 		
 		../home.nix

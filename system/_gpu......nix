@@ -3,7 +3,7 @@
 # gpu metapackage
 {
   imports = [
-    ./.gpu.amdgpu+.nix
+    ./_gpu.amdgpu+.nix
    ];
    environment.systemPackages = with pkgs; [
       glfw
