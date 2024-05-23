@@ -1,5 +1,9 @@
 {
-  imports = [
-    ./.nix.nix-settings.nix
-   ];
+  ...
+}:
+
+# nix settings metapackage
+{
+    nix.settings.experimental-features = [ "nix-command" "flakes" ];
+    nixpkgs.config.allowUnfree = true;
 }

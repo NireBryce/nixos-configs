@@ -1,7 +1,7 @@
-{ lib, ...}:
+{...}:
+
+# mouse metapackage
 {
-  imports = [ 
-    ./.mou.logitech+.nix
-  ];
-  _logitech.enable = lib.mkDefault true;
+  # mouse (for piper, which is managed by home-manager)
+  services.ratbagd.enable = true;  
 }

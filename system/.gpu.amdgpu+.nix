@@ -12,9 +12,11 @@
     hardware.opengl.extraPackages = with pkgs; [
       libva-utils
     ];
+    
+  };
+}
 
-
-  ### Everything below this is in nixos-hardware already ###
+### in nixos-hardware already ###
   
   #   boot.initrd.kernelModules = [ "amdgpu" ];
   #   environment.variables.AMD_VULKAN_ICD = "RADV"; # force RADV
@@ -34,6 +36,3 @@
   #     ];
 
   #   };
-    
-  };
-}

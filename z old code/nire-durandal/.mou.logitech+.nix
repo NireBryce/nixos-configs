@@ -6,8 +6,7 @@
     _logitech.enable = lib.mkEnableOption "Enables logitech and razer mouse settings";
   };
   config = lib.mkIf config._logitech.enable {
-    # mouse (for piper, which is managed by fleek/home-manager)
-    services.ratbagd.enable = true;  
+    
   };
 }
 

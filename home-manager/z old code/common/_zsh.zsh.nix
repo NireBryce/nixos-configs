@@ -1,15 +1,6 @@
+{ lib, config, pkgs, ... }: 
 {
-  pkgs,
-  ...
-}:
-
-{
-  imports = [ 
-    ./_zsh.abbrs.nix
-    ./_zsh.aliases.nix
-  ];
-
-    # Notes:
+  # Notes:
     # If you get `zsh side` errors, delete ~/.zcompdump and ~/.config/zsh/.zcompdump and run `zi update`
     # installing multiple highlighters causes "zsh_zle-highlight-buffer-p:4: permission denied error
     # in this case it was trapd00r/zsh-syntax-highlighting-filetypes which highlights more than filetypes turns out
@@ -70,6 +61,8 @@
       _ZO_CMD_PREFIX="x";
     };
 
+
+
     # .zshrc
     initExtraFirst = ''
       zmodload zsh/zprof                                  # zsh profiler
@@ -110,40 +103,39 @@
     };
   };
 }
-
-# old code
-  # dotDir=".config/zsh";
-  # plugins = [
-  # {
-  #   name = "powerlevel10k";
-  #   src = pkgs.zsh-powerlevel10k;
-  #   file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
-  # }
-  # {
-  #   name = "powerlevel10k-config";
-  #   src = config/zsh-powerlevel10k; file = ".p10k.zsh";
-  #   }
-  # ];
-
-
-# # f-sy-h is better. 
-# syntaxHighlighting = {
-  # enable = true;
-  # # package = "";
-  # highlighters = [
-  #   "brackets"
-  #   "pattern"
-  #   "regexp"
-  #   # "cursor"
-  #   # "root"
-  #   # "line"
-  # ];
-  
-# };   
+  # old code
+      # dotDir=".config/zsh";
+      # plugins = [
+      # {
+      #   name = "powerlevel10k";
+      #   src = pkgs.zsh-powerlevel10k;
+      #   file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
+      # }
+      # {
+      #   name = "powerlevel10k-config";
+      #   src = config/zsh-powerlevel10k; file = ".p10k.zsh";
+      #   }
+      # ];
 
 
+    # # f-sy-h is better. 
+    # syntaxHighlighting = {
+      # enable = true;
+      # # package = "";
+      # highlighters = [
+      #   "brackets"
+      #   "pattern"
+      #   "regexp"
+      #   # "cursor"
+      #   # "root"
+      #   # "line"
+      # ];
+      
+    # };   
 
-# history = {
-#   path = "${config.xdg.configHome}/zsh/history";
-#   save = 5000;
-# };
+
+
+    # history = {
+    #   path = "${config.xdg.configHome}/zsh/history";
+    #   save = 5000;
+    # };

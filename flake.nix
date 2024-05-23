@@ -75,9 +75,9 @@
         system = "x86_64-linux";
         config = { allowUnfree = true; };
       };
-      extraSpecialArgs  = inputs;        # Pass flake inputs to our config
+      extraSpecialArgs  = inputs;       # Pass flake inputs to our config
       modules           = [
-        ./home-manager/home.nix
+        # ./home-manager/home.nix       # TODO: put this back once you're importing more modules here
         ./home-manager/nire-durandal
       ];
     };

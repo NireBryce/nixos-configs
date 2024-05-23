@@ -13,6 +13,9 @@
     # _def defaults
     ../../system/._def.common.nix
 
+    # users
+    ../../system/.usr.elly.nix
+    
     # fixes
     ../../system/_bugfixes/_suspend/_b550m-gpp0-etc.nix
   ];

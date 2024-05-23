@@ -1,7 +1,5 @@
 { 
   impermanence,
-  config,
-  lib,
   ...
 }: 
 
