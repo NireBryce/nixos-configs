@@ -3,7 +3,10 @@
 { 
   config,
   ...
-}: {
+}: 
+
+# TODO: Broken
+{
   # imports = [outputs.nixosModules.tailscale-autoconnect];
   imports = [ ../_modules/tailscale-autoconnect.nix ];
   services.tailscaleAutoconnect = {

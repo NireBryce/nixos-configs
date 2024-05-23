@@ -1,4 +1,7 @@
-{
+{ ... }:
+
+# TODO: broken
+{ 
 # services
   services.syncthing = {
     enable = true;

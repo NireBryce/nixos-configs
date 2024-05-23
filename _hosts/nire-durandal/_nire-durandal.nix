@@ -1,4 +1,4 @@
-{ nixos-hardware, lib, config, pkgs, ... }: {
+{ nixos-hardware, ... }: {
   imports = [
     nixos-hardware.nixosModules.common-cpu-amd
     nixos-hardware.nixosModules.common-gpu-amd
@@ -11,8 +11,11 @@
     
 
     # _def defaults
-    ../../system/._def.common.nix
+    ../../system/__def.common.nix
 
+    # users
+    ../../system/_usr.elly.nix
+    
     # fixes
     ../../system/_bugfixes/_suspend/_b550m-gpp0-etc.nix
   ];
@@ -30,25 +33,7 @@
   # TODO: stylix theme config also in it's own module
   # https://danth.github.io/stylix/configuration.htmloverride {argsOverride = {version = "6.6.27";};
 
-  users.users.elly.extraGroups = [ "audio" ];
-
   hardware.amdgpu.amdvlk = false;
-
-  _gui.enable = true;
-  _amdgpu.enable = true;
-  _steam.enable = true;
-
-  _bluetooth.enable = true;
-  _pipewire.enable = true;
-  _pipewire-bt.enable = true;
-  _wifi.enable = true;
-  _firewall.enable = true;
-  _zsa.enable = true;
-  _logitech.enable = true;
-
-  # _impermanence.enable = true;
-  _delete-root.enable = true;
-  _system-partitions.enable = true;
 }
 
 # ways of overriding kernel
