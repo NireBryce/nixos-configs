@@ -12,68 +12,65 @@
         (nerdfonts.override { fonts = [ "FiraCode" ]; })
       
       # browsers                  # browsers
-        kdePackages.konqueror       # one of the best `info` file pagers
-        firefox                     # firefox is installed as a system package.  this might not work.
+        kdePackages.konqueror       # one of the best `info` file pagers        https://invent.kde.org/network/konqueror
+        firefox                     # TODO: also installed as a system package. https://www.mozilla.org/en-US/firefox/
       # comms                     # comms
-        cinny-desktop               # matrix client
-        discord                     # discord (all the tech support happens here)
-        keybase-gui                 # encrypted chat almost no one uses
-          keybase                   # see above
-        obs-studio                  # screen recording / streaming
-        signal-desktop              # encrypted chat everone uses
-        teamspeak_client            # teamspeak game comms
-        telegram-desktop            # telegram (unsecure)
-        wire-desktop                # old encrypted chat client, my ex used it
-        zoom-us                     # less features than facetime somehow
+        cinny-desktop               # matrix client                             https://github.com/cinnyapp/cinny-desktop
+        discord                     # discord chat                              https://discord.com/
+        keybase-gui                 # encrypted chat almost no one uses         https://keybase.io/
+          keybase                   # see above                                 https://keybase.io/
+        obs-studio                  # screen recording / streaming              https://obsproject.com/
+        signal-desktop              # encrypted chat everone uses               https://signal.org/
+        teamspeak_client            # teamspeak game comms                      https://www.teamspeak.com/
+        wire-desktop                # old encrypted chat client, my ex used it  https://wire.com/
+        zoom-us                     # less features than facetime somehow       https://zoom.us/
       # keyboard/mouse/text       # keyboard/mouse/text
-        emote                       # gui emoji picker
         qmk                         # qmk keyboard manager                      https://github.com/qmk/qmk_firmware
         piper                       # logitech/razer mouse manager              https://github.com/soxoj/piper
       # multi-machine             # multi-machine
-        mosh                        # ssh but better
-        input-leap                  # soft-KVM, synergy/barrier fork
+        mosh                        # ssh but better                            https://mosh.org/
+        input-leap                  # soft-KVM, synergy/barrier fork            https://github.com/input-leap/input-leap
       # media and sound           # media and sound
-        vlc                         # video player
-        qpwgraph                    # sound mixer
+        vlc                         # video player                              https://www.videolan.org/vlc/
+        qpwgraph                    # sound mixer                               https://github.com/rncbc/qpwgraph
       # image editing             # image editing
-        gimp                        # GNU Image Manipulation Program.
+        gimp                        # GNU Image Manipulation Program.           https://www.gimp.org
       # gpu diagnostics           # gpu diagnostics
-        vulkan-tools                # vulkan-tools
-        glxinfo                     # glxinfo
-        clinfo                      # clinfo
-        amdgpu_top                  # amdgpu_top gpu monitor
+        vulkan-tools                # vulkan-tools                              https://github.com/KhronosGroup/Vulkan-Tools
+        glxinfo                     # glxinfo                                   https://www.khronos.org/opengl/
+        clinfo                      # clinfo                                    https://github.com/Oblomov/clinfo
+        amdgpu_top                  # amdgpu_top gpu monitor                    https://github.com/Umio-Yasuno/amdgpu_top
       # desktop dev               # desktop dev
-        vscode-fhs                  # vscode
-        github-desktop              # github-desktop
+        vscode-fhs                  # vscode                                    https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/applications/editors/vscode/
+        github-desktop              # github-desktop                            https://desktop.github.com/
       # dev cli tools             # dev cli tools
         asdf-vm                     # asdf (use dev shells instead)             https://github.com/asdf-vm/asdf-vm
         diffutils                   # `diff` utils                              https://github.com/ogham/diffutils
         direnv                      # per-directory environments                https://github.com/direnv/direnv
         gnumake                     # gnumake                                   https://github.com/ogham/gnumake
-        lazydocker                  # TUI docker interface
+        lazydocker                  # TUI docker interface                      https://github.com/jesseduffield/lazydocker
         # Git                     # Git
           gh                        # github cli                                https://github.com/cli/cli
-          git                       # git scm
+          git                       # git scm                                   https://git-scm.com
           delta                     # `delta` - git diff                        https://github.com/dandavison/delta
-          lazygit                   # TUI git interface
+          lazygit                   # TUI git interface                         https://github.com/jesseduffield/lazygit
         # Bash                    # Bash
-          shellcheck                # bash linter 
-          shfmt                     # bash formatter
+          shellcheck                # bash linter                               https://www.shellcheck.net/
+          shfmt                     # bash formatter                            https://github.com/mvdan/sh
         # Linux debugging         # Linux debugging
-          lsof                      # list open files
-          ltrace                    # library call tracer
-          strace                    # system call tracer
+          lsof                      # list open files                           https://linux.die.net/man/1/lsof
+          ltrace                    # library call tracer                       https://linux.die.net/man/1/ltrace
+          strace                    # system call tracer                        https://linux.die.net/man/1/strace
           # dtrace                  # TODO FIND PACKAGE NAME
       # TUI editors               # TUI editors
-        nano                        # text editor
-        nanorc                      # nano syntax highlighting
-        neovim                      # text editor
-        helix                       # text editor
+        nano                        # text editor                               https://www.nano-editor.org/
+        nanorc                      # nano syntax highlighting                  https://github.com/scopatz/nanorc
+        neovim                      # text editor                               https://neovim.io/
       # 'productivity'            # 'productivity'
-        obsidian                    # pkm
-        libreoffice-qt              # office
+        obsidian                    # pkm                                       https://obsidian.md/
+        libreoffice-qt              # office                                    https://www.libreoffice.org/
       # terminals                 # terminals
-        kitty                       # gpu accelerated terminal
+        kitty                       # gpu accelerated terminal                  https://sw.kovidgoyal.net/kitty
         kitty-img                   # kitty image rendering engine, like sixel
       # get things from strangers  # get things from strangers
         magic-wormhole-rs           # transfer arbitrary files easy and encrypted
@@ -122,6 +119,7 @@
         nnn                         # TUI file manager
         ripgrep                     # `rg` grep replacement
         tree                        # necessary for some zi things
+        vivid                       # LS_COLORS generator                       https://github.com/sharkdp/vivid
         which                       # `which`
         yq-go                       # yaml query                                https://github.com/mikefarah/yq
         zellij                      # terminal multiplexer/tiler
