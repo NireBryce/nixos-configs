@@ -11,89 +11,141 @@
       # Font config
         (nerdfonts.override { fonts = [ "FiraCode" ]; })
       
+      # archive                 # archive                                   # archive
+        zip                         # zip                                       http://www.info-zip.org/
+        unzip                       # unzip                                     http://www.info-zip.org/
+        p7zip                       # p7zip                                     https://github.com/p7zip-project/p7zip
+
+      # bash                    # bash                                    # bash
+        shellcheck                # bash linter                               https://www.shellcheck.net/
+        shfmt                     # bash formatter                            https://github.com/mvdan/sh
+
       # browsers                # browsers                                  # browsers
         kdePackages.konqueror       # one of the best `info` file pagers        https://invent.kde.org/network/konqueror
         firefox                     # TODO: also installed as a system package. https://www.mozilla.org/en-US/firefox/
+
       # comms                   # comms                                     # comms
         cinny-desktop               # matrix client                             https://github.com/cinnyapp/cinny-desktop
         discord                     # discord chat                              https://discord.com/
         keybase-gui                 # encrypted chat almost no one uses         https://keybase.io/
-          keybase                   # see above                                 https://keybase.io/
+        keybase                     # see above                                 https://keybase.io/
         obs-studio                  # screen recording / streaming              https://obsproject.com/
         signal-desktop              # encrypted chat everone uses               https://signal.org/
         teamspeak_client            # teamspeak game comms                      https://www.teamspeak.com/
         wire-desktop                # old encrypted chat client, my ex used it  https://wire.com/
         zoom-us                     # less features than facetime somehow       https://zoom.us/
-      # keyboard/mouse/text     # keyboard/mouse/text                       # keyboard/mouse/text
-        qmk                         # qmk keyboard manager                      https://github.com/qmk/qmk_firmware
-        piper                       # logitech/razer mouse manager              https://github.com/soxoj/piper
-      # multi-machine           # multi-machine                             # multi-machine
-        mosh                        # ssh but better                            https://mosh.org/
-        input-leap                  # soft-KVM, synergy/barrier fork            https://github.com/input-leap/input-leap
-      # media and sound         # media and sound                           # media and sound
-        vlc                         # video player                              https://www.videolan.org/vlc/
-        qpwgraph                    # sound mixer                               https://github.com/rncbc/qpwgraph
-      # image editing           # image editing                             # image editing
-        gimp                        # GNU Image Manipulation Program.           https://www.gimp.org
-      # gpu diagnostics         # gpu diagnostics                           # gpu diagnostics
-        vulkan-tools                # vulkan-tools                              https://github.com/KhronosGroup/Vulkan-Tools
-        glxinfo                     # glxinfo                                   https://www.khronos.org/opengl/
-        clinfo                      # clinfo                                    https://github.com/Oblomov/clinfo
-        amdgpu_top                  # amdgpu_top gpu monitor                    https://github.com/Umio-Yasuno/amdgpu_top
-      # desktop dev             # desktop dev                               # desktop dev
-        vscode-fhs                  # vscode                                    https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/applications/editors/vscode/
-        github-desktop              # github-desktop                            https://desktop.github.com/
-      # dev cli tools           # dev cli tools                             # dev cli tools
+
+      # cli tools               # cli tools                                 # CLI tools
+        entr                        # run commands when files change            https://github.com/eradman/entr
+        ethtool                     # ethtool                                   https://www.kernel.org/pub/software/network/ethtool/
+        iotop                       # io monitoring                             http://guichaz.free.fr/iotop
+        mlocate                     # locate from db built with `updatedb`      https://pagure.io/mlocate
+        pciutils                    # lspci                                     https://mj.ucw.cz/sw/pciutils/
+        sysstat                     # system stats                              http://sebastien.godard.pagesperso-orange.fr/
+        topgrade                    # upgrade all the things (nix sorta broken) https://github.com/topgrade-rs/topgrade
+        usbutils                    # lsusb                                     http://www.linux-usb.org/
+
+      # dev                     #  dev                                      #  dev
         asdf-vm                     # asdf (use dev shells instead)             https://github.com/asdf-vm/asdf-vm
         diffutils                   # `diff` utils                              https://github.com/ogham/diffutils
         direnv                      # per-directory environments                https://github.com/direnv/direnv
         gnumake                     # gnumake                                   https://github.com/ogham/gnumake
         lazydocker                  # TUI docker interface                      https://github.com/jesseduffield/lazydocker
         riffdiff                    # provides `riff`, where-in-line diff       https://github.com/walles/riff
-        # git                   # git                                       # git  
-          gh                        # github cli                                https://github.com/cli/cli
-          git                       # git scm                                   https://git-scm.com
-          delta                     # `delta` - git diff                        https://github.com/dandavison/delta
-          lazygit                   # TUI git interface                         https://github.com/jesseduffield/lazygit
-        # bash                  # bash                                      # bash
-          shellcheck                # bash linter                               https://www.shellcheck.net/
-          shfmt                     # bash formatter                            https://github.com/mvdan/sh
-        # linux debugging       # linux debugging                           # linux debugging
-          lsof                      # list open files                           https://linux.die.net/man/1/lsof
-          ltrace                    # library call tracer                       https://linux.die.net/man/1/ltrace
-          strace                    # system call tracer                        https://linux.die.net/man/1/strace
-          # dtrace                  # TODO FIND PACKAGE NAME                    https://wiki.freebsd.org/DTrace
-      # tui editors             # tui editors                               # tui editors
+
+      # editors                 # editors                                   # editors
         nano                        # text editor                               https://www.nano-editor.org/
         nanorc                      # nano syntax highlighting                  https://github.com/scopatz/nanorc
         neovim                      # text editor                               https://neovim.io/
-      # 'productivity'          # 'productivity'                            # 'productivity'
-        obsidian                    # pkm                                       https://obsidian.md/
-        libreoffice-qt              # office                                    https://www.libreoffice.org/
-      # terminals               # terminals                                 # terminals
-        kitty                       # gpu accelerated terminal                  https://sw.kovidgoyal.net/kitty
-        kitty-img                   # kitty image rendering engine, like sixel  https://git.sr.ht/~zethra/kitty-img
+        vscode-fhs                  # vscode                                    https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/applications/editors/vscode/
+
       # file transfer           # file transfer                             # file transfer
+        aria2                       # cli download manager                      https://aria2.github.io/
         magic-wormhole-rs           # easy transfer arbitrary files encrypted   https://github.com/magic-wormhole/magic-wormhole.rs
         rsync                       # up hill both ways                         https://linux.die.net/man/1/rsync
-        aria2                       # cli download manager                      https://aria2.github.io/
+
+      # games                   # games                                     # games
+        lutris                      # lutris game launcher                      https://lutris.net/
+        # steam                     # in nix config                             https://github.com/NixOS/nixpkgs/blob/stable/pkgs/applications/games/steam/steam.nix
+        protonup-qt                 # proton installer/updater                  https://davidotek.github.io/protonup-qt/
+        protontricks                # protontricks                              https://github.com/Matoking/protontricks
+        wineWowPackages.waylandFull # Wine for wayland                          https://www.winehq.org/
+        steamtinkerlaunch           # steamtinkerlaunch                         https://github.com/sonic2kk/steamtinkerlaunch
+        glfw                        # TODO: redundant, in system config         https://www.glfw.org/
+        dxvk                        # TODO: redundant, in system config         https://github.com/doitsujin/dxvk
+
+      # git                     # git                                     # git  
+        gh                        # github cli                                https://github.com/cli/cli
+        github-desktop            # github-desktop                            https://desktop.github.com/
+        git                       # git scm                                   https://git-scm.com
+        delta                     # `delta` - git diff                        https://github.com/dandavison/delta
+        lazygit                   # TUI git interface                         https://github.com/jesseduffield/lazygit
+
+      # gpu diagnostics         # gpu diagnostics                           # gpu diagnostics
+        vulkan-tools                # vulkan-tools                              https://github.com/KhronosGroup/Vulkan-Tools
+        glxinfo                     # glxinfo                                   https://www.khronos.org/opengl/
+        clinfo                      # clinfo                                    https://github.com/Oblomov/clinfo
+        amdgpu_top                  # amdgpu_top gpu monitor                    https://github.com/Umio-Yasuno/amdgpu_top
+
+      # help systems            # help systems                              # Help Systems
+        cheat                       # cli cheatsheets                           https://github.com/cheat/cheat
+        tldr                        # better man pages                          https://tldr.sh/
+
+      # internet                # internet                                  # internet
         curl                        # `curl`                                    https://curl.se/download.html
-        wget                        # its like curl but different               https://www.gnu.org/software/wget/
-      # networking              # networking                                # networking
         dnsutils                    # `dig` + `nslookup`                        https://www.isc.org/bind/
         iftop                       # network monitor                           https://pdw.ex-parrot.com/iftop/
         ipcalc                      # IP address calculator                     https://gitlab.com/ipcalc/ipcalc
         iperf3                      # network tools                             https://software.es.net/iperf/
         ldns                        # provides `drill` a `dig` replacement      https://www.nlnetlabs.nl/projects/ldns/about/
         mtr                         # traceroute + ping                         https://www.bitwizard.nl/mtr/
-        mtr-gui                     # GUI for mtr                               https://www.bitwizard.nl/mtr/
         nmap                        # network scanner                           http://www.nmap.org/
         socat                       # openbsd-netcat replacement                http://www.dest-unreach.org/socat/
+        wget                        # its like curl but different               https://www.gnu.org/software/wget/
         whois                       # whois lookup                              https://packages.qa.debian.org/w/whois.html
-      # archive                 # archive                                   # archive
-        zip                         # zip                                       http://www.info-zip.org/
-        unzip                       # unzip                                     http://www.info-zip.org/
-        p7zip                       # p7zip                                     https://github.com/p7zip-project/p7zip
+
+      # keyboard/mouse/text     # keyboard/mouse/text                       # keyboard/mouse/text
+        qmk                         # qmk keyboard manager                      https://github.com/qmk/qmk_firmware
+        piper                       # logitech/razer mouse manager              https://github.com/soxoj/piper
+
+      # linux debugging         # linux debugging                             # linux debugging
+        lsof                      # list open files                           https://linux.die.net/man/1/lsof
+        ltrace                    # library call tracer                       https://linux.die.net/man/1/ltrace
+        strace                    # system call tracer                        https://linux.die.net/man/1/strace
+
+      # media and sound         # media and sound                           # media and sound
+        gimp                        # GNU Image Manipulation Program.           https://www.gimp.org
+        qpwgraph                    # sound mixer                               https://github.com/rncbc/qpwgraph
+        vlc                         # video player                              https://www.videolan.org/vlc/
+
+      # multi-machine           # multi-machine                             # multi-machine
+        mosh                        # ssh but better                            https://mosh.org/
+        input-leap                  # soft-KVM, synergy/barrier fork            https://github.com/input-leap/input-leap
+
+      # nix                     # nix                                       # Nix - Move some of these into dev shells
+        comma                       # `,` run things without installing them    https://github.com/nix-community/comma
+        deadnix                     # scan for dead nix code                    https://github.com/astro/deadnix
+        manix                       # nix man pages                             https://github.com/nix-community/manix
+        nix-diff                    # diff nix code                             https://hackage.haskell.org/package/nix-diff
+        nix-du                      # nix-store analysis                        https://github.com/symphorien/nix-du
+        nix-health                  # check nix issues                          https://github.com/juspay/nix-health
+        nix-init                    # nix packages from URLs                    https://github.com/nix-community/nix-init
+        nix-output-monitor          # `nom`                                     https://github.com/maralorn/nix-output-monitor
+        nix-tree                    # view dependency graph                     https://hackage.haskell.org/package/nix-tree
+        nix-zsh-completions         # nix shell completions                     https://github.com/nix-community/nix-zsh-completions
+        nixfmt                      # format nix code                           https://github.com/serokell/nixfmt
+        nurl                        # nix fetcher calls from repository URLs    https://github.com/nix-community/nurl
+        nvd                         # nix package version diff                  https://gitlab.com/khumba/nvd
+        statix                      # antipattern linter                        https://github.com/nerdypepper/statix
+
+      # productivity            # productivity                              # productivity
+        obsidian                    # pkm                                       https://obsidian.md/
+        libreoffice-qt              # office                                    https://www.libreoffice.org/
+
+      # terminals               # terminals                                 # terminals
+        kitty                       # gpu accelerated terminal                  https://sw.kovidgoyal.net/kitty
+        kitty-img                   # kitty image rendering engine, like sixel  https://git.sr.ht/~zethra/kitty-img
+
       # shell                   # shell                                     # shell
         atuin                       # shell history                             https://github.com/ellie/atuin
         bash-completion             # bash complete                             https://github.com/scop/bash-completion
@@ -126,46 +178,12 @@
         yq-go                       # yaml query                                https://github.com/mikefarah/yq
         zellij                      # terminal multiplexer/tiler                https://zellij.dev/
         zoxide                      # smarter cd                                https://github.com/ajeetdsouza/zoxide
-      # help systems            # help systems                              # Help Systems
-        cheat                       # cli cheatsheets                           https://github.com/cheat/cheat
-        tldr                        # better man pages                          https://tldr.sh/
-      # cli tools               # cli tools                                 # CLI tools
-        entr                        # run commands when files change            https://github.com/eradman/entr
-        ethtool                     # ethtool                                   https://www.kernel.org/pub/software/network/ethtool/
-        iotop                       # io monitoring                             http://guichaz.free.fr/iotop
-        mlocate                     # locate from db built with `updatedb`      https://pagure.io/mlocate
-        pciutils                    # lspci                                     https://mj.ucw.cz/sw/pciutils/
-        sysstat                     # system stats                              http://sebastien.godard.pagesperso-orange.fr/
-        topgrade                    # upgrade all the things (nix sorta broken) https://github.com/topgrade-rs/topgrade
-        usbutils                    # lsusb                                     http://www.linux-usb.org/
+
       # system tools            # system tools                              # System Tools
         auto-cpufreq                # auto-cpufreq                              https://github.com/AdnanHodzic/auto-cpufreq
         lm_sensors                  # lm_sensors                                https://hwmon.wiki.kernel.org/lm_sensors
         libinput                    # TODO: I forget what I need this for.      https://www.freedesktop.org/wiki/Software/libinput/
-      # nix                     # nix                                       # Nix - Move some of these into dev shells
-        comma                       # `,` run things without installing them    https://github.com/nix-community/comma
-        deadnix                     # scan for dead nix code                    https://github.com/astro/deadnix
-        manix                       # nix man pages                             https://github.com/nix-community/manix
-        nix-diff                    # diff nix code                             https://hackage.haskell.org/package/nix-diff
-        nix-du                      # nix-store analysis                        https://github.com/symphorien/nix-du
-        nix-health                  # check nix issues                          https://github.com/juspay/nix-health
-        nix-init                    # nix packages from URLs                    https://github.com/nix-community/nix-init
-        nix-output-monitor          # `nom`                                     https://github.com/maralorn/nix-output-monitor
-        nix-tree                    # view dependency graph                     https://hackage.haskell.org/package/nix-tree
-        nix-zsh-completions         # nix shell completions                     https://github.com/nix-community/nix-zsh-completions
-        nixfmt                      # format nix code                           https://github.com/serokell/nixfmt
-        nurl                        # nix fetcher calls from repository URLs    https://github.com/nix-community/nurl
-        nvd                         # nix package version diff                  https://gitlab.com/khumba/nvd
-        statix                      # antipattern linter                        https://github.com/nerdypepper/statix
-      # Games                   # Games                                     # Games
-        lutris                      # lutris game launcher                      https://lutris.net/
-        # steam                     # in nix config                             https://github.com/NixOS/nixpkgs/blob/stable/pkgs/applications/games/steam/steam.nix
-        protonup-qt                 # proton installer/updater                  https://davidotek.github.io/protonup-qt/
-        protontricks                # protontricks                              https://github.com/Matoking/protontricks
-        wineWowPackages.waylandFull # Wine for wayland                          https://www.winehq.org/
-        steamtinkerlaunch           # steamtinkerlaunch                         https://github.com/sonic2kk/steamtinkerlaunch
-        glfw                        # TODO: redundant, in system config         https://www.glfw.org/
-        dxvk                        # TODO: redundant, in system config         https://github.com/doitsujin/dxvk
+        
       # Wayland                 # Wayland                                   # Wayland
         wl-clipboard                # clipboard in wayland                      https://github.com/bugaevc/wl-clipboard
         wl-clipboard-x11            # clipboard in xwayland                     https://search.nixos.org/packages?channel=unstable&from=0&size=50&sort=relevance&type=packages&query=wl-clipboard
