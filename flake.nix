@@ -78,7 +78,7 @@
       extraSpecialArgs  = inputs;       # Pass flake inputs to our config
       modules           = [
         # ./home-manager/home.nix       # TODO: put this back once you're importing more modules here
-        ./home-manager/nire-durandal
+        ./__home-manager/nire-durandal
       ];
     };
 
@@ -97,8 +97,8 @@
       };
       extraSpecialArgs  = {inherit inputs;};        # Pass flake inputs to our config
       modules           = [
-        ./home-manager/home.nix
-        ./home-manager/nire-lysithea
+        ./__home-manager/home.nix
+        ./__home-manager/nire-lysithea
       ];
     };
 
@@ -117,8 +117,8 @@
       };
       extraSpecialArgs  = {inherit inputs;};        # Pass flake inputs to our config
       modules           = [
-        ./home-manager/home.nix
-        ./home-manager/nire-galatea
+        ./__home-manager/home.nix
+        ./__home-manager/nire-galatea
       ];
     };
   };

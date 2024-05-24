@@ -7,12 +7,6 @@
   #TODO: also document .. notation for 'default.nix' style behavior in a flat directory
   imports = [
       ./_adm......nix # admin
-      ./_gam......nix # games
-      ./_gpu......nix # gpu
-      ./_gui......nix # gui
-      ./_ipr......nix # impermanence 
-      ./_kb......nix  # keyboard
-      ./_mou......nix # mouse
       ./_net......nix # network
       ./_nix......nix # nix settings
       ./_pkg......nix # system packages

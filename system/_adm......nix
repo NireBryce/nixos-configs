@@ -3,8 +3,10 @@
 # Admin metapackage
 {
   imports = [
+    ./_adm.gui-environment.nix
     ./_adm.shells.nix
     ./_adm.sshd.nix
+    ./_adm.impermanence.nix
   ];
 
   # Locale
