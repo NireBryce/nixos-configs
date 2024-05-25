@@ -2,10 +2,10 @@
   imports = [
     ./_dev
     ./_dotfiles
-    ./_pkg._packages.nix    # user packages
-    ./_sys._system.nix      # system
-    ./_wm._wm-packages.nix  # window-manager specific packages
-    ./_zsh._zsh.nix         # zsh
+    ./_pkg._packages.nix        # user packages
+    ./_sys._system.nix          # system
+    ./_wm._window-manager.nix   # window-manager specific packages
+    ./_zsh._zsh.nix             # zsh
   ];
 }
 
