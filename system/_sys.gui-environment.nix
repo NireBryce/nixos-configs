@@ -18,4 +18,6 @@
   
   # make GTK apps obey theme settings
   programs.dconf.enable = true;
+
+  
 }

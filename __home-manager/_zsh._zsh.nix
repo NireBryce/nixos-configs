@@ -106,7 +106,7 @@
       cp  ="cp -i";                                       # Confirm before overwriting something
       cd  = "x";                                          # Empty oneletter for zoxide to not interfere with zi
       exa = "eza --icons=always";                         # back compat for one of the tools
-      ls  = "eza --icons=always --header --group-directories-first";
+      ls  = "eza --icons=always --header --group-directories-first --hyperlink";
     };
   };
 }

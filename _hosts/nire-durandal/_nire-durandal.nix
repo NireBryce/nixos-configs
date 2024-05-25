@@ -9,6 +9,8 @@
     ./hardware-configuration.nix
     ./stateVersion.nix
     
+    # hardware
+    ./_gpu.nix
 
     # _def defaults
     ../../system/__def.common.nix
@@ -25,7 +27,7 @@
 
   # TODO: turn into its own module
   musnix = {
-    enable = true;
+    enable          = true;
     kernel.realtime = false;
     # das_watchdog.enable = true; # starts the das watchdog which ensures realtime processes don't hang the machine
   };
@@ -33,7 +35,16 @@
   # TODO: stylix theme config also in it's own module
   # https://danth.github.io/stylix/configuration.htmloverride {argsOverride = {version = "6.6.27";};
 
-  hardware.amdgpu.amdvlk = false;
+  nixos-hardware.amdgpu.amdvlk = false;     # disable vulkan driver through nixos-hardware
+  hardware.keyboard.zsa.enable = true;      # zsa keyboard package
+  services.ratbagd.enable      = true;      # for piper logitech mouse ctl
+
+  programs.steam = {
+      enable = true;
+      remotePlay.openFirewall      = true;  # Open ports in the firewall for Steam Remote Play
+      dedicatedServer.openFirewall = true;  # Open ports in the firewall for Source Dedicated Server
+      gamescopeSession.enable      = true;  # third party gamescope compositor
+    }; 
 }
 
 # ways of overriding kernel
