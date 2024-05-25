@@ -108,6 +108,7 @@
       system = "x86_64-linux";
       modules = [
         ./_hosts/nire-galatea
+        nixos-hardware.nixosModules.lenovo-thinkpad-x270
       ];
     };
     homeConfigurations."elly@nire-galatea" = home-manager.lib.homeManagerConfiguration {
