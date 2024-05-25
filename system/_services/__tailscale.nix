@@ -2,13 +2,12 @@
 # from https://guekka.github.io/nixos-server-2/
 { 
   config,
+  outputs,
   ...
 }: 
 
-# TODO: Broken
 {
-  # imports = [outputs.nixosModules.tailscale-autoconnect];
-  imports = [ ../_modules/tailscale-autoconnect.nix ];
+  imports = [outputs.nixosModules.tailscale-autoconnect];
   services.tailscaleAutoconnect = {
     enable = true;
 
