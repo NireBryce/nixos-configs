@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }: 
+{ config, pkgs, ... }: 
 {
   # Notes:
     # If you get `zsh side` errors, delete ~/.zcompdump and ~/.config/zsh/.zcompdump and run `zi update`
@@ -40,15 +40,24 @@
       ];
     };
   };
+  programs.atuin = {            # atuin key config
+    enable = true;
+    settings = {
+      key_path = config.sops.secrets.atuin_key.path;
+    };
+  };
+  sops.secrets.atuin_key = {
+    sopsFile = ../system/_sec.secrets.yaml;
+  };
 
   home.packages = with pkgs; [ # Things needed for my .zshrc
     diff-so-fancy
-    zoxide
-    atuin
-    tree
-    zi                        # zsh plugin manager
+    zoxide                      # better cd
+    atuin                       # Shell history
+    tree                        # tree
+    zi                          # zsh plugin manager
   ];
-  
+
   programs.zsh = {
     enable = true;
     autocd = false;
@@ -60,8 +69,6 @@
     localVariables = {
       _ZO_CMD_PREFIX="x";
     };
-
-
 
     # .zshrc
     initExtraFirst = ''

@@ -51,7 +51,7 @@
        
     
     # Reusable nixos modules you might want to export
-    nixosModules = import ./system/_modules;   # These are usually stuff you would upstream into nixpkgs
+    nixosModules = import ./system/modules;   # These are usually stuff you would upstream into nixpkgs
     # homeManagerModules = import ./modules/home-manager
 
     overlays     = import ./_overlays {inherit inputs;};
@@ -63,10 +63,11 @@
       specialArgs = inputs;     # send inputs to modules
       system      = "x86_64-linux";
       modules     = [
-        ./_hosts/nire-durandal
+        ./_0H1-nire-durandal
         inputs.musnix.nixosModules.musnix
         # inputs.nixos-hardware.nixosModules.b550 # TODO: fix flake on nixos-hardware repo
         # inputs.stylix.nixosModules.stylix
+        # TODO: stylix
       ];
     };
   # `home-manager switch --flake .#elly@nire-durandal`
@@ -77,28 +78,7 @@
       };
       extraSpecialArgs  = inputs;       # Pass flake inputs to our config
       modules           = [
-        # ./home-manager/home.nix       # TODO: put this back once you're importing more modules here
-        ./__home-manager/nire-durandal
-      ];
-    };
-
-  # nire-lysithea
-    nixosConfigurations."nire-lysithea"     = nixpkgs.lib.nixosSystem {
-      specialArgs = inputs;
-      system = "x86_64-linux";
-      modules = [
-        ./_hosts/nire-lysithea
-      ];
-    };
-    homeConfigurations."elly@nire-lysithea" = home-manager.lib.homeManagerConfiguration {
-      pkgs              = import nixpkgs {          # Home-manager requires 'pkgs' instance
-        system = "x86_64-linux";
-        config = { allowUnfree = true; };
-      };
-      extraSpecialArgs  = {inherit inputs;};        # Pass flake inputs to our config
-      modules           = [
-        ./__home-manager/home.nix
-        ./__home-manager/nire-lysithea
+        ./0U1-elly/_01Uh1-nire-durandal.nix # Elly home manager config
       ];
     };
 
@@ -107,7 +87,7 @@
       specialArgs = inputs;
       system = "x86_64-linux";
       modules = [
-        ./_hosts/nire-galatea
+        ./0H2-nire-galatea
         nixos-hardware.nixosModules.lenovo-thinkpad-x270
       ];
     };
@@ -118,8 +98,26 @@
       };
       extraSpecialArgs  = {inherit inputs;};        # Pass flake inputs to our config
       modules           = [
-        ./__home-manager/home.nix
-        ./__home-manager/nire-galatea
+        ./0U1-elly/0U1h2-nire-galatea.nix
+      ];
+    };
+
+  # nire-lysithea
+    nixosConfigurations."nire-lysithea"     = nixpkgs.lib.nixosSystem {
+      specialArgs = inputs;
+      system = "x86_64-linux";
+      modules = [
+        ./0H3-nire-lysithea
+      ];
+    };
+    homeConfigurations."elly@nire-lysithea" = home-manager.lib.homeManagerConfiguration {
+      pkgs              = import nixpkgs {          # Home-manager requires 'pkgs' instance
+        system = "x86_64-linux";
+        config = { allowUnfree = true; };
+      };
+      extraSpecialArgs  = {inherit inputs;};        # Pass flake inputs to our config
+      modules           = [
+        ./0U1-elly/0U1h3-nire-lysithea.nix
       ];
     };
   };
