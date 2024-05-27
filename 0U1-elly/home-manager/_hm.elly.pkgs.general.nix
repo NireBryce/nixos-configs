@@ -16,8 +16,8 @@
       p7zip                         # p7zip                                     https://github.com/p7zip-project/p7zip
   
     # bash                      # bash                                      # bash
-      shellcheck                  # bash linter                               https://www.shellcheck.net/
-      shfmt                       # bash formatter                            https://github.com/mvdan/sh
+      shellcheck                    # bash linter                               https://www.shellcheck.net/
+      shfmt                         # bash formatter                            https://github.com/mvdan/sh
     
     # cli tools                 # cli tools                                 # CLI tools
       entr                          # run commands when files change            https://github.com/eradman/entr
@@ -36,6 +36,9 @@
       gnumake                       # gnumake                                   https://github.com/ogham/gnumake
       lazydocker                    # TUI docker interface                      https://github.com/jesseduffield/lazydocker
       riffdiff                      # provides `riff`, where-in-line diff       https://github.com/walles/riff
+      python3                       # here for zsh                              https://python.org
+      ruff                          # python linter                             https://github.com/astral-sh/ruff
+      ruff-lsp                      # ruff integration with vscode              https://github.com/astral-sh/ruff-lsp
   
     # editors                   # editors                                   # editors
       nano                          # text editor                               https://www.nano-editor.org/
@@ -49,10 +52,10 @@
       rsync                         # up hill both ways                         https://linux.die.net/man/1/rsync
   
     # git                       # git                                       # git  
-      gh                          # github cli                                  https://github.com/cli/cli
-      git                         # git scm                                     https://git-scm.com
-      delta                       # `delta` - git diff                          https://github.com/dandavison/delta
-      lazygit                     # TUI git interface                           https://github.com/jesseduffield/lazygit
+      gh                            # github cli                                https://github.com/cli/cli
+      git                           # git scm                                   https://git-scm.com
+      delta                         # `delta` - git diff                        https://github.com/dandavison/delta
+      lazygit                       # TUI git interface                         https://github.com/jesseduffield/lazygit
   
     # help systems              # help systems                              # Help Systems
       cheat                         # cli cheatsheets                           https://github.com/cheat/cheat
@@ -72,9 +75,9 @@
       whois                         # whois lookup                              https://packages.qa.debian.org/w/whois.html
   
     # linux debugging           # linux debugging                           # linux debugging
-      lsof                        # list open files                             https://linux.die.net/man/1/lsof
-      ltrace                      # library call tracer                         https://linux.die.net/man/1/ltrace
-      strace                      # system call tracer                          https://linux.die.net/man/1/strace
+      lsof                          # list open files                           https://linux.die.net/man/1/lsof
+      ltrace                        # library call tracer                       https://linux.die.net/man/1/ltrace
+      strace                        # system call tracer                        https://linux.die.net/man/1/strace
 
     # multi-machine             # multi-machine                             # multi-machine
       mosh                          # ssh but better                            https://mosh.org/

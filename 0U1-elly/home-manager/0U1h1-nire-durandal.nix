@@ -6,16 +6,16 @@
 		# TODO: move these into flake?
 		../../0U0-general/hm-stateVersion.nix
 		
-		../100-home-manager/__def.common.nix
+		../../100-home-manager/__def.common.nix
 
 		# user
     ./_hm.elly.hm.nix
 		./_hm.elly.git.nix
 
 		# machine
-		./_hm.elly.pkgs.nix
-		./_hm.elly.pkgs-gui.nix
-		../100-home-manager/_bugfixes/_kde-middle-mouse-scroll.nix        # Enables middle mouse scrolling instead of paste in kde	
+		./_hm.elly.pkgs.general.nix
+		./_hm.elly.pkgs.gui.nix
+		../../100-home-manager/_bugfixes/_kde-middle-mouse-scroll.nix        # Enables middle mouse scrolling instead of paste in kde	
 	];
 }
 

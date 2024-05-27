@@ -63,7 +63,7 @@
       specialArgs = inputs;     # send inputs to modules
       system      = "x86_64-linux";
       modules     = [
-        ./_0H1-nire-durandal
+        ./0H1-nire-durandal/0H1-nire-durandal.nix
         inputs.musnix.nixosModules.musnix
         # inputs.nixos-hardware.nixosModules.b550 # TODO: fix flake on nixos-hardware repo
         # inputs.stylix.nixosModules.stylix
@@ -78,7 +78,7 @@
       };
       extraSpecialArgs  = inputs;       # Pass flake inputs to our config
       modules           = [
-        ./0U1-elly/_01Uh1-nire-durandal.nix # Elly home manager config
+        ./0U1-elly/home-manager/0U1h1-nire-durandal.nix # Elly home manager config
       ];
     };
 
@@ -98,7 +98,7 @@
       };
       extraSpecialArgs  = {inherit inputs;};        # Pass flake inputs to our config
       modules           = [
-        ./0U1-elly/0U1h2-nire-galatea.nix
+        ./0U1-elly/home-manager/0U1h2-nire-galatea.nix
       ];
     };
 
