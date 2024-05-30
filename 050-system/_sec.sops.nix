@@ -1,0 +1,26 @@
+{ 
+  sops-nix, 
+  config,
+  ...
+}:
+
+# sops secret management
+
+let
+  isEd25519 = k: k.type == "ed25519";
+  getKeyPath = k: k.path;
+  keys = builtins.filter isEd25519 config.services.openssh.hostKeys;
+in
+
+{
+  imports = [
+    sops-nix.nixosModules.sops
+  ];
+
+  sops = {
+    age.sshKeyPaths = map getKeyPath keys;
+    defaultSopsFile = ./_secrets/.secrets.yaml;
+
+  };
+}
+
