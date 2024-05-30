@@ -1,10 +1,12 @@
 { lib, impermanence, ...}:
 
 # impermanence metapackage
+# THIS WILL DELETE YOUR ROOT ON BOOT, so like, know what you're doing
 {
   imports = [
     impermanence.nixosModule
   ];
+# TODO: Disko configs
 
 # filesystems
   fileSystems."/".options = [ "compress=zstd" "noatime" ];

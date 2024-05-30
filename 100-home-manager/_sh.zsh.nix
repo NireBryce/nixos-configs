@@ -4,15 +4,15 @@
 }:
 
 {
-  imports = [ 
-    ./_zsh.abbrs.nix
-    ./_zsh.aliases.nix
-  ];
 
     # Notes:
     # If you get `zsh side` errors, delete ~/.zcompdump and ~/.config/zsh/.zcompdump and run `zi update`
     # installing multiple highlighters causes "zsh_zle-highlight-buffer-p:4: permission denied error
     # in this case it was trapd00r/zsh-syntax-highlighting-filetypes which highlights more than filetypes turns out
+
+
+  
+
 
   programs = { # zsh specific, it dedups them if they're already enabled
     dircolors.enable = true; 
@@ -49,13 +49,16 @@
       ];
     };
   };
+  
 
-  home.packages = with pkgs; [ # Things needed for my .zshrc
+  
+
+  home.packages = with pkgs; [  # Things needed for my .zshrc
     diff-so-fancy
     zoxide
     atuin
     tree
-    zi                        # zsh plugin manager
+    zi                              # zsh plugin manager
   ];
   
   programs.zsh = {
@@ -63,7 +66,7 @@
     autocd = false;
     enableVteIntegration = true;
     autosuggestion.enable = true;
-    enableCompletion = false;    # enabled through config, removing one compinit call.
+    enableCompletion = false;       # enabled through config, removing one compinit call.
     zsh-abbr.enable = true;
     
     localVariables = {
@@ -111,7 +114,17 @@
   };
 }
 
+
+  # # For LS_COLORS customization options run this in shell:
+  # for theme in $(vivid themes); do
+  #     echo "Theme: $theme"
+  #     LS_COLORS=$(vivid generate $theme)
+  #     ls
+  #     echo
+  # done
+
 # old code
+
   # dotDir=".config/zsh";
   # plugins = [
   # {
@@ -147,3 +160,8 @@
 #   path = "${config.xdg.configHome}/zsh/history";
 #   save = 5000;
 # };
+
+# from fleek / getfleek.dev (RIP)
+  # "apply-nire-durandal" = "nix run --impure home-manager/master -- -b bak switch --flake .#elly@nire-durandal";
+  # "apply-nire-galatea" = "nix run --impure home-manager/master -- -b bak switch --flake .#elly@nire-galatea";
+  # "apply-nire-lysithea" = "nix run --impure home-manager/master -- -b bak switch --flake .#elly@nire-lysithea";

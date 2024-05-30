@@ -34,10 +34,3 @@
     extraPackages = [ pkgs.pipewire ];
   };
 }
-
-  
-  
-    
-    
-    
-

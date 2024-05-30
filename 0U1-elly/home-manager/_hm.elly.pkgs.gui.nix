@@ -1,7 +1,12 @@
 { pkgs, ...}:
 
 {
-
+  programs.obs-studio = {
+    enable = true;                  # screen recording / streaming         https://obsproject.com/
+    plugins = with pkgs; [ 
+      obs-studio-plugins.obs-vaapi  # enables AMD hardware accel
+    ];
+  };
   # vscode-fhs, terminal emulators, and  
   home.packages = with pkgs; [ 
     # browsers                    # browsers                                # browsers
@@ -13,7 +18,7 @@
       discord                       # discord chat                              https://discord.com/
       keybase-gui                   # encrypted chat almost no one uses         https://keybase.io/
       keybase                       # see above                                 https://keybase.io/
-      obs-studio                    # screen recording / streaming              https://obsproject.com/
+
       signal-desktop                # encrypted chat everone uses               https://signal.org/
       teamspeak_client              # teamspeak game comms                      https://www.teamspeak.com/
       wire-desktop                  # old encrypted chat client, my ex used it  https://wire.com/

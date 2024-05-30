@@ -3,7 +3,7 @@
 # system packages metapackage
 {
   imports = [ 
-    ./_pkg.linux-crisis-utilities.nix
+    ./modules/linux-crisis-utilities.nix
   ];
 
   services.fwupd.enable = true;         # fwupd
@@ -12,8 +12,8 @@
   programs.xwayland.enable = true;      # xwayland
   programs.nh = {                       # `nh` nix-helper           https://github.com/viperML/nh
     enable = true;
-    # clean.enable = true;
-    # clean.extraArgs = "--keep-since 4d --keep 3";
+    clean.enable = true;
+    clean.extraArgs = "--keep-since 7d --keep 5";
     flake = "/home/elly/nixos";
   };
 
@@ -21,7 +21,7 @@
     (nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" "Iosevka" "JetBrainsMono" ];})  # be not afraid
   ];
   environment.systemPackages = with pkgs; [ # Always have an editor here
-      bash                              # bash.  ok i guess.
+      bash                                          # bash.  ok i guess.
       coreutils                                     # coreutils
       curl                                          # curl
       gcc                                           # gcc
@@ -35,5 +35,7 @@
       nh                                            # nix helper                https://github.com/viperML/nh
       linuxHeaders                                  # linux headers
     ];
+
+    
 
 }
