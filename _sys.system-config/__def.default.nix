@@ -5,12 +5,12 @@
 
 { 
   imports = [
-      ./_disk.WARN.impermanence.nix # this will delete /root on boot
-      ./_pkg._packages.nix # system packages
-      ./_sec._security.nix # security modules
-      ./_snd.sound.nix     # sound
-      ./_sh.shells.nix     # shells
-      ./_wm.kde.nix        # KDE
+      ./_sys.disk.WARN.impermanence.nix # this will delete /root on boot
+      ./_sys.packages.nix # system packages
+      ./_sys.sec.security.nix # security modules
+      ./_sys.sound.nix     # sound
+      ./_sys.shells.nix     # shells
+      ./_sys.wm.kde.nix        # KDE
   ];
 
   wm-kde.enable = lib.mkDefault true; # Move this flag to user/machine configs

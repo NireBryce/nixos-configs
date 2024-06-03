@@ -51,10 +51,10 @@
        
     
     # Reusable nixos modules you might want to export
-    nixosModules = import ./system/modules;   # These are usually stuff you would upstream into nixpkgs
+    nixosModules = import ./___modules;   # These are usually stuff you would upstream into nixpkgs
     # homeManagerModules = import ./modules/home-manager
 
-    overlays     = import ./_overlays {inherit inputs;};
+    overlays     = import ./___overlays {inherit inputs;};
     hardware     = import nixos-hardware;
 
   # nire-durandal
@@ -63,7 +63,7 @@
       specialArgs = inputs;     # send inputs to modules
       system      = "x86_64-linux";
       modules     = [
-        ./0H1-nire-durandal/0H1-nire-durandal.nix
+        ./_sys.system-config/__host.nire-durandal/__host.nire-durandal.nix
         inputs.musnix.nixosModules.musnix
         # inputs.nixos-hardware.nixosModules.b550 # TODO: fix flake on nixos-hardware repo
         # inputs.stylix.nixosModules.stylix
@@ -78,7 +78,7 @@
       };
       extraSpecialArgs  = inputs;       # Pass flake inputs to our config
       modules           = [
-        ./0U1-elly/home-manager/0U1h1-nire-durandal.nix # Elly home manager config
+        ./_hm.home-config/__usr.elly/__elly-nire-durandal.nix # Elly home manager config
       ];
     };
 
@@ -98,7 +98,7 @@
       };
       extraSpecialArgs  = {inherit inputs;};        # Pass flake inputs to our config
       modules           = [
-        ./0U1-elly/home-manager/0U1h2-nire-galatea.nix
+        # ./0U1-elly/home-manager/0U1h2-nire-galatea.nix
       ];
     };
 
@@ -107,7 +107,7 @@
       specialArgs = inputs;
       system = "x86_64-linux";
       modules = [
-        ./0H3-nire-lysithea
+        # ./0H3-nire-lysithea
       ];
     };
     homeConfigurations."elly@nire-lysithea" = home-manager.lib.homeManagerConfiguration {
@@ -117,7 +117,7 @@
       };
       extraSpecialArgs  = {inherit inputs;};        # Pass flake inputs to our config
       modules           = [
-        ./0U1-elly/0U1h3-nire-lysithea.nix
+        # ./0U1-elly/0U1h3-nire-lysithea.nix
       ];
     };
   };

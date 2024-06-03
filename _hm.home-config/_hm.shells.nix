@@ -4,7 +4,7 @@
 
 {
   imports = [ 
-    ./_sh.zsh.nix 
+    ./_hm.zsh.nix 
   ];
 
   home.shellAliases = { 

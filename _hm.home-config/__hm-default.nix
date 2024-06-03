@@ -1,9 +1,9 @@
 {
   imports = [
-    ./_dev
-    ./_dotfiles
-    ./_wm._window-manager.nix   # window-manager specific packages
-    ./_sh.shells.nix            # shells
+    ./_hm.dev
+    ./_hm.dotfiles
+    ./_hm.window-manager.nix   # window-manager specific packages
+    ./_hm.shells.nix            # shells
   ];
   wm-kde.enable = true; # move to user configs
   nixpkgs.config.allowUnfree = true;                   # Disable if you don't want unfree packages

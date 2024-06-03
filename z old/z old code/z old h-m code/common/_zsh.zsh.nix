@@ -47,7 +47,7 @@
     };
   };
   sops.secrets.atuin_key = {
-    sopsFile = ../system/_sec.secrets.yaml;
+    sopsFile = ../system/_secsecrets.yaml;
   };
 
   home.packages = with pkgs; [ # Things needed for my .zshrc
