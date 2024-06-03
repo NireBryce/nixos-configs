@@ -31,7 +31,8 @@
       protontricks                  # protontricks                              https://github.com/Matoking/protontricks
       wineWowPackages.waylandFull   # Wine for wayland                          https://www.winehq.org/
       steamtinkerlaunch             # steamtinkerlaunch                         https://github.com/sonic2kk/steamtinkerlaunch
-    
+    # Home                      # Home                                      # Home
+      grocy                         # grocy                                     https://www.grocy.info/
     # media and sound           # media and sound                           # media and sound
       gimp                          # GNU Image Manipulation Program.           https://www.gimp.org
       vlc                           # video player                              https://www.videolan.org/vlc/
