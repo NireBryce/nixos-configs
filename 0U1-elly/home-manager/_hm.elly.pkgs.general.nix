@@ -91,6 +91,7 @@
       nix-du                        # nix-store analysis                        https://github.com/symphorien/nix-du
       nix-health                    # check nix issues                          https://github.com/juspay/nix-health
       nix-init                      # nix packages from URLs                    https://github.com/nix-community/nix-init
+      nix-index                     # nix store index search                    https://github.com/nix-community/nix-index
       nix-output-monitor            # `nom`                                     https://github.com/maralorn/nix-output-monitor
       nix-tree                      # view dependency graph                     https://hackage.haskell.org/package/nix-tree
       nix-zsh-completions           # nix shell completions                     https://github.com/nix-community/nix-zsh-completions
