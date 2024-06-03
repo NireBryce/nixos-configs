@@ -1,4 +1,8 @@
-{ pkgs, ... }:
+{ 
+  pkgs, 
+  config,
+  ... 
+}:
 {
   # User
   users.mutableUsers = false;
@@ -16,6 +20,14 @@
         micro
         tree
       ];
+      # openssh.authorizedKeys.keyFiles = [
+      # # TODO: figure out how to get the key from a sops path and put these in sops 
+      #   config.sops.secrets.ssh-durandal.path
+      #   config.sops.secrets.ssh-galatea.path
+      #   config.sops.secrets.ssh-lysithea.path
+      #   config.sops.secrets.ssh-sif.path
+      #   config.sops.secrets.ssh-iona.path
+      # ];
       openssh.authorizedKeys.keys = [ 
         ''ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILk2lST7kOSRlanAKhl42b9IQib1hzrbxlR5pve/X37D elly@nire-lysithea'' 
         ''ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL0sEOPmravXojxuKqN3XwplTbuz2p36UDTxmUthktnX elly@durandal''

@@ -3,7 +3,8 @@ keys:
   - &nire-galatea age10dwrrkxcejsla38hfaj95vchr97gg6n0qhld8v2gj2hvntn5xcxqjq5dx2
   - &nire-lysithea age1t2fu3pdpkvd6lqsk5ckgyyxm556u6dtmvpz4g7yqy7a0nk638c3s3pnrvs
 creation_rules:
-  - path_regex: _sys.sec.secrets/secrets.yaml$
+  # - path_regex: ./secrets.yaml$
+  - path: ./secrets.yaml$
     key_groups:
       - age:
           - *nire-durandal

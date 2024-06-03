@@ -1,6 +1,9 @@
-{ ... }:
+{ 
+  config,
+  ... 
+}:
 
-# TODO: broken
+# TODO: broken(? - 2024-06-03)
 { 
 # services
   services.syncthing = {
@@ -35,6 +38,7 @@
       }; 
     };  
     settings.devices = {
+    # TODO: This may break syncthing
       # "nire-durandal"    = { id = "5FTZQAS-KEE5XI5-BHCQNFQ-E3S2QEA-KVOQAID-Q55I2Y3-YH4WM6N-2LA7XAN"; };
       "nire-sif"         = { id = "4AWC42H-PXBIBQB-OZDROYJ-6WZVR6V-WXBZ4AU-UFH6EJM-WWZWA3X-XFQ3TAS"; };
       "nire-galatea"     = { id = "PCIR5O7-73WQN63-DXAVK3Z-G7QEWUY-R2BFF5P-TVCYFKU-LBRI3N3-IA477QL"; };
