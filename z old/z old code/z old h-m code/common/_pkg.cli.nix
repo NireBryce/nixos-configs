@@ -49,7 +49,7 @@
   # system python tools
     python3Packages.ipdb
     python3Packages.ipython
-    python3Minimal
+    python3Full
   # System call monitoring
     # dtrace # TODO FIND PACKAGE NAME            # global overview of a running system, tracing of individual functions, etc
     lsof                      # list open files
