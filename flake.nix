@@ -82,6 +82,7 @@
       };
       extraSpecialArgs  = inputs;       # Pass flake inputs to our config
       modules           = [
+        nix-index-database.nixosModules.nix-index
         ./_hm.home-config/__usr.elly/__elly-nire-durandal.nix # Elly home manager config
       ];
     };
