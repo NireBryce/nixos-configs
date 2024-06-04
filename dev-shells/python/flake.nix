@@ -14,7 +14,9 @@
     };
     # A function to make a shell with a python version
     makePythonShell = shellName: pythonPackage: pkgs.mkShell {
+      venvDir = "./.venv";
       buildInputs = with pkgs.python3Packages; [
+        venvShellHook
         rich
         pytest
         more-itertools
@@ -47,15 +49,3 @@
         devShells.x86_64-linux = builtins.mapAttrs makePythonShell pythonVersions;
       };
 }
-
-# # in shell.nix
-# let
-#   pkgs = import <nixpkgs> {};
-#   pythonPackages = pkgs.python3Packages;
-# in
-# pkgs.mkShell rec {
-#   venvDir = "./.venv";
-#   buildInputs = with pythonPackages; [
-#     python
-#     venvShellHook
-#   ];
