@@ -36,7 +36,7 @@
       gnumake                       # gnumake                                   https://github.com/ogham/gnumake
       lazydocker                    # TUI docker interface                      https://github.com/jesseduffield/lazydocker
       riffdiff                      # provides `riff`, where-in-line diff       https://github.com/walles/riff
-      python3                       # system python, zsh complains without      https://python.org
+      # python3                       # system python, zsh complains without      https://python.org
       ruff                          # python linter                             https://github.com/astral-sh/ruff
       ruff-lsp                      # ruff integration with vscode              https://github.com/astral-sh/ruff-lsp
   

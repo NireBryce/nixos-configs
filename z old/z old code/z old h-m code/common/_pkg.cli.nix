@@ -47,8 +47,9 @@
       lazygit                   # TUI git browser
 
   # system python tools
-    python312Packages.ipdb
-    python312Packages.ipython
+    python3Packages.ipdb
+    python3Packages.ipython
+    python3Minimal
   # System call monitoring
     # dtrace # TODO FIND PACKAGE NAME            # global overview of a running system, tracing of individual functions, etc
     lsof                      # list open files

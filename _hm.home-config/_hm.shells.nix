@@ -44,6 +44,7 @@
     "$HOME/.zi/bin"
     "$HOME/.config/zi/bin"
     "$HOME/.cargo/bin"
+    
   ];
   programs.zsh.zsh-abbr.abbreviations = {
     # ! WARN: unsure how globals work here
