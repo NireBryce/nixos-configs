@@ -4,15 +4,10 @@
 }:
 
 {
-
     # Notes:
     # If you get `zsh side` errors, delete ~/.zcompdump and ~/.config/zsh/.zcompdump and run `zi update`
     # installing multiple highlighters causes "zsh_zle-highlight-buffer-p:4: permission denied error
     # in this case it was trapd00r/zsh-syntax-highlighting-filetypes which highlights more than filetypes turns out
-
-
-  
-
 
   programs = { # zsh specific, it dedups them if they're already enabled
     dircolors.enable = true; 

@@ -4,7 +4,7 @@
 
 {
   imports = [ 
-    ./_sec.sops.nix         # Secret management
+    ./_sys.sec.sops.nix         # Secret management
   ];
 
     services.openssh = {

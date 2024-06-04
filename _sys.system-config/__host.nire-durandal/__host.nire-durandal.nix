@@ -10,19 +10,19 @@
 
     # nix generated
     ./hardware-configuration.nix
-    ../0H0-common/stateVersion.nix
+    ./stateVersion.nix
     
     # hardware
     ./gpu.nix
 
-    # _def defaults
-    ../050-system/__def.common.nix
+    # defaults and imports
+    ../__def.default.nix
 
     # users
-    ../0U1-elly/_sys.conf.elly.nix
+    ../_usr.elly/_sys.conf.elly.nix
     
     # fixes
-    ../050-system/_bugfixes/_suspend/_b550m-gpp0-etc.nix
+    ../_sys.bugfixes/_suspend/_b550m-gpp0-etc.nix
   ];
   # hostname
   networking.hostName = "nire-durandal";

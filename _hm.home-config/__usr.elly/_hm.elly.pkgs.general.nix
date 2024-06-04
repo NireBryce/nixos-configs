@@ -129,6 +129,7 @@
       mc                            # midnight commander TUI file manager       https://www.midnight-commander.org/
       moar                          # better pager                              https://github.com/walles/moar
       nnn                           # TUI file manager                          https://github.com/jarun/nnn
+      nushell                       # nushell                                   https://github.com/nushell/nushell
       ripgrep                       # `rg` grep replacement                     https://github.com/BurntSushi/ripgrep
       tree                          # necessary for some zi things              https://oldmanprogrammer.net/source.php?dir=projects/tree
       vivid                         # LS_COLORS generator                       https://github.com/sharkdp/vivid
@@ -152,6 +153,15 @@
   ];  
   # programs are packages you set extra pre-defined options in.
   #   google 'home-manager option search' to see how to find them.
+
+  programs.direnv = {
+    enable = true;
+    enableBashIntegration = true;
+    enableZshIntegration = true;
+    enableNushellIntegration = true;
+    nix-direnv.enable = true;
+  };
+
   programs.micro = {                # editor for phone-ssh
   enable = true;
   settings = {
