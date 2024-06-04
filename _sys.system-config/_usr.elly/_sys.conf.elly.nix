@@ -4,6 +4,24 @@
   ... 
 }:
 {
+
+    sops.secrets.ssh-durandal = {
+      sopsFile =  ../_sys.sec.secrets/secrets.yaml;
+      owner = config.users.users.elly.name;
+      inherit (config.users.users.elly) group;
+    };
+      sops.secrets.ssh-galatea = {
+      sopsFile =  ../_sys.sec.secrets/secrets.yaml;
+    };
+      sops.secrets.ssh-lysithea = {
+      sopsFile =  ../_sys.sec.secrets/secrets.yaml;
+    };
+      sops.secrets.ssh-sif = {
+      sopsFile =  ../_sys.sec.secrets/secrets.yaml; 
+    };
+      sops.secrets.ssh-iona = {
+      sopsFile =  ../_sys.sec.secrets/secrets.yaml; 
+    };
   # User
   users.mutableUsers = false;
   users.users = { 
@@ -20,6 +38,8 @@
         micro
         tree
       ];
+
+    
       # openssh.authorizedKeys.keyFiles = [
       # # TODO: figure out how to get the key from a sops path and put these in sops 
       #   config.sops.secrets.ssh-durandal.path

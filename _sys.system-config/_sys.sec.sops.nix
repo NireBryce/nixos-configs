@@ -32,21 +32,21 @@ in
   };
 
   # SSH
-    sops.secrets.ssh-durandal = {
-      sopsFile =  ./_sys.sec.secrets/secrets.yaml;
-    };
-      sops.secrets.ssh-galatea = {
-      sopsFile =  ./_sys.sec.secrets/secrets.yaml;
-    };
-      sops.secrets.ssh-lysithea = {
-      sopsFile =  ./_sys.sec.secrets/secrets.yaml;
-    };
-      sops.secrets.ssh-sif = {
-      sopsFile =  ./_sys.sec.secrets/secrets.yaml; 
-    };
-      sops.secrets.ssh-iona = {
-      sopsFile =  ./_sys.sec.secrets/secrets.yaml; 
-    };
+    # sops.secrets.ssh-durandal = {
+    #   sopsFile =  ./_sys.sec.secrets/secrets.yaml;
+    # };
+    #   sops.secrets.ssh-galatea = {
+    #   sopsFile =  ./_sys.sec.secrets/secrets.yaml;
+    # };
+    #   sops.secrets.ssh-lysithea = {
+    #   sopsFile =  ./_sys.sec.secrets/secrets.yaml;
+    # };
+    #   sops.secrets.ssh-sif = {
+    #   sopsFile =  ./_sys.sec.secrets/secrets.yaml; 
+    # };
+    #   sops.secrets.ssh-iona = {
+    #   sopsFile =  ./_sys.sec.secrets/secrets.yaml; 
+    # };
   # Syncthing
     sops.secrets.syncthing-durandal = {
       sopsFile =  ./_sys.sec.secrets/secrets.yaml; 
