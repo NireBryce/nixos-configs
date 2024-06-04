@@ -1,37 +1,39 @@
 {
   inputs = {
     # 23.11
-    nixpkgs-stable.url                      = "github:NixOS/nixpkgs/nixos-23.11";
+    nixpkgs-stable.url                          = "github:NixOS/nixpkgs/nixos-23.11";
     # Unstable
-    nixpkgs.url                             = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url                                 = "github:NixOS/nixpkgs/nixos-unstable";
 
     # Impermanence
-    impermanence.url                        = "github:Nix-community/impermanence";
+    impermanence.url                            = "github:Nix-community/impermanence";
 
     # secret management
-    sops-nix.url                            = "github:mic92/sops-nix";
-    sops-nix.inputs.nixpkgs.follows         = "nixpkgs";
-    sops-nix.inputs.nixpkgs-stable.follows  = "nixpkgs";
+    sops-nix.url                                = "github:mic92/sops-nix";
+    sops-nix.inputs.nixpkgs.follows             = "nixpkgs";
+    sops-nix.inputs.nixpkgs-stable.follows      = "nixpkgs";
 
     # Home Manager
-    home-manager.url                        = "github:nix-community/home-manager/master";
-    home-manager-unstable.url               = "github:NixOS/nixpkgs/nixos-unstable";
-    home-manager.inputs.nixpkgs.follows     = "nixpkgs";
+    home-manager.url                            = "github:nix-community/home-manager/master";
+    home-manager-unstable.url                   = "github:NixOS/nixpkgs/nixos-unstable";
+    home-manager.inputs.nixpkgs.follows         = "nixpkgs";
 
     # NixOS-Hardware (for machine-specific fixes)
-    nixos-hardware.url                      = "github:NixOS/nixos-hardware/master";
-    # nixos-hardware-b550-stopgap.url         = "github:NixOS/nixos-hardware/master/gigabyte";  # TODO: fix flake.nix on nixos-hardware 
+    nixos-hardware.url                          = "github:NixOS/nixos-hardware/master";
+    # nixos-hardware-b550-stopgap.url             = "github:NixOS/nixos-hardware/master/gigabyte";  # TODO: fix flake.nix on nixos-hardware 
 
     # Musnix
-    musnix.url                              = "github:musnix/musnix";
+    musnix.url                                  = "github:musnix/musnix";
+
+    nix-index-database.url                      = "github:nix-community/nix-index-database";
+    nix-index-database.inputs.nixpkgs.follows   = "nixpkgs";
 
     #Stylix
-    # stylix.url                              = "github:danth/stylix";
+    # stylix.url                                  = "github:danth/stylix";
 
     # Haumea (Folder structure for imports)
-    # haumea.url                              = "github:nix-community/haumea";
-    # haumea.inputs.nixpkgs.follows           = "nixpkgs";
-
+    # haumea.url                                  = "github:nix-community/haumea";
+    # haumea.inputs.nixpkgs.follows               = "nixpkgs";
 
     
   };
@@ -42,6 +44,7 @@
     nixpkgs-stable,
     home-manager,
     nixos-hardware,
+    nix-index-database,
     # nixos-hardware-b550-stopgap, # TODO: fix flake.nix on nixos-hardware repo
     musnix,
     ...
@@ -64,6 +67,7 @@
       system      = "x86_64-linux";
       modules     = [
         ./_sys.system-config/__host.nire-durandal/__host.nire-durandal.nix
+        nix-index-database.nixosModules.nix-index
         inputs.musnix.nixosModules.musnix
         # inputs.nixos-hardware.nixosModules.b550 # TODO: fix flake on nixos-hardware repo
         # inputs.stylix.nixosModules.stylix
@@ -78,6 +82,7 @@
       };
       extraSpecialArgs  = inputs;       # Pass flake inputs to our config
       modules           = [
+        nix-index-database.nixosModules.nix-index
         ./_hm.home-config/__usr.elly/__elly-nire-durandal.nix # Elly home manager config
       ];
     };

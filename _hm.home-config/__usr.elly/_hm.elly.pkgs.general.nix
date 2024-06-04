@@ -36,7 +36,7 @@
       gnumake                       # gnumake                                   https://github.com/ogham/gnumake
       lazydocker                    # TUI docker interface                      https://github.com/jesseduffield/lazydocker
       riffdiff                      # provides `riff`, where-in-line diff       https://github.com/walles/riff
-      python3                       # system python, zsh complains without      https://python.org
+      # python3                       # system python, zsh complains without      https://python.org
       ruff                          # python linter                             https://github.com/astral-sh/ruff
       ruff-lsp                      # ruff integration with vscode              https://github.com/astral-sh/ruff-lsp
   
@@ -154,6 +154,11 @@
   # programs are packages you set extra pre-defined options in.
   #   google 'home-manager option search' to see how to find them.
 
+  programs.nix-index = { 
+    enable = true;
+    enableZshIntegration = true;
+    enableBashIntegration = true;
+  };
   programs.direnv = {
     enable = true;
     enableBashIntegration = true;

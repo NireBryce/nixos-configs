@@ -15,19 +15,19 @@
     # A function to make a shell with a python version
     makePythonShell = shellName: pythonPackage: pkgs.mkShell {
       venvDir = "./.venv";
-      buildInputs = with pkgs.python3Packages; [
-        venvShellHook
-        rich
-        pytest
-        more-itertools
-        isort
-        setuptools
-        toml
+      
 
-      ] ++ [ 
+    packages = [ 
         # You could add extra packages you need here too
         pythonPackage
         pkgs.ruff
+        pkgs.python3Packages.venvShellHook
+        pkgs.python3Packages.rich
+        pkgs.python3Packages.pytest
+        pkgs.python3Packages.more-itertools
+        pkgs.python3Packages.isort
+        pkgs.python3Packages.setuptools
+        pkgs.python3Packages.toml
       ]; 
       # You can also add commands that run on shell startup with shellHook
       shellHook = ''
@@ -49,3 +49,4 @@
         devShells.x86_64-linux = builtins.mapAttrs makePythonShell pythonVersions;
       };
 }
+
