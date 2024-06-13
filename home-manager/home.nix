@@ -3,14 +3,14 @@
   ...
 }:
 
-let flakeRoot = self;
+let flakePath = self;
 in {
   imports = [
   # home manager config fragments
-    "${flakeRoot}/home-manager/dev"
-    "${flakeRoot}/home-manager/dotfiles"
-    "${flakeRoot}/home-manager/_hm.window-manager.nix"      # window-manager specific packages
-    "${flakeRoot}/home-manager/_hm.shells.nix"              # shells
+    "${flakePath}/home-manager/dev"
+    "${flakePath}/home-manager/dotfiles"
+    "${flakePath}/home-manager/_hm.window-manager.nix"      # window-manager specific packages
+    "${flakePath}/home-manager/_hm.shells.nix"              # shells
   ];
   wm-kde.enable = true; # move to user configs
   nixpkgs.config.allowUnfree = true;                   # Disable if you don't want unfree packages

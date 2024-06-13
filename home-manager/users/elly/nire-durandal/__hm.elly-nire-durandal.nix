@@ -2,7 +2,7 @@
 	self,
 	... 
 }:
-let flakeRoot = self;
+let flakePath = self;
 
 in {
 	# This defines the nire-durandal host-specific user config for elly
@@ -12,7 +12,7 @@ in {
 
 		# machine
 		# TODO: move to kde
-		"${flakeRoot}/home-manager/bugfixes/_kde-middle-mouse-scroll.nix"        # Enables middle mouse scrolling instead of paste in kde	
+		"${flakePath}/home-manager/bugfixes/_kde-middle-mouse-scroll.nix"        # Enables middle mouse scrolling instead of paste in kde	
 	];
 }
 

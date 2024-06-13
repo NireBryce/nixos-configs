@@ -4,20 +4,20 @@
   ...
 }:
 
-let flakeRoot = self;
+let flakePath = self;
 in { 
   imports = [
   # Load system config fragments
-    "${flakeRoot}/system-config/_sys.packages.nix"      # system packages
-    "${flakeRoot}/system-config/_sys.sec.security.nix"  # security modules
-    "${flakeRoot}/system-config/_sys.sound.nix"         # sound
-    "${flakeRoot}/system-config/_sys.shells.nix"        # shells
-    "${flakeRoot}/system-config/_sys.wm.kde.nix"        # KDE
+    "${flakePath}/system-config/_sys.packages.nix"      # system packages
+    "${flakePath}/system-config/_sys.sec.security.nix"  # security modules
+    "${flakePath}/system-config/_sys.sound.nix"         # sound
+    "${flakePath}/system-config/_sys.shells.nix"        # shells
+    "${flakePath}/system-config/_sys.wm.kde.nix"        # KDE
     
     # ____________________________________________________ 
     # |- /!!\ WARN: this will delete /root on boot /!!\ -|
     # ----------------------------------------------------
-    "${flakeRoot}/system-config/_sys.disk.WARN.impermanence.nix"       
+    "${flakePath}/system-config/_sys.disk.WARN.impermanence.nix"       
   ];
 
   wm-kde.enable = lib.mkDefault true;       # Move this flag to user/machine configs

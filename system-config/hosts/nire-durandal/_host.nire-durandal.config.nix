@@ -4,7 +4,7 @@
   ... 
 }: 
 
-let flakeRoot = self;
+let flakePath = self;
 in {
   imports = [
     nixos-hardware.nixosModules.common-cpu-amd
@@ -16,20 +16,20 @@ in {
     # ../.usr.elly.nix # modularize this later
 
     # nix generated
-    "${flakeRoot}/system-config/hosts/nire-durandal/hardware-configuration.nix"
-    "${flakeRoot}/system-config/hosts/nire-durandal/stateVersion.nix"
+    "${flakePath}/system-config/hosts/nire-durandal/hardware-configuration.nix"
+    "${flakePath}/system-config/hosts/nire-durandal/stateVersion.nix"
 
     # hardware
-    "${flakeRoot}/system-config/hosts/nire-durandal/gpu.nix"
+    "${flakePath}/system-config/hosts/nire-durandal/gpu.nix"
 
     # defaults and imports
-    "${flakeRoot}/system-config/configuration.nix"
+    "${flakePath}/system-config/configuration.nix"
 
     # users
-    "${flakeRoot}/system-config/users/elly/_sys.elly.nix"
+    "${flakePath}/system-config/users/elly/_sys.elly.nix"
     
     # fixes
-    "${flakeRoot}/system-config/system-fixes/suspend/_b550m-gpp0-etc.nix"
+    "${flakePath}/system-config/system-fixes/suspend/_b550m-gpp0-etc.nix"
   ];
   # hostname
   networking.hostName = "nire-durandal";
