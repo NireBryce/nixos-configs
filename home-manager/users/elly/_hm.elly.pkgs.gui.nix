@@ -10,6 +10,7 @@
   # vscode-fhs, terminal emulators, and  
   home.packages = with pkgs; [ 
     # browsers                    # browsers                                # browsers
+    # TODO: move kde packages to kde
       kdePackages.konqueror         # one of the best `info` file pagers        https://invent.kde.org/network/konqueror
       firefox                       # TODO: also installed as a system package. https://www.mozilla.org/en-US/firefox/
 
@@ -24,6 +25,7 @@
       wire-desktop                  # old encrypted chat client, my ex used it  https://wire.com/
       zoom-us                       # less features than facetime somehow       https://zoom.us/
 
+    # TODO: bring back gaming module?
     # games                     # games                                     # games
       lutris                        # lutris game launcher                      https://lutris.net/
       # steam                       # in nix config                             https://github.com/NixOS/nixpkgs/blob/stable/pkgs/applications/games/steam/steam.nix
@@ -51,3 +53,6 @@
 
   ];
 }
+
+# NOTES:
+# - consider moving qpwgraph to headed-server configs too

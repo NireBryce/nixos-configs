@@ -36,7 +36,7 @@
       gnumake                       # gnumake                                   https://github.com/ogham/gnumake
       lazydocker                    # TUI docker interface                      https://github.com/jesseduffield/lazydocker
       riffdiff                      # provides `riff`, where-in-line diff       https://github.com/walles/riff
-      # python3                       # system python, zsh complains without      https://python.org
+      python3                       # system python, zsh complains without      https://python.org
       ruff                          # python linter                             https://github.com/astral-sh/ruff
       ruff-lsp                      # ruff integration with vscode              https://github.com/astral-sh/ruff-lsp
   
@@ -132,6 +132,7 @@
       nushell                       # nushell                                   https://github.com/nushell/nushell
       ripgrep                       # `rg` grep replacement                     https://github.com/BurntSushi/ripgrep
       tree                          # necessary for some zi things              https://oldmanprogrammer.net/source.php?dir=projects/tree
+      starship                      # shell prompt                              https://github.com/starship/starship
       vivid                         # LS_COLORS generator                       https://github.com/sharkdp/vivid
       which                         # `which`                                   https://www.gnu.org/software/which/
       yq-go                         # yaml query                                https://github.com/mikefarah/yq
@@ -142,7 +143,8 @@
       auto-cpufreq                  # auto-cpufreq                              https://github.com/AdnanHodzic/auto-cpufreq
       lm_sensors                    # lm_sensors                                https://hwmon.wiki.kernel.org/lm_sensors
       libinput                      # TODO: I forget what I need this for.      https://www.freedesktop.org/wiki/Software/libinput/
-        
+    
+    # TODO: move to system config
     # Wayland                   # Wayland                                   # Wayland
       wl-clipboard                  # clipboard in wayland                      https://github.com/bugaevc/wl-clipboard
       wl-clipboard-x11              # clipboard in xwayland                     https://search.nixos.org/packages?channel=unstable&from=0&size=50&sort=relevance&type=packages&query=wl-clipboard
@@ -156,8 +158,8 @@
 
   programs.nix-index = { 
     enable = true;
-    enableZshIntegration = true;
-    enableBashIntegration = true;
+    # enableZshIntegration = true;  # conflicts with command-not-found
+    # enableBashIntegration = true;
   };
   programs.direnv = {
     enable = true;

@@ -1,16 +1,24 @@
-{ pkgs, ... }:
+{ 
+  pkgs, 
+  lib,
+  self, 
+  ...
+}:
 
 # system packages metapackage
-{
+# TODO: trawl through home-manager config fragments and see what packages really need to be system packages
+
+let flakeRoot = self;
+in {
   imports = [ 
-    ../___modules/linux-crisis-utilities.nix
+    "${flakeRoot}/___modules/linux-crisis-utilities.nix"
   ];
 
   services.fwupd.enable = true;         # fwupd
   programs.nix-ld.enable = true;        # Needed for VSCode remote connection
   programs.kdeconnect.enable = true;    # kde connect
   programs.xwayland.enable = true;      # xwayland
-  programs.nh = {                       # `nh` nix-helper           https://github.com/viperML/nh
+  programs.nh = {                                   # `nh` nix-helper           https://github.com/viperML/nh
     enable = true;
     clean.enable = true;
     clean.extraArgs = "--keep-since 7d --keep 5";
@@ -37,6 +45,6 @@
       sops                                          # secret management
     ];
 
-    
+    programs.command-not-found.enable = lib.mkForce false; # conflicts with nix-index-database
 
 }

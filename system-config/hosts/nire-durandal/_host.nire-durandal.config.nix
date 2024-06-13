@@ -1,28 +1,35 @@
-{ nixos-hardware, ... }: {
+{ 
+  nixos-hardware,
+  self,
+  ... 
+}: 
+
+let flakeRoot = self;
+in {
   imports = [
     nixos-hardware.nixosModules.common-cpu-amd
     nixos-hardware.nixosModules.common-gpu-amd
     # nixos-hardware.nixosModules.gigabyte-b550 # needs to be fixed upstream in nixos-hardware
                                                 # also need to fix oneshot being in unit instead of the next section
-
+    
     # Users
     # ../.usr.elly.nix # modularize this later
 
     # nix generated
-    ./hardware-configuration.nix
-    ./stateVersion.nix
-    
+    "${flakeRoot}/system-config/hosts/nire-durandal/hardware-configuration.nix"
+    "${flakeRoot}/system-config/hosts/nire-durandal/stateVersion.nix"
+
     # hardware
-    ./gpu.nix
+    "${flakeRoot}/system-config/hosts/nire-durandal/gpu.nix"
 
     # defaults and imports
-    ../__def.default.nix
+    "${flakeRoot}/system-config/configuration.nix"
 
     # users
-    ../_usr.elly/_sys.conf.elly.nix
+    "${flakeRoot}/system-config/users/elly/_sys.elly.nix"
     
     # fixes
-    ../_sys.bugfixes/_suspend/_b550m-gpp0-etc.nix
+    "${flakeRoot}/system-config/system-fixes/suspend/_b550m-gpp0-etc.nix"
   ];
   # hostname
   networking.hostName = "nire-durandal";
