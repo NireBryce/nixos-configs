@@ -1,4 +1,4 @@
-{ pkgs, misc, ... }: {
+{ pkgs, ... }: {
 # Where the nix packages live
 # TODO: lib.mkIf lib.mkEnable 
   home.packages = with pkgs;[

@@ -1,9 +1,16 @@
-{
+{ 
+  self,
+  ...
+}:
+
+let flakeRoot = self;
+in {
   imports = [
-    ./_hm.dev
-    ./_hm.dotfiles
-    ./_hm.window-manager.nix   # window-manager specific packages
-    ./_hm.shells.nix            # shells
+  # home manager config fragments
+    "${flakeRoot}/home-manager/dev"
+    "${flakeRoot}/home-manager/dotfiles"
+    "${flakeRoot}/home-manager/_hm.window-manager.nix"      # window-manager specific packages
+    "${flakeRoot}/home-manager/_hm.shells.nix"              # shells
   ];
   wm-kde.enable = true; # move to user configs
   nixpkgs.config.allowUnfree = true;                   # Disable if you don't want unfree packages

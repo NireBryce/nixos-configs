@@ -1,26 +1,29 @@
 { 
   pkgs, 
   config,
+  self,
   ... 
 }:
-{
+
+let secretsPath = "${self}/system-config/secrets/secrets.yaml";
+in {
 
     sops.secrets.ssh-durandal = {
-      sopsFile =  ../_sys.sec.secrets/secrets.yaml;
+      sopsFile =  "${secretsPath}";
       owner = config.users.users.elly.name;
       inherit (config.users.users.elly) group;
     };
       sops.secrets.ssh-galatea = {
-      sopsFile =  ../_sys.sec.secrets/secrets.yaml;
+      sopsFile =  "${secretsPath}";
     };
       sops.secrets.ssh-lysithea = {
-      sopsFile =  ../_sys.sec.secrets/secrets.yaml;
+      sopsFile =  "${secretsPath}";
     };
       sops.secrets.ssh-sif = {
-      sopsFile =  ../_sys.sec.secrets/secrets.yaml; 
+      sopsFile =  "${secretsPath}"; 
     };
       sops.secrets.ssh-iona = {
-      sopsFile =  ../_sys.sec.secrets/secrets.yaml; 
+      sopsFile =  "${secretsPath}"; 
     };
   # User
   users.mutableUsers = false;
@@ -48,7 +51,7 @@
       #   config.sops.secrets.ssh-sif.path
       #   config.sops.secrets.ssh-iona.path
       # ];
-      openssh.authorizedKeys.keys = [ 
+      openssh.authorizedKeys.keys = [ # TODO: sopsify or something for belt and suspenders because @munin gets antsy when I link this
         ''ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILk2lST7kOSRlanAKhl42b9IQib1hzrbxlR5pve/X37D elly@nire-lysithea'' 
         ''ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL0sEOPmravXojxuKqN3XwplTbuz2p36UDTxmUthktnX elly@durandal''
         ''ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKLrl5HoGmaeht/D6J/uZWyhpB04huXARmgoKJABuOw6 elly@nire-galatea''

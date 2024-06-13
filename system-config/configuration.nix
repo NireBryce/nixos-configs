@@ -1,20 +1,27 @@
 {
   lib,
+  self,
   ...
 }:
 
-{ 
+let flakeRoot = self;
+in { 
   imports = [
-      ./_sys.disk.WARN.impermanence.nix # this will delete /root on boot
-      ./_sys.packages.nix # system packages
-      ./_sys.sec.security.nix # security modules
-      ./_sys.sound.nix     # sound
-      ./_sys.shells.nix     # shells
-      ./_sys.wm.kde.nix        # KDE
+  # Load system config fragments
+    "${flakeRoot}/system-config/_sys.packages.nix"      # system packages
+    "${flakeRoot}/system-config/_sys.sec.security.nix"  # security modules
+    "${flakeRoot}/system-config/_sys.sound.nix"         # sound
+    "${flakeRoot}/system-config/_sys.shells.nix"        # shells
+    "${flakeRoot}/system-config/_sys.wm.kde.nix"        # KDE
+    
+    # ____________________________________________________ 
+    # |- /!!\ WARN: this will delete /root on boot /!!\ -|
+    # ----------------------------------------------------
+    "${flakeRoot}/system-config/_sys.disk.WARN.impermanence.nix"       
   ];
 
-  wm-kde.enable = lib.mkDefault true; # Move this flag to user/machine configs
-  environment.pathsToLink = [ # This determines what to add to /run/current-system/sw, generally defined elsewhere
+  wm-kde.enable = lib.mkDefault true;       # Move this flag to user/machine configs
+  environment.pathsToLink = [               # This determines what to add to /run/current-system/sw, generally defined elsewhere
     
   ];
 # nix settings metapackage
