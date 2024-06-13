@@ -19,5 +19,5 @@ in {
   programs.home-manager.enable = true;
 }
 
-# TODO: remove the declarations from individual modules such that you can not have to maintain those when you add/remove packages
+# TODO: remove the declarations from individual modules such that you can not have to maintain those when you add/remove packages 
 
