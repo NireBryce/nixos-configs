@@ -8,10 +8,10 @@
 # system packages metapackage
 # TODO: trawl through home-manager config fragments and see what packages really need to be system packages
 
-let flakeRoot = self;
+let flakePath = self;
 in {
   imports = [ 
-    "${flakeRoot}/___modules/linux-crisis-utilities.nix"
+    "${flakePath}/___modules/linux-crisis-utilities.nix"
   ];
 
   services.fwupd.enable = true;         # fwupd
