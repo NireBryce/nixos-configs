@@ -33,8 +33,7 @@ in {
   ];
   # hostname
   networking.hostName = "nire-durandal";
-
-
+  
   # TODO: turn into its own module
   musnix = {
     enable          = true;

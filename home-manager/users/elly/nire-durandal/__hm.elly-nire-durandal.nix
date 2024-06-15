@@ -9,8 +9,6 @@ in {
 	imports = [
 		
 		    # TODO: we need to make this host-agnostic by splitting it or using options
-
-		# machine
 		# TODO: move to kde
 		"${flakePath}/home-manager/bugfixes/_kde-middle-mouse-scroll.nix"        # Enables middle mouse scrolling instead of paste in kde	
 	];
