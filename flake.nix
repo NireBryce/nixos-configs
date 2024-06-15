@@ -1,40 +1,38 @@
 {
   inputs = {
-    # 23.11
+  # 23.11
     nixpkgs-stable.url                          = "github:NixOS/nixpkgs/nixos-23.11";
-    # Unstable
+  # Unstable
     nixpkgs.url                                 = "github:NixOS/nixpkgs/nixos-unstable";
 
-    # Impermanence
+  # Impermanence
     impermanence.url                            = "github:Nix-community/impermanence";
 
-    # secret management
+  # secret management
     sops-nix.url                                = "github:mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows             = "nixpkgs";
     sops-nix.inputs.nixpkgs-stable.follows      = "nixpkgs";
 
-    # Home Manager
+  # Home Manager
     home-manager.url                            = "github:nix-community/home-manager/master";
     home-manager-unstable.url                   = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager.inputs.nixpkgs.follows         = "nixpkgs";
-
-    # NixOS-Hardware (for machine-specific fixes)
+  # NixOS-Hardware (for machine-specific fixes)
     nixos-hardware.url                          = "github:NixOS/nixos-hardware/master";
     # nixos-hardware-b550-stopgap.url             = "github:NixOS/nixos-hardware/master/gigabyte";  # TODO: fix flake.nix on nixos-hardware 
 
-    # Musnix
+  # Musnix
     musnix.url                                  = "github:musnix/musnix";
 
+  # populate nix index
     nix-index-database.url                      = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows   = "nixpkgs";
 
-    #Stylix
+
+  #Stylix
     # stylix.url                                  = "github:danth/stylix";
 
-    # Haumea (Folder structure for imports)
-    # haumea.url                                  = "github:nix-community/haumea";
-    # haumea.inputs.nixpkgs.follows               = "nixpkgs";
-
+    
     
   };
 
@@ -45,7 +43,7 @@
     home-manager,
     nixos-hardware,
     nix-index-database,
-    # nixos-hardware-b550-stopgap, # TODO: fix flake.nix on nixos-hardware repo
+    # nixos-hardware-b550-stopgap,                          # TODO: fix flake.nix on nixos-hardware repo
     musnix,
     ...
   } @ inputs: 

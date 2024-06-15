@@ -7,7 +7,6 @@
       obs-studio-plugins.obs-vaapi  # enables AMD hardware accel
     ];
   };
-  # vscode-fhs, terminal emulators, and  
   home.packages = with pkgs; [ 
     # browsers                    # browsers                                # browsers
     # TODO: move kde packages to kde
