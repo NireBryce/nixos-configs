@@ -10,8 +10,6 @@
     
     # Font config
       (nerdfonts.override { fonts = [ "FiraCode" ]; })
-    # alternative input
-      talon
     # archive                   # archive                                   # archive
       zip                           # zip                                       http://www.info-zip.org/
       unzip                         # unzip                                     http://www.info-zip.org/
