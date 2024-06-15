@@ -4,12 +4,11 @@
 {
 
 # TODO: make server config
-
-
   home.packages = with pkgs; [    # TODO: figure out which should be modularized for, say, headless machines
     
     # Font config
       (nerdfonts.override { fonts = [ "FiraCode" ]; })
+    
     # archive                   # archive                                   # archive
       zip                           # zip                                       http://www.info-zip.org/
       unzip                         # unzip                                     http://www.info-zip.org/
