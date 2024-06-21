@@ -1,52 +1,93 @@
 {
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+  inputs.nixpkgs.url                                 = "github:NixOS/nixpkgs/nixos-unstable";
 
-  outputs = { self, nixpkgs }:
+
+  outputs = { self, nixpkgs, lib }:
+
   let
     pkgs = import nixpkgs { system = "x86_64-linux"; };
-    # pythonPackages = pkgs.python3Packages;
-    # A list of shell names and their Python versions
-    pythonVersions = {
-      python310 = pkgs.python310;
-      python311 = pkgs.python311;
-      python312 = pkgs.python312;
-      default   = pkgs.python312;
-    };
-    # A function to make a shell with a python version
-    makePythonShell = shellName: pythonPackage: pkgs.mkShell {
-      venvDir = "./.venv";
-      
+    python = pkgs.python313;
+    # https://github.com/NixOS/nixpkgs/blob/c339c066b893e5683830ba870b1ccd3bbea88ece/nixos/modules/programs/nix-ld.nix#L44
+    # > We currently take all libraries from systemd and nix as the default.
+    pythonLdLibPath = lib.makeLibraryPath (with pkgs; [
+      zlib
+      zstd
+      stdenv.cc.cc
+      curl
+      openssl
+      attr
+      libssh
+      bzip2
+      libxml2
+      acl
+      libsodium
+      util-linux
+      xz
+      systemd
+    ]);
+    patchedpython = (python.overrideAttrs (
+      previousAttrs: {
+        # Add the nix-ld libraries to the LD_LIBRARY_PATH.
+        # creating a new library path from all desired libraries
+        postInstall = previousAttrs.postInstall + ''
+          mv  "$out/bin/python3.13" "$out/bin/unpatched_python3.13"
+          cat << EOF >> "$out/bin/python3.13"
+          #!/run/current-system/sw/bin/bash
+          export LD_LIBRARY_PATH="${pythonldlibpath}"
+          exec "$out/bin/unpatched_python3.13" "\$@"
+          EOF
+          chmod +x "$out/bin/python3.13"
+        '';
+      }
+    ));
+    # if you want poetry
+    patchedpoetry =  ((pkgs.poetry.override { python3 = patchedpython; }).overrideAttrs (
+      previousAttrs: {
+        # same as above, but for poetry
+        # not that if you dont keep the blank line bellow, it crashes :(
+        postInstall = previousAttrs.postInstall + ''
 
-    packages = [ 
-        # You could add extra packages you need here too
-        pythonPackage
-        pkgs.ruff
-        pkgs.python3Packages.venvShellHook
-        pkgs.python3Packages.rich
-        pkgs.python3Packages.pytest
-        pkgs.python3Packages.more-itertools
-        pkgs.python3Packages.isort
-        pkgs.python3Packages.setuptools
-        pkgs.python3Packages.toml
-      ]; 
-      # You can also add commands that run on shell startup with shellHook
-      shellHook = ''
-        echo "Now entering ${shellName} environment."
-      '';
-      postVenvCreation = ''
-        unset SOURCE_DATE_EPOCH
-        pip install -r requirements.txt
-      '';
+          mv "$out/bin/poetry" "$out/bin/unpatched_poetry"
+          cat << EOF >> "$out/bin/poetry"
+          #!/run/current-system/sw/bin/bash
+          export LD_LIBRARY_PATH="${pythonLdLibPath}"
+          exec "$out/bin/unpatched_poetry" "\$@"
+          EOF
+          chmod +x "$out/bin/poetry"
+        '';
+      }
+    ));
+  in
+  {
 
-      postShellHook = ''
-        unset SOURCE_DATE_EPOCH
-      '';
-    };
-      in
-      {
-        # mapAttrs runs the given function (makePythonShell) against every value
-        # in the attribute set (pythonVersions) and returns a new set
-        devShells.x86_64-linux = builtins.mapAttrs makePythonShell pythonVersions;
-      };
+    
+    environment.systemPackages = with pkgs; [
+      ruff
+      python3Packages.venvShellHook
+      python3Packages.rich
+      python3Packages.ruff
+      python3Packages.more-itertools
+      python3Packages.isort
+      python3Packages.setuptools
+      python3Packages.toml
+      python3Packages.pip
+      patchedpython
+
+      # if you want poetry
+      patchedpoetry
+    ];
+    shellHook = ''
+      # Allow the use of wheels.
+      SOURCE_DATE_EPOCH=$(date +%s)
+      # Augment the dynamic linker path
+      export "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pythonLdLibPath}"
+      # Setup the virtual environment if it doesn't already exist.
+      VENV=.venv
+      if test ! -d $VENV; then
+        virtualenv $VENV
+      fi
+      source ./$VENV/bin/activate
+      export PYTHONPATH=$PYTHONPATH:`pwd`/$VENV/${myPython.sitePackages}/
+  '';
+  };
 }
-
