@@ -51,6 +51,7 @@
 
   # syntax highlighting
     zi light z-shell/F-Sy-H
+
     # # a different highlighter plugin, misleadingly named but cool colors 
       # zi light trapd00r/zsh-syntax-highlighting-filetypes                     # https://github.com/trapd00r/zsh-syntax-highlighting-filetypes
       # it gives "zsh_zle-highlight-buffer-p:4: permission denied error
