@@ -61,15 +61,15 @@ in {
   ];
   
   programs.zsh = 
-    let 
+    let               
       p10k_cfg          = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/010-p10k.zsh";
       bindings_cfg      = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/initial-bindings.zsh";
       setopts_cfg       = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/initial-setopts.zsh";
       zstyle_cfg        = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/initial-zstyle.zsh";
       nix_fpath_cfg     = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/011-nix-fpath.zsh";
       zi_cfg            = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/020-zi.zsh";
-      zi_plugins_cfg    = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/021-zi-plugins.zsh";
-      atuin_cfg         = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/040-atuin.zsh";
+      zi_plugins_cfg    = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/zi-plugins.zsh";
+      atuin_cfg         = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/021-atuin.zsh";
       zellij_keys_cfg   = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/040-free-zellij-keys.zsh";
     in {
     enable = true;
@@ -88,28 +88,28 @@ in {
     initExtraFirst = ''
       zmodload zsh/zprof                                # zsh profiler
       #################PASSWORD ENTRY/CONFIRM DIALOGS GO ABOVE##############################
-      source ${p10k_cfg}                                # Powerlevel10k instant prompt.  input above, else below
-      source ${bindings_cfg}                            # keybindings from various configs
-      source ${setopts_cfg}                             # setopts from the same
-      source ${zstyle_cfg}                              # zstyle opts from the same
+      ${p10k_cfg}                                       # Powerlevel10k instant prompt.  input above, else below
+      ${bindings_cfg}                                   # keybindings from various configs
+      ${setopts_cfg}                                    # setopts from the same
+      ${zstyle_cfg}                                     # zstyle opts from the same
       typeset -U path cdpath fpath manpath              # TODO: magic, no idea what it does
-      source ${nix_fpath_cfg}                           # tells zsh where nix lives
+      ${nix_fpath_cfg}                                  # tells zsh where nix lives
       autoload -U add-zsh-hook                          # TODO: Magic, no idea.
       zmodload zsh/terminfo                             # load terminfo
       WORDCHARS='*?[]~=&;!#$%^(){}<>';                  # Dont consider certain characters part of the word
     '';
     
     initExtraBeforeCompInit = ''
-      source ${zi_cfg}                                  # zi bootstrap
-      source ${zi_plugins_cfg}                          # Zi plugins
+      ${zi_cfg}                                         # zi bootstrap
+      ${zi_plugins_cfg}                                 # Zi plugins
       [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh        # Load p10k theme
       zicompinit                                          # zi cleanup
       autoload -Uz compinit
       compinit -C
     '';
     initExtra = ''
-      source ${atuin_cfg}                               # Atuin
-      source ${zellij_keys_cfg}                         # Free up bindings for zellij
+      ${atuin_cfg}                                      # Atuin
+      ${zellij_keys_cfg}                                # Free up bindings for zellij
       disable -p '#'                                    # Necessary to run flakes, otherwise # gets expanded
     '';
     shellAliases = {
@@ -118,6 +118,7 @@ in {
       cd  = "x";                                        # Empty oneletter for zoxide to not interfere with zi
       exa = "eza --icons=always";                       # back compat for one of the tools
       ls  = "eza --icons=always --header --group-directories-first --hyperlink";
+      rustdevshell = "nix develop ~/nixos/dev-shells/rust#";
     };
   };
 }

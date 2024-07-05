@@ -4,8 +4,18 @@
 {
 
 # TODO: make server config
+
+
+
   home.packages = with pkgs; [    # TODO: figure out which should be modularized for, say, headless machines
     
+
+    # tailscale
+    tailscale
+    tailscale-systray
+
+    
+
     # Font config
       (nerdfonts.override { fonts = [ "FiraCode" ]; })
     
@@ -38,7 +48,7 @@
       python3                       # system python, zsh complains without      https://python.org
       ruff                          # python linter                             https://github.com/astral-sh/ruff
       ruff-lsp                      # ruff integration with vscode              https://github.com/astral-sh/ruff-lsp
-  
+      sqlite                        # sqlite                                    https://www.sqlite.org/
     # editors                   # editors                                   # editors
       nano                          # text editor                               https://www.nano-editor.org/
       nanorc                        # nano syntax highlighting                  https://github.com/scopatz/nanorc
@@ -138,6 +148,7 @@
       yq-go                         # yaml query                                https://github.com/mikefarah/yq
       zellij                        # terminal multiplexer/tiler                https://zellij.dev/
       zoxide                        # smarter cd                                https://github.com/ajeetdsouza/zoxide
+      inshellisense                 # inshellisense                             https://github.com/microsoft/inshellisense
   
     # system tools              # system tools                              # System Tools
       auto-cpufreq                  # auto-cpufreq                              https://github.com/AdnanHodzic/auto-cpufreq
@@ -150,6 +161,12 @@
       wl-clipboard-x11              # clipboard in xwayland                     https://search.nixos.org/packages?channel=unstable&from=0&size=50&sort=relevance&type=packages&query=wl-clipboard
       wayland-utils                 # `wayland-info`                            https://gitlab.freedesktop.org/wayland/wayland-utils
       egl-wayland                   # who knows what this is for                https://github.com/NVIDIA/egl-wayland/
+
+      # SteamTinkerLaunch needs these
+      xxd
+      xdotool
+      xorg.xwininfo
+      yad
         
   
   ];  

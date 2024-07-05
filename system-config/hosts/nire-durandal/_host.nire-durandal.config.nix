@@ -44,7 +44,7 @@ in {
   # TODO: stylix theme config also in it's own module
   # https://danth.github.io/stylix/configuration.htmloverride {argsOverride = {version = "6.6.27";};
 
-  hardware.amdgpu.amdvlk = false;           # disable amdvlk to use radv
+  hardware.amdgpu.amdvlk.enable = false;           # disable amdvlk to use radv
   hardware.keyboard.zsa.enable = true;      # zsa keyboard package
   services.ratbagd.enable      = true;      # for piper logitech mouse ctl
 
