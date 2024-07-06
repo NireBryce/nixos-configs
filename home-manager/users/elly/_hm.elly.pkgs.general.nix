@@ -65,6 +65,7 @@
       git                           # git scm                                   https://git-scm.com
       delta                         # `delta` - git diff                        https://github.com/dandavison/delta
       lazygit                       # TUI git interface                         https://github.com/jesseduffield/lazygit
+      commitizen                    # commitizen                                https://github.com/commitizen-tools/commitizen
   
     # help systems              # help systems                              # Help Systems
       cheat                         # cli cheatsheets                           https://github.com/cheat/cheat
