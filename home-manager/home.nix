@@ -11,6 +11,7 @@ in {
     "${flakePath}/home-manager/dotfiles"
     "${flakePath}/home-manager/_hm.window-manager.nix"      # window-manager specific packages
     "${flakePath}/home-manager/_hm.shells.nix"              # shells
+    "${flakePath}/home-manager/_hm.bash.nix"                # bash
   ];
   wm-kde.enable = true; # move to user configs
   nixpkgs.config.allowUnfree = true;                   # Disable if you don't want unfree packages

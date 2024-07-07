@@ -13,7 +13,7 @@ in {
     "${flakePath}/system-config/_sys.sound.nix"         # sound
     "${flakePath}/system-config/_sys.shells.nix"        # shells
     "${flakePath}/system-config/_sys.wm.kde.nix"        # KDE
-    
+    "${flakePath}/system-config/_sys.bash.nix"          # bash
     # ____________________________________________________ 
     # |- /!!\ WARN: this will delete /root on boot /!!\ -|
     # ----------------------------------------------------

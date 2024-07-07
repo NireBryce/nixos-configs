@@ -149,7 +149,10 @@
       yq-go                         # yaml query                                https://github.com/mikefarah/yq
       zellij                        # terminal multiplexer/tiler                https://zellij.dev/
       zoxide                        # smarter cd                                https://github.com/ajeetdsouza/zoxide
-      inshellisense                 # inshellisense                             https://github.com/microsoft/inshellisense
+    
+    # bash                      # bash                                      # bash
+      inshellisense                 # intellisense type shell complete          https://github.com/microsoft/inshellisense
+      blesh                         # better bash line editor                   https://github.com/akinomyoga/ble.sh
   
     # system tools              # system tools                              # System Tools
       auto-cpufreq                  # auto-cpufreq                              https://github.com/AdnanHodzic/auto-cpufreq

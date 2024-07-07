@@ -32,6 +32,8 @@
     LC_CTYPE="en_US.UTF-8";
     LS_COLORS="$(vivid generate dracula)";                                      # https://github.com/sharkdp/vivid
     EZA_COLORS="$(vivid generate dracula)";
+    STARSHIP_CONFIG="$HOME/.config/starship.toml";
+    STARSHIP_CACHE="$HOME/.cache/starship";
   };
 
 
