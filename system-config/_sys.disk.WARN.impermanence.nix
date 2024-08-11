@@ -2,6 +2,8 @@
 
 # impermanence metapackage
 # THIS WILL DELETE YOUR ROOT ON BOOT, so like, know what you're doing
+
+# consider https://www.reddit.com/r/NixOS/comments/1ad0m5n/impermanence_disko_setup/
 {
   imports = [
     impermanence.nixosModule
@@ -44,6 +46,8 @@
   '';
 
 # delete root at boot
+
+# postResumeCommands comes from https://github.com/NixOS/nixpkgs/pull/240651
   boot.initrd.postResumeCommands = lib.mkAfter ''
       mkdir -p /mnt
     # We first mount the btrfs root to /mnt

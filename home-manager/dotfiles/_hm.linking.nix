@@ -5,7 +5,7 @@
   home.file = {
   "./.bash_logout".source              = config/.bash_logout;
   "./.bash_profile".source             = config/.bash_profile;
-  # "./.bashrc".source                   = config/.bashrc;
+  "./.bashrc".source                   = config/.bashrc;
   "./.config/atuin".source             = config/atuin;
   "./.config/F-Sy-H".source            = config/zsh-f-s-highlight-themes;
   "./.config/kitty".source             = config/kitty;

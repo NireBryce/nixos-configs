@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # ~/.bashrc
 #
-
+# Add this lines at the top of .bashrc:
+    # [[ $- == *i* ]] && source $(blesh-share)/ble.sh --noattach
 
 colors() {
 	local fgc bgc vals seq0
@@ -134,7 +135,10 @@ ex() {
 		echo "'$1' is not a valid file"
 	fi
 }
-
+	eval "$(is init bash)"
+    eval "$(starship init bash)"
+    # Add this line at the end of .bashrc:
+    # [[ ''${BLE_VERSION-} ]] && ble-attach      # ble.sh
 # if [[ ! $PS1 =~ 133 ]] ; then
 #     source ~/utilities/bash_mouse_enable/bash-preexec.sh
 #     source ~/utilities/bash_mouse_enable/shell-integration.bash
