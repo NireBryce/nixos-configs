@@ -3,10 +3,6 @@
 }:
 
 {
-  imports = [ 
-    ./_sys.sec.sops.nix         # Secret management
-  ];
-
     services.openssh = {
     enable = true;
     settings.PasswordAuthentication = false;

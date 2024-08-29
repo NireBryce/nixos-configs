@@ -30,7 +30,6 @@
     bindsTo = [ "pipewire.service" ];
     after = [ "pipewire.service" ];
   };
-  hardware.opengl = {
-    extraPackages = [ pkgs.pipewire ];
-  };
+  
+  hardware.graphics.extraPackages = [ pkgs.pipewire ];
 }

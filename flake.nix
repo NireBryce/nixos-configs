@@ -60,8 +60,9 @@
 
   # nire-durandal
   # `sudo nixos-rebuild switch --flake .#nire-durandal`
+  # `nh os switch --hostname nire-durandal ~/nixos/`
     nixosConfigurations."nire-durandal"     = nixpkgs.lib.nixosSystem {
-      specialArgs = inputs;     # send inputs to modules (is this true?)
+      specialArgs = inputs;     # send inputs to modules (is this actually the right description?)
       system      = "x86_64-linux";
       modules     = [
         ./system-config/hosts/nire-durandal/_host.nire-durandal.config.nix
@@ -73,6 +74,7 @@
       ];
     };
   # `home-manager switch --flake .#elly@nire-durandal`
+  # `nh home switch --configuration elly@nire-durandal ~/nixos/`
     homeConfigurations."elly@nire-durandal" = home-manager.lib.homeManagerConfiguration {
       pkgs              = import nixpkgs {              # Home manger requires a pkgs instance
         system = "x86_64-linux";
@@ -80,10 +82,35 @@
       };
       extraSpecialArgs  = inputs;                       # Pass flake inputs to our config
       modules           = [
-        ./home-manager/users/elly/__hm.elly.config.nix  # Elly home manager config
+        ./home-manager/users/elly/nire-durandal/__hm.elly-nire-durandal.nix  # Elly home manager config
       ];
     };
   
+
+  # nire-galatea
+  # `sudo nixos-rebuild switch --flake .#nire-galatea`
+  # `nh os switch --hostname nire-galatea ~/nixos/`
+    nixosConfigurations."nire-galatea"     = nixpkgs.lib.nixosSystem {
+      specialArgs = inputs;     # send inputs to modules (is this true?)
+      system      = "x86_64-linux";
+      modules     = [
+        ./system-config/hosts/nire-galatea/_host-nire-galatea.config.nix
+        nix-index-database.nixosModules.nix-index
+        
+      ];
+    };
+  # `home-manager switch --flake .#elly@nire-galatea`
+  # `nh home switch --configuration elly@nire-galatea ~/nixos/`
+    homeConfigurations."elly@nire-galatea" = home-manager.lib.homeManagerConfiguration {
+      pkgs              = import nixpkgs {              # Home manger requires a pkgs instance
+        system = "x86_64-linux";
+        config = { allowUnfree = true; };
+      };
+      extraSpecialArgs  = inputs;                       # Pass flake inputs to our config
+      modules           = [
+        ./home-manager/users/elly/nire-galatea/__hm.elly-nire-galatea.nix  # Elly's home manager config
+      ];
+    };
   };
 }
 

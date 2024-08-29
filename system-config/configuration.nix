@@ -8,19 +8,14 @@ let flakePath = self;
 in { 
   imports = [
   # Load system config fragments
-    "${flakePath}/system-config/_sys.packages.nix"      # system packages
-    "${flakePath}/system-config/_sys.sec.security.nix"  # security modules
+    "${flakePath}/system-config/_sys.sec.sops.nix"  # security modules
     "${flakePath}/system-config/_sys.sound.nix"         # sound
     "${flakePath}/system-config/_sys.shells.nix"        # shells
-    "${flakePath}/system-config/_sys.wm.kde.nix"        # KDE
     "${flakePath}/system-config/_sys.bash.nix"          # bash
-    # ____________________________________________________ 
-    # |- /!!\ WARN: this will delete /root on boot /!!\ -|
-    # ----------------------------------------------------
-    "${flakePath}/system-config/_sys.disk.WARN.impermanence.nix"       
+     
   ];
 
-  wm-kde.enable = lib.mkDefault true;       # Move this flag to user/machine configs
+  
   environment.pathsToLink = [               # This determines what to add to /run/current-system/sw, generally defined elsewhere
     
   ];

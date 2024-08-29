@@ -15,6 +15,16 @@ in {
     # Users
     # ../.usr.elly.nix # modularize this later
 
+    # window-manager
+    "${flakePath}/system-config/window-manager/_kde.nix"        # KDE
+
+    # packages
+    "${flakePath}/system-config/hosts/nire-durandal/durandal-packages.nix"      # system packages
+
+    # firewall and ssh
+    "${flakePath}/system-config/hosts/nire-durandal/firewall.nix"
+    "${flakePath}/system-config/hosts/nire-durandal/ssh.nix"
+
     # nix generated
     "${flakePath}/system-config/hosts/nire-durandal/hardware-configuration.nix"
     "${flakePath}/system-config/hosts/nire-durandal/stateVersion.nix"
@@ -30,10 +40,18 @@ in {
     
     # fixes
     "${flakePath}/system-config/system-fixes/suspend/_b550m-gpp0-etc.nix"
+
+    # impermanence
+    # ____________________________________________________ 
+    # |- /!!\ WARN: this will delete /root on boot /!!\ -|
+    # ----------------------------------------------------
+    "${flakePath}/system-config/impermanence/_WARN.impermanence.nix"  
   ];
   # hostname
   networking.hostName = "nire-durandal";
-  
+
+
+
   # TODO: turn into its own module
   musnix = {
     enable          = true;

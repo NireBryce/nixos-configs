@@ -13,7 +13,7 @@
     clinfo                      # clinfo                                    https://github.com/Oblomov/clinfo
     amdgpu_top                  # amdgpu_top gpu monitor                    https://github.com/Umio-Yasuno/amdgpu_top
   ];
-  hardware.opengl.extraPackages = with pkgs; [
+  hardware.graphics.extraPackages = with pkgs; [
     libva-utils
   ];
   
