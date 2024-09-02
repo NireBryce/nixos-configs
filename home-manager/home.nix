@@ -7,8 +7,8 @@ let flakePath = self;
 in {
   imports = [
   # home manager config fragments
-    "${flakePath}/home-manager/dev"
-    "${flakePath}/home-manager/dotfiles"
+    "${flakePath}/home-manager/dev/default.nix"
+    "${flakePath}/home-manager/dotfiles/default.nix"
     "${flakePath}/home-manager/_hm.shells.nix"              # shells
     "${flakePath}/home-manager/_hm.bash.nix"                # bash
   ];

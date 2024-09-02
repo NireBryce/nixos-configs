@@ -3,8 +3,9 @@
   lib,
   ... 
 }: 
+let mouseName = "Logitech Gaming Mouse G600";
 
-{
+in {
 
   
   # check for KDE, install KDE packages
@@ -27,12 +28,27 @@
   # `sudo libinput list-devices`
   #
 
-  home.activation = { 
+
+  home.activation = { # TODO: every time USB changes, we have to reset this.  Eventually look into ways to automate
+                      #   Consider a systemd script or something that runs sudo libinput list-devices and greps for `mouseName` (Bound above) 
     bugfix-middle-mouse-scroll = lib.hm.dag.entryAfter ["writeBoundary"] ''
-      ''$HOME/.nix-profile/bin/qdbus org.kde.KWin /org/kde/KWin/InputDevice/event4 org.kde.KWin.InputDevice.scrollOnButtonDown true 
+      /run/current-system/sw/bin/qdbus org.kde.KWin /org/kde/KWin/InputDevice/event5 org.kde.KWin.InputDevice.scrollOnButtonDown true 
     '';
     # optionally 
     # `qdbus org.kde.KWin /org/kde/KWin/InputDevice/eventNN org.kde.KWin.InputDevice.scrollButton X[`
   };
+
+  # potential automation of it:
+  # systemd.services.kwin-mouse = {
+  #   wantedBy = [ "Multi-user.target" ];
+  #   enable = true;
+  #   serviceConfig = {
+  #     User = "root";
+  #     Group = "root";
+  #     ExecStart = '' 
+  #       /run/current-system/sw/bin/qdbus org.kde.KWin /org/kde/KWin/InputDevice/''$(${pkgs.libinput}/bin/libinput list-devices | rg "Logitech Gaming Mouse G600" --after-context 1  --max-count=1 | rg "event." --only-matching) org.kde.KWin.InputDevice.scrollOnButtonDown true
+  #     '';
+  #   };
+  # };
 
 }

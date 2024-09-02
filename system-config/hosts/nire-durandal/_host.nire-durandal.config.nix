@@ -1,6 +1,7 @@
 { 
   nixos-hardware,
   self,
+  nixpkgs,
   ... 
 }: 
 
@@ -41,28 +42,32 @@ in {
     # fixes
     "${flakePath}/system-config/system-fixes/suspend/_b550m-gpp0-etc.nix"
 
+    # tailscale
+    "${flakePath}/system-config/services/__tailscale.nix"
+
     # impermanence
     # ____________________________________________________ 
     # |- /!!\ WARN: this will delete /root on boot /!!\ -|
     # ----------------------------------------------------
     "${flakePath}/system-config/impermanence/_WARN.impermanence.nix"  
   ];
+
+  nix.nixPath = [ "nixpkgs=${nixpkgs}" ];                                       # make nix-index not use channels https://github.com/nix-community/nix-index/issues/167
+  
   # hostname
   networking.hostName = "nire-durandal";
-
-
 
   # TODO: turn into its own module
   musnix = {
     enable          = true;
     kernel.realtime = false;
-    # das_watchdog.enable = true; # starts the das watchdog which ensures realtime processes don't hang the machine
+    # das_watchdog.enable = true;                                               # starts the das watchdog which ensures realtime processes don't hang the machine
   };
 
   # TODO: stylix theme config also in it's own module
   # https://danth.github.io/stylix/configuration.htmloverride {argsOverride = {version = "6.6.27";};
 
-  hardware.amdgpu.amdvlk.enable = false;           # disable amdvlk to use radv
+  hardware.amdgpu.amdvlk.enable = false;    # disable amdvlk to use radv
   hardware.keyboard.zsa.enable = true;      # zsa keyboard package
   services.ratbagd.enable      = true;      # for piper logitech mouse ctl
 

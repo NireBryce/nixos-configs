@@ -26,7 +26,8 @@
       firefox                       # TODO: also installed as a system package. https://www.mozilla.org/en-US/firefox/
 
     # comms                       # comms                                   # comms
-      cinny-desktop                 # matrix client                             https://github.com/cinnyapp/cinny-desktop
+      # cinny-desktop                 # matrix client                             https://github.com/cinnyapp/cinny-desktop
+        # TODO: waiting on libolm fix
       discord                       # discord chat                              https://discord.com/
       keybase-gui                   # encrypted chat almost no one uses         https://keybase.io/
       keybase                       # see above                                 https://keybase.io/
