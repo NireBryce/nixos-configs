@@ -18,12 +18,6 @@
     ];
   };
 
-  console = {
-    keyMap = "us";
-    # useXkbConfig = true; # use xkb.options in tty.
-    font = "Lat2-Terminus16";
-  };
-
 
 }
 

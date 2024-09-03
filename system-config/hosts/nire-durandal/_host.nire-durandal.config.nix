@@ -77,7 +77,14 @@ in {
       dedicatedServer.openFirewall = true;  # Open ports in the firewall for Source Dedicated Server
       gamescopeSession.enable      = true;  # third party gamescope compositor
     }; 
+
+  console = {
+    keyMap = "us";
+    # useXkbConfig = true; # use xkb.options in tty.
+    font = "Lat2-Terminus16";
+  };
 }
+
 
 # ways of overriding kernel
   # boot.kernelPackages = pkgs.linuxPackages_6_9;
