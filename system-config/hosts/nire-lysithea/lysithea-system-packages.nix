@@ -35,10 +35,10 @@ in {
       enable = true;
       clean.enable = true;
       clean.extraArgs = "--keep-since 7d --keep 5";
-      flake = "/home/elly/nixos";
+      flake = "/Users/elly/nixos";
     };
 
-  # programs.command-not-found.enable = lib.mkForce false; # conflicts with nix-index-database
+    programs.command-not-found.enable = lib.mkForce false; # conflicts with nix-index-database
 
   # TODO: fixme for darwin
     # fonts.packages = with pkgs; [
