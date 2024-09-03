@@ -1,13 +1,17 @@
 {
+  self,
   pkgs,
+  lib,
   ...
 }:
-
-{
+let flakePath = self;
+in {
     # Notes:
     # If you get `zsh side` errors, delete ~/.zcompdump and ~/.config/zsh/.zcompdump and run `zi update`
     # installing multiple highlighters causes "zsh_zle-highlight-buffer-p:4: permission denied error
     # in this case it was trapd00r/zsh-syntax-highlighting-filetypes which highlights more than filetypes turns out
+
+    # TODO: replace p10k with `starship` now that p10k is in life support mode
 
   programs = { # zsh specific, it dedups them if they're already enabled
     dircolors.enable = true; 
@@ -50,13 +54,28 @@
 
   home.packages = with pkgs; [  # Things needed for my .zshrc
     diff-so-fancy
+    inshellisense
+    starship
     zoxide
     atuin
     tree
     zi                              # zsh plugin manager
   ];
   
-  programs.zsh = {
+  programs.zsh = 
+    let               
+      p10k_cfg          = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/010-p10k.zsh";
+      bindings_cfg      = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/initial-bindings.zsh";
+      setopts_cfg       = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/initial-setopts.zsh";
+      zstyle_cfg        = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/initial-zstyle.zsh";
+      zi_cfg            = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/020-zi.zsh";
+      zi_plugins_cfg    = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/zi-plugins.zsh";
+      atuin_cfg         = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/021-atuin.zsh";
+      zellij_keys_cfg   = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/040-free-zellij-keys.zsh";
+    in {
+    shellAliases = {
+      
+    };
     enable = true;
     autocd = false;
     enableVteIntegration = true;
@@ -65,47 +84,84 @@
     zsh-abbr.enable = true;
     
     localVariables = {
+      # local variables
       _ZO_CMD_PREFIX="x";
+
     };
 
     # .zshrc
+    
     initExtraFirst = ''
-      zmodload zsh/zprof                                  # zsh profiler
+      zmodload zsh/zprof                                # zsh profiler
+
       #################PASSWORD ENTRY/CONFIRM DIALOGS GO ABOVE##############################
-      source $HOME/.config/zsh/010-p10k.zsh               # Powerlevel10k instant prompt.  input above, else below
-      source $HOME/.config/zsh/initial-bindings.zsh       # keybindings from various configs
-      source $HOME/.config/zsh/initial-setopts.zsh        # setopts from the same
-      source $HOME/.config/zsh/initial-zstyle.zsh         # zstyle opts from the same
-      typeset -U path cdpath fpath manpath                # TODO: magic, no idea what it does
-      source $HOME/.config/zsh/011-nix-fpath.zsh          # tells zsh where nix lives
-      autoload -U add-zsh-hook                            # TODO: Magic, no idea.
-      zmodload zsh/terminfo                               # load terminfo
-      WORDCHARS='*?[]~=&;!#$%^(){}<>';                    # Dont consider certain characters part of the word
+
+      # Powerlevel10k instant prompt.  input above, else below
+      ${p10k_cfg}                                       
+
+      # keybindings from various configs
+      ${bindings_cfg}
+      # end keybindings
+
+      # setopts
+      ${setopts_cfg}
+      # end setopts
+
+      # zstyle
+      ${zstyle_cfg}                                     
+      # end zstyle
+
+      typeset -U path cdpath fpath manpath              # TODO: magic, no idea what it does                                
+
+      autoload -U add-zsh-hook                          # TODO: Magic, no idea.
+
+      zmodload zsh/terminfo                             # load terminfo
+
+      WORDCHARS='*?[]~=&;!#$%^(){}<>';                  # Dont consider certain characters part of the word
+      
+      
     '';
     
     initExtraBeforeCompInit = ''
-      source $HOME/.config/zsh/020-zi.zsh                 # zi bootstrap
-      source $HOME/.config/zsh/zi-plugins.zsh             # Zi plugins
-      [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh        # Load p10k theme
-      zicompinit                                          # zi cleanup
+      # zi
+        # zi bootstrap
+        ${zi_cfg}
+        # end zi bootstrap
+
+        # Zi plugins
+        ${zi_plugins_cfg}
+        # end zi plugins
+      # end zi
+
+      [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh      # Load p10k theme
+
+      zicompinit                                        # zi cleanup
       autoload -Uz compinit
-      # for dump in ~/.zcompdump(N.mh+24); do
-      #   compinit
-      # done
       compinit -C
     '';
     initExtra = ''
-      source $HOME/.config/zsh/021-atuin.zsh              # Atuin
-      source $HOME/.config/zsh/040-free-zellij-keys.zsh   # Free up bindings for zellij
-      disable -p '#'                                      # Necessary to run flakes, otherwise # gets expanded
+      # Aliases
+        alias "ll"="ls -l";
+        alias "cp"="cp -i";                                     # Confirm before overwriting something
+        alias "cd"="x";                                        # Empty oneletter for zoxide to not interfere with zi
+        alias "exa"="eza --icons=always";                       # back compat for one of the tools
+        alias "ls"="eza --icons=always --header --group-directories-first --hyperlink";
+        alias "rustdevshell"="nix develop ~/nixos/dev-shells/rust#";
+      # Atuin
+      ${atuin_cfg}
+      # Free up bindings for zellij
+      ${zellij_keys_cfg}  
+
+
+      # Necessary to run flakes, otherwise # gets expanded
+        disable -p '#'  
+
+      # Inshellisense
+        # eval "$(is init zsh)"k
+  
     '';
-    shellAliases = {
-      ll  ="ls -l";
-      cp  ="cp -i";                                       # Confirm before overwriting something
-      cd  = "x";                                          # Empty oneletter for zoxide to not interfere with zi
-      exa = "eza --icons=always";                         # back compat for one of the tools
-      ls  = "eza --icons=always --header --group-directories-first --hyperlink";
-    };
+
+
   };
 }
 
@@ -160,3 +216,8 @@
   # "apply-nire-durandal" = "nix run --impure home-manager/master -- -b bak switch --flake .#elly@nire-durandal";
   # "apply-nire-galatea" = "nix run --impure home-manager/master -- -b bak switch --flake .#elly@nire-galatea";
   # "apply-nire-lysithea" = "nix run --impure home-manager/master -- -b bak switch --flake .#elly@nire-lysithea";
+
+# Whats this do? something from ancient compinit start time debugging
+      # for dump in ~/.zcompdump(N.mh+24); do
+      #   compinit
+      # done

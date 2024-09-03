@@ -4,6 +4,9 @@
     nixpkgs-stable.url                          = "github:NixOS/nixpkgs/nixos-23.11";
   # Unstable
     nixpkgs.url                                 = "github:NixOS/nixpkgs/nixos-unstable";
+  # Darwin
+    nix-darwin.url                              = "github:LnL7/nix-darwin";
+    nix-darwin.inputs.nixpkgs.follows           = "nixpkgs";
 
   # Impermanence
     impermanence.url                            = "github:Nix-community/impermanence";
@@ -39,7 +42,8 @@
   outputs = {
     self,
     nixpkgs,
-    nixpkgs-stable,
+    nixpkgs-stable,                                         # https://nixos-and-flakes.thiscute.world/nixos-with-flakes/downgrade-or-upgrade-packages
+    nix-darwin,
     home-manager,
     nixos-hardware,
     nix-index-database,
@@ -58,10 +62,11 @@
     overlays        = import ./___overlays {inherit inputs;};
     hardware        = import nixos-hardware;
 
-  # nire-durandal
+  # nire-durandal (workstation)
   # `sudo nixos-rebuild switch --flake .#nire-durandal`
+  # `nh os switch --hostname nire-durandal ~/nixos/`
     nixosConfigurations."nire-durandal"     = nixpkgs.lib.nixosSystem {
-      specialArgs = inputs;     # send inputs to modules (is this true?)
+      specialArgs = inputs;     # send inputs to modules (is this actually the right description?)
       system      = "x86_64-linux";
       modules     = [
         ./system-config/hosts/nire-durandal/_host.nire-durandal.config.nix
@@ -73,6 +78,7 @@
       ];
     };
   # `home-manager switch --flake .#elly@nire-durandal`
+  # `nh home switch --configuration elly@nire-durandal ~/nixos/`
     homeConfigurations."elly@nire-durandal" = home-manager.lib.homeManagerConfiguration {
       pkgs              = import nixpkgs {              # Home manger requires a pkgs instance
         system = "x86_64-linux";
@@ -80,10 +86,65 @@
       };
       extraSpecialArgs  = inputs;                       # Pass flake inputs to our config
       modules           = [
-        ./home-manager/users/elly/__hm.elly.config.nix  # Elly home manager config
+        ./home-manager/users/elly/nire-durandal/__hm.elly-nire-durandal.nix  # Elly home manager config
       ];
     };
   
+  # nire-lysithea (macbook)
+  # TODO: FIXME `sudo nixos-rebuild switch --flake .#nire-durandal`
+  # TODO: FIXME `nh os switch --hostname nire-durandal ~/nixos/`
+    darwinConfigurations."nire-lysithea"     = nix-darwin.lib.darwinSystem {
+      specialArgs = inputs;     # send inputs to modules (is this actually the right description?)
+      system      = "aarch64-darwin";
+      modules     = [
+        ./system-config/hosts/nire-lysithea/_host.nire-lysithea.config.nix
+        nix-index-database.nixosModules.nix-index
+
+        # inputs.stylix.nixosModules.stylix
+        # TODO: stylix
+      ];
+    # Expose the package set, including overlays, for convenience.
+    darwinPackages = self.darwinConfigurations."simple".pkgs;
+    };
+  # TODO: fixme `home-manager switch --flake .#elly@nire-durandal`
+  # TODO: fixme `nh home switch --configuration elly@nire-durandal ~/nixos/`
+    homeConfigurations."elly@nire-lysithea" = home-manager.darwinModules.home-manager {
+      pkgs              = import nixpkgs {              # Home manger requires a pkgs instance
+        system = "aarch64-darwin";
+        config = { allowUnfree = true; };
+      };
+      extraSpecialArgs  = inputs;                       # Pass flake inputs to our config
+      modules           = [
+        ./home-manager/users/elly/nire-lysithea/__hm.elly-nire-lysithea.nix  # Elly home manager config
+      ];
+      useGlobalPkgs = true;
+      useUserPackages = true;
+    };
+
+  # nire-galatea (thinkpad)
+  # `sudo nixos-rebuild switch --flake .#nire-galatea`
+  # `nh os switch --hostname nire-galatea ~/nixos/`
+    nixosConfigurations."nire-galatea"     = nixpkgs.lib.nixosSystem {
+      specialArgs = inputs;     # send inputs to modules (is this true?)
+      system      = "x86_64-linux";
+      modules     = [
+        ./system-config/hosts/nire-galatea/_host-nire-galatea.config.nix
+        nix-index-database.nixosModules.nix-index
+        
+      ];
+    };
+  # `home-manager switch --flake .#elly@nire-galatea`
+  # `nh home switch --configuration elly@nire-galatea ~/nixos/`
+    homeConfigurations."elly@nire-galatea" = home-manager.lib.homeManagerConfiguration {
+      pkgs              = import nixpkgs {              # Home manger requires a pkgs instance
+        system = "x86_64-linux";
+        config = { allowUnfree = true; };
+      };
+      extraSpecialArgs  = inputs;                       # Pass flake inputs to our config
+      modules           = [
+        ./home-manager/users/elly/nire-galatea/__hm.elly-nire-galatea.nix  # Elly's home manager config
+      ];
+    };
   };
 }
 

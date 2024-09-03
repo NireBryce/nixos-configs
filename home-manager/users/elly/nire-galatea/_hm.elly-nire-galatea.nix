@@ -12,7 +12,7 @@ in {
 		"${flakePath}/home-manager/window-manager/_kde.nix"      								# window-manager specific packages
 
 		"${flakePath}/home-manager/users/elly/_hm.elly.pkgs.general.nix"        # CLI packages
-		"${flakePath}/home-manager/users/elly/_hm.elly.pkgs.gui.nix" 						# GUI packages
+		# "${flakePath}/home-manager/users/elly/_hm.elly.pkgs.gui.nix" 						# GUI packages
 
 
     "${flakePath}/home-manager/users/elly/_hm.elly.hm-meta.nix"

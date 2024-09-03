@@ -6,12 +6,19 @@
 # TODO: make server config
 
 
+
   home.packages = with pkgs; [    # TODO: figure out which should be modularized for, say, headless machines
     
+
+    # tailscale
+    tailscale
+    tailscale-systray
+
+    
+
     # Font config
       (nerdfonts.override { fonts = [ "FiraCode" ]; })
-    # alternative input
-      talon
+    
     # archive                   # archive                                   # archive
       zip                           # zip                                       http://www.info-zip.org/
       unzip                         # unzip                                     http://www.info-zip.org/
@@ -41,7 +48,7 @@
       python3                       # system python, zsh complains without      https://python.org
       ruff                          # python linter                             https://github.com/astral-sh/ruff
       ruff-lsp                      # ruff integration with vscode              https://github.com/astral-sh/ruff-lsp
-  
+      sqlite                        # sqlite                                    https://www.sqlite.org/
     # editors                   # editors                                   # editors
       nano                          # text editor                               https://www.nano-editor.org/
       nanorc                        # nano syntax highlighting                  https://github.com/scopatz/nanorc
@@ -58,6 +65,7 @@
       git                           # git scm                                   https://git-scm.com
       delta                         # `delta` - git diff                        https://github.com/dandavison/delta
       lazygit                       # TUI git interface                         https://github.com/jesseduffield/lazygit
+      commitizen                    # commitizen                                https://github.com/commitizen-tools/commitizen
   
     # help systems              # help systems                              # Help Systems
       cheat                         # cli cheatsheets                           https://github.com/cheat/cheat
@@ -89,6 +97,7 @@
       comma                         # `,` run things without installing them    https://github.com/nix-community/comma
       deadnix                       # scan for dead nix code                    https://github.com/astro/deadnix
       manix                         # nix man pages                             https://github.com/nix-community/manix
+      niv                           # like flakes but worse
       nix-diff                      # diff nix code                             https://hackage.haskell.org/package/nix-diff
       nix-du                        # nix-store analysis                        https://github.com/symphorien/nix-du
       nix-health                    # check nix issues                          https://github.com/juspay/nix-health
@@ -102,9 +111,7 @@
       nvd                           # nix package version diff                  https://gitlab.com/khumba/nvd
       statix                        # antipattern linter                        https://github.com/nerdypepper/statix
 
-    # terminals                 # terminals                                 # terminals
-      kitty                         # gpu accelerated terminal                  https://sw.kovidgoyal.net/kitty
-      kitty-img                     # kitty image rendering engine, like sixel  https://git.sr.ht/~zethra/kitty-img
+
   
     # shell                     # shell                                     # shell
       atuin                         # shell history                             https://github.com/ellie/atuin
@@ -140,6 +147,10 @@
       yq-go                         # yaml query                                https://github.com/mikefarah/yq
       zellij                        # terminal multiplexer/tiler                https://zellij.dev/
       zoxide                        # smarter cd                                https://github.com/ajeetdsouza/zoxide
+    
+    # bash                      # bash                                      # bash
+      inshellisense                 # intellisense type shell complete          https://github.com/microsoft/inshellisense
+      blesh                         # better bash line editor                   https://github.com/akinomyoga/ble.sh
   
     # system tools              # system tools                              # System Tools
       auto-cpufreq                  # auto-cpufreq                              https://github.com/AdnanHodzic/auto-cpufreq
@@ -152,6 +163,12 @@
       wl-clipboard-x11              # clipboard in xwayland                     https://search.nixos.org/packages?channel=unstable&from=0&size=50&sort=relevance&type=packages&query=wl-clipboard
       wayland-utils                 # `wayland-info`                            https://gitlab.freedesktop.org/wayland/wayland-utils
       egl-wayland                   # who knows what this is for                https://github.com/NVIDIA/egl-wayland/
+
+      # SteamTinkerLaunch needs these
+      xxd
+      xdotool
+      xorg.xwininfo
+      yad
         
   
   ];  

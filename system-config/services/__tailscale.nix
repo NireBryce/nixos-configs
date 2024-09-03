@@ -1,16 +1,18 @@
-# in <host>/tailscale.nix
+# in tailscale.nix
 # from https://guekka.github.io/nixos-server-2/
 { 
   config,
   outputs,
   lib,
+  self,
   ...
 }: 
 
 {
   imports = [
-    outputs.nixosModules.tailscale-autoconnect
-    # ../../___modules/tailscale-autoconnect.nix
+    # TODO: fixme
+    # outputs.nixosModules.tailscale-autoconnect
+    "${self}/___modules/tailscale-autoconnect.nix"
   ];
   services.tailscaleAutoconnect = {
     enable = true;
@@ -19,9 +21,9 @@
     advertiseExitNode = lib.mkDefault false;
   };
 
-  # sops.secrets.tailscale_key = {
-  #   sopsFile =  ../_sys.sec.secrets/secrets.yaml; 
-  # };
+  sops.secrets.tailscale_key = {
+    sopsFile =  "${self}/system-config/secrets/secrets.yaml"; 
+  };
 
   environment.persistence = {
     "/persist".directories = ["/var/lib/tailscale"];

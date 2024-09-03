@@ -1,6 +1,13 @@
 { pkgs, ...}:
 
 {
+
+  # programs.teamspeak_client = {              # teamspeak game comms                      https://www.teamspeak.com/
+  # enable = true;
+  #     # teamspeak_client.override {
+  #     #   ts3Plugins = [ teamspeak-pluginsdk.test_plugin ];
+  #     # }
+  # };
   programs.obs-studio = {
     enable = true;                  # screen recording / streaming         https://obsproject.com/
     plugins = with pkgs; [ 
@@ -8,19 +15,24 @@
     ];
   };
   home.packages = with pkgs; [ 
+
+    # terminals                 # terminals                                 # terminals
+      kitty                         # gpu accelerated terminal                  https://sw.kovidgoyal.net/kitty
+      kitty-img                     # kitty image rendering engine, like sixel  https://git.sr.ht/~zethra/kitty-img
+      wezterm                       # terminal emulator                         https://github.com/wez/wezterm
     # browsers                    # browsers                                # browsers
     # TODO: move kde packages to kde
       kdePackages.konqueror         # one of the best `info` file pagers        https://invent.kde.org/network/konqueror
       firefox                       # TODO: also installed as a system package. https://www.mozilla.org/en-US/firefox/
 
     # comms                       # comms                                   # comms
-      cinny-desktop                 # matrix client                             https://github.com/cinnyapp/cinny-desktop
+      # cinny-desktop                 # matrix client                             https://github.com/cinnyapp/cinny-desktop
+        # TODO: waiting on libolm fix
       discord                       # discord chat                              https://discord.com/
       keybase-gui                   # encrypted chat almost no one uses         https://keybase.io/
       keybase                       # see above                                 https://keybase.io/
-
+      teamspeak_client              # voice chat                                https://www.teamspeak.com/
       signal-desktop                # encrypted chat everone uses               https://signal.org/
-      teamspeak_client              # teamspeak game comms                      https://www.teamspeak.com/
       wire-desktop                  # old encrypted chat client, my ex used it  https://wire.com/
       zoom-us                       # less features than facetime somehow       https://zoom.us/
 
