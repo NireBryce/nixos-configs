@@ -15,7 +15,7 @@ in {
   ];
 
     environment.systemPackages = with pkgs; [ # Always have an editor here
-      bash                                          # bash.  ok i guess.
+      # bash                                          # bash.  ok i guess.
       coreutils                                     # coreutils
       curl                                          # curl
       gcc                                           # gcc
@@ -25,11 +25,12 @@ in {
       wget                                          # wget
       zoxide                                        # zoxide
       ripgrep                                       # ripgrep
-      # nix-output-monitor                            # `nom` nix-output-monitor  https://github.com/maralorn/nix-output-monitor
-      # nh                                            # nix helper                https://github.com/viperML/nh
+      nix-output-monitor                            # `nom` nix-output-monitor  https://github.com/maralorn/nix-output-monitor
+      nh                                            # nix helper                https://github.com/viperML/nh
       sops                                          # secret management
     ];
 
+ # TODO: move to home-manager
   # programs.nh = {                                   # `nh` nix-helper           https://github.com/viperML/nh
   #     enable = true;
   #     clean.enable = true;

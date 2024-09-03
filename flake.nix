@@ -98,7 +98,7 @@
       system      = "aarch64-darwin";
       modules     = [
         ./system-config/hosts/nire-lysithea/_host.nire-lysithea.config.nix
-        nix-index-database.nixosModules.nix-index
+        # nix-index-database.nixosModules.nix-index
 
         # inputs.stylix.nixosModules.stylix
         # TODO: stylix
