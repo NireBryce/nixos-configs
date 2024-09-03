@@ -38,8 +38,8 @@ in {
       flake = "/home/elly/nixos";
     };
 
-  programs.command-not-found.enable = lib.mkForce false; # conflicts with nix-index-database
-  
+  # programs.command-not-found.enable = lib.mkForce false; # conflicts with nix-index-database
+
   # TODO: fixme for darwin
     # fonts.packages = with pkgs; [
     #   (nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" "Iosevka" "JetBrainsMono" ];})  # be not afraid
