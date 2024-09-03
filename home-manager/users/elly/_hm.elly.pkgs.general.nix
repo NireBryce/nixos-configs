@@ -175,11 +175,11 @@
   # programs are packages you set extra pre-defined options in.
   #   google 'home-manager option search' to see how to find them.
 
-  programs.nix-index = { 
-    enable = true;
-    # enableZshIntegration = true;  # conflicts with command-not-found
-    # enableBashIntegration = true;
-  };
+  # programs.nix-index = { 
+  #   enable = true;
+  #   # enableZshIntegration = true;  # conflicts with command-not-found
+  #   # enableBashIntegration = true;
+  # };
   programs.direnv = {
     enable = true;
     enableBashIntegration = true;
