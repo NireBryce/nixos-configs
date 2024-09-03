@@ -1,4 +1,4 @@
-# in <host>/tailscale.nix
+# in tailscale.nix
 # from https://guekka.github.io/nixos-server-2/
 { 
   config,

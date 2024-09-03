@@ -19,7 +19,7 @@ in {
   environment.pathsToLink = [               # This determines what to add to /run/current-system/sw, generally defined elsewhere
     
   ];
-# nix settings metapackage
+# nix settings
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nixpkgs.config.allowUnfree = true;
 
