@@ -104,8 +104,10 @@
         # TODO: stylix
       ];
     # Expose the package set, including overlays, for convenience.
-    darwinPackages = self.darwinConfigurations."simple".pkgs;
+    # TODO: fixme
+      # darwinPackages = self.darwinConfigurations."nire-lysithea".pkgs;
     };
+    
   # TODO: fixme `home-manager switch --flake .#elly@nire-durandal`
   # TODO: fixme `nh home switch --configuration elly@nire-durandal ~/nixos/`
     homeConfigurations."elly@nire-lysithea" = home-manager.darwinModules.home-manager {
@@ -118,7 +120,8 @@
         ./home-manager/users/elly/nire-lysithea/__hm.elly-nire-lysithea.nix  # Elly home manager config
       ];
       useGlobalPkgs = true;
-      useUserPackages = true;
+      useUserPackages = true; 
+      users.users.elly.home = "/Users/elly";
     };
 
   # nire-galatea (thinkpad)
