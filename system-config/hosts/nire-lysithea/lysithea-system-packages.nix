@@ -25,8 +25,8 @@ in {
       wget                                          # wget
       zoxide                                        # zoxide
       ripgrep                                       # ripgrep
-      nix-output-monitor                            # `nom` nix-output-monitor  https://github.com/maralorn/nix-output-monitor
-      nh                                            # nix helper                https://github.com/viperML/nh
+      # nix-output-monitor                            # `nom` nix-output-monitor  https://github.com/maralorn/nix-output-monitor
+      # nh                                            # nix helper                https://github.com/viperML/nh
       linuxHeaders                                  # linux headers
       sops                                          # secret management
     ];
