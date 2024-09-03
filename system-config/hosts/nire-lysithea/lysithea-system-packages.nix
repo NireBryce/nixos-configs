@@ -11,7 +11,7 @@
 let flakePath = self;
 in {
   imports = [ 
-    "${flakePath}/___modules/linux-crisis-utilities.nix"
+    # "${flakePath}/___modules/linux-crisis-utilities.nix"
   ];
 
     environment.systemPackages = with pkgs; [ # Always have an editor here
@@ -27,7 +27,6 @@ in {
       ripgrep                                       # ripgrep
       # nix-output-monitor                            # `nom` nix-output-monitor  https://github.com/maralorn/nix-output-monitor
       # nh                                            # nix helper                https://github.com/viperML/nh
-      linuxHeaders                                  # linux headers
       sops                                          # secret management
     ];
 
