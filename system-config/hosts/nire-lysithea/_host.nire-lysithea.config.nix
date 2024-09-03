@@ -1,6 +1,7 @@
 # MacOS
 {
   self,
+  lib,
   ...
 }:
 
@@ -17,6 +18,10 @@ in {
     "${flakePath}/system-config/_sys.shells.nix"
 
   ];
+
+  programs.zsh.enable = true;
+  programs.zsh.enableCompletion = lib.mkForce false;    # Handled in home-manager, otherwise this calls compaudit
+
   # nix settings
     nix.settings.experimental-features = [ "nix-command" "flakes" ];
     nixpkgs.config.allowUnfree = true; 
