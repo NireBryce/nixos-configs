@@ -13,9 +13,9 @@ in {
     "${flakePath}/system-config/hosts/nire-lysithea/lysithea-system-packages.nix"
 
     # from common defaults
-    # "${flakePath}/system-config/_sys.bash.nix"
+    "${flakePath}/system-config/_sys.bash.nix"
     "${flakePath}/system-config/_sys.sec.sops.nix"
-    # "${flakePath}/system-config/_sys.shells.nix"
+    "${flakePath}/system-config/_sys.shells.nix"
 
   ];
 

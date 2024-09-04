@@ -105,9 +105,9 @@
       ];
     # Expose the package set, including overlays, for convenience.
     # TODO: fixme
-      # darwinPackages = self.darwinConfigurations."nire-lysithea".pkgs;
+      #  darwinPackages = self.darwinConfigurations."nire-lysithea".pkgs;
     };
-    
+
   # TODO: fixme `home-manager switch --flake .#elly@nire-durandal`
   # TODO: fixme `nh home switch --configuration elly@nire-durandal ~/nixos/`
     homeConfigurations."elly@nire-lysithea" = home-manager.darwinModules.home-manager {
