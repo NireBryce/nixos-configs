@@ -5,8 +5,8 @@
   # Unstable
     nixpkgs.url                                 = "github:NixOS/nixpkgs/nixos-unstable";
   # Darwin
-    nix-darwin.url                              = "github:LnL7/nix-darwin";
-    nix-darwin.inputs.nixpkgs.follows           = "nixpkgs";
+    darwin.url                                  = "github:LnL7/nix-darwin";
+    darwin.inputs.nixpkgs.follows               = "nixpkgs";
 
   # Impermanence
     impermanence.url                            = "github:Nix-community/impermanence";
@@ -43,7 +43,7 @@
     self,
     nixpkgs,
     nixpkgs-stable,                                         # https://nixos-and-flakes.thiscute.world/nixos-with-flakes/downgrade-or-upgrade-packages
-    nix-darwin,
+    darwin,
     home-manager,
     nixos-hardware,
     nix-index-database,
@@ -93,13 +93,18 @@
   # nire-lysithea (macbook)
   # TODO: FIXME `sudo nixos-rebuild switch --flake .#nire-durandal`
   # TODO: FIXME `nh os switch --hostname nire-durandal ~/nixos/`
-    darwinConfigurations."nire-lysithea"     = nix-darwin.lib.darwinSystem {
+    darwinConfigurations."nire-lysithea"     = darwin.lib.darwinSystem {
       specialArgs = inputs;     # send inputs to modules (is this actually the right description?)
       system      = "aarch64-darwin";
       modules     = [
         ./system-config/hosts/nire-lysithea/_host.nire-lysithea.config.nix
         # nix-index-database.nixosModules.nix-index
-
+        home-manager.darwinModules.home-manager { 
+          home-manager.useGlobalPkgs   = true;
+          home-manager.useUserPackages = true;
+          home-manager.users.elly = import ./home-manager/users/elly/nire-lysithea/__hm.elly-nire-lysithea.nix;  # Elly home manager config
+        #users.users.elly.home = "/Users/elly";
+        }
         # inputs.stylix.nixosModules.stylix
         # TODO: stylix
       ];
@@ -108,21 +113,6 @@
       # darwinPackages = self.darwinConfigurations."nire-lysithea".pkgs;
     };
     
-  # TODO: fixme `home-manager switch --flake .#elly@nire-durandal`
-  # TODO: fixme `nh home switch --configuration elly@nire-durandal ~/nixos/`
-    homeConfigurations."elly@nire-lysithea" = home-manager.darwinModules.home-manager {
-      pkgs              = import nixpkgs {              # Home manger requires a pkgs instance
-        system = "aarch64-darwin";
-        config = { allowUnfree = true; };
-      };
-      extraSpecialArgs  = inputs;                       # Pass flake inputs to our config
-      modules           = [
-        ./home-manager/users/elly/nire-lysithea/__hm.elly-nire-lysithea.nix  # Elly home manager config
-      ];
-      useGlobalPkgs = true;
-      useUserPackages = true; 
-      users.users.elly.home = "/Users/elly";
-    };
 
   # nire-galatea (thinkpad)
   # `sudo nixos-rebuild switch --flake .#nire-galatea`
