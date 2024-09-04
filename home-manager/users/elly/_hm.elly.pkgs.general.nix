@@ -7,12 +7,13 @@
 
 
 
+
   home.packages = with pkgs; [    # TODO: figure out which should be modularized for, say, headless machines
     
 
     # tailscale
     tailscale
-    tailscale-systray
+
 
     
 
@@ -30,13 +31,8 @@
     
     # cli tools                 # cli tools                                 # CLI tools
       entr                          # run commands when files change            https://github.com/eradman/entr
-      ethtool                       # ethtool                                   https://www.kernel.org/pub/software/network/ethtool/
-      iotop                         # io monitoring                             http://guichaz.free.fr/iotop
-      mlocate                       # locate from db built with `updatedb`      https://pagure.io/mlocate
       pciutils                      # lspci                                     https://mj.ucw.cz/sw/pciutils/
-      sysstat                       # system stats                              http://sebastien.godard.pagesperso-orange.fr/
       topgrade                      # upgrade all the things (nix sorta broken) https://github.com/topgrade-rs/topgrade
-      usbutils                      # lsusb                                     http://www.linux-usb.org/
   
     # dev                       #  dev                                      # dev
       asdf-vm                       # asdf (use dev shells instead)             https://github.com/asdf-vm/asdf-vm
@@ -53,7 +49,6 @@
       nano                          # text editor                               https://www.nano-editor.org/
       nanorc                        # nano syntax highlighting                  https://github.com/scopatz/nanorc
       neovim                        # text editor                               https://neovim.io/
-      vscode-fhs                    # vscode                                    https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/applications/editors/vscode/
 
     # file transfer             # file transfer                             # file transfer
       aria2                         # cli download manager                      https://aria2.github.io/
@@ -86,12 +81,10 @@
   
     # linux debugging           # linux debugging                           # linux debugging
       lsof                          # list open files                           https://linux.die.net/man/1/lsof
-      ltrace                        # library call tracer                       https://linux.die.net/man/1/ltrace
-      strace                        # system call tracer                        https://linux.die.net/man/1/strace
+      
 
     # multi-machine             # multi-machine                             # multi-machine
       mosh                          # ssh but better                            https://mosh.org/
-      input-leap                    # soft-KVM, synergy/barrier fork            https://github.com/input-leap/input-leap
   
     # nix                       # nix                                       # Nix - Move some of these into dev shells
       comma                         # `,` run things without installing them    https://github.com/nix-community/comma
@@ -152,23 +145,8 @@
       inshellisense                 # intellisense type shell complete          https://github.com/microsoft/inshellisense
       blesh                         # better bash line editor                   https://github.com/akinomyoga/ble.sh
   
-    # system tools              # system tools                              # System Tools
-      auto-cpufreq                  # auto-cpufreq                              https://github.com/AdnanHodzic/auto-cpufreq
-      lm_sensors                    # lm_sensors                                https://hwmon.wiki.kernel.org/lm_sensors
-      libinput                      # TODO: I forget what I need this for.      https://www.freedesktop.org/wiki/Software/libinput/
     
     # TODO: move to system config
-    # Wayland                   # Wayland                                   # Wayland
-      wl-clipboard                  # clipboard in wayland                      https://github.com/bugaevc/wl-clipboard
-      wl-clipboard-x11              # clipboard in xwayland                     https://search.nixos.org/packages?channel=unstable&from=0&size=50&sort=relevance&type=packages&query=wl-clipboard
-      wayland-utils                 # `wayland-info`                            https://gitlab.freedesktop.org/wayland/wayland-utils
-      egl-wayland                   # who knows what this is for                https://github.com/NVIDIA/egl-wayland/
-
-      # SteamTinkerLaunch needs these
-      xxd
-      xdotool
-      xorg.xwininfo
-      yad
         
   
   ];  
