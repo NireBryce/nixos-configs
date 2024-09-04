@@ -13,6 +13,7 @@ in {
 
 		"${flakePath}/home-manager/users/elly/_hm.elly.pkgs.general.nix"        # CLI packages
 		"${flakePath}/home-manager/users/elly/_hm.elly.pkgs.gui.nix" 						# GUI packages
+		"${flakePath}/home-manager/users/elly/_hm.elly.linux.pkgs.cli.nix" 			# linux-only packages
 
 
     "${flakePath}/home-manager/users/elly/_hm.elly.hm-meta.nix"

@@ -99,12 +99,7 @@
       modules     = [
         ./system-config/hosts/nire-lysithea/_host.nire-lysithea.config.nix
         # nix-index-database.nixosModules.nix-index
-        home-manager.darwinModules.home-manager { 
-          home-manager.useGlobalPkgs   = true;
-          home-manager.useUserPackages = true;
-          home-manager.users.elly = import ./home-manager/users/elly/nire-lysithea/__hm.elly-nire-lysithea.nix;  # Elly home manager config
-        #users.users.elly.home = "/Users/elly";
-        }
+      
         # inputs.stylix.nixosModules.stylix
         # TODO: stylix
       ];
@@ -112,7 +107,23 @@
     # TODO: fixme
       # darwinPackages = self.darwinConfigurations."nire-lysithea".pkgs;
     };
-    
+  # elly@nire-lysithea
+   homeConfigurations."elly@nire-lysithea" = home-manager.lib.homeManagerConfiguration {
+      pkgs = import nixpkgs {
+        system = "aarch64-darwin";
+        config = { 
+          allowUnfree = true; 
+          useGlobalPkgs   = true;
+          useUserPackages = true; 
+        };
+      };
+      extraSpecialArgs = inputs;
+      modules = [
+        ./home-manager/users/elly/nire-lysithea/__hm.elly-nire-lysithea.nix     # Elly home manager config
+        
+      ];
+      
+    };
 
   # nire-galatea (thinkpad)
   # `sudo nixos-rebuild switch --flake .#nire-galatea`
