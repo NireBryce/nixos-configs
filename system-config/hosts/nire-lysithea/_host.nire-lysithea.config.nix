@@ -14,7 +14,7 @@ in {
 
     # from common defaults
     "${flakePath}/system-config/_sys.bash.nix"
-    # "${flakePath}/system-config/_sys.sec.sops.nix"
+    "${flakePath}/system-config/_sys.sec.sops.nix"
     "${flakePath}/system-config/_sys.shells.nix"
 
   ];

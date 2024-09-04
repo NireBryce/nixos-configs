@@ -105,7 +105,7 @@
       ];
     # Expose the package set, including overlays, for convenience.
     # TODO: fixme
-      # darwinPackages = self.darwinConfigurations."nire-lysithea".pkgs;
+      #  darwinPackages = self.darwinConfigurations."nire-lysithea".pkgs;
     };
   # elly@nire-lysithea
    homeConfigurations."elly@nire-lysithea" = home-manager.lib.homeManagerConfiguration {
