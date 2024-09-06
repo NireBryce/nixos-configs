@@ -25,7 +25,7 @@
     22                        # ssh
     ];
     allowedTCPPortRanges = [  
-      {                       # kde-connect TCP
+      { # kde-connect TCP
         from = 1714;
         to   = 1764;    
       }
@@ -33,7 +33,7 @@
     allowedUDPPorts = [                            
     ];
     allowedUDPPortRanges = [
-      {                       # kde-connect UDP 
+      { ## kde-connect UDP 
         from = 1714;
         to   = 1764;
       }   
