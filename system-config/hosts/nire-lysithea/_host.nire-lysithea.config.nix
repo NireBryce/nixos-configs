@@ -1,6 +1,7 @@
 # MacOS
 {
   self,
+  nixpkgs,
   lib,
   ...
 }:
@@ -18,6 +19,13 @@ in {
     "${flakePath}/system-config/_sys.shells.nix"
 
   ];
+
+  # $NIX_PATH
+    nix.nixPath = [                                           # make nix-index not use channels https://github.com/nix-community/nix-index/issues/167
+      "nixpkgs=${nixpkgs}"
+      "/nix/var/nix/profiles/per-user/root/channels"
+    ];
+  
 
   programs.zsh.enable = true;
   programs.zsh.enableCompletion = lib.mkForce false;    # Handled in home-manager, otherwise this calls compaudit

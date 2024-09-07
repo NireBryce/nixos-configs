@@ -14,9 +14,6 @@
     # tailscale
     tailscale
 
-
-    
-
     # Font config
       (nerdfonts.override { fonts = [ "FiraCode" ]; })
     
@@ -84,7 +81,7 @@
       
 
     # multi-machine             # multi-machine                             # multi-machine
-      mosh                          # ssh but better                            https://mosh.org/
+      mosh                          # ssh but better (but abandoned)            https://mosh.org/
   
     # nix                       # nix                                       # Nix - Move some of these into dev shells
       comma                         # `,` run things without installing them    https://github.com/nix-community/comma

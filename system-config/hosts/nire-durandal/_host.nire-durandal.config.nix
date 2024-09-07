@@ -10,19 +10,39 @@ in {
   imports = [
     nixos-hardware.nixosModules.common-cpu-amd
     nixos-hardware.nixosModules.common-gpu-amd
-    # nixos-hardware.nixosModules.gigabyte-b550 # needs to be fixed upstream in nixos-hardware
-                                                # also need to fix oneshot being in unit instead of the next section
+    # nixos-hardware.nixosModules.gigabyte-b550             # needs to be fixed upstream in nixos-hardware
+                                                            #   also need to fix oneshot being in unit instead of the next section
     
-    # Users
+    ## Users
     # ../.usr.elly.nix # modularize this later
 
+<<<<<<< HEAD
     ## window-manager
     "${flakePath}/system-config/window-manager/_kde.nix"        # KDE
+||||||| parent of c9c87d9 (nix darwin might conflict with other commits)
+    # window-manager
+    "${flakePath}/system-config/window-manager/_kde.nix"        # KDE
+=======
+    ## window-manager
+    "${flakePath}/system-config/window-manager/_kde.nix"
+>>>>>>> c9c87d9 (nix darwin might conflict with other commits)
 
+<<<<<<< HEAD
     ## packages
     "${flakePath}/system-config/hosts/nire-durandal/durandal-packages.nix"      # system packages
 
     ## firewall and ssh
+||||||| parent of c9c87d9 (nix darwin might conflict with other commits)
+    # packages
+    "${flakePath}/system-config/hosts/nire-durandal/durandal-packages.nix"      # system packages
+
+    # firewall and ssh
+=======
+    ## system-level packages (home-manager manages user packages for me)
+    "${flakePath}/system-config/hosts/nire-durandal/durandal-packages.nix"      
+    
+    ## firewall and ssh
+>>>>>>> c9c87d9 (nix darwin might conflict with other commits)
     "${flakePath}/system-config/hosts/nire-durandal/firewall.nix"
     "${flakePath}/system-config/hosts/nire-durandal/ssh.nix"
 
@@ -45,6 +65,7 @@ in {
     ## tailscale
     "${flakePath}/system-config/services/__tailscale.nix"
 
+<<<<<<< HEAD
     ## sunshine game streaming
     "${flakePath}/___modules/sunshine.nix"
 
@@ -52,10 +73,24 @@ in {
     # ____________________________________________________ 
     # |- /!!\ WARN: this will delete /root on boot /!!\ -|
     # ----------------------------------------------------
+||||||| parent of c9c87d9 (nix darwin might conflict with other commits)
+    # impermanence
+    # ____________________________________________________ 
+    # |- /!!\ WARN: this will delete /root on boot /!!\ -|
+    # ----------------------------------------------------
+=======
+    ## impermanence
+    #! ____________________________________________________ 
+    #! |- /!!\ WARN: this will delete /root on boot /!!\ -|
+    #! ----------------------------------------------------
+>>>>>>> c9c87d9 (nix darwin might conflict with other commits)
     "${flakePath}/system-config/impermanence/_WARN.impermanence.nix"  
   ];
 
-  nix.nixPath = [ "nixpkgs=${nixpkgs}" ];                                       # make nix-index not use channels https://github.com/nix-community/nix-index/issues/167
+    nix.nixPath = [                                           # make nix-index not use channels https://github.com/nix-community/nix-index/issues/167
+      "nixpkgs=${nixpkgs}"
+      "/nix/var/nix/profiles/per-user/root/channels"
+    ];
   
   # hostname
   networking.hostName = "nire-durandal";
@@ -64,7 +99,9 @@ in {
   musnix = {
     enable          = true;
     kernel.realtime = false;
-    # das_watchdog.enable = true;                                               # starts the das watchdog which ensures realtime processes don't hang the machine
+    
+    ## ensure realtime processes don't hang the machine
+    # das_watchdog.enable = true;
   };
 
   # TODO: stylix theme config also in it's own module
@@ -85,13 +122,12 @@ in {
 
   console = {
     keyMap = "us";
-    # useXkbConfig = true; # use xkb.options in tty.
     font = "Lat2-Terminus16";
   };
 }
 
 
-# ways of overriding kernel
+## ways of overriding kernel
   # boot.kernelPackages = pkgs.linuxPackages_6_9;
   # boot.kernelPackages = pkgs.linux_6_6.override { argsOverride = { version = "6.6.23"; }; };
   # boot.kernelPackages = lib.mkForce pkgs.linuxPackagesFor (pkgs.linux_6_6.override {argsOverride = {version = "6.6.27";};});
@@ -107,14 +143,14 @@ in {
   #   };
   # });
 
-  # musnix:
-    # musnix.kernel.packages =  pkgs.linuxPackagesFor (pkgs.linux_6_6.override {
-    #   argsOverride = rec {
-    #     src = pkgs.fetchurl {
-    #       url = "mirror://kernel/linux/kernel/v6.x/linux-${version}.tar.xz";
-    #       sha256 = "IA/RGcue8GvO3NtSvgC6RDFj6rFUKVxYMf7ZoSIRqLk=";
-    #     };
-    #     version = "6.6.23";
-    #     modDirVersion = "6.6.23";
-    #   };
-    # });
+## musnix:
+  # musnix.kernel.packages =  pkgs.linuxPackagesFor (pkgs.linux_6_6.override {
+  #   argsOverride = rec {
+  #     src = pkgs.fetchurl {
+  #       url = "mirror://kernel/linux/kernel/v6.x/linux-${version}.tar.xz";
+  #       sha256 = "IA/RGcue8GvO3NtSvgC6RDFj6rFUKVxYMf7ZoSIRqLk=";
+  #     };
+  #     version = "6.6.23";
+  #     modDirVersion = "6.6.23";
+  #   };
+  # });

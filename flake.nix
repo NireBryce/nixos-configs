@@ -56,7 +56,7 @@
        
     
     # Reusable nixos modules you might want to export
-    nixosModules    = import ./___modules;   # These are usually stuff you would upstream into nixpkgs
+    nixosModules    = import ./___modules;                  # there are better names for this, but this is de-facto standard
     # homeManagerModules = import ./modules/home-manager
 
     overlays        = import ./___overlays {inherit inputs;};
@@ -66,7 +66,7 @@
   # `sudo nixos-rebuild switch --flake .#nire-durandal`
   # `nh os switch --hostname nire-durandal ~/nixos/`
     nixosConfigurations."nire-durandal"     = nixpkgs.lib.nixosSystem {
-      specialArgs = inputs;     # send inputs to modules (is this actually the right description?)
+      specialArgs = inputs;                                 # send inputs to modules (is this actually the right description?)
       system      = "x86_64-linux";
       modules     = [
         ./system-config/hosts/nire-durandal/_host.nire-durandal.config.nix
@@ -80,13 +80,13 @@
   # `home-manager switch --flake .#elly@nire-durandal`
   # `nh home switch --configuration elly@nire-durandal ~/nixos/`
     homeConfigurations."elly@nire-durandal" = home-manager.lib.homeManagerConfiguration {
-      pkgs              = import nixpkgs {              # Home manger requires a pkgs instance
+      pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
         system = "x86_64-linux";
         config = { allowUnfree = true; };
       };
-      extraSpecialArgs  = inputs;                       # Pass flake inputs to our config
+      extraSpecialArgs  = inputs;                           # Pass flake inputs to our config
       modules           = [
-        ./home-manager/users/elly/nire-durandal/__hm.elly-nire-durandal.nix  # Elly home manager config
+        ./home-manager/users/elly/nire-durandal/__hm.elly-nire-durandal.nix  # home manager entrypoint
       ];
     };
   
@@ -94,7 +94,7 @@
   # TODO: FIXME `sudo nixos-rebuild switch --flake .#nire-durandal`
   # TODO: FIXME `nh os switch --hostname nire-durandal ~/nixos/`
     darwinConfigurations."nire-lysithea"     = darwin.lib.darwinSystem {
-      specialArgs = inputs;     # send inputs to modules (is this actually the right description?)
+      specialArgs = inputs;
       system      = "aarch64-darwin";
       modules     = [
         ./system-config/hosts/nire-lysithea/_host.nire-lysithea.config.nix
@@ -120,7 +120,6 @@
       extraSpecialArgs = inputs;
       modules = [
         ./home-manager/users/elly/nire-lysithea/__hm.elly-nire-lysithea.nix     # Elly home manager config
-        
       ];
       
     };
@@ -152,45 +151,9 @@
   };
 }
 
-
-# nire-galatea
-  #   nixosConfigurations."nire-galatea"      = nixpkgs.lib.nixosSystem {
-  #     specialArgs = inputs;
-  #     system = "x86_64-linux";
-  #     modules = [
-  #       ./0H2-nire-galatea
-  #       nixos-hardware.nixosModules.lenovo-thinkpad-x270
-  #     ];
-  #   };
-  #   homeConfigurations."elly@nire-galatea"  = home-manager.lib.homeManagerConfiguration {
-  #     pkgs              = import nixpkgs {          # Home-manager requires 'pkgs' instance
-  #       system = "x86_64-linux";
-  #       config = { allowUnfree = true; };
-  #     };
-  #     extraSpecialArgs  = {inherit inputs;};        # Pass flake inputs to our config
-  #     modules           = [
-  #       # ./0U1-elly/home-manager/0U1h2-nire-galatea.nix
-  #     ];
-  #   };
-
-  # # nire-lysithea
-  #   nixosConfigurations."nire-lysithea"     = nixpkgs.lib.nixosSystem {
-  #     specialArgs = inputs;
-  #     system = "x86_64-linux";
-  #     modules = [
-  #       # ./0H3-nire-lysithea
-  #     ];
-  #   };
-  #   homeConfigurations."elly@nire-lysithea" = home-manager.lib.homeManagerConfiguration {
-  #     pkgs              = import nixpkgs {          # Home-manager requires 'pkgs' instance
-  #       system = "x86_64-linux";
-  #       config = { allowUnfree = true; };
-  #     };
-  #     extraSpecialArgs  = {inherit inputs;};        # Pass flake inputs to our config
-  #     modules           = [
-  #       # ./0U1-elly/0U1h3-nire-lysithea.nix
-  #     ];
-  #   };
+# NOTE: for nix-index to work with flake installs, you must `nix profile install` something
+#   see: https://github.com/nix-community/nix-index/issues/167
+#   `nix profile install nixpkgs#hello
 
 
 ################################################################################
