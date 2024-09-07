@@ -16,6 +16,10 @@
 
     # Font config
       (nerdfonts.override { fonts = [ "FiraCode" ]; })
+
+
+    ## Keybinds
+      kanata                        # keybinds                                  https://github.com/jtroo/kanata
     
     # archive                   # archive                                   # archive
       zip                           # zip                                       http://www.info-zip.org/

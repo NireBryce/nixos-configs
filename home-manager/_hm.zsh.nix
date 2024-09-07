@@ -157,7 +157,10 @@ in {
         disable -p '#'  
 
       # Inshellisense
-        # eval "$(is init zsh)"k
+        # eval "$(is init zsh)"
+
+      # homebrew
+      export PATH="/opt/homebrew/bin:$PATH"
   
     '';
 
