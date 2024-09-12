@@ -94,7 +94,7 @@
   # TODO: FIXME `sudo nixos-rebuild switch --flake .#nire-durandal`
   # TODO: FIXME `nh os switch --hostname nire-durandal ~/nixos/`
     darwinConfigurations."nire-lysithea"     = darwin.lib.darwinSystem {
-      specialArgs = inputs;
+      specialArgs = { inherit inputs; };
       system      = "aarch64-darwin";
       modules     = [
         ./system-config/hosts/nire-lysithea/_host.nire-lysithea.config.nix

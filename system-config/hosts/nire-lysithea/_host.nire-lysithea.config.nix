@@ -17,6 +17,8 @@ in {
     "${flakePath}/system-config/_sys.bash.nix"
     "${flakePath}/system-config/_sys.sec.sops.nix"
     "${flakePath}/system-config/_sys.shells.nix"
+    "${flakePath}/system-config/ssh.nix"
+
 
   ];
 
@@ -27,8 +29,8 @@ in {
     ];
   
 
-  programs.zsh.enable = true;
-  programs.zsh.enableCompletion = lib.mkForce false;    # Handled in home-manager, otherwise this calls compaudit
+    programs.zsh.enable = true;
+    programs.zsh.enableCompletion = lib.mkForce false;    # Handled in home-manager, otherwise this calls compaudit
 
   # nix settings
     nix.settings.experimental-features = [ "nix-command" "flakes" ];

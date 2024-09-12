@@ -16,35 +16,15 @@ in {
     ## Users
     # ../.usr.elly.nix # modularize this later
 
-<<<<<<< HEAD
     ## window-manager
     "${flakePath}/system-config/window-manager/_kde.nix"        # KDE
-||||||| parent of c9c87d9 (nix darwin might conflict with other commits)
-    # window-manager
-    "${flakePath}/system-config/window-manager/_kde.nix"        # KDE
-=======
-    ## window-manager
-    "${flakePath}/system-config/window-manager/_kde.nix"
->>>>>>> c9c87d9 (nix darwin might conflict with other commits)
 
-<<<<<<< HEAD
     ## packages
     "${flakePath}/system-config/hosts/nire-durandal/durandal-packages.nix"      # system packages
 
     ## firewall and ssh
-||||||| parent of c9c87d9 (nix darwin might conflict with other commits)
-    # packages
-    "${flakePath}/system-config/hosts/nire-durandal/durandal-packages.nix"      # system packages
-
-    # firewall and ssh
-=======
-    ## system-level packages (home-manager manages user packages for me)
-    "${flakePath}/system-config/hosts/nire-durandal/durandal-packages.nix"      
-    
-    ## firewall and ssh
->>>>>>> c9c87d9 (nix darwin might conflict with other commits)
     "${flakePath}/system-config/hosts/nire-durandal/firewall.nix"
-    "${flakePath}/system-config/hosts/nire-durandal/ssh.nix"
+    "${flakePath}/system-config/ssh.nix"
 
     ## nix generated
     "${flakePath}/system-config/hosts/nire-durandal/hardware-configuration.nix"
@@ -65,7 +45,6 @@ in {
     ## tailscale
     "${flakePath}/system-config/services/__tailscale.nix"
 
-<<<<<<< HEAD
     ## sunshine game streaming
     "${flakePath}/___modules/sunshine.nix"
 
@@ -73,17 +52,6 @@ in {
     # ____________________________________________________ 
     # |- /!!\ WARN: this will delete /root on boot /!!\ -|
     # ----------------------------------------------------
-||||||| parent of c9c87d9 (nix darwin might conflict with other commits)
-    # impermanence
-    # ____________________________________________________ 
-    # |- /!!\ WARN: this will delete /root on boot /!!\ -|
-    # ----------------------------------------------------
-=======
-    ## impermanence
-    #! ____________________________________________________ 
-    #! |- /!!\ WARN: this will delete /root on boot /!!\ -|
-    #! ----------------------------------------------------
->>>>>>> c9c87d9 (nix darwin might conflict with other commits)
     "${flakePath}/system-config/impermanence/_WARN.impermanence.nix"  
   ];
 
