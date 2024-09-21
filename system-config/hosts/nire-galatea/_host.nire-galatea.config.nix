@@ -9,7 +9,7 @@ in {
   imports = [
     nixos-hardware.nixosModules.lenovo-thinkpad-x270 
                                                 
-    
+      # TODO: make look like home-manager via let/in
     # Users
     # ../.usr.elly.nix # modularize this later
 

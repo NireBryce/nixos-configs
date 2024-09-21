@@ -13,6 +13,8 @@ in {
     nixpkgs.hostPlatform = "aarch64-darwin";
     
     imports = [
+
+        # TODO: make look like home-manager via let/in
       # from common defaults
         "${flakePath}/system-config/_sys.bash.nix"
       # "${flakePath}/system-config/_sys.sec.sops.nix"

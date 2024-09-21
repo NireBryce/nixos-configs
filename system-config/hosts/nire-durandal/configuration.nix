@@ -13,6 +13,7 @@ in {
     # nixos-hardware.nixosModules.gigabyte-b550             # needs to be fixed upstream in nixos-hardware
                                                             #   also need to fix oneshot being in unit instead of the next section
     
+    # TODO: make look like home-manager via let/in
     ## Users
     # ../.usr.elly.nix # modularize this later
 
