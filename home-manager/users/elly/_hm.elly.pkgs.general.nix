@@ -11,8 +11,6 @@
   home.packages = with pkgs; [    # TODO: figure out which should be modularized for, say, headless machines
     
 
-    # tailscale
-    tailscale
 
     # Font config
       (nerdfonts.override { fonts = [ "FiraCode" ]; })
