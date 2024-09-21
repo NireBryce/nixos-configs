@@ -21,6 +21,7 @@ in {
 
 		"${flakePath}/home-manager/meta/_hm.stateVersion.nix"
     "${flakePath}/home-manager/home.nix"
+    "${flakePath}/home-manager/_hm.hm-nix-defaults.nix"
 	];
 }
 
