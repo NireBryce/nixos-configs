@@ -4,13 +4,14 @@
 }:
 
 let flakePath = self;
+in let
+  elly-aliases = "${flakePath}/home-manager/elly/aliases.nix";
+  elly-default-vars = "${flakePath}/home-manager/elly/default-vars.nix";
 in {
   imports = [
   # home manager config fragments
-    "${flakePath}/home-manager/dev/default.nix"
-    "${flakePath}/home-manager/dotfiles/default.nix"
-    "${flakePath}/home-manager/_hm.shells.nix"              # shells
-    "${flakePath}/home-manager/_hm.bash.nix"                # bash
+    elly-aliases
+    elly-default-vars
   ];
 }
 
