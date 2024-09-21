@@ -96,7 +96,8 @@
       nix-du                        # nix-store analysis                        https://github.com/symphorien/nix-du
       nix-health                    # check nix issues                          https://github.com/juspay/nix-health
       nix-init                      # nix packages from URLs                    https://github.com/nix-community/nix-init
-      nix-index                     # nix store index search                    https://github.com/nix-community/nix-index
+      #TODO: nix-index handled in flake.nix, refer to darwin config 
+      # nix-index                     # nix store index search                    https://github.com/nix-community/nix-index
       nix-output-monitor            # `nom`                                     https://github.com/maralorn/nix-output-monitor
       nix-tree                      # view dependency graph                     https://hackage.haskell.org/package/nix-tree
       nix-zsh-completions           # nix shell completions                     https://github.com/nix-community/nix-zsh-completions
@@ -154,11 +155,13 @@
   # programs are packages you set extra pre-defined options in.
   #   google 'home-manager option search' to see how to find them.
 
-  programs.nix-index = { 
-    enable = true;
-    # enableZshIntegration = true;  # conflicts with command-not-found
-    # enableBashIntegration = true;
-  };
+  # TODO: refer to darwin section of flake for how to handle nix-index
+  # programs.nix-index = { 
+  #   enable = true;
+  #   enableZshIntegration = true;  # conflicts with command-not-found
+  #   enableBashIntegration = true;
+  # };
+
   programs.direnv = {
     enable = true;
     enableBashIntegration = true;

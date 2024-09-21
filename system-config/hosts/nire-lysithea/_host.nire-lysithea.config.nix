@@ -19,11 +19,12 @@ in {
     "${flakePath}/system-config/_sys.shells.nix"
   ];
 
+  # TODO: nix-index workaround potentially deprecated refer to darwin section of flake
   # $NIX_PATH
-    nix.nixPath = [                                           # make nix-index not use channels https://github.com/nix-community/nix-index/issues/167
-      "nixpkgs=${nixpkgs}"
-      "/nix/var/nix/profiles/per-user/root/channels"
-    ];
+    # nix.nixPath = [                                           # make nix-index not use channels https://github.com/nix-community/nix-index/issues/167
+    #   "nixpkgs=${nixpkgs}"
+    #   "/nix/var/nix/profiles/per-user/root/channels"
+    # ];
   
 
   programs.zsh.enable = true;

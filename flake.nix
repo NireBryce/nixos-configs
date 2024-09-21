@@ -97,11 +97,11 @@
       specialArgs = inputs;
       system      = "aarch64-darwin";
       modules     = [
-        ./system-config/hosts/nire-lysithea/_host.nire-lysithea.config.nix
-        # nix-index-database.nixosModules.nix-index
+        ./system-config/hosts/nire-lysithea/configuration.nix
+        nix-index-database.darwinModules.nix-index
       
-        # inputs.stylix.nixosModules.stylix
         # TODO: stylix
+        # inputs.stylix.darwinModules.stylix
       ];
     # Expose the package set, including overlays, for convenience.
     # TODO: fixme
@@ -120,6 +120,8 @@
       extraSpecialArgs = inputs;
       modules = [
         ./home-manager/users/elly/nire-lysithea/__hm.elly-nire-lysithea.nix     # Elly home manager config
+        nix-index-database.hmModules.nix-index
+          { programs.nix-index-database.comma.enable = true; }
       ];
       
     };
