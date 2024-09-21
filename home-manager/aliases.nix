@@ -1,0 +1,34 @@
+{
+  ...
+}:
+{
+    home.shellAliases = { 
+      # for functions in aliases:  https://stackoverflow.com/questions/34340575/zsh-alias-with-parameter
+      lcd = ''f() { cd $1 && ls -lah };f'';               
+      manix-browse = ''manix "" | grep '^# ' | sed 's/^# \(.*\) (.*/\1/;s/ (.*//;s/^# //' | fzf --preview="manix '{}'" | xargs manix'';
+      ll           ="ls -l";
+      cp           ="cp -i";                              # Confirm before overwriting something
+      cd           = "x";                                 # Empty oneletter for zoxide to not interfere with zi
+      exa          = "eza --icons=always";                # back compat tools
+      ls           = "eza --icons=always --header --group-directories-first --hyperlink";
+      gsa="git stash push";
+      img-cat="kitty +kitten icat";
+      kssh="kitty +kitten ssh";
+    };  
+
+  # ! WARN: unsure how globals work here
+  # TODO: for now they're declared in the zsh config but that's not 
+  #    declarative -- it saves them to abbr even if you remove them from 
+  #    the zsh config
+    programs.zsh.zsh-abbr.abbreviations = {
+        "abbr remove"="abbr erase";
+        "abbr rm"="abbr erase";
+        "cs-zsh-bindings"="bindkey";
+        "highlighting-theme-default"="fast-theme sv-orple";
+        "wh"="wormhole";
+        "whence"="type -a";
+        "zsh-keymap"="bindkey";
+        "rebuild-system" = "nh os switch .";
+        "rebuild-home" = "nh home switch ."; 
+    };
+}

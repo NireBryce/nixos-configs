@@ -17,6 +17,7 @@ in let
     elly-dotfiles               = "${flakePath}/home-manager/dotfiles/default.nix";
     elly-git-hm                 = "${flakePath}/home-manager/users/elly/_hm.elly.git.nix";
     elly-shells                 = "${flakePath}/home-manager/_hm.shells.nix";
+    elly-aliases                = "${flakePath}/home-manager/aliases.nix";
 in {
     imports = [
       hm-state
@@ -27,6 +28,7 @@ in {
       elly-darwin-packages
       elly-development-packages
       elly-dotfiles
+      elly-aliases
       
 
       # Previously on home.nix:
