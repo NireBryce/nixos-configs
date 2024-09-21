@@ -69,7 +69,7 @@
       specialArgs = inputs;                                 # send inputs to modules (is this actually the right description?)
       system      = "x86_64-linux";
       modules     = [
-        ./system-config/hosts/nire-durandal/_host.nire-durandal.config.nix
+        ./system-config/hosts/nire-durandal/configuration.nix
         nix-index-database.nixosModules.nix-index
         inputs.musnix.nixosModules.musnix
         # inputs.nixos-hardware.nixosModules.b550 # TODO: fix flake on nixos-hardware repo
