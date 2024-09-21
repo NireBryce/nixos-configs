@@ -86,7 +86,7 @@
       };
       extraSpecialArgs  = inputs;                           # Pass flake inputs to our config
       modules           = [
-        ./home-manager/users/elly/nire-durandal/__hm.elly-nire-durandal.nix  # home manager entrypoint
+        ./home-manager/user-elly/home-nire-durandal.nix  # home manager entrypoint
       ];
     };
   
@@ -119,7 +119,7 @@
       };
       extraSpecialArgs = inputs;
       modules = [
-        ./home-manager/users/elly/nire-lysithea/__hm.elly-nire-lysithea.nix     # Elly home manager config
+        ./home-manager/user-elly/home-nire-lysithea.nix     # Elly home manager config
         nix-index-database.hmModules.nix-index
           { programs.nix-index-database.comma.enable = true; }
       ];
@@ -147,7 +147,7 @@
       };
       extraSpecialArgs  = inputs;                       # Pass flake inputs to our config
       modules           = [
-        ./home-manager/users/elly/nire-galatea/__hm.elly-nire-galatea.nix  # Elly's home manager config
+        ./home-manager/user-elly/home-nire-galatea.nix  # Elly's home manager config
       ];
     };
   };
