@@ -5,14 +5,16 @@
 }:
 
 let flakePath = self;
+in let 
+    _sops-secrets = "${flakePath}/system-config/_sys.sec.sops.nix";
+    _sound = "${flakePath}/system-config/_sys.sound.nix";
+    _shells = "${flakePath}/system-config/_sys.shells.nix";
 in { 
     imports = [
       # Load system config fragments
-        "${flakePath}/system-config/_sys.sec.sops.nix"  # security modules
-        "${flakePath}/system-config/_sys.sound.nix"         # sound
-        "${flakePath}/system-config/_sys.shells.nix"        # shells
-        "${flakePath}/system-config/_sys.bash.nix"          # bash
-        
+        _sops-secrets
+        _sound
+        _shells
     ];
 
   
