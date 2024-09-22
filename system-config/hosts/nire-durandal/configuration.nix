@@ -54,13 +54,17 @@ in {
         "/nix/var/nix/profiles/per-user/root/channels"
     ];
   
-  # console / VTs
+  ## console / VTs
     console = {
         keyMap = "us";
         font = "Lat2-Terminus16";
     };
+  ## fonts
+    fonts.packages = with pkgs; [
+        (nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" "Iosevka" "JetBrainsMono" ];})  # be not afraid
+    ];
   
-  # hostname
+  ## hostname
     networking.hostName = "nire-durandal";
 
   # TODO: turn into its own module.  helps microphone issues, reduces latency

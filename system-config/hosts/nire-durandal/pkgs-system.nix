@@ -25,9 +25,7 @@ in {
     flake = "/home/elly/nixos";
   };
 
-  fonts.packages = with pkgs; [
-    (nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" "Iosevka" "JetBrainsMono" ];})  # be not afraid
-  ];
+  
   environment.systemPackages = with pkgs; [ # Always have an editor here
       bash                                          # bash.  ok i guess.
       coreutils                                     # coreutils
