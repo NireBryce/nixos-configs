@@ -19,11 +19,11 @@ in let
     shells-zsh      = "${flakePath}/home-manager/user-elly/_shells-zsh.nix";
     shell-aliases   = "${flakePath}/home-manager/user-elly/shell-aliases.nix";
     shell-paths     = "${flakePath}/home-manager/user-elly/_shell-paths.nix";
+
 in {
     imports = [
       hm-state
       hm-nix-defaults
-
       git
       shells-bash
       shells-zsh
