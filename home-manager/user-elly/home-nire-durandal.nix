@@ -14,8 +14,7 @@ in let
     pkgs-linux-cli  = "${flakePath}/home-manager/user-elly/_hm.elly.pkgs-linux-cli.nix";
     pkgs-dev        = "${flakePath}/home-manager/user-elly/_pkgs-dev.nix";
     dotfiles        = "${flakePath}/home-manager/user-elly/dotfiles/default.nix";
-    shells-bash     = "${flakePath}/home-manager/user-elly/_shells.bash.nix";
-    shells-zsh      = "${flakePath}/home-manager/user-elly/_shells.zsh.nix";
+    shells          = "${flakePath}/home-manager/user-elly/_shells.nix";
     git             = "${flakePath}/home-manager/user-elly/_git.nix";
     shell-paths     = "${flakePath}/home-manager/user-elly/_shell-paths.nix";
     shell-aliases   = "${flakePath}/home-manager/user-elly/_shell-aliases.nix";
@@ -31,8 +30,7 @@ in {
       pkgs-linux-cli
       pkgs-dev
       dotfiles
-      shells-bash
-      shells-zsh
+      shells
       shell-paths
       shell-aliases
       git

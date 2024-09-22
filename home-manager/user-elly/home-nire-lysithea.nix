@@ -12,25 +12,20 @@ in let
     pkgs-darwin     = "${flakePath}/home-manager/user-elly/_pkgs-darwin.nix";            
     pkgs-dev        = "${flakePath}/home-manager/user-elly/_pkgs-dev.nix";
     git             = "${flakePath}/home-manager/user-elly/_git.nix";
-    shells-bash     = "${flakePath}/home-manager/user-elly/_shells-bash.nix";
-    shells-zsh      = "${flakePath}/home-manager/user-elly/_shells-zsh.nix";
+    shells          = "${flakePath}/home-manager/user-elly/_shells.nix";
     shell-aliases   = "${flakePath}/home-manager/user-elly/_shell-aliases.nix";
     shell-paths     = "${flakePath}/home-manager/user-elly/_shell-paths.nix";
 
 in {
     imports = [
-      git
-      shells-bash
-      shells-zsh
-      pkgs-cli
-      pkgs-darwin
-      pkgs-dev
-      dotfiles
-      shell-aliases
-      shell-paths
-      shells-zsh
-      shells-bash
-      
+        git
+        shells
+        pkgs-cli
+        pkgs-darwin
+        pkgs-dev
+        dotfiles
+        shell-aliases
+        shell-paths     
     ];
 
   ## Defaults
