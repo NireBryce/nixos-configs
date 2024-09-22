@@ -2,6 +2,7 @@
   nixos-hardware,
   self,
   nixpkgs,
+  pkgs,
   ... 
 }: 
 
@@ -11,7 +12,6 @@ in let
     nixos-system-defaults       = "${flakePath}/system-config/configuration.nix";
     fixes-b550-suspend          = "${flakePath}/system-config/system-fixes/suspend/_b550m-gpp0-etc.nix";
     hardware-configuration      = "${flakePath}/system-config/hosts/nire-durandal/hardware-configuration.nix";
-    hardware-gpu                = "${flakePath}/system-config/hosts/nire-durandal/gpu.nix";
     networking-firewall         = "${flakePath}/system-config/hosts/nire-durandal/firewall.nix";
     networking-tailscale        = "${flakePath}/system-config/services/__tailscale.nix";
     remote-ssh                  = "${flakePath}/system-config/ssh.nix";
@@ -20,7 +20,7 @@ in let
     pkgs-system                 = "${flakePath}/system-config/hosts/nire-durandal/durandal-packages.nix";
     wm-kde                      = "${flakePath}/system-config/window-manager/_kde.nix";
 
-  # ! WARNING TO THE UNWARY ! this will erase the / mount point
+  #? ! WARNING TO THE UNWARY ! this will erase the / mount point
     replace-root-at-boot-etc    = "${flakePath}/system-config/impermanence/_WARN.impermanence.nix";
 
 in {
@@ -33,7 +33,6 @@ in {
         nixos-system-defaults
         fixes-b550-suspend
         hardware-configuration
-        hardware-gpu
         networking-firewall
         networking-tailscale
         remote-ssh
@@ -47,50 +46,102 @@ in {
       # |- /!!\ WARN: this will delete /root on boot /!!\ -|
       # ----------------------------------------------------
         replace-root-at-boot-etc
-      ];
+    ];
 
-      nix.nixPath = [                                           # make nix-index not use channels https://github.com/nix-community/nix-index/issues/167
+  # TODO: probably deprecated by the nix-index flake import
+    nix.nixPath = [                                           # make nix-index not use channels https://github.com/nix-community/nix-index/issues/167
         "nixpkgs=${nixpkgs}"
         "/nix/var/nix/profiles/per-user/root/channels"
     ];
   
+  # console / VTs
+    console = {
+        keyMap = "us";
+        font = "Lat2-Terminus16";
+    };
+  
   # hostname
-  networking.hostName = "nire-durandal";
+    networking.hostName = "nire-durandal";
 
-  # TODO: turn into its own module
-  musnix = {
-    enable          = true;
-    kernel.realtime = false;
-    
-    ## ensure realtime processes don't hang the machine
-    # das_watchdog.enable = true;
-  };
+  # TODO: turn into its own module.  helps microphone issues, reduces latency
+    musnix = {
+      enable          = true;
+      kernel.realtime = false;  # you shouldn't enable this unless debugging something
+      ## ensure realtime processes don't hang the machine
+        # das_watchdog.enable = true;
+    };
 
-  # TODO: stylix theme config also in it's own module
+  # TODO: stylix theme config
   # https://danth.github.io/stylix/configuration.htmloverride {argsOverride = {version = "6.6.27";};
 
-  hardware.amdgpu.amdvlk.enable = false;    # disable amdvlk to use radv
-  hardware.keyboard.zsa.enable = true;      # zsa keyboard package
-  services.ratbagd.enable      = true;      # for piper logitech mouse ctl
+  ## Input
+    hardware.keyboard.zsa.enable = true;      # zsa keyboard package
+    services.ratbagd.enable      = true;      # for piper logitech mouse ctl
+
+  ## SSH
+    services.openssh = {
+        enable = true;
+        settings.PasswordAuthentication = false;
+        settings.KbdInteractiveAuthentication = false;
+        allowSFTP = false; # Don't set this if you need sftp
+        # challengeResponseAuthentication = false; # folded into settings.KbdInteractiveAuthentication
+        
+        extraConfig = ''
+            AllowTcpForwarding yes
+            X11Forwarding no
+            AllowAgentForwarding no
+            AllowStreamLocalForwarding no
+            AuthenticationMethods publickey
+        '';
+    };
   
-  programs.steam = {
+  ## Firewall
+    networking.firewall = { 
       enable = true;
-      remotePlay.openFirewall      = true;  # Open ports in the firewall for Steam Remote Play
-      dedicatedServer.openFirewall = true;  # Open ports in the firewall for Source Dedicated Server
-      gamescopeSession.enable      = true;  # third party gamescope compositor
+    ## TCP
+      allowedTCPPorts = [
+          22                            # ssh
+      ];
+      allowedTCPPortRanges = [  
+          { from = 1714; to = 1764; }    # kde-connect TCP
+      ];
+    ## UDP
+      allowedUDPPorts = [                            
+      ];
+      allowedUDPPortRanges = [
+          { from = 1714; to = 1764; }   # kde-connect UDP   
+      ];
+    };
+  ## Games
+    programs.steam = {
+        enable = true;
+        remotePlay.openFirewall      = true;  # Open ports in the firewall for Steam Remote Play
+        dedicatedServer.openFirewall = true;  # Open ports in the firewall for Source Dedicated Server
+        gamescopeSession.enable      = true;  # third party gamescope compositor
     }; 
 
-  
+  ## GPU
+    hardware.amdgpu.amdvlk.enable = false;    # disable amdvlk to use radv
+    environment.systemPackages = with pkgs; [ # TODO: describe these
+        amf-headers
+        mesa
+        glfw
+        dxvk
+        vulkan-tools                # vulkan-tools                              https://github.com/KhronosGroup/Vulkan-Tools
+        glxinfo                     # glxinfo                                   https://www.khronos.org/opengl/
+        clinfo                      # clinfo                                    https://github.com/Oblomov/clinfo
+        amdgpu_top                  # amdgpu_top gpu monitor                    https://github.com/Umio-Yasuno/amdgpu_top
+    ];
+    hardware.graphics.extraPackages = with pkgs; [
+      libva-utils
+    ];
 
-  console = {
-    keyMap = "us";
-    font = "Lat2-Terminus16";
-  };
 
     # system
     # don't change this
     # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
     system.stateVersion = "23.11"; # Did you read the comment?
+
 }
 
 
