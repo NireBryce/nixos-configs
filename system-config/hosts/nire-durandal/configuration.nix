@@ -88,7 +88,7 @@ in {
         settings.PasswordAuthentication = false;
         settings.KbdInteractiveAuthentication = false;
         allowSFTP = false; # Don't set this if you need sftp
-        # challengeResponseAuthentication = false; # folded into settings.KbdInteractiveAuthentication
+
         
         extraConfig = ''
             AllowTcpForwarding yes
@@ -141,9 +141,9 @@ in {
     ];
 
 
-    # system
-    # don't change this
-    # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
+  ## nixos stateVersion for this system
+  #   don't change this
+  #   For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
     system.stateVersion = "23.11"; # Did you read the comment?
 
 }
