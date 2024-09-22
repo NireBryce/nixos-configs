@@ -16,7 +16,7 @@ in let
     networking-tailscale        = "${flakePath}/system-config/services/__tailscale.nix";
     remote-ssh                  = "${flakePath}/system-config/ssh.nix";
     remote-sunshine             = "${flakePath}/___modules/sunshine.nix";
-    user-elly                   = "${flakePath}/system-config/users/elly/_sys.elly.nix";
+    user-elly                   = "${flakePath}/system-config/users/_elly.nix";
     pkgs-system                 = "${flakePath}/system-config/hosts/nire-durandal/pkgs-system.nix";
     wm-kde                      = "${flakePath}/system-config/window-manager/_kde.nix";
 
