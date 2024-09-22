@@ -14,7 +14,7 @@ in let
     git             = "${flakePath}/home-manager/user-elly/_git.nix";
     shells-bash     = "${flakePath}/home-manager/user-elly/_shells-bash.nix";
     shells-zsh      = "${flakePath}/home-manager/user-elly/_shells-zsh.nix";
-    shell-aliases   = "${flakePath}/home-manager/user-elly/shell-aliases.nix";
+    shell-aliases   = "${flakePath}/home-manager/user-elly/_shell-aliases.nix";
     shell-paths     = "${flakePath}/home-manager/user-elly/_shell-paths.nix";
 
 in {

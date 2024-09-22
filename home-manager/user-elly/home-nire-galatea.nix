@@ -8,7 +8,7 @@ in {
   # This defines the nire-durandal host-specific user config for elly
   imports = [
     
-        # TODO: we need to make this host-agnostic by splitting it or using options
+      # TODO: fix these, refer to durandal or lysithea
       "${flakePath}/home-manager/window-manager/_kde.nix"      								# window-manager specific packages
 
       "${flakePath}/home-manager/users/elly/_hm.elly.pkgs.general.nix"      # CLI packages

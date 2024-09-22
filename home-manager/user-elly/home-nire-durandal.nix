@@ -18,7 +18,7 @@ in let
     shells-zsh      = "${flakePath}/home-manager/user-elly/_shells.zsh.nix";
     git             = "${flakePath}/home-manager/user-elly/_git.nix";
     shell-paths     = "${flakePath}/home-manager/user-elly/_shell-paths.nix";
-    shell-aliases   = "${flakePath}/home-manager/user-elly/shell-aliases.nix";
+    shell-aliases   = "${flakePath}/home-manager/user-elly/_shell-aliases.nix";
 
 in {
     desciption =  "This defines the nire-durandal host-specific user config for elly";
