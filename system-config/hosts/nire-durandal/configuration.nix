@@ -9,17 +9,17 @@
 let flakePath = self;
 in let 
     nixos-system-defaults       = "${flakePath}/system-config/linux-defaults.nix";
-    fixes-b550-suspend          = "${flakePath}/system-config/system-fixes/suspend/_b550m-gpp0-etc.nix";
     hardware-configuration      = "${flakePath}/system-config/hosts/nire-durandal/hardware-configuration.nix";
-    networking-firewall         = "${flakePath}/system-config/hosts/nire-durandal/firewall.nix";
+    pkgs-system                 = "${flakePath}/system-config/hosts/nire-durandal/pkgs-system.nix";
     networking-tailscale        = "${flakePath}/system-config/services/__tailscale.nix";
     remote-ssh                  = "${flakePath}/system-config/ssh.nix";
     remote-sunshine             = "${flakePath}/___modules/sunshine.nix";
     user-elly                   = "${flakePath}/system-config/users/_elly.nix";
-    pkgs-system                 = "${flakePath}/system-config/hosts/nire-durandal/pkgs-system.nix";
     wm-kde                      = "${flakePath}/system-config/window-manager/_kde.nix";
-
-  #? ! WARNING TO THE UNWARY ! this will erase the / mount point
+  
+  ## hardware bugfixes
+    fixes-b550-suspend          = "${flakePath}/system-config/system-fixes/suspend/_b550m-gpp0-etc.nix";
+  #! ! WARNING TO THE UNWARY ! this will erase the / mount point
     replace-root-at-boot-etc    = "${flakePath}/system-config/impermanence/_WARN.impermanence.nix";
 
 in {
@@ -32,7 +32,6 @@ in {
         nixos-system-defaults
         fixes-b550-suspend
         hardware-configuration
-        networking-firewall
         networking-tailscale
         remote-ssh
         remote-sunshine
