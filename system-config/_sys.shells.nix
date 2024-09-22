@@ -8,7 +8,7 @@
     "/share/zsh"
     "/share/bash-completion"
     "/share/fish"
-    ];
+  ];
 
   # shells
   environment = {
