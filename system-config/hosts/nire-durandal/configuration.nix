@@ -6,59 +6,52 @@
 }: 
 
 let flakePath = self;
+in let 
+  ## window-manager
+    nixos-system-defaults       = "${flakePath}/system-config/configuration.nix";
+    fixes-b550-suspend          = "${flakePath}/system-config/system-fixes/suspend/_b550m-gpp0-etc.nix";
+    hardware-configuration      = "${flakePath}/system-config/hosts/nire-durandal/hardware-configuration.nix";
+    hardware-gpu                = "${flakePath}/system-config/hosts/nire-durandal/gpu.nix";
+    networking-firewall         = "${flakePath}/system-config/hosts/nire-durandal/firewall.nix";
+    networking-tailscale        = "${flakePath}/system-config/services/__tailscale.nix";
+    remote-ssh                  = "${flakePath}/system-config/ssh.nix";
+    remote-sunshine             = "${flakePath}/___modules/sunshine.nix";
+    user-elly                   = "${flakePath}/system-config/users/elly/_sys.elly.nix";
+    pkgs-system                 = "${flakePath}/system-config/hosts/nire-durandal/durandal-packages.nix";
+    wm-kde                      = "${flakePath}/system-config/window-manager/_kde.nix";
+
+  # ! WARNING TO THE UNWARY ! this will erase the / mount point
+    replace-root-at-boot-etc    = "${flakePath}/system-config/impermanence/_WARN.impermanence.nix";
+
 in {
-  imports = [
-    nixos-hardware.nixosModules.common-cpu-amd
-    nixos-hardware.nixosModules.common-gpu-amd
-    # nixos-hardware.nixosModules.gigabyte-b550             # needs to be fixed upstream in nixos-hardware
+  # TODO: bring most of these back into the durandal configuration to better follow community conventions
+    imports = [
+        nixos-hardware.nixosModules.common-cpu-amd
+        nixos-hardware.nixosModules.common-gpu-amd
+        # nixos-hardware.nixosModules.gigabyte-b550         # needs to be fixed upstream in nixos-hardware
                                                             #   also need to fix oneshot being in unit instead of the next section
-    
-    # TODO: make look like home-manager via let/in
-    ## Users
-    # ../.usr.elly.nix # modularize this later
+        nixos-system-defaults
+        fixes-b550-suspend
+        hardware-configuration
+        hardware-gpu
+        networking-firewall
+        networking-tailscale
+        remote-ssh
+        remote-sunshine
+        user-elly
+        pkgs-system
+        wm-kde
 
-    ## window-manager
-    "${flakePath}/system-config/window-manager/_kde.nix"        # KDE
+      # impermanence
+      # ____________________________________________________ 
+      # |- /!!\ WARN: this will delete /root on boot /!!\ -|
+      # ----------------------------------------------------
+        replace-root-at-boot-etc
+      ];
 
-    ## packages
-    "${flakePath}/system-config/hosts/nire-durandal/durandal-packages.nix"      # system packages
-
-    ## firewall and ssh
-    "${flakePath}/system-config/hosts/nire-durandal/firewall.nix"
-    "${flakePath}/system-config/ssh.nix"
-
-    ## nix generated
-    "${flakePath}/system-config/hosts/nire-durandal/hardware-configuration.nix"
-    "${flakePath}/system-config/hosts/nire-durandal/stateVersion.nix"
-
-    ## hardware
-    "${flakePath}/system-config/hosts/nire-durandal/gpu.nix"
-
-    ## defaults and imports
-    "${flakePath}/system-config/configuration.nix"
-
-    ## users
-    "${flakePath}/system-config/users/elly/_sys.elly.nix"
-    
-    ## fixes
-    "${flakePath}/system-config/system-fixes/suspend/_b550m-gpp0-etc.nix"
-
-    ## tailscale
-    "${flakePath}/system-config/services/__tailscale.nix"
-
-    ## sunshine game streaming
-    "${flakePath}/___modules/sunshine.nix"
-
-    # impermanence
-    # ____________________________________________________ 
-    # |- /!!\ WARN: this will delete /root on boot /!!\ -|
-    # ----------------------------------------------------
-    "${flakePath}/system-config/impermanence/_WARN.impermanence.nix"  
-  ];
-
-    nix.nixPath = [                                           # make nix-index not use channels https://github.com/nix-community/nix-index/issues/167
-      "nixpkgs=${nixpkgs}"
-      "/nix/var/nix/profiles/per-user/root/channels"
+      nix.nixPath = [                                           # make nix-index not use channels https://github.com/nix-community/nix-index/issues/167
+        "nixpkgs=${nixpkgs}"
+        "/nix/var/nix/profiles/per-user/root/channels"
     ];
   
   # hostname
@@ -93,6 +86,11 @@ in {
     keyMap = "us";
     font = "Lat2-Terminus16";
   };
+
+    # system
+    # don't change this
+    # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
+    system.stateVersion = "23.11"; # Did you read the comment?
 }
 
 
