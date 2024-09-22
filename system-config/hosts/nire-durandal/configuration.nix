@@ -24,6 +24,7 @@ in let
 
 in {
   # TODO: bring most of these back into the durandal configuration to better follow community conventions
+  # TODO: start with linux-defaults next time
     imports = [
         nixos-hardware.nixosModules.common-cpu-amd
         nixos-hardware.nixosModules.common-gpu-amd
