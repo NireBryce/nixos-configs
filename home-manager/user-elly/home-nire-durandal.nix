@@ -6,7 +6,6 @@
 let flakePath = self;
 
 in let
-    hm-state            = "${flakePath}/home-manager/user-elly/_defaults-hm";
     hm-nix-defaults     = "${flakePath}/home-manager/user-elly/_defaults-nix.nix";
 
     wm-kde          = "${flakePath}/home-manager/user-elly/window-manager/_kde.nix";
@@ -25,7 +24,6 @@ in {
     desciption =  "This defines the nire-durandal host-specific user config for elly";
     
     imports = [
-      hm-state
       hm-nix-defaults
       wm-kde
       pkgs-cli
@@ -39,6 +37,11 @@ in {
       shell-aliases
       git
     ];
+
+    home.username = "elly";
+    home.homeDirectory = "/home/elly";
+
+    home.stateVersion = "22.11"; # Do not edit. To figure this out (in-case it changes) you can comment out the line and see what version it expected.
 }
 
 # REMINDER: home manager broke, so I had to use `nix-shell -p home-manager` to bootstrap

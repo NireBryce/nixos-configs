@@ -7,7 +7,6 @@ let
 in let 
 ## imports
   #* home-manager
-    hm-state        = "${flakePath}/home-manager/meta/_hm.stateVersion.nix";
     hm-nix-defaults = "${flakePath}/home-manager/_hm.hm-nix-defaults.nix";  
   #* user.elly
     dotfiles        = "${flakePath}/home-manager/user-elly/dotfiles/default.nix";
@@ -22,7 +21,6 @@ in let
 
 in {
     imports = [
-      hm-state
       hm-nix-defaults
       git
       shells-bash
@@ -38,7 +36,9 @@ in {
       
     ];
 
+  
   home.username = "elly";
-  home.homeDirectory = "/Users/elly";
+  home.homeDirectory = "/home/elly";
 
+  home.stateVersion = "22.11"; # Do not edit. To figure this out (in-case it changes) you can comment out the line and see what version it expected.
 }

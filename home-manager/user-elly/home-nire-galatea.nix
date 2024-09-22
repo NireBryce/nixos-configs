@@ -18,7 +18,6 @@ in {
       "${flakePath}/home-manager/users/elly/_hm.elly.hm-meta.nix"
       "${flakePath}/home-manager/users/elly/_hm.elly.git.nix"
 
-      "${flakePath}/home-manager/meta/_hm.stateVersion.nix"
       "${flakePath}/home-manager/_hm.hm-nix-defaults.nix"
       
     # previously on home.nix:
@@ -27,6 +26,13 @@ in {
       "${flakePath}/home-manager/_hm.shells.nix"              # shells
       "${flakePath}/home-manager/_hm.bash.nix"                # bash
   ];
+
+
+  home.username = "elly";
+  home.homeDirectory = "/home/elly";
+
+  home.stateVersion = "22.11"; # Do not edit.  To figure this out (in-case it changes) you can comment out the line and see what version it expected.
 }
 
+  
 # REMINDER: home manager broke, so I had to use `nix-shell -p home-manager` to bootstrap
