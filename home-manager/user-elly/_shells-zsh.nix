@@ -97,18 +97,18 @@ in {
       #################PASSWORD ENTRY/CONFIRM DIALOGS GO ABOVE##############################
 
       # Powerlevel10k instant prompt.  input above, else below
-      ${p10k_cfg}                                       
+        ${p10k_cfg}                                       
 
       # keybindings from various configs
-      ${bindings_cfg}
+        ${bindings_cfg}
       # end keybindings
 
       # setopts
-      ${setopts_cfg}
+        ${setopts_cfg}
       # end setopts
 
       # zstyle
-      ${zstyle_cfg}                                     
+        ${zstyle_cfg}                                     
       # end zstyle
 
       typeset -U path cdpath fpath manpath              # TODO: magic, no idea what it does                                
@@ -153,7 +153,7 @@ in {
       ${zellij_keys_cfg}  
 
 
-      # Necessary to run flakes, otherwise # gets expanded
+      # Necessary to run flakes, otherwise `#` gets expanded
         disable -p '#'  
 
       # Inshellisense

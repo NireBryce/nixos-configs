@@ -10,7 +10,7 @@ in let
     dotfiles        = "${flakePath}/home-manager/user-elly/dotfiles/default.nix";
     pkgs-cli        = "${flakePath}/home-manager/user-elly/_pkgs-general-cli.nix";
     pkgs-darwin     = "${flakePath}/home-manager/user-elly/_pkgs-darwin.nix";            
-    pkgs-dev        = "${flakePath}/home-manager/user-elly/dev/default.nix";
+    pkgs-dev        = "${flakePath}/home-manager/user-elly/_pkgs-dev.nix";
     git             = "${flakePath}/home-manager/user-elly/_git.nix";
     shells-bash     = "${flakePath}/home-manager/user-elly/_shells-bash.nix";
     shells-zsh      = "${flakePath}/home-manager/user-elly/_shells-zsh.nix";

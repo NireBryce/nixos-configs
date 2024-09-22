@@ -12,7 +12,7 @@ in let
     pkgs-cli        = "${flakePath}/home-manager/user-elly/_pkgs-general-cli.nix";
     pkgs-linux-gui  = "${flakePath}/home-manager/user-elly/_pkgs-linux-gui.nix";
     pkgs-linux-cli  = "${flakePath}/home-manager/user-elly/_hm.elly.pkgs-linux-cli.nix";
-    pkgs-dev        = "${flakePath}/home-manager/user-elly/dev/default.nix";
+    pkgs-dev        = "${flakePath}/home-manager/user-elly/_pkgs-dev.nix";
     dotfiles        = "${flakePath}/home-manager/user-elly/dotfiles/default.nix";
     shells-bash     = "${flakePath}/home-manager/user-elly/_shells.bash.nix";
     shells-zsh      = "${flakePath}/home-manager/user-elly/_shells.zsh.nix";
