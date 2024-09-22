@@ -9,7 +9,7 @@
 let flakePath = self;
 in let 
     nixos-system-defaults       = "${flakePath}/system-config/linux-defaults.nix";
-    hardware-configuration      = "${flakePath}/system-config/hosts/nire-durandal/hardware-configuration.nix";
+    hardware-configuration      = "${flakePath}/system-config/hardware-configurations/durandal-hardware-configuration.nix";
     networking-tailscale        = "${flakePath}/system-config/services/__tailscale.nix";
     remote-sunshine             = "${flakePath}/___modules/sunshine.nix";
     user-elly                   = "${flakePath}/system-config/users/_elly.nix";
