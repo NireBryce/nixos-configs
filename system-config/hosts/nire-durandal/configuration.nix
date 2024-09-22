@@ -8,13 +8,12 @@
 
 let flakePath = self;
 in let 
-    nixos-system-defaults       = "${flakePath}/system-config/linux-defaults.nix";
-    hardware-configuration      = "${flakePath}/system-config/hardware-configurations/durandal-hardware-configuration.nix";
-    networking-tailscale        = "${flakePath}/system-config/services/__tailscale.nix";
-    remote-sunshine             = "${flakePath}/___modules/sunshine.nix";
-    user-elly                   = "${flakePath}/system-config/users/_elly.nix";
-    wm-kde                      = "${flakePath}/system-config/window-manager/_kde.nix";
-
+    _nixos-system-defaults       = "${flakePath}/system-config/linux-defaults.nix";
+    _hardware-configuration      = "${flakePath}/system-config/hardware-configurations/durandal-hardware-configuration.nix";
+    _networking-tailscale        = "${flakePath}/system-config/services/__tailscale.nix";
+    _remote-sunshine             = "${flakePath}/___modules/sunshine.nix";
+    _user-elly                   = "${flakePath}/system-config/users/_elly.nix";
+    _wm-kde                      = "${flakePath}/system-config/window-manager/_kde.nix";
     linux-crisis-utils          = "${flakePath}/___modules/linux-crisis-utilities.nix";
   
   ## hardware bugfixes
@@ -30,15 +29,15 @@ in {
         nixos-hardware.nixosModules.common-gpu-amd
         # nixos-hardware.nixosModules.gigabyte-b550         # needs to be fixed upstream in nixos-hardware
                                                             #   also need to fix oneshot being in unit instead of the next section
-        nixos-system-defaults
-        fixes-b550-suspend
-        hardware-configuration
-        networking-tailscale
-        remote-sunshine
-        user-elly
-        wm-kde
+        _nixos-system-defaults
+        _hardware-configuration
+        _networking-tailscale
+        _remote-sunshine
+        _user-elly
+        _wm-kde
 
         linux-crisis-utils                                  # these are utilities that you want installed when something happens
+        fixes-b550-suspend
       # impermanence
       # ____________________________________________________ 
       # |- /!!\ WARN: this will delete /root on boot /!!\ -|

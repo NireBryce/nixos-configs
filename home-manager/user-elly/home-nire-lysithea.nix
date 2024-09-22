@@ -7,23 +7,23 @@ let
 in let 
 ## imports
   #* user.elly
-    dotfiles        = "${flakePath}/home-manager/user-elly/dotfiles/default.nix";
-    pkgs-cli        = "${flakePath}/home-manager/user-elly/_pkgs-general-cli.nix";
-    pkgs-darwin     = "${flakePath}/home-manager/user-elly/_pkgs-darwin.nix";            
-    pkgs-dev        = "${flakePath}/home-manager/user-elly/_pkgs-dev.nix";
-    git             = "${flakePath}/home-manager/user-elly/_git.nix";
-    shells          = "${flakePath}/home-manager/user-elly/_shells.nix";
-    shell-defaults   = "${flakePath}/home-manager/user-elly/_shell-aliases.nix";
+    _dotfiles        = "${flakePath}/home-manager/user-elly/dotfiles/default.nix";
+    _pkgs-cli        = "${flakePath}/home-manager/user-elly/_pkgs-general-cli.nix";
+    _pkgs-darwin     = "${flakePath}/home-manager/user-elly/_pkgs-darwin.nix";            
+    _pkgs-dev        = "${flakePath}/home-manager/user-elly/_pkgs-dev.nix";
+    _git             = "${flakePath}/home-manager/user-elly/_git.nix";
+    _shells          = "${flakePath}/home-manager/user-elly/_shells.nix";
+    _shell-defaults  = "${flakePath}/home-manager/user-elly/_shell-aliases.nix";
 
 in {
     imports = [
-        git
-        shells
-        pkgs-cli
-        pkgs-darwin
-        pkgs-dev
-        dotfiles
-        shell-defaults
+        _git
+        _shells
+        _pkgs-cli
+        _pkgs-darwin
+        _pkgs-dev
+        _dotfiles
+        _shell-defaults
     ];
 
   ## Defaults
