@@ -8,8 +8,7 @@
 
 let flakePath = self;
 in let 
-  ## window-manager
-    nixos-system-defaults       = "${flakePath}/system-config/configuration.nix";
+    nixos-system-defaults       = "${flakePath}/system-config/linux-defaults.nix";
     fixes-b550-suspend          = "${flakePath}/system-config/system-fixes/suspend/_b550m-gpp0-etc.nix";
     hardware-configuration      = "${flakePath}/system-config/hosts/nire-durandal/hardware-configuration.nix";
     networking-firewall         = "${flakePath}/system-config/hosts/nire-durandal/firewall.nix";
