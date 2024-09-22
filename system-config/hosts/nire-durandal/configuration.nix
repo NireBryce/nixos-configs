@@ -16,6 +16,8 @@ in let
     remote-sunshine             = "${flakePath}/___modules/sunshine.nix";
     user-elly                   = "${flakePath}/system-config/users/_elly.nix";
     wm-kde                      = "${flakePath}/system-config/window-manager/_kde.nix";
+
+    linux-crisis-utils          = "${flakePath}/___modules/linux-crisis-utilities.nix";
   
   ## hardware bugfixes
     fixes-b550-suspend          = "${flakePath}/system-config/system-fixes/suspend/_b550m-gpp0-etc.nix";
@@ -40,6 +42,7 @@ in {
         pkgs-system
         wm-kde
 
+        linux-crisis-utils                                  # these are utilities that you want installed when something happens
       # impermanence
       # ____________________________________________________ 
       # |- /!!\ WARN: this will delete /root on boot /!!\ -|
@@ -88,7 +91,6 @@ in {
         settings.KbdInteractiveAuthentication = false;
         allowSFTP = false; # Don't set this if you need sftp
 
-        
         extraConfig = ''
             AllowTcpForwarding yes
             X11Forwarding no
@@ -100,20 +102,20 @@ in {
   
   ## Firewall
     networking.firewall = { 
-      enable = true;
-    ## TCP
-      allowedTCPPorts = [
-          22                            # ssh
-      ];
-      allowedTCPPortRanges = [  
-          { from = 1714; to = 1764; }    # kde-connect TCP
-      ];
-    ## UDP
-      allowedUDPPorts = [                            
-      ];
-      allowedUDPPortRanges = [
-          { from = 1714; to = 1764; }   # kde-connect UDP   
-      ];
+        enable = true;
+      ## TCP
+        allowedTCPPorts = [
+            22                            # ssh
+        ];
+        allowedTCPPortRanges = [  
+            { from = 1714; to = 1764; }    # kde-connect TCP
+        ];
+      ## UDP
+        allowedUDPPorts = [                            
+        ];
+        allowedUDPPortRanges = [
+            { from = 1714; to = 1764; }   # kde-connect UDP   
+        ];
     };
   ## Games
     programs.steam = {
@@ -123,9 +125,23 @@ in {
         gamescopeSession.enable      = true;  # third party gamescope compositor
     }; 
 
-  ## GPU
-    hardware.amdgpu.amdvlk.enable = false;    # disable amdvlk to use radv
     environment.systemPackages = with pkgs; [ # TODO: describe these
+      ## System utilities
+        bash                        # bash.  ok i guess.
+        coreutils                   # coreutils
+        curl                        # curl
+        gcc                         # gcc
+        git                         # git
+        micro                       # micro
+        stdenv                      # stdenv
+        wget                        # wget
+        zoxide                      # zoxide
+        ripgrep                     # ripgrep
+        nix-output-monitor          # `nom` nix-output-monitor                  https://github.com/maralorn/nix-output-monitor
+        nh                          # nix helper                                https://github.com/viperML/nh
+        linuxHeaders                # linux headers
+        sops                        # secret management
+      ## GPU-related packages
         amf-headers
         mesa
         glfw
@@ -135,10 +151,27 @@ in {
         clinfo                      # clinfo                                    https://github.com/Oblomov/clinfo
         amdgpu_top                  # amdgpu_top gpu monitor                    https://github.com/Umio-Yasuno/amdgpu_top
     ];
+  
+  ## GPU
+    hardware.amdgpu.amdvlk.enable = false;    # disable amdvlk to use radv
     hardware.graphics.extraPackages = with pkgs; [
-      libva-utils
+        libva-utils
     ];
 
+  
+    services.fwupd.enable = true;         # fwupd
+    programs.nix-ld.enable = true;        # Needed for VSCode remote connection
+    programs.kdeconnect.enable = true;    # kde connect
+    programs.xwayland.enable = true;      # xwayland
+    programs.nh = {                                   # `nh` nix-helper           https://github.com/viperML/nh
+        enable = true;
+        clean.enable = true;
+        clean.extraArgs = "--keep-since 7d --keep 5";
+        flake = "/home/elly/nixos";
+    };
+
+  
+  
 
   ## nixos stateVersion for this system
   #   don't change this
@@ -147,6 +180,8 @@ in {
 
 }
 
+## I think this is deprecated by it being in the flake
+  # programs.command-not-found.enable = lib.mkForce false; # conflicts with nix-index-database
 
 ## ways of overriding kernel
   # boot.kernelPackages = pkgs.linuxPackages_6_9;
