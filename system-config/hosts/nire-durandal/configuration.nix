@@ -34,7 +34,6 @@ in {
         fixes-b550-suspend
         hardware-configuration
         networking-tailscale
-        remote-ssh
         remote-sunshine
         user-elly
         wm-kde
