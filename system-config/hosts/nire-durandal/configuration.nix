@@ -10,7 +10,6 @@ let flakePath = self;
 in let 
     nixos-system-defaults       = "${flakePath}/system-config/linux-defaults.nix";
     hardware-configuration      = "${flakePath}/system-config/hosts/nire-durandal/hardware-configuration.nix";
-    pkgs-system                 = "${flakePath}/system-config/hosts/nire-durandal/pkgs-system.nix";
     networking-tailscale        = "${flakePath}/system-config/services/__tailscale.nix";
     remote-ssh                  = "${flakePath}/system-config/ssh.nix";
     remote-sunshine             = "${flakePath}/___modules/sunshine.nix";
@@ -39,7 +38,6 @@ in {
         remote-ssh
         remote-sunshine
         user-elly
-        pkgs-system
         wm-kde
 
         linux-crisis-utils                                  # these are utilities that you want installed when something happens
