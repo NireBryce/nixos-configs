@@ -28,10 +28,15 @@ in {
   ];
 
 
-  home.username = "elly";
-  home.homeDirectory = "/home/elly";
+  ## Defaults
+    nixpkgs.config = {
+        allowUnfree          =     true;            # Disable if you don't want unfree packages
+        allowUnfreePredicate = (_: true);           # Workaround for https://github.com/nix-community/home-manager/issues/2942
+    };
+    home.username            = "elly";
+    home.homeDirectory       = "/home/elly";
 
-  home.stateVersion = "22.11"; # Do not edit.  To figure this out (in-case it changes) you can comment out the line and see what version it expected.
+    home.stateVersion        = "22.11"; # Do not edit. To figure this out (in-case it changes) you can comment out the line and see what version it expected.
 }
 
   

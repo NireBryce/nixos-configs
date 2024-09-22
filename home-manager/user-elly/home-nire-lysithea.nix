@@ -6,8 +6,6 @@ let
   flakePath = self;
 in let 
 ## imports
-  #* home-manager
-    hm-nix-defaults = "${flakePath}/home-manager/_hm.hm-nix-defaults.nix";  
   #* user.elly
     dotfiles        = "${flakePath}/home-manager/user-elly/dotfiles/default.nix";
     pkgs-cli        = "${flakePath}/home-manager/user-elly/_pkgs-general-cli.nix";
@@ -21,7 +19,6 @@ in let
 
 in {
     imports = [
-      hm-nix-defaults
       git
       shells-bash
       shells-zsh
@@ -36,9 +33,13 @@ in {
       
     ];
 
-  
-  home.username = "elly";
-  home.homeDirectory = "/home/elly";
+  ## Defaults
+    nixpkgs.config = {
+        allowUnfree          =     true;            # Disable if you don't want unfree packages
+        allowUnfreePredicate = (_: true);           # Workaround for https://github.com/nix-community/home-manager/issues/2942
+    };
+    home.username            = "elly";
+    home.homeDirectory       = "/home/elly";
 
-  home.stateVersion = "22.11"; # Do not edit. To figure this out (in-case it changes) you can comment out the line and see what version it expected.
+    home.stateVersion        = "22.11"; # Do not edit. To figure this out (in-case it changes) you can comment out the line and see what version it expected.
 }
