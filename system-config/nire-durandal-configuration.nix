@@ -15,7 +15,7 @@ in let
     _user-elly                  = "${flakePath}/system-config/users/_elly.nix";
     _wm-kde                     = "${flakePath}/system-config/window-manager/_kde.nix";
     linux-crisis-utils          = "${flakePath}/___modules/linux-crisis-utilities.nix";
-    _sops-secrets               = "${flakePath}/system-config/_sys.sec.sops.nix";
+    _sops-secrets               = "${flakePath}/system-config/secrets/_sops.nix";
   
   ## hardware bugfixes
     fixes-b550-suspend          = "${flakePath}/system-config/system-fixes/suspend/_b550m-gpp0-etc.nix";

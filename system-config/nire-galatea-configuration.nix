@@ -10,8 +10,8 @@ let flakePath = self;
 in let 
     # networking-tailscale = "${flakePath}/system-config/services/__tailscale.nix";
     _hardware-configuration = "${flakePath}/system-config/hardware-configurations/galatea-hardware-configuration.nix";
-    _sops-secrets           = "${flakePath}/system-config/_sys.sec.sops.nix";
-    _user-elly              = "${flakePath}/system-config/users/elly/_elly.nix";
+    _sops-secrets           = "${flakePath}/system-config/secrets/_sops.nix";
+    _user-elly              = "${flakePath}/system-config/users/_elly.nix";
     linux-crisis-utils      = "${flakePath}/___modules/linux-crisis-utilities.nix";
 
 in {
