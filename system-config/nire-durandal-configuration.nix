@@ -184,6 +184,9 @@ in {
     programs.zsh.enable = true;
     programs.zsh.enableCompletion = lib.mkForce false;  # unless disabled, home-manager causes an extra compaudit
    
+    programs.bash.interactiveShellInit = ''
+        ${pkgs.inshellisense}/bin/inshellisense;
+    '';
 
   ## System packages
     environment.systemPackages = with pkgs; [ # TODO: describe these

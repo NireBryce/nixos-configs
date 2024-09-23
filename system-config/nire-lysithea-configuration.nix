@@ -37,11 +37,13 @@
     programs.zsh.enable = true;
     programs.zsh.enableCompletion = lib.mkForce false;  # unless disabled, home-manager causes an extra compaudit
   
-
+    programs.bash.interactiveShellInit = ''
+        ${pkgs.inshellisense}/bin/inshellisense;
+    '';
   ## System packages
     environment.systemPackages = with pkgs; [ # Always have an editor here
       #* System utilities
-        bash                                           # ok. i guess.
+        # bash                                           # ok. i guess.
           #? Bash Plugins
             inshellisense                       # menu-complete and auto-suggest
             starship                            # theming
