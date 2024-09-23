@@ -13,7 +13,7 @@ in let
     _pkgs-dev        = "${flakePath}/home-manager/user-elly/_pkgs-dev.nix";
     _git             = "${flakePath}/home-manager/user-elly/_git.nix";
     _shells          = "${flakePath}/home-manager/user-elly/_shells.nix";
-    _shell-defaults  = "${flakePath}/home-manager/user-elly/_shell-aliases.nix";
+    _shell-defaults  = "${flakePath}/home-manager/user-elly/_shell-defaults.nix";
 
 in {
     imports = [

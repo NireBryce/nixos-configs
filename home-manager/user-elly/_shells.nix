@@ -61,14 +61,14 @@ in {
   
     programs.zsh = 
     let               
-        p10k_cfg          = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/010-p10k.zsh";
-        bindings_cfg      = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/initial-bindings.zsh";
-        setopts_cfg       = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/initial-setopts.zsh";
-        zstyle_cfg        = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/initial-zstyle.zsh";
-        zi_cfg            = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/020-zi.zsh";
-        zi_plugins_cfg    = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/zi-plugins.zsh";
-        atuin_cfg         = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/021-atuin.zsh";
-        zellij_keys_cfg   = lib.fileContents "${flakePath}/home-manager/dotfiles/config/zsh/040-free-zellij-keys.zsh";
+        p10k_cfg          = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/010-p10k.zsh";
+        bindings_cfg      = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/initial-bindings.zsh";
+        setopts_cfg       = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/initial-setopts.zsh";
+        zstyle_cfg        = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/initial-zstyle.zsh";
+        zi_cfg            = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/020-zi.zsh";
+        zi_plugins_cfg    = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/zi-plugins.zsh";
+        atuin_cfg         = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/021-atuin.zsh";
+        zellij_keys_cfg   = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/040-free-zellij-keys.zsh";
     in {
         shellAliases = {
           
