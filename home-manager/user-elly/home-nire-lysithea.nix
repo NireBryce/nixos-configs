@@ -3,26 +3,23 @@
 	... 
 }:
 let 
-  flakePath = self;
-in let 
-## imports
-    _dotfiles               = "${flakePath}/home-manager/user-elly/dotfiles/default.nix";
-    _git                    = "${flakePath}/home-manager/user-elly/_git.nix";
-    _pkgs-cli               = "${flakePath}/home-manager/user-elly/_pkgs-general-cli.nix";
-    _pkgs-darwin            = "${flakePath}/home-manager/user-elly/_pkgs-darwin.nix";            
-    _pkgs-dev               = "${flakePath}/home-manager/user-elly/_pkgs-dev.nix";
-    _shell-common           = "${flakePath}/home-manager/user-elly/_shell-common.nix";
-    _shells                 = "${flakePath}/home-manager/user-elly/_shells.nix";
+    flakePath = self;
+    ellyPath = "${flakePath}/home-manager/user-elly";
+    _dotfiles               = "${ellyPath}/dotfiles";
+    _git                    = "${ellyPath}/git";
+    _pkgs-cli               = "${ellyPath}/packages/_general-cli-pkgs.nix";
+    _pkgs-darwin            = "${ellyPath}/packages/_darwin-pkgs.nix";            
+    _pkgs-dev               = "${ellyPath}/packages/_dev-pkgs.nix";
+    _shell                  = "${ellyPath}/shell";
 
 in {
     imports = [
         _dotfiles           # dotfiles
-        _git                # elly git config
+        _git                # git
         _pkgs-cli           # general cli packages
         _pkgs-darwin        # mac-only packages
         _pkgs-dev           # dev packages (mostly nix)
-        _shell-common       # shell aliases, paths, etc
-        _shells             # zsh config, bash launch commands
+        _shell              # zsh config, bash launch commands, paths, etc
     ];
 
     desciption = 

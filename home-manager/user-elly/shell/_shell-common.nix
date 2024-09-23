@@ -17,22 +17,23 @@
 
     home.shellAliases = { 
       # for in-place functions in aliases refer to:  https://stackoverflow.com/questions/34340575/zsh-alias-with-parameter
-        lcd = ''f() { cd $1 && ls -lah };f'';               
-        manix-browse = ''${pkgs.manix}/bin/manix "" | grep '^# ' | sed 's/^# \(.*\) (.*/\1/;s/ (.*//;s/^# //' | fzf --preview="${pkgs.manix}/bin/manix '{}'" | xargs manix'';
-        ll           ="ls -l";
-        cp           ="cp -i";                              # Confirm before overwriting something
-        cd           = "x";                                 # Empty oneletter for zoxide to not interfere with zi
-        exa          = "${pkgs.eza}/bin/eza --icons=always";                # back compat tools
-        ls           = "${pkgs.eza}/bin/eza --icons=always --header --group-directories-first --hyperlink";
-        gsa="${pkgs.git}/bin/git stash push";
-        img-cat="${pkgs.kitty}/bin/kitty +kitten icat";
-        kssh="${pkgs.kitty}/bin/kitty +kitten ssh";
+        lcd             = ''f() { cd $1 && ls -lah };f'';               
+        cdls            = ''f() { cd $1 && ls -lah };f'';               
+        manix-browse    = ''${pkgs.manix}/bin/manix "" | grep '^# ' | sed 's/^# \(.*\) (.*/\1/;s/ (.*//;s/^# //' | fzf --preview="${pkgs.manix}/bin/manix '{}'" | xargs manix'';
+        ll              = "ls -l";
+        cp              = "cp -i";    # Confirm before overwriting something
+        cd              = "x";        # Empty oneletter for zoxide to not interfere with zi
+        exa             = "${pkgs.eza}/bin/eza --icons=always"; # exa back compat for tools
+        ls              = "${pkgs.eza}/bin/eza --icons=always --header --group-directories-first --hyperlink";
+        gsa             = "${pkgs.git}/bin/git stash push";
+        img-cat         = "${pkgs.kitty}/bin/kitty +kitten icat";
+        kssh            = "${pkgs.kitty}/bin/kitty +kitten ssh";
     };  
 
   # ! WARN: unsure how global aliases work here
-  # TODO: for now they're declared in the zsh config but that's not 
-  #    declarative -- it saves them to abbr even if you remove them from 
-  #    the zsh config
+  # for now they're declared in the zsh config but that's 
+  #    not declarative -- it saves them to abbr even if
+  #    you remove them from the zsh config
     programs.zsh.zsh-abbr.abbreviations = {
         "abbr remove"                = "abbr erase";
         "abbr rm"                    = "abbr erase";

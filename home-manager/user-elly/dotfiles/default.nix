@@ -1,7 +1,7 @@
 {...}:
 {
   imports = [
-  ./_hm.linking.nix
+      ./_hm.linking.nix
   ];
   
 }
