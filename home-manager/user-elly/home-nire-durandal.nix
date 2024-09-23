@@ -4,8 +4,9 @@
 }:
 
 let 
-    flakePath = self;
-    ellyPath = "${flakePath}/home-manager";
+    flakePath       =       self; # the root of the flake
+    ellyPath        =       "${flakePath}/home-manager";
+
     _dotfiles       =       "${ellyPath}/dotfiles";
     _git            =       "${ellyPath}/git";
     _pkgs-cli       =       "${ellyPath}/packages/_general-cli-pkgs.nix";
