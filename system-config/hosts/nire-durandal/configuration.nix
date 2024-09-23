@@ -3,18 +3,21 @@
   self,
   nixpkgs,
   pkgs,
+  lib,
   ... 
 }: 
 
 let flakePath = self;
 in let 
-    _nixos-system-defaults       = "${flakePath}/system-config/linux-defaults.nix";
     _hardware-configuration      = "${flakePath}/system-config/hardware-configurations/durandal-hardware-configuration.nix";
     _networking-tailscale        = "${flakePath}/system-config/services/__tailscale.nix";
     _remote-sunshine             = "${flakePath}/___modules/sunshine.nix";
     _user-elly                   = "${flakePath}/system-config/users/_elly.nix";
     _wm-kde                      = "${flakePath}/system-config/window-manager/_kde.nix";
     linux-crisis-utils          = "${flakePath}/___modules/linux-crisis-utilities.nix";
+    _sops-secrets = "${flakePath}/system-config/_sys.sec.sops.nix";
+    _sound = "${flakePath}/system-config/_sys.sound.nix";
+    _shells = "${flakePath}/system-config/_sys.shells.nix";
   
   ## hardware bugfixes
     fixes-b550-suspend          = "${flakePath}/system-config/system-fixes/suspend/_b550m-gpp0-etc.nix";
@@ -27,8 +30,9 @@ in {
     imports = [
         nixos-hardware.nixosModules.common-cpu-amd
         nixos-hardware.nixosModules.common-gpu-amd
-        # nixos-hardware.nixosModules.gigabyte-b550         # needs to be fixed upstream in nixos-hardware
-                                                            #   also need to fix oneshot being in unit instead of the next section
+        _sops-secrets
+        _sound
+        _shells
         _nixos-system-defaults
         _hardware-configuration
         _networking-tailscale
@@ -44,12 +48,24 @@ in {
       # ----------------------------------------------------
         replace-root-at-boot-etc
     ];
-
+    
+  ## nix settings
+    nix.settings.experimental-features = [ "nix-command" "flakes" ];
+    nixpkgs.config.allowUnfree = true;
   # TODO: probably deprecated by the nix-index flake import
     nix.nixPath = [                                           # make nix-index not use channels https://github.com/nix-community/nix-index/issues/167
         "nixpkgs=${nixpkgs}"
         "/nix/var/nix/profiles/per-user/root/channels"
     ];
+  
+  #? This determines what to add to /run/current-system/sw, generally defined elsewhere
+    environment.pathsToLink = [
+    ];
+
+  ## Boot
+    #? Use the systemd-boot EFI boot loader.
+    boot.loader.systemd-boot.enable = lib.mkDefault true;
+    boot.loader.efi.canTouchEfiVariables = lib.mkDefault true;
   
   ## console / VTs
     console = {
@@ -64,16 +80,9 @@ in {
   ## hostname
     networking.hostName = "nire-durandal";
 
-  # TODO: turn into its own module.  helps microphone issues, reduces latency
-    musnix = {
-      enable          = true;
-      kernel.realtime = false;  # you shouldn't enable this unless debugging something
-      ## ensure realtime processes don't hang the machine
-        # das_watchdog.enable = true;
-    };
-
-  # TODO: stylix theme config
-  # https://danth.github.io/stylix/configuration.htmloverride {argsOverride = {version = "6.6.27";};
+  ## Locale
+    i18n.defaultLocale = lib.mkDefault "en_US.UTF-8";
+    time.timeZone = lib.mkDefault "America/New_York"; 
 
   ## Input
     hardware.keyboard.zsa.enable = true;      # zsa keyboard package
@@ -94,7 +103,21 @@ in {
             AuthenticationMethods publickey
         '';
     };
-  
+  ## Networking
+    #* WiFi
+    networking.networkmanager.enable = true;  # Needs to be 'true' for KDE networking
+
+    #* Bluetooth
+    hardware.bluetooth.powerOnBoot = true;
+    hardware.bluetooth.enable =  true;
+    hardware.bluetooth.settings = {
+        General = {
+            FastConnectable = true;
+            DiscoverableTimeout =  60;  # seconds
+            PairableTimeout = 60;       # seconds
+        };
+    };
+
   ## Firewall
     networking.firewall = { 
         enable = true;
@@ -112,6 +135,7 @@ in {
             { from = 1714; to = 1764; }   # kde-connect UDP   
         ];
     };
+
   ## Games
     programs.steam = {
         enable = true;
@@ -120,8 +144,11 @@ in {
         gamescopeSession.enable      = true;  # third party gamescope compositor
     }; 
 
+  # TODO: do nix automatic garbage collection https://www.youtube.com/watch?v=uS8Bx8nQots 
+
+  ## System packages
     environment.systemPackages = with pkgs; [ # TODO: describe these
-      ## System utilities
+      #* System utilities
         bash                        # bash.  ok i guess.
         coreutils                   # coreutils
         curl                        # curl
@@ -136,7 +163,7 @@ in {
         nh                          # nix helper                                https://github.com/viperML/nh
         linuxHeaders                # linux headers
         sops                        # secret management
-      ## GPU-related packages
+      #* GPU-related packages
         amf-headers
         mesa
         glfw
@@ -153,7 +180,7 @@ in {
         libva-utils
     ];
 
-  
+  ## System services and utilities  
     services.fwupd.enable = true;         # fwupd
     programs.nix-ld.enable = true;        # Needed for VSCode remote connection
     programs.kdeconnect.enable = true;    # kde connect
@@ -166,6 +193,16 @@ in {
     };
 
   
+  # TODO: turn into its own module.  helps microphone issues, reduces latency
+    musnix = {
+      enable          = true;
+      kernel.realtime = false;  # you shouldn't enable this unless debugging something
+      ## ensure realtime processes don't hang the machine
+        # das_watchdog.enable = true;
+    };
+
+  # TODO: stylix theme config
+  # https://danth.github.io/stylix/configuration.htmloverride {argsOverride = {version = "6.6.27";};
   
 
   ## nixos stateVersion for this system
