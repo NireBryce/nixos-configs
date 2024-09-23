@@ -9,15 +9,13 @@
 
 let flakePath = self;
 in let 
-    _hardware-configuration      = "${flakePath}/system-config/hardware-configurations/durandal-hardware-configuration.nix";
-    _networking-tailscale        = "${flakePath}/system-config/services/__tailscale.nix";
-    _remote-sunshine             = "${flakePath}/___modules/sunshine.nix";
-    _user-elly                   = "${flakePath}/system-config/users/_elly.nix";
-    _wm-kde                      = "${flakePath}/system-config/window-manager/_kde.nix";
+    _hardware-configuration     = "${flakePath}/system-config/hardware-configurations/durandal-hardware-configuration.nix";
+    _networking-tailscale       = "${flakePath}/system-config/services/__tailscale.nix";
+    _remote-sunshine            = "${flakePath}/___modules/sunshine.nix";
+    _user-elly                  = "${flakePath}/system-config/users/_elly.nix";
+    _wm-kde                     = "${flakePath}/system-config/window-manager/_kde.nix";
     linux-crisis-utils          = "${flakePath}/___modules/linux-crisis-utilities.nix";
-    _sops-secrets = "${flakePath}/system-config/_sys.sec.sops.nix";
-    _sound = "${flakePath}/system-config/_sys.sound.nix";
-  
+    _sops-secrets               = "${flakePath}/system-config/_sys.sec.sops.nix";
   
   ## hardware bugfixes
     fixes-b550-suspend          = "${flakePath}/system-config/system-fixes/suspend/_b550m-gpp0-etc.nix";
@@ -31,7 +29,6 @@ in {
         nixos-hardware.nixosModules.common-cpu-amd
         nixos-hardware.nixosModules.common-gpu-amd
         _sops-secrets
-        _sound
         _hardware-configuration
         _networking-tailscale
         _remote-sunshine
@@ -106,6 +103,7 @@ in {
             AuthenticationMethods publickey
         '';
     };
+
   ## Networking
     #* WiFi
     networking.networkmanager.enable = true;  # Needs to be 'true' for KDE networking
@@ -120,6 +118,34 @@ in {
             PairableTimeout = 60;       # seconds
         };
     };
+  ## Sound
+    security.rtkit.enable = true;       # rtkit is optional but recommended
+    hardware.bluetooth.package = pkgs.bluez5-experimental;
+    services.pipewire = {
+        enable = true;
+        wireplumber.enable = true;
+        alsa.enable = true;
+        alsa.support32Bit = true;
+        pulse.enable = true;
+      #? If you want to use JACK applications, uncomment this
+        # jack.enable = true;
+    };
+    services.pipewire.wireplumber.configPackages = [
+        (pkgs.writeTextDir "wireplumber/bluetooth.lua.d/51-bluez-config.lua" ''
+            bluez_monitor.properties = { 
+                ["bluez6.enable-sbc-xq"] = true,
+                ["bluez6.enable-msbc"] = true,
+                ["bluez6.enable-hw-volume"] = true,
+                ["bluez6.headset-roles"] = "[ hsp_hs hsp_ag hfp_hf hfp_ag ]"
+            }''
+        )
+    ];
+  #? from https://github.com/jpas/etc-nixos/blob/365e5301e559af29eafec7f7c391f1c84b6c6477/profiles/hardware/sound.nix#L18
+    systemd.user.services.pipewire-pulse = {
+        bindsTo = [ "pipewire.service" ];
+        after = [ "pipewire.service" ];
+    };
+    #? pipewire also set in graphics.extraPackages below, presumably for hdmi/displayport audio
 
   ## Firewall
     networking.firewall = { 
@@ -194,6 +220,7 @@ in {
   ## GPU
     hardware.amdgpu.amdvlk.enable = false;    # disable amdvlk to use radv
     hardware.graphics.extraPackages = with pkgs; [
+        pipewire
         libva-utils
     ];
 

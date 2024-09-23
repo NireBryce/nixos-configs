@@ -6,29 +6,29 @@
 let flakePath = self;
 
 in let
-    _wm-kde          = "${flakePath}/home-manager/user-elly/window-manager/_kde.nix";
-    _pkgs-cli        = "${flakePath}/home-manager/user-elly/_pkgs-general-cli.nix";
-    _pkgs-linux-gui  = "${flakePath}/home-manager/user-elly/_pkgs-linux-gui.nix";
-    _pkgs-linux-cli  = "${flakePath}/home-manager/user-elly/_hm.elly.pkgs-linux-cli.nix";
-    _pkgs-dev        = "${flakePath}/home-manager/user-elly/_pkgs-dev.nix";
-    _dotfiles        = "${flakePath}/home-manager/user-elly/dotfiles/default.nix";
-    _shells          = "${flakePath}/home-manager/user-elly/_shells.nix";
-    _git             = "${flakePath}/home-manager/user-elly/_git.nix";
-    _shell-defaults  = "${flakePath}/home-manager/user-elly/_shell-defaults.nix";
+    wm-kde          = "${flakePath}/home-manager/user-elly/window-manager/_kde.nix";
+    pkgs-cli        = "${flakePath}/home-manager/user-elly/_pkgs-general-cli.nix";
+    pkgs-linux-gui  = "${flakePath}/home-manager/user-elly/_pkgs-linux-gui.nix";
+    pkgs-linux-cli  = "${flakePath}/home-manager/user-elly/_hm.elly.pkgs-linux-cli.nix";
+    pkgs-dev        = "${flakePath}/home-manager/user-elly/_pkgs-dev.nix";
+    dotfiles        = "${flakePath}/home-manager/user-elly/dotfiles/default.nix";
+    shells          = "${flakePath}/home-manager/user-elly/_shells.nix";
+    git             = "${flakePath}/home-manager/user-elly/_git.nix";
+    shell-defaults  = "${flakePath}/home-manager/user-elly/_shell-defaults.nix";
 
 in {
     desciption =  "This defines the nire-durandal host-specific user config for elly";
     
     imports = [
-      _wm-kde
-      _pkgs-cli
-      _pkgs-linux-gui
-      _pkgs-linux-cli
-      _pkgs-dev
-      _dotfiles
-      _shells
-      _shell-defaults
-      _git
+      wm-kde
+      pkgs-cli
+      pkgs-linux-gui
+      pkgs-linux-cli
+      pkgs-dev
+      dotfiles
+      shells
+      shell-defaults
+      git
     ];
 
   ## Defaults

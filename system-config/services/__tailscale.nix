@@ -2,7 +2,6 @@
 # from https://guekka.github.io/nixos-server-2/
 { 
   config,
-  outputs,
   lib,
   self,
   ...
