@@ -33,7 +33,6 @@ in {
         _sops-secrets
         _sound
         _shells
-        _nixos-system-defaults
         _hardware-configuration
         _networking-tailscale
         _remote-sunshine
