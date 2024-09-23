@@ -38,14 +38,14 @@
     programs.zsh.enableCompletion = lib.mkForce false;  # unless disabled, home-manager causes an extra compaudit
   
 
-
+  ## System packages
     environment.systemPackages = with pkgs; [ # Always have an editor here
+      #* System utilities
         bash                                           # ok. i guess.
           #? Bash Plugins
             inshellisense                       # menu-complete and auto-suggest
             starship                            # theming
             blesh                               # if bash were zsh
-
         coreutils                                     # coreutils
         gcc                                           # gcc
         git                                           # git
@@ -64,7 +64,7 @@
 } 
 
 
-# TODO: move to home-manager
+# TODO: move to home-manager / fix for darwin
   # programs.nh = {                                   # `nh` nix-helper           https://github.com/viperML/nh
   #     enable = true;
   #     clean.enable = true;

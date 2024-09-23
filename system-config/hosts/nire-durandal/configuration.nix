@@ -17,7 +17,7 @@ in let
     linux-crisis-utils          = "${flakePath}/___modules/linux-crisis-utilities.nix";
     _sops-secrets = "${flakePath}/system-config/_sys.sec.sops.nix";
     _sound = "${flakePath}/system-config/_sys.sound.nix";
-    _shells = "${flakePath}/system-config/_sys.shells.nix";
+  
   
   ## hardware bugfixes
     fixes-b550-suspend          = "${flakePath}/system-config/system-fixes/suspend/_b550m-gpp0-etc.nix";
@@ -32,7 +32,6 @@ in {
         nixos-hardware.nixosModules.common-gpu-amd
         _sops-secrets
         _sound
-        _shells
         _hardware-configuration
         _networking-tailscale
         _remote-sunshine
@@ -51,6 +50,7 @@ in {
   ## nix settings
     nix.settings.experimental-features = [ "nix-command" "flakes" ];
     nixpkgs.config.allowUnfree = true;
+
   # TODO: probably deprecated by the nix-index flake import
     nix.nixPath = [                                           # make nix-index not use channels https://github.com/nix-community/nix-index/issues/167
         "nixpkgs=${nixpkgs}"
@@ -59,6 +59,10 @@ in {
   
   #? This determines what to add to /run/current-system/sw, generally defined elsewhere
     environment.pathsToLink = [
+      #? Make sure system completions work even with home-manager managed shells 
+        "/share/zsh"
+        "/share/bash-completion"
+        "/share/fish"
     ];
 
   ## Boot
@@ -143,12 +147,26 @@ in {
         gamescopeSession.enable      = true;  # third party gamescope compositor
     }; 
 
-  # TODO: do nix automatic garbage collection https://www.youtube.com/watch?v=uS8Bx8nQots 
+  # TODO: do nix automatic garbage collection https://www.youtube.com/watch?v=uS8Bx8nQots
+  
+  ## Shells
+        environment.shells = with pkgs; [
+        bash
+        zsh
+    ];
+  #? zsh is handled through home-manager
+    programs.zsh.enable = true;
+    programs.zsh.enableCompletion = lib.mkForce false;  # unless disabled, home-manager causes an extra compaudit
+   
 
   ## System packages
     environment.systemPackages = with pkgs; [ # TODO: describe these
       #* System utilities
         bash                        # bash.  ok i guess.
+          #? Bash Plugins
+            inshellisense       # menu-complete and auto-suggest
+            starship            # theming
+            blesh               # if bash were zsh
         coreutils                   # coreutils
         curl                        # curl
         gcc                         # gcc
