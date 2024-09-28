@@ -39,5 +39,7 @@
       xdotool
       xorg.xwininfo
       yad
+    # xdg-open for stuff like `protontricks`
+      xdg-utils
   ];
 }

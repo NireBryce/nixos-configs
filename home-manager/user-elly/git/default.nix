@@ -3,5 +3,5 @@
 }: 
 
 {
-  import = [ ./_elly-git.nix ];
+  imports = [ ./_elly-git.nix ];
 }

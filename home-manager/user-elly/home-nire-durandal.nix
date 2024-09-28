@@ -1,3 +1,4 @@
+#* This defines the nire-durandal host-specific user config for elly
 { 
   self,
   ... 
@@ -5,7 +6,7 @@
 
 let 
     flakePath       =       self; # the root of the flake
-    ellyPath        =       "${flakePath}/home-manager";
+    ellyPath        =       "${flakePath}/home-manager/user-elly";
 
     _dotfiles       =       "${ellyPath}/dotfiles";
     _git            =       "${ellyPath}/git";
@@ -28,8 +29,6 @@ in {
         _wm-kde             # kde config
     ];
 
-    desciption = 
-    "This defines the nire-durandal host-specific user config for elly";
 
   ## Defaults
     nixpkgs.config = {

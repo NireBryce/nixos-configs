@@ -6,26 +6,26 @@ let flakePath = self;
 
 in {
   # This defines the nire-durandal host-specific user config for elly
-  imports = [
-    
-      # TODO: fix these, refer to durandal or lysithea
-      "${flakePath}/home-manager/window-manager/_kde.nix"      								# window-manager specific packages
-
-      "${flakePath}/home-manager/users/elly/_hm.elly.pkgs.general.nix"      # CLI packages
-      # "${flakePath}/home-manager/users/elly/_hm.elly.pkgs.gui.nix" 				# GUI packages
-
-
-      "${flakePath}/home-manager/users/elly/_hm.elly.hm-meta.nix"
-      "${flakePath}/home-manager/users/elly/_hm.elly.git.nix"
-
-      "${flakePath}/home-manager/_hm.hm-nix-defaults.nix"
+    imports = [
       
-    # previously on home.nix:
-      "${flakePath}/home-manager/dev/default.nix"
-      "${flakePath}/home-manager/dotfiles/default.nix"
-      "${flakePath}/home-manager/_hm.shells.nix"              # shells
-      "${flakePath}/home-manager/_hm.bash.nix"                # bash
-  ];
+        # TODO: fix these, refer to durandal or lysithea
+        "${flakePath}/home-manager/window-manager/_kde.nix"      								# window-manager specific packages
+
+        "${flakePath}/home-manager/users/elly/_hm.elly.pkgs.general.nix"      # CLI packages
+        # "${flakePath}/home-manager/users/elly/_hm.elly.pkgs.gui.nix" 				# GUI packages
+
+
+        "${flakePath}/home-manager/users/elly/_hm.elly.hm-meta.nix"
+        "${flakePath}/home-manager/users/elly/_hm.elly.git.nix"
+
+        "${flakePath}/home-manager/_hm.hm-nix-defaults.nix"
+        
+      # previously on home.nix:
+        "${flakePath}/home-manager/dev/default.nix"
+        "${flakePath}/home-manager/dotfiles/default.nix"
+        "${flakePath}/home-manager/_hm.shells.nix"              # shells
+        "${flakePath}/home-manager/_hm.bash.nix"                # bash
+    ];
 
 
   ## Defaults

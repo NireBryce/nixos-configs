@@ -173,6 +173,16 @@ in {
         gamescopeSession.enable      = true;  # third party gamescope compositor
     }; 
 
+    xdg.portal = { # https://github.com/NixOS/nixpkgs/issues/160923 
+      enable = true;
+      xdgOpenUsePortal = true;
+      wlr.enable = true;
+      extraPortals = [
+        pkgs.xdg-desktop-portal-gtk
+        pkgs.xdg-desktop-portal-wlr
+      ];
+    };
+
   # TODO: do nix automatic garbage collection https://www.youtube.com/watch?v=uS8Bx8nQots
   
   ## Shells
@@ -226,6 +236,9 @@ in {
         pipewire
         libva-utils
     ];
+    hardware.graphics.enable = true;
+    hardware.graphics.enable32Bit = true;
+
 
   ## System services and utilities  
     services.fwupd.enable = true;         # fwupd

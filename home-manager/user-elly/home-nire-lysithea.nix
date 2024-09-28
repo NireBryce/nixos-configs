@@ -1,3 +1,5 @@
+#* This defines the nire-lysithea host-specific user config for elly
+
 { 
 	self,
 	... 
@@ -22,9 +24,6 @@ in {
         _pkgs-dev           # dev packages (mostly nix)
         _shell              # zsh config, bash launch commands, paths, etc
     ];
-
-    desciption = 
-    "This defines the nire-lysithea host-specific user config for elly";
 
   ## Defaults
     nixpkgs.config = {
