@@ -81,45 +81,46 @@ in {
     networking.hostName = "nire-durandal";
 
   ## Locale
-    i18n.defaultLocale = lib.mkDefault "en_US.UTF-8";
-    time.timeZone = lib.mkDefault "America/New_York"; 
+    i18n.defaultLocale  = lib.mkDefault "en_US.UTF-8";
+    time.timeZone       = lib.mkDefault "America/New_York"; 
 
   ## Input
-    hardware.keyboard.zsa.enable = true;      # zsa keyboard package
-    services.ratbagd.enable      = true;      # for piper logitech mouse ctl
+    hardware.keyboard.zsa.enable    = true;         # zsa keyboard package
+    services.ratbagd.enable         = true;         # for piper logitech mouse ctl
 
   ## SSH
     services.openssh = {
-        enable = true;
-        settings.PasswordAuthentication = false;
-        settings.KbdInteractiveAuthentication = false;
-        allowSFTP = false; # Don't set this if you need sftp
-
+        enable                          = true;
+        allowSFTP                       = false;    # Don't set this if you need sftp
+        settings = {
+          PasswordAuthentication        = false;
+          KbdInteractiveAuthentication  = false;
+        };
         extraConfig = ''
-            AllowTcpForwarding yes
-            X11Forwarding no
-            AllowAgentForwarding no
-            AllowStreamLocalForwarding no
-            AuthenticationMethods publickey
+            AllowTcpForwarding          yes
+            X11Forwarding               no
+            AllowAgentForwarding        no
+            AllowStreamLocalForwarding  no
+            AuthenticationMethods       publickey
         '';
     };
 
   ## Networking
     #* WiFi
-    networking.networkmanager.enable = true;  # Needs to be 'true' for KDE networking
+    networking.networkmanager.enable = true;        # Needs to be 'true' for KDE networking
 
     #* Bluetooth
-    hardware.bluetooth.powerOnBoot = true;
-    hardware.bluetooth.enable =  true;
-    hardware.bluetooth.settings = {
+    hardware.bluetooth.powerOnBoot   = true;
+    hardware.bluetooth.enable        = true;
+    hardware.bluetooth.settings      = {
         General = {
             FastConnectable = true;
-            DiscoverableTimeout =  60;  # seconds
-            PairableTimeout = 60;       # seconds
+            DiscoverableTimeout = 60; # seconds
+            PairableTimeout     = 60; # seconds
         };
     };
   ## Sound
-    security.rtkit.enable = true;       # rtkit is optional but recommended
+    security.rtkit.enable = true;                       # rtkit is optional but recommended
     hardware.bluetooth.package = pkgs.bluez5-experimental;
     services.pipewire = {
         enable = true;
@@ -152,25 +153,25 @@ in {
         enable = true;
       ## TCP
         allowedTCPPorts = [
-            22                            # ssh
+            22                                          # ssh
         ];
         allowedTCPPortRanges = [  
-            { from = 1714; to = 1764; }    # kde-connect TCP
+            { from = 1714; to = 1764; }                 # kde-connect TCP
         ];
       ## UDP
         allowedUDPPorts = [                            
         ];
         allowedUDPPortRanges = [
-            { from = 1714; to = 1764; }   # kde-connect UDP   
+            { from = 1714; to = 1764; }                 # kde-connect UDP   
         ];
     };
 
   ## Games
     programs.steam = {
         enable = true;
-        remotePlay.openFirewall      = true;  # Open ports in the firewall for Steam Remote Play
-        dedicatedServer.openFirewall = true;  # Open ports in the firewall for Source Dedicated Server
-        gamescopeSession.enable      = true;  # third party gamescope compositor
+        remotePlay.openFirewall      = true;            # Open ports in the firewall for Steam Remote Play
+        dedicatedServer.openFirewall = true;            # Open ports in the firewall for Source Dedicated Server
+        gamescopeSession.enable      = true;            # third party gamescope compositor
     }; 
 
     xdg.portal = { # https://github.com/NixOS/nixpkgs/issues/160923 
@@ -203,9 +204,9 @@ in {
       #* System utilities
         bash                        # bash.  ok i guess.
           #? Bash Plugins
-            inshellisense       # menu-complete and auto-suggest
-            starship            # theming
-            blesh               # if bash were zsh
+            inshellisense               # menu-complete and auto-suggest
+            starship                    # theming
+            blesh                       # if bash were zsh
         coreutils                   # coreutils
         curl                        # curl
         gcc                         # gcc
@@ -231,7 +232,7 @@ in {
     ];
   
   ## GPU
-    hardware.amdgpu.amdvlk.enable = false;    # disable amdvlk to use radv
+    hardware.amdgpu.amdvlk.enable = true;   # disable amdvlk to use radv
     hardware.graphics.extraPackages = with pkgs; [
         pipewire
         libva-utils
@@ -241,11 +242,11 @@ in {
 
 
   ## System services and utilities  
-    services.fwupd.enable = true;         # fwupd
-    programs.nix-ld.enable = true;        # Needed for VSCode remote connection
-    programs.kdeconnect.enable = true;    # kde connect
-    programs.xwayland.enable = true;      # xwayland
-    programs.nh = {                                   # `nh` nix-helper           https://github.com/viperML/nh
+    services.fwupd.enable = true;           # fwupd
+    programs.nix-ld.enable = true;          # Needed for VSCode remote connection
+    programs.kdeconnect.enable = true;      # kde connect
+    programs.xwayland.enable = true;        # xwayland
+    programs.nh = {                         # `nh` nix-helper           https://github.com/viperML/nh
         enable = true;
         clean.enable = true;
         clean.extraArgs = "--keep-since 7d --keep 5";
@@ -256,13 +257,13 @@ in {
   # TODO: turn into its own module.  helps microphone issues, reduces latency
     musnix = {
       enable          = true;
-      kernel.realtime = false;  # you shouldn't enable this unless debugging something
+      kernel.realtime = false;              # you shouldn't enable this unless debugging something
       ## ensure realtime processes don't hang the machine
         # das_watchdog.enable = true;
     };
 
   # TODO: stylix theme config
-  # https://danth.github.io/stylix/configuration.htmloverride {argsOverride = {version = "6.6.27";};
+  # https://danth.github.io/stylix/configuration.html override {argsOverride = {version = "6.6.27";};
   
 
   ## nixos stateVersion for this system
