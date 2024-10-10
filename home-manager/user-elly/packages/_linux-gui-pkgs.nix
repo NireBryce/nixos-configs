@@ -20,12 +20,12 @@
       kitty                         # gpu accelerated terminal                  https://sw.kovidgoyal.net/kitty
       kitty-img                     # kitty image rendering engine, like sixel  https://git.sr.ht/~zethra/kitty-img
       wezterm                       # terminal emulator                         https://github.com/wez/wezterm
-    # browsers                    # browsers                                # browsers
+    # browsers                  # browsers                                # browsers
     # TODO: move kde packages to kde
       kdePackages.konqueror         # one of the best `info` file pagers        https://invent.kde.org/network/konqueror
       firefox                       # TODO: also installed as a system package. https://www.mozilla.org/en-US/firefox/
 
-    # comms                       # comms                                   # comms
+    # comms                     # comms                                   # comms
       # cinny-desktop                 # matrix client                             https://github.com/cinnyapp/cinny-desktop
         # TODO: waiting on libolm fix
       discord                       # discord chat                              https://discord.com/
@@ -35,15 +35,8 @@
       signal-desktop                # encrypted chat everone uses               https://signal.org/
       wire-desktop                  # old encrypted chat client, my ex used it  https://wire.com/
       zoom-us                       # less features than facetime somehow       https://zoom.us/
-
-    # TODO: bring back gaming module?
-    # games                     # games                                     # games
-      lutris                        # lutris game launcher                      https://lutris.net/
-      # steam                       # in nix config                             https://github.com/NixOS/nixpkgs/blob/stable/pkgs/applications/games/steam/steam.nix
-      protonup-qt                   # proton installer/updater                  https://davidotek.github.io/protonup-qt/
-      protontricks                  # protontricks                              https://github.com/Matoking/protontricks
-      wineWowPackages.waylandFull   # Wine for wayland                          https://www.winehq.org/
-      steamtinkerlaunch             # steamtinkerlaunch                         https://github.com/sonic2kk/steamtinkerlaunch
+    # editors                   # editors                                   # editors
+      vscode-fhs                    # vscode                                    https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/applications/editors/vscode/
     # Home                      # Home                                      # Home
       # grocy                         # grocy                                     https://www.grocy.info/
     # media and sound           # media and sound                           # media and sound
@@ -63,6 +56,7 @@
       libreoffice-qt                # office                                    https://www.libreoffice.org/
 
   ];
+  # Game stuff managed through system configuration
 }
 
 # NOTES:

@@ -166,23 +166,6 @@ in {
         ];
     };
 
-  ## Games
-    programs.steam = {
-        enable = true;
-        remotePlay.openFirewall      = true;            # Open ports in the firewall for Steam Remote Play
-        dedicatedServer.openFirewall = true;            # Open ports in the firewall for Source Dedicated Server
-        gamescopeSession.enable      = true;            # third party gamescope compositor
-    }; 
-
-    xdg.portal = { # https://github.com/NixOS/nixpkgs/issues/160923 
-      enable = true;
-      xdgOpenUsePortal = true;
-      wlr.enable = true;
-      extraPortals = [
-        pkgs.xdg-desktop-portal-gtk
-        pkgs.xdg-desktop-portal-wlr
-      ];
-    };
 
   # TODO: do nix automatic garbage collection https://www.youtube.com/watch?v=uS8Bx8nQots
   
@@ -229,8 +212,32 @@ in {
         glxinfo                     # glxinfo                                   https://www.khronos.org/opengl/
         clinfo                      # clinfo                                    https://github.com/Oblomov/clinfo
         amdgpu_top                  # amdgpu_top gpu monitor                    https://github.com/Umio-Yasuno/amdgpu_top
+      #* games                     
+        lutris                        # lutris game launcher                      https://lutris.net/
+        # steam                       # in nix config                             https://github.com/NixOS/nixpkgs/blob/stable/pkgs/applications/games/steam/steam.nix
+        protonup-qt                   # proton installer/updater                  https://davidotek.github.io/protonup-qt/
+        protontricks                  # protontricks                              https://github.com/Matoking/protontricks
+        wineWowPackages.waylandFull   # Wine for wayland                          https://www.winehq.org/
+        steamtinkerlaunch             # steamtinkerlaunch                         https://github.com/sonic2kk/steamtinkerlaunch
     ];
-  
+  #* steam - (fhs)
+    programs.steam = {
+        enable = true;
+        remotePlay.openFirewall      = true;            # Open ports in the firewall for Steam Remote Play
+        dedicatedServer.openFirewall = true;            # Open ports in the firewall for Source Dedicated Server
+        gamescopeSession.enable      = true;            # third party gamescope compositor
+    }; 
+
+    xdg.portal = { # fix steam/proton/wine issues with xdg-open https://github.com/NixOS/nixpkgs/issues/160923 
+      enable = true;
+      xdgOpenUsePortal = true;
+      wlr.enable = true;
+      extraPortals = [
+        pkgs.xdg-desktop-portal-gtk
+        pkgs.xdg-desktop-portal-wlr
+      ];
+    };
+    
   ## GPU
     hardware.amdgpu.amdvlk.enable = true;   # disable amdvlk to use radv
     hardware.graphics.extraPackages = with pkgs; [

@@ -12,8 +12,6 @@
       mlocate                       # locate from db built with `updatedb`      https://pagure.io/mlocate
       sysstat                       # system stats                              http://sebastien.godard.pagesperso-orange.fr/
       usbutils                      # lsusb                                     http://www.linux-usb.org/
-    # editors
-      vscode-fhs                    # vscode                                    https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/applications/editors/vscode/
     # linux debugging
       ltrace                        # library call tracer                       https://linux.die.net/man/1/ltrace
       strace                        # system call tracer                        https://linux.die.net/man/1/strace
@@ -23,6 +21,7 @@
       auto-cpufreq                  # auto-cpufreq                              https://github.com/AdnanHodzic/auto-cpufreq
       lm_sensors                    # lm_sensors                                https://hwmon.wiki.kernel.org/lm_sensors
       libinput                      # TODO: I forget what I need this for.      https://www.freedesktop.org/wiki/Software/libinput/
+      xdg-utils                     # xdg-open for stuff like `protontricks`
     
     ## tailscale
       tailscale
@@ -39,7 +38,5 @@
       xdotool
       xorg.xwininfo
       yad
-    # xdg-open for stuff like `protontricks`
-      xdg-utils
   ];
 }
