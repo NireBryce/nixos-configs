@@ -12,7 +12,7 @@ let
   getKeyPath = k: k.path;
   keys = builtins.filter isEd25519 config.services.openssh.hostKeys;
 
-  secretsPath = "./secrets.yaml";
+  secretsPath = ./secrets.yaml;
 
 in {
   imports = [
@@ -29,9 +29,9 @@ in {
       # defaultSecretsMountPoint = "/run/user/1000/secrets.d";
   };
 
-  sops.secrets.tailscale_key = {
-    sopsFile        = "${secretsPath}"; 
-  };
+  # sops.secrets.tailscale_key = {
+  #   sopsFile        = "${secretsPath}"; 
+  # };
 
   # SSH
     # sops.secrets.ssh-durandal = {
