@@ -15,7 +15,7 @@
   ];
   services.tailscaleAutoconnect = {
     enable = true;
-    authkeyFile = config.sops.secrets.tailscale_key.path;
+    authkeyFile = config.sops.secrets.tailscale_key.path; # TODO: Why can't this be in the sops file? it broke something
     loginServer = "https://login.tailscale.com";
     advertiseExitNode = lib.mkDefault false;
   };
