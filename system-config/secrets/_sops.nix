@@ -12,7 +12,7 @@ let
   getKeyPath = k: k.path;
   keys = builtins.filter isEd25519 config.services.openssh.hostKeys;
 
-  secretsPath = "${self}/system-config/secrets/secrets.yaml";
+  secretsPath = "./secrets.yaml";
 
 in {
   imports = [
@@ -23,7 +23,7 @@ in {
 
   sops = {
     age.sshKeyPaths = map getKeyPath keys;
-    defaultSopsFile = "${secretsPath}/secrets.yaml";
+    defaultSopsFile = "${secretsPath}";
     # TODO: figure out how to fix this to not require UUID hardcoding
       # defaultSymlinkPath = "/run/user/1000/secrets";
       # defaultSecretsMountPoint = "/run/user/1000/secrets.d";
