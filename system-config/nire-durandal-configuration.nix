@@ -160,21 +160,13 @@ in {
         ];
       ## UDP
         allowedUDPPorts = [                            
+            5353                                        # mdns
         ];
         allowedUDPPortRanges = [
             { from = 1714; to = 1764; }                 # kde-connect UDP   
         ];
     };
-    services.avahi = {
-        enable = true;
-        nssmdns = false; # switch this to true if this doesn't work
-        openFirewall = true;
-        publish = {
-            enable = true;
-            userServices = true;
-            addresses = true;
-        };
-    };
+    
 
 
   # TODO: do nix automatic garbage collection https://www.youtube.com/watch?v=uS8Bx8nQots
