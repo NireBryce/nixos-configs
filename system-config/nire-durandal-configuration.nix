@@ -168,7 +168,7 @@ in {
     };
     services.avahi = {
         enable = true;
-        nssmdns = false; # switch this to true if this doesn't work
+        nssmdns4 = true; # switch this to false if this doesn't work
         openFirewall = true;
         publish = {
             enable = true;
