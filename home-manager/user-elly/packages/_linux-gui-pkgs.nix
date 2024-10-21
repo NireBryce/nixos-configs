@@ -55,6 +55,8 @@
       obsidian                      # pkm                                       https://obsidian.md/
       libreoffice-qt                # office                                    https://www.libreoffice.org/
 
+    # screenshot                # screenshot                                # screenshot
+      kdePackages.spectacle         # screenshot tool                          https://invent.kde.org/graphics/spectacle
   ];
   # Game stuff managed through system configuration
 }
