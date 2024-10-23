@@ -24,8 +24,8 @@
       xdg-utils                     # xdg-open for stuff like `protontricks`
     
     ## tailscale
-      tailscale
-      tailscale-systray
+      # tailscale
+      # tailscale-systray
 
     ## Wayland                  # Wayland                                   # Wayland
       wl-clipboard                  # clipboard in wayland                      https://github.com/bugaevc/wl-clipboard
