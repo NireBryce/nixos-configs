@@ -4,6 +4,7 @@
   nixpkgs,
   pkgs,
   lib,
+  config,
   ... 
 }: 
 
@@ -170,9 +171,14 @@ in {
       ## UDP
         allowedUDPPorts = [                            
             5353                                        # mdns
+            config.services.tailscale.port
         ];
         allowedUDPPortRanges = [
             { from = 1714; to = 1764; }                 # kde-connect UDP   
+        ];
+    
+        trustedInterfaces = [ 
+            "tailscale0"  # always allow traffic from your Tailscale network
         ];
     };
     # services.avahi = {
@@ -236,6 +242,7 @@ in {
         nh                          # nix helper                                https://github.com/viperML/nh
         linuxHeaders                # linux headers
         sops                        # secret management
+        tailscale                   # make tailscale command available to users
       #* GPU-related packages
         amf-headers
         mesa
