@@ -61,9 +61,10 @@
         nh                                            # nix helper                https://github.com/viperML/nh
         sops                                          # secret management
     ];
-
-
 } 
+
+
+
 
 
 # TODO: move to home-manager / fix for darwin
