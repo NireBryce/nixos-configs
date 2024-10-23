@@ -171,7 +171,7 @@ in {
       ## UDP
         allowedUDPPorts = [                            
             5353                                        # mdns
-            config.services.tailscale.port
+            config.services.tailscale.port              # todo: move to tailscale-autoconnect
         ];
         allowedUDPPortRanges = [
             { from = 1714; to = 1764; }                 # kde-connect UDP   
@@ -179,6 +179,7 @@ in {
     
         trustedInterfaces = [ 
             "tailscale0"  # always allow traffic from your Tailscale network
+            # TODO: move to tailscale-autoconnect
         ];
     };
     # services.avahi = {
@@ -196,6 +197,7 @@ in {
 
     services.resolved = {
         enable = true;  # necessiary for tailscale https://github.com/tailscale/tailscale/issues/4254
+                        #  TODO: move to/duplicate for tailscale-autoconnect
         dnssec = "true";
         domains = [ "~." ];
         fallbackDns = [ 
