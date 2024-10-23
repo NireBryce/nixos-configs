@@ -93,7 +93,7 @@ in {
     networking.firewall = {
       trustedInterfaces = [ "tailscale0" ];
       allowedUDPPorts = [ config.services.tailscale.port ];
-      networking.firewall.checkReversePath = "loose"; # https://nixos.wiki/wiki/Tailscale#No_internet_when_using_an_exit_node
+      checkReversePath = "loose"; # https://nixos.wiki/wiki/Tailscale#No_internet_when_using_an_exit_node
     };
 
     services.tailscale = {
