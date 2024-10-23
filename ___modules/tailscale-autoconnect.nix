@@ -4,6 +4,9 @@
 with lib; let
   cfg = config.services.tailscaleAutoconnect; 
 in {
+
+
+
   options.services.tailscaleAutoconnect = {
     enable = mkEnableOption "tailscaleAutoconnect";
     authkeyFile = mkOption {
@@ -52,7 +55,6 @@ in {
       }
     ];
     
-    systemd.services.tailscaled.after = [ "network-online.target" "systemd-resolved.service" ] ; # https://github.com/tailscale/tailscale/issues/4254#issuecomment-1154107428
     systemd.services.tailscale-autoconnect = {
       description = "Automatic connection to Tailscale";
 
@@ -90,6 +92,9 @@ in {
           ${lib.optionalString (cfg.exitNodeAllowLanAccess) "--exit-node-allow-lan-access"}
       '';
     };
+    #  TODO: evaluation warning: tailscaled.service is ordered after 'network-online.target' but doesn't depend on it
+    systemd.services.tailscaled.after = [ "network-online.target" "systemd-resolved.service" ] ; # https://github.com/tailscale/tailscale/issues/4254#issuecomment-1154107428
+    
     networking.firewall = {
       trustedInterfaces = [ "tailscale0" ];
       allowedUDPPorts = [ config.services.tailscale.port ];
@@ -101,5 +106,6 @@ in {
       useRoutingFeatures = if cfg.advertiseExitNode then "server" else "client";
     };
   };
+  
 }
 
