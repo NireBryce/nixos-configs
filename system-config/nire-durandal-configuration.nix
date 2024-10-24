@@ -71,7 +71,7 @@ in {
   ## console / VTs
     console = {
         keyMap = "us";
-        font = "Lat2-Terminus16";
+        # font = "Lat2-Terminus16";
     };
   ## fonts
     fonts.packages = with pkgs; [
@@ -182,30 +182,30 @@ in {
             # TODO: move to tailscale-autoconnect
         ];
     };
-    # services.avahi = {
-    #     enable = true;
-    #     nssmdns4 = true; # switch this to false if this doesn't work
-    #     openFirewall = true;
-    #     publish = {
-    #         enable = true;
-    #         userServices = true;
-    #         addresses = true;
-    #     };
-    # };
+    services.avahi = {
+        enable = true;
+        nssmdns4 = true; # switch this to false if this doesn't work
+        openFirewall = true;
+        publish = {
+            enable = true;
+            userServices = true;
+            addresses = true;
+        };
+    };
     
     networking.nameservers = [ "1.1.1.1" "1.0.0.1" ];
 
-    services.resolved = {
-        enable = true;  # necessiary for tailscale https://github.com/tailscale/tailscale/issues/4254
-                        #  TODO: move to/duplicate for tailscale-autoconnect
-        dnssec = "true";
-        domains = [ "~." ];
-        fallbackDns = [ 
-            "8.8.8.8"
-            "8.8.4.4" 
-        ];
-        dnsovertls = "true";
-    };
+    # services.resolved = {
+    #     enable = true;  # necessiary for tailscale https://github.com/tailscale/tailscale/issues/4254
+    #                     #  TODO: move to/duplicate for tailscale-autoconnect
+    #     dnssec = "true";
+    #     domains = [ "~." ];
+    #     fallbackDns = [ 
+    #         "8.8.8.8"
+    #         "8.8.4.4" 
+    #     ];
+    #     dnsovertls = "true";
+    # };
 
 
   # TODO: do nix automatic garbage collection https://www.youtube.com/watch?v=uS8Bx8nQots

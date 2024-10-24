@@ -93,11 +93,11 @@ in {
       '';
     };
     #  TODO: evaluation warning: tailscaled.service is ordered after 'network-online.target' but doesn't depend on it
-    systemd.services.tailscaled.after = [ "network-online.target" "systemd-resolved.service" ] ; # https://github.com/tailscale/tailscale/issues/4254#issuecomment-1154107428
+    # systemd.services.tailscaled.after = [ "network-online.target" "systemd-resolved.service" ] ; # https://github.com/tailscale/tailscale/issues/4254#issuecomment-1154107428
     
     networking.firewall = {
       trustedInterfaces = [ "tailscale0" ];
-      allowedUDPPorts = [ config.services.tailscale.port ];
+      # allowedUDPPorts = [ config.services.tailscale.port ];
       checkReversePath = "loose"; # https://nixos.wiki/wiki/Tailscale#No_internet_when_using_an_exit_node
     };
 
