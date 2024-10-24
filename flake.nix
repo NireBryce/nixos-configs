@@ -3,7 +3,10 @@
   # 23.11
     nixpkgs-stable.url                          = "github:NixOS/nixpkgs/nixos-23.11";
   # Unstable
-    nixpkgs.url                                 = "github:NixOS/nixpkgs/nixos-unstable";
+    # nixpkgs.url                                 = "github:NixOS/nixpkgs/nixos-unstable";
+
+    # TODO: this is a YOLO fix for https://github.com/nix-community/home-manager/issues/5991,  I have already spent too much time on this
+    nixpkgs.url =                               "github:NixOS/nixpkgs/nixpkgs-unstable"; 
   # Darwin
     darwin.url                                  = "github:LnL7/nix-darwin";
     darwin.inputs.nixpkgs.follows               = "nixpkgs";
