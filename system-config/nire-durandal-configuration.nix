@@ -4,7 +4,7 @@
   nixpkgs,
   pkgs,
   lib,
-  # config,
+  config,
   ... 
 }: 
 
@@ -171,7 +171,7 @@ in {
       ## UDP
         allowedUDPPorts = [                            
             5353                                        # mdns
-            # config.services.tailscale.port              # todo: move to tailscale-autoconnect
+            config.services.tailscale.port              # todo: move to tailscale-autoconnect
         ];
         allowedUDPPortRanges = [
             { from = 1714; to = 1764; }                 # kde-connect UDP   
@@ -256,7 +256,7 @@ in {
         amdgpu_top                  # amdgpu_top gpu monitor                    https://github.com/Umio-Yasuno/amdgpu_top
       #* games                     
         lutris                      # lutris game launcher                      https://lutris.net/
-        # steam                     # in nix config                             https://github.com/NixOS/nixpkgs/blob/stable/pkgs/applications/games/steam/steam.nix
+        # steam                     # see below                                 https://github.com/NixOS/nixpkgs/blob/stable/pkgs/applications/games/steam/steam.nix
         protonup-qt                 # proton installer/updater                  https://davidotek.github.io/protonup-qt/
         protontricks                # protontricks                              https://github.com/Matoking/protontricks
         wineWowPackages.waylandFull # Wine for wayland                          https://www.winehq.org/

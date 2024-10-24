@@ -56,7 +56,7 @@
        
     
     # Reusable nixos modules you might want to export
-    nixosModules    = import ./___modules;                  # there are better names for this, but this is de-facto standard
+    # nixosModules    = import ./___modules;                  # there are better names for this, but this is de-facto standard
     # homeManagerModules = import ./modules/home-manager
 
     overlays        = import ./___overlays {inherit inputs;};
