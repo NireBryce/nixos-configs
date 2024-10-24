@@ -4,7 +4,7 @@
   nixpkgs,
   pkgs,
   lib,
-  config,
+  # config,
   ... 
 }: 
 
@@ -171,7 +171,7 @@ in {
       ## UDP
         allowedUDPPorts = [                            
             5353                                        # mdns
-            config.services.tailscale.port              # todo: move to tailscale-autoconnect
+            # config.services.tailscale.port              # todo: move to tailscale-autoconnect
         ];
         allowedUDPPortRanges = [
             { from = 1714; to = 1764; }                 # kde-connect UDP   
@@ -193,7 +193,7 @@ in {
     #     };
     # };
     
-    networking.nameservers = [ "1.1.1.1#one.one.one.one" "1.0.0.1#one.one.one.one" ];
+    networking.nameservers = [ "1.1.1.1" "1.0.0.1" ];
 
     services.resolved = {
         enable = true;  # necessiary for tailscale https://github.com/tailscale/tailscale/issues/4254
