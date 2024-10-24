@@ -71,7 +71,7 @@ in {
   ## console / VTs
     console = {
         keyMap = "us";
-        # font = "Lat2-Terminus16";
+        font = "Lat2-Terminus16";
     };
   ## fonts
     fonts.packages = with pkgs; [

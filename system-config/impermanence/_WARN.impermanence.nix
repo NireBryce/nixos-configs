@@ -20,7 +20,7 @@
   fileSystems."/var/log".neededForBoot = true;
 
 # impermanence
-  environment.etc.machine-id.source = /persist/etc/machine-id;
+  environment.etc.machine-id.source = "/persist/etc/machine-id";
   environment.persistence."/persist" = {
     directories = [
       "/var/lib/bluetooth"
