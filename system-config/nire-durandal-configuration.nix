@@ -357,3 +357,11 @@ in {
   #     modDirVersion = "6.6.23";
   #   };
   # });
+
+
+## Hacks
+    # I had a problem where etc/machine-id in impermanence was unquoted but never being evaluated and suddenly it was one day
+    #    to find where a build fails:
+    #        sudo nixos-rebuild dry-build -vvv          --flake .#nire-durandal 2>&1 | tee pure.txt; 
+    #        sudo nixos-rebuild dry-build -vvv --impure --flake .#nire-durandal 2>&1 | tee impure.txt; 
+    #        diff -y pure.txt impure.txt
