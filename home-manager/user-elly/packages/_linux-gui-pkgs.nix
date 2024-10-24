@@ -33,7 +33,6 @@
       keybase                       # see above                                 https://keybase.io/
       teamspeak_client              # voice chat                                https://www.teamspeak.com/
       signal-desktop                # encrypted chat everone uses               https://signal.org/
-      wire-desktop                  # old encrypted chat client, my ex used it  https://wire.com/
       zoom-us                       # less features than facetime somehow       https://zoom.us/
     # editors                   # editors                                   # editors
       vscode-fhs                    # vscode                                    https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/applications/editors/vscode/
