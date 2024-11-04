@@ -20,7 +20,7 @@
     # system tools              # system tools                              # System Tools
       auto-cpufreq                  # auto-cpufreq                              https://github.com/AdnanHodzic/auto-cpufreq
       lm_sensors                    # lm_sensors                                https://hwmon.wiki.kernel.org/lm_sensors
-      libinput                      # TODO: I forget what I need this for.      https://www.freedesktop.org/wiki/Software/libinput/
+      libinput                      # kde middle mouse scroll fix requires this
       xdg-utils                     # xdg-open for stuff like `protontricks`
     
     ## tailscale
