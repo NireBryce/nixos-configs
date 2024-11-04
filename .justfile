@@ -18,3 +18,7 @@ nix-debug-impure HOSTNAME FLAKE_PATH:
 # find event name with `sudo libinput list-devices`
 kde-fix-middle-mouse-scroll EVENT_NAME:
   qdbus org.kde.KWin /org/kde/KWin/InputDevice/{{EVENT_NAME}} org.kde.KWin.InputDevice.scrollOnButtonDown true
+
+
+# https://just.systems/man/en/selecting-recipes-to-run-with-an-interactive-chooser.html 
+# need to fix zsh fzf integrations to use this
