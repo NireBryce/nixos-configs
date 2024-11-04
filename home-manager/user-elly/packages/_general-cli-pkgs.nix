@@ -34,6 +34,7 @@
       entr                          # run commands when files change            https://github.com/eradman/entr
       pciutils                      # lspci                                     https://mj.ucw.cz/sw/pciutils/
       topgrade                      # upgrade all the things (nix sorta broken) https://github.com/topgrade-rs/topgrade
+      just                          # just                                      https://github.com/casey/just
   
     # dev                       #  dev                                      # dev
       asdf-vm                       # asdf (use dev shells instead)             https://github.com/asdf-vm/asdf-vm
