@@ -4,7 +4,7 @@
     # Install packages
       # fzf plugins
         zi load Aloxaf/fzf-tab
-        zi light alexiszamanidis/zsh-git-fzf                                  # https://github.com/alexiszamanidis/zsh-git-fzf
+        
       # zoxide plugin
         zi has'zoxide' wait lucid for z-shell/zsh-zoxide
 
@@ -48,7 +48,7 @@
           # zi light https://github.com/gmatheu/shell-plugins                     # WARN: flaky
 
       # syntax highlighting
-        zi light z-shell/F-Sy-H
+        # zi light z-shell/F-Sy-H
 
         # # a different highlighter plugin, misleadingly named but cool colors 
           # zi light trapd00r/zsh-syntax-highlighting-filetypes                     # https://github.com/trapd00r/zsh-syntax-highlighting-filetypes
@@ -61,7 +61,7 @@
       # MAGIC: idk why this is here, but it's needed to make zsh not print python=python every login
         # you might be able to remove this
         unset python
-
+        
       # Completions
         zi load RobSis/zsh-completion-generator
         zi light 3v1n0/zsh-bash-completions-fallback                            # https://github.com/3v1n0/zsh-bash-completions-fallback
@@ -69,3 +69,4 @@
         
 
 
+# zi light alexiszamanidis/zsh-git-fzf                                  # https://github.com/alexiszamanidis/zsh-git-fzf

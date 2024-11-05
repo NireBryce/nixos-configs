@@ -108,9 +108,8 @@ in {
             ${zstyle_cfg}                                     
           # end zstyle
 
-          typeset -U path cdpath fpath manpath              # TODO: magic, no idea what it does                                
-
-          autoload -U add-zsh-hook                          # TODO: Magic, no idea.
+          typeset -U path cdpath fpath manpath              # TODO: magic, no idea what it does anymore.
+          autoload -U add-zsh-hook                          # TODO: Magic, no idea what it does anymore.
 
           zmodload zsh/terminfo                             # load terminfo
 
