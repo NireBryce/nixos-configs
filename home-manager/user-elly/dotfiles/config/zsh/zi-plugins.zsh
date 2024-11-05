@@ -14,7 +14,7 @@
         zi light olets/zsh-abbr                                                 # abbr - Alias but more annoying for you, less annoying for everyone around you 
 
       # annexes and metaplugins
-        zi light-mode for z-shell/z-a-meta-plugins @zsh-users+fast              # https://github.com/z-shell/zsh-fancy-completions
+        # zi light-mode for z-shell/z-a-meta-plugins @zsh-users+fast              # https://github.com/z-shell/zsh-fancy-completions
         zi light z-shell/z-a-bin-gem-node                                       # uhhhhh https://wiki.zshell.dev/ecosystem/annexes/bin-gem-node but it's not that important
         zi light z-shell/z-a-patch-dl
 
@@ -28,7 +28,7 @@
         zi light kutsan/zsh-system-clipboard                                    # synchronize tmux clipboard buffers if ZSH_SYSTEM_CLIPBOARD_TMUX_SUPPORT='true'
                                                                                 # Also enables clipboard use in the zsh vi-mode line editor
       # diff
-        zi light https://github.com/z-shell/zsh-diff-so-fancy
+        # zi light https://github.com/z-shell/zsh-diff-so-fancy
 
       # History plugins
         zi light jgogstad/passwordless-history
@@ -37,12 +37,12 @@
         # zi light tymm/zsh-directory-history
 
       # man / help
-        zi light mattmc3/zman                                                   # https://github.com/mattmc3/zman
+        # zi light mattmc3/zman                                                   # https://github.com/mattmc3/zman
         zi light ael-code/zsh-colored-man-pages
         zi light z-shell/z-a-man                                                # https://github.com/z-shell/z-a-man
       
       # ssh  
-        zi light gko/ssh-connect
+        # zi light gko/ssh-connect
 
       # Shell plugins
           # zi light https://github.com/gmatheu/shell-plugins                     # WARN: flaky
@@ -65,7 +65,7 @@
       # Completions
         zi load RobSis/zsh-completion-generator
         zi light 3v1n0/zsh-bash-completions-fallback                            # https://github.com/3v1n0/zsh-bash-completions-fallback
-        zi light clarketm/zsh-completions                                       # https://github.com/clarketm/zsh-completions
+        zi light clarketm/zsh-completions                                       # additional completions https://github.com/clarketm/zsh-completions
         
 
 

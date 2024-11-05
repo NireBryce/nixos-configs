@@ -60,6 +60,7 @@ in {
     ];
   
     programs.zsh = 
+    
     let               
         p10k_cfg          = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/010-p10k.zsh";
         bindings_cfg      = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/initial-bindings.zsh";
@@ -70,15 +71,29 @@ in {
         atuin_cfg         = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/021-atuin.zsh";
         zellij_keys_cfg   = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/040-free-zellij-keys.zsh";
     in {
-        shellAliases = {
-          
-        };
+        
+        
         enable = true;
         autocd = false;
         enableVteIntegration = true;
         autosuggestion.enable = true;
-        enableCompletion = false;       # enabled through config, removing one compinit call.
+        enableCompletion = false;       # enabled through config, removing one compinit call.        
         zsh-abbr.enable = true;
+
+        # # f-sy-h is better, but has been flakey lately and i trust z-shell (unaffiliated with ZSH) about as far as I can throw them
+        syntaxHighlighting = {
+          enable = true;
+          # package = "";
+          highlighters = [
+            "brackets"
+            "pattern"
+            "regexp"
+            # "cursor"
+            "root"
+            "line"
+          ];
+          
+        };   
         
         localVariables = {
           # local variables
@@ -87,6 +102,9 @@ in {
         };
 
         # .zshrc
+        shellAliases = {
+          
+        };
         
         initExtraFirst = ''
           zmodload zsh/zprof                                # zsh profiler
@@ -222,20 +240,7 @@ in {
   # ];
 
 
-# # f-sy-h is better. 
-# syntaxHighlighting = {
-  # enable = true;
-  # # package = "";
-  # highlighters = [
-  #   "brackets"
-  #   "pattern"
-  #   "regexp"
-  #   # "cursor"
-  #   # "root"
-  #   # "line"
-  # ];
-  
-# };   
+
 
 
 
