@@ -3,15 +3,15 @@
 
     # Install packages
       # fzf plugins
-        zi load Aloxaf/fzf-tab
+        # zi load Aloxaf/fzf-tab
         
       # zoxide plugin
         zi has'zoxide' wait lucid for z-shell/zsh-zoxide
 
     # Plugins
       # Aliases
-        zi light akash329d/zsh-alias-finder 
-        zi light olets/zsh-abbr                                                 # abbr - Alias but more annoying for you, less annoying for everyone around you 
+        # zi light akash329d/zsh-alias-finder 
+        # zi light olets/zsh-abbr                                                 # abbr - Alias but more annoying for you, less annoying for everyone around you 
 
       # annexes and metaplugins
         # zi light-mode for z-shell/z-a-meta-plugins @zsh-users+fast              # https://github.com/z-shell/zsh-fancy-completions
@@ -19,13 +19,10 @@
         zi light z-shell/z-a-patch-dl
 
       # Autosuggest -- use right-arrow to complete
-        zi light zsh-users/zsh-autosuggestions
-
-      # cheatsheets
-        zi light 0b10/cheatsheet
+        # zi light zsh-users/zsh-autosuggestions
 
       # clipboard
-        zi light kutsan/zsh-system-clipboard                                    # synchronize tmux clipboard buffers if ZSH_SYSTEM_CLIPBOARD_TMUX_SUPPORT='true'
+        # zi light kutsan/zsh-system-clipboard                                    # synchronize tmux clipboard buffers if ZSH_SYSTEM_CLIPBOARD_TMUX_SUPPORT='true'
                                                                                 # Also enables clipboard use in the zsh vi-mode line editor
       # diff
         # zi light https://github.com/z-shell/zsh-diff-so-fancy
@@ -54,7 +51,7 @@
           # zi light trapd00r/zsh-syntax-highlighting-filetypes                     # https://github.com/trapd00r/zsh-syntax-highlighting-filetypes
           # it gives "zsh_zle-highlight-buffer-p:4: permission denied error
       # Themes and colors
-        zi ice depth=1; zi light romkatv/powerlevel10k                          # Powerlevel 10k - main theme
+        # zi ice depth=1; zi light romkatv/powerlevel10k                          # Powerlevel 10k - main theme
         zi light chrissicool/zsh-256color
         zi light zpm-zsh/colorize                                               # color common commands
       
@@ -65,7 +62,7 @@
       # Completions
         zi load RobSis/zsh-completion-generator
         zi light 3v1n0/zsh-bash-completions-fallback                            # https://github.com/3v1n0/zsh-bash-completions-fallback
-        zi light clarketm/zsh-completions                                       # additional completions https://github.com/clarketm/zsh-completions
+        # zi light clarketm/zsh-completions                                       # additional completions https://github.com/clarketm/zsh-completions
         
 
 

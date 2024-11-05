@@ -12,15 +12,36 @@ in {
     # in this case it was trapd00r/zsh-syntax-highlighting-filetypes which highlights more than filetypes turns out
 
     # TODO: replace p10k with `starship` now that p10k is in life support mode
-
     programs = { # zsh specific, it dedups them if they're already enabled
         dircolors.enable = true; 
         dircolors.enableZshIntegration = true;
-        eza.enableZshIntegration = true;
-        direnv.enableZshIntegration = true;
-        zellij.enableZshIntegration = true;
-        broot.enableZshIntegration = true;
-        nix-index.enableZshIntegration = true;
+
+        direnv      .enableZshIntegration = true;
+        eza         .enableZshIntegration = true;
+        zellij      .enableZshIntegration = true;
+        broot       .enableZshIntegration = true;
+        nix-index   .enableZshIntegration = true;
+        
+        zoxide = {
+          enable = true;
+          enableZshIntegration = true;
+          options = [
+            "--cmd x" # change zoxide binding to not interfere with zi
+          ];
+        };
+
+        atuin = {       
+          enable = true;
+          enableZshIntegration = true;
+          settings = {
+            inline_height = 40;     # search window height
+            style = "compact";
+            show_preview = true;
+            show_help = true;
+            secrets_filter = true;
+          };
+        };            
+
         fzf = {
             enable = true;
             enableZshIntegration = true;
@@ -56,12 +77,24 @@ in {
         zoxide
         atuin
         tree
-        zi                              # zsh plugin manager
+        # zi                              # zsh plugin manager, doesn't work fsr
+        ruby                            # zi depends on `gem`
+        nix-zsh-completions
+
+        zsh-f-sy-h
+        zsh-fzf-tab
+        zsh-nix-shell
+        zsh-completions
+        zsh-autocomplete
+        zsh-autosuggestions
+        zsh-powerlevel10k
+        zsh-system-clipboard
+        zsh-you-should-use
+        
+
     ];
   
-    programs.zsh = 
-    
-    let               
+    programs.zsh = let               
         p10k_cfg          = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/010-p10k.zsh";
         bindings_cfg      = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/initial-bindings.zsh";
         setopts_cfg       = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/initial-setopts.zsh";
@@ -79,29 +112,14 @@ in {
         autosuggestion.enable = true;
         enableCompletion = false;       # enabled through config, removing one compinit call.        
         zsh-abbr.enable = true;
-
-        # # f-sy-h is better, but has been flakey lately and i trust z-shell (unaffiliated with ZSH) about as far as I can throw them
-        syntaxHighlighting = {
-          enable = true;
-          # package = "";
-          highlighters = [
-            "brackets"
-            "pattern"
-            "regexp"
-            # "cursor"
-            "root"
-            "line"
-          ];
-          
-        };   
+        # enableBashCompletion = true; # TODO: why doesn't this work? https://search.nixos.org/options?channel=unstable&show=programs.zsh.enableBashCompletion&from=0&size=50&sort=relevance&type=packages&query=zsh
         
         localVariables = {
           # local variables
-          _ZO_CMD_PREFIX="x";
-
+          # _ZO_CMD_PREFIX="x";
         };
 
-        # .zshrc
+      # .zshrc
         shellAliases = {
           
         };
@@ -161,8 +179,8 @@ in {
             alias "exa"="eza --icons=always";                       # back compat for one of the tools
             alias "ls"="eza --icons=always --header --group-directories-first --hyperlink";
             alias "rustdevshell"="nix develop ~/nixos/dev-shells/rust#";
-          # Atuin
-          ${atuin_cfg}
+          # Atuin bindings and shell integration
+          # ${atuin_cfg}
           # Free up bindings for zellij
           ${zellij_keys_cfg}  
 
@@ -174,10 +192,26 @@ in {
             # eval "$(is init zsh)"
 
           # homebrew
-          export PATH="/opt/homebrew/bin:$PATH"
+          export PATH="/opt/homebrew/bin:$PATH" # TODO: pull this out into nix path definitions
       
         '';
     };
+}
+
+        # # f-sy-h is better, but has been flakey lately and i trust z-shell (unaffiliated with ZSH) about as far as I can throw them.
+        # # consider switching back
+        # syntaxHighlighting = {
+        #   enable = true;
+        #   # package = "";
+        #   highlighters = [
+        #     "brackets"
+        #     "pattern"
+        #     "regexp"
+        #     # "cursor"
+        #     "root"
+        #     "line"
+        #   ];
+        # };   
 
 ## Bash
   #? Shell integrations go here but main bash config is in the system one.
@@ -213,7 +247,6 @@ in {
   # programs.fzf.enableBashIntegration = true;
   # programs.exa.enableBashIntegration = true;
   # programs.atuin.enableBashIntegration = true;
-}
 
 
   # # For LS_COLORS customization options run this in shell:
