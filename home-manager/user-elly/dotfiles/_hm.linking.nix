@@ -3,9 +3,7 @@
   ...
 }:
 
-let
-  flakePath = self;
-in 
+
 { 
   # TODO: split this out into where they're installed.
   # TODO: mkEnable, mkIf, for the things that need to be toggled,  less important here because who cares about hanging dotfiles in .config though.
@@ -23,12 +21,13 @@ in
         "./.gitconfig"        .source = config/.gitconfig;
         "./.p10k.zsh"         .source = config/zsh-powerlevel10k/.p10k.zsh;
         "./.profile"          .source = config/.profile;
-        "./.talon"            .source = config/.talon;
         "./.zlogin"           .source = config/zsh/.zlogin;
         "./.zlogout"          .source = config/zsh/.zlogout;
         "./.zprofile"         .source = config/zsh/.zprofile;
         "./.zshenv"           .source = config/zsh/.zshenv;
-        "./.justfile"         .source = "${flakePath}/.justfile";
+        "./.justfile"         .source = ./.just/.justfile;
+        "./.just/.justfile"   .source = ./.just/.justfile;
+        "./.just"             .source = ./.just;                          # Fractal subcommands galore.
     };
 # TODO: python linkables
 }
