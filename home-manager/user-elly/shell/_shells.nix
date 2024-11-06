@@ -11,6 +11,8 @@ in {
     # installing multiple highlighters causes "zsh_zle-highlight-buffer-p:4: permission denied error
     # in this case it was trapd00r/zsh-syntax-highlighting-filetypes which highlights more than filetypes turns out
 
+    # TODO: evaluate oh-my-zsh, prezto
+
     # TODO: replace p10k with `starship` now that p10k is in life support mode
     programs = { # zsh specific, it dedups them if they're already enabled
         dircolors.enable = true; 
@@ -67,6 +69,21 @@ in {
                 "--color 'spinner:#\${vars.colors.base0E}'"         # Streaming input indicator
                 "--color 'header:#\${vars.colors.base05}'"          # Header
             ];
+        };
+        kitty = {
+          extraConfig = ''
+            clipboard_control write-clipboard write-primary read-clipboard-ask read-primary-ask
+          
+            kitty_mod ctrl+shift
+
+            map kitty_mod+c copy_to_clipboard
+            map cmd+c       copy_or_interrupt
+
+            map kitty_mod+v paste_from_clipboard
+            map cmd+v       paste_from_clipboard
+
+
+          '';
         };
     };
   

@@ -110,7 +110,7 @@
 
   
     # shell                     # shell                                     # shell
-      atuin                         # shell history                             https://github.com/ellie/atuin
+      atuin                         # shell history, but handled through home manager shell config                             https://github.com/ellie/atuin
       bash-completion               # bash complete                             https://github.com/scop/bash-completion
       bat                           # `cat` alternative                         https://github.com/sharkdp/bat
       bat-extras.batdiff            # bat diff                                  https://github.com/eth-p/bat-extras
