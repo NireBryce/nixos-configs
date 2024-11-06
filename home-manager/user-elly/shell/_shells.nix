@@ -87,7 +87,7 @@ in {
         zsh-completions
         zsh-autocomplete
         zsh-autosuggestions
-        zsh-powerlevel10k
+        # zsh-powerlevel10k # in zi
         zsh-system-clipboard
         zsh-you-should-use
         
