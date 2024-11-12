@@ -30,7 +30,7 @@ FLAKE_PATH := "~/nixos"
 # update the flake in the default repo
 [group('nix-flake-update')]
 nix-flake-update:
-  nix flake update {{FLAKE_PATH}}
+  nix flake update {{FLAKE_PATH}} && git commit -m "chore: update flake inputs"
 
 # Debug a build that builds only with --impure
 [group('nix-debug')]
