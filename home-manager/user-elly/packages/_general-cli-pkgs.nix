@@ -148,6 +148,8 @@
       inshellisense                 # intellisense type shell complete          https://github.com/microsoft/inshellisense
       blesh                         # better bash line editor                   https://github.com/akinomyoga/ble.sh
   
+    # python dev
+      uv
     
     # TODO: move to system config
         
