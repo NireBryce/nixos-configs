@@ -285,14 +285,19 @@ in {
       ];
     };
     
-  ## GPU
-    hardware.amdgpu.amdvlk.enable = true;   # disable amdvlk to use radv
-    hardware.graphics.extraPackages = with pkgs; [
-        pipewire
-        libva-utils
+## GPU
+  # mesa / vulkan
+    #? This used to be called 'hardware.opengl' but the wiki is unclear and it
+    #?    sounds like it's been renamed because it enables vulkan.
+    hardware.graphics.enable = lib.mkDefault true;  
+    hardware.graphics.enable32Bit = true;           #     
+    hardware.graphics.extraPackages = with pkgs; [  #     
+      pipewire
+      libva-utils
     ];
-    hardware.graphics.enable = true;
-    hardware.graphics.enable32Bit = true;
+  # AMD vulkan drivers
+    hardware.amdgpu.amdvlk.enable = true;   # disable this to default to RadV
+    
 
 
   ## System services and utilities  
