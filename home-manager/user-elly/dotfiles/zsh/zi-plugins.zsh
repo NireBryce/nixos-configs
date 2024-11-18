@@ -1,3 +1,4 @@
+#TODO: move off zi
         # completions from --help
         # source "${HOME}/.zi/plugins/RobSis---zsh-completion-generator/zsh-completion-generator.plugin.zsh" 
 

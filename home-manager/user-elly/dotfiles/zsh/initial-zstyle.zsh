@@ -1,3 +1,5 @@
+  #TODO: labeling, weeding
+  
   # from manjaro defaults
     # tab completion list
       # zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}'

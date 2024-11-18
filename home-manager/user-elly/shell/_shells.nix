@@ -135,6 +135,56 @@ in {
           # local variables
           # _ZO_CMD_PREFIX="x";
         };
+        plugins = [ 
+          { 
+            name = "zsh-mask";  # formerly "passwordless-history"
+            src = pkgs.fetchFromGithub { 
+              owner = "jgogstad";
+              repo = "zsh-mask";
+              sha256 = "0000000000000000000000000000000000000000000000000000"; # TODO: replace after run, magic 
+            };
+          }
+          {
+            name = "zsh-colored-man-pages";
+            src = pkgs.fetchFromGithub {
+              owner = "ael-code";
+              repo = "zsh-colored-man-pages";
+              sha256 = "0000000000000000000000000000000000000000000000000000"; # TODO: replace after run, magic
+            };
+          }
+          {
+            name = "zsh-256color";
+            src = pkgs.fetchFromGithub {
+              owner = "chrissicool";
+              repo = "zsh-256color";
+              sha256 = "0000000000000000000000000000000000000000000000000000"; # TODO: replace after run, magic
+            };
+          }
+          {
+            name = "colorize";
+            src = pkgs.fetchFromGithub { # TODO: can you live without?
+              owner = "zpm-zsh";
+              repo = "colorize";
+              sha256 = "0000000000000000000000000000000000000000000000000000"; # TODO: replace after run, magic
+            };
+          }
+          {
+            name = "zsh-completion-generator"; # TODO: just switch to fish? would need to learn how to config it.
+            src = pkgs.fetchFromGithub {
+              owner = "RobSis";
+              repo = "zsh-completion-generator";
+              sha256 = "0000000000000000000000000000000000000000000000000000"; # TODO: replace after run, magic
+            };
+          }
+          {
+            name = "zsh-bash-completions-fallback";
+            src = pkgs.fetchFromGithub {
+              owner = "3v1n0";
+              repo = "zsh-bash-completions-fallback";
+              sha256 = "0000000000000000000000000000000000000000000000000000"; # TODO: replace after run, magic
+            };
+          }
+        ];
 
       # .zshrc
         shellAliases = {

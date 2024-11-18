@@ -1,3 +1,4 @@
+  #TODO: labeling, weeding
   # From manjaro defaults:
     setopt correct                                                  # Auto correct mistakes
     setopt nocaseglob                                               # Case insensitive globbing

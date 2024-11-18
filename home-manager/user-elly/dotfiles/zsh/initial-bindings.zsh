@@ -1,3 +1,5 @@
+  #TODO: label these, figure out what you care about.  do you use ANY of them?
+
   # Manjaro default keybindings:
     bindkey -e
     bindkey '^[[7~' beginning-of-line                               # Home key

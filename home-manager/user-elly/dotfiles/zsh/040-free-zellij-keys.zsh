@@ -5,3 +5,5 @@
     bindkey -r "^[V"
     bindkey -r "^[c"
     bindkey -r "^[C"
+
+    # TODO: move to nix
