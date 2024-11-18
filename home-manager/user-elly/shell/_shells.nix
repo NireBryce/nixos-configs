@@ -224,21 +224,22 @@ in {
         initExtraBeforeCompInit = ''
           # zi
             # zi bootstrap
-            ${zi_cfg}
+            # ${zi_cfg}
             # end zi bootstrap
 
             # Zi plugins
-            ${zi_plugins_cfg}
+            # ${zi_plugins_cfg}
             # end zi plugins
           # end zi
 
-          [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh      # Load p10k theme
+          [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh      # TODO: marked for deletion, p10k deprecated
 
           zicompinit                                        # zi cleanup
           autoload -Uz compinit
           compinit -C
         '';
         initExtra = ''
+          # TODO: pull these into nix
           # Aliases
             alias "ll"="ls -l";
             alias "cp"="cp -i";                                     # Confirm before overwriting something
@@ -247,7 +248,7 @@ in {
             alias "ls"="eza --icons=always --header --group-directories-first --hyperlink";
             alias "rustdevshell"="nix develop ~/nixos/dev-shells/rust#";
           # Atuin bindings and shell integration
-          # ${atuin_cfg}
+          # ${atuin_cfg} # TODO: remove
           # Free up bindings for zellij
           ${zellij_keys_cfg}  
 
