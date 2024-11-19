@@ -10,6 +10,7 @@ let
 
     _dotfiles               = "${ellyPath}/dotfiles";
     _git                    = "${ellyPath}/git";
+  # TODO: make these names less confusing even though they're to optimize for code-skim and file-manager sort respectively
     _pkgs-cli               = "${ellyPath}/packages/_general-cli-pkgs.nix";
     _pkgs-darwin            = "${ellyPath}/packages/_darwin-pkgs.nix";            
     _pkgs-dev               = "${ellyPath}/packages/_dev-pkgs.nix";
@@ -25,6 +26,7 @@ in {
         _shell              # zsh config, bash launch commands, paths, etc
     ];
 
+  
   ## Defaults
     nixpkgs.config = {
         allowUnfree          =     true;            # Disable if you don't want unfree packages
