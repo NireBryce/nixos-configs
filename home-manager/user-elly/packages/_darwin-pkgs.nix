@@ -67,6 +67,7 @@
             "whisky"
             "xcodes"
             "xscope"
+            "zoom"
         ];
     };  
 
