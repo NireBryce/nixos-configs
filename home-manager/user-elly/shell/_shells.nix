@@ -89,9 +89,49 @@ in {
         starship = {
             enable = true;  
             enableZshIntegration = true;
+          # https://github.com/theRubberDuckiee/dev-environment-files/blob/main/starship.toml
+            settings = {
+                format ="[](bg:#030B16 fg:#7DF9AA)[󰀵 ](bg:#7DF9AA fg:#090c0c)[](fg:#7DF9AA bg:#1C3A5E)$time[](fg:#1C3A5E bg:#3B76F0)$directory[](fg:#3B76F0 bg:#FCF392)$git_branch$git_status$git_metrics[](fg:#FCF392 bg:#030B16)$character";
+                directory     = {
+                    format          = "[ $path ]($style)";
+                    style           = "fg:#E4E4E4 bg:#3B76F0";
+                };
+                git_branch    = {
+                    format          = "[ $symbol$branch(:$remote_branch) ]($style)";
+                    symbol          = "  ";
+                    style           = "fg:#1C3A5E bg:#FCF392";
+                };
+                git_status    = {
+                    format          = "[$all_status]($style)";
+                    style           = "fg:#1C3A5E bg:#FCF392";
+                };
+                git_metrics   = {
+                    format          = "([+$added]($added_style))[]($added_style)";
+                    added_style     = "fg:#1C3A5E bg:#FCF392";
+                    deleted_style   = "fg:bright-red bg:235";
+                    disabled        = false;
+                };
+                hg_branch     = {
+                    format          = "[ $symbol$branch ]($style)";
+                    symbol          = " ";
+                };
+                cmd_duration  = {
+                    format          = "[  $duration ]($style)";
+                    style           = "fg:bright-white bg:18";
+                };
+                character     = {
+                    success_symbol  = "[ ➜](bold green) ";
+                    error_symbol    = "[ ✗](#E84D44) ";
+                };
+                time          = {
+                    disabled        = false;
+                    time_format     = "%R"; # Hour:Minute Format
+                    style           = "bg:#1d2230";
+                    format          = "[[ 󱑍 $time ](bg:#1C3A5E fg:#8DFBD2)]($style)";
+                };
+            };
         };
     };
-  
     home.packages = with pkgs; [  # Things needed for my .zshrc
         diff-so-fancy
         inshellisense
@@ -122,7 +162,6 @@ in {
         zstyle_cfg        = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/initial-zstyle.zsh";
         zi_cfg            = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/020-zi.zsh";
         zi_plugins_cfg    = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/zi-plugins.zsh";
-        atuin_cfg         = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/021-atuin.zsh";
         zellij_keys_cfg   = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/040-free-zellij-keys.zsh";
     in {
         
@@ -138,53 +177,17 @@ in {
         localVariables = {
           # local variables
           # _ZO_CMD_PREFIX="x";
-          ZSH="${pkgs.zsh}";
+
         };
         
-        oh-my-zsh = {
-          enable = true;
-          plugins = [ 
-            "alias-finder"
-            "colored-man-pages"
-            "colorize"
-            "dotenv"
-            "emoji"
-            "eza"
-            "gh"
-            "git-escape-magic"
-            "gitfast"
-            "git-prompt"
-            "macos"
-            "python"
-            "rsync"
-            "rust"
-            "safe-paste"
-            "ssh"
-            "ssh-agent"
-            "starship"
-            "tig"
-            "tmux"
-            "tldr"
-            "ufw"
-            "vscode"
-          ];
-        };
-        zplug = {
-          enable = true;
-          plugins = [
-            { name = "jgogstad/zsh-mask"; }
-            { name = "chrissicool/zsh-256color"; }
-            { name = "RobSis/zsh-completion-generator"; }
-            { name = "3v1n0/zsh-bash-completions-fallback"; }
-          ];
-        };
-
+      
 
       # .zshrc
         shellAliases = {
           
         };
         
+      #! FOOTGUN: if you comment out a nix variable pointing to .filecontents, '#' only comments out the first line 
         initExtraFirst = ''
           zmodload zsh/zprof                                # zsh profiler
 
@@ -218,17 +221,17 @@ in {
         initExtraBeforeCompInit = ''
           # zi
             # zi bootstrap
-            # ${zi_cfg}
+              ${zi_cfg}
             # end zi bootstrap
 
             # Zi plugins
-            # ${zi_plugins_cfg}
+              ${zi_plugins_cfg}
             # end zi plugins
           # end zi
 
           [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh      # TODO: marked for deletion, p10k deprecated
 
-          zicompinit                                        # zi cleanup
+          # zicompinit                                        # zi cleanup
           autoload -Uz compinit
           compinit -C
         '';
@@ -242,7 +245,7 @@ in {
             alias "ls"="eza --icons=always --header --group-directories-first --hyperlink";
             alias "rustdevshell"="nix develop ~/nixos/dev-shells/rust#";
           # Atuin bindings and shell integration
-          # ${atuin_cfg} # TODO: remove
+        
           # Free up bindings for zellij
           ${zellij_keys_cfg}  
 

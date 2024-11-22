@@ -4,10 +4,16 @@
 
     # Install packages
       # fzf plugins
-        # zi load Aloxaf/fzf-tab
+        zi load Aloxaf/fzf-tab                # todo: nix config?
+        zi load Tom-Power/fzf-tab-widgets
+        
+      #???
+        zi light dim-an/cod
+
+
         
       # zoxide plugin
-        zi has'zoxide' wait lucid for z-shell/zsh-zoxide   # do we actually need this? the only reason we need to use this is because zi binds over zoxide's default zi binding, but we already added that to the nix thing
+        # zi has'zoxide' wait lucid for z-shell/zsh-zoxide   # do we actually need this? the only reason we need to use this is because zi binds over zoxide's default zi binding, but we already added that to the nix thing
 
     # Plugins
       # Aliases
@@ -15,21 +21,21 @@
         # zi light olets/zsh-abbr                                                 # abbr - Alias but more annoying for you, less annoying for everyone around you 
 
       # annexes and metaplugins
-        # zi light-mode for z-shell/z-a-meta-plugins @zsh-users+fast              # https://github.com/z-shell/zsh-fancy-completions
+        zi light-mode for z-shell/z-a-meta-plugins @zsh-users+fast              # https://github.com/z-shell/zsh-fancy-completions
         zi light z-shell/z-a-bin-gem-node                                       # uhhhhh https://wiki.zshell.dev/ecosystem/annexes/bin-gem-node but it's not that important
         zi light z-shell/z-a-patch-dl                               # todo: only need if we care about zi
 
       # Autosuggest -- use right-arrow to complete
-        # zi light zsh-users/zsh-autosuggestions
+        zi light zsh-users/zsh-autosuggestions
 
       # clipboard
-        # zi light kutsan/zsh-system-clipboard                                    # synchronize tmux clipboard buffers if ZSH_SYSTEM_CLIPBOARD_TMUX_SUPPORT='true'
+        zi light kutsan/zsh-system-clipboard                                    # synchronize tmux clipboard buffers if ZSH_SYSTEM_CLIPBOARD_TMUX_SUPPORT='true'
                                                                                 # Also enables clipboard use in the zsh vi-mode line editor
       # diff
-        # zi light https://github.com/z-shell/zsh-diff-so-fancy
+        zi light https://github.com/z-shell/zsh-diff-so-fancy
 
       # History plugins
-        zi light jgogstad/passwordless-history # todo: better ways?
+        zi light jgogstad/zsh-mask # todo: better ways?
         # zi load z-shell/H-S-MW # history-search-multi_word
         # zi load zsh-users/zsh-history-substring-search
         # zi light tymm/zsh-directory-history
@@ -64,8 +70,11 @@
       # Completions
         zi load RobSis/zsh-completion-generator # todo: do I even need this
         zi light 3v1n0/zsh-bash-completions-fallback                            # https://github.com/3v1n0/zsh-bash-completions-fallback
-        # zi light clarketm/zsh-completions                                       # additional completions https://github.com/clarketm/zsh-completions
-        
+        zi light clarketm/zsh-completions                                       # additional completions https://github.com/clarketm/zsh-completions
+        zi light MenkeTechnologies/zsh-more-completions
+        zi light syohex/zsh-misc-completions
+        zi light MenkeTechnologies/zsh-cargo-completions
+
 
 
 # zi light alexiszamanidis/zsh-git-fzf                                  # https://github.com/alexiszamanidis/zsh-git-fzf
