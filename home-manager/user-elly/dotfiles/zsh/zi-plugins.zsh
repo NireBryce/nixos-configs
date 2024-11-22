@@ -26,7 +26,7 @@
         zi light z-shell/z-a-patch-dl                               # todo: only need if we care about zi
 
       # Autosuggest -- use right-arrow to complete
-        zi light zsh-users/zsh-autosuggestions
+        # zi light zsh-users/zsh-autosuggestions
 
       # clipboard
         zi light kutsan/zsh-system-clipboard                                    # synchronize tmux clipboard buffers if ZSH_SYSTEM_CLIPBOARD_TMUX_SUPPORT='true'
@@ -52,7 +52,7 @@
           # zi light https://github.com/gmatheu/shell-plugins                     # WARN: flaky
 
       # syntax highlighting
-        # zi light z-shell/F-Sy-H
+        zi light z-shell/F-Sy-H
 
         # # a different highlighter plugin, misleadingly named but cool colors 
           # zi light trapd00r/zsh-syntax-highlighting-filetypes                     # https://github.com/trapd00r/zsh-syntax-highlighting-filetypes
@@ -69,11 +69,10 @@
         
       # Completions
         zi load RobSis/zsh-completion-generator # todo: do I even need this
-        zi light 3v1n0/zsh-bash-completions-fallback                            # https://github.com/3v1n0/zsh-bash-completions-fallback
         zi light clarketm/zsh-completions                                       # additional completions https://github.com/clarketm/zsh-completions
         zi light MenkeTechnologies/zsh-more-completions
         zi light syohex/zsh-misc-completions
-        zi light MenkeTechnologies/zsh-cargo-completions
+        zi light 3v1n0/zsh-bash-completions-fallback                            # https://github.com/3v1n0/zsh-bash-completions-fallback
 
 
 
