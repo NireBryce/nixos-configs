@@ -212,7 +212,7 @@ in {
             # eval "$(is init zsh)"
 
           # homebrew
-          export PATH="/opt/homebrew/bin:$PATH" # TODO: pull this out into nix path definitions
+          export PATH="/opt/homebrew/bin:$PATH" # TODO: pull this out into nix's path definitions, matters for darwin
       
         '';
     };
