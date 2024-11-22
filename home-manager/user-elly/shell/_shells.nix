@@ -23,13 +23,14 @@ in {
         zellij      .enableZshIntegration = true;
         broot       .enableZshIntegration = true;
         nix-index   .enableZshIntegration = true;
-        
+
+
         zoxide = {
           enable = true;
           enableZshIntegration = true;
-          options = [
-            "--cmd x" # change zoxide binding to not interfere with zi
-          ];
+          # options = [
+          #   "--cmd x" # change zoxide binding to not interfere with zi
+          # ];
         };
 
         atuin = {       
@@ -85,6 +86,10 @@ in {
 
           '';
         };
+        starship = {
+            enable = true;  
+            enableZshIntegration = true;
+        };
     };
   
     home.packages = with pkgs; [  # Things needed for my .zshrc
@@ -97,7 +102,6 @@ in {
         # zi                              # zsh plugin manager, doesn't work fsr
         ruby                            # zi depends on `gem`
         nix-zsh-completions
-
         zsh-f-sy-h
         zsh-fzf-tab
         zsh-nix-shell
@@ -107,10 +111,10 @@ in {
         # zsh-powerlevel10k # in zi
         zsh-system-clipboard
         zsh-you-should-use
-        
-
     ];
-  
+
+    
+
     programs.zsh = let               
         p10k_cfg          = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/010-p10k.zsh";
         bindings_cfg      = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/initial-bindings.zsh";
@@ -134,63 +138,47 @@ in {
         localVariables = {
           # local variables
           # _ZO_CMD_PREFIX="x";
+          ZSH="${pkgs.zsh}";
         };
-        plugins = [ 
-          { 
-            name = "zsh-mask";  # formerly "passwordless-history"
-            src = pkgs.fetchFromGitHub { 
-              owner = "jgogstad";
-              repo = "zsh-mask";
-              rev = "master";
-              sha256 = "sha256-u4ZDWKSnk27rBz6ZYLLgWy4yHTgxfK2apPCZEOcMwt4="; # TODO: replace after run, magic 
-            };
-          }
-          {
-            name = "zsh-colored-man-pages";
-            src = pkgs.fetchFromGitHub {
-              owner = "ael-code";
-              repo = "zsh-colored-man-pages";
-              rev = "master";
-              sha256 = "sha256-087bNmB5gDUKoSriHIjXOVZiUG5+Dy9qv3D69E8GBhs="; # TODO: replace after run, magic
-            };
-          }
-          {
-            name = "zsh-256color";
-            src = pkgs.fetchFromGitHub {
-              owner = "chrissicool";
-              repo = "zsh-256color";
-              rev = "master";
-              sha256 = "sha256-OoK+LMUaFYxLrGG6awb5fU97jXNT0SFACO3AbLheZNU="; # TODO: replace after run, magic
-            };
-          }
-          {
-            name = "colorize";
-            src = pkgs.fetchFromGitHub { # TODO: can you live without?
-              owner = "zpm-zsh";
-              repo = "colorize";
-              rev = "master";
-              sha256 = "sha256-OoK+LMUaFYxLrGG6awb5fU97jXNT0SFACO3AbLheZNU="; # TODO: replace after run, magic
-            };
-          }
-          {
-            name = "zsh-completion-generator"; # TODO: just switch to fish? would need to learn how to config it.
-            src = pkgs.fetchFromGitHub {
-              owner = "RobSis";
-              repo = "zsh-completion-generator";
-              rev = "master";
-              sha256 = "sha256-OoK+LMUaFYxLrGG6awb5fU97jXNT0SFACO3AbLheZNU="; # TODO: replace after run, magic
-            };
-          }
-          {
-            name = "zsh-bash-completions-fallback";
-            src = pkgs.fetchFromGitHub {
-              owner = "3v1n0";
-              repo = "zsh-bash-completions-fallback";
-              rev = "master";
-              sha256 = "sha256-X219zFA0HEeZgOtP7G0lyRwKDSUAQrjaFMUJYAd6084="; # TODO: replace after run, magic
-            };
-          }
-        ];
+        
+        oh-my-zsh = {
+          enable = true;
+          plugins = [ 
+            "alias-finder"
+            "colored-man-pages"
+            "colorize"
+            "dotenv"
+            "emoji"
+            "eza"
+            "gh"
+            "git-escape-magic"
+            "gitfast"
+            "git-prompt"
+            "macos"
+            "python"
+            "rsync"
+            "rust"
+            "safe-paste"
+            "ssh"
+            "ssh-agent"
+            "starship"
+            "tig"
+            "tmux"
+            "tldr"
+            "ufw"
+            "vscode"
+          ];
+        };
+        zplug = {
+          enable = true;
+          plugins = [
+            { name = "jgogstad/zsh-mask"; }
+            { name = "chrissicool/zsh-256color"; }
+            { name = "RobSis/zsh-completion-generator"; }
+            { name = "3v1n0/zsh-bash-completions-fallback"; }
+          ];
+        };
+
 
       # .zshrc
         shellAliases = {
