@@ -112,14 +112,14 @@ in {
     ];
   
     programs.zsh = let               
-        p10k_cfg          = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/010-p10k.zsh";
-        bindings_cfg      = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/initial-bindings.zsh";
-        setopts_cfg       = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/initial-setopts.zsh";
-        zstyle_cfg        = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/initial-zstyle.zsh";
-        zi_cfg            = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/020-zi.zsh";
-        zi_plugins_cfg    = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/zi-plugins.zsh";
-        atuin_cfg         = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/021-atuin.zsh";
-        zellij_keys_cfg   = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/config/zsh/040-free-zellij-keys.zsh";
+        p10k_cfg          = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/010-p10k.zsh";
+        bindings_cfg      = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/initial-bindings.zsh";
+        setopts_cfg       = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/initial-setopts.zsh";
+        zstyle_cfg        = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/initial-zstyle.zsh";
+        zi_cfg            = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/020-zi.zsh";
+        zi_plugins_cfg    = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/zi-plugins.zsh";
+        atuin_cfg         = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/021-atuin.zsh";
+        zellij_keys_cfg   = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/040-free-zellij-keys.zsh";
     in {
         
         
@@ -138,50 +138,56 @@ in {
         plugins = [ 
           { 
             name = "zsh-mask";  # formerly "passwordless-history"
-            src = pkgs.fetchFromGithub { 
+            src = pkgs.fetchFromGitHub { 
               owner = "jgogstad";
               repo = "zsh-mask";
-              sha256 = "0000000000000000000000000000000000000000000000000000"; # TODO: replace after run, magic 
+              rev = "master";
+              sha256 = "sha256-u4ZDWKSnk27rBz6ZYLLgWy4yHTgxfK2apPCZEOcMwt4="; # TODO: replace after run, magic 
             };
           }
           {
             name = "zsh-colored-man-pages";
-            src = pkgs.fetchFromGithub {
+            src = pkgs.fetchFromGitHub {
               owner = "ael-code";
               repo = "zsh-colored-man-pages";
-              sha256 = "0000000000000000000000000000000000000000000000000000"; # TODO: replace after run, magic
+              rev = "master";
+              sha256 = "sha256-087bNmB5gDUKoSriHIjXOVZiUG5+Dy9qv3D69E8GBhs="; # TODO: replace after run, magic
             };
           }
           {
             name = "zsh-256color";
-            src = pkgs.fetchFromGithub {
+            src = pkgs.fetchFromGitHub {
               owner = "chrissicool";
               repo = "zsh-256color";
-              sha256 = "0000000000000000000000000000000000000000000000000000"; # TODO: replace after run, magic
+              rev = "master";
+              sha256 = "sha256-OoK+LMUaFYxLrGG6awb5fU97jXNT0SFACO3AbLheZNU="; # TODO: replace after run, magic
             };
           }
           {
             name = "colorize";
-            src = pkgs.fetchFromGithub { # TODO: can you live without?
+            src = pkgs.fetchFromGitHub { # TODO: can you live without?
               owner = "zpm-zsh";
               repo = "colorize";
-              sha256 = "0000000000000000000000000000000000000000000000000000"; # TODO: replace after run, magic
+              rev = "master";
+              sha256 = "sha256-OoK+LMUaFYxLrGG6awb5fU97jXNT0SFACO3AbLheZNU="; # TODO: replace after run, magic
             };
           }
           {
             name = "zsh-completion-generator"; # TODO: just switch to fish? would need to learn how to config it.
-            src = pkgs.fetchFromGithub {
+            src = pkgs.fetchFromGitHub {
               owner = "RobSis";
               repo = "zsh-completion-generator";
-              sha256 = "0000000000000000000000000000000000000000000000000000"; # TODO: replace after run, magic
+              rev = "master";
+              sha256 = "sha256-OoK+LMUaFYxLrGG6awb5fU97jXNT0SFACO3AbLheZNU="; # TODO: replace after run, magic
             };
           }
           {
             name = "zsh-bash-completions-fallback";
-            src = pkgs.fetchFromGithub {
+            src = pkgs.fetchFromGitHub {
               owner = "3v1n0";
               repo = "zsh-bash-completions-fallback";
-              sha256 = "0000000000000000000000000000000000000000000000000000"; # TODO: replace after run, magic
+              rev = "master";
+              sha256 = "sha256-X219zFA0HEeZgOtP7G0lyRwKDSUAQrjaFMUJYAd6084="; # TODO: replace after run, magic
             };
           }
         ];
