@@ -69,10 +69,10 @@
         
       # Completions
         zi load RobSis/zsh-completion-generator # todo: do I even need this
-        zi light clarketm/zsh-completions                                       # additional completions https://github.com/clarketm/zsh-completions
-        zi light MenkeTechnologies/zsh-more-completions
-        zi light syohex/zsh-misc-completions
-        zi light 3v1n0/zsh-bash-completions-fallback                            # https://github.com/3v1n0/zsh-bash-completions-fallback
+        # zi light clarketm/zsh-completions                                       # additional completions https://github.com/clarketm/zsh-completions
+        # zi light MenkeTechnologies/zsh-more-completions
+        # zi light syohex/zsh-misc-completions
+        # zi light 3v1n0/zsh-bash-completions-fallback                            # https://github.com/3v1n0/zsh-bash-completions-fallback
 
 
 
