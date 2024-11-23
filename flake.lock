@@ -7,11 +7,25 @@
         ]
       },
       "locked": {
+<<<<<<< HEAD
         "lastModified": 1732229547,
         "narHash": "sha256-vtUhSQFgDfyyNM6rgmn35A2T+L5PXBS0H89cxWK9N2A=",
+||||||| parent of 5044ec4 (CHORE: bump flake.lock)
+        "lastModified": 1732016537,
+        "narHash": "sha256-XwXUK+meYnlhdQz2TVE4Wv+tsx1CkdGbDPt1tRzCNH4=",
+=======
+        "lastModified": 1732324260,
+        "narHash": "sha256-0xzQvoId/P008QkTSAdFVv465P9rL9nYkIOWXL5pdsY=",
+>>>>>>> 5044ec4 (CHORE: bump flake.lock)
         "owner": "LnL7",
         "repo": "nix-darwin",
+<<<<<<< HEAD
         "rev": "edabc790a834326dcb5810e2698fa743483510d0",
+||||||| parent of 5044ec4 (CHORE: bump flake.lock)
+        "rev": "61cee20168a3ebb71a9efd70a55adebaadfbe4d4",
+=======
+        "rev": "698a62c628c2ec423aa770d8ec0e1d0bcf4fca1a",
+>>>>>>> 5044ec4 (CHORE: bump flake.lock)
         "type": "github"
       },
       "original": {
@@ -27,11 +41,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1732025103,
-        "narHash": "sha256-qjEI64RKvDxRyEarY0jTzrZMa8ebezh2DEZmJJrpVdo=",
+        "lastModified": 1732383377,
+        "narHash": "sha256-FnTC1Eycct/oD1I0ZUuy9FmQFfBeuymbVD2ptlQWaGc=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "a46e702093a5c46e192243edbd977d5749e7f294",
+        "rev": "16fe78182e924c9a2b0cffa1f343efea80945ef2",
         "type": "github"
       },
       "original": {
