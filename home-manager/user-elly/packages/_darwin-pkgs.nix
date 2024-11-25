@@ -68,6 +68,7 @@
             "xcodes"
             "xscope"
             "zoom"
+            "google-chrome"
         ];
     };  
 
