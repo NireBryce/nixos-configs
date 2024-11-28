@@ -7,6 +7,7 @@
   # Darwin GUI packages
     home.packages = with pkgs; [
         # discord
+        just
     ];
   
     homebrew = {
