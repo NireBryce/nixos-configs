@@ -110,46 +110,45 @@
 
   
     # shell                     # shell                                     # shell
-      atuin                         # shell history, but handled through home manager shell config                             https://github.com/ellie/atuin
+      atuin                         # shared encrypted shell history            https://github.com/ellie/atuin
       bash-completion               # bash complete                             https://github.com/scop/bash-completion
-      bat                           # `cat` alternative                         https://github.com/sharkdp/bat
-      bat-extras.batdiff            # bat diff                                  https://github.com/eth-p/bat-extras
-      bat-extras.batgrep            # bat grep                                  https://github.com/eth-p/bat-extras
-      bat-extras.batman             # TODO: broken                              https://github.com/eth-p/bat-extras
-      bat-extras.batpipe            # bat pipe                                  https://github.com/eth-p/bat-extras
-      bat-extras.batwatch           # bat watch                                 https://github.com/eth-p/bat-extras
-      bat-extras.prettybat          # prettybat                                 https://github.com/eth-p/bat-extras
+      bat                           # `cat`, `less` alternative (w/ SynHi)      https://github.com/sharkdp/bat
+      bat-extras.batdiff            # bat `diff`                                https://github.com/eth-p/bat-extras
+      bat-extras.batgrep            # bat `grep`                                https://github.com/eth-p/bat-extras
+      bat-extras.batman             # TODO: broken fzf                          https://github.com/eth-p/bat-extras
+      bat-extras.batpipe            # bat pipe - idk what it does               https://github.com/eth-p/bat-extras
+      bat-extras.batwatch           # bat `watch`                               https://github.com/eth-p/bat-extras
+      bat-extras.prettybat          # pretty print w/ bat                       https://github.com/eth-p/bat-extras
       broot                         # `br` - tree alternative                   https://github.com/Canop/broot
       btop                          # `htop` alternative                        https://github.com/aristocratos/btop
       du-dust                       # `du` alternative                          https://github.com/bootandy/dust
       duf                           # `df` alternative                          https://github.com/muesli/duf
-      eza                           # `ls` alternative                          https://github.com/ogham/eza
+      eza                           # `ls`, `tree` alternative                  https://github.com/ogham/eza
       fd                            # `find` alternative                        https://github.com/sharkdp/fd
       file                          # `file` show filetype                      https://darwinsys.com/file
       fzf                           # fuzzy finder and fast TUI via piping      https://github.com/junegunn/fzf
       glow                          # terminal markdown viewer                  https://github.com/charmbracelet/glow
       hyfetch                       # neofetch replacement                      https://github.com/hykilpikonna/HyFetch
       jc                            # jc converts output into JSON or YAML      https://github.com/kellyjonbrazil/jc
-      jq                            # json query                                https://github.com/stedolan/jq
+      jq                            # jq                                        https://github.com/stedolan/jq
       mc                            # midnight commander TUI file manager       https://www.midnight-commander.org/
-      moar                          # better pager                              https://github.com/walles/moar
-      nnn                           # TUI file manager                          https://github.com/jarun/nnn
-      nushell                       # nushell                                   https://github.com/nushell/nushell
-      ripgrep                       # `rg` grep replacement                     https://github.com/BurntSushi/ripgrep
-      tree                          # necessary for some zi things              https://oldmanprogrammer.net/source.php?dir=projects/tree
-      starship                      # shell prompt                              https://github.com/starship/starship
+      moar                          # better pager for some things              https://github.com/walles/moar
+      nushell                       # nushell -c for tabular display any shell  https://github.com/nushell/nushell
+      ripgrep                       # `rg` very fast grep replacement           https://github.com/BurntSushi/ripgrep
+      tree                          # necessary for some `zi` things            https://oldmanprogrammer.net/source.php?dir=projects/tree
+      starship                      # shell prompt generator                    https://github.com/starship/starship
       vivid                         # LS_COLORS generator                       https://github.com/sharkdp/vivid
       which                         # `which`                                   https://www.gnu.org/software/which/
       yq-go                         # yaml query                                https://github.com/mikefarah/yq
-      zellij                        # terminal multiplexer/tiler                https://zellij.dev/
+      zellij                        # terminal multiplexer/tiler rich TUI       https://zellij.dev/
       zoxide                        # smarter cd                                https://github.com/ajeetdsouza/zoxide
     
     # bash                      # bash                                      # bash
       inshellisense                 # intellisense type shell complete          https://github.com/microsoft/inshellisense
-      blesh                         # better bash line editor                   https://github.com/akinomyoga/ble.sh
+      blesh                         # zsh line editor tricks for bash           https://github.com/akinomyoga/ble.sh
   
     # python dev
-      uv
+      uv                            # `pyenv` but it's actually good
     
     # TODO: move to system config
         
