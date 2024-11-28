@@ -37,7 +37,6 @@
       just                          # just                                      https://github.com/casey/just
   
     # dev                       #  dev                                      # dev
-      asdf-vm                       # asdf (use dev shells instead)             https://github.com/asdf-vm/asdf-vm
       diffutils                     # `diff` utils                              https://github.com/ogham/diffutils
       direnv                        # per-directory environments                https://github.com/direnv/direnv
       gnumake                       # gnumake                                   https://github.com/ogham/gnumake
