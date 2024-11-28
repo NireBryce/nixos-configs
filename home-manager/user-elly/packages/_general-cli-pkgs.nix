@@ -139,7 +139,7 @@
       starship                      # shell prompt generator                    https://github.com/starship/starship
       vivid                         # LS_COLORS generator                       https://github.com/sharkdp/vivid
       which                         # `which`                                   https://www.gnu.org/software/which/
-      yq-go                         # yaml query                                https://github.com/mikefarah/yq
+      yq-go                         # yaml jq                                   https://github.com/mikefarah/yq
       zellij                        # terminal multiplexer/tiler rich TUI       https://zellij.dev/
       zoxide                        # smarter cd                                https://github.com/ajeetdsouza/zoxide
     
