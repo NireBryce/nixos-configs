@@ -11,12 +11,19 @@ in {
     # installing multiple highlighters causes "zsh_zle-highlight-buffer-p:4: permission denied error
     # in this case it was trapd00r/zsh-syntax-highlighting-filetypes which highlights more than filetypes turns out
 
-    # TODO: evaluate oh-my-zsh, prezto
+    # TO-DONE: evaluate oh-my-zsh, prezto
+    #          o-m-z is too all-encompassing still, but has best support
+    #          prezto not worth looking into imo because I want something stable
+    #          ironically this means going back to `zi` for now
 
     # TODO: replace p10k with `starship` now that p10k is in life support mode
-    programs = { # zsh specific, it dedups them if they're already enabled
-        dircolors.enable = true; 
-        dircolors.enableZshIntegration = true;
+
+    # TODO: figure out how to make zi less fragile, or how to do zi's plugin management declaratively
+
+
+    programs = { # zsh specific, if these are enabled elsewhere nix will dedupe
+        dircolors   .enable               = true; 
+        dircolors   .enableZshIntegration = true;
 
         direnv      .enableZshIntegration = true;
         eza         .enableZshIntegration = true;
@@ -24,14 +31,9 @@ in {
         broot       .enableZshIntegration = true;
         nix-index   .enableZshIntegration = true;
 
-
-        zoxide = {
-          enable = true;
-          enableZshIntegration = true;
-          options = [
-            "--cmd x" # change zoxide binding to not interfere with zi
-          ];
-        };
+        zoxide      .enable               = true;
+        zoxide      .enableZshIntegration = true;
+        zoxide      .options              = [ "--cmd x" ];  # `zi` alias interferes with z-shell/zi
 
         atuin = {       
           enable = true;
@@ -87,6 +89,8 @@ in {
           '';
         };
     };
+    # end programs
+
     home.packages = with pkgs; [  # Things needed for my .zshrc
         diff-so-fancy
         inshellisense
@@ -94,7 +98,6 @@ in {
         zoxide
         atuin
         tree
-        # zi                              # zsh plugin manager, doesn't work fsr
         ruby                            # zi depends on `gem`
         nix-zsh-completions
         zsh-f-sy-h
@@ -111,21 +114,26 @@ in {
     
 
     programs.zsh = let               
-        p10k_cfg          = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/010-p10k.zsh";
-        bindings_cfg      = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/initial-bindings.zsh";
-        setopts_cfg       = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/initial-setopts.zsh";
-        zstyle_cfg        = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/initial-zstyle.zsh";
-        zi_cfg            = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/020-zi.zsh";
-        zi_plugins_cfg    = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/zi-plugins.zsh";
-        zellij_keys_cfg   = lib.fileContents "${flakePath}/home-manager/user-elly/dotfiles/zsh/040-free-zellij-keys.zsh";
+        p10k_cfg        = lib.fileContents 
+            "${flakePath}/home-manager/user-elly/dotfiles/zsh/010-p10k.zsh";
+        bindings_cfg    = lib.fileContents 
+            "${flakePath}/home-manager/user-elly/dotfiles/zsh/initial-bindings.zsh";
+        setopts_cfg     = lib.fileContents 
+            "${flakePath}/home-manager/user-elly/dotfiles/zsh/initial-setopts.zsh";
+        zstyle_cfg      = lib.fileContents 
+            "${flakePath}/home-manager/user-elly/dotfiles/zsh/initial-zstyle.zsh";
+        zi_cfg          = lib.fileContents 
+            "${flakePath}/home-manager/user-elly/dotfiles/zsh/020-zi.zsh";
+        zi_plugins_cfg  = lib.fileContents 
+            "${flakePath}/home-manager/user-elly/dotfiles/zsh/zi-plugins.zsh";
+        zellij_keys_cfg = lib.fileContents 
+            "${flakePath}/home-manager/user-elly/dotfiles/zsh/040-free-zellij-keys.zsh";
     in {
-        
-        
-        enable = true;
-        autocd = false;
-        enableVteIntegration = true;
-        autosuggestion.enable = true;
-        enableCompletion = false;       # enabled through config, removing one compinit call.        
+        enable                  =  true;
+        autocd                  = false;
+        enableVteIntegration    =  true;
+        autosuggestion.enable   =  true;
+        enableCompletion        = false;       # enabled through config, removing one compinit call.        
         zsh-abbr.enable = true;
         # enableBashCompletion = true; # TODO: why doesn't this work? https://search.nixos.org/options?channel=unstable&show=programs.zsh.enableBashCompletion&from=0&size=50&sort=relevance&type=packages&query=zsh
         
@@ -134,9 +142,6 @@ in {
           # _ZO_CMD_PREFIX="x";
 
         };
-        
-      
-
       # .zshrc
         shellAliases = {
           
@@ -148,12 +153,12 @@ in {
 
           #################PASSWORD ENTRY/CONFIRM DIALOGS GO ABOVE##############################
 
-          # Powerlevel10k instant prompt.  input above, else below
+          # Powerlevel10k instant prompt.  anything requiring input/perf goes above, else below
             ${p10k_cfg}                                       
 
           # keybindings from various configs
             ${bindings_cfg}
-          # end keybindings
+          # end keybindings (we are bracketing these categories for collated zshrc debugging purposes)
 
           # setopts
             ${setopts_cfg}
@@ -166,9 +171,9 @@ in {
           typeset -U path cdpath fpath manpath              # TODO: magic, no idea what it does anymore.
           autoload -U add-zsh-hook                          # TODO: Magic, no idea what it does anymore.
 
-          zmodload zsh/terminfo                             # load terminfo
+          zmodload zsh/terminfo                             # TODO: I think this is needed for `kitty` terminal
 
-          WORDCHARS='*?[]~=&;!#$%^(){}<>';                  # Dont consider certain characters part of the word
+          WORDCHARS='*?[]~=&;!#$%^(){}<>';                  # Dont consider certain characters part of the word for nav
           
           
         '';

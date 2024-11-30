@@ -4,8 +4,8 @@
 }:
 
 {
-  # Darwin GUI packages
-    home.packages = with pkgs; [
+  # Darwin packages, for some reason home.packages does not install them, googling found nothing
+    environment.systemPackages = with pkgs; [
         # discord
         just
         fish

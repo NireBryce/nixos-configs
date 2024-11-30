@@ -17,7 +17,7 @@
 
     # Plugins
       # Aliases
-        # zi light akash329d/zsh-alias-finder 
+        zi light akash329d/zsh-alias-finder 
         # zi light olets/zsh-abbr                                                 # abbr - Alias but more annoying for you, less annoying for everyone around you 
 
       # annexes and metaplugins
