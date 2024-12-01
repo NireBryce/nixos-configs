@@ -144,7 +144,7 @@ in {
         };
       # .zshrc
         shellAliases = {
-          
+            "yo" = "just";
         };
         
       #! FOOTGUN: if you comment out a nix variable pointing to .filecontents, '#' only comments out the first line 
