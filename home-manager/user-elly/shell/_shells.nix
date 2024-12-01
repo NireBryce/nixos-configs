@@ -140,13 +140,15 @@ in {
         localVariables = {
           # local variables
           # _ZO_CMD_PREFIX="x";
-
+            SHELL="${pkgs.zsh}/bin/zsh";
+            PATH="$HOME/.nix-profile/bin:$PATH";
         };
       # .zshrc
         shellAliases = {
             "yo" = "just";
         };
-        
+    
+
       #! FOOTGUN: if you comment out a nix variable pointing to .filecontents, '#' only comments out the first line 
         initExtraFirst = ''
           zmodload zsh/zprof                                # zsh profiler

@@ -20,10 +20,6 @@
         "./.gitconfig"        .source = ./.gitconfig;
         "./.p10k.zsh"         .source = ./zsh-powerlevel10k/.p10k.zsh;
         "./.profile"          .source = ./.profile;
-        "./.zlogin"           .source = ./zsh/.zlogin;
-        "./.zlogout"          .source = ./zsh/.zlogout;
-        "./.zprofile"         .source = ./zsh/.zprofile;
-        "./.zshenv"           .source = ./zsh/.zshenv;
         "./.justfile"         .source = ./.just/.justfile;
         "./.just/.justfile"   .source = ./.just/.justfile;
         "./.just"             .source = ./.just;                          # Fractal subcommands galore.
