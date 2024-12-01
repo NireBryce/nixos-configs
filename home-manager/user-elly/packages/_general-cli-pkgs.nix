@@ -13,7 +13,7 @@
 
 
     # Font config
-      (nerdfonts.override { fonts = [ "FiraCode" ]; })
+      nerd-fonts.fira-code
 
 
     ## Keybinds
@@ -88,7 +88,7 @@
       mosh                          # ssh but better (but abandoned)            https://mosh.org/
   
     # nix                       # nix                                       # Nix - Move some of these into dev shells
-      comma                         # `,` run things without installing them    https://github.com/nix-community/comma
+      # comma                         # `,` run things without installing them    https://github.com/nix-community/comma
       deadnix                       # scan for dead nix code                    https://github.com/astro/deadnix
       manix                         # nix man pages                             https://github.com/nix-community/manix
       niv                           # like flakes but worse

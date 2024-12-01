@@ -1,5 +1,8 @@
 #* This defines the nire-lysithea host-specific user config for elly
 
+
+# ! NOTE !
+# ? Packages are currently managed via darwin.
 { 
 	self,
 	... 

@@ -111,7 +111,7 @@
       #  darwinPackages = self.darwinConfigurations."nire-lysithea".pkgs;
     };
   # elly@nire-lysithea
-   homeConfigurations."elly@nire-lysithea" = home-manager.lib.homeManagerConfiguration {
+   homeConfigurations."elly@nire-lysithea.local" = home-manager.lib.homeManagerConfiguration {
       pkgs = import nixpkgs {
         system = "aarch64-darwin";
         config = { 
