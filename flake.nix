@@ -97,37 +97,50 @@
   # TODO: FIXME `sudo nixos-rebuild switch --flake .#nire-durandal`
   # TODO: FIXME `nh os switch --hostname nire-durandal ~/nixos/`
     darwinConfigurations."nire-lysithea"     = darwin.lib.darwinSystem {
-      specialArgs = inputs;
+      specialArgs = { inherit inputs ; };
       system      = "aarch64-darwin";
       modules     = [
         ./system-config/nire-lysithea-configuration.nix
-        nix-index-database.darwinModules.nix-index
+        # nix-index-database.darwinModules.nix-index
       
         # TODO: stylix
         # inputs.stylix.darwinModules.stylix
+        
+        home-manager.darwinModules.home-manager 
+        {
+          home-manager = { 
+            users.elly = import ./home-manager/user-elly/home-nire-lysithea.nix;
+          };
+          users.users.elly.home = "/Users/elly";
+        }
+
+        # nix-index-database.hmModules.nix-index
+        # { programs.nix-index-database.comma.enable = true; }
+        # todo: fix this
+
       ];
     # Expose the package set, including overlays, for convenience.
     # TODO: fixme
       #  darwinPackages = self.darwinConfigurations."nire-lysithea".pkgs;
     };
   # elly@nire-lysithea
-   homeConfigurations."elly@nire-lysithea.local" = home-manager.lib.homeManagerConfiguration {
-      pkgs = import nixpkgs {
-        system = "aarch64-darwin";
-        config = { 
-          allowUnfree = true; 
-          useGlobalPkgs   = true;
-          useUserPackages = true; 
-        };
-      };
-      extraSpecialArgs = inputs;
-      modules = [
-        ./home-manager/user-elly/home-nire-lysithea.nix     # Elly home manager config
-        nix-index-database.hmModules.nix-index
-          { programs.nix-index-database.comma.enable = true; }
-      ];
+  #  homeConfigurations."elly@nire-lysithea.local" = home-manager.lib.homeManagerConfiguration {
+  #     pkgs = import nixpkgs {
+  #       system = "aarch64-darwin";
+  #       config = { 
+  #         allowUnfree = true; 
+  #         useGlobalPkgs   = true;
+  #         useUserPackages = true; 
+  #       };
+  #     };
+  #     extraSpecialArgs = inputs;
+  #     modules = [
+  #       ./home-manager/user-elly/home-nire-lysithea.nix     # Elly home manager config
+  #       nix-index-database.hmModules.nix-index
+  #         { programs.nix-index-database.comma.enable = true; }
+  #     ];
       
-    };
+  #   };
 
   # nire-galatea (thinkpad)
   # `sudo nixos-rebuild switch --flake .#nire-galatea`

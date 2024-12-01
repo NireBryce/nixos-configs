@@ -17,7 +17,7 @@
     services.nix-daemon.enable = true;
 
   # Set Git commit hash for darwin-version.
-    system.configurationRevision = self.rev or self.dirtyRev or null;
+    # system.configurationRevision = self.rev or self.dirtyRev or null;
   
 
   ## shells
@@ -49,6 +49,7 @@
             inshellisense                       # menu-complete and auto-suggest
             starship                            # theming
             blesh                               # if bash were zsh
+        atuin
         coreutils                                     # coreutils
         gcc                                           # gcc
         git                                           # git

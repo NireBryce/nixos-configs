@@ -8,7 +8,7 @@
 	... 
 }:
 let 
-    flakePath               = self; # the root of the flake
+    flakePath               = ../..; # the root of the flake
     ellyPath                = "${flakePath}/home-manager/user-elly";
 
     _dotfiles               = "${ellyPath}/dotfiles";

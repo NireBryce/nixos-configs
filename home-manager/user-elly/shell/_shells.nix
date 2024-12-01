@@ -4,7 +4,7 @@
   lib,
   ...
 }:
-let flakePath = self;
+let flakePath = ../../..; # TODO: fix-me otherwise cause recursion bug with home-manager being run via nix-darwin
 in {
     # Notes:
     # If you get `zsh side` errors, delete ~/.zcompdump and ~/.config/zsh/.zcompdump and run `zi update`
@@ -96,7 +96,7 @@ in {
         inshellisense
         starship
         zoxide
-        atuin
+        # atuin
         tree
         ruby                            # zi depends on `gem`
         nix-zsh-completions

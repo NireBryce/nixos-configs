@@ -109,7 +109,7 @@
 
   
     # shell                     # shell                                     # shell
-      atuin                         # shared encrypted shell history            https://github.com/ellie/atuin
+      # atuin                         # shared encrypted shell history            https://github.com/ellie/atuin
       bash-completion               # bash complete                             https://github.com/scop/bash-completion
       bat                           # `cat`, `less` alternative (w/ SynHi)      https://github.com/sharkdp/bat
       bat-extras.batdiff            # bat `diff`                                https://github.com/eth-p/bat-extras
