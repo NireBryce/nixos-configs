@@ -222,7 +222,7 @@ in {
           export PATH="/opt/homebrew/bin:$PATH" # TODO: pull this out into nix's path definitions, matters for darwin
           
           # Justfile
-          eval "$(${pkgs.just}/bin/just --completions zsh
+          eval "$(${pkgs.just}/bin/just --completions zsh)"
         '';
     };
 }
