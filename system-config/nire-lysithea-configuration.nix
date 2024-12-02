@@ -125,6 +125,7 @@
             "xscope"                # TODO: dont remember
             "zoom"                  # video conferencing
             "google-chrome"         # need for webserial and webBLE apps for devices
+            "autodesk-fusion"       # Fusion 180 (personal featureless edition)
         ];
     };  
 
