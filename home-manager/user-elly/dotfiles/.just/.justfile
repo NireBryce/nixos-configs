@@ -13,7 +13,9 @@ zsh-highlighting-theme-default:
   fast-theme sv-orple
 
 
-
+[group('python')]
+py-activate-venv:
+  "source .venv/bin/activate"
 
 # find event name with `sudo libinput list-devices`
 [group('fix')]
@@ -111,3 +113,4 @@ nix-rebuild-system HOSTNAME:
 
 # https://just.systems/man/en/selecting-recipes-to-run-with-an-interactive-chooser.html 
 # need to fix zsh fzf integrations to use this
+
