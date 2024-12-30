@@ -314,12 +314,12 @@ in {
 
   
   # TODO: turn into its own module.  helps microphone issues, reduces latency
-    musnix = {
-      enable          = true;
-      kernel.realtime = false;              # you shouldn't enable this unless debugging something
-      ## ensure realtime processes don't hang the machine
-        # das_watchdog.enable = true;
-    };
+    # musnix = {
+    #   enable          = true;
+    #   kernel.realtime = false;              # you shouldn't enable this unless debugging something
+    #   ## ensure realtime processes don't hang the machine
+    #     # das_watchdog.enable = true;
+    # };
 
   # TODO: stylix theme config
   # https://danth.github.io/stylix/configuration.html override {argsOverride = {version = "6.6.27";};
