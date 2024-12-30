@@ -244,7 +244,7 @@ in {
       #* System utilities
         bash                        # bash.  ok i guess.
           #? Bash Plugins
-            inshellisense               # menu-complete and auto-suggest
+            # inshellisense               # menu-complete and auto-suggest
             starship                    # theming
             blesh                       # if bash were zsh
         coreutils                   # coreutils

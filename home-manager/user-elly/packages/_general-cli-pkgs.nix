@@ -143,7 +143,7 @@
       zoxide                        # smarter cd                                https://github.com/ajeetdsouza/zoxide
     
     # bash                      # bash                                      # bash
-      inshellisense                 # intellisense type shell complete          https://github.com/microsoft/inshellisense
+      # inshellisense                 # intellisense type shell complete          https://github.com/microsoft/inshellisense
       blesh                         # zsh line editor tricks for bash           https://github.com/akinomyoga/ble.sh
   
     # python dev

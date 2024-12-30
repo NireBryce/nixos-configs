@@ -93,7 +93,7 @@ in {
 
     home.packages = with pkgs; [  # Things needed for my .zshrc
         diff-so-fancy
-        inshellisense
+        # inshellisense
         starship
         zoxide
         # atuin
