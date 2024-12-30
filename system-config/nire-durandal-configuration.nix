@@ -74,9 +74,25 @@ in {
         font = "Lat2-Terminus16";
     };
   ## fonts
-    fonts.packages = with pkgs; [
-        (nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" "Iosevka" "JetBrainsMono" ];})  # be not afraid
-    ];
+    # TODO: fix this:
+    #   error: nerdfonts has been separated into individual font packages under the namespace nerd-fonts.
+    #   ┃        For example change:
+    #   ┃          fonts.packages = [
+    #   ┃            ...
+    #   ┃            (pkgs.nerdfonts.override { fonts = [ "0xproto" "DroidSansMono" ]; })
+    #   ┃          ]
+    #   ┃        to
+    #   ┃          fonts.packages = [
+    #   ┃            ...
+    #   ┃            pkgs.nerd-fonts._0xproto
+    #   ┃            pkgs.nerd-fonts.droid-sans-mono
+    #   ┃          ]
+    #   ┃        or for all fonts
+    #   ┃          fonts.packages = [ ... ] ++ builtins.filter lib.attrsets.isDerivation (builtins.attrValues pkgs.nerd-fonts)
+    
+    # fonts.packages = with pkgs; [
+    #     (nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" "Iosevka" "JetBrainsMono" ];})  # be not afraid
+    # ];
   
   ## hostname
     networking.hostName = "nire-durandal";
