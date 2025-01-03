@@ -94,6 +94,12 @@ in {
     #     (nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" "Iosevka" "JetBrainsMono" ];})  # be not afraid
     # ];
   
+    # TODONE? 
+    fonts.packages = with pkgs; [
+        nerd-fonts.jetbrains-mono
+        nerd-fonts.iosevka
+        nerd-fonts.fira-code
+    ];
   ## hostname
     networking.hostName = "nire-durandal";
 
@@ -235,9 +241,9 @@ in {
     programs.zsh.enable = true;
     programs.zsh.enableCompletion = lib.mkForce false;  # unless disabled, home-manager causes an extra compaudit
    
-    programs.bash.interactiveShellInit = ''
-        ${pkgs.inshellisense}/bin/inshellisense;
-    '';
+    # programs.bash.interactiveShellInit = ''
+    #     ${pkgs.inshellisense}/bin/inshellisense;
+    # '';
 
   ## System packages
     environment.systemPackages = with pkgs; [ # TODO: describe these
@@ -277,6 +283,8 @@ in {
         protontricks                # protontricks                              https://github.com/Matoking/protontricks
         wineWowPackages.waylandFull # Wine for wayland                          https://www.winehq.org/
         steamtinkerlaunch           # steamtinkerlaunch                         https://github.com/sonic2kk/steamtinkerlaunch
+
+        
     ];
   #* steam - (fhs)
     programs.steam = {

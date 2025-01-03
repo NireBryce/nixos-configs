@@ -12,7 +12,7 @@
     numactl    # numastat(8)                      | NUMA stats
     tcpdump    # tcpdump(8)                       | Network sniffer
     bcc        # hardirqs(8), funccount(8) etc    | canned eBPF tools 
-    bpftrace   # bpftrace, basic bcc tools        | eBPF scripting
+    # bpftrace   # bpftrace, basic bcc tools        | eBPF scripting
     trace-cmd  # trace-cmd(1)                     | Ftrace CLI
     ethtool    # ethtool(8)                       | net device info
     tiptop     # tiptop(1)                        | PMU/PMC top

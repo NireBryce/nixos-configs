@@ -14,6 +14,8 @@
 
     # Font config
       nerd-fonts.fira-code
+      
+      
 
 
     ## Keybinds
