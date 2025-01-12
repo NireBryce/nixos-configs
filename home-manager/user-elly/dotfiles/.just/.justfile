@@ -26,7 +26,7 @@ fix-kde-middle-mouse-scroll EVENT_NAME:
   + " "                                         / 
   + "org.kde.KWin.InputDevice.scrollOnButtonDown true"
 
-[group('nix')]
+
 FLAKE_PATH := "~/nixos"
 
 # update the flake in the default repo
