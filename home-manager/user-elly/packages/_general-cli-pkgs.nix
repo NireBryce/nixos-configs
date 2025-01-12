@@ -109,12 +109,6 @@
       # atuin                         # shared encrypted shell history            https://github.com/ellie/atuin
       bash-completion               # bash complete                             https://github.com/scop/bash-completion
       bat                           # `cat`, `less` alternative (w/ SynHi)      https://github.com/sharkdp/bat
-      bat-extras.batdiff            # bat `diff`                                https://github.com/eth-p/bat-extras
-      bat-extras.batgrep            # bat `grep`                                https://github.com/eth-p/bat-extras
-      bat-extras.batman             # TODO: broken fzf                          https://github.com/eth-p/bat-extras
-      bat-extras.batpipe            # bat pipe - idk what it does               https://github.com/eth-p/bat-extras
-      bat-extras.batwatch           # bat `watch`                               https://github.com/eth-p/bat-extras
-      bat-extras.prettybat          # pretty print w/ bat                       https://github.com/eth-p/bat-extras
       broot                         # `br` - tree alternative                   https://github.com/Canop/broot
       btop                          # `htop` alternative                        https://github.com/aristocratos/btop
       du-dust                       # `du` alternative                          https://github.com/bootandy/dust
