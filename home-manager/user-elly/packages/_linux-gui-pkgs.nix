@@ -11,7 +11,7 @@
   programs.obs-studio = {
     enable = true;                  # screen recording / streaming         https://obsproject.com/
     plugins = with pkgs; [ 
-      obs-studio-plugins.obs-vaapi  # enables AMD hardware accel
+      obs-studio-plugins.obs-vaapi  # enables AMD hardware accel?
     ];
   };
   home.packages = with pkgs; [ 
@@ -21,8 +21,6 @@
       kitty-img                     # kitty image rendering engine, like sixel  https://git.sr.ht/~zethra/kitty-img
       wezterm                       # terminal emulator                         https://github.com/wez/wezterm
     # browsers                  # browsers                                # browsers
-    # TODO: move kde packages to kde
-      kdePackages.konqueror         # one of the best `info` file pagers        https://invent.kde.org/network/konqueror
       firefox                       # TODO: also installed as a system package. https://www.mozilla.org/en-US/firefox/
 
     # comms                     # comms                                   # comms
@@ -54,8 +52,6 @@
       obsidian                      # pkm                                       https://obsidian.md/
       libreoffice-qt                # office                                    https://www.libreoffice.org/
 
-    # screenshot                # screenshot                                # screenshot
-      kdePackages.spectacle         # screenshot tool                          https://invent.kde.org/graphics/spectacle
   ];
   # Game stuff managed through system configuration
 }

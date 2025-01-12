@@ -1,4 +1,5 @@
 { 
+  pkgs,
   ...
 }:
 
@@ -19,6 +20,20 @@
   
   # make GTK apps obey theme settings
   programs.dconf.enable = true;
+
+  # fix electron fonts? https://github.com/electron/electron/issues/31797
+  environment.systemPackages = with pkgs; [
+    kdePackages.xdg-desktop-portal-kde
+    kdePackages.spectacle         # screenshot tool                          https://invent.kde.org/graphics/spectacle
+    kdePackages.konqueror         # one of the best `info` file pagers        https://invent.kde.org/network/konqueror
+    kdePackages.qttools
+    partition-manager
+    kcharselect        # symbol picker, may need to be kdePackages.kcharselect
+  ];
+
+  environment.sessionVariables = {
+    GTK_USE_PORTAL = 1;
+  };
 
   # https://wiki.nixos.org/wiki/KDE
 }
