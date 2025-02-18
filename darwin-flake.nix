@@ -2,6 +2,7 @@
   inputs = {
   # 23.11
   # TODO: bump
+  # TODO: actually remember how to use this / make overlays
     nixpkgs-stable.url                          = "github:NixOS/nixpkgs/nixos-23.11";
   # Unstable
     # nixpkgs.url                                 = "github:NixOS/nixpkgs/nixos-unstable";
@@ -36,9 +37,7 @@
     nixpkgs-stable,                                         # https://nixos-and-flakes.thiscute.world/nixos-with-flakes/downgrade-or-upgrade-packages
     darwin,
     home-manager,
-    nixos-hardware,
     nix-index-database,
-    # nixos-hardware-b550-stopgap,                          # TODO: fix flake.nix on nixos-hardware repo
     ...
   } @ inputs: 
   {
@@ -49,13 +48,12 @@
     # nixosModules    = import ./___modules;                  # there are better names for this, but this is de-facto standard
     # homeManagerModules = import ./modules/home-manager
 
+    # TODO: actually learn overlays
     overlays        = import ./___overlays {inherit inputs;};
 
   
   
   # nire-lysithea (macbook)
-  # TODO: FIXME `sudo nixos-rebuild switch --flake .#nire-durandal`
-  # TODO: FIXME `nh os switch --hostname nire-durandal ~/nixos/`
     darwinConfigurations."nire-lysithea"     = darwin.lib.darwinSystem {
       specialArgs = { inherit inputs ; };
       system      = "aarch64-darwin";
@@ -83,25 +81,8 @@
     # TODO: fixme
       #  darwinPackages = self.darwinConfigurations."nire-lysithea".pkgs;
     };
-  # elly@nire-lysithea
-  #  homeConfigurations."elly@nire-lysithea.local" = home-manager.lib.homeManagerConfiguration {
-  #     pkgs = import nixpkgs {
-  #       system = "aarch64-darwin";
-  #       config = { 
-  #         allowUnfree = true; 
-  #         useGlobalPkgs   = true;
-  #         useUserPackages = true; 
-  #       };
-  #     };
-  #     extraSpecialArgs = inputs;
-  #     modules = [
-  #       ./home-manager/user-elly/home-nire-lysithea.nix     # Elly home manager config
-  #       nix-index-database.hmModules.nix-index
-  #         { programs.nix-index-database.comma.enable = true; }
-  #     ];
-      
-  #   };
-
+  };
+}
   
 
 # NOTE: for nix-index to work with flake installs, you must `nix profile install` something
@@ -118,3 +99,22 @@
 # otherwise `nixos-rebuild --flake .#hostname` will not get evaluated correctly.
 ################################################################################
 
+# TODO: fix zsh on macbook
+
+## old: 
+  # elly@nire-lysithea
+  #  homeConfigurations."elly@nire-lysithea.local" = home-manager.lib.homeManagerConfiguration {
+  #     pkgs = import nixpkgs {
+  #       system = "aarch64-darwin";
+  #       config = { 
+  #         allowUnfree = true; 
+  #         useGlobalPkgs   = true;
+  #         useUserPackages = true; 
+  #       };
+  #     };
+  #     extraSpecialArgs = inputs;
+  #     modules = [
+  #       ./home-manager/user-elly/home-nire-lysithea.nix     # Elly home manager config
+  #       nix-index-database.hmModules.nix-index
+  #         { programs.nix-index-database.comma.enable = true; }
+  #     ];
