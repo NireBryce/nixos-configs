@@ -15,7 +15,7 @@
   # nix settings
     nix.settings.experimental-features = [ "nix-command" "flakes" ];
     nixpkgs.config.allowUnfree = true; 
-    services.nix-daemon.enable = true;
+    nix.enable = true;
 
   # Set Git commit hash for darwin-version.
     # system.configurationRevision = self.rev or self.dirtyRev or null;

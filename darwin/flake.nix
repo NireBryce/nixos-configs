@@ -58,7 +58,7 @@
       specialArgs = { inherit inputs ; };
       system      = "aarch64-darwin";
       modules     = [
-        ./system-config/nire-lysithea-configuration.nix
+        ../system-config/nire-lysithea-configuration.nix # structure lives above this folder
         # nix-index-database.darwinModules.nix-index
       
         # TODO: stylix
@@ -67,7 +67,7 @@
         home-manager.darwinModules.home-manager 
         {
           home-manager = { 
-            users.elly = import ./home-manager/user-elly/home-nire-lysithea.nix;
+            users.elly = import ../home-manager/user-elly/home-nire-lysithea.nix; # same thing, all the paths assume the flake is one folder up
           };
           users.users.elly.home = "/Users/elly";
         }
