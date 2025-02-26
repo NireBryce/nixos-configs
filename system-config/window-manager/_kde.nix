@@ -32,7 +32,7 @@
   ];
 
   environment.sessionVariables = {
-    GTK_USE_PORTAL = 1;
+    GTK_USE_PORTAL = 1;  # TODO: what does this do
   };
 
   # https://wiki.nixos.org/wiki/KDE
