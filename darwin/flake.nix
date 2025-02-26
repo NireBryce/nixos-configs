@@ -3,7 +3,7 @@
   # 23.11
   # TODO: bump
   # TODO: actually remember how to use this / make overlays
-    nixpkgs-stable.url                          = "github:NixOS/nixpkgs/nixos-23.11";
+    # nixpkgs-stable.url                          = "github:NixOS/nixpkgs/nixos-23.11";
   # Unstable
     # nixpkgs.url                                 = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs.url                                 = "github:NixOS/nixpkgs/nixpkgs-unstable"; # TODO: this is a YOLO fix for https://github.com/nix-community/home-manager/issues/5991,  I have already spent too much time on this
@@ -16,7 +16,7 @@
   # secret management
     sops-nix.url                                = "github:mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows             = "nixpkgs";
-    sops-nix.inputs.nixpkgs-stable.follows      = "nixpkgs";
+    sops-nix.inputs.nixpkgs-stable.follows      = "nixpkgs-stable";
 
   # Home Manager
     home-manager.url                            = "github:nix-community/home-manager/master";

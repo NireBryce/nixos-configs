@@ -17,7 +17,7 @@
   # secret management
     sops-nix.url                                = "github:mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows             = "nixpkgs";
-    sops-nix.inputs.nixpkgs-stable.follows      = "nixpkgs";
+
 
   # Home Manager
     home-manager.url                            = "github:nix-community/home-manager/master";
