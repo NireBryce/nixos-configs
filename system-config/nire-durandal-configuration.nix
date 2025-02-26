@@ -17,6 +17,7 @@ in let
     _wm-kde                     = "${flakePath}/system-config/window-manager/_kde.nix";
     linux-crisis-utils          = "${flakePath}/___modules/linux-crisis-utilities.nix";
     _sops-secrets               = "${flakePath}/system-config/secrets/_sops.nix";
+    _sunshine                   = "${flakePath}/system-config/modules/sunshine.nix";
   
   ## hardware bugfixes
     fixes-b550-suspend          = "${flakePath}/system-config/system-fixes/suspend/_b550m-gpp0-etc.nix";
@@ -35,8 +36,9 @@ in {
         _remote-sunshine
         _user-elly
         _wm-kde
+        _sunshine
 
-        linux-crisis-utils                                  # these are utilities that you want installed when something happens
+        linux-crisis-utils  # optional
         fixes-b550-suspend
       # impermanence
       # ____________________________________________________ 
