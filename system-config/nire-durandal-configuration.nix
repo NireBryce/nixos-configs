@@ -35,7 +35,7 @@ in {
         _networking-tailscale
         _remote-sunshine
         _user-elly
-        _wm-kde
+        _wm-kde 
         _sunshine
 
         linux-crisis-utils  # optional
