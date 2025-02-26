@@ -12,7 +12,7 @@ let flakePath = self;
 in let 
     _hardware-configuration     = "${flakePath}/system-config/hardware-configurations/durandal-hardware-configuration.nix";
     _networking-tailscale       = "${flakePath}/system-config/services/__tailscale.nix";
-    _remote-sunshine            = "${flakePath}/___modules/services/sunshine.nix";
+    _remote-sunshine            = "${flakePath}/___modules/sunshine.nix";
     _user-elly                  = "${flakePath}/system-config/users/_elly.nix";
     _wm-kde                     = "${flakePath}/system-config/window-manager/_kde.nix";
     linux-crisis-utils          = "${flakePath}/___modules/linux-crisis-utilities.nix";
