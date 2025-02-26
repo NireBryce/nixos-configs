@@ -27,7 +27,7 @@
     kdePackages.spectacle         # screenshot tool                          https://invent.kde.org/graphics/spectacle
     kdePackages.konqueror         # one of the best `info` file pagers        https://invent.kde.org/network/konqueror
     kdePackages.qttools
-    partition-manager
+    kdePackages.partitionmanager
     kcharselect        # symbol picker, may need to be kdePackages.kcharselect
   ];
 
