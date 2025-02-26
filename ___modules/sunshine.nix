@@ -3,21 +3,12 @@
   ...
 }:
 {
-## Sunshine https://www.reddit.com/r/NixOS/comments/1bq2bx4/beginners_guide_to_sunshine_gamedesktop_streaming/
-  environment.systemPackages = with pkgs; [
-    sunshine
-    moonlight-qt
-  ];
-
-  
-
-  security.wrappers.sunshine = {
-      owner = "root";
-      group = "root";
-      capabilities = "cap_sys_admin+p";
-      source = "${pkgs.sunshine}/bin/sunshine";
-  };
-  
+services.sunshine = {
+  enable = true;
+  autoStart = true;
+  capSysAdmin = true;
+  openFirewall = true;
+};
   networking.firewall = {
 
     allowedTCPPorts = [ # ## Sunshine

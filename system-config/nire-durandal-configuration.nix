@@ -12,12 +12,11 @@ let flakePath = self;
 in let 
     _hardware-configuration     = "${flakePath}/system-config/hardware-configurations/durandal-hardware-configuration.nix";
     _networking-tailscale       = "${flakePath}/system-config/services/__tailscale.nix";
-    _remote-sunshine            = "${flakePath}/___modules/sunshine.nix";
+    _remote-sunshine            = "${flakePath}/___modules/services/sunshine.nix";
     _user-elly                  = "${flakePath}/system-config/users/_elly.nix";
     _wm-kde                     = "${flakePath}/system-config/window-manager/_kde.nix";
     linux-crisis-utils          = "${flakePath}/___modules/linux-crisis-utilities.nix";
     _sops-secrets               = "${flakePath}/system-config/secrets/_sops.nix";
-    _sunshine                   = "${flakePath}/system-config/modules/sunshine.nix";
   
   ## hardware bugfixes
     fixes-b550-suspend          = "${flakePath}/system-config/system-fixes/suspend/_b550m-gpp0-etc.nix";
@@ -36,7 +35,6 @@ in {
         _remote-sunshine
         _user-elly
         _wm-kde 
-        _sunshine
 
         linux-crisis-utils  # optional
         fixes-b550-suspend
