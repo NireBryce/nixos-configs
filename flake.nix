@@ -44,7 +44,7 @@
   outputs = {
     self,
     nixpkgs,
-    nixpkgs-stable,                                         # https://nixos-and-flakes.thiscute.world/nixos-with-flakes/downgrade-or-upgrade-packages
+    #nixpkgs-stable,                                         # https://nixos-and-flakes.thiscute.world/nixos-with-flakes/downgrade-or-upgrade-packages
     darwin,
     home-manager,
     nixos-hardware,
