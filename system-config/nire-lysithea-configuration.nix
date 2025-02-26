@@ -128,6 +128,7 @@
             "google-chrome"         # need for webserial and webBLE apps for devices
             "autodesk-fusion"       # Fusion 180 (personal featureless edition)
             "fantastical"           # Calendar Software
+            "moonlight"             # moonlight game streaming (sunshine on durandal)
         ];
     };  
 
