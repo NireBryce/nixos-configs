@@ -5,8 +5,7 @@
   ... 
 }:
 
-let secretsPath = "${self}/system-config/secrets/secrets.yaml";
-in {
+{
 
   # User
   users.mutableUsers = false;
