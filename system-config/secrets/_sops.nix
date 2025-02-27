@@ -24,9 +24,9 @@ in {
   sops = {
     age.sshKeyPaths = map getKeyPath keys;
     defaultSopsFile = "${secretsPath}";
-    # TODO: figure out how to fix this to not require UUID hardcoding
-      defaultSymlinkPath = "/run/user/1000/secrets";
-      defaultSecretsMountPoint = "/run/user/1000/secrets.d";
+    # TODO: what did this do
+      # defaultSymlinkPath = "/run/user/1000/secrets";
+      # defaultSecretsMountPoint = "/run/user/1000/secrets.d";
   };
 
   # sops.secrets.tailscale_key = {
