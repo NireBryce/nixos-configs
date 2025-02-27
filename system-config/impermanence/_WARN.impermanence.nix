@@ -12,7 +12,7 @@
 
 # filesystems
   fileSystems."/".options = [ "compress=zstd" "noatime" ];
-  fileSystems."/home".options = [ "compess=zstd" ];
+  fileSystems."/home".options = [ "compress=zstd" ];
   fileSystems."/nix".options = [ "compress=zstd" "noatime" ];
   fileSystems."/persist".options = [ "compress=zstd" "noatime" ];
   fileSystems."/persist".neededForBoot = true;
