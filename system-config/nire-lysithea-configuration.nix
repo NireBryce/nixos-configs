@@ -129,6 +129,7 @@
             "autodesk-fusion"       # Fusion 180 (personal featureless edition)
             "fantastical"           # Calendar Software
             "moonlight"             # moonlight game streaming (sunshine on durandal)
+            "mullvadvpn"            # mullvad vpn
         ];
     };  
 
