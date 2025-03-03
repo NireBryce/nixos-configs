@@ -24,7 +24,6 @@
     home-manager.inputs.nixpkgs.follows         = "nixpkgs";
   # NixOS-Hardware (for machine-specific fixes)
     nixos-hardware.url                          = "github:NixOS/nixos-hardware/master";
-    # nixos-hardware-b550-stopgap.url             = "github:NixOS/nixos-hardware/master/gigabyte";  # TODO: fix flake.nix on nixos-hardware 
 
   # Musnix
     musnix.url                                  = "github:musnix/musnix";
@@ -49,7 +48,6 @@
     home-manager,
     nixos-hardware,
     nix-index-database,
-    # nixos-hardware-b550-stopgap,                          # TODO: fix flake.nix on nixos-hardware repo
     musnix,
     ...
   } @ inputs: 
@@ -73,6 +71,7 @@
       modules     = [
         ./system-config/nire-durandal-configuration.nix
         nix-index-database.nixosModules.nix-index
+        nixos-hardware.nixosModules.gigabyte-b550
         # inputs.musnix.nixosModules.musnix
         # inputs.nixos-hardware.nixosModules.b550 # TODO: fix flake on nixos-hardware repo
         # inputs.stylix.nixosModules.stylix

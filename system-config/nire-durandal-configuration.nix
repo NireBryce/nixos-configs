@@ -19,7 +19,7 @@ in let
     _sops-secrets               = "${flakePath}/system-config/secrets/_sops.nix";
   
   ## hardware bugfixes
-    fixes-b550-suspend          = "${flakePath}/system-config/system-fixes/suspend/_b550m-gpp0-etc.nix";
+    # fixes-b550-suspend          = "${flakePath}/system-config/system-fixes/suspend/_b550m-gpp0-etc.nix";
   #! ! WARNING TO THE UNWARY ! this will erase the / mount point
     replace-root-at-boot-etc    = "${flakePath}/system-config/impermanence/_WARN.impermanence.nix";
 
