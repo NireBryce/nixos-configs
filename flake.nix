@@ -71,7 +71,7 @@
       modules     = [
         ./system-config/nire-durandal-configuration.nix
         nix-index-database.nixosModules.nix-index
-        nixos-hardware.nixosModules.gigabyte-b550
+        # nixos-hardware.nixosModules.gigabyte-b550 # TODO: enable this when https://github.com/NixOS/nixos-hardware/pull/1394 goes through
         # inputs.musnix.nixosModules.musnix
         # inputs.nixos-hardware.nixosModules.b550 # TODO: fix flake on nixos-hardware repo
         # inputs.stylix.nixosModules.stylix
