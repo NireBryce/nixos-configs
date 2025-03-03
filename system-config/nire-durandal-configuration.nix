@@ -37,7 +37,7 @@ in {
         _wm-kde 
 
         linux-crisis-utils  # optional
-        fixes-b550-suspend
+        # fixes-b550-suspend
       # impermanence
       # ____________________________________________________ 
       # |- /!!\ WARN: this will delete /root on boot /!!\ -|
