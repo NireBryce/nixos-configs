@@ -247,6 +247,7 @@ in {
         wget                        # wget
         zoxide                      # zoxide
         ripgrep                     # ripgrep
+        mullvad-vpn                 # mullvad-vpn
         nix-output-monitor          # `nom` nix-output-monitor                  https://github.com/maralorn/nix-output-monitor
         nh                          # nix helper                                https://github.com/viperML/nh
         linuxHeaders                # linux headers
