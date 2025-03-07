@@ -53,7 +53,7 @@ in {
     '';
 
   ## nix settings
-    nix.settings.trusted-users = [ "root" "elly" ];
+    nix.settings.trusted-users = [ "root" ];
     nix.settings.experimental-features = [ "nix-command" "flakes" ];
     nixpkgs.config.allowUnfree = true;
 
