@@ -287,9 +287,20 @@ in {
         gamescopeSession.enable      = true;            # third party gamescope compositor
     };
   #* fix steamtinkerlaunch compatability tool
+    systemd.services.fixSteamTinkerLaunchComaptLink = {
+        enable = true;
+        after = [ "network.target" ];
+        wantedBy = [ "multi-user.target" ];
+        description = "fix steamtinkerlaunch compatability issues with either nixos or impermaence, unsure which";
+        serviceConfig = {
+            Type = "oneshot";
+            ExecStart = "
+                mkdir -p $STEAM_EXTRA_COMPAT_TOOL_PATHS/SteamTinkerLaunch && ln -s /run/current-system/sw/bin/steamtinkerlaunch $STEAM_EXTRA_COMPAT_TOOL_PATHS/SteamTinkerLaunch/steamtinkerlaunch
+            "; 
+        };
+    };
     environment.shellAliases = {
         # https://gist.github.com/jakehamilton/632edeb9d170a2aedc9984a0363523d3
-        steamtinkerlaunch-compataddfix = "mkdir -p $STEAM_EXTRA_COMPAT_TOOL_PATHS/SteamTinkerLaunch && ln -s /run/current-system/sw/bin/steamtinkerlaunch $STEAM_EXTRA_COMPAT_TOOL_PATHS/SteamTinkerLaunch/steamtinkerlaunch"; 
     };
     
     xdg.portal = { # fix steam/proton/wine issues with xdg-open https://github.com/NixOS/nixpkgs/issues/160923 
