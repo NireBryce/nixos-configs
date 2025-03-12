@@ -294,13 +294,9 @@ in {
         description = "fix steamtinkerlaunch compatability issues with either nixos or impermaence, unsure which";
         serviceConfig = {
             Type = "oneshot";
-            ExecStart = "
-                mkdir -p $STEAM_EXTRA_COMPAT_TOOL_PATHS/SteamTinkerLaunch && ln -s /run/current-system/sw/bin/steamtinkerlaunch $STEAM_EXTRA_COMPAT_TOOL_PATHS/SteamTinkerLaunch/steamtinkerlaunch
-            "; 
+            ExecStart = "mkdir -p $STEAM_EXTRA_COMPAT_TOOL_PATHS/SteamTinkerLaunch && ln -s /run/current-system/sw/bin/steamtinkerlaunch $STEAM_EXTRA_COMPAT_TOOL_PATHS/SteamTinkerLaunch/steamtinkerlaunch";
+            # https://gist.github.com/jakehamilton/632edeb9d170a2aedc9984a0363523d3
         };
-    };
-    environment.shellAliases = {
-        # https://gist.github.com/jakehamilton/632edeb9d170a2aedc9984a0363523d3
     };
     
     xdg.portal = { # fix steam/proton/wine issues with xdg-open https://github.com/NixOS/nixpkgs/issues/160923 
