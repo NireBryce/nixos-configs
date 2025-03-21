@@ -10,7 +10,7 @@
 
 let flakePath = self;
 in let 
-    _hardware-configuration     = "${flakePath}/system-config/hardware-configurations/durandal-hardware-configuration.nix";
+    _hardware-configuration     = "${flakePath}/system-config/hardware-configurations/tenacity-hardware-configuration.nix";
     _networking-tailscale       = "${flakePath}/system-config/services/__tailscale.nix";
     _remote-sunshine            = "${flakePath}/___modules/sunshine.nix";
     _user-elly                  = "${flakePath}/system-config/users/_elly.nix";
@@ -84,7 +84,7 @@ in {
         nerd-fonts.fira-code
     ];
   ## hostname
-    networking.hostName = "nire-durandal";
+    networking.hostName = "nire-tenacity";
 
   ## Locale
     i18n.defaultLocale  = lib.mkDefault "en_US.UTF-8";
