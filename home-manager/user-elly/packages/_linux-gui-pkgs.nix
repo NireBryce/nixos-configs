@@ -26,6 +26,7 @@
     # comms                     # comms                                   # comms
       # cinny-desktop                 # matrix client                             https://github.com/cinnyapp/cinny-desktop
         # TODO: waiting on libolm fix
+      bitwarden                     # password manager                          https://bitwarden.com/
       discord                       # discord chat                              https://discord.com/
       keybase-gui                   # encrypted chat almost no one uses         https://keybase.io/
       keybase                       # see above                                 https://keybase.io/
