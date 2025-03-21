@@ -91,6 +91,33 @@
       ];
     };
   
+
+    # nire-durandal (workstation)
+    # `sudo nixos-rebuild switch --flake .#nire-durandal`
+    # `nh os switch --hostname nire-durandal ~/nixos/`
+    nixosConfigurations."nire-tenacity"     = nixpkgs.lib.nixosSystem {
+      specialArgs = inputs;                                 # send inputs to modules (is this actually the right description?)
+      system      = "x86_64-linux";
+      modules     = [
+        ./system-config/nire-tenacity-configuration.nix
+        nix-index-database.nixosModules.nix-index
+        # TODO: stylix
+      ];
+    };
+  # `home-manager switch --flake .#elly@nire-durandal`
+  # `nh home switch --configuration elly@nire-durandal ~/nixos/`
+    homeConfigurations."elly@nire-tenacity" = home-manager.lib.homeManagerConfiguration {
+      pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
+        system = "x86_64-linux";
+        config = { allowUnfree = true; };
+      };
+      extraSpecialArgs  = inputs;                           # Pass flake inputs to our config
+      modules           = [
+        ./home-manager/user-elly/home-nire-tenacity.nix  # home manager entrypoint
+      ];
+    };
+
+
   # nire-lysithea (macbook)
   # TODO: FIXME `sudo nixos-rebuild switch --flake .#nire-durandal`
   # TODO: FIXME `nh os switch --hostname nire-durandal ~/nixos/`
