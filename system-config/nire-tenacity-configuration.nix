@@ -4,6 +4,7 @@
   nixpkgs,
   pkgs,
   lib,
+  jovian,
   config,
   ... 
 }: 

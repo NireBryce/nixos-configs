@@ -12,7 +12,7 @@
     darwin.inputs.nixpkgs.follows               = "nixpkgs";
 
   # Jovian (steam deck etc)
-    jovian                                      = "github:Jovian-Experiments/Jovian-NixOS";
+    jovian.url                                  = "github:Jovian-Experiments/Jovian-NixOS";
   # Impermanence
     impermanence.url                            = "github:Nix-community/impermanence";
 
@@ -51,6 +51,7 @@
     nixos-hardware,
     nix-index-database,
     musnix,
+    jovian,
     ...
   } @ inputs: 
   {
@@ -78,6 +79,7 @@
         # inputs.nixos-hardware.nixosModules.b550 # TODO: fix flake on nixos-hardware repo
         # inputs.stylix.nixosModules.stylix
         # TODO: stylix
+        
       ];
     };
   # `home-manager switch --flake .#elly@nire-durandal`
@@ -104,6 +106,7 @@
         ./system-config/nire-tenacity-configuration.nix
         nix-index-database.nixosModules.nix-index
         # TODO: stylix
+        jovian.nixosModules.jovian
       ];
     };
   # `home-manager switch --flake .#elly@nire-durandal`
