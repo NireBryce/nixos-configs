@@ -39,7 +39,7 @@ in {
           enable = true;
           enableZshIntegration = true;
           settings = {
-            inline_height = 40;     # search window height
+            inline_height = 30;     # search window height
             style = "compact";
             show_preview = true;
             show_help = true;

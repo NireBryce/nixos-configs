@@ -11,6 +11,8 @@
     darwin.url                                  = "github:LnL7/nix-darwin";
     darwin.inputs.nixpkgs.follows               = "nixpkgs";
 
+  # Jovian (steam deck etc)
+    jovian                                      = "github:Jovian-Experiments/Jovian-NixOS";
   # Impermanence
     impermanence.url                            = "github:Nix-community/impermanence";
 

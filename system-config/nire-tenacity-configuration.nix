@@ -278,6 +278,13 @@ in {
         dedicatedServer.openFirewall = true;            # Open ports in the firewall for Source Dedicated Server
         gamescopeSession.enable      = true;            # third party gamescope compositor
     };
+    jovian.steam.enable = true;
+    jovian.decky-loader.enable = true;
+    services.handheld-daemon = {
+      enable = true;
+      user = "elly";
+      ui.enable = true;
+    };
   #* fix steamtinkerlaunch compatability tool
     environment.shellAliases = {
         # https://gist.github.com/jakehamilton/632edeb9d170a2aedc9984a0363523d3
