@@ -54,6 +54,7 @@ in {
     nix.settings.trusted-users = [ "root" ];
     nix.settings.experimental-features = [ "nix-command" "flakes" ];
     nixpkgs.config.allowUnfree = true;
+    # TODO: do nix automatic garbage collection https://www.youtube.com/watch?v=uS8Bx8nQots
 
   # TODO: probably deprecated by the nix-index flake import
     nix.nixPath = [                                           # make nix-index not use channels https://github.com/nix-community/nix-index/issues/167
@@ -87,18 +88,9 @@ in {
   ## hostname
     networking.hostName = "nire-tenacity";
 
-  ## Input
-    
-    
-
-    # TODO: why this DNS
-    networking.nameservers = [ "1.1.1.1" "1.0.0.1" ];
 
 
-  # TODO: do nix automatic garbage collection https://www.youtube.com/watch?v=uS8Bx8nQots
   
-
-
 
   ## System packages
     environment.systemPackages = with pkgs; [ # TODO: describe these
@@ -119,66 +111,8 @@ in {
         mullvad-vpn                 # mullvad-vpn
         linuxHeaders                # linux headers
         tailscale                   # make tailscale command available to users
-
-      #* GPU-related packages
-        
-
-        
-        
     ];
 
-  
-    
-
-  ## nixos stateVersion for this system
-  #   don't change this
-  #   For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
+  # don't change this without reading about it
     system.stateVersion = "25.05"; # Did you read the comment?
-
 }
-
-
-## ** Fixes **
-
-## `SteamTinkerLaunch` requires some workarounds, see: https://gist.github.com/jakehamilton/632edeb9d170a2aedc9984a0363523d3
-
-## I think this is deprecated by it being in the flake
-  # programs.command-not-found.enable = lib.mkForce false; # conflicts with nix-index-database
-
-
-## * Notes
-  ## Determine where a build is failing if --impure works.
-    #? This is a hack and there must be a better way
-      # sudo nixos-rebuild dry-build -vvv          --flake .#nire-durandal 2>&1 | tee pure.txt; 
-      # sudo nixos-rebuild dry-build -vvv --impure --flake .#nire-durandal 2>&1 | tee impure.txt; 
-      # diff -y pure.txt impure.txt
-      
-  ## ways of overriding kernel
-    # boot.kernelPackages = pkgs.linuxPackages_6_9;
-    # boot.kernelPackages = pkgs.linux_6_6.override { argsOverride = { version = "6.6.23"; }; };
-    # boot.kernelPackages = lib.mkForce pkgs.linuxPackagesFor (pkgs.linux_6_6.override {argsOverride = {version = "6.6.27";};});
-    # boot.kernelPackages = lib.mkForce pkgs.linuxKernel.kernels.linux_6_6;
-    # boot.kernelPackages = pkgs.linuxPackagesFor (pkgs.linux_6_6.override {
-    #   argsOverride = rec {
-    #     src = pkgs.fetchurl {
-    #       url = "mirror://kernel/linux/kernel/v6.x/linux-${version}.tar.xz";
-    #       sha256 = "IA/RGcue8GvO3NtSvgC6RDFj6rFUKVxYMf7ZoSIRqLk=";
-    #     };
-    #     version = "6.6.23";
-    #     modDirVersion = "6.6.23";
-    #   };
-    # });
-
-  ## musnix:
-    # musnix.kernel.packages =  pkgs.linuxPackagesFor (pkgs.linux_6_6.override {
-    #   argsOverride = rec {
-    #     src = pkgs.fetchurl {
-    #       url = "mirror://kernel/linux/kernel/v6.x/linux-${version}.tar.xz";
-    #       sha256 = "IA/RGcue8GvO3NtSvgC6RDFj6rFUKVxYMf7ZoSIRqLk=";
-    #     };
-    #     version = "6.6.23";
-    #     modDirVersion = "6.6.23";
-    #   };
-    # });
-
-
