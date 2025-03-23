@@ -79,7 +79,6 @@ in {
         keyMap = "us";
         font   = "Lat2-Terminus16";
     };
-  
 
   ## Locale
     i18n.defaultLocale  = lib.mkDefault "en_US.UTF-8";
@@ -87,10 +86,6 @@ in {
 
   ## hostname
     networking.hostName = "nire-tenacity";
-
-
-
-  
 
   ## System packages
     environment.systemPackages = with pkgs; [ # TODO: describe these

@@ -1,5 +1,6 @@
 {
     pkgs,
+    lib,
     ...
 }:
 
@@ -22,14 +23,13 @@
 
 # general
     # mesa / vulkan
-    hardware.graphics.enable = lib.mkDefault true;  
-    hardware.graphics.enable32Bit = true;           #     
-    hardware.graphics.extraPackages = with pkgs; [  #     
-      pipewire
+    hardware.graphics.enable        = lib.mkDefault true;  
+    hardware.graphics.enable32Bit   = true;
+    hardware.graphics.extraPackages = with pkgs; [
       libva-utils
     ];
     
 # AMD
     # AMD vulkan drivers
-    hardware.amdgpu.amdvlk.enable = true;   # disable this to default to RadV
+    hardware.amdgpu.amdvlk.enable   = true;   # disable this to default to RadV
 }
