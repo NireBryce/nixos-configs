@@ -1,7 +1,7 @@
 { 
   sops-nix, 
   config,
-  self,
+  pkgs,
   ...
 }:
 
@@ -19,7 +19,9 @@ in {
     sops-nix.nixosModules.sops
   ];
 
-  
+  environment.systemPackages = with pkgs; [
+            sops
+  ];
 
   sops = {
     age.sshKeyPaths = map getKeyPath keys;
@@ -29,26 +31,7 @@ in {
       # defaultSecretsMountPoint = "/run/user/1000/secrets.d";
   };
 
-  # sops.secrets.tailscale_key = {
-  #   sopsFile        = "${secretsPath}"; 
-  # };
 
-  # SSH
-    # sops.secrets.ssh-durandal = {
-    #   sopsFile =  "${secretsPath}";
-    # };
-    #   sops.secrets.ssh-galatea = {
-    #   sopsFile =  "${secretsPath}";
-    # };
-    #   sops.secrets.ssh-lysithea = {
-    #   sopsFile =  "${secretsPath}";
-    # };
-    #   sops.secrets.ssh-sif = {
-    #   sopsFile =  "${secretsPath}"; 
-    # };
-    #   sops.secrets.ssh-iona = {
-    #   sopsFile =  "${secretsPath}"; 
-    # };
   # Syncthing
     sops.secrets.syncthing-durandal = {
       sopsFile =  "${secretsPath}"; 

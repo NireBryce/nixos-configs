@@ -1,5 +1,6 @@
 { 
   pkgs,
+  lib,
   ...
 }:
 
@@ -7,7 +8,7 @@
 {
 
   # WiFi
-  networking.networkmanager.enable = true;  # Needs to be 'true' for KDE networking
+  networking.networkmanager.enable = lib.mkForce true;  # Needs to be 'true' for KDE networking
 
   # Enable the windowing system.
   services.xserver.enable = true;
