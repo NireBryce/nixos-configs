@@ -269,7 +269,7 @@ in {
         protontricks                # protontricks                              https://github.com/Matoking/protontricks
         wineWowPackages.waylandFull # Wine for wayland                          https://www.winehq.org/
         steamtinkerlaunch           # steamtinkerlaunch                         https://github.com/sonic2kk/steamtinkerlaunch
-
+        
         
     ];
   #* steam - (fhs)
@@ -281,6 +281,8 @@ in {
     };
     jovian.steam.enable = true;
     jovian.decky-loader.enable = true;
+    #  $ touch ~/.steam/steam/.cef-enable-remote-debugging  https://github.com/Jovian-Experiments/Jovian-NixOS/issues/460#issuecomment-2599835660
+    
     services.handheld-daemon = {
       enable = true;
       user = "elly";
