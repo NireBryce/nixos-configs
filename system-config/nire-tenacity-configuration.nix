@@ -88,16 +88,9 @@ in {
     networking.hostName = "nire-tenacity";
 
   ## Input
-    hardware.keyboard.zsa.enable        = true;         # zsa keyboard package
-    services.ratbagd.enable             = true;         # for piper logitech mouse ctl
-
-
     
-  
-
-  
-  
     
+
     # TODO: why this DNS
     networking.nameservers = [ "1.1.1.1" "1.0.0.1" ];
 
