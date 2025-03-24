@@ -29,7 +29,7 @@
       };
       "sync" = {
         path = "/home/elly/sync";
-        devices = [ "nire-galatea" "nire-durandal" "nire-tenacity" "nire-sif" "nire-iona" ];
+        devices = [ "nire-galatea" "nire-tenacity" "nire-sif" "nire-iona" ];  # TODO: durandal removed for now to make it work.
         versioning = { 
           type = "simple";
           params = { keep = 5; };
