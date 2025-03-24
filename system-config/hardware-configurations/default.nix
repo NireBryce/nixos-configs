@@ -3,9 +3,9 @@
     ...
 }:
 
-
+let cfg = config.networking;
+in 
 {
-    cfg = config.networking;
     imports = [ 
         "./${cfg.networking.hostName}-hardware-configuration.nix" 
     ];
