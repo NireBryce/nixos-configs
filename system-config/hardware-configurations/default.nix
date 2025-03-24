@@ -1,11 +1,14 @@
 {
-    self,
+    config,
     ...
 }:
+let cfg = config;
 
+in
 {
+    
     imports = [ 
-        "./${self.networking.hostName}-hardware-configuration.nix" 
+        "./${cfg.system.networking.hostName}-hardware-configuration.nix" 
     ];
     
 }
