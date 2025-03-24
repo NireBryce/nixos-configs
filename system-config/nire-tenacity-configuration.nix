@@ -7,25 +7,16 @@
 }: 
   
 let flakePath = self;
+    
 in let 
-    _font                       = "${flakePath}/system-config/common";
+    _common                     = "${flakePath}/system-config/common";
     #impermanence               # See below
-    _networking                 = "${flakePath}/system-config/common/networking";
-    _nix                        = "${flakePath}/system-config/common/nix";
-    _secrets                    = "${flakePath}/system-config/common/secrets";
-    _services                   = "${flakePath}/system-config/common/services";
-    _shells                     = "${flakePath}/system-config/common/shells";
-    _sound                      = "${flakePath}/system-config/common/sound";
-    _ssh                        = "${flakePath}/system-config/common/ssh";
-    _system                     = "${flakePath}/system-config/common/system";
-    _users                      = "${flakePath}/system-config/common/users";
-    _window-manager             = "${flakePath}/system-config/common/window-manager";
-    _xdg                        = "${flakePath}/system-config/common/xdg";
+    
 
     _gaming                     = "${flakePath}/system-config/gaming";
     _gaming-handheld            = "${flakePath}/system-config/hardware-specific/gaming-handheld";
 
-    _hardware-configuration     = "${flakePath}/system-config/hardware-configurations/tenacity-hardware-configuration.nix";
+    _hardware-configuration     = "${flakePath}/system-config/hardware-configurations/";
     _amd-gpu                    = "${flakePath}/system-config/hardware-specific/amd/gpu.nix";
     _zsa-moonlander             = "${flakePath}/system-config/hardware-specific/zsa-moonlander.nix";
     _logitech-g600              = "${flakePath}/system-config/hardware-specific/logitech-g600.nix";
@@ -44,20 +35,14 @@ in {
         nixos-hardware.nixosModules.common-cpu-amd
         nixos-hardware.nixosModules.common-gpu-amd
 
-      # Common
-        _font
-        #impermanence               # See below
-        _networking
-        _nix
-        _secrets
-        _services
-        _shells
-        _sound
-        _ssh
-        _system
-        _users
-        _window-manager
-        _xdg
+        _common
+        _gaming
+        _gaming-handheld
+
+        _hardware-configuration
+        _amd-gpu
+        _zsa-moonlander
+        _logitech-g600
 
       # Hardware
         _hardware-configuration
