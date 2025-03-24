@@ -21,7 +21,7 @@
   };
 
   sops.secrets.tailscale_key = {
-    sopsFile =  "${self}/system-config/secrets/secrets.yaml"; 
+    sopsFile =  "${self}/system-config/common/secrets/secrets.yaml";  # TODO: un-hardcode
   };
 
   environment.persistence = {
