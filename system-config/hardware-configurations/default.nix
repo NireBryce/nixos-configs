@@ -1,11 +1,11 @@
 {
-    config,
+    self,
     ...
 }:
 
 {
     imports = [ 
-        "./${config.networking.hostName}-hardware-configuration.nix" 
+        "./${self.networking.hostName}-hardware-configuration.nix" 
     ];
     
 }
