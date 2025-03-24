@@ -1,6 +1,6 @@
 { 
   imports = [ # TODO: both broken
     ./__tailscale.nix
-    ./__syncthing.nix
+    # ./__syncthing.nix
   ];
 }

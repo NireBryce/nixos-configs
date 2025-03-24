@@ -18,7 +18,7 @@
     settings.folders = { 
       "code" = { 
         path = "/home/elly/code";
-        devices = [ "nire-galatea" "nire-durandal" "nire-tenacity" "nire-sif"];
+        devices = [ "nire-galatea" "nire-tenacity" "nire-sif"]; # "nire-durandal" 
         versioning = {
           type = "staggered";
           params = { 
