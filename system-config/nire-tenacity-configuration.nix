@@ -16,7 +16,9 @@ in let
     _gaming                     = "${flakePath}/system-config/gaming";
     _gaming-handheld            = "${flakePath}/system-config/hardware-specific/gaming-handheld";
 
-    _hardware-configuration     = "${flakePath}/system-config/hardware-configurations/";
+    # TODO: pull hardware config into flake
+    _hardware-configuration     = "${flakePath}/system-config/hardware-configurations/nire-tenacity-hardware-configuration.nix";
+    
     _amd-gpu                    = "${flakePath}/system-config/hardware-specific/amd/gpu.nix";
     _zsa-moonlander             = "${flakePath}/system-config/hardware-specific/zsa-moonlander.nix";
     _logitech-g600              = "${flakePath}/system-config/hardware-specific/logitech-g600.nix";
