@@ -4,7 +4,7 @@
 }:
 
 {
-    import = [ 
+    imports = [ 
         "./${config.networking.hostName}-hardware-configuration.nix" 
     ];
     
