@@ -8,4 +8,4 @@
         ./wayland.nix
         ./kde.nix
     ];
-}
+}git

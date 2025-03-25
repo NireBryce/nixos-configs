@@ -49,7 +49,7 @@ in {
 
         _common
         _gaming
-        _gaming-handheld
+        _kde
 
         _hardware-configuration
         _amd-gpu
