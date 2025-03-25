@@ -1,5 +1,6 @@
 {
     config,
+    pkgs,
     lib,
     ...
 }:
@@ -43,27 +44,27 @@
 
     jovian.decky-loader.enable = true;
     jovian.decky-loader.extraPackages = with pkgs; [
-    power-profiles-daemon
-    inotify-tools
-    libpulseaudio
-    coreutils
-    gamescope
-    gamemode
-    mangohud
-    pciutils
-    systemd
-    gnugrep
-    python3
-    gnused
-    procps
-    steam
-    gawk
-    file
-  ];
-  jovian.decky-loader.extraPythonPackages = pythonPkgs: with pythonPkgs; [
-    click
-  ];
-    https://github.com/gradientvera/GradientOS/blob/adcc4892703dc2129fc8f16d0bce56c2146cd788/mixins/jovian-decky-loader.nix#L5
+        power-profiles-daemon
+        inotify-tools
+        libpulseaudio
+        coreutils
+        gamescope
+        gamemode
+        mangohud
+        pciutils
+        systemd
+        gnugrep
+        python3
+        gnused
+        procps
+        steam
+        gawk
+        file
+    ];
+    jovian.decky-loader.extraPythonPackages = pythonPkgs: with pythonPkgs; [
+        click
+    ];
+    # https://github.com/gradientvera/GradientOS/blob/adcc4892703dc2129fc8f16d0bce56c2146cd788/mixins/jovian-decky-loader.nix#L5
     systemd.services.decky-loader.environment.LD_LIBRARY_PATH = lib.makeLibraryPath config.jovian.decky-loader.extraPackages;
     
 }
