@@ -32,4 +32,5 @@
 # AMD
     # AMD vulkan drivers
     hardware.amdgpu.amdvlk.enable   = true;   # disable this to default to RadV
+    hardware.amdgpu.amdvlk.support32Bit.enable = true;
 }
