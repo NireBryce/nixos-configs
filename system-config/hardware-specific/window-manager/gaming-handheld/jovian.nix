@@ -4,13 +4,29 @@
 }:
 
 {
+    # users = {
+    #     groups.deck = {
+    #         name = "deck";
+    #         gid = 10000;
+    #     };
+    #     users.deck = {
+    #         description = "steamos";
+    #         extraGroups = [ "gamemode" "networkmanager" ];
+    #         group = "deck";
+    #         passwordFile = /persist/passwords/deck;
+    #         home = /home/deck;
+    #         isNormalUser = true;
+    #         uid = 10000;
+    #     };
+    # };
+
     jovian.steam.enable = true;
     jovian.steam.autoStart = true;
     jovian.steam.desktopSession = "plasma";
     jovian.steam.user = "deck";
 
     # TODO: I think this is for GPUs and not APUs, toggle if it doesn't work.
-    # jovian.hardware.has.amd.gpu = true;
+    jovian.hardware.has.amd.gpu = true;
 
     # Early modesetting
     # jovian.hardware.amd.gpu.enableEarlyModesetting = true;
