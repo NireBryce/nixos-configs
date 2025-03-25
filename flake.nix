@@ -13,6 +13,8 @@
 
   # Jovian (steam deck etc)
     jovian.url                                  = "github:Jovian-Experiments/Jovian-NixOS";
+    jovian.inputs.nixpkgs.follows               = "nixpkgs";
+
   # Impermanence
     impermanence.url                            = "github:Nix-community/impermanence";
 
@@ -106,7 +108,8 @@
         ./system-config/nire-tenacity-configuration.nix
         nix-index-database.nixosModules.nix-index
         # TODO: stylix
-        jovian.nixosModules.jovian
+        # jovian.nixosModules.jovian
+        jovian.nixosModules.default
       ];
     };
   # `home-manager switch --flake .#elly@nire-tenacity`
