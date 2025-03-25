@@ -46,3 +46,8 @@ boot.kernelPackages = pkgs.linuxPackagesFor (pkgs.linux_6_6.override {
    });
 ```
 
+home manager broke, so I had to use `nix-shell -p home-manager` to bootstrap
+
+nh os switch --hostname nire-durandal ~/nixos
+
+nh home switch --configuration elly@nire-durandal ~/nixos/

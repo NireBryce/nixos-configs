@@ -41,4 +41,4 @@ in {
     home.stateVersion        = "22.11"; # Do not edit. To figure this out (in-case it changes) you can comment out the line and see what version it expected.
 }
 
-# REMINDER: home manager broke, so I had to use `nix-shell -p home-manager` to bootstrap
+
