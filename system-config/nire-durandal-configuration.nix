@@ -20,7 +20,7 @@ in let
 
     _common                     = "${flakePath}/system-config/common";
     #impermanence               # See below
-    
+    _kde                        = "${flakePath}/system-config/hardware-specific/window-manager/kde";
 
     _gaming                     = "${flakePath}/system-config/gaming";
     _gaming-handheld            = "${flakePath}/system-config/hardware-specific/gaming-handheld";
@@ -49,7 +49,7 @@ in {
 
         _common
         _gaming
-        _gaming-handheld
+        _kde
 
         _hardware-configuration
         _amd-gpu

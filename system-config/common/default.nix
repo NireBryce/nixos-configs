@@ -13,7 +13,6 @@
         ./ssh
         ./system
         ./users/elly
-        ./window-manager
         ./xdg
     ];
 }

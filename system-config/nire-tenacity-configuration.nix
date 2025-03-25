@@ -12,9 +12,9 @@ in let
     _common                     = "${flakePath}/system-config/common";
     #impermanence               # See below
     
-
+    _window-manager             = "${flakePath}/system-config/hardware-specific/window-manager/kde";
     _gaming                     = "${flakePath}/system-config/gaming";
-    _gaming-handheld            = "${flakePath}/system-config/hardware-specific/gaming-handheld";
+    _gaming-handheld            = "${flakePath}/system-config/hardware-specific/window-manager/gaming-handheld";
 
     # TODO: pull hardware config into flake
     _hardware-configuration     = "${flakePath}/system-config/hardware-configurations/nire-tenacity-hardware-configuration.nix";
@@ -24,7 +24,7 @@ in let
     _logitech-g600              = "${flakePath}/system-config/hardware-specific/logitech-g600.nix";
 
   # TODO: why are these in modules
-    _remote-sunshine            = "${flakePath}/___modules/sunshine.nix";
+    # _remote-sunshine            = "${flakePath}/___modules/sunshine.nix";
     linux-crisis-utils          = "${flakePath}/___modules/linux-crisis-utilities.nix";
   
   # Impermanence
@@ -36,7 +36,7 @@ in {
       # <nixos-hardware> modules
         nixos-hardware.nixosModules.common-cpu-amd
         nixos-hardware.nixosModules.common-gpu-amd
-
+        _window-manager
         _common
         _gaming
         _gaming-handheld
@@ -50,7 +50,7 @@ in {
         _hardware-configuration
       
       # TODO: Modules? why
-        _remote-sunshine
+        # _remote-sunshine
         linux-crisis-utils  # optional
 
       # impermanence
