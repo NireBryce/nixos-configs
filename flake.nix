@@ -21,10 +21,10 @@
   # secret management
     sops-nix.url                                = "github:mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows             = "nixpkgs";
-    sops-nix.inputs.nixpkgs-stable.follows      = "nixpkgs";
+    # sops-nix.inputs.nixpkgs-stable.follows      = "nixpkgs";
   # Home Manager
     home-manager.url                            = "github:nix-community/home-manager/master";
-    home-manager-unstable.url                   = "github:NixOS/nixpkgs/nixos-unstable";
+    # home-manager-unstable.url                   = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager.inputs.nixpkgs.follows         = "nixpkgs";
   # NixOS-Hardware (for machine-specific fixes)
     nixos-hardware.url                          = "github:NixOS/nixos-hardware/master";

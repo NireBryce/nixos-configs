@@ -18,7 +18,8 @@
     # multi-machine
       input-leap                    # soft-KVM, synergy/barrier fork            https://github.com/input-leap/input-leap
     # system tools              # system tools                              # System Tools
-      auto-cpufreq                  # auto-cpufreq                              https://github.com/AdnanHodzic/auto-cpufreq
+      #todo: dependency not yet updated
+      # auto-cpufreq                  # auto-cpufreq                              https://github.com/AdnanHodzic/auto-cpufreq
       lm_sensors                    # lm_sensors                                https://hwmon.wiki.kernel.org/lm_sensors
       libinput                      # kde middle mouse scroll fix requires this
       xdg-utils                     # xdg-open for stuff like `protontricks`

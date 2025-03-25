@@ -12,7 +12,7 @@ in let
     _common                     = "${flakePath}/system-config/common";
     #impermanence               # See below
     
-    _window-manager             = "${flakePath}/system-config/hardware-specific/window-manager/kde";
+    # _window-manager             = "${flakePath}/system-config/hardware-specific/window-manager/kde";
     _gaming                     = "${flakePath}/system-config/gaming";
     _gaming-handheld            = "${flakePath}/system-config/hardware-specific/window-manager/gaming-handheld";
 
@@ -36,7 +36,8 @@ in {
       # <nixos-hardware> modules
         nixos-hardware.nixosModules.common-cpu-amd
         nixos-hardware.nixosModules.common-gpu-amd
-        _window-manager
+        # _window-manager
+        
         _common
         _gaming
         _gaming-handheld
