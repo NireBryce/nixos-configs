@@ -13,42 +13,47 @@
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
 
+  fileSystems."/boot" =
+    { device = "/dev/disk/by-uuid/EABC-266A";
+      fsType = "vfat";
+      options = [ "fmask=0022" "dmask=0022" ];
+    };
+
+  boot.initrd.luks.devices."enc".device = "/dev/disk/by-uuid/03b8f5c0-d846-4fde-b533-2a22e8e9975b";
+
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
       fsType = "btrfs";
       options = [ "subvol=root" "compress=zstd" "noatime" ];
     };
 
-  boot.initrd.luks.devices."enc".device = "/dev/disk/by-uuid/03b8f5c0-d846-4fde-b533-2a22e8e9975b";
-
   fileSystems."/home" =
     { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
       fsType = "btrfs";
-      options = [ "compress=zstd" "subvol=home" ];
-      
+      options = [ "subvol=home" ];
     };
 
   fileSystems."/nix" =
     { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
       fsType = "btrfs";
-      options = [ "subvol=nix" "noatime" "compress=zstd" ];
+      options = [ "subvol=nix" ];
     };
 
   fileSystems."/persist" =
     { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
       fsType = "btrfs";
-      options = [ "subvol=persist" "noatime" "compress=zstd" ];
-      neededForBoot = true; 
+      options = [ "subvol=persist" ];
     };
 
   fileSystems."/var/log" =
     { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
       fsType = "btrfs";
-      options = [ "subvol=log" "noatime" "compress=zstd" ];
-      neededForBoot = true;
+      options = [ "subvol=log" ];
     };
 
-  swapDevices = [ ];
+  swapDevices =
+    [ { device = "/dev/disk/by-uuid/0e6095c0-a10b-4a80-8d9c-8f701456e4f9"; }
+    ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's
