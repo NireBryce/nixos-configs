@@ -14,7 +14,7 @@ in let
     
 
     _gaming                     = "${flakePath}/system-config/gaming";
-    _gaming-handheld            = "${flakePath}/system-config/hardware-specific/gaming-handheld";
+    _gaming-handheld            = "${flakePath}/system-config/hardware-specific/window-manager/gaming-handheld";
 
     # TODO: pull hardware config into flake
     _hardware-configuration     = "${flakePath}/system-config/hardware-configurations/nire-tenacity-hardware-configuration.nix";
