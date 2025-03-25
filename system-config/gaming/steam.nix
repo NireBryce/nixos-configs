@@ -18,16 +18,17 @@
         protontricks                # protontricks                              https://github.com/Matoking/protontricks
     ];
 
+    # todo: fix steamtinkerlaunch
     #* fix steamtinkerlaunch compatability tool
-    systemd.services.fixSteamTinkerLaunchComaptLink = {
-        enable = true;
-        after = [ "network.target" ];
-        wantedBy = [ "multi-user.target" ];
-        description = "fix steamtinkerlaunch compatability issues with either nixos or impermaence, unsure which";
-        serviceConfig = {
-            Type = "oneshot";
-            ExecStart = "mkdir -p $STEAM_EXTRA_COMPAT_TOOL_PATHS/SteamTinkerLaunch && ln -s /run/current-system/sw/bin/steamtinkerlaunch $STEAM_EXTRA_COMPAT_TOOL_PATHS/SteamTinkerLaunch/steamtinkerlaunch";
-            # https://gist.github.com/jakehamilton/632edeb9d170a2aedc9984a0363523d3
-        };
-    };
+    # systemd.services.fixSteamTinkerLaunchComaptLink = {
+    #     enable = true;
+    #     after = [ "network.target" ];
+    #     wantedBy = [ "multi-user.target" ];
+    #     description = "fix steamtinkerlaunch compatability issues with either nixos or impermaence, unsure which";
+    #     serviceConfig = {
+    #         Type = "oneshot";
+    #         ExecStart = "mkdir -p $STEAM_EXTRA_COMPAT_TOOL_PATHS/SteamTinkerLaunch && ln -s /run/current-system/sw/bin/steamtinkerlaunch $STEAM_EXTRA_COMPAT_TOOL_PATHS/SteamTinkerLaunch/steamtinkerlaunch";
+    #         # https://gist.github.com/jakehamilton/632edeb9d170a2aedc9984a0363523d3
+    #     };
+    # };
 }
