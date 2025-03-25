@@ -66,8 +66,8 @@
     hardware        = import nixos-hardware;
 
   # nire-durandal (workstation)
-  # `sudo nixos-rebuild switch --flake .#nire-durandal`
-  # `nh os switch --hostname nire-durandal ~/nixos/`
+    # `sudo nixos-rebuild switch --flake .#nire-durandal`
+    # `nh os switch --hostname nire-durandal ~/nixos/`
     nixosConfigurations."nire-durandal"     = nixpkgs.lib.nixosSystem {
       specialArgs = inputs;                                 # send inputs to modules (is this actually the right description?)
       system      = "x86_64-linux";
@@ -82,8 +82,8 @@
         
       ];
     };
-  # `home-manager switch --flake .#elly@nire-durandal`
-  # `nh home switch --configuration elly@nire-durandal ~/nixos/`
+    # `home-manager switch --flake .#elly@nire-durandal`
+    # `nh home switch --configuration elly@nire-durandal ~/nixos/`
     homeConfigurations."elly@nire-durandal" = home-manager.lib.homeManagerConfiguration {
       pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
         system = "x86_64-linux";
@@ -96,9 +96,9 @@
     };
   
 
-    # nire-durandal (workstation)
-    # `sudo nixos-rebuild switch --flake .#nire-durandal`
-    # `nh os switch --hostname nire-durandal ~/nixos/`
+  # nire-tenacity (GPD Win Mini 25)
+    # `sudo nixos-rebuild switch --flake .#nire-tenacity`
+    # `nh os switch --hostname nire-tenacity ~/nixos/`
     nixosConfigurations."nire-tenacity"     = nixpkgs.lib.nixosSystem {
       specialArgs = inputs;                                 # send inputs to modules (is this actually the right description?)
       system      = "x86_64-linux";
@@ -109,8 +109,8 @@
         jovian.nixosModules.jovian
       ];
     };
-  # `home-manager switch --flake .#elly@nire-durandal`
-  # `nh home switch --configuration elly@nire-durandal ~/nixos/`
+  # `home-manager switch --flake .#elly@nire-tenacity`
+  # `nh home switch --configuration elly@nire-tenacity ~/nixos/`
     homeConfigurations."elly@nire-tenacity" = home-manager.lib.homeManagerConfiguration {
       pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
         system = "x86_64-linux";
@@ -124,8 +124,6 @@
 
 
   # nire-lysithea (macbook)
-  # TODO: FIXME `sudo nixos-rebuild switch --flake .#nire-durandal`
-  # TODO: FIXME `nh os switch --hostname nire-durandal ~/nixos/`
     darwinConfigurations."nire-lysithea"     = darwin.lib.darwinSystem {
       specialArgs = { inherit inputs ; };
       system      = "aarch64-darwin";
