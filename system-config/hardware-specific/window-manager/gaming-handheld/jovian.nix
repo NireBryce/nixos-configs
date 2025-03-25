@@ -6,7 +6,7 @@
 {
     jovian.steam.enable = true;
     jovian.steam.autoStart = true;
-    jovian.steam.desktopSession = "plasmawayland";
+    jovian.steam.desktopSession = "plasma";
     jovian.steam.user = "deck";
 
     # TODO: I think this is for GPUs and not APUs, toggle if it doesn't work.
