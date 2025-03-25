@@ -23,7 +23,7 @@
     jovian.steam.enable = true;
     jovian.steam.autoStart = true;
     jovian.steam.desktopSession = "plasma";
-    jovian.steam.user = "deck";
+    jovian.steam.user = "elly";
 
     # TODO: I think this is for GPUs and not APUs, toggle if it doesn't work.
     jovian.hardware.has.amd.gpu = true;
