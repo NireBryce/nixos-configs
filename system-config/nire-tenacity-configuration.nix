@@ -24,7 +24,7 @@ in let
     _logitech-g600              = "${flakePath}/system-config/hardware-specific/logitech-g600.nix";
 
   # TODO: why are these in modules
-    _remote-sunshine            = "${flakePath}/___modules/sunshine.nix";
+    # _remote-sunshine            = "${flakePath}/___modules/sunshine.nix";
     linux-crisis-utils          = "${flakePath}/___modules/linux-crisis-utilities.nix";
   
   # Impermanence
@@ -50,7 +50,7 @@ in {
         _hardware-configuration
       
       # TODO: Modules? why
-        _remote-sunshine
+        # _remote-sunshine
         linux-crisis-utils  # optional
 
       # impermanence

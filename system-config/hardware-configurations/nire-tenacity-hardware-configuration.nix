@@ -13,6 +13,15 @@
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
 
+
+  fileSystems."/boot" =
+    { device = "/dev/disk/by-uuid/380C-3C39";
+      fsType = "vfat";
+      options = [ "fmask=0022" "dmask=0022" ];
+    };
+
+
+
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
       fsType = "btrfs";
