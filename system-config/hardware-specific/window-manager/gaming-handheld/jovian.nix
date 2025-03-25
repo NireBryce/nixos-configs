@@ -6,17 +6,17 @@
 {
     jovian.steam.enable = true;
     jovian.steam.autoStart = true;
-    jovian.steam.desktopSession = "plasma";
+    jovian.steam.desktopSession = "plasmawayland";
     jovian.steam.user = "deck";
 
     # TODO: I think this is for GPUs and not APUs, toggle if it doesn't work.
-    jovian.hardware.has.amd.gpu = true;
+    # jovian.hardware.has.amd.gpu = true;
 
     # Early modesetting
     # jovian.hardware.amd.gpu.enableEarlyModesetting = true;
 
     # ease backlight permissions for auto-dimming
-    jovian.hardware.amd.gpu.enableBacklightControl = true;
+    # jovian.hardware.amd.gpu.enableBacklightControl = true;
 
 
     # https://github.com/ciarandg/portfolio/blob/a45bfbd2ba95148a6df6cfcbba62b3e814364d4c/content/posts/nixos-steam-box/index.md?plain=1#L81
