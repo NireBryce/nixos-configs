@@ -52,6 +52,7 @@
       obsidian                      # pkm                                       https://obsidian.md/
       libreoffice-qt                # office                                    https://www.libreoffice.org/
 
+      audacity
   ];
   # Game stuff managed through system configuration
 }
