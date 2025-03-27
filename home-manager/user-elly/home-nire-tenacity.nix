@@ -16,7 +16,7 @@ let
     _pkgs-linux-cli =       "${ellyPath}/packages/_linux-cli-pkgs.nix";
     _pkgs-linux-gui =       "${ellyPath}/packages/_linux-gui-pkgs.nix";
     _shell          =       "${ellyPath}/shell";
-    _wm-kde         =       "${ellyPath}/window-manager/_kde.nix";
+    # _wm-kde         =       "${ellyPath}/window-manager/_kde.nix";
 
 in {
     imports = [
@@ -27,7 +27,7 @@ in {
         _pkgs-linux-cli     # linux only cli tools
         _pkgs-linux-gui     # linux only gui tools
         _shell              # zsh config, bash launch commands, etc
-        _wm-kde             # kde config
+        # _wm-kde             # kde config
     ];
 
 
