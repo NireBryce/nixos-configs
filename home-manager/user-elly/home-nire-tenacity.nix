@@ -8,27 +8,20 @@
 let 
     flakePath       =       self; # the root of the flake
     ellyPath        =       "${flakePath}/home-manager/user-elly";
-
-    _dotfiles       =       "${ellyPath}/dotfiles";
-    _git            =       "${ellyPath}/git";
-    _pkgs-cli       =       "${ellyPath}/packages/_general-cli-pkgs.nix";
-    _pkgs-dev       =       "${ellyPath}/packages/_dev-pkgs.nix";
-    _pkgs-linux-cli =       "${ellyPath}/packages/_linux-cli-pkgs.nix";
-    _pkgs-linux-gui =       "${ellyPath}/packages/_linux-gui-pkgs.nix";
-    _shell          =       "${ellyPath}/shell";
-    # _wm-kde         =       "${ellyPath}/window-manager/_kde.nix";
+    
+    subConfigList = [ 
+        "${ellyPath}/dotfiles"
+        "${ellyPath}/git"
+        "${ellyPath}/packages/_general-cli-pkgs.nix"
+        "${ellyPath}/packages/_dev-pkgs.nix"
+        "${ellyPath}/packages/_linux-cli-pkgs.nix"
+        "${ellyPath}/packages/_linux-gui-pkgs.nix"
+        "${ellyPath}/shell"
+        "${ellyPath}/window-manager/_kde.nix"
+    ];
 
 in {
-    imports = [
-        _dotfiles           # dotfiles
-        _git                # elly git config
-        _pkgs-cli           # general cli packages
-        _pkgs-dev           # dev packages (mostly nix)
-        _pkgs-linux-cli     # linux only cli tools
-        _pkgs-linux-gui     # linux only gui tools
-        _shell              # zsh config, bash launch commands, etc
-        # _wm-kde             # kde config
-    ];
+    imports = subConfigList;
 
 
   ## Defaults
