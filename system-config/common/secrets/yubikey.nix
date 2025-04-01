@@ -9,7 +9,7 @@ in
 {
     environment.systemPackages = with pkgs; [
         pam_u2f
-        yubikey-flutter
+        yubioath-flutter
         yubikey-manager
     ];
 
