@@ -1,10 +1,11 @@
 {
     pkgs,
     lib,
+    config,
     ...
 }:
 
-let homeDirectory = /home/elly; # todo: automatee, or at least set only one top level variable
+let homeDirectory = "${config.users.users.elly.home}";  # todo: automatee, or at least set only one top level variable
 in
 {
     environment.systemPackages = with pkgs; [
