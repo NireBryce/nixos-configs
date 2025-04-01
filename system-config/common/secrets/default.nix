@@ -5,6 +5,6 @@
 {
     imports = [
         ./sops.nix
-        ./yubikey.nix
+        # ./yubikey.nix
     ];
 }
