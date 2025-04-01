@@ -38,6 +38,7 @@ in {
         nixos-hardware.nixosModules.common-gpu-amd
         # _window-manager
         
+        
         _common
         _gaming
         _gaming-handheld
