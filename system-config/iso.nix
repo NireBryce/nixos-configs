@@ -13,50 +13,30 @@ let
     _hostname = "nire-bootstrap";
     _username = "elly";
     _subconfigList = [
-        
+        ../z-create-iso
+    ];      
 
 in
 {
-  imports = lib.flatten [
-    "${inputs.nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
-    "${inputs.nixpkgs}/nixos/modules/installer/cd-dvd/channel.nix"
-    # This is overkill but I want my core home level utils if I need to use the iso environment for recovery purpose
-  ];
+    networking.hostName = _hostname;
+    
+    imports = lib.flatten [
+        "${inputs.nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+        "${inputs.nixpkgs}/nixos/modules/installer/cd-dvd/channel.nix"
+        _subconfigList
+    ];
 
-  hostSpec = {
-    hostName = "iso";
-    username = "ta";
-    isProduction = lib.mkForce false;
+    #TODO: git creds
 
-    # Needed because we don't use hosts/common/core for iso
-    inherit (inputs.nix-secrets)
-      domain
-      networking
-      ;
-
-    #TODO(git): This is stuff for home/ta/common/core/git.nix. should create home/ta/common/optional/development.nix so core git.nix doesn't use it.
-    handle = "emergentmind";
-    email.gitHub = inputs.nix-secrets.email.gitHub;
-  };
-
-  # root's ssh key are mainly used for remote deployment
-  users.extraUsers.root = {
-    inherit (config.users.users.${config.hostSpec.username}) hashedPassword;
-    openssh.authorizedKeys.keys =
-      config.users.users.${config.hostSpec.username}.openssh.authorizedKeys.keys;
-  };
-
-  environment.etc = {
-    isoBuildTime = {
-      #
-      text = lib.readFile (
-        "${pkgs.runCommand "timestamp" {
-          # builtins.currentTime requires --impure
-          env.when = builtins.currentTime;
-        } "echo -n `date -d @$when  +%Y-%m-%d_%H-%M-%S` > $out"}"
-      );
+    environment.etc = {
+        isoBuildTime = {
+            # builtins.currentTime requires --impure
+            text = lib.readFile (''${pkgs.runCommand 
+                "timestamp" { env.when = builtins.currentTime; } 
+                "echo -n `date -d @$when  +%Y-%m-%d_%H-%M-%S` > $out"
+            }'');
+        };
     };
-  };
 
   # Add the build time to the prompt so it's easier to know the ISO age
   programs.bash.promptInit = ''
@@ -66,11 +46,11 @@ in
   # The default compression-level is (6) and takes too long on some machines (>30m). 3 takes <2m
   isoImage.squashfsCompression = "zstd -Xcompression-level 3";
 
+  # todo: submodule iso nix settings
   nixpkgs = {
     hostPlatform = lib.mkDefault "x86_64-linux";
     config.allowUnfree = true;
   };
-
   nix = {
     settings.experimental-features = [
       "nix-command"
@@ -79,34 +59,9 @@ in
     extraOptions = "experimental-features = nix-command flakes";
   };
 
-  services = {
-    qemuGuest.enable = true;
-    openssh = {
-      ports = [ config.hostSpec.networking.ports.tcp.ssh ];
-      settings.PermitRootLogin = lib.mkForce "yes";
-    };
-  };
+  # todo: ssh?
+  
+  # todo: submodule iso boot settinga
 
-  boot = {
-    kernelPackages = pkgs.linuxPackages_latest;
-    supportedFilesystems = lib.mkForce [
-      "btrfs"
-      "vfat"
-    ];
-  };
 
-  networking = {
-    hostName = "iso";
-  };
-
-  systemd = {
-    services.sshd.wantedBy = lib.mkForce [ "multi-user.target" ];
-    # gnome power settings to not turn off screen
-    targets = {
-      sleep.enable = false;
-      suspend.enable = false;
-      hibernate.enable = false;
-      hybrid-sleep.enable = false;
-    };
-  };
 }

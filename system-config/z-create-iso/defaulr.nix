@@ -7,6 +7,7 @@
         ../common/font
         ../common/networking
         ../common/nix
+        ./boot.nix
     ];
     environment.systemPackages = with pkgs; [
       # bash
