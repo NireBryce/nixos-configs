@@ -28,9 +28,11 @@
       shfmt                         # bash formatter                            https://github.com/mvdan/sh
     
     # cli tools                 # cli tools                                 # CLI tools
+      # todo: fix topgrade to ignore what it cannot change and mostly stick to git repos
+      # todo: fix for darwin-nix too
+      # topgrade                      # upgrade all the things (nix sorta broken) https://github.com/topgrade-rs/topgrade
       entr                          # run commands when files change            https://github.com/eradman/entr
       pciutils                      # lspci                                     https://mj.ucw.cz/sw/pciutils/
-      topgrade                      # upgrade all the things (nix sorta broken) https://github.com/topgrade-rs/topgrade
       just                          # just                                      https://github.com/casey/just
   
     # dev                       #  dev                                      # dev
@@ -82,13 +84,13 @@
       
 
     # multi-machine             # multi-machine                             # multi-machine
-      mosh                          # ssh but better (but abandoned)            https://mosh.org/
+      # mosh                          # ssh but better (but abandoned)            https://mosh.org/
   
     # nix                       # nix                                       # Nix - Move some of these into dev shells
       # comma                         # `,` run things without installing them    https://github.com/nix-community/comma
       deadnix                       # scan for dead nix code                    https://github.com/astro/deadnix
       manix                         # nix man pages                             https://github.com/nix-community/manix
-      niv                           # like flakes but worse
+      # niv                           # like flakes but worse
       nix-diff                      # diff nix code                             https://hackage.haskell.org/package/nix-diff
       nix-du                        # nix-store analysis                        https://github.com/symphorien/nix-du
       nix-health                    # check nix issues                          https://github.com/juspay/nix-health
