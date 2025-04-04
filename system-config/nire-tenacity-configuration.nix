@@ -89,6 +89,7 @@ in {
         mullvad-vpn                 # mullvad-vpn
         linuxHeaders                # linux headers
         tailscale                   # make tailscale command available to users
+        google-chrome               # Firefox doesn't support webUSB or web Bluetooth yet
     ];
 
   # don't change this without reading about it
