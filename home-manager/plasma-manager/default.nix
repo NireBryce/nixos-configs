@@ -4,6 +4,6 @@
 
 {
     imports = [ 
-        ./plasma-configuration.nix # TODO: CURRENTLY UNUSED
+        # ./plasma-configuration.nix # TODO: CURRENTLY UNUSED
     ];
 }
