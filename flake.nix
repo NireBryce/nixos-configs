@@ -36,6 +36,8 @@
     nix-index-database.url                      = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows   = "nixpkgs";
 
+  # plasma manager
+    plasma-manager.url                          = "github:nix-community/plasma-manager";
 
   #Stylix
     # stylix.url                                  = "github:danth/stylix";
@@ -48,6 +50,7 @@
     self,
     nixpkgs,
     #nixpkgs-stable,                                         # https://nixos-and-flakes.thiscute.world/nixos-with-flakes/downgrade-or-upgrade-packages
+    plasma-manager,
     darwin,
     home-manager,
     nixos-hardware,
@@ -93,6 +96,7 @@
       };
       extraSpecialArgs  = inputs;                           # Pass flake inputs to our config
       modules           = [
+        plasma-manager.homeManagerModules.plasma-manager
         ./home-manager/user-elly/home-nire-durandal.nix  # home manager entrypoint
       ];
     };
@@ -121,6 +125,7 @@
       };
       extraSpecialArgs  = inputs;                           # Pass flake inputs to our config
       modules           = [
+        plasma-manager.homeManagerModules.plasma-manager
         ./home-manager/user-elly/home-nire-tenacity.nix  # home manager entrypoint
       ];
     };
