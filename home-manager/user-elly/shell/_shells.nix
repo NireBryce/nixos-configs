@@ -36,15 +36,15 @@ in {
         zoxide      .options              = [ "--cmd x" ];  # `zi` alias interferes with z-shell/zi
 
         atuin = {       
-          enable = true;
-          enableZshIntegration = true;
-          settings = {
-            inline_height = 30;     # search window height
-            style = "compact";
-            show_preview = true;
-            show_help = true;
-            secrets_filter = true;
-          };
+            enable     = true;
+            enableZshIntegration = true;
+            settings = {
+                inline_height   = 30;       # search window height
+                style           = "compact";
+                show_preview    = true;
+                show_help       = true;
+                secrets_filter  = true;
+            };
         };            
 
         fzf = {
@@ -77,7 +77,6 @@ in {
         kitty = {
           extraConfig = ''
             clipboard_control write-clipboard write-primary read-clipboard-ask read-primary-ask
-          
             kitty_mod ctrl+shift
 
             map kitty_mod+c copy_to_clipboard
@@ -85,8 +84,6 @@ in {
 
             map kitty_mod+v paste_from_clipboard
             map cmd+v       paste_from_clipboard
-
-
           '';
         };
     };
@@ -135,18 +132,16 @@ in {
         enableVteIntegration    =  true;
         autosuggestion.enable   =  true;
         enableCompletion        = false;       # enabled through config, removing one compinit call.        
-        zsh-abbr.enable = true;
-        # enableBashCompletion = true; # TODO: why doesn't this work? https://search.nixos.org/options?channel=unstable&show=programs.zsh.enableBashCompletion&from=0&size=50&sort=relevance&type=packages&query=zsh
+        zsh-abbr.enable         =  true;
         
         localVariables = {
-          # local variables
           # _ZO_CMD_PREFIX="x";
             SHELL="${pkgs.zsh}/bin/zsh";
             PATH="$HOME/.nix-profile/bin:$PATH";
         };
       # .zshrc
         shellAliases = {
-            "yo" = "just";
+
         };
     
 
@@ -228,20 +223,6 @@ in {
     };
 }
 
-        # # f-sy-h is better, but has been flakey lately and i trust z-shell (unaffiliated with ZSH) about as far as I can throw them.
-        # # consider switching back
-        # syntaxHighlighting = {
-        #   enable = true;
-        #   # package = "";
-        #   highlighters = [
-        #     "brackets"
-        #     "pattern"
-        #     "regexp"
-        #     # "cursor"
-        #     "root"
-        #     "line"
-        #   ];
-        # };   
 
 ## Bash
   #? Shell integrations go here but main bash config is in the system one.

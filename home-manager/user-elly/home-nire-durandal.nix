@@ -5,17 +5,17 @@
 }:
 
 let 
-    flakePath       =       self; # the root of the flake
-    ellyPath        =       "${flakePath}/home-manager/user-elly";
+    flakePath       = self; # the root of the flake
+    ellyPath        = "${flakePath}/home-manager/user-elly";
 
-    _dotfiles       =       "${ellyPath}/dotfiles";
-    _git            =       "${ellyPath}/git";
-    _pkgs-cli       =       "${ellyPath}/packages/_general-cli-pkgs.nix";
-    _pkgs-dev       =       "${ellyPath}/packages/_dev-pkgs.nix";
-    _pkgs-linux-cli =       "${ellyPath}/packages/_linux-cli-pkgs.nix";
-    _pkgs-linux-gui =       "${ellyPath}/packages/_linux-gui-pkgs.nix";
-    _shell          =       "${ellyPath}/shell";
-    _wm-kde         =       "${ellyPath}/window-manager/_kde.nix";
+    _dotfiles       = "${ellyPath}/dotfiles";
+    _git            = "${ellyPath}/git";
+    _pkgs-cli       = "${ellyPath}/packages/_general-cli-pkgs.nix";
+    _pkgs-dev       = "${ellyPath}/packages/_dev-pkgs.nix";
+    _pkgs-linux-cli = "${ellyPath}/packages/_linux-cli-pkgs.nix";
+    _pkgs-linux-gui = "${ellyPath}/packages/_linux-gui-pkgs.nix";
+    _shell          = "${ellyPath}/shell";
+    _wm-kde         = "${ellyPath}/window-manager/_kde.nix";
 
 in {
     imports = [

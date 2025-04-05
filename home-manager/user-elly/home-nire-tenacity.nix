@@ -10,7 +10,6 @@ let
     flakePath       =       self; # the root of the flake
     ellyPath        =       "${flakePath}/home-manager/user-elly";
     
-    # todo: experimenting with uing variable names to better explain unintuitive nixOS names
     subConfigList = [ 
         "${ellyPath}/nix-settings"
         "${ellyPath}/dotfiles"
