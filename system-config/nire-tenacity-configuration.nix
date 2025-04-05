@@ -28,27 +28,14 @@ let
       # ____________________________________________________ 
       # |- /!!\ WARN: this will delete /root on boot /!!\ -|
       # ----------------------------------------------------
-        "${_scPath}/system-config/impermanence/_WARN.impermanence.nix"
+        "${_scPath}/impermanence/_WARN.impermanence.nix"
     ];
 
 
 in {
     imports = _submodulesList;
-      # <nixos-hardware> modules
-
-       _submodulesList
-        # _remote-sunshine
-
-
-      
-
-    ];
     
-  #? This determines what to add to /run/current-system/sw, generally defined elsewhere
-    environment.pathsToLink = [
-
-    ];
-
+  
   ## hostname
     networking.hostName = "nire-tenacity";
 
