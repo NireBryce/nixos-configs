@@ -6,6 +6,7 @@
         ./font
         ./networking
         ./nix
+        ./packages
         ./secrets
         ./services
         ./shells

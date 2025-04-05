@@ -6,7 +6,7 @@
 
 {
     ## Shells
-        environment.shells = with pkgs; [
+    environment.shells = with pkgs; [
         bash
         zsh
     ];
