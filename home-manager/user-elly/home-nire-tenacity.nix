@@ -22,7 +22,7 @@ let
         "${ellyPath}/packages/_dev-pkgs.nix"
         "${ellyPath}/packages/_linux-cli-pkgs.nix"
         "${ellyPath}/packages/_linux-gui-pkgs.nix"
-        "${ellyPath}/plasma-manager"
+        "${flakePath}/home-manager/plasma-manager"
     ];
 
 in {
