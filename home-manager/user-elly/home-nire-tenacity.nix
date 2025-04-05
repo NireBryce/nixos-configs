@@ -2,6 +2,7 @@
 #* This defines the nire-durandal host-specific user config for elly
 { 
   self,
+  pkgs,
   ... 
 }:
 
@@ -32,6 +33,10 @@ in {
     home.homeDirectory       = "/home/elly";
 
     home.stateVersion        = "22.11"; # Do not edit. To figure this out (in-case it changes) you can comment out the line and see what version it expected.
+
+    home.packages = with pkgs; [
+        google-chrome
+    ];
 } 
 
 # REMINDER: home manager broke, so I had to use `nix-shell -p home-manager` to bootstrap
