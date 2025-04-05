@@ -1,7 +1,6 @@
 { 
   nixos-hardware,
   self,
-
   ... 
 }: 
   
@@ -31,12 +30,8 @@ let
         "${_scPath}/impermanence/_WARN.impermanence.nix"
     ];
 
-
 in {
     imports = _submodulesList;
-    
-  
-  ## hostname
     networking.hostName = "nire-tenacity";
 
   # don't change this without reading about it
