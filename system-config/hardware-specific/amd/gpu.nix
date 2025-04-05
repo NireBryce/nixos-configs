@@ -13,10 +13,8 @@
         vulkan-tools                # vulkan-tools                              https://github.com/KhronosGroup/Vulkan-Tools
         glxinfo                     # glxinfo                                   https://www.khronos.org/opengl/
         
-        # maybe amd only
         clinfo                      # clinfo                                    https://github.com/Oblomov/clinfo
         
-        # amd
         amf-headers                 # todo: document
         amdgpu_top                  # amdgpu_top gpu monitor                    https://github.com/Umio-Yasuno/amdgpu_top
     ];
@@ -26,7 +24,7 @@
     hardware.graphics.enable        = lib.mkDefault true;  
     hardware.graphics.enable32Bit   = true;
     hardware.graphics.extraPackages = with pkgs; [
-      libva-utils
+        libva-utils
     ];
     
 # AMD

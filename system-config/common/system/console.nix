@@ -4,7 +4,7 @@
 
 {
     console = {
-        keyMap = "us";
-        font   = "Lat2-Terminus16";
+        keyMap  = "us";
+        font    = "Lat2-Terminus16";
     };
 }

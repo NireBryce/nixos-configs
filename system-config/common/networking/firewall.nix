@@ -4,6 +4,7 @@
 }:
 
 {
+    # TODO: this module needs to be refactored for readability
     ## Firewall
     networking.firewall = { 
         enable = true;

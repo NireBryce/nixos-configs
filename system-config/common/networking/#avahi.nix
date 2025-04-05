@@ -4,13 +4,13 @@
 
 {
   services.avahi = {
-        enable = true;
-        nssmdns4 = true; # switch this to false if this doesn't work
-        openFirewall = true;
+        enable          = true;
+        nssmdns4        = true; # switch this to false if this doesn't work
+        openFirewall    = true;
         publish = {
-            enable = true;
-            userServices = true;
-            addresses = true;
+            enable          = true;
+            userServices    = true;
+            addresses       = true;
         };
     };
 }

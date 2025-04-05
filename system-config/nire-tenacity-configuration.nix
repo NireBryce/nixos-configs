@@ -6,28 +6,26 @@
   
 let 
     _relativePathRoot = self; # self is the flake's path
-        _rPath = _relativePathRoot;
     _systemConfigFolder = "${_relativePathRoot}/system-config"; 
-        _scPath = _systemConfigFolder;
     
     _submodulesList = [ 
         nixos-hardware.nixosModules.common-cpu-amd
         nixos-hardware.nixosModules.common-gpu-amd
-        "${_rPath}/___modules/linux-crisis-utilities.nix"
-        "${_scPath}/hardware-configurations/nire-tenacity-hardware-configuration.nix"
-        "${_scPath}/hardware-specific/zsa-moonlander.nix"
-        "${_scPath}/hardware-specific/logitech-g600.nix"
+        "${_relativePathRoot}/___modules/linux-crisis-utilities.nix"
+        "${_systemConfigFolder}/hardware-configurations/nire-tenacity-hardware-configuration.nix"
+        "${_systemConfigFolder}/hardware-specific/zsa-moonlander.nix"
+        "${_systemConfigFolder}/hardware-specific/logitech-g600.nix"
         
-        "${_scPath}/hardware-specific/amd/gpu.nix"
-        "${_scPath}/hardware-specific/window-manager/gaming-handheld"
+        "${_systemConfigFolder}/hardware-specific/amd/gpu.nix"
+        "${_systemConfigFolder}/hardware-specific/window-manager/gaming-handheld"
       
-        "${_scPath}/common"
-        "${_scPath}/gaming"
+        "${_systemConfigFolder}/common"
+        "${_systemConfigFolder}/gaming"
       # impermanence
       # ____________________________________________________ 
       # |- /!!\ WARN: this will delete /root on boot /!!\ -|
       # ----------------------------------------------------
-        "${_scPath}/impermanence/_WARN.impermanence.nix"
+        "${_systemConfigFolder}/impermanence/_WARN.impermanence.nix"
     ];
 
 in {

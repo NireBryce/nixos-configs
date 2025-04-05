@@ -14,17 +14,17 @@
     "${self}/___modules/tailscale-autoconnect.nix"
   ];
   services.tailscaleAutoconnect = {
-    enable = true;
+    enable      = true;
     authkeyFile = config.sops.secrets.tailscale_key.path; # TODO: Why can't this be in the sops file? it broke something
     loginServer = "https://login.tailscale.com";
     advertiseExitNode = lib.mkDefault false;
   };
 
   sops.secrets.tailscale_key = {
-    sopsFile =  "${self}/system-config/common/secrets/secrets.yaml";  # TODO: un-hardcode
+    sopsFile    =  "${self}/system-config/common/secrets/secrets.yaml";  # TODO: un-hardcode
   };
 
-  environment.persistence = {
+  environment.persistence    = {
     "/persist".directories = ["/var/lib/tailscale"];
   };
 }

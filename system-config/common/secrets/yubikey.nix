@@ -58,19 +58,19 @@ in
 
     # Yubikey required services and config. See Dr. Duh NixOS config for
     # reference
-    services.pcscd.enable = true; # smartcard service
+    services.pcscd.enable  = true; # smartcard service
     services.udev.packages = [ pkgs.yubikey-personalization ];
 
     # yubikey login / sudo
     security.pam = lib.optionalAttrs pkgs.stdenv.isLinux {
         u2f = {
-            enable = true;
-            settings = {
+            enable      = true;
+            settings    = {
                 cue         = true; # Tells user they need to press the button
                 authFile    = "${homeDirectory}/.config/Yubico/u2f_keys";
             };
         };
-        services = {
+        services    = {
             login.u2fAuth   = true;
             sudo .u2fAuth   = true;
         };
