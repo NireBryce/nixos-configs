@@ -5,7 +5,8 @@
     ...
 }:
 let 
-_deckyLoaderPackages = with pkgs; [                power-profiles-daemon
+_deckyLoaderPackages = with pkgs; [
+    power-profiles-daemon
     inotify-tools
     libpulseaudio
     coreutils
