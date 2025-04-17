@@ -35,7 +35,7 @@ _deckyLoaderPyPackages = pythonPkgs: with pythonPkgs; [
             enable              = true;
             autoStart           = true;
             desktopSession      = "plasma";
-            steam.user          = "elly";
+            user                = "elly";
         };
         hardware.has.amd.gpu    = true;
 

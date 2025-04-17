@@ -18,6 +18,7 @@
         gh
         micro
         tree
+        kdePackages.partitionmanager
       ];
     };
   };
