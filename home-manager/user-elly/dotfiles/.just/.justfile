@@ -3,6 +3,21 @@
 _default:
   @just --list
 
+DARWIN_FLAKE_PATH   :=  "~/nixos-config/darwin"
+DARWIN_HOSTNAME     :=  "nire-lysithea"             #TODO: FIXME
+
+[group('darwin')]
+darwin-flake:
+  nix flake update {{DARWIN_FLAKE_PATH}}
+
+darwin-rebuild:
+  nixos-rebuild switch          \
+  --show-trace                  \
+  --option eval-cache false     \
+  --flake                       \
+      {{DARWIN_FLAKE_PATH}}     \
+    + "#"                       \
+    + {{DARWIN_HOSTNAME}}       \
 
 [group('zsh')]
 zsh-keymap: 
