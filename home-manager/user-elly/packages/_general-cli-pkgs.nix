@@ -43,7 +43,7 @@
       riffdiff                      # provides `riff`, where-in-line diff       https://github.com/walles/riff
       python3                       # system python, zsh complains without      https://python.org
       ruff                          # python linter                             https://github.com/astral-sh/ruff
-      ruff-lsp                      # ruff integration with vscode              https://github.com/astral-sh/ruff-lsp
+      # ruff-lsp                      # ruff integration with vscode              https://github.com/astral-sh/ruff-lsp
       sqlite                        # sqlite                                    https://www.sqlite.org/
     # editors                   # editors                                   # editors
       nano                          # text editor                               https://www.nano-editor.org/
