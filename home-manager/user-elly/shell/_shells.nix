@@ -143,7 +143,17 @@ in {
         shellAliases = {
 
         };
-    
+#       evaluation warning: nixfmt was renamed to nixfmt-classic. The nixfmt attribute may be used for the new RFC 166-style formatter in the future, which is currently available as nixfmt-rfc-style
+# evaluation warning: nixfmt was renamed to nixfmt-classic. The nixfmt attribute may be used for the new RFC 166-style formatter in the future, which is currently available as nixfmt-rfc-style
+# evaluation warning: `programs.zsh.initExtraFirst` is deprecated, use `programs.zsh.initContent` with `lib.mkBefore` instead.
+
+#                     Example: programs.zsh.initContent = lib.mkBefore "your content here";
+# evaluation warning: `programs.zsh.initExtraBeforeCompInit` is deprecated, use `programs.zsh.initContent` with `lib.mkOrder 550` instead.
+
+#                     Example: programs.zsh.initContent = lib.mkOrder 550 "your content here";
+# evaluation warning: `programs.zsh.initExtra` is deprecated, use `programs.zsh.initContent` instead.
+
+#                     Example: programs.zsh.initContent = "your content here";
 
       #! FOOTGUN: if you comment out a nix variable pointing to .filecontents, '#' only comments out the first line 
         initExtraFirst = ''
