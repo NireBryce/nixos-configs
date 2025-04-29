@@ -1,11 +1,15 @@
 {
     pkgs,
     lib,
+    nixos-hardware,
     ...
 }:
 
 {
-
+    imports = [ 
+            nixos-hardware.nixosModules.common-gpu-amd 
+        ];
+        
     environment.systemPackages = with pkgs; [ 
         mesa                        # todo: document
         glfw                        # todo: document

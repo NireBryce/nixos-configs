@@ -13,7 +13,6 @@
         ./sound
         ./ssh
         ./system
-        ./users/elly
         ./xdg
     ];
 }
