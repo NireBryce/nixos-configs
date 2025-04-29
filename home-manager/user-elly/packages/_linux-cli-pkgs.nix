@@ -16,7 +16,7 @@
       ltrace                        # library call tracer                       https://linux.die.net/man/1/ltrace
       strace                        # system call tracer                        https://linux.die.net/man/1/strace
     # multi-machine
-      input-leap                    # soft-KVM, synergy/barrier fork            https://github.com/input-leap/input-leap
+      # input-leap                    # soft-KVM, synergy/barrier fork            https://github.com/input-leap/input-leap
     # system tools              # system tools                              # System Tools
       #todo: dependency not yet updated
       # auto-cpufreq                  # auto-cpufreq                              https://github.com/AdnanHodzic/auto-cpufreq
