@@ -9,6 +9,7 @@ _flakeDir       =       self; # the root of the flake
 _userName       =       "elly";
 _userHome       =       "/home/${_userName}";
 _hmUserDir      =       "${_flakeDir}/home-manager/user-${_userName}";
+_windowManager  =       "kde";
 
 
 subConfigList = [
@@ -17,7 +18,7 @@ subConfigList = [
     "${_hmUserDir}/dotfiles"
     "${_hmUserDir}/git"
     "${_hmUserDir}/shell"
-    "${_hmUserDir}/window-manager/_kde.nix"
+    "${_hmUserDir}/window-manager/${_windowManager}.nix"
 
     "${_hmUserDir}/packages/_general-cli-pkgs.nix"
     "${_hmUserDir}/packages/_dev-pkgs.nix"
