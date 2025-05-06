@@ -53,6 +53,7 @@
       libreoffice-qt                # office                                    https://www.libreoffice.org/
 
       audacity
+      davinci-resolve
   ];
   # Game stuff managed through system configuration
 }
