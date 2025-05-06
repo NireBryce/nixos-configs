@@ -15,11 +15,10 @@
     # linux debugging
       ltrace                        # library call tracer                       https://linux.die.net/man/1/ltrace
       strace                        # system call tracer                        https://linux.die.net/man/1/strace
-    # multi-machine
-      # input-leap                    # soft-KVM, synergy/barrier fork            https://github.com/input-leap/input-leap
+    
     # system tools              # system tools                              # System Tools
       #todo: dependency not yet updated
-      # auto-cpufreq                  # auto-cpufreq                              https://github.com/AdnanHodzic/auto-cpufreq
+      auto-cpufreq                  # auto-cpufreq                              https://github.com/AdnanHodzic/auto-cpufreq
       lm_sensors                    # lm_sensors                                https://hwmon.wiki.kernel.org/lm_sensors
       libinput                      # kde middle mouse scroll fix requires this
       xdg-utils                     # xdg-open for stuff like `protontricks`
@@ -35,6 +34,7 @@
       egl-wayland                   # who knows what this is for                https://github.com/NVIDIA/egl-wayland/
 
     # SteamTinkerLaunch needs these
+    # TODO: move to steam config
       xxd
       xdotool
       xorg.xwininfo
