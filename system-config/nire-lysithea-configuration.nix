@@ -130,6 +130,7 @@
             "fantastical"           # Calendar Software
             "moonlight"             # moonlight game streaming (sunshine on durandal)
             "mullvadvpn"            # mullvad vpn
+            "insta360-studio"       # 360 video editor
         ];
     };  
 
