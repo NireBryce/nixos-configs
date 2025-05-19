@@ -50,6 +50,7 @@
       nanorc                        # nano syntax highlighting                  https://github.com/scopatz/nanorc
       neovim                        # text editor                               https://neovim.io/
 
+
     # file transfer             # file transfer                             # file transfer
       aria2                         # cli download manager                      https://aria2.github.io/
       magic-wormhole-rs             # easy transfer arbitrary files encrypted   https://github.com/magic-wormhole/magic-wormhole.rs
@@ -133,6 +134,7 @@
       which                         # `which`                                   https://www.gnu.org/software/which/
       yq-go                         # yaml jq                                   https://github.com/mikefarah/yq
       zellij                        # terminal multiplexer/tiler rich TUI       https://zellij.dev/
+      tmux                          # terminal multiplexer                      https://github.com/tmux/tmux
       zoxide                        # smarter cd                                https://github.com/ajeetdsouza/zoxide
     
     # bash                      # bash                                      # bash
