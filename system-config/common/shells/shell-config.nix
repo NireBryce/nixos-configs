@@ -3,7 +3,18 @@
   lib,
   ...
 }:
+let 
+  fishPlugins = with pkgs; [
+    # fishPlugins.done
+    # fishPlugins.fzf-fish
+    # fishPlugins.forgit
+    # fishPlugins.hydro
+    # fzf
+    # fishPlugins.grc
+    # grc
+  ];
 
+in
 {
     ## Shells
     environment.shells = with pkgs; [
@@ -23,4 +34,5 @@
     programs.zsh.enableCompletion = lib.mkForce false;  # unless disabled, home-manager causes an extra compaudit
 
     programs.fish.enable = true;
+    environment.systemPackages = [ fishPlugins ];
 }
