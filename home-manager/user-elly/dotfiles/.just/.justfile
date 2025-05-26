@@ -27,10 +27,15 @@ zsh-keymap:
 zsh-highlighting-theme-default:
   fast-theme sv-orple
 
-
+[no-cd]
 [group('python')]
-py-activate-venv:
-  "source .venv/bin/activate"
+py-activate:
+  source ${PWD}/.venv/bin/activate
+
+[no-cd]
+[group('python')]
+py-deactivate:
+  deactivate
 
 # find event name with `sudo libinput list-devices`
 [group('fix')]

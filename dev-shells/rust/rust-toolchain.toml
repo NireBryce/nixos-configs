@@ -1,0 +1,7 @@
+# from https://nixos.wiki/wiki/Rust
+
+# syntax found at https://rust-lang.github.io/rustup/overrides.html#the-toolchain-file
+
+[toolchain]
+channel = "stable"
+# components = ["rustfmt", "clippy"]

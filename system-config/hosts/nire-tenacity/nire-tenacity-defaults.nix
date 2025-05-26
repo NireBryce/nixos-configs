@@ -15,7 +15,6 @@ in
 
     imports = [
         "${_systemConfigDir}/hosts/${_hostName}/hw-conf"
-        "${_systemConfigDir}/hosts/${_hostName}/fixes"
         "${_systemConfigDir}/hw/gpu/${_gpuVendor}"
         "${_systemConfigDir}/hw/cpu/${_cpuVendor}"
         "${_systemConfigDir}/peripherals/zsa-moonlander.nix"
