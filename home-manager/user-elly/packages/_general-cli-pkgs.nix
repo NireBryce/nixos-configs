@@ -34,7 +34,7 @@
     # dev                       #  dev                                      # dev
       diffutils                     # `diff` utils                              https://github.com/ogham/diffutils
       direnv                        # per-directory environments                https://github.com/direnv/direnv
-      gnumake                       # gnumake                                   https://github.com/ogham/gnumake
+      
       lazydocker                    # TUI docker interface                      https://github.com/jesseduffield/lazydocker
       riffdiff                      # provides `riff`, where-in-line diff       https://github.com/walles/riff
       python3                       # system python, zsh complains without      https://python.org
@@ -42,8 +42,6 @@
       # ruff-lsp                      # ruff integration with vscode              https://github.com/astral-sh/ruff-lsp
       sqlite                        # sqlite                                    https://www.sqlite.org/
     # editors                   # editors                                   # editors
-      nano                          # text editor                               https://www.nano-editor.org/
-      nanorc                        # nano syntax highlighting                  https://github.com/scopatz/nanorc
       neovim                        # text editor                               https://neovim.io/
 
 
