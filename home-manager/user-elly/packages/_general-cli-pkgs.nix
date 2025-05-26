@@ -17,11 +17,7 @@
       
       # TOOD: broken
       # kanata                     # keybinds                                  https://github.com/jtroo/kanata
-    
-    # archive                   # archive                                   # archive
-      zip                           # zip                                       http://www.info-zip.org/
-      unzip                         # unzip                                     http://www.info-zip.org/
-      p7zip                         # p7zip                                     https://github.com/p7zip-project/p7zip
+
   
     # bash                      # bash                                      # bash
       shellcheck                    # bash linter                               https://www.shellcheck.net/
