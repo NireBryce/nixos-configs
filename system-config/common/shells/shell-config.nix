@@ -21,4 +21,6 @@
   #? zsh is handled through home-manager
     programs.zsh.enable = true;
     programs.zsh.enableCompletion = lib.mkForce false;  # unless disabled, home-manager causes an extra compaudit
+
+    programs.fish.enable = true;
 }
