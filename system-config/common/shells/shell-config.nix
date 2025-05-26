@@ -9,6 +9,7 @@
     environment.shells = with pkgs; [
         bash
         zsh
+        fish
     ];
   #? This determines what to add to /run/current-system/sw, generally defined elsewhere
   environment.pathsToLink = [
