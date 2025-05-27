@@ -22,6 +22,7 @@ subConfigList = [
 
     "${_hmUserDir}/packages/_general-cli-pkgs.nix"
     "${_hmUserDir}/packages/_dev-pkgs.nix"
+    "${_hmUserDir}/packages/_nix-util-pkgs.nix"
     "${_hmUserDir}/packages/_linux-cli-pkgs.nix"
     "${_hmUserDir}/packages/_linux-gui-pkgs.nix"
     "${_flakeDir}/home-manager/plasma-manager"
