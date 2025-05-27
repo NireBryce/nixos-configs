@@ -20,13 +20,9 @@ subConfigList = [
     "${_hmUserDir}/shell"
     "${_hmUserDir}/window-manager/${_windowManager}"
 
-    #todo: folderize and default
-    "${_hmUserDir}/packages/_general-cli-pkgs.nix"
-    "${_hmUserDir}/packages/_dev-pkgs.nix"
-    "${_hmUserDir}/packages/_linux-cli-pkgs.nix"
-    "${_hmUserDir}/packages/_linux-gui-pkgs.nix"
-    "${_hmUserDir}/packages/_nix-util-pkgs.nix"
-    "${_hmUserDir}/packages/_shell-pkgs.nix"
+    #todo: folderize and default even more granularly
+    "${_hmUserDir}/packages/hardware-independent"
+    "${_hmUserDir}/packages/linux"
 
     "${_flakeDir}/home-manager/plasma-manager"
 ];

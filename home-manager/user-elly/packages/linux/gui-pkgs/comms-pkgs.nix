@@ -11,4 +11,11 @@
       teamspeak_client              # voice chat                                https://www.teamspeak.com/
       zoom-us                       # less features than facetime somehow       https://zoom.us/
     ];
+
+    # programs.teamspeak_client = {              # teamspeak game comms                      https://www.teamspeak.com/
+    #     enable = true;
+    #     teamspeak_client.override {
+    #       ts3Plugins = [ teamspeak-pluginsdk.test_plugin ];
+    #     }
+    # };
 }
