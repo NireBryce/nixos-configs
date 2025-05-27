@@ -5,6 +5,10 @@
 
 {
     home.packages = with pkgs; [
+      # bash                      # bash                                      # bash
+        # inshellisense                 # intellisense type shell complete          https://github.com/microsoft/inshellisense
+        blesh                         # zsh line editor tricks for bash           https://github.com/akinomyoga/ble.sh
+  
         # atuin                         # shared encrypted shell history            https://github.com/ellie/atuin
         bash-completion               # bash complete                             https://github.com/scop/bash-completion
         bat                           # `cat`, `less` alternative (w/ SynHi)      https://github.com/sharkdp/bat
