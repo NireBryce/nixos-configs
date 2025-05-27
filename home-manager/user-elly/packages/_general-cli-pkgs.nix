@@ -43,15 +43,7 @@
       cheat                         # cli cheatsheets                           https://github.com/cheat/cheat
       tldr                          # better man pages                          https://tldr.sh/
   
-      
-
-    # multi-machine             # multi-machine                             # multi-machine
-      # mosh                          # ssh but better (but abandoned)            https://mosh.org/
   
-    # nix                       # nix                                       # Nix - Move some of these into dev shells
-      
-  
-
 
 
   
