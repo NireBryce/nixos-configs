@@ -18,11 +18,9 @@
       # TOOD: broken
       # kanata                     # keybinds                                  https://github.com/jtroo/kanata
 
+    # system interpreters (everything else should be virtualenv or dev shell)
+      python3                       # system python, zsh complains without      https://python.org
   
-    # bash                      # bash                                      # bash
-      shellcheck                    # bash linter                               https://www.shellcheck.net/
-      shfmt                         # bash formatter                            https://github.com/mvdan/sh
-    
     # cli tools                 # cli tools                                 # CLI tools
       # todo: fix topgrade to ignore what it cannot change and mostly stick to git repos
       # todo: fix for darwin-nix too
@@ -31,16 +29,6 @@
       pciutils                      # lspci                                     https://mj.ucw.cz/sw/pciutils/
       just                          # just                                      https://github.com/casey/just
   
-    # dev                       #  dev                                      # dev
-      diffutils                     # `diff` utils                              https://github.com/ogham/diffutils
-      direnv                        # per-directory environments                https://github.com/direnv/direnv
-      
-      lazydocker                    # TUI docker interface                      https://github.com/jesseduffield/lazydocker
-      riffdiff                      # provides `riff`, where-in-line diff       https://github.com/walles/riff
-      python3                       # system python, zsh complains without      https://python.org
-      ruff                          # python linter                             https://github.com/astral-sh/ruff
-      # ruff-lsp                      # ruff integration with vscode              https://github.com/astral-sh/ruff-lsp
-      sqlite                        # sqlite                                    https://www.sqlite.org/
     # editors                   # editors                                   # editors
       neovim                        # text editor                               https://neovim.io/
 
@@ -50,13 +38,7 @@
       magic-wormhole-rs             # easy transfer arbitrary files encrypted   https://github.com/magic-wormhole/magic-wormhole.rs
       rsync                         # up hill both ways                         https://linux.die.net/man/1/rsync
   
-    # git                       # git                                       # git  
-      gh                            # github cli                                https://github.com/cli/cli
-      git                           # git scm                                   https://git-scm.com
-      delta                         # `delta` - git diff                        https://github.com/dandavison/delta
-      lazygit                       # TUI git interface                         https://github.com/jesseduffield/lazygit
-      commitizen                    # commitizen                                https://github.com/commitizen-tools/commitizen
-  
+    
     # help systems              # help systems                              # Help Systems
       cheat                         # cli cheatsheets                           https://github.com/cheat/cheat
       tldr                          # better man pages                          https://tldr.sh/
@@ -89,11 +71,7 @@
       # inshellisense                 # intellisense type shell complete          https://github.com/microsoft/inshellisense
       blesh                         # zsh line editor tricks for bash           https://github.com/akinomyoga/ble.sh
   
-    # python dev
-      uv                            # `pyenv` but it's actually good
-    
-    # TODO: move to system config
-        
+
   
   ];  
   # programs are packages you set extra pre-defined options in.
