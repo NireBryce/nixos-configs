@@ -5,9 +5,6 @@
 
 # TODO: make server config
 
-
-    fonts.fontconfig.enable = true;
-
     home.packages = with pkgs; [
         # todo: fix comma
         # comma                         # `,` run things without installing them    https://github.com/nix-community/comma
