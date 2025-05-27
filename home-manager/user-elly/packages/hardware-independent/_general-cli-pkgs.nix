@@ -36,12 +36,7 @@
     
     # help systems              # help systems                              # Help Systems
       cheat                         # cli cheatsheets                           https://github.com/cheat/cheat
-      tldr                          # better man pages                          https://tldr.sh/
-  
-  
-
-
-  
+      tldr                          # better man pages                          https://tldr.sh/      
   ];  
   # programs are packages you set extra pre-defined options in.
   #   google 'home-manager option search' to see how to find them.
