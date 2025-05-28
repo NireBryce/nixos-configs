@@ -1,1 +1,13 @@
+condense directories
+pivot darwin to its own dir and then branch, the duplication is worth the directory condensation.
+eventually put nix darwin in separate repo
+
+
+
+
+
+
+
+old:
+
 fix nix darwin home manager something broke when we moved it to home-manager

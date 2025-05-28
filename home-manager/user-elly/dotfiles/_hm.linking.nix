@@ -12,7 +12,7 @@
         "./.bashrc"           .source = ./.bashrc;
         "./.config/F-Sy-H"    .source = ./zsh-f-s-highlight-themes;
         # "./.config/kitty"     .source = ./kitty;
-        "./.config/micro"     .source = ./micro;
+        # "./.config/micro"     .source = ./micro;
         "./.config/sway"      .source = ./sway;
         "./.config/zellij"    .source = ./zellij;
         "./.config/zsh"       .source = ./zsh;
