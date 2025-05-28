@@ -46,6 +46,19 @@
             "    ];",
             "}"
         ]
+    },
+        "nix-templates-empty-config": {
+        "scope": "nix",
+        "prefix": "nix-templates-empty-config",
+        "body": [
+            "{",
+            "    ...", 
+            "}:",
+            "    ", 
+            "{",
+            "    ",
+            "}"
+        ]
     }
 }
 
