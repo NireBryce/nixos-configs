@@ -1,0 +1,12 @@
+
+[misc]
+
+# Disable specific steps - same options as the command line flag
+disable = [
+        "system", # nixos
+        "nix", 
+        "uv",
+        "micro",
+        "vim",
+        "vscode"
+    ]

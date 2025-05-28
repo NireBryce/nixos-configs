@@ -55,7 +55,14 @@ let
         vivid                         # LS_COLORS generator                       https://github.com/sharkdp/vivid
         starship                      # shell prompt generator                    https://github.com/starship/starship
     ];
+    #todo: move somewhere more obvious
+    devUtils = with pkgs; [
+        entr                          # run commands when files change            https://github.com/eradman/entr
+    ];
 
+
+
+# todo this may need a different data shape
 in {
     home.packages = [
         bashPkgs
@@ -70,5 +77,6 @@ in {
         infoPkgs
         utilityShells
         shellCustomization 
+        devUtils
     ];
 }
