@@ -22,8 +22,6 @@ in {
 
 
     programs = { # zsh specific, if these are enabled elsewhere nix will dedupe
-        dircolors   .enable               = true; 
-        dircolors   .enableZshIntegration = true;
 
         direnv      .enableZshIntegration = true;
         eza         .enableZshIntegration = true;
