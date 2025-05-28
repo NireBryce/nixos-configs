@@ -4,6 +4,6 @@
  
 {
     imports = [
-        
+        ./fzf.nix
     ];
 }
