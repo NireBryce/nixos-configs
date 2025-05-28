@@ -11,7 +11,7 @@
     ## Keybinds
       
       # TOOD: broken
-      # kanata                     # keybinds                                  https://github.com/jtroo/kanata
+
 
     # system interpreters (everything else should be virtualenv or dev shell)
       python3                       # system python, zsh complains without      https://python.org
