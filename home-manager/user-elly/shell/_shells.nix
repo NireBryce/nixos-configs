@@ -31,10 +31,7 @@ in {
         broot       .enableZshIntegration = true;
         nix-index   .enableZshIntegration = true;
 
-        zoxide      .enable               = true;
-        zoxide      .enableZshIntegration = true;
-        zoxide      .options              = [ "--cmd x" ];  # `zi` alias interferes with z-shell/zi
-
+        
         atuin = {       
             enable     = true;
             enableZshIntegration = true;
