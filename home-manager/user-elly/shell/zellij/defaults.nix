@@ -4,6 +4,6 @@
  
 {
     imports = [
-        
+        ./zellij.nix
     ];
 }

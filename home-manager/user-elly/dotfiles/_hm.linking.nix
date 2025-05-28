@@ -14,7 +14,7 @@
         # "./.config/kitty"     .source = ./kitty;
         # "./.config/micro"     .source = ./micro;
         "./.config/sway"      .source = ./sway;
-        "./.config/zellij"    .source = ./zellij;
+        
         "./.config/zsh"       .source = ./zsh;
         "./.gitconfig"        .source = ./.gitconfig;
         "./.p10k.zsh"         .source = ./zsh-powerlevel10k/.p10k.zsh;
