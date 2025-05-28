@@ -41,47 +41,11 @@
   # programs are packages you set extra pre-defined options in.
   #   google 'home-manager option search' to see how to find them.
 
-  # TODO: refer to darwin section of flake for how to handle nix-index
-  # programs.nix-index = { 
-  #   enable = true;
-  #   enableZshIntegration = true;  # conflicts with command-not-found
-  #   enableBashIntegration = true;
-  # };
 
-  programs.direnv = {
-    enable = true;
-    enableBashIntegration = true;
-    enableZshIntegration = true;
-    enableNushellIntegration = true;
-    nix-direnv.enable = true;
-  };
 
-  programs.micro = {                # editor for phone-ssh
-    enable = true;
-    settings = {
-      autoclose = false;
-      backup = false;
-      autosu = true;
-      cursorline  = true;
-      colorscheme = "dukeubuntu-tc";
-      difgutter = true;
-      eofnewline = true;
-      fastdirty = true;
-      ignorecase = false;
-      keyenu = true;
-      mkparents = true;
-      savehistory = false;
-      tabsize = 2;
-      tsbstospaces = true;
-      colorcolumn = 81;
-      indentchar = "·";
-      multiopen = "hsplit";
-      parsecursor = true;
-      linter = true;
-      comment = true;
-      tabstospaces = true;
-    };
-  };
+
+
+  
   }
 
 
