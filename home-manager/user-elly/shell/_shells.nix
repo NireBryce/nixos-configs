@@ -27,7 +27,7 @@ in {
 
         direnv      .enableZshIntegration = true;
         eza         .enableZshIntegration = true;
-        zellij      .enableZshIntegration = true;
+        
         broot       .enableZshIntegration = true;
         nix-index   .enableZshIntegration = true;
 
@@ -259,7 +259,7 @@ in {
   # programs.bash.logoutExtra = ''
   # '';
 
-  # programs.zellij.enableBashIntegration = true;
+
   # programs.zoxide.enableBashIntegration = true;
   # programs.starship.enableBashIntegration = true;
   # programs.nix-index.enableBashIntegration = true;

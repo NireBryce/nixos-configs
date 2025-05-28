@@ -12,4 +12,10 @@
             source = ./config.kdl;
         };
     };
+
+    programs.zellij = {
+        enableZshIntegration = true;
+        enableBashIntegration = true;
+        enableFishIntegration = true;
+    };
 }
