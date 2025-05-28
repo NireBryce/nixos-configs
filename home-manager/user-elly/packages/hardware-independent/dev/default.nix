@@ -3,7 +3,7 @@
 }: 
 {
     imports = [
-        
+        ./dev.nix
     ];
 }
 

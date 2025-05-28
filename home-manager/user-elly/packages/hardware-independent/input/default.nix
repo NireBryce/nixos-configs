@@ -3,7 +3,7 @@
 }: 
 {
     imports = [
-        
+        ./keybinding.nix
     ];
 }
 

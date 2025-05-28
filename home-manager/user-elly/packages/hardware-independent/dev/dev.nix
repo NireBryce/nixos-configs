@@ -3,6 +3,7 @@
     ... 
 }: 
 {
+  #todo splitme
     home.packages = with pkgs;[
     # nix dev
       nixfmt

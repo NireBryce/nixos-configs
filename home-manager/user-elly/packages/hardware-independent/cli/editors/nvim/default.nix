@@ -3,7 +3,7 @@
 }: 
 {
     imports = [
-        
+        ./nvim.nix
     ];
 }
 

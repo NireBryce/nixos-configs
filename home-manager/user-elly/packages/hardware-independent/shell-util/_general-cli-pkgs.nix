@@ -19,8 +19,7 @@
     # cli tools                 # cli tools                                 # CLI tools
       # todo: fix topgrade to ignore what it cannot change and mostly stick to git repos
       # todo: fix for darwin-nix too
-                just                          # just                                      https://github.com/casey/just
-  
+
     # editors                   # editors                                   # editors
       
 
