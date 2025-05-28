@@ -1,0 +1,9 @@
+{ 
+    ... 
+}: 
+{
+    imports = [
+        ./media-players.nix
+    ];
+}
+

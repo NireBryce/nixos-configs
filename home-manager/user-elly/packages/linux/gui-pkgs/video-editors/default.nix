@@ -1,0 +1,9 @@
+{ 
+    ... 
+}: 
+{
+    imports = [
+        ./video-editors.nix
+    ];
+}
+
