@@ -3,7 +3,7 @@
 }: 
 {
     imports = [
-        
+        ./file-transfer.nix
     ];
 }
 

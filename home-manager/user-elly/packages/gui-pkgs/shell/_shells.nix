@@ -4,7 +4,7 @@
   lib,
   ...
 }:
-let flakePath = ../../..; # TODO: fix-me if this is `self` like the rest, it causes recursion bug with home-manager being run via nix-darwin
+let flakePath = self; # TODO: fix-me if this is `self` like the rest, it causes recursion bug with home-manager being run via nix-darwin
 in {
     # Notes:
     # If you get `zsh side` errors, delete ~/.zcompdump and ~/.config/zsh/.zcompdump and run `zi update`
@@ -21,20 +21,7 @@ in {
     # TODO: figure out how to make zi less fragile, or how to do zi's plugin management declaratively
 
 
-    programs = { # zsh specific, if these are enabled elsewhere nix will dedupe
 
-                
-        
-        
-        
-
-        
-          
-
-        
-        
-    };
-    # end programs
 
     home.packages = with pkgs; [  # Things needed for my .zshrc
         diff-so-fancy

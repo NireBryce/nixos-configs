@@ -12,6 +12,7 @@
         ./internet
         ./media-players
         ./notes-productivity
+        ./shell
         ./streaming
         ./terminals
         ./video-editors

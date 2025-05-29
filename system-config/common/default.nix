@@ -13,6 +13,7 @@
         ./sound
         ./ssh
         ./system
+        ./wayland
         ./xdg
     ];
 }
