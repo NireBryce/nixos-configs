@@ -23,8 +23,7 @@ in {
 
     programs = { # zsh specific, if these are enabled elsewhere nix will dedupe
 
-        direnv      .enableZshIntegration = true;
-        eza         .enableZshIntegration = true;
+                eza         .enableZshIntegration = true;
         
         broot       .enableZshIntegration = true;
         nix-index   .enableZshIntegration = true;
