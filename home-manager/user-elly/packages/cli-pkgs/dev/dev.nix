@@ -30,7 +30,8 @@
       lazydocker                    # TUI docker interface                      https://github.com/jesseduffield/lazydocker
   
       entr                          # run commands when files change            https://github.com/eradman/entr
-
-
+      tokei                         # count lines of code                       https://github.com/XAMPPRocky/tokei
+      mprocs                        # run multiple commands in parallel         https://github.com/ogham/mprocs
+      
   ];
 }
