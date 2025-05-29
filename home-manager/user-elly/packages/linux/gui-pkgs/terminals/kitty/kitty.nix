@@ -1,8 +1,12 @@
 {
+    pkgs,
     ...
 }:
  
 {
+    home.packages = with pkgs;[     
+        kitty-img                     # kitty image rendering engine, like sixel  https://git.sr.ht/~zethra/kitty-img
+    ];
     programs.kitty = {
         enable  = true;
         extraConfig = ''
