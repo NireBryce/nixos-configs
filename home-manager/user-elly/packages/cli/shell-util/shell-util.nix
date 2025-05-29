@@ -3,12 +3,11 @@
     ...
 }:
 let
-    bashPkgs = with pkgs; [
-            ];
-    multiplexerPkgs = with pkgs; [
-        zellij                        # terminal multiplexer/tiler rich TUI       https://zellij.dev/
-        tmux                          # terminal multiplexer                      https://github.com/tmux/tmux
-    ];
+
+    # multiplexerPkgs = with pkgs; [
+    #     zellij                        # terminal multiplexer/tiler rich TUI       https://zellij.dev/
+    #     tmux                          # terminal multiplexer                      https://github.com/tmux/tmux
+    # ];
     textPkgs = with pkgs; [
         bat                           # `cat`, `less` alternative (w/ SynHi)      https://github.com/sharkdp/bat
         moar                          # better pager for some things              https://github.com/walles/moar
@@ -62,8 +61,6 @@ let
 # todo this may need a different data shape
 in {
     home.packages = [
-        bashPkgs
-        multiplexerPkgs
         textPkgs
         statsPkgs
         storageStats

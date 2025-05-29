@@ -68,3 +68,19 @@ nh home switch --configuration elly@nire-durandal ~/nixos/
         z
     ];
 ```
+
+# Things to look into:
+    MyNixOS
+    nixpkgs-wayland
+    nix-direnv
+    haumea                # nix configuration tool that allows you to just use the filesystem instead of imports 
+    flakelight            # less flake boilerplate
+    flake-utils
+    flake-utils-plus
+    flake-parts           # module system for flakes
+    devshell              # like virtualenv
+    devbox                # isolated development shells, maybe like the above
+    devenv                # same
+    nixos-shell           # easy VMs
+    nix-index             # quickly locate packages providing a certain file
+    nix-prefetch          # determine hash of fixed-output derivations such as package source
