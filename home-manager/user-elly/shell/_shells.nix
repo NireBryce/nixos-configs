@@ -25,7 +25,7 @@ in {
 
                 
         
-        broot       .enableZshIntegration = true;
+        
         nix-index   .enableZshIntegration = true;
 
         

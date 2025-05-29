@@ -3,7 +3,7 @@
 }:
  
 {
-    programs.eza = {
+    programs.broot = {
         enable  = true;
         enableZshIntegration    = true;
         enableBashIntegration   = true;
