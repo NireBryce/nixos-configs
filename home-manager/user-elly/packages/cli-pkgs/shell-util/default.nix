@@ -8,6 +8,7 @@
     ./broot
     ./dircolors
     ./direnv
+    ./espanso
     ./eza
     ./fzf
     ./just
