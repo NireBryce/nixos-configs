@@ -3,6 +3,7 @@
 }:
  
 {
+    # "smarter `cd` https://github.com/ajeetdsouza/zoxide";
     programs.zoxide = {      
         enable                  = true;
         enableZshIntegration    = true;

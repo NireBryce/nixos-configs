@@ -17,12 +17,8 @@ subConfigList = [
     "${_hmUserDir}/hm-settings"
     "${_hmUserDir}/dotfiles"
     "${_hmUserDir}/git"
-    "${_hmUserDir}/shell"
+    "${_hmUserDir}/packages"
     "${_hmUserDir}/window-manager/${_windowManager}"
-
-    #todo: folderize and default even more granularly
-    "${_hmUserDir}/packages/hardware-independent"
-    "${_hmUserDir}/packages/linux"
 
     "${_flakeDir}/home-manager/plasma-manager"
 ];

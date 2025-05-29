@@ -34,5 +34,5 @@ in
     programs.zsh.enableCompletion = lib.mkForce false;  # unless disabled, home-manager causes an extra compaudit
 
     programs.fish.enable = true;
-    environment.systemPackages = [ fishPlugins ];
+    environment.systemPackages = fishPlugins;
 }

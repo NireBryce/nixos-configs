@@ -1,0 +1,9 @@
+{
+    ...
+}:
+ 
+{
+    imports = [
+        ./text-manip.nix
+    ];
+}

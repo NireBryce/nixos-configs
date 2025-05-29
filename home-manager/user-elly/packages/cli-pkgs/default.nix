@@ -5,12 +5,20 @@
   imports = [
     ./dev
     ./editors
+    ./file-browsers
     ./file-transfer
     ./help-systems
     ./input
+    ./interpreters
     ./nix-util
+    ./search-utils
+    ./shell-customization
     ./shell-util
+    ./storage-stats
     ./sysadmin
+    ./system-stats
+    ./text-manip
+    ./text-viewers
     ./updaters
   ];
 }

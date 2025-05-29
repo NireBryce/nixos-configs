@@ -29,5 +29,8 @@
     # docker
       lazydocker                    # TUI docker interface                      https://github.com/jesseduffield/lazydocker
   
+      entr                          # run commands when files change            https://github.com/eradman/entr
+
+
   ];
 }

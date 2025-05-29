@@ -7,6 +7,5 @@
         ./font-pkgs
         ./gui-pkgs
         ./home-automation
-        ./sysadmin-pkgs
     ];
 }

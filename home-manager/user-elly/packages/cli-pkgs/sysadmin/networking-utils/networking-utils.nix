@@ -10,6 +10,7 @@
         mtr                           # traceroute + ping                         https://www.bitwizard.nl/mtr/
         nmap                          # network scanner                           http://www.nmap.org/
         socat                         # openbsd-netcat replacement                http://www.dest-unreach.org/socat/
+        ethtool                       # ethtool                                   https://www.kernel.org/pub/software/network/ethtool/
     ];
 }
 

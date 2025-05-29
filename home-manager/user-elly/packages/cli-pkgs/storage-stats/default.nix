@@ -1,0 +1,9 @@
+{
+    ...
+}:
+ 
+{
+    imports = [
+        ./storage-stats.nix
+    ];
+}

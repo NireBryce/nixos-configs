@@ -1,0 +1,9 @@
+{
+    ...
+}:
+ 
+{
+    imports = [
+        ./file-info.nix
+    ];
+}

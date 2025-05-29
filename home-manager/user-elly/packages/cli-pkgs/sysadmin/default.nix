@@ -4,7 +4,7 @@
 {
     imports = [
         ./fetch-web
-        ./interpreters
+        ./file-info
         ./linux-debug
         ./networking-utils
         ./web-dns

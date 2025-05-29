@@ -34,5 +34,12 @@
         
         # build tools
         gnumake                       # gnumake                                   https://github.com/ogham/gnumake
+        
+        auto-cpufreq                  # auto-cpufreq                              https://github.com/AdnanHodzic/auto-cpufreq
+        lm_sensors                    # lm_sensors                                https://hwmon.wiki.kernel.org/lm_sensors
+        libinput                      # kde middle mouse scroll fix requires this
+        xdg-utils                     # xdg-open for stuff like `protontricks`
+    
     ];
 }
+

@@ -1,0 +1,9 @@
+{
+    ...
+}:
+ 
+{
+    imports = [
+        ./text-viewers.nix
+    ];
+}

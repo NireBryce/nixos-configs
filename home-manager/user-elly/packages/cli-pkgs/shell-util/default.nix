@@ -14,7 +14,6 @@
     ./tmux
     ./zellij
     ./zoxide
-    ./shell-util.nix
     # todo: fix nix-index
     # ./nix-index
   ];

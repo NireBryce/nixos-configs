@@ -1,9 +1,0 @@
-{
-    ...
-}:
- 
-{
-    imports = [
-        ./sysadmin-pkgs.nix
-    ];
-}
