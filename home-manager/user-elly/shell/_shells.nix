@@ -26,7 +26,7 @@ in {
                 
         
         
-        nix-index   .enableZshIntegration = true;
+        
 
         
           
