@@ -17,7 +17,7 @@
     // }
     "nix-templates-defaults": {
         "scope": "nix",
-        "prefix": "nix-twemplates-defaults",
+        "prefix": "nix-templates-defaults",
         "body": [
             "{",
             "    ...",
