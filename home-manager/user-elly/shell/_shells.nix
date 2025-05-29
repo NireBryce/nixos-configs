@@ -208,8 +208,7 @@ in {
 
 
   # programs.zoxide.enableBashIntegration = true;
-  # programs.starship.enableBashIntegration = true;
-  # programs.nix-index.enableBashIntegration = true;
+    # programs.nix-index.enableBashIntegration = true;
   # programs.kitty.shellIntegration.enableBashIntegration = true;
 
   # programs.exa.enableBashIntegration = true;
