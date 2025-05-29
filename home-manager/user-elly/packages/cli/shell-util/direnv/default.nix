@@ -3,7 +3,7 @@
 }: 
 {
     imports = [
-        ./hm-direnv.nix
+        ./direnv.nix
     ];
 }
 

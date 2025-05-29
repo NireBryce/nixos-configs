@@ -4,6 +4,6 @@
  
 {
     imports = [
-        ./nix-index.nix
+        ./python.nix
     ];
 }

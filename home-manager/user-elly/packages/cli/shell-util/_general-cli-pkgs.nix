@@ -14,8 +14,7 @@
 
 
     # system interpreters (everything else should be virtualenv or dev shell)
-      python3                       # system python, zsh complains without      https://python.org
-  
+
     # cli tools                 # cli tools                                 # CLI tools
       # todo: fix topgrade to ignore what it cannot change and mostly stick to git repos
       # todo: fix for darwin-nix too

@@ -4,10 +4,7 @@
 }:
 let
     bashPkgs = with pkgs; [
-        # inshellisense                 # intellisense type shell complete          https://github.com/microsoft/inshellisense
-        blesh                         # zsh line editor tricks for bash           https://github.com/akinomyoga/ble.sh
-        bash-completion               # bash complete                             https://github.com/scop/bash-completion
-    ];
+            ];
     multiplexerPkgs = with pkgs; [
         zellij                        # terminal multiplexer/tiler rich TUI       https://zellij.dev/
         tmux                          # terminal multiplexer                      https://github.com/tmux/tmux
