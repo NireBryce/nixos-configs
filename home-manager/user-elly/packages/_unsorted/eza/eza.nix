@@ -5,8 +5,8 @@
  
 {
     programs.eza = {
-        enable = true;
-        enableZshIntegration = true;
-        enableBashIntegration = true;
+        enable  = true;
+        enableZshIntegration    = true;
+        enableBashIntegration   = true;
     };
 }
