@@ -4,7 +4,6 @@
  
 {
     imports = [
-        ./just
-        ./mask
+        ./atuin
     ];
 }

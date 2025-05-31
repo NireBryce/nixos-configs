@@ -4,6 +4,7 @@
  
 {
     imports = [
-        ./dircolors
+        ./tmux
+        ./zellij
     ];
 }

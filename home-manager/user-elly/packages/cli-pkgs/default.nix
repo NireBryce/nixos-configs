@@ -3,22 +3,26 @@
 }: 
 {
   imports = [
+    ./appearance-cli
+    ./command-runners
     ./dev
     ./editors
-    ./file-browsers
+    ./file-info
     ./file-transfer
     ./help-systems
     ./input
     ./interpreters
+    ./multiplexers
+    ./navigation
     ./nix-util
+    ./package-management
     ./search-utils
-    ./shell-customization
-    ./shell-util
+    ./shell-history
+    ./shell-specific
     ./storage-stats
     ./sysadmin
     ./system-stats
     ./text-manip
     ./text-viewers
-    ./updaters
   ];
 }

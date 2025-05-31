@@ -4,6 +4,6 @@
  
 {
     imports = [
-        ./file-info.nix
+        ./bash
     ];
 }

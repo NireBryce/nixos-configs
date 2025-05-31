@@ -1,0 +1,11 @@
+{
+    ...
+}:
+ 
+{
+    imports = [
+        ./espanso
+        ./just
+        ./mask
+    ];
+}
