@@ -1,9 +1,0 @@
-{
-    ...
-}:
- 
-{
-    imports = [
-        ./file-browsers.nix
-    ];
-}

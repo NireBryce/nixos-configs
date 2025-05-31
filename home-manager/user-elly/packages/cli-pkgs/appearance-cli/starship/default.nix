@@ -4,6 +4,12 @@
  
 {
     imports = [
-        ./starship.nix
+        
     ];
+        programs.starship = {
+        enable = true;
+        enableBashIntegration = true;
+        enableZshIntegration = true;
+        enableFishIntegration = true;
+    };
 }

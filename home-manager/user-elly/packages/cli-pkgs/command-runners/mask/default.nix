@@ -1,9 +1,13 @@
 {
+    pkgs,
     ...
 }:
  
 {
     imports = [
-        ./mask.nix
+        
+    ];
+    home.packages = with pkgs;[
+        mask
     ];
 }

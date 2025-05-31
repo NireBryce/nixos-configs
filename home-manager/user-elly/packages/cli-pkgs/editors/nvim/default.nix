@@ -1,9 +1,13 @@
 { 
+    pkgs,
     ... 
 }: 
 {
     imports = [
-        ./nvim.nix
+        
+    ];
+    home.packages = with pkgs;[ 
+        neovim                        # text editor                               https://neovim.io/
     ];
 }
 

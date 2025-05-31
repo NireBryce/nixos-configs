@@ -4,8 +4,8 @@
  
 {
     imports = [
+        ./_file-browsers
         ./eza
-        ./file-browsers
         ./zoxide
     ];
 }
