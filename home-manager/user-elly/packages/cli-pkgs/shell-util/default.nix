@@ -7,7 +7,7 @@
         ./bash
         ./broot
         ./command-runners
-        ./dircolors
+        ./color-config
         ./direnv
         ./espanso
         ./eza
