@@ -4,7 +4,8 @@
 
 {
     imports = [
-        ./nix-index.nix
+        ./nh
+        ./nix-index
         ./nix-utilities.nix
         ./nix-settings.nix
     ];
