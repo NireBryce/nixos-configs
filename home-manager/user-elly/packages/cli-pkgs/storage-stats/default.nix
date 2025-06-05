@@ -5,7 +5,7 @@
  
 {
     imports = [
-        ./storage-stats.nix
+        
     ];
     home.packages = with pkgs;[
         du-dust                       # `du` alternative                          https://github.com/bootandy/dust

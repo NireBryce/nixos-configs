@@ -3,7 +3,7 @@
 }: 
 {
     imports = [
-        ./direnv.nix
+        
     ];
     programs.direnv = {
         enable = true;

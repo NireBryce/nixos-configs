@@ -17,10 +17,11 @@ subConfigList = [
     "${_hmUserDir}/hm-settings"
     "${_hmUserDir}/dotfiles"
     "${_hmUserDir}/git"
-    "${_hmUserDir}/window-manager/${_windowManager}.nix"
+    "${_hmUserDir}/window-manager/${_windowManager}"
 
     "${_hmUserDir}/packages/"
     "${_flakeDir}/home-manager/plasma-manager"
+
 ];
 in 
 {
