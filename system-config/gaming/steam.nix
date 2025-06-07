@@ -10,14 +10,11 @@
         remotePlay.openFirewall      = true;            # Open ports in the firewall for Steam Remote Play
         dedicatedServer.openFirewall = true;            # Open ports in the firewall for Source Dedicated Server
         gamescopeSession.enable      = true;            # third party gamescope compositor
+        extraCompatPackages = [ "steamtinkerlaunch" "protonup-qt" "protontricks" ];
     };
 
     environment.systemPackages = with pkgs; [
-        steamtinkerlaunch           # steamtinkerlaunch                         https://github.com/sonic2kk/steamtinkerlaunch
-        protonup-qt                 # proton installer/updater                  https://davidotek.github.io/protonup-qt/
-        protontricks                # protontricks                              https://github.com/Matoking/protontricks
-        
-        # SteamTinkerLaunch needs these
+        # TODO: SteamTinkerLaunch needs these and they aren't in the package?
         xxd
         xdotool
         xorg.xwininfo
