@@ -1,4 +1,6 @@
-ksyscoa6 to rebuild the kde menu index
+kbuildsyscoa6 to rebuild the kde menu index
+
+i could have sworn it was ksyscoa6
 
 nh os/home
 

@@ -11,13 +11,13 @@
         dedicatedServer.openFirewall = true;            # Open ports in the firewall for Source Dedicated Server
         gamescopeSession.enable      = true;            # third party gamescope compositor
         extraCompatPackages = with pkgs; [ 
-            steamtinkerlaunch 
-            protonup-qt 
-            protontricks 
+            steamtinkerlaunch
         ];
     };
 
     environment.systemPackages = with pkgs; [
+        protonup-qt 
+        protontricks
         # TODO: SteamTinkerLaunch needs these and they aren't in the package?
         xxd
         xdotool
