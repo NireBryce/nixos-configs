@@ -60,19 +60,12 @@
     ...
   } @ inputs: 
   {
-    
-       
-    
-    # Reusable nixos modules you might want to export
-    # nixosModules    = import ./___modules;                  # there are better names for this, but this is de-facto standard
-    # homeManagerModules = import ./modules/home-manager
-
     overlays        = import ./___overlays {inherit inputs;};
     hardware        = import nixos-hardware;
 
-  # nire-durandal (workstation)
-    # `sudo nixos-rebuild switch --flake .#nire-durandal`
-    # `nh os switch --hostname nire-durandal ~/nixos/`
+    # nire-durandal (workstation)
+    #   `sudo nixos-rebuild switch --flake .#nire-durandal`
+    #   `nh os switch --hostname nire-durandal ~/nixos/`
     nixosConfigurations."nire-durandal"     = nixpkgs.lib.nixosSystem {
       specialArgs = inputs;                                 # send inputs to modules (is this actually the right description?)
       system      = "x86_64-linux";
@@ -87,8 +80,8 @@
         
       ];
     };
-    # `home-manager switch --flake .#elly@nire-durandal`
-    # `nh home switch --configuration elly@nire-durandal ~/nixos/`
+    #   `home-manager switch --flake .#elly@nire-durandal`
+    #   `nh home switch --configuration elly@nire-durandal ~/nixos/`
     homeConfigurations."elly@nire-durandal" = home-manager.lib.homeManagerConfiguration {
       pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
         system = "x86_64-linux";
