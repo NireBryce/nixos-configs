@@ -42,6 +42,13 @@
     programs.bash.interactiveShellInit = ''
         ${pkgs.inshellisense}/bin/inshellisense;
     '';
+
+    fonts.packages = with pkgs; [
+        nerd-fonts.fira-code
+        nerd-fonts.iosevka
+        nerd-fonts.jetbrains-mono
+    ]
+
   ## System packages
     environment.systemPackages = with pkgs; [ # Always have an editor here
       #* System utilities

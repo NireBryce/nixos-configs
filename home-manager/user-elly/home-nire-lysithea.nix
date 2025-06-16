@@ -29,7 +29,7 @@ in {
         _shell              # zsh config, bash launch commands, paths, etc
     ];
 
-  
+    
   ## Defaults
     nixpkgs.config = {
         allowUnfree          =     true;            # Disable if you don't want unfree packages
