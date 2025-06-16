@@ -47,7 +47,7 @@
         nerd-fonts.fira-code
         nerd-fonts.iosevka
         nerd-fonts.jetbrains-mono
-    ]
+    ];
 
   ## System packages
     environment.systemPackages = with pkgs; [ # Always have an editor here
@@ -71,7 +71,7 @@
         nh                                            # nix helper                https://github.com/viperML/nh
         sops                                          # secret management
         just
-        
+        vscode-fhs
     ];
     homebrew = {
         enable = true;
