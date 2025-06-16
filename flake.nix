@@ -44,8 +44,6 @@
   
     haumea.url = "github:nix-community/haumea/v0.2.2"; #TODO: figure out haumea update schedule
     haumea.inputs.nixpkgs.follows = "nixpkgs";
-    
-    # flakeRoot = 
   };
 
   outputs = {
@@ -63,9 +61,9 @@
     ...
   } @ inputs: 
   {
-    flakeRoot = self;
     overlays    = import ./___overlays {inherit inputs;};
     hardware    = import nixos-hardware;
+    inputs = inputs;                               # send inputs to modules (is this actually the right description?)
     lib = haumea.lib.load {
       src    = ./src;
       inputs = {
@@ -76,7 +74,7 @@
     #   `sudo nixos-rebuild switch --flake .#nire-durandal`
     #   `nh os switch --hostname nire-durandal ~/nixos/`
     nixosConfigurations."nire-durandal"     = nixpkgs.lib.nixosSystem {
-      specialArgs = inputs; #// flakeRoot;                                 # send inputs to modules (is this actually the right description?)
+      specialArgs = inputs;
       system      = "x86_64-linux";
       modules     = [
         ./system-config/nire-durandal-configuration.nix

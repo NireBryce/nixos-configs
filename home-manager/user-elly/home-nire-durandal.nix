@@ -5,7 +5,7 @@
 }:
 
 let 
-_flakeDir       =       self; # the root of the flake
+_flakeDir       =       "${self}"; # the root of the flake
 _userName       =       "elly";
 _userHome       =       "/home/${_userName}";
 _hmUserDir      =       "${_flakeDir}/home-manager/user-${_userName}";
