@@ -3,7 +3,7 @@
 # as some packages are installed in their modules.
 {
 
-# TODO: make server config
+# TODO: break into better
 
     home.packages = with pkgs; [
         # todo: fix comma
