@@ -41,8 +41,9 @@
 
   #Stylix
     # stylix.url                                  = "github:danth/stylix";
-
-    
+  
+    haumea.url = "github:nix-community/haumea/v0.2.2"; #TODO: figure out haumea update schedule
+    haumea.inputs.nixpkgs.follows = "nixpkgs";
     
   };
 
@@ -57,12 +58,18 @@
     nix-index-database,
     musnix,
     jovian,
+    haumea,
     ...
   } @ inputs: 
   {
-    overlays        = import ./___overlays {inherit inputs;};
-    hardware        = import nixos-hardware;
-
+    overlays    = import ./___overlays {inherit inputs;};
+    hardware    = import nixos-hardware;
+    lib = haumea.lib.load {
+      src    = ./src;
+      inputs = {
+        inherit (nixpkgs) lib;
+      };
+    };
     # nire-durandal (workstation)
     #   `sudo nixos-rebuild switch --flake .#nire-durandal`
     #   `nh os switch --hostname nire-durandal ~/nixos/`
