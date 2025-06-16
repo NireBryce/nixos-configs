@@ -1,6 +1,5 @@
 # MacOS
 {
-  self,
   pkgs,
   lib,
   ...
@@ -77,7 +76,7 @@
         just
         mask
         direnv
-        
+
     ];
     homebrew = {
         enable = true;
