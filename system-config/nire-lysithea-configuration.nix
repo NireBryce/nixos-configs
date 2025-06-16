@@ -72,6 +72,12 @@
         sops                                          # secret management
         just
         vscode-fhs
+        dircolors
+        starship
+        just
+        mask
+        direnv
+        
     ];
     homebrew = {
         enable = true;
@@ -138,7 +144,9 @@
             "moonlight"             # moonlight game streaming (sunshine on durandal)
             "mullvadvpn"            # mullvad vpn
             "insta360-studio"       # 360 video editor
-        ];
+            "espanso"               # global text expansions
+            
+        ];  
     };  
 
 } 

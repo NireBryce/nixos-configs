@@ -4,9 +4,6 @@
 }:
  
 {
-    imports = [
-        
-    ];
     home.packages = with pkgs;[
         mask
     ];
