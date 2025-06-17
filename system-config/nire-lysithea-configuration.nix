@@ -7,8 +7,8 @@
 
 {
   imports = [ 
-    ../home-manager/user-elly/packages/cli-pkgs/shell
-
+    
+    
   ];
   home-manager.backupFileExtension = "backup";
   # Used for backwards compatibility, please read the changelog before changing: `darwin-rebuild changelog`
@@ -74,8 +74,7 @@
         nh                                            # nix helper                https://github.com/viperML/nh
         sops                                          # secret management
         just
-        vscode-fhs
-        dircolors
+        # dircolors # either not darwin or needs home manager
         starship
         just
         mask
@@ -108,7 +107,7 @@
       tokei                         # count lines of code                       https://github.com/XAMPPRocky/tokei
       mprocs                        # run multiple commands in parallel         https://github.com/ogham/mprocs
         #editors
-        nvim
+        # nvim # not darwin
         micro
         aria2                         # cli download manager                      https://aria2.github.io/
         # magic-wormhole-rs             # easy transfer arbitrary files encrypted   https://github.com/magic-wormhole/magic-wormhole.rs
@@ -116,7 +115,7 @@
 
         # helptext
         cheat                         # cli cheatsheets                           https://github.com/cheat/cheat
-        tldr                          # better man pages 
+        # tldr                          # better man pages 
 
         # multiplexers
         tmux
@@ -141,8 +140,7 @@
 
         bat
         kitty-img
-        davinci-resolve
-
+        
     ];
     homebrew = {
         enable = true;
@@ -215,87 +213,7 @@
             "obs"
         ];  
     };  
-    programs.kitty = {
-        enable  = true;
-        extraConfig = ''
-            clipboard_control write-clipboard write-primary read-clipboard-ask read-primary-ask
-            kitty_mod ctrl+shift
-
-            map kitty_mod+c copy_to_clipboard
-            map cmd+c       copy_or_interrupt
-
-            map kitty_mod+v paste_from_clipboard
-            map cmd+v       paste_from_clipboard
-        '';
-    };
-    programs.micro = {
-        enable = true;
-        settings = {
-            autoclose = false;
-            backup = false;
-            autosu = true;
-            cursorline  = true;
-            colorscheme = "dukeubuntu-tc";
-            difgutter = true;
-            eofnewline = true;
-            fastdirty = true;
-            ignorecase = false;
-            keyenu = true;
-            mkparents = true;
-            savehistory = false;
-            tabsize = 2;
-            tsbstospaces = true;
-            colorcolumn = 81;
-            indentchar = "·";
-            multiopen = "hsplit";
-            parsecursor = true;
-            linter = true;
-            comment = true;
-            tabstospaces = true;
-        };
-    };
-    programs.fzf = {
-        enable = true;
-        enableZshIntegration    = true;
-        enableBashIntegration   = true;
-        enableFishIntegration   = true;
-        defaultOptions = [
-            "--height 40%"
-            "--layout=reverse"
-            "--border"
-            "--inline-info"
-            #todo: fix these I think they only work for bash or its expecting `vivid`
-            # '' --color 'fg:#${vars.colors.base05}' ''              # Text
-            # '' --color 'bg:#''${vars.colors.base00}' ''              # Background
-            # '' --color 'preview-fg:#''${vars.colors.base05}' ''      # Preview window text
-            # '' --color 'preview-bg:#''${vars.colors.base02}' ''      # Preview window background
-            # '' --color 'hl:#''${vars.colors.base0A}' ''              # Highlighted substrings
-            # '' --color 'fg+:#''${vars.colors.base0D}' ''             # Text (current line)
-            # '' --color 'bg+:#''${vars.colors.base02}' ''             # Background (current line)
-            # '' --color 'gutter:#''${vars.colors.base02}' ''          # Gutter on the left (defaults to bg+)
-            # '' --color 'hl+:#''${vars.colors.base0E}' ''             # Highlighted substrings (current line)
-            # '' --color 'info:#''${vars.colors.base0E}' ''            # Info line (match counters)
-            # '' --color 'border:#''${vars.colors.base0D}' ''          # Border around the window (--border and --preview)
-            # '' --color 'prompt:#''${vars.colors.base05}' ''          # Prompt
-            # '' --color 'pointer:#''${vars.colors.base0E}' ''         # Pointer to the current line
-            # '' --color 'marker:#''${vars.colors.base0E}' ''          # Multi-select marker
-            # '' --color 'spinner:#''${vars.colors.base0E}' ''         # Streaming input indicator
-            # '' --color 'header:#''${vars.colors.base05}' ''          # Header
-        ];
-    };
-
-  programs.atuin = {       
-        enable                  = true;
-        enableZshIntegration    = true;
-        enableBashIntegration   = true;
-        settings = {
-            inline_height   = 10;       # search window height
-            style = "compact";
-            show_preview    = true;
-            show_help       = true;
-            secrets_filter  = true;
-        };
-    }; 
+    
 
 
 
