@@ -5,7 +5,7 @@
 {
     imports = [
         ./_file-browsers
-        ./eza
-        ./zoxide
+        ./eza.nix
+        ./zoxide.nix
     ];
 }

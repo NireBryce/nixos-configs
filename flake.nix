@@ -57,6 +57,8 @@
     nix-index-database,
     musnix,
     jovian,
+    impermanence,
+    sops-nix,
     haumea,
     ...
   } @ inputs: 
@@ -64,12 +66,7 @@
     overlays    = import ./___overlays {inherit inputs;};
     hardware    = import nixos-hardware;
     inputs = inputs;                               # send inputs to modules (is this actually the right description?)
-    lib = haumea.lib.load {
-      src    = ./src;
-      inputs = {
-        inherit (nixpkgs) lib;
-      };
-    };
+    
     # nire-durandal (workstation)
     #   `sudo nixos-rebuild switch --flake .#nire-durandal`
     #   `nh os switch --hostname nire-durandal ~/nixos/`
