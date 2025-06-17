@@ -17,6 +17,7 @@
     ./nix-util
     ./package-management
     ./search-utils
+    ./shell
     ./shell-history
     ./shell-specific
     ./storage-stats

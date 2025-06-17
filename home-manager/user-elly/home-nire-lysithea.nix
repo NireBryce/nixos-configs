@@ -4,7 +4,6 @@
 # ! NOTE !
 # ? Packages are currently managed via darwin.
 { 
-	self,
 	... 
 }:
 let 
@@ -14,19 +13,20 @@ let
     _dotfiles               = "${ellyPath}/dotfiles";
     _git                    = "${ellyPath}/git";
   # TODO: make these names less confusing even though they're to optimize for code-skim and file-manager sort respectively
-    _pkgs-cli               = "${ellyPath}/packages/_general-cli-pkgs.nix";
-    _pkgs-darwin            = "${ellyPath}/packages/_darwin-pkgs.nix";            
-    _pkgs-dev               = "${ellyPath}/packages/_dev-pkgs.nix";
-    _shell                  = "${ellyPath}/shell";
+    # _pkgs-cli               = "${ellyPath}/packages/_general-cli-pkgs.nix";
+    # _pkgs-darwin            = "${ellyPath}/packages/_darwin-pkgs.nix";            
+    # _pkgs-dev               = "${ellyPath}/packages/_dev-pkgs.nix";
+    # _shell                  = "${ellyPath}/shell";
 
 in {
     imports = [
         _dotfiles           # dotfiles
         _git                # git
-        _pkgs-cli           # general cli packages
-        _pkgs-darwin        # mac-only packages
-        _pkgs-dev           # dev packages (mostly nix)
-        _shell              # zsh config, bash launch commands, paths, etc
+        ./packages/cli-pkgs/shell
+        # _pkgs-cli           # general cli packages
+        # _pkgs-darwin        # mac-only packages
+        # _pkgs-dev           # dev packages (mostly nix)
+        # _shell              # zsh config, bash launch commands, paths, etc
     ];
 
     
