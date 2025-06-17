@@ -11,7 +11,7 @@
     ];
     home.file = {
         "./.config/zellij/config.kdl" = {
-            source = ./config.kdl;
+            source = ./zellij/config.kdl;
         };
     };
 

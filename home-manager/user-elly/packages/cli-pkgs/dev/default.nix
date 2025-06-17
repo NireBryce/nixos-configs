@@ -4,7 +4,7 @@
 {
     imports = [
         ./dev.nix
-        ./direnv
+        ./direnv.nix
     ];
 }
 

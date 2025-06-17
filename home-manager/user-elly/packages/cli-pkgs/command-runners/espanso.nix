@@ -12,7 +12,7 @@
     };
     # home.file = {# empty for now
     #     "./.config/espanso/config/config.yml" = {
-    #         source = ./config.yml;
+    #         source = ./espanso/config.yml;
     #     };
     # };
 }

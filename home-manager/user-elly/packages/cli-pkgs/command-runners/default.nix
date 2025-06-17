@@ -4,8 +4,8 @@
  
 {
     imports = [
-        ./espanso
-        ./just
-        ./mask
+        ./espanso.nix
+        ./just.nix
+        ./mask.nix
     ];
 }

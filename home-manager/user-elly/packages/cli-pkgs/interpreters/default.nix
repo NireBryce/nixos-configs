@@ -4,7 +4,7 @@
  
 {
     imports = [
-        ./python
-        ./nushell
+        ./python.nix
+        ./nushell.nix
     ];
 }

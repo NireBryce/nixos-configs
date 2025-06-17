@@ -5,7 +5,7 @@
  
 {
     imports = [
-        ./broot
+        ./broot.nix
     ];
     home.packages = with pkgs;[
         which                         # `which`                                   https://www.gnu.org/software/which/

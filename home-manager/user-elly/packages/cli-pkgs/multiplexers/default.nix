@@ -4,7 +4,7 @@
  
 {
     imports = [
-        ./tmux
-        ./zellij
+        ./tmux.nix
+        ./zellij.nix
     ];
 }

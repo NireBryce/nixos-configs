@@ -3,8 +3,8 @@
 }: 
 {
     imports = [
-        ./micro
-        ./nvim
+        ./micro.nix
+        ./nvim.nix
     ];
 }
 

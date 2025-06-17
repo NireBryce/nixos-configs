@@ -4,8 +4,8 @@
  
 {
     imports = [
-        ./dircolors
-        ./starship
-        ./vivid         # LS_COLORS generator                       https://github.com/sharkdp/vivid
+        ./dircolors.nix
+        ./starship.nix
+        ./vivid.nix         # LS_COLORS generator                       https://github.com/sharkdp/vivid
     ];
 }
