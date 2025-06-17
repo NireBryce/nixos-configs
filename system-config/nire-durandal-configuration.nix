@@ -19,6 +19,5 @@ _subModulesList     = [
 
 in {
     imports = _subModulesList;
-    
     networking.hostName = _hostName;
 }

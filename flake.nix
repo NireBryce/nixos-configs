@@ -79,12 +79,15 @@
       modules     = [
         ./system-config/nire-durandal-configuration.nix
         nix-index-database.nixosModules.nix-index
-        # nixos-hardware.nixosModules.gigabyte-b550 # TODO: enable this when https://github.com/NixOS/nixos-hardware/pull/1394 goes through
-        # inputs.musnix.nixosModules.musnix
-        # inputs.nixos-hardware.nixosModules.b550 # TODO: fix flake on nixos-hardware repo
-        # inputs.stylix.nixosModules.stylix
-        # TODO: stylix
+        # This lets us flatten 'programs' configs into a single file, I hope.
         
+        # nixos-hardware.nixosModules.gigabyte-b550 # TODO: enable this when https://github.com/NixOS/nixos-hardware/pull/1394 goes through
+        # inputs.nixos-hardware.nixosModules.b550 # TODO: fix flake on nixos-hardware repo
+        
+        # inputs.musnix.nixosModules.musnix
+        # inputs.stylix.nixosModules.stylix
+        
+        # TODO: home manager merge
       ];
     };
     #   `home-manager switch --flake .#elly@nire-durandal`
