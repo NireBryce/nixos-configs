@@ -1,12 +1,11 @@
 { 
   self,
-  flakeLocation,
   ... 
 }: 
 
 let 
 # self variable is the root location of the build tree, give or take
-_flakeDir           = "${flakeLocation}";
+_flakeDir           = "${self}";
 _systemConfigDir    = "${_flakeDir}/system-config";
 _hostName           = "nire-durandal";
 _windowManager      = "kde";
