@@ -35,6 +35,7 @@
   # populate nix index
     nix-index-database.url                      = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows   = "nixpkgs";
+    
 
   # plasma manager
     plasma-manager.url                          = "github:nix-community/plasma-manager";
@@ -44,7 +45,10 @@
   
   # flake-parts
     flake-parts.url = "github:hercules-ci/flake-parts";
-
+    inputs.nixpkgs-lib.follows = "nixpkgs";
+  # import-tree flake-parts util
+    inputs.import-tree.url = "github:vic/import-tree"
+    
   };
 
   outputs = {
