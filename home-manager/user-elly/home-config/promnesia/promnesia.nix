@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "promnesia breadcrumb-bookmarks-and-more";
+    # desc = "promnesia breadcrumb-bookmarks-and-more";
     flake.modules.homeManager.base =
     { ... }:
     

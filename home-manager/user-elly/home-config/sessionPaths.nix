@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "elly user session paths";
+    # desc = "elly user session paths";
     flake.modules.homeManager.base =
     { ... }:
     {

@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "`nom`"; # TODO: better desc
+    # desc = "`nom`"; # TODO: better desc
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [
@@ -9,5 +9,6 @@
     in
     {
         home.packages = packageList;
+        
     };
 }
