@@ -112,16 +112,23 @@
         ];
       };
       #   `home-manager switch --flake .#elly@nire-durandal`
-      #   `nh home switch --configuration elly@nire-durandal ~/nixos/`
-      homeConfigurations."elly@nire-durandal" = home-manager.lib.homeManagerConfiguration {
+      #   `nh home switch --configuration elly-in-nire-durandal ~/nixos/`
+      homeConfigurations."elly-in-nire-durandal" = home-manager.lib.homeManagerConfiguration {
         pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
           system = "x86_64-linux";
           config = { allowUnfree = true; };
         };
         extraSpecialArgs  = inputs;                           # Pass flake inputs to our config
         modules           = [
-          plasma-manager.homeManagerModules.plasma-manager
-          ./home-manager/user-elly/_hosts/elly-nire-durandal.nix  # home manager entrypoint
+            (inputs.import-tree ./home-manager/plasma-manager)
+            (inputs.import-tree ./home-manager/user-elly)
+            (inputs.import-tree ./home-manager/window-manager/kde)
+            plasma-manager.homeManagerModules.plasma-manager
+            {
+                home.stateVersion        = "22.11"; 
+                home.username            = "elly";
+                home.homeDirectory       = "/home/elly";
+            }
         ];
       };
     
@@ -142,7 +149,7 @@
       };
     # `home-manager switch --flake .#elly@nire-tenacity`
     # `nh home switch --configuration elly@nire-tenacity ~/nixos/`
-      homeConfigurations."elly@nire-tenacity" = home-manager.lib.homeManagerConfiguration {
+      homeConfigurations."elly-in-nire-tenacity" = home-manager.lib.homeManagerConfiguration {
         pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
           system = "x86_64-linux";
           config = { allowUnfree = true; };
@@ -156,7 +163,7 @@
     };
 
 
-    _module.args.rootPath = ./.;
+    # _module.args.rootPath = ./.;
   });
 }
 

@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "bash configs";
+    # desc = "bash configs";
     flake.modules.homeManager.base =
     { ... }:
 
