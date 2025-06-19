@@ -1,7 +1,7 @@
 { ... }:
 {
     # TODO: fix comma
-    description = "`,` - `nix-shell -p` style run commands without installing to env";
+    # description = "`,` - `nix-shell -p` style run commands without installing to env";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

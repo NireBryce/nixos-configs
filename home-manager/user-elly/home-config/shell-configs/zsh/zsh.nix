@@ -22,7 +22,7 @@
     #   Example: programs.zsh.initContent = "your content here";
 
 
-    description = "zsh shell config";
+    # description = "zsh shell config";
     flake.modules.homeManager.base =
     { pkgs, lib, ... }:
     let zshPluginRequiresList = with pkgs; [
