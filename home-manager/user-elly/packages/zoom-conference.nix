@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "zoom videoconferencing software https://zoom.us/";
+    # desc = "zoom videoconferencing software https://zoom.us/";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [
