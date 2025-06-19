@@ -73,13 +73,14 @@
     sops-nix,
     ...
   } @ inputs:
-  flake-parts.lib.mkFlake { inherit inputs; } (top@{ config, withSystem, moduleWithSystem, ... }: {
+  flake-parts.lib.mkFlake { inherit inputs; } {
     debug = true;
     imports = [ 
     # Optional: use external flake logic, e.g.
     #     inputs.foo.flakeModules.default
         inputs.home-manager.flakeModules.home-manager
-        flakeModules.default
+        inputs.flake-parts.flakeModules.flakeModules
+        inputs.flake-parts.flakeModules.modules
 
     ] ;
     systems = [ 
@@ -106,34 +107,28 @@
       #   `sudo nixos-rebuild switch --flake .#nire-durandal`
       #   `nh os switch --hostname nire-durandal ~/nixos/`
       nixosConfigurations."nire-durandal"     = 
-         withSystem "x86_64-linux" (ctx@{ config, inputs', ... }:           # Expose `packages`, `inputs` and `inputs'` as module arguments.
-         inputs.nixpkgs.lib.nixosSystem 
+          inputs.nixpkgs.lib.nixosSystem 
       {
         # Use specialArgs permits use in `imports`.
         # Note: if you publish modules for reuse, do not rely on specialArgs, but
         # on the flake scope instead. See also https://flake.parts/define-module-in-separate-file.html
         specialArgs = {
-          packages = config.packages;
-          inherit inputs inputs';
+          inherit inputs;
         };
         modules     = [
           ./system-config/nire-durandal-configuration.nix
           nix-index-database.nixosModules.nix-index
         ];
-      });
+      };
       #   `home-manager switch --flake .#elly@nire-durandal`
       #   `nh home switch --configuration elly-in-nire-durandal ~/nixos/`
-      homeConfigurations."elly-in-nire-durandal" = 
-          withSystem "x86_64-linux" (ctx@{ config, inputs', ... }:  
-          home-manager.lib.homeManagerConfiguration 
-      {
+      homeConfigurations."elly@nire-durandal" = home-manager.lib.homeManagerConfiguration {
         pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
           system = "x86_64-linux";
           config = { allowUnfree = true; };
         };
         extraSpecialArgs  = {
-            packages = config.packages;
-            inherit inputs inputs';
+            inherit inputs;
         };
         modules           = [
             (inputs.import-tree ./home-manager/plasma-manager)
@@ -146,7 +141,7 @@
                 home.homeDirectory       = "/home/elly";
             }
         ];
-      });
+      };
     
 
     # nire-tenacity (GPD Win Mini 25)
@@ -180,7 +175,7 @@
 
 
     # _module.args.rootPath = ./.;
-  });
+  };
 }
 
 # NOTE: for nix-index to work with flake installs, you must `nix profile install` something
