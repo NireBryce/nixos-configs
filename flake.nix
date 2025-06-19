@@ -78,6 +78,8 @@
     imports = [ 
     # Optional: use external flake logic, e.g.
     #     inputs.foo.flakeModules.default
+        inputs.home-manager.flakeModules.home-manager
+        flakeModules.default
 
     ] ;
     systems = [ 
@@ -94,31 +96,45 @@
       #     };
     };
     flake = {
-  
+
       overlays    = import ./___overlays {inherit inputs;};
       hardware    = import nixos-hardware;           # needed for something in nixos hardware
       inputs = inputs;                               # move inputs into this scope (I think)
       
 
-      nixosConfigurations."nire-durandal"     = nixpkgs.lib.nixosSystem {
       # nire-durandal (workstation)
       #   `sudo nixos-rebuild switch --flake .#nire-durandal`
       #   `nh os switch --hostname nire-durandal ~/nixos/`
-        specialArgs = inputs;
-        system      = "x86_64-linux";
+      nixosConfigurations."nire-durandal"     = 
+         withSystem "x86_64-linux" (ctx@{ config, inputs', ... }:           # Expose `packages`, `inputs` and `inputs'` as module arguments.
+         inputs.nixpkgs.lib.nixosSystem 
+      {
+        # Use specialArgs permits use in `imports`.
+        # Note: if you publish modules for reuse, do not rely on specialArgs, but
+        # on the flake scope instead. See also https://flake.parts/define-module-in-separate-file.html
+        specialArgs = {
+          packages = config.packages;
+          inherit inputs inputs';
+        };
         modules     = [
           ./system-config/nire-durandal-configuration.nix
           nix-index-database.nixosModules.nix-index
         ];
-      };
+      });
       #   `home-manager switch --flake .#elly@nire-durandal`
       #   `nh home switch --configuration elly-in-nire-durandal ~/nixos/`
-      homeConfigurations."elly-in-nire-durandal" = home-manager.lib.homeManagerConfiguration {
+      homeConfigurations."elly-in-nire-durandal" = 
+          withSystem "x86_64-linux" (ctx@{ config, inputs', ... }:  
+          home-manager.lib.homeManagerConfiguration 
+      {
         pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
           system = "x86_64-linux";
           config = { allowUnfree = true; };
         };
-        extraSpecialArgs  = inputs;                           # Pass flake inputs to our config
+        extraSpecialArgs  = {
+            packages = config.packages;
+            inherit inputs inputs';
+        };
         modules           = [
             (inputs.import-tree ./home-manager/plasma-manager)
             (inputs.import-tree ./home-manager/user-elly)
@@ -130,7 +146,7 @@
                 home.homeDirectory       = "/home/elly";
             }
         ];
-      };
+      });
     
 
     # nire-tenacity (GPD Win Mini 25)
