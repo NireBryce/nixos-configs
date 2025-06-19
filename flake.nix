@@ -120,7 +120,6 @@
         };
         extraSpecialArgs  = inputs;                           # Pass flake inputs to our config
         modules           = [
-            ./home-manager/user-elly/git-config/git-settings-elly.nix
             (inputs.import-tree ./home-manager/plasma-manager)
             (inputs.import-tree ./home-manager/user-elly)
             (inputs.import-tree ./home-manager/window-manager/kde)
