@@ -31,23 +31,27 @@
         ],
         "description": "Create empty defaults.nix"
     },
-    "nix-templates-hm-pkg": {
+    "nix-hm-pkg": {
         "scope": "nix",
-        "prefix": "nix-templates-hm-pkgs",
+        "prefix": "nix-templates-hm-pkg",
         "body": [
-            "{" ,
-            "    pkgs,", 
-            "    ...", 
-            "}:",
-            " ", 
-            "{",
-            "    home.packages = with pkgs;[",
-            "        ",
-            "    ];",
-            "}"
-        ]
+           "{ ... }:"    
+        ,  "{"
+        ,  "    description = \"\";"
+        ,  "    flake.modules.homeManager.base ="
+        ,  "    { pkgs, ... }:"
+        ,  "    let packageList = with pkgs; ["
+        ,  "        "
+        ,  "    ];"
+        ,  "    in"
+        ,  "    {" 
+        ,  "        home.packages = packageList;"
+        ,  "    };"
+        ,  "}"
+        ],
+        "description": "create new flake-parts home-manager package module", 
     },
-        "nix-templates-empty-config": {
+    "nix-empty-config": {
         "scope": "nix",
         "prefix": "nix-templates-empty-config",
         "body": [
@@ -58,7 +62,9 @@
             "{",
             "    ",
             "}"
-        ]
-    }
+        ],
+        "description": "create an empty nix system module",
+    },
+
 }
 
