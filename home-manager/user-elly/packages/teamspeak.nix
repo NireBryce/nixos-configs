@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "Teamspeak 3";
+    # desc = "Teamspeak 3";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

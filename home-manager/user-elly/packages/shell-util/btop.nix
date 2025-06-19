@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "`htop` alternative";
+    # desc = "`htop` alternative";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

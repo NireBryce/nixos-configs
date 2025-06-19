@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "nix-command zsh completions";
+    # desc = "nix-command zsh completions";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

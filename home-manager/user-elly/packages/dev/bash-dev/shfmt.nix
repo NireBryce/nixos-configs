@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "bash formatter";
+    # desc = "bash formatter";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

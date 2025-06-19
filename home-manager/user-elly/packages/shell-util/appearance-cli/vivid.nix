@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "LS_COLORS generator";
+    # desc = "LS_COLORS generator";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

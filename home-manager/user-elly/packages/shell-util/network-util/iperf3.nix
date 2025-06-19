@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "network tools https://software.es.net/iperf/";
+    # desc = "network tools https://software.es.net/iperf/";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

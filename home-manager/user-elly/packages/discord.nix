@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "discord chat https://discord.com/";
+    # desc = "discord chat https://discord.com/";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

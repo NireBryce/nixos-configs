@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "jq https://github.com/stedolan/jq";
+    # desc = "jq https://github.com/stedolan/jq";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

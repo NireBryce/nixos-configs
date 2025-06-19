@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "home-manager instance of python3";
+    # desc = "home-manager instance of python3";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

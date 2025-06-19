@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "python version- and venv-manager ";
+    # desc = "python version- and venv-manager ";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

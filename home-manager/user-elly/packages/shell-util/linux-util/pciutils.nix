@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "lspci";
+    # desc = "lspci";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

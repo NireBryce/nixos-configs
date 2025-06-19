@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "gnu which"; # TODO: better desc
+    # desc = "gnu which"; # TODO: better desc
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

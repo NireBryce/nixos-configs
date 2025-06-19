@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "bash completions";
+    # desc = "bash completions";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

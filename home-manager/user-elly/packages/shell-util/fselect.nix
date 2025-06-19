@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "fselect - I don't remember what this does"; # TODO: better desc
+    # desc = "fselect - I don't remember what this does"; # TODO: better desc
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

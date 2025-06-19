@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "sqlite";
+    # desc = "sqlite";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

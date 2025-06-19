@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "terminal markdown viewer https://github.com/charmbracelet/glow";
+    # desc = "terminal markdown viewer https://github.com/charmbracelet/glow";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

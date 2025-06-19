@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "provides `dig` + `nslookup`";
+    # desc = "provides `dig` + `nslookup`";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

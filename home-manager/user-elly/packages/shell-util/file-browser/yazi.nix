@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "file browser"; # TODO: better desc
+    # desc = "file browser"; # TODO: better desc
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

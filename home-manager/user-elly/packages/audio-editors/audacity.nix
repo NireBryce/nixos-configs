@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "Audacity audio editor";
+    # desc = "Audacity audio editor";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let

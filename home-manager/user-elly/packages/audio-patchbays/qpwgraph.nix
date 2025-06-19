@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "qpw graph virtual mixer";
+    # desc = "qpw graph virtual mixer";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let

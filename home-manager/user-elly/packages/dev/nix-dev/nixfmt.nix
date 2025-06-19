@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = ".nix file formatter";
+    # desc = ".nix file formatter";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "cli cheatsheets";
+    # desc = "cli cheatsheets";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

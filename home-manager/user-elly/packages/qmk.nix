@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = " qmk keyboard manager https://github.com/qmk/qmk_firmware";
+    # desc = " qmk keyboard manager https://github.com/qmk/qmk_firmware";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let

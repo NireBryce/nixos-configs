@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "nix antipattern linter";
+    # desc = "nix antipattern linter";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

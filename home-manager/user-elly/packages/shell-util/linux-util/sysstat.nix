@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "system stats http://sebastien.godard.pagesperso-orange.fr/";
+    # desc = "system stats http://sebastien.godard.pagesperso-orange.fr/";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

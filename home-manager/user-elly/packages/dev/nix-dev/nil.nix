@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "nix LSP server";
+    # desc = "nix LSP server";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

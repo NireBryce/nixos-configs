@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "Obsidian markdown PKM like org mode, https://obsidian.md/";
+    # desc = "Obsidian markdown PKM like org mode, https://obsidian.md/";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let

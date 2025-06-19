@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "provides `drill`, a `dig` replacement https://www.nlnetlabs.nl/projects/ldns/about/";
+    # desc = "provides `drill`, a `dig` replacement https://www.nlnetlabs.nl/projects/ldns/about/";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

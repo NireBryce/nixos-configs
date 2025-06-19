@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "git diff viewer";
+    # desc = "git diff viewer";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

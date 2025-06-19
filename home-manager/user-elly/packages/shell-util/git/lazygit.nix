@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "TUI git interface";
+    # desc = "TUI git interface";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

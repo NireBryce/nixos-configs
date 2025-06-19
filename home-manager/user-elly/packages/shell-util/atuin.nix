@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "Atuin remote encrypted history manager";
+    # desc = "Atuin remote encrypted history manager";
     flake.modules.homeManager.base =
     { ... }:
     {

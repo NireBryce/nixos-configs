@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "TUI docker interface";
+    # desc = "TUI docker interface";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

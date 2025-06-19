@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "git-scm";
+    # desc = "git-scm";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

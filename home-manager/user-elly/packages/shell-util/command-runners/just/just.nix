@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "just - justfile runner";
+    # desc = "just - justfile runner";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "input-level keybinding, platform independent";
+    # desc = "input-level keybinding, platform independent";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

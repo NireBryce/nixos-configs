@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "`df` alternative";
+    # desc = "`df` alternative";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

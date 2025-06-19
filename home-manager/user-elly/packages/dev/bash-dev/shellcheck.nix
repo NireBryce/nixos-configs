@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "bash linter";
+    # desc = "bash linter";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

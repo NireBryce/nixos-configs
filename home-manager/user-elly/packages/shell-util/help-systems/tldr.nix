@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "tldr - community provided man pages";
+    # desc = "tldr - community provided man pages";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

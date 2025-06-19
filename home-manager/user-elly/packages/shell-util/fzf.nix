@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "fuzzy finder";
+    # desc = "fuzzy finder";
     flake.modules.homeManager.base =
     { ... }:
 

@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "view dependency graph";
+    # desc = "view dependency graph";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

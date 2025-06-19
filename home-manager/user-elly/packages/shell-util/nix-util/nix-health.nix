@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "check nix issues";
+    # desc = "check nix issues";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

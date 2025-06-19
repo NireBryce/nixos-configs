@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "cli download manager";
+    # desc = "cli download manager";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

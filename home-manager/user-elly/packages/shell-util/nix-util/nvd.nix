@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "nix package version diff";
+    # desc = "nix package version diff";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

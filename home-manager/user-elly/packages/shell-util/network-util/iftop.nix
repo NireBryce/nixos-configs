@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "network monitor https://pdw.ex-parrot.com/iftop/";
+    # desc = "network monitor https://pdw.ex-parrot.com/iftop/";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

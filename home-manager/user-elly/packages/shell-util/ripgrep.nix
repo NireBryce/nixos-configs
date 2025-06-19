@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "`rg` much faster grep alternative";
+    # desc = "`rg` much faster grep alternative";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

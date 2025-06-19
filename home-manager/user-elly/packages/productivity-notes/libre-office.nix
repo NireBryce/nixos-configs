@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "office productivity software https://www.libreoffice.org/";
+    # desc = "office productivity software https://www.libreoffice.org/";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let

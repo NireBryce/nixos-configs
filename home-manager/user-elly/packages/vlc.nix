@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "VLC media player";
+    # desc = "VLC media player";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let

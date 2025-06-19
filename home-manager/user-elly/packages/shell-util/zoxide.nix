@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "";
+    # desc = "";
     flake.modules.homeManager.base =
     {  ... }:
 

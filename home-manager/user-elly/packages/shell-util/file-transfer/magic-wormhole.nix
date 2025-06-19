@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "magic-wormhole point to point file transfer";
+    # desc = "magic-wormhole point to point file transfer";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

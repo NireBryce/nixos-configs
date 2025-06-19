@@ -2,7 +2,7 @@
 # other settings in system-config/dev/vscode-setup
 # TODO: consider merging home-manager and system-config under same flake
 {
-    description = "vscode-fhs";
+    # desc = "vscode-fhs";
     flake.modules.homeManager.base =
     { pkgs, ... }:
 

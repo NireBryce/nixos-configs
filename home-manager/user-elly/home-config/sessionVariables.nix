@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "elly user session variables";
+    # desc = "elly user session variables";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     {

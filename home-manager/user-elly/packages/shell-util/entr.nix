@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "run commands when file changes";
+    # desc = "run commands when file changes";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [

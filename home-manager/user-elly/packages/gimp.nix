@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = " GNU Image Manipulation Program. https://www.gimp.org";
+    # desc = " GNU Image Manipulation Program. https://www.gimp.org";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let

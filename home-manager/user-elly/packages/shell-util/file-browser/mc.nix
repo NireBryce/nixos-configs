@@ -1,6 +1,6 @@
 { ... }:
 {
-    description = "midnight commander file browser";
+    # desc = "midnight commander file browser";
     flake.modules.homeManager.base =
     { pkgs, ... }:
     let packageList = with pkgs; [
