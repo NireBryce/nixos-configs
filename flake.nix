@@ -79,12 +79,8 @@
     # nire-durandal (workstation)
     #   `sudo nixos-rebuild switch --flake .#nire-durandal`
     #   `nh os switch --hostname nire-durandal ~/nixos/`
-    nixosConfigurations."nire-durandal"     = 
-        inputs.nixpkgs.lib.nixosSystem 
+    nixosConfigurations."nire-durandal" = inputs.nixpkgs.lib.nixosSystem 
     {
-      # Use specialArgs permits use in `imports`.
-      # Note: if you publish modules for reuse, do not rely on specialArgs, but
-      # on the flake scope instead. See also https://flake.parts/define-module-in-separate-file.html
         specialArgs = {
             inherit inputs;
         };
