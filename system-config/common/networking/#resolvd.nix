@@ -1,8 +1,8 @@
-# {
-#     ...
-# }:
+{
+    ...
+}:
 
-# {
+{
   # services.resolved = {
   #       enable      = true;  # necessiary for tailscale https://github.com/tailscale/tailscale/issues/4254
   #                       #  TODO: move to/duplicate for tailscale-autoconnect
@@ -14,5 +14,5 @@
   #       ];
   #       dnsovertls  = "true";
   #   };
-# }
+}
 

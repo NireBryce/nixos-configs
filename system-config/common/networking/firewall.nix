@@ -1,5 +1,5 @@
 {
-    config,
+
     ...
 }:
 
@@ -18,7 +18,7 @@
       ## UDP
         allowedUDPPorts = [                            
             5353                                        # mdns
-            config.services.tailscale.port              # todo: move to tailscale-autoconnect
+            # config.services.tailscale.port              # todo: move to tailscale-autoconnect
         ];
         allowedUDPPortRanges = [
             { from = 1714; to = 1764; }                 # kde-connect UDP   

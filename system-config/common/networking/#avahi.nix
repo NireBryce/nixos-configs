@@ -1,8 +1,8 @@
-# {
-#     ...
-# }:
+{
+    ...
+}:
 
-# {
+{
 #   services.avahi = {
 #         enable          = true;
 #         nssmdns4        = true; # switch this to false if this doesn't work
@@ -13,4 +13,4 @@
 #             addresses       = true;
 #         };
 #     };
-# }
+}

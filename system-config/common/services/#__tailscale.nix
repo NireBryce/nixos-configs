@@ -1,14 +1,14 @@
 # todo: fixme
 # in tailscale.nix
 # from https://guekka.github.io/nixos-server-2/
-# { 
+{ 
 #   config,
 #   lib,
 #   self,
-#   ...
-# }: 
+  ...
+}: 
 
-# {
+{
 #   imports = [
 #     # TODO: fixme
 #     # outputs.nixosModules.tailscale-autoconnect
@@ -28,7 +28,7 @@
 #   environment.persistence    = {
 #     "/persist".directories = ["/var/lib/tailscale"];
 #   };
-# }
+}
 
 
 

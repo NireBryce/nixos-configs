@@ -1,9 +1,9 @@
-# { 
-#   ... 
-# }:
+{ 
+  ... 
+}:
 
 # TODO: fixme broken(? - 2024-06-03)
-# { 
+{ 
 # # services
 #   services.syncthing = {
 #     enable = true;
@@ -48,4 +48,4 @@
 #     # declarative = {
 #     # };
 #   };
-# }
+}

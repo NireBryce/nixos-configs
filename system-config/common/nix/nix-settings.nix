@@ -1,5 +1,5 @@
 {
-    nixpkgs,
+    inputs,
     ...
 }:
 
@@ -14,7 +14,7 @@
     };
     
     nix.nixPath = [
-        "nixpkgs=${nixpkgs}"
+        "nixpkgs=${inputs.nixpkgs}"
     ];
 
     nixpkgs.config.allowUnfree = true;

@@ -1,4 +1,4 @@
-{ lib, impermanence, ...}:
+{ lib, inputs, ...}:
 
 # impermanence metapackage
 # THIS WILL DELETE YOUR ROOT ON BOOT, so like, know what you're doing
@@ -6,7 +6,7 @@
 # consider https://www.reddit.com/r/NixOS/comments/1ad0m5n/impermanence_disko_setup/
 {
   imports = [
-    impermanence.nixosModule
+    inputs.impermanence.nixosModule
   ];
 # TODO: Disko configs
 

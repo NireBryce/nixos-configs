@@ -90,6 +90,7 @@
         };
         modules     = [
             ./hosts/nire-durandal-configuration.nix
+            ./___modules/linux-crisis-utilities.nix
             nix-index-database.nixosModules.nix-index
         ];
     };

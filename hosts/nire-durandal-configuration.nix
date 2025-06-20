@@ -20,6 +20,6 @@
     
     
 ];
-system.stateVersion = "23.11"; # Don't change. https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion
-networking.hostName = "nire-durandal";
+    system.stateVersion = "23.11"; # Don't change. https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion
+    networking.hostName = "nire-durandal";
 }
