@@ -89,7 +89,13 @@
           inherit inputs;
         };
         modules     = [
-          ./system-config/nire-durandal-configuration.nix
+          {
+            imports = [
+              (inputs.import-tree ./hosts/nire-durandal) # durandal entry-point
+            ];
+            system.stateVersion = "23.11"; # Don't change. https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion
+            networking.hostName = "nire-durandal";
+          }
           nix-index-database.nixosModules.nix-index
         ];
     };
