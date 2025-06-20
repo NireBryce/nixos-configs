@@ -1,7 +1,7 @@
 { ... }:
 {
     imports = [
-        ../peripherals/logitech-g600.nix
-        ../peripherals/zsa-moonlander.nix
+        ../../system-config/peripherals/logitech-g600.nix
+        ../../system-config/peripherals/zsa-moonlander.nix
     ];
 }

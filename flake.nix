@@ -126,7 +126,8 @@
       specialArgs = inputs;                                 # send inputs to modules (is this actually the right description?)
       system      = "x86_64-linux";
       modules     = [
-        ./system-config/nire-tenacity-configuration.nix
+        ./hosts/nire-tenacity-configuration.nix
+        ./___modules/linux-crisis-utilities.nix
         nix-index-database.nixosModules.nix-index
         # TODO: stylix
         # jovian.nixosModules.jovian
