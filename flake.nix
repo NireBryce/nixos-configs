@@ -89,7 +89,7 @@
             inherit inputs;
         };
         modules     = [
-            ./hosts/nire-durandal.nix
+            ./hosts/nire-durandal-configuration.nix
             nix-index-database.nixosModules.nix-index
         ];
     };

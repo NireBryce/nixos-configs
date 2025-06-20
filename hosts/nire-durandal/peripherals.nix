@@ -1,4 +1,3 @@
-{ ... }:
 {
     imports = [
         ../../system-config/peripherals/logitech-g600.nix

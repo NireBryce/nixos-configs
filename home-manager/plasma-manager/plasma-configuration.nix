@@ -1,9 +1,9 @@
-# {
-#     plasma-manager,
-#     ...
-# }:
+{
+    plasma-manager,
+    ...
+}:
 
-# {
+{
 #     # `nix run github:nix-community/plasma-manager` to generate a config
   
 #     # programs.plasma = {
@@ -558,5 +558,4 @@
 #     };
 #   };
 
-# }
-
+}
