@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "TUI docker interface";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    lazydocker
+];
+in
 {
-    # desc = "TUI docker interface";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        lazydocker
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

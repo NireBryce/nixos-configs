@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "neofetch replacement https://github.com/hykilpikonna/HyFetch";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    hyfetch
+];
+in
 {
-    # desc = "neofetch replacement https://github.com/hykilpikonna/HyFetch";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        hyfetch
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

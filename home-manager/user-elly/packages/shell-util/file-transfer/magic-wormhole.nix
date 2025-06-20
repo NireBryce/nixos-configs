@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "magic-wormhole point to point file transfer";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    magic-wormhole-rs
+];
+in
 {
-    # desc = "magic-wormhole point to point file transfer";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        magic-wormhole-rs
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

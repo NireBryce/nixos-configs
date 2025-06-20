@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "check nix issues";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    nix-health
+];
+in
 {
-    # desc = "check nix issues";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        nix-health
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

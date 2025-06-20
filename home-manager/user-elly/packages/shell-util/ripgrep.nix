@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "`rg` much faster grep alternative";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    ripgrep
+];
+in
 {
-    # desc = "`rg` much faster grep alternative";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        ripgrep
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

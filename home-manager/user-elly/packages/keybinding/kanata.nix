@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "input-level keybinding, platform independent";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    kanata
+];
+in
 {
-    # desc = "input-level keybinding, platform independent";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        kanata
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

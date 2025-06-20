@@ -48,17 +48,13 @@
   #Stylix
     # stylix.url                                  = "github:danth/stylix";
   
-  # flake-parts
-    flake-parts.url = "github:hercules-ci/flake-parts";
-    nixpkgs-lib.follows = "nixpkgs";
-  # import-tree flake-parts util
+  # import-tree
     import-tree.url = "github:vic/import-tree";
     
   };
 
   outputs = {
     self,
-    flake-parts,
     import-tree,
     nixpkgs,
     #nixpkgs-stable,                                         # https://nixos-and-flakes.thiscute.world/nixos-with-flakes/downgrade-or-upgrade-packages
@@ -73,45 +69,22 @@
     sops-nix,
     ...
   } @ inputs:
-  flake-parts.lib.mkFlake { inherit inputs; } {
+  {
     debug = true;
-    imports = [ 
-    # Optional: use external flake logic, e.g.
-    #     inputs.foo.flakeModules.default
-        inputs.home-manager.flakeModules.home-manager
-        inputs.flake-parts.flakeModules.flakeModules
-        inputs.flake-parts.flakeModules.modules
+    overlays    = import ./___overlays {inherit inputs;};
+    hardware    = import nixos-hardware;           # needed for something in nixos hardware
+    inputs = inputs;                               # move inputs into this scope (I think)
+    
 
-    ] ;
-    systems = [ 
-    # Systems for which you want to build the `perSystem` attributes
-      "x86_64-linux"
-      "aarch64-darwin"
-    ];
-    perSystem = { ... }: {
-      # Recommended: Move all package definitions here.
-      #     e.g. (assuming you have a nixpkgs input)
-      #     packages.foo = pkgs.callPackage ./foo/package.nix { };
-      #     packages.bar = pkgs.callpackage ./bar/package.nix {
-      #         foo = config.packages.foo;
-      #     };
-    };
-    flake = {
-
-      overlays    = import ./___overlays {inherit inputs;};
-      hardware    = import nixos-hardware;           # needed for something in nixos hardware
-      inputs = inputs;                               # move inputs into this scope (I think)
-      
-
-      # nire-durandal (workstation)
-      #   `sudo nixos-rebuild switch --flake .#nire-durandal`
-      #   `nh os switch --hostname nire-durandal ~/nixos/`
-      nixosConfigurations."nire-durandal"     = 
-          inputs.nixpkgs.lib.nixosSystem 
-      {
-        # Use specialArgs permits use in `imports`.
-        # Note: if you publish modules for reuse, do not rely on specialArgs, but
-        # on the flake scope instead. See also https://flake.parts/define-module-in-separate-file.html
+    # nire-durandal (workstation)
+    #   `sudo nixos-rebuild switch --flake .#nire-durandal`
+    #   `nh os switch --hostname nire-durandal ~/nixos/`
+    nixosConfigurations."nire-durandal"     = 
+        inputs.nixpkgs.lib.nixosSystem 
+    {
+      # Use specialArgs permits use in `imports`.
+      # Note: if you publish modules for reuse, do not rely on specialArgs, but
+      # on the flake scope instead. See also https://flake.parts/define-module-in-separate-file.html
         specialArgs = {
           inherit inputs;
         };
@@ -119,10 +92,10 @@
           ./system-config/nire-durandal-configuration.nix
           nix-index-database.nixosModules.nix-index
         ];
-      };
-      #   `home-manager switch --flake .#elly@nire-durandal`
-      #   `nh home switch --configuration elly-in-nire-durandal ~/nixos/`
-      homeConfigurations."elly@nire-durandal" = home-manager.lib.homeManagerConfiguration {
+    };
+    #   `home-manager switch --flake .#elly@nire-durandal`
+    #   `nh home switch --configuration elly-in-nire-durandal ~/nixos/`
+    homeConfigurations."nire-durandal-hm-elly" = home-manager.lib.homeManagerConfiguration {
         pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
           system = "x86_64-linux";
           config = { allowUnfree = true; };
@@ -131,51 +104,60 @@
             inherit inputs;
         };
         modules           = [
-            (inputs.import-tree ./home-manager/plasma-manager)
-            (inputs.import-tree ./home-manager/user-elly)
-            (inputs.import-tree ./home-manager/window-manager/kde)
-            plasma-manager.homeManagerModules.plasma-manager
-            {
-                home.stateVersion        = "22.11"; 
-                home.username            = "elly";
-                home.homeDirectory       = "/home/elly";
+            { imports = [ 
+                (inputs.import-tree ./home-manager/plasma-manager)
+                (inputs.import-tree ./home-manager/user-elly)
+                (inputs.import-tree ./home-manager/window-manager/kde)
+              ];
+              home.stateVersion        = "22.11"; 
+              home.username            = "elly";
+              home.homeDirectory       = "/home/elly";
             }
+            plasma-manager.homeManagerModules.plasma-manager
         ];
-      };
-    
-
-    # nire-tenacity (GPD Win Mini 25)
-      # `sudo nixos-rebuild switch --flake .#nire-tenacity`
-      # `nh os switch --hostname nire-tenacity ~/nixos/`
-      nixosConfigurations."nire-tenacity"     = nixpkgs.lib.nixosSystem {
-        specialArgs = inputs;                                 # send inputs to modules (is this actually the right description?)
-        system      = "x86_64-linux";
-        modules     = [
-          ./system-config/nire-tenacity-configuration.nix
-          nix-index-database.nixosModules.nix-index
-          # TODO: stylix
-          # jovian.nixosModules.jovian
-          jovian.nixosModules.default
-        ];
-      };
-    # `home-manager switch --flake .#elly@nire-tenacity`
-    # `nh home switch --configuration elly@nire-tenacity ~/nixos/`
-      homeConfigurations."elly-in-nire-tenacity" = home-manager.lib.homeManagerConfiguration {
-        pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
-          system = "x86_64-linux";
-          config = { allowUnfree = true; };
-        };
-        extraSpecialArgs  = inputs;                           # Pass flake inputs to our config
-        modules           = [
-          plasma-manager.homeManagerModules.plasma-manager
-          ./home-manager/user-elly/home-nire-tenacity.nix  # home manager entrypoint
-        ];
-      };
     };
+  
 
-
-    # _module.args.rootPath = ./.;
+  # nire-tenacity (GPD Win Mini 25)
+    # `sudo nixos-rebuild switch --flake .#nire-tenacity`
+    # `nh os switch --hostname nire-tenacity ~/nixos/`
+    nixosConfigurations."nire-tenacity"     = nixpkgs.lib.nixosSystem {
+      specialArgs = inputs;                                 # send inputs to modules (is this actually the right description?)
+      system      = "x86_64-linux";
+      modules     = [
+        ./system-config/nire-tenacity-configuration.nix
+        nix-index-database.nixosModules.nix-index
+        # TODO: stylix
+        # jovian.nixosModules.jovian
+        jovian.nixosModules.default
+      ];
+    };
+  # `home-manager switch --flake .#elly@nire-tenacity`
+  # `nh home switch --configuration elly@nire-tenacity ~/nixos/`
+    homeConfigurations."nire-tenacity-hm-elly" = home-manager.lib.homeManagerConfiguration {
+      pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
+        system = "x86_64-linux";
+        config = { allowUnfree = true; };
+      };
+      extraSpecialArgs  = inputs;                           # Pass flake inputs to our config
+      modules           = [
+          { imports = [ 
+                (inputs.import-tree ./home-manager/plasma-manager)
+                (inputs.import-tree ./home-manager/user-elly)
+                (inputs.import-tree ./home-manager/window-manager/kde)
+              ];
+              home.stateVersion        = "22.11"; 
+              home.username            = "elly";
+              home.homeDirectory       = "/home/elly";
+          }
+          plasma-manager.homeManagerModules.plasma-manager
+        
+      ];
+    };
   };
+
+
+  # _module.args.rootPath = ./.;
 }
 
 # NOTE: for nix-index to work with flake installs, you must `nix profile install` something

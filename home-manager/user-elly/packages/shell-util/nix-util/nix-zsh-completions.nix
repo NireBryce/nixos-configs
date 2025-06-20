@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "nix-command zsh completions";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    nix-zsh-completions
+];
+in
 {
-    # desc = "nix-command zsh completions";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        nix-zsh-completions
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

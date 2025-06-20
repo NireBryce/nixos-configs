@@ -1,14 +1,9 @@
-{ ... }:
+# desc = "`nom`"; # TODO: better desc
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    nix-output-monitor
+];
+in
 {
-    # desc = "`nom`"; # TODO: better desc
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        nix-output-monitor
-    ];
-    in
-    {
-        home.packages = packageList;
-        
-    };
+    home.packages = packageList;
 }

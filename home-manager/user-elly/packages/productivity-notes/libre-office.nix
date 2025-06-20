@@ -1,14 +1,10 @@
-{ ... }:
+# desc = "office productivity software https://www.libreoffice.org/";
+{ pkgs, ... }:
+let
+    packageList = with pkgs; [
+        libreoffice-qt
+    ];
+in 
 {
-    # desc = "office productivity software https://www.libreoffice.org/";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let
-        packageList = with pkgs; [
-            libreoffice-qt
-        ];
-    in 
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

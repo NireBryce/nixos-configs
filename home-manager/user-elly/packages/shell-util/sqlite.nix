@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "sqlite";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    sqlite
+];
+in
 {
-    # desc = "sqlite";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        sqlite
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

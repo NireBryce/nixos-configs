@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "Bitwarden password manager https://bitwarden.com/";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    bitwarden
+];
+in
 {
-    # desc = "Bitwarden password manager https://bitwarden.com/";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        bitwarden
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "nix man pages, kinda";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    manix
+];
+in
 {
-    # desc = "nix man pages, kinda";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        manix
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

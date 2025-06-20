@@ -1,14 +1,10 @@
-{ ... }:
+# desc = "Audacity audio editor";
+{ pkgs, ... }:
+let
+    packageList = with pkgs; [
+        audacity
+    ];
+in 
 {
-    # desc = "Audacity audio editor";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let
-        packageList = with pkgs; [
-            audacity
-        ];
-    in 
-    {
-        home.packages = packageList;
-    };
+home.packages = packageList;
 }

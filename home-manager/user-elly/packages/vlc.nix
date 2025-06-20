@@ -1,14 +1,10 @@
-{ ... }:
+# desc = "VLC media player";
+{ pkgs, ... }:
+let
+    packageList = with pkgs; [
+        vlc
+    ];
+in 
 {
-    # desc = "VLC media player";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let
-        packageList = with pkgs; [
-            vlc
-        ];
-    in 
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

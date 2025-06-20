@@ -1,9 +1,6 @@
+# desc = "Atuin remote encrypted history manager";
 { ... }:
 {
-    # desc = "Atuin remote encrypted history manager";
-    flake.modules.homeManager.base =
-    { ... }:
-    {
     programs.atuin = {       
         enable                  = true;
         enableZshIntegration    = true;
@@ -15,6 +12,5 @@
             show_help       = true;
             secrets_filter  = true;
         };
-    }; 
     };
 }

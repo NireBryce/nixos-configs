@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "`du` alternative";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    du-dust
+];
+in
 {
-    # desc = "`du` alternative";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        du-dust
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

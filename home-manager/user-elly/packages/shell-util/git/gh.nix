@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "github-cli";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    gh
+];
+in
 {
-    # desc = "github-cli";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        gh
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "openbsd netcat replacement https://www.dest-unreach.org/socat/";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    socat
+];
+in
 {
-    # desc = "openbsd netcat replacement https://www.dest-unreach.org/socat/";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        socat
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

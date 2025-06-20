@@ -1,7 +1,4 @@
-{ ... }:
-{
-    # desc = "";
-    flake.modules.homeManager.base =
+# desc = "";
     { pkgs, ... }:
     let packageList = with pkgs; [
     # Storage stats

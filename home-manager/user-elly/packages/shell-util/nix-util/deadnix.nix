@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "scan for 'dead' (uncalled) nix code";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    deadnix
+];
+in
 {
-    # desc = "scan for 'dead' (uncalled) nix code";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        deadnix
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

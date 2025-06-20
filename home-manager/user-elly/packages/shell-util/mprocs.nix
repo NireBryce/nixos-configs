@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "run multiple commands in parallel";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    mprocs
+];
+in
 {
-    # desc = "run multiple commands in parallel";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        mprocs
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

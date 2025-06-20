@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "system call tracer https://linux.die.net/man/1/strace";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    strace
+];
+in
 {
-    # desc = "system call tracer https://linux.die.net/man/1/strace";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        strace
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

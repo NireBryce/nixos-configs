@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "lspci";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    pciutils
+];
+in
 {
-    # desc = "lspci";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        pciutils
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

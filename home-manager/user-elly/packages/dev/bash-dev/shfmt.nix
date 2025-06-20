@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "bash formatter";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    shfmt
+];
+in
 {
-    # desc = "bash formatter";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        shfmt
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

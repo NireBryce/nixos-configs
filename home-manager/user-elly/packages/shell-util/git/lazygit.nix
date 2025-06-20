@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "TUI git interface";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    lazygit
+];
+in
 {
-    # desc = "TUI git interface";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        lazygit
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

@@ -1,13 +1,9 @@
+# desc = "";
 { ... }:
-{
-    # desc = "";
-    flake.modules.homeManager.base =
-    { ... }:
 
-    {
-        services.espanso = {
-            enable  = true;
-            waylandSupport = true;
-        };
+{
+    services.espanso = {
+        enable  = true;
+        waylandSupport = true;
     };
 }

@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "commitizen"; # TODO: better description
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    commitizen
+];
+in
 {
-    # desc = "commitizen"; # TODO: better description
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        commitizen
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

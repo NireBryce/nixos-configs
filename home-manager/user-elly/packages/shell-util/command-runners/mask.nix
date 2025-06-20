@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "mask - markdown task runner";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    mask
+];
+in
 {
-    # desc = "mask - markdown task runner";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        mask
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

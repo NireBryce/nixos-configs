@@ -1,9 +1,6 @@
+# desc = "";
 { ... }:
 {
-    # desc = "";
-    flake.modules.homeManager.base =
-    { ... }:
-    {
     # ! WARN: unsure how global aliases work here
     # for now they're declared in the zsh config but that's 
     #    not declarative -- it saves them to abbr even if
@@ -17,5 +14,4 @@
         "whence"                = "type -a";
         "zsh-keymap"            = "bindkey";
     };    
-    };
 }

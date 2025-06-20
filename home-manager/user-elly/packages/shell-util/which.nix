@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "gnu which"; # TODO: better desc
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    which
+];
+in
 {
-    # desc = "gnu which"; # TODO: better desc
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        which
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "show filetype";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    file
+];
+in
 {
-    # desc = "show filetype";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        file
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

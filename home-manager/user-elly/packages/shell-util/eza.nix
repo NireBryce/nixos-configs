@@ -1,14 +1,11 @@
-{ ... }:
-{
-    # desc = "";
-    flake.modules.homeManager.base =
+# desc = "";
     { ... }:
 
-    {
-        programs.eza = {
-            enable  = true;
-            enableZshIntegration    = true;
-            enableBashIntegration   = true;
-        };
+{
+    programs.eza = {
+        enable  = true;
+        enableZshIntegration    = true;
+        enableBashIntegration   = true;
     };
 }
+

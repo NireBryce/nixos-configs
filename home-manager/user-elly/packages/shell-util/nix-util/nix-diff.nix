@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "diff nix code";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    nix-diff
+];
+in
 {
-    # desc = "diff nix code";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        nix-diff
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

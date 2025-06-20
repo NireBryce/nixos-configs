@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "neovim editor";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    neovim
+];
+in
 {
-    # desc = "neovim editor";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        neovim
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

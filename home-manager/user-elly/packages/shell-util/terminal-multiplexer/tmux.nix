@@ -1,12 +1,9 @@
-{ ... }:
-{
-    # desc = "";
-    flake.modules.homeManager.base =
+# desc = "";
     { ... }:
 
-    {
-        programs.tmux = {
-            enable = true;
-        };
+{
+    programs.tmux = {
+        enable = true;
     };
 }
+

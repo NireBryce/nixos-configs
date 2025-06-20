@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "`diff` utils";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    diffutils
+];
+in
 {
-    # desc = "`diff` utils";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        diffutils
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

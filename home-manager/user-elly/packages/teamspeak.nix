@@ -1,16 +1,11 @@
-{ ... }:
+# desc = "Teamspeak 3";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    teamspeak_client
+];
+in
 {
-    # desc = "Teamspeak 3";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        teamspeak_client
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
-
+    home.packages = packageList;
 }
 
 

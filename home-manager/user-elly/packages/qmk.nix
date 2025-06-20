@@ -1,14 +1,10 @@
-{ ... }:
+# desc = " qmk keyboard manager https://github.com/qmk/qmk_firmware";
+{ pkgs, ... }:
+let
+    packageList = with pkgs; [
+        qmk
+    ];
+in 
 {
-    # desc = " qmk keyboard manager https://github.com/qmk/qmk_firmware";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let
-        packageList = with pkgs; [
-            qmk
-        ];
-    in 
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

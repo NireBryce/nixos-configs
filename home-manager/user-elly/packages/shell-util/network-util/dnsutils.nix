@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "provides `dig` + `nslookup`";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    dnsutils
+];
+in
 {
-    # desc = "provides `dig` + `nslookup`";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        dnsutils
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

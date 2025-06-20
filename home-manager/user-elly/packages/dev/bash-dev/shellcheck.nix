@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "bash linter";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    shellcheck
+];
+in
 {
-    # desc = "bash linter";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        shellcheck
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

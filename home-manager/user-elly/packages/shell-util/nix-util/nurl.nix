@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "make nix fetcher calls from repository URLs";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    nurl
+];
+in
 {
-    # desc = "make nix fetcher calls from repository URLs";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        nurl
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

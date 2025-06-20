@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "io monitoring http://guichaz.free.fr/iotop";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    iotop
+];
+in
 {
-    # desc = "io monitoring http://guichaz.free.fr/iotop";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        iotop
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }

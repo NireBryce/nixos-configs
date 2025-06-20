@@ -1,13 +1,9 @@
-{ ... }:
+# desc = "python linter";
+{ pkgs, ... }:
+let packageList = with pkgs; [
+    ruff
+];
+in
 {
-    # desc = "python linter";
-    flake.modules.homeManager.base =
-    { pkgs, ... }:
-    let packageList = with pkgs; [
-        ruff
-    ];
-    in
-    {
-        home.packages = packageList;
-    };
+    home.packages = packageList;
 }
