@@ -86,17 +86,11 @@
       # Note: if you publish modules for reuse, do not rely on specialArgs, but
       # on the flake scope instead. See also https://flake.parts/define-module-in-separate-file.html
         specialArgs = {
-          inherit inputs;
+            inherit inputs;
         };
         modules     = [
-          {
-            imports = [
-              (inputs.import-tree ./hosts/nire-durandal) # durandal entry-point
-            ];
-            system.stateVersion = "23.11"; # Don't change. https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion
-            networking.hostName = "nire-durandal";
-          }
-          nix-index-database.nixosModules.nix-index
+            ./hosts/nire-durandal.nix
+            nix-index-database.nixosModules.nix-index
         ];
     };
     #   `home-manager switch --flake .#elly@nire-durandal`
