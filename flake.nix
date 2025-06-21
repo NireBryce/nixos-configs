@@ -76,7 +76,7 @@
     inputs = inputs;                               # move inputs into this scope (I think)
     
 
-    # nire-durandal (workstation)
+    # nire-durandal (workstation) 
     #   `sudo nixos-rebuild switch --flake .#nire-durandal`
     #   `nh os switch --hostname nire-durandal ~/nixos/`
     nixosConfigurations."nire-durandal" = inputs.nixpkgs.lib.nixosSystem 
