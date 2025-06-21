@@ -1,7 +1,12 @@
 {
+  nixConfig = {
+    # abort-on-warn = true;
+    extra-experimental-features = [ "pipe-operators" ];
+    # allow-import-from-derivation = false;
+  };
   inputs = {
   # 23.11
-    nixpkgs-stable.url                          = "github:NixOS/nixpkgs/nixos-23.11";
+    # nixpkgs-stable.url                          = "github:NixOS/nixpkgs/nixos-23.11";
   # Unstable
     # nixpkgs.url                                 = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs.url                                 = "github:NixOS/nixpkgs/nixpkgs-unstable"; # TODO: this is a YOLO fix for https://github.com/nix-community/home-manager/issues/5991,  I have already spent too much time on this
@@ -35,6 +40,7 @@
   # populate nix index
     nix-index-database.url                      = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows   = "nixpkgs";
+    
 
   # plasma manager
     plasma-manager.url                          = "github:nix-community/plasma-manager";
@@ -42,12 +48,14 @@
   #Stylix
     # stylix.url                                  = "github:danth/stylix";
   
-    haumea.url = "github:nix-community/haumea/v0.2.2"; #TODO: figure out haumea update schedule
-    haumea.inputs.nixpkgs.follows = "nixpkgs";
+  # import-tree
+    import-tree.url = "github:vic/import-tree";
+    
   };
 
   outputs = {
     self,
+    import-tree,
     nixpkgs,
     #nixpkgs-stable,                                         # https://nixos-and-flakes.thiscute.world/nixos-with-flakes/downgrade-or-upgrade-packages
     plasma-manager,
@@ -59,46 +67,49 @@
     jovian,
     impermanence,
     sops-nix,
-    haumea,
     ...
-  } @ inputs: 
+  } @ inputs:
   {
+    debug = true;
     overlays    = import ./___overlays {inherit inputs;};
-    hardware    = import nixos-hardware;
-    inputs = inputs;                               # send inputs to modules (is this actually the right description?)
+    hardware    = import nixos-hardware;           # needed for something in nixos hardware
+    inputs = inputs;                               # move inputs into this scope (I think)
     
-    # nire-durandal (workstation)
+
+    # nire-durandal (workstation) 
     #   `sudo nixos-rebuild switch --flake .#nire-durandal`
     #   `nh os switch --hostname nire-durandal ~/nixos/`
-    nixosConfigurations."nire-durandal"     = nixpkgs.lib.nixosSystem {
-      specialArgs = inputs;
-      system      = "x86_64-linux";
-      modules     = [
-        ./system-config/nire-durandal-configuration.nix
-        nix-index-database.nixosModules.nix-index
-        # This lets us flatten 'programs' configs into a single file, I hope.
-        
-        # nixos-hardware.nixosModules.gigabyte-b550 # TODO: enable this when https://github.com/NixOS/nixos-hardware/pull/1394 goes through
-        # inputs.nixos-hardware.nixosModules.b550 # TODO: fix flake on nixos-hardware repo
-        
-        # inputs.musnix.nixosModules.musnix
-        # inputs.stylix.nixosModules.stylix
-        
-        # TODO: home manager merge
-      ];
+    nixosConfigurations."nire-durandal" = inputs.nixpkgs.lib.nixosSystem 
+    {
+        specialArgs = inputs;
+        modules     = [
+            ./hosts/nire-durandal-configuration.nix
+            ./___modules/linux-crisis-utilities.nix
+            nix-index-database.nixosModules.nix-index
+        ];
     };
     #   `home-manager switch --flake .#elly@nire-durandal`
-    #   `nh home switch --configuration elly@nire-durandal ~/nixos/`
-    homeConfigurations."elly@nire-durandal" = home-manager.lib.homeManagerConfiguration {
-      pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
-        system = "x86_64-linux";
-        config = { allowUnfree = true; };
-      };
-      extraSpecialArgs  = inputs;                           # Pass flake inputs to our config
-      modules           = [
-        plasma-manager.homeManagerModules.plasma-manager
-        ./home-manager/user-elly/home-nire-durandal.nix  # home manager entrypoint
-      ];
+    #   `nh home switch --configuration elly-in-nire-durandal ~/nixos/`
+    homeConfigurations."nire-durandal-hm-elly" = home-manager.lib.homeManagerConfiguration {
+        pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
+          system = "x86_64-linux";
+          config = { allowUnfree = true; };
+        };
+        extraSpecialArgs  = {
+            inherit inputs;
+        };
+        modules           = [
+            { imports = [ 
+                (inputs.import-tree ./home-manager/plasma-manager)
+                (inputs.import-tree ./home-manager/user-elly)
+                (inputs.import-tree ./home-manager/window-manager/kde)
+              ];
+              home.stateVersion        = "22.11"; 
+              home.username            = "elly";
+              home.homeDirectory       = "/home/elly";
+            }
+            plasma-manager.homeManagerModules.plasma-manager
+        ];
     };
   
 
@@ -109,7 +120,8 @@
       specialArgs = inputs;                                 # send inputs to modules (is this actually the right description?)
       system      = "x86_64-linux";
       modules     = [
-        ./system-config/nire-tenacity-configuration.nix
+        ./hosts/nire-tenacity-configuration.nix
+        ./___modules/linux-crisis-utilities.nix
         nix-index-database.nixosModules.nix-index
         # TODO: stylix
         # jovian.nixosModules.jovian
@@ -118,91 +130,30 @@
     };
   # `home-manager switch --flake .#elly@nire-tenacity`
   # `nh home switch --configuration elly@nire-tenacity ~/nixos/`
-    homeConfigurations."elly@nire-tenacity" = home-manager.lib.homeManagerConfiguration {
+    homeConfigurations."nire-tenacity-hm-elly" = home-manager.lib.homeManagerConfiguration {
       pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
         system = "x86_64-linux";
         config = { allowUnfree = true; };
       };
       extraSpecialArgs  = inputs;                           # Pass flake inputs to our config
       modules           = [
-        plasma-manager.homeManagerModules.plasma-manager
-        ./home-manager/user-elly/home-nire-tenacity.nix  # home manager entrypoint
-      ];
-    };
-
-
-  # nire-lysithea (macbook)
-    darwinConfigurations."nire-lysithea"     = darwin.lib.darwinSystem {
-      specialArgs = { inherit inputs ; };
-      system      = "aarch64-darwin";
-      modules     = [
-        ./system-config/nire-lysithea-configuration.nix
-        # nix-index-database.darwinModules.nix-index
-      
-        # TODO: stylix
-        # inputs.stylix.darwinModules.stylix
+          { imports = [ 
+                (inputs.import-tree ./home-manager/plasma-manager)
+                (inputs.import-tree ./home-manager/user-elly)
+                (inputs.import-tree ./home-manager/window-manager/kde)
+              ];
+              home.stateVersion        = "22.11"; 
+              home.username            = "elly";
+              home.homeDirectory       = "/home/elly";
+          }
+          plasma-manager.homeManagerModules.plasma-manager
         
-        home-manager.darwinModules.home-manager 
-        {
-          home-manager = { 
-            users.elly = import ./home-manager/user-elly/home-nire-lysithea.nix;
-          };
-          users.users.elly.home = "/Users/elly";
-        }
-
-        # nix-index-database.hmModules.nix-index
-        # { programs.nix-index-database.comma.enable = true; }
-        # todo: fix this
-
-      ];
-    # Expose the package set, including overlays, for convenience.
-    # TODO: fixme
-      #  darwinPackages = self.darwinConfigurations."nire-lysithea".pkgs;
-    };
-  # elly@nire-lysithea
-  #  homeConfigurations."elly@nire-lysithea.local" = home-manager.lib.homeManagerConfiguration {
-  #     pkgs = import nixpkgs {
-  #       system = "aarch64-darwin";
-  #       config = { 
-  #         allowUnfree = true; 
-  #         useGlobalPkgs   = true;
-  #         useUserPackages = true; 
-  #       };
-  #     };
-  #     extraSpecialArgs = inputs;
-  #     modules = [
-  #       ./home-manager/user-elly/home-nire-lysithea.nix     # Elly home manager config
-  #       nix-index-database.hmModules.nix-index
-  #         { programs.nix-index-database.comma.enable = true; }
-  #     ];
-      
-  #   };
-
-  # nire-galatea (thinkpad)
-  # `sudo nixos-rebuild switch --flake .#nire-galatea`
-  # `nh os switch --hostname nire-galatea ~/nixos/`
-    nixosConfigurations."nire-galatea"     = nixpkgs.lib.nixosSystem {
-      specialArgs = inputs;     # send inputs to modules (is this true?)
-      system      = "x86_64-linux";
-      modules     = [
-        ./system-config/hosts/nire-galatea/_host-nire-galatea.config.nix
-        nix-index-database.nixosModules.nix-index
-        
-      ];
-    };
-  # `home-manager switch --flake .#elly@nire-galatea`
-  # `nh home switch --configuration elly@nire-galatea ~/nixos/`
-    homeConfigurations."elly@nire-galatea" = home-manager.lib.homeManagerConfiguration {
-      pkgs              = import nixpkgs {              # Home manger requires a pkgs instance
-        system = "x86_64-linux";
-        config = { allowUnfree = true; };
-      };
-      extraSpecialArgs  = inputs;                       # Pass flake inputs to our config
-      modules           = [
-        ./home-manager/user-elly/home-nire-galatea.nix  # Elly's home manager config
       ];
     };
   };
+
+
+  # _module.args.rootPath = ./.;
 }
 
 # NOTE: for nix-index to work with flake installs, you must `nix profile install` something

@@ -1,5 +1,5 @@
 { 
-    sops-nix, 
+    sops-nix,
     config,
     pkgs,
     ...

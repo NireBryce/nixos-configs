@@ -1,9 +1,0 @@
-{
-    ...
-}:
- 
-{
-    imports = [
-        ./wayland.nix
-    ];
-}
