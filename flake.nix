@@ -74,7 +74,7 @@
     overlays    = import ./___overlays {inherit inputs;};
     hardware    = import nixos-hardware;           # needed for something in nixos hardware
     inputs = inputs;                               # move inputs into this scope (I think)
-    
+    util = (import-tree ./util-nix);
 
     # nire-durandal (workstation) 
     #   `sudo nixos-rebuild switch --flake .#nire-durandal`
@@ -95,9 +95,7 @@
           system = "x86_64-linux";
           config = { allowUnfree = true; };
         };
-        extraSpecialArgs  = {
-            inherit inputs;
-        };
+        extraSpecialArgs  = inputs; # this might need to be = { inherit inputs; }
         modules           = [
             { imports = [ 
                 (inputs.import-tree ./home-manager/plasma-manager)
