@@ -1,13 +1,13 @@
 {
     pkgs,
     lib,
-    inputs,
+    nixos-hardware,
     ...
 }:
 
 {
     imports = [ 
-            inputs.nixos-hardware.nixosModules.common-gpu-amd 
+            nixos-hardware.nixosModules.common-gpu-amd 
         ];
         
     environment.systemPackages = with pkgs; [ 

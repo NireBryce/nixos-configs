@@ -1,5 +1,5 @@
 { 
-    inputs, 
+    sops-nix,
     config,
     pkgs,
     ...
@@ -16,7 +16,7 @@ let
 
 in {
     imports     = [
-        inputs.sops-nix.nixosModules.sops
+        sops-nix.nixosModules.sops
     ];
 
     environment.systemPackages = with pkgs; [

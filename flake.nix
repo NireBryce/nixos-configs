@@ -81,9 +81,7 @@
     #   `nh os switch --hostname nire-durandal ~/nixos/`
     nixosConfigurations."nire-durandal" = inputs.nixpkgs.lib.nixosSystem 
     {
-        specialArgs = {
-            inherit inputs;
-        };
+        specialArgs = inputs;
         modules     = [
             ./hosts/nire-durandal-configuration.nix
             ./___modules/linux-crisis-utilities.nix

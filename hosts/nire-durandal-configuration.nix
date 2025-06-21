@@ -1,16 +1,16 @@
 { 
-    inputs,
+    import-tree
     ... 
 }:
 {
     imports = [
-        (inputs.import-tree ./nire-durandal)
-        (inputs.import-tree ../system-config/users/elly)
-        (inputs.import-tree ../system-config/hw/gpu/amd)
-        (inputs.import-tree ../system-config/hw/cpu/amd)
-        (inputs.import-tree ../system-config/common)
-        (inputs.import-tree ../system-config/gaming)
-        (inputs.import-tree ../system-config/wm/kde)
+        (import-tree ./nire-durandal)
+        (import-tree ../system-config/users/elly)
+        (import-tree ../system-config/hw/gpu/amd)
+        (import-tree ../system-config/hw/cpu/amd)
+        (import-tree ../system-config/common)
+        (import-tree ../system-config/gaming)
+        (import-tree ../system-config/wm/kde)
 
     # impermanence
     # ____________________________________________________ 

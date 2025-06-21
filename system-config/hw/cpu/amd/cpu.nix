@@ -1,8 +1,8 @@
 { 
-    inputs,
+    nixos-hardware,
     ...
 }:
 
 {
-    imports = [ inputs.nixos-hardware.nixosModules.common-cpu-amd ];
+    imports = [ nixos-hardware.nixosModules.common-cpu-amd ];
 }
