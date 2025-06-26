@@ -83,9 +83,7 @@
       hardware    = import nixos-hardware;           # needed for something in nixos hardware
       inputs = inputs;                               # move inputs into this scope (I think)
 
-      # nire-durandal (workstation) 
-      #   `sudo nixos-rebuild switch --flake .#nire-durandal`
-      #   `nh os switch --hostname nire-durandal ~/nixos/`
+      # nire-durandal (workstation) `nh os switch --hostname nire-durandal ~/nixos/` `sudo nixos-rebuild switch --flake .#nire-durandal`
       nixosConfigurations."nire-durandal" = inputs.nixpkgs.lib.nixosSystem {
           specialArgs = inputs;
           modules     = [
@@ -115,8 +113,7 @@
             }
           ];
       };
-      #   `home-manager switch --flake .#elly@nire-durandal`
-      #   `nh home switch --configuration elly-in-nire-durandal ~/nixos/`
+      # `nh home switch --configuration elly-in-nire-durandal ~/nixos/` `home-manager switch --flake .#elly@nire-durandal`
       homeConfigurations."nire-durandal-hm-elly" = home-manager.lib.homeManagerConfiguration {
           pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
             system = "x86_64-linux";
@@ -140,9 +137,7 @@
       };
     
 
-      # nire-tenacity (GPD Win Mini 25)
-      # `sudo nixos-rebuild switch --flake .#nire-tenacity`
-      # `nh os switch --hostname nire-tenacity ~/nixos/`
+      # nire-tenacity (GPD Win Mini 25). `nh os switch --hostname nire-tenacity ~/nixos/` `sudo nixos-rebuild switch --flake .#nire-tenacity`
       nixosConfigurations."nire-tenacity"     = nixpkgs.lib.nixosSystem {
         specialArgs = inputs;                                 # send inputs to modules (is this actually the right description?)
         system      = "x86_64-linux";
@@ -173,8 +168,7 @@
         ];
       };
 
-        # `home-manager switch --flake .#elly@nire-tenacity`
-        # `nh home switch --configuration elly@nire-tenacity ~/nixos/`
+        # `nh home switch --configuration elly@nire-tenacity ~/nixos/` `home-manager switch --flake .#elly@nire-tenacity`
         homeConfigurations."nire-tenacity-hm-elly" = home-manager.lib.homeManagerConfiguration {
             pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
               system = "x86_64-linux";
@@ -182,21 +176,22 @@
             };
             extraSpecialArgs  = inputs;                           # Pass flake inputs to our config
             modules           = [
-                { 
-                    home.stateVersion        = "22.11"; 
-                    home.username            = "elly";
-                    home.homeDirectory       = "/home/elly";
-                    imports = [ 
-                        (inputs.import-tree ./home-manager/plasma-manager)
-                        (inputs.import-tree ./home-manager/user-elly)
-                        (inputs.import-tree ./home-manager/window-manager/kde)
-                    ];
-                }
-                (import-tree ./util/nix) # utility functions
+                { home = { 
+                    stateVersion        = "22.11"; 
+                    username            = "elly";
+                    homeDirectory       = "/home/elly";
+                };}
+                { imports = [ 
+                    (inputs.import-tree ./home-manager/plasma-manager)
+                    (inputs.import-tree ./home-manager/user-elly)
+                    (inputs.import-tree ./home-manager/window-manager/kde)
+                ];}
+
                 plasma-manager.homeManagerModules.plasma-manager
+                (import-tree ./util/nix) # utility functions
               
             ];
-      };
+        };
     };
 
 
