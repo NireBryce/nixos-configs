@@ -176,16 +176,18 @@
             };
             extraSpecialArgs  = inputs;                           # Pass flake inputs to our config
             modules           = [
-                { home = { 
+                { 
+                  home = { 
                     stateVersion        = "22.11"; 
                     username            = "elly";
                     homeDirectory       = "/home/elly";
-                };}
-                { imports = [ 
+                };
+                imports = [ 
                     (inputs.import-tree ./home-manager/plasma-manager)
                     (inputs.import-tree ./home-manager/user-elly)
                     (inputs.import-tree ./home-manager/window-manager/kde)
-                ];}
+                ];
+                }
 
                 plasma-manager.homeManagerModules.plasma-manager
                 (import-tree ./util/nix) # utility functions
