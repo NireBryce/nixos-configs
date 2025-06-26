@@ -1,56 +1,62 @@
 {
     nixConfig = {
-      # abort-on-warn = true;
-      extra-experimental-features = [ "pipe-operators" ];
-      # allow-import-from-derivation = false;
+        # abort-on-warn = true;
+        extra-experimental-features = [ "pipe-operators" ];
+        # allow-import-from-derivation = false;
     };
     inputs = {
-    # 23.11
-      # nixpkgs-stable.url                          = "github:NixOS/nixpkgs/nixos-23.11";
     # Unstable
-      # nixpkgs.url                                 = "github:NixOS/nixpkgs/nixos-unstable";
-      nixpkgs.url                                 = "github:NixOS/nixpkgs/nixpkgs-unstable"; # TODO: this is a YOLO fix for https://github.com/nix-community/home-manager/issues/5991,  I have already spent too much time on this
-                                                                                            #* notice that it's nixpkgs.unstable not nixos.unstable 
-
+        # nixpkgs.url
+        #   = "github:NixOS/nixpkgs/nixos-unstable";
+        nixpkgs.url
+            = "github:NixOS/nixpkgs/nixpkgs-unstable"; # TODO: this is a YOLO fix for https://github.com/nix-community/home-manager/issues/5991,  I have already spent too much time on this
     # Darwin
-      darwin.url                                  = "github:LnL7/nix-darwin";
-      darwin.inputs.nixpkgs.follows               = "nixpkgs";
-
+        darwin.url
+          = "github:LnL7/nix-darwin";
+        darwin.inputs.nixpkgs.follows
+          = "nixpkgs";
     # Jovian (steam deck etc)
-      jovian.url                                  = "github:Jovian-Experiments/Jovian-NixOS";
-      jovian.inputs.nixpkgs.follows               = "nixpkgs";
-
+        jovian.url
+          = "github:Jovian-Experiments/Jovian-NixOS";
+        jovian.inputs.nixpkgs.follows
+          = "nixpkgs";
     # Impermanence
-      impermanence.url                            = "github:Nix-community/impermanence";
-
+        impermanence.url
+          = "github:Nix-community/impermanence";
     # secret management
-      sops-nix.url                                = "github:mic92/sops-nix";
-      sops-nix.inputs.nixpkgs.follows             = "nixpkgs";
-      # sops-nix.inputs.nixpkgs-stable.follows      = "nixpkgs";
+        sops-nix.url
+          = "github:mic92/sops-nix";
+        sops-nix.inputs.nixpkgs.follows
+          = "nixpkgs";
+        # sops-nix.inputs.nixpkgs-stable.follows
+        #  = "nixpkgs";
     # Home Manager
-      home-manager.url                            = "github:nix-community/home-manager/master";
-      # home-manager-unstable.url                   = "github:NixOS/nixpkgs/nixos-unstable";
-      home-manager.inputs.nixpkgs.follows         = "nixpkgs";
+        home-manager.url
+          = "github:nix-community/home-manager/master";
+        # home-manager-unstable.url
+        #   = "github:NixOS/nixpkgs/nixos-unstable";
+        home-manager.inputs.nixpkgs.follows
+          = "nixpkgs";
     # NixOS-Hardware (for machine-specific fixes)
-      nixos-hardware.url                          = "github:NixOS/nixos-hardware/master";
-
+        nixos-hardware.url
+          = "github:NixOS/nixos-hardware/master";
     # Musnix
-      musnix.url                                  = "github:musnix/musnix";
-
+        musnix.url                                  
+          = "github:musnix/musnix";
     # populate nix index
-      nix-index-database.url                      = "github:nix-community/nix-index-database";
-      nix-index-database.inputs.nixpkgs.follows   = "nixpkgs";
-      
-
+        nix-index-database.url                      
+          = "github:nix-community/nix-index-database";
+        nix-index-database.inputs.nixpkgs.follows 
+          = "nixpkgs";
     # plasma manager
-      plasma-manager.url                          = "github:nix-community/plasma-manager";
-
+        plasma-manager.url 
+          = "github:nix-community/plasma-manager";
     #Stylix
-      # stylix.url                                  = "github:danth/stylix";
-    
+        # stylix.url
+        #   = "github:danth/stylix";
     # import-tree
-      import-tree.url = "github:vic/import-tree";
-      
+        import-tree.url 
+          = "github:vic/import-tree";
     };
 
     outputs = {
@@ -83,10 +89,30 @@
       nixosConfigurations."nire-durandal" = inputs.nixpkgs.lib.nixosSystem {
           specialArgs = inputs;
           modules     = [
-              (import-tree ./util/nix) # utility functions
-              ./hosts/nire-durandal-configuration.nix
-              ./___modules/linux-crisis-utilities.nix
-              nix-index-database.nixosModules.nix-index
+            {
+              system.stateVersion = "23.11"; # Don't change. https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion
+              networking.hostName = "nire-durandal";
+              
+              imports = 
+              let user = "elly"; host = "nire-durandal"; wm = "kde"; cpu = "amd"; gpu = "amd"; 
+              in 
+              [
+                  (import-tree ./util/nix) # utility functions
+                  nix-index-database.nixosModules.nix-index
+                  ./___modules/linux-crisis-utilities.nix
+                  (import-tree ./hosts/${host})
+                  (import-tree ./system-config/users/${user})
+                  (import-tree ./system-config/hw/gpu/${gpu})
+                  (import-tree ./system-config/hw/cpu/${cpu})
+                  (import-tree ./system-config/common)
+                  (import-tree ./system-config/gaming)
+                  (import-tree ./system-config/wm/${wm})
+                  # impermanence
+                  # |- /!!\ WARN: this will delete /root on boot /!!\ -|
+                  ./system-config/impermanence/_WARN.impermanence.nix
+              ];
+
+            }
           ];
       };
       #   `home-manager switch --flake .#elly@nire-durandal`
@@ -99,14 +125,15 @@
           extraSpecialArgs  = inputs; # this might need to be = { inherit inputs; }
           modules           = [
               (import-tree ./util/nix) # utility functions
-              { imports = [ 
+              { 
+                home.stateVersion        = "22.11"; 
+                home.username            = "elly";
+                home.homeDirectory       = "/home/elly";
+                imports = [ 
                   (inputs.import-tree ./home-manager/plasma-manager)
                   (inputs.import-tree ./home-manager/user-elly)
                   (inputs.import-tree ./home-manager/window-manager/kde)
                 ];
-                home.stateVersion        = "22.11"; 
-                home.username            = "elly";
-                home.homeDirectory       = "/home/elly";
               }
               plasma-manager.homeManagerModules.plasma-manager
           ];
@@ -119,39 +146,56 @@
       nixosConfigurations."nire-tenacity"     = nixpkgs.lib.nixosSystem {
         specialArgs = inputs;                                 # send inputs to modules (is this actually the right description?)
         system      = "x86_64-linux";
-        modules     = [
-          (import-tree ./util/nix) # utility functions
-          ./hosts/nire-tenacity-configuration.nix
-          ./___modules/linux-crisis-utilities.nix
-          nix-index-database.nixosModules.nix-index
-          # TODO: stylix
-          # jovian.nixosModules.jovian
-          jovian.nixosModules.default
+        modules = [
+            {
+              system.stateVersion = "25.05"; # Don't change. https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion
+              networking.hostName = "nire-tenacity";
+              imports =
+              let user = "elly"; host = "nire-tenacity"; wm = "gaming-handheld"; cpu = "amd"; gpu = "amd"; 
+              in
+              [
+                ./___modules/linux-crisis-utilities.nix
+                (import-tree ./util/nix) # utility functions
+                nix-index-database.nixosModules.nix-index
+                jovian.nixosModules.default
+                
+                (import-tree ./hosts/${host})
+                (import-tree ./system-config/users/${user})
+                (import-tree ./system-config/hw/gpu/${gpu})
+                (import-tree ./system-config/hw/cpu/${cpu})
+                (import-tree ./system-config/common)
+                (import-tree ./system-config/gaming)
+                (import-tree ./system-config/wm/${wm})
+                # |- /!!\ WARN: this will delete /root on boot /!!\ -|
+                ./system-config/impermanence/_WARN.impermanence.nix
+              ];
+            }
         ];
       };
 
-      # `home-manager switch --flake .#elly@nire-tenacity`
-      # `nh home switch --configuration elly@nire-tenacity ~/nixos/`
-      homeConfigurations."nire-tenacity-hm-elly" = home-manager.lib.homeManagerConfiguration {
-        pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
-          system = "x86_64-linux";
-          config = { allowUnfree = true; };
-        };
-        extraSpecialArgs  = inputs;                           # Pass flake inputs to our config
-        modules           = [
-            (import-tree ./util/nix) # utility functions
-            { imports = [ 
-                  (inputs.import-tree ./home-manager/plasma-manager)
-                  (inputs.import-tree ./home-manager/user-elly)
-                  (inputs.import-tree ./home-manager/window-manager/kde)
-                ];
-                home.stateVersion        = "22.11"; 
-                home.username            = "elly";
-                home.homeDirectory       = "/home/elly";
-            }
-            plasma-manager.homeManagerModules.plasma-manager
-          
-        ];
+        # `home-manager switch --flake .#elly@nire-tenacity`
+        # `nh home switch --configuration elly@nire-tenacity ~/nixos/`
+        homeConfigurations."nire-tenacity-hm-elly" = home-manager.lib.homeManagerConfiguration {
+            pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
+              system = "x86_64-linux";
+              config = { allowUnfree = true; };
+            };
+            extraSpecialArgs  = inputs;                           # Pass flake inputs to our config
+            modules           = [
+                { 
+                    home.stateVersion        = "22.11"; 
+                    home.username            = "elly";
+                    home.homeDirectory       = "/home/elly";
+                    imports = [ 
+                        (inputs.import-tree ./home-manager/plasma-manager)
+                        (inputs.import-tree ./home-manager/user-elly)
+                        (inputs.import-tree ./home-manager/window-manager/kde)
+                    ];
+                }
+                (import-tree ./util/nix) # utility functions
+                plasma-manager.homeManagerModules.plasma-manager
+              
+            ];
       };
     };
 
