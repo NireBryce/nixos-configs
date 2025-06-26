@@ -1,12 +1,12 @@
 { 
     import-tree,
-    util,
     ... 
 }:
 
 {
     imports = [
-        (util.importRecurseDirectories ./nire-durandal)
+        # (util.importRecurseDirectories ./nire-durandal)
+        (import-tree ./nire-durandal)
         (import-tree ../system-config/users/elly)
         (import-tree ../system-config/hw/gpu/amd)
         (import-tree ../system-config/hw/cpu/amd)
