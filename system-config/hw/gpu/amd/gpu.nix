@@ -7,8 +7,8 @@
 
 {
     imports = [ 
-            nixos-hardware.nixosModules.common-gpu-amd 
-        ];
+      nixos-hardware.nixosModules.common-gpu-amd 
+    ];
         
     environment.systemPackages = with pkgs; [ 
         mesa                        # todo: document
@@ -29,6 +29,9 @@
     hardware.graphics.enable32Bit   = true;
     hardware.graphics.extraPackages = with pkgs; [
         libva-utils
+        rocm-opencl-icd
+        rocm-runtime-ext
+        
     ];
     
 # AMD
