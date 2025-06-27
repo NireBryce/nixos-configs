@@ -177,15 +177,15 @@
             extraSpecialArgs  = inputs;                           # Pass flake inputs to our config
             modules           = [
                 { 
-                  home = { 
-                    stateVersion        = "22.11"; 
-                    username            = "elly";
-                    homeDirectory       = "/home/elly";
-                };
+                    home = { 
+                      stateVersion        = "22.11"; 
+                      username            = "elly";
+                      homeDirectory       = "/home/elly";
+                    };
                 imports = [ 
-                    (inputs.import-tree ./home-manager/plasma-manager)
-                    (inputs.import-tree ./home-manager/user-elly)
-                    (inputs.import-tree ./home-manager/window-manager/kde)
+                    (import-tree ./home-manager/plasma-manager)
+                    (import-tree ./home-manager/user-elly)
+                    (import-tree ./home-manager/window-manager/kde)
                 ];
                 }
 
