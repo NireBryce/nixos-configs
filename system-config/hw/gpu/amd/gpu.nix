@@ -29,10 +29,9 @@
     hardware.graphics.enable32Bit   = true;
     hardware.graphics.extraPackages = with pkgs; [
         libva-utils
-        rocm-opencl-icd
-        rocm-runtime-ext
-        
+        rocmPackages.clr.icd # https://nixos.org/manual/nixos/stable/#sec-gpu-accel-opencl-amd
     ];
+
     
 # AMD
     # AMD vulkan drivers
