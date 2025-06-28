@@ -2,13 +2,14 @@
 {
   pkgs,
   lib,
+  import-tree,
   ...
 }:
 
 {
   imports = [ 
-    
-    
+    ../home-manager/user-elly/home-config/shell-configs/zsh/zsh.nix
+    (import-tree ../home-manager/user-elly/home-config/packages/shell-util)
   ];
   home-manager.backupFileExtension = "backup";
   # Used for backwards compatibility, please read the changelog before changing: `darwin-rebuild changelog`
@@ -41,10 +42,6 @@
   #? zsh is handled through home-manager
     programs.zsh.enable = true;
     programs.zsh.enableCompletion = lib.mkForce false;  # unless disabled, home-manager causes an extra compaudit
-  
-    programs.bash.interactiveShellInit = ''
-        ${pkgs.inshellisense}/bin/inshellisense;
-    '';
 
     fonts.packages = with pkgs; [
         nerd-fonts.fira-code

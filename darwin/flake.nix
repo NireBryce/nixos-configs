@@ -26,7 +26,8 @@
   # populate nix index
     nix-index-database.url                      = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows   = "nixpkgs";
-
+  
+    import-tree.url                             = "github:vic/import-tree";
     
     
   };
@@ -38,6 +39,7 @@
     darwin,
     home-manager,
     nix-index-database,
+    import-tree,
     ...
   } @ inputs: 
   {
