@@ -2,15 +2,15 @@
 {
   pkgs,
   lib,
-  import-tree,
   ...
 }:
 
 {
   imports = [ 
-    ../home-manager/user-elly/home-config/shell-configs/zsh/zsh.nix
   ];
-  home-manager.backupFileExtension = "backup";
+
+  system.primaryUser = "elly"; # user used for darwin-rebuild
+
   # Used for backwards compatibility, please read the changelog before changing: `darwin-rebuild changelog`
     system.stateVersion = 4;
     nixpkgs.hostPlatform = "aarch64-darwin";
@@ -56,11 +56,9 @@
             inshellisense                       # menu-complete and auto-suggest
             starship                            # theming
             blesh                               # if bash were zsh
-        atuin
         coreutils                                     # coreutils
         gcc                                           # gcc
         git                                           # git
-        micro                                         # micro
         stdenv                                        # stdenv
         wget                                          # wget
         curl                                          # curl
@@ -138,7 +136,7 @@
         kitty-img
 
         broot
-        fzf
+        
         
     ];
     homebrew = {
