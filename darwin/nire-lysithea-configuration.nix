@@ -9,7 +9,6 @@
 {
   imports = [ 
     ../home-manager/user-elly/home-config/shell-configs/zsh/zsh.nix
-    (import-tree ../home-manager/user-elly/home-config/packages/shell-util)
   ];
   home-manager.backupFileExtension = "backup";
   # Used for backwards compatibility, please read the changelog before changing: `darwin-rebuild changelog`
@@ -137,6 +136,9 @@
 
         bat
         kitty-img
+
+        broot
+        fzf
         
     ];
     homebrew = {
