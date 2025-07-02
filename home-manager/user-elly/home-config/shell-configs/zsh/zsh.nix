@@ -40,9 +40,12 @@ let zshPluginRequiresList = with pkgs; [
 ];
 in
 {
+    imports = [ 
+        ../../shellAliases.nix 
+        ];
     home.file."./.config/F-Sy-H".source = ./config/zsh-f-s-highlight-themes;
     home.packages = zshPluginRequiresList;
-
+    
     programs.zsh = let               
         p10k_cfg        = lib.fileContents ./config/zsh-powerlevel10k/.p10k.zsh;
         p10k_zshrc      = lib.fileContents ./config/p10k.zsh;

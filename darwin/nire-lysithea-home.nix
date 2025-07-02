@@ -27,7 +27,13 @@ in {
     #! Do not edit. To figure this out (in-case it changes) you can comment out the line and see what version it expected.
     home.stateVersion        = "22.11"; 
 
-
+    programs.zoxide = {      
+        enable                  = true;
+        enableZshIntegration    = true;
+        enableBashIntegration   = true;
+        enableFishIntegration   = true;
+        options                 = [ "--cmd x" ];  # `zi` alias interferes with z-shell/zi
+    };
 
     programs.kitty = {
         enable  = true;
