@@ -14,5 +14,6 @@
         EZA_COLORS              = "$(${pkgs.vivid}/bin/vivid generate dracula)";
         STARSHIP_CONFIG         = "$HOME/.config/starship.toml";
         STARSHIP_CACHE          = "$HOME/.cache/starship";
+        PYTHON                  = "PYTHON";
     };
 }

@@ -40,9 +40,7 @@ let zshPluginRequiresList = with pkgs; [
 ];
 in
 {
-    imports = [ 
-        ../../shellAliases.nix 
-        ];
+
     home.file."./.config/F-Sy-H".source = ./config/zsh-f-s-highlight-themes;
     home.packages = zshPluginRequiresList;
     

@@ -14,8 +14,14 @@ in {
         "${home-manager-user}/home-config/git-config/git-settings-elly.nix"
         "${home-manager-user}/home-config/shell-configs/zsh/zsh.nix"
         "${home-manager-user}/home-config/nix-settings.nix"
+        "${home-manager-user}/home-config/sessionPaths.nix"
+        "${home-manager-user}/home-config/sessionVariables.nix"
+        "${home-manager-user}/home-config/shellAliases.nix"
+        "${home-manager-user}/home-config/shellAbbrs.nix"
     ];
-    
+    home.sessionPath = [
+        "/Users/elly/.local/bin:$PATH"
+    ];
   ## Defaults
     nixpkgs.config = {
         allowUnfree          =     true;            # Disable if you don't want unfree packages
