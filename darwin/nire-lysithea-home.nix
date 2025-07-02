@@ -18,7 +18,11 @@ in {
         "${home-manager-user}/home-config/sessionVariables.nix"
         "${home-manager-user}/home-config/shellAliases.nix"
         "${home-manager-user}/home-config/shellAbbrs.nix"
+        
     ];
+
+    # TODO: mvpn keeps reinstalling itself
+
     home.sessionPath = [
         "/Users/elly/.local/bin:$PATH"
     ];

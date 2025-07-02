@@ -6,8 +6,7 @@
 }:
 
 {
-  imports = [ 
-  ];
+
 
   system.primaryUser = "elly"; # user used for darwin-rebuild
 
@@ -76,6 +75,7 @@
     # nix dev
       nixfmt
       nil
+      nixd
     # python dev
       uv                            # `pyenv` but it's actually good
       ruff                          # python linter                             https://github.com/astral-sh/ruff
