@@ -1,7 +1,7 @@
 # desc = "Teamspeak 3";
 { pkgs, ... }:
 let packageList = with pkgs; [
-    teamspeak_client
+    teamspeak3
 ];
 in
 {
@@ -10,9 +10,9 @@ in
 
 
 # Potentially useful dead code:
-        # programs.teamspeak_client = {
+        # programs.teamspeak3 = {
         #     enable = true;
-        #     teamspeak_client.override {
+        #     teamspeak3.override {
         #       ts3Plugins = [ teamspeak-pluginsdk.test_plugin ];
         #     }
         # };
