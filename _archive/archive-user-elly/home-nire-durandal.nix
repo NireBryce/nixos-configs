@@ -20,7 +20,7 @@ subConfigList = [
     "${_hmUserDir}/window-manager/${_windowManager}"
 
     "${_hmUserDir}/packages/"
-    "${_flakeDir}/home-manager/plasma-manager"
+
 
 ];
 in 

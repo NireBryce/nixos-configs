@@ -48,9 +48,6 @@
           = "github:nix-community/nix-index-database";
         nix-index-database.inputs.nixpkgs.follows 
           = "nixpkgs";
-    # plasma manager
-        plasma-manager.url 
-          = "github:nix-community/plasma-manager";
     #Stylix
         # stylix.url
         #   = "github:danth/stylix";
@@ -64,7 +61,6 @@
       import-tree,
       nixpkgs,
       #nixpkgs-stable,                                         # https://nixos-and-flakes.thiscute.world/nixos-with-flakes/downgrade-or-upgrade-packages
-      plasma-manager,
       darwin,
       home-manager,
       nixos-hardware,
@@ -127,12 +123,10 @@
                 home.username            = "elly";
                 home.homeDirectory       = "/home/elly";
                 imports = [ 
-                  (inputs.import-tree ./home-manager/plasma-manager)
                   (inputs.import-tree ./home-manager/user-elly)
                   (inputs.import-tree ./home-manager/window-manager/kde)
                 ];
               }
-              plasma-manager.homeManagerModules.plasma-manager
           ];
       };
     
@@ -183,13 +177,11 @@
                       homeDirectory       = "/home/elly";
                     };
                 imports = [ 
-                    (import-tree ./home-manager/plasma-manager)
                     (import-tree ./home-manager/user-elly)
                     (import-tree ./home-manager/window-manager/kde)
                 ];
                 }
 
-                plasma-manager.homeManagerModules.plasma-manager
                 (import-tree ./util/nix) # utility functions
               
             ];
