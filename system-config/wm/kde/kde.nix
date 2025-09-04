@@ -35,7 +35,8 @@
         kdePackages.qttools
         kdePackages.partitionmanager
         kdePackages.kcharselect       # symbol picker, may need to be kdePackages.kcharselect
-        polonium # tiling wm
+        # polonium # tiling wm
+        kdePackages.krohnkite
     
     ];
 
