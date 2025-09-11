@@ -35,10 +35,34 @@
         kdePackages.qttools
         kdePackages.partitionmanager
         kdePackages.kcharselect       # symbol picker, may need to be kdePackages.kcharselect
-        # polonium # tiling wm
-        kdePackages.krohnkite
+        polonium # tiling wm
+        kdePackages.krohnkite # other tiling wm
+
     
     ];
+
+    # Krohnkite binds:
+    # decrease priority: meta-ctrl-+
+    # increase priority: meta-ctrl-shift-+
+    # floating layout: meta-alt-F
+    # focus down: meta+k
+    # focus up: meta-i
+    # focus left: meta-j
+    # focus right: meta-l
+    # focus next: meta-right
+    # focus previous: meta-left
+    # grow height: meta-Y
+    # grow width: meta-ctrl-y
+    # shrink height: meta-h
+    # shrink width: meta-ctrl-h
+    # move is done with meta-alt-ijkl
+    # rotate: meta R, rotate part: meta-shift-r
+    # set master: meta-return
+    # shrink height: meta-ctrl-h
+    # tile layout: meta-T
+    # toggle dock: meta-shift-d
+    # toggle float: meta-f
+    # toggle float all: meta-shift-F
 
     environment.sessionVariables = {
         GTK_USE_PORTAL = 1;  # TODO: what does this do
