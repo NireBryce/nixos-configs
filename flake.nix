@@ -75,7 +75,7 @@
     {
       # lib.util = import ./util-nix/importRecurseDirectories.nix;
       debug = true;
-      overlays    = import ./___overlays {inherit inputs;};
+      overlays    = import ./misc/overlays {inherit inputs;};
       hardware    = import nixos-hardware;           # needed for something in nixos hardware
       inputs = inputs;                               # move inputs into this scope (I think)
 
@@ -91,9 +91,9 @@
               let user = "elly"; host = "nire-durandal"; wm = "kde"; cpu = "amd"; gpu = "amd"; 
               in 
               [
-                  (import-tree ./util/nix) # utility functions
+                  (import-tree ./misc/util/nix) # utility functions
                   nix-index-database.nixosModules.nix-index
-                  ./___modules/linux-crisis-utilities.nix
+                  ./misc/modules/linux-crisis-utilities.nix
                   (import-tree ./hosts/${host})
                   (import-tree ./system-config/users/${user})
                   (import-tree ./system-config/hw/gpu/${gpu})
@@ -117,7 +117,7 @@
           };
           extraSpecialArgs  = inputs; # this might need to be = { inherit inputs; }
           modules           = [
-              (import-tree ./util/nix) # utility functions
+              (import-tree ./misc/util/nix) # utility functions
               { 
                 home.stateVersion        = "22.11"; 
                 home.username            = "elly";
@@ -143,8 +143,8 @@
               let user = "elly"; host = "nire-tenacity"; wm = "gaming-handheld"; cpu = "amd"; gpu = "amd"; 
               in
               [
-                ./___modules/linux-crisis-utilities.nix
-                (import-tree ./util/nix) # utility functions
+                ./misc/modules/linux-crisis-utilities.nix
+                (import-tree ./misc/util/nix) # utility functions
                 nix-index-database.nixosModules.nix-index
                 jovian.nixosModules.default
                 
@@ -182,7 +182,7 @@
                 ];
                 }
 
-                (import-tree ./util/nix) # utility functions
+                (import-tree ./misc/util/nix) # utility functions
               
             ];
         };

@@ -1,9 +1,0 @@
-#TODO:  need to build the zsh config and confirm nothing broke (currently on laptop)
-
-#TODO: need to continue detangling from zsh configs into nix
-
-#TODO: other dotfiles should be moved into nix
-
-#TODO: consider cutting and running with fish instead of all this zsh work
-
-#TODO: starship config

@@ -47,11 +47,11 @@
        
     
     # Reusable nixos modules you might want to export
-    # nixosModules    = import ./___modules;                  # there are better names for this, but this is de-facto standard
+    # nixosModules    = import ./misc/modules;                  # there are better names for this, but this is de-facto standard
     # homeManagerModules = import ./modules/home-manager
 
     # TODO: actually learn overlays
-    overlays        = import ./___overlays {inherit inputs;};
+    overlays        = import ../misc/overlays {inherit inputs;};
 
   
   

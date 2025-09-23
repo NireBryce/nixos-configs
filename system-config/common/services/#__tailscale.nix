@@ -12,7 +12,7 @@
 #   imports = [
 #     # TODO: fixme
 #     # outputs.nixosModules.tailscale-autoconnect
-#     "${self}/___modules/tailscale-autoconnect.nix"
+#     "./misc/modules/tailscale-autoconnect.nix"
 #   ];
 #   services.tailscaleAutoconnect = {
 #     enable      = true;

@@ -1,9 +1,0 @@
-{ 
-    ... 
-}: 
-{
-    imports = [
-        ./editors-gui.nix
-    ];
-}
-

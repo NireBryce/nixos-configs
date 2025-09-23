@@ -1,9 +1,0 @@
-{ 
-    ... 
-}: 
-{
-    imports = [
-        ./internet-pkgs.nix
-    ];
-}
-
