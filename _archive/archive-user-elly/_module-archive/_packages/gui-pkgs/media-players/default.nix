@@ -1,9 +1,0 @@
-{ 
-    ... 
-}: 
-{
-    imports = [
-        ./media-players.nix
-    ];
-}
-

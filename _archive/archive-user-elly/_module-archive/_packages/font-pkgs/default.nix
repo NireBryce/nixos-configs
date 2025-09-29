@@ -1,9 +1,0 @@
-{
-    ...
-}:
- 
-{
-    imports = [
-        ./font-pkgs.nix
-    ];
-}

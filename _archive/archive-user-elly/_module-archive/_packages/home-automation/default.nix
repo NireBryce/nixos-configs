@@ -1,9 +1,0 @@
-{
-    ...
-}:
- 
-{
-    imports = [
-        ./home-automation.nix
-    ];
-}

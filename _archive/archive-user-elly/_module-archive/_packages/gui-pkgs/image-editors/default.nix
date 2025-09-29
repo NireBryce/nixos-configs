@@ -1,9 +1,0 @@
-{ 
-    ... 
-}: 
-{
-    imports = [
-            ./image-editors.nix
-    ];
-}
-

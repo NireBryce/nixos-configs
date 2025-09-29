@@ -1,9 +1,0 @@
-{ 
-    ... 
-}: 
-{
-    imports = [
-        ./fetch-web.nix
-    ];
-}
-

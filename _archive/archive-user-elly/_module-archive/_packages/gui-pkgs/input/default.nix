@@ -1,9 +1,0 @@
-{ 
-    ... 
-}: 
-{
-    imports = [
-        ./input-pkgs.nix
-    ];
-}
-
