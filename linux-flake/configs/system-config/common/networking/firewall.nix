@@ -18,10 +18,13 @@
       ## UDP
         allowedUDPPorts = [                            
             5353                                        # mdns
+            24470                                       # planetside2
+            25410                                       # planetside2
             # config.services.tailscale.port              # todo: move to tailscale-autoconnect
         ];
         allowedUDPPortRanges = [
-            { from = 1714; to = 1764; }                 # kde-connect UDP   
+            { from =  1714; to =  1764; }               # kde-connect UDP
+            { from = 20040; to = 20199; }               # planetside2
         ];
     
         trustedInterfaces = [ 
