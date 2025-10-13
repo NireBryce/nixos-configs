@@ -11,7 +11,7 @@
         dedicatedServer.openFirewall            = true;     # Open ports in the firewall for Source Dedicated Server
         gamescopeSession.enable                 = true;     # third party gamescope compositor
         localNetworkGameTransfers.openFirewall  = true;
-        steam.protontricks.enable               = true;
+        protontricks.enable                     = true;
         extraCompatPackages = with pkgs; [ 
             steamtinkerlaunch
         ];
