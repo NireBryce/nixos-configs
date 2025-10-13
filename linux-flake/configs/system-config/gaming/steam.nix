@@ -7,9 +7,11 @@
     #* steam - (fhs)
     programs.steam = {
         enable = true;
-        remotePlay.openFirewall      = true;            # Open ports in the firewall for Steam Remote Play
-        dedicatedServer.openFirewall = true;            # Open ports in the firewall for Source Dedicated Server
-        gamescopeSession.enable      = true;            # third party gamescope compositor
+        remotePlay.openFirewall                 = true;     # Open ports in the firewall for Steam Remote Play
+        dedicatedServer.openFirewall            = true;     # Open ports in the firewall for Source Dedicated Server
+        gamescopeSession.enable                 = true;     # third party gamescope compositor
+        localNetworkGameTransfers.openFirewall  = true;
+        steam.protontricks.enable               = true;
         extraCompatPackages = with pkgs; [ 
             steamtinkerlaunch
         ];
@@ -18,6 +20,8 @@
     environment.systemPackages = with pkgs; [
         protonup-qt 
         protontricks
+        mangohud
+        steamtinkerlaunch
         # TODO: SteamTinkerLaunch needs these and they aren't in the package?
         xxd
         xdotool
@@ -25,8 +29,13 @@
         yad
     ];
 
+
+
     # todo: fix steamtinkerlaunch
-    #* fix steamtinkerlaunch compatability tool
+    # https://gist.github.com/jakehamilton/632edeb9d170a2aedc9984a0363523d3
+
+    # #? This fixes the compatability tool issue, in theory
+    # #? it may have been fixed by including steamtinkerlaunch in extraCompatPackages
     # systemd.services.fixSteamTinkerLaunchComaptLink = {
     #     enable = true;
     #     after = [ "network.target" ];
