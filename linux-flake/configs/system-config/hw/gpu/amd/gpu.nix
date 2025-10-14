@@ -32,9 +32,4 @@
         rocmPackages.clr.icd # https://nixos.org/manual/nixos/stable/#sec-gpu-accel-opencl-amd
     ];
 
-    
-# AMD
-    # AMD vulkan drivers
-    hardware.amdgpu.amdvlk.enable   = true;   # disable this to default to RadV
-    hardware.amdgpu.amdvlk.support32Bit.enable = true;
 }
