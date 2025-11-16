@@ -15,7 +15,7 @@
         glfw                        # todo: document
         dxvk                        # todo: document
         vulkan-tools                # vulkan-tools                              https://github.com/KhronosGroup/Vulkan-Tools
-        glxinfo                     # glxinfo                                   https://www.khronos.org/opengl/
+        mesa-demos                  # glxinfo   -> mesa-demos                                 https://www.khronos.org/opengl/
         
         clinfo                      # clinfo                                    https://github.com/Oblomov/clinfo
         
