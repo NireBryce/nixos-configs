@@ -1,7 +1,7 @@
-# desc = "better pager for some things https://github.com/walles/moar";
+# desc = "better pager for some things https://github.com/walles/moor";
 { pkgs, ... }:
 let packageList = with pkgs; [
-    moar
+    moor # moar renamed to moor https://github.com/walles/moor/pull/305
 ];
 in
 {
