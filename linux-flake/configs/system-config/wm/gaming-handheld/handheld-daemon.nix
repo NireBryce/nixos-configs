@@ -1,9 +1,15 @@
 {
     config,
+    pkgs,
     ...
 }:
+let packageList = with pkgs; [
+        adjustor
+];
 
+in
 {
+    environment.systemPackages = packageList;
 
 
     # needed for tdp adjustor
@@ -17,6 +23,15 @@
         enable      = true;
         user        = "elly";
         ui.enable   = true;
+        adjustor = {
+            enable = true;
+            loadAcpiCallModule = true;
+        };
+
+    };
+
+    systemd.services."power-profiles-daemon" = {
+        enable = false;
     };
 
     # TODO: remove when https://github.com/NixOS/nixpkgs/pull/347279 is merged
