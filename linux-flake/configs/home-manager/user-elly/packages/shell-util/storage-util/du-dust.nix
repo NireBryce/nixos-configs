@@ -1,7 +1,7 @@
 # desc = "`du` alternative";
 { pkgs, ... }:
 let packageList = with pkgs; [
-    du-dust
+    dust
 ];
 in
 {

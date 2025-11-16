@@ -1,7 +1,7 @@
 # desc = "Bitwarden password manager https://bitwarden.com/";
 { pkgs, ... }:
 let packageList = with pkgs; [
-    bitwarden
+    bitwarden-desktop
 ];
 in
 {
