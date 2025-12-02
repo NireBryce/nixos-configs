@@ -1,4 +1,7 @@
 # ? Flatpak
+flatpak-repo-init:
+  flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
 teamspeak-flatpak:
   flatpak run --branch=stable --arch=x86_64 --command=teamspeak3 --file-forwarding com.teamspeak.TeamSpeak3 @@u %u @@
 
