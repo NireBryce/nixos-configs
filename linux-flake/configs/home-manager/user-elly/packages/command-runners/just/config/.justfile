@@ -1,3 +1,8 @@
+# ? Flatpak
+teamspeak-flatpak:
+  flatpak run --branch=stable --arch=x86_64 --command=teamspeak3 --file-forwarding com.teamspeak.TeamSpeak3 @@u %u @@
+
+
 # rebuild home-manager
 
 _default:
