@@ -1,7 +1,8 @@
 # desc = "Teamspeak 3";
 { pkgs, ... }:
 let packageList = with pkgs; [
-    teamspeak6-client
+    # teamspeak6-client
+    teamspeak3
 ];
 in
 {
