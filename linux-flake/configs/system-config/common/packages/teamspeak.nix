@@ -6,7 +6,7 @@ let packageList = with pkgs; [
 ];
 in
 {
-    home.packages = packageList;
+    environment.systemPackages = packageList;
 }
 
 
