@@ -1,3 +1,6 @@
+_default:
+  @just --list
+
 # ? Flatpak
 flatpak-repo-init:
   flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
@@ -8,8 +11,6 @@ teamspeak-flatpak:
 
 # rebuild home-manager
 
-_default:
-  @just --list
 
 DARWIN_FLAKE_PATH   :=  "~/nixos-config/darwin"
 DARWIN_HOSTNAME     :=  "nire-lysithea"             #TODO: FIXME
