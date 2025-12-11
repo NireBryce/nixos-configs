@@ -28,6 +28,8 @@
       "/var/lib/nixos"
       "/var/lib/systemd/coredump"
       "/etc/NetworkManager/system-connections"
+      "/var/lib/flatpak"
+      "/var/lib/sbctl"
         # "/etc/nixos" # no longer needed with the flake.
         # { directory = "/var/lib/colord"; user = "colord"; group = "colord"; mode = "u=rwx,g=rx,o="; }
       
