@@ -11,13 +11,15 @@
 # TODO: Disko configs
 
 # filesystems
-  fileSystems."/".options = [ "compress=zstd" "noatime" ];
-  fileSystems."/home".options = [ "compress=zstd" ];
-  fileSystems."/nix".options = [ "compress=zstd" "noatime" ];
-  fileSystems."/persist".options = [ "compress=zstd" "noatime" ];
-  fileSystems."/persist".neededForBoot = true;
-  fileSystems."/var/log".options = [ "compress=zstd" "noatime" ];
-  fileSystems."/var/log".neededForBoot = true;
+  fileSystems."/".options                     = [ "compress=zstd" "noatime" ];
+  fileSystems."/home".options                 = [ "compress=zstd" ];
+  fileSystems."/nix".options                  = [ "compress=zstd" "noatime" ];
+  fileSystems."/persist".options              = [ "compress=zstd" "noatime" ];
+  fileSystems."/persist".neededForBoot        = true;
+  fileSystems."/var/log".options              = [ "compress=zstd" "noatime" ];
+  fileSystems."/var/log".neededForBoot        = true;
+  fileSystems."/var/lib/sbctl".options        = [ "compress=zstd" "noatime" ];
+  fileSystems."/var/lib/sbctl".neededForBoot  = true;
 
 # impermanence
   environment.etc.machine-id.source = "/persist/etc/machine-id";  
@@ -29,7 +31,7 @@
       "/var/lib/systemd/coredump"
       "/etc/NetworkManager/system-connections"
       "/var/lib/flatpak"
-      "/var/lib/sbctl"
+      # "/var/lib/sbctl"
         # "/etc/nixos" # no longer needed with the flake.
         # { directory = "/var/lib/colord"; user = "colord"; group = "colord"; mode = "u=rwx,g=rx,o="; }
       
