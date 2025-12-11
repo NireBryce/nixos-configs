@@ -29,6 +29,13 @@ _deckyLoaderPyPackages = pythonPkgs: with pythonPkgs; [
 
 # TODO: 2025-04-07 22:10 EDT why does decky not show up in steamOS
  in {
+
+    boot.loader = {
+        # todo: replace after switching tinylaptop to limine
+        limine.enable               = lib.mkForce false;
+        limine.secureBoot.enable    = lib.mkForce false;
+        systemd-boot.enable         = lib.mkDefault true;
+    };
     systemd.services.decky-loader.environment.LD_LIBRARY_PATH = lib.makeLibraryPath config.jovian.decky-loader.extraPackages;
     services.desktopManager.plasma6.enable = true;
     
