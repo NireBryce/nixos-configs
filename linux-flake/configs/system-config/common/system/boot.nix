@@ -13,7 +13,7 @@ in
 
     boot.loader = {
         limine.enable               = lib.mkDefault true;
-        limine.secureBoot.enable    = true;
+        limine.secureBoot.enable    = lib.mkDefault true;
         # systemd-boot.enable       = lib.mkDefault true;
         efi.canTouchEfiVariables    = lib.mkDefault true;
     };
