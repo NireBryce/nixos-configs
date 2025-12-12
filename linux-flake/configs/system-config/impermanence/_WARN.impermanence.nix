@@ -18,8 +18,8 @@
   fileSystems."/persist".neededForBoot        = true;
   fileSystems."/var/log".options              = [ "compress=zstd" "noatime" ];
   fileSystems."/var/log".neededForBoot        = true;
-  # fileSystems."/var/lib/sbctl".options        = [ "compress=zstd" "noatime" ];
-  # fileSystems."/var/lib/sbctl".neededForBoot  = true;
+  fileSystems."/var/lib/sbctl".options        = [ "compress=zstd" "noatime" ];
+  fileSystems."/var/lib/sbctl".neededForBoot  = true;
 
 # impermanence
   environment.etc.machine-id.source = "/persist/etc/machine-id";  

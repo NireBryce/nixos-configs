@@ -48,12 +48,12 @@
       neededForBoot = true;
     };
 
-    # fileSystems."/var/lib/sbctl" =
-    # { device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
-    #   fsType  = "btrfs";
-    #   options = [ "subvol=sbctl" "compress=zstd" "noatime" ];
-    #   neededForBoot = true;
-    # };
+    fileSystems."/var/lib/sbctl" =
+    { device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
+      fsType  = "btrfs";
+      options = [ "subvol=secureboot" "compress=zstd" "noatime" ];
+      neededForBoot = true;
+    };
 
   fileSystems."/boot" =
     { device  = "/dev/disk/by-uuid/B35C-D0E8";
