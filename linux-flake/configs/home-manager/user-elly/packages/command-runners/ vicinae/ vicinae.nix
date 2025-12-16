@@ -1,9 +1,15 @@
-{ pkgs, ... }:
-let
-    packageList = with pkgs; [
-        vicinae
-    ];
-in
+{ ... }:
+
 {
-    home.packages = packageList;
+    programs.vicinae = {
+        enable = true;
+        settings = {
+            
+        };
+        systemd = {
+            enable = true;
+            autoStart = true;
+        };
+
+    };
 }
