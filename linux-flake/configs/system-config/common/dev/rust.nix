@@ -3,7 +3,7 @@ let
     packageList = with pkgs; [
         cargo
         rustc
-        # rustup
+        rustup
         rustfmt
         clippy
         rust-analyzer
