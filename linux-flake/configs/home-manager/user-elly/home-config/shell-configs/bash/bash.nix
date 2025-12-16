@@ -1,5 +1,5 @@
 # desc = "bash configs";
-{ ... }:
+{ pkgs, ... }:
 
 {
     home.file = {
@@ -20,9 +20,9 @@
     };
 
     #? Extra commands that should be run when initializing an interactive shell.
-    # programs.bash.initExtra = ''
-    #     ${pkgs.inshellisense}/bin/inshellisense;
-    # '';
+    programs.bash.initExtra = ''
+        ${pkgs.inshellisense}/bin/inshellisense;
+    '';
 
     # ? Extra commands that should be placed in {file}~/.bashrc.
     # ?   Note that these commands will be run even in non-interactive shells.
