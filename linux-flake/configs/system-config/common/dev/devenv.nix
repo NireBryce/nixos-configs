@@ -6,4 +6,5 @@ let
 in
 {
     environment.systemPackages = packageList;
+    cachix.enable = false; # disable cachix caching
 }
