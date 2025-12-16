@@ -1,7 +1,7 @@
 { pkgs, ... }:
 let
     packageList = with pkgs; [
-        ulauncher
+        vicinae
     ];
 in
 {
