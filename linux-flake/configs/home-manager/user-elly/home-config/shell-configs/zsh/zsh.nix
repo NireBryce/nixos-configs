@@ -53,9 +53,7 @@ in
         zellij_keys_cfg = lib.fileContents ./config/free-zellij-keys.zsh;
     in 
     {
-        plugins = { 
 
-        };
         enable                  =  true;
         autocd                  = false;
         enableVteIntegration    =  true;
@@ -69,52 +67,48 @@ in
             share = true;               # share history across sessions
         };
 
-        
-        zplug = {
-            enable = true;
-            plugins = [
-                { 
-                    name = pkgs.nix-zsh-completions.pname;
-                    src = pkgs.nix-zsh-completions.src;
-                }
-                {
-                    name = pkgs.zsh-f-sy-h.pname;
-                    src = pkgs.zsh-f-sy-h.src;
-                }
-                {
-                    name = pkgs.zsh-nix-shell.pname;
-                    src = pkgs.zsh-nix-shell.src;
-                }
-                {
-                    name = pkgs.zsh-completions.pname;
-                    src = pkgs.zsh-completions.src;
-                }
-                {
-                    name = pkgs.zsh-autocomplete.pname;
-                    src = pkgs.zsh-autocomplete.src;
-                }
-                {
-                    name = pkgs.zsh-autosuggestions.pname;
-                    src = pkgs.zsh-autosuggestions.src;
-                }
-                { 
-                    name = pkgs.zsh-powerlevel10k.pname; 
-                    src = pkgs.zsh-powerlevel10k.src;
-                }
-                { 
-                    name = pkgs.zsh-system-clipboard.pname; 
-                    src = pkgs.zsh-system-clipboard.src;
-                }
-                {
-                    name = pkgs.zsh-you-should-use.pname; 
-                    src = pkgs.zsh-you-should-use.src;
-                }
-                {
-                    name = pkgs.zsh-fzf-tab.pname;
-                    src = pkgs.zsh-fzf-tab.src;
-                }
-            ];
-        };
+        plugins = [
+            { 
+                name = pkgs.nix-zsh-completions.pname;
+                src = pkgs.nix-zsh-completions.src;
+            }
+            {
+                name = pkgs.zsh-f-sy-h.pname;
+                src = pkgs.zsh-f-sy-h.src;
+            }
+            {
+                name = pkgs.zsh-nix-shell.pname;
+                src = pkgs.zsh-nix-shell.src;
+            }
+            {
+                name = pkgs.zsh-completions.pname;
+                src = pkgs.zsh-completions.src;
+            }
+            {
+                name = pkgs.zsh-autocomplete.pname;
+                src = pkgs.zsh-autocomplete.src;
+            }
+            {
+                name = pkgs.zsh-autosuggestions.pname;
+                src = pkgs.zsh-autosuggestions.src;
+            }
+            # { 
+            #     name = pkgs.zsh-powerlevel10k.pname; 
+            #     src = pkgs.zsh-powerlevel10k.src;
+            # }
+            { 
+                name = pkgs.zsh-system-clipboard.pname; 
+                src = pkgs.zsh-system-clipboard.src;
+            }
+            {
+                name = pkgs.zsh-you-should-use.pname; 
+                src = pkgs.zsh-you-should-use.src;
+            }
+            {
+                name = pkgs.zsh-fzf-tab.pname;
+                src = pkgs.zsh-fzf-tab.src;
+            }
+        ];
 
         localVariables = {
         # _ZO_CMD_PREFIX="x";
@@ -164,7 +158,7 @@ in
             #################PASSWORD ENTRY/CONFIRM DIALOGS GO ABOVE##############################
 
             # Powerlevel10k instant prompt.  anything requiring input/perf goes above, else below
-                ${p10k_zshrc}                                       
+                                                      
 
             # keybindings from various configs
                 ${bindings_cfg}
@@ -197,8 +191,8 @@ in
             ### p10k cfg end
 
             # zicompinit                                        # zi cleanup
-            # autoload -Uz compinit
-            # compinit -C
+            autoload -Uz compinit
+            compinit -C
             '';
         initExtra = ''
             source <(${pkgs.cod}/bin/cod init $$ zsh)
