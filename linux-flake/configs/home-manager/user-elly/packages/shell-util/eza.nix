@@ -11,9 +11,10 @@
         colors = "auto";
         git = true;
         extraOptions = [ 
-            "header" 
-            "hyperlink" 
-            "group-directories-first" 
+            "-1"
+            "--header" 
+            "--hyperlink" 
+            "--group-directories-first" 
         ];
     
     };
