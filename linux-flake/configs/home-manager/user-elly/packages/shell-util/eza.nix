@@ -8,10 +8,10 @@
         enableBashIntegration   = true;
         enableFishIntegration   = true;
         defaultOptions = [ 
-            "--icons" 
-            "--header" 
-            "--hyperlink" 
-            "--group-directories-first" 
+            "icons" 
+            "header" 
+            "hyperlink" 
+            "group-directories-first" 
         ];
         
     };
