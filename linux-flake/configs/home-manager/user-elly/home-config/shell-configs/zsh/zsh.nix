@@ -67,6 +67,40 @@ in
             SHELL="${pkgs.zsh}/bin/zsh";
             PATH="$HOME/.nix-profile/bin:$PATH";
         };
+
+        setOptions = [
+          # From manjaro defaults:
+            "correct"                                                  # Auto correct mistakes
+            "nocaseglob"                                               # Case insensitive globbing
+            "rcexpandparam"                                            # Array expension with parameters
+            "nocheckjobs"                                              # Don't warn about running processes when exiting
+            "numericglobsort"                                          # Sort filenames numerically when it makes sense
+            "nobeep"                                                   # No beep
+            "appendhistory"                                            # Immediately append history instead of overwriting
+            "histignorealldups"                                        # If a new command is a duplicate, remove the older one
+            "autocd"                                                   # if only directory path is entered, cd there.
+            "inc_append_history"                                       # save commands are added to the history immediately, otherwise only when shell exits.
+            "histignorespace"                                          # Don't save commands that start with space
+            # "extendedglob"                                             # Extended globbing. Allows using regular expressions with *
+        
+          # Prezto
+            "COMPLETE_IN_WORD"                                         # Complete from both ends of a word.
+            "ALWAYS_TO_END"                                            # Move cursor to the end of a completed word.
+            "PATH_DIRS"                                                # Perform path search even on command names with slashes.
+            "AUTO_MENU"                                                # Show completion menu on a successive tab press.
+            "AUTO_LIST"                                                # Automatically list choices on ambiguous completion.
+            "AUTO_PARAM_SLASH"                                         # If completed parameter is a directory, add a trailing slash.
+            "EXTENDED_GLOB"                                            # Needed for file modification glob modifiers with compinit.
+            "extendedglob" #belt and suspenders
+
+          # grabbed from zsh4humans
+            "glob_dots"
+            "globdots" #belt and suspenders            # no special treatment for file names with a leading dot
+            # "no_auto_menu"                           # require an extra TAB press to open the completion menu
+            "NO_MENU_COMPLETE"                         # Do not autoselect the first completion entry.
+            "NO_FLOW_CONTROL"                          # Disable start/stop characters in shell editor.
+
+        ];
     
         ## .zshrc
         #! FOOTGUN: if you comment out a nix variable pointing to .filecontents, '#' only comments out the first line 
@@ -121,6 +155,8 @@ in
             compinit -C
             '';
         initExtra = ''
+            source <(cod init $$ zsh)
+            
             # TODO: pull these into nix
             # Aliases
                 alias "ll"="ls -l";

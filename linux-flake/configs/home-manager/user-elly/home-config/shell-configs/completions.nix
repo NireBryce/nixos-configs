@@ -1,10 +1,9 @@
 { pkgs, ... }:
-# Deface face redaction
-let
+let 
     packageList = with pkgs; [
-        deface
+        cod
     ];
-in 
+in
 {
     home.packages = packageList;
 }
