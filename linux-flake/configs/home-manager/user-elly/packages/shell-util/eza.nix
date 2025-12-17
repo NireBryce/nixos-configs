@@ -11,7 +11,7 @@
         colors = "auto";
         git = true;
         extraOptions = [ 
-            "-1"
+            "-1"                        # portrait mode
             "--header" 
             "--hyperlink" 
             "--group-directories-first" 
