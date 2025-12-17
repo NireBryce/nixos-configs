@@ -35,4 +35,5 @@ in
 
     programs.fish.enable = true;
     environment.systemPackages = fishPlugins;
+    programs.bash.blesh.enable = true;
 }
