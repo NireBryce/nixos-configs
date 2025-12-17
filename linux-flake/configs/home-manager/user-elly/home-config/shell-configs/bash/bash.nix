@@ -4,12 +4,7 @@
 {
     
 
-    home.file = {
-        "./.bash_logout"      .source = ./config/.bash_logout;
-        "./.bash_profile"     .source = ./config/.bash_profile;
-        "./.bashrc"           .source = ./config/.bashrc;
-        "./.profile"          .source = ./config/.profile;
-    };
+
     programs.bash = {
         enable = true;
         enableCompletion = true;
@@ -25,7 +20,20 @@
         
         #? Extra commands that should be run when initializing an interactive shell.
         initExtra = ''
-            [[ $- == *i* ]] && source -- ${pkgs.blesh}/share/blesh/ble.sh --attach=none
+
+
+
+            [[ ''$- == *i* ]] && source -- ${pkgs.blesh}/share/blesh/ble.sh --attach=none
+            eval "''$(starship init bash)"
+            
+            source <(cod init ''$''$ bash)
+
+
+
+
+
+
+            [[ ! ''${BLE_VERSION-} ]] || ble-attach
         '';
 
         # ? Extra commands that should be placed in {file}~/.bashrc.
