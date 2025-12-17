@@ -2,8 +2,7 @@
 {
     programs.fish = {
         enable = true;
-        enableCompletion = true;
-        promptInit = ''
+        interactiveShellInit = ''
             function fish_prompt
                 starship prompt
             end

@@ -7,13 +7,15 @@
         enableZshIntegration    = true;
         enableBashIntegration   = true;
         enableFishIntegration   = true;
-        defaultOptions = [ 
-            "icons" 
+        icons = "auto";
+        colors = "auto";
+        git = true;
+        extraOptions = [ 
             "header" 
             "hyperlink" 
             "group-directories-first" 
         ];
-        
+    
     };
 }
 
