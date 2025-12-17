@@ -5,6 +5,7 @@
         enable                  = true;
         enableZshIntegration    = true;
         enableBashIntegration   = true;
+        enableFishIntegration   = true;
         settings = {
             inline_height   = 13;       # search window height
             style           = "compact";

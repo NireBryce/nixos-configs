@@ -10,7 +10,7 @@
         cp              = "cp -i";    # Confirm before overwriting something
         cd              = "x";        # Empty oneletter for zoxide to not interfere with zi
         exa             = "${pkgs.eza}/bin/eza --icons=always"; # exa back compat for tools
-        ls              = "${pkgs.eza}/bin/eza --icons=always --header --group-directories-first --hyperlink";
+        # ls              = "${pkgs.eza}/bin/eza --icons=always --header --group-directories-first --hyperlink";
         gsa             = "${pkgs.git}/bin/git stash push";
         img-cat         = "${pkgs.kitty}/bin/kitty +kitten icat";
         kssh            = "${pkgs.kitty}/bin/kitty +kitten ssh";
