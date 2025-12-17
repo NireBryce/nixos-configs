@@ -24,9 +24,9 @@
 { pkgs, lib, ... }:
 let zshPluginRequiresList = with pkgs; [
     diff-so-fancy
-    starship
+    # starship
     tree
-    ruby                            # zi depends on `gem`
+    # ruby                            # zi depends on `gem`
     nix-zsh-completions
     zsh-f-sy-h
     zsh-fzf-tab
@@ -41,6 +41,8 @@ let zshPluginRequiresList = with pkgs; [
 in
 {
 
+    plugins = {
+        
     home.file."./.config/F-Sy-H".source = ./config/zsh-f-s-highlight-themes;
     home.packages = zshPluginRequiresList;
     
@@ -50,8 +52,6 @@ in
         bindings_cfg    = lib.fileContents ./config/initial-bindings.zsh;
         setopts_cfg     = lib.fileContents ./config/initial-setopts.zsh;
         zstyle_cfg      = lib.fileContents ./config/initial-zstyle.zsh;
-        zi_cfg          = lib.fileContents ./config/zi.zsh;
-        zi_plugins_cfg  = lib.fileContents ./config/zi-plugins.zsh;
         zellij_keys_cfg = lib.fileContents ./config/free-zellij-keys.zsh;
     in 
     {
@@ -59,9 +59,18 @@ in
         autocd                  = false;
         enableVteIntegration    =  true;
         autosuggestion.enable   =  true;
-        enableCompletion        = false;       # enabled through config, removing one compinit call.        
+        enableCompletion        =  true;        #  may remove one compinit call if you disable here and enable in config      
         zsh-abbr.enable         =  true;
         
+        history = {
+            save = 10000;
+            size = 10000;
+            share = true;               # share history across sessions
+        };
+
+            
+
+
         localVariables = {
         # _ZO_CMD_PREFIX="x";
             SHELL="${pkgs.zsh}/bin/zsh";
@@ -70,27 +79,27 @@ in
 
         setOptions = [
           # From manjaro defaults:
-            "correct"                                                  # Auto correct mistakes
-            "nocaseglob"                                               # Case insensitive globbing
-            "rcexpandparam"                                            # Array expension with parameters
-            "nocheckjobs"                                              # Don't warn about running processes when exiting
-            "numericglobsort"                                          # Sort filenames numerically when it makes sense
-            "nobeep"                                                   # No beep
-            "appendhistory"                                            # Immediately append history instead of overwriting
-            "histignorealldups"                                        # If a new command is a duplicate, remove the older one
-            "autocd"                                                   # if only directory path is entered, cd there.
-            "inc_append_history"                                       # save commands are added to the history immediately, otherwise only when shell exits.
-            "histignorespace"                                          # Don't save commands that start with space
-            # "extendedglob"                                             # Extended globbing. Allows using regular expressions with *
+            "correct"                               # Auto correct mistakes
+            "nocaseglob"                            # Case insensitive globbing
+            "rcexpandparam"                         # Array expension with parameters
+            "nocheckjobs"                           # Don't warn about running processes when exiting
+            "numericglobsort"                       # Sort filenames numerically when it makes sense
+            "nobeep"                                # No beep
+            "appendhistory"                         # Immediately append history instead of overwriting
+            "histignorealldups"                     # If a new command is a duplicate, remove the older one
+            "autocd"                                # if only directory path is entered, cd there.
+            "inc_append_history"                    # save commands are added to the history immediately, otherwise only when shell exits.
+            "histignorespace"                       # Don't save commands that start with space
+            # "extendedglob"                          # Extended globbing. Allows using regular expressions with *
         
           # Prezto
-            "COMPLETE_IN_WORD"                                         # Complete from both ends of a word.
-            "ALWAYS_TO_END"                                            # Move cursor to the end of a completed word.
-            "PATH_DIRS"                                                # Perform path search even on command names with slashes.
-            "AUTO_MENU"                                                # Show completion menu on a successive tab press.
-            "AUTO_LIST"                                                # Automatically list choices on ambiguous completion.
-            "AUTO_PARAM_SLASH"                                         # If completed parameter is a directory, add a trailing slash.
-            "EXTENDED_GLOB"                                            # Needed for file modification glob modifiers with compinit.
+            "COMPLETE_IN_WORD"                      # Complete from both ends of a word.
+            "ALWAYS_TO_END"                         # Move cursor to the end of a completed word.
+            "PATH_DIRS"                             # Perform path search even on command names with slashes.
+            "AUTO_MENU"                             # Show completion menu on a successive tab press.
+            "AUTO_LIST"                             # Automatically list choices on ambiguous completion.
+            "AUTO_PARAM_SLASH"                      # If completed parameter is a directory, add a trailing slash.
+            "EXTENDED_GLOB"                         # Needed for file modification glob modifiers with compinit.
             "extendedglob" #belt and suspenders
 
           # grabbed from zsh4humans
@@ -135,15 +144,7 @@ in
             '';
             
         initExtraBeforeCompInit = ''
-            # zi
-                # zi bootstrap
-                ${zi_cfg}
-                # end zi bootstrap
-
-                # Zi plugins
-                ${zi_plugins_cfg}
-                # end zi plugins
-            # end zi
+            
 
             # TODO: marked for deletion, p10k deprecated
             ### p10k cfg start
@@ -151,11 +152,11 @@ in
             ### p10k cfg end
 
             # zicompinit                                        # zi cleanup
-            autoload -Uz compinit
-            compinit -C
+            # autoload -Uz compinit
+            # compinit -C
             '';
         initExtra = ''
-            source <(cod init $$ zsh)
+            source <(${pkgs.cod}/bin/cod init $$ zsh)
             
             # TODO: pull these into nix
             # Aliases
