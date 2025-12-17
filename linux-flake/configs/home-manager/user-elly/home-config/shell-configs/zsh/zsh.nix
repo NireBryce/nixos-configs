@@ -41,8 +41,6 @@ let zshPluginRequiresList = with pkgs; [
 in
 {
 
-    plugins = {
-        
     home.file."./.config/F-Sy-H".source = ./config/zsh-f-s-highlight-themes;
     home.packages = zshPluginRequiresList;
     
@@ -55,6 +53,9 @@ in
         zellij_keys_cfg = lib.fileContents ./config/free-zellij-keys.zsh;
     in 
     {
+        plugins = { 
+
+        };
         enable                  =  true;
         autocd                  = false;
         enableVteIntegration    =  true;
@@ -68,8 +69,52 @@ in
             share = true;               # share history across sessions
         };
 
-            
-
+        
+        zplug = {
+            enable = true;
+            plugins = [
+                { 
+                    name = pkgs.nix-zsh-completions.pname;
+                    src = pkgs.nix-zsh-completions.src;
+                }
+                {
+                    name = pkgs.zsh-f-sy-h.pname;
+                    src = pkgs.zsh-f-sy-h.src;
+                }
+                {
+                    name = pkgs.zsh-nix-shell.pname;
+                    src = pkgs.zsh-nix-shell.src;
+                }
+                {
+                    name = pkgs.zsh-completions.pname;
+                    src = pkgs.zsh-completions.src;
+                }
+                {
+                    name = pkgs.zsh-autocomplete.pname;
+                    src = pkgs.zsh-autocomplete.src;
+                }
+                {
+                    name = pkgs.zsh-autosuggestions.pname;
+                    src = pkgs.zsh-autosuggestions.src;
+                }
+                { 
+                    name = pkgs.zsh-powerlevel10k.pname; 
+                    src = pkgs.zsh-powerlevel10k.src;
+                }
+                { 
+                    name = pkgs.zsh-system-clipboard.pname; 
+                    src = pkgs.zsh-system-clipboard.src;
+                }
+                {
+                    name = pkgs.zsh-you-should-use.pname; 
+                    src = pkgs.zsh-you-should-use.src;
+                }
+                {
+                    name = pkgs.zsh-fzf-tab.pname;
+                    src = pkgs.zsh-fzf-tab.src;
+                }
+            ];
+        };
 
         localVariables = {
         # _ZO_CMD_PREFIX="x";
