@@ -6,8 +6,10 @@
     };
     environment.systemPackages = with pkgs; [ 
         distrobox
+        distrobox-tui
         distroshelf
         boxbuddy
+        host-spawn
     ];
 
     # expose profile to distrobox containers
