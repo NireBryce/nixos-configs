@@ -1,19 +1,17 @@
 { pkgs, ... }:
-{
-    virtualisation.podman = {
-        enable = true;
-        dockerCompat = true;
-        defaultNetwork.settings.dns_enabled = true; # Required for containers under podman-compose to be able to talk to each other.
-    };
-
-
-    environment.systemPackages = with pkgs; [ 
+let
+    packageList = with pkgs; [
         distrobox
         distrobox-tui
         distroshelf
         boxbuddy
         host-spawn
     ];
+
+in
+{
+
+    environment.systemPackages = packageList;
 
     # expose profile to distrobox containers
     environment.etc."distrobox/distrobox.conf".text = ''
