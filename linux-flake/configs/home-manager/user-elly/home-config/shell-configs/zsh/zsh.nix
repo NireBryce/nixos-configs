@@ -201,7 +201,6 @@ in
             # Aliases
                 alias "ll"="ls -l";
                 alias "cp"="cp -i";                                     # Confirm before overwriting something
-                alias "cd"="x";                                        # Empty oneletter for zoxide to not interfere with zi
                 alias "exa"="eza --icons=always";                       # back compat for one of the tools
                 alias "ls"="eza --icons=always --header --group-directories-first --hyperlink";
                 alias "rustdevshell"="nix develop ~/nixos/dev-shells/rust#";
