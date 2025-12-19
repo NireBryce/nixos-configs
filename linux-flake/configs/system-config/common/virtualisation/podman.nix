@@ -35,6 +35,19 @@ in
             ];
         };
 
+        # vscode devcontainers https://wiki.nixos.org/wiki/Podman
+        # Global `/etc/containers/registries.conf`
+        environment.etc."containers/registries.conf".text = ''
+            [registries.search]
+            registries = ['docker.io']
+        '';
+
+        # User-scoped `~/.config/containers/registries`
+        xdg.configFile."containers/registries.conf".text = ''
+            [registries.search]
+            registries = ['docker.io']
+        '';
+
 
         environment.systemPackages = packageList;
 
