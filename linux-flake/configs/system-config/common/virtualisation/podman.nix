@@ -42,7 +42,7 @@ in
             registries = ['docker.io']
         '';
 
-        # User-scoped `~/.config/containers/registries`
+                # User-scoped `~/.config/containers/registries`
         xdg.configFile."containers/registries.conf".text = ''
             [registries.search]
             registries = ['docker.io']
