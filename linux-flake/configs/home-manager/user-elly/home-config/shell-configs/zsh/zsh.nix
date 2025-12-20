@@ -61,6 +61,7 @@ in
         enableCompletion        =  true;        #  may remove one compinit call if you disable here and enable in config      
         zsh-abbr.enable         =  true;
         
+        
         history = {
             save = 10000;
             size = 10000;
@@ -70,27 +71,27 @@ in
         plugins = [
             { 
                 name = pkgs.nix-zsh-completions.pname;
-                src = pkgs.nix-zsh-completions.src;
+                src = pkgs.nix-zsh-completions;
             }
             {
                 name = pkgs.zsh-f-sy-h.pname;
-                src = pkgs.zsh-f-sy-h.src;
+                src = pkgs.zsh-f-sy-h;
             }
             {
                 name = pkgs.zsh-nix-shell.pname;
-                src = pkgs.zsh-nix-shell.src;
+                src = pkgs.zsh-nix-shell;
             }
             {
                 name = pkgs.zsh-completions.pname;
-                src = pkgs.zsh-completions.src;
+                src = pkgs.zsh-completions;
             }
             {
                 name = pkgs.zsh-autocomplete.pname;
-                src = pkgs.zsh-autocomplete.src;
+                src = pkgs.zsh-autocomplete;
             }
             {
                 name = pkgs.zsh-autosuggestions.pname;
-                src = pkgs.zsh-autosuggestions.src;
+                src = pkgs.zsh-autosuggestions;
             }
             # { 
             #     name = pkgs.zsh-powerlevel10k.pname; 
@@ -98,15 +99,15 @@ in
             # }
             { 
                 name = pkgs.zsh-system-clipboard.pname; 
-                src = pkgs.zsh-system-clipboard.src;
+                src = pkgs.zsh-system-clipboard;
             }
             {
                 name = pkgs.zsh-you-should-use.pname; 
-                src = pkgs.zsh-you-should-use.src;
+                src = pkgs.zsh-you-should-use;
             }
             {
                 name = pkgs.zsh-fzf-tab.pname;
-                src = pkgs.zsh-fzf-tab.src;
+                src = pkgs.zsh-fzf-tab;
             }
         ];
 
