@@ -76,14 +76,10 @@
           users.users.elly.home = "/Users/elly";
         }
 
-        # nix-index-database.hmModules.nix-index
-        # { programs.nix-index-database.comma.enable = true; }
-        # todo: fix this
+
 
       ];
-    # Expose the package set, including overlays, for convenience.
-    # TODO: fixme
-      #  darwinPackages = self.darwinConfigurations."nire-lysithea".pkgs;
+
     };
   };
 }

@@ -13,7 +13,7 @@ teamspeak-flatpak:
 
 
 DARWIN_FLAKE_PATH   :=  "~/nixos-config/darwin"
-DARWIN_HOSTNAME     :=  "nire-lysithea"             #TODO: FIXME
+DARWIN_HOSTNAME     :=  "nire-lysithea"             
 
 [group('darwin')]
 darwin-flake:

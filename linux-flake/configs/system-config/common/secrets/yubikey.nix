@@ -18,20 +18,7 @@ in
     # This is linux only
     services.udev.extraRules = ''
     
-      ##
-      # Yubikey 4
-      ##
-
-      # FIXME(yubikey): We only want this to happen if we're undocked, so we need to see how that works. We probably need to run a
-      # script that does smarter checks
-      # Lock the device if you remove the yubikey (use udevadm monitor -p to debug)
-    #   ACTION=="remove",\
-    #    ENV{ID_MODEL_ID}=="0406",\ # This doesn't match all the newer keys
-    #    ENV{ID_BUS}=="usb",\
-    #    ENV{ID_VENDOR_ID}=="1050",\
-    #    ENV{ID_VENDOR}=="Yubico",\
-    #    RUN+="${pkgs.systemd}/bin/loginctl lock-sessions"
-
+    # Yubikey 4 / bio need different config
     #   ##
       # Yubikey 5 BIO
       #
@@ -51,8 +38,6 @@ in
           ENV{HID_NAME}=="Yubico YubiKey FIDO+CCID",\
           RUN+="${pkgs.systemd}/bin/loginctl activate 1"
           
-          #! WARN: testing purposes only until I find how to bind to yubikey unique key
-          # RUN+="${pkgs.systemd}/bin/loginctl unlock-sessions"
     '';
 
 
