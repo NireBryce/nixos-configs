@@ -175,7 +175,6 @@
                     };
                 imports = [ 
                     (import-tree ./configs/home-manager/user-elly)
-                    (import-tree ./configs/home-manager/window-manager/kde)
                 ];
                 }
 
