@@ -1,15 +1,6 @@
 { ... }:
 
 {
-    # programs.vicinae = {
-    #     enable = true;
-    #     settings = {
-            
-    #     };
-    #     systemd = {
-    #         enable = true;
-    #         autoStart = true;
-    #     };
     programs.vicinae = {
         enable = true;
         systemd = {

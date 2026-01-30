@@ -124,7 +124,6 @@
                 home.homeDirectory       = "/home/elly";
                 imports = [ 
                   (inputs.import-tree ./configs/home-manager/user-elly)
-                  (inputs.import-tree ./configs/home-manager/window-manager/kde)
                 ];
               }
           ];
