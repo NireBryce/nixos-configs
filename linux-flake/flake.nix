@@ -123,7 +123,7 @@
                 home.username            = "elly";
                 home.homeDirectory       = "/home/elly";
               }
-              (inputs.import-tree ./configs/home-manager/user-elly)
+              (import-tree ./configs/home-manager/user-elly)
           ];
       };
     
