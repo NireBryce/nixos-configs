@@ -8,7 +8,7 @@
 	... 
 }:
 let 
-    home-manager-user = ../linux-flake/config/home-manager/user-elly;
+    home-manager-user = ../linux-flake/configs/home-manager/user-elly;
 in {
     imports = [
         "${home-manager-user}/home-config/git-config/git-settings-elly.nix"
