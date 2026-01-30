@@ -122,10 +122,8 @@
                 home.stateVersion        = "22.11"; 
                 home.username            = "elly";
                 home.homeDirectory       = "/home/elly";
-                imports = [ 
-                  (inputs.import-tree ./configs/home-manager/user-elly)
-                ];
               }
+              (inputs.import-tree ./configs/home-manager/user-elly)
           ];
       };
     
