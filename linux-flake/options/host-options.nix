@@ -54,6 +54,32 @@
             default = false;
             description = "Enable development packages and configuration";
         };
+        wmKde = lib.mkOption {
+            type = lib.types.bool;
+            default = false;
+            description = "Enable KDE window manager packages and config";
+        };
+        wmWayland = lib.mkOption {
+            type = lib.types.bool;
+            default = false;
+            description = "Enable wayland packages and config";
+        };
+        wmJovian = lib.mkOption {
+            type = lib.types.bool;
+            default = false;
+            description = "Enable Jovian-nix";
+        };
+        
+        impermanent = lib.mkOption {
+            type = lib.types.bool;
+            default = false;
+            description = "Enable impermanence";
+        };
+        user-elly = lib.mkOption {
+            type = lib.types.bool;
+            default = false;
+            description = "set elly user";
+        };
     
     };
 }
