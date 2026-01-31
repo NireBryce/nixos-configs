@@ -84,3 +84,12 @@ nh home switch --configuration elly@nire-durandal ~/nixos/
     nixos-shell           # easy VMs
     nix-index             # quickly locate packages providing a certain file
     nix-prefetch          # determine hash of fixed-output derivations such as package source
+
+
+
+
+
+
+
+
+## Learn what outputs @ inputs: means and figure out specialargs

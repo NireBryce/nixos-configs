@@ -75,10 +75,12 @@
       sops-nix,
       ... 
     }@inputs:
-    flake-parts.lib.mkFlake { inherit inputs; } {top@{ config, withSystem, moduleWithSystem, ... }: { 
+    flake-parts.lib.mkFlake { inherit inputs; } (top@{ config, withSystem, moduleWithSystem, ... }: { 
+      imports = { };
+
       flake = {
         debug = true;
-        hardware    = import nixos-hardware;           # needed for something in nixos hardware
+
         inputs = inputs;                               # move inputs into this scope (I think)
 
         # nire-durandal (workstation) `nh os switch --hostname nire-durandal ~/nixos/` `sudo nixos-rebuild switch --flake .#nire-durandal`
@@ -185,7 +187,7 @@
               ];
           };
       };
-
+    });
 
   # _module.args.rootPath = ./.;
 }
