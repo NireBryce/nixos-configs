@@ -10,10 +10,8 @@
 #          prezto not worth looking into imo because I want something stable
 #          ironically this means going back to `zi` for now
 
-# TODO: replace p10k with `starship` now that p10k is in life support mode
 
-# TODO: figure out how to make zi less fragile, or how to do zi's plugin management declaratively
-
+# TODO:  MIGRATE OFF ZI
 # TODO: evaluation warning: `programs.zsh.initExtraFirst` is deprecated, use `programs.zsh.initContent` with `lib.mkBefore` instead.
 #   Example: programs.zsh.initContent = lib.mkBefore "your content here";
 # evaluation warning: `programs.zsh.initExtraBeforeCompInit` is deprecated, use `programs.zsh.initContent` with `lib.mkOrder 550` instead.
@@ -46,7 +44,6 @@ in
     
     programs.zsh = let               
         p10k_cfg        = lib.fileContents ./config/zsh-powerlevel10k/.p10k.zsh;
-        p10k_zshrc      = lib.fileContents ./config/p10k.zsh;
         bindings_cfg    = lib.fileContents ./config/initial-bindings.zsh;
         setopts_cfg     = lib.fileContents ./config/initial-setopts.zsh;
         zstyle_cfg      = lib.fileContents ./config/initial-zstyle.zsh;
@@ -186,7 +183,6 @@ in
         initExtraBeforeCompInit = ''
             
 
-            # TODO: marked for deletion, p10k deprecated
             ### p10k cfg start
             ${p10k_cfg}
             ### p10k cfg end

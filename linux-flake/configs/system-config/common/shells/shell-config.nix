@@ -5,7 +5,7 @@
 }:
 let 
   fishPlugins = with pkgs; [
-
+    fishPlugins.fzf-fish
   ];
 
 in
