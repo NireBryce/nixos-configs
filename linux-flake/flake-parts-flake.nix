@@ -34,7 +34,7 @@
         systems = [
           "x86_64-linux"
         ];
-        perSystem = { pkgs, ... }: {
+        perSystem = { ... }: {
           # responsible for system-specific outputs
         }; 
     };
