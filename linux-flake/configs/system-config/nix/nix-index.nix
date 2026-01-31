@@ -2,7 +2,7 @@
     ...
 }:
 {
-    flake.modules.nixos.nix-utils = { pkgs, ... }: {
+    flake.modules.nixos.nix-utils = { ... }: {
         # this barely works. figure out why
         programs.nix-index.enable = true;
     };

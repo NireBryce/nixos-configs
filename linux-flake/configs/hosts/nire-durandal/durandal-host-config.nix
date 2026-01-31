@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ ... }:
 {
     
  # Set the capability flags for this machine at the flake level

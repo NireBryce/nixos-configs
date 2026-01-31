@@ -2,7 +2,7 @@
     ...
 }:
 {
-    flake.modules.nixos.networking.bt = { pkgs, ... }: {
+    flake.modules.nixos.networking.bt = { ... }: {
         hardware.bluetooth.powerOnBoot   = true;
         hardware.bluetooth.enable        = true;
         hardware.bluetooth.settings      = {

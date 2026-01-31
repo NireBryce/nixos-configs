@@ -2,7 +2,7 @@
     ...
 }:
 {
-    flake.modules.nixos.nix-utils = { pkgs, ... }: {
+    flake.modules.nixos.nix-utils = { ... }: {
         programs.nh = {
             enable          = true;
             clean.enable    = true;
