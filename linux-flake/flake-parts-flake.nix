@@ -55,7 +55,8 @@
         import-tree.url 
           = "github:vic/import-tree";
     # flake parts
-      
+        flake-parts.url = "github:hercules-ci/flake-parts";
+
     };
 
     outputs = {
@@ -64,6 +65,7 @@
       nixpkgs,
       #nixpkgs-stable,                                         # https://nixos-and-flakes.thiscute.world/nixos-with-flakes/downgrade-or-upgrade-packages
       darwin,
+      flake-parts,
       home-manager,
       nixos-hardware,
       nix-index-database,
@@ -71,31 +73,80 @@
       jovian,
       impermanence,
       sops-nix,
-      ...
-    } @ inputs:
+      ... 
+    }@inputs:
+    flake-parts.lib.mkFlake { inherit inputs; } {top@{ config, withSystem, moduleWithSystem, ... }: { 
+      flake = {
+        debug = true;
+        hardware    = import nixos-hardware;           # needed for something in nixos hardware
+        inputs = inputs;                               # move inputs into this scope (I think)
 
-    {
-      # lib.util = import ./util-nix/importRecurseDirectories.nix;
-      debug = true;
-      overlays    = import ../misc/overlays {inherit inputs;};
-      hardware    = import nixos-hardware;           # needed for something in nixos hardware
-      inputs = inputs;                               # move inputs into this scope (I think)
+        # nire-durandal (workstation) `nh os switch --hostname nire-durandal ~/nixos/` `sudo nixos-rebuild switch --flake .#nire-durandal`
+        nixosConfigurations."nire-durandal" = inputs.nixpkgs.lib.nixosSystem {
+            specialArgs = inputs;
+            modules     = [
+              {
+                system.stateVersion = "23.11"; # Don't change. https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion
+                networking.hostName = "nire-durandal";
+                
+                imports = 
+                let user = "elly"; host = "nire-durandal"; wm = "kde"; cpu = "amd"; gpu = "amd"; 
+                in 
+                [
+                    (import-tree ../misc/util/nix) # utility functions
+                    nix-index-database.nixosModules.nix-index
+                    ../misc/modules/linux-crisis-utilities.nix
+                    (import-tree ./configs/hosts/${host})
+                    (import-tree ./configs/system-config/users/${user})
+                    (import-tree ./configs/system-config/hw/gpu/${gpu})
+                    (import-tree ./configs/system-config/hw/cpu/${cpu})
+                    (import-tree ./configs/system-config/common)
+                    (import-tree ./configs/system-config/gaming)
+                    (import-tree ./configs/system-config/wm/${wm})
+                    # impermanence
+                    # |- /!!\ WARN: this will delete /root on boot /!!\ -|
+                    ./configs/system-config/impermanence/_WARN.impermanence.nix
+                ];
 
-      # nire-durandal (workstation) `nh os switch --hostname nire-durandal ~/nixos/` `sudo nixos-rebuild switch --flake .#nire-durandal`
-      nixosConfigurations."nire-durandal" = inputs.nixpkgs.lib.nixosSystem {
-          specialArgs = inputs;
-          modules     = [
-            {
-              system.stateVersion = "23.11"; # Don't change. https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion
-              networking.hostName = "nire-durandal";
-              
-              imports = 
-              let user = "elly"; host = "nire-durandal"; wm = "kde"; cpu = "amd"; gpu = "amd"; 
-              in 
-              [
+              }
+            ];
+        };
+        # `nh home switch --configuration elly-in-nire-durandal ~/nixos/` `home-manager switch --flake .#elly@nire-durandal`
+        homeConfigurations."nire-durandal-hm-elly" = home-manager.lib.homeManagerConfiguration {
+            pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
+              system = "x86_64-linux";
+              config = { allowUnfree = true; };
+            };
+            extraSpecialArgs  = inputs; # this might need to be = { inherit inputs; }
+            modules           = [
+                (import-tree ../misc/util/nix) # utility functions
+                { 
+                  home.stateVersion        = "22.11"; 
+                  home.username            = "elly";
+                  home.homeDirectory       = "/home/elly";
+                }
+                (import-tree ./configs/home-manager/user-elly)
+            ];
+        };
+      
+
+        # nire-tenacity (GPD Win Mini 25). `nh os switch --hostname nire-tenacity ~/nixos/` `sudo nixos-rebuild switch --flake .#nire-tenacity`
+        nixosConfigurations."nire-tenacity"     = nixpkgs.lib.nixosSystem {
+          specialArgs = inputs;                                 # send inputs to modules (is this actually the right description?)
+          system      = "x86_64-linux";
+          modules = [
+              {
+                system.stateVersion = "25.05"; # Don't change. https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion
+                networking.hostName = "nire-tenacity";
+                imports =
+                let user = "elly"; host = "nire-tenacity"; wm = "gaming-handheld"; cpu = "amd"; gpu = "amd"; 
+                in
+                [
+                  ../misc/modules/linux-crisis-utilities.nix
                   (import-tree ../misc/util/nix) # utility functions
                   nix-index-database.nixosModules.nix-index
-                  ../misc/modules/linux-crisis-utilities.nix
+                  jovian.nixosModules.default
+                  
                   (import-tree ./configs/hosts/${host})
                   (import-tree ./configs/system-config/users/${user})
                   (import-tree ./configs/system-config/hw/gpu/${gpu})
@@ -103,88 +154,37 @@
                   (import-tree ./configs/system-config/common)
                   (import-tree ./configs/system-config/gaming)
                   (import-tree ./configs/system-config/wm/${wm})
-                  # impermanence
                   # |- /!!\ WARN: this will delete /root on boot /!!\ -|
                   ./configs/system-config/impermanence/_WARN.impermanence.nix
-              ];
-
-            }
-          ];
-      };
-      # `nh home switch --configuration elly-in-nire-durandal ~/nixos/` `home-manager switch --flake .#elly@nire-durandal`
-      homeConfigurations."nire-durandal-hm-elly" = home-manager.lib.homeManagerConfiguration {
-          pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
-            system = "x86_64-linux";
-            config = { allowUnfree = true; };
-          };
-          extraSpecialArgs  = inputs; # this might need to be = { inherit inputs; }
-          modules           = [
-              (import-tree ../misc/util/nix) # utility functions
-              { 
-                home.stateVersion        = "22.11"; 
-                home.username            = "elly";
-                home.homeDirectory       = "/home/elly";
-              }
-              (import-tree ./configs/home-manager/user-elly)
-          ];
-      };
-    
-
-      # nire-tenacity (GPD Win Mini 25). `nh os switch --hostname nire-tenacity ~/nixos/` `sudo nixos-rebuild switch --flake .#nire-tenacity`
-      nixosConfigurations."nire-tenacity"     = nixpkgs.lib.nixosSystem {
-        specialArgs = inputs;                                 # send inputs to modules (is this actually the right description?)
-        system      = "x86_64-linux";
-        modules = [
-            {
-              system.stateVersion = "25.05"; # Don't change. https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion
-              networking.hostName = "nire-tenacity";
-              imports =
-              let user = "elly"; host = "nire-tenacity"; wm = "gaming-handheld"; cpu = "amd"; gpu = "amd"; 
-              in
-              [
-                ../misc/modules/linux-crisis-utilities.nix
-                (import-tree ../misc/util/nix) # utility functions
-                nix-index-database.nixosModules.nix-index
-                jovian.nixosModules.default
-                
-                (import-tree ./configs/hosts/${host})
-                (import-tree ./configs/system-config/users/${user})
-                (import-tree ./configs/system-config/hw/gpu/${gpu})
-                (import-tree ./configs/system-config/hw/cpu/${cpu})
-                (import-tree ./configs/system-config/common)
-                (import-tree ./configs/system-config/gaming)
-                (import-tree ./configs/system-config/wm/${wm})
-                # |- /!!\ WARN: this will delete /root on boot /!!\ -|
-                ./configs/system-config/impermanence/_WARN.impermanence.nix
-              ];
-            }
-        ];
-      };
-
-        # `nh home switch --configuration elly@nire-tenacity ~/nixos/` `home-manager switch --flake .#elly@nire-tenacity`
-        homeConfigurations."nire-tenacity-hm-elly" = home-manager.lib.homeManagerConfiguration {
-            pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
-              system = "x86_64-linux";
-              config = { allowUnfree = true; };
-            };
-            extraSpecialArgs  = inputs;                           # Pass flake inputs to our config
-            modules           = [
-                { 
-                    home = { 
-                      stateVersion        = "22.11"; 
-                      username            = "elly";
-                      homeDirectory       = "/home/elly";
-                    };
-                imports = [ 
-                    (import-tree ./configs/home-manager/user-elly)
                 ];
-                }
-
-                (import-tree ../misc/util/nix) # utility functions
-              
-            ];
+              }
+          ];
         };
-    };
+
+          # `nh home switch --configuration elly@nire-tenacity ~/nixos/` `home-manager switch --flake .#elly@nire-tenacity`
+          homeConfigurations."nire-tenacity-hm-elly" = home-manager.lib.homeManagerConfiguration {
+              pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
+                system = "x86_64-linux";
+                config = { allowUnfree = true; };
+              };
+              extraSpecialArgs  = inputs;                           # Pass flake inputs to our config
+              modules           = [
+                  { 
+                      home = { 
+                        stateVersion        = "22.11"; 
+                        username            = "elly";
+                        homeDirectory       = "/home/elly";
+                      };
+                  imports = [ 
+                      (import-tree ./configs/home-manager/user-elly)
+                  ];
+                  }
+
+                  (import-tree ../misc/util/nix) # utility functions
+                
+              ];
+          };
+      };
 
 
   # _module.args.rootPath = ./.;
