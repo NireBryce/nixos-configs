@@ -14,9 +14,17 @@
         user-elly   = true;
     };
   # The NixOS module for this machine
-    flake.modules.nixos.nire-durandal = 
-    {import-tree, nix-index-database, ...}:
-    {
+
+  nixosConfigurations."nire-durandal" = inputs.nixpkgs.lib.nixosSystem {
+          specialArgs = inputs;
+          modules     = [
+            ./hosts/nire-durandal/durandal-host-config.nix
+          ];
+        };
+flake.modules.nixos.nire-durandal = 
+{import-tree, nix-index-database, ...}:
+{
+    nixpkgs.hostPlatform = "x86_64-linux";
     system.stateVersion = "23.11"; # Don't change. https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion
     networking.hostName = "nire-durandal";
     
