@@ -1,4 +1,5 @@
 # desc = "";
+{ flake.modules.homeManager.common.shells.zsh =
 { ... }:
 {
     # ! WARN: unsure how global aliases work here
@@ -14,4 +15,6 @@
         "whence"                = "type -a";
         "zsh-keymap"            = "bindkey";
     };    
+
 }
+;}

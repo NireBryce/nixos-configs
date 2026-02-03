@@ -1,5 +1,6 @@
+{flake.modules.homeManager.common.shells.fish = 
 { ... }:
-{
+{ 
     programs.fish = {
         enable = true;
         interactiveShellInit = ''
@@ -9,4 +10,5 @@
         '';
         generateCompletions = true;
     };
+};
 }

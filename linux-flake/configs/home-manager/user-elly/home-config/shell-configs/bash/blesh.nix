@@ -1,4 +1,5 @@
 # desc = "bash line editor, allows zsh-like line editor tricks and bindings";
+{ flake.modules.homeManager.common.shells.bash =
 { pkgs, ... }:
 let packageList = with pkgs; [
     blesh
@@ -25,4 +26,6 @@ in
 
 
     '';
-}
+};
+
+}#

@@ -1,4 +1,5 @@
 # desc = "";
+{ flake.modules.homeManager.packages.shellUtil.starship=
 { ... }:
 
 {
@@ -10,3 +11,4 @@
     };
 }
 
+;}

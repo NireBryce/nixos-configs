@@ -1,4 +1,5 @@
 # desc = "";
+{ flake.modules.homeManager.packages.shellUtil.zoxide =
 {  ... }:
 
 {
@@ -11,3 +12,4 @@
     };    
 }
 
+;}

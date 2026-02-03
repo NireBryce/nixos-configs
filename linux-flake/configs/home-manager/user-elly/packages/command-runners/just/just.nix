@@ -1,9 +1,6 @@
 # desc = "just - justfile runner";
+{ flake.modules.homeManager.packages.commandRunners.just =
 { pkgs, ... }:
-let packageList = with pkgs; [
-    just
-];
-in
 {
     home.file = {
         "./.justfile"         .source = ./config/.justfile;
@@ -11,5 +8,8 @@ in
         "./.just"             .source = ./config;
     };
 
-    home.packages = packageList;
+    home.packages = with pkgs; [
+        just
+    ];
 }
+;}

@@ -1,10 +1,8 @@
 # desc = "bash configs";
+{ flake.modules.homeManager.common.shells.bash = 
 { pkgs, ... }:
 
 {
-    
-
-
     programs.bash = {
         enable = true;
         enableCompletion = true;
@@ -49,4 +47,6 @@
         '';
 
     };
-}
+};
+
+}#

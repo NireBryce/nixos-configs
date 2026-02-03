@@ -1,4 +1,5 @@
-# desc = "Obsidian markdown PKM like org mode, https://obsidian.md/";
+# Obsidian - markdown PKM like org mode, https://obsidian.md/
+{ flake.modules.homeManager.packages.productivity.obsidian =
 { pkgs, ... }:
 let
     packageList = with pkgs; [
@@ -8,3 +9,4 @@ in
 {
     home.packages = packageList;
 }
+;}

@@ -1,3 +1,4 @@
+{ flake.modules.homeManager.development.claude =
 { pkgs, ... }:
 let 
     packageList = with pkgs; [
@@ -7,3 +8,4 @@ in
 {
     home.packages = packageList;
 }
+;}

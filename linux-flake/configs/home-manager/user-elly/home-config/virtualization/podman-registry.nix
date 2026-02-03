@@ -1,3 +1,4 @@
+{ flake.modules.homeManager.virtualization.podman-registry = 
 { ... }:
 {
         # User-scoped `~/.config/containers/registries`
@@ -7,3 +8,4 @@
             registries = ['docker.io']
         '';
 }
+;}

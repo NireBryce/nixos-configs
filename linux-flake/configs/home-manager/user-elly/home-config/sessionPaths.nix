@@ -1,4 +1,5 @@
 # desc = "elly user session paths";
+{ flake.modules.homeManager.common.sessionPaths =
 { ... }:
 {
     home.sessionPath = [ 
@@ -12,3 +13,4 @@
         "$HOME/.cargo/bin"
     ];
 }
+;}

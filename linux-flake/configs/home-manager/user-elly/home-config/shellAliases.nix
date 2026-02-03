@@ -1,4 +1,5 @@
 # desc = "";
+{ flake.modules.homeManager.common.shellAliases =
 { pkgs, ... }:
 {
     home.shellAliases = { 
@@ -15,3 +16,4 @@
         kssh            = "${pkgs.kitty}/bin/kitty +kitten ssh";
     };  
 }
+;}

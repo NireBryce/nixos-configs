@@ -1,5 +1,6 @@
 # desc = "";
-    { ... }:
+{ flake.modules.homeManager.packages.shellUtil.eza =
+{ ... }:
 
 {
     programs.eza = {
@@ -19,4 +20,4 @@
     
     };
 }
-
+;}

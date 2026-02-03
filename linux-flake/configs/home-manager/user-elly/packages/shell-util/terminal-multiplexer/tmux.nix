@@ -1,4 +1,5 @@
 # desc = "";
+{ flake.modules.homeManager.packages.shellUtil.multiplexer.tmux =
     { ... }:
 
 {
@@ -6,4 +7,4 @@
         enable = true;
     };
 }
-
+;}

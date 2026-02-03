@@ -1,9 +1,9 @@
-# desc = "bash linter";
+# shellcheck shellscript linter
+{ flake.modules.homeManager.development.shellscript.shellcheck =
 { pkgs, ... }:
-let packageList = with pkgs; [
-    shellcheck
-];
-in
 {
-    home.packages = packageList;
+    home.packages = with pkgs; [
+        shellcheck
+    ];
 }
+;}

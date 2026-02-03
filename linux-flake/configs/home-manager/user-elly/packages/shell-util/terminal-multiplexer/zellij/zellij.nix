@@ -1,4 +1,5 @@
 # desc = "";
+{ flake.modules.homeManager.packages.shellUtil.multiplexer.zellij =
 { pkgs, ... }:
 let packageList = with pkgs; [
     zellij
@@ -19,4 +20,4 @@ programs.zellij = {
     enableFishIntegration = true;
 };
 }
-
+;}

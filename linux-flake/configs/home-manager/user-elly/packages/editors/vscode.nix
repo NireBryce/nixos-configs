@@ -1,7 +1,7 @@
+# vscode - it is what it is
 # other settings in system-config/dev/vscode-setup
-# TODO: consider merging home-manager and system-config under same flake
-
-# desc = "vscode-fhs";
+# checkme: consider merging home-manager and system-config under same flake
+{ flake.modules.homeManager.packages.editors.vscode = 
 { pkgs, ... }:
 
 {
@@ -10,3 +10,4 @@
         package = pkgs.vscode-fhs;
     };
 }
+;}

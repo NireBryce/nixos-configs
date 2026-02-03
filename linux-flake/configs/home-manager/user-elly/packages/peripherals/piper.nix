@@ -1,4 +1,5 @@
-# desc = " logitech/razer mouse manager https://github.com/soxoj/piper";
+# piper - logitech/razer graphical mouse manager https://github.com/soxoj/piper";
+{ flake.modules.homeManager.packages.peripherals.mouse.piper = 
 { pkgs, ... }:
 let
     packageList = with pkgs; [
@@ -8,3 +9,4 @@ in
 {
     home.packages = packageList;
 }
+;}

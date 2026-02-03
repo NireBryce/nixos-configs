@@ -1,4 +1,5 @@
 # desc = "";
+{ flake.modules.homeManager.packages.shellUtil.dircolors =
 { ... }:
 
 {
@@ -9,3 +10,4 @@
         enableFishIntegration = true;
     };
 }
+;}

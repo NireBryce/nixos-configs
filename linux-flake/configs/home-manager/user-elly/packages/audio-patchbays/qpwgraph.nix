@@ -1,4 +1,5 @@
 # desc = "qpw graph virtual mixer";
+{ flake.modules.homeManager.packages.audio = 
 { pkgs, ... }:
 let
     packageList = with pkgs; [
@@ -8,3 +9,4 @@ in
 {
     home.packages = packageList;
 }
+;}

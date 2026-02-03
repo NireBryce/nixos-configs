@@ -1,5 +1,5 @@
+{ flake.modules.homeManager.packages.commandRunners.vicinae = 
 { ... }:
-
 {
     programs.vicinae = {
         enable = true;
@@ -21,3 +21,4 @@
         };
     };
 }
+;}

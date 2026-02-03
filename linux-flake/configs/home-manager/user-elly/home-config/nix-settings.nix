@@ -1,4 +1,5 @@
 # desc = "";
+{ flake.modules.homeManager.common.nix-settings =
 { ... }:
 
 {
@@ -7,3 +8,4 @@
         allowUnfreePredicate = (_: true);           # Workaround for https://github.com/nix-community/home-manager/issues/2942
     };
 }
+;}

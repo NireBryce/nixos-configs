@@ -1,4 +1,5 @@
-# desc = " GNU Image Manipulation Program. https://www.gimp.org";
+# gimp - the GNU Image Manipulation Program. https://www.gimp.org
+{ flake.modules.homeManager.packages.imageEditors.gimp =
 { pkgs, ... }:
 let
     packageList = with pkgs; [
@@ -8,3 +9,4 @@ in
 {
     home.packages = packageList;
 }
+;}

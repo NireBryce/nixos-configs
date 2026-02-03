@@ -1,4 +1,5 @@
-# desc = "TUI docker interface";
+# lazydocker - TUI docker interface
+{ flake.modules.homeManager.packages.docker.lazydocker =
 { pkgs, ... }:
 let packageList = with pkgs; [
     lazydocker
@@ -6,4 +7,7 @@ let packageList = with pkgs; [
 in
 {
     home.packages = packageList;
+
+    # might require zsh - low priority checkme
 }
+;}

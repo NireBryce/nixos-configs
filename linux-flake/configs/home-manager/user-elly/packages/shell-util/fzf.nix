@@ -1,4 +1,5 @@
 # desc = "fuzzy finder";
+{ flake.modules.homeManager.packages.shellUtil.fzf =
 { ... }:
 
 {
@@ -33,3 +34,4 @@
     };
 }
 
+;}

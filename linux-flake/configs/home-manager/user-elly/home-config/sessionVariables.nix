@@ -1,4 +1,5 @@
 # desc = "elly user session variables";
+{ flake.modules.homeManager.common.sessionVariables =
 { pkgs, ... }:
 {
     home.sessionVariables = { 
@@ -17,3 +18,4 @@
         PYTHON                  = "PYTHON";
     };
 }
+;}

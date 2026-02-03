@@ -1,5 +1,6 @@
 
 { pkgs, ... }:
+{ flake.modules.homeManager.packages.terminals.kitty = 
 let
     packageList = with pkgs; [
         kitty-img
@@ -22,3 +23,4 @@ in
         };
     };
 }
+;}

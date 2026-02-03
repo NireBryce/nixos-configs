@@ -1,4 +1,5 @@
 # desc = "";
+{ flake.modules.homeManager.packages.shellUtil.direnv =
 { ... }:
 
 {
@@ -10,4 +11,4 @@
         nix-direnv.enable = true;
     };
 }
-
+;}

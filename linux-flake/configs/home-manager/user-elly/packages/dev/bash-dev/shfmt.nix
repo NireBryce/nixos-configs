@@ -1,9 +1,9 @@
-# desc = "bash formatter";
+# shellfmt shellscript formatter
+{ flake.modules.homeManager.development.shellscript.shfmt =
 { pkgs, ... }:
-let packageList = with pkgs; [
-    shfmt
-];
-in
 {
-    home.packages = packageList;
+    home.packages = with pkgs; [
+        shfmt
+    ];
 }
+;}

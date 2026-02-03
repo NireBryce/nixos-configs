@@ -1,4 +1,5 @@
 # desc = "Atuin remote encrypted history manager";
+{ flake.modules.homeManager.packages.shellUtil.history.atuin = 
 { ... }:
 {
     programs.atuin = {       
@@ -15,3 +16,4 @@
         };
     };
 }
+;}

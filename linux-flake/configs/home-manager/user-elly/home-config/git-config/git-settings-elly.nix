@@ -1,8 +1,6 @@
-# desc = "";
+{ flake.modules.homeManager.common.git = 
 { ... }:
-
 {
-    #
     home.file."./.gitconfig".source = ./.gitconfig;
     
     programs.git = {        # User-specific git config
@@ -30,4 +28,6 @@
         lfs.enable = true;
         ignores = [ ".direnv" "result" ];
     };
-}
+};
+
+}#

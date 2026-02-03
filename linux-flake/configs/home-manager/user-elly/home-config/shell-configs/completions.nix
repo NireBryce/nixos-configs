@@ -1,9 +1,8 @@
+{ flake.modules.homeManager.common.shells.completions = # 1
 { pkgs, ... }:
-let 
-    packageList = with pkgs; [
+{
+    home.packages = with pkgs; [
         cod
     ];
-in
-{
-    home.packages = packageList;
 }
+;}  

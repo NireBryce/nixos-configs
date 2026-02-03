@@ -1,10 +1,10 @@
 # desc = "Audacity audio editor";
+{ flake.modules.homeManager.packages.audioEditing.audacity =
 { pkgs, ... }:
-let
-    packageList = with pkgs; [
+{
+home.packages = with pkgs; [
         audacity
     ];
-in 
-{
-home.packages = packageList;
+# TODO: make this only load for workstation or audio workstation
 }
+;}

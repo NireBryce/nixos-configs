@@ -1,4 +1,5 @@
-# desc = "office productivity software https://www.libreoffice.org/";
+# libreoffice - office productivity software https://www.libreoffice.org/
+{ flake.modules.homeManager.packages.productivity.libreOffice =
 { pkgs, ... }:
 let
     packageList = with pkgs; [
@@ -8,3 +9,4 @@ in
 {
     home.packages = packageList;
 }
+;}

@@ -1,4 +1,4 @@
-# desc = "magic-wormhole point to point file transfer";
+# wh - magic-wormhole point to point file transfer
 { pkgs, ... }:
 let packageList = with pkgs; [
     magic-wormhole-rs

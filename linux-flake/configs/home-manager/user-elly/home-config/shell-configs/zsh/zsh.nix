@@ -19,6 +19,7 @@
 # evaluation warning: `programs.zsh.initExtra` is deprecated, use `programs.zsh.initContent` instead.
 #   Example: programs.zsh.initContent = "your content here";
 
+{ flake.modules.homeManager.common.shells.zsh =
 { pkgs, lib, ... }:
 let zshPluginRequiresList = with pkgs; [
     diff-so-fancy
@@ -219,4 +220,5 @@ in
             eval "''$(${pkgs.just}/bin/just --completions zsh)"
         '';
     };
+};
 }
