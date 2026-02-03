@@ -55,6 +55,9 @@
         import-tree.url 
           = "github:vic/import-tree";
     };
+    # flake-parts
+        flake-parts.url 
+          = "github:hercules-ci/flake-parts";
 
     outputs = {
       self,
@@ -65,17 +68,16 @@
       home-manager,
       nixos-hardware,
       nix-index-database,
+      flake-parts,
       musnix,
       jovian,
       impermanence,
       sops-nix,
       ...
     } @ inputs:
-
+    flake-parts.lib.mkFlake {inherit inputs; } (top@{ config, withSystem, moduleWithSystem, ... }: 
     {
-      # lib.util = import ./util-nix/importRecurseDirectories.nix;
       debug = true;
-      overlays    = import ../misc/overlays {inherit inputs;};
       hardware    = import nixos-hardware;           # needed for something in nixos hardware
       inputs = inputs;                               # move inputs into this scope (I think)
 
@@ -83,30 +85,7 @@
       nixosConfigurations."nire-durandal" = inputs.nixpkgs.lib.nixosSystem {
           specialArgs = inputs;
           modules     = [
-            {
-              system.stateVersion = "23.11"; # Don't change. https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion
-              networking.hostName = "nire-durandal";
-              
-              imports = 
-              let user = "elly"; host = "nire-durandal"; wm = "kde"; cpu = "amd"; gpu = "amd"; 
-              in 
-              [
-                  (import-tree ../misc/util/nix) # utility functions
-                  nix-index-database.nixosModules.nix-index
-                  ../misc/modules/linux-crisis-utilities.nix
-                  (import-tree ./configs/hosts/${host})
-                  (import-tree ./configs/system-config/users/${user})
-                  (import-tree ./configs/system-config/hw/gpu/${gpu})
-                  (import-tree ./configs/system-config/hw/cpu/${cpu})
-                  (import-tree ./configs/system-config/common)
-                  (import-tree ./configs/system-config/gaming)
-                  (import-tree ./configs/system-config/wm/${wm})
-                  # impermanence
-                  # |- /!!\ WARN: this will delete /root on boot /!!\ -|
-                  ./configs/system-config/impermanence/_WARN.impermanence.nix
-              ];
-
-            }
+            ./hosts/nire-durandal/durandal-host-config.nix
           ];
       };
       # `nh home switch --configuration elly-in-nire-durandal ~/nixos/` `home-manager switch --flake .#elly@nire-durandal`
@@ -117,13 +96,7 @@
           };
           extraSpecialArgs  = inputs; # this might need to be = { inherit inputs; }
           modules           = [
-              (import-tree ../misc/util/nix) # utility functions
-              { 
-                home.stateVersion        = "22.11"; 
-                home.username            = "elly";
-                home.homeDirectory       = "/home/elly";
-              }
-              (import-tree ./configs/home-manager/user-elly)
+            (import-tree ./configs/home-manager/user-elly)
           ];
       };
     
@@ -182,8 +155,7 @@
               
             ];
         };
-    };
-
+    });
 
   # _module.args.rootPath = ./.;
 }

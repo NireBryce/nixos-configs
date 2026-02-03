@@ -1,7 +1,7 @@
-{ inputs, config, ...}:
+{ import-tree, home-manager,... }:
 let
     home-manager-config =
-    { lib, ... }:
+    { ... }:
     {
         home-manager = {
             verbose = true;
@@ -16,14 +16,14 @@ in
 {
     flake.modules.nixos.home-manager = {
         imports = [
-            inputs.home-manager.nixosModules.home-manager
-            home-manager-config
+            home-manager.nixosModules.home-manager
+            (import-tree ./configs/home-manager/user-elly)
         ];
     };
     flake.modules.darwin.home-manager = {
         imports = [
-            inputs.home-manager.nixosModules.home-manager
-            home-manager-config
+            home-manager.darwinModules.home-manager
+            (import-tree ./configs/home-manager/user-elly)
         ];
     };
 }
