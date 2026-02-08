@@ -75,6 +75,8 @@
       sops-nix,
       ...
     } @ inputs:
+
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } (import-tree ./configs);
     flake-parts.lib.mkFlake {inherit inputs; } (top@{ config, withSystem, moduleWithSystem, ... }: 
     {
       debug = true;

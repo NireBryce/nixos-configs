@@ -1,5 +1,6 @@
 # impermanence metapackage
 # THIS WILL DELETE YOUR ROOT ON BOOT, so like, know what you're doing
+# Leading _ prevents import-tree from importing this automatically from tree
 {
     lib,
     config,

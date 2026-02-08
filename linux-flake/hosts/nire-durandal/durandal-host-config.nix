@@ -1,4 +1,8 @@
-{ ... }:
+# note: may need to be inputs and then inputs.self, see https://github.com/Doc-Steve/dendritic-design-with-flake-parts/blob/main/modules/hosts/homeserver%20%5BN%5D/flake-parts.nix
+{ 
+    self, 
+    ... 
+}:
 {
     
  # Set the capability flags for this machine at the flake level
@@ -13,37 +17,23 @@
         impermanent = true; # |- /!!\ WARN: this will delete /root on boot /!!\ -|
         user-elly   = true;
     };
-  # The NixOS module for this machine
-
-  nixosConfigurations."nire-durandal" = inputs.nixpkgs.lib.nixosSystem {
-          specialArgs = inputs;
-          modules     = [
-            ./hosts/nire-durandal/durandal-host-config.nix
-          ];
-        };
-flake.modules.nixos.nire-durandal = 
+flake.nixosConfigurations = self.lib.mkNixos "x86_64-linux" "nire-durandal";
+flake.modules.nixos."nire-durandal" = 
 {import-tree, nix-index-database, ...}:
 {
     nixpkgs.hostPlatform = "x86_64-linux";
+
+
+    
     system.stateVersion = "23.11"; # Don't change. https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion
     networking.hostName = "nire-durandal";
     
-    imports = 
-    let 
-        user = "elly"; host = "nire-durandal"; 
-        wm = "kde"; cpu = "amd"; gpu = "amd"; 
-    in 
-    [
-        (import-tree ../misc/util/nix) # utility functions
+    imports = [
         nix-index-database.nixosModules.nix-index
         ../misc/modules/linux-crisis-utilities.nix
-        (import-tree ./configs/hosts/${host})
-        (import-tree ./configs/system-config/users/${user})
-        (import-tree ./configs/system-config/hw/gpu/${gpu})
-        (import-tree ./configs/system-config/hw/cpu/${cpu})
-        (import-tree ./configs/system-config/common)
-        (import-tree ./configs/system-config/gaming)
-        (import-tree ./configs/system-config/wm/${wm})
+        (import-tree ./configs/hosts/nire-durandal/hw-conf)
+        (import-tree ./configs/hosts/nire-durandal/fixes)
+        (import-tree ./configs/system-config)
         # impermanence
         # |- /!!\ WARN: this will delete /root on boot /!!\ -|
         ./configs/system-config/impermanence/_WARN.impermanence.nix
