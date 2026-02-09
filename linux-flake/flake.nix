@@ -8,8 +8,8 @@
     # Unstable
         nixpkgs.url
           = "github:NixOS/nixpkgs/nixos-unstable";
-        # nixpkgs.url
-        #     = "github:NixOS/nixpkgs/nixpkgs-unstable"; # TODO: this is a YOLO fix for https://github.com/nix-community/home-manager/issues/5991,  I have already spent too much time on this
+        nixpkgs-lib.follows 
+          = "nixpkgs";
     # Darwin
         darwin.url
           = "github:LnL7/nix-darwin";
@@ -33,8 +33,6 @@
     # Home Manager
         home-manager.url
           = "github:nix-community/home-manager/master";
-        # home-manager-unstable.url
-        #   = "github:NixOS/nixpkgs/nixos-unstable";
         home-manager.inputs.nixpkgs.follows
           = "nixpkgs";
     # NixOS-Hardware (for machine-specific fixes)
@@ -58,6 +56,21 @@
     # flake-parts
         flake-parts.url 
           = "github:hercules-ci/flake-parts";
+        flake-parts.inputs.nixpkgs-lib.follows 
+          = "nixpkgs-lib";
+    # default nix system
+        systems.url 
+          = "github:nix-systems/default";
+    # den - dendridic pattern tool
+        den.url 
+          = "github:vic/den";
+    # flake-aspects dendridic tools
+        flake-aspects.url 
+          = "github:vic/flake-aspects";
+    # merge flake modules into one output file
+        flake-file.url 
+          = "github:vic/flake-file";
+      
 
     outputs = {
       self,
@@ -77,33 +90,32 @@
     } @ inputs:
 
     inputs.flake-parts.lib.mkFlake { inherit inputs; } (import-tree ./configs);
-    flake-parts.lib.mkFlake {inherit inputs; } (top@{ config, withSystem, moduleWithSystem, ... }: 
-    {
-      debug = true;
+    
+    
+    # flake-parts.lib.mkFlake {inherit inputs; } (top@{ config, withSystem, moduleWithSystem, ... }: 
+    # {
+    #   debug = true;
       
-      flake = { };
-      systems = [
-        "x86_64-linux"
-      ];
-      perSystem = { config, pkgs, ... }: {
-        # nire-durandal (workstation) `nh os switch --hostname nire-durandal ~/nixos/` `sudo nixos-rebuild switch --flake .#nire-durandal`
-        nixosConfigurations."nire-durandal" = inputs.nixpkgs.lib.nixosSystem {
-          specialArgs = inputs;
-          modules     = [
-            ./hosts/nire-durandal/durandal-host-config.nix
-          ];
-        };
-        # `nh home switch --configuration elly-in-nire-durandal ~/nixos/` `home-manager switch --flake .#elly@nire-durandal`
-        homeConfigurations."nire-durandal-hm-elly" = home-manager.lib.homeManagerConfiguration {
-          pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
-            system = "x86_64-linux";
-            config = { allowUnfree = true; };
-          };
-            extraSpecialArgs  = inputs; # this might need to be = { inherit inputs; }
-            modules           = [
-              (import-tree ./configs/home-manager/user-elly)
-            ];
-        };
+    #   flake = { };
+    #   systems = [
+    #     "x86_64-linux"
+    #   ];
+    #   perSystem = { config, pkgs, ... }: {
+    #     # nire-durandal (workstation) `nh os switch --hostname nire-durandal ~/nixos/` `sudo nixos-rebuild switch --flake .#nire-durandal`
+    #     nixosConfigurations."nire-durandal" = inputs.nixpkgs.lib.nixosSystem {
+    #       specialArgs = inputs;
+    #       modules     = [
+    #         ./hosts/nire-durandal/durandal-host-config.nix
+    #       ];
+    #     };
+    #     # `nh home switch --configuration elly-in-nire-durandal ~/nixos/` `home-manager switch --flake .#elly@nire-durandal`
+    #     homeConfigurations."nire-durandal-hm-elly" = home-manager.lib.homeManagerConfiguration {
+    #       pkgs              = import nixpkgs {                  # Home manger requires a pkgs instance
+    #         system = "x86_64-linux";
+    #         config = { allowUnfree = true; };
+    #       };
+    #
+    #     };
         # nire-tenacity (GPD Win Mini 25). `nh os switch --hostname nire-tenacity ~/nixos/` `sudo nixos-rebuild switch --flake .#nire-tenacity`
       #   nixosConfigurations."nire-tenacity" = nixpkgs.lib.nixosSystem {
       #     specialArgs = inputs;                                 # send inputs to modules (is this actually the right description?)

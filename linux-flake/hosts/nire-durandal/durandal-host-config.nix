@@ -17,17 +17,16 @@
         impermanent = true; # |- /!!\ WARN: this will delete /root on boot /!!\ -|
         user-elly   = true;
     };
+
 flake.nixosConfigurations = self.lib.mkNixos "x86_64-linux" "nire-durandal";
+
 flake.modules.nixos."nire-durandal" = 
 {import-tree, nix-index-database, ...}:
 {
     nixpkgs.hostPlatform = "x86_64-linux";
-
-
-    
     system.stateVersion = "23.11"; # Don't change. https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion
     networking.hostName = "nire-durandal";
-    
+
     imports = [
         nix-index-database.nixosModules.nix-index
         ../misc/modules/linux-crisis-utilities.nix
