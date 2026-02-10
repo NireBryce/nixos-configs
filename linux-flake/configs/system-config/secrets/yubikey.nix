@@ -5,7 +5,7 @@
 let homeDirectory = "${config.users.users.elly.home}";  # todo: automatee, or at least set only one top level variable
 in
 {
-    flake.modules.nixos.secrets.yubikey = { pkgs, lib, ... }: {
+    den.bundles.yubikey = { pkgs, lib, ... }: {
         environment.systemPackages = with pkgs; [
             pam_u2f
             yubioath-flutter

@@ -1,4 +1,4 @@
 ### RUST DEV MOVED TO SYSTEM
-{ flake.modules.homeManager.development.rust =
+{ den.bundles.hm.dev-tools =
 {    }
 ;}

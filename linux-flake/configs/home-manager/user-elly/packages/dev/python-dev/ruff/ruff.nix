@@ -1,5 +1,5 @@
 # ruff - python linter
-{ flake.modules.homeManager.development.python.ruff = 
+{ den.bundles.hm.dev-tools =
 { pkgs, ... }:
 let packageList = with pkgs; [
     ruff

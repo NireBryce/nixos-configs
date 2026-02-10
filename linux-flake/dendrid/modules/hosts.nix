@@ -2,7 +2,10 @@
 # then config their aspects in as many files you want
 {
   # tux user at igloo host.
-  den.hosts.x86_64-linux.igloo.users.tux = { };
+  den.hosts.x86_64-linux.nire-durandal.users.elly = { };
+  den.hosts.x86_64-linux.nire-tenacity.users.elly = { };
+  den.hosts.x86_64-linux.nire-legion.users.elly = { };
+  den.hosts.aarch64-darwin.nire-lysithea.users.elly = { };
 
   # define an standalone home-manager for tux
   # den.homes.x86_64-linux.tux = { };

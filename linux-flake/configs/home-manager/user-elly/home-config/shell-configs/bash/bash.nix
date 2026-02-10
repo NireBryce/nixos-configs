@@ -1,5 +1,5 @@
 # desc = "bash configs";
-{ flake.modules.homeManager.common.shells.bash = 
+{ den.bundles.hm.shells = 
 { pkgs, ... }:
 
 {

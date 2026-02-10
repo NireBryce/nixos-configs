@@ -1,5 +1,5 @@
 # desc = "Audacity audio editor";
-{ flake.modules.homeManager.packages.audioEditing.audacity =
+{ den.bundles.hm.audio-edit =
 { pkgs, ... }:
 {
 home.packages = with pkgs; [

@@ -1,4 +1,4 @@
-{ flake.modules.homeManager.packages.commandRunners.vicinae = 
+{ den.bundles.hm.command-runners =
 { ... }:
 {
     programs.vicinae = {

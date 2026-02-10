@@ -1,5 +1,5 @@
 # discord gamer chat app that broke containment
-{ flake.modules.homeManager.packages.comms.discord =
+{ den.bundles.hm.comms =
 { pkgs, ... }:
 let packageList = with pkgs; [
     discord

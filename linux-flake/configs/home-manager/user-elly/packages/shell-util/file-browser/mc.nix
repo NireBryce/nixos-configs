@@ -1,5 +1,5 @@
 # desc = "midnight commander file browser";
-{ flake.modules.homeManager.shellUtil.fileBrowser.mc =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     mc

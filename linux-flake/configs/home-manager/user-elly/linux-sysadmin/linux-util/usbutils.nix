@@ -1,5 +1,5 @@
 # desc = "provides `lsusb` https://www.linux-usb.org/";
-{ flake.modules.homeManager.commonLinux.linuxUtil.usbutils =
+{ den.bundles.hm.linux-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     usbutils

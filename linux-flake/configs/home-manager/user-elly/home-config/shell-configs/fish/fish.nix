@@ -1,4 +1,4 @@
-{flake.modules.homeManager.common.shells.fish = 
+{den.bundles.hm.shells = 
 { ... }:
 { 
     programs.fish = {

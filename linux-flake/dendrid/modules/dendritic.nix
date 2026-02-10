@@ -14,4 +14,5 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
+  # https://github.com/vic/flake-aspects
 }

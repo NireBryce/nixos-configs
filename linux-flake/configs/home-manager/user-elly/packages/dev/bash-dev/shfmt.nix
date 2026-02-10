@@ -1,5 +1,5 @@
 # shellfmt shellscript formatter
-{ flake.modules.homeManager.development.shellscript.shfmt =
+{ den.bundles.hm.dev-tools =
 { pkgs, ... }:
 {
     home.packages = with pkgs; [

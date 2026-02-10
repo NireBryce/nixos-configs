@@ -1,5 +1,5 @@
 # desc = "fselect - I don't remember what this does"; # TODO: better desc
-{ flake.modules.homeManager.packages.shellUtil.fselect =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     fselect

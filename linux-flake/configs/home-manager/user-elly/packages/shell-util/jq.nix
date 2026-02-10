@@ -1,5 +1,5 @@
 # desc = "jq https://github.com/stedolan/jq";
-{ flake.modules.homeManager.packages.shellUtil.jq =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     jq

@@ -1,6 +1,6 @@
 # desc = "`htop` alternative";
 { pkgs, ... }:
-{ flake.modules.homeManager.packages.shellUtil.btop =
+{ den.bundles.hm.shell-util =
 let packageList = with pkgs; [
     btop
 ];

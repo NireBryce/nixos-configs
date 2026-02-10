@@ -1,5 +1,5 @@
 # desc = "view dependency graph";
-{ flake.modules.homeManager.packages.nix.nix-tree =
+{ den.bundles.hm.nix-util = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     nix-tree

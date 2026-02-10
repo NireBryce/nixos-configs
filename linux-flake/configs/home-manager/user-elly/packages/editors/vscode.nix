@@ -1,7 +1,8 @@
 # vscode - it is what it is
 # other settings in system-config/dev/vscode-setup
 # checkme: consider merging home-manager and system-config under same flake
-{ flake.modules.homeManager.packages.editors.vscode = 
+# TODO: can you remove this?
+{ den.bundles.hm.editors =
 { pkgs, ... }:
 
 {

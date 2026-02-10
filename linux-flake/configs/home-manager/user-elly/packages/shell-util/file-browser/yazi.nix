@@ -1,5 +1,5 @@
 # yazi - file browser MAKE BETTER DESC
-{ flake.modules.homeManager.shellUtil.fileBrowser.yazi =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     yazi

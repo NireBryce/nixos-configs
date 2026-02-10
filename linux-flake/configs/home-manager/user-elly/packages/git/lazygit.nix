@@ -1,5 +1,5 @@
 # lazygit - TUI git interface
-{ flake.modules.homeManager.packages.git.lazygit =
+{ den.bundles.hm.git =
 { pkgs, ... }:
 let packageList = with pkgs; [
     lazygit

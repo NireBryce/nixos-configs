@@ -1,6 +1,6 @@
 # desc = "nix antipattern linter";
 # todo: move to nix dev
-{ flake.modules.homeManager.development.nix-dev.linters.statix =
+{ den.bundles.hm.nix-util = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     statix

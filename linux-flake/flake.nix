@@ -52,7 +52,6 @@
     # import-tree
         import-tree.url 
           = "github:vic/import-tree";
-    };
     # flake-parts
         flake-parts.url 
           = "github:hercules-ci/flake-parts";
@@ -70,11 +69,16 @@
     # merge flake modules into one output file
         flake-file.url 
           = "github:vic/flake-file";
+    };
       
 
     outputs = {
       self,
       import-tree,
+      den,
+      flake-aspects,
+      flake-file,
+      systems,
       nixpkgs,
       #nixpkgs-stable,                                         # https://nixos-and-flakes.thiscute.world/nixos-with-flakes/downgrade-or-upgrade-packages
       darwin,
@@ -171,7 +175,6 @@
       #       ];
       #   };
       # }
-  });
 
   # _module.args.rootPath = ./.;
 }

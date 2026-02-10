@@ -1,5 +1,5 @@
 # desc = "lspci";
-{ flake.modules.homeManager.commonLinux.linuxUtil.pciutils =
+{ den.bundles.hm.linux-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     pciutils

@@ -2,7 +2,7 @@
 #    nushell - the next generation shell
 #    hint: nushell -c for tabular display in any shell
 # ";
-{ flake.modules.homeManager.packages.shellUtil.nushell =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     nushell

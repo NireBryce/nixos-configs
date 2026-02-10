@@ -1,5 +1,5 @@
 # desc = "curl https://curl.se/";
-{ flake.modules.homeManager.packages.webFetchers.curl =
+{ den.bundles.hm.web-fetchers =
 { pkgs, ... }:
 let packageList = with pkgs; [
     curl

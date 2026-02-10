@@ -1,5 +1,5 @@
 # desc = "network monitor https://pdw.ex-parrot.com/iftop/";
-{ flake.modules.homeManager.commonLinux.networkUtil.iftop =
+{ den.bundles.hm.linux-sysadmin-tools =
 { pkgs, ... }:
 let packageList = with pkgs; [
     iftop

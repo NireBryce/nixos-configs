@@ -1,5 +1,5 @@
 # nixfmt - .nix file formatter";
-{ flake.modules.homeManager.development.nix.nixfmt =
+{ den.bundles.hm.dev-tools =
 { pkgs, ... }:
 let packageList = with pkgs; [
     nixfmt

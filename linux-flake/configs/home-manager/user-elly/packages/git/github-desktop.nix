@@ -1,5 +1,5 @@
 # github-desktop - github gui
-{ flake.modules.homeManager.packages.git.github-desktop =
+{ den.bundles.hm.git =
 { pkgs, ... }:
 let packageList = with pkgs; [
     github-desktop

@@ -1,5 +1,5 @@
 # desc = "";
-{ flake.modules.homeManager.packages.shellUtil.multiplexer.zellij =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     zellij

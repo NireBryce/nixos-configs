@@ -1,8 +1,8 @@
-# desc = "diff nix code";
-{ flake.modules.homeManager.packages.nix.nix-diff =
+# desc = "`nom`"; # TODO: better desc
+{ den.bundles.hm.nix-util = 
 { pkgs, ... }:
 let packageList = with pkgs; [
-    nix-diff
+    nix-output-monitor
 ];
 in
 {

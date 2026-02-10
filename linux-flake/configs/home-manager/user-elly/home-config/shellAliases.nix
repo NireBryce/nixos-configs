@@ -1,5 +1,5 @@
 # desc = "";
-{ flake.modules.homeManager.common.shellAliases =
+{ den.bundles.hm.homeConfig =
 { pkgs, ... }:
 {
     home.shellAliases = { 

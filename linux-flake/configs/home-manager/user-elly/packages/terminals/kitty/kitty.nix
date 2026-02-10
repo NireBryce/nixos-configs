@@ -1,6 +1,6 @@
 
 { pkgs, ... }:
-{ flake.modules.homeManager.packages.terminals.kitty = 
+{ den.bundles.hm.terminals =
 let
     packageList = with pkgs; [
         kitty-img

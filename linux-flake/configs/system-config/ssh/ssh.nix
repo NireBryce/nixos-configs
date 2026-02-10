@@ -2,7 +2,7 @@
     ...
 }:
 {
-    flake.modules.nixos.ssh = { ... }: {
+    den.bundles.system = { ... }: {
         services.openssh = {
             enable                          = true;
             allowSFTP                       = false;    # Don't set this if you need sftp

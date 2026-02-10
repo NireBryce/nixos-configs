@@ -2,7 +2,7 @@
     ...
 }:
 {
-    flake.modules.nixos.core.shells = { pkgs, lib, ... }: {
+    den.bundles.system = { pkgs, lib, ... }: {
       ## Shells
       environment.shells = with pkgs; [
           bash

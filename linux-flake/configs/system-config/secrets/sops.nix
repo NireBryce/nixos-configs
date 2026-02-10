@@ -11,7 +11,7 @@ let
     secretsPath = ./secrets.yaml;
 
 in {
-    flake.modules.nixos.secrets.sops = { sops-nix, pkgs, ... }: {
+    den.bundles.secrets = { sops-nix, pkgs, ... }: {
 
 
         imports     = [

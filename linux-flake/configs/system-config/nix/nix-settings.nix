@@ -2,7 +2,8 @@
     ...
 }:
 {
-    flake.modules.nixos.nix-settings = { ... }: {
+den.packages.nix-packages = { ... }:  
+{
         nix.extraOptions    = "experimental-features = nix-command flakes";
         nix.settings        = {
             trusted-users          = [ "root" ];

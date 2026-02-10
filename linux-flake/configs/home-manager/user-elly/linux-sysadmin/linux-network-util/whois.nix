@@ -1,5 +1,5 @@
 # desc = "whois lookup https://packages.qa.debian.org/w/whois.html";
-{ flake.modules.homeManager.commonLinux.networkUtil.whois =
+{ den.bundles.hm.linux-sysadmin-tools =
 { pkgs, ... }:
 let packageList = with pkgs; [
     whois

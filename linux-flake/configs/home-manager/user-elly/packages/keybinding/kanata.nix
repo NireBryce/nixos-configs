@@ -1,5 +1,5 @@
 # kanata - input-level keybinding, platform independent
-{ flake.modules.homeManager.packages.keybinding.kanata =
+{ den.bundles.hm.keybinding =
 { pkgs, ... }:
 let packageList = with pkgs; [
     kanata

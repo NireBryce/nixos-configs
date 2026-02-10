@@ -1,5 +1,5 @@
 # desc = "`rg` much faster grep alternative";
-{ flake.modules.homeManager.packages.shellUtil.ripgrep =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     ripgrep

@@ -1,5 +1,5 @@
 # desc = "openbsd netcat replacement https://www.dest-unreach.org/socat/";
-{ flake.modules.homeManager.commonLinux.networkUtil.socat =
+{ den.bundles.hm.linux-sysadmin-tools =
 { pkgs, ... }:
 let packageList = with pkgs; [
     socat

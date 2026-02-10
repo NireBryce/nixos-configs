@@ -1,6 +1,6 @@
 # desc = "run multiple commands in parallel";
 { pkgs, ... }:
-{ flake.modules.homeManager.packages.shellUtil.mprocs =
+{ den.bundles.hm.shell-util =
 let packageList = with pkgs; [
     mprocs
 ];

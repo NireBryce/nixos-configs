@@ -2,7 +2,7 @@
     ...
 }:
 {
-    flake.modules.nixos.core.disks = { ... }: {
+    den.bundles.system = { ... }: {
         fileSystems."/mnt/qnap-erin" = {
             device = "192.168.0.200:/erin-pub";
             fsType = "nfs";

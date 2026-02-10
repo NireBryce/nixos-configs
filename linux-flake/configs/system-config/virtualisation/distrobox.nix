@@ -2,7 +2,7 @@
     ...
 }:
 {
-    flake.modules.nixos.core.virt.distrobox = { pkgs, ... }: {
+    den.bundles.distrobox = { pkgs, ... }: {
 
         environment.systemPackages = with pkgs; [
             distrobox

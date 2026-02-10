@@ -1,5 +1,5 @@
 # desc = "yaml jq https://github.com/mikefarah/yq";
-{ flake.modules.homeManager.packages.shellUtil.yq-go =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     yq-go

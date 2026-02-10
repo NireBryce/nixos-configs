@@ -2,7 +2,7 @@
     ...
 }:
 {
-    flake.modules.nixos.settings.boot = { pkgs, lib, ... }: {
+    den.bundles.system = { pkgs, lib, ... }: {
         environment.systemPackages = with pkgs; [
             sbctl # secure boot ctl  
         ];

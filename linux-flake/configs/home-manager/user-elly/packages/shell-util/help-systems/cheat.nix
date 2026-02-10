@@ -1,5 +1,5 @@
 # cht.sh - cli cheatsheets
-{ flake.modules.homeManager.shellUtil.helpSystems.cheat =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     cheat

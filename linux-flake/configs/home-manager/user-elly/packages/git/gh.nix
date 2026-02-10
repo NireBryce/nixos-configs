@@ -1,5 +1,5 @@
 # gh - github-cli
-{ flake.modules.homeManager.packages.git.github-cli = 
+{ den.bundles.hm.git =
 { pkgs, ... }:
 let packageList = with pkgs; [
     gh

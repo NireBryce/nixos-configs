@@ -1,11 +1,9 @@
 # desc = "provides `dig` + `nslookup`";
-{ flake.modules.homeManager.commonLinux.networkUtil.dnsutils =
+{ den.bundles.hm.linux-sysadmin-tools =
 { pkgs, ... }:
-let packageList = with pkgs; [
-    dnsutils
-];
-in
 {
-    home.packages = packageList;
+    home.packages = with pkgs; [
+        dnsutils
+    ];
 }
 ;}

@@ -1,8 +1,8 @@
-# nil - a nix LSP server
-{ den.bundles.hm.dev-tools =
+# desc = "nix package version diff";
+{ den.bundles.hm.nix-util = 
 { pkgs, ... }:
 let packageList = with pkgs; [
-    nil
+    nvd
 ];
 in
 {

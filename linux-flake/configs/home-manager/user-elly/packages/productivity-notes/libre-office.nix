@@ -1,5 +1,5 @@
 # libreoffice - office productivity software https://www.libreoffice.org/
-{ flake.modules.homeManager.packages.productivity.libreOffice =
+{ den.bundles.hm.productivity =
 { pkgs, ... }:
 let
     packageList = with pkgs; [

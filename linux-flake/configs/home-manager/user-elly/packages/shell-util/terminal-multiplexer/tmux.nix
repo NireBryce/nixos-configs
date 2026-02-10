@@ -1,7 +1,6 @@
 # desc = "";
-{ flake.modules.homeManager.packages.shellUtil.multiplexer.tmux =
-    { ... }:
-
+{ den.bundles.hm.shell-util =
+{ ... }:
 {
     programs.tmux = {
         enable = true;

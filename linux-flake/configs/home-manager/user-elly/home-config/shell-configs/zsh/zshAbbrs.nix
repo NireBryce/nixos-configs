@@ -1,5 +1,5 @@
 # desc = "";
-{ flake.modules.homeManager.common.shells.zsh =
+{ den.bundles.hm.shells =
 { ... }:
 {
     # ! WARN: unsure how global aliases work here

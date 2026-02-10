@@ -1,8 +1,8 @@
-# desc = "nix package version diff";
-{ flake.modules.homeManager.packages.nix.nvd =
+# desc = "scan for 'dead' (uncalled) nix code";
+{ den.bundles.hm.nix-util = 
 { pkgs, ... }:
 let packageList = with pkgs; [
-    nvd
+    deadnix
 ];
 in
 {

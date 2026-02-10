@@ -2,7 +2,7 @@
     ...
 }:
 {
-    flake.modules.nixos.core.vscode = { pkgs, ... }: {
+    den.bundles.vscode = { pkgs, ... }: {
         # vscode errata, actual vscode definition in `home-manager/user-elly/packages/dev/vscode`
         environment.sessionVariables.NIXOS_OZONE_WL = "1";
         environment.systemPackages = with pkgs; [

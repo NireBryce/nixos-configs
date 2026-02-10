@@ -2,7 +2,7 @@
     ...
 }:
 {
-    flake.modules.nixos.core.virt.podman = { pkgs, ... }: {
+    den.bundles.podman = { pkgs, ... }: {
         virtualisation.podman = {
             enable = true;
             dockerCompat = true;

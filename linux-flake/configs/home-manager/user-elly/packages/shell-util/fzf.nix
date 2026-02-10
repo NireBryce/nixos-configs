@@ -1,5 +1,5 @@
 # desc = "fuzzy finder";
-{ flake.modules.homeManager.packages.shellUtil.fzf =
+{ den.bundles.hm.shell-util =
 { ... }:
 
 {

@@ -1,5 +1,5 @@
 # desc = "";
-{ flake.modules.homeManager.packages.shellUtil.zoxide =
+{ den.bundles.hm.shell-util =
 {  ... }:
 
 {

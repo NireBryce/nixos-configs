@@ -1,5 +1,5 @@
 # desc = "";
-{ flake.modules.homeManager.packages.shellUtil.eza =
+{ den.bundles.hm.shell-util =
 { ... }:
 
 {

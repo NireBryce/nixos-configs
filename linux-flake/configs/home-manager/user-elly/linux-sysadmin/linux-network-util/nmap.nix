@@ -1,5 +1,5 @@
 # desc = "network scanner http://www.nmap.org/";
-{ flake.modules.homeManager.commonLinux.networkUtil.nmap =
+{ den.bundles.hm.linux-sysadmin-tools =
 { pkgs, ... }:
 let packageList = with pkgs; [
     nmap

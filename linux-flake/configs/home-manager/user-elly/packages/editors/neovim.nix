@@ -1,5 +1,5 @@
 # neovim - it's like vim but heavier
-{ flake.modules.homeManager.packages.editors.neovim =
+{ den.bundles.hm.editors =
 { pkgs, ... }:
 let packageList = with pkgs; [
     neovim

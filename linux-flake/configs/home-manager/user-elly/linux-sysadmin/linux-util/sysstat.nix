@@ -1,5 +1,5 @@
 # desc = "system stats http://sebastien.godard.pagesperso-orange.fr/";
-{ flake.modules.homeManager.commonLinux.linuxUtil.sysstat =
+{ den.bundles.hm.linux-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     sysstat

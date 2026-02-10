@@ -1,4 +1,4 @@
-{ flake.modules.homeManager.development.claude =
+{ den.bundles.hm.claude =
 { pkgs, ... }:
 let 
     packageList = with pkgs; [

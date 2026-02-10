@@ -1,5 +1,5 @@
 # lazydocker - TUI docker interface
-{ flake.modules.homeManager.packages.docker.lazydocker =
+{ den.bundles.hm.docker =
 { pkgs, ... }:
 let packageList = with pkgs; [
     lazydocker

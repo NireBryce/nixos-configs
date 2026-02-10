@@ -1,5 +1,5 @@
 # desc = "`find` alternative";
-{ flake.modules.homeManager.packages.shellUtil.fd =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     fd

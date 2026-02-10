@@ -1,5 +1,5 @@
 # desc = "elly user session variables";
-{ flake.modules.homeManager.common.sessionVariables =
+{ den.bundles.hm.homeConfig =
 { pkgs, ... }:
 {
     home.sessionVariables = { 

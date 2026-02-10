@@ -1,5 +1,5 @@
 # git - git-scm
-{ flake.modules.homeManager.packages.git.git =
+{ den.bundles.hm.git =
 { pkgs, ... }:
 let packageList = with pkgs; [
     git

@@ -1,5 +1,5 @@
 # desc = "mtr - traceroute + ping https://www.bitwizard.nl/mtr/";
-{ flake.modules.homeManager.commonLinux.networkUtil.mtr =
+{ den.bundles.hm.linux-sysadmin-tools =
 { pkgs, ... }:
 let packageList = with pkgs; [
     mtr

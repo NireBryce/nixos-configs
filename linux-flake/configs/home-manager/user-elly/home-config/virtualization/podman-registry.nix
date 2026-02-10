@@ -1,4 +1,4 @@
-{ flake.modules.homeManager.virtualization.podman-registry = 
+{ den.bundles.hm.podman = 
 { ... }:
 {
         # User-scoped `~/.config/containers/registries`

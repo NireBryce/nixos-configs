@@ -2,7 +2,7 @@
     ...
 }:
 {
-    flake.modules.nixos.hw.peripherals = { ... }: {
+    den.bundles.peripherals.moonlander = { ... }: {
         hardware.keyboard.zsa.enable        = true;         # zsa keyboard package
     };
 }

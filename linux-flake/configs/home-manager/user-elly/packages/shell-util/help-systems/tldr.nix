@@ -1,5 +1,5 @@
 # tldr - community provided man pages
-{ flake.modules.homeManager.shellUtil.helpSystems.tldr =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     tldr

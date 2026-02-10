@@ -19,7 +19,7 @@
 # evaluation warning: `programs.zsh.initExtra` is deprecated, use `programs.zsh.initContent` instead.
 #   Example: programs.zsh.initContent = "your content here";
 
-{ flake.modules.homeManager.common.shells.zsh =
+{ den.bundles.hm.shells =
 { pkgs, lib, ... }:
 let zshPluginRequiresList = with pkgs; [
     diff-so-fancy

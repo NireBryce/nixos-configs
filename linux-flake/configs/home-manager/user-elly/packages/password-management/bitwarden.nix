@@ -1,5 +1,5 @@
 # bitwarden - password manager https://bitwarden.com/";
-{ flake.modules.homeManager.packages.passwordManagers.bitwarden =
+{ den.bundles.hm.password-management =
 { pkgs, ... }:
 let packageList = with pkgs; [
     bitwarden-desktop

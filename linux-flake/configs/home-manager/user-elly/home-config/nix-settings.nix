@@ -1,5 +1,5 @@
 # desc = "";
-{ flake.modules.homeManager.common.nix-settings =
+{ den.bundles.hm.nix-settings =
 { ... }:
 
 {

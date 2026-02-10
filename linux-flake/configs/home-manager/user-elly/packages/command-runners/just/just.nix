@@ -1,5 +1,5 @@
 # desc = "just - justfile runner";
-{ flake.modules.homeManager.packages.commandRunners.just =
+{ den.bundles.hm.command-runners =
 { pkgs, ... }:
 {
     home.file = {

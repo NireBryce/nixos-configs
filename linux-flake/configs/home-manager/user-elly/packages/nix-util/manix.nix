@@ -1,5 +1,5 @@
 # desc = "nix man pages, kinda";
-{ flake.modules.homeManager.packages.nix.manix =
+{ den.bundles.hm.nix-util = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     manix

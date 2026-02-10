@@ -1,5 +1,5 @@
 # desc = "IP address calculator https://gitlab.com/ipcalc/ipcalc";
-{ flake.modules.homeManager.commonLinux.networkUtil.ipcalc =
+{ den.bundles.hm.linux-sysadmin-tools =
 { pkgs, ... }:
 let packageList = with pkgs; [
     ipcalc

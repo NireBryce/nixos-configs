@@ -1,5 +1,5 @@
 # desc = "per-character in-line diff";
-{ flake.modules.homeManager.packages.shellUtil.riffdiff =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     riffdiff

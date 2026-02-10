@@ -1,5 +1,5 @@
 # uv - python version-, venv-, and packaging-management tool
-{ flake.modules.homeManager.development.python.uv =
+{ den.bundles.hm.dev-tools =
 { pkgs, ... }:
 let packageList = with pkgs; [
     uv

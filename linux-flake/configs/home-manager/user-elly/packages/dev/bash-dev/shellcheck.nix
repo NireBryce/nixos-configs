@@ -1,5 +1,5 @@
 # shellcheck shellscript linter
-{ flake.modules.homeManager.development.shellscript.shellcheck =
+{ den.bundles.hm.dev-tools =
 { pkgs, ... }:
 {
     home.packages = with pkgs; [

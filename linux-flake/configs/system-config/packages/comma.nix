@@ -2,7 +2,8 @@
     ...
 }:
 {
-    flake.modules.nixos.nix-utils = { ... }: {
-        programs.nix-index-database.comma.enable = true;
-    };
+den.packages.nix-packages = { ... }: 
+{
+    programs.nix-index-database.comma.enable = true;
 }
+;}

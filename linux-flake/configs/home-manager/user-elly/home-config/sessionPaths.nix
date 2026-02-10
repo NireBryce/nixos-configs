@@ -1,5 +1,5 @@
 # desc = "elly user session paths";
-{ flake.modules.homeManager.common.sessionPaths =
+{ den.bundles.hm.homeConfig =
 { ... }:
 {
     home.sessionPath = [ 

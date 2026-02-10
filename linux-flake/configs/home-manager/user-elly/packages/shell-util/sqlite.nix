@@ -1,5 +1,5 @@
 # desc = "sqlite";
-{ flake.modules.homeManager.packages.shellUtil.sqlite =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     sqlite

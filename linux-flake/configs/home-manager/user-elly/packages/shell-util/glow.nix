@@ -1,5 +1,5 @@
 # desc = "terminal markdown viewer https://github.com/charmbracelet/glow";
-{ flake.modules.homeManager.packages.shellUtil.glow =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     glow

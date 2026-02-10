@@ -1,5 +1,5 @@
 # desc = "count lines of code";
-{ flake.modules.homeManager.packages.shellUtil.tokei =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     tokei

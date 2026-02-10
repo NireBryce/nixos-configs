@@ -1,4 +1,4 @@
-{ flake.modules.homeManager.common.git = 
+{ den.bundles.hm.git = 
 { ... }:
 {
     home.file."./.gitconfig".source = ./.gitconfig;

@@ -1,5 +1,5 @@
 # desc = "make nix fetcher calls from repository URLs";
-{ flake.modules.homeManager.packages.nix.nurl =
+{ den.bundles.hm.nix-util = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     nurl

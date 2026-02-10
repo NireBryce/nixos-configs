@@ -1,5 +1,5 @@
 # iotop -io monitoring http://guichaz.free.fr/iotop";
-{ flake.modules.homeManager.commonLinux.linuxUtil.iotop =
+{ den.bundles.hm.linux-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     iotop

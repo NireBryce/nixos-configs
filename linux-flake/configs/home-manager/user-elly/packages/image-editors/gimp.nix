@@ -1,5 +1,5 @@
 # gimp - the GNU Image Manipulation Program. https://www.gimp.org
-{ flake.modules.homeManager.packages.imageEditors.gimp =
+{ den.bundles.hm.image-edit =
 { pkgs, ... }:
 let
     packageList = with pkgs; [

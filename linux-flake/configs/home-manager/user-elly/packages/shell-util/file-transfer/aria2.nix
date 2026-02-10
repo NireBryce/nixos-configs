@@ -1,5 +1,5 @@
 # aria2 -cli download manager
-{ flake.modules.homeManager.shellUtil.fileTransfer.aria2 =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     aria2

@@ -1,4 +1,4 @@
-{ flake.modules.homeManager.common.shells.completions = # 1
+{ den.bundles.hm.shells = 
 { pkgs, ... }:
 {
     home.packages = with pkgs; [

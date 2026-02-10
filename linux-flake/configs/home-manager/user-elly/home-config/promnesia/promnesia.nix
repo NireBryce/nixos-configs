@@ -1,5 +1,5 @@
 # desc = "promnesia breadcrumb-bookmarks-and-more";
-{ flake.modules.homeManager.common.knowledgeManagement = 
+{ den.bundles.hm.promnesia = 
 { ... }:
 {
     home.file.".config/promnesia".source = ./config/config.py;

@@ -1,5 +1,5 @@
 # desc = "qpw graph virtual mixer";
-{ flake.modules.homeManager.packages.audio = 
+{ den.bundles.hm.audio-tools =  
 { pkgs, ... }:
 let
     packageList = with pkgs; [

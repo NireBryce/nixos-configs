@@ -1,8 +1,8 @@
-# desc = "nix-store analysis";
-{ flake.modules.homeManager.packages.nix.nix-du =
+# desc = "diff nix code";
+{ den.bundles.hm.nix-util = 
 { pkgs, ... }:
 let packageList = with pkgs; [
-    nix-du
+    nix-diff
 ];
 in
 {

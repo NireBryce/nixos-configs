@@ -1,5 +1,5 @@
 # desc = "run commands when file changes";
-{ flake.modules.homeManager.packages.shellUtil.entr =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     entr

@@ -1,5 +1,5 @@
 # desc = "neofetch replacement https://github.com/hykilpikonna/HyFetch";
-{ flake.modules.homeManager.packages.shellUtil.hyfetch =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     hyfetch

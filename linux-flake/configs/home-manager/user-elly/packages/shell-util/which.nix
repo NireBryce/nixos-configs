@@ -1,5 +1,5 @@
 # desc = "gnu which"; # TODO: better desc
-{ flake.modules.homeManager.packages.shellUtil.which =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     which

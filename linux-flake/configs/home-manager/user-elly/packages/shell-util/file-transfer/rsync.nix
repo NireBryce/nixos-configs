@@ -1,5 +1,5 @@
 # rsync - back in my day we transfered our files uphill both ways
-{ flake.modules.homeManager.shellUtil.fileTransfer.rsync =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     rsync

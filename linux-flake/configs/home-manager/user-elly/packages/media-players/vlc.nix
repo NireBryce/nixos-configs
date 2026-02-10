@@ -1,5 +1,5 @@
 # vlc - VLC media player
-{ flake.modules.homeManager.packages.mediaPlayers.vlc =
+{ den.bundles.hm.media-players =
 { pkgs, ... }:
 let
     packageList = with pkgs; [

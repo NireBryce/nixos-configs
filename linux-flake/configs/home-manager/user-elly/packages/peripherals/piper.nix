@@ -1,5 +1,5 @@
 # piper - logitech/razer graphical mouse manager https://github.com/soxoj/piper";
-{ flake.modules.homeManager.packages.peripherals.mouse.piper = 
+{ den.bundles.hm.peripherals =
 { pkgs, ... }:
 let
     packageList = with pkgs; [

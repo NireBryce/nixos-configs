@@ -1,5 +1,5 @@
 # typescript - it's typescript
-{ flake.modules.homeManager.development.typescript =
+{ den.bundles.hm.dev-tools =
 { pkgs, ... }:
 let packageList = with pkgs; [
     typescript

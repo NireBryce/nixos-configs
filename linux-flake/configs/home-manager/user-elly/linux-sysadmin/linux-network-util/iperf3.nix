@@ -1,5 +1,5 @@
 # desc = "network tools https://software.es.net/iperf/";
-{ flake.modules.homeManager.commonLinux.networkUtil.iperf3 =
+{ den.bundles.hm.linux-sysadmin-tools =
 { pkgs, ... }:
 let packageList = with pkgs; [
     iperf3

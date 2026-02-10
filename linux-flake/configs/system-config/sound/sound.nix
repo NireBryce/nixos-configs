@@ -2,7 +2,7 @@
     ...
 }:
 {
-    flake.modules.nixos.core.sound = { pkgs, ... }: {
+    den.bundles.system = { pkgs, ... }: {
         security.rtkit.enable       = true;                       # TODO: "rtkit is optional but recommended."  I forget why I wrote this
         hardware.bluetooth.package  = pkgs.bluez5-experimental;
         services.pipewire = {

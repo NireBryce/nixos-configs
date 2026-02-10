@@ -1,5 +1,5 @@
 # desc = "show filetype";
-{ flake.modules.homeManager.packages.shellUtil.file =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     file

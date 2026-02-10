@@ -1,6 +1,6 @@
 # desc = "nix formatter";
 # TODO: dedupe, exists in develop
-{ flake.modules.homeManager.packages.nix.nixfmt =
+{ den.bundles.hm.nix-util = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     nixfmt

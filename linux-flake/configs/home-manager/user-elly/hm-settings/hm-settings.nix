@@ -1,5 +1,6 @@
-{ flake.modules.homeManager.hmSettings =
-{ import-tree, ... }:
+{ den, ...}:
+{
+den.bundles.home-manager = { import-tree, ... }:
 { 
     home.stateVersion        = "22.11"; 
     home.username            = "elly";

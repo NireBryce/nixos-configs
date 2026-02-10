@@ -1,5 +1,5 @@
 # micro, what if nano was msword for dos
-{ flake.modules.homeManager.packages.editors.micro =
+{ den.bundles.hm.editors =
 { ... }:
 {
     programs.micro = {

@@ -1,5 +1,5 @@
 # desc = "`df` alternative";
-{ flake.modules.homeManager.commonLinux.shellUtil.storage.duf =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     duf

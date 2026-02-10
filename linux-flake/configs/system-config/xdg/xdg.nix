@@ -2,7 +2,7 @@
     ...
 }:
 {
-    flake.modules.nixos.core.xdg = { pkgs, ... }: {
+    den.bundles.xdg = { pkgs, ... }: {
         # should fix steam/proton/wine issues with xdg-open https://github.com/NixOS/nixpkgs/issues/160923 
         xdg.portal = { 
             enable           = true;

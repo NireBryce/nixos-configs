@@ -1,6 +1,6 @@
 # desc = "nix-command zsh completions";
 # I think this belongs here more than with the zsh completions elsewhere
-{ flake.modules.homeManager.common.shells.zsh.completions.nix-completions =
+{ den.bundles.hm.nix-util = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     nix-zsh-completions

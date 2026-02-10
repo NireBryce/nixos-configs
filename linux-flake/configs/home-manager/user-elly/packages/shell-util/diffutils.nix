@@ -1,5 +1,5 @@
 # desc = "`diff` utils";
-{ flake.modules.homeManager.packages.shellUtil.diffutils =
+{ den.bundles.hm.shell-util =
 { pkgs, ... }:
 let packageList = with pkgs; [
     diffutils

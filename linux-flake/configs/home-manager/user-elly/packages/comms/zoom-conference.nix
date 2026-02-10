@@ -1,5 +1,5 @@
 # zoom videoconferencing software
-{ flake.modules.homeManager.packages.comms.zoom =
+{ den.bundles.hm.comms =
 { pkgs, ... }:
 let packageList = with pkgs; [
     zoom-us

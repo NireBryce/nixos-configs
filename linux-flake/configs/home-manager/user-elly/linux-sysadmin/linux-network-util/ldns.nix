@@ -1,5 +1,5 @@
 # desc = "provides `drill`, a `dig` replacement https://www.nlnetlabs.nl/projects/ldns/about/";
-{ flake.modules.homeManager.commonLinux.networkUtil.ldns =
+{ den.bundles.hm.linux-sysadmin-tools =
 { pkgs, ... }:
 let packageList = with pkgs; [
     ldns
