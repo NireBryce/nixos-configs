@@ -1,8 +1,8 @@
 {
     ...
 }: 
-{  
-den.aspects.pkg.provides.dev-tools = {pkgs, ...}: 
+{ den.aspects.nixos.provides.dev-tools = 
+{pkgs, ...}: 
 {
     nix.settings = {
         substituters = [ "https://devenv.cachix.org/" ];

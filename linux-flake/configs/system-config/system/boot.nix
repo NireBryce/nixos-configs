@@ -1,8 +1,9 @@
 {
     ...
 }:
+{ den.aspects.nixos.provides.system = 
+{ pkgs, lib, ... }: 
 {
-    den.bundles.system = { pkgs, lib, ... }: {
         environment.systemPackages = with pkgs; [
             sbctl # secure boot ctl  
         ];

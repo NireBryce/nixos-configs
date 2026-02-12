@@ -1,9 +1,9 @@
 {
     ...
 }:
+{ den.aspects.nixos.provides.jovian = 
+{ config, pkgs, lib, ... }: 
 {
-den.bundles.jovian = { config, pkgs, lib, ... }: {
-
     boot.loader = {
         # todo: replace after switching tinylaptop to limine
         limine.enable               = lib.mkForce false;

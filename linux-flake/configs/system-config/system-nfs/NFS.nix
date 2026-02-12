@@ -1,8 +1,9 @@
 {
     ...
 }:
+{ den.aspects.nixos.provides.system-nfs = 
+{ ... }:
 {
-    den.bundles.system = { ... }: {
         fileSystems."/mnt/qnap-erin" = {
             device = "192.168.0.200:/erin-pub";
             fsType = "nfs";

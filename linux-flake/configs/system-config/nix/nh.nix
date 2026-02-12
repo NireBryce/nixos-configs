@@ -1,8 +1,7 @@
 {
     ...
 }:
-{
-den.bundles.nix-packages = { ... }:  
+{ den.aspects.nixos.provides.nix = 
 {
     programs.nh = {
         enable          = true;

@@ -2,8 +2,8 @@
     ...
 }:
 
-{
-den.bundles.dev-tools = {pkgs, ...}: 
+{ den.aspects.nixos.provides.dev-tools = 
+{pkgs, ...}: 
 {
     environment.systemPackages = with pkgs; [
         cargo

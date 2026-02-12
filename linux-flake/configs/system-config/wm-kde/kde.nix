@@ -1,9 +1,10 @@
 { 
   ...
 }:
+{den.bundles.kde = 
+{ lib, pkgs, ... }: 
 {
-den.bundles.kde = { lib, pkgs, ... }: {
-    services.xserver.enable = true;
+    services.xserver.enable = true; # TODO: I think this is still needed for xwayland
 
     # Enable the KDE Desktop Environment and set wayland.
     services.desktopManager.plasma6.enable = true;
@@ -19,7 +20,6 @@ den.bundles.kde = { lib, pkgs, ... }: {
         networkmanager.enable = lib.mkDefault true;  # Needs to be 'true' for KDE networking
     };
 
-    
     # make GTK apps obey theme settings
     programs.dconf.enable = true;
 
@@ -34,8 +34,6 @@ den.bundles.kde = { lib, pkgs, ... }: {
         polonium # tiling wm
         kdePackages.krohnkite # other tiling wm
     ];
-
-
 
     environment.sessionVariables = {
         GTK_USE_PORTAL = 1;  # TODO: what does this do

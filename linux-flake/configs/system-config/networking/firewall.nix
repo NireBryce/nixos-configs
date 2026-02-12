@@ -1,8 +1,7 @@
 {
     ...
 }:
-{
-den.bundles.networking.firewall = { ... }:  
+{ den.aspects.nixos.provides.networking = 
 {        
     ## Firewall
     networking.firewall = { 

@@ -1,8 +1,8 @@
 {
     ...
 }:
-{
-den.bundles.hw.provides.amdgpu = {nixos-hardware, pkgs, ...}: 
+{ den.aspects.nixos.provides.hw-amd-gpu = 
+{ nixos-hardware, pkgs, ... }: 
 {
     imports = [ nixos-hardware.nixosModules.common-gpu-amd ];
         

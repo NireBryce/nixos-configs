@@ -1,11 +1,12 @@
 {
     ...
 }:
+{ den.aspects.nixos.provides.system = 
+{ ... }: 
 {
-    den.bundles.system = { ... }: {
-        console = {
-            keyMap  = "us";
-            font    = "Lat2-Terminus16";
-        };
+    console = {
+        keyMap  = "us";
+        font    = "Lat2-Terminus16";
     };
 }
+;}

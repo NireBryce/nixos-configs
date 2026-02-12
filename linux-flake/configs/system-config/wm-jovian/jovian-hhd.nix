@@ -1,9 +1,9 @@
 {
     ...
 }:
+{ den.aspects.nixos.provides.jovian = 
+{ pkgs, config, ... }: 
 {
-den.bundles.jovian = { pkgs, config, ... }: {
-    
     environment.systemPackages = with pkgs; [
         adjustor
     ];

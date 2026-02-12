@@ -2,8 +2,8 @@
     pkgs,
     ...
 }:
-{
-den.bundles.users.elly = { ... }: 
+{ den.aspects.nixos.provides.user-elly = 
+{ ... }: 
 {
     users.mutableUsers = false;
     users.users = { 

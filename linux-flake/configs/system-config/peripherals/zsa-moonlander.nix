@@ -1,8 +1,9 @@
 {
     ...
 }:
+{ den.aspects.nixos.provides.peripherals = 
+{ ... }: 
 {
-    den.bundles.peripherals.moonlander = { ... }: {
-        hardware.keyboard.zsa.enable        = true;         # zsa keyboard package
-    };
+    hardware.keyboard.zsa.enable        = true;         # zsa keyboard package
 }
+;}

@@ -1,8 +1,8 @@
 {
     ...
 }:
-{
-den.bundles.font.nixos = {pkgs, ...}: 
+{ den.aspects.nixos.provides.font = 
+{pkgs, ...}: 
 {
     fonts = {
         packages = with pkgs; [

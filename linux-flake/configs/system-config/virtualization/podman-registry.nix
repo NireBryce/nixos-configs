@@ -1,4 +1,4 @@
-{ den.aspects.hm.provides.shell-config = 
+{ den.aspects.nixos.provides.virtualization = 
 { ... }:
 {
         # User-scoped `~/.config/containers/registries`

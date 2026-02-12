@@ -1,8 +1,9 @@
 { 
     ... 
 }: 
+{ den.aspects.nixos.provides.wayland = 
+{ pkgs, ... }:
 {
-    den.bundles.xwayland = { pkgs, ... }: {
   
     programs.xwayland.enable = true;
 

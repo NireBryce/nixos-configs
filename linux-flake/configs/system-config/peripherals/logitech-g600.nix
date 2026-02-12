@@ -1,8 +1,9 @@
 {
     ...
 }:
+{ den.aspects.nixos.provides.peripherals = 
+{ ... }: 
 {
-    den.bundles.peripherals.logitech-g600 = { ... }: {
-        services.ratbagd.enable             = true;         # for piper logitech mouse ctl
-    };
+    services.ratbagd.enable = true;         # for piper logitech mouse ctl
 }
+;}

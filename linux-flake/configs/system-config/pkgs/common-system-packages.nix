@@ -1,8 +1,8 @@
 {
     ...
 }:
-{
-den.bundles.common-system-packages = { pkgs, ... }:  
+{ den.aspects.nixos.provides.pkgs = 
+{ pkgs, ... }:  
 {
     environment.systemPackages = with pkgs; [ # TODO: describe these
         # Editors

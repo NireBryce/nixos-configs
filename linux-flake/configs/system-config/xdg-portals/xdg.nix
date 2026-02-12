@@ -1,8 +1,9 @@
 {
     ...
 }:
+{ den.aspects.nixos.provides.xdg-portals = 
+{ pkgs, ... }: 
 {
-    den.bundles.xdg = { pkgs, ... }: {
         # should fix steam/proton/wine issues with xdg-open https://github.com/NixOS/nixpkgs/issues/160923 
         xdg.portal = { 
             enable           = true;
@@ -14,5 +15,5 @@
                 pkgs.xdg-desktop-portal-wlr
             ];
         };
-    };
 }
+;}

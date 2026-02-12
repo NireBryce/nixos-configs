@@ -1,8 +1,8 @@
 {
     ...
 }:
-{
-    den.bundles.flatpak = { pkgs, ... }:  
+{ den.aspects.nixos.provides.flatpak = 
+{ pkgs, ... }:  
 {
     services.flatpak.enable = true;
     systemd.services.flatpak-repo = {

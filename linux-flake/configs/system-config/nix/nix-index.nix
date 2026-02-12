@@ -1,8 +1,8 @@
 {
     ...
 }:
-{
-den.bundles.nix-packages = { ... }:  
+{ den.aspects.nixos.provides.nix = 
+{ ... }:  
 {
         # this barely works. figure out why
         programs.nix-index.enable = true;

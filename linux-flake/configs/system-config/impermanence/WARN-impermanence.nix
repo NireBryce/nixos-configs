@@ -4,9 +4,8 @@
 {
     ...
 }:
-
-{
-den.bundles.impermanence = { impermanence, lib, ... }:
+{ den.aspects.nixos.provides.impermanence = 
+{ impermanence, lib, ... }:
 { 
     imports = [
         impermanence.nixosModule

@@ -1,8 +1,8 @@
 {
     ...
 }:
-{
-den.bundles.gaming = {pkgs, ...}: 
+{ den.aspects.nixos.provides.gaming = 
+{pkgs, ...}: 
 {
     #* steam - (fhs)
     programs.steam = {

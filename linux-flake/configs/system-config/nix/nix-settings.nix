@@ -1,8 +1,8 @@
 {
     ...
 }:
-{
-den.packages.nix-packages = { ... }:  
+{ den.aspects.nixos.provides.nix = 
+{ ... }:  
 {
         nix.extraOptions    = "experimental-features = nix-command flakes";
         nix.settings        = {
