@@ -1,5 +1,5 @@
 # desc = "promnesia breadcrumb-bookmarks-and-more";
-{ den.bundles.hm.promnesia = 
+{ den.aspects.cfg.provides.hm- = 
 { ... }:
 {
     home.file.".config/promnesia".source = ./config/config.py;

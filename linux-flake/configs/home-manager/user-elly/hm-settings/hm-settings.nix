@@ -1,6 +1,6 @@
 { den, ...}:
 {
-den.bundles.home-manager = { import-tree, ... }:
+den.aspects.cfg.provides.home-manager = { import-tree, ... }:
 { 
     home.stateVersion        = "22.11"; 
     home.username            = "elly";

@@ -1,7 +1,6 @@
 # desc = "";
-{ den.bundles.hm.shell-util =
+{ den.aspects.hm-pkg-shell-util =
 { ... }:
-
 {
     programs.direnv = {
         enable = true;

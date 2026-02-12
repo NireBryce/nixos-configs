@@ -1,4 +1,4 @@
-{ den.bundles.hm.git = 
+{ den.aspects.cfg.provides.hm-git = 
 { ... }:
 {
     home.file."./.gitconfig".source = ./.gitconfig;
