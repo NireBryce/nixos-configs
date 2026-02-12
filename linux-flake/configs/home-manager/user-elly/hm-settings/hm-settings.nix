@@ -1,6 +1,6 @@
 { den, ...}:
 {
-den.aspects.cfg.provides.home-manager = { import-tree, ... }:
+den.aspects.hm.provides.hm-settings = { import-tree, ... }:
 { 
     home.stateVersion        = "22.11"; 
     home.username            = "elly";

@@ -1,5 +1,5 @@
 # desc = "elly user session paths";
-{ den.bundles.hm.homeConfig =
+{ den.aspects.hm.provides.home-config = 
 { ... }:
 {
     home.sessionPath = [ 
