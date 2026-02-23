@@ -1,7 +1,7 @@
 { 
   ...
 }:
-{den.bundles.kde = 
+{den.aspects.nixos.provides.wm-kde = 
 { lib, pkgs, ... }: 
 {
     services.xserver.enable = true; # TODO: I think this is still needed for xwayland
