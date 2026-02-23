@@ -1,5 +1,5 @@
 # aria2 -cli download manager
-{ den.aspects.hm.provides.pkgs-cli = 
+{ den.aspects.pkgs-cli.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     aria2

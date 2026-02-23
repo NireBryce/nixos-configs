@@ -1,7 +1,7 @@
 {
     ...
 }:
-{ den.aspects.nixos.provides.shells = 
+{ den.aspects.shells.nixos = 
 { pkgs, lib, ... }: 
 {
     # Shells

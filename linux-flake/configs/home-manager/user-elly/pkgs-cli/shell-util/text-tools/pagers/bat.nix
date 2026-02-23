@@ -1,5 +1,5 @@
 # desc = "`bat` - syntax highlighted `cat` and `less` replacement https://github.com/sharkdp/bat;";
-{ den.aspects.hm.provides.pkgs-cli = 
+{ den.aspects.pkgs-cli.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     bat

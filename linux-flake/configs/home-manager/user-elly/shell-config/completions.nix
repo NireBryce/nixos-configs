@@ -1,4 +1,4 @@
-{ den.aspects.hm.provides.shell-config = 
+{ den.aspects.shell-config.homeManager = 
 { pkgs, ... }:
 {
     home.packages = with pkgs; [

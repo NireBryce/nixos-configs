@@ -1,17 +1,17 @@
 {den, ...}:
 let
 imports = [
-    den.aspects.hm.provides.aliases
-    den.aspects.hm.provides.fonts
-    den.aspects.hm.provides.git
-    den.aspects.hm.provides.hm-settings
-    den.aspects.hm.provides.home-config
-    den.aspects.hm.provides.linux-tools 
-    den.aspects.hm.provides.misc-dotfiles
-    den.aspects.hm.provides.nix
-    den.aspects.hm.provides.pkgs-cli
-    den.aspects.hm.provides.pkgs-gui
-    den.aspects.hm.provides.shell-config
+    den.aspects.aliases.homeManager
+    den.aspects.fonts.homeManager
+    den.aspects.git.homeManager
+    den.aspects.hm-settings.homeManager
+    den.aspects.home-config.homeManager
+    den.aspects.linux-tools.homeManager 
+    den.aspects.misc-dotfiles.homeManager
+    den.aspects.nix.homeManager
+    den.aspects.pkgs-cli.homeManager
+    den.aspects.pkgs-gui.homeManager
+    den.aspects.shell-config.homeManager
 
 ];
 in

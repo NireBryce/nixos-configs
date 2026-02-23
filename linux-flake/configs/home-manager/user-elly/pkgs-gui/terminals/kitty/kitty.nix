@@ -1,11 +1,12 @@
 
+{ ... }:
+{ den.aspects.pkgs-gui.homeManager =
 { pkgs, ... }:
-{ den.aspects.hm.provides.pkgs-gui = 
 let
     packageList = with pkgs; [
         kitty-img
     ];
-in 
+in
 {
     home.packages = packageList;
     

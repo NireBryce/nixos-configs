@@ -1,5 +1,5 @@
 # desc = "network monitor https://pdw.ex-parrot.com/iftop/";
-{ den.aspects.hm.provides.linux-tools = 
+{ den.aspects.linux-tools.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     iftop

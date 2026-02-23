@@ -1,5 +1,5 @@
 # desc = "lspci";
-{ den.aspects.hm.provides.linux-tools = 
+{ den.aspects.linux-tools.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     pciutils

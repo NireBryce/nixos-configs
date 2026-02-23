@@ -1,5 +1,5 @@
 # piper - logitech/razer graphical mouse manager https://github.com/soxoj/piper";
-{ den.aspects.hm.provides.pkgs-gui = 
+{ den.aspects.pkgs-gui.homeManager = 
 { pkgs, ... }:
 let
     packageList = with pkgs; [

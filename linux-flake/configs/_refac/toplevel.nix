@@ -1,8 +1,4 @@
-{
-    flake.modules.nixos = { import-tree }: {
-        nixosConfigurations = {
-            "nire-durandal" = import-tree ./configs/hosts/nire-durandal;
-            "nire-tenacity" = import-tree ./configs/hosts/nire-tenacity;
-        };
-    };
-}
+# nixosConfigurations are declared per-host via:
+#   flake.nixosConfigurations = inputs.self.lib.mkNixos "<system>" "<hostname>";
+# in each host's flake-parts module (e.g. hosts/nire-durandal/durandal-host-config.nix)
+{ }

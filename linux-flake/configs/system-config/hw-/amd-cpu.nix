@@ -1,7 +1,7 @@
 { 
     ...
 }:
-{ den.aspects.nixos.provides.hw-amd-cpu = 
+{ den.aspects.hw-amd-cpu.nixos = 
 { nixos-hardware, ... }: 
 {
     imports = [ 

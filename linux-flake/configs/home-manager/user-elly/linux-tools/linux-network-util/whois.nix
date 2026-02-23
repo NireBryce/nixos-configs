@@ -1,5 +1,5 @@
 # desc = "whois lookup https://packages.qa.debian.org/w/whois.html";
-{ den.aspects.hm.provides.linux-tools = 
+{ den.aspects.linux-tools.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     whois

@@ -1,5 +1,5 @@
 # desc = "elly user session variables";
-{ den.aspects.hm.provides.home-config = 
+{ den.aspects.home-config.homeManager = 
 { pkgs, ... }:
 {
     home.sessionVariables = { 

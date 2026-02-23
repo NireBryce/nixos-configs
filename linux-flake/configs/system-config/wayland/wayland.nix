@@ -1,7 +1,7 @@
 { 
     ... 
 }: 
-{ den.aspects.nixos.provides.wayland = 
+{ den.aspects.wayland.nixos = 
 { pkgs, ... }:
 {
   

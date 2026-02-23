@@ -1,7 +1,7 @@
 {
     ...
 }:
-{ den.aspects.nixos.provides.srvc-kdeconnect = 
+{ den.aspects.srvc-kdeconnect.nixos = 
 { ... }: {
     # todo: shouldn't this be a service?
         programs.kdeconnect = {

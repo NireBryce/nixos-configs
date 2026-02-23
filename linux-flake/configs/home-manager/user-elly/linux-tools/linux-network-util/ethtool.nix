@@ -1,5 +1,5 @@
 # desc = "ethtool https://www.kernel.org/pub/software/network/ethtool/";
-{ den.aspects.hm.provides.linux-tools = 
+{ den.aspects.linux-tools.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     ethtool

@@ -1,5 +1,5 @@
 # desc = "neofetch replacement https://github.com/hykilpikonna/HyFetch";
-{ den.aspects.hm.provides.pkgs-cli = 
+{ den.aspects.pkgs-cli.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     hyfetch

@@ -93,7 +93,12 @@
       ...
     } @ inputs:
 
-    inputs.flake-parts.lib.mkFlake { inherit inputs; } (import-tree ./configs);
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      imports = [
+        inputs.den.flakeModule
+        (import-tree ./configs)
+      ];
+    };
     
     
     # flake-parts.lib.mkFlake {inherit inputs; } (top@{ config, withSystem, moduleWithSystem, ... }: 

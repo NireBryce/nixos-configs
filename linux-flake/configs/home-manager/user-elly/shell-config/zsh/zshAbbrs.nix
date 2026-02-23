@@ -1,5 +1,5 @@
 # desc = "";
-{ den.aspects.hm.provides.shell-config = 
+{ den.aspects.shell-config.homeManager = 
 { ... }:
 {
     # ! WARN: unsure how global aliases work here

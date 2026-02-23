@@ -1,4 +1,4 @@
-{ den.aspects.nixos.provides.virtualization = 
+{ den.aspects.virtualization.nixos = 
 { ... }:
 {
         # User-scoped `~/.config/containers/registries`

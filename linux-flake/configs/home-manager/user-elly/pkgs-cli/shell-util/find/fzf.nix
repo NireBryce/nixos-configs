@@ -1,5 +1,5 @@
 # desc = "fuzzy finder";
-{ den.aspects.hm.provides.pkgs-cli = 
+{ den.aspects.pkgs-cli.homeManager = 
 { ... }:
 
 {

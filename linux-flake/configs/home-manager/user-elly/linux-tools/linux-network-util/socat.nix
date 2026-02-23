@@ -1,5 +1,5 @@
 # desc = "openbsd netcat replacement https://www.dest-unreach.org/socat/";
-{ den.aspects.hm.provides.linux-tools = 
+{ den.aspects.linux-tools.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     socat

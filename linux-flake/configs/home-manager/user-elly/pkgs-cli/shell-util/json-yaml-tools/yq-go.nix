@@ -1,5 +1,5 @@
 # desc = "yaml jq https://github.com/mikefarah/yq";
-{ den.aspects.hm.provides.pkgs-cli = 
+{ den.aspects.pkgs-cli.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     yq-go

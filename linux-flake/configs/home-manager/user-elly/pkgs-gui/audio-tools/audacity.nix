@@ -1,5 +1,5 @@
 # desc = "Audacity audio editor";
-{ den.aspects.hm.provides.pkgs-gui = 
+{ den.aspects.pkgs-gui.homeManager = 
 { pkgs, ... }:
 {
 home.packages = with pkgs; [

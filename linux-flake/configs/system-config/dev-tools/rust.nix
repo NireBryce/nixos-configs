@@ -2,7 +2,7 @@
     ...
 }:
 
-{ den.aspects.nixos.provides.dev-tools = 
+{ den.aspects.dev-tools.nixos = 
 {pkgs, ...}: 
 {
     environment.systemPackages = with pkgs; [

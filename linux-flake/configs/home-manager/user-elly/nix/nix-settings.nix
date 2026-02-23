@@ -1,5 +1,5 @@
 # desc = "";
-{ den.bundles.hm.provides.nix =
+{ den.aspects.nix.homeManager =
 { ... }:
 
 {

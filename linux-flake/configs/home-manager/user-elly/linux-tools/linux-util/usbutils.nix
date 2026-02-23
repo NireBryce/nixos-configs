@@ -1,5 +1,5 @@
 # desc = "provides `lsusb` https://www.linux-usb.org/";
-{ den.aspects.hm.provides.linux-tools = 
+{ den.aspects.linux-tools.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     usbutils

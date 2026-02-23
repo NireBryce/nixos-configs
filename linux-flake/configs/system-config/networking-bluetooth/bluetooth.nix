@@ -1,7 +1,7 @@
 {
     ...
 }:
-{ den.aspects.nixos.provides.networking-bluetooth = 
+{ den.aspects.networking-bluetooth.nixos = 
 { ... }:  
 {
     hardware.bluetooth.powerOnBoot   = true;

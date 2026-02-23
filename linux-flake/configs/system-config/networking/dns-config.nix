@@ -1,7 +1,7 @@
 {
     ...
 }:
-{ den.aspects.nixos.provides.networking = 
+{ den.aspects.networking.nixos = 
 { ... }:  
 {
     # TODO: why this DNS

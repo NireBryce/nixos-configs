@@ -1,7 +1,7 @@
 {
     ...
 }:
-{ den.aspects.nixos.provides.nix = 
+{ den.aspects.nix.nixos = 
 { ... }:  
 {
         # this barely works. figure out why

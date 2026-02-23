@@ -1,5 +1,5 @@
 # desc = "make nix fetcher calls from repository URLs";
-{ den.aspects.hm.provides.pkgs-cli = 
+{ den.aspects.pkgs-cli.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     nurl

@@ -1,5 +1,5 @@
 # uv - python version-, venv-, and packaging-management tool
-{ den.aspects.hm.provides.pkgs-cli = 
+{ den.aspects.pkgs-cli.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     uv

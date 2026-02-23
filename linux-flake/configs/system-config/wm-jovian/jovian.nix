@@ -1,7 +1,7 @@
 {
     ...
 }:
-{ den.aspects.nixos.provides.jovian = 
+{ den.aspects.jovian.nixos = 
 { config, pkgs, lib, ... }: 
 {
     boot.loader = {

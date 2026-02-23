@@ -1,7 +1,7 @@
 {
     ...
 }:
-{ den.aspects.nixos.provides.hw-amd-gpu = 
+{ den.aspects.hw-amd-gpu.nixos = 
 { nixos-hardware, pkgs, ... }: 
 {
     imports = [ nixos-hardware.nixosModules.common-gpu-amd ];

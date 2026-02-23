@@ -1,5 +1,5 @@
 # desc = "provides `dig` + `nslookup`";
-{ den.aspects.hm.provides.linux-tools = 
+{ den.aspects.linux-tools.homeManager = 
 { pkgs, ... }:
 {
     home.packages = with pkgs; [

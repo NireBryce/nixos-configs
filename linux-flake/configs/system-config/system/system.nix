@@ -1,7 +1,7 @@
 {
     ...
 }:
-{ den.aspects.nixos.provides.system = 
+{ den.aspects.system.nixos = 
 { lib, ... }: 
 {
     programs.nix-ld.enable      = lib.mkDefault true;      # Needed for VSCode remote connection, etc

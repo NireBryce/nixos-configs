@@ -1,5 +1,5 @@
 # desc = "jq https://github.com/stedolan/jq";
-{ den.aspects.hm.provides.pkgs-cli = 
+{ den.aspects.pkgs-cli.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     jq

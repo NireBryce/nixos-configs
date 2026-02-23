@@ -1,7 +1,7 @@
 {
     ...
 }:
-{ den.aspects.nixos.provides.font = 
+{ den.aspects.font.nixos = 
 {pkgs, ...}: 
 {
     fonts = {

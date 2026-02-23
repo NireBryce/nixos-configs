@@ -1,6 +1,7 @@
 # desc = "`htop` alternative";
+{ ... }:
+{ den.aspects.pkgs-cli.homeManager =
 { pkgs, ... }:
-{ den.aspects.hm.provides.pkgs-cli = 
 let packageList = with pkgs; [
     btop
 ];

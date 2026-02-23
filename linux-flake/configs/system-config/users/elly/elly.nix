@@ -1,9 +1,6 @@
-{
-    pkgs,
-    ...
-}:
-{ den.aspects.nixos.provides.user-elly = 
-{ ... }: 
+{ ... }:
+{ den.aspects.user-elly.nixos =
+{ pkgs, ... }:
 {
     users.mutableUsers = false;
     users.users = { 

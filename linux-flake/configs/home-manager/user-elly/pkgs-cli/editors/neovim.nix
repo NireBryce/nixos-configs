@@ -1,5 +1,5 @@
 # neovim - it's like vim but heavier
-{ den.aspects.hm.provides.pkgs-cli = 
+{ den.aspects.pkgs-cli.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     neovim

@@ -19,7 +19,7 @@
 # evaluation warning: `programs.zsh.initExtra` is deprecated, use `programs.zsh.initContent` instead.
 #   Example: programs.zsh.initContent = "your content here";
 
-{ den.aspects.hm.provides.shell-config = 
+{ den.aspects.shell-config.homeManager = 
 { pkgs, lib, ... }:
 let zshPluginRequiresList = with pkgs; [
     diff-so-fancy

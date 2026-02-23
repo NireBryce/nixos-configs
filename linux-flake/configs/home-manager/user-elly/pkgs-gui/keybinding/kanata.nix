@@ -1,5 +1,5 @@
 # kanata - input-level keybinding, platform independent
-{ den.aspects.hm.provides.pkgs-gui = 
+{ den.aspects.pkgs-gui.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     kanata

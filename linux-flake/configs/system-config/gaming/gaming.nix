@@ -1,7 +1,7 @@
 {
     ...
 }:
-{ den.aspects.nixos.provides.gaming = 
+{ den.aspects.gaming.nixos = 
 {pkgs, ...}: 
 {
     #* steam - (fhs)

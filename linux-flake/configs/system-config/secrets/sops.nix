@@ -3,7 +3,7 @@
     config,
     ...
 }:
-{ den.aspects.nixos.provides.secrets = 
+{ den.aspects.secrets.nixos = 
 { sops-nix, pkgs, ... }: 
 let
     isEd25519   = k: k.type == "ed25519";

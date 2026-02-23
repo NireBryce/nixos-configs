@@ -1,5 +1,5 @@
 # micro, what if nano was msword for dos
-{ den.aspects.hm.provides.pkgs-cli = 
+{ den.aspects.pkgs-cli.homeManager = 
 { ... }:
 {
     programs.micro = {

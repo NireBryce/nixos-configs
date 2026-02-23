@@ -1,5 +1,5 @@
 # desc = "";
-{ den.aspects.hm.provides.aliases = 
+{ den.aspects.aliases.homeManager = 
 { pkgs, ... }:
 {
     home.shellAliases = { 

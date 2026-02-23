@@ -1,7 +1,7 @@
 {
     ...
 }:
-{ den.aspects.nixos.provides.pkgs-vscode = 
+{ den.aspects.pkgs-vscode.nixos = 
 { pkgs, ... }: {
         # vscode errata, actual vscode definition in `home-manager/user-elly/packages/dev/vscode`
         environment.sessionVariables.NIXOS_OZONE_WL = "1";

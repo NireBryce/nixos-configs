@@ -1,5 +1,5 @@
 # delta - a better git diff viewer
-{ den.aspects.hm.provides.pkgs-cli = 
+{ den.aspects.pkgs-cli.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     delta

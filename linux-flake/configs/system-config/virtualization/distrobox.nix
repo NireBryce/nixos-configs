@@ -1,7 +1,7 @@
 {
     ...
 }:
-{ den.aspects.nixos.provides.virtualization = 
+{ den.aspects.virtualization.nixos = 
 { pkgs, ... }: 
 {
     environment.systemPackages = with pkgs; [

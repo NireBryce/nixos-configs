@@ -1,5 +1,5 @@
 # desc = "view dependency graph";
-{ den.aspects.hm.provides.pkgs-cli = 
+{ den.aspects.pkgs-cli.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     nix-tree

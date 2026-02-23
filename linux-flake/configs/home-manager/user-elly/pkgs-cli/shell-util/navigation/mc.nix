@@ -1,5 +1,5 @@
 # desc = "midnight commander file browser";
-{ den.aspects.hm.provides.pkgs-cli = 
+{ den.aspects.pkgs-cli.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     mc

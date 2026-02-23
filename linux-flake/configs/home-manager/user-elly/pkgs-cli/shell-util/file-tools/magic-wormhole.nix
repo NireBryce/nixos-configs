@@ -1,5 +1,5 @@
 # wh - magic-wormhole point to point file transfer
-{ den.aspects.hm.provides.pkgs-cli = 
+{ den.aspects.pkgs-cli.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     magic-wormhole-rs

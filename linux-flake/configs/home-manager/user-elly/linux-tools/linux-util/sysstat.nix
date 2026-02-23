@@ -1,5 +1,5 @@
 # desc = "system stats http://sebastien.godard.pagesperso-orange.fr/";
-{ den.aspects.hm.provides.linux-tools = 
+{ den.aspects.linux-tools.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     sysstat

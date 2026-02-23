@@ -1,5 +1,5 @@
 # desc = "bash line editor, allows zsh-like line editor tricks and bindings";
-{ den.aspects.hm.provides.shell-config = 
+{ den.aspects.shell-config.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     blesh

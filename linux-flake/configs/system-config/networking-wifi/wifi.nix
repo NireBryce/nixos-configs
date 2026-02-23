@@ -1,7 +1,7 @@
 {
     ...
 }:
-{ den.aspects.nixos.provides.networking-wifi = 
+{ den.aspects.networking-wifi.nixos = 
 { ... }:  
 {
     networking.networkmanager.enable = true;        # Needs to be 'true' for KDE networking

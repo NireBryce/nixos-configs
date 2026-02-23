@@ -1,5 +1,5 @@
 # libreoffice - office productivity software https://www.libreoffice.org/
-{ den.aspects.hm.provides.pkgs-gui = 
+{ den.aspects.pkgs-gui.homeManager = 
 { pkgs, ... }:
 let
     packageList = with pkgs; [

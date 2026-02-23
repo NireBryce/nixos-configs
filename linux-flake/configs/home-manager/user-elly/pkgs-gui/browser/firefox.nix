@@ -1,5 +1,5 @@
 # desc = "  ";
-{ den.aspects.hm.provides.pkgs-gui = 
+{ den.aspects.pkgs-gui.homeManager = 
 { pkgs, ... }:
 {
     # todo: this is also installed as a system package, does that matter?

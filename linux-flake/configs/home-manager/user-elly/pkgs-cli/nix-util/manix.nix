@@ -1,5 +1,5 @@
 # desc = "nix man pages, kinda";
-{ den.aspects.hm.provides.pkgs-cli = 
+{ den.aspects.pkgs-cli.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     manix

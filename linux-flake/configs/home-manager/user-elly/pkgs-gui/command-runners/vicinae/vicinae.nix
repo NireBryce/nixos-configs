@@ -1,4 +1,4 @@
-{ den.aspects.hm.provides.pkgs-gui = 
+{ den.aspects.pkgs-gui.homeManager = 
 { ... }:
 {
     programs.vicinae = {

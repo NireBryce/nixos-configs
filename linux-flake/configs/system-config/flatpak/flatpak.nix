@@ -1,7 +1,7 @@
 {
     ...
 }:
-{ den.aspects.nixos.provides.flatpak = 
+{ den.aspects.flatpak.nixos = 
 { pkgs, ... }:  
 {
     services.flatpak.enable = true;

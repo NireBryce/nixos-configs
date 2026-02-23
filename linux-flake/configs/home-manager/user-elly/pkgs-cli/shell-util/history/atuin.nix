@@ -1,5 +1,5 @@
 # desc = "Atuin remote encrypted history manager";
-{ den.aspects.hm.provides.pkgs-cli = 
+{ den.aspects.pkgs-cli.homeManager = 
 { ... }:
 {
     programs.atuin = {       

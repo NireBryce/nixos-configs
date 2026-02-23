@@ -1,7 +1,7 @@
 {
     ...
 }:
-{ den.aspects.nixos.provides.ssh = 
+{ den.aspects.ssh.nixos = 
 { ... }: 
 {
     services.openssh = {

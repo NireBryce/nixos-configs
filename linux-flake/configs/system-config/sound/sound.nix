@@ -1,7 +1,7 @@
 {
     ...
 }:
-{ den.aspects.nixos.provides.sound = 
+{ den.aspects.sound.nixos = 
 { pkgs, ... }: 
 {
         security.rtkit.enable       = true;                       # TODO: "rtkit is optional but recommended."  I forget why I wrote this

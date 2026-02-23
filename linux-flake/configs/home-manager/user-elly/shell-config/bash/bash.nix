@@ -1,5 +1,5 @@
 # desc = "bash configs";
-{ den.aspects.hm.provides.shell-config = 
+{ den.aspects.shell-config.homeManager = 
 { pkgs, ... }:
 
 {

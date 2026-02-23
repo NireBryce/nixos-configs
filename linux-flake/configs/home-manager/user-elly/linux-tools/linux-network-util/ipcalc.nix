@@ -1,5 +1,5 @@
 # desc = "IP address calculator https://gitlab.com/ipcalc/ipcalc";
-{ den.aspects.hm.provides.linux-tools = 
+{ den.aspects.linux-tools.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     ipcalc

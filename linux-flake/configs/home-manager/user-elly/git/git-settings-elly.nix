@@ -1,4 +1,4 @@
-{ den.aspects.hm.provides.git = 
+{ den.aspects.git.homeManager = 
 { ... }:
 {
     home.file."./.gitconfig".source = ./.gitconfig;

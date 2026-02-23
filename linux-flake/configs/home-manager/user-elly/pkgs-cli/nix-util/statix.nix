@@ -1,6 +1,6 @@
 # desc = "nix antipattern linter";
 # todo: move to nix dev
-{ den.aspects.hm.provides.pkgs-cli = 
+{ den.aspects.pkgs-cli.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     statix

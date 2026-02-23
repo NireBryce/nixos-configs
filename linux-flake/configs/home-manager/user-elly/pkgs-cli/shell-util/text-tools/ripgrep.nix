@@ -1,5 +1,5 @@
 # desc = "`rg` much faster grep alternative";
-{ den.aspects.hm.provides.pkgs-cli = 
+{ den.aspects.pkgs-cli.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     ripgrep

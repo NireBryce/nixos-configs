@@ -1,5 +1,5 @@
 # desc = "qpw graph virtual mixer";
-{ den.aspects.hm.provides.pkgs-gui = 
+{ den.aspects.pkgs-gui.homeManager = 
 { pkgs, ... }:
 let
     packageList = with pkgs; [

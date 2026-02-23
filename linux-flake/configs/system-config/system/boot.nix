@@ -1,7 +1,7 @@
 {
     ...
 }:
-{ den.aspects.nixos.provides.system = 
+{ den.aspects.system.nixos = 
 { pkgs, lib, ... }: 
 {
         environment.systemPackages = with pkgs; [

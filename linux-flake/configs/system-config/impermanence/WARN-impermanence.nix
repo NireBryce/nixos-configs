@@ -4,7 +4,7 @@
 {
     ...
 }:
-{ den.aspects.nixos.provides.impermanence = 
+{ den.aspects.impermanence.nixos = 
 { impermanence, lib, ... }:
 { 
     imports = [

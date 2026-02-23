@@ -1,7 +1,7 @@
 {
     ...
 }:
-{ den.aspects.nixos.provides.system-nfs = 
+{ den.aspects.system-nfs.nixos = 
 { ... }:
 {
         fileSystems."/mnt/qnap-erin" = {

@@ -1,7 +1,7 @@
 {
     ...
 }:
-{ den.aspects.nixos.provides.secrets = 
+{ den.aspects.secrets.nixos = 
 { pkgs, lib, config, ... }: 
 let homeDirectory = "${config.users.users.elly.home}";  # todo: automatee, or at least set only one top level variable
 in

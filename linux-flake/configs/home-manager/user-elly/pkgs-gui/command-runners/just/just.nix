@@ -1,5 +1,5 @@
 # desc = "just - justfile runner";
-{ den.aspects.hm.provides.pkgs-gui = 
+{ den.aspects.pkgs-gui.homeManager = 
 { pkgs, ... }:
 {
     home.file = {

@@ -1,5 +1,5 @@
 # desc = "library call tracer https://linux.die.net/man/1/ltrace";
-{ den.aspects.hm.provides.linux-tools = 
+{ den.aspects.linux-tools.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     ltrace

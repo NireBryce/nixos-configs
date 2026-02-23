@@ -1,5 +1,5 @@
 # shellfmt shellscript formatter
-{ den.aspects.hm.provides.pkgs-cli = 
+{ den.aspects.pkgs-cli.homeManager = 
 { pkgs, ... }:
 {
     home.packages = with pkgs; [

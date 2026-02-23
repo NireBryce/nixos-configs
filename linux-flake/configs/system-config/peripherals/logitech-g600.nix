@@ -1,7 +1,7 @@
 {
     ...
 }:
-{ den.aspects.nixos.provides.peripherals = 
+{ den.aspects.peripherals.nixos = 
 { ... }: 
 {
     services.ratbagd.enable = true;         # for piper logitech mouse ctl
