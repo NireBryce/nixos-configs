@@ -1,3 +1,6 @@
+list of what's currently categorized
+
+```
 {den, ...}:
 let
 imports = [
@@ -34,3 +37,4 @@ in
 {
     placeholder = imports;
 }
+```
