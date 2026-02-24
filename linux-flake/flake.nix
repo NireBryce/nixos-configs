@@ -96,7 +96,11 @@
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
         inputs.den.flakeModule
+        inputs.flake-aspects.flakeModule
+        inputs.flake-file.flakeModules.default
         (import-tree ./configs)
+        ./hosts/lib.nix
+        ./hosts/nire-durandal/durandal-host-config.nix
       ];
     };
     
