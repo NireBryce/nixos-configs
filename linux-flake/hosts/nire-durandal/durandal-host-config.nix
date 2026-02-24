@@ -16,8 +16,8 @@ flake.modules.nixos."nire-durandal" =
 
     imports = [
         nix-index-database.nixosModules.nix-index
-        (inputs.import-tree ./configs/hosts/nire-durandal/hw-conf)
-        (inputs.import-tree ./configs/hosts/nire-durandal/fixes)
+        (inputs.import-tree ./hw-conf)
+        (inputs.import-tree ./fixes)
     ];
 
 };
