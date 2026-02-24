@@ -6,8 +6,8 @@ inputs.flake-parts.lib.mkFlake { inherit inputs; } {
   imports = [
     # den: provides the `den.aspects` option used throughout configs/ to declare
     # reusable NixOS/home-manager modules in a dendritic pattern.
-    # Aspect resolution (den.aspects.X.resolve) is used directly — no
-    # flake-aspects transposition needed.
+    # lib.nix and elly-home.nix collect aspects directly from config.den.aspects —
+    # no flake-aspects transposition or den includes/resolve needed.
     inputs.den.flakeModule
 
     # flake-file: provides the `write-flake` app that regenerates flake.nix.
@@ -20,12 +20,12 @@ inputs.flake-parts.lib.mkFlake { inherit inputs; } {
     # Declares which CPU architectures this flake supports (x86_64-linux, aarch64-darwin).
     ./system-archs.nix
 
-    # Defines flake.lib.mkNixos — builds a nixosConfiguration via den.resolve.
+    # Defines flake.lib.mkNixos — builds a nixosConfiguration by collecting all
+    # den.aspects.*.nixos modules from config.den.aspects.
     ./hosts/lib.nix
 
-    # nire-durandal host: sets flake.nixosConfigurations."nire-durandal",
-    # declares the host-specific NixOS aspect (hostname, stateVersion, hw-conf),
-    # and sets up the elly user aspect with dynamic includes.
+    # nire-durandal host: sets flake.nixosConfigurations."nire-durandal" and
+    # declares the host-specific NixOS aspect (hostname, stateVersion, hw-conf).
     ./hosts/nire-durandal/durandal-host-config.nix
 
     # elly's standalone home-manager configuration for nire-durandal.

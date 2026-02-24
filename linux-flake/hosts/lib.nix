@@ -1,13 +1,13 @@
-# Defines flake.lib.mkNixos — builds a nixosConfiguration by resolving the
-# host's root aspect through den's native resolution mechanism.
+# Defines flake.lib.mkNixos — builds a nixosConfiguration from all nixos
+# aspects declared across configs/.
 #
-# den.aspects.${hostname}.resolve { class = "nixos"; } traverses the aspect's
-# includes list transitively and collects every .nixos module it finds, so
-# system-config aspects (gaming, sound, wayland, …) are included automatically
-# alongside the host-specific aspect that sets hostname/stateVersion/hw-conf.
+# Every den.aspects.X.nixos module is collected directly from config.den.aspects
+# at the flake-parts level. Aspects that declare no .nixos are silently skipped.
+# No flake-aspects transposition or den includes/resolve needed.
 #
-# The includes list is declared dynamically in each host file (see
-# durandal-host-config.nix) — no flake-aspects transposition needed.
+# TRADEOFF: all nixos aspects are included unconditionally regardless of
+# hostname. Host-specific behaviour should be gated inside the module itself
+# with lib.mkIf (config.networking.hostName == "…").
 #
 # Home-manager is standalone — see hosts/nire-durandal/elly-home.nix.
 #
@@ -21,9 +21,11 @@
       # them by name (e.g. `{ impermanence, nix-index-database, ... }:`).
       specialArgs = inputs;
 
-      # Resolve the host aspect: collects .nixos from the root aspect and all
-      # transitively included aspects. Aspects with no .nixos are ignored.
-      # resolve returns a single merged module (a set), so wrap it in a list.
-      modules = [ (config.den.aspects.${_hostname}.resolve { class = "nixos"; }) ];
+      # Collect every .nixos module from every aspect. Aspects that only
+      # define .homeManager (or nothing) are filtered out via `or null`.
+      modules =
+        builtins.filter (m: m != null)
+          (map (aspect: aspect.nixos or null)
+            (builtins.attrValues config.den.aspects));
     };
 }

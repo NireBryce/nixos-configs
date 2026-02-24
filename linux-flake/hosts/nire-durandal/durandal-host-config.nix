@@ -1,29 +1,15 @@
-# Host aspect for nire-durandal and user aspect for elly.
+# Host aspect for nire-durandal.
 #
-# TRADEOFF — den.resolve + dynamic includes:
-#   Every top-level "root" aspect (one per host, one per user) must be listed
-#   in the removeAttrs exclusion list below. Leaf aspects (gaming, sound,
-#   wayland, …) are picked up automatically and never need to be touched here.
+# Every den.aspects.X.nixos module across configs/ is automatically included
+# in this host's NixOS build — no explicit includes list needed. See lib.nix.
 #
-#   Adding a new host or user means:
-#     1. Declare its root aspect in its own host file (like this one).
-#     2. Add its aspect name to the removeAttrs call in every other host/user
-#        file so it isn't accidentally pulled into unrelated configs.
-#
-#   Forgetting step 2 causes cross-contamination: host A's aspect gets resolved
-#   into host B's NixOS config, and vice versa.
-{ inputs, config, ... }:
+# TRADEOFF: because all aspects are collected unconditionally, there is no
+# per-host filtering at this level. If a future aspect should only apply to
+# one specific host, gate it inside the module with:
+#   lib.mkIf (config.networking.hostName == "nire-durandal") { … }
+{ inputs, ... }:
 {
   flake.nixosConfigurations."nire-durandal" = inputs.self.lib.mkNixos "x86_64-linux" "nire-durandal";
-
-  # Dynamic includes: every aspect except the root aggregators is pulled in.
-  # resolve { class = "nixos"; }     only collects the .nixos side.
-  # resolve { class = "homeManager"; } only collects the .homeManager side.
-  # Aspects that only define one class are silently ignored when resolving the other.
-  #
-  # ADD NEW HOSTS / USERS HERE — see tradeoff note at the top of this file.
-  den.aspects."nire-durandal".includes =
-    builtins.attrNames (removeAttrs config.den.aspects [ "nire-durandal" "elly" ]);
 
   den.aspects."nire-durandal".nixos =
     { nix-index-database, ... }:
@@ -38,13 +24,4 @@
         (inputs.import-tree ./fixes)
       ];
     };
-
-  # elly's user aspect — root aggregator for home-manager.
-  # The stub homeManager module is required so den recognises this as a
-  # valid aspect with a homeManager class; the actual config lives in
-  # configs/home-manager/user-elly/ and is pulled in via includes above.
-  den.aspects.elly.includes =
-    builtins.attrNames (removeAttrs config.den.aspects [ "nire-durandal" "elly" ]);
-
-  den.aspects.elly.homeManager = { ... }: { };
 }

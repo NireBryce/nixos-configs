@@ -1,9 +1,8 @@
 # Standalone home-manager configuration for elly on nire-durandal.
 #
-# den.aspects.elly.resolve { class = "homeManager"; } traverses elly's
-# includes list transitively and collects every .homeManager module it finds.
-# The actual config lives in configs/home-manager/user-elly/; the elly aspect
-# in durandal-host-config.nix pulls it all in via dynamic includes.
+# Every den.aspects.X.homeManager module is collected directly from
+# config.den.aspects at the flake-parts level. Aspects that declare no
+# .homeManager are silently skipped. No flake-aspects transposition needed.
 #
 # Switch with: nh home switch --configuration elly@nire-durandal ~/nixos/linux-flake/
 #          or: home-manager switch --flake .#elly@nire-durandal
@@ -17,9 +16,11 @@
       # (e.g. `{ impermanence, ... }:`).
       extraSpecialArgs = inputs;
 
-      # Resolve the elly aspect: collects .homeManager from all transitively
-      # included aspects. Aspects with no .homeManager are ignored.
-      # resolve returns a single merged module (a set), so wrap it in a list.
-      modules = [ (config.den.aspects.elly.resolve { class = "homeManager"; }) ];
+      # Collect every .homeManager module from every aspect. Aspects that only
+      # define .nixos (or nothing) are filtered out via `or null`.
+      modules =
+        builtins.filter (m: m != null)
+          (map (aspect: aspect.homeManager or null)
+            (builtins.attrValues config.den.aspects));
     };
 }
