@@ -72,38 +72,7 @@
     };
       
 
-    outputs = {
-      self,
-      import-tree,
-      den,
-      flake-aspects,
-      flake-file,
-      systems,
-      nixpkgs,
-      #nixpkgs-stable,                                         # https://nixos-and-flakes.thiscute.world/nixos-with-flakes/downgrade-or-upgrade-packages
-      darwin,
-      home-manager,
-      nixos-hardware,
-      nix-index-database,
-      flake-parts,
-      musnix,
-      jovian,
-      impermanence,
-      sops-nix,
-      ...
-    } @ inputs:
-
-    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
-      imports = [
-        inputs.den.flakeModule
-        inputs.flake-aspects.flakeModule
-        inputs.flake-file.flakeModules.default
-        (import-tree ./configs)
-        ./system-archs.nix
-        ./hosts/lib.nix
-        ./hosts/nire-durandal/durandal-host-config.nix
-      ];
-    };
+    outputs = inputs: import ./outputs.nix inputs;
     
     
     # flake-parts.lib.mkFlake {inherit inputs; } (top@{ config, withSystem, moduleWithSystem, ... }: 
