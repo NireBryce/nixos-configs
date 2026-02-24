@@ -1,7 +1,9 @@
 # Standalone home-manager configuration for elly on nire-durandal.
-# Assembled from all den.aspects.X.homeManager modules declared in
-# configs/home-manager/user-elly/, bridged via den-bridge.nix into
-# config.flake.modules.homeManager.
+#
+# den.aspects.elly.resolve { class = "homeManager"; } traverses elly's
+# includes list transitively and collects every .homeManager module it finds.
+# The actual config lives in configs/home-manager/user-elly/; the elly aspect
+# in durandal-host-config.nix pulls it all in via dynamic includes.
 #
 # Switch with: nh home switch --configuration elly@nire-durandal ~/nixos/linux-flake/
 #          or: home-manager switch --flake .#elly@nire-durandal
@@ -15,6 +17,8 @@
       # (e.g. `{ impermanence, ... }:`).
       extraSpecialArgs = inputs;
 
-      modules = builtins.attrValues config.flake.modules.homeManager;
+      # Resolve the elly aspect: collects .homeManager from all transitively
+      # included aspects. Aspects with no .homeManager are ignored.
+      modules = config.den.aspects.elly.resolve { class = "homeManager"; };
     };
 }
