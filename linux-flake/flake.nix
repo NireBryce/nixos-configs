@@ -99,6 +99,7 @@
         inputs.flake-aspects.flakeModule
         inputs.flake-file.flakeModules.default
         (import-tree ./configs)
+        ./system-archs.nix
         ./hosts/lib.nix
         ./hosts/nire-durandal/durandal-host-config.nix
       ];
