@@ -22,12 +22,19 @@ inputs.flake-parts.lib.mkFlake { inherit inputs; } {
     # Declares which CPU architectures this flake supports (x86_64-linux, aarch64-darwin).
     ./system-archs.nix
 
-    # Defines flake.lib.mkNixos — wires a nixosConfiguration together from
-    # the transposed den.aspects modules and home-manager.
+    # Bridges den.aspects → flake.aspects so flake-aspects can transpose them
+    # into config.flake.modules.{nixos,homeManager}.
+    ./hosts/den-bridge.nix
+
+    # Defines flake.lib.mkNixos — builds a nixosConfiguration from all
+    # transposed nixos aspects.
     ./hosts/lib.nix
 
     # nire-durandal host: sets flake.nixosConfigurations."nire-durandal" and
     # declares the host-specific NixOS aspect (hostname, stateVersion, hw-conf).
     ./hosts/nire-durandal/durandal-host-config.nix
+
+    # elly's standalone home-manager configuration for nire-durandal.
+    ./hosts/nire-durandal/elly-home.nix
   ];
 }
