@@ -1,3 +1,4 @@
+❯ nix flake check --no-build
 error:
        … while checking flake output 'nixosConfigurations'
 
@@ -10,6 +11,15 @@ error:
              |                  ^
           404|         _module = checked (config._module);
 
+       … while evaluating the option `den.aspects.nire-durandal.__functor.<function body>.<function body>.includes':
+
+       … while evaluating definitions from `<unknown-file>':
+
        (stack trace truncated; use '--show-trace' to show the full, detailed trace)
 
-       error: expected a list but found a set: { imports = «thunk»; }
+       error: infinite recursion encountered
+       at /nix/store/gnf2ayqhb31qvgh1s9mg3aqaj9378cg7-source/lib/types.nix:303:7:
+          302|           functor;
+          303|       description = if description == null then name else description;
+             |       ^
+          304|     };
