@@ -19,6 +19,7 @@
 
       # Resolve the elly aspect: collects .homeManager from all transitively
       # included aspects. Aspects with no .homeManager are ignored.
-      modules = config.den.aspects.elly.resolve { class = "homeManager"; };
+      # resolve returns a single merged module (a set), so wrap it in a list.
+      modules = [ (config.den.aspects.elly.resolve { class = "homeManager"; }) ];
     };
 }

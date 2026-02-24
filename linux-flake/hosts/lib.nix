@@ -23,6 +23,7 @@
 
       # Resolve the host aspect: collects .nixos from the root aspect and all
       # transitively included aspects. Aspects with no .nixos are ignored.
-      modules = config.den.aspects.${_hostname}.resolve { class = "nixos"; };
+      # resolve returns a single merged module (a set), so wrap it in a list.
+      modules = [ (config.den.aspects.${_hostname}.resolve { class = "nixos"; }) ];
     };
 }
