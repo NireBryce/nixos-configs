@@ -6,9 +6,14 @@ inputs.flake-parts.lib.mkFlake { inherit inputs; } {
   imports = [
     # den: provides the `den.aspects` option used throughout configs/ to declare
     # reusable NixOS/home-manager modules in a dendritic pattern.
-    # lib.nix and elly-home.nix collect aspects directly from config.den.aspects —
-    # no flake-aspects transposition or den includes/resolve needed.
+    # Also sets _module.args.den = config.den inside NixOS configurations.
     inputs.den.flakeModule
+
+    # flake-aspects: transposes den.aspects.X.nixos  → flake.modules.nixos.X
+    #                            den.aspects.X.homeManager → flake.modules.homeManager.X
+    # Resolution happens eagerly at flake-parts time, producing plain module
+    # values that NixOS can safely consume without re-entering den's machinery.
+    inputs.flake-aspects.flakeModule
 
     # flake-file: provides the `write-flake` app that regenerates flake.nix.
     inputs.flake-file.flakeModules.default
@@ -20,8 +25,12 @@ inputs.flake-parts.lib.mkFlake { inherit inputs; } {
     # Declares which CPU architectures this flake supports (x86_64-linux, aarch64-darwin).
     ./system-archs.nix
 
-    # Defines flake.lib.mkNixos — builds a nixosConfiguration by collecting all
-    # den.aspects.*.nixos modules from config.den.aspects.
+    # Bridges den.aspects → flake.aspects so flake-aspects can transpose them.
+    # Required because den.aspects is NOT automatically forwarded to flake.aspects.
+    ./hosts/den-bridge.nix
+
+    # Defines flake.lib.mkNixos — builds a nixosConfiguration from all
+    # transposed nixos aspects via flake.modules.nixos.
     ./hosts/lib.nix
 
     # nire-durandal host: sets flake.nixosConfigurations."nire-durandal" and

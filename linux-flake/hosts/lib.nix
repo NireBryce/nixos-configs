@@ -1,13 +1,12 @@
 # Defines flake.lib.mkNixos — builds a nixosConfiguration from all nixos
 # aspects declared across configs/.
 #
-# Every den.aspects.X.nixos module is collected directly from config.den.aspects
-# at the flake-parts level. Aspects that declare no .nixos are silently skipped.
-# No flake-aspects transposition or den includes/resolve needed.
-#
-# TRADEOFF: all nixos aspects are included unconditionally regardless of
-# hostname. Host-specific behaviour should be gated inside the module itself
-# with lib.mkIf (config.networking.hostName == "…").
+# flake-aspects transposes den.aspects.X.nixos → flake.modules.nixos.X at
+# flake-parts evaluation time (via den-bridge.nix + flake-aspects.flakeModule
+# in outputs.nix). Using the already-resolved flake.modules here avoids
+# triggering den's internal resolve machinery inside the NixOS evaluation
+# context, which causes infinite recursion in den's recursive providerType
+# description when nix flake check force-evaluates _module.args.den.
 #
 # Home-manager is standalone — see hosts/nire-durandal/elly-home.nix.
 #
@@ -21,11 +20,8 @@
       # them by name (e.g. `{ impermanence, nix-index-database, ... }:`).
       specialArgs = inputs;
 
-      # Collect every .nixos module from every aspect. Aspects that only
-      # define .homeManager (or nothing) are filtered out via `or null`.
-      modules =
-        builtins.filter (m: m != null)
-          (map (aspect: aspect.nixos or null)
-            (builtins.attrValues config.den.aspects));
+      # All nixos aspects, already resolved to plain module values by
+      # flake-aspects at flake-parts time.
+      modules = builtins.attrValues config.flake.modules.nixos;
     };
 }
