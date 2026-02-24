@@ -1,11 +1,11 @@
 # note: may need to be inputs and then inputs.self, see https://github.com/Doc-Steve/dendritic-design-with-flake-parts/blob/main/modules/hosts/homeserver%20%5BN%5D/flake-parts.nix
 { 
-    self,
+    inputs,
     ... 
 }:
 {
 
-flake.nixosConfigurations."nire-durandal" = self.lib.mkNixos "x86_64-linux" "nire-durandal";
+flake.nixosConfigurations."nire-durandal" = inputs.self.lib.mkNixos "x86_64-linux" "nire-durandal";
 
 flake.modules.nixos."nire-durandal" = 
 { nix-index-database, ... }:
@@ -16,6 +16,8 @@ flake.modules.nixos."nire-durandal" =
 
     imports = [
         nix-index-database.nixosModules.nix-index
+        (inputs.import-tree ./configs/hosts/nire-durandal/hw-conf)
+        (inputs.import-tree ./configs/hosts/nire-durandal/fixes)
     ];
 
 };
