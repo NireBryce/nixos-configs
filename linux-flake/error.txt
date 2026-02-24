@@ -1,0 +1,15 @@
+error:
+       … while checking flake output 'nixosConfigurations'
+
+       … while checking the NixOS configuration 'nixosConfigurations.nire-durandal'
+
+       … while calling the 'seq' builtin
+         at /nix/store/gnf2ayqhb31qvgh1s9mg3aqaj9378cg7-source/lib/modules.nix:403:18:
+          402|         options = checked options;
+          403|         config = checked (removeAttrs config [ "_module" ]);
+             |                  ^
+          404|         _module = checked (config._module);
+
+       (stack trace truncated; use '--show-trace' to show the full, detailed trace)
+
+       error: expected a list but found a set: { imports = «thunk»; }
