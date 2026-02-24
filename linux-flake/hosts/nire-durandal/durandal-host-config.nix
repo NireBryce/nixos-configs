@@ -7,7 +7,7 @@
 
 flake.nixosConfigurations."nire-durandal" = inputs.self.lib.mkNixos "x86_64-linux" "nire-durandal";
 
-flake.modules.nixos."nire-durandal" = 
+den.aspects."nire-durandal".nixos =
 { nix-index-database, ... }:
 {
     nixpkgs.hostPlatform = "x86_64-linux";
