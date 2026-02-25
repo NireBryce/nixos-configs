@@ -1,9 +1,18 @@
 # Standalone home-manager configuration for elly on nire-durandal.
 #
-# flake-aspects transposes den.aspects.X.homeManager → flake.modules.homeManager.X
-# at flake-parts evaluation time. Using flake.modules here (rather than
-# accessing config.den.aspects directly) avoids the infinite recursion in
-# den's recursive providerType description triggered during nix flake check.
+# "Standalone" means home-manager runs as its own tool (activated with
+# `home-manager switch`), separate from NixOS. The alternative would be
+# integrating it into the NixOS build via the home-manager NixOS module,
+# but standalone lets you switch home config without a full system rebuild.
+#
+# The modules list works the same way as for NixOS:
+#   every den.aspects.<name>.homeManager declaration in configs/ is
+#   transposed by flake-aspects into flake.modules.homeManager.<name>,
+#   and builtins.attrValues collects them all into the modules list here.
+#
+# extraSpecialArgs = inputs
+#   Same purpose as specialArgs in lib.nix: makes all flake inputs available
+#   as module arguments so home-manager modules can receive them by name.
 #
 # Switch with: nh home switch --configuration elly@nire-durandal ~/nixos/linux-flake/
 #          or: home-manager switch --flake .#elly@nire-durandal
@@ -12,12 +21,7 @@
   flake.homeConfigurations."elly@nire-durandal" =
     inputs.home-manager.lib.homeManagerConfiguration {
       pkgs = inputs.nixpkgs.legacyPackages."x86_64-linux";
-
-      # Pass all flake inputs so HM modules can receive them by name
-      # (e.g. `{ impermanence, ... }:`).
       extraSpecialArgs = inputs;
-
-      # All homeManager aspects, already resolved by flake-aspects.
       modules = builtins.attrValues config.flake.modules.homeManager;
     };
 }

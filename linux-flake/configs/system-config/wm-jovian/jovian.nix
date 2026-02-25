@@ -2,15 +2,16 @@
     ...
 }:
 { den.aspects.jovian.nixos = 
-{ config, pkgs, lib, ... }: 
+{ inputs, pkgs, lib, ... }: 
 {
+    imports = [ inputs.jovian.nixosModules.default ];
     boot.loader = {
         # todo: hack, replace after switching tinylaptop to limine
         limine.enable               = lib.mkForce false;
         limine.secureBoot.enable    = lib.mkForce false;
         systemd-boot.enable         = lib.mkDefault true;
     };
-    systemd.services.decky-loader.environment.LD_LIBRARY_PATH = lib.makeLibraryPath config.jovian.decky-loader.extraPackages;
+    systemd.services.decky-loader.environment.LD_LIBRARY_PATH = lib.makeLibraryPath inputs.jovian.decky-loader.extraPackages;
     services.desktopManager.plasma6.enable = true;
     
     jovian = {
