@@ -11,7 +11,7 @@
         limine.secureBoot.enable    = lib.mkForce false;
         systemd-boot.enable         = lib.mkDefault true;
     };
-    systemd.services.decky-loader.environment.LD_LIBRARY_PATH = lib.makeLibraryPath config.jovian.decky-loader.extraPackages;
+    systemd.services.decky-loader.environment.LD_LIBRARY_PATH = lib.makeLibraryPath inputs.jovian.decky-loader.extraPackages;
     services.desktopManager.plasma6.enable = true;
     
     jovian = {
