@@ -1,8 +1,19 @@
-# den.aspects is NOT automatically forwarded to flake.aspects.
-# Den's own mechanism is den.hosts-based; this project uses flake-aspects'
-# transposition instead. This module manually bridges the two so that every
-# den.aspects.X.{nixos,homeManager} declaration ends up in
-# config.flake.modules.{nixos,homeManager}.X via flake-aspects.
+# Why this file exists
+# ────────────────────
+# Two separate libraries are in play:
+#
+#   den         — provides the `den.aspects` option that every config file
+#                 in configs/ writes to.
+#
+#   flake-aspects — reads from `flake.aspects` and transposes it into
+#                   `flake.modules.{nixos,homeManager}`.
+#
+# These two libraries are independent and use different namespaces.
+# den does NOT automatically forward its aspects into flake.aspects.
+# This one-liner performs that bridge manually.
+#
+# Without it, flake-aspects would see an empty flake.aspects and produce
+# no modules, so nixosSystem would receive no configuration at all.
 { config, ... }:
 {
   flake.aspects = config.den.aspects;

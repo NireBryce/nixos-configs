@@ -1,27 +1,28 @@
-# Defines flake.lib.mkNixos — builds a nixosConfiguration from all nixos
-# aspects declared across configs/.
+# flake.lib.mkNixos — assembles a nixosSystem from all declared aspects.
 #
-# flake-aspects transposes den.aspects.X.nixos → flake.modules.nixos.X at
-# flake-parts evaluation time (via den-bridge.nix + flake-aspects.flakeModule
-# in outputs.nix). Using the already-resolved flake.modules here avoids
-# triggering den's internal resolve machinery inside the NixOS evaluation
-# context, which causes infinite recursion in den's recursive providerType
-# description when nix flake check force-evaluates _module.args.den.
+# By the time this runs, flake-aspects has already transposed every
+#   den.aspects.<name>.nixos = { ... }: { ... };
+# declaration into an entry in config.flake.modules.nixos:
+#   flake.modules.nixos.<name> = <resolved module>
 #
-# Home-manager is standalone — see hosts/nire-durandal/elly-home.nix.
+# builtins.attrValues collects all of those module values into a list,
+# which becomes the `modules` argument to nixosSystem. The result is that
+# every aspect file automatically contributes to every host's config —
+# no host needs to explicitly list which aspects it wants.
 #
-# Usage (in a host's flake-parts module):
-#   flake.nixosConfigurations."nire-durandal" = self.lib.mkNixos "x86_64-linux" "nire-durandal";
+# specialArgs = inputs
+#   Passes all flake inputs as extra arguments to every NixOS module.
+#   This is what lets individual modules receive inputs by name:
+#     { impermanence, nix-index-database, ... }: { imports = [ impermanence.nixosModule ]; }
+#   Without this, modules would have no way to access flake inputs.
+#
+# Usage (in a host file):
+#   flake.nixosConfigurations."nire-durandal" = inputs.self.lib.mkNixos "x86_64-linux" "nire-durandal";
 { inputs, config, ... }:
 {
   flake.lib.mkNixos = _system: _hostname:
     inputs.nixpkgs.lib.nixosSystem {
-      # Pass all flake inputs as specialArgs so NixOS modules can receive
-      # them by name (e.g. `{ impermanence, nix-index-database, ... }:`).
       specialArgs = inputs;
-
-      # All nixos aspects, already resolved to plain module values by
-      # flake-aspects at flake-parts time.
       modules = builtins.attrValues config.flake.modules.nixos;
     };
 }
