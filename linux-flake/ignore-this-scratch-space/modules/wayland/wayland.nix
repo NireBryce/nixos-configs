@@ -1,7 +1,4 @@
-{ 
-    ... 
-}: 
-{ den.aspects.wayland.nixos = 
+{ nire.wayland.nixos = 
 { pkgs, ... }:
 {
   

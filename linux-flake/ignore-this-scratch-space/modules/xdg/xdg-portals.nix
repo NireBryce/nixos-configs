@@ -1,7 +1,4 @@
-{
-    ...
-}:
-{ den.aspects.xdg-portals.nixos = 
+{ nire.xdg.nixos = 
 { pkgs, ... }: 
 {
         # should fix steam/proton/wine issues with xdg-open https://github.com/NixOS/nixpkgs/issues/160923 

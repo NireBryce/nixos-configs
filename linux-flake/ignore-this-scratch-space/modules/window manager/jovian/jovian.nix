@@ -1,7 +1,4 @@
-{
-    ...
-}:
-{ den.aspects.jovian.nixos = 
+{ nire.wm-jovian.nixos = 
 { inputs, pkgs, lib, ... }: 
 {
     imports = [ inputs.jovian.nixosModules.default ];

@@ -1,7 +1,4 @@
-{
-    ...
-}:
-{ den.aspects.jovian.nixos = 
+{ nire.wm-jovian.nixos = 
 { pkgs, config, ... }: 
 {
     environment.systemPackages = with pkgs; [

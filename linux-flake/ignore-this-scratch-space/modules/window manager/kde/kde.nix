@@ -17,10 +17,7 @@
 # final system config on the next rebuild.
 #
 # Reference: https://wiki.nixos.org/wiki/KDE
-{
-  ...
-}:
-{den.aspects.wm-kde.nixos =
+{ nire.wm-kde.nixos =
 { lib, pkgs, ... }: 
 {
     services.xserver.enable = true; # TODO: I think this is still needed for xwayland

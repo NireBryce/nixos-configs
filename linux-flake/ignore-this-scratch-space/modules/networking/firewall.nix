@@ -1,7 +1,4 @@
-{
-    ...
-}:
-{ den.aspects.networking.nixos = 
+{ nire.networking.nixos = 
 {        
     ## Firewall
     networking.firewall = { 
