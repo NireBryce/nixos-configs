@@ -1,4 +1,4 @@
-{ durandal.fixes = {
+{ durandal.fixes.nixos = {
 ## Temporary B550 suspend fix pending nixos-hardware update
   # TODO: remove this when https://github.com/NixOS/nixos-hardware/pull/1394 goes through
     services.udev.extraRules = ''
