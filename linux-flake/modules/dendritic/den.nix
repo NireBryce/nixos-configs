@@ -7,7 +7,6 @@
 {
     imports = [
         inputs.den.flakeModule
-        (inputs.den.namespace "nire" true)
         # TODO: check this
         # (inputs.den.namespace "elly" false)
     ];
