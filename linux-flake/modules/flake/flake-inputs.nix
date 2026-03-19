@@ -51,7 +51,7 @@
         nix-index-database.inputs.nixpkgs.follows  = "nixpkgs";
     };
     imports = [ 
-        inputs.flake-file.flakeModule
+        # inputs.flake-file.flakeModule
         # eventually start splitting from inputs.nix into other files https://flake-file.oeiuwq.com/tutorials/migrate-flake-parts/
     ];
 
