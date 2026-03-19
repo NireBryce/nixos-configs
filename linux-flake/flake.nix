@@ -3,7 +3,7 @@
 {
   description = "elly's NixOS configuration";
 
-  outputs = inputs: import ./outputs.nix inputs;
+  outputs = inputs: import ./flake-inputs.nix inputs;
 
   nixConfig = {
     extra-experimental-features = [ "pipe-operators" ];
