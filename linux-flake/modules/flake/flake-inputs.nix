@@ -3,11 +3,6 @@
 # declarations.  The generated flake.nix will carry a "do not edit" header.
 { inputs, lib, ... }:  # resolved flake inputs as specialArgs, https://flake-file.oeiuwq.com/tutorials/migrate-flake-parts/
 {
-    flake-file.description = "Nire NixOS configuration";
-
-    flake-file.nixConfig = {
-        extra-experimental-features = [ "pipe-operators" ];
-    };
 
     flake-file.inputs = {
         # ── Core framework ────────────────────────────────────────────────────────
@@ -50,10 +45,5 @@
         nix-index-database.url                     = "github:nix-community/nix-index-database";
         nix-index-database.inputs.nixpkgs.follows  = "nixpkgs";
     };
-    imports = [ 
-        # inputs.flake-file.flakeModule
-        # eventually start splitting from inputs.nix into other files https://flake-file.oeiuwq.com/tutorials/migrate-flake-parts/
-    ];
-
-    flake-file.outputs = "flake-parts";
+    
 }
