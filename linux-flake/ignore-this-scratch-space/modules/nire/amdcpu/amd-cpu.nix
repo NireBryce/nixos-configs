@@ -1,5 +1,5 @@
 
-{ amd.cpu.nixos = 
+{ nire.amdcpu.nixos = 
 { nixos-hardware, ... }: 
 {
     imports = [ 

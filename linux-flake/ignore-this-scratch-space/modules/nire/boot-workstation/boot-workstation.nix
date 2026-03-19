@@ -1,4 +1,4 @@
-{ workstation.boot.nixos = 
+{ nire.boot-workstation.nixos = 
 { lib, pkgs, ...}:
 {
         

@@ -55,16 +55,11 @@
 inputs:
 inputs.flake-parts.lib.mkFlake { inherit inputs; } {
   imports = [
-    # den: provides the `den.aspects` flake-parts option. Every file under
-    # configs/ sets den.aspects.<name>.{nixos,homeManager} to declare its
-    # piece of the configuration.
+    # den
     inputs.den.flakeModule
 
-    # flake-aspects: transposes den.aspects.X.nixos  → flake.modules.nixos.X
-    #                            den.aspects.X.homeManager → flake.modules.homeManager.X
-    # This transposition happens at evaluation time before NixOS sees anything,
-    # so hosts/lib.nix can just read builtins.attrValues config.flake.modules.nixos.
-    inputs.flake-aspects.flakeModule
+    
+    # inputs.flake-aspects.flakeModule
 
     # flake-file: provides the `write-flake` app that regenerates flake.nix.
     inputs.flake-file.flakeModules.default
@@ -73,17 +68,6 @@ inputs.flake-parts.lib.mkFlake { inherit inputs; } {
     # This is what makes the aspect pattern zero-boilerplate: no central list.
     (inputs.import-tree ./configs)
 
-    # Which CPU architectures this flake supports. Add a new entry here when
-    # adding a host with an architecture not already listed.
-    ./system-archs.nix
-
-    # Copies den.aspects → flake.aspects so flake-aspects can see them.
-    # The two libraries use separate namespaces and don't connect on their own.
-    ./hosts/den-bridge.nix
-
-    # Defines flake.lib.mkNixos, the helper used by each host to assemble
-    # all aspects into a nixosSystem call.
-    ./hosts/lib.nix
 
     # nire-durandal: host-specific aspect (hostname, stateVersion, hw-conf)
     # and the flake.nixosConfigurations."nire-durandal" output.

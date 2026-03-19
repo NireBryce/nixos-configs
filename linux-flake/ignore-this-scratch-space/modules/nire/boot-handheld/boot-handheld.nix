@@ -1,4 +1,4 @@
-{ handheld.boot.nixos =
+{ nire.boot-handheld.nixos =
 { lib, ... }: 
 {
     boot.loader = {

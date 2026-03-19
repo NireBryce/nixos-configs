@@ -9,8 +9,21 @@
     }:
     {
         imports = with inputs.self.modules.nixos; [
-            nix-index-database.nixosModules.nix-index
             durandal.fixes
+            nire.amdcpu
+            nire.amdgpu
+            nire.boot-workstation # boot.handheld for handhelds
+            nire.dev-tools
+            nire.firmware-all
+            nire.flatpak
+            nire.font
+            nire.gaming
+            nire.impermanence-WARN-README
+            nire.kdeconnect
+            nire.networking
+            nix-index-database.nixosModules.nix-index
+
+
             ./hardware-configuration.nix # todo: Figure out a better way
         ];
 

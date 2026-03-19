@@ -1,7 +1,3 @@
-{
-    ...
-}:
-{ nire.pkgs.nixos = 
 { pkgs, ... }:  
 {
     environment.systemPackages = with pkgs; [ # TODO: describe these
@@ -42,5 +38,4 @@
     
     ];
 }
-;}
 

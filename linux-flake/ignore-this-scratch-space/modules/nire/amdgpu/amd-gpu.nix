@@ -1,4 +1,4 @@
-{ amd.gpu.nixos = 
+{ nire.amdgpu.nixos = 
 { nixos-hardware, pkgs, ... }: 
 {
     imports = [ nixos-hardware.nixosModules.common-gpu-amd ];
