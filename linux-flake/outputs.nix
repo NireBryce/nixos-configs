@@ -66,7 +66,7 @@ inputs.flake-parts.lib.mkFlake { inherit inputs; } {
 
     # Auto-discovers and imports every .nix file under configs/.
     # This is what makes the aspect pattern zero-boilerplate: no central list.
-    (inputs.import-tree ./configs)
+    (inputs.import-tree ./modules)
 
 
     # nire-durandal: host-specific aspect (hostname, stateVersion, hw-conf)

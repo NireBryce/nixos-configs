@@ -16,6 +16,7 @@
 #
 # Switch with: nh home switch --configuration elly@nire-durandal ~/nixos/linux-flake/
 #          or: home-manager switch --flake .#elly@nire-durandal
+{ users.elly.homeManager =
 { inputs, config, ... }:
 {
     flake.homeConfigurations."elly@nire-durandal" 
@@ -37,3 +38,4 @@
         ];
     };
 }
+;}

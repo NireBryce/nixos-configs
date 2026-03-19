@@ -2,13 +2,13 @@
 { 
     packages.linux.homeManager = {
         imports = [
-            (import-tree ./pkgs-hm)
+            (import-tree ./packages/pkgs-hm)
         ];
     };
 
     packages.linux.nixos = {
         imports = [
-            (import-tree ./pkgs-system)
+            (import-tree ./packages/pkgs-system)
         ];
     };
 }

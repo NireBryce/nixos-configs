@@ -13,9 +13,8 @@
             # TODO: look into ways of having den auto-import things and then blacklist individual modules
 
 
-
-            durandal.hardware # todo: Figure out a better way
-            durandal.fixes
+            users.elly
+            hosts.durandal # todo: Figure out a better way
             nire.amdcpu
             nire.amdgpu
             nire.avahi
