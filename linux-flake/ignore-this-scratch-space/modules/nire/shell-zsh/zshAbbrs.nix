@@ -1,5 +1,5 @@
 # desc = "";
-{ nire.shell-config.homeManager = 
+{ nire.shell-zsh.homeManager = 
 { ... }:
 {
     # ! WARN: unsure how global aliases work here

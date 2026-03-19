@@ -1,5 +1,5 @@
 # desc = "elly user session paths";
-{ nire.home-config.homeManager = 
+{ elly.home-config.homeManager = 
 { ... }:
 {
     home.sessionPath = [ 

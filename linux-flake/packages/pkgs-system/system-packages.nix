@@ -6,10 +6,10 @@
         nano                        # backup of a backup, vim is bad on a phone                               https://www.nano-editor.org/
         nanorc                      # nano syntax highlighting                  https://github.com/scopatz/nanorc
 
-        bash                        # bash.  ok i guess.
-        #? Bash Plugins
-            starship                    # theming
-            blesh                       # if bash were zsh
+        # bash                        # bash.  ok i guess.
+        # #? Bash Plugins
+        #     starship                    # theming
+        #     blesh                       # if bash were zsh
         coreutils                   # coreutils
         curl                        # curl
         gcc                         # gcc

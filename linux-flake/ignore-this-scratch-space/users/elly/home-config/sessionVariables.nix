@@ -1,5 +1,5 @@
 # desc = "elly user session variables";
-{ nire.home-config.homeManager = 
+{ elly.home-config.homeManager = 
 { pkgs, ... }:
 {
     home.sessionVariables = { 

@@ -18,10 +18,22 @@
 #          or: home-manager switch --flake .#elly@nire-durandal
 { inputs, config, ... }:
 {
-  flake.homeConfigurations."elly@nire-durandal" =
-    inputs.home-manager.lib.homeManagerConfiguration {
-      pkgs = inputs.nixpkgs.legacyPackages."x86_64-linux";
-      extraSpecialArgs = inputs;
-      modules = builtins.attrValues config.flake.modules.homeManager;
+    flake.homeConfigurations."elly@nire-durandal" 
+    = inputs.home-manager.lib.homeManagerConfiguration 
+    {
+        pkgs = inputs.nixpkgs.legacyPackages."x86_64-linux";
+        extraSpecialArgs = inputs;
+        modules = builtins.attrValues config.flake.modules.homeManager;
+        
+        # TODO: original is inputs.self.modules.nixos;
+        imports = with inputs.self.modules.homeManager; [
+            elly.aliases
+            elly.fonts
+            elly.git
+            elly.hm-settings
+            elly.home-config
+            elly.user
+            packages.linux
+        ];
     };
 }

@@ -1,5 +1,5 @@
 # desc = "";
-{ nire.aliases.homeManager = 
+{ elly.aliases.homeManager = 
 { pkgs, ... }:
 {
     home.shellAliases = { 

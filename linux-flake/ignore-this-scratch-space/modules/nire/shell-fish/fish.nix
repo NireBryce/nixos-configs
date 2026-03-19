@@ -1,4 +1,4 @@
-{ nire.shell-config.homeManager = 
+{ nire.shell-fish.homeManager = 
 { ... }:
 { 
     programs.fish = {

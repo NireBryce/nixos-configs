@@ -1,5 +1,5 @@
 # desc = "bash line editor, allows zsh-like line editor tricks and bindings";
-{ nire.shell-config.homeManager = 
+{ nire.shell-bash.homeManager = 
 { pkgs, ... }:
 let packageList = with pkgs; [
     blesh

@@ -1,4 +1,4 @@
-{ nire.git.homeManager = 
+{ elly.git.homeManager = 
 { ... }:
 {
     home.file."./.gitconfig".source = ./.gitconfig;

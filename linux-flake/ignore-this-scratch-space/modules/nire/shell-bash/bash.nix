@@ -1,5 +1,5 @@
 # desc = "bash configs";
-{ nire.shell-config.homeManager = 
+{ nire.shell-bash.homeManager = 
 { pkgs, ... }:
 
 {

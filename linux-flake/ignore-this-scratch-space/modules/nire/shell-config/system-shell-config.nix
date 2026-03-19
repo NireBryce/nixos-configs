@@ -1,4 +1,4 @@
-{ nire.shells.nixos = 
+{ nire.shell-config.nixos = 
 { pkgs, lib, ... }: 
 {
     # Shells

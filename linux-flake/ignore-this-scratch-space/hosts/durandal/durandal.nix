@@ -9,9 +9,16 @@
     }:
     {
         imports = with inputs.self.modules.nixos; [
+            # TODO: having to import these is a regression even if it makes for better errors
+            # TODO: look into ways of having den auto-import things and then blacklist individual modules
+
+
+
+            durandal.hardware # todo: Figure out a better way
             durandal.fixes
             nire.amdcpu
             nire.amdgpu
+            nire.avahi
             nire.boot-workstation # boot.handheld for handhelds
             nire.dev-tools
             nire.firmware-all
@@ -21,10 +28,24 @@
             nire.impermanence-WARN-README
             nire.kdeconnect
             nire.networking
+            nire.nix
+            nire.shell-bash
+            nire.shell-config
+            nire.shell-fish
+            nire.shell-zsh
+            nire.sound-pipewire
+            nire.ssh
+            nire.storage-nfs
+            nire.system
+            nire.virtualization
+            nire.wayland
+            nire.wifi
+            nire.wm-kde
+            nire.xdg
+            packages.linux
             nix-index-database.nixosModules.nix-index
-
-
-            ./hardware-configuration.nix # todo: Figure out a better way
+            peripherals.logitech-g600
+            peripherals.zsa-moonlander
         ];
 
     

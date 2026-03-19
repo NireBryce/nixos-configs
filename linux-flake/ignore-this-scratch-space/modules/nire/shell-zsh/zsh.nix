@@ -19,7 +19,7 @@
 # evaluation warning: `programs.zsh.initExtra` is deprecated, use `programs.zsh.initContent` instead.
 #   Example: programs.zsh.initContent = "your content here";
 
-{ nire.shell-config.homeManager = 
+{ nire.shell-zsh.homeManager = 
 { pkgs, lib, ... }:
 let zshPluginRequiresList = with pkgs; [
     diff-so-fancy
