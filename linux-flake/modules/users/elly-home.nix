@@ -28,13 +28,13 @@
         
         # TODO: original is inputs.self.modules.nixos;
         imports = with inputs.self.modules.homeManager; [
-            elly.aliases
-            elly.fonts
-            elly.git
-            elly.hm-settings
-            elly.home-config
-            elly.user
-            packages.linux
+            <elly.aliases>
+            <elly.fonts>
+            <elly.git>
+            <elly.hm-settings>
+            <elly.home-config>
+            <elly.user>
+            <packages.linux>
         ];
     };
 }
