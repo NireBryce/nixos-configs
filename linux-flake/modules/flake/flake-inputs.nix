@@ -1,8 +1,11 @@
 # Declares all flake inputs and top-level flake settings using flake-file options.
 # After editing, run `nix run .#write-flake` to regenerate flake.nix from these
 # declarations.  The generated flake.nix will carry a "do not edit" header.
-{ inputs, lib, ... }:  # resolved flake inputs as specialArgs, https://flake-file.oeiuwq.com/tutorials/migrate-flake-parts/
+{ inputs, ... }:  # resolved flake inputs as specialArgs, https://flake-file.oeiuwq.com/tutorials/migrate-flake-parts/
 {
+    imports = [ 
+        inputs.flake-file.inputs.flakeModules
+    ];
 
     flake-file.inputs = {
         # ── Core framework ────────────────────────────────────────────────────────
@@ -18,7 +21,7 @@
         # ── Dendritic toolchain ───────────────────────────────────────────────────
         den.url                                    = "github:vic/den";
         flake-aspects.url                          = "github:vic/flake-aspects";
-        flake-file.url                             = lib.mkDefault "github:vic/flake-file";
+        flake-file.url                             = "github:vic/flake-file";
 
         # ── Home Manager ──────────────────────────────────────────────────────────
         home-manager.url                           = "github:nix-community/home-manager/master";
@@ -46,9 +49,6 @@
         nix-index-database.inputs.nixpkgs.follows  = "nixpkgs";
     };
     
-    imports = [ 
-        inputs.flake-file.flakeModule 
-    ];
 
     flake-file.outputs = "flake-parts";
 }
