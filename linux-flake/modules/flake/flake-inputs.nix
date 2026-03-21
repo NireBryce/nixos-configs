@@ -46,4 +46,9 @@
         nix-index-database.inputs.nixpkgs.follows  = "nixpkgs";
     };
     
+    imports = [ 
+        inputs.flake-file.flakeModule 
+    ];
+
+    flake-file.outputs = "flake-parts";
 }
