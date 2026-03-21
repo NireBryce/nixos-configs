@@ -3,7 +3,7 @@
     
     outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
 
-    systems = [ "x86-64-linux" ];
+    # systems = [ "x86-64-linux" ];
 
     inputs = {
         nixpkgs.url                                = "github:NixOS/nixpkgs/nixos-unstable";
