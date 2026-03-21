@@ -1,6 +1,6 @@
-{ inputs, den, ...}:
+{ inputs, ...}:
 {
-    _module.args.__findFile = den.lib.__findFile;
+    _module.args.__findFile = inputs.den.lib.__findFile;
     imports = [ # can we put these with where they're invoked somehow?
         (inputs.den.namespace "nire" true)
         (inputs.den.namespace "packages" true)

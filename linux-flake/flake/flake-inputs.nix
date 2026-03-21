@@ -1,11 +1,10 @@
 # Declares all flake inputs and top-level flake settings using flake-file options.
 # After editing, run `nix run .#write-flake` to regenerate flake.nix from these
 # declarations.  The generated flake.nix will carry a "do not edit" header.
-{ inputs, ... }:  # resolved flake inputs as specialArgs, https://flake-file.oeiuwq.com/tutorials/migrate-flake-parts/
 {
-    imports = [ 
-        inputs.flake-file.inputs.flakeModules
-    ];
+    # imports = [ 
+    #     inputs.flake-file.inputs.flakeModules
+    # ];
 
     flake-file.inputs = {
         # ── Core framework ────────────────────────────────────────────────────────
@@ -49,6 +48,10 @@
         nix-index-database.inputs.nixpkgs.follows  = "nixpkgs";
     };
     
+    outputs = inputs: import ./modules inputs;
+    # flake-file.outputs = "flake-parts";
+    nixConfig = {
+        extra-experimental-features = [ "pipe-operators" ];
+    };
 
-    flake-file.outputs = "flake-parts";
 }
