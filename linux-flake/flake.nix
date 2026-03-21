@@ -47,6 +47,7 @@
     };
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-lib.follows = "nixpkgs";
     sops-nix = {
       url = "github:mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";

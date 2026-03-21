@@ -3,13 +3,15 @@
     
     outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
 
-    # systems = [ "x86-64-linux" ];
+    
 
     inputs = {
         nixpkgs.url                                = "github:NixOS/nixpkgs/nixos-unstable";
-        # nixpkgs-lib.follows                        = "nixpkgs";
+        nixpkgs-lib.follows                        = "nixpkgs";
+        
         flake-parts.url                            = "github:hercules-ci/flake-parts";
         flake-parts.inputs.nixpkgs-lib.follows     = "nixpkgs-lib";
+        
         systems.url                                = "github:nix-systems/default";
         import-tree.url                            = "github:vic/import-tree";
         # ── Dendritic toolchain ───────────────────────────────────────────────────
