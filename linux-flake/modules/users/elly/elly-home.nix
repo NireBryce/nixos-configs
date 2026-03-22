@@ -1,6 +1,6 @@
 { self, inputs, ...}:
 { 
-    flake.homeConfigurations.elly = inputs.home-manager.lib.homeManagerConfiguration {
+    flake.homeConfigurations."elly@nire-durandal" = inputs.home-manager.lib.homeManagerConfiguration {
         modules = [ ];
     };
  }
