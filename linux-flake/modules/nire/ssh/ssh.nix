@@ -1,7 +1,5 @@
-{
-    ...
-}:
-{ nire.ssh.nixos = 
+{ self, inputs, ...}:
+{ flake.nixosModules.ssh =
 { ... }: 
 {
     services.openssh = {

@@ -1,4 +1,6 @@
-{ pkgs, ... }:  
+{ self, inputs, ...}:
+{ flake.nixosModules.system-base-packages = 
+{ pkgs, ... }:
 {
     environment.systemPackages = with pkgs; [ # TODO: describe these
         # Editors
@@ -38,4 +40,5 @@
     
     ];
 }
+;}
 

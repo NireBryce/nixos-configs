@@ -1,5 +1,5 @@
-# desc = "elly user session variables";
-{ elly.home-config.homeManager = 
+{ self, inputs, ...}:
+{ flake.homeModules.elly-home-config = 
 { pkgs, ... }:
 {
     home.sessionVariables = { 

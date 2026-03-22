@@ -1,4 +1,5 @@
-{ nire.virtualization.nixos = 
+{ self, inputs, ...}:
+{ flake.nixosModules.virtualization = 
 { pkgs, ... }: 
 {
     environment.systemPackages = with pkgs; [

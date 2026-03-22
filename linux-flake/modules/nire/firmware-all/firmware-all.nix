@@ -1,4 +1,5 @@
-{ nire.firmware-all.nixos = 
+{ self, inputs, ...}:
+{ flake.nixosModules.firmware-all =
 {
     hardware.enableAllFirmware = true;
     hardware.enableRedistributableFirmware = true;

@@ -1,28 +1,23 @@
-{nire.nix = 
-{
-    nixos = {
-        nix.extraOptions    = "experimental-features = nix-command flakes";
-        nix.settings        = {
-            trusted-users          = [ "root" ];
-            experimental-features  = [
-                # duplicated in extraOptions?
-                "nix-command" 
-                "flakes" 
-            ];
-        };
-
-        # `comma` fix https://github.com/nix-community/comma/issues/43 (25.12.01)
-        nix.channel.enable = false; 
-
-        nixpkgs.config.allowUnfree = true;
-        
-        # TODO: do nix automatic garbage collection https://www.youtube.com/watch?v=uS8Bx8nQots
+{ self, inputs, ...}:
+{ flake.nixosModules.nix= { 
+    nix.extraOptions    = "experimental-features = nix-command flakes";
+    nix.settings        = {
+        trusted-users          = [ "root" ];
+        experimental-features  = [
+            # duplicated in extraOptions?
+            "nix-command" 
+            "flakes" 
+        ];
     };
-    homeManager = {
-        nixpkgs.config = {
-            allowUnfree          =     true;            # Disable if you don't want unfree packages
-            allowUnfreePredicate = (_: true);           # Workaround for https://github.com/nix-community/home-manager/issues/2942
-        };
-    };
+
+    # FIX: `comma` fix https://github.com/nix-community/comma/issues/43 (25.12.01)
+    nix.channel.enable = false; 
+
+    nixpkgs.config.allowUnfree = true;
+    
+    # NOTE: make nix-index not use channels https://github.com/nix-community/nix-index/issues/167
+    # WISHLIST: do nix automatic garbage collection https://www.youtube.com/watch?v=uS8Bx8nQots
+};
+
 }
-;}
+

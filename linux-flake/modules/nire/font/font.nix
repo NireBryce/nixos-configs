@@ -1,4 +1,5 @@
-{ nire.font.nixos = 
+{ self, inputs, ...}:
+{ flake.nixosModules.font = 
 { pkgs, ...}: 
 {
     fonts = {

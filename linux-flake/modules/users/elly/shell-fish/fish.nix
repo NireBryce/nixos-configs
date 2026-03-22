@@ -1,4 +1,5 @@
-{ nire.shell-fish.homeManager = 
+{ self, inputs, ...}:
+{ flake.homeModules.elly-shell-fish = 
 { ... }:
 { 
     programs.fish = {

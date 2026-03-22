@@ -1,5 +1,6 @@
 # desc = "bash configs";
-{ nire.shell-bash.homeManager = 
+{ self, inputs, ...}:
+{ flake.homeModules.elly-shell-bash = 
 { pkgs, ... }:
 
 {

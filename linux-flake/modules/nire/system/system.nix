@@ -1,4 +1,5 @@
-{ nire.system.nixos = 
+{ self, inputs, ...}:
+{ flake.nixosModules.system = 
 { lib, ... }: 
 {
     programs.nix-ld.enable      = lib.mkDefault true;      # Needed for VSCode remote connection, etc

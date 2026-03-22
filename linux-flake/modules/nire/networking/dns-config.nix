@@ -1,4 +1,5 @@
-{ nire.networking.nixos = 
+{ self, inputs, ...}:
+{ flake.nixosModules.networking =
 { ... }:  
 {
     # TODO: why this DNS

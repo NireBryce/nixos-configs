@@ -1,5 +1,5 @@
-
-{ nire.amdcpu.nixos = 
+{ self, inputs, ... }:
+{ flake.nixosModules.amdcpu = 
 { nixos-hardware, ... }: 
 {
     imports = [ 

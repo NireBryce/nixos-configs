@@ -1,5 +1,5 @@
-# sops secret management
-{ nire.secrets.nixos = 
+{ self, inputs, ...}:
+{ flake.nixosModules.secrets = 
 { config, sops-nix, pkgs, ... }: 
 let
     isEd25519   = k: k.type == "ed25519";

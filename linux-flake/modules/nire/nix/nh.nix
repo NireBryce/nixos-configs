@@ -1,4 +1,5 @@
-{ nire.nix.nixos = 
+{ self, inputs, ...}:
+{ flake.nixosModules.nix = 
 {
     programs.nh = {
         enable          = true;

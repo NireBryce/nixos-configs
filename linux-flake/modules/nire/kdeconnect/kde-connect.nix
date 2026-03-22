@@ -1,4 +1,5 @@
-{ nire.kde-connect.nixos = 
+{ self, inputs, ...}:
+{ flake.nixosModules.kdeconnect = 
 { ... }: 
 {
     # todo: shouldn't this be a service?

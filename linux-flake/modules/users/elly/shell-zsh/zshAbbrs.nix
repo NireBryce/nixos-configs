@@ -1,5 +1,5 @@
-# desc = "";
-{ nire.shell-zsh.homeManager = 
+{ self, inputs, ...}:
+{ flake.nixosModules.elly-shell-zsh =
 { ... }:
 {
     # ! WARN: unsure how global aliases work here

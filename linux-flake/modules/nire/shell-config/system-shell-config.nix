@@ -1,4 +1,5 @@
-{ nire.shell-config.nixos = 
+{ self, inputs, ...}:
+{ flake.nixosModules.shell-config =
 { pkgs, lib, ... }: 
 {
     # Shells

@@ -1,4 +1,5 @@
-{ nire.boot-workstation.nixos = 
+{ self, inputs, ...}:
+{ flake.nixosModules.boot-workstation =
 { lib, pkgs, ...}:
 {
         

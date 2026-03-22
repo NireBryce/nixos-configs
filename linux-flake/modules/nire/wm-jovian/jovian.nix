@@ -1,4 +1,5 @@
-{ nire.wm-jovian.nixos = 
+{ self, inputs, ...}:
+{ flake.nixosModules.wm-jovian = 
 { inputs, pkgs, lib, ... }: 
 {
     imports = [ inputs.jovian.nixosModules.default ];

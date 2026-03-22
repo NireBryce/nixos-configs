@@ -1,5 +1,5 @@
-# desc = "elly user session paths";
-{ elly.home-config.homeManager = 
+{ self, inputs, ...}:
+{ flake.homeModules.elly-home-config = 
 { ... }:
 {
     home.sessionPath = [ 

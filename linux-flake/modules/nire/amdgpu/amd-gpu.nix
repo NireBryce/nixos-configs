@@ -1,4 +1,5 @@
-{ nire.amdgpu.nixos = 
+{ self, inputs, ...}:
+{ flake.nixosModules.amdgpu = 
 { nixos-hardware, pkgs, ... }: 
 {
     imports = [ nixos-hardware.nixosModules.common-gpu-amd ];

@@ -1,4 +1,5 @@
-{ nire.wayland.nixos = 
+{ self, inputs, ...}:
+{ flake.nixosModules.wayland = 
 { pkgs, ... }:
 {
   

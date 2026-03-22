@@ -1,4 +1,5 @@
-{ nire.shell-config.homeManager = 
+{ self, inputs, ...}:
+{ flake.homeModules.shell-config = 
 { pkgs, ... }:
 {
     home.packages = with pkgs; [

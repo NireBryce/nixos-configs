@@ -1,4 +1,5 @@
-{ nire.system.nixos = 
+{ self, inputs, ...}:
+{ flake.nixosModules.system = 
 { ... }: 
 {
     console = {

@@ -1,12 +1,11 @@
-# desc = "bash line editor, allows zsh-like line editor tricks and bindings";
-{ nire.shell-bash.homeManager = 
+{ self, inputs, ...}:
+{ flake.homeModules.elly-shell-bash = 
 { pkgs, ... }:
-let packageList = with pkgs; [
-    blesh
-];
-in
 {
-    home.packages = packageList;
+# bash line editor, allows zsh-like line editor tricks and bindings
+    home.packages = with pkgs; [
+        blesh
+    ];
     home.file.".blerc".text = ''
         bleopt complete_menu_style=desc
 

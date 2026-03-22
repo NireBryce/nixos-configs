@@ -1,4 +1,5 @@
-{ nire.gaming.nixos = 
+{ self, inputs, ...}:
+{ flake.nixosModules.gaming =
 { pkgs, ...}: 
 {
     #* steam - (fhs)

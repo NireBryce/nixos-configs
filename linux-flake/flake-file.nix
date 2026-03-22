@@ -1,10 +1,16 @@
-{ 
+{
     description = "";
     
-    outputs = 
-        inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
+    nixConfig = {
+        extra-experimental-features = [ "pipe-operators" ];
+    };
 
-    
+    outputs = 
+        inputs: inputs.flake-parts.lib.mkFlake 
+        { inherit inputs; } 
+        (inputs.import-tree ./modules);
+
+#####################
 
     inputs = {
         nixpkgs.url                                = "github:NixOS/nixpkgs/nixos-unstable";
@@ -18,7 +24,7 @@
         # ── Dendritic toolchain ───────────────────────────────────────────────────
         den.url                                    = "github:vic/den";
         flake-aspects.url                          = "github:vic/flake-aspects";
-        flake-file.url                             = "github:vic/flake-file";
+        # flake-file.url                             = "github:vic/flake-file";
 
         # ── Home Manager ──────────────────────────────────────────────────────────
         home-manager.url                           = "github:nix-community/home-manager/master";
@@ -50,8 +56,4 @@
         with-inputs.flake = false;
     };
     
-    nixConfig = {
-        extra-experimental-features = [ "pipe-operators" ];
-    };
-    # flake-file.outputs = "flake-parts";
 }
