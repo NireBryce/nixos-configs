@@ -1,6 +1,6 @@
 { self, inputs, ... }:
 {
-    flake.nixosConfigurations.nire-durandal = inputs.nixpkgs.lib.nixosStystem {
+    flake.nixosConfigurations.nire-durandal = inputs.nixpkgs.lib.nixosSystem {
         modules = [ ];
     };
 }
