@@ -5,10 +5,21 @@
         extra-experimental-features = [ "pipe-operators" ];
     };
 
+    
+
     outputs = 
-        inputs: inputs.flake-parts.lib.mkFlake 
-        { inherit inputs; } 
-        (inputs.import-tree ./modules);
+        inputs: inputs.flake-parts.lib.mkFlake {   
+            inherit inputs; 
+        }
+        {
+            imports = [
+                (inputs.import-tree ./modules)
+            ];
+            systems = [ 
+                "x86-64-linux" 
+                "aarch64-darwin"
+            ];
+        };
 
 #####################
 
@@ -19,11 +30,11 @@
         flake-parts.url                            = "github:hercules-ci/flake-parts";
         flake-parts.inputs.nixpkgs-lib.follows     = "nixpkgs-lib";
         
-        systems.url                                = "github:nix-systems/default";
+        # systems.url                                = "github:nix-systems/default";
         import-tree.url                            = "github:vic/import-tree";
         # ── Dendritic toolchain ───────────────────────────────────────────────────
-        den.url                                    = "github:vic/den";
-        flake-aspects.url                          = "github:vic/flake-aspects";
+        # den.url                                    = "github:vic/den";
+        # flake-aspects.url                          = "github:vic/flake-aspects";
         # flake-file.url                             = "github:vic/flake-file";
 
         # ── Home Manager ──────────────────────────────────────────────────────────
@@ -52,8 +63,8 @@
         nix-index-database.inputs.nixpkgs.follows  = "nixpkgs";
         
         # vic
-        with-inputs.url = "github:vic/with-inputs";
-        with-inputs.flake = false;
+        # with-inputs.url = "github:vic/with-inputs";
+        # with-inputs.flake = false;
     };
     
 }
