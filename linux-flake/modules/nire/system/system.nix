@@ -8,6 +8,8 @@
         keyMap  = "us";
         font    = "Lat2-Terminus16";
     };
+    i18n.defaultLocale  = lib.mkDefault "en_US.UTF-8";
+    time.timeZone       = lib.mkDefault "America/New_York"; 
     environment.systemPackages = with pkgs; [
         sbctl # secure boot ctl  
     ];
