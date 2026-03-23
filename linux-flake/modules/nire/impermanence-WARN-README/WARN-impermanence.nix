@@ -3,10 +3,10 @@
 # Leading _ prevents import-tree from importing this automatically from tree
 { self, inputs, ...}:
 { flake.nixosModules.impermanence-WARN-README = 
-{ impermanence, lib, ... }:
+{ lib, ... }:
 { 
     imports = [
-        impermanence.nixosModule
+        inputs.impermanence.nixosModule
     ];
 
     # filesystems

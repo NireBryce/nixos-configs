@@ -1,6 +1,6 @@
 { self, inputs, ...}:
 { flake.nixosModules.secrets = 
-{ config, sops-nix, pkgs, ... }: 
+{ config, pkgs, ... }: 
 let
     isEd25519   = k: k.type == "ed25519";
     getKeyPath  = k: k.path;
@@ -9,7 +9,7 @@ let
 in 
 {
     imports = [
-        sops-nix.nixosModules.sops
+        inputs.sops-nix.nixosModules.sops
     ];
 
     environment.systemPackages = with pkgs; [

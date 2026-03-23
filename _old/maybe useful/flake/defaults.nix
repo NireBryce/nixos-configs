@@ -2,7 +2,7 @@
     imports = [ 
         ./flake-inputs.nix 
     ];
-    systems = [ "x86-64-linux" ];
+    systems = [ "x86_64-linux" ];
     # flake-file.description = "Nire NixOS configuration";
 
     # flake-file.nixConfig = {

@@ -1,8 +1,8 @@
 { self, inputs, ...}:
 { flake.nixosModules.amdgpu = 
-{ nixos-hardware, pkgs, ... }: 
+{ pkgs, ... }: 
 {
-    imports = [ nixos-hardware.nixosModules.common-gpu-amd ];
+    imports = [ inputs.nixos-hardware.nixosModules.common-gpu-amd ];
         
     environment.systemPackages = with pkgs; [ 
         mesa                        # todo: document

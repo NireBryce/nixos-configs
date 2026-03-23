@@ -1,9 +1,9 @@
 { self, inputs, ... }:
 { flake.nixosModules.amdcpu = 
-{ nixos-hardware, ... }: 
+{ inputs, ... }: 
 {
     imports = [ 
-        nixos-hardware.nixosModules.common-cpu-amd 
+        inputs.nixos-hardware.nixosModules.common-cpu-amd 
     ];
 }
 ;}

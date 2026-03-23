@@ -1,7 +1,7 @@
 { self, inputs, ...}:
 { flake.homeModules.pkgs-gui = {
         imports = [
-            (inputs.import-tree ./pkgs-gui)
+            (inputs.import-tree ../packages/pkgs-hm/pkgs-gui)
         ];
     };
 

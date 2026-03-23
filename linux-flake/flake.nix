@@ -16,7 +16,7 @@
                 (inputs.import-tree ./modules)
             ];
             systems = [ 
-                "x86-64-linux" 
+                "x86_64-linux" 
                 "aarch64-darwin"
             ];
         };

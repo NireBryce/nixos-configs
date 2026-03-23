@@ -1,6 +1,6 @@
 { self, inputs, ...}:
 { flake.nixosModules.wm-jovian = 
-{ inputs, pkgs, lib, ... }: 
+{ pkgs, lib, ... }: 
 {
     imports = [ inputs.jovian.nixosModules.default ];
     boot.loader = {
