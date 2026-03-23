@@ -3,7 +3,7 @@
 # to /etc/nixos/configuration.nix instead.
 
 { self, inputs, ... }:
-{ flake.nixosModules.durandalHardware = 
+{ flake.modules.nixos.durandalHardware = 
 { config, lib, modulesPath, ... }:
 
 {
