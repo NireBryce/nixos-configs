@@ -1,7 +1,20 @@
 { self, inputs, ...}:
-{ flake.nixosModules.virtualization =
+{ 
+flake.modules.nixos.virtualization = 
 { pkgs, ... }: 
 {
+    environment.systemPackages = with pkgs; [
+        distrobox
+        distrobox-tui
+        distroshelf
+        boxbuddy
+        host-spawn
+        podman-compose
+    ];
+    # expose profile to distrobox containers
+    environment.etc."distrobox/distrobox.conf".text = ''
+        container_additional_volumes="/nix/store:/nix/store:ro /etc/profiles/per-user:/etc/profiles/per-user:ro /etc/static/profiles/per-user:/etc/static/profiles/per-user:ro"
+    '';
     virtualisation.podman = {
         enable = true;
         dockerCompat = true;
@@ -37,12 +50,17 @@
     #     registries = ['docker.io']
     # '';
 
+};
 
-    environment.systemPackages = with pkgs; [ 
-        host-spawn
-        podman-compose
-    ];
+flake.modules.homeManager.virtualization = # TODO: figure out how to make a hybrid flake-parts that interleaves home-manager and nixos
+{ ... }:
+{
+    # User-scoped `~/.config/containers/registries`
+    # https://wiki.nixos.org/wiki/Podman#DevContainers
+    xdg.configFile."containers/registries.conf".text = ''
+        [registries.search]
+        registries = ['docker.io']
+    '';
+};
 }
-
-;}
 

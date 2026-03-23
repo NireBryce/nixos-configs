@@ -1,17 +1,20 @@
 { self, inputs, ...}:
-{ flake.nixosModules.networking = 
-{        
-    ## Firewall
+{ flake.modules.nixos.networking = 
+{     
+    # DNS
+    networking.nameservers = [ "1.1.1.1" "1.0.0.1" ];
+    
+    # Firewall
     networking.firewall = { 
         enable = true;
-    ## TCP
+    # TCP
     allowedTCPPorts = [
         22                                          # ssh
     ];
     allowedTCPPortRanges = [  
         { from = 1714; to = 1764; }                 # kde-connect TCP
     ];
-    ## UDP
+    # UDP
     allowedUDPPorts = [                            
         5353                                        # mdns
         24470                                       # planetside2

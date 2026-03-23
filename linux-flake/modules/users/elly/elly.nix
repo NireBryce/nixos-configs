@@ -1,7 +1,7 @@
 { self, inputs, ...}:
 { 
-flake.homeModules.elly ={
-    imports = with self.homeModules; [ 
+flake.modules.homeManager.elly ={
+    imports = with self.modules.homeManager; [ 
         virtualization
         elly-aliases
         elly-fonts

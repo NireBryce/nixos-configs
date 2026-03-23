@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.homeModules.pkgs-cli = {
+{ flake.modules.homeManager.pkgs-cli = {
         imports = [
             (inputs.import-tree ../pkgs-hm/pkgs-cli)
         ];

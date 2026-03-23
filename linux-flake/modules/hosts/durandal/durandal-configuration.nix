@@ -1,8 +1,8 @@
 { self, inputs, ... }:
-{ flake.nixosModules.durandalConfiguration = 
+{ flake.modules.nixos.durandalConfiguration = 
 
 {
-    imports = with self.nixosModules; [
+    imports = with self.modules.nixos; [
         elly
         durandalHardware
         amdcpu

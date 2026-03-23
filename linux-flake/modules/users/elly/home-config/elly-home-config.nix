@@ -17,5 +17,15 @@
         # STARSHIP_CACHE          = "$HOME/.cache/starship";
         PYTHON                  = "PYTHON";
     };
+    home.sessionPath = [ 
+        "/usr/local"
+        "/usr/bin"
+        "$HOME/bin"
+        "$HOME/.local/bin"
+        "$HOME/.nix-profile/bin"
+        "$HOME/.zi/bin"
+        "$HOME/.config/zi/bin"
+        "$HOME/.cargo/bin"
+    ];
 }
 ;}

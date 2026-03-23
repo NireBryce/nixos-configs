@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.nixosModules.dev-tools =
+{ flake.modules.nixos.dev-tools-rust =
 { pkgs, ...}: 
 {
     environment.systemPackages = with pkgs; [

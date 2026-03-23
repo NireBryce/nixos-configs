@@ -1,7 +1,8 @@
 { self, inputs, ...}:
 { 
     flake.homeConfigurations."elly@nire-durandal" = inputs.home-manager.lib.homeManagerConfiguration {
-        modules = with self.homeModules; [ 
+        pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
+        modules = with self.homeModules; [
             elly
         ];
     };

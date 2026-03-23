@@ -40,7 +40,6 @@ let zshPluginRequiresList = with pkgs; [
 ];
 in
 {
-
     home.file."./.config/F-Sy-H".source = ./config/zsh-f-s-highlight-themes;
     home.packages = zshPluginRequiresList;
     
@@ -52,7 +51,15 @@ in
         zellij_keys_cfg = lib.fileContents ./config/free-zellij-keys.zsh;
     in 
     {
-
+        zsh-abbr.abbreviations = {
+            "abbr remove"           = "abbr erase";
+            "abbr rm"               = "abbr erase";
+            "cs-zsh-bindings"       = "bindkey";
+            "cs-zsh-highlighting"          = "fast-theme sv-orple";
+            "wh"                    = "wormhole";
+            "whence"                = "type -a";
+            "zsh-keymap"            = "bindkey";
+        };    
         enable                  =  true;
         autocd                  = false;
         enableVteIntegration    =  true;
