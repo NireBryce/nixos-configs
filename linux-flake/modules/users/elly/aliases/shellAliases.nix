@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.homeModules.elly-aliases = 
+{ flake.modules.homeManager.elly-aliases = 
 { pkgs, ... }:
 {
     home.shellAliases = { 

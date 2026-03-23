@@ -1,6 +1,6 @@
 # desc = "bash configs";
 { self, inputs, ...}:
-{ flake.homeModules.elly-shell-bash = 
+{ flake.modules.homeManager.elly-shell-bash = 
 { pkgs, ... }:
 
 {

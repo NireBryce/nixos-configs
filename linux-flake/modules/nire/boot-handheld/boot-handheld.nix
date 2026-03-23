@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.nixosModules.boot-handheld =
+{ flake.modules.nixos.boot-handheld =
 { lib, ... }: 
 {
     boot.loader = {

@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.homeModules.elly-nix-settings =
+{ flake.modules.homeManager.elly-nix-settings =
 {
     nixpkgs.config = {
         allowUnfree          =     true;            # Disable if you don't want unfree packages

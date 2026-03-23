@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.nixosModules.auth-yubikey = 
+{ flake.modules.nixos.auth-yubikey = 
 { pkgs, lib, config, ... }: 
 let homeDirectory = "${config.users.users.elly.home}";  # todo: automatee, or at least set only one top level variable
 in

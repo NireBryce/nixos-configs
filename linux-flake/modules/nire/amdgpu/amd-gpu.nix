@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.nixosModules.amdgpu = 
+{ flake.modules.nixos.amdgpu = 
 { pkgs, ... }: 
 {
     imports = [ inputs.nixos-hardware.nixosModules.common-gpu-amd ];

@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.nixosModules.boot-workstation =
+{ flake.modules.nixos.boot-workstation =
 { lib, pkgs, ...}:
 {
         

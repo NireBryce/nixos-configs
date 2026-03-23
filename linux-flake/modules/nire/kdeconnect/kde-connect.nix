@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.nixosModules.kdeconnect = 
+{ flake.modules.nixos.kdeconnect = 
 { ... }: 
 {
     # todo: shouldn't this be a service?

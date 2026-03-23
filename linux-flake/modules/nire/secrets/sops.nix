@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.nixosModules.secrets = 
+{ flake.modules.nixos.secrets = 
 { config, pkgs, ... }: 
 let
     isEd25519   = k: k.type == "ed25519";

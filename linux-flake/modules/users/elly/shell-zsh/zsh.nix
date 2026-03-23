@@ -20,7 +20,7 @@
 #   Example: programs.zsh.initContent = "your content here";
 
 { self, inputs, ...}:
-{ flake.homeModules.elly-shell-zsh =
+{ flake.modules.homeManager.elly-shell-zsh =
 { pkgs, lib, ... }:
 let zshPluginRequiresList = with pkgs; [
     diff-so-fancy

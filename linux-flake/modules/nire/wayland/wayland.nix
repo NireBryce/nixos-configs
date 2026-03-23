@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.nixosModules.wayland = 
+{ flake.modules.nixos.wayland = 
 { pkgs, ... }:
 {
   

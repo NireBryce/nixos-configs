@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.nixosModules.system = 
+{ flake.modules.nixos.system = 
 { ... }: 
 {
     console = {

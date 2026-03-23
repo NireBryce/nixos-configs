@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.nixosModules.xdg =
+{ flake.modules.nixos.xdg =
 { pkgs, ... }: 
 {
         # should fix steam/proton/wine issues with xdg-open https://github.com/NixOS/nixpkgs/issues/160923 

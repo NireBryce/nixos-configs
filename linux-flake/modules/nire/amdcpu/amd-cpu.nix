@@ -1,5 +1,5 @@
 { self, inputs, ... }:
-{ flake.nixosModules.amdcpu = 
+{ flake.modules.nixos.amdcpu = 
 { ... }:
 {
     imports = [ 

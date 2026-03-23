@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.homeModules.elly-home-config = 
+{ flake.modules.homeManager.elly-home-config = 
 { pkgs, ... }:
 {
     home.sessionVariables = { 

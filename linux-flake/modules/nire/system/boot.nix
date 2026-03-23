@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.nixosModules.system-boot = 
+{ flake.modules.nixos.system-boot = 
 { pkgs, lib, ... }: 
 {
     environment.systemPackages = with pkgs; [

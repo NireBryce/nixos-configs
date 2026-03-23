@@ -1,6 +1,6 @@
 # Reference: https://wiki.nixos.org/wiki/KDE
 { self, inputs, ...}:
-{ flake.nixosModules.wm-kde =
+{ flake.modules.nixos.wm-kde =
 { lib, pkgs, ... }: 
 {
     services.xserver.enable = true; # TODO: I think this is still needed for xwayland

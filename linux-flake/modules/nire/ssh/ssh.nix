@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.nixosModules.ssh =
+{ flake.modules.nixos.ssh =
 { ... }: 
 {
     services.openssh = {
