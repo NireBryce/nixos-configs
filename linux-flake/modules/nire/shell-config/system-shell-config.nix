@@ -22,7 +22,11 @@
     programs.fish.enable = true;
     environment.systemPackages = with pkgs; [
         fishPlugins.fzf-fish
+        cod # Completion daemon
     ];
     programs.bash.blesh.enable = true;
+
+
+    
 }
 ;}

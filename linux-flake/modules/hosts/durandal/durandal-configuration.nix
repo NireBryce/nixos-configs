@@ -25,6 +25,7 @@
         ssh
         storage-nfs
         system
+        system-boot
         virtualization
         wayland
         wifi
