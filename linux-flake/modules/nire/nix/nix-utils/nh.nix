@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.modules.nixos.nix-nh = 
+{ flake.modules.nixos.nix-utils = 
 {
     programs.nh = {
         enable          = true;

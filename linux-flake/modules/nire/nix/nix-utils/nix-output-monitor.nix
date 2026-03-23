@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.modules.nixos.nix-nix-output = 
+{ flake.modules.nixos.nix-utils = 
 { pkgs, ... }:  
 {
     environment.systemPackages = with pkgs; [
