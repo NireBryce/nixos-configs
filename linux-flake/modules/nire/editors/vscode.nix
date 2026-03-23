@@ -3,10 +3,7 @@
 { pkgs, ... }:
 
 {
-    programs.vscode = {
-        enable = true;
-        package = pkgs.vscode-fhs;
-    };
+    
 
     # vscode settings
     environment.sessionVariables.NIXOS_OZONE_WL = "1"; # TODO: this is erroring benignly
