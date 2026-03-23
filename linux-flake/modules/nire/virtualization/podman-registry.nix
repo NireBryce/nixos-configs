@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.nixosModules.virtualization = 
+{ flake.homeModules.virtualization = # TODO: figure out how to make a hybrid flake-parts that interleaves home-manager and nixos
 { ... }:
 {
         # User-scoped `~/.config/containers/registries`

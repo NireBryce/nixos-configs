@@ -3,6 +3,7 @@
 
 {
     imports = with self.nixosModules; [
+        elly
         durandalHardware
         amdcpu
         amdgpu
