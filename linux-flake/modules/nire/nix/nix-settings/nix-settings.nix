@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.modules.nixos.nix-settings = { 
+{ flake.modules.nixos.nix = { 
     nix.extraOptions    = "experimental-features = nix-command flakes";
     nix.settings        = {
         trusted-users          = [ "root" ];

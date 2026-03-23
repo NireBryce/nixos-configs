@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.modules.homeManager.nix-index = 
+{ flake.modules.homeManager.elly-nix-settings = 
 {
     imports = [
         inputs.nix-index-database.homeModules.default

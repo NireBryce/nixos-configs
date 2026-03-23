@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{ flake.modules.nixos.dev-tools-devenv =
+{ flake.modules.nixos.dev-tools =
 { pkgs, ...}: 
 {
     nix.settings = {

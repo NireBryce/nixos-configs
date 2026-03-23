@@ -5,5 +5,5 @@
             self.modules.nixos.durandalConfiguration
         ];
     };
-    
+
 }

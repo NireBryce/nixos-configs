@@ -1,6 +1,6 @@
 { self, inputs, ...}:
 { 
-flake.modules.homeManager.elly ={
+flake.modules.configs-homeManager.elly ={
     imports = [ 
         self.modules.homeManager.virtualization
         self.modules.homeManager.elly-aliases
