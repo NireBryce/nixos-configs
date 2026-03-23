@@ -1,5 +1,5 @@
 { self, inputs, ...}:
-{flake.nixosModule.elly = 
+{ flake.nixosModules.elly =
 { pkgs, ... }:
 {
     users.mutableUsers = false;
