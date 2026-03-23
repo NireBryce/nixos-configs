@@ -1,4 +1,38 @@
 {
+    // nix settings
+    "nix.enableLanguageServer": true,
+    "[nix]": {
+        "editor.tabSize": 4,
+        "editor.defaultFormatter": "jnoortheen.nix-ide"
+    },
+    "nix.serverPath": "nixd",
+    "nix.serverSettings": {
+        "nixd": {
+            "formatting": {
+                "command": [
+                    "nixfmt"
+                ]
+            },
+            "options": {
+                // By default, this entry will be read from `import <nixpkgs> { }`.
+                // You can write arbitary Nix expressions here, to produce valid "options" declaration result.
+                // Tip: for flake-based configuration, utilize `builtins.getFlake`
+                "nixpkgs": {
+                    "expr": "import (builtins.getFlake \"/path/to/flake.nix\").inputs.nixpkgs {}"
+                },
+                "nixos": {
+                    "expr": "(builtins.getFlake \"/path/to/flake.nix\").nixosConfigurations.<name>.options"
+                },
+                "home-manager": {
+                    "expr": "(builtins.getFlake \"/path/to/flake.nix\").homeConfigurations.<name>.options"
+                },
+                // Tip: use ${workspaceFolder} variable to define path
+                "nix-darwin": {
+                    "expr": "(builtins.getFlake \"${workspaceFolder}\").darwinConfigurations.<name>.options"
+                }
+            }
+        }
+    },
     "workbench.colorCustomizations": {
         "terminal.background": "#282C34",
         "notebook.outputContainerBackgroundColor": "#a57b5aa5",
@@ -30,5 +64,82 @@
         "editorBracketHighlight.foreground5": "#97c26c",
         "editorBracketHighlight.foreground6": "#abb2c0",
         "editorBracketHighlight.unexpectedBracket.foreground": "#de7842"
-    }
+    },
+    "editor.rulers": [
+        //I like having gridlines for lining up comments
+        {
+            "column": 4,
+            "color": "#d8acf131"
+        },
+        {
+            "column": 8,
+            "color": "#84d89933"
+        },
+        {
+            "column": 12,
+            "color": "#d8acf131"
+        },
+        {
+            "column": 16,
+            "color": "#84d89933"
+        },
+        {
+            "column": 20,
+            "color": "#d8acf131"
+        },
+        {
+            "column": 24,
+            "color": "#84d89933"
+        },
+        {
+            "column": 28,
+            "color": "#d8acf131"
+        },
+        {
+            "column": 32,
+            "color": "#84d89933"
+        },
+        {
+            "column": 36,
+            "color": "#d8acf131"
+        },
+        {
+            "column": 40,
+            "color": "#84d89933"
+        },
+        {
+            "column": 44,
+            "color": "#d8acf131"
+        },
+        {
+            "column": 48,
+            "color": "#84d89933"
+        },
+        {
+            "column": 52,
+            "color": "#d8acf131"
+        },
+        {
+            "column": 56,
+            "color": "#84d89933"
+        },
+        {
+            "column": 60,
+            "color": "#d8acf131"
+        },
+        { //80-col margin comment heading
+            "column": 76,
+            "color": "#84d89933"
+        },
+        //common code style breakpoints
+        { //soft stop
+            "column": 80,
+            "color": "#61616161"
+        },
+        { //hard stop
+            "column": 120,
+            "color": "#f73c3c"
+        },
+    ],
+
 }
