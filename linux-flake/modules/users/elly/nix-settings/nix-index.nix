@@ -7,7 +7,7 @@
     # these might be hm-only
     programs.nix-index.enable = true;
     programs.nix-index.enableFishIntegration = true;
-    programs.nix-index.database.comma.enable = true;
+    programs.nix-index-database.comma.enable = true;
 
 }
 ;}
