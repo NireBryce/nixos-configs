@@ -33,6 +33,7 @@
         self.modules.nixos.logitech-g600
         self.modules.nixos.zsa-moonlander
         self.modules.nixos.system-base-packages
+        self.modules.nixos.vscode
     ];
 
 

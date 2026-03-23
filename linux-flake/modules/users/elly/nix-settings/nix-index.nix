@@ -2,7 +2,7 @@
 { flake.modules.homeManager.nix-index = 
 {
     imports = [
-        inputs.nix-index-database.homeManagerModules.nix-index
+        inputs.nix-index-database.homeModules.default
     ];
     # these might be hm-only
     programs.nix-index.enable = true;

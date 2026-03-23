@@ -1,7 +1,5 @@
-# vscode - it is what it is
-# other settings in system-config/dev/vscode-setup
-# checkme: consider merging home-manager and system-config under same flake
-# TODO: can you remove this?
+{ self, inputs, ...}:
+{ flake.modules.nixos.vscode =
 { pkgs, ... }:
 
 {
@@ -18,3 +16,4 @@
 
     programs.nix-ld.enable = true;      # Needed for VSCode remote connection, etc
 }
+;}
