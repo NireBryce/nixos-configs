@@ -20,12 +20,13 @@
         protontricks
         mangohud
         steamtinkerlaunch
-        # TODO: SteamTinkerLaunch needs these and they aren't in the package?
+        
+        # SteamTinkerLaunch needs these and they aren't in the package?
         xxd
         xdotool
         xorg.xwininfo
         yad           
-        # wineWowPackages.waylandFull # Wine for wayland                          https://www.winehq.org/
+
     ];
 }
 ;}

@@ -8,7 +8,7 @@
     # Enable the KDE Desktop Environment and set wayland.
     services.desktopManager.plasma6.enable = true;
     services.displayManager = {
-        defaultSession      = "plasma";        # TODO: remove this, it's meant to select for plasma6 but plasma 6 is the default now
+        defaultSession      = "plasma";
         sddm = {
             enable          = true;
             wayland.enable  = true;
@@ -35,7 +35,7 @@
     ];
 
     environment.sessionVariables = {
-        GTK_USE_PORTAL = 1;  # TODO: what does this do
+        GTK_USE_PORTAL = 1;
     };
 
 }

@@ -1,7 +1,7 @@
 { self, inputs, ...}:
 { flake.modules.nixos.auth-yubikey = 
 { pkgs, lib, config, ... }: 
-let homeDirectory = "${config.users.users.elly.home}";  # todo: automatee, or at least set only one top level variable
+let homeDirectory = "${config.users.users.elly.home}";  
 in
 {
     environment.systemPackages = with pkgs; [
@@ -28,7 +28,7 @@ in
         ENV{HID_NAME}=="Yubico YubiKey FIDO+CCID",\
         RUN+="${pkgs.systemd}/bin/loginctl lock-sessions"
 
-        # FIXME(yubikey): Change this so it only wakes up th    e screen to the login screen, xset cmd doesn't work
+        # INEEDFIX(yubikey): Change this so it only wakes up the screen to the login screen, xset cmd doesn't work
         SUBSYSTEM=="hid",\
         ACTION=="add",\
         ENV{HID_NAME}=="Yubico YubiKey FIDO+CCID",\

@@ -2,7 +2,7 @@
 { flake.modules.nixos.system-base-packages = 
 { pkgs, ... }:
 {
-    environment.systemPackages = with pkgs; [ # TODO: describe these
+    environment.systemPackages = with pkgs; [ 
         # Editors
         vim                         # failsafe
         nano                        # backup of a backup, vim is bad on a phone                               https://www.nano-editor.org/

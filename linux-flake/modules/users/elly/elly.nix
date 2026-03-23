@@ -15,6 +15,7 @@ flake.modules.homeManager.elly ={
         self.modules.homeManager.pkgs-linux-utils
         self.modules.homeManager.pkgs-gui
         self.modules.homeManager.pkgs-cli
+        self.modules.homeManager.nix-index
     ];
 };
 }

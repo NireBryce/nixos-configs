@@ -25,7 +25,6 @@
         self.modules.nixos.ssh
         self.modules.nixos.storage-nfs
         self.modules.nixos.system
-        self.modules.nixos.system-boot
         self.modules.nixos.virtualization
         self.modules.nixos.wayland
         self.modules.nixos.wifi

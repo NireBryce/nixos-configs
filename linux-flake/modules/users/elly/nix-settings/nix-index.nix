@@ -1,8 +1,8 @@
 { self, inputs, ...}:
-{ flake.modules.nixos.nix-nix-index = 
+{ flake.modules.homeManager.nix-index = 
 {
     imports = [
-        inputs.nix-index-database.nixosModules.nix-index
+        inputs.nix-index-database.homeManagerModules.nix-index
     ];
     # these might be hm-only
     programs.nix-index.enable = true;
