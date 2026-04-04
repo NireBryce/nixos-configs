@@ -20,6 +20,7 @@
         wayland = { imports = [ (inputs.import-tree ./_/wayland) ]; };
         xdg = { imports = [ (inputs.import-tree ./_/xdg) ]; };
     };
+    
     nixos = 
     { pkgs, lib, ... }: 
     {
