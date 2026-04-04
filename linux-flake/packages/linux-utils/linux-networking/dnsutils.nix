@@ -1,8 +1,7 @@
-# desc = "lspci";
 { pkgs, ... }:
 {
+    # provides `dig` + `nslookup`
     home.packages = with pkgs; [
-        pciutils
+        dnsutils
     ];
 }
-

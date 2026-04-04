@@ -1,6 +1,6 @@
-# desc = "provides `lsusb` https://www.linux-usb.org/";
 { pkgs, ... }:
 {
+# provides `lsusb` https://www.linux-usb.org/
     home.packages = with pkgs; [
         usbutils
     ];

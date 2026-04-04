@@ -1,7 +1,7 @@
-# desc = "provides `dig` + `nslookup`";
 { pkgs, ... }:
 {
+# network scanner http://www.nmap.org/
     home.packages = with pkgs; [
-        dnsutils
+        nmap
     ];
 }

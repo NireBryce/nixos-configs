@@ -1,6 +1,6 @@
-# desc = "network monitor https://pdw.ex-parrot.com/iftop/";
 { pkgs, ... }:
 {
+    # network monitor https://pdw.ex-parrot.com/iftop/
     home.packages = with pkgs; [
         iftop
     ];

@@ -1,7 +1,7 @@
-# desc = "IP address calculator https://gitlab.com/ipcalc/ipcalc";
 { pkgs, ... }:
 {
     home.packages = with pkgs; [
+        # IP address calculator https://gitlab.com/ipcalc/ipcalc
         ipcalc
     ];
 }
