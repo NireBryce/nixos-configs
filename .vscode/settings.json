@@ -18,13 +18,13 @@
                 // You can write arbitary Nix expressions here, to produce valid "options" declaration result.
                 // Tip: for flake-based configuration, utilize `builtins.getFlake`
                 "nixpkgs": {
-                    "expr": "import (builtins.getFlake \"/path/to/flake.nix\").inputs.nixpkgs {}"
+                    "expr": "import (builtins.getFlake \"${workspaceFolder}/linux-flake/flake.nix\").inputs.nixpkgs {}"
                 },
                 "nixos": {
-                    "expr": "(builtins.getFlake \"/path/to/flake.nix\").nixosConfigurations.<name>.options"
+                    "expr": "(builtins.getFlake \"${workspaceFolder}/linux-flake/flake.nix\").nixosConfigurations.<name>.options"
                 },
                 "home-manager": {
-                    "expr": "(builtins.getFlake \"/path/to/flake.nix\").homeConfigurations.<name>.options"
+                    "expr": "(builtins.getFlake \"${workspaceFolder}/linux-flake/flake.nix\").homeConfigurations.<name>.options"
                 },
                 // Tip: use ${workspaceFolder} variable to define path
                 "nix-darwin": {
