@@ -29,3 +29,7 @@ in {
 ```
 
 
+
+
+2026 04 04 
+need to go through and mark optional/required packages and weed optionals I dont use
