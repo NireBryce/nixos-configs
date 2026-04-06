@@ -1,6 +1,10 @@
 {
-    nire.elly = { inputs, den, ... }: {
+    den.homes.x86_64-linux.elly = {
+        
+    };
 
+    nireUser.elly = { inputs, den, ... }: {
+    
         provides = {
             all = { imports = [ (inputs.import-tree ./_) ]; };
             git = { imports = [ (inputs.import-tree ./_/git) ]; };
