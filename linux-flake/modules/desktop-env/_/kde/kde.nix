@@ -31,6 +31,7 @@
             kdePackages.kcharselect       # symbol picker, may need to be kdePackages.kcharselect
             polonium # tiling wm
             kdePackages.krohnkite # other tiling wm
+            libinput # kde middle mouse scroll fix requires this
         ];
 
         environment.sessionVariables = {
