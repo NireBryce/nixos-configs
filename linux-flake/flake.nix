@@ -1,17 +1,11 @@
 {
-    outputs = inputs: 
-        # Note: this is magic from https://den.oeiuwq.com/guides/from-flake-to-den/, learn how it works
-        let
-            den = (inputs.nixpkgs.lib.evalModules {
-                modules = [ 
-                    (inputs.import-tree ./modules) 
-                ];
-                specialArgs.inputs = inputs;
-            }).config;
-        in
-        {
-            inherit (den.flake) nixosConfigurations darwinConfigurations;
-        };
+ 
+    # Note: this is magic from https://den.oeiuwq.com/guides/from-flake-to-den/, learn how it works
+    outputs = inputs:
+    (inputs.nixpkgs.lib.evalModules {
+        modules = [ (inputs.import-tree ./modules) ];
+        specialArgs.inputs = inputs;
+    }).config.flake;
     
     nixConfig = {
         extra-experimental-features = [ "pipe-operators" ];

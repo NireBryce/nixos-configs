@@ -1,3 +1,3 @@
 { den, ... }: {
-  flake.den = den;  # remove after debugging
+#   flake.den = den;  # remove after debugging
 }
