@@ -25,14 +25,15 @@
             <nire.development>
             <nire.development>
             <nire.editors>
-            <nire.hardware>
+            <nire.hardware/amdcpu>
+            <nire.hardware/amdgpu>
             <nire.impermanence>
             <nire.nix>
             <nire.packages>
             <nire.peripherals>
             <nire.shell-config>
             <nire.system>
-            <nire.users> 
+            <nire.elly> 
         ];
         imports = [];
     };

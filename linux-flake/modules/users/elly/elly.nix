@@ -8,7 +8,7 @@
             user-settings = { imports = [ (inputs.import-tree ./_/user-settings) ]; };
         };
     };
-    
+
     includes = [ 
             # # https://den.oeiuwq.com/guides/batteries/
 
