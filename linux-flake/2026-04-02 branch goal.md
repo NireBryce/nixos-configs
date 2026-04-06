@@ -33,3 +33,7 @@ in {
 
 2026 04 04 
 need to go through and mark optional/required packages and weed optionals I dont use
+
+
+2026 04 06 
+i've got most of it working but it keeps hanging on being unable to find nixosConfigurations, consider falling back to the intermediary example flake tomorrow
