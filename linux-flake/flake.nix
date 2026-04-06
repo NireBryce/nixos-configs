@@ -1,29 +1,23 @@
-# todo: fix for den
+
+
 {
-    description = "";
+    outputs = inputs: 
+        # Note: this is magic from https://den.oeiuwq.com/guides/from-flake-to-den/, learn how it works
+        let
+            den = (inputs.nixpkgs.lib.evalModules {
+                modules = [ 
+                    (inputs.import-tree ./modules) 
+                ];
+                specialArgs.inputs = inputs;
+            }).config;
+        in
+        {
+            inherit (den.flake) nixosConfigurations darwinConfigurations;
+        };
     
     nixConfig = {
         extra-experimental-features = [ "pipe-operators" ];
     };
-
-    
-
-    outputs = 
-        inputs: inputs.flake-parts.lib.mkFlake {   
-            inherit inputs; 
-        }
-        {
-            imports = [
-                inputs.flake-parts.flakeModules.modules
-                (inputs.import-tree ./modules)
-            ];
-            systems = [ 
-                "x86_64-linux" 
-                "aarch64-darwin"
-            ];
-        };
-
-#####################
 
     inputs = {
         nixpkgs.url                                = "github:NixOS/nixpkgs/nixos-unstable";
@@ -32,9 +26,9 @@
         flake-parts.url                            = "github:hercules-ci/flake-parts";
         flake-parts.inputs.nixpkgs-lib.follows     = "nixpkgs-lib";
         
+        # ── Dendritic toolchain ───────────────────────────────────────────────────
         # systems.url                                = "github:nix-systems/default";
         import-tree.url                            = "github:vic/import-tree";
-        # ── Dendritic toolchain ───────────────────────────────────────────────────
         den.url                                    = "github:vic/den";
         flake-aspects.url                          = "github:vic/flake-aspects";
         flake-file.url                             = "github:vic/flake-file";
@@ -51,7 +45,6 @@
         jovian.url                                 = "github:Jovian-Experiments/Jovian-NixOS";
         jovian.inputs.nixpkgs.follows              = "nixpkgs";
 
-        
         # ── Impermanence ──────────────────────────────────────────────────────────
         impermanence.url                           = "github:Nix-community/impermanence";
 
@@ -63,11 +56,7 @@
         nixos-hardware.url                         = "github:NixOS/nixos-hardware/master";
         nix-index-database.url                     = "github:nix-community/nix-index-database";
         nix-index-database.inputs.nixpkgs.follows  = "nixpkgs";
-        
-        # vic
-        # with-inputs.url = "github:vic/with-inputs";
-        # with-inputs.flake = false;
     };
-    
-}
 
+
+}
