@@ -1,9 +1,9 @@
 { inputs, den, ... }:
 {
-    imports = [ inputs.den.flakeModule ];
 
     den.hosts.x86_64-linux = {
         nire-durandal = {
+            home-manager.enable = true;
             users.elly = { 
                 classes = [ "homeManager" ];
             };

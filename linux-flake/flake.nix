@@ -3,7 +3,10 @@
     # Note: this is magic from https://den.oeiuwq.com/guides/from-flake-to-den/, learn how it works
     outputs = inputs:
     (inputs.nixpkgs.lib.evalModules {
-        modules = [ (inputs.import-tree ./modules) ];
+        modules = [ 
+            (inputs.import-tree ./modules) 
+            inputs.den.flakeModule
+        ];
         specialArgs.inputs = inputs;
     }).config.flake;
     
