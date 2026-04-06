@@ -4,7 +4,9 @@
 
     den.hosts.x86_64-linux = {
         nire-durandal = {
-            users.elly = { };
+            users.elly = { 
+                classes = [ "homeManager" ];
+            };
         };
     };
 

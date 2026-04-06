@@ -1,7 +1,5 @@
 {
-    den.homes.x86_64-linux.elly = {
-        
-    };
+
 
     nireUser.elly = { inputs, den, ... }: {
     
