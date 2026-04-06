@@ -1,5 +1,3 @@
-
-
 {
     outputs = inputs: 
         # Note: this is magic from https://den.oeiuwq.com/guides/from-flake-to-den/, learn how it works
