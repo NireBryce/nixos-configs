@@ -2,6 +2,7 @@
     nire.elly = { inputs, den, ... }: {
 
         provides = {
+            all = { imports = [ (inputs.import-tree ./_) ]; };
             git = { imports = [ (inputs.import-tree ./_/git) ]; };
             session = { imports = [ (inputs.import-tree ./_/session) ]; };
             home-manager-settings = { imports = [ (inputs.import-tree ./_/home-manager-settings) ]; };

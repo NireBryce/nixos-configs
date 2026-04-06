@@ -22,18 +22,16 @@
         includes = [ 
             den.provides.hostname
             <nire.desktop-env/kde>
-            <nire.development>
-            <nire.development>
-            <nire.editors>
-            <nire.hardware/amdcpu>
-            <nire.hardware/amdgpu>
-            <nire.impermanence>
-            <nire.nix>
-            <nire.packages>
-            <nire.peripherals>
-            <nire.shell-config>
-            <nire.system>
-            <nire.elly> 
+            <nire.development/all>
+            <nire.editors/all>
+            <nire.hardware/amd>
+            <nire.impermanence/impermanence> # will delete your HD if you arent careful
+            <nire.nix/all>
+            <nire.packages/all>
+            <nire.peripherals/all>
+            <nire.shell-config/all>
+            <nire.system/all>
+            <nire.elly/all> 
         ];
         imports = [];
     };
