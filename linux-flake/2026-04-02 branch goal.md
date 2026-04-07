@@ -37,3 +37,7 @@ need to go through and mark optional/required packages and weed optionals I dont
 
 2026 04 06 
 i've got most of it working but it keeps hanging on being unable to find nixosConfigurations, consider falling back to the intermediary example flake tomorrow
+
+2026-04-08 
+
+I think that .provides.all doesn't work because it risks multiple include but i haven't experimented yet 
