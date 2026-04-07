@@ -41,3 +41,7 @@ i've got most of it working but it keeps hanging on being unable to find nixosCo
 2026-04-08 
 
 I think that .provides.all doesn't work because it risks multiple include but i haven't experimented yet 
+
+i found this and am going to dig through it to see if i can get more insight on solving this
+
+https://github.com/Gwenodai/nixos/blob/main/modules/system/settings/nix-config%20%5BH%5D/nix-config.nix
