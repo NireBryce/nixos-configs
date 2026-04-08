@@ -45,3 +45,14 @@ I think that .provides.all doesn't work because it risks multiple include but i 
 i found this and am going to dig through it to see if i can get more insight on solving this
 
 https://github.com/Gwenodai/nixos/blob/main/modules/system/settings/nix-config%20%5BH%5D/nix-config.nix
+
+also https://github.com/Gwenodai/nixos/blob/main/modules/programs/messaging%20%5BU%5D/!includes.nix
+
+```
+{ den, lib, ... }: {
+  den.aspects.messaging = {
+    # All default messenging programs are included when the generic 'messaging' aspect is used
+    includes = lib.attrValues den.aspects.messaging._;
+  };
+}
+```

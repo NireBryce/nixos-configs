@@ -1,10 +1,9 @@
 {
 
 
-    nireUser.elly = { inputs, den, ... }: {
-    
+    nireUser.elly = { inputs, lib, den, ... }: {
+        includes = lib.attrValues <nireUser.elly.provides>;
         provides = {
-            all = { imports = [ (inputs.import-tree ./_) ]; };
             git = { imports = [ (inputs.import-tree ./_/git) ]; };
             session = { imports = [ (inputs.import-tree ./_/session) ]; };
             home-manager-settings = { imports = [ (inputs.import-tree ./_/home-manager-settings) ]; };
