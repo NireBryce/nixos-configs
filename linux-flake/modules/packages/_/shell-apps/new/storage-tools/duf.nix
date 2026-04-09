@@ -1,9 +1,7 @@
 {
     description = "`df` alternative";
     
-    homeManager =
-    { pkgs, ... }:
-    {
+    homeManager = { pkgs, ... }: {
         home.packages = with pkgs; [
             duf
         ];

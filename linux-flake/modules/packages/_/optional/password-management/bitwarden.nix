@@ -1,10 +1,7 @@
 { 
-    # note: optional pkg
     description = "bitwarden - password manager https://bitwarden.com/";
 
-    homeManager =
-    { pkgs, ... }:
-    {
+    homeManager = { pkgs, ... }: {
         home.packages = with pkgs; [
             bitwarden-desktop
         ];

@@ -1,10 +1,7 @@
 {
     description = "an application to show file info";
 
-    homeManager =
-
-    { pkgs, ... }:
-    {
+    homeManager = { pkgs, ... }: {
         home.packages = with pkgs; [
             file
         ];

@@ -1,8 +1,7 @@
 {
     description = "tmux - terminal multiplexer";
 
-    homeManager = 
-    {
+    homeManager = {
         programs.tmux = {
             enable = true;
         };

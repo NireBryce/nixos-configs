@@ -1,9 +1,7 @@
 {
     description = "just - justfile runner";
     
-    homeManager =
-    { pkgs, ... }:
-    {
+    homeManager = { pkgs, ... }: {
         home.file = {
             "./.justfile"         .source = ./config/.justfile;
             "./.just/.justfile"   .source = ./config/.justfile;
@@ -14,5 +12,4 @@
             just
         ];
     };
-    # note: optional pkg
 }

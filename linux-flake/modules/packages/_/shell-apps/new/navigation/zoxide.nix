@@ -1,8 +1,7 @@
 {
     description = "Zoxide - better `cd`";
 
-    homeManager =
-    {
+    homeManager = {
         programs.zoxide = {      
             enable                  = true;
             enableZshIntegration    = true;

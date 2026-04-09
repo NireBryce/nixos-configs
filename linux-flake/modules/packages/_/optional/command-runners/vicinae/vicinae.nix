@@ -1,7 +1,6 @@
 {
     description = "Like raycast for linux";
-    homeManager =
-    {
+    homeManager = {
         programs.vicinae = {
             enable = true;
             systemd = {
@@ -22,5 +21,4 @@
             };
         };
     };
-    # note: optional pkg
 }

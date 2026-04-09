@@ -1,9 +1,9 @@
 {
-    nire.packages =
-    { inputs, ... }:
-    {
+    nire.packages = { inputs, ... }: {
         provides = {
             all = { lib, config }: { includes = lib.attrValues (removeAttrs config.provides [ "all" ]); };
+
+            mac-apps = { imports = [ (inputs.import-tree ./_/mac-apps) ]; };
 
             linux-utils = { imports = [ (inputs.import-tree ./_/linux-utils) ]; };
             
@@ -14,4 +14,4 @@
             terminals = { imports = [ (inputs.import-tree ./_/terminals) ]; };
         };
     };
-}
+}   

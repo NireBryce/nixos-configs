@@ -1,7 +1,5 @@
 { 
-    homeManager = 
-    { pkgs, ... }:
-    {
+    homeManager = { pkgs, ... }: {
         users.mutableUsers = false;
         users.users = { 
             # groups = {
@@ -24,5 +22,13 @@
                 ];
             };
         };
+    };
+
+    darwin = { pkgs, ... }: {
+        fonts.packages = with pkgs; [
+            nerd-fonts.fira-code
+            nerd-fonts.iosevka
+            nerd-fonts.jetbrains-mono
+        ];
     };
 }

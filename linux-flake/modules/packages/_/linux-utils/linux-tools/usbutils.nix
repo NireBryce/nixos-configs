@@ -1,9 +1,7 @@
 {
     description = "`lsusb` https://www.linux-usb.org/";
 
-    homeManager =
-    { pkgs, ... }:
-    {
+    homeManager = { pkgs, ... }: {
         home.packages = with pkgs; [
             usbutils
         ];

@@ -1,8 +1,7 @@
 {
     description = "`exa` fork, which is an ls alternative";
 
-    homeManager =
-    {
+    homeManager = {
         programs.eza = {
             enable  = true;
             enableZshIntegration    = true;
@@ -17,7 +16,6 @@
                 "--hyperlink" 
                 "--group-directories-first" 
             ];
-        
         };
     };
 }

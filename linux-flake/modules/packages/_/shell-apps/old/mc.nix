@@ -1,11 +1,7 @@
 {
     description = "midnight commander file browser";
 
-    homeManager =
-    { pkgs, ... }:
-
-
-    {
+    homeManager = { pkgs, ... }: {
         home.packages = with pkgs; [
             mc
         ];

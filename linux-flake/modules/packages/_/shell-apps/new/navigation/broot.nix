@@ -1,14 +1,12 @@
 {
     description = "`tree` alternative";
     
-    homeManager =
-    {
+    homeManager = {
         programs.broot = {
             enable  = true;
             enableZshIntegration    = true;
             enableBashIntegration   = true;
             enableFishIntegration   = true;
         };
-
     };
 }

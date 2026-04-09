@@ -1,9 +1,7 @@
 {
     description = "kitty terminal emulator";
 
-    homeManager =
-    { pkgs, ... }:
-    {
+    homeManager = { pkgs, ... }: {
         home.packages = with pkgs; [
             kitty-img
         ];

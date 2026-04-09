@@ -1,7 +1,5 @@
 { 
-    nire.hardware =
-    { inputs, ... }:
-    {
+    nire.hardware = { inputs, ... }: {
         provides = {
             amdcpu = { imports = [ (inputs.import-tree ./_/amd/amdcpu) ]; };
 

@@ -1,9 +1,7 @@
 {
     description = "`htop` alternative";
 
-    homeManager = 
-    { pkgs, ... }:
-    {
+    homeManager = { pkgs, ... }: {
         home.packages = with pkgs; [
             btop
         ];

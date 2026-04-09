@@ -1,8 +1,7 @@
 {
     description = "fuzzy finder";
     
-    homeManager =
-    {
+    homeManager = {
         programs.fzf = {
             enable = true;
             enableZshIntegration    = true;

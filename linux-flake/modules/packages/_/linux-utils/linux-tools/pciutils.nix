@@ -1,9 +1,7 @@
 {
     description = "`lspci`";
 
-    homeManager =
-    { pkgs, ... }:
-    {
+    homeManager = { pkgs, ... }: {
 
         home.packages = with pkgs; [
             pciutils

@@ -1,10 +1,7 @@
 {
-    homeManager =
-    { pkgs, ... }:
-    {
+    homeManager = { pkgs, ... }: {
         # note: this is also installed as a system package, does that matter?
         home.packages = with pkgs; [ firefox ];
-        
-        # note: optional pkg
+
     };
 }

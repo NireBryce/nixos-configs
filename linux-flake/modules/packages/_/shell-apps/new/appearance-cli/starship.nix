@@ -1,6 +1,5 @@
 {
-    homeManager =
-    {
+    homeManager = {
         programs.starship = {
             enable = true;
             enableBashIntegration = true;

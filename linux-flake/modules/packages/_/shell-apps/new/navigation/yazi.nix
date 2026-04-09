@@ -1,9 +1,7 @@
 {
     description = "yazi - file browser";
     
-    homeManager =
-    { pkgs, ... }:
-    {
+    homeManager = { pkgs, ... }: {
         home.packages = with pkgs; [
             yazi
         ];

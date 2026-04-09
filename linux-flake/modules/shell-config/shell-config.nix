@@ -1,7 +1,5 @@
 {
-    nire.shell-config =
-    { inputs, ... }:
-    {
+    nire.shell-config = { inputs, ... }: {
         provides = {
             all = { lib, config }: { includes = lib.attrValues (removeAttrs config.provides [ "all" ]); };
             

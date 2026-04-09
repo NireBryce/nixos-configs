@@ -1,9 +1,7 @@
 {
     description ="kanata - input-level keybinding, platform independent";
     
-    homeManager = 
-    { pkgs, ... }:
-    {
+    homeManager = { pkgs, ... }: {
         home.packages = with pkgs; [
             kanata
         ];

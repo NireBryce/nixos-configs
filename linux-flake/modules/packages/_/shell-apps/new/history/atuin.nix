@@ -1,8 +1,7 @@
 {
     description = "Atuin remote encrypted history manager";
 
-    homeManager =
-    {
+    homeManager = {
         programs.atuin = {       
             enable                  = true;
             enableZshIntegration    = true;

@@ -1,6 +1,5 @@
 {
-    homeManager = 
-    {
+    homeManager = {
         programs.direnv = {
             enable = true;
             enableBashIntegration = true;

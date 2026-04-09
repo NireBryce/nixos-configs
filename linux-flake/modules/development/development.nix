@@ -1,7 +1,5 @@
 { 
-    nire.development =
-    { inputs, ... }:
-    {
+    nire.development = { inputs, ... }: {
         provides = {
             all = { lib, config }: { includes = lib.attrValues (removeAttrs config.provides [ "all" ]); };
             

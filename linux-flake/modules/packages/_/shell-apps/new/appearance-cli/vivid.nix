@@ -1,8 +1,7 @@
 {
     description = "vivid - LS_COLORS generator";
-    homeManager =
-    { pkgs, ... }:
-    {
+    
+    homeManager = { pkgs, ... }: {
         home.packages = with pkgs; [
             vivid
         ];

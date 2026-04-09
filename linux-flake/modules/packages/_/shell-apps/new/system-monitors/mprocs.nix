@@ -1,9 +1,7 @@
 {
     description = "run multiple commands in parallel";
 
-    homeManager =
-    { pkgs, ... }:
-    {
+    homeManager = { pkgs, ... }: {
         home.packages = with pkgs; [
             mprocs
         ];

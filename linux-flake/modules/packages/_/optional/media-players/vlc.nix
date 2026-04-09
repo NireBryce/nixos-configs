@@ -1,5 +1,4 @@
 {
-    # note: optional pkg
     description = "vlc media player";
 
     homeManager =

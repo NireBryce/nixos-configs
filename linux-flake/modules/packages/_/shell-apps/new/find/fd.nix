@@ -1,9 +1,7 @@
 {
     description = "`find` alternative";
 
-    homeManager =
-    { pkgs, ... }:
-    {
+    homeManager = { pkgs, ... }: {
         home.packages = with pkgs; [
             fd
         ];

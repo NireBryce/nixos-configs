@@ -1,8 +1,6 @@
 {
     description = "per-character in-line diff";
-    homeManager =
-    { pkgs, ... }:
-    {
+    homeManager = { pkgs, ... }: {
         home.packages = with pkgs; [
             riffdiff
         ];

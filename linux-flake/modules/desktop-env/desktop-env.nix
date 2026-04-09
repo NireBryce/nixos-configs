@@ -1,7 +1,5 @@
 { 
-    nire.desktop-env =
-    { inputs, ... }:
-    {
+    nire.desktop-env = { inputs, ... }: {
         provides = {
             all = { lib, config }: { includes = lib.attrValues (removeAttrs config.provides [ "all" ]); };
             
