@@ -1,4 +1,8 @@
-{ den, ... }:
+{ 
+    den, 
+    __findFile, # https://den.oeiuwq.com/guides/angle-brackets/
+   ... 
+}:
 {
 
     den.hosts.x86_64-linux = {

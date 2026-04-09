@@ -1,26 +1,24 @@
 {
-
-
-    nireUser.elly = { inputs, lib, den, ... }: {
+    nireUser.elly = { inputs, den, lib, ... }:
+    let
         provides = {
-            all = { lib, config }: { includes = lib.attrValues (removeAttrs config.provides [ "all" ]); };
-
-            git = { imports = [ (inputs.import-tree ./_/git) ]; };
-            
-            session = { imports = [ (inputs.import-tree ./_/session) ]; };
-            
+            git                   = { imports = [ (inputs.import-tree ./_/git) ]; };
+            session               = { imports = [ (inputs.import-tree ./_/session) ]; };
             home-manager-settings = { imports = [ (inputs.import-tree ./_/home-manager-settings) ]; };
-            
-            user-settings = { imports = [ (inputs.import-tree ./_/user-settings) ]; };
+            user-settings         = { imports = [ (inputs.import-tree ./_/user-settings) ]; };
         };
-        includes = [ 
+    in {
+        provides = provides // {
+            all = { includes = lib.attrValues provides; };
+        };
+        includes = [
                 # # https://den.oeiuwq.com/guides/batteries/
 
-                den.proides.define-user
-                # # Sets users.users.<name> on NixOS/Darwin 
-                # # and home.username/home.homeDirectory for Home Manager. 
+                den.provides.define-user
+                # # Sets users.users.<name> on NixOS/Darwin
+                # # and home.username/home.homeDirectory for Home Manager.
                 # # Works in both host-user and standalone home contexts.
-                
+
                 den.provides.primary-user
                 # # Primary user:
                 # # NixOS: adds wheel and networkmanager groups, sets isNormalUser.

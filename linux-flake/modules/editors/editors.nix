@@ -1,13 +1,14 @@
-{ 
-    nire.editors = { inputs, ... }: {
+{
+    nire.editors = { inputs, lib, ... }:
+    let
         provides = {
-            all = { lib, config }: { includes = lib.attrValues (removeAttrs config.provides [ "all" ]); };
-            
             vscode = { imports = [ (inputs.import-tree ./_/vscode) ]; };
-            
             neovim = { imports = [ (inputs.import-tree ./_/neovim) ]; };
-            
-            micro = { imports = [ (inputs.import-tree ./_/micro) ]; };
+            micro  = { imports = [ (inputs.import-tree ./_/micro) ]; };
+        };
+    in {
+        provides = provides // {
+            all = { includes = lib.attrValues provides; };
         };
     };
 }

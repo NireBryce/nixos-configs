@@ -1,11 +1,13 @@
-{ 
-    nire.peripherals = { inputs, ... }: {
+{
+    nire.peripherals = { inputs, lib, ... }:
+    let
         provides = {
-            all = { lib, config }: { includes = lib.attrValues (removeAttrs config.provides [ "all" ]); };
-            
-            logitech-g600 = { imports = [ (inputs.import-tree ./_/logitech-g600) ]; };
-            
+            logitech-g600  = { imports = [ (inputs.import-tree ./_/logitech-g600) ]; };
             zsa-moonlander = { imports = [ (inputs.import-tree ./_/zsa-moonlander) ]; };
+        };
+    in {
+        provides = provides // {
+            all = { includes = lib.attrValues provides; };
         };
     };
 }

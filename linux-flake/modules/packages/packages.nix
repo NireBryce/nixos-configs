@@ -1,17 +1,16 @@
 {
-    nire.packages = { inputs, ... }: {
+    nire.packages = { inputs, lib, ... }:
+    let
         provides = {
-            all = { lib, config }: { includes = lib.attrValues (removeAttrs config.provides [ "all" ]); };
-
-            mac-apps = { imports = [ (inputs.import-tree ./_/mac-apps) ]; };
-
+            mac-apps    = { imports = [ (inputs.import-tree ./_/mac-apps) ]; };
             linux-utils = { imports = [ (inputs.import-tree ./_/linux-utils) ]; };
-            
-            optional = { imports = [ (inputs.import-tree ./_/optional) ]; };
-            
-            shell-apps = { imports = [ (inputs.import-tree ./_/shell-apps) ]; };
-            
-            terminals = { imports = [ (inputs.import-tree ./_/terminals) ]; };
+            optional    = { imports = [ (inputs.import-tree ./_/optional) ]; };
+            shell-apps  = { imports = [ (inputs.import-tree ./_/shell-apps) ]; };
+            terminals   = { imports = [ (inputs.import-tree ./_/terminals) ]; };
+        };
+    in {
+        provides = provides // {
+            all = { includes = lib.attrValues provides; };
         };
     };
-}   
+}

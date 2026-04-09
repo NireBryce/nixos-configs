@@ -1,11 +1,13 @@
-{ 
-    nire.desktop-env = { inputs, ... }: {
+{
+    nire.desktop-env = { inputs, lib, ... }:
+    let
         provides = {
-            all = { lib, config }: { includes = lib.attrValues (removeAttrs config.provides [ "all" ]); };
-            
             jovian = { imports = [ (inputs.import-tree ./_/jovian) ]; };
-            
-            kde = { imports = [ (inputs.import-tree ./_/kde) ]; };
+            kde    = { imports = [ (inputs.import-tree ./_/kde) ]; };
+        };
+    in {
+        provides = provides // {
+            all = { includes = lib.attrValues provides; };
         };
     };
 }

@@ -1,12 +1,13 @@
-{ 
-    nire.nix = { inputs, ... }: {
+{
+    nire.nix = { inputs, lib, ... }:
+    let
         provides = {
-            all = { lib, config }: { includes = lib.attrValues (removeAttrs config.provides [ "all" ]); };
-            
             nix-settings = { imports = [ (inputs.import-tree ./_/nix-settings) ]; };
-            
-            nix-utils = { imports = [ (inputs.import-tree ./_/nix-utils) ]; };
+            nix-utils    = { imports = [ (inputs.import-tree ./_/nix-utils) ]; };
+        };
+    in {
+        provides = provides // {
+            all = { includes = lib.attrValues provides; };
         };
     };
 }
-

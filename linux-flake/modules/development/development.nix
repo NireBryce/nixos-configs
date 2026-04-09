@@ -1,11 +1,13 @@
-{ 
-    nire.development = { inputs, ... }: {
+{
+    nire.development = { inputs, lib, ... }:
+    let
         provides = {
-            all = { lib, config }: { includes = lib.attrValues (removeAttrs config.provides [ "all" ]); };
-            
             langs = { imports = [ (inputs.import-tree ./_/langs) ]; };
-            
             tools = { imports = [ (inputs.import-tree ./_/tools) ]; };
+        };
+    in {
+        provides = provides // {
+            all = { includes = lib.attrValues provides; };
         };
     };
 }

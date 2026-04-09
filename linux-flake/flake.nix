@@ -28,7 +28,6 @@
         import-tree.url                            = "github:vic/import-tree";
         den.url                                    = "github:vic/den";
         flake-aspects.url                          = "github:vic/flake-aspects";
-        flake-file.url                             = "github:vic/flake-file";
 
         # ── Home Manager ──────────────────────────────────────────────────────────
         home-manager.url                           = "github:nix-community/home-manager/master";
