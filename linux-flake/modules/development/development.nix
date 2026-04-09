@@ -1,5 +1,5 @@
-{
-    nire.development = { inputs, lib, ... }:
+{ inputs, lib, ... }: {
+    nire.development = 
     let
         provides = {
             langs = { imports = [ (inputs.import-tree ./_/langs) ]; };

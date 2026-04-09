@@ -1,5 +1,5 @@
-{
-    nire.editors = { inputs, lib, ... }:
+{ inputs, lib, ... }: {
+    nire.editors = 
     let
         provides = {
             vscode = { imports = [ (inputs.import-tree ./_/vscode) ]; };

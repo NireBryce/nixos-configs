@@ -1,5 +1,5 @@
-{
-    nire.packages = { inputs, lib, ... }:
+{ inputs, lib, ... }: {
+    nire.packages = 
     let
         provides = {
             mac-apps    = { imports = [ (inputs.import-tree ./_/mac-apps) ]; };

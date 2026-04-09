@@ -1,5 +1,6 @@
+{ inputs, den, lib, ... }:
 {
-    nireUser.elly = { inputs, den, lib, ... }:
+    nireUser.elly = 
     let
         provides = {
             git                   = { imports = [ (inputs.import-tree ./_/git) ]; };

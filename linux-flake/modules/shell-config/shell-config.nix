@@ -1,5 +1,5 @@
-{
-    nire.shell-config = { inputs, lib, ... }:
+{ inputs, lib, ... }: {
+    nire.shell-config =
     let
         provides = {
             bash      = { imports = [ (inputs.import-tree ./_/bash) ]; };

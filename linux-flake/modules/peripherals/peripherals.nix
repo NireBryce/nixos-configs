@@ -1,5 +1,5 @@
-{
-    nire.peripherals = { inputs, lib, ... }:
+{ inputs, lib, ... }: {
+    nire.peripherals = 
     let
         provides = {
             logitech-g600  = { imports = [ (inputs.import-tree ./_/logitech-g600) ]; };

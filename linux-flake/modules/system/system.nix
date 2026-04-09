@@ -1,5 +1,5 @@
-{
-    nire.system = { inputs, lib, ... }:
+{ inputs, lib, ... }: {
+    nire.system = 
     let
         provides = {
             core                 = { imports = [ (inputs.import-tree ./_/core) ]; };

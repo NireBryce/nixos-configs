@@ -1,5 +1,5 @@
-{
-    nire.desktop-env = { inputs, lib, ... }:
+{ inputs, lib, ... }: { 
+    nire.desktop-env = 
     let
         provides = {
             jovian = { imports = [ (inputs.import-tree ./_/jovian) ]; };

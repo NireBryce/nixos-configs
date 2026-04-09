@@ -1,5 +1,5 @@
-{
-    nire.nix = { inputs, lib, ... }:
+{ inputs, lib, ... }: {
+    nire.nix = 
     let
         provides = {
             nix-settings = { imports = [ (inputs.import-tree ./_/nix-settings) ]; };
