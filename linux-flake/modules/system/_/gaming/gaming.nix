@@ -1,7 +1,5 @@
 { 
-    nixos =
-    { pkgs, ...}: 
-    {
+    nixos = { pkgs, ...}:  {
         #* steam - (fhs)
         programs.steam = {
             enable = true;
