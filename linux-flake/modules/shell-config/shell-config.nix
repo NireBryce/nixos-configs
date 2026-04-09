@@ -1,5 +1,5 @@
 {
-    nire.shell =
+    nire.shell-config =
     { inputs, ... }:
     {
         provides = {
