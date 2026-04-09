@@ -11,6 +11,8 @@
             
             configuration = { imports = [ (inputs.import-tree ./_/configuration) ]; };
             
+            fixes = { imports = [ (inputs.import-tree ./_/fixes) ]; };
+            
             hardware = { imports = [ (inputs.import-tree ./_/hardware) ]; };
         };   
 
