@@ -5,15 +5,14 @@
         nixpkgs.hostPlatform = "x86_64-linux";
         networking.hostName = "nire-durandal"; # can maybe get rid of this with den.provides.hostname doing the work
         
-        includes = with nireHost.durandal.provides; [
-            <nireHost.durandal/configuration>
-            <nireHost.durandal/hardware>
-        ];
-        provides = { inputs, ... }: {
-                # all = { imports = [ (inputs.import-tree ./_) ]; };
-                configuration =  { imports = [ (inputs.import-tree ./_/configuration) ]; };
-                hardware = { imports = [ (inputs.import-tree ./_/hardware) ]; };
-            };   
+        
+        provides = {
+            all = { lib, config }: { includes = lib.attrValues (removeAttrs config.provides [ "all" ]); };
+            
+            configuration = { imports = [ (inputs.import-tree ./_/configuration) ]; };
+            
+            hardware = { imports = [ (inputs.import-tree ./_/hardware) ]; };
+        };   
 
     };
 }

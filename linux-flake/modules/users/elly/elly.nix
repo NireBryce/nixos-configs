@@ -4,9 +4,14 @@
     nireUser.elly = { inputs, lib, den, ... }: {
         includes = lib.attrValues <nireUser.elly.provides>;
         provides = {
+            all = { lib, config }: { includes = lib.attrValues (removeAttrs config.provides [ "all" ]); };
+
             git = { imports = [ (inputs.import-tree ./_/git) ]; };
+            
             session = { imports = [ (inputs.import-tree ./_/session) ]; };
+            
             home-manager-settings = { imports = [ (inputs.import-tree ./_/home-manager-settings) ]; };
+            
             user-settings = { imports = [ (inputs.import-tree ./_/user-settings) ]; };
         };
     };
