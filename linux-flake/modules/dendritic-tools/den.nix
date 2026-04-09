@@ -5,8 +5,6 @@
         (inputs.den.namespace "nire" false)
         (inputs.den.namespace "nireUser" false)
         (inputs.den.namespace "nireHost" false)
-        
-
     ];
 
     # enables angle bracket syntax for imports shorthand
