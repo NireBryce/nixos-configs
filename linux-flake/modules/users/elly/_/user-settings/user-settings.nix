@@ -1,5 +1,5 @@
-{ 
-    homeManager = { pkgs, ... }: {
+{ lib, pkgs, ... }: {
+    nixos =  {
         users.mutableUsers = false;
         users.users = { 
             # groups = {
@@ -21,7 +21,14 @@
                     kdePackages.partitionmanager
                 ];
             };
+        
         };
+    };
+    
+    homeManager = {
+        home.stateVersion   = "22.11";
+        home.username       = "elly";
+        home.homeDirectory  = lib.mkDefault "/home/elly";
     };
 
     darwin = { pkgs, ... }: {
