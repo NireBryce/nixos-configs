@@ -3,12 +3,13 @@
   # name, which corresponds to the den namespace (e.g. "nirePackages").
   #
   # Usage: findNamespace (builtins.dirOf __curPos.file)
+{ ... }: 
 let
-  findNamespace = path:
+  findNamespaceUp = path:
     let parent = dirOf path;
     in if baseNameOf parent == "modules"
        then baseNameOf path
-       else findNamespace parent;
+       else findNamespaceUp parent;
 in {
-  inherit findNamespace;
+  inherit findNamespaceUp;
 }
