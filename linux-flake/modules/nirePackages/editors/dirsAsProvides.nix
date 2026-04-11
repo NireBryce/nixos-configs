@@ -22,10 +22,12 @@
 #   <nireHosts.durandal/hostName>   only nireHost/durandal/configuration/hostname.nix 
 { lib, nirePackages, ... }:
 let
-    aspect      = nirePackages.${category}; # don't forget to add it in the top module args too
+    namespace   = nirePackages; # don't forget to add it in the top module args too
+    flatStore   = nirePackages.packages;    # don't forget to change this too
+
     aspectRoot  = dirOf __curPos.file;
     category    = baseNameOf aspectRoot;
-    flatStore   = aspect.${category};
+    store       = flatStore;
 
     onlyDirs    = lib.filterAttrs (_: t: t == "directory");
     onlyFiles   = lib.filterAttrs (_: t: t == "regular");
@@ -43,13 +45,13 @@ let
     allModules = lib.concatMap modulesOf (lib.attrNames subcategories);
 
 in {
-    aspect = {
+    ${namespace}.${category} = {
         # <nireHosts.category> pulls in everything in this category
-        includes = map (n: flatStore._.${n}) allModules;
+        includes = map (n: store._.${n}) allModules;
 
         # <nireHosts.category/subcategory> pulls in just that subcategory
         _ = lib.mapAttrs (sub: _: {
-            includes = map (n: flatStore._.${n}) (modulesOf sub);
+            includes = map (n: store._.${n}) (modulesOf sub);
         }) subcategories;
     };
 }

@@ -1,3 +1,0 @@
-{
-    nirePackages.editors = { };
-}
