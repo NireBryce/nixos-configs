@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nirePackages.linux-utils._.${moduleName}.homeManager =  {
+    nirePackages.packages._.${moduleName}.homeManager =  {
         # description = "network scanner http://www.nmap.org/";
         home.packages = with pkgs; [
             nmap

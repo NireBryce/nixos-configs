@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nirePackages.development._.${moduleName}.nixos = {
+    nirePackages.packages._.${moduleName}.nixos = {
         environment.systemPackages = with pkgs; [
             cargo
             rustc

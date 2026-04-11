@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nirePackages.editors._.${moduleName}.nixos = {
+    nirePackages.packages._.${moduleName}.nixos = {
         programs.vscode = {
             enable = true;
             package = pkgs.vscode-fhs;

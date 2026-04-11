@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nirePackages.nix-utils._.${moduleName}.nixos = {
+    nirePackages.packages._.${moduleName}.nixos = {
         imports = [
             inputs.nix-index-database.homeModules.default
         ];
