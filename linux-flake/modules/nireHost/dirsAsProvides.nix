@@ -21,16 +21,12 @@
 #   <nireHosts.durandal/fixes>      all packages under fixes/
 #   <nireHosts.durandal/hostName>   only nireHost/durandal/configuration/hostname.nix 
 
-{ lib, nireHosts, ... }:
+{ lib, nireHost, ... }:
 let
-    baseNamespace = nireHosts; # don't forget to add it in the top module args too
+    baseNamespace = nireHost; # don't forget to add it in the top module args too
     
-    # grab the current folder as the aspect name 
-    # for example nireHosts/durandal -> nireHosts.durandal
     aspectRoot  = dirOf __curPos.file;
-    category    = baseNameOf aspectRoot;  
-    
-    # modules themselves are stored flatly under the base namespace
+    category    = baseNameOf aspectRoot;
     flatStore   = baseNamespace.${category};
 
     onlyDirs    = lib.filterAttrs (_: t: t == "directory");
@@ -49,7 +45,7 @@ let
     allModules = lib.concatMap modulesOf (lib.attrNames subcategories);
 
 in {
-    nireHosts.${category} = {
+    baseNamespace.${category} = {
       # <nireHosts.category> pulls in everything in this category
       includes = map (n: flatStore._.${n}) allModules;
 

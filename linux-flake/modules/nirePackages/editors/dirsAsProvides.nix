@@ -20,14 +20,12 @@
 #   <nireHosts.durandal/hardware>   all submodules under hardware/
 #   <nireHosts.durandal/fixes>      all packages under fixes/
 #   <nireHosts.durandal/hostName>   only nireHost/durandal/configuration/hostname.nix 
-
-{ lib, nireHosts, ... }:
+{ lib, nirePackages, ... }:
 let
-    baseNamespace = nireHosts; # don't forget to add it in the top module args too
-    
+    aspect      = nirePackages.${category}; # don't forget to add it in the top module args too
     aspectRoot  = dirOf __curPos.file;
     category    = baseNameOf aspectRoot;
-    flatStore   = baseNamespace.${category};
+    flatStore   = aspect.${category};
 
     onlyDirs    = lib.filterAttrs (_: t: t == "directory");
     onlyFiles   = lib.filterAttrs (_: t: t == "regular");
@@ -38,20 +36,20 @@ let
 
     # Package names within a subcategory
     modulesOf = sub:
-      lib.mapAttrsToList (name: _: stripNix name)
+        lib.mapAttrsToList (name: _: stripNix name)
         (onlyFiles (builtins.readDir (aspectRoot + "/${sub}")));
 
     # All package names across all subcategories
     allModules = lib.concatMap modulesOf (lib.attrNames subcategories);
 
 in {
-    nireHosts.${category} = {
-      # <nireHosts.category> pulls in everything in this category
-      includes = map (n: flatStore._.${n}) allModules;
+    aspect = {
+        # <nireHosts.category> pulls in everything in this category
+        includes = map (n: flatStore._.${n}) allModules;
 
-      # <nireHosts.category/subcategory> pulls in just that subcategory
-      _ = lib.mapAttrs (sub: _: {
-        includes = map (n: flatStore._.${n}) (modulesOf sub);
-      }) subcategories;
+        # <nireHosts.category/subcategory> pulls in just that subcategory
+        _ = lib.mapAttrs (sub: _: {
+            includes = map (n: flatStore._.${n}) (modulesOf sub);
+        }) subcategories;
     };
 }

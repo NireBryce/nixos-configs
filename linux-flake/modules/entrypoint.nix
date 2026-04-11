@@ -42,19 +42,19 @@
                 <nire.hardware/amdcpu>
                 <nire.hardware/amdgpu>
                 <nire.impermanence/impermanence> # will delete your HD if you arent careful
-                <nire.nix/all>
-                <nire.peripherals/all>
-                <nire.shell-config/all>
-                <nire.system/all>
-                <nireHost.durandal/all>
-                <nireUser.elly/all> 
-                <nirePackages.development/all>
-                <nirePackages.editors/all>
-                <nirePackages.linux-utils/all>
-                <nirePackages.nix-utils/all>
-                <nirePackages.optional/all>
-                <nirePackages.shell-apps/all>
-                <nirePackages.terminal/all>
+                <nire.nix>
+                <nire.peripherals>
+                <nire.shell-config>
+                <nire.system>
+                <nireHost.durandal>
+                <nireUser.elly> 
+                <nirePackages.development>
+                <nirePackages.editors>
+                <nirePackages.linux-utils>
+                <nirePackages.nix-utils>
+                <nirePackages.optional>
+                <nirePackages.shell-apps>
+                <nirePackages.terminal>
             ];
         };
     };

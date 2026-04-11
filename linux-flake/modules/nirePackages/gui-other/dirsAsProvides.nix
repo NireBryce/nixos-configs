@@ -21,9 +21,9 @@
 #   <nireHosts.durandal/fixes>      all packages under fixes/
 #   <nireHosts.durandal/hostName>   only nireHost/durandal/configuration/hostname.nix 
 
-{ lib, nireHosts, ... }:
+{ lib, nirePackages, ... }:
 let
-    baseNamespace = nireHosts; # don't forget to add it in the top module args too
+    baseNamespace = nirePackages; # don't forget to add it in the top module args too
     
     aspectRoot  = dirOf __curPos.file;
     category    = baseNameOf aspectRoot;
@@ -45,7 +45,7 @@ let
     allModules = lib.concatMap modulesOf (lib.attrNames subcategories);
 
 in {
-    nireHosts.${category} = {
+    baseNamespace.${category} = {
       # <nireHosts.category> pulls in everything in this category
       includes = map (n: flatStore._.${n}) allModules;
 
