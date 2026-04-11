@@ -21,12 +21,12 @@
 #   <nireHosts.durandal/fixes>      all packages under fixes/
 #   <nireHosts.durandal/hostName>   only nireHost/durandal/configuration/hostname.nix 
 
-{ lib, nirePackages, ... }:
+{ lib, nireHosts, ... }:
 let
-    baseNamespace = nirePackages; # don't forget to add it in the top module args too
+    baseNamespace = nireHosts; # don't forget to add it in the top module args too
     
-    root        = dirOf __curPos.file;
-    category    = baseNameOf root;
+    aspectRoot  = dirOf __curPos.file;
+    category    = baseNameOf aspectRoot;
     flatStore   = baseNamespace.${category};
 
     onlyDirs    = lib.filterAttrs (_: t: t == "directory");
@@ -34,12 +34,12 @@ let
     stripNix    = name: lib.removeSuffix ".nix" name;
 
     # Subcategories are directories at this level
-    subcategories = onlyDirs (builtins.readDir root);
+    subcategories = onlyDirs (builtins.readDir aspectRoot);
 
     # Package names within a subcategory
     modulesOf = sub:
       lib.mapAttrsToList (name: _: stripNix name)
-        (onlyFiles (builtins.readDir (root + "/${sub}")));
+        (onlyFiles (builtins.readDir (aspectRoot + "/${sub}")));
 
     # All package names across all subcategories
     allModules = lib.concatMap modulesOf (lib.attrNames subcategories);

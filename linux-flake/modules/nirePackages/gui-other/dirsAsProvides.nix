@@ -1,52 +1,57 @@
 # Claude co-written magic, my nix is not deep enough here even though I can follow it.
 # 
-# modules/packages/<subcategory>/dirBasedProvides.nix
+# modules/<namespace>/<subcategory>/dirBasedProvides.nix
 #
 # Automatically builds subcategory aspects for this category from the
 # directory structure. The category name is derived from the folder name
 # so this file can be copied to any category directory without changes.
 #
-# Expected structure:
-#   development/
-#     packages.nix        ← this file
-#     scm/
-#       git.nix           → nirePackages.development._.scm
-#       gh.nix            → nirePackages.development._.scm
-#     editors/
-#       helix.nix         → nirePackages.development._.editors
-#
+# Example structure:
+#   nireHosts/
+#     durandal/
+#       dirsAsProvides.nix  <- this file
+#       hardware/               -> nireHost.durandal._.hardware
+#         hardware-configuration.nix    -> nireHost.durandal._.hardware-configuration
+#       fixes/                  -> nireHost.durandal._.fixes
+#         b550-suspend-fix.nix          -> nireHost.durandal._.b550-suspend-fix
+#       
 # Produces:
-#   <nirePackages.development>         all packages in this category
-#   <nirePackages.development/scm>     all packages under scm/
-#   <nirePackages.development/editors> all packages under editors/
+#   <nireHosts.durandal>            all submodules in this category
+#   <nireHosts.durandal/hardware>   all submodules under hardware/
+#   <nireHosts.durandal/fixes>      all packages under fixes/
+#   <nireHosts.durandal/hostName>   only nireHost/durandal/configuration/hostname.nix 
 
-{ lib, nirePackages, ... }:
+{ lib, nireHosts, ... }:
 let
-    root     = dirOf __curPos.file;
-    category = baseNameOf root;
+    baseNamespace = nireHosts; # don't forget to add it in the top module args too
+    
+    aspectRoot  = dirOf __curPos.file;
+    category    = baseNameOf aspectRoot;
+    flatStore   = baseNamespace.${category};
 
-    onlyDirs  = lib.filterAttrs (_: t: t == "directory");
-    onlyFiles = lib.filterAttrs (_: t: t == "regular");
-    stripNix  = name: lib.removeSuffix ".nix" name;
+    onlyDirs    = lib.filterAttrs (_: t: t == "directory");
+    onlyFiles   = lib.filterAttrs (_: t: t == "regular");
+    stripNix    = name: lib.removeSuffix ".nix" name;
 
     # Subcategories are directories at this level
-    subcategories = onlyDirs (builtins.readDir root);
+    subcategories = onlyDirs (builtins.readDir aspectRoot);
 
     # Package names within a subcategory
-    packagesOf = sub:
+    modulesOf = sub:
       lib.mapAttrsToList (name: _: stripNix name)
-        (onlyFiles (builtins.readDir (root + "/${sub}")));
+        (onlyFiles (builtins.readDir (aspectRoot + "/${sub}")));
 
     # All package names across all subcategories
-    allPackages = lib.concatMap packagesOf (lib.attrNames subcategories);
-in {
-    nirePackages.${category} = {
-      # <nirePackages.category> pulls in everything in this category
-      includes = map (n: nirePackages.packages._.${n}) allPackages;
+    allModules = lib.concatMap modulesOf (lib.attrNames subcategories);
 
-      # <nirePackages.development/subcategory> pulls in just that subcategory
+in {
+    nireHosts.${category} = {
+      # <nireHosts.category> pulls in everything in this category
+      includes = map (n: flatStore._.${n}) allModules;
+
+      # <nireHosts.category/subcategory> pulls in just that subcategory
       _ = lib.mapAttrs (sub: _: {
-        includes = map (n: nirePackages.packages._.${n}) (packagesOf sub);
+        includes = map (n: flatStore._.${n}) (modulesOf sub);
       }) subcategories;
     };
 }
