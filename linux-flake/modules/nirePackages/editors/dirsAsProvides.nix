@@ -21,13 +21,13 @@
 #   <nireHosts.durandal/fixes>      all packages under fixes/
 #   <nireHosts.durandal/hostName>   only nireHost/durandal/configuration/hostname.nix 
 { lib, nirePackages, ... }:
-let
-    namespace   = nirePackages; # don't forget to add it in the top module args too
-    flatStore   = nirePackages.packages;    # don't forget to change this too
+let 
+
+    namespace   = lib.findNamespace (dirOf __curPos.file); # still need to add it in module args
+    store       = namespace.packages;    # don't forget to change this too
 
     aspectRoot  = dirOf __curPos.file;
     category    = baseNameOf aspectRoot;
-    store       = flatStore;
 
     onlyDirs    = lib.filterAttrs (_: t: t == "directory");
     onlyFiles   = lib.filterAttrs (_: t: t == "regular");
