@@ -4,26 +4,7 @@ let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
     nire.moduleStore._.${moduleName} = {
-        # Notes:
-        # If you get `zsh side` errors, delete ~/.zcompdump and ~/.config/zsh/.zcompdump and run `zi update`
-        # installing multiple highlighters causes "zsh_zle-highlight-buffer-p:4: permission denied error
-        # in this case it was trapd00r/zsh-syntax-highlighting-filetypes which highlights more than filetypes turns out
-
-        # TO-DONE: evaluate oh-my-zsh, prezto
-        #          o-m-z is too all-encompassing still, but has best support
-        #          prezto not worth looking into imo because I want something stable
-        #          ironically this means going back to `zi` for now
-
-
-        # TODO:  MIGRATE OFF ZI
-        # TODO: evaluation warning: `programs.zsh.initExtraFirst` is deprecated, use `programs.zsh.initContent` with `lib.mkBefore` instead.
-        #   Example: programs.zsh.initContent = lib.mkBefore "your content here";
-        # evaluation warning: `programs.zsh.initExtraBeforeCompInit` is deprecated, use `programs.zsh.initContent` with `lib.mkOrder 550` instead.
-        #   Example: programs.zsh.initContent = lib.mkOrder 550 "your content here";
-        # evaluation warning: `programs.zsh.initExtra` is deprecated, use `programs.zsh.initContent` instead.
-        #   Example: programs.zsh.initContent = "your content here";
-        
-        nixos = { pkgs, ... }:
+        nixos = { pkgs, ... }: {
             # zsh is handled through home-manager
             programs.zsh.enable = true;
             programs.zsh.enableCompletion = lib.mkForce false;  # unless disabled, home-manager causes an extra compaudit
@@ -33,7 +14,7 @@ in {
         };
         # description = "zsh shell config";
 
-        homeManager =
+        homeManager = { pkgs, ... }:
         let zshPluginRequiresList = with pkgs; [
             diff-so-fancy
             # starship
@@ -52,6 +33,24 @@ in {
         ];
         in
         {
+            # Notes:
+            # If you get `zsh side` errors, delete ~/.zcompdump and ~/.config/zsh/.zcompdump and run `zi update`
+            # installing multiple highlighters causes "zsh_zle-highlight-buffer-p:4: permission denied error
+            # in this case it was trapd00r/zsh-syntax-highlighting-filetypes which highlights more than filetypes turns out
+
+            # TO-DONE: evaluate oh-my-zsh, prezto
+            #          o-m-z is too all-encompassing still, but has best support
+            #          prezto not worth looking into imo because I want something stable
+            #          ironically this means going back to `zi` for now
+
+
+            # TODO:  MIGRATE OFF ZI
+            # TODO: evaluation warning: `programs.zsh.initExtraFirst` is deprecated, use `programs.zsh.initContent` with `lib.mkBefore` instead.
+            #   Example: programs.zsh.initContent = lib.mkBefore "your content here";
+            # evaluation warning: `programs.zsh.initExtraBeforeCompInit` is deprecated, use `programs.zsh.initContent` with `lib.mkOrder 550` instead.
+            #   Example: programs.zsh.initContent = lib.mkOrder 550 "your content here";
+            # evaluation warning: `programs.zsh.initExtra` is deprecated, use `programs.zsh.initContent` instead.
+            #   Example: programs.zsh.initContent = "your content here";
             home.file."./.config/F-Sy-H".source = ./config/zsh-f-s-highlight-themes;
             home.packages = zshPluginRequiresList;
             
