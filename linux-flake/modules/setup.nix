@@ -15,9 +15,10 @@ in
         lib.pipe (builtins.readDir libDir) [
             # Only pick up .nix files, ignore directories
             (lib.filterAttrs (name: type: type == "regular" && lib.hasSuffix ".nix" name))
-            # Import each file, passing nothing since utilities are self-contained
+            # Import each file
             (lib.mapAttrs (name: _: import (libDir + "/${name}") {}))
-            # Merge all the resulting attrsets into one
+            # Convert to list of attrsets and merge into one
+            (lib.attrValues)
             (lib.foldl' lib.mergeAttrs {})
         ];
 }

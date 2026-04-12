@@ -26,7 +26,7 @@ let
     store       = den.ful.nire.moduleStore;     # all modules are technically providers of nire.moduleStore.<moduleName> 
     aspectDir  = dirOf __curPos.file;
     aspectNamespace   = nireLib.findNamespaceUp aspectDir;
-    aspectName  = lib.findAspectUp aspectDir;
+    aspectName  = nireLib.findAspectUp aspectDir;
 
     onlyDirs    = lib.filterAttrs (_: t: t == "directory");
     stripNix    = name: lib.removeSuffix ".nix" name;

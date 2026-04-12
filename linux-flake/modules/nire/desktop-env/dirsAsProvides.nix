@@ -46,8 +46,8 @@ let
     modulesOf = sub: collectModules (aspectDir + "/${sub}");
 
     # All module names across all subcategories
-    allModules = lib.concatMap modulesOf (lib.attrNames subcategories);
-    
+    # allModules = lib.concatMap modulesOf (lib.attrNames subcategories);
+    allModules = builtins.trace "allModules: ${builtins.toJSON (lib.concatMap modulesOf (lib.attrNames subcategories))}" (lib.concatMap modulesOf (lib.attrNames subcategories));
 
 
 in {
