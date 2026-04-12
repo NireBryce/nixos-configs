@@ -1,15 +1,15 @@
 
-{ pkgs, lib, ... }:
+{ lib, ... }:
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
     nire.moduleStore._.${moduleName} = {
-        nixos = {
+        nixos = { pkgs, ... }: {
             environment.shells = with pkgs; [
                 fish
             ];
         }; 
-        homeManager = { 
+        homeManager = { pkgs, ... }: {
             programs.fish = {
                 enable = true;
                 interactiveShellInit = ''

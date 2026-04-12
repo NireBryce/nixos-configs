@@ -1,9 +1,9 @@
-{ pkgs, lib, ... }:
+{ lib, ... }:
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
     nire.moduleStore._.${moduleName} = { 
-        nixos = {
+        nixos = { pkgs, ... }: {
             users.mutableUsers = false;
             users.users = { 
                 # groups = {
@@ -30,7 +30,7 @@ in {
         };
     
     
-        homeManager = {
+        homeManager = { pkgs, ... }: {
             home.stateVersion   = "22.11";
             home.username       = "elly";
             home.homeDirectory  = lib.mkDefault "/home/elly";

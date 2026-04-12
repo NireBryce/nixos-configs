@@ -3,14 +3,14 @@ let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
     nire.moduleStore._.${moduleName} = {
-        homeManager = {
+        homeManager = { pkgs, ... }: {
             nixpkgs.config = {
                 allowUnfree          =     true;            # Disable if you don't want unfree packages
                 allowUnfreePredicate = (_: true);           # Workaround for https://github.com/nix-community/home-manager/issues/2942
             };
         };
         
-        nixos = {
+        nixos = { pkgs, ... }:
             nix.extraOptions    = "experimental-features = nix-command flakes";
             nix.settings        = {
                 trusted-users          = [ "root" ];

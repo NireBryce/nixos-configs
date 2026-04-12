@@ -1,8 +1,8 @@
-{ pkgs, lib, ... }:
+{ lib, ... }:
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nire.moduleStore._.${moduleName}.nixos = {
+    nire.moduleStore._.${moduleName}.nixos = { pkgs, ... }:
         #* steam - (fhs)
         programs.steam = {
             enable = true;

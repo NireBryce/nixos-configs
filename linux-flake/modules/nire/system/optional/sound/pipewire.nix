@@ -1,8 +1,8 @@
-{ pkgs, lib, ... }:
+{ lib, ... }:
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nire.moduleStore._.${moduleName}.nixos = {
+    nire.moduleStore._.${moduleName}.nixos = { pkgs, ... }:
         security.rtkit.enable       = true;                 # https://nixos.wiki/wiki/PipeWire
         hardware.bluetooth.package  = pkgs.bluez5-experimental;
         services.pipewire = {

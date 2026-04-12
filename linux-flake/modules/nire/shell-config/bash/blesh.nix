@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nire.moduleStore._.${moduleName}.homeManager = {
+    nire.moduleStore._.${moduleName}.homeManager = { pkgs, ... }: {
 
         # bash line editor, allows zsh-like line editor tricks and bindings
         programs.bash.blesh.enable = true;

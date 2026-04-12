@@ -1,9 +1,10 @@
-{ lib, pkgs, ... }:
+{ lib, ... }:
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
     nire.moduleStore._.${moduleName} = {
-        nixos = {
+        nixos = { pkgs, ... }:
+        
             environment.pathsToLink = [
                 "/share/bash-completion"
             ];
@@ -12,7 +13,7 @@ in {
             ];
         };
 
-        homeManager = {
+        homeManager = { pkgs, ... }: {
             # bash line editor, allows zsh-like line editor tricks and bindings
             home.packages = with pkgs; [
                 blesh

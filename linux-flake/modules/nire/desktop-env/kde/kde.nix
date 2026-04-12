@@ -1,8 +1,8 @@
-{ pkgs, lib, ... }:
+{ lib, ... }:
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nire.moduleStore._.${moduleName}.nixos = {
+    nire.moduleStore._.${moduleName}.nixos = { pkgs, ... }:
         services.xserver.enable = true; # TODO: I think this is still needed for xwayland
 
         # Enable the KDE Desktop Environment and set wayland.

@@ -1,9 +1,9 @@
-{ pkgs, lib, ... }:
+{ lib, ... }:
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
     nire.moduleStore._.${moduleName} = {
-        nixos = {
+        nixos = { pkgs, ... }:
             console = {
                 keyMap  = "us";
                 font    = "Lat2-Terminus16";
