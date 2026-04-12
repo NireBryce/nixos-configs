@@ -1,17 +1,20 @@
 {
- 
-    # Note: this is magic from https://den.oeiuwq.com/guides/from-flake-to-den/, learn how it works
-    # outputs = inputs:
-    # (inputs.nixpkgs.lib.evalModules {
-    #     modules = [ 
-    #         (inputs.import-tree ./modules) 
-    #         inputs.den.flakeModule
-    #     ];
-    #     specialArgs.inputs = inputs;
-    # }).config.flake;
-
-    outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
+    outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+        imports = inputs.import-tree ./modules;
+        
+        # Extends the lib module argument with all utility functions defined
+        # under modules/lib/. Any .nix file placed there is automatically
+        # picked up and its exported functions merged into lib.
+        _module.args.lib = inputs.nixpkgs.lib.extend (_: _:
+            inputs.nixpkgs.lib.pipe (builtins.readDir ./modules/lib) [
+                (inputs.nixpkgs.lib.filterAttrs (name: type: type == "regular" && inputs.nixpkgs.lib.hasSuffix ".nix" name))
+                (inputs.nixpkgs.lib.mapAttrs (name: _: import ./modules/lib/${name} { lib = inputs.nixpkgs.lib; }))
+                (inputs.nixpkgs.lib.foldl' inputs.nixpkgs.lib.mergeAttrs {})
+            ]
+        );
+    };
     
+
     nixConfig = {
         extra-experimental-features = [ "pipe-operators" ];
     };
