@@ -21,9 +21,9 @@
 #   <nireHosts.durandal/fixes>      all packages under fixes/
 #   <nireHosts.durandal/hostName>   only nireHost/durandal/configuration/hostname.nix 
 
-{ lib, nirePackages, ... }:
+{ lib, nireHost, ... }:
 let
-    baseNamespace = nirePackages; # don't forget to add it in the top module args too
+    baseNamespace = nireHost; # don't forget to add it in the top module args too
     
     aspectRoot  = dirOf __curPos.file;
     category    = baseNameOf aspectRoot;
