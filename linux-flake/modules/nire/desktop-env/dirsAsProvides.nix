@@ -20,14 +20,13 @@
 #   <nireHosts.durandal/hardware>   all submodules under hardware/
 #   <nireHosts.durandal/fixes>      all packages under fixes/
 #   <nireHosts.durandal/hostName>   only nireHost/durandal/configuration/hostname.nix 
-{ lib, den, ... }:
+{ nireLib, lib, den, ... }:
 let 
 
     store       = den.ful.nire.moduleStore;     # all modules are technically providers of nire.moduleStore.<moduleName> 
     aspectDir  = dirOf __curPos.file;
-    # aspectNamespace   = lib.findNamespaceUp aspectDir;
-    aspectNamespace = builtins.trace (builtins.attrNames lib) (lib.findNamespaceUp aspectDir); # debug trace
-    aspectName  = lib.findAspectUp aspectDir;
+    aspectNamespace = nireLib.findNamespaceUp aspectDir;
+    aspectName  = nireLib.findAspectUp aspectDir;
 
     onlyDirs    = lib.filterAttrs (_: t: t == "directory");
     stripNix    = name: lib.removeSuffix ".nix" name;

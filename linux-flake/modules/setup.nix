@@ -1,4 +1,4 @@
-{ den, lib, ... }: 
+{ lib, ... }: 
 let
     libDir = dirOf __curPos.file + "/_lib";
 in 
@@ -20,10 +20,4 @@ in
             # Merge all the resulting attrsets into one
             (lib.foldl' lib.mergeAttrs {})
         ];
-    
-    # enables angle bracket syntax for imports shorthand
-    # https://den.oeiuwq.com/guides/angle-brackets/
-    # everywhere it is must take __findFile, 
-    # { __findFile, ... }: { includes = [ <nire.nix/all> ]; };
-    _module.args.__findFile = den.lib.__findFile;
 }
