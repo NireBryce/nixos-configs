@@ -25,7 +25,8 @@ let
 
     store       = den.ful.nire.moduleStore;     # all modules are technically providers of nire.moduleStore.<moduleName> 
     aspectDir  = dirOf __curPos.file;
-    aspectNamespace   = lib.findNamespaceUp aspectDir;
+    # aspectNamespace   = lib.findNamespaceUp aspectDir;
+    aspectNamespace = builtins.trace (builtins.attrNames lib) (lib.findNamespaceUp aspectDir); # debug trace
     aspectName  = lib.findAspectUp aspectDir;
 
     onlyDirs    = lib.filterAttrs (_: t: t == "directory");
@@ -47,6 +48,7 @@ let
 
     # All module names across all subcategories
     allModules = lib.concatMap modulesOf (lib.attrNames subcategories);
+    
 
 
 in {

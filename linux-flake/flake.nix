@@ -1,31 +1,6 @@
 {
     outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } {
         imports = [ (inputs.import-tree ./modules) ];
-        
-        # Extends the lib module argument with all utility functions defined
-        # under modules/_lib/. Any .nix file placed there is automatically
-        # picked up and its exported functions merged into lib.
-        # Extends the lib module argument with all utility functions defined
-        # under modules/_lib/. The _lib/ prefix keeps import-tree from picking
-        # them up as modules.
-        # _module.args.lib = inputs.nixpkgs.lib.extend (_: _:
-        #     inputs.nixpkgs.lib.pipe (builtins.readDir ./modules/_lib) [
-        #         (inputs.nixpkgs.lib.filterAttrs (name: type: type == "regular" && inputs.nixpkgs.lib.hasSuffix ".nix" name))
-        #         (inputs.nixpkgs.lib.mapAttrs (name: _: import ./modules/_lib/${name} { lib = inputs.nixpkgs.lib; }))
-        #         (inputs.nixpkgs.lib.foldl' inputs.nixpkgs.lib.mergeAttrs {})
-        #     ]
-        # );
-
-        # debug trace
-        _module.args.lib = inputs.nixpkgs.lib.mkForce inputs.nixpkgs.lib.extend (_: _:
-    let
-        result = inputs.nixpkgs.lib.pipe (builtins.readDir ./modules/_lib) [
-            (inputs.nixpkgs.lib.filterAttrs (name: type: type == "regular" && inputs.nixpkgs.lib.hasSuffix ".nix" name))
-            (inputs.nixpkgs.lib.mapAttrs (name: _: import ./modules/_lib/${name} { lib = inputs.nixpkgs.lib; }))
-            (inputs.nixpkgs.lib.foldl' inputs.nixpkgs.lib.mergeAttrs {})
-        ];
-    in builtins.trace "lib extensions: ${builtins.toJSON (builtins.attrNames result)}" result
-);
     };
     
 

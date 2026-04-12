@@ -1,12 +1,19 @@
-{ lib, NAMESPACE_HERE, ... }:
+{ lib, ... }:
 let
-    aspect = NAMESPACE_HERE.ASPECT_HERE;
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    
 in {
-    ${aspect}._.${moduleName} = {
+    nire.moduleStore._.${moduleName} = {
+        homeManager = {
+
+        };
+
         nixos = {
         
         };
+
+        darwin = {
+
+        };
     };
 }
+

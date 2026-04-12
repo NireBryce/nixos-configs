@@ -1,5 +1,4 @@
 { 
-    __findFile, # must import for angle bracket syntax
     inputs,
     den, 
    ... 
@@ -54,13 +53,5 @@
             };
         };
     };
-
-
-    # enables angle bracket syntax for imports shorthand
-    # https://den.oeiuwq.com/guides/angle-brackets/
-    # everywhere it is must take __findFile, 
-    # { __findFile, ... }: { includes = [ <nire.nix/all> ]; };
-    _module.args.__findFile = den.lib.__findFile;
-
 
 }
