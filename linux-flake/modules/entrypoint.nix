@@ -23,7 +23,7 @@
             description = "nire-durandal, workstation and gaming PC";
             includes = with den.ful; [ 
                 nire.desktop-env._.kde
-                nire.hardware._.amdcpu
+                nire.hardware._.amd
                 nire.hardware._.amdgpu
                 nire.impermanence._.impermanence # will delete your HD if you arent careful
                 nire.nix
@@ -36,9 +36,9 @@
                 nirePackages.editors
                 nirePackages.linux-utils
                 nirePackages.nix-utils
-                nirePackages.optional
+                nirePackages.gui-other
                 nirePackages.shell-apps
-                nirePackages.terminal
+                nirePackages.terminals
             ];
         };
     };
