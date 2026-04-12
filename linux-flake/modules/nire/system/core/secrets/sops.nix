@@ -1,45 +1,53 @@
-{ config, inputs, pkgs, lib, ... }:
+{
+  config,
+  inputs,
+  pkgs,
+  lib,
+  ...
+}:
 let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    
-    isEd25519   = k: k.type == "ed25519";
-    getKeyPath  = k: k.path;
-    keys        = builtins.filter isEd25519 config.services.openssh.hostKeys;
-    secretsPath = ./secrets.yaml;
-in {
-    nire.moduleStore._.${moduleName}.nixos = {
-        imports = [
-            inputs.sops-nix.nixosModules.sops
-        ];
+  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 
-        environment.systemPackages = with pkgs; [
-            sops
-        ];
+  isEd25519 = k: k.type == "ed25519";
+  getKeyPath = k: k.path;
+  keys = builtins.filter isEd25519 config.services.openssh.hostKeys;
+  secretsPath = ./secrets.yaml;
+in
+{
+  nire.moduleStore._.${moduleName}.nixos =
+    { ... }:
+    {
+      imports = [
+        inputs.sops-nix.nixosModules.sops
+      ];
 
-        sops = {
-            age.sshKeyPaths = map getKeyPath keys;
-            defaultSopsFile = "${secretsPath}";
-            # TODO: what did this do
-            # defaultSymlinkPath = "/run/user/1000/secrets";
-            # defaultSecretsMountPoint = "/run/user/1000/secrets.d";
-        };
+      environment.systemPackages = with pkgs; [
+        sops
+      ];
 
-        # Syncthing
-        sops.secrets.syncthing-durandal = {
-            sopsFile    =  "${secretsPath}"; 
-        };
-            sops.secrets.syncthing-galatea  = {
-            sopsFile    =  "${secretsPath}"; 
-        };
-            sops.secrets.syncthing-lysithea = {
-            sopsFile    =  "${secretsPath}"; 
-        };
-            sops.secrets.syncthing-sif      = {
-            sopsFile    =  "${secretsPath}"; 
-        };
-            sops.secrets.syncthing-iona     = {
-            sopsFile    =  "${secretsPath}"; 
-        };
+      sops = {
+        age.sshKeyPaths = map getKeyPath keys;
+        defaultSopsFile = "${secretsPath}";
+        # TODO: what did this do
+        # defaultSymlinkPath = "/run/user/1000/secrets";
+        # defaultSecretsMountPoint = "/run/user/1000/secrets.d";
+      };
+
+      # Syncthing
+      sops.secrets.syncthing-durandal = {
+        sopsFile = "${secretsPath}";
+      };
+      sops.secrets.syncthing-galatea = {
+        sopsFile = "${secretsPath}";
+      };
+      sops.secrets.syncthing-lysithea = {
+        sopsFile = "${secretsPath}";
+      };
+      sops.secrets.syncthing-sif = {
+        sopsFile = "${secretsPath}";
+      };
+      sops.secrets.syncthing-iona = {
+        sopsFile = "${secretsPath}";
+      };
     };
 }
-
