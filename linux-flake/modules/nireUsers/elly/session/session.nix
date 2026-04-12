@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nireUser.elly._.${moduleName}.homeManager = {
+    nire.moduleStore._.${moduleName}.homeManager = {
         home.sessionVariables = { 
             EDITOR                  = "micro";
             MICRO_TRUECOLOR         = 1;

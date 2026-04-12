@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nire.system._.${moduleName}.nixos = {
+    nire.moduleStore._.${moduleName}.nixos = {
             # should fix steam/proton/wine issues with xdg-open https://github.com/NixOS/nixpkgs/issues/160923 
             xdg.portal = { 
                 enable           = true;

@@ -3,7 +3,7 @@ let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in
 {
-  nirePackages.packages._.${moduleName}.homeManager = {
+  nire.moduleStore._.${moduleName}.homeManager = {
     # description = "piper - logitech/razer graphical mouse manager https://github.com/soxoj/piper";
     home.packages = with pkgs; [
       piper

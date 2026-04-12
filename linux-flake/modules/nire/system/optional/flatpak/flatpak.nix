@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nire.system._.${moduleName}.nixos = {
+    nire.moduleStore._.${moduleName}.nixos = {
         services.flatpak.enable = true;
         systemd.services.flatpak-repo = {
             wantedBy = [ "multi-user.target" ];

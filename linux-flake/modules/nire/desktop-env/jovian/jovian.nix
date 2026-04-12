@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nire.desktop-env._.${moduleName}.nixos = {
+    nire.moduleStore._.${moduleName}.nixos = {
         imports = [ inputs.jovian.nixosModules.default ]; # I think this is instead of needing them as module args?
 
         systemd.services.decky-loader.environment.LD_LIBRARY_PATH = lib.makeLibraryPath inputs.jovian.decky-loader.extraPackages;

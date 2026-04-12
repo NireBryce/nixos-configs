@@ -7,7 +7,7 @@ let
     keys        = builtins.filter isEd25519 config.services.openssh.hostKeys;
     secretsPath = ./secrets.yaml;
 in {
-    nire.system._.${moduleName}.nixos = {
+    nire.moduleStore._.${moduleName}.nixos = {
         imports = [
             inputs.sops-nix.nixosModules.sops
         ];

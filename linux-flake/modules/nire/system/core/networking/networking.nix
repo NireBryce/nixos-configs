@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nire.system._.${moduleName}.nixos = {
+    nire.moduleStore._.${moduleName}.nixos = {
         # DNS
         networking.nameservers = [ "1.1.1.1" "1.0.0.1" ];
         

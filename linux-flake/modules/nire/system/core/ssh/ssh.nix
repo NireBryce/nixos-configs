@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nire.system._.${moduleName}.nixos = {
+    nire.moduleStore._.${moduleName}.nixos = {
         services.openssh = {
             enable                          = true;
             allowSFTP                       = false;    # Don't set this if you need sftp

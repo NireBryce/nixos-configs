@@ -3,7 +3,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nire.shell-config._.${moduleName} = {
+    nire.moduleStore._.${moduleName} = {
         # Notes:
         # If you get `zsh side` errors, delete ~/.zcompdump and ~/.config/zsh/.zcompdump and run `zi update`
         # installing multiple highlighters causes "zsh_zle-highlight-buffer-p:4: permission denied error

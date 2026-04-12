@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nire.impermanence._.${moduleName}.nixos = {
+    nire.moduleStore._.${moduleName}.nixos = {
         # impermanence metapackage
         # THIS WILL DELETE YOUR ROOT ON BOOT, so like, know what you're doing
         imports = [

@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nire.system._.${moduleName}.nixos = {
+    nire.moduleStore._.${moduleName}.nixos = {
         security.rtkit.enable       = true;                 # https://nixos.wiki/wiki/PipeWire
         hardware.bluetooth.package  = pkgs.bluez5-experimental;
         services.pipewire = {

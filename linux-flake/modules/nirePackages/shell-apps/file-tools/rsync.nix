@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nirePackages.packages._.${moduleName}.homeManager = {
+    nire.moduleStore._.${moduleName}.homeManager = {
         # description = "rsync - back in my day we transfered our files uphill both ways";
         home.packages = with pkgs; [
             rsync

@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nirePackages.packages._.${moduleName}.homeManager = {
+    nire.moduleStore._.${moduleName}.homeManager = {
         # description = "Atuin remote encrypted history manager";
         programs.atuin = {       
             enable                  = true;

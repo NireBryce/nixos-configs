@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nire.shell-config._.${moduleName} = {
+    nire.moduleStore._.${moduleName} = {
         nixos = {
             environment.pathsToLink = [
                 "/share/bash-completion"

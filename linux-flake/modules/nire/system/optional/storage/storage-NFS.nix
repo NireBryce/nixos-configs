@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nire.system._.${moduleName}.nixos = {
+    nire.moduleStore._.${moduleName}.nixos = {
         fileSystems."/mnt/qnap-erin" = {
             device = "192.168.0.200:/erin-pub";
             fsType = "nfs";

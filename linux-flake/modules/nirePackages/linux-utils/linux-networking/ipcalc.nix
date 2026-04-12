@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nirePackages.packages._.${moduleName}.homeManager =  {
+    nire.moduleStore._.${moduleName}.homeManager =  {
         # description = "IP address calculator https://gitlab.com/ipcalc/ipcalc";
         home.packages = with pkgs; [
             ipcalc

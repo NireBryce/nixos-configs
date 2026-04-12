@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nirePackages.nix._.${moduleName}.homeManager = {
+    nire.moduleStore._.${moduleName}.homeManager = {
         nixpkgs.config = {
             allowUnfree          =     true;            # Disable if you don't want unfree packages
             allowUnfreePredicate = (_: true);           # Workaround for https://github.com/nix-community/home-manager/issues/2942

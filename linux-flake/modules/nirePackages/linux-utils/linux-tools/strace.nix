@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nirePackages.packages._.${moduleName}.homeManager =  {
+    nire.moduleStore._.${moduleName}.homeManager =  {
         # description = "system call tracer https://linux.die.net/man/1/strace";
         home.packages = with pkgs; [
             strace

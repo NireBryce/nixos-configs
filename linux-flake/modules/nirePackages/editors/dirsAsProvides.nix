@@ -20,34 +20,37 @@
 #   <nireHosts.durandal/hardware>   all submodules under hardware/
 #   <nireHosts.durandal/fixes>      all packages under fixes/
 #   <nireHosts.durandal/hostName>   only nireHost/durandal/configuration/hostname.nix 
-{ lib, nirePackages, ... }:
+{ lib, den, ... }:
 let 
 
-    namespaceLooseModulesLocation = "packages";
-    namespace   = lib.findNamespaceUp (dirOf __curPos.file);
-    aspectName  = lib.findAspectUp (dirOf __curPos.file);
-    store       = namespace.${namespaceLooseModulesLocation};    # don't forget to change this to whatever 
-
-    aspectRoot  = dirOf __curPos.file;
-    category    = baseNameOf aspectRoot;
+    store       = den.ful.nire.moduleStore;     # all modules are technically providers of nire.moduleStore.<moduleName> 
+    aspectDir  = dirOf __curPos.file;
+    aspectNamespace   = lib.findNamespaceUp aspectDir;
+    aspectName  = lib.findAspectUp aspectDir;
 
     onlyDirs    = lib.filterAttrs (_: t: t == "directory");
-    onlyFiles   = lib.filterAttrs (_: t: t == "regular");
     stripNix    = name: lib.removeSuffix ".nix" name;
 
     # Subcategories are directories at this level
-    subcategories = onlyDirs (builtins.readDir aspectRoot);
+    subcategories = onlyDirs (builtins.readDir aspectDir);
 
+    collectModules = dir:
+        lib.concatMap
+        ({ name, value }:
+            if value == "directory"
+            then collectModules (dir + "/${name}")
+            else [ (stripNix name) ])
+        (lib.mapAttrsToList lib.nameValuePair (builtins.readDir dir));
+    
     # Package names within a subcategory
-    modulesOf = sub:
-        lib.mapAttrsToList (name: _: stripNix name)
-        (onlyFiles (builtins.readDir (aspectRoot + "/${sub}")));
+    modulesOf = sub: collectModules (aspectDir + "/${sub}");
 
-    # All package names across all subcategories
+    # All module names across all subcategories
     allModules = lib.concatMap modulesOf (lib.attrNames subcategories);
 
+
 in {
-    ${namespace}.${aspectName}._.${category} = {
+    den.ful.${aspectNamespace}.${aspectName} = {
         # <nireHosts.category> pulls in everything in this category
         includes = map (n: store._.${n}) allModules;
 

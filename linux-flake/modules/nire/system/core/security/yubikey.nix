@@ -3,7 +3,7 @@ let
     homeDirectory = "${config.users.users.elly.home}";  
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nire.system._.${moduleName}.nixos = {
+    nire.moduleStore._.${moduleName}.nixos = {
         environment.systemPackages = with pkgs; [
             pam_u2f
             yubioath-flutter

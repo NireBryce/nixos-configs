@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nire.shell-config._.${moduleName}.homeManager = {
+    nire.moduleStore._.${moduleName}.homeManager = {
         home.shellAliases = { 
             # for in-place functions in aliases refer to:  https://stackoverflow.com/questions/34340575/zsh-alias-with-parameter
             lcd             = ''f() { cd $1 && ls -lah };f'';               
