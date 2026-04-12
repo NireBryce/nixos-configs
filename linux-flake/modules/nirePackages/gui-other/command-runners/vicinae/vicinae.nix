@@ -3,7 +3,7 @@ let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in
 {
-  nire.moduleStore._.${moduleName}.homeManager = {
+  nire.moduleStore._.${moduleName}.homeManager = { ... }: {
     # description = "Like raycast for linux";
     programs.vicinae = {
       enable = true;

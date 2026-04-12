@@ -1,13 +1,15 @@
-{ pkgs, lib, ... }:
+{ lib, ... }:
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in
 {
-  nire.moduleStore._.${moduleName}.homeManager = {
-    # nushell - the next generation shell
-    # hint: nushell -c for tabular display in any shell
-    home.packages = with pkgs; [
-      nushell
-    ];
-  };
+  nire.moduleStore._.${moduleName}.homeManager =
+    { pkgs, ... }:
+    {
+      # nushell - the next generation shell
+      # hint: nushell -c for tabular display in any shell
+      home.packages = with pkgs; [
+        nushell
+      ];
+    };
 }

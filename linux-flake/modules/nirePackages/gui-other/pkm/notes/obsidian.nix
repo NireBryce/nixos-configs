@@ -1,12 +1,14 @@
-{ pkgs, lib, ... }:
+{ lib, ... }:
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in
 {
-  nire.moduleStore._.${moduleName}.homeManager = {
-    # description = "Obsidian - markdown PKM like org mode, https://obsidian.md/";
-    home.packages = with pkgs; [
-      obsidian
-    ];
-  };
+  nire.moduleStore._.${moduleName}.homeManager =
+    { pkgs, ... }:
+    {
+      # description = "Obsidian - markdown PKM like org mode, https://obsidian.md/";
+      home.packages = with pkgs; [
+        obsidian
+      ];
+    };
 }

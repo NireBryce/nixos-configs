@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nire.moduleStore._.${moduleName}.homeManager = {
+    nire.moduleStore._.${moduleName}.homeManager = { ... }: {
         # micro, what if nano was msword for dos
         programs.micro = {
             enable = true;
