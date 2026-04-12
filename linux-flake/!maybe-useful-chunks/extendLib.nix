@@ -1,6 +1,8 @@
 # Extends the lib module argument with all utility functions defined
 # under modules/lib/. Any .nix file placed there is automatically
 # picked up and its exported functions merged into lib.
+# 
+# must live above the lib directory
 #
 # Usage in any module:
 #   { lib, ... }: let
@@ -11,7 +13,7 @@
 {
   
   _module.args.lib = lib.extend (_: _:
-    lib.pipe (builtins.readDir ./.) [
+    lib.pipe (builtins.readDir ./lib) [
       # Only pick up .nix files, ignore directories
       (lib.filterAttrs (name: type: type == "regular" && lib.hasSuffix ".nix" name))
       # Import each file, passing lib in case utilities need it

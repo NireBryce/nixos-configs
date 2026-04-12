@@ -1,6 +1,7 @@
 { 
     inputs,
     den, 
+    lib,
    ... 
 }:
 
@@ -16,21 +17,6 @@
         (inputs.den.namespace "nireHost" false)
         (inputs.den.namespace "nirePackages" false)
     ];
-
-    # enables angle bracket syntax for imports shorthand
-    # https://den.oeiuwq.com/guides/angle-brackets/
-    # everywhere it is must take __findFile, 
-    # { __findFile, ... }: { includes = [ <nire.nix/all> ]; };
-    _module.args.__findFile = den.lib.__findFile;
-
-    den.hosts.x86_64-linux = {
-        nire-durandal = {
-            home-manager.enable = true;
-            users.elly = { 
-                classes = [ "homeManager" ];
-            };
-        };
-    };
 
     den.aspects = {
     # Aspects load before the namespaced modules do, so we need to use den.aspects here.
@@ -58,4 +44,41 @@
             ];
         };
     };
+
+    # define user
+    den.hosts.x86_64-linux = {
+        nire-durandal = {
+            home-manager.enable = true;
+            users.elly = { 
+                classes = [ "homeManager" ];
+            };
+        };
+    };
+
+    # Extends the lib module argument with all utility functions defined
+    # under modules/lib/. Any .nix file placed there is automatically
+    # picked up and its exported functions merged into lib.
+    # 
+    # must live above the lib directory
+
+    _module.args.lib = lib.extend (_: _:
+        lib.pipe (builtins.readDir ./lib) [
+            # Only pick up .nix files, ignore directories
+            (lib.filterAttrs (name: type: type == "regular" && lib.hasSuffix ".nix" name))
+            # Import each file, passing lib in case utilities need it
+            (lib.mapAttrs (name: _: import ./lib/${name} { inherit lib; }))
+            # Merge all the resulting attrsets into one
+            (lib.foldl' lib.mergeAttrs {})
+        ]
+    );
+
+
+
+    # enables angle bracket syntax for imports shorthand
+    # https://den.oeiuwq.com/guides/angle-brackets/
+    # everywhere it is must take __findFile, 
+    # { __findFile, ... }: { includes = [ <nire.nix/all> ]; };
+    _module.args.__findFile = den.lib.__findFile;
+
+
 }
