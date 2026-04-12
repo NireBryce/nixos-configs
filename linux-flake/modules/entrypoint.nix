@@ -1,4 +1,5 @@
 { 
+    __findFile, # must import for angle bracket syntax
     inputs,
     den, 
    ... 
