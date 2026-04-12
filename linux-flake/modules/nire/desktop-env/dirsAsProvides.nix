@@ -22,7 +22,9 @@
 #   <nireHosts.durandal/hostName>   only nireHost/durandal/configuration/hostname.nix 
 { nireLib, lib, den, ... }:
 let 
-
+#      _ = builtins.trace "desktop-env dirsAsProvides loading" null;
+#   aspectNamespace = "nire";
+#   aspectName      = "desktop-env";
     store       = den.ful.nire.moduleStore;     # all modules are technically providers of nire.moduleStore.<moduleName> 
     aspectDir  = dirOf __curPos.file;
     aspectNamespace = nireLib.findNamespaceUp aspectDir;

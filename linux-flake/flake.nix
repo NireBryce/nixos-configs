@@ -1,6 +1,26 @@
 {
     outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } {
         imports = [ (inputs.import-tree ./modules) ];
+
+        # Sets _module.args.nireLib to all utility functions defined under modules/_lib/.
+        # Any .nix file placed there is automatically picked up and its exported
+        # functions merged into nireLib.
+        #
+        # Usage in any module:
+        #   { lib, nireLib, ... }: let
+        #     namespaceName = nireLib.findNamespaceUp (dirOf __curPos.file);
+        #   in { ... }
+        _module.args.nireLib =
+        let
+            lib    = inputs.nixpkgs.lib;
+            libDir = ./modules/_lib;
+        in
+        lib.pipe (builtins.readDir libDir) [
+            (lib.filterAttrs (name: type: type == "regular" && lib.hasSuffix ".nix" name))
+            (lib.mapAttrs (name: _: import (libDir + "/${name}") {}))
+            (lib.attrValues)
+            (lib.foldl' lib.mergeAttrs {})
+        ];
     };
     
 
