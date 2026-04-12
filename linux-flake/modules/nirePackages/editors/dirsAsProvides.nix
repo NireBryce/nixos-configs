@@ -23,8 +23,8 @@
 { lib, nirePackages, ... }:
 let 
 
-    namespace   = lib.findNamespace (dirOf __curPos.file); # still need to add it in module args
-    store       = namespace.packages;    # don't forget to change this too
+    namespace   = lib.findNamespaceUp (dirOf __curPos.file);
+    store       = namespace.${aspectName};    # don't forget to change this to whatever 
 
     aspectRoot  = dirOf __curPos.file;
     category    = baseNameOf aspectRoot;
