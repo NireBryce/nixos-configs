@@ -3,11 +3,11 @@
 # e.g. modules/nirePackages/editors/scm/git.nix -> "editors"
 { ... }:
 let
-  findAspect = path:
+  findAspectUp = path:
     let parent = dirOf path;
     in if baseNameOf (dirOf parent) == "modules"
        then baseNameOf parent
-       else findAspect parent;
+       else findAspectUp parent;
 in {
-  inherit findAspect;
+  inherit findAspectUp;
 }
