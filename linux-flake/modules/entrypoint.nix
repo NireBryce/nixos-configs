@@ -21,7 +21,11 @@
     # Aspects load before the namespaced modules do, so we need to use den.aspects here.
         nire-durandal = {
             description = "nire-durandal, workstation and gaming PC";
+ 
             includes = with den.ful; [ 
+                # since den.provides.hostname is fully qualified, it can be used under the `with`
+                den.provides.hostname
+                
                 nire.desktop-env._.kde
                 nire.hardware._.amd
                 nire.hardware._.amdgpu
