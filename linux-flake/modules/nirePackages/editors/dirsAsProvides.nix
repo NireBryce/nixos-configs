@@ -23,8 +23,10 @@
 { lib, nirePackages, ... }:
 let 
 
+    namespaceLooseModulesLocation = "packages";
     namespace   = lib.findNamespaceUp (dirOf __curPos.file);
-    store       = namespace.${aspectName};    # don't forget to change this to whatever 
+    aspectName  = lib.findAspectUp (dirOf __curPos.file);
+    store       = namespace.${namespaceLooseModulesLocation};    # don't forget to change this to whatever 
 
     aspectRoot  = dirOf __curPos.file;
     category    = baseNameOf aspectRoot;
@@ -45,7 +47,7 @@ let
     allModules = lib.concatMap modulesOf (lib.attrNames subcategories);
 
 in {
-    ${namespace}.${category} = {
+    ${namespace}.${aspectName}._.${category} = {
         # <nireHosts.category> pulls in everything in this category
         includes = map (n: store._.${n}) allModules;
 
