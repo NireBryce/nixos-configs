@@ -4,11 +4,11 @@ let
 in {
     nire.moduleStore._.${moduleName} = {
         nixos = {
+            console = {
+                keyMap  = "us";
+                font    = "Lat2-Terminus16";
+            };
             fonts = {
-                console = {
-                    keyMap  = "us";
-                    font    = "Lat2-Terminus16";
-                };
                 packages = with pkgs; [
                     nerd-fonts.jetbrains-mono
                     nerd-fonts.iosevka

@@ -1,19 +1,18 @@
-{ pkgs, config, lib, ... }:
+{ lib, ... }:
 let
-    homeDirectory = "${config.users.users.elly.home}";  
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    nire.moduleStore._.${moduleName}.nixos = {
-        environment.systemPackages = with pkgs; [
-            pam_u2f
-            yubioath-flutter
-            yubikey-manager
-        ];
+  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in
+{
+  nire.moduleStore._.${moduleName}.nixos = { pkgs, config, ... }: {
+      environment.systemPackages = with pkgs; [
+        pam_u2f
+        yubioath-flutter
+        yubikey-manager
+      ];
 
+      # This is linux only
+      services.udev.extraRules = ''
 
-        # This is linux only
-        services.udev.extraRules = ''
-        
         # Yubikey 4 / bio need different config
         #   ##
         # Yubikey 5 BIO
@@ -34,27 +33,26 @@ in {
             ENV{HID_NAME}=="Yubico YubiKey FIDO+CCID",\
             RUN+="${pkgs.systemd}/bin/loginctl activate 1"
             
-        '';
+      '';
 
+      # Yubikey required services and config. See Dr. Duh NixOS config for
+      # reference
+      services.pcscd.enable = true; # smartcard service
+      services.udev.packages = [ pkgs.yubikey-personalization ];
 
-        # Yubikey required services and config. See Dr. Duh NixOS config for
-        # reference
-        services.pcscd.enable  = true; # smartcard service
-        services.udev.packages = [ pkgs.yubikey-personalization ];
-
-        # yubikey login / sudo
-        security.pam = lib.optionalAttrs pkgs.stdenv.isLinux {
-            u2f = {
-                enable      = true;
-                settings    = {
-                    cue         = true; # Tells user they need to press the button
-                    authFile    = "${homeDirectory}/.config/Yubico/u2f_keys";
-                };
-            };
-            services    = {
-                login.u2fAuth   = true;
-                sudo .u2fAuth   = true;
-            };
+      # yubikey login / sudo
+      security.pam = lib.optionalAttrs pkgs.stdenv.isLinux {
+        u2f = {
+          enable = true;
+          settings = {
+            cue = true; # Tells user they need to press the button
+            authFile = "${config.users.users.elly.home}/.config/Yubico/u2f_keys";
+          };
         };
+        services = {
+          login.u2fAuth = true;
+          sudo.u2fAuth = true;
+        };
+      };
     };
 }

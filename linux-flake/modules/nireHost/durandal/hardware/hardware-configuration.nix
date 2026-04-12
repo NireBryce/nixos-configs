@@ -1,11 +1,9 @@
-{ config, lib, modulesPath, ... }:
+{ config, lib, ... }:
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
     nire.moduleStore._.${moduleName}.nixos = {
-        imports = [ 
-            (modulesPath + "/installer/scan/not-detected.nix")
-        ];
+
         boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
         boot.initrd.kernelModules = [ ];
         boot.kernelModules = [ "kvm-amd" ];
