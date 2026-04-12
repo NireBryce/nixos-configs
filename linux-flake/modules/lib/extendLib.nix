@@ -9,8 +9,9 @@
 
 { lib, ... }:
 {
+  
   _module.args.lib = lib.extend (_: _:
-    lib.pipe (builtins.readDir ./lib) [
+    lib.pipe (builtins.readDir ./.) [
       # Only pick up .nix files, ignore directories
       (lib.filterAttrs (name: type: type == "regular" && lib.hasSuffix ".nix" name))
       # Import each file, passing lib in case utilities need it
