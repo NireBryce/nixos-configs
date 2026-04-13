@@ -28,13 +28,6 @@ in {
             
             };
         };
-    
-    
-        homeManager = { pkgs, ... }: {
-            home.stateVersion   = "22.11";
-            home.username       = "elly";
-            home.homeDirectory  = lib.mkDefault "/home/elly";
-        };
 
         darwin = { pkgs, ... }: {
             fonts.packages = with pkgs; [

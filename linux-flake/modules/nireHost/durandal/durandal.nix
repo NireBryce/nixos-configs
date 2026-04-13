@@ -23,7 +23,13 @@
             nirePackages.terminals
         ];
 
-        # _.to-users = { };  # learn about this later
+        _.to-users = { };
+
+        _.elly = {
+            includes = [
+                den.primary-user
+            ];
+        };
     };
 }
 

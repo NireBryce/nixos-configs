@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nire.moduleStore._.${moduleName}.homeManager = { pkgs, ... }: {
+    nire.moduleStore._.${moduleName}.homeManager = { ... }: {
         home.file."./.gitconfig".source = ./.gitconfig;
         
         programs.git = {        # User-specific git config

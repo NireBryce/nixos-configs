@@ -27,7 +27,7 @@ in
 
       # fix electron fonts? https://github.com/electron/electron/issues/31797
       environment.systemPackages = with pkgs; [
-        kdePackages.xdg-desktop-portal-kde
+        # kdePackages.xdg-desktop-portal-kde  # lives in xdg-portals
         kdePackages.spectacle # screenshot tool                          https://invent.kde.org/graphics/spectacle
         kdePackages.konqueror # one of the best `info` file pagers        https://invent.kde.org/network/konqueror
         kdePackages.qttools
