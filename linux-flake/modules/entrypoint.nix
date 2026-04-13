@@ -17,8 +17,9 @@
         (inputs.den.namespace "nirePackages" false)
     ];
 
-    den.default = {
+    den.default = { lib, ... }: {
         includes = [ den.provides.define-user ];
+        homeManager.home.stateVersion = lib.mkDefault "22.11";
     };
         
 

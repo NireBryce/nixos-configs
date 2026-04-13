@@ -3,6 +3,7 @@
         includes = with den.ful; [ 
             # since den.provides.hostname is fully qualified, it can be used under the `with`
             den.provides.hostname
+            den.aspects.hmSettings._.hmConfig
 
             nire.desktop-env._.kde
             nire.hardware._.amd
@@ -27,9 +28,10 @@
 
         _.elly = {
             includes = [
-                den.primary-user
+                den._.primary-user
             ];
         };
+        
     };
 }
 
