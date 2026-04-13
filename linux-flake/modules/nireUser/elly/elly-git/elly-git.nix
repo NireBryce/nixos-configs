@@ -1,7 +1,7 @@
 { lib, ... }:
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
+in {    
     nire.moduleStore._.${moduleName}.homeManager = { ... }: {
         home.file."./.gitconfig".source = ./.gitconfig;
         
