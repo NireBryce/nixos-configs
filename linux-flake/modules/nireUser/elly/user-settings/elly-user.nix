@@ -11,10 +11,10 @@ in {
                 # };
                 elly = {
                     # group = "elly";
-                    shell                 = pkgs.bash;
-                    isNormalUser          = true;
-                    extraGroups           = [ "wheel" "audio" "podman" ]; # Enable ‘sudo’ and deeper audio access
-                    hashedPasswordFile    = "/persist/passwords/elly";
+                    # shell = lib.mkDefault pkgs.bash;
+                    isNormalUser = true;
+                    extraGroups = [ "wheel" "audio" "podman" ]; # Enable ‘sudo’ and deeper audio access
+                    hashedPasswordFile = "/persist/passwords/elly";
                     packages  = with pkgs; [ 
                         # Emergency packages if home-manager dies
                         firefox
