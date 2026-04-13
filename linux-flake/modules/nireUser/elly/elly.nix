@@ -3,7 +3,7 @@
         includes = [
             den.ful.nire.moduleStore._.elly-git
             den.ful.nire.moduleStore._.elly-session
-            den.ful.nire.moduleStore._.elly-configuration
+            den.ful.nire.moduleStore._.elly-user
         ];
     };
 }

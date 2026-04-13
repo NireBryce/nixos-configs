@@ -6,7 +6,7 @@
             den.aspects.hmSettings._.hmConfig
 
             nire.desktop-env._.kde
-            nire.hardware._.amd
+            nire.hardware._.amdcpu
             nire.hardware._.amdgpu
             nire.impermanence._.impermanence # will delete your HD if you arent careful
             nire.nix

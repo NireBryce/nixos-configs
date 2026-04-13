@@ -22,27 +22,25 @@
 #   <nireHosts.durandal/hostName>   only nireHost/durandal/configuration/hostname.nix
 { lib, den, ... }:
 let
+  aspectDir = dirOf __curPos.file;
+  aspectNamespace = baseNameOf (dirOf aspectDir);
+  aspectName = baseNameOf aspectDir;
 
-    store = den.ful.nire.moduleStore; # all modules are technically providers of nire.moduleStore.<moduleName>
-    aspectDir = dirOf __curPos.file;
-    aspectNamespace = baseNameOf (dirOf aspectDir);
-    aspectName = baseNameOf aspectDir;
+  onlyDirs = lib.filterAttrs (_: t: t == "directory");
+  stripNix = name: lib.removeSuffix ".nix" name;
 
-    onlyDirs = lib.filterAttrs (_: t: t == "directory");
-    stripNix = name: lib.removeSuffix ".nix" name;
+  # Subcategories are directories at this level
+  subcategories = onlyDirs (builtins.readDir aspectDir);
 
-    # Subcategories are directories at this level
-    subcategories = onlyDirs (builtins.readDir aspectDir);
-
-    collectModules =
-        dir:
-        lib.concatMap (
-        { name, value }:
-        if value == "directory" then
-            collectModules (dir + "/${name}")
-        else
-            lib.optional (lib.hasSuffix ".nix" name) (stripNix name)
-        ) (lib.mapAttrsToList lib.nameValuePair (builtins.readDir dir));
+  collectModules =
+    dir:
+    lib.concatMap (
+      { name, value }:
+      if value == "directory" then
+        collectModules (dir + "/${name}")
+      else
+        lib.optional (lib.hasSuffix ".nix" name) (stripNix name)
+    ) (lib.mapAttrsToList lib.nameValuePair (builtins.readDir dir));
 
   # Package names within a subcategory
   modulesOf = sub: collectModules (aspectDir + "/${sub}");
@@ -54,11 +52,17 @@ in
 {
   den.ful.${aspectNamespace}.${aspectName} = {
     # <nireHosts.category> pulls in everything in this category
-    includes = map (n: store._.${n}) allModules;
+    includes = map (n: den.ful.nire.moduleStore._.${n}) allModules;
 
     # <nireHosts.category/subcategory> pulls in just that subcategory
     _ = lib.mapAttrs (sub: _: {
-      includes = map (n: store._.${n}) (modulesOf sub);
+      includes = map (n: den.ful.nire.moduleStore._.${n}) (modulesOf sub);
     }) subcategories;
+    
   };
 }
+# # brings individual submodule names into the category, add to _ =
+#
+# // lib.genAttrs allModules (n: {
+#     includes = [ den.ful.nire.moduleStore._.${n} ];
+# });
