@@ -8,12 +8,10 @@ let
         nire.desktop-env._.kde
         nire.hardware._.amdcpu
         nire.hardware._.amdgpu
-        nire.impermanence._.impermanence # will delete your HD if you arent careful
         nire.nix
         nire.peripherals
         nire.shell-config
         nire.system
-        nireHost.durandal
         nireUser.elly
         nirePackages.development
         nirePackages.editors
@@ -29,16 +27,20 @@ in {
         includes = [ 
             # since den.provides.hostname is fully qualified, it can be used under the `with`
             den.provides.hostname
-        ] ++ moduleList;
-
-        _.to-users = { };
+            den.ful.nireHost.durandal
+            den.ful.nire.impermanence._.impermanence # will delete your HD if you arent careful
+        ] ++ [
+            ({ class, ... }: builtins.trace "class for moduleList: ${class}" { includes = if class == "os" then moduleList else [];})
+        ];
 
         _.elly = {
             # we need to do all the includes here so the homeManager sections can be processed under elly.
             # TODO: there has to be a better way
             includes = [
                 den._.primary-user
-            ] ++ moduleList;
+            ] ++ [
+                ({ class, ... }: builtins.trace "class: ${class}" { includes = if class == "homeManager" then moduleList else [];})
+            ];
         };
         
     };

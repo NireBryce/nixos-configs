@@ -8,8 +8,14 @@ in {
             environment.shells = with pkgs; [
                 fish
             ];
+            environment.pathsToLink = [
+                "/share/fish"
+            ];
+            environment.systemPackages = with pkgs; [
+                fishPlugins.fzf-fish
+            ];
         }; 
-        homeManager = { pkgs, ... }: {
+        homeManager = { ... }: {
             programs.fish = {
                 enable = true;
                 interactiveShellInit = ''
@@ -19,12 +25,6 @@ in {
                 '';
                 generateCompletions = true;
             };
-            environment.pathsToLink = [
-                "/share/fish"
-            ];
-            environment.systemPackages = with pkgs; [
-                fishPlugins.fzf-fish
-            ];
         };
     };
 }

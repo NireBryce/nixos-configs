@@ -1,5 +1,5 @@
 {
-  description = "Rust Rover environment";
+  # description = "Rust Rover environment";
 
     inputs = {
         nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";

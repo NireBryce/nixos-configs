@@ -6,7 +6,7 @@ in
   nire.moduleStore._.${moduleName}.homeManager =
     { pkgs, ... }:
     {
-      # description = "`find` alternative";
+      # # description = "`find` alternative";
       home.packages = with pkgs; [
         fd
       ];

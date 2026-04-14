@@ -3,7 +3,7 @@ let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
     nire.moduleStore._.${moduleName}.homeManager = { pkgs, ... }: {
-        # description = "`htop` alternative";
+        # # description = "`htop` alternative";
         home.packages = with pkgs; [
             btop
         ];

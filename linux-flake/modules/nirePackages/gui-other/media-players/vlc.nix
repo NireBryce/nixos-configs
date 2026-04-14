@@ -4,7 +4,7 @@ let
 in
 {
   nire.moduleStore._.${moduleName}.homeManager = { pkgs, ... }: {
-    # description = "vlc media player";
+    # # description = "vlc media player";
     home.packages = with pkgs; [
       vlc
     ];

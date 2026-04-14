@@ -6,7 +6,7 @@ in
   nire.moduleStore._.${moduleName}.homeManager =
     { pkgs, ... }:
     {
-      description = "zoom videoconferencing software";
+      # description = "zoom videoconferencing software";
       home.packages = with pkgs; [
         zoom-us
       ];

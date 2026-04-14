@@ -6,7 +6,7 @@ in
   nire.moduleStore._.${moduleName}.homeManager =
     { pkgs, ... }:
     {
-      # description = "just - justfile runner";
+      # # description = "just - justfile runner";
       home.file = {
         "./.justfile".source = ./config/.justfile;
         "./.just/.justfile".source = ./config/.justfile;

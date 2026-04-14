@@ -4,7 +4,7 @@ let
 in
 {
   nire.moduleStore._.${moduleName}.homeManager = { ... }: {
-    # description = "Like raycast for linux";
+    # # description = "Like raycast for linux";
     programs.vicinae = {
       enable = true;
       systemd = {

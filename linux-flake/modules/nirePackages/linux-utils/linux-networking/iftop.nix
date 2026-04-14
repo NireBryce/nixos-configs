@@ -3,7 +3,7 @@ let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
     nire.moduleStore._.${moduleName}.homeManager =  {
-        # description = "network monitor https://pdw.ex-parrot.com/iftop/";
+        # # description = "network monitor https://pdw.ex-parrot.com/iftop/";
         home.packages = with pkgs; [
             iftop
         ];

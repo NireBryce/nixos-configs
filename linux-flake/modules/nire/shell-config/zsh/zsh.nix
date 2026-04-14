@@ -12,7 +12,7 @@ in {
                 zsh
             ];
         };
-        # description = "zsh shell config";
+        # # description = "zsh shell config";
 
         homeManager = { pkgs, ... }:
         let zshPluginRequiresList = with pkgs; [

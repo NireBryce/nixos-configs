@@ -3,7 +3,7 @@ let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
     nire.moduleStore._.${moduleName}.homeManager = { pkgs, ... }: {
-        # description = "kitty terminal emulator";
+        # # description = "kitty terminal emulator";
         home.packages = with pkgs; [
             kitty-img
         ];

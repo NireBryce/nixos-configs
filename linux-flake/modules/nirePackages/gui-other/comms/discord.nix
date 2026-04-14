@@ -6,7 +6,7 @@ in
   nire.moduleStore._.${moduleName}.homeManager =
     { pkgs, ... }:
     {
-      # description = "discord gamer chat app that broke containment";
+      # # description = "discord gamer chat app that broke containment";
       home.packages = with pkgs; [
         discord
       ];

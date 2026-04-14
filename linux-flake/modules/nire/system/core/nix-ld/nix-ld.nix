@@ -6,7 +6,7 @@ in
   nire.moduleStore._.${moduleName}.nixos =
     { ... }:
     {
-      # description = "nix-ld, needed for VSCode remote connection, etc";
+      # # description = "nix-ld, needed for VSCode remote connection, etc";
       programs.nix-ld.enable = lib.mkDefault true;
     };
 }

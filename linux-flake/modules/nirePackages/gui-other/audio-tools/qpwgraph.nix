@@ -4,7 +4,7 @@ let
 in
 {
   nire.moduleStore._.${moduleName}.homeManager = { pkgs, ... }: {
-    # description = "qpw graph virtual mixer";
+    # # description = "qpw graph virtual mixer";
     home.packages = with pkgs; [
       qpwgraph
     ];

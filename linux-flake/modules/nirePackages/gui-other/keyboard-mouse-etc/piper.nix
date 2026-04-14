@@ -4,7 +4,7 @@ let
 in
 {
   nire.moduleStore._.${moduleName}.homeManager = { pkgs, ... }: {
-    # description = "piper - logitech/razer graphical mouse manager https://github.com/soxoj/piper";
+    # # description = "piper - logitech/razer graphical mouse manager https://github.com/soxoj/piper";
     home.packages = with pkgs; [
       piper
     ];

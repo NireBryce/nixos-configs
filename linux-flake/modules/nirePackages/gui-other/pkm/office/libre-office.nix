@@ -4,7 +4,7 @@ let
 in
 {
   nire.moduleStore._.${moduleName}.homeManager = { pkgs, ... }: {
-    # description = "libreoffice - office productivity software https://www.libreoffice.org/";
+    # # description = "libreoffice - office productivity software https://www.libreoffice.org/";
     home.packages = with pkgs; [
       libreoffice-qt
     ];

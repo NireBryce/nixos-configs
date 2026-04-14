@@ -4,7 +4,7 @@ let
 in
 {
   nire.moduleStore._.${moduleName}.homeManager = {  ... }: {
-    # description = "promnesia breadcrumb-bookmarks-and-more";
+    # # description = "promnesia breadcrumb-bookmarks-and-more";
     home.file.".config/promnesia".source = ./config/config.py;
   };
 }

@@ -3,7 +3,7 @@ let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
     nire.moduleStore._.${moduleName}.homeManager = { ... }: {
-    # description = "`exa` fork, which is an ls alternative";
+    # # description = "`exa` fork, which is an ls alternative";
         programs.eza = {
             enable  = true;
             enableZshIntegration    = true;

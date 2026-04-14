@@ -6,7 +6,7 @@ in
   nire.moduleStore._.${moduleName}.homeManager =
     { pkgs, ... }:
     {
-      # description = "bitwarden - password manager https://bitwarden.com/";
+      # # description = "bitwarden - password manager https://bitwarden.com/";
       home.packages = with pkgs; [
         bitwarden-desktop
       ];

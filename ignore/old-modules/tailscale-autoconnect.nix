@@ -11,31 +11,31 @@ in {
     enable = mkEnableOption "tailscaleAutoconnect";
     authkeyFile = mkOption {
       type = types.str;
-      description = "The authkey to use for authentication with Tailscale";
+      # description = "The authkey to use for authentication with Tailscale";
     };
 
     loginServer = mkOption {
       type = types.str;
       default = "";
-      description = "The login server to use for authentication with Tailscale";
+      # description = "The login server to use for authentication with Tailscale";
     };
 
     advertiseExitNode = mkOption {
       type = types.bool;
       default = false;
-      description = "Whether to advertise this node as an exit node";
+      # description = "Whether to advertise this node as an exit node";
     };
 
     exitNode = mkOption {
       type = types.str;
       default = "";
-      description = "The exit node to use for this node";
+      # description = "The exit node to use for this node";
     };
 
     exitNodeAllowLanAccess = mkOption {
       type = types.bool;
       default = false;
-      description = "Whether to allow LAN access to this node";
+      # description = "Whether to allow LAN access to this node";
     };
   };
 
@@ -56,7 +56,7 @@ in {
     ];
     
     systemd.services.tailscale-autoconnect = {
-      description = "Automatic connection to Tailscale";
+      # description = "Automatic connection to Tailscale";
 
       # make sure tailscale is running before trying to connect to tailscale
       after = ["network-pre.target" "tailscale.service"];

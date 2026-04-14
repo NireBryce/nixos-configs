@@ -22,8 +22,6 @@
 #   <nireHosts.durandal/hostName>   only nireHost/durandal/configuration/hostname.nix
 { lib, den, ... }:
 let
-
-
   aspectDir = dirOf __curPos.file;
   aspectNamespace = baseNameOf (dirOf aspectDir);
   aspectName = baseNameOf aspectDir;
@@ -34,21 +32,19 @@ let
   # Subcategories are directories at this level
   subcategories = onlyDirs (builtins.readDir aspectDir);
 
-  collectModules =
-    dir:
-    lib.concatMap (
-      { name, value }:
-      if value == "directory" then collectModules (dir + "/${name}") else [ (stripNix name) ]
-    ) (lib.mapAttrsToList lib.nameValuePair (builtins.readDir dir));
+  collectModules = dir:
+    lib.concatMap
+      ({ name, value }:
+        if value == "directory"
+        then collectModules (dir + "/${name}")
+        else lib.optional (lib.hasSuffix ".nix" name && name != "dirsAsProvides.nix") (stripNix name))
+      (lib.mapAttrsToList lib.nameValuePair (builtins.readDir dir));
 
   # Package names within a subcategory
   modulesOf = sub: collectModules (aspectDir + "/${sub}");
 
   # All module names across all subcategories
-  # allModules = lib.concatMap modulesOf (lib.attrNames subcategories);
-  allModules = builtins.trace "allModules: ${builtins.toJSON (lib.concatMap modulesOf (lib.attrNames subcategories))}" (
-    lib.concatMap modulesOf (lib.attrNames subcategories)
-  );
+  allModules = lib.concatMap modulesOf (lib.attrNames subcategories);
 
 in
 {

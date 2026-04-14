@@ -6,7 +6,7 @@ in
   nire.moduleStore._.${moduleName}.homeManager =
     { ... }:
     {
-      # description = "Atuin remote encrypted history manager";
+      # # description = "Atuin remote encrypted history manager";
       programs.atuin = {
         enable = true;
         enableZshIntegration = true;
