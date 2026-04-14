@@ -6,8 +6,8 @@ in
   nire.moduleStore._.${moduleName}.homeManager =
     { pkgs, ... }:
     {
-      home.packages = with pkgs; [
-        sqlite
-      ];
+        home.packages = with pkgs; [
+            sqlite
+        ];
     };
 }

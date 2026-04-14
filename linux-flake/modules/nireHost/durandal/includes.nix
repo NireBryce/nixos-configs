@@ -29,6 +29,7 @@ in {
             den.provides.hostname
             den.ful.nireHost.durandal
             den.ful.nire.impermanence._.impermanence # will delete your HD if you arent careful
+            den.ful.nire.moduleStore._.boot
         ] ++ [
             ({ class, ... }: builtins.trace "class for moduleList: ${class}" { includes = if class == "os" then moduleList else [];})
         ];

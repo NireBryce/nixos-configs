@@ -32,13 +32,15 @@ let
   # Subcategories are directories at this level
   subcategories = onlyDirs (builtins.readDir aspectDir);
 
-  collectModules = dir:
-    lib.concatMap
-      ({ name, value }:
-        if value == "directory"
-        then collectModules (dir + "/${name}")
-        else lib.optional (lib.hasSuffix ".nix" name && name != "dirsAsProvides.nix") (stripNix name))
-      (lib.mapAttrsToList lib.nameValuePair (builtins.readDir dir));
+  collectModules =
+    dir:
+    lib.concatMap (
+      { name, value }:
+      if value == "directory" then
+        collectModules (dir + "/${name}")
+      else
+        lib.optional (lib.hasSuffix ".nix" name && name != "dirsAsProvides.nix") (stripNix name)
+    ) (lib.mapAttrsToList lib.nameValuePair (builtins.readDir dir));
 
   # Package names within a subcategory
   modulesOf = sub: collectModules (aspectDir + "/${sub}");
@@ -56,7 +58,7 @@ in
     _ = lib.mapAttrs (sub: _: {
       includes = map (n: den.ful.nire.moduleStore._.${n}) (modulesOf sub);
     }) subcategories;
-    
+
   };
 }
 # # brings individual submodule names into the category, add to _ =

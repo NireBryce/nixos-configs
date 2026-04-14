@@ -1,8 +1,8 @@
-{ pkgs, lib, ... }:
+{ lib, ... }:
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nire.moduleStore._.${moduleName}.homeManager =  {
+    nire.moduleStore._.${moduleName}.homeManager =  { pkgs, ... }: {
         # # description = "network monitor https://pdw.ex-parrot.com/iftop/";
         home.packages = with pkgs; [
             iftop
