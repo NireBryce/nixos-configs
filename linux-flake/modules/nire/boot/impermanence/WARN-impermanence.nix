@@ -1,10 +1,15 @@
-{ inputs, lib, ... }:
+{ den, lib, ... }:
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+  aspectChain = den.aspects.moduleStore._.${moduleName};
+
 in
 {
-  den.aspects.moduleStore._.${moduleName}.nixos =
-    { ... }:
+ 
+   
+  ${aspectChain} = den.lib.perHost {
+    nixos =
+    { inputs, ... }:
     {
       # impermanence metapackage
       # THIS WILL DELETE YOUR ROOT ON BOOT, so like, know what you're doing
@@ -58,7 +63,7 @@ in
         Defaults lecture = never
       '';
 
-         # reset / at each boot
+        # reset / at each boot
       boot.initrd = {
         enable = true;
         supportedFilesystems = [ "btrfs" ];
@@ -117,4 +122,5 @@ in
         };
       };
     };
+  };
 }

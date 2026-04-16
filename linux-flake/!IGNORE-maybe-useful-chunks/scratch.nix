@@ -2,13 +2,10 @@
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
   aspectChain = den.aspects.moduleStore._.${moduleName};
+
 in
 {
-  ${aspectChain} = den.lib.perHost {
+  ${aspectChain} = den.lib.perUser { 
+    homeManager =
+  ${aspectChain} = den.lib.perHost { 
     nixos =
-    { ... }:
-    {
-      hardware.keyboard.zsa.enable = true; # zsa keyboard package
-    };
-  };
-}

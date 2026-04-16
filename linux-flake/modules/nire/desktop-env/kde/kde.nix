@@ -1,9 +1,12 @@
-{ lib, ... }:
+{ den, lib, ... }:
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+  aspectChain = den.aspects.moduleStore._.${moduleName};
+
 in
 {
-  den.aspects.moduleStore._.${moduleName}.nixos =
+  ${aspectChain} = den.lib.perHost { 
+    nixos =
     { pkgs, ... }:
     {
       services.xserver.enable = true; # TODO: I think this is still needed for xwayland
@@ -43,4 +46,5 @@ in
         GTK_USE_PORTAL = 1;
       };
     };
+  };
 }
