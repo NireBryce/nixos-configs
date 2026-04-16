@@ -12,15 +12,15 @@ in
         allowUnfree = true; # Disable if you don't want unfree packages
         allowUnfreePredicate = (_: true); # Workaround for https://github.com/nix-community/home-manager/issues/2942
       };
-      nix.extraOptions = "experimental-features = nix-command flakes";
-      nix.settings = {
-          trusted-users = [ "root" ];
-          experimental-features = [
-              # duplicated in extraOptions?
-              "nix-command"
-              "flakes"
-          ];
-      }; 
+      # nix.extraOptions = "experimental-features = nix-command flakes";
+      # nix.settings = {
+      #     trusted-users = [ "root" ];
+      #     experimental-features = [
+      #         # duplicated in extraOptions?
+      #         "nix-command"
+      #         "flakes"
+      #     ];
+      # }; 
     };
   };
 
