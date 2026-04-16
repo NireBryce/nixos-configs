@@ -3,7 +3,8 @@ let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in
 {
-den.aspects.moduleStore._.${moduleName}.nixos =
+${aspectChain} = den.lib.perHost {
+    nixos = { config, ... }: { =
     { ... }:
     {
       # todo: shouldn't this be a service?

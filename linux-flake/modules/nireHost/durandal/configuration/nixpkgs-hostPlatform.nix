@@ -6,9 +6,9 @@ in
 {
   ${aspectChain} = den.lib.perHost {
     nixos =
-    { ... }:
-    {
-      nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-    };
+      { ... }:
+      {
+        nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+      };
   };
 }

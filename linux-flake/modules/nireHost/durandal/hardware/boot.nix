@@ -4,17 +4,17 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  ${aspectChain} = den.lib.perHost { 
+  ${aspectChain} = den.lib.perHost {
     nixos =
-    { pkgs, ... }:
-    {
-      environment.systemPackages = with pkgs; [
-        sbctl # secure boot ctl
-      ];
-      boot.loader = {
-        systemd-boot.enable = lib.mkDefault true;
-        efi.canTouchEfiVariables = lib.mkDefault true;
+      { pkgs, ... }:
+      {
+        environment.systemPackages = with pkgs; [
+          sbctl # secure boot ctl
+        ];
+        boot.loader = {
+          systemd-boot.enable = lib.mkDefault true;
+          efi.canTouchEfiVariables = lib.mkDefault true;
+        };
       };
-    };
   };
 }

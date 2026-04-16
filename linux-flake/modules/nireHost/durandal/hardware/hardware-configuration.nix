@@ -4,7 +4,8 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-    den.aspects.moduleStore._.${moduleName}.nixos = { config, ... }: {
+    den.aspects.moduleStore._.${moduleName}
+    nixos = { config, ... }: {
 
         boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
         boot.initrd.kernelModules = [ ];
