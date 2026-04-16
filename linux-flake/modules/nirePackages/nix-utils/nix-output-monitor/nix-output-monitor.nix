@@ -1,13 +1,16 @@
-{ lib, ... }:
+{ lib, den, ... }:
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+  aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  nire.moduleStore._.${moduleName}.nixos =
+  ${aspectChain} = den.lib.perHost {
+    nixos =
     { pkgs, ... }:
     {
       environment.systemPackages = with pkgs; [
         nix-output-monitor # `nom` nix-output-monitor                  https://github.com/maralorn/nix-output-monitor
       ];
     };
+  };
 }
