@@ -1,7 +1,9 @@
-{ lib, ... }:
+{ lib, den, ... }:
 let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
+  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+  aspectChain = den.aspects.moduleStore._.${moduleName};
+in
+{
     den.aspects.moduleStore._.${moduleName} = {
         homeManager = { pkgs, ... }: {
             home.sessionVariables = { 
