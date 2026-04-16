@@ -14,7 +14,7 @@ let
         shell-config
         system
         elly
-        hm-settings
+        hm-config
 
         development
         editors
