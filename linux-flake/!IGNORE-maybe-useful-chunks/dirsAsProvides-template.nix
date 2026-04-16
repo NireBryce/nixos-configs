@@ -7,19 +7,19 @@
 # so this file can be copied to any category directory without changes.
 #
 # Example structure:
-#   nireHosts/
+#   modules/
 #     durandal/
 #       dirsAsProvides.nix  <- this file
 #       hardware/               -> nireHost.durandal._.hardware
 #         hardware-configuration.nix    -> nireHost.durandal._.hardware-configuration
 #       fixes/                  -> nireHost.durandal._.fixes
-#         b550-suspend-fix.nix          -> nireHost.durandal._.b550-suspend-fix
+#         suspend-fix.nix       -> nireHost.durandal._.b550-suspend-fix
 #
 # Produces:
-#   <nireHosts.durandal>            all submodules in this category
-#   <nireHosts.durandal/hardware>   all submodules under hardware/
-#   <nireHosts.durandal/fixes>      all packages under fixes/
-#   <nireHosts.durandal/hostName>   only nireHost/durandal/configuration/hostname.nix
+#   den.aspects.durandal    - durandal host
+#   <above>.hardware        - all submodules under hardware/
+#   <above>._.fixes         - all packages under  <flake>/modules/hardware/fixes/
+#   <above>._.suspend-fix   - only the one module
 { lib, den, ... }:
 let
   aspectDir = dirOf __curPos.file;
