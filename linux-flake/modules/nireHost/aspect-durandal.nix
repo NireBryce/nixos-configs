@@ -5,7 +5,8 @@ let
     # TODO: there has to be a better way
     moduleList = with den.ful; [ 
         den.aspects.boot
-        den.aspects.desktop-env._.kde
+        # den.aspects.desktop-env._.kde
+        den.aspects.moduleStore._.kde
         den.aspects.hardware._.amdcpu
         den.aspects.hardware._.amdgpu
         den.aspects.nix

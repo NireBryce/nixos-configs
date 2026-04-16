@@ -10,6 +10,7 @@ in
 
       # Enable the KDE Desktop Environment and set wayland.
       services.desktopManager.plasma6.enable = true;
+      
       services.displayManager = {
         defaultSession = "plasma";
         sddm = {
