@@ -1,23 +1,22 @@
-{ lib, ... }:
+{ den, lib, ... }:
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+  aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  nire.moduleStore._.${moduleName} = {
-    homeManager =
-      { ... }:
-      {
-
-      };
-
+  ${aspectChain} = den.lib.perHost { 
     nixos =
-      { ... }:
-      {
-
-      };
-
-    darwin = {
+    { ... }:
+    {
 
     };
   };
+  ${aspectChain} = den.lib.perUser { 
+    homeManager =
+    { ... }:
+    {
+
+    };
+  };
+
 }

@@ -1,9 +1,11 @@
-{ lib, ... }:
+{ den, lib, ... }:
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+  aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  den.aspects.moduleStore._.${moduleName}.nixos =
+  ${aspectChain} = den.lib.perHost {
+    nixos =
     { pkgs, ... }:
     {
 
@@ -16,4 +18,5 @@ in
         egl-wayland # who knows what this is for                https://github.com/NVIDIA/egl-wayland/
       ];
     };
+  };
 }

@@ -1,9 +1,13 @@
-{ lib, ... }:
+{ den, lib, ... }:
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+  aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  den.aspects.moduleStore._.${moduleName}.nixos = { pkgs, config, ... }: {
+  ${aspectChain} = den.lib.perHost {
+    nixos = 
+    { pkgs, config, ... }: 
+    {
       environment.systemPackages = with pkgs; [
         pam_u2f
         yubioath-flutter
@@ -55,4 +59,5 @@ in
         };
       };
     };
+  };
 }

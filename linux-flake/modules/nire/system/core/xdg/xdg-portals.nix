@@ -1,9 +1,11 @@
-{ lib, ... }:
+{ den, lib, ... }:
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+  aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  den.aspects.moduleStore._.${moduleName}.nixos =
+  ${aspectChain} = den.lib.perHost {
+    nixos =
     { pkgs, ... }:
     {
       # should fix steam/proton/wine issues with xdg-open https://github.com/NixOS/nixpkgs/issues/160923
@@ -18,4 +20,5 @@ in
         ];
       };
     };
+  };
 }

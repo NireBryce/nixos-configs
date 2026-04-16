@@ -1,13 +1,16 @@
 {
+  den,
   inputs,
   lib,
   ...
 }:
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+  aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  den.aspects.moduleStore._.${moduleName}.nixos =
+  ${aspectChain} = den.lib.perHost {
+    nixos =
     { config, pkgs, ... }:
     let   isEd25519 = k: k.type == "ed25519";
       getKeyPath = k: k.path;
@@ -48,4 +51,5 @@ in
         sopsFile = "${secretsPath}";
       };
     };
+  };
 }

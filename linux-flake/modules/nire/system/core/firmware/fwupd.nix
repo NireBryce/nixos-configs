@@ -1,11 +1,14 @@
-{ lib, ... }:
+{ den, lib, ... }:
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+  aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  den.aspects.moduleStore._.${moduleName}.nixos =
+  ${aspectChain} = den.lib.perhost {
+    nixos =
     { ... }:
     {
       services.fwupd.enable = lib.mkDefault true; # fwupd
     };
+  };
 }

@@ -9,3 +9,10 @@ in
     homeManager =
   ${aspectChain} = den.lib.perHost { 
     nixos =
+
+
+
+
+aspectChain = den.aspects.moduleStore._.${moduleName};
+
+${aspectChain} = den.lib.
