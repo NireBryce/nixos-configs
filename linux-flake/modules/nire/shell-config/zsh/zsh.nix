@@ -1,10 +1,12 @@
-
-{ lib, ... }:
+{ den, lib, ... }:
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    aspectChain = den.aspects.moduleStore._.${moduleName};
 in {
-    nire.moduleStore._.${moduleName} = {
-        nixos = { pkgs, ... }: {
+    ${aspectChain} = den.lib.perHost {
+        nixos = 
+        { pkgs, ... }: 
+        {
             # zsh is handled through home-manager
             programs.zsh.enable = true;
             programs.zsh.enableCompletion = lib.mkForce false;  # unless disabled, home-manager causes an extra compaudit
@@ -12,26 +14,10 @@ in {
                 zsh
             ];
         };
-        # # description = "zsh shell config";
-
-        homeManager = { pkgs, ... }:
-        let zshPluginRequiresList = with pkgs; [
-            diff-so-fancy
-            # starship
-            tree
-            # ruby                            # zi depends on `gem`
-            nix-zsh-completions
-            zsh-f-sy-h
-            zsh-fzf-tab
-            zsh-nix-shell
-            zsh-completions
-            zsh-autocomplete
-            zsh-autosuggestions
-            # zsh-powerlevel10k # in zi
-            zsh-system-clipboard
-            zsh-you-should-use
-        ];
-        in
+    };
+    ${aspectChain} = den.lib.perUser {
+        homeManager = 
+        { pkgs, ... }:
         {
             # Notes:
             # If you get `zsh side` errors, delete ~/.zcompdump and ~/.config/zsh/.zcompdump and run `zi update`
@@ -51,9 +37,29 @@ in {
             #   Example: programs.zsh.initContent = lib.mkOrder 550 "your content here";
             # evaluation warning: `programs.zsh.initExtra` is deprecated, use `programs.zsh.initContent` instead.
             #   Example: programs.zsh.initContent = "your content here";
-            home.file."./.config/F-Sy-H".source = ./config/zsh-f-s-highlight-themes;
-            home.packages = zshPluginRequiresList;
             
+            # fast syntax highlighting theems
+            home.file."./.config/F-Sy-H".source = ./config/zsh-f-s-highlight-themes;
+            
+            # plugin dependencies
+            home.packages = with pkgs; [
+                diff-so-fancy
+                # starship
+                tree
+                # ruby                            # zi depends on `gem`
+                nix-zsh-completions
+                zsh-f-sy-h
+                zsh-fzf-tab
+                zsh-nix-shell
+                zsh-completions
+                zsh-autocomplete
+                zsh-autosuggestions
+                # zsh-powerlevel10k # in zi
+                zsh-system-clipboard
+                zsh-you-should-use
+            ];
+            
+
             programs.zsh = let               
                 p10k_cfg        = lib.fileContents ./config/zsh-powerlevel10k/.p10k.zsh;
                 bindings_cfg    = lib.fileContents ./config/initial-bindings.zsh;

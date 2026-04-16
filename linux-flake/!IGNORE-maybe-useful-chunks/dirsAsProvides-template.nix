@@ -23,7 +23,6 @@
 { lib, den, ... }:
 let
   aspectDir = dirOf __curPos.file;
-  # aspectNamespace = baseNameOf (dirOf aspectDir);
   aspectName = baseNameOf aspectDir;
 
   onlyDirs = lib.filterAttrs (_: t: t == "directory");
@@ -49,10 +48,10 @@ let
 in
 {
   den.aspects.${aspectName} = {
-    # <nireHosts.category> pulls in everything in this category
+    # den.aspects.<category> pulls in everything in this category
     includes = map (n: den.aspects.moduleStore._.${n}) allModules;
 
-    # <nireHosts.category/subcategory> pulls in just that subcategory
+    # den.aspects.<category>._.<subcategory> pulls in just that subcategory
     _ = lib.mapAttrs (sub: _: {
       includes = map (n: den.aspects.moduleStore._.${n}) (modulesOf sub);
     }) subcategories;
