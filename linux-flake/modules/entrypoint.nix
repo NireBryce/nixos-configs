@@ -22,7 +22,6 @@
         homeManager.home.stateVersion = lib.mkDefault "22.11";
         nixos.system.stateVersion = "23.11";
     };
-
     den.ctx.user.includes = [
         den._.mutual-provider # allows the host to define user aspect stuff through providers
     ];

@@ -25,8 +25,7 @@ let
         nirePackages.terminals 
     ];
 in {
-    den.aspects.nire-durandal = 
-        {
+    den.aspects.nire-durandal = {
         includes = [ 
             # since den.provides.hostname is fully qualified, it can be used under the `with`
             den.provides.hostname
@@ -34,8 +33,8 @@ in {
         ] ++ [
             ({ class, ... }: builtins.trace "class for moduleList: ${class}" { includes = if class == "os" then moduleList else [];})
         ];
-
-        _.elly = {
+    };
+    den.aspects.elly._.nire-durandal = {
             # we need to do all the includes here so the homeManager sections can be processed under elly.
             # TODO: there has to be a better way
             includes = [
@@ -44,8 +43,6 @@ in {
             ] ++ [
                 ({ class, ... }: builtins.trace "class: ${class}" { includes = if class == "homeManager" then moduleList else [];})
             ];
-        };
-        
     };
 }
 
