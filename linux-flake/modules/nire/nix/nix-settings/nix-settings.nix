@@ -2,7 +2,6 @@
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
   aspectChain = den.aspects.moduleStore._.${moduleName};
-
 in
 {
   ${aspectChain} = den.lib.perUser { 
@@ -27,8 +26,13 @@ in
 
   ${aspectChain} = den.lib.perHost { 
     nixos =
-    { ... }:
+    { inputs, ... }:
     {
+      # https://github.com/nix-community/nixd/blob/main/nixd/docs/configuration.md
+      # set $NIX_PATH env to your flake input. 
+      # maybe lets things expecting channels work better
+      nix.nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
+      
       nix.extraOptions = "experimental-features = 'nix-command flakes'";
       nix.settings = {
         trusted-users = [ "root" ];
