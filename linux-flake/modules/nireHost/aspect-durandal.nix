@@ -30,19 +30,14 @@ in {
             # since den.provides.hostname is fully qualified, it can be used under the `with`
             den.provides.hostname
             den.aspects.durandal
-        ] ++ [
-            ({ class, ... }: builtins.trace "class for moduleList: ${class}" { includes = if class == "os" then moduleList else [];})
-        ];
+        ] ++ moduleList;
     };
     den.aspects.elly._.nire-durandal = {
-            # we need to do all the includes here so the homeManager sections can be processed under elly.
-            # TODO: there has to be a better way
-            includes = [
-                den._.primary-user
-                
-            ] ++ [
-                ({ class, ... }: builtins.trace "class: ${class}" { includes = if class == "homeManager" then moduleList else [];})
-            ];
+        # we need to do all the includes here so the homeManager sections can be processed under elly.
+        # TODO: there has to be a better way
+        includes = [
+            den._.primary-user
+        ] ++ moduleList;
     };
 }
 
