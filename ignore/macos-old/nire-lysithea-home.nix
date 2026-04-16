@@ -44,7 +44,7 @@ in
     options = [ "--cmd x" ]; # `zi` alias interferes with z-shell/zi
   };
 
-  programs.zitty = {
+  programs.kitty = {
     enable = true;
     extraConfig = ''
       clipboard_control write-clipboard write-primary read-clipboard-ask read-primary-ask
