@@ -5,14 +5,14 @@ let
     # TODO: there has to be a better way
     moduleList = with den.ful; [ 
         den.aspects.hmSettings._.hmConfig
-        nire.desktop-env._.kde
-        nire.hardware._.amdcpu
-        nire.hardware._.amdgpu
-        nire.nix
-        nire.peripherals
+        den.aspects.desktop-env._.kde
+        den.aspects.hardware._.amdcpu
+        den.aspects.hardware._.amdgpu
+        den.aspects.nix
+        den.aspects.peripherals
         nire.shell-config
         nire.system
-        nireUser.elly
+        den.aspects.elly
         nirePackages.development
         nirePackages.editors
         nirePackages.linux-utils
@@ -27,8 +27,7 @@ in {
         includes = [ 
             # since den.provides.hostname is fully qualified, it can be used under the `with`
             den.provides.hostname
-            den.ful.nireHost.durandal
-            den.ful.nire.impermanence._.impermanence # will delete your HD if you arent careful
+            den.aspects.durandal
             den.ful.nire.moduleStore._.boot
             { 
                 nix.extraOptions = "experimental-features = nix-command flakes";
