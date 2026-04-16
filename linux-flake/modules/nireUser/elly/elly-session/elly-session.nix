@@ -4,7 +4,7 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-    den.aspects.moduleStore._.${moduleName} = {
+    ${aspectChain} = den.lib.perUser {
         homeManager = { pkgs, ... }: {
             home.sessionVariables = { 
                 EDITOR                  = "micro";

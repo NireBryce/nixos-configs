@@ -4,7 +4,8 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  nire.moduleStore._.${moduleName}.homeManager =
+  ${aspectChain} = den.lib.perUser {
+    homeManager =
     { ... }:
     {
       imports = [
@@ -14,5 +15,5 @@ in
       programs.nix-index.enable = true;
       programs.nix-index.enableFishIntegration = true;
       programs.nix-index-database.comma.enable = true;
-    };
+    };};
 }

@@ -4,7 +4,8 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  nire.moduleStore._.${moduleName}.homeManager =
+  ${aspectChain} = den.lib.perUser {
+    homeManager =
     { pkgs, ... }:
     {
       # # description = "neofetch replacement https://github.com/hykilpikonna/HyFetch";
@@ -12,4 +13,5 @@ in
         hyfetch
       ];
     };
+  };
 }

@@ -4,7 +4,8 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  nire.moduleStore._.${moduleName}.homeManager =
+  ${aspectChain} = den.lib.perUser {
+    homeManager =
     { pkgs, ... }:
     {
       # # description = "provides `drill`, a `dig` replacement https://www.nlnetlabs.nl/projects/ldns/about/";
@@ -12,4 +13,5 @@ in
         ldns
       ];
     };
+  };
 }

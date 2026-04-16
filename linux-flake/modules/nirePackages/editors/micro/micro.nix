@@ -4,7 +4,8 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  nire.moduleStore._.${moduleName}.homeManager =
+  ${aspectChain} = den.lib.perUser {
+    homeManager =
     { ... }:
     {
       # micro, what if nano was msword for dos
@@ -35,4 +36,5 @@ in
         };
       };
     };
+  };
 }

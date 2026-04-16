@@ -4,11 +4,13 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  nire.moduleStore._.${moduleName}.homeManager = { ... }: {
+  ${aspectChain} = den.lib.perUser {
+    homeManager = { ... }: {
     # # description = "espanso is a text expansion tool that turns a trigger phrase into text";
     services.espanso = {
       enable = true;
       waylandSupport = true;
     };
+  };
   };
 }

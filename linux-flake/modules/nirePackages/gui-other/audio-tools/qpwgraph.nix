@@ -4,10 +4,14 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  nire.moduleStore._.${moduleName}.homeManager = { pkgs, ... }: {
-    # # description = "qpw graph virtual mixer";
-    home.packages = with pkgs; [
-      qpwgraph
-    ];
+  ${aspectChain} = den.lib.perUser {
+    homeManager = 
+      { pkgs, ... }: 
+      {
+      # # description = "qpw graph virtual mixer";
+      home.packages = with pkgs; [
+        qpwgraph
+      ];
+    };
   };
 }

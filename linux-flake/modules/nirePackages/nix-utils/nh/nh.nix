@@ -4,7 +4,8 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  nire.moduleStore._.${moduleName}.homeManager =
+  ${aspectChain} = den.lib.perUser {
+    homeManager =
     { ... }:
     {
       programs.nh = {
@@ -14,4 +15,5 @@ in
         # flake           = "/home/elly/nixos"; # TODO: see if this can be dynamically set to this flake's path
       };
     };
+  };
 }

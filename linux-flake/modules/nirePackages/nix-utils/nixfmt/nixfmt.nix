@@ -4,7 +4,7 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  nire.moduleStore._.${moduleName} = {
+  ${aspectChain} = den.lib.perHost {
     homeManager =
     { pkgs, ... }:
     {
@@ -14,9 +14,11 @@ in
       ];
     };
   };
-  nixos = { pkgs, ... }: {
-    environment.systemPackages = with pkgs; [
-      nixfmt
-    ];
+  ${aspectChain} = den.lib.perHost {
+    nixos = { pkgs, ... }: {
+      environment.systemPackages = with pkgs; [
+        nixfmt
+      ];
+    };
   };
 }

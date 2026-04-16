@@ -4,12 +4,13 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  nire.moduleStore._.${moduleName}.homeManager =
+  ${aspectChain} = den.lib.perUser {
+    homeManager =
     { pkgs, ... }:
     {
       # # description = "jc converts output into JSON or YAML https://github.com/kellyjonbrazil/jc";
       home.packages = with pkgs; [
         jc
       ];
-    };
+    };};
 }

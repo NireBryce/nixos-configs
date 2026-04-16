@@ -4,7 +4,8 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  nire.moduleStore._.${moduleName}.homeManager =
+  ${aspectChain} = den.lib.perUser {
+    homeManager =
     { pkgs, ... }:
     {
       # # description = "gimp - the GNU Image Manipulation Program. https://www.gimp.org";
@@ -12,4 +13,5 @@ in
         gimp
       ];
     };
+  };
 }

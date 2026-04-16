@@ -4,10 +4,12 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  nire.moduleStore._.${moduleName}.homeManager =
+  ${aspectChain} = den.lib.perUser {
+    homeManager =
     { pkgs, ... }:
     {
       # note: this is also installed as a system package, does that matter?
       home.packages = with pkgs; [ google-chrome ];
     };
+  };
 }

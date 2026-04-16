@@ -4,12 +4,13 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  nire.moduleStore._.${moduleName}.homeManager =
+  ${aspectChain} = den.lib.perUser {
+    homeManager =
     { pkgs, ... }:
     {
       # # description = "`lspci`";
       home.packages = with pkgs; [
         pciutils
       ];
-    };
+    };};
 }

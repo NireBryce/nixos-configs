@@ -4,8 +4,7 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  nire.moduleStore._.${moduleName} = 
-    {
+  ${aspectChain} = den.lib.perUser {
       homeManager =
       { ... }:
       {

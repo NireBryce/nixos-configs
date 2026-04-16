@@ -2,9 +2,12 @@
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
   aspectChain = den.aspects.moduleStore._.${moduleName};
-in    
-    den.aspects.moduleStore._.${moduleName} = {
-        homeManager = { ... }: {
+in
+{
+    ${aspectChain} = den.lib.perUser {
+        homeManager = 
+        { ... }: 
+        {
             home.file."./.gitconfig".source = ./.gitconfig;
             
             programs.git = {        # User-specific git config

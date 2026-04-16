@@ -4,10 +4,12 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  nire.moduleStore._.${moduleName}.homeManager =
+  ${aspectChain} = den.lib.perUser {
+    homeManager =
     { ... }:
     {
       # # description = "promnesia breadcrumb-bookmarks-and-more";
       home.file.".config/promnesia".source = ./config/config.py;
     };
+  };
 }

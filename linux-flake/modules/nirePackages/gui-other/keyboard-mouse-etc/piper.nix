@@ -4,10 +4,12 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  nire.moduleStore._.${moduleName}.homeManager = { pkgs, ... }: {
+  ${aspectChain} = den.lib.perUser {
+    homeManager = { pkgs, ... }: {
     # # description = "piper - logitech/razer graphical mouse manager https://github.com/soxoj/piper";
     home.packages = with pkgs; [
       piper
     ];
+  };
   };
 }

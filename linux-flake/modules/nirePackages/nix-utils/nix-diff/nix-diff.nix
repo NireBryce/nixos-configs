@@ -4,12 +4,13 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  nire.moduleStore._.${moduleName}.homeManager =
+  ${aspectChain} = den.lib.perUser {
+    homeManager =
     { pkgs, ... }:
     {
       # # description = "diff nix code";
       home.packages = with pkgs; [
         nix-diff
       ];
-    };
+    };};
 }

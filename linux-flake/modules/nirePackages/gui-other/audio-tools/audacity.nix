@@ -4,9 +4,13 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  nire.moduleStore._.${moduleName}.homeManager = { pkgs, ... }: {
-    home.packages = with pkgs; [
-      audacity
-    ];
+  ${aspectChain} = den.lib.perUser {
+    homeManager = 
+      { pkgs, ... }: 
+      {
+        home.packages = with pkgs; [
+          audacity
+        ];
+      };
   };
 }

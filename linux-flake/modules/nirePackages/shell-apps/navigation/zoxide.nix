@@ -4,7 +4,8 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  nire.moduleStore._.${moduleName}.homeManager =
+  ${aspectChain} = den.lib.perUser {
+    homeManager =
     { ... }:
     {
       # # description = "Zoxide - better `cd`";
@@ -15,5 +16,5 @@ in
         enableFishIntegration = true;
         # options                 = [ "--cmd x" ];
       };
-    };
+    };};
 }

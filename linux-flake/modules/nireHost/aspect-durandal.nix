@@ -3,26 +3,26 @@ let
     # den.aspects.nire-durandal evaluates *.nixos
     # den.aspects.nire-durandal._.elly evaluates *.homeManager
     # TODO: there has to be a better way
-    moduleList = with den.ful; [ 
-        den.aspects.boot
-        # den.aspects.desktop-env._.kde
-        den.aspects.moduleStore._.kde
-        den.aspects.hardware._.amdcpu
-        den.aspects.hardware._.amdgpu
-        den.aspects.nix
-        den.aspects.peripherals
-        nire.shell-config
-        den.aspects.system
-        den.aspects.elly
-        den.aspects.hmSettings._.hmConfig
+    moduleList = with den.aspects;[ 
+        boot
+        # desktop-env._.kde
+        moduleStore._.kde
+        hardware._.amdcpu
+        hardware._.amdgpu
+        nix
+        peripherals
+        shell-config
+        system
+        elly
+        hm-settings
 
-        nirePackages.development
-        nirePackages.editors
-        nirePackages.linux-utils
-        nirePackages.nix-utils
-        nirePackages.gui-other
-        nirePackages.shell-apps
-        nirePackages.terminals 
+        development
+        editors
+        linux-utils
+        nix-utils
+        gui-other
+        shell-apps
+        terminals 
     ];
 in {
     den.aspects.nire-durandal = {

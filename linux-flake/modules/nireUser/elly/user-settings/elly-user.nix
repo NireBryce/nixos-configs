@@ -4,7 +4,7 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-    den.aspects.moduleStore._.${moduleName} = { 
+    ${aspectChain} = den.lib.perHost {
         nixos = { pkgs, ... }: {
             users.mutableUsers = false;
             users.users = { 
@@ -31,12 +31,16 @@ in
             };
         };
 
-        darwin = { pkgs, ... }: {
+        ${aspectChain} = den.lib.perHost {
+        darwin = 
+        { pkgs, ... }: 
+        {
             fonts.packages = with pkgs; [
                 nerd-fonts.fira-code
                 nerd-fonts.iosevka
                 nerd-fonts.jetbrains-mono
             ];
         };
+    };
     };
 }

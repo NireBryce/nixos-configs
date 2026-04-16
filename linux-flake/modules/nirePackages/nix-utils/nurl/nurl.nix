@@ -4,12 +4,14 @@ let
   aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  nire.moduleStore._.${moduleName}.homeManager =
+  ${aspectChain} = den.lib.perUser {
+    homeManager =
     { pkgs, ... }:
     {
       # # description = "make nix fetcher calls from repository URLs";
       home.packages = with pkgs; [
         nurl
       ];
+    };
     };
 }
