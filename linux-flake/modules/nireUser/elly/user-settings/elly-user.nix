@@ -2,7 +2,7 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-    nire.moduleStore._.${moduleName} = { 
+    den.aspects.moduleStore._.${moduleName} = { 
         nixos = { pkgs, ... }: {
             users.mutableUsers = false;
             users.users = { 

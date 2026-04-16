@@ -48,7 +48,7 @@ let
 
 in
 {
-  den.ful.${aspectNamespace}.${aspectName} = {
+  den.aspects.${aspectName} = {
     # <nireHosts.category> pulls in everything in this category
     includes = map (n: den.ful.nire.moduleStore._.${n}) allModules;
 

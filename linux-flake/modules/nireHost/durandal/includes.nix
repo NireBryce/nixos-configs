@@ -30,6 +30,17 @@ in {
             den.ful.nireHost.durandal
             den.ful.nire.impermanence._.impermanence # will delete your HD if you arent careful
             den.ful.nire.moduleStore._.boot
+            { 
+                nix.extraOptions = "experimental-features = nix-command flakes";
+                nix.settings = {
+                    trusted-users = [ "root" ];
+                    experimental-features = [
+                        # duplicated in extraOptions?
+                        "nix-command"
+                        "flakes"
+                    ];
+                }; 
+            }
         ] ++ [
             ({ class, ... }: builtins.trace "class for moduleList: ${class}" { includes = if class == "os" then moduleList else [];})
         ];
@@ -39,6 +50,17 @@ in {
             # TODO: there has to be a better way
             includes = [
                 den._.primary-user
+                { 
+                    nix.extraOptions = "experimental-features = nix-command flakes";
+                    nix.settings = {
+                        trusted-users = [ "root" ];
+                        experimental-features = [
+                            # duplicated in extraOptions?
+                            "nix-command"
+                            "flakes"
+                        ];
+                    }; 
+                }
             ] ++ [
                 ({ class, ... }: builtins.trace "class: ${class}" { includes = if class == "homeManager" then moduleList else [];})
             ];
