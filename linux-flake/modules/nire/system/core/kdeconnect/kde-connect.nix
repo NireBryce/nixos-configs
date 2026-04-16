@@ -1,11 +1,10 @@
 { lib, den, ... }:
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-  aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-${aspectChain} = den.lib.perHost {
-    nixos = { config, ... }: { =
+  den.aspects.moduleStore._.${moduleName} = den.lib.perHost {
+    nixos = 
     { ... }:
     {
       # todo: shouldn't this be a service?
@@ -13,4 +12,5 @@ ${aspectChain} = den.lib.perHost {
         enable = true; # kde connect
       };
     };
+  };
 }

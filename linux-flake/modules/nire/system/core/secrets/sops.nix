@@ -6,10 +6,10 @@
 }:
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-  aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  ${aspectChain} = den.lib.perHost {
+ 
+  den.aspects.moduleStore._.${moduleName} = den.lib.perHost {
     nixos =
     { config, pkgs, ... }:
     let   isEd25519 = k: k.type == "ed25519";

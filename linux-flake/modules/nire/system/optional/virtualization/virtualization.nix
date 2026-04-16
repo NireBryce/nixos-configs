@@ -1,10 +1,10 @@
 { den, lib, ... }:
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-  aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  ${aspectChain} = den.lib.perHost {
+ 
+  den.aspects.moduleStore._.${moduleName} = den.lib.perHost {
     nixos =
     { pkgs, ... }:
     {
@@ -68,7 +68,7 @@ in
     };
   };
 
-  ${aspectChain} = den.lib.perUser {
+  den.aspects.moduleStore._.${moduleName} = den.lib.perUser {
     homeManager =
     { ... }:
     {

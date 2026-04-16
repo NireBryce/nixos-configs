@@ -1,17 +1,13 @@
 { den, lib, ... }:
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-  aspectChain = den.aspects.moduleStore._.${moduleName};
 in
 {
-  ${aspectChain} = den.lib.perUser { 
-    homeManager =
-  ${aspectChain} = den.lib.perHost { 
-    nixos =
-
-
-
-
-aspectChain = den.aspects.moduleStore._.${moduleName};
-
-${aspectChain} = den.lib.
+  den.aspects.moduleStore._.${moduleName} = den.lib.perUser { 
+    homeManager = {};
+    
+  den.aspects.moduleStore._.${moduleName} = den.lib.perHost { 
+    nixos = {};
+  };
+  };
+}

@@ -1,16 +1,15 @@
 { den, lib, ... }:
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    aspectChain = den.aspects.moduleStore._.${moduleName};
 in {
-    ${aspectChain} = den.lib.perHost {
+    den.aspects.moduleStore._.${moduleName} = den.lib.perHost {
         nixos = {
             # bash line editor, allows zsh-like line editor tricks and bindings
             programs.bash.blesh.enable = true;
         };
     };
     
-    ${aspectChain} = den.lib.perUser {
+    den.aspects.moduleStore._.${moduleName} = den.lib.perUser {
         homeManager = 
         { pkgs, ... }: 
         {
