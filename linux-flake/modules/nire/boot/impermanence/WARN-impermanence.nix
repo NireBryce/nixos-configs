@@ -1,21 +1,17 @@
-{ den, lib, ... }:
+{ inputs, lib, ... }:
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-  aspectChain = den.aspects.moduleStore._.${moduleName};
+  aspectChain = inputs.den.aspects.moduleStore._.${moduleName};
 
 in
 {
  
    
-  ${aspectChain} = den.lib.perHost {
+  ${aspectChain} = inputs.den.lib.perHost {
     nixos =
-    { inputs, ... }:
+    { ... }:
     {
-      # impermanence metapackage
-      # THIS WILL DELETE YOUR ROOT ON BOOT, so like, know what you're doing
-      imports = [
-        inputs.impermanence.nixosModule
-      ];
+      # WARNING: IF YOU HAVE A SIMILAR LAYOUT TO MY LUKS SETUP, IMPORTING THIS WILL DELETE YOUR ROOT ON BOOT, so like, know what you're doing
 
       # filesystems
       fileSystems."/".options = [
@@ -40,6 +36,9 @@ in
       # fileSystems."/var/lib/sbctl".options        = [ "compress=zstd" "noatime" ];
       # fileSystems."/var/lib/sbctl".neededForBoot  = true;
 
+      imports = [
+        inputs.impermanence.nixosModule
+      ];
       # impermanence
       environment.etc.machine-id.source = "/persist/etc/machine-id";
 
