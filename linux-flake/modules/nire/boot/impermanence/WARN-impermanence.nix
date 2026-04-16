@@ -2,7 +2,6 @@
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
   aspectChain = inputs.den.aspects.moduleStore._.${moduleName};
-
 in
 {
  
