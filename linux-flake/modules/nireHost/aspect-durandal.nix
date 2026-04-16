@@ -13,8 +13,6 @@ let
         peripherals
         shell-config
         system
-        elly
-
         development
         editors
         linux-utils
@@ -35,6 +33,7 @@ in {
         # we need to do all the includes here so the homeManager sections can be processed under elly.
         # TODO: there has to be a better way
         includes = [
+            den.aspects.elly
             den._.primary-user
         ] ++ moduleList;
     };

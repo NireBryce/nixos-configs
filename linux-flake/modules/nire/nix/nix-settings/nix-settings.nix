@@ -33,7 +33,7 @@ in
       # maybe lets things expecting channels work better
       nix.nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
       
-      nix.extraOptions = "experimental-features = 'nix-command flakes'";
+      # nix.extraOptions = "experimental-features = 'nix-command flakes'";
       nix.settings = {
         trusted-users = [ "root" ];
         experimental-features = [
