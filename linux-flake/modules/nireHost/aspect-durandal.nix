@@ -4,15 +4,17 @@ let
     # den.aspects.nire-durandal._.elly evaluates *.homeManager
     # TODO: there has to be a better way
     moduleList = with den.ful; [ 
-        den.aspects.hmSettings._.hmConfig
+        den.aspects.boot
         den.aspects.desktop-env._.kde
         den.aspects.hardware._.amdcpu
         den.aspects.hardware._.amdgpu
         den.aspects.nix
         den.aspects.peripherals
         nire.shell-config
-        nire.system
+        den.aspects.system
         den.aspects.elly
+        den.aspects.hmSettings._.hmConfig
+
         nirePackages.development
         nirePackages.editors
         nirePackages.linux-utils
@@ -28,21 +30,6 @@ in {
             # since den.provides.hostname is fully qualified, it can be used under the `with`
             den.provides.hostname
             den.aspects.durandal
-            den.aspects.boot
-            den.ful.nire.system._.core
-            den.ful.nire.system._.gaming
-            den.ful.nire.system._.
-            { 
-                nix.extraOptions = "experimental-features = nix-command flakes";
-                nix.settings = {
-                    trusted-users = [ "root" ];
-                    experimental-features = [
-                        # duplicated in extraOptions?
-                        "nix-command"
-                        "flakes"
-                    ];
-                }; 
-            }
         ] ++ [
             ({ class, ... }: builtins.trace "class for moduleList: ${class}" { includes = if class == "os" then moduleList else [];})
         ];
@@ -52,17 +39,7 @@ in {
             # TODO: there has to be a better way
             includes = [
                 den._.primary-user
-                { 
-                    nix.extraOptions = "experimental-features = nix-command flakes";
-                    nix.settings = {
-                        trusted-users = [ "root" ];
-                        experimental-features = [
-                            # duplicated in extraOptions?
-                            "nix-command"
-                            "flakes"
-                        ];
-                    }; 
-                }
+                
             ] ++ [
                 ({ class, ... }: builtins.trace "class: ${class}" { includes = if class == "homeManager" then moduleList else [];})
             ];

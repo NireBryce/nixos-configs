@@ -3,7 +3,7 @@ let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in
 {
-  nire.moduleStore._.${moduleName}.nixos =
+  den.aspects.moduleStore._.${moduleName}.nixos =
     { pkgs, ... }:
     {
       # should fix steam/proton/wine issues with xdg-open https://github.com/NixOS/nixpkgs/issues/160923

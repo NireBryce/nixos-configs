@@ -3,7 +3,7 @@ let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in
 {
-  nire.moduleStore._.${moduleName}.nixos = { pkgs, config, ... }: {
+  den.aspects.moduleStore._.${moduleName}.nixos = { pkgs, config, ... }: {
       environment.systemPackages = with pkgs; [
         pam_u2f
         yubioath-flutter

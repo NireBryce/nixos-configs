@@ -7,7 +7,7 @@ let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in
 {
-  nire.moduleStore._.${moduleName}.nixos =
+  den.aspects.moduleStore._.${moduleName}.nixos =
     { config, pkgs, ... }:
     let   isEd25519 = k: k.type == "ed25519";
       getKeyPath = k: k.path;
