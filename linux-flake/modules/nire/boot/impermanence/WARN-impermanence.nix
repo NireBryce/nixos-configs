@@ -1,14 +1,14 @@
-{ inputs, lib, ... }:
+{ den, lib, ... }:
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-  aspectChain = inputs.den.aspects.moduleStore._.${moduleName};
+  
 in
 {
  
    
-  ${aspectChain} = inputs.den.lib.perHost {
+  den.aspects.moduleStore._.${moduleName} = den.lib.perHost {
     nixos =
-    { ... }:
+    { inputs, ... }:
     {
       # WARNING: IF YOU HAVE A SIMILAR LAYOUT TO MY LUKS SETUP, IMPORTING THIS WILL DELETE YOUR ROOT ON BOOT, so like, know what you're doing
 
