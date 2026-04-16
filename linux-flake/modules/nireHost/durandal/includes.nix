@@ -28,7 +28,10 @@ in {
             # since den.provides.hostname is fully qualified, it can be used under the `with`
             den.provides.hostname
             den.aspects.durandal
-            den.ful.nire.moduleStore._.boot
+            den.aspects.boot
+            den.ful.nire.system._.core
+            den.ful.nire.system._.gaming
+            den.ful.nire.system._.
             { 
                 nix.extraOptions = "experimental-features = nix-command flakes";
                 nix.settings = {
