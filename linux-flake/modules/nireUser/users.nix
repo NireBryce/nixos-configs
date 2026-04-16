@@ -11,5 +11,5 @@
         };
     };
 
-    den.homes.x86_64-linux."elly@nire-durandal" = { };
+    # den.homes.x86_64-linux."elly@nire-durandal" = { };
 }
