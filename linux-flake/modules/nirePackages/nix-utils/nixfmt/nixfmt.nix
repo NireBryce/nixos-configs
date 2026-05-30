@@ -1,24 +1,18 @@
-{ lib, den, ... }:
-let
-  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in
-{
- 
-  den.aspects.moduleStore._.${moduleName} = den.lib.perHost {
-    homeManager =
-    { pkgs, ... }:
-    {
-      # # description = "nixfmt - .nix file formatter";
-      home.packages = with pkgs; [
-        nixfmt
-      ];
+{ 
+    perSystem = {pkgs, lib, ...}:
+    let
+        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in {
+        flake.modules.homeManager.${moduleName} = {
+            # # description = "nixfmt - .nix file formatter";
+            home.packages = with pkgs; [
+                nixfmt
+            ];
+        };
+        flake.modules.nixos.${moduleName} = {
+            environment.systemPackages = with pkgs; [
+                nixfmt
+            ];
+        };
     };
-  };
-  den.aspects.moduleStore._.${moduleName} = den.lib.perHost {
-    nixos = { pkgs, ... }: {
-      environment.systemPackages = with pkgs; [
-        nixfmt
-      ];
-    };
-  };
 }

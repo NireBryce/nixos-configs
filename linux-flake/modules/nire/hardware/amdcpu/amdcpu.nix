@@ -1,16 +1,12 @@
-{ den, inputs, lib, ... }:
-let
-  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in
-{
- 
-  den.aspects.moduleStore._.${moduleName} = den.lib.perHost { 
-    nixos =
-    { ... }:
-    {
-      imports = [
-        inputs.nixos-hardware.nixosModules.common-cpu-amd
-      ];
+{ 
+    perSystem = {lib, inputs, ...}:
+    let
+        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in {
+        flake.modules.nixos.${moduleName} = {
+            imports = [
+                inputs.nixos-hardware.nixosModules.common-cpu-amd
+            ];
+        };
     };
-  };
 }

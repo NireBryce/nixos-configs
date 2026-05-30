@@ -1,13 +1,10 @@
-{ den, lib, ... }:
-let
-  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in
-{
-  den.aspects.moduleStore._.${moduleName} = den.lib.perHost {
-    nixos =
-    { ... }:
-    {
-      i18n.defaultLocale = lib.mkDefault "en_US.UTF-8";
+{ 
+    perSystem = {lib, ...}:
+    let
+          moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in {
+    flake.modules.nixos.${moduleName} = {
+            i18n.defaultLocale = lib.mkDefault "en_US.UTF-8";
+        };
     };
-  };
 }

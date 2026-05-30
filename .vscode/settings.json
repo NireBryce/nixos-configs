@@ -141,5 +141,6 @@
             "color": "#f73c3c"
         },
     ],
+    "prettier.tabWidth": 4,
 
 }

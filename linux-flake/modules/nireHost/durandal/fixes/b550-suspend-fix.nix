@@ -1,17 +1,13 @@
-{ lib, den, ... }:
-let
-  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in
-{
- 
-  den.aspects.moduleStore._.${moduleName} = den.lib.perHost {
-    nixos =
-      { ... }:
-      {
-        # Temporary B550 suspend fix pending nixos-hardware update
-        services.udev.extraRules = ''
-          ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x1483", ATTR{power/wakeup}="disabled"
-        '';
-      };
-  };
+{ 
+    perSystem = {lib, ...}:
+    let
+        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in {
+        flake.modules.nixos.${moduleName} = {
+            # Temporary B550 suspend fix pending nixos-hardware update
+            services.udev.extraRules = ''
+            ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x1483", ATTR{power/wakeup}="disabled"
+            '';
+        };
+    };
 }

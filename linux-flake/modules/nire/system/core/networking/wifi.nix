@@ -1,13 +1,10 @@
-{ den, lib, ... }:
-let
-  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in
-{
-  den.aspects.moduleStore._.${moduleName} = den.lib.perHost {
-  nixos =
-    { ... }:
-    {
-      networking.networkmanager.enable = true; # Needs to be 'true' for KDE networking
+{ 
+    perSystem = {lib, ...}:
+    let
+        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in {
+        flake.modules.nixos.${moduleName} = {
+            networking.networkmanager.enable = true; # Needs to be 'true' for KDE networking
+        };
     };
-  };
 }

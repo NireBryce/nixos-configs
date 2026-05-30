@@ -1,8 +1,6 @@
-{ den, ... }: 
-let
-    # den.aspects.nire-durandal evaluates *.nixos
-    # den.aspects.nire-durandal._.elly evaluates *.homeManager
-    # TODO: there has to be a better way
+{self, inputs, ...}:
+# TODO: this is wrong and will need to be modified for flake-parts
+    let
     moduleList = with den.aspects;[ 
         boot
         desktop-env._.kde
@@ -22,19 +20,18 @@ let
         terminals 
     ];
 in {
-    den.aspects.nire-durandal = {
+    flake.nixosConfigurations.nire-durandal = {
         includes = [ 
             # since den.provides.hostname is fully qualified, it can be used under the `with`
             den.provides.hostname
             den.aspects.durandal
         ] ++ moduleList;
     };
-    den.aspects.elly._.nire-durandal = {
+    flake.homeConfigurations.elly-nire-durandal = {
         # we need to do all the includes here so the homeManager sections can be processed under elly.
         # TODO: there has to be a better way
         includes = [
-            den.aspects.elly
-            den._.primary-user
+            flake.modules.elly
         ] ++ moduleList;
     };
 }

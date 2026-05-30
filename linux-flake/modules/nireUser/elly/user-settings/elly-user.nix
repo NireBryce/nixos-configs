@@ -1,10 +1,10 @@
-{ lib, den, ... }:
-let
-  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in
-{
-  den.aspects.moduleStore._.${moduleName} = den.lib.perHost {
-        nixos = { pkgs, ... }: {
+{ 
+    perSystem = {pkgs, lib, ...}:
+    let
+        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in {
+        # TODO: these modules should be stored outside of the users folder, so it's clearer when it's imported
+        flake.modules.nixos.${moduleName} = {
             users.mutableUsers = false;
             users.users = { 
                 # groups = {
@@ -26,20 +26,15 @@ in
                         kdePackages.partitionmanager
                     ];
                 };
-            
             };
         };
 
-        den.aspects.moduleStore._.${moduleName} = den.lib.perHost {
-        darwin = 
-        { pkgs, ... }: 
-        {
+        flake.modules.darwin.${moduleName} = {
             fonts.packages = with pkgs; [
                 nerd-fonts.fira-code
                 nerd-fonts.iosevka
                 nerd-fonts.jetbrains-mono
             ];
         };
-    };
     };
 }

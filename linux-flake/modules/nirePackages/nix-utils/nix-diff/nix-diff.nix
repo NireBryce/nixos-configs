@@ -1,16 +1,13 @@
-{ lib, den, ... }:
-let
-  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in
-{
- 
-  den.aspects.moduleStore._.${moduleName} = den.lib.perUser {
-    homeManager =
-    { pkgs, ... }:
-    {
-      # # description = "diff nix code";
-      home.packages = with pkgs; [
-        nix-diff
-      ];
-    };};
+{ 
+    perSystem = {pkgs, lib, ...}:
+    let
+        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in {
+        flake.modules.homeManager.${moduleName} = {
+            # # description = "diff nix code";
+            home.packages = with pkgs; [
+                nix-diff
+            ];
+        };
+    };
 }

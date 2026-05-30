@@ -1,14 +1,10 @@
-{ den, lib, ... }:
-let
-  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in
-{
- 
-  den.aspects.moduleStore._.${moduleName} = den.lib.perHost {
-    nixos =
-    { ... }:
-    {
-      hardware.keyboard.zsa.enable = true; # zsa keyboard package
+{ 
+    perSystem = {lib, ...}:
+    let
+        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in {
+        flake.modules.nixos.${moduleName} = {
+            hardware.keyboard.zsa.enable = true; # zsa keyboard package
+        };
     };
-  };
 }

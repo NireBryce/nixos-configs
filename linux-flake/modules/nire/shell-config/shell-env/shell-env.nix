@@ -1,22 +1,20 @@
-{ den, lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    den.aspects.moduleStore._.${moduleName} = den.lib.perUser {
-        homeManager = 
-        { pkgs, ... }: 
-        {
+{ 
+    perSystem = {pkgs, lib, ...}:
+    let
+        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in {
+        flake.modules.homeManager.${moduleName} = {
             home.shellAliases = { 
                 # for in-place functions in aliases refer to:  https://stackoverflow.com/questions/34340575/zsh-alias-with-parameter
-                lcd             = ''f() { cd $1 && ls -lah };f'';               
-                cdls            = ''f() { cd $1 && ls -lah };f'';               
-                ll              = "ls -l";
-                cp              = "cp -i";    # Confirm before overwriting something
-                exa             = "${pkgs.eza}/bin/eza --icons=always"; # exa back compat for tools
-                # ls              = "${pkgs.eza}/bin/eza --icons=always --header --group-directories-first --hyperlink";
-                # gsa             = "${pkgs.git}/bin/git stash push";
-                img-cat         = "${pkgs.kitty}/bin/kitty +kitten icat";
-                kssh            = "${pkgs.kitty}/bin/kitty +kitten ssh";
+                lcd                     = ''f() { cd $1 && ls -lah };f'';               
+                cdls                    = ''f() { cd $1 && ls -lah };f'';               
+                ll                      = "ls -l";
+                cp                      = "cp -i";    # Confirm before overwriting something
+                exa                     = "${pkgs.eza}/bin/eza --icons=always"; # exa back compat for tools
+                # ls                      = "${pkgs.eza}/bin/eza --icons=always --header --group-directories-first --hyperlink";
+                # gsa                     = "${pkgs.git}/bin/git stash push";
+                img-cat                 = "${pkgs.kitty}/bin/kitty +kitten icat";
+                kssh                    = "${pkgs.kitty}/bin/kitty +kitten ssh";
             };  
             home.sessionVariables = { 
                 EDITOR                  = "micro";

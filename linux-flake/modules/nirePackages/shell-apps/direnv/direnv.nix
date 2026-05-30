@@ -1,19 +1,16 @@
-{ lib, den, ... }:
-let
-  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in
-{
- 
-  den.aspects.moduleStore._.${moduleName} = den.lib.perUser {
-    homeManager =
-    { ... }:
-    {
-      programs.direnv = {
-        enable = true;
-        enableBashIntegration = true;
-        enableZshIntegration = true;
-        enableNushellIntegration = true;
-        nix-direnv.enable = true;
-      };
-    };};
+{ 
+    perSystem = {lib, ...}:
+    let
+        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in { 
+        flake.modules.homeManager.${moduleName} = {
+            programs.direnv = {
+                enable = true;
+                enableBashIntegration = true;
+                enableZshIntegration = true;
+                enableNushellIntegration = true;
+                nix-direnv.enable = true;
+            };
+        };
+    };
 }

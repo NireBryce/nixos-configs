@@ -1,18 +1,14 @@
-{ den, lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    den.aspects.moduleStore._.${moduleName} = den.lib.perHost {
-        nixos = {
+{ 
+    perSystem = {pkgs, lib, ...}:
+    let
+        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in {
+        flake.modules.homeManager.${moduleName} = {
             # bash line editor, allows zsh-like line editor tricks and bindings
             programs.bash.blesh.enable = true;
         };
-    };
     
-    den.aspects.moduleStore._.${moduleName} = den.lib.perUser {
-        homeManager = 
-        { pkgs, ... }: 
-        {
+        flake.modules.homeManager.${moduleName} = {
             home.file.".blerc".text = ''
                 bleopt complete_menu_style=desc
 

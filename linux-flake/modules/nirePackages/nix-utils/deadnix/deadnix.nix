@@ -1,16 +1,13 @@
-{ lib, den, ... }:
-let
-  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in
-{
- 
-  den.aspects.moduleStore._.${moduleName} = den.lib.perUser {
-    homeManager =
-    { pkgs, ... }:
-    {
-      #  # description = "scan for 'dead' (uncalled) nix code";
-      home.packages = with pkgs; [
-        deadnix
-      ];
-    };};
+{ 
+    perSystem = {pkgs, lib, ...}:
+    let
+        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in {
+        flake.modules.homeManager.${moduleName} = {
+            #  # description = "scan for 'dead' (uncalled) nix code";
+            home.packages = with pkgs; [
+                deadnix
+            ];
+        };
+    };
 }

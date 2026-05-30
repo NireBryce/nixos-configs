@@ -1,16 +1,13 @@
-{ lib, den, ... }:
-let
-  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in
-{
- 
-  den.aspects.moduleStore._.${moduleName} = den.lib.perUser {
-    homeManager =
-    { pkgs, ... }:
-    {
-      # # description = "wh - magic-wormhole point to point file transfer";
-      home.packages = with pkgs; [
-        magic-wormhole-rs
-      ];
-    };};
+{ 
+    perSystem = {pkgs, lib, ...}:
+    let
+        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in {
+        flake.modules.homeManager.${moduleName} = {
+            # # description = "wh - magic-wormhole point to point file transfer";
+            home.packages = with pkgs; [
+                magic-wormhole-rs
+            ];
+        };
+    };
 }

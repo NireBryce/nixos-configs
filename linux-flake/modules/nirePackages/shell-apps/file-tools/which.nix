@@ -1,15 +1,13 @@
-{ lib, den, ... }:
-let
-  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in
-{
- 
-  den.aspects.moduleStore._.${moduleName} = den.lib.perUser {
-    homeManager =
-    { pkgs, ... }:
-    {
-      home.packages = with pkgs; [
-        which
-      ];
-    };};
+{ 
+    perSystem = {pkgs, lib, ...}:
+    let
+        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in { 
+        flake.modules.homeManager.${moduleName} = {
+            # # description = "which - find the location of a given command's binary";
+            home.packages = with pkgs; [
+                which
+            ];
+        };
+    };
 }

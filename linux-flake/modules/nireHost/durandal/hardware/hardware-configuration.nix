@@ -1,12 +1,9 @@
-{ lib, den, ... }:
-let
-  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in
-{
-  den.aspects.moduleStore._.${moduleName} = den.lib.perHost {
-    nixos = 
-        { config, ... }: 
-        {
+{ 
+    perSystem = {lib, config, ...}:
+    let
+        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in {
+        flake.modules.nixos.${moduleName} = {
 
             boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
             boot.initrd.kernelModules = [ ];

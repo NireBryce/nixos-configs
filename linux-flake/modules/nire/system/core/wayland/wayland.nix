@@ -1,22 +1,18 @@
-{ den, lib, ... }:
-let
-  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in
-{
- 
-  den.aspects.moduleStore._.${moduleName} = den.lib.perHost {
-    nixos =
-    { pkgs, ... }:
-    {
+{ 
+    perSystem = {pkgs, lib, ...}:
+    let
+        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in {
+        flake.modules.nixos.${moduleName} = {
 
-      programs.xwayland.enable = true;
+            programs.xwayland.enable = true;
 
-      environment.systemPackages = with pkgs; [
-        wl-clipboard # clipboard in wayland                      https://github.com/bugaevc/wl-clipboard
-        wl-clipboard-x11 # clipboard in xwayland                     https://search.nixos.org/packages?channel=unstable&from=0&size=50&sort=relevance&type=packages&query=wl-clipboard
-        wayland-utils # `wayland-info`                            https://gitlab.freedesktop.org/wayland/wayland-utils
-        egl-wayland # who knows what this is for                https://github.com/NVIDIA/egl-wayland/
-      ];
+            environment.systemPackages = with pkgs; [
+                wl-clipboard # clipboard in wayland                      https://github.com/bugaevc/wl-clipboard
+                wl-clipboard-x11 # clipboard in xwayland                     https://search.nixos.org/packages?channel=unstable&from=0&size=50&sort=relevance&type=packages&query=wl-clipboard
+                wayland-utils # `wayland-info`                            https://gitlab.freedesktop.org/wayland/wayland-utils
+                egl-wayland # who knows what this is for                https://github.com/NVIDIA/egl-wayland/
+            ];
+        };
     };
-  };
 }

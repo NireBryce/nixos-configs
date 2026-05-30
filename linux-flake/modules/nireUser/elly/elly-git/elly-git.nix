@@ -1,12 +1,9 @@
-{ lib, den, ... }:
-let
-  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in
-{
-  den.aspects.moduleStore._.${moduleName} = den.lib.perUser {
-        homeManager = 
-        { ... }: 
-        {
+{ 
+    perSystem = {lib, ...}:
+    let
+        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in {
+  flake.modules.homeManager.${moduleName} = {
             home.file."./.gitconfig".source = ./.gitconfig;
             
             programs.git = {        # User-specific git config

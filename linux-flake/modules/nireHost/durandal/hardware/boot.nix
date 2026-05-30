@@ -1,20 +1,16 @@
-{ den, lib, ... }:
-let
-  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in
-{
- 
-  den.aspects.moduleStore._.${moduleName} = den.lib.perHost {
-    nixos =
-      { pkgs, ... }:
-      {
-        environment.systemPackages = with pkgs; [
-          sbctl # secure boot ctl
-        ];
-        boot.loader = {
-          systemd-boot.enable = lib.mkDefault true;
-          efi.canTouchEfiVariables = lib.mkDefault true;
+{ 
+    perSystem = {pkgs, lib, ...}:
+    let
+        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in {
+        flake.modules.nixos.${moduleName} = {
+            environment.systemPackages = with pkgs; [
+            sbctl # secure boot ctl
+            ];
+            boot.loader = {
+                systemd-boot.enable = lib.mkDefault true;
+                efi.canTouchEfiVariables = lib.mkDefault true;
+            };
         };
-      };
-  };
+    };
 }

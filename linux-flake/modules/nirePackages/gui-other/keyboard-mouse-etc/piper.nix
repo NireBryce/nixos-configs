@@ -1,15 +1,13 @@
-{ lib, den, ... }:
-let
-  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in
-{
- 
-  den.aspects.moduleStore._.${moduleName} = den.lib.perUser {
-    homeManager = { pkgs, ... }: {
-    # # description = "piper - logitech/razer graphical mouse manager https://github.com/soxoj/piper";
-    home.packages = with pkgs; [
-      piper
-    ];
-  };
-  };
+{ 
+    perSystem = {pkgs, lib, ...}:
+    let
+        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in {
+        flake.modules.homeManager.${moduleName} = {
+            # # description = "piper - logitech/razer graphical mouse manager https://github.com/soxoj/piper";
+            home.packages = with pkgs; [
+                piper
+            ];
+        };
+    };
 }
