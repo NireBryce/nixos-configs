@@ -1,16 +1,13 @@
-{ lib, den, ... }:
-let
-  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in
-{
- 
-  den.aspects.moduleStore._.${moduleName} = den.lib.perUser {
-    homeManager =
-    { pkgs, ... }:
-    {
-      # # description = "jq https://github.com/stedolan/jq";
-      home.packages = with pkgs; [
-        jq
-      ];
-    };};
+{ 
+    perSystem = {lib, pkgs, ...}:
+    let
+        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in {
+        flake.modules.nixos.${moduleName} = {
+          # # description = "jq https://github.com/stedolan/jq";
+            home.packages = with pkgs; [
+                jq
+            ];
+        };
+    };
 }

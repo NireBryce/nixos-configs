@@ -3,33 +3,83 @@
 # ! NOTE !
 # ? Packages are currently managed via darwin.
 {
+  pkgs,
   ...
 }:
-let
-  home-manager-user = ../linux-flake/configs/home-manager/user-elly;
-in
 {
   imports = [
-    "${home-manager-user}/home-config/git-config/git-settings-elly.nix"
-    "${home-manager-user}/home-config/shell-configs/zsh/zsh.nix"
-    "${home-manager-user}/home-config/nix-settings.nix"
-    "${home-manager-user}/home-config/sessionPaths.nix"
-    "${home-manager-user}/home-config/sessionVariables.nix"
-    "${home-manager-user}/home-config/shellAliases.nix"
-    "${home-manager-user}/home-config/shellAbbrs.nix"
+    ./zsh.nix
 
   ];
 
-  # TODO: mvpn keeps reinstalling itself
-
-  home.sessionPath = [
-    "/Users/elly/.local/bin:$PATH"
-  ];
-  ## Defaults
   nixpkgs.config = {
-    allowUnfree = true; # Disable if you don't want unfree packages
-    allowUnfreePredicate = (_: true); # Workaround for https://github.com/nix-community/home-manager/issues/2942
+                allowUnfree = true; # Disable if you don't want unfree packages
+                allowUnfreePredicate = (_: true); # Workaround for https://github.com/nix-community/home-manager/issues/2942
+            };
+  # git
+  home.file."./.gitconfig".source = ./.gitconfig;
+  programs.git = {        # User-specific git config
+      enable = true;
+      settings = {
+          alias = {
+              pushall = "!git remote | xargs -L1 git push --all";
+              graph = "log --decorate --oneline --graph";
+              add-nowhitespace = "!git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-zero -";
+          };
+          user = {
+              name = "Nire Bryce";
+              email = "nire@computernope.net";
+          };
+          
+          feature.manyFiles = true;
+          init.defaultBranch = "main";
+          gpg.format = "ssh";
+      };
+      signing = {
+          key = "~/.ssh/id_ed25519";
+          signByDefault = builtins.stringLength "~/.ssh/id_ed25519" > 0;
+      };
+
+      lfs.enable = true;
+      ignores = [ ".direnv" "result" ];
   };
+
+  # Session
+
+  
+    home.sessionVariables = { 
+        EDITOR                  = "micro";
+        MICRO_TRUECOLOR         = 1;
+        NIXPKGS_ALLOW_UNFREE    = 1;
+        PYTHONBREAKPOINT        = "ipdb.set_trace";
+        COLORTERM               = "truecolor";
+        PAGER                   = "less -R";
+        MANPAGER                = "${pkgs.bat}/bin/bat --language man";
+        LC_CTYPE                = "en_US.UTF-8";
+        LS_COLORS               = "$(${pkgs.vivid}/bin/vivid generate dracula)";  # https://github.com/sharkdp/vivid
+        EZA_COLORS              = "$(${pkgs.vivid}/bin/vivid generate dracula)";
+        # STARSHIP_CONFIG         = "$HOME/.config/starship.toml";
+        # STARSHIP_CACHE          = "$HOME/.cache/starship";
+        PYTHON                  = "PYTHON";
+    };
+    home.sessionPath = [ 
+        "/usr/local"
+        "/usr/bin"
+        "$HOME/bin"
+        "$HOME/.local/bin"
+        "$HOME/.nix-profile/bin"
+        "$HOME/.zi/bin"
+        "$HOME/.config/zi/bin"
+        "$HOME/.cargo/bin"
+        "/Users/elly/.local/bin:$PATH"
+    ];
+
+    
+# TODO: mvpn keeps reinstalling itself
+
+
+  ## Defaults
+
   home.username = "elly";
   home.homeDirectory = "/Users/elly";
 
