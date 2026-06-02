@@ -42,11 +42,11 @@
 
     programs.zsh =
     let
-        p10k_cfg = lib.fileContents ./config/zsh-powerlevel10k/.p10k.zsh;
-        bindings_cfg = lib.fileContents ./config/initial-bindings.zsh;
-        setopts_cfg = lib.fileContents ./config/initial-setopts.zsh;
-        zstyle_cfg = lib.fileContents ./config/initial-zstyle.zsh;
-        zellij_keys_cfg = lib.fileContents ./config/free-zellij-keys.zsh;
+        p10k_cfg = lib.fileContents ./zsh-config/zsh-powerlevel10k/.p10k.zsh;
+        bindings_cfg = lib.fileContents ./zsh-config/initial-bindings.zsh;
+        setopts_cfg = lib.fileContents ./zsh-config/initial-setopts.zsh;
+        zstyle_cfg = lib.fileContents ./zsh-config/initial-zstyle.zsh;
+        zellij_keys_cfg = lib.fileContents ./zsh-config/free-zellij-keys.zsh;
     in 
     {
         zsh-abbr.abbreviations = {
