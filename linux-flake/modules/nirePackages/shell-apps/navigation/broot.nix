@@ -1,5 +1,5 @@
 { 
-    perSystem = {lib, pkgs, ...}:
+    perSystem = {lib, ...}:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
