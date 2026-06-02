@@ -20,7 +20,7 @@
     #   Example: programs.zsh.initContent = "your content here";
 
     # fast syntax highlighting theems
-    home.file."./.config/F-Sy-H".source = ./config/zsh-f-s-highlight-themes;
+    home.file."./.config/F-Sy-H".source = ./zsh-config/zsh-f-s-highlight-themes;
 
     # plugin dependencies
     home.packages = with pkgs; [
@@ -192,8 +192,10 @@
             autoload -Uz compinit
             compinit -C
         '';
+        
+        # eventually re-add this: `source <(${pkgs.cod}/bin/cod init $$ zsh)`
         initExtra = ''
-            source <(${pkgs.cod}/bin/cod init $$ zsh)
+             
 
             # TODO: pull these into nix
             # Aliases
