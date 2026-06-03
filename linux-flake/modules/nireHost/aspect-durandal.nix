@@ -1,4 +1,4 @@
-{self, inputs, ...}:
+{ den, flake, ...}:
 # TODO: this is wrong and will need to be modified for flake-parts
     let
     moduleList = with den.aspects;[ 
