@@ -8,6 +8,12 @@
             services.espanso = {
                 enable = true;
                 waylandSupport = true;
+                configs = {
+                    default = {
+                        search_shortcut = "off";
+                        search_trigger = ".espanso";
+                    };
+                };
             };
         };
     };
