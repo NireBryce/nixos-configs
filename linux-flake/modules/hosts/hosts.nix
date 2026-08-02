@@ -6,4 +6,9 @@
         ];
     };
 
+    flake.nixosConfigurations.nire-tenacity = inputs.nixpkgs.lib.nixosSystem {
+        modules = [
+            self.modules.nixos.tenacityConfiguration
+        ];
+    };
 }
