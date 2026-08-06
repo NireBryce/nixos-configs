@@ -27,7 +27,7 @@
         # SteamTinkerLaunch needs these and they aren't in the package?
         xxd
         xdotool
-        xorg.xwininfo
+        xwininfo
         yad           
 
     ];

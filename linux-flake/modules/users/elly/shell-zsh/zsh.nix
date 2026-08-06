@@ -12,12 +12,6 @@
 
 
 # TODO:  MIGRATE OFF ZI
-# TODO: evaluation warning: `programs.zsh.initExtraFirst` is deprecated, use `programs.zsh.initContent` with `lib.mkBefore` instead.
-#   Example: programs.zsh.initContent = lib.mkBefore "your content here";
-# evaluation warning: `programs.zsh.initExtraBeforeCompInit` is deprecated, use `programs.zsh.initContent` with `lib.mkOrder 550` instead.
-#   Example: programs.zsh.initContent = lib.mkOrder 550 "your content here";
-# evaluation warning: `programs.zsh.initExtra` is deprecated, use `programs.zsh.initContent` instead.
-#   Example: programs.zsh.initContent = "your content here";
 
 { config, ... }:
 {
@@ -162,7 +156,8 @@ in
     
         ## .zshrc
         #! FOOTGUN: if you comment out a nix variable pointing to .filecontents, '#' only comments out the first line 
-        initExtraFirst = ''
+        initContent = lib.mkMerge [
+        (lib.mkBefore ''
             zmodload zsh/zprof                                # zsh profiler
 
             #################PASSWORD ENTRY/CONFIRM DIALOGS GO ABOVE##############################
@@ -190,9 +185,9 @@ in
             WORDCHARS='*?[]~=&;!#$%^(){}<>';                  # Dont consider certain characters part of the word for nav
             
             
-            '';
+            '')
             
-        initExtraBeforeCompInit = ''
+        (lib.mkOrder 550 ''
             
 
             ### p10k cfg start
@@ -202,8 +197,8 @@ in
             # zicompinit                                        # zi cleanup
             autoload -Uz compinit
             compinit -C
-            '';
-        initExtra = ''
+            '')
+        ''
             source <(${pkgs.cod}/bin/cod init $$ zsh)
             
             # TODO: pull these into nix
@@ -229,7 +224,8 @@ in
             
             # Justfile
             eval "''$(${pkgs.just}/bin/just --completions zsh)"
-        '';
+        ''
+        ];
     };
 };
 }
