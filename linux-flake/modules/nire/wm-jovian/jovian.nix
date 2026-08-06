@@ -1,5 +1,8 @@
-{ inputs, ... }:
-{ flake.modules.nixos.wm-jovian =
+{ config, inputs, ... }:
+{
+    flake.modules.nixos.handheld.imports = [ config.flake.modules.nixos.wm-jovian ];
+
+    flake.modules.nixos.wm-jovian =
 { config, pkgs, lib, ... }: 
 {
     imports = [ inputs.jovian.nixosModules.default ];

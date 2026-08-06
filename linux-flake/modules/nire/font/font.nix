@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.nixos.font = 
+{ config, ... }:
+{
+    flake.modules.nixos.base.imports = [ config.flake.modules.nixos.font ];
+
+    flake.modules.nixos.font = 
 { pkgs, ...}: 
 {
     fonts = {

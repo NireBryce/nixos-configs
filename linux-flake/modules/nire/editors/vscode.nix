@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.nixos.vscode =
+{ config, ... }:
+{
+    flake.modules.nixos.desktop.imports = [ config.flake.modules.nixos.vscode ];
+
+    flake.modules.nixos.vscode =
 { pkgs, ... }:
 
 {

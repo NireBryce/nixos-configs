@@ -1,4 +1,7 @@
+{ config, ... }:
 { 
+    flake.modules.nixos.base.imports = [ config.flake.modules.nixos.system-base-packages ];
+
     flake.modules.nixos.system-base-packages = { pkgs, ... }: 
     {
         environment.systemPackages = with pkgs; [ 

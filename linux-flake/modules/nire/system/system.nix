@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.nixos.system = 
+{ config, ... }:
+{
+    flake.modules.nixos.base.imports = [ config.flake.modules.nixos.system ];
+
+    flake.modules.nixos.system = 
 { pkgs, lib, ... }: 
 {
     programs.nix-ld.enable      = lib.mkDefault true;      # Needed for VSCode remote connection, etc

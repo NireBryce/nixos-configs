@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.nixos.wayland = 
+{ config, ... }:
+{
+    flake.modules.nixos.base.imports = [ config.flake.modules.nixos.wayland ];
+
+    flake.modules.nixos.wayland = 
 { pkgs, ... }:
 {
   

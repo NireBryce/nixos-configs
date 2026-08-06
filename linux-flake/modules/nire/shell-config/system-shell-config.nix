@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.nixos.shell-config =
+{ config, ... }:
+{
+    flake.modules.nixos.base.imports = [ config.flake.modules.nixos.shell-config ];
+
+    flake.modules.nixos.shell-config =
 { pkgs, lib, ... }: 
 {
     # Shells

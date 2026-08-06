@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.nixos.flatpak = 
+{ config, ... }:
+{
+    flake.modules.nixos.desktop.imports = [ config.flake.modules.nixos.flatpak ];
+
+    flake.modules.nixos.flatpak = 
 { pkgs, ... }:  
 {
     services.flatpak.enable = true;

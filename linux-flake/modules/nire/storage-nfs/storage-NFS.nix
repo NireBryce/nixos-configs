@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.nixos.storage-nfs = 
+{ config, ... }:
+{
+    flake.modules.nixos.desktop.imports = [ config.flake.modules.nixos.storage-nfs ];
+
+    flake.modules.nixos.storage-nfs = 
 { ... }:
 {
         fileSystems."/mnt/qnap-erin" = {

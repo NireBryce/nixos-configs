@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.nixos.ssh =
+{ config, ... }:
+{
+    flake.modules.nixos.base.imports = [ config.flake.modules.nixos.ssh ];
+
+    flake.modules.nixos.ssh =
 { ... }: 
 {
     services.openssh = {

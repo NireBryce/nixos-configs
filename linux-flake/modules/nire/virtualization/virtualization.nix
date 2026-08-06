@@ -1,5 +1,7 @@
-{ self, inputs, ...}:
+{ config, ... }:
 { 
+    flake.modules.nixos.desktop.imports = [ config.flake.modules.nixos.virtualization ];
+
 flake.modules.nixos.virtualization = 
 { pkgs, ... }: 
 {

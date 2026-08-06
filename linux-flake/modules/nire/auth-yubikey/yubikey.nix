@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.nixos.auth-yubikey = 
+{ config, ... }:
+{
+    flake.modules.nixos.desktop.imports = [ config.flake.modules.nixos.auth-yubikey ];
+
+    flake.modules.nixos.auth-yubikey = 
 { pkgs, lib, config, ... }: 
 let homeDirectory = "${config.users.users.elly.home}";  
 in

@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.nixos.sound-pipewire = 
+{ config, ... }:
+{
+    flake.modules.nixos.base.imports = [ config.flake.modules.nixos.sound-pipewire ];
+
+    flake.modules.nixos.sound-pipewire = 
 { pkgs, ... }: 
 {
         security.rtkit.enable       = true;                 # https://nixos.wiki/wiki/PipeWire

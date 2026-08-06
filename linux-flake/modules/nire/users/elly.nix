@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.nixos.elly =
+{ config, ... }:
+{
+    flake.modules.nixos.base.imports = [ config.flake.modules.nixos.elly ];
+
+    flake.modules.nixos.elly =
 { pkgs, ... }:
 {
     users.mutableUsers = false;

@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.nixos.boot-handheld =
+{ config, ... }:
+{
+    flake.modules.nixos.handheld.imports = [ config.flake.modules.nixos.boot-handheld ];
+
+    flake.modules.nixos.boot-handheld =
 { lib, ... }: 
 {
     boot.loader = {

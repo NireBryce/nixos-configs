@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.nixos.dev-tools =
+{ config, ... }:
+{
+    flake.modules.nixos.desktop.imports = [ config.flake.modules.nixos.dev-tools ];
+
+    flake.modules.nixos.dev-tools =
 { pkgs, ...}: 
 {
     nix.settings = {

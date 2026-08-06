@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.nixos.networking = 
+{ config, ... }:
+{
+    flake.modules.nixos.base.imports = [ config.flake.modules.nixos.networking ];
+
+    flake.modules.nixos.networking = 
 {     
     # DNS
     networking.nameservers = [ "1.1.1.1" "1.0.0.1" ];

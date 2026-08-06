@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.nixos.kdeconnect = 
+{ config, ... }:
+{
+    flake.modules.nixos.desktop.imports = [ config.flake.modules.nixos.kdeconnect ];
+
+    flake.modules.nixos.kdeconnect = 
 { ... }: 
 {
     # todo: shouldn't this be a service?

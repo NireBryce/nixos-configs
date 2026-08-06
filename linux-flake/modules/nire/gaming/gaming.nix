@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.nixos.gaming =
+{ config, ... }:
+{
+    flake.modules.nixos.base.imports = [ config.flake.modules.nixos.gaming ];
+
+    flake.modules.nixos.gaming =
 { pkgs, ...}: 
 {
     #* steam - (fhs)
