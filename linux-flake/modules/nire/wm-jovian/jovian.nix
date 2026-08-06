@@ -9,7 +9,7 @@
         limine.secureBoot.enable    = lib.mkForce false;
         systemd-boot.enable         = lib.mkDefault true;
     };
-    systemd.services.decky-loader.environment.LD_LIBRARY_PATH = lib.makeLibraryPath inputs.jovian.decky-loader.extraPackages;
+    systemd.services.decky-loader.environment.LD_LIBRARY_PATH = lib.makeLibraryPath config.jovian.decky-loader.extraPackages;
     services.desktopManager.plasma6.enable = true;
     
     jovian = {
@@ -47,10 +47,8 @@
         };
     };
 
-    environment.systemPackages = with pkgs; [
-        adjustor
-    ];
-
+    # `adjustor` was removed from nixpkgs; it now ships as part of the
+    # handheld-daemon package and is pulled in by the adjustor option below.
 
     # needed for tdp adjustor
     boot.extraModulePackages = [ config.boot.kernelPackages.acpi_call ];
