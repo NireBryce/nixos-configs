@@ -59,7 +59,8 @@ home manager broke, so I had to use `nix-shell -p home-manager` to bootstrap
 
 nh os switch --hostname nire-durandal ~/nixos
 
-nh home switch --configuration elly@nire-durandal ~/nixos/
+(as of 2026-08-06 there is no separate `nh home switch` step: home-manager is
+applied as part of the system. see `just switch`.)
 
 ## This determines what to add to /run/current-system/sw, generally defined elsewhere
 
