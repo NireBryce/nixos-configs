@@ -33,6 +33,9 @@
         
         # systems.url                                = "github:nix-systems/default";
         import-tree.url                            = "github:vic/import-tree";
+
+        treefmt-nix.url                            = "github:numtide/treefmt-nix";
+        treefmt-nix.inputs.nixpkgs.follows         = "nixpkgs";
         # ── Dendritic toolchain ───────────────────────────────────────────────────
         # den.url                                    = "github:vic/den";
         # flake-aspects.url                          = "github:vic/flake-aspects";
