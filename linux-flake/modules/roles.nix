@@ -9,6 +9,12 @@
 # which means adding a module is a one-file change rather than also editing
 # every host that wants it. This file only declares the hierarchy between the
 # roles; membership lives with each module.
+#
+# The same applies to `flake.modules.homeManager.ellyHomeManager`, which has no
+# declaration of its own: each Home Manager module opts into it the same way.
+# That replaced an aggregator that imported *every* homeManager module via
+#   builtins.attrValues (builtins.removeAttrs self.modules.homeManager [ ... ])
+# and needed a growing exclusion list to avoid importing itself.
 { config, ... }:
 {
     flake.modules.nixos.desktop.imports  = [ config.flake.modules.nixos.base ];

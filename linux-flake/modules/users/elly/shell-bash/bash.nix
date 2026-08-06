@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.homeManager.elly-shell-bash = 
+{ config, ... }:
+{
+    flake.modules.homeManager.ellyHomeManager.imports = [ config.flake.modules.homeManager.elly-shell-bash ];
+
+    flake.modules.homeManager.elly-shell-bash = 
 { pkgs, ... }:
 
 {

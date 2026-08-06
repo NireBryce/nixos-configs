@@ -54,6 +54,8 @@ flake.modules.nixos.virtualization =
 
 };
 
+    flake.modules.homeManager.ellyHomeManager.imports = [ config.flake.modules.homeManager.virtualization ];
+
 flake.modules.homeManager.virtualization = # TODO: figure out how to make a hybrid flake-parts that interleaves home-manager and nixos
 { ... }:
 {

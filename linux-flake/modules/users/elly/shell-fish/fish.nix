@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.homeManager.elly-shell-fish = 
+{ config, ... }:
+{
+    flake.modules.homeManager.ellyHomeManager.imports = [ config.flake.modules.homeManager.elly-shell-fish ];
+
+    flake.modules.homeManager.elly-shell-fish = 
 { ... }:
 { 
     programs.fish = {

@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.homeManager.elly-git = 
+{ config, ... }:
+{
+    flake.modules.homeManager.ellyHomeManager.imports = [ config.flake.modules.homeManager.elly-git ];
+
+    flake.modules.homeManager.elly-git = 
 { ... }:
 {
     home.file."./.gitconfig".source = ./.gitconfig;

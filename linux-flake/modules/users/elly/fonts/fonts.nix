@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.homeManager.elly-fonts = 
+{ config, ... }:
+{
+    flake.modules.homeManager.ellyHomeManager.imports = [ config.flake.modules.homeManager.elly-fonts ];
+
+    flake.modules.homeManager.elly-fonts = 
 { pkgs, ... }:
 {
     # font packages that are per-user through home-manager

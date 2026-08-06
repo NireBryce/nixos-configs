@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.homeManager.elly-aliases = 
+{ config, ... }:
+{
+    flake.modules.homeManager.ellyHomeManager.imports = [ config.flake.modules.homeManager.elly-aliases ];
+
+    flake.modules.homeManager.elly-aliases = 
 { pkgs, ... }:
 {
     home.shellAliases = { 
