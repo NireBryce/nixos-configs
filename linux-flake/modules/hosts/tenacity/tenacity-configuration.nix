@@ -23,7 +23,7 @@
         wayland
         wifi
         xdg
-        self.modules.jovian.wm-jovian
+        wm-jovian
     ];
 
     nixpkgs.hostPlatform = "x86_64-linux";
