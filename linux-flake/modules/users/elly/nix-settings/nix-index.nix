@@ -1,5 +1,8 @@
-{ self, inputs, ...}:
-{ flake.modules.homeManager.elly-nix-settings = 
+{ config, inputs, ... }:
+{
+    flake.modules.homeManager.ellyHomeManager.imports = [ config.flake.modules.homeManager.elly-nix-settings ];
+
+    flake.modules.homeManager.elly-nix-settings =
 {
     imports = [
         inputs.nix-index-database.homeModules.default
