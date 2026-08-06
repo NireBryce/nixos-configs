@@ -1,13 +1,7 @@
 {
-    description = "";
-    
-    nixConfig = {
-        extra-experimental-features = [ "pipe-operators" ];
-    };
+    description = "NixOS and Home Manager configurations for nire-durandal (workstation) and nire-tenacity (handheld)";
 
-    
-
-    outputs = 
+    outputs =
         inputs: inputs.flake-parts.lib.mkFlake {   
             inherit inputs; 
         }
@@ -44,10 +38,6 @@
         # ── Home Manager ──────────────────────────────────────────────────────────
         home-manager.url                           = "github:nix-community/home-manager/master";
         home-manager.inputs.nixpkgs.follows        = "nixpkgs";
-
-        # ── Darwin ────────────────────────────────────────────────────────────────
-        darwin.url                                 = "github:LnL7/nix-darwin";
-        darwin.inputs.nixpkgs.follows              = "nixpkgs";
 
         # ── Handheld / SteamOS ────────────────────────────────────────────────────
         jovian.url                                 = "github:Jovian-Experiments/Jovian-NixOS";
