@@ -14,7 +14,8 @@ committed; it is not a mistake to be "fixed".
 
 ## Repo shape
 
-Three independent flakes. Only one of them is flake-parts.
+Three top-level areas, holding three unrelated flakes. Only `linux-flake` is
+flake-parts.
 
 - **`linux-flake/`** — the live config, and where essentially all work happens.
   flake-parts + the dendritic pattern. Two hosts: `nire-durandal` (workstation)
@@ -29,9 +30,10 @@ Three independent flakes. Only one of them is flake-parts.
   means either consuming linux-flake's `flake.modules.homeManager` as an input
   or folding macos in — a design decision, not a repair. Do not assume this
   flake works.
-- **`misc/`** — not wired into any flake at all; its only referent was a broken
-  `overlays` line removed in `d08bc50`. Standalone modules, a rust dev-shell
-  flake, util scripts. Treat as a scratch area.
+- **`misc/`** — a directory, not a flake, though it contains one
+  (`misc/dev-shells/rust/`). Nothing here is wired into either host config; its
+  only referent was a broken `overlays` line removed in `d08bc50`. Standalone
+  modules, util scripts. Treat as a scratch area.
 
 Everything below is about `linux-flake/`.
 
@@ -40,7 +42,7 @@ Everything below is about `linux-flake/`.
 `just` recipes live in the root `.justfile` and work from anywhere in the repo:
 
 ```sh
-just check      # nix flake check -- builds both hosts' toplevels
+just check      # nix flake check -- builds both hosts' toplevels, on Linux only
 just build      # nh os build for this host, no activation
 just switch     # nh os switch (applies Home Manager too, see below)
 just update     # flake update + re-check
@@ -53,6 +55,8 @@ works on any platform:
 ```sh
 cd linux-flake
 nix eval --raw .#nixosConfigurations.nire-durandal.config.system.build.toplevel.drvPath
+# `elly` is literal here: this reads an *evaluated* config, where the attribute
+# name is already resolved. Only module source should use nire.primaryUser.
 nix eval --raw '.#nixosConfigurations.nire-durandal.config.home-manager.users.elly.home.activationPackage.drvPath'
 nix flake check --all-systems --no-build     # evaluates every output, builds nothing
 ```
@@ -68,12 +72,14 @@ import. That is the point, per the README.
 level is `{ flake.modules.<class>.<name> = …; }` or similar — never a bare NixOS
 or Home Manager module.
 
-### The trap that has caused real breakage twice
+### The trap that actually broke this flake
 
 Dropping a raw NixOS module into `modules/` (for example fresh
 `nixos-generate-config` output) makes flake-parts try to resolve that module's
 `modulesPath` argument through its own `_module.args`, and evaluation dies with
-`error: infinite recursion encountered`. The fix is always to wrap it:
+`error: infinite recursion encountered`. The dendritic migration re-wrapped these
+in bulk (`67a1284`), one still slipped through, and it left the whole flake
+unevaluable until `922289e`. The fix is always to wrap it:
 
 ```nix
 { ... }:
@@ -205,8 +211,9 @@ nix eval .#nixosConfigurations.nire-tenacity.config.jovian.steam.user   # => "el
 ```
 
 **Report honestly.** Everything in this repo has so far been verified by
-evaluation only — nothing has been built or switched from the dev machine, and
-it cannot be. Say so rather than implying a change is known to work.
+evaluation only — nothing has been built or switched from the dev machine. That
+would need a remote builder or binfmt emulation, neither of which is set up. Say
+so rather than implying a change is known to work.
 
 ## Conventions
 
