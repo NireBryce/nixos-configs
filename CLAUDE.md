@@ -185,6 +185,33 @@ knowing:
   login shell, so its `PATH` is only coreutils/findutils/gnugrep/gnused/systemd.
 - See `linux-flake/home-manager-cutover.md` for the migration runbook.
 
+### Shells
+
+A large share of this config is shell setup, under `modules/users/elly/shell-*`.
+Current state, after the zi/prompt cleanup:
+
+| | bash | zsh |
+|---|---|---|
+| prompt | starship | starship |
+| line editor | ble.sh | zle |
+| completion menu | fzf, via ble.sh `fzf-menu` | fzf, via `zsh-fzf-tab` |
+| auto menu | `bleopt complete_auto_menu=1` | `zsh-autocomplete` |
+| suggestions | `complete_auto_complete` | `zsh-autosuggestions` |
+| highlighting | ble.sh built-in | `F-Sy-H` |
+
+Neither shell uses a plugin manager. zi is gone: its bootstrap and plugin list
+turned out never to be sourced, and everything is `programs.zsh.plugins` now.
+powerlevel10k is gone too — `programs.starship` is enabled for bash, zsh and
+fish in one place, `pkgs/cli/shell-util/appearance-cli/starship.nix`.
+
+**Order in the generated rc files is load-bearing and not obvious.** Home
+Manager emits, in this order: `initContent` `mkBefore`, then `mkOrder 550`,
+then `programs.zsh.plugins`, then unordered `initContent`. Anything that must
+run after a plugin cannot live at 550. Later definitions also win, so an alias
+or prompt init written by hand earlier in the file is silently overridden by
+the nix-managed one later. Both mistakes were live here: hand-written aliases
+that had no effect, and a p10k theme that starship overrode.
+
 ## Working in this repo
 
 **`git add` before `nix eval`.** Flakes in a git repo ignore untracked files, so
@@ -195,6 +222,29 @@ time every single session if forgotten.
 cross-platform, building does not. `checks` is filtered by system, so
 `nix flake check` on the mac exercises only the formatter — the host checks
 have never run there. Claims about anything building must say so honestly.
+
+**Read the generated dotfile, not just the module.** Most shell bugs here are
+invisible in the `.nix` source and obvious in the output. Line numbers make
+ordering and duplication questions answerable in one command:
+
+```sh
+nix eval --raw '.#nixosConfigurations.nire-durandal.config.home-manager.users.elly.home.file.".zshrc".text'
+```
+
+The attribute name is inconsistent and worth checking first with
+`--apply builtins.attrNames` on `home.file` — it has been `".zshrc"`,
+`"./.zshrc"` and `"/home/elly/.zsh/plugins/…"` for different entries. Some
+files have no `.text` at all and are built from `.source`.
+
+**Read the upstream source in the store rather than guessing at options.**
+`nix build nixpkgs#<pkg>` works on darwin for most of these, and grepping the
+result settles questions that documentation leaves ambiguous. This has been
+worth it repeatedly: ble.sh's `bleopt` defaults and its `ble-import` path
+resolution, home-manager's `useUserPackages` and `profileDirectory` behaviour,
+flake-parts' `_class` stamping, and whether `zsh-autosuggestions` autoloads
+`add-zsh-hook` itself. In the `ble-import` case the source showed the `.bash`
+extension is required for absolute paths, which would otherwise have silently
+broken every import.
 
 **Verify refactors by fingerprint, not by "it still evaluates."** For any change
 meant to preserve behaviour, capture the drvPath before and after:
@@ -246,6 +296,24 @@ place `users.users.elly` appears. Do the same for any future rename.
 **VSCode settings live only at the repo root.** `linux-flake/.vscode/` and
 `macos/.vscode/` were byte-identical copies and were removed; do not recreate
 them.
+
+**`home.file.<n>.text` concatenates; it does not override.** The type is
+`types.lines`, so two modules declaring the same file both contribute and the
+result is the content twice over. `.blerc` was generated duplicated for exactly
+this reason, from `shell-bash/bash.nix` and `shell-bash/blesh.nix`. In a
+dendritic layout this is easy to do by accident, so give each generated file a
+single owning module.
+
+**Check for an existing `programs.*` integration before hand-writing one.**
+`eval "$(starship init bash)"` in `initExtra` ran alongside
+`programs.starship.enableBashIntegration`, so starship initialised twice. The
+HM integration is also better: it uses the store path instead of relying on
+`PATH`.
+
+**`${...}` inside a Nix `''` string is Nix interpolation.** Writing
+`${terminfo[khome]}` in a comment inside `initContent` is an evaluation error,
+not a comment. Escape as `''${...}` or reword. Related to the `#` FOOTGUN note
+already in `shell-zsh/zsh.nix`.
 
 ## Repo docs worth reading
 
