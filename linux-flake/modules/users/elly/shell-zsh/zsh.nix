@@ -1,17 +1,19 @@
 # description = "zsh shell config";
 
 # Notes:
-# If you get `zsh side` errors, delete ~/.zcompdump and ~/.config/zsh/.zcompdump and run `zi update`
+# If you get `zsh side` errors, delete ~/.zcompdump and ~/.config/zsh/.zcompdump.
 # installing multiple highlighters causes "zsh_zle-highlight-buffer-p:4: permission denied error
 # in this case it was trapd00r/zsh-syntax-highlighting-filetypes which highlights more than filetypes turns out
 
 # TO-DONE: evaluate oh-my-zsh, prezto
 #          o-m-z is too all-encompassing still, but has best support
 #          prezto not worth looking into imo because I want something stable
-#          ironically this means going back to `zi` for now
 
-
-# TODO:  MIGRATE OFF ZI
+# DONE: migrated off zi. Plugins are programs.zsh.plugins now; the zi bootstrap
+#       and plugin list were deleted in 3443c94 after turning out to be unsourced.
+# DONE: prompt is starship, for every shell, from
+#       pkgs/cli/shell-util/appearance-cli/starship.nix. powerlevel10k and its
+#       1659-line .p10k.zsh are gone.
 
 { config, ... }:
 {
@@ -31,7 +33,6 @@ let zshPluginRequiresList = with pkgs; [
     zsh-completions
     zsh-autocomplete
     zsh-autosuggestions
-    zsh-powerlevel10k
     zsh-system-clipboard
     zsh-you-should-use
 ];
@@ -41,8 +42,6 @@ in
     home.packages = zshPluginRequiresList;
     
     programs.zsh = let               
-        p10k_cfg            = lib.fileContents ./config/zsh-powerlevel10k/.p10k.zsh;
-        instant_prompt_cfg  = lib.fileContents ./config/p10k.zsh;
         bindings_cfg    = lib.fileContents ./config/initial-bindings.zsh;
         setopts_cfg     = lib.fileContents ./config/initial-setopts.zsh;
         zstyle_cfg      = lib.fileContents ./config/initial-zstyle.zsh;
@@ -97,17 +96,8 @@ in
                 name = pkgs.zsh-autosuggestions.pname;
                 src = pkgs.zsh-autosuggestions;
             }
-            {
-                # The theme must be sourced before config/zsh-powerlevel10k/.p10k.zsh,
-                # which is why that block lives in the unordered initContent below.
-                # `src` is the installed theme dir, not .src: the package puts the
-                # .zsh-theme there next to gitstatus/ and internal/, which it needs
-                # at runtime, whereas .src is the raw checkout. Canonical path used
-                # rather than the share/zsh-powerlevel10k compat symlink.
-                name = "powerlevel10k";
-                src  = "${pkgs.zsh-powerlevel10k}/share/zsh/themes/powerlevel10k";
-                file = "powerlevel10k.zsh-theme";
-            }
+            # No prompt theme here: the prompt is starship, enabled for every
+            # shell in pkgs/cli/shell-util/appearance-cli/starship.nix.
             { 
                 name = pkgs.zsh-system-clipboard.pname; 
                 src = pkgs.zsh-system-clipboard;
@@ -170,8 +160,9 @@ in
 
             #################PASSWORD ENTRY/CONFIRM DIALOGS GO ABOVE##############################
 
-            # Powerlevel10k instant prompt.  anything requiring input/perf goes above, else below
-                ${instant_prompt_cfg}
+            # Anything requiring console input (password prompts, [y/n]) goes above
+            # here; everything else below. Kept as a marker now that the p10k
+            # instant prompt that used to live here is gone.
 
             # keybindings from various configs
                 ${bindings_cfg}
@@ -203,13 +194,6 @@ in
             compinit -C
             '')
         ''
-            # p10k's settings must be sourced *after* the theme itself, and
-            # home-manager emits programs.zsh.plugins between mkOrder 550 and
-            # this unordered block -- so this cannot move back up to 550.
-            ### p10k cfg start
-            ${p10k_cfg}
-            ### p10k cfg end
-
             source <(${pkgs.cod}/bin/cod init $$ zsh)
 
             # Aliases live in nix now, see users/elly/aliases/shellAliases.nix.
