@@ -2,7 +2,7 @@
 # and may be overwritten by future invocations.  Please make changes
 # to /etc/nixos/configuration.nix instead.
 { ... }:
-{ flake.modules.nixos.tenacityHardware = { config, lib, pkgs, modulesPath, ... }:
+{ flake.modules.nixos.tenacityHardware = { config, lib, modulesPath, ... }:
 {
   imports =
     [ (modulesPath + "/installer/scan/not-detected.nix")
