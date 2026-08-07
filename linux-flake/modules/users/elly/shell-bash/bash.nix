@@ -6,29 +6,9 @@
 { pkgs, ... }:
 
 {
-    # bash line editor, allows zsh-like line editor tricks and bindings
-    home.packages = with pkgs; [
-        blesh
-    ];
-    home.file.".blerc".text = ''
-        bleopt complete_menu_style=desc
-
-        bleopt menu_desc_multicolumn_width=
-
-        # Note: If you would like to combine fzf-completion with bash_completion, you
-        # need to load bash_completion earlier than fzf-completion.
-
-        # source ${pkgs.bash-completion}/etc/bash_completion
-
-        _ble_contrib_fzf_base=${pkgs.fzf}/share/fzf
-
-        # Set up fzf
-        ble-import -d ${pkgs.blesh}/share/blesh/contrib/integration/fzf-completion.bash
-        ble-import -d ${pkgs.blesh}/share/blesh/contrib/integration/fzf-key-bindings.bash
-
-
-
-    '';
+    # blesh and .blerc are owned by shell-bash/blesh.nix. This file used to
+    # declare both as well, and since home.file.<n>.text is types.lines the two
+    # definitions concatenated -- the generated .blerc ran every ble-import twice.
     programs.bash = {
         enable = true;
         enableCompletion = true;
@@ -48,8 +28,12 @@
 
 
             [[ ''$- == *i* ]] && source -- ${pkgs.blesh}/share/blesh/ble.sh --attach=none
-            eval "''$(starship init bash)"
-            
+
+            # starship is NOT initialised here: programs.starship.enableBashIntegration
+            # (pkgs/cli/shell-util/appearance-cli/starship.nix) already emits an init
+            # later in this file, using the store path rather than bare `starship`.
+            # Doing it here as well ran it twice.
+
             source <(cod init ''$''$ bash)
 
 
