@@ -4,7 +4,7 @@
         imports = with config.flake.modules.nixos; [
             desktop
             durandalHardware
-            # impermanence-WARN-README  # see module for warnings
+            impermanence-WARN-README  # see module for warnings
         ];
 
         nixpkgs.hostPlatform = "x86_64-linux";
