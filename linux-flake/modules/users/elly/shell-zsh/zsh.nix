@@ -178,9 +178,6 @@ in
             # end zstyle
 
             typeset -U path cdpath fpath manpath              # -U = keep these arrays unique, i.e. dedupe $PATH etc.
-            autoload -U add-zsh-hook                          # makes add-zsh-hook callable. Nothing here registers a hook
-                                                              # any more (the old precmd/preexec ones are commented out in
-                                                              # config/.zshrc.old); kept because zi plugins expect it loaded.
 
             zmodload zsh/terminfo                             # provides the $terminfo array. Required by config/initial-bindings.zsh,
                                                               # which reads terminfo[khome] / terminfo[kend] to bind Home and End.
