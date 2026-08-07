@@ -16,11 +16,9 @@
   # secret management
     sops-nix.url                                = "github:mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows             = "nixpkgs";
-    sops-nix.inputs.nixpkgs-stable.follows      = "nixpkgs";
 
   # Home Manager
     home-manager.url                            = "github:nix-community/home-manager/master";
-    home-manager-unstable.url                   = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager.inputs.nixpkgs.follows         = "nixpkgs";
 
   # populate nix index
@@ -51,10 +49,13 @@
     # homeManagerModules = import ./modules/home-manager
 
     # TODO: actually learn overlays
-    overlays        = import ../misc/overlays {inherit inputs;};
+    # This used to be `overlays = import ../misc/overlays { inherit inputs; };`,
+    # which was broken two ways: misc/overlays does not exist, and ../ escapes
+    # this flake's root so it could never resolve in a pure evaluation. It only
+    # ever failed when something forced the `overlays` output, which nothing did.
 
-  
-  
+
+
   # nire-lysithea (macbook)
     darwinConfigurations."nire-lysithea"     = darwin.lib.darwinSystem {
       specialArgs = { inherit inputs ; };
