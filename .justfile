@@ -30,7 +30,11 @@ diff ref="HEAD~1" host="":
 
 # Find modules that nothing imports (also runs as part of `just check`)
 orphans:
-    @python3 {{ flake }}/scripts/find-orphans.py {{ flake }}/modules
+    @python3 {{ flake }}/scripts/modules.py orphans {{ flake }}/modules
+
+# Show what each aggregate contains; `just modules --reverse` inverts it
+modules *args:
+    @python3 {{ flake }}/scripts/modules.py tree {{ flake }}/modules {{ args }}
 
 # Print a dotfile as home-manager generates it, e.g. `just dotfile .zshrc`
 dotfile name host="":

@@ -26,7 +26,7 @@
             orphaned-modules = pkgs.runCommand "orphaned-modules"
                 { nativeBuildInputs = [ pkgs.python3 ]; }
                 ''
-                    if ! python3 ${../scripts/find-orphans.py} ${./.} > "$out"; then
+                    if ! python3 ${../scripts/modules.py} orphans ${./.} > "$out"; then
                         cat "$out" >&2
                         exit 1
                     fi
