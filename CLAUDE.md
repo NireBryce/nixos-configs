@@ -170,6 +170,9 @@ that does not need a more specific tag; start broad and narrow as things clarify
 
 ## Repo docs worth reading
 
+- `linux-flake/flake-parts-reference.md` — the flake-parts machinery this config
+  depends on, with the upstream source backing each claim. Read this before
+  changing anything structural.
 - `linux-flake/2026-08-06 changelog.md` — the flake-parts cleanup: what was
   broken, what changed, how each refactor was verified.
 - `linux-flake/home-manager-cutover.md` — first-switch runbook for the HM change.
