@@ -72,14 +72,22 @@ import. That is the point, per the README.
 level is `{ flake.modules.<class>.<name> = …; }` or similar — never a bare NixOS
 or Home Manager module.
 
-### The trap that actually broke this flake
+### The trap that has broken this flake twice
 
 Dropping a raw NixOS module into `modules/` (for example fresh
 `nixos-generate-config` output) makes flake-parts try to resolve that module's
 `modulesPath` argument through its own `_module.args`, and evaluation dies with
-`error: infinite recursion encountered`. The dendritic migration re-wrapped these
-in bulk (`67a1284`), one still slipped through, and it left the whole flake
-unevaluable until `922289e`. The fix is always to wrap it:
+`error: infinite recursion encountered`.
+
+Worth knowing it has happened twice: the dendritic migration re-wrapped these in
+bulk (`67a1284`), and later `9fa44b2` — a Claude Code session — added
+`hosts/tenacity/hardware-configuration.nix` as 95 lines of unwrapped
+`nixos-generate-config` output, fixed in `922289e`. So this is a mistake an
+agent plausibly makes here, not just a theoretical one.
+
+It is easy to miss because the error names `modulesPath` rather than the file
+you added. If you add or regenerate a hardware config, wrap it in the same
+commit:
 
 ```nix
 { ... }:
