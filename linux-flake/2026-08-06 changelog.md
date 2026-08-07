@@ -67,6 +67,11 @@ Point 3 is the whole argument for having checks. Add them first next time.
   one `initContent` mkMerge (`mkBefore` / `mkOrder 550` / unordered), which the
   file's own TODO block had already spelled out. `xorg.xwininfo` → `xwininfo`.
 
+- `72a2bf7` — `pkgs-hm/` (104 raw HM modules behind a nested `import-tree`,
+  outside the flake-parts tree entirely) → `modules/pkgs/{cli,gui,linux-utils}`,
+  each file its own flake-parts module opting into its group. Byte-identical
+  output. 119 addressable homeManager modules, up from 15.
+
 ## How it was verified
 
 Every refactor was diffed attribute-by-attribute against its predecessor, not
