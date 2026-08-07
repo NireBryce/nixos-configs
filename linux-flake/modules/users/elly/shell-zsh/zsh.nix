@@ -177,10 +177,14 @@ in
                 ${zstyle_cfg}                                     
             # end zstyle
 
-            typeset -U path cdpath fpath manpath              # TODO: magic, no idea what it does anymore.
-            autoload -U add-zsh-hook                          # TODO: Magic, no idea what it does anymore.
+            typeset -U path cdpath fpath manpath              # -U = keep these arrays unique, i.e. dedupe $PATH etc.
+            autoload -U add-zsh-hook                          # makes add-zsh-hook callable. Nothing here registers a hook
+                                                              # any more (the old precmd/preexec ones are commented out in
+                                                              # config/.zshrc.old); kept because zi plugins expect it loaded.
 
-            zmodload zsh/terminfo                             # TODO: I think this is needed for `kitty` terminal
+            zmodload zsh/terminfo                             # provides the $terminfo array. Required by config/initial-bindings.zsh,
+                                                              # which reads terminfo[khome] / terminfo[kend] to bind Home and End.
+                                                              # Not kitty-specific, despite the old note here.
 
             WORDCHARS='*?[]~=&;!#$%^(){}<>';                  # Dont consider certain characters part of the word for nav
             
@@ -201,14 +205,12 @@ in
         ''
             source <(${pkgs.cod}/bin/cod init $$ zsh)
             
-            # TODO: pull these into nix
-            # Aliases
-                alias "ll"="ls -l";
-                alias "cp"="cp -i";                                     # Confirm before overwriting something
-                alias "exa"="eza --icons=always";                       # back compat for one of the tools
-                alias "ls"="eza --icons=always --header --group-directories-first --hyperlink";
-                alias "rustdevshell"="nix develop ~/nixos/dev-shells/rust#";
-            
+            # Aliases live in nix now, see users/elly/aliases/shellAliases.nix.
+            # home.shellAliases is emitted *after* this block, so anything
+            # defined here is silently overridden -- ll/cp/exa/ls used to be
+            # duplicated here and were already dead. `ls` resolves through
+            # programs.eza (pkgs/cli/shell-util/navigation/eza.nix), not here.
+
             # Free up bindings for zellij
             ${zellij_keys_cfg}  
 
@@ -219,13 +221,17 @@ in
             # Inshellisense
                 # eval "''$(is init zsh)"
 
-            # homebrew
-            export PATH="/opt/homebrew/bin:$PATH" # TODO: pull this out into nix's path definitions, matters for darwin
-            
+            # homebrew: now declared via home.sessionPath below, guarded to darwin.
+
             # Justfile
             eval "''$(${pkgs.just}/bin/just --completions zsh)"
         ''
         ];
     };
+
+    # Was `export PATH="/opt/homebrew/bin:$PATH"` hardcoded in the block above,
+    # which on the NixOS hosts only ever prepended a directory that does not
+    # exist. home.sessionPath prepends too, so darwin behaviour is unchanged.
+    home.sessionPath = lib.optionals pkgs.stdenv.isDarwin [ "/opt/homebrew/bin" ];
 };
 }
