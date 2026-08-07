@@ -42,12 +42,24 @@ Everything below is about `linux-flake/`.
 `just` recipes live in the root `.justfile` and work from anywhere in the repo:
 
 ```sh
-just check      # nix flake check -- builds both hosts' toplevels, on Linux only
+just check      # nix flake check -- host toplevels on Linux, orphan check everywhere
 just build      # nh os build for this host, no activation
 just switch     # nh os switch (applies Home Manager too, see below)
 just update     # flake update + re-check
 just fmt        # see "formatting" before running this
+
+just diff HEAD~1              # what changed in a host's config vs a git ref
+just dotfile .zshrc           # a dotfile as home-manager actually generates it
+just orphans                  # modules nothing imports
+just add-pkg cli ripgrep      # new package module, correctly opted in
+just new-host-hardware NAME   # wrap nixos-generate-config output safely
 ```
+
+`just orphans` is also a flake check (`checks.<system>.orphaned-modules`). It
+catches the one failure mode evaluation cannot: a module that is never opted
+into an aggregate is valid, evaluates fine, and simply does nothing. Being
+static analysis it is platform independent, so it is the only real check that
+runs on darwin.
 
 For iterating, evaluate directly rather than building — it is far faster and
 works on any platform:

@@ -28,6 +28,10 @@ fmt:
 diff ref="HEAD~1" host="":
     {{ flake }}/scripts/diff-config.sh {{ ref }} {{ host }}
 
+# Find modules that nothing imports (also runs as part of `just check`)
+orphans:
+    @python3 {{ flake }}/scripts/find-orphans.py {{ flake }}/modules
+
 # Print a dotfile as home-manager generates it, e.g. `just dotfile .zshrc`
 dotfile name host="":
     @{{ flake }}/scripts/dotfile.sh {{ name }} {{ host }}

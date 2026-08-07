@@ -6,15 +6,32 @@
 # class of breakage without building anything.
 { config, lib, ... }:
 {
-    perSystem = { system, ... }:
+    perSystem = { system, pkgs, ... }:
     let
         hostsForThisSystem = lib.filterAttrs
             (_: host: host.config.nixpkgs.hostPlatform.system == system)
             config.flake.nixosConfigurations;
-    in
-    {
-        checks = lib.mapAttrs'
+
+        hostChecks = lib.mapAttrs'
             (name: host: lib.nameValuePair "nixos-${name}" host.config.system.build.toplevel)
             hostsForThisSystem;
+    in
+    {
+        checks = hostChecks // {
+            # A module that never gets opted into an aggregate is valid, evaluates
+            # fine, and does nothing -- so no amount of evaluating catches it.
+            # Static reachability over the module tree does. Unlike the host
+            # checks this is platform independent, so it is the one real check
+            # that also runs on darwin.
+            orphaned-modules = pkgs.runCommand "orphaned-modules"
+                { nativeBuildInputs = [ pkgs.python3 ]; }
+                ''
+                    if ! python3 ${../scripts/find-orphans.py} ${./.} > "$out"; then
+                        cat "$out" >&2
+                        exit 1
+                    fi
+                    cat "$out"
+                '';
+        };
     };
 }
