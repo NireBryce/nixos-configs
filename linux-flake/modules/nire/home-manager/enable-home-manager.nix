@@ -1,8 +1,16 @@
 { config, inputs, ... }:
+let
+    # Bound out here on purpose. The inner module below takes the NixOS `config`
+    # so it can read config.nire.primaryUser, which shadows this file's
+    # flake-parts `config` -- so config.flake.modules.* has to be resolved
+    # before that shadowing happens.
+    ellyHome = config.flake.modules.homeManager.ellyHomeManager;
+in
 {
     flake.modules.nixos.base.imports = [ config.flake.modules.nixos.home-manager ];
 
     flake.modules.nixos.home-manager =
+    { config, ... }:
     {
         imports = [
             inputs.home-manager.nixosModules.home-manager
@@ -14,7 +22,7 @@
             useGlobalPkgs   = true;
             useUserPackages = true;
 
-            users.elly = config.flake.modules.homeManager.ellyHomeManager;
+            users.${config.nire.primaryUser} = ellyHome;
         };
     };
 }

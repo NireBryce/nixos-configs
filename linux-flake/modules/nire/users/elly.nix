@@ -3,14 +3,14 @@
     flake.modules.nixos.base.imports = [ config.flake.modules.nixos.elly ];
 
     flake.modules.nixos.elly =
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
     users.mutableUsers = false;
-    users.users = { 
+    users.users = {
         # groups = {
         #     elly = { };
         # };
-        elly = {
+        ${config.nire.primaryUser} = {
             # group = "elly";
             shell                 = pkgs.bash;
             isNormalUser          = true;

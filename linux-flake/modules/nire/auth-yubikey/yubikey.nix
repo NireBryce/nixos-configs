@@ -4,7 +4,7 @@
 
     flake.modules.nixos.auth-yubikey = 
 { pkgs, lib, config, ... }: 
-let homeDirectory = "${config.users.users.elly.home}";  
+let homeDirectory = "${config.users.users.${config.nire.primaryUser}.home}";
 in
 {
     environment.systemPackages = with pkgs; [

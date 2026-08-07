@@ -3,7 +3,7 @@
     flake.modules.nixos.base.imports = [ config.flake.modules.nixos.ssh ];
 
     flake.modules.nixos.ssh =
-{ ... }: 
+{ config, ... }:
 {
     services.openssh = {
         enable                          = true;
@@ -20,7 +20,7 @@
             AuthenticationMethods       publickey
         '';
     };
-    users.users.elly = { 
+    users.users.${config.nire.primaryUser} = {
         openssh.authorizedKeys.keys = [
             ''ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILk2lST7kOSRlanAKhl42b9IQib1hzrbxlR5pve/X37D elly@nire-lysithea'' 
             ''ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL0sEOPmravXojxuKqN3XwplTbuz2p36UDTxmUthktnX elly@durandal''

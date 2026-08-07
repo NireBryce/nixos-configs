@@ -2,8 +2,8 @@
 { 
     flake.modules.nixos.desktop.imports = [ config.flake.modules.nixos.virtualization ];
 
-flake.modules.nixos.virtualization = 
-{ pkgs, ... }: 
+flake.modules.nixos.virtualization =
+{ config, pkgs, ... }:
 {
     environment.systemPackages = with pkgs; [
         distrobox
@@ -35,7 +35,7 @@ flake.modules.nixos.virtualization =
         autoSubUidGidRange = true;
     };
 
-    users.users.elly = { 
+    users.users.${config.nire.primaryUser} = {
         # credit: https://github.com/NixOS/nixpkgs/issues/389088#issuecomment-3379482882
         subUidRanges = [ { startUid = 100000; count = 65536; } ];
         subGidRanges = [ { startGid = 100000; count = 65536; } ];

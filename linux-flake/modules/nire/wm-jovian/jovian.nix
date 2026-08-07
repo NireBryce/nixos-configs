@@ -20,7 +20,7 @@
             enable              = true;
             autoStart           = true;
             desktopSession      = "plasma";
-            user                = "elly";
+            user                = config.nire.primaryUser;
         };
         hardware.has.amd.gpu    = true;
 
@@ -62,7 +62,7 @@
     #     if you want it to work, it needs some work that I cannot do.
     #     https://github.com/NixOS/nixpkgs/pull/347279
         enable      = true;
-        user        = "elly"; # TODO: use flake-parts to make this declared centrally
+        user        = config.nire.primaryUser;
         ui.enable   = true;
         adjustor = {
             enable = true;
