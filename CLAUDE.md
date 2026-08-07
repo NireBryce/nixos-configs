@@ -22,7 +22,15 @@ Three independent flakes. Only one of them is flake-parts.
 - **`macos/`** — a separate, older, plain flake for `nire-lysithea`. Not
   flake-parts, and its inputs deliberately diverge (it pins `nixpkgs-unstable`,
   linux-flake pins `nixos-unstable`). Changes here do not propagate.
-- **`misc/`** — not wired into any flake. Standalone modules, a rust dev-shell
+  **It currently does not evaluate**: `nire-lysithea-home.nix` imports seven
+  files from `linux-flake/configs/home-manager/user-elly/`, a layout deleted in
+  `8244eb9`. Those modules now live under `linux-flake/modules/users/elly/` *as
+  flake-parts modules*, so they cannot be imported by path any more. Fixing it
+  means either consuming linux-flake's `flake.modules.homeManager` as an input
+  or folding macos in — a design decision, not a repair. Do not assume this
+  flake works.
+- **`misc/`** — not wired into any flake at all; its only referent was a broken
+  `overlays` line removed in `d08bc50`. Standalone modules, a rust dev-shell
   flake, util scripts. Treat as a scratch area.
 
 Everything below is about `linux-flake/`.
@@ -121,15 +129,46 @@ Inside a flake module prefer **`config.flake.modules.…` over `self.modules.…
 same data without the round trip through flake outputs, and it avoids a class of
 recursion errors.
 
+### There are two different `config`s, and they shadow
+
+Every file here has an outer flake-parts scope and an inner NixOS/HM module.
+Both call their argument `config`, and they are **not the same thing**:
+
+```nix
+{ config, ... }:                       # flake-parts config: config.flake.modules.*
+{
+    flake.modules.nixos.base.imports = [ config.flake.modules.nixos.foo ];
+
+    flake.modules.nixos.foo =
+    { config, ... }:                   # NixOS config: config.services.*, config.nire.*
+    {
+        # the outer `config` is unreachable from in here
+    };
+}
+```
+
+A module written as a bare attrset (no `{ ... }:` line) has **no inner scope**,
+so `config` inside it still means the flake-parts one. Adding an argument list
+to reach the NixOS `config` silently changes what every existing `config` in
+that module refers to, and `config.flake.modules.…` starts failing.
+
+The fix is to bind what you need from the outer scope in a `let` *before* the
+shadowing — see `modules/nire/home-manager/enable-home-manager.nix`, which has
+to do exactly this to read `config.nire.primaryUser` while still referencing
+`config.flake.modules.homeManager.ellyHomeManager`.
+
 ### Home Manager is NixOS-integrated
 
-`home-manager.users.elly` is set from the NixOS side with `useGlobalPkgs` and
-`useUserPackages`. There is no `nh home switch` step and no `homeConfigurations`
-output; `just switch` applies both. Consequences worth knowing:
+`home-manager.users.${config.nire.primaryUser}` is set from the NixOS side with
+`useGlobalPkgs` and `useUserPackages`. There is no `nh home switch` step and no
+`homeConfigurations` output; `just switch` applies both. Consequences worth
+knowing:
 
 - HM rejects `nixpkgs.*` options under `useGlobalPkgs`. `allowUnfree` comes from
   the system (`modules/nire/nix/nix-settings/`).
 - `home.profileDirectory` is `/etc/profiles/per-user/elly`, not `~/.nix-profile`.
+- Activation runs as the `home-manager-elly.service` systemd unit, not from a
+  login shell, so its `PATH` is only coreutils/findutils/gnugrep/gnused/systemd.
 - See `linux-flake/home-manager-cutover.md` for the migration runbook.
 
 ## Working in this repo
@@ -157,6 +196,18 @@ safe — reordering module imports permutes list-valued options like
 `systemPackages`, which changes the hash without changing the package set. Use a
 `git worktree` at the previous commit to evaluate both sides.
 
+**Also spot-check the values, not just the hash.** An identical drvPath proves
+the output did not move; it does not prove the mechanism you introduced is the
+one producing it. After making something indirect, evaluate the indirection:
+
+```sh
+nix eval .#nixosConfigurations.nire-tenacity.config.jovian.steam.user   # => "elly"
+```
+
+**Report honestly.** Everything in this repo has so far been verified by
+evaluation only — nothing has been built or switched from the dev machine, and
+it cannot be. Say so rather than implying a change is known to work.
+
 ## Conventions
 
 **Formatting is deliberate.** The aligned-`=` columns throughout `modules/` are
@@ -167,6 +218,19 @@ surrounding alignment when editing.
 
 **Namespacing**, per `notes-and-fixes.md`: `nire` is the namespace for any module
 that does not need a more specific tag; start broad and narrow as things clarify.
+Custom options live under it too — `nire.primaryUser` is the account name; never
+hardcode `"elly"` in a nixos module, read that option instead.
+
+**Leave a grep trail when you make a name dynamic.** Turning
+`users.users.elly` into `users.users.${config.nire.primaryUser}` makes the old
+string unfindable, which is the real cost of the indirection. The convention
+here is to put the literal old form in a comment on the declaration — see the
+`GREP NOTE` in `modules/nire/users/primary-user.nix`, which is now the only
+place `users.users.elly` appears. Do the same for any future rename.
+
+**VSCode settings live only at the repo root.** `linux-flake/.vscode/` and
+`macos/.vscode/` were byte-identical copies and were removed; do not recreate
+them.
 
 ## Repo docs worth reading
 
