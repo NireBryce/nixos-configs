@@ -404,6 +404,27 @@ evaluate" section should then be deleted rather than left to rot.
   the old one is parked at `ignore/macos-old/`. Whether the darwin flake comes
   back as a separate flake is an open question from Bob's prompt; not acting on
   it unasked.
+- **Two modules declare the same session config.**
+  `nire/shell-config/shell-env/shell-env.nix` and
+  `nireUser/elly/elly-session/elly-session.nix` hold byte-identical
+  `home.sessionVariables` (12 entries) and `home.sessionPath` (8 entries);
+  `shell-env.nix` additionally has `home.shellAliases`. `git log --follow` traces
+  both to `3278862`, so this is a split during the den restructure rather than
+  one superseding the other, and both land in categories durandal selects.
+
+  Verified against the locked home-manager (`2de7205`): `sessionVariables` is
+  `lazyAttrsOf (oneOf …)` and merges silently because the values are equal, but
+  `sessionPath` is `listOf str`, so definitions **concatenate — every path entry
+  is currently duplicated**. Confirmed by evaluating both types with two
+  identical definitions.
+
+  The fix is to delete both options from `elly-session.nix` and let
+  `shell-env.nix` own them: it is the more complete of the two and sits with the
+  rest of the shell config, whereas `nireUser/elly` is about identity. Held until
+  the flake evaluates, since it is the only one of the shell cleanups that
+  changes real output and cannot be shown correct before then. This is the
+  sibling branch's `.blerc` lesson in a different option — one owning module per
+  generated thing.
 - **`misc/` is untracked** — it exists on disk, is not in `.gitignore`, and was
   simply never added.
 
