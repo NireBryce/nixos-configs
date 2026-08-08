@@ -209,23 +209,32 @@
                     autoload -Uz compinit
                     compinit -C
                 '')
+                    # Deliberately no aliases in this block. `#` inside a '' string
+                    # is shell text, not a Nix comment, so the reasoning lives
+                    # above the string rather than being emitted into ~/.zshrc:
+                    #
+                    #   home.shellAliases is emitted *after* initContent and later
+                    #   definitions win, so an alias written here that also exists
+                    #   there is dead. Four were: ll, cp and exa duplicated
+                    #   shell-env.nix exactly, and `ls` lost to the `ls = eza` that
+                    #   programs.eza generates.
+                    #
+                    #   That last one loses nothing. Both zsh and bash expand
+                    #   aliases recursively, so `ls` -> `eza` -> the flagged
+                    #   `eza --icons auto --color auto --git -1 --header --hyperlink
+                    #   --group-directories-first` that programs.eza.extraOptions
+                    #   builds. Adding an explicit `ls` alias back would *break*
+                    #   that chain and drop --color, --git and -1. Change the flags
+                    #   in nirePackages/shell-apps/navigation/eza.nix instead.
+                    #
+                    #   `rustdevshell` did survive, nothing else defining it, but
+                    #   pointed at `~/nixos/dev-shells/rust#` -- stale twice over.
+                    #   The checkout is nixos-configs, and that dev-shell is parked
+                    #   in ignore/dev-shells/rust/, wired into nothing.
+                    #
+                    # Add aliases to home.shellAliases in shell-env.nix.
                     ''
                     source <(${pkgs.cod}/bin/cod init $$ zsh)
-
-                    # No aliases here. home.shellAliases is emitted *after* this
-                    # block and later definitions win, so anything written here
-                    # that also exists there is dead. Four did: ll, cp and exa
-                    # duplicated shell-env.nix exactly, and `ls` was overridden by
-                    # the shorter `ls = eza` from the eza module -- losing the
-                    # --header/--group-directories-first/--hyperlink flags it set.
-                    #
-                    # `rustdevshell` was the one that did survive, because nothing
-                    # else defines it. Its target was stale twice over:
-                    # `~/nixos/dev-shells/rust#` -- the checkout is nixos-configs,
-                    # and the dev-shell is parked in ignore/dev-shells/rust/, which
-                    # is not wired into anything. Dropped rather than guessed at.
-                    #
-                    # Add aliases to home.shellAliases in shell-env.nix instead.
 
                     # Free up bindings for zellij
                     ${zellij_keys_cfg}  
