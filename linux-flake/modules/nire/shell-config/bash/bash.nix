@@ -48,7 +48,6 @@
                 #? Extra commands that should be run when initializing an interactive shell.
                 initExtra = ''
                     [[ ''$- == *i* ]] && source -- ${pkgs.blesh}/share/blesh/ble.sh --attach=none
-                    eval "''$(starship init bash)"
 
                     source <(cod init ''$''$ bash)
                     [[ ! ''${BLE_VERSION-} ]] || ble-attach
