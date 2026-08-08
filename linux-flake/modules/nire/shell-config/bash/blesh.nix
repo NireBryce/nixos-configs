@@ -2,12 +2,13 @@
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
+        # This module owns .blerc. bash.nix carried a byte-identical copy of it
+        # until they were merged here -- home.file.<n>.text is types.lines, so
+        # both definitions concatenated and every ble-import below ran twice.
         flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
             # bash line editor, allows zsh-like line editor tricks and bindings
             programs.bash.blesh.enable = true;
-        };
-    
-        flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
+
             home.file.".blerc".text = ''
                 bleopt complete_menu_style=desc
 
