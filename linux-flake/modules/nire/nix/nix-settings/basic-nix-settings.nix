@@ -4,10 +4,15 @@
     in {
     
         flake.modules.homeManager.${moduleName} = {
-            nixpkgs.config = {
-                allowUnfree = true; # Disable if you don't want unfree packages
-                allowUnfreePredicate = (_: true); # Workaround for https://github.com/nix-community/home-manager/issues/2942
-            };
+            # `nixpkgs.config` cannot be set here. Home Manager is NixOS-managed
+            # with useGlobalPkgs, which makes it reject every `nixpkgs.*` option
+            # outright rather than ignore it. allowUnfree therefore comes from the
+            # nixos module below, which applies to the same pkgs instance.
+            #
+            # This also drops the `allowUnfreePredicate = (_: true)` workaround for
+            # home-manager issue #2942 that used to sit here. If unfree packages
+            # start failing in home config, that is the first thing to look at.
+
             # nix.extraOptions = "experimental-features = nix-command flakes";
             # nix.settings = {
             #     trusted-users = [ "root" ];
