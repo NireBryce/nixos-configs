@@ -192,10 +192,14 @@
                         ${zstyle_cfg}                                     
                     # end zstyle
 
-                    typeset -U path cdpath fpath manpath              # TODO: magic, no idea what it does anymore.
-                    autoload -U add-zsh-hook                          # TODO: Magic, no idea what it does anymore.
+                    typeset -U path cdpath fpath manpath              # -U keeps these arrays unique, i.e. dedupes $PATH and friends
+                    autoload -U add-zsh-hook                          # makes add-zsh-hook callable. Nothing here registers a hook,
+                                                                      # so this is currently unused
 
-                    zmodload zsh/terminfo                             # TODO: I think this is needed for `kitty` terminal
+                    zmodload zsh/terminfo                             # provides the $terminfo array, which
+                                                                      # config/initial-bindings.zsh reads as terminfo[khome] /
+                                                                      # terminfo[kend] to bind Home and End. Not kitty-specific,
+                                                                      # despite the old note here.
 
                     WORDCHARS='*?[]~=&;!#$%^(){}<>';                  # Dont consider certain characters part of the word for nav
                 '')
@@ -208,13 +212,20 @@
                     ''
                     source <(${pkgs.cod}/bin/cod init $$ zsh)
 
-                    # TODO: pull these into nix
-                    # Aliases
-                        alias "ll"="ls -l";
-                        alias "cp"="cp -i";                                     # Confirm before overwriting something
-                        alias "exa"="eza --icons=always";                       # back compat for one of the tools
-                        alias "ls"="eza --icons=always --header --group-directories-first --hyperlink";
-                        alias "rustdevshell"="nix develop ~/nixos/dev-shells/rust#";
+                    # No aliases here. home.shellAliases is emitted *after* this
+                    # block and later definitions win, so anything written here
+                    # that also exists there is dead. Four did: ll, cp and exa
+                    # duplicated shell-env.nix exactly, and `ls` was overridden by
+                    # the shorter `ls = eza` from the eza module -- losing the
+                    # --header/--group-directories-first/--hyperlink flags it set.
+                    #
+                    # `rustdevshell` was the one that did survive, because nothing
+                    # else defines it. Its target was stale twice over:
+                    # `~/nixos/dev-shells/rust#` -- the checkout is nixos-configs,
+                    # and the dev-shell is parked in ignore/dev-shells/rust/, which
+                    # is not wired into anything. Dropped rather than guessed at.
+                    #
+                    # Add aliases to home.shellAliases in shell-env.nix instead.
 
                     # Free up bindings for zellij
                     ${zellij_keys_cfg}  
