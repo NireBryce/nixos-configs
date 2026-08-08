@@ -10,7 +10,7 @@ in {
         };
         
         programs.nix-ld.enable = true; # Needed for VSCode remote connection, etc
-        environment.sessionVariables.NIXOS_OZONE_WL = "1"; # TODO: this is erroring benignly
+        environment.sessionVariables.NIXOS_OZONE_WL = "1";
         nix.nixPath = [ "nixpkgs=${inputs.nixpkgs}" ]; # https://discourse.nixos.org/t/vs-code-and-nix-ide-newbie-problems/51385/5
       };
   };
