@@ -14,16 +14,33 @@
         
         flake.modules.homeManager.${moduleName} = {
             # Notes:
-            # If you get `zsh side` errors, delete ~/.zcompdump and ~/.config/zsh/.zcompdump and run `zi update`
+            # If you get `zsh side` errors, delete ~/.zcompdump and ~/.config/zsh/.zcompdump
             # installing multiple highlighters causes "zsh_zle-highlight-buffer-p:4: permission denied error
             # in this case it was trapd00r/zsh-syntax-highlighting-filetypes which highlights more than filetypes turns out
 
             # TO-DONE: evaluate oh-my-zsh, prezto
             #          o-m-z is too all-encompassing still, but has best support
             #          prezto not worth looking into imo because I want something stable
-            #          ironically this means going back to `zi` for now
 
-            # TODO:  MIGRATE OFF ZI
+            # TO-DONE: migrate off zi. `5659567` dropped the last two references to
+            #          config/zi.zsh and config/zi-plugins.zsh, so nothing has sourced
+            #          zi since 2025-12-17; plugins are all programs.zsh.plugins now.
+            #
+            #          Seven plugins from the old zi list were never carried across, and
+            #          have therefore been off since that date without being missed.
+            #          Kept here because deleting zi-plugins.zsh deletes the only record:
+            #            Tom-Power/fzf-tab-widgets        (fzf-tab itself -> zsh-fzf-tab)
+            #            akash329d/zsh-alias-finder
+            #            jgogstad/zsh-mask
+            #            ael-code/zsh-colored-man-pages
+            #            chrissicool/zsh-256color
+            #            zpm-zsh/colorize                 (colorizes gcc/grep/etc)
+            #            RobSis/zsh-completion-generator
+            #
+            #          The z-a-* entries in that file were zi's own annexes and mean
+            #          nothing without zi. It also carried an `unset python` marked
+            #          "MAGIC: idk why this is here" -- possibly related to the
+            #          PYTHON = "PYTHON" in shell-env.nix, which is equally unexplained.
 
             # fast syntax highlighting theems
             home.file."./.config/F-Sy-H".source = ./config/zsh-f-s-highlight-themes;
