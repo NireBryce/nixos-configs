@@ -1,3 +1,7 @@
+# ORPHAN-OK: tenacity's module, and tenacity has no configuration on this branch
+# -- the den restructure dropped the host rather than migrating it. Nothing
+# imports this, deliberately. durandal takes `kde` directly rather than the
+# desktop-env category precisely so it does not pick this up.
 { lib, inputs, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
