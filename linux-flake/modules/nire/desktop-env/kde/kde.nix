@@ -1,9 +1,8 @@
-{ 
-    perSystem = {lib, pkgs, ...}:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.nixos.${moduleName} = {
+        flake.modules.nixos.${moduleName} = { pkgs, ... }: {
             services.xserver.enable = true; # TODO: I think this is still needed for xwayland
             # Enable the KDE Desktop Environment and set wayland.
             services.desktopManager.plasma6.enable = true;
@@ -39,5 +38,4 @@
                 GTK_USE_PORTAL = 1;
             };
         };
-    };
 }

@@ -1,9 +1,8 @@
-{ 
-    perSystem = {pkgs, lib, ...}:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in { 
-        flake.modules.nixos.${moduleName} = {
+        flake.modules.nixos.${moduleName} = { pkgs, ... }: {
             # zsh is handled through home-manager
             programs.zsh.enable = true;
             programs.zsh.enableCompletion = lib.mkForce false; # unless disabled, home-manager causes an extra compaudit
@@ -12,7 +11,7 @@
             ];
         };
         
-        flake.modules.homeManager.${moduleName} = {
+        flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
             # Notes:
             # If you get `zsh side` errors, delete ~/.zcompdump and ~/.config/zsh/.zcompdump
             # installing multiple highlighters causes "zsh_zle-highlight-buffer-p:4: permission denied error
@@ -236,5 +235,4 @@
                 ];
             };
         };
-    };
 }

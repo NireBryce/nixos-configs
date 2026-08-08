@@ -1,9 +1,8 @@
-{ 
-    perSystem = {pkgs, lib, ...}:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.nixos.${moduleName} = {
+        flake.modules.nixos.${moduleName} = { pkgs, ... }: {
             services.flatpak.enable = true;
             systemd.services.flatpak-repo = {
                 wantedBy = [ "multi-user.target" ];
@@ -13,5 +12,4 @@
                 '';
             };
         };
-    };
 }

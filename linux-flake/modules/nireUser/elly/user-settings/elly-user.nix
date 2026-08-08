@@ -1,10 +1,9 @@
-{ 
-    perSystem = {pkgs, lib, ...}:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
         # TODO: these modules should be stored outside of the users folder, so it's clearer when it's imported
-        flake.modules.nixos.${moduleName} = {
+        flake.modules.nixos.${moduleName} = { pkgs, ... }: {
             users.mutableUsers = false;
             users.users = { 
                 # groups = {
@@ -29,12 +28,11 @@
             };
         };
 
-        flake.modules.darwin.${moduleName} = {
+        flake.modules.darwin.${moduleName} = { pkgs, ... }: {
             fonts.packages = with pkgs; [
                 nerd-fonts.fira-code
                 nerd-fonts.iosevka
                 nerd-fonts.jetbrains-mono
             ];
         };
-    };
 }

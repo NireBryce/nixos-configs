@@ -1,5 +1,4 @@
-{ 
-    perSystem = {lib, ...}:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
@@ -11,5 +10,4 @@
                 # flake           = "/home/elly/nixos"; # TODO: see if this can be dynamically set to this flake's path
             };
         };
-    };
 }

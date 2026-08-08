@@ -1,9 +1,8 @@
-{ 
-    perSystem = {pkgs, lib, ...}:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.nixos.${moduleName} = {
+        flake.modules.nixos.${moduleName} = { pkgs, ... }: {
             environment.shells = with pkgs; [
                 fish
             ];
@@ -15,7 +14,7 @@
             ];
         };
   
-        flake.modules.homeManager.${moduleName} = {
+        flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
             programs.fish = {
             enable = true;
             interactiveShellInit = ''
@@ -26,5 +25,4 @@
             generateCompletions = true;
             };
         };
-    };
 }

@@ -1,9 +1,8 @@
-{ 
-    perSystem = {lib, config, ...}:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.nixos.${moduleName} = {
+        flake.modules.nixos.${moduleName} = { config, ... }: {
 
             boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
             boot.initrd.kernelModules = [ ];
@@ -70,5 +69,4 @@
             nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
             hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
         };
-    };
 }

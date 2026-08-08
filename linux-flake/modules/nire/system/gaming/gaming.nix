@@ -1,9 +1,8 @@
-{ 
-    perSystem = {pkgs, lib, ...}:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.nixos.${moduleName} = {
+        flake.modules.nixos.${moduleName} = { pkgs, ... }: {
             #* steam - (fhs)
             programs.steam = {
                 enable = true;
@@ -31,5 +30,4 @@
 
             ];
         };
-    };
 }

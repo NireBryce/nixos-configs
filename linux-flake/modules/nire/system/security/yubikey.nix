@@ -1,9 +1,8 @@
-{ 
-    perSystem = {pkgs, lib, config, ...}:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.nixos.${moduleName} = {
+        flake.modules.nixos.${moduleName} = { config, pkgs, ... }: {
             environment.systemPackages = with pkgs; [
                 pam_u2f
                 yubioath-flutter
@@ -52,5 +51,4 @@
                 };
             };
         };
-    };
 }

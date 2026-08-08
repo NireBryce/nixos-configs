@@ -1,9 +1,8 @@
-{ 
-    perSystem = {pkgs, lib, ...}:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.nixos.${moduleName} = {
+        flake.modules.nixos.${moduleName} = { pkgs, ... }: {
 
             programs.xwayland.enable = true;
 
@@ -14,5 +13,4 @@
                 egl-wayland # who knows what this is for                https://github.com/NVIDIA/egl-wayland/
             ];
         };
-    };
 }

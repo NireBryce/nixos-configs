@@ -1,9 +1,9 @@
-{ 
-    perSystem = {pkgs, lib, inputs, ...}: # TODO: remove need for `inputs`, try `'self?`
+{ lib, inputs, ... }:
+    # TODO: remove need for `inputs`, try `'self?`
 let
   moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-  flake.modules.nixos.${moduleName} = {
+  flake.modules.nixos.${moduleName} = { pkgs, ... }: {
         programs.vscode = {
           enable = true;
           package = pkgs.vscode-fhs;
@@ -13,5 +13,4 @@ in {
         environment.sessionVariables.NIXOS_OZONE_WL = "1";
         nix.nixPath = [ "nixpkgs=${inputs.nixpkgs}" ]; # https://discourse.nixos.org/t/vs-code-and-nix-ide-newbie-problems/51385/5
       };
-  };
 }

@@ -1,5 +1,4 @@
-{ 
-    perSystem = {lib, ...}:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
@@ -8,5 +7,4 @@
             hardware.enableRedistributableFirmware = true;
             nixpkgs.config.allowUnfree = true; # enableAllFirmware depends on this
         };
-    };
 }

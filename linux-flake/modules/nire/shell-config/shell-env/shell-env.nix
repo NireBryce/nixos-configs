@@ -1,9 +1,8 @@
-{ 
-    perSystem = {pkgs, lib, ...}:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.homeManager.${moduleName} = {
+        flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
             home.shellAliases = { 
                 # for in-place functions in aliases refer to:  https://stackoverflow.com/questions/34340575/zsh-alias-with-parameter
                 lcd                     = ''f() { cd $1 && ls -lah };f'';               
@@ -40,5 +39,4 @@
                 "$HOME/.cargo/bin"
             ];
         };
-    };
 }

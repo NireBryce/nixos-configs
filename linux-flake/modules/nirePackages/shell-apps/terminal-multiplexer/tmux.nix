@@ -1,5 +1,4 @@
-{ 
-    perSystem = {lib, ...}:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
@@ -9,5 +8,4 @@
                 enable = true;
             };
         };
-    };
 }

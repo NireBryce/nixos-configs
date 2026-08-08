@@ -1,5 +1,4 @@
-{ 
-    perSystem = {lib, ...}:
+{ lib, ... }:
   let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
   in {
@@ -8,5 +7,4 @@
             home.username       = lib.mkDefault "elly";
             home.homeDirectory  = lib.mkDefault "/home/elly"; # Darwin is different
         };
-    };
 }

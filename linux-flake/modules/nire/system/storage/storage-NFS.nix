@@ -1,5 +1,4 @@
-{ 
-    perSystem = {lib, ...}:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
@@ -16,5 +15,4 @@
             # optional, but ensures rpc-statsd is running for on demand mounting
             boot.supportedFilesystems = [ "nfs" ];
         };
-    };
 }

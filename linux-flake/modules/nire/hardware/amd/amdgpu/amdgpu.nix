@@ -1,9 +1,8 @@
-{ 
-    perSystem = {lib, inputs, pkgs, ...}:
+{ lib, inputs, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.nixos.${moduleName} = {
+        flake.modules.nixos.${moduleName} = { pkgs, ... }: {
             imports = [ inputs.nixos-hardware.nixosModules.common-gpu-amd ];
 
             environment.systemPackages = with pkgs; [
@@ -27,5 +26,4 @@
                 rocmPackages.clr.icd # https://nixos.org/manual/nixos/stable/#sec-gpu-accel-opencl-amd
             ];
         };
-    };
 }

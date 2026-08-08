@@ -1,9 +1,8 @@
-{ 
-    perSystem = {pkgs, lib, ...}:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.nixos.${moduleName} = {
+        flake.modules.nixos.${moduleName} = { pkgs, ... }: {
             environment.pathsToLink = [
             "/share/bash-completion"
             ];
@@ -12,7 +11,7 @@
             ];
         };
         
-        flake.modules.homeManager.${moduleName} = {
+        flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
             # bash line editor, allows zsh-like line editor tricks and bindings
             home.packages = with pkgs; [
                 blesh
@@ -61,5 +60,4 @@
                 logoutExtra = '''';
             };
         };
-    };
 }

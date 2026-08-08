@@ -1,9 +1,8 @@
-{ 
-    perSystem = { pkgs, lib, config, inputs, ...}:
+{ lib, inputs, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.nixos.${moduleName} = { 
+        flake.modules.nixos.${moduleName} = { config, pkgs, ... }: { 
             imports = [ inputs.jovian.nixosModules.default ]; # I think this is instead of needing them as module args?
 
             # `config.jovian.…`, not `inputs.jovian.…`: the Jovian flake exposes
@@ -75,7 +74,6 @@
                 enable = false; # conflicts with adjustor in hhd
             };
         };
-    };
 }
 
 # more examples:

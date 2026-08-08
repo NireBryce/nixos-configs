@@ -1,9 +1,8 @@
-{ 
-    perSystem = {pkgs, lib, config, inputs, ...}:
+{ lib, inputs, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.nixos.${moduleName} = 
+        flake.modules.nixos.${moduleName} = { config, pkgs, ... }:
         let   
           isEd25519 = k: k.type == "ed25519";
           getKeyPath = k: k.path;
@@ -43,5 +42,4 @@
             sopsFile = "${secretsPath}";
         };
         };
-    };
 }

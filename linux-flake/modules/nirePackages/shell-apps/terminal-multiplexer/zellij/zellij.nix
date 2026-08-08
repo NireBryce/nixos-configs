@@ -1,9 +1,8 @@
-{ 
-    perSystem = {lib, pkgs, ...}:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.homeManager.${moduleName} = { 
+        flake.modules.homeManager.${moduleName} = { pkgs, ... }: { 
             # # description = "zellij terminal multiplexer";
             home.packages = with pkgs; [
                 zellij
@@ -21,5 +20,4 @@
                 enableFishIntegration = true;
             };
         };
-    };
 }

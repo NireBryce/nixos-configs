@@ -1,5 +1,4 @@
-{ 
-    perSystem = {lib, ...}:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
@@ -32,5 +31,4 @@
                 ignores = [ ".direnv" "result" ];
             };
         };
-    };
 }

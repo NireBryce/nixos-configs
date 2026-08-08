@@ -1,5 +1,4 @@
-{ 
-    perSystem = {lib, inputs, ...}:
+{ lib, inputs, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
@@ -12,5 +11,4 @@
             programs.nix-index.enableFishIntegration = true;
             programs.nix-index-database.comma.enable = true;
         };
-    };
 }

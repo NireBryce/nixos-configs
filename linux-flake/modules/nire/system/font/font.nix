@@ -1,9 +1,8 @@
-{ 
-    perSystem = {pkgs, lib, ...}:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.nixos.${moduleName} = {
+        flake.modules.nixos.${moduleName} = { pkgs, ... }: {
             console = {
                 keyMap = "us";
                 font = "Lat2-Terminus16";
@@ -21,7 +20,7 @@
                 };
             };
         };
-        flake.modules.homeManager.${moduleName} = {
+        flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
             # font packages that are per-user through home-manager
             # duplicated in system fonts, this primarily for non-nix hosts; consider moving to there
             home.packages = with pkgs; [
@@ -30,5 +29,4 @@
                 nerd-fonts.jetbrains-mono
             ];
         };
-    };
 }

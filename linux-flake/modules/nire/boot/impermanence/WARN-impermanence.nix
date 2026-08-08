@@ -1,5 +1,4 @@
-{ 
-    perSystem = { lib, inputs, ...}:
+{ lib, inputs, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in { 
@@ -111,5 +110,4 @@
                 };
             };
         };
-    };
 }

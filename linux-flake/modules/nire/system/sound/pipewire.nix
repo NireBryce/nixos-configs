@@ -1,9 +1,8 @@
-{ 
-    perSystem = {pkgs, lib, ...}:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.nixos.${moduleName} = {
+        flake.modules.nixos.${moduleName} = { pkgs, ... }: {
             security.rtkit.enable = true; # https://nixos.wiki/wiki/PipeWire
             hardware.bluetooth.package = pkgs.bluez5-experimental;
             services.pipewire = {
@@ -31,5 +30,4 @@
             };
             # pipewire also set in graphics.extraPackages presumably for hdmi/displayport audio
         };
-    };
 }

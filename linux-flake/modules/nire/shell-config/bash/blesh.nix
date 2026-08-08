@@ -1,14 +1,13 @@
-{ 
-    perSystem = {pkgs, lib, ...}:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.homeManager.${moduleName} = {
+        flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
             # bash line editor, allows zsh-like line editor tricks and bindings
             programs.bash.blesh.enable = true;
         };
     
-        flake.modules.homeManager.${moduleName} = {
+        flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
             home.file.".blerc".text = ''
                 bleopt complete_menu_style=desc
 
@@ -26,5 +25,4 @@
                 ble-import -d ${pkgs.blesh}/share/blesh/contrib/integration/fzf-key-bindings.bash
             '';
         };
-    };
 }

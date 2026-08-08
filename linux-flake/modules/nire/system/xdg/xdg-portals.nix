@@ -1,9 +1,8 @@
-{ 
-    perSystem = {pkgs, lib, ...}:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in { 
-        flake.modules.nixos.${moduleName} = {
+        flake.modules.nixos.${moduleName} = { pkgs, ... }: {
             # should fix steam/proton/wine issues with xdg-open https://github.com/NixOS/nixpkgs/issues/160923
             xdg.portal = {
                 enable = true;
@@ -16,5 +15,4 @@
                 ];
             };
         };
-    };
 }
