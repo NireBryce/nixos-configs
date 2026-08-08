@@ -18,7 +18,7 @@ let
       ({ name, value }:
         if value == "directory"
         then collectModules (dir + "/${name}")
-        else lib.optional (lib.hasSuffix ".nix" name && name != "dirsAsProvides.nix") (stripNix name))
+        else lib.optional (lib.hasSuffix ".nix" name && name != "dirsAsCategory.nix") (stripNix name))
       (lib.mapAttrsToList lib.nameValuePair (builtins.readDir dir));
 
   # Package names within a subcategory
