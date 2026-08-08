@@ -10,202 +10,167 @@ on boot. Never suggest installing it wholesale on a machine, and be careful with
 anything touching `linux-flake/modules/nire/boot/impermanence/` or the
 `fileSystems`/`boot` options in the host hardware modules.
 
+`WARN-impermanence.nix` is reached by durandal through the `boot` category. It
+deletes the `/root` btrfs subvolume in initrd on every boot. Read it before
+changing anything near it.
+
 Secrets are sops-nix (`linux-flake/modules/nire/system/secrets/`).
 `secrets.yaml` is encrypted and committed; that is deliberate, not a mistake to
 be "fixed". Its `.sops.yaml` still enrolls `nire-tenacity` even though that host
 has no config here any more — the key is valid, leave it.
 
-## Read this first: the flake does not evaluate
+## State
 
-No output on this branch evaluates. Not one host, not `networking.hostName`:
+The flake evaluates and `nix flake check --all-systems` passes. It did not until
+recently: the branch was a stalled migration off `vic/den`, with 151 module files
+already written in flake-parts idiom while `flake.nix` still used a raw
+`nixpkgs.lib.evalModules`. `PORT-PLAN.md` records that work and what remains.
 
-```
-error: The option `perSystem' does not exist. Definition values:
-  - In `…/modules/nireUser/elly/user-settings/elly-user.nix': <function, args: {lib, pkgs}>
-```
+**Nothing here has ever been built or switched.** The dev machine is
+aarch64-darwin and the host is x86_64-linux, so building it needs a remote builder
+or binfmt, neither of which is set up. Every "verified" claim in this repo means
+*evaluates and produces the expected derivation*, never *runs*. The single
+exception is `checks.<system>.module-tree`, which is static and does build here.
 
-The cause is structural, not a typo. `linux-flake/flake.nix` has flake-parts
-**commented out** and uses a raw `nixpkgs.lib.evalModules` instead, while 151 of
-the 178 module files are written in flake-parts idiom and wrap themselves in
-`perSystem`. Nothing declares that option.
-
-**Do not treat this as a bug to patch locally.** It is the visible end of a
-half-finished migration off `vic/den`, and `PORT-PLAN.md` is the plan for
-finishing it. Anything you verify before that lands is unverified in practice —
-evaluation is the only check available here, and it currently returns nothing
-useful.
-
-A consequence worth internalising, from the sibling branch's experience: on a
-tree that cannot evaluate, bugs **serialize**. Four were found there stacked
-behind one another, each invisible until the previous was fixed. Assume the
-defect list below is incomplete.
-
-## Repo shape
-
-Three top-level areas. Only `linux-flake/` is a flake.
-
-- **`linux-flake/`** — the live config and where essentially all work happens.
-  One host: `nire-durandal` (workstation). `nire-tenacity` (handheld,
-  Jovian/SteamOS) exists in the git history and in `.sops.yaml`, but the den
-  restructure dropped the host rather than migrating it, so there are no
-  tenacity files here at all.
-- **`ignore/`** — parked material: the old macOS flake (`ignore/macos-old/`), old
-  modules, util scripts. Not wired into anything. Despite the name it is
-  **tracked** and not in `.gitignore`.
-- **`misc/`** — exists on disk, is not ignored, and was never `git add`ed. Treat
-  as scratch.
-
-There is no `macos/` directory on this branch. `claude cave/` holds notes the
-user keeps for chasing cryptic errors; `den-reference.md` and `project-vibes.md`
-in it are currently empty files.
-
-Everything below is about `linux-flake/`.
+One host: `nire-durandal`. `nire-tenacity` exists in git history and in
+`.sops.yaml`, but the den restructure dropped it rather than migrating it. Its
+one surviving module, `jovian.nix`, is marked `ORPHAN-OK`.
 
 ## Commands
 
-There is no working `just` yet — the root `.justfile` is nothing but commented
-example lines. Porting real recipes is Phase 3 of `PORT-PLAN.md`. Until then,
-raw nix:
+`just` recipes live in the root `.justfile` and work from anywhere:
+
+```sh
+just check           # nix flake check --all-systems --no-build
+just modules         # static module-tree check; the only one that means anything on darwin
+just fingerprint     # drvPath of the host toplevel
+just dotfiles        # every generated dotfile's attribute name
+just dotfile ./.zshrc
+just build / switch  # Linux only; cannot run from this machine
+```
+
+For iterating, evaluate directly:
 
 ```sh
 cd linux-flake
-
-# The only check that means anything. Currently fails; see above.
 nix eval --raw .#nixosConfigurations.nire-durandal.config.system.build.toplevel.drvPath
-
-# Evaluates every output, builds nothing.
+nix eval --raw '.#nixosConfigurations.nire-durandal.config.home-manager.users.elly.home.activationPackage.drvPath'
 nix flake check --all-systems --no-build
-
-# Read a generated dotfile as home-manager actually emits it.
-nix eval --raw '.#nixosConfigurations.nire-durandal.config.home-manager.users.elly.home.file.".zshrc".text'
 ```
 
-In that last command `elly` is literal on purpose: it reads an *evaluated*
-config, where the attribute name is already resolved. Only module **source**
-should go through an option rather than hardcoding the name.
+`elly` is literal in that second command on purpose: it reads an *evaluated*
+config, where the attribute name is already resolved.
 
-The `home.file` attribute name is inconsistent and worth checking first with
-`--apply builtins.attrNames` — on the sibling branch it has been `".zshrc"`,
-`"./.zshrc"` and a full `/home/elly/…` path for different entries, and some
-entries have no `.text` at all because they are built from `.source`.
+## Architecture
 
-**Development is on darwin; the host is `x86_64-linux`.** Evaluation works
-cross-platform, building does not. Nothing in this repo has ever been built or
-switched from the dev machine — that would need a remote builder or binfmt
-emulation, neither of which is set up. Any claim that something builds must say
-so honestly. "Evaluates and produces the expected derivation" is the strongest
-true statement available here.
-
-## Architecture: where this is going, and where it actually is
-
-### The intent
-
-`flake.nix` is a manifest and nothing else. `(inputs.import-tree ./modules)`
-recursively imports **every** `.nix` file under `linux-flake/modules/`, so paths
-carry no meaning beyond naming and files can be moved freely without editing any
-import. That is the point, per the README.
+`flake.nix` is a manifest. `(inputs.import-tree ./modules)` recursively imports
+every `.nix` file under `linux-flake/modules/`, and
+`flake-parts.flakeModules.modules` declares the `flake.modules.<class>.<name>`
+option they all write into.
 
 **Every `.nix` file under `modules/` is a flake-parts module** — its top level is
 `{ flake.modules.<class>.<name> = …; }` or similar, never a bare NixOS or Home
 Manager module.
 
-### Where it actually is
+### Membership is implicit, and comes from the directory
 
-| | |
-|---|---|
-| files under `modules/` | 178 |
-| reference `den` | 3 — `entrypoint.nix`, `nireHost/aspect-durandal.nix`, `nireHost/hosts.nix` |
-| reference `flake-aspects` | 0 (it is an unused input) |
-| wrapped in `perSystem` | 151 |
-| `dirsAsCategory.nix` files | 24 |
+Each category directory holds a copy of `dirsAsCategory.nix`, which derives the
+category name from its own directory, collects the modules beneath it, and
+declares one aggregate per class. **A module belongs to the category of the
+directory it is filed in.** Adding a module is a one-file change: create the file
+in the right place and it is in.
 
-Two of the three den files already say
-`# TODO: this is wrong and will need to be modified for flake-parts` in the tree.
-`08fcc74` is the user converting den module bodies into flake-parts ones by hand.
-The direction of travel is off den; it just stopped partway.
+`linux-flake/dirsAsCategory.md` covers the mechanism, what is load-bearing in it,
+and the trailhead to per-module opt-in if that is ever wanted. Read it before
+changing any `dirsAsCategory.nix`.
 
-Module counts by area: `nirePackages` 117, `nire` 47, `nireHost` 8, `nireUser` 5.
+Two consequences worth holding onto:
 
-Of the 151 real modules, 99 declare `homeManager` only, 43 `nixos` only, 8 both,
-and 1 (`nireUser/elly/user-settings/elly-user.nix`) declares `darwin` — that
-last one is the *only* real darwin module; the other 24 `flake.modules.darwin`
-hits in the tree come from `dirsAsCategory.nix` emitting the class for every
-category. There are no `darwinConfigurations` here, so all of it is inert.
-`aspect-durandal.nix:34` also reads a `flake.modules.elly` that nothing declares.
+- **A category collects from its *sub*directories only.** A `.nix` file sitting
+  directly in a category directory is collected by nothing.
+- **Entry points are defined by being outside every category tree.**
+  `modules/checks.nix`, `nireHost/hosts.nix`, `nireHost/durandal-configuration.nix`
+  and `nireUser/elly-home-manager.nix` all sit where `dirsAsCategory` cannot reach
+  them, deliberately. `just modules` relies on exactly this rule.
 
-Two wrinkles worth knowing before touching aggregates: 9 modules under
-`nirePackages/` declare `nixos` rather than `homeManager` (`vscode`, `rust`,
-`devenv`, `bitwarden`, `jq`, `nixd`, `nixfmt`, `nix-output-monitor`,
-`cod-completions`), so "packages go to home" is not a rule; and 8 modules declare
-both classes (`basic-nix-settings`, `bash`, `fish`, `zsh`, `font`,
-`virtualization`, `nixd`, `nixfmt`).
+Areas: `nire/` (shared system), `nireHost/` (per-host), `nirePackages/`
+(packages), `nireUser/` (elly). By declared class: 101 homeManager-only, 43
+nixos-only, 9 both, and one (`elly-user.nix`) that adds `darwin` for fonts — that
+last reaches nothing, since there are no `darwinConfigurations`.
 
-All 151 files share one shape — `{ perSystem = {args}: let moduleName = …; in {
-flake.modules.<class>.${moduleName} = <bare attrset>; }; }` — with no inner
-functions anywhere, which is what makes the fix mechanical.
+### Home Manager is NixOS-integrated
 
-## Traps, all verified on this tree
+`home-manager.users.elly` is set from the NixOS side with `useGlobalPkgs` and
+`useUserPackages`, in `nire/system/home-manager/enable-home-manager.nix`. There
+is no `homeConfigurations` output and no separate home switch; `just switch`
+applies both. `linux-flake/home-manager-standalone.md` is the way back.
+
+- HM **rejects** `nixpkgs.*` options under `useGlobalPkgs` — errors, not ignores.
+  `allowUnfree` comes from the system side of `basic-nix-settings.nix`.
+- `home.profileDirectory` is `/etc/profiles/per-user/elly`, not `~/.nix-profile`.
+- Activation runs as a systemd unit, so its `PATH` is only
+  coreutils/findutils/gnugrep/gnused/systemd.
+
+## Traps, all of which have actually happened here
 
 ### `flake.modules` cannot live inside `perSystem`
 
-This is the one that matters most, because 151 files depend on it.
+**`perSystem` itself is fine and is used** — `checks.nix` is built on it, and it
+is core flake-parts, not a den concept.
 
-**`perSystem` itself is fine and is used here** — it is core flake-parts
-(`flake-parts/modules/perSystem.nix`, loaded from `all-modules.nix:16` next to
-`withSystem.nix`), not a den or flake-aspects concept, and it is the right home
-for `checks`, `formatter`, `devShells` and `packages`. A previous instance
-claimed it was a den concept; that is wrong, and it is the kind of wrong that
-would have distorted the whole den decision.
-
-What does not work is putting `flake.modules` **inside** it. `perSystem` is
-evaluated once per system, and its outputs are transposed into
-`flake.<output>.<system>.*` (`modules/transposition.nix`) — that is why
-`perSystem.packages.foo` becomes `flake.packages.x86_64-linux.foo`. It is for
-things with a genuine `<system>` axis.
-
-`flake.modules.<class>.<name>` has no such axis: it is one system-independent
-definition, declared at the top level by `flakeModules.modules` as
+What does not work is putting `flake.modules` inside it. `perSystem` is evaluated
+once per system and its outputs are transposed to `flake.<output>.<system>.*`.
+`flake.modules.<class>.<name>` has no `<system>` axis: it is one
+system-independent definition declared at the top level as
 `lazyAttrsOf (lazyAttrsOf deferredModule)` (`flake-parts/extras/modules.nix:33`).
-`perSystem` is a distinct module type (`mkPerSystemType`) with no
-`freeformType` — the only one in flake-parts is on the top-level `flake` option
-(`modules/flake.nix:14`) — so there is no escape hatch either.
+There is no `freeformType` on `perSystem` to let it through — the only one in
+flake-parts is on the top-level `flake` option. This is what 151 files got wrong.
 
-So turning flake-parts back on does not fix the current error, it replaces it
-with `The option 'flake' does not exist`. The fix is to move `flake.modules` out
-to the top level, not to stop using `perSystem`.
+### Names share one namespace per class, and collisions merge
 
-### Bare strings in `imports` do not resolve
+Two modules with the same name do not conflict; they **merge**. `boot` was both
+the `nire/boot/` category and `nireHost/durandal/hardware/boot.nix`, so importing
+the category also applied durandal's bootloader — and importing the bootloader
+applied an impermanence rollback. `just modules` checks for this.
 
-All 24 `dirsAsCategory.nix` files build a list of module *names* and emit
-`imports = allModules`. Outside den's name resolution that fails:
+### There are two different `config`s, and they shadow
 
+Every file has an outer flake-parts scope and an inner NixOS/HM module. Both call
+their argument `config`, and they are not the same thing:
+
+```nix
+{ config, ... }:                       # flake-parts: config.flake.modules.*
+{
+    flake.modules.nixos.foo =
+    { config, ... }:                   # NixOS: config.services.*, config.boot.*
+    {
+        # the outer `config` is unreachable from in here
+    };
+}
 ```
-error: string 'bluetooth' doesn't represent an absolute path
-```
 
-Beyond that, a directory cannot know which classes a module declares —
-`micro.nix` declares only `homeManager`, so emitting
-`flake.modules.nixos.editors.imports = [ … micro … ]` asks for an attribute that
-does not exist.
+A module written as a bare attrset has **no inner scope**, so `config` in it
+still means the flake-parts one, and adding an argument list silently repoints
+every existing `config`. Bind what you need in a `let` above the declaration —
+`enable-home-manager.nix` does exactly this and says why.
 
-Both are repairable without abandoning categories, which is the chosen direction:
-resolve names to references, and filter each class to the names that class
-declares. See `linux-flake/dirsAsCategory.md` for the mechanism, the traps in it
-(notably: never make the aggregate attribute itself conditional — that recurses),
-and the trailhead for converting to per-module opt-in if that is ever wanted.
+### Module classes are not validated
+
+flake-parts stamps the outer attribute name on as `_class` verbatim and checks
+nothing, so a wrong class declares fine and fails much later at the import site.
+It sets `_file` to `<flake>#modules.<class>.<name>`, so the error names its own
+declaration site. Only `nixos`, `homeManager`, `flake` and `generic` are
+meaningful; `darwin` works because nix-darwin sets that `_class` itself.
+
+Related: a module can declare a *valid* class and still be wrong. `jq` and
+`bitwarden` declared `flake.modules.nixos` bodies full of `home.packages`.
 
 ### Raw NixOS modules in the import-tree path
 
-Dropping a raw NixOS module into `modules/` — for example fresh
-`nixos-generate-config` output — makes flake-parts try to resolve that module's
-`modulesPath` argument through its own `_module.args`, and evaluation dies with
-`error: infinite recursion encountered`.
-
-The error names `modulesPath` and suggests you referenced `config` in `imports`,
-neither of which is the cause, so it blames the wrong thing. This has broken the
-sibling branch twice, once from a Claude Code session that added 95 lines of
-unwrapped generator output. If you add or regenerate a hardware config, wrap it
-in the same commit:
+Dropping fresh `nixos-generate-config` output into `modules/` makes flake-parts
+resolve its `modulesPath` through its own `_module.args`, and evaluation dies
+with `infinite recursion encountered` — naming `modulesPath`, which is not the
+cause. Wrap it in the same commit:
 
 ```nix
 { ... }:
@@ -216,163 +181,92 @@ in the same commit:
 ;}
 ```
 
-### Module classes are not validated
+### `home.file.<n>.text` concatenates; it does not override
 
-flake-parts stamps the outer attribute name onto the module as `_class`
-verbatim and checks nothing. A made-up class declares successfully and then
-fails much later, at import, with
-`cannot be imported into a module evaluation that expects class "nixos"`. Only
-`nixos`, `homeManager`, `flake` and `generic` are meaningful; `darwin` works
-because nix-darwin sets that `_class` itself.
+The type is `types.lines`, so two modules declaring the same file both
+contribute. `.blerc` was declared by `bash.nix` and `blesh.nix` with identical
+content, which would have run every `ble-import` twice. Give each generated file
+one owning module. `home.sessionPath` is `listOf str` and behaves the same way —
+`shell-env.nix` and `elly-session.nix` doubled every PATH entry between them.
 
-The one mercy is that flake-parts also sets
-`_file = "<flake>#modules.<class>.<name>"`, so the error names its own
-declaration site.
+### Reading a generated dotfile is full of false negatives
 
-### There are two different `config`s, and they shadow
+Most shell bugs are invisible in the `.nix` and obvious in the output, but:
 
-Every file here has an outer flake-parts scope and an inner NixOS/HM module.
-Both call their argument `config`, and they are **not the same thing**:
+- **The attribute name is inconsistent.** `".zshrc"` and `"./.zshrc"` and full
+  `/home/elly/...` paths all occur. A wrong name returns **empty rather than
+  erroring**, which reads exactly like a real negative. `just dotfiles` first.
+- **Some entries have no `.text` at all** and are built from `.source`. `.bashrc`
+  is one. Read the owning option instead — `programs.bash.initExtra`.
 
-```nix
-{ config, ... }:                       # flake-parts config: config.flake.modules.*
-{
-    flake.modules.nixos.base.imports = [ config.flake.modules.nixos.foo ];
+Both of these were hit during the port, minutes apart, by someone who had already
+written them down.
 
-    flake.modules.nixos.foo =
-    { config, ... }:                   # NixOS config: config.services.*, config.nire.*
-    {
-        # the outer `config` is unreachable from in here
-    };
-}
-```
+### Order in generated shell rc files is load-bearing
 
-A module written as a bare attrset (no `{ ... }:` line) has **no inner scope**,
-so `config` inside it still means the flake-parts one. Adding an argument list
-to reach the NixOS `config` silently changes what every existing `config` in
-that module refers to. The fix is to bind what you need from the outer scope in
-a `let` *before* the shadowing.
+Home Manager emits `initContent` `mkBefore`, then `mkOrder 550`, then
+`programs.zsh.plugins`, then unordered `initContent`. Anything that must run
+after a plugin cannot sit at 550. Later definitions win, which is how a
+hand-written `starship init bash` and a 1,659-line p10k config both turned out to
+be dead weight.
 
-Four files here take `config` as a `perSystem` argument and will need this
-treatment individually when the wrappers come off.
+### `${...}` inside a Nix `''` string is interpolation
 
-### `pkgs` from perSystem loses `allowUnfree`
-
-perSystem's `pkgs` defaults to `inputs.nixpkgs.legacyPackages.<system>`, which
-has no `nixpkgs.config` applied. This config installs plenty of unfree packages.
-When unwrapping, `pkgs` belongs in the **deferred module's** argument list, where
-it comes from the NixOS/HM evaluation, not in the outer scope. The same reasoning
-is why host `nixosSystem` calls deliberately do not share a perSystem `pkgs`.
-
-## Known defects
-
-Seven, all confirmed by grep rather than inherited on trust. Full detail and
-ordering in `PORT-PLAN.md`.
-
-| file | defect |
-|---|---|
-| `nire/desktop-env/jovian/jovian.nix:49,63` | `adjustor` was removed from nixpkgs, folded into `handheld-daemon` |
-| `nire/desktop-env/jovian/jovian.nix:11` | `inputs.jovian.decky-loader` — that flake exposes no such output |
-| `nirePackages/editors/micro/micro.nix:7` | `flake.module` singular; declares nothing, so micro's config has never applied |
-| `nire/shell-config/zsh/zsh.nix:171,198,207` | deprecated `initExtraFirst` / `initExtraBeforeCompInit` / `initExtra` |
-| `nire/shell-config/bash/bash.nix:51` | hand-written `starship init bash` duplicating the HM integration |
-| `nire/shell-config/zsh/` | powerlevel10k still present alongside starship |
-| `nireHost/aspect-durandal.nix:34` | reads `flake.modules.elly`, which nothing declares |
-
-The `flake.module` typo is the instructive one: it is valid Nix, evaluates
-cleanly, and silently does nothing. Nothing can catch that by evaluating, which
-is the standing argument for a static check over the module tree — but note the
-sibling branch's orphan check answers a *different* question than this layout
-poses. There, membership is an explicit opt-in line that can be forgotten; here
-it follows from the directory, so the equivalent failure is a module whose
-category no host selects, or a typo'd class that quietly joins nothing. Write
-the check against this mechanism rather than porting theirs wholesale.
+Writing `${terminfo[khome]}` in what you intend as a comment is an evaluation
+error. Escape as `''${...}` or reword.
 
 ## Working in this repo
 
 **`git add` before `nix eval`.** Flakes in a git repo ignore untracked files, so
-a new module silently does not exist and you will debug a phantom. This wastes
-time every session if forgotten.
-
-**Read the generated dotfile, not just the module.** Most shell bugs here are
-invisible in the `.nix` source and obvious in the output. Line numbers make
-ordering and duplication questions answerable in one command. Every shell bug
-found on the sibling branch was found this way.
+a new module silently does not exist.
 
 **Read upstream source in the store rather than guessing at options.**
-`nix build nixpkgs#<pkg>` works on darwin for most of these even though the host
-is x86_64-linux, and grepping the result settles questions documentation leaves
-ambiguous. This has repeatedly been worth it: ble.sh's `bleopt` defaults and
-`ble-import` path resolution, home-manager's `useUserPackages` behaviour, and
-flake-parts' `_class` stamping and `freeformType` placement were all settled from
-source. In the `ble-import` case the source showed the `.bash` extension is
-required for absolute paths, which would otherwise have silently broken every
-import.
+`nix build nixpkgs#<pkg>` works on darwin for most of these. This settled, during
+the port: that `perSystem` has no `freeformType`, that `home.sessionPath` is
+`listOf str`, and that Home Manager has no blesh module at all — which is why
+`programs.bash.blesh.enable = true` had been doing nothing.
 
-**Verify refactors by fingerprint, not by "it still evaluates."** For any change
-meant to preserve behaviour, capture `toplevel.drvPath` before and after. But
-identical drvPath is not the same as a correct mechanism — reordering module
-imports permutes list-valued options like `environment.systemPackages`, which
-changes the hash without changing the package set. Compare sets before concluding
-a refactor broke something, and spot-check the values, not just the hash.
+**Verify refactors by fingerprint, but not only by fingerprint.** `just
+fingerprint` before and after. A differing hash does not prove breakage —
+reordering imports permutes `environment.systemPackages` — so compare the values,
+not just the hash.
 
-**Calibrate severity.** This is a homelab config, not production; the repo has
-gone six months between commits. "This is broken and here is the fix" reads
-better than incident-report framing.
+**Bugs here serialize.** Everything that broke this branch was an evaluation
+error hiding behind another evaluation error. Evaluating a cheap attribute proves
+nothing; `networking.hostName` resolved happily while four separate things were
+broken. Force a toplevel.
+
+**Calibrate severity.** Homelab, not production; the repo has gone six months
+between commits. "This is broken and here is the fix" beats incident-report
+framing.
 
 ## Conventions
 
 **Formatting is deliberate.** The aligned-`=` columns throughout `modules/` are
-intentional. Do not run a formatter casually, and match surrounding alignment
-when editing. If treefmt gets ported, it should carry `flakeCheck = false` for
-the same reason.
+intentional. Do not run a formatter casually, and match surrounding alignment.
+Module bodies are currently indented one level deeper than they need to be, left
+over from unwrapping `perSystem` without reflowing — reindenting would risk the
+`''` strings in the shell modules.
 
-**Namespacing.** `nire` is the namespace for anything that does not need a more
-specific tag; start broad and narrow as things clarify. `nireHost`, `nireUser`
-and `nirePackages` are the more specific ones currently in use.
+**Namespacing.** `nire` for anything that does not need a more specific tag;
+`nireHost`, `nireUser`, `nirePackages` otherwise.
 
-**Leave a grep trail when you make a name dynamic.** Turning `users.users.elly`
-into `users.users.${config.nire.primaryUser}` makes the old string unfindable,
-which is the real cost of the indirection. The convention — the user's own — is
-to put the literal old form in a comment on the declaration so grepping it lands
-somewhere instead of nowhere. Do the same for any future rename.
+**Leave a grep trail when you make a name unfindable.** Put the literal old form
+in a comment on the declaration — see the `GREP NOTE` in `boot-durandal.nix` and
+in `enable-home-manager.nix`.
 
-**`${...}` inside a Nix `''` string is Nix interpolation.** Writing
-`${terminfo[khome]}` in what you intend as a comment is an evaluation error, not
-a comment. Escape as `''${...}` or reword.
+**`elly` is hardcoded**, in `users.users.elly`, `home.username`, and
+`home-manager.users.elly`. The sibling branch has a `nire.primaryUser` option;
+introducing it here is a deliberate separate change, not a tidy-up.
 
-**`home.file.<n>.text` concatenates; it does not override.** The type is
-`types.lines`, so two modules declaring the same file both contribute and the
-result is the content twice over. In a dendritic layout this is easy to do by
-accident, so give each generated file a single owning module.
+**Check for an existing `programs.*` integration before hand-writing one.**
 
-**Check for an existing `programs.*` integration before hand-writing one.** The
-`starship init bash` defect above is exactly this: the HM integration was already
-enabled, and it is also better, since it uses the store path instead of relying
-on `PATH`.
+## Docs
 
-**Order in generated shell rc files is load-bearing and not obvious.** Home
-Manager emits, in this order: `initContent` `mkBefore`, then `mkOrder 550`, then
-`programs.zsh.plugins`, then unordered `initContent`. Anything that must run
-after a plugin cannot live at 550. Later definitions also win, so an alias or
-prompt init written by hand earlier in the file is silently overridden by the
-nix-managed one later.
-
-**VSCode settings.** Both `.vscode/` and `linux-flake/.vscode/` are tracked here.
-On the sibling branch these were byte-identical copies and the nested one was
-removed; worth checking they have not drifted before assuming either is live.
-
-## Docs worth reading
-
-- **`PORT-PLAN.md`** — the plan for finishing the migration. Read before changing
-  anything structural.
-- `git show flake-parts:SESSION-HANDOFF.md` — the sibling branch's notes on what
-  is not recoverable from the tree: dead ends with their actual symptoms,
-  load-bearing constraints, and decisions the user made that should not be
-  silently relitigated.
-- `git show flake-parts:SESSION-CHANGES.md` — its 37 commits, marked portable /
-  file-addition / not-applicable.
-- `git show flake-parts:linux-flake/flake-parts-reference.md` — the flake-parts
-  machinery, with the upstream source backing each claim.
-- `claude cave/port-prompt.md` — the kickoff prompt for this port. Note that its
-  description of this branch as den-based is wrong; see `PORT-PLAN.md`.
+- `PORT-PLAN.md` — the migration off den: what was done, what remains.
+- `linux-flake/dirsAsCategory.md` — the category mechanism and its trailhead.
+- `linux-flake/home-manager-standalone.md` — reversing the HM decision.
+- `git show flake-parts:SESSION-HANDOFF.md` — the sibling branch's notes on dead
+  ends and decisions that should not be silently relitigated.
+- `git show flake-parts:linux-flake/flake-parts-reference.md` — flake-parts
+  machinery, with upstream source backing each claim.
