@@ -6,9 +6,13 @@
         flake.modules.nixos.${moduleName} = { 
             imports = [ inputs.jovian.nixosModules.default ]; # I think this is instead of needing them as module args?
 
+            # `config.jovian.…`, not `inputs.jovian.…`: the Jovian flake exposes
+            # only nixosModules/legacyPackages/overlays/checks/devShells, no
+            # `decky-loader`. The intended referent is the module option this
+            # same file sets below.
             systemd.services.decky-loader.environment.LD_LIBRARY_PATH =
-              lib.makeLibraryPath 
-              inputs.jovian.decky-loader.extraPackages;
+              lib.makeLibraryPath
+              config.jovian.decky-loader.extraPackages;
             services.desktopManager.plasma6.enable = true;
 
             jovian = {
@@ -45,9 +49,10 @@
                     ];
                 };
             };
-            environment.systemPackages = with pkgs; [
-                adjustor
-            ];
+            # `adjustor` was removed from nixpkgs and folded into
+            # handheld-daemon; referencing it fails evaluation outright. The
+            # services.handheld-daemon.adjustor option set below already pulls
+            # it in, so nothing needs to be listed here.
 
             # needed for tdp adjustor
             boot.extraModulePackages = [ config.boot.kernelPackages.acpi_call ];
