@@ -168,7 +168,8 @@
 
                 ## .zshrc
                 #! FOOTGUN: if you comment out a nix variable pointing to .filecontents, '#' only comments out the first line
-                initExtraFirst = ''
+                initContent = lib.mkMerge [
+                    (lib.mkBefore ''
                     zmodload zsh/zprof                                # zsh profiler
 
                     #################PASSWORD ENTRY/CONFIRM DIALOGS GO ABOVE##############################
@@ -193,9 +194,9 @@
                     zmodload zsh/terminfo                             # TODO: I think this is needed for `kitty` terminal
 
                     WORDCHARS='*?[]~=&;!#$%^(){}<>';                  # Dont consider certain characters part of the word for nav
-                '';
+                '')
 
-                initExtraBeforeCompInit = ''
+                    (lib.mkOrder 550 ''
                     ### p10k cfg start
                     ${p10k_cfg}
                     ### p10k cfg end
@@ -203,8 +204,8 @@
                     # zicompinit                                        # zi cleanup
                     autoload -Uz compinit
                     compinit -C
-                '';
-                initExtra = ''
+                '')
+                    ''
                     source <(${pkgs.cod}/bin/cod init $$ zsh)
 
                     # TODO: pull these into nix
@@ -230,7 +231,8 @@
 
                     # Justfile
                     eval "''$(${pkgs.just}/bin/just --completions zsh)"
-                '';
+                ''
+                ];
             };
         };
     };
