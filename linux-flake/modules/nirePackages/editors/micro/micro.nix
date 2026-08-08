@@ -4,7 +4,7 @@
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in { 
-        flake.module.homeManager.${moduleName} = {
+        flake.modules.homeManager.${moduleName} = {
             # micro, what if nano was msword for dos
             programs.micro = {
                 enable = true;
