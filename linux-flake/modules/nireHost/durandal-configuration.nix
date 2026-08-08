@@ -1,0 +1,45 @@
+# What nire-durandal is made of.
+#
+# This file sits directly under nireHost/ rather than in a category directory,
+# because dirsAsCategory only collects from *sub*directories -- a host definition
+# should not become a member of anything.
+#
+# The list mirrors the `moduleList` the den version carried, translated from den
+# aspects to the category aggregates dirsAsCategory now produces.
+{ config, ... }:
+{
+    flake.modules.nixos.durandalConfiguration.imports =
+    with config.flake.modules.nixos; [
+        # ── this machine ──────────────────────────────────────────────────────
+        # nireHost/durandal/: hardware-configuration, boot-durandal,
+        # b550-suspend-fix, nixpkgs-hostPlatform, nixpkgs-stateVersion
+        durandal
+
+        # ── shared ────────────────────────────────────────────────────────────
+        boot            # WARN-impermanence -- wipes /root on boot, see the module
+        hardware        # amdcpu, amdgpu
+        nix
+        peripherals
+        shell-config
+        system
+
+        # `desktop-env` also contains jovian, which is tenacity's. Durandal takes
+        # kde on its own rather than the whole category.
+        kde
+
+        # ── packages ──────────────────────────────────────────────────────────
+        development
+        editors
+        gui-other
+        linux-utils
+        nix-utils
+        shell-apps
+        terminals
+
+        # ── user ──────────────────────────────────────────────────────────────
+        elly            # elly-user: the account, groups, emergency packages
+    ];
+
+    # den.provides.hostname set this automatically from the aspect name.
+    flake.modules.nixos.durandalConfiguration.networking.hostName = "nire-durandal";
+}

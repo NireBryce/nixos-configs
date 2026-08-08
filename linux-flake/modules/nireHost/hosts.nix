@@ -1,17 +1,20 @@
-{ den,... }:
-# TODO: this is wrong and will need to be modified for flake-parts
+{ config, inputs, withSystem, ... }:
+let
+    # withSystem enters flake-parts' per-system scope, which is what makes the
+    # system-preselected `self'` / `inputs'` available to host modules.
+    #
+    # `pkgs` is deliberately NOT taken from perSystem: nixosSystem builds its own
+    # from the host's own nixpkgs.config, and perSystem's default
+    # legacyPackages.<system> instance has none of that applied -- taking it from
+    # there would silently drop allowUnfree, which this config depends on.
+    mkHost = system: hostModule: withSystem system ({ self', inputs', ... }:
+        inputs.nixpkgs.lib.nixosSystem {
+            specialArgs = { inherit inputs self' inputs'; };
+            modules     = [ hostModule ];
+        });
+in
 {
-    den.hosts.x86_64-linux.nire-durandal = {
-        home-manager.enable = true;
-        users = {
-            elly = {
-                classes = [ "homeManager" ];
-            };
-        };
+    flake.nixosConfigurations = {
+        nire-durandal = mkHost "x86_64-linux" config.flake.modules.nixos.durandalConfiguration;
     };
-
-    den.ctx.host.includes = [
-        den._.hostname # automatically set hostnames
-    ];
-    
 }
