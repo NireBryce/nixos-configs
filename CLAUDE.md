@@ -267,6 +267,9 @@ introducing it here is a deliberate separate change, not a tidy-up.
 - `2026-08-08-PORT-PLAN-(COMPLETED).md` — the migration off den: what was
   done, where the plan was wrong, and what is still open.
 - `linux-flake/dirsAsCategory.md` — the category mechanism and its trailhead.
+- `linux-flake/home-manager-cutover.md` — the first-switch runbook. Read before
+  `just switch`: the collision risk is real and the starting state on the
+  machine is not known from here.
 - `linux-flake/home-manager-standalone.md` — reversing the HM decision.
 - `git show flake-parts:SESSION-HANDOFF.md` — the sibling branch's notes on dead
   ends and decisions that should not be silently relitigated.
