@@ -42,6 +42,12 @@ fingerprint:
         .#nixosConfigurations.{{host}}.config.system.build.toplevel.drvPath
     @echo
 
+# What changed in the host's config vs a git ref: `just diff HEAD~1`
+diff ref:
+    # Says *what* differs when the drvPath moves, which a hash cannot. Evaluates
+    # both sides in a throwaway worktree; builds nothing, so it works from darwin.
+    @{{justfile_directory()}}/linux-flake/scripts/diff-config.sh {{ref}} {{host}}
+
 # drvPath of the home activation package
 fingerprint-home:
     @cd {{flake}} && nix eval --raw \

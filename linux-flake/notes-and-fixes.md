@@ -61,6 +61,12 @@ nh os switch --hostname nire-durandal ~/nixos
 
 nh home switch --configuration elly@nire-durandal ~/nixos/
 
+(as of 2026-08-08 there is no separate `nh home switch` step, and no
+`homeConfigurations` output to point it at: home-manager is applied as part of
+the system. Use `just switch`. Also note both paths above are stale — the
+checkout is `nixos-configs` and the flake is in its `linux-flake/` subdirectory,
+which is why the just recipes exist.)
+
 ## This determines what to add to /run/current-system/sw, generally defined elsewhere
 
 ```nix
