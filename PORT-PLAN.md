@@ -62,8 +62,13 @@ is only that this branch has already paid most of the cost of leaving.
 
 ## The thing the manual migration got wrong
 
-Every one of those 151 conversions wrapped the module in `perSystem`. That does
-not work, and it is why **no output on this branch evaluates today**:
+**`perSystem` stays.** It is core flake-parts, it is not a den concept, and this
+port uses it — Phase 3's `checks.nix` is built on it, and a formatter or
+devShells would live there too. Nothing below is an argument against `perSystem`.
+
+The mistake is narrower: those 151 conversions put **`flake.modules` inside**
+`perSystem`, and that specific pairing cannot work. It is why **no output on
+this branch evaluates today**:
 
 ```
 error: The option `perSystem' does not exist. Definition values:
@@ -71,26 +76,42 @@ error: The option `perSystem' does not exist. Definition values:
   Did you mean `nireUser', `nire' or `nireHost'?
 ```
 
-`perSystem` is core flake-parts (`flake-parts/modules/perSystem.nix`, loaded
-from `all-modules.nix:16`), and `linux-flake/flake.nix` currently has flake-parts
-**commented out** in favour of a raw `nixpkgs.lib.evalModules`. So 151 files use
-an option nothing declares.
+That first error is only because `linux-flake/flake.nix` currently has
+flake-parts **commented out** in favour of a raw `nixpkgs.lib.evalModules`, so
+nothing declares `perSystem` at all. Turning flake-parts back on does not fix
+it — it replaces that error with `The option 'flake' does not exist`.
 
-Turning flake-parts back on does not fix it by itself. `perSystem` is a distinct
-module type built by `mkPerSystemType`, and the only `freeformType` in
-flake-parts is on the **top-level** `flake` option (`modules/flake.nix:14`).
-There is no freeform escape in `perSystem`, so `perSystem = …: { flake.… }` will
-fail with `The option 'flake' does not exist` the moment flake-parts is enabled.
+The reason is not arbitrary. `perSystem` is evaluated **once per system**, and
+its outputs are transposed into `flake.<output>.<system>.*` — that is what
+`modules/transposition.nix` does, and it is why `perSystem.packages.foo` becomes
+`flake.packages.x86_64-linux.foo`. It is the right home for anything with a
+genuine `<system>` axis.
 
-The 151 wrappers have to come off. That is the bulk of this port.
+`flake.modules.<class>.<name>` has no such axis. It is one system-independent
+definition, declared at the top level by `flakeModules.modules` as
+`lazyAttrsOf (lazyAttrsOf deferredModule)` (`flake-parts/extras/modules.nix:33`).
+Defining it inside a per-system loop is a category error, which is why
+flake-parts declares no such option there and gives `perSystem` no
+`freeformType` to sneak it through — the only `freeformType` in flake-parts is
+on the top-level `flake` option (`modules/flake.nix:14`).
+
+So the 151-file transform does not *remove* `perSystem`. It **moves
+`flake.modules` out of it**, to the top level where that option is declared.
+That is the bulk of this port.
 
 ---
 
 ## Phase 1 — defects, as small commits
 
-Seven, all verified present in the tree by grep rather than taken from the
-handoff on trust. Four are the ones `SESSION-CHANGES.md` part 1 predicted; three
-are specific to this branch.
+Eight, all verified present in the tree rather than taken from the handoff on
+trust. Four are the ones `SESSION-CHANGES.md` part 1 predicted; four are specific
+to this branch.
+
+Note on priority: **nothing imports `jovian.nix`.** `aspect-durandal.nix`'s
+`moduleList` selects `desktop-env._.kde`, not jovian, and there is no tenacity
+host here. So #1 and #2 are real bugs that cannot currently break anything —
+they matter when tenacity returns. #3 and #8 are the ones silently affecting the
+tree today.
 
 | # | fix | file |
 |---|---|---|
@@ -101,9 +122,18 @@ are specific to this branch.
 | 5 | drop hand-written `eval "$(starship init bash)"`, which duplicates `programs.starship.enableBashIntegration` | `nire/shell-config/bash/bash.nix:51` |
 | 6 | starship for all shells; delete `p10k.zsh`, `zsh-powerlevel10k/` and the p10k lines in `zsh.nix` | `nire/shell-config/zsh/` |
 | 7 | `flake.modules.elly` is read but nothing declares it — resolved by Phase 2e, listed here so it isn't lost | `nireHost/aspect-durandal.nix:34` |
+| 8 | `collectModules` still filters out `"dirsAsProvides.nix"`, the filename from before `0c0b5f0` renamed providers to categories — so every category containing a *nested* category file collects a phantom module named `dirsAsCategory` | all 24 `dirsAsCategory.nix` |
 
 For #4, move **only** the option and delimiter lines. Leaving the `''` bodies
 untouched keeps Nix's indentation stripping from changing the emitted text.
+
+For #8, the four affected categories are `nire/hardware`,
+`nirePackages/development`, `nirePackages/gui-other` and
+`nirePackages/shell-apps` — each has subdirectories carrying their own
+`dirsAsCategory.nix`. `nire/hardware` currently collects
+`[ "amdcpu" "amdgpu" "dirsAsCategory" ]`. The Phase 2d repair happens to mask
+this (a name nothing declares gets filtered), so fix the filter explicitly
+rather than relying on that.
 
 For #6, this repeats a decision already made on the sibling branch: p10k's theme
 was never loaded while 1,659 lines of its config were injected, and starship's
@@ -201,9 +231,16 @@ Verify with `toplevel.drvPath` afterwards, but expect it to differ — import
 reordering permutes list-valued options like `environment.systemPackages`, which
 changes the hash without changing the package set. Compare sets, not hashes.
 
-### 2d — replace the 24 `dirsAsCategory.nix` with per-module opt-in
+### 2d — repair the 24 `dirsAsCategory.nix`
 
-`dirsAsCategory.nix` derives a category from its own directory name and emits:
+**Decision: keep directory-derived categories.** They are this branch's own
+mechanism (`0c0b5f0`), the category names are already the vocabulary
+`aspect-durandal.nix` selects from, and they can be made to work. The per-module
+opt-in pattern from the sibling branch is *not* being adopted now — see
+`linux-flake/dirsAsCategory.md` for the trailhead if that changes later.
+
+Each `dirsAsCategory.nix` derives a category name from its own directory and
+emits:
 
 ```nix
 flake.modules.nixos.${categoryName}.imports        = allModules;
@@ -211,66 +248,68 @@ flake.modules.homeManager.${categoryName}.imports  = allModules;
 flake.modules.darwin.${categoryName}.imports       = allModules;
 ```
 
-where `allModules` is a list of **strings**. Two independent problems:
+where `allModules` is a list of **name strings**. Two problems, both fixable
+without abandoning the mechanism:
 
-1. Bare strings in `imports` do not work outside den's name resolution.
-   Verified directly:
+1. Bare strings in `imports` do not resolve outside den's name lookup. Verified:
    `error: string 'bluetooth' doesn't represent an absolute path`.
-2. Even resolved to real references, a directory cannot know **which classes**
-   a module declares. `micro.nix` declares only `homeManager`, so
-   `config.flake.modules.nixos.micro` is a missing attribute. Emitting all three
-   classes for every name found is unfixable from the directory side. Only the
-   module knows.
+2. A directory cannot know **which classes** a module declares. `micro.nix`
+   declares only `homeManager`, so `config.flake.modules.nixos.micro` is a
+   missing attribute. Emitting all three classes for every name found is wrong.
 
-Point 2 is the structural argument for the opt-in pattern, independent of taste.
-Replace with a `roles.nix` declaring only the hierarchy, and one line per module
-next to its own definition:
+The repair handles both — resolve names to real references, and filter each
+class to the names that class actually declares:
 
 ```nix
-# roles.nix — hierarchy only; membership lives with each module
-{ config, ... }:
+{ config, lib, ... }:                       # `config` is new; `lib` was already here
+let
+    # ... categoryDir / categoryName / allModules unchanged ...
+
+    forClass = class:
+        map (n: config.flake.modules.${class}.${n})
+            (lib.filter (n: config.flake.modules.${class} ? ${n}) allModules);
+in
 {
-    flake.modules.nixos.desktop.imports  = [ config.flake.modules.nixos.base ];
-    flake.modules.nixos.handheld.imports = [ config.flake.modules.nixos.base ];
+    flake.modules.nixos.${categoryName}.imports       = forClass "nixos";
+    flake.modules.homeManager.${categoryName}.imports = forClass "homeManager";
+    flake.modules.darwin.${categoryName}.imports      = forClass "darwin";
 }
 ```
 
-```nix
-# ripgrep.nix — opts itself in, next to its own definition
-{ config, lib, ... }:
-{
-    flake.modules.homeManager.pkgs-cli.imports =
-        [ config.flake.modules.homeManager.ripgrep ];
+**This was verified before being written down**, not reasoned about — the
+self-reference (reading `config.flake.modules.<class>` while *defining* an
+attribute in it) is the part that could plausibly recurse. A model using
+flake-parts' exact option type and `apply` from `extras/modules.nix:33,72`
+resolves cleanly: a category imports only the modules that declare its class,
+`micro` lands in `homeManager` and not `nixos`, and the imported modules' config
+actually applies. Redo that check if the mechanism changes.
 
-    flake.modules.homeManager.ripgrep = { pkgs, ... }: {
-        home.packages = [ pkgs.ripgrep ];
-    };
-}
-```
+`dirsAsCategory.nix` is one of the 27 files that never used `perSystem`, so its
+outer shape is already correct; it only gains `config` in its argument list.
+There is no inner module scope in it, so no shadowing risk.
 
-Two constraints from the sibling branch's experience:
+Two traps to respect when editing it:
 
-- Use `config.flake.modules.<class>.<name>` references, **not** `let`-bound local
-  modules. A reference bound in a `let` above the first declaration belongs to no
-  declaration, which is what produced 119 false orphans in that branch's tooling.
-- Keep the intermediate package-group tier (`pkgs-cli` → `ellyHomeManager`)
-  rather than opting each package straight into the top aggregate. It buys
-  nothing visible today; it is what lets a role take some groups and not others
-  later without touching 100+ files.
+- **Always define all three classes, even when the filtered list is empty.**
+  Making the *attribute itself* conditional (`lib.optionalAttrs (forClass … != [])`)
+  looks tidier and will recurse: computing the attribute names of
+  `flake.modules.nixos` would require reading `flake.modules.nixos`. An empty
+  aggregate is harmless; a conditional one is not.
+- **Fix the stale filename filter in the same commit** — see Phase 1 #8.
 
-The known cost: no file lists a category's roster any more. `just modules` from
-Phase 3 reconstructs it by static analysis. That trade was made deliberately on
-the sibling branch — the roster-readability question was raised *after* adoption
-and answered with the script, not by reverting.
+Cleanups this enables: `nirePackages/_templates/` contains *only* a
+`dirsAsCategory.nix` and no modules, so it can go. And nested categories overlap
+their parents by design (`nire/hardware` and `nire/hardware/amd` both collect
+`amdcpu`/`amdgpu`) — that is fine and was presumably deliberate under den, but
+worth knowing before it looks like a bug.
 
-The other known cost is silent: omit the opt-in line and **nothing happens**.
-The module is valid, evaluates cleanly, installs nothing, and no evaluation can
-ever produce an error. That is what the orphan check in Phase 3 exists for, and
-it is why Phase 3 should not be skipped.
-
-Also worth deciding here: 25 files declare `flake.modules.darwin.*`, but this
-branch has no `darwinConfigurations`, so all 25 are inert. Either wire up a
-darwin host or drop the declarations; leaving them is a third silent-no-op class.
+On `darwin`: only **one** real module declares it — `nireUser/elly/user-settings/`
+`elly-user.nix`, which sets `fonts.packages`. The other 24 `flake.modules.darwin`
+hits in the tree are `dirsAsCategory.nix` emitting the class for every category.
+With the repair those become empty aggregates. Since there are no
+`darwinConfigurations` here, decide whether darwin is a real target on this
+branch or whether that one module and the `darwin` line in `dirsAsCategory`
+should go.
 
 ### 2e — rewrite the host wiring
 
@@ -307,13 +346,22 @@ git checkout flake-parts -- linux-flake/scripts/
 git checkout flake-parts -- .justfile
 ```
 
-- **`modules/checks.nix`** — forces every host's `system.build.toplevel`, plus
-  the orphan check. The host-toplevel part is layout-independent; the orphan
-  check just needs the right path to `modules.py`. Its entry-point heuristic
-  assumes the file declaring host configs declares no modules of its own —
-  confirm that holds for whatever replaces `nireHost/hosts.nix`.
+- **`modules/checks.nix`** — forces every host's `system.build.toplevel`. That
+  part is layout-independent and is the high-value half; port it first.
+- **The orphan check needs rethinking for categories**, not just repointing. On
+  the sibling branch "orphan" means *no module opted it into an aggregate*,
+  which is a reachability question over explicit edges. Here membership is
+  implicit — a module belongs to its directory's category automatically, so the
+  equivalent failure is different: a module in a directory whose **category** no
+  host selects, or a category emitted for a class nothing consumes. Worth
+  writing against this branch's mechanism rather than porting `modules.py`'s
+  edge model wholesale. Its entry-point heuristic also assumes the file
+  declaring host configs declares no modules of its own — confirm that holds for
+  whatever replaces `nireHost/hosts.nix`.
 - **`scripts/add-pkg.sh`** hardcodes `modules/pkgs/{cli,gui,linux-utils}` and the
-  `pkgs-*` aggregate names — retarget at `nirePackages`.
+  `pkgs-*` aggregate names, and writes the opt-in line. Retarget at
+  `nirePackages` — and note that under categories it gets *simpler*, since
+  creating the file in the right directory is the whole of the membership step.
 - **`scripts/host-fingerprint.nix`** and **`scripts/dotfile.sh`** read
   `cfg.nire.primaryUser`; either port that option too or change those lines.
 - **`.justfile`** currently holds nothing but comments; recipe paths assume

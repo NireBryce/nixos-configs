@@ -125,28 +125,54 @@ Two of the three den files already say
 The direction of travel is off den; it just stopped partway.
 
 Module counts by area: `nirePackages` 117, `nire` 47, `nireHost` 8, `nireUser` 5.
-Declarations by class: `homeManager` 131, `nixos` 76, `darwin` 25, and one
-`flake.modules.elly` at `aspect-durandal.nix:34` that nothing declares. The 25
-`darwin` declarations are inert — there are no `darwinConfigurations` here.
+
+Of the 151 real modules, 99 declare `homeManager` only, 43 `nixos` only, 8 both,
+and 1 (`nireUser/elly/user-settings/elly-user.nix`) declares `darwin` — that
+last one is the *only* real darwin module; the other 24 `flake.modules.darwin`
+hits in the tree come from `dirsAsCategory.nix` emitting the class for every
+category. There are no `darwinConfigurations` here, so all of it is inert.
+`aspect-durandal.nix:34` also reads a `flake.modules.elly` that nothing declares.
+
+Two wrinkles worth knowing before touching aggregates: 9 modules under
+`nirePackages/` declare `nixos` rather than `homeManager` (`vscode`, `rust`,
+`devenv`, `bitwarden`, `jq`, `nixd`, `nixfmt`, `nix-output-monitor`,
+`cod-completions`), so "packages go to home" is not a rule; and 8 modules declare
+both classes (`basic-nix-settings`, `bash`, `fish`, `zsh`, `font`,
+`virtualization`, `nixd`, `nixfmt`).
+
+All 151 files share one shape — `{ perSystem = {args}: let moduleName = …; in {
+flake.modules.<class>.${moduleName} = <bare attrset>; }; }` — with no inner
+functions anywhere, which is what makes the fix mechanical.
 
 ## Traps, all verified on this tree
 
-### `perSystem` cannot set `flake.*`
+### `flake.modules` cannot live inside `perSystem`
 
-This is the one that matters most, because 151 files depend on it. `perSystem`
-is a distinct module type (`flake-parts-lib.mkPerSystemType`) with its own
-options. The only `freeformType` anywhere in flake-parts is on the **top-level**
-`flake` option (`flake-parts/modules/flake.nix:14`). There is no freeform escape
-inside `perSystem`.
+This is the one that matters most, because 151 files depend on it.
+
+**`perSystem` itself is fine and is used here** — it is core flake-parts
+(`flake-parts/modules/perSystem.nix`, loaded from `all-modules.nix:16` next to
+`withSystem.nix`), not a den or flake-aspects concept, and it is the right home
+for `checks`, `formatter`, `devShells` and `packages`. A previous instance
+claimed it was a den concept; that is wrong, and it is the kind of wrong that
+would have distorted the whole den decision.
+
+What does not work is putting `flake.modules` **inside** it. `perSystem` is
+evaluated once per system, and its outputs are transposed into
+`flake.<output>.<system>.*` (`modules/transposition.nix`) — that is why
+`perSystem.packages.foo` becomes `flake.packages.x86_64-linux.foo`. It is for
+things with a genuine `<system>` axis.
+
+`flake.modules.<class>.<name>` has no such axis: it is one system-independent
+definition, declared at the top level by `flakeModules.modules` as
+`lazyAttrsOf (lazyAttrsOf deferredModule)` (`flake-parts/extras/modules.nix:33`).
+`perSystem` is a distinct module type (`mkPerSystemType`) with no
+`freeformType` — the only one in flake-parts is on the top-level `flake` option
+(`modules/flake.nix:14`) — so there is no escape hatch either.
 
 So turning flake-parts back on does not fix the current error, it replaces it
-with `The option 'flake' does not exist`. The wrappers have to come off.
-
-`perSystem` is **core flake-parts**, incidentally — declared in
-`flake-parts/modules/perSystem.nix`, loaded from `all-modules.nix:16` next to
-`withSystem.nix`. It is not a den or flake-aspects concept, and a previous
-instance got this wrong in a way that would have distorted the whole den
-decision.
+with `The option 'flake' does not exist`. The fix is to move `flake.modules` out
+to the top level, not to stop using `perSystem`.
 
 ### Bare strings in `imports` do not resolve
 
@@ -160,8 +186,13 @@ error: string 'bluetooth' doesn't represent an absolute path
 Beyond that, a directory cannot know which classes a module declares —
 `micro.nix` declares only `homeManager`, so emitting
 `flake.modules.nixos.editors.imports = [ … micro … ]` asks for an attribute that
-does not exist. Only the module itself knows. That is the structural reason the
-opt-in pattern replaces this, not a matter of taste.
+does not exist.
+
+Both are repairable without abandoning categories, which is the chosen direction:
+resolve names to references, and filter each class to the names that class
+declares. See `linux-flake/dirsAsCategory.md` for the mechanism, the traps in it
+(notably: never make the aggregate attribute itself conditional — that recurses),
+and the trailhead for converting to per-module opt-in if that is ever wanted.
 
 ### Raw NixOS modules in the import-tree path
 
@@ -249,8 +280,13 @@ ordering in `PORT-PLAN.md`.
 | `nireHost/aspect-durandal.nix:34` | reads `flake.modules.elly`, which nothing declares |
 
 The `flake.module` typo is the instructive one: it is valid Nix, evaluates
-cleanly, and silently does nothing. That failure mode is the single real cost of
-this whole architecture, and it is why the orphan check is worth porting early.
+cleanly, and silently does nothing. Nothing can catch that by evaluating, which
+is the standing argument for a static check over the module tree — but note the
+sibling branch's orphan check answers a *different* question than this layout
+poses. There, membership is an explicit opt-in line that can be forgotten; here
+it follows from the directory, so the equivalent failure is a module whose
+category no host selects, or a typo'd class that quietly joins nothing. Write
+the check against this mechanism rather than porting theirs wholesale.
 
 ## Working in this repo
 
