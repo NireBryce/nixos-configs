@@ -183,7 +183,8 @@ Compare sets, not hashes.
 
 ## Related reading
 
-- `PORT-PLAN.md` — Phase 2d, where the repair-not-replace decision was made.
+- `2026-08-08-PORT-PLAN-(COMPLETED).md` — Phase 2d, where the
+  repair-not-replace decision was made.
 - `git show flake-parts:SESSION-HANDOFF.md` §6 — the sibling branch's account of
   the opt-in pattern: what it replaced, its four failure modes, and the
   mechanics of converting ~140 files to it.

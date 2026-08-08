@@ -8,7 +8,81 @@ git show flake-parts:SESSION-HANDOFF.md    # what isn't recoverable from the tre
 git show flake-parts:SESSION-CHANGES.md    # the 37 commits, and how to port them
 ```
 
-rename this file to <timestamp>-PORT-PLAN-(COMPLETED).md when finished
+---
+
+# Outcome — completed 2026-08-08
+
+All five phases done, in 24 commits from `dd99518` to `573a0eb`. The branch went
+from **no output evaluating at all** to `nix flake check --all-systems` passing.
+
+```
+nixosConfigurations.nire-durandal.config.system.build.toplevel.drvPath   resolves
+  …config.home-manager.users.elly.home.activationPackage.drvPath         resolves
+nix flake check --all-systems --no-build                                 all checks passed
+just modules                                                             no findings
+```
+
+**Nothing was built or switched.** Every result above except
+`checks.<system>.module-tree` means *evaluates and produces the expected
+derivation*. That check is static, so it is the one thing here that has actually
+been built.
+
+## Where the plan was wrong
+
+Kept for the next time a plan gets written from static analysis.
+
+- **Eight defects became twelve.** The four extra were invisible until the phase
+  before them landed, exactly as `SESSION-HANDOFF.md` §3 predicted: `.blerc`
+  declared twice and `blesh.nix` declaring its module twice (2c), `boot` being
+  both a category and a module (2d), `jq`/`bitwarden` declaring nixos modules
+  full of home-manager options (2e), and `programs.bash.blesh.enable` — an option
+  Home Manager has never had — surfacing only when HM was finally wired.
+- **The `boot` collision was the one worth catching.** `flake.modules.nixos.boot`
+  merged the `nire/boot/` category (which wipes `/root` on boot) with durandal's
+  bootloader. Harmless here by luck; a second host would have inherited both.
+  Nothing in the plan anticipated that module and category names share a
+  namespace.
+- **Phase 2c's transform script was silently wrong on first run** and would have
+  dropped `sops.nix`'s `config` argument — a module that looks fine and
+  references an undefined variable. Found by previewing output rather than
+  trusting "151 ok, 0 skipped". The script now asserts its rewrite count.
+- **The orphan check's first model was wrong too**, reporting eight nested
+  categories as dead because `collectModules` recurses. Reachability is per
+  module, not per category.
+- **Phase 1 before Phase 2 was the wrong order**, as the handoff argued. Seven
+  defects were fixed unverifiably and only re-checked later. Nothing was wrong,
+  but nothing could have been known to be right either.
+
+## What was decided along the way
+
+- **Categories kept, not replaced by per-module opt-in.** `dirsAsCategory` was
+  repaired instead — the mechanism was verified against flake-parts' own option
+  type before being written. `linux-flake/dirsAsCategory.md` is the trailhead if
+  that is ever revisited.
+- **Home Manager NixOS-integrated.** `linux-flake/home-manager-standalone.md` is
+  the way back.
+
+## Still open
+
+- **Nothing has been built or switched.** The most valuable next step by a wide
+  margin. Two things deserve attention when it happens: impermanence is live and
+  deletes `/root` on boot, and this is a *first* Home Manager activation, so any
+  dotfile HM wants to own and finds already present will collide.
+- **Tenacity**, deliberately not re-added. See below.
+- **`nire.primaryUser`** — `elly` is still hardcoded in `users.users.elly`,
+  `home.username` and `home-manager.users.elly`.
+- **`nixpkgs.hostPlatform` is declared twice**, in
+  `nireHost/durandal/configuration/nixpkgs-hostPlatform.nix` and in
+  `hardware-configuration.nix:69`. Both `mkDefault` with the same value, so
+  harmless, but one of them is redundant.
+- **Four `hostPlatform has been renamed` warnings.** Not from this tree — no bare
+  `pkgs.hostPlatform` exists here or in the imported input modules. Traced as far
+  as nixpkgs internals and left.
+- **The `darwin` input and `macos/`**, untouched.
+- **`misc/` is untracked** — on disk, not in `.gitignore`, never added.
+- **treefmt / `nix fmt`** was never set up; the tree is deliberately unformatted.
+
+Everything below is the plan as written on 2026-08-07, unedited.
 
 ---
 

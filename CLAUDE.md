@@ -24,7 +24,8 @@ has no config here any more — the key is valid, leave it.
 The flake evaluates and `nix flake check --all-systems` passes. It did not until
 recently: the branch was a stalled migration off `vic/den`, with 151 module files
 already written in flake-parts idiom while `flake.nix` still used a raw
-`nixpkgs.lib.evalModules`. `PORT-PLAN.md` records that work and what remains.
+`nixpkgs.lib.evalModules`. `2026-08-08-PORT-PLAN-(COMPLETED).md` records that
+work, where the plan turned out wrong, and what is still open.
 
 **Nothing here has ever been built or switched.** The dev machine is
 aarch64-darwin and the host is x86_64-linux, so building it needs a remote builder
@@ -263,7 +264,8 @@ introducing it here is a deliberate separate change, not a tidy-up.
 
 ## Docs
 
-- `PORT-PLAN.md` — the migration off den: what was done, what remains.
+- `2026-08-08-PORT-PLAN-(COMPLETED).md` — the migration off den: what was
+  done, where the plan was wrong, and what is still open.
 - `linux-flake/dirsAsCategory.md` — the category mechanism and its trailhead.
 - `linux-flake/home-manager-standalone.md` — reversing the HM decision.
 - `git show flake-parts:SESSION-HANDOFF.md` — the sibling branch's notes on dead
