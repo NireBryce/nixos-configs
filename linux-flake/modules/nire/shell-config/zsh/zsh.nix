@@ -24,12 +24,6 @@
             #          ironically this means going back to `zi` for now
 
             # TODO:  MIGRATE OFF ZI
-            # TODO: evaluation warning: `programs.zsh.initExtraFirst` is deprecated, use `programs.zsh.initContent` with `lib.mkBefore` instead.
-            #   Example: programs.zsh.initContent = lib.mkBefore "your content here";
-            # evaluation warning: `programs.zsh.initExtraBeforeCompInit` is deprecated, use `programs.zsh.initContent` with `lib.mkOrder 550` instead.
-            #   Example: programs.zsh.initContent = lib.mkOrder 550 "your content here";
-            # evaluation warning: `programs.zsh.initExtra` is deprecated, use `programs.zsh.initContent` instead.
-            #   Example: programs.zsh.initContent = "your content here";
 
             # fast syntax highlighting theems
             home.file."./.config/F-Sy-H".source = ./config/zsh-f-s-highlight-themes;
@@ -37,7 +31,7 @@
             # plugin dependencies
             home.packages = with pkgs; [
                 diff-so-fancy
-                # starship
+                # starship                        # enabled via programs.starship, see appearance-cli/starship.nix
                 tree
                 # ruby                            # zi depends on `gem`
                 nix-zsh-completions
@@ -47,14 +41,12 @@
                 zsh-completions
                 zsh-autocomplete
                 zsh-autosuggestions
-                # zsh-powerlevel10k # in zi
                 zsh-system-clipboard
                 zsh-you-should-use
             ];
 
             programs.zsh =
             let
-                p10k_cfg = lib.fileContents ./config/zsh-powerlevel10k/.p10k.zsh;
                 bindings_cfg = lib.fileContents ./config/initial-bindings.zsh;
                 setopts_cfg = lib.fileContents ./config/initial-setopts.zsh;
                 zstyle_cfg = lib.fileContents ./config/initial-zstyle.zsh;
@@ -108,10 +100,6 @@
                         name = pkgs.zsh-autosuggestions.pname;
                         src = pkgs.zsh-autosuggestions;
                     }
-                    # {
-                    #     name = pkgs.zsh-powerlevel10k.pname;
-                    #     src = pkgs.zsh-powerlevel10k.src;
-                    # }
                     {
                         name = pkgs.zsh-system-clipboard.pname;
                         src = pkgs.zsh-system-clipboard;
@@ -174,7 +162,7 @@
 
                     #################PASSWORD ENTRY/CONFIRM DIALOGS GO ABOVE##############################
 
-                    # Powerlevel10k instant prompt.  anything requiring input/perf goes above, else below
+                    # anything requiring input/perf goes above, else below
                                                             
                     # keybindings from various configs
                         ${bindings_cfg}
@@ -197,10 +185,6 @@
                 '')
 
                     (lib.mkOrder 550 ''
-                    ### p10k cfg start
-                    ${p10k_cfg}
-                    ### p10k cfg end
-
                     # zicompinit                                        # zi cleanup
                     autoload -Uz compinit
                     compinit -C
