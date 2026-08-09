@@ -16,7 +16,7 @@
         elly
 
         nix             # basic-nix-settings
-        shell-config    # bash, blesh, fish, shell-env, zsh
+        shell-config    # bash, blesh, shell-env, zsh
         system          # font, virtualization
 
         # packages
