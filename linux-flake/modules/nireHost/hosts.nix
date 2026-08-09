@@ -16,5 +16,6 @@ in
 {
     flake.nixosConfigurations = {
         nire-durandal = mkHost "x86_64-linux" config.flake.modules.nixos.durandalConfiguration;
+        nire-tenacity = mkHost "x86_64-linux" config.flake.modules.nixos.tenacityConfiguration;
     };
 }

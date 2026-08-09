@@ -8,7 +8,7 @@
             #
             # Neither built-in option is usable here. `programs.man.generateCaches`
             # builds a buildEnv over every entry in home.packages and runs mandb at
-            # *build* time, so touching any one of ~128 packages rebuilds the whole
+            # *build* time, so touching any one of ~126 packages rebuilds the whole
             # index locally. It had been on only as a side effect -- fish's
             # generateCompletions sets it with mkDefault -- and left with fish.
             # `documentation.man.generateCaches` is the same shape at system scope
