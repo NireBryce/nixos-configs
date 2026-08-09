@@ -30,10 +30,9 @@
                 # separate ~/.nix-profile, so home.profileDirectory moves too.
                 useUserPackages = true;
 
-                # GREP NOTE: `home-manager.users.elly`. The account name is
-                # hardcoded here as it is elsewhere on this branch
-                # (users.users.elly, home.username); introducing nire.primaryUser
-                # is a separate change.
+                # the full path here is `home-manager.users.elly`; the account
+                # name is hardcoded, as it is in users.users.elly and
+                # home.username
                 users.elly = ellyHome;
             };
         };

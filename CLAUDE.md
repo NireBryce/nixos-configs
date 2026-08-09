@@ -243,18 +243,23 @@ framing.
 
 ## Conventions
 
-**Formatting is deliberate.** The aligned-`=` columns throughout `modules/` are
-intentional. Do not run a formatter casually, and match surrounding alignment.
-Module bodies are currently indented one level deeper than they need to be, left
-over from unwrapping `perSystem` without reflowing — reindenting would risk the
-`''` strings in the shell modules.
+**Read `linux-flake/style-guide.md` before writing a new module.** It covers the
+bracket rule, the module header and where each argument belongs, the
+`# # description` convention and why it stays a comment, and the fact that file
+placement is load-bearing. Formatting here is deliberate — the aligned-`=`
+columns are intentional and `nix fmt` is deliberately not wired up, because it
+would flatten them.
+
+Module bodies currently sit one level deeper than they need to, left over from
+unwrapping `perSystem` without reflowing — reindenting would risk the `''`
+strings in the shell modules.
 
 **Namespacing.** `nire` for anything that does not need a more specific tag;
 `nireHost`, `nireUser`, `nirePackages` otherwise.
 
-**Leave a grep trail when you make a name unfindable.** Put the literal old form
-in a comment on the declaration — see the `GREP NOTE` in `boot-durandal.nix` and
-in `enable-home-manager.nix`.
+**When a rename makes the old name ungreppable, say what it was** in a short
+comment on the declaration — see `boot-durandal.nix` and
+`enable-home-manager.nix`.
 
 **`elly` is hardcoded**, in `users.users.elly`, `home.username`, and
 `home-manager.users.elly`. The sibling branch has a `nire.primaryUser` option;

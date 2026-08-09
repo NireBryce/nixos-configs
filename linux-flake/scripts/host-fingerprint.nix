@@ -11,9 +11,8 @@ let
   flakePath = builtins.getEnv "FLAKE_PATH";
   host = builtins.getEnv "HOST";
   cfg = (builtins.getFlake "path:${flakePath}").nixosConfigurations.${host}.config;
-  # GREP NOTE: `cfg.nire.primaryUser` on the sibling branch. There is no
-  # nire.primaryUser option here -- the account name is hardcoded throughout
-  # this tree (users.users.elly, home.username, home-manager.users.elly).
+  # this reads `cfg.nire.primaryUser` on the sibling branch; there is no such
+  # option here, the account name being hardcoded throughout this tree
   user = "elly";
   sortStr = builtins.sort (a: b: a < b);
   names = ps: sortStr (map (p: p.name or "?") ps);
