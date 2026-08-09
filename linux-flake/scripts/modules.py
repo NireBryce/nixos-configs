@@ -28,6 +28,13 @@ AGG = re.compile(r'with\s+config\.flake\.modules\.(\w+);\s*\[(.*?)\]', re.S)
 
 
 def scan(root):
+    """categories: name -> dirsAsCategory path.  modules: name -> [(path, classes)].
+
+    modules maps to a *list*, not a single entry. Keying it by stem and assigning
+    would silently drop one of two same-named files, which is the exact case
+    `collisions` exists to report -- the checker would have overwritten the
+    evidence and then found nothing.
+    """
     root = pathlib.Path(root)
     categories, modules = {}, {}
     for p in sorted(root.rglob('*.nix')):
@@ -36,7 +43,7 @@ def scan(root):
             continue
         classes = {m.group(1) for m in DECL.finditer(p.read_text())}
         if classes:
-            modules[p.stem] = (p, classes)
+            modules.setdefault(p.stem, []).append((p, classes))
     return categories, modules
 
 
@@ -56,11 +63,30 @@ def imported_names(root):
 
 
 def collisions(root):
+    """Two ways one attribute ends up with two owners, both silent."""
     categories, modules = scan(root)
-    hits = sorted(set(categories) & set(modules))
-    for n in hits:
-        print(f"COLLISION  {n!r}: category {categories[n].parent}/ "
-              f"and module {modules[n][0]} declare the same attribute; they merge")
+    hits = []
+
+    # a module named the same as a category
+    for n in sorted(set(categories) & set(modules)):
+        for path, _ in modules[n]:
+            print(f"COLLISION  {n!r}: category {categories[n].parent}/ and module "
+                  f"{path} declare the same attribute; they merge")
+        hits.append(n)
+
+    # two modules with the same filename, anywhere in the tree. Only collides
+    # per class, so `foo.nix` declaring nixos and another declaring homeManager
+    # is legal -- reported only when the classes actually overlap.
+    for n, entries in sorted(modules.items()):
+        if len(entries) < 2:
+            continue
+        for i, (p1, c1) in enumerate(entries):
+            for p2, c2 in entries[i + 1:]:
+                shared = c1 & c2
+                if shared:
+                    print(f"COLLISION  {n!r}: {p1} and {p2} both declare "
+                          f"{'/'.join(sorted(shared))}.{n}; they merge")
+                    hits.append(n)
     return hits
 
 
@@ -80,7 +106,9 @@ def orphans(root):
     catdirs = {p.parent: name for name, p in categories.items()}
 
     findings = []
-    for name, (path, classes) in sorted(modules.items()):
+    for name, (path, classes) in sorted(
+        (n, e) for n, entries in modules.items() for e in entries
+    ):
         if name in all_imported:
             continue
 
