@@ -28,6 +28,18 @@ in
   users = builtins.attrNames cfg.users.users;
   userGroups = sortStr cfg.users.users.${user}.extraGroups;
   fileSystems = builtins.attrNames cfg.fileSystems;
+
+  # Names alone missed a real change: options is `listOf str`, so two modules
+  # declaring the same mount concatenate rather than override, and the
+  # duplication that produced was invisible here. Order matters for mount, so
+  # these are deliberately not sorted.
+  fileSystemOptions = builtins.mapAttrs (_: fs: fs.options) cfg.fileSystems;
+  # no `lib` in scope here -- this file is evaluated standalone with
+  # `nix eval --file`, so only builtins are available
+  fileSystemsNeededForBoot = sortStr (
+    builtins.filter (n: cfg.fileSystems.${n}.neededForBoot)
+      (builtins.attrNames cfg.fileSystems)
+  );
   etc = builtins.attrNames cfg.environment.etc;
   fonts = names cfg.fonts.packages;
   kernelModules = sortStr cfg.boot.kernelModules;

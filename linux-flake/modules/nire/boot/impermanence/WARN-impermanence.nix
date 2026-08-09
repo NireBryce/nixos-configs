@@ -4,28 +4,20 @@
     in { 
         flake.modules.nixos.${moduleName} = {
             # WARNING: IF YOU HAVE A SIMILAR LAYOUT TO MY LUKS SETUP, IMPORTING THIS WILL DELETE YOUR ROOT ON BOOT, so like, know what you're doing
-            # filesystems
-            fileSystems."/".options = [
-                "compress=zstd"
-                "noatime"
-            ];
-            fileSystems."/home".options = [ "compress=zstd" ];
-            fileSystems."/nix".options = [
-                "compress=zstd"
-                "noatime"
-            ];
-            fileSystems."/persist".options = [
-                "compress=zstd"
-                "noatime"
-            ];
-            fileSystems."/persist".neededForBoot = true;
-            fileSystems."/var/log".options = [
-                "compress=zstd"
-                "noatime"
-            ];
-            fileSystems."/var/log".neededForBoot = true;
-                # fileSystems."/var/lib/sbctl".options        = [ "compress=zstd" "noatime" ];
-                # fileSystems."/var/lib/sbctl".neededForBoot  = true;
+
+            # filesystems -- disabled 2026-08-09, the host hardware configs own
+            # these now. They concatenated rather than overrode; see history at
+            # the bottom of this file before re-enabling any of them.
+            #
+            # fileSystems."/".options                     = [ "compress=zstd" "noatime" ];
+            # fileSystems."/home".options                 = [ "compress=zstd" ];
+            # fileSystems."/nix".options                  = [ "compress=zstd" "noatime" ];
+            # fileSystems."/persist".options              = [ "compress=zstd" "noatime" ];
+            # fileSystems."/persist".neededForBoot        = true;
+            # fileSystems."/var/log".options              = [ "compress=zstd" "noatime" ];
+            # fileSystems."/var/log".neededForBoot        = true;
+            # fileSystems."/var/lib/sbctl".options        = [ "compress=zstd" "noatime" ];
+            # fileSystems."/var/lib/sbctl".neededForBoot  = true;
 
             imports = [
                 inputs.impermanence.nixosModule
@@ -111,3 +103,46 @@
             };
         };
 }
+
+# ── history ─────────────────────────────────────────────────────────────────
+#
+# 2026-08-09 — why the fileSystems block at the top is commented out
+#
+# This module declared mount options for /, /home, /nix, /persist and /var/log,
+# and so did each host's hardware-configuration.nix. `fileSystems.<n>.options`
+# is `listOf str`, so those definitions did not override one another — they
+# concatenated. Durandal evaluated to:
+#
+#   /          [ "x-initrd.mount" "subvol=root" "compress=zstd" "noatime"
+#                                               "compress=zstd" "noatime" ]
+#   /home      [ "subvol=home" "compress=zstd" "compress=zstd" ]
+#   /nix       [ "x-initrd.mount" "subvol=nix" "compress=zstd" "noatime"
+#                                              "compress=zstd" "noatime" ]
+#   /persist   ... same doubling
+#   /var/log   ... same doubling
+#
+# Harmless in practice — mount accepts a repeated option and the last wins —
+# but it is the one-owning-module rule broken, the same way `.blerc` and
+# `home.sessionPath` were. The hardware config is the owner that has to know the
+# subvol names anyway, so it owns the rest too.
+#
+# Nothing is lost: every option above, and `neededForBoot` for /persist and
+# /var/log, is declared in the hwconfigs already. Verified after the change with
+# `just diff` — the option *set* per filesystem is unchanged, only the repeats
+# are gone.
+#
+# If you re-enable any of these, check what the host hwconfig already declares
+# for that mount first.
+#
+#
+# STILL OUTSTANDING — this module is durandal-only, and not by choice
+#
+# `systemd.services.restore-root` waits on
+# `systemd-cryptsetup@nire-durandal.service`, which is hardcoded to one host and
+# carries its own "fix me to be general" note. Both machines happen to name the
+# LUKS device `enc`, so `dev-mapper-enc.device` is fine; only the cryptsetup unit
+# name is host-specific.
+#
+# That is why nire-tenacity does not import the `boot` category, despite its disk
+# having the persist and log subvolumes that only make sense with impermanence.
+# See TENACITY-PLAN.md.
