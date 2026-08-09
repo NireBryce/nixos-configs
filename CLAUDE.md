@@ -267,6 +267,9 @@ introducing it here is a deliberate separate change, not a tidy-up.
 - `2026-08-08-PORT-PLAN-(COMPLETED).md` — the migration off den: what was
   done, where the plan was wrong, and what is still open.
 - `linux-flake/dirsAsCategory.md` — the category mechanism and its trailhead.
+- `linux-flake/2026-08-08 lessons.md` — how the port went wrong in the doing:
+  tools that reported success while being wrong, traps that were documented and
+  hit anyway, and which questions were settled by reading source.
 - `linux-flake/home-manager-cutover.md` — the first-switch runbook. Read before
   `just switch`: the collision risk is real and the starting state on the
   machine is not known from here.
