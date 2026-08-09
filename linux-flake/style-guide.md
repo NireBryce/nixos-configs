@@ -184,6 +184,14 @@ contain the string so a search lands here.
 Both live in the tree: `nireHost/durandal/hardware/boot-durandal.nix` and
 `nire/system/home-manager/enable-home-manager.nix`.
 
+## A bug recorded in a comment stays in the file
+
+Commit messages hold the fuller account, but nobody finds them. If a later
+change strands the comment — its code is gone, or the name it explained has
+changed — move it to a `history` section at the bottom of the file rather than
+deleting it, and expand it, since it can no longer lean on the context it sat
+next to. `boot-durandal.nix` has one. See `CLAUDE.md` for the rule in full.
+
 ## File placement is load-bearing
 
 Not formatting, but it belongs here because getting it wrong produces no error:

@@ -261,6 +261,18 @@ strings in the shell modules.
 comment on the declaration — see `boot-durandal.nix` and
 `enable-home-manager.nix`.
 
+**A bug recorded in a comment stays in the file.** The commit message is the
+fuller record, but nobody goes looking through `git log` — the comment is what
+the next person editing this code actually reads, and several of the bugs here
+are the kind that recur. Do not trim one out because the fix has landed.
+
+If a later change leaves the comment stranded — the code it described is gone,
+or the name it explained has changed, so it no longer reads as an annotation of
+anything nearby — **move it to the bottom of the file under a `history` heading
+rather than deleting it**, and expand it enough to stand alone. A comment that
+has lost its surroundings has also lost the context that made it terse, so it
+needs to say more, not less. `boot-durandal.nix` has one.
+
 **`elly` is hardcoded**, in `users.users.elly`, `home.username`, and
 `home-manager.users.elly`. The sibling branch has a `nire.primaryUser` option;
 introducing it here is a deliberate separate change, not a tidy-up.
