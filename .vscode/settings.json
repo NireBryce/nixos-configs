@@ -3,33 +3,52 @@
     "nix.enableLanguageServer": true,
     "[nix]": {
         "editor.tabSize": 4,
-        "editor.defaultFormatter": "jnoortheen.nix-ide"
+        // Nix formatting is off on purpose: nixfmt collapses the aligned `=` columns
+        // this repo keeps deliberately (see CLAUDE.md -- `nix fmt` is unwired for the
+        // same reason). Carved out per-language so turning editor.formatOnSave on
+        // globally for everything else stays safe.
+        "editor.formatOnSave": false
+        // no "editor.defaultFormatter" -- leaving it unset means Format Document has
+        // nothing to invoke for .nix, rather than silently reaching for nixfmt.
     },
     "nix.serverPath": "nixd",
     "nix.serverSettings": {
         "nixd": {
+            // An EMPTY command is the off switch. Deleting this block does NOT disable
+            // formatting -- nixd's built-in default is `{"nixfmt"}`
+            // (Controller/Configuration.h), so an absent block still formats. Empty makes
+            // onFormat bail with "formating command is empty" before it ever forks
+            // (Controller/Format.cpp). Restore with ["nixfmt"] -- note it must be one
+            // argv element per token; ["nixfmt -q"] execvp's a binary of that literal name.
             "formatting": {
-                "command": [
-                    "nixfmt"
-                ]
+                "command": []
+            },
+            // getFlake takes a flake *directory*, never the flake.nix itself:
+            // ".../linux-flake/flake.nix" fails with `path '/nix/store/...-source/flake.nix'
+            // does not exist`, because the string is resolved as a flake ref and then
+            // flake.nix is looked up *inside* it. The flake lives in linux-flake/, not the
+            // repo root, so every path here needs the subdirectory.
+            // ${workspaceFolder} does expand -- vscode-nix-ide walks serverSettings
+            // recursively through the vscode-variables package (src/utils.ts).
+            "nixpkgs": {
+                "expr": "import (builtins.getFlake \"${workspaceFolder}/linux-flake\").inputs.nixpkgs {}"
             },
             "options": {
-                // By default, this entry will be read from `import <nixpkgs> { }`.
-                // You can write arbitary Nix expressions here, to produce valid "options" declaration result.
-                // Tip: for flake-based configuration, utilize `builtins.getFlake`
-                "nixpkgs": {
-                    "expr": "import (builtins.getFlake \"${workspaceFolder}/linux-flake/flake.nix\").inputs.nixpkgs {}"
-                },
+                // <name> in the upstream README is a placeholder, not syntax. One host.
                 "nixos": {
-                    "expr": "(builtins.getFlake \"${workspaceFolder}/linux-flake/flake.nix\").nixosConfigurations.<name>.options"
+                    "expr": "(builtins.getFlake \"${workspaceFolder}/linux-flake\").nixosConfigurations.nire-durandal.options"
                 },
+                // Home Manager is a NixOS module here (useGlobalPkgs/useUserPackages), so
+                // there is no `homeConfigurations` output at all -- reaching for one returns
+                // an attribute error and nixd silently serves no HM options. Options have to
+                // be dug out of the NixOS config's submodule type instead.
                 "home-manager": {
-                    "expr": "(builtins.getFlake \"${workspaceFolder}/linux-flake/flake.nix\").homeConfigurations.<name>.options"
-                },
-                // Tip: use ${workspaceFolder} variable to define path
-                "nix-darwin": {
-                    "expr": "(builtins.getFlake \"${workspaceFolder}\").darwinConfigurations.<name>.options"
+                    "expr": "(builtins.getFlake \"${workspaceFolder}/linux-flake\").nixosConfigurations.nire-durandal.options.home-manager.users.type.getSubOptions []"
                 }
+                // A `nix-darwin` entry was here, pointing at ${workspaceFolder} -- the repo
+                // root, which has no flake.nix -- for darwinConfigurations, which this flake
+                // does not have. `elly-user.nix` declares a darwin class for fonts, but
+                // nothing consumes it. Removed; restore if darwinConfigurations ever exist.
             }
         }
     },
