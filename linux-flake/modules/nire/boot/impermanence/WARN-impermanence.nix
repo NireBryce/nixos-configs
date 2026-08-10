@@ -237,6 +237,49 @@
 
 # ── history ─────────────────────────────────────────────────────────────────
 #
+# 2026-08-10 — what the move to systemd stage 1 took out with it
+#
+# Three things above were true only of scripted stage 1 and are recorded here
+# rather than deleted, because each is a real finding and the mechanism could
+# come back if the migration is ever reverted.
+#
+# `udevadm settle` before the mount. The deployed system's initrd hardcoded
+# /dev/mapper/enc, which cryptsetup creates synchronously. fileSystems."/".device
+# is a /dev/disk/by-uuid path on both hosts, and that symlink is created
+# asynchronously by udev afterwards -- with no `udevadm settle` and no
+# `waitDevice` anywhere between the LUKS open and postResumeCommands. The next
+# settle in stage-1-init.sh ran after the whole block. So the rollback raced
+# udev, and losing the race meant a mount that failed and a wipe that silently
+# did not happen. The systemd unit fixes this structurally instead: ordering
+# After= the device units means udev has finished with the device by
+# definition, so no polling is involved.
+#
+# `boot.kernelParams = [ "boot.shell_on_fail" ]`, and the `fail` calls that
+# needed it. stage-1-init.sh defines fail(), but it only offers an interactive
+# shell when `allowShell` is set, and that comes from that kernel parameter.
+# Without it fail() still prompts and still blocks on `read -n 1`, but the only
+# choices are `r` to reboot or any other key to continue. The systemd
+# equivalent is OnFailure=emergency.target plus
+# boot.initrd.systemd.emergencyAccess, both above.
+#
+# The explicit `if ! mount ...; then ... fail; fi` guards. There is no `set -e`
+# in stage-1-init.sh, so after a failed mount every later command failed
+# harmlessly against an empty /mnt and the rollback simply stopped happening --
+# which looks exactly like a working system until the disk fills. systemd job
+# scripts are built by makeJobScript, which is writeShellScriptBin over
+# `set -e`, so the first failure now aborts the unit on its own and the guards
+# were dropped as redundant.
+#
+# One trap that died with the mechanism, kept because it cost a near-miss:
+# never write an at-sign placeholder token inside a scripted stage-1 hook
+# string, comments included. stage-1-init.sh is assembled by 19 sequential
+# substituteInPlace --replace-fail passes and the one pasting postResumeCommands
+# in runs 10th, so any such token survives insertion and is then expanded by a
+# later pass. Naming the pre-LVM hook in a comment would have pasted the whole
+# LUKS unlock script into the middle of that comment, where only its first line
+# stays commented out. Full account in CLAUDE.md.
+#
+#
 # 2026-08-09 — why the fileSystems block at the top is commented out
 #
 # This module declared mount options for /, /home, /nix, /persist and /var/log,
