@@ -367,9 +367,10 @@ introducing it here is a deliberate separate change, not a tidy-up.
 - `2026-08-08-PORT-PLAN-(COMPLETED).md` — the migration off den: what was
   done, where the plan was wrong, and what is still open.
 - `linux-flake/dirsAsCategory.md` — the category mechanism and its trailhead.
-- `linux-flake/impermanence-stage1.md` — why the root rollback uses scripted
-  stage 1, and the trailhead to a systemd-initrd unit. Read before touching
-  `boot.initrd.systemd.enable`.
+- `linux-flake/impermanence-stage1.md` — the root rollback's move from scripted
+  stage 1 to a systemd-initrd unit, done 2026-08-10 because the 2026-08-07
+  nixpkgs flipped `boot.initrd.systemd.enable` to default true. Evaluates, never
+  booted. Read before touching anything in initrd.
 - `linux-flake/lessons.md` — how the work went wrong in the doing: tools that
   reported success while being wrong, traps that were documented and hit anyway,
   and which questions were settled by reading source. §§1–18 are the port,
