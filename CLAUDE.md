@@ -33,9 +33,11 @@ or binfmt, neither of which is set up. Every "verified" claim in this repo means
 *evaluates and produces the expected derivation*, never *runs*. The single
 exception is `checks.<system>.module-tree`, which is static and does build here.
 
-One host: `nire-durandal`. `nire-tenacity` exists in git history and in
-`.sops.yaml`, but the den restructure dropped it rather than migrating it. Its
-one surviving module, `jovian.nix`, is marked `ORPHAN-OK`.
+Two hosts: `nire-durandal` (workstation) and `nire-tenacity` (handheld,
+Jovian/SteamOS). Tenacity was dropped by the den restructure and brought back
+from `origin/backup-before-flake-parts-happened`, the last config it actually
+ran. It does **not** currently import the `boot` category, so it has no
+impermanence — see `TENACITY-PLAN.md`.
 
 ## Commands
 
@@ -47,6 +49,7 @@ just modules         # static module-tree check; the only one that means anythin
 just fingerprint     # drvPath of the host toplevel
 just dotfiles        # every generated dotfile's attribute name
 just dotfile ./.zshrc
+just diff HEAD~1     # what changed in a host's config, attribute by attribute
 just build / switch  # Linux only; cannot run from this machine
 ```
 
@@ -126,6 +129,23 @@ system-independent definition declared at the top level as
 `lazyAttrsOf (lazyAttrsOf deferredModule)` (`flake-parts/extras/modules.nix:33`).
 There is no `freeformType` on `perSystem` to let it through — the only one in
 flake-parts is on the top-level `flake` option. This is what 151 files got wrong.
+
+### A module's name is its filename
+
+`moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file)` in all 151
+modules, so **renaming a file renames the attribute it declares.**
+
+That is usually harmless, because `dirsAsCategory` also derives its member list
+from filenames — the two move together and category membership survives a
+rename. What does not survive is anything referring to the module by literal
+name: a host config importing it, or another module's `imports`. Those break
+loudly, which is the good case.
+
+The bad case is hardcoding a name that then disagrees with the filename. The
+category looks up members by filename stem and filters with `? ${n}`, so a
+module whose declared name no longer matches its file is **silently dropped** —
+valid, evaluated, and absent. Keep declared names derived, or keep them in sync
+deliberately and say so in the file.
 
 ### Names share one namespace per class, and collisions merge
 
@@ -284,6 +304,9 @@ introducing it here is a deliberate separate change, not a tidy-up.
 - `2026-08-08-PORT-PLAN-(COMPLETED).md` — the migration off den: what was
   done, where the plan was wrong, and what is still open.
 - `linux-flake/dirsAsCategory.md` — the category mechanism and its trailhead.
+- `linux-flake/impermanence-stage1.md` — why the root rollback uses scripted
+  stage 1, and the trailhead to a systemd-initrd unit. Read before touching
+  `boot.initrd.systemd.enable`.
 - `linux-flake/2026-08-08 lessons.md` — how the port went wrong in the doing:
   tools that reported success while being wrong, traps that were documented and
   hit anyway, and which questions were settled by reading source.

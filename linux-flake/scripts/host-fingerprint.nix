@@ -20,6 +20,13 @@ in
 {
   toplevel = cfg.system.build.toplevel.drvPath;
 
+  # Sampled separately from the toplevel because a great deal can change in the
+  # initrd without any other attribute here moving -- the impermanence root
+  # rollback lives there. It is also how you tell a change reached the initrd at
+  # all: a boot.initrd.systemd.services unit under scripted stage 1 leaves this
+  # untouched, because it is never rendered.
+  initrd = cfg.system.build.initialRamdisk.drvPath;
+
   # sorted: set membership, insensitive to module import order
   systemPackages = names cfg.environment.systemPackages;
   homePackages = names cfg.home-manager.users.${user}.home.packages;
