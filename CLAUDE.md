@@ -254,6 +254,10 @@ error. Escape as `''${...}` or reword.
 
 ### `@name@` inside an initrd hook string is a live template placeholder
 
+Applies to **scripted** stage 1, which this branch left on 2026-08-10 — the hooks
+below do not exist under systemd stage 1. Kept because the mechanism is one
+`boot.initrd.systemd.enable = false` away, and because this cost a near-miss.
+
 `boot.initrd.postResumeCommands` and its siblings are not copied into
 `stage-1-init.sh` — they are pasted in by a fixed sequence of 19
 `substituteInPlace --replace-fail` passes. `@postResumeCommands@` is the
@@ -375,6 +379,10 @@ introducing it here is a deliberate separate change, not a tidy-up.
   reported success while being wrong, traps that were documented and hit anyway,
   and which questions were settled by reading source. §§1–18 are the port,
   §§19–23 the first session run on the hardware.
+- `linux-flake/first-boot-runbook.md` — getting this branch from *evaluates* to
+  *runs* on tenacity via `nh os boot`, with the pre-flight, the fallback
+  generation, how to tell a stage-1 failure from a rollback failure, and the
+  `subvolid` test that catches a silently-skipped `/root` wipe.
 - `linux-flake/home-manager-cutover.md` — the first-switch runbook. Read before
   `just switch`: the collision risk is real and the starting state on the
   machine is not known from here.
