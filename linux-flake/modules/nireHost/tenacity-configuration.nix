@@ -29,10 +29,15 @@
         shell-config
         system
 
-        # `desktop-env` holds kde and jovian and no host wants both, so each takes
-        # the one it wants directly. jovian is generic to handhelds -- machines
-        # with built-in controllers that occasionally launch a SteamOS session --
+        # `desktop-env` holds kde-base, kde-desktop and jovian. The shared Plasma
+        # 6 desktop is kde-base, which both jovian and kde-desktop import
+        # themselves -- so each host takes only its own session module and the
+        # category is still never imported whole. jovian is generic to handhelds,
         # not specific to this host; a second handheld would import it too.
+        #
+        # kde-desktop is the half this host must NOT have: sddm, and
+        # defaultSession = "plasma". Jovian sets both itself, to
+        # "gamescope-wayland" with autologin.
         jovian
 
         # ── packages ──────────────────────────────────────────────────────────

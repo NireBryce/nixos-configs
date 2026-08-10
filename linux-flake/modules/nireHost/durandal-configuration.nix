@@ -25,8 +25,10 @@
 
         # `desktop-env` also contains jovian -- a generic handheld module (built-in
         # controllers, occasional SteamOS session), not one host's. Durandal is a
-        # workstation and takes kde on its own rather than the whole category.
-        kde
+        # workstation and takes its own session module rather than the whole
+        # category. kde-desktop pulls in kde-base itself; was plain `kde` before
+        # the 2026-08-10 split.
+        kde-desktop
 
         # ── packages ──────────────────────────────────────────────────────────
         development

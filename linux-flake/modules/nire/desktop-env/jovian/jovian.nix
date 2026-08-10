@@ -1,9 +1,35 @@
-{ lib, inputs, ... }:
+# The handheld half of the desktop story: Jovian, Steam, and the TDP stack.
+#
+# Generic to handhelds -- machines with built-in controllers that occasionally
+# launch a SteamOS session -- not specific to tenacity; a second handheld would
+# import this too.
+#
+# The Plasma 6 desktop this drops back to lives in kde-base.nix, imported below.
+# It used to be one `services.desktopManager.plasma6.enable = true` here, which
+# gave the handheld a desktop session with no XWayland and none of the KDE
+# applications; kde-base.nix's history block has the detail.
+#
+# Not moved to kde-base: sddm, the default session and autologin all come from
+# Jovian's own modules/steam/autostart.nix, which sets defaultSession to
+# "gamescope-wayland". That is the half of kde-desktop.nix this host must not
+# have.
+{ config, lib, inputs, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+
+        # Bound out here, before the module body: inside it `config` is the
+        # NixOS config and `config.flake.modules...` would not resolve. The body
+        # below genuinely needs the inner one, for
+        # `config.jovian.decky-loader.extraPackages`, so the two must not be
+        # confused. See CLAUDE.md, "There are two different `config`s".
+        kdeBase = config.flake.modules.nixos.kde-base;
     in {
-        flake.modules.nixos.${moduleName} = { config, pkgs, ... }: { 
-            imports = [ inputs.jovian.nixosModules.default ]; # I think this is instead of needing them as module args?
+        flake.modules.nixos.${moduleName} = { config, pkgs, ... }: {
+            # # description = "Jovian/SteamOS handheld: Steam session, decky, TDP control";
+            imports = [
+                inputs.jovian.nixosModules.default # I think this is instead of needing them as module args?
+                kdeBase
+            ];
 
             # `config.jovian.…`, not `inputs.jovian.…`: the Jovian flake exposes
             # only nixosModules/legacyPackages/overlays/checks/devShells, no
@@ -12,7 +38,6 @@
             systemd.services.decky-loader.environment.LD_LIBRARY_PATH =
               lib.makeLibraryPath
               config.jovian.decky-loader.extraPackages;
-            services.desktopManager.plasma6.enable = true;
 
             jovian = {
                 steam = {
