@@ -506,7 +506,9 @@ evaluate" section should then be deleted rather than left to rot.
 
 ## Verification, throughout
 
-Nothing on either branch has ever been built or switched. The dev machine is
+Nothing on either branch has been built or switched -- the machines run
+`origin/main`, which already merged flake-parts and predates both. The dev
+machine is
 aarch64-darwin; the host is x86_64-linux. Every claim of "verified" in this port
 means *evaluates and produces the expected derivation*, never *runs*. Say so
 plainly rather than implying otherwise.

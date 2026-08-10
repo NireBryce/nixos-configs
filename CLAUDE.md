@@ -28,7 +28,10 @@ already written in flake-parts idiom while `flake.nix` still used a raw
 `nixpkgs.lib.evalModules`. `2026-08-08-PORT-PLAN-(COMPLETED).md` records that
 work, where the plan turned out wrong, and what is still open.
 
-**Nothing here has ever been built or switched.** The dev machine is
+**Nothing on this branch has been built or switched.** `origin/main` merged
+flake-parts (PRs #28, #29) and is what the machines run, so the architecture is
+proven — it is this branch's 172 commits on top of it that are not. The dev
+machine is
 aarch64-darwin and the host is x86_64-linux, so building it needs a remote builder
 or binfmt, neither of which is set up. Every "verified" claim in this repo means
 *evaluates and produces the expected derivation*, never *runs*. The single
@@ -307,7 +310,7 @@ introducing it here is a deliberate separate change, not a tidy-up.
 - `linux-flake/impermanence-stage1.md` — why the root rollback uses scripted
   stage 1, and the trailhead to a systemd-initrd unit. Read before touching
   `boot.initrd.systemd.enable`.
-- `linux-flake/2026-08-08 lessons.md` — how the port went wrong in the doing:
+- `linux-flake/lessons.md` — how the port went wrong in the doing:
   tools that reported success while being wrong, traps that were documented and
   hit anyway, and which questions were settled by reading source.
 - `linux-flake/home-manager-cutover.md` — the first-switch runbook. Read before

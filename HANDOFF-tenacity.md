@@ -18,7 +18,7 @@ Delete this file once tenacity is switched and the checklist below is answered.
 | `linux-flake/home-manager-cutover.md` | the first-switch runbook — read before `just switch` |
 | `linux-flake/impermanence-stage1.md` | why the root rollback works the way it does |
 | `linux-flake/style-guide.md` | conventions, before writing any module |
-| `linux-flake/2026-08-08 lessons.md` | how the work went wrong in the doing |
+| `linux-flake/lessons.md` | how the work went wrong in the doing |
 
 ## Getting the code
 
@@ -47,7 +47,10 @@ git log --oneline -1     # expect 282e72e or later
 
 ## Why you exist
 
-**Nothing in this repository has ever been built or switched.** Every "verified"
+**Nothing on this branch has been built or switched.** `origin/main` merged
+flake-parts in PRs #28 and #29 and is what these machines run, so the
+architecture itself is proven; what is untested is the 172 commits this branch
+adds on top. Every "verified"
 claim in every doc and commit message means *evaluates and produces the expected
 derivation* — never *runs*. The dev machine is aarch64-darwin; both hosts are
 x86_64-linux; there is no remote builder and no binfmt. The single exception is

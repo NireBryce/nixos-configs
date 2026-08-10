@@ -29,10 +29,12 @@ SAFETY, before you touch anything:
 Read HANDOFF-tenacity.md at the repo root first, then CLAUDE.md.
 
 The handoff was written by the previous instance — Darryl — working from my
-darwin laptop, and it exists because of one fact: nothing in this repo has ever
-been built or switched. Every "verified" claim in every doc and commit message
-means "it evaluates", never "it runs". You are the first instance on the actual
-hardware, and that is the whole point of you.
+darwin laptop, and it exists because of one fact: nothing on this branch has been
+built or switched. origin/main merged flake-parts a while back and is what these
+machines actually run, so the architecture is proven; what is untested is the
+~172 commits this branch stacks on top of it. Every "verified" claim in the docs
+and commit messages from that work means "it evaluates", never "it runs". You are
+the first instance on the actual hardware, and that is the whole point of you.
 
 Work the handoff's checklist in the order it gives. Stop and check with me
 before any of:
@@ -61,7 +63,10 @@ plausibly set about adding it again.
 
 **"Every verified claim means it evaluates."** The single most useful thing to
 hand over. There are a lot of confident verification claims in those commit
-messages and every one of them has that ceiling.
+messages and every one of them has that ceiling. Scoped to the branch rather than
+the repo, which is a correction Elly had to make — origin/main is deployed and is
+already flake-parts, so "none of this has ever worked" would be false and would
+overstate the risk.
 
 **Explicit stop points.** The four listed are where an instance can do something
 that cannot be undone from a chat window.

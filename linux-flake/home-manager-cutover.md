@@ -150,7 +150,8 @@ restore them; move the `*.hm-bak` files back by hand.
   `/root` btrfs subvolume in initrd on every boot. It is unrelated to the HM
   cutover, but the first reboot after a switch is when you would find out
   something about it was wrong, so it is worth a look first.
-- **Nothing in this repo has ever been built or switched.** This procedure is
+- **Nothing on this branch has been built or switched.** The machines run
+  `origin/main`, which predates all of this. This procedure is
   derived from the config and from Home Manager's source, not from having run it.
 
 ## Going the other way

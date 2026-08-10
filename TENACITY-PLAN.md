@@ -208,7 +208,7 @@ machine; every check below is evaluation.
 ## What cannot be verified from here
 
 Both hosts are `x86_64-linux`; this machine is aarch64-darwin. Nothing in this
-repo has ever been built or switched, tenacity least of all — it has not
+branch has been built or switched, tenacity least of all — it has not
 evaluated since March and its jovian module has never been evaluated by any
 host at all. Expect the first `just build` on the machine to find things that
 evaluation cannot.

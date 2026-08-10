@@ -279,13 +279,23 @@ script rather than a reversion.
 Transcript archaeology is available. The user's own history is a better source
 than inference.
 
-## 18. Honest reporting, specifically
+## 18. Honest reporting, specifically — and scope the claim
 
-Nothing in this repository has ever been built or switched. Every "verified"
-claim means *evaluates and produces the expected derivation*. The single
-exception is `checks.<system>.module-tree`, which is static and does build on
-darwin.
+Nothing **on this branch** has been built or switched. Every "verified" claim
+about this session's work means *evaluates and produces the expected
+derivation*. The exception is `checks.<system>.module-tree`, which is static and
+does build on darwin.
 
-Say which you mean, every time — *evaluates*, *builds*, or *runs*. The instance
-on tenacity will be the first that can say the third, and everything it inherits
-from here stops at the first.
+Say which you mean, every time — *evaluates*, *builds*, or *runs*.
+
+**And get the scope right.** For most of this session I wrote "nothing in this
+repository has ever been built or switched", which is false and was propagated
+into seven files before Elly caught it. `origin/main` merged flake-parts in PRs
+#28 and #29, already uses `flake-parts.lib.mkFlake`, and is what the machines
+run. The architecture is deployed and proven; what is unproven is this branch's
+172 commits on top of it.
+
+That distinction is not pedantry — it changes the risk. "This has never worked
+anywhere" and "this is a large untested delta on top of something that works"
+call for different amounts of caution, and the second is the true one. An
+overclaim in the safe-sounding direction is still an overclaim.
