@@ -33,27 +33,45 @@ account of tenacity's starting state does not apply — see above.
 `nireUser/elly/user-settings/elly-user.nix` plus `home-manager-path`, which is
 the 126-package HM closure.
 
-## Read this before switching: the starting state is unknown
+## The starting state — answered for tenacity, still open for durandal
 
-The sibling branch could say "durandal's dotfiles are already HM-owned symlinks,
-so collisions are unlikely". **That claim does not transfer here**, and it is the
-one thing worth being careful about.
+**Checked on the hardware, 2026-08-10: on nire-tenacity this is a relink with no
+collisions.** Of the 57 files Home Manager will own, 42 are already HM symlinks,
+13 do not exist yet, and **none are real files**. No `backupFileExtension`
+needed.
 
-This branch produced `flake.homeConfigurations.elly-nire-durandal` under den, but
-it has not evaluated since March, so nothing *on this branch* has ever been
-applied. What is on either machine was put there by the pre-restructure config,
-which did manage both. So the dotfiles are probably already HM-owned symlinks and
-this is a relink — but "probably" is doing work, so check rather than assume.
-Same check on both hosts:
+Two of them look like collisions and are not. Worth knowing before repeating the
+check, because both make a naive test lie:
+
+- `~/.just/.justfile` — `~/.just` is *itself* a symlink into
+  `home-manager-files`, so the file inside it is not a symlink and `[ -L ]`
+  reports a real file. Already HM-owned.
+- `~/.config/broot` — a real directory whose contents are HM symlinks. Its
+  `home.file` entry is `recursive = true`, so HM links the files individually and
+  leaves the directory real. That *is* the correct end state, not a conflict.
+
+So test by where the path resolves, not by whether the leaf is a symlink:
 
 ```sh
-readlink -f ~/.zshrc ~/.bashrc ~/.gitconfig    # into /nix/store => HM-owned already
-nix profile list | grep home-manager-path      # present => a standalone HM profile exists
-ls ~/.local/state/nix/profiles/ 2>/dev/null    # old HM generations
+readlink -f <path>      # lands in /nix/store => HM-owned
 ```
 
-If those are store symlinks, this is a relink and low risk. If they are real
-files, every one of them is a collision (see below).
+**Durandal has not been checked**, and its answer does not follow from
+tenacity's even though both machines ran the same pre-restructure config. Same
+procedure there:
+
+```sh
+just host=nire-durandal dotfiles                # every file HM will take over
+nix profile list | grep home-manager-path       # present => standalone profile
+ls ~/.local/state/nix/profiles/ 2>/dev/null     # old HM generations
+```
+
+If those are store symlinks it is a relink and low risk. If they are real files,
+every one of them is a collision (see below).
+
+Tenacity also still has the old standalone profile and its generations
+(`home-manager-46-link` … `50`, `profile-40-link`). Both are expected and handled
+— see the next section.
 
 ## The good news: an old standalone profile cleans itself up
 
@@ -71,6 +89,12 @@ Manager to a submodule managed one we attempt to uninstall the
 So **you do not need to expire the old profile by hand.** Old *generations* under
 `~/.local/state/nix/profiles/` linger as GC roots; they are harmless and go away
 on the next `nix-collect-garbage -d`.
+
+Re-read out of the **2026-08-09** Home Manager on 2026-08-10, after the lock
+update moved it four months, and it is unchanged: `home.activation.installPackages`
+still collapses to that single `nixProfileRemove home-manager-path` under
+`submoduleSupport.externalPackageInstall`, with the same upstream comment. The
+claim above survives the bump.
 
 ## The one real risk: file collisions
 
@@ -100,14 +124,24 @@ if you would rather not accumulate backups.
 ## Procedure
 
 ```sh
-just check      # evaluates everything; on darwin this only runs the module-tree check
-just build      # nh os build, no activation -- catches eval and build errors
-just switch     # nh os switch
+just check                      # evaluates everything
+just host=<host> build          # nh os build, no activation -- catches eval and build errors
+just host=<host> switch         # nh os switch
 ```
+
+**The assignment goes before the recipe name**, and it is not optional: the
+justfile defaults `host := "nire-durandal"`, so a bare `just build` on tenacity
+builds the wrong machine. `just build host=nire-tenacity` is not a variant of
+this — just reads it as a second recipe name and errors.
 
 `just build` and `just switch` are Linux-only. `just check` builds the host and
 home derivations on Linux; on the mac `checks.aarch64-darwin` contains only
 `module-tree`, so it exercises almost nothing.
+
+To stage the change without activating it — which is what the first boot on
+tenacity actually wants — use `nh os boot` instead of `switch`. See
+`first-boot-runbook.md`, which covers the reboot, the fallback generation and
+the verification.
 
 ## Verifying it took
 
@@ -150,9 +184,20 @@ restore them; move the `*.hm-bak` files back by hand.
   `/root` btrfs subvolume in initrd on every boot. It is unrelated to the HM
   cutover, but the first reboot after a switch is when you would find out
   something about it was wrong, so it is worth a look first.
+- **`home.stateVersion` is `22.11`**, against a system at `25.05` and an August
+  2026 Home Manager. That is a compat anchor roughly four years behind the module
+  set now reading it, and it is what pins `programs.git.signing.format` to legacy
+  `openpgp`. Do not bump it casually — holding defaults still is its entire job —
+  but know that every legacy branch it selects is one nobody here has run.
+- **`fzf` and `atuin` both bind Ctrl-R.** Both are enabled with shell
+  integration, and the 2026-08 Home Manager warns about it during evaluation.
+  Whichever initialises last wins; see CLAUDE.md on rc-file ordering being
+  load-bearing. Cosmetic, but confusing the first time you hit Ctrl-R after
+  switching.
 - **Nothing on this branch has been built or switched.** The machines run
   `origin/main`, which predates all of this. This procedure is
-  derived from the config and from Home Manager's source, not from having run it.
+  derived from the config and from Home Manager's source, plus the on-hardware
+  checks noted above — not from having run it.
 
 ## Going the other way
 
