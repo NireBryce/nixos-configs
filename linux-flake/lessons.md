@@ -8,7 +8,7 @@ Written for the next instance. The technical traps live in `CLAUDE.md`; these
 are about method.
 
 Two groups. §§1–18 are from the port, done from the darwin laptop against a tree
-that could only be evaluated. §§19–23 are from the first session run on
+that could only be evaluated. §§19–24 are from the first session run on
 `nire-tenacity` itself, where the disk and the build plan became visible and
 brought their own ways to be wrong.
 
@@ -448,3 +448,37 @@ this next. Teaching it the third form cost one regex and one loop.
 and they present identically. Per §1, the widened checker was then run against a
 copy of the tree with a deliberately dead module added, to confirm it still
 reports one.
+
+## 24. Compare against what is deployed, not against the last commit
+
+§2 says the repo is not the machine. On the hardware there is finally a way to
+act on that: diff the branch against the **running system**, which is a
+different question from diffing it against `HEAD`.
+
+It answered "would this break the machine" in a way evaluation could not.
+Persistence, the kernel command line, the declarative password model and the
+LUKS device all turned out identical to what generation 60 runs — and the one
+real difference, the rollback's mount target moving from `/dev/mapper/enc` to a
+`/dev/disk/by-uuid` path, was invisible from the tree, because both are correct
+in isolation and only the *deployed* one proves which was in use.
+
+The enabling trick: **a system's `.drv` outlives its inputs' outputs.**
+Generation 60's `stage-1-init.sh` had already been garbage collected, but its
+derivation was still in the store with the whole script sitting in `buildPhase`,
+so the deployed rollback could be read without building or booting anything.
+
+```sh
+D=$(nix-store --query --deriver /run/current-system)
+nix derivation show "$D"          # kernelParams, bootloader, kernel
+nix derivation show -r "$D"       # every input drv, script text included
+```
+
+Declarative users are not in `/etc` under `mutableUsers = false`; they are in a
+`users-groups.json` named by `/run/current-system/activate`. That is how "root
+has no password at all, and elly's comes from a file on /persist" was
+established rather than assumed — the difference between a switch and a lockout.
+
+**This evidence expires.** Once the new generation boots and
+`nix-collect-garbage` runs, the old baseline is gone and cannot be re-derived.
+Write it down before switching, not after — `first-boot-runbook.md` has
+tenacity's, as an appendix, for exactly that reason.

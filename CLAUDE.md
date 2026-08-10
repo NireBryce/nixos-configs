@@ -378,7 +378,7 @@ introducing it here is a deliberate separate change, not a tidy-up.
 - `linux-flake/lessons.md` — how the work went wrong in the doing: tools that
   reported success while being wrong, traps that were documented and hit anyway,
   and which questions were settled by reading source. §§1–18 are the port,
-  §§19–23 the first session run on the hardware.
+  §§19–24 the first session run on the hardware.
 - `linux-flake/first-boot-runbook.md` — getting this branch from *evaluates* to
   *runs* on tenacity via `nh os boot`, with the pre-flight, the fallback
   generation, how to tell a stage-1 failure from a rollback failure, and the

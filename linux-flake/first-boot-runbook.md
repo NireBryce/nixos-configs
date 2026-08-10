@@ -242,6 +242,71 @@ is an observation of the new one.
 Report which you mean when you write up what happened: *evaluates*, *builds*, or
 *runs*.
 
+## Appendix — the deployed baseline, generation 60
+
+Captured 2026-08-10, before anything was switched. This is what the machine
+*actually ran*, and it is the evidence base for the claim that generation 61
+introduces no fatal difference. **It becomes unrecoverable once 61 is booted and
+`nix-collect-garbage` runs**, so it is written down rather than left in a
+transcript.
+
+| | generation 60 (deployed) |
+|---|---|
+| toplevel | `syazdhsgdh3pgi2gjgs3917fd35d2qfs-nixos-system-nire-tenacity-26.05.20260306.aca4d95` |
+| nixpkgs | `aca4d95fce4914b3892661bcb80b8087293536c6` |
+| kernel | 6.18.16 |
+| stage 1 | **scripted**, rollback via `postResumeCommands` |
+| rollback device | hardcoded `/dev/mapper/enc` |
+| `mutableUsers` | `false` |
+| elly | `hashedPasswordFile = /persist/passwords/elly` |
+| root | no password at all |
+| `/root` | subvolid **607** |
+| `root-blank` | subvolume ID 265 |
+| other subvols | 257 home · 258 nix · 259 persist · 261 log |
+| LUKS | `enc` ← `nvme0n1p7` (`03b8f5c0-…`) |
+| rootfs | `a99ae3fe-…` → `dm-0` |
+| `/boot` | `380C-3C39` → `nvme0n1p4`, vfat |
+
+Kernel command line, which generation 61 reproduces exactly and then appends to:
+
+```
+log_buf_len=4M amd_iommu=off amdgpu.lockup_timeout=5000,10000,10000,5000
+ttm.pages_min=2097152 amdgpu.sched_hw_submission=4 amdgpu.dcdebugmask=0x20000
+audit=0 loglevel=4 lsm=landlock,yama,bpf
+```
+
+Persistence, which is byte-identical between 60 and 61 — five directories
+(`/var/lib/bluetooth`, `/var/lib/nixos`, `/var/lib/systemd/coredump`,
+`/etc/NetworkManager/system-connections`, `/var/lib/flatpak`) and four ssh host
+key files. Confirmed against the live bind mounts in `/proc/1/mountinfo`, not
+just against the config.
+
+### How to capture this again
+
+The useful trick is that **a system's `.drv` outlives its inputs' outputs.**
+`stage-1-init.sh` for generation 60 had already been garbage collected, but the
+derivation was still there and carries the whole script in its `buildPhase`:
+
+```sh
+D=$(nix-store --query --deriver /run/current-system)
+nix derivation show "$D"                    # kernelParams, installBootLoader, kernel path
+nix derivation show -r "$D" | grep stage-1  # then read that drv's buildPhase
+```
+
+Declarative users, including whether root has a password, come out of the
+activation script rather than `/etc`:
+
+```sh
+grep -oE '/nix/store/[a-z0-9]+-users-groups\.json' /run/current-system/activate
+```
+
+And the running mount and subvolume state:
+
+```sh
+grep btrfs /proc/1/mountinfo
+sudo btrfs subvolume list -a /
+```
+
 ## Related
 
 - `impermanence-stage1.md` — the stage-1 migration, and how to reverse it
