@@ -150,6 +150,19 @@ module whose declared name no longer matches its file is **silently dropped** �
 valid, evaluated, and absent. Keep declared names derived, or keep them in sync
 deliberately and say so in the file.
 
+### Hyphens are legal in Nix identifiers
+
+`kde-base` is **one** attribute name, not `kde` minus `base`. A Nix identifier is
+`[a-zA-Z_][a-zA-Z0-9_'-]*`, so `a-b` is a single token and subtraction needs
+spaces around the operator. Two consequences here:
+
+- `with config.flake.modules.nixos; [ kde-desktop ]` resolves the whole
+  hyphenated name, which is why a host config can list it bare.
+- **Any regex over this tree that matches module names with `\w+` is wrong.**
+  `modules.py` did, and read `config.flake.modules.nixos.kde-base` as a reference
+  to `kde` — which left `kde-base` reported as an orphan the same hour it was
+  created. It matches `[\w-]+` now.
+
 ### Names share one namespace per class, and collisions merge
 
 Two modules with the same name do not conflict; they **merge**. `boot` was both
@@ -239,6 +252,33 @@ be dead weight.
 Writing `${terminfo[khome]}` in what you intend as a comment is an evaluation
 error. Escape as `''${...}` or reword.
 
+### `lsblk` and `findmnt` describe the sandbox, not the machine
+
+The shell runs in a mount namespace, and both tools report **that** namespace —
+faithfully, and about the wrong world. Run on tenacity they said `/` was a
+tmpfs, showed `/dev/mapper/enc` mounted at `/etc/xdg`, and left every UUID column
+empty. Read literally, that is *the disk does not match the host's hardware
+module*, which is a stop-and-ask condition. It matched perfectly.
+
+Two sources are not rewritten, and both are unprivileged:
+
+- `/proc/1/mountinfo` — PID 1's mount table, which is the host's
+- `/dev/disk/by-uuid/` — udev's symlinks, so LUKS and filesystem UUIDs resolve
+
+Check the disk against a hardware module through those, never through `findmnt`.
+
+`btrfs subvolume list` does need privileges, and is worth asking Elly to run
+rather than working around — it answers `root-blank` without mounting anything,
+unlike the `mount -o subvol=/` procedure in `HANDOFF-tenacity.md`:
+
+```sh
+sudo btrfs subvolume list -a /
+```
+
+Read the subvolids in its output as well as the names. `/root` sitting far above
+its neighbours — 607 against 257–261 — is the impermanence rollback
+*demonstrably running*, which is a stronger fact than `root-blank` existing.
+
 ## Working in this repo
 
 **`git add` before `nix eval`.** Flakes in a git repo ignore untracked files, so
@@ -310,9 +350,10 @@ introducing it here is a deliberate separate change, not a tidy-up.
 - `linux-flake/impermanence-stage1.md` — why the root rollback uses scripted
   stage 1, and the trailhead to a systemd-initrd unit. Read before touching
   `boot.initrd.systemd.enable`.
-- `linux-flake/lessons.md` — how the port went wrong in the doing:
-  tools that reported success while being wrong, traps that were documented and
-  hit anyway, and which questions were settled by reading source.
+- `linux-flake/lessons.md` — how the work went wrong in the doing: tools that
+  reported success while being wrong, traps that were documented and hit anyway,
+  and which questions were settled by reading source. §§1–18 are the port,
+  §§19–23 the first session run on the hardware.
 - `linux-flake/home-manager-cutover.md` — the first-switch runbook. Read before
   `just switch`: the collision risk is real and the starting state on the
   machine is not known from here.
