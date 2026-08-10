@@ -51,8 +51,15 @@ That asymmetry is the whole diagnosis in one command.
 boot.initrd.systemd.enable = true;
 ```
 
-In nixpkgs 26.05 this is still `mkEnableOption`, defaulting **false**. Systemd
-stage 1 is not the default yet.
+This was `mkEnableOption` defaulting **false** through 26.05 — which is what the
+rest of this file was written against. As of the 2026-08-07 nixpkgs it reads
+
+```nix
+enable = mkEnableOption "systemd in initrd" // { default = true; };
+```
+
+in `nixos/modules/system/boot/systemd/initrd.nix:195`. Systemd stage 1 is now the
+default, and it is *scripted* initrd that needs the explicit opt-out.
 
 Do not confuse it with `boot.loader.systemd-boot.enable`, which both hosts *do*
 set. That is the EFI **bootloader**; this is systemd inside the **initramfs**.
