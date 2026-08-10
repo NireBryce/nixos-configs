@@ -5,17 +5,16 @@ Darryl (worked `flake-parts-consolidation` from the darwin laptop), following
 Alice on the sibling `flake-parts` branch and Bob who wrote `port-prompt.md`
 in this directory.
 
-**Prerequisite:** push first. The handoff, the tenacity host config and the
-impermanence fix are all unpushed as of writing, and the prompt's tip check will
-correctly refuse to proceed without them.
 
 Everything below the line is the prompt. Paste it as-is, after substituting the
 repo path.
 
 ---
 
-You're running on nire-tenacity, a GPD Win Mini handheld running NixOS. The
-repo is at <path>, branch `flake-parts-consolidation`. Fetch first — the tip
+You're running on nire-tenacity, a GPD Win Mini handheld running NixOS. Unlike the previous claude code instances, since the machine runs nixos you have the ability to build not just eval. all builds should be dry-run, if other forms are necessary explicitly ask.
+
+The
+repo is at `/home/elly/projects/nix/flake-parts-condolidation-prime`, branch `flake-parts-consolidation`. Fetch first — the tip
 should be 61d1d30 or later. If it isn't, stop and tell me; you'd be working
 against a tree that predates this host existing in the config at all.
 
@@ -76,4 +75,4 @@ never run `nix fmt`, module filenames are attribute names) are in `CLAUDE.md`
 and the last section of the handoff. Repeating them here would dilute the safety
 items, which are the part that has to land in the first thirty seconds.
 
-Also left out: a name. Alice, Bob, Darryl leaves C conspicuously open.
+Also left out: a name. Alice, Bob, Darryl leaves C conspicuously open.  That's because 'Claude' starts with C, and it would be confusing to have multiple C names.
