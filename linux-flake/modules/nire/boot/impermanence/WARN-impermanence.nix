@@ -57,6 +57,21 @@
                 # impermanence-style wiping root results in sudo lectures after each reboot
                 Defaults lecture = never
             '';
+            # Required by the `fail` calls in postResumeCommands below.
+            #
+            # stage-1-init.sh's fail() only offers an interactive shell when
+            # `allowShell` is set, and that comes from this kernel parameter.
+            # Without it fail() still prompts -- and blocks on `read -n 1` --
+            # but the only options are `r` to reboot or any other key to
+            # continue, which is precisely the silent-continue this is meant to
+            # stop. Not `boot.panic_on_fail`: that exits stage 1 outright, with
+            # no chance to look at why.
+            #
+            # Modest security cost, and it is bounded: everything here runs
+            # *after* the LUKS volume is open, so anyone who can reach this
+            # prompt already had the passphrase.
+            boot.kernelParams = [ "boot.shell_on_fail" ];
+
             # reset / at each boot
             boot.initrd = {
                 enable = true;
@@ -85,7 +100,38 @@
                     # ${rootDevice} rather than a hardcoded /dev/mapper/enc: taken
                     # from this host's own fileSystems, so the module carries no
                     # host-specific device name.
-                    mount -o subvol=/ ${rootDevice} /mnt
+                    #
+                    # udevadm settle, because that swap has a cost. The deployed
+                    # system named /dev/mapper/enc, which cryptsetup creates
+                    # synchronously; fileSystems."/".device is a
+                    # /dev/disk/by-uuid path on BOTH hosts, and that symlink is
+                    # created asynchronously by udev afterwards. Nothing between
+                    # the LUKS open and this point synchronises -- the next
+                    # udevadm settle in stage-1-init.sh runs after this whole
+                    # block. udevd is still running here; it is not stopped
+                    # until `udevadm control --exit`, much later.
+                    #
+                    # NOTE: do not write an at-sign placeholder name in this
+                    # string. stage-1-init.sh is assembled by a series of
+                    # substituteInPlace --replace-fail passes, and the one that
+                    # pastes this block in runs 10th of 19 -- so any such token
+                    # left in here is substituted by a LATER pass. Naming the
+                    # pre-LVM one in a comment would have pasted the entire LUKS
+                    # unlock script into the middle of that comment, where only
+                    # its first line stays commented out.
+                    udevadm settle
+
+                    # Fail loudly. Every command after a failed mount would
+                    # otherwise fail harmlessly against an empty /mnt -- there is
+                    # no `set -e` in stage-1-init.sh -- so the rollback would
+                    # simply stop happening, and a machine that has silently
+                    # stopped wiping /root looks exactly like a working one until
+                    # the disk fills.
+                    if ! mount -o subvol=/ ${rootDevice} /mnt; then
+                        echo "impermanence: could not mount the btrfs top level of ${rootDevice}"
+                        echo "impermanence: /root has NOT been rolled back this boot"
+                        fail
+                    fi
 
                     # While we're tempted to just delete /root and create
                     # a new snapshot from /root-blank, /root is already
@@ -111,8 +157,19 @@
                     echo "deleting /root subvolume..." &&
                     btrfs subvolume delete /mnt/root
 
+                    # The one choke point worth guarding besides the mount. It
+                    # catches the delete above failing too: a /root that could
+                    # not be deleted still exists, so the snapshot cannot be
+                    # created over it. It also catches root-blank being absent,
+                    # which is the prerequisite named at the import site in each
+                    # host config -- and the case where continuing would leave
+                    # the machine with no /root subvolume at all.
                     echo "restoring blank /root subvolume..."
-                    btrfs subvolume snapshot /mnt/root-blank /mnt/root
+                    if ! btrfs subvolume snapshot /mnt/root-blank /mnt/root; then
+                        echo "impermanence: could not restore /root from root-blank"
+                        echo "impermanence: does the root-blank subvolume still exist?"
+                        fail
+                    fi
 
                     # Once we're done rolling back to a blank snapshot,
                     # we can unmount /mnt and continue on the boot process.
