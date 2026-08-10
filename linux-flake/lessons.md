@@ -273,6 +273,10 @@ it carried a fact not available anywhere in the tree:
   see §2.
 - *"jovian isn't tenacity's module, it's a generic handheld module"* — a framing
   error that had already propagated into two host configs and the plan.
+- *"will that actually work"* — asked about a proposed fix rather than a
+  diagnosis. Checking it found a bug in the fix: a comment naming
+  `@preLVMCommands@`, which stage 1 substitutes three passes after the one that
+  inserts it. See `CLAUDE.md`, "`@name@` inside an initrd hook string".
 
 A correction phrased as a small clarification is often load-bearing.
 

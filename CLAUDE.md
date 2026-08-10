@@ -252,6 +252,26 @@ be dead weight.
 Writing `${terminfo[khome]}` in what you intend as a comment is an evaluation
 error. Escape as `''${...}` or reword.
 
+### `@name@` inside an initrd hook string is a live template placeholder
+
+`boot.initrd.postResumeCommands` and its siblings are not copied into
+`stage-1-init.sh` — they are pasted in by a fixed sequence of 19
+`substituteInPlace --replace-fail` passes. `@postResumeCommands@` is the
+**10th**. Every placeholder substituted *after* it is still live in the text you
+just inserted: `@preDeviceCommands@` (11th), `@preFailCommands@` (12th),
+`@preLVMCommands@` (13th), then `@resumeDevice@`, `@setHostId@`, `@shell@`,
+`@udevRules@`, `@verbose@`.
+
+So naming `@preLVMCommands@` in a **comment** inside `postResumeCommands` pastes
+the entire LUKS unlock script into the middle of that comment. Only its first
+line stays commented out; the rest executes, in initrd, part-way through the
+`/root` rollback. Caught in review rather than on a boot, which is why
+`WARN-impermanence.nix` carries a `NOTE:` saying not to do it.
+
+Same family as the `${...}` trap above, and the same underlying rule: **text in
+these strings is not inert, and a comment is not a safe place to name things.**
+Refer to a hook in prose ("the pre-LVM commands"), never by its token.
+
 ### `lsblk` and `findmnt` describe the sandbox, not the machine
 
 The shell runs in a mount namespace, and both tools report **that** namespace —
