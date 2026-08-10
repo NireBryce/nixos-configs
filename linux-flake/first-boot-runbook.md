@@ -69,26 +69,46 @@ just modules                         # expect: no findings
 just check                           # expect: no errors
 ```
 
-Then the two things whose failure mode is initrd:
+**`host` now defaults to the machine you are on**, so plain `just build` here
+targets tenacity. Override with `just host=nire-durandal build` — the assignment
+goes before the recipe name.
+
+Capture what you are about to replace, and keep the output:
 
 ```sh
-sudo btrfs subvolume list -a / | grep -E 'root-blank|path root$'
-ls -l /persist/passwords/elly
+sudo just baseline > ~/baseline-gen60.md
 ```
 
-Expect `root-blank` present (it was ID 265 today) and the password file present
-(107 bytes). `users.mutableUsers` is `false` and root has **no** password, so
-that file is the only way into the account after a boot.
+That records the toplevel, kernel command line, declarative users, mounts and
+btrfs subvolumes. **It stops being recoverable once the new generation boots and
+the store is collected**, and it is what you compare against if anything is odd
+afterwards. Run it with `sudo` or the subvolume section is skipped.
+
+Check what Home Manager is about to take over:
+
+```sh
+just hm-collisions                   # expect: No collisions. This is a relink.
+```
+
+Then confirm the two whose failure mode is initrd — both appear in the baseline
+output, so this is really just reading it:
+
+- `root-blank` present (ID 265 today)
+- `/persist/passwords/elly` present, 107 bytes
+
+`users.mutableUsers` is `false` and root has **no** password, so that file is the
+only way into the account after a boot.
 
 ## 1. Build only
 
 ```sh
-just host=nire-tenacity build
+just build
 ```
 
-Note the syntax — just takes variable assignments **before** the recipe name.
-Plain `just build` targets *durandal*, because the justfile defaults
-`host := "nire-durandal"`.
+`host` is derived from `hostname`, so on this machine that is tenacity. It used
+to be a flat `nire-durandal`, which meant a bare `just build` here spent an hour
+on the wrong machine and said nothing about it. Confirm with `just --evaluate
+host` if you want to be sure before committing the time.
 
 Roughly 700 derivations build and ~2800 are fetched (~6 GB). Most of the build
 list is `preferLocalBuild` config generation that costs milliseconds; the real
@@ -102,9 +122,18 @@ later run resumes.
 
 ## 2. Make it the boot default
 
+First, see what actually moves. This needs the new toplevel to exist, so it only
+works after step 1 — and it answers what a drvPath cannot, which after a
+26.05 → 26.11 bump is a great deal:
+
 ```sh
-sudo nh os boot ~/projects/nix/flake-parts-condolidation-prime/nixos-configs/linux-flake \
-    --hostname nire-tenacity
+just diff-deployed
+```
+
+Then set it as the boot default:
+
+```sh
+just boot
 ```
 
 Verify before going further:

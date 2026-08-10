@@ -53,8 +53,23 @@ just fingerprint     # drvPath of the host toplevel
 just dotfiles        # every generated dotfile's attribute name
 just dotfile ./.zshrc
 just diff HEAD~1     # what changed in a host's config, attribute by attribute
-just build / switch  # Linux only; cannot run from this machine
+just build / boot / switch   # Linux only; `boot` activates nothing until you reboot
 ```
+
+On the hardware, and read-only:
+
+```sh
+just baseline        # what the machine is REALLY running -- capture before switching
+just hm-collisions   # which files HM will take over, and whether any would collide
+just diff-deployed   # package-level diff, running vs new toplevel; needs `just build` first
+```
+
+`host` is derived from `hostname`, so it is the machine you are on when that is
+one of the hosts, and `nire-durandal` everywhere else. It was a flat default
+until 2026-08-10, which made a bare `just build` on tenacity build the wrong
+machine silently. To override, the assignment goes **before** the recipe name —
+`just host=nire-durandal build`. `just build host=…` is not a variant of that;
+just reads it as a second recipe name and errors.
 
 For iterating, evaluate directly:
 

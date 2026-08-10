@@ -8,8 +8,20 @@
 # each one gets a single-line summary and any detail goes in the body.
 
 flake := justfile_directory() / "linux-flake"
-host  := "nire-durandal"
 user  := "elly"
+
+# Default to the machine you are standing on, when that is one of the hosts.
+#
+# This used to be a flat "nire-durandal", which meant a plain `just build` on
+# tenacity spent an hour building the wrong machine and said nothing about it.
+# Anywhere else -- the darwin laptop, a container -- it still falls back to
+# durandal, so nothing that worked before changes.
+#
+# Overriding is unchanged and the assignment still goes BEFORE the recipe name:
+#     just host=nire-durandal build
+# `just build host=nire-durandal` is not a variant of that; just reads it as a
+# second recipe name and errors.
+host := if `hostname` == "nire-tenacity" { "nire-tenacity" } else { "nire-durandal" }
 
 _default:
     @just --list
@@ -29,10 +41,52 @@ build:
     # needs a remote builder or binfmt; neither is set up.
     nh os build {{flake}} --hostname {{host}}
 
+# Build and make it the boot default, activating nothing now
+boot:
+    # The safe first step for a config that has never booted: nothing changes
+    # until you reboot deliberately, and the running generation stays in the
+    # systemd-boot menu as the fallback. See linux-flake/first-boot-runbook.md.
+    nh os boot {{flake}} --hostname {{host}}
+
 # Build and activate, applying Home Manager too
 switch:
     # HM is NixOS-integrated here, so there is no separate `nh home switch`.
     nh os switch {{flake}} --hostname {{host}}
+
+# Package-level diff between what is running and what would be installed
+diff-deployed:
+    # Answers the question a drvPath cannot: which packages actually move. A
+    # nixpkgs bump shows up here as a list of version changes rather than one
+    # different hash.
+    #
+    # Needs the new toplevel to exist, so run it AFTER `just build` and before
+    # `just boot`. Linux only, and only meaningful on the host itself.
+    #
+    # Guarded rather than left to nix: unbuilt, it otherwise fails with "there
+    # is no substituter that can build it", which is true and unhelpful.
+    @cd {{flake}} && top=$(nix eval --raw \
+        '.#nixosConfigurations.{{host}}.config.system.build.toplevel') && \
+    if [ -e "$top" ]; then \
+        nix store diff-closures /run/current-system "$top"; \
+    else \
+        echo "{{host}} is not built yet -- run \`just build\` first."; \
+        echo "  wanted: $top"; \
+        exit 1; \
+    fi
+
+# What this machine is really running -- capture BEFORE switching
+baseline:
+    # Everything it prints stops being recoverable once the new generation boots
+    # and the store is collected. lessons.md §24 covers why that matters; run it
+    # with sudo to include the btrfs subvolumes.
+    @{{justfile_directory()}}/linux-flake/scripts/deployed-baseline.sh
+
+# Which files home-manager will take over, and whether any would collide
+hm-collisions:
+    # Run before the first switch on a host. Classifies by where each path
+    # resolves rather than by whether its leaf is a symlink, which is what makes
+    # ~/.just/.justfile and ~/.config/broot look like conflicts when they are not.
+    @{{justfile_directory()}}/linux-flake/scripts/hm-collisions.sh {{host}} {{user}}
 
 # drvPath of the host toplevel, for before/after comparison
 fingerprint:
