@@ -1,4 +1,4 @@
-# Lessons from the den → flake-parts port, 2026-08-08/09
+# Lessons from the den → flake-parts port
 
 Companion to `2026-08-08-PORT-PLAN-(COMPLETED).md` and `TENACITY-PLAN.md`, which
 record *what* was done. This one records how the work went wrong in the doing,
@@ -6,6 +6,11 @@ because none of that is recoverable from the tree or the commits.
 
 Written for the next instance. The technical traps live in `CLAUDE.md`; these
 are about method.
+
+Two groups. §§1–18 are from the port, done from the darwin laptop against a tree
+that could only be evaluated. §§19–23 are from the first session run on
+`nire-tenacity` itself, where the disk and the build plan became visible and
+brought their own ways to be wrong.
 
 ---
 
@@ -243,6 +248,10 @@ neighbours before writing a new file, not after.
   `blesh.nix` change the message never mentioned, fixed by amending.
 - Staging early — `git add` before `nix eval`, which flakes require — makes both
   easy to do by accident.
+- **Order commits so that each one is green.** A checker fix and the refactor
+  that needed it landed as two commits, checker first; the other order leaves an
+  intermediate commit where `just modules` fails. Checked rather than assumed, by
+  putting the intermediate commit in a throwaway worktree and running it there.
 - **Git authorship does not say who wrote it.** Every commit here is authored by
   Elly, including ones written by an agent. I said "you didn't add them" about a
   four-month-old commit; the honest statement is that it predates this session.
@@ -299,3 +308,139 @@ That distinction is not pedantry — it changes the risk. "This has never worked
 anywhere" and "this is a large untested delta on top of something that works"
 call for different amounts of caution, and the second is the true one. An
 overclaim in the safe-sounding direction is still an overclaim.
+
+**The ladder has four rungs, not three.** Being on the hardware added one
+between *evaluates* and *builds*: `nix build --dry-run` yields the **derivation
+plan** — for tenacity, 711 derivations to build, 2840 to fetch, 6.2 GB, and the
+fact that `decky-loader` has nothing cached — without compiling a line. That is
+real information, it is more than *evaluates*, and it is not *builds*. A dry-run
+says what the work would be, never whether the work succeeds.
+
+---
+
+# From the first session on the hardware
+
+Sections 1–18 come from the port itself, done from Elly's darwin laptop.
+These come from the first instance running on `nire-tenacity`, which could
+inspect the disk and build rather than only evaluate. The ceiling moved, and the
+available ways to be wrong moved with it.
+
+## 19. The machine's own tools can lie about the machine
+
+Confirming the disk matches `hardware-tenacity.nix` is a stop condition — a
+mismatch means regenerating it. The obvious commands returned nonsense:
+
+```
+findmnt /   →  tmpfs[/newroot]  tmpfs  rw,uid=1000,gid=100
+lsblk       →  `enc` mounted at /etc/xdg; every UUID column empty
+```
+
+Read literally: the root filesystem is not btrfs, the LUKS volume is mounted
+somewhere absurd, and none of the config's UUIDs exist on the machine. All three
+are false. The shell runs inside a mount namespace, and `findmnt` and `lsblk`
+report the namespace they are in — accurately, and about the wrong world.
+
+Two sources the namespace does not rewrite:
+
+- `/proc/1/mountinfo` — PID 1's mount table, which is the host's
+- `/dev/disk/by-uuid/` — symlinks straight from udev
+
+Those matched the config exactly: LUKS `03b8f5c0…` → `nvme0n1p7`, root
+`a99ae3fe…` → `dm-0`, `/boot` `380C-3C39` → `nvme0n1p4`, subvolumes 257/258/259/261.
+
+**A read-only inspection command is not thereby trustworthy.** This was not a
+permission error and not a refusal; it was a confident, well-formed answer to a
+question about somewhere else. When a machine-inspection result contradicts a
+config that is supposed to describe that machine, find out which world you are
+looking at before believing either one.
+
+The same output carried the round's best single piece of evidence, which no
+amount of reading the tree would have produced: `/` is **subvolid 607** while
+every neighbour is 257–261. Nothing but hundreds of recreations explains that
+gap. That is the `/root` rollback demonstrably *running*, which is a stronger
+fact than `root-blank` merely existing.
+
+## 20. A pipeline reports the exit status of its last command
+
+`just check 2>&1 | tail -60` exited 0, and I reported the check as passing.
+`just` had exited 1: the flake check failed outright. The failure was in the
+text `tail` kept and printed, and I read past it because the status said
+otherwise.
+
+`set -o pipefail`, or do not pipe. The general form matters more than the shell
+detail: **a status and the text above it are two separate claims, and when they
+disagree the text is usually the honest one.**
+
+## 21. An environment failure can wear a config failure's clothes
+
+That same failure presented as a flake-parts evaluation trace:
+
+```
+… while evaluating the attribute 'root.result'
+    at «flakes-internal»/call-flake.nix:94:7
+… in the left operand of the update (//) operator
+```
+
+Which reads as a broken flake. Eight lines lower:
+
+```
+error: Failed to open archive … HTTP error 401 … "Bad credentials"
+```
+
+An expired GitHub token in `~/.config/nix/nix.conf` — outside the repo, managed
+by nothing in the tree, and unrelated to any of this branch's work.
+`--option access-tokens ''` fetches unauthenticated, and the check then passed
+with no change to the config at all.
+
+**Read to the bottom of a nix trace before believing the top of it.** Nix puts
+the innermost failure last; the frames above are the path taken, not the cause.
+Getting this backwards buys a search for a bug that is not there.
+
+## 22. Name matching fails silently, and reads exactly like a real negative
+
+§5 records this for `home.file` attribute names. It recurred twice here, in
+output I had generated myself, in a different disguise each time:
+
+- **The option and the package spell it differently.** I searched a
+  711-derivation build plan for `acpi_call` — the spelling used by
+  `boot.extraModulePackages` and by `handheld-daemon.loadAcpiCallModule` — and
+  got zero hits. The package is `acpi-call`. That was one keystroke away from
+  reporting a module the handheld's TDP control depends on as missing from the
+  build.
+- **Zero in both columns can mean "already present".** `adjustor` appeared in
+  neither the build list nor the fetch list, which looks like "not in the
+  config". It is in `/nix/store` already, so there was no work to list. A
+  dry-run enumerates *work*, not contents.
+
+Same class, caught in a tool before it shipped rather than after:
+`modules.py`'s name pattern was `\w+`, which does not match a hyphen.
+**Hyphens are legal in Nix identifiers** — `kde-base` is a single attribute, not
+a subtraction — so `\w+` would have recorded a reference to `kde`, left
+`kde-base` looking unreferenced, and reported a module created that same hour as
+dead. It is `[\w-]+` now.
+
+**Before believing a zero, show that the query can return non-zero.**
+
+## 23. When a check fires on new work, fix its model before reaching for the flag
+
+Splitting `kde-base.nix` out made `just modules` report it as an orphan
+imported by nothing. `modules.py` carries an `ORPHAN-OK` escape hatch for
+exactly that complaint — one line, already in the file, documented.
+
+Using it would have been wrong. The module *is* imported, by `kde-desktop.nix`
+and `jovian.nix`, through `config.flake.modules.nixos.kde-base` bound in a `let`
+above the body. The checker modelled two import forms and this is a third — one
+**the repo already used**, since `enable-home-manager.nix` reaches
+`ellyHomeManager` the same way. It had never tripped the check because that file
+sits outside every category tree, where orphan detection skips it as an entry
+point.
+
+So the check was right to fire and wrong about the reason, and the escape hatch
+would have silenced a true report while leaving the blind spot for whoever did
+this next. Teaching it the third form cost one regex and one loop.
+
+**A suppression flag is the right fix only when the thing really is unreachable.**
+"This check is wrong" and "this check is incomplete" call for opposite responses,
+and they present identically. Per §1, the widened checker was then run against a
+copy of the tree with a deliberately dead module added, to confirm it still
+reports one.
