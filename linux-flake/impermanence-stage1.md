@@ -159,6 +159,37 @@ changes nothing now.
    until the disk fills.
 5. Second host only after the first has survived a few reboots.
 
+### Corrections to that list, from doing it
+
+**Step 1 as written is impossible.** "Nothing else changed" contradicts this
+file's own "the switch has to be atomic" above: leaving `postResumeCommands` in
+place while enabling stage 1 *is* the failed assertion. To isolate the risky
+part, enable stage 1 and **drop the rollback block entirely** for that boot. One
+boot without a wipe is harmless — it just leaves that boot's `/root` behind — and
+it separates "does LUKS come up under systemd initrd" from "does the new unit
+work". In the event this was not done: both landed together, so a failure to boot
+has two candidate causes rather than one.
+
+**Step 3 has a better check than the `initrd:` line.** That line moves for any
+initrd change at all, so it cannot distinguish "the unit was rendered" from
+"something else moved". Ask the initrd closure directly:
+
+```sh
+nix derivation show -r "$(nix eval --raw \
+  '.#nixosConfigurations.<host>.config.system.build.initialRamdisk.drvPath')" \
+  | grep -c restore-root
+```
+
+Non-zero means the unit is really in the initrd. That is the precise question
+`ad38ffb` got wrong, and it is answerable without building anything.
+
+Reading the rendered unit is worth it too — it shows whether the LUKS ordering
+derived correctly:
+
+```sh
+nix eval --raw '.#nixosConfigurations.<host>.config.boot.initrd.systemd.units."restore-root.service".text'
+```
+
 ## Related
 
 - `WARN-impermanence.nix` — the module, with the full account in its `history`
