@@ -1,13 +1,23 @@
 # Converting impermanence to systemd stage 1
 
-`WARN-impermanence.nix` wipes `/root` from `boot.initrd.postResumeCommands`,
-which is the **scripted** stage 1 mechanism. This is the trailhead for moving it
-to a `boot.initrd.systemd.services` unit when systemd stage 1 is adopted.
+**Done on 2026-08-10, on `flake-parts-consolidation`.** `WARN-impermanence.nix`
+now wipes `/root` from `boot.initrd.systemd.services.restore-root`, and the
+`boot.initrd.postResumeCommands` version is gone. What follows is the note that
+guided that, corrected where it turned out to be wrong, and kept in full because
+the result **evaluates but has never booted**.
 
-**Not a recommendation to convert.** The scripted version is what both machines
-run and what `origin/main` and `origin/flake-parts` both use. This exists so the
-conversion does not have to be re-derived — and because it was already attempted
-once, in `ad38ffb` (2026-04-15), in a way that silently did nothing.
+It was not a free decision. The 2026-08-07 nixpkgs flipped
+`boot.initrd.systemd.enable` to default `true`, and warns that scripted initrd is
+"deprecated and scheduled for removal in 26.11" — the release that same bump
+moved both hosts onto. Updating the lock broke evaluation of both hosts at once,
+on exactly the assertion this file predicted.
+
+Both machines still *run* the scripted version, as do `origin/main` and
+`origin/flake-parts`. Reverting means restoring `postResumeCommands` **and**
+pinning `boot.initrd.systemd.enable = false`; the two cannot overlap.
+
+It had been attempted once before, in `ad38ffb` (2026-04-15), in a way that
+silently did nothing.
 
 ---
 
