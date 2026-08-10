@@ -25,6 +25,16 @@ CATEGORY_FILE = 'dirsAsCategory.nix'
 DECL = re.compile(r'flake\.modules\.(\w+)\.(?:\$\{moduleName\}|(\w+))')
 # `with config.flake.modules.<class>; [ a b c ]` -- how the aggregates list members
 AGG = re.compile(r'with\s+config\.flake\.modules\.(\w+);\s*\[(.*?)\]', re.S)
+# `config.flake.modules.<class>.<name>` -- one module importing another directly,
+# rather than a host aggregate listing it. Bound in a `let` above the body, since
+# inside it `config` is the NixOS/HM one; enable-home-manager.nix reaches
+# ellyHomeManager this way and kde-desktop.nix/jovian.nix both reach kde-base.
+#
+# The name is [\w-]+, not \w+: hyphens are legal in Nix identifiers, so `kde-base`
+# is one attribute and not a subtraction. Matching \w+ here would silently record
+# a reference to `kde` and leave kde-base looking like an orphan.
+REF = re.compile(r'config\.flake\.modules\.(\w+)\.([\w-]+)')
+COMMENT = re.compile(r'#[^\n]*')
 
 
 def scan(root):
@@ -48,17 +58,31 @@ def scan(root):
 
 
 def imported_names(root):
-    """Names any aggregate imports, by class. Aggregates live directly under a
-    namespace dir (nireHost/, nireUser/), where dirsAsCategory cannot collect
-    them -- which is also what makes them findable as 'not in a category dir'."""
+    """Names anything imports, by class.
+
+    Two forms count. Aggregates list members with `with config.flake.modules.
+    <class>; [ ... ]`; they live directly under a namespace dir (nireHost/,
+    nireUser/), where dirsAsCategory cannot collect them -- which is also what
+    makes them findable as 'not in a category dir'.
+
+    A module can also import another module directly, by naming it as
+    `config.flake.modules.<class>.<name>`. That form is not a host's choice and
+    can appear anywhere, including inside a category.
+    """
     out = {}
     for p in pathlib.Path(root).rglob('*.nix'):
         if p.name == CATEGORY_FILE:
             continue
-        for m in AGG.finditer(p.read_text()):
+        text = p.read_text()
+        for m in AGG.finditer(text):
             cls, body = m.group(1), m.group(2)
-            body = re.sub(r'#[^\n]*', '', body)          # strip trailing comments
+            body = COMMENT.sub('', body)                 # strip trailing comments
             out.setdefault(cls, set()).update(re.findall(r'[\w-]+', body))
+        # Comments are stripped first here: several modules discuss
+        # `config.flake.modules` in prose, and a reference named only in a
+        # comment would mark a genuinely dead module as reachable.
+        for m in REF.finditer(COMMENT.sub('', text)):
+            out.setdefault(m.group(1), set()).add(m.group(2))
     return out
 
 
@@ -97,8 +121,8 @@ def orphans(root):
     by every category above it -- `rust` sits in `langs`, but `development`
     picks it up too. Checking categories directly would report every nested one
     as dead. So: walk each module's ancestors, and treat it as reachable if the
-    module itself is imported by name (durandal takes `kde` that way) or any
-    ancestor category is.
+    module itself is imported by name (durandal takes `kde-desktop` that way,
+    and kde-desktop in turn takes `kde-base`) or any ancestor category is.
     """
     categories, modules = scan(root)
     imported = imported_names(root)
