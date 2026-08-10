@@ -10,9 +10,10 @@ on boot. Never suggest installing it wholesale on a machine, and be careful with
 anything touching `linux-flake/modules/nire/boot/impermanence/` or the
 `fileSystems`/`boot` options in the host hardware modules.
 
-`WARN-impermanence.nix` is reached by durandal through the `boot` category. It
-deletes the `/root` btrfs subvolume in initrd on every boot. Read it before
-changing anything near it.
+`WARN-impermanence.nix` is reached by **both hosts** through the `boot`
+category. It deletes the `/root` btrfs subvolume in initrd on every boot, and it
+depends on a `root-blank` subvolume existing on the machine. Read it, and
+`linux-flake/impermanence-stage1.md`, before changing anything near it.
 
 Secrets are sops-nix (`linux-flake/modules/nire/system/secrets/`).
 `secrets.yaml` is encrypted and committed; that is deliberate, not a mistake to
@@ -36,8 +37,7 @@ exception is `checks.<system>.module-tree`, which is static and does build here.
 Two hosts: `nire-durandal` (workstation) and `nire-tenacity` (handheld,
 Jovian/SteamOS). Tenacity was dropped by the den restructure and brought back
 from `origin/backup-before-flake-parts-happened`, the last config it actually
-ran. It does **not** currently import the `boot` category, so it has no
-impermanence — see `TENACITY-PLAN.md`.
+ran. Both import the `boot` category, so **both wipe `/root` on boot**.
 
 ## Commands
 

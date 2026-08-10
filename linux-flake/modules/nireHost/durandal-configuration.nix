@@ -23,8 +23,9 @@
         shell-config
         system
 
-        # `desktop-env` also contains jovian, which is tenacity's. Durandal takes
-        # kde on its own rather than the whole category.
+        # `desktop-env` also contains jovian -- a generic handheld module (built-in
+        # controllers, occasional SteamOS session), not one host's. Durandal is a
+        # workstation and takes kde on its own rather than the whole category.
         kde
 
         # ── packages ──────────────────────────────────────────────────────────

@@ -8,6 +8,45 @@ rename this file to `<timestamp>-TENACITY-PLAN-(COMPLETED).md` when finished
 
 ---
 
+## Resolved 2026-08-09 — steps 1-7 done
+
+All seven steps landed. Both hosts evaluate, `nix flake check --all-systems`
+passes, `just modules` is clean.
+
+Two things the plan got wrong, both found by reading the config the machine
+actually ran rather than the sibling branch's stub:
+
+  **stateVersion is 25.05**, not the 23.11 the stub implied — that looks copied
+  from durandal. The backup branch has durandal 23.11 and tenacity 25.05 on
+  adjacent lines.
+
+  **Tenacity had Home Manager**, and the same config as durandal:
+  `homeConfigurations."nire-tenacity-hm-elly"` importing the identical
+  `user-elly` tree. The sibling's handoff says it had none, which is true of
+  that branch but not of the machine. So its dotfiles are probably already
+  HM-owned and it is no riskier to switch than durandal.
+
+And the impermanence question resolved differently than expected. The blocker
+was never the host-specific unit name: `boot.initrd.systemd.services` is not
+rendered at all under scripted stage 1, which is what both hosts run, so the
+whole service was inert. Restoring `postResumeCommands` — what `origin/main` and
+`origin/flake-parts` both use, and what these machines have been running — fixed
+it for both hosts at once. Tenacity now imports `boot` and wipes `/root` on boot,
+as it did before the restructure. See `linux-flake/impermanence-stage1.md`.
+
+Also corrected: `jovian.nix` is a *generic handheld* module — machines with
+built-in controllers that occasionally launch a SteamOS session — not tenacity's.
+A second handheld would import it too. The plan and both host configs described
+it as host-specific.
+
+**Prerequisite before switching tenacity**, which cannot be checked from here:
+the rollback runs `btrfs subvolume snapshot /mnt/root-blank /mnt/root`, so a
+`root-blank` subvolume must exist on that machine's btrfs top level. It should,
+from when it last ran impermanence.
+
+
+---
+
 ## Where the blueprint came from
 
 **Not `origin/main`.** It has no tenacity configuration — `modules/hosts/`

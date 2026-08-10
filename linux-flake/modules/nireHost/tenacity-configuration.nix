@@ -12,19 +12,27 @@
         tenacity
 
         # ── shared ────────────────────────────────────────────────────────────
-        # NOT `boot`. That category is WARN-impermanence, whose restore-root
-        # service waits on `systemd-cryptsetup@nire-durandal.service` -- hardcoded
-        # to the other host. Tenacity's disk has the persist and log subvolumes
-        # that only make sense with impermanence, so this is deferred rather than
-        # settled; see TENACITY-PLAN.md and the history block in that module.
+        # WARN-impermanence -- wipes /root on boot, see the module. This host ran
+        # it before the restructure too, and its disk still has the persist and
+        # log subvolumes that only make sense with it.
+        #
+        # PREREQUISITE: the rollback does
+        #   btrfs subvolume snapshot /mnt/root-blank /mnt/root
+        # so a `root-blank` subvolume must exist on this machine's btrfs top
+        # level. It should, from when this host last ran impermanence, but the
+        # first boot after switching is where you would find out otherwise.
+        boot
+
         hardware        # amdcpu, amdgpu
         nix
         peripherals     # logitech-g600, zsa-moonlander -- both were on the old config
         shell-config
         system
 
-        # `desktop-env` holds kde and jovian, and no host wants both. durandal
-        # takes kde directly for the same reason.
+        # `desktop-env` holds kde and jovian and no host wants both, so each takes
+        # the one it wants directly. jovian is generic to handhelds -- machines
+        # with built-in controllers that occasionally launch a SteamOS session --
+        # not specific to this host; a second handheld would import it too.
         jovian
 
         # ── packages ──────────────────────────────────────────────────────────
