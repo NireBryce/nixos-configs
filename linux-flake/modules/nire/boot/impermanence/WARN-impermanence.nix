@@ -15,6 +15,22 @@
             # btrfs top level to reach the subvolumes; taking it from fileSystems
             # stays unambiguous even if a host ever unlocks more than one volume.
             rootDevice = config.fileSystems."/".device;
+
+            # Ordering for the rollback unit. systemd names the crypt unit after
+            # the *volume*, not the host: nixpkgs writes
+            # boot.initrd.luks.devices.<n> as field 1 of the initrd crypttab
+            # (luksroot.nix, stage1Crypttab -- `"${n} ${v.device} ..."`) and
+            # systemd-cryptsetup-generator derives
+            # systemd-cryptsetup@<that field>.service from it.
+            #
+            # Both machines use "enc", so deriving these costs nothing today. It
+            # stops the next host from ordering against a unit that is never
+            # generated, which is exactly what ad38ffb did with
+            # systemd-cryptsetup@nire-durandal.service -- and After= a
+            # non-existent unit is a silent no-op, not an error.
+            luksVolumes     = builtins.attrNames config.boot.initrd.luks.devices;
+            luksDeviceUnits = map (v: "dev-mapper-${v}.device") luksVolumes;
+            luksCryptUnits  = map (v: "systemd-cryptsetup@${v}.service") luksVolumes;
         in {
             # WARNING: IF YOU HAVE A SIMILAR LAYOUT TO MY LUKS SETUP, IMPORTING THIS WILL DELETE YOUR ROOT ON BOOT, so like, know what you're doing
 
@@ -57,124 +73,164 @@
                 # impermanence-style wiping root results in sudo lectures after each reboot
                 Defaults lecture = never
             '';
-            # Required by the `fail` calls in postResumeCommands below.
-            #
-            # stage-1-init.sh's fail() only offers an interactive shell when
-            # `allowShell` is set, and that comes from this kernel parameter.
-            # Without it fail() still prompts -- and blocks on `read -n 1` --
-            # but the only options are `r` to reboot or any other key to
-            # continue, which is precisely the silent-continue this is meant to
-            # stop. Not `boot.panic_on_fail`: that exits stage 1 outright, with
-            # no chance to look at why.
-            #
-            # Modest security cost, and it is bounded: everything here runs
-            # *after* the LUKS volume is open, so anyone who can reach this
-            # prompt already had the passphrase.
-            boot.kernelParams = [ "boot.shell_on_fail" ];
-
-            # reset / at each boot
+            # reset / at each boot, under systemd stage 1
             boot.initrd = {
                 enable = true;
                 supportedFilesystems = [ "btrfs" ];
 
-                # postResumeCommands, not a boot.initrd.systemd.services unit.
-                # Both hosts run the *scripted* stage 1 -- boot.initrd.systemd.enable
-                # is false, and in 26.05 that is still an mkEnableOption defaulting
-                # off; boot.loader.systemd-boot is the EFI bootloader and a
-                # different thing entirely. A systemd-initrd unit is simply not
-                # rendered under scripted stage 1, so the service this replaces was
-                # never built into the initrd at all. See the history block.
+                # Migrated from boot.initrd.postResumeCommands on 2026-08-10.
                 #
-                # This option is rejected *only* when systemd stage 1 is enabled
-                # (nixos/modules/system/boot/systemd/initrd.nix lists it among the
-                # unsupported ones), so it is correct here and will need revisiting
-                # if stage 1 is ever turned on.
+                # The 2026-08-07 nixpkgs flipped boot.initrd.systemd.enable to
+                # default true and warns "Scripted initrd is deprecated and
+                # scheduled for removal in 26.11" -- and the same bump moved
+                # both hosts to 26.11. postResumeCommands is a scripted stage-1
+                # mechanism which systemd stage 1 rejects with a failed
+                # assertion, so the two cannot overlap and the switch is atomic.
                 #
-                # https://github.com/NixOS/nixpkgs/pull/240651
-                postResumeCommands = lib.mkAfter ''
-                    mkdir -p /mnt
+                # Not to be confused with boot.loader.systemd-boot, which both
+                # hosts also set. That is the EFI bootloader; this is systemd
+                # inside the initramfs. Similar names, unrelated options -- and
+                # the likeliest reason ad38ffb's first attempt looked finished.
+                #
+                # linux-flake/impermanence-stage1.md is the working note.
+                systemd = {
+                    enable = true;
 
-                    # We first mount the btrfs root to /mnt
-                    # so we can manipulate btrfs subvolumes.
+                    # OnFailure below is worthless without this. systemd's
+                    # emergency.target asks for the root password, and root has
+                    # no password on either host -- users.mutableUsers is false
+                    # and only elly has a hashedPasswordFile. The default is
+                    # false, which would give an unenterable prompt on exactly
+                    # the path we most need to inspect.
                     #
-                    # ${rootDevice} rather than a hardcoded /dev/mapper/enc: taken
-                    # from this host's own fileSystems, so the module carries no
-                    # host-specific device name.
-                    #
-                    # udevadm settle, because that swap has a cost. The deployed
-                    # system named /dev/mapper/enc, which cryptsetup creates
-                    # synchronously; fileSystems."/".device is a
-                    # /dev/disk/by-uuid path on BOTH hosts, and that symlink is
-                    # created asynchronously by udev afterwards. Nothing between
-                    # the LUKS open and this point synchronises -- the next
-                    # udevadm settle in stage-1-init.sh runs after this whole
-                    # block. udevd is still running here; it is not stopped
-                    # until `udevadm control --exit`, much later.
-                    #
-                    # NOTE: do not write an at-sign placeholder name in this
-                    # string. stage-1-init.sh is assembled by a series of
-                    # substituteInPlace --replace-fail passes, and the one that
-                    # pastes this block in runs 10th of 19 -- so any such token
-                    # left in here is substituted by a LATER pass. Naming the
-                    # pre-LVM one in a comment would have pasted the entire LUKS
-                    # unlock script into the middle of that comment, where only
-                    # its first line stays commented out.
-                    udevadm settle
+                    # Weaker than the scripted stage-1 equivalent it replaces:
+                    # stage 1 can now fail *before* the LUKS volume opens, so
+                    # "they already had the passphrase" no longer holds. It is
+                    # still a root shell only for someone physically holding an
+                    # unlocked-bootloader handheld, and /persist and /home stay
+                    # encrypted behind LUKS regardless.
+                    emergencyAccess = true;
 
-                    # Fail loudly. Every command after a failed mount would
-                    # otherwise fail harmlessly against an empty /mnt -- there is
-                    # no `set -e` in stage-1-init.sh -- so the rollback would
-                    # simply stop happening, and a machine that has silently
-                    # stopped wiping /root looks exactly like a working one until
-                    # the disk fills.
-                    if ! mount -o subvol=/ ${rootDevice} /mnt; then
-                        echo "impermanence: could not mount the btrfs top level of ${rootDevice}"
-                        echo "impermanence: /root has NOT been rolled back this boot"
-                        fail
-                    fi
+                    services.restore-root = {
+                        description = "Roll /root back to the blank btrfs snapshot";
 
-                    # While we're tempted to just delete /root and create
-                    # a new snapshot from /root-blank, /root is already
-                    # populated at this point with a number of subvolumes,
-                    # which makes `btrfs subvolume delete` fail.
-                    # So, we remove them first.
-                    #
-                    # /root contains subvolumes:
-                    # - /root/var/lib/portables
-                    # - /root/var/lib/machines
-                    #
-                    # I suspect these are related to systemd-nspawn, but
-                    # since I don't use it I'm not 100% sure.
-                    # Anyhow, deleting these subvolumes hasn't resulted
-                    # in any issues so far, except for fairly
-                    # benign-looking errors from systemd-tmpfiles.
-                    btrfs subvolume list -o /mnt/root |
-                    cut -f9 -d' ' |
-                    while read subvolume; do
-                    echo "deleting /$subvolume subvolume..."
-                    btrfs subvolume delete "/mnt/$subvolume"
-                    done &&
-                    echo "deleting /root subvolume..." &&
-                    btrfs subvolume delete /mnt/root
+                        # initrd-root-device.target is the host-generic
+                        # synchronisation point: reached once the root block
+                        # device exists, after LUKS unlock, whatever the volume
+                        # is called.
+                        #
+                        # It also removes the reason the scripted version needed
+                        # `udevadm settle`. rootDevice is a /dev/disk/by-uuid
+                        # path on both hosts and that symlink is udev's work; a
+                        # systemd .device unit only becomes active once udev has
+                        # finished with the device, so ordering after these is a
+                        # real barrier rather than the poll it replaces.
+                        #
+                        # Requires= and After= are independent -- activation
+                        # dependency versus pure ordering -- and systemd.unit(5)
+                        # says to pair them. Requires= alone can run before the
+                        # device exists; After= alone runs the service anyway
+                        # and lets it fail.
+                        wantedBy = [ "initrd.target" ];
+                        requires = luksDeviceUnits;
+                        after    = [ "initrd-root-device.target" ] ++ luksDeviceUnits ++ luksCryptUnits;
+                        before   = [ "sysroot.mount" ];
 
-                    # The one choke point worth guarding besides the mount. It
-                    # catches the delete above failing too: a /root that could
-                    # not be deleted still exists, so the snapshot cannot be
-                    # created over it. It also catches root-blank being absent,
-                    # which is the prerequisite named at the import site in each
-                    # host config -- and the case where continuing would leave
-                    # the machine with no /root subvolume at all.
-                    echo "restoring blank /root subvolume..."
-                    if ! btrfs subvolume snapshot /mnt/root-blank /mnt/root; then
-                        echo "impermanence: could not restore /root from root-blank"
-                        echo "impermanence: does the root-blank subvolume still exist?"
-                        fail
-                    fi
+                        unitConfig = {
+                            DefaultDependencies = "no";
 
-                    # Once we're done rolling back to a blank snapshot,
-                    # we can unmount /mnt and continue on the boot process.
-                    umount /mnt
-                '';
+                            # The safety property postResumeCommands gave for
+                            # free, and the one thing this conversion would
+                            # otherwise silently drop: that option ran *after*
+                            # the resume attempt, so a successful hibernation
+                            # resume skipped the wipe. A plain initrd.target
+                            # unit has no equivalent and would delete the root
+                            # that the restored memory image expects.
+                            #
+                            # Fails in the safe direction -- stops wiping rather
+                            # than wiping a resuming system. Neither host puts
+                            # `resume` on the kernel command line today, so it
+                            # changes nothing yet.
+                            ConditionKernelCommandLine = [ "!resume" ];
+
+                            # Otherwise a failed rollback is just a failed unit
+                            # that nothing depends on: the boot carries on with
+                            # /root un-wiped, which looks exactly like a working
+                            # system until the disk fills.
+                            OnFailure = "emergency.target";
+                        };
+
+                        serviceConfig.Type = "oneshot";
+
+                        # This script runs under `set -e`, which is the opposite
+                        # of the scripted stage-1 situation it replaces.
+                        # nixpkgs builds service scripts with makeJobScript,
+                        # which is writeShellScriptBin over `set -e`
+                        # (nixos/lib/systemd-lib.nix). Under stage-1-init.sh
+                        # there was no errexit, so every command after a failed
+                        # mount failed harmlessly against an empty /mnt and the
+                        # rollback just stopped happening. Here the first
+                        # failure aborts the unit and OnFailure turns it into
+                        # emergency, so the explicit guards that used to be
+                        # necessary are not.
+                        #
+                        # The tools are all present: btrfs because
+                        # boot.initrd.supportedFilesystems includes btrfs and
+                        # tasks/filesystems/btrfs.nix feeds
+                        # boot.initrd.systemd.initrdBin from it; mount and
+                        # umount from systemd's own extraBin; coreutils, for
+                        # cut, from initrdBin. PATH in the initrd is /bin:/sbin.
+                        script = ''
+                            mkdir -p /mnt
+
+                            # We first mount the btrfs root to /mnt
+                            # so we can manipulate btrfs subvolumes.
+                            #
+                            # ${rootDevice} rather than a hardcoded
+                            # /dev/mapper/enc: taken from this host's own
+                            # fileSystems, so the module carries no
+                            # host-specific device name.
+                            mount -o subvol=/ ${rootDevice} /mnt
+
+                            # While we're tempted to just delete /root and create
+                            # a new snapshot from /root-blank, /root is already
+                            # populated at this point with a number of subvolumes,
+                            # which makes `btrfs subvolume delete` fail.
+                            # So, we remove them first.
+                            #
+                            # /root contains subvolumes:
+                            # - /root/var/lib/portables
+                            # - /root/var/lib/machines
+                            #
+                            # I suspect these are related to systemd-nspawn, but
+                            # since I don't use it I'm not 100% sure.
+                            # Anyhow, deleting these subvolumes hasn't resulted
+                            # in any issues so far, except for fairly
+                            # benign-looking errors from systemd-tmpfiles.
+                            #
+                            # Read off the running machine on 2026-08-10, the
+                            # list was srv, var/lib/portables, var/lib/machines
+                            # and var/tmp -- so `srv` and `var/tmp` join the two
+                            # named above.
+                            btrfs subvolume list -o /mnt/root |
+                            cut -f9 -d' ' |
+                            while read subvolume; do
+                                echo "deleting /$subvolume subvolume..."
+                                btrfs subvolume delete "/mnt/$subvolume"
+                            done
+
+                            echo "deleting /root subvolume..."
+                            btrfs subvolume delete /mnt/root
+
+                            echo "restoring blank /root subvolume..."
+                            btrfs subvolume snapshot /mnt/root-blank /mnt/root
+
+                            # Once we're done rolling back to a blank snapshot,
+                            # we can unmount /mnt and continue on the boot process.
+                            umount /mnt
+                        '';
+                    };
+                };
             };
         };
 }
