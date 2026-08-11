@@ -29,31 +29,25 @@ has no config here any more — the key is valid, leave it.
 
 ## State
 
-The flake evaluates and `nix flake check --all-systems` passes. It did not until
-recently: the branch was a stalled migration off `vic/den`, with 151 module files
-already written in flake-parts idiom while `flake.nix` still used a raw
-`nixpkgs.lib.evalModules`. `2026-08-08-PORT-PLAN-(COMPLETED).md` records that
-work, where the plan turned out wrong, and what is still open.
-
-**This branch has now booted on `nire-tenacity`** — 2026-08-10, generation 62,
-NixOS 26.11, kernel 6.18.43, on systemd stage 1. The `/root` rollback ran and
-was confirmed by subvolid (607 → 622), not merely by the machine coming up.
+**This branch has booted on `nire-tenacity`** — 2026-08-10, generation 62, NixOS
+26.11, kernel 6.18.43, systemd stage 1. The `/root` rollback ran and was
+confirmed by subvolid (607 → 622), not merely by the machine coming up.
 `durandal` remains unbuilt and unswitched.
 
-So "verified" is no longer one thing, and claims should say which rung they
-mean: *evaluates*, *builds*, *runs*. Most of this repo's history predates the
-third — it was written from an aarch64-darwin laptop against x86_64-linux hosts,
-with no remote builder or binfmt, where the only thing that built was
-`checks.<system>.module-tree`. Treat an undated "verified" as *evaluates*.
-
-The first boot found four defects that evaluation and a successful build both
-missed, which is `lessons.md` §25 and worth believing before you trust a green
-`nix flake check` about anything behavioural.
+Most of this repo's history predates that, written from an aarch64-darwin laptop
+against x86_64-linux hosts with no remote builder, where the only thing that
+built was `checks.<system>.module-tree`. **Treat an undated "verified" as
+*evaluates*.** The first boot found four defects that evaluation and a
+successful build both missed (`lessons.md` §25), so a green `nix flake check`
+says nothing about behaviour.
 
 Two hosts: `nire-durandal` (workstation) and `nire-tenacity` (handheld,
-Jovian/SteamOS). Tenacity was dropped by the den restructure and brought back
-from `origin/backup-before-flake-parts-happened`, the last config it actually
-ran. Both import the `boot` category, so **both wipe `/root` on boot**.
+Jovian/SteamOS). Both import the `boot` category, so **both wipe `/root` on
+boot**. Tenacity was dropped by the den restructure and brought back from
+`origin/backup-before-flake-parts-happened`, the last config it actually ran.
+
+`2026-08-08-PORT-PLAN-(COMPLETED).md` records the migration off `vic/den`, where
+the plan turned out wrong, and what is still open.
 
 ## Commands
 
@@ -77,24 +71,20 @@ just hm-collisions   # which files HM will take over, and whether any would coll
 just diff-deployed   # package-level diff, running vs new toplevel; needs `just build` first
 ```
 
-`host` is derived from `hostname`, so it is the machine you are on when that is
-one of the hosts, and `nire-durandal` everywhere else. It was a flat default
-until 2026-08-10, which made a bare `just build` on tenacity build the wrong
-machine silently. To override, the assignment goes **before** the recipe name —
-`just host=nire-durandal build`. `just build host=…` is not a variant of that;
-just reads it as a second recipe name and errors.
+`host` derives from `hostname`, falling back to `nire-durandal` off-host. To
+override, the assignment goes **before** the recipe name —
+`just host=nire-durandal build`. `just build host=…` is not a variant; just
+reads it as a second recipe name and errors.
 
-For iterating, evaluate directly:
+For iterating, evaluate directly from `linux-flake/`:
 
 ```sh
-cd linux-flake
 nix eval --raw .#nixosConfigurations.nire-durandal.config.system.build.toplevel.drvPath
 nix eval --raw '.#nixosConfigurations.nire-durandal.config.home-manager.users.elly.home.activationPackage.drvPath'
-nix flake check --all-systems --no-build
 ```
 
-`elly` is literal in that second command on purpose: it reads an *evaluated*
-config, where the attribute name is already resolved.
+`elly` is literal there on purpose: it reads an *evaluated* config, where the
+attribute name is already resolved.
 
 ## Architecture
 
@@ -282,75 +272,75 @@ error. Escape as `''${...}` or reword.
 
 ### `@name@` inside an initrd hook string is a live template placeholder
 
-Applies to **scripted** stage 1, which this branch left on 2026-08-10 — the hooks
-below do not exist under systemd stage 1. Kept because the mechanism is one
-`boot.initrd.systemd.enable = false` away, and because this cost a near-miss.
+Applies to **scripted** stage 1, which this branch left on 2026-08-10. Kept
+because the mechanism is one `boot.initrd.systemd.enable = false` away.
 
-`boot.initrd.postResumeCommands` and its siblings are not copied into
-`stage-1-init.sh` — they are pasted in by a fixed sequence of 19
-`substituteInPlace --replace-fail` passes. `@postResumeCommands@` is the
-**10th**. Every placeholder substituted *after* it is still live in the text you
-just inserted: `@preDeviceCommands@` (11th), `@preFailCommands@` (12th),
-`@preLVMCommands@` (13th), then `@resumeDevice@`, `@setHostId@`, `@shell@`,
-`@udevRules@`, `@verbose@`.
+`boot.initrd.postResumeCommands` and its siblings are pasted into
+`stage-1-init.sh` by a fixed sequence of 19 `substituteInPlace --replace-fail`
+passes. `@postResumeCommands@` is the **10th**, so every placeholder substituted
+after it — `@preDeviceCommands@`, `@preFailCommands@`, `@preLVMCommands@`,
+`@resumeDevice@`, `@shell@`, `@udevRules@` — is still live in the text you just
+inserted.
 
-So naming `@preLVMCommands@` in a **comment** inside `postResumeCommands` pastes
-the entire LUKS unlock script into the middle of that comment. Only its first
-line stays commented out; the rest executes, in initrd, part-way through the
-`/root` rollback. Caught in review rather than on a boot, which is why
-`WARN-impermanence.nix` carries a `NOTE:` saying not to do it.
+Naming `@preLVMCommands@` in a **comment** inside `postResumeCommands` therefore
+pastes the whole LUKS unlock script into that comment. Only its first line stays
+commented; the rest executes, in initrd, part-way through the `/root` rollback.
 
-Same family as the `${...}` trap above, and the same underlying rule: **text in
-these strings is not inert, and a comment is not a safe place to name things.**
-Refer to a hook in prose ("the pre-LVM commands"), never by its token.
+Same family as the `${...}` trap above: **text in these strings is not inert, and
+a comment is not a safe place to name things.** Refer to a hook in prose, never
+by its token.
 
-### `lsblk` and `findmnt` describe the sandbox, not the machine
+### The shell's view of the machine is a mount namespace
 
-The shell runs in a mount namespace, and both tools report **that** namespace —
-faithfully, and about the wrong world. Run on tenacity they said `/` was a
-tmpfs, showed `/dev/mapper/enc` mounted at `/etc/xdg`, and left every UUID column
-empty. Read literally, that is *the disk does not match the host's hardware
-module*, which is a stop-and-ask condition. It matched perfectly.
+`lsblk`, `findmnt` and `/etc` all describe **that** namespace — faithfully, and
+about the wrong world. On tenacity they reported `/` as a tmpfs,
+`/dev/mapper/enc` mounted at `/etc/xdg`, empty UUID columns, and an `/etc` that
+is missing files the system definitely has. Read literally, the first of those
+says *the disk does not match the hardware module*, which is a stop-and-ask
+condition. It matched perfectly.
 
-Two sources are not rewritten, and both are unprivileged:
+Sources that are not rewritten, all unprivileged:
 
-- `/proc/1/mountinfo` — PID 1's mount table, which is the host's
+- `/proc/1/mountinfo` — PID 1's mount table, the host's
 - `/dev/disk/by-uuid/` — udev's symlinks, so LUKS and filesystem UUIDs resolve
+- `/run/current-system/…` and any `/nix/store` path — for what `/etc` should hold
 
-Check the disk against a hardware module through those, never through `findmnt`.
-
-`btrfs subvolume list` does need privileges, and is worth asking Elly to run
-rather than working around — it answers `root-blank` without mounting anything,
-unlike the `mount -o subvol=/` procedure in `HANDOFF-tenacity.md`:
+`btrfs subvolume list` needs privileges and is worth asking Elly to run; it
+answers `root-blank` without mounting anything:
 
 ```sh
 sudo btrfs subvolume list -a /
 ```
 
-Read the subvolids in its output as well as the names. `/root` sitting far above
-its neighbours — 607 against 257–261 — is the impermanence rollback
-*demonstrably running*, which is a stronger fact than `root-blank` existing.
+Read the subvolids as well as the names. `/root` far above its neighbours — 607
+against 257–265 — is the rollback *demonstrably running*, a stronger fact than
+`root-blank` existing.
 
 ## Working in this repo
 
 **`git add` before `nix eval`.** Flakes in a git repo ignore untracked files, so
 a new module silently does not exist.
 
-**Read upstream source in the store rather than guessing at options.**
-`nix build nixpkgs#<pkg>` works on darwin for most of these. This settled, during
-the port: that `perSystem` has no `freeformType`, that `home.sessionPath` is
-`listOf str`, and that Home Manager has no blesh module at all — which is why
-`programs.bash.blesh.enable = true` had been doing nothing.
+**Read upstream source rather than guessing at options.** It settled, during the
+port, that `perSystem` has no `freeformType`, that `home.sessionPath` is
+`listOf str`, and that Home Manager has no blesh module at all — so
+`programs.bash.blesh.enable = true` had been doing nothing. For third-party
+packages, check the project's own current source too: `handheld-daemon` got a
+bespoke compatibility shim for something upstream had already fixed.
 
-**Verify refactors by fingerprint, but not only by fingerprint.** `just
-fingerprint` before and after. A differing hash does not prove breakage —
-reordering imports permutes `environment.systemPackages` — so compare the values,
-not just the hash.
+**Verify refactors by fingerprint, but not only by fingerprint.** A differing
+hash does not prove breakage — reordering imports permutes
+`environment.systemPackages` — so compare values with `just diff`, not just the
+hash.
 
-**Bugs here serialize.** Everything that broke this branch was an evaluation
-error hiding behind another evaluation error. Evaluating a cheap attribute proves
-nothing; `networking.hostName` resolved happily while four separate things were
-broken. Force a toplevel.
+**Bugs here serialize.** Evaluating a cheap attribute proves nothing;
+`networking.hostName` resolved happily while four separate things were broken.
+Force a toplevel. And note that evaluating and building both stop short of the
+defects that only appear at runtime — `lessons.md` §25.
+
+**Ask "did it work before?" first.** These machines keep journals across boots,
+so `journalctl --list-boots` plus a grep settles whether something is a
+regression faster than any argument about mechanism.
 
 **Calibrate severity.** Homelab, not production; the repo has gone six months
 between commits. "This is broken and here is the fix" beats incident-report
@@ -358,39 +348,31 @@ framing.
 
 ## Conventions
 
-**Read `linux-flake/style-guide.md` before writing a new module.** It covers the
-bracket rule, the module header and where each argument belongs, the
-`# # description` convention and why it stays a comment, and the fact that file
-placement is load-bearing. Formatting here is deliberate — the aligned-`=`
-columns are intentional and `nix fmt` is deliberately not wired up, because it
-would flatten them.
+**Read `linux-flake/style-guide.md` before writing a new module.** Formatting
+here is deliberate: the aligned-`=` columns are intentional and `nix fmt` is
+deliberately not wired up, because it would flatten them. Module bodies sit one
+level deeper than they need to, left over from unwrapping `perSystem`;
+reindenting would risk the `''` strings in the shell modules.
 
-Module bodies currently sit one level deeper than they need to, left over from
-unwrapping `perSystem` without reflowing — reindenting would risk the `''`
-strings in the shell modules.
+**Namespacing.** `nire` unless it needs a more specific tag; `nireHost`,
+`nireUser`, `nirePackages` otherwise.
 
-**Namespacing.** `nire` for anything that does not need a more specific tag;
-`nireHost`, `nireUser`, `nirePackages` otherwise.
+**When a rename makes the old name ungreppable, say what it was** on the
+declaration — see `boot-durandal.nix`, `enable-home-manager.nix`.
 
-**When a rename makes the old name ungreppable, say what it was** in a short
-comment on the declaration — see `boot-durandal.nix` and
-`enable-home-manager.nix`.
+**A bug recorded in a comment stays in the file.** Nobody reads `git log`; the
+comment is what the next person editing the code sees, and several of these
+recur. Do not trim one because the fix landed.
 
-**A bug recorded in a comment stays in the file.** The commit message is the
-fuller record, but nobody goes looking through `git log` — the comment is what
-the next person editing this code actually reads, and several of the bugs here
-are the kind that recur. Do not trim one out because the fix has landed.
+If a later change strands a comment — the code it described is gone, or the name
+it explained has changed — **move it to a `history` heading at the bottom rather
+than deleting it**, and expand it enough to stand alone. It has lost the context
+that made it terse, so it needs to say more, not less. `boot-durandal.nix`,
+`WARN-impermanence.nix` and `vscode.nix` have them.
 
-If a later change leaves the comment stranded — the code it described is gone,
-or the name it explained has changed, so it no longer reads as an annotation of
-anything nearby — **move it to the bottom of the file under a `history` heading
-rather than deleting it**, and expand it enough to stand alone. A comment that
-has lost its surroundings has also lost the context that made it terse, so it
-needs to say more, not less. `boot-durandal.nix` has one.
-
-**`elly` is hardcoded**, in `users.users.elly`, `home.username`, and
-`home-manager.users.elly`. The sibling branch has a `nire.primaryUser` option;
-introducing it here is a deliberate separate change, not a tidy-up.
+**`elly` is hardcoded**, in `users.users.elly`, `home.username` and
+`home-manager.users.elly`. The sibling branch has `nire.primaryUser`;
+introducing it here is a separate change, not a tidy-up.
 
 **Check for an existing `programs.*` integration before hand-writing one.**
 
