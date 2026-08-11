@@ -61,6 +61,15 @@
                     "/var/lib/systemd/coredump"
                     "/etc/NetworkManager/system-connections"
                     "/var/lib/flatpak"
+
+                    # handheld-daemon's real config/state dir -- CONFIG_DIR in
+                    # its __main__.py defaults to /etc/hhd regardless of the
+                    # --user flag this service passes. Not obviously host state
+                    # from the path alone, which is why it is commented: without
+                    # this, fan curves and TDP profiles saved through hhd-ui
+                    # silently reset to whatever root-blank froze, every boot.
+                    # Found 2026-08-11 as "hhd fan curves don't persist".
+                    "/etc/hhd"
                 ];
                 files = [
                     "/etc/ssh/ssh_host_ed25519_key"

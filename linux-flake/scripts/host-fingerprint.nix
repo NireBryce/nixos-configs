@@ -48,6 +48,24 @@ in
       (builtins.attrNames cfg.fileSystems)
   );
   etc = builtins.attrNames cfg.environment.etc;
+
+  # Blind spot found 2026-08-11: /etc/hhd held real state (fan curves, TDP
+  # profiles) and was missing from WARN-impermanence.nix's persist list, so it
+  # reset to the root-blank snapshot every boot -- and nothing here would have
+  # shown that, because no attribute sampled environment.persistence at all.
+  #
+  # `.directory or d` / `.file or d`, not the raw attrset: each entry can be a
+  # plain string or a submodule with `directory`/`file`, `user`, `group`, `mode`
+  # -- and that submodule carries a deprecated `method` option that throws on
+  # `--json` serialization the moment anything forces it, toJSON included. The
+  # projection reads the path and drops the rest, same as this file already
+  # does by not hashing fileSystemOptions' submodule internals.
+  persistedDirectories = sortStr (
+    map (d: d.directory or d) cfg.environment.persistence."/persist".directories
+  );
+  persistedFiles = sortStr (
+    map (f: f.file or f) cfg.environment.persistence."/persist".files
+  );
   fonts = names cfg.fonts.packages;
   kernelModules = sortStr cfg.boot.kernelModules;
   sessionVariables = builtins.attrNames cfg.environment.sessionVariables;
