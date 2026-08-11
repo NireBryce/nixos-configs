@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(HM=/nix/store/2wcgpwi76kxfh27vghs1wnfp5ycfwcqs-source; echo \"=== zoxide bash init ordering ===\"; grep -n -B6 'zoxide init bash' $HM/modules/programs/zoxide.nix | head -14)",
+      "Read(//nix/store/2wcgpwi76kxfh27vghs1wnfp5ycfwcqs-source/modules/programs/**)"
+    ]
+  }
+}
