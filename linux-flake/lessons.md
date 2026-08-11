@@ -1,11 +1,15 @@
 # Lessons from the den → flake-parts port
 
-Companion to `2026-08-08-PORT-PLAN-(COMPLETED).md` and `TENACITY-PLAN.md`, which
-record *what* was done. This one records how the work went wrong in the doing,
-because none of that is recoverable from the tree or the commits.
+> **Written by Claude Code, for Claude Code**, and largely a record of its own
+> mistakes. It is written to be read by an agent starting cold, so it is more
+> emphatic and more repetitive than a human would want, and the "I" throughout
+> is a machine with no memory of having done any of it. Useful to a person
+> mainly as a list of things that have gone wrong here before. Not a design
+> document — `CLAUDE.md` has the rules, this has the scar tissue.
 
-Written for the next instance. The technical traps live in `CLAUDE.md`; these
-are about method.
+Companion to `2026-08-08-PORT-PLAN-(COMPLETED).md` and `TENACITY-PLAN.md`, which
+record *what* was done. This records how the work went wrong in the doing, which
+is not recoverable from the tree or the commits.
 
 Three groups, by what could be observed at the time. §§1–18 are from the port,
 done from the darwin laptop against a tree that could only be evaluated.

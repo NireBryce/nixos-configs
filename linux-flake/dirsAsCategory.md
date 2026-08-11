@@ -1,5 +1,8 @@
 # `dirsAsCategory`, and the trailhead out of it
 
+> **Written by Claude Code.** A working note, not documentation: it records how one mechanism here works and what it cost to find out. Accurate as far as it was checked, and more thorough about its own reasoning than a human would bother being.
+
+
 Two things: how the category mechanism works and why it is shaped the way it is,
 and — if you ever want to — how to convert it to per-module opt-in.
 

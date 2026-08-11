@@ -1,5 +1,8 @@
 # Home Manager cutover — the first switch
 
+> **Written by Claude Code**, from this machine, and checked against it. Meant to be *used* by a person at a terminal, unlike `CLAUDE.md` and `lessons.md`, which are agent notes. Every expected value was read off the hardware rather than assumed, but an agent wrote the prose and it shows.
+
+
 Home Manager is applied as part of the system now, not via a separate
 `nh home switch`. This covers the first switch on each host, which is the only
 step where anything can go wrong.
@@ -129,10 +132,11 @@ just host=<host> build          # nh os build, no activation -- catches eval and
 just host=<host> switch         # nh os switch
 ```
 
-**The assignment goes before the recipe name**, and it is not optional: the
-justfile defaults `host := "nire-durandal"`, so a bare `just build` on tenacity
-builds the wrong machine. `just build host=nire-tenacity` is not a variant of
-this — just reads it as a second recipe name and errors.
+`host` is derived from `hostname`, so on either host a bare `just build` targets
+the machine you are on, and the recipes announce which. Only pass `host=` to
+build the *other* one — and **the assignment goes before the recipe name**;
+`just build host=nire-durandal` is not a variant of that, just reads it as a
+second recipe name and errors.
 
 `just build` and `just switch` are Linux-only. `just check` builds the host and
 home derivations on Linux; on the mac `checks.aarch64-darwin` contains only
@@ -189,15 +193,12 @@ restore them; move the `*.hm-bak` files back by hand.
   set now reading it, and it is what pins `programs.git.signing.format` to legacy
   `openpgp`. Do not bump it casually — holding defaults still is its entire job —
   but know that every legacy branch it selects is one nobody here has run.
-- **`fzf` and `atuin` both bind Ctrl-R.** Both are enabled with shell
-  integration, and the 2026-08 Home Manager warns about it during evaluation.
-  Whichever initialises last wins; see CLAUDE.md on rc-file ordering being
-  load-bearing. Cosmetic, but confusing the first time you hit Ctrl-R after
-  switching.
-- **Nothing on this branch has been built or switched.** The machines run
-  `origin/main`, which predates all of this. This procedure is
-  derived from the config and from Home Manager's source, plus the on-hardware
-  checks noted above — not from having run it.
+- **Ctrl-R belongs to atuin**, resolved in three places: `programs.fzf`
+  yields it via `historyWidget.<shell>.command = ""`, and `.blerc` rebinds it
+  after `fzf-key-bindings` loads. fzf keeps Ctrl-T and Alt-C.
+- **This has now run on tenacity** (2026-08-10). Durandal has not been switched,
+  so for that host this is still derived from the config and Home Manager's
+  source rather than from experience.
 
 ## Going the other way
 

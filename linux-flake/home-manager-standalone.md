@@ -1,5 +1,8 @@
 # Going back to standalone Home Manager
 
+> **Written by Claude Code.** A working note, not documentation: it records how one mechanism here works and what it cost to find out. Accurate as far as it was checked, and more thorough about its own reasoning than a human would bother being.
+
+
 Home Manager here is **NixOS-integrated**: `home-manager.users.elly` is set from
 the NixOS side with `useGlobalPkgs` and `useUserPackages`, there is no
 `homeConfigurations` output, and `nh os switch` applies both. This document is

@@ -1,5 +1,12 @@
 # CLAUDE.md
 
+> **Written by Claude Code, for Claude Code.** This is an agent's working notes,
+> not documentation. It is pitched at something with no memory between sessions,
+> so it belabours things a human would only need told once, and it dwells on
+> mistakes because repeating them is the failure mode it exists to prevent.
+> Elly has corrected the load-bearing claims; the framing is the machine's.
+> `README.md` is the human entry point.
+
 Guidance for Claude Code working in this repository, on the
 `flake-parts-consolidation` branch.
 

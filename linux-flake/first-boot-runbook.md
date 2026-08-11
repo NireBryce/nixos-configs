@@ -1,37 +1,44 @@
 # First boot runbook — nire-tenacity
 
-Getting `flake-parts-consolidation` from "evaluates" to "runs", using
-`nh os boot` rather than `switch` so nothing changes until you choose the moment.
+> **Written by Claude Code**, from this machine, and checked against it. Meant to be *used* by a person at a terminal, unlike `CLAUDE.md` and `lessons.md`, which are agent notes. Every expected value was read off the hardware rather than assumed, but an agent wrote the prose and it shows.
 
-Written on the machine, 2026-08-10, from the state described below. Every
-expected value here was read off this hardware, not assumed.
 
-**Keep a copy off this machine.** If step 4 goes badly, the runbook you need is
+**DONE — tenacity first booted this branch on 2026-08-10, generation 62.** It
+has booted several times since. Kept because the procedure is the one to reuse
+for durandal, which has still never been built or switched, and because the
+verification in step 6 is worth repeating after any risky change.
+
+Read it as a template with worked examples, not as a live checklist: the
+generation numbers, subvolids and store paths below are the ones from that
+first boot. Substitute the current ones.
+
+Written on the machine, using `nh os boot` rather than `switch` so nothing
+changes until you choose the moment.
+
+**Keep a copy off the machine.** If step 4 goes badly, the runbook you need is
 on the device that will not boot.
 
 ---
 
-## What is untested, honestly
+## What was untested at the time
 
-Everything below has been *evaluated*. None of it has run.
+All of this has since run on tenacity. It is what made that first boot risky,
+and all of it is still true of **durandal**.
 
 | | |
 |---|---|
-| the branch | 172 commits on top of `origin/main`, never built, never switched, never booted |
-| stage 1 | migrated scripted → systemd on 2026-08-10, **both halves at once** |
+| the branch | 172 commits on top of `origin/main` |
+| stage 1 | migrated scripted → systemd, **both halves at once** |
 | nixpkgs | 26.05 (Apr 9) → **26.11** (Aug 7) — a release cycle, not a point bump |
-| kernel | running 6.18.16 → **6.18.43** |
-| handheld stack | `decky-loader`, `handheld-daemon`, `gamescope` never compiled by anything |
+| handheld stack | `decky-loader`, `handheld-daemon`, `gamescope` never compiled |
 | Home Manager | first activation as a NixOS-integrated module |
 
-The single highest risk is **LUKS under systemd initrd** — see
-[nixpkgs#527478](https://github.com/NixOS/nixpkgs/issues/527478). It is also the
-one thing that fails *before* you have a shell.
+The highest risk was **LUKS under systemd initrd** —
+[nixpkgs#527478](https://github.com/NixOS/nixpkgs/issues/527478) — because it is
+the one thing that fails *before* you have a shell. It did not bite here.
 
-Because the stage-1 switch had to be atomic (`postResumeCommands` and systemd
-stage 1 cannot coexist), a boot failure has two candidate causes rather than
-one: systemd initrd itself, or the new `restore-root` unit. Step 5 tells them
-apart.
+The stage-1 switch had to be atomic, so a boot failure has two candidate causes:
+systemd initrd itself, or the `restore-root` unit. Step 5 tells them apart.
 
 ## Why `boot` and not `switch`
 
@@ -174,10 +181,14 @@ What is new this boot, in order:
 5. `/root` is deleted and re-snapshotted from `root-blank`
 6. stage 2, then `home-manager-elly.service` during activation
 
-If `restore-root` fails, `OnFailure=emergency.target` fires and you get a root
-shell **without a password prompt** — `boot.initrd.systemd.emergencyAccess` is
-`true`, deliberately, because root has no password and the prompt would
-otherwise be unenterable.
+If `restore-root` fails, `OnFailure=emergency.target` fires and the boot stops
+there. The prompt asks for a root password that does not exist, so it cannot be
+used — that is intended. Recovery is rebooting and picking the previous
+generation, per step 5.
+
+(`boot.initrd.systemd.emergencyAccess = true` made that prompt an
+unauthenticated root shell. It was carried for the first boot only and removed
+once this branch booted; see `WARN-impermanence.nix`.)
 
 ## 5. If it does not boot
 
@@ -261,15 +272,18 @@ there is no separate HM rollback.
 What a rollback does **not** undo: the `/root` wipe that already happened. That
 is by design and is what the machine does every boot anyway.
 
-## What this runbook cannot tell you
+## How it actually went
 
-Whether any of it works. It was written from a machine running generation 60,
-against a configuration that has been evaluated and never run. Every expected
-value is either read from the current system or derived from the config — none
-is an observation of the new one.
+Written before the fact, from generation 60, so every "expected" value in it was
+derived rather than observed. It held up: the boot worked, the rollback ran, and
+the subvolid test in step 6 is what proved it.
 
-Report which you mean when you write up what happened: *evaluates*, *builds*, or
-*runs*.
+What it could not predict was the four defects that only appear once something
+runs — VS Code's extensions directory, blesh's `ble-attach` ordering,
+`handheld-daemon` dying on an import, and suspend writing a hibernation image.
+See `lessons.md` §25.
+
+Say which rung you mean when writing up a change: *evaluates*, *builds*, *runs*.
 
 ## Appendix — the deployed baseline, generation 60
 

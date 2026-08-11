@@ -1,10 +1,15 @@
 # Converting impermanence to systemd stage 1
 
+> **Written by Claude Code.** A working note, not documentation: it records how one mechanism here works and what it cost to find out. Accurate as far as it was checked, and more thorough about its own reasoning than a human would bother being.
+
+
 **Done on 2026-08-10, on `flake-parts-consolidation`.** `WARN-impermanence.nix`
 now wipes `/root` from `boot.initrd.systemd.services.restore-root`, and the
 `boot.initrd.postResumeCommands` version is gone. What follows is the note that
-guided that, corrected where it turned out to be wrong, and kept in full because
-the result **evaluates but has never booted**.
+guided that, corrected where it turned out to be wrong.
+
+**It has since booted** — tenacity, generation 62 onwards, with the `/root`
+rollback confirmed by subvolid rather than by the machine merely coming up.
 
 It was not a free decision. The 2026-08-07 nixpkgs flipped
 `boot.initrd.systemd.enable` to default `true`, and warns that scripted initrd is
