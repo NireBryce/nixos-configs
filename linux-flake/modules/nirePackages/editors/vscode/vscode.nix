@@ -107,3 +107,6 @@ in {
 # Still present on nixpkgs master as of 2026-08-11, so a bump will not fix it.
 # A fix is an overlay symlinking the asar.unpacked copy, and it needs building
 # rather than evaluating to confirm the override survives the FHS wrapper.
+#
+# Written up in full, with reproduction and a suggested upstream patch, in
+# 2026-08-11-bugreport-nixpkgs-vscode-ripgrep.md at the repo root.
