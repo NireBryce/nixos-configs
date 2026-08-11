@@ -385,6 +385,10 @@ introducing it here is a separate change, not a tidy-up.
 
 - `2026-08-08-PORT-PLAN-(COMPLETED).md` — the migration off den: what was
   done, where the plan was wrong, and what is still open.
+- `2026-08-11-HANDOFF-durandal-and-lysithea.md` — what tenacity's first boot
+  bought the other two hosts. Read before touching either: durandal has
+  secure-boot config nothing has exercised, and lysithea (aarch64-darwin) does
+  not exist in the config at all.
 - `linux-flake/dirsAsCategory.md` — the category mechanism and its trailhead.
 - `linux-flake/impermanence-stage1.md` — the root rollback's move from scripted
   stage 1 to a systemd-initrd unit, done 2026-08-10 because the 2026-08-07
