@@ -15,6 +15,12 @@
         # elly-git, elly-session, hm-config (username, homeDirectory, stateVersion)
         elly
 
+        # kde-power only -- kde-base, kde-desktop and jovian are nixos-class, so
+        # this aggregate is just that one module. It is here because the setting
+        # it writes has to agree with nohibernate on the system side; see the
+        # module.
+        desktop-env
+
         nix             # basic-nix-settings
         shell-config    # bash, blesh, shell-env, zsh
         system          # font, virtualization
