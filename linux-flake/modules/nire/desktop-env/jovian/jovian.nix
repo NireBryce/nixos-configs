@@ -143,6 +143,35 @@
                 # acpi_call in lsmod, TDP reset after a real suspend.
                 enable = true;
                 user = "elly"; # TODO: use flake-parts to make this declared centrally
+                # Leave this on, despite the crashes it causes in a Plasma
+                # session. Under Plasma the journal fills with OVRL D-Bus and GL
+                # errors ending in "Overlay thread died", and hhd-ui dumps core
+                # about three times per boot.
+                #
+                # That is expected, not a fault to chase: the overlay is a
+                # *gamescope* overlay and only renders inside the Steam session.
+                # In desktop mode it has nothing to attach to. Upstream treats
+                # this as by design and there is no fix to wait for -- the
+                # advice is to use the desktop app instead, which is the same
+                # binary run directly.
+                #
+                # Turning it off is worse than the noise. This one flag gates
+                # both uses (nixos/modules/services/hardware/handheld-daemon.nix):
+                #
+                #     environment.systemPackages = [ cfg.package ]
+                #       ++ lib.optional cfg.ui.enable cfg.ui.package;
+                #
+                # so `false` removes the overlay from Game Mode *and* takes
+                # hhd-ui off PATH in Plasma, losing the tool upstream points you
+                # at. The daemon, TDP, controller, RGB and power button are all
+                # unaffected by the overlay dying, and it is a thread inside hhd
+                # rather than a unit, so `systemctl --failed` stays clean.
+                #
+                # Two control surfaces already work on the desktop: `hhd-ui`, and
+                # a web UI on 127.0.0.1:5335.
+                #
+                # The coredumps are bounded by
+                # nire/system/storage/coredump-limit.nix.
                 ui.enable = true;
                 adjustor = {
                     enable = true;
