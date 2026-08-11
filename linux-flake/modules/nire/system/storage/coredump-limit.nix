@@ -10,9 +10,13 @@
 #
 # What this adds is a ceiling on the rate. Two weeks of the crash loops being
 # fixed around this date left 1121 files and 1.1G, all of them inside the
-# retention window and so all legitimately kept. A cap bounds that: 256M is
-# still days of ordinary crashes, and a runaway loop cannot spend the disk
-# before the daily cleaner next runs.
+# retention window and so all legitimately kept. A cap bounds that: a runaway
+# loop cannot spend the disk before the daily cleaner next runs.
+#
+# 2G is set above that observed 1.1G on purpose. A cap below what a real bad
+# fortnight produces would silently discard dumps during exactly the incident
+# they were wanted for, which is worse than the disk it saves -- the point is to
+# stop a loop eating the volume, not to keep the directory small.
 #
 # Boot-count retention -- "keep the last N boots" -- is not something systemd
 # offers for coredumps. Age is the only axis, and it is the better one anyway.
@@ -34,7 +38,7 @@
         flake.modules.nixos.${moduleName} = {
             # # description = "keep /var/lib/systemd/coredump from growing without bound";
             systemd.coredump.settings.Coredump = {
-                MaxUse  = "256M";
+                MaxUse   = "2G";
                 KeepFree = "1G";
             };
         };
