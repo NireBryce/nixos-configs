@@ -156,20 +156,33 @@
                 systemd = {
                     enable = true;
 
-                    # OnFailure below is worthless without this. systemd's
-                    # emergency.target asks for the root password, and root has
-                    # no password on either host -- users.mutableUsers is false
-                    # and only elly has a hashedPasswordFile. The default is
-                    # false, which would give an unenterable prompt on exactly
-                    # the path we most need to inspect.
+                    # emergencyAccess is deliberately NOT set -- the default is
+                    # false, which is what we want. See the history block; it
+                    # was true for exactly one boot.
                     #
-                    # Weaker than the scripted stage-1 equivalent it replaces:
-                    # stage 1 can now fail *before* the LUKS volume opens, so
-                    # "they already had the passphrase" no longer holds. It is
-                    # still a root shell only for someone physically holding an
-                    # unlocked-bootloader handheld, and /persist and /home stay
-                    # encrypted behind LUKS regardless.
-                    emergencyAccess = true;
+                    # `true` means an *unauthenticated* root shell from
+                    # emergency.target, which under systemd stage 1 can be
+                    # reached before the LUKS volume is open. That is a root
+                    # shell for anyone holding the handheld, and it was carried
+                    # only to make the first-ever boot of this branch
+                    # debuggable.
+                    #
+                    # OnFailure = emergency.target below still does its job
+                    # without it. The point of that line was never the shell --
+                    # it was to stop a failed rollback from being a failed unit
+                    # nothing depends on, with the boot carrying on and /root
+                    # quietly un-wiped. It still halts the boot loudly. The
+                    # prompt is simply unenterable, because root has no password
+                    # on either host (users.mutableUsers = false, and only elly
+                    # has a hashedPasswordFile).
+                    #
+                    # Recovery does not need that shell: pick the previous
+                    # generation in the systemd-boot menu, which is what the
+                    # runbook says to do anyway. If a future failure genuinely
+                    # needs an initrd shell, set this to a password hash rather
+                    # than `true` -- the option takes `oneOf [ bool (nullOr
+                    # (passwdEntry str)) ]`, so authenticated access is
+                    # available without reopening the unauthenticated hole.
 
                     services.restore-root = {
                         description = "Roll /root back to the blank btrfs snapshot";
@@ -328,8 +341,32 @@
 # shell when `allowShell` is set, and that comes from that kernel parameter.
 # Without it fail() still prompts and still blocks on `read -n 1`, but the only
 # choices are `r` to reboot or any other key to continue. The systemd
-# equivalent is OnFailure=emergency.target plus
-# boot.initrd.systemd.emergencyAccess, both above.
+# equivalent is OnFailure=emergency.target, still set above.
+#
+#
+# 2026-08-10 (later the same day) — emergencyAccess, set and then removed
+#
+# The migration also carried `boot.initrd.systemd.emergencyAccess = true`,
+# because OnFailure=emergency.target drops to a prompt that asks for the root
+# password and root has no password on either host, so the prompt is
+# unenterable. `true` makes that access unauthenticated.
+#
+# That was a real hole and it was accepted knowingly, to make the first-ever
+# boot of this branch debuggable: systemd stage 1, a rewritten rollback and a
+# nixpkgs release jump all landed together, and a failure would have needed
+# inspecting from inside the initrd. Under systemd stage 1 the exposure is also
+# worse than the scripted equivalent it replaced -- stage 1 can fail *before*
+# the LUKS volume is open, so "whoever reaches this prompt already typed the
+# passphrase" stops being true.
+#
+# Removed once the branch booted and the rollback was confirmed by subvolid.
+# Nothing depended on it: the value of OnFailure is halting the boot, not the
+# shell, and recovery is picking the previous generation in the boot menu.
+#
+# If an initrd shell is ever genuinely needed again, set the option to a
+# password hash instead of `true`. Its type is
+# `oneOf [ bool (nullOr (passwdEntry str)) ]`, so authenticated emergency
+# access exists and is strictly better than what was here.
 #
 # The explicit `if ! mount ...; then ... fail; fi` guards. There is no `set -e`
 # in stage-1-init.sh, so after a failed mount every later command failed
