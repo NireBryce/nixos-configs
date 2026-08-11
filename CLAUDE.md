@@ -28,14 +28,20 @@ already written in flake-parts idiom while `flake.nix` still used a raw
 `nixpkgs.lib.evalModules`. `2026-08-08-PORT-PLAN-(COMPLETED).md` records that
 work, where the plan turned out wrong, and what is still open.
 
-**Nothing on this branch has been built or switched.** `origin/main` merged
-flake-parts (PRs #28, #29) and is what the machines run, so the architecture is
-proven — it is this branch's 172 commits on top of it that are not. The dev
-machine is
-aarch64-darwin and the host is x86_64-linux, so building it needs a remote builder
-or binfmt, neither of which is set up. Every "verified" claim in this repo means
-*evaluates and produces the expected derivation*, never *runs*. The single
-exception is `checks.<system>.module-tree`, which is static and does build here.
+**This branch has now booted on `nire-tenacity`** — 2026-08-10, generation 62,
+NixOS 26.11, kernel 6.18.43, on systemd stage 1. The `/root` rollback ran and
+was confirmed by subvolid (607 → 622), not merely by the machine coming up.
+`durandal` remains unbuilt and unswitched.
+
+So "verified" is no longer one thing, and claims should say which rung they
+mean: *evaluates*, *builds*, *runs*. Most of this repo's history predates the
+third — it was written from an aarch64-darwin laptop against x86_64-linux hosts,
+with no remote builder or binfmt, where the only thing that built was
+`checks.<system>.module-tree`. Treat an undated "verified" as *evaluates*.
+
+The first boot found four defects that evaluation and a successful build both
+missed, which is `lessons.md` §25 and worth believing before you trust a green
+`nix flake check` about anything behavioural.
 
 Two hosts: `nire-durandal` (workstation) and `nire-tenacity` (handheld,
 Jovian/SteamOS). Tenacity was dropped by the den restructure and brought back
@@ -393,7 +399,7 @@ introducing it here is a deliberate separate change, not a tidy-up.
 - `linux-flake/lessons.md` — how the work went wrong in the doing: tools that
   reported success while being wrong, traps that were documented and hit anyway,
   and which questions were settled by reading source. §§1–18 are the port,
-  §§19–24 the first session run on the hardware.
+  §§19–24 the first session on the hardware, §§25–29 after it booted.
 - `linux-flake/first-boot-runbook.md` — getting this branch from *evaluates* to
   *runs* on tenacity via `nh os boot`, with the pre-flight, the fallback
   generation, how to tell a stage-1 failure from a rollback failure, and the

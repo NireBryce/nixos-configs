@@ -7,10 +7,11 @@ because none of that is recoverable from the tree or the commits.
 Written for the next instance. The technical traps live in `CLAUDE.md`; these
 are about method.
 
-Two groups. §§1–18 are from the port, done from the darwin laptop against a tree
-that could only be evaluated. §§19–24 are from the first session run on
-`nire-tenacity` itself, where the disk and the build plan became visible and
-brought their own ways to be wrong.
+Three groups, by what could be observed at the time. §§1–18 are from the port,
+done from the darwin laptop against a tree that could only be evaluated.
+§§19–24 are from the first session on `nire-tenacity` itself, where the disk and
+the build plan became visible. §§25–29 are from after it booted, which is a
+different vantage again — see §25.
 
 ---
 
@@ -482,3 +483,105 @@ established rather than assumed — the difference between a switch and a lockou
 `nix-collect-garbage` runs, the old baseline is gone and cannot be re-derived.
 Write it down before switching, not after — `first-boot-runbook.md` has
 tenacity's, as an appendix, for exactly that reason.
+
+---
+
+# From the first session where it actually ran
+
+§§19–24 were written while the branch still only evaluated. It boots now, and
+running it is where the next four sections come from.
+
+## 25. Running it is a rung of its own, and it finds a different class
+
+`nh os switch` put this branch on the hardware, and four things broke that
+neither evaluation nor a successful build had any way to see:
+
+- VS Code launched pointed at an empty store directory as its extensions dir
+- `ble-attach` ran ahead of seven other shell integrations
+- `handheld-daemon` died on `import pkg_resources`
+- suspend wrote a 2.3G hibernation image on every sleep
+
+The daemon is the purest case. It evaluated, it *built*, and it failed on the
+first line it executed, because a missing import is a runtime event. No amount
+of `nix flake check` or `nix build` reaches it.
+
+§18's ladder — *evaluates*, *builds*, *runs* — is not a formality about how to
+phrase claims. Each rung finds a different class of defect, and everything
+above only bounds what the rungs below could not have told you.
+
+## 26. "Did it work before?" is one command, and it beats reasoning
+
+Twice I built a causal story that the journal demolished immediately.
+
+Vicinae crash-looping into 103 DrKonqi coredumps was, I said, what made the
+machine unusable. It was not: Elly had driven a rollback from a working
+session, so the session was fine.
+
+The stage-1 migration, I said, was what made hibernation reachable and suspend
+hang. Also not: `journalctl --list-boots`, then one grep, showed
+`systemd-hybrid-sleep.service` writing 2.1G images for months under scripted
+stage 1.
+
+Both took a single command, and both times I ran it only after being
+challenged. On a machine with persistent logs, **"is this new?" is cheaper than
+any argument about mechanism, and it belongs before the argument, not after
+it.** The same command settled a third question — whether handheld-daemon had
+ever worked — in one line.
+
+## 27. Check whether upstream already fixed it before writing the patch
+
+`handheld-daemon` imports `pkg_resources`, which setuptools 83 removed. That
+got a 45-line bespoke compatibility shim, and it worked, and it was the wrong
+artefact. Upstream had already replaced `pkg_resources` with
+`importlib.metadata` in 4.1.12 — five lines.
+
+The rewrite matters for more than size. A backport of upstream's own change
+deletes cleanly the moment nixpkgs catches up; a shim of your own invention has
+to be reconciled with whatever upstream actually did. The same file settled a
+second question the first patch got wrong: `pyproject.toml` says
+`[tool.setuptools.packages.find] where = ["src"]`, so the paths were `src/hhd/`
+and not `hhd/`.
+
+**Read the project's own current source and packaging metadata before writing
+compatibility code.** It is usually one fetch, and it tells you both whether to
+write anything and what to write.
+
+## 28. A guard keyed on a signal that never fires is worse than no guard
+
+Moving the `/root` rollback to systemd stage 1 dropped the one safety property
+the old mechanism had for free: `postResumeCommands` ran *after* the kernel's
+resume attempt, so a hibernation resume skipped the wipe. The name carried the
+guarantee.
+
+The replacement was `unitConfig.ConditionKernelCommandLine = [ "!resume" ]`,
+and it cannot fire. systemd does not need `resume=` on the kernel command line:
+`systemd-gpt-auto-generator` finds the swap partition by GPT type and sets
+`/sys/power/resume` itself, which it had already done — 259:6 — with nothing on
+the command line at all.
+
+It was justified in a comment reading "tenacity has no swap", taken from
+`swapDevices = [ ]` in the host config. The machine had 20G on nvme0n1p6 the
+whole time. That is §2 and §24, in the module that deletes `/root`, written the
+same day as §24.
+
+Hibernation is now off at the kernel level, which removes the hazard instead of
+testing for it. **A condition is a claim about the world; check it fires on the
+machine before trusting it to prevent something.**
+
+## 29. Ordering fixes do not reach code that schedules itself later
+
+`ble-attach` was running before seven shell integrations, so the fix was to
+push it last with `mkOrder`. That worked and was still not enough, because one
+of the things binding `Ctrl-R` was not in `.bashrc` at all: `.blerc` registers
+it with `ble-import -d`, and `-d` means "register for later loading in idle
+time". It lands after the whole file, `ble-attach` included.
+
+Nothing you do to the order of a file controls something that has deferred
+itself out of that file. The hook has to be attached to the deferred thing —
+here `ble-import -C`, "evaluated when all of SCRIPTFILEs are loaded".
+
+Second half, which the obvious fix would have got wrong: *unbinding* a key in
+a system that has replaced the underlying mechanism does not fall back, it
+leaves the key dead. ble.sh replaces readline entirely, so removing fzf's
+`Ctrl-R` binding would not have revealed atuin's underneath — it had to be
+rebound.
