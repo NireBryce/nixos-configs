@@ -1,14 +1,21 @@
 # Recipes work from anywhere in the repo.
 #
+# This file is an interface, not a home for logic. Anything with a conditional,
+# a pipeline or a reason worth explaining belongs in linux-flake/scripts/ --
+# where it can be run directly, and where the explanation sits next to the code
+# it explains rather than in a recipe body nobody reads. Recipes should stay
+# one line of dispatch plus the one-line summary `just --list` shows.
+#
 # `just` runs recipes from the directory holding this justfile, which is the
 # repo root -- and the root has no flake.nix. Every recipe therefore has to
 # point at linux-flake explicitly; `.#` would resolve against the root and fail.
 #
 # Note that `just --list` shows only the LAST comment line above a recipe, so
-# each one gets a single-line summary and any detail goes in the body.
+# each one gets a single-line summary and any detail goes in the script.
 
-flake := justfile_directory() / "linux-flake"
-user  := "elly"
+flake   := justfile_directory() / "linux-flake"
+scripts := justfile_directory() / "linux-flake" / "scripts"
+user    := "elly"
 
 # Default to the machine you are standing on, when that is one of the hosts.
 #
@@ -63,38 +70,21 @@ switch:
 
 # Package-level diff between what is running and what would be installed
 diff-deployed:
-    # Answers the question a drvPath cannot: which packages actually move. A
-    # nixpkgs bump shows up here as a list of version changes rather than one
-    # different hash.
-    #
-    # Needs the new toplevel to exist, so run it AFTER `just build` and before
-    # `just boot`. Linux only, and only meaningful on the host itself.
-    #
-    # Guarded rather than left to nix: unbuilt, it otherwise fails with "there
-    # is no substituter that can build it", which is true and unhelpful.
-    @cd {{flake}} && top=$(nix eval --raw \
-        '.#nixosConfigurations.{{host}}.config.system.build.toplevel') && \
-    if [ -e "$top" ]; then \
-        nix store diff-closures /run/current-system "$top"; \
-    else \
-        echo "{{host}} is not built yet -- run \`just build\` first."; \
-        echo "  wanted: $top"; \
-        exit 1; \
-    fi
+    @{{scripts}}/diff-deployed.sh {{host}}
 
 # What this machine is really running -- capture BEFORE switching
 baseline:
     # Everything it prints stops being recoverable once the new generation boots
     # and the store is collected. lessons.md §24 covers why that matters; run it
     # with sudo to include the btrfs subvolumes.
-    @{{justfile_directory()}}/linux-flake/scripts/deployed-baseline.sh
+    @{{scripts}}/deployed-baseline.sh
 
 # Which files home-manager will take over, and whether any would collide
 hm-collisions:
     # Run before the first switch on a host. Classifies by where each path
     # resolves rather than by whether its leaf is a symlink, which is what makes
     # ~/.just/.justfile and ~/.config/broot look like conflicts when they are not.
-    @{{justfile_directory()}}/linux-flake/scripts/hm-collisions.sh {{host}} {{user}}
+    @{{scripts}}/hm-collisions.sh {{host}} {{user}}
 
 # drvPath of the host toplevel, for before/after comparison
 fingerprint:
@@ -108,7 +98,7 @@ fingerprint:
 diff ref:
     # Says *what* differs when the drvPath moves, which a hash cannot. Evaluates
     # both sides in a throwaway worktree; builds nothing, so it works from darwin.
-    @{{justfile_directory()}}/linux-flake/scripts/diff-config.sh {{ref}} {{host}}
+    @{{scripts}}/diff-config.sh {{ref}} {{host}}
 
 # drvPath of the home activation package
 fingerprint-home:
@@ -118,23 +108,11 @@ fingerprint-home:
 
 # Every generated dotfile's attribute name -- run this before `just dotfile`
 dotfiles:
-    @cd {{flake}} && nix eval --json \
-        '.#nixosConfigurations.{{host}}.config.home-manager.users.{{user}}.home.file' \
-        --apply builtins.attrNames | tr ',' '\n' | tr -d '[]"'
+    @{{scripts}}/dotfiles.sh {{host}} {{user}}
 
 # A dotfile as home-manager actually generates it: `just dotfile ./.zshrc`
 dotfile name:
-    # Shell bugs are visible here and invisible in the .nix source.
-    #
-    # The attribute name is inconsistent -- it has been ".zshrc", "./.zshrc" and a
-    # full /home/elly/... path for different entries -- and a wrong name returns
-    # empty rather than erroring, which looks exactly like a real negative. Use
-    # `just dotfiles` to get the real names.
-    #
-    # Some entries have no .text at all and are built from .source; for those,
-    # read the owning option instead (e.g. programs.bash.initExtra for .bashrc).
-    @cd {{flake}} && nix eval --raw \
-        '.#nixosConfigurations.{{host}}.config.home-manager.users.{{user}}.home.file."{{name}}".text'
+    @{{scripts}}/dotfiles.sh {{host}} {{user}} '{{name}}'
 
 # Update inputs, then re-check
 update:
