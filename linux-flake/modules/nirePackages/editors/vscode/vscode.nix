@@ -51,3 +51,59 @@ in {
 # If declarative extensions are ever wanted, that is `programs.vscode.extensions`
 # with the list actually populated -- and it means giving up GUI installs, since
 # the store directory is then the only one VS Code reads.
+#
+#
+# 2026-08-11 — ~/.vscode/argv.json is hand-managed, and needs a keyring setting
+#
+# NOT declared here, deliberately. Recorded because nothing else in the repo
+# says it, and a reinstall or a first run on durandal will hit it again.
+#
+# VS Code shows "An OS keyring couldn't be identified for storing the
+# encryption related data in your current desktop environment" and then cannot
+# save credentials, because it guesses the keyring backend and guesses wrong.
+# The fix is one key in ~/.vscode/argv.json:
+#
+#     "password-store": "kwallet6"
+#
+# kwallet6 because `strings lib/vscode/code` offers basic, kwallet5 and
+# KWALLET6, and Plasma 6 runs kwalletd6. If it still complains,
+# gnome-libsecret is the other candidate -- ksecretd runs as a Secret Service
+# bridge on this desktop.
+#
+# It is version churn, not anything this config did. The old working setup ran
+# code-1.109.5 out of the standalone home-manager profile, already as the
+# FHS/bwrap build; the nixpkgs 26.11 bump moved it to 1.130.0, 21 releases, and
+# detection that used to work stopped.
+#
+# Why not `home.file.".vscode/argv.json"`: that makes it a read-only store
+# symlink, and VS Code writes to this file itself -- it stores a generated
+# crash-reporter-id there, and "Configure Runtime Arguments" edits it. Declaring
+# it also meant either committing a telemetry UUID or having both hosts share
+# one. It was written that way once, on this branch, and reverted (reflog
+# 7b3399f) in favour of leaving the file mutable.
+#
+#
+# 2026-08-11 — search is broken by an upstream nixpkgs bug, not by this file
+#
+# The other VS Code notification, about ripgrep, is not ours and is not fixed
+# by anything above. VS Code 1.129 moved native binaries into
+# resources/app/node_modules.asar.unpacked, and pkgs/applications/editors/
+# vscode/generic.nix applies that knowledge to Darwin only:
+#
+#     nodeModulesPath =
+#       if stdenv.hostPlatform.isDarwin then
+#         if lib.versionAtLeast vscodeVersion "1.129.0" then
+#           "Contents/Resources/app/node_modules.asar.unpacked"
+#         ...
+#       else
+#         "resources/app/node_modules";      # Linux, unconditional
+#
+# So on Linux it replaces the copy nothing executes and leaves the one Electron
+# actually runs as the vendored binary, which segfaults:
+#
+#     node_modules/@vscode/ripgrep-universal/.../rg              -> ripgrep 15.2.0, works
+#     node_modules.asar.unpacked/@vscode/ripgrep-universal/.../rg -> real file, exit 139
+#
+# Still present on nixpkgs master as of 2026-08-11, so a bump will not fix it.
+# A fix is an overlay symlinking the asar.unpacked copy, and it needs building
+# rather than evaluating to confirm the override survives the FHS wrapper.
