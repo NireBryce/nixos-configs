@@ -73,6 +73,66 @@
                 # impermanence-style wiping root results in sudo lectures after each reboot
                 Defaults lecture = never
             '';
+            # Hibernation is disabled, and on a host that wipes /root it has to
+            # be. A hibernation image is a snapshot of a system whose /root
+            # existed; resuming it after the rollback has deleted and recreated
+            # that subvolume restores a kernel holding open files that are gone.
+            #
+            # This is not theoretical here, which was the surprise. Nothing in
+            # this config asks for hibernation -- boot.resumeDevice is "" and
+            # swapDevices is [] on both hosts -- but on tenacity, 2026-08-10:
+            #
+            #   /proc/swaps          /dev/nvme0n1p6, 20G, active
+            #   /sys/power/resume    259:6, i.e. that same partition
+            #   the unit             dev-disk-by\x2ddesignator-swap.swap
+            #
+            # systemd-gpt-auto-generator finds swap partitions by GPT type UUID
+            # and activates them with no configuration at all, and sets the
+            # resume device to match. So hibernation had a live target that
+            # nobody chose.
+            #
+            # It surfaced as "suspend hangs with the fan on": KDE asked for
+            # hybrid-sleep, which is suspend *plus* writing a hibernation image,
+            # and systemd-hybrid-sleep.service spent 19 seconds of wall clock and
+            # 2.3G of writes before coming back. Disabling hibernation makes any
+            # such request fall back to a plain s2idle suspend, which is the only
+            # sleep state this hardware advertises anyway (/sys/power/mem_sleep is
+            # `[s2idle]`, with no `deep`).
+            #
+            # That hang is NOT a regression from the stage-1 migration, and the
+            # first version of this comment implied it was. The journal covers a
+            # boot that ran from 2025-12-17 to 2026-08-10 under scripted stage 1,
+            # and hybrid-sleep behaves the same there: 14.8s/2.1G, 15.2s/2.2G,
+            # 20.4s/2.1G, against 19.0s/2.3G and 12.9s/2.0G afterwards. This
+            # machine has been writing hibernation images for months.
+            #
+            # What the migration DID change is the guard, and that is the part
+            # that matters. `postResumeCommands` ran *after* the kernel's resume
+            # attempt -- the safety was in the name -- so a successful resume
+            # skipped the wipe by construction. restore-root.service has no such
+            # ordering, so on a boot that resumes from disk it can race ahead of
+            # the resume and delete the /root the restored image expects.
+            #
+            # Which is reachable on this hardware specifically: it is a handheld,
+            # every suspend leaves a hibernation image on nvme0n1p6, and a flat
+            # battery during suspend is exactly the case that resumes from disk
+            # rather than from RAM. It appears never to have fired -- that
+            # eight-month boot resumed from RAM every time -- but it was one dead
+            # battery away.
+            #
+            # nohibernate is the kernel-level switch, so it holds regardless of
+            # what systemd discovers. The sleep.conf entries are so that logind
+            # and powerdevil stop offering the options rather than failing them.
+            #
+            # settings.Sleep, not extraConfig: `systemd.sleep.extraConfig` was
+            # removed in 26.11 and errors out by name rather than being ignored.
+            boot.kernelParams = [ "nohibernate" ];
+            systemd.sleep.settings.Sleep = {
+                AllowHibernation          = false;
+                AllowHybridSleep          = false;
+                AllowSuspendThenHibernate = false;
+            };
+
             # reset / at each boot, under systemd stage 1
             boot.initrd = {
                 enable = true;
@@ -148,9 +208,18 @@
                             # that the restored memory image expects.
                             #
                             # Fails in the safe direction -- stops wiping rather
-                            # than wiping a resuming system. Neither host puts
-                            # `resume` on the kernel command line today, so it
-                            # changes nothing yet.
+                            # than wiping a resuming system.
+                            #
+                            # It is NOT the real defence, and on its own it does
+                            # not work here: it keys on a kernel command line
+                            # parameter, and systemd does not need one. On
+                            # tenacity, 2026-08-10, /sys/power/resume was already
+                            # 259:6 -- nvme0n1p6 -- with no `resume=` anywhere,
+                            # because systemd-gpt-auto-generator discovered the
+                            # swap partition by GPT type and wired it up. So this
+                            # condition would have passed and the wipe would have
+                            # gone ahead. `nohibernate` below is what actually
+                            # closes it; this stays as a second line only.
                             ConditionKernelCommandLine = [ "!resume" ];
 
                             # Otherwise a failed rollback is just a failed unit
@@ -354,9 +423,25 @@
 # guard, so if a resume ever happens it will delete the root the restored memory
 # image expects.
 #
-# Neither host puts `resume` on the kernel command line today -- durandal has a
-# swap device but no boot.resumeDevice, tenacity has no swap -- so nothing is
-# wrong now. `unitConfig.ConditionKernelCommandLine = [ "!resume" ]` is the usual
-# guard and fails in the safe direction (stops wiping rather than wiping a
-# resuming system), but it was left out as a change nobody asked for on a module
-# that deletes /root. Add it before configuring hibernation on either machine.
+# RESOLVED 2026-08-10 by `boot.kernelParams = [ "nohibernate" ]` above. The
+# paragraph that stood here is kept because the way it was wrong is the point:
+#
+#   "Neither host puts `resume` on the kernel command line today -- durandal has
+#    a swap device but no boot.resumeDevice, tenacity has no swap -- so nothing
+#    is wrong now."
+#
+# Two errors in one sentence, both from reading the config instead of the
+# machine, and both written into the module that deletes /root:
+#
+# 1. Tenacity has 20G of swap on nvme0n1p6, plus zram. `swapDevices = [ ]` in
+#    hardware-tenacity.nix describes what the config declares, not what the
+#    machine runs -- systemd-gpt-auto-generator activates the partition on its
+#    own, by GPT type UUID.
+# 2. "No `resume=` on the kernel command line" was true and irrelevant.
+#    /sys/power/resume was already set to 259:6 anyway, because systemd does not
+#    need the parameter. So ConditionKernelCommandLine = [ "!resume" ], added as
+#    the fix for this very note, would have passed and let the wipe proceed.
+#
+# lessons.md §2 is "the repo is not the machine" and §24 is "compare against what
+# is deployed". This is both of them, committed the same day, by the person who
+# wrote them down.
