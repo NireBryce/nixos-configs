@@ -388,7 +388,7 @@ introducing it here is a separate change, not a tidy-up.
 - `linux-flake/lessons.md` — how the work went wrong in the doing: tools that
   reported success while being wrong, traps that were documented and hit anyway,
   and which questions were settled by reading source. §§1–18 are the port,
-  §§19–24 the first session on the hardware, §§25–29 after it booted.
+  §§19–24 the first session on the hardware, §§25–30 after it booted.
 - `linux-flake/home-manager-standalone.md` — reversing the HM decision, and the
   part of the cutover that is one-way on the machine rather than in the repo.
 - `git show flake-parts:SESSION-HANDOFF.md` — the sibling branch's notes on dead

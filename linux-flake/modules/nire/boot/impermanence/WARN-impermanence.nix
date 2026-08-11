@@ -95,10 +95,25 @@
             # It surfaced as "suspend hangs with the fan on": KDE asked for
             # hybrid-sleep, which is suspend *plus* writing a hibernation image,
             # and systemd-hybrid-sleep.service spent 19 seconds of wall clock and
-            # 2.3G of writes before coming back. Disabling hibernation makes any
-            # such request fall back to a plain s2idle suspend, which is the only
-            # sleep state this hardware advertises anyway (/sys/power/mem_sleep is
-            # `[s2idle]`, with no `deep`).
+            # 2.3G of writes before coming back.
+            #
+            # REQUIRES A MATCHING CHANGE IN KDE. `~/.config/powerdevil.rc` must
+            # have `SleepMode=1` -- PowerDevil's enum is
+            # `SuspendToRam = 1, HybridSuspend = 2, SuspendThenHibernate = 3`
+            # (plasma/powerdevil, daemon/powerdevilenums.h), and it was set to 2.
+            #
+            # Nothing falls back. An earlier version of this comment claimed
+            # disabling hibernation would make such a request degrade to a plain
+            # s2idle suspend; it does not. PowerDevil asks logind for
+            # HybridSleep, logind answers CanHybridSleep=no, and the request is
+            # simply dropped -- so suspend stopped working entirely until the
+            # KDE setting was changed. logind still reports CanSuspend=yes and
+            # /sys/power/state still offers `freeze mem` throughout; the
+            # capability was never gone, only unrequested.
+            #
+            # s2idle is the only mem_sleep this hardware advertises
+            # (/sys/power/mem_sleep is `[s2idle]`, no `deep`), so plain suspend
+            # is what it can do regardless.
             #
             # That hang is NOT a regression from the stage-1 migration, and the
             # first version of this comment implied it was. The journal covers a
