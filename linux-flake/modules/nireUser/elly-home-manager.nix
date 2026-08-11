@@ -9,8 +9,9 @@
 # `desktop-env` and `durandal` also exist here -- as empty aggregates. Importing
 # them would be harmless but would suggest content that is not there.
 #
-# `boot` is listed and is nearly empty: one module, and only because a system
-# decision made in that category has a consequence on the home side.
+# `impermanence` is listed and is nearly empty: one module, and only because a
+# system decision made in that category has a consequence on the home side.
+# Was `boot` until 2026-08-11.
 { config, ... }:
 {
     flake.modules.homeManager.ellyHomeManager.imports =
@@ -18,12 +19,12 @@
         # elly-git, elly-session, hm-config (username, homeDirectory, stateVersion)
         elly
 
-        # kde-sleepmode only. The rest of `boot` is nixos-class -- notably
-        # WARN-impermanence, which is what makes this necessary: it sets
-        # nohibernate, and KDE has to be told to stop asking for hibernation or
-        # suspend silently stops working. Both hosts import `boot` on the system
-        # side, so both need this.
-        boot
+        # kde-sleepmode only. The rest of `impermanence` is nixos-class --
+        # notably WARN-impermanence, which is what makes this necessary: it
+        # sets nohibernate, and KDE has to be told to stop asking for
+        # hibernation or suspend silently stops working. Both hosts import
+        # `impermanence` on the system side, so both need this.
+        impermanence
 
         nix             # basic-nix-settings
         shell-config    # bash, blesh, shell-env, zsh

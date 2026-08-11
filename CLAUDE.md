@@ -14,12 +14,13 @@ Guidance for Claude Code working in this repository, on the
 
 The README's warning is real: this config enables impermanence and wipes `/root`
 on boot. Never suggest installing it wholesale on a machine, and be careful with
-anything touching `linux-flake/modules/nire/boot/impermanence/` or the
+anything touching `linux-flake/modules/nire/impermanence/` or the
 `fileSystems`/`boot` options in the host hardware modules.
 
-`WARN-impermanence.nix` is reached by **both hosts** through the `boot`
-category. It deletes the `/root` btrfs subvolume in initrd on every boot, and it
-depends on a `root-blank` subvolume existing on the machine. Read it, and
+`WARN-impermanence.nix` is reached by **both hosts** through the `impermanence`
+category -- named `boot` until 2026-08-11; renamed because `boot` had come to
+mean only this. It deletes the `/root` btrfs subvolume in initrd on every boot,
+and it depends on a `root-blank` subvolume existing on the machine. Read it, and
 `linux-flake/impermanence-stage1.md`, before changing anything near it.
 
 Secrets are sops-nix (`linux-flake/modules/nire/system/secrets/`).
@@ -47,9 +48,10 @@ successful build both missed (`lessons.md` §25), so a green `nix flake check`
 says nothing about behaviour.
 
 Two hosts: `nire-durandal` (workstation) and `nire-tenacity` (handheld,
-Jovian/SteamOS). Both import the `boot` category, so **both wipe `/root` on
-boot**. Tenacity was dropped by the den restructure and brought back from
-`origin/backup-before-flake-parts-happened`, the last config it actually ran.
+Jovian/SteamOS). Both import the `impermanence` category, so **both wipe
+`/root` on boot**. Tenacity was dropped by the den restructure and brought back
+from `origin/backup-before-flake-parts-happened`, the last config it actually
+ran.
 
 `2026-08-08-PORT-PLAN-(COMPLETED).md` records the migration off `vic/den`, where
 the plan turned out wrong, and what is still open.

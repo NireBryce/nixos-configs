@@ -48,9 +48,9 @@ does not fix. Nothing on this branch has exercised it.
 - **`just hm-collisions` has never been run there.** Tenacity came back clean —
   42 of 57 files already Home-Manager-owned — which says nothing about
   durandal's `$HOME`. It is read-only; run it first.
-- Whether the `/root` rollback works. durandal imports `boot` too, so it wipes
-  `/root` and needs a `root-blank` subvolume. Confirm that exists *before*
-  switching.
+- Whether the `/root` rollback works. durandal imports `impermanence` too (was
+  `boot`, renamed 2026-08-11), so it wipes `/root` and needs a `root-blank`
+  subvolume. Confirm that exists *before* switching.
 
 ## The order that worked
 
@@ -117,9 +117,10 @@ directory rather than at boot.
 
 ## Hazards specific to this
 
-- **Never import the `boot` category.** It is `WARN-impermanence`, which deletes
-  the `/root` btrfs subvolume in initrd. It is nixos-class so it cannot apply to
-  darwin — but do not let it near a shared aggregate either.
+- **Never import the `impermanence` category** (was `boot` until 2026-08-11).
+  It is `WARN-impermanence`, which deletes the `/root` btrfs subvolume in
+  initrd. It is nixos-class so it cannot apply to darwin — but do not let it
+  near a shared aggregate either.
 - **Not every homeManager module is portable.** They are named by function, not
   platform: `nirePackages/linux-utils/` is obvious, but Linux-only packages are
   scattered elsewhere too. Expect evaluation failures on the first attempt and

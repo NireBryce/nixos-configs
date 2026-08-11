@@ -12,16 +12,18 @@
         tenacity
 
         # ── shared ────────────────────────────────────────────────────────────
-        # WARN-impermanence -- wipes /root on boot, see the module. This host ran
-        # it before the restructure too, and its disk still has the persist and
-        # log subvolumes that only make sense with it.
+        # WARN-impermanence -- wipes /root on boot, see the module. Was the
+        # `boot` category until 2026-08-11; renamed because `boot` had come to
+        # mean only this, and read as though it covered bootloader concerns it
+        # never did. This host ran it before the restructure too, and its disk
+        # still has the persist and log subvolumes that only make sense with it.
         #
         # PREREQUISITE: the rollback does
         #   btrfs subvolume snapshot /mnt/root-blank /mnt/root
         # so a `root-blank` subvolume must exist on this machine's btrfs top
         # level. It should, from when this host last ran impermanence, but the
         # first boot after switching is where you would find out otherwise.
-        boot
+        impermanence
 
         hardware        # amdcpu, amdgpu
         nix

@@ -5,7 +5,9 @@
 
 `WARN-impermanence.nix` deletes the `/root` btrfs subvolume on every boot and
 re-creates it from a `root-blank` snapshot. Both hosts import it through the
-`boot` category.
+`impermanence` category -- named `boot` until 2026-08-11, when it was renamed
+because `boot` had come to mean only this, and read as though it covered
+bootloader concerns it never touched.
 
 It ran from `boot.initrd.postResumeCommands` — scripted stage 1 — until
 2026-08-10, and now runs as `boot.initrd.systemd.services.restore-root`.
