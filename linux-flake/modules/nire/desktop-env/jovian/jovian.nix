@@ -78,6 +78,32 @@
             # services.handheld-daemon.adjustor option set below already pulls
             # it in, so nothing needs to be listed here.
 
+            # handheld-daemon 4.1.10 imports pkg_resources, which setuptools 83
+            # no longer ships, so the daemon exits 1 on startup and systemd
+            # restart-loops it. Caught on the first boot of this branch,
+            # 2026-08-10 -- evaluation and even a successful build cannot see
+            # this, because it is an import that only runs at runtime.
+            #
+            # The shim beside this file has the full account. Not a config bug:
+            # nixpkgs already lists setuptools as a dependency, and it does not
+            # help, because pkg_resources was removed from setuptools itself.
+            #
+            # Drop this whole overlay when handheld-daemon stops importing
+            # pkg_resources upstream. --replace-fail makes that loud: the build
+            # fails rather than quietly patching nothing.
+            nixpkgs.overlays = [
+                (final: prev: {
+                    handheld-daemon = prev.handheld-daemon.overridePythonAttrs (old: {
+                        postPatch = (old.postPatch or "") + ''
+                            cp ${./hhd-pkg-resources-shim.py} hhd/_pkg_resources_shim.py
+                            substituteInPlace hhd/__main__.py \
+                                --replace-fail 'import pkg_resources' \
+                                               'from hhd import _pkg_resources_shim as pkg_resources'
+                        '';
+                    });
+                })
+            ];
+
             # needed for tdp adjustor
             boot.extraModulePackages = [ config.boot.kernelPackages.acpi_call ];
 
