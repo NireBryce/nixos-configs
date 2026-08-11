@@ -42,16 +42,16 @@ modules:
 
 # Build this host, without activating it
 build:
-    # Linux only. The dev machine is darwin and the host is x86_64-linux, so this
-    # needs a remote builder or binfmt; neither is set up.
+    # Linux only, and in practice that means running it on the host itself:
+    # there is no remote builder and no binfmt, so the darwin laptop cannot.
     @echo "==> building {{host}}   (override: just host=<other> build)"
     nh os build {{flake}} --hostname {{host}}
 
 # Build and make it the boot default, activating nothing now
 boot:
-    # The safe first step for a config that has never booted: nothing changes
-    # until you reboot deliberately, and the running generation stays in the
-    # systemd-boot menu as the fallback.
+    # Nothing changes until you reboot deliberately, and the running generation
+    # stays in the systemd-boot menu as the fallback. Worth preferring over
+    # `switch` for anything touching initrd, the bootloader or impermanence.
     @echo "==> {{host}} will be the boot default on next reboot"
     nh os boot {{flake}} --hostname {{host}}
 
