@@ -1,25 +1,28 @@
-# Cap the coredump store, which nothing else does.
+# A size backstop for the coredump store. NOT a fix for it never being cleaned
+# -- it is cleaned, correctly, and an earlier version of this comment said
+# otherwise.
 #
-# Found on 2026-08-11 with 76,171 coredumps and 1.1G in
-# /var/lib/systemd/coredump on tenacity. systemd's default is MaxUse=10% of the
-# filesystem, and on an 836G disk that ceiling is never reached, so the store
-# only ever grows.
+# What is already true without this file: systemd ships
+# `d /var/lib/systemd/coredump 0755 root root 2w` in tmpfiles, and
+# systemd-tmpfiles-clean.timer runs it daily. Checked on tenacity 2026-08-11 --
+# the timer had run ten minutes earlier and *zero* files were older than 14
+# days. Age-based retention works and needs nothing from us.
 #
-# It matters more here than on an ordinary host because
-# WARN-impermanence.nix persists /var/lib/systemd/coredump -- deliberately, so a
-# crash is still debuggable after the /root wipe. That also means nothing ever
-# clears it, and the wipe cannot be relied on to.
+# What this adds is a ceiling on the rate. Two weeks of the crash loops being
+# fixed around this date left 1121 files and 1.1G, all of them inside the
+# retention window and so all legitimately kept. A cap bounds that: 256M is
+# still days of ordinary crashes, and a runaway loop cannot spend the disk
+# before the daily cleaner next runs.
 #
-# The cost is not just disk. drkonqi-coredump-processor walks the store, so a
-# large backlog means it spends every boot reprocessing dumps from months ago --
-# on 2026-08-11 it was still working through boot -3's, which is noise that
-# hides whatever crashed this boot.
+# Boot-count retention -- "keep the last N boots" -- is not something systemd
+# offers for coredumps. Age is the only axis, and it is the better one anyway.
 #
-# 256M keeps enough to debug something that happened last week and bounds the
-# damage of a crash loop. Anything already over the limit is only vacuumed as
-# new dumps arrive, so the existing backlog needs clearing by hand once:
-#
-#     sudo find /var/lib/systemd/coredump -type f -delete
+# Do not confuse the two numbers. `coredumpctl list` showed 76,171 entries
+# against 1121 files, because the journal keeps a record after tmpfiles has
+# vacuumed the dump itself. That is what drkonqi's "Unable to find file for pid
+# ... expected at kcrash-metadata/..." means, and it is normal. Those records
+# are bounded by journald, not by anything here, and are worth keeping: the
+# journal is what answers "did this work before", which is lessons.md §26.
 #
 # settings.Coredump, not extraConfig: `systemd.coredump.extraConfig` is
 # deprecated in 26.11 and errors by name, the same way systemd.sleep.extraConfig
