@@ -32,7 +32,12 @@ has no config here any more — the key is valid, leave it.
 **This branch has booted on `nire-tenacity`** — 2026-08-10, generation 62, NixOS
 26.11, kernel 6.18.43, systemd stage 1. The `/root` rollback ran and was
 confirmed by subvolid (607 → 622), not merely by the machine coming up.
-`durandal` remains unbuilt and unswitched.
+
+`durandal` has not been built or switched. For now that is fine — tenacity is
+serving as the testbed, so changes land there first and durandal follows later.
+It is not a blocker and does not need raising as one every session. It does
+mean a claim verified on tenacity is not thereby verified for durandal: say
+which host you mean, and treat anything host-shaped there as unanswered.
 
 Most of this repo's history predates that, written from an aarch64-darwin laptop
 against x86_64-linux hosts with no remote builder, where the only thing that
