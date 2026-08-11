@@ -5,9 +5,12 @@
 # *sub*directories, so a file here does not become a member of anything.
 #
 # Only the categories that actually contain homeManager modules are listed. Every
-# category is declared for all three classes, so `boot`, `hardware`, `peripherals`
-# and `durandal` also exist here -- as empty aggregates. Importing them would be
-# harmless but would suggest content that is not there.
+# category is declared for all three classes, so `hardware`, `peripherals`,
+# `desktop-env` and `durandal` also exist here -- as empty aggregates. Importing
+# them would be harmless but would suggest content that is not there.
+#
+# `boot` is listed and is nearly empty: one module, and only because a system
+# decision made in that category has a consequence on the home side.
 { config, ... }:
 {
     flake.modules.homeManager.ellyHomeManager.imports =
@@ -15,11 +18,12 @@
         # elly-git, elly-session, hm-config (username, homeDirectory, stateVersion)
         elly
 
-        # kde-power only -- kde-base, kde-desktop and jovian are nixos-class, so
-        # this aggregate is just that one module. It is here because the setting
-        # it writes has to agree with nohibernate on the system side; see the
-        # module.
-        desktop-env
+        # kde-sleepmode only. The rest of `boot` is nixos-class -- notably
+        # WARN-impermanence, which is what makes this necessary: it sets
+        # nohibernate, and KDE has to be told to stop asking for hibernation or
+        # suspend silently stops working. Both hosts import `boot` on the system
+        # side, so both need this.
+        boot
 
         nix             # basic-nix-settings
         shell-config    # bash, blesh, shell-env, zsh
