@@ -137,10 +137,10 @@
             boot.extraModulePackages = [ config.boot.kernelPackages.acpi_call ];
 
             services.handheld-daemon = {
-                # TODO: if you're coming here from github search looking for ways to make HHD work,
-                #     I need you to understand that the TDP control is currently mired in nixpkgs
-                #     if you want it to work, it needs some work that I cannot do.
-                #     https://github.com/NixOS/nixpkgs/pull/347279
+                # TDP control works. The old warning here said it was stuck in
+                # nixpkgs (#347279); adjustor is part of handheld-daemon now.
+                # Confirmed running 2026-08-11: five adjustor plugins loaded,
+                # acpi_call in lsmod, TDP reset after a real suspend.
                 enable = true;
                 user = "elly"; # TODO: use flake-parts to make this declared centrally
                 ui.enable = true;
