@@ -14,14 +14,19 @@ user  := "elly"
 #
 # This used to be a flat "nire-durandal", which meant a plain `just build` on
 # tenacity spent an hour building the wrong machine and said nothing about it.
-# Anywhere else -- the darwin laptop, a container -- it still falls back to
-# durandal, so nothing that worked before changes.
+#
+# Derived from the host configs on disk rather than a hardcoded list of
+# hostnames: `nire-tenacity` -> nireHost/tenacity-configuration.nix. A third
+# host is picked up by existing, with no edit here -- which matters, because
+# the failure mode of forgetting is the silent wrong-machine build this exists
+# to prevent. Anywhere with no matching config -- the darwin laptop, a
+# container -- it falls back to durandal, as before.
 #
 # Overriding is unchanged and the assignment still goes BEFORE the recipe name:
 #     just host=nire-durandal build
 # `just build host=nire-durandal` is not a variant of that; just reads it as a
 # second recipe name and errors.
-host := if `hostname` == "nire-tenacity" { "nire-tenacity" } else { "nire-durandal" }
+host := `h=$(hostname); [ -e "linux-flake/modules/nireHost/${h#nire-}-configuration.nix" ] && echo "$h" || echo nire-durandal`
 
 _default:
     @just --list
@@ -39,6 +44,7 @@ modules:
 build:
     # Linux only. The dev machine is darwin and the host is x86_64-linux, so this
     # needs a remote builder or binfmt; neither is set up.
+    @echo "==> building {{host}}   (override: just host=<other> build)"
     nh os build {{flake}} --hostname {{host}}
 
 # Build and make it the boot default, activating nothing now
@@ -46,11 +52,13 @@ boot:
     # The safe first step for a config that has never booted: nothing changes
     # until you reboot deliberately, and the running generation stays in the
     # systemd-boot menu as the fallback. See linux-flake/first-boot-runbook.md.
+    @echo "==> {{host}} will be the boot default on next reboot"
     nh os boot {{flake}} --hostname {{host}}
 
 # Build and activate, applying Home Manager too
 switch:
     # HM is NixOS-integrated here, so there is no separate `nh home switch`.
+    @echo "==> ACTIVATING {{host}} now, home-manager included"
     nh os switch {{flake}} --hostname {{host}}
 
 # Package-level diff between what is running and what would be installed
