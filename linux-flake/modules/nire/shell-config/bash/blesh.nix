@@ -24,9 +24,30 @@
                 #   complete_menu_color=on     coloured candidates
                 # so only the gaps are set here.
 
-                # Show the menu without waiting for a TAB, the way zsh-autocomplete
-                # does on the zsh side. Off by default in ble.sh.
-                bleopt complete_auto_menu=1
+                # complete_auto_menu is NOT set, and must not be set to 1.
+                #
+                # It reads like a boolean and is an idle *delay*. ble.sh uses it
+                # as `until=$((_ble_idle_clock_start + bleopt_complete_auto_menu))`
+                # (lib/core-complete.sh), and the surrounding case fires on
+                # ble/widget/self-insert -- ordinary typing. So `=1` means "open
+                # the completion menu one tick after every character", and with
+                # fzf-menu.bash imported below, that menu is fzf.
+                #
+                # This file did set it to 1, meaning "on", the way
+                # zsh-autocomplete works on the zsh side. The result on the
+                # hardware was fzf taking over the terminal on every keystroke,
+                # as though TAB were held down. Unset, it is disabled and the
+                # menu is TAB-driven, which is what pairing it with fzf-menu
+                # wanted in the first place -- that is the zsh-fzf-tab
+                # behaviour, not the zsh-autocomplete one.
+                #
+                # The inline grey suggestion that made zsh-autocomplete feel
+                # live is a different option, complete_auto_complete, and it is
+                # already on by default.
+                #
+                # If a delay is ever genuinely wanted, it is a number of
+                # milliseconds and wants to be in the hundreds or thousands --
+                # and check it against fzf-menu, which renders full-screen.
 
                 # Candidates with their descriptions alongside, like zsh's
                 # completion descriptions.
