@@ -69,8 +69,9 @@
                     "/etc/ssh/ssh_host_rsa_key.pub"
                 ];
             };
+
+            # impermanence-style wiping root results in sudo lectures after each reboot
             security.sudo.extraConfig = ''
-                # impermanence-style wiping root results in sudo lectures after each reboot
                 Defaults lecture = never
             '';
             # Hibernation is disabled, and on a host that wipes /root it has to
