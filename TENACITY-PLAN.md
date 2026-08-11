@@ -213,6 +213,6 @@ evaluated since March and its jovian module has never been evaluated by any
 host at all. Expect the first `just build` on the machine to find things that
 evaluation cannot.
 
-`linux-flake/home-manager-cutover.md` applies doubly here: tenacity has never
+Home Manager applies doubly here: tenacity has never
 had Home Manager, so every dotfile it manages is a potential collision on first
 activation, where durandal's are at least already HM-owned.

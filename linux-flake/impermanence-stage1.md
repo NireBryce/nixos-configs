@@ -1,183 +1,126 @@
-# Converting impermanence to systemd stage 1
+# Impermanence on systemd stage 1 — what is known
 
-> **Written by Claude Code.** A working note, not documentation: it records how one mechanism here works and what it cost to find out. Accurate as far as it was checked, and more thorough about its own reasoning than a human would bother being.
+> **Written by Claude Code.** A record of how the `/root` rollback works here
+> and what was learned getting it there, not a procedure. The migration is done.
 
+`WARN-impermanence.nix` deletes the `/root` btrfs subvolume on every boot and
+re-creates it from a `root-blank` snapshot. Both hosts import it through the
+`boot` category.
 
-**Done on 2026-08-10, on `flake-parts-consolidation`.** `WARN-impermanence.nix`
-now wipes `/root` from `boot.initrd.systemd.services.restore-root`, and the
-`boot.initrd.postResumeCommands` version is gone. What follows is the note that
-guided that, corrected where it turned out to be wrong.
-
-**It has since booted** — tenacity, generation 62 onwards, with the `/root`
-rollback confirmed by subvolid rather than by the machine merely coming up.
-
-It was not a free decision. The 2026-08-07 nixpkgs flipped
-`boot.initrd.systemd.enable` to default `true`, and warns that scripted initrd is
-"deprecated and scheduled for removal in 26.11" — the release that same bump
-moved both hosts onto. Updating the lock broke evaluation of both hosts at once,
-on exactly the assertion this file predicted.
-
-Both machines still *run* the scripted version, as do `origin/main` and
-`origin/flake-parts`. Reverting means restoring `postResumeCommands` **and**
-pinning `boot.initrd.systemd.enable = false`; the two cannot overlap.
-
-It had been attempted once before, in `ad38ffb` (2026-04-15), in a way that
-silently did nothing.
+It ran from `boot.initrd.postResumeCommands` — scripted stage 1 — until
+2026-08-10, and now runs as `boot.initrd.systemd.services.restore-root`.
+Tenacity has booted on it since generation 62, with the rollback confirmed by
+subvolid rather than by the machine merely coming up. Durandal has not.
 
 ---
 
-## Why the first attempt failed
+## Why it moved
 
-`ad38ffb` replaced `postResumeCommands` with
-`boot.initrd.systemd.services.restore-root` — a correct-looking unit — but
-nothing ever set `boot.initrd.systemd.enable = true`.
+Not a preference. The 2026-08-07 nixpkgs flipped `boot.initrd.systemd.enable`
+to default `true` and warns that scripted initrd is "deprecated and scheduled
+for removal in 26.11" — the release that same bump moved both hosts onto.
+Updating the lock broke evaluation of both hosts at once:
 
-Under scripted stage 1 a systemd-initrd unit is **not rendered into the initrd
-at all**. It is not an error and produces no warning: the option accepts the
-definition, the config evaluates, and the service simply never exists. The root
-rollback stopped happening, and nothing said so.
-
-It survived four months because the branch it landed on never evaluated, so it
-was never deployed. Had it been, `/root` would have quietly stopped being wiped.
-
-**The tell**, if you are ever unsure whether a change reached the initrd:
-
-```sh
-just diff <ref>          # `initrd:` line, sampled by host-fingerprint.nix
+```
+systemd stage 1 does not support `boot.initrd.postResumeCommands`
 ```
 
-Editing the systemd unit under scripted stage 1 leaves the initrd drvPath
-**byte-identical**. Switching back to `postResumeCommands` moved it immediately.
-That asymmetry is the whole diagnosis in one command.
+The two mechanisms cannot coexist, so the switch had to be atomic. Reverting
+means restoring `postResumeCommands` **and** pinning
+`boot.initrd.systemd.enable = false`, together.
 
-## The option that has to come first
-
-```nix
-boot.initrd.systemd.enable = true;
-```
-
-This was `mkEnableOption` defaulting **false** through 26.05 — which is what the
-rest of this file was written against. As of the 2026-08-07 nixpkgs it reads
-
-```nix
-enable = mkEnableOption "systemd in initrd" // { default = true; };
-```
-
-in `nixos/modules/system/boot/systemd/initrd.nix:195`. Systemd stage 1 is now the
-default, and it is *scripted* initrd that needs the explicit opt-out.
-
-Do not confuse it with `boot.loader.systemd-boot.enable`, which both hosts *do*
-set. That is the EFI **bootloader**; this is systemd inside the **initramfs**.
-Unrelated options, similar names — and the likeliest reason the first attempt
-looked finished.
-
-Once it is on, `postResumeCommands` becomes a hard error rather than a silent
-no-op: `nixos/modules/system/boot/systemd/initrd.nix` lists it among the
-unsupported stage-1 options, alongside `preDeviceCommands`, `postDeviceCommands`,
-`postMountCommands` and friends. So the two mechanisms cannot overlap, and the
-switch has to be atomic.
+`boot.initrd.systemd.enable` is not `boot.loader.systemd-boot`, which both hosts
+also set. That is the EFI bootloader; this is systemd inside the initramfs.
+Similar names, unrelated options — and the likeliest reason the first attempt at
+this looked finished when it was not.
 
 ## The unit
 
-Ordering, from the [stage-1 migration guide](https://discourse.nixos.org/t/migrating-to-boot-initrd-systemd-and-debugging-stage-1-systemd-services/54444):
-
 ```nix
-boot.initrd.systemd.services.restore-root = {
-    description = "Rollback btrfs rootfs";
-    wantedBy    = [ "initrd.target" ];
-    after       = [ "initrd-root-device.target" ];
-    before      = [ "sysroot.mount" ];
-    unitConfig.DefaultDependencies = "no";
-    serviceConfig.Type = "oneshot";
-    script = ''…same btrfs script…'';
-};
+wantedBy = [ "initrd.target" ];
+requires = luksDeviceUnits;                                    # dev-mapper-enc.device
+after    = [ "initrd-root-device.target" ] ++ luksDeviceUnits ++ luksCryptUnits;
+before   = [ "sysroot.mount" ];
+unitConfig.DefaultDependencies = "no";
+serviceConfig.Type = "oneshot";
 ```
 
-`initrd-root-device.target` is the host-generic synchronisation point: it is
-reached once the root block device exists, after LUKS unlock, whatever the
-volume is called.
+`initrd-root-device.target` is the host-generic synchronisation point: reached
+once the root block device exists, after LUKS unlock, whatever the volume is
+called.
 
-### If you order against the LUKS units directly instead
-
-The unit name is derived from the **volume**, not the host. nixpkgs writes
+The LUKS unit names are derived, not written out. systemd names the crypt unit
+after the **volume**, not the host: nixpkgs writes
 `boot.initrd.luks.devices.<n>` as field 1 of the initrd crypttab
-(`luksroot.nix`, `stage1Crypttab` — `"${n} ${v.device} ..."`), and
-`systemd-cryptsetup-generator` names the unit after that field. Both machines use
-`enc`, so:
+(`luksroot.nix`, `stage1Crypttab`) and `systemd-cryptsetup-generator` derives
+`systemd-cryptsetup@<that field>.service` from it. Both machines use `enc`.
 
-```
-dev-mapper-enc.device
-systemd-cryptsetup@enc.service
-```
+`Requires=` and `After=` are independent — activation dependency versus pure
+ordering — and systemd.unit(5) says to pair them. `Requires=` alone can run
+before the device exists; `After=` alone runs the service and lets it fail.
 
-Derive them rather than hardcoding:
+## What the move cost, and what replaced it
 
-```nix
-luksVolumes = builtins.attrNames config.boot.initrd.luks.devices;
-requires    = map (v: "dev-mapper-${v}.device") luksVolumes;
-after       = (map (v: "dev-mapper-${v}.device") luksVolumes)
-           ++ (map (v: "systemd-cryptsetup@${v}.service") luksVolumes);
-```
+**Ordering against udev, gained.** The scripted version mounted
+`fileSystems."/".device`, a `/dev/disk/by-uuid` path on both hosts, with no
+`udevadm settle` between the LUKS open and the rollback — the next settle in
+`stage-1-init.sh` ran after the whole block. It raced udev, and losing meant a
+failed mount and a wipe that silently did not happen. Ordering `After=` the
+device units makes udev's completion a precondition, so no polling is involved.
 
-**The version in `ad38ffb` said `systemd-cryptsetup@nire-durandal.service`** —
-the hostname, not the volume. No such unit is ever generated, and `After=` a
-unit that does not exist is a silent no-op, so it never ordered anything even on
-durandal. Do not "fix" it by interpolating `networking.hostName`; that produces
-the same non-existent unit with a different name.
+**Loud failure, gained.** There is no `set -e` in `stage-1-init.sh`, so after a
+failed mount every later command failed harmlessly against an empty `/mnt`.
+systemd job scripts are built by `makeJobScript`, which is `writeShellScriptBin`
+over `set -e`, so the first failure aborts the unit — and
+`OnFailure = emergency.target` stops the boot rather than continuing with
+`/root` un-wiped.
 
-`Requires=` and `After=` are independent — the first is an activation
-dependency, the second is pure ordering, and systemd.unit(5) says to pair them.
-`Requires=` alone can run before the device exists; `After=` alone runs the
-service and lets it fail rather than not running it.
+**Hibernation safety, lost — and not restored by the obvious guard.**
+`postResumeCommands` ran *after* the kernel's resume attempt, so a successful
+hibernation resume skipped the wipe. The safety was in the option's name. A
+plain `initrd.target` unit has no equivalent and can race ahead of the resume,
+deleting the `/root` the restored image expects.
 
-## Hibernation — the safety property the conversion drops
+The obvious replacement, `unitConfig.ConditionKernelCommandLine = [ "!resume" ]`,
+**cannot fire**. systemd does not need `resume=` on the kernel command line:
+`systemd-gpt-auto-generator` finds the swap partition by GPT type UUID and sets
+`/sys/power/resume` itself. On tenacity it had already done so — 259:6, with
+nothing on the command line.
 
-`postResumeCommands` runs *after* the resume attempt. A successful hibernation
-resume therefore skips the wipe: the property is in the option's name. A plain
-`initrd.target` service has no equivalent, and would delete the root the restored
-memory image expects.
+It is closed by `boot.kernelParams = [ "nohibernate" ]` instead, which removes
+the hazard rather than testing for it. After that, `/sys/power/state` no longer
+offers `disk` and `/sys/power/resume` reads `0:0`. The condition stays as a
+second line only.
 
-Add the guard as part of the conversion:
+## Things that are true of this machine and were not obvious
 
-```nix
-unitConfig.ConditionKernelCommandLine = [ "!resume" ];
-```
+- **Swap exists that nothing configured.** `swapDevices = [ ]` and
+  `boot.resumeDevice = ""` on both hosts, yet tenacity runs 20G of swap on
+  `nvme0n1p6`, activated by `systemd-gpt-auto-generator` as
+  `dev-disk-by\x2ddesignator-swap.swap`. Reading the config would tell you the
+  opposite.
+- **Hibernation was happening for months.** KDE asked for hybrid-sleep — suspend
+  *plus* writing a hibernation image — and `systemd-hybrid-sleep.service` wrote
+  ~2.1G on every sleep under scripted stage 1, long before this migration. It
+  presented as "suspend hangs with the fan on".
+- **`emergencyAccess` was on for exactly one boot.** `OnFailure` drops to a
+  prompt asking for a root password that does not exist, so it cannot be used.
+  `boot.initrd.systemd.emergencyAccess = true` makes it an *unauthenticated*
+  root shell, which was carried deliberately for the first boot and removed
+  after. If it is ever needed again, the option takes a password hash —
+  `oneOf [ bool (nullOr (passwdEntry str)) ]` — which is strictly better.
 
-It fails in the safe direction — stops wiping rather than wiping a resuming
-system. Neither host puts `resume` on the kernel command line today (durandal
-has a swap device but no `boot.resumeDevice`; tenacity has no swap), so it
-changes nothing now.
+## How to tell the unit is really there
 
-## Order of work
+This is the check that matters, because the failure mode is silence.
+`ad38ffb` (2026-04-15) replaced `postResumeCommands` with a correct-looking
+`restore-root` unit and never set `boot.initrd.systemd.enable`. Under scripted
+stage 1 a systemd-initrd unit is **not rendered at all** — no error, no warning,
+the option accepts the definition and the service simply never exists. The
+rollback stopped happening and nothing said so. It survived four months because
+the branch it landed on never evaluated.
 
-1. `boot.initrd.systemd.enable = true` on **one** host, nothing else changed.
-   Build, switch, reboot, confirm it comes up. This is the risky step, not the
-   unit: LUKS plus systemd initrd is where boots break — see
-   [NixOS/nixpkgs#527478](https://github.com/NixOS/nixpkgs/issues/527478).
-2. Only then swap `postResumeCommands` for the unit — they cannot coexist, since
-   the option becomes an error once stage 1 is on.
-3. Confirm the initrd actually changed: `just diff <ref>` must show the `initrd:`
-   line move. If it does not, the unit is not being rendered and you are back
-   where `ad38ffb` was.
-4. Reboot and check `/root` was actually rolled back, not merely that the system
-   booted. A rollback that silently stops looks exactly like a working system
-   until the disk fills.
-5. Second host only after the first has survived a few reboots.
-
-### Corrections to that list, from doing it
-
-**Step 1 as written is impossible.** "Nothing else changed" contradicts this
-file's own "the switch has to be atomic" above: leaving `postResumeCommands` in
-place while enabling stage 1 *is* the failed assertion. To isolate the risky
-part, enable stage 1 and **drop the rollback block entirely** for that boot. One
-boot without a wipe is harmless — it just leaves that boot's `/root` behind — and
-it separates "does LUKS come up under systemd initrd" from "does the new unit
-work". In the event this was not done: both landed together, so a failure to boot
-has two candidate causes rather than one.
-
-**Step 3 has a better check than the `initrd:` line.** That line moves for any
-initrd change at all, so it cannot distinguish "the unit was rendered" from
-"something else moved". Ask the initrd closure directly:
+Ask the initrd closure directly:
 
 ```sh
 nix derivation show -r "$(nix eval --raw \
@@ -185,8 +128,8 @@ nix derivation show -r "$(nix eval --raw \
   | grep -c restore-root
 ```
 
-Non-zero means the unit is really in the initrd. That is the precise question
-`ad38ffb` got wrong, and it is answerable without building anything.
+Non-zero means it is in the initrd. This answers the precise question `ad38ffb`
+got wrong, without building anything.
 
 Reading the rendered unit is worth it too — it shows whether the LUKS ordering
 derived correctly:
@@ -195,14 +138,33 @@ derived correctly:
 nix eval --raw '.#nixosConfigurations.<host>.config.boot.initrd.systemd.units."restore-root.service".text'
 ```
 
+A `just diff <ref>` showing the `initrd:` line move is weaker evidence: it moves
+for any initrd change at all, so it cannot distinguish "the unit was rendered"
+from "something else moved".
+
+## And that it ran
+
+The machine coming up proves nothing. Compare the `/root` subvolid across a
+reboot:
+
+```sh
+findmnt -no SOURCE /        # or: awk '$5=="/"{print $NF}' /proc/1/mountinfo
+```
+
+It must change. On tenacity: 607 → 622 → 627 across successive boots, against
+neighbours sitting at 257–265. A `/root` subvolid far above its siblings is the
+rollback demonstrably running.
+
+`journalctl -b 0 -u restore-root` has the unit's own log from the initrd.
+
 ## Related
 
-- `WARN-impermanence.nix` — the module, with the full account in its `history`
+- `WARN-impermanence.nix` — the module, with the full account in its history
   block.
-- `2026-08-09-TENACITY-PLAN.md` if it exists, or `TENACITY-PLAN.md` — tenacity's
-  impermanence was deferred on the strength of this.
-- [nix-community/impermanence#320](https://github.com/nix-community/impermanence/issues/320)
-  — someone hitting the `postResumeCommands` assertion after enabling stage 1.
-  No fix in the thread; note that most impermanence rollback recipes online are
-  ZFS, where `zfs rollback` is atomic. The btrfs subvolume-delete approach here
-  has different constraints and the ZFS examples do not transfer.
+- [nixpkgs#527478](https://github.com/NixOS/nixpkgs/issues/527478) — LUKS under
+  systemd initrd, the risk that did not bite here.
+- [impermanence#320](https://github.com/nix-community/impermanence/issues/320) —
+  someone hitting the `postResumeCommands` assertion after enabling stage 1. No
+  fix in the thread. Most rollback recipes online are ZFS, where
+  `zfs rollback` is atomic; the btrfs subvolume-delete approach has different
+  constraints and the ZFS examples do not transfer.

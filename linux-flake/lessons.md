@@ -485,8 +485,7 @@ established rather than assumed — the difference between a switch and a lockou
 
 **This evidence expires.** Once the new generation boots and
 `nix-collect-garbage` runs, the old baseline is gone and cannot be re-derived.
-Write it down before switching, not after — `first-boot-runbook.md` has
-tenacity's, as an appendix, for exactly that reason.
+Write it down before switching, not after. `just baseline` does it.
 
 ---
 

@@ -51,7 +51,7 @@ build:
 boot:
     # The safe first step for a config that has never booted: nothing changes
     # until you reboot deliberately, and the running generation stays in the
-    # systemd-boot menu as the fallback. See linux-flake/first-boot-runbook.md.
+    # systemd-boot menu as the fallback.
     @echo "==> {{host}} will be the boot default on next reboot"
     nh os boot {{flake}} --hostname {{host}}
 

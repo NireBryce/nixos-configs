@@ -407,14 +407,8 @@ introducing it here is a deliberate separate change, not a tidy-up.
   reported success while being wrong, traps that were documented and hit anyway,
   and which questions were settled by reading source. §§1–18 are the port,
   §§19–24 the first session on the hardware, §§25–29 after it booted.
-- `linux-flake/first-boot-runbook.md` — getting this branch from *evaluates* to
-  *runs* on tenacity via `nh os boot`, with the pre-flight, the fallback
-  generation, how to tell a stage-1 failure from a rollback failure, and the
-  `subvolid` test that catches a silently-skipped `/root` wipe.
-- `linux-flake/home-manager-cutover.md` — the first-switch runbook. Read before
-  `just switch`: the collision risk is real and the starting state on the
-  machine is not known from here.
-- `linux-flake/home-manager-standalone.md` — reversing the HM decision.
+- `linux-flake/home-manager-standalone.md` — reversing the HM decision, and the
+  part of the cutover that is one-way on the machine rather than in the repo.
 - `git show flake-parts:SESSION-HANDOFF.md` — the sibling branch's notes on dead
   ends and decisions that should not be silently relitigated.
 - `git show flake-parts:linux-flake/flake-parts-reference.md` — flake-parts

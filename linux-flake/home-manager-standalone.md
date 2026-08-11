@@ -106,13 +106,34 @@ breadcrumb back here.
    `nh home switch --configuration elly-nire-durandal` step, which integrated
    does not have.
 
-**The one-way part is on the machine, not in the repo.** If integrated has ever
-been switched to, `useUserPackages` will have removed the old `home-manager-path`
-entry from the user profile (Home Manager's own `installPackages` step reduces to
-`nixProfileRemove home-manager-path` under that option). Going back to standalone
-re-creates a user profile from empty. That is a first-activation again, with the
-collision risk that implies for any dotfile HM wants to own and finds already
-present — the same risk described for the initial cutover.
+**The one-way part is on the machine, not in the repo**, and this is no longer
+theoretical — it happened on tenacity, 2026-08-10.
+
+Switching to integrated makes Home Manager's own `installPackages` step reduce
+to `nixProfileRemove home-manager-path`, which deletes the standalone profile
+entry. The trap is what that implies for *rolling back*: the profile lives in
+`$HOME`, not in the system generation, so **a system rollback does not restore
+it**. Rolling the system back to a pre-integration generation left the account
+with no user profile at all, and recovery meant re-activating an old Home
+Manager generation by hand.
+
+That worked only because the generation links under
+`~/.local/state/nix/profiles/` were still present. They are GC roots, but
+`nix-collect-garbage -d` prunes old profile generations — so tidying up before
+the switch would have removed the only way back.
+
+Pin one explicitly before switching, and keep it until the cutover has stuck:
+
+```sh
+nix-store --add-root ~/hm-pre-cutover --indirect -r \
+  "$(readlink -f ~/.local/state/nix/profiles/home-manager)"
+```
+
+Recovery is then `~/hm-pre-cutover/activate`, whatever GC has done since.
+
+Going back to standalone otherwise re-creates a user profile from empty, which
+is a first activation again, with the collision risk that implies for any
+dotfile HM wants to own and finds already present.
 
 ---
 
