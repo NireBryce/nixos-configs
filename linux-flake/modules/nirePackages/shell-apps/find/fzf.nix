@@ -8,6 +8,27 @@
                 enableZshIntegration = true;
                 enableBashIntegration = true;
                 enableFishIntegration = true;
+
+                # Ctrl-R belongs to atuin. fzf keeps Ctrl-T and Alt-C.
+                #
+                # An empty command is the supported way to yield the binding --
+                # home-manager's own description says so: "An empty string
+                # disables the CTRL-R binding, which is the supported way to
+                # yield CTRL-R to a history manager such as Atuin or McFly."
+                # Not `programs.atuin.flags = [ "--disable-ctrl-r" ]`, which the
+                # 2026-08 evaluation warning offers as the other half of the
+                # same choice and would hand the key to fzf instead.
+                #
+                # Per shell, because that is how the option is shaped. Only the
+                # three integrations enabled above are set; the module also
+                # covers nushell, which this config does not turn on -- add it
+                # here if that ever changes, or fzf will take Ctrl-R back on
+                # that shell alone.
+                historyWidget = {
+                    bash.command = "";
+                    zsh.command  = "";
+                    fish.command = "";
+                };
                 defaultOptions = [
                     "--height 40%"
                     "--layout=reverse"

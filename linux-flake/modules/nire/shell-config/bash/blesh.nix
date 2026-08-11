@@ -50,7 +50,41 @@
                 # closest equivalent to the zsh config's zsh-fzf-tab.
                 ble-import -d ${pkgs.blesh}/share/blesh/contrib/integration/fzf-menu.bash
                 ble-import -d ${pkgs.blesh}/share/blesh/contrib/integration/fzf-completion.bash
-                ble-import -d ${pkgs.blesh}/share/blesh/contrib/integration/fzf-key-bindings.bash
+
+                # Ctrl-R is atuin's. fzf-key-bindings keeps Ctrl-T and Alt-C.
+                #
+                # This has to be a -C callback on the import, not a couple of
+                # ble-bind lines further down this file, because -d means
+                # "register for later loading in idle time" -- ble.sh's own
+                # --help -- so the module lands *after* everything in .bashrc,
+                # including ble-attach. The order actually is:
+                #
+                #   .bashrc:35  ble.sh sourced, this file registers the deferred import
+                #   .bashrc:49  atuin binds C-r, via readline `bind -m`
+                #   .bashrc:75  ble-attach imports atuin's readline binding
+                #   idle        fzf-key-bindings loads and overwrites C-r
+                #
+                # fzf wins by arriving last. -C runs "when all of SCRIPTFILEs
+                # are loaded", so it is the only hook that reliably follows it.
+                #
+                # It rebinds rather than unbinds. ble.sh replaces readline
+                # outright, so a key with no entry in its keymap does nothing --
+                # removing fzf's binding would leave Ctrl-R dead rather than
+                # falling back to atuin's.
+                #
+                # The commands are what atuin's own atuin-bind maps
+                # atuin-search-emacs and atuin-search-viins to; it binds through
+                # readline rather than ble-bind, so there is no widget name to
+                # reuse. If Ctrl-R ever starts doing nothing, check that
+                # __atuin_history still takes --keymap-mode.
+                # Two -C options rather than one carrying an embedded newline:
+                # ble.sh's usage line is `[-C CALLBACK|--callback=CALLBACK]+`,
+                # so the option repeats, and each callback stays a single
+                # command.
+                ble-import -d \
+                    -C 'ble-bind -m emacs   -x C-r "__atuin_history --keymap-mode=emacs"' \
+                    -C 'ble-bind -m vi_imap -x C-r "__atuin_history --keymap-mode=vim-insert"' \
+                    ${pkgs.blesh}/share/blesh/contrib/integration/fzf-key-bindings.bash
             '';
         };
 }
