@@ -78,27 +78,56 @@
             # services.handheld-daemon.adjustor option set below already pulls
             # it in, so nothing needs to be listed here.
 
-            # handheld-daemon 4.1.10 imports pkg_resources, which setuptools 83
-            # no longer ships, so the daemon exits 1 on startup and systemd
-            # restart-loops it. Caught on the first boot of this branch,
-            # 2026-08-10 -- evaluation and even a successful build cannot see
-            # this, because it is an import that only runs at runtime.
+            # DELETE THIS OVERLAY once nixpkgs carries handheld-daemon >= 4.1.12.
             #
-            # The shim beside this file has the full account. Not a config bug:
-            # nixpkgs already lists setuptools as a dependency, and it does not
-            # help, because pkg_resources was removed from setuptools itself.
+            # hhd 4.1.10 -- what nixpkgs pins as of the 2026-08-07 bump -- opens
+            # src/hhd/__main__.py with `import pkg_resources`. setuptools 81
+            # deprecated that module and 83 removed it outright; the setuptools
+            # in the store ships only _distutils_hack, distutils-precedence.pth
+            # and setuptools itself. So hhd exits 1 on startup and systemd
+            # restart-loops it every 10s.
             #
-            # Drop this whole overlay when handheld-daemon stops importing
-            # pkg_resources upstream. --replace-fail makes that loud: the build
-            # fails rather than quietly patching nothing.
+            # Not a config bug and not a missing dependency: nixpkgs lists
+            # setuptools in both build-system and dependencies, and hhd's own
+            # pyproject.toml asks for setuptools>=65.5.0 expecting pkg_resources
+            # to come with it. The module is gone from setuptools, so neither
+            # helps.
+            #
+            # It worked before the nixpkgs bump, which is the tell -- 26.05
+            # carried a setuptools that still had pkg_resources. The journal has
+            # hhd running its full plugin set (adjustor_smu, adjustor_ppd,
+            # gpd_win_controllers, powerbuttond, controller_rgb) right up to the
+            # reboot on 2026-08-10. Nothing to do with the stage-1 migration:
+            # hhd is an ordinary stage-2 service.
+            #
+            # What is below is upstream's own fix, backported verbatim rather
+            # than invented here. hhd master (4.1.12) replaced pkg_resources
+            # with importlib.metadata and dropped setuptools from its runtime
+            # dependencies entirely. Every replacement here is one of theirs, so
+            # when nixpkgs catches up this deletes cleanly instead of having to
+            # be reconciled.
+            #
+            # src/hhd/, not hhd/: pyproject.toml says
+            # `[tool.setuptools.packages.find] where = ["src"]`, so the package
+            # sits under src/ in the tree even though it imports as `hhd`.
+            #
+            # --replace-fail throughout, so a version that no longer matches
+            # fails the build loudly rather than silently patching nothing.
             nixpkgs.overlays = [
                 (final: prev: {
                     handheld-daemon = prev.handheld-daemon.overridePythonAttrs (old: {
                         postPatch = (old.postPatch or "") + ''
-                            cp ${./hhd-pkg-resources-shim.py} hhd/_pkg_resources_shim.py
-                            substituteInPlace hhd/__main__.py \
+                            substituteInPlace src/hhd/__main__.py \
                                 --replace-fail 'import pkg_resources' \
-                                               'from hhd import _pkg_resources_shim as pkg_resources'
+                                               'from importlib.metadata import entry_points' \
+                                --replace-fail 'pkg_resources.iter_entry_points("hhd.plugins")' \
+                                               'entry_points(group="hhd.plugins")' \
+                                --replace-fail 'pkg_resources.iter_entry_points("hhd.i18n")' \
+                                               'entry_points(group="hhd.i18n")' \
+                                --replace-fail 'autodetect.resolve()' \
+                                               'autodetect.load()' \
+                                --replace-fail 'register.resolve()' \
+                                               'register.load()'
                         '';
                     });
                 })
