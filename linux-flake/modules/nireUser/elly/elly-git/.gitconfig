@@ -2,9 +2,9 @@
 	name = Nire Bryce
 	email = nire@computernope.net
 [credential "https://github.com"]
-	helper = !/home/elly/.nix-profile/bin/gh auth git-credential
+	helper = !/etc/profiles/per-user/elly/bin/gh auth git-credential
 [credential "https://gist.github.com"]
-	helper = !/home/elly/.nix-profile/bin/gh auth git-credential
+	helper = !/etc/profiles/per-user/elly/bin/gh auth git-credential
 [filter "lfs"]
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
