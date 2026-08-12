@@ -1,7 +1,7 @@
 # Re-enable the IOMMU that Jovian turns off, because this is not a Steam Deck.
 #
-# THIS IS AN EXPERIMENT, not a confirmed fix. Read the last paragraph before
-# assuming it worked.
+# CONFIRMED FIX, 2026-08-12. Suspend went from 0% to 92.5% hardware sleep
+# residency on the first boot with this applied -- evidence at the bottom.
 #
 # Jovian sets `amd_iommu=off` in modules/steamos/boot.nix, copied verbatim from
 # Valve's grub-steamos defaults in jupiter-hw-support. That is Steam Deck
@@ -33,14 +33,28 @@
 # copied unchanged, with their reasoning left at the reference rather than
 # duplicated here.
 #
-# UNPROVEN: amd-s2idle did NOT name a blocking device -- it reported 0%
-# residency without attributing it. This change tests the one prerequisite it
-# flagged. If a forced run still shows 0.00% hardware sleep afterwards, the
-# IOMMU was not the blocker: revert this file rather than leaving it in on the
-# theory that it might be helping, and look next at the EC, which fired gpe0A
-# 187 times during a 65-second sleep (`ACPI: EC: GPE=0xa`), or at the USB4/
-# Thunderbolt bridge at 00:08.3, which the kernel already quirks with
-# "disabling D3cold for suspend".
+# RESULT, first boot with this applied:
+#
+#     last_hw_sleep   59,213,866 us  = 59.2s
+#     sleep cycle     01:37:27 -> 01:38:31 = 64s      -> 92.5% residency
+#     "Last suspend didn't reach deepest state"       -> 0 occurrences
+#
+# from /sys/power/suspend_stats and the journal, not from the tool. amd-s2idle
+# itself reports this as "8939.39%", which is its own arithmetic bug -- it is
+# off by exactly 100x (59.2s rendered as 5900s). Read the kernel counter, not
+# that percentage, when checking this again.
+#
+# So the IOMMU was the blocker, and the NPU prerequisite amd-s2idle flagged was
+# pointing at the real cause even though it never named a blocking device. Two
+# other suspects were noted while diagnosing and turned out NOT to be needed --
+# recorded here so nobody re-investigates them: the EC fired gpe0A 187 times
+# during a 65-second sleep (`ACPI: EC: GPE=0xa`), and the USB4 bridge at
+# 00:08.3 carries a kernel quirk "disabling D3cold for suspend". Both were
+# present on the fixed boot too.
+#
+# The touchscreen fix in this directory is a separate bug and was never
+# implicated in this one: it cut wake events during sleep from 71 to 1, which
+# is its own win.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
