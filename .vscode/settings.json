@@ -158,8 +158,7 @@
         { //hard stop
             "column": 120,
             "color": "#f73c3c"
-        },
+        }
     ],
-    "prettier.tabWidth": 4,
-
+    "prettier.tabWidth": 4
 }
