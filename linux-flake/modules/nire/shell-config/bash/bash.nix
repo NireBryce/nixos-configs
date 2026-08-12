@@ -11,7 +11,7 @@
             ];
         };
         
-        flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
+        flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }: {
             # bash line editor, allows zsh-like line editor tricks and bindings
             home.packages = with pkgs; [
                 blesh
@@ -73,9 +73,15 @@
                         [[ ''$- == *i* ]] && source -- ${pkgs.blesh}/share/blesh/ble.sh --attach=none
                     '')
 
-                    ''
+                    # cod (nireHost/../shell-apps/completions/cod-completions.nix
+                    # provides it on PATH, nixos-class only) is broken on
+                    # darwin -- nixpkgs: meta.broken = stdenv.hostPlatform.isDarwin
+                    # -- and isn't imported there either way, so this would be
+                    # a command-not-found on nire-lysithea. Guarded the same
+                    # way zsh.nix guards its own cod line.
+                    (lib.optionalString (!pkgs.stdenv.isDarwin) ''
                         source <(cod init ''$''$ bash)
-                    ''
+                    '')
 
                     # Last. ble.sh absorbs the hooks every other integration
                     # installed, so this cannot move back into the block above.

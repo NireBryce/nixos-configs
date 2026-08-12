@@ -3,7 +3,15 @@
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.homeManager.${moduleName} = {
+        flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }:
+            # Genuinely Linux-only, not just untested there: the module itself
+            # asserts `meta.platforms`, a hard eval failure rather than
+            # something that would merely install nothing. Hit evaluating this
+            # shared module for nire-lysithea (aarch64-darwin) -- Raycast,
+            # already in nire/macos/homebrew/homebrew.nix, is the real
+            # equivalent on that machine, which is what the "Like raycast for
+            # linux" description below was already saying.
+            lib.mkIf (!pkgs.stdenv.isDarwin) {
             # # description = "Like raycast for linux";
             programs.vicinae = {
                 enable = true;
@@ -42,3 +50,5 @@
             };
         };
 }
+
+

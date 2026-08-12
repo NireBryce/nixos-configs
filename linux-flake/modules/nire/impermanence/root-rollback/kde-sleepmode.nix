@@ -19,7 +19,14 @@
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }: {
+        flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }:
+            # KDE-specific, and `impermanence` is imported by every host
+            # (elly-home-manager.nix) since nohibernate applies to every host
+            # too. Guarded here rather than at the import, which cannot depend
+            # on pkgs.stdenv.isLinux without an infinite recursion under
+            # useGlobalPkgs -- see elly-home-manager.nix's own comment on
+            # exactly this.
+            lib.mkIf (!pkgs.stdenv.isDarwin) {
             # # description = "KDE sleep mode, kept in step with nohibernate";
 
             # kwriteconfig6 rather than home.file, deliberately.

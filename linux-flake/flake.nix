@@ -1,5 +1,5 @@
 {
-    description = "NixOS and Home Manager configuration for nire-durandal";
+    description = "NixOS, nix-darwin and Home Manager configuration for nire's machines";
 
     outputs = inputs: inputs.flake-parts.lib.mkFlake {
         inherit inputs;
@@ -8,6 +8,12 @@
         imports = [
             # declares flake.modules.<class>.<name>, which every module here writes into
             inputs.flake-parts.flakeModules.modules
+            # declares flake.darwinConfigurations as lazyAttrsOf raw. Not
+            # strictly required -- freeformType on `flake` would accept an
+            # undeclared attribute same as nixosConfigurations does -- but it
+            # is nix-darwin's own module for exactly this, so there is no
+            # reason to skip it.
+            inputs.darwin.flakeModules.default
             (inputs.import-tree ./modules)
         ];
         systems = [
@@ -32,6 +38,10 @@
         # ── Home Manager ──────────────────────────────────────────────────────────
         home-manager.url                           = "github:nix-community/home-manager/master";
         home-manager.inputs.nixpkgs.follows        = "nixpkgs";
+
+        # ── macOS ─────────────────────────────────────────────────────────────────
+        darwin.url                                 = "github:LnL7/nix-darwin/master";
+        darwin.inputs.nixpkgs.follows               = "nixpkgs";
 
         # ── Handheld / SteamOS ────────────────────────────────────────────────────
         jovian.url                                 = "github:Jovian-Experiments/Jovian-NixOS";

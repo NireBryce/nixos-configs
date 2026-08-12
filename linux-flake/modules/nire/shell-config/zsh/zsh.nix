@@ -233,8 +233,17 @@
                     #   in ignore/dev-shells/rust/, wired into nothing.
                     #
                     # Add aliases to home.shellAliases in shell-env.nix.
+                    #
+                    # cod is broken on darwin (nixpkgs: meta.broken =
+                    # stdenv.hostPlatform.isDarwin), so pkgs.cod can't be
+                    # evaluated there -- lib.optionalString below keeps that
+                    # interpolation unforced when the condition is false, same
+                    # reasoning as the lib.mkIf guards elsewhere in this tree
+                    # (see elly-home-manager.nix). Written as a real Nix
+                    # comment up here, not inside the '' string below, per the
+                    # `#` note two paragraphs up.
                     ''
-                    source <(${pkgs.cod}/bin/cod init $$ zsh)
+                    ${lib.optionalString (!pkgs.stdenv.isDarwin) "source <(${pkgs.cod}/bin/cod init $$ zsh)"}
 
                     # Free up bindings for zellij
                     ${zellij_keys_cfg}  

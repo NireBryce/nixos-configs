@@ -12,10 +12,25 @@ let
             specialArgs = { inherit inputs self' inputs'; };
             modules     = [ hostModule ];
         });
+
+    # Same shape and same reasoning as mkHost -- pkgs not taken from perSystem,
+    # for the same allowUnfree reason -- just calling darwinSystem instead of
+    # nixosSystem. darwinSystem's own signature (nix-darwin's flake.nix) takes
+    # `modules` and forwards anything else through, same as nixosSystem, so
+    # `specialArgs` works identically.
+    mkDarwinHost = system: hostModule: withSystem system ({ self', inputs', ... }:
+        inputs.darwin.lib.darwinSystem {
+            specialArgs = { inherit inputs self' inputs'; };
+            modules     = [ hostModule ];
+        });
 in
 {
     flake.nixosConfigurations = {
         nire-durandal = mkHost "x86_64-linux" config.flake.modules.nixos.durandalConfiguration;
         nire-tenacity = mkHost "x86_64-linux" config.flake.modules.nixos.tenacityConfiguration;
+    };
+
+    flake.darwinConfigurations = {
+        nire-lysithea = mkDarwinHost "aarch64-darwin" config.flake.modules.darwin.lysitheaConfiguration;
     };
 }

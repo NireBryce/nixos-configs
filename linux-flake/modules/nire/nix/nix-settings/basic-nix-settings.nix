@@ -47,4 +47,20 @@
             nixpkgs.config.allowUnfree = true;
 
         };
+
+        # Same reasoning as the nixos block, minus nix.channel.enable -- not
+        # confirmed to exist on nix-darwin, and channel management is a much
+        # smaller concern on a machine nobody points at nixos-unstable by
+        # habit, so it was left out rather than guessed at.
+        flake.modules.darwin.${moduleName} = {
+            nix.nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
+            nix.settings = {
+                trusted-users = [ "root" ];
+                experimental-features = [
+                    "nix-command"
+                    "flakes"
+                ];
+            };
+            nixpkgs.config.allowUnfree = true;
+        };
 }
