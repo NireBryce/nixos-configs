@@ -9,7 +9,8 @@
     with config.flake.modules.nixos; [
         # ── this machine ──────────────────────────────────────────────────────
         # nireHost/tenacity/: hardware-tenacity, boot-tenacity,
-        # nixpkgs-hostPlatform-tenacity, nixpkgs-stateVersion-tenacity -- suffixed
+        # touchscreen-wakeup-tenacity, nixpkgs-hostPlatform-tenacity,
+        # nixpkgs-stateVersion-tenacity -- suffixed
         # because a module's name is its filename: two nixos hosts both
         # declaring a bare nixpkgs-hostPlatform.nix would merge into one module
         # instead of erroring. Caught by `just modules` the first time these
