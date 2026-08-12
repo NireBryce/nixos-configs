@@ -23,7 +23,10 @@
     flake.modules.darwin.lysitheaConfiguration.imports =
     with config.flake.modules.darwin; [
         # ── this machine ────────────────────────────────────────────────────────
-        # nireHost/lysithea/: nixpkgs-hostPlatform, nixpkgs-stateVersion
+        # nireHost/lysithea/: nixpkgs-hostPlatform-lysithea, nixpkgs-stateVersion-lysithea
+        # -- suffixed 2026-08-12 for consistency with durandal/tenacity, though
+        # darwin is its own module class here, so nothing would actually have
+        # collided yet.
         lysithea
 
         # ── shared ───────────────────────────────────────────────────────────────

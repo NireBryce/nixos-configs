@@ -8,7 +8,13 @@
     flake.modules.nixos.tenacityConfiguration.imports =
     with config.flake.modules.nixos; [
         # ── this machine ──────────────────────────────────────────────────────
-        # nireHost/tenacity/: hardware-tenacity, boot-tenacity
+        # nireHost/tenacity/: hardware-tenacity, boot-tenacity,
+        # nixpkgs-hostPlatform-tenacity, nixpkgs-stateVersion-tenacity -- suffixed
+        # because a module's name is its filename: two nixos hosts both
+        # declaring a bare nixpkgs-hostPlatform.nix would merge into one module
+        # instead of erroring. Caught by `just modules` the first time these
+        # were added unsuffixed; durandal's copies got the same suffix treatment
+        # right after, for the same reason.
         tenacity
 
         # ── shared ────────────────────────────────────────────────────────────
@@ -58,11 +64,10 @@
         elly            # elly-user: the account, groups, emergency packages
     ];
 
-    # hostPlatform comes from hardware-tenacity.nix, as mkDefault.
+    # hostPlatform comes from hardware-tenacity.nix AND
+    # tenacity/configuration/nixpkgs-hostPlatform-tenacity.nix, both mkDefault
+    # with the same value -- same redundant-but-harmless shape durandal has
+    # between hardware-configuration.nix and nixpkgs-hostPlatform-durandal.nix.
+    # stateVersion moved to tenacity/configuration/nixpkgs-stateVersion-tenacity.nix.
     flake.modules.nixos.tenacityConfiguration.networking.hostName = "nire-tenacity";
-    # 25.05, not durandal's 23.11 -- this host was installed later. The sibling
-    # branch's tenacity stub said 23.11, which looks like it was copied from
-    # durandal; the pre-restructure config that actually ran on this machine
-    # (origin/backup-before-flake-parts-happened) says 25.05.
-    flake.modules.nixos.tenacityConfiguration.system.stateVersion = "25.05"; # Don't change. https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion
 }
