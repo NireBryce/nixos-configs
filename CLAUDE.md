@@ -383,6 +383,22 @@ introducing it here is a separate change, not a tidy-up.
 
 **Check for an existing `programs.*` integration before hand-writing one.**
 
+**Don't bury Python inside a bash script.** Bash is fine, and most of
+`linux-flake/scripts/` is bash. But `python3 -c '...'` heredocs inside it are
+not: the Python is a quoted string as far as every editor is concerned, so it
+gets no syntax highlighting, no linting, and no indentation help — which is
+exactly when quoting bugs stop being visible. Two ways out, by proportion:
+
+- **A little Python in an otherwise-shell script** — put it in
+  `linux-flake/scripts/util/` as a real `.py` file and call it.
+- **Mostly Python** — write the whole thing in Python. `modules.py` is the
+  precedent, and the trigger is the same one the `.justfile` header uses for
+  shell: data structures, parsing, or anything with a reason worth explaining.
+
+This was written after a package-availability checker went out as bash
+wrapping Nix wrapping inline Python, and shipped both bugs the shape invites —
+env vars passed where `argv` was read, and a mangled line nothing highlighted.
+
 ## Docs
 
 - `2026-08-08-PORT-PLAN-(COMPLETED).md` — the migration off den: what was
