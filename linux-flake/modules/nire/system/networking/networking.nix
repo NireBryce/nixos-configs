@@ -27,7 +27,8 @@
                     5353 # mdns
                     24470 # planetside2
                     25410 # planetside2
-                    # config.services.tailscale.port              # todo: move to tailscale-autoconnect
+                    # tailscale's own port is opened by services.tailscale.openFirewall
+                    # in tailscale.nix, not listed here.
                 ];
                 allowedUDPPortRanges = [
                     {
@@ -44,7 +45,6 @@
 
                 trustedInterfaces = [
                     "tailscale0" # always allow traffic from your Tailscale network
-                    # TODO: move to tailscale-autoconnect
                 ];
             };
         };
