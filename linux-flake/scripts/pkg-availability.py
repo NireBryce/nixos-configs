@@ -4,9 +4,9 @@
 Exists because the alternative is guessing, and guessing is what happened. Every
 Linux-only guard in nirePackages/ is a claim about platform support, but
 `lib.mkIf (!pkgs.stdenv.isDarwin)` gets reached for whenever a shared module
-looks Linux-shaped -- which is a different question from whether the pinned
-nixpkgs can build it on aarch64-darwin. Checking by hand meant writing the same
-expression out again each time, so mostly nobody did.
+looks Linux-shaped -- a different question from whether the pinned nixpkgs can
+build it on aarch64-darwin. Checking by hand meant writing the same expression
+out again each time, so mostly nobody did.
 
     pkg-availability.py obsidian discord kitty
     pkg-availability.py --all
@@ -28,11 +28,8 @@ Columns:
             lib/meta.nix checks platforms and badPlatforms only -- so a package
             can read `available` and still refuse to build without allowBroken.
 
-  CASK      a cask in nire/macos/homebrew/homebrew.nix whose name looks like
-            this package's. Fuzzy, and a hint rather than a fact: the names do
-            not match 1:1 (google-chrome/chrome, zoom-us/zoom,
-            bitwarden-desktop/bitwarden). A hit means "check whether darwin is
-            getting two copies", not "it is".
+  CASK      a cask in nire/macos/homebrew/homebrew.nix installing the same
+            thing, with the signal that identified it. See match_cask.
 
 `available` PLUS a cask hit is the interesting case, and the one no
 platform-shaped guard would ever catch: the package builds fine, the machine
@@ -53,8 +50,16 @@ HERE     = pathlib.Path(__file__).resolve().parent
 FLAKE    = HERE.parent
 HOMEBREW = FLAKE / 'modules/nire/macos/homebrew/homebrew.nix'
 
+# Homebrew's own cache of the cask API -- every cask's token and homepage,
+# offline. Read directly rather than shelling out to `brew info --json=v2`,
+# which crashes on this cask list: Homebrew 5.1.6 raises "undefined method
+# 'to_sym' for nil" out of cask_struct_generator.rb when one of the 59 is in
+# the batch. The cache is plain JSON under a JWS envelope and has no such
+# problem.
+CASK_API = pathlib.Path.home() / 'Library/Caches/Homebrew/api/cask.jws.json'
+
 # `home.packages = with pkgs; [ a b c ]`, possibly spanning lines. Used only by
-# --all, and only a convenience: this finds the ~70 files using the bare
+# --all, and a convenience only: it finds the ~70 files using the bare
 # single-package wrapper shape and misses everything installed through a
 # `programs.*.enable`, which is most of shell-config/. Name a package
 # explicitly when you actually care about the answer.
@@ -62,10 +67,6 @@ PKGLIST = re.compile(r'home\.packages\s*=\s*with pkgs;\s*\[(.*?)\]', re.S)
 PKGNAME = re.compile(r'^[a-zA-Z][a-zA-Z0-9._-]*$')
 COMMENT = re.compile(r'#[^\n]*')
 CASKS   = re.compile(r'casks\s*=\s*\[(.*?)\];', re.S)
-
-# Suffixes nixpkgs adds to tell a desktop app apart from its library or CLI.
-# Stripped before matching against cask names, which never carry them.
-SUFFIXES = ('-desktop', '-us', '-bin', '-unwrapped', '-wayland')
 
 PROBE = '''
 let
@@ -85,23 +86,24 @@ let
         let
             r = builtins.tryEval (
                 let p = lib.attrByPath (lib.splitString "." n) null pkgs; in
-                if p == null then { verdict = "missing"; broken = false; }
+                if p == null then { verdict = "missing"; broken = false; homepage = ""; }
                 else {
                     verdict =
                         if lib.meta.availableOn pkgs.stdenv.hostPlatform p
                         then "available" else "unsupported";
-                    broken  = p.meta.broken or false;
+                    broken   = p.meta.broken or false;
+                    homepage = p.meta.homepage or "";
                 });
         in { name = n; } // (if r.success then r.value
-                            else { verdict = "eval-error"; broken = false; });
+                            else { verdict = "eval-error"; broken = false; homepage = ""; });
 in
     builtins.toJSON (map probe names)
 '''
 
 
 def strip_comments(text):
-    """Nix comments only. Good enough here: no `#` appears inside the string
-    literals in these files, and the alternative is a Nix parser."""
+    """Nix comments only. Good enough here -- no `#` appears inside the string
+    literals in these files -- and the alternative is a Nix parser."""
     return COMMENT.sub('', text)
 
 
@@ -116,20 +118,57 @@ def scan_packages():
     return names
 
 
-def casks():
+def our_casks():
+    """The cask tokens homebrew.nix installs. Only the `casks = [ ... ]` block:
+    `brews` are CLI tools, a different conversation from a GUI app arriving
+    twice."""
     block = CASKS.search(strip_comments(HOMEBREW.read_text()))
     return set(re.findall(r'"([a-z0-9@.-]+)"', block.group(1))) if block else set()
 
 
-def cask_for(pkg, known):
-    stem = pkg.split('.')[-1]
-    for suffix in SUFFIXES:
-        if stem.endswith(suffix):
-            stem = stem[: -len(suffix)]
-            break
-    for c in sorted(known):
-        if c == stem or stem in c or c in stem:
-            return c
+def cask_homepages(tokens):
+    """token -> normalized homepage, for our casks only.
+
+    Restricting to our tokens is what keeps `vlc@nightly` and `gimp@dev` -- both
+    of which share a homepage with the cask we do install -- out of the results.
+    """
+    if not CASK_API.exists():
+        return {}
+    payload = json.loads(json.loads(CASK_API.read_text())['payload'])
+    return {c['token']: normalize(c.get('homepage'))
+            for c in payload if c['token'] in tokens}
+
+
+def normalize(url):
+    url = (url or '').lower()
+    url = re.sub(r'^https?://', '', url)
+    url = re.sub(r'^www\.', '', url)
+    return url.rstrip('/')
+
+
+def match_cask(pkg, homepage, tokens, homepages):
+    """Two independent signals, both exact equality, neither fuzzy.
+
+      name      the cask token IS the package name. Catches the cases where the
+                two projects describe the same product with different URLs:
+                nixpkgs still has discord at discordapp.com and firefox at
+                mozilla.com, Homebrew has discord.com and mozilla.org.
+      homepage  same normalized homepage. Catches the cases where the names
+                disagree instead: zoom-us/zoom, bitwarden-desktop/bitwarden.
+
+    Nothing here does substring or suffix matching, which both earlier drafts
+    tried and both got wrong on their first run -- containment reported
+    `obsidian` as the unrelated cask `obs`, and suffix-stripping reported
+    `kitty-img`, a separate image tool, as the terminal emulator. A false hit
+    argues for deleting a package the machine needs, so this errs toward
+    missing a duplicate over inventing one. kitty-img matches neither signal.
+    """
+    if pkg in tokens:
+        return f'{pkg} (name)'
+    if homepage:
+        for token, hp in sorted(homepages.items()):
+            if hp and hp == normalize(homepage):
+                return f'{token} (homepage)'
     return ''
 
 
@@ -162,15 +201,21 @@ def main():
     if not names:
         ap.error('name at least one package, or pass --all')
 
-    rows  = probe(names, args.system)
-    known = casks()
-    w     = max([len(r['name']) for r in rows] + [7])
+    rows      = probe(names, args.system)
+    tokens    = our_casks()
+    homepages = cask_homepages(tokens)
+    w         = max([len(r['name']) for r in rows] + [7])
 
     print(f'{args.system}\n')
+    if not homepages:
+        # Not fatal: the name signal still works anywhere. Said out loud
+        # because a silently weaker CASK column reads exactly like a clean one.
+        print(f'note: {CASK_API} not found -- cask matching is by name only\n')
     print(f'{"PACKAGE":<{w}}  {"VERDICT":<11}  {"BROKEN":<6}  CASK')
     for r in sorted(rows, key=lambda r: (ORDER.get(r['verdict'], 9), r['name'])):
         print(f'{r["name"]:<{w}}  {r["verdict"]:<11}  '
-              f'{"yes" if r["broken"] else "":<6}  {cask_for(r["name"], known)}')
+              f'{"yes" if r["broken"] else "":<6}  '
+              f'{match_cask(r["name"], r["homepage"], tokens, homepages)}')
 
 
 if __name__ == '__main__':
