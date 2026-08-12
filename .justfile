@@ -114,6 +114,14 @@ dotfiles:
 dotfile name:
     @{{scripts}}/dotfiles.sh {{host}} {{user}} '{{name}}'
 
+# Can these packages build on a system, and does Homebrew already install them
+available *pkgs:
+    # Platform independent, like `just modules`. Defaults to aarch64-darwin,
+    # which is the system the answer is usually wanted for; `--all` sweeps every
+    # home.packages entry in the tree. Answers a question that was previously
+    # settled by eye, wrongly.
+    @{{scripts}}/pkg-availability.py {{pkgs}}
+
 # Update inputs, then re-check
 update:
     cd {{flake}} && nix flake update
