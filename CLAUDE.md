@@ -129,8 +129,13 @@ Two consequences worth holding onto:
 
 Areas: `nire/` (shared system), `nireHost/` (per-host), `nirePackages/`
 (packages), `nireUser/` (elly). By declared class: 101 homeManager-only, 43
-nixos-only, 9 both, and one (`elly-user.nix`) that adds `darwin` for fonts — that
-last reaches nothing, since there are no `darwinConfigurations`.
+nixos-only, 9 both, and one (`elly-user.nix`) that adds `darwin` for fonts.
+
+**There are three hosts, not two, and one of them is darwin.**
+`nireHost/hosts.nix` declares `flake.darwinConfigurations.nire-lysithea`
+alongside the two `nixosConfigurations`, and the `darwin` class is live — this
+file claimed the opposite until 2026-08-12, and a session read that instead of
+`hosts.nix` and told Elly a darwin build could not have come from this repo.
 
 ### Home Manager is NixOS-integrated
 
