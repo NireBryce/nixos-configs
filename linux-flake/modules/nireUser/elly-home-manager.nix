@@ -65,8 +65,15 @@
         development
         editors
         gui-other
-        linux-utils     # each module here excludes darwin itself; see the
-                        # directory
+        linux-utils     # the name stopped being true on 2026-08-12: the
+                        # per-module darwin guards came off and all twelve
+                        # install on lysithea too. They all build there, and
+                        # only pciutils and usbutils are inert on macOS -- the
+                        # rest (lsof, nmap, mtr, socat, dnsutils, whois,
+                        # iperf3, ldns, iftop, ipcalc) are the same tools they
+                        # are on Linux. Renaming the directory would rename
+                        # this attribute and every reference to it, so it is a
+                        # deliberate change rather than a tidy-up.
         nix-utils
         shell-apps
         terminals
