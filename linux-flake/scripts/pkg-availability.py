@@ -65,6 +65,10 @@ CASK_API = pathlib.Path.home() / 'Library/Caches/Homebrew/api/cask.jws.json'
 # explicitly when you actually care about the answer.
 PKGLIST = re.compile(r'home\.packages\s*=\s*with pkgs;\s*\[(.*?)\]', re.S)
 PKGNAME = re.compile(r'^[a-zA-Z][a-zA-Z0-9._-]*$')
+# `programs.kitty = { ... }` / `services.espanso = { ... }`. The option name is
+# used as the package name -- true for kitty and espanso, the two that matter
+# here, and false often enough that --duplicates reports rather than acts.
+PROGRAM = re.compile(r'\b(?:programs|services)\.([a-zA-Z][a-zA-Z0-9-]*)\s*=')
 COMMENT = re.compile(r'#[^\n]*')
 CASKS   = re.compile(r'casks\s*=\s*\[(.*?)\];', re.S)
 
@@ -108,14 +112,36 @@ def strip_comments(text):
 
 
 def scan_packages():
-    """Package names named in `home.packages` blocks across nirePackages/."""
-    names = set()
+    """package name -> {(module path relative to modules/, shape)}.
+
+    Two shapes, because the fix differs between them and --duplicates has to say
+    which one it found:
+
+      packages  `home.packages = with pkgs; [ foo ]`. The module contributes a
+                package and nothing else, so excluding it on darwin costs
+                nothing.
+      programs  `programs.foo` / `services.foo`. The option name is taken as the
+                package name, which is right often enough to be worth reporting
+                and is why this is a report and not an edit: these modules
+                usually ALSO generate config the Homebrew copy will read. See
+                --duplicates output.
+
+    Regex over Nix source either way, so this finds things rather than proving
+    them. Anything under a `_` directory is skipped, matching import-tree.
+    """
+    found = {}
     for p in sorted((FLAKE / 'modules/nirePackages').rglob('*.nix')):
         if any(part.startswith('_') for part in p.parts):
-            continue                       # import-tree ignores these; so do we
-        for block in PKGLIST.findall(strip_comments(p.read_text())):
-            names.update(t for t in block.split() if PKGNAME.match(t))
-    return names
+            continue
+        rel  = p.relative_to(FLAKE / 'modules')
+        text = strip_comments(p.read_text())
+        for block in PKGLIST.findall(text):
+            for tok in block.split():
+                if PKGNAME.match(tok):
+                    found.setdefault(tok, set()).add((str(rel), 'packages'))
+        for opt in PROGRAM.findall(text):
+            found.setdefault(opt, set()).add((str(rel), 'programs'))
+    return found
 
 
 def our_casks():
@@ -187,6 +213,66 @@ def probe(names, system):
 
 ORDER = {'available': 0, 'unsupported': 1, 'eval-error': 2, 'missing': 3}
 
+DUPLICATE_HELP = '''
+Each of these builds fine on {system} AND is installed by a cask, so
+nire-lysithea gets two copies. Nothing here is broken -- it is wasted build
+time, and for unfree packages it is a live upstream fetch on every build, which
+is how a GitHub 503 once failed the whole darwin build for an app Homebrew had
+already installed.
+
+`drop-unsupported-packages.nix` will NOT catch these. It reads meta.platforms,
+and meta.platforms has no opinion about Homebrew. This needs a decision.
+
+To exclude one, by shape:
+
+  packages  guard the module with lib.mkIf (!pkgs.stdenv.isDarwin), the way
+            gui-other/pkm/notes/obsidian.nix does. Read the isDarwin test as
+            "on darwin, homebrew.nix owns this app", not "Linux-only".
+
+  programs  do NOT guard the whole module: it usually also generates config
+            that the Homebrew copy reads, and guarding throws that away. Check
+            whether the HM option is nullable --
+
+                grep -n 'package = ' $(nix eval --raw \\
+                  .#inputs.home-manager.outPath)/modules/programs/<name>.nix
+
+            mkPackageOption with { nullable = true; } means `package = null`
+            drops the binary and keeps the config, which is what kitty wants.
+
+Leaving one alone is a fine answer too. Homebrew and nixpkgs disagreeing about
+a version matters for some apps and not others, and this script does not know
+which.
+'''
+
+
+def report_duplicates(system):
+    modules   = scan_packages()
+    rows      = probe(set(modules), system)
+    tokens    = our_casks()
+    homepages = cask_homepages(tokens)
+
+    hits = []
+    for r in rows:
+        if r['verdict'] != 'available':
+            continue
+        cask = match_cask(r['name'], r['homepage'], tokens, homepages)
+        if cask:
+            hits.append((r['name'], cask, sorted(modules[r['name']])))
+
+    print(f'{system}\n')
+    if not hits:
+        print('no packages are installed by both nixpkgs and a homebrew cask.')
+        return 0
+
+    w = max(len(n) for n, _, _ in hits)
+    print(f'{"PACKAGE":<{w}}  {"CASK":<24}  SHAPE     MODULE')
+    for name, cask, places in sorted(hits):
+        for i, (path, shape) in enumerate(places):
+            head = f'{name:<{w}}  {cask:<24}' if i == 0 else ' ' * (w + 26)
+            print(f'{head}  {shape:<8}  {path}')
+    print(DUPLICATE_HELP.format(system=system))
+    return 0
+
 
 def main():
     ap = argparse.ArgumentParser(
@@ -195,11 +281,18 @@ def main():
     ap.add_argument('--system', default='aarch64-darwin')
     ap.add_argument('--all', action='store_true',
                     help='derive the list from home.packages across nirePackages/')
+    ap.add_argument('--duplicates', action='store_true',
+                    help='report packages a homebrew cask ALSO installs, and what to do')
     args = ap.parse_args()
 
-    names = set(args.names) | (scan_packages() if args.all else set())
+    if args.duplicates:
+        if args.names or args.all:
+            ap.error('--duplicates sweeps the tree; do not also name packages')
+        sys.exit(report_duplicates(args.system))
+
+    names = set(args.names) | (set(scan_packages()) if args.all else set())
     if not names:
-        ap.error('name at least one package, or pass --all')
+        ap.error('name at least one package, or pass --all or --duplicates')
 
     rows      = probe(names, args.system)
     tokens    = our_casks()
