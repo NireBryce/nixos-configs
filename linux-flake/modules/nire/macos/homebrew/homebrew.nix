@@ -18,12 +18,32 @@
             homebrew = {
                 enable = true;
 
-                # Uninstall anything not declared here on activation. This is
-                # the aggressive end of nix-darwin's cleanup enum (none / check
-                # / uninstall / zap) -- carried over deliberately, since a
+                # Uninstall anything not declared here on activation, since a
                 # homebrew install that silently drifts from what is declared
-                # defeats the point of declaring it at all.
-                onActivation.cleanup = "uninstall";
+                # defeats the point of declaring it at all. That intent is
+                # unchanged; only the way of asking for it is.
+                #
+                # `onActivation.cleanup = "uninstall"` is the option that
+                # expresses this, and it is BROKEN as of 2026-08-12. nix-darwin
+                # turns it into `brew bundle --force-cleanup`
+                # (modules/homebrew.nix:196), and Homebrew removed that flag.
+                # On 5.1.6 activation dies with:
+                #
+                #     Error: invalid option --force-cleanup
+                #
+                # `brew bundle`'s flags are now `--cleanup` and `--force`
+                # separately -- checked against its own arg parser in
+                # /opt/homebrew/Library/Homebrew/cmd/bundle.rb, which declares
+                # --cleanup and no --force-cleanup. Per `brew bundle --help`,
+                # `--cleanup` alone is "same as running cleanup --force", so it
+                # is the exact behaviour the enum value was asking for.
+                #
+                # Not fixed upstream: nix-darwin master resolves to the same
+                # store path as the pinned rev here, and still emits the old
+                # flag. Revisit when the input moves -- if `cleanup` starts
+                # working, this pair should collapse back to it.
+                onActivation.cleanup    = "none";
+                onActivation.extraFlags = [ "--cleanup" ];
 
                 taps = [ ];
 
