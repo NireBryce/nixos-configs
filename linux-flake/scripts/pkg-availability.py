@@ -270,7 +270,9 @@ def report_duplicates(system):
         for i, (path, shape) in enumerate(places):
             head = f'{name:<{w}}  {cask:<24}' if i == 0 else ' ' * (w + 26)
             print(f'{head}  {shape:<8}  {path}')
-    print(DUPLICATE_HELP.format(system=system))
+    # .replace, not .format: the help text contains literal Nix braces
+    # (`{ nullable = true; }`) and str.format reads those as fields.
+    print(DUPLICATE_HELP.replace('<SYSTEM>', system))
     return 0
 
 
