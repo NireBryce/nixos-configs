@@ -14,9 +14,8 @@
 # Was `boot` until 2026-08-11.
 #
 # This whole bundle is reused as-is by every host, nire-lysithea (darwin)
-# included -- see enable-home-manager-darwin.nix. Two of the categories below
-# (`linux-utils`, `impermanence`) contain content that only makes sense on
-# Linux. The fix for that is NOT here: `imports` cannot depend on `pkgs` under
+# included -- see enable-home-manager-darwin.nix. Some of what it carries only
+# makes sense on Linux. The fix for that is NOT here: `imports` cannot depend on `pkgs` under
 # useGlobalPkgs without a genuine infinite recursion -- `pkgs` for a
 # useGlobalPkgs home-manager module is itself threaded in through
 # `_module.args`, which is not resolved until after `imports` is, so
