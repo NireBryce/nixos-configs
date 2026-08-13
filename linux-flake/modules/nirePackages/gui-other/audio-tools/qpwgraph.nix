@@ -2,10 +2,8 @@
     let
       moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }:
-            # PipeWire is Linux-only; nixpkgs doesn't build qpwgraph for
-            # aarch64-darwin.
-            lib.mkIf (!pkgs.stdenv.isDarwin) {
+        flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
+            # PipeWire is Linux-only; meta.platforms excludes aarch64-darwin.
             # # description = "qpw graph virtual mixer";
             home.packages = with pkgs; [
                 qpwgraph
