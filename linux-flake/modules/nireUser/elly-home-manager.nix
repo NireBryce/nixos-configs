@@ -27,10 +27,21 @@
 # importing unconditionally, and using mkEnableOption and mkIf to control its
 # effect."
 #
-# So: import everything unconditionally, same as always, and guard each
-# Linux-only *module* internally with `lib.mkIf (!pkgs.stdenv.isDarwin) { ... }`,
-# the same pattern vicinae.nix already uses for the identical reason. See the
-# individual files under linux-utils/ and kde-sleepmode.nix.
+# So: import everything unconditionally, same as always, and deal with darwin
+# per *module* rather than per import. Two mechanisms, and they answer
+# different questions -- see CLAUDE.md, "Platform support is derived; Homebrew
+# overlap is not":
+#
+#   can't build there   nothing to do. nire/system/home-manager/
+#                       drop-unsupported-packages.nix filters home.packages by
+#                       meta.platforms on darwin and warns about what it took.
+#
+#   won't work there    an explicit `lib.mkIf (!pkgs.stdenv.isDarwin) { ... }`
+#                       in the module, because the package builds and the
+#                       objection is behavioural. kde-sleepmode.nix and
+#                       vicinae.nix are the two, both option-shaped: the HM
+#                       module asserts before any package list exists, so the
+#                       filter cannot reach them.
 { config, ... }:
 {
     flake.modules.homeManager.ellyHomeManager.imports =
