@@ -145,6 +145,38 @@ applies both. `linux-flake/home-manager-standalone.md` is the way back.
 - Activation runs as a systemd unit, so its `PATH` is only
   coreutils/findutils/gnugrep/gnused/systemd.
 
+### Platform support is derived; Homebrew overlap is not
+
+`ellyHomeManager` is shared verbatim by all three hosts, including
+`nire-lysithea` (aarch64-darwin), so everything in it has to survive darwin.
+Two different things can go wrong there, they look identical in the config, and
+only one of them is decided for you.
+
+**Can nixpkgs build it here?** Answered automatically.
+`nire/system/home-manager/drop-unsupported-packages.nix` re-declares
+`home.packages` with an `apply` that filters by `lib.meta.availableOn`, **on
+darwin only**, and warns naming everything it dropped. So:
+
+- **Do not add `lib.mkIf (!pkgs.stdenv.isDarwin)` to a single-package module
+  for platform reasons.** `meta.platforms` already says it; restating it by
+  hand is a claim that can drift. Eleven modules used to, all correct, none
+  necessary.
+- On Linux the filter does nothing, deliberately — an unsupported package on
+  durandal stays a loud error, because that is a mistake worth stopping on.
+- It only reaches `home.packages`. A module whose body is `programs.foo.enable`
+  or `services.foo.enable` asserts before any package list exists, so those
+  still need their own guard — `vicinae.nix` is the worked example and says so.
+
+**Does Homebrew already install it?** Never answered automatically, because
+`meta.platforms` has no opinion about Homebrew and never will. `homebrew.nix`
+installs 59 casks, and eight of them are also nixpkgs packages in
+`ellyHomeManager` — lysithea gets two copies of each. `just available
+--duplicates` lists them with the owning module; deciding is a judgement call
+per app. `obsidian.nix` is the worked example, and its `isDarwin` test means
+*"on darwin, homebrew.nix owns this app"* — not *"Linux-only"*. Read every
+remaining `isDarwin` in `nirePackages/` that way and check which question it is
+answering before copying it.
+
 ## Traps, all of which have actually happened here
 
 ### `flake.modules` cannot live inside `perSystem`
