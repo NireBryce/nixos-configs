@@ -49,24 +49,26 @@ modules:
 
 # Build this host, without activating it
 build:
-    # Linux only, and in practice that means running it on the host itself:
-    # there is no remote builder and no binfmt, so the darwin laptop cannot.
+    # Runs on the host itself: no remote builder and no binfmt, so a NixOS host
+    # cannot be built from the Mac. nire-lysithea IS the Mac, and builds here.
     @echo "==> building {{host}}   (override: just host=<other> build)"
-    nh os build {{flake}} --hostname {{host}}
+    @{{scripts}}/rebuild.sh build {{flake}} {{host}}
 
 # Build and make it the boot default, activating nothing now
 boot:
     # Nothing changes until you reboot deliberately, and the running generation
     # stays in the systemd-boot menu as the fallback. Worth preferring over
     # `switch` for anything touching initrd, the bootloader or impermanence.
+    # NixOS only -- nix-darwin has no boot generation; rebuild.sh says so.
     @echo "==> {{host}} will be the boot default on next reboot"
-    nh os boot {{flake}} --hostname {{host}}
+    @{{scripts}}/rebuild.sh boot {{flake}} {{host}}
 
 # Build and activate, applying Home Manager too
 switch:
-    # HM is NixOS-integrated here, so there is no separate `nh home switch`.
+    # HM is integrated on both classes here, so there is no separate
+    # `nh home switch` on either.
     @echo "==> ACTIVATING {{host}} now, home-manager included"
-    nh os switch {{flake}} --hostname {{host}}
+    @{{scripts}}/rebuild.sh switch {{flake}} {{host}}
 
 # Package-level diff between what is running and what would be installed
 diff-deployed:
