@@ -17,9 +17,17 @@
 # name for every caller instead of theirs. See CLAUDE.md, "a module's name
 # is its filename". That's the one thing this deliberately does NOT try to
 # factor out.
+#
+# There is deliberately no `linuxOnly` parameter. It had one until 2026-08-12,
+# wrapping the body in lib.mkIf (!pkgs.stdenv.isDarwin), and it is now
+# redundant: nire/system/home-manager/drop-unsupported-packages.nix filters
+# home.packages by meta.platforms on darwin already. A package that cannot
+# build there needs no annotation here, and one that CAN build there but is
+# unwanted anyway -- the linux-utils/ tools -- is a preference, which belongs
+# in the module as an explicit mkIf where a reader will see it, not as a flag
+# passed to a generator.
 { moduleName
 , packages          # list of pkgs attribute paths, e.g. [ "which" ] or [ "kdePackages.kate" ]
-, linuxOnly ? false  # wraps the module in lib.mkIf (!pkgs.stdenv.isDarwin)
 }:
 {
     flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }:
@@ -28,9 +36,8 @@
                 lib.attrByPath (lib.splitString "." name)
                     (throw "mkPkgModule (${moduleName}): pkgs has no attribute '${name}'")
                     pkgs;
-            body = { home.packages = map resolve packages; };
         in
-            if linuxOnly then lib.mkIf (!pkgs.stdenv.isDarwin) body else body;
+            { home.packages = map resolve packages; };
 }
 
 # ── worked example, not real -- see README.md ────────────────────────────
@@ -54,10 +61,15 @@
 #     in
 #         import ../../_lib/mkPkgModule.nix { inherit moduleName; packages = [ "which" ]; }
 #
-# vlc.nix (linuxOnly) the same way:
+# vlc.nix the same way. Nothing extra is needed for it despite not building on
+# aarch64-darwin -- drop-unsupported-packages.nix handles that from
+# meta.platforms:
 #
 #     import ../../../_lib/mkPkgModule.nix {
 #         inherit moduleName;
 #         packages = [ "vlc" ];
-#         linuxOnly = true;
 #     }
+#
+# A module that IS buildable on darwin but unwanted there anyway -- ipcalc.nix
+# and the rest of linux-utils/ -- cannot use this generator as written, and
+# should keep its explicit mkIf. That is the one case the generator gives up.
