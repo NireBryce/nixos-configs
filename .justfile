@@ -116,10 +116,11 @@ dotfile name:
 
 # Can these packages build on a system, and does Homebrew already install them
 available *pkgs:
-    # Platform independent, like `just modules`. Defaults to aarch64-darwin,
-    # which is the system the answer is usually wanted for; `--all` sweeps every
-    # home.packages entry in the tree. Answers a question that was previously
-    # settled by eye, wrongly.
+    # Platform independent, like `just modules`, and defaults to aarch64-darwin
+    # because that is the system the answer is usually wanted for. `--all`
+    # sweeps every home.packages entry; `--duplicates` reports only the ones a
+    # homebrew cask ALSO installs, and says what to do about each. Answers by
+    # reading meta.platforms a question that used to be settled by eye, wrongly.
     @{{scripts}}/pkg-availability.py {{pkgs}}
 
 # Update inputs, then re-check

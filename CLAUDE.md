@@ -63,6 +63,8 @@ the plan turned out wrong, and what is still open.
 ```sh
 just check           # nix flake check --all-systems --no-build
 just modules         # static module-tree check; the only one that means anything on darwin
+just available <pkg> # can it build on aarch64-darwin, and does a cask install it too
+just available --duplicates   # only the ones homebrew ALSO installs, and what to do
 just fingerprint     # drvPath of the host toplevel
 just dotfiles        # every generated dotfile's attribute name
 just dotfile ./.zshrc

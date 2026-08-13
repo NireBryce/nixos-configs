@@ -10,7 +10,22 @@ out again each time, so mostly nobody did.
 
     pkg-availability.py obsidian discord kitty
     pkg-availability.py --all
+    pkg-availability.py --duplicates
     pkg-availability.py --system x86_64-linux vlc gimp
+
+Two questions, and they are NOT the same one:
+
+  can it build here      meta.platforms. Answered, and acted on, automatically:
+                         nire/system/home-manager/drop-unsupported-packages.nix
+                         drops unavailable packages on darwin and warns. Nothing
+                         needs a hand-written guard for this any more, and the
+                         default table is how you check its work.
+
+  is it already installed by homebrew
+                         meta.platforms has no opinion, and never will. This
+                         one is a judgement call every time, so --duplicates
+                         reports it -- with the owning module and what to do
+                         about each shape -- rather than deciding.
 
 Columns:
 
@@ -135,6 +150,15 @@ def scan_packages():
             continue
         rel  = p.relative_to(FLAKE / 'modules')
         text = strip_comments(p.read_text())
+        # A module that already excludes itself on darwin is decided, not
+        # pending. Without this the report never shrinks as the work gets done
+        # -- obsidian.nix stayed listed after it was fixed, which trains you to
+        # ignore the output. Deliberately crude: any mention of isDarwin
+        # counts, because a module that talks about darwin at all has had the
+        # question asked of it, and a false "handled" is recoverable by reading
+        # the file while a permanently-stale list is not.
+        if 'isDarwin' in text:
+            continue
         for block in PKGLIST.findall(text):
             for tok in block.split():
                 if PKGNAME.match(tok):
@@ -214,7 +238,7 @@ def probe(names, system):
 ORDER = {'available': 0, 'unsupported': 1, 'eval-error': 2, 'missing': 3}
 
 DUPLICATE_HELP = '''
-Each of these builds fine on {system} AND is installed by a cask, so
+Each of these builds fine on <SYSTEM> AND is installed by a cask, so
 nire-lysithea gets two copies. Nothing here is broken -- it is wasted build
 time, and for unfree packages it is a live upstream fetch on every build, which
 is how a GitHub 503 once failed the whole darwin build for an app Homebrew had
