@@ -34,6 +34,10 @@ has no config here any more — the key is valid, leave it.
 26.11, kernel 6.18.43, systemd stage 1. The `/root` rollback ran and was
 confirmed by subvolid (607 → 622), not merely by the machine coming up.
 
+**`nire-lysithea` is switched and running this config** — generation 52 as of
+2026-08-12, `darwin-system-26.11.15abb8c`. It is also the machine you are
+working from, so `just build` there exercises the real thing.
+
 `durandal` has not been built or switched. For now that is fine — tenacity is
 serving as the testbed, so changes land there first and durandal follows later.
 It is not a blocker and does not need raising as one every session. It does
@@ -69,7 +73,7 @@ just fingerprint     # drvPath of the host toplevel
 just dotfiles        # every generated dotfile's attribute name
 just dotfile ./.zshrc
 just diff HEAD~1     # what changed in a host's config, attribute by attribute
-just build / boot / switch   # Linux only; `boot` activates nothing until you reboot
+just build / boot / switch   # dispatches per host class; `boot` activates nothing until you reboot
 ```
 
 On the hardware, and read-only:
@@ -94,6 +98,13 @@ nix eval --raw '.#nixosConfigurations.nire-durandal.config.home-manager.users.el
 
 `elly` is literal there on purpose: it reads an *evaluated* config, where the
 attribute name is already resolved.
+
+`build`/`boot`/`switch` go through `scripts/rebuild.sh`, which asks the flake
+whether the host is a `darwinConfiguration` and calls `nh darwin` or `nh os`
+accordingly. **You are on `nire-lysithea`, so darwin builds work right here** —
+`just build` is a real test, not just evaluation. The two NixOS hosts still
+cannot be built from here (no remote builder, no binfmt) and rebuild.sh says so
+rather than failing inside nix.
 
 ## Architecture
 
