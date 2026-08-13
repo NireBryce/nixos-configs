@@ -80,10 +80,17 @@ CASK_API = pathlib.Path.home() / 'Library/Caches/Homebrew/api/cask.jws.json'
 # explicitly when you actually care about the answer.
 PKGLIST = re.compile(r'home\.packages\s*=\s*with pkgs;\s*\[(.*?)\]', re.S)
 PKGNAME = re.compile(r'^[a-zA-Z][a-zA-Z0-9._-]*$')
-# `programs.kitty = { ... }` / `services.espanso = { ... }`. The option name is
-# used as the package name -- true for kitty and espanso, the two that matter
-# here, and false often enough that --duplicates reports rather than acts.
-PROGRAM = re.compile(r'\b(?:programs|services)\.([a-zA-Z][a-zA-Z0-9-]*)\s*=')
+# `programs.kitty = { ... }` / `services.espanso = { ... }`, and equally
+# `programs.kitty.enable = true`. The trailing attribute path is not optional
+# polish: matching only `programs.<name> =` missed kitty.nix entirely once it
+# was split into enable/package and config halves, so the half carrying the
+# darwin guard went unseen and kitty was reported as unhandled.
+#
+# The option name is used as the package name -- true for kitty and espanso,
+# the two that matter here, and false often enough that --duplicates reports
+# rather than acts.
+PROGRAM = re.compile(
+    r'\b(?:programs|services)\.([a-zA-Z][a-zA-Z0-9-]*)(?:\.[a-zA-Z][a-zA-Z0-9-]*)*\s*=')
 COMMENT = re.compile(r'#[^\n]*')
 CASKS   = re.compile(r'casks\s*=\s*\[(.*?)\];', re.S)
 
@@ -150,21 +157,24 @@ def scan_packages():
             continue
         rel  = p.relative_to(FLAKE / 'modules')
         text = strip_comments(p.read_text())
-        # A module that already excludes itself on darwin is decided, not
-        # pending. Without this the report never shrinks as the work gets done
-        # -- obsidian.nix stayed listed after it was fixed, which trains you to
-        # ignore the output. Deliberately crude: any mention of isDarwin
-        # counts, because a module that talks about darwin at all has had the
-        # question asked of it, and a false "handled" is recoverable by reading
-        # the file while a permanently-stale list is not.
-        if 'isDarwin' in text:
-            continue
+        # Whether this file has already had the darwin question asked of it.
+        # Tracked PER ENTRY rather than skipping the file, because a package
+        # can be spread across sibling modules: terminals/kitty/ is kitty.nix
+        # (which sets package = null on darwin) plus kitty-config.nix (which
+        # does not mention darwin and should not have to). Skipping per file
+        # reported kitty as unhandled the moment it was split.
+        #
+        # Deliberately crude -- any mention of isDarwin counts. A module that
+        # names darwin at all has had the question put to it, and a wrong
+        # "handled" is recoverable by reading the file, while a report that
+        # never shrinks just trains you to ignore it.
+        guarded = 'isDarwin' in text
         for block in PKGLIST.findall(text):
             for tok in block.split():
                 if PKGNAME.match(tok):
-                    found.setdefault(tok, set()).add((str(rel), 'packages'))
+                    found.setdefault(tok, set()).add((str(rel), 'packages', guarded))
         for opt in PROGRAM.findall(text):
-            found.setdefault(opt, set()).add((str(rel), 'programs'))
+            found.setdefault(opt, set()).add((str(rel), 'programs', guarded))
     return found
 
 
@@ -279,9 +289,14 @@ def report_duplicates(system):
     for r in rows:
         if r['verdict'] != 'available':
             continue
+        places = sorted(modules[r['name']])
+        # Any one of a package's modules handling darwin settles it for all of
+        # them -- see scan_packages.
+        if any(guarded for _, _, guarded in places):
+            continue
         cask = match_cask(r['name'], r['homepage'], tokens, homepages)
         if cask:
-            hits.append((r['name'], cask, sorted(modules[r['name']])))
+            hits.append((r['name'], cask, [(p, s) for p, s, _ in places]))
 
     print(f'{system}\n')
     if not hits:
