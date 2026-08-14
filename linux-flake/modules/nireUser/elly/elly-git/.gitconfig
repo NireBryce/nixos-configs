@@ -10,10 +10,10 @@
 	process = git-lfs filter-process
 	required = true
 	clean = git-lfs clean -- %f
-[maintenance]
-	repo = /home/elly/nixos
-	repo = /home/elly/.local/share/fleek
-	
+; [maintenance] belongs in programs.git.maintenance in elly-git.nix, not here.
+; git reads this file *and* the Home Manager one, and maintenance.repo is
+; multi-valued, so declaring it in both accumulates rather than overrides.
+
 [core]
     pager = delta
 
