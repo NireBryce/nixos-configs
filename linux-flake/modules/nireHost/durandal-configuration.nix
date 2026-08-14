@@ -18,6 +18,7 @@
         durandal
 
         # ── shared ────────────────────────────────────────────────────────────
+        boot            # common boot options: boot-generations
         impermanence    # WARN-impermanence -- wipes /root on boot, see the module.
                         # Was `boot` until 2026-08-11; see tenacity-configuration.nix.
         hardware        # amdcpu, amdgpu

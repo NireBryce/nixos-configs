@@ -30,6 +30,28 @@
                 # separate ~/.nix-profile, so home.profileDirectory moves too.
                 useUserPackages = true;
 
+                # Without this, HM's activation *aborts* the first time it finds
+                # a file it does not already track sitting where it wants to
+                # write -- "Existing file '...' is in the way of '...'". Set
+                # 2026-08-13, before durandal's first switch onto this branch.
+                #
+                # It matters here specifically because every host reaching this
+                # branch is arriving from *standalone* HM, and the two do not
+                # share a profile. Durandal was on standalone generation 319
+                # (~/.local/state/nix/profiles/home-manager) with its dotfiles
+                # symlinked into a home-manager-files store path. HM reads
+                # ~/.local/state/home-manager/gcroots/current-home to work out
+                # what it owns, and that gcroot is intact, so the handover
+                # should be clean -- but "should" is the whole reason for a
+                # backup extension. Anything HM cannot account for gets renamed
+                # to <file>.hm-bak instead of failing the switch half-applied,
+                # with the system activated and the home not.
+                #
+                # Cheap to leave on permanently: on a run with no collisions it
+                # does nothing at all. If .hm-bak files appear, that is a real
+                # finding about untracked state, not noise to be swept up.
+                backupFileExtension = "hm-bak";
+
                 # the full path here is `home-manager.users.elly`; the account
                 # name is hardcoded, as it is in users.users.elly and
                 # home.username
