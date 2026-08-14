@@ -29,6 +29,7 @@ in
         nire-durandal = mkHost "x86_64-linux" config.flake.modules.nixos.durandalConfiguration;
         nire-tenacity = mkHost "x86_64-linux" config.flake.modules.nixos.tenacityConfiguration;
         nire-testbed  = mkHost "x86_64-linux" config.flake.modules.nixos.testbedConfiguration;
+        nire-lego     = mkHost "x86_64-linux" config.flake.modules.nixos.legoConfiguration;
     };
 
     flake.darwinConfigurations = {
