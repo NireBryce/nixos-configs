@@ -48,7 +48,7 @@ Most of this repo's history predates that, written from an aarch64-darwin laptop
 against x86_64-linux hosts with no remote builder, where the only thing that
 built was `checks.<system>.module-tree`. **Treat an undated "verified" as
 *evaluates*.** The first boot found four defects that evaluation and a
-successful build both missed (`lessons.md` §25), so a green `nix flake check`
+successful build both missed (`lessons-learned.md` §25), so a green `nix flake check`
 says nothing about behaviour.
 
 Two hosts: `nire-durandal` (workstation) and `nire-tenacity` (handheld,
@@ -393,7 +393,7 @@ hash.
 **Bugs here serialize.** Evaluating a cheap attribute proves nothing;
 `networking.hostName` resolved happily while four separate things were broken.
 Force a toplevel. And note that evaluating and building both stop short of the
-defects that only appear at runtime — `lessons.md` §25.
+defects that only appear at runtime — `lessons-learned.md` §25.
 
 **Ask "did it work before?" first.** These machines keep journals across boots,
 so `journalctl --list-boots` plus a grep settles whether something is a

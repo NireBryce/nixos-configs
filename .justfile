@@ -77,7 +77,7 @@ diff-deployed:
 # What this machine is really running -- capture BEFORE switching
 baseline:
     # Everything it prints stops being recoverable once the new generation boots
-    # and the store is collected. lessons.md §24 covers why that matters; run it
+    # and the store is collected. lessons-learned.md §24 covers why that matters; run it
     # with sudo to include the btrfs subvolumes.
     @{{scripts}}/deployed-baseline.sh
 

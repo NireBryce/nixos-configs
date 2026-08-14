@@ -6,7 +6,7 @@
 # boot cannot survive resuming an image that predates the wipe. PowerDevil
 # shipped here asking for hybrid sleep. logind answers CanHybridSleep=no, and
 # PowerDevil drops a refused request rather than degrading to plain suspend, so
-# suspend stopped working entirely on 2026-08-10. See lessons.md §30.
+# suspend stopped working entirely on 2026-08-10. See lessons-learned.md §30.
 #
 # This is not a preference. It is the other half of a system-level decision, and
 # the two have to agree or the machine cannot sleep.

@@ -141,13 +141,13 @@ Most of this repo was written *from* an aarch64-darwin laptop against
 x86_64-linux hosts with no remote builder, which is why so much of it says
 "verified" meaning *evaluates*. Working on lysithea puts you back in that
 position for anything Linux-shaped — except that now the laptop is the target
-rather than the workstation. Say which rung you mean: `lessons.md` §18 and §25.
+rather than the workstation. Say which rung you mean: `lessons-learned.md` §18 and §25.
 
 ---
 
 # What cost the most on tenacity
 
-All in `lessons.md` with the detail:
+All in `lessons-learned.md` with the detail:
 
 - **The repo is not the machine** (§2, §24). `swapDevices = [ ]` while 20G of
   swap was active, and a guard written on that basis could never fire.

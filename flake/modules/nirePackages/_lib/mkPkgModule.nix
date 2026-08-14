@@ -1,6 +1,5 @@
-# DRAFT -- not wired into any caller yet. See ../../../mkPkgModule.md (repo
-# root, alongside dirsAsCategory.md) for what this is and why nothing in the
-# tree uses it.
+# DRAFT -- not wired into any caller yet. See flake/scripts/mkPkgModule.md for
+# what this is and why nothing in the tree uses it.
 #
 # Generator for the single-package home.packages wrapper shape ~70 files in
 # this tree already share by hand (which.nix, jq.nix, vlc.nix, most of

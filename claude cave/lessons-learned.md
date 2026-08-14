@@ -6,8 +6,8 @@
 > mainly as a list of things that have gone wrong here before. `CLAUDE.md` has
 > the rules; this has the scar tissue.
 
-Companion to `2026-08-08-PORT-PLAN-(COMPLETED).md` and `TENACITY-PLAN.md`, which
-record *what* was done. This records how it went wrong in the doing, which is
+Companion to `old-2026-08-08-PORT-PLAN-(COMPLETED).md` and
+`old-historical-TENACITY-PLAN.md`, which record *what* was done. This records how it went wrong in the doing, which is
 not recoverable from the tree or the commits.
 
 Three groups, by what could be observed at the time. §§1–18 are the port, from
@@ -170,7 +170,8 @@ Cheap, and the difference between a recommendation and a guess.
 ## 13. Reversibility can stand in for a decision
 
 Three times Elly declined a fork and asked for a documented escape hatch:
-`dirsAsCategory.md`, `home-manager-standalone.md`, `impermanence-stage1.md`.
+`dirsAsCategory.md`, `trailhead-home-manager-standalone.md`,
+`lessons-learned-impermanence-stage1-migration.md`.
 None had to be settled to make progress, and writing the reversal path while the
 consequences are in hand is cheap. **Ask whether a close decision needs deciding
 or documenting.**

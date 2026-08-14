@@ -6,7 +6,7 @@
 # Run it before switching. Everything it prints becomes unrecoverable once the
 # new generation boots and nix-collect-garbage runs, and it is the only thing
 # that can answer "is what I am about to install different from what works" --
-# see lessons.md §24. first-boot-runbook.md has tenacity's captured output.
+# see lessons-learned.md §24.
 #
 # Read-only. The btrfs section needs root and is skipped without it.
 #
@@ -99,7 +99,7 @@ echo '```'
 echo
 echo "Note: read /proc/1/mountinfo, not findmnt or lsblk. Inside a sandboxed"
 echo "shell those two report the namespace they are in, not the host — see"
-echo "CLAUDE.md and lessons.md §19."
+echo "CLAUDE.md and lessons-learned.md §19."
 echo
 
 uid=$(id -u)

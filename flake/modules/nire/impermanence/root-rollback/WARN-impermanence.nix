@@ -502,6 +502,6 @@
 #    need the parameter. So ConditionKernelCommandLine = [ "!resume" ], added as
 #    the fix for this very note, would have passed and let the wipe proceed.
 #
-# lessons.md §2 is "the repo is not the machine" and §24 is "compare against what
+# lessons-learned.md §2 is "the repo is not the machine" and §24 is "compare against what
 # is deployed". This is both of them, committed the same day, by the person who
 # wrote them down.
