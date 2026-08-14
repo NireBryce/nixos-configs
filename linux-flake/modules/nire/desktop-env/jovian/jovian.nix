@@ -132,7 +132,7 @@
             # needed for tdp adjustor
             boot.extraModulePackages = [ config.boot.kernelPackages.acpi_call ];
 
-            # Persist hhd's real state, not WARN-impermanence.nix. Declared
+            # Persist hhd's real state. Declared
             # here instead because that file is imported by both hosts and
             # only tenacity runs handheld-daemon; durandal has no reason to
             # carry a persistence rule for a daemon it never runs.
@@ -161,13 +161,9 @@
             environment.persistence."/persist".directories = [ "/etc/hhd" ];
 
             services.handheld-daemon = {
-                # TDP control works. The old warning here said it was stuck in
-                # nixpkgs (#347279); adjustor is part of handheld-daemon now.
-                # Confirmed running 2026-08-11: five adjustor plugins loaded,
-                # acpi_call in lsmod, TDP reset after a real suspend.
                 enable = true;
                 user = "elly"; # TODO: use flake-parts to make this declared centrally
-                # Leave this on, despite the crashes it causes in a Plasma
+                # Leave this on, despite benign crashes it causes in a Plasma
                 # session. Under Plasma the journal fills with OVRL D-Bus and GL
                 # errors ending in "Overlay thread died", and hhd-ui dumps core
                 # about three times per boot.
