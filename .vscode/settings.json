@@ -44,11 +44,16 @@
                 // be dug out of the NixOS config's submodule type instead.
                 "home-manager": {
                     "expr": "(builtins.getFlake \"${workspaceFolder}/linux-flake\").nixosConfigurations.nire-durandal.options.home-manager.users.type.getSubOptions []"
+                },
+                // Restored 2026-08-14. This entry was removed once on the belief that the
+                // flake had no darwinConfigurations -- it does: `nireHost/hosts.nix` declares
+                // nire-lysithea (aarch64-darwin) via `mkDarwinHost`. The original entry's
+                // actual bug was the path, which pointed at ${workspaceFolder} -- the repo
+                // root, which has no flake.nix. Same subdirectory mistake as the getFlake
+                // note above, misdiagnosed as a missing output.
+                "nix-darwin": {
+                    "expr": "(builtins.getFlake \"${workspaceFolder}/linux-flake\").darwinConfigurations.nire-lysithea.options"
                 }
-                // A `nix-darwin` entry was here, pointing at ${workspaceFolder} -- the repo
-                // root, which has no flake.nix -- for darwinConfigurations, which this flake
-                // does not have. `elly-user.nix` declares a darwin class for fonts, but
-                // nothing consumes it. Removed; restore if darwinConfigurations ever exist.
             }
         }
     },
