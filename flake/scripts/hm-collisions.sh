@@ -3,10 +3,12 @@
 #
 #   hm-collisions.sh [host] [user]
 #
-# HM refuses to overwrite a file it does not already own -- check-link-targets.sh
-# aborts activation with "Existing file '<path>' would be clobbered". This
-# answers, before switching, whether that is going to happen. Read
-# home-manager-cutover.md for what to do if it is.
+# HM will not silently overwrite a file it does not already own. Without
+# home-manager.backupFileExtension, check-link-targets.sh aborts activation with
+# "Existing file '<path>' would be clobbered"; with it set -- which it is here,
+# to "hm-bak" in enable-home-manager.nix -- each such file is renamed aside and
+# the switch continues. Either way, this answers before switching which paths
+# are affected.
 #
 # Evaluation plus stat(2). Builds nothing, activates nothing, writes nothing.
 #
@@ -79,14 +81,15 @@ if recursive_dirs:
     print()
 
 if collisions:
-    print("COLLISIONS -- activation will abort on these:")
+    print("COLLISIONS -- HM does not own these paths yet:")
     for p in collisions:
         print(f"    {p}")
     print()
-    print("Set home-manager.backupFileExtension in")
-    print("modules/nire/system/home-manager/enable-home-manager.nix, switch,")
-    print("check the *.hm-bak files, then REMOVE the option again so future")
-    print("collisions stay loud. See flake/home-manager-cutover.md.")
+    print("Not fatal. home-manager.backupFileExtension is set permanently to")
+    print("\"hm-bak\" in modules/nire/system/home-manager/enable-home-manager.nix,")
+    print("so activation renames each of these to <file>.hm-bak and carries on")
+    print("rather than aborting half-applied. Switch, then read the .hm-bak")
+    print("files: they are untracked state worth understanding, not noise.")
     raise SystemExit(1)
 
 print("No collisions. This is a relink.")
