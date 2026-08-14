@@ -45,12 +45,25 @@
                 "home-manager": {
                     "expr": "(builtins.getFlake \"${workspaceFolder}/linux-flake\").nixosConfigurations.nire-durandal.options.home-manager.users.type.getSubOptions []"
                 },
-                // Restored 2026-08-14. This entry was removed once on the belief that the
-                // flake had no darwinConfigurations -- it does: `nireHost/hosts.nix` declares
-                // nire-lysithea (aarch64-darwin) via `mkDarwinHost`. The original entry's
-                // actual bug was the path, which pointed at ${workspaceFolder} -- the repo
-                // root, which has no flake.nix. Same subdirectory mistake as the getFlake
-                // note above, misdiagnosed as a missing output.
+                // Restored 2026-08-14. Removed once on the belief that this flake has no
+                // darwinConfigurations -- it does: `nireHost/hosts.nix` declares
+                // nire-lysithea (aarch64-darwin) via `mkDarwinHost`, alongside the two
+                // nixosConfigurations. That is the same wrong reading CLAUDE.md records
+                // under "three hosts, not two".
+                //
+                // The original entry had TWO bugs, not one, and the removal note named
+                // neither. It read, verbatim (887cdc6f and earlier):
+                //     (builtins.getFlake "${workspaceFolder}").darwinConfigurations.<name>.options
+                //   - the path is the repo root, which has no flake.nix -- the same
+                //     subdirectory mistake the getFlake note above documents, and the
+                //     only one the removal note mentioned
+                //   - `<name>` is the upstream README's placeholder, never substituted
+                //     for a host -- which is exactly what the `nixos` entry's comment
+                //     three lines up already warns about
+                // Both are fixed below. Verified by evaluating the expression rather than
+                // by reading it: it returns the darwin option tree (environment, homebrew,
+                // launchd, system, ...), and does so from x86_64-linux, so the entry is
+                // checkable off the darwin host.
                 "nix-darwin": {
                     "expr": "(builtins.getFlake \"${workspaceFolder}/linux-flake\").darwinConfigurations.nire-lysithea.options"
                 }
