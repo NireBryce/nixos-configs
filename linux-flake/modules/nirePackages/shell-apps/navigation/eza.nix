@@ -3,7 +3,7 @@
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
         flake.modules.homeManager.${moduleName} = { 
-        # # description = "`exa` fork, which is an ls alternative";
+        # `exa` fork, which is an ls alternative
             programs.eza = {
                 enable = true;
                 enableZshIntegration = true;

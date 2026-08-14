@@ -3,7 +3,7 @@
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
         flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
-            # # description = "nixd lsp";
+            # nixd lsp
             home.packages = with pkgs; [
                 nixd
             ];

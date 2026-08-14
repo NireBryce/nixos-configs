@@ -12,7 +12,7 @@
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
         flake.modules.nixos.${moduleName} = {
-            # # description = "keep /var/lib/systemd/coredump from growing without bound";
+            # keep /var/lib/systemd/coredump from growing without bound
             systemd.coredump.settings.Coredump = {
                 MaxUse   = "2G";
                 KeepFree = "1G";

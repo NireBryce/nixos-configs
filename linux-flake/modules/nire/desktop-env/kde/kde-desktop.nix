@@ -19,7 +19,7 @@
         kdeBase = config.flake.modules.nixos.kde-base;
     in {
         flake.modules.nixos.${moduleName} = {
-            # # description = "Plasma 6 as a workstation desktop session, via sddm";
+            # Plasma 6 as a workstation desktop session, via sddm
             imports = [ kdeBase ];
 
             services.displayManager = {

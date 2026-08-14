@@ -5,7 +5,7 @@
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
         flake.modules.darwin.${moduleName} = {
-            # # description = "core darwin system settings: primary user, nix management";
+            # core darwin system settings: primary user, nix management
 
             # `elly` hardcoded, same as users.users.elly and home.username
             # elsewhere in this tree. nix-darwin needs this for homebrew,

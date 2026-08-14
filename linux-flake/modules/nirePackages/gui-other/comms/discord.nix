@@ -17,7 +17,7 @@
             # come from the cache, so they cost build time rather than
             # risking the build.
             lib.mkIf (!pkgs.stdenv.isDarwin) {
-            # # description = "discord gamer chat app that broke containment";
+            # discord gamer chat app that broke containment
             home.packages = with pkgs; [
                 discord
             ];

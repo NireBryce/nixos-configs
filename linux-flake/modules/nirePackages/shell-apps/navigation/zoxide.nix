@@ -3,7 +3,7 @@
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
         flake.modules.homeManager.${moduleName} = { 
-      # # description = "Zoxide - better `cd`";
+      # Zoxide - better `cd`
       programs.zoxide = {
         enable = true;
         enableZshIntegration = true;

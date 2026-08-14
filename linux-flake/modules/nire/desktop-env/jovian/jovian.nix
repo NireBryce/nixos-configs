@@ -25,7 +25,7 @@
         kdeBase = config.flake.modules.nixos.kde-base;
     in {
         flake.modules.nixos.${moduleName} = { config, pkgs, ... }: {
-            # # description = "Jovian/SteamOS handheld: Steam session, decky, TDP control";
+            # Jovian/SteamOS handheld: Steam session, decky, TDP control
             imports = [
                 inputs.jovian.nixosModules.default # I think this is instead of needing them as module args?
                 kdeBase

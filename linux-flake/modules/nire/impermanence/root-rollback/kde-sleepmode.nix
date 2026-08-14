@@ -27,7 +27,7 @@
             # useGlobalPkgs -- see elly-home-manager.nix's own comment on
             # exactly this.
             lib.mkIf (!pkgs.stdenv.isDarwin) {
-            # # description = "KDE sleep mode, kept in step with nohibernate";
+            # KDE sleep mode, kept in step with nohibernate
 
             # kwriteconfig6 rather than home.file, deliberately.
             #

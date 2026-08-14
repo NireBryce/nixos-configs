@@ -3,7 +3,7 @@
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
         flake.modules.homeManager.${moduleName} = {
-        # # description = "Atuin remote encrypted history manager";
+        # Atuin remote encrypted history manager
         programs.atuin = {
           enable = true;
           enableZshIntegration = true;

@@ -3,7 +3,7 @@
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
         flake.modules.homeManager.${moduleName} = {
-            # # description = "promnesia breadcrumb-bookmarks-and-more";
+            # promnesia breadcrumb-bookmarks-and-more
             home.file.".config/promnesia".source = ./config/config.py;
         };
 }

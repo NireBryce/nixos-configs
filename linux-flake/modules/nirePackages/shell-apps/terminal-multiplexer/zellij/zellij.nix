@@ -3,7 +3,7 @@
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
         flake.modules.homeManager.${moduleName} = { pkgs, ... }: { 
-            # # description = "zellij terminal multiplexer";
+            # zellij terminal multiplexer
             home.packages = with pkgs; [
                 zellij
             ];

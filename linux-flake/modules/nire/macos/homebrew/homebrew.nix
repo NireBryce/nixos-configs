@@ -14,7 +14,7 @@
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
         flake.modules.darwin.${moduleName} = {
-            # # description = "homebrew casks and formulae not covered by nix";
+            # homebrew casks and formulae not covered by nix
             homebrew = {
                 enable = true;
 

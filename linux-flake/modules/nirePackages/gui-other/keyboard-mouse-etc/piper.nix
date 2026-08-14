@@ -5,7 +5,7 @@
         flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
             # A libratbag/udev frontend, so Linux-only with no macOS
             # equivalent; meta.platforms excludes aarch64-darwin.
-            # # description = "piper - logitech/razer graphical mouse manager https://github.com/soxoj/piper";
+            # piper - logitech/razer graphical mouse manager https://github.com/soxoj/piper
             home.packages = with pkgs; [
                 piper
             ];

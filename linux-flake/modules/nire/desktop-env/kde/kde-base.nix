@@ -10,7 +10,7 @@
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
         flake.modules.nixos.${moduleName} = { pkgs, ... }: {
-            # # description = "Plasma 6 and the KDE bits shared by every desktop host";
+            # Plasma 6 and the KDE bits shared by every desktop host
 
             services.xserver.enable = true; # TODO: I think this is still needed for xwayland
 

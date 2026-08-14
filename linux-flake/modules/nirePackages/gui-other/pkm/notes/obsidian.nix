@@ -27,7 +27,7 @@
             # Do not read the isDarwin test here as "this is Linux-only". It
             # means "on darwin, homebrew.nix owns this app".
             lib.mkIf (!pkgs.stdenv.isDarwin) {
-        # # description = "Obsidian - markdown PKM like org mode, https://obsidian.md/";
+        # Obsidian - markdown PKM like org mode, https://obsidian.md/
             home.packages = with pkgs; [
                 obsidian
             ];

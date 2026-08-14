@@ -8,7 +8,7 @@
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
         flake.modules.darwin.${moduleName} = { pkgs, lib, ... }: {
-            # # description = "shell registration and completion plumbing, macOS side";
+            # shell registration and completion plumbing, macOS side
             environment.shells = with pkgs; [
                 bash
                 zsh

@@ -12,7 +12,7 @@
             # equivalent on that machine, which is what the "Like raycast for
             # linux" description below was already saying.
             lib.mkIf (!pkgs.stdenv.isDarwin) {
-            # # description = "Like raycast for linux";
+            # Like raycast for linux
             programs.vicinae = {
                 enable = true;
                 systemd = {

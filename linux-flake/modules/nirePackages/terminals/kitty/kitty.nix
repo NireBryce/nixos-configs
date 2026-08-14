@@ -17,7 +17,7 @@
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
         flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }: {
-            # # description = "kitty terminal emulator";
+            # kitty terminal emulator
             home.packages = with pkgs; [
                 kitty-img
             ];
