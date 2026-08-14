@@ -1,4 +1,4 @@
-{ lib, inputs, ... }:
+{ lib, ... }:
     let
         # As everywhere here, the attribute name comes from the filename: rename
         # WARN-impermanence.nix and this silently becomes
@@ -48,10 +48,27 @@
             # fileSystems."/var/lib/sbctl".options        = [ "compress=zstd" "noatime" ];
             # fileSystems."/var/lib/sbctl".neededForBoot  = true;
 
-            imports = [
-                inputs.impermanence.nixosModule
-            ];
-            # impermanence
+            # The impermanence NixOS module itself (environment.persistence's
+            # declaration) is NOT imported here any more, as of nire-testbed.
+            # It moved to nire/system/impermanence/declare-persistence-option.nix,
+            # imported unconditionally via the `system` category every host
+            # (including this one) already takes -- so it is declared once, for
+            # every host, whether or not that host actually wipes anything.
+            #
+            # Importing it from here too, alongside that, is NOT redundant-but-
+            # harmless the way the amdcpu/amdgpu nested-category overlap is.
+            # Tried it: two DIFFERENT named modules (this one and
+            # declare-persistence-option) each independently importing the same
+            # inputs.impermanence.nixosModule produces "The option
+            # `environment.persistence' ... is already declared", because they
+            # are two distinct declaration sites as far as the module system is
+            # concerned, not deduplicated the way two categories resolving to
+            # the literal same flake.modules.nixos.<name> reference are. Confirmed
+            # by evaluating durandal with both imports present before removing
+            # this one.
+            #
+            # environment.persistence.<...> below still works exactly as before:
+            # the option is declared, just from the other file now.
             environment.etc.machine-id.source = "/persist/etc/machine-id";
 
             # This is not the only definition of this option. Host-specific
