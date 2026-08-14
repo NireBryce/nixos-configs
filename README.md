@@ -15,7 +15,7 @@ care about.
 Layout
 ------
 
-`flake.nix` imports every `.nix` file under `linux-flake/modules/` via
+`flake.nix` imports every `.nix` file under `flake/modules/` via
 `import-tree`, rather than wiring paths together by hand. Each file declares
 one `flake.modules.<class>.<name>` module. Which category it belongs to is
 decided by the directory it sits in, not by an explicit list, so moving a
@@ -23,7 +23,7 @@ file between directories moves it between categories and nothing else has
 to change.
 
 This keeps the config easy to reshape and hard to browse from a directory
-listing alone. `linux-flake/dirsAsCategory.md` explains the mechanism.
+listing alone. `flake/doc/dirsAsCategory.md` explains the mechanism.
 
 Hosts
 -----
@@ -46,5 +46,5 @@ Using this
 Steal what's useful. Don't run `nixos-rebuild switch` against this as-is on
 a machine you are not prepared to lose `/root` on.
 
-`CLAUDE.md` and `linux-flake/lessons.md` are an AI agent's working notes,
+`CLAUDE.md` and `claude cave/lessons-learned.md` are an AI agent's working notes,
 not documentation for a human reader — skip them unless you're the agent.

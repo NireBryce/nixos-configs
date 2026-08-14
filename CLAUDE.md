@@ -14,16 +14,16 @@ Guidance for Claude Code working in this repository, on the
 
 The README's warning is real: this config enables impermanence and wipes `/root`
 on boot. Never suggest installing it wholesale on a machine, and be careful with
-anything touching `linux-flake/modules/nire/impermanence/` or the
+anything touching `flake/modules/nire/impermanence/` or the
 `fileSystems`/`boot` options in the host hardware modules.
 
 `WARN-impermanence.nix` is reached by **both hosts** through the `impermanence`
 category -- named `boot` until 2026-08-11; renamed because `boot` had come to
 mean only this. It deletes the `/root` btrfs subvolume in initrd on every boot,
 and it depends on a `root-blank` subvolume existing on the machine. Read it, and
-`linux-flake/impermanence-stage1.md`, before changing anything near it.
+`claude cave/lessons-learned-impermanence-stage1-migration.md`, before changing anything near it.
 
-Secrets are sops-nix (`linux-flake/modules/nire/system/secrets/`).
+Secrets are sops-nix (`flake/modules/nire/system/secrets/`).
 `secrets.yaml` is encrypted and committed; that is deliberate, not a mistake to
 be "fixed". Its `.sops.yaml` still enrolls `nire-tenacity` even though that host
 has no config here any more — the key is valid, leave it.
@@ -89,7 +89,7 @@ override, the assignment goes **before** the recipe name —
 `just host=nire-durandal build`. `just build host=…` is not a variant; just
 reads it as a second recipe name and errors.
 
-For iterating, evaluate directly from `linux-flake/`:
+For iterating, evaluate directly from `flake/`:
 
 ```sh
 nix eval --raw .#nixosConfigurations.nire-durandal.config.system.build.toplevel.drvPath
@@ -109,7 +109,7 @@ rather than failing inside nix.
 ## Architecture
 
 `flake.nix` is a manifest. `(inputs.import-tree ./modules)` recursively imports
-every `.nix` file under `linux-flake/modules/`, and
+every `.nix` file under `flake/modules/`, and
 `flake-parts.flakeModules.modules` declares the `flake.modules.<class>.<name>`
 option they all write into.
 
@@ -125,7 +125,7 @@ declares one aggregate per class. **A module belongs to the category of the
 directory it is filed in.** Adding a module is a one-file change: create the file
 in the right place and it is in.
 
-`linux-flake/dirsAsCategory.md` covers the mechanism, what is load-bearing in it,
+`flake/doc/dirsAsCategory.md` covers the mechanism, what is load-bearing in it,
 and the trailhead to per-module opt-in if that is ever wanted. Read it before
 changing any `dirsAsCategory.nix`.
 
@@ -153,7 +153,7 @@ file claimed the opposite until 2026-08-12, and a session read that instead of
 `home-manager.users.elly` is set from the NixOS side with `useGlobalPkgs` and
 `useUserPackages`, in `nire/system/home-manager/enable-home-manager.nix`. There
 is no `homeConfigurations` output and no separate home switch; `just switch`
-applies both. `linux-flake/home-manager-standalone.md` is the way back.
+applies both. `flake/doc/trailhead-home-manager-standalone.md` is the way back.
 
 - HM **rejects** `nixpkgs.*` options under `useGlobalPkgs` — errors, not ignores.
   `allowUnfree` comes from the system side of `basic-nix-settings.nix`.
@@ -405,7 +405,7 @@ framing.
 
 ## Conventions
 
-**Read `linux-flake/style-guide.md` before writing a new module.** Formatting
+**Read `claude cave/claude-style-guide.md` before writing a new module.** Formatting
 here is deliberate: the aligned-`=` columns are intentional and `nix fmt` is
 deliberately not wired up, because it would flatten them. Module bodies sit one
 level deeper than they need to, left over from unwrapping `perSystem`;
@@ -434,13 +434,13 @@ introducing it here is a separate change, not a tidy-up.
 **Check for an existing `programs.*` integration before hand-writing one.**
 
 **Don't bury Python inside a bash script.** Bash is fine, and most of
-`linux-flake/scripts/` is bash. But `python3 -c '...'` heredocs inside it are
+`flake/scripts/` is bash. But `python3 -c '...'` heredocs inside it are
 not: the Python is a quoted string as far as every editor is concerned, so it
 gets no syntax highlighting, no linting, and no indentation help — which is
 exactly when quoting bugs stop being visible. Two ways out, by proportion:
 
 - **A little Python in an otherwise-shell script** — put it in
-  `linux-flake/scripts/util/` as a real `.py` file and call it.
+  `flake/scripts/util/` as a real `.py` file and call it.
 - **Mostly Python** — write the whole thing in Python. `modules.py` is the
   precedent, and the trigger is the same one the `.justfile` header uses for
   shell: data structures, parsing, or anything with a reason worth explaining.
@@ -457,16 +457,16 @@ env vars passed where `argv` was read, and a mangled line nothing highlighted.
   bought the other two hosts. Read before touching either: durandal has
   secure-boot config nothing has exercised, and lysithea (aarch64-darwin) does
   not exist in the config at all.
-- `linux-flake/dirsAsCategory.md` — the category mechanism and its trailhead.
-- `linux-flake/impermanence-stage1.md` — the root rollback's move from scripted
+- `flake/doc/dirsAsCategory.md` — the category mechanism and its trailhead.
+- `claude cave/lessons-learned-impermanence-stage1-migration.md` — the root rollback's move from scripted
   stage 1 to a systemd-initrd unit, done 2026-08-10 because the 2026-08-07
   nixpkgs flipped `boot.initrd.systemd.enable` to default true. Evaluates, never
   booted. Read before touching anything in initrd.
-- `linux-flake/lessons.md` — how the work went wrong in the doing: tools that
+- `claude cave/lessons-learned.md` — how the work went wrong in the doing: tools that
   reported success while being wrong, traps that were documented and hit anyway,
   and which questions were settled by reading source. §§1–18 are the port,
   §§19–24 the first session on the hardware, §§25–31 after it booted.
-- `linux-flake/home-manager-standalone.md` — reversing the HM decision, and the
+- `flake/doc/trailhead-home-manager-standalone.md` — reversing the HM decision, and the
   part of the cutover that is one-way on the machine rather than in the repo.
 - `git show flake-parts:SESSION-HANDOFF.md` — the sibling branch's notes on dead
   ends and decisions that should not be silently relitigated.

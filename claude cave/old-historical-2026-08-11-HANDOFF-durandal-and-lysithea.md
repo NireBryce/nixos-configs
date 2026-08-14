@@ -2,7 +2,7 @@
 
 > **Written by Claude Code, for Claude Code**, from `nire-tenacity` after taking
 > this branch from "evaluates" to "runs" on it. `CLAUDE.md` has the rules and
-> `linux-flake/lessons.md` has the mistakes; this is only what is specific to
+> `claude cave/lessons-learned.md` has the mistakes; this is only what is specific to
 > **nire-durandal** (workstation, x86_64-linux) and **nire-lysithea**
 > (M3 MacBook Air, aarch64-darwin).
 
@@ -104,7 +104,7 @@ and gets you nothing.
 **Standalone Home Manager, no nix-darwin.** The 101 homeManager modules are
 where the value is — shell config, dotfiles, most packages. This gets them onto
 the laptop without adopting nix-darwin, and
-`linux-flake/home-manager-standalone.md` already documents the
+`flake/doc/trailhead-home-manager-standalone.md` already documents the
 `homeConfigurations` mechanics, because reversing tenacity's integration needs
 the same output.
 

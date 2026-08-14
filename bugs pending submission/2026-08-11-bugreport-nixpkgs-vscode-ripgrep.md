@@ -152,7 +152,7 @@ The other notification, about the keyring, is **not** this bug and not a
 nixpkgs one: VS Code guesses its credential backend and guesses wrong on
 Plasma 6. That is fixed with `"password-store": "kwallet6"` in
 `~/.vscode/argv.json`, and is recorded in the history block of
-`linux-flake/modules/nirePackages/editors/vscode/vscode.nix`.
+`flake/modules/nirePackages/editors/vscode/vscode.nix`.
 
 Neither is caused by this repo moving vscode from `programs.vscode` to
 `environment.systemPackages`, which was checked: that module sets only

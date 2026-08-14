@@ -152,7 +152,7 @@ This is what is running on the affected machine.
 ## Local notes — remove before filing
 
 Found on `nire-tenacity` while chasing "suspend leaves the fan on". Fixed in
-this repo by `linux-flake/modules/nireHost/tenacity/fixes/iommu-tenacity.nix`,
+this repo by `flake/modules/nireHost/tenacity/fixes/iommu-tenacity.nix`,
 which is the workaround above; the module carries the full evidence.
 
 Worth checking before filing, since none of it is verified here:

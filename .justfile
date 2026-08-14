@@ -1,20 +1,20 @@
 # Recipes work from anywhere in the repo.
 #
 # This file is an interface, not a home for logic. Anything with a conditional,
-# a pipeline or a reason worth explaining belongs in linux-flake/scripts/ --
+# a pipeline or a reason worth explaining belongs in flake/scripts/ --
 # where it can be run directly, and where the explanation sits next to the code
 # it explains rather than in a recipe body nobody reads. Recipes should stay
 # one line of dispatch plus the one-line summary `just --list` shows.
 #
 # `just` runs recipes from the directory holding this justfile, which is the
 # repo root -- and the root has no flake.nix. Every recipe therefore has to
-# point at linux-flake explicitly; `.#` would resolve against the root and fail.
+# point at flake explicitly; `.#` would resolve against the root and fail.
 #
 # Note that `just --list` shows only the LAST comment line above a recipe, so
 # each one gets a single-line summary and any detail goes in the script.
 
-flake   := justfile_directory() / "linux-flake"
-scripts := justfile_directory() / "linux-flake" / "scripts"
+flake   := justfile_directory() / "flake"
+scripts := justfile_directory() / "flake" / "scripts"
 user    := "elly"
 
 # Default to the machine you are standing on, when that is one of the hosts.
@@ -33,7 +33,7 @@ user    := "elly"
 #     just host=nire-durandal build
 # `just build host=nire-durandal` is not a variant of that; just reads it as a
 # second recipe name and errors.
-host := `h=$(hostname); [ -e "linux-flake/modules/nireHost/${h#nire-}-configuration.nix" ] && echo "$h" || echo nire-durandal`
+host := `h=$(hostname); [ -e "flake/modules/nireHost/${h#nire-}-configuration.nix" ] && echo "$h" || echo nire-durandal`
 
 _default:
     @just --list

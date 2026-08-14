@@ -1,6 +1,6 @@
 # Style guide
 
-Conventions for `linux-flake/modules/`. Counts are from the tree as of
+Conventions for `flake/modules/`. Counts are from the tree as of
 2026-08-08, so "how many files do this" is checkable rather than asserted.
 
 This file used to live at `modules/nirePackages/style-guide.md`, where its

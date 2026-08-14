@@ -57,9 +57,9 @@ Kept for the next time a plan gets written from static analysis.
 
 - **Categories kept, not replaced by per-module opt-in.** `dirsAsCategory` was
   repaired instead — the mechanism was verified against flake-parts' own option
-  type before being written. `linux-flake/dirsAsCategory.md` is the trailhead if
+  type before being written. `flake/doc/dirsAsCategory.md` is the trailhead if
   that is ever revisited.
-- **Home Manager NixOS-integrated.** `linux-flake/home-manager-standalone.md` is
+- **Home Manager NixOS-integrated.** `flake/doc/trailhead-home-manager-standalone.md` is
   the way back.
 
 ## Still open
@@ -88,14 +88,14 @@ Everything below is the plan as written on 2026-08-07, unedited.
 
 ## The decision, and why it was already made
 
-Bob's kickoff prompt (`claude cave/port-prompt.md`) framed the gate as *keep
+Bob's kickoff prompt (`claude cave/old-historical-port-prompt.md`) framed the gate as *keep
 vic/den and port ideas onto it, or abandon den and adopt real flake-parts*, and
 described this branch as den-based. **That description is wrong**, and the
 correction changes the answer:
 
 | | |
 |---|---|
-| `.nix` files under `linux-flake/modules/` | 178 |
+| `.nix` files under `flake/modules/` | 178 |
 | reference `den` at all | **3** |
 | reference `flake-aspects` | **0** — it is an unused input |
 | wrapped in `perSystem = …: { flake.modules.<class>.<name> = …; }` | **151** |
@@ -150,7 +150,7 @@ error: The option `perSystem' does not exist. Definition values:
   Did you mean `nireUser', `nire' or `nireHost'?
 ```
 
-That first error is only because `linux-flake/flake.nix` currently has
+That first error is only because `flake/flake.nix` currently has
 flake-parts **commented out** in favour of a raw `nixpkgs.lib.evalModules`, so
 nothing declares `perSystem` at all. Turning flake-parts back on does not fix
 it — it replaces that error with `The option 'flake' does not exist`.
@@ -311,7 +311,7 @@ changes the hash without changing the package set. Compare sets, not hashes.
 mechanism (`0c0b5f0`), the category names are already the vocabulary
 `aspect-durandal.nix` selects from, and they can be made to work. The per-module
 opt-in pattern from the sibling branch is *not* being adopted now — see
-`linux-flake/dirsAsCategory.md` for the trailhead if that changes later.
+`flake/doc/dirsAsCategory.md` for the trailhead if that changes later.
 
 Each `dirsAsCategory.nix` derives a category name from its own directory and
 emits:
@@ -439,7 +439,7 @@ git checkout flake-parts -- .justfile
 - **`scripts/host-fingerprint.nix`** and **`scripts/dotfile.sh`** read
   `cfg.nire.primaryUser`; either port that option too or change those lines.
 - **`.justfile`** currently holds nothing but comments; recipe paths assume
-  `linux-flake/scripts/`.
+  `flake/scripts/`.
 - `modules.py` deliberately uses **two different edge models** — `tree` uses
   segment-scoped edges, `orphans` uses file-level ones, because segment scoping
   loses `let`-bound references. Do not "simplify" them into one.

@@ -24,26 +24,26 @@
                 "command": []
             },
             // getFlake takes a flake *directory*, never the flake.nix itself:
-            // ".../linux-flake/flake.nix" fails with `path '/nix/store/...-source/flake.nix'
+            // ".../flake/flake.nix" fails with `path '/nix/store/...-source/flake.nix'
             // does not exist`, because the string is resolved as a flake ref and then
-            // flake.nix is looked up *inside* it. The flake lives in linux-flake/, not the
+            // flake.nix is looked up *inside* it. The flake lives in flake/, not the
             // repo root, so every path here needs the subdirectory.
             // ${workspaceFolder} does expand -- vscode-nix-ide walks serverSettings
             // recursively through the vscode-variables package (src/utils.ts).
             "nixpkgs": {
-                "expr": "import (builtins.getFlake \"${workspaceFolder}/linux-flake\").inputs.nixpkgs {}"
+                "expr": "import (builtins.getFlake \"${workspaceFolder}/flake\").inputs.nixpkgs {}"
             },
             "options": {
                 // <name> in the upstream README is a placeholder, not syntax. One host.
                 "nixos": {
-                    "expr": "(builtins.getFlake \"${workspaceFolder}/linux-flake\").nixosConfigurations.nire-durandal.options"
+                    "expr": "(builtins.getFlake \"${workspaceFolder}/flake\").nixosConfigurations.nire-durandal.options"
                 },
                 // Home Manager is a NixOS module here (useGlobalPkgs/useUserPackages), so
                 // there is no `homeConfigurations` output at all -- reaching for one returns
                 // an attribute error and nixd silently serves no HM options. Options have to
                 // be dug out of the NixOS config's submodule type instead.
                 "home-manager": {
-                    "expr": "(builtins.getFlake \"${workspaceFolder}/linux-flake\").nixosConfigurations.nire-durandal.options.home-manager.users.type.getSubOptions []"
+                    "expr": "(builtins.getFlake \"${workspaceFolder}/flake\").nixosConfigurations.nire-durandal.options.home-manager.users.type.getSubOptions []"
                 },
                 // Restored 2026-08-14. Removed once on the belief that this flake has no
                 // darwinConfigurations -- it does: `nireHost/hosts.nix` declares
@@ -65,7 +65,7 @@
                 // launchd, system, ...), and does so from x86_64-linux, so the entry is
                 // checkable off the darwin host.
                 "nix-darwin": {
-                    "expr": "(builtins.getFlake \"${workspaceFolder}/linux-flake\").darwinConfigurations.nire-lysithea.options"
+                    "expr": "(builtins.getFlake \"${workspaceFolder}/flake\").darwinConfigurations.nire-lysithea.options"
                 }
             }
         }

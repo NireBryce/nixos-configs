@@ -32,7 +32,7 @@ rendered at all under scripted stage 1, which is what both hosts run, so the
 whole service was inert. Restoring `postResumeCommands` — what `origin/main` and
 `origin/flake-parts` both use, and what these machines have been running — fixed
 it for both hosts at once. Tenacity now imports `boot` and wipes `/root` on boot,
-as it did before the restructure. See `linux-flake/impermanence-stage1.md`.
+as it did before the restructure. See `claude cave/lessons-learned-impermanence-stage1-migration.md`.
 
 Also corrected: `jovian.nix` is a *generic handheld* module — machines with
 built-in controllers that occasionally launch a SteamOS session — not tenacity's.

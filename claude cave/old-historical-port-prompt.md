@@ -46,13 +46,13 @@ Read the other branch without checking it out:
        git log --oneline -5 origin/flake-parts
        git show --stat origin/flake-parts
 
-   It's PORT-NOTES.md or linux-flake/notes-and-fixes.md. It covers why den
+   It's PORT-NOTES.md or flake/doc/notes-and-fixes.md. It covers why den
    was dropped, dead ends, and load-bearing constraints.
 
 2. `git show origin/flake-parts:CLAUDE.md` (338 lines, substantive)
 
 3. `git show origin/flake-parts:linux-flake/flake.nix`
-   vs this branch's linux-flake/flake.nix
+   vs this branch's flake/flake.nix
 
 4. The three files that carry the ideas worth porting:
 
@@ -60,8 +60,8 @@ Read the other branch without checking it out:
        git show origin/flake-parts:linux-flake/modules/checks.nix
        git show origin/flake-parts:linux-flake/modules/hosts/hosts.nix
 
-5. This branch: linux-flake/modules/entrypoint.nix and
-   linux-flake/modules/nireHost/aspect-durandal.nix — both carry
+5. This branch: flake/modules/entrypoint.nix and
+   flake/modules/nireHost/aspect-durandal.nix — both carry
    "# TODO: this is wrong and will need to be modified for flake-parts"
 
 Verify all of the above against the actual files. Don't trust this summary.
@@ -87,7 +87,7 @@ Everything else depends on that. Stop and ask me — do not pick for me.
   imports. This branch has no real checks. Read its comment header: both
   bugs it was written to catch were pure evaluation errors.
 
-- **The .justfile and linux-flake/scripts/** (modules.py, diff-config.sh,
+- **The .justfile and flake/scripts/** (modules.py, diff-config.sh,
   dotfile.sh, add-pkg.sh, new-host-hardware.sh, host-fingerprint.nix,
   update-flake.sh). This branch's .justfile is comments only.
 
@@ -103,7 +103,7 @@ Everything else depends on that. Stop and ask me — do not pick for me.
   This branch has no tenacity files at all — the den restructure dropped the
   host rather than migrating it, so it's been durandal-only since. The only
   traces are .justfile comments and its enrollment in
-  linux-flake/modules/nire/system/secrets/.sops.yaml + secrets.yaml, so the
+  flake/modules/nire/system/secrets/.sops.yaml + secrets.yaml, so the
   key is still valid.
 
   Evaluate any tenacity work against how the actual tenacity machine behaves
@@ -122,12 +122,12 @@ Everything else depends on that. Stop and ask me — do not pick for me.
 
 ## Open questions I have not decided
 
-- Whether the `darwin` input currently in linux-flake/flake.nix stays there,
+- Whether the `darwin` input currently in flake/flake.nix stays there,
   or moves back out to a separate macos/ flake the way origin/flake-parts has
   it. Raise this once the den question is settled; don't act on it unasked.
 
 ## How to work
 
 Plan first, ask before editing files — I want to approve changes. Note that
-linux-flake/modules/nirePackages/editors/vscode/vscode.nix has uncommitted
+flake/modules/nirePackages/editors/vscode/vscode.nix has uncommitted
 changes in the working tree right now. Work in small commits.

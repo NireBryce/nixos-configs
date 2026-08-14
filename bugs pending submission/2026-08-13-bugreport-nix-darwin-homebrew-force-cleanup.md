@@ -233,7 +233,7 @@ plain `cleanup = "uninstall"`.
 
 Found on `nire-lysithea` (aarch64-darwin), written up from `nire-durandal`.
 Recorded in this repo at
-`linux-flake/modules/nire/macos/homebrew/homebrew.nix`, which carries the
+`flake/modules/nire/macos/homebrew/homebrew.nix`, which carries the
 workaround and a comment about it.
 
 **That comment is wrong about the cause and should be corrected.** It says

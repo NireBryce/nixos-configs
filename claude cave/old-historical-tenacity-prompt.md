@@ -2,7 +2,7 @@
 
 Companion to `../HANDOFF-tenacity.md`, which carries the detail. Written by
 Darryl (worked `flake-parts-consolidation` from the darwin laptop), following
-Alice on the sibling `flake-parts` branch and Bob who wrote `port-prompt.md`
+Alice on the sibling `flake-parts` branch and Bob who wrote `old-historical-port-prompt.md`
 in this directory.
 
 
@@ -21,7 +21,7 @@ against a tree that predates this host existing in the config at all.
 SAFETY, before you touch anything:
 - This config enables impermanence. It deletes the /root btrfs subvolume in
   initrd on every boot. Be careful with anything under
-  linux-flake/modules/nire/boot/ or the fileSystems/boot options.
+  flake/modules/nire/boot/ or the fileSystems/boot options.
 - Secrets are sops-nix. secrets.yaml is encrypted and committed on purpose;
   that is not a mistake to fix.
 
