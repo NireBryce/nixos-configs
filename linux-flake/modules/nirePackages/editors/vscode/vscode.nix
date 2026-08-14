@@ -81,32 +81,3 @@ in {
 # it also meant either committing a telemetry UUID or having both hosts share
 # one. It was written that way once, on this branch, and reverted (reflog
 # 7b3399f) in favour of leaving the file mutable.
-#
-#
-# 2026-08-11 — search is broken by an upstream nixpkgs bug, not by this file
-#
-# The other VS Code notification, about ripgrep, is not ours and is not fixed
-# by anything above. VS Code 1.129 moved native binaries into
-# resources/app/node_modules.asar.unpacked, and pkgs/applications/editors/
-# vscode/generic.nix applies that knowledge to Darwin only:
-#
-#     nodeModulesPath =
-#       if stdenv.hostPlatform.isDarwin then
-#         if lib.versionAtLeast vscodeVersion "1.129.0" then
-#           "Contents/Resources/app/node_modules.asar.unpacked"
-#         ...
-#       else
-#         "resources/app/node_modules";      # Linux, unconditional
-#
-# So on Linux it replaces the copy nothing executes and leaves the one Electron
-# actually runs as the vendored binary, which segfaults:
-#
-#     node_modules/@vscode/ripgrep-universal/.../rg              -> ripgrep 15.2.0, works
-#     node_modules.asar.unpacked/@vscode/ripgrep-universal/.../rg -> real file, exit 139
-#
-# Still present on nixpkgs master as of 2026-08-11, so a bump will not fix it.
-# A fix is an overlay symlinking the asar.unpacked copy, and it needs building
-# rather than evaluating to confirm the override survives the FHS wrapper.
-#
-# Written up in full, with reproduction and a suggested upstream patch, in
-# 2026-08-11-bugreport-nixpkgs-vscode-ripgrep.md at the repo root.
