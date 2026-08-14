@@ -23,12 +23,20 @@
         # `config.jovian.decky-loader.extraPackages`, so the two must not be
         # confused. See CLAUDE.md, "There are two different `config`s".
         kdeBase = config.flake.modules.nixos.kde-base;
+
+        # Imported by name, not left to the category: `desktop-env` is never
+        # imported whole (see tenacity-configuration.nix), so a sibling file is
+        # reachable through nothing and `just modules` reports it as an orphan.
+        # Naming it here is also what scopes it -- /etc/hhd persists exactly
+        # where handheld-daemon runs, because the two arrive together.
+        jovianPersist = config.flake.modules.nixos.jovian-persist;
     in {
         flake.modules.nixos.${moduleName} = { config, pkgs, ... }: {
             # Jovian/SteamOS handheld: Steam session, decky, TDP control
             imports = [
                 inputs.jovian.nixosModules.default # I think this is instead of needing them as module args?
                 kdeBase
+                jovianPersist
             ];
 
             # `config.jovian.…`, not `inputs.jovian.…`: the Jovian flake exposes
@@ -132,33 +140,10 @@
             # needed for tdp adjustor
             boot.extraModulePackages = [ config.boot.kernelPackages.acpi_call ];
 
-            # Persist hhd's real state. Declared
-            # here instead because that file is imported by both hosts and
-            # only tenacity runs handheld-daemon; durandal has no reason to
-            # carry a persistence rule for a daemon it never runs.
-            # environment.persistence."/persist".directories is `listOf`, so
-            # this and WARN-impermanence.nix's own entries concatenate --
-            # matching how `environment.systemPackages` merges across files
-            # everywhere else in this tree. It works even though this file
-            # does not import the impermanence module itself: the option is
-            # declared once wherever `inputs.impermanence.nixosModule` lands,
-            # and any module in the same host's tree can set a value for it,
-            # regardless of who imports whom. Assumes the host also imports
-            # `boot`, which every handheld does today; a jovian host without
-            # impermanence would need this guarded, not just added.
-            #
-            # CONFIG_DIR in hhd's __main__.py defaults to /etc/hhd regardless
-            # of the --user flag this service passes -- that flag only feeds
-            # get_context()'s permission lookup, not the write path. /etc/hhd
-            # is not nix-managed, so without this it resets to whatever
-            # root-blank froze every single boot: fan curves and TDP profiles
-            # saved through hhd-ui reverted the moment the machine rebooted.
-            # Found 2026-08-11 as "hhd fan curves don't persist".
-            #
-            # This protects state going forward, not retroactively -- nothing
-            # already in /persist/etc/hhd, so whatever was set before this
-            # landed needs setting once more after it does.
-            environment.persistence."/persist".directories = [ "/etc/hhd" ];
+            # hhd's own /etc/hhd state is persisted by jovian-persist.nix, a
+            # sibling of this file -- without it, fan curves and TDP profiles
+            # reset on every boot. Split out 2026-08-14; it was declared here
+            # until then.
 
             services.handheld-daemon = {
                 enable = true;

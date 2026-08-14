@@ -56,11 +56,17 @@
 
             # This is not the only definition of this option. Host-specific
             # persistence -- state that only matters to a particular category,
-            # not to every host importing `boot` -- is declared next to what
-            # generates it instead: /etc/hhd's fan curves and TDP profiles are
-            # set in desktop-env/jovian/jovian.nix, so they persist only on the
-            # hosts that actually run handheld-daemon. `directories` is
-            # `listOf`, so entries from both files concatenate.
+            # not to every host importing `impermanence` -- is declared next to
+            # what generates it instead, in a `<name>-persist.nix` sibling of
+            # the module that owns the state:
+            #
+            #   desktop-env/jovian/jovian-persist.nix     /etc/hhd
+            #   system/networking/tailscale-persist.nix   /var/lib/tailscale
+            #
+            # Filing them as siblings is what scopes them: each is collected by
+            # the same category as the module it belongs to, so /etc/hhd
+            # persists only on hosts that actually run handheld-daemon.
+            # `directories` is `listOf`, so entries from every file concatenate.
             environment.persistence."/persist" = {
                 directories = [
                     "/var/lib/bluetooth"
