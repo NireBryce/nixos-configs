@@ -17,6 +17,18 @@
 # pkgs.vlc.outPath on aarch64-darwin genuinely throws, so a filter that touched
 # rejected packages would fail exactly where it is needed.
 #
+# ── what this does NOT catch ─────────────────────────────────────────────────
+#
+# `meta.broken`. availableOn reads platforms and badPlatforms and nothing else
+# (nixpkgs lib/meta.nix:368-369), so a package marked broken on this platform
+# passes the filter and then fails evaluation anyway, with "Refusing to
+# evaluate package ... because it has problems: - broken". `cod` is the live
+# example -- `meta.broken = stdenv.hostPlatform.isDarwin` in its package.nix --
+# which is why nire/shell-config/{zsh,bash}.nix still guard their `cod` lines
+# by hand and must keep doing so. That guard is also outside this filter's
+# reach for a second reason: it is a ${pkgs.cod} interpolation inside a shell
+# rc string, not an entry in home.packages.
+#
 # ── how it attaches ──────────────────────────────────────────────────────────
 #
 # By re-declaring home.packages to add an `apply`. Home Manager declares it as a
