@@ -1,0 +1,101 @@
+{ lib, ... }:
+    let
+        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in {
+        flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+            environment.pathsToLink = [
+            "/share/bash-completion"
+            ];
+            environment.shells = with pkgs; [
+            bash
+            ];
+        };
+        
+        flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }: {
+            # bash line editor, allows zsh-like line editor tricks and bindings
+            home.packages = with pkgs; [
+                blesh
+            ];
+            # .blerc is owned by blesh.nix; this file used to declare a
+            # byte-identical copy, which concatenated rather than overrode.
+
+            programs.bash = {
+                enable = true;
+                enableCompletion = true;
+                enableVteIntegration = true;
+
+                #? Shell integrations go here but main bash config is in the system one.
+                sessionVariables = {
+                };
+                shellAliases = {
+                };
+                #? Extra commands that should be run when initializing an interactive shell.
+                #
+                # Split into three ordered pieces rather than one block. ble.sh
+                # has to be loaded FIRST and attached LAST, and everything else
+                # -- kitty, dircolors, bash-preexec/atuin, the VTE
+                # PROMPT_COMMAND rewrite, direnv, starship, zoxide -- has to
+                # land in between.
+                #
+                # It was one plain block, which put ble-attach ahead of all
+                # seven of those. Nothing enforced that order: every one of
+                # those modules also writes a plain `programs.bash.initExtra`
+                # with no mkOrder, so `types.lines` merged them by module
+                # evaluation order. It happened to work and was never chosen.
+                #
+                # Measured on 2026-08-10 by running both orders under a
+                # throwaway HOME. Attaching early strands direnv's hook in the
+                # raw PROMPT_COMMAND, outside ble.sh's management:
+                #
+                #   as shipped     PROMPT_COMMAND = [_direnv_hook]
+                #   attach last    PROMPT_COMMAND = []          <- absorbed
+                #
+                # with both giving blehook PRECMD = bash-preexec hook + starship.
+                #
+                # mkBefore is order 500, a plain definition is 1000, mkAfter is
+                # 1500. The attach needs to beat all of them, and finding the
+                # right number took two tries, both caught by reading the merged
+                # value rather than by assuming:
+                #
+                #   mkAfter (1500)  direnv, starship and zoxide are also >=1500,
+                #                   so it tied and lost on module evaluation
+                #                   order -- all three still ran after attach
+                #   mkOrder 2000    beat direnv and starship, still tied with
+                #                   zoxide, which is itself `lib.mkOrder 2000`
+                #                   (home-manager modules/programs/zoxide.nix:42)
+                #
+                # 2500 clears zoxide, the latest-ordered bash integration in
+                # this config. Anything added later that also wants the last
+                # word will need a number above this one -- check the merged
+                # value, do not assume.
+                initExtra = lib.mkMerge [
+                    (lib.mkBefore ''
+                        [[ ''$- == *i* ]] && source -- ${pkgs.blesh}/share/blesh/ble.sh --attach=none
+                    '')
+
+                    # cod (nireHost/../shell-apps/completions/cod-completions.nix
+                    # provides it on PATH, nixos-class only) is broken on
+                    # darwin -- nixpkgs: meta.broken = stdenv.hostPlatform.isDarwin
+                    # -- and isn't imported there either way, so this would be
+                    # a command-not-found on nire-lysithea. Guarded the same
+                    # way zsh.nix guards its own cod line.
+                    (lib.optionalString (!pkgs.stdenv.isDarwin) ''
+                        source <(cod init ''$''$ bash)
+                    '')
+
+                    # Last. ble.sh absorbs the hooks every other integration
+                    # installed, so this cannot move back into the block above.
+                    (lib.mkOrder 2500 ''
+                        [[ ! ''${BLE_VERSION-} ]] || ble-attach
+                    '')
+                ];
+                # ? Extra commands that should be placed in {file}~/.bashrc.
+                # ?   Note that these commands will be run even in non-interactive shells.
+                bashrcExtra = '''';
+                #? Extra commands that should be run when initializing a login shell.
+                profileExtra = '''';
+                #? Extra commands that should be run when logging out of an interactive shell.
+                logoutExtra = '''';
+            };
+        };
+}

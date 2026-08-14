@@ -1,0 +1,34 @@
+[user]
+	name = Nire Bryce
+	email = nire@computernope.net
+[credential "https://github.com"]
+	helper = !/etc/profiles/per-user/elly/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = !/etc/profiles/per-user/elly/bin/gh auth git-credential
+[filter "lfs"]
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+; [maintenance] belongs in programs.git.maintenance in elly-git.nix, not here.
+; git reads this file *and* the Home Manager one, and maintenance.repo is
+; multi-valued, so declaring it in both accumulates rather than overrides.
+
+[core]
+    pager = delta
+
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    navigate = true    # use n and N to move between diff sections
+
+    # delta detects terminal colors automatically; set one of these to disable auto-detection
+    # dark = true
+    # light = true
+
+[merge]
+    conflictstyle = diff3
+
+[diff]
+    colorMoved = default

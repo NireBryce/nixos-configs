@@ -3,7 +3,13 @@
     "allow": [
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:den.oeiuwq.com)"
+      "WebFetch(domain:den.oeiuwq.com)",
+      "Bash(S=/nix/store/gwrsddkkq6w3grl0ps7cd0vfypjh8yq5-source; grep -rn 'pkgs\\\\.hostPlatform\\\\|hostPlatform' \"$S\"/modules/sops.nix \"$S\"/modules/sops/ 2>/dev/null | head; echo \"=== where is nixos-hardware used in our tree? ===\"; grep -rn 'nixos-hardware' modules --include='*.nix')",
+      "Read(//nix/store/gwrsddkkq6w3grl0ps7cd0vfypjh8yq5-source/modules/**)",
+      "Bash(T=/nix/store/s1ypdi737d13p5al17sjlgq2r64zcy13-stage-1-init.sh; sed -n '87,130p' \"$T\")",
+      "Read(//nix/store/**)",
+      "Bash(nix flake *)",
+      "Bash(python3 -c \"import json,sys;d=json.load\\(sys.stdin\\);print\\(d['inputs']['nixpkgs']['path']\\)\")"
     ]
   }
 }

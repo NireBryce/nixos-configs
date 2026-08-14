@@ -1,0 +1,7 @@
+vicinae:
+
+just:
+
+espanso: 
+
+other: 
