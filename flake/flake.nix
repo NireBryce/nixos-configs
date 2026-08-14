@@ -50,6 +50,15 @@
         # ── Impermanence ──────────────────────────────────────────────────────────
         impermanence.url                           = "github:Nix-community/impermanence";
 
+        # Declarative disk partitioning. Not used by any host's own config yet --
+        # durandal and tenacity were hand-partitioned, then captured after the
+        # fact by nixos-generate-config. Added for
+        # nire/impermanence/_disko/impermanence-luks-btrfs.nix, a reusable
+        # template for the LUKS+btrfs+impermanence layout those two hosts already
+        # use by hand. See flake/doc/disko-impermanence-layout.md.
+        disko.url                                  = "github:nix-community/disko";
+        disko.inputs.nixpkgs.follows                = "nixpkgs";
+
         # ── Secrets ───────────────────────────────────────────────────────────────
         sops-nix.url                               = "github:mic92/sops-nix";
         sops-nix.inputs.nixpkgs.follows            = "nixpkgs";
