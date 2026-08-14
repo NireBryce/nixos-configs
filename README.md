@@ -30,9 +30,12 @@ Hosts
 
 - `nire-durandal` — workstation
 - `nire-tenacity` — handheld, Jovian/SteamOS
+- `nire-testbed` — workstation (ThinkPad X270)
 
-Both wipe `/root` on boot. `nire-tenacity` is currently the one this branch
-actually runs on; `nire-durandal` has not been built or switched yet.
+`nire-durandal` and `nire-tenacity` wipe `/root` on boot; `nire-testbed`
+deliberately does not (see `flake/modules/nireHost/testbed-configuration.nix`
+for why). `nire-tenacity` is currently the one this branch actually runs on;
+the other two have not been built or switched yet.
 
 Secrets
 -------

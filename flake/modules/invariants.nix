@@ -40,6 +40,37 @@
 # Sits at the top of modules/ so dirsAsCategory does not collect it -- that
 # walks subdirectories only. It declares no flake.modules.<class> attribute, so
 # it is not a module and modules.py does not consider it for orphans either.
+#
+# OPT-IN, SINCE NIRE-TESTBED
+#
+# The root-rollback, hibernation and persistence groups only apply to hosts
+# that actually opted into impermanence, gated on
+# `boot.initrd.systemd.services ? restore-root` -- the unit WARN-impermanence.nix
+# creates, and nothing else creates. Before nire-testbed this gate was
+# unconditional, because both existing hosts wiped `/root`; testbed does not,
+# so checking for restore-root existing there would fail every single boot
+# rather than ever catching a real regression.
+#
+# The gate is intentionally the unit's *existence*, not some separate marker
+# option, and intentionally not `environment.persistence ? "/persist"` --
+# nire/system/impermanence/declare-persistence-option.nix now declares that
+# option for every NixOS host, impermanence or not, so tailscale-persist.nix
+# and jovian-persist.nix have somewhere valid to write even when they end up
+# writing nothing. environment.persistence existing would therefore no longer
+# distinguish an impermanence host from one that merely has the option
+# declared. restore-root is the one thing only WARN-impermanence.nix creates.
+# (tailscale-persist.nix itself is gated on this same restore-root check, for
+# the same reason -- see that file.)
+#
+# This does not weaken what the file catches. A host silently losing part of
+# its OWN impermanence setup while restore-root still exists -- wantedBy
+# dropped, hibernation creeping back, a persistence entry lost -- is exactly
+# what these invariants still catch, because the gate stays true and every
+# sub-check still runs. What it stops catching is a host that never claimed
+# impermanence in the first place, which was never a regression to begin with.
+#
+# home-manager's useGlobalPkgs invariant is NOT gated -- it holds for every
+# NixOS host regardless of impermanence, testbed included.
 { config, lib, ... }:
 {
     perSystem = { system, pkgs, ... }:
@@ -68,8 +99,13 @@
             files    = persistFiles c;
             rollback = c.boot.initrd.systemd.services.restore-root or null;
             hhd      = c.services.handheld-daemon.enable or false;
-        in
-        [
+
+            # restore-root existing is what marks a host as having actually
+            # opted into impermanence -- see the file header, "OPT-IN, SINCE
+            # NIRE-TESTBED", for why this is the gate and not something else.
+            usesImpermanence = rollback != null;
+
+            impermanenceInvariants = [
             # -- the root rollback actually runs ------------------------------
             #
             # This is the one that matters most and the one with no runtime
@@ -153,8 +189,13 @@
                       else "${name}: persists /etc/hhd but runs no handheld-daemon -- "
                          + "jovian-persist.nix has escaped its category";
             }
-
+            ];
+        in
+            (if usesImpermanence then impermanenceInvariants else [ ])
             # -- home manager ------------------------------------------------
+            # NOT gated on usesImpermanence: holds for every NixOS host,
+            # testbed included.
+            ++ [
             {
                 # HM *rejects* every nixpkgs.* option under useGlobalPkgs rather
                 # than ignoring it, so this flipping does not degrade quietly --
