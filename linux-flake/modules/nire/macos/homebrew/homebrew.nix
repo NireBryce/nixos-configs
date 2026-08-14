@@ -1,5 +1,5 @@
 # Homebrew casks and formulae, for the GUI applications and CLI tools nix
-# does not package well on macOS (or that need App Store / notarisation /
+# does not package well on Aarch64 (or that need App Store / notarisation /
 # menu-bar integration that a nix-built .app bundle does not get for free).
 #
 # Ported from macos-old/nire-lysithea-configuration.nix, which had this
@@ -21,7 +21,7 @@
                 # Uninstall anything not declared here on activation, since a
                 # homebrew install that silently drifts from what is declared
                 # defeats the point of declaring it at all. That intent is
-                # unchanged; only the way of asking for it is.
+                # unchanged; only the way of asking for it has.
                 #
                 # `onActivation.cleanup = "uninstall"` is the option that
                 # expresses this, and it is BROKEN as of 2026-08-12. nix-darwin

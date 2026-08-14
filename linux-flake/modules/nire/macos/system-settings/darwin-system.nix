@@ -28,11 +28,7 @@
             #
             # hm-config.nix already carries `home.homeDirectory = mkDefault
             # "/home/elly"; # Darwin is different` -- correctly anticipating
-            # the problem, wrongly assuming mkDefault would be enough to fix
-            # it. common.nix's derivation is a plain (unwrapped, priority 100)
-            # definition, which beats a mkDefault (priority 1000) regardless
-            # of which one is more specific to the platform. The real fix has
-            # to be here, at the thing common.nix actually reads from.
+            # the problem.
             users.users.elly.home = "/Users/elly";
         };
 }
