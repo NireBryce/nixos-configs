@@ -73,10 +73,6 @@
                     ];
                 };
             };
-            # `adjustor` was removed from nixpkgs and folded into
-            # handheld-daemon; referencing it fails evaluation outright. The
-            # services.handheld-daemon.adjustor option set below already pulls
-            # it in, so nothing needs to be listed here.
 
             # DELETE THIS OVERLAY once nixpkgs carries handheld-daemon >= 4.1.12.
             #
