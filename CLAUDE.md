@@ -207,213 +207,81 @@ applies both. `flake/doc/trailhead-home-manager-standalone.md` is the way back.
 
 `ellyHomeManager` is shared verbatim by all five hosts, including
 `nire-lysithea` (aarch64-darwin), so everything in it has to survive darwin.
-Two different things can go wrong there, they look identical in the config, and
-only one of them is decided for you.
-
-**Can nixpkgs build it here?** Answered automatically.
-`nire/system/home-manager/drop-unsupported-packages.nix` re-declares
-`home.packages` with an `apply` that filters by `lib.meta.availableOn`, **on
-darwin only**, and warns naming everything it dropped. So:
-
-- **Do not add `lib.mkIf (!pkgs.stdenv.isDarwin)` to a single-package module
-  for platform reasons.** `meta.platforms` already says it; restating it by
-  hand is a claim that can drift. Eleven modules used to, all correct, none
-  necessary.
-- On Linux the filter does nothing, deliberately — an unsupported package on
-  durandal stays a loud error, because that is a mistake worth stopping on.
-- It only reaches `home.packages`. A module whose body is `programs.foo.enable`
-  or `services.foo.enable` asserts before any package list exists, so those
-  still need their own guard — `vicinae.nix` is the worked example and says so.
-
-**Does Homebrew already install it?** Never answered automatically, because
-`meta.platforms` has no opinion about Homebrew and never will. `homebrew.nix`
-installs 59 casks, and eight of them are also nixpkgs packages in
-`ellyHomeManager` — lysithea gets two copies of each. `just available
---duplicates` lists them with the owning module; deciding is a judgement call
-per app. `obsidian.nix` is the worked example, and its `isDarwin` test means
-*"on darwin, homebrew.nix owns this app"* — not *"Linux-only"*. Read every
-remaining `isDarwin` in `nirePackages/` that way and check which question it is
-answering before copying it.
+Two different questions come up when adding a package — can nixpkgs build it
+on darwin (answered automatically, don't hand-restate `meta.platforms`), and
+does Homebrew already install it (never answered automatically, and easy to
+mistake for the first question when reading an `isDarwin` guard). Full detail,
+worked examples (`vicinae.nix`, `obsidian.nix`), and the `just available
+--duplicates` workflow: skill `nirepackages-platform-support`.
 
 ## Traps, all of which have actually happened here
 
-### `flake.modules` cannot live inside `perSystem`
+As of 2026-08-15, most of these moved out to skills that load only when the
+matching task comes up, rather than costing context on every session
+regardless of what it's doing. What follows are the short versions — the
+skills have the full mechanism, code, and worked examples; read the skill
+before doing the matching task rather than re-deriving from these one-liners.
 
-**`perSystem` itself is fine and is used** — `checks.nix` is built on it, and it
-is core flake-parts, not a den concept.
+### Writing or renaming a flake-parts module — skill `new-flake-module`
 
-What does not work is putting `flake.modules` inside it. `perSystem` is evaluated
-once per system and its outputs are transposed to `flake.<output>.<system>.*`.
-`flake.modules.<class>.<name>` has no `<system>` axis: it is one
-system-independent definition declared at the top level as
-`lazyAttrsOf (lazyAttrsOf deferredModule)` (`flake-parts/extras/modules.nix:33`).
-There is no `freeformType` on `perSystem` to let it through — the only one in
-flake-parts is on the top-level `flake` option. This is what 151 files got wrong.
+`flake.modules` cannot live inside `perSystem` (no `<system>` axis, no
+`freeformType` there — this is what 151 files got wrong in the original
+port). A module's declared name comes from its own filename, so a rename
+silently drops it from its category if the two disagree afterward. Hyphens
+are legal in Nix identifiers (`kde-base` is one token, not `kde` minus
+`base`) — a regex over module names that doesn't account for that will
+misparse them. Two modules sharing a name **merge** rather than conflict
+(`just modules` catches this). Every module has an outer flake-parts
+`config` and an inner NixOS/HM `config` that shadow each other. Module
+classes (`nixos`, `homeManager`, `darwin`, ...) aren't validated at
+declaration time — a wrong one fails much later, at the import site. Raw
+`nixos-generate-config` output needs wrapping before it can live under
+`modules/`, or evaluation dies with a misleading `infinite recursion` error
+naming `modulesPath`.
 
-### A module's name is its filename
+### Editing Home Manager shell/dotfile modules — skill `home-manager-dotfiles`
 
-`moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file)` in all 151
-modules, so **renaming a file renames the attribute it declares.**
+`home.file.<n>.text` and `home.sessionPath` both concatenate across modules
+rather than override — two modules writing the "same" file or PATH entry
+double it, silently. Reading a generated dotfile back is full of false
+negatives: a wrong attribute name returns empty rather than erroring, and
+some entries (`.bashrc`) have no `.text` at all, only `.source`. Home
+Manager's shell rc ordering (`mkBefore` → `mkOrder 550` →
+`programs.zsh.plugins` → unordered) means anything that must run after a
+plugin can't sit at 550 — this silently orphaned a hand-written `starship
+init` and a 1,659-line p10k config.
 
-That is usually harmless, because `dirsAsCategory` also derives its member list
-from filenames — the two move together and category membership survives a
-rename. What does not survive is anything referring to the module by literal
-name: a host config importing it, or another module's `imports`. Those break
-loudly, which is the good case.
+### Editing impermanence or initrd — skill `impermanence-initrd`
 
-The bad case is hardcoding a name that then disagrees with the filename. The
-category looks up members by filename stem and filters with `? ${n}`, so a
-module whose declared name no longer matches its file is **silently dropped** —
-valid, evaluated, and absent. Keep declared names derived, or keep them in sync
-deliberately and say so in the file.
+**Read `WARN-impermanence.nix` before changing anything near this
+regardless.** In the scripted stage-1 hooks this repo still uses, `@name@`
+inside a hook string — even inside what looks like a comment — is a live
+template placeholder substituted later in the same fixed pass, so naming one
+in a comment can paste a whole other script in and execute most of it. Also:
+the shell's own view of the machine (`lsblk`, `findmnt`, `/etc`) is scoped
+to its mount namespace, not the host's, and can describe a completely
+different, wrong-looking disk layout that is nonetheless correct — use
+`/proc/1/mountinfo`, `/dev/disk/by-uuid/`, and `/run/current-system` instead,
+all unprivileged.
 
-### Hyphens are legal in Nix identifiers
+### Adding or platform-gating a package — skill `nirepackages-platform-support`
 
-`kde-base` is **one** attribute name, not `kde` minus `base`. A Nix identifier is
-`[a-zA-Z_][a-zA-Z0-9_'-]*`, so `a-b` is a single token and subtraction needs
-spaces around the operator. Two consequences here:
-
-- `with config.flake.modules.nixos; [ kde-desktop ]` resolves the whole
-  hyphenated name, which is why a host config can list it bare.
-- **Any regex over this tree that matches module names with `\w+` is wrong.**
-  `modules.py` did, and read `config.flake.modules.nixos.kde-base` as a reference
-  to `kde` — which left `kde-base` reported as an orphan the same hour it was
-  created. It matches `[\w-]+` now.
-
-### Names share one namespace per class, and collisions merge
-
-Two modules with the same name do not conflict; they **merge**. `boot` was both
-the `nire/boot/` category and `nireHost/durandal/hardware/boot.nix`, so importing
-the category also applied durandal's bootloader — and importing the bootloader
-applied an impermanence rollback. `just modules` checks for this.
-
-### There are two different `config`s, and they shadow
-
-Every file has an outer flake-parts scope and an inner NixOS/HM module. Both call
-their argument `config`, and they are not the same thing:
-
-```nix
-{ config, ... }:                       # flake-parts: config.flake.modules.*
-{
-    flake.modules.nixos.foo =
-    { config, ... }:                   # NixOS: config.services.*, config.boot.*
-    {
-        # the outer `config` is unreachable from in here
-    };
-}
-```
-
-A module written as a bare attrset has **no inner scope**, so `config` in it
-still means the flake-parts one, and adding an argument list silently repoints
-every existing `config`. Bind what you need in a `let` above the declaration —
-`enable-home-manager.nix` does exactly this and says why.
-
-### Module classes are not validated
-
-flake-parts stamps the outer attribute name on as `_class` verbatim and checks
-nothing, so a wrong class declares fine and fails much later at the import site.
-It sets `_file` to `<flake>#modules.<class>.<name>`, so the error names its own
-declaration site. Only `nixos`, `homeManager`, `flake` and `generic` are
-meaningful; `darwin` works because nix-darwin sets that `_class` itself.
-
-Related: a module can declare a *valid* class and still be wrong. `jq` and
-`bitwarden` declared `flake.modules.nixos` bodies full of `home.packages`.
-
-### Raw NixOS modules in the import-tree path
-
-Dropping fresh `nixos-generate-config` output into `modules/` makes flake-parts
-resolve its `modulesPath` through its own `_module.args`, and evaluation dies
-with `infinite recursion encountered` — naming `modulesPath`, which is not the
-cause. Wrap it in the same commit:
-
-```nix
-{ ... }:
-{ flake.modules.nixos.someHardware = { config, lib, modulesPath, ... }:
-{
-  # ... the original module body, unchanged
-}
-;}
-```
-
-### `home.file.<n>.text` concatenates; it does not override
-
-The type is `types.lines`, so two modules declaring the same file both
-contribute. `.blerc` was declared by `bash.nix` and `blesh.nix` with identical
-content, which would have run every `ble-import` twice. Give each generated file
-one owning module. `home.sessionPath` is `listOf str` and behaves the same way —
-`shell-env.nix` and `elly-session.nix` doubled every PATH entry between them.
-
-### Reading a generated dotfile is full of false negatives
-
-Most shell bugs are invisible in the `.nix` and obvious in the output, but:
-
-- **The attribute name is inconsistent.** `".zshrc"` and `"./.zshrc"` and full
-  `/home/elly/...` paths all occur. A wrong name returns **empty rather than
-  erroring**, which reads exactly like a real negative. `just dotfiles` first.
-- **Some entries have no `.text` at all** and are built from `.source`. `.bashrc`
-  is one. Read the owning option instead — `programs.bash.initExtra`.
-
-Both of these were hit during the port, minutes apart, by someone who had already
-written them down.
-
-### Order in generated shell rc files is load-bearing
-
-Home Manager emits `initContent` `mkBefore`, then `mkOrder 550`, then
-`programs.zsh.plugins`, then unordered `initContent`. Anything that must run
-after a plugin cannot sit at 550. Later definitions win, which is how a
-hand-written `starship init bash` and a 1,659-line p10k config both turned out to
-be dead weight.
+Two different questions, easy to conflate because both show up as an
+`isDarwin` guard in a package module: can nixpkgs build it on darwin at
+all (answered automatically by `drop-unsupported-packages.nix` off
+`meta.platforms` — don't hand-restate it with `lib.mkIf
+(!pkgs.stdenv.isDarwin)`), versus does Homebrew already install it on
+lysithea, meaning this module should defer rather than double-install
+(never answered automatically — `just available --duplicates` finds the
+overlap, but which one wins is still a judgement call per app).
+`obsidian.nix` is the worked example for the second question.
 
 ### `${...}` inside a Nix `''` string is interpolation
 
 Writing `${terminfo[khome]}` in what you intend as a comment is an evaluation
-error. Escape as `''${...}` or reword.
-
-### `@name@` inside an initrd hook string is a live template placeholder
-
-Applies to **scripted** stage 1, which this branch left on 2026-08-10. Kept
-because the mechanism is one `boot.initrd.systemd.enable = false` away.
-
-`boot.initrd.postResumeCommands` and its siblings are pasted into
-`stage-1-init.sh` by a fixed sequence of 19 `substituteInPlace --replace-fail`
-passes. `@postResumeCommands@` is the **10th**, so every placeholder substituted
-after it — `@preDeviceCommands@`, `@preFailCommands@`, `@preLVMCommands@`,
-`@resumeDevice@`, `@shell@`, `@udevRules@` — is still live in the text you just
-inserted.
-
-Naming `@preLVMCommands@` in a **comment** inside `postResumeCommands` therefore
-pastes the whole LUKS unlock script into that comment. Only its first line stays
-commented; the rest executes, in initrd, part-way through the `/root` rollback.
-
-Same family as the `${...}` trap above: **text in these strings is not inert, and
-a comment is not a safe place to name things.** Refer to a hook in prose, never
-by its token.
-
-### The shell's view of the machine is a mount namespace
-
-`lsblk`, `findmnt` and `/etc` all describe **that** namespace — faithfully, and
-about the wrong world. On tenacity they reported `/` as a tmpfs,
-`/dev/mapper/enc` mounted at `/etc/xdg`, empty UUID columns, and an `/etc` that
-is missing files the system definitely has. Read literally, the first of those
-says *the disk does not match the hardware module*, which is a stop-and-ask
-condition. It matched perfectly.
-
-Sources that are not rewritten, all unprivileged:
-
-- `/proc/1/mountinfo` — PID 1's mount table, the host's
-- `/dev/disk/by-uuid/` — udev's symlinks, so LUKS and filesystem UUIDs resolve
-- `/run/current-system/…` and any `/nix/store` path — for what `/etc` should hold
-
-`btrfs subvolume list` needs privileges and is worth asking Elly to run; it
-answers `root-blank` without mounting anything:
-
-```sh
-sudo btrfs subvolume list -a /
-```
-
-Read the subvolids as well as the names. `/root` far above its neighbours — 607
-against 257–265 — is the rollback *demonstrably running*, a stronger fact than
-`root-blank` existing.
+error. Escape as `''${...}` or reword. Small and general enough (any `''`
+string, not one kind of module) that it stays inline here rather than in a
+skill.
 
 ## Working in this repo
 
