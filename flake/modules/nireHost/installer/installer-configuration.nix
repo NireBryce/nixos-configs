@@ -1,10 +1,22 @@
 # nire-installer: a live-USB NixOS installer image, built specifically to
 # install nire-testbed (ThinkPad X270) onto its real disk. See
-# `nireHost/testbed/hardware/hardware-testbed.nix`'s own header -- that file
-# is a placeholder fileSystems/boot.initrd block until this ISO is booted on
-# the real machine and `nixos-generate-config` run against it. See also
 # `./liveusb-installer.md`, right next to this file, for the full
 # boot-to-install walkthrough.
+#
+# Carries a copy of this whole flake baked into the image itself (see
+# `environment.etc."nixos-configs"` below), so booting it is enough on its
+# own to run `nixos-install --flake` -- no network, no `git clone`, needed
+# just to get the config onto the live system. Network is still needed for
+# `nixos-install` itself to pull packages from the binary cache.
+#
+# Graphical (GNOME live session, not the separate Calamares installer
+# wizard -- this still installs by hand-partitioning plus `nixos-install
+# --flake`, same as before, not Calamares' own generic-NixOS wizard), with
+# `gh` on it. The point of both is the same: a browser to complete `gh auth
+# login`'s device-code flow at the actual keyboard, so a real `git clone` of
+# this repo -- with push access -- is possible from the live session itself,
+# rather than only the read-only embedded copy below. See
+# liveusb-installer.md for when to reach for which.
 #
 # This is not a host anyone switches to or boots persistently -- it exists
 # only to produce `config.system.build.isoImage`, which `./installer-iso.nix`
@@ -40,7 +52,7 @@
 # durandal-configuration.nix declares `durandalConfiguration`, not
 # `durandal-configuration`, and hosts.nix looks it up by that literal name;
 # this file matches that convention rather than the category one.
-{ config, ... }:
+{ config, inputs, ... }:
     let
         # Bound out here, before the module body, for the same reason
         # enable-home-manager.nix binds `ellyHome` out here: the inner module
@@ -51,9 +63,21 @@
         # "There are two different `config`s, and they shadow".
         nixCategory = config.flake.modules.nixos.nix;
     in {
+        # `inputs` closes over from this outer scope into the inner module
+        # body below, same reason hardware-testbed.nix takes it outside the
+        # inner lambda's own arg list -- adding it to that inner arg list
+        # instead would shadow it with the *NixOS* module system's own
+        # `inputs`-shaped nothing (it isn't a standard module arg there) and
+        # break the reference instead of fixing it.
         flake.modules.nixos.installerConfiguration = { lib, pkgs, modulesPath, ... }: {
             imports = [
-                (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix")
+                # GNOME live session (Firefox, NetworkManager applet, a
+                # terminal) -- upstream's own base for the official
+                # "graphical" ISO variant. Superset of installation-cd-minimal
+                # (still carries nixos-install-tools), swapped in for the
+                # browser, needed for `gh auth login`'s device-code flow --
+                # see this file's header.
+                (modulesPath + "/installer/cd-dvd/installation-cd-graphical-base.nix")
 
                 # flakes + nix-command + allowUnfree + trusted-users=root --
                 # same module every real host gets, needed here so
@@ -74,10 +98,12 @@
             # file. Same value durandal/tenacity/testbed's copies all set.
             nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
-            # installation-cd-base.nix defaults to wpa_supplicant-driven
-            # `networking.wireless`. NetworkManager (nmtui) is easier to drive
-            # at the actual keyboard on a laptop being installed in person,
-            # and NixOS refuses to evaluate with both wireless.enable and
+            # installation-cd-base.nix (which -graphical-base.nix still
+            # builds on) defaults to wpa_supplicant-driven
+            # `networking.wireless`; the graphical profile likely turns
+            # NetworkManager on itself for its own applet, but forcing this
+            # explicitly costs nothing and keeps the intent documented either
+            # way. NixOS refuses to evaluate with both wireless.enable and
             # networkmanager.enable true at once, so the default has to be
             # forced off rather than merely overridden.
             networking.wireless.enable       = lib.mkForce false;
@@ -104,12 +130,30 @@
                 "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJFTe27f8e8B4DpqQYHFK7I7Pg3ZK12W7LqIrdI+ChI1 elly@nire-galatea"
             ];
 
-            # installation-cd-minimal.nix already carries nixos-install-tools
-            # (nixos-generate-config, nixos-install, parted, filesystem tools).
-            # These are the extras it doesn't promise: an editor worth using,
-            # and git to pull this flake down onto the live system.
+            # The whole flake, baked into the image -- see this file's header.
+            # `inputs.self` is this flake's own outPath, the same value every
+            # host's `specialArgs` already gets via hosts.nix's `mkHost`.
+            # `environment.etc` symlinks it in from the Nix store, so
+            # `/etc/nixos-configs` is real but read-only; `nixos-install
+            # --flake path:/etc/nixos-configs#nire-testbed` works straight off
+            # it (the `path:` prefix is what lets a plain, non-git directory
+            # be used as a flake at all -- see liveusb-installer.md). Editing
+            # anything first (a hardware fix, a new host) needs a writable
+            # copy: `cp -r /etc/nixos-configs ~/nixos-configs` before editing,
+            # same doc.
+            environment.etc."nixos-configs".source = inputs.self;
+
+            # installation-cd-minimal.nix (which -graphical-base.nix still
+            # carries) already has nixos-install-tools (nixos-generate-config,
+            # nixos-install, parted, filesystem tools). These are the extras
+            # it doesn't promise: an editor worth using; git, for a real
+            # `git clone` with push access once `gh auth login` has run (the
+            # embedded /etc/nixos-configs copy below doesn't need it); and gh
+            # itself, for that login -- its device-code flow needs a browser,
+            # which is the whole reason this image is graphical now.
             environment.systemPackages = with pkgs; [
                 git
+                gh
                 vim
                 tmux
                 htop
