@@ -9,7 +9,8 @@
       "Bash(T=/nix/store/s1ypdi737d13p5al17sjlgq2r64zcy13-stage-1-init.sh; sed -n '87,130p' \"$T\")",
       "Read(//nix/store/**)",
       "Bash(nix flake *)",
-      "Bash(python3 -c \"import json,sys;d=json.load\\(sys.stdin\\);print\\(d['inputs']['nixpkgs']['path']\\)\")"
+      "Bash(python3 -c \"import json,sys;d=json.load\\(sys.stdin\\);print\\(d['inputs']['nixpkgs']['path']\\)\")",
+      "Bash(python3 -c ' *)"
     ]
   }
 }

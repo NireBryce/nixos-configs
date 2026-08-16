@@ -7,58 +7,87 @@
 > Elly has corrected the load-bearing claims; the framing is the machine's.
 > `README.md` is the human entry point.
 
-Guidance for Claude Code working in this repository, on the
-`flake-parts-consolidation` branch.
+Guidance for Claude Code working in this repository, on `main`. (The
+`flake-parts-consolidation` branch this was originally written on merged into
+`main` via PR #30 on 2026-08-14; `main` is now well ahead of it. Don't assume
+you're on that branch — check `git branch --show-current`.)
 
 ## Safety
 
 The README's warning is real: this config enables impermanence and wipes `/root`
-on boot. Never suggest installing it wholesale on a machine, and be careful with
-anything touching `flake/modules/nire/impermanence/` or the
+on boot on most hosts. Never suggest installing it wholesale on a machine, and
+be careful with anything touching `flake/modules/nire/impermanence/` or the
 `fileSystems`/`boot` options in the host hardware modules.
 
-`WARN-impermanence.nix` is reached by **both hosts** through the `impermanence`
-category -- named `boot` until 2026-08-11; renamed because `boot` had come to
-mean only this. It deletes the `/root` btrfs subvolume in initrd on every boot,
-and it depends on a `root-blank` subvolume existing on the machine. Read it, and
+`WARN-impermanence.nix` is reached through the `impermanence` category --
+named `boot` until 2026-08-11; renamed because `boot` had come to mean only
+this. It deletes the `/root` btrfs subvolume in initrd on every boot, and it
+depends on a `root-blank` subvolume existing on the machine. **Three of the
+four NixOS hosts import it and wipe `/root` on every boot: `nire-durandal`,
+`nire-tenacity`, `nire-lego`.** `nire-testbed` (added 2026-08-14) deliberately
+does **not** import it -- its own config says so explicitly, because it hits
+persistence assumptions the other hosts don't (see `nireHost/testbed-configuration.nix`).
+Don't assume "every host wipes root" or "no host does" -- check the specific
+host. Read `WARN-impermanence.nix`, and
 `claude cave/lessons-learned-impermanence-stage1-migration.md`, before changing anything near it.
 
 Secrets are sops-nix (`flake/modules/nire/system/secrets/`).
 `secrets.yaml` is encrypted and committed; that is deliberate, not a mistake to
-be "fixed". Its `.sops.yaml` still enrolls `nire-tenacity` even though that host
-has no config here any more — the key is valid, leave it.
+be "fixed". `.sops.yaml` enrolls `nire-durandal`, `nire-lysithea`, and
+`nire-tenacity` -- all three are live hosts with current config here, so this
+is the normal case, not a leftover to prune. `nire-testbed` and `nire-lego`
+(both added 2026-08-14) are not yet enrolled; if either ends up needing
+secrets, add its SSH host key converted with `ssh-to-age` and run `sops
+updatekeys secrets.yaml`.
 
 ## State
 
-**This branch has booted on `nire-tenacity`** — 2026-08-10, generation 62, NixOS
+**`nire-tenacity` booted this config** — 2026-08-10, generation 62, NixOS
 26.11, kernel 6.18.43, systemd stage 1. The `/root` rollback ran and was
 confirmed by subvolid (607 → 622), not merely by the machine coming up.
 
 **`nire-lysithea` is switched and running this config** — generation 52 as of
-2026-08-12, `darwin-system-26.11.15abb8c`. It is also the machine you are
-working from, so `just build` there exercises the real thing.
+2026-08-12, `darwin-system-26.11.15abb8c`.
 
-`durandal` has not been built or switched. For now that is fine — tenacity is
-serving as the testbed, so changes land there first and durandal follows later.
-It is not a blocker and does not need raising as one every session. It does
-mean a claim verified on tenacity is not thereby verified for durandal: say
-which host you mean, and treat anything host-shaped there as unanswered.
+**`nire-durandal` is switched and running this config too** — generation 222
+(`nixos-system-nire-durandal-26.11.20260807.f13ff45`) as of 2026-08-14.
+`switch-to-configuration boot` ran 2026-08-13 23:58 EDT (i.e. `just boot`, not
+`switch` — it only sets the default for next boot); the machine was rebooted
+at 23:59:46, and the journal for that boot confirms the `/root` rollback ran:
+subvolume 1426 deleted, a fresh snapshot of `root-blank` created, `/root` now
+mounted at subvolid 1431. Same confirmation pattern as tenacity's, found by
+reading `journalctl` rather than trusting the mount coming up.
 
-Most of this repo's history predates that, written from an aarch64-darwin laptop
-against x86_64-linux hosts with no remote builder, where the only thing that
-built was `checks.<system>.module-tree`. **Treat an undated "verified" as
-*evaluates*.** The first boot found four defects that evaluation and a
-successful build both missed (`lessons-learned.md` §25), so a green `nix flake check`
-says nothing about behaviour.
+**A Claude Code session in this repo is not necessarily running on
+`nire-lysithea`.** This section was corrected from a session running directly
+on `nire-durandal` (`hostname` said so, and the boot evidence above is what
+that session found). Check `hostname` before assuming which machine you're on.
 
-Two hosts: `nire-durandal` (workstation) and `nire-tenacity` (handheld,
-Jovian/SteamOS). Both import the `impermanence` category, so **both wipe
-`/root` on boot**. Tenacity was dropped by the den restructure and brought back
-from `origin/backup-before-flake-parts-happened`, the last config it actually
-ran.
+**`nire-testbed` and `nire-lego` exist in config but have not been built or
+switched** — both added 2026-08-14. Neither is a blocker and neither needs
+raising every session, same as durandal's status used to read. It does mean a
+claim verified on one host is not thereby verified for another: say which host
+you mean, and treat anything host-shaped on testbed or lego as unanswered.
 
-`2026-08-08-PORT-PLAN-(COMPLETED).md` records the migration off `vic/den`, where
-the plan turned out wrong, and what is still open.
+Most of this repo's history predates all of that, written from an
+aarch64-darwin laptop against x86_64-linux hosts with no remote builder, where
+the only thing that built was `checks.<system>.module-tree`. **Treat an
+undated "verified" as *evaluates*.** The first boot found four defects that
+evaluation and a successful build both missed (`lessons-learned.md` §25), so a
+green `nix flake check` says nothing about behaviour.
+
+Four NixOS hosts now, not two: `nire-durandal` (workstation), `nire-tenacity`
+(handheld, Jovian/SteamOS), `nire-testbed` (ThinkPad X270, added 2026-08-14),
+and `nire-lego` (Legion Go handheld, added 2026-08-14, using tenacity's disk
+layout) — plus the darwin host, `nire-lysithea` (see Architecture). `durandal`,
+`tenacity`, and `lego` import the `impermanence` category and wipe `/root` on
+boot; `testbed` deliberately does not (see Safety). Tenacity was dropped by
+the den restructure and brought back from
+`origin/backup-before-flake-parts-happened`, the last config it actually ran.
+
+`claude cave/old-2026-08-08-PORT-PLAN-(COMPLETED).md` records the migration off
+`vic/den`, where the plan turned out wrong, and what is still open (moved and
+`old`-prefixed 2026-08-13; see Docs).
 
 ## Commands
 
@@ -101,10 +130,14 @@ attribute name is already resolved.
 
 `build`/`boot`/`switch` go through `scripts/rebuild.sh`, which asks the flake
 whether the host is a `darwinConfiguration` and calls `nh darwin` or `nh os`
-accordingly. **You are on `nire-lysithea`, so darwin builds work right here** —
-`just build` is a real test, not just evaluation. The two NixOS hosts still
-cannot be built from here (no remote builder, no binfmt) and rebuild.sh says so
-rather than failing inside nix.
+accordingly. **Which machine a given session is running on varies** — check
+`hostname` rather than assuming `nire-lysithea`; sessions have also run
+directly on `nire-durandal` (linux, not darwin), which is switched and booted
+for real now too (see State). Wherever you're on one of the actual hosts,
+`just build`/`switch` there is a real test, not just evaluation. From any
+machine that is not the target NixOS host itself, a NixOS host still cannot be
+built (no remote builder, no binfmt) and `rebuild.sh` says so rather than
+failing inside nix.
 
 ## Architecture
 
@@ -138,15 +171,24 @@ Two consequences worth holding onto:
   and `nireUser/elly-home-manager.nix` all sit where `dirsAsCategory` cannot reach
   them, deliberately. `just modules` relies on exactly this rule.
 
-Areas: `nire/` (shared system), `nireHost/` (per-host), `nirePackages/`
-(packages), `nireUser/` (elly). By declared class: 101 homeManager-only, 43
-nixos-only, 9 both, and one (`elly-user.nix`) that adds `darwin` for fonts.
+Areas: `nire/` (shared system, now including a `nire/macos/` subarea for
+darwin-specific settings), `nireHost/` (per-host), `nirePackages/`
+(packages), `nireUser/` (elly). This file used to give a declared-class
+breakdown here (101 homeManager-only, 43 nixos-only, 9 both, one darwin) — it's
+stale as of 2026-08-15 (`nire/macos/` alone now holds several darwin-touching
+modules beyond the `elly-user.nix` example that used to be "the one"), and
+nothing here derives it mechanically the way `just modules` derives category
+membership. Don't quote old numbers; recount if it matters.
 
-**There are three hosts, not two, and one of them is darwin.**
+**There are five hosts, not two, and one of them is darwin.**
 `nireHost/hosts.nix` declares `flake.darwinConfigurations.nire-lysithea`
-alongside the two `nixosConfigurations`, and the `darwin` class is live — this
-file claimed the opposite until 2026-08-12, and a session read that instead of
-`hosts.nix` and told Elly a darwin build could not have come from this repo.
+alongside **four** `nixosConfigurations` — `nire-durandal`, `nire-tenacity`,
+`nire-testbed`, `nire-lego` (the latter two added 2026-08-14) — and the
+`darwin` class is live. This file claimed only two hosts total until
+2026-08-12, then three until 2026-08-15, and a session read an earlier version
+instead of `hosts.nix` and told Elly a darwin build could not have come from
+this repo. Check `hosts.nix` directly before stating a host count; it has
+grown twice already and will again.
 
 ### Home Manager is NixOS-integrated
 
@@ -163,7 +205,7 @@ applies both. `flake/doc/trailhead-home-manager-standalone.md` is the way back.
 
 ### Platform support is derived; Homebrew overlap is not
 
-`ellyHomeManager` is shared verbatim by all three hosts, including
+`ellyHomeManager` is shared verbatim by all five hosts, including
 `nire-lysithea` (aarch64-darwin), so everything in it has to survive darwin.
 Two different things can go wrong there, they look identical in the config, and
 only one of them is decided for you.
@@ -451,12 +493,16 @@ env vars passed where `argv` was read, and a mangled line nothing highlighted.
 
 ## Docs
 
-- `2026-08-08-PORT-PLAN-(COMPLETED).md` — the migration off den: what was
-  done, where the plan was wrong, and what is still open.
-- `2026-08-11-HANDOFF-durandal-and-lysithea.md` — what tenacity's first boot
-  bought the other two hosts. Read before touching either: durandal has
-  secure-boot config nothing has exercised, and lysithea (aarch64-darwin) does
-  not exist in the config at all.
+- `claude cave/old-2026-08-08-PORT-PLAN-(COMPLETED).md` — the migration off
+  den: what was done, where the plan was wrong, and what is still open. Moved
+  and `old-`-prefixed 2026-08-13; was at the repo root as
+  `2026-08-08-PORT-PLAN-(COMPLETED).md` until then.
+- `claude cave/old-historical-2026-08-11-HANDOFF-durandal-and-lysithea.md` —
+  what tenacity's first boot bought the other two hosts, written when durandal
+  hadn't booted this config and lysithea didn't exist in it yet. Both of those
+  have since happened (see State) — read this one as history, not current
+  status. Moved and prefixed 2026-08-13; was
+  `2026-08-11-HANDOFF-durandal-and-lysithea.md` at the repo root until then.
 - `flake/doc/dirsAsCategory.md` — the category mechanism and its trailhead.
 - `claude cave/lessons-learned-impermanence-stage1-migration.md` — the root rollback's move from scripted
   stage 1 to a systemd-initrd unit, done 2026-08-10 because the 2026-08-07
@@ -468,7 +514,11 @@ env vars passed where `argv` was read, and a mangled line nothing highlighted.
   §§19–24 the first session on the hardware, §§25–31 after it booted.
 - `flake/doc/trailhead-home-manager-standalone.md` — reversing the HM decision, and the
   part of the cutover that is one-way on the machine rather than in the repo.
-- `git show flake-parts:SESSION-HANDOFF.md` — the sibling branch's notes on dead
-  ends and decisions that should not be silently relitigated.
-- `git show flake-parts:linux-flake/flake-parts-reference.md` — flake-parts
-  machinery, with upstream source backing each claim.
+- `git show origin/flake-parts:SESSION-HANDOFF.md` — the sibling branch's notes
+  on dead ends and decisions that should not be silently relitigated. Needs the
+  `origin/` prefix — there is no local `flake-parts` branch in a normal
+  checkout of this repo, only `origin/flake-parts`, and the bare name 404s.
+- `git show origin/flake-parts:linux-flake/flake-parts-reference.md` —
+  flake-parts machinery, with upstream source backing each claim. That branch
+  never went through the `linux-flake/` → `flake/` rename this one did
+  (2026-08-14), so the old path is still correct *there*.
