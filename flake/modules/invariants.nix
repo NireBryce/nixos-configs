@@ -69,8 +69,18 @@
 # sub-check still runs. What it stops catching is a host that never claimed
 # impermanence in the first place, which was never a regression to begin with.
 #
-# home-manager's useGlobalPkgs invariant is NOT gated -- it holds for every
-# NixOS host regardless of impermanence, testbed included.
+# home-manager's useGlobalPkgs invariant is NOT gated on usesImpermanence --
+# it holds for every NixOS host regardless of impermanence, testbed included.
+#
+# It IS gated on the host having home-manager at all (`c ? home-manager`),
+# added for nire-installer: a live-USB image with no `elly` user and no
+# reason to carry the home-manager closure, which never imports
+# enable-home-manager.nix and so has no `home-manager` option namespace at
+# all. Same shape as the impermanence gate -- check for the real thing's
+# existence, not the host's name -- and it does not make the check vacuous:
+# enable-home-manager.nix is the only thing that sets useGlobalPkgs, but a
+# later import overriding it back to false on a host that DOES have
+# home-manager is exactly the regression this still catches.
 { config, lib, ... }:
 {
     perSystem = { system, pkgs, ... }:
@@ -104,6 +114,11 @@
             # opted into impermanence -- see the file header, "OPT-IN, SINCE
             # NIRE-TESTBED", for why this is the gate and not something else.
             usesImpermanence = rollback != null;
+
+            # Whether this host imported enable-home-manager.nix at all --
+            # see the file header's "OPT-IN, SINCE NIRE-TESTBED" addendum
+            # above. nire-installer has no `elly` user and never does.
+            usesHomeManager = c ? home-manager;
 
             impermanenceInvariants = [
             # -- the root rollback actually runs ------------------------------
@@ -190,12 +205,7 @@
                          + "jovian-persist.nix has escaped its category";
             }
             ];
-        in
-            (if usesImpermanence then impermanenceInvariants else [ ])
-            # -- home manager ------------------------------------------------
-            # NOT gated on usesImpermanence: holds for every NixOS host,
-            # testbed included.
-            ++ [
+            homeManagerInvariants = [
             {
                 # HM *rejects* every nixpkgs.* option under useGlobalPkgs rather
                 # than ignoring it, so this flipping does not degrade quietly --
@@ -206,6 +216,12 @@
                     + "nixpkgs and lose the system's allowUnfree";
             }
         ];
+        in
+            (if usesImpermanence then impermanenceInvariants else [ ])
+            # NOT gated on usesImpermanence: holds for every NixOS host that
+            # has home-manager at all, testbed included. See usesHomeManager
+            # above for the one host it does not -- nire-installer.
+            ++ (if usesHomeManager then homeManagerInvariants else [ ]);
 
         failures = lib.concatLists (lib.mapAttrsToList
             (name: host: lib.filter (i: !i.ok) (invariantsFor name host))

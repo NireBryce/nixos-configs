@@ -70,6 +70,12 @@ switch:
     @echo "==> ACTIVATING {{host}} now, home-manager included"
     @{{scripts}}/rebuild.sh switch {{flake}} {{host}}
 
+# Build the nire-installer live-USB image, for installing nire-testbed
+liveusb:
+    # Lives with the rest of the installer feature under nireHost/installer/,
+    # not flake/scripts/ -- see installer-configuration.nix for why.
+    @{{flake}}/modules/nireHost/installer/build-liveusb.sh {{flake}}
+
 # Package-level diff between what is running and what would be installed
 diff-deployed:
     @{{scripts}}/diff-deployed.sh {{host}}

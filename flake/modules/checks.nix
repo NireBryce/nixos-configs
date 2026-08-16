@@ -24,10 +24,16 @@
         # The home config is only reachable through the host that owns it, so a
         # check on the toplevel does force it -- but naming it separately makes a
         # home-only breakage say so instead of failing as "the host".
+        #
+        # Filtered to hosts that actually have home-manager, same gate
+        # invariants.nix's usesHomeManager uses and for the same reason:
+        # nire-installer never imports enable-home-manager.nix, has no `elly`
+        # user, and `host.config.home-manager` is a missing attribute there
+        # rather than an empty one.
         homeChecks = lib.mapAttrs'
             (name: host: lib.nameValuePair "home-${name}"
                 host.config.home-manager.users.elly.home.activationPackage)
-            hostsForThisSystem;
+            (lib.filterAttrs (_: host: host.config ? home-manager) hostsForThisSystem);
     in
     {
         checks = hostChecks // homeChecks // {
