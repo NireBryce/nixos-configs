@@ -19,13 +19,19 @@ deliberately grouped, rather than split across `modules/`/`scripts/`/`doc/`
 the way the rest of the repo is. See `installer-configuration.nix`'s header
 for why that's safe.
 
-Two ways to actually run the install, covered separately below: a graphical
-Calamares wizard (patched to run `nixos-install --flake` instead of its own
-generic install, `installer-calamares.nix`), or the terminal by hand. Try
-Calamares first -- it's the reason this image is graphical at all -- but
-nothing about the patched wizard has been run against real hardware yet
-(see "What this doc does not cover"), so the terminal path stays documented
-as the fallback if it fails or hangs mid-wizard.
+Three ways to actually run the install, covered separately below: unattended
+(`installer-autoinstall-testbed.nix`, a systemd service that mounts the real
+disk by its already-known UUIDs and runs `nixos-install --flake` with nobody
+driving anything), a graphical Calamares wizard (patched to run the same
+`nixos-install --flake` instead of its own generic install,
+`installer-calamares.nix`), or the terminal by hand. **Reach for unattended
+first if the disk is already partitioned** (a reinstall, or this is the
+known machine) -- it needs no desktop session at all, which matters because
+GDM/GNOME has not been confirmed to actually come up on the real X270 yet
+(a real, hit gap -- see "What's on it" and "What this doc does not cover").
+Calamares needs that desktop and is the least proven of the three; the
+terminal path is the fallback of last resort, and the only one of the three
+with the `nixos-generate-config` step a genuine repartition needs.
 
 ## Building it
 
@@ -54,6 +60,24 @@ bigger closure and longer first build than the old minimal profile.
 
 ## What's on it
 
+- `autoinstall-testbed.service` (`installer-autoinstall-testbed.nix`), a
+  `systemd` oneshot that waits for network, checks whether the disk already
+  has the two exact partitions `hardware-testbed.nix` expects (by UUID --
+  never partitions or guesses; if they're not there, it refuses and exits
+  loudly rather than touching the disk), then runs the same
+  `nixos-install --flake path:/etc/nixos-configs#nire-testbed` the other two
+  paths use, unattended. A 10s window at the start allows aborting with
+  `systemctl stop autoinstall-testbed` (from SSH, or another console) before
+  anything gets mounted. Does **not** auto-reboot when it finishes -- prints
+  a message and stops, so there's still a chance to notice something's wrong
+  before committing to a reboot.
+- Optional unattended wifi for the above: `build-liveusb.sh` prompts for an
+  SSID/password at build time (skippable) and bakes a `NetworkManager`
+  profile in if given one -- see that script and
+  `installer-autoinstall-testbed.nix`'s header for the mechanism and why the
+  password ends up in the built image's Nix store regardless (there's no way
+  around that for something unattended with nobody present to type it).
+  Treat a built `.iso` with credentials baked in as sensitive.
 - A real GNOME live desktop (`services.desktopManager.gnome.enable` + `gdm`,
   `installer-calamares.nix`) with autologin as `nixos`. **Correction**: for a
   while this was believed to come from
@@ -98,6 +122,33 @@ bigger closure and longer first build than the old minimal profile.
   pushed from there directly instead of copied back by hand afterward.
 - `vim`, `tmux`, `htop`, `gptfdisk`, `btrfs-progs` on top of the base
   profile's own package set.
+
+## Installing nire-testbed unattended
+
+Only works if the disk is already partitioned the way `hardware-testbed.nix`
+expects -- this path never partitions anything (see "What's on it"). If it's
+a fresh disk or a different layout, use the terminal path below instead,
+which has the `nixos-generate-config` step a repartition needs.
+
+1. `just liveusb` -- answer (or skip) the wifi prompt -- write it to a USB
+   stick, boot the X270 from it.
+2. If wifi credentials were baked in, it associates on its own; otherwise
+   plug in ethernet, or connect wifi by hand (GNOME's NetworkManager applet
+   or `nmtui`) so `autoinstall-testbed.service` has network to install with.
+3. Watch it (from another machine over SSH is easiest:
+   `ssh nixos@<its address>`):
+   ```sh
+   journalctl -u autoinstall-testbed -f
+   ```
+   It refuses and exits immediately if the expected partitions aren't found
+   -- that's the signal to switch to the terminal path, not a bug to retry.
+4. When it finishes, it says so and stops rather than rebooting itself.
+   Reboot manually when ready (`reboot`), then remove the USB stick.
+5. Update `CLAUDE.md`'s "State" section with the result -- generation
+   number, date, whether it actually booted. Same discipline as tenacity's
+   first boot: an undated "verified" means *evaluates*, not *booted* -- and
+   this whole path is unconfirmed against real hardware regardless (see
+   "What this doc does not cover").
 
 ## Installing nire-testbed with Calamares
 
@@ -200,16 +251,33 @@ bigger closure and longer first build than the old minimal profile.
 
 ## What this doc does not cover
 
-Nothing about either path has been run against the real X270 yet. The hand
-walkthrough is at least the standard NixOS flake-install procedure end to
-end; the Calamares path is considerably less proven -- eval-time checks
-(`just modules`, `nix eval .../isoImage.drvPath`, and confirming the patched
-`calamares-nixos-extensions` derivation actually builds with the right files
-inside it) all pass, but none of that can confirm Calamares actually
-launches on real GNOME/GDM hardware, that the trimmed wizard flow behaves
-correctly end to end, that the patched `main.py` runs without a Python-level
-error under Calamares' own interface loader, or that `pkexec` succeeds
-non-interactively in that session. All of that is only observable by
-physically building the ISO and booting it on the X270 -- treat the whole
-Calamares path as unconfirmed until that happens, and the partition layout
-(both paths) as the first thing to go wrong if something does.
+Nothing about any of the three paths has been run to completion against the
+real X270 yet. The hand walkthrough is at least the standard NixOS
+flake-install procedure end to end. The other two carry real, specific
+unknowns:
+
+- **GDM/GNOME itself has already failed once** on real hardware during this
+  work -- booted to a bare TTY with no `display-manager.service` unit at
+  all, cause not yet root-caused (the leading theory, unconfirmed, is a
+  stale checkout on whichever machine ran `just liveusb` predating the
+  commit that added `services.desktopManager.gnome.enable`, not a config
+  bug in what's on `main` now -- but that's not confirmed either). Until
+  that's understood, **Calamares should be assumed not to come up**, since
+  it depends entirely on that same desktop session existing. This is the
+  main reason the unattended path exists: it needs no desktop at all.
+- **Unattended has its own unknowns**, different ones: whether
+  `network-online.target` is actually reached in time (and at all, if wifi
+  needs hand-connecting), whether the baked-in `NetworkManager` profile (if
+  used) actually associates, and whether `nixos-install --no-root-passwd`
+  behaves the same run non-interactively from a `systemd` service as it
+  does from an interactive terminal. None of this can be checked from eval
+  alone.
+
+Eval-time checks (`just modules`, `nix eval .../isoImage.drvPath`, confirming
+the patched `calamares-nixos-extensions` derivation builds with the right
+files inside it, confirming the wifi profile populates under `--impure` and
+stays empty without it) all pass for all three paths -- but none of that
+confirms behavior on the real machine. All of it is only observable by
+physically building the ISO and booting it on the X270. Treat every path as
+unconfirmed until that happens, and the partition layout (all three) as the
+first thing to go wrong if something does.
