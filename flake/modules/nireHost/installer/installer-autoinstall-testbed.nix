@@ -51,39 +51,19 @@
         rootUuid = "298d1ce7-3fb9-4918-b77c-21d419ccf62a";
         bootUuid = "DED7-8FEF";
 
-        autoinstallScript = pkgs.writeShellScript "autoinstall-testbed" ''
-            set -euo pipefail
-
-            root_dev=/dev/disk/by-uuid/${rootUuid}
-            boot_dev=/dev/disk/by-uuid/${bootUuid}
-
-            if [ ! -e "$root_dev" ] || [ ! -e "$boot_dev" ]; then
-                echo "autoinstall-testbed: expected partitions not found (root=${rootUuid} boot=${bootUuid})." >&2
-                echo "autoinstall-testbed: refusing to guess or partition anything -- not installing." >&2
-                echo "autoinstall-testbed: this is not the disk hardware-testbed.nix was written for, or it was reformatted. See liveusb-installer.md." >&2
-                exit 1
-            fi
-
-            echo "autoinstall-testbed: found the expected partitions. Installing in 10s."
-            echo "autoinstall-testbed: to abort, from another session: systemctl stop autoinstall-testbed"
-            sleep 10
-
-            mkdir -p /mnt
-            mount "$root_dev" /mnt
-            mkdir -p /mnt/boot
-            mount "$boot_dev" /mnt/boot
-
-            echo "autoinstall-testbed: mounted. Running nixos-install --flake -- this can take a while, watch with: journalctl -u autoinstall-testbed -f"
-            nixos-install \
-                --root /mnt \
-                --flake path:/etc/nixos-configs#nire-testbed \
-                --no-root-passwd
-
-            umount -R /mnt || true
-
-            echo "autoinstall-testbed: install finished. Reboot manually when ready: 'reboot'."
-            echo "autoinstall-testbed: deliberately NOT auto-rebooting -- one last chance to notice something's wrong before committing to it."
-        '';
+        # Kept as a real .sh file (config/autoinstall-testbed.sh) rather than
+        # an inline '' ... '' string -- installer-checks.nix shellchecks it
+        # directly, which an inline string can't be (shellcheck needs a real
+        # file, and disagrees with itself about heredoc-embedded Nix
+        # interpolation splicing arbitrary text into the middle of a shell
+        # token). @rootUuid@/@bootUuid@ substituted with lib.replaceStrings,
+        # not Nix string interpolation, for the same reason -- an inline
+        # ${rootUuid} would make the source file invalid shell on its own.
+        autoinstallScript = pkgs.writeShellScript "autoinstall-testbed"
+            (lib.replaceStrings
+                [ "@rootUuid@" "@bootUuid@" ]
+                [ rootUuid    bootUuid    ]
+                (builtins.readFile ./config/autoinstall-testbed.sh));
     in {
         # Only materializes with real credentials present (see hasWifiCreds
         # above) -- otherwise this is an empty attrset and wifi stays
