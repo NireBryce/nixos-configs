@@ -7,16 +7,25 @@ a NixOS live-USB image, built for one purpose: installing `nire-testbed`
 (ThinkPad X270) onto its real disk. It is not a host anyone switches to.
 `nireHost/testbed/hardware/hardware-testbed.nix` already carries real
 `fileSystems`/`boot.initrd.*` values as of 2026-08-16 (read off the actual
-partitioned disk), so this doc's steps 4-6 below are only live again if that
-disk ever gets repartitioned -- `by-uuid` device paths are generated fresh by
-`mkfs` every time, so a reformat always needs a fresh
-`nixos-generate-config` and a fresh edit to that file, embedded flake or not.
+partitioned disk), so the repartitioning steps in both walkthroughs below are
+only live again if that disk ever gets repartitioned -- `by-uuid` device
+paths are generated fresh by `mkfs` every time, so a reformat always needs a
+fresh `nixos-generate-config` and a fresh edit to that file, embedded flake
+or Calamares or not.
 
 This whole feature -- this doc, the config, `installer-iso.nix` and
 `build-liveusb.sh` -- lives together in `flake/modules/nireHost/installer/`,
 deliberately grouped, rather than split across `modules/`/`scripts/`/`doc/`
 the way the rest of the repo is. See `installer-configuration.nix`'s header
 for why that's safe.
+
+Two ways to actually run the install, covered separately below: a graphical
+Calamares wizard (patched to run `nixos-install --flake` instead of its own
+generic install, `installer-calamares.nix`), or the terminal by hand. Try
+Calamares first -- it's the reason this image is graphical at all -- but
+nothing about the patched wizard has been run against real hardware yet
+(see "What this doc does not cover"), so the terminal path stays documented
+as the fallback if it fails or hangs mid-wizard.
 
 ## Building it
 
@@ -45,12 +54,27 @@ bigger closure and longer first build than the old minimal profile.
 
 ## What's on it
 
-- A GNOME live desktop -- upstream's `installer/cd-dvd/installation-cd-graphical-base.nix`,
-  not the separate Calamares installer wizard. This is still a hand-partition
-  plus `nixos-install --flake` install, same as always; the graphical session
-  is here for a browser, not for Calamares' own generic-NixOS install flow.
+- A real GNOME live desktop (`services.desktopManager.gnome.enable` + `gdm`,
+  `installer-calamares.nix`) with autologin as `nixos`. **Correction**: for a
+  while this was believed to come from
+  `installer/cd-dvd/installation-cd-graphical-base.nix` alone, but that file
+  only turns on `services.xserver.enable` -- no desktop manager at all --
+  confirmed by reading it directly. Before this fix, `nire-installer` booted
+  to a bare LightDM greeter with nothing to log into, despite this doc and
+  `installer-configuration.nix`'s own header claiming otherwise. Recorded
+  here since it was a real, shipped gap, not hypothetical.
+- Calamares (`installer-calamares.nix`), patched so its `nixos` job runs
+  `nixos-install --flake path:/etc/nixos-configs#nire-testbed` against
+  whatever the wizard's own partition/mount pages set up, instead of
+  generating a generic `configuration.nix` the way it does by default. The
+  wizard's `locale`/`users`/`packagechooser` pages are dropped from the
+  sequence -- the target flake already declares all of that -- `keyboard`
+  stays (it has a live effect on the running session, useful for the
+  partition page's own text entry). See `installer-calamares.nix` and
+  `config/calamares-settings.conf`/`config/calamares-nixos-main.py` for the
+  full mechanism.
   `nixos-generate-config`, `nixos-install`, `parted` and the rest of
-  `nixos-install-tools` are still on it, same as the old minimal profile.
+  `nixos-install-tools` are still on it too, for the terminal path.
 - Flakes, `nix-command`, and `allowUnfree` already on
   (`nire/nix/nix-settings/basic-nix-settings.nix`, imported the same as every
   real host), so `nixos-install --flake` works with no setup.
@@ -66,15 +90,39 @@ bigger closure and longer first build than the old minimal profile.
   install from -- no network, no `git clone`, needed just to get the config
   onto the live system. It's a symlink into the read-only Nix store, so it's
   real but not editable in place -- see step 5 below for what that means.
+  Calamares' patched `nixos` job reads from this same path directly.
 - `gh`, alongside `git` -- `gh auth login`'s device-code flow needs a
   browser to complete, which is the actual reason this image is graphical
-  now: it turns a plain `git clone` into one with push access, so an edit
-  made on the live system (step 5) can be committed and pushed from there
-  directly instead of copied back by hand afterward.
+  at all: it turns a plain `git clone` into one with push access, so an edit
+  made on the live system (step 5, terminal path) can be committed and
+  pushed from there directly instead of copied back by hand afterward.
 - `vim`, `tmux`, `htop`, `gptfdisk`, `btrfs-progs` on top of the base
   profile's own package set.
 
-## Installing nire-testbed with it
+## Installing nire-testbed with Calamares
+
+1. `just liveusb`, write it to a USB stick, boot the X270 from it. Lands on
+   a GNOME desktop, autologged in as `nixos`.
+2. Get on the network (GNOME's NetworkManager applet or `nmtui`), then open
+   Calamares from the desktop.
+3. Walk the wizard: welcome, keyboard layout, partition the real disk
+   (a plain EFI-system-partition-plus-ext4 layout -- no LUKS, no btrfs, no
+   impermanence, see `hardware-testbed.nix` and `CLAUDE.md`'s safety section
+   for why), summary, then let it run.
+4. **If the disk was just repartitioned differently than what's already in
+   `hardware-testbed.nix`** (a fresh disk, not a reinstall onto the same
+   layout), the install will still run against the *old* `fileSystems`
+   values baked into `/etc/nixos-configs` -- Calamares' wizard doesn't
+   regenerate that file. Cancel before the `exec` phase and use the terminal
+   path below instead, which has the `nixos-generate-config` step this needs.
+5. When it finishes, reboot and remove the USB stick.
+6. Update `CLAUDE.md`'s "State" section with the result -- generation number,
+   date, whether it actually booted, and whether Calamares itself launched
+   and completed cleanly (this is the first real run of the patched wizard --
+   see "What this doc does not cover"). Same discipline as tenacity's first
+   boot: an undated "verified" means *evaluates*, not *booted*.
+
+## Installing nire-testbed by hand (fallback, or if the disk needs repartitioning)
 
 1. `just liveusb`, write it to a USB stick, boot the X270 from it.
 2. Get on the network -- the GNOME NetworkManager applet or `nmtui` for
@@ -152,7 +200,16 @@ bigger closure and longer first build than the old minimal profile.
 
 ## What this doc does not cover
 
-Nothing about this has been run against the real X270 yet. The install steps
-above are the standard NixOS flake-install procedure, not a confirmed
-account of this machine's install -- treat step 3 in particular (the real
-partition layout) as the first thing to go wrong if something does.
+Nothing about either path has been run against the real X270 yet. The hand
+walkthrough is at least the standard NixOS flake-install procedure end to
+end; the Calamares path is considerably less proven -- eval-time checks
+(`just modules`, `nix eval .../isoImage.drvPath`, and confirming the patched
+`calamares-nixos-extensions` derivation actually builds with the right files
+inside it) all pass, but none of that can confirm Calamares actually
+launches on real GNOME/GDM hardware, that the trimmed wizard flow behaves
+correctly end to end, that the patched `main.py` runs without a Python-level
+error under Calamares' own interface loader, or that `pkexec` succeeds
+non-interactively in that session. All of that is only observable by
+physically building the ISO and booting it on the X270 -- treat the whole
+Calamares path as unconfirmed until that happens, and the partition layout
+(both paths) as the first thing to go wrong if something does.
