@@ -50,6 +50,27 @@
                 "services.openssh.enable is false -- installer-configuration.nix didn't merge, or was edited";
             assert lib.assertMsg installerCfg.networking.networkmanager.enable
                 "networking.networkmanager.enable is false -- installer-configuration.nix didn't merge, or was edited";
+            # NetworkManager's own module sets these two itself (normal
+            # priority) whenever it's enabled with the default wpa_supplicant
+            # backend and no wireless.networks/unmanaged delegation -- exactly
+            # nire-installer's case. A `networking.wireless.enable = mkForce
+            # false;` anywhere would silence both of these and, with them,
+            # wpa_supplicant's own D-Bus service registration
+            # (services.dbus.packages, wpa_supplicant.nix, gated on
+            # wireless.enable) -- confirmed on the real X270, not just by
+            # reading source: wifi interface existed, iwlwifi was bound, no
+            # firmware error, but NetworkManager's network list never
+            # populated, and `systemctl start wpa_supplicant` failed with
+            # "Unit wpa_supplicant.service not found". See
+            # installer-configuration.nix's history note for the full trace
+            # and the (wrong) comment that used to justify forcing this off.
+            assert lib.assertMsg installerCfg.networking.wireless.enable
+                "networking.wireless.enable is false -- something is overriding NetworkManager's own dbus-controlled wpa_supplicant setup again (see installer-configuration.nix's history note), wifi will silently fail to scan";
+            assert lib.assertMsg installerCfg.networking.wireless.dbusControlled
+                "networking.wireless.dbusControlled is false -- NetworkManager won't get wpa_supplicant under D-Bus control, wifi will silently fail to scan (see installer-configuration.nix's history note)";
+            assert lib.assertMsg
+                (builtins.any (p: (p.pname or "") == "wpa_supplicant") installerCfg.services.dbus.packages)
+                "wpa_supplicant is missing from services.dbus.packages -- its D-Bus service won't be registered, NetworkManager's activation request will find nothing (see installer-configuration.nix's history note)";
             assert lib.assertMsg (installerCfg.systemd.services ? autoinstall-testbed)
                 "systemd.services.autoinstall-testbed is missing -- installer-autoinstall-testbed.nix didn't merge, or was renamed";
             assert lib.assertMsg (installerCfg.environment.etc ? "nixos-configs")
