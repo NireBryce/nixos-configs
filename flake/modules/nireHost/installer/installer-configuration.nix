@@ -98,15 +98,13 @@
             # file. Same value durandal/tenacity/testbed's copies all set.
             nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
-            # installation-cd-base.nix (which -graphical-base.nix still
-            # builds on) defaults to wpa_supplicant-driven
-            # `networking.wireless`; the graphical profile likely turns
-            # NetworkManager on itself for its own applet, but forcing this
-            # explicitly costs nothing and keeps the intent documented either
-            # way. NixOS refuses to evaluate with both wireless.enable and
-            # networkmanager.enable true at once, so the default has to be
-            # forced off rather than merely overridden.
-            networking.wireless.enable       = lib.mkForce false;
+            # No networking.wireless.enable here -- see this file's history
+            # note at the bottom. There used to be one, forced off, and it
+            # was a real bug: NetworkManager's own module sets wireless.enable
+            # (+ dbusControlled) itself when it needs wpa_supplicant, and
+            # forcing it off broke exactly that -- confirmed on the real
+            # X270 ("failed to activate wpa_supplicant dbus", wifi scanning
+            # hung forever, nothing ever listed).
             networking.networkmanager.enable = true;
 
             # Firmware for the X270's Intel wireless chip. hardware-testbed.nix
@@ -162,3 +160,81 @@
             ];
         };
     }
+
+# ── history ─────────────────────────────────────────────────────────────────
+#
+# 2026-08-16 — the `networking.wireless.enable = lib.mkForce false;` that
+# used to sit next to `networking.networkmanager.enable = true;`, and why it
+# was wrong
+#
+# Original comment claimed two things, both false, checked against the
+# actual nixpkgs source at the pinned revision (not assumed):
+#
+#   1. "installation-cd-base.nix defaults to wpa_supplicant-driven
+#      networking.wireless" -- that file never touches
+#      networking.wireless.enable at all. Grepped it; zero matches.
+#   2. "NixOS refuses to evaluate with both wireless.enable and
+#      networkmanager.enable true at once" -- no such assertion exists.
+#      The only assertion anywhere that even mentions NetworkManager
+#      (nixos/modules/services/networking/wpa_supplicant.nix) is
+#      `length cfg.interfaces > 1 -> !cfg.dbusControlled` -- about having
+#      more than one entry in networking.wireless.interfaces while
+#      dbus-controlled, not about wireless.enable and networkmanager.enable
+#      both being true. NetworkManager only gets named in that assertion's
+#      *message* text, as a hint ("you don't need to set `interfaces` by
+#      hand when using NetworkManager"). nire-installer never sets
+#      networking.wireless.interfaces, so this assertion was never a risk
+#      for it regardless.
+#
+# What was actually happening: NetworkManager's own module
+# (nixos/modules/services/networking/networkmanager.nix), whenever enabled
+# with the default wpa_supplicant backend and no wireless.networks/unmanaged
+# delegation configured -- nire-installer's exact case -- sets, itself, at
+# normal priority:
+#     networking.wireless.enable            = true;
+#     networking.wireless.autoDetectInterfaces = false;
+#     networking.wireless.dbusControlled    = true;
+# That's the real, intended mechanism for NetworkManager to get
+# wpa_supplicant running under its own D-Bus control. wpa_supplicant.nix's
+# entire module body is gated on `mkIf cfg.enable`, including the line that
+# actually registers wpa_supplicant's D-Bus service at all:
+#     services.dbus.packages = optional cfg.dbusControlled pkgs.wpa_supplicant;
+# `mkForce false` (priority 50) overrode NetworkManager's own `= true`
+# (priority 100), so that whole module body never activated, so
+# wpa_supplicant's D-Bus service never got registered, so NetworkManager's
+# own D-Bus activation request for it found nothing.
+#
+# Confirmed on the real X270, not just by reading source: booted the image,
+# wifi interface existed and iwlwifi was bound (no firmware error), but
+# NetworkManager's network list never populated -- `systemctl start
+# wpa_supplicant` failed with "Unit wpa_supplicant.service not found",
+# exactly matching the trace above. The fix is deleting the override, not
+# adding anything -- NetworkManager already does the right thing on its own
+# once nothing is fighting it.
+#
+# Original text, word for word, unchanged since the commit that created
+# this whole file (e5656e76, "liveusb", 2026-08-15) through the point this
+# was found and removed:
+#
+#     # installation-cd-base.nix (which -graphical-base.nix still
+#     # builds on) defaults to wpa_supplicant-driven
+#     # `networking.wireless`; the graphical profile likely turns
+#     # NetworkManager on itself for its own applet, but forcing this
+#     # explicitly costs nothing and keeps the intent documented either
+#     # way. NixOS refuses to evaluate with both wireless.enable and
+#     # networkmanager.enable true at once, so the default has to be
+#     # forced off rather than merely overridden.
+#     networking.wireless.enable       = lib.mkForce false;
+#     networking.networkmanager.enable = true;
+#
+# Best reconstruction of how it happened, not confirmed: the commit message
+# is just "liveusb", no reasoning recorded. The one real, plausible source
+# of the confusion is the assertion described above -- if some earlier
+# iteration of a config set `networking.wireless.interfaces` explicitly
+# (durandal/tenacity's real hardware configs do, for their actual NICs)
+# alongside NetworkManager, that assertion would fire, its message would
+# name NetworkManager, and generalizing "can't have both enabled" from an
+# error that was really about `interfaces` list length is an easy
+# mistake to make once, and then propagate by not re-deriving it the next
+# time this file was touched (it was, once, in the PR that made this image
+# graphical -- moved and reworded slightly, not re-verified).
