@@ -13,7 +13,10 @@ not recoverable from the tree or the commits.
 Three groups, by what could be observed at the time. §§1–18 are the port, from
 the darwin laptop, against a tree that could only be evaluated. §§19–24 are the
 first session on `nire-tenacity`, where the disk and the build plan became
-visible. §§25–31 are from after it booted — see §25.
+visible. §§25–31 are from after it booted — see §25. §§32–34 are later work on
+already-booted hosts, where the open question stopped being "does it
+evaluate" and became "is this true on the hosts that have never been
+installed".
 
 Numbers are stable; §§2, 5, 7, 11, 14, 18, 24 and 25 are referenced elsewhere.
 
@@ -483,3 +486,91 @@ policy it claimed to be. And the cap was initially set *below* the 1.1G a real
 bad fortnight had just produced, which would have discarded dumps during exactly
 the incident they were wanted for. **A limit under the observed worst case is
 not a safety measure.**
+
+## 32. An auto-allocator that cannot see manual entries will collide with them
+
+`nire/system/containers/containers.nix` (then `virtualization.nix`) set
+`autoSubUidGidRange = true` on a `container` user while pinning
+`subUidRanges = [{ startUid = 100000; ... }]` on `elly` four lines below. It
+evaluated. It had evaluated for a week. Both users would have shared one
+subordinate UID range.
+
+nixpkgs allocates auto ranges in `update-users-groups.pl`'s `allocSubUid`,
+which walks 100000, 165536, … and rejects a candidate only if it is in
+`%subUidsUsed` (handed out this activation) or `%subUidsPrevUsed` (read back
+from `/var/lib/nixos/auto-subuid-map`). **Explicitly-declared `subUidRanges`
+are never added to either set.** The manual pin is not a reservation; it is
+invisible to the thing doing the reserving.
+
+What makes this the interesting kind of bug is why `nire-durandal` was fine.
+`elly` had been auto-allocated 100000 *before* the pin was written, so 100000
+is in that host's map file, so `%subUidsPrevUsed` contains it, so the allocator
+steps past it to 165536. The machine's accumulated state was concealing the
+defect. On `nire-testbed` or `nire-lego`, neither of which has been installed
+yet and neither of which has a map file, the same config produces
+`elly:100000:65536` and `container:100000:65536` — two users, one range, with
+rootless podman storage on both sides of it.
+
+- **When an option has both an "auto" mode and a "manual" mode for the same
+  resource, find out whether auto can see manual before using both.** Often it
+  cannot, and nothing says so.
+- §24 is "compare against what is deployed, not the last commit". This is its
+  inverse and it bites in the other direction: **a host that works can be
+  working because of state a fresh one will not have.** Four of the six
+  `nixosConfigurations` here have never been installed, so "durandal is fine"
+  is not the same claim as "the config is right".
+
+## 33. A removed option is not an ignored option, and defaults are worth reading
+
+Three separate restatements went into one afternoon's libvirt module, and the
+tree caught none of them:
+
+- `virtualisation.libvirtd.qemu.ovmf` — every wiki page and blog post still
+  tells you to set this. nixpkgs **removed** the submodule; all OVMF images
+  QEMU distributes are now installed by default. It is not silently dropped:
+  `libvirtd.nix` carries an assertion whose message is "the submodule has been
+  removed", so writing it out of habit fails evaluation. `qemuOvmf` and
+  `qemuOvmfPackage` are `mkRemovedOptionModule` alongside it.
+- `virtualisation.libvirtd.allowedBridges` was written as `[ "virbr0" ]`. That
+  is already its nixpkgs default, verbatim.
+- `spice-gtk` was added to `environment.systemPackages` next to
+  `virtualisation.spiceUSBRedirection.enable`, which installs `spice-gtk`
+  itself for the polkit actions belonging to its setuid wrapper.
+
+Only the first would have failed. The other two are the same class as the
+`lib.mkIf (!pkgs.stdenv.isDarwin)` hand-restatement CLAUDE.md warns about under
+"Platform support is derived": **config that agrees with the default is not
+harmless, because it reads as a decision.** The duplicate `spice-gtk` was found
+by evaluating the package-name list and noticing the same string twice —
+`nix eval … environment.systemPackages --apply` with a filter, which takes
+seconds and is worth doing after adding any module that installs things.
+
+The general habit, since option churn in `virtualisation.*` is heavy: **read
+the nixpkgs module, not the wiki.** The `mkRenamedOptionModule` /
+`mkRemovedOptionModule` block near the top of one is a changelog of exactly the
+options a stale guide will tell you to set.
+
+## 34. The dangerous name collision is the one where both halves work
+
+CLAUDE.md's `boot` story — the `nire/boot/` category and durandal's
+`boot.nix` merging into one name — has an obvious tell: importing a bootloader
+got you an impermanence rollback, which is startling enough to investigate.
+
+Moving the VM modules into a category directory of their own set up the same
+collision in a shape with no tell. The directory would have been
+`nire/virtualization/`, so `dirsAsCategory` would declare
+`flake.modules.nixos.virtualization`; the file inside it was `virtualization.nix`,
+which declares `flake.modules.nixos.virtualization` from its own filename.
+They **merge**. And both halves are libvirt config, so importing either name
+still gets you working VMs, and the tree still evaluates, and `just diff` still
+shows what you expected. Nothing would have looked wrong until someone imported
+the category expecting the category.
+
+Caught before it landed, by asking what the aggregate would be named rather
+than by anything reporting it — `just modules` does detect it, but only once
+the file exists and only if it is run. The file is `libvirt.nix` now, which is
+the better name anyway.
+
+**A merge is only visible when the two halves disagree.** When naming a module,
+check what its directory is already going to declare — and prefer the specific
+name for the file, leaving the general one to the category that hosts import.

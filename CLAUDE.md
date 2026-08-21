@@ -23,24 +23,28 @@ be careful with anything touching `flake/modules/nire/impermanence/` or the
 named `boot` until 2026-08-11; renamed because `boot` had come to mean only
 this. It deletes the `/root` btrfs subvolume in initrd on every boot, and it
 depends on a `root-blank` subvolume existing on the machine. **Three of the
-four NixOS hosts import it and wipe `/root` on every boot: `nire-durandal`,
-`nire-tenacity`, `nire-lego`.** `nire-testbed` (added 2026-08-14) deliberately
-does **not** import it -- its own config says so explicitly, because it hits
-persistence assumptions the other hosts don't (see `nireHost/testbed-configuration.nix`).
-Don't assume "every host wipes root" or "no host does" -- check the specific
-host. (`nire-installer`, added 2026-08-15, is neither -- it's a live-USB
-image with no persistent `/root` to roll back, not one of "the four" above;
-see State.) Read `WARN-impermanence.nix`, and
+five NixOS hosts import it and wipe `/root` on every boot: `nire-durandal`,
+`nire-tenacity`, `nire-lego`.** `nire-testbed` (added 2026-08-14) and
+`nire-cube` (added 2026-08-20) deliberately do **not** import it -- both configs
+say so explicitly, because it hits persistence assumptions the other hosts
+don't (see `nireHost/testbed-configuration.nix`, and cube's header: its real
+install turned out to be a plain root, not LUKS+impermanence, corrected
+2026-08-21 in `2efca5e4`). Don't assume "every host wipes root" or "no host
+does" -- check the specific host. (`nire-installer`, added 2026-08-15, is
+neither -- it's a live-USB image with no persistent `/root` to roll back, not
+one of "the five" above; see State.) Read `WARN-impermanence.nix`, and
 `claude cave/lessons-learned-impermanence-stage1-migration.md`, before changing anything near it.
 
 Secrets are sops-nix (`flake/modules/nire/system/secrets/`).
 `secrets.yaml` is encrypted and committed; that is deliberate, not a mistake to
-be "fixed". `.sops.yaml` enrolls `nire-durandal`, `nire-lysithea`, and
-`nire-tenacity` -- all three are live hosts with current config here, so this
-is the normal case, not a leftover to prune. `nire-testbed` and `nire-lego`
-(both added 2026-08-14) are not yet enrolled; if either ends up needing
-secrets, add its SSH host key converted with `ssh-to-age` and run `sops
-updatekeys secrets.yaml`.
+be "fixed". `.sops.yaml` enrolls `nire-durandal`, `nire-lysithea`,
+`nire-tenacity` and `nire-cube` (the last added 2026-08-21 in `9480b06a`) --
+all four are live hosts with current config here, so this is the normal case,
+not a leftover to prune. `nire-testbed` and `nire-lego` (both added
+2026-08-14) are not yet enrolled; if either ends up needing secrets, add its
+SSH host key converted with `ssh-to-age` and run `sops updatekeys
+secrets.yaml`. Read the file rather than this paragraph -- it said "three"
+for a day after cube was enrolled.
 
 ## State
 
@@ -87,12 +91,14 @@ undated "verified" as *evaluates*.** The first boot found four defects that
 evaluation and a successful build both missed (`lessons-learned.md` §25), so a
 green `nix flake check` says nothing about behaviour.
 
-Four NixOS *hosts* now, not two: `nire-durandal` (workstation), `nire-tenacity`
+Five NixOS *hosts* now, not two: `nire-durandal` (workstation), `nire-tenacity`
 (handheld, Jovian/SteamOS), `nire-testbed` (ThinkPad X270, added 2026-08-14),
-and `nire-lego` (Legion Go handheld, added 2026-08-14, using tenacity's disk
-layout) — plus the darwin host, `nire-lysithea`. A fifth `nixosConfigurations`
-entry, `nire-installer`, exists too but isn't a host (see above and
-Architecture). `durandal`, `tenacity`, and `lego` import the `impermanence`
+`nire-lego` (Legion Go handheld, added 2026-08-14, using tenacity's disk
+layout), and `nire-cube` (GMKtec mini PC, added 2026-08-20) — plus the darwin host,
+`nire-lysithea`. A sixth `nixosConfigurations` entry, `nire-installer`, exists
+too but isn't a host (see above and Architecture). This paragraph said "four"
+until 2026-08-21, when `nire-cube` had already been in `hosts.nix` for a day;
+the count below has the standing warning about that. `durandal`, `tenacity`, and `lego` import the `impermanence`
 category and wipe `/root` on boot; `testbed` deliberately does not (see
 Safety). Tenacity was dropped by the den restructure and brought back from
 `origin/backup-before-flake-parts-happened`, the last config it actually ran.
@@ -190,29 +196,53 @@ Two consequences worth holding onto:
 
 Areas: `nire/` (shared system, now including a `nire/macos/` subarea for
 darwin-specific settings), `nireHost/` (per-host), `nirePackages/`
-(packages), `nireUser/` (elly). This file used to give a declared-class
+(packages), `nireUser/` (elly).
+
+**Not every category is imported by every host, and `virtualization` is the
+clearest example.** Added 2026-08-21 as `nire/virtualization/`, holding
+`libvirt`, `virt-tools` and `vm-networking`. `nire-durandal`, `nire-cube` and
+`nire-testbed` import it; `nire-tenacity` and `nire-lego` — the handhelds, i.e.
+the two that import `jovian` — deliberately do not, because libvirtd is a
+boot-time daemon and a gamescope handheld will never open virt-manager. It got
+its own category for exactly that reason: it started inside `nire/system/`,
+which every Linux host imports whole, so there was no way to decline it. **If
+something shared needs to be optional, a category is the mechanism; nothing in
+this tree declares `mkEnableOption`.** `kde-desktop` is the other shape of the
+same idea — a single module imported by name while its category (`desktop-env`,
+which also holds `jovian`) is never imported whole.
+
+Related, and a live trap rather than history: containers and VMs are separate
+here and the word "virtualization" means only the second.
+`nire/system/containers/containers.nix` is podman and distrobox, is a member of
+`system`, and is therefore on every Linux host. It was
+`nire/system/virtualization/virtualization.nix` until 2026-08-21 — so a search
+for the old path or the old module name finds nothing, and a memory of
+"virtualization is the podman one" is now exactly backwards. This file used to give a declared-class
 breakdown here (101 homeManager-only, 43 nixos-only, 9 both, one darwin) — it's
 stale as of 2026-08-15 (`nire/macos/` alone now holds several darwin-touching
 modules beyond the `elly-user.nix` example that used to be "the one"), and
 nothing here derives it mechanically the way `just modules` derives category
 membership. Don't quote old numbers; recount if it matters.
 
-**There are five hosts, not two, and one of them is darwin — plus a sixth
+**There are six hosts, not two, and one of them is darwin — plus a seventh
 `nixosConfigurations` entry that isn't a host at all.**
 `nireHost/hosts.nix` declares `flake.darwinConfigurations.nire-lysithea`
-alongside **five** `nixosConfigurations` — `nire-durandal`, `nire-tenacity`,
-`nire-testbed`, `nire-lego` (the latter two added 2026-08-14), and
-`nire-installer` (added 2026-08-15) — and the `darwin` class is live. Of
-those five, `nire-installer` is the odd one: a live-USB image built solely to
+alongside **six** `nixosConfigurations` — `nire-durandal`, `nire-tenacity`,
+`nire-testbed`, `nire-lego` (the latter two added 2026-08-14), `nire-cube`
+(added 2026-08-20), and `nire-installer` (added 2026-08-15) — and the `darwin`
+class is live. Of those six, `nire-installer` is the odd one: a live-USB image built solely to
 install `nire-testbed`, "not a host anyone switches to or boots
 persistently" per its own header (`nireHost/installer/installer-configuration.nix`).
 It has no `elly` user, no impermanence, no persistent state, and `just
 liveusb` builds it rather than `just build`/`switch`. Don't count it as a
-sixth machine, but don't forget it either — it's the only way `nire-testbed`
+seventh machine, but don't forget it either — it's the only way `nire-testbed`
 is expected to actually get installed. This file claimed only two hosts total
 until 2026-08-12, then three until 2026-08-15, then four real hosts (five
-`nixosConfigurations`) same day. Check `hosts.nix` directly before stating a
-host count; it has grown three times already and will again.
+`nixosConfigurations`) same day, then five (six) on 2026-08-21. Check
+`hosts.nix` directly before stating a host count; it has grown four times
+already and will again — and it was stale for a day each of the last two times,
+so a count in prose here is a claim about when someone last looked, not about
+the tree.
 
 ### Home Manager is NixOS-integrated
 
@@ -229,7 +259,7 @@ applies both. `flake/doc/trailhead-home-manager-standalone.md` is the way back.
 
 ### Platform support is derived; Homebrew overlap is not
 
-`ellyHomeManager` is shared verbatim by all five hosts, including
+`ellyHomeManager` is shared verbatim by all six hosts, including
 `nire-lysithea` (aarch64-darwin), so everything in it has to survive darwin.
 Two different questions come up when adding a package — can nixpkgs build it
 on darwin (answered automatically, don't hand-restate `meta.platforms`), and
@@ -411,7 +441,13 @@ env vars passed where `argv` was read, and a mangled line nothing highlighted.
 - `claude cave/lessons-learned.md` — how the work went wrong in the doing: tools that
   reported success while being wrong, traps that were documented and hit anyway,
   and which questions were settled by reading source. §§1–18 are the port,
-  §§19–24 the first session on the hardware, §§25–31 after it booted.
+  §§19–24 the first session on the hardware, §§25–31 after it booted, §§32–34
+  later work on booted hosts. §32 (an auto-allocator cannot see manually pinned
+  ranges, and a working host can be working on state a fresh one lacks), §33
+  (a removed nixpkgs option asserts rather than being ignored; `virtualisation.*`
+  churns and the wiki is stale) and §34 (a module name that collides with its own
+  category *merges*, and the merge is invisible when both halves do the same
+  thing) all came out of the virtualization work.
 - `flake/doc/trailhead-home-manager-standalone.md` — reversing the HM decision, and the
   part of the cutover that is one-way on the machine rather than in the repo.
 - `git show origin/flake-parts:SESSION-HANDOFF.md` — the sibling branch's notes
