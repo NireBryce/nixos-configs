@@ -354,6 +354,14 @@ hash does not prove breakage — reordering imports permutes
 `environment.systemPackages` — so compare values with `just diff`, not just the
 hash.
 
+**A drvPath moving after a docs-only edit is `nire-installer`, and is
+expected.** `nireHost/installer/installer-configuration.nix` sets
+`environment.etc."nixos-configs".source = inputs.self`, so the image embeds this
+whole flake — which makes its toplevel depend on *every tracked file*,
+`CLAUDE.md` and `.claude/` included. Editing only markdown moves that one drv
+and no other. Don't go looking for a config change that isn't there; check
+whether the host that moved is the installer first.
+
 **Bugs here serialize.** Evaluating a cheap attribute proves nothing;
 `networking.hostName` resolved happily while four separate things were broken.
 Force a toplevel. And note that evaluating and building both stop short of the

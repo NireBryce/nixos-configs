@@ -66,14 +66,26 @@ git worktree remove --force /tmp/wt
 
 ## 1. Branch, push, open the PR
 
-Never commit onto `main`. If commits are already sitting on local `main`
-unpushed, move them rather than pushing:
+Never commit onto `main`. Run `git status -sb` first — the fix differs by
+which of two positions you are in, and they look similar in a diff:
 
-```sh
-git branch <branch-name>          # keep the commits
-git reset --hard origin/main      # put main back
-git checkout <branch-name>
-```
+- **Uncommitted changes on `main`** (the common one; `## main...origin/main`
+  with a dirty tree). Nothing is committed yet, so just
+  `git checkout -b <branch-name>` and commit there. No reset, nothing to
+  rescue.
+- **Commits already sitting on local `main`, unpushed** (`[ahead N]`). Move
+  them rather than pushing:
+
+  ```sh
+  git branch <branch-name>          # keep the commits
+  git reset --hard origin/main      # put main back
+  git checkout <branch-name>
+  ```
+
+On commit shape, follow `lessons-learned.md` §15: order commits so each is
+green, and do not split into commits that describe state the tree does not have
+yet. One coherent commit beats two artificial ones — a `CLAUDE.md` line
+pointing at a new file belongs in the same commit as the file.
 
 Then `git push -u origin <branch-name>` and `gh pr create`. Write the PR body
 the way the commit messages are written here — what changed, why, what was
@@ -86,10 +98,14 @@ Show what **actually landed**, read back from git and `gh`, not recalled from
 what you meant to do (`check-claims-against-the-machine`). At minimum:
 
 ```sh
-gh pr view --json url,title,additions,deletions,changedFiles
+gh pr view --json url,title,additions,deletions,changedFiles,mergeable
 git log --oneline origin/main..HEAD
 git diff --stat origin/main...HEAD
 ```
+
+Include `mergeable` and check it before asking. Asking "merge?" on a PR that
+cannot merge spends one of Elly's round-trips on a question with no good
+answer; sort the conflict out first, then ask.
 
 Print that in your response, then ask with `AskUserQuestion` whether to merge.
 Include the merge method in what you show. **Default to `--merge`**, not
@@ -123,6 +139,21 @@ git push origin --delete <branch-name>
 On no, leave it and say it is still there. Report the merge commit and the
 branch's fate; do not report a commit range on `main` as if you had pushed
 there.
+
+## The ruleset does not enforce this for you
+
+A branch ruleset ("main: require a PR", id 21163726) was added 2026-08-21:
+`main` cannot be deleted, cannot be force-pushed, and needs a PR to merge into.
+Zero approvals are required, so Elly can merge their own PRs — requiring one on
+a solo repo would deadlock, since nobody can approve their own.
+
+**It does not stop you.** Bypass is granted to the admin repository role, and
+`gh`/`git` here authenticate as Elly, who is the admin — the API reports
+`current_user_can_bypass: always`. A direct `git push origin main` from this
+session would still succeed. The ruleset is a backstop for everything else and
+a visible statement of intent; the actual guard against the mistake this file
+documents is this file. Do not read "main is protected" as "the tooling will
+catch me".
 
 ## Only when Elly names main
 
