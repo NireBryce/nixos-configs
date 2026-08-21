@@ -59,7 +59,16 @@
 
         nix             # basic-nix-settings
         shell-config    # bash, blesh, shell-env, zsh
-        system          # font, virtualization
+        system          # font, drop-unsupported-packages. The rest of the
+                        # `system` category is nixos/darwin-class and does not
+                        # reach here. This line used to read "font,
+                        # virtualization" -- virtualization.nix's homeManager
+                        # block was, and still is, commented out, so it never
+                        # contributed one. That file is now
+                        # nire/system/containers/containers.nix; the word
+                        # `virtualization` moved to a category of its own,
+                        # which is nixos-class throughout and imported by only
+                        # three hosts, so it never reaches this list either.
 
         # packages
         development
