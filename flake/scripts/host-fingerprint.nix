@@ -34,6 +34,35 @@ in
   systemdUserServices = builtins.attrNames cfg.systemd.user.services;
   users = builtins.attrNames cfg.users.users;
   userGroups = sortStr cfg.users.users.${user}.extraGroups;
+
+  # Blind spot found 2026-08-21: ssh.nix's `elly@nire-lysithea` key had no
+  # private half left on that machine, so the laptop this repo is edited from
+  # could not ssh to any host in the fleet -- ssh.nix is publickey-only, so a
+  # mismatch is a refusal, not a fallback. Adding the right key moved the
+  # toplevel and this file reported "no attribute in the fingerprint differs",
+  # because nothing sampled who is allowed to log in.
+  #
+  # Every user, not just ${user}: a key appearing on `root` is precisely the
+  # change worth seeing, and it would be invisible if this sampled one account.
+  #
+  # A flat list of "<user>: <key>" rather than an attrset of user -> keys,
+  # because diff-config.sh prints dict entries as `changed 'root'` with no
+  # values, while list entries print the added and removed items themselves.
+  # The whole key line is kept rather than just its comment field: the bug that
+  # prompted this was two DIFFERENT keys whose comments differed only by a
+  # `.local` suffix, so a projection down to the comment would have shown
+  # nothing at all.
+  #
+  # `openssh.authorizedKeys.keyFiles` is deliberately not sampled -- nothing in
+  # this tree sets it, and a path there would serialize to a store path that
+  # churns on every flake change, making this noisy for a case that does not
+  # arise. If something ever does set it, sample it here too.
+  authorizedKeys =
+    let
+      users = builtins.attrNames cfg.users.users;
+      keysOf = n: map (k: "${n}: ${k}") cfg.users.users.${n}.openssh.authorizedKeys.keys;
+    in
+    sortStr (builtins.concatLists (map keysOf users));
   fileSystems = builtins.attrNames cfg.fileSystems;
 
   # Names alone missed a real change: options is `listOf str`, so two modules
