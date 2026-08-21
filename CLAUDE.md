@@ -464,8 +464,9 @@ env vars passed where `argv` was read, and a mangled line nothing highlighted.
 - `claude cave/lessons-learned.md` — how the work went wrong in the doing: tools that
   reported success while being wrong, traps that were documented and hit anyway,
   and which questions were settled by reading source. §§1–18 are the port,
-  §§19–24 the first session on the hardware, §§25–31 after it booted, §§32–34
-  later work on booted hosts. §32 (an auto-allocator cannot see manually pinned
+  §§19–24 the first session on the hardware, §§25–31 after it booted, §§32–35
+  later work on booted hosts (§35 borrowed from upstream rather than lived here,
+  and labelled as such). §32 (an auto-allocator cannot see manually pinned
   ranges, and a working host can be working on state a fresh one lacks), §33
   (a removed nixpkgs option asserts rather than being ignored; `virtualisation.*`
   churns and the wiki is stale) and §34 (a module name that collides with its own
