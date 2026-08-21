@@ -13,10 +13,11 @@ not recoverable from the tree or the commits.
 Three groups, by what could be observed at the time. §§1–18 are the port, from
 the darwin laptop, against a tree that could only be evaluated. §§19–24 are the
 first session on `nire-tenacity`, where the disk and the build plan became
-visible. §§25–31 are from after it booted — see §25. §§32–34 are later work on
+visible. §§25–31 are from after it booted — see §25. §§32–35 are later work on
 already-booted hosts, where the open question stopped being "does it
 evaluate" and became "is this true on the hosts that have never been
-installed".
+installed". §35 is the one entry not lived here: a caveat adopted from an
+upstream bug report about a change that is merged but unbuilt, and it says so.
 
 Numbers are stable; §§2, 5, 7, 11, 14, 18, 24 and 25 are referenced elsewhere.
 
@@ -574,3 +575,48 @@ the better name anyway.
 **A merge is only visible when the two halves disagree.** When naming a module,
 check what its directory is already going to declare — and prefer the specific
 name for the file, leaving the general one to the category that hosts import.
+
+## 35. "Enabled" is a claim about config, not about whether anything works
+
+**Borrowed, not lived.** Everything above happened here. This one is a caveat
+taken from someone else's bug report while enabling avahi and systemd-resolved
+together (2026-08-21, `nire/system/networking/`), written down because the
+shape is one this file already keeps hitting and because it is a live risk on
+the next rebuild. Nothing on this fleet has demonstrated it yet — the config is
+merged and unbuilt.
+
+A NixOS Discourse thread reports `.local` names failing to resolve while
+`resolvectl status` showed mDNS enabled **both globally and per-interface**.
+Queries still timed out with "All attempts to contact name servers or networks
+failed", while avahi resolved the same names on the same host. The suggested
+per-link `nmcli` fix changed nothing, and the thread closed unresolved.
+
+The trap is that mDNS is not a switch either daemon owns. It is a claim on UDP
+port 5353, and only one listener receives the unicast replies. So a daemon can
+be configured correctly, report itself enabled, and still answer nothing,
+because another process holds the socket. **Neither daemon's status output
+mentions the other.** `resolvectl status` will not tell you avahi has the port;
+`avahi-daemon` logs about a competing stack, but only in its own journal.
+
+Which makes "is it enabled?" the wrong question and "who holds 5353?" the right
+one:
+
+```sh
+sudo ss -ulpn 'sport = :5353'      # who actually has the socket
+resolvectl mdns                    # what resolved thinks, per link
+journalctl -u avahi-daemon | grep -i "another\|stack"
+```
+
+Same family as §1 (a tool reporting success has not thereby been tested), §22
+(a zero is not evidence until you show the query can return non-zero) and §31
+(a count is only evidence if you know what it counts). The general form:
+
+- **A configuration readout is not a functional test.** It reports intent, and
+  intent is exactly what is not in question when two things contend.
+- **When two components can claim one resource, neither one's view of itself
+  is diagnostic.** Go look at the resource.
+
+If `.local` misbehaves after the avahi/resolved rebuild, check the socket
+before concluding the Nix config is wrong. The config was verified by value —
+`nsswitch` ordering, `MulticastDNS = "no"`, the NetworkManager handover — and
+none of that is evidence about a running daemon.
