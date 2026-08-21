@@ -30,6 +30,7 @@ in
         nire-tenacity = mkHost "x86_64-linux" config.flake.modules.nixos.tenacityConfiguration;
         nire-testbed  = mkHost "x86_64-linux" config.flake.modules.nixos.testbedConfiguration;
         nire-lego     = mkHost "x86_64-linux" config.flake.modules.nixos.legoConfiguration;
+        nire-cube     = mkHost "x86_64-linux" config.flake.modules.nixos.cubeConfiguration;
 
         # Not a machine anyone owns -- a live-USB installer image, built to
         # install nire-testbed onto real hardware. See
