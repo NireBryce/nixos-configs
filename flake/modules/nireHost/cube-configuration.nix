@@ -13,8 +13,8 @@
 # definition should not become a member of anything.
 #
 # Meant as a copy of durandal-configuration.nix's shape -- same category
-# imports, same workstation session, WITH impermanence -- adapted for
-# hardware that isn't durandal's:
+# imports, same workstation session -- adapted for hardware that isn't
+# durandal's:
 #
 #   - b550-suspend-fix.nix is NOT carried over. It clears PCI wakeup on two
 #     specific PCI IDs (1022:1483) belonging to durandal's Gigabyte B550M
@@ -26,25 +26,34 @@
 #     diagnose it fresh and add a `cube`-specific fix the same way durandal's
 #     was added, rather than assuming this one applies.
 #
-#   - Disk layout comes from disko, not a captured hardware-configuration.nix,
-#     because this machine has not been installed yet -- see
-#     cube/hardware/disko-cube.nix, which wires in
-#     nire/impermanence/_disko/impermanence-luks-btrfs.nix with
-#     includeSecureboot = true (matching durandal's own secureboot subvolume)
-#     and no swap. The device path in that file is a deliberate placeholder
-#     and MUST be checked against the real hardware before this is ever
-#     installed -- see that file's own header for why it is not a
-#     plausible-looking guess like "/dev/nvme0n1".
+#   - Disk layout comes from a captured hardware-configuration, not disko.
+#     cube/hardware/disko-cube.nix used to wire in
+#     nire/impermanence/_disko/impermanence-luks-btrfs.nix against a
+#     deliberate placeholder device, from when this host had not been
+#     installed yet. It was installed by hand instead, off the stock NixOS
+#     live ISO -- plain persistent btrfs root, no LUKS -- so that file was
+#     deleted and replaced with cube/hardware/hardware-cube.nix, a real
+#     nixos-generate-config capture. See that file's own header and history
+#     note for the full story.
 #
-# WITH impermanence, same as durandal: `/root` gets wiped and recreated from
-# a blank snapshot on every boot. Read WARN-impermanence.nix and README.md's
-# safety section before touching anything near this.
+# WITHOUT impermanence, unlike durandal: this host was installed with a plain
+# persistent root, the same shape as testbed (see testbed-configuration.nix),
+# not the `/root`-wipe durandal, tenacity, and lego have. `impermanence` is
+# deliberately NOT in this file's imports below. invariants.nix's rollback,
+# hibernation, and persistence checks are gated on the restore-root initrd
+# unit existing (see its "OPT-IN, SINCE NIRE-TESTBED" header) so they don't
+# apply here, same as testbed. WARN-password-required.nix fires its warning
+# on this host for the same reason -- elly-user.nix's hashedPasswordFile still
+# points at /persist/passwords/elly unconditionally, and nothing in this repo
+# creates that file; it was created by hand on the real machine before this
+# was ever switched to. Read WARN-impermanence.nix and README.md's safety
+# section before assuming any of that has changed for cube specifically.
 { config, ... }:
 {
     flake.modules.nixos.cubeConfiguration.imports =
     with config.flake.modules.nixos; [
         # ── this machine ──────────────────────────────────────────────────────
-        # nireHost/cube/: disko-cube, boot-cube, nixpkgs-hostPlatform-cube,
+        # nireHost/cube/: hardware-cube, boot-cube, nixpkgs-hostPlatform-cube,
         # nixpkgs-stateVersion-cube -- suffixed for the same reason
         # tenacity's/testbed's/lego's are: a module's name is its filename, and
         # same name in the same class merges rather than erroring.
@@ -53,16 +62,9 @@
         # ── shared ────────────────────────────────────────────────────────────
         boot            # common boot options: boot-generations
 
-        # WARN-impermanence -- wipes /root on boot, see the module.
-        #
-        # PREREQUISITE: the rollback does
-        #   btrfs subvolume snapshot /mnt/root-blank /mnt/root
-        # so a `root-blank` subvolume must exist on this machine's btrfs top
-        # level. disko-cube.nix's layout creates it -- see that file -- but
-        # only once disko has actually been run against the real disk. This
-        # host cannot boot successfully before that regardless of what the
-        # rest of this config says.
-        impermanence
+        # Deliberately NOT `impermanence` -- see the header above. This host
+        # keeps a plain persistent root, same as testbed, not the `/root`
+        # wipe durandal/tenacity/lego have.
 
         hardware        # amdcpu, amdgpu -- R2514 + integrated Radeon is AMD
                         # throughout, same shared category durandal and lego

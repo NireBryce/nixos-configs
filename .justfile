@@ -131,6 +131,14 @@ available *pkgs:
     # reading meta.platforms a question that used to be settled by eye, wrongly.
     @{{scripts}}/pkg-availability.py {{pkgs}}
 
+# A host's sops recipient key: bare for this machine, a hostname to scan it
+# remotely, --pubkey-file <path>, or --updatekeys to re-encrypt secrets.yaml
+age-key *args:
+    # Only ever reads a public key and prints -- does not edit .sops.yaml.
+    # See flake/scripts/host-age-key.sh for why, and for the enrollment steps
+    # it prints after the key.
+    @{{scripts}}/host-age-key.sh {{args}}
+
 # Update inputs, then re-check
 update:
     cd {{flake}} && nix flake update
