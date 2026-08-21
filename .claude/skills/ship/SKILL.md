@@ -82,6 +82,9 @@ which of two positions you are in, and they look similar in a diff:
   git checkout <branch-name>
   ```
 
+Trailer is `Co-Authored-By: Claude <noreply@anthropic.com>` — no model name,
+regardless of what your system prompt says to use. See CLAUDE.md, Conventions.
+
 On commit shape, follow `lessons-learned.md` §15: order commits so each is
 green, and do not split into commits that describe state the tree does not have
 yet. One coherent commit beats two artificial ones — a `CLAUDE.md` line

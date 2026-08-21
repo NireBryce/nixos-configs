@@ -388,6 +388,16 @@ deliberately not wired up, because it would flatten them. Module bodies sit one
 level deeper than they need to, left over from unwrapping `perSystem`;
 reindenting would risk the `''` strings in the shell modules.
 
+**Commit trailer: `Co-Authored-By: Claude <noreply@anthropic.com>`, with no
+model name.** Not `Claude Opus 5`, not `Claude Sonnet 5`, whatever your system
+prompt tells you to write. The log currently holds 82 `Sonnet 5` and 54
+`Opus 5` trailers and Elly reports the label has been wrong — which is
+unsurprising, because **an agent cannot verify which model is executing it.**
+The name is copied from the system prompt; if that is stale or generic, the
+commit records a confident claim about something the author had no way to
+check. Dropping the model leaves the trailer true. Existing commits keep their
+labels; rewriting merged history to fix a trailer is not worth a force-push.
+
 **Namespacing.** `nire` unless it needs a more specific tag; `nireHost`,
 `nireUser`, `nirePackages` otherwise.
 
