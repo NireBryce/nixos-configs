@@ -143,6 +143,43 @@ On no, leave it and say it is still there. Report the merge commit and the
 branch's fate; do not report a commit range on `main` as if you had pushed
 there.
 
+## When one working tree becomes two PRs
+
+Both of these bit on 2026-08-21, splitting one dirty tree into #43 and #44.
+
+**`cp` is aliased to `cp -i` on this machine** — `~/.zshrc:372`, Home Manager
+generated. In a non-interactive Bash call it answers its own prompt, prints
+`not overwritten`, and **exits 0**. The copy does not happen and the output
+reads like success. `mv`, `rm` and `ln` are not aliased; only `cp`. When
+restoring saved file states to reconstruct a branch, use `cat src > dst` or
+`command cp`. This was caught by the staged diff coming back empty, not by
+anything the copy said — `lessons-learned.md` §1, a tool reporting success
+while being wrong.
+
+Note the alias is written `alias -- cp='cp -i'`, so a grep for `alias cp=`
+misses it. That is how it went unnoticed the first time.
+
+**A stacked PR is not retargeted when its base merges.** GitHub retargets a
+child PR only when the base *branch is deleted*. So after the parent merges,
+the child still points at a merged branch, and the obvious way to unblock it is
+to delete that branch — which is step 4, and would mean the mechanics forcing a
+confirmation that is supposed to be Elly's. Retarget explicitly instead, before
+merging the child:
+
+```sh
+gh pr edit <child-number> --base main
+```
+
+Then merge it, then ask about both branches together at step 4.
+
+**Both gates still apply per PR, but they can share a round-trip.**
+`AskUserQuestion` takes up to four questions in one call, so two PRs is one call
+with two merge questions, then one call with the branch-deletion question. That
+is still a separate question per decision — which is the requirement — without
+four round-trips. Say in the options which PR is stacked on which, so a
+"no on the parent, yes on the child" answer is visibly incoherent rather than
+something you have to unpick afterwards.
+
 ## The ruleset does not enforce this for you
 
 A branch ruleset ("main: require a PR", id 21163726) was added 2026-08-21:
