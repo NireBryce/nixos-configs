@@ -52,6 +52,12 @@
         # kde-desktop pulls in kde-base itself.
         kde-desktop
 
+        # libvirt/QEMU VMs: libvirt, virt-tools, vm-networking. Kept here on
+        # the same grounds as the package parity below -- nothing in it is
+        # vendor-specific, and an X270 runs a small guest fine. Drop this line
+        # if the machine turns out too thin for it; nothing else depends on it.
+        virtualization
+
         # ── packages ──────────────────────────────────────────────────────────
         # Full parity with durandal. Nothing here is Intel/AMD-specific --
         # swept for hidden vendor assumptions before this host was added, and

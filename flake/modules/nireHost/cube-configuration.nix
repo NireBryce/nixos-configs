@@ -80,6 +80,11 @@
         # kde-desktop pulls in kde-base itself.
         kde-desktop
 
+        # libvirt/QEMU VMs: libvirt, virt-tools, vm-networking. Same choice
+        # durandal made. Not imported by tenacity or lego, which is the whole
+        # reason this is a category of its own instead of part of `system`.
+        virtualization
+
         # ── packages ──────────────────────────────────────────────────────────
         # Full parity with durandal.
         development

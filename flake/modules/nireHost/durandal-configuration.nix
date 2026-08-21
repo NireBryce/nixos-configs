@@ -34,6 +34,12 @@
         # the 2026-08-10 split.
         kde-desktop
 
+        # libvirt/QEMU VMs: libvirt, virt-tools, vm-networking. Its own category
+        # rather than part of `system` precisely so the handhelds can decline it
+        # -- tenacity and lego omit this line. Needs security.polkit.enable,
+        # which kde-desktop already brings.
+        virtualization
+
         # ── packages ──────────────────────────────────────────────────────────
         development
         editors
