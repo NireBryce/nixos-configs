@@ -367,6 +367,11 @@ regression faster than any argument about mechanism.
 between commits. "This is broken and here is the fix" beats incident-report
 framing.
 
+**"push" means the `ship` skill, not `git push origin main`.** Branch, PR, ask
+before merging, ask again before deleting the branch — two confirmations, not
+one. Only for work headed to `main` — pushing a topic branch is just a push.
+The skill has the flow and why.
+
 ## Conventions
 
 **Read `claude cave/claude-style-guide.md` before writing a new module.** Formatting
