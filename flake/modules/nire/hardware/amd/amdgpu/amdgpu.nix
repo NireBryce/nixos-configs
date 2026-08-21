@@ -19,6 +19,10 @@
             ];
 
             # mesa / vulkan
+            # This is also what gives sunshine.nix's VAAPI hardware encode a driver to
+            # find -- mesa's radeonsi bundles VAAPI for AMD, no extra package needed the
+            # way Intel's does. See that file for the rest of the story (why the encoder
+            # isn't forced) and sunshine-elly.nix for the device-permission groups it needs.
             hardware.graphics.enable = true;
             hardware.graphics.enable32Bit = true;
             hardware.graphics.extraPackages = with pkgs; [
