@@ -17,6 +17,13 @@ don't have to be rediscovered by grepping the whole tree.
   (2026-08-12, found on a GPD G1617-02-L).
 - **[nix-darwin: `homebrew.onActivation.cleanup` requires Homebrew ≥ 6.0, with no version check or error naming it](<../bugs pending submission/2026-08-13-bugreport-nix-darwin-homebrew-force-cleanup.md>)**
   (2026-08-13).
+- **ble.sh: spurious `read: `': not a valid identifier` on Tab / auto-complete
+  when carapace is the active completer** — found 2026-08-22, not yet
+  written up for submission. Reproduces in a minimal ble.sh+carapace config,
+  unrelated to anything in this repo. Traced as far as ble.sh's global
+  `read` override intercepting reads inside carapace's progcomp-invoked
+  `_carapace_completer`, but not pinned to one statement; cosmetic only.
+  Full diagnosis: [blesh.md](categories/shell-config/blesh.md).
 
 ## Todos and ideas left next to the code
 

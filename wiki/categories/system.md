@@ -103,7 +103,7 @@ Both rely on `environment.persistence."/persist".directories` being
 `listOf` and therefore concatenating across every file that appends to it —
 same merge behavior as `environment.systemPackages` and the same one that
 makes `home.file.<n>.text` a trap on the Home Manager side (see
-[shell-config](shell-config.md)). See
+[shell-config](shell-config/README.md)). See
 `nire/system/impermanence/declare-persistence-option.nix`'s own header (and
 [impermanence](impermanence.md)) for why that option has to be declared
 unconditionally even on hosts where nothing populates it.

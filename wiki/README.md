@@ -32,23 +32,34 @@ of re-deriving it.
 - [Category reference](categories/README.md) — one article per real
   category (`nire/system`, `nire/impermanence`, `nire/virtualization`, …):
   what's in it, which hosts import it, and the traps specific to that one.
+  [shell-config](categories/shell-config/README.md) is the one category
+  that's grown its own subdirectory, with deep-dives on
+  [blesh](categories/shell-config/blesh.md) (the hand-wired bash line
+  editor config, and an open upstream bug found while diagnosing a
+  spurious `read` error on Tab-completion) and
+  [carapace](categories/shell-config/carapace.md) (the completion engine
+  blesh layers a menu on top of, and how it avoids clobbering — and being
+  clobbered by — `cod`'s daemon-based completions).
 - [Impermanence, initrd & secrets](impermanence-and-secrets.md) — the
   `/root`-wipe-on-boot mechanism, which hosts opt in, sops-nix.
 - [Traps & skills](traps-and-skills.md) — the mistakes that have actually
   happened here, and the skills that hold the long version of each.
 - [History & lessons learned](history.md) — the den → flake-parts port, the
   first hardware boots, and the sibling branch's own notes.
-- [Conventions & workflow](conventions.md) — style guide, `just` commands,
-  the `ship` flow, assorted fix snippets.
+- [Conventions & workflow](conventions.md) — the *repo's* style guide: Nix
+  formatting, `just` commands, the `ship` flow, assorted fix snippets.
 - [Open threads](open-threads.md) — pending upstream bug reports, todos,
   half-formed ideas, and things-to-look-into notes left in various corners.
+- [Wiki style guide](styleguide.md) — this wiki's *own* house style: the
+  directory hierarchy above in full (when a category page earns its own
+  subdirectory, like `shell-config` did), naming, linking, and how pages
+  here are meant to stay index-shaped instead of drifting into a second
+  copy of the facts they point at.
 
 ## Keeping this from rotting
 
 If a linked file moves or is renamed, this wiki's links break silently —
-there's no CI check tying the two together. Update the link when you notice
-it's stale; don't let a wiki page assert something the file it points to no
-longer says. If a page here starts accumulating actual facts instead of
-links (a paragraph explaining *why*, not just *where*), that's a sign the
-fact belongs in the linked file's own header instead, per this repo's
-existing convention of keeping explanations next to the code they explain.
+there's no CI check tying the two together. [styleguide.md](styleguide.md)
+has the full rule; the short version is the same one `CLAUDE.md` holds
+itself to: whichever change makes a page stale corrects it in the same
+change, not as a follow-up.

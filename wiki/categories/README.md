@@ -29,10 +29,19 @@ articles. Not covered here, deliberately:
 | [macos](macos.md) | `nire/macos/` | darwin | 3 | lysithea |
 | [nix](nix.md) | `nire/nix/` | nixos, homeManager, darwin | 2 | all 5 hosts |
 | [peripherals](peripherals.md) | `nire/peripherals/` | nixos | 2 | all 4 NixOS hosts |
-| [shell-config](shell-config.md) | `nire/shell-config/` | nixos, homeManager | 4 | all 4 NixOS hosts directly; reaches lysithea via `ellyHomeManager` |
+| [shell-config](shell-config/README.md) | `nire/shell-config/` | nixos, homeManager | 4 | all 4 NixOS hosts directly; reaches lysithea via `ellyHomeManager` |
 | [system](system.md) | `nire/system/` | nixos, homeManager, darwin | 38, in ~19 subdirectories | all 4 NixOS hosts + lysithea (partially) |
 | [virtualization](virtualization.md) | `nire/virtualization/` | nixos | 4 | durandal, cube (not the handhelds) |
 | [elly](elly.md) | `nireUser/elly/` | nixos, homeManager | 4 | all 5 hosts |
 
 "Members" counts real `.nix` files under the category directory, excluding
 `dirsAsCategory.nix` itself and anything under a `_`-prefixed path.
+
+`shell-config` is the one category page that's grown into its own
+directory rather than a single file — `shell-config/README.md` is the
+category article proper, and `shell-config/blesh.md` /
+`shell-config/carapace.md` sit alongside it as deep-dives on two specific
+members that turned out to have enough to say for their own pages. If
+another category's page grows a deep-dive worth splitting out, this is the
+precedent to follow — see [../styleguide.md](../styleguide.md) for the
+general rule (when it applies, naming, and why not to nest further).
