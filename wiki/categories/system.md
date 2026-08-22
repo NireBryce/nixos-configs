@@ -22,7 +22,7 @@ handhelds, specifically) can't be filed under `system`.
 | `impermanence/` | 1 | `declare-persistence-option.nix` — **not** the [impermanence](impermanence.md) category; see that page's "don't confuse the two" section. |
 | `kdeconnect/` | 1 | `kde-connect.nix`. |
 | `locale-tz-etc/` | 2 | `locale.nix`, `tz.nix`. |
-| `networking/` | 8 | tailscale, vpn, wifi, avahi, base `networking.nix`, `resolved.nix`, and two `*-persist.nix` siblings. See below. |
+| `networking/` | 8 | tailscale, vpn, wifi, avahi, base `networking.nix`, `resolved.nix`, and two `*-persist.nix` siblings. See below — MagicDNS naming and the ACL trap especially. |
 | `nix-ld/` | 1 | `nix-ld.nix`. |
 | `secrets/` | 1 | `sops.nix` — sops-nix wiring. See below. |
 | `security/` | 1 | `yubikey.nix`. |
@@ -107,6 +107,36 @@ makes `home.file.<n>.text` a trap on the Home Manager side (see
 `nire/system/impermanence/declare-persistence-option.nix`'s own header (and
 [impermanence](impermanence.md)) for why that option has to be declared
 unconditionally even on hosts where nothing populates it.
+
+## Tailscale: MagicDNS names, and the ACL lives outside this repo
+
+`networking/resolved.nix` + `networking/avahi.nix` (added 2026-08-21, split
+DNS between the two — avahi owns `.local`, resolved owns unicast DNS and
+Tailscale's split-DNS) were runtime-verified on `nire-tenacity` 2026-08-22:
+`getent`/`ping`/`ssh` all resolve peers by MagicDNS name correctly. Two traps
+turned up doing that verification, both real, neither a bug in this repo —
+recorded in full in `networking/tailscale.nix`'s own header:
+
+- **Tailscale device names don't match `networking.hostName`.** `nire-cube`
+  the NixOS host is `ts-cube` on the tailnet; same `ts-` pattern fleet-wide.
+  Looks exactly like a DNS failure until you check `tailscale status` for
+  the name a device actually registered.
+- **A tailnet ACL can silently block all peer-to-peer traffic while every
+  local NixOS firewall setting is correct**, and it looks exactly like a
+  host firewall problem right up until you check the admin console. The
+  fault hit here: a "match everything" access rule whose `dst` was
+  `autogroup:internet` (grants exit-node/internet access only) instead of
+  `autogroup:members` — the rule's own comment said "match absolutely
+  everything," and it didn't. `networking.firewall.trustedInterfaces =
+  [ "tailscale0" ]` (`networking.nix`) is provably not the cause in that
+  scenario — the ACL lives entirely in Tailscale's admin console, outside
+  this repo and outside anything `just switch` touches.
+
+Also worth keeping: `systemctl show firewall.service -p ExecStart`, read as
+a plain shell script (world-readable, no root needed), is the literal
+in-order `iptables` ruleset NixOS applied at boot — faster than querying the
+live table when the question is "is `trustedInterfaces` really the first
+rule in the chain."
 
 ## Imported by
 

@@ -349,6 +349,17 @@ lysithea, meaning this module should defer rather than double-install
 overlap, but which one wins is still a judgement call per app).
 `obsidian.nix` is the worked example for the second question.
 
+### Debugging "can't reach a host by tailscale name" — wiki `system.md`
+
+Two traps, neither a bug in this repo's nix config: this tailnet's device
+names don't match `networking.hostName` (`nire-cube` the host is `ts-cube`
+on the tailnet, fleet-wide), and a tailnet ACL can silently block all
+peer-to-peer traffic while every local firewall setting is correct and
+`tailscale ping`/PeerAPI still work -- that one's fixed in Tailscale's admin
+console, not in this repo. Full mechanism and the read-the-firewall-script-
+without-root trick: `networking/tailscale.nix`'s own header, indexed at
+`wiki/categories/system.md`'s "Tailscale" section.
+
 ### `${...}` inside a Nix `''` string is interpolation
 
 Writing `${terminfo[khome]}` in what you intend as a comment is an evaluation

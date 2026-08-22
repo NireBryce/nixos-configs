@@ -29,6 +29,17 @@ these fits into the bigger picture; this page is just the index.
   files, so a new module can silently not exist yet as far as evaluation is
   concerned.
 
+## A trap that points at the wiki instead of a skill
+
+- **Debugging "can't reach a host by tailscale name"** — no skill for this
+  one; the full mechanism lives in `networking/tailscale.nix`'s own header
+  and is indexed at [categories/system.md](categories/system.md)'s
+  "Tailscale" section instead. Two traps, neither a bug in this repo's nix
+  config: Tailscale device names don't match `networking.hostName`
+  (`nire-cube` the host is `ts-cube` on the tailnet), and a tailnet ACL can
+  silently block all peer-to-peer traffic while every local firewall
+  setting is correct — that one's fixed in the admin console, not here.
+
 ## Style
 
 - **[`../claude cave/claude-style-guide.md`](<../claude cave/claude-style-guide.md>)**
