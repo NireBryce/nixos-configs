@@ -98,7 +98,7 @@ root-drift:
 hm-collisions:
     # Run before the first switch on a host. Classifies by where each path
     # resolves rather than by whether its leaf is a symlink, which is what makes
-    # ~/.just/.justfile and ~/.config/broot look like conflicts when they are not.
+    # ~/.config/broot look like a conflict when it is not.
     @{{scripts}}/hm-collisions.sh {{host}} {{user}}
 
 # drvPath of the host toplevel, for before/after comparison
