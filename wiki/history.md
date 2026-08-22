@@ -1,0 +1,54 @@
+# History & lessons learned
+
+## This repo's own history
+
+- **[`../claude cave/lessons-learned.md`](<../claude cave/lessons-learned.md>)**
+  — "Written by Claude Code, for Claude Code, and largely a record of its
+  own mistakes." The main one. §§1–18 the den → flake-parts port, §§19–24
+  the first session on real hardware, §§25–31 after it first booted, §§32–34
+  later work on already-booted hosts (auto-allocators can't see manually
+  pinned ranges; a removed nixpkgs option asserts rather than being ignored;
+  a module name that collides with its own category *merges* invisibly).
+  `CLAUDE.md` has the rules this produced; this has the scar tissue behind
+  them.
+- **[`../claude cave/lessons-learned-impermanence-stage1-migration.md`](<../claude cave/lessons-learned-impermanence-stage1-migration.md>)**
+  — the stage-1 impermanence migration specifically. Covered from the
+  impermanence angle on [impermanence-and-secrets.md](impermanence-and-secrets.md).
+- **[`../claude cave/old-2026-08-08-PORT-PLAN-(COMPLETED).md`](<../claude cave/old-2026-08-08-PORT-PLAN-(COMPLETED).md>)**
+  — the migration off `vic/den`: what was done, where the plan turned out
+  wrong, what was still open at the time. Completed and historical.
+- **[`../claude cave/old-historical-2026-08-11-HANDOFF-durandal-and-lysithea.md`](<../claude cave/old-historical-2026-08-11-HANDOFF-durandal-and-lysithea.md>)**
+  — written before durandal had booted this config and before lysithea
+  existed in it. Both have since happened (see [hosts.md](hosts.md)); read
+  this as history, not current status.
+- **[`../claude cave/old-historical-TENACITY-PLAN.md`](<../claude cave/old-historical-TENACITY-PLAN.md>)**,
+  **[`old-historical-tenacity-prompt.md`](<../claude cave/old-historical-tenacity-prompt.md>)**,
+  **[`old-historical-port-prompt.md`](<../claude cave/old-historical-port-prompt.md>)**
+  — planning/prompt artifacts from before tenacity booted. Historical.
+- **[`../claude cave/2026-08-09 things to look into eventually.md`](<../claude cave/2026-08-09 things to look into eventually.md>)**
+  — open questions rescued from a deleted `HANDOFF-tenacity.md`, partially
+  answered since (handheld stack — Jovian Steam autostart, decky-loader,
+  handheld-daemon/adjustor — does work; recorded in `jovian.nix`). Also
+  listed on [open-threads.md](open-threads.md).
+
+## Confirmed-on-hardware facts, and how they were confirmed
+
+Both durandal's and tenacity's first-boot `/root` rollbacks were confirmed
+by reading the journal and checking the btrfs subvolid actually changed
+(607 → 622 for tenacity; 1426 deleted / 1431 mounted for durandal) — not
+merely by the machine coming back up. See
+[`../CLAUDE.md`](../CLAUDE.md)'s State section for the dates and
+generations. This is the concrete example behind the repo's own
+"treat an undated 'verified' as *evaluates*" and "ask 'did it work before?'
+first, via `journalctl --list-boots`" rules.
+
+## The sibling branch
+
+- **`git show origin/flake-parts:SESSION-HANDOFF.md`** — that branch's own
+  notes on dead ends and decisions not to silently relitigate. Needs the
+  `origin/` prefix; there's no local `flake-parts` branch in a normal
+  checkout.
+- **`git show origin/flake-parts:linux-flake/flake-parts-reference.md`** —
+  flake-parts machinery reference with upstream source backing each claim.
+  That branch never went through this one's `linux-flake/` → `flake/`
+  rename, so the old path is correct *there* specifically.

@@ -122,9 +122,20 @@ in the same file: it imports upstream's
 adding `config` to the inner module's argument list, specifically to avoid
 repointing that reference at the NixOS `config` instead.
 
+## Keep the wiki in sync
+
+If this change adds, removes, or renames a module in a category that has an
+article under `wiki/categories/` — or edits a `dirsAsCategory.nix` — update
+that article's member list and `wiki/categories/README.md`'s table in the
+same change, not as a follow-up. Same discipline as keeping a stranded
+comment or `CLAUDE.md`'s own State section current: the wiki is only useful
+if it's corrected by whoever's change made it stale.
+
 ## Further reading
 
 - `flake/doc/dirsAsCategory.md` — the category mechanism itself, and the
   trailhead to per-module opt-in if that's ever wanted.
 - `claude cave/claude-style-guide.md` — formatting conventions (aligned `=`
   columns are deliberate; `nix fmt` is deliberately not wired up).
+- `wiki/categories/README.md` — the category reference this skill's changes
+  should keep current.
