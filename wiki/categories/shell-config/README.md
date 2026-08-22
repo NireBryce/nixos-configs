@@ -14,7 +14,9 @@
   (`pkgs.writeText`) rather than an inline Nix string specifically because
   it's full of bash `${...}` parameter expansions that would each need
   escaping as `''${...}` inside a Nix `''` string otherwise — content read
-  from disk is never touched by Nix's own interpolation at all.
+  from disk is never touched by Nix's own interpolation at all. Full
+  writeup, including the carapace/fzf/atuin integrations it wires together
+  and an open upstream bug found in them: [blesh](blesh.md).
 - **`shell-env/shell-env.nix`** — `homeManager`-only: `home.shellAliases`
   (the everyday `ll`, `cp -i`, `lcd`, `img-cat`, `kssh`, etc.).
 - **`zsh/zsh.nix`** — `nixos`-class enables the shell and disables HM's
@@ -41,15 +43,19 @@ own imports, but reaches the `homeManager`-class content anyway (`bash`,
 `ellyHomeManager` bundle, which every host's Home Manager config points at
 regardless of what that host's own `nixos`/`darwin` import list says. System
 shell *registration* on darwin (which shells exist in `/etc/shells`) is a
-separate, platform-specific concern handled by [macos](macos.md)'s
+separate, platform-specific concern handled by [macos](../macos.md)'s
 `shells.nix` instead.
 
 ## See also
 
+- [blesh](blesh.md) — the `.blerc` config in full: what each
+  `ble-import` wires up, and an open upstream bug (spurious `read: `':
+  not a valid identifier` on Tab/auto-complete) traced into ble.sh's
+  carapace/progcomp interaction.
 - Skill `home-manager-dotfiles`
   (`.claude/skills/home-manager-dotfiles/SKILL.md`) — the general form of
   the concatenation trap above.
-- [macos](macos.md) — darwin-side shell registration.
-- [../architecture.md](../architecture.md) — the `ellyHomeManager` bundle
-  and why it, not per-host imports, is what actually reaches every host's
-  home config.
+- [macos](../macos.md) — darwin-side shell registration.
+- [../../architecture.md](../../architecture.md) — the `ellyHomeManager`
+  bundle and why it, not per-host imports, is what actually reaches every
+  host's home config.
