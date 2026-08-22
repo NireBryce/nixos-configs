@@ -11,7 +11,7 @@
     flake.modules.nixos.durandalConfiguration.imports =
     with config.flake.modules.nixos; [
         # ── this machine ──────────────────────────────────────────────────────
-        # nireHost/durandal/: hardware-configuration, boot-durandal,
+        # nireHost/durandal/: hardware-durandal, boot-durandal,
         # b550-suspend-fix, nixpkgs-hostPlatform-durandal, nixpkgs-stateVersion-durandal
         # -- suffixed 2026-08-12 so a second nixos host's copies (tenacity's)
         # don't merge into these under the "module name is its filename" rule.
