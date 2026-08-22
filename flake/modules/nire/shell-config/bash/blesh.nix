@@ -5,7 +5,17 @@
         # This module owns .blerc. bash.nix carried a byte-identical copy of it
         # until they were merged here -- home.file.<n>.text is types.lines, so
         # both definitions concatenated and every ble-import below ran twice.
-        flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
+        flake.modules.homeManager.${moduleName} = { pkgs, ... }:
+            let
+                # A real file rather than inlined into the .blerc string
+                # below on purpose: this script is full of bash `${...}`
+                # parameter expansions, and every one of those would need
+                # escaping as ''${...} inside a Nix '' string. Reading it
+                # from disk means its content is never touched by Nix's
+                # string interpolation at all.
+                carapaceDescBash = pkgs.writeText "carapace-desc.bash"
+                    (builtins.readFile ./carapace-desc.bash);
+            in {
             # bash line editor, allows zsh-like line editor tricks and bindings.
             #
             # There is no `programs.bash.blesh` option -- Home Manager has no blesh
@@ -63,6 +73,16 @@
                 # nix/nixos/nix-shell completions -- the counterpart to
                 # nix-zsh-completions on the zsh side.
                 ble-import -d ${pkgs.blesh}/share/blesh/contrib/integration/nix-completion.bash
+
+                # carapace's own bash completer only emits plain candidate
+                # words (bash's COMPREPLY has no description slot); this
+                # advises it to pull real descriptions from a separate
+                # carapace mode and feed them through ble.sh's own
+                # candidate list instead. See carapace-desc.bash for the
+                # full mechanism and its 2026-08-22 caveats -- in
+                # particular, it has been checked against ble.sh's source
+                # but not yet against the live menu.
+                ble-import -d ${carapaceDescBash}
 
                 # ─── fzf ─────────────────────────────────────────────────────
                 _ble_contrib_fzf_base=${pkgs.fzf}/share/fzf

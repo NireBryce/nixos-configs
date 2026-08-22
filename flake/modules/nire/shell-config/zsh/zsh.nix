@@ -242,8 +242,24 @@
                     # (see elly-home-manager.nix). Written as a real Nix
                     # comment up here, not inside the '' string below, per the
                     # `#` note two paragraphs up.
+                    #
+                    # cod's source line must come before carapace's: zsh's
+                    # compdef, like bash's complete -F, is last-registration-
+                    # wins per command, and cod-completions.nix's ignore-list
+                    # only stops cod from *re*-claiming a command carapace
+                    # covers, not its first registration this session -- see
+                    # that file and bash.nix's identical ordering note for
+                    # the full reasoning.
+                    #
+                    # carapace itself builds on darwin (unlike cod), so its
+                    # own line needs no such guard. And unlike bash, zsh's
+                    # own completion system (compsys) natively supports
+                    # paired descriptions, so carapace's zsh output shows
+                    # them for free -- no equivalent of blesh.nix's
+                    # carapace-desc advice hook is needed here.
                     ''
                     ${lib.optionalString (!pkgs.stdenv.isDarwin) "source <(${pkgs.cod}/bin/cod init $$ zsh)"}
+                    source <(${pkgs.carapace}/bin/carapace _carapace zsh)
 
                     # Free up bindings for zellij
                     ${zellij_keys_cfg}  
