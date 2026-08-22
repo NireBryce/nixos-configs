@@ -12,12 +12,10 @@
 #
 # Evaluation plus stat(2). Builds nothing, activates nothing, writes nothing.
 #
-# Classify by where a path RESOLVES, not by whether its leaf is a symlink. Two
-# real cases from tenacity that a naive `[ -L ]` test gets wrong, both of which
-# it reports as collisions when they are not:
+# Classify by where a path RESOLVES, not by whether its leaf is a symlink. A
+# real case from tenacity that a naive `[ -L ]` test gets wrong, reporting it
+# as a collision when it is not:
 #
-#   ~/.just/.justfile   ~/.just is itself a symlink into home-manager-files, so
-#                       the file *inside* it is a plain file
 #   ~/.config/broot     a real directory whose contents are HM symlinks. Its
 #                       home.file entry is `recursive = true`, so HM links the
 #                       files individually and leaves the directory real -- that
@@ -94,3 +92,20 @@ if collisions:
 
 print("No collisions. This is a relink.")
 PY
+
+# ── history ─────────────────────────────────────────────────────────────────
+#
+# 2026-08-22 — the ~/.just/.justfile false-positive collision case
+#
+# just.nix used to place ~/.just/.justfile (a copy of ~/.justfile's content)
+# and ~/.just itself (a whole-directory symlink), alongside ~/.justfile. This
+# script's `[ -L ]`-vs-resolved-target distinction was written to handle it:
+# ~/.just/.justfile's leaf is a plain file, but it resolves into
+# home-manager-files because ~/.just, its parent, is the symlink -- so a naive
+# leaf-only symlink check reported it as a collision when it was not.
+#
+# Removed from just.nix the same day, once `just -g` was straced and found to
+# open ~/.justfile directly -- never ~/.just/.justfile, on any version this
+# repo has run. Nothing was reading the file this case existed to classify.
+# The classification logic itself (resolve, don't just test -L) stays; it is
+# still what makes the ~/.config/broot case above correct.
