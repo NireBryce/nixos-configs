@@ -87,6 +87,13 @@ baseline:
     # with sudo to include the btrfs subvolumes.
     @{{scripts}}/deployed-baseline.sh
 
+# What's on / that no persistence entry covers -- needs sudo, or it says so and exits
+root-drift:
+    # Everything this lists gets deleted by the impermanence rollback on next
+    # boot. Only meaningful on a host that imports `impermanence` -- see
+    # CLAUDE.md, Safety.
+    @{{scripts}}/root-drift.sh
+
 # Which files home-manager will take over, and whether any would collide
 hm-collisions:
     # Run before the first switch on a host. Classifies by where each path

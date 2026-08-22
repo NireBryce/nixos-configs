@@ -145,6 +145,7 @@ On the hardware, and read-only:
 just baseline        # what the machine is REALLY running -- capture before switching
 just hm-collisions   # which files HM will take over, and whether any would collide
 just diff-deployed   # package-level diff, running vs new toplevel; needs `just build` first
+just root-drift      # what's on / that no persistence entry covers -- needs sudo
 ```
 
 `host` derives from `hostname`, falling back to `nire-durandal` off-host. To
