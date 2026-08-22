@@ -73,15 +73,35 @@
                         [[ ''$- == *i* ]] && source -- ${pkgs.blesh}/share/blesh/ble.sh --attach=none
                     '')
 
-                    # cod (nireHost/../shell-apps/completions/cod-completions.nix
+                    # cod (nirePackages/shell-apps/completions/cod-completions.nix
                     # provides it on PATH, nixos-class only) is broken on
                     # darwin -- nixpkgs: meta.broken = stdenv.hostPlatform.isDarwin
                     # -- and isn't imported there either way, so this would be
                     # a command-not-found on nire-lysithea. Guarded the same
                     # way zsh.nix guards its own cod line.
+                    #
+                    # Must come *before* carapace's own source line below:
+                    # bash's `complete -F` is last-registration-wins per
+                    # command, cod's own PROMPT_COMMAND hook re-registers
+                    # completions live whenever it sees a `--help` run, and
+                    # cod-completions.nix's ignore-list only stops cod from
+                    # re-claiming a command carapace covers -- it doesn't
+                    # stop cod's *first* registration of it this session.
+                    # Sourcing carapace after cod means carapace's bulk
+                    # registration is always what's left standing at shell
+                    # startup for every command they both know.
                     (lib.optionalString (!pkgs.stdenv.isDarwin) ''
                         source <(cod init ''$''$ bash)
                     '')
+
+                    # carapace (nirePackages/shell-apps/completions/carapace-completions.nix
+                    # provides it, home.packages, all platforms). Registers
+                    # `complete -F _carapace_completer` for every command
+                    # carapace has a spec for (~1000, `carapace --list`),
+                    # unconditionally, no darwin guard needed.
+                    ''
+                        source <(carapace _carapace bash)
+                    ''
 
                     # Last. ble.sh absorbs the hooks every other integration
                     # installed, so this cannot move back into the block above.

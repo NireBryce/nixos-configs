@@ -29,6 +29,10 @@
 # reach for a second reason: it is a ${pkgs.cod} interpolation inside a shell
 # rc string, not an entry in home.packages.
 #
+# (Briefly gone from this tree entirely on 2026-08-22, replaced by carapace
+# -- came back the same day, kept alongside it; see cod-completions.nix.
+# carapace itself is not meta.broken anywhere, for what it's worth.)
+#
 # ── how it attaches ──────────────────────────────────────────────────────────
 #
 # By re-declaring home.packages to add an `apply`. Home Manager declares it as a
