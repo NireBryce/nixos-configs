@@ -457,6 +457,14 @@ env vars passed where `argv` was read, and a mangled line nothing highlighted.
 
 ## Docs
 
+- `wiki/README.md` — a topic index over everything below (and a few things
+  not listed below), for finding the right doc without already knowing its
+  path. Links out to these files rather than restating them; it isn't a
+  replacement for reading this file. **Maintained the same way this file
+  is**: whichever session's change makes a wiki page stale (a category's
+  members, its host-import list, a fact a page states) corrects that page in
+  the same change, not as a follow-up. `new-flake-module` and
+  `new-host-config` name the specific pages each one tends to affect.
 - `claude cave/old-2026-08-08-PORT-PLAN-(COMPLETED).md` — the migration off
   den: what was done, where the plan was wrong, and what is still open. Moved
   and `old-`-prefixed 2026-08-13; was at the repo root as

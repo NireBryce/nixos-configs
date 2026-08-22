@@ -53,3 +53,7 @@ a machine you are not prepared to lose `/root` on.
 
 `CLAUDE.md` and `claude cave/lessons-learned.md` are an AI agent's working notes,
 not documentation for a human reader — skip them unless you're the agent.
+
+`wiki/README.md` is a topic index over the docs scattered around this repo
+(architecture, hosts, impermanence, conventions, open threads) — a better
+starting point than grepping if you're looking for a specific thing.

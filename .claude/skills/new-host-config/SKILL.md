@@ -157,6 +157,12 @@ recording a deliberate omission.
    updatekeys secrets.yaml` when that need actually arises, not preemptively.
 5. Consider whether `CLAUDE.md`'s Architecture/State sections need a line —
    they've needed one every time a host was added so far, and they say so.
+6. Update `wiki/hosts.md`'s host table, and the `Imported by` line on every
+   `wiki/categories/*.md` article for a category this host now imports (or
+   an existing host stops importing, e.g. opting out of `impermanence` or
+   `virtualization` the way `nire-cube` and the handhelds do). Same rule as
+   step 5 — this has needed an update every time a host's category list
+   changed so far.
 
 ## Verifying
 
