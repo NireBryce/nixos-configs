@@ -11,7 +11,7 @@ LUKS-encrypted partition, btrfs inside it, subvolumes for `root` / `home` /
 **Nothing imports it.** Same spirit as `dirsAsCategory.md`'s trailhead for
 per-module opt-in and `mkPkgModule.md`'s for the single-package generator:
 written to have the mechanism ready and checked, not to commit any host to
-using it. `nire-testbed` was added with a plain persistent ext4 root instead,
+using it. `nire-cube` was added with a plain persistent btrfs root instead,
 deliberately, and this file exists alongside that decision rather than because
 of it.
 

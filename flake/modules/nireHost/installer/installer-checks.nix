@@ -27,7 +27,7 @@
 
         # Forces evaluation of exactly the options this session's manual
         # `nix eval` calls checked by hand after adding installer-calamares.nix
-        # and installer-autoinstall-testbed.nix -- both of which merge into
+        # and installer-autoinstall.nix -- both of which merge into
         # flake.modules.nixos.installerConfiguration by literal name rather
         # than `imports`, which `just modules` cannot see (it only compares
         # module class + filename stem, never the attribute a file actually
@@ -71,8 +71,13 @@
             assert lib.assertMsg
                 (builtins.any (p: (p.pname or "") == "wpa_supplicant") installerCfg.services.dbus.packages)
                 "wpa_supplicant is missing from services.dbus.packages -- its D-Bus service won't be registered, NetworkManager's activation request will find nothing (see installer-configuration.nix's history note)";
-            assert lib.assertMsg (installerCfg.systemd.services ? autoinstall-testbed)
-                "systemd.services.autoinstall-testbed is missing -- installer-autoinstall-testbed.nix didn't merge, or was renamed";
+            # NOT asserted: systemd.services ? autoinstall. Unlike the checks
+            # above, that unit only materializes under an impure build with
+            # NIRE_INSTALLER_TARGET_HOST/_ROOT_UUID/_BOOT_UUID actually set
+            # (installer-autoinstall.nix's hasAutoinstall) -- under this
+            # check's plain, pure evaluation it is legitimately absent, so
+            # asserting its presence here would fail on every ordinary
+            # `nix flake check` rather than catch a real regression.
             assert lib.assertMsg (installerCfg.environment.etc ? "nixos-configs")
                 "environment.etc.\"nixos-configs\" is missing -- installer-configuration.nix didn't merge, or was edited";
             true;
@@ -113,15 +118,16 @@
             # build-liveusb.sh and the autoinstall script both actually run
             # unattended on real hardware with nobody watching -- shellcheck
             # catches the class of quoting/globbing bug that's invisible
-            # until exactly the wrong moment. config/autoinstall-testbed.sh
+            # until exactly the wrong moment. config/autoinstall.sh
             # is kept as a real file specifically so this can lint it
-            # directly (installer-autoinstall-testbed.nix substitutes
-            # @rootUuid@/@bootUuid@ into it with lib.replaceStrings, not Nix
-            # string interpolation, for the same reason -- see that file).
+            # directly (installer-autoinstall.nix substitutes
+            # @rootUuid@/@bootUuid@/@targetFlakeAttr@ into it with
+            # lib.replaceStrings, not Nix string interpolation, for the same
+            # reason -- see that file).
             installer-shellcheck = pkgs.runCommand "installer-shellcheck"
                 { nativeBuildInputs = [ pkgs.shellcheck ]; }
                 ''
-                    shellcheck ${./build-liveusb.sh} ${./config/autoinstall-testbed.sh}
+                    shellcheck ${./build-liveusb.sh} ${./config/autoinstall.sh}
                     touch "$out"
                 '';
         };

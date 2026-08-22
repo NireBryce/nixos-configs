@@ -28,13 +28,15 @@ in
     flake.nixosConfigurations = {
         nire-durandal = mkHost "x86_64-linux" config.flake.modules.nixos.durandalConfiguration;
         nire-tenacity = mkHost "x86_64-linux" config.flake.modules.nixos.tenacityConfiguration;
-        nire-testbed  = mkHost "x86_64-linux" config.flake.modules.nixos.testbedConfiguration;
         nire-lego     = mkHost "x86_64-linux" config.flake.modules.nixos.legoConfiguration;
         nire-cube     = mkHost "x86_64-linux" config.flake.modules.nixos.cubeConfiguration;
 
-        # Not a machine anyone owns -- a live-USB installer image, built to
-        # install nire-testbed onto real hardware. See
+        # Not a machine anyone owns -- a generic live-USB installer image. See
         # nireHost/installer/installer-configuration.nix and the doc next to it.
+        # Originally built solely to install nire-testbed (removed 2026-08-22);
+        # generalized the same day rather than deleted, since the mechanism
+        # (embedded flake, patched Calamares, unattended nixos-install) is not
+        # specific to any one host -- see that doc for the current shape.
         nire-installer = mkHost "x86_64-linux" config.flake.modules.nixos.installerConfiguration;
     };
 

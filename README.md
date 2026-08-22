@@ -30,14 +30,14 @@ Hosts
 
 - `nire-durandal` — workstation
 - `nire-tenacity` — handheld, Jovian/SteamOS
-- `nire-testbed` — workstation (ThinkPad X270)
 - `nire-lego` — handheld, Jovian/SteamOS (Legion Go)
+- `nire-cube` — workstation (GMKtec mini PC)
 
 `nire-durandal`, `nire-tenacity` and `nire-lego` wipe `/root` on boot;
-`nire-testbed` deliberately does not (see
-`flake/modules/nireHost/testbed-configuration.nix` for why). `nire-tenacity`
-is currently the one this branch actually runs on; the other three have not
-been built or switched yet -- `nire-lego` has not even been installed.
+`nire-cube` deliberately does not (see
+`flake/modules/nireHost/cube-configuration.nix` for why). `nire-tenacity`
+is currently the one this branch actually runs on; check `CLAUDE.md`'s State
+section for the others' current status.
 
 Secrets
 -------

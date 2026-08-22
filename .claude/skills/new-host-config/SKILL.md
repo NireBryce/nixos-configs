@@ -10,7 +10,7 @@ Every host is two things: an entry-point file directly under `nireHost/`
 `new-flake-module`'s skill for why that placement matters) and a `nireHost/<name>/`
 directory holding that host's own hardware/boot/platform modules, collected by
 its own `dirsAsCategory.nix` copy. `nire-durandal`, `nire-tenacity`,
-`nire-testbed`, `nire-lego`, `nire-installer`, and `nire-lysithea` (darwin) are
+`nire-lego`, `nire-cube`, `nire-installer`, and `nire-lysithea` (darwin) are
 the worked examples — read the one closest in shape to what you're adding
 before inventing anything.
 
@@ -19,26 +19,31 @@ before inventing anything.
 These are independent axes; check `hosts.nix` for the current roster rather
 than assuming a count, per `CLAUDE.md`'s own standing warning that it changes.
 
-- **Workstation or handheld?** Workstation (durandal, testbed, now cube) takes
+- **Workstation or handheld?** Workstation (durandal, now cube) takes
   `kde-desktop` alone. Handheld (tenacity, lego) takes the `jovian` module
   instead, for the built-in-controller/SteamOS-session shape — `desktop-env`
   as a whole holds both `kde-desktop` and `jovian`, so import the specific one
   your host wants, not the category.
-- **Impermanence or not?** Default yes (durandal, tenacity, lego, and now
-  cube all wipe `/root` on boot) — but `nire-testbed` deliberately opts out
-  because it hits persistence assumptions the others don't. Read
-  `WARN-impermanence.nix` and the `impermanence-initrd` skill before deciding
-  either way, and if you opt out, say so explicitly in the host file's header
-  the way `testbed-configuration.nix` does, including the `invariants.nix`
-  interaction.
+- **Impermanence or not?** Default yes (durandal, tenacity, and lego all wipe
+  `/root` on boot) — but `nire-cube` deliberately opts out because it hits
+  persistence assumptions the others don't (its real install turned out to be
+  a plain root, not LUKS+impermanence). Read `WARN-impermanence.nix` and the
+  `impermanence-initrd` skill before deciding either way, and if you opt out,
+  say so explicitly in the host file's header the way `cube-configuration.nix`
+  does, including the `invariants.nix` interaction. (`nire-testbed`, removed
+  2026-08-22, was the earlier example of this — an Intel host that opted out
+  the same way, for the same reason.)
 - **Which CPU/GPU category?** AMD hosts (durandal, lego, and cube) import the
   shared `hardware` category (`amdcpu`, `amdgpu`) directly. **Do not add an
   `intel` sibling under `nire/hardware/` to make an Intel host fit the same
   shape** — `dirsAsCategory` recurses into subdirectories, so anything filed
-  there would start applying to the AMD hosts too. Intel hosts (testbed) skip
+  there would start applying to the AMD hosts too. An Intel host should skip
   `hardware` entirely and instead pull a `nixos-hardware` module scoped to the
-  exact machine (e.g. `lenovo-thinkpad-x270`) from inside their own
-  `<name>/hardware/hardware-<name>.nix`.
+  exact machine (e.g. `lenovo-thinkpad-x270`) from inside its own
+  `<name>/hardware/hardware-<name>.nix` — `nire-testbed` did exactly this
+  before it was removed; there is no live Intel host to point at as a worked
+  example right now, so re-derive from that shape rather than nixos-hardware's
+  own docs alone.
 - **NixOS or darwin?** `mkHost`/`mkDarwinHost` in `hosts.nix` are the two
   entry points; darwin hosts have no `elly-user`, no impermanence, and take
   `flake.darwinConfigurations` instead of `flake.nixosConfigurations`.
@@ -56,10 +61,12 @@ flake-parts resolve `modulesPath` through its own `_module.args` and die with
 a misleading `infinite recursion` error — `new-flake-module`'s skill has the
 wrapping shape and a second worked example (`installer-configuration.nix`).
 `durandal/hardware/hardware-configuration.nix` and
-`testbed/hardware/hardware-testbed.nix` are the two real ones in this repo;
-testbed's own history note documents what it looked like as a placeholder
-*before* the real scan, and that it produced a config for a machine that
-didn't exist — worth reading before deciding a placeholder here is harmless.
+`cube/hardware/hardware-cube.nix` are the two real ones in this repo;
+hardware-cube.nix's own history note documents what it replaced (a disko
+template pointed at a placeholder device, from when cube hadn't been
+installed yet) and why that file was deleted rather than pointed at a real
+device once the actual install turned out different — worth reading before
+deciding a placeholder here is harmless.
 
 **Hardware doesn't exist yet, or hasn't been partitioned** (this is the
 common case for a newly-added host — check `CLAUDE.md`'s State section for
@@ -75,7 +82,7 @@ are easy to get backwards here:
 - **The placeholder device path must be unmistakably fake**
   (`/dev/disk/by-id/REPLACE-ME-before-running-disko`), never a
   plausible-looking one like `/dev/nvme0n1`. That path exists on real
-  machines in this repo already (tenacity, testbed) — a plausible guess run
+  machines in this repo already (tenacity) — a plausible guess run
   through disko's actual partitioning step on the wrong box would silently
   wipe a disk that has real data on it. A path that doesn't exist just fails
   loudly, which is the point.
@@ -98,8 +105,8 @@ host's own header, the way `lego-configuration.nix` and
 
 A module's declared name is its filename (`new-flake-module` skill), and
 names in the same class **merge** rather than conflict. Every host-specific
-file under `<name>/` needs its own host suffix — `boot-testbed.nix`,
-`hardware-testbed.nix`, `disko-lego.nix`, `boot-cube.nix` — precisely so a
+file under `<name>/` needs its own host suffix — `hardware-cube.nix`,
+`disko-lego.nix`, `boot-cube.nix` — precisely so a
 second host's `boot-<name>.nix` doesn't merge into the first's. (Durandal's
 own `hardware-configuration.nix` and `nixpkgs-hostPlatform-durandal.nix`
 predate full consistency on this — the first is unsuffixed and gets away
@@ -118,8 +125,8 @@ durandal's `23.11` or tenacity's `25.05`. Check the current pin with:
 nix eval --raw .#nixosConfigurations.nire-tenacity.config.system.nixos.release
 ```
 
-`testbed-configuration.nix` and `cube`'s state-version file both explain this
-inline — copy the reasoning comment, not just the string.
+`lego`'s state-version file explains this inline — copy the reasoning
+comment, not just the string.
 
 ## Don't copy host-specific fixes without re-diagnosing
 

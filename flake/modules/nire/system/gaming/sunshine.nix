@@ -3,7 +3,7 @@
 # Filed alongside gaming.nix rather than as its own category: this directory
 # is collected into the `system` category same as gaming.nix is, and `system`
 # is imported whole by every NixOS host (see CLAUDE.md, "Membership is
-# implicit"), so this reaches all five hosts -- durandal, cube and testbed
+# implicit"), so this reaches all four hosts -- durandal and cube
 # (workstations) as well as tenacity and lego (handhelds) -- with no
 # per-host wiring. That is deliberate: streaming a session off a handheld is
 # as legitimate a use as streaming to one.

@@ -1,4 +1,4 @@
-# Non-impermanence hosts (nire-testbed today) have no help anywhere in this
+# Non-impermanence hosts (nire-cube today) have no help anywhere in this
 # repo setting a login password. WARN-impermanence.nix documents the whole
 # /persist dance for hosts that wipe /root on boot; a host that keeps a plain
 # persistent root has no equivalent pointer, and elly-user.nix's
@@ -7,12 +7,13 @@
 #
 # Gated the same way invariants.nix gates its impermanence-only checks: on
 # `boot.initrd.systemd.services ? restore-root`, the unit only
-# WARN-impermanence.nix creates. See that file's "OPT-IN, SINCE NIRE-TESTBED"
-# header for why that signal and not `environment.persistence` (declared for
+# WARN-impermanence.nix creates. See that file's "OPT-IN: HOSTS WITHOUT
+# IMPERMANENCE ARE EXEMPT" header for why that signal and not
+# `environment.persistence` (declared for
 # every host regardless -- nire/system/impermanence/declare-persistence-option.nix).
 #
 # Filed under nireUser/elly/, so it rides the `elly` category into every host
-# automatically rather than being wired into testbed-configuration.nix by
+# automatically rather than being wired into a specific host's config by
 # hand. Stays silent for durandal/tenacity/lego, and fires on its own for any
 # future host that also skips impermanence.
 #

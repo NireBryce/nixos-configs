@@ -5,10 +5,10 @@
 # dirsAsCategory only collects from *sub*directories -- a host definition
 # should not become a member of anything.
 #
-# WITH impermanence, unlike nire-testbed. That was a real decision there and
-# is a real decision here too, just the other way: `/root` gets wiped and
-# recreated from a blank snapshot on every boot. Read WARN-impermanence.nix
-# and README.md's safety section before touching anything near this.
+# WITH impermanence, unlike nire-cube, which keeps a plain persistent root.
+# That is a real decision either way: `/root` gets wiped and recreated from a
+# blank snapshot on every boot here. Read WARN-impermanence.nix and README.md's
+# safety section before touching anything near this.
 #
 # Disk layout comes from disko now, not a captured nixos-generate-config --
 # see lego/hardware/disko-lego.nix. It wires in
@@ -25,7 +25,7 @@
         # ── this machine ──────────────────────────────────────────────────────
         # nireHost/lego/: disko-lego, boot-lego, nixpkgs-hostPlatform-lego,
         # nixpkgs-stateVersion-lego -- suffixed for the same reason tenacity's
-        # and testbed's are: a module's name is its filename, and same name
+        # is: a module's name is its filename, and same name
         # in the same class merges rather than erroring.
         lego
 
@@ -44,8 +44,7 @@
         impermanence
 
         hardware        # amdcpu, amdgpu -- Legion Go is AMD (Ryzen Z1
-                        # family), so this is the correct shared category,
-                        # unlike testbed which is Intel and had to skip it.
+                        # family), so this is the correct shared category.
         nix
         peripherals
         shell-config

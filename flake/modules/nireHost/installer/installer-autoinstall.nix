@@ -1,4 +1,4 @@
-# Unattended install of nire-testbed: a systemd service that mounts the
+# Unattended install of a target host: a systemd service that mounts the
 # real disk's already-known partitions and runs `nixos-install --flake`
 # with nobody driving Calamares or a terminal, plus (optionally) wifi
 # credentials to get on the network with nobody typing an `nmtui` password
@@ -7,12 +7,20 @@
 # that's a deliberate merge, not a typo, and what `just modules` can't see
 # about it.
 #
+# Renamed from installer-autoinstall-testbed.nix 2026-08-22, when nire-testbed
+# (the host this was originally written for and the only one it ever pointed
+# at) was removed: nothing about the mechanism was actually testbed-specific,
+# so it was generalized rather than deleted. The target host, and the disk's
+# partition UUIDs, are now chosen at image-build time the same way the wifi
+# credentials below already were -- see NIRE_INSTALLER_TARGET_HOST,
+# NIRE_INSTALLER_ROOT_UUID, NIRE_INSTALLER_BOOT_UUID and build-liveusb.sh.
+#
 # Exists alongside, not instead of, the Calamares and hand-run paths in
 # liveusb-installer.md: none of the three has been confirmed against real
-# hardware, and this one in particular has the least room for a human to
-# notice something's wrong mid-install, being the one built for nobody to be
-# watching. See that doc for the full picture and which path to reach for
-# when.
+# hardware since this generalization, and this one in particular has the
+# least room for a human to notice something's wrong mid-install, being the
+# one built for nobody to be watching. See that doc for the full picture and
+# which path to reach for when.
 { ... }:
 {
     flake.modules.nixos.installerConfiguration = { lib, pkgs, ... }:
@@ -21,10 +29,10 @@
         # invocation) -- ordinary `nix eval`/`nix flake check`/`just modules`
         # run in Nix's default pure-eval mode, where builtins.getEnv always
         # returns "" rather than erroring (Nix manual, restricted eval), so
-        # hasWifiCreds below is simply false and this whole block is a no-op
-        # for every verification command already in use in this repo. Only
-        # an explicit `--impure` build (and the env vars actually set) turns
-        # it on.
+        # hasWifiCreds/hasAutoinstall below are simply false and this whole
+        # file is a no-op for every verification command already in use in
+        # this repo. Only an explicit `--impure` build (and the env vars
+        # actually set) turns any of it on.
         #
         # Deliberately NOT committed anywhere in this repo, per the reason
         # this file exists at all: build-liveusb.sh prompts for these
@@ -40,30 +48,34 @@
         wifiPassword = builtins.getEnv "NIRE_INSTALLER_WIFI_PASSWORD";
         hasWifiCreds = wifiSsid != "" && wifiPassword != "";
 
-        # The exact UUIDs hardware-testbed.nix already carries for this
-        # disk (real, read off the machine -- see that file's own header
-        # and history note). Mount-by-UUID is the safety mechanism here,
-        # not a formality: if the disk doesn't have these exact partitions
-        # -- wrong machine, a wipe, a repartition -- the mount just fails
-        # and the script below refuses to guess or partition anything. It
-        # can never touch the wrong disk the way a blind `parted /dev/sda`
-        # could.
-        rootUuid = "298d1ce7-3fb9-4918-b77c-21d419ccf62a";
-        bootUuid = "DED7-8FEF";
+        # Which flake attr to install, and the exact partition UUIDs of the
+        # disk it's already been partitioned on -- all three read the same
+        # way as the wifi credentials above, and all three are required
+        # together for this feature to do anything (see hasAutoinstall).
+        # Mount-by-UUID is the safety mechanism here, not a formality: if the
+        # disk doesn't have these exact partitions -- wrong machine, a wipe,
+        # a repartition -- the mount just fails and the script below refuses
+        # to guess or partition anything. It can never touch the wrong disk
+        # the way a blind `parted /dev/sda` could.
+        targetFlakeAttr = builtins.getEnv "NIRE_INSTALLER_TARGET_HOST";
+        rootUuid        = builtins.getEnv "NIRE_INSTALLER_ROOT_UUID";
+        bootUuid        = builtins.getEnv "NIRE_INSTALLER_BOOT_UUID";
+        hasAutoinstall  = targetFlakeAttr != "" && rootUuid != "" && bootUuid != "";
 
-        # Kept as a real .sh file (config/autoinstall-testbed.sh) rather than
-        # an inline '' ... '' string -- installer-checks.nix shellchecks it
+        # Kept as a real .sh file (config/autoinstall.sh) rather than an
+        # inline '' ... '' string -- installer-checks.nix shellchecks it
         # directly, which an inline string can't be (shellcheck needs a real
         # file, and disagrees with itself about heredoc-embedded Nix
         # interpolation splicing arbitrary text into the middle of a shell
-        # token). @rootUuid@/@bootUuid@ substituted with lib.replaceStrings,
-        # not Nix string interpolation, for the same reason -- an inline
-        # ${rootUuid} would make the source file invalid shell on its own.
-        autoinstallScript = pkgs.writeShellScript "autoinstall-testbed"
+        # token). @rootUuid@/@bootUuid@/@targetFlakeAttr@ substituted with
+        # lib.replaceStrings, not Nix string interpolation, for the same
+        # reason -- an inline ${rootUuid} would make the source file invalid
+        # shell on its own.
+        autoinstallScript = pkgs.writeShellScript "autoinstall"
             (lib.replaceStrings
-                [ "@rootUuid@" "@bootUuid@" ]
-                [ rootUuid    bootUuid    ]
-                (builtins.readFile ./config/autoinstall-testbed.sh));
+                [ "@rootUuid@" "@bootUuid@" "@targetFlakeAttr@" ]
+                [ rootUuid    bootUuid    targetFlakeAttr    ]
+                (builtins.readFile ./config/autoinstall.sh));
     in {
         # Only materializes with real credentials present (see hasWifiCreds
         # above) -- otherwise this is an empty attrset and wifi stays
@@ -89,8 +101,12 @@
             };
         };
 
-        systemd.services.autoinstall-testbed = {
-            description = "Unattended nixos-install of nire-testbed onto its already-partitioned disk";
+        # Only materializes with a target host and both UUIDs actually set
+        # (see hasAutoinstall above) -- otherwise this unit doesn't exist at
+        # all, rather than existing and failing loudly on every boot of an
+        # image nobody meant to run it unattended.
+        systemd.services.autoinstall = lib.mkIf hasAutoinstall {
+            description = "Unattended nixos-install of the configured target host onto its already-partitioned disk";
             # network-online.target, not just network.target: nixos-install
             # needs to actually reach the binary cache, not merely have an
             # interface configured -- same reason any real host's
@@ -101,7 +117,7 @@
             wantedBy = [ "multi-user.target" ];
             serviceConfig = {
                 Type = "oneshot";
-                # Keeps `systemctl status autoinstall-testbed` showing
+                # Keeps `systemctl status autoinstall` showing
                 # success/failure after the oneshot script exits, instead of
                 # reverting to "inactive (dead)" and losing that at a
                 # glance -- useful over SSH, where nobody's watching the

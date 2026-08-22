@@ -1,7 +1,9 @@
-# nire-installer: a live-USB NixOS installer image, built specifically to
-# install nire-testbed (ThinkPad X270) onto its real disk. See
-# `./liveusb-installer.md`, right next to this file, for the full
-# boot-to-install walkthrough.
+# nire-installer: a live-USB NixOS installer image, built to install any host
+# already declared in this flake onto real disk. Originally built specifically
+# for nire-testbed (removed 2026-08-22); generalized the same day rather than
+# deleted, since nothing about the mechanism was actually testbed-specific --
+# see `./liveusb-installer.md`, right next to this file, for the full
+# boot-to-install walkthrough and how the target host is chosen at build time.
 #
 # Carries a copy of this whole flake baked into the image itself (see
 # `environment.etc."nixos-configs"` below), so booting it is enough on its
@@ -20,7 +22,7 @@
 #
 # This is not a host anyone switches to or boots persistently -- it exists
 # only to produce `config.system.build.isoImage`, which `./installer-iso.nix`
-# turns into a `packages.*` output so `nix build .#liveusb-testbed-installer`
+# turns into a `packages.*` output so `nix build .#liveusb-installer`
 # doesn't need anyone to know the nixosConfigurations attribute path by
 # heart.
 #
@@ -133,7 +135,7 @@
             # host's `specialArgs` already gets via hosts.nix's `mkHost`.
             # `environment.etc` symlinks it in from the Nix store, so
             # `/etc/nixos-configs` is real but read-only; `nixos-install
-            # --flake path:/etc/nixos-configs#nire-testbed` works straight off
+            # --flake path:/etc/nixos-configs#<target-host>` works straight off
             # it (the `path:` prefix is what lets a plain, non-git directory
             # be used as a flake at all -- see liveusb-installer.md). Editing
             # anything first (a hardware fix, a new host) needs a writable

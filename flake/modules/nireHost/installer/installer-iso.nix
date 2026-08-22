@@ -1,5 +1,5 @@
 # Turns nire-installer's `system.build.isoImage` into a flake package, so
-# `nix build .#liveusb-testbed-installer` (or `just liveusb`) produces
+# `nix build .#liveusb-installer` (or `just liveusb`) produces
 # something `dd`-able to a USB stick without anyone needing to know the
 # nixosConfigurations attribute path by heart.
 #
@@ -24,7 +24,7 @@
         # fail with "could not determine statically that no formatter is
         # defined for *all* systems", on a file that sets no formatter at all.
         packages = lib.optionalAttrs (system == "x86_64-linux") {
-            liveusb-testbed-installer =
+            liveusb-installer =
                 config.flake.nixosConfigurations.nire-installer.config.system.build.isoImage;
         };
     };
