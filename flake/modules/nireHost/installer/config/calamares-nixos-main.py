@@ -10,12 +10,15 @@
 # Calamares wizard answers (locale/keyboard/hostname/user/package choices)
 # and hardware-configuration.nix from nixos-generate-config, then runs a
 # plain, non-flake `nixos-install`. This version skips all of that and runs
-# `nixos-install --flake` against nire-testbed's own flake config instead,
-# which nire-installer already carries embedded and real (see
-# installer-configuration.nix's environment.etc."nixos-configs", and
-# hardware-testbed.nix, which has real fileSystems/boot.initrd values for
-# this exact disk as of 2026-08-16 -- a freshly generated
-# hardware-configuration.nix would only need throwing away).
+# `nixos-install --flake` against a target host's own flake config instead,
+# which nire-installer already carries embedded (see
+# installer-configuration.nix's environment.etc."nixos-configs"). Which
+# host is `@targetFlakeAttr@` below -- a plain textual placeholder, not Nix
+# interpolation, substituted by installer-calamares.nix's postInstall at
+# image-build time from NIRE_INSTALLER_TARGET_HOST (see that file). The
+# target host's own hardware module needs real fileSystems/boot.initrd
+# values already committed before this is any use -- a freshly generated
+# hardware-configuration.nix from THIS install is not fed back into it.
 #
 # Kept verbatim from the original: the imports actually still used,
 # env_is_set/generateProxyStrings/pretty_name/pretty_status_message (calamares
@@ -220,7 +223,7 @@ class NixProgress:
 
 
 def run():
-    """Install nire-testbed from the embedded flake."""
+    """Install this image's configured target host from the embedded flake."""
 
     INSTALL_PROGRESS_START = 0.1
     INSTALL_PROGRESS_END = 1.0
@@ -247,14 +250,14 @@ def run():
 
     # path:/etc/nixos-configs -- this image's own embedded, read-only copy of
     # the flake (environment.etc."nixos-configs", installer-configuration.nix).
-    # #nire-testbed hardcoded: nire-installer's sole purpose is installing
-    # this one host -- see installer-configuration.nix's header.
+    # @targetFlakeAttr@ is substituted at image-build time -- see this file's
+    # header and installer-calamares.nix.
     nixosInstallCmd = ["pkexec"] + generateProxyStrings() + [
         "nixos-install",
         "--no-root-passwd",   # headless: nothing behind this Popen can answer
                                # an interactive root-password prompt.
         "--root", root_mount_point,
-        "--flake", "path:/etc/nixos-configs#nire-testbed",
+        "--flake", "path:/etc/nixos-configs#@targetFlakeAttr@",
         "--log-format", "internal-json",
         "--option", "build-dir", "/nix/var/nix/builds",
     ]

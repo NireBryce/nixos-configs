@@ -53,7 +53,7 @@
                 # (%subUidsPrevUsed, from /var/lib/nixos/auto-subuid-map). It never
                 # looks at explicitly-declared subUidRanges. So elly's hardcoded
                 # 100000 is invisible to it, and on a machine with no prior map file
-                # -- i.e. any fresh install, nire-testbed and nire-lego included --
+                # -- i.e. any fresh install, nire-lego included --
                 # both users get 100000:65536 in /etc/subuid and share a subordinate
                 # range. durandal only escapes this by accident: elly was auto-
                 # allocated 100000 before the pin below existed, so it is in the map

@@ -1,7 +1,9 @@
-# Wires Calamares into nire-installer, patched to install nire-testbed's
-# flake instead of the generic configuration.nix it generates by default.
-# See ./config/calamares-nixos-main.py and ./config/calamares-settings.conf,
-# the two files this overrides in, for what actually changed and why.
+# Wires Calamares into nire-installer, patched to install this flake's own
+# target host (chosen at image-build time -- see NIRE_INSTALLER_TARGET_HOST
+# below and liveusb-installer.md) instead of the generic configuration.nix it
+# generates by default. See ./config/calamares-nixos-main.py and
+# ./config/calamares-settings.conf, the two files this overrides in, for what
+# actually changed and why.
 #
 # Confirmed by reading calamares-nixos-extensions' real source (vendored in
 # nixpkgs, not fetched -- pkgs/by-name/ca/calamares-nixos-extensions/src):
@@ -33,8 +35,21 @@
 # name.
 { ... }:
 {
-    flake.modules.nixos.installerConfiguration = { pkgs, ... }:
+    flake.modules.nixos.installerConfiguration = { lib, pkgs, ... }:
     let
+        # The flake attr Calamares' patched `nixos` job installs --
+        # `nixos-install --flake path:/etc/nixos-configs#<this>`. Read only
+        # via `nix build --impure` (build-liveusb.sh's own invocation), same
+        # mechanism and same caveats as installer-autoinstall.nix's wifi
+        # credentials: ordinary `nix eval`/`nix flake check`/`just modules`
+        # run pure, where builtins.getEnv always returns "", so this is
+        # always "" for every verification command already in use in this
+        # repo, and main.py ends up substituted with an empty target -- eval-
+        # safe, just not a working image, same as unset wifi creds. Only an
+        # explicit `--impure` build with this actually set produces an image
+        # that installs anything.
+        targetFlakeAttr = builtins.getEnv "NIRE_INSTALLER_TARGET_HOST";
+
         # calamares-nixos-extensions' installPhase (unmodified, upstream's
         # own package.nix) ends with `runHook postInstall` -- this hook point
         # lets the two files below overwrite what installPhase's own `cp -r`
@@ -50,6 +65,12 @@
                 substituteInPlace $out/etc/calamares/settings.conf --replace-fail @out@ $out
 
                 cp ${./config/calamares-nixos-main.py} $out/lib/calamares/modules/nixos/main.py
+                # @targetFlakeAttr@ is a plain textual token in main.py's own
+                # source (not Nix interpolation -- see that file's header for
+                # why), substituted here the same way installer-autoinstall.nix
+                # substitutes @rootUuid@/@bootUuid@ into autoinstall.sh.
+                substituteInPlace $out/lib/calamares/modules/nixos/main.py \
+                    --replace-fail @targetFlakeAttr@ ${lib.escapeShellArg targetFlakeAttr}
             '';
         });
 

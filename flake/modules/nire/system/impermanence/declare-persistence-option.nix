@@ -3,8 +3,9 @@
 # happen unless something populates environment.persistence."/persist" with
 # actual entries -- this file alone is a complete no-op.
 #
-# Added alongside nire-testbed, the first NixOS host in this repo that does
-# NOT import `impermanence`. tailscale-persist.nix (and jovian-persist.nix)
+# Added alongside the first NixOS host in this repo that does NOT import
+# `impermanence` (originally nire-testbed, since removed; nire-cube is the
+# current example). tailscale-persist.nix (and jovian-persist.nix)
 # write to environment.persistence."/persist" unconditionally, and each
 # already carries a comment anticipating this: "A future host taking `system`
 # WITHOUT [impermanence] would hit an option-does-not-exist error here and
@@ -37,7 +38,7 @@
 # system.activationScripts run a createDirectories script that mkdir -p's the
 # persistentStoragePath side of every configured directory before bind
 # mounting, so a host whose /persist is a plain directory on its ordinary
-# persistent root (testbed's situation) does not need /persist to be its own
+# persistent root (cube's situation) does not need /persist to be its own
 # filesystem or mountpoint at all -- the bind mount ends up being one
 # directory onto a sibling directory on the same filesystem, which is a
 # little redundant and entirely functional.

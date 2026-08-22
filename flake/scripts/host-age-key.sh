@@ -4,9 +4,9 @@
 # host's own ed25519 SSH host key, converted with ssh-to-age. That's what
 # sops.age.sshKeyPaths (sops.nix) points at on the decrypting side, and what
 # .sops.yaml's `keys:` list holds on the encrypting side -- see
-# flake/modules/nire/system/secrets/.sops.yaml for durandal/lysithea/tenacity's
-# existing entries, and CLAUDE.md's Safety section for testbed/lego, which
-# don't have one yet.
+# flake/modules/nire/system/secrets/.sops.yaml for durandal/lysithea/tenacity/
+# cube's existing entries, and CLAUDE.md's Safety section for lego, which
+# doesn't have one yet.
 #
 #   host-age-key.sh                        # this machine's own host key
 #   host-age-key.sh <host>                  # a remote host, via ssh-keyscan

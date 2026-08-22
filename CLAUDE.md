@@ -23,16 +23,17 @@ be careful with anything touching `flake/modules/nire/impermanence/` or the
 named `boot` until 2026-08-11; renamed because `boot` had come to mean only
 this. It deletes the `/root` btrfs subvolume in initrd on every boot, and it
 depends on a `root-blank` subvolume existing on the machine. **Three of the
-five NixOS hosts import it and wipe `/root` on every boot: `nire-durandal`,
-`nire-tenacity`, `nire-lego`.** `nire-testbed` (added 2026-08-14) and
-`nire-cube` (added 2026-08-20) deliberately do **not** import it -- both configs
-say so explicitly, because it hits persistence assumptions the other hosts
-don't (see `nireHost/testbed-configuration.nix`, and cube's header: its real
+four NixOS hosts import it and wipe `/root` on every boot: `nire-durandal`,
+`nire-tenacity`, `nire-lego`.** `nire-cube` (added 2026-08-20) deliberately
+does **not** import it -- its config says so explicitly, because it hits
+persistence assumptions the other hosts don't (see cube's header: its real
 install turned out to be a plain root, not LUKS+impermanence, corrected
-2026-08-21 in `2efca5e4`). Don't assume "every host wipes root" or "no host
+2026-08-21 in `2efca5e4`). `nire-testbed` opted out the same way, for the same
+reason, before it was removed 2026-08-22 (never installed on real hardware --
+see State). Don't assume "every host wipes root" or "no host
 does" -- check the specific host. (`nire-installer`, added 2026-08-15, is
 neither -- it's a live-USB image with no persistent `/root` to roll back, not
-one of "the five" above; see State.) Read `WARN-impermanence.nix`, and
+one of "the four" above; see State.) Read `WARN-impermanence.nix`, and
 `claude cave/lessons-learned-impermanence-stage1-migration.md`, before changing anything near it.
 
 Secrets are sops-nix (`flake/modules/nire/system/secrets/`).
@@ -40,10 +41,11 @@ Secrets are sops-nix (`flake/modules/nire/system/secrets/`).
 be "fixed". `.sops.yaml` enrolls `nire-durandal`, `nire-lysithea`,
 `nire-tenacity` and `nire-cube` (the last added 2026-08-21 in `9480b06a`) --
 all four are live hosts with current config here, so this is the normal case,
-not a leftover to prune. `nire-testbed` and `nire-lego` (both added
-2026-08-14) are not yet enrolled; if either ends up needing secrets, add its
-SSH host key converted with `ssh-to-age` and run `sops updatekeys
-secrets.yaml`. Read the file rather than this paragraph -- it said "three"
+not a leftover to prune. `nire-lego` (added 2026-08-14) is not yet enrolled;
+if it ends up needing secrets, add its SSH host key converted with
+`ssh-to-age` and run `sops updatekeys secrets.yaml`. (`nire-testbed` was the
+other unenrolled host until it was removed 2026-08-22, having never needed
+secrets.) Read the file rather than this paragraph -- it said "three"
 for a day after cube was enrolled.
 
 ## State
@@ -69,20 +71,31 @@ reading `journalctl` rather than trusting the mount coming up.
 on `nire-durandal` (`hostname` said so, and the boot evidence above is what
 that session found). Check `hostname` before assuming which machine you're on.
 
-**`nire-testbed` and `nire-lego` exist in config but have not been built or
-switched** — both added 2026-08-14. Neither is a blocker and neither needs
-raising every session, same as durandal's status used to read. It does mean a
-claim verified on one host is not thereby verified for another: say which host
-you mean, and treat anything host-shaped on testbed or lego as unanswered.
+**`nire-lego` exists in config but has not been built or switched** — added
+2026-08-14. Not a blocker and doesn't need raising every session, same as
+durandal's status used to read. It does mean a claim verified on one host is
+not thereby verified for another: say which host you mean, and treat anything
+host-shaped on lego as unanswered.
 
-**`nire-installer` (added 2026-08-15) is not a host awaiting install like the
-above — it's the mechanism for installing one.** A live-USB `nixosConfigurations`
-entry, not a machine, built with `just liveusb` rather than `just
-build`/`switch`; its whole purpose is putting `nire-testbed` onto real
-hardware for the first time (see Architecture, and
-`nireHost/installer/liveusb-installer.md` for the full walkthrough). As of
-2026-08-15 nothing about the install has actually been run against the X270
-yet — the doc says so itself.
+**`nire-testbed` (ThinkPad X270, added 2026-08-14) was removed 2026-08-22.**
+Never built or switched, and nothing about its install was ever run to
+completion against the real X270 -- see `claude cave/lessons-learned.md` and
+this doc's own git history for what was tried. Removed at Elly's request
+rather than left as a permanently-unbuilt host; if a similar Intel workstation
+is ever added again, `testbed-configuration.nix`'s last version (git history)
+and the `new-host-config` skill's notes on it are the starting point, not a
+reason to assume any of this is still wired up.
+
+**`nire-installer` (added 2026-08-15) is not a host awaiting install like
+`nire-lego` — it's the mechanism for installing one.** A live-USB
+`nixosConfigurations` entry, not a machine, built with `just liveusb` rather
+than `just build`/`switch`. Originally built solely to install `nire-testbed`;
+generalized 2026-08-22 when that host was removed, so it now installs
+whichever host you give it at build time (see Architecture, and
+`nireHost/installer/liveusb-installer.md` for the full walkthrough and how
+the target host is chosen). Nothing about the install has actually been run
+to completion against real hardware since that generalization — the doc says
+so itself.
 
 Most of this repo's history predates all of that, written from an
 aarch64-darwin laptop against x86_64-linux hosts with no remote builder, where
@@ -91,16 +104,18 @@ undated "verified" as *evaluates*.** The first boot found four defects that
 evaluation and a successful build both missed (`lessons-learned.md` §25), so a
 green `nix flake check` says nothing about behaviour.
 
-Five NixOS *hosts* now, not two: `nire-durandal` (workstation), `nire-tenacity`
-(handheld, Jovian/SteamOS), `nire-testbed` (ThinkPad X270, added 2026-08-14),
-`nire-lego` (Legion Go handheld, added 2026-08-14, using tenacity's disk
-layout), and `nire-cube` (GMKtec mini PC, added 2026-08-20) — plus the darwin host,
-`nire-lysithea`. A sixth `nixosConfigurations` entry, `nire-installer`, exists
-too but isn't a host (see above and Architecture). This paragraph said "four"
-until 2026-08-21, when `nire-cube` had already been in `hosts.nix` for a day;
-the count below has the standing warning about that. `durandal`, `tenacity`, and `lego` import the `impermanence`
-category and wipe `/root` on boot; `testbed` deliberately does not (see
-Safety). Tenacity was dropped by the den restructure and brought back from
+Four NixOS *hosts* now: `nire-durandal` (workstation), `nire-tenacity`
+(handheld, Jovian/SteamOS), `nire-lego` (Legion Go handheld, added 2026-08-14,
+using tenacity's disk layout), and `nire-cube` (GMKtec mini PC, added
+2026-08-20) — plus the darwin host, `nire-lysithea`. A fifth
+`nixosConfigurations` entry, `nire-installer`, exists too but isn't a host
+(see above and Architecture). This paragraph said "five NixOS hosts" (six
+counting `nire-testbed`) until 2026-08-22, when testbed was removed; before
+that it said "four" until 2026-08-21, when `nire-cube` had already been in
+`hosts.nix` for a day; the count below has the standing warning about that.
+`durandal`, `tenacity`, and `lego` import the `impermanence` category and wipe
+`/root` on boot; `cube` deliberately does not (see Safety). Tenacity was
+dropped by the den restructure and brought back from
 `origin/backup-before-flake-parts-happened`, the last config it actually ran.
 
 `claude cave/old-2026-08-08-PORT-PLAN-(COMPLETED).md` records the migration off
@@ -200,8 +215,9 @@ darwin-specific settings), `nireHost/` (per-host), `nirePackages/`
 
 **Not every category is imported by every host, and `virtualization` is the
 clearest example.** Added 2026-08-21 as `nire/virtualization/`, holding
-`libvirt`, `virt-tools` and `vm-networking`. `nire-durandal`, `nire-cube` and
-`nire-testbed` import it; `nire-tenacity` and `nire-lego` — the handhelds, i.e.
+`libvirt`, `virt-tools` and `vm-networking`. `nire-durandal` and `nire-cube`
+import it (`nire-testbed` did too, before it was removed 2026-08-22);
+`nire-tenacity` and `nire-lego` — the handhelds, i.e.
 the two that import `jovian` — deliberately do not, because libvirtd is a
 boot-time daemon and a gamescope handheld will never open virt-manager. It got
 its own category for exactly that reason: it started inside `nire/system/`,
@@ -224,25 +240,27 @@ modules beyond the `elly-user.nix` example that used to be "the one"), and
 nothing here derives it mechanically the way `just modules` derives category
 membership. Don't quote old numbers; recount if it matters.
 
-**There are six hosts, not two, and one of them is darwin — plus a seventh
+**There are five hosts, not two, and one of them is darwin — plus a sixth
 `nixosConfigurations` entry that isn't a host at all.**
 `nireHost/hosts.nix` declares `flake.darwinConfigurations.nire-lysithea`
-alongside **six** `nixosConfigurations` — `nire-durandal`, `nire-tenacity`,
-`nire-testbed`, `nire-lego` (the latter two added 2026-08-14), `nire-cube`
-(added 2026-08-20), and `nire-installer` (added 2026-08-15) — and the `darwin`
-class is live. Of those six, `nire-installer` is the odd one: a live-USB image built solely to
-install `nire-testbed`, "not a host anyone switches to or boots
-persistently" per its own header (`nireHost/installer/installer-configuration.nix`).
-It has no `elly` user, no impermanence, no persistent state, and `just
-liveusb` builds it rather than `just build`/`switch`. Don't count it as a
-seventh machine, but don't forget it either — it's the only way `nire-testbed`
-is expected to actually get installed. This file claimed only two hosts total
-until 2026-08-12, then three until 2026-08-15, then four real hosts (five
-`nixosConfigurations`) same day, then five (six) on 2026-08-21. Check
-`hosts.nix` directly before stating a host count; it has grown four times
-already and will again — and it was stale for a day each of the last two times,
-so a count in prose here is a claim about when someone last looked, not about
-the tree.
+alongside **five** `nixosConfigurations` — `nire-durandal`, `nire-tenacity`,
+`nire-lego` (added 2026-08-14), `nire-cube` (added 2026-08-20), and
+`nire-installer` (added 2026-08-15) — and the `darwin`
+class is live. Of those five, `nire-installer` is the odd one: a live-USB
+image, "not a host anyone switches to or boots persistently" per its own
+header (`nireHost/installer/installer-configuration.nix`), built to install
+whichever host you give it at build time. It has no `elly` user, no
+impermanence, no persistent state, and `just liveusb` builds it rather than
+`just build`/`switch`. Don't count it as a sixth machine, but don't forget it
+either. This file claimed only two hosts total until 2026-08-12, then three
+until 2026-08-15, then four real hosts (five `nixosConfigurations`) same day,
+then five (six) on 2026-08-21 when `nire-testbed` was still around, then back
+to four real hosts (five `nixosConfigurations`) on 2026-08-22 when
+`nire-testbed` was removed (never installed on real hardware). Check
+`hosts.nix` directly before stating a host count; it has changed five times
+already and will again — and it was stale for a day each of two of those
+times, so a count in prose here is a claim about when someone last looked, not
+about the tree.
 
 ### Home Manager is NixOS-integrated
 
@@ -259,7 +277,7 @@ applies both. `flake/doc/trailhead-home-manager-standalone.md` is the way back.
 
 ### Platform support is derived; Homebrew overlap is not
 
-`ellyHomeManager` is shared verbatim by all six hosts, including
+`ellyHomeManager` is shared verbatim by all five hosts, including
 `nire-lysithea` (aarch64-darwin), so everything in it has to survive darwin.
 Two different questions come up when adding a package — can nixpkgs build it
 on darwin (answered automatically, don't hand-restate `meta.platforms`), and
@@ -450,13 +468,16 @@ env vars passed where `argv` was read, and a mangled line nothing highlighted.
   `2026-08-11-HANDOFF-durandal-and-lysithea.md` at the repo root until then.
 - `flake/doc/dirsAsCategory.md` — the category mechanism and its trailhead.
 - `nireHost/installer/liveusb-installer.md` — building the `nire-installer`
-  live-USB image and the full walkthrough for installing `nire-testbed` with
-  it, step by step. Nothing in it has been run against the real X270 yet
-  (added 2026-08-15) — read step 3 (partition layout) skeptically first.
+  live-USB image and the full walkthrough for installing a target host with
+  it, step by step. Originally written for `nire-testbed` alone; generalized
+  2026-08-22 when that host was removed, so the target host and its
+  partition UUIDs are now chosen at build time. Nothing in it has been run
+  against real hardware since that generalization — read step 3 (partition
+  layout) skeptically first.
 - `flake/doc/disko-impermanence-layout.md` — the reusable disko generator for
   the LUKS + btrfs + impermanence layout durandal and tenacity already run by
-  hand; the template to reach for if testbed's install ever adopts
-  impermanence instead of the plain persistent root it has now.
+  hand; the template to reach for if cube's install ever adopts impermanence
+  instead of the plain persistent root it has now.
 - `claude cave/lessons-learned-impermanence-stage1-migration.md` — the root rollback's move from scripted
   stage 1 to a systemd-initrd unit, done 2026-08-10 because the 2026-08-07
   nixpkgs flipped `boot.initrd.systemd.enable` to default true. Evaluates, never

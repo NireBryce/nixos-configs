@@ -49,7 +49,9 @@
             # fileSystems."/var/lib/sbctl".neededForBoot  = true;
 
             # The impermanence NixOS module itself (environment.persistence's
-            # declaration) is NOT imported here any more, as of nire-testbed.
+            # declaration) is NOT imported here any more, as of the first host
+            # added without impermanence (originally nire-testbed, since
+            # removed; nire-cube is the current example).
             # It moved to nire/system/impermanence/declare-persistence-option.nix,
             # imported unconditionally via the `system` category every host
             # (including this one) already takes -- so it is declared once, for

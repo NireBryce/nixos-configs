@@ -41,15 +41,16 @@
 # walks subdirectories only. It declares no flake.modules.<class> attribute, so
 # it is not a module and modules.py does not consider it for orphans either.
 #
-# OPT-IN, SINCE NIRE-TESTBED
+# OPT-IN: HOSTS WITHOUT IMPERMANENCE ARE EXEMPT
 #
 # The root-rollback, hibernation and persistence groups only apply to hosts
 # that actually opted into impermanence, gated on
 # `boot.initrd.systemd.services ? restore-root` -- the unit WARN-impermanence.nix
-# creates, and nothing else creates. Before nire-testbed this gate was
-# unconditional, because both existing hosts wiped `/root`; testbed does not,
-# so checking for restore-root existing there would fail every single boot
-# rather than ever catching a real regression.
+# creates, and nothing else creates. Originally (before nire-testbed, since
+# removed) this gate was unconditional, because both hosts that existed then
+# wiped `/root`; nire-cube is the current example of a host that does not --
+# checking for restore-root existing there would fail every single boot rather
+# than ever catching a real regression.
 #
 # The gate is intentionally the unit's *existence*, not some separate marker
 # option, and intentionally not `environment.persistence ? "/persist"` --
@@ -70,7 +71,7 @@
 # impermanence in the first place, which was never a regression to begin with.
 #
 # home-manager's useGlobalPkgs invariant is NOT gated on usesImpermanence --
-# it holds for every NixOS host regardless of impermanence, testbed included.
+# it holds for every NixOS host regardless of impermanence, cube included.
 #
 # It IS gated on the host having home-manager at all (`c ? home-manager`),
 # added for nire-installer: a live-USB image with no `elly` user and no
@@ -111,13 +112,14 @@
             hhd      = c.services.handheld-daemon.enable or false;
 
             # restore-root existing is what marks a host as having actually
-            # opted into impermanence -- see the file header, "OPT-IN, SINCE
-            # NIRE-TESTBED", for why this is the gate and not something else.
+            # opted into impermanence -- see the file header, "OPT-IN: HOSTS
+            # WITHOUT IMPERMANENCE ARE EXEMPT", for why this is the gate and
+            # not something else.
             usesImpermanence = rollback != null;
 
             # Whether this host imported enable-home-manager.nix at all --
-            # see the file header's "OPT-IN, SINCE NIRE-TESTBED" addendum
-            # above. nire-installer has no `elly` user and never does.
+            # see the file header's opt-in addendum above. nire-installer has
+            # no `elly` user and never does.
             usesHomeManager = c ? home-manager;
 
             impermanenceInvariants = [
@@ -219,7 +221,7 @@
         in
             (if usesImpermanence then impermanenceInvariants else [ ])
             # NOT gated on usesImpermanence: holds for every NixOS host that
-            # has home-manager at all, testbed included. See usesHomeManager
+            # has home-manager at all, cube included. See usesHomeManager
             # above for the one host it does not -- nire-installer.
             ++ (if usesHomeManager then homeManagerInvariants else [ ]);
 

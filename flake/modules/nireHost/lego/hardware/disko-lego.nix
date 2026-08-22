@@ -8,7 +8,7 @@
 # plausible-looking guess like "/dev/nvme0n1" -- lego has not been installed,
 # there is no real disk to point at yet, and a plausible-looking placeholder
 # is a real hazard here: /dev/nvme0n1 exists on plenty of machines, including
-# this repo's own tenacity and testbed, so if this config were ever run
+# this repo's own tenacity, so if this config were ever run
 # through disko's actual partitioning step unmodified, on the wrong machine,
 # a plausible path would silently wipe whatever disk is actually there. This
 # one fails loudly instead -- "device does not exist" -- which is the point.

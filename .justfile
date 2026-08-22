@@ -70,7 +70,7 @@ switch:
     @echo "==> ACTIVATING {{host}} now, home-manager included"
     @{{scripts}}/rebuild.sh switch {{flake}} {{host}}
 
-# Build the nire-installer live-USB image, for installing nire-testbed
+# Build the nire-installer live-USB image, for installing NixOS onto real hardware
 liveusb:
     # Lives with the rest of the installer feature under nireHost/installer/,
     # not flake/scripts/ -- see installer-configuration.nix for why.

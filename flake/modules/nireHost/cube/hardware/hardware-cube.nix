@@ -9,8 +9,8 @@
 # btrfs root, not the LUKS + impermanence layout disko-cube.nix (deleted by
 # this same change) was speculatively building towards. See
 # cube-configuration.nix for why `impermanence` was dropped from this host's
-# imports and invariants.nix's "OPT-IN, SINCE NIRE-TESTBED" header for what
-# that does and doesn't still check on a host like this.
+# imports and invariants.nix's "hosts without impermanence opt out" header for
+# what that does and doesn't still check on a host like this.
 #
 # The disk DOES have root/nix/persist/log/home btrfs subvolumes -- whoever
 # partitioned this machine by hand used the same subvolume names
@@ -23,7 +23,7 @@
 # boot-cube.nix still installs sbctl as a package (parity with durandal), it
 # just has nowhere dedicated to keep its files.
 #
-# Wrapped as a flake-parts module for the same reason durandal/testbed's
+# Wrapped as a flake-parts module for the same reason durandal's/lego's
 # hardware files are: a raw nixos-generate-config file under modules/ makes
 # flake-parts resolve `modulesPath` through its own _module.args and dies with
 # "infinite recursion encountered", naming modulesPath rather than this file.
@@ -32,8 +32,8 @@
 # capture already claims the module name "hardware-configuration", and a
 # module's name is its filename -- reusing that name here would merge this
 # host's fileSystems into durandal's under the same attribute instead of
-# erroring, the same collision testbed's/lego's suffixed filenames exist to
-# avoid. See CLAUDE.md's new-flake-module trap notes.
+# erroring, the same collision lego's suffixed filename exists to avoid. See
+# CLAUDE.md's new-flake-module trap notes.
 { config, lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);

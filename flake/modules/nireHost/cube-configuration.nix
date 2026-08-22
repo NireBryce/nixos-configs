@@ -6,7 +6,7 @@
 # GPU: AMD Radeon integrated graphics (on-die with the R2514).
 # Both are plain AMD, same silicon family durandal and lego already run, so
 # this host takes the shared `hardware` category (amdcpu, amdgpu) same as
-# they do -- unlike testbed, which is Intel and had to skip it.
+# they do.
 #
 # This file sits directly under nireHost/ rather than in a category directory,
 # because dirsAsCategory only collects from *sub*directories -- a host
@@ -37,12 +37,12 @@
 #     note for the full story.
 #
 # WITHOUT impermanence, unlike durandal: this host was installed with a plain
-# persistent root, the same shape as testbed (see testbed-configuration.nix),
-# not the `/root`-wipe durandal, tenacity, and lego have. `impermanence` is
-# deliberately NOT in this file's imports below. invariants.nix's rollback,
-# hibernation, and persistence checks are gated on the restore-root initrd
-# unit existing (see its "OPT-IN, SINCE NIRE-TESTBED" header) so they don't
-# apply here, same as testbed. WARN-password-required.nix fires its warning
+# persistent root, not the `/root`-wipe durandal, tenacity, and lego have.
+# `impermanence` is deliberately NOT in this file's imports below.
+# invariants.nix's rollback, hibernation, and persistence checks are gated on
+# the restore-root initrd unit existing (see its "hosts without impermanence
+# opt out" header) so they don't apply here. WARN-password-required.nix fires
+# its warning
 # on this host for the same reason -- elly-user.nix's hashedPasswordFile still
 # points at /persist/passwords/elly unconditionally, and nothing in this repo
 # creates that file; it was created by hand on the real machine before this
@@ -55,7 +55,7 @@
         # ── this machine ──────────────────────────────────────────────────────
         # nireHost/cube/: hardware-cube, boot-cube, nixpkgs-hostPlatform-cube,
         # nixpkgs-stateVersion-cube -- suffixed for the same reason
-        # tenacity's/testbed's/lego's are: a module's name is its filename, and
+        # tenacity's/lego's are: a module's name is its filename, and
         # same name in the same class merges rather than erroring.
         cube
 
@@ -63,8 +63,8 @@
         boot            # common boot options: boot-generations
 
         # Deliberately NOT `impermanence` -- see the header above. This host
-        # keeps a plain persistent root, same as testbed, not the `/root`
-        # wipe durandal/tenacity/lego have.
+        # keeps a plain persistent root, not the `/root` wipe
+        # durandal/tenacity/lego have.
 
         hardware        # amdcpu, amdgpu -- R2514 + integrated Radeon is AMD
                         # throughout, same shared category durandal and lego
