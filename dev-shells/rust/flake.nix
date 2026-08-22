@@ -18,6 +18,8 @@
             pkgs = import nixpkgs {
                 inherit system;
                 overlays = [ (import rust-overlay) ];
+                # rust-rover below is unfree; nixpkgs refuses to evaluate it otherwise.
+                config.allowUnfree = true;
             };
 
             rustToolchain = pkgs.rust-bin.stable.latest.default.override {
@@ -26,7 +28,7 @@
         in 
         {
             devShell = pkgs.mkShell {
-                nativeBuildInputs = with pkgs; [
+                nativeBuildInputs = [
                     rustToolchain
                 ];
 

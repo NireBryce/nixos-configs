@@ -1,0 +1,25 @@
+# Recipes for the python dev-shell template in this directory.
+#
+# This flake.nix is a template, not a project of its own -- `create` copies it
+# into a new project directory and lays down a uv project inside the shell it
+# defines, so the new project never needs python/uv installed outside nix.
+#
+# `activate` can't export a venv into your CURRENT shell -- a just recipe runs
+# in a subprocess, so nothing it sets survives the recipe returning. Instead
+# it drops you into `nix develop` interactively: a real shell with
+# python/uv/ruff/pyright on PATH that blocks until you exit it.
+
+here := justfile_directory()
+
+_default:
+    @just --list
+
+# Scaffold a new python project at <path>: copies flake.nix in, then `uv init`s it
+create path:
+    mkdir -p {{path}}
+    cp {{here}}/flake.nix {{path}}/flake.nix
+    cd {{path}} && nix develop --command uv init
+
+# Drop into the python dev shell, blocking until you exit it
+activate:
+    nix develop {{here}}

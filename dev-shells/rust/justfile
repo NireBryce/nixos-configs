@@ -1,0 +1,27 @@
+# Recipes for the rust dev-shell template in this directory.
+#
+# This flake.nix is a template, not a project of its own -- `create` copies it
+# (and rust-toolchain.toml) into a new project directory and lays down a cargo
+# project inside the shell it defines, so the new project never needs a rust
+# toolchain installed outside nix.
+#
+# `activate` can't export a toolchain into your CURRENT shell -- a just recipe
+# runs in a subprocess, so nothing it sets survives the recipe returning.
+# Instead it drops you into `nix develop` interactively: a real shell with
+# cargo/rustc/rust-analyzer on PATH that blocks until you exit it.
+
+here := justfile_directory()
+
+_default:
+    @just --list
+
+# Scaffold a new rust project at <path>: copies flake.nix in, then `cargo init`s it
+create path:
+    mkdir -p {{path}}
+    cp {{here}}/flake.nix {{path}}/flake.nix
+    cp {{here}}/rust-toolchain.toml {{path}}/rust-toolchain.toml
+    cd {{path}} && nix develop --command cargo init
+
+# Drop into the rust dev shell, blocking until you exit it
+activate:
+    nix develop {{here}}
