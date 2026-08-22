@@ -1,3 +1,9 @@
+# renamed from `hardware-configuration.nix` 2026-08-21 -- every other host
+# with a captured hardware file already used `hardware-<hostname>.nix`
+# (hardware-cube.nix, hardware-testbed.nix, hardware-tenacity.nix); this one
+# was the last holdout on the generic nixos-generate-config name, which is
+# also exactly the name a future host's raw capture would collide with under
+# the "module name is its filename" merge rule.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
