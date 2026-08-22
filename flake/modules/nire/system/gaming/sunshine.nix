@@ -37,6 +37,21 @@
 # and KMS capture both need at runtime (`render`, `video`, `uinput`) are in
 # sunshine-elly.nix, right next to this file -- they edit the user account,
 # not the service, so they're split out rather than living here.
+#
+# autoStart = true has a real, confirmed cost: because sunshine is
+# `wantedBy = [ "graphical-session.target" ]`, it starts the instant you land
+# in a graphical session, and Sunshine creates its five virtual uinput
+# passthrough devices (mouse, mouse-absolute, keyboard, and two gamepads) on
+# startup rather than on first client connection. That makes KWin/libinput
+# redo its device enumeration right as you log in, which is felt as the
+# keyboard not responding for a few seconds -- the SDDM login screen is
+# unaffected, since sunshine hasn't started yet at that point. Confirmed on
+# nire-durandal 2026-08-21 via the kernel log: five `input: ... (virtual)`
+# lines at the same timestamp sunshine.service starts. Kept as `true` anyway,
+# deliberately -- the alternative is starting sunshine by hand
+# (`systemctl --user start sunshine`) before every streaming session, and
+# always-ready-to-stream was judged worth a few seconds of login lag. Revisit
+# if that tradeoff stops feeling worth it.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
@@ -45,7 +60,8 @@
             # # description = "Sunshine: host a Moonlight game-stream session, reachable only over Tailscale";
             services.sunshine = {
                 enable      = true;
-                autoStart   = true; # runs as a systemd user service, not launched by hand
+                autoStart   = true; # runs as a systemd user service, not launched by hand --
+                                    # see the login-lag tradeoff in the header above
                 capSysAdmin = true; # KMS screen capture without running the service as root
                 # openFirewall deliberately omitted -- see header.
             };
