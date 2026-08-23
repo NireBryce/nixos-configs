@@ -1,9 +1,17 @@
 ---
 name: home-manager-dotfiles
-description: Traps in editing Home Manager shell/dotfile modules in this repo (zsh, bash, starship, prompt config, anything under home.file or shell initContent) or in reading a generated dotfile back to check it. Use before editing shell rc content, home.file, home.sessionPath, or when a generated dotfile looks wrong or empty.
+description: How to edit Home Manager shell/dotfile modules in this repo, and read a generated dotfile back correctly.
 ---
 
 # Editing Home Manager shell/dotfile modules
+
+## Applies to
+
+Home Manager shell/dotfile modules in this repo — zsh, bash, starship, prompt
+config, anything under `home.file` or shell `initContent` — and reading a
+generated dotfile back to check it. Use before editing shell rc content,
+`home.file`, `home.sessionPath`, or when a generated dotfile looks wrong or
+empty.
 
 Home Manager is NixOS-integrated in this repo (`home-manager.users.elly` set
 from the NixOS side, no separate home switch — see `CLAUDE.md`). All of the

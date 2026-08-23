@@ -1,9 +1,18 @@
 ---
 name: ship
-description: The branch -> PR -> confirm -> merge -> confirm -> delete-branch flow for landing work on MAIN in this repo. Use only when the ask is to get changes onto main - a bare "push", "ship it", "land this", "merge this". Do NOT use for pushing a topic branch, opening a PR you were not asked to merge, pushing to a fork or any non-main target, or committing without pushing - and note that Elly naming `main` outright is the one case that means push directly, see the last section.
+description: Branch -> PR -> confirm -> merge -> confirm -> delete-branch flow for landing work on main in this repo.
 ---
 
 # Landing work on main in nixos-configs
+
+## Applies to
+
+Use only when the ask is to get changes onto `main` — a bare "push", "ship
+it", "land this", "merge this". Do NOT use for pushing a topic branch,
+opening a PR you were not asked to merge, pushing to a fork or any non-main
+target, or committing without pushing. Elly naming `main` outright is the
+one case that means push directly — see the last section, "Only when Elly
+names main".
 
 **"push" in this repo means this whole flow, not `git push origin main`.** Elly
 said so on 2026-08-21, after a session pushed three commits straight to `main`

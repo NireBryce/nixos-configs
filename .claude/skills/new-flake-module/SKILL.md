@@ -1,9 +1,16 @@
 ---
 name: new-flake-module
-description: Traps in creating, renaming, or wiring a flake-parts module in this repo (a file under flake/modules/ declaring flake.modules.<class>.<name>). Use before adding a new .nix file under flake/modules/, renaming an existing one, editing a dirsAsCategory.nix, or debugging why a module doesn't seem to be applying.
+description: How to create, rename, or wire a flake-parts module in this repo.
 ---
 
 # Writing a flake-parts module in this repo
+
+## Applies to
+
+A file under `flake/modules/` declaring `flake.modules.<class>.<name>`. Use
+before adding a new `.nix` file under `flake/modules/`, renaming an existing
+one, editing a `dirsAsCategory.nix`, or debugging why a module doesn't seem
+to be applying.
 
 Background: every `.nix` file under `flake/modules/` is a flake-parts module
 — its top level is `{ flake.modules.<class>.<name> = …; }`, never a bare

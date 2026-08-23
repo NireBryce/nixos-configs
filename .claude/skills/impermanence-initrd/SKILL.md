@@ -1,9 +1,17 @@
 ---
 name: impermanence-initrd
-description: Traps in editing impermanence/initrd config in this repo (flake/modules/nire/impermanence/, boot.initrd.* options, stage-1 hooks) or in reading disk/mount state on one of the hosts that wipes /root on boot. Use before touching anything under nire/impermanence/, any boot.initrd option, or before trusting lsblk/findmnt/mounted-/etc output on these hosts.
+description: How to edit impermanence/initrd config in this repo, and read real disk/mount state on a host that wipes /root on boot.
 ---
 
 # Editing impermanence or initrd, and reading real disk state
+
+## Applies to
+
+`flake/modules/nire/impermanence/`, any `boot.initrd.*` option, stage-1
+hooks, and reading disk/mount state on one of the hosts that wipes `/root` on
+boot. Use before touching anything under `nire/impermanence/`, any
+`boot.initrd` option, or before trusting `lsblk`/`findmnt`/mounted-`/etc`
+output on these hosts.
 
 **Read `WARN-impermanence.nix` and
 `claude cave/lessons-learned-impermanence-stage1-migration.md` before
