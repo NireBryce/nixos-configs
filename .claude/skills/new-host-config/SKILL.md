@@ -1,9 +1,18 @@
 ---
 name: new-host-config
-description: Adding a new machine (nixosConfigurations or darwinConfigurations entry) to this repo, or copying an existing host's config as the starting point for one. Use before creating a nireHost/<name>-configuration.nix, a nireHost/<name>/ directory, or editing hosts.nix to register a host -- covers which category imports a new host actually wants, real hardware vs. not-yet-installed hardware, and what NOT to copy from the host you're basing it on.
+description: How to add a new host (nixosConfigurations or darwinConfigurations entry) to this repo.
 ---
 
 # Adding a new host
+
+## Applies to
+
+Adding a new machine to this repo, or copying an existing host's config as
+the starting point for one. Use before creating a
+`nireHost/<name>-configuration.nix`, a `nireHost/<name>/` directory, or
+editing `hosts.nix` to register a host — covers which category imports a new
+host actually wants, real hardware vs. not-yet-installed hardware, and what
+NOT to copy from the host you're basing it on.
 
 Every host is two things: an entry-point file directly under `nireHost/`
 (`<name>-configuration.nix`, outside every category tree on purpose — see

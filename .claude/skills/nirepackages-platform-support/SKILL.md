@@ -1,9 +1,16 @@
 ---
 name: nirepackages-platform-support
-description: How platform support and Homebrew overlap work for packages in ellyHomeManager (nirePackages/, nireUser/) in this repo, shared across all five hosts including darwin. Use before adding a package module, adding an isDarwin/platform guard, or deciding whether a cask duplicates a nixpkgs package.
+description: How platform support and Homebrew overlap work for packages in ellyHomeManager in this repo.
 ---
 
 # Adding or platform-gating a package
+
+## Applies to
+
+Packages in `ellyHomeManager` (`nirePackages/`, `nireUser/`), shared across
+all five hosts including darwin. Use before adding a package module, adding
+an `isDarwin`/platform guard, or deciding whether a cask duplicates a
+nixpkgs package.
 
 `ellyHomeManager` is shared verbatim by all five hosts, including
 `nire-lysithea` (aarch64-darwin), so everything in it has to survive darwin.
