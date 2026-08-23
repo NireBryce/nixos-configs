@@ -51,6 +51,13 @@ don't have to be rediscovered by grepping the whole tree.
   devenv, nixos-shell, nix-index, nix-prefetch — and an unanswered "learn
   what `outputs @ inputs:` means and figure out specialArgs" note. Also
   covered from the fix-snippet angle on [conventions.md](conventions.md).
+- **`nire-llm-sandbox` isn't defined in libvirt or booted anywhere yet** —
+  added 2026-08-22 (see [hosts.md](hosts.md) and
+  [categories/virtualization.md](categories/virtualization.md)). Verified
+  past plain evaluation (the qcow2 actually builds, the generated domain XML
+  and activation script were read back and are correct) but nobody has run
+  `virsh define` against a real `libvirtd` or watched it boot. The next real
+  step is exactly that, on `nire-cube`, not another round of `nix eval`.
 
 ## Not covered here
 

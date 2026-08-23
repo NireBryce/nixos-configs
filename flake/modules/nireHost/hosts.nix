@@ -38,6 +38,13 @@ in
         # (embedded flake, patched Calamares, unattended nixos-install) is not
         # specific to any one host -- see that doc for the current shape.
         nire-installer = mkHost "x86_64-linux" config.flake.modules.nixos.installerConfiguration;
+
+        # Also not a machine anyone owns, and also exists to build an image
+        # rather than to be switched-to -- but unlike nire-installer, this one
+        # is meant to run persistently once started, as a libvirt VM on
+        # nire-cube. See nireHost/llm-sandbox/llm-sandbox-configuration.nix
+        # and nire/virtualization/virtualization-cube.nix.
+        nire-llm-sandbox = mkHost "x86_64-linux" config.flake.modules.nixos.llmSandboxConfiguration;
     };
 
     flake.darwinConfigurations = {

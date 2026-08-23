@@ -15,11 +15,24 @@ of where to look for each host.
 | `nire-cube` | nixos | mini PC (GMKtec) | **no** — deliberately, see below |
 | `nire-lysithea` | darwin | laptop | n/a |
 | `nire-installer` | nixos | live-USB installer, not a persistent host | n/a — no persistent `/root` at all |
+| `nire-llm-sandbox` | nixos | libvirt VM guest (Claude Code sandbox), runs on `nire-cube` | n/a — persistent guest disk, not part of the impermanence fleet |
 
 `nire-testbed` (ThinkPad X270) existed 2026-08-14 to 2026-08-22 and was
 removed, never having been built or switched on real hardware. It's history
 now, not a live host — see [history.md](history.md) and
 [`../claude cave/lessons-learned.md`](<../claude cave/lessons-learned.md>).
+
+`nire-llm-sandbox`, added 2026-08-22, is a third shape alongside "real host"
+and "live-USB image": a `nixosConfigurations` entry that exists to build a
+qcow2 disk image (same pattern `nire-installer` uses for its ISO), but
+unlike the installer it's meant to run *persistently* once started, as a
+libvirt-managed guest on `nire-cube` — see
+[virtualization](categories/virtualization.md)'s own section on it, and
+skill `nixos-vm-images` for the mechanism. Verified further than plain
+evaluation (the actual qcow2 builds, the generated libvirt domain XML and
+activation script were read back and are correct) but **not yet defined in
+libvirt or booted anywhere** — same "evaluates/builds ≠ verified" gap this
+page's own installer walkthrough note already flags for a different reason.
 
 ## Where each fact lives
 
