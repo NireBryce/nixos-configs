@@ -3,6 +3,13 @@
 # only over the tailnet -- see the firewall comment below before assuming
 # `openFirewall`-style options belong here.
 #
+# RUNTIME-VERIFIED, 2026-08-23, on nire-cube: `just switch` activates cleanly
+# and every other unit in this stack came up, but grafana.service itself
+# failed on the first real switch -- the secret_key file existed but was
+# root:root, unreadable to the `grafana` user the service runs as. See the
+# `warnings` entry below for the fix and the corrected creation command.
+# Nothing else in this module has been checked against real hardware yet.
+#
 # No `grafana-persist.nix` alongside this the way tailscale.nix has
 # tailscale-persist.nix: cube-configuration.nix's own header says this host
 # was installed with a plain persistent root, not the `/root` wipe
@@ -103,9 +110,35 @@
                     Grafana's secret_key has no value here until you create
                     /persist/secrets/grafana-secret-key by hand -- nothing in
                     this repo does it for you, and Grafana will fail to start
-                    without it:
+                    without it.
 
-                        sudo install -D -m600 <(openssl rand -hex 32) /persist/secrets/grafana-secret-key
+                    RUNTIME-VERIFIED TRAP, 2026-08-23: the file has to be
+                    owned by the `grafana` user, not root. `services.grafana`
+                    runs its systemd unit as `User = "grafana"` (upstream
+                    nixpkgs grafana.nix), and a file created the obvious way
+                    -- `sudo install -m600 ...`, root:root -- is unreadable to
+                    that user. Grafana starts, can't read its own secret_key,
+                    and dies; `systemctl status grafana` shows the service
+                    failed with nothing more specific than that in the
+                    default log view. This is why the fix below is two steps,
+                    not one, and why the `grafana` user has to already exist
+                    (i.e. a `switch` with this module has already run once)
+                    before the chown can succeed:
+
+                        sudo install -D -m600 /dev/stdin /persist/secrets/grafana-secret-key <<< "$(openssl rand -hex 32)"
+                        sudo chown grafana:grafana /persist/secrets/grafana-secret-key
+
+                    (`/dev/stdin` here, not `<(openssl rand -hex 32)` as a bare
+                    argument -- process substitution's /dev/fd/N path doesn't
+                    reliably survive being handed to a forked `sudo` child on
+                    every shell, and hit exactly that "cannot stat" failure
+                    here. A here-string into /dev/stdin does not have that
+                    problem: sudo inherits stdin directly.)
+
+                    If the file already exists with the wrong ownership from
+                    before this warning was corrected, `sudo chown
+                    grafana:grafana` on it and `sudo systemctl restart
+                    grafana` is enough -- no need to regenerate the key.
                 ''
             ];
 
