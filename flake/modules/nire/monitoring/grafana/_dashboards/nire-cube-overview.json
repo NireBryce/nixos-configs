@@ -1,0 +1,200 @@
+{
+  "uid": "nire-cube-overview",
+  "title": "nire-cube overview",
+  "tags": ["nire-cube", "cube"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "panels": [
+    { "id": 1, "type": "row", "title": "System", "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }, "panels": [] },
+
+    {
+      "id": 2, "type": "gauge", "title": "CPU usage",
+      "gridPos": { "h": 8, "w": 6, "x": 0, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-cube" },
+      "targets": [
+        { "expr": "100 - (avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)", "legendFormat": "CPU" }
+      ],
+      "fieldConfig": { "defaults": {
+        "unit": "percent", "min": 0, "max": 100,
+        "thresholds": { "mode": "absolute", "steps": [
+          { "color": "green", "value": null },
+          { "color": "yellow", "value": 70 },
+          { "color": "red", "value": 90 }
+        ] }
+      }, "overrides": [] }
+    },
+    {
+      "id": 3, "type": "gauge", "title": "Memory usage",
+      "gridPos": { "h": 8, "w": 6, "x": 6, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-cube" },
+      "targets": [
+        { "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100", "legendFormat": "Memory" }
+      ],
+      "fieldConfig": { "defaults": {
+        "unit": "percent", "min": 0, "max": 100,
+        "thresholds": { "mode": "absolute", "steps": [
+          { "color": "green", "value": null },
+          { "color": "yellow", "value": 75 },
+          { "color": "red", "value": 90 }
+        ] }
+      }, "overrides": [] }
+    },
+    {
+      "id": 4, "type": "timeseries", "title": "Load average",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-cube" },
+      "targets": [
+        { "expr": "node_load1", "legendFormat": "1m" },
+        { "expr": "node_load5", "legendFormat": "5m" },
+        { "expr": "node_load15", "legendFormat": "15m" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] }
+    },
+    {
+      "id": 5, "type": "timeseries", "title": "Filesystem usage",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 9 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-cube" },
+      "targets": [
+        {
+          "expr": "(1 - (node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay|squashfs\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|overlay|squashfs\"})) * 100",
+          "legendFormat": "{{ mountpoint }}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100 }, "overrides": [] }
+    },
+    {
+      "id": 6, "type": "timeseries", "title": "Network traffic",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 9 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-cube" },
+      "targets": [
+        { "expr": "rate(node_network_receive_bytes_total{device!=\"lo\"}[5m])", "legendFormat": "rx {{ device }}" },
+        { "expr": "rate(node_network_transmit_bytes_total{device!=\"lo\"}[5m])", "legendFormat": "tx {{ device }}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "Bps" }, "overrides": [] }
+    },
+    {
+      "id": 7, "type": "timeseries", "title": "Disk I/O",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 17 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-cube" },
+      "targets": [
+        { "expr": "rate(node_disk_read_bytes_total[5m])", "legendFormat": "read {{ device }}" },
+        { "expr": "rate(node_disk_written_bytes_total[5m])", "legendFormat": "write {{ device }}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "Bps" }, "overrides": [] }
+    },
+    {
+      "id": 8, "type": "stat", "title": "Scrape targets up",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 17 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-cube" },
+      "targets": [
+        { "expr": "up{job=~\"node|cadvisor|libvirt\"}", "legendFormat": "{{ job }}" }
+      ],
+      "fieldConfig": { "defaults": {
+        "unit": "short", "min": 0, "max": 1,
+        "mappings": [
+          { "type": "value", "options": { "0": { "text": "down", "color": "red" } } },
+          { "type": "value", "options": { "1": { "text": "up", "color": "green" } } }
+        ],
+        "thresholds": { "mode": "absolute", "steps": [
+          { "color": "red", "value": null },
+          { "color": "green", "value": 1 }
+        ] }
+      }, "overrides": [] },
+      "options": { "textMode": "value_and_name", "colorMode": "background" }
+    },
+
+    { "id": 9, "type": "row", "title": "libvirt / QEMU VMs", "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 25 }, "panels": [] },
+
+    {
+      "id": 10, "type": "stat", "title": "VM state",
+      "gridPos": { "h": 8, "w": 6, "x": 0, "y": 26 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-cube" },
+      "targets": [
+        { "expr": "libvirt_domain_info_state", "legendFormat": "{{ domain }}" }
+      ],
+      "fieldConfig": { "defaults": {
+        "mappings": [
+          { "type": "value", "options": { "1": { "text": "running", "color": "green" } } },
+          { "type": "value", "options": { "5": { "text": "shut off", "color": "red" } } }
+        ]
+      }, "overrides": [] },
+      "options": { "textMode": "value_and_name", "colorMode": "background" }
+    },
+    {
+      "id": 11, "type": "timeseries", "title": "VM CPU time",
+      "gridPos": { "h": 8, "w": 9, "x": 6, "y": 26 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-cube" },
+      "targets": [
+        { "expr": "rate(libvirt_domain_info_cpu_time_seconds_total[5m])", "legendFormat": "{{ domain }}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percentunit" }, "overrides": [] }
+    },
+    {
+      "id": 12, "type": "timeseries", "title": "VM memory usage",
+      "gridPos": { "h": 8, "w": 9, "x": 15, "y": 26 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-cube" },
+      "targets": [
+        { "expr": "libvirt_domain_info_memory_usage_bytes", "legendFormat": "{{ domain }}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] }
+    },
+    {
+      "id": 13, "type": "timeseries", "title": "VM disk I/O",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 34 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-cube" },
+      "targets": [
+        { "expr": "rate(libvirt_domain_block_stats_read_bytes_total[5m])", "legendFormat": "read {{ domain }}/{{ target_device }}" },
+        { "expr": "rate(libvirt_domain_block_stats_write_bytes_total[5m])", "legendFormat": "write {{ domain }}/{{ target_device }}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "Bps" }, "overrides": [] }
+    },
+    {
+      "id": 14, "type": "timeseries", "title": "VM network I/O",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 34 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-cube" },
+      "targets": [
+        { "expr": "rate(libvirt_domain_interface_stats_receive_bytes_total[5m])", "legendFormat": "rx {{ domain }}/{{ interface }}" },
+        { "expr": "rate(libvirt_domain_interface_stats_transmit_bytes_total[5m])", "legendFormat": "tx {{ domain }}/{{ interface }}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "Bps" }, "overrides": [] }
+    },
+
+    { "id": 15, "type": "row", "title": "Containers (podman)", "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 42 }, "panels": [] },
+
+    {
+      "id": 16, "type": "timeseries", "title": "Container CPU usage",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 43 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-cube" },
+      "targets": [
+        { "expr": "rate(container_cpu_usage_seconds_total{name!=\"\"}[5m])", "legendFormat": "{{ name }}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percentunit" }, "overrides": [] }
+    },
+    {
+      "id": 17, "type": "timeseries", "title": "Container memory usage",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 43 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-cube" },
+      "targets": [
+        { "expr": "container_memory_usage_bytes{name!=\"\"}", "legendFormat": "{{ name }}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] }
+    },
+    {
+      "id": 18, "type": "timeseries", "title": "Container network I/O",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 43 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-cube" },
+      "targets": [
+        { "expr": "rate(container_network_receive_bytes_total{name!=\"\"}[5m])", "legendFormat": "rx {{ name }}" },
+        { "expr": "rate(container_network_transmit_bytes_total{name!=\"\"}[5m])", "legendFormat": "tx {{ name }}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "Bps" }, "overrides": [] }
+    }
+  ]
+}
