@@ -40,6 +40,12 @@
         # which kde-desktop already brings.
         virtualization
 
+        # podman + distrobox. Its own category as of 2026-08-22, split out of
+        # `system` the same way `virtualization` was -- see that category's
+        # wiki page. All four NixOS hosts import this explicitly now; no
+        # host's package set changed, only where the module lives.
+        containers
+
         # ── packages ──────────────────────────────────────────────────────────
         development
         editors

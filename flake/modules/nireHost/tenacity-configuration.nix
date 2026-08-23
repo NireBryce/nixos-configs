@@ -51,6 +51,13 @@
         # "gamescope-wayland" with autologin.
         jovian
 
+        # podman + distrobox. Its own category as of 2026-08-22, split out of
+        # `system` the same way `virtualization` was (see
+        # durandal-configuration.nix) -- but unlike `virtualization`, this one
+        # is NOT handheld-exclusive: all four NixOS hosts import it, tenacity
+        # included, so this line preserves what `system` already gave it.
+        containers
+
         # ── packages ──────────────────────────────────────────────────────────
         # Full parity with durandal, deliberately. The sibling branch was offered
         # a split that would stop the handheld getting vscode/gimp/libre-office/

@@ -15,7 +15,8 @@
             # trustedInterfaces is `listOf str` and concatenates rather than
             # overrides, so this adds to the tailscale0/lo already set elsewhere
             # instead of replacing them -- the same merge behaviour that made the
-            # duplicate "podman" group in nire/system/containers/, useful here.
+            # duplicate "podman" group in nire/containers/podman/podman.nix
+            # (nire/system/containers/ until 2026-08-22), useful here.
             #
             # The tradeoff is real and worth knowing: trusting the interface means
             # the host accepts *anything* from a guest on it, so a compromised

@@ -85,6 +85,12 @@
         # reason this is a category of its own instead of part of `system`.
         virtualization
 
+        # podman + distrobox. Its own category as of 2026-08-22, split out of
+        # `system` the same way `virtualization` was. All four NixOS hosts
+        # import this explicitly now -- no package set changed, only where
+        # the module lives.
+        containers
+
         # ── packages ──────────────────────────────────────────────────────────
         # Full parity with durandal.
         development

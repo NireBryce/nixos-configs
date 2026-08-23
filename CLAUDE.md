@@ -230,16 +230,27 @@ which also holds `jovian`) is never imported whole.
 
 Related, and a live trap rather than history: containers and VMs are separate
 here and the word "virtualization" means only the second.
-`nire/system/containers/containers.nix` is podman and distrobox, is a member of
-`system`, and is therefore on every Linux host. It was
-`nire/system/virtualization/virtualization.nix` until 2026-08-21 — so a search
-for the old path or the old module name finds nothing, and a memory of
-"virtualization is the podman one" is now exactly backwards. This file used to give a declared-class
-breakdown here (101 homeManager-only, 43 nixos-only, 9 both, one darwin) — it's
-stale as of 2026-08-15 (`nire/macos/` alone now holds several darwin-touching
-modules beyond the `elly-user.nix` example that used to be "the one"), and
-nothing here derives it mechanically the way `just modules` derives category
-membership. Don't quote old numbers; recount if it matters.
+`nire/containers/podman/podman.nix` is podman and distrobox. It was
+`nire/system/virtualization/virtualization.nix` until 2026-08-21, then
+`nire/system/containers/containers.nix` until 2026-08-22, when it moved out
+of `system` entirely into its own category — same split `virtualization` got
+the day before, for the same "if something shared needs to be optional, a
+category is the mechanism" reason above, though the option wasn't actually
+exercised: all four NixOS hosts import `containers` explicitly now, so
+coverage didn't change, only the mechanism did. The file itself got renamed
+in the same move, `containers.nix` → `podman.nix` — a category named
+`containers` and a module named `containers` would declare the same
+`flake.modules.nixos.containers` attribute and silently merge, the exact
+near-miss `virtualization`'s own header already warned about, hit for real
+this time and caught by `just modules`. A search for any of the old paths or
+module names finds nothing, and a memory of "virtualization is the podman
+one" is now exactly backwards regardless of which name you're picturing.
+This file used to give a declared-class breakdown here (101 homeManager-only,
+43 nixos-only, 9 both, one darwin) — it's stale as of 2026-08-15
+(`nire/macos/` alone now holds several darwin-touching modules beyond the
+`elly-user.nix` example that used to be "the one"), and nothing here derives
+it mechanically the way `just modules` derives category membership. Don't
+quote old numbers; recount if it matters.
 
 **There are five hosts, not two, and one of them is darwin — plus a sixth
 `nixosConfigurations` entry that isn't a host at all.**

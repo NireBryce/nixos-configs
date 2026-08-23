@@ -1,11 +1,12 @@
 # `system` — `nire/system/`
 
-The largest category by far — 38 files across 19 subdirectories — and the
+The largest category by far — 37 files across 19 subdirectories — and the
 one every Linux host in this repo imports whole, with no way to opt out of
 any piece of it. That property is exactly why
-[virtualization](virtualization.md) got split into its own category instead
-of living here: anything that needs to be optional for some hosts (the
-handhelds, specifically) can't be filed under `system`.
+[virtualization](virtualization.md) and [containers](containers.md) got
+split into their own categories instead of living here: anything that needs
+to be optional for some hosts (or just optional in principle) can't be filed
+under `system`.
 
 ## Subdirectories at a glance
 
@@ -13,7 +14,6 @@ handhelds, specifically) can't be filed under `system`.
 |---|---|---|
 | `base-system-packages/` | 4 | `core-utilities`, `fallback-editors`, `performance`, `sensors` — baseline `environment.systemPackages` every host wants. |
 | `bluetooth/` | 1 | `bluetooth.nix`. |
-| `containers/` | 1 | `containers.nix` — podman + distrobox. See below; **not** the VM category. |
 | `firmware/` | 2 | `firmware-all.nix`, `fwupd.nix`. |
 | `flatpak/` | 1 | `flatpak.nix`. |
 | `font/` | 1 | `font.nix` — reaches every host via `ellyHomeManager`, see below. |
@@ -65,17 +65,18 @@ the decryption key path from the host's own ed25519 SSH host key
 hosts are actually enrolled in `.sops.yaml` — that's tracked separately from
 which hosts import this module.
 
-## Containers vs. virtualization — the live trap
+## Containers vs. virtualization — the live trap, and no longer filed here
 
-`containers/containers.nix` is podman and distrobox — OCI containers — and
-was **`nire/system/virtualization.nix`** until 2026-08-21, declaring
-`flake.modules.nixos.virtualization`. It was renamed, file and directory
-both, because the word "virtualization" now means only
-[the VM category](virtualization.md) (libvirt/QEMU), which is a category of
-its own precisely so the handhelds can decline it — and `containers.nix` is
-on every Linux host regardless, imported whole as part of `system`. A search
-for the old path or the old module name finds nothing; a memory of
-"virtualization is the podman one" is now exactly backwards.
+Podman and distrobox — OCI containers — used to live under
+`system/containers/`, but moved out entirely 2026-08-22 into their own
+category: see [containers](containers.md). This section stays as a pointer
+because the trap is still live and this is where someone remembering the old
+location will look first: the word "virtualization" means only
+[the VM category](virtualization.md) (libvirt/QEMU) — the containers module
+was briefly named `virtualization.nix` itself, until 2026-08-21, before that
+name was needed for the actual VM category — and a memory of "virtualization
+is the podman one" is exactly backwards no matter which of the module's three
+names and two directories you're picturing.
 
 ## The `*-persist.nix` sibling-file convention
 
@@ -154,8 +155,9 @@ via `ellyHomeManager` rather than through this category import at all.
 
 - [impermanence](impermanence.md) — `declare-persistence-option.nix`, and
   the "don't confuse the two `impermanence`s" note.
-- [virtualization](virtualization.md) — the category `containers.nix` is
-  easy to confuse this one with, by history.
+- [virtualization](virtualization.md) and [containers](containers.md) — both
+  split out of `system` so hosts could opt out (or, for containers, could in
+  principle); easy to confuse the two by history and by name.
 - [../architecture.md](../architecture.md) — the Home Manager integration
   and platform-support mechanisms this category's `home-manager/` files
   implement.
