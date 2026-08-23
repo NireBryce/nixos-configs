@@ -99,6 +99,16 @@
         # the module lives.
         containers
 
+        # Prometheus + Grafana, scraping this host's own node/cadvisor/libvirt
+        # exporters -- node-exporter, cadvisor, libvirt-exporter, prometheus,
+        # grafana. cube-only for now, added 2026-08-23, same reasoning
+        # `virtualization` got its own category for: nothing here belongs on
+        # the handhelds. Grafana is reachable over Tailscale (tailscale0 is
+        # trusted at the firewall, see networking.nix) and nowhere else --
+        # everything upstream of it stays on loopback. See grafana.nix's
+        # header for the exact mechanism and its caveats.
+        monitoring
+
         # ── packages ──────────────────────────────────────────────────────────
         # Full parity with durandal.
         development
