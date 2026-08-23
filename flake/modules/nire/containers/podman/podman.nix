@@ -6,9 +6,31 @@
         # `flake.modules.nixos.virtualization`. Everything here is OCI containers
         # -- podman and distrobox -- and never was anything else; the word
         # `virtualization` now names the VM category at nire/virtualization/,
-        # which is libvirt/QEMU and is not imported by every host the way this
-        # is. The directory was `nire/system/virtualization/` until 2026-08-21
-        # for the same reason the file was.
+        # which is libvirt/QEMU. The directory was `nire/system/virtualization/`
+        # until 2026-08-21 for the same reason the file was.
+        #
+        # MOVED AGAIN, 2026-08-22: out of `nire/system/containers/` (a
+        # subdirectory of the `system` category, imported whole by every Linux
+        # host with no way to opt out) into its own category,
+        # `nire/containers/` -- structurally the same split `virtualization`
+        # got 2026-08-21, giving hosts the *option* to decline it the way
+        # `system` membership never did. That option wasn't exercised at move
+        # time: all four NixOS hosts (durandal, tenacity, lego, cube) import
+        # `containers` by name now, explicitly, in place of the implicit
+        # coverage `system` used to give it -- no host's actual package set
+        # changed. See wiki/categories/containers.md.
+        #
+        # RENAMED IN THE SAME MOVE, `containers.nix` -> `podman.nix`: this is
+        # the exact near-miss `virtualization`'s own header records, hit for
+        # real this time rather than caught before shipping. The new
+        # category's `dirsAsCategory.nix` derives its aggregate name from its
+        # own directory, `nire/containers/`, so it declares
+        # `flake.modules.nixos.containers` -- the same attribute a file still
+        # named `containers.nix` would declare from ITS filename. `just
+        # modules` caught the collision immediately (both would have merged
+        # invisibly, not conflicted). Renamed to `podman.nix` for the same
+        # reason `libvirt.nix` isn't named `virtualization.nix`: name the file
+        # after the actual technology, not the category it sits in.
         flake.modules.nixos.${moduleName} = { pkgs, ... }: {
             # # description = "podman, distrobox, and the subuid pinning they need";
             environment.systemPackages = with pkgs; [

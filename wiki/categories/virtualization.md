@@ -1,8 +1,8 @@
 # `virtualization` — `nire/virtualization/`
 
-Libvirt/QEMU VMs, and *only* that — see [system](system.md) for why podman
-and distrobox (OCI containers) are a completely different category despite
-"virtualization" sounding like it should cover both.
+Libvirt/QEMU VMs, and *only* that — see [containers](containers.md) for why
+podman and distrobox (OCI containers) are a completely different category
+despite "virtualization" sounding like it should cover both.
 
 ## What's in it
 
@@ -59,8 +59,9 @@ two handhelds (the ones that import `jovian` — see
 
 ## See also
 
-- [system](system.md) — where OCI containers (podman/distrobox) actually
-  live, and why "virtualization" meaning only this is a live trap for a
+- [containers](containers.md) — where OCI containers (podman/distrobox)
+  actually live (its own category since 2026-08-22, previously filed under
+  `system`), and why "virtualization" meaning only this is a live trap for a
   stale memory.
 - [impermanence](impermanence.md), [desktop-env](desktop-env.md) — the two
   other categories with their own `*-persist.nix` sibling files following

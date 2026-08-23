@@ -57,6 +57,12 @@
         # persistence along with it; nothing lego-specific needed for that.
         jovian
 
+        # podman + distrobox. Its own category as of 2026-08-22, split out of
+        # `system` the same way `virtualization` was -- but not
+        # handheld-exclusive the way that one is; all four NixOS hosts import
+        # it, same as tenacity's copy of this comment explains.
+        containers
+
         # ── packages ──────────────────────────────────────────────────────────
         # Full parity with durandal and tenacity, deliberately, same reasoning
         # as tenacity's own comment on this list.

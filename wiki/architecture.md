@@ -62,7 +62,9 @@ instead of this page; this page is the mechanism, not the inventory.
 Containers and VMs are separate categories here, and "virtualization" means
 only the VM one (`nire/virtualization/`: libvirt, virt-tools,
 vm-networking — optional, workstation-only). Podman/distrobox live in
-`nire/system/containers/` and are on every Linux host. See
-[`../CLAUDE.md`](../CLAUDE.md)'s Architecture section for the file that used
-to be named the other way and why a stale memory of "virtualization is the
-podman one" is now exactly backwards.
+[`nire/containers/`](categories/containers.md) — its own category since
+2026-08-22 (moved out of `nire/system/containers/`), imported explicitly by
+all four NixOS hosts rather than reaching them through `system`. See
+[`../CLAUDE.md`](../CLAUDE.md)'s Architecture section for the file that's
+been renamed twice now and why a stale memory of "virtualization is the
+podman one" is exactly backwards regardless of which name you're picturing.
