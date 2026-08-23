@@ -574,3 +574,70 @@ the better name anyway.
 **A merge is only visible when the two halves disagree.** When naming a module,
 check what its directory is already going to declare — and prefer the specific
 name for the file, leaving the general one to the category that hosts import.
+
+## 35. The same collision, a third time — caught immediately because the tool was actually run
+
+`containers.nix`, moved into its own category (`nire/containers/`) on
+2026-08-22 for the same reason `virtualization` split off `system` a day
+earlier, walked straight into §34's exact trap: the new category's
+`dirsAsCategory.nix` derives `flake.modules.nixos.containers` from the
+directory name, and the file, freshly moved, was still named `containers.nix`
+— declaring the identical attribute from its own filename. Same failure
+mode as `boot`/`boot-durandal` and `virtualization.nix`/`virtualization`
+before it: a category and a module racing for one name, set to merge rather
+than conflict.
+
+The difference from both those cases: this one never shipped even briefly.
+`just modules` was run as a matter of course before committing (not because
+anything looked wrong) and reported it flatly —
+`COLLISION 'containers': category modules/nire/containers/ and module
+modules/nire/containers/containers/containers.nix declare the same
+attribute; they merge` — and it was renamed to `podman.nix` (the actual
+technology, same reasoning `libvirt.nix` isn't named `virtualization.nix`)
+before any commit existed with the collision in it.
+
+**Three instances of the identical trap in one repo's history is not bad
+luck, it's a predictable cost of the category-name-from-directory
+mechanism.** The lesson isn't "be more careful" — §34 already said that and
+it still happened again. It's: **splitting anything into its own category is
+now a specific, checkable moment** — the new directory's basename is a
+reserved word for every module filed under it, so name-collision is worth
+checking for *by construction* (does any file under here share the
+category's own name) rather than by hoping `just modules` gets run before
+the commit that matters.
+
+## 36. Evaluating the Nix expression and building the artifact it describes are different tests, and only one of them was run
+
+Two real bugs surfaced building `nire-llm-sandbox` (a libvirt VM guest, see
+skill `nixos-vm-images`), and both share a shape worth naming on its own,
+past what §25 ("running it is a rung of its own") already covered:
+
+1. Using `image.modules.qemu` (nixpkgs' image-*variant* system) instead of
+   importing `virtualisation/disk-image.nix` directly. This one WAS caught
+   by evaluation — `nix eval` on `system.build.toplevel` failed outright,
+   with a real assertion naming the missing `fileSystems`/`grub.devices`.
+   Forcing every touched host's toplevel (this repo's own standing rule,
+   `checks.nix`'s whole reason for existing) is what caught it, immediately,
+   before anything was built.
+2. Using `config.image.filePath` as if it were already an absolute path,
+   when it's documented as relative to the image derivation's own `$out`.
+   This one was NOT caught by evaluation — `nix eval` on the consuming
+   systemd unit's `ExecStart` returned a perfectly well-typed store path to
+   a generated script. The script's own *content* was wrong (a bare filename
+   in an `[ -e ... ]` check, certain to fail under systemd's cwd), and
+   nothing about evaluating the expression that produced it revealed that —
+   only building the script and reading it back did.
+
+**Bug #1 is the "evaluates ≠ works" lesson this file already has (§25),
+found the normal way. Bug #2 is one level past it: a value can be
+well-typed, evaluate cleanly, and still be semantically wrong — and no
+amount of `nix eval` on the *consumer* finds that, because the consumer
+faithfully substituted a bad string into a syntactically fine derivation.**
+The only thing that caught it was `nix build`-ing the specific derivation
+whose *string content* mattered and reading the file back — the same
+`Read`-the-artifact discipline this repo already applies to generated
+dotfiles (`home-manager-dotfiles` skill) and rendered firewall scripts
+(wiki `system.md`'s Tailscale section), just not yet named as a general
+rule. Worth generalizing: **when a value is a path, a filename, or anything
+else whose correctness depends on more than its type, build the thing that
+consumes it and read the result — don't stop at the expression type-checking.**

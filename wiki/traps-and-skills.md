@@ -14,6 +14,7 @@ one-liner.
 | Editing impermanence or initrd | `.claude/skills/impermanence-initrd/SKILL.md` |
 | Adding/platform-gating a package | `.claude/skills/nirepackages-platform-support/SKILL.md` |
 | Adding a new host | `.claude/skills/new-host-config/SKILL.md` |
+| Building a NixOS VM image / wiring a libvirt guest | `.claude/skills/nixos-vm-images/SKILL.md` |
 | Landing work on `main` | `.claude/skills/ship/SKILL.md` |
 
 See [architecture.md](architecture.md) and

@@ -29,6 +29,36 @@ All four files live under `libvirt/` and are all `nixos`-class:
   non-cosmetic drift, alongside NetworkManager's own secret key (see
   [system](system.md)'s `networkmanager-persist.nix`).
 
+## A cube-only addition that is deliberately NOT a category member
+
+`VMs/_lib/libvirt-vm.nix` and `virtualization-cube.nix` (added 2026-08-22)
+define and start `nire-llm-sandbox` — a libvirt VM guest sandboxing an LLM
+coding agent — but neither counts toward this category's 4 members above,
+and that's by design, not an oversight. Two different exclusion mechanisms,
+easy to conflate (see skill `nixos-vm-images` for the full account):
+
+- **`VMs/_lib/libvirt-vm.nix`** is a plain curried function (`{ name, image,
+  ... }: { pkgs, lib, ... }: {...}`), not a flake-parts module — it can't
+  declare `flake.modules.nixos.<name>` because it takes parameters, and
+  `import-tree` would fail outright trying to auto-import it with standard
+  module args. Filed under `_lib/` for the same reason
+  `nirePackages/_lib/mkPkgModule.nix` is: `import-tree` ignores any path
+  containing `/_`.
+- **`virtualization-cube.nix`** sits bare in `nire/virtualization/` itself,
+  not in any subdirectory — the OTHER dirsAsCategory exclusion (this
+  directory only collects from *sub*directories; a file sitting directly in
+  the category directory is collected by nothing). This is what keeps the
+  VM cube-exclusive: durandal also imports `virtualization`, and without
+  this placement it would get the sandbox VM too. Confirmed empirically, not
+  just asserted — durandal's/tenacity's/lego's toplevel drvPaths are
+  byte-identical before and after this addition.
+
+See [hosts.md](../hosts.md) for `nire-llm-sandbox` itself, and skill
+`nixos-vm-images` for two real bugs this specific feature hit (nixpkgs'
+image-variant isolation not reaching a base config's toplevel, and
+`image.filePath` being relative rather than absolute) — both caught before
+landing, neither by evaluation alone.
+
 ## The near-miss this category's own header records
 
 `libvirt.nix`'s header carries a live example of the `boot`-style merge
@@ -70,3 +100,7 @@ two handhelds (the ones that import `jovian` — see
 - [../architecture.md](../architecture.md) — "If something shared needs to
   be optional, a category is the mechanism" — this category is the running
   example that claim is built on.
+- [../hosts.md](../hosts.md) — `nire-llm-sandbox`, the VM guest
+  `virtualization-cube.nix` defines and starts.
+- Skill `nixos-vm-images` (`.claude/skills/nixos-vm-images/SKILL.md`) — the
+  full mechanism and traps behind the cube-only addition above.

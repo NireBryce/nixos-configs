@@ -85,6 +85,14 @@
         # reason this is a category of its own instead of part of `system`.
         virtualization
 
+        # The nire-llm-sandbox libvirt VM (Claude Code, isolated from the
+        # real host) -- cube only, added 2026-08-22. NOT part of the
+        # `virtualization` aggregate above, on purpose: this line is the only
+        # thing that reaches it. See virtualization-cube.nix's own header for
+        # why it has to be named and imported this way rather than living in
+        # a normal subdirectory of nire/virtualization/.
+        virtualization-cube
+
         # podman + distrobox. Its own category as of 2026-08-22, split out of
         # `system` the same way `virtualization` was. All four NixOS hosts
         # import this explicitly now -- no package set changed, only where
