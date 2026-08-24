@@ -20,36 +20,27 @@
 
                 # Uninstall anything not declared here on activation, since a
                 # homebrew install that silently drifts from what is declared
-                # defeats the point of declaring it at all. That intent is
-                # unchanged; only the way of asking for it has.
+                # defeats the point of declaring it at all.
                 #
-                # `onActivation.cleanup = "uninstall"` is the option that
-                # expresses this, and it is BROKEN as of 2026-08-12. nix-darwin
-                # turns it into `brew bundle --force-cleanup`
-                # (modules/homebrew.nix:196), and Homebrew removed that flag.
-                # On 5.1.6 activation dies with:
-                #
-                #     Error: invalid option --force-cleanup
-                #
-                # `brew bundle`'s flags are now `--cleanup` and `--force`
-                # separately -- checked against its own arg parser in
-                # /opt/homebrew/Library/Homebrew/cmd/bundle.rb, which declares
-                # --cleanup and no --force-cleanup. Per `brew bundle --help`,
-                # `--cleanup` alone is "same as running cleanup --force", so it
-                # is the exact behaviour the enum value was asking for.
-                #
-                # Not fixed upstream: nix-darwin master resolves to the same
-                # store path as the pinned rev here, and still emits the old
-                # flag. Revisit when the input moves -- if `cleanup` starts
-                # working, this pair should collapse back to it.
-                onActivation.cleanup    = "none";
-                onActivation.extraFlags = [ "--cleanup" ];
+                # nix-darwin turns this into `brew bundle --force-cleanup`
+                # (modules/homebrew.nix:196), a switch Homebrew added in 6.0.0.
+                # This option spent 2026-08-12..24 worked around as
+                # `cleanup = "none"` + `extraFlags = [ "--cleanup" ]`, back
+                # when lysithea was on Homebrew 5.x; that workaround is
+                # 5.x-only and breaks on 6.x. Read the history block at the
+                # bottom before reaching for it again -- neither spelling
+                # works on both generations.
+                onActivation.cleanup = "uninstall";
 
                 taps = [ ];
 
                 brews = [
                     "gifski" # gif creator/converter
                     "magic-wormhole" # easy secure point-to-point file transfer
+                    "opencode" # LLM coding agent CLI
+                    "python@3.13" # kept explicitly: `cleanup = "uninstall"`
+                                  # removes anything undeclared, and this was
+                                  # installed by hand rather than as a dep
                 ];
 
                 casks = [
@@ -93,28 +84,74 @@
                     "rocket" # emoji menu
                     "sloth" # TODO: dont remember
                     "steam" # steam games library
-                    "tailscale" # network tunnel
+                    "tailscale-app" # network tunnel -- renamed from `tailscale` by homebrew
                     "the-unarchiver" # TODO: dont remember
                     "transmit" # TODO: dont remember
                     "unicodechecker" # TODO: dont remember
                     "utm" # another VM thing
                     "visual-studio-code" # VSCode
                     "whisky" # `wine` for mac
-                    "xcodes" # version manager for various languages (python?)
+                    "xcodes-app" # renamed from `xcodes` by homebrew; version manager for various languages (python?)
                     "xscope" # TODO: dont remember
                     "zoom" # video conferencing
                     "google-chrome" # need for webserial and webBLE apps for devices
                     "autodesk-fusion" # Fusion 180 (personal featureless edition)
                     "fantastical" # Calendar Software
                     "moonlight" # moonlight game streaming (sunshine on durandal)
-                    "mullvadvpn" # mullvad vpn
+                    "mullvad-vpn" # mullvad vpn -- renamed from `mullvadvpn` by homebrew
                     "insta360-studio" # 360 video editor
                     "espanso" # global text expansions -- see the homeManager
                               # espanso module too; check for a real conflict
                               # before running both on the same machine
                     "firefox" # TODO: this might break FF it used to be system managed
                     "obs"
+                    "zcode" # AI-assisted development environment
                 ];
             };
         };
 }
+
+# ── history ─────────────────────────────────────────────────────────────────
+#
+# `onActivation.cleanup = "uninstall"` was replaced on 2026-08-12 by
+# `cleanup = "none"` + `onActivation.extraFlags = [ "--cleanup" ]`, and that
+# workaround was reverted on 2026-08-24. Both halves of the round trip were
+# real; neither was a mistake at the time. Recorded here because the obvious
+# reading of the reverted diff -- "someone put back a flag that was removed
+# upstream" -- is backwards.
+#
+# nix-darwin translates `cleanup = "uninstall"` into `brew bundle
+# --force-cleanup` (its modules/homebrew.nix:196; unchanged across the whole
+# round trip). On Homebrew 5.1.6 that flag did not exist, and activation died
+# with `Error: invalid option --force-cleanup`. Its arg parser at the time
+# declared `--cleanup` and `--force` separately with no `--force-cleanup`, and
+# `brew bundle --help` said `--cleanup` alone was "same as running cleanup
+# --force" -- so passing `--cleanup` by hand through `extraFlags`, with the
+# nix-darwin option set to "none" so it would not also emit the dead flag, was
+# the same behaviour by a working spelling.
+#
+# Homebrew 6 undid both halves of that. `--force-cleanup` is a real switch
+# again (`bundle/subcommand/install.rb:49`, "Perform cleanup after installing
+# dependencies without asking"), and bare `--cleanup` is deprecated and no
+# longer implies force: without `--force`/`--force-cleanup`/`$HOMEBREW_ASK` it
+# runs cleanup as a DRY RUN, prints `Would uninstall …` and `Run brew bundle
+# cleanup --force to make these changes`, and then exits 1. So the workaround
+# stopped cleaning anything up and started failing every `just switch`, on
+# Homebrew 6.0.19.
+#
+# That failure is worth recognising by shape, because nh reports only the
+# subprocess's stderr and every line of the dry run goes to stdout. What an
+# activation failure looked like was a wall of harmless `Warning: <cask> was
+# renamed to …` lines and no error at all -- the renames were unrelated
+# (fixed in the same change: tailscale -> tailscale-app, xcodes -> xcodes-app,
+# mullvadvpn -> mullvad-vpn) and had nothing to do with the exit code. Running
+# the activation script's own `brew bundle` line by hand is what showed it;
+# the stderr matched the failure byte for byte and the answer was on stdout.
+#
+# Reverting also meant cleanup would, for the first time in twelve days,
+# actually uninstall. `brew leaves` and the dry run's own `Would uninstall`
+# list were checked first: cask `zcode` and formulae `opencode` and
+# `python@3.13` were installed by hand and wanted, so they were added to the
+# lists above in the same change rather than being removed by it. Everything
+# else the dry run named (`node`, `ripgrep`, `pcre2`, `icu4c@78`, `libuv`, and
+# the rest) was a dependency of those, and comes back on demand.
