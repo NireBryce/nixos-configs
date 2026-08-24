@@ -61,6 +61,29 @@
                    # agent inside it cannot actually do its job. A serial
                    # console (below, unconditional) is the only way in
                    # either way -- ssh needs the network too.
+
+, sshForward ? null
+    # null (default: no inbound access to this VM at all -- NAT means
+    # nothing can reach it unprompted, which is the right default for
+    # something like llm-sandbox whose whole point is isolation), or
+    # `{ guestId = <int, 2-254>; hostPort = <int>; sourceCidrs ? defaultAllowedSourceCidrs; }`
+    # to forward hostPort on THIS HOST to the guest's SSH port. `sourceCidrs`
+    # defaults to LAN-or-Tailscale (see `defaultAllowedSourceCidrs` below);
+    # pass `tailnetOnlyCidrs` (also below) instead to admit only Tailscale
+    # sources, or a bespoke list for anything narrower still.
+    #
+    # `guestId` is a plain human-assigned integer, not derived from `name`
+    # or auto-allocated -- same "pin explicitly, a human reasons about
+    # collisions" reasoning `nire/containers/podman/podman.nix` already
+    # gives for its own `subUidRanges` (see that file's own comment on the
+    # incident that taught it). It fixes both this guest's MAC
+    # (`52:54:00:00:00:<guestId, hex>`) and its DHCP-reserved IP
+    # (`192.168.122.<guestId>`) on libvirt's default network, so the port
+    # forward below always has a stable, known destination -- no runtime
+    # `virsh domifaddr` polling, no dependency on DHCP lease timing. Two
+    # VMs sharing a `guestId` is a real, unchecked collision -- there's no
+    # auto-allocator here on purpose, so avoiding that is on whoever wires
+    # up the second VM, the same way avoiding a `subUidRanges` collision is.
 }:
 { pkgs, lib, ... }:
 let
@@ -69,12 +92,47 @@ let
     baseImg  = imagePath;
     xmlPath  = "/etc/libvirt/qemu/${name}.xml";
 
+    hex2 = n: lib.fixedWidthString 2 "0" (lib.toLower (lib.toHexString n));
+    # Both only meaningful (and only evaluated) when sshForward != null --
+    # guarded at every use site below rather than given a placeholder value
+    # here, so a mistaken reference with sshForward == null fails loudly
+    # instead of silently pointing at 192.168.122.0.
+    guestMac = "52:54:00:00:00:${hex2 sshForward.guestId}";
+    guestIp  = "192.168.122.${toString sshForward.guestId}";
+
     interfaceXml = lib.optionalString networked ''
       <interface type='network'>
         <source network='default'/>
         <model type='virtio'/>
+        ${lib.optionalString (sshForward != null) "<mac address='${guestMac}'/>"}
       </interface>
     '';
+
+    # Tailscale's own CGNAT range. Its own constant (not folded into the
+    # list below silently) so a caller can opt into *only* this -- pass
+    # `sourceCidrs = tailnetOnlyCidrs` on `sshForward` for a VM that should
+    # never be reachable from the plain LAN, tailnet or nothing.
+    tailnetOnlyCidrs = [ "100.64.0.0/10" ];
+
+    # RFC1918 (any private LAN) plus the tailnet range above -- the default
+    # when `sshForward` doesn't say otherwise. Deliberately source-IP-based
+    # rather than interface-based either way: an interface name (`enp3s0`,
+    # `wlp4s0`, ...) isn't portable across hosts, which matters here
+    # specifically because this generator is meant to be called from more
+    # than one host's config (see this file's own header); a private-range
+    # source check needs no per-host parameter to stay correct everywhere.
+    # Real limit worth knowing, for either list: this is a network-layer
+    # check, not authentication -- it keeps casual/scanning traffic from
+    # the wider internet out (source-IP spoofing can't complete a TCP
+    # handshake, so this isn't trivially bypassable), but SSH's own key
+    # auth is still the actual security boundary once a connection is
+    # allowed through at all.
+    defaultAllowedSourceCidrs = [ "10.0.0.0/8" "172.16.0.0/12" "192.168.0.0/16" ] ++ tailnetOnlyCidrs;
+
+    effectiveSourceCidrs =
+        if sshForward != null
+        then sshForward.sourceCidrs or defaultAllowedSourceCidrs
+        else [ ]; # never read -- extraCommands below is gated on sshForward != null too
 
     # machine='pc' (i440fx), not 'q35': the older chipset defaults
     # unambiguously to SeaBIOS with no <loader> element at all, matching
@@ -172,6 +230,28 @@ let
       fi
       ''}
 
+      ${lib.optionalString (sshForward != null) ''
+      # Pin this guest's DHCP lease to a known address so the port-forward
+      # rule in networking.firewall.extraCommands (below) always has a
+      # correct destination -- a static reservation, not something read
+      # back from the guest at runtime. dnsmasq (what libvirt's network
+      # driver actually runs) excludes a reserved address from its dynamic
+      # pool automatically, so this can't collide with some OTHER guest's
+      # ordinary DHCP lease -- only with another `sshForward.guestId` set
+      # to the same integer, which is on whoever configures the second VM
+      # to avoid, per this file's `guestId` parameter comment.
+      # `--live --config`: applies immediately (the guest may already be
+      # running and lease-renew into this) AND persists across a libvirtd
+      # restart, matching `virsh define`'s own persistence below. Guarded
+      # rather than reapplied unconditionally: `net-update add-last` on an
+      # already-present entry errors, and this activation script runs on
+      # every switch, not just the first one.
+      if ! ${pkgs.libvirt}/bin/virsh -c qemu:///system net-dumpxml default | grep -qi "mac='${guestMac}'"; then
+        ${pkgs.libvirt}/bin/virsh -c qemu:///system net-update default add-last ip-dhcp-host \
+          "<host mac='${guestMac}' ip='${guestIp}'/>" --live --config
+      fi
+      ''}
+
       ${pkgs.libvirt}/bin/virsh -c qemu:///system define "${xmlPath}"
 
       state="$(${pkgs.libvirt}/bin/virsh -c qemu:///system domstate ${name})"
@@ -181,6 +261,13 @@ let
     '';
 in
 {
+    assertions = [
+        {
+            assertion = sshForward != null -> networked;
+            message   = "libvirt-vm ${name}: sshForward is set but networked = false -- there's no NIC for a forwarded port to reach.";
+        }
+    ];
+
     environment.etc."libvirt/qemu/${name}.xml".source = domainXml;
 
     systemd.services."libvirt-vm-${name}" = {
@@ -194,4 +281,24 @@ in
             ExecStart       = activate;
         };
     };
+
+    # Inbound port-forward into this one guest, from whichever source
+    # ranges `sshForward.sourceCidrs` names (LAN-and-tailnet by default,
+    # tailnet-only if the caller asked for that) -- see
+    # `defaultAllowedSourceCidrs`/`tailnetOnlyCidrs` above for what that
+    # means and its actual limits. `extraCommands` is `lines`-typed (concatenates across
+    # modules), so this is additive with any other VM's own forward and
+    # with anything else that sets it -- not an override.
+    #
+    # PREROUTING DNAT only, deliberately no explicit FORWARD-chain rule
+    # alongside it: `vm-networking.nix`'s `trustedInterfaces = [ "virbr0" ]`
+    # already accepts everything to/from that bridge, which is what a
+    # DNAT'd packet needs to cross once its destination has been rewritten
+    # to this guest's address -- adding a second, narrower FORWARD rule here
+    # would be redundant with, not additional to, that existing trust.
+    networking.firewall.extraCommands = lib.optionalString (sshForward != null) (
+        lib.concatMapStringsSep "\n"
+            (cidr: "iptables -t nat -A PREROUTING -s ${cidr} -p tcp --dport ${toString sshForward.hostPort} -j DNAT --to-destination ${guestIp}:22")
+            effectiveSourceCidrs
+    );
 }

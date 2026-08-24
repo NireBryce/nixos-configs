@@ -60,5 +60,28 @@
                 # into the generator) because the isolation/functionality
                 # tradeoff is a real, live decision, not a fixed default.
                 networked = true;
+
+                # SSH into the sandbox from off-host, tailnet only -- NOT
+                # LAN too. Added 2026-08-23. The guest side was already
+                # fully ready for this (llm-sandbox-configuration.nix has
+                # had `services.openssh.enable` and elly's authorized keys
+                # from the start); this is what actually opens a path in.
+                # `sourceCidrs = tailnetOnlyCidrs` overrides
+                # libvirt-vm.nix's own default (LAN-or-tailnet) down to
+                # tailnet-only, a deliberate choice for this VM
+                # specifically -- not a property of the generator. `10` and
+                # `2222` are this generator's first real allocation; if a
+                # second VM ever wants sshForward too, it needs its own
+                # `guestId` (no auto-allocator -- see libvirt-vm.nix's
+                # parameter comment) and its own `hostPort`.
+                sshForward = {
+                    guestId     = 10;
+                    hostPort    = 2222;
+                    sourceCidrs = [ "100.64.0.0/10" ]; # tailnetOnlyCidrs, inlined:
+                                                        # this file has no `let`
+                                                        # binding reaching into
+                                                        # libvirt-vm.nix's own
+                                                        # internals to name it by.
+                };
             };
 }
