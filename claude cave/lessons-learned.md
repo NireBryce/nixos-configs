@@ -715,3 +715,147 @@ to be optional, a category is the mechanism" instinct `CLAUDE.md`'s
 Architecture section already states — applied one level down, to a single
 behavior inside one already-shared module rather than to category
 membership itself.
+
+## 39. A live interactive bug needs a live interactive repro — `ssh host 'cmd'` is not the same session a human types into
+
+Reported 2026-08-24: "weird completion errors" over SSH to `nire-cube`,
+`-bash: read: `': not a valid identifier`, appearing while typing (before
+any Tab) and sometimes on Tab itself, for ordinary commands like `git co`.
+
+The instinct was to read `bash.nix`/`blesh.nix`/`carapace-desc.bash` and
+reason about it, but reading found nothing wrong, and `ssh nire-cube 'bash -ic
+"..."'` couldn't reproduce it either — no pty, so `[[ $- == *i* ]]` in
+bash.nix's own ble.sh-attach line never fires, exactly the trap that line's
+own neighboring comments don't warn about because nobody had hit it yet.
+Getting a real pty (`ssh -tt`) and typing real keystrokes into it (built as
+`ssh-pty-drive.py` this session, later generalized beyond SSH, renamed and
+published as [`terminal-puppeteer`](https://github.com/NireBryce/terminal-puppeteer)
+— see its own README) reproduced the exact error on the first try.
+
+Tracing (monkey-patching `ble/bash/read` live to log every real `read`
+builtin call and its caller stack, then reproducing again) found the actual
+call chain: ble.sh's own auto-complete/progcomp machinery globally shadows
+the `read` builtin, and while a registered completer is running it installs
+`_ble_builtin_read_hook`, a safety net that periodically checks whether the
+user has kept typing (`ble/complete/progcomp/.check-limits`, tripped every
+`bleopt_complete_polling_cycle` reads — 50 by default — precisely the "am I
+being too slow, is there more input already queued" check ble.sh runs
+*constantly* during normal-speed typing, not a rare edge case) and, if so,
+redirects the in-flight `read` to `/dev/null` and cancels. carapace's own
+generated `_carapace_completer` (`source <(carapace _carapace bash)` in
+`bash.nix` — third-party output, not this repo's code) has exactly one
+`read` call in it, and its visible form — `IFS='' read -r -d '' nospace data
+<<< "${data}"` — is a misread that survived several rounds of this exact
+tracing before `od -c` caught it: that first `''` is not empty, it's two
+single quotes around a literal SOH (0x01) control byte that a terminal
+just doesn't render, so it *looks* like an empty string in every plain
+`echo`/`grep`/`type` capture, including the ones this session took first.
+When that read call is the one caught by the cancellation fallback, its
+args come back corrupted — split character-by-character rather than into
+the two variable names — which is what produces
+`read: `': not a valid identifier`, repeatedly, for any carapace-routed
+command, on any keystroke fast enough to leave more input queued when the
+50-read check lands.
+
+**This is not `carapace-desc.bash`'s bug.** That file (added the day before,
+2026-08-22, and flagged in its own header as unverified against a live Tab
+press) was the first suspect precisely because it was newest and explicitly
+marked unverified. Confirmed innocent by removing its advice and
+re-`source`-ing carapace's completer plain: the error still fires with zero
+of this repo's completion code involved. It is a genuine interaction bug
+between carapace's stock bash completer and ble.sh's own live-typing
+cancellation path, exposed by this repo wiring carapace into `complete -F`
+for the first time — not introduced by anything added on top of it.
+
+Also worth naming plainly: **this exact bug was already found and written
+up two days earlier**, 2026-08-22, in
+[`wiki/categories/shell-config/blesh.md`](../wiki/categories/shell-config/blesh.md)
+— pinned to "somewhere inside ble.sh's global `read` override" and left
+open. This session re-derived the whole thing from a live pty before
+checking whether the wiki already had it, which cost real effort the
+earlier session's own diagnosis would have saved. `wiki/README.md` exists
+specifically so a finding like that isn't rediscovered by grepping the
+tree — check it before re-deriving, not after.
+
+The fix that tested clean against carapace's real generated function on
+`nire-cube` (avoid ever calling `read` for that line —
+`nospace=${data##*$sep}; data=${data%$sep*}`, `$sep` the real SOH byte,
+instead of `IFS=$sep read -r -d '' nospace data <<< "${data}"`) sidesteps
+ble.sh's read-shadow entirely rather than trying to out-think it, and is now
+in the tree:
+`flake/modules/nire/shell-config/bash/carapace-completer-read-fix.bash`,
+sourced from `bash.nix` right after `source <(carapace _carapace bash)`,
+patching `_carapace_completer`'s own body via `declare -f` plus a textual
+substitution — with a loud stderr warning if the line it's looking for ever
+stops matching, so carapace changing its generated template doesn't make
+this silently do nothing. Confirmed three ways: evaluates and renders into
+`programs.bash.initExtra` correctly with `just modules` clean; the
+substitution reproduces the real SOH byte exactly when checked with `od -c`
+against carapace's actual output, not by eye; and applied live, by hand, to
+the real `_carapace_completer` on `nire-cube` and driven through four
+different completions (`git co`, `git commit --amend --no-e`, `git checkout
+-`, `git log --pretty=onel`, each Tab-completed) with zero `read` errors,
+where every one of those reliably produced the error before the fix.
+**Still not run through an actual `just switch` on `nire-cube`** — the live
+validation applied the fix by hand to an already-running shell, not by
+rebuilding and switching the host — do that, and re-confirm live with
+[`terminal-puppeteer`](https://github.com/NireBryce/terminal-puppeteer) the
+same way the bug itself was found, before calling this closed. Same as everything else this file says
+to treat that way.
+
+## 40. A failed systemd unit doesn't mean the thing it manages is down — check the resource, not just the unit
+
+`nire-llm-sandbox` finally got a real end-to-end test 2026-08-23/24: `just
+switch` on `nire-cube`, watching `libvirt-vm-llm-sandbox.service`. It failed.
+Then, after a fix, it failed again, differently. Then, after a second fix,
+it failed a third time, differently again. Each time the instinct was "the
+VM isn't coming up" — wrong every time after the first. `virsh dominfo
+llm-sandbox` on the real host showed `State: running` with climbing CPU
+time through fixes two and three both: the guest booted once, on the first
+successful `virsh define` + `virsh start`, and stayed up continuously while
+the *systemd unit* kept failing on an unrelated step (`virsh define`
+re-run, idempotency of the redefine) on every activation after that.
+
+The three failures, in order, and why none of them were visible to `nix
+eval` or a build — only to reading `journalctl`/`systemctl status` against
+the real host:
+
+1. `error: Requested operation is not valid: network 'default' is not
+   active` — libvirt ships its default NAT network *defined* but never
+   *started*; nothing in NixOS's own libvirtd module starts it. Fixed by
+   having the VM's own activation script start it when needed
+   (`VMs/_lib/libvirt-vm.nix`), scoped per-VM rather than host-wide per
+   lesson #38's reasoning.
+2. `error: command 'net-list' doesn't support option --state-active` — the
+   fix for (1) checked "is the network already active" with a flag that
+   doesn't exist on virsh 12.4.0. The check errored, `set -e`-adjacent logic
+   fell through to an unconditional `net-start`, which then failed with
+   `network is already active` on every activation after the first. Fixed
+   by dropping the nonexistent flag — plain `net-list --name` already lists
+   active-only networks with neither `--all` nor `--inactive` given.
+3. `error: operation failed: domain 'llm-sandbox' already exists with uuid
+   ...` — the domain XML had no `<uuid>`. Omitting it doesn't mean "keep
+   whatever UUID is already registered under this name"; it means libvirt
+   generates a *brand new random UUID on every single parse*, so the second
+   and every later `virsh define` collided with the domain object the first
+   one created. Fixed by giving the generator a required `uuid` parameter
+   and, for the already-running `llm-sandbox`, adopting the UUID libvirt
+   had already assigned rather than minting a fresh one — the fix a human
+   would reach for on reflex (regenerate a clean UUID) would have collided
+   with the running guest exactly the way (3) itself did.
+
+None of these three would have been caught by evaluating the module,
+building the toplevel, or even reading the generated activation script by
+eye — each is a fact about how the *real* `virsh` on the *real* host
+behaves (a flag it does or doesn't support, whether a network is already
+up, what UUID a domain is already registered under), true only at runtime.
+Consistent with lesson #37. What's new here: **when a unit fails, check
+what it manages before assuming the failure means that thing isn't
+running.** `systemctl status` alone said "failed" three times in a row;
+`virsh dominfo` said "running" for two of those three, with a real host
+walked to over SSH (`ts-cube` via Tailscale) precisely so the check wasn't
+taken on faith. Confirmed clean end state, 2026-08-24: `systemctl status
+libvirt-vm-llm-sandbox.service` is `active (exited)` / exit 0, `virsh
+dominfo llm-sandbox` shows `running`, `Persistent: yes`. Each of the three
+fixes was also confirmed not to touch `nire-durandal` (byte-identical
+toplevel drvPath) before being applied to cube, same discipline as #38.
