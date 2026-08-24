@@ -154,6 +154,24 @@ let
         ${pkgs.qemu}/bin/qemu-img create -f qcow2 -F qcow2 -b "${baseImg}" "${overlay}"
       fi
 
+      ${lib.optionalString networked ''
+      # libvirt ships the default NAT network DEFINED but never STARTED --
+      # nothing in NixOS's own libvirtd module does that part (see
+      # vm-networking.nix's header for the two-piece explanation: the
+      # definition itself self-heals via libvirtd-config.service, only the
+      # "is it running" half is missing). Deliberately scoped to exactly
+      # this VM's own activation rather than a host-wide boot-time unit: it
+      # only fires when a VM that actually declared `networked = true` is
+      # being brought up, so a host with no networked VM defined through
+      # this generator (durandal, today) sees no change in behaviour at
+      # all. RUNTIME-VERIFIED TRAP, 2026-08-23, on nire-cube: without this,
+      # `virsh start` below fails outright with "Requested operation is not
+      # valid: network 'default' is not active".
+      if ! ${pkgs.libvirt}/bin/virsh -c qemu:///system net-list --name --state-active | grep -qx default; then
+        ${pkgs.libvirt}/bin/virsh -c qemu:///system net-start default
+      fi
+      ''}
+
       ${pkgs.libvirt}/bin/virsh -c qemu:///system define "${xmlPath}"
 
       state="$(${pkgs.libvirt}/bin/virsh -c qemu:///system domstate ${name})"
