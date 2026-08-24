@@ -37,6 +37,17 @@
         flake.modules.nixos.${moduleName} =
             import ./VMs/_lib/libvirt-vm.nix {
                 name  = "llm-sandbox";
+
+                # The UUID libvirt itself assigned when `virsh define` first
+                # succeeded on nire-cube, 2026-08-23 -- adopted here rather
+                # than a fresh `uuidgen` because the domain was already
+                # running under it by the time this generator gained a
+                # `uuid` parameter (see libvirt-vm.nix's own comment on that
+                # parameter for why one is required at all); picking a new
+                # UUID here would make this same define-conflict fire again
+                # on the next switch, against the guest that's already up.
+                uuid  = "4da8f257-fad8-4670-ab2d-7577ca94d5ed";
+
                 image = sandboxCfg.system.build.image;
 
                 # NOT just sandboxCfg.image.filePath -- that option is

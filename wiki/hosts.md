@@ -31,11 +31,16 @@ libvirt-managed guest on `nire-cube` — see
 skill `nixos-vm-images` for the mechanism. `nire-cube`'s first real `just
 switch` with this VM wired in (2026-08-23) hit a real bug — libvirt's
 default network was defined but never started, so the VM's own activation
-service failed outright — fixed the same day (see
-[virtualization](categories/virtualization.md)). Still **not yet confirmed
-to actually boot**; the fix landed but hasn't been watched succeed on the
-real host yet, same "evaluates/builds ≠ verified" gap this page's own
-installer walkthrough note already flags for a different reason.
+service failed outright — fixed the same day. That fix uncovered two more
+runtime-only bugs in turn (a nonexistent `virsh` flag, then a missing fixed
+domain UUID breaking `virsh define` idempotency) before the unit finally
+came up clean; see `claude cave/lessons-learned.md` §40 for the full
+sequence. **Confirmed booted and staying up as of 2026-08-24** —
+`systemctl status libvirt-vm-llm-sandbox.service` is `active (exited)` /
+exit 0 and `virsh dominfo llm-sandbox` shows `running`, watched directly on
+the real host, not inferred from the unit alone (the guest was in fact
+running through two of the three failures above — the unit failing did not
+mean the VM was down; see lesson #40).
 
 `nire-cube` also runs a Prometheus + Grafana monitoring stack as of
 2026-08-23 — see [monitoring](categories/monitoring.md). Grafana is reachable
