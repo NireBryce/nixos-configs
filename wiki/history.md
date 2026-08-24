@@ -5,12 +5,16 @@
 - **[`../claude cave/lessons-learned.md`](<../claude cave/lessons-learned.md>)**
   — "Written by Claude Code, for Claude Code, and largely a record of its
   own mistakes." The main one. §§1–18 the den → flake-parts port, §§19–24
-  the first session on real hardware, §§25–31 after it first booted, §§32–34
-  later work on already-booted hosts (auto-allocators can't see manually
-  pinned ranges; a removed nixpkgs option asserts rather than being ignored;
-  a module name that collides with its own category *merges* invisibly).
-  `CLAUDE.md` has the rules this produced; this has the scar tissue behind
-  them.
+  the first session on real hardware, §§25–31 after it first booted, §§32–38
+  later work on already-booted or newly-added hosts (auto-allocators can't
+  see manually pinned ranges; a removed nixpkgs option asserts rather than
+  being ignored; a module name that collides with its own category *merges*
+  invisibly, three separate times; a well-typed value can still be
+  semantically wrong, so build the artifact and read it back; some bugs need
+  real filesystem/daemon state that only exists once an actual `switch` runs
+  — invisible to evaluation *and* to reading back a built artifact; a fix
+  scoped to the caller that needs it beats a general one). `CLAUDE.md` has
+  the rules this produced; this has the scar tissue behind them.
 - **[`../claude cave/lessons-learned-impermanence-stage1-migration.md`](<../claude cave/lessons-learned-impermanence-stage1-migration.md>)**
   — the stage-1 impermanence migration specifically. Covered from the
   impermanence angle on [impermanence-and-secrets.md](impermanence-and-secrets.md).

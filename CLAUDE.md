@@ -66,10 +66,25 @@ subvolume 1426 deleted, a fresh snapshot of `root-blank` created, `/root` now
 mounted at subvolid 1431. Same confirmation pattern as tenacity's, found by
 reading `journalctl` rather than trusting the mount coming up.
 
+**`nire-cube` has been switched — 2026-08-23**, with the `monitoring`
+category (Prometheus + Grafana, see Architecture) and a fix for
+`nire-llm-sandbox`'s default-network bug both live. `just switch` completed
+overall, but two units failed on that same switch: `grafana.service` (a
+file-ownership bug in this session's own first attempt at the `secret_key`
+fix — corrected same day, `systemctl status` confirmed it running
+afterward) and `libvirt-vm-llm-sandbox.service` (`network 'default' is not
+active` — the bug the fix above addresses). That fix evaluates and is
+confirmed not to touch durandal (byte-identical toplevel drvPath before and
+after), but **has not yet been confirmed to actually let the VM boot** — see
+`wiki/open-threads.md`. Treat "the sandbox VM works" as unverified until
+that's watched succeed on the real host, same as everything else this file
+says to treat that way.
+
 **A Claude Code session in this repo is not necessarily running on
 `nire-lysithea`.** This section was corrected from a session running directly
 on `nire-durandal` (`hostname` said so, and the boot evidence above is what
-that session found). Check `hostname` before assuming which machine you're on.
+that session found); a later session found itself on `nire-tenacity` instead.
+Check `hostname` before assuming which machine you're on.
 
 **`nire-lego` exists in config but has not been built or switched** — added
 2026-08-14. Not a blocker and doesn't need raising every session, same as
@@ -107,9 +122,10 @@ green `nix flake check` says nothing about behaviour.
 Four NixOS *hosts* now: `nire-durandal` (workstation), `nire-tenacity`
 (handheld, Jovian/SteamOS), `nire-lego` (Legion Go handheld, added 2026-08-14,
 using tenacity's disk layout), and `nire-cube` (GMKtec mini PC, added
-2026-08-20) — plus the darwin host, `nire-lysithea`. A fifth
-`nixosConfigurations` entry, `nire-installer`, exists too but isn't a host
-(see above and Architecture). This paragraph said "five NixOS hosts" (six
+2026-08-20) — plus the darwin host, `nire-lysithea`. Two more
+`nixosConfigurations` entries exist besides those four but aren't hosts:
+`nire-installer` and `nire-llm-sandbox` (see above and Architecture for both).
+This paragraph said "five NixOS hosts" (six
 counting `nire-testbed`) until 2026-08-22, when testbed was removed; before
 that it said "four" until 2026-08-21, when `nire-cube` had already been in
 `hosts.nix` for a day; the count below has the standing warning about that.
@@ -216,9 +232,10 @@ darwin-specific settings), `nireHost/` (per-host), `nirePackages/`
 
 **Not every category is imported by every host, and `virtualization` is the
 clearest example.** Added 2026-08-21 as `nire/virtualization/`, holding
-`libvirt`, `virt-tools` and `vm-networking`. `nire-durandal` and `nire-cube`
-import it (`nire-testbed` did too, before it was removed 2026-08-22);
-`nire-tenacity` and `nire-lego` — the handhelds, i.e.
+`libvirt`, `virt-tools`, `vm-networking`, and `libvirt-persist.nix` (added
+2026-08-22, persists libvirt's own secrets-encryption key). `nire-durandal`
+and `nire-cube` import it (`nire-testbed` did too, before it was removed
+2026-08-22); `nire-tenacity` and `nire-lego` — the handhelds, i.e.
 the two that import `jovian` — deliberately do not, because libvirtd is a
 boot-time daemon and a gamescope handheld will never open virt-manager. It got
 its own category for exactly that reason: it started inside `nire/system/`,
@@ -227,6 +244,32 @@ something shared needs to be optional, a category is the mechanism; nothing in
 this tree declares `mkEnableOption`.** `kde-desktop` is the other shape of the
 same idea — a single module imported by name while its category (`desktop-env`,
 which also holds `jovian`) is never imported whole.
+
+`nire-cube` alone, via `virtualization-cube.nix` (deliberately not a category
+member — see that file's own header), also runs `nire-llm-sandbox`: a
+persistent libvirt-managed VM guest sandboxing an LLM coding agent, generated
+by `VMs/_lib/libvirt-vm.nix` (added 2026-08-22; see skill `nixos-vm-images`
+and `wiki/categories/virtualization.md`). That generator's activation script
+also starts libvirt's default NAT network itself when a VM asks for one
+(`networked = true`) — libvirt ships that network defined but never started,
+a real bug found on `nire-cube`'s first switch with this VM wired in
+(2026-08-23), fixed per-VM rather than as a host-wide unit specifically
+because a host-wide unit would have changed durandal's behavior too, for a
+bug durandal never had. The same generator also takes an optional
+`sshForward` parameter (added 2026-08-23) to forward a host port into a VM's
+SSH port, restricted by source IP (LAN-or-Tailscale by default, narrowable to
+tailnet-only) rather than by interface name — `nire-llm-sandbox` uses it,
+tailnet-only, `hostPort = 2222`.
+
+**`monitoring`**, added 2026-08-23 as `nire/monitoring/`, is Prometheus +
+Grafana scraping a host's own resource metrics — cube-only so far, same
+"category is how something shared stays optional" mechanism as
+`virtualization`, except nothing here was ever part of `system` to split out
+of; it started as its own category. Everything but Grafana stays on
+`127.0.0.1`; Grafana is reachable over Tailscale only, via the same
+`trustedInterfaces = [ "tailscale0" ]` firewall rule `system`'s
+`tailscale.nix` already sets, not a new mechanism. See
+`wiki/categories/monitoring.md`.
 
 Related, and a live trap rather than history: containers and VMs are separate
 here and the word "virtualization" means only the second.
@@ -252,27 +295,39 @@ This file used to give a declared-class breakdown here (101 homeManager-only,
 it mechanically the way `just modules` derives category membership. Don't
 quote old numbers; recount if it matters.
 
-**There are five hosts, not two, and one of them is darwin — plus a sixth
-`nixosConfigurations` entry that isn't a host at all.**
+**There are five hosts, not two, and one of them is darwin — plus two more
+`nixosConfigurations` entries that aren't hosts at all, for two different
+reasons.**
 `nireHost/hosts.nix` declares `flake.darwinConfigurations.nire-lysithea`
-alongside **five** `nixosConfigurations` — `nire-durandal`, `nire-tenacity`,
-`nire-lego` (added 2026-08-14), `nire-cube` (added 2026-08-20), and
-`nire-installer` (added 2026-08-15) — and the `darwin`
-class is live. Of those five, `nire-installer` is the odd one: a live-USB
-image, "not a host anyone switches to or boots persistently" per its own
-header (`nireHost/installer/installer-configuration.nix`), built to install
-whichever host you give it at build time. It has no `elly` user, no
-impermanence, no persistent state, and `just liveusb` builds it rather than
-`just build`/`switch`. Don't count it as a sixth machine, but don't forget it
-either. This file claimed only two hosts total until 2026-08-12, then three
-until 2026-08-15, then four real hosts (five `nixosConfigurations`) same day,
-then five (six) on 2026-08-21 when `nire-testbed` was still around, then back
-to four real hosts (five `nixosConfigurations`) on 2026-08-22 when
-`nire-testbed` was removed (never installed on real hardware). Check
-`hosts.nix` directly before stating a host count; it has changed five times
-already and will again — and it was stale for a day each of two of those
-times, so a count in prose here is a claim about when someone last looked, not
-about the tree.
+alongside **six** `nixosConfigurations` — `nire-durandal`, `nire-tenacity`,
+`nire-lego` (added 2026-08-14), `nire-cube` (added 2026-08-20),
+`nire-installer` (added 2026-08-15), and `nire-llm-sandbox` (added
+2026-08-22) — and the `darwin` class is live. Of those six, two aren't
+machines anyone owns:
+
+- `nire-installer` — a live-USB image, "not a host anyone switches to or
+  boots persistently" per its own header
+  (`nireHost/installer/installer-configuration.nix`), built to install
+  whichever host you give it at build time. No `elly` user, no impermanence,
+  no persistent state; `just liveusb` builds it rather than
+  `just build`/`switch`.
+- `nire-llm-sandbox` — also builds an image rather than being switched to,
+  but unlike the installer this one is meant to run *persistently* once
+  started, as a libvirt-managed VM guest on `nire-cube` (see the
+  `virtualization` note above, and `wiki/hosts.md`).
+
+Don't count either as a real host, but don't forget them either — `hosts.nix`
+comments each with the reasoning above, right at the declaration. This file
+claimed only two hosts total until 2026-08-12, then three until 2026-08-15,
+then four real hosts (five `nixosConfigurations`) same day, then five (six)
+on 2026-08-21 when `nire-testbed` was still around, then back to four real
+hosts (five `nixosConfigurations`) on 2026-08-22 when `nire-testbed` was
+removed, then (same day) six `nixosConfigurations` once more when
+`nire-llm-sandbox` was added — still four real hosts throughout that last
+change, only the non-host count moved. Check `hosts.nix` directly before
+stating a count of anything; it has changed six times already and will
+again — and it was stale for a day each of two of those times, so a count in
+prose here is a claim about when someone last looked, not about the tree.
 
 ### Home Manager is NixOS-integrated
 
@@ -516,13 +571,23 @@ env vars passed where `argv` was read, and a mangled line nothing highlighted.
 - `claude cave/lessons-learned.md` — how the work went wrong in the doing: tools that
   reported success while being wrong, traps that were documented and hit anyway,
   and which questions were settled by reading source. §§1–18 are the port,
-  §§19–24 the first session on the hardware, §§25–31 after it booted, §§32–34
-  later work on booted hosts. §32 (an auto-allocator cannot see manually pinned
-  ranges, and a working host can be working on state a fresh one lacks), §33
-  (a removed nixpkgs option asserts rather than being ignored; `virtualisation.*`
-  churns and the wiki is stale) and §34 (a module name that collides with its own
-  category *merges*, and the merge is invisible when both halves do the same
-  thing) all came out of the virtualization work.
+  §§19–24 the first session on the hardware, §§25–31 after it booted, §§32–38
+  later work on booted or newly-added hosts. §32 (an auto-allocator cannot see
+  manually pinned ranges, and a working host can be working on state a fresh
+  one lacks), §33 (a removed nixpkgs option asserts rather than being
+  ignored; `virtualisation.*` churns and the wiki is stale), §34 (a module
+  name that collides with its own category *merges*, and the merge is
+  invisible when both halves do the same thing) and §35 (the identical
+  collision a third time, caught only because `just modules` was actually
+  run) all came out of the virtualization work. §36 (a well-typed value can
+  still be semantically wrong; build the artifact and read it, don't stop at
+  evaluation), §37 (some bugs need real filesystem/daemon state that exists
+  only once a real `switch` runs — a service's own runtime UID, a network
+  daemon's runtime state — invisible to evaluation *and* to reading back a
+  built artifact) and §38 (a fix scoped to the caller that actually needs it
+  beats a general one; asking "does this affect a host that never asked"
+  caught the wrong mechanism before it was written) came out of `nire-cube`'s
+  `nire-llm-sandbox` VM and its `monitoring` category, 2026-08-22/23.
 - `flake/doc/trailhead-home-manager-standalone.md` — reversing the HM decision, and the
   part of the cutover that is one-way on the machine rather than in the repo.
 - `git show origin/flake-parts:SESSION-HANDOFF.md` — the sibling branch's notes

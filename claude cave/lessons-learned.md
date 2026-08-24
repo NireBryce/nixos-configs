@@ -13,10 +13,13 @@ not recoverable from the tree or the commits.
 Three groups, by what could be observed at the time. §§1–18 are the port, from
 the darwin laptop, against a tree that could only be evaluated. §§19–24 are the
 first session on `nire-tenacity`, where the disk and the build plan became
-visible. §§25–31 are from after it booted — see §25. §§32–34 are later work on
-already-booted hosts, where the open question stopped being "does it
-evaluate" and became "is this true on the hosts that have never been
-installed".
+visible. §§25–31 are from after it booted — see §25. §§32–38 are later work on
+already-booted or newly-added hosts: §§32–35 where the open question was "is
+this true on a host that's never been installed" or "does a new category
+collide with the module inside it"; §§36–38 (`nire-llm-sandbox`,
+`nire-cube`'s `monitoring` category) where evaluating and even building the
+artifact both stopped being enough — some bugs only exist once real
+filesystem/daemon state shows up at an actual `switch`, see §37.
 
 Numbers are stable; §§2, 5, 7, 11, 14, 18, 24 and 25 are referenced elsewhere.
 
@@ -641,3 +644,74 @@ dotfiles (`home-manager-dotfiles` skill) and rendered firewall scripts
 rule. Worth generalizing: **when a value is a path, a filename, or anything
 else whose correctness depends on more than its type, build the thing that
 consumes it and read the result — don't stop at the expression type-checking.**
+
+## 37. Some bugs need real system state to exist at all — no amount of building or reading the artifact finds them
+
+`nire-cube`'s first real `just switch` with the `monitoring` category and
+`nire-llm-sandbox`'s network fix both wired in (2026-08-23) failed two
+units, and both bugs share a shape one level past §36's: not "the built
+artifact's content is wrong" but "the artifact is exactly right, and the bug
+only exists once real system state it depends on shows up at runtime."
+
+1. Grafana's `secret_key` pointed at
+   `$__file{/persist/secrets/grafana-secret-key}` — correct syntax, and the
+   nixpkgs assertion requiring *some* value for the option was satisfied.
+   `grafana.service` still failed, because the file `sudo install -D -m600`
+   created was `root:root`, and `services.grafana` runs as `User =
+   "grafana"` (a fact about the *systemd unit*, nowhere near the Nix
+   expression that set the option). No `nix eval`, and no reading back the
+   generated config file, would have shown this — the config file's
+   *content* was correct throughout; only the *filesystem permissions* on a
+   path outside the Nix store, set by a command run outside of Nix
+   entirely, were wrong.
+2. `libvirt-vm-llm-sandbox.service` failed with `network 'default' is not
+   active` despite `virsh define` succeeding immediately before it in the
+   same script. The domain XML was correct, the activation script was
+   correct — the failure depended on libvirtd's own *runtime* network
+   state (defined vs. started), which is neither part of the Nix
+   expression nor visible in any built artifact, only in `virsh net-list`
+   against a live daemon.
+
+**Both bugs were only visible by actually running `just switch` on the real
+host and reading `systemctl status`/`journalctl` afterward — not by
+evaluating, not by building, not by reading back a generated file.** That's
+a third rung past §25 ("evaluates ≠ works") and §36 ("a well-typed value can
+still be wrong, build and read the artifact"): some correctness depends on
+state that doesn't exist anywhere until the real activation runs on the
+real machine — a service's runtime UID, a daemon's own runtime object
+state. For anything shaped like that (a file a *service* reads rather than
+Nix, a resource a *daemon* manages rather than a NixOS option), the only
+real test is the switch itself, and `systemctl status`/`journalctl` after
+it — matching this repo's own standing rule ("did it work before?", "force a
+toplevel") one step further: even a forced toplevel and a successful
+activation don't prove every unit inside it actually started.
+
+## 38. A fix scoped to what actually asked for it beats a general one — asking "does this affect the host that didn't ask" caught it before writing the wrong mechanism
+
+The obvious fix for #37's network-not-active bug was a host-wide systemd
+unit, in the shared `virtualization` category, unconditionally starting
+libvirt's default network at boot. It would have worked. It was also about
+to ship as the first draft, until asked directly: does this have security
+implications on `nire-durandal`, which imports `virtualization` too and
+never had this problem?
+
+It does. `vm-networking.nix`'s `trustedInterfaces = [ "virbr0" ]` already
+unconditionally trusts that whole bridge — pre-existing, not something the
+fix would add — but a host-wide unit would change *when* that trust is
+actually live: from "only while a VM is actually running" to "for the
+machine's entire uptime, whether or not anything ever uses the bridge."
+Fixed instead inside `VMs/_lib/libvirt-vm.nix`'s own per-VM activation
+script, gated on the `networked` parameter each VM already declares — so a
+host with no networked VM defined through that generator (durandal, at the
+time) gets zero behavior change, confirmed by drvPath rather than assumed.
+
+**The general fix and the scoped fix produce identical behavior on the host
+that has the bug. They only diverge on hosts that don't — and that
+divergence is exactly the kind of thing that's invisible until someone
+asks "who else does this touch" before writing it, not after.** Scoping a
+fix to the actual caller that needs it, rather than to the category or
+host class it happens to live in, is the same "if something shared needs
+to be optional, a category is the mechanism" instinct `CLAUDE.md`'s
+Architecture section already states — applied one level down, to a single
+behavior inside one already-shared module rather than to category
+membership itself.
