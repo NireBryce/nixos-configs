@@ -40,6 +40,13 @@ of re-deriving it.
   [carapace](categories/shell-config/carapace.md) (the completion engine
   blesh layers a menu on top of, and how it avoids clobbering — and being
   clobbered by — `cod`'s daemon-based completions).
+- [Homelab services](homelab/README.md) — how to *use* what the fleet
+  actually runs, as opposed to how it's configured: currently
+  [creating go/ links](homelab/golinks.md), with Grafana and Forgejo
+  listed but not yet written up. A different tier from the category
+  pages, and the one place a page may hold real content rather than
+  links — because its source is often the running service's own help
+  page, not a file in this repo.
 - [Impermanence, initrd & secrets](impermanence-and-secrets.md) — the
   `/root`-wipe-on-boot mechanism, which hosts opt in, sops-nix.
 - [Traps & skills](traps-and-skills.md) — the mistakes that have actually
