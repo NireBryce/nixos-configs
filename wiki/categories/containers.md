@@ -80,3 +80,5 @@ section on which classes actually cross to lysithea).
 - [../architecture.md](../architecture.md) — "if something shared needs to
   be optional, a category is the mechanism," and the merge-vs-conflict trap
   a same-named category and module walk straight into.
+- [monitoring](monitoring.md) — `cadvisor.nix` scrapes the containers this
+  category enables, on `nire-cube`.
