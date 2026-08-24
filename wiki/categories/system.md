@@ -161,3 +161,7 @@ via `ellyHomeManager` rather than through this category import at all.
 - [../architecture.md](../architecture.md) — the Home Manager integration
   and platform-support mechanisms this category's `home-manager/` files
   implement.
+- [monitoring](monitoring.md) — Grafana on `nire-cube` reuses this
+  category's `trustedInterfaces = [ "tailscale0" ]` firewall rule rather
+  than opening a new port, the same mechanism the Tailscale section above
+  documents.

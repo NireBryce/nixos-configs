@@ -42,3 +42,11 @@ that import it.
   been caught stale on this before. `nire-lego` isn't enrolled yet; enrolling
   a new host means converting its SSH host key with `ssh-to-age` and running
   `sops updatekeys secrets.yaml`.
+- **Not everything secret-shaped goes through sops.** Two things on
+  `nire-cube` deliberately don't: `elly`'s login password
+  (`hashedPasswordFile`, `WARN-password-required.nix`) and Grafana's
+  `secret_key` ([monitoring](categories/monitoring.md)) both point at a
+  file this repo never creates, expected to exist by hand at a fixed path
+  under `/persist`. Same reasoning both times — cube has no impermanence to
+  lose the file to, so there's nothing sops's own persistence story would
+  buy that a plain hand-created file doesn't already have.

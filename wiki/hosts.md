@@ -28,11 +28,21 @@ qcow2 disk image (same pattern `nire-installer` uses for its ISO), but
 unlike the installer it's meant to run *persistently* once started, as a
 libvirt-managed guest on `nire-cube` — see
 [virtualization](categories/virtualization.md)'s own section on it, and
-skill `nixos-vm-images` for the mechanism. Verified further than plain
-evaluation (the actual qcow2 builds, the generated libvirt domain XML and
-activation script were read back and are correct) but **not yet defined in
-libvirt or booted anywhere** — same "evaluates/builds ≠ verified" gap this
-page's own installer walkthrough note already flags for a different reason.
+skill `nixos-vm-images` for the mechanism. `nire-cube`'s first real `just
+switch` with this VM wired in (2026-08-23) hit a real bug — libvirt's
+default network was defined but never started, so the VM's own activation
+service failed outright — fixed the same day (see
+[virtualization](categories/virtualization.md)). Still **not yet confirmed
+to actually boot**; the fix landed but hasn't been watched succeed on the
+real host yet, same "evaluates/builds ≠ verified" gap this page's own
+installer walkthrough note already flags for a different reason.
+
+`nire-cube` also runs a Prometheus + Grafana monitoring stack as of
+2026-08-23 — see [monitoring](categories/monitoring.md). Grafana is reachable
+over Tailscale only (same `trustedInterfaces` mechanism
+[system](categories/system.md)'s Tailscale section documents); confirmed
+running after a same-day fix to a file-ownership bug in its own secret-key
+setup (see that page's traps section).
 
 ## Where each fact lives
 
