@@ -18,7 +18,19 @@
   writeup, including the carapace/fzf/atuin integrations it wires together
   and an open upstream bug found in them: [blesh](blesh.md).
 - **`shell-env/shell-env.nix`** — `homeManager`-only: `home.shellAliases`
-  (the everyday `ll`, `cp -i`, `lcd`, `img-cat`, `kssh`, etc.).
+  (the everyday `ll`, `cp -i`, `lcd`, `img-cat`, `kssh`, etc.), plus
+  `home.sessionVariables` and `home.sessionPath`. Since 2026-08-24 it also
+  carries the category's only platform-guarded content: a
+  `lib.optionalAttrs pkgs.stdenv.isDarwin` block aliasing `discord` and
+  `google-chrome` to `open -a …`. Those two are homebrew casks on lysithea,
+  and a cask with no `binary` stanza installs a `.app` and nothing on PATH,
+  so both stopped being commands there when `b0845be6` excluded the nix
+  packages as unfree cask duplicates — a side effect that commit's
+  evaluation-only verification could not see. The guard matters because this
+  file is shared with the four Linux hosts, where `discord` and
+  `google-chrome` already are the real binaries and an unguarded alias would
+  shadow them with an `open` that doesn't exist. The file's own header has
+  the full timeline.
 - **`zsh/zsh.nix`** — `nixos`-class enables the shell and disables HM's
   `enableCompletion` with `mkForce false` ("unless disabled, home-manager
   causes an extra compaudit"); `homeManager`-class carries the actual
