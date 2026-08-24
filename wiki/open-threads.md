@@ -67,6 +67,16 @@ specific report — not as a housekeeping pass over this list:
   deleted handoff doc (are `logitech-g600`/`zsa-moonlander` peripheral
   modules still wanted on a handheld; is full desktop package parity still
   wanted on tenacity). Neither has been decided.
+- **[`../claude cave/2026-08-24-evaluation-self-hosted-booking.md`](<../claude cave/2026-08-24-evaluation-self-hosted-booking.md>)**
+  — Easy!Appointments vs LibreBooking, compared 2026-08-24 and then
+  explicitly not pursued. Nothing built, no host picked. Records which of
+  the two fits which problem (they aren't competitors — one books a
+  person's time, the other books a *thing*), that **neither is in nixpkgs
+  and neither has a NixOS module**, and the one design problem that would
+  actually need solving if it restarts: both are PHP apps wanting a
+  writable install dir, so podman-vs-hand-written-module is the unanswered
+  first question. Also corrects a from-memory claim about Cal.com's
+  license.
 - **[`../flake/doc/notes-and-fixes.md`](<../flake/doc/notes-and-fixes.md>)**
   ends with a "things to look into" list — MyNixOS, nixpkgs-wayland,
   nix-direnv, haumea, flakelight, flake-utils(-plus), devshell, devbox,
