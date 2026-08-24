@@ -502,6 +502,20 @@ the boundary as this deliberate, not as something a careful-enough bundled
 ask would have covered on its own; see `claude cave/lessons-learned.md`
 #39.
 
+**Filing in this repo can still reach another project's repo by accident, through GitHub's own
+autolinking — not just through `gh issue create --repo <other>`.** A title
+or body containing `owner/repo#123` (an actual org/repo name immediately
+followed by `#` and a number) gets cross-referenced by GitHub automatically,
+which notifies that other repo — a real ping, even though nothing was
+filed there. Plain prose naming a project — "ble.sh", "carapace",
+"ble.sh/carapace", even "akinomyoga/ble.sh" with no trailing `#number` —
+does not trigger this; GitHub needs the `#number` to treat it as a
+cross-reference rather than text. Checked 2026-08-24 across issues #72–76:
+none contained the `owner/repo#number` shape, confirmed by grepping every
+title and body for it rather than assuming from how they read. Do the same
+grep before naming a specific upstream issue/PR number in anything filed
+here.
+
 ## Conventions
 
 **Read `claude cave/claude-style-guide.md` before writing a new module.** Formatting
