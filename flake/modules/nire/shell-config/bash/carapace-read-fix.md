@@ -68,9 +68,11 @@ the full account.
 
 ## How to undo
 
-If this ever needs backing out — carapace fixes the underlying bug
-upstream, ble.sh changes how its cancellation path works, or the fix turns
-out to cause some problem of its own:
+Tracked as [issue #75](https://github.com/NireBryce/nixos-configs/issues/75)
+— check there first, it may already say more than this section does by
+the time you're reading it. If this ever needs backing out — carapace
+fixes the underlying bug upstream, ble.sh changes how its cancellation
+path works, or the fix turns out to cause some problem of its own:
 
 1. Remove the `source ${carapaceCompleterReadFix}` line from `bash.nix`'s
    `initExtra` (the block right after `source <(carapace _carapace bash)`).

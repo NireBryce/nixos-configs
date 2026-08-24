@@ -17,13 +17,20 @@ repo's own tracker is the issue queue, not another markdown list.
 
 ## Tracked as GitHub issues
 
-Closed, kept here as a worked example of the "check first" pattern this
-section's own header describes:
-
+- **[#75 — remove `carapace-completer-read-fix.bash` once ble.sh/carapace
+  fix it upstream](https://github.com/NireBryce/nixos-configs/issues/75)**
+  — open. The follow-on to #72 below: a local workaround stays in the tree
+  until the real bug is fixed in one of the two projects it's actually in,
+  and this is the reminder to check rather than let it sit unnoticed.
+  Doesn't need revisiting on any particular schedule — but before assuming
+  it's still needed just because nobody's looked, see its own "how to
+  check" steps.
 - **[#72 — ble.sh + carapace: spurious `read: `': not a valid identifier` on
   Tab / auto-complete](https://github.com/NireBryce/nixos-configs/issues/72)**
   — closed 2026-08-24, confirmed via a real `just switch` on `nire-cube`.
-  Full diagnosis: [blesh.md](categories/shell-config/blesh.md).
+  Kept listed here as a worked example of the "check first" pattern this
+  section's own header describes. Full diagnosis:
+  [blesh.md](categories/shell-config/blesh.md).
 
 ## Pending upstream bug reports
 

@@ -137,7 +137,9 @@ change to carapace or ble.sh — but low priority now that it no longer
 produces wrong output, only (until switched) the cosmetic stray line. Not
 filed, and not something to file on the strength of this page alone: per
 `CLAUDE.md`, filing against either project needs Elly to say so explicitly
-first.
+first. Removing the workaround once it's no longer needed — upstream fix
+or otherwise — is tracked separately as
+[issue #75](https://github.com/NireBryce/nixos-configs/issues/75).
 
 ## See also
 
