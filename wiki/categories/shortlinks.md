@@ -24,10 +24,23 @@ taking three runtime-only fixes: **a green evaluation and a read-back of the
 rendered unit text both said nothing**, which is
 [`lessons-learned.md`](<../../claude cave/lessons-learned.md>) §37 exactly.
 
-The fix itself **is** runtime-verified — same binary, same knobs, run twice
-under `systemd-run --user` on the real host differing only in `AF_NETLINK`.
-Still unverified as of 2026-08-24: an actually-authenticated node, which
-needs the one-time login below to be done.
+**Now confirmed working end to end, 2026-08-24**, after the fix landed and
+the one-time login was done: `golink.service` is `active (running)` with
+**`NRestarts=0`**, 0 failed units on the host, the tailnet device `go` is up
+on a direct connection, and `http://go/` answered `HTTP 200`
+(`<title>go/</title>`) from *another* tailnet host — not just from cube
+itself. The journal shows the whole arc: `NeedsLogin` re-printing its auth
+URL every 5s, then `Listening on :443` / `:80`, `Serving http://go/`, and
+`AuthLoop: state is Running; done`.
+
+`NRestarts=0` is the load-bearing number rather than `active (running)`: the
+original failure was a crash-loop, and a unit that has restarted eight times
+also reports `active` in between. See
+[`lessons-learned.md`](<../../claude cave/lessons-learned.md>) §40 for the
+inverse of the same care — a failed unit whose resource was fine all along.
+
+Usage — creating and managing links — is [homelab/golinks.md](../homelab/golinks.md).
+This page stays the configuration side.
 
 ## What's in it
 
@@ -193,5 +206,7 @@ and after this change.
   sidesteps here.
 - [system](system.md) — `tailscale.nix`, for the host daemon, the auth-key
   decision this module mirrors, and the two tailnet traps.
+- [homelab/golinks.md](../homelab/golinks.md) — the usage side: creating
+  links, the template syntax, and the `curl` traps.
 - [hosts.md](../hosts.md) — current switch/verification status for
   `nire-cube`.

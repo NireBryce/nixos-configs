@@ -59,9 +59,10 @@ systemd units healthy, and a real `HTTP 200` from another tailnet host.
 `nire-cube` also runs golink, Tailscale's `go/foo` shortlink service, as of
 2026-08-24 — see [shortlinks](categories/shortlinks.md). Its first real
 switch **failed** (generation 13, a missing `AF_NETLINK` in the module's own
-`RestrictAddressFamilies`, which Go's netlink interface enumeration needs);
-the fix is verified at the sandbox level but an authenticated node still
-needs the one-time login below. Not the same tailnet-only
+`RestrictAddressFamilies`, which Go's netlink interface enumeration needs).
+Fixed and **confirmed working end to end the same day**: `NRestarts=0`, 0
+failed units, the tailnet device `go` up, and `HTTP 200` from another tailnet
+host. Creating links is [homelab/golinks.md](homelab/golinks.md). Not the same tailnet-only
 mechanism either, and that's the part worth not misreading: golink embeds
 tsnet, so it joins the tailnet as its *own device* (named `go`) and listens
 there rather than on any of cube's interfaces — no firewall rule, no

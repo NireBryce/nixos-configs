@@ -325,8 +325,15 @@ problem, with nothing in it pointing at systemd. It shipped as "evaluates
 only" because it was written from a darwin session that can't build an
 x86_64-linux toplevel, and it then broke for exactly the reason its own
 hardening comment claimed to be avoiding by leaving SystemCallFilter out.
-The fix is verified by A/B on the real host; an authenticated node still
-needs the one-time login. Named `shortlinks` rather than `golink` for the
+Fixed the same day and **confirmed working end to end**: `golink.service`
+`active (running)` with `NRestarts=0` (the load-bearing number -- the
+original failure was a crash-loop, and a crash-looping unit also reports
+`active` between restarts), 0 failed units, the tailnet device `go` up on a
+direct connection, and `http://go/` answering `HTTP 200` from another
+tailnet host rather than only from cube. Usage -- creating links, the
+template syntax, the `curl -L`/delete traps -- is `wiki/homelab/golinks.md`,
+the first page under a new `wiki/homelab/` tier for using the services as
+opposed to configuring them. Named `shortlinks` rather than `golink` for the
 same category/module collision reason `git-forge` isn't `forgejo`, and
 deliberately not `golinks` either -- one letter off its own module reads
 as a typo later. Two things about it are genuinely different from

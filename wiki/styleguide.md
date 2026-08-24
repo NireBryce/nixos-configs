@@ -9,7 +9,8 @@ a rewrite" gets turned into concrete rules.
 
 ## Directory hierarchy
 
-Two tiers, plus one escape hatch:
+Two tiers for the *configuration* side, plus one escape hatch — and one
+separate tier for the *usage* side:
 
 - **`wiki/*.md`** — cross-cutting topics that don't belong to one category:
   `architecture.md`, `hosts.md`, `history.md`, `impermanence-and-secrets.md`,
@@ -25,6 +26,29 @@ Two tiers, plus one escape hatch:
   (single-package files, already self-explanatory from a glance) and
   `nireHost/*` per-host bundles (host definitions, not categories — see
   [hosts.md](hosts.md) instead).
+- **`wiki/homelab/`** — the usage tier, added 2026-08-24 with
+  [golinks.md](homelab/golinks.md). Pages about operating a service this
+  fleet runs, for a reader who wants to *do something with it* rather than
+  edit `flake/modules/`. Its `README.md` is the index; each service gets a
+  page named after the thing you'd search for, not after the module
+  (`golinks.md`, not `golink.md` or `shortlinks.md` — the module is
+  `golink`, the category is `shortlinks`, and the thing people say is
+  "go links").
+
+  It's a separate tier rather than more `wiki/*.md` pages because the two
+  rot differently: a category page goes stale when the config changes, a
+  usage page goes stale when the *service* changes under it — possibly
+  with no commit to this repo at all. Keeping them apart means "is this
+  still true?" has a different answer method for each, instead of one pile
+  where you have to work out which kind of page you're reading.
+
+  **"Index over restatement" is relaxed here, with a condition.** For these
+  pages the real source is often the running service's own help endpoint
+  (`http://go/.help`), not a file in this repo, so there's nothing local to
+  link to. A page here may therefore hold synthesized content the way a
+  category deep-dive may — but it must say **what was verified against the
+  live service and what was only transcribed**, and point at the live
+  source as canonical. `golinks.md`'s closing section is the pattern.
 - **`wiki/categories/<name>/`** — the escape hatch, used exactly once so
   far ([shell-config](categories/shell-config/README.md)). A category
   outgrows a single file not by being long, but by one specific *member*
@@ -56,6 +80,10 @@ Two tiers, plus one escape hatch:
   writeup — rather than copying its content into the wiki page. When in
   doubt, the wiki page should be short and the linked file should be where
   the reader actually ends up.
+- **`wiki/homelab/` pages are the other exception**, on the terms in the
+  hierarchy section above: synthesized content is allowed because the
+  source is the live service, but the page owes the reader an explicit
+  verified-vs-transcribed split.
 - **The one exception is a deep-dive page** (`blesh.md`, `carapace.md`):
   those *are* allowed to hold real, synthesized findings, because they
   document a cross-file or cross-tool interaction that has no single
