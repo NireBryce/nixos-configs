@@ -9,6 +9,10 @@ Paste-ready for <https://github.com/nix-darwin/nix-darwin/issues>. Everything
 below the "Describe the bug" heading is the report; the last section is local
 notes and should be dropped before filing.
 
+**Not filed. Not to be filed on the strength of this file existing** — per
+`CLAUDE.md`, filing outside `NireBryce/nixos-configs` needs Elly saying so
+explicitly, in those words, for this specific report.
+
 ---
 
 ## Describe the bug

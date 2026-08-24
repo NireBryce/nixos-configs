@@ -86,8 +86,11 @@ by reading back the actual generated domain XML, activation script, and
 firewall rule (not just evaluation) — the domain XML carries the exact MAC,
 the activation script's DHCP-reservation guard references it correctly, and
 `networking.firewall.extraCommands` contains exactly one DNAT rule, scoped to
-`100.64.0.0/10`, no LAN range. Still short of an actual SSH connection having
-been made — that's real-hardware-only, same as the domain booting at all.
+`100.64.0.0/10`, no LAN range. The domain itself is now confirmed booted and
+staying up on `nire-cube` (2026-08-24 — see [hosts.md](../hosts.md) and
+`claude cave/lessons-learned.md` §40), but an actual SSH connection through
+this forward has not yet been made — that part is still real-hardware-only
+and unverified.
 
 ## A cube-only addition that is deliberately NOT a category member
 

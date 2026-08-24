@@ -42,9 +42,14 @@ As of 2026-08-22 it does, in order:
    nospace flag off the front of the payload; `mapfile -t COMPREPLY < <(echo
    "${data}")` then loads the actual candidates, and `unset COMPREPLY[-1]`
    drops a trailing sentinel element the encoding leaves behind. (This
-   `read` call, and the one in step 2's `jobs` loop, are exactly the ones
-   implicated in the ble.sh interaction bug — see
-   [blesh.md](blesh.md#open-bug-spurious-read--not-a-valid-identifier-on-tab--auto-complete).)
+   `read` call is the one implicated in the ble.sh interaction bug — root
+   cause pinned and a fix applied, not yet switched, as of 2026-08-24. The
+   `\x01` above is real, not a typo to double-check: after `bash.nix`'s
+   `source <(carapace _carapace bash)` parses it once, the SOH byte prints
+   as an invisible, apparently-empty `''` in a plain `echo`/`type` capture
+   — confirmed with `od -c`, not by eye, after that exact misreading of it
+   as a literally-empty `IFS=''` cost real time in the bug's own diagnosis;
+   see [blesh.md](blesh.md#bug-spurious-read--not-a-valid-identifier-on-tab--auto-complete).)
 5. Registers with `complete -o noquote -F _carapace_completer` against a
    single hardcoded list of command names — several hundred, covering
    everything from `git`/`docker`/`kubectl` to `dd`/`chmod`/coreutils.

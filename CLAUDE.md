@@ -67,18 +67,24 @@ mounted at subvolid 1431. Same confirmation pattern as tenacity's, found by
 reading `journalctl` rather than trusting the mount coming up.
 
 **`nire-cube` has been switched — 2026-08-23**, with the `monitoring`
-category (Prometheus + Grafana, see Architecture) and a fix for
-`nire-llm-sandbox`'s default-network bug both live. `just switch` completed
-overall, but two units failed on that same switch: `grafana.service` (a
+category (Prometheus + Grafana, see Architecture) live, and `nire-llm-sandbox`
+**confirmed booted and staying up as of 2026-08-24**. The first `just switch`
+with the sandbox VM wired in failed two units: `grafana.service` (a
 file-ownership bug in this session's own first attempt at the `secret_key`
 fix — corrected same day, `systemctl status` confirmed it running
-afterward) and `libvirt-vm-llm-sandbox.service` (`network 'default' is not
-active` — the bug the fix above addresses). That fix evaluates and is
-confirmed not to touch durandal (byte-identical toplevel drvPath before and
-after), but **has not yet been confirmed to actually let the VM boot** — see
-`wiki/open-threads.md`. Treat "the sandbox VM works" as unverified until
-that's watched succeed on the real host, same as everything else this file
-says to treat that way.
+afterward) and `libvirt-vm-llm-sandbox.service`, which took three separate
+runtime-verified fixes to `VMs/_lib/libvirt-vm.nix` across 2026-08-23/24
+before it stopped failing — libvirt's default network defined-but-never-
+started, a nonexistent `net-list --state-active` flag in the fix for that,
+and a missing fixed `<uuid>` in the domain XML that made every `virsh
+define` collide with the domain's own prior definition. None of the three
+was visible to `nix eval` or a build; all three only showed up against real
+`virsh` on the real host. Each was confirmed not to touch durandal
+(byte-identical toplevel drvPath) before being applied to cube. Full
+diagnosis and fix-by-fix detail: `wiki/open-threads.md`. The guest was
+actually running the whole time, including while the systemd unit itself
+was failing on fixes two and three — `systemctl status` and `virsh
+dominfo` are both now clean.
 
 **A Claude Code session in this repo is not necessarily running on
 `nire-lysithea`.** This section was corrected from a session running directly
@@ -476,6 +482,26 @@ before merging, ask again before deleting the branch — two confirmations, not
 one. Only for work headed to `main` — pushing a topic branch is just a push.
 The skill has the flow and why.
 
+**Never file anything outside `NireBryce/nixos-configs` — an issue or PR on
+nixpkgs, ble.sh, carapace, any other project — without Elly saying so
+explicitly, in those words, unprompted.** Asking and getting a yes does not
+clear this: a yes to a bundled "ok to do these four things" does not cover
+an upstream filing folded into it, even if upstream filing was one of the
+four and nothing was hidden. It has to be Elly raising it, not a box
+checked on the way to approving something else. `propose-issue` already
+only ever files in this repo (`gh issue create --repo
+NireBryce/nixos-configs`) and `bugs pending submission/` plus
+`wiki/open-threads.md`'s "Pending upstream bug reports" are deliberately
+drafts nothing works through automatically — this rule is what keeps that
+true rather than something an efficient-looking bundled plan quietly
+crosses. Written 2026-08-24: a same-repo issue got filed under a bundled
+"ok to do these four things" approval, upstream filing was never actually
+proposed in it, and Elly still stepped in ahead of time to draw this
+boundary explicitly rather than leave it to be inferred from that. Treat
+the boundary as this deliberate, not as something a careful-enough bundled
+ask would have covered on its own; see `claude cave/lessons-learned.md`
+#39.
+
 ## Conventions
 
 **Read `claude cave/claude-style-guide.md` before writing a new module.** Formatting
@@ -571,7 +597,7 @@ env vars passed where `argv` was read, and a mangled line nothing highlighted.
 - `claude cave/lessons-learned.md` — how the work went wrong in the doing: tools that
   reported success while being wrong, traps that were documented and hit anyway,
   and which questions were settled by reading source. §§1–18 are the port,
-  §§19–24 the first session on the hardware, §§25–31 after it booted, §§32–38
+  §§19–24 the first session on the hardware, §§25–31 after it booted, §§32–40
   later work on booted or newly-added hosts. §32 (an auto-allocator cannot see
   manually pinned ranges, and a working host can be working on state a fresh
   one lacks), §33 (a removed nixpkgs option asserts rather than being
@@ -587,7 +613,22 @@ env vars passed where `argv` was read, and a mangled line nothing highlighted.
   built artifact) and §38 (a fix scoped to the caller that actually needs it
   beats a general one; asking "does this affect a host that never asked"
   caught the wrong mechanism before it was written) came out of `nire-cube`'s
-  `nire-llm-sandbox` VM and its `monitoring` category, 2026-08-22/23.
+  `nire-llm-sandbox` VM and its `monitoring` category, 2026-08-22/23. §39 (a
+  live-typing bug needs a live pty repro, not `ssh host 'cmd'`; and the
+  newest, explicitly-unverified file is a suspect, not automatically the
+  culprit) is the ble.sh/carapace completion bug reported on `nire-cube`
+  2026-08-24 — diagnosed, and the fix
+  (`carapace-completer-read-fix.bash`) is in the tree and evaluates, but has
+  not been run through `just switch` or re-confirmed live; see the section
+  itself before assuming that's done too. §40 (a failed systemd unit doesn't
+  mean the resource it manages is down; check that resource itself, not
+  just the unit) is `nire-llm-sandbox`'s first real end-to-end test on
+  `nire-cube`, 2026-08-23/24 — three runtime-only bugs in a row in
+  `VMs/_lib/libvirt-vm.nix` (default network never started; the fix for
+  that using a nonexistent `virsh` flag; a missing fixed domain UUID making
+  every redefine collide with the last), during which the guest itself was
+  running the whole time even while the unit kept reporting failed. Now
+  confirmed clean end to end; see State and `wiki/open-threads.md`.
 - `flake/doc/trailhead-home-manager-standalone.md` — reversing the HM decision, and the
   part of the cutover that is one-way on the machine rather than in the repo.
 - `git show origin/flake-parts:SESSION-HANDOFF.md` — the sibling branch's notes

@@ -57,54 +57,86 @@ together external completion/history tools underneath ble.sh's UI:
   unbinding, because a ble.sh keymap with no entry for a key does nothing,
   not "fall through to atuin").
 
-## Open bug: spurious `read: `': not a valid identifier` on Tab / auto-complete
+## Bug: spurious `read: `': not a valid identifier` on Tab / auto-complete
 
 Seen on `nire-cube`'s real terminal (VSCode's integrated terminal) as a
 stray `bash: read: `': not a valid identifier` line printed alongside an
 otherwise-correct completion menu, on both explicit Tab and ble.sh's
-inline auto-complete-as-you-type. Diagnosed 2026-08-22 by actually
+inline auto-complete-as-you-type. First diagnosed 2026-08-22 by actually
 reproducing it — not just reading source — with a scripted pty (Python's
 `pty` module driving a real interactive `bash -i`), per this repo's own
 "evaluating proves nothing, force a real run" convention
-([CLAUDE.md](../../../CLAUDE.md), [history.md](../../history.md) §25).
+([CLAUDE.md](../../../CLAUDE.md), [history.md](../../history.md) §25); that
+session pinned the bug as far as "somewhere inside ble.sh's global `read`
+override" but no further (see history below). Reopened 2026-08-24 when it
+was reported by a user typing over SSH — reproduced again with the same pty
+technique, packaged that same day as a reusable tool
+(`flake/scripts/ssh-pty-drive.py` at the time, since generalized beyond SSH
+and moved out to its own repo,
+[`terminal-puppeteer`](https://github.com/NireBryce/terminal-puppeteer) —
+not part of this repo any more, kept here only as the "how this was found"
+credit),
+and pinned the rest of the way to a specific line and a working fix. Full
+session account: [lessons-learned.md](../../../claude%20cave/lessons-learned.md) §39.
 
-Findings:
+**Root cause**: ble.sh's own auto-complete/progcomp machinery installs a
+cancellation safety net, `_ble_builtin_read_hook`, while any registered
+completer is running — checked every `bleopt_complete_polling_cycle` reads
+(50 by default) against whether the user is still typing
+(`ble/complete/progcomp/.check-limits`, `lib/core-complete.sh`). That check
+succeeding during ordinary fast typing is the *common* case, not an edge
+case. When it succeeds mid-completer, the hook redirects whatever `read`
+call was in flight through a fallback path
+(`ble/bash/read "$@" < /dev/null; return 148`) — and when the read call
+caught by that fallback is carapace's own read line (see
+[carapace.md](carapace.md) for what it actually is — its visible `IFS=''`
+is an invisible SOH byte, not a literally empty string, confirmed with
+`od -c` after that misreading briefly derailed this diagnosis too), the
+forwarded `"$@"` comes back split character-by-character instead of into
+the two variable names, which is exactly what produces the
+empty-identifier error.
 
-- **Reproduces in a minimal config**: `ble.sh --attach=none` plus
-  `source <(carapace _carapace bash)` and nothing else. No bash-completion,
-  no fzf integrations, no atuin.
-- **Not caused by this repo's own `carapace-desc.bash`** — stripping that
-  file (and the rest of the `.blerc`) out of the test config entirely did
-  not make the bug go away. Its own header invites suspicion ("checked...
-  but not yet against the live menu"), but it's exonerated here: the advice
-  hook it installs isn't even loaded when the bug fires.
-- **Traced as far as**: ble.sh globally overrides the `read` builtin
-  (`function read` in `ble.sh`, around line 27992), routing every `read`
-  call through `ble/builtin/read` → `ble/bash/read`. When ble.sh calls into
-  carapace's registered `_carapace_completer` via its own progcomp
-  integration (`ble/complete/progcomp/.compgen-helper-func` in
-  `lib/core-complete.sh`), every `read` inside that completer — including
-  carapace's own `IFS=$'\001' read -r -d '' nospace data <<<"${data}"` and
-  its `jobs | while read -r line` — goes through that override machinery.
-- **Not pinned further than that.** Every static call site walked
-  (`ble/builtin/read/.read-arguments`, `.process-option`, `ble/bash/read`)
-  reconstructs `nospace`/`data` as literal, always-valid identifiers on
-  paper — none of them explain an empty name at runtime. Advising
-  `ble/builtin/read/.impl` directly (ble.sh's own advice framework, the
-  same mechanism `carapace-desc.bash` uses) to log arguments made things
-  *worse* in a different way — it broke ble.sh's own read machinery rather
-  than cleanly observing it — so that avenue wasn't pushed further against
-  a real interactive shell.
-- **Cosmetic, not functional**: the completion menu, descriptions included,
-  renders correctly on the same keypress as the stray error line.
+**Not caused by this repo's own `carapace-desc.bash`** — confirmed twice,
+independently, two days apart: stripping the whole `.blerc` out of a
+minimal test config didn't stop it (2026-08-22), and neither did removing
+just the advice from a live shell and re-sourcing carapace's stock
+completer plain (2026-08-24). It's a genuine carapace↔ble.sh interaction,
+exposed by this repo routing carapace through bash's native `complete -F`
+protocol for the first time, not introduced by anything layered on top of
+it.
 
-Read as: an upstream ble.sh↔carapace progcomp interaction, present before
-today's config changes and not a regression from them. Not yet filed
-upstream or worked around. If it becomes annoying enough to fix rather than
-ignore, the mitigation path is avoiding bash's native `complete -F`
-protocol for carapace's commands (a non-progcomp carapace completion mode,
-if one exists) rather than chasing the exact line inside ble.sh — see
-[open-threads.md](../../open-threads.md).
+**Fix, in the tree as of 2026-08-24, not yet switched**: don't call `read`
+for that line at all, so there's nothing for ble.sh's global override to
+catch —
+[`carapace-completer-read-fix.bash`](../../../flake/modules/nire/shell-config/bash/carapace-completer-read-fix.bash)
+(see
+[`carapace-read-fix.md`](../../../flake/modules/nire/shell-config/bash/carapace-read-fix.md)
+next to it for the operator-facing summary and how to undo it)
+patches `_carapace_completer`'s body via `declare -f` plus a textual
+substitution, replacing the `read` with parameter expansion split on the
+same real SOH byte (`nospace=${data##*$sep}; data=${data%$sep*}`), sourced
+from `bash.nix` right after `source <(carapace _carapace bash)` and before
+`carapace-desc.bash`'s advice wraps the same function. Validated three
+ways: the substitution reproduces the exact byte checked with `od -c`
+against carapace's real output; applied by hand to the real
+`_carapace_completer` on `nire-cube` via the pty-driving tool mentioned
+above and driven through four different Tab-completions with zero errors,
+where each
+reliably errored before; and `just modules` clean with the change
+evaluating correctly into `programs.bash.initExtra`. **Not yet run through
+an actual `just switch`** — the live validation patched an already-running
+shell by hand, not a rebuilt-and-switched host — see
+[open-threads.md](../../open-threads.md) and lessons-learned.md §39 before
+assuming that step is done. Tracked as
+[issue #72](https://github.com/NireBryce/nixos-configs/issues/72); update
+that, not just this page, once `just switch` confirms it.
+
+Still worth filing upstream — this repo's fix is a local workaround, not a
+change to carapace or ble.sh — but low priority now that it no longer
+produces wrong output, only (until switched) the cosmetic stray line. Not
+filed, and not something to file on the strength of this page alone: per
+`CLAUDE.md`, filing against either project needs Elly to say so explicitly
+first.
 
 ## See also
 

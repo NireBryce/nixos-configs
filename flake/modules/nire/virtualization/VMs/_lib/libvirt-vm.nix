@@ -40,6 +40,28 @@
 # coverage from merging back together the way `boot`/`boot-durandal` almost
 # did.
 { name
+, uuid            # a fixed libvirt domain UUID, standard 8-4-4-4-12 hex format.
+                   # Pin explicitly rather than omit and let libvirt generate
+                   # one -- same "a human reasons about collisions" reasoning
+                   # `guestId` below already gives, but here it's load-bearing
+                   # for idempotency, not just collision-avoidance: if
+                   # `domainXml` has no <uuid>, `virsh define` generates a
+                   # FRESH random one on every single parse, and libvirt then
+                   # refuses to redefine an already-registered domain of the
+                   # same name under a different UUID -- "domain 'X' already
+                   # exists with uuid Y". RUNTIME-VERIFIED TRAP, 2026-08-23,
+                   # on nire-cube: this generator's own header comment claimed
+                   # "virsh define redefining an already-running domain's
+                   # persistent config does not stop or restart it (standard
+                   # libvirt semantics)" -- true only once the UUID is fixed;
+                   # without one, that redefine fails outright on the second
+                   # and every subsequent activation, even though the domain
+                   # from the first successful define was still running fine
+                   # underneath the failing unit. `uuidgen` once per VM to
+                   # produce one; for llm-sandbox this is the UUID libvirt
+                   # itself assigned on its first successful `virsh define`
+                   # (adopted here rather than picked fresh, so fixing this
+                   # doesn't require tearing down the already-running guest).
 , image           # the disk-image derivation itself (config.system.build.image
                    # off the guest's own nixosConfiguration) -- used only for
                    # the GC-root symlink below, so it stays alive regardless
@@ -145,6 +167,7 @@ let
     domainXml = pkgs.writeText "${name}-domain.xml" ''
       <domain type='kvm'>
         <name>${name}</name>
+        <uuid>${uuid}</uuid>
         <memory unit='MiB'>${toString memoryMB}</memory>
         <currentMemory unit='MiB'>${toString memoryMB}</currentMemory>
         <vcpu placement='static'>${toString vcpus}</vcpu>
@@ -181,11 +204,14 @@ let
       </domain>
     '';
 
-    # Idempotent by design, safe to re-run on every activation:
+    # Idempotent by design, safe to re-run on every activation -- but this
+    # claim only holds because `domainXml` now carries a fixed `uuid` (see
+    # that parameter's own comment for the trap hit when it didn't):
     #   - the overlay is only ever CREATED if missing, so a rebuild never
     #     wipes a VM's accumulated state;
     #   - `virsh define` redefining an already-running domain's persistent
-    #     config does not stop or restart it (standard libvirt semantics);
+    #     config, UUID unchanged, does not stop or restart it (standard
+    #     libvirt semantics);
     #   - the start is skipped if the domain is already running.
     #
     # The GC root matters more than it looks: `image` is a Nix store path,
@@ -225,7 +251,16 @@ let
       # all. RUNTIME-VERIFIED TRAP, 2026-08-23, on nire-cube: without this,
       # `virsh start` below fails outright with "Requested operation is not
       # valid: network 'default' is not active".
-      if ! ${pkgs.libvirt}/bin/virsh -c qemu:///system net-list --name --state-active | grep -qx default; then
+      #
+      # SECOND RUNTIME-VERIFIED TRAP, same day, found on the very next
+      # switch: `net-list` has no `--state-active` flag (virsh 12.4.0:
+      # "command 'net-list' doesn't support option --state-active"), so the
+      # check above always errored and fell through to `net-start`
+      # unconditionally -- which then fails with "network is already
+      # active" on every activation after the first. Plain `net-list
+      # --name` already lists active-only networks by default (no `--all`
+      # or `--inactive` given), so that's the whole fix -- no flag needed.
+      if ! ${pkgs.libvirt}/bin/virsh -c qemu:///system net-list --name | grep -qx default; then
         ${pkgs.libvirt}/bin/virsh -c qemu:///system net-start default
       fi
       ''}

@@ -33,6 +33,21 @@ the three above the bug also warrants, not instead of it. Checked
 `wontfix`, `help wanted`, `good first issue`) but zero issues filed — there's
 no backlog yet, which is exactly why one bug going unfiled is easy to lose.
 
+## This never extends to a third-party repo
+
+Every `gh issue create` in this skill hardcodes `--repo
+NireBryce/nixos-configs`. That's not incidental — this skill files in this
+repo only, full stop, even for a bug whose real fix belongs upstream (in
+nixpkgs, ble.sh, carapace, whatever). Filing there instead is a different,
+heavier action with its own rule in `CLAUDE.md`: never without Elly saying
+so explicitly, in those words, unprompted — not satisfied by this skill's
+own step 3 `AskUserQuestion`, and not satisfied by folding it into some
+other approval. If a bug genuinely belongs upstream, this skill still
+applies for tracking it *here* (`bug` label, or note it in
+`wiki/open-threads.md`/`bugs pending submission/` if a draft write-up is
+what's actually ready); filing it at the third-party project is a separate
+ask you make by name, not a step of this flow.
+
 ## Why propose instead of just filing
 
 Filing is outward-facing the moment `gh issue create` returns — same reason
