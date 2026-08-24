@@ -36,7 +36,19 @@
             #
             # Whether the default network actually runs is *runtime* state in
             # /var/lib/libvirt, not config -- libvirt ships the definition
-            # inactive, and no NixOS option starts it. Once per host:
+            # inactive, and no NixOS option starts it. NixOS's own libvirtd
+            # module (systemd.services.libvirtd-config) already handles the
+            # *definition* -- it re-copies the stock default.xml into
+            # /var/lib/libvirt/qemu/networks/ on every boot if missing, so
+            # that half survives an impermanence wipe for free. The other
+            # half -- actually starting it -- is handled per-VM instead of
+            # here: VMs/_lib/libvirt-vm.nix's activation script starts the
+            # default network itself when a VM declares `networked = true`,
+            # rather than a host-wide unit unconditionally bringing up
+            # virbr0 (and the trustedInterfaces trust above) on every boot
+            # regardless of whether anything ever uses it. A VM started by
+            # hand instead -- outside that generator, e.g. via virt-manager
+            # directly on durandal today -- still needs the old manual step:
             #
             #     virsh net-start default && virsh net-autostart default
             #
