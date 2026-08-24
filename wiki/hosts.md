@@ -57,8 +57,11 @@ Confirmed working end to end the same day: `just switch` clean, both its
 systemd units healthy, and a real `HTTP 200` from another tailnet host.
 
 `nire-cube` also runs golink, Tailscale's `go/foo` shortlink service, as of
-2026-08-24 — see [shortlinks](categories/shortlinks.md). **Evaluates only;
-not runtime-verified**, unlike the two above. Not the same tailnet-only
+2026-08-24 — see [shortlinks](categories/shortlinks.md). Its first real
+switch **failed** (generation 13, a missing `AF_NETLINK` in the module's own
+`RestrictAddressFamilies`, which Go's netlink interface enumeration needs);
+the fix is verified at the sandbox level but an authenticated node still
+needs the one-time login below. Not the same tailnet-only
 mechanism either, and that's the part worth not misreading: golink embeds
 tsnet, so it joins the tailnet as its *own device* (named `go`) and listens
 there rather than on any of cube's interfaces — no firewall rule, no

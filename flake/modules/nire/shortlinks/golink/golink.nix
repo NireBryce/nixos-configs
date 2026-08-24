@@ -75,14 +75,22 @@
 # `ts-go` or similar out of consistency would break the entire point of the
 # service: `go/foo` would stop resolving. Leave it as `go`.
 #
-# STATUS: evaluates; NOT runtime-verified. Written 2026-08-24 from a darwin
-# session, which cannot build an x86_64-linux toplevel here (no remote
-# builder -- CLAUDE.md's State section). Per this repo's own history, a
-# green evaluation says nothing about a hand-written systemd unit: the
-# sandbox VM next door took three runtime-only fixes, and grafana.service
-# failed its first real switch on a file-ownership bug nothing static could
-# see. Treat the first `just switch` on cube as the real test, and check
-# `systemctl status golink` plus the journal for the auth URL.
+# STATUS: this unit FAILED its first real switch on nire-cube (2026-08-24,
+# generation 13) and the fix is in the RestrictAddressFamilies comment
+# below -- a missing AF_NETLINK, invisible to evaluation and to reading the
+# rendered unit text back, exactly the class of defect lessons-learned.md
+# §37 describes. It was written from a darwin session that cannot build an
+# x86_64-linux toplevel (no remote builder -- CLAUDE.md's State section),
+# shipped as "evaluates, not runtime-verified", and then broke for the one
+# reason its own hardening comment claimed to be avoiding by leaving
+# SystemCallFilter out. The lesson is not "harden less"; it is that a
+# hardening knob you cannot exercise is untested regardless of how
+# well-understood it looks.
+#
+# The fix itself IS runtime-verified: same binary, same knobs, run twice
+# under `systemd-run --user` on the real host differing only in AF_NETLINK.
+# What is still unverified as of 2026-08-24 is the authenticated node --
+# that needs the one-time login below to actually be done.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
@@ -160,16 +168,40 @@
                     # daemon with no cgo (golink's sqlite is modernc.org/
                     # sqlite, pure Go) and no device access (tsnet is
                     # userspace netstack -- it never opens /dev/net/tun).
-                    # Knobs like MemoryDenyWriteExecute or a SystemCallFilter
-                    # are left OUT on purpose: this module could not be
-                    # runtime-tested when it was written (see header), and an
-                    # untested syscall filter fails as a confusing crash at
-                    # start rather than as anything diagnosable.
+                    # MemoryDenyWriteExecute and a SystemCallFilter are still
+                    # left OUT on purpose: an untested syscall filter fails as
+                    # a confusing crash at start rather than as anything
+                    # diagnosable. That reasoning was right about the risk and
+                    # wrong about which knob carried it -- see the next
+                    # comment.
                     ProtectHome           = true;
                     ProtectKernelTunables = true;
                     ProtectKernelModules  = true;
                     ProtectControlGroups  = true;
-                    RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
+
+                    # AF_NETLINK IS LOAD-BEARING. Leaving it out is what made
+                    # this unit crash-loop on its first real switch
+                    # (nire-cube, 2026-08-24, generation 13):
+                    #
+                    #   tsnet: route ip+net: netlinkrib: address family not
+                    #   supported by protocol
+                    #
+                    # Go's `net` package enumerates interfaces and routes
+                    # through a netlink socket (syscall.NetlinkRIB ->
+                    # socket(AF_NETLINK, SOCK_RAW, ...)), and
+                    # RestrictAddressFamilies makes a blocked socket() return
+                    # EAFNOSUPPORT -- which is that message verbatim. So the
+                    # error names netlink but reads like a kernel/protocol
+                    # problem rather than a sandbox one, which is what makes
+                    # it worth writing down: nothing in it says "systemd".
+                    #
+                    # Confirmed by A/B on the real host rather than reasoned
+                    # about: the same golink binary under the same knobs, run
+                    # twice via `systemd-run --user`, differing ONLY in this
+                    # list. Without AF_NETLINK it exits 1 on that message;
+                    # with it, tsnet starts and prints its auth URL. Anything
+                    # tsnet-based needs this; do not "tidy" it back out.
+                    RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" "AF_NETLINK" ];
                     RestrictNamespaces      = true;
                     LockPersonality         = true;
                 };

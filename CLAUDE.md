@@ -316,9 +316,17 @@ fixed by renaming the category rather than the module. See
 `wiki/categories/git-forge.md`.
 
 **`shortlinks`**, added 2026-08-24 as `nire/shortlinks/`, is golink --
-Tailscale's `go/foo` shortlink service -- cube-only, **evaluates only, NOT
-runtime-verified** (written from a darwin session, which can't build an
-x86_64-linux toplevel). Named `shortlinks` rather than `golink` for the
+Tailscale's `go/foo` shortlink service -- cube-only. **Its first real
+switch failed** (generation 13, same day): a missing `AF_NETLINK` in the
+module's own `RestrictAddressFamilies`, which Go's netlink interface
+enumeration needs, surfacing as `netlinkrib: address family not supported
+by protocol` -- a message that names netlink and reads like a kernel
+problem, with nothing in it pointing at systemd. It shipped as "evaluates
+only" because it was written from a darwin session that can't build an
+x86_64-linux toplevel, and it then broke for exactly the reason its own
+hardening comment claimed to be avoiding by leaving SystemCallFilter out.
+The fix is verified by A/B on the real host; an authenticated node still
+needs the one-time login. Named `shortlinks` rather than `golink` for the
 same category/module collision reason `git-forge` isn't `forgejo`, and
 deliberately not `golinks` either -- one letter off its own module reads
 as a typo later. Two things about it are genuinely different from

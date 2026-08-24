@@ -3,17 +3,31 @@
 [golink](https://github.com/tailscale/golink), Tailscale's `go/foo`
 shortlink service. Added 2026-08-24, cube-only.
 
-**Evaluates; NOT runtime-verified.** Written from a darwin session, which
-cannot build an `x86_64-linux` toplevel (no remote builder — see
-[`../../CLAUDE.md`](../../CLAUDE.md)'s State section). `nire-cube`'s
-`nixosConfigurations` entry evaluates, `just modules` reports no findings,
-and the rendered `golink.service` unit text was read back rather than
-assumed — but nothing here has run. Per this repo's own history that is a
-weak claim: [monitoring](monitoring.md)'s `grafana.service` failed its first
-real switch on a file-ownership bug, and
-[virtualization](virtualization.md)'s sandbox VM took three runtime-only
-fixes. Treat the first `just switch` on cube as the real test, and expect to
-do the one-time login below.
+**It failed its first real switch, and the fix is in.** `golink.service`
+crash-looped on `nire-cube` (2026-08-24, generation 13) with:
+
+```
+tsnet: route ip+net: netlinkrib: address family not supported by protocol
+```
+
+A missing `AF_NETLINK` in this module's own `RestrictAddressFamilies` — see
+[the hardening section](#dynamicuser-deliberately) below for the mechanism.
+It was shipped as "evaluates, not runtime-verified" (written from a darwin
+session, which can't build an `x86_64-linux` toplevel), and it broke for
+precisely the reason its own hardening comment claimed to be guarding
+against by leaving `SystemCallFilter` out — the risk was named correctly and
+attached to the wrong knob.
+
+That puts this alongside [monitoring](monitoring.md)'s `grafana.service`
+first-switch failure and [virtualization](virtualization.md)'s sandbox VM
+taking three runtime-only fixes: **a green evaluation and a read-back of the
+rendered unit text both said nothing**, which is
+[`lessons-learned.md`](<../../claude cave/lessons-learned.md>) §37 exactly.
+
+The fix itself **is** runtime-verified — same binary, same knobs, run twice
+under `systemd-run --user` on the real host differing only in `AF_NETLINK`.
+Still unverified as of 2026-08-24: an actually-authenticated node, which
+needs the one-time login below to be done.
 
 ## What's in it
 
@@ -138,10 +152,20 @@ Hardening is modest on purpose. `DynamicUser` already implies
 `NoNewPrivileges`, `ProtectSystem=strict`, `PrivateTmp` and `RemoveIPC`;
 what's added is the handful obviously safe for a pure-Go network daemon with
 no cgo (golink's sqlite is `modernc.org/sqlite`, pure Go) and no device
-access. `MemoryDenyWriteExecute` and a `SystemCallFilter` are left out —
-this module could not be runtime-tested when written, and an untested
-syscall filter fails as a confusing crash at start rather than as anything
-diagnosable.
+access. `MemoryDenyWriteExecute` and a `SystemCallFilter` are still left out
+— an untested syscall filter fails as a confusing crash at start rather than
+as anything diagnosable.
+
+**`AF_NETLINK` in `RestrictAddressFamilies` is load-bearing**, and leaving
+it out is what broke the first switch. Go's `net` package enumerates
+interfaces and routes through a netlink socket (`syscall.NetlinkRIB` →
+`socket(AF_NETLINK, SOCK_RAW, …)`), and `RestrictAddressFamilies` makes a
+blocked `socket()` return `EAFNOSUPPORT` — which is the
+`netlinkrib: address family not supported by protocol` message verbatim.
+The error names netlink and reads like a kernel or protocol problem;
+nothing in it says "systemd", which is what made it worth writing down in
+the module rather than only here. Anything tsnet-based needs it — don't
+tidy it back out.
 
 ## No persistence entry
 
