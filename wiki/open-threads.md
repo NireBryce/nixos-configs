@@ -17,10 +17,13 @@ repo's own tracker is the issue queue, not another markdown list.
 
 ## Tracked as GitHub issues
 
+Closed, kept here as a worked example of the "check first" pattern this
+section's own header describes:
+
 - **[#72 — ble.sh + carapace: spurious `read: `': not a valid identifier` on
   Tab / auto-complete](https://github.com/NireBryce/nixos-configs/issues/72)**
-  — a local workaround is in the tree, not yet confirmed with a real
-  `just switch`. Full diagnosis: [blesh.md](categories/shell-config/blesh.md).
+  — closed 2026-08-24, confirmed via a real `just switch` on `nire-cube`.
+  Full diagnosis: [blesh.md](categories/shell-config/blesh.md).
 
 ## Pending upstream bug reports
 

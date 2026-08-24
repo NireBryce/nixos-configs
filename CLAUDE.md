@@ -617,10 +617,11 @@ env vars passed where `argv` was read, and a mangled line nothing highlighted.
   live-typing bug needs a live pty repro, not `ssh host 'cmd'`; and the
   newest, explicitly-unverified file is a suspect, not automatically the
   culprit) is the ble.sh/carapace completion bug reported on `nire-cube`
-  2026-08-24 — diagnosed, and the fix
-  (`carapace-completer-read-fix.bash`) is in the tree and evaluates, but has
-  not been run through `just switch` or re-confirmed live; see the section
-  itself before assuming that's done too. §40 (a failed systemd unit doesn't
+  2026-08-24 — diagnosed, fixed
+  (`carapace-completer-read-fix.bash`), and as of the same day confirmed
+  through a real `just switch` on `nire-cube` (generation 10) and
+  re-verified live: repeated repro attempts, zero errors, where each
+  reliably errored before. §40 (a failed systemd unit doesn't
   mean the resource it manages is down; check that resource itself, not
   just the unit) is `nire-llm-sandbox`'s first real end-to-end test on
   `nire-cube`, 2026-08-23/24 — three runtime-only bugs in a row in
