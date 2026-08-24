@@ -39,7 +39,7 @@ silently. There is no overlap between the two Homebrew generations here:
 | flag emitted | Homebrew < 6.0 | Homebrew ≥ 6.0 |
 | --- | --- | --- |
 | `--force-cleanup` (current) | `Error: invalid option` | works |
-| `--cleanup` (pre-#1789) | works | `UsageError`, and deprecated |
+| `--cleanup` (pre-#1789) | works | deprecated, and exits 1 without cleaning up |
 
 So no single flag string satisfies both, and the module currently picks one
 without checking which one applies.
@@ -201,9 +201,36 @@ homebrew.onActivation.extraFlags = [ "--cleanup" ];       # Homebrew 5.x only
 
 `extraFlags` is appended after the `cleanup` optionals, so with `cleanup =
 "none"` nothing conflicts. **This inverts the bug rather than fixing it** — the
-moment Homebrew reaches 6.x, bare `--cleanup` starts raising
-`UsageError: brew bundle install --cleanup requires --force, --force-cleanup or
-$HOMEBREW_ASK`, and activation breaks again in the other direction.
+moment Homebrew reaches 6.x, activation breaks again in the other direction.
+
+The failure it inverts into is worse than the one it fixes, and this section
+originally predicted the wrong one. It guessed the `UsageError` from
+`install.rb`'s guard:
+
+```ruby
+if args.cleanup? && !context.force && !args.force_cleanup? && !context.ask
+```
+
+That guard does not fire, because `HOMEBREW_ASK` has `default: true`
+(`Library/Homebrew/env_config.rb:93–103`, itself `odeprecated`), so
+`context.ask` is true with nothing set in the environment. Execution falls
+through to the cleanup call with `force: context.force || args.force_cleanup?`
+— i.e. `false` — which makes it a **dry run**: it prints `Would uninstall
+casks:` / `Would uninstall formulae:` / `Run brew bundle cleanup --force to
+make these changes`, cleans nothing up, and exits 1.
+
+Observed on Homebrew 6.0.19, 2026-08-24. Two things make that hard to read
+during a `nh`-driven switch:
+
+- every line of the dry run goes to **stdout**, and `nh` reports only the
+  subprocess's stderr, so the activation error shows nothing but a wall of
+  unrelated `Warning: <cask> was renamed to …` lines and no error at all;
+- the workaround has by then silently stopped cleaning up. It is not just
+  failing loudly, it stopped doing its job first.
+
+Running the activation script's own `brew bundle` line by hand is what
+surfaces it — its stderr matches the reported failure byte for byte, and the
+answer is on stdout.
 
 The durable answer for a user hitting this is `brew update` to 6.x and then
 plain `cleanup = "uninstall"`.
@@ -259,18 +286,32 @@ upstream". Both readings are backwards:
   input moving will not fix it; **updating Homebrew on lysithea will**, and at
   that moment the current workaround becomes the thing that breaks activation.
 
-Unverified from here, worth doing on lysithea before filing:
+**The first two of these were verified on lysithea 2026-08-24, and both went
+the way this file predicted.** Left as written above rather than rewritten,
+because the prediction being right is the point; what follows is what actually
+happened.
 
-- `brew --version` — 5.1.6 is what the module comment records, and the whole
-  report is pinned to that. Confirm it, and confirm the machine has not been
-  updated since.
-- Whether `brew update && brew upgrade` to 6.0.x, followed by dropping the
-  workaround for plain `cleanup = "uninstall"`, works end to end. If it does,
-  that is the real fix for this repo and the workaround should come out — but
-  note that `cleanup = "uninstall"` will then actually uninstall, so `just
-  hm-collisions`-style caution applies: check what `brew bundle cleanup` would
-  remove before switching, since the Brewfile is the 59-cask list and anything
-  hand-installed goes.
+- `brew --version` is **6.0.19**, not the 5.1.6 this report is pinned to.
+  Homebrew updated itself out from under the workaround at some point between
+  2026-08-13 and 2026-08-24 — which is exactly the trigger this file said to
+  watch for, and it is not something nix-darwin does
+  (`HOMEBREW_NO_AUTO_UPDATE=1`), so `brew` was run by hand at some point.
+  Anyone filing this report now needs a 5.x machine or has to pin it to the
+  5.1.6 evidence already recorded above, since it can no longer be reproduced
+  here.
+- Dropping the workaround for plain `cleanup = "uninstall"` **works end to
+  end**, confirmed by running the built activation script's own `brew bundle`
+  line: `--force-cleanup` is emitted, exit 0, clean stderr, "64 Brewfile
+  dependencies now installed". Done in this repo 2026-08-24; see
+  `homebrew.nix`'s history block.
+- The caution about hand-installed packages was warranted. `brew bundle
+  cleanup` without `--force` (a dry run, and the read-only way to ask this)
+  named cask `zcode` and formulae `opencode` and `python@3.13` — all three
+  `installed on request` per `brew leaves` — plus ~20 dependencies of theirs.
+  Those three were added to the Brewfile lists in the same change, so the
+  revert removed nothing anyone wanted. **Check this before enabling cleanup
+  on any machine**; `brew bundle cleanup --file=<the Brewfile>` with no
+  `--force` is the whole check.
 - Whether the suggested capability-detection snippet actually works inside the
   activation script's `sudo … env` invocation. It is untested; the reproduction
   in this report is by evaluation and source reading plus the observed

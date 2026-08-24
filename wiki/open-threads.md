@@ -47,7 +47,16 @@ specific report — not as a housekeeping pass over this list:
 - **[Jovian-NixOS: `amd_iommu=off` blocks s0i3 on non-Deck handhelds with an NPU](<../bugs pending submission/2026-08-12-bugreport-jovian-amd-iommu-s0i3.md>)**
   (2026-08-12, found on a GPD G1617-02-L).
 - **[nix-darwin: `homebrew.onActivation.cleanup` requires Homebrew ≥ 6.0, with no version check or error naming it](<../bugs pending submission/2026-08-13-bugreport-nix-darwin-homebrew-force-cleanup.md>)**
-  (2026-08-13).
+  (2026-08-13). Still unfiled and still a real upstream gap, but **no longer
+  reproducible from this fleet**: lysithea reached Homebrew 6.0.19 by
+  2026-08-24, which is the side of the version skew nix-darwin already
+  handles. The local workaround it documented (`cleanup = "none"` +
+  `extraFlags = [ "--cleanup" ]`) had by then inverted into a different
+  failure — bare `--cleanup` on Homebrew 6 runs cleanup as a dry run and
+  exits 1, breaking every `just switch` while silently having stopped
+  cleaning up — and was reverted the same day to plain
+  `cleanup = "uninstall"`. The report has been updated with what the 6.x
+  side actually does, since it had predicted the wrong error for it.
 
 ## Todos and ideas left next to the code
 
