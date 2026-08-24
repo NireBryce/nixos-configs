@@ -56,6 +56,17 @@ see [git-forge](categories/git-forge.md). Same tailnet-only mechanism.
 Confirmed working end to end the same day: `just switch` clean, both its
 systemd units healthy, and a real `HTTP 200` from another tailnet host.
 
+`nire-cube` also runs golink, Tailscale's `go/foo` shortlink service, as of
+2026-08-24 — see [shortlinks](categories/shortlinks.md). **Evaluates only;
+not runtime-verified**, unlike the two above. Not the same tailnet-only
+mechanism either, and that's the part worth not misreading: golink embeds
+tsnet, so it joins the tailnet as its *own device* (named `go`) and listens
+there rather than on any of cube's interfaces — no firewall rule, no
+`trustedInterfaces` reliance, and no dependency on the host's `tailscaled`.
+It needs a one-time interactive login on first start (`journalctl -u golink
+-f`, open the printed URL), because no `TS_AUTHKEY` is wired in — the same
+call `tailscale.nix` makes for the host daemon.
+
 ## Where each fact lives
 
 - **Boot/switch status per host** — [`../CLAUDE.md`](../CLAUDE.md), State
