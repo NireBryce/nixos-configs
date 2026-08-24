@@ -5,9 +5,30 @@ corners of the tree, plus upstream bugs found here but not yet filed. None
 of this is acted on just by being listed here — this page exists so these
 don't have to be rediscovered by grepping the whole tree.
 
+**Before starting work on any of these, or investigating a symptom that
+might already be one of them: `gh issue list --search "<keywords>"` in
+addition to grepping this page.** As of 2026-08-24 this repo actually files
+GitHub issues (see below) rather than leaving everything here as prose —
+started specifically because the ble.sh/carapace bug below had already been
+independently rediscovered once, at real cost, before it was tracked this
+way. `bugs pending submission/` (next section) is still the write-up stage
+for a bug against a *third-party* project, before it's filed there; this
+repo's own tracker is the issue queue, not another markdown list.
+
+## Tracked as GitHub issues
+
+- **[#72 — ble.sh + carapace: spurious `read: `': not a valid identifier` on
+  Tab / auto-complete](https://github.com/NireBryce/nixos-configs/issues/72)**
+  — a local workaround is in the tree, not yet confirmed with a real
+  `just switch`. Full diagnosis: [blesh.md](categories/shell-config/blesh.md).
+
 ## Pending upstream bug reports
 
-`bugs pending submission/` — written up, not yet filed:
+`bugs pending submission/` — written up, not yet filed against the
+third-party project itself, and **not filed by anyone here on their own
+initiative**: per `CLAUDE.md`, filing outside `NireBryce/nixos-configs`
+happens only when Elly says so explicitly, in those words, for that
+specific report — not as a housekeeping pass over this list:
 
 - **[nixpkgs: vscode ≥ 1.129 patches the wrong ripgrep on Linux](<../bugs pending submission/2026-08-11-bugreport-nixpkgs-vscode-ripgrep.md>)**
   (2026-08-11, still present on nixpkgs `master` as of that date).
@@ -17,13 +38,6 @@ don't have to be rediscovered by grepping the whole tree.
   (2026-08-12, found on a GPD G1617-02-L).
 - **[nix-darwin: `homebrew.onActivation.cleanup` requires Homebrew ≥ 6.0, with no version check or error naming it](<../bugs pending submission/2026-08-13-bugreport-nix-darwin-homebrew-force-cleanup.md>)**
   (2026-08-13).
-- **ble.sh: spurious `read: `': not a valid identifier` on Tab / auto-complete
-  when carapace is the active completer** — found 2026-08-22, not yet
-  written up for submission. Reproduces in a minimal ble.sh+carapace config,
-  unrelated to anything in this repo. Traced as far as ble.sh's global
-  `read` override intercepting reads inside carapace's progcomp-invoked
-  `_carapace_completer`, but not pinned to one statement; cosmetic only.
-  Full diagnosis: [blesh.md](categories/shell-config/blesh.md).
 
 ## Todos and ideas left next to the code
 
@@ -51,16 +65,29 @@ don't have to be rediscovered by grepping the whole tree.
   devenv, nixos-shell, nix-index, nix-prefetch — and an unanswered "learn
   what `outputs @ inputs:` means and figure out specialArgs" note. Also
   covered from the fix-snippet angle on [conventions.md](conventions.md).
-- **`nire-llm-sandbox` still isn't confirmed to boot** — added 2026-08-22
-  (see [hosts.md](hosts.md) and
-  [categories/virtualization.md](categories/virtualization.md)). `nire-cube`'s
-  first real `just switch` with it wired in (2026-08-23) got as far as
-  `virsh define` succeeding and then failed to start the domain — libvirt's
-  default network was defined but never started, a real bug, fixed the same
-  day in `VMs/_lib/libvirt-vm.nix`. The fix evaluates and durandal's toplevel
-  is confirmed unaffected, but nobody has watched the domain actually come up
-  on `nire-cube` yet. The next real step is exactly that, not another round
-  of `nix eval`.
+- **`nire-llm-sandbox` boots and stays up on `nire-cube`, confirmed
+  2026-08-24** — added 2026-08-22 (see [hosts.md](hosts.md) and
+  [categories/virtualization.md](categories/virtualization.md)). Took three
+  runtime-verified fixes to `VMs/_lib/libvirt-vm.nix` across 2026-08-23/24,
+  all against real `virsh` behaviour on `nire-cube`, none caught by `nix
+  eval` or a build: (1) libvirt's default NAT network is defined but never
+  started, so `virsh start` failed outright until the activation script
+  started it itself; (2) the fix for that used a `net-list --state-active`
+  flag that doesn't exist on virsh 12.4.0, so the check errored and fell
+  through to an unconditional `net-start`, which then failed with "network
+  is already active" on every activation after the first -- plain `net-list
+  --name` already lists active-only networks by default, no flag needed;
+  (3) `domainXml` had no `<uuid>`, so `virsh define` generated a fresh
+  random UUID on every parse and collided with the domain already
+  registered under the UUID from the first successful define -- fixed by
+  giving the generator a required `uuid` parameter, and for `llm-sandbox`
+  adopting the UUID libvirt had already assigned the (already-running)
+  guest rather than picking a new one. Each fix was confirmed not to touch
+  durandal's toplevel (byte-identical drvPath) before being applied on
+  cube. `systemctl status libvirt-vm-llm-sandbox.service` is `active
+  (exited)` / exit 0, and `virsh dominfo llm-sandbox` shows the domain
+  `running` with CPU time climbing across the fixes -- it was up the whole
+  time even while the systemd unit itself was failing on (2) and (3).
 
 ## Not covered here
 

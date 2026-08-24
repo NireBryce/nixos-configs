@@ -146,6 +146,10 @@ age-key *args:
     # it prints after the key.
     @{{scripts}}/host-age-key.sh {{args}}
 
+# Has this already been seen? GitHub issues + wiki/ + lessons-learned.md
+threads *term:
+    @{{scripts}}/threads.sh {{term}}
+
 # Update inputs, then re-check
 update:
     cd {{flake}} && nix flake update

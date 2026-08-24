@@ -11,7 +11,16 @@
             ];
         };
         
-        flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }: {
+        flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }:
+            let
+                # A real file rather than inlined, same reasoning as
+                # blesh.nix's carapaceDescBash: it does textual surgery on
+                # carapace's own generated function via ${...} parameter
+                # expansions, and every one would need ''${...} escaping
+                # inside a Nix '' string.
+                carapaceCompleterReadFix = pkgs.writeText "carapace-completer-read-fix.bash"
+                    (builtins.readFile ./carapace-completer-read-fix.bash);
+            in {
             # bash line editor, allows zsh-like line editor tricks and bindings
             home.packages = with pkgs; [
                 blesh
@@ -99,8 +108,19 @@
                     # `complete -F _carapace_completer` for every command
                     # carapace has a spec for (~1000, `carapace --list`),
                     # unconditionally, no darwin guard needed.
+                    #
+                    # The read-fix source line must come right after this
+                    # one: it patches _carapace_completer's own body, so it
+                    # needs that function to already exist, and it needs to
+                    # run before carapace-desc.bash's advice wraps the same
+                    # function (that happens later, from .blerc, when
+                    # ble.sh attaches) so the advice ends up wrapping the
+                    # patched version. See the fix file's own header and
+                    # `claude cave/lessons-learned.md` #39 for what it's
+                    # working around and how it was found.
                     ''
                         source <(carapace _carapace bash)
+                        source ${carapaceCompleterReadFix}
                     ''
 
                     # Last. ble.sh absorbs the hooks every other integration
