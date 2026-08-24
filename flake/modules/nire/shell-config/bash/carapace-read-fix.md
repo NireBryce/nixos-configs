@@ -54,14 +54,17 @@ ends up wrapping the *patched* version, not the original.
 
 ## Status as of 2026-08-24
 
-In the tree, evaluates correctly (`just modules` clean, renders into
-`programs.bash.initExtra` as expected), and validated live by hand —
-patched directly into a real, already-running shell on `nire-cube` via
-[`terminal-puppeteer`](https://github.com/NireBryce/terminal-puppeteer),
-then driven through four different Tab-completions with zero errors, where
-each reliably errored before the patch. **Not yet run through an actual
-`just switch`.** Don't assume that step happened without checking
-`lessons-learned.md` #39 or issue #72 for whether it's since been updated.
+**Confirmed, through a real `just switch`.** In the tree, evaluates
+correctly (`just modules` clean, renders into `programs.bash.initExtra` as
+expected), landed via [PR #73](https://github.com/NireBryce/nixos-configs/pull/73),
+and switched on `nire-cube` (generation 10, current). Re-verified live
+against the switched host with
+[`terminal-puppeteer`](https://github.com/NireBryce/terminal-puppeteer) —
+several passes of the original repro, zero errors, plus a check that the
+fix's own tripwire warning doesn't fire (confirming the substitution is
+actually applying, not silently skipping). See `lessons-learned.md` #39
+and [issue #72](https://github.com/NireBryce/nixos-configs/issues/72) for
+the full account.
 
 ## How to undo
 

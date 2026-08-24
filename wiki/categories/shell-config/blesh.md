@@ -105,7 +105,7 @@ exposed by this repo routing carapace through bash's native `complete -F`
 protocol for the first time, not introduced by anything layered on top of
 it.
 
-**Fix, in the tree as of 2026-08-24, not yet switched**: don't call `read`
+**Fix, in the tree as of 2026-08-24, confirmed via a real `just switch`**: don't call `read`
 for that line at all, so there's nothing for ble.sh's global override to
 catch —
 [`carapace-completer-read-fix.bash`](../../../flake/modules/nire/shell-config/bash/carapace-completer-read-fix.bash)
@@ -123,13 +123,14 @@ against carapace's real output; applied by hand to the real
 above and driven through four different Tab-completions with zero errors,
 where each
 reliably errored before; and `just modules` clean with the change
-evaluating correctly into `programs.bash.initExtra`. **Not yet run through
-an actual `just switch`** — the live validation patched an already-running
-shell by hand, not a rebuilt-and-switched host — see
-[open-threads.md](../../open-threads.md) and lessons-learned.md §39 before
-assuming that step is done. Tracked as
-[issue #72](https://github.com/NireBryce/nixos-configs/issues/72); update
-that, not just this page, once `just switch` confirms it.
+evaluating correctly into `programs.bash.initExtra`. **Since confirmed
+through a real `just switch`** on `nire-cube` (generation 10, current,
+toplevel matches evaluating `nire-cube` fresh off `main`) — re-run against
+the switched host: several passes of the same repro, zero errors, plus a
+check that the fix's own tripwire warning doesn't fire, confirming the
+patch is actually applying rather than silently skipping while the bug
+happens not to trigger. Tracked as, and closed on,
+[issue #72](https://github.com/NireBryce/nixos-configs/issues/72).
 
 Still worth filing upstream — this repo's fix is a local workaround, not a
 change to carapace or ble.sh — but low priority now that it no longer

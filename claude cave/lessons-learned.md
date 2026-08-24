@@ -796,12 +796,23 @@ the real `_carapace_completer` on `nire-cube` and driven through four
 different completions (`git co`, `git commit --amend --no-e`, `git checkout
 -`, `git log --pretty=onel`, each Tab-completed) with zero `read` errors,
 where every one of those reliably produced the error before the fix.
-**Still not run through an actual `just switch` on `nire-cube`** — the live
-validation applied the fix by hand to an already-running shell, not by
-rebuilding and switching the host — do that, and re-confirm live with
-[`terminal-puppeteer`](https://github.com/NireBryce/terminal-puppeteer) the
-same way the bug itself was found, before calling this closed. Same as everything else this file says
-to treat that way.
+**Confirmed through a real `just switch`, same day.** `nixos-rebuild
+list-generations` on `nire-cube` shows generation 10 (built/switched
+2026-08-24 04:34) as current, and its toplevel matches evaluating
+`nire-cube` fresh off the merged `main` exactly — not just a generation
+that happened to get built, actually switched to and active. Re-ran the
+same live repro against the switched host with `terminal-puppeteer`
+(`git co`, `git commit --amend --no-e`, `git checkout -`,
+`git log --pretty=onel`, `git diff --sta`, each Tab-completed, several
+passes): zero `read` errors, where every one of those reliably produced
+the error before the fix. Also checked the fix's own tripwire — the
+`expected line not found` warning it prints if its textual substitution
+ever stops matching carapace's generated function — and it doesn't fire on
+a fresh shell, meaning the patch is actually applying, not silently
+skipping while the bug happens to not trigger this time. This is the
+"evaluating and building both stop short of runtime behaviour" pattern
+(§25, §36, §37) resolved the ordinary way: build, switch, then check the
+real thing, not the artifact.
 
 ## 40. A failed systemd unit doesn't mean the thing it manages is down — check the resource, not just the unit
 
