@@ -6,7 +6,7 @@ One article per real category — a directory holding its own
 pages are the "what's actually in it, and why is it shaped this way" detail
 for each one, at the same what/why/traps depth as the rest of this wiki.
 
-Scoped to the `nire/*` system-ish categories plus `nireUser/elly` — 13
+Scoped to the `nire/*` system-ish categories plus `nireUser/elly` — 14
 articles. Not covered here, deliberately:
 
 - **`nirePackages/*` subcategories** (`editors`, `terminals`, `gui-other`,
@@ -25,6 +25,7 @@ articles. Not covered here, deliberately:
 | [boot](boot.md) | `nire/boot/` | nixos | 1 | all 4 NixOS hosts |
 | [containers](containers.md) | `nire/containers/` | nixos | 1 | all 4 NixOS hosts |
 | [desktop-env](desktop-env.md) | `nire/desktop-env/` | nixos, homeManager | 4 | never imported whole — hosts take `jovian` or `kde-desktop` by name |
+| [git-forge](git-forge.md) | `nire/git-forge/` | nixos | 1 | cube only |
 | [hardware](hardware.md) | `nire/hardware/` (+ nested `amd`) | nixos | 2 | all 4 NixOS hosts |
 | [impermanence](impermanence.md) | `nire/impermanence/` | nixos, homeManager | 2 | durandal, tenacity, lego (not cube) |
 | [macos](macos.md) | `nire/macos/` | darwin | 3 | lysithea |

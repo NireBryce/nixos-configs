@@ -68,11 +68,33 @@ reading `journalctl` rather than trusting the mount coming up.
 
 **`nire-cube` has been switched — 2026-08-23**, with the `monitoring`
 category (Prometheus + Grafana, see Architecture) live, and `nire-llm-sandbox`
-**confirmed booted and staying up as of 2026-08-24**. The first `just switch`
-with the sandbox VM wired in failed two units: `grafana.service` (a
-file-ownership bug in this session's own first attempt at the `secret_key`
-fix — corrected same day, `systemctl status` confirmed it running
-afterward) and `libvirt-vm-llm-sandbox.service`, which took three separate
+**confirmed booted and staying up as of 2026-08-24**. `grafana.service` took
+three rounds to actually land: the first `just switch` with the sandbox VM
+wired in failed it on a `secret_key` file-ownership bug
+(`/persist/secrets/grafana-secret-key` owned `root:root`, unreadable to the
+`grafana` user); a same-day hand fix was believed to have corrected it, but
+a live re-check on `ts-cube` 2026-08-24 found it had regressed to the same
+`root:root` state and `grafana.service` actively crash-looping
+(`start-limit-hit`) on the same permission-denied error. Chowned by hand
+again the same day — but a **hand fix regressing once already** was reason
+enough not to trust a second hand fix either, so this time the fix went
+into the module itself: `grafana-secret-key-setup.service`
+(`grafana.nix`), a oneshot ordered before `grafana.service` on every
+activation, generates the secret only if missing (never regenerates an
+existing one — no official rotation path for `secret_key` as of nixpkgs
+26.05, so overwriting would break re-decryption of whatever's already in
+Grafana's DB) and unconditionally reasserts ownership/mode. **Confirmed
+working end to end, 2026-08-24**: after `just switch` picked up the new
+unit (inert until `grafana.service` itself next restarts — adding a
+dependency to an already-running unit doesn't retroactively pull in a new
+one), `sudo systemctl restart grafana.service` triggered it;
+`grafana-secret-key-setup.service` exited `0/SUCCESS`, `grafana.service`
+came back `active (running)`, and the secret file's mtime was unchanged
+(not regenerated) while ownership was `grafana:grafana`. `grafana.nix`'s
+old `warnings` entry describing the manual two-step fix is gone — replaced
+by the unit itself, not by trusting a repeat of the same manual step that
+already regressed once.
+`libvirt-vm-llm-sandbox.service`, separately, took three
 runtime-verified fixes to `VMs/_lib/libvirt-vm.nix` across 2026-08-23/24
 before it stopped failing — libvirt's default network defined-but-never-
 started, a nonexistent `net-list --state-active` flag in the fix for that,
@@ -276,6 +298,22 @@ of; it started as its own category. Everything but Grafana stays on
 `trustedInterfaces = [ "tailscale0" ]` firewall rule `system`'s
 `tailscale.nix` already sets, not a new mechanism. See
 `wiki/categories/monitoring.md`.
+
+**`git-forge`**, added 2026-08-24 as `nire/git-forge/`, is Forgejo, a
+self-hosted git forge — cube-only, **confirmed working end to end,
+2026-08-24**: `just switch` came up clean (0 failed units),
+`forgejo-secrets.service` exited `0/SUCCESS`, `forgejo.service` stayed
+`active (running)` past its first 40s, and `http://ts-cube:3001/` answered
+`HTTP 200` from another tailnet host. Same tailnet-only mechanism as
+Grafana above, on its own port (3001; Grafana already has 3000). Unlike
+Grafana, needs no hand-created secret file — `services.forgejo` generates
+its own `SECRET_KEY`/`INTERNAL_TOKEN`/`JWT_SECRET` on first activation. The category
+is named `git-forge`, not `forgejo`, on purpose: naming both the category
+and its one module `forgejo` would repeat the exact
+`containers`/`podman.nix` collision two paragraphs below, and did on the
+first attempt at writing this — caught by `just modules` before it shipped,
+fixed by renaming the category rather than the module. See
+`wiki/categories/git-forge.md`.
 
 Related, and a live trap rather than history: containers and VMs are separate
 here and the word "virtualization" means only the second.

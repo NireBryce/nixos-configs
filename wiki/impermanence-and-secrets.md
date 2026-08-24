@@ -43,10 +43,18 @@ that import it.
   a new host means converting its SSH host key with `ssh-to-age` and running
   `sops updatekeys secrets.yaml`.
 - **Not everything secret-shaped goes through sops.** Two things on
-  `nire-cube` deliberately don't: `elly`'s login password
-  (`hashedPasswordFile`, `WARN-password-required.nix`) and Grafana's
-  `secret_key` ([monitoring](categories/monitoring.md)) both point at a
-  file this repo never creates, expected to exist by hand at a fixed path
-  under `/persist`. Same reasoning both times — cube has no impermanence to
-  lose the file to, so there's nothing sops's own persistence story would
-  buy that a plain hand-created file doesn't already have.
+  `nire-cube` deliberately don't, though they've diverged in how they're
+  provisioned: `elly`'s login password (`hashedPasswordFile`,
+  `WARN-password-required.nix`) still points at a file this repo never
+  creates, expected to exist by hand at a fixed path under `/persist` — a
+  human has to know the password anyway, so hand-creating it is the point,
+  not a gap. Grafana's `secret_key`
+  ([monitoring](categories/monitoring.md)) started the same way, but a
+  hand-created copy of it was found regressed (ownership reverted to
+  `root:root`) on a live re-check 2026-08-24 with nobody noticing until
+  `grafana.service` was already crash-looping — so as of that date it's
+  generated and its ownership reasserted by a `grafana-secret-key-setup.service`
+  the module itself declares, not by hand. Neither goes through sops
+  either way — same reasoning for both: cube has no impermanence to lose
+  the file to, so there's nothing sops's own persistence story would buy
+  that a plain file under `/persist` doesn't already have.

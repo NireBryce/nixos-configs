@@ -109,6 +109,21 @@
         # header for the exact mechanism and its caveats.
         monitoring
 
+        # Forgejo, a self-hosted git forge -- cube-only, added 2026-08-24,
+        # same "nothing here belongs on the handhelds" reasoning as
+        # `monitoring` just above. Reachable over Tailscale only, exactly
+        # the same trustedInterfaces mechanism Grafana uses -- see
+        # forgejo.nix's own header for the mechanism and the two runtime
+        # traps (secret handling, tailnet device-name) it deliberately
+        # avoids by not repeating grafana.nix's/tailscale.nix's own history.
+        # Category is named `git-forge`, NOT `forgejo` -- a category and its
+        # own single module both named `forgejo` would declare the same
+        # `flake.modules.nixos.forgejo` attribute and silently merge, the
+        # exact `containers`/`podman.nix` collision CLAUDE.md's Architecture
+        # section already warns about, hit for real writing this and caught
+        # by `just modules` before it shipped.
+        git-forge
+
         # ── packages ──────────────────────────────────────────────────────────
         # Full parity with durandal.
         development
