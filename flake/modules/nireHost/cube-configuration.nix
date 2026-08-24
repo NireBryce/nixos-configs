@@ -124,6 +124,21 @@
         # by `just modules` before it shipped.
         git-forge
 
+        # golink, tailscale's `go/foo` shortlink service -- cube-only, added
+        # 2026-08-24, own category (`shortlinks`) for the same "nothing here
+        # belongs on the handhelds" reason `monitoring` and `git-forge` above
+        # each got one. Unlike those two, this one is NOT reached at
+        # nire-cube's own address and needs no firewall consideration at all:
+        # golink embeds tsnet, so it joins the tailnet as its own separate
+        # device (named `go`, which is what makes `http://go/` resolve) and
+        # listens only there. Needs a ONE-TIME interactive login on first
+        # start -- `journalctl -u golink -f`, open the printed URL -- because
+        # no TS_AUTHKEY is wired in, the same call tailscale.nix makes for
+        # the host daemon. See golink.nix's own header for all of it.
+        # Category is `shortlinks`, not `golink`, for the same
+        # category/module name-collision reason `git-forge` isn't `forgejo`.
+        shortlinks
+
         # ── packages ──────────────────────────────────────────────────────────
         # Full parity with durandal.
         development

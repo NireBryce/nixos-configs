@@ -315,6 +315,25 @@ first attempt at writing this — caught by `just modules` before it shipped,
 fixed by renaming the category rather than the module. See
 `wiki/categories/git-forge.md`.
 
+**`shortlinks`**, added 2026-08-24 as `nire/shortlinks/`, is golink --
+Tailscale's `go/foo` shortlink service -- cube-only, **evaluates only, NOT
+runtime-verified** (written from a darwin session, which can't build an
+x86_64-linux toplevel). Named `shortlinks` rather than `golink` for the
+same category/module collision reason `git-forge` isn't `forgejo`, and
+deliberately not `golinks` either -- one letter off its own module reads
+as a typo later. Two things about it are genuinely different from
+`monitoring`/`git-forge` and are easy to get wrong by analogy: **there is
+no `services.golink` in nixpkgs** (the package exists, the NixOS module
+does not, checked against the pinned rev), so this module hand-writes its
+own `systemd.services.golink`; and **it is not a service on cube's
+network at all** -- golink embeds tsnet, joining the tailnet as its own
+separate device named `go`, listening only there. No firewall rule, no
+reliance on `trustedInterfaces`, and no dependency on the host's
+`tailscaled`. It needs a one-time interactive login on first start
+(`journalctl -u golink -f`, open the printed URL) because no `TS_AUTHKEY`
+is wired in -- the same call `tailscale.nix` makes for the host daemon,
+for the same reason (keys expire). See `wiki/categories/shortlinks.md`.
+
 Related, and a live trap rather than history: containers and VMs are separate
 here and the word "virtualization" means only the second.
 `nire/containers/podman/podman.nix` is podman and distrobox. It was
