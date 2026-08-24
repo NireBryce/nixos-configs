@@ -6,9 +6,37 @@
 # RUNTIME-VERIFIED, 2026-08-23, on nire-cube: `just switch` activates cleanly
 # and every other unit in this stack came up, but grafana.service itself
 # failed on the first real switch -- the secret_key file existed but was
-# root:root, unreadable to the `grafana` user the service runs as. See the
-# `warnings` entry below for the fix and the corrected creation command.
-# Nothing else in this module has been checked against real hardware yet.
+# root:root, unreadable to the `grafana` user the service runs as. Fixed by
+# hand that day; RE-BROKE the same way, found on a live re-check 2026-08-24
+# (`root:root` again, `grafana.service` actively crash-looping on the same
+# permission-denied error) -- whatever fixed it the first time didn't
+# persist, and nothing caught the regression until someone happened to
+# check `systemctl status` again.
+#
+# `grafana-secret-key-setup` below is the fix for that: not a one-time
+# manual step (a `warnings` entry pointing at a shell command used to sit
+# here instead), but a oneshot unit that runs before `grafana.service` on
+# EVERY activation and unconditionally re-asserts ownership and
+# permissions -- so a `root:root` regression, whatever causes it, self-heals
+# on the next switch instead of silently recurring until someone happens to
+# look. Modeled on `services.forgejo`'s own upstream `forgejo-secrets.service`
+# (nixpkgs nixos/modules/services/misc/forgejo.nix) for the generate-if-
+# missing shape, but NOT idiomatic to `services.grafana` specifically --
+# checked upstream `grafana.nix` before writing this: it used to have a
+# `security.secretKeyFile` option and that was REMOVED in favor of the
+# manual file-provider, with the module's own assertion message telling the
+# deployer to generate one themselves. Upstream's stance here is "we won't
+# manage this for you," not "we forgot to." Two things that follow from
+# that, both load-bearing in the script below:
+#   - Only CREATE the file if it's missing, never regenerate an existing
+#     one. Upstream's own assertion text warns there's no official way to
+#     rotate secret_key as of 26.05 -- doing so breaks re-decryption of
+#     whatever's already encrypted in Grafana's own database (datasource
+#     passwords, etc). A generator that "self-heals" by overwriting content
+#     would be actively destructive, not just redundant.
+#   - Ownership/permissions ARE safe to reassert unconditionally, every
+#     activation -- that part has no rotation-style downside, which is
+#     exactly the part that kept regressing.
 #
 # No `grafana-persist.nix` alongside this the way tailscale.nix has
 # tailscale-persist.nix: cube-configuration.nix's own header says this host
@@ -19,9 +47,16 @@
 # module is ever imported by a host that DOES wipe root, add one first,
 # modeled on tailscale-persist.nix -- otherwise every dashboard edit made
 # through the UI (anything not sourced from _dashboards/) is gone on reboot.
+# The secret_key file itself would NOT need a persistence entry even then --
+# it already lives directly at /persist/secrets/grafana-secret-key, not a
+# root-relative path environment.persistence would need to bind-mount back;
+# same reasoning elly's hashedPasswordFile sits at /persist/passwords/elly
+# rather than under /var/lib/... plus a bind-mount entry.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+
+        secretKeyPath = "/persist/secrets/grafana-secret-key";
 
         # Fixed rather than left to auto-generate, so the dashboard JSON below
         # can reference it directly instead of needing a templated
@@ -30,7 +65,13 @@
         # the same module, so nothing needs resolving at import time.
         prometheusDatasourceUid = "prometheus-cube";
     in {
-        flake.modules.nixos.${moduleName} = {
+        # `pkgs` bound HERE, on the inner NixOS-module function, not the
+        # outer flake-parts one above -- flake-parts doesn't inject a `pkgs`
+        # into `_module.args` at this scope (evaluating it errors: "attribute
+        # 'pkgs' missing"). Same pattern zsh.nix/bash.nix/pipewire.nix/etc.
+        # already use throughout this tree; hit the eval error writing this
+        # before checking those first.
+        flake.modules.nixos.${moduleName} = { pkgs, ... }: {
             # # description = "grafana -- dashboards over the tailnet only, for the metrics prometheus.nix collects";
             services.grafana = {
                 enable = true;
@@ -42,13 +83,13 @@
                 # start, never by Nix, so this satisfies the assertion without
                 # needing the file to exist at eval time (unlike
                 # environment.persistence entries, which do need their source
-                # to exist). It DOES need to exist at service-start time
-                # though, and nothing in this repo creates it -- same shape as
-                # elly's hashedPasswordFile
-                # (nireUser/elly/user-settings/WARN-password-required.nix),
-                # hence the matching `warnings` entry below rather than
-                # silently shipping a build that fails at boot.
-                settings.security.secret_key = "$__file{/persist/secrets/grafana-secret-key}";
+                # to exist). It DOES need to exist -- and be readable by the
+                # `grafana` user -- by the time grafana.service actually
+                # starts; `grafana-secret-key-setup` below is what guarantees
+                # that on every activation, not just the first one. See this
+                # file's own header for why that's a oneshot unit rather than
+                # a `warnings` entry pointing at a manual command.
+                settings.security.secret_key = "$__file{${secretKeyPath}}";
 
                 settings.server = {
                     http_port = 3000;
@@ -100,47 +141,48 @@
                 };
             };
 
-            # Same pattern as WARN-password-required.nix: this repo declares
-            # the option, it does not create the file the option reads at
-            # runtime. Unconditional (not gated on impermanence the way that
-            # file is) because `monitoring` is only imported by cube today,
-            # and cube always needs this regardless of its persistence model.
-            warnings = [
-                ''
-                    Grafana's secret_key has no value here until you create
-                    /persist/secrets/grafana-secret-key by hand -- nothing in
-                    this repo does it for you, and Grafana will fail to start
-                    without it.
+            # Generates secretKeyPath if missing, and unconditionally
+            # re-asserts its ownership/mode every activation -- the actual
+            # fix for the ownership regression this file's own header
+            # documents. `before`+`wantedBy` on grafana.service (rather than
+            # folding this into grafana.service's own ExecStartPre) keeps it
+            # a separate, independently-inspectable unit -- `systemctl status
+            # grafana-secret-key-setup` shows exactly what it did, separate
+            # from grafana.service's own log.
+            #
+            # `before`/`wantedBy` are additive on `services.grafana`'s own
+            # `systemd.services.grafana` (list-type options merge), not a
+            # redeclaration -- same pattern `services.openssh.settings.
+            # AcceptEnv` extension in nixpkgs' own forgejo.nix uses to extend
+            # a module-owned option from outside that module.
+            systemd.services.grafana-secret-key-setup = {
+                description = "Generate/repair Grafana's secret_key file and its ownership";
+                before      = [ "grafana.service" ];
+                wantedBy    = [ "grafana.service" ];
 
-                    RUNTIME-VERIFIED TRAP, 2026-08-23: the file has to be
-                    owned by the `grafana` user, not root. `services.grafana`
-                    runs its systemd unit as `User = "grafana"` (upstream
-                    nixpkgs grafana.nix), and a file created the obvious way
-                    -- `sudo install -m600 ...`, root:root -- is unreadable to
-                    that user. Grafana starts, can't read its own secret_key,
-                    and dies; `systemctl status grafana` shows the service
-                    failed with nothing more specific than that in the
-                    default log view. This is why the fix below is two steps,
-                    not one, and why the `grafana` user has to already exist
-                    (i.e. a `switch` with this module has already run once)
-                    before the chown can succeed:
+                serviceConfig = {
+                    Type            = "oneshot";
+                    RemainAfterExit = true;
+                };
 
-                        sudo install -D -m600 /dev/stdin /persist/secrets/grafana-secret-key <<< "$(openssl rand -hex 32)"
-                        sudo chown grafana:grafana /persist/secrets/grafana-secret-key
+                # Deliberately two separate steps, not "regenerate every
+                # time": creating (only if missing) and fixing ownership/mode
+                # (always) have different safety properties -- see this
+                # file's own header for why overwriting an EXISTING key would
+                # be destructive, not just redundant.
+                script = ''
+                    set -euo pipefail
+                    mkdir -p "$(dirname '${secretKeyPath}')"
 
-                    (`/dev/stdin` here, not `<(openssl rand -hex 32)` as a bare
-                    argument -- process substitution's /dev/fd/N path doesn't
-                    reliably survive being handed to a forked `sudo` child on
-                    every shell, and hit exactly that "cannot stat" failure
-                    here. A here-string into /dev/stdin does not have that
-                    problem: sudo inherits stdin directly.)
+                    if [ ! -s '${secretKeyPath}' ]; then
+                        umask 077
+                        ${pkgs.openssl}/bin/openssl rand -hex 32 > '${secretKeyPath}'
+                    fi
 
-                    If the file already exists with the wrong ownership from
-                    before this warning was corrected, `sudo chown
-                    grafana:grafana` on it and `sudo systemctl restart
-                    grafana` is enough -- no need to regenerate the key.
-                ''
-            ];
+                    chown grafana:grafana '${secretKeyPath}'
+                    chmod 600 '${secretKeyPath}'
+                '';
+            };
 
             # DELIBERATELY NOT adding 3000 to networking.firewall.allowedTCPPorts
             # (networking.nix, part of the `system` category this host already

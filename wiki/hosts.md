@@ -45,9 +45,16 @@ mean the VM was down; see lesson #40).
 `nire-cube` also runs a Prometheus + Grafana monitoring stack as of
 2026-08-23 — see [monitoring](categories/monitoring.md). Grafana is reachable
 over Tailscale only (same `trustedInterfaces` mechanism
-[system](categories/system.md)'s Tailscale section documents); confirmed
-running after a same-day fix to a file-ownership bug in its own secret-key
-setup (see that page's traps section).
+[system](categories/system.md)'s Tailscale section documents); its
+secret-key file-ownership bug took two rounds to actually fix (a same-day
+hand fix regressed; the real fix, 2026-08-24, is a self-healing systemd
+unit in the module itself — see that page's section on it) and is now
+confirmed running.
+
+`nire-cube` also runs Forgejo, a self-hosted git forge, as of 2026-08-24 —
+see [git-forge](categories/git-forge.md). Same tailnet-only mechanism.
+Confirmed working end to end the same day: `just switch` clean, both its
+systemd units healthy, and a real `HTTP 200` from another tailnet host.
 
 ## Where each fact lives
 

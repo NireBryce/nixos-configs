@@ -55,7 +55,7 @@ rather than reinvented. Worth keeping in view: `trustedInterfaces` trusts the
 ssh/kde-connect already get on every host, not something this category
 introduces.
 
-## Two runtime-verified traps, both in `grafana.nix`'s own header
+## The secret_key trap, and why it's now a unit instead of a warning
 
 Found on `nire-cube`'s first real `just switch` with this category —
 [hosts.md](../hosts.md) has the current switch status.
@@ -66,17 +66,37 @@ Found on `nire-cube`'s first real `just switch` with this category —
   (`$__file{/persist/secrets/grafana-secret-key}`, read by Grafana at
   service start, never by Nix) rather than sops — same reasoning
   [elly's `hashedPasswordFile`](../impermanence-and-secrets.md) gets a
-  hand-created file instead of a secrets entry on this specific host. A
-  `warnings` entry fires until that file exists, mirroring
-  `WARN-password-required.nix`.
+  hand-created file instead of a secrets entry on this specific host.
 - **The file has to be owned by the `grafana` user, not root.**
   `services.grafana` runs its systemd unit as `User = "grafana"` (upstream
   nixpkgs), and creating the secret the obvious way —
   `sudo install -m600 ...` — produces a `root:root` file that user can't
   read. Grafana starts, can't read its own secret key, and dies, with
   nothing more specific than "failed" in `systemctl status`'s default view.
-  Fixed as a documented two-step (`install` as root, then `chown
-  grafana:grafana`) in the `warnings` text itself.
+
+A `warnings` entry describing a two-step manual fix (`install`, then
+`chown`) used to sit here — fixed by hand once, 2026-08-23, then found
+**regressed to the exact same `root:root` state** on a live re-check
+2026-08-24, `grafana.service` actively crash-looping the whole time nobody
+happened to check. A hand fix regressing once was reason enough not to
+trust a second hand fix either: `grafana-secret-key-setup.service`
+(`grafana.nix`) replaced the warning, a oneshot ordered before
+`grafana.service` on *every* activation that generates the secret only if
+missing and unconditionally reasserts ownership/mode — modeled on
+`services.forgejo`'s own upstream `forgejo-secrets.service`
+([git-forge](git-forge.md)), though checking `services.grafana`'s own
+nixpkgs module first showed this isn't idiomatic *to Grafana specifically*:
+it used to have a `secretKeyFile` option and nixpkgs removed it in favor of
+exactly this "the deployer manages it" file-provider approach, with an
+explicit warning that there's no official way to rotate `secret_key` — so
+the unit only ever *creates* a missing file, never regenerates an existing
+one; only ownership/mode are safe to reassert unconditionally, and that's
+the part that kept regressing. **Confirmed working end to end, 2026-08-24**:
+`sudo systemctl restart grafana.service` (needed once, since a brand-new
+unit added by `switch` doesn't retroactively get pulled into an
+already-running `grafana.service`) ran the setup unit first
+(`0/SUCCESS`), and `grafana.service` came back up with the secret file's
+mtime unchanged and ownership `grafana:grafana`.
 
 A third, unrelated thing broke in the same `switch` and is **not** part of
 this category: the sandbox VM (`nire-llm-sandbox`) failed with `network
@@ -110,9 +130,11 @@ design reason rules them out, it just hasn't been asked for there yet.
 - [virtualization](virtualization.md) — what `libvirt-exporter.nix` scrapes,
   and the unrelated network-start bug found in the same activation.
 - [containers](containers.md) — what `cadvisor.nix` scrapes.
-- [impermanence-and-secrets.md](../impermanence-and-secrets.md) — the
-  hand-created-file pattern `grafana.nix`'s `secret_key` follows instead of
-  sops, and why (cube has no impermanence to lose the file to, but nothing
-  in this repo creates it either).
+- [impermanence-and-secrets.md](../impermanence-and-secrets.md) — why
+  `grafana.nix`'s `secret_key` doesn't go through sops either (cube has no
+  impermanence to lose the file to), and how that's diverged from elly's
+  `hashedPasswordFile`, the other file in that category.
+- [git-forge](git-forge.md) — `forgejo-secrets.service`, the upstream
+  pattern `grafana-secret-key-setup.service` above is modeled on.
 - [hosts.md](../hosts.md) — current switch/verification status for
   `nire-cube`.
