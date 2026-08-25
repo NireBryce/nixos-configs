@@ -20,7 +20,8 @@
       "Bash(grep \"DEBUG diagnostics\" /tmp/diag-log.txt | sed -n '20,100p')",
       "Read(//tmp/**)",
       "Bash(grep \"nix flake check --all-systems\" /tmp/diag-log.txt | grep -v \"DEBUG diagnostics\" | tail -20)",
-      "Bash(just lint *)"
+      "Bash(just lint *)",
+      "Bash(git commit *)"
     ]
   }
 }
