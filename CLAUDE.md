@@ -293,19 +293,23 @@ tailnet-only, `hostPort = 2222`.
 Grafana scraping a host's own resource metrics — cube-only so far, same
 "category is how something shared stays optional" mechanism as
 `virtualization`, except nothing here was ever part of `system` to split out
-of; it started as its own category. Everything but Grafana stays on
-`127.0.0.1`; Grafana is reachable over Tailscale only, via the same
-`trustedInterfaces = [ "tailscale0" ]` firewall rule `system`'s
-`tailscale.nix` already sets, not a new mechanism. See
-`wiki/categories/monitoring.md`.
+of; it started as its own category. **Every listener in it is on
+`127.0.0.1`, Grafana included, as of 2026-08-24** — Grafana bound `0.0.0.0`
+until then and depended on the `trustedInterfaces = [ "tailscale0" ]`
+firewall rule `system`'s `tailscale.nix` sets. It's reached through
+`reverse-proxy`'s Caddy now, at
+`https://ts-cube.moose-micro.ts.net/grafana/`; `http://ts-cube:3000/` is
+gone. See `wiki/categories/monitoring.md`.
 
 **`git-forge`**, added 2026-08-24 as `nire/git-forge/`, is Forgejo, a
 self-hosted git forge — cube-only, **confirmed working end to end,
 2026-08-24**: `just switch` came up clean (0 failed units),
 `forgejo-secrets.service` exited `0/SUCCESS`, `forgejo.service` stayed
 `active (running)` past its first 40s, and `http://ts-cube:3001/` answered
-`HTTP 200` from another tailnet host. Same tailnet-only mechanism as
-Grafana above, on its own port (3001; Grafana already has 3000). Unlike
+`HTTP 200` from another tailnet host. **That URL is stale**: later the same
+day Forgejo moved to `127.0.0.1:3001` behind `reverse-proxy`'s Caddy, at
+`https://ts-cube.moose-micro.ts.net/git/`, and the end-to-end confirmation
+above was of the direct arrangement, not the proxied one. Unlike
 Grafana, needs no hand-created secret file — `services.forgejo` generates
 its own `SECRET_KEY`/`INTERNAL_TOKEN`/`JWT_SECRET` on first activation. The category
 is named `git-forge`, not `forgejo`, on purpose: naming both the category
@@ -348,6 +352,31 @@ reliance on `trustedInterfaces`, and no dependency on the host's
 (`journalctl -u golink -f`, open the printed URL) because no `TS_AUTHKEY`
 is wired in -- the same call `tailscale.nix` makes for the host daemon,
 for the same reason (keys expire). See `wiki/categories/shortlinks.md`.
+
+**`reverse-proxy`**, added 2026-08-24 as `nire/reverse-proxy/`, is Caddy --
+cube-only, and the single tailnet-facing HTTPS listener on that host.
+Everything above it moved to loopback in the same change: Grafana and
+Forgejo are now `https://ts-cube.moose-micro.ts.net/grafana/` and `/git/`,
+their old `:3000`/`:3001` URLs answer nothing, and `http://ts-cube/`
+redirects. Three things about it are easy to get wrong by analogy:
+**certs come from tailscaled with no plugin and no ACME account** -- caddy
+2.11.4's `autohttps.go` routes any `.ts.net` site address to its built-in
+`tls.get_certificate.tailscale` manager, which is the whole mechanism;
+**that needs `services.tailscale.permitCertUid = "caddy"`**, set in
+`caddy.nix` itself rather than in `system`'s `tailscale.nix` so it doesn't
+reach three hosts that don't run caddy; and **routing is by path, not
+subdomain**, because MagicDNS gives a device exactly one name -- which is
+why `grafana.nix` needs `serve_from_sub_path` and `forgejo.nix`'s `DOMAIN`
+and `ROOT_URL` now deliberately disagree. **Confirmed working end to end on nire-cube,
+2026-08-24**: both paths 200 over validated TLS from another tailnet host,
+0 failed units, `caddy` at `NRestarts=0`, 3000/3001 bound to loopback only.
+It took two switches, and the reason is worth keeping: `handle` (prefix
+left on) is right for Grafana and WRONG for Forgejo, which always serves
+at `/` and needs `handle_path` (prefix stripped) no matter what its
+`ROOT_URL` says. Eval, `just modules`, `caddy adapt`, a real build, and
+reading the built artifact back had all passed --
+`claude cave/lessons-learned.md` #41. See
+`wiki/categories/reverse-proxy.md`.
 
 Related, and a live trap rather than history: containers and VMs are separate
 here and the word "virtualization" means only the second.

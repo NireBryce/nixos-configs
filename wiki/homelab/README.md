@@ -26,8 +26,16 @@ category pages covering configuration; neither has a usage page here yet.
 
 | Service | Reach it at | Configuration |
 |---|---|---|
-| Grafana — dashboards over cube's own metrics | `http://ts-cube:3000/` | [monitoring](../categories/monitoring.md) |
-| Forgejo — self-hosted git forge | `http://ts-cube:3001/` | [git-forge](../categories/git-forge.md) |
+| Grafana — dashboards over cube's own metrics | `https://ts-cube.moose-micro.ts.net/grafana/` | [monitoring](../categories/monitoring.md) |
+| Forgejo — self-hosted git forge | `https://ts-cube.moose-micro.ts.net/git/` | [git-forge](../categories/git-forge.md) |
+
+**Those URLs changed on 2026-08-24**, and the old ones
+(`http://ts-cube:3000/`, `http://ts-cube:3001/`) no longer answer at all.
+Both services moved to loopback and are now reached through Caddy, which
+holds a real TLS certificate issued by tailscaled — see
+[reverse-proxy](../categories/reverse-proxy.md). `http://ts-cube/`
+redirects to the Grafana/Forgejo index, so the short name is still a usable
+starting point.
 
 `ts-cube`, **not** `nire-cube`: this tailnet's device names don't match
 `networking.hostName`. That trip-up has its own writeup in

@@ -4,6 +4,13 @@ Prometheus + Grafana, scraping this host's own resource metrics. Added
 2026-08-23, cube-only so far — see [Imported by](#imported-by) for why that's
 current state, not a structural limit.
 
+As of 2026-08-24 Grafana is reached at
+`https://ts-cube.moose-micro.ts.net/grafana/`, through Caddy
+([reverse-proxy](reverse-proxy.md)) — **not** the `http://ts-cube:3000/` this
+page described before, which no longer answers. Every listener in this
+category is on loopback now. Confirmed working the same day: 200 over
+validated TLS from another tailnet host.
+
 ## What's in it
 
 Five files, all `nixos`-class:
@@ -43,17 +50,26 @@ Five files, all `nixos`-class:
 
 ## Tailnet-only access, not a new firewall mechanism
 
-Grafana binds `0.0.0.0:3000`, but its port is deliberately **not** added to
-`networking.firewall.allowedTCPPorts`. What actually restricts access is the
+Grafana binds `127.0.0.1:3000` as of 2026-08-24, so the whole category is
+loopback-only and nothing outside cube can open a connection to any of it.
+Its port is deliberately **not** in `networking.firewall.allowedTCPPorts`,
+but that is no longer what restricts access — the binding is.
+
+Grafana bound `0.0.0.0` from 2026-08-23 until then, because nothing else on
+the host could accept the connection on its behalf, and the
 `trustedInterfaces = [ "tailscale0" ]` rule [system](system.md)'s
-`tailscale.nix` already sets on every host: traffic arriving on
-`tailscale0` bypasses the allow-list entirely, traffic arriving on any other
-interface hits the default-deny. Same mechanism `CLAUDE.md`'s Tailscale
-section documents for the daemon's own port, applied to a second service
-rather than reinvented. Worth keeping in view: `trustedInterfaces` trusts the
-*whole* interface, not just this one port — the same blanket trust
-ssh/kde-connect already get on every host, not something this category
-introduces.
+`tailscale.nix` sets on every host was the only thing between port 3000 and
+the LAN: traffic arriving on `tailscale0` bypasses the allow-list entirely,
+traffic arriving on any other interface hits the default-deny.
+
+That rule still applies, to Caddy's 443 now
+([reverse-proxy](reverse-proxy.md)), and the same caveat with it:
+`trustedInterfaces` trusts the *whole* interface, not one port — the blanket
+trust ssh/kde-connect already get on every host, not something this category
+introduces. What changed is that it is the second line rather than the only
+one. Two settings in `grafana.nix` exist purely because of the proxy
+(`http_addr`, and `root_url`/`serve_from_sub_path` for the `/grafana` path
+prefix); its own history note at the bottom of the file has the before/after.
 
 ## The secret_key trap, and why it's now a unit instead of a warning
 
@@ -125,8 +141,10 @@ design reason rules them out, it just hasn't been asked for there yet.
 
 ## See also
 
+- [reverse-proxy](reverse-proxy.md) — Caddy, how Grafana is reached as of
+  2026-08-24, and where its TLS certificate comes from.
 - [system](system.md) — `tailscale.nix`, the firewall rule this category's
-  entire access model depends on.
+  access model still rests on, one layer out.
 - [virtualization](virtualization.md) — what `libvirt-exporter.nix` scrapes,
   and the unrelated network-start bug found in the same activation.
 - [containers](containers.md) — what `cadvisor.nix` scrapes.
