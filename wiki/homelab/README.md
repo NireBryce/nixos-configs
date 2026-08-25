@@ -18,6 +18,11 @@ under it, which can happen with no commit to this repo at all.
 | Service | Host | Reach it at | Page |
 |---|---|---|---|
 | golink — `go/` shortlinks | `nire-cube` | `http://go/` | [Creating go/ links](golinks.md) |
+| glance — the service index | `nire-cube` | `https://ts-cube.moose-micro.ts.net/` | not yet written up; [landing](../categories/landing.md) covers config |
+
+**Start at that second one if you don't know what's running.** It lists the
+services below, live-checks each one, and shows how cube itself is doing —
+so it answers "what's on here and is it up" without reading this page.
 
 ## Also running, not yet written up
 

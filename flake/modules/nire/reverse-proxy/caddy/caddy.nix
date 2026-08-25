@@ -115,6 +115,12 @@
 #     https://ts-cube.moose-micro.ts.net/grafana/  ->  200, TLS verified
 #     https://ts-cube.moose-micro.ts.net/git/      ->  200, TLS verified
 #     https://ts-cube.moose-micro.ts.net/          ->  200 (the index below)
+#
+# The `/` row is the second arrangement of that route and was re-verified
+# the same day: it was a plaintext `respond` placeholder at first, and now
+# proxies to glance (nire/landing/). 200 over validated TLS, serving
+# glance's own page, with glance's assets under /static/ resolving through
+# this same fallback route.
 #     https://ts-cube.moose-micro.ts.net/git       ->  301 to /git/
 #     http://ts-cube/                              ->  301 to the FQDN
 #
@@ -197,14 +203,20 @@
                         reverse_proxy 127.0.0.1:3001
                     }
 
-                    # Placeholder index. Two path matchers on one host is
-                    # exactly the arrangement that makes "what else is on
-                    # here?" unanswerable from a browser, and the answer is
-                    # otherwise a 404 with no hint. If the `shortlinks`
-                    # category's golink is up, `go/` is the better index;
-                    # this is the fallback for when you're already here.
+                    # Everything not claimed above goes to glance
+                    # (nire/landing/), the service index -- what's running,
+                    # whether it's up, and how this machine is doing. It
+                    # replaced a `respond` with a two-item plaintext list
+                    # here on 2026-08-24, the same day that placeholder was
+                    # written.
+                    #
+                    # This is the one route on this vhost with no prefix
+                    # question: glance serves at `/`, so nothing is stripped
+                    # and nothing is preserved. glance's own assets
+                    # (/static/..., /api/...) fall through here too, which is
+                    # exactly right -- they are not under a prefix either.
                     handle {
-                        respond "nire-cube: /grafana  /git" 200
+                        reverse_proxy 127.0.0.1:3002
                     }
                 '';
 

@@ -378,6 +378,23 @@ reading the built artifact back had all passed --
 `claude cave/lessons-learned.md` #41. See
 `wiki/categories/reverse-proxy.md`.
 
+**`landing`**, added 2026-08-24 as `nire/landing/`, is glance -- a service
+index for cube: what's running, whether each service answers, and the
+host's own CPU/memory/disk. It is what `reverse-proxy`'s Caddy serves at
+`/`, which makes those two categories a **pair** -- drop `landing` and the
+front page 502s. Named `landing` rather than `dashboard` on purpose:
+`monitoring` next door is full of Grafana dashboards and two categories
+answering to "the dashboard one" is a grep problem later; not `glance`
+either, for the usual category/module collision reason. **Confirmed
+working on its first switch, 2026-08-24**, with one caveat worth keeping:
+the page returning 200 proves almost nothing, because glance renders
+widget content behind `/api/pages/home/content/` -- that endpoint is what
+showed all three monitored sites OK. It monitors through the proxy at the
+real URLs rather than at `127.0.0.1:300x`, deliberately, so a Caddy
+misconfiguration surfaces there. It is NOT a second monitoring system --
+no scraping, no storage, no alerts; `monitoring` still owns that. See
+`wiki/categories/landing.md`.
+
 Related, and a live trap rather than history: containers and VMs are separate
 here and the word "virtualization" means only the second.
 `nire/containers/podman/podman.nix` is podman and distrobox. It was

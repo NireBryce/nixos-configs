@@ -70,6 +70,12 @@ Forgejo an un-stripped path prefix and it 404'd everything, a per-app
 requirement no static check could see
 ([lessons-learned.md](<../claude cave/lessons-learned.md>) #41).
 
+`https://ts-cube.moose-micro.ts.net/` itself serves
+[glance](categories/landing.md), a service index added the same day: which
+services are running, whether each is reachable *through the proxy*, and
+cube's own CPU/memory/disk. Confirmed working on its first switch — all
+three monitored sites (Grafana, Forgejo, golink) reporting OK.
+
 `nire-cube` also runs golink, Tailscale's `go/foo` shortlink service, as of
 2026-08-24 — see [shortlinks](categories/shortlinks.md). Its first real
 switch **failed** (generation 13, a missing `AF_NETLINK` in the module's own

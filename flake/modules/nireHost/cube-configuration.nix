@@ -155,6 +155,16 @@
         # category every host imports. See caddy.nix's own header.
         reverse-proxy
 
+        # glance: the service index -- what's running on this host, whether
+        # it's up, and how the machine is doing. Added 2026-08-24, cube-only,
+        # own category (`landing`, deliberately not `dashboard` -- `monitoring`
+        # above is full of Grafana dashboards and two categories called "the
+        # dashboard one" is a grep problem later). It is served at `/` by
+        # reverse-proxy's caddy, replacing the plaintext placeholder that
+        # route had for a few hours, so this import and that one are a pair:
+        # without `landing`, `https://ts-cube.moose-micro.ts.net/` 502s.
+        landing
+
         # ── packages ──────────────────────────────────────────────────────────
         # Full parity with durandal.
         development

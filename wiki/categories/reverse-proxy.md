@@ -11,7 +11,7 @@ switch` came up with 0 failed units, `caddy.service` `active (running)` at
 |---|---|
 | `https://ts-cube.moose-micro.ts.net/grafana/` | 200, TLS validated |
 | `https://ts-cube.moose-micro.ts.net/git/` | 200, TLS validated |
-| `https://ts-cube.moose-micro.ts.net/` | 200 — the placeholder index |
+| `https://ts-cube.moose-micro.ts.net/` | 200 — [glance](landing.md), the service index |
 | `https://ts-cube.moose-micro.ts.net/git` | 301 → `/git/` |
 | `http://ts-cube/` | 301 → the FQDN |
 
@@ -55,6 +55,11 @@ the only one. The old URLs do not answer.
 `http://ts-cube/` (the bare MagicDNS name, port 80) redirects to the HTTPS
 index, so the short name someone already has in muscle memory still lands
 somewhere useful.
+
+The root route was a plaintext `respond` placeholder for a few hours on
+2026-08-24 and now proxies to [glance](landing.md) — which means these two
+categories are a pair: dropping `landing` while keeping this one leaves the
+front page returning 502.
 
 ## Certificates come from tailscaled, with no plugin
 
