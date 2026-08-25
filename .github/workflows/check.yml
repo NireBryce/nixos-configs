@@ -32,6 +32,34 @@ name: flake-check
 # check is a derivation that has to actually RUN to mean anything, and
 # `--no-build` skips exactly that -- `just modules` bypasses Nix's build
 # system entirely instead of trying to force one check through --no-build.
+#
+# RUNTIME-VERIFIED TRAP, 2026-08-25, found on this workflow's first real
+# runs and taking real investigation to pin down: `nix flake check
+# --all-systems --no-build` intermittently failed with `error: path
+# '.../secrets.yaml' is not valid`, evaluating a sops-enrolled host's
+# secrets (durandal/tenacity/cube all hit it across different runs). Two
+# theories that turned out WRONG, ruled out empirically before landing on
+# the real one -- kept here so nobody re-chases them:
+#   - NOT a stale Nix version (cachix/install-nix-action's old 2.22.1
+#     default was swapped for DeterminateSystems/nix-installer-action,
+#     which installs current Nix -- the failure still reproduced after).
+#   - NOT the checkout shape (reproduced locally against the exact same
+#     `refs/pull/N/merge` ref actions/checkout uses, full clone, shallow
+#     clone, depth=1 -- none of them reproduced it; only the real CI
+#     runner ever did, and not even every time there).
+# The actual pattern: evaluating each sops-enrolled host separately
+# forces Nix to add the SAME literal `secrets.yaml` path to the store
+# once per host's own module evaluation. Warming that up with isolated
+# `nix eval` calls for each host BEFORE the real `nix flake check` made
+# the failure stop appearing entirely across several runs -- consistent
+# with a store-registration race across near-simultaneous adds of
+# identical content, not something wrong with this repo's own config.
+# Mitigated two ways below rather than just one: an explicit warmup
+# (matches what empirically fixed it) plus a retry on the real check
+# (in case the warmup doesn't fully close the window on a differently-
+# timed run). Neither is a full root-cause fix for whatever's actually
+# racing inside Nix/sops-nix -- if this stops being enough, that's the
+# next place to look, not something already ruled out here.
 
 on:
   pull_request:
@@ -46,13 +74,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: cachix/install-nix-action@v27
-        with:
-          extra_nix_config: |
-            experimental-features = nix-command flakes
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      - name: warm up sops-enrolled hosts' secrets.yaml store registration
+        run: |
+          cd flake
+          for host in nire-durandal nire-tenacity nire-cube; do
+            nix eval --raw ".#nixosConfigurations.$host.config.system.build.toplevel.drvPath" > /dev/null
+          done
 
       - name: nix flake check --all-systems --no-build
-        run: cd flake && nix flake check --all-systems --no-build
+        run: |
+          cd flake
+          nix flake check --all-systems --no-build \
+            || { echo "::warning::nix flake check failed, retrying once (see this workflow's own header comment on the known intermittent secrets.yaml store race)"; sleep 5; nix flake check --all-systems --no-build; }
 
       - name: module tree check (just modules)
         run: cd flake && python3 scripts/modules.py check modules

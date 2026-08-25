@@ -15,11 +15,33 @@
             # reason to skip it.
             inputs.darwin.flakeModules.default
             (inputs.import-tree ./modules)
+            # RUNTIME-VERIFIED, 2026-08-25, in CI (.github/workflows/check.yml)
+            # on its first real run: without this, `nix flake check` errors
+            # outright -- "flake-parts could not determine statically that no
+            # formatter is defined for *all* systems" -- because this flake
+            # never sets `perSystem.formatter` for either system, and
+            # flake-parts' own heuristic for proving that (rather than
+            # actually querying perSystem per-system, which it avoids for
+            # performance) isn't perfect enough to conclude it on its own.
+            # Reproducible locally too on a genuinely fresh clone, full or
+            # shallow -- NOT a CI-only issue, just never caught locally
+            # because a long-lived dev checkout's own eval had apparently
+            # gone stale relative to a truly fresh one, and because piping
+            # the check through `tail` (as this session did more than once
+            # before CI caught it for real) reads the pipe's own exit code,
+            # not the command's. `touchup.attr.formatter.enable = false`
+            # drops the `formatter` output entirely rather than defining a
+            # trivial one -- consistent with `nix fmt` being deliberately
+            # unwired here already (claude-style-guide.md: it would flatten
+            # this repo's aligned-`=` columns), so there was never a
+            # formatter to expose in the first place.
+            inputs.flake-parts.flakeModules.touchup
         ];
         systems = [
             "x86_64-linux"
             "aarch64-darwin"
         ];
+        touchup.attr.formatter.enable = false;
     };
 
     inputs = {
