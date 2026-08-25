@@ -3,6 +3,13 @@
 # only over the tailnet -- see the firewall comment below before assuming
 # `openFirewall`-style options belong here.
 #
+# As of 2026-08-24 it is not reached off-host DIRECTLY: every listener in
+# this stack, this one included, is on loopback, and
+# nire/reverse-proxy/caddy.nix fronts it at
+# https://ts-cube.moose-micro.ts.net/grafana/ with a cert from tailscaled.
+# Two settings here exist solely because of that (`http_addr`,
+# `root_url`/`serve_from_sub_path`) and are commented as such.
+#
 # RUNTIME-VERIFIED, 2026-08-23, on nire-cube: `just switch` activates cleanly
 # and every other unit in this stack came up, but grafana.service itself
 # failed on the first real switch -- the secret_key file existed but was
@@ -94,22 +101,49 @@
                 settings.server = {
                     http_port = 3000;
 
-                    # 0.0.0.0, not the loopback-only pattern the rest of this
-                    # stack uses: this is the one service here that has to be
-                    # reachable from off-host (over Tailscale) at all, so it
-                    # can't bind to 127.0.0.1 the way node-exporter/cadvisor/
-                    # libvirt-exporter/prometheus itself do.
+                    # Loopback, exactly like the rest of this stack
+                    # (node-exporter, cadvisor, libvirt-exporter, prometheus).
+                    # As of 2026-08-24 nothing off-host talks to this port
+                    # directly: reverse-proxy/caddy.nix terminates TLS on the
+                    # tailnet and is the only client. This used to be 0.0.0.0
+                    # -- see the history note at the bottom of this file for
+                    # why, and for what changed.
+                    http_addr = "127.0.0.1";
+
+                    # BOTH of these, together, or the /grafana prefix breaks.
+                    # root_url alone tells Grafana what to put in redirects
+                    # and emails; serve_from_sub_path is what makes it
+                    # actually serve its own assets under that prefix.
+                    # Setting only the first gives a login page whose CSS and
+                    # JS 404 -- a broken-looking UI, not an obvious
+                    # misconfiguration.
                     #
-                    # "Tailnet only" is enforced below, at the firewall, not
-                    # here -- see that comment for the actual mechanism and its
-                    # caveats. If Grafana ever throws "invalid redirect"
-                    # errors after login, that's `domain`/`root_url` needing to
-                    # be set to this host's MagicDNS name (`ts-cube`, per
-                    # networking/tailscale.nix's header -- NOT `nire-cube`,
-                    # that name was the costly-to-rediscover trap that file
-                    # documents); left at the module defaults for now since
-                    # nothing has hit that yet.
-                    http_addr = "0.0.0.0";
+                    # caddy.nix routes THIS ONE with `handle`, NOT
+                    # `handle_path`, so `/grafana/...` arrives here with the
+                    # prefix intact, which is what serve_from_sub_path
+                    # expects. Changing one side without the other breaks it.
+                    # Note the contrast with forgejo.nix next door, which
+                    # gets `handle_path` (prefix stripped) precisely because
+                    # it has no serve_from_sub_path equivalent -- the two
+                    # apps want opposite things from the same proxy.
+                    #
+                    # `ts-cube.moose-micro.ts.net`, NOT `nire-cube` -- this
+                    # tailnet renames its devices
+                    # (networking/tailscale.nix's trap #1). The FQDN is
+                    # duplicated in caddy.nix and forgejo.nix rather than
+                    # shared, because nothing in this tree declares options
+                    # (CLAUDE.md, Architecture); all three move together.
+                    root_url            = "https://ts-cube.moose-micro.ts.net/grafana/";
+                    serve_from_sub_path = true;
+
+                    # Not load-bearing while `enforce_domain` is false and
+                    # `root_url` is a literal (nixpkgs leaves this at
+                    # "localhost", and Grafana only uses it to BUILD a
+                    # default root_url). Set anyway so the two agree: a
+                    # reader comparing them shouldn't have to work out which
+                    # one wins, and flipping enforce_domain on later would
+                    # otherwise reject every real request.
+                    domain              = "ts-cube.moose-micro.ts.net";
                 };
 
                 provision = {
@@ -184,27 +218,63 @@
                 '';
             };
 
-            # DELIBERATELY NOT adding 3000 to networking.firewall.allowedTCPPorts
-            # (networking.nix, part of the `system` category this host already
-            # imports). allowedTCPPorts opens a port on every interface; what
-            # actually makes Grafana tailnet-only is `trustedInterfaces =
-            # [ "tailscale0" ]`, already set in that same file -- traffic
-            # arriving on tailscale0 bypasses the allow-list entirely, traffic
-            # arriving on any other interface hits the default-deny and is
-            # dropped, so leaving port 3000 out of the list is what keeps this
-            # off the LAN. Same mechanism CLAUDE.md's tailscale.nix section
-            # already documents (`services.tailscale.openFirewall` +
-            # `trustedInterfaces`), applied to a second service.
+            # STILL deliberately not adding 3000 to
+            # networking.firewall.allowedTCPPorts (networking.nix, part of the
+            # `system` category this host already imports) -- but as of
+            # 2026-08-24 that is no longer the thing keeping Grafana off the
+            # LAN. `http_addr` above is: the port is bound on loopback, so
+            # there is nothing on any other interface to allow or deny. The
+            # firewall is now the second line rather than the only one.
             #
-            # Caveat worth keeping in view: trustedInterfaces trusts the WHOLE
-            # interface, not just this port -- it is not a Grafana-specific
-            # rule, it is "anything arriving over Tailscale is already
-            # trusted", the same blanket trust ssh/kde-connect/etc. get on this
-            # host. That is the existing security model here, not something
-            # this module introduces. And per networking/tailscale.nix's own
-            # "TWO REAL TRAPS" note: a tailnet ACL denying member-to-member
-            # traffic would make this unreachable even though every setting in
-            # this repo is correct -- that's fixed in Tailscale's admin
-            # console, not here.
+            # What IS exposed on the tailnet is caddy's 443, and the same
+            # reasoning applies to it one file over: `trustedInterfaces =
+            # [ "tailscale0" ]` lets tailnet traffic bypass the allow-list
+            # while everything on any other interface hits the default-deny.
+            # See reverse-proxy/caddy.nix for that half.
+            #
+            # Caveat worth keeping in view, unchanged by any of the above:
+            # trustedInterfaces trusts the WHOLE interface, not a port -- it
+            # is "anything arriving over Tailscale is already trusted", the
+            # same blanket trust ssh/kde-connect/etc. get on this host. That
+            # is the existing security model here, not something this module
+            # introduces. And per networking/tailscale.nix's own "TWO REAL
+            # TRAPS" note: a tailnet ACL denying member-to-member traffic
+            # would make this unreachable even though every setting in this
+            # repo is correct -- that's fixed in Tailscale's admin console,
+            # not here.
         };
 }
+
+# ── history ─────────────────────────────────────────────────────────────────
+#
+# 2026-08-24 — this used to bind 0.0.0.0, and `root_url` used to be unset
+#
+# From 2026-08-23 until 2026-08-24 `settings.server.http_addr` was "0.0.0.0",
+# with this comment on it:
+#
+#   > 0.0.0.0, not the loopback-only pattern the rest of this stack uses:
+#   > this is the one service here that has to be reachable from off-host
+#   > (over Tailscale) at all, so it can't bind to 127.0.0.1 the way
+#   > node-exporter/cadvisor/libvirt-exporter/prometheus itself do.
+#   > "Tailnet only" is enforced below, at the firewall, not here.
+#
+# True at the time: nothing else on this host could accept the connection, so
+# Grafana had to take it itself, and `trustedInterfaces = [ "tailscale0" ]`
+# was the ONLY thing between port 3000 and the LAN. Adding
+# nire/reverse-proxy/caddy.nix removed that constraint -- caddy accepts on
+# the tailnet, terminates TLS with a cert from tailscaled, and connects to
+# this port over loopback -- so the listener moved back in line with the rest
+# of the stack.
+#
+# The same comment ended by predicting the other half of this change:
+#
+#   > If Grafana ever throws "invalid redirect" errors after login, that's
+#   > `domain`/`root_url` needing to be set to this host's MagicDNS name
+#   > (`ts-cube` ... NOT `nire-cube`); left at the module defaults for now
+#   > since nothing has hit that yet.
+#
+# `root_url` is set now, and for the predicted reason plus one more: behind a
+# path prefix Grafana needs both `root_url` AND `serve_from_sub_path`, and
+# the FQDN in it has to be the full `ts-cube.moose-micro.ts.net`, not the
+# short MagicDNS name that comment guessed at, because it is what the browser
+# will have in its address bar.

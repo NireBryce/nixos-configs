@@ -56,6 +56,20 @@ see [git-forge](categories/git-forge.md). Same tailnet-only mechanism.
 Confirmed working end to end the same day: `just switch` clean, both its
 systemd units healthy, and a real `HTTP 200` from another tailnet host.
 
+As of 2026-08-24 neither of those two is reached directly any more.
+`nire-cube` runs Caddy — see [reverse-proxy](categories/reverse-proxy.md) —
+which is the single tailnet-facing HTTPS listener on the host, holding a
+certificate issued by the local `tailscaled` (no ACME, no plugin). Grafana
+and Forgejo both moved to loopback in the same change and are now
+`https://ts-cube.moose-micro.ts.net/grafana/` and `/git/` respectively; the
+old `http://ts-cube:3000/` and `:3001/` URLs no longer answer, and
+`http://ts-cube/` redirects. **Confirmed working end to end the same day**:
+both paths return 200 over validated TLS from another tailnet host, 0 failed
+units, `caddy` at `NRestarts=0`. It took two switches — the first served
+Forgejo an un-stripped path prefix and it 404'd everything, a per-app
+requirement no static check could see
+([lessons-learned.md](<../claude cave/lessons-learned.md>) #41).
+
 `nire-cube` also runs golink, Tailscale's `go/foo` shortlink service, as of
 2026-08-24 — see [shortlinks](categories/shortlinks.md). Its first real
 switch **failed** (generation 13, a missing `AF_NETLINK` in the module's own

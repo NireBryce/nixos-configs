@@ -139,6 +139,22 @@
         # category/module name-collision reason `git-forge` isn't `forgejo`.
         shortlinks
 
+        # Caddy: one tailnet-only HTTPS front door for this host's web
+        # services -- added 2026-08-24, cube-only, own category
+        # (`reverse-proxy`, not `caddy`, for the same category/module
+        # name-collision reason `git-forge` isn't `forgejo`). It is what
+        # `monitoring`'s Grafana and `git-forge`'s Forgejo are reached
+        # THROUGH as of the same day: both of those moved to loopback in that
+        # change, so this import is not optional garnish for them -- drop it
+        # and neither is reachable from anywhere but this host itself.
+        #
+        # Certs come from tailscaled, with no plugin and no ACME account:
+        # caddy hands any `.ts.net` site address to its built-in tailscale
+        # cert manager. That needs `services.tailscale.permitCertUid`, which
+        # caddy.nix sets itself rather than putting it in the `system`
+        # category every host imports. See caddy.nix's own header.
+        reverse-proxy
+
         # ── packages ──────────────────────────────────────────────────────────
         # Full parity with durandal.
         development

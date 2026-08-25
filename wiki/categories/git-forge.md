@@ -9,6 +9,15 @@ another tailnet host, not just from `localhost` on cube itself. Git+ssh
 over the host's OpenSSH (below) has NOT been exercised yet — only the HTTP
 side is confirmed.
 
+**That URL is no longer current.** Later the same day Forgejo moved behind
+Caddy ([reverse-proxy](reverse-proxy.md)): it listens on `127.0.0.1:3001`
+now and is reached at `https://ts-cube.moose-micro.ts.net/git/`. The
+proxied arrangement is **confirmed working too**, same day — 200 over
+validated TLS from another tailnet host, with Forgejo's own generated links
+carrying the `/git/` prefix and assets under it loading. Getting there took
+a second switch: the first one served Forgejo the un-stripped prefix and it
+404'd everything, see that page's section on it.
+
 ## What's in it
 
 One file, `nixos`-class: `forgejo/forgejo.nix`.
@@ -49,12 +58,29 @@ and nixpkgs removed it, pushing secret management onto the deployer) — so
 
 ## Tailnet-only access, same mechanism as Grafana
 
-Forgejo binds `0.0.0.0:3001` (3000 is already Grafana's), but that port is
-deliberately **not** added to `networking.firewall.allowedTCPPorts`. What
-restricts access is the same `trustedInterfaces = [ "tailscale0" ]` rule
-[system](system.md)'s `tailscale.nix` sets on every host — see
-[monitoring](monitoring.md)'s own writeup of this mechanism, applied here to
-a third service rather than reinvented.
+Forgejo binds `127.0.0.1:3001` (3000 is already Grafana's), and that port is
+deliberately **not** in `networking.firewall.allowedTCPPorts`. Since
+2026-08-24 the binding is what keeps it off the LAN — nothing outside cube
+can open a connection to it at all — and the only client is Caddy, one file
+over in [reverse-proxy](reverse-proxy.md), which accepts on the tailnet and
+proxies over loopback.
+
+Caddy strips the `/git` prefix before proxying here (`handle_path`), unlike
+Grafana's route next door, because Forgejo always serves at `/` regardless
+of `ROOT_URL` — the asymmetry is written up in
+[reverse-proxy](reverse-proxy.md).
+
+It bound `0.0.0.0` for the first few hours of its existence, when
+`trustedInterfaces = [ "tailscale0" ]` ([system](system.md)'s
+`tailscale.nix`) was the only thing between port 3001 and the LAN. That rule
+still applies — to Caddy's 443 now — but it is the second line rather than
+the only one. `forgejo.nix`'s own history note at the bottom of the file has
+the before/after.
+
+One knock-on the move fixed quietly: Forgejo's `LOCAL_ROOT_URL` defaults to
+`http://%(HTTP_ADDR)s:%(HTTP_PORT)s/` and nixpkgs doesn't override it, so
+with `0.0.0.0` it was building self-referential URLs out of an any-address.
+It resolves to `http://127.0.0.1:3001/` now.
 
 Git access over SSH is a partial exception, and deliberately so: Forgejo's
 own built-in SSH server is left disabled (`START_SSH_SERVER` unset, so it
@@ -73,11 +99,19 @@ authenticate against the sshd that was already reachable.
 
 `system/networking/tailscale.nix`'s own header documents a costly-to-find
 trap: this tailnet's device names don't match `networking.hostName` (the
-host is `nire-cube`, its Tailscale/MagicDNS name is `ts-cube`). `grafana.nix`
-left `domain`/`root_url` at the nixpkgs default rather than fix this
-proactively, flagging it as the trap to fix "if it's ever hit." This module
-sets `DOMAIN`/`ROOT_URL` to `ts-cube` explicitly from the start, so cloning
-over HTTP and any redirect-URL checks don't hit that trap at all.
+host is `nire-cube`, its Tailscale/MagicDNS name is `ts-cube`). This module
+set `DOMAIN`/`ROOT_URL` to `ts-cube` explicitly from the start, so cloning
+over HTTP and any redirect-URL checks never hit that trap. `grafana.nix`
+left its own `domain`/`root_url` at the nixpkgs default at first, flagging
+this as the trap to fix "if it's ever hit" — it sets both now, since going
+behind a path prefix forced the issue anyway.
+
+`DOMAIN` and `ROOT_URL` deliberately disagree as of 2026-08-24, which reads
+like a typo and isn't. `ROOT_URL` is what a browser sees, so it is the full
+`https://ts-cube.moose-micro.ts.net/git/`; `DOMAIN` is what SSH clone URLs
+are built from, and git+ssh doesn't go through Caddy at all (see the
+section above), so it stays the short `ts-cube` and clone URLs stay
+`forgejo@ts-cube:...`.
 
 ## Single-user, sqlite3, registration closed
 
@@ -108,6 +142,8 @@ gives for itself.
 
 ## See also
 
+- [reverse-proxy](reverse-proxy.md) — Caddy, which is how this is reached
+  as of 2026-08-24, and where the TLS certificate comes from.
 - [monitoring](monitoring.md) — the `grafana.nix` secret-handling trap this
   category deliberately doesn't repeat, and the same tailnet-only firewall
   mechanism.
