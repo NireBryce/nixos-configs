@@ -231,15 +231,21 @@ something you have to unpick afterwards.
 A branch ruleset ("main: require a PR", id 21163726) was added 2026-08-21:
 `main` cannot be deleted, cannot be force-pushed, and needs a PR to merge into.
 Zero approvals are required, so Elly can merge their own PRs — requiring one on
-a solo repo would deadlock, since nobody can approve their own.
+a solo repo would deadlock, since nobody can approve their own. As of
+2026-08-25 it also requires the `nix flake check + module tree` status check
+(`.github/workflows/check.yml`) to pass before a PR can merge — added once
+that workflow had a stable, real check name from several actual runs, not
+guessed at before it existed.
 
 **It does not stop you.** Bypass is granted to the admin repository role, and
 `gh`/`git` here authenticate as Elly, who is the admin — the API reports
 `current_user_can_bypass: always`. A direct `git push origin main` from this
-session would still succeed. The ruleset is a backstop for everything else and
-a visible statement of intent; the actual guard against the mistake this file
-documents is this file. Do not read "main is protected" as "the tooling will
-catch me".
+session would still succeed, and `gh pr merge` would still work on a PR whose
+check is red. The ruleset is a backstop for everything else and a visible
+statement of intent; the actual guard against the mistake this file documents
+is this file. Do not read "main is protected" as "the tooling will catch me" —
+that was true before the status check existed and is still true now that it
+does.
 
 ## Only when Elly names main
 
