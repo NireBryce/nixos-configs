@@ -83,12 +83,15 @@ path works, or the fix turns out to cause some problem of its own:
    whichever host you're testing.
 
 **Before removing it because carapace shipped a new version**: re-run the
-repro rather than assuming a version bump fixed it. `terminal-puppeteer
---ssh <host> 'git co' TAB CTRL-C` a few times is the same check that found
-this in the first place — a version bump changing carapace's generated
-template is exactly what would also make this fix's own tripwire warning
-fire (see "What the fix does" above), which is your actual signal to look
-again, not silence.
+repro rather than assuming a version bump fixed it.
+`nix run github:NireBryce/terminal-puppeteer -- --ssh <host> 'git co' TAB
+CTRL-C` a few times is the same check that found this in the first place
+(`terminal-puppeteer` gained its own flake 2026-08-24 specifically so it
+can be run this way, with no local clone needed — this repo has no
+checkout of it to reference by path) — a version bump changing carapace's
+generated template is exactly what would also make this fix's own
+tripwire warning fire (see "What the fix does" above), which is your
+actual signal to look again, not silence.
 
 If the tripwire warning fires because carapace changed its template but
 the underlying ble.sh interaction is still there, the fix needs updating to
