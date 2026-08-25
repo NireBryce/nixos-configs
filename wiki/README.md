@@ -41,12 +41,17 @@ of re-deriving it.
   blesh layers a menu on top of, and how it avoids clobbering — and being
   clobbered by — `cod`'s daemon-based completions).
 - [Homelab services](homelab/README.md) — how to *use* what the fleet
-  actually runs, as opposed to how it's configured: currently
-  [creating go/ links](homelab/golinks.md), with Grafana and Forgejo
-  listed but not yet written up. A different tier from the category
-  pages, and the one place a page may hold real content rather than
-  links — because its source is often the running service's own help
-  page, not a file in this repo.
+  actually runs, as opposed to how it's configured:
+  [reaching cube's services](homelab/reaching-services.md) (the URL map
+  since everything moved behind one HTTPS hostname on 2026-08-24, and what
+  to check when something doesn't answer),
+  [using the forge](homelab/forgejo.md), and
+  [creating go/ links](homelab/golinks.md), plus
+  [pending setup](homelab/pending-setup.md) — the services that are running
+  but not finished (no Forgejo users, no go/ links, no backups). Grafana is
+  listed but not written up. A different tier from the category pages, and the one place a
+  page may hold real content rather than links — because its source is
+  often the running service's own help page, not a file in this repo.
 - [Impermanence, initrd & secrets](impermanence-and-secrets.md) — the
   `/root`-wipe-on-boot mechanism, which hosts opt in, sops-nix.
 - [Traps & skills](traps-and-skills.md) — the mistakes that have actually
