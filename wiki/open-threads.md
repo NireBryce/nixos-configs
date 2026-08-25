@@ -17,6 +17,15 @@ repo's own tracker is the issue queue, not another markdown list.
 
 ## Tracked as GitHub issues
 
+- **[#87 — no backups anywhere in the fleet; decide a scheme for cube's
+  service state](https://github.com/NireBryce/nixos-configs/issues/87)** —
+  open, filed 2026-08-24. Nothing in `flake/` configures any backup tool at
+  all (verified by grep, not assumed), while `nire-cube` now holds a git
+  forge, a metrics db and a shortlink db that nothing else has a copy of. A
+  QNAP NAS on the network makes this mostly a matter of picking a tool;
+  the issue carries the restic-over-SFTP sketch, the sqlite-consistency
+  problem, and the four things that need deciding rather than defaulting.
+  **Done means a restore actually performed**, not a green timer.
 - **[#75 — remove `carapace-completer-read-fix.bash` once ble.sh/carapace
   fix it upstream](https://github.com/NireBryce/nixos-configs/issues/75)**
   — open. The follow-on to #72 below: a local workaround stays in the tree
@@ -106,6 +115,41 @@ specific report — not as a housekeeping pass over this list:
   (exited)` / exit 0, and `virsh dominfo llm-sandbox` shows the domain
   `running` with CPU time climbing across the fixes -- it was up the whole
   time even while the systemd unit itself was failing on (2) and (3).
+
+## Left open by the cube service stack, 2026-08-24
+
+Four things the reverse-proxy/glance work knowingly did not do. None is a
+bug; each is a decision someone might otherwise re-litigate from scratch.
+
+- **`nire-cube` is running a config activated from `~/nixos-caddy-test/`**, a
+  plain rsync of a working tree, while its real checkout at
+  `~/nixos-configs` sits several commits behind `main`. The running system is
+  byte-identical to what `main` evaluates to, so this is bookkeeping rather
+  than drift — but the next person to `just switch` from `~/nixos-configs`
+  should `git pull` first, and the test directory can be deleted once they
+  have. Sync-and-build-over-ssh exists because a darwin session cannot build
+  an `x86_64-linux` toplevel; see the `new-homelab-service` skill.
+- **Nothing backs up `/var/lib/forgejo`** — or anything else on cube. Repos,
+  the sqlite database, and Forgejo's self-generated secrets all live there
+  with exactly one copy. **Now tracked as
+  [#87](https://github.com/NireBryce/nixos-configs/issues/87)**, which covers
+  the whole fleet rather than just the forge; documented at
+  [homelab/forgejo.md](homelab/forgejo.md) so nobody mistakes the forge for
+  durable storage in the meantime.
+- **Tailscale Services (`svc:`) were weighed and deferred.** They would give
+  each service its own tailnet DNS name (`https://grafana/` rather than a
+  path prefix), which removes the whole prefix-handling problem
+  [reverse-proxy](categories/reverse-proxy.md) documents, and they'd allow
+  per-service ACLs. The cost is a per-service approval step in the Tailscale
+  admin console, and state that lives in `tailscaled` rather than in the Nix
+  store. Path routing under one hostname won on "everything stays in the
+  repo". The other scaling path, if the service count makes prefixes
+  annoying, is a real domain with split DNS and a wildcard certificate.
+- **Grafana dashboards edited in the UI are not in this repo.** Anything
+  under `monitoring`'s `_dashboards/` is provisioned read-only from the
+  store; anything created through the web UI lives only in cube's sqlite db,
+  which is not backed up either. Writing up "how to add a dashboard that
+  survives a rebuild" is the missing piece.
 
 ## Not covered here
 

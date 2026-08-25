@@ -14,6 +14,7 @@ one-liner.
 | Editing impermanence or initrd | `.claude/skills/impermanence-initrd/SKILL.md` |
 | Adding/platform-gating a package | `.claude/skills/nirepackages-platform-support/SKILL.md` |
 | Adding a new host | `.claude/skills/new-host-config/SKILL.md` |
+| Adding a homelab service (port, proxy route, verification) | `.claude/skills/new-homelab-service/SKILL.md` |
 | Building a NixOS VM image / wiring a libvirt guest | `.claude/skills/nixos-vm-images/SKILL.md` |
 | Landing work on `main` | `.claude/skills/ship/SKILL.md` |
 | Filing a bug noticed while doing something else | `.claude/skills/propose-issue/SKILL.md` |
@@ -32,6 +33,19 @@ these fits into the bigger picture; this page is just the index.
 - **`git add` before `nix eval`** — flakes in a git repo ignore untracked
   files, so a new module can silently not exist yet as far as evaluation is
   concerned.
+
+## A trap worth knowing before it's needed
+
+- **Two apps behind the same reverse proxy can need opposite prefix
+  handling.** Grafana serves *under* its path prefix (`serve_from_sub_path`)
+  and Caddy must leave the prefix on; Forgejo always serves at `/` no matter
+  what its `ROOT_URL` says, and Caddy must strip it. Both spellings are valid
+  Caddy, both build, and the wrong one is a 404 on every page of the affected
+  app. It cost a switch on 2026-08-24 —
+  [lessons-learned.md](<../claude cave/lessons-learned.md>) #41, with the
+  routing detail in [reverse-proxy](categories/reverse-proxy.md). The
+  `new-homelab-service` skill has the two-`curl` test that settles it in
+  seconds.
 
 ## A trap that points at the wiki instead of a skill
 

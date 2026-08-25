@@ -33,7 +33,18 @@ separate tier for the *usage* side:
   page named after the thing you'd search for, not after the module
   (`golinks.md`, not `golink.md` or `shortlinks.md` — the module is
   `golink`, the category is `shortlinks`, and the thing people say is
-  "go links").
+  "go links"). Where the tool's own name *is* what you'd search for, that
+  wins: `forgejo.md`, even though the module is also `forgejo`.
+
+  One page there isn't about a single service:
+  [reaching-services.md](homelab/reaching-services.md), added 2026-08-24
+  when everything on `nire-cube` moved behind one HTTPS hostname. A
+  cross-service page earns its place here when the *thing being explained
+  is the arrangement rather than any one service* — the URL map, why the
+  certificate is trusted, and which layer to suspect when something doesn't
+  answer, none of which belongs in three separate service pages. Prefer a
+  service page; reach for this shape only when the alternative is repeating
+  yourself.
 
   It's a separate tier rather than more `wiki/*.md` pages because the two
   rot differently: a category page goes stale when the config changes, a

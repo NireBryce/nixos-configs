@@ -17,8 +17,11 @@ under it, which can happen with no commit to this repo at all.
 
 | Service | Host | Reach it at | Page |
 |---|---|---|---|
+| *(all of cube's web services)* | `nire-cube` | `https://ts-cube.moose-micro.ts.net/` | [Reaching cube's services](reaching-services.md) |
+| *(what's still unfinished)* | `nire-cube` | — | [Pending setup](pending-setup.md) |
 | golink — `go/` shortlinks | `nire-cube` | `http://go/` | [Creating go/ links](golinks.md) |
-| glance — the service index | `nire-cube` | `https://ts-cube.moose-micro.ts.net/` | not yet written up; [landing](../categories/landing.md) covers config |
+| Forgejo — self-hosted git forge | `nire-cube` | `.../git/` | [Using the forge](forgejo.md) |
+| glance — the service index | `nire-cube` | `.../` (the root) | [Reaching cube's services](reaching-services.md); [landing](../categories/landing.md) covers config |
 
 **Start at that second one if you don't know what's running.** It lists the
 services below, live-checks each one, and shows how cube itself is doing —
@@ -26,13 +29,18 @@ so it answers "what's on here and is it up" without reading this page.
 
 ## Also running, not yet written up
 
-Both are on `nire-cube` and reachable over the tailnet only. They have
-category pages covering configuration; neither has a usage page here yet.
+On `nire-cube`, reachable over the tailnet only, with a category page
+covering configuration but no usage page here yet.
 
 | Service | Reach it at | Configuration |
 |---|---|---|
 | Grafana — dashboards over cube's own metrics | `https://ts-cube.moose-micro.ts.net/grafana/` | [monitoring](../categories/monitoring.md) |
-| Forgejo — self-hosted git forge | `https://ts-cube.moose-micro.ts.net/git/` | [git-forge](../categories/git-forge.md) |
+
+Grafana mostly doesn't need one: you log in and look at the dashboards
+[monitoring](../categories/monitoring.md) provisions. What *would* be worth
+writing up is adding a dashboard that survives a rebuild — anything edited in
+the UI lives only in cube's sqlite db, while anything under the module's
+`_dashboards/` is provisioned read-only from the store.
 
 **Those URLs changed on 2026-08-24**, and the old ones
 (`http://ts-cube:3000/`, `http://ts-cube:3001/`) no longer answer at all.
@@ -51,6 +59,16 @@ golink is the exception to that pattern rather than a naming inconsistency —
 it's its own tailnet device named `go`, not a port on cube, which is why its
 URL looks nothing like the other two. See
 [shortlinks](../categories/shortlinks.md).
+
+## Half-finished is the normal state here
+
+Several of these services are running, reachable, and still missing the
+human step that makes them useful — Forgejo has no users, golink has no
+links, and nothing is backed up. [Pending setup](pending-setup.md) is the
+list, kept separate from [open-threads.md](../open-threads.md) because
+those are the *repo's* loose ends and these are the *fleet's*: one-time
+operational work that no commit will ever complete, because it lives in a
+service's own database rather than in Nix.
 
 ## Index over restatement still applies, with one carve-out
 
