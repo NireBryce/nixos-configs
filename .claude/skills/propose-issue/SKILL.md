@@ -60,9 +60,12 @@ closing a wrongly-filed issue costs nothing the way an unwound merge does.
    `CLAUDE.md`: "Bugs here serialize" — the discipline that applies to fixing
    a bug applies to reporting one too; a half-remembered impression is how a
    false one gets filed.
-2. **Check it isn't already tracked.** Grep `CLAUDE.md` and
-   `claude cave/lessons-learned.md` for the topic, and run
-   `gh issue list --repo NireBryce/nixos-configs --search "<keywords>" --state all`.
+2. **Check it isn't already tracked.** Run `just threads "<keywords>"` — the
+   same command `investigate-bug` step 1 uses, and for the same reason: it
+   already covers GitHub issues plus `wiki/`, `lessons-learned.md` and
+   `bugs pending submission/` in one shot (`flake/scripts/threads.sh`), so
+   there's no separate hand-grep to keep in sync with what that script
+   covers. Also grep `CLAUDE.md` itself, which threads.sh doesn't touch.
    Stop here if it's already covered.
 3. **Ask, showing the real content.** Use `AskUserQuestion` with the title
    and a short body already drafted — the decision should land on the actual

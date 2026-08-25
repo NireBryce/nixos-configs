@@ -1,9 +1,19 @@
 name: flake-check
 
-# Mirrors `just check` + `just modules` exactly (see .justfile) rather than
-# inventing separate CI-only logic -- what runs here is what any session
-# already runs by hand before opening a PR (the ship skill's own step 0),
-# just automated instead of relying on that being remembered every time.
+# Mirrors `just check` + `just modules` + `just lint` exactly (see
+# .justfile) rather than inventing separate CI-only logic -- what runs
+# here is what any session already runs by hand before opening a PR (the
+# ship skill's own step 0), just automated instead of relying on that
+# being remembered every time.
+#
+# `just lint` (statix + deadnix + an oversized-file check, ratcheted
+# against flake/scripts/lint-baseline.json) is the backstop for the local
+# pre-commit hook (.githooks/pre-commit, wired in via `just
+# install-hooks`) rather than a redundant re-check: the hook is opt-in
+# per clone and skips itself silently if statix/deadnix aren't on PATH,
+# so this is what actually blocks a regression on a contributor who never
+# ran `just install-hooks`. See flake/scripts/lint.py's own header for
+# why it's a ratchet rather than a plain pass/fail.
 #
 # Deliberately `--no-build`, matching `just check` locally: this flake
 # defines full NixOS/darwin system toplevels (`checks.nix`) for real
@@ -91,3 +101,8 @@ jobs:
 
       - name: module tree check (just modules)
         run: cd flake && python3 scripts/modules.py check modules
+
+      - name: lint ratchet (just lint)
+        run: |
+          cd flake
+          nix shell nixpkgs#statix nixpkgs#deadnix --command python3 scripts/lint.py check

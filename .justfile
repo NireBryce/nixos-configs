@@ -47,6 +47,27 @@ modules:
     # Platform independent, so this is the one check that means anything on darwin.
     cd {{flake}} && python3 scripts/modules.py check modules
 
+# statix + deadnix + an oversized-file check, ratcheted against a committed baseline
+lint:
+    # Needs statix/deadnix on PATH -- already there via nirePackages/nix-utils/
+    # on a real host; `nix shell nixpkgs#statix nixpkgs#deadnix` first otherwise.
+    # A commit can lower the finding count but never raise it -- see
+    # flake/scripts/lint.py's own header for why this is a ratchet and not a
+    # plain pass/fail, and `just install-hooks` for enforcing it pre-commit.
+    cd {{flake}} && python3 scripts/lint.py check
+
+# Point git at .githooks/: lint ratchet pre-commit, trailer fixup commit-msg
+install-hooks:
+    git config core.hooksPath .githooks
+    @echo "==> git will now run .githooks/pre-commit and .githooks/commit-msg"
+
+# check + modules + lint in one shot -- what the ship skill's step 0 asks for,
+# short of the per-host forced toplevel eval that still needs picking a host
+preflight:
+    @just check
+    @just modules
+    @just lint
+
 # Build this host, without activating it
 build:
     # Runs on the host itself: no remote builder and no binfmt, so a NixOS host

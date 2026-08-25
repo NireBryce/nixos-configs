@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Runs `just lint`'s ratchet before every commit. Not active by default --
+# `git config core.hooksPath .githooks` (or `just install-hooks`) has to point
+# git at this directory first; a fresh clone still relies on CI to catch a
+# lint regression until that's run once, same as any other opt-in hook.
+#
+# On PASS-WITH-IMPROVEMENT, lint.py has already rewritten
+# flake/scripts/lint-baseline.json in place (see its own header) -- this hook
+# re-stages that file so the lowered baseline rides along in the commit that
+# earned it, rather than showing up as an unrelated dirty file afterward.
+set -euo pipefail
+repo_root="$(git rev-parse --show-toplevel)"
+
+if ! command -v statix >/dev/null || ! command -v deadnix >/dev/null; then
+    echo "pre-commit: statix/deadnix not on PATH -- skipping the lint ratchet." >&2
+    echo "  (nix shell nixpkgs#statix nixpkgs#deadnix, or run on a host with" >&2
+    echo "  nirePackages/nix-utils/ installed, to get this check locally)" >&2
+    exit 0
+fi
+
+cd "${repo_root}/flake"
+if ! python3 scripts/lint.py check; then
+    echo >&2
+    echo "pre-commit: lint regression above -- fix it, or 'just lint' to see it" >&2
+    echo "  again without committing. --no-verify bypasses this hook if you" >&2
+    echo "  really need to; CI still runs the same check on the PR either way." >&2
+    exit 1
+fi
+
+git add "${repo_root}/flake/scripts/lint-baseline.json"
