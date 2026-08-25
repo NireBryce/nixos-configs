@@ -1,0 +1,7 @@
+- [ ] scan memories for things that can be codified into more deterministic things (lints, checks, skills, etc), or belongs in CLAUDE.md.  Things that are no longer relevant should be pruned unless they are recurring traps
+- [ ] do the same with claude.md
+- [ ] scan skills and check what ncan be made into deterministic replacements for them like scripts
+- [ ] fix linter and add rule to limit filesize in repo to 5000 lines
+- [ ] add linting/etc rule where you can only reduce number of errors for committing, not increasing
+- [ ] suggest ways we could improve this workflow and put suggestions in markdown-cave
+- [ ] when done, timestamp this filename and put it in .claude/completed_todos/

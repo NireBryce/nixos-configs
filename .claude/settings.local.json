@@ -10,7 +10,16 @@
       "Read(//nix/store/**)",
       "Bash(nix flake *)",
       "Bash(python3 -c \"import json,sys;d=json.load\\(sys.stdin\\);print\\(d['inputs']['nixpkgs']['path']\\)\")",
-      "Bash(python3 -c ' *)"
+      "Bash(python3 -c ' *)",
+      "Bash(just check *)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(just modules *)",
+      "Bash(git add *)",
+      "Bash(git restore *)",
+      "Bash(gh run *)",
+      "Bash(grep \"DEBUG diagnostics\" /tmp/diag-log.txt | sed -n '20,100p')",
+      "Read(//tmp/**)",
+      "Bash(grep \"nix flake check --all-systems\" /tmp/diag-log.txt | grep -v \"DEBUG diagnostics\" | tail -20)"
     ]
   }
 }
