@@ -165,10 +165,6 @@ that it said "four" until 2026-08-21, when `nire-cube` had already been in
 dropped by the den restructure and brought back from
 `origin/backup-before-flake-parts-happened`, the last config it actually ran.
 
-`claude cave/old-2026-08-08-PORT-PLAN-(COMPLETED).md` records the migration off
-`vic/den`, where the plan turned out wrong, and what is still open (moved and
-`old`-prefixed 2026-08-13; see Docs).
-
 ## Commands
 
 `just` recipes live in the root `.justfile` and work from anywhere:
@@ -720,16 +716,6 @@ env vars passed where `argv` was read, and a mangled line nothing highlighted.
   members, its host-import list, a fact a page states) corrects that page in
   the same change, not as a follow-up. `new-flake-module` and
   `new-host-config` name the specific pages each one tends to affect.
-- `claude cave/old-2026-08-08-PORT-PLAN-(COMPLETED).md` — the migration off
-  den: what was done, where the plan was wrong, and what is still open. Moved
-  and `old-`-prefixed 2026-08-13; was at the repo root as
-  `2026-08-08-PORT-PLAN-(COMPLETED).md` until then.
-- `claude cave/old-historical-2026-08-11-HANDOFF-durandal-and-lysithea.md` —
-  what tenacity's first boot bought the other two hosts, written when durandal
-  hadn't booted this config and lysithea didn't exist in it yet. Both of those
-  have since happened (see State) — read this one as history, not current
-  status. Moved and prefixed 2026-08-13; was
-  `2026-08-11-HANDOFF-durandal-and-lysithea.md` at the repo root until then.
 - `flake/doc/dirsAsCategory.md` — the category mechanism and its trailhead.
 - `nireHost/installer/liveusb-installer.md` — building the `nire-installer`
   live-USB image and the full walkthrough for installing a target host with
