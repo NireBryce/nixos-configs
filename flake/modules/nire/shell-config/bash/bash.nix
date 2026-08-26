@@ -79,6 +79,26 @@
                 # value, do not assume.
                 initExtra = lib.mkMerge [
                     (lib.mkBefore ''
+                        # nixpkgs' programs.ssh module exports SSH_ASKPASS
+                        # globally whenever services.xserver.enable is true --
+                        # which kde-desktop brings, on durandal and cube --
+                        # with no way to scope it to sessions that actually
+                        # have a display. Over a plain SSH login (no
+                        # DISPLAY/WAYLAND_DISPLAY) it's worse than useless:
+                        # anything that tries to use it (e.g. `git push`
+                        # prompting for HTTPS credentials) crashes instead of
+                        # falling back to a normal terminal prompt, because
+                        # ksshaskpass needs a Qt/X11 platform that isn't
+                        # there. Found 2026-08-26 on cube: an interactive SSH
+                        # session's `git push` died with "ksshaskpass died of
+                        # signal 6" before ever reaching a username prompt.
+                        # Harmless no-op on a host that never had it set (no
+                        # desktop imported -- tenacity, lego) or a real
+                        # graphical session (DISPLAY/WAYLAND_DISPLAY present).
+                        if [[ -z "''${DISPLAY:-}''${WAYLAND_DISPLAY:-}" ]]; then
+                            unset SSH_ASKPASS
+                        fi
+
                         [[ ''$- == *i* ]] && source -- ${pkgs.blesh}/share/blesh/ble.sh --attach=none
                     '')
 
