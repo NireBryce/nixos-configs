@@ -30,7 +30,8 @@
       "Bash(git push *)",
       "Read(//var/lib/NetworkManager/**)",
       "Bash(systemctl --failed)",
-      "Bash(nixos-rebuild list-generations *)"
+      "Bash(nixos-rebuild list-generations *)",
+      "Bash(nix eval *)"
     ]
   }
 }
