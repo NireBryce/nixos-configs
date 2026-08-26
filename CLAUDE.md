@@ -781,7 +781,13 @@ env vars passed where `argv` was read, and a mangled line nothing highlighted.
   that using a nonexistent `virsh` flag; a missing fixed domain UUID making
   every redefine collide with the last), during which the guest itself was
   running the whole time even while the unit kept reporting failed. Now
-  confirmed clean end to end; see State and `wiki/open-threads.md`.
+  confirmed clean end to end; see State and `wiki/open-threads.md`. §42 (not
+  every file git tracks deserves the same scrutiny) is a 2026-08-26 session
+  behavior correction, not a repo bug: `.claude/settings.local.json` got the
+  same protect-the-semantics treatment as an actual Nix module across a
+  string of merge conflicts, unprompted and after being told once already to
+  stop -- it's a local permission allowlist, not something to defend from
+  redundancy on Elly's behalf.
 - `flake/doc/trailhead-home-manager-standalone.md` — reversing the HM decision, and the
   part of the cutover that is one-way on the machine rather than in the repo.
 - `git show origin/flake-parts:SESSION-HANDOFF.md` — the sibling branch's notes
