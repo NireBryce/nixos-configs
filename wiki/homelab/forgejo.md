@@ -35,7 +35,16 @@ Please contact your site administrator." with no form fields on it. Verified
 live, 2026-08-24. So "the signup page loads" is not evidence registration is
 open — read the page, not the status code.
 
-To add a user, on cube:
+**The first account (`elly`, admin) is bootstrapped automatically as of
+2026-08-26** — `forgejo-admin-bootstrap` (see
+[git-forge](../categories/git-forge.md)) creates it on activation, with a
+password from this repo's sops secrets rather than typed by hand. It
+resets that password to the sops value on every `switch`, so changing it
+through the web UI won't stick — change it in `secrets.yaml` instead if it
+ever needs to change. Not yet switched on cube or confirmed by an actual
+login; treat as unverified until then.
+
+To add a *second* user, on cube:
 
 ```sh
 sudo -u forgejo forgejo admin user create --help
@@ -43,7 +52,8 @@ sudo -u forgejo forgejo admin user create --help
 
 `--admin`, `--username`, `--email` and `--password` are the flags that
 matter. Run `--help` rather than trusting a command line from this page —
-nothing here has created a user, so the exact invocation is untested.
+nothing here has created a second user, so the exact invocation is
+untested.
 
 ## SSH keys, and the second user on this host
 

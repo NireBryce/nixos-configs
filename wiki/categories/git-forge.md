@@ -119,9 +119,46 @@ section above), so it stays the short `ts-cube` and clone URLs stay
 homelab forge has no concurrent-write load a real RDBMS is needed for, and
 it avoids standing up a second service/category just for this one. Since
 only the tailnet (in practice, elly's own devices) can reach it at all,
-`DISABLE_REGISTRATION = true` closes public self-registration too — a new
-user, if this ever wants more than one, is a `forgejo admin user create`
-away.
+`DISABLE_REGISTRATION = true` closes public self-registration too — a
+*second* user, if this ever wants more than one, is a `forgejo admin user
+create` (or the web UI's Site Administration panel) away. The first
+account no longer needs that by-hand step — see below.
+
+## Admin account: bootstrapped from nix+sops, not created by hand
+
+Added 2026-08-26. `DISABLE_REGISTRATION` plus no setup wizard
+(`useWizard` stays at its nixpkgs default `false`, and `INSTALL_LOCK` is
+forced `true` a few lines up) means nothing creates the *first* account
+either — before this, that was a manual `forgejo admin user create` on
+cube, same as any additional user still is.
+
+`forgejo-admin-bootstrap`, a systemd oneshot ordered after
+`forgejo.service`, now does this declaratively: it tries
+`admin user create --admin` for `elly`, and if that fails (the only
+realistic reason, once `forgejo.service` itself is healthy, is "already
+exists") falls back to `admin user change-password`. The password comes
+from a new sops secret, `forgejo-admin-password`, declared **in this
+module** rather than centralized in `system/secrets/sops.nix` alongside
+the syncthing-\* secrets — deliberately, so it only decrypts on
+`nire-cube`, where `git-forge` is actually imported, not on
+durandal/tenacity/lego too.
+
+**This resets the password to the sops value on every activation** — a
+considered choice, not the create-once/never-touch-again shape
+`forgejo-secrets.service` and Grafana's `grafana-secret-key-setup.service`
+use for signing keys. Unlike a signing key, a password has nothing else
+that breaks if it changes, and the intent is for this repo's nix+sops
+config to be the sole source of truth for it. The real tradeoff: changing
+the password by hand through the web UI would get silently reverted on
+the next `just switch`.
+
+**Status: evaluates only, not yet switched on cube.** `just preflight`
+passes and durandal/tenacity/lego's toplevels were confirmed unaffected
+beyond the expected drvPath move from `secrets.yaml`'s own content
+changing (`just diff` shows no sampled attribute differs) — but nobody
+has logged in with this account yet. Treat as unverified until a real
+`switch` on cube and a login confirm it, per this repo's own "treat an
+undated verified as evaluates" rule.
 
 ## No persistence entry, same reasoning as Grafana
 

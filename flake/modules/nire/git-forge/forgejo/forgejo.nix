@@ -23,7 +23,7 @@
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.nixos.${moduleName} = {
+        flake.modules.nixos.${moduleName} = { config, ... }: {
             services.forgejo = {
                 enable  = true;
                 # sqlite3 (the module default) rather than postgres/mysql --
@@ -150,6 +150,85 @@
             # environment.persistence entry needed. If this module is ever
             # imported by a host that DOES wipe root, add one first, modeled
             # on tailscale-persist.nix.
+
+            # Admin account bootstrap. Added 2026-08-26 -- DISABLE_REGISTRATION
+            # above closes self-signup, and there's no setup wizard
+            # (useWizard stays at its default false, INSTALL_LOCK is forced
+            # true a few lines up), so nothing creates the FIRST account
+            # either. Declared here rather than run by hand
+            # (`forgejo admin user create` at a shell) so the account is
+            # reproducible from this repo + sops rather than living only in
+            # whatever state a one-off command left on the machine.
+            #
+            # sopsFile is left unset -- it defaults to
+            # `config.sops.defaultSopsFile`, already secrets.yaml, set
+            # globally in nire/system/secrets/sops.nix (imported by every
+            # Linux host via the `system` category). Declared HERE rather
+            # than centralized alongside the syncthing-* secrets in
+            # sops.nix, on purpose: `git-forge` is cube-only, and a secret
+            # declared in sops.nix decrypts on every host that imports
+            # `system` -- durandal/tenacity/lego included, none of which run
+            # Forgejo. Declaring it in the module that actually uses it
+            # means it only decrypts where the module is imported.
+            sops.secrets.forgejo-admin-password = {
+                owner = config.services.forgejo.user;
+                group = config.services.forgejo.group;
+                mode  = "0400";
+            };
+
+            # Deliberately RESETS the password to the sops value on every
+            # activation, rather than the create-if-missing/never-touch-again
+            # shape forgejo-secrets.service and grafana-secret-key-setup.service
+            # use for SECRET_KEY-style values -- a considered choice, not an
+            # oversight: unlike a signing key, a password has no other state
+            # that breaks if it changes, and this repo's nix+sops config is
+            # meant to be the sole source of truth for it. The tradeoff,
+            # spelled out rather than left implicit: logging into the web UI
+            # and changing the password by hand would get silently reverted
+            # on the next `just switch`.
+            #
+            # `admin user create` is tried first (handles the very first
+            # activation, when the account doesn't exist yet); if it fails
+            # -- the only realistic failure mode once forgejo.service itself
+            # is healthy is "user already exists" -- `admin user change-password`
+            # runs instead. Ordered `after`/`wants` forgejo.service rather
+            # than duplicating its own `forgejo migrate` preStart step,
+            # since by the time a Type=notify unit reports active its
+            # preStart (which runs the migration) has already completed.
+            systemd.services.forgejo-admin-bootstrap = {
+                description = "Ensure the Forgejo admin account exists with the sops-managed password";
+                after       = [ "forgejo.service" ];
+                wants       = [ "forgejo.service" ];
+                wantedBy    = [ "multi-user.target" ];
+                path        = [ config.services.forgejo.package ];
+
+                script = ''
+                    set -euo pipefail
+                    USERNAME=elly
+                    EMAIL=nire@computernope.net
+                    CONFIG=${config.services.forgejo.customDir}/conf/app.ini
+                    PASSWORD_FILE=${config.sops.secrets.forgejo-admin-password.path}
+
+                    if ! forgejo --config "$CONFIG" admin user create \
+                        --username "$USERNAME" \
+                        --email "$EMAIL" \
+                        --password "$(cat "$PASSWORD_FILE")" \
+                        --admin \
+                        --must-change-password=false
+                    then
+                        forgejo --config "$CONFIG" admin user change-password \
+                            --username "$USERNAME" \
+                            --password "$(cat "$PASSWORD_FILE")"
+                    fi
+                '';
+
+                serviceConfig = {
+                    Type             = "oneshot";
+                    RemainAfterExit  = true;
+                    User             = config.services.forgejo.user;
+                    Group            = config.services.forgejo.group;
+                };
+            };
         };
 }
 
