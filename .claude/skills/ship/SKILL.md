@@ -1,67 +1,84 @@
 ---
 name: ship
-description: Branch -> PR -> confirm -> merge -> confirm -> delete-branch flow for landing work on main in this repo.
+description: Branch -> PR -> confirm -> merge -> confirm -> delete-branch flow for landing work on experimental in this repo.
 ---
 
-# Landing work on main in nixos-configs
+# Landing work on experimental in nixos-configs
 
 ## Applies to
 
-Use only when the ask is to get changes onto `main` — a bare "push", "ship
-it", "land this", "merge this". Do NOT use for pushing a topic branch,
-opening a PR you were not asked to merge, pushing to a fork or any non-main
-target, or committing without pushing. Elly naming `main` outright is the
-one case that means push directly — see the last section, "Only when Elly
-names main".
+Use only when the ask is to get changes onto `experimental` — a bare "push",
+"ship it", "land this", "merge this". Do NOT use for pushing a topic branch,
+opening a PR you were not asked to merge, pushing to a fork, or committing
+without pushing. Elly naming a branch outright is the one case that means
+push directly there instead — see the last section, "Only when Elly names a
+branch".
 
-**"push" in this repo means this whole flow, not `git push origin main`.** Elly
-said so on 2026-08-21, after a session pushed three commits straight to `main`
-on the strength of a bare "push" plus a commit log full of `yeahhhhh` and
-`idek`. That inference read *tone* as *process*. They are independent: this
-config wipes `/root` on boot on three hosts, so an unreviewed change on `main`
-is not low-stakes even when the diff is small.
+**"push" in this repo means this whole flow, not `git push origin
+experimental`.** Elly said so on 2026-08-21, after a session pushed three
+commits straight to `main` (the flow's target at the time) on the strength of
+a bare "push" plus a commit log full of `yeahhhhh` and `idek`. That inference
+read *tone* as *process*. They are independent: this config wipes `/root` on
+boot on three hosts, so an unreviewed change on the trunk is not low-stakes
+even when the diff is small. Redirected 2026-08-25: this flow now lands on
+`experimental` rather than `main` (see CLAUDE.md, "push"); the discipline the
+2026-08-21 incident established — a bare "push" always means the guarded flow
+below, never a raw `git push` — carries over unchanged, only the branch at
+the end of it moved.
 
 There are **two** confirmations, and they are separate questions. Do not
 collapse them.
 
 ## When this fires
 
-**Only when the ask is to get changes onto `main`.** That is the single
-trigger. It covers a bare "push" — which is what started this, and which means
-main here — as well as "ship it", "land this", "merge this".
+**Only when the ask is to get changes onto `experimental`.** That is the
+single trigger. It covers a bare "push" — which is what started this, and
+which means `experimental` here, not `main` — as well as "ship it", "land
+this", "merge this".
 
-Elly naming `main` outright is the exception, not a stronger version of the
-trigger; see "Only when Elly names main" at the bottom.
+Elly naming a branch outright is the exception, not a stronger version of the
+trigger; see "Only when Elly names a branch" at the bottom.
 
-It does **not** fire for git work that is not aimed at main. Do those normally,
-without this flow:
+It does **not** fire for git work that is not aimed at `experimental`. Do
+those normally, without this flow:
 
 | ask | what to do |
 |---|---|
 | "push this branch" / "push the branch up" | `git push` it. No PR, no gates. |
 | "open a PR" (without being asked to merge) | Open it and stop. Steps 3-4 are not yours to run. |
 | "commit this" | Commit. Pushing was not asked for. |
-| push to a fork, a remote that is not `origin`, or any branch that is not `main` | Ordinary push. |
+| "push to main" / naming `main` (or any other specific branch) outright | Push directly there — see "Only when Elly names a branch". |
+| push to a fork, a remote that is not `origin`, or any branch that is not `experimental` | Ordinary push. |
 
-If you are unsure whether an ask means main, ask Elly rather than assuming
-either way. Assuming *yes* opens an unwanted PR; assuming *no* is the mistake
-this file exists to prevent.
+If you are unsure whether an ask means `experimental`, ask Elly rather than
+assuming either way. Assuming *yes* opens an unwanted PR; assuming *no* is the
+mistake this file exists to prevent.
+
+**GitHub's own default branch is still `main`, not `experimental`** — this
+flow changed, the repo setting didn't. `gh pr create` and `gh pr edit --base`
+both default to `main` when `--base` is omitted, so every PR this flow opens
+needs `--base experimental` stated explicitly; leaving it implicit lands the
+PR against the wrong trunk silently, not as an error.
 
 ## 0. Before anything: fetch, then is it green?
 
 `git fetch origin` first, always — before `git status -sb`, before branching,
-before deciding whether main is ahead. Local `main` silently drifting behind
-`origin/main` is a real, repeated failure mode here: other sessions land PRs
-concurrently, and a branch cut from a stale `main` either merges awkwardly or
-(worse) makes a "confirmed unaffected" drvPath comparison meaningless because
-it was never actually comparing against current `main`.
+before deciding whether `experimental` is ahead. Local `experimental` silently
+drifting behind `origin/experimental` is a real, repeated failure mode here:
+other sessions land PRs concurrently, and a branch cut from a stale
+`experimental` either merges awkwardly or (worse) makes a "confirmed
+unaffected" drvPath comparison meaningless because it was never actually
+comparing against current `experimental`.
 
 Then: a PR is a review gate someone reads, so do not open one on work you have
 not checked. `.github/workflows/check.yml` runs `just check` + `just modules`
 + `just lint` on every PR automatically now (`lint` added 2026-08-25) — but
 that is a few-minutes-later backstop, not a substitute for checking locally
 first; a red CI run on a PR someone is about to be asked to merge is a worse
-experience than not opening the PR yet.
+experience than not opening the PR yet. (As of 2026-08-25 that check is a
+required status only on `main`'s ruleset — see the ruleset note below — so on
+`experimental` it is purely a courtesy backstop, not something GitHub will
+enforce for you either.)
 
 ```sh
 just preflight    # check + modules + lint in one shot -- from the repo root,
@@ -87,20 +104,20 @@ git worktree remove --force /tmp/wt
 
 ## 1. Branch, push, open the PR
 
-Never commit onto `main`. Run `git status -sb` first (you already fetched in
-step 0) — the fix differs by which of two positions you are in, and they look
-similar in a diff:
+Never commit onto `experimental`. Run `git status -sb` first (you already
+fetched in step 0) — the fix differs by which of two positions you are in,
+and they look similar in a diff:
 
-- **Uncommitted changes on `main`** (the common one; `## main...origin/main`
-  with a dirty tree). Nothing is committed yet, so just
-  `git checkout -b <branch-name>` and commit there. No reset, nothing to
-  rescue.
-- **Commits already sitting on local `main`, unpushed** (`[ahead N]`). Move
-  them rather than pushing:
+- **Uncommitted changes on `experimental`** (the common one; `##
+  experimental...origin/experimental` with a dirty tree). Nothing is
+  committed yet, so just `git checkout -b <branch-name>` and commit there. No
+  reset, nothing to rescue.
+- **Commits already sitting on local `experimental`, unpushed** (`[ahead
+  N]`). Move them rather than pushing:
 
   ```sh
-  git branch <branch-name>          # keep the commits
-  git reset --hard origin/main      # put main back
+  git branch <branch-name>                 # keep the commits
+  git reset --hard origin/experimental     # put experimental back
   git checkout <branch-name>
   ```
 
@@ -123,7 +140,9 @@ green, and do not split into commits that describe state the tree does not have
 yet. One coherent commit beats two artificial ones — a `CLAUDE.md` line
 pointing at a new file belongs in the same commit as the file.
 
-Then `git push -u origin <branch-name>` and `gh pr create`. Write the PR body
+Then `git push -u origin <branch-name>` and
+`gh pr create --base experimental` (the explicit `--base` is load-bearing —
+see "GitHub's own default branch is still `main`" above). Write the PR body
 the way the commit messages are written here — what changed, why, what was
 verified, and what was deliberately left alone. `.github/PULL_REQUEST_TEMPLATE.md`
 (added 2026-08-25) has this shape as headings already; `gh pr create --body`
@@ -137,20 +156,23 @@ Show what **actually landed**, read back from git and `gh`, not recalled from
 what you meant to do (`check-claims-against-the-machine`). At minimum:
 
 ```sh
-gh pr view --json url,title,additions,deletions,changedFiles,mergeable
-git log --oneline origin/main..HEAD
-git diff --stat origin/main...HEAD
+gh pr view --json url,title,additions,deletions,changedFiles,mergeable,baseRefName
+git log --oneline origin/experimental..HEAD
+git diff --stat origin/experimental...HEAD
 ```
 
-Include `mergeable` and check it before asking. Asking "merge?" on a PR that
-cannot merge spends one of Elly's round-trips on a question with no good
-answer; sort the conflict out first, then ask.
+Include `mergeable` and check it before asking. Also check `baseRefName` is
+actually `experimental` — a PR opened without the explicit `--base` from step
+1 lands silently against `main` instead, and that is a base to catch here,
+not at merge time. Asking "merge?" on a PR that cannot merge, or that is
+based on the wrong branch, spends one of Elly's round-trips on a question
+with no good answer; sort it out first, then ask.
 
 Print that in your response, then ask with `AskUserQuestion` whether to merge.
 Include the merge method in what you show:
 
 - **PR is a single commit** (the common case here — check with `git log
-  --oneline origin/main..HEAD` from step 2, already run): default to
+  --oneline origin/experimental..HEAD` from step 2, already run): default to
   `--rebase`. Linear history, no merge commit, and `--merge`'s whole reason
   for existing (preserving multi-commit reasoning that squash would flatten)
   doesn't apply to a PR that's already one commit — `--merge` there is a
@@ -158,8 +180,8 @@ Include the merge method in what you show:
 - **PR is multiple commits**: default to `--merge`, not `--squash` — this
   repo puts real reasoning in individual commit messages and squashing
   flattens it, and `--rebase` here would replay each commit individually
-  onto `main`, which is fine but loses the visual grouping a merge commit
-  gives a multi-commit PR.
+  onto `experimental`, which is fine but loses the visual grouping a merge
+  commit gives a multi-commit PR.
 
 On **no**: leave the PR open, say so, and stop. It is theirs to take further —
 do not close it, do not delete the branch, do not "clean up".
@@ -172,27 +194,30 @@ gh pr merge <n> --merge    # multi-commit PR
 ```
 
 **Do not pass `--delete-branch`.** That is the shortcut that silently removes
-the second confirmation, which is the specific thing Elly asked for. This repo
-has `deleteBranchOnMerge: false`, so the branch really does survive a merge and
-step 4 is real work rather than a formality.
+the second confirmation, which is the specific thing Elly asked for.
+`main` has `deleteBranchOnMerge: false` (set at the repo level, so it applies
+here too), so the branch really does survive a merge and step 4 is real work
+rather than a formality.
 
 ## 4. Ask again, then delete — second confirmation
 
 Separate `AskUserQuestion`. On yes:
 
 ```sh
-git checkout main && git pull
+git checkout experimental && git pull
 git branch -d <branch-name>
 git push origin --delete <branch-name>
 ```
 
 On no, leave it and say it is still there. Report the merge commit and the
-branch's fate; do not report a commit range on `main` as if you had pushed
-there.
+branch's fate; do not report a commit range on `experimental` as if you had
+pushed there.
 
 ## When one working tree becomes two PRs
 
-Both of these bit on 2026-08-21, splitting one dirty tree into #43 and #44.
+Both of these bit on 2026-08-21, splitting one dirty tree into #43 and #44
+(back when this flow's target was still `main`; the mechanics below are
+unchanged by the 2026-08-25 redirect).
 
 **`cp` is aliased to `cp -i` on this machine** — `~/.zshrc:372`, Home Manager
 generated. In a non-interactive Bash call it answers its own prompt, prints
@@ -214,7 +239,7 @@ confirmation that is supposed to be Elly's. Retarget explicitly instead, before
 merging the child:
 
 ```sh
-gh pr edit <child-number> --base main
+gh pr edit <child-number> --base experimental
 ```
 
 Then merge it, then ask about both branches together at step 4.
@@ -227,7 +252,7 @@ four round-trips. Say in the options which PR is stacked on which, so a
 "no on the parent, yes on the child" answer is visibly incoherent rather than
 something you have to unpick afterwards.
 
-## The ruleset does not enforce this for you
+## The ruleset does not enforce this for you — and it only covers `main`
 
 A branch ruleset ("main: require a PR", id 21163726) was added 2026-08-21:
 `main` cannot be deleted, cannot be force-pushed, and needs a PR to merge into.
@@ -238,17 +263,30 @@ a solo repo would deadlock, since nobody can approve their own. As of
 that workflow had a stable, real check name from several actual runs, not
 guessed at before it existed.
 
-**It does not stop you.** Bypass is granted to the admin repository role, and
-`gh`/`git` here authenticate as Elly, who is the admin — the API reports
-`current_user_can_bypass: always`. A direct `git push origin main` from this
-session would still succeed, and `gh pr merge` would still work on a PR whose
-check is red. The ruleset is a backstop for everything else and a visible
-statement of intent; the actual guard against the mistake this file documents
-is this file. Do not read "main is protected" as "the tooling will catch me" —
-that was true before the status check existed and is still true now that it
-does.
+**`experimental` has no ruleset at all** (checked 2026-08-25 via `gh api
+repos/NireBryce/nixos-configs/rulesets`: exactly one ruleset exists, and it
+names `main`). Nothing stops a direct `git push origin experimental`, a
+force-push, or a branch deletion — the two `AskUserQuestion` confirmations in
+this flow are the *entire* guard for work landing on `experimental`, not a
+belt-and-suspenders layered on top of a GitHub-enforced one the way `main`'s
+are. If Elly wants equivalent protection on `experimental`, that is a
+deliberate GitHub-side change (a new ruleset) to ask about explicitly, not
+something to infer from this redirect or set up unasked.
 
-## Only when Elly names main
+**It does not stop you, on `main` either.** Bypass is granted to the admin
+repository role, and `gh`/`git` here authenticate as Elly, who is the admin —
+the API reports `current_user_can_bypass: always`. A direct `git push origin
+main` from this session would still succeed, and `gh pr merge` would still
+work on a PR whose check is red. The ruleset is a backstop for everything
+else and a visible statement of intent; the actual guard against the mistake
+this file documents is this file. Do not read "main is protected" as "the
+tooling will catch me" — that was true before the status check existed and
+is still true now that it does, and it was never true for `experimental` at
+all.
 
-The one exception is Elly specifically saying `main` for that push. A bare
-"push", "ship it", or "land this" is not that.
+## Only when Elly names a branch
+
+The one exception is Elly specifically naming a branch — `main`,
+`experimental`, or anything else — for that push. A bare "push", "ship it",
+or "land this" is not that; it means the guarded flow above, targeting
+`experimental`.

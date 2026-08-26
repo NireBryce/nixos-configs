@@ -38,10 +38,11 @@ was rejected as still not saying what the skill *does*; "How to create,
 rename, or wire a flake-parts module in this repo" was accepted. Prefer
 active "How to `<verb>`…" phrasing over a "Known traps in…" noun phrase for
 a procedural skill — "traps" framing reads as scope, not purpose. `ship`'s
-description ("Branch -> PR -> confirm -> merge -> confirm -> delete-branch
-flow for landing work on main in this repo") shows the same test passing
-without literal "How to" wording — a short flow description is fine as
-long as it states purpose, not scope.
+description as of that pass ("Branch -> PR -> confirm -> merge -> confirm ->
+delete-branch flow for landing work on main in this repo" — reworded
+2026-08-25 to target `experimental` instead, see `ship` itself) shows the
+same test passing without literal "How to" wording — a short flow
+description is fine as long as it states purpose, not scope.
 
 ## Steps
 
@@ -62,7 +63,7 @@ long as it states purpose, not scope.
 3. **Write `## Applies to` immediately after the title.** This is where all
    of the following belongs, wherever it exists for this skill: which
    files or situations trigger it, explicit non-triggers (see `ship`'s
-   table of "ask means main" vs. "ordinary push" cases), named example
+   table of "ask means experimental" vs. "ordinary push" cases), named example
    files, exceptions to the general rule.
 4. **Write the rest of the body** in whatever shape the task actually
    needs, picking only sections that earn their place: `Why this exists`
