@@ -17,9 +17,10 @@ Both are platform independent, so unlike the host checks they also run on darwin
 
     modules.py collisions <modules-dir>
     modules.py orphans    <modules-dir>
-    modules.py check      <modules-dir>     # both; non-zero exit on any finding
+    modules.py untracked  <modules-dir>     # untracked .nix files -- invisible to flakes
+    modules.py check      <modules-dir>     # all three; non-zero exit on any finding
 """
-import re, sys, pathlib
+import re, sys, pathlib, subprocess
 
 CATEGORY_FILE = 'dirsAsCategory.nix'
 DECL = re.compile(r'flake\.modules\.(\w+)\.(?:\$\{moduleName\}|(\w+))')
@@ -165,6 +166,31 @@ def orphans(root):
     return findings
 
 
+def untracked(root):
+    """A new .nix file that git doesn't know about yet.
+
+    CLAUDE.md, 'Working in this repo': flakes in a git repo ignore untracked
+    files, so a brand-new module silently does not exist as far as `nix eval`
+    or a build is concerned -- no error, just a module that was never there.
+    `git status` already reports this, but nothing surfaces it at the moment
+    it actually matters (right before a check/build), so it stays easy to
+    forget in exactly the way that trap already bit once.
+    """
+    try:
+        out = subprocess.run(
+            ['git', 'status', '--porcelain', '--untracked-files=all', '--', str(root)],
+            capture_output=True, text=True, check=True,
+        ).stdout
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return []           # not a git checkout, or git unavailable -- nothing to report
+    hits = [line[3:] for line in out.splitlines()
+            if line.startswith('??') and line[3:].endswith('.nix')]
+    for path in hits:
+        print(f"UNTRACKED  {path} -- `git add` it, or nix will silently act as "
+              f"though it does not exist")
+    return hits
+
+
 def main():
     if len(sys.argv) != 3:
         print(__doc__); sys.exit(2)
@@ -173,8 +199,10 @@ def main():
         sys.exit(1 if collisions(root) else 0)
     if cmd == 'orphans':
         sys.exit(1 if orphans(root) else 0)
+    if cmd == 'untracked':
+        sys.exit(1 if untracked(root) else 0)
     if cmd == 'check':
-        bad = bool(collisions(root)) | bool(orphans(root))
+        bad = bool(collisions(root)) | bool(orphans(root)) | bool(untracked(root))
         print("no findings" if not bad else "", end="")
         sys.exit(1 if bad else 0)
     print(__doc__); sys.exit(2)

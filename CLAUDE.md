@@ -173,6 +173,8 @@ dropped by the den restructure and brought back from
 ```sh
 just check           # nix flake check --all-systems --no-build
 just modules         # static module-tree check; the only one that means anything on darwin
+just lint            # statix + deadnix + oversized-file check, ratcheted -- see flake/scripts/lint.py
+just install-hooks   # one-time: run this check locally pre-commit too, not just in CI
 just available <pkg> # can it build on aarch64-darwin, and does a cask install it too
 just available --duplicates   # only the ones homebrew ALSO installs, and what to do
 just fingerprint     # drvPath of the host toplevel
@@ -560,7 +562,11 @@ skill.
 ## Working in this repo
 
 **`git add` before `nix eval`.** Flakes in a git repo ignore untracked files, so
-a new module silently does not exist.
+a new module silently does not exist. `just modules` (`modules.py`'s
+`untracked` check, added 2026-08-25) now catches this mechanically — an
+untracked `.nix` file under `modules/` fails the check with the path — so this
+is a backstop for when that check wasn't run, not the only place the rule
+lives.
 
 **Read upstream source rather than guessing at options.** It settled, during the
 port, that `perSystem` has no `freeformType`, that `home.sessionPath` is
@@ -651,6 +657,11 @@ The name is copied from the system prompt; if that is stale or generic, the
 commit records a confident claim about something the author had no way to
 check. Dropping the model leaves the trailer true. Existing commits keep their
 labels; rewriting merged history to fix a trailer is not worth a force-push.
+Added 2026-08-25: `.githooks/commit-msg` (active once `just install-hooks` has
+been run once in this checkout) auto-corrects a `Claude <model name>` trailer
+to the canonical form at commit time — a mechanical fix for a mistake this
+paragraph already established can't be caught by re-reading, rather than
+something to keep manually double-checking for.
 
 **Namespacing.** `nire` unless it needs a more specific tag; `nireHost`,
 `nireUser`, `nirePackages` otherwise.

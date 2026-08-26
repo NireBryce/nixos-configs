@@ -58,14 +58,15 @@ it was never actually comparing against current `main`.
 
 Then: a PR is a review gate someone reads, so do not open one on work you have
 not checked. `.github/workflows/check.yml` runs `just check` + `just modules`
-on every PR automatically now (added 2026-08-25) — but that is a
-few-minutes-later backstop, not a substitute for checking locally first; a red
-CI run on a PR someone is about to be asked to merge is a worse experience
-than not opening the PR yet. From `flake/`:
++ `just lint` on every PR automatically now (`lint` added 2026-08-25) — but
+that is a few-minutes-later backstop, not a substitute for checking locally
+first; a red CI run on a PR someone is about to be asked to merge is a worse
+experience than not opening the PR yet.
 
 ```sh
-just modules      # name collisions and orphans; the one check that means
-                  # anything on darwin
+just preflight    # check + modules + lint in one shot -- from the repo root,
+                  # not flake/; the three recipes it dispatches to already
+                  # each cd into flake themselves
 ```
 
 plus a forced toplevel for every config the change could touch — `nix eval
