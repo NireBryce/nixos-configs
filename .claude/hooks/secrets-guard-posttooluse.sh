@@ -16,13 +16,28 @@
 set -euo pipefail
 
 input=$(cat)
-text=$(jq -r '.tool_response // empty | tostring' <<<"$input" 2>/dev/null || true)
+# Extract stdout/stderr as RAW text, not `tostring` on the whole object --
+# tostring re-serializes an object to compact JSON, which turns real
+# newlines inside .stdout into literal two-character `\n` escapes and glues
+# the rest of the JSON structure onto that same "line". That silently broke
+# every newline-sensitive check below (found live, 2026-08-26: a plain list
+# of secrets.yaml key names with no values at all was flagged, because the
+# JSON-escaped remainder of the blob became "content after the key name").
+text=$(jq -r '
+    if (.tool_response | type) == "object" then
+        [(.tool_response.stdout // ""), (.tool_response.stderr // "")] | join("\n")
+    elif (.tool_response | type) == "string" then
+        .tool_response
+    else
+        empty
+    end
+' <<<"$input" 2>/dev/null || true)
 
 hit=""
 grep -qE 'tskey-[A-Za-z0-9_-]+' <<<"$text" && hit="a Tailscale auth key (tskey-...)"
 [ -z "$hit" ] && grep -qE 'AGE-SECRET-KEY-[A-Z0-9]+' <<<"$text" && hit="an age secret key (AGE-SECRET-KEY-...)"
 [ -z "$hit" ] && grep -qE -- '-----BEGIN (OPENSSH|RSA|EC|DSA) PRIVATE KEY-----' <<<"$text" && hit="a private key block"
-[ -z "$hit" ] && grep -qP '\b(tailscale_key|atuin_key):\s*(?!ENC\[)\S' <<<"$text" && hit="a bare tailscale_key/atuin_key value (not ENC[...])"
+[ -z "$hit" ] && grep -qP '\b(tailscale_key|atuin_key):[ \t]*+(?!ENC\[).{15,}' <<<"$text" && hit="a bare tailscale_key/atuin_key value (not ENC[...])"
 
 if [ -n "$hit" ]; then
     jq -n --arg hit "$hit" '{
