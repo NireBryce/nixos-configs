@@ -21,7 +21,8 @@
       "Read(//tmp/**)",
       "Bash(grep \"nix flake check --all-systems\" /tmp/diag-log.txt | grep -v \"DEBUG diagnostics\" | tail -20)",
       "Bash(just lint *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(gh pr *)"
     ]
   }
 }
