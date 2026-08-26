@@ -27,7 +27,11 @@
       "Bash(git status *)",
       "Bash(just preflight *)",
       "Bash(git checkout *)",
-      "Bash(git commit -m 'docs: redirect ship flow from main to experimental *)"
+      "Bash(git commit -m 'docs: redirect ship flow from main to experimental *)",
+      "Bash(git push *)",
+      "Read(//var/lib/NetworkManager/**)",
+      "Bash(systemctl --failed)",
+      "Bash(nixos-rebuild list-generations *)"
     ]
   }
 }
