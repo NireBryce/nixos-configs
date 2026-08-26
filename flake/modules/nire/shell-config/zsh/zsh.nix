@@ -176,6 +176,22 @@
                     (lib.mkBefore ''
                     zmodload zsh/zprof                                # zsh profiler
 
+                    # nixpkgs' programs.ssh module exports SSH_ASKPASS
+                    # globally whenever services.xserver.enable is true --
+                    # which kde-desktop brings, on durandal and cube -- with
+                    # no way to scope it to sessions that actually have a
+                    # display. Over a plain SSH login it's worse than
+                    # useless: anything that tries to use it crashes instead
+                    # of falling back to a normal terminal prompt, since
+                    # ksshaskpass needs a Qt/X11 platform that isn't there.
+                    # Same fix as bash.nix's initExtra -- see its comment for
+                    # the 2026-08-26 incident this came from. Harmless no-op
+                    # on a host that never had it set, or a real graphical
+                    # session.
+                    if [[ -z "''${DISPLAY:-}''${WAYLAND_DISPLAY:-}" ]]; then
+                        unset SSH_ASKPASS
+                    fi
+
                     #################PASSWORD ENTRY/CONFIRM DIALOGS GO ABOVE##############################
 
                     # anything requiring input/perf goes above, else below
