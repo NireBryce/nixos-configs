@@ -32,3 +32,35 @@
                 environment.persistence."/persist".files = [ "/var/lib/NetworkManager/secret_key" ];
             };
 }
+
+# ── history ─────────────────────────────────────────────────────────────────
+#
+# 2026-08-26 — first real activation on nire-tenacity hit impermanence's
+# own guard
+#
+# `just switch` failed with "A file already exists at
+# /var/lib/NetworkManager/secret_key!". Not a bug in this file: NetworkManager
+# had already generated a live secret_key on the running boot (dated a day
+# after /persist/var/lib/NetworkManager/ itself was created, from an earlier
+# partial attempt), and impermanence's `files` activation refuses to silently
+# bind-mount over a real file that's already sitting at the target -- it can't
+# know whether to keep the live one or discard it, so it stops rather than
+# guess wrong the way Grafana's secret_key module guards against re-rotating
+# on top of `grafana.nix`, above -- same shape, unrelated file. Fixed by hand,
+# once, the same way that file's header describes for itself: moved the live
+# key into persistent storage rather than letting the activation invent a
+# fresh one --
+#
+#     sudo mkdir -p /persist/var/lib/NetworkManager
+#     sudo mv /var/lib/NetworkManager/secret_key /persist/var/lib/NetworkManager/secret_key
+#
+# -- then re-ran `just switch`, which succeeded. Confirmed after: the live
+# path and the /persist copy are the same inode (`stat -c '%d %i'` on both
+# matched), and the key's mtime was unchanged, so the wifi secrets already
+# encrypted with it in `/etc/NetworkManager/system-connections` stayed
+# decryptable rather than getting silently orphaned by a fresh key. This is a
+# one-time migration step for whichever host activates this module's
+# persistence entry for the first time, not something the module itself
+# should try to automate -- moving a file on someone's behalf during
+# activation is exactly the silent-overwrite impermanence's guard exists to
+# prevent.
