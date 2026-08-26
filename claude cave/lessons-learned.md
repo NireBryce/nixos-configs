@@ -6,9 +6,11 @@
 > mainly as a list of things that have gone wrong here before. `CLAUDE.md` has
 > the rules; this has the scar tissue.
 
-Companion to `old-2026-08-08-PORT-PLAN-(COMPLETED).md` and
-`old-historical-TENACITY-PLAN.md`, which record *what* was done. This records how it went wrong in the doing, which is
-not recoverable from the tree or the commits.
+Used to be a companion to `old-2026-08-08-PORT-PLAN-(COMPLETED).md` and
+`old-historical-TENACITY-PLAN.md`, which recorded *what* was done; both were
+removed 2026-08-26 (see `wiki/history.md`), their content already superseded
+by this file and `CLAUDE.md`'s State section. This records how it went wrong
+in the doing, which is not recoverable from the tree or the commits.
 
 Three groups, by what could be observed at the time. §§1–18 are the port, from
 the darwin laptop, against a tree that could only be evaluated. §§19–24 are the

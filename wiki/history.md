@@ -18,22 +18,16 @@
 - **[`../claude cave/lessons-learned-impermanence-stage1-migration.md`](<../claude cave/lessons-learned-impermanence-stage1-migration.md>)**
   — the stage-1 impermanence migration specifically. Covered from the
   impermanence angle on [impermanence-and-secrets.md](impermanence-and-secrets.md).
-- **[`../claude cave/old-2026-08-08-PORT-PLAN-(COMPLETED).md`](<../claude cave/old-2026-08-08-PORT-PLAN-(COMPLETED).md>)**
-  — the migration off `vic/den`: what was done, where the plan turned out
-  wrong, what was still open at the time. Completed and historical.
-- **[`../claude cave/old-historical-2026-08-11-HANDOFF-durandal-and-lysithea.md`](<../claude cave/old-historical-2026-08-11-HANDOFF-durandal-and-lysithea.md>)**
-  — written before durandal had booted this config and before lysithea
-  existed in it. Both have since happened (see [hosts.md](hosts.md)); read
-  this as history, not current status.
-- **[`../claude cave/old-historical-TENACITY-PLAN.md`](<../claude cave/old-historical-TENACITY-PLAN.md>)**,
-  **[`old-historical-tenacity-prompt.md`](<../claude cave/old-historical-tenacity-prompt.md>)**,
-  **[`old-historical-port-prompt.md`](<../claude cave/old-historical-port-prompt.md>)**
-  — planning/prompt artifacts from before tenacity booted. Historical.
 - **[`../claude cave/2026-08-09 things to look into eventually.md`](<../claude cave/2026-08-09 things to look into eventually.md>)**
   — open questions rescued from a deleted `HANDOFF-tenacity.md`, partially
   answered since (handheld stack — Jovian Steam autostart, decky-loader,
   handheld-daemon/adjustor — does work; recorded in `jovian.nix`). Also
   listed on [open-threads.md](open-threads.md).
+- The `old-`/`old-historical-`-prefixed planning and handoff artifacts (the
+  den→flake-parts port plan, the durandal/lysithea handoff, and tenacity's
+  plan/prompt files) were removed 2026-08-26, their useful content already
+  superseded by `lessons-learned.md`, `CLAUDE.md`'s State section, and this
+  page. Still in git history if one of them is ever needed again.
 
 ## Confirmed-on-hardware facts, and how they were confirmed
 
