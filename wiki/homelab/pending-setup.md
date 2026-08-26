@@ -24,24 +24,22 @@ restore drill nobody has run.
 
 ## 1. Forgejo has no users, so nobody can log in
 
-**Status: blocking.** `GET /git/api/v1/users/search` returns
-`{"data":[],"ok":true}` and `/git/api/v1/repos/search` returns an empty list.
-The forge is up, serving, and completely empty — and since registration is
-deliberately closed, the first account has to be made from the command line.
+**Status: should be resolved by the next switch, not yet confirmed.** As of
+2026-08-24, `GET /git/api/v1/users/search` returned `{"data":[],"ok":true}`
+and `/git/api/v1/repos/search` an empty list — the forge up, serving, and
+completely empty, with registration closed so the first account needed a
+manual command.
 
-On cube:
-
-```sh
-sudo -u forgejo forgejo admin user create --help
-```
-
-`--admin --username --email --password` are the flags that matter; read
-`--help` rather than trusting a line copied from here, since nothing has run
-it yet.
+2026-08-26: that manual step is now automated. `forgejo-admin-bootstrap`
+(see [git-forge](../categories/git-forge.md)) creates the `elly`/admin
+account declaratively on activation, password from this repo's sops
+secrets. `just preflight` passes, but this hasn't gone through a real
+`switch` on cube yet — the users API call above hasn't been re-run since.
 
 **Done when** you can sign in at
 `https://ts-cube.moose-micro.ts.net/git/user/login` and the users API returns
-something.
+something — re-check after the next `switch`, don't assume this item is
+closed just because the module landed.
 
 Then, separately: add an SSH key under Settings → SSH keys if you want
 `forgejo@ts-cube:…` clones. See [using the forge](forgejo.md) for why that
