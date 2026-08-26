@@ -98,7 +98,15 @@ centralized under [impermanence](impermanence.md).
   fresh key while the encrypted secrets alongside it stayed keyed to the
   previous one. Found 2026-08-22 via `root-drift.sh` flagging `secret_key`
   as real, non-cosmetic drift — the same pass that found
-  [virtualization](virtualization.md)'s `libvirt-persist.nix` gap.
+  [virtualization](virtualization.md)'s `libvirt-persist.nix` gap. First real
+  activation, on `nire-tenacity` 2026-08-26, hit impermanence's own guard —
+  NetworkManager had already generated a live `secret_key` on that boot
+  before the persistence entry ever ran, and `environment.persistence`
+  refused to silently bind-mount over it. Fixed by hand (moved the live key
+  into `/persist` before re-switching) and confirmed after: `stat` matched
+  the same inode on both paths, with the key's mtime unchanged, so existing
+  wifi secrets stayed decryptable. Full detail in the module's own history
+  note.
 
 Both rely on `environment.persistence."/persist".directories` being
 `listOf` and therefore concatenating across every file that appends to it —
