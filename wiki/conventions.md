@@ -14,12 +14,16 @@ anything on darwin), `just available <pkg>` / `--duplicates`,
 (the override goes *before* the recipe name — `just build host=…` is parsed
 as a second recipe, not a flag, and errors).
 
-## Landing changes on `main`
+## Landing changes on `experimental`
 
 Skill `ship` (`.claude/skills/ship/SKILL.md`) — branch → PR → confirm →
 merge → confirm → delete-branch. Two confirmations, not one. Only for work
-headed to `main`; pushing a topic branch is just a push. "Push" in
-conversation means this flow, not `git push origin main` directly.
+headed to `experimental`; pushing a topic branch is just a push. "Push" in
+conversation means this flow, not `git push origin main` directly. Redirected
+from `main` to `experimental` 2026-08-25 — GitHub's default branch and its
+only branch ruleset are still `main`, so the flow states `--base
+experimental` explicitly; naming a branch outright (`main` included) means
+push directly there instead.
 
 ## Style
 

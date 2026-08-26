@@ -74,7 +74,12 @@ name: flake-check
 on:
   pull_request:
   push:
-    branches: [main]
+    # `main` because that's what the branch ruleset actually protects;
+    # `experimental` added 2026-08-25 alongside the `ship` skill's redirect
+    # to it (see CLAUDE.md, "push") so a direct push/merge landing there
+    # still gets checked, even though `experimental` has no ruleset of its
+    # own to make that a requirement.
+    branches: [main, experimental]
 
 jobs:
   eval-and-modules:

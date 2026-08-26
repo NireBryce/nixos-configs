@@ -7,10 +7,13 @@
 > Elly has corrected the load-bearing claims; the framing is the machine's.
 > `README.md` is the human entry point.
 
-Guidance for Claude Code working in this repository, on `main`. (The
-`flake-parts-consolidation` branch this was originally written on merged into
-`main` via PR #30 on 2026-08-14; `main` is now well ahead of it. Don't assume
-you're on that branch — check `git branch --show-current`.)
+Guidance for Claude Code working in this repository. Historically written
+against `main` — the `flake-parts-consolidation` branch this was originally
+written on merged into `main` via PR #30 on 2026-08-14, and `main` is now
+well ahead of it. As of 2026-08-25, landing work in this repo targets
+`experimental` instead — see "push" under Working in this repo, and skill
+`ship` — while GitHub's own default branch stays `main`. Don't assume you're
+on any particular branch either way — check `git branch --show-current`.
 
 ## Safety
 
@@ -601,10 +604,16 @@ regression faster than any argument about mechanism.
 between commits. "This is broken and here is the fix" beats incident-report
 framing.
 
-**"push" means the `ship` skill, not `git push origin main`.** Branch, PR, ask
-before merging, ask again before deleting the branch — two confirmations, not
-one. Only for work headed to `main` — pushing a topic branch is just a push.
-The skill has the flow and why.
+**"push" means the `ship` skill, landing on `experimental`, not `git push
+origin main`.** Branch, PR, ask before merging, ask again before deleting the
+branch — two confirmations, not one. Only for work headed to `experimental`
+— pushing a topic branch is just a push. Redirected from `main` 2026-08-25;
+GitHub's default branch is still `main`, so the flow states `--base
+experimental` explicitly rather than relying on `gh pr create`'s default, and
+`main` keeps the only branch ruleset that exists (`experimental` has none —
+see the `ship` skill). Elly naming a branch outright (`main` included) means
+push directly there instead, bypassing the flow. The skill has the flow and
+why.
 
 **Never file anything outside `NireBryce/nixos-configs` — an issue or PR on
 nixpkgs, ble.sh, carapace, any other project — without Elly saying so
