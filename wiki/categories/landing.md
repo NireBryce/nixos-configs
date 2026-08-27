@@ -1,9 +1,14 @@
-# `landing` — `nire/landing/`
+# `landing` — `nire/homelab/landing/`
 
 [glance](https://github.com/glanceapp/glance), the service index for
 `nire-cube`: what's running, whether it's up, and how the machine itself is
 doing. Added 2026-08-24, cube-only. It is what
 `https://ts-cube.moose-micro.ts.net/` serves.
+
+Moved from `nire/landing/` to `nire/homelab/landing/` on 2026-08-27,
+nested under a new umbrella `homelab` category alongside six other
+self-hosted-service categories — see
+[categories/README.md](README.md). The category name is unaffected.
 
 **Confirmed working end to end, 2026-08-24**, on the first switch with no
 fixes needed. `glance.service` `active (running)` at `NRestarts=0`, 0 failed

@@ -1,51 +1,19 @@
-# Claude co-written magic, my nix is not deep enough here even though I can follow it.
+# Template: copy this file, unchanged, into any new category directory.
 #
-# modules/<namespace>/<subcategory>/dirBasedProvides.nix
-#
-# Automatically builds category modules for this category from the
-# directory structure. The category name is derived from the folder name
-# so this file can be copied to any category directory without changes.
+# Historical note this template used to carry inline, kept here rather than
+# dropped since the code it described has moved, not disappeared: this
+# mechanism was named `dirBasedProvides.nix` before a rename, and the actual
+# collection logic (walking directories, resolving names to real module
+# references per class) used to live in every one of these files by hand.
+# As of 2026-08-27 it lives once, in `modules/_lib/category-collector.nix` --
+# see that file and `flake/doc/dirsAsCategory.md`'s History section for the
+# refactor that moved it there. This file, like every real category's copy,
+# is now just the two-line shim below.
 { config, lib, ... }:
 let
   categoryDir = dirOf __curPos.file;
-  categoryName = baseNameOf categoryDir;
-
-  onlyDirs = lib.filterAttrs (_: t: t == "directory");
-  stripNix = name: lib.removeSuffix ".nix" name;
-
-  # Subcategories are directories at this level
-  subcategories = onlyDirs (builtins.readDir categoryDir);
-
-  collectModules = dir:
-    lib.concatMap
-      ({ name, value }:
-        if value == "directory"
-        then collectModules (dir + "/${name}")
-        else lib.optional (lib.hasSuffix ".nix" name && name != "dirsAsCategory.nix") (stripNix name))
-      (lib.mapAttrsToList lib.nameValuePair (builtins.readDir dir));
-
-  # Package names within a subcategory
-  modulesOf = sub: collectModules (categoryDir + "/${sub}");
-
-  # All module names across all subcategories
-  allModules = lib.concatMap modulesOf (lib.attrNames subcategories);
-  # Names have to be resolved to real module references: a bare string in
-  # `imports` is treated as a path (`error: string 'bluetooth' doesn't represent
-  # an absolute path`). The filter is equally load-bearing -- a directory cannot
-  # know which classes a module declares, so asking every class for every name
-  # is a missing-attribute error the moment one of them only declares another.
-  #
-  # Do NOT make the aggregate attribute itself conditional on the list being
-  # non-empty: computing the attribute names of flake.modules.<class> would then
-  # require reading flake.modules.<class>. Empty aggregates are harmless.
-  # See flake/doc/dirsAsCategory.md.
-  forClass = class:
-    map (n: config.flake.modules.${class}.${n})
-        (lib.filter (n: config.flake.modules.${class} ? ${n}) allModules);
-
+  findModulesRoot = dir: if baseNameOf dir == "modules" then dir else findModulesRoot (dirOf dir);
 in
-{
-  flake.modules.nixos.${categoryName}.imports        = forClass "nixos";
-  flake.modules.homeManager.${categoryName}.imports  = forClass "homeManager";
-  flake.modules.darwin.${categoryName}.imports       = forClass "darwin";
+import (findModulesRoot categoryDir + "/_lib/category-collector.nix") {
+  inherit config lib categoryDir;
 }

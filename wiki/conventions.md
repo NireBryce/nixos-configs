@@ -5,10 +5,13 @@
 `just` recipes (root `.justfile`, work from anywhere) — full list in
 [`../CLAUDE.md`](../CLAUDE.md)'s Commands section. The ones worth knowing
 exist: `just check`, `just modules` (the only static check that means
-anything on darwin), `just available <pkg>` / `--duplicates`,
-`just build`/`boot`/`switch` (dispatch per host class via
-`scripts/rebuild.sh`), `just liveusb`, and the hardware-only, read-only
-`just baseline` / `hm-collisions` / `diff-deployed` / `root-drift`.
+anything on darwin), `just wiki-lint` (checks this wiki's own "Imported by"
+claims and category member counts against the real module tree — added
+2026-08-27, `wiki/scripts/check_wiki.py`; not yet part of `preflight`),
+`just available <pkg>` / `--duplicates`, `just build`/`boot`/`switch`
+(dispatch per host class via `scripts/rebuild.sh`), `just liveusb`, and the
+hardware-only, read-only `just baseline` / `hm-collisions` /
+`diff-deployed` / `root-drift`.
 
 `host` derives from `hostname`; override with `just host=<name> <recipe>`
 (the override goes *before* the recipe name — `just build host=…` is parsed

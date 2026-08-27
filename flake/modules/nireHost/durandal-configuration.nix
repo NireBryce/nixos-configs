@@ -34,17 +34,24 @@
         # the 2026-08-10 split.
         kde-desktop
 
-        # libvirt/QEMU VMs: libvirt, virt-tools, vm-networking. Its own category
-        # rather than part of `system` precisely so the handhelds can decline it
-        # -- tenacity and lego omit this line. Needs security.polkit.enable,
-        # which kde-desktop already brings.
-        virtualization
-
-        # podman + distrobox. Its own category as of 2026-08-22, split out of
-        # `system` the same way `virtualization` was -- see that category's
-        # wiki page. All four NixOS hosts import this explicitly now; no
-        # host's package set changed, only where the module lives.
-        containers
+        # Deliberately NOT `virtualization` (libvirt/QEMU VMs) or `containers`
+        # (podman + distrobox) as of 2026-08-27 -- dropped from this host.
+        # Both were imported here since the flake-parts port purely for
+        # parity with what the den config carried, on the theory this
+        # workstation might use them the way cube's nire-llm-sandbox
+        # actually does -- but nothing in this repo's history records this
+        # host ever actually running a VM or a distrobox container, unlike
+        # cube's confirmed usage. Removing them stops `libvirtd`/`podman` on
+        # the next `just switch` here. `virtualization` was already
+        # host-optional by design (tenacity/lego, the handhelds, already
+        # decline it) so this doesn't change any documented invariant; the
+        # `nire-llm-sandbox`/`homelab` category still exist and are
+        # unaffected -- `containers` is now cube/tenacity/lego only, and
+        # `virtualization` is cube only. See wiki/categories/virtualization.md
+        # and wiki/categories/containers.md's "Imported by" sections. If
+        # this host ever does need libvirt or podman again, re-add the two
+        # lines this comment replaced -- see git history for the exact
+        # wording.
 
         # ── packages ──────────────────────────────────────────────────────────
         development

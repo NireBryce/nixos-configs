@@ -38,10 +38,10 @@ directory.
   [../flake/doc/disko-impermanence-layout.md](<../../flake/doc/disko-impermanence-layout.md>)
   for what it's for and how to actually wire it in.
 
-## Which hosts import it, and the one that pointedly doesn't
+## Imported by
 
-`durandal`, `tenacity`, `lego` import `impermanence` and wipe `/root` on
-every boot. `nire-cube` does **not** — its real install turned out to be a
+`durandal`, `tenacity`, `lego` — three of the four NixOS hosts, wiping
+`/root` on every boot. `nire-cube` does **not** — its real install turned out to be a
 plain persistent root, not LUKS+impermanence, a correction made 2026-08-21
 after the fact. That absence is why two other things exist:
 [`nireUser/elly/user-settings/WARN-password-required.nix`](elly.md), which
