@@ -80,90 +80,37 @@
         # kde-desktop pulls in kde-base itself.
         kde-desktop
 
-        # libvirt/QEMU VMs: libvirt, virt-tools, vm-networking. Same choice
-        # durandal made. Not imported by tenacity or lego, which is the whole
-        # reason this is a category of its own instead of part of `system`.
-        virtualization
-
-        # The nire-llm-sandbox libvirt VM (Claude Code, isolated from the
-        # real host) -- cube only, added 2026-08-22. NOT part of the
-        # `virtualization` aggregate above, on purpose: this line is the only
-        # thing that reaches it. See virtualization-cube.nix's own header for
-        # why it has to be named and imported this way rather than living in
-        # a normal subdirectory of nire/virtualization/.
-        virtualization-cube
-
-        # podman + distrobox. Its own category as of 2026-08-22, split out of
-        # `system` the same way `virtualization` was. All four NixOS hosts
-        # import this explicitly now -- no package set changed, only where
-        # the module lives.
-        containers
-
-        # Prometheus + Grafana, scraping this host's own node/cadvisor/libvirt
-        # exporters -- node-exporter, cadvisor, libvirt-exporter, prometheus,
-        # grafana. cube-only for now, added 2026-08-23, same reasoning
-        # `virtualization` got its own category for: nothing here belongs on
-        # the handhelds. Grafana is reachable over Tailscale (tailscale0 is
-        # trusted at the firewall, see networking.nix) and nowhere else --
-        # everything upstream of it stays on loopback. See grafana.nix's
-        # header for the exact mechanism and its caveats.
-        monitoring
-
-        # Forgejo, a self-hosted git forge -- cube-only, added 2026-08-24,
-        # same "nothing here belongs on the handhelds" reasoning as
-        # `monitoring` just above. Reachable over Tailscale only, exactly
-        # the same trustedInterfaces mechanism Grafana uses -- see
-        # forgejo.nix's own header for the mechanism and the two runtime
-        # traps (secret handling, tailnet device-name) it deliberately
-        # avoids by not repeating grafana.nix's/tailscale.nix's own history.
-        # Category is named `git-forge`, NOT `forgejo` -- a category and its
-        # own single module both named `forgejo` would declare the same
-        # `flake.modules.nixos.forgejo` attribute and silently merge, the
-        # exact `containers`/`podman.nix` collision CLAUDE.md's Architecture
-        # section already warns about, hit for real writing this and caught
-        # by `just modules` before it shipped.
-        git-forge
-
-        # golink, tailscale's `go/foo` shortlink service -- cube-only, added
-        # 2026-08-24, own category (`shortlinks`) for the same "nothing here
-        # belongs on the handhelds" reason `monitoring` and `git-forge` above
-        # each got one. Unlike those two, this one is NOT reached at
-        # nire-cube's own address and needs no firewall consideration at all:
-        # golink embeds tsnet, so it joins the tailnet as its own separate
-        # device (named `go`, which is what makes `http://go/` resolve) and
-        # listens only there. Needs a ONE-TIME interactive login on first
-        # start -- `journalctl -u golink -f`, open the printed URL -- because
-        # no TS_AUTHKEY is wired in, the same call tailscale.nix makes for
-        # the host daemon. See golink.nix's own header for all of it.
-        # Category is `shortlinks`, not `golink`, for the same
-        # category/module name-collision reason `git-forge` isn't `forgejo`.
-        shortlinks
-
-        # Caddy: one tailnet-only HTTPS front door for this host's web
-        # services -- added 2026-08-24, cube-only, own category
-        # (`reverse-proxy`, not `caddy`, for the same category/module
-        # name-collision reason `git-forge` isn't `forgejo`). It is what
-        # `monitoring`'s Grafana and `git-forge`'s Forgejo are reached
-        # THROUGH as of the same day: both of those moved to loopback in that
-        # change, so this import is not optional garnish for them -- drop it
-        # and neither is reachable from anywhere but this host itself.
+        # Every self-hosted/homelab service this host runs, as one aggregate
+        # -- added 2026-08-27, folding what used to be seven separate
+        # imports here (virtualization, virtualization-cube, containers,
+        # monitoring, git-forge, shortlinks, reverse-proxy, landing) into
+        # `nire/homelab/`. Each of those is still its own category nested
+        # under it (`nire/homelab/<name>/`, each keeping its own
+        # `dirsAsCategory.nix`) and still individually importable by name --
+        # durandal and lego still pull `virtualization`/`containers`
+        # directly, unaffected by this move, per the same coarse-and-fine
+        # nesting `nire/hardware`/`nire/hardware/amd` already established
+        # (see flake/doc/dirsAsCategory.md). All of it was cube-only before
+        # this move and stays cube-only now -- nothing here belongs on the
+        # handhelds, which is the reason each got its own category in the
+        # first place rather than living in `system`.
         #
-        # Certs come from tailscaled, with no plugin and no ACME account:
-        # caddy hands any `.ts.net` site address to its built-in tailscale
-        # cert manager. That needs `services.tailscale.permitCertUid`, which
-        # caddy.nix sets itself rather than putting it in the `system`
-        # category every host imports. See caddy.nix's own header.
-        reverse-proxy
-
-        # glance: the service index -- what's running on this host, whether
-        # it's up, and how the machine is doing. Added 2026-08-24, cube-only,
-        # own category (`landing`, deliberately not `dashboard` -- `monitoring`
-        # above is full of Grafana dashboards and two categories called "the
-        # dashboard one" is a grep problem later). It is served at `/` by
-        # reverse-proxy's caddy, replacing the plaintext placeholder that
-        # route had for a few hours, so this import and that one are a pair:
-        # without `landing`, `https://ts-cube.moose-micro.ts.net/` 502s.
-        landing
+        # `virtualization-cube.nix` (the nire-llm-sandbox libvirt VM) is
+        # nested inside `homelab/virtualization/` now rather than sitting
+        # outside every category the way it used to -- deliberately: unlike
+        # the plain `virtualization` category (which durandal also imports,
+        # and which must NOT reach this VM), `homelab` is cube-only, so
+        # there's no host it could leak onto. See that file's own header for
+        # why it was kept out of `virtualization` specifically.
+        #
+        # Individual per-service mechanism notes (Tailscale-only reachability,
+        # the category/module name-collision reasons `git-forge` isn't
+        # `forgejo`, `shortlinks` isn't `golink`, `reverse-proxy` isn't
+        # `caddy`, `landing` isn't `glance`/`dashboard`, and the `landing` /
+        # `reverse-proxy` pairing) live on each service's own module header
+        # and in `wiki/categories/`, not repeated here now that they share
+        # one import line.
+        homelab
 
         # ── packages ──────────────────────────────────────────────────────────
         # Full parity with durandal.

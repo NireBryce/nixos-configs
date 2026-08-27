@@ -1,9 +1,18 @@
-# `containers` — `nire/containers/`
+# `containers` — `nire/homelab/containers/`
 
 Podman and distrobox — OCI containers — and *only* that. See
 [virtualization](virtualization.md) for why libvirt/QEMU is a completely
 different category despite "virtualization" sounding like it should cover
 this too; it doesn't, and never has.
+
+Moved from `nire/containers/` to `nire/homelab/containers/` on 2026-08-27,
+when this and six other self-hosted-service categories (`git-forge`,
+`landing`, `monitoring`, `reverse-proxy`, `shortlinks`, `virtualization`)
+were nested under a new umbrella `homelab` category — see
+[categories/README.md](README.md). The category name (`containers`) and
+its individual importability by name are unaffected by that move; only the
+directory nesting changed. Separately, and the same day, `durandal` stopped
+importing this category at all — see [Imported by](#imported-by).
 
 ## What's in it
 
@@ -36,13 +45,12 @@ splitting a module into its own category is this repo's only mechanism for
 making something optional (see [../architecture.md](../architecture.md),
 "if something shared needs to be optional, a category is the mechanism").
 
-Unlike `virtualization`, that option wasn't actually exercised here — no
-host currently declines `containers`. All four NixOS hosts import it
-explicitly now, in place of the implicit coverage `system` used to give it,
-and no host's package set changed as a result. The split makes declining it
-*possible* for some future host without another category reshuffle; it
-isn't (yet) load-bearing for any host that exists today the way
-`virtualization`'s split is for the handhelds.
+Unlike `virtualization`, that option wasn't exercised at the time — as of
+the 2026-08-22 split, no host declined `containers`, and no host's package
+set changed as a result of the move itself. That changed 2026-08-27, when
+`durandal` became the first host to actually decline it (see
+[Imported by](#imported-by)) — the split's optionality is load-bearing now,
+not just theoretical.
 
 ## The collision this move hit for real
 
@@ -53,7 +61,8 @@ its own category's `dirsAsCategory.nix` derives from the surrounding
 directory. Caught and renamed before it shipped.
 
 The same thing happened here, not as a near-miss but as an actual `just
-modules` failure: the module, freshly moved into `nire/containers/`, was
+modules` failure: the module, freshly moved into `nire/containers/` (as it
+was named then — see the `homelab` consolidation note above), was
 still named `containers.nix`, so it declared `flake.modules.nixos.containers`
 — exactly what the new category's own `dirsAsCategory.nix` declares for its
 aggregate. Renamed to `podman.nix`, for the same reason `libvirt.nix` isn't
@@ -64,10 +73,17 @@ account, including the two earlier names it's carried
 
 ## Imported by
 
-All four NixOS hosts: `durandal`, `tenacity`, `lego`, `cube`. Not `lysithea`
-— this module is `nixos`-class only, so it never reached darwin even back
-when it was still part of `system` (see [system](system.md)'s "Imported by"
-section on which classes actually cross to lysithea).
+`tenacity`, `lego`, `cube` — three of the four NixOS hosts, not all four
+any more. All four *did* import this explicitly from 2026-08-22 until
+2026-08-27, when it was dropped from `durandal` specifically: nothing in
+this repo's history ever recorded durandal actually running a podman
+container or a distrobox, unlike cube's confirmed homelab usage, so it was
+carried purely for parity rather than an established need. See
+`durandal-configuration.nix`'s own comment at the point it was removed.
+Not `lysithea` either way — this module is `nixos`-class only, so it never
+reached darwin even back when it was still part of `system` (see
+[system](system.md)'s "Imported by" section on which classes actually
+cross to lysithea).
 
 ## See also
 

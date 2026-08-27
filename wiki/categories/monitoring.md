@@ -1,8 +1,13 @@
-# `monitoring` — `nire/monitoring/`
+# `monitoring` — `nire/homelab/monitoring/`
 
 Prometheus + Grafana, scraping this host's own resource metrics. Added
 2026-08-23, cube-only so far — see [Imported by](#imported-by) for why that's
 current state, not a structural limit.
+
+Moved from `nire/monitoring/` to `nire/homelab/monitoring/` on 2026-08-27,
+nested under a new umbrella `homelab` category alongside six other
+self-hosted-service categories — see
+[categories/README.md](README.md). The category name is unaffected.
 
 As of 2026-08-24 Grafana is reached at
 `https://ts-cube.moose-micro.ts.net/grafana/`, through Caddy

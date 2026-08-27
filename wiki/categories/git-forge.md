@@ -1,4 +1,4 @@
-# `git-forge` — `nire/git-forge/`
+# `git-forge` — `nire/homelab/git-forge/`
 
 Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only. **Confirmed
 working end to end, 2026-08-24**: `just switch` came up with 0 failed
@@ -8,6 +8,11 @@ crash-looped yet), and `http://ts-cube:3001/` answered `HTTP 200` from
 another tailnet host, not just from `localhost` on cube itself. Git+ssh
 over the host's OpenSSH (below) has NOT been exercised yet — only the HTTP
 side is confirmed.
+
+Moved from `nire/git-forge/` to `nire/homelab/git-forge/` on 2026-08-27,
+nested under a new umbrella `homelab` category alongside six other
+self-hosted-service categories — see
+[categories/README.md](README.md). The category name is unaffected.
 
 **That URL is no longer current.** Later the same day Forgejo moved behind
 Caddy ([reverse-proxy](reverse-proxy.md)): it listens on `127.0.0.1:3001`

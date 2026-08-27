@@ -1,7 +1,12 @@
-# `shortlinks` — `nire/shortlinks/`
+# `shortlinks` — `nire/homelab/shortlinks/`
 
 [golink](https://github.com/tailscale/golink), Tailscale's `go/foo`
 shortlink service. Added 2026-08-24, cube-only.
+
+Moved from `nire/shortlinks/` to `nire/homelab/shortlinks/` on 2026-08-27,
+nested under a new umbrella `homelab` category alongside six other
+self-hosted-service categories — see
+[categories/README.md](README.md). The category name is unaffected.
 
 **It failed its first real switch, and the fix is in.** `golink.service`
 crash-looped on `nire-cube` (2026-08-24, generation 13) with:

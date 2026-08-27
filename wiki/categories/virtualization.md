@@ -1,8 +1,17 @@
-# `virtualization` — `nire/virtualization/`
+# `virtualization` — `nire/homelab/virtualization/`
 
 Libvirt/QEMU VMs, and *only* that — see [containers](containers.md) for why
 podman and distrobox (OCI containers) are a completely different category
 despite "virtualization" sounding like it should cover both.
+
+Moved from `nire/virtualization/` to `nire/homelab/virtualization/` on
+2026-08-27, nested under a new umbrella `homelab` category alongside six
+other self-hosted-service categories — see
+[categories/README.md](README.md). The category name and its individual
+importability by name are unaffected by that move; only the directory
+nesting changed, with one real consequence for `virtualization-cube.nix`
+specifically — see below. `durandal` also stopped importing this category
+the same day, unrelated to the move — see [Imported by](#imported-by).
 
 ## What's in it
 
@@ -107,14 +116,32 @@ easy to conflate (see skill `nixos-vm-images` for the full account):
   module args. Filed under `_lib/` for the same reason
   `nirePackages/_lib/mkPkgModule.nix` is: `import-tree` ignores any path
   containing `/_`.
-- **`virtualization-cube.nix`** sits bare in `nire/virtualization/` itself,
-  not in any subdirectory — the OTHER dirsAsCategory exclusion (this
+- **`virtualization-cube.nix`** sits bare in `nire/homelab/virtualization/`
+  itself, not in any subdirectory — the OTHER dirsAsCategory exclusion (this
   directory only collects from *sub*directories; a file sitting directly in
   the category directory is collected by nothing). This is what keeps the
-  VM cube-exclusive: durandal also imports `virtualization`, and without
-  this placement it would get the sandbox VM too. Confirmed empirically, not
-  just asserted — durandal's/tenacity's/lego's toplevel drvPaths are
+  VM out of the `virtualization` category's own aggregate specifically —
+  added 2026-08-22, when `durandal` still imported `virtualization` too
+  (see [Imported by](#imported-by) for its current status) and would
+  otherwise have gotten the sandbox VM. Confirmed empirically, not just
+  asserted — durandal's/tenacity's/lego's toplevel drvPaths were
   byte-identical before and after this addition.
+
+**This exclusion is category-scoped, not tree-scoped, since the `homelab`
+consolidation (2026-08-27).** `homelab`'s own collector references
+`virtualization`'s aggregate by name rather than re-deriving it (see
+`flake/doc/dirsAsCategory.md`'s History section), but it still separately
+collects any bare `.nix` files sitting directly in `virtualization/`'s own
+root alongside that reference — deliberately, specifically so this file
+wouldn't stop reaching `nire-cube` when delegation was added (an earlier
+version of that change delegated without this and silently dropped it, see
+[homelab.md](homelab.md#nested-categories-overlap-their-parents-on-purpose)
+for that account). So while `virtualization-cube.nix` is still excluded
+from the `virtualization` aggregate itself (the bullet above still holds),
+it **is** swept into the `homelab` aggregate that cube imports. Harmless in
+practice, since only cube imports `homelab` and the VM was already
+cube-only by intent, but it's a real narrowing of a deliberately-scoped
+exclusion, not just a directory reshuffle.
 
 See [hosts.md](../hosts.md) for `nire-llm-sandbox` itself, and skill
 `nixos-vm-images` for two real bugs this specific feature hit (nixpkgs'
@@ -146,9 +173,15 @@ session (`kde-desktop`) already brings on the hosts that import it.
 
 ## Imported by
 
-`durandal` and `cube` — the two workstations. Not `tenacity` or `lego`, the
-two handhelds (the ones that import `jovian` — see
-[desktop-env](desktop-env.md)).
+`cube` only, as of 2026-08-27. `durandal` imported this too until then —
+same as `cube` does today, "the workstations get it, the handhelds don't"
+— but was dropped: nothing in this repo's history ever recorded durandal
+actually running a VM (unlike cube's confirmed `nire-llm-sandbox`), so it
+was carried purely for parity rather than an established need. See
+`durandal-configuration.nix`'s own comment at the point it was removed.
+Still not `tenacity` or `lego`, the two handhelds (the ones that import
+`jovian` — see [desktop-env](desktop-env.md)) — that part of the reasoning
+is unchanged.
 
 ## See also
 

@@ -30,7 +30,7 @@ of re-deriving it.
 - [Architecture & module system](architecture.md) — flake-parts, the
   `dirsAsCategory` mechanism, Home Manager integration, package modules.
 - [Category reference](categories/README.md) — one article per real
-  category (`nire/system`, `nire/impermanence`, `nire/virtualization`, …):
+  category (`nire/system`, `nire/impermanence`, `nire/homelab/virtualization`, …):
   what's in it, which hosts import it, and the traps specific to that one.
   [shell-config](categories/shell-config/README.md) is the one category
   that's grown its own subdirectory, with deep-dives on

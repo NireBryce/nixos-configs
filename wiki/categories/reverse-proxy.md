@@ -1,7 +1,12 @@
-# `reverse-proxy` — `nire/reverse-proxy/`
+# `reverse-proxy` — `nire/homelab/reverse-proxy/`
 
 [Caddy](https://caddyserver.com/), one tailnet-only HTTPS front door for
 every web service on `nire-cube`. Added 2026-08-24, cube-only.
+
+Moved from `nire/reverse-proxy/` to `nire/homelab/reverse-proxy/` on
+2026-08-27, nested under a new umbrella `homelab` category alongside six
+other self-hosted-service categories — see
+[categories/README.md](README.md). The category name is unaffected.
 
 **Confirmed working end to end, 2026-08-24**, on the second switch. `just
 switch` came up with 0 failed units, `caddy.service` `active (running)` at
