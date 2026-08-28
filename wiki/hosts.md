@@ -84,7 +84,9 @@ services above, **this one is evaluates-only, not switched**: two things
 outside what Nix can close on its own — the repository password's actual
 value, and a QNAP-side snapshot schedule for anti-deletion — are still
 pending, and issue #87's own "done means" (a real Forgejo repo actually
-recovered) hasn't been attempted. See the category page for both.
+recovered) hasn't been attempted. See the category page for both, and
+[homelab/backup-runbook.md](homelab/backup-runbook.md) for the actual
+commands.
 
 ## Where each fact lives
 

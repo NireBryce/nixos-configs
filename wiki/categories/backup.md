@@ -99,7 +99,8 @@ not the usual "evaluates, not switched" gap, a different kind:
 Until both are done and a real `switch` has run on cube, this module is
 config, not a backup. Per issue #87's own "done means": a **restore actually
 performed** — one Forgejo repo recovered and confirmed to open — is the bar,
-not a green timer.
+not a green timer. [homelab/backup-runbook.md](../homelab/backup-runbook.md)
+is the step-by-step procedure for all of the above, including the restore.
 
 ## Imported by
 
@@ -117,6 +118,9 @@ after this category was added.
   stack", where issue #87 was first tracked.
 - [../homelab/pending-setup.md](../homelab/pending-setup.md) — the two
   remaining human steps, alongside the fleet's other one-time setup.
+- [../homelab/backup-runbook.md](../homelab/backup-runbook.md) — the actual
+  commands: finishing setup, checking status, running a backup by hand, and
+  performing a restore.
 - [`../../claude cave/plans/2026-08-27-1816-cube-qnap-backup-plan.md`](<../../claude cave/plans/2026-08-27-1816-cube-qnap-backup-plan.md>)
   — the plan this category implements, including what it got wrong about
   the QNAP mount's status.

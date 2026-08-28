@@ -94,6 +94,11 @@ for rather than a Nix change:
 - **No QNAP-side snapshot schedule exists on the backup share** — the
   anti-deletion mitigation the module assumes but can't configure itself.
 
+**The [backup runbook](backup-runbook.md) is the actual procedure for both,
+plus switching cube, checking status, running an ad hoc backup, and — the
+real "done" bar — performing a restore.** This entry stays the tracking
+summary; that page is where the commands live.
+
 Once both are done and cube has actually been switched: **done still means a
 restore actually performed** — one Forgejo repo recovered from the backup —
 because a restore nobody has run isn't a backup, and neither is a module
