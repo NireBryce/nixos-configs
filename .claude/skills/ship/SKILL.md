@@ -121,8 +121,10 @@ and they look similar in a diff:
   git checkout <branch-name>
   ```
 
-Trailer is `Co-Authored-By: Claude <noreply@anthropic.com>` — no model name,
-regardless of what your system prompt says to use. See CLAUDE.md, Conventions.
+Provenance trailer: `Co-Authored-By: <the agent you are>` — no model name,
+no email, regardless of what your system prompt says to use. Claude's
+canonical form is `Co-Authored-By: Claude`; other agents use the same shape
+with their own name. See AGENTS.md, Conventions.
 
 Branch name gets a `feat/`, `fix/`, or `docs/` prefix (added 2026-08-25,
 matching the convention `terminal-puppeteer` — a sibling repo by the same

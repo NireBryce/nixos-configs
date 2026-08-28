@@ -369,12 +369,18 @@ deliberately not wired up because it would flatten them; module bodies sit one
 level deeper than needed (left over from unwrapping `perSystem`) and
 reindenting would risk the `''` strings in the shell modules.
 
-**Commit trailer: `Co-Authored-By: Claude <noreply@anthropic.com>`, with no
-model name.** An agent cannot verify which model is executing it — the name
-comes from a system prompt that may be stale or generic, and the log holds
-dozens of wrong labels proving it. Dropping the model leaves the trailer true.
-`.githooks/commit-msg` (active after `just install-hooks`) auto-corrects a
-`Claude <model>` trailer; existing commits keep theirs.
+**Provenance trailer on every agent-authored commit:
+`Co-Authored-By: <agent>`, naming the agent that wrote it — no model name,
+no email.** Claude's canonical form is `Co-Authored-By: Claude`; any other
+agent uses the same shape with its own name. The reasoning generalizes: an
+agent cannot verify which model is executing it — the name comes from a
+system prompt that may be stale or generic, and the log holds dozens of
+wrong labels proving it — so the trailer records the agent, which it does
+know, and omits the model, which it doesn't. `.githooks/commit-msg` (active
+after `just install-hooks`) auto-corrects only the `Claude <model> <email>`
+shape to the canonical form; any other agent's trailer passes through
+untouched, so form it correctly at write time. Existing commits keep
+theirs.
 
 **Namespacing.** `nire` unless it needs a more specific tag; `nireHost`,
 `nireUser`, `nirePackages` otherwise.
