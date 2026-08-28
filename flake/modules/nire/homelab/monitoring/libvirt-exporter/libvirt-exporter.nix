@@ -1,8 +1,11 @@
 # prometheus-libvirt-exporter: per-VM state/CPU/memory/disk/network metrics
-# for the libvirt/QEMU guests `virtualization` and `virtualization-cube`
-# (nire-llm-sandbox) define on this host. One of three things prometheus.nix
-# scrapes -- see that file and grafana.nix for the rest of the stack this
-# belongs to.
+# for whatever libvirt/QEMU guests are defined on this host via
+# `virtualization`. No guest is currently defined here -- `virtualization-cube`
+# (nire-llm-sandbox) was removed 2026-08-28 -- so this scrapes an empty set
+# until a VM exists again; kept rather than dropped since the exporter itself
+# is generic to the `virtualization` category, not to that one VM. One of
+# three things prometheus.nix scrapes -- see that file and grafana.nix for
+# the rest of the stack this belongs to.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);

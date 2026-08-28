@@ -82,29 +82,20 @@
 
         # Every self-hosted/homelab service this host runs, as one aggregate
         # -- added 2026-08-27, folding what used to be seven separate
-        # imports here (virtualization, virtualization-cube, containers,
-        # monitoring, git-forge, shortlinks, reverse-proxy, landing) into
-        # `nire/homelab/`. Each of those is still its own category nested
-        # under it (`nire/homelab/<name>/`, each keeping its own
-        # `dirsAsCategory.nix`) and still individually importable by name --
-        # tenacity still pulls `containers` directly, unaffected by this
-        # move (durandal dropped both `virtualization` and `containers`
-        # 2026-08-27, the same day this move landed; cube's own copies come
-        # through `homelab` now), per the same coarse-and-fine
-        # nesting `nire/hardware`/`nire/hardware/amd` already established
-        # (see flake/doc/dirsAsCategory.md). All of it was cube-only before
-        # this move and stays cube-only now -- nothing here belongs on the
+        # imports here (virtualization, containers, monitoring, git-forge,
+        # shortlinks, reverse-proxy, landing) into `nire/homelab/`. Each of
+        # those is still its own category nested under it
+        # (`nire/homelab/<name>/`, each keeping its own `dirsAsCategory.nix`)
+        # and still individually importable by name -- tenacity still pulls
+        # `containers` directly, unaffected by this move (durandal dropped
+        # both `virtualization` and `containers` 2026-08-27, the same day
+        # this move landed; cube's own copies come through `homelab` now),
+        # per the same coarse-and-fine nesting `nire/hardware`/
+        # `nire/hardware/amd` already established (see
+        # flake/doc/dirsAsCategory.md). All of it was cube-only before this
+        # move and stays cube-only now -- nothing here belongs on the
         # handhelds, which is the reason each got its own category in the
         # first place rather than living in `system`.
-        #
-        # `virtualization-cube.nix` (the nire-llm-sandbox libvirt VM) is
-        # nested inside `homelab/virtualization/` now rather than sitting
-        # outside every category the way it used to -- deliberately: unlike
-        # the plain `virtualization` category (host-optional by design, and
-        # which must NOT reach this VM if some other host ever imports it),
-        # `homelab` is cube-only, so there's no host it could leak onto.
-        # See that file's own header for
-        # why it was kept out of `virtualization` specifically.
         #
         # Individual per-service mechanism notes (Tailscale-only reachability,
         # the category/module name-collision reasons `git-forge` isn't

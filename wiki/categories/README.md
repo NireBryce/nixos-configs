@@ -27,7 +27,7 @@ articles. Not covered here, deliberately:
 | [desktop-env](desktop-env.md) | `nire/desktop-env/` | nixos, homeManager | 4 | never imported whole — hosts take `jovian` or `kde-desktop` by name |
 | [git-forge](git-forge.md) | `nire/homelab/git-forge/` | nixos | 1 | cube only |
 | [hardware](hardware.md) | `nire/hardware/` (+ nested `amd`) | nixos | 2 | all 3 NixOS hosts |
-| [homelab](homelab.md) | `nire/homelab/` (+ 7 nested) | nixos | 15 | cube only |
+| [homelab](homelab.md) | `nire/homelab/` (+ 7 nested) | nixos | 14 | cube only |
 | [impermanence](impermanence.md) | `nire/impermanence/` | nixos, homeManager | 2 | durandal, tenacity (not cube) |
 | [landing](landing.md) | `nire/homelab/landing/` | nixos | 1 | cube only |
 | [macos](macos.md) | `nire/macos/` | darwin | 3 | lysithea |

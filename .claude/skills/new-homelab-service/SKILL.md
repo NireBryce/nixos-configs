@@ -107,7 +107,6 @@ the switch.
 | 9090 | Prometheus | loopback |
 | 9100 | node-exporter | loopback |
 | 9177 | libvirt-exporter | loopback |
-| 2222 | `nire-llm-sandbox` ssh forward | tailnet |
 | 80, 443 | Caddy | all interfaces |
 
 Take the next free `300x` for anything user-facing. Grep before trusting this

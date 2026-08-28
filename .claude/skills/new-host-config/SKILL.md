@@ -70,7 +70,9 @@ block into `<name>/hardware/hardware-<name>.nix`, wrapped as a flake-parts
 module. Dropping the raw generated file under `modules/` as-is makes
 flake-parts resolve `modulesPath` through its own `_module.args` and die with
 a misleading `infinite recursion` error — `new-flake-module`'s skill has the
-wrapping shape and a second worked example (`llm-sandbox-configuration.nix`).
+wrapping shape and a second worked example (`llm-sandbox-configuration.nix`,
+removed 2026-08-28 along with the host it configured — still readable in git
+history).
 `durandal/hardware/hardware-configuration.nix` and
 `cube/hardware/hardware-cube.nix` are the two real ones in this repo;
 hardware-cube.nix's own history note documents what it replaced (a disko

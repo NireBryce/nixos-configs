@@ -13,7 +13,6 @@ of where to look for each host.
 | `nire-tenacity` | nixos | handheld (Jovian/SteamOS) | yes |
 | `nire-cube` | nixos | mini PC (GMKtec) | **no** — deliberately, see below |
 | `nire-lysithea` | darwin | laptop | n/a |
-| `nire-llm-sandbox` | nixos | libvirt VM guest (Claude Code sandbox), runs on `nire-cube` | n/a — persistent guest disk, not part of the impermanence fleet |
 
 `nire-testbed` (ThinkPad X270) existed 2026-08-14 to 2026-08-22 and was
 removed, never having been built or switched on real hardware. It's history
@@ -23,24 +22,11 @@ now, not a live host — see [history.md](history.md) and
 `nire-lego` (handheld, Legion Go) and `nire-installer` (the generic live-USB
 installer image) were both removed 2026-08-27 — see [history.md](history.md).
 
-`nire-llm-sandbox`, added 2026-08-22, is a `nixosConfigurations` entry that
-exists to build a qcow2 disk image (the same mechanism a live-ISO build
-uses), but meant to run *persistently* once started, as a
-libvirt-managed guest on `nire-cube` — see
-[virtualization](categories/virtualization.md)'s own section on it, and
-skill `nixos-vm-images` for the mechanism. `nire-cube`'s first real `just
-switch` with this VM wired in (2026-08-23) hit a real bug — libvirt's
-default network was defined but never started, so the VM's own activation
-service failed outright — fixed the same day. That fix uncovered two more
-runtime-only bugs in turn (a nonexistent `virsh` flag, then a missing fixed
-domain UUID breaking `virsh define` idempotency) before the unit finally
-came up clean; see `claude cave/lessons-learned.md` §40 for the full
-sequence. **Confirmed booted and staying up as of 2026-08-24** —
-`systemctl status libvirt-vm-llm-sandbox.service` is `active (exited)` /
-exit 0 and `virsh dominfo llm-sandbox` shows `running`, watched directly on
-the real host, not inferred from the unit alone (the guest was in fact
-running through two of the three failures above — the unit failing did not
-mean the VM was down; see lesson #40).
+`nire-llm-sandbox` (a libvirt-managed guest on `nire-cube`, added 2026-08-22
+and confirmed booted and staying up as of 2026-08-24) was removed
+2026-08-28 — see [history.md](history.md) for what it was and what its
+removal took with it; [virtualization](categories/virtualization.md) still
+carries the generic generator it ran on.
 
 `nire-cube` also runs a Prometheus + Grafana monitoring stack as of
 2026-08-23 — see [monitoring](categories/monitoring.md). Grafana is reachable

@@ -1,12 +1,12 @@
-# DRAFT -- structurally exercised only by virtualization-cube.nix, which
-# itself hasn't been booted (see its header and this repo's own
-# "Treat an undated 'verified' as *evaluates*" rule). A generator for a
-# persistent, libvirt-managed QEMU guest backed by an immutable qcow2 base
-# image from the Nix store -- one caller today (virtualization-cube.nix's
-# "llm-sandbox"), kept a generator for the same reason
-# nire/impermanence/_disko/impermanence-luks-btrfs.nix gives: a second VM
-# is a real possibility, and hand-deriving it twice is worse than
-# parameterizing once.
+# DRAFT -- no current caller. A generator for a persistent, libvirt-managed
+# QEMU guest backed by an immutable qcow2 base image from the Nix store.
+# Its one caller, virtualization-cube.nix (nire-llm-sandbox, a sandboxed-LLM-
+# agent VM on nire-cube), was removed 2026-08-28 -- see wiki/history.md; this
+# generator itself was kept as reusable infrastructure for the same reason
+# nire/impermanence/_disko/impermanence-luks-btrfs.nix gives: a VM here is a
+# real possibility, and hand-deriving one from scratch is worse than
+# parameterizing once. Unexercised entirely until a new caller shows up --
+# nothing here has been evaluated, let alone built or booted, since removal.
 #
 # Not a flake-parts module -- a plain function, `import`ed by path. Filed
 # under `_lib/` because `import-tree` ignores any path containing `/_`: a
@@ -19,15 +19,18 @@
 # directories too, harmlessly: nothing under `_lib/` ever declares
 # `flake.modules.nixos.<that-name>`, since import-tree never touched it.
 #
-# Deliberately does NOT sit directly under nire/virtualization/VMs/: a
-# category collects every .nix file in every *sub*directory, and VMs/ is
-# a subdirectory of `virtualization`, so a module there would be swept
-# into the shared `flake.modules.nixos.virtualization` aggregate,
-# durandal included. This must reach only cube (via
-# virtualization-cube.nix, bare in nire/virtualization/ for the opposite
-# reason -- see its header); keeping the generator under `_lib/`,
-# invoked only from there, keeps the two hosts' coverage from merging
-# back the way `boot`/`boot-durandal` almost did.
+# Deliberately does NOT sit directly under nire/homelab/virtualization/VMs/:
+# a category collects every .nix file in every *sub*directory, and VMs/ is
+# a subdirectory of `virtualization`, so a module there would be swept into
+# the shared `flake.modules.nixos.virtualization` aggregate -- reaching
+# every host that imports `virtualization` whole, not just whichever one
+# a caller means it for. The one caller this generator ever had
+# (virtualization-cube.nix, bare in nire/homelab/virtualization/ for the
+# opposite reason -- see this file's own top comment) kept its VM
+# cube-exclusive that way even while durandal still imported
+# `virtualization` too; keeping the generator under `_lib/`, invoked only
+# from a bare-in-category-root file like that one, is what any future
+# caller wants for the same reason `boot`/`boot-durandal` almost merged.
 { name
 , uuid            # a fixed libvirt domain UUID, standard 8-4-4-4-12 hex format.
                    # Pin explicitly rather than let libvirt generate one --
@@ -41,10 +44,10 @@
                    # the redefine then fails on every subsequent activation
                    # even though the domain from the first define was still
                    # running underneath the failing unit. `uuidgen` once per
-                   # VM; llm-sandbox's is the UUID libvirt assigned on its
-                   # first successful define, adopted rather than picked
-                   # fresh so the fix needed no teardown of the running
-                   # guest.
+                   # VM -- the trap's original repro (nire-llm-sandbox, since
+                   # removed) adopted the UUID libvirt assigned on its first
+                   # successful define, rather than picking a fresh one, so
+                   # the fix needed no teardown of the running guest.
 , image           # the disk-image derivation itself (config.system.build.image
                    # off the guest's own nixosConfiguration) -- used only for
                    # the GC-root symlink below, so it stays alive regardless
@@ -58,15 +61,17 @@
 , memoryMB ? 4096
 , vcpus    ? 2
 , networked ? true # NAT internet access via libvirt's default network, vs.
-                   # none at all. NOT purely a security knob: with
-                   # networked = false an agent inside can't reach Claude's
-                   # API either -- the sandbox boots but the LLM agent can't
-                   # work. The serial console (below, unconditional) is the
-                   # only way in either way -- ssh needs the network too.
+                   # none at all. NOT purely a security knob: whatever runs
+                   # inside a networked = false guest also loses any network
+                   # access it needed to do its job -- an isolation guest
+                   # that boots but can't reach anything it depends on. The
+                   # serial console (below, unconditional) is the only way in
+                   # either way -- ssh needs the network too.
 
 , sshForward ? null
     # null (default: no inbound access -- NAT means nothing reaches the
-    # VM unprompted; right for an isolation guest like llm-sandbox), or
+    # VM unprompted; right for an isolation guest, e.g. the sandboxed-LLM-
+    # agent VM this generator originally shipped for, since removed), or
     # `{ guestId = <int, 2-254>; hostPort = <int>; sourceCidrs ? defaultAllowedSourceCidrs; }`
     # to forward hostPort on THIS HOST to the guest's SSH port. `sourceCidrs`
     # defaults to LAN-or-Tailscale (`defaultAllowedSourceCidrs` below); pass

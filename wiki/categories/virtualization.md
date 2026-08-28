@@ -9,8 +9,7 @@ Moved from `nire/virtualization/` to `nire/homelab/virtualization/` on
 other self-hosted-service categories — see
 [categories/README.md](README.md). The category name and its individual
 importability by name are unaffected by that move; only the directory
-nesting changed, with one real consequence for `virtualization-cube.nix`
-specifically — see below. `durandal` also stopped importing this category
+nesting changed. `durandal` also stopped importing this category
 the same day, unrelated to the move — see [Imported by](#imported-by).
 
 ## What's in it
@@ -52,7 +51,8 @@ Whether it's actually *running* is a separate problem, and nothing in
 network that's already up.
 
 RUNTIME-VERIFIED TRAP, 2026-08-23, on `nire-cube`'s first real `just switch`
-with the sandbox VM below: it failed outright with `error: Requested
+with `nire-llm-sandbox` (the VM this category once ran; removed 2026-08-28,
+see [history.md](../history.md)): it failed outright with `error: Requested
 operation is not valid: network 'default' is not active`. A host-wide
 systemd unit unconditionally starting the network at boot was considered and
 rejected — it would've turned `virbr0` + dnsmasq + this category's own
@@ -87,67 +87,58 @@ VM:
   default network, so the forwarded port always has a known, stable
   destination rather than depending on `virsh domifaddr` at connection time.
 
-`nire-llm-sandbox` is the one VM using it so far: `guestId = 10`, `hostPort =
-2222`, `sourceCidrs` narrowed to Tailscale only (not the generator's own
-LAN-or-Tailscale default) — a deliberate per-VM choice made in
-`virtualization-cube.nix`, not a property of the generator itself. Verified
-by reading back the actual generated domain XML, activation script, and
-firewall rule (not just evaluation) — the domain XML carries the exact MAC,
-the activation script's DHCP-reservation guard references it correctly, and
-`networking.firewall.extraCommands` contains exactly one DNAT rule, scoped to
-`100.64.0.0/10`, no LAN range. The domain itself is now confirmed booted and
-staying up on `nire-cube` (2026-08-24 — see [hosts.md](../hosts.md) and
-`claude cave/lessons-learned.md` §40), but an actual SSH connection through
-this forward has not yet been made — that part is still real-hardware-only
-and unverified.
+`nire-llm-sandbox` was the one VM using it, before its removal 2026-08-28
+(see [history.md](../history.md)): `guestId = 10`, `hostPort = 2222`,
+`sourceCidrs` narrowed to Tailscale only (not the generator's own
+LAN-or-Tailscale default) — a deliberate per-VM choice made in that VM's
+own cube wiring (`virtualization-cube.nix`, also removed), not a property
+of the generator itself. While it existed it was verified by reading back
+the actual generated domain XML, activation script, and firewall rule (not
+just evaluation) — the domain XML carried the exact MAC, the activation
+script's DHCP-reservation guard referenced it correctly, and
+`networking.firewall.extraCommands` contained exactly one DNAT rule, scoped
+to `100.64.0.0/10`, no LAN range. The domain itself was confirmed booted and
+staying up on `nire-cube` (2026-08-24 — see `claude cave/lessons-learned.md`
+§40), but an actual SSH connection through this forward was never made
+before the VM was removed. No caller uses `sshForward` today; the mechanism
+above is unexercised until one does.
 
-## A cube-only addition that is deliberately NOT a category member
+## `VMs/_lib/libvirt-vm.nix` — a generator, not a category member
 
-`VMs/_lib/libvirt-vm.nix` and `virtualization-cube.nix` (added 2026-08-22)
-define and start `nire-llm-sandbox` — a libvirt VM guest sandboxing an LLM
-coding agent — but neither counts toward this category's 4 members above,
-and that's by design, not an oversight. Two different exclusion mechanisms,
-easy to conflate (see skill `nixos-vm-images` for the full account):
+Still in this category, but deliberately not one of its 4 members above,
+and not currently called by anything: a plain curried function (`{ name,
+image, ... }: { pkgs, lib, ... }: {...}`), not a flake-parts module — it
+can't declare `flake.modules.nixos.<name>` because it takes parameters, and
+`import-tree` would fail outright trying to auto-import it with standard
+module args. Filed under `_lib/` for the same reason
+`nirePackages/_lib/mkPkgModule.nix` is: `import-tree` ignores any path
+containing `/_`.
 
-- **`VMs/_lib/libvirt-vm.nix`** is a plain curried function (`{ name, image,
-  ... }: { pkgs, lib, ... }: {...}`), not a flake-parts module — it can't
-  declare `flake.modules.nixos.<name>` because it takes parameters, and
-  `import-tree` would fail outright trying to auto-import it with standard
-  module args. Filed under `_lib/` for the same reason
-  `nirePackages/_lib/mkPkgModule.nix` is: `import-tree` ignores any path
-  containing `/_`.
-- **`virtualization-cube.nix`** sits bare in `nire/homelab/virtualization/`
-  itself, not in any subdirectory — the OTHER dirsAsCategory exclusion (this
-  directory only collects from *sub*directories; a file sitting directly in
-  the category directory is collected by nothing). This is what keeps the
-  VM out of the `virtualization` category's own aggregate specifically —
-  added 2026-08-22, when `durandal` still imported `virtualization` too
-  (see [Imported by](#imported-by) for its current status) and would
-  otherwise have gotten the sandbox VM. Confirmed empirically, not just
-  asserted — durandal's/tenacity's toplevel drvPaths were
-  byte-identical before and after this addition.
+Its one caller was `virtualization-cube.nix`, cube-side wiring that defined
+and started `nire-llm-sandbox` — a libvirt VM guest sandboxing an LLM coding
+agent. Both the VM and its wiring were removed 2026-08-28 (see
+[history.md](../history.md)); the generator itself was kept as unexercised
+reusable infrastructure, on the theory that hand-deriving a second VM from
+scratch would be worse than parameterizing once. While `virtualization-cube.nix`
+existed it illustrated a second, unrelated dirsAsCategory exclusion worth
+knowing regardless: a file sitting bare in `nire/homelab/virtualization/`
+itself, not in any subdirectory, is collected by nothing (this category only
+collects from *sub*directories) — which is what kept that VM out of the
+`virtualization` category's own aggregate, back when `durandal` still
+imported `virtualization` too and would otherwise have gotten it. It still
+**was** swept into the `homelab` aggregate that cube imports, since
+`homelab`'s own collector separately gathers bare `.nix` files sitting
+directly in each nested category's root alongside its by-name reference to
+that category's aggregate (see
+`flake/doc/dirsAsCategory.md`'s History section for why that second half
+exists — an earlier version of `homelab`'s delegation lacked it and silently
+dropped this exact file).
 
-**This exclusion is category-scoped, not tree-scoped, since the `homelab`
-consolidation (2026-08-27).** `homelab`'s own collector references
-`virtualization`'s aggregate by name rather than re-deriving it (see
-`flake/doc/dirsAsCategory.md`'s History section), but it still separately
-collects any bare `.nix` files sitting directly in `virtualization/`'s own
-root alongside that reference — deliberately, specifically so this file
-wouldn't stop reaching `nire-cube` when delegation was added (an earlier
-version of that change delegated without this and silently dropped it, see
-[homelab.md](homelab.md#nested-categories-overlap-their-parents-on-purpose)
-for that account). So while `virtualization-cube.nix` is still excluded
-from the `virtualization` aggregate itself (the bullet above still holds),
-it **is** swept into the `homelab` aggregate that cube imports. Harmless in
-practice, since only cube imports `homelab` and the VM was already
-cube-only by intent, but it's a real narrowing of a deliberately-scoped
-exclusion, not just a directory reshuffle.
-
-See [hosts.md](../hosts.md) for `nire-llm-sandbox` itself, and skill
-`nixos-vm-images` for two real bugs this specific feature hit (nixpkgs'
-image-variant isolation not reaching a base config's toplevel, and
-`image.filePath` being relative rather than absolute) — both caught before
-landing, neither by evaluation alone.
+See [history.md](../history.md) for `nire-llm-sandbox` itself, and skill
+`nixos-vm-images` for two real bugs this specific feature hit while it
+existed (nixpkgs' image-variant isolation not reaching a base config's
+toplevel, and `image.filePath` being relative rather than absolute) — both
+caught before landing, neither by evaluation alone.
 
 ## The near-miss this category's own header records
 
@@ -176,8 +167,9 @@ session (`kde-desktop`) already brings on the hosts that import it.
 `cube` only, as of 2026-08-27. `durandal` imported this too until then —
 same as `cube` does today, "the workstations get it, the handhelds don't"
 — but was dropped: nothing in this repo's history ever recorded durandal
-actually running a VM (unlike cube's confirmed `nire-llm-sandbox`), so it
-was carried purely for parity rather than an established need. See
+actually running a VM (cube's own confirmed usage, `nire-llm-sandbox`, was
+itself removed 2026-08-28 — see [history.md](../history.md)), so it was
+carried purely for parity rather than an established need. See
 `durandal-configuration.nix`'s own comment at the point it was removed.
 Still not `tenacity`, the handheld (the one that imports
 `jovian` — see [desktop-env](desktop-env.md)) — that part of the reasoning
@@ -196,11 +188,11 @@ is unchanged.
 - [../architecture.md](../architecture.md) — "If something shared needs to
   be optional, a category is the mechanism" — this category is the running
   example that claim is built on.
-- [../hosts.md](../hosts.md) — `nire-llm-sandbox`, the VM guest
-  `virtualization-cube.nix` defines and starts.
+- [../history.md](../history.md) — `nire-llm-sandbox`, the VM guest
+  `virtualization-cube.nix` used to define and start.
 - Skill `nixos-vm-images` (`.claude/skills/nixos-vm-images/SKILL.md`) — the
-  full mechanism and traps behind the cube-only addition above.
-- [monitoring](monitoring.md) — `libvirt-exporter.nix` scrapes the VMs this
-  category defines, and the same `just switch` that surfaced the
-  default-network bug above also surfaced two unrelated Grafana bugs on
-  `nire-cube`.
+  full mechanism and traps behind `VMs/_lib/libvirt-vm.nix` above.
+- [monitoring](monitoring.md) — `libvirt-exporter.nix` scrapes whatever VMs
+  this category defines (none currently), and the same `just switch` that
+  surfaced the default-network bug above also surfaced two unrelated
+  Grafana bugs on `nire-cube`.
