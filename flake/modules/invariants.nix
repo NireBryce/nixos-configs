@@ -1,87 +1,77 @@
 # Things that must be TRUE of an evaluated host, not merely resolvable.
 #
-# checks.nix forces each host's toplevel, which catches evaluation errors --
-# every defect the flake-parts port produced was one. It cannot catch a host
-# that evaluates perfectly and is wrong: a persistence entry dropped when a
-# module moved, an initrd unit that stopped being wanted by anything,
-# hibernation creeping back onto a machine that cannot survive it. Those are
-# the ones the first boot on tenacity found, and a green `nix flake check` said
-# nothing about any of them (lessons.md 25).
+# checks.nix forces each host's toplevel, catching evaluation errors --
+# every defect the flake-parts port produced was one. It cannot catch a
+# host that evaluates perfectly and is wrong: a persistence entry dropped
+# when a module moved, an initrd unit nothing wants, hibernation creeping
+# back onto a machine that cannot survive it -- what tenacity's first
+# boot found, about which a green `nix flake check` said nothing
+# (lessons.md 25).
 #
 # WHY THIS THROWS RATHER THAN FAILING A BUILD
 #
-# `just check` is `nix flake check --all-systems --no-build`. Under --no-build a
-# derivation-shaped check is only *evaluated* -- the log says "derivation
-# evaluated to ..." and stops -- so a runCommand that exits 1 never runs and
-# never fails. That is also true of the module-tree check next door, which is
-# why `just modules` invokes the script directly instead of relying on the flake
-# check. An invariant that only fails at build time would silently pass here
-# every single time, which is precisely the failure mode this file exists to
-# stop. Failing during evaluation is what makes --no-build sufficient.
-#
-# The whole failure list is built before anything throws, so one run reports
-# every broken invariant across every host rather than only the first.
+# `just check` is `nix flake check --all-systems --no-build`: a
+# derivation-shaped check is only *evaluated* -- a runCommand exiting 1
+# never runs and never fails. (Also true of the module-tree check, hence
+# `just modules` invokes the script directly.) A build-time-only
+# invariant would silently pass every time -- the failure mode this file
+# stops; failing during evaluation is what makes --no-build sufficient.
+# The whole failure list is built before anything throws, so one run
+# reports every broken invariant on every host.
 #
 # WHERE IT ACTUALLY RUNS
 #
-# Unlike the host checks, this is useful from darwin. `--all-systems` evaluates
-# every system's checks regardless of the machine doing the evaluating, and
-# these throw during evaluation, so `just check` on lysithea enforces both Linux
-# hosts. That is the point: durandal and tenacity cannot be built from here, so
-# evaluation is the only lever this machine has on them.
+# Useful from darwin, unlike the host checks: `--all-systems` evaluates
+# every system's checks, and these throw during evaluation, so `just
+# check` on lysithea enforces both Linux hosts -- evaluation is this
+# machine's only lever on hosts it cannot build. The aarch64-darwin
+# instance is vacuous (filters nixosConfigurations by system; lysithea
+# is a darwinConfiguration, so "0 invariants held across 0 host(s)") --
+# do not "fix" that by dropping the system filter: the host attributes
+# below are NixOS-only, and a darwin host would fail on the option
+# paths, not on the invariants.
 #
-# The aarch64-darwin instance is consequently vacuous -- it filters
-# nixosConfigurations by system and lysithea is a darwinConfiguration, so it
-# reports "0 invariants held across 0 host(s)" and passes. That is honest rather
-# than broken. Do not "fix" it by dropping the system filter; the host attributes
-# below are NixOS-only and a darwin host would fail on the option paths, not on
-# the invariants.
-#
-# Sits at the top of modules/ so dirsAsCategory does not collect it -- that
-# walks subdirectories only. It declares no flake.modules.<class> attribute, so
-# it is not a module and modules.py does not consider it for orphans either.
+# Sits at the top of modules/ (dirsAsCategory walks subdirectories only,
+# so it is not collected); it declares no flake.modules.<class>
+# attribute, so modules.py does not consider it for orphans either.
 #
 # OPT-IN: HOSTS WITHOUT IMPERMANENCE ARE EXEMPT
 #
-# The root-rollback, hibernation and persistence groups only apply to hosts
-# that actually opted into impermanence, gated on
-# `boot.initrd.systemd.services ? restore-root` -- the unit WARN-impermanence.nix
-# creates, and nothing else creates. Originally (before nire-testbed, since
-# removed) this gate was unconditional, because both hosts that existed then
-# wiped `/root`; nire-cube is the current example of a host that does not --
-# checking for restore-root existing there would fail every single boot rather
-# than ever catching a real regression.
+# The root-rollback, hibernation and persistence groups apply only to
+# hosts that opted into impermanence, gated on
+# `boot.initrd.systemd.services ? restore-root` -- the unit
+# WARN-impermanence.nix creates and nothing else does. Originally
+# (pre-nire-testbed, since removed) unconditional, because both hosts
+# then wiped `/root`; nire-cube is the current counterexample -- checking
+# it would fail every boot and never catch a real regression.
 #
-# The gate is intentionally the unit's *existence*, not some separate marker
-# option, and intentionally not `environment.persistence ? "/persist"` --
-# nire/system/impermanence/declare-persistence-option.nix now declares that
-# option for every NixOS host, impermanence or not, so tailscale-persist.nix
-# and jovian-persist.nix have somewhere valid to write even when they end up
-# writing nothing. environment.persistence existing would therefore no longer
-# distinguish an impermanence host from one that merely has the option
-# declared. restore-root is the one thing only WARN-impermanence.nix creates.
-# (tailscale-persist.nix itself is gated on this same restore-root check, for
-# the same reason -- see that file.)
+# The gate is the unit's *existence*, deliberately not a marker option
+# and deliberately not `environment.persistence ? "/persist"` --
+# nire/system/impermanence/declare-persistence-option.nix now declares
+# that option on every NixOS host so tailscale-persist.nix and
+# jovian-persist.nix have somewhere valid to write even when they write
+# nothing; it no longer distinguishes an impermanence host from one
+# merely declaring the option. restore-root is the one thing only
+# WARN-impermanence.nix creates. (tailscale-persist.nix is gated on the
+# same check -- see that file.)
 #
-# This does not weaken what the file catches. A host silently losing part of
-# its OWN impermanence setup while restore-root still exists -- wantedBy
-# dropped, hibernation creeping back, a persistence entry lost -- is exactly
-# what these invariants still catch, because the gate stays true and every
-# sub-check still runs. What it stops catching is a host that never claimed
-# impermanence in the first place, which was never a regression to begin with.
+# No weakening of what the file catches: a host silently losing part of
+# its OWN impermanence setup while restore-root exists -- wantedBy
+# dropped, hibernation creeping back, a persistence entry lost -- still
+# trips these invariants, the gate staying true and every sub-check
+# running. Only a host that never claimed impermanence escapes, and that
+# was never a regression.
 #
-# home-manager's useGlobalPkgs invariant is NOT gated on usesImpermanence --
-# it holds for every NixOS host regardless of impermanence, cube included.
-#
-# It IS gated on the host having home-manager at all (`c ? home-manager`),
-# added for nire-installer (the live-USB image, removed 2026-08-27): no
-# `elly` user and no reason to carry the home-manager closure, so it never
-# imported enable-home-manager.nix and had no `home-manager` option namespace
-# at all. nire-llm-sandbox is the current example of the same shape. Same
-# shape as the impermanence gate -- check for the real thing's
-# existence, not the host's name -- and it does not make the check vacuous:
-# enable-home-manager.nix is the only thing that sets useGlobalPkgs, but a
-# later import overriding it back to false on a host that DOES have
+# The useGlobalPkgs invariant is NOT gated on usesImpermanence -- it
+# holds for every NixOS host, cube included. It IS gated on the host
+# having home-manager at all (`c ? home-manager`), added for
+# nire-installer (live-USB image, removed 2026-08-27): no `elly` user,
+# no home-manager closure, so it never imported enable-home-manager.nix
+# and had no `home-manager` namespace; nire-llm-sandbox is the current
+# example. Same principle as the impermanence gate -- check the real
+# thing's existence, not the host's name -- and not vacuous:
+# enable-home-manager.nix is the only setter of useGlobalPkgs, but a
+# later import flipping it back to false on a host that DOES have
 # home-manager is exactly the regression this still catches.
 { config, lib, ... }:
 {
@@ -91,9 +81,10 @@
             (_: host: host.config.nixpkgs.hostPlatform.system == system)
             config.flake.nixosConfigurations;
 
-        # `directories` is `listOf (either str (submodule ...))` and both forms
-        # occur after merging, so normalise before comparing. Same for `files`,
-        # whose submodule names the attribute `file` rather than `directory`.
+        # `directories` is `listOf (either str (submodule ...))`, both
+        # forms occur after merging, so normalise before comparing. Same
+        # for `files` -- its submodule names the attribute `file`, not
+        # `directory`.
         persistDirs = c:
             map (d: if lib.isString d then d else d.directory)
                 (c.environment.persistence."/persist".directories or []);
@@ -101,9 +92,9 @@
             map (f: if lib.isString f then f else f.file)
                 (c.environment.persistence."/persist".files or []);
 
-        # Every invariant is `{ ok; msg; }`. msg says what breaks, not what
-        # differs -- a failure here is read by someone who does not yet know why
-        # the line existed.
+        # Every invariant is `{ ok; msg; }`; msg says what breaks, not
+        # what differs -- read by someone who doesn't yet know why the
+        # line existed.
         invariantsFor = name: host:
         let
             c        = host.config;
@@ -112,24 +103,23 @@
             rollback = c.boot.initrd.systemd.services.restore-root or null;
             hhd      = c.services.handheld-daemon.enable or false;
 
-            # restore-root existing is what marks a host as having actually
-            # opted into impermanence -- see the file header, "OPT-IN: HOSTS
-            # WITHOUT IMPERMANENCE ARE EXEMPT", for why this is the gate and
-            # not something else.
+            # restore-root existing is what marks a host as having opted
+            # into impermanence -- see the header, "OPT-IN: HOSTS WITHOUT
+            # IMPERMANENCE ARE EXEMPT", for why this is the gate.
             usesImpermanence = rollback != null;
 
             # Whether this host imported enable-home-manager.nix at all --
-            # see the file header's opt-in addendum above. nire-llm-sandbox
-            # (and, before its removal 2026-08-27, nire-installer) has no
-            # `elly` user and never does.
+            # see the header's opt-in addendum. nire-llm-sandbox (and,
+            # before removal 2026-08-27, nire-installer) has no `elly`
+            # user and never does.
             usesHomeManager = c ? home-manager;
 
             impermanenceInvariants = [
             # -- the root rollback actually runs ------------------------------
             #
-            # This is the one that matters most and the one with no runtime
-            # symptom until it is too late: if restore-root stops being pulled
-            # in, / simply stops being wiped and the machine looks fine.
+            # The one that matters most, with no runtime symptom until too
+            # late: if restore-root stops being pulled in, / simply stops
+            # being wiped and the machine looks fine.
             {
                 ok  = rollback != null;
                 msg = "${name}: boot.initrd.systemd.services.restore-root is gone -- "
@@ -146,20 +136,21 @@
                     + "could run after / is already mounted";
             }
             {
-                # postResumeCommands (scripted stage 1) and an initrd systemd
-                # unit are mutually exclusive mechanisms. If this flips false the
-                # unit above stops existing rather than misbehaving, so this is
-                # the invariant that explains the previous three when they go.
+                # postResumeCommands (scripted stage 1) and an initrd
+                # systemd unit are mutually exclusive. If this flips
+                # false the unit above stops existing rather than
+                # misbehaving -- this invariant explains the previous
+                # three when they go.
                 ok  = c.boot.initrd.systemd.enable;
                 msg = "${name}: boot.initrd.systemd.enable is false, but the rollback is a "
                     + "systemd stage-1 unit -- see flake/doc/impermanence-stage1.md";
             }
             {
-                # supportedFilesystems is `attrsOf bool` now and only *accepts*
-                # the list form WARN-impermanence.nix writes; by the time it is
-                # read back it is { btrfs = true; }. Both shapes are handled
+                # supportedFilesystems is `attrsOf bool` now and only
+                # *accepts* the list form WARN-impermanence.nix writes;
+                # read back it is { btrfs = true; }. Both shapes handled
                 # because reading it as a list is an error, not a false
-                # negative, and that error names nixpkgs rather than this file.
+                # negative -- and that error names nixpkgs, not this file.
                 ok  = let sf = c.boot.initrd.supportedFilesystems or { }; in
                       if lib.isList sf then lib.elem "btrfs" sf else (sf.btrfs or false);
                 msg = "${name}: btrfs missing from boot.initrd.supportedFilesystems -- the "
@@ -168,9 +159,10 @@
 
             # -- hibernation stays off ---------------------------------------
             #
-            # A hibernation image is a snapshot of a system whose / is about to
-            # be deleted underneath it. Disabling it also broke suspend outright
-            # once; both halves are recorded in WARN-impermanence.nix.
+            # A hibernation image is a snapshot of a system whose / is
+            # about to be deleted underneath it. Disabling it also broke
+            # suspend outright once; both halves recorded in
+            # WARN-impermanence.nix.
             {
                 ok  = lib.elem "nohibernate" (c.boot.kernelParams or []);
                 msg = "${name}: nohibernate missing from boot.kernelParams -- impermanence "
@@ -197,10 +189,11 @@
                     + "every boot and every client warns about a changed key";
             }
             {
-                # States the scoping rule rather than the hosts, so it keeps
-                # holding when a second handheld appears. Both directions matter:
-                # a handheld silently losing its fan curves, and durandal quietly
-                # acquiring a rule for a daemon it never runs.
+                # States the scoping rule, not the hosts, so it keeps
+                # holding when a second handheld appears. Both directions
+                # matter: a handheld silently losing its fan curves, and
+                # durandal quietly acquiring a rule for a daemon it never
+                # runs.
                 ok  = lib.elem "/etc/hhd" dirs == hhd;
                 msg = if hhd
                       then "${name}: runs handheld-daemon but does not persist /etc/hhd -- fan "
@@ -211,10 +204,10 @@
             ];
             homeManagerInvariants = [
             {
-                # HM *rejects* every nixpkgs.* option under useGlobalPkgs rather
-                # than ignoring it, so this flipping does not degrade quietly --
-                # but allowUnfree comes from the system side because of it, and
-                # that is the part that would go strange.
+                # HM *rejects* every nixpkgs.* option under useGlobalPkgs
+                # rather than ignoring it, so this flipping does not degrade
+                # quietly -- but allowUnfree comes from the system side
+                # because of it, and that is the part that would go strange.
                 ok  = c.home-manager.useGlobalPkgs or false;
                 msg = "${name}: home-manager.useGlobalPkgs is false -- HM would build its own "
                     + "nixpkgs and lose the system's allowUnfree";
@@ -222,9 +215,10 @@
         ];
         in
             (if usesImpermanence then impermanenceInvariants else [ ])
-            # NOT gated on usesImpermanence: holds for every NixOS host that
-            # has home-manager at all, cube included. See usesHomeManager
-            # above for the current host it does not -- nire-llm-sandbox.
+            # NOT gated on usesImpermanence: holds for every NixOS host
+            # that has home-manager at all, cube included. See
+            # usesHomeManager for the host it currently does not:
+            # nire-llm-sandbox.
             ++ (if usesHomeManager then homeManagerInvariants else [ ]);
 
         failures = lib.concatLists (lib.mapAttrsToList

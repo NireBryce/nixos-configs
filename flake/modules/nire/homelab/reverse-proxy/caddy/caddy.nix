@@ -1,143 +1,107 @@
 # Caddy: one tailnet-only HTTPS front door for every web service on this
-# host. Added 2026-08-24, cube-only, own category (`nire/reverse-proxy/`) for
-# the same "if something shared needs to be optional, a category is the
-# mechanism" reason `monitoring`, `git-forge` and `shortlinks` each already
+# host. Added 2026-08-24, cube-only, own category (`nire/reverse-proxy/`)
+# for the same "if something shared needs to be optional, a category is
+# the mechanism" reason `monitoring`, `git-forge` and `shortlinks` each
 # give (CLAUDE.md's Architecture section) -- the handhelds have no web
-# services to front, and durandal has not asked for one.
+# services, durandal has not asked.
 #
-# The category is named `reverse-proxy`, not `caddy`: a category and its one
-# module both named `caddy` would declare the same
+# The category is named `reverse-proxy`, not `caddy`: a category and its
+# one module both named `caddy` would declare the same
 # `flake.modules.nixos.caddy` attribute and silently MERGE rather than
-# error. That's the `containers`/`podman.nix` collision CLAUDE.md documents,
-# hit for real writing `git-forge` and again writing `shortlinks`.
+# error -- the `containers`/`podman.nix` collision CLAUDE.md documents,
+# hit for real writing `git-forge` and again `shortlinks`.
 #
-# WHAT THIS CHANGED ELSEWHERE, in the same commit -- read those two files'
-# own history notes, this is the summary:
-#
-#   - monitoring/grafana/grafana.nix  http_addr 0.0.0.0 -> 127.0.0.1
-#   - git-forge/forgejo/forgejo.nix   HTTP_ADDR 0.0.0.0 -> 127.0.0.1
-#
-# Both used to listen on every interface and rely ENTIRELY on
+# WHAT THIS CHANGED ELSEWHERE, same commit (see those files' history
+# notes): grafana.nix `http_addr` and forgejo.nix `HTTP_ADDR`, both
+# 0.0.0.0 -> 127.0.0.1. Both relied ENTIRELY on
 # `trustedInterfaces = [ "tailscale0" ]` (system/networking/networking.nix)
-# to keep the LAN out -- a firewall property, not a listener property, and
-# one firewall mistake away from being on the LAN. They now listen on
-# loopback only and are reachable exclusively through this proxy, so the
-# firewall is no longer the only thing standing between them and the
-# network. The old URLs stop working, deliberately:
+# to keep the LAN out -- a firewall property, not a listener property, one
+# firewall mistake from being on the LAN. Loopback-only now, reachable
+# only through this proxy, so the firewall is no longer the only line.
+# The old URLs stop working, deliberately:
 #
 #     http://ts-cube:3000/  ->  https://ts-cube.moose-micro.ts.net/grafana/
 #     http://ts-cube:3001/  ->  https://ts-cube.moose-micro.ts.net/git/
 #
-# TAILSCALE ISSUES THE CERT, AND CADDY DOES IT WITH NO PLUGIN. Checked
-# caddy 2.11.4's own source in the pinned nixpkgs rather than assuming a
-# `withPlugins` build was needed: modules/caddyhttp/autohttps.go:884
-# defines `isTailscaleDomain` as nothing more than a `.ts.net` suffix
-# check, and any site address matching it is pulled OUT of the normal
-# ACME-managed set and handed to `tls.get_certificate.tailscale`
-# (modules/caddytls/certmanagers.go:28), which asks the LOCAL tailscaled
-# for the cert. So: no ACME account, no `email`, no DNS-01 credentials, no
-# xcaddy rebuild with a vendor hash. Ordinary `pkgs.caddy` and a `.ts.net`
+# TAILSCALE ISSUES THE CERT, NO PLUGIN NEEDED -- checked in caddy 2.11.4's
+# source (pinned nixpkgs), not assumed: modules/caddyhttp/autohttps.go:884
+# defines `isTailscaleDomain` as a `.ts.net` suffix check; a matching site
+# address is pulled from the normal ACME set and handed to
+# `tls.get_certificate.tailscale` (modules/caddytls/certmanagers.go:28),
+# which asks the LOCAL tailscaled. No ACME account, `email`, DNS-01
+# credentials, or xcaddy rebuild -- ordinary `pkgs.caddy` and a `.ts.net`
 # site address is the whole mechanism.
 #
 # `services.tailscale.permitCertUid = "caddy"` below is what makes that
-# request succeed, and it is NOT optional. tailscaled refuses cert requests
-# from non-root local-API clients unless the peer's uid matches
+# request succeed, NOT optional: tailscaled refuses cert requests from
+# non-root local-API clients unless the peer's uid matches
 # TS_PERMIT_CERT_UID (ipn/ipnserver/server.go:390, `CanFetchCerts`, whose
-# own upstream comment names caddy as the intended case). That option is
-# set HERE rather than in system/networking/tailscale.nix on purpose:
-# tailscale.nix is in the `system` category that EVERY Linux host imports,
-# so setting it there would grant cert-fetching rights to a `caddy` user on
-# durandal and tenacity -- two hosts that don't run caddy at all.
-# Scoped to the category that actually needs it, the same way
-# `virtualization`'s VM fixes were scoped to the host that had the bug.
-# The value is resolved by name at request time (`userIDFromString` does a
-# `user.Lookup` when the value isn't all digits), so it tracks whatever uid
-# services.caddy's own `caddy` user ends up with -- nothing to keep in sync.
+# upstream comment names caddy as the intended case). Set HERE, not in
+# system/networking/tailscale.nix: tailscale.nix is in the `system`
+# category every Linux host imports, so it would grant a `caddy` user
+# cert rights on durandal and tenacity, which don't run caddy -- scoped
+# to the category that needs it, like `virtualization`'s VM fixes.
+# Resolved by name at request time (`userIDFromString` does a
+# `user.Lookup` for a non-numeric value), tracking whatever uid caddy's
+# user gets -- nothing to keep in sync.
 #
-# TAILNET HTTPS MUST BE ENABLED IN THE ADMIN CONSOLE, and this one was
-# checked rather than assumed: `tailscale status --json` on nire-lysithea,
-# 2026-08-24, reported a non-empty `CertDomains`, which is the tailnet-wide
-# HTTPS-certificates setting being on. If it were off, every request here
-# would fail the TLS handshake with nothing wrong in this file. It's a
-# claim about the Tailscale admin console, same class as tailscale.nix's
-# "TWO REAL TRAPS" -- not something this repo can assert.
+# TAILNET HTTPS MUST BE ON IN THE ADMIN CONSOLE, checked not assumed:
+# `tailscale status --json` on nire-lysithea, 2026-08-24, reported a
+# non-empty `CertDomains` (the tailnet-wide HTTPS-certificates setting).
+# If it were off, every request fails the TLS handshake with nothing
+# wrong in this file -- an admin-console claim, like tailscale.nix's
+# "TWO REAL TRAPS", not assertable from this repo.
 #
-# THE FQDN IS WRITTEN OUT, and it is `ts-cube`, NOT `nire-cube`. This
-# tailnet renames its devices fleet-wide (tailscale.nix's trap #1, the
-# expensive one). Verified against the live tailnet rather than inferred
-# from that doc: `tailscale status --json` from lysithea, 2026-08-24, lists
-# the peer as `ts-cube.moose-micro.ts.net.` and its own MagicDNSSuffix as
-# `moose-micro.ts.net`. The same string appears in grafana.nix's `root_url`
-# and forgejo.nix's `ROOT_URL`; there is no shared constant for it because
-# nothing in this tree declares options (CLAUDE.md, Architecture), so a
-# change here means editing those two as well.
+# THE FQDN IS `ts-cube`, NOT `nire-cube` -- this tailnet renames devices
+# fleet-wide (tailscale.nix's trap #1, the expensive one), verified live
+# 2026-08-24 (`tailscale status --json` from lysithea: peer
+# `ts-cube.moose-micro.ts.net.`, MagicDNSSuffix `moose-micro.ts.net`).
+# Same string in grafana.nix's `root_url` and forgejo.nix's `ROOT_URL`;
+# no shared constant, nothing here declares options (CLAUDE.md,
+# Architecture) -- a change means editing those two.
 #
-# PATHS, NOT PORTS OR SUBDOMAINS, and that's forced. MagicDNS gives a
-# device exactly ONE name, so `grafana.ts-cube...` does not resolve and
-# cannot be made to without either Tailscale Services (`svc:`, which needs
-# per-service admin approval) or a real domain with split DNS. Both apps
-# are therefore mounted under a path prefix, which each has to be told
-# about: grafana.nix sets `serve_from_sub_path` + `root_url`, forgejo.nix
-# sets `ROOT_URL`.
+# PATHS, NOT PORTS OR SUBDOMAINS, and that's forced: MagicDNS gives a
+# device ONE name, so `grafana.ts-cube...` does not resolve and can't be
+# made to without Tailscale Services (`svc:`, per-service admin approval)
+# or a real domain with split DNS. Both apps mount under a path prefix,
+# each told about it: grafana.nix sets `serve_from_sub_path` +
+# `root_url`, forgejo.nix sets `ROOT_URL`.
 #
-# THE TWO APPS THEN WANT OPPOSITE THINGS FROM THE PROXY, which is the one
-# thing here that was actually gotten wrong on the first live test
-# (2026-08-24: /grafana/ returned 200, /git/ returned 404). Grafana, with
-# `serve_from_sub_path`, serves UNDER the prefix and needs it left on, so
-# it gets `handle`. Forgejo has no equivalent option, always serves at `/`,
-# and needs the prefix STRIPPED, so it gets `handle_path` -- while its
-# ROOT_URL keeps the `/git/` so the links it generates still point through
-# the prefix. Full detail at each route below.
+# THE TWO APPS WANT OPPOSITE THINGS FROM THE PROXY -- the one thing
+# gotten wrong on the first live test (2026-08-24: /grafana/ 200, /git/
+# 404). Grafana, with `serve_from_sub_path`, serves UNDER the prefix and
+# needs it left on: `handle`. Forgejo has no equivalent, always serves at
+# `/`, needs the prefix STRIPPED: `handle_path`, while ROOT_URL keeps
+# `/git/` so its generated links still point through the prefix. Detail
+# at each route below.
 #
-# NO FIREWALL CHANGE, on purpose. 443/80 are NOT added to
-# `networking.firewall.allowedTCPPorts` -- the same reasoning grafana.nix
-# and forgejo.nix each already spell out for their own ports:
-# `trustedInterfaces = [ "tailscale0" ]` lets tailnet traffic bypass the
-# allow-list, everything arriving on any other interface hits the
-# default-deny. What's changed is that the firewall is now the SECOND line
-# rather than the only one, since the apps behind it are on loopback.
-# Caddy itself still binds every interface: it can't bind the tailnet IP
-# specifically, because that address is assigned at runtime by tailscaled
-# and isn't knowable at build time.
+# NO FIREWALL CHANGE, on purpose: 443/80 are NOT added to
+# `networking.firewall.allowedTCPPorts`, same reasoning grafana.nix and
+# forgejo.nix give for their own ports -- `trustedInterfaces` lets
+# tailnet traffic bypass the allow-list, everything else hits
+# default-deny. What's changed: the firewall is now the SECOND line, the
+# apps being on loopback. Caddy still binds every interface: the tailnet
+# IP is assigned at runtime by tailscaled, unknowable at build time.
 #
-# Binding 443 as the unprivileged `caddy` user works because upstream's own
-# caddy.service -- which nixpkgs ships via `systemd.packages` and only
-# overrides ExecStart on -- carries
-# `AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE`. Read out of the
-# caddy dist tarball rather than assumed; nothing in this file needs to
-# grant it.
+# Binding 443 as the unprivileged `caddy` user works because upstream's
+# caddy.service -- shipped via `systemd.packages`, only ExecStart
+# overridden -- carries `AmbientCapabilities=CAP_NET_ADMIN
+# CAP_NET_BIND_SERVICE` (read from the dist tarball, not assumed).
 #
-# STATUS: RUNTIME-VERIFIED end to end on nire-cube, 2026-08-24. `just
-# switch` came up with 0 failed units, `caddy.service` `active (running)`
-# with `NRestarts=0`, and from ANOTHER tailnet host (lysithea, not
-# localhost on cube):
+# STATUS: RUNTIME-VERIFIED end to end on nire-cube from ANOTHER tailnet
+# host (lysithea), 2026-08-24: 200 over validated TLS on /grafana/, /git/
+# and / (the index route, proxying to glance, nire/landing/), plus both
+# 301 redirects; `tls_verify_result` 0 -- the tailscaled-issued cert
+# validated against the system trust store, which eval or a build could
+# not have shown. Forgejo's generated links checked (a stripped prefix
+# can proxy right yet emit links that 404 on the next click); `ss -ltn`:
+# 3000/3001 on 127.0.0.1 only, 80/443 the only tailnet-facing listeners.
 #
-#     https://ts-cube.moose-micro.ts.net/grafana/  ->  200, TLS verified
-#     https://ts-cube.moose-micro.ts.net/git/      ->  200, TLS verified
-#     https://ts-cube.moose-micro.ts.net/          ->  200 (the index below)
-#
-# The `/` row is the second arrangement of that route and was re-verified
-# the same day: it was a plaintext `respond` placeholder at first, and now
-# proxies to glance (nire/landing/). 200 over validated TLS, serving
-# glance's own page, with glance's assets under /static/ resolving through
-# this same fallback route.
-#     https://ts-cube.moose-micro.ts.net/git       ->  301 to /git/
-#     http://ts-cube/                              ->  301 to the FQDN
-#
-# `tls_verify_result` was 0, i.e. the tailscaled-issued cert validated
-# against the system trust store -- the whole point of this module, and
-# not something evaluation or a build could have told us. Forgejo's
-# generated links were checked too (`href="/git/explore/repos"`, and an
-# asset under /git/ returning 200), because a stripped prefix can proxy
-# correctly and still emit links that 404 on the next click. `ss -ltn` on
-# the host confirms 3000/3001 bound to 127.0.0.1 only, with 80/443 the
-# only tailnet-facing listeners.
-#
-# It took two switches. The first shipped `handle` for BOTH apps and
-# Forgejo answered 404 to everything -- see the route comments below, and
-# `claude cave/lessons-learned.md` #41. Everything static had passed:
-# eval, `just modules`, `caddy adapt`, a real build, and reading the built
-# artifact back. Only a live request found it.
+# Took two switches: the first shipped `handle` for both apps and
+# Forgejo 404'd everything -- see the route comments and
+# `claude cave/lessons-learned.md` #41; eval, `just modules`, `caddy
+# adapt`, a real build, and reading the artifact back all passed. Only a
+# live request found it.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
@@ -157,43 +121,39 @@
                 # `.ts.net` address is what triggers the tailscale cert
                 # manager -- see the header.
                 virtualHosts.${tailnetFqdn}.extraConfig = ''
-                    # NAMED matchers, not inline ones. `handle` accepts at
-                    # most ONE matcher token, so `handle /grafana /grafana/*`
-                    # is a parse error ("wrong argument count or unexpected
+                    # NAMED matchers, not inline: `handle` accepts at most
+                    # ONE matcher token, so `handle /grafana /grafana/*` is
+                    # a parse error ("wrong argument count or unexpected
                     # line ending") -- caught by running the generated
-                    # Caddyfile through a real `caddy adapt` before this
-                    # shipped, which is the only reason it isn't in the first
-                    # `just switch`. The two-path form is deliberate over the
-                    # shorter `/grafana*`: that also matches `/grafanafoo`.
+                    # Caddyfile through `caddy adapt` before shipping. The
+                    # two-path form is deliberate over `/grafana*`: that
+                    # also matches `/grafanafoo`.
                     @grafana path /grafana /grafana/*
                     handle @grafana {
                         reverse_proxy 127.0.0.1:3000
                     }
 
-                    # Forgejo is `handle_path`, NOT `handle`, and that
-                    # asymmetry with Grafana above is the whole point --
-                    # getting it wrong is a 404, which is exactly how it was
-                    # found (first live test, 2026-08-24: /grafana/ returned
-                    # 200 and /git/ returned 404). The two apps want opposite
-                    # things from a proxy:
+                    # Forgejo is `handle_path`, NOT `handle` -- the
+                    # asymmetry with Grafana above is the whole point, and
+                    # getting it wrong is a 404, exactly how it was found
+                    # (first live test, 2026-08-24). Opposite things:
                     #
                     #   - Grafana, with serve_from_sub_path = true, SERVES
                     #     under /grafana and wants the prefix left on.
-                    #   - Forgejo has no such option. It always serves at
-                    #     `/` -- confirmed on the host itself, not inferred:
-                    #     `curl 127.0.0.1:3001/` is 200 and
-                    #     `curl 127.0.0.1:3001/git/` is 404 -- and expects
-                    #     the proxy to strip. Its ROOT_URL still carries
-                    #     `/git/`, which is what makes the links it
-                    #     GENERATES point back through this prefix. Same
-                    #     shape as the nginx `proxy_pass http://…:3001/;`
-                    #     trailing-slash idiom Gitea/Forgejo document.
+                    #   - Forgejo has no such option and always serves at
+                    #     `/` -- confirmed on the host (`curl
+                    #     127.0.0.1:3001/` 200, `curl
+                    #     127.0.0.1:3001/git/` 404) -- and expects the
+                    #     proxy to strip. ROOT_URL keeps `/git/`, which is
+                    #     what makes its GENERATED links point back through
+                    #     the prefix. Same shape as nginx's `proxy_pass
+                    #     http://…:3001/;` trailing-slash idiom.
                     #
-                    # `handle_path /git/*` strips the `/git` prefix. It takes
-                    # an inline path matcher only -- a named matcher is
-                    # rejected -- so the bare `/git` (no trailing slash) can't
-                    # ride along in the same matcher the way @grafana's two
-                    # paths do, and gets its own redirect below instead.
+                    # `handle_path /git/*` strips the `/git` prefix. It
+                    # takes an inline path matcher only -- a named matcher
+                    # is rejected -- so the bare `/git` can't ride along
+                    # the way @grafana's two paths do; its own redirect
+                    # below.
                     @gitbare path /git
                     handle @gitbare {
                         redir https://${tailnetFqdn}/git/ permanent
@@ -204,61 +164,56 @@
                     }
 
                     # Everything not claimed above goes to glance
-                    # (nire/landing/), the service index -- what's running,
-                    # whether it's up, and how this machine is doing. It
-                    # replaced a `respond` with a two-item plaintext list
-                    # here on 2026-08-24, the same day that placeholder was
-                    # written.
+                    # (nire/landing/), the service index -- what's
+                    # running, whether it's up, how this machine is doing.
+                    # Replaced a plaintext `respond` placeholder here
+                    # 2026-08-24, the day it was written.
                     #
-                    # This is the one route on this vhost with no prefix
-                    # question: glance serves at `/`, so nothing is stripped
-                    # and nothing is preserved. glance's own assets
-                    # (/static/..., /api/...) fall through here too, which is
-                    # exactly right -- they are not under a prefix either.
+                    # The one route with no prefix question: glance serves
+                    # at `/`, nothing stripped or preserved. Its assets
+                    # (/static/..., /api/...) fall through here too --
+                    # not under a prefix either.
                     handle {
                         reverse_proxy 127.0.0.1:3002
                     }
                 '';
 
-                # Bare MagicDNS name -> the real thing. `http://` in the site
-                # address is load-bearing: it tells caddy this site is
-                # HTTP-only and suppresses automatic HTTPS for it. Without
-                # the scheme, caddy would try to obtain a cert for the name
-                # `ts-cube`, which is not a `.ts.net` domain, so the
-                # tailscale manager would decline it and it would fall
+                # Bare MagicDNS name -> the real thing. `http://` is
+                # load-bearing: it marks the site HTTP-only and suppresses
+                # automatic HTTPS. Without the scheme, caddy would seek a
+                # cert for `ts-cube`, which is not a `.ts.net` domain, so
+                # the tailscale manager would decline it and it would fall
                 # through to caddy's internal CA -- an untrusted cert on a
-                # name that only ever needed to redirect.
+                # name that only needed to redirect.
                 virtualHosts."http://ts-cube".extraConfig = ''
                     redir https://${tailnetFqdn}{uri} permanent
                 '';
             };
 
-            # See the header: without this, tailscaled refuses to hand caddy
-            # a cert, and every HTTPS request fails at the handshake with
-            # nothing visibly wrong here. Set in this module rather than in
-            # system/networking/tailscale.nix so it reaches only hosts that
-            # actually import this category.
+            # See the header: without this, tailscaled refuses to hand
+            # caddy a cert and every HTTPS request fails at the handshake
+            # with nothing visibly wrong here. Set in this module, not in
+            # system/networking/tailscale.nix, so it reaches only hosts
+            # that import this category.
             services.tailscale.permitCertUid = "caddy";
 
-            # Certs (and caddy's own account state) live under
-            # /var/lib/caddy, which the upstream module already declares as a
-            # StateDirectory. No caddy-persist.nix alongside this, same
-            # reasoning grafana.nix, forgejo.nix and golink.nix each give:
-            # cube-configuration.nix's header says this host has a plain
-            # persistent root, not the `/root` wipe durandal/tenacity
-            # get. If this module is ever imported by a host that DOES wipe
-            # root, add one first, modeled on tailscale-persist.nix --
-            # otherwise every boot re-fetches certs from tailscaled.
+            # Certs (and caddy's account state) live under /var/lib/caddy,
+            # which the upstream module already declares as a
+            # StateDirectory. No caddy-persist.nix, same reasoning as
+            # grafana.nix/forgejo.nix/golink.nix: cube-configuration.nix's
+            # header says this host has a plain persistent root, not the
+            # `/root` wipe durandal/tenacity get. If a root-wiping host
+            # ever imports this module, add one first, modeled on
+            # tailscale-persist.nix -- else every boot re-fetches certs.
             systemd.services.caddy = {
                 # Ordering only, not a dependency: tailscaled is enabled
-                # unconditionally by system/networking/tailscale.nix on every
-                # host that could import this, so there is nothing to pull
-                # in. What this avoids is the narrow startup window where
-                # caddy asks a not-yet-running tailscaled for a cert; the
-                # tailscale cert manager is consulted per-handshake, so
-                # getting this wrong would mean early requests failing and
-                # later ones working -- an intermittent, easy-to-misread
-                # failure rather than a clean one.
+                # unconditionally by system/networking/tailscale.nix on
+                # every host that could import this. This avoids the
+                # narrow startup window where caddy asks a not-yet-running
+                # tailscaled for a cert; the cert manager is consulted
+                # per-handshake, so getting it wrong means early requests
+                # failing and later ones working -- intermittent and easy
+                # to misread, rather than a clean failure.
                 after = [ "tailscaled.service" ];
             };
         };

@@ -47,26 +47,22 @@
 #
 # 2026-08-10 — why this file exists, and what the split found
 #
-# `services.xserver.enable` was in kde.nix, which only durandal imported.
-# Tenacity got `services.desktopManager.plasma6.enable` from jovian.nix instead,
-# so it evaluated to a Plasma 6 session with xserver.enable = false: no
-# XWayland, and no xorg-server, xrandr, xprop, xinput, xterm or
-# xf86-input-libinput in systemPackages. Gamescope brings its own X server for
-# the Steam session, so games were unaffected -- but an X11-only application
+# `services.xserver.enable` was in kde.nix, which only durandal imported;
+# tenacity got plasma6 from jovian.nix and evaluated with xserver.enable =
+# false: no XWayland, and no xorg-server, xrandr, xprop, xinput, xterm or
+# xf86-input-libinput in systemPackages. Gamescope brings its own X server
+# for the Steam session, so games were unaffected -- but an X11-only app
 # launched from the *desktop* session had nothing to talk to.
 #
-# The pre-restructure tree had a separate configs/system-config/wm/kde/
-# xwayland.nix, which suggests this was handled deliberately once and simply
-# was not carried across the port. Nothing on this branch replaced it.
+# The pre-restructure tree had configs/system-config/wm/kde/xwayland.nix,
+# suggesting this was handled deliberately once and not carried across the
+# port; nothing here replaced it. Confirmed by evaluation before the split:
+# xserver.enable durandal true, tenacity false.
 #
-# Confirmed by evaluation before the split, not by reading:
+# The other half tenacity was missing was this file's package list --
+# konqueror, partitionmanager, kcharselect, polonium, krohnkite, libinput
+# (spectacle and qttools it already had; Plasma 6 pulls those in).
 #
-#   services.xserver.enable   durandal true    tenacity false
-#
-# The other half of what tenacity was missing was this file's package list --
-# konqueror, partitionmanager, kcharselect, polonium, krohnkite, libinput.
-# spectacle and qttools it already had, since Plasma 6 pulls those in itself.
-#
-# Not a gap, though it looks like one: networkmanager.enable is mkDefault here,
-# but both hosts get it as `true` from nire/system/networking/wifi.nix. Tenacity
-# was never without networking.
+# Not a gap: networkmanager.enable is mkDefault here, but both hosts get it
+# as `true` from nire/system/networking/wifi.nix -- tenacity was never
+# without networking.

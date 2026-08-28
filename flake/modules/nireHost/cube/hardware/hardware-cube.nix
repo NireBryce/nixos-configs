@@ -103,17 +103,15 @@
 #
 # 2026-08-21 -- this file replaces disko-cube.nix
 #
-# From when nire-cube was added (2026-08-15) until this update, this host's
-# hardware module was disko-cube.nix: a disko template wiring in
+# From cube's addition (2026-08-15) until then, this host's hardware module
+# was disko-cube.nix: a disko template wiring in
 # nire/impermanence/_disko/impermanence-luks-btrfs.nix, with an intentionally
-# fake device path ("/dev/disk/by-id/REPLACE-ME-before-running-disko") that
-# was never meant to be plausible, because the machine hadn't been installed
-# yet. It wasn't installed through this flake in the end -- it was installed
-# by hand off the stock NixOS live ISO, plain persistent root, no LUKS -- so
-# disko-cube.nix was deleted rather than pointed at a real device, and
-# cube-configuration.nix dropped its `impermanence` import to match. If this
-# host ever gets reinstalled with LUKS + impermanence later, that's a fresh
-# decision to make then, not a reason to resurrect this file from git history
-# as-is: re-derive the device path and layout against whatever disk is
-# actually there at the time, the same way this file itself was derived from
-# a real scan rather than trusted from the old placeholder.
+# fake device path ("/dev/disk/by-id/REPLACE-ME-before-running-disko") -- the
+# machine hadn't been installed yet. It was installed by hand off the stock
+# NixOS live ISO instead (plain persistent root, no LUKS, not through this
+# flake), so disko-cube.nix was deleted rather than pointed at a real
+# device, and cube-configuration.nix dropped its `impermanence` import to
+# match. A future LUKS + impermanence reinstall is a fresh decision, not a
+# git-history resurrection: re-derive the device path and layout against
+# the disk actually there, the way this file was derived from a real scan
+# rather than the old placeholder.

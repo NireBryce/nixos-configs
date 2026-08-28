@@ -13,21 +13,20 @@
         
         flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
             # Notes:
-            # If you get `zsh side` errors, delete ~/.zcompdump and ~/.config/zsh/.zcompdump
-            # installing multiple highlighters causes "zsh_zle-highlight-buffer-p:4: permission denied error
-            # in this case it was trapd00r/zsh-syntax-highlighting-filetypes which highlights more than filetypes turns out
+            # `zsh side` errors: delete ~/.zcompdump and ~/.config/zsh/.zcompdump
+            # Multiple highlighters cause "zsh_zle-highlight-buffer-p:4: permission denied";
+            # here it was trapd00r/zsh-syntax-highlighting-filetypes, which highlights more than filetypes
 
-            # TO-DONE: evaluate oh-my-zsh, prezto
-            #          o-m-z is too all-encompassing still, but has best support
-            #          prezto not worth looking into imo because I want something stable
+            # TO-DONE: evaluate oh-my-zsh, prezto -- o-m-z too all-encompassing but best support;
+            #          prezto not worth it, want something stable
 
-            # TO-DONE: migrate off zi. `5659567` dropped the last two references to
-            #          config/zi.zsh and config/zi-plugins.zsh, so nothing has sourced
-            #          zi since 2025-12-17; plugins are all programs.zsh.plugins now.
+            # TO-DONE: migrate off zi. `5659567` dropped the last references to
+            #          config/zi.zsh and config/zi-plugins.zsh; nothing has sourced
+            #          zi since 2025-12-17, plugins are all programs.zsh.plugins now.
             #
-            #          Seven plugins from the old zi list were never carried across, and
-            #          have therefore been off since that date without being missed.
-            #          Kept here because deleting zi-plugins.zsh deletes the only record:
+            #          Seven plugins from the old zi list were never carried across and
+            #          have been off since that date without being missed. Kept here
+            #          because deleting zi-plugins.zsh deletes the only record:
             #            Tom-Power/fzf-tab-widgets        (fzf-tab itself -> zsh-fzf-tab)
             #            akash329d/zsh-alias-finder
             #            jgogstad/zsh-mask
@@ -36,10 +35,9 @@
             #            zpm-zsh/colorize                 (colorizes gcc/grep/etc)
             #            RobSis/zsh-completion-generator
             #
-            #          The z-a-* entries in that file were zi's own annexes and mean
-            #          nothing without zi. It also carried an `unset python` marked
-            #          "MAGIC: idk why this is here" -- possibly related to the
-            #          PYTHON = "PYTHON" in shell-env.nix, which is equally unexplained.
+            #          The file's z-a-* entries were zi annexes, meaningless without zi;
+            #          its `unset python` marked "MAGIC: idk why this is here" is possibly
+            #          related to the equally unexplained PYTHON = "PYTHON" in shell-env.nix.
 
             # fast syntax highlighting theems
             home.file."./.config/F-Sy-H".source = ./config/zsh-f-s-highlight-themes;
@@ -176,18 +174,15 @@
                     (lib.mkBefore ''
                     zmodload zsh/zprof                                # zsh profiler
 
-                    # nixpkgs' programs.ssh module exports SSH_ASKPASS
-                    # globally whenever services.xserver.enable is true --
-                    # which kde-desktop brings, on durandal and cube -- with
-                    # no way to scope it to sessions that actually have a
-                    # display. Over a plain SSH login it's worse than
-                    # useless: anything that tries to use it crashes instead
-                    # of falling back to a normal terminal prompt, since
-                    # ksshaskpass needs a Qt/X11 platform that isn't there.
-                    # Same fix as bash.nix's initExtra -- see its comment for
-                    # the 2026-08-26 incident this came from. Harmless no-op
-                    # on a host that never had it set, or a real graphical
-                    # session.
+                    # nixpkgs' programs.ssh module exports SSH_ASKPASS globally
+                    # whenever services.xserver.enable is true (kde-desktop,
+                    # so durandal and cube), with no way to scope it to
+                    # sessions that have a display. Over plain SSH anything
+                    # using it crashes instead of falling back to a terminal
+                    # prompt -- ksshaskpass needs a Qt/X11 platform that isn't
+                    # there. Same fix as bash.nix's initExtra, which has the
+                    # 2026-08-26 incident. Harmless no-op on a host that never
+                    # had it set, or a real graphical session.
                     if [[ -z "''${DISPLAY:-}''${WAYLAND_DISPLAY:-}" ]]; then
                         unset SSH_ASKPASS
                     fi
@@ -225,28 +220,26 @@
                     autoload -Uz compinit
                     compinit -C
                 '')
-                    # Deliberately no aliases in this block. `#` inside a '' string
-                    # is shell text, not a Nix comment, so the reasoning lives
-                    # above the string rather than being emitted into ~/.zshrc:
+                    # Deliberately no aliases in this block: `#` inside a ''
+                    # string is shell text, not a Nix comment, so the reasoning
+                    # lives above the string rather than being emitted into
+                    # ~/.zshrc.
                     #
-                    #   home.shellAliases is emitted *after* initContent and later
-                    #   definitions win, so an alias written here that also exists
-                    #   there is dead. Four were: ll, cp and exa duplicated
-                    #   shell-env.nix exactly, and `ls` lost to the `ls = eza` that
-                    #   programs.eza generates.
+                    # home.shellAliases is emitted *after* initContent and later
+                    # definitions win, so an alias written here that also exists
+                    # there is dead. Four were: ll, cp and exa duplicated
+                    # shell-env.nix exactly, and `ls` lost to the `ls = eza`
+                    # that programs.eza generates. That one loses nothing --
+                    # aliases expand recursively, so `ls` -> `eza` -> the full
+                    # flagged command from programs.eza.extraOptions -- and
+                    # re-adding `ls` would *break* that chain, dropping
+                    # --color, --git and -1. Change the flags in
+                    # nirePackages/shell-apps/navigation/eza.nix instead.
                     #
-                    #   That last one loses nothing. Both zsh and bash expand
-                    #   aliases recursively, so `ls` -> `eza` -> the flagged
-                    #   `eza --icons auto --color auto --git -1 --header --hyperlink
-                    #   --group-directories-first` that programs.eza.extraOptions
-                    #   builds. Adding an explicit `ls` alias back would *break*
-                    #   that chain and drop --color, --git and -1. Change the flags
-                    #   in nirePackages/shell-apps/navigation/eza.nix instead.
-                    #
-                    #   `rustdevshell` did survive, nothing else defining it, but
-                    #   pointed at `~/nixos/dev-shells/rust#` -- stale twice over.
-                    #   The checkout is nixos-configs, and that dev-shell is parked
-                    #   in ignore/dev-shells/rust/, wired into nothing.
+                    # `rustdevshell` did survive, nothing else defining it, but
+                    # was stale twice over: the checkout is nixos-configs, and
+                    # that dev-shell is parked in ignore/dev-shells/rust/,
+                    # wired into nothing.
                     #
                     # Add aliases to home.shellAliases in shell-env.nix.
                     #
@@ -255,23 +248,20 @@
                     # evaluated there -- lib.optionalString below keeps that
                     # interpolation unforced when the condition is false, same
                     # reasoning as the lib.mkIf guards elsewhere in this tree
-                    # (see elly-home-manager.nix). Written as a real Nix
-                    # comment up here, not inside the '' string below, per the
-                    # `#` note two paragraphs up.
+                    # (see elly-home-manager.nix). A real Nix comment up here,
+                    # not inside the '' string below, per the `#` note above.
                     #
                     # cod's source line must come before carapace's: zsh's
                     # compdef, like bash's complete -F, is last-registration-
                     # wins per command, and cod-completions.nix's ignore-list
                     # only stops cod from *re*-claiming a command carapace
                     # covers, not its first registration this session -- see
-                    # that file and bash.nix's identical ordering note for
-                    # the full reasoning.
+                    # that file and bash.nix's identical ordering note.
                     #
-                    # carapace itself builds on darwin (unlike cod), so its
-                    # own line needs no such guard. And unlike bash, zsh's
-                    # own completion system (compsys) natively supports
-                    # paired descriptions, so carapace's zsh output shows
-                    # them for free -- no equivalent of blesh.nix's
+                    # carapace itself builds on darwin (unlike cod), so its own
+                    # line needs no guard. And zsh's completion system (compsys)
+                    # natively supports paired descriptions, so carapace's zsh
+                    # output shows them for free -- no equivalent of blesh.nix's
                     # carapace-desc advice hook is needed here.
                     ''
                     ${lib.optionalString (!pkgs.stdenv.isDarwin) "source <(${pkgs.cod}/bin/cod init $$ zsh)"}
