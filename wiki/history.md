@@ -28,6 +28,16 @@
   plan/prompt files) were removed 2026-08-26, their useful content already
   superseded by `lessons-learned.md`, `CLAUDE.md`'s State section, and this
   page. Still in git history if one of them is ever needed again.
+- `nire-lego` (a handheld, Legion Go, added to config but never built or
+  switched) and `nire-installer` (the generic live-USB installer image,
+  generalized 2026-08-22 from what originally installed `nire-testbed`) were
+  both removed 2026-08-27, along with their `nireHost/lego/`,
+  `nireHost/lego-configuration.nix`, and `nireHost/installer/` files and
+  `hosts.nix` entries. Neither had ever run against real hardware. The
+  live-USB mechanism itself (embedded flake, patched Calamares, unattended
+  `nixos-install`) isn't disproven or abandoned, just not carried in this
+  tree any more — its last version is in git history if it's ever needed
+  again, same as `nire-testbed`'s.
 
 ## Confirmed-on-hardware facts, and how they were confirmed
 

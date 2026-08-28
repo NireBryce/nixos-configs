@@ -43,8 +43,8 @@
             # UDP 5353 itself. Restating a default reads as a decision.
 
             # No avahi-persist.nix companion, deliberately, and the same goes for
-            # resolved. Checked rather than assumed, because durandal, tenacity
-            # and lego wipe the whole root subvolume on boot and anything under
+            # resolved. Checked rather than assumed, because durandal and tenacity
+            # wipe the whole root subvolume on boot and anything under
             # /var/lib is gone unless WARN-impermanence.nix names it -- that is
             # how /etc/hhd was lost for a while. Neither nixpkgs module declares a
             # StateDirectory or any /var/lib path: avahi rebuilds its record set

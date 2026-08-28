@@ -144,7 +144,7 @@
             # No forgejo-persist.nix alongside this, same reasoning
             # grafana.nix gives for skipping a grafana-persist.nix: cube has
             # a plain persistent root (cube-configuration.nix's own header),
-            # not the durandal/tenacity/lego `/root` wipe, so
+            # not the durandal/tenacity `/root` wipe, so
             # /var/lib/forgejo (repos, sqlite db, the self-generated secrets
             # under its `custom/conf/`) just survives reboots with no
             # environment.persistence entry needed. If this module is ever
@@ -167,7 +167,7 @@
             # than centralized alongside the syncthing-* secrets in
             # sops.nix, on purpose: `git-forge` is cube-only, and a secret
             # declared in sops.nix decrypts on every host that imports
-            # `system` -- durandal/tenacity/lego included, none of which run
+            # `system` -- durandal/tenacity included, none of which run
             # Forgejo. Declaring it in the module that actually uses it
             # means it only decrypts where the module is imported.
             sops.secrets.forgejo-admin-password = {

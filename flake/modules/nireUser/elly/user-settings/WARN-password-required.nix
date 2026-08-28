@@ -14,7 +14,7 @@
 #
 # Filed under nireUser/elly/, so it rides the `elly` category into every host
 # automatically rather than being wired into a specific host's config by
-# hand. Stays silent for durandal/tenacity/lego, and fires on its own for any
+# hand. Stays silent for durandal/tenacity, and fires on its own for any
 # future host that also skips impermanence.
 #
 # A `warnings` entry, not an `assertions` failure: this can't check whether

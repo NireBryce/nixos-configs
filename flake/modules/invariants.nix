@@ -74,10 +74,11 @@
 # it holds for every NixOS host regardless of impermanence, cube included.
 #
 # It IS gated on the host having home-manager at all (`c ? home-manager`),
-# added for nire-installer: a live-USB image with no `elly` user and no
-# reason to carry the home-manager closure, which never imports
-# enable-home-manager.nix and so has no `home-manager` option namespace at
-# all. Same shape as the impermanence gate -- check for the real thing's
+# added for nire-installer (the live-USB image, removed 2026-08-27): no
+# `elly` user and no reason to carry the home-manager closure, so it never
+# imported enable-home-manager.nix and had no `home-manager` option namespace
+# at all. nire-llm-sandbox is the current example of the same shape. Same
+# shape as the impermanence gate -- check for the real thing's
 # existence, not the host's name -- and it does not make the check vacuous:
 # enable-home-manager.nix is the only thing that sets useGlobalPkgs, but a
 # later import overriding it back to false on a host that DOES have
@@ -118,8 +119,9 @@
             usesImpermanence = rollback != null;
 
             # Whether this host imported enable-home-manager.nix at all --
-            # see the file header's opt-in addendum above. nire-installer has
-            # no `elly` user and never does.
+            # see the file header's opt-in addendum above. nire-llm-sandbox
+            # (and, before its removal 2026-08-27, nire-installer) has no
+            # `elly` user and never does.
             usesHomeManager = c ? home-manager;
 
             impermanenceInvariants = [
@@ -222,7 +224,7 @@
             (if usesImpermanence then impermanenceInvariants else [ ])
             # NOT gated on usesImpermanence: holds for every NixOS host that
             # has home-manager at all, cube included. See usesHomeManager
-            # above for the one host it does not -- nire-installer.
+            # above for the current host it does not -- nire-llm-sandbox.
             ++ (if usesHomeManager then homeManagerInvariants else [ ]);
 
         failures = lib.concatLists (lib.mapAttrsToList

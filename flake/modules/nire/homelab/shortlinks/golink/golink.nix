@@ -210,7 +210,7 @@
             # No golink-persist.nix alongside this, same reasoning
             # grafana.nix and forgejo.nix each give: cube-configuration.nix's
             # header says this host has a plain persistent root, not the
-            # `/root` wipe durandal/tenacity/lego get, so /var/lib/private/
+            # `/root` wipe durandal/tenacity get, so /var/lib/private/
             # golink (the links database AND the tsnet node key) survives
             # reboots with no environment.persistence entry. If this module
             # is ever imported by a host that DOES wipe root, add one first,

@@ -43,10 +43,10 @@
         # host ever actually running a VM or a distrobox container, unlike
         # cube's confirmed usage. Removing them stops `libvirtd`/`podman` on
         # the next `just switch` here. `virtualization` was already
-        # host-optional by design (tenacity/lego, the handhelds, already
-        # decline it) so this doesn't change any documented invariant; the
+        # host-optional by design (tenacity, the handheld, already
+        # declines it) so this doesn't change any documented invariant; the
         # `nire-llm-sandbox`/`homelab` category still exist and are
-        # unaffected -- `containers` is now cube/tenacity/lego only, and
+        # unaffected -- `containers` is now cube/tenacity only, and
         # `virtualization` is cube only. See wiki/categories/virtualization.md
         # and wiki/categories/containers.md's "Imported by" sections. If
         # this host ever does need libvirt or podman again, re-add the two

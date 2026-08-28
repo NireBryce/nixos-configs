@@ -48,7 +48,7 @@
 # No `grafana-persist.nix` alongside this the way tailscale.nix has
 # tailscale-persist.nix: cube-configuration.nix's own header says this host
 # was installed with a plain persistent root, not the `/root` wipe
-# durandal/tenacity/lego get, so /var/lib/grafana (sqlite db, provisioned
+# durandal/tenacity get, so /var/lib/grafana (sqlite db, provisioned
 # dashboards land here as read-only file-provider entries, not writes) just
 # survives reboots with no environment.persistence entry needed. If this
 # module is ever imported by a host that DOES wipe root, add one first,

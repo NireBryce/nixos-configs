@@ -21,8 +21,8 @@
 # Each caller reaches this file by walking up from its own directory to find
 # `modules/`, not via `inputs.self + "/flake/modules/_lib/..."`. The latter
 # looks like the obvious way to get a depth-independent path and does NOT
-# work: unlike a NixOS module's use of `inputs.self` (e.g.
-# installer-configuration.nix, evaluated downstream once `self` already
+# work: unlike a NixOS module's use of `inputs.self` (e.g. embedding the
+# flake in `environment.etc`, evaluated downstream once `self` already
 # exists), every `dirsAsCategory.nix` shim is itself one of the flake-parts
 # modules that compose `flake.modules`, which composes `self`. Referencing
 # `inputs.self` from there forces the very fixed point the shim contributes

@@ -39,8 +39,7 @@ plus several others — see [../architecture.md](../architecture.md).
 
 ## Imported by
 
-All five hosts, `nire-installer` included in spirit (though the installer
-has no `elly` user at all — see [../hosts.md](../hosts.md)). Every NixOS and
+All four hosts. Every NixOS and
 darwin host lists `elly` in its own per-host imports for the `nixos`/`darwin`-class
 content (the account, darwin fonts); the `homeManager`-class content
 (`elly-git`, `hm-config`) reaches every host via the shared

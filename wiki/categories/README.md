@@ -14,7 +14,7 @@ articles. Not covered here, deliberately:
   single-package wrapper files that are already self-explanatory from their
   filename and a glance at the file itself; see
   [../architecture.md](../architecture.md)'s package-modules section instead.
-- **`nireHost/*` per-host bundles** (`durandal`, `tenacity`, `lego`, `cube`,
+- **`nireHost/*` per-host bundles** (`durandal`, `tenacity`, `cube`,
   `lysithea`) — these are host definitions, not conceptual categories; see
   [../hosts.md](../hosts.md).
 
@@ -22,24 +22,24 @@ articles. Not covered here, deliberately:
 
 | Category | Directory | Class(es) | Members | Imported by |
 |---|---|---|---|---|
-| [boot](boot.md) | `nire/boot/` | nixos | 1 | all 4 NixOS hosts |
-| [containers](containers.md) | `nire/homelab/containers/` | nixos | 1 | tenacity, lego, cube (not durandal) |
+| [boot](boot.md) | `nire/boot/` | nixos | 1 | all 3 NixOS hosts |
+| [containers](containers.md) | `nire/homelab/containers/` | nixos | 1 | tenacity, cube (not durandal) |
 | [desktop-env](desktop-env.md) | `nire/desktop-env/` | nixos, homeManager | 4 | never imported whole — hosts take `jovian` or `kde-desktop` by name |
 | [git-forge](git-forge.md) | `nire/homelab/git-forge/` | nixos | 1 | cube only |
-| [hardware](hardware.md) | `nire/hardware/` (+ nested `amd`) | nixos | 2 | all 4 NixOS hosts |
+| [hardware](hardware.md) | `nire/hardware/` (+ nested `amd`) | nixos | 2 | all 3 NixOS hosts |
 | [homelab](homelab.md) | `nire/homelab/` (+ 7 nested) | nixos | 15 | cube only |
-| [impermanence](impermanence.md) | `nire/impermanence/` | nixos, homeManager | 2 | durandal, tenacity, lego (not cube) |
+| [impermanence](impermanence.md) | `nire/impermanence/` | nixos, homeManager | 2 | durandal, tenacity (not cube) |
 | [landing](landing.md) | `nire/homelab/landing/` | nixos | 1 | cube only |
 | [macos](macos.md) | `nire/macos/` | darwin | 3 | lysithea |
 | [monitoring](monitoring.md) | `nire/homelab/monitoring/` | nixos | 5 | cube only |
-| [nix](nix.md) | `nire/nix/` | nixos, homeManager, darwin | 2 | all 5 hosts |
-| [peripherals](peripherals.md) | `nire/peripherals/` | nixos | 2 | all 4 NixOS hosts |
+| [nix](nix.md) | `nire/nix/` | nixos, homeManager, darwin | 2 | all 4 hosts |
+| [peripherals](peripherals.md) | `nire/peripherals/` | nixos | 2 | all 3 NixOS hosts |
 | [reverse-proxy](reverse-proxy.md) | `nire/homelab/reverse-proxy/` | nixos | 1 | cube only |
-| [shell-config](shell-config/README.md) | `nire/shell-config/` | nixos, homeManager | 4 | all 4 NixOS hosts directly; reaches lysithea via `ellyHomeManager` |
+| [shell-config](shell-config/README.md) | `nire/shell-config/` | nixos, homeManager | 4 | all 3 NixOS hosts directly; reaches lysithea via `ellyHomeManager` |
 | [shortlinks](shortlinks.md) | `nire/homelab/shortlinks/` | nixos | 1 | cube only |
-| [system](system.md) | `nire/system/` | nixos, homeManager, darwin | 37, in ~19 subdirectories | all 4 NixOS hosts + lysithea (partially) |
-| [virtualization](virtualization.md) | `nire/homelab/virtualization/` | nixos | 4 | cube only (not durandal, not the handhelds) |
-| [elly](elly.md) | `nireUser/elly/` | nixos, homeManager | 4 | all 5 hosts |
+| [system](system.md) | `nire/system/` | nixos, homeManager, darwin | 37, in ~19 subdirectories | all 3 NixOS hosts + lysithea (partially) |
+| [virtualization](virtualization.md) | `nire/homelab/virtualization/` | nixos | 4 | cube only (not durandal, not the handheld) |
+| [elly](elly.md) | `nireUser/elly/` | nixos, homeManager | 4 | all 4 hosts |
 
 "Members" counts real `.nix` files under the category directory, excluding
 `dirsAsCategory.nix` itself and anything under a `_`-prefixed path.

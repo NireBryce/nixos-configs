@@ -141,7 +141,7 @@ looking forward: if a second host ever wants this stack, importing
 
 ## Imported by
 
-`nire-cube` only, as of 2026-08-23. Not durandal, tenacity, or lego — no
+`nire-cube` only, as of 2026-08-23. Not durandal or tenacity — no
 design reason rules them out, it just hasn't been asked for there yet.
 
 ## See also

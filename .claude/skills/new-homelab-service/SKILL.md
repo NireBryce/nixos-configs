@@ -187,7 +187,7 @@ there before, and the manual step regressed.
 `nire-cube` has a plain persistent root, so `/var/lib/<service>` survives
 reboots on its own and none of these five modules has a `*-persist.nix`.
 
-`nire-durandal`, `nire-tenacity` and `nire-lego` wipe `/root` on boot. If a
+`nire-durandal` and `nire-tenacity` wipe `/root` on boot. If a
 service module is ever imported by one of those, add a persistence entry
 **first**, modeled on `tailscale-persist.nix`, and file it next to the module
 rather than under `nire/impermanence/` (see `WARN-impermanence.nix` on that
@@ -202,7 +202,7 @@ fine; claiming a rung you didn't run is not.
    doesn't exist.
 2. `just modules` — name collisions and orphans.
 3. `nix eval` the host's `toplevel.drvPath`, and the *other* hosts' too. A
-   cube-only change must leave durandal, tenacity, lego and lysithea
+   cube-only change must leave durandal, tenacity and lysithea
    byte-identical; that's a two-minute check and it's the repo's standing
    claim.
 4. For Caddy changes, `caddy adapt` the generated Caddyfile. On darwin, build

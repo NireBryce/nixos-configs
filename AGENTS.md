@@ -26,12 +26,11 @@ be careful with anything touching `flake/modules/nire/impermanence/` or the
 `WARN-impermanence.nix` (reached through the `impermanence` category; the
 category was named `boot` until 2026-08-11) deletes the `/root` btrfs subvolume
 in initrd on every boot and depends on a `root-blank` subvolume existing on the
-machine. **Three of the four NixOS hosts import it and wipe `/root` on boot:
-`nire-durandal`, `nire-tenacity`, `nire-lego`.** `nire-cube` deliberately does
+machine. **Two of the three NixOS hosts import it and wipe `/root` on boot:
+`nire-durandal`, `nire-tenacity`.** `nire-cube` deliberately does
 not — its real install is a plain persistent root, not LUKS+impermanence (see
 cube's own header; corrected in `2efca5e4`). Don't assume "every host wipes
-root" or "no host does" — check the specific host. (`nire-installer` is neither:
-a live-USB image with no persistent `/root` at all.) Read `WARN-impermanence.nix`
+root" or "no host does" — check the specific host. Read `WARN-impermanence.nix`
 and `claude cave/lessons-learned-impermanence-stage1-migration.md` before
 changing anything near it.
 
@@ -39,10 +38,8 @@ Secrets are sops-nix (`flake/modules/nire/system/secrets/`). `secrets.yaml` is
 encrypted and committed; that is deliberate, not a mistake to be "fixed".
 `.sops.yaml` (same directory) enrolls `nire-durandal`, `nire-lysithea`,
 `nire-tenacity`, and `nire-cube` — all live hosts with current config here, the
-normal case, not a leftover to prune. `nire-lego` is not yet enrolled; if it
-needs secrets: `just age-key nire-lego` for its recipient key, then
-`sops updatekeys secrets.yaml`. Read the file rather than this paragraph — this
-paragraph has been stale before.
+normal case, not a leftover to prune. Read the file rather than this
+paragraph — this paragraph has been stale before.
 
 ## State
 
@@ -52,16 +49,16 @@ paragraph has been stale before.
 | `nire-lysithea` | switched 2026-08-12 (gen 52, darwin) |
 | `nire-durandal` | booted this config 2026-08-14 (gen 222); rollback confirmed in the journal the same way |
 | `nire-cube` | switched 2026-08-23; monitoring, git-forge, shortlinks, reverse-proxy, landing, and `nire-llm-sandbox` all confirmed working end to end 2026-08-24. Grafana's `secret_key` fix lives in the module (`grafana-secret-key-setup.service` in `grafana.nix`), deliberately not a hand fix — the hand fix regressed once already. Fix-by-fix detail: `wiki/open-threads.md`, lessons-learned §40–§43 |
-| `nire-lego` | exists in config; never built or switched |
-| `nire-installer` | not a host — the live-USB that installs one, target chosen at build time (`just liveusb`). Nothing has been run against real hardware since that generalization; see `nireHost/installer/liveusb-installer.md` |
 | `nire-llm-sandbox` | not a host either — a libvirt VM image on cube, meant to run persistently once started |
 
 - **Check `hostname` before assuming which machine the session is on.**
   Sessions have run on `nire-lysithea`, directly on `nire-durandal`, and on
   `nire-tenacity`.
-- lego unbuilt ⇒ a claim verified on one host is not thereby verified on
-  another. Say which host you mean; treat anything host-shaped on lego as
-  unanswered.
+- `nire-lego` (added, never built or switched) and `nire-installer` (the
+  generic live-USB installer image, target chosen at build time) were both
+  removed 2026-08-27 — see `wiki/history.md`. If a handheld or a live-USB
+  installer is needed again, their last config (git history) is the starting
+  point, not a reason to assume either is still wired up.
 - `nire-testbed` (added 2026-08-14, removed 2026-08-22, never installed on real
   hardware) is gone. If a similar Intel workstation is ever added, its last
   config (git history) and the `new-host-config` skill's notes are the starting
@@ -89,7 +86,6 @@ just fingerprint     # drvPath of the host toplevel
 just dotfiles        # every generated dotfile's attribute name
 just diff HEAD~1     # what changed in a host's config, attribute by attribute
 just build / boot / switch   # dispatches per host class; `boot` activates nothing until you reboot
-just liveusb         # builds the nire-installer image, prints the dd command (doesn't run it)
 just age-key         # a host's sops recipient key; --updatekeys re-encrypts secrets.yaml
 just threads <term>  # search known threads: GitHub issues + wiki/ + lessons-learned.md
 ```
@@ -148,12 +144,9 @@ Two consequences worth holding onto:
   directly in a category directory is collected by nothing.
 - **Entry points are defined by being outside every category tree.**
   `modules/checks.nix`, `nireHost/hosts.nix`,
-  `nireHost/durandal-configuration.nix`,
-  `nireHost/installer/installer-configuration.nix`, and
+  `nireHost/durandal-configuration.nix`, and
   `nireUser/elly-home-manager.nix` all sit where `dirsAsCategory` cannot reach
-  them, deliberately; `just modules` relies on exactly this rule. Entry points
-  also don't follow the name-from-filename pattern (the installer hardcodes
-  `installerConfiguration`).
+  them, deliberately; `just modules` relies on exactly this rule.
 
 Areas: `nire/` (shared system, including a `nire/macos/` subarea for darwin),
 `nireHost/` (per-host), `nirePackages/` (packages), `nireUser/` (elly).
@@ -167,8 +160,8 @@ also holds `jovian`) is never imported whole.
 `virtualization`, `containers`, `monitoring`, `git-forge`, `shortlinks`,
 `reverse-proxy`, and `landing` — the same coarse-and-fine overlap as
 `nire/hardware`/`nire/hardware/amd`. Each nested category keeps its own name
-and is still individually importable (`lego` imports `containers` directly);
-`nire-cube` imports `homelab` as one line instead of eight. One real quirk:
+and is still individually importable (`tenacity` imports `containers`
+directly); `nire-cube` imports `homelab` as one line instead of eight. One real quirk:
 `virtualization-cube.nix` sits bare in `homelab/virtualization/`'s root — out of
 `virtualization`'s own aggregate, but swept into `homelab`'s — harmless because
 only cube imports `homelab`. Full account: `wiki/categories/homelab.md`.
@@ -188,7 +181,7 @@ renames all dodge the same silent-merge collision `just modules` catches):
   bugs invisible to eval and build (lessons-learned §40).
 - **`containers`** — podman + distrobox (`podman/podman.nix`; the module was
   renamed from `containers.nix` for the collision reason above). Imported by
-  cube, tenacity, lego — durandal dropped it 2026-08-27. **"virtualization"
+  cube and tenacity — durandal dropped it 2026-08-27. **"virtualization"
   means VMs only**; containers are a separate category, and the word means the
   other thing.
 - **`monitoring`** — Prometheus + Grafana on the host's own metrics. Every
@@ -218,11 +211,11 @@ renames all dodge the same silent-merge collision `just modules` catches):
   `/api/pages/home/content/`, which is the check that matters.
 
 **Hosts**: `hosts.nix` declares one `darwinConfigurations` entry
-(`nire-lysithea`, aarch64-darwin) alongside six `nixosConfigurations` — four
-real hosts (`nire-durandal` workstation, `nire-tenacity` and `nire-lego`
-handhelds, `nire-cube` mini PC) plus two entries that are images, not machines:
-`nire-installer` and `nire-llm-sandbox` (see State). `hosts.nix` comments each
-right at the declaration; check it before stating any count.
+(`nire-lysithea`, aarch64-darwin) alongside four `nixosConfigurations` — three
+real hosts (`nire-durandal` workstation, `nire-tenacity` handheld, `nire-cube`
+mini PC) plus one entry that is an image, not a machine: `nire-llm-sandbox`
+(see State). `hosts.nix` comments each right at the declaration; check it
+before stating any count.
 
 ### Home Manager is NixOS-integrated
 
@@ -323,12 +316,6 @@ reason — dead code looks exactly like safe code until you make it live
 (lessons-learned §43). Compare values with `just diff`, and make refactored
 paths actually run.
 
-**A drvPath moving after a docs-only edit is `nire-installer`, and is
-expected.** The installer image embeds this whole flake
-(`environment.etc."nixos-configs".source = inputs.self`), so its toplevel
-depends on every tracked file, CLAUDE.md included. Check whether the host that
-moved is the installer before hunting a config change that isn't there.
-
 **Bugs here serialize.** Evaluating a cheap attribute proves nothing;
 `networking.hostName` resolved happily while four separate things were broken.
 Force a toplevel — and know that eval and build both stop short of defects that
@@ -416,9 +403,6 @@ bugs the shape invites.
   mechanical claims).
 - `flake/doc/dirsAsCategory.md` — the category mechanism, what's load-bearing,
   and its History section.
-- `nireHost/installer/liveusb-installer.md` — building the live-USB image and
-  the full install walkthrough; untested against real hardware since it was
-  generalized 2026-08-22 — read step 3 (partition layout) skeptically.
 - `flake/doc/disko-impermanence-layout.md` — reusable disko generator for the
   LUKS+btrfs+impermanence layout durandal/tenacity run; the template if cube
   ever adopts impermanence.

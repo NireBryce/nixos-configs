@@ -5,8 +5,7 @@
 # sops.age.sshKeyPaths (sops.nix) points at on the decrypting side, and what
 # .sops.yaml's `keys:` list holds on the encrypting side -- see
 # flake/modules/nire/system/secrets/.sops.yaml for durandal/lysithea/tenacity/
-# cube's existing entries, and CLAUDE.md's Safety section for lego, which
-# doesn't have one yet.
+# cube's existing entries -- run this any time a fifth host needs one.
 #
 #   host-age-key.sh                        # this machine's own host key
 #   host-age-key.sh <host>                  # a remote host, via ssh-keyscan

@@ -4,15 +4,16 @@
 # credentials, and network identity. The VM *is* the sandbox boundary --
 # everything inside it can be treated as disposable the way the host cannot.
 #
-# Not a physical host and not switched-to like durandal/tenacity/lego/cube --
-# same shape as nire-installer (see that file's own header for the pattern:
+# Not a physical host and not switched-to like durandal/tenacity/cube --
 # a nixosConfigurations entry that exists to build an image, not to be
-# deployed to hardware directly). Unlike the installer though, this one is
-# meant to run *persistently* once started, not booted once and discarded.
+# deployed to hardware directly (nire-installer, the live-USB image, was the
+# same shape before its removal 2026-08-27; see wiki/history.md). Unlike a
+# live-USB installer image though, this one is meant to run *persistently*
+# once started, not booted once and discarded.
 #
 # Built as a qcow2 disk image via nixpkgs' own virtualisation/disk-image.nix
-# (imported explicitly below via `modulesPath`, the same way
-# installer-configuration.nix pulls in its live-ISO profile) -- NOT via
+# (imported explicitly below via `modulesPath`, the same mechanism a live-ISO
+# profile uses) -- NOT via
 # nixos/modules/image/images.nix's `image.modules.qemu` "variant" system,
 # despite that module using this exact same disk-image.nix internally.
 # Deliberately bypassed: images.nix builds each variant as an ISOLATED
@@ -35,27 +36,24 @@
 #
 # `llm-sandbox-image.nix`, right next to this file, turns
 # config.system.build.image into a `packages.llm-sandbox-vm` flake output
-# for humans (`nix build .#llm-sandbox-vm`) -- the same way installer-iso.nix
-# does for the live-USB's isoImage -- but virtualization-cube.nix does NOT
-# depend on that package; it reads the same underlying value directly, so
-# there is exactly one path to this derivation, not two that have to agree.
+# for humans (`nix build .#llm-sandbox-vm`) -- but virtualization-cube.nix
+# does NOT depend on that package; it reads the same underlying value
+# directly, so there is exactly one path to this derivation, not two that
+# have to agree.
 #
 # An EARLIER version of this file used nixos-generators (a third-party flake
 # input) for the same job, before its own eval output turned out to say it's
 # deprecated in favour of exactly this mechanism -- upstreamed into nixpkgs
 # as of NixOS 25.05. Switched the same day, before ever landing on main.
 #
-# No `elly` user, no Home Manager, no impermanence -- same reasoning as
-# nire-installer: a minimal, self-contained guest, not a member of the
-# fleet's shared `elly`/`system` conventions (importing `system` would also
-# pull in things this guest has no business with -- kdeconnect, gaming,
-# bluetooth, a desktop session). ssh key list duplicated from ssh.nix rather
-# than imported, same as installer-configuration.nix and for the same
-# reason: there is no `elly` user here to hang `authorizedKeys` off of via
-# that shared module. Copied from ssh.nix's CURRENT list as of 2026-08-22,
-# not installer-configuration.nix's own copy of it -- that one has drifted
-# behind ssh.nix by two keys (nire-lysithea.local, nire-tenacity) already;
-# don't propagate that drift into a third copy.
+# No `elly` user, no Home Manager, no impermanence: a minimal, self-contained
+# guest, not a member of the fleet's shared `elly`/`system` conventions
+# (importing `system` would also pull in things this guest has no business
+# with -- kdeconnect, gaming, bluetooth, a desktop session). ssh key list
+# duplicated from ssh.nix rather than imported, for the same reason: there is
+# no `elly` user here to hang `authorizedKeys` off of via that shared module.
+# Copied from ssh.nix's CURRENT list as of 2026-08-22 -- re-copy if ssh.nix's
+# list moves on, rather than letting this one silently drift behind it.
 #
 # VERIFIED FURTHER THAN "EVALUATION ONLY", 2026-08-22, but still short of a
 # real boot: `just modules` is clean, and the actual qcow2 was BUILT (not
@@ -73,10 +71,9 @@
 # exactly the gap between a successful build and a real boot.
 { config, ... }:
     let
-        # Bound out here rather than added to the inner module's own arg
-        # list, for the same reason installer-configuration.nix's identical
-        # `nixCategory` binding is: the inner module below takes its own
-        # `lib`/`pkgs`, and if `config` were added to that list too it would
+        # Bound out here rather than added to the inner module's own arg list:
+        # the inner module below takes its own `lib`/`pkgs`, and if `config`
+        # were added to that list too it would
         # silently start meaning the *NixOS* config instead of this
         # flake-parts one. See CLAUDE.md, "There are two different `config`s,
         # and they shadow".

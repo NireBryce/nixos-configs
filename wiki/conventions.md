@@ -9,7 +9,7 @@ anything on darwin), `just wiki-lint` (checks this wiki's own "Imported by"
 claims and category member counts against the real module tree — added
 2026-08-27, `wiki/scripts/check_wiki.py`; not yet part of `preflight`),
 `just available <pkg>` / `--duplicates`, `just build`/`boot`/`switch`
-(dispatch per host class via `scripts/rebuild.sh`), `just liveusb`, and the
+(dispatch per host class via `scripts/rebuild.sh`), and the
 hardware-only, read-only `just baseline` / `hm-collisions` /
 `diff-deployed` / `root-drift`.
 

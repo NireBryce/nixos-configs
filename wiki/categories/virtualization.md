@@ -124,7 +124,7 @@ easy to conflate (see skill `nixos-vm-images` for the full account):
   added 2026-08-22, when `durandal` still imported `virtualization` too
   (see [Imported by](#imported-by) for its current status) and would
   otherwise have gotten the sandbox VM. Confirmed empirically, not just
-  asserted — durandal's/tenacity's/lego's toplevel drvPaths were
+  asserted — durandal's/tenacity's toplevel drvPaths were
   byte-identical before and after this addition.
 
 **This exclusion is category-scoped, not tree-scoped, since the `homelab`
@@ -179,7 +179,7 @@ same as `cube` does today, "the workstations get it, the handhelds don't"
 actually running a VM (unlike cube's confirmed `nire-llm-sandbox`), so it
 was carried purely for parity rather than an established need. See
 `durandal-configuration.nix`'s own comment at the point it was removed.
-Still not `tenacity` or `lego`, the two handhelds (the ones that import
+Still not `tenacity`, the handheld (the one that imports
 `jovian` — see [desktop-env](desktop-env.md)) — that part of the reasoning
 is unchanged.
 

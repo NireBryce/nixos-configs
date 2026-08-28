@@ -42,9 +42,9 @@ for that account and `category-collector.nix`'s own header for the fix
 
 ## Imported by
 
-All four NixOS hosts import `hardware` directly (not the narrower `amd`) —
-durandal, tenacity, lego, cube are all AMD (Ryzen desktop/APU, Ryzen Z1
-handhelds). `nire-lysithea` (darwin, Apple Silicon) does not import this
+All three NixOS hosts import `hardware` directly (not the narrower `amd`) —
+durandal, tenacity, cube are all AMD (Ryzen desktop/APU, Ryzen Z1
+handheld). `nire-lysithea` (darwin, Apple Silicon) does not import this
 category at all — importing it would resolve to an empty darwin aggregate
 since neither module declares a darwin class, so it's left out rather than
 imported for nothing, same reasoning `lysithea-configuration.nix` gives for

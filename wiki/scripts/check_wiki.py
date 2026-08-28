@@ -55,9 +55,10 @@ COMMENT = re.compile(r'#[^\n]*')
 # host short-name -> its nireHost/*-configuration.nix. lysithea is darwin-class;
 # every other host is nixos-class. nire-installer and nire-llm-sandbox are
 # deliberately excluded -- CLAUDE.md's Architecture section is explicit that
-# neither counts as "a host" the way these five do, and categories/README.md's
-# "Imported by" columns never name either one.
-HOSTS = ['durandal', 'tenacity', 'lego', 'cube', 'lysithea']
+# neither counts as "a host" the way these four do, and categories/README.md's
+# "Imported by" columns never name either one. (nire-lego was a fifth real
+# host here until its removal 2026-08-27 -- see wiki/history.md.)
+HOSTS = ['durandal', 'tenacity', 'cube', 'lysithea']
 
 IMPORTED_BY_HEADING = re.compile(r'^##\s+Imported by\s*$', re.M)
 NEXT_HEADING = re.compile(r'^##\s+', re.M)
@@ -181,18 +182,20 @@ def find_categories(root):
     return cats
 
 
-# "all five hosts" / "All four NixOS hosts" -- a page is allowed to claim
+# "all four hosts" / "All three NixOS hosts" -- a page is allowed to claim
 # blanket coverage in prose instead of naming every host individually. Two
-# separate phrases because they cover different sets: "four NixOS hosts"
-# means specifically {durandal, tenacity, lego, cube} (lysithea is darwin,
-# not NixOS), while "five hosts" means all of HOSTS including lysithea. A
-# category can use the four-host phrase and still separately name lysithea
+# separate phrases because they cover different sets: "three NixOS hosts"
+# means specifically {durandal, tenacity, cube} (lysithea is darwin,
+# not NixOS), while "four hosts" means all of HOSTS including lysithea. A
+# category can use the three-host phrase and still separately name lysithea
 # by hand for a narrower reason (system.md, nix.md) -- so blanket coverage
 # only removes hosts it actually covers from the per-host check below,
-# rather than skipping that check entirely.
-ALL_NIXOS_HOSTS_PHRASE = re.compile(r'\ball\s+(?:four|4)\s+NixOS\s+hosts\b', re.I)
-ALL_FIVE_HOSTS_PHRASE = re.compile(r'\ball\s+(?:five|5)\s+hosts\b', re.I)
-NIXOS_HOSTS = {'durandal', 'tenacity', 'lego', 'cube'}
+# rather than skipping that check entirely. (Before nire-lego's removal
+# 2026-08-27 these were "four NixOS hosts" / "five hosts" -- renumbered,
+# not renamed, since the phrases themselves are what pages actually say.)
+ALL_NIXOS_HOSTS_PHRASE = re.compile(r'\ball\s+(?:three|3)\s+NixOS\s+hosts\b', re.I)
+ALL_HOSTS_PHRASE = re.compile(r'\ball\s+(?:four|4)\s+hosts\b', re.I)
+NIXOS_HOSTS = {'durandal', 'tenacity', 'cube'}
 
 
 def check_imports(root):
@@ -223,7 +226,7 @@ def check_imports(root):
         covered = set()
         if ALL_NIXOS_HOSTS_PHRASE.search(section):
             covered |= NIXOS_HOSTS
-        if ALL_FIVE_HOSTS_PHRASE.search(section):
+        if ALL_HOSTS_PHRASE.search(section):
             covered |= set(HOSTS)
 
         # Hosts a blanket phrase already accounts for are satisfied; anything

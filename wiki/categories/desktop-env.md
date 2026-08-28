@@ -18,7 +18,7 @@ Two sub-areas, split along the same line as the hosts that use them:
 
 No host lists `desktop-env` in its imports — each names the one session
 module it actually wants: `kde-desktop` (durandal, cube — pulls in
-`kde-base` itself) or `jovian` (tenacity, lego — also pulls in `kde-base`
+`kde-base` itself) or `jovian` (tenacity — also pulls in `kde-base`
 itself, for the Plasma 6 desktop Jovian's SteamOS session drops back to).
 That's why `kde-base.nix` is imported by *two different files*, not by the
 category: `desktop-env` existing as a category still gives it a name and a
@@ -53,7 +53,7 @@ convention `libvirt-persist.nix`, `tailscale-persist.nix` and
 ## Imported by
 
 Not imported as a category by anyone. `kde-base` reached transitively via
-`kde-desktop` (durandal, cube) or `jovian` (tenacity, lego).
+`kde-desktop` (durandal, cube) or `jovian` (tenacity).
 `services.xserver`/Plasma 6 itself always arrives through one of those two,
 never both.
 

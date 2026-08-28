@@ -1,12 +1,12 @@
 # What nire-cube is made of. GMKtec Nucbox G11, a mini PC -- workstation
-# shape, same as durandal, not a handheld (see lego/tenacity-configuration.nix
+# shape, same as durandal, not a handheld (see tenacity-configuration.nix
 # for that shape instead).
 #
 # CPU: AMD Ryzen Embedded R2514, 4c/8t, max boost 3.7GHz, 4MB L3.
 # GPU: AMD Radeon integrated graphics (on-die with the R2514).
-# Both are plain AMD, same silicon family durandal and lego already run, so
+# Both are plain AMD, same silicon family durandal already runs, so
 # this host takes the shared `hardware` category (amdcpu, amdgpu) same as
-# they do.
+# it does.
 #
 # This file sits directly under nireHost/ rather than in a category directory,
 # because dirsAsCategory only collects from *sub*directories -- a host
@@ -37,7 +37,7 @@
 #     note for the full story.
 #
 # WITHOUT impermanence, unlike durandal: this host was installed with a plain
-# persistent root, not the `/root`-wipe durandal, tenacity, and lego have.
+# persistent root, not the `/root`-wipe durandal and tenacity have.
 # `impermanence` is deliberately NOT in this file's imports below.
 # invariants.nix's rollback, hibernation, and persistence checks are gated on
 # the restore-root initrd unit existing (see its "hosts without impermanence
@@ -55,7 +55,7 @@
         # ── this machine ──────────────────────────────────────────────────────
         # nireHost/cube/: hardware-cube, boot-cube, nixpkgs-hostPlatform-cube,
         # nixpkgs-stateVersion-cube -- suffixed for the same reason
-        # tenacity's/lego's are: a module's name is its filename, and
+        # tenacity's are: a module's name is its filename, and
         # same name in the same class merges rather than erroring.
         cube
 
@@ -64,11 +64,11 @@
 
         # Deliberately NOT `impermanence` -- see the header above. This host
         # keeps a plain persistent root, not the `/root` wipe
-        # durandal/tenacity/lego have.
+        # durandal/tenacity have.
 
         hardware        # amdcpu, amdgpu -- R2514 + integrated Radeon is AMD
-                        # throughout, same shared category durandal and lego
-                        # already import.
+                        # throughout, same shared category durandal
+                        # already imports.
         nix
         peripherals
         shell-config
@@ -87,8 +87,10 @@
         # `nire/homelab/`. Each of those is still its own category nested
         # under it (`nire/homelab/<name>/`, each keeping its own
         # `dirsAsCategory.nix`) and still individually importable by name --
-        # durandal and lego still pull `virtualization`/`containers`
-        # directly, unaffected by this move, per the same coarse-and-fine
+        # tenacity still pulls `containers` directly, unaffected by this
+        # move (durandal dropped both `virtualization` and `containers`
+        # 2026-08-27, the same day this move landed; cube's own copies come
+        # through `homelab` now), per the same coarse-and-fine
         # nesting `nire/hardware`/`nire/hardware/amd` already established
         # (see flake/doc/dirsAsCategory.md). All of it was cube-only before
         # this move and stays cube-only now -- nothing here belongs on the
@@ -98,9 +100,10 @@
         # `virtualization-cube.nix` (the nire-llm-sandbox libvirt VM) is
         # nested inside `homelab/virtualization/` now rather than sitting
         # outside every category the way it used to -- deliberately: unlike
-        # the plain `virtualization` category (which durandal also imports,
-        # and which must NOT reach this VM), `homelab` is cube-only, so
-        # there's no host it could leak onto. See that file's own header for
+        # the plain `virtualization` category (host-optional by design, and
+        # which must NOT reach this VM if some other host ever imports it),
+        # `homelab` is cube-only, so there's no host it could leak onto.
+        # See that file's own header for
         # why it was kept out of `virtualization` specifically.
         #
         # Individual per-service mechanism notes (Tailscale-only reachability,

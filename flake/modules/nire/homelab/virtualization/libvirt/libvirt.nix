@@ -18,10 +18,11 @@
             # `libvirt` is this file. That is also the more honest filename: what is
             # below is libvirtd options and nothing else.
             #
-            # Scope: NOT every host. This category is imported by durandal and cube
-            # -- see their nireHost/*-configuration.nix -- and deliberately
-            # not by tenacity or lego, which are the handhelds (they are the two that
-            # import `jovian`). libvirtd is a boot-time daemon and a gamescope
+            # Scope: NOT every host. Cube is the only importer -- durandal dropped
+            # this category 2026-08-27 (carried for unused parity; nothing in this
+            # repo's history records durandal ever running a VM) -- and it is
+            # deliberately declined by tenacity, the handheld (the one that imports
+            # `jovian`). libvirtd is a boot-time daemon and a gamescope
             # handheld will never open virt-manager. Before 2026-08-21 these modules
             # lived under `nire/system/`, which every Linux host imports whole, so
             # they did land on the handhelds; moving them to their own category is

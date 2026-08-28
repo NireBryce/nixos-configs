@@ -15,10 +15,12 @@
         # `nire/containers/` -- structurally the same split `virtualization`
         # got 2026-08-21, giving hosts the *option* to decline it the way
         # `system` membership never did. That option wasn't exercised at move
-        # time: all four NixOS hosts (durandal, tenacity, lego, cube) import
-        # `containers` by name now, explicitly, in place of the implicit
-        # coverage `system` used to give it -- no host's actual package set
-        # changed. See wiki/categories/containers.md.
+        # time: all four NixOS hosts on the tree then (durandal, tenacity,
+        # lego, cube) imported `containers` by name, explicitly, in place of
+        # the implicit coverage `system` used to give it -- no host's actual
+        # package set changed. Since: durandal dropped it 2026-08-27, and lego
+        # was removed the same day -- see wiki/categories/containers.md for
+        # the current import list.
         #
         # RENAMED IN THE SAME MOVE, `containers.nix` -> `podman.nix`: this is
         # the exact near-miss `virtualization`'s own header records, hit for
@@ -75,7 +77,7 @@
                 # (%subUidsPrevUsed, from /var/lib/nixos/auto-subuid-map). It never
                 # looks at explicitly-declared subUidRanges. So elly's hardcoded
                 # 100000 is invisible to it, and on a machine with no prior map file
-                # -- i.e. any fresh install, nire-lego included --
+                # -- i.e. any fresh install --
                 # both users get 100000:65536 in /etc/subuid and share a subordinate
                 # range. durandal only escapes this by accident: elly was auto-
                 # allocated 100000 before the pin below existed, so it is in the map

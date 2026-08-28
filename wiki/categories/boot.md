@@ -35,9 +35,8 @@ want `impermanence`, not this page.
 
 ## Imported by
 
-All four NixOS hosts (`durandal`, `tenacity`, `lego`, `cube`) — not
-`lysithea` (darwin has no bootloader-generation concept here) and not
-`nire-installer` (a live-USB image, no persistent boot generations to prune).
+All three NixOS hosts (`durandal`, `tenacity`, `cube`) — not
+`lysithea` (darwin has no bootloader-generation concept here).
 
 ## See also
 

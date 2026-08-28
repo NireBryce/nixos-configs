@@ -1,7 +1,8 @@
 # nire-cube (GMKtec Nucbox G11). fileSystems/boot.initrd.*/swapDevices below
 # are real, captured from `nixos-generate-config` after installing NixOS onto
-# the real disk with the stock NixOS live ISO (not `nire-installer`, and not
-# through this flake at all) -- see the history note at the bottom for what
+# the real disk with the stock NixOS live ISO -- not this flake's own
+# live-USB image (nire-installer, removed 2026-08-27), and not through this
+# flake at all -- see the history note at the bottom for what
 # stood here before this and why. Cross-checked against the live system's own
 # `lsblk -f` while writing this file, not just copied from /etc/nixos blind.
 #
@@ -23,7 +24,7 @@
 # boot-cube.nix still installs sbctl as a package (parity with durandal), it
 # just has nowhere dedicated to keep its files.
 #
-# Wrapped as a flake-parts module for the same reason durandal's/lego's
+# Wrapped as a flake-parts module for the same reason durandal's/tenacity's
 # hardware files are: a raw nixos-generate-config file under modules/ makes
 # flake-parts resolve `modulesPath` through its own _module.args and dies with
 # "infinite recursion encountered", naming modulesPath rather than this file.
@@ -32,8 +33,8 @@
 # capture already claims the module name "hardware-configuration", and a
 # module's name is its filename -- reusing that name here would merge this
 # host's fileSystems into durandal's under the same attribute instead of
-# erroring, the same collision lego's suffixed filename exists to avoid. See
-# CLAUDE.md's new-flake-module trap notes.
+# erroring, the same collision tenacity's suffixed filename exists to avoid.
+# See CLAUDE.md's new-flake-module trap notes.
 { config, lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);

@@ -17,7 +17,7 @@
 # assuming /mnt is already set up, so it runs on a live booted host.
 #
 # Only meaningful on a host that actually imports the `impermanence`
-# category -- durandal, tenacity, lego, not cube. Says so and exits cleanly
+# category -- durandal, tenacity, not cube. Says so and exits cleanly
 # if root-blank does not exist rather than guessing.
 set -euo pipefail
 
