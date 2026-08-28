@@ -120,14 +120,16 @@ evaluation dies with `infinite recursion encountered` — naming
 ;}
 ```
 
-`nireHost/installer/installer-configuration.nix` (added 2026-08-15) is a
-second worked example of both this trap and the `config`-shadowing one above
-in the same file: it imports upstream's
-`installer/cd-dvd/installation-cd-minimal.nix` via `modulesPath` from the
-*inner* module's args, and separately binds
+`nireHost/llm-sandbox/llm-sandbox-configuration.nix` is a second worked
+example of both this trap and the `config`-shadowing one above in the same
+file: it imports upstream's `virtualisation/disk-image.nix` via
+`modulesPath` from the *inner* module's args, and separately binds
 `nixCategory = config.flake.modules.nixos.nix` in an outer `let` rather than
 adding `config` to the inner module's argument list, specifically to avoid
-repointing that reference at the NixOS `config` instead.
+repointing that reference at the NixOS `config` instead. (`nireHost/installer/
+installer-configuration.nix`, added 2026-08-15, was the original worked
+example of this same pattern until its removal 2026-08-27 — see
+`wiki/history.md`.)
 
 ## Keep the wiki in sync
 

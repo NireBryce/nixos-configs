@@ -19,9 +19,11 @@ Every host is two things: an entry-point file directly under `nireHost/`
 `new-flake-module`'s skill for why that placement matters) and a `nireHost/<name>/`
 directory holding that host's own hardware/boot/platform modules, collected by
 its own `dirsAsCategory.nix` copy. `nire-durandal`, `nire-tenacity`,
-`nire-lego`, `nire-cube`, `nire-installer`, and `nire-lysithea` (darwin) are
+`nire-cube`, and `nire-lysithea` (darwin) are
 the worked examples — read the one closest in shape to what you're adding
-before inventing anything.
+before inventing anything. (`nire-lego`, a handheld, and `nire-installer`, a
+live-USB image, were both removed 2026-08-27 — `wiki/history.md` has their
+last shape if either is a closer match than what's left.)
 
 ## Decide the shape before copying a file
 
@@ -29,11 +31,11 @@ These are independent axes; check `hosts.nix` for the current roster rather
 than assuming a count, per `CLAUDE.md`'s own standing warning that it changes.
 
 - **Workstation or handheld?** Workstation (durandal, now cube) takes
-  `kde-desktop` alone. Handheld (tenacity, lego) takes the `jovian` module
+  `kde-desktop` alone. Handheld (tenacity) takes the `jovian` module
   instead, for the built-in-controller/SteamOS-session shape — `desktop-env`
   as a whole holds both `kde-desktop` and `jovian`, so import the specific one
   your host wants, not the category.
-- **Impermanence or not?** Default yes (durandal, tenacity, and lego all wipe
+- **Impermanence or not?** Default yes (durandal and tenacity both wipe
   `/root` on boot) — but `nire-cube` deliberately opts out because it hits
   persistence assumptions the others don't (its real install turned out to be
   a plain root, not LUKS+impermanence). Read `WARN-impermanence.nix` and the
@@ -42,7 +44,7 @@ than assuming a count, per `CLAUDE.md`'s own standing warning that it changes.
   does, including the `invariants.nix` interaction. (`nire-testbed`, removed
   2026-08-22, was the earlier example of this — an Intel host that opted out
   the same way, for the same reason.)
-- **Which CPU/GPU category?** AMD hosts (durandal, lego, and cube) import the
+- **Which CPU/GPU category?** AMD hosts (durandal, tenacity, and cube) import the
   shared `hardware` category (`amdcpu`, `amdgpu`) directly. **Do not add an
   `intel` sibling under `nire/hardware/` to make an Intel host fit the same
   shape** — `dirsAsCategory` recurses into subdirectories, so anything filed
@@ -68,7 +70,7 @@ block into `<name>/hardware/hardware-<name>.nix`, wrapped as a flake-parts
 module. Dropping the raw generated file under `modules/` as-is makes
 flake-parts resolve `modulesPath` through its own `_module.args` and die with
 a misleading `infinite recursion` error — `new-flake-module`'s skill has the
-wrapping shape and a second worked example (`installer-configuration.nix`).
+wrapping shape and a second worked example (`llm-sandbox-configuration.nix`).
 `durandal/hardware/hardware-configuration.nix` and
 `cube/hardware/hardware-cube.nix` are the two real ones in this repo;
 hardware-cube.nix's own history note documents what it replaced (a disko
@@ -82,10 +84,17 @@ common case for a newly-added host — check `CLAUDE.md`'s State section for
 whether the machine has actually booted this config): use the disko
 generator instead of inventing a `hardware-configuration.nix`.
 `nire/impermanence/_disko/impermanence-luks-btrfs.nix`
-(`flake/doc/disko-impermanence-layout.md` explains it) reproduces the LUKS +
+(`flake/doc/disko-impermanence-layout.md` explains it, call-site example
+included) reproduces the LUKS +
 btrfs + impermanence layout durandal and tenacity run by hand, curried over
 `device`, `includeSecureboot`, and `swapSize`. `lego/hardware/disko-lego.nix`
-and `cube/hardware/disko-cube.nix` are the worked examples. Two rules that
+was the one live caller of it in this tree; removed with the rest of
+`nire-lego` 2026-08-27 (its content is in git history if a closer worked
+example than the doc's own is needed), and `cube/hardware/disko-cube.nix`
+was deleted earlier still, once cube's real install turned out to be a plain
+root instead — see `cube-configuration.nix`'s own header. Nothing in the
+tree currently calls this generator; the doc's inline example is the
+reference until a new host does. Two rules that
 are easy to get backwards here:
 
 - **The placeholder device path must be unmistakably fake**
@@ -107,15 +116,16 @@ Either way, if the host imports `impermanence`, its rollback
 btrfs top level — the disko template creates it, unmounted, but only once
 disko is actually run against the real disk. A host can be fully wired up in
 this repo and still be unable to boot before that happens; say so in the
-host's own header, the way `lego-configuration.nix` and
-`cube-configuration.nix` do.
+host's own header, the way `nire-lego`'s did before its removal 2026-08-27
+(git history) and `cube-configuration.nix` does for its own, different
+reason (no impermanence at all).
 
 ## Naming: suffix anything host-specific
 
 A module's declared name is its filename (`new-flake-module` skill), and
 names in the same class **merge** rather than conflict. Every host-specific
 file under `<name>/` needs its own host suffix — `hardware-cube.nix`,
-`disko-lego.nix`, `boot-cube.nix` — precisely so a
+`hardware-tenacity.nix`, `boot-cube.nix` — precisely so a
 second host's `boot-<name>.nix` doesn't merge into the first's. (Durandal's
 own `hardware-configuration.nix` and `nixpkgs-hostPlatform-durandal.nix`
 predate full consistency on this — the first is unsuffixed and gets away
@@ -134,8 +144,14 @@ durandal's `23.11` or tenacity's `25.05`. Check the current pin with:
 nix eval --raw .#nixosConfigurations.nire-tenacity.config.system.nixos.release
 ```
 
-`lego`'s state-version file explains this inline — copy the reasoning
-comment, not just the string.
+`nire-lego`'s state-version file (removed 2026-08-27 with the rest of the
+host; git history has it verbatim) explained this inline: "not yet
+installed, no existing data to pin a release for, so start on the current
+release rather than inheriting durandal's 23.11 or tenacity's 25.05." Write
+the equivalent comment for a new not-yet-installed host rather than just the
+bare string — every currently-live host's `stateVersion` now reflects real
+installed data, so there's no live example of the fresh-host case to point
+at instead.
 
 ## Don't copy host-specific fixes without re-diagnosing
 

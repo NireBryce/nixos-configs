@@ -73,13 +73,15 @@ account, including the two earlier names it's carried
 
 ## Imported by
 
-`tenacity`, `lego`, `cube` — three of the four NixOS hosts, not all four
-any more. All four *did* import this explicitly from 2026-08-22 until
-2026-08-27, when it was dropped from `durandal` specifically: nothing in
-this repo's history ever recorded durandal actually running a podman
-container or a distrobox, unlike cube's confirmed homelab usage, so it was
-carried purely for parity rather than an established need. See
-`durandal-configuration.nix`'s own comment at the point it was removed.
+`tenacity`, `cube` — two of the three NixOS hosts now on the tree. All four
+NixOS hosts on the tree at the time (durandal, tenacity, lego, cube) *did*
+import this explicitly from 2026-08-22 until 2026-08-27, when it was dropped
+from `durandal` specifically: nothing in this repo's history ever recorded
+durandal actually running a podman container or a distrobox, unlike cube's
+confirmed homelab usage, so it was carried purely for parity rather than an
+established need. See `durandal-configuration.nix`'s own comment at the
+point it was removed. `lego` (which also imported this) was itself removed
+the same day — see [../history.md](../history.md).
 Not `lysithea` either way — this module is `nixos`-class only, so it never
 reached darwin even back when it was still part of `system` (see
 [system](system.md)'s "Imported by" section on which classes actually

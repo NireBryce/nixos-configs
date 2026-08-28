@@ -3,8 +3,8 @@
 # Filed alongside gaming.nix rather than as its own category: this directory
 # is collected into the `system` category same as gaming.nix is, and `system`
 # is imported whole by every NixOS host (see CLAUDE.md, "Membership is
-# implicit"), so this reaches all four hosts -- durandal and cube
-# (workstations) as well as tenacity and lego (handhelds) -- with no
+# implicit"), so this reaches all three hosts -- durandal and cube
+# (workstations) as well as tenacity (the handheld) -- with no
 # per-host wiring. That is deliberate: streaming a session off a handheld is
 # as legitimate a use as streaming to one.
 #
@@ -12,8 +12,8 @@
 # native HTTP/RTSP/UDP parsing are real attack surface -- a paired client gets
 # full remote control (keyboard, mouse, screen), gated only by a 4-digit PIN --
 # and `openFirewall = true` would open that on every interface, not just
-# trusted ones. For the two handhelds especially, that means whatever wifi
-# tenacity or lego happen to be on that day, not just home. `tailscale0` is
+# trusted ones. For the handheld especially, that means whatever wifi
+# tenacity happens to be on that day, not just home. `tailscale0` is
 # already in `networking.firewall.trustedInterfaces` (see networking.nix), so
 # Sunshine is reachable over the tailnet with no firewall rule needed here --
 # a device has to already be authenticated onto the tailnet before it can

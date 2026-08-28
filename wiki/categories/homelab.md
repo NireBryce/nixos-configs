@@ -20,7 +20,7 @@ the seven nested categories by name (as of the 2026-08-27 refactor into
 `modules/_lib/category-collector.nix` — see that doc's History section)
 rather than re-deriving their modules independently, giving a coarse handle
 (`homelab`, what `nire-cube` actually imports) and seven fine ones (for
-`tenacity`/`lego`, which still need `containers` individually and must not
+`tenacity`, which still needs `containers` individually and must not
 get the rest — see [containers.md](containers.md)) on overlapping content.
 `flake/doc/dirsAsCategory.md` documents this as load-bearing, not a bug.
 (`durandal` used to be the other consumer of a fine handle here too, for
@@ -66,7 +66,7 @@ header). The other two, `virtualization` (added 2026-08-21) and
 `containers` (added 2026-08-22), started life shared with other hosts —
 `virtualization` with durandal, `containers` with all four NixOS hosts —
 and only became cube-exclusive-in-practice-on-cube once durandal dropped
-both, 2026-08-27 (`lego` still imports `containers` on its own; see that
+both, 2026-08-27 (`tenacity` still imports `containers` on its own; see that
 page's "Imported by"). By 2026-08-27 `cube-configuration.nix` listed eight
 import lines for self-hosted services alone (the seven categories plus
 `virtualization-cube` as a standalone), each with its own explanatory

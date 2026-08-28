@@ -27,9 +27,10 @@
         #
         # Filtered to hosts that actually have home-manager, same gate
         # invariants.nix's usesHomeManager uses and for the same reason:
-        # nire-installer never imports enable-home-manager.nix, has no `elly`
-        # user, and `host.config.home-manager` is a missing attribute there
-        # rather than an empty one.
+        # nire-llm-sandbox (and, before its removal 2026-08-27, nire-installer)
+        # never imports enable-home-manager.nix, has no `elly` user, and
+        # `host.config.home-manager` is a missing attribute there rather than
+        # an empty one.
         homeChecks = lib.mapAttrs'
             (name: host: lib.nameValuePair "home-${name}"
                 host.config.home-manager.users.elly.home.activationPackage)

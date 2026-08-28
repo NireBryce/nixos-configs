@@ -18,7 +18,7 @@ hosts that import this category.
 
 ## Imported by
 
-All four NixOS hosts (`durandal`, `tenacity`, `lego`, `cube`) — not
+All three NixOS hosts (`durandal`, `tenacity`, `cube`) — not
 `lysithea`, left out rather than imported-for-nothing since neither module
 declares a `darwin` class (same reasoning as [hardware](hardware.md) and
 [desktop-env](desktop-env.md) being absent from lysithea's imports).

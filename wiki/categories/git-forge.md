@@ -146,7 +146,7 @@ from a new sops secret, `forgejo-admin-password`, declared **in this
 module** rather than centralized in `system/secrets/sops.nix` alongside
 the syncthing-\* secrets — deliberately, so it only decrypts on
 `nire-cube`, where `git-forge` is actually imported, not on
-durandal/tenacity/lego too.
+durandal/tenacity too.
 
 **This resets the password to the sops value on every activation** — a
 considered choice, not the create-once/never-touch-again shape
@@ -158,7 +158,7 @@ the password by hand through the web UI would get silently reverted on
 the next `just switch`.
 
 **Status: evaluates only, not yet switched on cube.** `just preflight`
-passes and durandal/tenacity/lego's toplevels were confirmed unaffected
+passes and durandal/tenacity's toplevels were confirmed unaffected
 beyond the expected drvPath move from `secrets.yaml`'s own content
 changing (`just diff` shows no sampled attribute differs) — but nobody
 has logged in with this account yet. Treat as unverified until a real
@@ -169,7 +169,7 @@ undated verified as evaluates" rule.
 
 No `forgejo-persist.nix` alongside this, for the same reason
 [monitoring](monitoring.md) has no `grafana-persist.nix`: `nire-cube` has a
-plain persistent root, not the `/root` wipe durandal/tenacity/lego get
+plain persistent root, not the `/root` wipe durandal/tenacity get
 (`cube-configuration.nix`'s own header), so `/var/lib/forgejo` (repos,
 sqlite db, the self-generated secrets under `custom/conf/`) survives reboots
 with no `environment.persistence` entry needed. If this module is ever
@@ -178,7 +178,7 @@ imported by a host that DOES wipe root, add one first, modeled on
 
 ## Imported by
 
-`nire-cube` only, as of 2026-08-24. Not durandal, tenacity, or lego — same
+`nire-cube` only, as of 2026-08-24. Not durandal or tenacity — same
 "hasn't been asked for there yet," not a design limit, [monitoring](monitoring.md)
 gives for itself.
 

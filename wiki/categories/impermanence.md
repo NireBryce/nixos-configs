@@ -40,7 +40,7 @@ directory.
 
 ## Imported by
 
-`durandal`, `tenacity`, `lego` — three of the four NixOS hosts, wiping
+`durandal`, `tenacity` — two of the three NixOS hosts, wiping
 `/root` on every boot. `nire-cube` does **not** — its real install turned out to be a
 plain persistent root, not LUKS+impermanence, a correction made 2026-08-21
 after the fact. That absence is why two other things exist:

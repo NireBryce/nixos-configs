@@ -39,7 +39,7 @@ compose. They don't.
   variant actually imports internally (`imports = [ ../virtualisation/disk-image.nix ]; image.efiSupport = false;`
   for the `qemu` variant specifically). Importing it **directly** into a
   real `nixosConfiguration` (via `modulesPath + "/virtualisation/disk-image.nix"`,
-  same pattern `installer-configuration.nix` uses for its live-ISO profile)
+  the same mechanism a live-ISO profile uses)
   makes `fileSystems."/"` and the bootloader part of the *base* config too.
 
 **Why the difference matters here specifically**: `checks.nix` forces

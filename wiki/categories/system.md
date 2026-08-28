@@ -149,7 +149,7 @@ rule in the chain."
 
 ## Imported by
 
-All four NixOS hosts import `system` whole. `lysithea` imports it too — for
+All three NixOS hosts import `system` whole. `lysithea` imports it too — for
 `enable-home-manager-darwin.nix`, per that file's own comment "this is what
 brings packages and dotfiles in" — but only the `nixos`/`darwin`-class
 subset that actually declares a `darwin` class reaches it; `bluetooth`,

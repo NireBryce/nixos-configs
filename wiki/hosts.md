@@ -11,10 +11,8 @@ of where to look for each host.
 |---|---|---|---|
 | `nire-durandal` | nixos | workstation | yes |
 | `nire-tenacity` | nixos | handheld (Jovian/SteamOS) | yes |
-| `nire-lego` | nixos | handheld, Legion Go (Jovian/SteamOS) | yes |
 | `nire-cube` | nixos | mini PC (GMKtec) | **no** — deliberately, see below |
 | `nire-lysithea` | darwin | laptop | n/a |
-| `nire-installer` | nixos | live-USB installer, not a persistent host | n/a — no persistent `/root` at all |
 | `nire-llm-sandbox` | nixos | libvirt VM guest (Claude Code sandbox), runs on `nire-cube` | n/a — persistent guest disk, not part of the impermanence fleet |
 
 `nire-testbed` (ThinkPad X270) existed 2026-08-14 to 2026-08-22 and was
@@ -22,10 +20,12 @@ removed, never having been built or switched on real hardware. It's history
 now, not a live host — see [history.md](history.md) and
 [`../claude cave/lessons-learned.md`](<../claude cave/lessons-learned.md>).
 
-`nire-llm-sandbox`, added 2026-08-22, is a third shape alongside "real host"
-and "live-USB image": a `nixosConfigurations` entry that exists to build a
-qcow2 disk image (same pattern `nire-installer` uses for its ISO), but
-unlike the installer it's meant to run *persistently* once started, as a
+`nire-lego` (handheld, Legion Go) and `nire-installer` (the generic live-USB
+installer image) were both removed 2026-08-27 — see [history.md](history.md).
+
+`nire-llm-sandbox`, added 2026-08-22, is a `nixosConfigurations` entry that
+exists to build a qcow2 disk image (the same mechanism a live-ISO build
+uses), but meant to run *persistently* once started, as a
 libvirt-managed guest on `nire-cube` — see
 [virtualization](categories/virtualization.md)'s own section on it, and
 skill `nixos-vm-images` for the mechanism. `nire-cube`'s first real `just
@@ -103,14 +103,9 @@ call `tailscale.nix` makes for the host daemon.
   (`.claude/skills/new-host-config/SKILL.md`): which category a new host
   wants, real hardware vs. not-yet-installed, what *not* to copy from the
   host you're basing it on.
-- **Building/installing a host with the live-USB image** —
-  [`../flake/modules/nireHost/installer/liveusb-installer.md`](<../flake/modules/nireHost/installer/liveusb-installer.md>)
-  — full walkthrough, generalized 2026-08-22 to target any host at build
-  time. Untested against real hardware since that generalization; read the
-  partition-layout step skeptically.
 - **Disk layout (LUKS + btrfs + impermanence)** —
   [`../flake/doc/disko-impermanence-layout.md`](<../flake/doc/disko-impermanence-layout.md>)
-  — the reusable generator durandal/tenacity/lego already run by hand, and
+  — the reusable generator durandal/tenacity already run by hand, and
   the template if cube ever adopts impermanence instead of its current plain
   root.
 - **Repo-wide layout and the impermanence warning** —

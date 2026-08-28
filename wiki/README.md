@@ -24,9 +24,9 @@ of re-deriving it.
 
 ## Pages
 
-- [Hosts & current state](hosts.md) — the five hosts (four NixOS + one
-  darwin) plus the live-USB installer, what's actually been switched/booted
-  vs. only evaluated, and where that status is tracked.
+- [Hosts & current state](hosts.md) — the four hosts (three NixOS + one
+  darwin), what's actually been switched/booted vs. only evaluated, and
+  where that status is tracked.
 - [Architecture & module system](architecture.md) — flake-parts, the
   `dirsAsCategory` mechanism, Home Manager integration, package modules.
 - [Category reference](categories/README.md) — one article per real

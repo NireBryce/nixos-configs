@@ -93,7 +93,7 @@
                         # session's `git push` died with "ksshaskpass died of
                         # signal 6" before ever reaching a username prompt.
                         # Harmless no-op on a host that never had it set (no
-                        # desktop imported -- tenacity, lego) or a real
+                        # desktop imported -- tenacity) or a real
                         # graphical session (DISPLAY/WAYLAND_DISPLAY present).
                         if [[ -z "''${DISPLAY:-}''${WAYLAND_DISPLAY:-}" ]]; then
                             unset SSH_ASKPASS

@@ -32,7 +32,7 @@
 
 ## Imported by
 
-All five hosts. The four NixOS hosts import `nix` directly in their own
+All four hosts. The three NixOS hosts import `nix` directly in their own
 category list; `lysithea` imports it too, under its `darwin`-class list —
 which works precisely because `basic-nix-settings.nix` declares a real
 `darwin` block, unlike most modules in this tree. `manconfig.nix` (homeManager-only)

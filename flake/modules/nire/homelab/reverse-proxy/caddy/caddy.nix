@@ -47,7 +47,7 @@
 # set HERE rather than in system/networking/tailscale.nix on purpose:
 # tailscale.nix is in the `system` category that EVERY Linux host imports,
 # so setting it there would grant cert-fetching rights to a `caddy` user on
-# durandal, tenacity and lego -- three hosts that don't run caddy at all.
+# durandal and tenacity -- two hosts that don't run caddy at all.
 # Scoped to the category that actually needs it, the same way
 # `virtualization`'s VM fixes were scoped to the host that had the bug.
 # The value is resolved by name at request time (`userIDFromString` does a
@@ -245,7 +245,7 @@
             # StateDirectory. No caddy-persist.nix alongside this, same
             # reasoning grafana.nix, forgejo.nix and golink.nix each give:
             # cube-configuration.nix's header says this host has a plain
-            # persistent root, not the `/root` wipe durandal/tenacity/lego
+            # persistent root, not the `/root` wipe durandal/tenacity
             # get. If this module is ever imported by a host that DOES wipe
             # root, add one first, modeled on tailscale-persist.nix --
             # otherwise every boot re-fetches certs from tailscaled.

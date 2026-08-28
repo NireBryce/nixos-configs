@@ -189,7 +189,7 @@ tidy it back out.
 
 Same reasoning [monitoring](monitoring.md) and [git-forge](git-forge.md)
 each give: `nire-cube` has a plain persistent root, not the `/root` wipe
-durandal/tenacity/lego get (`cube-configuration.nix`'s header), so
+durandal/tenacity get (`cube-configuration.nix`'s header), so
 `/var/lib/private/golink` — the links database *and* the tsnet node key —
 survives reboots with no `environment.persistence` entry. If this module is
 ever imported by a host that DOES wipe root, add one first, modeled on
@@ -198,8 +198,8 @@ registers a fresh tailnet device.
 
 ## Imported by
 
-`nire-cube` only, as of 2026-08-24. Confirmed not to move durandal,
-tenacity, or lego: each host's toplevel `drvPath` is byte-identical before
+`nire-cube` only, as of 2026-08-24. Confirmed not to move durandal or
+tenacity: each host's toplevel `drvPath` is byte-identical before
 and after this change.
 
 ## See also

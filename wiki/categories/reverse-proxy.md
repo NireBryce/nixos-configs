@@ -100,7 +100,7 @@ Two prerequisites, neither of which lives in this repo:
 `permitCertUid` is set in `caddy.nix` itself, deliberately, rather than in
 `system/networking/tailscale.nix`. That file is in the `system` category
 *every* Linux host imports, so setting it there would grant cert-fetching
-rights to a `caddy` user on durandal, tenacity and lego — three hosts that
+rights to a `caddy` user on durandal and tenacity — two hosts that
 don't run Caddy. Scoping a change to the host that actually needs it is the
 same call [virtualization](virtualization.md)'s VM fixes made.
 
@@ -205,7 +205,7 @@ rather than a clean failure.
 
 Same reasoning [monitoring](monitoring.md), [git-forge](git-forge.md) and
 [shortlinks](shortlinks.md) each give: `nire-cube` has a plain persistent
-root, not the `/root` wipe durandal/tenacity/lego get
+root, not the `/root` wipe durandal/tenacity get
 (`cube-configuration.nix`'s header), so `/var/lib/caddy` — certificates and
 Caddy's own state — survives reboots with no `environment.persistence`
 entry. If this module is ever imported by a host that DOES wipe root, add
@@ -224,7 +224,7 @@ twice in this tree already.
 ## Imported by
 
 `nire-cube` only, as of 2026-08-24. Confirmed not to move durandal,
-tenacity, lego or lysithea: each host's toplevel `drvPath` is byte-identical
+tenacity or lysithea: each host's toplevel `drvPath` is byte-identical
 before and after this change.
 
 ## See also
