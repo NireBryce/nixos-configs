@@ -168,7 +168,8 @@ not at merge time. Asking "merge?" on a PR that cannot merge, or that is
 based on the wrong branch, spends one of Elly's round-trips on a question
 with no good answer; sort it out first, then ask.
 
-Print that in your response, then ask with `AskUserQuestion` whether to merge.
+Print that in your response, then ask the user — through whatever ask/confirm
+mechanism your harness provides — whether to merge.
 Include the merge method in what you show:
 
 - **PR is a single commit** (the common case here — check with `git log
@@ -201,7 +202,7 @@ rather than a formality.
 
 ## 4. Ask again, then delete — second confirmation
 
-Separate `AskUserQuestion`. On yes:
+A separate ask-the-user round-trip, not the one that asked about merging. On yes:
 
 ```sh
 git checkout experimental && git pull
@@ -245,7 +246,8 @@ gh pr edit <child-number> --base experimental
 Then merge it, then ask about both branches together at step 4.
 
 **Both gates still apply per PR, but they can share a round-trip.**
-`AskUserQuestion` takes up to four questions in one call, so two PRs is one call
+A harness that batches questions can put both merge decisions in one ask (up to
+four questions per call), so two PRs is one call
 with two merge questions, then one call with the branch-deletion question. That
 is still a separate question per decision — which is the requirement — without
 four round-trips. Say in the options which PR is stacked on which, so a
@@ -266,7 +268,7 @@ guessed at before it existed.
 **`experimental` has no ruleset at all** (checked 2026-08-25 via `gh api
 repos/NireBryce/nixos-configs/rulesets`: exactly one ruleset exists, and it
 names `main`). Nothing stops a direct `git push origin experimental`, a
-force-push, or a branch deletion — the two `AskUserQuestion` confirmations in
+force-push, or a branch deletion — the two ask-the-user confirmations in
 this flow are the *entire* guard for work landing on `experimental`, not a
 belt-and-suspenders layered on top of a GitHub-enforced one the way `main`'s
 are. If Elly wants equivalent protection on `experimental`, that is a

@@ -41,7 +41,7 @@ repo only, full stop, even for a bug whose real fix belongs upstream (in
 nixpkgs, ble.sh, carapace, whatever). Filing there instead is a different,
 heavier action with its own rule in `CLAUDE.md`: never without Elly saying
 so explicitly, in those words, unprompted — not satisfied by this skill's
-own step 3 `AskUserQuestion`, and not satisfied by folding it into some
+own step 3 ask-the-user confirmation, and not satisfied by folding it into some
 other approval. If a bug genuinely belongs upstream, this skill still
 applies for tracking it *here* (`bug` label, or note it in
 `wiki/open-threads.md`/`bugs pending submission/` if a draft write-up is
@@ -67,7 +67,8 @@ closing a wrongly-filed issue costs nothing the way an unwound merge does.
    there's no separate hand-grep to keep in sync with what that script
    covers. Also grep `CLAUDE.md` itself, which threads.sh doesn't touch.
    Stop here if it's already covered.
-3. **Ask, showing the real content.** Use `AskUserQuestion` with the title
+3. **Ask, showing the real content.** Ask the user (through whatever
+   ask/confirm mechanism your harness provides) with the title
    and a short body already drafted — the decision should land on the actual
    text, not on a vague "should I file something?" — and name which label
    you'd use (`bug` for a defect, `documentation` for a doc that's wrong,
