@@ -49,23 +49,26 @@
 # 2. Making the check fire at the depth that exists (applying it in
 #    `allModules` too, as below) without `bareModulesOf` silently dropped
 #    `libvirt-vm-llm-sandbox` from `nire-cube`'s `systemd.services`:
-#    `virtualization-cube.nix` sits bare in `nire/homelab/virtualization/`'s
-#    own root -- deliberately excluded from the `virtualization` category's
-#    *own* aggregate (a category collects from subdirectories only), but
-#    reaching `nire-cube` only because `homelab` walks into
-#    `virtualization/` as *its* subdirectory, where a bare file one level
-#    in was never excluded (see `wiki/categories/virtualization.md`'s
-#    "This exclusion is category-scoped, not tree-scoped"). Delegating
-#    straight to `virtualization`'s aggregate collapsed that independence
-#    and lost exactly that file. `bareModulesOf` is the fix: at every
-#    nested-category boundary, delegate to the child's own aggregate for
-#    what IT collects, but also separately collect bare `.nix` files in
-#    the child's own root -- the files its own collector deliberately
-#    leaves out, that a plain recursive walk would still sweep in.
+#    `virtualization-cube.nix` (nire-llm-sandbox's cube wiring, both since
+#    removed -- see wiki/history.md) sat bare in
+#    `nire/homelab/virtualization/`'s own root -- deliberately excluded from
+#    the `virtualization` category's *own* aggregate (a category collects
+#    from subdirectories only), but reaching `nire-cube` only because
+#    `homelab` walks into `virtualization/` as *its* subdirectory, where a
+#    bare file one level in was never excluded (see
+#    `wiki/categories/virtualization.md`'s "This exclusion is
+#    category-scoped, not tree-scoped"). Delegating straight to
+#    `virtualization`'s aggregate collapsed that independence and lost
+#    exactly that file. `bareModulesOf` is the fix: at every nested-category
+#    boundary, delegate to the child's own aggregate for what IT collects,
+#    but also separately collect bare `.nix` files in the child's own root --
+#    the files its own collector deliberately leaves out, that a plain
+#    recursive walk would still sweep in.
 #    Verified against all six configurations then present (`nire-durandal`,
 #    `nire-cube`, `nire-tenacity`, `nire-lego`, `nire-llm-sandbox`,
-#    `nire-lysithea`): `environment.systemPackages`, `systemd.services`
-#    and `users.users` identical to the pre-refactor baseline,
+#    `nire-lysithea` -- `nire-lego` and `nire-llm-sandbox` both since
+#    removed): `environment.systemPackages`, `systemd.services` and
+#    `users.users` identical to the pre-refactor baseline,
 #    `libvirt-vm-llm-sandbox` included; `drvPath` shifts on most hosts --
 #    expected per flake/doc/dirsAsCategory.md's "Expect drvPath to change
 #    from import reordering alone", since a nested category is now

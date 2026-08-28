@@ -53,11 +53,13 @@ AGG = re.compile(r'with\s+config\.flake\.modules\.(\w+);\s*\[(.*?)\]', re.S)
 COMMENT = re.compile(r'#[^\n]*')
 
 # host short-name -> its nireHost/*-configuration.nix. lysithea is darwin-class;
-# every other host is nixos-class. nire-installer and nire-llm-sandbox are
-# deliberately excluded -- CLAUDE.md's Architecture section is explicit that
-# neither counts as "a host" the way these four do, and categories/README.md's
-# "Imported by" columns never name either one. (nire-lego was a fifth real
-# host here until its removal 2026-08-27 -- see wiki/history.md.)
+# every other host is nixos-class. nire-installer and nire-llm-sandbox
+# (removed 2026-08-27 and 2026-08-28 respectively -- see wiki/history.md; both
+# were deliberately excluded even while they existed) are not listed here --
+# CLAUDE.md's Architecture section is explicit that neither counted as "a
+# host" the way these four do, and categories/README.md's "Imported by"
+# columns never name either one. (nire-lego was a fifth real host here until
+# its removal 2026-08-27 -- see wiki/history.md.)
 HOSTS = ['durandal', 'tenacity', 'cube', 'lysithea']
 
 IMPORTED_BY_HEADING = re.compile(r'^##\s+Imported by\s*$', re.M)
@@ -146,8 +148,8 @@ def collect_modules(d):
 def category_member_count(category_dir):
     """Real member count of one category, mirroring its own dirsAsCategory.nix:
     sum of collect_modules() over each *immediate* subdirectory only -- a file
-    sitting bare in category_dir itself (e.g. virtualization-cube.nix) is
-    correctly never counted, same as the real aggregate never imports it.
+    sitting bare in category_dir itself (e.g. shell-apps/text-tools/glow.nix)
+    is correctly never counted, same as the real aggregate never imports it.
 
     An immediate subdirectory named `_something` (e.g. impermanence/_disko/)
     is skipped here too, not just when collect_modules recurses into a

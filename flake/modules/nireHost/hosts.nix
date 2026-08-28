@@ -37,12 +37,11 @@ in
         # not carried in this tree; nireHost/installer/liveusb-installer.md's
         # last version (git history) is the starting point if it returns.
 
-        # Also not a machine anyone owns, and also exists to build an image
-        # rather than to be switched-to -- but unlike nire-installer, this one
-        # is meant to run persistently once started, as a libvirt VM on
-        # nire-cube. See nireHost/llm-sandbox/llm-sandbox-configuration.nix
-        # and nire/virtualization/virtualization-cube.nix.
-        nire-llm-sandbox = mkHost "x86_64-linux" config.flake.modules.nixos.llmSandboxConfiguration;
+        # nire-llm-sandbox (a libvirt VM on nire-cube sandboxing an LLM coding
+        # agent) was removed 2026-08-28 -- see wiki/history.md. The generic
+        # generator it was built on, VMs/_lib/libvirt-vm.nix, is kept as
+        # unexercised reusable infrastructure; its last full config (git
+        # history) is the starting point if a VM like it is wanted again.
     };
 
     flake.darwinConfigurations = {

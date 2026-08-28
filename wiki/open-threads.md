@@ -92,29 +92,12 @@ specific report — not as a housekeeping pass over this list:
   devenv, nixos-shell, nix-index, nix-prefetch — and an unanswered "learn
   what `outputs @ inputs:` means and figure out specialArgs" note. Also
   covered from the fix-snippet angle on [conventions.md](conventions.md).
-- **`nire-llm-sandbox` boots and stays up on `nire-cube`, confirmed
-  2026-08-24** — added 2026-08-22 (see [hosts.md](hosts.md) and
-  [categories/virtualization.md](categories/virtualization.md)). Took three
-  runtime-verified fixes to `VMs/_lib/libvirt-vm.nix` across 2026-08-23/24,
-  all against real `virsh` behaviour on `nire-cube`, none caught by `nix
-  eval` or a build: (1) libvirt's default NAT network is defined but never
-  started, so `virsh start` failed outright until the activation script
-  started it itself; (2) the fix for that used a `net-list --state-active`
-  flag that doesn't exist on virsh 12.4.0, so the check errored and fell
-  through to an unconditional `net-start`, which then failed with "network
-  is already active" on every activation after the first -- plain `net-list
-  --name` already lists active-only networks by default, no flag needed;
-  (3) `domainXml` had no `<uuid>`, so `virsh define` generated a fresh
-  random UUID on every parse and collided with the domain already
-  registered under the UUID from the first successful define -- fixed by
-  giving the generator a required `uuid` parameter, and for `llm-sandbox`
-  adopting the UUID libvirt had already assigned the (already-running)
-  guest rather than picking a new one. Each fix was confirmed not to touch
-  durandal's toplevel (byte-identical drvPath) before being applied on
-  cube. `systemctl status libvirt-vm-llm-sandbox.service` is `active
-  (exited)` / exit 0, and `virsh dominfo llm-sandbox` shows the domain
-  `running` with CPU time climbing across the fixes -- it was up the whole
-  time even while the systemd unit itself was failing on (2) and (3).
+
+`nire-llm-sandbox`'s three runtime-verified `VMs/_lib/libvirt-vm.nix` fixes
+(default network never started, a nonexistent `virsh` flag, a missing fixed
+domain UUID) used to be recorded here; the VM itself was removed 2026-08-28
+— see [history.md](history.md) and `claude cave/lessons-learned.md` §40 for
+that detail now.
 
 ## Left open by the cube service stack, 2026-08-24
 

@@ -29,32 +29,33 @@ get the rest — see [containers.md](containers.md)) on overlapping content.
 [containers.md](containers.md)'s own "Imported by" sections.)
 
 **One real behavioral consequence, not just reorganization:**
-`virtualization-cube.nix` (the `nire-llm-sandbox` VM wiring) sits bare in
-`nire/homelab/virtualization/`'s own root, which is what keeps it out of
+`virtualization-cube.nix` (the `nire-llm-sandbox` VM wiring, both since
+removed 2026-08-28 — see [../history.md](../history.md)) used to sit bare
+in `nire/homelab/virtualization/`'s own root, which is what kept it out of
 the `virtualization` category's aggregate specifically. `homelab` still
-reaches it anyway — not by walking into `virtualization/` independently any
+reached it anyway — not by walking into `virtualization/` independently any
 more, but because the collector explicitly re-collects a nested category's
 own bare files alongside delegating to its aggregate (`bareModulesOf` in
-`category-collector.nix`), specifically so this file wouldn't get lost when
-delegation was added. This is harmless in practice (only cube imports
-`homelab`, and the VM was already meant to be cube-exclusive) but it is a
-real narrowing of a deliberate exclusion, not a no-op move — see
-[virtualization.md](virtualization.md#a-cube-only-addition-that-is-deliberately-not-a-category-member)
+`category-collector.nix`), specifically so that file wouldn't get lost when
+delegation was added. That mechanism is unchanged and still live — nothing
+currently in the tree happens to exercise it, the same way it did for this
+file while it existed — see
+[virtualization.md](virtualization.md#vmslib-libvirt-vmnix--a-generator-not-a-category-member)
 for the full account.
 
 **This exact file is why `homelab` referencing `virtualization`'s aggregate
 had to carry its bare files along explicitly, rather than delegating
 outright.** A first version of the 2026-08-27 delegation change did
 delegate outright, and silently dropped `libvirt-vm-llm-sandbox` from
-`nire-cube`'s `systemd.services` — exactly the file this section is about,
-lost because plain delegation means `homelab` only gets what
-`virtualization`'s *own* aggregate decided to include, and that deliberately
-excludes this one. Confirmed by evaluating `config.systemd.services` before
-and after, not just reasoned about. Fixed the same session, not reverted —
-`bareModulesOf` is what restores it, verified again afterward with a full
-attribute-set diff (`environment.systemPackages`, `systemd.services`,
-`users.users`) against the pre-refactor baseline on every host in the repo,
-this one included.
+`nire-cube`'s `systemd.services` — exactly the file this section is about
+(both since removed, along with the VM itself). Lost because plain
+delegation means `homelab` only gets what `virtualization`'s *own* aggregate
+decided to include, and that deliberately excludes this one. Confirmed by
+evaluating `config.systemd.services` before and after, not just reasoned
+about. Fixed the same session, not reverted — `bareModulesOf` is what
+restores it, verified again afterward with a full attribute-set diff
+(`environment.systemPackages`, `systemd.services`, `users.users`) against
+the pre-refactor baseline on every host in the repo, this one included.
 
 ## Why one category for all seven
 

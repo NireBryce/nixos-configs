@@ -120,16 +120,17 @@ evaluation dies with `infinite recursion encountered` — naming
 ;}
 ```
 
-`nireHost/llm-sandbox/llm-sandbox-configuration.nix` is a second worked
+`nireHost/llm-sandbox/llm-sandbox-configuration.nix` was a second worked
 example of both this trap and the `config`-shadowing one above in the same
-file: it imports upstream's `virtualisation/disk-image.nix` via
-`modulesPath` from the *inner* module's args, and separately binds
+file: it imported upstream's `virtualisation/disk-image.nix` via
+`modulesPath` from the *inner* module's args, and separately bound
 `nixCategory = config.flake.modules.nixos.nix` in an outer `let` rather than
 adding `config` to the inner module's argument list, specifically to avoid
 repointing that reference at the NixOS `config` instead. (`nireHost/installer/
 installer-configuration.nix`, added 2026-08-15, was the original worked
-example of this same pattern until its removal 2026-08-27 — see
-`wiki/history.md`.)
+example of this same pattern until its removal 2026-08-27; `llm-sandbox`'s
+own removal followed 2026-08-28 — see `wiki/history.md` for both. Both are
+still readable in git history if a third example is needed.)
 
 ## Keep the wiki in sync
 

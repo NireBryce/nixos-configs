@@ -38,6 +38,20 @@
   `nixos-install`) isn't disproven or abandoned, just not carried in this
   tree any more — its last version is in git history if it's ever needed
   again, same as `nire-testbed`'s.
+- `nire-llm-sandbox` (a `nixosConfigurations` entry that built a qcow2 image
+  and ran it persistently as a libvirt VM on `nire-cube`, sandboxing an LLM
+  coding agent away from the real host) was removed 2026-08-28, along with
+  its `nireHost/llm-sandbox/` files, its `hosts.nix` entry, and
+  `virtualization-cube.nix` (the cube-side wiring that defined the guest
+  domain). It had been confirmed booted and staying up on real hardware as
+  of 2026-08-24 — see the "Confirmed-on-hardware facts" section below for
+  what that confirmation actually checked, and
+  [`../claude cave/lessons-learned.md`](<../claude cave/lessons-learned.md>)
+  §40 for the three runtime-only bugs its first switch hit. The generic
+  generator it ran on, `VMs/_lib/libvirt-vm.nix`, is kept as unexercised
+  reusable infrastructure — see [virtualization](categories/virtualization.md);
+  the sandbox's own last full config is in git history if a VM like it is
+  wanted again.
 
 ## Confirmed-on-hardware facts, and how they were confirmed
 

@@ -67,9 +67,11 @@
 # having home-manager at all (`c ? home-manager`), added for
 # nire-installer (live-USB image, removed 2026-08-27): no `elly` user,
 # no home-manager closure, so it never imported enable-home-manager.nix
-# and had no `home-manager` namespace; nire-llm-sandbox is the current
-# example. Same principle as the impermanence gate -- check the real
-# thing's existence, not the host's name -- and not vacuous:
+# and had no `home-manager` namespace; nire-llm-sandbox (a libvirt VM
+# image, removed 2026-08-28) was the same shape. Kept general rather than
+# special-cased to either, since every host currently in hosts.nix does
+# have home-manager. Same principle as the impermanence gate -- check the
+# real thing's existence, not the host's name -- and not vacuous:
 # enable-home-manager.nix is the only setter of useGlobalPkgs, but a
 # later import flipping it back to false on a host that DOES have
 # home-manager is exactly the regression this still catches.
@@ -109,9 +111,11 @@
             usesImpermanence = rollback != null;
 
             # Whether this host imported enable-home-manager.nix at all --
-            # see the header's opt-in addendum. nire-llm-sandbox (and,
-            # before removal 2026-08-27, nire-installer) has no `elly`
-            # user and never does.
+            # see the header's opt-in addendum. nire-installer (removed
+            # 2026-08-27) and nire-llm-sandbox (removed 2026-08-28) both had
+            # no `elly` user and never did; no host currently in hosts.nix
+            # is this shape, but the gate stays general for the next one
+            # that is.
             usesHomeManager = c ? home-manager;
 
             impermanenceInvariants = [
@@ -217,8 +221,9 @@
             (if usesImpermanence then impermanenceInvariants else [ ])
             # NOT gated on usesImpermanence: holds for every NixOS host
             # that has home-manager at all, cube included. See
-            # usesHomeManager for the host it currently does not:
-            # nire-llm-sandbox.
+            # usesHomeManager for what a host without one looks like --
+            # none currently in hosts.nix is, but nire-llm-sandbox (removed
+            # 2026-08-28) was.
             ++ (if usesHomeManager then homeManagerInvariants else [ ]);
 
         failures = lib.concatLists (lib.mapAttrsToList

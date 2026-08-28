@@ -26,11 +26,13 @@
         # home-only breakage say so instead of failing as "the host".
         #
         # Filtered to hosts that actually have home-manager, same gate
-        # invariants.nix's usesHomeManager uses and for the same reason:
-        # nire-llm-sandbox (and, before its removal 2026-08-27, nire-installer)
-        # never imports enable-home-manager.nix, has no `elly` user, and
-        # `host.config.home-manager` is a missing attribute there rather than
-        # an empty one.
+        # invariants.nix's usesHomeManager uses and for the same reason: a
+        # host with no `elly` user and no home-manager closure never imports
+        # enable-home-manager.nix, so `host.config.home-manager` is a missing
+        # attribute there rather than an empty one -- true of nire-installer
+        # and nire-llm-sandbox before their removal (2026-08-27, 2026-08-28),
+        # and kept general for whatever image-only host comes next, since
+        # every real host currently in hosts.nix does have home-manager.
         homeChecks = lib.mapAttrs'
             (name: host: lib.nameValuePair "home-${name}"
                 host.config.home-manager.users.elly.home.activationPackage)

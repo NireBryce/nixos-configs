@@ -99,8 +99,10 @@ logic out:
   level up (so `hardware` delegates to `amd`'s aggregate and `homelab`
   delegates to `virtualization`'s) made it fire at the real depth, and
   silently dropped `libvirt-vm-llm-sandbox` from `nire-cube`'s
-  `systemd.services` entirely. Cause: `virtualization-cube.nix` sits bare in
-  `nire/homelab/virtualization/`'s own root, deliberately excluded from the
+  `systemd.services` entirely. Cause: `virtualization-cube.nix` (the
+  `nire-llm-sandbox` VM's cube wiring — both since removed, 2026-08-28; see
+  `wiki/history.md`) sat bare in `nire/homelab/virtualization/`'s own root,
+  deliberately excluded from the
   `virtualization` category's own aggregate (a `.nix` file bare in a
   category's own root is collected by nothing — see "Things that are
   load-bearing" below) — but it reached `nire-cube` at all only because

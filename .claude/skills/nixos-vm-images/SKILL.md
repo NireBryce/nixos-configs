@@ -12,16 +12,22 @@ guest VM in this repo — covers nixpkgs' image-variant system vs. its
 underlying disk-image module, the relative-path gotcha in `image.filePath`,
 and the category-scoping trick used to keep a generator's *consumer*
 host-exclusive without hiding the generator itself. Use before adding
-another VM guest (`nireHost/llm-sandbox/`, `nire/virtualization/VMs/` are the
-worked example), building any `config.system.build.image`, or debugging why
-a per-host libvirt module reached a host it shouldn't have (or didn't reach
-the one it should).
+another VM guest (`flake/modules/nire/homelab/virtualization/VMs/_lib/libvirt-vm.nix`
+is the reusable generator, currently uncalled by anything — see below),
+building any `config.system.build.image`, or debugging why a per-host
+libvirt module reached a host it shouldn't have (or didn't reach the one it
+should).
 
 Background: `nire-llm-sandbox` (`flake/modules/nireHost/llm-sandbox/`) and
-its libvirt wiring (`flake/modules/nire/virtualization/VMs/_lib/libvirt-vm.nix`,
-`flake/modules/nire/virtualization/virtualization-cube.nix`) are the worked
-example everything below was learned from, 2026-08-22. Read those files'
-own headers for the full account; this is the trap-shaped summary.
+its libvirt wiring (`VMs/_lib/libvirt-vm.nix`, `virtualization-cube.nix`) were
+the worked example everything below was learned from, 2026-08-22. Both the
+VM and `virtualization-cube.nix` were removed 2026-08-28 (see
+`wiki/history.md`); the generator itself, `VMs/_lib/libvirt-vm.nix`, was kept
+as unexercised reusable infrastructure and now lives at
+`flake/modules/nire/homelab/virtualization/VMs/_lib/libvirt-vm.nix` (moved
+under the `homelab` umbrella 2026-08-27, before the VM's removal). Read
+`llm-sandbox-configuration.nix`'s last version (git history) for the full
+account; this is the trap-shaped summary.
 
 ## `image.modules.<variant>` and `config.system.build.image` are NOT the same mechanism
 
@@ -50,7 +56,8 @@ fails its own *toplevel* with "the `fileSystems` option does not specify
 your root file system" and no `boot.loader.grub.devices` — because those
 only exist inside the isolated variant sub-config, not the base one
 `system.build.toplevel` is asking about. This was hit for real, not
-theorized: see `llm-sandbox-configuration.nix`'s header for the exact
+theorized: see `llm-sandbox-configuration.nix`'s header (git history — the
+file was removed 2026-08-28 along with the VM it configured) for the exact
 assertion text.
 
 **The fix, and the rule**: import `disk-image.nix` directly into the base
@@ -89,35 +96,41 @@ cheaply, build it and read the artifact back before trusting the string.
 `dirsAsCategory` collects every `.nix` file from every *sub*directory of a
 category unconditionally — see `flake/doc/dirsAsCategory.md` and the
 `new-flake-module` skill's collision-merge warning. That means a module
-placed in a normal subdirectory of e.g. `nire/virtualization/VMs/` is
-automatically part of `flake.modules.nixos.virtualization`, reaching every
-host that imports the category whole — not just the one host you wrote it
-for.
+placed in a normal subdirectory of e.g. `nire/homelab/virtualization/VMs/`
+is automatically part of `flake.modules.nixos.virtualization`, reaching
+every host that imports the category whole — not just the one host you
+wrote it for.
 
-The pattern used here has two separate pieces filed in two separate places,
-each for a different reason:
+The pattern used here (worked example: `nire-llm-sandbox`, removed
+2026-08-28 — see `wiki/history.md`) had two separate pieces filed in two
+separate places, each for a different reason. Only the first piece still
+exists; the second is described in past tense as a template for the next
+VM that needs it:
 
-- **The reusable generator** (`VMs/_lib/libvirt-vm.nix`) is a **plain
-  curried function**, not a flake-parts module — it can't declare
-  `flake.modules.<class>.<name>` because it's parameterized (`{ name, image,
-  ... }: { pkgs, lib, ... }: {...}`), and if `import-tree` tried to
-  auto-import it the normal way it would call it with flake-parts' own
-  module args and fail outright (closed lambda pattern, no `...`). It goes
-  under `_lib/` for the same reason `nirePackages/_lib/mkPkgModule.nix` and
-  `nire/impermanence/_disko/impermanence-luks-btrfs.nix` do: `import-tree`
-  ignores any path containing `/_`. `dirsAsCategory`'s own directory walk
-  does NOT skip `_`-prefixed paths (it has no special case for them), but it
-  harmlessly finds nothing to collect there anyway, because nothing under
-  `_lib/` ever declared `flake.modules.nixos.<name>` in the first place —
-  `import-tree` never touched it to make that declaration happen.
-- **The host-exclusive caller** (`virtualization-cube.nix`) sits **bare in
-  the category directory itself**, not in any subdirectory — the OTHER half
-  of `dirsAsCategory`'s rule ("a `.nix` file sitting directly in a category
-  directory is collected by nothing"). This is what keeps it out of the
-  `virtualization` aggregate: durandal also imports `virtualization`, and
-  without this placement it would get the VM too. Only an explicit,
-  separate `virtualization-cube` line in `cube-configuration.nix`'s own
-  imports reaches it.
+- **The reusable generator** (`VMs/_lib/libvirt-vm.nix`, still in the tree)
+  is a **plain curried function**, not a flake-parts module — it can't
+  declare `flake.modules.<class>.<name>` because it's parameterized (`{
+  name, image, ... }: { pkgs, lib, ... }: {...}`), and if `import-tree`
+  tried to auto-import it the normal way it would call it with flake-parts'
+  own module args and fail outright (closed lambda pattern, no `...`). It
+  goes under `_lib/` for the same reason `nirePackages/_lib/mkPkgModule.nix`
+  and `nire/impermanence/_disko/impermanence-luks-btrfs.nix` do:
+  `import-tree` ignores any path containing `/_`. `dirsAsCategory`'s own
+  directory walk does NOT skip `_`-prefixed paths (it has no special case
+  for them), but it harmlessly finds nothing to collect there anyway,
+  because nothing under `_lib/` ever declared `flake.modules.nixos.<name>`
+  in the first place — `import-tree` never touched it to make that
+  declaration happen.
+- **The host-exclusive caller** (`virtualization-cube.nix`, removed with the
+  VM) sat **bare in the category directory itself**, not in any
+  subdirectory — the OTHER half of `dirsAsCategory`'s rule ("a `.nix` file
+  sitting directly in a category directory is collected by nothing"). That
+  is what kept it out of the `virtualization` aggregate: durandal also
+  imported `virtualization` at the time, and without this placement it
+  would have gotten the VM too. Only an explicit, separate
+  `virtualization-cube` line in `cube-configuration.nix`'s own imports
+  reached it. The next host-exclusive VM generator's caller wants the same
+  placement.
 
 **These two exclusion mechanisms look similar (both "not automatically
 collected") but are for entirely different reasons** — one because
