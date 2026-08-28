@@ -378,9 +378,10 @@ declaration — see `boot-durandal.nix`, `enable-home-manager.nix`.
 **A bug recorded in a comment stays in the file.** Nobody reads `git log`; the
 comment is what the next editor sees. Do not trim one because the fix landed.
 If a change strands a comment entirely, move it to a `history` heading at the
-bottom and expand it enough to stand alone — it has lost the context that made
-it terse, so it needs to say more, not less (`boot-durandal.nix`,
-`WARN-impermanence.nix`, `vscode.nix` have them).
+bottom — still written to stand alone (dates, mechanism, what was tried,
+outcome), but under the same compression discipline as every other comment:
+facts kept, narration cut (`boot-durandal.nix`, `WARN-impermanence.nix`,
+`vscode.nix` have them).
 
 **`elly` is hardcoded**, in `users.users.elly`, `home.username`, and
 `home-manager.users.elly`. The sibling branch has `nire.primaryUser`;

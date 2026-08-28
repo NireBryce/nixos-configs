@@ -1,91 +1,74 @@
-# glance: the service index for this host -- what's running, whether it's up,
-# and how the machine itself is doing. Added 2026-08-24, cube-only, own
-# category (`nire/landing/`) for the same "if something shared needs to be
-# optional, a category is the mechanism" reason `monitoring`, `git-forge`,
-# `shortlinks` and `reverse-proxy` each already give (CLAUDE.md's
-# Architecture section).
+# glance: the service index for this host -- what's running, whether it's
+# up, how the machine is doing. Added 2026-08-24, cube-only, own category
+# (`nire/landing/`) -- the category-as-optionality mechanism CLAUDE.md's
+# Architecture section gives `monitoring`, `git-forge`, `shortlinks` and
+# `reverse-proxy`.
 #
-# The category is `landing`, NOT `dashboard`, and not `glance` either. Not
-# `glance` for the collision reason `git-forge` isn't `forgejo` (a category
-# and its one module sharing a name declare the same
-# `flake.modules.nixos.<name>` attribute and silently MERGE). Not `dashboard`
-# because `monitoring` next door is full of Grafana dashboards, and two
-# categories both reasonably called "the dashboard one" is the kind of
-# ambiguity that costs a grep later. This is the page you LAND on; Grafana is
-# where you go to read graphs.
+# Named `landing`, NOT `dashboard`, not `glance`. Not `glance` for the
+# collision reason `git-forge` isn't `forgejo` (category + module sharing a
+# name declare the same `flake.modules.nixos.<name>` and silently MERGE).
+# Not `dashboard` because `monitoring` next door is full of Grafana
+# dashboards; this is the page you LAND on, Grafana is where you read
+# graphs.
 #
-# WHAT IT IS NOT: a second monitoring system. The `monitor` widget below does
-# an HTTP GET and reports the status code -- it does not scrape, store, alert,
-# or retain anything. prometheus.nix is still what knows what CPU usage was an
-# hour ago. This answers "is it up right now, and what's the URL", which is
-# the question `wiki/homelab/README.md` exists to answer for humans and which
-# nothing on the machine answered before.
+# NOT a second monitoring system: the `monitor` widget does an HTTP GET and
+# reports the status code -- no scraping, storage, alerting, retention.
+# prometheus.nix is what knows what CPU was an hour ago; this answers "is
+# it up right now, and what's the URL", the question `wiki/homelab/
+# README.md` answers for humans.
 #
-# IT SITS AT `/`, WHICH MAKES IT THE ONE ROUTE WITH NO PREFIX PROBLEM.
-# reverse-proxy/caddy.nix mounts Grafana at /grafana and Forgejo at /git, and
-# those two need OPPOSITE prefix handling (`handle` vs `handle_path`, see that
-# file and lessons-learned #41). glance is the fallback `handle` at the root
-# of the same vhost, so nothing is stripped, nothing is preserved, and
-# `base-url` stays unset. If it ever moves under a prefix, glance's own docs
-# are explicit that `base-url` must be set AND the proxy must strip -- i.e.
-# Forgejo's shape, not Grafana's.
+# SITS AT `/`, THE ONE ROUTE WITH NO PREFIX PROBLEM. reverse-proxy/caddy.nix
+# mounts Grafana at /grafana and Forgejo at /git with OPPOSITE prefix
+# handling (`handle` vs `handle_path`; that file, lessons-learned #41).
+# glance is the fallback `handle` at the vhost root: nothing stripped,
+# `base-url` unset. Under a prefix, glance's docs require `base-url` set
+# AND the proxy stripping -- Forgejo's shape, not Grafana's.
 #
-# `proxied = true` is not cosmetic: it tells glance to trust `X-Forwarded-*`,
-# which is what makes it see the real client rather than 127.0.0.1 for every
-# request. Caddy sets those headers itself; without this every visitor looks
+# `proxied = true` is not cosmetic: glance then trusts `X-Forwarded-*` and
+# sees the real client instead of 127.0.0.1; without it every visitor looks
 # like the proxy.
 #
-# NO ICONS, DELIBERATELY. The monitor and bookmarks widgets take an `icon`
-# with `si:`/`sh:`/`di:`/`mdi:` prefixes -- and glance's own documentation
-# says those "are loaded externally and are hosted on cdn.jsdelivr.net". This
-# is a page reachable only from the tailnet, whose entire point is that it
-# doesn't leave the tailnet; pulling an icon per service from a CDN on every
-# load would quietly undo that for no gain over three legible titles. If icons
-# are ever wanted, `assets-path` serves a local directory under /assets/ and
-# is the way to do it without the CDN.
+# NO ICONS, DELIBERATELY. `si:`/`sh:`/`di:`/`mdi:` icons "are loaded
+# externally and are hosted on cdn.jsdelivr.net" (glance's own docs). A
+# page whose point is not leaving the tailnet must not pull icons from a
+# CDN on every load; if ever wanted, `assets-path` serves a local
+# directory under /assets/.
 #
-# ONLY CLICKABLE SERVICES ARE LISTED. The monitor widget's title IS the link,
-# so a loopback-only service (prometheus on 127.0.0.1:9090, node-exporter,
-# cadvisor, libvirt-exporter) would render as a link that 404s in the reader's
-# browser -- correct as a health check, actively misleading as a UI. Their
-# health shows up in Grafana, which IS listed. Don't add them here without
-# also giving them a URL a browser on another host can actually follow.
+# ONLY CLICKABLE SERVICES ARE LISTED: the monitor widget's title IS the
+# link, so a loopback-only service (prometheus 127.0.0.1:9090,
+# node-exporter, cadvisor, libvirt-exporter) would render as a 404 link --
+# fine as a health check, misleading as a UI. Their health is in Grafana,
+# which IS listed. Don't add them without a browser-followable URL.
 #
-# STATUS: RUNTIME-VERIFIED on nire-cube, 2026-08-24, first switch, no fixes
-# needed. `glance.service` `active (running)` at `NRestarts=0`, 0 failed
-# units, 3002 bound to 127.0.0.1 only, and from ANOTHER tailnet host
-# `https://ts-cube.moose-micro.ts.net/` returns 200 over validated TLS with
-# `<title>Home</title>`.
+# STATUS: runtime-verified on nire-cube, 2026-08-24, first switch, no fixes
+# (glance.service active, NRestarts=0, 3002 on 127.0.0.1; from another
+# tailnet host https://ts-cube.moose-micro.ts.net/ 200 over validated TLS).
 #
-# The widget content is rendered behind `/api/pages/home/content/` rather
-# than in the initial HTML, so checking the page returns 200 proves almost
-# nothing about the widgets -- that endpoint is where to look. It reported
-# all three sites OK (65ms/62ms/68ms) and the server-stats widget rendering
-# CPU/SWAP for `nire-cube`.
+# Widget content renders behind `/api/pages/home/content/`, not the initial
+# HTML -- a page 200 proves almost nothing; that endpoint is where to look
+# (all three sites OK; server-stats rendering CPU/SWAP for `nire-cube`).
 #
-# Two things that were reasoned from source before the switch and are now
-# facts, both of which would have been quiet wrong-looking output rather
-# than errors:
+# Two facts reasoned from source; both would have been quiet wrong-looking
+# output, not errors:
 #
 #   - Grafana answers /grafana/ with a 302 to /grafana/login, and
 #     `statusCodeToText` treats ONLY 200 (or an explicit `alt-status-codes`
 #     entry) as OK. It reads OK because glance's `defaultHTTPClient`
-#     (widget-utils.go) sets no `CheckRedirect`, so Go's default
-#     follow-up-to-10 policy applies. If a future glance ever stops
-#     following redirects, this row goes red with nothing actually broken --
-#     `alt-status-codes: [302]` would be the fix, not a change to Grafana.
-#   - `http://go/` reads OK too, i.e. golink answers a request originating
-#     from cube. That was genuinely uncertain: it's a separate tailnet
-#     device (tsnet), so this depended on MagicDNS resolving `go` from cube
-#     AND golink serving its index to that node without interactive auth.
+#     (widget-utils.go) sets no `CheckRedirect`, so Go's
+#     follow-up-to-10 default applies. If a future glance stops following
+#     redirects, the row goes red with nothing broken -- fix is
+#     `alt-status-codes: [302]`, not a Grafana change.
+#   - `http://go/` reads OK, i.e. golink answers a request from cube --
+#     genuinely uncertain beforehand: golink is a separate tailnet device
+#     (tsnet), so this needed MagicDNS resolving `go` from cube AND golink
+#     serving that node without interactive auth.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 
         # Written out rather than shared, same as reverse-proxy/caddy.nix,
-        # monitoring/grafana.nix and git-forge/forgejo.nix: nothing in this
-        # tree declares options (CLAUDE.md, Architecture), so this string
-        # lives in four files now and they move together.
+        # monitoring/grafana.nix and git-forge/forgejo.nix: nothing declares
+        # options (CLAUDE.md, Architecture) -- four copies, moved together.
         tailnetFqdn = "ts-cube.moose-micro.ts.net";
     in {
         flake.modules.nixos.${moduleName} = {
@@ -95,19 +78,17 @@
                 enable = true;
 
                 settings.server = {
-                    # Also the module's own default, stated anyway: on this
-                    # host "listens on loopback" is the security model rather
-                    # than an implementation detail, and the two neighbours
-                    # that had to be MOVED to loopback (grafana.nix,
-                    # forgejo.nix) both say so at their own listener. Upstream
-                    # glance's default is every interface; nixpkgs narrows it.
+                    # Also the module's own default, stated anyway: here
+                    # "listens on loopback" IS the security model, and the
+                    # two neighbours MOVED to loopback (grafana.nix,
+                    # forgejo.nix) say so at their listener. Upstream glance
+                    # defaults to every interface; nixpkgs narrows it.
                     host = "127.0.0.1";
 
                     # 3000 grafana, 3001 forgejo, 3002 here. NOT glance's own
-                    # default of 8080 -- monitoring/cadvisor.nix already holds
-                    # that port on this host, and two services defaulting to
-                    # the same port is a bind failure at start, not an eval
-                    # error.
+                    # default 8080 -- monitoring/cadvisor.nix already holds
+                    # that port on this host, and two services on one port is
+                    # a bind failure at start, not an eval error.
                     port = 3002;
 
                     # See this file's header: trust Caddy's X-Forwarded-*.
@@ -126,22 +107,21 @@
                                         type  = "monitor";
                                         title = "Services";
 
-                                        # A GET per site per minute, which is
-                                        # cheap and keeps the page honest
-                                        # without hammering anything.
+                                        # A GET per site per minute: cheap,
+                                        # keeps the page honest, hammers
+                                        # nothing.
                                         cache = "1m";
 
                                         # Checked through the PROXY, at the
-                                        # same URLs a person would use, not at
-                                        # 127.0.0.1:300x. That makes this a
-                                        # test of the whole path -- MagicDNS,
-                                        # the tailnet, caddy's routing, the
-                                        # TLS cert, and the app -- rather than
-                                        # of the app alone. A caddy
+                                        # URLs a person uses, not
+                                        # 127.0.0.1:300x -- tests the whole
+                                        # path (MagicDNS, tailnet, caddy
+                                        # routing, TLS cert, app), not the
+                                        # app alone. A caddy
                                         # misconfiguration should show up
                                         # here; a loopback check would hide
-                                        # exactly the class of bug that
-                                        # actually happened (the /git 404).
+                                        # exactly the bug that actually
+                                        # happened (the /git 404).
                                         sites = [
                                             {
                                                 title = "Grafana";
@@ -152,13 +132,11 @@
                                                 url   = "https://${tailnetFqdn}/git/";
                                             }
                                             {
-                                                # Its own tailnet device, not
-                                                # a path on this host --
-                                                # shortlinks/golink.nix embeds
-                                                # tsnet. Listed here because
-                                                # it's a service on this
-                                                # fleet, not because cube
-                                                # serves it.
+                                                # Its own tailnet device
+                                                # (shortlinks/golink.nix
+                                                # embeds tsnet), listed as a
+                                                # fleet service -- cube does
+                                                # not serve it.
                                                 title = "golink";
                                                 url   = "http://go/";
                                             }
@@ -174,12 +152,12 @@
                                         type = "server-stats";
 
                                         # `local` reads /proc directly. The
-                                        # nixpkgs module already sets
-                                        # `ProcSubset = "all"` on the unit,
-                                        # which is what makes that work under
-                                        # its DynamicUser sandbox -- without
-                                        # it this widget renders empty rather
-                                        # than failing loudly.
+                                        # nixpkgs module sets
+                                        # `ProcSubset = "all"` on the unit --
+                                        # that is what makes it work under
+                                        # the DynamicUser sandbox; without
+                                        # it the widget renders empty, not
+                                        # an error.
                                         servers = [
                                             {
                                                 type = "local";
@@ -194,13 +172,11 @@
                 ];
             };
 
-            # No firewall entry and no glance-persist.nix, for the reasons the
-            # neighbouring modules each give: this binds loopback so nothing
-            # arrives at the firewall for it, and cube has a plain persistent
-            # root (cube-configuration.nix's header) so /var/lib/glance
-            # survives reboots on its own. Note there is nothing in
-            # /var/lib/glance worth keeping anyway -- every widget here is
-            # derived from live state, and the config itself comes from the
-            # store.
+            # No firewall entry and no glance-persist.nix, for the reasons
+            # the neighbouring modules give: loopback bind, so nothing
+            # arrives at the firewall; cube has a plain persistent root
+            # (cube-configuration.nix's header), so /var/lib/glance survives
+            # reboots. Nothing in /var/lib/glance is worth keeping anyway --
+            # widgets derive from live state, config is from the store.
         };
 }

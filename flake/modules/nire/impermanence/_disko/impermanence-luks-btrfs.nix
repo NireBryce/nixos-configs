@@ -1,37 +1,35 @@
 # A reusable disko config reproducing the LUKS + btrfs subvolume layout
 # durandal and tenacity already use by hand. Not wired into any host --
-# nothing imports this file today. See flake/doc/disko-impermanence-layout.md
-# for what this is, why it exists unused, and how to actually use it.
+# nothing imports this file; see flake/doc/disko-impermanence-layout.md for
+# what this is, why it exists unused, and how to use it.
 #
-# Not a flake-parts module. Curried: call it with this host's own parameters
-# to get back a NORMAL nixosModule (a function of `{ lib, ... }`), which is
-# what a host's own imports list actually wants. Safe to sit under modules/
-# because import-tree ignores any path containing "/_" by default -- same
-# rule _templates/dirsAsCategory.nix and _lib/mkPkgModule.nix already rely on.
+# Not a flake-parts module. Curried: call it with this host's parameters to
+# get back a NORMAL nixosModule (a function of `{ lib, ... }`), which is
+# what a host's imports list wants. Safe under modules/ because import-tree
+# ignores any path containing "/_" -- the same rule
+# _templates/dirsAsCategory.nix and _lib/mkPkgModule.nix already rely on.
 #
 # Subvolumes match hardware-configuration.nix / hardware-tenacity.nix exactly:
 # root, home, nix, persist, log, and an unmounted root-blank that
 # WARN-impermanence.nix snapshots from on every boot
-# (`btrfs subvolume snapshot /mnt/root-blank /mnt/root`, read from that file
-# directly before writing this). secureboot is durandal's own addition, not
-# universal, hence includeSecureboot rather than always including it.
+# (`btrfs subvolume snapshot /mnt/root-blank /mnt/root`). secureboot is
+# durandal's own addition, not universal, hence includeSecureboot rather than
+# always including it.
 #
-# No LUKS keyFile/passwordFile set anywhere in here on purpose: disko's own
-# luks type defaults `askPassword` to true whenever none of
-# keyFile/passwordFile/enrollFido2 are set (lib/types/luks.nix), which means
-# both disko itself (at partitioning time) and boot.initrd.luks.devices (at
-# every subsequent boot) prompt interactively -- the same thing durandal and
-# tenacity actually do today. Automating that is a real, separate decision
-# (key file on a USB stick, TPM enrollment, etc.) and does not belong in a
-# generic template.
+# No LUKS keyFile/passwordFile, on purpose: disko's luks type defaults
+# `askPassword` to true whenever none of keyFile/passwordFile/enrollFido2 are
+# set (lib/types/luks.nix), so disko (at partitioning time) and
+# boot.initrd.luks.devices (every subsequent boot) prompt interactively --
+# the same thing durandal and tenacity do today. Automating that (USB key
+# file, TPM enrollment, etc.) is a real, separate decision and does not
+# belong in a generic template.
 { device
 , luksName ? "enc"        # matches durandal/tenacity's own mapper name; WARN-
                             # impermanence.nix derives its ordering from
                             # whatever boot.initrd.luks.devices actually
                             # contains, so nothing downstream requires "enc"
-                            # specifically, but keeping it makes a fresh host
-                            # look like the other two rather than needing its
-                            # own explanation.
+                            # specifically; keeping it makes a fresh host
+                            # look like the other two.
 , espSize ? "512M"
 , includeSecureboot ? false # durandal-specific (sbctl, /var/lib/sbctl).
 , swapSize ? null           # null = no swap partition, matching tenacity.
@@ -113,19 +111,17 @@
         };
 
         # disko does not set neededForBoot -- both real hosts add it by hand
-        # alongside their own generated fileSystems, so this does the same.
-        # /root-blank has no mountpoint, so it never gets a fileSystems entry
-        # to add this to in the first place.
+        # alongside their own generated fileSystems; /root-blank has no
+        # mountpoint, so it never gets a fileSystems entry to add this to.
         #
-        # `//` merges attrsets shallowly: it replaces a key present on both
-        # sides rather than combining them, so this has to apply `//` to the
-        # value AT fileSystems, not to the two top-level module attrsets --
+        # `//` merges attrsets shallowly (replaces a key present on both
+        # sides, does not combine), so `//` must apply to the value AT
+        # fileSystems, not the two top-level module attrsets:
         # `{ fileSystems = {...}; } // lib.optionalAttrs cond { fileSystems = {...}; }`
-        # would let the second fileSystems attrset silently replace the first
-        # whenever cond is true, dropping persist/log entirely. Caught by
-        # actually evaluating this with includeSecureboot = true, not assumed:
-        # sbctl's neededForBoot came back true and persist/log's both came back
-        # false.
+        # would let the second fileSystems silently replace the first
+        # whenever cond is true, dropping persist/log entirely (checked with
+        # includeSecureboot = true: sbctl's neededForBoot came back true,
+        # persist/log's false).
         fileSystems = {
             "/persist".neededForBoot = true;
             "/var/log".neededForBoot = true;

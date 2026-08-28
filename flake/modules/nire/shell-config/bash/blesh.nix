@@ -18,11 +18,12 @@
             in {
             # bash line editor, allows zsh-like line editor tricks and bindings.
             #
-            # There is no `programs.bash.blesh` option -- Home Manager has no blesh
-            # module of any kind, so the `programs.bash.blesh.enable = true` that
-            # used to be here had never applied. blesh is wired up by hand in
-            # bash.nix instead: the package in home.packages, `source ble.sh
-            # --attach=none` early in initContent, and `ble-attach` at the end.
+            # There is no `programs.bash.blesh` option -- Home Manager has no
+            # blesh module of any kind, so the `programs.bash.blesh.enable =
+            # true` that used to be here had never applied. blesh is wired up
+            # by hand in bash.nix instead: the package in home.packages,
+            # `source ble.sh --attach=none` early in initContent, and
+            # `ble-attach` at the end.
 
             home.file.".blerc".text = ''
                 # ─── completion behaviour ────────────────────────────────────
@@ -40,20 +41,17 @@
                 # as `until=$((_ble_idle_clock_start + bleopt_complete_auto_menu))`
                 # (lib/core-complete.sh), and the surrounding case fires on
                 # ble/widget/self-insert -- ordinary typing. So `=1` means "open
-                # the completion menu one tick after every character", and with
-                # fzf-menu.bash imported below, that menu is fzf.
-                #
-                # This file did set it to 1, meaning "on", the way
-                # zsh-autocomplete works on the zsh side. The result on the
-                # hardware was fzf taking over the terminal on every keystroke,
-                # as though TAB were held down. Unset, it is disabled and the
-                # menu is TAB-driven, which is what pairing it with fzf-menu
-                # wanted in the first place -- that is the zsh-fzf-tab
-                # behaviour, not the zsh-autocomplete one.
+                # the menu one tick after every character", and with
+                # fzf-menu.bash imported below, that menu is fzf. This file did
+                # set it to 1, meaning "on", the way zsh-autocomplete works on
+                # the zsh side; on the hardware fzf took over the terminal on
+                # every keystroke, as though TAB were held down. Unset, the
+                # menu is TAB-driven -- the zsh-fzf-tab behaviour, which is
+                # what pairing it with fzf-menu wanted in the first place.
                 #
                 # The inline grey suggestion that made zsh-autocomplete feel
-                # live is a different option, complete_auto_complete, and it is
-                # already on by default.
+                # live is a different option, complete_auto_complete, already
+                # on by default.
                 #
                 # If a delay is ever genuinely wanted, it is a number of
                 # milliseconds and wants to be in the hundreds or thousands --
@@ -66,8 +64,8 @@
                 # ─── completion sources ──────────────────────────────────────
                 # bash-completion must be imported *before* the fzf integrations,
                 # per ble.sh's own note. The contrib integration is the right way
-                # in; sourcing etc/bash_completion directly is what the old
-                # commented-out line here was reaching for.
+                # in (the old commented-out line here sourced etc/bash_completion
+                # directly).
                 ble-import -d ${pkgs.blesh}/share/blesh/contrib/integration/bash-completion.bash
 
                 # nix/nixos/nix-shell completions -- the counterpart to
@@ -77,11 +75,10 @@
                 # carapace's own bash completer only emits plain candidate
                 # words (bash's COMPREPLY has no description slot); this
                 # advises it to pull real descriptions from a separate
-                # carapace mode and feed them through ble.sh's own
-                # candidate list instead. See carapace-desc.bash for the
-                # full mechanism and its 2026-08-22 caveats -- in
-                # particular, it has been checked against ble.sh's source
-                # but not yet against the live menu.
+                # carapace mode and feed them through ble.sh's own candidate
+                # list instead. See carapace-desc.bash for the full mechanism
+                # and its 2026-08-22 caveats -- checked against ble.sh's
+                # source, not yet against the live menu.
                 ble-import -d ${carapaceDescBash}
 
                 # ─── fzf ─────────────────────────────────────────────────────
@@ -108,16 +105,16 @@
                 # fzf wins by arriving last. -C runs "when all of SCRIPTFILEs
                 # are loaded", so it is the only hook that reliably follows it.
                 #
-                # It rebinds rather than unbinds. ble.sh replaces readline
+                # It rebinds rather than unbinds: ble.sh replaces readline
                 # outright, so a key with no entry in its keymap does nothing --
                 # removing fzf's binding would leave Ctrl-R dead rather than
                 # falling back to atuin's.
                 #
                 # The commands are what atuin's own atuin-bind maps
-                # atuin-search-emacs and atuin-search-viins to; it binds through
-                # readline rather than ble-bind, so there is no widget name to
-                # reuse. If Ctrl-R ever starts doing nothing, check that
-                # __atuin_history still takes --keymap-mode.
+                # atuin-search-emacs and atuin-search-viins to; atuin binds
+                # through readline rather than ble-bind, so there is no widget
+                # name to reuse. If Ctrl-R ever starts doing nothing, check
+                # that __atuin_history still takes --keymap-mode.
                 # Two -C options rather than one carrying an embedded newline:
                 # ble.sh's usage line is `[-C CALLBACK|--callback=CALLBACK]+`,
                 # so the option repeats, and each callback stays a single

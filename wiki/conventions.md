@@ -41,7 +41,9 @@ push directly there instead.
   after the fix lands; nobody reads `git log`, the comment is what the next
   editor sees. If a later change stands a comment (the code it described is
   gone, the name it explained has changed), move it to a `history` heading
-  at the bottom rather than deleting it, and expand it to stand alone.
+  at the bottom rather than deleting it — written to stand alone (dates,
+  mechanism, what was tried, outcome), but compressed like every other
+  comment: facts kept, narration cut.
 - **Don't bury Python inside bash** — a little Python in an otherwise-shell
   script goes in `flake/scripts/util/` as a real `.py` file; mostly-Python
   work is written as Python outright (`modules.py` is the precedent). Grew

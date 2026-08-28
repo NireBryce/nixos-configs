@@ -2,37 +2,31 @@
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        # renamed from `virtualization.nix`, which declared
-        # `flake.modules.nixos.virtualization`. Everything here is OCI containers
-        # -- podman and distrobox -- and never was anything else; the word
-        # `virtualization` now names the VM category at nire/virtualization/,
-        # which is libvirt/QEMU. The directory was `nire/system/virtualization/`
-        # until 2026-08-21 for the same reason the file was.
+        # Renamed from `virtualization.nix`, which declared
+        # `flake.modules.nixos.virtualization`. Everything here is OCI
+        # containers -- podman and distrobox -- and never was anything else;
+        # `virtualization` now names the VM category (libvirt/QEMU) at
+        # nire/virtualization/. Directory was `nire/system/virtualization/`
+        # until 2026-08-21 for the same reason.
         #
-        # MOVED AGAIN, 2026-08-22: out of `nire/system/containers/` (a
-        # subdirectory of the `system` category, imported whole by every Linux
-        # host with no way to opt out) into its own category,
-        # `nire/containers/` -- structurally the same split `virtualization`
-        # got 2026-08-21, giving hosts the *option* to decline it the way
-        # `system` membership never did. That option wasn't exercised at move
-        # time: all four NixOS hosts on the tree then (durandal, tenacity,
-        # lego, cube) imported `containers` by name, explicitly, in place of
-        # the implicit coverage `system` used to give it -- no host's actual
-        # package set changed. Since: durandal dropped it 2026-08-27, and lego
-        # was removed the same day -- see wiki/categories/containers.md for
-        # the current import list.
+        # MOVED AGAIN, 2026-08-22: out of `nire/system/containers/` (under
+        # `system`, imported whole by every Linux host, no opt-out) into its
+        # own category, `nire/containers/` -- the split `virtualization` got
+        # 2026-08-21. Unexercised at move time: all four NixOS hosts then
+        # (durandal, tenacity, lego, cube) imported `containers` explicitly
+        # in place of `system`'s implicit coverage -- no package set changed.
+        # Since: durandal dropped it 2026-08-27, lego removed the same day --
+        # see wiki/categories/containers.md.
         #
-        # RENAMED IN THE SAME MOVE, `containers.nix` -> `podman.nix`: this is
-        # the exact near-miss `virtualization`'s own header records, hit for
-        # real this time rather than caught before shipping. The new
-        # category's `dirsAsCategory.nix` derives its aggregate name from its
-        # own directory, `nire/containers/`, so it declares
+        # RENAMED IN THE SAME MOVE, `containers.nix` -> `podman.nix`: the
+        # exact near-miss `virtualization`'s header records, hit for real.
+        # The category's `dirsAsCategory.nix` derives its aggregate name from
+        # its directory `nire/containers/`, declaring
         # `flake.modules.nixos.containers` -- the same attribute a file still
-        # named `containers.nix` would declare from ITS filename. `just
-        # modules` caught the collision immediately (both would have merged
-        # invisibly, not conflicted). Renamed to `podman.nix` for the same
-        # reason `libvirt.nix` isn't named `virtualization.nix`: name the file
-        # after the actual technology, not the category it sits in.
+        # named `containers.nix` would declare from ITS filename; the two
+        # would merge invisibly, not conflict, and `just modules` caught it.
+        # Named after the technology, like `libvirt.nix` isn't named
+        # `virtualization.nix`.
         flake.modules.nixos.${moduleName} = { pkgs, ... }: {
             # # description = "podman, distrobox, and the subuid pinning they need";
             environment.systemPackages = with pkgs; [
@@ -45,11 +39,11 @@
             ];
             # expose profile to distrobox containers
             #
-            # Both paths are needed, not one. /etc/profiles/per-user/elly is an
-            # `environment.etc` entry (nixpkgs config/users-groups.nix), so on the
-            # host it is a symlink to /etc/static/profiles/per-user/elly, which is
-            # itself the symlink into /nix/store. Mounting only the first gives the
-            # container a dangling link.
+            # Both paths needed: /etc/profiles/per-user/elly is an
+            # `environment.etc` entry (nixpkgs config/users-groups.nix), a
+            # symlink to /etc/static/profiles/per-user/elly, itself a symlink
+            # into /nix/store -- mounting only the first gives the container
+            # a dangling link.
             environment.etc."distrobox/distrobox.conf".text = ''
                 container_additional_volumes="/nix/store:/nix/store:ro /etc/profiles/per-user:/etc/profiles/per-user:ro /etc/static/profiles/per-user:/etc/static/profiles/per-user:ro"
             '';
@@ -69,21 +63,19 @@
                 linger       = true;
                 createHome   = true;
 
-                # NOT autoSubUidGidRange. That looks like the obvious thing to write
-                # and it silently collides with elly below. nixpkgs allocates auto
-                # ranges in update-users-groups.pl's allocSubUid, which walks
-                # 100000, 165536, ... and skips only ranges *it* has already handed
-                # out (%subUidsUsed) or handed out on a previous activation
-                # (%subUidsPrevUsed, from /var/lib/nixos/auto-subuid-map). It never
-                # looks at explicitly-declared subUidRanges. So elly's hardcoded
-                # 100000 is invisible to it, and on a machine with no prior map file
-                # -- i.e. any fresh install --
-                # both users get 100000:65536 in /etc/subuid and share a subordinate
-                # range. durandal only escapes this by accident: elly was auto-
-                # allocated 100000 before the pin below existed, so it is in the map
-                # and allocSubUid steps past it.
-                #
-                # Hence: pin explicitly, in the block after elly's.
+                # NOT autoSubUidGidRange: looks like the obvious thing to
+                # write, silently collides with elly below. nixpkgs allocates
+                # auto ranges in update-users-groups.pl's allocSubUid, which
+                # walks 100000, 165536, ... and skips only ranges *it*
+                # already handed out (%subUidsUsed) or on a previous
+                # activation (%subUidsPrevUsed, from
+                # /var/lib/nixos/auto-subuid-map); it never looks at
+                # explicitly-declared subUidRanges, so elly's hardcoded
+                # 100000 is invisible: on any fresh install both users get
+                # 100000:65536 in /etc/subuid and share a subordinate range.
+                # durandal escapes only by accident -- elly was auto-allocated
+                # 100000 before the pin below existed, so it is in the map
+                # and allocSubUid steps past it. Hence: pin explicitly.
                 subUidRanges = [
                 {
                     startUid = 165536;
@@ -101,13 +93,13 @@
             users.users.elly = {
                 # credit: https://github.com/NixOS/nixpkgs/issues/389088#issuecomment-3379482882
                 #
-                # Pinned rather than auto-allocated so the range cannot move out from
-                # under container storage that is already chowned into it. This is
+                # Pinned rather than auto-allocated so the range cannot move
+                # out from under container storage already chowned into it --
                 # the fix nixpkgs itself prints when an auto range shifts.
                 #
-                # No extraGroups here. elly is already in `podman` via
-                # nireUser/elly/user-settings/elly-user.nix, and extraGroups is a
-                # list that *concatenates* across modules rather than overriding --
+                # No extraGroups: elly is already in `podman` via
+                # nireUser/elly/user-settings/elly-user.nix, and extraGroups
+                # *concatenates* across modules rather than overriding --
                 # naming it in both places put "podman" in the list twice.
                 subUidRanges = [
                 {
