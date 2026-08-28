@@ -22,6 +22,7 @@ under it, which can happen with no commit to this repo at all.
 | golink — `go/` shortlinks | `nire-cube` | `http://go/` | [Creating go/ links](golinks.md) |
 | Forgejo — self-hosted git forge | `nire-cube` | `.../git/` | [Using the forge](forgejo.md) |
 | glance — the service index | `nire-cube` | `.../` (the root) | [Reaching cube's services](reaching-services.md); [landing](../categories/landing.md) covers config |
+| restic — backups to the QNAP | `nire-cube` | — (no URL; a timer, not a listener) | [Backup runbook](backup-runbook.md) |
 
 **Start at that second one if you don't know what's running.** It lists the
 services below, live-checks each one, and shows how cube itself is doing —
