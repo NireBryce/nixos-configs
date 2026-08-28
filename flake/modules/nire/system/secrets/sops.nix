@@ -20,9 +20,6 @@
         sops = {
             age.sshKeyPaths = map getKeyPath keys;
             defaultSopsFile = "${secretsPath}";
-            # TODO: what did this do
-            # defaultSymlinkPath = "/run/user/1000/secrets";
-            # defaultSecretsMountPoint = "/run/user/1000/secrets.d";
         };
 
         # Syncthing
