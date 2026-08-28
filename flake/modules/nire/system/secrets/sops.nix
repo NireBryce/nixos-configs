@@ -22,21 +22,6 @@
             defaultSopsFile = "${secretsPath}";
         };
 
-        # Syncthing
-        sops.secrets.syncthing-durandal = {
-            sopsFile = "${secretsPath}";
-        };
-        sops.secrets.syncthing-galatea = {
-            sopsFile = "${secretsPath}";
-        };
-        sops.secrets.syncthing-lysithea = {
-            sopsFile = "${secretsPath}";
-        };
-        sops.secrets.syncthing-sif = {
-            sopsFile = "${secretsPath}";
-        };
-        sops.secrets.syncthing-iona = {
-            sopsFile = "${secretsPath}";
-        };
+        
         };
 }
