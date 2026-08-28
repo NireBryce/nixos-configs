@@ -77,6 +77,15 @@ It needs a one-time interactive login on first start (`journalctl -u golink
 -f`, open the printed URL), because no `TS_AUTHKEY` is wired in — the same
 call `tailscale.nix` makes for the host daemon.
 
+`nire-cube` also gets a [backup](categories/backup.md) category as of
+2026-08-28 — restic to the QNAP NAS already on the network, against issue
+[#87](https://github.com/NireBryce/nixos-configs/issues/87). Unlike the
+services above, **this one is evaluates-only, not switched**: two things
+outside what Nix can close on its own — the repository password's actual
+value, and a QNAP-side snapshot schedule for anti-deletion — are still
+pending, and issue #87's own "done means" (a real Forgejo repo actually
+recovered) hasn't been attempted. See the category page for both.
+
 ## Where each fact lives
 
 - **Boot/switch status per host** — [`../CLAUDE.md`](../CLAUDE.md), State
