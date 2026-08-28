@@ -1,14 +1,34 @@
 # Plan: back up cube's service state to the QNAP NAS
 
-**Written 2026-08-27 18:16 EDT. Status: proposed, nothing built, nothing
-switched.** This is a concrete plan against issue
+**Written 2026-08-27 18:16 EDT. Status as of 2026-08-28: implemented in Nix,
+not yet switched.** This plan was against issue
 [#87](https://github.com/NireBryce/nixos-configs/issues/87) (open, filed
 2026-08-24, "not decided") and
-[wiki/homelab/pending-setup.md](../../wiki/homelab/pending-setup.md) item 4 —
-it doesn't supersede either; #87 is still the tracking issue and still says
-"not decided" until this plan (or a different one) actually lands. Written
-from a read of the repo, not from any live session on cube — nothing here has
-touched the real machine or the real QNAP.
+[wiki/homelab/pending-setup.md](../../wiki/homelab/pending-setup.md) item 4;
+it doesn't supersede either, and #87 stays open until a real restore has been
+performed per its own "done means". The module this plan describes now
+exists as [`nire/homelab/backup/`](../../flake/modules/nire/homelab/backup/)
+— see [wiki/categories/backup.md](../../wiki/categories/backup.md) for
+current status, and don't trust this file's own "Steps"/"Open questions"
+sections below as still-open once that page says otherwise.
+
+**Correction, found while implementing (2026-08-28):** "storage-NFS.nix
+already exists in the tree... It's dangling — not imported by any host" a
+few paragraphs down is **wrong**. `nire/system/storage/` has no
+`dirsAsCategory.nix` of its own, so that module is collected straight into
+the shared `system` aggregate, which every Linux host already imports — the
+QNAP mount was live on durandal, tenacity, and cube before this plan was
+even written, confirmed by `nix eval .#nixosConfigurations.<host>.config.
+fileSystems` listing `/mnt/qnap-erin` on all three. Left the paragraph below
+as originally written rather than silently fixed, per this repo's "a bug
+recorded in a comment stays in the file" convention — the module itself
+(`restic.nix`) carries the same correction in its own header, which is the
+copy to trust.
+
+Written from a read of the repo, not from any live session on cube — nothing
+at the time of writing had touched the real machine or the real QNAP; see the
+category page for what's since been checked by evaluation (still no real
+switch, no real QNAP contact).
 
 ## What's at risk (from #87, re-confirmed by grep 2026-08-27)
 

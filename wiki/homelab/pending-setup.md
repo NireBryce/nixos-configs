@@ -77,15 +77,27 @@ one that created it.
 ## 4. No backups exist for any of it
 
 **The big one**, tracked as
-[#87](https://github.com/NireBryce/nixos-configs/issues/87). Nothing in the
-repo configures any backup tool, verified by grep. `/var/lib/forgejo`,
+[#87](https://github.com/NireBryce/nixos-configs/issues/87). `/var/lib/forgejo`,
 `/var/lib/grafana`, `/var/lib/private/golink` and `/persist/` all have exactly
-one copy each.
+one copy each, still — the module below doesn't change that yet.
 
-The issue carries the proposed scheme (restic to the QNAP over SFTP) and the
-decisions that need making. The part that belongs on *this* page rather than
-in the issue: **done means a restore actually performed** — one Forgejo repo
-recovered from the backup — because a restore nobody has run isn't a backup.
+2026-08-28: the [backup](../categories/backup.md) category exists now
+(restic, local-path repo on the already-imported QNAP NFS mount, not the
+issue's original SFTP sketch — see that page for why). Two things stop it
+from being a real backup yet, both live-machine/human steps this page is
+for rather than a Nix change:
+
+- **The repository password has no value.** `sops.secrets.restic-cube-password`
+  is declared but unset — needs real decrypt access to `secrets.yaml` from a
+  session/host that has it. The module's own header carries the exact
+  command.
+- **No QNAP-side snapshot schedule exists on the backup share** — the
+  anti-deletion mitigation the module assumes but can't configure itself.
+
+Once both are done and cube has actually been switched: **done still means a
+restore actually performed** — one Forgejo repo recovered from the backup —
+because a restore nobody has run isn't a backup, and neither is a module
+nobody has switched to.
 
 ## 5. Grafana's admin credentials
 

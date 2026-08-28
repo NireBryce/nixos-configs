@@ -118,7 +118,12 @@ bug; each is a decision someone might otherwise re-litigate from scratch.
   [#87](https://github.com/NireBryce/nixos-configs/issues/87)**, which covers
   the whole fleet rather than just the forge; documented at
   [homelab/forgejo.md](homelab/forgejo.md) so nobody mistakes the forge for
-  durable storage in the meantime.
+  durable storage in the meantime. **A [backup](categories/backup.md)
+  category landed 2026-08-28** implementing #87's scheme (restic, local-path
+  repo on the QNAP mount) — evaluates and doesn't move any other host, but
+  is not yet switched, has no repository password set, and has no QNAP-side
+  anti-deletion snapshot configured. Still exactly one copy of everything
+  until those land and a restore is actually performed.
 - **Tailscale Services (`svc:`) were weighed and deferred.** They would give
   each service its own tailnet DNS name (`https://grafana/` rather than a
   path prefix), which removes the whole prefix-handling problem
