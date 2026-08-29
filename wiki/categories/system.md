@@ -1,6 +1,6 @@
 # `system` — `nire/system/`
 
-The largest category by far — 37 files across 19 subdirectories — and the
+The largest category by far — 39 files across 19 subdirectories — and the
 one every Linux host in this repo imports whole, with no way to opt out of
 any piece of it. That property is exactly why
 [virtualization](virtualization.md) and [containers](containers.md) got
@@ -24,7 +24,7 @@ under `system`.
 | `locale-tz-etc/` | 2 | `locale.nix`, `tz.nix`. |
 | `networking/` | 8 | tailscale, vpn, wifi, avahi, base `networking.nix`, `resolved.nix`, and two `*-persist.nix` siblings. See below — MagicDNS naming and the ACL trap especially. |
 | `nix-ld/` | 1 | `nix-ld.nix`. |
-| `secrets/` | 1 | `sops.nix` — sops-nix wiring. See below. |
+| `secrets/` | 3 | `sops.nix` — sops-nix wiring (nixos-only). `sops-darwin.nix` — the darwin key-file-path fix. `sops-interactive-key.nix` — the nixos interactive-`sops` fix. See below. |
 | `security/` | 1 | `yubikey.nix`. |
 | `sound/` | 1 | `pipewire.nix`. |
 | `ssh/` | 1 | `ssh.nix`. |
@@ -60,10 +60,44 @@ the full build-support-vs-Homebrew-overlap distinction this is one half of.
 
 `secrets/sops.nix` wires in `inputs.sops-nix.nixosModules.sops`, deriving
 the decryption key path from the host's own ed25519 SSH host key
-(`config.services.openssh.hostKeys`) rather than a hardcoded path. See
-[../impermanence-and-secrets.md](../impermanence-and-secrets.md) for which
-hosts are actually enrolled in `.sops.yaml` — that's tracked separately from
-which hosts import this module.
+(`config.services.openssh.hostKeys`) rather than a hardcoded path. It's
+`flake.modules.nixos` only — nothing on darwin currently consumes
+`sops.secrets.*` at activation, so there was nothing to wire there.
+
+`secrets/sops-darwin.nix` (2026-08-29) fixes a narrower, separate problem:
+sops's default identity-file lookup is platform-dependent (Linux checks
+`~/.config/sops/age/keys.txt`, darwin checks `~/Library/Application
+Support/sops/age/keys.txt` instead), so a key sitting at the Linux-XDG path
+is invisible to a plain `sops` invocation on macOS even with a correctly
+enrolled `.sops.yaml` entry and a correctly re-encrypted `secrets.yaml`. This
+module points `SOPS_AGE_KEY_FILE` at the Linux-XDG path directly via
+`environment.variables`, Nix-interpolated off `config.users.users.elly.home`
+rather than left for the shell to expand at sourcing time.
+
+`secrets/sops-interactive-key.nix` (2026-08-29) fixes a third, NixOS-side
+problem found chasing this on `nire-cube`: `sops`'s own
+`SOPS_AGE_SSH_PRIVATE_KEY_FILE` code path failed to match a host's own
+enrolled key against its own correctly-encrypted `secrets.yaml` block, even
+though that key was independently verified correct three separate ways
+(`ssh-to-age` on the `.pub` file, a live `ssh-keyscan`, and `ssh-to-age`
+against the private key file itself) — a real bug/quirk in sops's SSH-key
+conversion, not a config problem. A systemd oneshot unit, run unconditionally
+on every boot, converts the host's ed25519 key to a native age identity file
+at the Linux default location instead (no `environment.variables` needed
+there, unlike darwin — that default path already matches). Unconditional
+regeneration (contrast `grafana-secret-key-setup.service`, which only
+creates its file if missing) is deliberate: this is a pure derivation of a
+key that already exists, not a value anything depends on staying stable, and
+it needs to self-heal every boot specifically because `durandal`/`tenacity`
+wipe `/root` in initrd every boot (`WARN-impermanence.nix`) — a hand-run fix
+there would vanish at the next reboot with no memory of ever being needed.
+See the module's own header for the nix-store-safety reasoning (why this is
+written as shell text operating on file paths, never a `builtins.readFile`
+of the actual key).
+
+See [../impermanence-and-secrets.md](../impermanence-and-secrets.md) for
+which hosts are actually enrolled in `.sops.yaml` — that's tracked separately
+from which hosts import these modules.
 
 ## Containers vs. virtualization — the live trap, and no longer filed here
 

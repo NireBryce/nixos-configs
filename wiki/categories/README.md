@@ -38,7 +38,7 @@ articles. Not covered here, deliberately:
 | [reverse-proxy](reverse-proxy.md) | `nire/homelab/reverse-proxy/` | nixos | 1 | cube only |
 | [shell-config](shell-config/README.md) | `nire/shell-config/` | nixos, homeManager | 4 | all 3 NixOS hosts directly; reaches lysithea via `ellyHomeManager` |
 | [shortlinks](shortlinks.md) | `nire/homelab/shortlinks/` | nixos | 1 | cube only |
-| [system](system.md) | `nire/system/` | nixos, homeManager, darwin | 37, in ~19 subdirectories | all 3 NixOS hosts + lysithea (partially) |
+| [system](system.md) | `nire/system/` | nixos, homeManager, darwin | 39, in ~19 subdirectories | all 3 NixOS hosts + lysithea (partially) |
 | [virtualization](virtualization.md) | `nire/homelab/virtualization/` | nixos | 4 | cube only (not durandal, not the handheld) |
 | [elly](elly.md) | `nireUser/elly/` | nixos, homeManager | 4 | all 4 hosts |
 
