@@ -20,30 +20,35 @@ articles. Not covered here, deliberately:
 
 ## Index
 
-| Category | Directory | Class(es) | Members | Imported by |
-|---|---|---|---|---|
-| [backup](backup.md) | `nire/homelab/backup/` | nixos | 1 | cube only |
-| [boot](boot.md) | `nire/boot/` | nixos | 1 | all 3 NixOS hosts |
-| [containers](containers.md) | `nire/homelab/containers/` | nixos | 1 | tenacity, cube (not durandal) |
-| [desktop-env](desktop-env.md) | `nire/desktop-env/` | nixos, homeManager | 4 | never imported whole — hosts take `jovian` or `kde-desktop` by name |
-| [git-forge](git-forge.md) | `nire/homelab/git-forge/` | nixos | 1 | cube only |
-| [hardware](hardware.md) | `nire/hardware/` (+ nested `amd`) | nixos | 2 | all 3 NixOS hosts |
-| [homelab](homelab.md) | `nire/homelab/` (+ 8 nested) | nixos | 15 | cube only |
-| [impermanence](impermanence.md) | `nire/impermanence/` | nixos, homeManager | 2 | durandal, tenacity (not cube) |
-| [landing](landing.md) | `nire/homelab/landing/` | nixos | 1 | cube only |
-| [macos](macos.md) | `nire/macos/` | darwin | 3 | lysithea |
-| [monitoring](monitoring.md) | `nire/homelab/monitoring/` | nixos | 5 | cube only |
-| [nix](nix.md) | `nire/nix/` | nixos, homeManager, darwin | 2 | all 4 hosts |
-| [peripherals](peripherals.md) | `nire/peripherals/` | nixos | 2 | all 3 NixOS hosts |
-| [reverse-proxy](reverse-proxy.md) | `nire/homelab/reverse-proxy/` | nixos | 1 | cube only |
-| [shell-config](shell-config/README.md) | `nire/shell-config/` | nixos, homeManager | 4 | all 3 NixOS hosts directly; reaches lysithea via `ellyHomeManager` |
-| [shortlinks](shortlinks.md) | `nire/homelab/shortlinks/` | nixos | 1 | cube only |
-| [system](system.md) | `nire/system/` | nixos, homeManager, darwin | 39, in ~19 subdirectories | all 3 NixOS hosts + lysithea (partially) |
-| [virtualization](virtualization.md) | `nire/homelab/virtualization/` | nixos | 4 | cube only (not durandal, not the handheld) |
-| [elly](elly.md) | `nireUser/elly/` | nixos, homeManager | 4 | all 4 hosts |
+| Category | Directory | Class(es) | Imported by |
+|---|---|---|---|
+| [backup](backup.md) | `nire/homelab/backup/` | nixos | cube only |
+| [boot](boot.md) | `nire/boot/` | nixos | all 3 NixOS hosts |
+| [containers](containers.md) | `nire/homelab/containers/` | nixos | tenacity, cube (not durandal) |
+| [desktop-env](desktop-env.md) | `nire/desktop-env/` | nixos, homeManager | never imported whole — hosts take `jovian` or `kde-desktop` by name |
+| [git-forge](git-forge.md) | `nire/homelab/git-forge/` | nixos | cube only |
+| [hardware](hardware.md) | `nire/hardware/` (+ nested `amd`) | nixos | all 3 NixOS hosts |
+| [homelab](homelab.md) | `nire/homelab/` (+ 8 nested) | nixos | cube only |
+| [impermanence](impermanence.md) | `nire/impermanence/` | nixos, homeManager | durandal, tenacity (not cube) |
+| [landing](landing.md) | `nire/homelab/landing/` | nixos | cube only |
+| [macos](macos.md) | `nire/macos/` | darwin | lysithea |
+| [monitoring](monitoring.md) | `nire/homelab/monitoring/` | nixos | cube only |
+| [nix](nix.md) | `nire/nix/` | nixos, homeManager, darwin | all 4 hosts |
+| [peripherals](peripherals.md) | `nire/peripherals/` | nixos | all 3 NixOS hosts |
+| [reverse-proxy](reverse-proxy.md) | `nire/homelab/reverse-proxy/` | nixos | cube only |
+| [shell-config](shell-config/README.md) | `nire/shell-config/` | nixos, homeManager | all 3 NixOS hosts directly; reaches lysithea via `ellyHomeManager` |
+| [shortlinks](shortlinks.md) | `nire/homelab/shortlinks/` | nixos | cube only |
+| [system](system.md) | `nire/system/` | nixos, homeManager, darwin | all 3 NixOS hosts + lysithea (partially) |
+| [virtualization](virtualization.md) | `nire/homelab/virtualization/` | nixos | cube only (not durandal, not the handheld) |
+| [elly](elly.md) | `nireUser/elly/` | nixos, homeManager | all 4 hosts |
 
-"Members" counts real `.nix` files under the category directory, excluding
-`dirsAsCategory.nix` itself and anything under a `_`-prefixed path.
+No per-category file count here on purpose (removed 2026-08-29, along with
+`system.md`'s matching "N files across M subdirectories" line and the
+`check_wiki.py` machinery that verified it) — read the category's own
+directory for the current file list rather than trusting a number here;
+same reasoning this repo already applies to host enrollment lists
+(CLAUDE.md, Safety: "read the file directly ... rather than trusting a
+count here").
 
 `shell-config` is the one category page that's grown into its own
 directory rather than a single file — `shell-config/README.md` is the

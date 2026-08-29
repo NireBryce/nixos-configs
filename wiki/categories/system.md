@@ -1,8 +1,9 @@
 # `system` — `nire/system/`
 
-The largest category by far — 39 files across 19 subdirectories — and the
-one every Linux host in this repo imports whole, with no way to opt out of
-any piece of it. That property is exactly why
+The largest category by far — across 19 subdirectories, no per-file count
+kept here on purpose (see categories/README.md's Index section for why) —
+and the one every Linux host in this repo imports whole, with no way to opt
+out of any piece of it. That property is exactly why
 [virtualization](virtualization.md) and [containers](containers.md) got
 split into their own categories instead of living here: anything that needs
 to be optional for some hosts (or just optional in principle) can't be filed
@@ -10,27 +11,27 @@ under `system`.
 
 ## Subdirectories at a glance
 
-| Subdirectory | Files | What it is |
-|---|---|---|
-| `base-system-packages/` | 4 | `core-utilities`, `fallback-editors`, `performance`, `sensors` — baseline `environment.systemPackages` every host wants. |
-| `bluetooth/` | 1 | `bluetooth.nix`. |
-| `firmware/` | 2 | `firmware-all.nix`, `fwupd.nix`. |
-| `flatpak/` | 1 | `flatpak.nix`. |
-| `font/` | 1 | `font.nix` — reaches every host via `ellyHomeManager`, see below. |
-| `gaming/` | 3 | `gaming.nix`, `sunshine.nix`, `sunshine-elly.nix`. |
-| `home-manager/` | 3 | The NixOS↔Home Manager wiring itself. See below. |
-| `impermanence/` | 1 | `declare-persistence-option.nix` — **not** the [impermanence](impermanence.md) category; see that page's "don't confuse the two" section. |
-| `kdeconnect/` | 1 | `kde-connect.nix`. |
-| `locale-tz-etc/` | 2 | `locale.nix`, `tz.nix`. |
-| `networking/` | 8 | tailscale, vpn, wifi, avahi, base `networking.nix`, `resolved.nix`, and two `*-persist.nix` siblings. See below — MagicDNS naming and the ACL trap especially. |
-| `nix-ld/` | 1 | `nix-ld.nix`. |
-| `secrets/` | 3 | `sops.nix` — sops-nix wiring (nixos-only). `sops-darwin.nix` — the darwin key-file-path fix. `sops-interactive-key.nix` — the nixos interactive-`sops` fix. See below. |
-| `security/` | 1 | `yubikey.nix`. |
-| `sound/` | 1 | `pipewire.nix`. |
-| `ssh/` | 1 | `ssh.nix`. |
-| `storage/` | 2 | `coredump-limit.nix`, `storage-NFS.nix`. |
-| `wayland/` | 1 | `wayland.nix`. |
-| `xdg/` | 2 | `xdg.nix`, `xdg-portals.nix`. |
+| Subdirectory | What it is |
+|---|---|
+| `base-system-packages/` | `core-utilities`, `fallback-editors`, `performance`, `sensors` — baseline `environment.systemPackages` every host wants. |
+| `bluetooth/` | `bluetooth.nix`. |
+| `firmware/` | `firmware-all.nix`, `fwupd.nix`. |
+| `flatpak/` | `flatpak.nix`. |
+| `font/` | `font.nix` — reaches every host via `ellyHomeManager`, see below. |
+| `gaming/` | `gaming.nix`, `sunshine.nix`, `sunshine-elly.nix`. |
+| `home-manager/` | The NixOS↔Home Manager wiring itself. See below. |
+| `impermanence/` | `declare-persistence-option.nix` — **not** the [impermanence](impermanence.md) category; see that page's "don't confuse the two" section. |
+| `kdeconnect/` | `kde-connect.nix`. |
+| `locale-tz-etc/` | `locale.nix`, `tz.nix`. |
+| `networking/` | tailscale, vpn, wifi, avahi, base `networking.nix`, `resolved.nix`, and two `*-persist.nix` siblings. See below — MagicDNS naming and the ACL trap especially. |
+| `nix-ld/` | `nix-ld.nix`. |
+| `secrets/` | `sops.nix` — sops-nix wiring (nixos-only). `sops-darwin.nix` — the darwin key-file-path fix. `sops-interactive-key.nix` — the nixos interactive-`sops` fix. See below. |
+| `security/` | `yubikey.nix`. |
+| `sound/` | `pipewire.nix`. |
+| `ssh/` | `ssh.nix`. |
+| `storage/` | `coredump-limit.nix`, `storage-NFS.nix`. |
+| `wayland/` | `wayland.nix`. |
+| `xdg/` | `xdg.nix`, `xdg-portals.nix`. |
 
 ## Home Manager integration lives here
 

@@ -56,14 +56,22 @@ lint:
     # plain pass/fail, and `just install-hooks` for enforcing it pre-commit.
     cd {{flake}} && python3 scripts/lint.py check
 
-# Static check: wiki claims (import lists, member counts) against the actual
-# module tree -- catches a category page going stale after a refactor. Exits
-# non-zero only on a hard finding (MISSING/COUNT/no-Imported-by-section); a
-# REVIEW-only result (heuristic, needs a human look -- see the script's own
-# docstring) prints but exits 0. Not part of `preflight` yet -- new and
-# unproven against the rest of the wiki's prose style.
+# Static check: wiki claims (import lists) against the actual module tree --
+# catches a category page going stale after a refactor. Exits non-zero only
+# on a hard finding (MISSING/no-Imported-by-section); a REVIEW-only result
+# (heuristic, needs a human look -- see the script's own docstring) prints
+# but exits 0. Not part of `preflight` yet -- new and unproven against the
+# rest of the wiki's prose style.
 wiki-lint:
     python3 wiki/scripts/check_wiki.py check
+
+# Reporting only, never fails -- ranks wiki/ pages by git-log edit churn, to
+# spot a page turning into hand-maintained toil (a stale-prone claim nearby
+# things keep forcing edits to) before it becomes another categories/
+# README.md-Members-column situation (removed 2026-08-29). Pass args through,
+# e.g. `just wiki-churn --top 5` or `just wiki-churn --since "3 weeks ago"`.
+wiki-churn *args:
+    python3 wiki/scripts/wiki_churn.py {{args}}
 
 # Point git at .githooks/: lint ratchet pre-commit, trailer fixup commit-msg
 install-hooks:
