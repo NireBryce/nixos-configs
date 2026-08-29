@@ -40,6 +40,33 @@ that import it.
   trusting a count here; [`../CLAUDE.md`](../CLAUDE.md)'s Safety section has
   been caught stale on this before. Enrolling a new host means converting its
   SSH host key with `ssh-to-age` and running `sops updatekeys secrets.yaml`.
+  A host's SSH key can also drift out from under an existing enrollment (a
+  reinstall, a regenerated host key) — found this way on `nire-lysithea`
+  2026-08-29, where the enrolled key no longer matched
+  `/etc/ssh/ssh_host_ed25519_key.pub`; re-run `host-age-key.sh` on the host
+  in question and diff against `.sops.yaml` rather than assuming the
+  original enrollment still holds.
+- **Decrypting interactively on darwin needs `SOPS_AGE_KEY_FILE` set
+  explicitly** — sops's default identity-file lookup differs by platform
+  (Linux: `~/.config/sops/age/keys.txt`; darwin: `~/Library/Application
+  Support/sops/age/keys.txt`), so a key placed at the Linux-XDG path is
+  invisible to a plain `sops` invocation on macOS even with everything else
+  correct. `secrets/sops-darwin.nix` (2026-08-29) sets it via
+  `environment.variables`.
+- **`SOPS_AGE_SSH_PRIVATE_KEY_FILE` (sops's ssh-key-as-identity flag) can't
+  be trusted for interactive use, even with a provably correct key.** Chased
+  on `nire-cube` 2026-08-29: pointing it straight at
+  `/etc/ssh/ssh_host_ed25519_key` failed against every recipient, including
+  cube's own — despite that key being independently verified correct three
+  separate ways. Converting to a native age identity file and using
+  `SOPS_AGE_KEY_FILE` instead decrypted cleanly with the exact same key, so
+  this is a real bug/quirk in sops's own SSH-conversion code path, not
+  anything wrong in this repo. `secrets/sops-interactive-key.nix`
+  (2026-08-29) does that conversion automatically, every boot, on every
+  NixOS host — see [categories/system.md](categories/system.md)'s Secrets
+  section for the full writeup, including why unconditional regeneration on
+  every boot matters specifically because of `/root` impermanence on
+  durandal/tenacity.
 - **Not everything secret-shaped goes through sops.** Two things on
   `nire-cube` deliberately don't, though they've diverged in how they're
   provisioned: `elly`'s login password (`hashedPasswordFile`,
