@@ -84,7 +84,8 @@ just preflight       # check + modules + lint in one shot -- the ship skill's st
 just check           # nix flake check --all-systems --no-build
 just modules         # static module-tree check; the only one that means anything on darwin
 just lint            # statix + deadnix + oversized-file, ratcheted -- see flake/scripts/lint.py
-just wiki-lint       # wiki claims (import lists, counts) vs the actual module tree; new, not in preflight yet
+just wiki-lint       # wiki claims (import lists) vs the actual module tree; new, not in preflight yet
+just wiki-churn      # rank wiki/ pages by git-log edit churn; reporting only, never fails
 just install-hooks   # one-time: run the checks locally pre-commit, plus the commit-trailer fixup
 just available <pkg> # can it build on aarch64-darwin, and does a cask install it too
 just available --duplicates   # only the ones homebrew ALSO installs, and what to do

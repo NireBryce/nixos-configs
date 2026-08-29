@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
 """Static checks of wiki/ against the actual module tree, for authoritative
 claims that silently go stale after a refactor -- a category moved, a host
-stopped importing something, a member count that was hand-counted once and
-never revisited. Same motivation as `flake/scripts/modules.py`: nothing about
-`nix flake check` or `just modules` reads prose, so a wiki page can say
-something the tree has stopped agreeing with and nothing catches it.
+stopped importing something. Same motivation as `flake/scripts/modules.py`:
+nothing about `nix flake check` or `just modules` reads prose, so a wiki page
+can say something the tree has stopped agreeing with and nothing catches it.
 
 This does NOT replace human judgement about whether a change actually needs a
 wiki update -- see skill `wiki-sync` for that. It only catches the mechanical
-case: a claim that's phrased as a checkable fact (an import list, a member
-count, a path) and no longer matches what's on disk. Historical claims
-("added 2026-08-21 as `nire/foo/`") are deliberately NOT the target -- this
-repo keeps those on purpose (CLAUDE.md, "a bug recorded in a comment stays in
-the file"), and a script can't tell historical prose from a live claim by
-itself, so it checks structured, extractable facts only:
+case: a claim that's phrased as a checkable fact (an import list, a path) and
+no longer matches what's on disk. Historical claims ("added 2026-08-21 as
+`nire/foo/`") are deliberately NOT the target -- this repo keeps those on
+purpose (CLAUDE.md, "a bug recorded in a comment stays in the file"), and a
+script can't tell historical prose from a live claim by itself, so it checks
+structured, extractable facts only:
 
   imports   For each host's actual bare-category import list (parsed the same
             way `modules.py` parses aggregates) and each `wiki/categories/
@@ -28,17 +27,20 @@ itself, so it checks structured, extractable facts only:
             nireHost/* bundles -- see categories/README.md's own exclusion
             list) are silently skipped: nothing to check them against.
 
-  counts    For each category directory under flake/modules/ that has a
-            `dirsAsCategory.nix`, replicates that file's own `collectModules`
-            walk (subdirectories only, dirsAsCategory.nix itself excluded) to
-            get the real current member count, and compares it against the
-            "Members" column in `wiki/categories/README.md`'s table for that
-            category, when a row exists.
-
-  check     Both, non-zero exit if either finds anything.
+  check     Currently just `imports` -- kept as its own subcommand so a
+            second mechanical check can be added later without another
+            plumbing pass. A per-category file COUNT used to be one (a
+            "Members" column in categories/README.md, and a duplicate,
+            unchecked "N files across M subdirectories" line in
+            categories/system.md) -- removed 2026-08-29 along with the
+            counts themselves, once the toil of hand-incrementing them on
+            every module add/remove outweighed what they told a reader that
+            "read the directory" didn't already. See wiki-sync and this
+            repo's existing "read the file directly for the current list
+            rather than trusting a count here" idiom (CLAUDE.md, Safety) --
+            the same reasoning applies to file counts as to host lists.
 
     check_wiki.py imports [repo-root]
-    check_wiki.py counts  [repo-root]
     check_wiki.py check   [repo-root]
 
 repo-root defaults to two directories up from this script (wiki/scripts/ ->
@@ -64,8 +66,6 @@ HOSTS = ['durandal', 'tenacity', 'cube', 'lysithea']
 
 IMPORTED_BY_HEADING = re.compile(r'^##\s+Imported by\s*$', re.M)
 NEXT_HEADING = re.compile(r'^##\s+', re.M)
-MEMBERS_ROW = re.compile(
-    r'^\|\s*\[([\w-]+)\]\([\w./-]+\)\s*\|[^|]*\|[^|]*\|\s*(\d+)', re.M)
 
 
 def repo_root(argv):
@@ -112,59 +112,6 @@ def host_imports(root, categories):
             effective |= nested_category_names(categories, n)
         out[host] = effective
     return out
-
-
-def collect_modules(d):
-    """Faithful port of dirsAsCategory.nix's own collectModules: recurse into
-    every subdirectory, collect .nix filenames (minus suffix), skip
-    dirsAsCategory.nix itself. A file sitting bare in `d` is still collected
-    here (collectModules doesn't distinguish) -- the "bare in the category's
-    own root is excluded" rule lives one level up, in which directories
-    `modulesOf` even calls this on (immediate subdirectories only, never the
-    category root itself). See flake/doc/dirsAsCategory.md.
-
-    One thing collectModules itself does NOT do, but the real aggregate ends
-    up excluding anyway: a file under a `_`-prefixed directory (e.g.
-    `VMs/_lib/libvirt-vm.nix`) is never imported by `import-tree` in the
-    first place, so it never declares a `flake.modules.<class>.<name>`
-    attribute for `forClass` to find -- the exclusion happens one layer
-    earlier than dirsAsCategory.nix, but the visible effect on a real
-    aggregate's member count is the same as if collectModules itself skipped
-    it. Skipped here for that reason, to match the *real* count rather than
-    the literal (and slightly larger) file list dirsAsCategory.nix's own
-    collectModules would produce on its own.
-    """
-    names = []
-    for child in sorted(d.iterdir()):
-        if child.is_dir():
-            if child.name.startswith('_'):
-                continue
-            names.extend(collect_modules(child))
-        elif child.suffix == '.nix' and child.name != CATEGORY_FILE:
-            names.append(child.stem)
-    return names
-
-
-def category_member_count(category_dir):
-    """Real member count of one category, mirroring its own dirsAsCategory.nix:
-    sum of collect_modules() over each *immediate* subdirectory only -- a file
-    sitting bare in category_dir itself (e.g. shell-apps/text-tools/glow.nix)
-    is correctly never counted, same as the real aggregate never imports it.
-
-    An immediate subdirectory named `_something` (e.g. impermanence/_disko/)
-    is skipped here too, not just when collect_modules recurses into a
-    *nested* one -- dirsAsCategory.nix's own `subcategories` doesn't filter
-    by underscore either, so a bare walk would still count it; the exclusion
-    is real (import-tree never imports it, so forClass drops it from the
-    real aggregate) but it has to be applied at this top level too, or a
-    `_`-prefixed immediate subdirectory slips through uncounted-for-the-
-    -right-reason but counted-anyway.
-    """
-    total = 0
-    for child in sorted(category_dir.iterdir()):
-        if child.is_dir() and not child.name.startswith('_'):
-            total += len(collect_modules(child))
-    return total
 
 
 def find_categories(root):
@@ -252,28 +199,6 @@ def check_imports(root):
     return findings
 
 
-def check_counts(root):
-    categories = find_categories(root)
-    readme = root / 'wiki' / 'categories' / 'README.md'
-    findings = []
-    if not readme.exists():
-        return [f"MISSING  {readme}"]
-
-    claimed = {m.group(1): int(m.group(2))
-               for m in MEMBERS_ROW.finditer(readme.read_text())}
-
-    for name, claimed_count in sorted(claimed.items()):
-        if name not in categories:
-            continue  # row for something outside nire/*, nireUser/* (e.g. shell-config's own dir shape) -- not this check's job
-        actual = category_member_count(categories[name])
-        if actual != claimed_count:
-            findings.append(
-                f"COUNT    {readme}: '{name}' claims {claimed_count} member"
-                f"{'s' if claimed_count != 1 else ''}, actual is {actual} "
-                f"({categories[name]})")
-    return findings
-
-
 def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else 'check'
     root = repo_root([sys.argv[0]] + sys.argv[2:])
@@ -281,9 +206,7 @@ def main():
     findings = []
     if cmd in ('imports', 'check'):
         findings += check_imports(root)
-    if cmd in ('counts', 'check'):
-        findings += check_counts(root)
-    if cmd not in ('imports', 'counts', 'check'):
+    if cmd not in ('imports', 'check'):
         print(__doc__)
         sys.exit(2)
 

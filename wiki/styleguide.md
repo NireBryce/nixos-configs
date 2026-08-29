@@ -21,7 +21,8 @@ separate tier for the *usage* side:
   directory under `flake/modules/` holding its own `dirsAsCategory.nix`
   (see [architecture.md](architecture.md)). Indexed in
   [categories/README.md](categories/README.md)'s table (`Category |
-  Directory | Class(es) | Members | Imported by`). Deliberately *not*
+  Directory | Class(es) | Imported by` — deliberately no per-category file
+  count column; see that page's own note on why). Deliberately *not*
   covered by their own category page: `nirePackages/*` subcategories
   (single-package files, already self-explanatory from a glance) and
   `nireHost/*` per-host bundles (host definitions, not categories — see
