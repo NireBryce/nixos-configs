@@ -268,7 +268,7 @@ default_mode "locked"
 //
 // copy_command "xclip -selection clipboard" // x11
 // copy_command "wl-copy"                    // wayland
-// copy_command "pbcopy"                     // osx
+// copy_command "pbcopy"                     // osx -- actually set on darwin, appended by zellij.nix rather than uncommented here (this file is shared by every host)
 
 // Choose the destination for copied text
 // Allows using the primary selection buffer (on x11/wayland) instead of the system clipboard.
