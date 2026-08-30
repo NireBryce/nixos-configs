@@ -16,11 +16,13 @@ plus several others — see [../architecture.md](../architecture.md).
   `lib.mkDefault`, with a comment flagging that darwin's home directory
   differs (though the actual value isn't branched here; it's a default
   meant to be overridden per-platform if one ever needs to).
-- **`user-settings/elly-user.nix`** — `nixos`-class: the account itself.
-  `users.mutableUsers = false`, `isNormalUser = true`,
-  `extraGroups = [ "wheel" "audio" "podman" ]`. Carries its own open TODO
-  ("these modules should be stored outside of the users folder, so it's
-  clearer when it's imported").
+- **`user-settings/elly-user.nix`** — both `nixos`- and `darwin`-class: the
+  account itself on the NixOS side (`users.mutableUsers = false`,
+  `isNormalUser = true`, `extraGroups = [ "wheel" "audio" "podman" ]`) and,
+  on darwin, the nerd-font packages Home Manager's terminal config expects
+  to already be on the system. Carries its own open TODO ("these modules
+  should be stored outside of the users folder, so it's clearer when it's
+  imported").
 - **`user-settings/WARN-password-required.nix`** — the module that exists
   *because* `nire-cube` doesn't import [impermanence](impermanence.md).
   `elly-user.nix`'s `hashedPasswordFile` is unconditional, and nothing else

@@ -56,12 +56,14 @@ lint:
     # plain pass/fail, and `just install-hooks` for enforcing it pre-commit.
     cd {{flake}} && python3 scripts/lint.py check
 
-# Static check: wiki claims (import lists) against the actual module tree --
-# catches a category page going stale after a refactor. Exits non-zero only
-# on a hard finding (MISSING/no-Imported-by-section); a REVIEW-only result
-# (heuristic, needs a human look -- see the script's own docstring) prints
-# but exits 0. Not part of `preflight` yet -- new and unproven against the
-# rest of the wiki's prose style.
+# Static check: wiki claims (import lists, and categories/README.md's Index
+# table -- Directory/Class(es)/Imported by) against the actual module tree --
+# catches a category page, or its row in the summary table, going stale after
+# a refactor. Exits non-zero only on a hard finding (MISSING/DIRECTORY/
+# CLASSES/no-Imported-by-section); a REVIEW-only result (heuristic, needs a
+# human look -- see the script's own docstring) prints but exits 0. Not part
+# of `preflight` yet -- new and unproven against the rest of the wiki's prose
+# style.
 wiki-lint:
     python3 wiki/scripts/check_wiki.py check
 

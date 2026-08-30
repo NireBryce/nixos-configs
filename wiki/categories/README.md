@@ -25,7 +25,7 @@ articles. Not covered here, deliberately:
 | [backup](backup.md) | `nire/homelab/backup/` | nixos | cube only |
 | [boot](boot.md) | `nire/boot/` | nixos | all 3 NixOS hosts |
 | [containers](containers.md) | `nire/homelab/containers/` | nixos | tenacity, cube (not durandal) |
-| [desktop-env](desktop-env.md) | `nire/desktop-env/` | nixos, homeManager | never imported whole — hosts take `jovian` or `kde-desktop` by name |
+| [desktop-env](desktop-env.md) | `nire/desktop-env/` | nixos | never imported whole — hosts take `jovian` or `kde-desktop` by name |
 | [git-forge](git-forge.md) | `nire/homelab/git-forge/` | nixos | cube only |
 | [hardware](hardware.md) | `nire/hardware/` (+ nested `amd`) | nixos | all 3 NixOS hosts |
 | [homelab](homelab.md) | `nire/homelab/` (+ 8 nested) | nixos | cube only |
@@ -40,7 +40,7 @@ articles. Not covered here, deliberately:
 | [shortlinks](shortlinks.md) | `nire/homelab/shortlinks/` | nixos | cube only |
 | [system](system.md) | `nire/system/` | nixos, homeManager, darwin | all 3 NixOS hosts + lysithea (partially) |
 | [virtualization](virtualization.md) | `nire/homelab/virtualization/` | nixos | cube only (not durandal, not the handheld) |
-| [elly](elly.md) | `nireUser/elly/` | nixos, homeManager | all 4 hosts |
+| [elly](elly.md) | `nireUser/elly/` | nixos, homeManager, darwin | all 4 hosts |
 
 No per-category file count here on purpose (removed 2026-08-29, along with
 `system.md`'s matching "N files across M subdirectories" line and the
