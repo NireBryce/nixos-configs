@@ -15,8 +15,9 @@ instead of this page; this page is the mechanism, not the inventory.
   overview: `import-tree`, entry points that sit outside every category tree
   (`modules/checks.nix`, `nireHost/hosts.nix`, the per-host configs,
   `nireUser/elly-home-manager.nix`), and which categories aren't imported by
-  every host (`virtualization` is the running example — libvirt on
-  workstations, deliberately absent on the handhelds).
+  every host (`virtualization` is the running example — cube only as of
+  2026-08-27, deliberately absent on the handhelds and, since that date, on
+  durandal too — see [`categories/virtualization.md`](categories/virtualization.md)).
 - **Skill `new-flake-module`** (`.claude/skills/new-flake-module/SKILL.md`)
   — the traps in *writing* one: `flake.modules` can't live inside
   `perSystem`, a module's name comes from its filename so a rename can
@@ -61,13 +62,14 @@ instead of this page; this page is the mechanism, not the inventory.
 
 Containers and VMs are separate categories here, and "virtualization" means
 only the VM one (`nire/homelab/virtualization/`: libvirt, virt-tools,
-vm-networking — optional, workstation-only). Podman/distrobox live in
+vm-networking — optional, cube only). Podman/distrobox live in
 [`nire/homelab/containers/`](categories/containers.md) — its own category since
 2026-08-22 (moved out of `nire/system/containers/`; both it and
 `virtualization` moved again on 2026-08-27, nested under a new umbrella
 `homelab` category alongside five other self-hosted-service categories —
 see [`categories/homelab.md`](categories/homelab.md)), imported explicitly by
-all four NixOS hosts rather than reaching them through `system`. See
+tenacity and cube (durandal dropped it 2026-08-27, same day as
+`virtualization`) rather than reaching them through `system`. See
 [`../CLAUDE.md`](../CLAUDE.md)'s Architecture section for the file that's
 been renamed twice now and why a stale memory of "virtualization is the
 podman one" is exactly backwards regardless of which name you're picturing.
