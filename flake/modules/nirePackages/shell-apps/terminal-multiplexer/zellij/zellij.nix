@@ -10,7 +10,14 @@
 
             home.file = {
                 "./.config/zellij/config.kdl" = {
-                    source = ./config/config.kdl;
+                    # darwin: pbcopy instead of relying on zellij's default OSC 52
+                    # copy, which needs "Applications in terminal may access
+                    # clipboard" enabled in iTerm2 prefs to land in the real
+                    # clipboard. See config.kdl's own copy_command comment.
+                    text = builtins.readFile ./config/config.kdl
+                        + lib.optionalString pkgs.stdenv.isDarwin ''
+                            copy_command "pbcopy"
+                        '';
                 };
             };
 
