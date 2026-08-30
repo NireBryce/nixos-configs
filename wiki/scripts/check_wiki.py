@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Static checks of wiki/ against the actual module tree, for authoritative
-claims that silently go stale after a refactor -- a category moved, a host
-stopped importing something. Same motivation as `flake/scripts/modules.py`:
-nothing about `nix flake check` or `just modules` reads prose, so a wiki page
-can say something the tree has stopped agreeing with and nothing catches it.
+"""Static checks of wiki/ (and AGENTS.md, the one file outside wiki/ that
+duplicates wiki-shaped claims verbatim -- see `doc_files`) against the actual
+module tree, for authoritative claims that silently go stale after a
+refactor -- a category moved, a host stopped importing something, a recipe
+got renamed. Same motivation as `flake/scripts/modules.py`: nothing about
+`nix flake check` or `just modules` reads prose, so a doc can say something
+the repo has stopped agreeing with and nothing catches it.
 
 This does NOT replace human judgement about whether a change actually needs a
 wiki update -- see skill `wiki-sync` for that. It only catches the mechanical
@@ -59,12 +61,33 @@ structured, extractable facts only:
             claim worth making a script watch instead of a human remembering
             to.
 
-  check     Runs `imports`, `table`, and `hosts`.
+  recipes   Every backtick `just <recipe...>` mention across wiki/ and
+            AGENTS.md against .justfile's own recipe names -- a rename or
+            removal silently breaks every doc that told someone to run the
+            old name, and nothing about `just` itself would complain until
+            someone actually tried it.
 
-    check_wiki.py imports [repo-root]
-    check_wiki.py table   [repo-root]
-    check_wiki.py hosts   [repo-root]
-    check_wiki.py check   [repo-root]
+  skills    Every "skill `name`"/"`name` skill" mention across wiki/ and
+            AGENTS.md against real `.claude/skills/<name>/` directories --
+            same shape as `recipes`, for a skill rename instead.
+
+  secrets   The "`.sops.yaml` ... enrolls `host`, `host`, ... —" claim
+            (wiki/impermanence-and-secrets.md and AGENTS.md's Safety section
+            both make it, in the same shape, and AGENTS.md's own text admits
+            "this paragraph has been stale before") against .sops.yaml's
+            actual key anchors. Fully mechanical in both directions -- unlike
+            Imported by, there's no legitimate "named to say it's absent"
+            case for an enrollment list.
+
+  check     Runs all six of the above.
+
+    check_wiki.py imports  [repo-root]
+    check_wiki.py table    [repo-root]
+    check_wiki.py hosts    [repo-root]
+    check_wiki.py recipes  [repo-root]
+    check_wiki.py skills   [repo-root]
+    check_wiki.py secrets  [repo-root]
+    check_wiki.py check    [repo-root]
 
 repo-root defaults to two directories up from this script (wiki/scripts/ ->
 wiki/ -> repo root).
@@ -421,11 +444,125 @@ def check_hosts(root):
     return findings
 
 
+def doc_files(root):
+    """Every markdown file the three checks below scan: all of wiki/
+    (recursive) plus AGENTS.md itself -- the one file outside wiki/ that
+    duplicates wiki-shaped claims verbatim (CLAUDE.md is a symlink to it, so
+    checking the symlink's target once covers both names)."""
+    return sorted(root.joinpath('wiki').rglob('*.md')) + [root / 'AGENTS.md']
+
+
+# A recipe header, e.g. `wiki-churn *args:` or `host=nire-durandal build`'s
+# own definition `build:` -- name, then zero or more space-separated
+# parameter/default tokens, then a bare `:`. `(?!=)` excludes a `name :=
+# value` variable assignment, just's *other* use of a leading identifier.
+JUST_RECIPE = re.compile(r'^([a-zA-Z][\w-]*)(?:\s+[\w=*-]+)*:(?!=)', re.M)
+# A backtick-quoted invocation, e.g. `` `just wiki-lint` `` or
+# `` `just host=nire-durandal build` ``.
+JUST_MENTION = re.compile(r'`just ([^`]+)`')
+
+
+def check_recipes(root):
+    """Every backtick `just <recipe...>` mention across wiki/ and AGENTS.md
+    against .justfile's own recipe names -- catches a recipe rename or
+    removal silently breaking every doc that told someone to run it. Handles
+    the `just host=<host> <recipe>` override form (AGENTS.md's own Commands
+    section documents it) by checking the token after the `key=value`
+    override, not the override itself.
+    """
+    justfile = root / '.justfile'
+    recipes = set(JUST_RECIPE.findall(COMMENT.sub('', justfile.read_text())))
+
+    findings = []
+    for path in doc_files(root):
+        for m in JUST_MENTION.finditer(path.read_text()):
+            tokens = m.group(1).split()
+            if not tokens or '<' in m.group(1):
+                continue  # a template like `just host=<name> <recipe>`, not
+                          # a literal invocation -- nothing to look up
+            name = tokens[1] if '=' in tokens[0] and len(tokens) > 1 else tokens[0]
+            if name not in recipes:
+                findings.append(
+                    f"UNKNOWN RECIPE  {path}: `just {m.group(1)}` -- "
+                    f"'{name}' is not a recipe in .justfile")
+    return findings
+
+
+# Either word order this repo actually uses: "skill `name`" (architecture.md,
+# CLAUDE.md's Traps section) or "`name` skill" (reaching-services.md). Plain
+# "the `name`" is deliberately NOT matched -- most backtick tokens in this
+# wiki are code identifiers, not skill names, and "skill"/"Skill" right next
+# to the backticks is what actually distinguishes the two.
+SKILL_MENTION = re.compile(r'[Ss]kill `([a-zA-Z][\w-]*)`|`([a-zA-Z][\w-]*)` skill\b')
+
+
+def check_skills(root):
+    """Every "skill `name`" / "`name` skill" mention across wiki/ and
+    AGENTS.md against real `.claude/skills/<name>/` directories -- same
+    shape and motivation as `recipes`, for a skill rename instead of a
+    recipe rename."""
+    skills_dir = root / '.claude' / 'skills'
+    real = ({p.name for p in skills_dir.iterdir() if p.is_dir()}
+            if skills_dir.exists() else set())
+
+    findings = []
+    for path in doc_files(root):
+        for m in SKILL_MENTION.finditer(path.read_text()):
+            name = m.group(1) or m.group(2)
+            if name not in real:
+                findings.append(
+                    f"UNKNOWN SKILL  {path}: '{name}' has no "
+                    f".claude/skills/{name}/ directory")
+    return findings
+
+
+# Both current instances end the enrolled-host list right before an em-dash;
+# `re.S` lets `.*?` cross the markdown line-wrap between them.
+ENROLLS_CLAIM = re.compile(r'enrolls\s+(.*?)—', re.S)
+HOST_TOKEN = re.compile(r'`(nire-[\w-]+)`')
+
+
+def enrolled_hosts(root):
+    """host names anchored under .sops.yaml's own `keys:` list -- the actual
+    enrollment, independent of the "enrolls ..." prose that names the same
+    set by hand in more than one doc."""
+    p = root / 'flake' / 'modules' / 'nire' / 'system' / 'secrets' / '.sops.yaml'
+    return set(re.findall(r'&(nire-[\w-]+)', COMMENT.sub('', p.read_text())))
+
+
+def check_secrets(root):
+    """Every "`.sops.yaml` ... enrolls `host`, `host`, ... —" claim
+    (wiki/impermanence-and-secrets.md and AGENTS.md's Safety section both
+    make this exact claim by hand, in the same shape -- AGENTS.md's own text
+    even admits "this paragraph has been stale before") against
+    .sops.yaml's actual key anchors. Unlike Imported by, there's no
+    legitimate named-as-an-exclusion case for enrollment, so a mismatch
+    either way is a hard finding, not a REVIEW.
+    """
+    actual = enrolled_hosts(root)
+    findings = []
+    for path in doc_files(root):
+        for m in ENROLLS_CLAIM.finditer(path.read_text()):
+            claimed = set(HOST_TOKEN.findall(m.group(1)))
+            if not claimed:
+                continue  # some other "enrolls ... --" sentence, not this one
+            for host in sorted(actual - claimed):
+                findings.append(
+                    f"MISSING  {path}: .sops.yaml enrolls '{host}' but the "
+                    f"enrolls claim doesn't name it")
+            for host in sorted(claimed - actual):
+                findings.append(
+                    f"EXTRA    {path}: the enrolls claim names '{host}' but "
+                    f".sops.yaml doesn't enroll it")
+    return findings
+
+
 def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else 'check'
     root = repo_root([sys.argv[0]] + sys.argv[2:])
 
-    if cmd not in ('imports', 'table', 'hosts', 'check'):
+    cmds = ('imports', 'table', 'hosts', 'recipes', 'skills', 'secrets', 'check')
+    if cmd not in cmds:
         print(__doc__)
         sys.exit(2)
 
@@ -436,6 +573,12 @@ def main():
         findings += check_table(root)
     if cmd in ('hosts', 'check'):
         findings += check_hosts(root)
+    if cmd in ('recipes', 'check'):
+        findings += check_recipes(root)
+    if cmd in ('skills', 'check'):
+        findings += check_skills(root)
+    if cmd in ('secrets', 'check'):
+        findings += check_secrets(root)
 
     for f in findings:
         print(f)
