@@ -46,10 +46,24 @@ structured, extractable facts only:
             reclassification, which is exactly the kind of stale-claim-after-
             a-refactor case this whole script exists for.
 
-  check     Runs both `imports` and `table`.
+  hosts     Checks wiki/hosts.md's "The hosts" table -- Host, Class, and
+            Wipes `/root`? -- against `nireHost/hosts.nix` (the actual
+            `nixosConfigurations`/`darwinConfigurations` entries, read
+            independently of this script's own HOSTS constant below, which
+            exists for a narrower reason and is a second hand-maintained
+            list this incidentally cross-checks) and, for Wipes `/root`?,
+            against whether the host's own import list actually contains
+            `impermanence`. Role is free prose and not checked. This is the
+            table CLAUDE.md's Safety section calls out by name as something
+            to read rather than trust a stale copy of -- exactly the kind of
+            claim worth making a script watch instead of a human remembering
+            to.
+
+  check     Runs `imports`, `table`, and `hosts`.
 
     check_wiki.py imports [repo-root]
     check_wiki.py table   [repo-root]
+    check_wiki.py hosts   [repo-root]
     check_wiki.py check   [repo-root]
 
 repo-root defaults to two directories up from this script (wiki/scripts/ ->
@@ -142,6 +156,29 @@ def find_categories(root):
         for p in base.rglob(CATEGORY_FILE):
             cats[p.parent.name] = p.parent
     return cats
+
+
+# `nire-durandal = mkHost "x86_64-linux" ...;` / `nire-lysithea = mkDarwinHost
+# "aarch64-darwin" ...;` -- hosts.nix's own two attrsets, `flake.
+# nixosConfigurations` and `flake.darwinConfigurations`. The constructor name
+# is what tells the two apart; no need to isolate which attrset a line sits
+# in first.
+HOST_LINE = re.compile(r'^\s*(nire-[\w-]+)\s*=\s*(mkHost|mkDarwinHost)\b', re.M)
+
+
+def actual_hosts(root):
+    """host name (with `nire-` prefix, matching how wiki/hosts.md writes it)
+    -> class ('nixos' or 'darwin'), read straight from hosts.nix. Deliberately
+    independent of this script's own HOSTS constant (below) -- HOSTS exists
+    for host_imports' narrower purpose (which per-host aggregate file to
+    read) and is itself a second hand-maintained list that could in
+    principle drift from hosts.nix; going back to the source here means
+    check_hosts also catches that, not just wiki/hosts.md's own table.
+    """
+    p = root / 'flake' / 'modules' / 'nireHost' / 'hosts.nix'
+    text = COMMENT.sub('', p.read_text())
+    return {name: ('darwin' if ctor == 'mkDarwinHost' else 'nixos')
+            for name, ctor in HOST_LINE.findall(text)}
 
 
 def category_classes(category_dir):
@@ -328,11 +365,67 @@ def check_table(root):
     return findings
 
 
+HOSTS_TABLE_ROW = re.compile(
+    r'^\|\s*`(?P<host>nire-[\w-]+)`\s*\|\s*(?P<class>\w+)\s*\|'
+    r'(?P<role>[^|]*)\|(?P<wipes>[^|]*)\|\s*$', re.M)
+
+
+def check_hosts(root):
+    """Checks wiki/hosts.md's "The hosts" table against hosts.nix and the
+    `impermanence` category's actual importers -- see this module's
+    docstring for what each column can and can't be checked mechanically."""
+    hosts = actual_hosts(root)
+    categories = find_categories(root)
+    imports = host_imports(root, categories)  # short name -> category set
+
+    page = root / 'wiki' / 'hosts.md'
+    rows = {m.group('host'): m for m in HOSTS_TABLE_ROW.finditer(page.read_text())}
+
+    findings = []
+    for name in sorted(set(hosts) | set(rows)):
+        if name not in rows:
+            findings.append(
+                f"MISSING ROW  {page}: hosts.nix declares '{name}' but The "
+                f"hosts table has no row for it")
+            continue
+        if name not in hosts:
+            findings.append(
+                f"STALE ROW  {page}: '{name}' has a table row but hosts.nix "
+                f"no longer declares it")
+            continue
+        row = rows[name]
+
+        claimed_class = row.group('class').strip()
+        if claimed_class != hosts[name]:
+            findings.append(
+                f"CLASS      {page}: '{name}' row says {claimed_class!r}, "
+                f"hosts.nix declares it {hosts[name]!r}")
+
+        # Wipes /root? is only meaningful for nixos-class hosts -- darwin has
+        # no initrd stage this repo touches, hence hosts.md's own "n/a".
+        wipes_cell = row.group('wipes').lower()
+        if hosts[name] == 'darwin':
+            if 'n/a' not in wipes_cell:
+                findings.append(
+                    f"WIPES ROOT {page}: '{name}' is darwin-class (no /root "
+                    f"wipe concept) but its row doesn't say 'n/a'")
+            continue
+        wipes_claimed = 'yes' in wipes_cell
+        wipes_actual = 'impermanence' in imports.get(name.removeprefix('nire-'), set())
+        if wipes_claimed != wipes_actual:
+            findings.append(
+                f"WIPES ROOT {page}: '{name}' row says "
+                f"{'yes' if wipes_claimed else 'no'!r}, but it "
+                f"{'does' if wipes_actual else 'does not'} import "
+                f"'impermanence'")
+    return findings
+
+
 def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else 'check'
     root = repo_root([sys.argv[0]] + sys.argv[2:])
 
-    if cmd not in ('imports', 'table', 'check'):
+    if cmd not in ('imports', 'table', 'hosts', 'check'):
         print(__doc__)
         sys.exit(2)
 
@@ -341,6 +434,8 @@ def main():
         findings += check_imports(root)
     if cmd in ('table', 'check'):
         findings += check_table(root)
+    if cmd in ('hosts', 'check'):
+        findings += check_hosts(root)
 
     for f in findings:
         print(f)
