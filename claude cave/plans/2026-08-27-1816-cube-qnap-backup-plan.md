@@ -25,6 +25,15 @@ recorded in a comment stays in the file" convention — the module itself
 (`restic.nix`) carries the same correction in its own header, which is the
 copy to trust.
 
+**Mount point renamed, same day (2026-08-28), unrelated to the correction
+above:** `/mnt/qnap-erin` (device `192.168.0.200:/erin-pub`), named
+throughout the rest of this file, is now `/mnt/restic-backup` (device
+`192.168.0.200:/restic-backup`) — a share dedicated to this backup rather
+than shared with other QNAP uses. `storage-NFS.nix` and `restic.nix` both
+carry the current path; this file's own later mentions of `qnap-erin`/
+`erin-pub` are left as written, for the same "don't silently rewrite"
+reason as the correction above.
+
 Written from a read of the repo, not from any live session on cube — nothing
 at the time of writing had touched the real machine or the real QNAP; see the
 category page for what's since been checked by evaluation (still no real

@@ -28,32 +28,41 @@ silently **merge** — the `containers`/`podman.nix` collision
 
 The plan doc this category implements got one thing wrong, corrected while
 writing the module rather than left to rot: it described
-`nire/system/storage/storage-NFS.nix` (the NFS mount to the QNAP, at
-`/mnt/qnap-erin`) as an unused module nobody had wired into any host. It
-isn't. `nire/system/storage/` has no `dirsAsCategory.nix` of its own, so
-that module is collected straight into the shared `system` aggregate
+`nire/system/storage/storage-NFS.nix` (the NFS mount to the QNAP) as an
+unused module nobody had wired into any host. It isn't.
+`nire/system/storage/` has no `dirsAsCategory.nix` of its own, so that
+module is collected straight into the shared `system` aggregate
 ([architecture.md](../architecture.md) covers this mechanism generally) —
 and every Linux host imports `system`. `nix eval
 .#nixosConfigurations.<host>.config.fileSystems` on all three NixOS hosts
-already lists `/mnt/qnap-erin`, checked 2026-08-28. So the mount was already
-live everywhere; this category needed no new import to reach it. What's
-still true from the original plan: nothing in this repo has ever exercised
-that mount against the real QNAP, so "already imported" is not the same
-claim as "known to work."
+already listed the mount, checked 2026-08-28. So it was already live
+everywhere; this category needed no new import to reach it. What's still
+true from the original plan: nothing in this repo has ever exercised that
+mount against the real QNAP, so "already imported" is not the same claim as
+"known to work."
+
+**The mount point itself moved, same day.** Originally `/mnt/qnap-erin`
+(device `192.168.0.200:/erin-pub`), a share shared with other, unrelated
+QNAP uses; renamed to `/mnt/restic-backup` (device
+`192.168.0.200:/restic-backup`), a share dedicated to this category —
+`storage-NFS.nix`'s own header is the current source of truth. This page
+and the module both reflect the new path.
 
 ## Local-path repository, not SFTP
 
 Issue #87's original sketch was restic over SFTP to the QNAP. This module
-uses a local-path repository instead — `/mnt/qnap-erin/restic-cube`, on the
-NFS mount above — because restic encrypts client-side regardless of backend,
-so a local-path repo gets the same encryption-at-rest #87 wanted from SFTP
-without standing up SSH, a restricted backup user, or `rest-server`/
-Container Station on the QNAP side at all.
+uses a local-path repository instead — `/mnt/restic-backup/cube` (`cube` is
+a host-scoped subdirectory in case another host gets its own backup
+category later) — because restic encrypts client-side regardless of
+backend, so a local-path repo gets the same encryption-at-rest #87 wanted
+from SFTP without standing up SSH, a restricted backup user, or
+`rest-server`/Container Station on the QNAP side at all.
 
 This is the one real trade-off in the module, not a settled fact: NFS export
 trust is IP-based rather than keyed, so anything on the LAN with the right
-IP can mount `erin-pub`. It's compensated for, not eliminated — see
-"Anti-deletion" below.
+IP can mount the share. It's compensated for, not eliminated — see
+"Anti-deletion" below — and less exposed than under the old shared
+`erin-pub` export, now that this lives on a share dedicated to backups.
 
 ## sqlite consistency
 
@@ -77,30 +86,41 @@ Issue #87's open question 3: anything that compromises or wipes cube can run
 `restic forget --prune` against its own backups, since cube has full
 read-write access to the NFS export. The mitigation this module assumes —
 cheapest rung of the ascending-effort list #87 proposes — is a **QNAP-side
-native snapshot schedule on the `restic-cube` share**, so cube can write and
-prune within the restic repository but can't touch the NAS's own snapshots.
+native snapshot schedule on the `restic-backup` share**, so cube can write
+and prune within the restic repository but can't touch the NAS's own
+snapshots.
 That's QNAP admin-console configuration, not something this module (or
 anything in this repo) can enforce or verify.
 
 ## What isn't done yet
 
-Two things, both genuinely outside what a Nix module can close on its own —
-not the usual "evaluates, not switched" gap, a different kind:
+Smaller than it looked partway through, as of 2026-08-29:
 
-- **The repository password has no value.** `sops.secrets.restic-cube-password`
-  is declared, but setting it needs real decrypt access to `secrets.yaml`
-  (one of the age keys enrolled in `.sops.yaml`), which the session that
-  wrote this module confirmed it did not have. See the module's own header
-  for the exact `sops set` invocation, written so the value is generated
-  inline and never appears as a literal anywhere.
+- **The repository password now has a value — but it's uncommitted.** Set
+  via `sops set` against a separate checkout on cube itself
+  (`~/projects/nix/nixos-configs`), not from this tree. sops-nix validates
+  its secrets manifest as part of the *build*, not only at activation, so
+  this was a real blocker until found: a first `just build` on cube (synced
+  over ssh, since darwin can't cross-build `x86_64-linux`) failed exactly
+  there —
+  `sops-install-secrets: ... the key 'restic-cube-password' cannot be
+  found` — because the session that wrote this module never had decrypt
+  access to set it. What that first attempt didn't know is that the secret
+  already existed, just in a checkout it hadn't looked at. Merging that
+  checkout's `secrets.yaml` into the tree and rebuilding: a clean full
+  `system.build.toplevel`, `restic`/`restic-cube`/`rustic` all present.
+  **Committing that `secrets.yaml` edit — safe, it's ciphertext, this repo
+  commits `secrets.yaml` encrypted deliberately — is the remaining step**,
+  not generating a new value.
 - **The QNAP-side snapshot schedule** described above hasn't been
   configured — this repo has no way to reach into the QNAP's admin console.
 
-Until both are done and a real `switch` has run on cube, this module is
-config, not a backup. Per issue #87's own "done means": a **restore actually
-performed** — one Forgejo repo recovered and confirmed to open — is the bar,
-not a green timer. [homelab/backup-runbook.md](../homelab/backup-runbook.md)
-is the step-by-step procedure for all of the above, including the restore.
+Once the secret is committed and a real `switch` has run on cube, this
+module still isn't done — per issue #87's own "done means": a **restore
+actually performed** — one Forgejo repo recovered and confirmed to open —
+is the bar, not a green timer or even a clean build.
+[homelab/backup-runbook.md](../homelab/backup-runbook.md) is the
+step-by-step procedure for what's left.
 
 ## Imported by
 
@@ -121,6 +141,9 @@ after this category was added.
 - [../homelab/backup-runbook.md](../homelab/backup-runbook.md) — the actual
   commands: finishing setup, checking status, running a backup by hand, and
   performing a restore.
+- [../homelab/rustic.md](../homelab/rustic.md) — an interactive TUI that can
+  browse and restore from this same repository, installed but not yet
+  switched or run against it.
 - [`../../claude cave/plans/2026-08-27-1816-cube-qnap-backup-plan.md`](<../../claude cave/plans/2026-08-27-1816-cube-qnap-backup-plan.md>)
   — the plan this category implements, including what it got wrong about
   the QNAP mount's status.
