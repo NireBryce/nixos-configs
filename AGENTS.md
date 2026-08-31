@@ -349,19 +349,18 @@ settles regression-vs-always-broken faster than any argument about mechanism.
 **Calibrate severity.** Homelab, not production; the repo has gone six months
 between commits. "This is broken and here is the fix" beats incident framing.
 
-**A shared working directory can change underneath you.** Two sessions (or
-a session plus manual work) pointed at the same checkout — `git checkout`,
-a commit, a branch delete from either side — are all visible to the other
-immediately, mid-task, with no warning. Hit 2026-08-30: files reverted to
-stale content, a different branch was suddenly checked out, and it took
-several turns to recognize "something external changed this" instead of
-"my last edit didn't take." If `git status`/`git branch --show-current`/a
-file's content doesn't match what you expect from your own last action,
-check `git reflog` for a checkout or commit you didn't make before
-concluding anything is actually broken. Prefer `git worktree add` for your
-own throwaway checks and branch work over reusing the shared directory's
-current checkout — it isolates exactly this class of surprise, at the cost
-of a second `flake/` to evaluate from.
+**Default to a dedicated `git worktree` for any task that will branch,
+commit, or check out — skill `use-a-worktree`.** Not for read-only work;
+see that skill's own "Applies to" for the exceptions. A shared working
+directory can change underneath you with no warning: two sessions (or a
+session plus manual work) pointed at the same checkout see each other's
+`git checkout`/commit/branch delete immediately, mid-task. Hit 2026-08-30:
+files reverted to stale content, a different branch was suddenly checked
+out, and it took several turns to recognize "something external changed
+this" instead of "my last edit didn't take." If `git status`/`git branch
+--show-current`/a file's content doesn't match what you expect from your
+own last action, check `git reflog` for a checkout or commit you didn't
+make before concluding anything is actually broken.
 
 **"push" means the `ship` skill, landing on `experimental`** — branch, PR, ask
 before merging, ask again before deleting the branch. Elly naming a branch
