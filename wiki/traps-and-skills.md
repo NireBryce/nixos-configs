@@ -50,19 +50,13 @@ these fits into the bigger picture; this page is just the index.
 ## A trap that points at the wiki instead of a skill
 
 - **Debugging "can't reach a host by tailscale name"** — no skill for this
-  one; the full mechanism lives in `networking/tailscale.nix`'s own header
-  and is indexed at [categories/system.md](categories/system.md)'s
-  "Tailscale" section instead. Three traps, none a bug in this repo's nix
-  config: Tailscale device names don't match `networking.hostName`
-  (`nire-cube` the host is `ts-cube` on the tailnet); a tailnet ACL can
-  silently block all peer-to-peer traffic while every local firewall
-  setting is correct (fixed in the admin console, not here); and a tailnet
-  name that won't resolve **at all** means Tailscale isn't connected on the
-  machine you're running *from*, not that the name is wrong — try
-  `<host>.local` (LAN mDNS, no Tailscale needed) rather than debugging
-  Tailscale itself. `just reach <host>` (`flake/scripts/reach-host.sh`)
-  tries all three real names in the right order automatically, so this
-  doesn't need re-deriving by hand.
+  one; the full mechanism (three traps: names don't match `networking.
+  hostName`, a tailnet ACL can silently block peer traffic, and a name
+  that won't resolve at all means check Tailscale on the client, not the
+  name) lives in `networking/tailscale.nix`'s own header, indexed at
+  [categories/system.md](categories/system.md)'s "Tailscale" section. `just
+  reach <host>` (`flake/scripts/reach-host.sh`) is the automated fix for
+  the third one.
 
 ## Style
 

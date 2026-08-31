@@ -157,33 +157,19 @@ unconditionally even on hosts where nothing populates it.
 `networking/resolved.nix` + `networking/avahi.nix` (added 2026-08-21, split
 DNS between the two — avahi owns `.local`, resolved owns unicast DNS and
 Tailscale's split-DNS) were runtime-verified on `nire-tenacity` 2026-08-22:
-`getent`/`ping`/`ssh` all resolve peers by MagicDNS name correctly. Three
-traps have turned up around this, all real, none a bug in this repo —
-recorded in full in `networking/tailscale.nix`'s own header:
+`getent`/`ping`/`ssh` all resolve peers by MagicDNS name correctly.
 
-- **Tailscale device names don't match `networking.hostName`.** `nire-cube`
-  the NixOS host is `ts-cube` on the tailnet; same `ts-` pattern fleet-wide.
-  Looks exactly like a DNS failure until you check `tailscale status` for
-  the name a device actually registered.
-- **A tailnet ACL can silently block all peer-to-peer traffic while every
-  local NixOS firewall setting is correct**, and it looks exactly like a
-  host firewall problem right up until you check the admin console. The
-  fault hit here: a "match everything" access rule whose `dst` was
-  `autogroup:internet` (grants exit-node/internet access only) instead of
-  `autogroup:members` — the rule's own comment said "match absolutely
-  everything," and it didn't. `networking.firewall.trustedInterfaces =
-  [ "tailscale0" ]` (`networking.nix`) is provably not the cause in that
-  scenario — the ACL lives entirely in Tailscale's admin console, outside
-  this repo and outside anything `just switch` touches.
-- **A tailnet name that won't resolve AT ALL means check Tailscale on the
-  machine you're running FROM, not the name.** Found 2026-08-30: `ssh
-  ts-cube` failed with a plain "could not resolve hostname" because
-  Tailscale wasn't connected on the client, not because `ts-cube` was
-  wrong — it wasn't. `nire-cube.local` (plain LAN mDNS/Avahi, no Tailscale
-  involved) was reachable the whole time. `flake/scripts/reach-host.sh`
-  (`just reach <host>`) now tries `.local`, then the tailnet name, then
-  plain DNS, in that order, so this doesn't have to be re-diagnosed by
-  hand — see [../traps-and-skills.md](../traps-and-skills.md).
+Three traps have turned up reaching a host by name since, none a bug in
+this repo — full mechanism, dates, and the actual fixes for all three live
+in `networking/tailscale.nix`'s own header, not repeated here:
+
+- Tailscale device names don't match `networking.hostName`.
+- A tailnet ACL can silently block peer-to-peer traffic while every local
+  firewall setting is correct — fixed in the admin console, not here.
+- A tailnet name that won't resolve *at all* means check Tailscale on the
+  machine you're running *from*, not the name — `just reach <host>`
+  (`flake/scripts/reach-host.sh`) tries the LAN/tailnet/DNS names in the
+  right order automatically. See [../traps-and-skills.md](../traps-and-skills.md).
 
 Also worth keeping: `systemctl show firewall.service -p ExecStart`, read as
 a plain shell script (world-readable, no root needed), is the literal
