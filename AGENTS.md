@@ -228,10 +228,14 @@ renames all dodge the same silent-merge collision `just modules` catches):
   host via `system`, not a new import; see the category's own page for the
   "was described as dangling, wasn't" correction) rather than issue #87's
   original SFTP sketch. No port, no Caddy route — a timer, not a listener.
-  Build-verified on cube 2026-08-29 (`just build` over ssh, real toplevel,
-  `rustic`/`restic-cube` both present and `rustic --version` run directly)
-  — not just evaluates. Still not switched, and the QNAP itself is
-  unconfirmed; tracked in `wiki/homelab/pending-setup.md` item 4.
+  Switched and running on cube as of 2026-08-30 (`/run/current-system`
+  confirmed matching), `rustic`/`restic-cube` real on `elly`'s `$PATH` —
+  blocked on one live finding: the QNAP rejects the NFS mount
+  (`access denied by server`, almost certainly the `restic-backup` share's
+  host-access list not including cube yet) and has no SSH open to fix it
+  from a shell (checked LAN and tailnet both) — needs the QNAP's own admin
+  console; tracked in `wiki/homelab/pending-setup.md` item 4 and
+  `wiki/homelab/backup-runbook.md`.
 
 **Hosts**: `hosts.nix` declares one `darwinConfigurations` entry
 (`nire-lysithea`, aarch64-darwin) alongside three `nixosConfigurations`, all

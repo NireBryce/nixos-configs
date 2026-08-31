@@ -26,8 +26,9 @@ under it, which can happen with no commit to this repo at all.
 
 **Not a service of its own, but related**: [rustic](rustic.md) — a TUI that
 can browse and restore from the same repository the row above writes.
-Installed 2026-08-28 (`ellyHomeManager`-wide), not yet switched anywhere or
-run against a real repository.
+Installed 2026-08-28 (`ellyHomeManager`-wide) and switched on cube as of
+2026-08-30, but not yet run against a real repository — the QNAP mount
+itself isn't working yet either (see the runbook).
 
 **Start at that second one if you don't know what's running.** It lists the
 services below, live-checks each one, and shows how cube itself is doing —

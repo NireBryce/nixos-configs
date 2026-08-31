@@ -83,32 +83,31 @@ one copy each, still — the module below doesn't change that yet.
 
 2026-08-28: the [backup](../categories/backup.md) category exists now
 (restic, local-path repo on the already-imported QNAP NFS mount, not the
-issue's original SFTP sketch — see that page for why). Two things stop it
-from being a real backup yet, both live-machine/human steps this page is
-for rather than a Nix change:
+issue's original SFTP sketch — see that page for why). The secret, build,
+and switch are all done as of 2026-08-30 — what's actually stopping it from
+being a real backup now:
 
-- **The repository password has a value now, but it's uncommitted.** Set
-  via `sops set` in a separate checkout on cube itself
-  (`~/projects/nix/nixos-configs`). A real `just build` on cube confirmed
-  2026-08-28 that the missing key fails `system.build.toplevel` outright
-  (sops-nix validates its manifest at build time, not only activation) —
-  and confirmed 2026-08-29, once that checkout's `secrets.yaml` was merged
-  into the tree being built, that the build is otherwise completely clean.
-  What's left is committing that `secrets.yaml` edit (safe: ciphertext,
-  this repo commits `secrets.yaml` encrypted on purpose), not generating a
-  new value.
+- **The QNAP is refusing the NFS mount** — `mount.nfs: access denied by
+  server`, a real error from cube's journal once the switch made the
+  automount unit live. Almost certainly the `restic-backup` share's NFS
+  host-access list not including cube yet, since it's a share created just
+  for this. Fix is in the QNAP's own admin web console.
+- **SSH into the QNAP doesn't work** (checked from the LAN and the tailnet
+  both), so that fix can't be scripted or done from a shell — Telnet/SSH
+  is very likely just off in QTS, its own default.
 - **No QNAP-side snapshot schedule exists on the backup share** — the
   anti-deletion mitigation the module assumes but can't configure itself.
 
-**The [backup runbook](backup-runbook.md) is the actual procedure for both,
-plus switching cube, checking status, running an ad hoc backup, and — the
-real "done" bar — performing a restore.** This entry stays the tracking
-summary; that page is where the commands live.
+**The [backup runbook](backup-runbook.md) is the actual procedure**,
+including the current blocker's diagnosis, checking status, running an ad
+hoc backup, and — the real "done" bar — performing a restore. This entry
+stays the tracking summary; that page is where the commands and the live
+error text live.
 
-Once both are done and cube has actually been switched: **done still means a
-restore actually performed** — one Forgejo repo recovered from the backup —
-because a restore nobody has run isn't a backup, and neither is a module
-nobody has switched to.
+Once the NFS access rule is fixed: **done still means a restore actually
+performed** — one Forgejo repo recovered from the backup — because a
+restore nobody has run isn't a backup, and neither is a mount that still
+fails.
 
 ## 5. Grafana's admin credentials
 

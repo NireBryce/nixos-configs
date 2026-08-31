@@ -94,33 +94,33 @@ anything in this repo) can enforce or verify.
 
 ## What isn't done yet
 
-Smaller than it looked partway through, as of 2026-08-29:
+As of 2026-08-30, the secret and the build/switch are done — see the module
+header and [homelab/backup-runbook.md](../homelab/backup-runbook.md) for
+that history. What's actually left:
 
-- **The repository password now has a value — but it's uncommitted.** Set
-  via `sops set` against a separate checkout on cube itself
-  (`~/projects/nix/nixos-configs`), not from this tree. sops-nix validates
-  its secrets manifest as part of the *build*, not only at activation, so
-  this was a real blocker until found: a first `just build` on cube (synced
-  over ssh, since darwin can't cross-build `x86_64-linux`) failed exactly
-  there —
-  `sops-install-secrets: ... the key 'restic-cube-password' cannot be
-  found` — because the session that wrote this module never had decrypt
-  access to set it. What that first attempt didn't know is that the secret
-  already existed, just in a checkout it hadn't looked at. Merging that
-  checkout's `secrets.yaml` into the tree and rebuilding: a clean full
-  `system.build.toplevel`, `restic`/`restic-cube`/`rustic` all present.
-  **Committing that `secrets.yaml` edit — safe, it's ciphertext, this repo
-  commits `secrets.yaml` encrypted deliberately — is the remaining step**,
-  not generating a new value.
-- **The QNAP-side snapshot schedule** described above hasn't been
-  configured — this repo has no way to reach into the QNAP's admin console.
+- **The QNAP is refusing the NFS mount.** Real, live error from cube's
+  journal: `mount.nfs: access denied by server while mounting
+  192.168.0.200:/restic-backup`. Not a Nix problem — the kernel modules are
+  loaded, the automount unit is correctly set up, and the QNAP answers
+  pings and its admin web ports fine. This is the QNAP's own NFS export
+  permissions not yet including cube, most likely because `restic-backup`
+  is a share that was only just created for this and never got a host-access
+  rule. Fix is on the QNAP's admin web console — see the runbook's "The
+  current blocker" section for what that probably looks like (unverified
+  against the real menu).
+- **SSH into the QNAP doesn't work**, checked from both the LAN IP and its
+  tailnet device (`ts-hive`) — the LAN attempt times out, the tailnet one
+  is refused outright. Consistent with Telnet/SSH simply being off in QTS,
+  its own default, not a fault on cube's side. The fix above has to happen
+  through the QNAP's web console, not a shell.
+- **The QNAP-side snapshot schedule** described above still hasn't been
+  configured — this repo has no way to reach into the QNAP's admin console
+  for this either.
 
-Once the secret is committed and a real `switch` has run on cube, this
-module still isn't done — per issue #87's own "done means": a **restore
-actually performed** — one Forgejo repo recovered and confirmed to open —
-is the bar, not a green timer or even a clean build.
-[homelab/backup-runbook.md](../homelab/backup-runbook.md) is the
-step-by-step procedure for what's left.
+Even once the NFS mount works, this module still isn't done — per issue
+#87's own "done means": a **restore actually performed** — one Forgejo
+repo recovered and confirmed to open — is the bar, not a mount succeeding
+or even a real backup running once.
 
 ## Imported by
 
