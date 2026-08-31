@@ -82,27 +82,27 @@ one that created it.
 one copy each, still — the module below doesn't change that yet.
 
 2026-08-28: the [backup](../categories/backup.md) category exists now
-(restic, local-path repo on the already-imported QNAP NFS mount, not the
-issue's original SFTP sketch — see that page for why). The secret, build,
-and switch are all done as of 2026-08-30 — what's actually stopping it from
-being a real backup now:
+(restic to the QNAP). Originally a local-path repo on the QNAP NFS mount —
+that failed for real (`mount.nfs: access denied by server`, the share's
+export ACL never included cube), and as of 2026-08-31 the module switched
+to SFTP instead, issue #87's original plan. SSH now works on the QNAP (a
+dedicated key for this, confirmed authenticating by hand), but:
 
-- **The QNAP is refusing the NFS mount** — `mount.nfs: access denied by
-  server`, a real error from cube's journal once the switch made the
-  automount unit live. Almost certainly the `restic-backup` share's NFS
-  host-access list not including cube yet, since it's a share created just
-  for this. Fix is in the QNAP's own admin web console.
-- **SSH into the QNAP doesn't work** (checked from the LAN and the tailnet
-  both), so that fix can't be scripted or done from a shell — Telnet/SSH
-  is very likely just off in QTS, its own default.
+- **Neither sops secret has a value in this tree** — the repository
+  password, and the new dedicated SSH private key (currently sitting as a
+  plain file on cube, not yet in `secrets.yaml`). Both need real decrypt
+  access this session doesn't have; see the runbook for the exact commands.
 - **No QNAP-side snapshot schedule exists on the backup share** — the
   anti-deletion mitigation the module assumes but can't configure itself.
+- **QuTS hero has no toggle to force key-only SSH auth** — enabling SSH at
+  all means password auth stays reachable too. Mitigating that (QNAP
+  firewall rules, strong passwords, brute-force protection, possibly a
+  Tailscale ACL) is a separate, still-open human step.
 
 **The [backup runbook](backup-runbook.md) is the actual procedure**,
-including the current blocker's diagnosis, checking status, running an ad
-hoc backup, and — the real "done" bar — performing a restore. This entry
-stays the tracking summary; that page is where the commands and the live
-error text live.
+including all three of the above, checking status, running an ad hoc
+backup, and — the real "done" bar — performing a restore. This entry stays
+the tracking summary; that page is where the commands live.
 
 Once the NFS access rule is fixed: **done still means a restore actually
 performed** — one Forgejo repo recovered from the backup — because a

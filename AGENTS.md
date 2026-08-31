@@ -222,20 +222,18 @@ renames all dodge the same silent-merge collision `just modules` catches):
   reverse-proxy: drop it and the front page 502s. Not a second monitoring
   system; and a 200 from the page proves little — glance renders behind
   `/api/pages/home/content/`, which is the check that matters.
-- **`backup`** (2026-08-28) — restic, a local-path repository on the QNAP
-  NFS mount (`/mnt/restic-backup`, a share dedicated to this,
-  `nire/system/storage/storage-NFS.nix` — already imported by every Linux
-  host via `system`, not a new import; see the category's own page for the
-  "was described as dangling, wasn't" correction) rather than issue #87's
-  original SFTP sketch. No port, no Caddy route — a timer, not a listener.
-  Switched and running on cube as of 2026-08-30 (`/run/current-system`
-  confirmed matching), `rustic`/`restic-cube` real on `elly`'s `$PATH` —
-  blocked on one live finding: the QNAP rejects the NFS mount
-  (`access denied by server`, almost certainly the `restic-backup` share's
-  host-access list not including cube yet) and has no SSH open to fix it
-  from a shell (checked LAN and tailnet both) — needs the QNAP's own admin
-  console; tracked in `wiki/homelab/pending-setup.md` item 4 and
-  `wiki/homelab/backup-runbook.md`.
+- **`backup`** (2026-08-28) — restic to the QNAP. Shipped as a local-path
+  repository on the QNAP NFS mount (`/mnt/restic-backup`,
+  `nire/system/storage/storage-NFS.nix`); that failed for real
+  (`access denied by server`, the share's export ACL never included cube),
+  and as of 2026-08-31 switched to **SFTP** instead — issue #87's original
+  plan, real per-connection key auth rather than an IP allowlist. SSH now
+  works on the QNAP with a dedicated key generated for this, confirmed
+  authenticating by hand; a real build on cube confirms everything else
+  works, blocked only on two sops secrets this session can't set (the
+  repository password, and the new SSH private key) — see the category's
+  own page for the switch's reasoning; tracked in
+  `wiki/homelab/pending-setup.md` item 4 and `wiki/homelab/backup-runbook.md`.
 
 **Hosts**: `hosts.nix` declares one `darwinConfigurations` entry
 (`nire-lysithea`, aarch64-darwin) alongside three `nixosConfigurations`, all

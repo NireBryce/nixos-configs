@@ -41,28 +41,39 @@ true from the original plan: nothing in this repo has ever exercised that
 mount against the real QNAP, so "already imported" is not the same claim as
 "known to work."
 
-**The mount point itself moved, same day.** Originally `/mnt/qnap-erin`
+**The mount point itself moved, 2026-08-28.** Originally `/mnt/qnap-erin`
 (device `192.168.0.200:/erin-pub`), a share shared with other, unrelated
 QNAP uses; renamed to `/mnt/restic-backup` (device
-`192.168.0.200:/restic-backup`), a share dedicated to this category —
-`storage-NFS.nix`'s own header is the current source of truth. This page
-and the module both reflect the new path.
+`192.168.0.200:/restic-backup`), a share dedicated to this category. **As
+of 2026-08-31 this module no longer uses that mount at all** — see the next
+section — but `storage-NFS.nix` itself is untouched and still exists for
+whatever else might want it.
 
-## Local-path repository, not SFTP
+## SFTP repository now, not local-path on NFS
 
-Issue #87's original sketch was restic over SFTP to the QNAP. This module
-uses a local-path repository instead — `/mnt/restic-backup/cube` (`cube` is
-a host-scoped subdirectory in case another host gets its own backup
-category later) — because restic encrypts client-side regardless of
-backend, so a local-path repo gets the same encryption-at-rest #87 wanted
-from SFTP without standing up SSH, a restricted backup user, or
-`rest-server`/Container Station on the QNAP side at all.
+This module shipped 2026-08-28 with a local-path repository on the NFS
+mount above, a deliberate departure from issue #87's original sketch of
+restic over SFTP — the reasoning at the time: restic encrypts client-side
+regardless of backend, so a local-path repo gets the same encryption-at-rest
+without standing up SSH on the QNAP at all. Stated then as the one real
+trade-off: NFS export trust is IP-based, not keyed, so anything on the LAN
+with the right IP could mount the share.
 
-This is the one real trade-off in the module, not a settled fact: NFS export
-trust is IP-based rather than keyed, so anything on the LAN with the right
-IP can mount the share. It's compensated for, not eliminated — see
-"Anti-deletion" below — and less exposed than under the old shared
-`erin-pub` export, now that this lives on a share dedicated to backups.
+**That trade-off is what broke it.** A real switch on cube hit `mount.nfs:
+access denied by server` — the `restic-backup` share's NFS host-access list
+never got cube added. Chasing that down (and finding the QNAP's own admin
+console has no way to force key-only SSH, so the NFS route wasn't even the
+weaker option by much) led to just doing what issue #87 originally
+suggested: enable SSH on the QNAP and use SFTP directly. Real per-connection
+key auth, not a host-IP allowlist — better on the exact axis that failed.
+
+The module now points at `sftp:nire@ts-hive:/share/homes/nire/restic-cube`,
+authenticating with a dedicated ed25519 key (generated on cube specifically
+for this, not the personal key that already had interactive QNAP access —
+confirmed working by hand: `ssh -i ~/.ssh/restic-cube-backup nire@ts-hive`
+authenticates with no password). The QNAP's host key is pinned in Nix
+(`programs.ssh.knownHosts`, captured via `ssh-keyscan` against the real
+host) rather than trusted on first connection at runtime.
 
 ## sqlite consistency
 
@@ -83,44 +94,45 @@ fully regenerable by scraping again. Nothing else cube runs is excluded.
 ## Anti-deletion is not a Nix change
 
 Issue #87's open question 3: anything that compromises or wipes cube can run
-`restic forget --prune` against its own backups, since cube has full
-read-write access to the NFS export. The mitigation this module assumes —
-cheapest rung of the ascending-effort list #87 proposes — is a **QNAP-side
-native snapshot schedule on the `restic-backup` share**, so cube can write
-and prune within the restic repository but can't touch the NAS's own
-snapshots.
-That's QNAP admin-console configuration, not something this module (or
-anything in this repo) can enforce or verify.
+`restic forget --prune` against its own backups, since `nire` (the QNAP
+account restic authenticates as) has full read-write access to
+`~/restic-cube`. Switching from NFS to SFTP didn't close this — the
+mitigation this module still assumes, unchanged, cheapest rung of the
+ascending-effort list #87 proposes — is a **QNAP-side native snapshot
+schedule on the `restic-backup` share** (`nire`'s home lives under it), so
+cube can write and prune within the restic repository but can't touch the
+NAS's own snapshots. That's QNAP admin-console configuration, not something
+this module (or anything in this repo) can enforce or verify.
 
 ## What isn't done yet
 
-As of 2026-08-30, the secret and the build/switch are done — see the module
-header and [homelab/backup-runbook.md](../homelab/backup-runbook.md) for
-that history. What's actually left:
+As of 2026-08-31: SSH now works on the QNAP, the dedicated key
+authenticates, and the module points at the SFTP repository — but nothing
+has actually confirmed a real backup works end to end yet.
 
-- **The QNAP is refusing the NFS mount.** Real, live error from cube's
-  journal: `mount.nfs: access denied by server while mounting
-  192.168.0.200:/restic-backup`. Not a Nix problem — the kernel modules are
-  loaded, the automount unit is correctly set up, and the QNAP answers
-  pings and its admin web ports fine. This is the QNAP's own NFS export
-  permissions not yet including cube, most likely because `restic-backup`
-  is a share that was only just created for this and never got a host-access
-  rule. Fix is on the QNAP's admin web console — see the runbook's "The
-  current blocker" section for what that probably looks like (unverified
-  against the real menu).
-- **SSH into the QNAP doesn't work**, checked from both the LAN IP and its
-  tailnet device (`ts-hive`) — the LAN attempt times out, the tailnet one
-  is refused outright. Consistent with Telnet/SSH simply being off in QTS,
-  its own default, not a fault on cube's side. The fix above has to happen
-  through the QNAP's web console, not a shell.
+- **Both sops secrets are declared but this tree can't set their values.**
+  `restic-cube-password` (the repository password) and the new
+  `restic-cube-ssh-key` (the dedicated SSH private key, currently sitting
+  as a plain file on cube at `~/.ssh/restic-cube-backup`) both need real
+  decrypt access to `secrets.yaml`, which the session that wrote this
+  switch didn't have. See the module's own header for the exact commands.
+  A real build on cube confirmed the *shape* of the resulting failure for
+  the new key — the same build-time `sops-install-secrets` failure the
+  password hit originally — and confirmed everything else (21 other
+  derivations, including `home-manager-generation`) builds clean around it.
 - **The QNAP-side snapshot schedule** described above still hasn't been
-  configured — this repo has no way to reach into the QNAP's admin console
-  for this either.
+  configured.
+- **The mitigations for SSH's own exposure** (QuTS hero has no toggle to
+  force key-only auth) are a separate, still-open thread — restricting
+  which sources can reach port 22 at the QNAP's own firewall, strong
+  passwords on whatever accounts can still use them, brute-force
+  protection, and possibly Tailscale Access Controls, none of which this
+  repo can configure.
 
-Even once the NFS mount works, this module still isn't done — per issue
-#87's own "done means": a **restore actually performed** — one Forgejo
-repo recovered and confirmed to open — is the bar, not a mount succeeding
-or even a real backup running once.
+Even once all of that's done, this module still isn't done — per issue
+#87's own "done means": a **restore actually performed** — one Forgejo repo
+recovered and confirmed to open — is the bar, not a working connection or
+even a real backup running once.
 
 ## Imported by
 

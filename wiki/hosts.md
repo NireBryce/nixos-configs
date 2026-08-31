@@ -80,16 +80,18 @@ call `tailscale.nix` makes for the host daemon.
 `nire-cube` also gets a [backup](categories/backup.md) category as of
 2026-08-28 — restic to the QNAP NAS already on the network, against issue
 [#87](https://github.com/NireBryce/nixos-configs/issues/87). **Switched and
-running as of 2026-08-30** (unlike this section's older framing might
-suggest if read from history) — `restic-backups-cube.timer` is active on
-the real running system, `rustic`/`restic-cube` are real binaries on
-`elly`'s `$PATH`. Blocked on one live, QNAP-side finding: the NFS mount is
-rejected (`access denied by server`, a share host-access rule, not a Nix
-problem) and the QNAP has no SSH open to fix it remotely — needs its own
-admin console. Issue #87's own "done means" (a real Forgejo repo actually
-recovered) is further out than that and hasn't been attempted. See the
-category page and [homelab/backup-runbook.md](homelab/backup-runbook.md)
-for the full account and the actual commands.
+running as of 2026-08-30**, but the repository backend changed again since:
+shipped as a local-path repo on an NFS mount, which failed for real
+(`access denied by server`, an export ACL the QNAP never granted cube), so
+as of 2026-08-31 it's **SFTP** instead — issue #87's original plan. SSH now
+works on the QNAP with a key generated just for this, confirmed
+authenticating by hand; a real build on cube confirms everything else
+works, blocked only on two sops secrets (repository password, SSH private
+key) this session can't set. Issue #87's own "done means" (a real Forgejo
+repo actually recovered) is further out than that and hasn't been
+attempted. See the category page and
+[homelab/backup-runbook.md](homelab/backup-runbook.md) for the full
+account and the actual commands.
 
 ## Where each fact lives
 

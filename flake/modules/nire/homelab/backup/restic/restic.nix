@@ -8,6 +8,45 @@
 # silently MERGE, the `containers`/`podman.nix` collision CLAUDE.md/AGENTS.md
 # document -- same reason `git-forge` isn't `forgejo`.
 #
+# REPOSITORY IS SFTP NOW, NOT A LOCAL PATH ON THE NFS MOUNT -- reversed
+# 2026-08-31 from the local-path-on-NFS choice this module shipped with.
+# That choice was deliberate (see history below for the original reasoning
+# and issue #87's own alternative), but it depended on the QNAP's NFS
+# export ACL for `restic-backup`, and that turned out not to work: a real
+# switch on cube (below) hit `mount.nfs: access denied by server`, live,
+# not hypothetical. Chasing that down (QNAP admin console has no menu for
+# forcing key-only SSH, so plain host-IP-allowlist NFS access was already
+# the weaker of the two anyway) led to just enabling SSH on the QNAP and
+# using it directly, which is what issue #87 originally suggested. SFTP
+# gets real per-connection key auth instead of NFS's host-IP allowlist --
+# strictly better on the one axis that mattered here, and doesn't depend
+# on `storage-NFS.nix`'s mount succeeding at all anymore. That mount still
+# exists in the tree (nothing else stopped using it), just not for this.
+#
+# THE KEY IS DEDICATED, NOT REUSED. Generated on cube specifically for this
+# (`~/.ssh/restic-cube-backup`, ed25519, no passphrase -- it has to work
+# unattended from a systemd unit), not the personal `elly@nire-cube` key
+# that already had QNAP access for interactive admin use. Public half
+# appended to the QNAP's `nire` user's `~/.ssh/authorized_keys` directly
+# (confirmed working: `ssh -i ~/.ssh/restic-cube-backup nire@ts-hive`
+# authenticates with no password prompt). Private half has to reach
+# secrets.yaml the same way restic-cube-password did -- see that secret's
+# own comment below for why this session can't do that step itself.
+#
+# THE QNAP'S HOST KEY IS PINNED, NOT TRUST-ON-FIRST-USE: `programs.ssh.
+# knownHosts` below, captured via `ssh-keyscan` against the real host and
+# checked into the tree, rather than `StrictHostKeyChecking=accept-new` at
+# connection time. A stale or spoofed host key fails loud at connection
+# time instead of silently trusting whatever answers on first contact.
+#
+# NOTHING HERE HAS BEEN VERIFIED PAST EVALUATION for the SFTP switch
+# specifically -- the connection itself was tested by hand (see above), but
+# this module hasn't been built or switched since. The build/secret saga
+# below is about the NFS-era version of this module; treat it as history,
+# not current status.
+#
+# ── history: NFS era, 2026-08-28 through 2026-08-31 ──────────────────────
+#
 # THE PLAN DOC'S "storage-NFS.nix IS DANGLING" CLAIM WAS WRONG, corrected
 # while writing this module rather than left to rot: `nire/system/storage/`
 # has no `dirsAsCategory.nix` of its own, so `storage-NFS.nix` is collected
@@ -16,59 +55,43 @@
 # imports. `nix eval .#nixosConfigurations.<host>.config.fileSystems` on all
 # three (durandal, tenacity, cube) listed `/mnt/qnap-erin`, checked
 # 2026-08-28 (the mount point was renamed to `/mnt/restic-backup`, a share
-# dedicated to this module, shortly after -- storage-NFS.nix's own header
-# has the current path; this comment's claim about it being collected
-# through `system` rather than needing a new import is unaffected by the
-# rename). So the QNAP NFS mount was ALREADY live everywhere, not an unused
-# module one import away -- this module needed no new import to reach it,
-# and neither does anything else that already imports `system`. Nothing in
-# this repo has ever exercised that mount against the real QNAP, though:
-# untested infra, not proven-working infra.
+# dedicated to this module, shortly after). So the QNAP NFS mount was
+# ALREADY live everywhere, not an unused module one import away.
 #
-# REPOSITORY IS A LOCAL PATH ON THAT NFS MOUNT, NOT SFTP -- deliberately
-# different from issue #87's original sketch. restic encrypts client-side
-# regardless of backend, so a local-path repo on the mount gets the same
-# encryption-at-rest #87 wanted from SFTP without standing up SSH/
-# `rest-server`/Container Station on the QNAP. Trade-off, stated plainly
-# because it's the one judgment call in this module rather than a fact:
-# NFS export trust is IP-based, not keyed, so anything on the LAN with the
-# right IP can mount the share. Compensated for below (see
-# "anti-deletion"), not eliminated -- and less exposed than it was under
-# the old shared `erin-pub` export, now that this lives on a share
-# dedicated to backups rather than general QNAP storage.
+# The original repository choice was a local path on that mount, not SFTP
+# -- deliberately different from issue #87's original sketch, on the
+# reasoning that restic encrypts client-side regardless of backend, so a
+# local-path repo gets the same encryption-at-rest without standing up
+# SSH/`rest-server`/Container Station on the QNAP. Stated then as the one
+# real trade-off in the module: NFS export trust is IP-based, not keyed.
+# That trade-off is what ended up mattering -- see the new header above.
 #
-# UPDATE 2026-08-28/29, REAL BUILD ON CUBE: rsynced this tree over ssh
-# (darwin can't cross-build x86_64-linux -- AGENTS.md, Commands) to
-# `nire-cube.local` and ran `just build` for real. First attempt failed --
-# but at exactly the one predicted point, `sops.secrets.restic-cube-password`
-# below having no value in the secrets.yaml this session had decrypt access
-# to -- and that turned out to be a BUILD-time failure (sops-nix validates
-# its manifest as part of `system.build.toplevel`, not only at activation),
-# worse than the runtime failure this comment used to describe. What that
-# first attempt didn't know: the secret DOES exist, set via `sops set`
-# against a SEPARATE checkout on cube (`~/projects/nix/nixos-configs`, a
-# few commits behind but with a real value) that this session hadn't
-# checked -- not overwritten, just not looked at yet. Rebuilt with that
-# checkout's `secrets.yaml` merged in: clean full-toplevel build, `restic`/
-# `restic-cube`/`rustic`/`ssh-to-age` and the new `restic-backups-cube`
-# service+timer all present in the diff, zero errors. `just modules`/
-# `just lint` pass and the other hosts' toplevels are confirmed unaffected
-# on top of that. Still open: the secret addition itself is uncommitted (in
-# that other checkout, not this tree), no real `switch` has happened, the
-# mount is still unconfirmed against the real QNAP, and -- per issue #87's
-# own "done means" -- neither has a real restore of one Forgejo repo.
+# A real build on cube (synced over ssh, twice -- darwin can't cross-build
+# x86_64-linux, AGENTS.md Commands) first failed on `sops.secrets.
+# restic-cube-password` having no value in the secrets.yaml that attempt
+# had -- a BUILD-time failure (sops-nix validates its manifest as part of
+# `system.build.toplevel`), not just a runtime one. The password already
+# existed, set via `sops set` against a separate checkout on cube
+# (`~/projects/nix/nixos-configs`) the first attempt hadn't checked --
+# merging that checkout's secrets.yaml in and rebuilding gave a clean full
+# toplevel. Cube was later switched (not by an agent session -- `sudo`
+# there needs a password one doesn't have) to a generation with this
+# module, and the NFS mount failed exactly the way described above.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 
-        # `/mnt/restic-backup` (storage-NFS.nix), a QNAP share dedicated to
-        # this module -- renamed 2026-08-28 from a generic `/mnt/qnap-erin`
-        # shared with other, unrelated uses. `cube` underneath is a
-        # host-scoped subdirectory, not stripped now that the share itself
-        # is purpose-built: nothing stops another host getting its own
+        # `nire`'s home on the QNAP, confirmed live via
+        # `ssh nire@ts-hive 'echo $HOME'` -- `/share/homes/nire`, real path
+        # `/share/ZFS19_DATA/homes/nire`. `restic-cube` underneath it is a
+        # host-scoped subdirectory for the same reason the old NFS
+        # `repoRoot` had one: nothing stops another host getting its own
         # backup category later, and this keeps repositories from
-        # colliding if one does.
-        repoRoot          = "/mnt/restic-backup/cube";
+        # colliding if one does. Pre-created by hand (`mkdir -p
+        # ~/restic-cube && chmod 700`) on the QNAP, since restic's SFTP
+        # backend needs the parent to exist even though it creates the
+        # repository structure itself on `init`.
+        sftpRepo          = "sftp:nire@ts-hive:/share/homes/nire/restic-cube";
         sqliteStagingDir  = "/var/cache/restic-backups-cube/sqlite-staging";
 
         # The three sqlite dbs actually at risk (issue #87's table), and
@@ -95,6 +118,17 @@
         # the flake-parts config, not this option tree. Same pattern
         # grafana.nix/golink.nix/forgejo.nix use.
         flake.modules.nixos.${moduleName} = { config, pkgs, ... }: {
+            # Pinned host key, not TOFU -- see the module header. Captured
+            # 2026-08-31 via `ssh-keyscan -t ed25519 ts-hive` against the
+            # real host. `programs.ssh.knownHosts` writes this into
+            # `/etc/ssh/ssh_known_hosts` (system-wide), which any `ssh`
+            # invocation on this host consults by default -- including the
+            # one `sftp.command` below shells out to -- so no
+            # `-o UserKnownHostsFile=`/`-o StrictHostKeyChecking=` is
+            # needed on that command line.
+            programs.ssh.knownHosts."ts-hive".publicKey =
+                "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFyg7GFh4XWohudoODsdbzj8MtyymHChvk/BHvm+IRDU";
+
             # sopsFile unset -- defaults to `config.sops.defaultSopsFile`
             # (secrets.yaml, set in nire/system/secrets/sops.nix, imported
             # by every Linux host via `system`). Declared HERE, not beside
@@ -115,41 +149,54 @@
             # right, unlike Forgejo's secret which had to be readable by
             # the non-root `forgejo` user.
             #
-            # THE VALUE ITSELF WAS NOT SET FROM THIS TREE. Adding it needs
-            # real decrypt access to secrets.yaml (one of the age keys in
-            # `.sops.yaml`: durandal, lysithea, tenacity, or cube's own
-            # host key) -- absent from the session that originally wrote
-            # this module (`sops -d` failed, no usable key found there).
-            # It DOES exist now: set via `sops set` against a separate
-            # checkout on cube itself (`~/projects/nix/nixos-configs`,
-            # decrypt access via cube's own host key), confirmed 2026-08-29
-            # by a full `just build` succeeding once that checkout's
-            # `secrets.yaml` was in the tree being built -- restic-nix's own
-            # header has the fuller account of both build attempts. Still
-            # true: **that secrets.yaml edit is uncommitted**, sitting only
-            # in that other checkout, not in this tree or on `experimental`
-            # -- committing it (safe: it's ciphertext, this repo commits
-            # `secrets.yaml` encrypted deliberately, see AGENTS.md Safety)
-            # is a real remaining step, distinct from "the module works."
-            # For the record, the command that would generate a fresh value
-            # the same safe way (inline via command substitution, so it's
-            # never a literal in the command text or in any tool output,
-            # per `.claude/skills/secrets-hygiene/SKILL.md`) if this secret
-            # ever needs rotating rather than just committing what already
-            # exists:
+            # THE VALUE ITSELF WAS NOT SET FROM THIS TREE, same shape as
+            # restic-cube-password below: needs real decrypt access to
+            # secrets.yaml, absent from the session that generated the
+            # keypair. The private half sits at ~/.ssh/restic-cube-backup
+            # on cube right now (mode 600, ed25519, no passphrase) --
+            # setting this secret means reading that file's content into
+            # sops from a session/host that has decrypt access, e.g.:
             #
-            #     nix shell nixpkgs#sops nixpkgs#age --command \
-            #         sops set flake/modules/nire/system/secrets/secrets.yaml \
-            #         '["restic-cube-password"]' \
-            #         "\"$(openssl rand -base64 32)\""
+            #     ssh nire-cube.local 'cat ~/.ssh/restic-cube-backup' \
+            #         | jq -Rs . \
+            #         | xargs -0 -I{} nix shell nixpkgs#sops nixpkgs#age \
+            #             --command sops set \
+            #             flake/modules/nire/system/secrets/secrets.yaml \
+            #             '["restic-cube-ssh-key"]' {}
+            #
+            # (`jq -Rs .` JSON-encodes the multi-line key, escaping
+            # newlines, into the single quoted scalar `sops set` expects
+            # as its value argument.) Once set, `rm` the file on cube --
+            # its only job was getting the value into secrets.yaml.
+            sops.secrets.restic-cube-ssh-key = { };
+
+            # See sops.secrets.restic-cube-ssh-key just above for why this
+            # has no value from this tree yet either -- same gap, same fix
+            # shape, first hit for this module 2026-08-28/29 (see the
+            # module header's history section for the full build-time
+            # failure this caused before it was found and fixed once).
             sops.secrets.restic-cube-password = { };
 
             services.restic.backups.cube = {
-                repository    = repoRoot;
+                repository    = sftpRepo;
                 passwordFile  = config.sops.secrets.restic-cube-password.path;
                 initialize    = true; # `restic cat config || restic init` in
-                                      # preStart; local backend creates
-                                      # repoRoot itself if missing.
+                                      # preStart; the SFTP backend creates
+                                      # the repo structure itself, but
+                                      # needs sftpRepo's parent directory
+                                      # to already exist (it does -- see
+                                      # sftpRepo's own comment).
+
+                # `nire@ts-hive`'s dedicated key, not whatever `ssh` would
+                # otherwise pick (agent, default identity files) --
+                # IdentitiesOnly=yes stops it from trying anything else
+                # first. This is restic's own documented shape for a
+                # non-default SFTP identity (nixpkgs' services.restic
+                # module example uses the identical
+                # `sftp.command='ssh ... -i ... -s sftp'` form).
+                extraOptions = [
+                    "sftp.command='${pkgs.openssh}/bin/ssh -i ${config.sops.secrets.restic-cube-ssh-key.path} -o IdentitiesOnly=yes nire@ts-hive -s sftp'"
+                ];
 
                 # The four paths issue #87's table names as unrecoverable,
                 # plus the sqlite staging copies backupPrepareCommand below
@@ -200,20 +247,6 @@
                 };
             };
 
-            # RequiresMountsFor, not a hand-written `after`/`wants` on the
-            # mount unit: systemd resolves a plain path to whichever
-            # unit(s) actually cover it, automount included -- covers
-            # `/mnt/restic-backup` being an `x-systemd.automount` mount
-            # (storage-NFS.nix) without this module needing to know or
-            # hand-escape the generated unit name
-            # (`mnt-restic\x2dbackup.mount`). `services.restic`'s own module
-            # doesn't offer a hook for this, so it's added the same way
-            # grafana.nix extends `before`/`wantedBy` on a unit
-            # `services.grafana` itself defines -- additive on
-            # `systemd.services."restic-backups-cube"`, not a
-            # redeclaration.
-            systemd.services."restic-backups-cube".unitConfig.RequiresMountsFor = repoRoot;
-
             # No backup-persist.nix: cube has a plain persistent root
             # (cube-configuration.nix's header), not the `/root` wipe
             # durandal/tenacity get, so restic's own state (`/var/cache/
@@ -224,13 +257,16 @@
             # nothing to persist even then.
 
             # Anti-deletion (issue #87's open question 3: "push means cube
-            # can delete its own backups") is NOT a Nix change -- it's a
-            # QNAP-side native snapshot schedule on the `restic-backup`
-            # share, so cube can write and prune within the restic repo
-            # but can't touch the NAS's own snapshots. Cheapest rung of
-            # the ascending-effort list #87 proposes; see the plan doc.
-            # Nothing in this module enforces it, because nothing in this
-            # module *can* -- it's QNAP admin-console configuration, same
-            # category of gap as the secret value above.
+            # can delete its own backups") is NOT a Nix change, and
+            # switching to SFTP didn't close it either -- `nire` can still
+            # delete anything it has permission to on `~/restic-cube` over
+            # SFTP, same as it could over NFS. Still needs a QNAP-side
+            # native snapshot schedule on the share, so cube can write and
+            # prune within the restic repo but can't touch the NAS's own
+            # snapshots. Cheapest rung of the ascending-effort list #87
+            # proposes; see the plan doc. Nothing in this module enforces
+            # it, because nothing in this module *can* -- it's QNAP
+            # admin-console configuration, same category of gap as the
+            # two secret values above.
         };
 }

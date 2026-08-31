@@ -119,13 +119,14 @@ bug; each is a decision someone might otherwise re-litigate from scratch.
   the whole fleet rather than just the forge; documented at
   [homelab/forgejo.md](homelab/forgejo.md) so nobody mistakes the forge for
   durable storage in the meantime. **A [backup](categories/backup.md)
-  category landed 2026-08-28** implementing #87's scheme (restic, local-path
-  repo on the QNAP mount) — doesn't move any other host, and as of
-  2026-08-30 is switched and running on cube. Blocked on the QNAP itself
-  rejecting the NFS mount (a share host-access rule, live-diagnosed but not
-  yet fixed — the QNAP has no SSH open to fix it remotely) and still has no
-  anti-deletion snapshot configured. Still exactly one copy of everything
-  until the mount works and a restore is actually performed.
+  category landed 2026-08-28** implementing #87's scheme — doesn't move any
+  other host, switched and running on cube as of 2026-08-30. Shipped as
+  restic over a local-path NFS repo, which failed for real (an export ACL
+  the QNAP never granted cube); as of 2026-08-31 it's SFTP instead, #87's
+  original plan, now that SSH works on the QNAP. Blocked on two sops
+  secrets nobody with decrypt access has set yet and still no anti-deletion
+  snapshot configured. Still exactly one copy of everything until both
+  land and a restore is actually performed.
 - **Tailscale Services (`svc:`) were weighed and deferred.** They would give
   each service its own tailnet DNS name (`https://grafana/` rather than a
   path prefix), which removes the whole prefix-handling problem
