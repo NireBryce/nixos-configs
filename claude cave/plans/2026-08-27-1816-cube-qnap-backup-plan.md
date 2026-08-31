@@ -34,6 +34,16 @@ carry the current path; this file's own later mentions of `qnap-erin`/
 `erin-pub` are left as written, for the same "don't silently rewrite"
 reason as the correction above.
 
+**The repository backend this plan recommended (local-path on the NFS
+mount) has since been abandoned, 2026-08-31.** It worked in evaluation but
+failed for real on a live switch — `mount.nfs: access denied by server`,
+the QNAP's export permissions for the dedicated share never included cube.
+The module now uses SFTP instead, which is what issue #87's own original
+sketch proposed before this plan talked it out of that in favor of NFS.
+Left as written below for the same reason as the corrections above; see
+[wiki/categories/backup.md](../../wiki/categories/backup.md) for the
+current, real backend and why.
+
 Written from a read of the repo, not from any live session on cube — nothing
 at the time of writing had touched the real machine or the real QNAP; see the
 category page for what's since been checked by evaluation (still no real

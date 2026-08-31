@@ -16,8 +16,9 @@ doesn't prove.
 
 A full reimplementation of restic in Rust, not a wrapper around the `restic`
 binary — it reads and writes the **same repository format** restic does, so
-it can operate on `/mnt/restic-backup/cube` directly, no conversion, no
-separate copy. Since version 0.8.0 it ships an interactive TUI:
+it can operate on the same repository [backup](../categories/backup.md)
+writes directly, no conversion, no separate copy. Since version 0.8.0 it
+ships an interactive TUI:
 
 ```sh
 rustic snapshots -i
@@ -71,8 +72,15 @@ nix run nixpkgs#rustic -- snapshots -i
 
 ## Pointing it at this repo's repository
 
-**Name mismatch to know about**: rustic's own environment variables are
-`RUSTIC_REPOSITORY` / `RUSTIC_PASSWORD_FILE`, not restic's
+**The repository moved, 2026-08-31**: SFTP now, not a local path on an NFS
+mount — see [backup](../categories/backup.md) for why. The command below is
+updated to match but is **more speculative than the rest of this page**:
+it's unconfirmed whether rustic accepts the same `-o sftp.command=` shape
+restic's `extraOptions` does for pointing at a non-default SSH identity —
+nothing has tried.
+
+**Name mismatch to know about regardless**: rustic's own environment
+variables are `RUSTIC_REPOSITORY` / `RUSTIC_PASSWORD_FILE`, not restic's
 `RESTIC_REPOSITORY` / `RESTIC_PASSWORD_FILE` — so it will **not**
 automatically pick up the environment the module's generated `restic-cube`
 wrapper script sets (see the runbook's "Ad hoc restic commands" section).
@@ -80,13 +88,14 @@ Either export the `RUSTIC_*` names yourself or pass the equivalent flags
 directly:
 
 ```sh
-sudo rustic -r /mnt/restic-backup/cube \
+sudo rustic -r sftp:nire@ts-hive:/share/homes/nire/restic-cube \
     --password-file /run/secrets/restic-cube-password \
+    -o sftp.command="ssh -i /run/secrets/restic-cube-ssh-key -o IdentitiesOnly=yes nire@ts-hive -s sftp" \
     snapshots -i
 ```
 
-`sudo` for the same reason plain `restic-cube` needs it: the password file
-is root-owned, mode `0400`, by sops-nix's own default — see the runbook.
+`sudo` for the same reason plain `restic-cube` needs it: both secret files
+are root-owned, mode `0400`, by sops-nix's own default — see the runbook.
 
 ## What's verified here
 
@@ -98,9 +107,10 @@ platform filter, never built, run, or switched there.
 **Still entirely unverified everywhere**: whether the TUI actually behaves
 as its own docs describe, and whether the command shape in "Pointing it at
 this repo's repository" above is right — pointing it at the real
-repository specifically can't be tested yet regardless, since
-[the runbook](backup-runbook.md) has the QNAP itself refusing the NFS
-mount. All of "What it is" and that section are transcribed from rustic's
+repository specifically can't be tested yet regardless, since neither sops
+secret the backup itself needs has a value in this tree yet (see
+[the runbook](backup-runbook.md)). All of "What it is" and that section are
+transcribed from rustic's
 own GitHub repo, docs site, and FAQ, not from a run here; `--version` is
 the only subcommand actually invoked. Treat the rest the way
 [forgejo.md](forgejo.md) treats its own untested commands: plausible from
