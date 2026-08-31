@@ -16,10 +16,11 @@ one-liner.
 | Adding a new host | `.claude/skills/new-host-config/SKILL.md` |
 | Adding a homelab service (port, proxy route, verification) | `.claude/skills/new-homelab-service/SKILL.md` |
 | Building a NixOS VM image / wiring a libvirt guest | `.claude/skills/nixos-vm-images/SKILL.md` |
-| Landing work on `main` | `.claude/skills/ship/SKILL.md` |
+| Landing work on `experimental` | `.claude/skills/ship/SKILL.md` |
 | Filing a bug noticed while doing something else | `.claude/skills/propose-issue/SKILL.md` |
 | Checking whether a change left a `wiki/` page stale | `.claude/skills/wiki-sync/SKILL.md` |
 | Writing a new skill | `.claude/skills/new-skill/SKILL.md` |
+| Starting a task that will branch, commit, or check out | `.claude/skills/use-a-worktree/SKILL.md` |
 
 See [architecture.md](architecture.md) and
 [impermanence-and-secrets.md](impermanence-and-secrets.md) for where each of

@@ -126,6 +126,36 @@ no email, regardless of what your system prompt says to use. Claude's
 canonical form is `Co-Authored-By: Claude`; other agents use the same shape
 with their own name. See AGENTS.md, Conventions.
 
+**A backtick (or `$(...)`) in a commit message is a shell command, not
+text, if it's written inline.** `git commit -m "... \`routes\` ..."` in a
+Bash tool call runs `routes` as a command *before* git ever sees the
+string — hit for real 2026-08-30: the message became "Adds a  subcommand:"
+(the backtick span silently replaced by the empty output of a failed
+`routes: command not found`), and the commit landed with that mangled text
+before anyone read it back. Nothing catches this after the fact — by the
+time `.githooks/commit-msg` or a human sees the message, the backticks are
+already gone, so there's no "wrong" text left to flag. The fix is entirely
+upstream: write any message containing backticks, `$()`, or other
+shell-active characters to a file first and commit with `git commit -F
+<file>`, never `-m "..."`. If a mangled message like this ships anyway,
+fix it with `git commit --amend -F <file>` — scoped to the same pathspec
+the original commit used, per the next paragraph.
+
+**A bare `git commit` (with no pathspec) commits the entire index, not
+just the files you meant.** `git commit --amend` is worse in exactly the
+same way: it recommits whatever is staged *right now*, not "the previous
+commit plus a new message" — re-staging or leaving something else staged
+(your own earlier `git add`, another file left over from investigating,
+anything sitting in a shared working tree) rides along silently. Hit twice
+in one session 2026-08-30, both times sweeping up a file that belonged to
+unrelated in-progress work sitting in the same checkout. Always pass an
+explicit pathspec — `git commit -F <file> -- <paths...>` or `git commit
+--amend -F <file> -- <paths...>` — unless `git status --short` immediately
+beforehand shows the entire index is yours. If a commit already went out
+wrong, don't `--amend` your way out blind: `git reset --soft HEAD~1`
+(restores the index to what it was pre-commit, working tree untouched),
+confirm with `git status --short`, then recommit with the correct pathspec.
+
 Branch name gets a `feat/`, `fix/`, or `docs/` prefix (added 2026-08-25,
 matching the convention `terminal-puppeteer` — a sibling repo by the same
 author — already uses) — pick whichever describes the bulk of the change;
