@@ -19,9 +19,10 @@ this session can't set) before this page trusts anything past that.
 The NFS-era troubleshooting this page used to carry is gone — it's history
 now, in the module's own header (`restic.nix`), not duplicated here.
 
-## Before any of this works: two setup steps
+## Before any of this works: four setup steps
 
-Both tracked in [Pending setup](pending-setup.md) item 4.
+Tracked in [Pending setup](pending-setup.md) item 4. Step 3 (SSH's own
+exposure) is done; 1, 2, and 4 aren't.
 
 ### 1. Set the two sops secrets
 
@@ -92,15 +93,26 @@ If the QNAP's snapshot granularity is coarser than a single share, the
 remaining fallback from issue #87's list is `restic-rest-server` in
 append-only mode, if the QNAP has Container Station.
 
-### 3. Also open, separately: mitigating SSH's own exposure
+### 3. Mitigating SSH's own exposure — done, 2026-08-31
 
 QuTS hero has no toggle to force key-only SSH auth, so enabling it at all on
-the QNAP means password auth stays reachable too. Not this module's
-problem to solve in Nix, but real: restricting which sources can reach port
-22 at the QNAP's own firewall, strong unique passwords on whatever accounts
-still accept them, QNAP's brute-force protection, and possibly a Tailscale
-Access Controls restriction, are all still-open, human, QNAP/Tailscale-console
-steps.
+the QNAP means password auth stays reachable too — mitigated at the network
+level instead:
+
+- **Port 22 is LAN-blocked, tailnet-only.** Confirmed live, both directions:
+  `192.168.0.200:22` times out from both lysithea and cube (neither can
+  reach it over the LAN anymore); `ts-hive`'s tailnet address
+  (`100.78.140.91:22`) still accepts a connection from cube.
+- **No further Tailscale ACL restriction** — every tailnet device can still
+  reach it, a deliberate choice, not an oversight: the existing tailnet
+  policy already grants `autogroup:members` full reachability to every
+  member device (see the earlier discussion this runbook doesn't
+  duplicate), and narrowing that specifically for `ts-hive` would mean
+  restructuring a shared policy for marginal benefit once the LAN block
+  above is in place.
+- **QNAP brute-force protection (Network Access Protection) is on** — taken
+  on confirmation, not independently checked (no `sudo` on the QNAP from
+  here to inspect it directly).
 
 ### 4. Switch cube
 
@@ -276,10 +288,14 @@ is only reachable via `ssh nire-cube.local 'ssh ... ts-hive ...'`):
   after the SFTP switch, confirmed by `git stash`-isolating just the
   `restic.nix` change, not inferred from category scoping alone.
 
+- **SSH's LAN exposure is closed, tailnet-only now** — `192.168.0.200:22`
+  times out from both lysithea and cube; `ts-hive`'s tailnet address still
+  accepts a connection. See setup step 3 above for the full account,
+  including what's taken on confirmation rather than independently checked.
+
 **Not verified**: anything past the SSH connection and the build — no
-backup has run, no snapshot exists, no restore has been attempted, the
-QNAP snapshot schedule (setup step 2) is unconfirmed, and none of the SSH
-exposure mitigations (setup step 3) have been done. This section gets
+backup has run, no snapshot exists, no restore has been attempted, and the
+QNAP snapshot schedule (setup step 2) is unconfirmed. This section gets
 filled in further the first time each of those does.
 
 ## See also
