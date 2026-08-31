@@ -20,8 +20,9 @@
 # peers by MagicDNS name via nsswitch -> resolve -> systemd-resolved ->
 # tailscale0's D-Bus split-DNS. That mechanism was never the problem (below).
 #
-# TWO REAL TRAPS found diagnosing "nire-cube unreachable from nire-tenacity"
-# that day, neither a bug in this file or in resolved.nix/avahi.nix:
+# THREE REAL TRAPS, the first two found diagnosing "nire-cube unreachable
+# from nire-tenacity" that day, the third found separately 2026-08-30 --
+# none a bug in this file or in resolved.nix/avahi.nix:
 #
 # 1. Tailnet device names do NOT match `networking.hostName`: the NixOS host
 #    is `nire-cube`, its Tailscale device (and MagicDNS name) is `ts-cube` --
@@ -46,6 +47,25 @@
 #    every peer connection was silently denied at the mesh layer, before any
 #    host's own firewall. Fixed in the admin console -- nothing to change
 #    here.
+#
+# A THIRD TRAP, found 2026-08-30 on a session working from nire-lysithea:
+# `ssh ts-cube` (the right tailnet name, per trap 1 above) failed with a
+# plain resolution error -- not a timeout, not NXDOMAIN-for-the-wrong-name,
+# just "could not resolve hostname" -- because Tailscale itself wasn't
+# connected on the CLIENT machine. Several turns went into diagnosing
+# Tailscale's own health (`tailscale status`, whether the app was even
+# running) before trying the other real name this host answers to:
+# `nire-cube.local`, plain LAN mDNS/Avahi (avahi.nix, system category),
+# which needs no Tailscale at all and was reachable the entire time.
+#
+# THE RULE THIS GIVES: a tailnet name that flat-out won't resolve (as
+# opposed to trap 1's "resolves to nothing because it's the wrong name")
+# means check whether Tailscale is UP ON THE MACHINE YOU'RE RUNNING FROM,
+# and try the `.local` name meanwhile -- not "debug why the tailnet name is
+# broken". `flake/scripts/reach-host.sh` (added the same day) automates
+# exactly that fallback order (`.local`, then the tailnet FQDN, then plain
+# DNS) so this doesn't have to be re-derived by hand again; `just reach
+# <host>` is the front door to it.
 #
 # Diagnostic trick worth keeping: to check whether a *local* NixOS firewall
 # rule is really the problem, no root needed -- `openFirewall` and
