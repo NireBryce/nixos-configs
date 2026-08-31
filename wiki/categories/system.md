@@ -168,8 +168,8 @@ in `networking/tailscale.nix`'s own header, not repeated here:
   firewall setting is correct — fixed in the admin console, not here.
 - A tailnet name that won't resolve *at all* means check Tailscale on the
   machine you're running *from*, not the name — `just reach <host>`
-  (`flake/scripts/reach-host.sh`) tries the LAN/tailnet/DNS names in the
-  right order automatically. See [../traps-and-skills.md](../traps-and-skills.md).
+  (`flake/scripts/reach-host.sh`) tries a host's real names automatically
+  instead. See [../traps-and-skills.md](../traps-and-skills.md).
 
 Also worth keeping: `systemctl show firewall.service -p ExecStart`, read as
 a plain shell script (world-readable, no root needed), is the literal

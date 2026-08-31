@@ -63,9 +63,9 @@
 # means check whether Tailscale is UP ON THE MACHINE YOU'RE RUNNING FROM,
 # and try the `.local` name meanwhile -- not "debug why the tailnet name is
 # broken". `flake/scripts/reach-host.sh` (added the same day) automates
-# exactly that fallback order (`.local`, then the tailnet FQDN, then plain
-# DNS) so this doesn't have to be re-derived by hand again; `just reach
-# <host>` is the front door to it.
+# trying all of a host's real names so this doesn't have to be re-derived
+# by hand again -- see its own header for the current order (its own to
+# maintain, not restated here); `just reach <host>` is the front door.
 #
 # Diagnostic trick worth keeping: to check whether a *local* NixOS firewall
 # rule is really the problem, no root needed -- `openFirewall` and
