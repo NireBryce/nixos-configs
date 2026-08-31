@@ -24,6 +24,11 @@ under it, which can happen with no commit to this repo at all.
 | glance — the service index | `nire-cube` | `.../` (the root) | [Reaching cube's services](reaching-services.md); [landing](../categories/landing.md) covers config |
 | restic — backups to the QNAP | `nire-cube` | — (no URL; a timer, not a listener) | [Backup runbook](backup-runbook.md) |
 
+**Not a service of its own, but related**: [rustic](rustic.md) — a TUI that
+can browse and restore from the same repository the row above writes.
+Installed 2026-08-28 (`ellyHomeManager`-wide), not yet switched anywhere or
+run against a real repository.
+
 **Start at that second one if you don't know what's running.** It lists the
 services below, live-checks each one, and shows how cube itself is doing —
 so it answers "what's on here and is it up" without reading this page.

@@ -87,10 +87,16 @@ issue's original SFTP sketch — see that page for why). Two things stop it
 from being a real backup yet, both live-machine/human steps this page is
 for rather than a Nix change:
 
-- **The repository password has no value.** `sops.secrets.restic-cube-password`
-  is declared but unset — needs real decrypt access to `secrets.yaml` from a
-  session/host that has it. The module's own header carries the exact
-  command.
+- **The repository password has a value now, but it's uncommitted.** Set
+  via `sops set` in a separate checkout on cube itself
+  (`~/projects/nix/nixos-configs`). A real `just build` on cube confirmed
+  2026-08-28 that the missing key fails `system.build.toplevel` outright
+  (sops-nix validates its manifest at build time, not only activation) —
+  and confirmed 2026-08-29, once that checkout's `secrets.yaml` was merged
+  into the tree being built, that the build is otherwise completely clean.
+  What's left is committing that `secrets.yaml` edit (safe: ciphertext,
+  this repo commits `secrets.yaml` encrypted on purpose), not generating a
+  new value.
 - **No QNAP-side snapshot schedule exists on the backup share** — the
   anti-deletion mitigation the module assumes but can't configure itself.
 

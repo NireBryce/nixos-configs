@@ -221,15 +221,15 @@ renames all dodge the same silent-merge collision `just modules` catches):
   system; and a 200 from the page proves little — glance renders behind
   `/api/pages/home/content/`, which is the check that matters.
 - **`backup`** (2026-08-28) — restic, a local-path repository on the QNAP
-  NFS mount (`/mnt/qnap-erin`, `nire/system/storage/storage-NFS.nix` —
-  already imported by every Linux host via `system`, not a new import; see
-  the category's own page for the "was described as dangling, wasn't"
-  correction) rather than issue #87's original SFTP sketch. No port, no
-  Caddy route — a timer, not a listener. Evaluates only as of this writing:
-  the repository password has no value (needs real sops decrypt access this
-  session didn't have) and no QNAP-side anti-deletion snapshot schedule
-  exists yet — both human/live-machine steps, tracked in
-  `wiki/homelab/pending-setup.md` item 4.
+  NFS mount (`/mnt/restic-backup`, a share dedicated to this,
+  `nire/system/storage/storage-NFS.nix` — already imported by every Linux
+  host via `system`, not a new import; see the category's own page for the
+  "was described as dangling, wasn't" correction) rather than issue #87's
+  original SFTP sketch. No port, no Caddy route — a timer, not a listener.
+  Build-verified on cube 2026-08-29 (`just build` over ssh, real toplevel,
+  `rustic`/`restic-cube` both present and `rustic --version` run directly)
+  — not just evaluates. Still not switched, and the QNAP itself is
+  unconfirmed; tracked in `wiki/homelab/pending-setup.md` item 4.
 
 **Hosts**: `hosts.nix` declares one `darwinConfigurations` entry
 (`nire-lysithea`, aarch64-darwin) alongside three `nixosConfigurations`, all

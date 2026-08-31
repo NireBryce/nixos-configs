@@ -1,0 +1,121 @@
+# rustic — an interactive alternative to the plain `restic` CLI
+
+[rustic](https://github.com/rustic-rs/rustic) (the `rustic-rs` project), not
+to be confused with the unrelated `bnavetta/rustic` "restic wrapper" that
+shares its name in search results. This page is about using it against the
+repository [backup](../categories/backup.md) already writes — it isn't
+about a service this fleet runs, it's a client tool. Researched 2026-08-28
+from the web, in response to the backup runbook having a lot of reusable
+`restic-cube snapshots`/`restore` commands worth checking for existing
+tooling before hand-rolling more of them; installed the same day, in
+`nirePackages/shell-apps/backup-tools/rustic.nix`, so it's now on every host
+`ellyHomeManager` reaches — see "Getting it" below for what that does and
+doesn't prove.
+
+## What it is
+
+A full reimplementation of restic in Rust, not a wrapper around the `restic`
+binary — it reads and writes the **same repository format** restic does, so
+it can operate on `/mnt/restic-backup/cube` directly, no conversion, no
+separate copy. Since version 0.8.0 it ships an interactive TUI:
+
+```sh
+rustic snapshots -i
+```
+
+opens a snapshots view (browse, forget, retag) and a tree view (file
+preview, diffs, restore a whole snapshot / a subtree / a single file) — one
+session covering most of what [the runbook](backup-runbook.md)'s manual
+`snapshots`/`restore` commands do by hand. `check` and `prune` stay outside
+the TUI, which is fine — those are already the module's job
+(`runCheck`/`pruneOpts` on a timer), not something to run interactively.
+
+The project's own FAQ states rustic and restic can share a repository, with
+one caveat: don't run `prune` from both at the same time.
+
+## Getting it
+
+**Installed, 2026-08-28**: `pkgs.rustic` (pname `rustic`, v0.11.3,
+`mainProgram = "rustic"`) via
+`nirePackages/shell-apps/backup-tools/rustic.nix` — a plain `home.packages`
+entry, no `programs.*`/`services.*` module exists for it. It's in
+`ellyHomeManager`, which every host shares, rather than gated to cube: it's
+a generally useful restic-repository browser, not tied to this one
+repository, and `just available rustic` found no Homebrew cask duplicating
+it (so no `isDarwin` judgment call the way `obsidian.nix` needed one).
+
+**Build- and run-verified on cube, 2026-08-29**: a real `just build` on
+cube (synced over ssh — darwin can't cross-build `x86_64-linux`) produced a
+clean `home-manager-generation` with `rustic` in it, and running the built
+binary directly —
+
+```
+$ /nix/store/44nmllvciygc0rxcgbf90v62djx1fqa0-rustic-0.11.3/bin/rustic --version
+rustic 0.11.3
+```
+
+— confirms it actually executes on the real hardware, not just that Nix
+says it should. Still true on darwin: only `nix eval`-level confirmation
+(present in `home.packages`, absent from the unsupported-package drop
+list), no build or run there yet. And still true everywhere: nobody has
+`switch`ed to this generation, so `rustic` isn't on any interactive `$PATH`
+yet — see "What's verified here" for the line between what a build proves
+and what a switch would.
+
+Try it without a switch, meanwhile:
+
+```sh
+nix shell nixpkgs#rustic
+# or, one-off:
+nix run nixpkgs#rustic -- snapshots -i
+```
+
+## Pointing it at this repo's repository
+
+**Name mismatch to know about**: rustic's own environment variables are
+`RUSTIC_REPOSITORY` / `RUSTIC_PASSWORD_FILE`, not restic's
+`RESTIC_REPOSITORY` / `RESTIC_PASSWORD_FILE` — so it will **not**
+automatically pick up the environment the module's generated `restic-cube`
+wrapper script sets (see the runbook's "Ad hoc restic commands" section).
+Either export the `RUSTIC_*` names yourself or pass the equivalent flags
+directly:
+
+```sh
+sudo rustic -r /mnt/restic-backup/cube \
+    --password-file /run/secrets/restic-cube-password \
+    snapshots -i
+```
+
+`sudo` for the same reason plain `restic-cube` needs it: the password file
+is root-owned, mode `0400`, by sops-nix's own default — see the runbook.
+
+## What's verified here
+
+**On cube**: builds cleanly (real `just build`, 2026-08-29) and the binary
+runs (`rustic --version` → `rustic 0.11.3`, invoked directly from its store
+path over ssh). **On darwin**: `nix eval` only — present in `home.packages`,
+survives the platform filter, never built or run there.
+
+**Still entirely unverified everywhere**: `just switch` (so `rustic` isn't
+on anyone's interactive `$PATH` yet), whether the TUI actually behaves as
+its own docs describe, and whether the command shape in "Pointing it at
+this repo's repository" above is right — all of "What it is" and that
+section are transcribed from rustic's own GitHub repo, docs site, and FAQ,
+not from a run here; `--version` is the only subcommand actually invoked.
+Treat the rest the way [forgejo.md](forgejo.md) treats its own untested
+commands: plausible from the source, not proven. Run `rustic --help` /
+`rustic snapshots --help` against the real binary, after a real `switch`,
+before trusting a flag name from this page.
+
+## See also
+
+- [Backup runbook](backup-runbook.md) — the plain-`restic` commands this
+  page is an alternative front end for, and the wrapper-script env vars
+  that don't carry over automatically.
+- [backup](../categories/backup.md) — the module that actually writes this
+  repository.
+- [rustic-rs/rustic](https://github.com/rustic-rs/rustic) and
+  [rustic.cli.rs](https://rustic.cli.rs/) — the live, canonical source;
+  right about the current build even when this page has drifted.
+- Skill `nirepackages-platform-support` — the process the package addition
+  followed (platform check, Homebrew-duplicate check).

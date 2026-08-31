@@ -3,8 +3,8 @@
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
         flake.modules.nixos.${moduleName} = {
-            fileSystems."/mnt/qnap-erin" = {
-                device = "192.168.0.200:/erin-pub";
+            fileSystems."/mnt/restic-backup" = {
+                device = "192.168.0.200:/restic-backup";
                 fsType = "nfs";
                 options = [
                     "x-systemd.automount"
