@@ -94,10 +94,10 @@ dedicated key for this, confirmed authenticating by hand), but:
   access this session doesn't have; see the runbook for the exact commands.
 - **No QNAP-side snapshot schedule exists on the backup share** — the
   anti-deletion mitigation the module assumes but can't configure itself.
-- **QuTS hero has no toggle to force key-only SSH auth** — enabling SSH at
-  all means password auth stays reachable too. Mitigating that (QNAP
-  firewall rules, strong passwords, brute-force protection, possibly a
-  Tailscale ACL) is a separate, still-open human step.
+- ~~QuTS hero has no toggle to force key-only SSH auth~~ — **mitigated,
+  2026-08-31**: port 22 is now LAN-blocked and tailnet-only (confirmed
+  live), and QNAP's brute-force protection is on. See the runbook's setup
+  step 3.
 
 **The [backup runbook](backup-runbook.md) is the actual procedure**,
 including all three of the above, checking status, running an ad hoc

@@ -122,12 +122,13 @@ has actually confirmed a real backup works end to end yet.
   derivations, including `home-manager-generation`) builds clean around it.
 - **The QNAP-side snapshot schedule** described above still hasn't been
   configured.
-- **The mitigations for SSH's own exposure** (QuTS hero has no toggle to
-  force key-only auth) are a separate, still-open thread — restricting
-  which sources can reach port 22 at the QNAP's own firewall, strong
-  passwords on whatever accounts can still use them, brute-force
-  protection, and possibly Tailscale Access Controls, none of which this
-  repo can configure.
+- **SSH's own exposure is mitigated, as of 2026-08-31** — QuTS hero has no
+  toggle to force key-only auth, so this was done at the network level
+  instead: port 22 is LAN-blocked and tailnet-only (confirmed live from
+  both lysithea and cube — the LAN address times out, `ts-hive`'s tailnet
+  address still connects), and QNAP's own brute-force protection is on
+  (taken on confirmation, not independently checked). See the runbook's
+  setup step 3 for the full account.
 
 Even once all of that's done, this module still isn't done — per issue
 #87's own "done means": a **restore actually performed** — one Forgejo repo
