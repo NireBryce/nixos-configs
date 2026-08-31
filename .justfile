@@ -121,6 +121,11 @@ switch:
     @echo "==> ACTIVATING {{host}} now, home-manager included"
     @{{scripts}}/rebuild.sh switch {{flake}} {{host}}
 
+# SSH to another host by short name (durandal/tenacity/cube/lysithea),
+# trying LAN mDNS then Tailscale then plain DNS -- see reach-host.sh
+reach *args:
+    @{{scripts}}/reach-host.sh {{args}}
+
 # Package-level diff between what is running and what would be installed
 diff-deployed:
     @{{scripts}}/diff-deployed.sh {{host}}

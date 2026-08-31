@@ -157,8 +157,8 @@ unconditionally even on hosts where nothing populates it.
 `networking/resolved.nix` + `networking/avahi.nix` (added 2026-08-21, split
 DNS between the two — avahi owns `.local`, resolved owns unicast DNS and
 Tailscale's split-DNS) were runtime-verified on `nire-tenacity` 2026-08-22:
-`getent`/`ping`/`ssh` all resolve peers by MagicDNS name correctly. Two traps
-turned up doing that verification, both real, neither a bug in this repo —
+`getent`/`ping`/`ssh` all resolve peers by MagicDNS name correctly. Three
+traps have turned up around this, all real, none a bug in this repo —
 recorded in full in `networking/tailscale.nix`'s own header:
 
 - **Tailscale device names don't match `networking.hostName`.** `nire-cube`
@@ -175,6 +175,15 @@ recorded in full in `networking/tailscale.nix`'s own header:
   [ "tailscale0" ]` (`networking.nix`) is provably not the cause in that
   scenario — the ACL lives entirely in Tailscale's admin console, outside
   this repo and outside anything `just switch` touches.
+- **A tailnet name that won't resolve AT ALL means check Tailscale on the
+  machine you're running FROM, not the name.** Found 2026-08-30: `ssh
+  ts-cube` failed with a plain "could not resolve hostname" because
+  Tailscale wasn't connected on the client, not because `ts-cube` was
+  wrong — it wasn't. `nire-cube.local` (plain LAN mDNS/Avahi, no Tailscale
+  involved) was reachable the whole time. `flake/scripts/reach-host.sh`
+  (`just reach <host>`) now tries `.local`, then the tailnet name, then
+  plain DNS, in that order, so this doesn't have to be re-diagnosed by
+  hand — see [../traps-and-skills.md](../traps-and-skills.md).
 
 Also worth keeping: `systemctl show firewall.service -p ExecStart`, read as
 a plain shell script (world-readable, no root needed), is the literal
