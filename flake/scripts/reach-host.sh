@@ -17,10 +17,10 @@
 # resolve hostname") means try the OTHER name, not diagnose the resolver.
 #
 # Tries, in order, the first one that accepts a real SSH connection:
-#   1. nire-<host>.local            -- mDNS/Avahi, LAN-only, no Tailscale
-#   2. ts-<host>.moose-micro.ts.net -- the tailnet name, works off-LAN too
-#   3. nire-<host>                  -- last resort, in case plain DNS has it
-#                                       somewhere neither of the above does
+#   1. ts-<host>                     -- the tailnet name, short form
+#   2. nire-<host>                   -- plain DNS, in case it has it
+#   3. nire-<host>.local             -- mDNS/Avahi, LAN-only, no Tailscale
+#   4. ts-<host>.moose-micro.ts.net  -- the tailnet name, full FQDN
 #
 #   reach-host.sh <host> [remote command...]   # connect (or run a command)
 #   reach-host.sh --resolve <host>              # print the working name, don't connect
@@ -41,9 +41,10 @@ host=${1:?usage: reach-host.sh [--resolve] <durandal|tenacity|cube|lysithea> [re
 shift || true
 
 candidates=(
+    "ts-${host}"
+    "nire-${host}"
     "nire-${host}.local"
     "ts-${host}.moose-micro.ts.net"
-    "nire-${host}"
 )
 
 probe() {
