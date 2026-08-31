@@ -54,7 +54,7 @@ not just theoretical.
 
 ## The collision this move hit for real
 
-`virtualization/libvirt.nix`'s own header already records a near-miss: for
+`virtualization/libvirt/libvirt.nix`'s own header already records a near-miss: for
 about an hour on 2026-08-21, that file was named `virtualization.nix` and
 declared `flake.modules.nixos.virtualization` — the exact attribute name
 its own category's `dirsAsCategory.nix` derives from the surrounding
