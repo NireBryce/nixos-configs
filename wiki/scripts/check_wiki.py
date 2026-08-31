@@ -88,7 +88,20 @@ structured, extractable facts only:
             is phrased too many different ways to match reliably. Cube-only,
             one file, so no per-host or per-category generality needed.
 
-  check     Runs all seven of the above.
+  links     Every relative markdown link (`[text](target)`) across wiki/ and
+            AGENTS.md resolves to a real file, percent-decoded first so
+            `claude%20cave/...` is checked as the real path it is rather
+            than the literal encoded string. Unlike every other check here,
+            this one is fully general instead of scanning for one specific
+            claim shape -- a link target is unambiguously either a real path
+            or not, no historical-prose judgement call needed. See
+            `wiki/scripts/wiki_stale_refs.py` for the bare-filename mention
+            (no link, just a name in backticks) version of this same idea,
+            which DOES need that judgement call and so is a separate,
+            report-only, never-fails tool rather than a subcommand here --
+            same reasoning as `wiki_churn.py` living outside this file.
+
+  check     Runs all eight of the above.
 
     check_wiki.py imports  [repo-root]
     check_wiki.py table    [repo-root]
@@ -97,12 +110,13 @@ structured, extractable facts only:
     check_wiki.py skills   [repo-root]
     check_wiki.py secrets  [repo-root]
     check_wiki.py routes   [repo-root]
+    check_wiki.py links    [repo-root]
     check_wiki.py check    [repo-root]
 
 repo-root defaults to two directories up from this script (wiki/scripts/ ->
 wiki/ -> repo root).
 """
-import re, sys, pathlib
+import re, sys, pathlib, urllib.parse
 
 CATEGORY_FILE = 'dirsAsCategory.nix'
 # Same shape as modules.py's AGG -- `with config.flake.modules.<class>; [ ... ]`,
@@ -621,12 +635,49 @@ def check_routes(root):
     return findings
 
 
+# `[text](target)` -- the target only; `text` isn't checked against anything.
+MD_LINK = re.compile(r'\[[^\]]*\]\(([^)]+)\)')
+
+
+def check_links(root):
+    """Every relative markdown link across wiki/ and AGENTS.md resolves to a
+    real file. Skips `http(s)://`/`mailto:` targets (nothing on disk to
+    check) and a pure in-page anchor (`(#see-also)`, no file component).
+    Percent-decodes the target first -- `claude%20cave/...` is a real,
+    existing path (the directory has a literal space in its name); comparing
+    the raw encoded string against the filesystem is what would make this
+    check wrong about a link that actually works.
+
+    Unlike the other checks here, this one is fully general rather than
+    scanning for one specific claim shape -- a link target is unambiguously
+    either a real path or not, no historical-prose judgement call needed
+    (contrast the bare-filename mentions `wiki/scripts/wiki_stale_refs.py`
+    reports instead, which need exactly that judgement call and so are
+    heuristic and report-only rather than a hard check here).
+    """
+    findings = []
+    for path in doc_files(root):
+        for m in MD_LINK.finditer(path.read_text()):
+            target = m.group(1).strip()
+            if target.startswith(('http://', 'https://', 'mailto:')):
+                continue
+            file_part = urllib.parse.unquote(target.split('#', 1)[0].strip('<>'))
+            if not file_part:
+                continue  # pure in-page anchor, e.g. (#see-also)
+            resolved = path.parent / file_part
+            if not resolved.exists():
+                findings.append(
+                    f"BROKEN LINK  {path}: ({target}) -> {resolved} does "
+                    f"not exist")
+    return findings
+
+
 def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else 'check'
     root = repo_root([sys.argv[0]] + sys.argv[2:])
 
     cmds = ('imports', 'table', 'hosts', 'recipes', 'skills', 'secrets',
-            'routes', 'check')
+            'routes', 'links', 'check')
     if cmd not in cmds:
         print(__doc__)
         sys.exit(2)
@@ -646,6 +697,8 @@ def main():
         findings += check_secrets(root)
     if cmd in ('routes', 'check'):
         findings += check_routes(root)
+    if cmd in ('links', 'check'):
+        findings += check_links(root)
 
     for f in findings:
         print(f)

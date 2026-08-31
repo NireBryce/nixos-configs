@@ -58,14 +58,14 @@ lint:
 
 # Static check: wiki (and AGENTS.md) claims against the actual repo -- import
 # lists, categories/README.md's Index table, hosts.md's host table, every
-# `just <recipe>`/skill-name reference, and the .sops.yaml enrollment claim --
-# catches any of those going stale after a refactor, a rename, or a
-# re-enrollment. Exits non-zero on a hard finding (MISSING/STALE/EXTRA/
-# DIRECTORY/CLASSES/WIPES ROOT/UNKNOWN RECIPE/UNKNOWN SKILL/no-Imported-by-
-# section); a REVIEW-only result (heuristic, needs a human look -- see the
-# script's own docstring) prints but exits 0. Not part of `preflight` yet --
-# new and unproven against the rest of the wiki's prose
-# style.
+# `just <recipe>`/skill-name/markdown-link reference, and the .sops.yaml
+# enrollment claim -- catches any of those going stale after a refactor, a
+# rename, or a re-enrollment. Exits non-zero on a hard finding (MISSING/
+# STALE/EXTRA/DIRECTORY/CLASSES/WIPES ROOT/UNKNOWN RECIPE/UNKNOWN SKILL/
+# BROKEN LINK/no-Imported-by-section); a REVIEW-only result (heuristic,
+# needs a human look -- see the script's own docstring) prints but exits 0.
+# Not part of `preflight` yet -- new and unproven against the rest of the
+# wiki's prose style.
 wiki-lint:
     python3 wiki/scripts/check_wiki.py check
 
@@ -76,6 +76,15 @@ wiki-lint:
 # e.g. `just wiki-churn --top 5` or `just wiki-churn --since "3 weeks ago"`.
 wiki-churn *args:
     python3 wiki/scripts/wiki_churn.py {{args}}
+
+# Reporting only, never fails -- lists backtick-quoted file/path mentions in
+# wiki/ and AGENTS.md that don't resolve to a tracked file. Deliberately not
+# a check_wiki.py subcommand and not in `wiki-lint`: most candidates are a
+# deliberately-kept historical name, an upstream reference, or a
+# styleguide.md example, not an actual bug -- read the script's own
+# docstring before treating any hit as one.
+wiki-stale-refs:
+    python3 wiki/scripts/wiki_stale_refs.py
 
 # Point git at .githooks/: lint ratchet pre-commit, trailer fixup commit-msg
 install-hooks:
