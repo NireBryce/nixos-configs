@@ -79,7 +79,16 @@ structured, extractable facts only:
             Imported by, there's no legitimate "named to say it's absent"
             case for an enrollment list.
 
-  check     Runs all six of the above.
+  routes    Every routed URL mentioned in wiki/ or AGENTS.md (the tailnet
+            FQDN form, or the `.../name/` shorthand) against caddy.nix's
+            actual path prefixes, read out of its embedded Caddyfile string.
+            Narrower than the others: it only catches a route renamed or
+            removed out from under a doc that still names the old prefix,
+            not which of `handle`/`handle_path` a doc claims -- that nuance
+            is phrased too many different ways to match reliably. Cube-only,
+            one file, so no per-host or per-category generality needed.
+
+  check     Runs all seven of the above.
 
     check_wiki.py imports  [repo-root]
     check_wiki.py table    [repo-root]
@@ -87,6 +96,7 @@ structured, extractable facts only:
     check_wiki.py recipes  [repo-root]
     check_wiki.py skills   [repo-root]
     check_wiki.py secrets  [repo-root]
+    check_wiki.py routes   [repo-root]
     check_wiki.py check    [repo-root]
 
 repo-root defaults to two directories up from this script (wiki/scripts/ ->
@@ -557,11 +567,66 @@ def check_secrets(root):
     return findings
 
 
+CADDY_NIX = pathlib.Path('flake/modules/nire/homelab/reverse-proxy/caddy/caddy.nix')
+# `@grafana path /grafana /grafana/*` then plain `handle` -- Grafana serves
+# UNDER the prefix (serve_from_sub_path) and needs it left on. The `\1`
+# backreference is what `caddy adapt` itself would reject a mismatched pair
+# as (see caddy.nix's own header on the two-path form).
+CADDY_KEPT_PATH = re.compile(r'path\s+/([\w-]+)\s+/\1/\*')
+# `handle_path /git/*` -- Forgejo has no serve_from_sub_path equivalent and
+# always serves at `/`, so the prefix has to be stripped before reaching it.
+CADDY_STRIPPED_PATH = re.compile(r'handle_path\s+/([\w-]+)/\*')
+# The two forms this wiki actually writes a routed URL in: the full FQDN
+# (reaching-services.md, categories/monitoring.md) or the `.../name/`
+# shorthand (homelab/README.md) -- deliberately NOT a bare `/name/` pattern,
+# which would also match ordinary filesystem paths like `/root/` or
+# `/persist/` that have nothing to do with Caddy.
+ROUTE_MENTION = re.compile(r'ts-cube\.moose-micro\.ts\.net/([\w-]+)/|`\.\.\./([\w-]+)/`')
+
+
+def caddy_routes(root):
+    """path-prefix name -> True if Caddy strips it before reaching the app,
+    False if it's kept -- read straight out of caddy.nix's own embedded
+    Caddyfile string rather than assumed (the "read the built artifact,
+    don't guess" reasoning lessons-learned #41 is about, applied statically
+    here instead of via `caddy adapt`). Cube-only and there's exactly one
+    caddy.nix, so no need for find_categories-style generality."""
+    p = root / CADDY_NIX
+    if not p.exists():
+        return {}
+    text = p.read_text()
+    routes = {name: False for name in CADDY_KEPT_PATH.findall(text)}
+    routes.update({name: True for name in CADDY_STRIPPED_PATH.findall(text)})
+    return routes
+
+
+def check_routes(root):
+    """Every routed URL mentioned in wiki/ or AGENTS.md (the two shapes this
+    wiki actually uses -- see ROUTE_MENTION) against caddy.nix's real path
+    prefixes. Narrower than the other checks: it only catches a route that's
+    been renamed or removed in caddy.nix out from under a doc that still
+    names the old prefix, not which of `handle`/`handle_path` a doc claims --
+    that nuance shows up in enough different phrasings that matching it
+    reliably would cost more false positives than it's worth.
+    """
+    routes = caddy_routes(root)
+    findings = []
+    for path in doc_files(root):
+        for m in ROUTE_MENTION.finditer(path.read_text()):
+            name = m.group(1) or m.group(2)
+            if name not in routes:
+                findings.append(
+                    f"UNKNOWN ROUTE  {path}: '/{name}/' is mentioned but "
+                    f"caddy.nix has no matching route")
+    return findings
+
+
 def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else 'check'
     root = repo_root([sys.argv[0]] + sys.argv[2:])
 
-    cmds = ('imports', 'table', 'hosts', 'recipes', 'skills', 'secrets', 'check')
+    cmds = ('imports', 'table', 'hosts', 'recipes', 'skills', 'secrets',
+            'routes', 'check')
     if cmd not in cmds:
         print(__doc__)
         sys.exit(2)
@@ -579,6 +644,8 @@ def main():
         findings += check_skills(root)
     if cmd in ('secrets', 'check'):
         findings += check_secrets(root)
+    if cmd in ('routes', 'check'):
+        findings += check_routes(root)
 
     for f in findings:
         print(f)
