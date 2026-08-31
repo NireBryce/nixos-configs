@@ -79,14 +79,17 @@ call `tailscale.nix` makes for the host daemon.
 
 `nire-cube` also gets a [backup](categories/backup.md) category as of
 2026-08-28 — restic to the QNAP NAS already on the network, against issue
-[#87](https://github.com/NireBryce/nixos-configs/issues/87). Unlike the
-services above, **this one is evaluates-only, not switched**: two things
-outside what Nix can close on its own — the repository password's actual
-value, and a QNAP-side snapshot schedule for anti-deletion — are still
-pending, and issue #87's own "done means" (a real Forgejo repo actually
-recovered) hasn't been attempted. See the category page for both, and
-[homelab/backup-runbook.md](homelab/backup-runbook.md) for the actual
-commands.
+[#87](https://github.com/NireBryce/nixos-configs/issues/87). **Switched and
+running as of 2026-08-30** (unlike this section's older framing might
+suggest if read from history) — `restic-backups-cube.timer` is active on
+the real running system, `rustic`/`restic-cube` are real binaries on
+`elly`'s `$PATH`. Blocked on one live, QNAP-side finding: the NFS mount is
+rejected (`access denied by server`, a share host-access rule, not a Nix
+problem) and the QNAP has no SSH open to fix it remotely — needs its own
+admin console. Issue #87's own "done means" (a real Forgejo repo actually
+recovered) is further out than that and hasn't been attempted. See the
+category page and [homelab/backup-runbook.md](homelab/backup-runbook.md)
+for the full account and the actual commands.
 
 ## Where each fact lives
 

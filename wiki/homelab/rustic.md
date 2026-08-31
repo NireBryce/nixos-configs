@@ -55,14 +55,13 @@ rustic 0.11.3
 ```
 
 — confirms it actually executes on the real hardware, not just that Nix
-says it should. Still true on darwin: only `nix eval`-level confirmation
-(present in `home.packages`, absent from the unsupported-package drop
-list), no build or run there yet. And still true everywhere: nobody has
-`switch`ed to this generation, so `rustic` isn't on any interactive `$PATH`
-yet — see "What's verified here" for the line between what a build proves
-and what a switch would.
+says it should. **Switched, 2026-08-30**: `which rustic` now resolves under
+`/etc/profiles/per-user/elly/bin/` on cube, so it's on `elly`'s real
+interactive `$PATH` there, not just built. Still true on darwin: only
+`nix eval`-level confirmation (present in `home.packages`, absent from the
+unsupported-package drop list), no build, run, or switch there yet.
 
-Try it without a switch, meanwhile:
+Try it without a switch on a host that hasn't gotten there yet:
 
 ```sh
 nix shell nixpkgs#rustic
@@ -91,21 +90,21 @@ is root-owned, mode `0400`, by sops-nix's own default — see the runbook.
 
 ## What's verified here
 
-**On cube**: builds cleanly (real `just build`, 2026-08-29) and the binary
-runs (`rustic --version` → `rustic 0.11.3`, invoked directly from its store
-path over ssh). **On darwin**: `nix eval` only — present in `home.packages`,
-survives the platform filter, never built or run there.
+**On cube**: builds (2026-08-29), switched and on `elly`'s real `$PATH`
+(2026-08-30), and the binary runs (`rustic --version` → `rustic 0.11.3`).
+**On darwin**: `nix eval` only — present in `home.packages`, survives the
+platform filter, never built, run, or switched there.
 
-**Still entirely unverified everywhere**: `just switch` (so `rustic` isn't
-on anyone's interactive `$PATH` yet), whether the TUI actually behaves as
-its own docs describe, and whether the command shape in "Pointing it at
-this repo's repository" above is right — all of "What it is" and that
-section are transcribed from rustic's own GitHub repo, docs site, and FAQ,
-not from a run here; `--version` is the only subcommand actually invoked.
-Treat the rest the way [forgejo.md](forgejo.md) treats its own untested
-commands: plausible from the source, not proven. Run `rustic --help` /
-`rustic snapshots --help` against the real binary, after a real `switch`,
-before trusting a flag name from this page.
+**Still entirely unverified everywhere**: whether the TUI actually behaves
+as its own docs describe, and whether the command shape in "Pointing it at
+this repo's repository" above is right — pointing it at the real
+repository specifically can't be tested yet regardless, since
+[the runbook](backup-runbook.md) has the QNAP itself refusing the NFS
+mount. All of "What it is" and that section are transcribed from rustic's
+own GitHub repo, docs site, and FAQ, not from a run here; `--version` is
+the only subcommand actually invoked. Treat the rest the way
+[forgejo.md](forgejo.md) treats its own untested commands: plausible from
+the source, not proven.
 
 ## See also
 
