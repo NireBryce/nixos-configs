@@ -79,20 +79,22 @@ specific report — not as a housekeeping pass over this list:
 - **[`../flake/scripts/script-wishlist.md`](<../flake/scripts/script-wishlist.md>)**
   — bare headings only (`vicinae`, `just`, `espanso`, `other`), no content
   yet. A placeholder for future script ideas, not current work.
-- **[`../claude cave/2026-08-09 things to look into eventually.md`](<../claude cave/2026-08-09 things to look into eventually.md>)**
-  — a security-hardening reference link, plus two questions rescued from a
-  deleted handoff doc (are `logitech-g600`/`zsa-moonlander` peripheral
-  modules still wanted on a handheld; is full desktop package parity still
-  wanted on tenacity). Neither has been decided.
-- **[`../claude cave/2026-08-24-evaluation-self-hosted-booking.md`](<../claude cave/2026-08-24-evaluation-self-hosted-booking.md>)**
-  — Easy!Appointments vs LibreBooking, compared 2026-08-24 and then
-  explicitly not pursued. Nothing built, no host picked. Records which of
+- **Are the `peripherals` modules (`logitech-g600`/`zsa-moonlander`) still
+  wanted on a handheld? Is full desktop package parity still wanted on
+  tenacity?** Two open questions, neither decided, rescued from a deleted
+  handoff doc into `claude cave/2026-08-09 things to look into
+  eventually.md` — itself removed 2026-09-01 (still in git history; also
+  carried a security-hardening reference link, now only recoverable there).
+- `claude cave/2026-08-24-evaluation-self-hosted-booking.md` (removed
+  2026-09-01, no longer a link — still in git history if wanted again) —
+  Easy!Appointments vs LibreBooking, compared 2026-08-24 and then
+  explicitly not pursued. Nothing built, no host picked. Recorded which of
   the two fits which problem (they aren't competitors — one books a
   person's time, the other books a *thing*), that **neither is in nixpkgs
   and neither has a NixOS module**, and the one design problem that would
   actually need solving if it restarts: both are PHP apps wanting a
-  writable install dir, so podman-vs-hand-written-module is the unanswered
-  first question. Also corrects a from-memory claim about Cal.com's
+  writable install dir, so podman-vs-hand-written-module was the unanswered
+  first question. Also corrected a from-memory claim about Cal.com's
   license.
 - **[`../flake/doc/notes-and-fixes.md`](<../flake/doc/notes-and-fixes.md>)**
   ends with a "things to look into" list — MyNixOS, nixpkgs-wayland,
