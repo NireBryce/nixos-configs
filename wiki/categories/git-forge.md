@@ -16,7 +16,7 @@ self-hosted-service categories — see
 
 **That URL is no longer current.** Later the same day Forgejo moved behind
 Caddy ([reverse-proxy](reverse-proxy.md)): it listens on `127.0.0.1:3001`
-now and is reached at `https://ts-cube.moose-micro.ts.net/git/`. The
+now and is reached at `https://ts-cube.<tailnet>.ts.net/git/`. The
 proxied arrangement is **confirmed working too**, same day — 200 over
 validated TLS from another tailnet host, with Forgejo's own generated links
 carrying the `/git/` prefix and assets under it loading. Getting there took
@@ -113,7 +113,7 @@ behind a path prefix forced the issue anyway.
 
 `DOMAIN` and `ROOT_URL` deliberately disagree as of 2026-08-24, which reads
 like a typo and isn't. `ROOT_URL` is what a browser sees, so it is the full
-`https://ts-cube.moose-micro.ts.net/git/`; `DOMAIN` is what SSH clone URLs
+`https://ts-cube.<tailnet>.ts.net/git/`; `DOMAIN` is what SSH clone URLs
 are built from, and git+ssh doesn't go through Caddy at all (see the
 section above), so it stays the short `ts-cube` and clone URLs stay
 `forgejo@ts-cube:...`.

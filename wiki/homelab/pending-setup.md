@@ -37,7 +37,7 @@ secrets. `just preflight` passes, but this hasn't gone through a real
 `switch` on cube yet — the users API call above hasn't been re-run since.
 
 **Done when** you can sign in at
-`https://ts-cube.moose-micro.ts.net/git/user/login` and the users API returns
+`https://ts-cube.<tailnet>.ts.net/git/user/login` and the users API returns
 something — re-check after the next `switch`, don't assume this item is
 closed just because the module landed.
 
@@ -63,9 +63,9 @@ running:
 
 | Short | Target |
 |---|---|
-| `go/dash` | `https://ts-cube.moose-micro.ts.net/` |
-| `go/git` | `https://ts-cube.moose-micro.ts.net/git/` |
-| `go/graf` | `https://ts-cube.moose-micro.ts.net/grafana/` |
+| `go/dash` | `https://ts-cube.<tailnet>.ts.net/` |
+| `go/git` | `https://ts-cube.<tailnet>.ts.net/git/` |
+| `go/graf` | `https://ts-cube.<tailnet>.ts.net/grafana/` |
 
 Creating them is the web UI at `http://go/`, or the `curl` form in
 [creating go/ links](golinks.md) — read that page's `--post302` and delete

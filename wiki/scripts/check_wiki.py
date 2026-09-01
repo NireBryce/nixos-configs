@@ -595,7 +595,7 @@ CADDY_STRIPPED_PATH = re.compile(r'handle_path\s+/([\w-]+)/\*')
 # shorthand (homelab/README.md) -- deliberately NOT a bare `/name/` pattern,
 # which would also match ordinary filesystem paths like `/root/` or
 # `/persist/` that have nothing to do with Caddy.
-ROUTE_MENTION = re.compile(r'ts-cube\.moose-micro\.ts\.net/([\w-]+)/|`\.\.\./([\w-]+)/`')
+ROUTE_MENTION = re.compile(r'ts-cube\.<tailnet>\.ts\.net/([\w-]+)/|`\.\.\./([\w-]+)/`')
 
 
 def caddy_routes(root):

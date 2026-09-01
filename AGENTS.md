@@ -200,7 +200,7 @@ renames all dodge the same silent-merge collision `just modules` catches):
 - **`monitoring`** — Prometheus + Grafana on the host's own metrics. Every
   listener is on `127.0.0.1`, Grafana included (since 2026-08-24; before, it
   leaned on `tailscale.nix`'s `trustedInterfaces` firewall rule). Reached via
-  Caddy at `https://ts-cube.moose-micro.ts.net/grafana/`.
+  Caddy at `https://ts-cube.<tailnet>.ts.net/grafana/`.
 - **`git-forge`** — Forgejo, loopback `:3001` behind Caddy at `.../git/`.
   Generates its own secrets on first activation, unlike Grafana.
 - **`shortlinks`** — golink. Two things easy to get wrong by analogy: **no

@@ -10,7 +10,7 @@ self-hosted-service categories — see
 [categories/README.md](README.md). The category name is unaffected.
 
 As of 2026-08-24 Grafana is reached at
-`https://ts-cube.moose-micro.ts.net/grafana/`, through Caddy
+`https://ts-cube.<tailnet>.ts.net/grafana/`, through Caddy
 ([reverse-proxy](reverse-proxy.md)) — **not** the `http://ts-cube:3000/` this
 page described before, which no longer answers. Every listener in this
 category is on loopback now. Confirmed working the same day: 200 over

@@ -3,7 +3,7 @@
 [glance](https://github.com/glanceapp/glance), the service index for
 `nire-cube`: what's running, whether it's up, and how the machine itself is
 doing. Added 2026-08-24, cube-only. It is what
-`https://ts-cube.moose-micro.ts.net/` serves.
+`https://ts-cube.<tailnet>.ts.net/` serves.
 
 Moved from `nire/landing/` to `nire/homelab/landing/` on 2026-08-27,
 nested under a new umbrella `homelab` category alongside six other
