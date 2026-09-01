@@ -17,18 +17,22 @@
 # resolve hostname") means try the OTHER name, not diagnose the resolver.
 #
 # Tries, in order, the first one that accepts a real SSH connection:
-#   1. ts-<host>                     -- the tailnet name, short form
-#   2. nire-<host>                   -- plain DNS, in case it has it
-#   3. nire-<host>.local             -- mDNS/Avahi, LAN-only, no Tailscale
-#   4. ts-<host>.moose-micro.ts.net  -- the tailnet name, full FQDN
+#   1. ts-<host>                  -- the tailnet name, short form
+#   2. nire-<host>                -- plain DNS, in case it has it
+#   3. nire-<host>.local          -- mDNS/Avahi, LAN-only, no Tailscale
+#   4. ts-<host>.<tailnet>.ts.net -- the tailnet name, full FQDN -- only
+#                                     tried if the LOCAL machine's own
+#                                     `tailscale status --json` reports a
+#                                     suffix (below); skipped, not a
+#                                     literal, otherwise.
 #
 #   reach-host.sh <host> [remote command...]   # connect (or run a command)
 #   reach-host.sh --resolve <host>              # print the working name, don't connect
 #
 # <host> is whatever comes after "nire-"/"ts-" -- durandal, tenacity, cube,
-# lysithea. Not validated against hosts.nix: this only ever tries three
-# derived DNS names and lets ssh's own connection attempt be the judge, so a
-# fifth host works the day it's added with no edit here.
+# lysithea. Not validated against hosts.nix: this only ever tries three or
+# four derived DNS names and lets ssh's own connection attempt be the judge,
+# so a fifth host works the day it's added with no edit here.
 set -euo pipefail
 
 resolve_only=false
@@ -44,8 +48,19 @@ candidates=(
     "ts-${host}"
     "nire-${host}"
     "nire-${host}.local"
-    "ts-${host}.moose-micro.ts.net"
 )
+
+# Asks the LOCAL machine's own tailscaled for the tailnet suffix rather than
+# a literal -- this script used to hardcode it (moved off that 2026-09-01,
+# same reason the FQDN moved out of caddy.nix/grafana.nix/forgejo.nix/
+# glance.nix: a public repo is a bad place for a tailnet name to live). No
+# suffix (tailscaled not running/not up on THIS machine) just means
+# candidate 4 is skipped -- the first three don't need it, and the client
+# needing its own Tailscale up to try a tailnet name at all isn't new here.
+tailnet_suffix=$(tailscale status --json 2>/dev/null | jq -r '.MagicDNSSuffix // empty' 2>/dev/null || true)
+if [[ -n $tailnet_suffix ]]; then
+    candidates+=("ts-${host}.${tailnet_suffix}")
+fi
 
 probe() {
     # A real (cheap) SSH handshake + auth, not just a DNS/ping check --

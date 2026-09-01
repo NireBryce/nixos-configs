@@ -20,8 +20,8 @@
 # only through this proxy, so the firewall is no longer the only line.
 # The old URLs stop working, deliberately:
 #
-#     http://ts-cube:3000/  ->  https://ts-cube.moose-micro.ts.net/grafana/
-#     http://ts-cube:3001/  ->  https://ts-cube.moose-micro.ts.net/git/
+#     http://ts-cube:3000/  ->  https://ts-cube.<tailnet>.ts.net/grafana/
+#     http://ts-cube:3001/  ->  https://ts-cube.<tailnet>.ts.net/git/
 #
 # TAILSCALE ISSUES THE CERT, NO PLUGIN NEEDED -- checked in caddy 2.11.4's
 # source (pinned nixpkgs), not assumed: modules/caddyhttp/autohttps.go:884
@@ -55,10 +55,15 @@
 # THE FQDN IS `ts-cube`, NOT `nire-cube` -- this tailnet renames devices
 # fleet-wide (tailscale.nix's trap #1, the expensive one), verified live
 # 2026-08-24 (`tailscale status --json` from lysithea: peer
-# `ts-cube.moose-micro.ts.net.`, MagicDNSSuffix `moose-micro.ts.net`).
-# Same string in grafana.nix's `root_url` and forgejo.nix's `ROOT_URL`;
-# no shared constant, nothing here declares options (CLAUDE.md,
-# Architecture) -- a change means editing those two.
+# `ts-cube.<tailnet>.ts.net.`, MagicDNSSuffix `<tailnet>.ts.net`).
+#
+# READ FROM /persist/secrets/tailnet-fqdn, not a literal, since 2026-09-01
+# -- see tailnet-fqdn-refresh.nix (sibling category member) for why and how
+# it gets there, and its header for the eval-time-vs-runtime caveat. Same
+# read expression in grafana.nix, forgejo.nix, glance.nix; no shared
+# constant, nothing here declares options (CLAUDE.md, Architecture) -- a
+# change to the READ means editing all four, but the VALUE itself is
+# already centralized in the one file all four read.
 #
 # PATHS, NOT PORTS OR SUBDOMAINS, and that's forced: MagicDNS gives a
 # device ONE name, so `grafana.ts-cube...` does not resolve and can't be
@@ -106,9 +111,16 @@
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 
-        # See this file's header: verified against the live tailnet, and
-        # duplicated (by necessity) in grafana.nix and forgejo.nix.
-        tailnetFqdn = "ts-cube.moose-micro.ts.net";
+        # See this file's header: read from /persist/secrets/tailnet-fqdn
+        # (tailnet-fqdn-refresh.nix), falling back to an obviously-fake
+        # placeholder so `just check`/`just modules` still evaluate off
+        # cube, where that file doesn't exist. Duplicated (by necessity,
+        # not sharing an option) in grafana.nix, forgejo.nix, glance.nix.
+        tailnetFqdn =
+            let path = /persist/secrets/tailnet-fqdn;
+            in if builtins.pathExists path
+               then lib.removeSuffix "\n" (builtins.readFile path)
+               else "ts-cube.tailnet-fqdn-unset.invalid";
     in {
         flake.modules.nixos.${moduleName} = {
             # # description = "caddy -- tailnet-only HTTPS front door, with certs from tailscaled";

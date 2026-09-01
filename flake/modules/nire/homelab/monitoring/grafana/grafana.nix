@@ -5,7 +5,7 @@
 #
 # As of 2026-08-24 not reached off-host DIRECTLY: every listener in this
 # stack is on loopback; nire/reverse-proxy/caddy.nix fronts it at
-# https://ts-cube.moose-micro.ts.net/grafana/ with a cert from tailscaled.
+# https://ts-cube.<tailnet>.ts.net/grafana/ with a cert from tailscaled.
 # Two settings exist solely because of that (`http_addr`,
 # `root_url`/`serve_from_sub_path`).
 #
@@ -63,6 +63,16 @@
         # flow -- datasource and dashboard are both provisioned from
         # files by the same module; nothing to resolve at import time.
         prometheusDatasourceUid = "prometheus-cube";
+
+        # Read from /persist/secrets/tailnet-fqdn (reverse-proxy/
+        # tailnet-fqdn-refresh.nix), not a literal -- see caddy.nix's
+        # header for why and its eval-time-vs-runtime caveat. Same read
+        # expression duplicated in caddy.nix, forgejo.nix, glance.nix.
+        tailnetFqdn =
+            let path = /persist/secrets/tailnet-fqdn;
+            in if builtins.pathExists path
+               then lib.removeSuffix "\n" (builtins.readFile path)
+               else "ts-cube.tailnet-fqdn-unset.invalid";
     in {
         # `pkgs` bound HERE, on the inner NixOS-module function, not the
         # outer flake-parts one -- flake-parts doesn't inject a `pkgs`
@@ -110,13 +120,15 @@
                     # Contrast forgejo.nix: `handle_path` (stripped)
                     # because it has no serve_from_sub_path equivalent.
                     #
-                    # `ts-cube.moose-micro.ts.net`, NOT `nire-cube` --
+                    # `ts-cube.<tailnet>.ts.net`, NOT `nire-cube` --
                     # this tailnet renames devices fleet-wide
-                    # (networking/tailscale.nix's trap #1). The FQDN is
-                    # duplicated in caddy.nix and forgejo.nix, not shared
-                    # (no options in this tree, CLAUDE.md, Architecture);
-                    # all three move together.
-                    root_url            = "https://ts-cube.moose-micro.ts.net/grafana/";
+                    # (networking/tailscale.nix's trap #1). `tailnetFqdn`
+                    # above reads the FQDN from /persist/secrets/
+                    # tailnet-fqdn, the same file caddy.nix/forgejo.nix/
+                    # glance.nix read; not shared as an option (no options
+                    # in this tree, CLAUDE.md, Architecture), but the VALUE
+                    # is centralized in that one file.
+                    root_url            = "https://${tailnetFqdn}/grafana/";
                     serve_from_sub_path = true;
 
                     # Not load-bearing while `enforce_domain` is false
@@ -125,7 +137,7 @@
                     # default root_url). Set anyway so the two agree --
                     # flipping enforce_domain on later would otherwise
                     # reject every real request.
-                    domain              = "ts-cube.moose-micro.ts.net";
+                    domain              = tailnetFqdn;
                 };
 
                 provision = {
@@ -243,5 +255,5 @@
 # NOT `nire-cube`). `root_url` is set now, for that predicted reason plus
 # one more: behind a path prefix Grafana needs `root_url` AND
 # `serve_from_sub_path`, and the FQDN must be the full
-# `ts-cube.moose-micro.ts.net`, not the short name that comment guessed at
+# `ts-cube.<tailnet>.ts.net`, not the short name that comment guessed at
 # -- it is what the browser has in its address bar.

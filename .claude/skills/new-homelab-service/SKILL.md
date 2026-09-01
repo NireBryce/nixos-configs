@@ -136,7 +136,7 @@ no firewall interaction, and no Caddy route.
 ## 5. The prefix question — get this right before the first switch
 
 MagicDNS gives a device exactly one name, so everything is mounted under a path
-prefix on `ts-cube.moose-micro.ts.net`. **Each app must be told its prefix, and
+prefix on `ts-cube.<tailnet>.ts.net`. **Each app must be told its prefix, and
 apps disagree about who strips it.** This is lesson §41 and it cost a switch:
 
 - **The app can serve under a subpath** (Grafana's `serve_from_sub_path`) →
