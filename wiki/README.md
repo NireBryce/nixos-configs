@@ -28,6 +28,10 @@ know roughly what you're after — a human skimming for the right doc, or an
 agent trying to find the one file that actually answers a question instead
 of re-deriving it.
 
+**Don't know what you're after yet?** Start with [Overview](overview.md) —
+the 2-minute mental model this index assumes. Already know what you're
+trying to do? Skip straight to Common tasks below.
+
 ## Common tasks
 
 A task-shaped way in, for when you already know what you're about to *do*
@@ -48,6 +52,10 @@ or a skill (`.claude/skills/<name>/SKILL.md`) — nothing here is new content.
 
 ### Cross-cutting topics
 
+- [Overview](overview.md) — the 2-minute mental model: what this repo is,
+  the shape of it, what's distinctive here, and where to go next. Start
+  here if you're new; everything else on this page assumes you've read it
+  or don't need to.
 - [Hosts & current state](hosts.md) — the four hosts (three NixOS + one
   darwin), what's actually been switched/booted vs. only evaluated, and
   where that status is tracked.
