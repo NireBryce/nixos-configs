@@ -28,6 +28,28 @@ only branch ruleset are still `main`, so the flow states `--base
 experimental` explicitly; naming a branch outright (`main` included) means
 push directly there instead.
 
+## The GitHub repo was renamed; a checkout's `origin` doesn't follow
+
+The repo lives at `NireBryce/nixos-configs` now — every reference in this
+wiki, in skills, and in `AGENTS.md` already names it that way. GitHub
+renamed it from `NireBryce/nixos` at some point before 2026-08-24 (the
+earliest `nixos-configs` link in this tree), and `git push`/`pull`/`fetch`
+on the *old* URL still work, silently, via GitHub's redirect — so an
+existing checkout's `origin` can go on pointing at the pre-rename URL
+indefinitely with nothing ever erroring to say so. Noticed 2026-08-31 on
+this machine's own checkout: `git push` printed `This repository moved.
+Please use the new location: https://github.com/NireBryce/nixos-configs.git`
+on every push, and `git remote -v` still showed the old `nixos.git` URL.
+
+Check with `git remote -v`; fix a stale one with:
+
+```sh
+git remote set-url origin https://github.com/NireBryce/nixos-configs.git
+```
+
+Nothing breaks by leaving it — this is a courtesy fix, not a bug with
+consequences — but the redirect warning on every push is the tell.
+
 ## Style
 
 - **[`../claude cave/claude-style-guide.md`](<../claude cave/claude-style-guide.md>)**
