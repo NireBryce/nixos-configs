@@ -24,11 +24,12 @@
 - **[`../claude cave/lessons-learned-impermanence-stage1-migration.md`](<../claude cave/lessons-learned-impermanence-stage1-migration.md>)**
   — the stage-1 impermanence migration specifically. Covered from the
   impermanence angle on [impermanence-and-secrets.md](impermanence-and-secrets.md).
-- **[`../claude cave/2026-08-09 things to look into eventually.md`](<../claude cave/2026-08-09 things to look into eventually.md>)**
-  — open questions rescued from a deleted `HANDOFF-tenacity.md`, partially
+- `claude cave/2026-08-09 things to look into eventually.md` (removed
+  2026-09-01, no longer a link — still in git history if wanted again) —
+  open questions rescued from a deleted `HANDOFF-tenacity.md`, partially
   answered since (handheld stack — Jovian Steam autostart, decky-loader,
-  handheld-daemon/adjustor — does work; recorded in `jovian.nix`). Also
-  listed on [open-threads.md](open-threads.md).
+  handheld-daemon/adjustor — does work; recorded in `jovian.nix`). The
+  still-open ones are listed on [open-threads.md](open-threads.md).
 - The `old-`/`old-historical-`-prefixed planning and handoff artifacts (the
   den→flake-parts port plan, the durandal/lysithea handoff, and tenacity's
   plan/prompt files) were removed 2026-08-26, their useful content already
