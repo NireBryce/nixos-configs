@@ -22,8 +22,11 @@ Two tiers for the *configuration* side, plus one escape hatch — and one
 separate tier for the *usage* side:
 
 - **`wiki/*.md`** — cross-cutting topics that don't belong to one category:
-  `architecture.md`, `hosts.md`, `history.md`, `impermanence-and-secrets.md`,
-  `open-threads.md`, `traps-and-skills.md`, `conventions.md`, this file.
+  `overview.md`, `architecture.md`, `hosts.md`, `history.md`,
+  `impermanence-and-secrets.md`, `open-threads.md`, `traps-and-skills.md`,
+  `conventions.md`, this file. `overview.md` is the one deliberately
+  written to be read *before* the rest of this tier makes sense — a
+  newcomer's on-ramp, not a topic among equals; see its own header.
   These span multiple categories or aren't tied to a `flake/modules/`
   directory at all.
 - **`wiki/categories/<name>.md`** — one page per real category, i.e. a
