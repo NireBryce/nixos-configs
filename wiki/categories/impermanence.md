@@ -17,20 +17,28 @@ directory.
 
 ## What's in it
 
-- **`root-rollback/WARN-impermanence.nix`** — the module. Deletes the `/root`
-  btrfs subvolume in initrd on every boot and snapshots a fresh one from
-  `root-blank`. 532 lines; the file itself is the documentation for the
-  mechanics (systemd-cryptsetup unit naming, ordering, the persisted
-  directories list). Its own name is deliberately alarming, and per its own
-  header comment, even the module's *name* is load-bearing: rename the file
-  and anything importing it by literal name breaks silently, though category
-  membership itself survives a rename (both are keyed off the same
-  filename).
-- **`root-rollback/kde-sleepmode.nix`** — the desktop half of `nohibernate`.
-  `WARN-impermanence.nix` sets `nohibernate` and disables hybrid
-  sleep/hibernation at the systemd level, because a host that wipes `/root`
-  on boot cannot survive resuming an image that predates the wipe. PowerDevil
-  (KDE's power daemon) doesn't degrade gracefully when told
+`root-rollback/` is itself a nested category (its own `dirsAsCategory.nix`,
+added for issue #103) rather than two bare files — a host can import
+`root-rollback` directly instead of the whole `impermanence` umbrella, the
+same handle homelab's children give theirs. Its actual modules sit one level
+further in, under `restore-root/` (named for the systemd service
+`WARN-impermanence.nix` declares), because a category collects from its
+*sub*directories only — see `flake/doc/dirsAsCategory.md`.
+
+- **`root-rollback/restore-root/WARN-impermanence.nix`** — the module.
+  Deletes the `/root` btrfs subvolume in initrd on every boot and snapshots a
+  fresh one from `root-blank`. 532 lines; the file itself is the
+  documentation for the mechanics (systemd-cryptsetup unit naming, ordering,
+  the persisted directories list). Its own name is deliberately alarming, and
+  per its own header comment, even the module's *name* is load-bearing:
+  rename the file and anything importing it by literal name breaks silently,
+  though category membership itself survives a rename (both are keyed off
+  the same filename).
+- **`root-rollback/restore-root/kde-sleepmode.nix`** — the desktop half of
+  `nohibernate`. `WARN-impermanence.nix` sets `nohibernate` and disables
+  hybrid sleep/hibernation at the systemd level, because a host that wipes
+  `/root` on boot cannot survive resuming an image that predates the wipe.
+  PowerDevil (KDE's power daemon) doesn't degrade gracefully when told
   `CanHybridSleep=no` — it drops the suspend request entirely rather than
   falling back to plain suspend, which broke suspend outright on 2026-08-10
   (`lessons-learned.md` §30). This module is the other half of that same
@@ -44,7 +52,13 @@ directory.
   module but a curried function returning a normal `nixosModule`. **Nothing
   imports this today** — see
   [../flake/doc/disko-impermanence-layout.md](<../../flake/doc/disko-impermanence-layout.md>)
-  for what it's for and how to actually wire it in.
+  for what it's for and how to actually wire it in. Deliberately does **not**
+  get a `dirsAsCategory.nix` of its own the way `root-rollback/` did: that
+  file would itself sit on a path containing `/_`, so `import-tree` would
+  skip importing it too, leaving `flake.modules.nixos._disko` never defined
+  — dead weight, not a working category. It doesn't need one anyway: nothing
+  has ever auto-imported it, by design, so there was no bundling to undo on
+  this side (see the file's own header).
 
 ## Imported by
 

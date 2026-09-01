@@ -9,6 +9,19 @@
 # ignores any path containing "/_" -- the same rule
 # _templates/dirsAsCategory.nix and _lib/mkPkgModule.nix already rely on.
 #
+# issue #103 asked for a dirsAsCategory.nix here too, mirroring
+# root-rollback/ (see that directory's own copy) so a host could opt into
+# this disko layout the same way it opts into a homelab child category.
+# Deliberately not done: a dirsAsCategory.nix under `_disko/` would itself
+# sit on a path containing "/_", so import-tree would skip importing IT too
+# -- `flake.modules.nixos._disko` would never exist, making the file dead
+# weight rather than a working category. This file already gets the
+# independence the issue asked for, just by a different route: nothing
+# imports it automatically at all, by design (above), so there was never
+# a bundling problem to fix on this side -- only root-rollback needed its
+# own dirsAsCategory.nix, to stop being reachable *only* by importing the
+# whole `impermanence` umbrella.
+#
 # Subvolumes match hardware-configuration.nix / hardware-tenacity.nix exactly:
 # root, home, nix, persist, log, and an unmounted root-blank that
 # WARN-impermanence.nix snapshots from on every boot
