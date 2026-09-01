@@ -22,11 +22,16 @@ Two tiers for the *configuration* side, plus one escape hatch — and one
 separate tier for the *usage* side:
 
 - **`wiki/*.md`** — cross-cutting topics that don't belong to one category:
-  `overview.md`, `architecture.md`, `hosts.md`, `history.md`,
-  `impermanence-and-secrets.md`, `open-threads.md`, `traps-and-skills.md`,
-  `conventions.md`, this file. `overview.md` is the one deliberately
-  written to be read *before* the rest of this tier makes sense — a
-  newcomer's on-ramp, not a topic among equals; see its own header.
+  `overview.md`, `architecture.md`, `hosts.md`, `disk-formatting.md`,
+  `history.md`, `impermanence-and-secrets.md`, `open-threads.md`,
+  `traps-and-skills.md`, `conventions.md`, this file. `overview.md` is the
+  one deliberately written to be read *before* the rest of this tier makes
+  sense — a newcomer's on-ramp, not a topic among equals; see its own
+  header. `disk-formatting.md` is the one runbook-shaped page in this tier
+  — ordered steps and safety warnings rather than a what/why/traps topic
+  article, closer in shape to a `homelab/` usage page than its siblings
+  here, but scoped to a `flake/modules/` mechanism (`impermanence`) rather
+  than a running service, so it stays in this tier instead of that one.
   These span multiple categories or aren't tied to a `flake/modules/`
   directory at all.
 - **`wiki/categories/<name>.md`** — one page per real category, i.e. a

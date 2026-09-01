@@ -47,6 +47,7 @@ or a skill (`.claude/skills/<name>/SKILL.md`) — nothing here is new content.
 | land a change on `experimental` | [conventions.md](conventions.md), skill [`ship`](../.claude/skills/ship/SKILL.md) |
 | check whether a bug is already a known thread | [open-threads.md](open-threads.md), skill [`investigate-bug`](../.claude/skills/investigate-bug/SKILL.md) |
 | add a self-hosted service to a host | [homelab/README.md](homelab/README.md), skill [`new-homelab-service`](../.claude/skills/new-homelab-service/SKILL.md) |
+| add a new host, or format its disk for impermanence | [disk-formatting.md](disk-formatting.md), skill [`new-host-config`](../.claude/skills/new-host-config/SKILL.md) |
 
 ## Pages
 
@@ -59,6 +60,10 @@ or a skill (`.claude/skills/<name>/SKILL.md`) — nothing here is new content.
 - [Hosts & current state](hosts.md) — the four hosts (three NixOS + one
   darwin), what's actually been switched/booted vs. only evaluated, and
   where that status is tracked.
+- [New host disk formatting](disk-formatting.md) — the LUKS + btrfs +
+  impermanence disk layout runbook: what to decide before touching a real
+  disk, what depends on disko actually having run, and how to confirm the
+  `/root` rollback is really working rather than just booting.
 - [Architecture & module system](architecture.md) — flake-parts, the
   `dirsAsCategory` mechanism, Home Manager integration, package modules.
 - [Impermanence, initrd & secrets](impermanence-and-secrets.md) — the

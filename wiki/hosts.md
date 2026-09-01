@@ -114,7 +114,8 @@ account and the actual commands.
   [`../flake/doc/disko-impermanence-layout.md`](<../flake/doc/disko-impermanence-layout.md>)
   — the reusable generator durandal/tenacity already run by hand, and
   the template if cube ever adopts impermanence instead of its current plain
-  root.
+  root. [disk-formatting.md](disk-formatting.md) is the runbook for actually
+  using it on a new host.
 - **Repo-wide layout and the impermanence warning** —
   [`../README.md`](../README.md) — the human-facing entry point; short,
   and the first thing to read before running any of this on real hardware.

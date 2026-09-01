@@ -35,6 +35,10 @@ that import it.
 - **Disk layout template** —
   [`../flake/doc/disko-impermanence-layout.md`](<../flake/doc/disko-impermanence-layout.md>),
   covered in more depth on [hosts.md](hosts.md).
+- **New-host runbook** — [disk-formatting.md](disk-formatting.md): the
+  ordered steps and safety warnings for actually getting a new host onto
+  this layout, pulled together from the doc above, `WARN-impermanence.nix`,
+  and the `new-host-config` skill.
 
 ## Secrets
 

@@ -87,6 +87,9 @@ not through each host's own per-host imports list.
 
 ## See also
 
+- [../disk-formatting.md](../disk-formatting.md) — the runbook: what to
+  decide and do to actually get a new host onto this layout, as opposed to
+  what's in the category once it does.
 - [../impermanence-and-secrets.md](../impermanence-and-secrets.md) — the
   cross-cutting topic page.
 - [system](system.md) — for `declare-persistence-option.nix` and the
