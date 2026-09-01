@@ -189,9 +189,10 @@
                     # root has no password on either host
                     # (users.mutableUsers = false; only elly has a
                     # hashedPasswordFile). Recovery picks the previous
-                    # generation in the systemd-boot menu, which is what the
-                    # runbook says to do anyway. If an initrd shell is ever
-                    # genuinely needed, set this to a password hash rather
+                    # generation in the systemd-boot menu -- the same
+                    # recovery step this repo has always pointed at. If an
+                    # initrd shell is ever genuinely needed, set this to a
+                    # password hash rather
                     # than `true` -- the option takes
                     # `oneOf [ bool (nullOr (passwdEntry str)) ]`, so
                     # authenticated access is available without reopening the
