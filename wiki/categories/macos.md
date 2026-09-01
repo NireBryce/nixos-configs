@@ -25,6 +25,44 @@ section for the general pattern this fits into.
   nix installation itself rather than assuming an external installer like
   Determinate owns it).
 
+## Sharp corner: a Homebrew-updated system extension can get stuck mid-upgrade
+
+Found 2026-08-31 on `nire-lysithea` diagnosing "the Tailscale service won't
+install". Not a bug in this repo — `tailscale.nix`
+(`nire/system/networking/`) is `flake.modules.nixos`-only and never reaches
+darwin; on lysithea, Tailscale is entirely the `tailscale-app` cask in
+`homebrew.nix`, unmanaged by Nix past that one line.
+
+`systemextensionsctl list` showed two entries for the same extension at once:
+
+```
+io.tailscale.ipn.macsys.network-extension (1.98.9/101.98.9)   [terminating for uninstall]
+io.tailscale.ipn.macsys.network-extension (1.102.3/101.102.3) [activated waiting to upgrade]
+```
+
+macOS system-extension upgrades are transactional: the old extension has to
+fully unload before the new one activates, and that hand-off needs a reboot
+(or at least a full logout) to complete — Homebrew silently auto-updating the
+cask in the background does not trigger one. The machine had been up 4 days
+with no reboot since the update landed, so `sysextd` sat on the half-finished
+transaction the whole time. While stuck like this, any further
+install/upgrade of the extension looks like it "won't install" — `sysextd`
+already has a pending transaction outstanding and won't start another.
+`tailscaled` itself kept running and `tailscale status` still resolved peers
+fine in this state (apparently still riding the old, not-yet-unloaded
+extension), so connectivity can look fine right up until it doesn't.
+
+Fix is just a reboot — nothing to change in this repo, and no SIP-disabling
+`systemextensionsctl reset` needed. After reboot, `systemextensionsctl list`
+should show exactly one entry for the extension, `[activated enabled]`.
+
+Separately noticed in the same session, unrelated to the stuck extension: the
+tailnet listed this machine twice — `nire-lysithea` (online, the live node)
+and `ts-lysithea` (offline, stale) — a leftover from a past re-registration
+that doesn't match the fleet's `ts-<host>` MagicDNS naming
+([system](system.md)'s Tailscale section). Worth pruning `ts-lysithea` from
+the tailnet admin console; not a Nix-config issue either.
+
 ## Why `hardware`/`desktop-env`/`peripherals` are absent from lysithea instead of guarded here
 
 Nothing in `macos/` guards against being imported on Linux, because nothing
