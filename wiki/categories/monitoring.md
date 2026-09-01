@@ -1,5 +1,14 @@
 # `monitoring` — `nire/homelab/monitoring/`
 
+## Contents
+
+- [What's in it](#whats-in-it)
+- [Tailnet-only access, not a new firewall mechanism](#tailnet-only-access-not-a-new-firewall-mechanism)
+- [The secret_key trap, and why it's now a unit instead of a warning](#the-secret_key-trap-and-why-its-now-a-unit-instead-of-a-warning)
+- [Why cube only, and why that's a category rather than a host-specific file](#why-cube-only-and-why-thats-a-category-rather-than-a-host-specific-file)
+- [Imported by](#imported-by)
+- [See also](#see-also)
+
 Prometheus + Grafana, scraping this host's own resource metrics. Added
 2026-08-23, cube-only so far — see [Imported by](#imported-by) for why that's
 current state, not a structural limit.
@@ -146,6 +155,10 @@ design reason rules them out, it just hasn't been asked for there yet.
 
 ## See also
 
+- [homelab/README.md](../homelab/README.md) — Grafana is listed there under
+  "Also running, not yet written up": reachable and confirmed working, just
+  no usage-tier page yet since logging in and reading the provisioned
+  dashboards needs little explaining.
 - [reverse-proxy](reverse-proxy.md) — Caddy, how Grafana is reached as of
   2026-08-24, and where its TLS certificate comes from.
 - [system](system.md) — `tailscale.nix`, the firewall rule this category's

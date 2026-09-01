@@ -1,5 +1,11 @@
 # carapace
 
+## Contents
+
+- [The generated bash completer, read from its own output](#the-generated-bash-completer-read-from-its-own-output)
+- [The `cod` registration race, and how it's resolved](#the-cod-registration-race-and-how-its-resolved)
+- [See also](#see-also)
+
 A completion engine used as the primary source of shell completions across
 this repo: `pkgs.carapace` in `home.packages`
 ([`carapace-completions.nix`](../../../flake/modules/nirePackages/shell-apps/completions/carapace-completions.nix)),

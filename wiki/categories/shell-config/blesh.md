@@ -1,5 +1,12 @@
 # blesh (bash line editor)
 
+## Contents
+
+- [Plugins](#plugins)
+- [What the `.blerc` actually wires together](#what-the-blerc-actually-wires-together)
+- [Bug: spurious `read: `': not a valid identifier` on Tab / auto-complete](#bug-spurious-read--not-a-valid-identifier-on-tab--auto-complete)
+- [See also](#see-also)
+
 `ble.sh` is wired up by hand for bash — there's no Home Manager option for
 it (`programs.bash.blesh.enable` doesn't exist; see
 [shell-config](README.md)). The package, `source ble.sh

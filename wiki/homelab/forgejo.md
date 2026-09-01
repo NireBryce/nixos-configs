@@ -1,5 +1,14 @@
 # Using the forge
 
+## Contents
+
+- [Where it is](#where-it-is)
+- [Signing in, and why there's no sign-up](#signing-in-and-why-theres-no-sign-up)
+- [SSH keys, and the second user on this host](#ssh-keys-and-the-second-user-on-this-host)
+- [Database and backups](#database-and-backups)
+- [What's verified here](#whats-verified-here)
+- [See also](#see-also)
+
 [Forgejo](https://forgejo.org/) on `nire-cube`, at
 `https://ts-cube.moose-micro.ts.net/git/`. This page is about **using** it —
 signing in, cloning, pushing. For how it's configured and why its two

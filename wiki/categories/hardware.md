@@ -1,5 +1,12 @@
 # `hardware` — `nire/hardware/` (+ nested `amd`)
 
+## Contents
+
+- [What's in it](#whats-in-it)
+- [Nested categories overlap their parents on purpose](#nested-categories-overlap-their-parents-on-purpose)
+- [Imported by](#imported-by)
+- [See also](#see-also)
+
 ## What's in it
 
 Two files, both under a nested `amd/` directory: `amdcpu/amdcpu.nix`

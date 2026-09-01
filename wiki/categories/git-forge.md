@@ -1,5 +1,18 @@
 # `git-forge` — `nire/homelab/git-forge/`
 
+## Contents
+
+- [What's in it](#whats-in-it)
+- [Why the category isn't named `forgejo`](#why-the-category-isnt-named-forgejo)
+- [Zero-touch secrets, built in rather than hand-rolled](#zero-touch-secrets-built-in-rather-than-hand-rolled)
+- [Tailnet-only access, same mechanism as Grafana](#tailnet-only-access-same-mechanism-as-grafana)
+- [The tailnet device-name trap, avoided rather than hit](#the-tailnet-device-name-trap-avoided-rather-than-hit)
+- [Single-user, sqlite3, registration closed](#single-user-sqlite3-registration-closed)
+- [Admin account: bootstrapped from nix+sops, not created by hand](#admin-account-bootstrapped-from-nixsops-not-created-by-hand)
+- [No persistence entry, same reasoning as Grafana](#no-persistence-entry-same-reasoning-as-grafana)
+- [Imported by](#imported-by)
+- [See also](#see-also)
+
 Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only. **Confirmed
 working end to end, 2026-08-24**: `just switch` came up with 0 failed
 units, `forgejo-secrets.service` exited `0/SUCCESS`, `forgejo.service`
@@ -184,6 +197,9 @@ gives for itself.
 
 ## See also
 
+- [homelab/forgejo.md](../homelab/forgejo.md) — the usage-tier page: how to
+  actually use the forge once it's up, as opposed to how it's configured
+  here.
 - [reverse-proxy](reverse-proxy.md) — Caddy, which is how this is reached
   as of 2026-08-24, and where the TLS certificate comes from.
 - [monitoring](monitoring.md) — the `grafana.nix` secret-handling trap this

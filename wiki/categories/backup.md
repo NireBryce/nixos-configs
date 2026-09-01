@@ -1,5 +1,18 @@
 # `backup` — `nire/homelab/backup/`
 
+## Contents
+
+- [What's in it](#whats-in-it)
+- [Why the category isn't named `restic`](#why-the-category-isnt-named-restic)
+- [The QNAP mount predates this category by months, and was never dangling](#the-qnap-mount-predates-this-category-by-months-and-was-never-dangling)
+- [SFTP repository now, not local-path on NFS](#sftp-repository-now-not-local-path-on-nfs)
+- [sqlite consistency](#sqlite-consistency)
+- [What's excluded, and why](#whats-excluded-and-why)
+- [Anti-deletion is not a Nix change](#anti-deletion-is-not-a-nix-change)
+- [What isn't done yet](#what-isnt-done-yet)
+- [Imported by](#imported-by)
+- [See also](#see-also)
+
 [restic](https://restic.net/), backing up `nire-cube`'s own service state to
 the QNAP NAS already on the network. Added 2026-08-28, cube-only, against
 issue [#87](https://github.com/NireBryce/nixos-configs/issues/87) ("no

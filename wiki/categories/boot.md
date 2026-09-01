@@ -1,5 +1,14 @@
 # `boot` — `nire/boot/`
 
+## Contents
+
+- [What's in it](#whats-in-it)
+- [Why one file needs a subdirectory](#why-one-file-needs-a-subdirectory)
+- [The name trap this category is the origin of](#the-name-trap-this-category-is-the-origin-of)
+- [Don't confuse this with the impermanence category](#dont-confuse-this-with-the-impermanence-category)
+- [Imported by](#imported-by)
+- [See also](#see-also)
+
 ## What's in it
 
 One file: `generations/boot-generations.nix`, caps how many bootloader

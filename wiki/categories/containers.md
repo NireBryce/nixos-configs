@@ -1,5 +1,13 @@
 # `containers` — `nire/homelab/containers/`
 
+## Contents
+
+- [What's in it](#whats-in-it)
+- [Why it's its own category, and why that didn't change anything](#why-its-its-own-category-and-why-that-didnt-change-anything)
+- [The collision this move hit for real](#the-collision-this-move-hit-for-real)
+- [Imported by](#imported-by)
+- [See also](#see-also)
+
 Podman and distrobox — OCI containers — and *only* that. See
 [virtualization](virtualization.md) for why libvirt/QEMU is a completely
 different category despite "virtualization" sounding like it should cover

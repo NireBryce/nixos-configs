@@ -1,5 +1,16 @@
 # Backup runbook — restic on `nire-cube`
 
+## Contents
+
+- [Before any of this works: four setup steps](#before-any-of-this-works-four-setup-steps)
+- [Checking status](#checking-status)
+- [Running a backup manually](#running-a-backup-manually)
+- [Ad hoc restic commands](#ad-hoc-restic-commands)
+- [Performing a restore — the actual bar for "done"](#performing-a-restore--the-actual-bar-for-done)
+- [Troubleshooting](#troubleshooting)
+- [What's verified here](#whats-verified-here)
+- [See also](#see-also)
+
 Operating [backup](../categories/backup.md) — the restic category that backs
 up Forgejo/Grafana/golink's state and `/persist` to the QNAP NAS. That page
 covers *why* it's shaped this way; this page is *what to actually type*, on

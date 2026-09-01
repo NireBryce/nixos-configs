@@ -1,5 +1,13 @@
 # Conventions & workflow
 
+## Contents
+
+- [Commands](#commands)
+- [Landing changes on `experimental`](#landing-changes-on-experimental)
+- [The GitHub repo was renamed; a checkout's `origin` doesn't follow](#the-github-repo-was-renamed-a-checkouts-origin-doesnt-follow)
+- [Style](#style)
+- [Fix snippets & one-offs](#fix-snippets--one-offs)
+
 ## Commands
 
 `just` recipes (root `.justfile`, work from anywhere) — full list in

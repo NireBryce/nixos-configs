@@ -1,5 +1,14 @@
 # `desktop-env` — `nire/desktop-env/`
 
+## Contents
+
+- [What's in it](#whats-in-it)
+- [Why this category is never imported whole](#why-this-category-is-never-imported-whole)
+- [Why the split happened](#why-the-split-happened)
+- [Why `jovian-persist.nix` isn't filed under `impermanence`](#why-jovian-persistnix-isnt-filed-under-impermanence)
+- [Imported by](#imported-by)
+- [See also](#see-also)
+
 ## What's in it
 
 Two sub-areas, split along the same line as the hosts that use them:

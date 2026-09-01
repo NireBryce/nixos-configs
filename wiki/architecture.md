@@ -1,5 +1,12 @@
 # Architecture & module system
 
+## Contents
+
+- [The core mechanism](#the-core-mechanism)
+- [Home Manager integration](#home-manager-integration)
+- [Package modules](#package-modules)
+- [Related, easy to get backwards](#related-easy-to-get-backwards)
+
 For what's actually inside each individual category — members, which hosts
 import it, category-specific traps — see the [category reference](categories/README.md)
 instead of this page; this page is the mechanism, not the inventory.

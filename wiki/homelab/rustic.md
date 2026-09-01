@@ -1,5 +1,13 @@
 # rustic — an interactive alternative to the plain `restic` CLI
 
+## Contents
+
+- [What it is](#what-it-is)
+- [Getting it](#getting-it)
+- [Pointing it at this repo's repository](#pointing-it-at-this-repos-repository)
+- [What's verified here](#whats-verified-here)
+- [See also](#see-also)
+
 [rustic](https://github.com/rustic-rs/rustic) (the `rustic-rs` project), not
 to be confused with the unrelated `bnavetta/rustic` "restic wrapper" that
 shares its name in search results. This page is about using it against the

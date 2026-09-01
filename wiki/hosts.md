@@ -1,5 +1,10 @@
 # Hosts & current state
 
+## Contents
+
+- [The hosts](#the-hosts)
+- [Where each fact lives](#where-each-fact-lives)
+
 Canonical status lives in [`CLAUDE.md`'s State section](../CLAUDE.md#state)
 — read that directly rather than trusting a count repeated here; it has been
 wrong-for-a-day more than once as hosts were added. This page is just a map

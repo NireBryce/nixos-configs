@@ -1,5 +1,18 @@
 # `shortlinks` — `nire/homelab/shortlinks/`
 
+## Contents
+
+- [What's in it](#whats-in-it)
+- [Why the category isn't named `golink`](#why-the-category-isnt-named-golink)
+- [It hand-writes a systemd unit, which is unusual here](#it-hand-writes-a-systemd-unit-which-is-unusual-here)
+- [It is not a service on this host's network](#it-is-not-a-service-on-this-hosts-network)
+- [First run needs a one-time interactive login](#first-run-needs-a-one-time-interactive-login)
+- [The node must stay named `go`](#the-node-must-stay-named-go)
+- [`DynamicUser`, deliberately](#dynamicuser-deliberately)
+- [No persistence entry](#no-persistence-entry)
+- [Imported by](#imported-by)
+- [See also](#see-also)
+
 [golink](https://github.com/tailscale/golink), Tailscale's `go/foo`
 shortlink service. Added 2026-08-24, cube-only.
 

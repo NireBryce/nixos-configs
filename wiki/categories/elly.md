@@ -1,5 +1,11 @@
 # `elly` — `nireUser/elly/`
 
+## Contents
+
+- [What's in it](#whats-in-it)
+- [Imported by](#imported-by)
+- [See also](#see-also)
+
 The one category under `nireUser/` — the "for the user" area, as opposed to
 `nire/` (shared system) or `nirePackages/` (packages). Don't confuse this
 category with `nireUser/elly-home-manager.nix`, the entry point one level up
