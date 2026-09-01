@@ -1,7 +1,7 @@
 # Using the forge
 
 [Forgejo](https://forgejo.org/) on `nire-cube`, at
-`https://ts-cube.<tailnet>.ts.net/git/`. This page is about **using** it —
+`https://ts-cube.moose-micro.ts.net/git/`. This page is about **using** it —
 signing in, cloning, pushing. For how it's configured and why its two
 hostnames disagree, see [git-forge](../categories/git-forge.md).
 
@@ -9,8 +9,8 @@ hostnames disagree, see [git-forge](../categories/git-forge.md).
 
 | | |
 |---|---|
-| Web | `https://ts-cube.<tailnet>.ts.net/git/` |
-| Clone over HTTPS | `https://ts-cube.<tailnet>.ts.net/git/<user>/<repo>.git` |
+| Web | `https://ts-cube.moose-micro.ts.net/git/` |
+| Clone over HTTPS | `https://ts-cube.moose-micro.ts.net/git/<user>/<repo>.git` |
 | Clone over SSH | `forgejo@ts-cube:<user>/<repo>.git` |
 
 **Those two hostnames are different on purpose, and it isn't a typo.** Web

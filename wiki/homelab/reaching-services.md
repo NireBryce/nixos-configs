@@ -9,9 +9,9 @@ built, see [reverse-proxy](../categories/reverse-proxy.md).
 
 | What | URL |
 |---|---|
-| Service index (glance) | `https://ts-cube.<tailnet>.ts.net/` |
-| Grafana | `https://ts-cube.<tailnet>.ts.net/grafana/` |
-| Forgejo | `https://ts-cube.<tailnet>.ts.net/git/` |
+| Service index (glance) | `https://ts-cube.moose-micro.ts.net/` |
+| Grafana | `https://ts-cube.moose-micro.ts.net/grafana/` |
+| Forgejo | `https://ts-cube.moose-micro.ts.net/git/` |
 | Anything, short form | `http://ts-cube/` → redirects to the above |
 | golink (**not** on cube) | `http://go/` — see [creating go/ links](golinks.md) |
 
@@ -29,8 +29,8 @@ These no longer answer at all:
 
 | Old | New |
 |---|---|
-| `http://ts-cube:3000/` | `https://ts-cube.<tailnet>.ts.net/grafana/` |
-| `http://ts-cube:3001/` | `https://ts-cube.<tailnet>.ts.net/git/` |
+| `http://ts-cube:3000/` | `https://ts-cube.moose-micro.ts.net/grafana/` |
+| `http://ts-cube:3001/` | `https://ts-cube.moose-micro.ts.net/git/` |
 
 Both services moved to loopback — they're reachable only through Caddy now,
 which is the point: a firewall mistake no longer exposes them, because
@@ -51,7 +51,7 @@ Two things follow that are worth knowing as a user:
 - **It only works on the tailnet.** The name doesn't resolve elsewhere, and
   nothing is exposed to the internet. This is not Funnel.
 - **The full FQDN matters for the certificate**, which is why the URLs above
-  are `ts-cube.<tailnet>.ts.net` and not just `ts-cube`. The short name
+  are `ts-cube.moose-micro.ts.net` and not just `ts-cube`. The short name
   works, it just redirects to the long one first.
 
 ## When something doesn't answer
@@ -60,7 +60,7 @@ Work down this list; it's ordered by what's most often actually wrong.
 
 1. **Is your device on the tailnet?** `tailscale status` on the machine
    you're browsing from. Everything here is tailnet-only.
-2. **Does the root page load?** If `https://ts-cube.<tailnet>.ts.net/`
+2. **Does the root page load?** If `https://ts-cube.moose-micro.ts.net/`
    works but `/git/` doesn't, Caddy is fine and the app is the problem — skip
    to 4. If the root is dead too, Caddy or the host is the problem.
 3. **Is cube up?** `ping ts-cube`, or check the admin console. A `tailscale

@@ -17,7 +17,7 @@ under it, which can happen with no commit to this repo at all.
 
 | Service | Host | Reach it at | Page |
 |---|---|---|---|
-| *(all of cube's web services)* | `nire-cube` | `https://ts-cube.<tailnet>.ts.net/` | [Reaching cube's services](reaching-services.md) |
+| *(all of cube's web services)* | `nire-cube` | `https://ts-cube.moose-micro.ts.net/` | [Reaching cube's services](reaching-services.md) |
 | *(what's still unfinished)* | `nire-cube` | — | [Pending setup](pending-setup.md) |
 | golink — `go/` shortlinks | `nire-cube` | `http://go/` | [Creating go/ links](golinks.md) |
 | Forgejo — self-hosted git forge | `nire-cube` | `.../git/` | [Using the forge](forgejo.md) |
@@ -41,7 +41,7 @@ covering configuration but no usage page here yet.
 
 | Service | Reach it at | Configuration |
 |---|---|---|
-| Grafana — dashboards over cube's own metrics | `https://ts-cube.<tailnet>.ts.net/grafana/` | [monitoring](../categories/monitoring.md) |
+| Grafana — dashboards over cube's own metrics | `https://ts-cube.moose-micro.ts.net/grafana/` | [monitoring](../categories/monitoring.md) |
 
 Grafana mostly doesn't need one: you log in and look at the dashboards
 [monitoring](../categories/monitoring.md) provisions. What *would* be worth

@@ -14,10 +14,10 @@ switch` came up with 0 failed units, `caddy.service` `active (running)` at
 
 | Request | Result |
 |---|---|
-| `https://ts-cube.<tailnet>.ts.net/grafana/` | 200, TLS validated |
-| `https://ts-cube.<tailnet>.ts.net/git/` | 200, TLS validated |
-| `https://ts-cube.<tailnet>.ts.net/` | 200 — [glance](landing.md), the service index |
-| `https://ts-cube.<tailnet>.ts.net/git` | 301 → `/git/` |
+| `https://ts-cube.moose-micro.ts.net/grafana/` | 200, TLS validated |
+| `https://ts-cube.moose-micro.ts.net/git/` | 200, TLS validated |
+| `https://ts-cube.moose-micro.ts.net/` | 200 — [glance](landing.md), the service index |
+| `https://ts-cube.moose-micro.ts.net/git` | 301 → `/git/` |
 | `http://ts-cube/` | 301 → the FQDN |
 
 `ssl_verify_result` was 0 — the tailscaled-issued certificate validated
@@ -48,8 +48,8 @@ change:
 
 | | Before | After |
 |---|---|---|
-| Grafana ([monitoring](monitoring.md)) | `0.0.0.0:3000`, `http://ts-cube:3000/` | `127.0.0.1:3000`, `https://ts-cube.<tailnet>.ts.net/grafana/` |
-| Forgejo ([git-forge](git-forge.md)) | `0.0.0.0:3001`, `http://ts-cube:3001/` | `127.0.0.1:3001`, `https://ts-cube.<tailnet>.ts.net/git/` |
+| Grafana ([monitoring](monitoring.md)) | `0.0.0.0:3000`, `http://ts-cube:3000/` | `127.0.0.1:3000`, `https://ts-cube.moose-micro.ts.net/grafana/` |
+| Forgejo ([git-forge](git-forge.md)) | `0.0.0.0:3001`, `http://ts-cube:3001/` | `127.0.0.1:3001`, `https://ts-cube.moose-micro.ts.net/git/` |
 
 Both used to listen on every interface and rely entirely on
 `trustedInterfaces = [ "tailscale0" ]` to keep the LAN out — a firewall

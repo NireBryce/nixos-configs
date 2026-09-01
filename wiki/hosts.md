@@ -47,7 +47,7 @@ As of 2026-08-24 neither of those two is reached directly any more.
 which is the single tailnet-facing HTTPS listener on the host, holding a
 certificate issued by the local `tailscaled` (no ACME, no plugin). Grafana
 and Forgejo both moved to loopback in the same change and are now
-`https://ts-cube.<tailnet>.ts.net/grafana/` and `/git/` respectively; the
+`https://ts-cube.moose-micro.ts.net/grafana/` and `/git/` respectively; the
 old `http://ts-cube:3000/` and `:3001/` URLs no longer answer, and
 `http://ts-cube/` redirects. **Confirmed working end to end the same day**:
 both paths return 200 over validated TLS from another tailnet host, 0 failed
@@ -56,7 +56,7 @@ Forgejo an un-stripped path prefix and it 404'd everything, a per-app
 requirement no static check could see
 ([lessons-learned.md](<../claude cave/lessons-learned.md>) #41).
 
-`https://ts-cube.<tailnet>.ts.net/` itself serves
+`https://ts-cube.moose-micro.ts.net/` itself serves
 [glance](categories/landing.md), a service index added the same day: which
 services are running, whether each is reachable *through the proxy*, and
 cube's own CPU/memory/disk. Confirmed working on its first switch — all
