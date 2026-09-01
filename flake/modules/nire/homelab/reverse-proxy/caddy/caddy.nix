@@ -57,7 +57,7 @@
 # 2026-08-24 (`tailscale status --json` from lysithea: peer
 # `ts-cube.<tailnet>.ts.net.`, MagicDNSSuffix `<tailnet>.ts.net`).
 #
-# READ FROM /persist/secrets/tailnet-fqdn, not a literal, since 2026-09-01
+# READ FROM /persist/tailnet-fqdn, not a literal, since 2026-09-01
 # -- see tailnet-fqdn-refresh.nix (sibling category member) for why and how
 # it gets there, and its header for the eval-time-vs-runtime caveat. Same
 # read expression in grafana.nix, forgejo.nix, glance.nix; no shared
@@ -111,13 +111,13 @@
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 
-        # See this file's header: read from /persist/secrets/tailnet-fqdn
+        # See this file's header: read from /persist/tailnet-fqdn
         # (tailnet-fqdn-refresh.nix), falling back to an obviously-fake
         # placeholder so `just check`/`just modules` still evaluate off
         # cube, where that file doesn't exist. Duplicated (by necessity,
         # not sharing an option) in grafana.nix, forgejo.nix, glance.nix.
         tailnetFqdn =
-            let path = /persist/secrets/tailnet-fqdn;
+            let path = /persist/tailnet-fqdn;
             in if builtins.pathExists path
                then lib.removeSuffix "\n" (builtins.readFile path)
                else "ts-cube.tailnet-fqdn-unset.invalid";

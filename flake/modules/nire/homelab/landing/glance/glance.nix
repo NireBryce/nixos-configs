@@ -66,13 +66,13 @@
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 
-        # Read from /persist/secrets/tailnet-fqdn (reverse-proxy/
+        # Read from /persist/tailnet-fqdn (reverse-proxy/
         # tailnet-fqdn-refresh.nix), not a literal -- see caddy.nix's
         # header for why and its eval-time-vs-runtime caveat. Same read
         # expression duplicated (not shared as an option, CLAUDE.md
         # Architecture) in caddy.nix, grafana.nix, forgejo.nix.
         tailnetFqdn =
-            let path = /persist/secrets/tailnet-fqdn;
+            let path = /persist/tailnet-fqdn;
             in if builtins.pathExists path
                then lib.removeSuffix "\n" (builtins.readFile path)
                else "ts-cube.tailnet-fqdn-unset.invalid";

@@ -64,12 +64,12 @@
         # files by the same module; nothing to resolve at import time.
         prometheusDatasourceUid = "prometheus-cube";
 
-        # Read from /persist/secrets/tailnet-fqdn (reverse-proxy/
+        # Read from /persist/tailnet-fqdn (reverse-proxy/
         # tailnet-fqdn-refresh.nix), not a literal -- see caddy.nix's
         # header for why and its eval-time-vs-runtime caveat. Same read
         # expression duplicated in caddy.nix, forgejo.nix, glance.nix.
         tailnetFqdn =
-            let path = /persist/secrets/tailnet-fqdn;
+            let path = /persist/tailnet-fqdn;
             in if builtins.pathExists path
                then lib.removeSuffix "\n" (builtins.readFile path)
                else "ts-cube.tailnet-fqdn-unset.invalid";
