@@ -42,7 +42,7 @@
 #
 # STATUS: runtime-verified on nire-cube, 2026-08-24, first switch, no fixes
 # (glance.service active, NRestarts=0, 3002 on 127.0.0.1; from another
-# tailnet host https://ts-cube.<tailnet>.ts.net/ 200 over validated TLS).
+# tailnet host https://ts-cube.moose-micro.ts.net/ 200 over validated TLS).
 #
 # Widget content renders behind `/api/pages/home/content/`, not the initial
 # HTML -- a page 200 proves almost nothing; that endpoint is where to look
@@ -66,16 +66,10 @@
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 
-        # Read from /persist/secrets/tailnet-fqdn (reverse-proxy/
-        # tailnet-fqdn-refresh.nix), not a literal -- see caddy.nix's
-        # header for why and its eval-time-vs-runtime caveat. Same read
-        # expression duplicated (not shared as an option, CLAUDE.md
-        # Architecture) in caddy.nix, grafana.nix, forgejo.nix.
-        tailnetFqdn =
-            let path = /persist/secrets/tailnet-fqdn;
-            in if builtins.pathExists path
-               then lib.removeSuffix "\n" (builtins.readFile path)
-               else "ts-cube.tailnet-fqdn-unset.invalid";
+        # Written out rather than shared, same as reverse-proxy/caddy.nix,
+        # monitoring/grafana.nix and git-forge/forgejo.nix: nothing declares
+        # options (CLAUDE.md, Architecture) -- four copies, moved together.
+        tailnetFqdn = "ts-cube.moose-micro.ts.net";
     in {
         flake.modules.nixos.${moduleName} = {
             # # description = "glance -- the service index for this host: what's running, whether it's up";

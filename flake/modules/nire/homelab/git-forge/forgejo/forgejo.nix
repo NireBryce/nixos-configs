@@ -16,16 +16,6 @@
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-
-        # Read from /persist/secrets/tailnet-fqdn (reverse-proxy/
-        # tailnet-fqdn-refresh.nix), not a literal -- see caddy.nix's
-        # header for why and its eval-time-vs-runtime caveat. Same read
-        # expression duplicated in caddy.nix, grafana.nix, glance.nix.
-        tailnetFqdn =
-            let path = /persist/secrets/tailnet-fqdn;
-            in if builtins.pathExists path
-               then lib.removeSuffix "\n" (builtins.readFile path)
-               else "ts-cube.tailnet-fqdn-unset.invalid";
     in {
         flake.modules.nixos.${moduleName} = { config, ... }: {
             services.forgejo = {
@@ -73,17 +63,13 @@
                         #   - DOMAIN builds the SSH clone URLs (SSH_DOMAIN
                         #     defaults to it); git+ssh bypasses caddy for the
                         #     host's sshd on port 22 (below). Short `ts-cube`
-                        #     keeps clone URLs `forgejo@ts-cube:...`, and
-                        #     stays a literal here -- it's just this host's
-                        #     short device name, not the tailnet's name.
+                        #     keeps clone URLs `forgejo@ts-cube:...`.
                         #
-                        # `tailnetFqdn` (this file's `let`) reads the FQDN
-                        # from /persist/secrets/tailnet-fqdn, the same file
-                        # caddy.nix/grafana.nix/glance.nix read; not shared
-                        # as an option (nothing declares options, CLAUDE.md
-                        # Architecture), but the VALUE is centralized there.
+                        # The FQDN is duplicated in caddy.nix and grafana.nix
+                        # rather than shared (nothing declares options,
+                        # CLAUDE.md Architecture); all three move together.
                         DOMAIN    = "ts-cube";
-                        ROOT_URL  = "https://${tailnetFqdn}/git/";
+                        ROOT_URL  = "https://ts-cube.moose-micro.ts.net/git/";
 
                         # DISABLE_SSH at default (false); START_SSH_SERVER
                         # unset, so false too -- git+ssh goes through the
