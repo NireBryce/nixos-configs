@@ -22,6 +22,14 @@
 # is on the host being built for, not on whatever machine is evaluating this
 # flake -- so it has nothing to assert. It only knows the class of host it's
 # looking at, hence a standing reminder rather than a one-time check.
+#
+# nire-cube is the only host this currently applies to (see the
+# `usesImpermanence` gate below), and its own case is already solved: the
+# hash was created by hand on the real machine before cube was ever switched
+# to this config, and a plain persistent root (cube's whole point -- see
+# cube-configuration.nix) never wipes it back out. Excluded by hostname
+# rather than deleting the module, so a *future* non-impermanence host still
+# gets the reminder.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
@@ -29,9 +37,10 @@
         flake.modules.nixos.${moduleName} = { config, ... }:
         let
             usesImpermanence = config.boot.initrd.systemd.services ? restore-root;
+            solvedByHand = config.networking.hostName == "nire-cube";
         in {
             # # description = "reminds a non-impermanence host that elly has no password until one is set by hand";
-            warnings = lib.optional (!usesImpermanence) ''
+            warnings = lib.optional (!usesImpermanence && !solvedByHand) ''
                 elly has no password on this host until you set one by hand. users.mutableUsers
                 is false, so `passwd` will not stick -- any change made that way is reverted on
                 the next switch -- and users.users.elly.hashedPasswordFile (elly-user.nix)

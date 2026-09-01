@@ -54,7 +54,10 @@ plain persistent root, not LUKS+impermanence, a correction made 2026-08-21
 after the fact. That absence is why two other things exist:
 [`nireUser/elly/user-settings/WARN-password-required.nix`](elly.md), which
 warns that a non-impermanence host has no login-password-setting help
-anywhere in this repo, and
+anywhere in this repo (cube itself is excluded by hostname as of
+2026-09-01 — its password was already set by hand before it was ever
+switched — so the warning is standing by for a *future* non-impermanence
+host rather than currently firing on any real one), and
 `nire/system/impermanence/declare-persistence-option.nix` (see
 [system](system.md)) — a **different, easily confused file** in a
 similarly-named-but-different location.
