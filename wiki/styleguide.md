@@ -1,5 +1,14 @@
 # Wiki style guide
 
+## Contents
+
+- [Directory hierarchy](#directory-hierarchy)
+- [Naming](#naming)
+- [Content shape](#content-shape)
+- [Linking](#linking)
+- [Keeping this from rotting](#keeping-this-from-rotting)
+- [See also](#see-also)
+
 How this wiki itself is organized and written — as opposed to
 [conventions.md](conventions.md), which is the *repo's* style guide (Nix
 formatting, `just` commands, the `ship` flow). Read this before adding a
@@ -83,6 +92,28 @@ separate tier for the *usage* side:
 
 ## Content shape
 
+- **Every page opens with a `## Contents`** — a bullet list of section links,
+  one per `##` heading on the page, placed right after the title and before
+  any intro prose (added wiki-wide 2026-09-01, for browsability: a reader
+  lands knowing the page's shape before reading a word of it). Each link's
+  target is GitHub's own heading-slug algorithm applied to that heading's
+  text: lowercase, strip everything that isn't a letter/digit/space/hyphen/
+  underscore (backticks, colons, periods, em-dashes, quotes all disappear; a
+  removed character between two spaces leaves a double hyphen once spaces
+  become hyphens), then replace each space with a hyphen.
+
+  **Don't hand-derive this.** `wiki/scripts/check_wiki.py` implements the
+  exact algorithm (`github_slug`, reverse-engineered against real rendered
+  GitHub output, not assumed) and two checks that use it: `anchors` (every
+  link with a `#fragment` resolves to a real heading on its target page) and
+  `contents` (every page's `## Contents` list still matches its own current
+  headings) — both part of `check`/`just wiki-lint`. After adding, renaming,
+  or removing a heading, run `python3 wiki/scripts/check_wiki.py gen-contents
+  <the page>` to regenerate its Contents block correctly rather than editing
+  it by hand; it's idempotent, so running it on an already-correct page is a
+  no-op. This exists because a hand-derived anchor already got it wrong once
+  — `categories/homelab.md`'s link into `virtualization.md`'s `` `VMs/_lib/
+  libvirt-vm.nix` `` heading — and sat wrong until `anchors` caught it.
 - Category pages follow **what's in it → mechanism notes specific to that
   category, if any → imported by → see also**. This is the same
   what/why/traps depth the rest of the wiki holds itself to, per

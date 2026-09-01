@@ -1,5 +1,17 @@
 # Creating go/ links
 
+## Contents
+
+- [Where it is](#where-it-is)
+- [Creating a link](#creating-a-link)
+- [Paths after the short name get appended](#paths-after-the-short-name-get-appended)
+- [Advanced destinations are Go templates](#advanced-destinations-are-go-templates)
+- [Reading links back](#reading-links-back)
+- [Traps](#traps)
+- [Backups](#backups)
+- [What's verified here](#whats-verified-here)
+- [See also](#see-also)
+
 `go/foo` shortlinks, served by [golink](https://github.com/tailscale/golink)
 on `nire-cube`. This page is about **using** it. For how it's configured,
 why it needed an `AF_NETLINK` fix, and why it's a tailnet device rather than

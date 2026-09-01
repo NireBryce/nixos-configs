@@ -1,5 +1,12 @@
 # `peripherals` — `nire/peripherals/`
 
+## Contents
+
+- [What's in it](#whats-in-it)
+- [Open question this category carries](#open-question-this-category-carries)
+- [Imported by](#imported-by)
+- [See also](#see-also)
+
 ## What's in it
 
 Two small files, both `nixos`-class, both single-option one-liners:

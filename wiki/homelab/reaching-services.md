@@ -1,5 +1,15 @@
 # Reaching cube's services
 
+## Contents
+
+- [The map](#the-map)
+- [What changed on 2026-08-24, and what to do about muscle memory](#what-changed-on-2026-08-24-and-what-to-do-about-muscle-memory)
+- [Why it's HTTPS, and why the certificate is trusted](#why-its-https-and-why-the-certificate-is-trusted)
+- [When something doesn't answer](#when-something-doesnt-answer)
+- [Adding another service to this](#adding-another-service-to-this)
+- [What's verified here](#whats-verified-here)
+- [See also](#see-also)
+
 Everything `nire-cube` serves over the web now lives under **one hostname,
 one certificate, one port**. This page is about *using* that — the URLs, why
 they're HTTPS, and what to check when one doesn't answer. For how it's

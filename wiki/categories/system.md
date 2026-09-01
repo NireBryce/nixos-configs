@@ -1,5 +1,16 @@
 # `system` — `nire/system/`
 
+## Contents
+
+- [Subdirectories at a glance](#subdirectories-at-a-glance)
+- [Home Manager integration lives here](#home-manager-integration-lives-here)
+- [Secrets](#secrets)
+- [Containers vs. virtualization — the live trap, and no longer filed here](#containers-vs-virtualization--the-live-trap-and-no-longer-filed-here)
+- [The `*-persist.nix` sibling-file convention](#the--persistnix-sibling-file-convention)
+- [Tailscale: MagicDNS names, and the ACL lives outside this repo](#tailscale-magicdns-names-and-the-acl-lives-outside-this-repo)
+- [Imported by](#imported-by)
+- [See also](#see-also)
+
 The largest category by far — across 19 subdirectories, no per-file count
 kept here on purpose (see categories/README.md's Index section for why) —
 and the one every Linux host in this repo imports whole, with no way to opt

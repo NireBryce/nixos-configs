@@ -1,5 +1,13 @@
 # Homelab services
 
+## Contents
+
+- [Pages](#pages)
+- [Also running, not yet written up](#also-running-not-yet-written-up)
+- [Half-finished is the normal state here](#half-finished-is-the-normal-state-here)
+- [Index over restatement still applies, with one carve-out](#index-over-restatement-still-applies-with-one-carve-out)
+- [See also](#see-also)
+
 How to **use** the services this fleet runs, as opposed to how they're
 configured. Everything here is reachable over the tailnet and nowhere else.
 

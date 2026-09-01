@@ -1,5 +1,11 @@
 # `nix` — `nire/nix/`
 
+## Contents
+
+- [What's in it](#whats-in-it)
+- [Imported by](#imported-by)
+- [See also](#see-also)
+
 ## What's in it
 
 - **`nix-settings/basic-nix-settings.nix`** — the one file in this whole

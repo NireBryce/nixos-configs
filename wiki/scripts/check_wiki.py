@@ -101,20 +101,47 @@ structured, extractable facts only:
             report-only, never-fails tool rather than a subcommand here --
             same reasoning as `wiki_churn.py` living outside this file.
 
-  check     Runs all eight of the above.
+  anchors   Every `#fragment` on a markdown link -- same-file (`(#see-also)`)
+            or into another page (`reverse-proxy.md#the-two-apps-...`) --
+            against a real GitHub-slug computation of the target page's own
+            headings (`github_slug`, reverse-engineered against real
+            rendered output from this repo's own GitHub pages, not assumed).
+            `check_links` above deliberately only checks the file half of a
+            link and says so in its own docstring; this is the fragment
+            half, added 2026-09-01 after a hand-derived anchor
+            (`categories/homelab.md`'s link into `virtualization.md`'s
+            `VMs/_lib/...` heading) turned out wrong and sat that way
+            unnoticed, since nothing checked it.
 
-    check_wiki.py imports  [repo-root]
-    check_wiki.py table    [repo-root]
-    check_wiki.py hosts    [repo-root]
-    check_wiki.py recipes  [repo-root]
-    check_wiki.py skills   [repo-root]
-    check_wiki.py secrets  [repo-root]
-    check_wiki.py routes   [repo-root]
-    check_wiki.py links    [repo-root]
-    check_wiki.py check    [repo-root]
+  contents  Every page's `## Contents` block (added wiki-wide 2026-09-01,
+            one per page, see styleguide.md) against what its own `##`
+            headings say right now -- catches a heading renamed, added, or
+            removed without the list above it following along. Skips a page
+            with no `## Contents` section rather than demanding one; that
+            expectation lives in styleguide.md, not here.
+
+  check     Runs all ten of the above.
+
+    check_wiki.py imports       [repo-root]
+    check_wiki.py table         [repo-root]
+    check_wiki.py hosts         [repo-root]
+    check_wiki.py recipes       [repo-root]
+    check_wiki.py skills        [repo-root]
+    check_wiki.py secrets       [repo-root]
+    check_wiki.py routes        [repo-root]
+    check_wiki.py links         [repo-root]
+    check_wiki.py anchors       [repo-root]
+    check_wiki.py contents      [repo-root]
+    check_wiki.py check         [repo-root]
+    check_wiki.py gen-contents  <file.md> [file.md ...]
 
 repo-root defaults to two directories up from this script (wiki/scripts/ ->
-wiki/ -> repo root).
+wiki/ -> repo root). `gen-contents` is different in kind from every command
+above -- a fixer, not a checker, so it takes file paths instead and is not
+part of `check`'s aggregate: it rewrites each given page's `## Contents`
+block in place to match that page's real headings, which is the actual fix
+for a `contents` finding (and, if the broken link was into the page's own
+Contents list rather than someone else's, an `anchors` finding too).
 """
 import re, sys, pathlib, urllib.parse
 
@@ -672,12 +699,226 @@ def check_links(root):
     return findings
 
 
+FENCE = re.compile(r'^(```|~~~)')
+HEADING = re.compile(r'^(#{1,6})\s+(.+?)\s*$')
+CONTENTS_HEADING = re.compile(r'^##\s+Contents\s*$', re.M)
+CONTENTS_ITEM = re.compile(r'^-\s+\[(?P<text>.+)\]\(#(?P<slug>[^)]+)\)\s*$', re.M)
+
+
+def _iter_headings(text):
+    """Yields (level, raw_heading_text) for every real heading line -- `#`
+    through `######` -- in document order, skipping anything inside a fenced
+    code block (```` ``` ```` or `~~~`). Without the fence tracking, a shell
+    comment like `# or, one-off:` inside a ```sh block (`homelab/rustic.md`
+    has exactly this) would be misread as a level-1 heading."""
+    in_fence = False
+    for line in text.splitlines():
+        if FENCE.match(line):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        m = HEADING.match(line)
+        if m:
+            yield len(m.group(1)), m.group(2)
+
+
+def github_slug(raw, seen):
+    """GitHub's own heading-anchor algorithm -- reverse-engineered against
+    real rendered output (fetched 2026-09-01 from this repo's own pages on
+    github.com, after a hand-derived anchor turned out wrong -- see
+    `wiki/styleguide.md`'s Content-shape section) rather than assumed:
+    lowercase, drop every character that isn't a letter/digit/space/hyphen/
+    underscore -- backticks, colons, periods, em-dashes, quotes, slashes,
+    asterisks all just disappear, nothing put in their place, so a removed
+    character sitting between two spaces leaves a double hyphen once spaces
+    become hyphens, and one with no surrounding space glues its two
+    neighbors together with none (`` `VMs/_lib/libvirt-vm.nix` `` slugs to
+    `vms_liblibvirt-vmnix`, confirmed against the live page, not the
+    `vmslib-libvirt-vmnix` a previous session guessed and left linked from
+    `categories/homelab.md`) -- then turn each remaining space into a
+    hyphen. `seen` is a dict this function mutates so repeated headings on
+    one page get GitHub's own `-1`/`-2` suffix instead of colliding; pass a
+    fresh `{}` per page, not per heading, and feed it every heading in
+    document order (including ones you don't otherwise care about) so the
+    counters land where GitHub's would.
+
+    Known gap: operates on the heading's raw source characters, not a
+    markdown-aware plain-text extraction -- a heading containing an actual
+    `[text](url)` link (none currently exist in this wiki) would slug
+    wrong, since the URL's characters aren't stripped as a unit. Backticks,
+    `**bold**`, and `*italic*` are fine, since stripping their marker
+    characters one at a time happens to produce the same result GitHub's
+    real markdown-aware slugger gives."""
+    s = raw.lower()
+    s = ''.join(c for c in s if c.isalnum() or c in ' -_')
+    s = s.replace(' ', '-')
+    n = seen.get(s, 0)
+    seen[s] = n + 1
+    return s if n == 0 else f'{s}-{n}'
+
+
+def _page_anchors(path):
+    """Every heading anchor a real GitHub render of `path` would produce, as
+    a set of slugs."""
+    seen = {}
+    return {github_slug(text, seen) for _, text in _iter_headings(path.read_text())}
+
+
+def check_anchors(root):
+    """Every `#fragment` on a markdown link -- same-file (`(#see-also)`) or
+    into another page (`reverse-proxy.md#the-two-apps-...`) -- resolves to a
+    real heading on the target page, per `github_slug` above. This is the
+    check `check_links` explicitly does NOT do (its own docstring only
+    checks the file half of a link), which is what let the wrong
+    `vmslib-libvirt-vmnix` anchor above sit unnoticed. Skips a target
+    `check_links` would already flag as a broken file path -- nothing to
+    check the fragment against, and no point duplicating that finding."""
+    cache = {}
+    findings = []
+    for path in doc_files(root):
+        for m in MD_LINK.finditer(path.read_text()):
+            target = m.group(1).strip()
+            if target.startswith(('http://', 'https://', 'mailto:')):
+                continue
+            if '#' not in target:
+                continue
+            file_part, _, frag = target.partition('#')
+            file_part = urllib.parse.unquote(file_part.strip('<>'))
+            frag = urllib.parse.unquote(frag)
+            if not frag:
+                continue  # a bare (#) with nothing after it -- not real
+            resolved = (path.parent / file_part) if file_part else path
+            if not resolved.exists():
+                continue  # check_links already reports this
+            if resolved not in cache:
+                cache[resolved] = _page_anchors(resolved)
+            if frag not in cache[resolved]:
+                findings.append(
+                    f"BROKEN ANCHOR  {path}: ({target}) -> {resolved} has no "
+                    f"heading matching #{frag}")
+    return findings
+
+
+def expected_contents_items(text):
+    """[(heading_text, slug), ...] a fresh `## Contents` block for this page
+    should list, in document order -- level-2 headings only, excluding a
+    heading literally named `Contents` (itself). Slugs every heading on the
+    page, not just the level-2 ones, so GitHub's per-page dedup counter
+    lands on the right ones even though only level-2 headings make it into
+    the returned list -- see `wiki/styleguide.md`'s Content-shape section
+    for why Contents is H2-only (several pages nest `###` steps under one H2
+    and Contents stays a flat top-level list, not a full outline)."""
+    seen = {}
+    items = []
+    for level, text_ in _iter_headings(text):
+        slug = github_slug(text_, seen)
+        if level == 2 and text_.strip() != 'Contents':
+            items.append((text_, slug))
+    return items
+
+
+def actual_contents_items(text):
+    """[(heading_text, slug), ...] a page's existing `## Contents` block
+    actually lists, read back from the file rather than assumed -- or
+    `None` if the page has no such section at all."""
+    m = CONTENTS_HEADING.search(text)
+    if not m:
+        return None
+    rest = text[m.end():]
+    end = NEXT_HEADING.search(rest)
+    section = rest[:end.start()] if end else rest
+    return [(mm.group('text'), mm.group('slug'))
+            for mm in CONTENTS_ITEM.finditer(section)]
+
+
+def check_contents(root):
+    """Every page's `## Contents` block matches what `expected_contents_items`
+    would generate from its own headings right now -- catches the drift this
+    whole mechanism exists to prevent: a heading renamed, added, or removed
+    without updating the list above it. Skips a page with no `## Contents`
+    section (nothing to check against) rather than demanding every page have
+    one; `styleguide.md` is where that expectation is written down instead."""
+    findings = []
+    for path in sorted(root.joinpath('wiki').rglob('*.md')):
+        text = path.read_text()
+        actual = actual_contents_items(text)
+        if actual is None:
+            continue
+        if actual != expected_contents_items(text):
+            findings.append(
+                f"STALE CONTENTS  {path}: its '## Contents' list doesn't "
+                f"match its own headings -- fix with `gen-contents {path}`")
+    return findings
+
+
+CONTENTS_ITEM_LINE = re.compile(r'^-\s+\[.+\]\(#[^)]+\)\s*$')
+
+
+def regenerate_contents(path):
+    """Rewrites `path`'s `## Contents` block in place to match its current
+    headings exactly -- inserting one right after the title if the page
+    doesn't have one yet. Idempotent: safe to run any time after adding,
+    renaming, or removing a heading. This is the actual fix for every
+    `STALE CONTENTS` finding above, and for a `BROKEN ANCHOR` finding whose
+    link points at the page's own Contents block rather than someone else's
+    -- not run automatically by `check`, since it writes files rather than
+    reporting, the same reasoning that keeps `--fix` flows in this repo
+    (`code-review`, `simplify`) separate from the check itself.
+
+    Replaces ONLY the contiguous run of `- [text](#slug)` lines right after
+    the `## Contents` heading -- never "everything up to the next `##`
+    heading" the way `check_table`'s NEXT_HEADING trick does elsewhere in
+    this file. Several pages put a line or two of intro prose between the
+    Contents heading and the first real section (deliberately -- title,
+    Contents, intro, first heading); an earlier version of this function
+    used the NEXT_HEADING span and silently deleted that prose on every
+    such page the first time it ran. Bullet-list-only replacement can't
+    repeat that mistake no matter what sits after the list."""
+    text = path.read_text()
+    items = expected_contents_items(text)
+    block = '## Contents\n\n' + '\n'.join(f'- [{t}](#{s})' for t, s in items) + '\n'
+    m = CONTENTS_HEADING.search(text)
+    if m:
+        rest = text[m.end():]
+        lines = rest.splitlines(keepends=True)
+        i = 0
+        while i < len(lines) and lines[i].strip() == '':
+            i += 1
+        while i < len(lines) and CONTENTS_ITEM_LINE.match(lines[i]):
+            i += 1
+        tail = m.end() + sum(len(l) for l in lines[:i])
+        new_text = text[:m.start()] + block + text[tail:]
+    else:
+        lines = text.splitlines(keepends=True)
+        if not lines or not lines[0].startswith('# '):
+            print(f"SKIP {path}: no '# Title' line to insert Contents after")
+            return
+        insert_at = 1
+        while insert_at < len(lines) and lines[insert_at].strip() == '':
+            insert_at += 1
+        new_text = ''.join(lines[:insert_at]) + block + '\n' + ''.join(lines[insert_at:])
+    if new_text != text:
+        path.write_text(new_text)
+        print(f"updated {path}")
+    else:
+        print(f"unchanged {path}")
+
+
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == 'gen-contents':
+        if len(sys.argv) < 3:
+            print("usage: check_wiki.py gen-contents <file.md> [file.md ...]")
+            sys.exit(2)
+        for p in sys.argv[2:]:
+            regenerate_contents(pathlib.Path(p))
+        sys.exit(0)
+
     cmd = sys.argv[1] if len(sys.argv) > 1 else 'check'
     root = repo_root([sys.argv[0]] + sys.argv[2:])
 
     cmds = ('imports', 'table', 'hosts', 'recipes', 'skills', 'secrets',
-            'routes', 'links', 'check')
+            'routes', 'links', 'anchors', 'contents', 'check')
     if cmd not in cmds:
         print(__doc__)
         sys.exit(2)
@@ -699,6 +940,10 @@ def main():
         findings += check_routes(root)
     if cmd in ('links', 'check'):
         findings += check_links(root)
+    if cmd in ('anchors', 'check'):
+        findings += check_anchors(root)
+    if cmd in ('contents', 'check'):
+        findings += check_contents(root)
 
     for f in findings:
         print(f)

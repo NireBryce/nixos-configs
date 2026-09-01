@@ -1,5 +1,11 @@
 # Wiki
 
+## Contents
+
+- [Common tasks](#common-tasks)
+- [Pages](#pages)
+- [Keeping this from rotting](#keeping-this-from-rotting)
+
 A topic index over documentation that already exists scattered around this
 repo — `CLAUDE.md`, `claude cave/`, `flake/doc/`, `.claude/skills/`, stray
 `.md` files sitting next to the code they're about, and `bugs pending
@@ -22,13 +28,42 @@ know roughly what you're after — a human skimming for the right doc, or an
 agent trying to find the one file that actually answers a question instead
 of re-deriving it.
 
+## Common tasks
+
+A task-shaped way in, for when you already know what you're about to *do*
+rather than what category it falls under. Every row points at a page above
+or a skill (`.claude/skills/<name>/SKILL.md`) — nothing here is new content.
+
+| I want to... | Start here |
+|---|---|
+| reach or debug a service running on cube | [homelab/reaching-services.md](homelab/reaching-services.md) |
+| add, rename, or wire a flake-parts module | [architecture.md](architecture.md), skill [`new-flake-module`](../.claude/skills/new-flake-module/SKILL.md) |
+| touch impermanence or initrd | [impermanence-and-secrets.md](impermanence-and-secrets.md), skill [`impermanence-initrd`](../.claude/skills/impermanence-initrd/SKILL.md) |
+| add or platform-gate a package | [categories/README.md](categories/README.md), skill [`nirepackages-platform-support`](../.claude/skills/nirepackages-platform-support/SKILL.md) |
+| land a change on `experimental` | [conventions.md](conventions.md), skill [`ship`](../.claude/skills/ship/SKILL.md) |
+| check whether a bug is already a known thread | [open-threads.md](open-threads.md), skill [`investigate-bug`](../.claude/skills/investigate-bug/SKILL.md) |
+| add a self-hosted service to a host | [homelab/README.md](homelab/README.md), skill [`new-homelab-service`](../.claude/skills/new-homelab-service/SKILL.md) |
+
 ## Pages
+
+### Cross-cutting topics
 
 - [Hosts & current state](hosts.md) — the four hosts (three NixOS + one
   darwin), what's actually been switched/booted vs. only evaluated, and
   where that status is tracked.
 - [Architecture & module system](architecture.md) — flake-parts, the
   `dirsAsCategory` mechanism, Home Manager integration, package modules.
+- [Impermanence, initrd & secrets](impermanence-and-secrets.md) — the
+  `/root`-wipe-on-boot mechanism, which hosts opt in, sops-nix.
+- [Traps & skills](traps-and-skills.md) — the mistakes that have actually
+  happened here, and the skills that hold the long version of each.
+- [History & lessons learned](history.md) — the den → flake-parts port, the
+  first hardware boots, and the sibling branch's own notes.
+- [Open threads](open-threads.md) — pending upstream bug reports, todos,
+  half-formed ideas, and things-to-look-into notes left in various corners.
+
+### Category reference (configuration)
+
 - [Category reference](categories/README.md) — one article per real
   category (`nire/system`, `nire/impermanence`, `nire/homelab/virtualization`, …):
   what's in it, which hosts import it, and the traps specific to that one.
@@ -40,6 +75,9 @@ of re-deriving it.
   [carapace](categories/shell-config/carapace.md) (the completion engine
   blesh layers a menu on top of, and how it avoids clobbering — and being
   clobbered by — `cod`'s daemon-based completions).
+
+### Homelab (usage)
+
 - [Homelab services](homelab/README.md) — how to *use* what the fleet
   actually runs, as opposed to how it's configured:
   [reaching cube's services](homelab/reaching-services.md) (the URL map
@@ -52,16 +90,11 @@ of re-deriving it.
   listed but not written up. A different tier from the category pages, and the one place a
   page may hold real content rather than links — because its source is
   often the running service's own help page, not a file in this repo.
-- [Impermanence, initrd & secrets](impermanence-and-secrets.md) — the
-  `/root`-wipe-on-boot mechanism, which hosts opt in, sops-nix.
-- [Traps & skills](traps-and-skills.md) — the mistakes that have actually
-  happened here, and the skills that hold the long version of each.
-- [History & lessons learned](history.md) — the den → flake-parts port, the
-  first hardware boots, and the sibling branch's own notes.
+
+### Conventions & meta
+
 - [Conventions & workflow](conventions.md) — the *repo's* style guide: Nix
   formatting, `just` commands, the `ship` flow, assorted fix snippets.
-- [Open threads](open-threads.md) — pending upstream bug reports, todos,
-  half-formed ideas, and things-to-look-into notes left in various corners.
 - [Wiki style guide](styleguide.md) — this wiki's *own* house style: the
   directory hierarchy above in full (when a category page earns its own
   subdirectory, like `shell-config` did), naming, linking, and how pages

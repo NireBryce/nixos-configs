@@ -1,5 +1,13 @@
 # Open threads
 
+## Contents
+
+- [Tracked as GitHub issues](#tracked-as-github-issues)
+- [Pending upstream bug reports](#pending-upstream-bug-reports)
+- [Todos and ideas left next to the code](#todos-and-ideas-left-next-to-the-code)
+- [Left open by the cube service stack, 2026-08-24](#left-open-by-the-cube-service-stack-2026-08-24)
+- [Not covered here](#not-covered-here)
+
 Todos, half-formed ideas, and things-to-look-into notes left in various
 corners of the tree, plus upstream bugs found here but not yet filed. None
 of this is acted on just by being listed here — this page exists so these

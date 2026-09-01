@@ -1,5 +1,11 @@
 # History & lessons learned
 
+## Contents
+
+- [This repo's own history](#this-repos-own-history)
+- [Confirmed-on-hardware facts, and how they were confirmed](#confirmed-on-hardware-facts-and-how-they-were-confirmed)
+- [The sibling branch](#the-sibling-branch)
+
 ## This repo's own history
 
 - **[`../claude cave/lessons-learned.md`](<../claude cave/lessons-learned.md>)**

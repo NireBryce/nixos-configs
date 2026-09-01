@@ -1,5 +1,12 @@
 # `shell-config` — `nire/shell-config/`
 
+## Contents
+
+- [What's in it](#whats-in-it)
+- [The `home.file`/`home.sessionPath` concatenation trap, live in this category](#the-homefilehomesessionpath-concatenation-trap-live-in-this-category)
+- [Imported by](#imported-by)
+- [See also](#see-also)
+
 ## What's in it
 
 - **`bash/bash.nix`** — `nixos`-class: `environment.pathsToLink` for bash

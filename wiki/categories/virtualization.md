@@ -1,5 +1,16 @@
 # `virtualization` — `nire/homelab/virtualization/`
 
+## Contents
+
+- [What's in it](#whats-in-it)
+- [The default network is defined but never started — and where that's fixed](#the-default-network-is-defined-but-never-started--and-where-thats-fixed)
+- [Optional inbound SSH, scoped by source IP rather than by interface](#optional-inbound-ssh-scoped-by-source-ip-rather-than-by-interface)
+- [`VMs/_lib/libvirt-vm.nix` — a generator, not a category member](#vms_liblibvirt-vmnix--a-generator-not-a-category-member)
+- [The near-miss this category's own header records](#the-near-miss-this-categorys-own-header-records)
+- [Why this is its own category and not part of `system`](#why-this-is-its-own-category-and-not-part-of-system)
+- [Imported by](#imported-by)
+- [See also](#see-also)
+
 Libvirt/QEMU VMs, and *only* that — see [containers](containers.md) for why
 podman and distrobox (OCI containers) are a completely different category
 despite "virtualization" sounding like it should cover both.

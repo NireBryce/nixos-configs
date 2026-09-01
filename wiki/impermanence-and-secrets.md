@@ -1,5 +1,10 @@
 # Impermanence, initrd & secrets
 
+## Contents
+
+- [Impermanence](#impermanence)
+- [Secrets](#secrets)
+
 ## Impermanence
 
 **Read `flake/modules/nire/impermanence/root-rollback/WARN-impermanence.nix`

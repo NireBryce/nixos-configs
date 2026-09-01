@@ -1,5 +1,13 @@
 # `homelab` — `nire/homelab/`
 
+## Contents
+
+- [What's in it](#whats-in-it)
+- [Nested categories overlap their parents on purpose](#nested-categories-overlap-their-parents-on-purpose)
+- [Why one category for all seven](#why-one-category-for-all-seven)
+- [Imported by](#imported-by)
+- [See also](#see-also)
+
 ## What's in it
 
 Nothing of its own — it's an umbrella. Added 2026-08-27, folding seven
@@ -47,7 +55,7 @@ own bare files alongside delegating to its aggregate (`bareModulesOf` in
 delegation was added. That mechanism is unchanged and still live — nothing
 currently in the tree happens to exercise it, the same way it did for this
 file while it existed — see
-[virtualization.md](virtualization.md#vmslib-libvirt-vmnix--a-generator-not-a-category-member)
+[virtualization.md](virtualization.md#vms_liblibvirt-vmnix--a-generator-not-a-category-member)
 for the full account.
 
 **This exact file is why `homelab` referencing `virtualization`'s aggregate

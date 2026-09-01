@@ -1,5 +1,13 @@
 # `macos` — `nire/macos/`
 
+## Contents
+
+- [What's in it](#whats-in-it)
+- [Sharp corner: a Homebrew-updated system extension can get stuck mid-upgrade](#sharp-corner-a-homebrew-updated-system-extension-can-get-stuck-mid-upgrade)
+- [Why `hardware`/`desktop-env`/`peripherals` are absent from lysithea instead of guarded here](#why-hardwaredesktop-envperipherals-are-absent-from-lysithea-instead-of-guarded-here)
+- [Imported by](#imported-by)
+- [See also](#see-also)
+
 `darwin`-class only, throughout — the one category in this repo that is
 entirely platform-specific rather than shared-with-a-guard. See
 [../architecture.md](../architecture.md)'s "Platform support is derived"

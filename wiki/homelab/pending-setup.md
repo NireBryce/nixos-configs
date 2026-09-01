@@ -1,5 +1,17 @@
 # Pending setup
 
+## Contents
+
+- [How this differs from open-threads.md](#how-this-differs-from-open-threadsmd)
+- [1. Forgejo has no users, so nobody can log in](#1-forgejo-has-no-users-so-nobody-can-log-in)
+- [2. Nothing has been pushed to the forge, and what it's *for* isn't decided](#2-nothing-has-been-pushed-to-the-forge-and-what-its-for-isnt-decided)
+- [3. golink has no links yet](#3-golink-has-no-links-yet)
+- [4. No backups exist for any of it](#4-no-backups-exist-for-any-of-it)
+- [5. Grafana's admin credentials](#5-grafanas-admin-credentials)
+- [6. Housekeeping on cube: one scratch directory left over](#6-housekeeping-on-cube-one-scratch-directory-left-over)
+- [What's verified here](#whats-verified-here)
+- [See also](#see-also)
+
 Services that are **running but not finished** — configured, switched,
 reachable, and still missing the human step that makes them useful. Every
 item here is something to do *to a live service*, in a browser or over ssh,

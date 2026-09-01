@@ -1,5 +1,21 @@
 # `reverse-proxy` — `nire/homelab/reverse-proxy/`
 
+## Contents
+
+- [What's in it](#whats-in-it)
+- [What it changed elsewhere](#what-it-changed-elsewhere)
+- [Certificates come from tailscaled, with no plugin](#certificates-come-from-tailscaled-with-no-plugin)
+- [Paths, not subdomains, and that's forced](#paths-not-subdomains-and-thats-forced)
+- [The two apps want opposite things from the proxy](#the-two-apps-want-opposite-things-from-the-proxy)
+- [Named matchers, not inline ones](#named-matchers-not-inline-ones)
+- [The redirect vhost needs its scheme spelled out](#the-redirect-vhost-needs-its-scheme-spelled-out)
+- [Firewall, and binding 443 as a non-root user](#firewall-and-binding-443-as-a-non-root-user)
+- [Ordering against tailscaled](#ordering-against-tailscaled)
+- [No persistence entry](#no-persistence-entry)
+- [Why the category isn't named `caddy`](#why-the-category-isnt-named-caddy)
+- [Imported by](#imported-by)
+- [See also](#see-also)
+
 [Caddy](https://caddyserver.com/), one tailnet-only HTTPS front door for
 every web service on `nire-cube`. Added 2026-08-24, cube-only.
 

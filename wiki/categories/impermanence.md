@@ -1,5 +1,13 @@
 # `impermanence` — `nire/impermanence/`
 
+## Contents
+
+- [What's in it](#whats-in-it)
+- [Imported by](#imported-by)
+- [The other "impermanence" — don't confuse the two](#the-other-impermanence--dont-confuse-the-two)
+- [Reaching the home-manager side](#reaching-the-home-manager-side)
+- [See also](#see-also)
+
 **Read `WARN-impermanence.nix` itself before changing anything here — this
 page is an index, not a substitute.** See
 [../impermanence-and-secrets.md](../impermanence-and-secrets.md) for the
