@@ -41,13 +41,15 @@
 # `impermanence` is deliberately NOT in this file's imports below.
 # invariants.nix's rollback, hibernation, and persistence checks are gated on
 # the restore-root initrd unit existing (see its "hosts without impermanence
-# opt out" header) so they don't apply here. WARN-password-required.nix fires
-# its warning
-# on this host for the same reason -- elly-user.nix's hashedPasswordFile still
-# points at /persist/passwords/elly unconditionally, and nothing in this repo
-# creates that file; it was created by hand on the real machine before this
-# was ever switched to. Read WARN-impermanence.nix and README.md's safety
-# section before assuming any of that has changed for cube specifically.
+# opt out" header) so they don't apply here. WARN-password-required.nix would
+# otherwise fire its warning on this host for the same reason --
+# elly-user.nix's hashedPasswordFile still points at /persist/passwords/elly
+# unconditionally, and nothing in this repo creates that file -- but it's
+# specifically excluded by hostname there: the hash was created by hand on
+# the real machine before this was ever switched to, and cube's plain
+# persistent root never wipes it back out, so the reminder has nothing left
+# to remind about. Read WARN-impermanence.nix and README.md's safety section
+# before assuming any of that has changed for cube specifically.
 { config, ... }:
 {
     flake.modules.nixos.cubeConfiguration.imports =

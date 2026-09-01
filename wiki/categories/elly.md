@@ -30,20 +30,25 @@ plus several others — see [../architecture.md](../architecture.md).
   should be stored outside of the users folder, so it's clearer when it's
   imported").
 - **`user-settings/WARN-password-required.nix`** — the module that exists
-  *because* `nire-cube` doesn't import [impermanence](impermanence.md).
-  `elly-user.nix`'s `hashedPasswordFile` is unconditional, and nothing else
-  in this repo tells a non-impermanence host how to actually populate that
-  file — `WARN-impermanence.nix` documents the whole `/persist` dance for
-  hosts that wipe `/root`, but a host with a plain persistent root has no
-  equivalent pointer. Gated on
+  *because* a non-impermanence host doesn't import
+  [impermanence](impermanence.md). `elly-user.nix`'s `hashedPasswordFile` is
+  unconditional, and nothing else in this repo tells such a host how to
+  actually populate that file — `WARN-impermanence.nix` documents the whole
+  `/persist` dance for hosts that wipe `/root`, but a host with a plain
+  persistent root has no equivalent pointer. Gated on
   `boot.initrd.systemd.services ? restore-root` existing (the unit only
   `WARN-impermanence.nix` creates) rather than on
   `environment.persistence`, because that option is declared for *every*
   host regardless, via `nire/system/impermanence/declare-persistence-option.nix`
-  (see [system](system.md)) — so it wouldn't distinguish anything. Filed
-  under `nireUser/elly/` specifically so it rides the `elly` category into
-  every host automatically, cube included, rather than needing to be wired
-  into cube's own host config by hand.
+  (see [system](system.md)) — so it wouldn't distinguish anything. `nire-cube`
+  is additionally excluded by hostname: the module used to fire on cube too,
+  but its password hash was created by hand on the real machine before cube
+  was ever switched, and a plain persistent root never wipes it back out, so
+  the reminder had nothing left to remind about there (fixed 2026-09-01).
+  Filed under `nireUser/elly/` specifically so it rides the `elly` category
+  into every host automatically — including any *future* non-impermanence
+  host, which would still get the warning — rather than needing to be wired
+  in by hand.
 
 ## Imported by
 
@@ -55,8 +60,9 @@ content (the account, darwin fonts); the `homeManager`-class content
 
 ## See also
 
-- [impermanence](impermanence.md) — the category whose *absence* on cube is
-  what `WARN-password-required.nix` exists to flag.
+- [impermanence](impermanence.md) — the category whose *absence* is what
+  `WARN-password-required.nix` exists to flag (cube itself is now excluded
+  by hostname, since its password was already solved by hand).
 - [system](system.md) — `declare-persistence-option.nix`, referenced above.
 - [../architecture.md](../architecture.md) — `nireUser/elly-home-manager.nix`,
   the entry point that assembles this category into the full bundle every
