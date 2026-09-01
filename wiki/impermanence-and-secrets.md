@@ -92,3 +92,19 @@ that import it.
   either way — same reasoning for both: cube has no impermanence to lose
   the file to, so there's nothing sops's own persistence story would buy
   that a plain file under `/persist` doesn't already have.
+- **A full `nix flake check`/`just preflight` can fail with `error: path
+  '<hash>-secrets.yaml' is not valid` in some eval environments** — seen from
+  a sandboxed agent session, 2026-09-01, on a fully clean tree (confirmed via
+  `git stash`, so not caused by an uncommitted change elsewhere).
+  `secrets/sops.nix`'s `secretsPath = ./secrets.yaml` is interpolated into
+  `sopsFile` as a string with context; sops-nix's own manifest validation
+  calls `builtins.pathExists` on it before checking anything else, which
+  forces that context to be realised — the file copied into the store as its
+  own path — and in that kind of session the copy silently fails, throwing
+  even though `secrets.yaml` is present, tracked, and unmodified. Only hits
+  eval of a host that imports `secrets/sops.nix` — which is all three NixOS
+  hosts, via the shared `system` category, so `nix flake check` catches it on
+  whichever of `nixos-nire-durandal`/`-tenacity`/`-cube` it evaluates first,
+  not one host specifically. Doesn't affect a real `just build`/`switch` on
+  the host itself, and doesn't affect `just modules`/`just lint`. Not a bug
+  in this repo or in `secrets.yaml`.
