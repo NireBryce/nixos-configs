@@ -34,6 +34,17 @@ separate tier for the *usage* side:
   than a running service, so it stays in this tier instead of that one.
   These span multiple categories or aren't tied to a `flake/modules/`
   directory at all.
+
+  Four pages in this tier are the exception to "index over restatement"
+  below: `lessons-learned.md`, `impermanence-stage1-migration.md`,
+  `module-style-guide.md`, and `kde-to-wayland-migration.md` moved in
+  verbatim from `claude cave/` when that directory was retired 2026-09-02,
+  the same shape `wiki/homelab/` pages and `categories/shell-config/`'s
+  deep-dives already use — real, synthesized content because there's
+  nothing else for it to link to instead. `history.md` stays the index into
+  `lessons-learned.md`; `impermanence-and-secrets.md` and `conventions.md`
+  stay the index into the other two, the same split as a category page and
+  its deep-dive.
 - **`wiki/categories/<name>.md`** — one page per real category, i.e. a
   directory under `flake/modules/` holding its own `dirsAsCategory.nix`
   (see [architecture.md](architecture.md)). Indexed in
@@ -166,10 +177,12 @@ separate tier for the *usage* side:
 - Link in both directions: an index links down into a page, and that page
   links back up (`categories/README.md` ↔ a category page ↔ its
   deep-dive pages).
-- A path containing a space (anything under `claude cave/` or `bugs
-  pending submission/`) has to be wrapped in `<...>` for the markdown link
-  target to parse — see the entries in
-  [open-threads.md](open-threads.md) for the pattern.
+- A path containing a space (anything under `bugs pending submission/`) has
+  to be wrapped in `<...>` for the markdown link target to parse — see the
+  entries in [open-threads.md](open-threads.md) for the pattern. `claude
+  cave/` used to be the other example of this until it was retired
+  2026-09-02 and its files moved into `wiki/` proper, whose own paths never
+  have spaces.
 - Verify a link resolves before leaving it. There's no automated check for
   this (see below); a quick `[ -e "$(dirname "$file")/$link" ]` per link
   after any move or rename catches what proofreading misses.

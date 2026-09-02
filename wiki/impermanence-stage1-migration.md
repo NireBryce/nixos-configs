@@ -1,5 +1,15 @@
 # Impermanence on systemd stage 1 — what is known
 
+## Contents
+
+- [Why it moved](#why-it-moved)
+- [The unit](#the-unit)
+- [What the move cost, and what replaced it](#what-the-move-cost-and-what-replaced-it)
+- [Things that are true of this machine and were not obvious](#things-that-are-true-of-this-machine-and-were-not-obvious)
+- [How to tell the unit is really there](#how-to-tell-the-unit-is-really-there)
+- [And that it ran](#and-that-it-ran)
+- [Related](#related)
+
 > **Written by Claude Code.** A record of how the `/root` rollback works here
 > and what was learned getting it there, not a procedure. The migration is done.
 
@@ -163,6 +173,10 @@ rollback demonstrably running.
 
 - `WARN-impermanence.nix` — the module, with the full account in its history
   block.
+- [history.md](history.md) — lived at `claude cave/lessons-learned-impermanence-stage1-migration.md`
+  until 2026-09-02, when that directory was retired and this file moved into
+  `wiki/` as a real page; [styleguide.md](styleguide.md) has why it counts as
+  an exception to this wiki's usual "index over restatement" rule.
 - [nixpkgs#527478](https://github.com/NixOS/nixpkgs/issues/527478) — LUKS under
   systemd initrd, the risk that did not bite here.
 - [impermanence#320](https://github.com/nix-community/impermanence/issues/320) —

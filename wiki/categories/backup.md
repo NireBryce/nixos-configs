@@ -16,8 +16,9 @@
 [restic](https://restic.net/), backing up `nire-cube`'s own service state to
 the QNAP NAS already on the network. Added 2026-08-28, cube-only, against
 issue [#87](https://github.com/NireBryce/nixos-configs/issues/87) ("no
-backups anywhere in the fleet") and the plan at
-[`claude cave/plans/2026-08-27-1816-cube-qnap-backup-plan.md`](<../../claude cave/plans/2026-08-27-1816-cube-qnap-backup-plan.md>).
+backups anywhere in the fleet") and an original plan, folded into
+[`../homelab/backup-runbook.md`](<../homelab/backup-runbook.md>)'s
+"Background" section 2026-09-02 when `claude cave/` was retired.
 
 Nested under [homelab](homelab.md) the same way the other seven are — see
 that page's own note on this one being the odd member out functionally
@@ -170,6 +171,7 @@ after this category was added.
 - [../homelab/rustic.md](../homelab/rustic.md) — an interactive TUI that can
   browse and restore from this same repository, installed but not yet
   switched or run against it.
-- [`../../claude cave/plans/2026-08-27-1816-cube-qnap-backup-plan.md`](<../../claude cave/plans/2026-08-27-1816-cube-qnap-backup-plan.md>)
-  — the plan this category implements, including what it got wrong about
-  the QNAP mount's status.
+- [../homelab/backup-runbook.md](<../homelab/backup-runbook.md>)'s
+  "Background" section — the plan this category implements, folded in
+  there 2026-09-02, including what it got wrong about the QNAP mount's
+  status.

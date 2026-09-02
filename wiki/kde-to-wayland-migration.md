@@ -1,5 +1,15 @@
 # Research: leaving KDE Plasma for a Wayland tiling WM
 
+## Contents
+
+- [What's actually in scope](#whats-actually-in-scope)
+- [Full inventory](#full-inventory)
+- [`plasma-manager` (tenacity) — landed after this doc's first draft](#plasma-manager-tenacity--landed-after-this-docs-first-draft)
+- [Picking among Hyprland / niri / sway](#picking-among-hyprland--niri--sway)
+- [Host-specific concerns](#host-specific-concerns)
+- [Open questions](#open-questions)
+- [Sources checked](#sources-checked)
+
 **Written 2026-09-01 22:31 EDT, updated 2026-09-01 23:51 EDT after commit
 `a0527f18`. Status: inventory + candidate replacements, nothing
 implemented, no WM chosen yet.** Scope per Elly: `nire-durandal`
@@ -12,7 +22,8 @@ import working, or cube needs its own copy before `kde-base.nix` changes.
 This is a research/planning doc, not a runbook — nothing here is "done means"
 until a host actually boots into the replacement and someone checks off the
 list below by hand, the way `wiki/homelab/backup-runbook.md` does for the
-backup migration.
+backup migration. Moved into `wiki/` verbatim from `claude cave/plans/` when
+that directory was retired 2026-09-02 — see [history.md](history.md).
 
 **Update, same day:** commit `a0527f18` ("feat: add tenacity-only
 plasma-manager config from live KDE state") landed *after* this doc's first
@@ -20,16 +31,6 @@ draft and *raises* tenacity's migration cost — see
 [plasma-manager (tenacity) — landed after this doc's first draft](#plasma-manager-tenacity--landed-after-this-docs-first-draft)
 below. Read that section before treating tenacity as the smaller of the two
 hosts to migrate; it may no longer be.
-
-## Contents
-
-- [What's actually in scope](#whats-actually-in-scope)
-- [Full inventory](#full-inventory)
-- [`plasma-manager` (tenacity) — landed after this doc's first draft](#plasma-manager-tenacity--landed-after-this-docs-first-draft)
-- [Picking among Hyprland / niri / sway](#picking-among-hyprland--niri--sway)
-- [Host-specific concerns](#host-specific-concerns)
-- [Open questions](#open-questions)
-- [Sources checked](#sources-checked)
 
 ## What's actually in scope
 

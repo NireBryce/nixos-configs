@@ -40,7 +40,7 @@ That puts this alongside [monitoring](monitoring.md)'s `grafana.service`
 first-switch failure and [virtualization](virtualization.md)'s sandbox VM
 taking three runtime-only fixes: **a green evaluation and a read-back of the
 rendered unit text both said nothing**, which is
-[`lessons-learned.md`](<../../claude cave/lessons-learned.md>) §37 exactly.
+[`lessons-learned.md`](../lessons-learned.md) §37 exactly.
 
 **Now confirmed working end to end, 2026-08-24**, after the fix landed and
 the one-time login was done: `golink.service` is `active (running)` with
@@ -54,7 +54,7 @@ URL every 5s, then `Listening on :443` / `:80`, `Serving http://go/`, and
 `NRestarts=0` is the load-bearing number rather than `active (running)`: the
 original failure was a crash-loop, and a unit that has restarted eight times
 also reports `active` in between. See
-[`lessons-learned.md`](<../../claude cave/lessons-learned.md>) §40 for the
+[`lessons-learned.md`](../lessons-learned.md) §40 for the
 inverse of the same care — a failed unit whose resource was fine all along.
 
 Usage — creating and managing links — is [homelab/golinks.md](../homelab/golinks.md).

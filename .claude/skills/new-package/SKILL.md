@@ -140,5 +140,5 @@ branch.
   converts to it yet.
 - `new-flake-module` — filenames, classes, the two `config`s, category
   collisions.
-- `claude cave/claude-style-guide.md` — formatting (aligned `=` columns,
+- `wiki/module-style-guide.md` — formatting (aligned `=` columns,
   `nix fmt` deliberately not wired up).

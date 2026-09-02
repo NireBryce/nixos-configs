@@ -127,7 +127,7 @@
                     # function (from .blerc, when ble.sh attaches), so the
                     # advice ends up wrapping the patched version. See the
                     # fix file's own header and
-                    # `claude cave/lessons-learned.md` #39 for what it's
+                    # `wiki/lessons-learned.md` #39 for what it's
                     # working around.
                     ''
                         source <(carapace _carapace bash)

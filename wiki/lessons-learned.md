@@ -1,5 +1,51 @@
 # Lessons from the den → flake-parts port
 
+## Contents
+
+- [1. A tool that reports success has not thereby been tested](#1-a-tool-that-reports-success-has-not-thereby-been-tested)
+- [2. The repo is not the machine](#2-the-repo-is-not-the-machine)
+- [3. When a tool contradicts you, suspect yourself first](#3-when-a-tool-contradicts-you-suspect-yourself-first)
+- [4. An unchanged fingerprint can mean the code is inert](#4-an-unchanged-fingerprint-can-mean-the-code-is-inert)
+- [5. Writing a trap down does not stop you walking into it](#5-writing-a-trap-down-does-not-stop-you-walking-into-it)
+- [6. Bugs serialise](#6-bugs-serialise)
+- [7. Cross-module side effects are invisible without a fingerprint](#7-cross-module-side-effects-are-invisible-without-a-fingerprint)
+- [8. A built-in option existing is not the same as it fitting](#8-a-built-in-option-existing-is-not-the-same-as-it-fitting)
+- [9. Caches in nix have three placements, and the default is the expensive one](#9-caches-in-nix-have-three-placements-and-the-default-is-the-expensive-one)
+- [10. Reading upstream source settled things guessing would have got wrong](#10-reading-upstream-source-settled-things-guessing-would-have-got-wrong)
+- [11. Read the links in a comment before deleting the code they annotate](#11-read-the-links-in-a-comment-before-deleting-the-code-they-annotate)
+- [12. Verify the mechanism before betting a refactor on it](#12-verify-the-mechanism-before-betting-a-refactor-on-it)
+- [13. Reversibility can stand in for a decision](#13-reversibility-can-stand-in-for-a-decision)
+- [14. Read the repo's own conventions before writing into it](#14-read-the-repos-own-conventions-before-writing-into-it)
+- [15. Commit hygiene](#15-commit-hygiene)
+- [16. When the user redirects, the redirect carries information](#16-when-the-user-redirects-the-redirect-carries-information)
+- [17. The record may already exist](#17-the-record-may-already-exist)
+- [18. Say which rung you mean](#18-say-which-rung-you-mean)
+- [19. The machine's own tools can lie about the machine](#19-the-machines-own-tools-can-lie-about-the-machine)
+- [20. A pipeline reports the exit status of its last command](#20-a-pipeline-reports-the-exit-status-of-its-last-command)
+- [21. An environment failure can wear a config failure's clothes](#21-an-environment-failure-can-wear-a-config-failures-clothes)
+- [22. Name matching fails silently, and reads exactly like a real negative](#22-name-matching-fails-silently-and-reads-exactly-like-a-real-negative)
+- [23. When a check fires on new work, fix its model before reaching for the flag](#23-when-a-check-fires-on-new-work-fix-its-model-before-reaching-for-the-flag)
+- [24. Compare against what is deployed, not against the last commit](#24-compare-against-what-is-deployed-not-against-the-last-commit)
+- [25. Running it is a rung of its own, and finds a different class](#25-running-it-is-a-rung-of-its-own-and-finds-a-different-class)
+- [26. "Did it work before?" is one command, and it beats reasoning](#26-did-it-work-before-is-one-command-and-it-beats-reasoning)
+- [27. Check whether upstream already fixed it before writing the patch](#27-check-whether-upstream-already-fixed-it-before-writing-the-patch)
+- [28. A guard keyed on a signal that never fires is worse than no guard](#28-a-guard-keyed-on-a-signal-that-never-fires-is-worse-than-no-guard)
+- [29. Ordering fixes do not reach code that schedules itself later](#29-ordering-fixes-do-not-reach-code-that-schedules-itself-later)
+- [30. Removing a capability does not make its consumers degrade gracefully](#30-removing-a-capability-does-not-make-its-consumers-degrade-gracefully)
+- [31. Count the thing you mean, and check the cleaner before declaring there is none](#31-count-the-thing-you-mean-and-check-the-cleaner-before-declaring-there-is-none)
+- [32. An auto-allocator that cannot see manual entries will collide with them](#32-an-auto-allocator-that-cannot-see-manual-entries-will-collide-with-them)
+- [33. A removed option is not an ignored option, and defaults are worth reading](#33-a-removed-option-is-not-an-ignored-option-and-defaults-are-worth-reading)
+- [34. The dangerous name collision is the one where both halves work](#34-the-dangerous-name-collision-is-the-one-where-both-halves-work)
+- [35. The same collision, a third time — caught immediately because the tool was actually run](#35-the-same-collision-a-third-time--caught-immediately-because-the-tool-was-actually-run)
+- [36. Evaluating the Nix expression and building the artifact it describes are different tests, and only one of them was run](#36-evaluating-the-nix-expression-and-building-the-artifact-it-describes-are-different-tests-and-only-one-of-them-was-run)
+- [37. Some bugs need real system state to exist at all — no amount of building or reading the artifact finds them](#37-some-bugs-need-real-system-state-to-exist-at-all--no-amount-of-building-or-reading-the-artifact-finds-them)
+- [38. A fix scoped to what actually asked for it beats a general one — asking "does this affect the host that didn't ask" caught it before writing the wrong mechanism](#38-a-fix-scoped-to-what-actually-asked-for-it-beats-a-general-one--asking-does-this-affect-the-host-that-didnt-ask-caught-it-before-writing-the-wrong-mechanism)
+- [39. A live interactive bug needs a live interactive repro — `ssh host 'cmd'` is not the same session a human types into](#39-a-live-interactive-bug-needs-a-live-interactive-repro--ssh-host-cmd-is-not-the-same-session-a-human-types-into)
+- [40. A failed systemd unit doesn't mean the thing it manages is down — check the resource, not just the unit](#40-a-failed-systemd-unit-doesnt-mean-the-thing-it-manages-is-down--check-the-resource-not-just-the-unit)
+- [41. A proxy config can be valid, buildable, *and* wrong per-app — two apps behind one prefix wanted opposite prefix handling](#41-a-proxy-config-can-be-valid-buildable-and-wrong-per-app--two-apps-behind-one-prefix-wanted-opposite-prefix-handling)
+- [42. Not every file git tracks deserves the same scrutiny — `.claude/settings.local.json` is Elly's, not a config artifact to protect](#42-not-every-file-git-tracks-deserves-the-same-scrutiny--claudesettingslocaljson-is-ellys-not-a-config-artifact-to-protect)
+- [43. A fingerprint check can pass for the wrong reason — dead code looks exactly like safe code until you make it live](#43-a-fingerprint-check-can-pass-for-the-wrong-reason--dead-code-looks-exactly-like-safe-code-until-you-make-it-live)
+
 > **Written by Claude Code, for Claude Code**, and largely a record of its own
 > mistakes. Written to be read by an agent starting cold, so the "I" throughout
 > is a machine with no memory of having done any of it. Useful to a person
@@ -24,6 +70,11 @@ artifact both stopped being enough — some bugs only exist once real
 filesystem/daemon state shows up at an actual `switch`, see §37.
 
 Numbers are stable; §§2, 5, 7, 11, 14, 18, 24 and 25 are referenced elsewhere.
+
+Lived at `claude cave/lessons-learned.md` until 2026-09-02, when that
+directory was retired and this file moved into `wiki/` as a real page —
+see [history.md](history.md) and [styleguide.md](styleguide.md) for why it
+counts as an exception to this wiki's usual "index over restatement" rule.
 
 ---
 

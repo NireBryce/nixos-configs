@@ -19,7 +19,7 @@ opinion (no failure scenario, no issue).
 `CLAUDE.md`'s own convention: **"A bug recorded in a comment stays in the
 file"** — fix lands, comment stays, or if the code it described is gone, it
 moves to a `history` heading instead of being deleted (`boot-durandal.nix`,
-`WARN-impermanence.nix`, `vscode.nix` do this). `claude cave/lessons-learned.md`
+`WARN-impermanence.nix`, `vscode.nix` do this). `wiki/lessons-learned.md`
 is the second: numbered entries (currently up to §34) for how something went
 wrong in the doing. `wiki/open-threads.md` is the third, for open questions
 rather than resolved bugs.

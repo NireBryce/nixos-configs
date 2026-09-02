@@ -99,7 +99,7 @@
 #
 # Took two switches: the first shipped `handle` for both apps and
 # Forgejo 404'd everything -- see the route comments and
-# `claude cave/lessons-learned.md` #41; eval, `just modules`, `caddy
+# `wiki/lessons-learned.md` #41; eval, `just modules`, `caddy
 # adapt`, a real build, and reading the artifact back all passed. Only a
 # live request found it.
 { lib, ... }:

@@ -145,7 +145,7 @@ if it's corrected by whoever's change made it stale.
 
 - `flake/doc/dirsAsCategory.md` — the category mechanism itself, and the
   trailhead to per-module opt-in if that's ever wanted.
-- `claude cave/claude-style-guide.md` — formatting conventions (aligned `=`
+- `wiki/module-style-guide.md` — formatting conventions (aligned `=`
   columns are deliberate; `nix fmt` is deliberately not wired up).
 - `wiki/categories/README.md` — the category reference this skill's changes
   should keep current.

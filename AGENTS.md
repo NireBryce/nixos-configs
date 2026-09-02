@@ -31,8 +31,7 @@ machine. **Two of the three NixOS hosts import it and wipe `/root` on boot:
 not — its real install is a plain persistent root, not LUKS+impermanence (see
 cube's own header; corrected in `2efca5e4`). Don't assume "every host wipes
 root" or "no host does" — check the specific host. Read `WARN-impermanence.nix`
-and `claude cave/lessons-learned-impermanence-stage1-migration.md` before
-changing anything near it.
+and `wiki/impermanence-stage1-migration.md` before changing anything near it.
 
 Secrets are sops-nix (`flake/modules/nire/system/secrets/`). `secrets.yaml` is
 encrypted and committed; that is deliberate, not a mistake to be "fixed".
@@ -72,9 +71,18 @@ paragraph — this paragraph has been stale before.
 - Host counts and statuses in prose are claims about when someone last looked,
   not about the tree — check `hosts.nix`.
 - The den→flake-parts port is done. Its planning doc and four other
-  `old`/`old-historical`-prefixed files under `claude cave/` were removed
-  2026-08-26 as superseded by `lessons-learned.md` and this section — see
-  `wiki/history.md`.
+  `old`/`old-historical`-prefixed files under the (since-removed) `claude
+  cave/` were removed 2026-08-26 as superseded by `wiki/lessons-learned.md`
+  and this section — see `wiki/history.md`.
+- **`claude cave/` itself was retired 2026-09-02** — its four remaining
+  files moved into `wiki/` as real pages (`lessons-learned.md`,
+  `impermanence-stage1-migration.md`, `module-style-guide.md`,
+  `kde-to-wayland-migration.md`; the backup plan folded into
+  `wiki/homelab/backup-runbook.md` instead of getting its own page, since
+  its content was already superseded by `wiki/categories/backup.md`). Any
+  reference to `claude cave/...` still turning up in an old commit message
+  or a stale local note means the pre-move path; the directory no longer
+  exists. See `wiki/history.md`.
 ## Commands
 
 `just` recipes live in the root `.justfile` and work from anywhere:
@@ -387,7 +395,7 @@ issue/PR in anything filed here.
 
 ## Conventions
 
-**Read `claude cave/claude-style-guide.md` before writing a new module.**
+**Read `wiki/module-style-guide.md` before writing a new module.**
 Formatting is deliberate: aligned-`=` columns are intentional and `nix fmt` is
 deliberately not wired up because it would flatten them; module bodies sit one
 level deeper than needed (left over from unwrapping `perSystem`) and
@@ -444,10 +452,10 @@ bugs the shape invites.
 - `flake/doc/disko-impermanence-layout.md` — reusable disko generator for the
   LUKS+btrfs+impermanence layout durandal/tenacity run; the template if cube
   ever adopts impermanence.
-- `claude cave/lessons-learned-impermanence-stage1-migration.md` — the root
+- `wiki/impermanence-stage1-migration.md` — the root
   rollback's move to systemd-initrd; evaluates, never booted. Read before
   touching initrd.
-- `claude cave/lessons-learned.md` — how the work went wrong in the doing.
+- `wiki/lessons-learned.md` — how the work went wrong in the doing.
   §§1–18 port, §§19–31 first hardware, then: §32 manually pinned state, §33
   removed nixpkgs options assert, §34/§35 category/module name collisions
   merge silently, §36 read the built artifact, §37 some bugs need a real

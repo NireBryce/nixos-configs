@@ -60,7 +60,7 @@ consequences — but the redirect warning on every push is the tell.
 
 ## Style
 
-- **[`../claude cave/claude-style-guide.md`](<../claude cave/claude-style-guide.md>)**
+- **[module-style-guide.md](module-style-guide.md)**
   — the full conventions doc for `flake/modules/`.
 - **Namespacing** — `nire` unless something needs a more specific tag;
   `nireHost`, `nireUser`, `nirePackages` otherwise.

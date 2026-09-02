@@ -50,7 +50,7 @@ Using this
 Steal what's useful. Don't run `nixos-rebuild switch` against this as-is on
 a machine you are not prepared to lose `/root` on.
 
-`CLAUDE.md` and `claude cave/lessons-learned.md` are an AI agent's working notes,
+`CLAUDE.md` and `wiki/lessons-learned.md` are an AI agent's working notes,
 not documentation for a human reader — skip them unless you're the agent.
 
 `wiki/README.md` is a topic index over the docs scattered around this repo

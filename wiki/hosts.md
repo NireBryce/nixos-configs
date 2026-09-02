@@ -22,7 +22,7 @@ of where to look for each host.
 `nire-testbed` (ThinkPad X270) existed 2026-08-14 to 2026-08-22 and was
 removed, never having been built or switched on real hardware. It's history
 now, not a live host — see [history.md](history.md) and
-[`../claude cave/lessons-learned.md`](<../claude cave/lessons-learned.md>).
+[lessons-learned.md](lessons-learned.md).
 
 `nire-lego` (handheld, Legion Go) and `nire-installer` (the generic live-USB
 installer image) were both removed 2026-08-27 — see [history.md](history.md).
@@ -59,7 +59,7 @@ both paths return 200 over validated TLS from another tailnet host, 0 failed
 units, `caddy` at `NRestarts=0`. It took two switches — the first served
 Forgejo an un-stripped path prefix and it 404'd everything, a per-app
 requirement no static check could see
-([lessons-learned.md](<../claude cave/lessons-learned.md>) #41).
+([lessons-learned.md](lessons-learned.md) #41).
 
 `https://ts-cube.moose-micro.ts.net/` itself serves
 [glance](categories/landing.md), a service index added the same day: which
