@@ -71,3 +71,10 @@ never both.
 - [impermanence](impermanence.md) — `kde-sleepmode.nix` lives there, not
   here, even though it's KDE-specific — see that page for why.
 - [../hosts.md](../hosts.md) — which host runs which session.
+- `nireHost/tenacity/configuration/plasma-tenacity.nix` — this host's own
+  Plasma *preferences* (theme, kwin behavior, input devices, global
+  shortcuts) via plasma-manager, captured from tenacity's live `~/.config`
+  on 2026-09-01. A separate mechanism from everything above: home-manager
+  class, wired in only through `tenacityConfiguration`'s own
+  `home-manager.users.elly.imports`, not this category or `ellyHomeManager` —
+  durandal, lysithea and cube never load plasma-manager's HM module.
