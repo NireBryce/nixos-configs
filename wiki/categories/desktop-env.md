@@ -78,3 +78,10 @@ never both.
   class, wired in only through `tenacityConfiguration`'s own
   `home-manager.users.elly.imports`, not this category or `ellyHomeManager` —
   durandal, lysithea and cube never load plasma-manager's HM module.
+- [`../../claude cave/plans/2026-09-01-2231-kde-to-wayland-wm-inventory.md`](<../../claude cave/plans/2026-09-01-2231-kde-to-wayland-wm-inventory.md>)
+  — research-stage inventory of every explicit and implicit KDE dependency on
+  durandal/tenacity (this page's `kde-base.nix`/`kde-desktop.nix`/`jovian.nix`
+  *and* `plasma-tenacity.nix` above) and candidate Wayland-tiling-WM
+  replacements for each, toward moving those two hosts off KDE. Nothing
+  implemented yet, no WM chosen; `nire-cube` (also a `kde-desktop` importer)
+  is explicitly out of scope for now.
