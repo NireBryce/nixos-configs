@@ -954,11 +954,22 @@ skill's own framing) primed every subsequent diff in it to pattern-match as
 "protect this file's correctness," the same reflex this repo rightly wants
 for `flake/modules/`. That reflex doesn't transfer here. This file is a
 local permission allowlist for reducing prompts, not a piece of the system
-this repo ships — it having been tracked in git (stopped the same day, via
-the `.gitignore` entry added alongside it) never meant its content earned
-review-grade care. When a conflict or diff touches it, take whichever
-resolution is simplest and move on; it is Elly's file to shape, not
-something to defend from redundancy or drift on their behalf.
+this repo ships — it having been tracked in git never meant its content
+earned review-grade care.
+
+**Correction, 2026-09-02:** this section originally claimed tracking
+"stopped the same day, via the `.gitignore` entry added alongside it." That
+was wrong, and stayed wrong for six more days of real commits to the file
+(`git log` shows three on 2026-08-26 alone, after the `.gitignore` entry
+already existed) — adding a pattern to `.gitignore` does not untrack a file
+already in the index, and nobody ran the `git rm --cached` that would have.
+Caught while cleaning up an unrelated permission-allowlist diff; actually
+untracked that same session (`git rm --cached`). See
+`prune-permissions/SKILL.md` for the current, accurate state.
+
+When a conflict or diff touches this file, take whichever resolution is
+simplest and move on; it is Elly's file to shape, not something to defend
+from redundancy or drift on their behalf.
 
 ## 43. A fingerprint check can pass for the wrong reason — dead code looks exactly like safe code until you make it live
 
