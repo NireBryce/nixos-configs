@@ -115,16 +115,13 @@ level instead:
   `192.168.0.200:22` times out from both lysithea and cube (neither can
   reach it over the LAN anymore); `ts-hive`'s tailnet address
   (`100.78.140.91:22`) still accepts a connection from cube.
-- **No further Tailscale ACL restriction** — every tailnet device can still
-  reach it, a deliberate choice, not an oversight: the existing tailnet
-  policy already grants `autogroup:members` full reachability to every
-  member device (see the earlier discussion this runbook doesn't
-  duplicate), and narrowing that specifically for `ts-hive` would mean
-  restructuring a shared policy for marginal benefit once the LAN block
-  above is in place.
-- **QNAP brute-force protection (Network Access Protection) is on** — taken
-  on confirmation, not independently checked (no `sudo` on the QNAP from
-  here to inspect it directly).
+- **No further Tailscale ACL restriction** — a deliberate choice: the
+  existing tailnet policy already grants `autogroup:members` full
+  reachability to every member device, and narrowing it for `ts-hive`
+  would restructure a shared policy for marginal benefit once the LAN
+  block is in place.
+- **QNAP brute-force protection (Network Access Protection) is on** —
+  taken on confirmation, not independently checked.
 
 ### 4. Switch cube
 
@@ -312,44 +309,30 @@ filled in further the first time each of those does.
 
 ## Background: the original plan (2026-08-27)
 
-Written before anything had touched cube or the QNAP for real, against
-issue #87 and [Pending setup](pending-setup.md) item 4. Folded in here
-2026-09-02 when `claude cave/` was retired — [backup](../categories/backup.md)
-has the mechanism as actually built, including where the plan turned out
-wrong (the NFS mount was never dangling — it was already live on all three
-NixOS hosts via the shared `system` aggregate) and where it was later
-reversed (SFTP instead of NFS, after a real switch hit `mount.nfs: access
-denied by server`). What's still worth keeping now that the plan no longer
-lives as its own file:
+Written before anything had touched cube or the QNAP, against issue #87 and
+[pending-setup](pending-setup.md) item 4; folded in here 2026-09-02 when
+`claude cave/` was retired. [backup](../categories/backup.md) has the
+mechanism as actually built, including where the plan turned out wrong (the
+NFS mount was never dangling) and where it was reversed (SFTP, not NFS).
+What's still worth keeping:
 
-- **What was at risk**, per issue #87 re-confirmed by grep 2026-08-27: cube
-  has a plain persistent root, no impermanence, and nothing in `flake/`
-  configured a backup tool. Four paths named explicitly: `/var/lib/forgejo`
-  (repos, sqlite db, self-generated secrets), `/var/lib/grafana` (sqlite
-  db — UI-created dashboards live only here), `/var/lib/private/golink`
-  (links db + tsnet node key), `/persist/secrets/`/`/persist/passwords/`
-  (hand-created, nothing recreates them). None recoverable if lost.
-  Prometheus's TSDB was deliberately excluded from the start — biggest
-  path, least valuable, fully regenerable by scraping again.
-- **The six-step shape it proposed**: size the paths first (`du -sh`)
-  before committing to a retention policy — still not done, see "What
-  isn't done yet" on [backup](../categories/backup.md); import the storage
-  mount; confirm the QNAP side (a share plus a native snapshot schedule,
-  the anti-deletion mitigation); a new cube-only category wrapping
-  `services.restic.backups.cube` with a sops-secret password and a
-  `backupPrepareCommand` staging sqlite copies; a repo password kept
-  outside cube too, since the sops key needed to decrypt it lives on
-  cube's own disk; and a restore drill as the actual bar for done — a
-  definition that outlived the plan itself and is still how #87 and this
-  runbook define "done."
-- **The one judgment call it flagged explicitly**, rather than presenting
-  as settled: NFS-local-path trades keyed auth for not standing up SSH on
-  the QNAP at all. That's the trade-off that broke in practice — see
-  [backup](../categories/backup.md)'s SFTP section.
-
-Everything past this point — what actually got built, what changed, and
-current status — is the rest of this page and
-[backup](../categories/backup.md), not this plan.
+- **What was at risk** (per #87, re-confirmed by grep): nothing in `flake/`
+  configured any backup tool, and cube has a plain persistent root. Four
+  paths named explicitly: `/var/lib/forgejo` (repos, sqlite db,
+  self-generated secrets), `/var/lib/grafana` (sqlite db — UI-created
+  dashboards live only there), `/var/lib/private/golink` (links db + tsnet
+  node key), `/persist/secrets/`+`/persist/passwords/` (hand-created,
+  nothing recreates them). None recoverable if lost. Prometheus's TSDB was
+  excluded from the start — biggest, least valuable, fully regenerable.
+- **The shape it proposed**, most of which is what got built: size the
+  paths (`du -sh`) before committing to retention (still not done); import
+  the storage mount; confirm the QNAP side (share + snapshot schedule); a
+  cube-only category wrapping `services.restic.backups.cube` with sops
+  secrets and sqlite staging; the repo password kept outside cube too; and
+  **a restore drill as the actual bar for done** — the one definition that
+  outlived the plan itself.
+- **The judgment call it flagged explicitly**: NFS-local-path trades keyed
+  auth for not standing up SSH on the QNAP — the exact trade-off that broke.
 
 ## See also
 

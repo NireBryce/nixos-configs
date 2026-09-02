@@ -14,24 +14,17 @@ or the wiki that the machine now contradicts, dead code. Not something you
 were asked to look into (fix that directly and say so), and not a style
 opinion (no failure scenario, no issue).
 
-## This repo already has three ways to record a bug, and none of them is a tracker
+## This repo already has three ways to record a bug, and none is a tracker
 
-`CLAUDE.md`'s own convention: **"A bug recorded in a comment stays in the
-file"** — fix lands, comment stays, or if the code it described is gone, it
-moves to a `history` heading instead of being deleted (`boot-durandal.nix`,
-`WARN-impermanence.nix`, `vscode.nix` do this). `wiki/lessons-learned.md`
-is the second: numbered entries (currently up to §34) for how something went
-wrong in the doing. `wiki/open-threads.md` is the third, for open questions
-rather than resolved bugs.
-
-All three are records — they make sure the next reader knows. None of them
-make sure the bug gets *worked*. That's what filing a GitHub issue adds, and
-it's why this skill exists: propose the issue in addition to whichever of
-the three above the bug also warrants, not instead of it. Checked
-2026-08-23: `NireBryce/nixos-configs` has labels already
-(`bug`, `documentation`, `enhancement`, `question`, `duplicate`, `invalid`,
-`wontfix`, `help wanted`, `good first issue`) but zero issues filed — there's
-no backlog yet, which is exactly why one bug going unfiled is easy to lose.
+Per `AGENTS.md`'s convention, **"a bug recorded in a comment stays in the
+file"** (or moves to a `history` heading — `boot-durandal.nix`,
+`WARN-impermanence.nix`, `vscode.nix`); `wiki/lessons-learned.md` numbers
+how things went wrong in the doing; `wiki/open-threads.md` holds open
+questions. All three are records; none make sure the bug gets *worked*.
+That's what the issue adds — propose it in addition to whichever of the
+three the bug also warrants, not instead. The repo has labels
+(`bug`, `documentation`, `enhancement`, …) but no backlog yet, which is
+exactly why one bug going unfiled is easy to lose.
 
 ## This never extends to a third-party repo
 
@@ -56,23 +49,16 @@ closing a wrongly-filed issue costs nothing the way an unwound merge does.
 
 ## Steps
 
-1. **Verify it, don't recall it.** Re-open the file or re-run the command.
-   `CLAUDE.md`: "Bugs here serialize" — the discipline that applies to fixing
-   a bug applies to reporting one too; a half-remembered impression is how a
-   false one gets filed.
-2. **Check it isn't already tracked.** Run `just threads "<keywords>"` — the
-   same command `investigate-bug` step 1 uses, and for the same reason: it
-   already covers GitHub issues plus `wiki/`, `lessons-learned.md` and
-   `bugs pending submission/` in one shot (`flake/scripts/threads.sh`), so
-   there's no separate hand-grep to keep in sync with what that script
-   covers. Also grep `CLAUDE.md` itself, which threads.sh doesn't touch.
-   Stop here if it's already covered.
-3. **Ask, showing the real content.** Ask the user (through whatever
-   ask/confirm mechanism your harness provides) with the title
-   and a short body already drafted — the decision should land on the actual
-   text, not on a vague "should I file something?" — and name which label
-   you'd use (`bug` for a defect, `documentation` for a doc that's wrong,
-   `enhancement` for a gap that isn't strictly broken).
+1. **Verify it, don't recall it.** Re-open the file or re-run the command —
+   "bugs here serialize" applies to reporting a bug as much as fixing one.
+2. **Check it isn't already tracked.** `just threads "<keywords>"` covers
+   GitHub issues plus `wiki/`, `lessons-learned.md` and `bugs pending
+   submission/` in one shot; also grep `AGENTS.md` itself, which that
+   script doesn't touch. Stop if already covered.
+3. **Ask, showing the real content.** Ask with title and a short drafted
+   body — the decision lands on actual text, not "should I file
+   something?" — and name the label (`bug`, `documentation`, or
+   `enhancement`).
 4. **On yes:**
 
    ```sh
@@ -81,18 +67,11 @@ closing a wrongly-filed issue costs nothing the way an unwound merge does.
      --body "..."
    ```
 
-   Body: what's wrong, where (`file:line`), how you noticed it, and a fix
-   sketch if one's obvious. Close it the same way this session's PR bodies
-   close, for provenance:
-
-   ```
-   🤖 Filed with [Claude Code](https://claude.com/claude-code)
-   ```
-
-   Report the issue URL back in your reply.
-5. **On no:** don't file it, say so, and still leave whatever comment or
-   `lessons-learned.md` entry the bug warrants regardless — declining the
-   issue doesn't mean the knowledge should evaporate too.
+   Body: what's wrong, where (`file:line`), how you noticed, fix sketch if
+   obvious. Report the issue URL back in your reply.
+5. **On no:** don't file it, say so — and still leave whatever comment or
+   `lessons-learned.md` entry the bug warrants. Declining the issue doesn't
+   mean the knowledge evaporates too.
 
 ## Calibrate
 

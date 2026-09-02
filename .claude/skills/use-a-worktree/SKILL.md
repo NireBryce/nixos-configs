@@ -28,91 +28,66 @@ Skip it, and stay on the shared checkout, when:
 
 ## Why
 
-2026-08-30: two things working in the same checkout (`/Users/elly/nixos`)
-at once — a `git checkout`, a commit, a branch delete from one side — were
-each visible to the other immediately, mid-task, with no warning. Files
-that had just been edited reverted to stale content; a branch swapped out
-from under an in-progress task; a `git branch -f` failed because a branch
-was checked out in what turned out to be the *other* session's directory.
-Recognizing "something external changed this" instead of assuming a tool
-had failed or an edit hadn't landed cost several turns each time. None of
-it needed to happen — the two lines of work never actually touched the
-same files.
+2026-08-30: two sessions shared one checkout; each saw the other's
+`checkout`/commit/`branch -d` immediately, mid-task — files reverting, a
+branch swapped out from under in-progress work, a `git branch -f` failing
+because the branch was checked out in the *other* session's directory.
+Telling "something external changed this" from "my edit didn't land" cost
+several turns each time, and none of it needed to happen.
 
-A dedicated worktree per task removes the whole class of surprise: nobody
-else's `checkout`/`commit`/`branch -d` can touch files you're looking at,
-because they're a different working directory with a different `HEAD`,
-backed by the same `.git` (so branches, objects, and `git worktree list`
-are still shared and visible to both).
+A dedicated worktree removes the whole class: nobody else's
+checkout/commit can touch the files you're looking at, because it's a
+different working directory with a different `HEAD`, backed by the same
+`.git` (branches, objects, `git worktree list` still shared and visible to
+both).
 
 ## How
 
-**Create one**, based on whatever the task's target branch is (usually
-`experimental` — see skill `ship`):
+**Create one**, based on the task's target branch (usually `experimental` —
+skill `ship`):
 
 ```sh
-git -C /Users/elly/nixos fetch origin
-git -C /Users/elly/nixos worktree add <scratchpad>/wt-<branch> -b <branch> origin/experimental
+git -C <repo> fetch origin
+git -C <repo> worktree add <scratchpad>/wt-<branch> -b <branch> origin/experimental
 ```
 
-`<scratchpad>` is the scratchpad directory named in your own system
-prompt — session-scoped, already the convention for temporary filesystem
-state, and not something to invent a different location for. `<branch>`
-should be the real branch name the task will end up shipping under, not a
-throwaway label, so the worktree directory and the branch stay obviously
-paired.
+`<scratchpad>` is the scratchpad directory named in your own system prompt;
+`<branch>` is the real branch the task ships under, not a throwaway label.
+Then work in it exactly as from the main checkout — `just` recipes, `nix
+eval`, `gh pr create` all work identically. **Verify you're actually in it**
+(`git status -sb` or `pwd`) before anything state-changing — the bash tool
+can reset your shell's cwd between calls, so re-assert the `cd` or use
+absolute paths.
 
-Then `cd` into it and work exactly as you would from the main checkout —
-`just` recipes, `nix eval`, `nix flake check`, `git commit`, `gh pr
-create` all work identically; it's a full, independent working directory,
-not a partial or read-only view. **Verify you're actually in it**
-(`git status -sb` or `pwd`) before running anything state-changing — the
-harness's own bash tool can reset your shell's cwd between calls (seen
-directly in this repo: `just` recipes that exec into a worktree print
-"Shell cwd was reset to /Users/elly/nixos" afterward), so a multi-step
-task needs the `cd` re-asserted or paths given absolutely, not assumed to
-persist.
-
-**Checking a specific commit/branch without touching any branch pointer**
-(the `ship` skill's own step 0 case — verifying each commit in a PR is
-green): use `--detach` instead of `-b`, since you're not going to commit
-there:
+**Checking a commit without touching a branch pointer** (ship step 0:
+verifying each commit in a multi-commit PR): use `--detach` instead of
+`-b`:
 
 ```sh
 git worktree add -q --detach <scratchpad>/wt-check <sha-or-ref>
 ```
 
-**If `core.hooksPath` hooks are installed** (`just install-hooks` — see
-`.githooks/`), a hook that runs `git` from a *different* cwd than the
-worktree's own top (e.g. `cd flake && git add <path>`, as `pre-commit`
-used to) needs `git -C "$repo_root" add <repo-root-relative-path>`, not a
-`cd` plus an absolute path — otherwise the `GIT_DIR` git already exported
-into the hook's own environment gets inherited by that `git add`, and
-without a matching `GIT_WORK_TREE` it silently reinterprets even an
-*absolute* path against the wrong root instead of erroring.
-`wiki/lessons-learned.md` §44 has the full mechanism, how it was found,
-and why the fix `githooks(5)` itself suggests
-(`unset $(git rev-parse --local-env-vars)`) makes it *worse* here — it
-also clears `GIT_INDEX_FILE`, which this same `git add` needs to keep
-pointed at the index the outer `git commit` already has open, or it
-collides with that lock instead. `.githooks/pre-commit` already uses the
-`-C` form. Worth knowing if you ever write a new hook in this repo, not
-just this one.
+**Hooks caveat** (`just install-hooks`, `.githooks/`): a hook running `git`
+from a different cwd than the worktree top (e.g. `cd flake && git add
+<path>`) must use `git -C "$repo_root" add <repo-root-relative-path>` — a
+`cd` plus absolute path gets silently reinterpreted against the wrong root
+via the inherited `GIT_DIR`. The fix `githooks(5)` suggests
+(`unset $(git rev-parse --local-env-vars)`) makes it worse here: it also
+clears `GIT_INDEX_FILE`, which that `git add` needs. §44 has the full
+mechanism. `.githooks/pre-commit` already uses the `-C` form — relevant if
+you ever write a new hook.
 
-**Clean up when done** — shipped or abandoned, don't leave it dangling:
+**Clean up when done** — shipped or abandoned:
 
 ```sh
 git worktree remove --force <path>
 ```
 
-`git branch -d <branch>` fails with "used by worktree at ..." while the
-worktree still exists — remove the worktree first, not the other way
-around. `git worktree list` (from any worktree, they all see the same
-list) shows everything outstanding; worth a glance at the start of a
-session for an orphaned one left by an earlier interrupted task. Don't
-remove one you don't recognize without checking it first (`git -C <path>
-status`, and note its `mtime`) — it may belong to another session running
-right now.
+`git branch -d` fails with "used by worktree at ..." until the worktree is
+removed — worktree first, then branch. `git worktree list` (visible from
+any worktree) shows what's outstanding; glance at session start for
+orphans, and don't remove one you don't recognize without checking (`git
+-C <path> status`, its mtime) — it may belong to a session running now.
 
 ## See also
 

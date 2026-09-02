@@ -8,31 +8,18 @@ description: How to add a package to a user's environment in this repo and verif
 ## Applies to
 
 Adding `pkgs.<name>` (or a small handful) to `ellyHomeManager` via
-`flake/modules/nirePackages/`. Use before writing the module, not after —
-several of the decisions below (which category, which platform guard) are
-easy to get backwards and `just modules`/`just check` won't catch the
-category choice, only outright collisions.
+`flake/modules/nirePackages/`. Use before writing the module — `just
+modules`/`just check` catch outright collisions, not a wrong category
+choice.
 
-Not this skill:
+Not this skill: platform support and Homebrew overlap in detail →
+`nirepackages-platform-support`; a network service → `new-homelab-service`;
+one module file's mechanics → `new-flake-module` (those rules still apply
+here); a whole host → `new-host-config`.
 
-| what you're doing | use instead |
-|---|---|
-| deciding platform support / Homebrew overlap in detail | `nirepackages-platform-support` |
-| adding a self-hosted network service (listens on a port, reached from another machine) | `new-homelab-service` |
-| the mechanics of one module file — filenames, classes, the two `config`s, `dirsAsCategory` | `new-flake-module` |
-| adding a whole host | `new-host-config` |
-
-Those overlap — a package module *is* a flake-parts module, so
-`new-flake-module`'s rules still apply, and this skill hands the platform
-question straight to `nirepackages-platform-support` rather than repeating
-it. This skill is the layer above: where the file goes, what shape it takes,
-and how to prove it actually works before shipping.
-
-One skill, not split by platform: the mechanism (category placement, module
-shape, wiring, verification order) is identical for a NixOS host and for
-`nire-lysithea`. The two places platform genuinely changes what you write —
-the darwin/Homebrew questions, and which host a real build has to run on —
-are each one section below, not a second skill's worth of content.
+The mechanism is identical on NixOS and darwin; only the platform questions
+and which host a real build runs on differ — one section each below, not a
+second skill.
 
 ## The shape
 

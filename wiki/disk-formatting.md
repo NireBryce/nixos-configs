@@ -77,17 +77,13 @@ Two things easy to get backwards here:
 
 - **The placeholder device path must be unmistakably fake.** Never a
   plausible-looking one like `/dev/nvme0n1` — that path exists on a real
-  machine in this repo already (tenacity), and a plausible guess run through
-  disko's actual partitioning step on the wrong box silently wipes a disk
-  that has real data on it. A path that doesn't exist just fails loudly,
-  which is the point. Replace it with the real `/dev/disk/by-id/...` path
-  only once you're certain which physical disk on which physical machine
-  you're pointed at.
-- **This generator produces the disk layout only.** It does not add the
-  `impermanence` category import, which is what actually brings in
-  `WARN-impermanence.nix` (the rollback unit), the hibernation guards, and
-  `environment.persistence`. Both have to happen — the disk layout and the
-  category import are two separate steps in the host's own config, not one.
+  machine here already (tenacity), and disko running against the wrong box
+  silently wipes real data. A nonexistent path just fails loudly. Replace it
+  only once you're certain which disk on which machine you're pointed at.
+- **This generator produces the disk layout only.** The `impermanence`
+  category import — which brings in `WARN-impermanence.nix` (the rollback
+  unit), the hibernation guards, and `environment.persistence` — is a
+  separate step in the host's own config. Both have to happen.
 
 ## Actually formatting the disk
 
@@ -112,24 +108,18 @@ verified" section), never against real hardware.
 
 ## What depends on this having actually run
 
-**A host can be fully wired up in this repo's Nix config and still be
-unable to boot**, because `WARN-impermanence.nix`'s rollback unit depends on
-the `root-blank` subvolume existing at the btrfs top level — and that
-subvolume is only created once disko has actually been run against the real
-disk. Evaluating cleanly, or even building a toplevel, proves nothing about
-this; it's runtime state that doesn't exist until the disk step above has
-happened. Say so explicitly in the new host's own header if it's been wired
-in before the disk step has run, the way `nire-lego`'s did before its
-removal (git history) and `cube-configuration.nix` does for the unrelated,
-opposite case (no impermanence at all).
+**A host can be fully wired up here and still be unable to boot**:
+`WARN-impermanence.nix`'s rollback depends on the `root-blank` subvolume
+existing at the btrfs top level, and that subvolume only exists once disko
+has actually run against the real disk. Eval and build prove nothing about
+it. Say so in the new host's header if wired in before the disk step, the
+way `nire-lego`'s did (git history).
 
 First boot also needs the KDE half of the hibernation guard —
 `root-rollback/kde-sleepmode.nix` sets `SleepMode=1` in `powerdevil.rc`,
-required to match `WARN-impermanence.nix`'s `nohibernate` kernel parameter or
+matching `WARN-impermanence.nix`'s `nohibernate` kernel parameter, or
 suspend breaks outright. It's `homeManager`-class and reaches every desktop
-host through `ellyHomeManager` automatically — nothing extra to wire in for
-this specifically, just worth knowing it's there if suspend misbehaves on
-first boot.
+host through `ellyHomeManager` automatically.
 
 ## Confirming the rollback actually works
 

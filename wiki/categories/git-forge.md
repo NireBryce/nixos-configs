@@ -13,28 +13,22 @@
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
-Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only. **Confirmed
+Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only; nested under
+the `homelab` umbrella since 2026-08-27 (name unaffected). **Confirmed
 working end to end, 2026-08-24**: `just switch` came up with 0 failed
 units, `forgejo-secrets.service` exited `0/SUCCESS`, `forgejo.service`
-stayed `active (running)` past its first 40s (not just a start that hadn't
-crash-looped yet), and `http://ts-cube:3001/` answered `HTTP 200` from
-another tailnet host, not just from `localhost` on cube itself. Git+ssh
-over the host's OpenSSH (below) has NOT been exercised yet — only the HTTP
-side is confirmed.
-
-Moved from `nire/git-forge/` to `nire/homelab/git-forge/` on 2026-08-27,
-nested under a new umbrella `homelab` category alongside six other
-self-hosted-service categories — see
-[categories/README.md](README.md). The category name is unaffected.
+stayed `active (running)` past its first 40s, and
+`http://ts-cube:3001/` answered `HTTP 200` from another tailnet host.
 
 **That URL is no longer current.** Later the same day Forgejo moved behind
 Caddy ([reverse-proxy](reverse-proxy.md)): it listens on `127.0.0.1:3001`
 now and is reached at `https://ts-cube.moose-micro.ts.net/git/`. The
 proxied arrangement is **confirmed working too**, same day — 200 over
-validated TLS from another tailnet host, with Forgejo's own generated links
-carrying the `/git/` prefix and assets under it loading. Getting there took
-a second switch: the first one served Forgejo the un-stripped prefix and it
-404'd everything, see that page's section on it.
+validated TLS from another tailnet host, generated links carrying `/git/`,
+assets loading. Getting there took a second switch: the first served
+Forgejo the un-stripped prefix and it 404'd everything (that page has the
+writeup). Git+ssh over the host's OpenSSH (below) has NOT been exercised
+yet — only the HTTP side is confirmed.
 
 ## What's in it
 
@@ -42,94 +36,73 @@ One file, `nixos`-class: `forgejo/forgejo.nix`.
 
 ## Why the category isn't named `forgejo`
 
-The category directory is `git-forge`, not `forgejo`, on purpose. A category
-and its one module both declaring `forgejo` would both write
-`flake.modules.nixos.forgejo` — the exact `containers`/`podman.nix`
-collision [architecture.md](../architecture.md) already documents, which
-`just modules` catches as a silent merge rather than an error. Hit for real
-while writing this category, fixed the same way `containers.nix` was:
-rename the thing that collides with its own directory, not the directory
-role. The module itself is still named (and reads as) `forgejo` — only the
-category umbrella needed a different name.
+A category and its one module both declaring `forgejo` would both write
+`flake.modules.nixos.forgejo` and silently **merge** — the exact
+`containers`/`podman.nix` collision [architecture.md](../architecture.md)
+documents, hit for real while writing this category. Fixed by renaming the
+thing that collides with its own directory; the module itself is still
+named (and reads as) `forgejo`.
 
 ## Zero-touch secrets, built in rather than hand-rolled
 
-Checked against the pinned nixpkgs' `nixos/modules/services/misc/forgejo.nix`
-before assuming a Grafana-style manual secret was needed here too: it
-isn't. `services.forgejo` ships its own `forgejo-secrets.service`, a
-oneshot that generates `SECRET_KEY`/`INTERNAL_TOKEN`/`JWT_SECRET` itself
-under `${customDir}/conf/` (`/var/lib/forgejo/custom/conf/` by default) the
-first time it runs, and no-ops on every activation after that. Nothing to
-create by hand, no `warnings` entry needed in this module.
+Checked against the pinned nixpkgs' forgejo module before assuming a
+Grafana-style manual secret was needed: it isn't. `services.forgejo` ships
+`forgejo-secrets.service`, a oneshot that generates
+`SECRET_KEY`/`INTERNAL_TOKEN`/`JWT_SECRET` under `${customDir}/conf/`
+(`/var/lib/forgejo/custom/conf/` by default) on first run and no-ops after.
+Nothing to create by hand.
 
-[monitoring](monitoring.md)'s `grafana.nix` needed one hand-rolled to match
-this exact shape, and only after finding out the hard way why: its
-`secret_key` file was hand-created 2026-08-23, found regressed to
-unreadable-by-`grafana` on a live re-check 2026-08-24, and only then fixed
-with a `grafana-secret-key-setup.service` modeled directly on this
-category's `forgejo-secrets.service` — generate-if-missing, reassert
-ownership unconditionally, never regenerate an existing key. The
-`services.forgejo` upstream module ships that pattern; `services.grafana`'s
-own module deliberately doesn't (it used to have a `secretKeyFile` option
-and nixpkgs removed it, pushing secret management onto the deployer) — so
-`git-forge` got this for free from upstream, `monitoring` had to write it.
+[monitoring](monitoring.md)'s `grafana.nix` needed a hand-rolled
+`grafana-secret-key-setup.service` to match this exact shape — its
+`secret_key` file was hand-created, found regressed unreadable on a live
+re-check, and only then fixed, modeled on `forgejo-secrets.service`:
+generate-if-missing, reassert ownership unconditionally, never regenerate an
+existing key. Upstream `services.forgejo` ships that pattern;
+`services.grafana`'s deliberately doesn't (nixpkgs removed its
+`secretKeyFile` option).
 
 ## Tailnet-only access, same mechanism as Grafana
 
-Forgejo binds `127.0.0.1:3001` (3000 is already Grafana's), and that port is
-deliberately **not** in `networking.firewall.allowedTCPPorts`. Since
-2026-08-24 the binding is what keeps it off the LAN — nothing outside cube
-can open a connection to it at all — and the only client is Caddy, one file
-over in [reverse-proxy](reverse-proxy.md), which accepts on the tailnet and
-proxies over loopback.
+Forgejo binds `127.0.0.1:3001` (3000 is Grafana's), deliberately **not** in
+`networking.firewall.allowedTCPPorts` — the binding is what keeps it off
+the LAN, and the only client is Caddy ([reverse-proxy](reverse-proxy.md)).
+Caddy strips the `/git` prefix before proxying (`handle_path`), unlike
+Grafana's route, because Forgejo always serves at `/` regardless of
+`ROOT_URL` — the asymmetry is written up there.
 
-Caddy strips the `/git` prefix before proxying here (`handle_path`), unlike
-Grafana's route next door, because Forgejo always serves at `/` regardless
-of `ROOT_URL` — the asymmetry is written up in
-[reverse-proxy](reverse-proxy.md).
+It bound `0.0.0.0` for its first few hours, when
+`trustedInterfaces = [ "tailscale0" ]` ([system](system.md)) was the only
+thing between port 3001 and the LAN. That rule still applies — to Caddy's
+443 now — but as the second line. `forgejo.nix`'s history note has the
+before/after.
 
-It bound `0.0.0.0` for the first few hours of its existence, when
-`trustedInterfaces = [ "tailscale0" ]` ([system](system.md)'s
-`tailscale.nix`) was the only thing between port 3001 and the LAN. That rule
-still applies — to Caddy's 443 now — but it is the second line rather than
-the only one. `forgejo.nix`'s own history note at the bottom of the file has
-the before/after.
-
-One knock-on the move fixed quietly: Forgejo's `LOCAL_ROOT_URL` defaults to
+One knock-on the move fixed quietly: `LOCAL_ROOT_URL` defaults to
 `http://%(HTTP_ADDR)s:%(HTTP_PORT)s/` and nixpkgs doesn't override it, so
-with `0.0.0.0` it was building self-referential URLs out of an any-address.
-It resolves to `http://127.0.0.1:3001/` now.
+under `0.0.0.0` it built self-referential URLs from an any-address; it
+resolves to `http://127.0.0.1:3001/` now.
 
-Git access over SSH is a partial exception, and deliberately so: Forgejo's
-own built-in SSH server is left disabled (`START_SSH_SERVER` unset, so it
-stays at the Forgejo/Gitea default of `false`), so `git+ssh` rides on the
-**host's own OpenSSH** (`system/ssh/ssh.nix`) instead of opening a second
-listening port. Forgejo manages `~forgejo/.ssh/authorized_keys` itself as
-users add keys through the web UI; ordinary per-user `authorized_keys`
-lookup in the host's sshd does the rest, no `AuthorizedKeysCommand` needed.
-Clone URLs are `forgejo@ts-cube:...`, port 22 — the same port ordinary ssh
-already uses on every NixOS host, already in `allowedTCPPorts`
-(`system/networking/networking.nix`) for LAN and tailnet alike. This module
-does not add a new port for git+ssh; it adds a new user (`forgejo`) that can
-authenticate against the sshd that was already reachable.
+Git over SSH is a partial exception, deliberately: Forgejo's built-in SSH
+server stays disabled (`START_SSH_SERVER` unset), so `git+ssh` rides the
+**host's own OpenSSH** (`system/ssh/ssh.nix`) instead of a second port.
+Forgejo manages `~forgejo/.ssh/authorized_keys` itself as keys are added
+through the web UI; ordinary sshd lookup does the rest. Clone URLs are
+`forgejo@ts-cube:...`, port 22 — already open. The module adds no new port,
+only a user (`forgejo`) that can authenticate against the already-reachable
+sshd.
 
 ## The tailnet device-name trap, avoided rather than hit
 
-`system/networking/tailscale.nix`'s own header documents a costly-to-find
-trap: this tailnet's device names don't match `networking.hostName` (the
-host is `nire-cube`, its Tailscale/MagicDNS name is `ts-cube`). This module
-set `DOMAIN`/`ROOT_URL` to `ts-cube` explicitly from the start, so cloning
-over HTTP and any redirect-URL checks never hit that trap. `grafana.nix`
-left its own `domain`/`root_url` at the nixpkgs default at first, flagging
-this as the trap to fix "if it's ever hit" — it sets both now, since going
-behind a path prefix forced the issue anyway.
+This tailnet's device names don't match `networking.hostName` (host
+`nire-cube`, device `ts-cube` — `tailscale.nix`'s header has the trap).
+This module set `DOMAIN`/`ROOT_URL` to `ts-cube` from the start, so clone
+URLs and redirect checks never hit it; `grafana.nix` left its defaults at
+first and sets both now.
 
 `DOMAIN` and `ROOT_URL` deliberately disagree as of 2026-08-24, which reads
-like a typo and isn't. `ROOT_URL` is what a browser sees, so it is the full
-`https://ts-cube.moose-micro.ts.net/git/`; `DOMAIN` is what SSH clone URLs
-are built from, and git+ssh doesn't go through Caddy at all (see the
-section above), so it stays the short `ts-cube` and clone URLs stay
-`forgejo@ts-cube:...`.
+like a typo and isn't: `ROOT_URL` is what a browser sees — the full
+`https://ts-cube.moose-micro.ts.net/git/` — while `DOMAIN` is what SSH
+clone URLs are built from, and git+ssh doesn't go through Caddy at all, so
+it stays the short `ts-cube`.
 
 ## Single-user, sqlite3, registration closed
 
@@ -144,39 +117,27 @@ account no longer needs that by-hand step — see below.
 
 ## Admin account: bootstrapped from nix+sops, not created by hand
 
-Added 2026-08-26. `DISABLE_REGISTRATION` plus no setup wizard
-(`useWizard` stays at its nixpkgs default `false`, and `INSTALL_LOCK` is
-forced `true` a few lines up) means nothing creates the *first* account
-either — before this, that was a manual `forgejo admin user create` on
-cube, same as any additional user still is.
+Added 2026-08-26. `DISABLE_REGISTRATION` plus no setup wizard means nothing
+creates the *first* account either — before this, that was a manual
+`forgejo admin user create` on cube.
 
-`forgejo-admin-bootstrap`, a systemd oneshot ordered after
-`forgejo.service`, now does this declaratively: it tries
-`admin user create --admin` for `elly`, and if that fails (the only
-realistic reason, once `forgejo.service` itself is healthy, is "already
-exists") falls back to `admin user change-password`. The password comes
-from a new sops secret, `forgejo-admin-password`, declared **in this
-module** rather than centralized in `system/secrets/sops.nix` alongside
-the syncthing-\* secrets — deliberately, so it only decrypts on
-`nire-cube`, where `git-forge` is actually imported, not on
-durandal/tenacity too.
+`forgejo-admin-bootstrap`, a oneshot ordered after `forgejo.service`, tries
+`admin user create --admin` for `elly`, falling back to `admin user
+change-password` if the user already exists. The password comes from a sops
+secret, `forgejo-admin-password`, declared **in this module** rather than
+centralized in `system/secrets/sops.nix` — so it only decrypts on cube,
+where `git-forge` is imported.
 
 **This resets the password to the sops value on every activation** — a
-considered choice, not the create-once/never-touch-again shape
-`forgejo-secrets.service` and Grafana's `grafana-secret-key-setup.service`
-use for signing keys. Unlike a signing key, a password has nothing else
-that breaks if it changes, and the intent is for this repo's nix+sops
-config to be the sole source of truth for it. The real tradeoff: changing
-the password by hand through the web UI would get silently reverted on
-the next `just switch`.
+considered choice, unlike the create-once shape the signing-key units use:
+a password has nothing that breaks if it changes, and this repo's nix+sops
+config is the sole source of truth for it. The tradeoff: a hand change
+through the web UI is silently reverted on the next `just switch`.
 
 **Status: evaluates only, not yet switched on cube.** `just preflight`
-passes and durandal/tenacity's toplevels were confirmed unaffected
-beyond the expected drvPath move from `secrets.yaml`'s own content
-changing (`just diff` shows no sampled attribute differs) — but nobody
-has logged in with this account yet. Treat as unverified until a real
-`switch` on cube and a login confirm it, per this repo's own "treat an
-undated verified as evaluates" rule.
+passes and durandal/tenacity's toplevels are unaffected beyond the expected
+drvPath move from `secrets.yaml` changing — but nobody has logged in with
+this account. Treat as unverified until a real `switch` and a login.
 
 ## No persistence entry, same reasoning as Grafana
 

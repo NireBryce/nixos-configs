@@ -120,26 +120,19 @@ evaluation dies with `infinite recursion encountered` — naming
 ;}
 ```
 
-`nireHost/llm-sandbox/llm-sandbox-configuration.nix` was a second worked
-example of both this trap and the `config`-shadowing one above in the same
-file: it imported upstream's `virtualisation/disk-image.nix` via
-`modulesPath` from the *inner* module's args, and separately bound
-`nixCategory = config.flake.modules.nixos.nix` in an outer `let` rather than
-adding `config` to the inner module's argument list, specifically to avoid
-repointing that reference at the NixOS `config` instead. (`nireHost/installer/
-installer-configuration.nix`, added 2026-08-15, was the original worked
-example of this same pattern until its removal 2026-08-27; `llm-sandbox`'s
-own removal followed 2026-08-28 — see `wiki/history.md` for both. Both are
-still readable in git history if a third example is needed.)
+`nireHost/llm-sandbox/llm-sandbox-configuration.nix` (removed 2026-08-28,
+still in git history — see `wiki/history.md`) was a worked example of both
+this trap and the `config`-shadowing one: it imported upstream's
+`virtualisation/disk-image.nix` via `modulesPath` from the *inner* module's
+args, and bound `nixCategory = config.flake.modules.nixos.nix` in an outer
+`let` rather than adding `config` to the inner module's argument list.
 
 ## Keep the wiki in sync
 
-If this change adds, removes, or renames a module in a category that has an
+If this change adds, removes, or renames a module in a category with an
 article under `wiki/categories/` — or edits a `dirsAsCategory.nix` — update
-that article's member list and `wiki/categories/README.md`'s table in the
-same change, not as a follow-up. Same discipline as keeping a stranded
-comment or `CLAUDE.md`'s own State section current: the wiki is only useful
-if it's corrected by whoever's change made it stale.
+that article and `wiki/categories/README.md`'s table in the same change.
+The wiki is only useful if corrected by whoever's change made it stale.
 
 ## Further reading
 

@@ -10,20 +10,15 @@
 - [See also](#see-also)
 
 Prometheus + Grafana, scraping this host's own resource metrics. Added
-2026-08-23, cube-only so far — see [Imported by](#imported-by) for why that's
-current state, not a structural limit.
-
-Moved from `nire/monitoring/` to `nire/homelab/monitoring/` on 2026-08-27,
-nested under a new umbrella `homelab` category alongside six other
-self-hosted-service categories — see
-[categories/README.md](README.md). The category name is unaffected.
+2026-08-23, cube-only so far; nested under the `homelab` umbrella since
+2026-08-27 (name unaffected).
 
 As of 2026-08-24 Grafana is reached at
 `https://ts-cube.moose-micro.ts.net/grafana/`, through Caddy
-([reverse-proxy](reverse-proxy.md)) — **not** the `http://ts-cube:3000/` this
-page described before, which no longer answers. Every listener in this
-category is on loopback now. Confirmed working the same day: 200 over
-validated TLS from another tailnet host.
+([reverse-proxy](reverse-proxy.md)) — **not** the `http://ts-cube:3000/`
+an earlier version of this page described, which no longer answers. Every
+listener in this category is on loopback now. Confirmed working the same
+day: 200 over validated TLS from another tailnet host.
 
 ## What's in it
 
@@ -104,37 +99,32 @@ Found on `nire-cube`'s first real `just switch` with this category —
   read. Grafana starts, can't read its own secret key, and dies, with
   nothing more specific than "failed" in `systemctl status`'s default view.
 
-A `warnings` entry describing a two-step manual fix (`install`, then
-`chown`) used to sit here — fixed by hand once, 2026-08-23, then found
-**regressed to the exact same `root:root` state** on a live re-check
-2026-08-24, `grafana.service` actively crash-looping the whole time nobody
-happened to check. A hand fix regressing once was reason enough not to
-trust a second hand fix either: `grafana-secret-key-setup.service`
-(`grafana.nix`) replaced the warning, a oneshot ordered before
+A `warnings` entry describing a two-step manual fix used to sit here —
+fixed by hand once (2026-08-23), then found **regressed to the same
+`root:root` state** on a live re-check 2026-08-24, `grafana.service`
+crash-looping the whole time nobody checked. One regression was reason
+enough not to trust a second hand fix: `grafana-secret-key-setup.service`
+(`grafana.nix`) replaced the warning — a oneshot ordered before
 `grafana.service` on *every* activation that generates the secret only if
-missing and unconditionally reasserts ownership/mode — modeled on
-`services.forgejo`'s own upstream `forgejo-secrets.service`
-([git-forge](git-forge.md)), though checking `services.grafana`'s own
-nixpkgs module first showed this isn't idiomatic *to Grafana specifically*:
-it used to have a `secretKeyFile` option and nixpkgs removed it in favor of
-exactly this "the deployer manages it" file-provider approach, with an
-explicit warning that there's no official way to rotate `secret_key` — so
-the unit only ever *creates* a missing file, never regenerates an existing
-one; only ownership/mode are safe to reassert unconditionally, and that's
-the part that kept regressing. **Confirmed working end to end, 2026-08-24**:
-`sudo systemctl restart grafana.service` (needed once, since a brand-new
-unit added by `switch` doesn't retroactively get pulled into an
-already-running `grafana.service`) ran the setup unit first
-(`0/SUCCESS`), and `grafana.service` came back up with the secret file's
-mtime unchanged and ownership `grafana:grafana`.
+missing and unconditionally reasserts ownership/mode, modeled on
+`services.forgejo`'s upstream `forgejo-secrets.service`
+([git-forge](git-forge.md)). Checking `services.grafana`'s nixpkgs module
+first showed this isn't idiomatic *to Grafana*: nixpkgs removed its
+`secretKeyFile` option in favor of exactly this "the deployer manages it"
+file-provider approach, warning there's no official way to rotate
+`secret_key` — so the unit only ever *creates* a missing file, never
+regenerates; only ownership/mode are safe to reassert, and that's the part
+that kept regressing. **Confirmed working end to end, 2026-08-24**:
+`sudo systemctl restart grafana.service` (needed once — a brand-new unit
+added by `switch` isn't pulled into an already-running service) ran the
+setup unit first (`0/SUCCESS`), and `grafana.service` came back up with the
+secret file's mtime unchanged and ownership `grafana:grafana`.
 
 A third, unrelated thing broke in the same `switch` and is **not** part of
-this category: the sandbox VM (`nire-llm-sandbox`) failed with `network
-'default' is not active` — that's [virtualization](virtualization.md)'s
-libvirt default network never being started, fixed in `libvirt-vm.nix`
-itself rather than here. Two independent failures in one activation log are
-easy to conflate; they had nothing to do with each other beyond landing in
-the same `just switch` output.
+this category: the sandbox VM failed with `network 'default' is not active`
+— that's [virtualization](virtualization.md)'s libvirt default network
+never being started. Two independent failures in one activation log are
+easy to conflate; they had nothing to do with each other.
 
 ## Why cube only, and why that's a category rather than a host-specific file
 

@@ -31,8 +31,7 @@ together external completion/history tools underneath ble.sh's UI:
   ordering note below for how it wins that key back from fzf. Package and
   config: [`atuin.nix`](../../../flake/modules/nirePackages/shell-apps/history/atuin.nix).
 - **bash-completion** / **nix-completion** — ble.sh's own contrib
-  integrations, loaded first per ble.sh's own note that bash-completion
-  must come before the fzf integrations.
+  integrations, loaded first.
 
 ## What the `.blerc` actually wires together
 
@@ -66,25 +65,18 @@ together external completion/history tools underneath ble.sh's UI:
 
 ## Bug: spurious `read: `': not a valid identifier` on Tab / auto-complete
 
-Seen on `nire-cube`'s real terminal (VSCode's integrated terminal) as a
-stray `bash: read: `': not a valid identifier` line printed alongside an
-otherwise-correct completion menu, on both explicit Tab and ble.sh's
-inline auto-complete-as-you-type. First diagnosed 2026-08-22 by actually
-reproducing it — not just reading source — with a scripted pty (Python's
-`pty` module driving a real interactive `bash -i`), per this repo's own
-"evaluating proves nothing, force a real run" convention
-([CLAUDE.md](../../../CLAUDE.md), [history.md](../../history.md) §25); that
-session pinned the bug as far as "somewhere inside ble.sh's global `read`
-override" but no further (see history below). Reopened 2026-08-24 when it
-was reported by a user typing over SSH — reproduced again with the same pty
-technique, packaged that same day as a reusable tool
-(`flake/scripts/ssh-pty-drive.py` at the time, since generalized beyond SSH
-and moved out to its own repo,
-[`terminal-puppeteer`](https://github.com/NireBryce/terminal-puppeteer) —
-not part of this repo any more, kept here only as the "how this was found"
-credit),
-and pinned the rest of the way to a specific line and a working fix. Full
-session account: [lessons-learned.md](../../lessons-learned.md) §39.
+Seen on `nire-cube`'s real terminal as a stray `bash: read: `': not a valid
+identifier` line alongside an otherwise-correct completion menu, on both
+explicit Tab and auto-complete-as-you-type. First diagnosed 2026-08-22 by
+reproducing it with a scripted pty (Python's `pty` module driving a real
+`bash -i`) — per this repo's "evaluating proves nothing, force a real run"
+convention ([history.md](../../history.md) §25); that session pinned it to
+"somewhere inside ble.sh's global `read` override" and no further.
+Reopened 2026-08-24 when reported over SSH, reproduced the same way, and
+pinned the rest of the way to a specific line and a working fix (the pty
+tool has since left this repo as
+[`terminal-puppeteer`](https://github.com/NireBryce/terminal-puppeteer)).
+Full session account: [lessons-learned.md](../../lessons-learned.md) §39.
 
 **Root cause**: ble.sh's own auto-complete/progcomp machinery installs a
 cancellation safety net, `_ble_builtin_read_hook`, while any registered

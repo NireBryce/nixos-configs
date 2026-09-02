@@ -8,17 +8,13 @@
 - [What's verified here](#whats-verified-here)
 - [See also](#see-also)
 
-[rustic](https://github.com/rustic-rs/rustic) (the `rustic-rs` project), not
-to be confused with the unrelated `bnavetta/rustic` "restic wrapper" that
-shares its name in search results. This page is about using it against the
-repository [backup](../categories/backup.md) already writes — it isn't
-about a service this fleet runs, it's a client tool. Researched 2026-08-28
-from the web, in response to the backup runbook having a lot of reusable
-`restic-cube snapshots`/`restore` commands worth checking for existing
-tooling before hand-rolling more of them; installed the same day, in
-`nirePackages/shell-apps/backup-tools/rustic.nix`, so it's now on every host
-`ellyHomeManager` reaches — see "Getting it" below for what that does and
-doesn't prove.
+[rustic](https://github.com/rustic-rs/rustic) (the `rustic-rs` project, not
+the unrelated `bnavetta/rustic` "restic wrapper" that shares its name in
+search results) — a client tool for the repository
+[backup](../categories/backup.md) writes, not a service this fleet runs.
+Installed 2026-08-28 in
+`nirePackages/shell-apps/backup-tools/rustic.nix`, so it's on every host
+`ellyHomeManager` reaches.
 
 ## What it is
 

@@ -22,29 +22,21 @@ Two tiers for the *configuration* side, plus one escape hatch — and one
 separate tier for the *usage* side:
 
 - **`wiki/*.md`** — cross-cutting topics that don't belong to one category:
-  `overview.md`, `architecture.md`, `hosts.md`, `disk-formatting.md`,
-  `history.md`, `impermanence-and-secrets.md`, `open-threads.md`,
-  `traps-and-skills.md`, `conventions.md`, this file. `overview.md` is the
-  one deliberately written to be read *before* the rest of this tier makes
-  sense — a newcomer's on-ramp, not a topic among equals; see its own
-  header. `disk-formatting.md` is the one runbook-shaped page in this tier
-  — ordered steps and safety warnings rather than a what/why/traps topic
-  article, closer in shape to a `homelab/` usage page than its siblings
-  here, but scoped to a `flake/modules/` mechanism (`impermanence`) rather
-  than a running service, so it stays in this tier instead of that one.
-  These span multiple categories or aren't tied to a `flake/modules/`
-  directory at all.
+  `overview.md` (the newcomer's on-ramp, deliberately written to be read
+  first), `architecture.md`, `hosts.md`, `disk-formatting.md` (the one
+  runbook-shaped page here — ordered steps, closer to a `homelab/` usage
+  page, but scoped to a `flake/modules/` mechanism so it stays in this
+  tier), `history.md`, `impermanence-and-secrets.md`, `open-threads.md`,
+  `traps-and-skills.md`, `conventions.md`, this file.
 
   Four pages in this tier are the exception to "index over restatement"
   below: `lessons-learned.md`, `impermanence-stage1-migration.md`,
   `module-style-guide.md`, and `kde-to-wayland-migration.md` moved in
-  verbatim from `claude cave/` when that directory was retired 2026-09-02,
-  the same shape `wiki/homelab/` pages and `categories/shell-config/`'s
-  deep-dives already use — real, synthesized content because there's
-  nothing else for it to link to instead. `history.md` stays the index into
-  `lessons-learned.md`; `impermanence-and-secrets.md` and `conventions.md`
-  stay the index into the other two, the same split as a category page and
-  its deep-dive.
+  verbatim from `claude cave/` when that directory was retired 2026-09-02 —
+  real, synthesized content because there's nothing else for it to link to.
+  `history.md` stays the index into `lessons-learned.md`;
+  `impermanence-and-secrets.md` and `conventions.md` stay the index into the
+  other two — the same split as a category page and its deep-dive.
 - **`wiki/categories/<name>.md`** — one page per real category, i.e. a
   directory under `flake/modules/` holding its own `dirsAsCategory.nix`
   (see [architecture.md](architecture.md)). Indexed in
@@ -58,35 +50,25 @@ separate tier for the *usage* side:
 - **`wiki/homelab/`** — the usage tier, added 2026-08-24 with
   [golinks.md](homelab/golinks.md). Pages about operating a service this
   fleet runs, for a reader who wants to *do something with it* rather than
-  edit `flake/modules/`. Its `README.md` is the index; each service gets a
-  page named after the thing you'd search for, not after the module
-  (`golinks.md`, not `golink.md` or `shortlinks.md` — the module is
-  `golink`, the category is `shortlinks`, and the thing people say is
-  "go links"). Where the tool's own name *is* what you'd search for, that
-  wins: `forgejo.md`, even though the module is also `forgejo`.
+  edit `flake/modules/`. `README.md` is the index; each service gets a page
+  named after the thing you'd search for, not the module (`golinks.md`, not
+  `golink.md` — but `forgejo.md`, where the tool's name *is* what you'd
+  search for).
 
-  One page there isn't about a single service:
-  [reaching-services.md](homelab/reaching-services.md), added 2026-08-24
-  when everything on `nire-cube` moved behind one HTTPS hostname. A
-  cross-service page earns its place here when the *thing being explained
-  is the arrangement rather than any one service* — the URL map, why the
-  certificate is trusted, and which layer to suspect when something doesn't
-  answer, none of which belongs in three separate service pages. Prefer a
-  service page; reach for this shape only when the alternative is repeating
-  yourself.
+  [reaching-services.md](homelab/reaching-services.md) is the one page not
+  about a single service: a cross-service page earns its place here when
+  the *thing being explained is the arrangement* — the URL map, why the
+  certificate is trusted, which layer to suspect. Prefer a service page;
+  reach for this shape only when the alternative is repeating yourself.
 
-  It's a separate tier rather than more `wiki/*.md` pages because the two
-  rot differently: a category page goes stale when the config changes, a
-  usage page goes stale when the *service* changes under it — possibly
-  with no commit to this repo at all. Keeping them apart means "is this
-  still true?" has a different answer method for each, instead of one pile
-  where you have to work out which kind of page you're reading.
+  It's a separate tier from `categories/` because the two rot differently:
+  a category page goes stale when the config changes, a usage page when the
+  *service* changes — possibly with no commit to this repo at all.
 
-  **"Index over restatement" is relaxed here, with a condition.** For these
-  pages the real source is often the running service's own help endpoint
-  (`http://go/.help`), not a file in this repo, so there's nothing local to
-  link to. A page here may therefore hold synthesized content the way a
-  category deep-dive may — but it must say **what was verified against the
+  **"Index over restatement" is relaxed here, with a condition.** The real
+  source is often the running service's own help endpoint
+  (`http://go/.help`), not a file in this repo, so a page here may hold
+  synthesized content — but it must say **what was verified against the
   live service and what was only transcribed**, and point at the live
   source as canonical. `golinks.md`'s closing section is the pattern.
 - **`wiki/categories/<name>/`** — the escape hatch, used exactly once so

@@ -111,15 +111,11 @@ dedicated key for this, confirmed authenticating by hand), but:
   live), and QNAP's brute-force protection is on. See the runbook's setup
   step 3.
 
-**The [backup runbook](backup-runbook.md) is the actual procedure**,
+**The [backup runbook](backup-runbook.md) is the actual procedure** —
 including all three of the above, checking status, running an ad hoc
-backup, and — the real "done" bar — performing a restore. This entry stays
-the tracking summary; that page is where the commands live.
-
-Once the NFS access rule is fixed: **done still means a restore actually
-performed** — one Forgejo repo recovered from the backup — because a
-restore nobody has run isn't a backup, and neither is a mount that still
-fails.
+backup, and the real "done" bar: **a restore actually performed**, one
+Forgejo repo recovered. A restore nobody has run isn't a backup. This entry
+stays the tracking summary; that page has the commands.
 
 ## 5. Grafana's admin credentials
 
@@ -136,22 +132,15 @@ the repo, not just in the UI.
 
 ## 6. Housekeeping on cube: one scratch directory left over
 
-Mostly done already. As of 2026-08-24:
-
-- `~/nixos-configs` is at `25b6bfb0`, and evaluates to
-  `l9iy6agb…-nixos-system-nire-cube`, which is **exactly what's running** —
-  checked by evaluating `toplevel.outPath` there and comparing to
-  `/run/current-system`. So switching from that checkout is a no-op, not a
-  risk.
-- It is one commit behind `main` (`dbfa80b5`, the `new-homelab-service`
-  skill). Docs only — it changes no host's system.
-- **`~/nixos-caddy-test` is still present.** That's the rsync'd working tree
-  the Caddy and glance switches were actually activated from, kept while they
-  were being verified. Nothing depends on it now.
+Mostly done already. As of 2026-08-24, `~/nixos-configs` evaluated to
+exactly what was running (`toplevel.outPath` matched
+`/run/current-system`), and was one docs-only commit behind. The leftover:
+**`~/nixos-caddy-test`**, the rsync'd tree the Caddy/glance switches were
+activated from — nothing depends on it now.
 
 ```sh
-cd ~/nixos-configs && git pull      # picks up the skill commit
-rm -rf ~/nixos-caddy-test           # after confirming the above outPath matches
+cd ~/nixos-configs && git pull
+rm -rf ~/nixos-caddy-test           # after confirming outPath matches current-system
 ```
 
 ## What's verified here

@@ -49,15 +49,8 @@
 
 > **Written by Claude Code, for Claude Code**, and largely a record of its own
 > mistakes. Written to be read by an agent starting cold, so the "I" throughout
-> is a machine with no memory of having done any of it. Useful to a person
-> mainly as a list of things that have gone wrong here before. `CLAUDE.md` has
-> the rules; this has the scar tissue.
-
-Used to be a companion to `old-2026-08-08-PORT-PLAN-(COMPLETED).md` and
-`old-historical-TENACITY-PLAN.md`, which recorded *what* was done; both were
-removed 2026-08-26 (see `wiki/history.md`), their content already superseded
-by this file and `CLAUDE.md`'s State section. This records how it went wrong
-in the doing, which is not recoverable from the tree or the commits.
+> is a machine with no memory of having done any of it. `AGENTS.md` has the
+> rules; this has the scar tissue.
 
 Three groups, by what could be observed at the time. §§1–18 are the port, from
 the darwin laptop, against a tree that could only be evaluated. §§19–24 are the
@@ -71,11 +64,9 @@ artifact both stopped being enough — some bugs only exist once real
 filesystem/daemon state shows up at an actual `switch`, see §37.
 
 Numbers are stable; §§2, 5, 7, 11, 14, 18, 24 and 25 are referenced elsewhere.
-
-Lived at `claude cave/lessons-learned.md` until 2026-09-02, when that
-directory was retired and this file moved into `wiki/` as a real page —
-see [history.md](history.md) and [styleguide.md](styleguide.md) for why it
-counts as an exception to this wiki's usual "index over restatement" rule.
+Lived at `claude cave/lessons-learned.md` until 2026-09-02 — see
+[history.md](history.md) and [styleguide.md](styleguide.md) for why it counts
+as an exception to this wiki's usual "index over restatement" rule.
 
 ---
 

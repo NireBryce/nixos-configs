@@ -17,12 +17,8 @@
 - [See also](#see-also)
 
 [Caddy](https://caddyserver.com/), one tailnet-only HTTPS front door for
-every web service on `nire-cube`. Added 2026-08-24, cube-only.
-
-Moved from `nire/reverse-proxy/` to `nire/homelab/reverse-proxy/` on
-2026-08-27, nested under a new umbrella `homelab` category alongside six
-other self-hosted-service categories — see
-[categories/README.md](README.md). The category name is unaffected.
+every web service on `nire-cube`. Added 2026-08-24, cube-only; nested under
+the `homelab` umbrella since 2026-08-27 (name unaffected).
 
 **Confirmed working end to end, 2026-08-24**, on the second switch. `just
 switch` came up with 0 failed units, `caddy.service` `active (running)` at
@@ -37,21 +33,19 @@ switch` came up with 0 failed units, `caddy.service` `active (running)` at
 | `http://ts-cube/` | 301 → the FQDN |
 
 `ssl_verify_result` was 0 — the tailscaled-issued certificate validated
-against the system trust store, which is the entire point of this category
-and the one thing no amount of building could have shown. Forgejo's
-*generated* links were checked separately (`href="/git/explore/repos"`, and
-an asset under `/git/` returning 200), since a correctly stripped prefix can
-still emit links that 404 on the next click. On the host, `ss -ltn` shows
-3000 and 3001 bound to `127.0.0.1` only, with 80/443 the sole tailnet-facing
-listeners.
+against the system trust store, the one thing no amount of building could
+have shown. Forgejo's *generated* links were checked separately
+(`href="/git/explore/repos"`, an asset under `/git/` returning 200), since a
+correctly stripped prefix can still emit links that 404 on the next click.
+On the host, `ss -ltn` shows 3000/3001 bound to `127.0.0.1` only, with
+80/443 the sole tailnet-facing listeners.
 
-**The first switch was broken**, and in an instructive way: `/grafana/`
-returned 200 while `/git/` returned 404, because both routes had been given
-the same Caddy directive. See [the two apps want opposite
+**The first switch was broken**, instructively: `/grafana/` returned 200
+while `/git/` returned 404, because both routes had been given the same
+Caddy directive. See [the two apps want opposite
 things](#the-two-apps-want-opposite-things-from-the-proxy) below, and
-[`lessons-learned.md`](../lessons-learned.md) #41 — every
-static check had passed first, including a real build and a read of the
-built artifact.
+[`lessons-learned.md`](../lessons-learned.md) #41 — every static check had
+passed first, including a real build and a read of the built artifact.
 
 ## What's in it
 
@@ -69,56 +63,44 @@ change:
 
 Both used to listen on every interface and rely entirely on
 `trustedInterfaces = [ "tailscale0" ]` to keep the LAN out — a firewall
-property, not a listener property. They are on loopback now and reachable
-only through this proxy, so the firewall became the second line rather than
-the only one. The old URLs do not answer.
-
-`http://ts-cube/` (the bare MagicDNS name, port 80) redirects to the HTTPS
-index, so the short name someone already has in muscle memory still lands
+property, not a listener property. They are on loopback now, reachable only
+through this proxy; the old URLs do not answer. `http://ts-cube/` (bare
+MagicDNS name) redirects to the HTTPS index, so the short name still lands
 somewhere useful.
 
-The root route was a plaintext `respond` placeholder for a few hours on
-2026-08-24 and now proxies to [glance](landing.md) — which means these two
-categories are a pair: dropping `landing` while keeping this one leaves the
-front page returning 502.
+The root route proxies to [glance](landing.md) — these two categories are a
+pair: dropping `landing` while keeping this one leaves the front page
+returning 502.
 
 ## Certificates come from tailscaled, with no plugin
 
-The mechanism is smaller than it looks, and was read out of Caddy's own
-source in the pinned nixpkgs rather than assumed:
+Read out of Caddy's own source in the pinned nixpkgs rather than assumed:
+`modules/caddyhttp/autohttps.go`'s `isTailscaleDomain` is a `.ts.net`
+suffix check — any matching site address is pulled out of the ACME-managed
+set and given a `tls.get_certificate.tailscale` policy
+(`modules/caddytls/certmanagers.go`), which asks the **local tailscaled**
+for the certificate. No ACME account, no `email`, no DNS-01 credentials, no
+`caddy.withPlugins` rebuild — ordinary `pkgs.caddy` plus a `.ts.net` site
+address is the whole thing.
 
-- `modules/caddyhttp/autohttps.go` defines `isTailscaleDomain` as nothing
-  more than a `.ts.net` suffix check. Any site address matching it is pulled
-  *out* of the normal ACME-managed set and given its own automation policy.
-- That policy's certificate manager is
-  `tls.get_certificate.tailscale` (`modules/caddytls/certmanagers.go`), which
-  asks the **local tailscaled** for the certificate.
+Two prerequisites, neither in this repo:
 
-So there is no ACME account, no `email`, no DNS-01 credentials, and no
-`caddy.withPlugins` rebuild with a vendor hash. Ordinary `pkgs.caddy` plus a
-`.ts.net` site address is the whole thing.
-
-Two prerequisites, neither of which lives in this repo:
-
-- **`services.tailscale.permitCertUid = "caddy"`.** Not optional: tailscaled
-  refuses certificate requests from non-root local-API clients unless the
-  peer's uid matches `TS_PERMIT_CERT_UID` (`ipn/ipnserver/server.go`,
-  `CanFetchCerts` — whose upstream comment names caddy as the intended
-  case). The value is resolved by name at request time, so it tracks
-  whatever uid `services.caddy`'s user ends up with.
-- **HTTPS certificates enabled for the tailnet**, in Tailscale's admin
-  console. Checked rather than assumed: `tailscale status --json` on
-  `nire-lysithea`, 2026-08-24, reported a non-empty `CertDomains`, which is
-  that setting being on. If it were off, every request here would fail the
-  TLS handshake with nothing wrong in this repo — the same class of
+- **`services.tailscale.permitCertUid = "caddy"`.** tailscaled refuses
+  certificate requests from non-root local-API clients unless the peer's
+  uid matches `TS_PERMIT_CERT_UID` (`ipn/ipnserver/server.go`,
+  `CanFetchCerts`). The value resolves by name at request time, so it
+  tracks whatever uid `services.caddy`'s user gets.
+- **HTTPS certificates enabled for the tailnet** in Tailscale's admin
+  console. Checked, not assumed: `tailscale status --json` reported a
+  non-empty `CertDomains` (2026-08-24). Off, every request here fails the
+  TLS handshake with nothing wrong in this repo — same class of
   out-of-repo trap [system](system.md)'s `tailscale.nix` documents.
 
-`permitCertUid` is set in `caddy.nix` itself, deliberately, rather than in
-`system/networking/tailscale.nix`. That file is in the `system` category
-*every* Linux host imports, so setting it there would grant cert-fetching
-rights to a `caddy` user on durandal and tenacity — two hosts that
-don't run Caddy. Scoping a change to the host that actually needs it is the
-same call [virtualization](virtualization.md)'s VM fixes made.
+`permitCertUid` is set in `caddy.nix` rather than in
+`system/networking/tailscale.nix` — that file is in the `system` category
+*every* Linux host imports, and setting it there would grant cert-fetching
+rights to a `caddy` user on hosts that don't run Caddy. Scope a change to
+the host that needs it.
 
 ## Paths, not subdomains, and that's forced
 
@@ -210,12 +192,11 @@ caddy dist tarball rather than assumed; nothing in this module grants it.
 ## Ordering against tailscaled
 
 `systemd.services.caddy.after = [ "tailscaled.service" ]`, ordering only —
-tailscaled is enabled unconditionally by `system`, so there's nothing to
-pull in. What it avoids is the narrow startup window where Caddy asks a
-not-yet-running tailscaled for a certificate. The Tailscale certificate
-manager is consulted per-handshake, so getting this wrong would mean early
-requests failing and later ones working: intermittent and easy to misread,
-rather than a clean failure.
+tailscaled is enabled unconditionally by `system`. What it avoids is the
+startup window where Caddy asks a not-yet-running tailscaled for a
+certificate. The manager is consulted per-handshake, so getting this wrong
+means early requests failing and later ones working: intermittent, easy to
+misread.
 
 ## No persistence entry
 

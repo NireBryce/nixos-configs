@@ -58,15 +58,14 @@ host, not anything under [macos](macos.md).
 
 `home-manager/drop-unsupported-packages.nix` is the platform-support
 counterpart: `ellyHomeManager` is shared verbatim across all five hosts, so
-every package in it has to survive `aarch64-darwin`. Eleven packages didn't
-(`vlc`, `gimp`, `libreoffice-qt`, `github-desktop`, `piper`, `qpwgraph`,
-`strace`, `ltrace`, `iotop`, `sysstat`, `ethtool`), each previously guarded
-by a hand-written `lib.mkIf (!pkgs.stdenv.isDarwin)` — a fact about the
-package restated by hand in config, which is exactly the shape that
-eventually disagrees with reality. This file reads `meta.platforms`/
-`meta.badPlatforms` instead and drops what can't build, once, with a warning
-naming what it dropped — see the `nirepackages-platform-support` skill for
-the full build-support-vs-Homebrew-overlap distinction this is one half of.
+every package in it has to survive `aarch64-darwin`. Eleven didn't (`vlc`,
+`gimp`, `libreoffice-qt`, `github-desktop`, `piper`, `qpwgraph`, `strace`,
+`ltrace`, `iotop`, `sysstat`, `ethtool`), each previously guarded by a
+hand-written `lib.mkIf (!pkgs.stdenv.isDarwin)` — a restated fact that can
+drift. This file reads `meta.platforms`/`meta.badPlatforms` and drops what
+can't build, once, with a warning naming what it dropped. See skill
+`nirepackages-platform-support` for the full
+build-support-vs-Homebrew-overlap distinction this is one half of.
 
 ## Secrets
 
@@ -87,25 +86,17 @@ module points `SOPS_AGE_KEY_FILE` at the Linux-XDG path directly via
 rather than left for the shell to expand at sourcing time.
 
 `secrets/sops-interactive-key.nix` (2026-08-29) fixes a third, NixOS-side
-problem found chasing this on `nire-cube`: `sops`'s own
-`SOPS_AGE_SSH_PRIVATE_KEY_FILE` code path failed to match a host's own
-enrolled key against its own correctly-encrypted `secrets.yaml` block, even
-though that key was independently verified correct three separate ways
-(`ssh-to-age` on the `.pub` file, a live `ssh-keyscan`, and `ssh-to-age`
-against the private key file itself) — a real bug/quirk in sops's SSH-key
-conversion, not a config problem. A systemd oneshot unit, run unconditionally
-on every boot, converts the host's ed25519 key to a native age identity file
-at the Linux default location instead (no `environment.variables` needed
-there, unlike darwin — that default path already matches). Unconditional
-regeneration (contrast `grafana-secret-key-setup.service`, which only
-creates its file if missing) is deliberate: this is a pure derivation of a
-key that already exists, not a value anything depends on staying stable, and
-it needs to self-heal every boot specifically because `durandal`/`tenacity`
-wipe `/root` in initrd every boot (`WARN-impermanence.nix`) — a hand-run fix
-there would vanish at the next reboot with no memory of ever being needed.
-See the module's own header for the nix-store-safety reasoning (why this is
-written as shell text operating on file paths, never a `builtins.readFile`
-of the actual key).
+problem found chasing this on `nire-cube`: sops's
+`SOPS_AGE_SSH_PRIVATE_KEY_FILE` path failed to match a host's own enrolled
+key against its own correctly-encrypted `secrets.yaml` block, despite the
+key being independently verified correct three ways — a real quirk in
+sops's SSH-key conversion, not a config problem. A oneshot run
+unconditionally every boot converts the host's ed25519 key to a native age
+identity at the Linux default location. Unconditional (contrast
+`grafana-secret-key-setup.service`'s create-if-missing) is deliberate: a
+pure derivation of an existing key, self-healing because durandal/tenacity
+wipe `/root` every boot. See the module header for the nix-store-safety
+reasoning.
 
 See [../impermanence-and-secrets.md](../impermanence-and-secrets.md) for
 which hosts are actually enrolled in `.sops.yaml` — that's tracked separately
@@ -113,16 +104,14 @@ from which hosts import these modules.
 
 ## Containers vs. virtualization — the live trap, and no longer filed here
 
-Podman and distrobox — OCI containers — used to live under
-`system/containers/`, but moved out entirely 2026-08-22 into their own
-category: see [containers](containers.md). This section stays as a pointer
-because the trap is still live and this is where someone remembering the old
-location will look first: the word "virtualization" means only
+Podman and distrobox — OCI containers — moved out of `system/containers/`
+2026-08-22 into their own category: see [containers](containers.md). This
+pointer stays because the trap is live and this is where someone remembering
+the old location will look: "virtualization" means only
 [the VM category](virtualization.md) (libvirt/QEMU) — the containers module
-was briefly named `virtualization.nix` itself, until 2026-08-21, before that
-name was needed for the actual VM category — and a memory of "virtualization
-is the podman one" is exactly backwards no matter which of the module's three
-names and two directories you're picturing.
+was itself briefly named `virtualization.nix` until 2026-08-21 — so a
+memory of "virtualization is the podman one" is exactly backwards no matter
+which of the module's three names you're picturing.
 
 ## The `*-persist.nix` sibling-file convention
 
@@ -137,21 +126,18 @@ centralized under [impermanence](impermanence.md).
   identity lives under `/var/lib` and both hosts that import this roll `/`
   back on every boot.
 - **`networkmanager-persist.nix`** persists
-  `/var/lib/NetworkManager/secret_key` — the key that encrypts
-  NetworkManager's stored connection secrets. `/etc/NetworkManager/system-connections`
-  itself was already persisted via `WARN-impermanence.nix`'s directory list,
-  but the *key* that encrypts what's in it wasn't, so every boot generated a
-  fresh key while the encrypted secrets alongside it stayed keyed to the
-  previous one. Found 2026-08-22 via `root-drift.sh` flagging `secret_key`
-  as real, non-cosmetic drift — the same pass that found
-  [virtualization](virtualization.md)'s `libvirt-persist.nix` gap. First real
-  activation, on `nire-tenacity` 2026-08-26, hit impermanence's own guard —
-  NetworkManager had already generated a live `secret_key` on that boot
-  before the persistence entry ever ran, and `environment.persistence`
-  refused to silently bind-mount over it. Fixed by hand (moved the live key
-  into `/persist` before re-switching) and confirmed after: `stat` matched
-  the same inode on both paths, with the key's mtime unchanged, so existing
-  wifi secrets stayed decryptable. Full detail in the module's own history
+  `/var/lib/NetworkManager/secret_key` — the key encrypting NetworkManager's
+  stored connection secrets. `/etc/NetworkManager/system-connections` was
+  already persisted via `WARN-impermanence.nix`'s directory list, but the
+  *key* wasn't — every boot generated a fresh key while the encrypted
+  secrets stayed keyed to the previous one. Found 2026-08-22 via
+  `root-drift.sh`, the same pass that found
+  [virtualization](virtualization.md)'s gap. First activation (tenacity,
+  2026-08-26) hit impermanence's own guard — NetworkManager had generated a
+  live `secret_key` before the persistence entry ran, and
+  `environment.persistence` refuses to bind-mount over a live file. Fixed by
+  moving the live key into `/persist` before re-switching; confirmed by
+  matching inode and unchanged mtime. Full detail in the module's history
   note.
 
 Both rely on `environment.persistence."/persist".directories` being

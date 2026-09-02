@@ -40,54 +40,39 @@ silently **merge** — the `containers`/`podman.nix` collision
 
 ## The QNAP mount predates this category by months, and was never dangling
 
-The plan doc this category implements got one thing wrong, corrected while
-writing the module rather than left to rot: it described
+The plan doc this category implements described
 `nire/system/storage/storage-NFS.nix` (the NFS mount to the QNAP) as an
-unused module nobody had wired into any host. It isn't.
-`nire/system/storage/` has no `dirsAsCategory.nix` of its own, so that
-module is collected straight into the shared `system` aggregate
-([architecture.md](../architecture.md) covers this mechanism generally) —
-and every Linux host imports `system`. `nix eval
-.#nixosConfigurations.<host>.config.fileSystems` on all three NixOS hosts
-already listed the mount, checked 2026-08-28. So it was already live
-everywhere; this category needed no new import to reach it. What's still
-true from the original plan: nothing in this repo has ever exercised that
-mount against the real QNAP, so "already imported" is not the same claim as
-"known to work."
+unused module. It isn't: `nire/system/storage/` has no `dirsAsCategory.nix`
+of its own, so the module is collected straight into the shared `system`
+aggregate, which every Linux host imports — confirmed via `nix eval
+.#nixosConfigurations.<host>.config.fileSystems` on all three NixOS hosts,
+2026-08-28. So no new import was needed to reach it. Still true from the
+plan: nothing had ever exercised that mount against the real QNAP, so
+"already imported" ≠ "known to work."
 
-**The mount point itself moved, 2026-08-28.** Originally `/mnt/qnap-erin`
-(device `192.168.0.200:/erin-pub`), a share shared with other, unrelated
-QNAP uses; renamed to `/mnt/restic-backup` (device
-`192.168.0.200:/restic-backup`), a share dedicated to this category. **As
-of 2026-08-31 this module no longer uses that mount at all** — see the next
-section — but `storage-NFS.nix` itself is untouched and still exists for
-whatever else might want it.
+The mount point itself moved 2026-08-28: `/mnt/qnap-erin` (a share shared
+with unrelated QNAP uses) → `/mnt/restic-backup` (dedicated). **As of
+2026-08-31 this module doesn't use that mount at all** — next section — but
+`storage-NFS.nix` is untouched, still there for whatever else wants it.
 
 ## SFTP repository now, not local-path on NFS
 
-This module shipped 2026-08-28 with a local-path repository on the NFS
-mount above, a deliberate departure from issue #87's original sketch of
-restic over SFTP — the reasoning at the time: restic encrypts client-side
-regardless of backend, so a local-path repo gets the same encryption-at-rest
-without standing up SSH on the QNAP at all. Stated then as the one real
-trade-off: NFS export trust is IP-based, not keyed, so anything on the LAN
-with the right IP could mount the share.
-
-**That trade-off is what broke it.** A real switch on cube hit `mount.nfs:
-access denied by server` — the `restic-backup` share's NFS host-access list
-never got cube added. Chasing that down (and finding the QNAP's own admin
-console has no way to force key-only SSH, so the NFS route wasn't even the
-weaker option by much) led to just doing what issue #87 originally
-suggested: enable SSH on the QNAP and use SFTP directly. Real per-connection
-key auth, not a host-IP allowlist — better on the exact axis that failed.
+Shipped 2026-08-28 with a local-path repository on the NFS mount, a
+deliberate departure from #87's original SFTP sketch (restic encrypts
+client-side regardless of backend, so local-path gets the same
+encryption-at-rest without SSH on the QNAP). The stated trade-off — NFS
+export trust is IP-based, not keyed — is what broke it: a real switch hit
+`mount.nfs: access denied by server`, the share's host-access list never
+got cube added, and the QNAP admin console has no way to force key-only
+SSH anyway. So: issue #87's original plan, SFTP — real per-connection key
+auth rather than a host-IP allowlist.
 
 The module now points at `sftp:nire@ts-hive:/share/homes/nire/restic-cube`,
-authenticating with a dedicated ed25519 key (generated on cube specifically
-for this, not the personal key that already had interactive QNAP access —
-confirmed working by hand: `ssh -i ~/.ssh/restic-cube-backup nire@ts-hive`
-authenticates with no password). The QNAP's host key is pinned in Nix
-(`programs.ssh.knownHosts`, captured via `ssh-keyscan` against the real
-host) rather than trusted on first connection at runtime.
+authenticating with a dedicated ed25519 key (generated for this, not the
+personal key; confirmed by hand: `ssh -i ~/.ssh/restic-cube-backup
+nire@ts-hive` authenticates with no password). The QNAP host key is pinned
+in Nix (`programs.ssh.knownHosts` via `ssh-keyscan`), not trusted on first
+connection.
 
 ## sqlite consistency
 
@@ -107,16 +92,15 @@ fully regenerable by scraping again. Nothing else cube runs is excluded.
 
 ## Anti-deletion is not a Nix change
 
-Issue #87's open question 3: anything that compromises or wipes cube can run
+Issue #87's open question 3: anything compromising cube can run
 `restic forget --prune` against its own backups, since `nire` (the QNAP
-account restic authenticates as) has full read-write access to
-`~/restic-cube`. Switching from NFS to SFTP didn't close this — the
-mitigation this module still assumes, unchanged, cheapest rung of the
-ascending-effort list #87 proposes — is a **QNAP-side native snapshot
-schedule on the `restic-backup` share** (`nire`'s home lives under it), so
-cube can write and prune within the restic repository but can't touch the
-NAS's own snapshots. That's QNAP admin-console configuration, not something
-this module (or anything in this repo) can enforce or verify.
+account) has full read-write access to `~/restic-cube`. SFTP didn't close
+this. The mitigation this module assumes — cheapest rung of #87's
+ascending-effort list — is a **QNAP-side native snapshot schedule on the
+`restic-backup` share** (`nire`'s home lives under it), so cube can write
+and prune within the repository but can't touch the NAS's own snapshots.
+QNAP admin-console configuration; nothing in this repo can enforce or
+verify it.
 
 ## What isn't done yet
 
@@ -166,12 +150,9 @@ after this category was added.
 - [../homelab/pending-setup.md](../homelab/pending-setup.md) — the two
   remaining human steps, alongside the fleet's other one-time setup.
 - [../homelab/backup-runbook.md](../homelab/backup-runbook.md) — the actual
-  commands: finishing setup, checking status, running a backup by hand, and
-  performing a restore.
+  commands (finishing setup, status, manual backup, restore); its
+  "Background" section is the plan this category implements, folded in
+  there 2026-09-02 including what it got wrong about the QNAP mount.
 - [../homelab/rustic.md](../homelab/rustic.md) — an interactive TUI that can
   browse and restore from this same repository, installed but not yet
   switched or run against it.
-- [../homelab/backup-runbook.md](<../homelab/backup-runbook.md>)'s
-  "Background" section — the plan this category implements, folded in
-  there 2026-09-02, including what it got wrong about the QNAP mount's
-  status.

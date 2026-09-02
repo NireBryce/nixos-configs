@@ -7,150 +7,90 @@ description: How to build a NixOS disk image and wire a libvirt-managed guest VM
 
 ## Applies to
 
-Building a NixOS disk image (qcow2/raw/etc.) and wiring a libvirt-managed
-guest VM in this repo — covers nixpkgs' image-variant system vs. its
-underlying disk-image module, the relative-path gotcha in `image.filePath`,
-and the category-scoping trick used to keep a generator's *consumer*
-host-exclusive without hiding the generator itself. Use before adding
-another VM guest (`flake/modules/nire/homelab/virtualization/VMs/_lib/libvirt-vm.nix`
-is the reusable generator, currently uncalled by anything — see below),
-building any `config.system.build.image`, or debugging why a per-host
-libvirt module reached a host it shouldn't have (or didn't reach the one it
-should).
+Building a NixOS disk image or wiring a libvirt guest. The reusable
+generator is
+`flake/modules/nire/homelab/virtualization/VMs/_lib/libvirt-vm.nix` —
+currently uncalled (its only consumer, `nire-llm-sandbox`, was removed
+2026-08-28; see `wiki/history.md` and that file's last version in git
+history for the full worked example). Use before adding another VM guest,
+building any `config.system.build.image`, or debugging a per-host libvirt
+module that reached the wrong host.
 
-Background: `nire-llm-sandbox` (`flake/modules/nireHost/llm-sandbox/`) and
-its libvirt wiring (`VMs/_lib/libvirt-vm.nix`, `virtualization-cube.nix`) were
-the worked example everything below was learned from, 2026-08-22. Both the
-VM and `virtualization-cube.nix` were removed 2026-08-28 (see
-`wiki/history.md`); the generator itself, `VMs/_lib/libvirt-vm.nix`, was kept
-as unexercised reusable infrastructure and now lives at
-`flake/modules/nire/homelab/virtualization/VMs/_lib/libvirt-vm.nix` (moved
-under the `homelab` umbrella 2026-08-27, before the VM's removal). Read
-`llm-sandbox-configuration.nix`'s last version (git history) for the full
-account; this is the trap-shaped summary.
+## `image.modules.<variant>` and `config.system.build.image` are not the same mechanism
 
-## `image.modules.<variant>` and `config.system.build.image` are NOT the same mechanism
+Both exist in nixpkgs, both can build a qcow2 from `make-disk-image.nix`,
+and they don't compose:
 
-Both exist in current nixpkgs, both can build a qcow2 from the same
-underlying `nixos/lib/make-disk-image.nix`, and it is easy to assume they
-compose. They don't.
+- **`image/modules/images.nix`** (`image.modules`,
+  `system.build.images.<variant>`) builds each variant as an **isolated**
+  `extendModules` sub-configuration — its own `fileSystems`, bootloader,
+  everything — none of it feeding back into the base config.
+- **`virtualisation/disk-image.nix`** is what the variant imports
+  internally. Imported **directly** into a real `nixosConfiguration`
+  (`modulesPath + "/virtualisation/disk-image.nix"`, setting
+  `image.efiSupport` yourself), it makes `fileSystems."/"` and the
+  bootloader part of the base config.
 
-- **`nixos/modules/image/images.nix`** (`image.modules`, `system.build.images.<variant>`)
-  is part of every NixOS configuration's module list already. Each variant
-  name (`qemu`, `amazon`, `iso`, …) maps to a module, and that module is
-  built as an **isolated** configuration via `extendModules` — its own
-  `fileSystems`, its own bootloader, its own everything. None of that feeds
-  back into the *base* configuration's own `config`.
-- **`nixos/modules/virtualisation/disk-image.nix`** is the module that
-  variant actually imports internally (`imports = [ ../virtualisation/disk-image.nix ]; image.efiSupport = false;`
-  for the `qemu` variant specifically). Importing it **directly** into a
-  real `nixosConfiguration` (via `modulesPath + "/virtualisation/disk-image.nix"`,
-  the same mechanism a live-ISO profile uses)
-  makes `fileSystems."/"` and the bootloader part of the *base* config too.
+Why it matters here: `checks.nix` forces `system.build.toplevel` for every
+`nixosConfigurations` entry. A guest built via `image.modules.qemu` has no
+root `fileSystems` or `boot.loader.grub.devices` in its *base* config —
+they only exist in the isolated variant — so the toplevel eval fails with
+"the `fileSystems` option does not specify your root file system". Hit for
+real; exact assertion text in `llm-sandbox-configuration.nix`'s header (git
+history).
 
-**Why the difference matters here specifically**: `checks.nix` forces
-`system.build.toplevel` for every `nixosConfigurations` entry (that's the
-whole point of the file — "evaluating a cheap attribute proves nothing").
-A guest built through `image.modules.qemu` evaluates its *image* fine but
-fails its own *toplevel* with "the `fileSystems` option does not specify
-your root file system" and no `boot.loader.grub.devices` — because those
-only exist inside the isolated variant sub-config, not the base one
-`system.build.toplevel` is asking about. This was hit for real, not
-theorized: see `llm-sandbox-configuration.nix`'s header (git history — the
-file was removed 2026-08-28 along with the VM it configured) for the exact
-assertion text.
+**The rule**: import `disk-image.nix` directly into the base config, so
+`config.system.build.image` and `config.image.filePath` are real values on
+the same config whose toplevel gets checked.
 
-**The fix, and the rule**: import `disk-image.nix` directly into the base
-config (setting `image.efiSupport` yourself) rather than going through
-`image.modules`/`system.build.images`. That makes `config.system.build.image`
-(singular — the raw derivation) and `config.image.filePath` both real,
-directly-readable values on the SAME config whose toplevel gets checked, with
-nothing isolated behind `extendModules`.
+## `image.filePath` is relative to the image derivation's `$out`, not absolute
 
-## `image.filePath` is relative to the image derivation's own `$out`, not absolute
+It's a filename, not a store path, however much it looks like one once
+interpolated. Using it bare produces a path that only resolves if cwd is the
+derivation's output dir — which nothing ever is.
 
-Easy to misread as a ready-to-use in-store path, because it looks like one
-once interpolated (`nixos-image-qcow2-26.11.....qcow2`). It isn't — it's
-just the filename, and using it bare produces a path that only resolves if
-the process happens to be running with the derivation's own output
-directory as its cwd, which nothing ever does.
+This did **not** show up at evaluation: `nix eval` happily returned the
+generated script with the bare filename substituted in. The bug appeared
+only when the script was built and read back — it was checking
+`[ -e "nixos-image-qcow2-....qcow2" ]`. §25/§1 shape: eval success says
+nothing about the string being *correct*.
 
-**This did not show up at evaluation.** `nix eval` on the consuming
-attribute (a systemd unit's `ExecStart`, in this case) happily returned a
-store path to the generated *script*, string-substituted and all. The bug
-only appeared when that script was actually **built** and read back — the
-generated shell script was checking `[ -e "nixos-image-qcow2-....qcow2" ]`,
-a bare filename, instead of an absolute path. Same shape as this repo's
-`lessons-learned.md` §25 ("running it is a rung of its own, and finds a
-different class [of bug]") and §1 (a tool reporting success while being
-wrong) — `nix eval` succeeding said nothing about the string it produced
-being *correct*, only that it type-checked.
+**The fix**: combine them yourself —
+`"${theImageDerivation}/${theConfig.image.filePath}"` — and if a value
+matters at runtime and builds cheaply, build and read the artifact back
+before trusting the string.
 
-**The fix**: combine the derivation and the relative path yourself —
-`"${theImageDerivation}/${theConfig.image.filePath}"` — rather than using
-either alone. If a value here matters at runtime and you can build it
-cheaply, build it and read the artifact back before trusting the string.
+## Keeping a generator's consumer host-exclusive without hiding the generator
 
-## Keeping a generator's *consumer* host-exclusive without hiding the generator
+Two different exclusion mechanisms, for entirely different reasons — don't
+confuse them:
 
-`dirsAsCategory` collects every `.nix` file from every *sub*directory of a
-category unconditionally — see `flake/doc/dirsAsCategory.md` and the
-`new-flake-module` skill's collision-merge warning. That means a module
-placed in a normal subdirectory of e.g. `nire/homelab/virtualization/VMs/`
-is automatically part of `flake.modules.nixos.virtualization`, reaching
-every host that imports the category whole — not just the one host you
-wrote it for.
+- **The reusable generator goes under `_lib/`** (`VMs/_lib/libvirt-vm.nix`):
+  it's a plain curried function (`{ name, image, ... }: { pkgs, lib, ... }:
+  ...`), which `import-tree` cannot auto-import at all (closed lambda, no
+  `...`) — and `import-tree` ignores any path containing `/_`, same as
+  `nirePackages/_lib/` and `nire/impermanence/_disko/`.
+  `dirsAsCategory` has no `_` special case but finds nothing to collect
+  there anyway, since nothing under `_lib/` ever declared a module.
+- **The host-exclusive caller sat bare in the category directory itself**,
+  in no subdirectory — the *other* half of the rule ("a `.nix` file sitting
+  directly in a category directory is collected by nothing"), per
+  `flake/doc/dirsAsCategory.md`. That kept it out of the `virtualization`
+  aggregate (durandal imported the category too, at the time); only an
+  explicit line in the host's own imports reached it. The next
+  host-exclusive VM caller wants the same placement.
 
-The pattern used here (worked example: `nire-llm-sandbox`, removed
-2026-08-28 — see `wiki/history.md`) had two separate pieces filed in two
-separate places, each for a different reason. Only the first piece still
-exists; the second is described in past tense as a template for the next
-VM that needs it:
+Both look like "not automatically collected", but a `_`-prefixed path is
+invisible to *both* mechanisms — nothing, on any host, would ever import it.
+Verify which problem you're solving before reaching for either.
 
-- **The reusable generator** (`VMs/_lib/libvirt-vm.nix`, still in the tree)
-  is a **plain curried function**, not a flake-parts module — it can't
-  declare `flake.modules.<class>.<name>` because it's parameterized (`{
-  name, image, ... }: { pkgs, lib, ... }: {...}`), and if `import-tree`
-  tried to auto-import it the normal way it would call it with flake-parts'
-  own module args and fail outright (closed lambda pattern, no `...`). It
-  goes under `_lib/` for the same reason `nirePackages/_lib/mkPkgModule.nix`
-  and `nire/impermanence/_disko/impermanence-luks-btrfs.nix` do:
-  `import-tree` ignores any path containing `/_`. `dirsAsCategory`'s own
-  directory walk does NOT skip `_`-prefixed paths (it has no special case
-  for them), but it harmlessly finds nothing to collect there anyway,
-  because nothing under `_lib/` ever declared `flake.modules.nixos.<name>`
-  in the first place — `import-tree` never touched it to make that
-  declaration happen.
-- **The host-exclusive caller** (`virtualization-cube.nix`, removed with the
-  VM) sat **bare in the category directory itself**, not in any
-  subdirectory — the OTHER half of `dirsAsCategory`'s rule ("a `.nix` file
-  sitting directly in a category directory is collected by nothing"). That
-  is what kept it out of the `virtualization` aggregate: durandal also
-  imported `virtualization` at the time, and without this placement it
-  would have gotten the VM too. Only an explicit, separate
-  `virtualization-cube` line in `cube-configuration.nix`'s own imports
-  reached it. The next host-exclusive VM generator's caller wants the same
-  placement.
+## Verify
 
-**These two exclusion mechanisms look similar (both "not automatically
-collected") but are for entirely different reasons** — one because
-`import-tree` can't handle a bare function at all, the other because
-`dirsAsCategory` specifically only walks subdirectories. Confusing them (e.g.
-"just put it under `_lib/` to keep it cube-only") would be wrong: a
-`_`-prefixed path is invisible to *both* mechanisms, so nothing would ever
-import it at all, from any host. Verify which problem you're actually
-solving before reaching for either one.
-
-## Verified this way, cheaply, before trusting any of it
-
-- `just modules` — catches the module-name-collision class of bug (see
-  `new-flake-module` skill), immediately and for free.
+- `just modules` — name collisions, free.
 - `nix eval --raw '.#nixosConfigurations.<name>.config.system.build.toplevel.drvPath'`
-  for every host touched, INCLUDING ones that shouldn't have changed — a
-  byte-identical drvPath there is real proof a change stayed scoped, not
-  just an assumption.
-- `nix build --no-link --print-out-paths` on the specific derivation whose
-  *content* matters (a generated script, a domain XML, the image itself),
-  then `Read` the result. Evaluation proves the Nix expression type-checks;
-  building and reading proves the string it produced is actually correct.
-  This is where the `image.filePath` bug above was actually found.
+  for every host touched, *including* ones that shouldn't change — a
+  byte-identical drvPath is real proof the change stayed scoped.
+- `nix build --no-link --print-out-paths` on the derivation whose *content*
+  matters (script, domain XML, image), then read the result. Eval proves
+  type-check; build-and-read proves the string is correct. This is where
+  the `image.filePath` bug was found.

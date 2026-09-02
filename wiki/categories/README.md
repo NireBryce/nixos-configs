@@ -80,19 +80,12 @@ config-vs-usage split. "—" means no service exists to write one about yet.
 | shortlinks | [homelab/golinks.md](../homelab/golinks.md) |
 | virtualization | — (`nire-llm-sandbox` removed 2026-08-28; see the category's own page) |
 
-No per-category file count here on purpose (removed 2026-08-29, along with
-`system.md`'s matching "N files across M subdirectories" line and the
+No per-category file count here on purpose (removed 2026-08-29, with the
 `check_wiki.py` machinery that verified it) — read the category's own
-directory for the current file list rather than trusting a number here;
-same reasoning this repo already applies to host enrollment lists
-(CLAUDE.md, Safety: "read the file directly ... rather than trusting a
-count here").
+directory rather than trusting a number here.
 
-`shell-config` is the one category page that's grown into its own
-directory rather than a single file — `shell-config/README.md` is the
-category article proper, and `shell-config/blesh.md` /
-`shell-config/carapace.md` sit alongside it as deep-dives on two specific
-members that turned out to have enough to say for their own pages. If
-another category's page grows a deep-dive worth splitting out, this is the
-precedent to follow — see [../styleguide.md](../styleguide.md) for the
-general rule (when it applies, naming, and why not to nest further).
+`shell-config` is the one category grown into its own directory —
+`shell-config/README.md` is the category article proper, with `blesh.md` /
+`carapace.md` as deep-dives on two specific members. If another category
+grows a deep-dive worth splitting out, that's the precedent — see
+[../styleguide.md](../styleguide.md) for the general rule.
