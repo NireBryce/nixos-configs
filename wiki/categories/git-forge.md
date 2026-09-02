@@ -14,21 +14,11 @@
 - [See also](#see-also)
 
 Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only; nested under
-the `homelab` umbrella since 2026-08-27 (name unaffected). **Confirmed
-working end to end, 2026-08-24**: `just switch` came up with 0 failed
-units, `forgejo-secrets.service` exited `0/SUCCESS`, `forgejo.service`
-stayed `active (running)` past its first 40s, and
-`http://ts-cube:3001/` answered `HTTP 200` from another tailnet host.
-
-**That URL is no longer current.** Later the same day Forgejo moved behind
-Caddy ([reverse-proxy](reverse-proxy.md)): it listens on `127.0.0.1:3001`
-now and is reached at `https://ts-cube.moose-micro.ts.net/git/`. The
-proxied arrangement is **confirmed working too**, same day — 200 over
-validated TLS from another tailnet host, generated links carrying `/git/`,
-assets loading. Getting there took a second switch: the first served
-Forgejo the un-stripped prefix and it 404'd everything (that page has the
-writeup). Git+ssh over the host's OpenSSH (below) has NOT been exercised
-yet — only the HTTP side is confirmed.
+the `homelab` umbrella since 2026-08-27 (name unaffected). Reached at
+`https://ts-cube.moose-micro.ts.net/git/` through Caddy
+([reverse-proxy](reverse-proxy.md)), confirmed working end to end —
+[git-forge-history.md](git-forge-history.md) has the first-switch record
+and the move behind Caddy.
 
 ## What's in it
 
@@ -70,16 +60,10 @@ Caddy strips the `/git` prefix before proxying (`handle_path`), unlike
 Grafana's route, because Forgejo always serves at `/` regardless of
 `ROOT_URL` — the asymmetry is written up there.
 
-It bound `0.0.0.0` for its first few hours, when
-`trustedInterfaces = [ "tailscale0" ]` ([system](system.md)) was the only
-thing between port 3001 and the LAN. That rule still applies — to Caddy's
-443 now — but as the second line. `forgejo.nix`'s history note has the
-before/after.
-
-One knock-on the move fixed quietly: `LOCAL_ROOT_URL` defaults to
-`http://%(HTTP_ADDR)s:%(HTTP_PORT)s/` and nixpkgs doesn't override it, so
-under `0.0.0.0` it built self-referential URLs from an any-address; it
-resolves to `http://127.0.0.1:3001/` now.
+It bound `0.0.0.0` briefly at first — [git-forge-history.md](git-forge-history.md)
+has that window and what it fixed quietly along the way.
+`trustedInterfaces = [ "tailscale0" ]` ([system](system.md)) still applies,
+to Caddy's 443 now, as the second line.
 
 Git over SSH is a partial exception, deliberately: Forgejo's built-in SSH
 server stays disabled (`START_SSH_SERVER` unset), so `git+ssh` rides the
@@ -173,3 +157,5 @@ gives for itself.
   name collision this category's own naming avoids repeating.
 - [hosts.md](../hosts.md) — current switch/verification status for
   `nire-cube`.
+- [git-forge-history.md](git-forge-history.md) — the first switch and the
+  move behind Caddy, in full.

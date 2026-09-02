@@ -82,6 +82,26 @@ separate tier for the *usage* side:
   a third tier under that; if a deep-dive page itself needs to fork
   further, that's a sign the split is at the wrong level, not a reason to
   nest another directory.
+- **`wiki/categories/<name>-history.md`** — a sibling file rather than a
+  new directory, used when a category page has accumulated resolved
+  incidents (a first-switch failure since fixed, a superseded plan, a
+  regression that's been fixed twice) whose *outcome* still matters but
+  whose blow-by-blow doesn't need loading every time the category page is
+  read. Added 2026-09-03 across `backup`, `virtualization`, `shortlinks`,
+  `git-forge`, `monitoring`, `reverse-proxy` — `backup-history.md` also
+  absorbed what had been a "Background" section on
+  [homelab/backup-runbook.md](homelab/backup-runbook.md), so a usage-tier
+  page's history can live on its category's history page too rather than
+  needing its own. **Don't reach for this by default** — most of what
+  reads as "history" in a category page is actually mechanism explained
+  through its discovery, and that stays put; see "index over restatement"
+  below for why narrating *how* something was verified is not the same as
+  narrating *that* it used to be broken. The test: does understanding the
+  *current* setting/behavior require this paragraph, or only understanding
+  how it came to be that way? Only the second kind moves. The main page
+  keeps a one-to-two-sentence summary and a link — never a bare pointer
+  with nothing — so a reader loses no context skimming the main page, only
+  the full narrative.
 
 ## Naming
 
