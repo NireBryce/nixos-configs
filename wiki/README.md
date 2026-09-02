@@ -7,10 +7,16 @@
 - [Keeping this from rotting](#keeping-this-from-rotting)
 
 A topic index over documentation that already exists scattered around this
-repo — `CLAUDE.md`, `claude cave/`, `flake/doc/`, `.claude/skills/`, stray
-`.md` files sitting next to the code they're about, and `bugs pending
-submission/`. Nothing has been moved here: every link below points at the
-file that's already the source for that fact.
+repo — `CLAUDE.md`, `flake/doc/`, `.claude/skills/`, stray `.md` files
+sitting next to the code they're about, and `bugs pending submission/`.
+Almost nothing has been moved here: every link below points at the file
+that's already the source for that fact. The exception is `claude cave/`'s
+four working-notes files, moved in as real pages 2026-09-02 when that
+directory was retired — the same "index over restatement, except here"
+shape `wiki/homelab/` pages and `categories/shell-config/`'s deep-dives
+already used; see [styleguide.md](styleguide.md)'s Directory hierarchy
+section for which tiers are allowed to hold synthesized content instead of
+links, and why.
 
 **Why a link layer and not a rewrite:** this repo has already been bitten,
 repeatedly, by the same fact living in two places and drifting — `CLAUDE.md`'s
@@ -67,11 +73,23 @@ or a skill (`.claude/skills/<name>/SKILL.md`) — nothing here is new content.
 - [Architecture & module system](architecture.md) — flake-parts, the
   `dirsAsCategory` mechanism, Home Manager integration, package modules.
 - [Impermanence, initrd & secrets](impermanence-and-secrets.md) — the
-  `/root`-wipe-on-boot mechanism, which hosts opt in, sops-nix.
+  `/root`-wipe-on-boot mechanism, which hosts opt in, sops-nix. The stage-1
+  migration's own full writeup,
+  [impermanence-stage1-migration.md](impermanence-stage1-migration.md),
+  moved in from `claude cave/` 2026-09-02 and lives here too.
 - [Traps & skills](traps-and-skills.md) — the mistakes that have actually
   happened here, and the skills that hold the long version of each.
 - [History & lessons learned](history.md) — the den → flake-parts port, the
-  first hardware boots, and the sibling branch's own notes.
+  first hardware boots, and the sibling branch's own notes. The full log
+  itself, [lessons-learned.md](lessons-learned.md) — numbered §1–43,
+  "written by Claude Code, for Claude Code" — moved in from `claude cave/`
+  2026-09-02; this page stays the index, that page stays the log, the same
+  split as `categories/shell-config/README.md` and its deep-dives.
+- [KDE → Wayland migration](kde-to-wayland-migration.md) — research-stage
+  inventory toward moving `nire-durandal`/`nire-tenacity` off KDE Plasma
+  onto a Wayland tiling WM; nothing implemented yet. Also moved in from
+  `claude cave/` 2026-09-02, but as live research rather than a closed
+  record — see its own header before trusting anything on it as settled.
 - [Open threads](open-threads.md) — pending upstream bug reports, todos,
   half-formed ideas, and things-to-look-into notes left in various corners.
 
@@ -107,7 +125,10 @@ or a skill (`.claude/skills/<name>/SKILL.md`) — nothing here is new content.
 ### Conventions & meta
 
 - [Conventions & workflow](conventions.md) — the *repo's* style guide: Nix
-  formatting, `just` commands, the `ship` flow, assorted fix snippets.
+  formatting, `just` commands, the `ship` flow, assorted fix snippets. Links
+  out to [module-style-guide.md](module-style-guide.md) for the full
+  `flake/modules/` conventions doc (aligned `=` columns, the module header,
+  why `nix fmt` isn't wired up) — moved in from `claude cave/` 2026-09-02.
 - [Wiki style guide](styleguide.md) — this wiki's *own* house style: the
   directory hierarchy above in full (when a category page earns its own
   subdirectory, like `shell-config` did), naming, linking, and how pages

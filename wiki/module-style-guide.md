@@ -1,11 +1,28 @@
-# Style guide
+# Module style guide
+
+## Contents
+
+- [Opening brackets go on the same line as whatever causes them](#opening-brackets-go-on-the-same-line-as-whatever-causes-them)
+- [Four-space indent](#four-space-indent)
+- [The module header — 151 of 151 files](#the-module-header--151-of-151-files)
+- [`# # description = "..."` as the first line of the body — 70 files](#--description---as-the-first-line-of-the-body--70-files)
+- [Rationale goes inside the module body, not in a header block](#rationale-goes-inside-the-module-body-not-in-a-header-block)
+- [`with pkgs; [ ... ]` for package lists — 106 files](#with-pkgs----for-package-lists--106-files)
+- [Aligned `=` columns](#aligned--columns)
+- [When a rename makes the old name ungreppable, say what it was](#when-a-rename-makes-the-old-name-ungreppable-say-what-it-was)
+- [A bug recorded in a comment stays in the file](#a-bug-recorded-in-a-comment-stays-in-the-file)
+- [File placement is load-bearing](#file-placement-is-load-bearing)
 
 Conventions for `flake/modules/`. Counts are from the tree as of
 2026-08-08, so "how many files do this" is checkable rather than asserted.
 
 This file used to live at `modules/nirePackages/style-guide.md`, where its
 location implied it governed only package modules and where nothing linked to
-it. It applies to every module.
+it. It applies to every module. Moved a second time, from `claude
+cave/claude-style-guide.md` to here, 2026-09-02, when that directory was
+retired — see [history.md](history.md) and [styleguide.md](styleguide.md)
+for why it counts as an exception to this wiki's usual "index over
+restatement" rule.
 
 ---
 

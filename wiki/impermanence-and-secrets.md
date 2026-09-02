@@ -27,7 +27,7 @@ that import it.
   describe a completely different, wrong-looking-but-correct disk layout —
   use `/proc/1/mountinfo`, `/dev/disk/by-uuid/`, `/run/current-system`
   instead.
-- **[`../claude cave/lessons-learned-impermanence-stage1-migration.md`](<../claude cave/lessons-learned-impermanence-stage1-migration.md>)**
+- **[impermanence-stage1-migration.md](impermanence-stage1-migration.md)**
   — the move from scripted stage 1 to a systemd-initrd unit (done because
   nixpkgs flipped `boot.initrd.systemd.enable` to default true). Evaluates,
   was never booted before durandal/tenacity's first real boots confirmed the

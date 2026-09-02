@@ -40,7 +40,7 @@ would have found:
 - Forgejo behind Caddy — a 404 on every page, because the proxy preserved a
   path prefix the app didn't want.
 
-The pattern is in `claude cave/lessons-learned.md` §§36, 37, 40, 41: each was
+The pattern is in `wiki/lessons-learned.md` §§36, 37, 40, 41: each was
 invisible to evaluation, to `just modules`, to a real build, and (for the last
 one) to reading the built artifact. The checklist below is mostly the accrued
 cost of those three.
@@ -263,7 +263,7 @@ rewriting the day Caddy landed.
 
 ## See also
 
-- `claude cave/lessons-learned.md` §§36, 37, 40, 41 — the four runtime-only
+- `wiki/lessons-learned.md` §§36, 37, 40, 41 — the four runtime-only
   failures this checklist is made of.
 - `wiki/categories/reverse-proxy.md` — the routing layer every HTTP service
   here goes through, including the prefix asymmetry in full.

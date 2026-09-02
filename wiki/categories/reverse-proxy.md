@@ -49,7 +49,7 @@ listeners.
 returned 200 while `/git/` returned 404, because both routes had been given
 the same Caddy directive. See [the two apps want opposite
 things](#the-two-apps-want-opposite-things-from-the-proxy) below, and
-[`lessons-learned.md`](<../../claude cave/lessons-learned.md>) #41 — every
+[`lessons-learned.md`](../lessons-learned.md) #41 — every
 static check had passed first, including a real build and a read of the
 built artifact.
 
@@ -156,7 +156,7 @@ rejected — so the bare `/git` can't ride along in one matcher the way
 `@grafana`'s two paths do, and gets its own `redir` to `/git/` instead.
 
 The general form of the mistake, and why every static check missed it, is
-[`lessons-learned.md`](<../../claude cave/lessons-learned.md>) #41.
+[`lessons-learned.md`](../lessons-learned.md) #41.
 
 ## Named matchers, not inline ones
 

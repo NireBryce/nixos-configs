@@ -1,8 +1,9 @@
 # restic: cube's only backup of its own service state, to the QNAP NAS
 # already on the network. Added 2026-08-28 against issue #87 ("no backups
-# anywhere in the fleet") and the plan at
-# `claude cave/plans/2026-08-27-1816-cube-qnap-backup-plan.md` -- read that
-# file for the reasoning this header only summarizes. Own category
+# anywhere in the fleet") and the original plan, folded into
+# `wiki/homelab/backup-runbook.md`'s "Background" section 2026-09-02 when
+# `claude cave/` was retired -- read that section for the reasoning this
+# header only summarizes. Own category
 # (`nire/homelab/backup/`), not `restic`: a category and its one module both
 # named `restic` would declare `flake.modules.nixos.restic` twice and
 # silently MERGE, the `containers`/`podman.nix` collision CLAUDE.md/AGENTS.md

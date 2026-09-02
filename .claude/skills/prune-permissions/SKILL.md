@@ -9,7 +9,7 @@ description: How to remove dead entries from .claude/settings.local.json's permi
 
 Use when asked to clean up, prune, or audit this repo's permission
 allowlist, or as a periodic housekeeping pass alongside other stale-state
-cleanup (memory files, `claude cave` notes). Not for *adding* entries to
+cleanup (memory files, stale `wiki/` drafts). Not for *adding* entries to
 reduce prompts — that's the built-in `fewer-permission-prompts` skill, which
 only appends and doesn't touch what's already there.
 

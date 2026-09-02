@@ -14,7 +14,7 @@ boot. Use before touching anything under `nire/impermanence/`, any
 output on these hosts.
 
 **Read `WARN-impermanence.nix` and
-`claude cave/lessons-learned-impermanence-stage1-migration.md` before
+`wiki/impermanence-stage1-migration.md` before
 changing anything near this.** This mechanism wipes `/root` on boot on most
 hosts in this repo — see `CLAUDE.md` Safety section for which ones, current
 as of the date on that file. Both of the following have actually happened

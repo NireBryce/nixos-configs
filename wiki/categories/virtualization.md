@@ -109,8 +109,9 @@ just evaluation) — the domain XML carried the exact MAC, the activation
 script's DHCP-reservation guard referenced it correctly, and
 `networking.firewall.extraCommands` contained exactly one DNAT rule, scoped
 to `100.64.0.0/10`, no LAN range. The domain itself was confirmed booted and
-staying up on `nire-cube` (2026-08-24 — see `claude cave/lessons-learned.md`
-§40), but an actual SSH connection through this forward was never made
+staying up on `nire-cube` (2026-08-24 — see
+[../lessons-learned.md](../lessons-learned.md) §40), but an actual SSH
+connection through this forward was never made
 before the VM was removed. No caller uses `sshForward` today; the mechanism
 above is unexercised until one does.
 

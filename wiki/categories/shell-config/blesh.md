@@ -84,7 +84,7 @@ and moved out to its own repo,
 not part of this repo any more, kept here only as the "how this was found"
 credit),
 and pinned the rest of the way to a specific line and a working fix. Full
-session account: [lessons-learned.md](../../../claude%20cave/lessons-learned.md) §39.
+session account: [lessons-learned.md](../../lessons-learned.md) §39.
 
 **Root cause**: ble.sh's own auto-complete/progcomp machinery installs a
 cancellation safety net, `_ble_builtin_read_hook`, while any registered

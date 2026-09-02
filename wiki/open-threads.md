@@ -66,7 +66,7 @@ specific report — not as a housekeeping pass over this list:
 
 ## Todos and ideas left next to the code
 
-- **[`../claude cave/plans/2026-09-01-2231-kde-to-wayland-wm-inventory.md`](<../claude cave/plans/2026-09-01-2231-kde-to-wayland-wm-inventory.md>)**
+- **[kde-to-wayland-migration.md](kde-to-wayland-migration.md)**
   — research-stage inventory toward moving `nire-durandal` and
   `nire-tenacity` off KDE Plasma onto a Wayland tiling WM (Hyprland/niri/
   sway, not yet chosen). Every explicit and implicit KDE dependency found so
@@ -112,8 +112,8 @@ specific report — not as a housekeeping pass over this list:
 `nire-llm-sandbox`'s three runtime-verified `VMs/_lib/libvirt-vm.nix` fixes
 (default network never started, a nonexistent `virsh` flag, a missing fixed
 domain UUID) used to be recorded here; the VM itself was removed 2026-08-28
-— see [history.md](history.md) and `claude cave/lessons-learned.md` §40 for
-that detail now.
+— see [history.md](history.md) and [lessons-learned.md](lessons-learned.md)
+§40 for that detail now.
 
 ## Left open by the cube service stack, 2026-08-24
 

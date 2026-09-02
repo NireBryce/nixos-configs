@@ -136,8 +136,9 @@ first boot.
 The machine coming up proves nothing — a failed rollback that silently
 doesn't wipe anything looks exactly like a working system until the disk
 fills. The confirmation method used on tenacity
-(`claude cave/lessons-learned-impermanence-stage1-migration.md`): compare the
-`/root` subvolid across a reboot, not just check that boot succeeded.
+([impermanence-stage1-migration.md](impermanence-stage1-migration.md)):
+compare the `/root` subvolid across a reboot, not just check that boot
+succeeded.
 
 ```sh
 findmnt -no SOURCE /        # or: awk '$5=="/"{print $NF}' /proc/1/mountinfo
@@ -192,7 +193,7 @@ this has actually been checked, not once the machine merely boots.
   category, which hosts import it today.
 - [impermanence-and-secrets.md](impermanence-and-secrets.md) — the
   cross-cutting topic page (impermanence and secrets together).
-- [`../claude cave/lessons-learned-impermanence-stage1-migration.md`](<../claude cave/lessons-learned-impermanence-stage1-migration.md>)
+- [impermanence-stage1-migration.md](impermanence-stage1-migration.md)
   — the systemd stage-1 migration this mechanism runs on now, and the
   subvolid verification method in full.
 - [hosts.md](hosts.md) — current roster and per-host boot/switch status.

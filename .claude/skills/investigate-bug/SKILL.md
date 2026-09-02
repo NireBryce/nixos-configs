@@ -25,7 +25,7 @@ up in `wiki/categories/shell-config/blesh.md` on **2026-08-22**, two days
 earlier, one link from `wiki/README.md`'s own top-level index. The
 sentence naming it was right there ("an open upstream bug found while
 diagnosing a spurious `read` error on Tab-completion") — never checked.
-Full account: `claude cave/lessons-learned.md` #39,
+Full account: `wiki/lessons-learned.md` #39,
 [issue #72](https://github.com/NireBryce/nixos-configs/issues/72).
 
 That session had also just spent its whole diagnosis proving a piece of
@@ -39,8 +39,8 @@ those files.
 1. **Before reproducing anything**, run `just threads "<keywords>"` with a
    couple of guesses from the report's own wording (symptom text, error
    message, command name). It checks this repo's GitHub issues
-   (`gh issue list --search`) and greps `wiki/`,
-   `claude cave/lessons-learned.md`, and `bugs pending submission/` in one
+   (`gh issue list --search`) and greps `wiki/` (which includes
+   `wiki/lessons-learned.md`) and `bugs pending submission/` in one
    shot — see `flake/scripts/threads.sh` for exactly what it covers.
 2. **A hit means read it fully** — the issue and/or the linked wiki
    deep-dive — before doing anything else. Pick up from where it left off

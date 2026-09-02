@@ -50,7 +50,7 @@ these fits into the bigger picture; this page is just the index.
   what its `ROOT_URL` says, and Caddy must strip it. Both spellings are valid
   Caddy, both build, and the wrong one is a 404 on every page of the affected
   app. It cost a switch on 2026-08-24 —
-  [lessons-learned.md](<../claude cave/lessons-learned.md>) #41, with the
+  [lessons-learned.md](lessons-learned.md) #41, with the
   routing detail in [reverse-proxy](categories/reverse-proxy.md). The
   `new-homelab-service` skill has the two-`curl` test that settles it in
   seconds.
@@ -68,7 +68,7 @@ these fits into the bigger picture; this page is just the index.
 
 ## Style
 
-- **[`../claude cave/claude-style-guide.md`](<../claude cave/claude-style-guide.md>)**
+- **[module-style-guide.md](module-style-guide.md)**
   — conventions for `flake/modules/`: aligned-`=` columns are intentional,
   `nix fmt` is deliberately not wired up because it would flatten them.
   Counts in it are dated 2026-08-08 and checkable against the tree rather

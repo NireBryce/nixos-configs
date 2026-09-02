@@ -8,7 +8,7 @@
 
 ## This repo's own history
 
-- **[`../claude cave/lessons-learned.md`](<../claude cave/lessons-learned.md>)**
+- **[lessons-learned.md](lessons-learned.md)**
   — "Written by Claude Code, for Claude Code, and largely a record of its
   own mistakes." The main one. §§1–18 the den → flake-parts port, §§19–24
   the first session on real hardware, §§25–31 after it first booted, §§32–38
@@ -20,8 +20,9 @@
   real filesystem/daemon state that only exists once an actual `switch` runs
   — invisible to evaluation *and* to reading back a built artifact; a fix
   scoped to the caller that needs it beats a general one). `CLAUDE.md` has
-  the rules this produced; this has the scar tissue behind them.
-- **[`../claude cave/lessons-learned-impermanence-stage1-migration.md`](<../claude cave/lessons-learned-impermanence-stage1-migration.md>)**
+  the rules this produced; this has the scar tissue behind them. Moved in
+  from `claude cave/` 2026-09-02 — see this page's own bullet below.
+- **[impermanence-stage1-migration.md](impermanence-stage1-migration.md)**
   — the stage-1 impermanence migration specifically. Covered from the
   impermanence angle on [impermanence-and-secrets.md](impermanence-and-secrets.md).
 - `claude cave/2026-08-09 things to look into eventually.md` (removed
@@ -53,12 +54,26 @@
   domain). It had been confirmed booted and staying up on real hardware as
   of 2026-08-24 — see the "Confirmed-on-hardware facts" section below for
   what that confirmation actually checked, and
-  [`../claude cave/lessons-learned.md`](<../claude cave/lessons-learned.md>)
+  [lessons-learned.md](lessons-learned.md)
   §40 for the three runtime-only bugs its first switch hit. The generic
   generator it ran on, `VMs/_lib/libvirt-vm.nix`, is kept as unexercised
   reusable infrastructure — see [virtualization](categories/virtualization.md);
   the sandbox's own last full config is in git history if a VM like it is
   wanted again.
+- **`claude cave/` itself was retired 2026-09-02.** Its four remaining
+  files became real wiki pages — [lessons-learned.md](lessons-learned.md),
+  [impermanence-stage1-migration.md](impermanence-stage1-migration.md),
+  [module-style-guide.md](module-style-guide.md), and
+  [kde-to-wayland-migration.md](kde-to-wayland-migration.md) — the same
+  "index over restatement, except here" shape `wiki/homelab/` pages and
+  `categories/shell-config/`'s deep-dives already used, per
+  [styleguide.md](styleguide.md). The one file that didn't get its own
+  page, the cube/QNAP backup plan, was folded into
+  [homelab/backup-runbook.md](homelab/backup-runbook.md)'s own "Background"
+  section instead, since its content was already superseded by
+  [categories/backup.md](categories/backup.md) — see that runbook section
+  for why. Every reference to a `claude cave/...` path across `AGENTS.md`,
+  the skills, and the module tree was repointed in the same change.
 
 ## Confirmed-on-hardware facts, and how they were confirmed
 

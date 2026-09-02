@@ -168,7 +168,7 @@
                 # inside the initramfs. Similar names, unrelated options -- and
                 # the likeliest reason ad38ffb's first attempt looked finished.
                 #
-                # claude cave/lessons-learned-impermanence-stage1-migration.md is the working note.
+                # wiki/impermanence-stage1-migration.md is the working note.
                 systemd = {
                     enable = true;
 
