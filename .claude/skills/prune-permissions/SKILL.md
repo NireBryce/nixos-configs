@@ -13,11 +13,17 @@ cleanup (memory files, `claude cave` notes). Not for *adding* entries to
 reduce prompts — that's the built-in `fewer-permission-prompts` skill, which
 only appends and doesn't touch what's already there.
 
-`.claude/settings.local.json` is git-tracked despite the "local" name (`git
-ls-files` confirms it — checked 2026-08-25), so pruning it is a real repo
-change like any other: commit it, and land it through `ship` if it's headed
-to `experimental` rather than editing the working tree and leaving it
-uncommitted.
+`.claude/settings.local.json` was git-tracked despite the "local" name and
+a `.gitignore` entry that named it from 2026-08-25 onward — the entry alone
+never untracks an already-tracked file, and nobody ran the `git rm --cached`
+that would have, so it kept accumulating real commits for another six days
+after being "ignored" (`lessons-learned.md` §42 has the full incident; its
+own claim that tracking "stopped the same day" was itself wrong until this
+was actually fixed). **Untracked for real 2026-09-02** — `git rm --cached`, the fix that was
+missing the whole time. Pruning it is now a pure local
+edit: no commit, no `ship`, nothing to land. The file still lives on disk
+and still holds real state worth curating; it just isn't shared via git
+anymore, so a prune here only benefits this machine's own copy.
 
 ## Why this exists
 
@@ -73,6 +79,7 @@ than resolves by pattern-matching alone.
 5. Validate it's still well-formed JSON (`python3 -c "import json;
    json.load(open('.claude/settings.local.json'))"` or equivalent) before
    calling it done.
-6. Commit it if the change is meant to stick — an uncommitted prune just
-   gets overwritten by the next auto-appended entry with nothing to show
-   for it.
+
+No commit step: the file is untracked (see above), so the edit is already
+the whole of "done" — there's no git state to persist it into, and no
+`ship` to land it through.
