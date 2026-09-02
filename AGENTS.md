@@ -177,50 +177,26 @@ Categories under `homelab/`, all cube-only unless noted (each has a
 `wiki/categories/<name>.md` page; the "category isn't named after its module"
 renames all dodge the same silent-merge collision `just modules` catches):
 
-- **`virtualization`** — libvirt/QEMU VMs. Cube the only importer; durandal
-  dropped it 2026-08-27 (parity, never used), handhelds decline it. No VM is
-  currently defined through it. The generator `VMs/_lib/libvirt-vm.nix`
-  (skill `nixos-vm-images`) is kept as unexercised infrastructure: it starts
-  libvirt's default NAT network when a VM asks, and takes an `sshForward`
-  param restricted by source IP. Its one outing hit three runtime-only bugs
-  (lessons-learned §40).
-- **`containers`** — podman + distrobox (`podman/podman.nix`; the module was
-  renamed from `containers.nix` for the collision reason above). Imported by
-  cube and tenacity — durandal dropped it 2026-08-27. **"virtualization"
-  means VMs only**; containers are a separate category, and the word means the
-  other thing.
-- **`monitoring`** — Prometheus + Grafana on the host's own metrics. Every
-  listener is on `127.0.0.1`, Grafana included (since 2026-08-24; before, it
-  leaned on `tailscale.nix`'s `trustedInterfaces` firewall rule). Reached via
-  Caddy at `https://ts-cube.moose-micro.ts.net/grafana/`.
-- **`git-forge`** — Forgejo, loopback `:3001` behind Caddy at `.../git/`.
-  Generates its own secrets on first activation, unlike Grafana.
-- **`shortlinks`** — golink. Two things easy to get wrong by analogy: **no
-  `services.golink` exists in nixpkgs** — the module hand-writes its systemd
-  unit (its first switch failed on a missing `AF_NETLINK` in
-  `RestrictAddressFamilies`); and it is **not a service on cube's network** —
-  tsnet joins the tailnet as its own device `go`, needing no firewall rule and
-  no host `tailscaled`. Usage: `wiki/homelab/golinks.md`.
-- **`reverse-proxy`** — Caddy, the single tailnet-facing HTTPS listener. Certs
-  come from tailscaled itself (no plugin, no ACME), which needs
-  `services.tailscale.permitCertUid = "caddy"`, set in `caddy.nix` rather than
-  in `system`'s `tailscale.nix` so it doesn't reach hosts that don't run caddy.
-  Routing is **by path, not subdomain** (MagicDNS gives a device one name):
-  `handle` (prefix kept) is right for Grafana, `handle_path` (prefix stripped)
-  is required for Forgejo, which serves at `/` regardless of its `ROOT_URL` —
-  that mismatch survived eval, `caddy adapt`, a build, and reading the artifact
-  back (lessons-learned #41).
+- **`virtualization`** — libvirt/QEMU VMs, cube-only; no VM currently
+  defined through it. `wiki/categories/virtualization.md`.
+- **`containers`** — podman + distrobox, cube and tenacity (not durandal).
+  **"virtualization" means VMs only** — containers is the separate category
+  despite the name overlap. `wiki/categories/containers.md`.
+- **`monitoring`** — Prometheus + Grafana, cube-only, behind Caddy at
+  `.../grafana/`. `wiki/categories/monitoring.md`.
+- **`git-forge`** — Forgejo, cube-only, behind Caddy at `.../git/`.
+  `wiki/categories/git-forge.md`.
+- **`shortlinks`** — golink. **Not a service on cube's network** — tsnet
+  joins the tailnet as its own device `go`, no firewall rule, no host
+  `tailscaled`. Usage: `wiki/homelab/golinks.md`.
+- **`reverse-proxy`** — Caddy, the single tailnet-facing HTTPS listener;
+  per-app path-prefix handling differs and has bitten before.
+  `wiki/categories/reverse-proxy.md`.
 - **`landing`** — glance, what Caddy serves at `/`. A **pair** with
-  reverse-proxy: drop it and the front page 502s. Not a second monitoring
-  system; and a 200 from the page proves little — glance renders behind
-  `/api/pages/home/content/`, which is the check that matters.
-- **`backup`** (2026-08-28) — restic to the QNAP. Shipped as local-path on
-  the QNAP NFS mount, which failed for real (`access denied by server`); as
-  of 2026-08-31 it's **SFTP** — issue #87's original plan, keyed auth
-  instead of an IP allowlist. SSH works on the QNAP with a dedicated key;
-  a real build on cube confirms everything else, blocked only on two sops
-  secrets no session has set. Detail: `wiki/categories/backup.md`,
-  `wiki/homelab/pending-setup.md` item 4, `wiki/homelab/backup-runbook.md`.
+  reverse-proxy: drop it and the front page 502s.
+- **`backup`** (2026-08-28) — restic to the QNAP over SFTP, blocked on two
+  sops secrets nobody's set yet. `wiki/categories/backup.md`,
+  `wiki/homelab/pending-setup.md` item 4.
 
 **Hosts**: `hosts.nix` declares one `darwinConfigurations` entry
 (`nire-lysithea`, aarch64-darwin) alongside three `nixosConfigurations`, all
