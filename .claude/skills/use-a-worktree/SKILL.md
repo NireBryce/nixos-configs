@@ -82,6 +82,23 @@ there:
 git worktree add -q --detach <scratchpad>/wt-check <sha-or-ref>
 ```
 
+**If `core.hooksPath` hooks are installed** (`just install-hooks` — see
+`.githooks/`), a hook that runs `git` from a *different* cwd than the
+worktree's own top (e.g. `cd flake && git add <path>`, as `pre-commit`
+used to) needs `git -C "$repo_root" add <repo-root-relative-path>`, not a
+`cd` plus an absolute path — otherwise the `GIT_DIR` git already exported
+into the hook's own environment gets inherited by that `git add`, and
+without a matching `GIT_WORK_TREE` it silently reinterprets even an
+*absolute* path against the wrong root instead of erroring.
+`wiki/lessons-learned.md` §44 has the full mechanism, how it was found,
+and why the fix `githooks(5)` itself suggests
+(`unset $(git rev-parse --local-env-vars)`) makes it *worse* here — it
+also clears `GIT_INDEX_FILE`, which this same `git add` needs to keep
+pointed at the index the outer `git commit` already has open, or it
+collides with that lock instead. `.githooks/pre-commit` already uses the
+`-C` form. Worth knowing if you ever write a new hook in this repo, not
+just this one.
+
 **Clean up when done** — shipped or abandoned, don't leave it dangling:
 
 ```sh
@@ -103,3 +120,6 @@ right now.
   skill exists to prevent, in the compressed form that's always in context.
 - Skill `ship` — step 0's "a throwaway worktree is the way" for checking
   every commit in a multi-commit PR is the same mechanism, narrower use.
+- `wiki/lessons-learned.md` §44 — the `.githooks/pre-commit` +
+  `GIT_DIR` bug this page's "hooks are installed" note summarizes, in
+  full: how it was reproduced, the `githooks(5)` citation, and the fix.
