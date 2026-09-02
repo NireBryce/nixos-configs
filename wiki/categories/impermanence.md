@@ -62,19 +62,16 @@ further in, under `restore-root/` (named for the systemd service
 
 ## Imported by
 
-`durandal`, `tenacity` — two of the three NixOS hosts, wiping
-`/root` on every boot. `nire-cube` does **not** — its real install turned out to be a
-plain persistent root, not LUKS+impermanence, a correction made 2026-08-21
-after the fact. That absence is why two other things exist:
+`durandal`, `tenacity` — two of the three NixOS hosts, wiping `/root` on
+every boot. `nire-cube` does **not** — its real install is a plain
+persistent root, not LUKS+impermanence (corrected 2026-08-21). That absence
+is why two other things exist:
 [`nireUser/elly/user-settings/WARN-password-required.nix`](elly.md), which
-warns that a non-impermanence host has no login-password-setting help
-anywhere in this repo (cube itself is excluded by hostname as of
-2026-09-01 — its password was already set by hand before it was ever
-switched — so the warning is standing by for a *future* non-impermanence
-host rather than currently firing on any real one), and
-`nire/system/impermanence/declare-persistence-option.nix` (see
-[system](system.md)) — a **different, easily confused file** in a
-similarly-named-but-different location.
+warns that a non-impermanence host has no login-password help here (cube
+itself is excluded by hostname as of 2026-09-01 — its password was set by
+hand before it was switched), and
+`nire/system/impermanence/declare-persistence-option.nix` — a **different,
+easily confused file**, next section.
 
 ## The other "impermanence" — don't confuse the two
 

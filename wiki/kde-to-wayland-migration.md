@@ -26,11 +26,10 @@ backup migration. Moved into `wiki/` verbatim from `claude cave/plans/` when
 that directory was retired 2026-09-02 — see [history.md](history.md).
 
 **Update, same day:** commit `a0527f18` ("feat: add tenacity-only
-plasma-manager config from live KDE state") landed *after* this doc's first
-draft and *raises* tenacity's migration cost — see
+plasma-manager config from live KDE state") landed after this doc's first
+draft and raises tenacity's migration cost — see
 [plasma-manager (tenacity) — landed after this doc's first draft](#plasma-manager-tenacity--landed-after-this-docs-first-draft)
-below. Read that section before treating tenacity as the smaller of the two
-hosts to migrate; it may no longer be.
+before treating tenacity as the smaller host to migrate.
 
 ## What's actually in scope
 
@@ -77,7 +76,7 @@ pieces, and each host keeping its own session-specific half.
 | `programs.dconf.enable` | `kde-base.nix:25` | explicit | keep | GTK apps still read dconf regardless of WM |
 | `networking.networkmanager.enable` | `kde-base.nix:21` | explicit, `mkDefault` | keep NetworkManager; need a **systray applet or TUI** instead of Plasma's built-in one | `nm-applet` (GTK, works in any tray) or `nmtui`; already `mkDefault true` from `wifi.nix` independent of KDE (comment there: "Needs to be 'true' for KDE networking" is stale phrasing worth fixing once this lands either way, since NetworkManager is desktop-agnostic) |
 | `programs.kdeconnect.enable` | `kde-connect.nix:7` | explicit | **may not need replacing at all** — the `kdeconnect` package/daemon runs standalone; it just needs a systray to live in and a GUI to configure devices (`kdeconnect-app`/`kdeconnectindicator`, or GSConnect if a GNOME box is ever in the mix) | check whether the current usage is just phone notifications/file transfer (works headless) vs. Plasma-integrated features (browser integration, KRunner search) |
-| `kdePackages.xdg-desktop-portal-kde` | `xdg-portals.nix:26` | explicit | `xdg-desktop-portal-hyprland` (Hyprland — forked from wlr's, adds window-level screenshare) or `xdg-desktop-portal-wlr` (sway; more limited) or niri's current recommended portal (check niri's own docs at migration time, this moves) | `xdg-portals.nix:11-22` **already has the wlr path scaffolded and commented out** — `wlr.enable`/`xdg-desktop-portal-wlr` were tried before the KDE-specific fix landed 2026-08-21, so half this work already exists in the tree, just needs uncommenting/updating rather than writing fresh |
+| `kdePackages.xdg-desktop-portal-kde` | `xdg-portals.nix:26` | explicit | `xdg-desktop-portal-hyprland` (Hyprland — forked from wlr's, adds window-level screenshare) or `xdg-desktop-portal-wlr` (sway; more limited) or niri's current recommended portal (check niri's own docs at migration time, this moves) | `xdg-portals.nix:11-22` already has the wlr path scaffolded, commented out, from a 2026-08-21 attempt — half this work exists in the tree, needing uncommenting/updating rather than writing fresh |
 | `kwriteconfig6` / PowerDevil sleep config | `kde-sleepmode.nix` (home-manager) | explicit | likely **deletable outright**, not replaceable | this file exists only because PowerDevil ignores logind's `AllowHibernation=no` and fails suspend outright instead of degrading (see file header, `lessons-learned.md` §30). `swayidle`/`hypridle` call `systemctl suspend` directly and should just respect what `WARN-impermanence.nix` already sets at the logind level — **needs verifying on the actual replacement**, not assumed, the same way the KDE bug itself was found by testing rather than guessed |
 | `programs.plasma` via plasma-manager | `plasma-tenacity.nix` (tenacity only, landed `a0527f18`, 2026-09-01) | explicit | see dedicated section below — this is new and substantial, not covered by the rest of this table | tenacity-only; durandal/lysithea/cube never load plasma-manager's HM module |
 | `ksshaskpass` (SSH_ASKPASS) | implicit — `programs.ssh` picks this based on `services.xserver.enable` | implicit | whatever the new WM's ecosystem uses (`ssh-askpass-fullscreen`, or drop askpass entirely and keep `bash.nix`/`zsh.nix`'s existing `unset SSH_ASKPASS` workaround, which already treats "no DISPLAY/WAYLAND_DISPLAY" as the safe case) | `bash.nix:79`, `zsh.nix:178` already carry the workaround for the ksshaskpass crash-over-plain-SSH bug; re-check whether it's still needed once the askpass binary changes |
@@ -92,7 +91,7 @@ pieces, and each host keeping its own session-specific half.
 | Screen lock | implicit (KDE session lock) | implicit, explicit as of `plasma-tenacity.nix` | `swaylock` (sway), `hyprlock` (Hyprland), niri: any wlr-compatible locker (`swaylock` works) | `plasma-tenacity.nix`'s `shortcuts.ksmserver."Lock Session" = [ ]` **unbinds the default lock shortcut entirely** — a deliberate finding from diffing the live shortcut file, not an oversight. Whatever locker replaces this needs the *same* choice made again explicitly, or the handheld silently gets a lock shortcut back that was deliberately removed. Needed before this ships either way — a workstation and especially a *handheld that suspends* need a working lock screen from day one |
 | Idle/suspend daemon | implicit (PowerDevil), now explicit in `plasma-tenacity.nix`'s `powerdevil` block | implicit/explicit | `swayidle` (sway/general wlroots), `hypridle` (Hyprland), niri: `swayidle` also works | `plasma-tenacity.nix` pins the *real*, verified behavior to port: power button and lid both trigger `sleep`/`turnOffScreen`, sleep mode is plain standby (never hibernate) on AC, battery, **and low battery** — this is now a concrete, non-guessable spec for whatever idle daemon replaces PowerDevil, not something to reconstruct from memory |
 | Status bar / panel | implicit (Plasma panel: clock, tray, taskbar) | implicit | `waybar` (works with all three candidates) | none of the three target WMs ship one; this is mandatory infrastructure, not optional polish. `plasma-tenacity.nix`'s header notes the *live* panel/widget layout on tenacity was deliberately left out of the capture (still hand-rearranged) — so there's no declarative spec to port here, just a live layout to look at before building the waybar equivalent |
-| App launcher | implicit (KRunner) | implicit | **already solved** — `vicinae.nix` is already "raycast for linux" and already has a `plasma-workspace.target` dependency that will need retargeting (`vicinae.nix:48`) to whatever the new WM's equivalent "session is up" target is | not a new tool to pick, just a unit-ordering fix, same shape as the incident `vicinae.nix`'s own header already documents. `plasma-tenacity.nix`'s `shortcuts` block also binds vicinae's own launch keys (`Menu`, `Meta+Backspace` — deliberately reusing the key KWin's own "Window Restore" gave up) — carry those bindings forward into the new WM's keybind config, not just the systemd-unit retarget |
+| App launcher | implicit (KRunner) | implicit | **already solved** — `vicinae.nix` (a Raycast-for-Linux launcher) already exists and carries a `plasma-workspace.target` dependency that needs retargeting (`vicinae.nix:48`) to the new WM's equivalent "session is up" target | a unit-ordering fix, not a new tool to pick; `plasma-tenacity.nix`'s `shortcuts` block also binds vicinae's launch keys (`Menu`, `Meta+Backspace` — reusing the key KWin's own "Window Restore" gave up), which belong in the new WM's keybind config too |
 | Notification daemon | implicit (Plasma's own) | implicit | `mako` (sway/wlroots-general), `dunst` (WM-agnostic), Hyprland: `hyprland-plugins` notification or `mako`/`dunst` also work | needed day one, same as screen lock |
 | Keyboard layout/model + xkb options | implicit (kxkbrc) | now explicit via `plasma-tenacity.nix` | any compositor's own `input` config (Hyprland `input {}`, niri `input {}`, sway `input *`) | concrete values to carry over: keyboard model `microsoftinet`, xkb options `terminate:ctrl_alt_bksp` and `altwin:menu` — both hand-set, not defaults |
 | Per-device mouse/touchpad tuning | implicit (kcminputrc) | now explicit via `plasma-tenacity.nix` | same compositors' per-device `input` matching (Hyprland `device {}` blocks by name, sway `input <identifier>`, niri per-device sections) | concrete values: Logitech G600 at raw/no-accel, a second mouse forced left-handed, the built-in touchpad's `pointerSpeed = 0.200` — all keyed by vendor/product IDs in the KDE version, will need re-matching by whatever identifier scheme the new compositor uses (often the evdev device name string, not vendor/product hex) |
@@ -105,48 +104,25 @@ pieces, and each host keeping its own session-specific half.
 Commit `a0527f18` (2026-09-01, same day as this doc) added
 `flake/modules/nireHost/tenacity/configuration/plasma-tenacity.nix`: a
 curated, deliberately-not-exhaustive capture of tenacity's *live* KDE
-preferences via the `plasma-manager` flake input, wired in only through
+preferences via plasma-manager, wired only through
 `tenacityConfiguration`'s own `home-manager.users.elly.imports` (not
-`ellyHomeManager`, so durandal/lysithea/cube never load it).
-
-**Why this matters for this migration, specifically:** before this commit,
-tenacity's KDE footprint was "whatever `kde-base.nix`/`jovian.nix` declare
-plus whatever's sitting undeclared in `~/.config`" — the undeclared part was
-a black box, not inventoried anywhere. This commit turned a real slice of
-that black box into an explicit, readable spec: exact keyboard model/xkb
-options, two mice and a touchpad with per-device tuning, virtual-desktop
-shape, power-button/lid/sleep behavior (verified: standby only, never
-hibernate, including at low battery), sticky-keys accessibility config, and
-~40 deliberately-unbound default KWin/plasmashell shortcuts plus a handful
-of real rebinds (vicinae's launch keys reusing KWin's freed
-`Meta+Backspace`, spectacle and emoji-picker bindings, the lock-session
-shortcut explicitly unbound).
+`ellyHomeManager`, so the other three hosts never load it).
 
 **Net effect: tenacity did not get closer to WM-agnostic — it got a
-larger, more precisely-specified KDE footprint to translate.** Every row
-added to the inventory table above from this commit is a concrete value
-someone captured by diffing live state against KDE's own defaults, not a
-guess — which is exactly the kind of fact this migration would otherwise
-have to rediscover from scratch, the hard way, on the new WM. Two
-different framings are both true at once and worth holding onto:
+larger, precisely-specified KDE footprint to translate.** Before this
+commit its undeclared `~/.config` state was a black box; now the values
+above (device tuning, shortcuts, power behavior, accessibility, visual
+behavior) are committed and reviewable. Two framings both true:
 
-- **It raises the amount of tenacity-specific work this migration now
-  has to redo** (the individual rows above — device tuning, shortcuts,
-  power behavior, accessibility, visual behavior — none of which existed
-  as a checkable spec before today).
-- **It removes the "reconstruct from live state" risk for tenacity
-  specifically** — every one of those values is now committed, reviewable,
-  and won't be lost if the handheld's `/root` gets wiped or the machine is
-  reinstalled before the WM migration happens. Durandal has no equivalent
-  capture; whatever's undeclared in *its* `~/.config` is still a real black
-  box this doc can't inventory.
+- It **raises** the tenacity-specific work the migration has to redo.
+- It **removes** the "reconstruct from live state" risk — the values
+  survive a `/root` wipe or reinstall. Durandal has no equivalent capture;
+  its undeclared `~/.config` is still a black box.
 
-One workflow-shape question this surfaces, not just a config-translation
-one: the 2×2 virtual-desktop grid and KWin's specific alt-tab/window
-functions don't map onto niri's scrollable-tiling model at all, and only
-partially onto Hyprland/sway's workspace models — see the [WM
-comparison](#picking-among-hyprland--niri--sway) below, now with this
-concrete case in mind rather than the abstract one.
+One workflow-shape question this surfaces: the 2×2 virtual-desktop grid and
+KWin's alt-tab/window functions don't map onto niri's scrollable-tiling
+model at all, and only partially onto Hyprland/sway's — see the
+[WM comparison](#picking-among-hyprland--niri--sway).
 
 ## Picking among Hyprland / niri / sway
 
@@ -155,13 +131,13 @@ tradeoffs found while researching the table above, for whoever decides:
 
 - **Hyprland** has the most mature portal (`xdg-desktop-portal-hyprland`,
   window-level screenshare, not just per-output) and the largest ecosystem
-  of prebuilt bar/lock/idle tooling (`hyprlock`, `hypridle`). It also already
-  has **a working precedent with Jovian** — the blog post
-  `jovian.nix`'s own footer already links
-  (`ciarandg/portfolio/.../nixos-steam-box`) is about exactly this
-  combination, worth reading in full before starting tenacity's side. Its
-  workspace model (numbered, not a fixed grid) is the closest fit for
-  porting tenacity's 2×2 virtual-desktop preference, though not identical.
+  of prebuilt bar/lock/idle tooling (`hyprlock`, `hypridle`). It also has
+  **a working precedent with Jovian** — the blog post `jovian.nix`'s own
+  footer links (ciarandegroot.com's NixOS Steam Box writeup, in Sources
+  below) is about exactly this combination; read it in full before starting
+  tenacity's side. Its workspace model (numbered, not a fixed grid) is the
+  closest fit for porting tenacity's 2×2 virtual-desktop preference, though
+  not identical.
 - **niri** is scrollable-tiling rather than grid-tiling — a different
   workflow, not just a different implementation of the same one. Its portal
   story is the least settled of the three as of this research; check niri's

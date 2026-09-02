@@ -52,37 +52,25 @@ paragraph — this paragraph has been stale before.
 - **Check `hostname` before assuming which machine the session is on.**
   Sessions have run on `nire-lysithea`, directly on `nire-durandal`, and on
   `nire-tenacity`.
-- `nire-lego` (added, never built or switched) and `nire-installer` (the
-  generic live-USB installer image, target chosen at build time) were both
-  removed 2026-08-27 — see `wiki/history.md`. If a handheld or a live-USB
-  installer is needed again, their last config (git history) is the starting
-  point, not a reason to assume either is still wired up.
-- `nire-testbed` (added 2026-08-14, removed 2026-08-22, never installed on real
-  hardware) is gone. If a similar Intel workstation is ever added, its last
-  config (git history) and the `new-host-config` skill's notes are the starting
-  point — not a reason to assume any of it is still wired up.
-- `nire-llm-sandbox` (a libvirt VM image on cube sandboxing an LLM coding
-  agent, never booted on real hardware — see the "verified further than
-  evaluation" caveat this section used to carry for it) was removed
-  2026-08-28 — see `wiki/history.md`. The generic generator it was built on,
-  `VMs/_lib/libvirt-vm.nix`, is kept as unexercised reusable infrastructure;
-  its last full config (git history) is the starting point if a VM like it
-  is wanted again.
-- Host counts and statuses in prose are claims about when someone last looked,
-  not about the tree — check `hosts.nix`.
-- The den→flake-parts port is done. Its planning doc and four other
-  `old`/`old-historical`-prefixed files under the (since-removed) `claude
-  cave/` were removed 2026-08-26 as superseded by `wiki/lessons-learned.md`
-  and this section — see `wiki/history.md`.
-- **`claude cave/` itself was retired 2026-09-02** — its four remaining
-  files moved into `wiki/` as real pages (`lessons-learned.md`,
+- `nire-lego` (never built or switched) and `nire-installer` (live-USB
+  installer image) were removed 2026-08-27 — `wiki/history.md`. Git history
+  is the starting point if either is wanted again.
+- `nire-testbed` (2026-08-14→08-22, never on real hardware) is gone; same
+  rule, plus the `new-host-config` skill's Intel-host notes.
+- `nire-llm-sandbox` (libvirt VM on cube, removed 2026-08-28 — see
+  `wiki/history.md`). The generator it ran on, `VMs/_lib/libvirt-vm.nix`,
+  is kept as unexercised reusable infrastructure.
+- Host counts and statuses in prose are claims about when someone last
+  looked, not about the tree — check `hosts.nix`.
+- The den→flake-parts port is done; its planning docs were removed
+  2026-08-26 as superseded (`wiki/history.md`).
+- **`claude cave/` was retired 2026-09-02** — its four remaining files
+  became `wiki/` pages (`lessons-learned.md`,
   `impermanence-stage1-migration.md`, `module-style-guide.md`,
-  `kde-to-wayland-migration.md`; the backup plan folded into
-  `wiki/homelab/backup-runbook.md` instead of getting its own page, since
-  its content was already superseded by `wiki/categories/backup.md`). Any
-  reference to `claude cave/...` still turning up in an old commit message
-  or a stale local note means the pre-move path; the directory no longer
-  exists. See `wiki/history.md`.
+  `kde-to-wayland-migration.md`); the backup plan folded into
+  `wiki/homelab/backup-runbook.md`. A `claude cave/...` reference in an old
+  commit means the pre-move path; the directory no longer exists.
+
 ## Commands
 
 `just` recipes live in the root `.justfile` and work from anywhere:
@@ -189,17 +177,13 @@ Categories under `homelab/`, all cube-only unless noted (each has a
 `wiki/categories/<name>.md` page; the "category isn't named after its module"
 renames all dodge the same silent-merge collision `just modules` catches):
 
-- **`virtualization`** — libvirt/QEMU VMs. Cube is the only importer; durandal
-  dropped it 2026-08-27 (carried for unused parity — nothing in this repo's
-  history records durandal ever running a VM), and the handhelds decline it.
-  No VM is currently defined through it — `nire-llm-sandbox`, the one that
-  was, is gone (removed 2026-08-28; see State). The generator it ran on,
-  `VMs/_lib/libvirt-vm.nix` (see skill `nixos-vm-images`), is kept as
-  unexercised reusable infrastructure: it starts libvirt's default NAT
-  network itself when a VM asks for one (libvirt ships it
-  defined-but-stopped), and takes an `sshForward` parameter restricted by
-  source IP. Its first and only outing hit three runtime-only bugs invisible
-  to eval and build (lessons-learned §40).
+- **`virtualization`** — libvirt/QEMU VMs. Cube the only importer; durandal
+  dropped it 2026-08-27 (parity, never used), handhelds decline it. No VM is
+  currently defined through it. The generator `VMs/_lib/libvirt-vm.nix`
+  (skill `nixos-vm-images`) is kept as unexercised infrastructure: it starts
+  libvirt's default NAT network when a VM asks, and takes an `sshForward`
+  param restricted by source IP. Its one outing hit three runtime-only bugs
+  (lessons-learned §40).
 - **`containers`** — podman + distrobox (`podman/podman.nix`; the module was
   renamed from `containers.nix` for the collision reason above). Imported by
   cube and tenacity — durandal dropped it 2026-08-27. **"virtualization"
@@ -230,18 +214,13 @@ renames all dodge the same silent-merge collision `just modules` catches):
   reverse-proxy: drop it and the front page 502s. Not a second monitoring
   system; and a 200 from the page proves little — glance renders behind
   `/api/pages/home/content/`, which is the check that matters.
-- **`backup`** (2026-08-28) — restic to the QNAP. Shipped as a local-path
-  repository on the QNAP NFS mount (`/mnt/restic-backup`,
-  `nire/system/storage/storage-NFS.nix`); that failed for real
-  (`access denied by server`, the share's export ACL never included cube),
-  and as of 2026-08-31 switched to **SFTP** instead — issue #87's original
-  plan, real per-connection key auth rather than an IP allowlist. SSH now
-  works on the QNAP with a dedicated key generated for this, confirmed
-  authenticating by hand; a real build on cube confirms everything else
-  works, blocked only on two sops secrets this session can't set (the
-  repository password, and the new SSH private key) — see the category's
-  own page for the switch's reasoning; tracked in
-  `wiki/homelab/pending-setup.md` item 4 and `wiki/homelab/backup-runbook.md`.
+- **`backup`** (2026-08-28) — restic to the QNAP. Shipped as local-path on
+  the QNAP NFS mount, which failed for real (`access denied by server`); as
+  of 2026-08-31 it's **SFTP** — issue #87's original plan, keyed auth
+  instead of an IP allowlist. SSH works on the QNAP with a dedicated key;
+  a real build on cube confirms everything else, blocked only on two sops
+  secrets no session has set. Detail: `wiki/categories/backup.md`,
+  `wiki/homelab/pending-setup.md` item 4, `wiki/homelab/backup-runbook.md`.
 
 **Hosts**: `hosts.nix` declares one `darwinConfigurations` entry
 (`nire-lysithea`, aarch64-darwin) alongside three `nixosConfigurations`, all

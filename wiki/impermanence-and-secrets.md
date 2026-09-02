@@ -62,49 +62,32 @@ that import it.
   invisible to a plain `sops` invocation on macOS even with everything else
   correct. `secrets/sops-darwin.nix` (2026-08-29) sets it via
   `environment.variables`.
-- **`SOPS_AGE_SSH_PRIVATE_KEY_FILE` (sops's ssh-key-as-identity flag) can't
-  be trusted for interactive use, even with a provably correct key.** Chased
-  on `nire-cube` 2026-08-29: pointing it straight at
-  `/etc/ssh/ssh_host_ed25519_key` failed against every recipient, including
-  cube's own — despite that key being independently verified correct three
-  separate ways. Converting to a native age identity file and using
-  `SOPS_AGE_KEY_FILE` instead decrypted cleanly with the exact same key, so
-  this is a real bug/quirk in sops's own SSH-conversion code path, not
-  anything wrong in this repo. `secrets/sops-interactive-key.nix`
-  (2026-08-29) does that conversion automatically, every boot, on every
-  NixOS host — see [categories/system.md](categories/system.md)'s Secrets
-  section for the full writeup, including why unconditional regeneration on
-  every boot matters specifically because of `/root` impermanence on
-  durandal/tenacity.
-- **Not everything secret-shaped goes through sops.** Two things on
-  `nire-cube` deliberately don't, though they've diverged in how they're
-  provisioned: `elly`'s login password (`hashedPasswordFile`,
-  `WARN-password-required.nix`) still points at a file this repo never
-  creates, expected to exist by hand at a fixed path under `/persist` — a
-  human has to know the password anyway, so hand-creating it is the point,
-  not a gap. Grafana's `secret_key`
-  ([monitoring](categories/monitoring.md)) started the same way, but a
-  hand-created copy of it was found regressed (ownership reverted to
-  `root:root`) on a live re-check 2026-08-24 with nobody noticing until
-  `grafana.service` was already crash-looping — so as of that date it's
-  generated and its ownership reasserted by a `grafana-secret-key-setup.service`
-  the module itself declares, not by hand. Neither goes through sops
-  either way — same reasoning for both: cube has no impermanence to lose
-  the file to, so there's nothing sops's own persistence story would buy
-  that a plain file under `/persist` doesn't already have.
+- **`SOPS_AGE_SSH_PRIVATE_KEY_FILE` can't be trusted for interactive use,
+  even with a provably correct key** — chased on `nire-cube` 2026-08-29:
+  pointing it at `/etc/ssh/ssh_host_ed25519_key` failed against every
+  recipient, while converting to a native age identity and using
+  `SOPS_AGE_KEY_FILE` decrypted cleanly with the same key — a real
+  quirk in sops's SSH-conversion path, not this repo.
+  `secrets/sops-interactive-key.nix` (2026-08-29) does the conversion every
+  boot on every NixOS host — see
+  [categories/system.md](categories/system.md)'s Secrets section for why
+  unconditional regeneration matters under `/root` impermanence.
+- **Not everything secret-shaped goes through sops.** On `nire-cube`:
+  `elly`'s login password (`hashedPasswordFile`, `WARN-password-required.nix`)
+  points at a file this repo never creates — a human must know the password
+  anyway, so hand-creating it is the point. Grafana's `secret_key`
+  ([monitoring](categories/monitoring.md)) started that way too, but a
+  hand-created copy was found regressed (`root:root` ownership) on a live
+  re-check 2026-08-24 with `grafana.service` crash-looping, so it's now
+  generated and ownership-reasserted by `grafana-secret-key-setup.service`,
+  declared by the module itself. Neither goes through sops: cube has no
+  impermanence to lose the file to.
 - **A full `nix flake check`/`just preflight` can fail with `error: path
-  '<hash>-secrets.yaml' is not valid` in some eval environments** — seen from
-  a sandboxed agent session, 2026-09-01, on a fully clean tree (confirmed via
-  `git stash`, so not caused by an uncommitted change elsewhere).
-  `secrets/sops.nix`'s `secretsPath = ./secrets.yaml` is interpolated into
-  `sopsFile` as a string with context; sops-nix's own manifest validation
-  calls `builtins.pathExists` on it before checking anything else, which
-  forces that context to be realised — the file copied into the store as its
-  own path — and in that kind of session the copy silently fails, throwing
-  even though `secrets.yaml` is present, tracked, and unmodified. Only hits
-  eval of a host that imports `secrets/sops.nix` — which is all three NixOS
-  hosts, via the shared `system` category, so `nix flake check` catches it on
-  whichever of `nixos-nire-durandal`/`-tenacity`/`-cube` it evaluates first,
-  not one host specifically. Doesn't affect a real `just build`/`switch` on
-  the host itself, and doesn't affect `just modules`/`just lint`. Not a bug
-  in this repo or in `secrets.yaml`.
+  '<hash>-secrets.yaml' is not valid` in some eval environments** (seen in a
+  sandboxed agent session, 2026-09-01, on a clean tree). `secrets/sops.nix`'s
+  `secretsPath = ./secrets.yaml` carries string context; sops-nix's manifest
+  validation calls `builtins.pathExists` on it first, forcing the store copy,
+  which silently fails in that kind of session. Hits eval of any host
+  importing `secrets/sops.nix` (all three NixOS hosts, via the shared
+  `system` category). Doesn't affect a real `just build`/`switch` on the
+  host, nor `just modules`/`just lint`. Not a bug in this repo.

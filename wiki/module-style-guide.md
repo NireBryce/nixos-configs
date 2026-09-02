@@ -17,12 +17,11 @@ Conventions for `flake/modules/`. Counts are from the tree as of
 2026-08-08, so "how many files do this" is checkable rather than asserted.
 
 This file used to live at `modules/nirePackages/style-guide.md`, where its
-location implied it governed only package modules and where nothing linked to
-it. It applies to every module. Moved a second time, from `claude
-cave/claude-style-guide.md` to here, 2026-09-02, when that directory was
-retired — see [history.md](history.md) and [styleguide.md](styleguide.md)
-for why it counts as an exception to this wiki's usual "index over
-restatement" rule.
+location implied it governed only package modules, and later at `claude
+cave/claude-style-guide.md` until that directory was retired 2026-09-02. It
+applies to every module — see [history.md](history.md) and
+[styleguide.md](styleguide.md) for why it counts as an exception to this
+wiki's usual "index over restatement" rule.
 
 ---
 
@@ -94,51 +93,26 @@ Keep it first, keep it to one line.
 ### Why it is a comment and not an option
 
 The doubled `#` looks like a placeholder for a field that will arrive. It is
-not. **There is no such field, in flakes, in flake-parts, or in the NixOS module
-system**, and this was checked rather than assumed:
-
-- flake-parts declares exactly `allSystems`, `debug`, `flake`,
-  `partitionedAttrs`, `partitions`, `perInput`, `perSystem`, `processedFlake`,
-  `systems`, `touchup`. None is module metadata. `extras/modules.nix`, which
-  declares `flake.modules`, attaches only `_class` and `_file`.
-  (`modules/apps.nix` does declare a `meta` option — for *apps*, not modules,
-  which is why the instinct that one exists is reasonable.)
-- NixOS has `meta.maintainers` and `meta.doc`, but `meta.doc` is typed as a
-  *path* to a manual source file for the nixpkgs docs build, not a string.
-- `lib/modules.nix` carries `_file`, `_class` and `key` per module, nothing else.
-
-The structural reason is that **the module system has no per-module namespace.**
-Every module's `config` merges into one tree, so a module has nowhere to say
-something about *itself* that stays attached to itself. Any description
-mechanism therefore has to be a registry keyed by module name, living outside
-the modules — which is what this comment already is, informally.
+not. **There is no such field, in flakes, in flake-parts, or in the NixOS
+module system** (checked, not assumed: flake-parts declares no module-
+metadata option; `extras/modules.nix` attaches only `_class` and `_file`;
+NixOS `meta.doc` is a path for the docs build, not a string; `lib/modules.nix`
+carries `_file`/`_class`/`key` and nothing else). Structurally, **the module
+system has no per-module namespace** — every module's `config` merges into
+one tree, so a description mechanism has to be a registry keyed by module
+name living outside the modules, which is what this comment already is,
+informally.
 
 ### The alternative that was considered and declined
 
-A typed registry:
-
-```nix
-flake.moduleDescriptions.${moduleName} = "...";     # attrsOf str
-```
-
-It has one advantage beyond being queryable: `attrsOf str` **errors** when two
-modules set the same key to different values, naming both files. That would
-catch the module-name collision class for free — the bug where `boot` meant both
-the `nire/boot/` category and durandal's bootloader — with a better error than
-`just modules` produces.
-
-Declined anyway, because the costs land now and the benefit is already covered:
-
-- 70 files to edit, mechanically, for something that is working.
-- `just modules` already detects name collisions, for *all* names rather than
-  only ones carrying a description.
-- Identical descriptions would still merge silently, so it is not a complete
-  check either.
-- One more `unknown flake output` warning from `nix flake check`.
-- A registry can go stale: delete a module, forget its entry, nothing complains.
-
-**Do not "upgrade" this to an option without a reason beyond tidiness.** The
-comment is deliberate.
+A typed registry (`flake.moduleDescriptions.${moduleName}`, `attrsOf str`)
+would be queryable and would **error** on two modules setting the same key
+differently, catching the module-name collision class for free. Declined:
+70 files to edit for something working; `just modules` already detects
+collisions for all names; identical descriptions would still merge silently;
+one more `unknown flake output` warning; and a registry can go stale
+silently. **Do not "upgrade" this to an option without a reason beyond
+tidiness.**
 
 ## Rationale goes inside the module body, not in a header block
 

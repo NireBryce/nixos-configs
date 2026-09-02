@@ -14,48 +14,35 @@
 - [See also](#see-also)
 
 [golink](https://github.com/tailscale/golink), Tailscale's `go/foo`
-shortlink service. Added 2026-08-24, cube-only.
-
-Moved from `nire/shortlinks/` to `nire/homelab/shortlinks/` on 2026-08-27,
-nested under a new umbrella `homelab` category alongside six other
-self-hosted-service categories — see
-[categories/README.md](README.md). The category name is unaffected.
+shortlink service. Added 2026-08-24, cube-only; nested under the `homelab`
+umbrella since 2026-08-27 (name unaffected).
 
 **It failed its first real switch, and the fix is in.** `golink.service`
-crash-looped on `nire-cube` (2026-08-24, generation 13) with:
+crash-looped on `nire-cube` (2026-08-24, generation 13):
 
 ```
 tsnet: route ip+net: netlinkrib: address family not supported by protocol
 ```
 
 A missing `AF_NETLINK` in this module's own `RestrictAddressFamilies` — see
-[the hardening section](#dynamicuser-deliberately) below for the mechanism.
-It was shipped as "evaluates, not runtime-verified" (written from a darwin
-session, which can't build an `x86_64-linux` toplevel), and it broke for
-precisely the reason its own hardening comment claimed to be guarding
-against by leaving `SystemCallFilter` out — the risk was named correctly and
-attached to the wrong knob.
+[the hardening section](#dynamicuser-deliberately). It shipped as
+"evaluates, not runtime-verified" (written from a darwin session, which
+can't build an `x86_64-linux` toplevel), and broke for precisely the reason
+its own hardening comment claimed to be guarding against — the risk was
+named correctly, attached to the wrong knob. Same family as
+[monitoring](monitoring.md)'s `grafana.service` first-switch failure:
+**a green evaluation and a read-back of the rendered unit both said
+nothing** ([`lessons-learned.md`](../lessons-learned.md) §37).
 
-That puts this alongside [monitoring](monitoring.md)'s `grafana.service`
-first-switch failure and [virtualization](virtualization.md)'s sandbox VM
-taking three runtime-only fixes: **a green evaluation and a read-back of the
-rendered unit text both said nothing**, which is
-[`lessons-learned.md`](../lessons-learned.md) §37 exactly.
+**Now confirmed working end to end, 2026-08-24**, after the fix and the
+one-time login: `golink.service` `active (running)` at **`NRestarts=0`**,
+0 failed units, tailnet device `go` up on a direct connection, and
+`http://go/` answering `HTTP 200` from *another* tailnet host.
 
-**Now confirmed working end to end, 2026-08-24**, after the fix landed and
-the one-time login was done: `golink.service` is `active (running)` with
-**`NRestarts=0`**, 0 failed units on the host, the tailnet device `go` is up
-on a direct connection, and `http://go/` answered `HTTP 200`
-(`<title>go/</title>`) from *another* tailnet host — not just from cube
-itself. The journal shows the whole arc: `NeedsLogin` re-printing its auth
-URL every 5s, then `Listening on :443` / `:80`, `Serving http://go/`, and
-`AuthLoop: state is Running; done`.
-
-`NRestarts=0` is the load-bearing number rather than `active (running)`: the
-original failure was a crash-loop, and a unit that has restarted eight times
-also reports `active` in between. See
-[`lessons-learned.md`](../lessons-learned.md) §40 for the
-inverse of the same care — a failed unit whose resource was fine all along.
+`NRestarts=0` is the load-bearing number rather than `active (running)`:
+the original failure was a crash-loop, and a unit that has restarted eight
+times also reports `active` in between (§40 covers the inverse — a failed
+unit whose resource was fine).
 
 Usage — creating and managing links — is [homelab/golinks.md](../homelab/golinks.md).
 This page stays the configuration side.
@@ -101,60 +88,49 @@ Two knock-on details of writing it by hand:
 
 ## It is not a service on this host's network
 
-This is the thing that most distinguishes `shortlinks` from
-[monitoring](monitoring.md) and [git-forge](git-forge.md), and the thing
-most likely to be misread by analogy with them.
+The thing most likely to be misread by analogy with
+[monitoring](monitoring.md) and [git-forge](git-forge.md): golink embeds
+**tsnet**, joining the tailnet as its own *separate device*, with its own
+tailnet IP — its `:80`/`:443` listeners live on that device, not on any of
+`nire-cube`'s interfaces. Three consequences:
 
-golink embeds **tsnet**, so it joins the tailnet as its own *separate
-device*, with its own tailnet IP, and its `:80`/`:443` listeners live on
-that device — not on any of `nire-cube`'s interfaces. Three consequences:
-
-- **No firewall change at all.** Not an `allowedTCPPorts` entry, and not the
+- **No firewall change at all.** No `allowedTCPPorts` entry, and not the
   `trustedInterfaces = [ "tailscale0" ]` mechanism Grafana and Forgejo rely
-  on either ([system](system.md)'s Tailscale section). Nothing ever arrives
-  at `nire-cube`'s own firewall for this. It isn't reachable on the LAN
-  because it doesn't listen there.
-- **No dependency on the host's `tailscaled`.** tsnet is a full userspace
-  WireGuard node in-process, talking to the coordination server itself; it
-  does not use the host's tunnel, its `tailscale0` interface, or
-  `/dev/net/tun`. The unit orders after `network-online.target` only —
-  deliberately *not* `tailscaled.service`, which would imply a dependency
-  that doesn't exist.
-- **It consumes a tailnet device slot, and the tailnet ACL applies to it**
-  like any other member. Per `tailscale.nix`'s "TWO REAL TRAPS": an ACL that
-  doesn't grant member-to-member traffic silently drops connections here
-  too, and that is fixed in Tailscale's admin console, not in this repo.
+  on ([system](system.md)'s Tailscale section). Nothing arrives at cube's
+  firewall for this; it isn't reachable on the LAN because it doesn't listen
+  there.
+- **No dependency on the host's `tailscaled`.** tsnet is a userspace
+  WireGuard node in-process, talking to the coordination server itself — it
+  doesn't use the host's tunnel, `tailscale0`, or `/dev/net/tun`. The unit
+  orders after `network-online.target` only, deliberately *not*
+  `tailscaled.service`.
+- **It consumes a tailnet device slot, and the tailnet ACL applies to it.**
+  Per `tailscale.nix`'s "TWO REAL TRAPS": an ACL that doesn't grant
+  member-to-member traffic silently drops connections here too — fixed in
+  Tailscale's admin console, not this repo.
 
 ## First run needs a one-time interactive login
 
-By design, and the same call [system](system.md)'s `tailscale.nix` makes for
-the host daemon: **no `TS_AUTHKEY` is wired in.** Tailscale auth keys expire
-(90 days maximum), so baking one into the unit mostly buys a service that
-fails on every boot some months from now.
+By design, the same call [system](system.md)'s `tailscale.nix` makes for
+the host daemon: **no `TS_AUTHKEY` is wired in.** Auth keys expire (90 days
+max), so baking one in buys a service that fails on every boot months from
+now.
 
-Without a key, tsnet prints an auth URL and waits. That it lands somewhere
-visible was confirmed by reading tsnet v1.96.1's own source rather than
-assumed: `printAuthURLLoop` logs through `(*Server).logf`, which falls
-through to `log.Printf` when `UserLogf` is nil — and golink sets only
-`Logf`, never `UserLogf`. So the URL reaches stderr, i.e. the journal,
-without needing `-verbose`.
+Without a key, tsnet prints an auth URL and waits — confirmed by reading
+tsnet v1.96.1's source: `printAuthURLLoop` logs through `(*Server).logf`,
+which falls through to `log.Printf` when `UserLogf` is nil (golink sets
+only `Logf`), so the URL reaches stderr, i.e. the journal:
 
 ```sh
 journalctl -u golink -f     # then open the printed URL, once
 ```
 
-tsnet writes its node key into the config-dir and reauthenticates from that
-on every later boot, so this is once per machine, not once per boot — the
-same shape `sudo tailscale up` already has on these hosts. (tsnet also logs
-`Authkey is set; but state is X. Ignoring authkey` when state already
-exists, so an expired key wired in later wouldn't break an
-already-authenticated node — there's still no reason to wire one.)
-
-To revisit anyway: mint a key, add `sops.secrets.tailscale_key` in
-`system/secrets/sops.nix` (nothing declares it today, though `secrets.yaml`
-carries an unused stale one — see
-[impermanence-and-secrets.md](../impermanence-and-secrets.md)), and pass it
-as an `EnvironmentFile` with `TS_AUTHKEY=`.
+tsnet writes its node key into the config-dir and reauthenticates from it
+on every later boot — once per machine, the same shape `sudo tailscale up`
+has. (tsnet ignores a later-wired authkey when state exists, so there's
+still no reason to wire one. To revisit anyway: mint a key, add
+`sops.secrets.tailscale_key` in `system/secrets/sops.nix`, pass it as an
+`EnvironmentFile`.)
 
 ## The node must stay named `go`
 
@@ -180,23 +156,21 @@ as a brand-new, unauthenticated node with no links. Move and `chown` the
 directory in the same change.
 
 Hardening is modest on purpose. `DynamicUser` already implies
-`NoNewPrivileges`, `ProtectSystem=strict`, `PrivateTmp` and `RemoveIPC`;
-what's added is the handful obviously safe for a pure-Go network daemon with
-no cgo (golink's sqlite is `modernc.org/sqlite`, pure Go) and no device
-access. `MemoryDenyWriteExecute` and a `SystemCallFilter` are still left out
-— an untested syscall filter fails as a confusing crash at start rather than
-as anything diagnosable.
+`NoNewPrivileges`, `ProtectSystem=strict`, `PrivateTmp`, `RemoveIPC`; what's
+added is the handful obviously safe for a pure-Go network daemon with no cgo
+(golink's sqlite is `modernc.org/sqlite`) and no device access.
+`MemoryDenyWriteExecute` and `SystemCallFilter` stay out — an untested
+syscall filter fails as a confusing crash at start.
 
-**`AF_NETLINK` in `RestrictAddressFamilies` is load-bearing**, and leaving
-it out is what broke the first switch. Go's `net` package enumerates
-interfaces and routes through a netlink socket (`syscall.NetlinkRIB` →
+**`AF_NETLINK` in `RestrictAddressFamilies` is load-bearing** — leaving it
+out is what broke the first switch. Go's `net` package enumerates interfaces
+and routes through a netlink socket (`syscall.NetlinkRIB` →
 `socket(AF_NETLINK, SOCK_RAW, …)`), and `RestrictAddressFamilies` makes a
-blocked `socket()` return `EAFNOSUPPORT` — which is the
+blocked `socket()` return `EAFNOSUPPORT` — the
 `netlinkrib: address family not supported by protocol` message verbatim.
-The error names netlink and reads like a kernel or protocol problem;
-nothing in it says "systemd", which is what made it worth writing down in
-the module rather than only here. Anything tsnet-based needs it — don't
-tidy it back out.
+The error names netlink and reads like a kernel problem; nothing in it says
+"systemd", which is why it's written in the module too. Anything tsnet-based
+needs it — don't tidy it back out.
 
 ## No persistence entry
 

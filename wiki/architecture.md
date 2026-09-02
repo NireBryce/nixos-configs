@@ -70,13 +70,10 @@ instead of this page; this page is the mechanism, not the inventory.
 Containers and VMs are separate categories here, and "virtualization" means
 only the VM one (`nire/homelab/virtualization/`: libvirt, virt-tools,
 vm-networking — optional, cube only). Podman/distrobox live in
-[`nire/homelab/containers/`](categories/containers.md) — its own category since
-2026-08-22 (moved out of `nire/system/containers/`; both it and
-`virtualization` moved again on 2026-08-27, nested under a new umbrella
-`homelab` category alongside five other self-hosted-service categories —
-see [`categories/homelab.md`](categories/homelab.md)), imported explicitly by
-tenacity and cube (durandal dropped it 2026-08-27, same day as
-`virtualization`) rather than reaching them through `system`. See
-[`../CLAUDE.md`](../CLAUDE.md)'s Architecture section for the file that's
-been renamed twice now and why a stale memory of "virtualization is the
-podman one" is exactly backwards regardless of which name you're picturing.
+[`nire/homelab/containers/`](categories/containers.md), its own category
+since 2026-08-22, nested under the `homelab` umbrella since 2026-08-27 —
+imported explicitly by tenacity and cube (durandal dropped it 2026-08-27,
+same day as `virtualization`). See
+[`categories/homelab.md`](categories/homelab.md) and `AGENTS.md`'s
+Architecture section. A stale memory of "virtualization is the podman one"
+is exactly backwards.

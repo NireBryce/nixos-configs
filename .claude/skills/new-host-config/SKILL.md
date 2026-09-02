@@ -7,195 +7,120 @@ description: How to add a new host (nixosConfigurations or darwinConfigurations 
 
 ## Applies to
 
-Adding a new machine to this repo, or copying an existing host's config as
-the starting point for one. Use before creating a
-`nireHost/<name>-configuration.nix`, a `nireHost/<name>/` directory, or
-editing `hosts.nix` to register a host — covers which category imports a new
-host actually wants, real hardware vs. not-yet-installed hardware, and what
-NOT to copy from the host you're basing it on.
+Adding a machine to this repo: a `nireHost/<name>-configuration.nix` entry
+point, a `nireHost/<name>/` directory of host-specific modules, and a line in
+`hosts.nix`. The entry point sits directly under `nireHost/`, outside every
+category tree on purpose (`new-flake-module` skill has why); the directory is
+collected by its own `dirsAsCategory.nix` copy. Worked examples: durandal,
+tenacity, cube, lysithea (darwin) — read the closest one first. (`nire-lego`
+and `nire-installer`, removed 2026-08-27: git history if either is a closer
+match.)
 
-Every host is two things: an entry-point file directly under `nireHost/`
-(`<name>-configuration.nix`, outside every category tree on purpose — see
-`new-flake-module`'s skill for why that placement matters) and a `nireHost/<name>/`
-directory holding that host's own hardware/boot/platform modules, collected by
-its own `dirsAsCategory.nix` copy. `nire-durandal`, `nire-tenacity`,
-`nire-cube`, and `nire-lysithea` (darwin) are
-the worked examples — read the one closest in shape to what you're adding
-before inventing anything. (`nire-lego`, a handheld, and `nire-installer`, a
-live-USB image, were both removed 2026-08-27 — `wiki/history.md` has their
-last shape if either is a closer match than what's left.)
+## Shape decisions — check `hosts.nix` for the roster, never assume a count
 
-## Decide the shape before copying a file
-
-These are independent axes; check `hosts.nix` for the current roster rather
-than assuming a count, per `CLAUDE.md`'s own standing warning that it changes.
-
-- **Workstation or handheld?** Workstation (durandal, now cube) takes
-  `kde-desktop` alone. Handheld (tenacity) takes the `jovian` module
-  instead, for the built-in-controller/SteamOS-session shape — `desktop-env`
-  as a whole holds both `kde-desktop` and `jovian`, so import the specific one
-  your host wants, not the category.
-- **Impermanence or not?** Default yes (durandal and tenacity both wipe
-  `/root` on boot) — but `nire-cube` deliberately opts out because it hits
-  persistence assumptions the others don't (its real install turned out to be
-  a plain root, not LUKS+impermanence). Read `WARN-impermanence.nix` and the
-  `impermanence-initrd` skill before deciding either way, and if you opt out,
-  say so explicitly in the host file's header the way `cube-configuration.nix`
-  does, including the `invariants.nix` interaction. (`nire-testbed`, removed
-  2026-08-22, was the earlier example of this — an Intel host that opted out
-  the same way, for the same reason.)
-- **Which CPU/GPU category?** AMD hosts (durandal, tenacity, and cube) import the
-  shared `hardware` category (`amdcpu`, `amdgpu`) directly. **Do not add an
-  `intel` sibling under `nire/hardware/` to make an Intel host fit the same
-  shape** — `dirsAsCategory` recurses into subdirectories, so anything filed
-  there would start applying to the AMD hosts too. An Intel host should skip
-  `hardware` entirely and instead pull a `nixos-hardware` module scoped to the
-  exact machine (e.g. `lenovo-thinkpad-x270`) from inside its own
-  `<name>/hardware/hardware-<name>.nix` — `nire-testbed` did exactly this
-  before it was removed; there is no live Intel host to point at as a worked
-  example right now, so re-derive from that shape rather than nixos-hardware's
-  own docs alone.
-- **NixOS or darwin?** `mkHost`/`mkDarwinHost` in `hosts.nix` are the two
-  entry points; darwin hosts have no `elly-user`, no impermanence, and take
-  `flake.darwinConfigurations` instead of `flake.nixosConfigurations`.
-  `nire-lysithea` is the only current example.
+- **Workstation or handheld?** Workstation takes `kde-desktop`; handheld
+  (tenacity) takes `jovian`. Both live in `desktop-env` — import the specific
+  module, not the category.
+- **Impermanence?** Default yes (durandal, tenacity wipe `/root` on boot),
+  but `nire-cube` deliberately opts out — its real install is a plain root,
+  not LUKS+impermanence. Read `WARN-impermanence.nix` and the
+  `impermanence-initrd` skill either way; if opting out, say so in the host
+  file's header like `cube-configuration.nix` does, including the
+  `invariants.nix` interaction.
+- **CPU/GPU?** AMD hosts import the shared `hardware` category (`amdcpu`,
+  `amdgpu`). **Never add an `intel` sibling under `nire/hardware/`** —
+  `dirsAsCategory` recurses into subdirectories, so it would apply to the AMD
+  hosts too. An Intel host skips `hardware` and pulls a `nixos-hardware`
+  module for the exact machine (e.g. `lenovo-thinkpad-x270`) from its own
+  `<name>/hardware/hardware-<name>.nix` (`nire-testbed`, removed 2026-08-22,
+  did this; no live Intel host exists to point at).
+- **NixOS or darwin?** `mkHost`/`mkDarwinHost` in `hosts.nix`; darwin has no
+  `elly-user`, no impermanence, and lands in `flake.darwinConfigurations`.
+  `nire-lysithea` is the only example.
 
 ## Real hardware, or not installed yet?
 
-This is the fork that matters most and is easy to get backwards.
+The fork that matters most, easy to get backwards. Check `AGENTS.md`'s State
+section for whether the machine has actually booted this config.
 
-**Hardware already exists and has been scanned** (`nixos-generate-config` run
-against a real partitioned disk): capture its `fileSystems`/`boot.initrd.*`
-block into `<name>/hardware/hardware-<name>.nix`, wrapped as a flake-parts
-module. Dropping the raw generated file under `modules/` as-is makes
-flake-parts resolve `modulesPath` through its own `_module.args` and die with
-a misleading `infinite recursion` error — `new-flake-module`'s skill has the
-wrapping shape and a second worked example (`llm-sandbox-configuration.nix`,
-removed 2026-08-28 along with the host it configured — still readable in git
-history).
-`durandal/hardware/hardware-configuration.nix` and
-`cube/hardware/hardware-cube.nix` are the two real ones in this repo;
-hardware-cube.nix's own history note documents what it replaced (a disko
-template pointed at a placeholder device, from when cube hadn't been
-installed yet) and why that file was deleted rather than pointed at a real
-device once the actual install turned out different — worth reading before
-deciding a placeholder here is harmless.
+**Real, scanned hardware**: capture `nixos-generate-config`'s
+`fileSystems`/`boot.initrd.*` into `<name>/hardware/hardware-<name>.nix`,
+wrapped as a flake-parts module — the raw generated file under `modules/`
+as-is makes flake-parts resolve `modulesPath` itself and dies with a
+misleading `infinite recursion` (`new-flake-module` has the wrapping shape).
 
-**Hardware doesn't exist yet, or hasn't been partitioned** (this is the
-common case for a newly-added host — check `CLAUDE.md`'s State section for
-whether the machine has actually booted this config): use the disko
-generator instead of inventing a `hardware-configuration.nix`.
-`nire/impermanence/_disko/impermanence-luks-btrfs.nix`
-(`flake/doc/disko-impermanence-layout.md` explains it, call-site example
-included) reproduces the LUKS +
-btrfs + impermanence layout durandal and tenacity run by hand, curried over
-`device`, `includeSecureboot`, and `swapSize`. `lego/hardware/disko-lego.nix`
-was the one live caller of it in this tree; removed with the rest of
-`nire-lego` 2026-08-27 (its content is in git history if a closer worked
-example than the doc's own is needed), and `cube/hardware/disko-cube.nix`
-was deleted earlier still, once cube's real install turned out to be a plain
-root instead — see `cube-configuration.nix`'s own header. Nothing in the
-tree currently calls this generator; the doc's inline example is the
-reference until a new host does. Two rules that
-are easy to get backwards here:
+**No hardware yet**: use the disko generator
+`nire/impermanence/_disko/impermanence-luks-btrfs.nix` (curried over
+`device`, `includeSecureboot`, `swapSize`; explained with a call-site example
+in `flake/doc/disko-impermanence-layout.md`) instead of inventing a
+`hardware-configuration.nix`. Nothing in the tree currently calls it; the
+doc's inline example is the reference. Two rules:
 
-- **The placeholder device path must be unmistakably fake**
-  (`/dev/disk/by-id/REPLACE-ME-before-running-disko`), never a
-  plausible-looking one like `/dev/nvme0n1`. That path exists on real
-  machines in this repo already (tenacity) — a plausible guess run
-  through disko's actual partitioning step on the wrong box would silently
-  wipe a disk that has real data on it. A path that doesn't exist just fails
-  loudly, which is the point.
-- **`includeSecureboot`/`swapSize` are per-host judgement calls, not
-  defaults to leave alone.** They default off/null because they're
-  durandal's own addition, not universal. If the host you're basing this on
-  has them (durandal does), decide whether the new host should too and set
-  them explicitly, with a one-line reason — don't silently inherit or
-  silently drop.
+- **Placeholder device path must be unmistakably fake**
+  (`/dev/disk/by-id/REPLACE-ME-before-running-disko`), never plausible like
+  `/dev/nvme0n1` — that path exists on real machines here (tenacity), and
+  disko running against the wrong box would silently wipe real data. A fake
+  path just fails loudly.
+- **`includeSecureboot`/`swapSize` are per-host judgement calls** (durandal's
+  additions, not universal). Set them explicitly with a one-line reason;
+  don't silently inherit or drop.
 
-Either way, if the host imports `impermanence`, its rollback
-(`WARN-impermanence.nix`) depends on a `root-blank` subvolume existing at the
-btrfs top level — the disko template creates it, unmounted, but only once
-disko is actually run against the real disk. A host can be fully wired up in
-this repo and still be unable to boot before that happens; say so in the
-host's own header, the way `nire-lego`'s did before its removal 2026-08-27
-(git history) and `cube-configuration.nix` does for its own, different
-reason (no impermanence at all).
+Either way, if the host imports `impermanence`: the rollback
+(`WARN-impermanence.nix`) needs a `root-blank` subvolume at the btrfs top
+level, which only exists once disko runs against the real disk. The host can
+be fully wired up here and still unable to boot — say so in the header.
 
 ## Naming: suffix anything host-specific
 
-A module's declared name is its filename (`new-flake-module` skill), and
-names in the same class **merge** rather than conflict. Every host-specific
-file under `<name>/` needs its own host suffix — `hardware-cube.nix`,
-`hardware-tenacity.nix`, `boot-cube.nix` — precisely so a
-second host's `boot-<name>.nix` doesn't merge into the first's. (Durandal's
-own `hardware-configuration.nix` and `nixpkgs-hostPlatform-durandal.nix`
-predate full consistency on this — the first is unsuffixed and gets away
-with it only because no other host is named `configuration`. Don't repeat
-that gap in something new; suffix everything.)
+Module names are filenames and names in one class **merge**. Every file under
+`<name>/` gets a host suffix — `hardware-cube.nix`, `boot-cube.nix` — so a
+second host's file can't merge into the first's. (Durandal's unsuffixed
+`hardware-configuration.nix` predates this rule and survives only because no
+other host is named `configuration`. Don't repeat the gap.)
 
-## `system.stateVersion`: don't copy the value, copy the reasoning
+## `system.stateVersion`: copy the reasoning, not the value
 
-`stateVersion` pins option defaults to whatever release a host's data was
-*first created under*, and is never bumped after the fact — it is not "what
-release do we run now." A host with no data yet (newly added, not installed)
-starts on the **current** release nixpkgs is actually pinned to, not on
-durandal's `23.11` or tenacity's `25.05`. Check the current pin with:
+`stateVersion` pins defaults to the release a host's data was first created
+under and is never bumped — it is not "what we run now". A host with no data
+starts on the **current** nixpkgs release pin:
 
 ```sh
 nix eval --raw .#nixosConfigurations.nire-tenacity.config.system.nixos.release
 ```
 
-`nire-lego`'s state-version file (removed 2026-08-27 with the rest of the
-host; git history has it verbatim) explained this inline: "not yet
-installed, no existing data to pin a release for, so start on the current
-release rather than inheriting durandal's 23.11 or tenacity's 25.05." Write
-the equivalent comment for a new not-yet-installed host rather than just the
-bare string — every currently-live host's `stateVersion` now reflects real
-installed data, so there's no live example of the fresh-host case to point
-at instead.
+Not durandal's `23.11` or tenacity's `25.05`. Write the comment explaining
+the fresh-host case, not just the bare string.
 
-## Don't copy host-specific fixes without re-diagnosing
+## Don't copy hardware-keyed fixes blind
 
-A fix keyed to specific hardware (PCI vendor/device IDs, a board revision, a
-panel quirk) belongs to the machine it was diagnosed on, not to "the config."
-`durandal/fixes/b550-suspend-fix.nix` clears PCI wakeup on two IDs specific to
-a Gigabyte B550M board — copying it to a new host with different silicon is
-superstition, not config, even if the new host is also AMD. Carry over
-*generic* pieces (the shared `hardware` category, `boot-<name>.nix`'s
-systemd-boot/sbctl shape) and leave hardware-keyed fixes behind unless you've
-actually confirmed the new machine has the same bug. Say so in the new host's
-header either way — `cube-configuration.nix` is the worked example of
-recording a deliberate omission.
+A fix tied to specific silicon (PCI IDs, board revision) belongs to the
+machine it was diagnosed on — `durandal/fixes/b550-suspend-fix.nix` is
+B550M-specific; copying it elsewhere is superstition even on AMD. Carry over
+generic pieces; leave hardware-keyed fixes unless confirmed. Record the
+decision either way in the host header (`cube-configuration.nix` is the
+worked example of recording a deliberate omission).
 
-## Wiring it in
+## Wiring
 
-1. Write `nireHost/<name>-configuration.nix` — imports list plus
-   `networking.hostName`, mirroring the shape decisions above.
-2. Add `nireHost/<name>/` with its own `dirsAsCategory.nix` (copy verbatim —
-   it derives everything from its own directory) and whatever
-   `configuration/`, `hardware/`, `fixes/` subdirectories the host needs.
-3. Register it in `hosts.nix`: add a line to `flake.nixosConfigurations` (via
-   `mkHost`) or `flake.darwinConfigurations` (via `mkDarwinHost`), pointing at
+1. `nireHost/<name>-configuration.nix` — imports + `networking.hostName`.
+2. `nireHost/<name>/` with a verbatim copy of `dirsAsCategory.nix` and the
+   `configuration/`, `hardware/`, `fixes/` subdirs the host needs.
+3. `hosts.nix`: `mkHost` line in `flake.nixosConfigurations` (or
+   `mkDarwinHost` in `darwinConfigurations`), pointing at
    `config.flake.modules.nixos.<name>Configuration`.
-4. If the host will ever need secrets: it is not auto-enrolled.
-   `.sops.yaml` only lists hosts that actually need `secrets.yaml` — add the
-   new host's SSH host key (converted with `ssh-to-age`) and run `sops
-   updatekeys secrets.yaml` when that need actually arises, not preemptively.
-5. Consider whether `CLAUDE.md`'s Architecture/State sections need a line —
-   they've needed one every time a host was added so far, and they say so.
-6. Update `wiki/hosts.md`'s host table, and the `Imported by` line on every
-   `wiki/categories/*.md` article for a category this host now imports (or
-   an existing host stops importing, e.g. opting out of `impermanence` or
-   `virtualization` the way `nire-cube` and the handhelds do). Same rule as
-   step 5 — this has needed an update every time a host's category list
-   changed so far.
+4. Secrets are not auto-enrolled: when the host actually needs
+   `secrets.yaml`, add its SSH host key (via `ssh-to-age`) to `.sops.yaml`
+   and run `sops updatekeys secrets.yaml`. Not preemptively.
+5. `AGENTS.md`'s Architecture/State sections need a line — they have, every
+   time so far.
+6. `wiki/hosts.md`'s table, plus the `Imported by` line of every
+   `wiki/categories/*.md` for categories this host now imports (or stops
+   importing).
 
 ## Verifying
 
-**`git add` before evaluating anything.** Flakes in a git repo ignore
-untracked files, so a brand-new module tree silently doesn't exist until it's
-staged.
+**`git add` before evaluating** — flakes ignore untracked files; a new module
+tree silently doesn't exist until staged.
 
 ```sh
 git add -A flake/modules/nireHost/<name> flake/modules/nireHost/<name>-configuration.nix flake/modules/nireHost/hosts.nix
@@ -203,13 +128,11 @@ just modules      # category-membership check; catches name collisions
 cd flake && nix eval --raw .#nixosConfigurations.<name>.config.system.build.toplevel.drvPath
 ```
 
-The last command is the one that matters — per `CLAUDE.md`, cheap attributes
-(`networking.hostName`) can resolve fine while something else is broken, so
-force a real toplevel rather than trusting a narrower eval. `just check` also
-works but currently fails on an unrelated pre-existing `flake-parts` formatter
-heuristic on this repo's `main` — confirm with `git stash` before treating
-that failure as something the new host caused.
+Force the real toplevel — cheap attributes resolve fine while something else
+is broken. (`just check` currently fails on a pre-existing `flake-parts`
+formatter heuristic on `main`; confirm with `git stash` before blaming the
+new host.)
 
-None of this proves the host boots. Say "evaluates" in whatever you write up,
-not "verified" or "works" — the first real boot in this repo's history found
-four defects that a green eval and a successful build both missed.
+None of this proves the host boots. Write "evaluates", not "verified" — the
+first real boot in this repo's history found four defects a green eval and
+build both missed.

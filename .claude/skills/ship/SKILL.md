@@ -7,94 +7,57 @@ description: Branch -> PR -> confirm -> merge -> confirm -> delete-branch flow f
 
 ## Applies to
 
-Use only when the ask is to get changes onto `experimental` — a bare "push",
-"ship it", "land this", "merge this". Do NOT use for pushing a topic branch,
-opening a PR you were not asked to merge, pushing to a fork, or committing
-without pushing. Elly naming a branch outright is the one case that means
-push directly there instead — see the last section, "Only when Elly names a
-branch".
+Fires only when the ask is to get changes onto `experimental`: a bare "push",
+"ship it", "land this", "merge this". Established 2026-08-21 after a session
+read a bare "push" as license for a direct push to `main`; the flow targets
+`experimental` since 2026-08-25.
 
-**"push" in this repo means this whole flow, not `git push origin
-experimental`.** Elly said so on 2026-08-21, after a session pushed three
-commits straight to `main` (the flow's target at the time) on the strength of
-a bare "push" plus a commit log full of `yeahhhhh` and `idek`. That inference
-read *tone* as *process*. They are independent: this config wipes `/root` on
-boot on three hosts, so an unreviewed change on the trunk is not low-stakes
-even when the diff is small. Redirected 2026-08-25: this flow now lands on
-`experimental` rather than `main` (see CLAUDE.md, "push"); the discipline the
-2026-08-21 incident established — a bare "push" always means the guarded flow
-below, never a raw `git push` — carries over unchanged, only the branch at
-the end of it moved.
-
-There are **two** confirmations, and they are separate questions. Do not
-collapse them.
-
-## When this fires
-
-**Only when the ask is to get changes onto `experimental`.** That is the
-single trigger. It covers a bare "push" — which is what started this, and
-which means `experimental` here, not `main` — as well as "ship it", "land
-this", "merge this".
-
-Elly naming a branch outright is the exception, not a stronger version of the
-trigger; see "Only when Elly names a branch" at the bottom.
-
-It does **not** fire for git work that is not aimed at `experimental`. Do
-those normally, without this flow:
+Does **not** fire for other git work — do those normally:
 
 | ask | what to do |
 |---|---|
-| "push this branch" / "push the branch up" | `git push` it. No PR, no gates. |
-| "open a PR" (without being asked to merge) | Open it and stop. Steps 3-4 are not yours to run. |
+| "push this branch" | `git push` it. No PR, no gates. |
+| "open a PR" (no merge ask) | Open it and stop. Steps 3-4 are not yours to run. |
 | "commit this" | Commit. Pushing was not asked for. |
-| "push to main" / naming `main` (or any other specific branch) outright | Push directly there — see "Only when Elly names a branch". |
-| push to a fork, a remote that is not `origin`, or any branch that is not `experimental` | Ordinary push. |
+| any branch named outright (`main`, `experimental`, anything) | Push directly there — see the last section. |
+| fork, non-`origin` remote | Ordinary push. |
 
-If you are unsure whether an ask means `experimental`, ask Elly rather than
-assuming either way. Assuming *yes* opens an unwanted PR; assuming *no* is the
+If unsure whether an ask means `experimental`, ask. Assuming *no* is the
 mistake this file exists to prevent.
 
-**GitHub's own default branch is still `main`, not `experimental`** — this
-flow changed, the repo setting didn't. `gh pr create` and `gh pr edit --base`
-both default to `main` when `--base` is omitted, so every PR this flow opens
-needs `--base experimental` stated explicitly; leaving it implicit lands the
-PR against the wrong trunk silently, not as an error.
+**GitHub's default branch is still `main`**, so every PR needs `--base
+experimental` stated explicitly — `gh pr create`/`gh pr edit` silently
+default to `main` otherwise.
 
-## 0. Before anything: fetch, then is it green?
+There are **two** confirmations (merge, then branch deletion) — separate
+questions, never collapsed, never delegated to `--delete-branch`.
 
-`git fetch origin` first, always — before `git status -sb`, before branching,
-before deciding whether `experimental` is ahead. Local `experimental` silently
-drifting behind `origin/experimental` is a real, repeated failure mode here:
-other sessions land PRs concurrently, and a branch cut from a stale
-`experimental` either merges awkwardly or (worse) makes a "confirmed
-unaffected" drvPath comparison meaningless because it was never actually
-comparing against current `experimental`.
+## 0. Fetch, then is it green?
 
-Then: a PR is a review gate someone reads, so do not open one on work you have
-not checked. `.github/workflows/check.yml` runs `just check` + `just modules`
-+ `just lint` on every PR automatically now (`lint` added 2026-08-25) — but
-that is a few-minutes-later backstop, not a substitute for checking locally
-first; a red CI run on a PR someone is about to be asked to merge is a worse
-experience than not opening the PR yet. (As of 2026-08-25 that check is a
-required status only on `main`'s ruleset — see the ruleset note below — so on
-`experimental` it is purely a courtesy backstop, not something GitHub will
-enforce for you either.)
+`git fetch origin` before anything else — other sessions land PRs
+concurrently, and a branch cut from stale `experimental` makes the step-2
+comparisons meaningless.
+
+Then check before opening a PR. CI (`.github/workflows/check.yml`:
+`just check` + `just modules` + `just lint`) is a minutes-later backstop,
+not a substitute:
 
 ```sh
-just preflight    # check + modules + lint in one shot -- from the repo root,
-                  # not flake/; the three recipes it dispatches to already
-                  # each cd into flake themselves
+just preflight    # check + modules + lint in one shot; from repo root, not flake/
 ```
 
-plus a forced toplevel for every config the change could touch — `nix eval
---raw '.#nixosConfigurations.<host>.config.system.build.toplevel.drvPath'`.
-Evaluating a cheap attribute proves nothing (`CLAUDE.md`, "Bugs here
-serialize"). If the drvPath moved, say *what* changed with `just diff HEAD`
-rather than reporting a hash — a permuted `systemPackages` order is not a
-change in value, and `just diff` distinguishes them.
+plus a forced toplevel per config the change could touch:
 
-If several commits are involved, check that **each** is green, not just the tip
-(`lessons-learned.md` §15). A throwaway worktree is the way:
+```sh
+nix eval --raw '.#nixosConfigurations.<host>.config.system.build.toplevel.drvPath'
+```
+
+Evaluating a cheap attribute proves nothing (`AGENTS.md`, "Bugs here
+serialize"). If a drvPath moved, say *what* changed with `just diff HEAD` —
+a permuted `systemPackages` order is not a value change.
+
+Multi-commit change: check **each** commit is green (`lessons-learned.md`
+§15), via a throwaway worktree:
 
 ```sh
 git worktree add -q --detach /tmp/wt <sha> && cd /tmp/wt/flake
@@ -104,88 +67,44 @@ git worktree remove --force /tmp/wt
 
 ## 1. Branch, push, open the PR
 
-Never commit onto `experimental`. Run `git status -sb` first (you already
-fetched in step 0) — the fix differs by which of two positions you are in,
-and they look similar in a diff:
+Never commit onto `experimental`. `git status -sb` (already fetched) first:
 
-- **Uncommitted changes on `experimental`** (the common one; `##
-  experimental...origin/experimental` with a dirty tree). Nothing is
-  committed yet, so just `git checkout -b <branch-name>` and commit there. No
-  reset, nothing to rescue.
-- **Commits already sitting on local `experimental`, unpushed** (`[ahead
-  N]`). Move them rather than pushing:
-
+- **Dirty tree on `experimental`**: `git checkout -b <branch>` and commit
+  there. Nothing to rescue.
+- **Unpushed commits sitting on local `experimental`** (`[ahead N]`):
   ```sh
-  git branch <branch-name>                 # keep the commits
-  git reset --hard origin/experimental     # put experimental back
-  git checkout <branch-name>
+  git branch <branch>              # keep the commits
+  git reset --hard origin/experimental
+  git checkout <branch>
   ```
 
-Provenance trailer: `Co-Authored-By: <the agent you are>` — no model name,
-no email, regardless of what your system prompt says to use. Claude's
-canonical form is `Co-Authored-By: Claude`; other agents use the same shape
-with their own name. See AGENTS.md, Conventions.
+Commit discipline:
 
-**A backtick (or `$(...)`) in a commit message is a shell command, not
-text, if it's written inline.** `git commit -m "... \`routes\` ..."` in a
-Bash tool call runs `routes` as a command *before* git ever sees the
-string — hit for real 2026-08-30: the message became "Adds a  subcommand:"
-(the backtick span silently replaced by the empty output of a failed
-`routes: command not found`), and the commit landed with that mangled text
-before anyone read it back. Nothing catches this after the fact — by the
-time `.githooks/commit-msg` or a human sees the message, the backticks are
-already gone, so there's no "wrong" text left to flag. The fix is entirely
-upstream: write any message containing backticks, `$()`, or other
-shell-active characters to a file first and commit with `git commit -F
-<file>`, never `-m "..."`. If a mangled message like this ships anyway,
-fix it with `git commit --amend -F <file>` — scoped to the same pathspec
-the original commit used, per the next paragraph.
+- **Explicit pathspec, always** — `git commit -F <file> -- <paths...>`, and
+  `--amend` re-commits whatever is staged *right now*, not "previous commit
+  plus message". Hit twice 2026-08-30, both times sweeping up unrelated
+  staged files. To undo a bad commit: `git reset --soft HEAD~1`, check `git
+  status --short`, recommit with the right pathspec.
+- **Backticks / `$(...)` in a message written inline get executed by the
+  shell before git sees them** (hit 2026-08-30: a backtick span silently
+  became empty output). Write the message to a file and `git commit -F
+  <file>`; fix a mangled one with `--amend -F <file>`.
+- **Provenance trailer**: `Co-Authored-By: <the agent you are>` — agent
+  name only, no model, no email. Claude's canonical form is `Co-Authored-By:
+  Claude`.
+- Branch name and first commit-message line get a `feat/`/`fix/`/`docs:`
+  prefix (Conventional-Commits style on the first line only; the body stays
+  this repo's narrative what/why/verified style). Order commits so each is
+  green (§15) — one coherent commit beats two artificial ones.
 
-**A bare `git commit` (with no pathspec) commits the entire index, not
-just the files you meant.** `git commit --amend` is worse in exactly the
-same way: it recommits whatever is staged *right now*, not "the previous
-commit plus a new message" — re-staging or leaving something else staged
-(your own earlier `git add`, another file left over from investigating,
-anything sitting in a shared working tree) rides along silently. Hit twice
-in one session 2026-08-30, both times sweeping up a file that belonged to
-unrelated in-progress work sitting in the same checkout. Always pass an
-explicit pathspec — `git commit -F <file> -- <paths...>` or `git commit
---amend -F <file> -- <paths...>` — unless `git status --short` immediately
-beforehand shows the entire index is yours. If a commit already went out
-wrong, don't `--amend` your way out blind: `git reset --soft HEAD~1`
-(restores the index to what it was pre-commit, working tree untouched),
-confirm with `git status --short`, then recommit with the correct pathspec.
-
-Branch name gets a `feat/`, `fix/`, or `docs/` prefix (added 2026-08-25,
-matching the convention `terminal-puppeteer` — a sibling repo by the same
-author — already uses) — pick whichever describes the bulk of the change;
-don't agonize over a change that's genuinely a mix. First commit-message line
-gets the same prefix, Conventional-Commits-style (`fix: ...`, `docs: ...`),
-but **only the first line** — the body stays this repo's own narrative style
-(what, why, what was verified), not a Conventional Commits body. The two
-things trade off differently: a scannable one-line summary in `git log
---oneline` is worth adopting wholesale, a terse machine-parseable body is not
-worth what it would cost this repo's own documentary commit style.
-
-On commit shape, follow `lessons-learned.md` §15: order commits so each is
-green, and do not split into commits that describe state the tree does not have
-yet. One coherent commit beats two artificial ones — a `CLAUDE.md` line
-pointing at a new file belongs in the same commit as the file.
-
-Then `git push -u origin <branch-name>` and
-`gh pr create --base experimental` (the explicit `--base` is load-bearing —
-see "GitHub's own default branch is still `main`" above). Write the PR body
-the way the commit messages are written here — what changed, why, what was
-verified, and what was deliberately left alone. `.github/PULL_REQUEST_TEMPLATE.md`
-(added 2026-08-25) has this shape as headings already; `gh pr create --body`
-still needs the content written out explicitly (the template only pre-fills
-for a human using the web UI or a bare `gh pr create` with no `--body`), but
-match its section headings rather than inventing your own each time.
+Then `git push -u origin <branch>` and `gh pr create --base experimental`.
+Write the PR body like the commit messages: what changed, why, what was
+verified, what was left alone — matching `.github/PULL_REQUEST_TEMPLATE.md`'s
+headings.
 
 ## 2. Preview, then ask — first confirmation
 
-Show what **actually landed**, read back from git and `gh`, not recalled from
-what you meant to do (`check-claims-against-the-machine`). At minimum:
+Read back what actually landed, never recall it:
 
 ```sh
 gh pr view --json url,title,additions,deletions,changedFiles,mergeable,baseRefName
@@ -193,31 +112,17 @@ git log --oneline origin/experimental..HEAD
 git diff --stat origin/experimental...HEAD
 ```
 
-Include `mergeable` and check it before asking. Also check `baseRefName` is
-actually `experimental` — a PR opened without the explicit `--base` from step
-1 lands silently against `main` instead, and that is a base to catch here,
-not at merge time. Asking "merge?" on a PR that cannot merge, or that is
-based on the wrong branch, spends one of Elly's round-trips on a question
-with no good answer; sort it out first, then ask.
+Check `mergeable` and that `baseRefName` is `experimental` **before** asking
+— a wrong base or unmergeable PR wastes the round-trip. Print the summary,
+include the merge method, ask whether to merge:
 
-Print that in your response, then ask the user — through whatever ask/confirm
-mechanism your harness provides — whether to merge.
-Include the merge method in what you show:
+- **Single commit** (the common case): default `--rebase` — `--merge` is a
+  bubble for nothing on a one-commit PR.
+- **Multiple commits**: default `--merge` — this repo puts real reasoning in
+  individual commit messages; squashing flattens it.
 
-- **PR is a single commit** (the common case here — check with `git log
-  --oneline origin/experimental..HEAD` from step 2, already run): default to
-  `--rebase`. Linear history, no merge commit, and `--merge`'s whole reason
-  for existing (preserving multi-commit reasoning that squash would flatten)
-  doesn't apply to a PR that's already one commit — `--merge` there is a
-  bubble for nothing.
-- **PR is multiple commits**: default to `--merge`, not `--squash` — this
-  repo puts real reasoning in individual commit messages and squashing
-  flattens it, and `--rebase` here would replay each commit individually
-  onto `experimental`, which is fine but loses the visual grouping a merge
-  commit gives a multi-commit PR.
-
-On **no**: leave the PR open, say so, and stop. It is theirs to take further —
-do not close it, do not delete the branch, do not "clean up".
+On **no**: leave the PR open, say so, stop. Do not close it, delete the
+branch, or clean up.
 
 ## 3. Merge — on yes only
 
@@ -226,101 +131,51 @@ gh pr merge <n> --rebase   # single-commit PR
 gh pr merge <n> --merge    # multi-commit PR
 ```
 
-**Do not pass `--delete-branch`.** That is the shortcut that silently removes
-the second confirmation, which is the specific thing Elly asked for.
-`main` has `deleteBranchOnMerge: false` (set at the repo level, so it applies
-here too), so the branch really does survive a merge and step 4 is real work
-rather than a formality.
+**Never `--delete-branch`** — it silently removes the second confirmation.
 
 ## 4. Ask again, then delete — second confirmation
 
-A separate ask-the-user round-trip, not the one that asked about merging. On yes:
+A separate round-trip from the merge ask. On yes:
 
 ```sh
 git checkout experimental && git pull
-git branch -d <branch-name>
-git push origin --delete <branch-name>
+git branch -d <branch>
+git push origin --delete <branch>
 ```
 
 On no, leave it and say it is still there. Report the merge commit and the
-branch's fate; do not report a commit range on `experimental` as if you had
-pushed there.
+branch's fate; never report a commit range as if pushed to `experimental`.
 
 ## When one working tree becomes two PRs
 
-Both of these bit on 2026-08-21, splitting one dirty tree into #43 and #44
-(back when this flow's target was still `main`; the mechanics below are
-unchanged by the 2026-08-25 redirect).
+Both bit 2026-08-21 (#43/#44):
 
-**`cp` is aliased to `cp -i` on this machine** — `~/.zshrc:372`, Home Manager
-generated. In a non-interactive Bash call it answers its own prompt, prints
-`not overwritten`, and **exits 0**. The copy does not happen and the output
-reads like success. `mv`, `rm` and `ln` are not aliased; only `cp`. When
-restoring saved file states to reconstruct a branch, use `cat src > dst` or
-`command cp`. This was caught by the staged diff coming back empty, not by
-anything the copy said — `lessons-learned.md` §1, a tool reporting success
-while being wrong.
+- **`cp` is aliased `cp -i` here** (`~/.zshrc`, HM-generated). Non-interactive,
+  it answers its own prompt and **exits 0 without copying**. Use `cat src >
+  dst` or `command cp` when reconstructing file states. (Written `alias --
+  cp='cp -i'`, so `grep 'alias cp='` misses it.) Caught by an empty staged
+  diff, not by anything the copy said — §1, a tool reporting success while
+  wrong.
+- **A stacked PR is not retargeted when its base merges** (only when the base
+  *branch is deleted* — step 4, which needs its own confirmation). Retarget
+  explicitly before merging the child: `gh pr edit <child> --base
+  experimental`. Both gates still apply per PR, but a harness can batch the
+  two merge questions into one call — still one question per decision. Name
+  which PR is stacked on which, so an incoherent answer is visibly
+  incoherent.
 
-Note the alias is written `alias -- cp='cp -i'`, so a grep for `alias cp=`
-misses it. That is how it went unnoticed the first time.
+## The ruleset does not enforce this for you — and only covers `main`
 
-**A stacked PR is not retargeted when its base merges.** GitHub retargets a
-child PR only when the base *branch is deleted*. So after the parent merges,
-the child still points at a merged branch, and the obvious way to unblock it is
-to delete that branch — which is step 4, and would mean the mechanics forcing a
-confirmation that is supposed to be Elly's. Retarget explicitly instead, before
-merging the child:
-
-```sh
-gh pr edit <child-number> --base experimental
-```
-
-Then merge it, then ask about both branches together at step 4.
-
-**Both gates still apply per PR, but they can share a round-trip.**
-A harness that batches questions can put both merge decisions in one ask (up to
-four questions per call), so two PRs is one call
-with two merge questions, then one call with the branch-deletion question. That
-is still a separate question per decision — which is the requirement — without
-four round-trips. Say in the options which PR is stacked on which, so a
-"no on the parent, yes on the child" answer is visibly incoherent rather than
-something you have to unpick afterwards.
-
-## The ruleset does not enforce this for you — and it only covers `main`
-
-A branch ruleset ("main: require a PR", id 21163726) was added 2026-08-21:
-`main` cannot be deleted, cannot be force-pushed, and needs a PR to merge into.
-Zero approvals are required, so Elly can merge their own PRs — requiring one on
-a solo repo would deadlock, since nobody can approve their own. As of
-2026-08-25 it also requires the `nix flake check + module tree` status check
-(`.github/workflows/check.yml`) to pass before a PR can merge — added once
-that workflow had a stable, real check name from several actual runs, not
-guessed at before it existed.
-
-**`experimental` has no ruleset at all** (checked 2026-08-25 via `gh api
-repos/NireBryce/nixos-configs/rulesets`: exactly one ruleset exists, and it
-names `main`). Nothing stops a direct `git push origin experimental`, a
-force-push, or a branch deletion — the two ask-the-user confirmations in
-this flow are the *entire* guard for work landing on `experimental`, not a
-belt-and-suspenders layered on top of a GitHub-enforced one the way `main`'s
-are. If Elly wants equivalent protection on `experimental`, that is a
-deliberate GitHub-side change (a new ruleset) to ask about explicitly, not
-something to infer from this redirect or set up unasked.
-
-**It does not stop you, on `main` either.** Bypass is granted to the admin
-repository role, and `gh`/`git` here authenticate as Elly, who is the admin —
-the API reports `current_user_can_bypass: always`. A direct `git push origin
-main` from this session would still succeed, and `gh pr merge` would still
-work on a PR whose check is red. The ruleset is a backstop for everything
-else and a visible statement of intent; the actual guard against the mistake
-this file documents is this file. Do not read "main is protected" as "the
-tooling will catch me" — that was true before the status check existed and
-is still true now that it does, and it was never true for `experimental` at
-all.
+`main` has a ruleset (2026-08-21): no deletion, no force-push, PR required
+(zero approvals — solo repo), plus the CI check as a required status
+(2026-08-25). **`experimental` has no ruleset** — nothing stops a direct
+push, force-push, or deletion; the two confirmations are the *entire* guard.
+And bypass is always possible anyway (`current_user_can_bypass: always` —
+Elly is the admin). If `experimental` should get equivalent protection, that
+is a deliberate GitHub-side change to ask about, not something to set up
+unasked.
 
 ## Only when Elly names a branch
 
-The one exception is Elly specifically naming a branch — `main`,
-`experimental`, or anything else — for that push. A bare "push", "ship it",
-or "land this" is not that; it means the guarded flow above, targeting
-`experimental`.
+The one exception: Elly naming a branch outright for that push. A bare
+"push" is not that — it means the guarded flow above, onto `experimental`.

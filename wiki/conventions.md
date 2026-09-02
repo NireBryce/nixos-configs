@@ -38,25 +38,19 @@ push directly there instead.
 
 ## The GitHub repo was renamed; a checkout's `origin` doesn't follow
 
-The repo lives at `NireBryce/nixos-configs` now — every reference in this
-wiki, in skills, and in `AGENTS.md` already names it that way. GitHub
-renamed it from `NireBryce/nixos` at some point before 2026-08-24 (the
-earliest `nixos-configs` link in this tree), and `git push`/`pull`/`fetch`
-on the *old* URL still work, silently, via GitHub's redirect — so an
-existing checkout's `origin` can go on pointing at the pre-rename URL
-indefinitely with nothing ever erroring to say so. Noticed 2026-08-31 on
-this machine's own checkout: `git push` printed `This repository moved.
-Please use the new location: https://github.com/NireBryce/nixos-configs.git`
-on every push, and `git remote -v` still showed the old `nixos.git` URL.
+The repo is `NireBryce/nixos-configs` (renamed from `NireBryce/nixos`
+before 2026-08-24). GitHub's redirect means `git push`/`pull`/`fetch` on the
+old URL keep working silently forever — a checkout's `origin` can point at
+the pre-rename URL with nothing erroring; the tell is `This repository
+moved...` on every push (noticed here 2026-08-31).
 
-Check with `git remote -v`; fix a stale one with:
+Check with `git remote -v`; fix with:
 
 ```sh
 git remote set-url origin https://github.com/NireBryce/nixos-configs.git
 ```
 
-Nothing breaks by leaving it — this is a courtesy fix, not a bug with
-consequences — but the redirect warning on every push is the tell.
+Nothing breaks by leaving it — courtesy, not a bug with consequences.
 
 ## Style
 

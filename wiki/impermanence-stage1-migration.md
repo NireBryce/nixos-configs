@@ -21,8 +21,9 @@ bootloader concerns it never touched.
 
 It ran from `boot.initrd.postResumeCommands` — scripted stage 1 — until
 2026-08-10, and now runs as `boot.initrd.systemd.services.restore-root`.
-Tenacity has booted on it since generation 62, with the rollback confirmed by
-subvolid rather than by the machine merely coming up. Durandal has not.
+Both hosts have booted on it (tenacity since generation 62, durandal since
+generation 222), with each rollback confirmed by subvolid in the journal
+rather than by the machine merely coming up.
 
 ---
 

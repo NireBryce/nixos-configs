@@ -12,16 +12,10 @@
 - [See also](#see-also)
 
 Libvirt/QEMU VMs, and *only* that — see [containers](containers.md) for why
-podman and distrobox (OCI containers) are a completely different category
-despite "virtualization" sounding like it should cover both.
-
-Moved from `nire/virtualization/` to `nire/homelab/virtualization/` on
-2026-08-27, nested under a new umbrella `homelab` category alongside six
-other self-hosted-service categories — see
-[categories/README.md](README.md). The category name and its individual
-importability by name are unaffected by that move; only the directory
-nesting changed. `durandal` also stopped importing this category
-the same day, unrelated to the move — see [Imported by](#imported-by).
+podman and distrobox (OCI containers) are a different category. Nested under
+the `homelab` umbrella since 2026-08-27 (moved from `nire/virtualization/`;
+name and by-name importability unaffected). `nire-llm-sandbox`, the one VM
+this category ran, was removed 2026-08-28 — [history.md](../history.md).
 
 ## What's in it
 
@@ -29,182 +23,119 @@ All four files live under `libvirt/` and are all `nixos`-class:
 
 - **`libvirt.nix`** — `virtualisation.libvirtd`, the daemon itself.
 - **`virt-tools.nix`** — client/disk-image tooling that runs *against*
-  libvirtd (split out so `libvirt.nix` stays about the daemon and its
-  options). Deliberately does not add `libvirt`/`qemu` packages itself —
-  the `libvirtd` module already puts `cfg.package` and `cfg.qemu.package`
-  onto `environment.systemPackages`, so `virsh`/`qemu-img` are already on
-  `PATH` without this file repeating that.
+  libvirtd. Deliberately adds no `libvirt`/`qemu` packages — the `libvirtd`
+  module already puts `cfg.package`/`cfg.qemu.package` on
+  `environment.systemPackages`.
 - **`vm-networking.nix`** — lets libvirt's default NAT bridge (`virbr0`,
-  with libvirt's own dnsmasq for DHCP/DNS) past the host firewall. Every
-  host in this repo has `networking.firewall.enable = true`, and without
-  this the symptom is a guest that boots fine, gets no DHCP lease, and
-  looks like a broken NIC rather than a firewall problem. Does **not**,
-  itself, start the network — see the next section for why that's a
-  separate piece, and where it actually lives.
+  with libvirt's dnsmasq) past the host firewall. Without it the symptom is
+  a guest that boots, gets no DHCP lease, and looks like a broken NIC. Does
+  **not** start the network — next section.
 - **`libvirt-persist.nix`** — persists
-  `/var/lib/libvirt/secrets/secrets-encryption-key` specifically (not
-  libvirtd's other first-run state under `/var/lib/libvirt`, which is just
-  libvirtd recreating its own stock defaults and not worth keeping). Losing
-  this key doesn't recreate a default — it orphans whatever it was
-  encrypting. Found 2026-08-22 via `root-drift.sh` flagging it as real,
-  non-cosmetic drift, alongside NetworkManager's own secret key (see
-  [system](system.md)'s `networkmanager-persist.nix`).
+  `/var/lib/libvirt/secrets/secrets-encryption-key` only (libvirtd's other
+  first-run state is just stock defaults recreating themselves). Losing the
+  key orphans whatever it was encrypting. Found 2026-08-22 via
+  `root-drift.sh`, alongside NetworkManager's key (see
+  [system](system.md)).
 
 ## The default network is defined but never started — and where that's fixed
 
 libvirt ships its default NAT network *defined* but never *started*.
-`libvirtd-config.service` (upstream NixOS) already re-copies the stock
-`default.xml` into `/var/lib/libvirt/qemu/networks/` on every boot if
-missing — so the *definition* self-heals for free, which is also why
-`libvirt-persist.nix` above correctly declines to persist that path.
-Whether it's actually *running* is a separate problem, and nothing in
-`vm-networking.nix` solves it — that file only opens the firewall for a
-network that's already up.
+`libvirtd-config.service` (upstream) re-copies the stock `default.xml` into
+`/var/lib/libvirt/qemu/networks/` on every boot if missing — the definition
+self-heals, which is why `libvirt-persist.nix` declines to persist that
+path. *Running* it is a separate problem `vm-networking.nix` doesn't solve.
 
-RUNTIME-VERIFIED TRAP, 2026-08-23, on `nire-cube`'s first real `just switch`
-with `nire-llm-sandbox` (the VM this category once ran; removed 2026-08-28,
-see [history.md](../history.md)): it failed outright with `error: Requested
-operation is not valid: network 'default' is not active`. A host-wide
-systemd unit unconditionally starting the network at boot was considered and
-rejected — it would've turned `virbr0` + dnsmasq + this category's own
-`trustedInterfaces = [ "virbr0" ]` (already unconditional today) from "live
-only during an active VM session" into "live for the entire uptime,"
-**on durandal too**, which never had this problem and wasn't asked about.
-Fixed instead in `VMs/_lib/libvirt-vm.nix`'s own per-VM activation script,
-gated on the `networked` parameter it already takes: the network starts only
-when a VM generated by that file actually declares it needs one. Confirmed,
-not assumed — durandal's toplevel drvPath is byte-identical before and after
-this fix, same as the confirmation method below.
+RUNTIME-VERIFIED TRAP, 2026-08-23, cube's first real `just switch` with
+`nire-llm-sandbox`: it failed with `error: Requested operation is not
+valid: network 'default' is not active`. A host-wide unit unconditionally
+starting the network was considered and rejected — it would have made
+`virbr0` + dnsmasq + this category's `trustedInterfaces = [ "virbr0" ]`
+live for the entire uptime **on durandal too**, which never had this
+problem. Fixed instead in `VMs/_lib/libvirt-vm.nix`'s per-VM activation
+script, gated on its `networked` parameter: the network starts only when a
+VM generated by that file declares it needs one. Confirmed by durandal's
+toplevel drvPath being byte-identical before and after.
 
 ## Optional inbound SSH, scoped by source IP rather than by interface
 
-`VMs/_lib/libvirt-vm.nix` takes an optional `sshForward = { guestId; hostPort;
-sourceCidrs ? ...; }` parameter, added 2026-08-23, that a caller can set to
-forward a host port to a guest's SSH port. `null` (the default) means the
-guest stays exactly as isolated as NAT already makes it — nothing can reach
-in unprompted. Two design choices worth knowing if extending this to another
-VM:
+`VMs/_lib/libvirt-vm.nix` takes an optional
+`sshForward = { guestId; hostPort; sourceCidrs ? ...; }` (added
+2026-08-23); `null` (default) leaves the guest as isolated as NAT makes it.
+Design choices, if extending to another VM:
 
-- **Source-IP-based, not interface-based.** Restricting to "LAN or Tailscale"
-  by interface name isn't portable — a NIC's device name (`enp3s0`, `wlp4s0`,
-  ...) differs per host, and this generator is meant to be called from more
-  than one. Restricting by source CIDR (RFC1918 for LAN, `100.64.0.0/10` for
-  Tailscale's own CGNAT range) needs no host-specific parameter to stay
-  correct everywhere.
-- **`guestId` is human-pinned, not derived or auto-allocated** — same
-  reasoning [containers](containers.md)'s `podman.nix` already gives for its
-  own `subUidRanges`. It fixes both a MAC (`52:54:00:00:00:<guestId,
-  hex>`) and a DHCP-reserved IP (`192.168.122.<guestId>`) on libvirt's
-  default network, so the forwarded port always has a known, stable
-  destination rather than depending on `virsh domifaddr` at connection time.
+- **Source-IP-based, not interface-based.** NIC names (`enp3s0`, ...)
+  differ per host; source CIDRs (RFC1918 for LAN, `100.64.0.0/10` for
+  Tailscale) need no host-specific parameter.
+- **`guestId` is human-pinned** (same reasoning as
+  [containers](containers.md)'s `subUidRanges`): it fixes both a MAC
+  (`52:54:00:00:00:<guestId, hex>`) and a DHCP-reserved IP
+  (`192.168.122.<guestId>`), so the forwarded port has a stable
+  destination.
 
-`nire-llm-sandbox` was the one VM using it, before its removal 2026-08-28
-(see [history.md](../history.md)): `guestId = 10`, `hostPort = 2222`,
-`sourceCidrs` narrowed to Tailscale only (not the generator's own
-LAN-or-Tailscale default) — a deliberate per-VM choice made in that VM's
-own cube wiring (`virtualization-cube.nix`, also removed), not a property
-of the generator itself. While it existed it was verified by reading back
-the actual generated domain XML, activation script, and firewall rule (not
-just evaluation) — the domain XML carried the exact MAC, the activation
-script's DHCP-reservation guard referenced it correctly, and
-`networking.firewall.extraCommands` contained exactly one DNAT rule, scoped
-to `100.64.0.0/10`, no LAN range. The domain itself was confirmed booted and
-staying up on `nire-cube` (2026-08-24 — see
-[../lessons-learned.md](../lessons-learned.md) §40), but an actual SSH
-connection through this forward was never made
-before the VM was removed. No caller uses `sshForward` today; the mechanism
-above is unexercised until one does.
+`nire-llm-sandbox` was the one caller (`guestId = 10`, `hostPort = 2222`,
+`sourceCidrs` narrowed to Tailscale only — a per-VM choice in its cube
+wiring, not a generator property). Verified by reading back the generated
+domain XML, activation script, and firewall rule; the domain itself was
+confirmed booted (2026-08-24 — [../lessons-learned.md](../lessons-learned.md)
+§40), but an actual SSH through the forward was never made before the VM's
+removal. The mechanism is unexercised until a caller exists.
 
 ## `VMs/_lib/libvirt-vm.nix` — a generator, not a category member
 
-Still in this category, but deliberately not one of its 4 members above,
-and not currently called by anything: a plain curried function (`{ name,
-image, ... }: { pkgs, lib, ... }: {...}`), not a flake-parts module — it
-can't declare `flake.modules.nixos.<name>` because it takes parameters, and
-`import-tree` would fail outright trying to auto-import it with standard
-module args. Filed under `_lib/` for the same reason
-`nirePackages/_lib/mkPkgModule.nix` is: `import-tree` ignores any path
-containing `/_`.
+Present but deliberately not one of the 4 members, and currently uncalled:
+a plain curried function (`{ name, image, ... }: { pkgs, lib, ... }: ...`),
+not a flake-parts module — it takes parameters, so `import-tree` would fail
+auto-importing it. Filed under `_lib/` because `import-tree` ignores any
+path containing `/_` (same as `nirePackages/_lib/mkPkgModule.nix`).
 
-Its one caller was `virtualization-cube.nix`, cube-side wiring that defined
-and started `nire-llm-sandbox` — a libvirt VM guest sandboxing an LLM coding
-agent. Both the VM and its wiring were removed 2026-08-28 (see
-[history.md](../history.md)); the generator itself was kept as unexercised
-reusable infrastructure, on the theory that hand-deriving a second VM from
-scratch would be worse than parameterizing once. While `virtualization-cube.nix`
-existed it illustrated a second, unrelated dirsAsCategory exclusion worth
-knowing regardless: a file sitting bare in `nire/homelab/virtualization/`
-itself, not in any subdirectory, is collected by nothing (this category only
-collects from *sub*directories) — which is what kept that VM out of the
-`virtualization` category's own aggregate, back when `durandal` still
-imported `virtualization` too and would otherwise have gotten it. It still
-**was** swept into the `homelab` aggregate that cube imports, since
-`homelab`'s own collector separately gathers bare `.nix` files sitting
-directly in each nested category's root alongside its by-name reference to
-that category's aggregate (see
-`flake/doc/dirsAsCategory.md`'s History section for why that second half
-exists — an earlier version of `homelab`'s delegation lacked it and silently
-dropped this exact file).
+Its one caller, `virtualization-cube.nix`, was removed with the VM
+2026-08-28. While it existed it illustrated a second dirsAsCategory
+exclusion worth knowing: a file sitting bare in `nire/homelab/virtualization/`
+itself (not in a subdirectory) is collected by nothing — which kept the VM
+out of this category's aggregate back when durandal imported it too. It
+still **was** swept into the `homelab` aggregate cube imports, since
+`homelab`'s collector separately gathers bare `.nix` files directly in each
+nested category's root (`flake/doc/dirsAsCategory.md`'s History section has
+why — an earlier version lacking that silently dropped this exact file).
 
-See [history.md](../history.md) for `nire-llm-sandbox` itself, and skill
-`nixos-vm-images` for two real bugs this specific feature hit while it
-existed (nixpkgs' image-variant isolation not reaching a base config's
-toplevel, and `image.filePath` being relative rather than absolute) — both
-caught before landing, neither by evaluation alone.
+Skill `nixos-vm-images` has the two real bugs this feature hit (nixpkgs'
+image-variant isolation not reaching a base config's toplevel;
+`image.filePath` relative rather than absolute).
 
 ## The near-miss this category's own header records
 
-`libvirt.nix`'s header carries a live example of the `boot`-style merge
-trap almost happening again: for about an hour on 2026-08-21, this file was
-named `virtualization.nix` and declared
-`flake.modules.nixos.virtualization` — the *exact* attribute name this
-category's own `dirsAsCategory.nix` declares for its aggregate, once the
-surrounding directory was renamed to `virtualization/`. File and category
-would have both written to `flake.modules.nixos.virtualization` and
-**merged** rather than conflicted, invisibly, because importing either one
-would have looked like it worked. Caught and renamed before it shipped.
+For about an hour on 2026-08-21, `libvirt.nix` was named
+`virtualization.nix` and declared `flake.modules.nixos.virtualization` —
+the exact attribute this category's `dirsAsCategory.nix` declares for its
+aggregate. Both would have written to the same name and **merged**
+invisibly. Caught and renamed before it shipped.
 
 ## Why this is its own category and not part of `system`
 
-So the handhelds can decline it. `nire/system/` is imported whole by every
-Linux host with no way to opt out of a piece of it — see
-[system](system.md) and [../architecture.md](../architecture.md). Splitting
-libvirt out into its own category makes it optional: a boot-time daemon
-like `libvirtd` has no business running on a gamescope handheld that will
-never open virt-manager. Needs `security.polkit.enable`, which the desktop
-session (`kde-desktop`) already brings on the hosts that import it.
+So the handhelds can decline it: `nire/system/` is imported whole by every
+Linux host, and a boot-time daemon like `libvirtd` has no business on a
+gamescope handheld. Needs `security.polkit.enable`, which `kde-desktop`
+already brings on the hosts that import it.
 
 ## Imported by
 
-`cube` only, as of 2026-08-27. `durandal` imported this too until then —
-same as `cube` does today, "the workstations get it, the handhelds don't"
-— but was dropped: nothing in this repo's history ever recorded durandal
-actually running a VM (cube's own confirmed usage, `nire-llm-sandbox`, was
-itself removed 2026-08-28 — see [history.md](../history.md)), so it was
-carried purely for parity rather than an established need. See
-`durandal-configuration.nix`'s own comment at the point it was removed.
-Still not `tenacity`, the handheld (the one that imports
-`jovian` — see [desktop-env](desktop-env.md)) — that part of the reasoning
-is unchanged.
+`cube` only, as of 2026-08-27. `durandal` imported it until then ("the
+workstations get it") but was dropped — nothing in this repo's history
+records durandal ever running a VM, so it was parity, not need (see
+`durandal-configuration.nix`'s comment at the removal point). Never
+`tenacity` — the handheld imports `jovian` (see
+[desktop-env](desktop-env.md)).
 
 ## See also
 
-- [containers](containers.md) — where OCI containers (podman/distrobox)
-  actually live (its own category since 2026-08-22, previously filed under
-  `system`), and why "virtualization" meaning only this is a live trap for a
-  stale memory.
-- [impermanence](impermanence.md), [desktop-env](desktop-env.md) — the two
-  other categories with their own `*-persist.nix` sibling files following
-  the same "persistence lives beside what generates it" convention as
-  `libvirt-persist.nix`.
-- [../architecture.md](../architecture.md) — "If something shared needs to
-  be optional, a category is the mechanism" — this category is the running
-  example that claim is built on.
-- [../history.md](../history.md) — `nire-llm-sandbox`, the VM guest
-  `virtualization-cube.nix` used to define and start.
-- Skill `nixos-vm-images` (`.claude/skills/nixos-vm-images/SKILL.md`) — the
-  full mechanism and traps behind `VMs/_lib/libvirt-vm.nix` above.
-- [monitoring](monitoring.md) — `libvirt-exporter.nix` scrapes whatever VMs
-  this category defines (none currently), and the same `just switch` that
-  surfaced the default-network bug above also surfaced two unrelated
-  Grafana bugs on `nire-cube`.
+- [containers](containers.md) — where OCI containers actually live, and why
+  "virtualization" meaning only this is a live trap for a stale memory.
+- [impermanence](impermanence.md), [desktop-env](desktop-env.md) — the other
+  categories with `*-persist.nix` siblings following the same
+  "persistence lives beside what generates it" convention.
+- [../architecture.md](../architecture.md) — "if something shared needs to
+  be optional, a category is the mechanism"; this category is the running
+  example.
+- [../history.md](../history.md) — `nire-llm-sandbox`.
+- Skill `nixos-vm-images` — the full mechanism and traps behind the
+  generator.

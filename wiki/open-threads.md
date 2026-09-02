@@ -92,16 +92,13 @@ specific report — not as a housekeeping pass over this list:
   eventually.md` — itself removed 2026-09-01 (still in git history; also
   carried a security-hardening reference link, now only recoverable there).
 - `claude cave/2026-08-24-evaluation-self-hosted-booking.md` (removed
-  2026-09-01, no longer a link — still in git history if wanted again) —
-  Easy!Appointments vs LibreBooking, compared 2026-08-24 and then
-  explicitly not pursued. Nothing built, no host picked. Recorded which of
-  the two fits which problem (they aren't competitors — one books a
-  person's time, the other books a *thing*), that **neither is in nixpkgs
-  and neither has a NixOS module**, and the one design problem that would
-  actually need solving if it restarts: both are PHP apps wanting a
-  writable install dir, so podman-vs-hand-written-module was the unanswered
-  first question. Also corrected a from-memory claim about Cal.com's
-  license.
+  2026-09-01, still in git history if wanted) — Easy!Appointments vs
+  LibreBooking, compared 2026-08-24 and explicitly not pursued. What's
+  recorded: they aren't competitors (one books a person's time, the other
+  books a *thing*), **neither is in nixpkgs and neither has a NixOS
+  module**, and the unanswered first question if it restarts: both are PHP
+  apps wanting a writable install dir, so podman-vs-hand-written-module.
+  Also corrected a from-memory claim about Cal.com's license.
 - **[`../flake/doc/notes-and-fixes.md`](<../flake/doc/notes-and-fixes.md>)**
   ends with a "things to look into" list — MyNixOS, nixpkgs-wayland,
   nix-direnv, haumea, flakelight, flake-utils(-plus), devshell, devbox,
@@ -128,20 +125,17 @@ bug; each is a decision someone might otherwise re-litigate from scratch.
   should `git pull` first, and the test directory can be deleted once they
   have. Sync-and-build-over-ssh exists because a darwin session cannot build
   an `x86_64-linux` toplevel; see the `new-homelab-service` skill.
-- **Nothing backs up `/var/lib/forgejo`** — or anything else on cube. Repos,
-  the sqlite database, and Forgejo's self-generated secrets all live there
-  with exactly one copy. **Now tracked as
-  [#87](https://github.com/NireBryce/nixos-configs/issues/87)**, which covers
-  the whole fleet rather than just the forge; documented at
+- **Nothing backs up `/var/lib/forgejo`** — or anything else on cube.
+  **Now tracked as
+  [#87](https://github.com/NireBryce/nixos-configs/issues/87)** (whole
+  fleet, not just the forge); documented at
   [homelab/forgejo.md](homelab/forgejo.md) so nobody mistakes the forge for
-  durable storage in the meantime. **A [backup](categories/backup.md)
-  category landed 2026-08-28** implementing #87's scheme — doesn't move any
-  other host, switched and running on cube as of 2026-08-30. Shipped as
-  restic over a local-path NFS repo, which failed for real (an export ACL
-  the QNAP never granted cube); as of 2026-08-31 it's SFTP instead, #87's
-  original plan, now that SSH works on the QNAP. Blocked on two sops
-  secrets nobody with decrypt access has set yet and still no anti-deletion
-  snapshot configured. Still exactly one copy of everything until both
+  durable storage. A [backup](categories/backup.md) category landed
+  2026-08-28 implementing #87's scheme, switched and running on cube as of
+  2026-08-30 — but as local-path restic over NFS, which failed for real (an
+  export ACL the QNAP never granted cube), so SFTP since 2026-08-31.
+  Blocked on two sops secrets nobody with decrypt access has set, plus no
+  anti-deletion snapshot. Still exactly one copy of everything until both
   land and a restore is actually performed.
 - **Tailscale Services (`svc:`) were weighed and deferred.** They would give
   each service its own tailnet DNS name (`https://grafana/` rather than a
