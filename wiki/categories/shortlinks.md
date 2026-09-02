@@ -17,32 +17,12 @@
 shortlink service. Added 2026-08-24, cube-only; nested under the `homelab`
 umbrella since 2026-08-27 (name unaffected).
 
-**It failed its first real switch, and the fix is in.** `golink.service`
-crash-looped on `nire-cube` (2026-08-24, generation 13):
-
-```
-tsnet: route ip+net: netlinkrib: address family not supported by protocol
-```
-
-A missing `AF_NETLINK` in this module's own `RestrictAddressFamilies` — see
-[the hardening section](#dynamicuser-deliberately). It shipped as
-"evaluates, not runtime-verified" (written from a darwin session, which
-can't build an `x86_64-linux` toplevel), and broke for precisely the reason
-its own hardening comment claimed to be guarding against — the risk was
-named correctly, attached to the wrong knob. Same family as
-[monitoring](monitoring.md)'s `grafana.service` first-switch failure:
-**a green evaluation and a read-back of the rendered unit both said
-nothing** ([`lessons-learned.md`](../lessons-learned.md) §37).
-
-**Now confirmed working end to end, 2026-08-24**, after the fix and the
-one-time login: `golink.service` `active (running)` at **`NRestarts=0`**,
-0 failed units, tailnet device `go` up on a direct connection, and
-`http://go/` answering `HTTP 200` from *another* tailnet host.
-
-`NRestarts=0` is the load-bearing number rather than `active (running)`:
-the original failure was a crash-loop, and a unit that has restarted eight
-times also reports `active` in between (§40 covers the inverse — a failed
-unit whose resource was fine).
+**It failed its first real switch, then was fixed and confirmed working
+end to end the same day (2026-08-24)** — a missing `AF_NETLINK` in this
+module's own `RestrictAddressFamilies`; see [the hardening
+section](#dynamicuser-deliberately) for the setting, and
+[shortlinks-history.md](shortlinks-history.md) for the crash-loop and the
+fix in full.
 
 Usage — creating and managing links — is [homelab/golinks.md](../homelab/golinks.md).
 This page stays the configuration side.
@@ -202,3 +182,5 @@ and after this change.
   links, the template syntax, and the `curl` traps.
 - [hosts.md](../hosts.md) — current switch/verification status for
   `nire-cube`.
+- [shortlinks-history.md](shortlinks-history.md) — the first-switch
+  crash-loop in full.

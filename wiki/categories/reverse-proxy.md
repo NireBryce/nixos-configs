@@ -20,32 +20,13 @@
 every web service on `nire-cube`. Added 2026-08-24, cube-only; nested under
 the `homelab` umbrella since 2026-08-27 (name unaffected).
 
-**Confirmed working end to end, 2026-08-24**, on the second switch. `just
-switch` came up with 0 failed units, `caddy.service` `active (running)` at
-`NRestarts=0`, and from *another* tailnet host (not `localhost` on cube):
-
-| Request | Result |
-|---|---|
-| `https://ts-cube.moose-micro.ts.net/grafana/` | 200, TLS validated |
-| `https://ts-cube.moose-micro.ts.net/git/` | 200, TLS validated |
-| `https://ts-cube.moose-micro.ts.net/` | 200 — [glance](landing.md), the service index |
-| `https://ts-cube.moose-micro.ts.net/git` | 301 → `/git/` |
-| `http://ts-cube/` | 301 → the FQDN |
-
-`ssl_verify_result` was 0 — the tailscaled-issued certificate validated
-against the system trust store, the one thing no amount of building could
-have shown. Forgejo's *generated* links were checked separately
-(`href="/git/explore/repos"`, an asset under `/git/` returning 200), since a
-correctly stripped prefix can still emit links that 404 on the next click.
-On the host, `ss -ltn` shows 3000/3001 bound to `127.0.0.1` only, with
-80/443 the sole tailnet-facing listeners.
-
-**The first switch was broken**, instructively: `/grafana/` returned 200
-while `/git/` returned 404, because both routes had been given the same
-Caddy directive. See [the two apps want opposite
-things](#the-two-apps-want-opposite-things-from-the-proxy) below, and
-[`lessons-learned.md`](../lessons-learned.md) #41 — every static check had
-passed first, including a real build and a read of the built artifact.
+**Confirmed working end to end, 2026-08-24**, on the second switch — the
+first served `/git/` a 404 through the wrong Caddy directive; see [the two
+apps want opposite things](#the-two-apps-want-opposite-things-from-the-proxy)
+below for that mechanism, and
+[reverse-proxy-history.md](reverse-proxy-history.md) for the full
+verification checklist (TLS validation, generated-link checks, the exact
+requests tested).
 
 ## What's in it
 
@@ -239,3 +220,5 @@ before and after this change.
   URLs for everything on cube.
 - [hosts.md](../hosts.md) — current switch/verification status for
   `nire-cube`.
+- [reverse-proxy-history.md](reverse-proxy-history.md) — the second
+  switch's full verification checklist.

@@ -4,7 +4,6 @@
 
 - [What's in it](#whats-in-it)
 - [Why the category isn't named `restic`](#why-the-category-isnt-named-restic)
-- [The QNAP mount predates this category by months, and was never dangling](#the-qnap-mount-predates-this-category-by-months-and-was-never-dangling)
 - [SFTP repository now, not local-path on NFS](#sftp-repository-now-not-local-path-on-nfs)
 - [sqlite consistency](#sqlite-consistency)
 - [What's excluded, and why](#whats-excluded-and-why)
@@ -16,9 +15,9 @@
 [restic](https://restic.net/), backing up `nire-cube`'s own service state to
 the QNAP NAS already on the network. Added 2026-08-28, cube-only, against
 issue [#87](https://github.com/NireBryce/nixos-configs/issues/87) ("no
-backups anywhere in the fleet") and an original plan, folded into
-[`../homelab/backup-runbook.md`](<../homelab/backup-runbook.md>)'s
-"Background" section 2026-09-02 when `claude cave/` was retired.
+backups anywhere in the fleet"). The original plan, an early NFS-mount
+correction, and the mount's own pre-history are on
+[backup-history.md](backup-history.md).
 
 Nested under [homelab](homelab.md) the same way the other seven are — see
 that page's own note on this one being the odd member out functionally
@@ -37,23 +36,6 @@ Same reason [git-forge](git-forge.md) isn't `forgejo` and
 both named `restic` would both declare `flake.modules.nixos.restic` and
 silently **merge** — the `containers`/`podman.nix` collision
 [architecture.md](../architecture.md) documents.
-
-## The QNAP mount predates this category by months, and was never dangling
-
-The plan doc this category implements described
-`nire/system/storage/storage-NFS.nix` (the NFS mount to the QNAP) as an
-unused module. It isn't: `nire/system/storage/` has no `dirsAsCategory.nix`
-of its own, so the module is collected straight into the shared `system`
-aggregate, which every Linux host imports — confirmed via `nix eval
-.#nixosConfigurations.<host>.config.fileSystems` on all three NixOS hosts,
-2026-08-28. So no new import was needed to reach it. Still true from the
-plan: nothing had ever exercised that mount against the real QNAP, so
-"already imported" ≠ "known to work."
-
-The mount point itself moved 2026-08-28: `/mnt/qnap-erin` (a share shared
-with unrelated QNAP uses) → `/mnt/restic-backup` (dedicated). **As of
-2026-08-31 this module doesn't use that mount at all** — next section — but
-`storage-NFS.nix` is untouched, still there for whatever else wants it.
 
 ## SFTP repository now, not local-path on NFS
 
@@ -150,9 +132,9 @@ after this category was added.
 - [../homelab/pending-setup.md](../homelab/pending-setup.md) — the two
   remaining human steps, alongside the fleet's other one-time setup.
 - [../homelab/backup-runbook.md](../homelab/backup-runbook.md) — the actual
-  commands (finishing setup, status, manual backup, restore); its
-  "Background" section is the plan this category implements, folded in
-  there 2026-09-02 including what it got wrong about the QNAP mount.
+  commands (finishing setup, status, manual backup, restore).
 - [../homelab/rustic.md](../homelab/rustic.md) — an interactive TUI that can
   browse and restore from this same repository, installed but not yet
   switched or run against it.
+- [backup-history.md](backup-history.md) — the original plan and what it
+  got wrong about the QNAP mount.

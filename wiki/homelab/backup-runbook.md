@@ -9,7 +9,6 @@
 - [Performing a restore — the actual bar for "done"](#performing-a-restore--the-actual-bar-for-done)
 - [Troubleshooting](#troubleshooting)
 - [What's verified here](#whats-verified-here)
-- [Background: the original plan (2026-08-27)](#background-the-original-plan-2026-08-27)
 - [See also](#see-also)
 
 Operating [backup](../categories/backup.md) — the restic category that backs
@@ -307,33 +306,6 @@ backup has run, no snapshot exists, no restore has been attempted, and the
 QNAP snapshot schedule (setup step 2) is unconfirmed. This section gets
 filled in further the first time each of those does.
 
-## Background: the original plan (2026-08-27)
-
-Written before anything had touched cube or the QNAP, against issue #87 and
-[pending-setup](pending-setup.md) item 4; folded in here 2026-09-02 when
-`claude cave/` was retired. [backup](../categories/backup.md) has the
-mechanism as actually built, including where the plan turned out wrong (the
-NFS mount was never dangling) and where it was reversed (SFTP, not NFS).
-What's still worth keeping:
-
-- **What was at risk** (per #87, re-confirmed by grep): nothing in `flake/`
-  configured any backup tool, and cube has a plain persistent root. Four
-  paths named explicitly: `/var/lib/forgejo` (repos, sqlite db,
-  self-generated secrets), `/var/lib/grafana` (sqlite db — UI-created
-  dashboards live only there), `/var/lib/private/golink` (links db + tsnet
-  node key), `/persist/secrets/`+`/persist/passwords/` (hand-created,
-  nothing recreates them). None recoverable if lost. Prometheus's TSDB was
-  excluded from the start — biggest, least valuable, fully regenerable.
-- **The shape it proposed**, most of which is what got built: size the
-  paths (`du -sh`) before committing to retention (still not done); import
-  the storage mount; confirm the QNAP side (share + snapshot schedule); a
-  cube-only category wrapping `services.restic.backups.cube` with sops
-  secrets and sqlite staging; the repo password kept outside cube too; and
-  **a restore drill as the actual bar for done** — the one definition that
-  outlived the plan itself.
-- **The judgment call it flagged explicitly**: NFS-local-path trades keyed
-  auth for not standing up SSH on the QNAP — the exact trade-off that broke.
-
 ## See also
 
 - [backup](../categories/backup.md) — the module, the NFS-to-SFTP switch
@@ -344,3 +316,5 @@ What's still worth keeping:
   runbook is the procedure for.
 - [open-threads.md](../open-threads.md) — issue #87, the "Left open by the
   cube service stack" section.
+- [../categories/backup-history.md](../categories/backup-history.md) — the
+  original plan this runbook implements.

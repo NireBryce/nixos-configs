@@ -6,7 +6,6 @@
 - [The default network is defined but never started — and where that's fixed](#the-default-network-is-defined-but-never-started--and-where-thats-fixed)
 - [Optional inbound SSH, scoped by source IP rather than by interface](#optional-inbound-ssh-scoped-by-source-ip-rather-than-by-interface)
 - [`VMs/_lib/libvirt-vm.nix` — a generator, not a category member](#vms_liblibvirt-vmnix--a-generator-not-a-category-member)
-- [The near-miss this category's own header records](#the-near-miss-this-categorys-own-header-records)
 - [Why this is its own category and not part of `system`](#why-this-is-its-own-category-and-not-part-of-system)
 - [Imported by](#imported-by)
 - [See also](#see-also)
@@ -72,13 +71,9 @@ Design choices, if extending to another VM:
   (`192.168.122.<guestId>`), so the forwarded port has a stable
   destination.
 
-`nire-llm-sandbox` was the one caller (`guestId = 10`, `hostPort = 2222`,
-`sourceCidrs` narrowed to Tailscale only — a per-VM choice in its cube
-wiring, not a generator property). Verified by reading back the generated
-domain XML, activation script, and firewall rule; the domain itself was
-confirmed booted (2026-08-24 — [../lessons-learned.md](../lessons-learned.md)
-§40), but an actual SSH through the forward was never made before the VM's
-removal. The mechanism is unexercised until a caller exists.
+`nire-llm-sandbox` was the one caller, before its removal 2026-08-28; the
+mechanism is unexercised until another one exists — full verification
+record on [virtualization-history.md](virtualization-history.md).
 
 ## `VMs/_lib/libvirt-vm.nix` — a generator, not a category member
 
@@ -101,14 +96,6 @@ why — an earlier version lacking that silently dropped this exact file).
 Skill `nixos-vm-images` has the two real bugs this feature hit (nixpkgs'
 image-variant isolation not reaching a base config's toplevel;
 `image.filePath` relative rather than absolute).
-
-## The near-miss this category's own header records
-
-For about an hour on 2026-08-21, `libvirt.nix` was named
-`virtualization.nix` and declared `flake.modules.nixos.virtualization` —
-the exact attribute this category's `dirsAsCategory.nix` declares for its
-aggregate. Both would have written to the same name and **merged**
-invisibly. Caught and renamed before it shipped.
 
 ## Why this is its own category and not part of `system`
 
@@ -137,5 +124,7 @@ records durandal ever running a VM, so it was parity, not need (see
   be optional, a category is the mechanism"; this category is the running
   example.
 - [../history.md](../history.md) — `nire-llm-sandbox`.
+- [virtualization-history.md](virtualization-history.md) — `nire-llm-sandbox`'s
+  own `sshForward` verification, and the module-naming near-miss.
 - Skill `nixos-vm-images` — the full mechanism and traps behind the
   generator.

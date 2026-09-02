@@ -99,32 +99,16 @@ Found on `nire-cube`'s first real `just switch` with this category —
   read. Grafana starts, can't read its own secret key, and dies, with
   nothing more specific than "failed" in `systemctl status`'s default view.
 
-A `warnings` entry describing a two-step manual fix used to sit here —
-fixed by hand once (2026-08-23), then found **regressed to the same
-`root:root` state** on a live re-check 2026-08-24, `grafana.service`
-crash-looping the whole time nobody checked. One regression was reason
-enough not to trust a second hand fix: `grafana-secret-key-setup.service`
-(`grafana.nix`) replaced the warning — a oneshot ordered before
-`grafana.service` on *every* activation that generates the secret only if
-missing and unconditionally reasserts ownership/mode, modeled on
+`grafana-secret-key-setup.service` (`grafana.nix`) generates the secret
+only if missing and unconditionally reasserts ownership/mode, modeled on
 `services.forgejo`'s upstream `forgejo-secrets.service`
-([git-forge](git-forge.md)). Checking `services.grafana`'s nixpkgs module
-first showed this isn't idiomatic *to Grafana*: nixpkgs removed its
+([git-forge](git-forge.md)) — nixpkgs removed Grafana's own
 `secretKeyFile` option in favor of exactly this "the deployer manages it"
-file-provider approach, warning there's no official way to rotate
-`secret_key` — so the unit only ever *creates* a missing file, never
-regenerates; only ownership/mode are safe to reassert, and that's the part
-that kept regressing. **Confirmed working end to end, 2026-08-24**:
-`sudo systemctl restart grafana.service` (needed once — a brand-new unit
-added by `switch` isn't pulled into an already-running service) ran the
-setup unit first (`0/SUCCESS`), and `grafana.service` came back up with the
-secret file's mtime unchanged and ownership `grafana:grafana`.
-
-A third, unrelated thing broke in the same `switch` and is **not** part of
-this category: the sandbox VM failed with `network 'default' is not active`
-— that's [virtualization](virtualization.md)'s libvirt default network
-never being started. Two independent failures in one activation log are
-easy to conflate; they had nothing to do with each other.
+file-provider approach, with no official way to rotate `secret_key`, so
+the unit only ever *creates* a missing file and never regenerates one.
+Replaced a hand-fixed file that regressed twice before this landed —
+[monitoring-history.md](monitoring-history.md) has that chronology and the
+confirmation this unit actually fixed it.
 
 ## Why cube only, and why that's a category rather than a host-specific file
 
@@ -164,3 +148,5 @@ design reason rules them out, it just hasn't been asked for there yet.
   pattern `grafana-secret-key-setup.service` above is modeled on.
 - [hosts.md](../hosts.md) — current switch/verification status for
   `nire-cube`.
+- [monitoring-history.md](monitoring-history.md) — the `secret_key`
+  regression, twice, and the unrelated VM failure in the same activation.
