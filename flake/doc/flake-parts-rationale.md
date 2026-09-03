@@ -100,4 +100,4 @@ Checked by grep — none of these appear anywhere in `flake/`:
   the NixOS side rather than as a standalone flake output.
 - `../../CLAUDE.md`, Architecture section — the prose overview this note
   fills the "why" and "what's unused" gaps of.
-- `../../wiki/architecture.md` — the wiki's index into this page.
+- `../../wiki/flake-parts.md` — the wiki's index into this page.

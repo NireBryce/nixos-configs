@@ -70,8 +70,14 @@ or a skill (`.claude/skills/<name>/SKILL.md`) — nothing here is new content.
   impermanence disk layout runbook: what to decide before touching a real
   disk, what depends on disko actually having run, and how to confirm the
   `/root` rollback is really working rather than just booting.
-- [Architecture & module system](architecture.md) — flake-parts, the
-  `dirsAsCategory` mechanism, Home Manager integration, package modules.
+- [flake-parts](flake-parts.md) — why this repo runs flake-parts at all:
+  its `flake.modules.<class>.<name>` option lets a single file declare a
+  NixOS module and a Home Manager module for the same feature side by
+  side, instead of splitting one feature across two files tied together
+  only by a shared filename. Ahead of
+  [Architecture & module system](architecture.md), which is the
+  `dirsAsCategory` mechanism, Home Manager integration, and package
+  modules built on top of it.
 - [Impermanence, initrd & secrets](impermanence-and-secrets.md) — the
   `/root`-wipe-on-boot mechanism, which hosts opt in, sops-nix. The stage-1
   migration's own full writeup,
