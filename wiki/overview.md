@@ -16,12 +16,17 @@ copied here to drift.
 
 ## What this is
 
-A single flake-parts flake that builds NixOS (and one nix-darwin) config for
-a small personal fleet — not a generalist template, and not meant to be
-installed as-is (see [../README.md](../README.md)'s own warning: two hosts
-wipe `/root` on every boot). One repo, one flake, every host's config comes
-out of it. [hosts.md](hosts.md) has the current roster and what's actually
-been switched versus only evaluated.
+A single [flake-parts](flake-parts.md) flake — chosen specifically because
+its `flake.modules.<class>.<name>` option lets one file declare a NixOS
+module and a Home Manager module for the same feature side by side,
+instead of two files tied together only by a shared filename — that builds
+NixOS (and one nix-darwin) config for a small personal fleet.
+
+Not a generalist template, and not meant to be installed as-is: two hosts
+wipe `/root` on every boot — see [../README.md](../README.md)'s own
+warning. One repo, one flake, every host's config comes out of it.
+[hosts.md](hosts.md) has the current roster and what's actually been
+switched versus only evaluated.
 
 ## The shape of it
 

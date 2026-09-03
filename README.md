@@ -17,13 +17,19 @@ Layout
 
 `flake.nix` imports every `.nix` file under `flake/modules/` via
 `import-tree`, rather than wiring paths together by hand. Each file declares
-one `flake.modules.<class>.<name>` module. Which category it belongs to is
-decided by the directory it sits in, not by an explicit list, so moving a
-file between directories moves it between categories and nothing else has
-to change.
+one `flake.modules.<class>.<name>` module — `<class>` is `nixos`,
+`homeManager`, or `darwin`, so a single file can declare a NixOS module and
+a Home Manager module for the same feature side by side (`nixd.nix`
+installs the nixd LSP for both) instead of splitting one feature across two
+files that agree only by sharing a filename. Which category a module
+belongs to is decided by the directory it sits in, not by an explicit list,
+so moving a file between directories moves it between categories and
+nothing else has to change.
 
 This keeps the config easy to reshape and hard to browse from a directory
-listing alone. `flake/doc/dirsAsCategory.md` explains the mechanism.
+listing alone. `flake/doc/dirsAsCategory.md` explains that mechanism;
+`flake/doc/flake-parts-rationale.md` explains why flake-parts specifically,
+and what else of it this repo actually uses.
 
 Hosts
 -----
