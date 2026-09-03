@@ -12,9 +12,10 @@
 > `.claude/skills/<name>/SKILL.md` — any agent can read them as files, with or
 > without a harness that loads skills automatically.
 
-Landing work targets `experimental` (see "push" under Working in this repo, and
-skill `ship`); GitHub's default branch stays `main`. Don't assume a branch —
-check `git branch --show-current`.
+Landing work targets `experimental`, the default branch (see "push" under
+Working in this repo, and skill `ship`); `main` is the promoted known-good
+and moves only via a PR from `experimental` after hardware verification.
+Don't assume a branch — check `git branch --show-current`.
 
 ## Safety
 
@@ -327,10 +328,12 @@ this" instead of "my last edit didn't take." If `git status`/`git branch
 own last action, check `git reflog` for a checkout or commit you didn't
 make before concluding anything is actually broken.
 
-**"push" means the `ship` skill, landing on `experimental`** — branch, PR, ask
-before merging, ask again before deleting the branch. Elly naming a branch
-outright (`main` included) means push directly there instead, bypassing the
-flow. The skill has the flow and why.
+**"push" means the `ship` skill, landing on `experimental`, the default
+branch** — branch, PR, ask before merging, ask again before deleting the
+branch. Elly naming a branch outright means push directly there, bypassing
+the flow — except `main`, which is promotion-only ("promote to main" = PR
+from `experimental`, after hardware verification). The skill has both flows
+and why.
 
 **Never file anything outside `NireBryce/nixos-configs` — an issue or PR on
 nixpkgs, ble.sh, carapace, any other project — without Elly saying so
