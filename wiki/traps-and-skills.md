@@ -26,6 +26,7 @@ one-liner.
 | Landing work on `experimental` | `.claude/skills/ship/SKILL.md` |
 | Filing a bug noticed while doing something else | `.claude/skills/propose-issue/SKILL.md` |
 | Checking whether a change left a `wiki/` page stale | `.claude/skills/wiki-sync/SKILL.md` |
+| Tightening wiki/skill/AGENTS prose for conciseness | `.claude/skills/trim-docs/SKILL.md` |
 | Writing a new skill | `.claude/skills/new-skill/SKILL.md` |
 | Starting a task that will branch, commit, or check out | `.claude/skills/use-a-worktree/SKILL.md` |
 
