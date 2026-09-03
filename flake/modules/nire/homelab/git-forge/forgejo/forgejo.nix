@@ -112,7 +112,7 @@
             # No forgejo-persist.nix, same reasoning grafana.nix gives for
             # skipping one: cube has a plain persistent root
             # (cube-configuration.nix's header), not the
-            # durandal/tenacity/lego `/root` wipe, so /var/lib/forgejo
+            # durandal/tenacity `/root` wipe, so /var/lib/forgejo
             # (repos, sqlite db, self-generated secrets under
             # `custom/conf/`) survives reboots. If a host that DOES wipe
             # root ever imports this, add one first, modeled on
@@ -130,7 +130,7 @@
             # by every Linux host via `system`). Declared HERE, not beside
             # the syncthing-* secrets in sops.nix, on purpose: `git-forge`
             # is cube-only, and a secret in sops.nix decrypts on every
-            # `system` host (durandal/tenacity/lego included, none running
+            # `system` host (durandal/tenacity included, neither running
             # Forgejo); declaring it here means it decrypts only where
             # imported.
             sops.secrets.forgejo-admin-password = {

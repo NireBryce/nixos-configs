@@ -22,25 +22,27 @@ local-path repository on an NFS mount; a real switch on cube hit
 dedicated `restic-backup` share never included cube). Chasing that down led
 to enabling SSH on the QNAP and switching to SFTP instead — real
 per-connection key auth rather than an IP allowlist, and issue #87's
-original plan besides. **Nothing has been built or switched with the SFTP
-repository yet** — see "What's verified here" for exactly how far this got
-(a real build on cube, confirming everything works except the two secrets
-this session can't set) before this page trusts anything past that.
+original plan besides. **Both sops secrets are now set** (`restic-cube-password`
+2026-08-30, `restic-cube-ssh-key` 2026-08-31 — confirmed present as
+ciphertext in `secrets.yaml`, not decrypted) — see "What's verified here"
+for exactly how far this got (a real build on cube, before the secrets
+landed) before this page trusts anything past that. Whether cube has
+actually been *switched* onto a build carrying them, and whether a backup
+has run successfully, is unconfirmed as of this writing.
 
 The NFS-era troubleshooting this page used to carry is gone — it's history
 now, in the module's own header (`restic.nix`), not duplicated here.
 
 ## Before any of this works: four setup steps
 
-Tracked in [Pending setup](pending-setup.md) item 4. Step 3 (SSH's own
-exposure) is done; 1, 2, and 4 aren't.
+Tracked in [Pending setup](pending-setup.md) item 4. Steps 1 and 3 are
+done; 2 and 4 aren't confirmed.
 
-### 1. Set the two sops secrets
+### 1. Set the two sops secrets — done, 2026-08-30/31
 
-Neither has a value in this tree — both need real decrypt access to
-`secrets.yaml` (one of the age keys enrolled in `.sops.yaml`: durandal,
-lysithea, tenacity, or cube's own host key), which the session that wrote
-the SFTP switch didn't have.
+Both now have a value in this tree (confirmed by their ciphertext being
+present in `secrets.yaml`, not by decrypting) — kept below for reference in
+case either ever needs rotating; skip to step 2 for what's still open.
 
 **The repository password** (`restic-cube-password`) — generate fresh, or
 skip if it's already set elsewhere (check first: `grep
@@ -88,17 +90,43 @@ re-authorize it on the QNAP) but breaks the backup until that's done.
 
 ### 2. Configure a QNAP-side snapshot schedule on the backup share
 
-The anti-deletion mitigation: `nire` can write and prune within
-`~/restic-cube` over SFTP but shouldn't be able to erase the NAS's own
-snapshots of it. **Not verified against the QNAP's actual menu layout** —
-treat this as a starting point, not a copy-paste procedure:
+The anti-deletion mitigation: `nire` can write and prune within the repo
+over SFTP but shouldn't be able to erase the NAS's own snapshots of it.
+**History of this share, corrected in each turn rather than left to
+rot:** briefly believed to be `restic-backup` (the abandoned NFS-era mount
+point name); actually `/share/homes/nire/restic-cube` (the `homes` share)
+from the SFTP switch through 2026-09-02 — checked live via the QNAP's own
+Snapshot Manager, `homes` was the only match, and `homes` covers every
+user's home directory, not just this repo; **moved for real, 2026-09-03**,
+to `sftp:nire@ts-hive:/share/restic-backup/cube` (`restic.nix:95`) —
+`restic-backup` genuinely is its own dedicated share (Storage Pool 2,
+confirmed empty/unused in the Snapshot Manager screenshot), just not the
+one this repo actually pointed at until now.
 
-1. QNAP admin console → Control Panel → Storage & Snapshots (or the
-   snapshot manager for the volume `restic-backup` lives on).
-2. Find or create a scheduled snapshot job for the `restic-backup` share.
+**Not yet confirmed live** — whether `nire` has write access to
+`restic-backup` over SFTP, and whether the old `homes`-share path had
+anything already backed up to it that needs migrating rather than a fresh
+`init` here, are both unchecked (see `restic.nix`'s header). Confirm those
+before relying on this, e.g.:
+
+```sh
+ssh nire@ts-hive 'mkdir -p /share/restic-backup/cube && chmod 700 /share/restic-backup/cube'
+ssh nire@ts-hive 'ls -la /share/homes/nire/restic-cube'   # anything already there?
+```
+
+Then, in the QNAP admin console:
+
+1. **Storage & Snapshots** app → **Snapshots** tab.
+2. Find or create a scheduled snapshot job for the **`restic-backup`**
+   shared folder (Storage Pool 2 in the Snapshot Manager's own listing) —
+   not `homes`. Since this share now holds nothing but backup data, the
+   schedule doesn't need to cover anything broader than that.
 3. A daily schedule with a few days/weeks of retention is enough to recover
    from an accidental or malicious `restic forget --prune`; it doesn't need
-   to match restic's own retention.
+   to match restic's own retention. Time it comfortably after the restic
+   timer's window (03:30 + up to 30 min, `timerConfig` in `restic.nix`) —
+   e.g. 04:30 or later — so the snapshot captures a completed backup rather
+   than one mid-write.
 
 If the QNAP's snapshot granularity is coarser than a single share, the
 remaining fallback from issue #87's list is `restic-rest-server` in

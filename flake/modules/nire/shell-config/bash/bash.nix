@@ -85,8 +85,8 @@
                         # 2026-08-26 on cube: `git push` died with "ksshaskpass
                         # died of signal 6" before reaching a username prompt.
                         # Harmless no-op on a host that never had it set (no
-                        # desktop imported -- tenacity, lego) or a real
-                        # graphical session.
+                        # xserver-enabling desktop imported -- tenacity) or a
+                        # real graphical session.
                         if [[ -z "''${DISPLAY:-}''${WAYLAND_DISPLAY:-}" ]]; then
                             unset SSH_ASKPASS
                         fi

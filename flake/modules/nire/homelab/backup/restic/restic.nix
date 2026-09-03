@@ -46,6 +46,22 @@
 # below is about the NFS-era version of this module; treat it as history,
 # not current status.
 #
+# REPOSITORY MOVED OFF `nire`'S HOME, 2026-09-03 -- the QNAP's Snapshot
+# Manager (checked directly, screenshot in the session that made this
+# change) showed the anti-deletion mitigation below would have to target
+# the `homes` share to cover `/share/homes/nire/restic-cube`, and QNAP
+# snapshots are per-shared-folder: that would snapshot every user's home
+# directory on the NAS, not just this repo. `restic-backup` already exists
+# as its own share (Storage Pool 2, unused since the abandoned NFS plan --
+# see history below), so the repo now points there instead. UNVERIFIED:
+# whether the `nire` SFTP account actually has write access to
+# `restic-backup` (it was provisioned for NFS-era access, not SFTP to this
+# path) and whether anything was ever backed up to the old
+# `/share/homes/nire/restic-cube` path that needs migrating rather than
+# starting fresh -- neither has been checked against the real QNAP. Confirm
+# both by hand before trusting a build against this path; see sftpRepo's
+# own comment for the exact check.
+#
 # ── history: NFS era, 2026-08-28 through 2026-08-31 ──────────────────────
 #
 # THE PLAN DOC'S "storage-NFS.nix IS DANGLING" CLAIM WAS WRONG, corrected
@@ -82,17 +98,25 @@
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 
-        # `nire`'s home on the QNAP, confirmed live via
-        # `ssh nire@ts-hive 'echo $HOME'` -- `/share/homes/nire`, real path
-        # `/share/ZFS19_DATA/homes/nire`. `restic-cube` underneath it is a
-        # host-scoped subdirectory for the same reason the old NFS
-        # `repoRoot` had one: nothing stops another host getting its own
-        # backup category later, and this keeps repositories from
-        # colliding if one does. Pre-created by hand (`mkdir -p
-        # ~/restic-cube && chmod 700`) on the QNAP, since restic's SFTP
-        # backend needs the parent to exist even though it creates the
-        # repository structure itself on `init`.
-        sftpRepo          = "sftp:nire@ts-hive:/share/homes/nire/restic-cube";
+        # `restic-backup`, the QNAP's own dedicated share (Storage Pool 2),
+        # not `nire`'s home -- see the module header's 2026-09-03 entry for
+        # why this moved off `/share/homes/nire/restic-cube`. `cube`
+        # underneath it is a host-scoped subdirectory for the same reason
+        # the old NFS `repoRoot` had one: nothing stops another host
+        # getting its own backup category later, and this keeps
+        # repositories from colliding if one does.
+        #
+        # NOT CONFIRMED LIVE -- the old home-directory path was checked by
+        # hand (`ssh nire@ts-hive 'echo $HOME'`); this one hasn't been.
+        # Before building against it: confirm `nire` can write here
+        # (`ssh nire@ts-hive 'mkdir -p /share/restic-backup/cube && chmod
+        # 700 /share/restic-backup/cube'` -- restic's SFTP backend needs
+        # the parent directory to exist even though it creates the
+        # repository structure itself on `init`) and that
+        # `/share/homes/nire/restic-cube` (the old path) has nothing
+        # already backed up to it that would need migrating instead of a
+        # fresh `init` here.
+        sftpRepo          = "sftp:nire@ts-hive:/share/restic-backup/cube";
         sqliteStagingDir  = "/var/cache/restic-backups-cube/sqlite-staging";
 
         # The three sqlite dbs actually at risk (issue #87's table), and
@@ -260,14 +284,17 @@
             # Anti-deletion (issue #87's open question 3: "push means cube
             # can delete its own backups") is NOT a Nix change, and
             # switching to SFTP didn't close it either -- `nire` can still
-            # delete anything it has permission to on `~/restic-cube` over
+            # delete anything it has permission to on `restic-backup` over
             # SFTP, same as it could over NFS. Still needs a QNAP-side
-            # native snapshot schedule on the share, so cube can write and
-            # prune within the restic repo but can't touch the NAS's own
-            # snapshots. Cheapest rung of the ascending-effort list #87
-            # proposes; see the plan doc. Nothing in this module enforces
-            # it, because nothing in this module *can* -- it's QNAP
-            # admin-console configuration, same category of gap as the
+            # native snapshot schedule on the `restic-backup` share itself
+            # (moved here from `nire`'s `homes` share 2026-09-03
+            # specifically so this snapshot schedule doesn't have to cover
+            # every user's home directory to cover this repo), so cube can
+            # write and prune within the restic repo but can't touch the
+            # NAS's own snapshots. Cheapest rung of the ascending-effort
+            # list #87 proposes; see the plan doc. Nothing in this module
+            # enforces it, because nothing in this module *can* -- it's
+            # QNAP admin-console configuration, same category of gap as the
             # two secret values above.
         };
 }

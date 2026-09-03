@@ -49,12 +49,22 @@ got cube added, and the QNAP admin console has no way to force key-only
 SSH anyway. So: issue #87's original plan, SFTP — real per-connection key
 auth rather than a host-IP allowlist.
 
-The module now points at `sftp:nire@ts-hive:/share/homes/nire/restic-cube`,
+The module now points at `sftp:nire@ts-hive:/share/restic-backup/cube`,
 authenticating with a dedicated ed25519 key (generated for this, not the
 personal key; confirmed by hand: `ssh -i ~/.ssh/restic-cube-backup
 nire@ts-hive` authenticates with no password). The QNAP host key is pinned
 in Nix (`programs.ssh.knownHosts` via `ssh-keyscan`), not trusted on first
 connection.
+
+**Moved off `nire`'s home 2026-09-03** — it originally pointed at
+`/share/homes/nire/restic-cube`, but QNAP snapshots the anti-deletion
+mitigation below needs are per-shared-folder, so that path would have
+required snapshotting every user's home directory just to cover this repo.
+`restic-backup` (Storage Pool 2) already exists as its own unused share, so
+the repo moved there. **Not yet confirmed live** — whether `nire` actually
+has write access to `restic-backup`, and whether anything was already
+backed up to the old path, are both unchecked; see `restic.nix`'s own
+header.
 
 ## sqlite consistency
 
@@ -76,13 +86,13 @@ fully regenerable by scraping again. Nothing else cube runs is excluded.
 
 Issue #87's open question 3: anything compromising cube can run
 `restic forget --prune` against its own backups, since `nire` (the QNAP
-account) has full read-write access to `~/restic-cube`. SFTP didn't close
+account) has full read-write access to the repository. SFTP didn't close
 this. The mitigation this module assumes — cheapest rung of #87's
 ascending-effort list — is a **QNAP-side native snapshot schedule on the
-`restic-backup` share** (`nire`'s home lives under it), so cube can write
-and prune within the repository but can't touch the NAS's own snapshots.
-QNAP admin-console configuration; nothing in this repo can enforce or
-verify it.
+`restic-backup` share itself** (the repo's own dedicated share as of
+2026-09-03, not a share shared with anything else), so cube can write and
+prune within the repository but can't touch the NAS's own snapshots. QNAP
+admin-console configuration; nothing in this repo can enforce or verify it.
 
 ## What isn't done yet
 
@@ -90,16 +100,14 @@ As of 2026-08-31: SSH now works on the QNAP, the dedicated key
 authenticates, and the module points at the SFTP repository — but nothing
 has actually confirmed a real backup works end to end yet.
 
-- **Both sops secrets are declared but this tree can't set their values.**
-  `restic-cube-password` (the repository password) and the new
-  `restic-cube-ssh-key` (the dedicated SSH private key, currently sitting
-  as a plain file on cube at `~/.ssh/restic-cube-backup`) both need real
-  decrypt access to `secrets.yaml`, which the session that wrote this
-  switch didn't have. See the module's own header for the exact commands.
-  A real build on cube confirmed the *shape* of the resulting failure for
-  the new key — the same build-time `sops-install-secrets` failure the
-  password hit originally — and confirmed everything else (21 other
-  derivations, including `home-manager-generation`) builds clean around it.
+- ~~Both sops secrets are declared but this tree can't set their
+  values~~ — **set, 2026-08-30 (`restic-cube-password`) and 2026-08-31
+  (`restic-cube-ssh-key`)**, confirmed present as ciphertext in
+  `secrets.yaml`. Whether cube has been switched onto a build carrying them
+  is still unconfirmed.
+- **The repository path moved** (2026-09-03, see above) — to a target
+  that's itself unverified live. This needs checking before the QNAP-side
+  snapshot schedule below is even worth setting up against it.
 - **The QNAP-side snapshot schedule** described above still hasn't been
   configured.
 - **SSH's own exposure is mitigated, as of 2026-08-31** — QuTS hero has no
