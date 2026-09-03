@@ -100,10 +100,11 @@ export ACL never included cube), and as of 2026-08-31 the module switched
 to SFTP instead, issue #87's original plan. SSH now works on the QNAP (a
 dedicated key for this, confirmed authenticating by hand), but:
 
-- **Neither sops secret has a value in this tree** — the repository
-  password, and the new dedicated SSH private key (currently sitting as a
-  plain file on cube, not yet in `secrets.yaml`). Both need real decrypt
-  access this session doesn't have; see the runbook for the exact commands.
+- ~~Neither sops secret has a value in this tree~~ — **set, 2026-08-30
+  (`restic-cube-password`) and 2026-08-31 (`restic-cube-ssh-key`)**,
+  confirmed present as ciphertext in `secrets.yaml`. Whether cube has been
+  switched onto a build carrying them, and whether a backup has actually
+  run, isn't confirmed yet — see the runbook.
 - **No QNAP-side snapshot schedule exists on the backup share** — the
   anti-deletion mitigation the module assumes but can't configure itself.
 - ~~QuTS hero has no toggle to force key-only SSH auth~~ — **mitigated,

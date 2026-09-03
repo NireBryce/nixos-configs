@@ -92,7 +92,7 @@ Either export the `RUSTIC_*` names yourself or pass the equivalent flags
 directly:
 
 ```sh
-sudo rustic -r sftp:nire@ts-hive:/share/homes/nire/restic-cube \
+sudo rustic -r sftp:nire@ts-hive:/share/restic-backup/cube \
     --password-file /run/secrets/restic-cube-password \
     -o sftp.command="ssh -i /run/secrets/restic-cube-ssh-key -o IdentitiesOnly=yes nire@ts-hive -s sftp" \
     snapshots -i
