@@ -5,10 +5,12 @@
 - [The hosts](#the-hosts)
 - [Where each fact lives](#where-each-fact-lives)
 
-Canonical status lives in [`AGENTS.md`'s State section](../AGENTS.md#state)
-— read that directly rather than trusting a count repeated here; it has been
-wrong-for-a-day more than once as hosts were added. This page is a map of
-where to look for each host.
+This page is a map of where to look for each host. **Switch state is not
+recorded anywhere in the repo** — it rots faster than any session can
+correct it, so "is this host running the current build?" is answered live
+on the host (`just baseline`, `just diff-deployed`, or comparing `nix eval
+...toplevel.outPath` against `readlink /run/current-system`); see
+[`AGENTS.md`'s State section](../AGENTS.md#state).
 
 ## The hosts
 
@@ -46,9 +48,10 @@ status and what broke on the way:
 
 ## Where each fact lives
 
-- **Boot/switch status per host** — [`../AGENTS.md`](../AGENTS.md), State
-  section; corrected in place when status changes, nothing else more
-  current.
+- **What a host is really running** — a live check on the host, not a
+  recorded fact: `just baseline` / `just diff-deployed`, or the toplevel
+  `outPath` vs `/run/current-system` comparison in
+  [`AGENTS.md`](../AGENTS.md)'s State section.
 - **Why `nire-cube` doesn't wipe `/root`** —
   `flake/modules/nireHost/cube-configuration.nix` header, and `AGENTS.md`'s
   Safety section.

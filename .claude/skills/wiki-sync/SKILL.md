@@ -19,9 +19,10 @@ opening every page.
 At the end of a change that could make a wiki fact wrong, for example:
 
 - moving or renaming a file that a wiki page links to
-- changing a fact a `wiki/*.md` page states as current: a host's
-  built/booted/switched status, a category's member count, an import list,
-  a command, a path, a stateVersion, a count of hosts
+- changing a fact a `wiki/*.md` page states as current: a category's member
+  count, an import list, a command, a path, a stateVersion, a count of
+  hosts (host switch/boot status is deliberately *not* a wiki fact — it
+  rots; it's a live check per `AGENTS.md`'s State section)
 - fixing a bug a wiki page describes as open (`open-threads.md`), or
   finding a new one worth recording there
 - reorganizing categories, splitting a module, or anything that changes
