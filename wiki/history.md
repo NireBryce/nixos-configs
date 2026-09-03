@@ -61,14 +61,21 @@
 
 ## Confirmed-on-hardware facts, and how they were confirmed
 
+First boots onto this config, as first-boot records (not current status —
+all hosts have switched repeatedly since; what a host is running now is a
+live check, see [`AGENTS.md`](../AGENTS.md)'s State section):
+
+- **tenacity** — booted 2026-08-10, generation 62, systemd stage 1.
+- **durandal** — booted 2026-08-14, generation 222.
+- **lysithea** — switched 2026-08-12 (generation 52, darwin).
+- **cube** — switched 2026-08-23 (plain persistent root, no impermanence).
+
 Both durandal's and tenacity's first-boot `/root` rollbacks were confirmed
 by reading the journal and checking the btrfs subvolid actually changed
 (607 → 622 for tenacity; 1426 deleted / 1431 mounted for durandal) — not
-merely by the machine coming back up. See
-[`../CLAUDE.md`](../CLAUDE.md)'s State section for the dates and
-generations. This is the concrete example behind the repo's own
-"treat an undated 'verified' as *evaluates*" and "ask 'did it work before?'
-first, via `journalctl --list-boots`" rules.
+merely by the machine coming back up. This is the concrete example behind
+the repo's own "treat an undated 'verified' as *evaluates*" and "ask 'did
+it work before?' first, via `journalctl --list-boots`" rules.
 
 ## The sibling branch
 

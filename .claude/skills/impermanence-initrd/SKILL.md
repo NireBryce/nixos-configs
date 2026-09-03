@@ -71,4 +71,5 @@ neighbours is the rollback *demonstrably running*, a stronger fact than
 `root-blank` merely existing. (Confirmed this way on tenacity: 607 vs.
 257–265 on first boot. Confirmed a second way — reading the boot journal for
 the delete-then-snapshot sequence rather than the mount — on durandal's
-first boot into this config; see `CLAUDE.md` State section for both.)
+first boot into this config; see `wiki/history.md`'s "Confirmed-on-hardware
+facts" for both.)

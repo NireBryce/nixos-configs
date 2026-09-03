@@ -227,9 +227,9 @@ Clean up afterward:
 sudo rm -rf /root/restore-test
 ```
 
-Write the outcome up here (or in `AGENTS.md`'s State section, per this
-repo's usual place for a runtime-verified fact) once this has actually run
-— that's what turns this module from configuration into a backup.
+Write the outcome up here (or on [backup](../categories/backup.md)'s
+"What isn't done yet") once this has actually run — that's what turns this
+module from configuration into a backup.
 
 ## Troubleshooting
 

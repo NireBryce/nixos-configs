@@ -40,8 +40,9 @@ match.)
 
 ## Real hardware, or not installed yet?
 
-The fork that matters most, easy to get backwards. Check `AGENTS.md`'s State
-section for whether the machine has actually booted this config.
+The fork that matters most, easy to get backwards. Whether the machine has
+actually booted this config is a live question — ask, or check on the host
+(`just baseline`); switch state is not recorded in the repo.
 
 **Real, scanned hardware**: capture `nixos-generate-config`'s
 `fileSystems`/`boot.initrd.*` into `<name>/hardware/hardware-<name>.nix`,

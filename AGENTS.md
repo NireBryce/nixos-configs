@@ -43,12 +43,24 @@ paragraph — this paragraph has been stale before.
 
 ## State
 
-| host | status |
-| --- | --- |
-| `nire-tenacity` | booted this config 2026-08-10 (gen 62, systemd stage 1); `/root` rollback confirmed by subvolid in the journal, not by the machine coming up |
-| `nire-lysithea` | switched 2026-08-12 (gen 52, darwin) |
-| `nire-durandal` | booted this config 2026-08-14 (gen 222); rollback confirmed in the journal the same way |
-| `nire-cube` | switched 2026-08-23; monitoring, git-forge, shortlinks, reverse-proxy, and landing all confirmed working end to end 2026-08-24. Grafana's `secret_key` fix lives in the module (`grafana-secret-key-setup.service` in `grafana.nix`), deliberately not a hand fix — the hand fix regressed once already. Fix-by-fix detail: `wiki/open-threads.md`, lessons-learned §40–§43 |
+**Switch/boot state is deliberately not recorded in this repo.** Every
+entry used to rot within days — only a session standing on the machine at
+switch time can update it, and the old per-host table was stale the moment
+the next switch landed (all hosts have switched since 2026-08-26; many not
+to the current build). Whether a host is running what the tree evaluates
+to is a live question, answered on the host:
+
+```sh
+just baseline        # what the machine is REALLY running -- capture before switching
+just diff-deployed   # package-level diff, running vs new toplevel; needs `just build` first
+nix eval --raw .#nixosConfigurations.<host>.config.system.build.toplevel.outPath
+# then compare with readlink /run/current-system on the host
+```
+
+Roster, class, and which hosts wipe `/root`: `nireHost/hosts.nix` (check it
+before stating any count) and `wiki/hosts.md`'s table. First-boot history
+(dates, generations, how the `/root` rollback was confirmed):
+`wiki/history.md`'s "Confirmed-on-hardware facts".
 
 - **Check `hostname` before assuming which machine the session is on.**
   Sessions have run on `nire-lysithea`, directly on `nire-durandal`, and on
@@ -61,8 +73,8 @@ paragraph — this paragraph has been stale before.
 - `nire-llm-sandbox` (libvirt VM on cube, removed 2026-08-28 — see
   `wiki/history.md`). The generator it ran on, `VMs/_lib/libvirt-vm.nix`,
   is kept as unexercised reusable infrastructure.
-- Host counts and statuses in prose are claims about when someone last
-  looked, not about the tree — check `hosts.nix`.
+- Switch state is not a wiki fact (see above); host *counts* in prose are
+  still claims about when someone last looked — check `hosts.nix`.
 - The den→flake-parts port is done; its planning docs were removed
   2026-08-26 as superseded (`wiki/history.md`).
 - **`claude cave/` was retired 2026-09-02** — its four remaining files
