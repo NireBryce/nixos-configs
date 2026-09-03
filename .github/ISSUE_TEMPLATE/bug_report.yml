@@ -1,0 +1,52 @@
+name: Bug report
+description: Something in this config or on one of its hosts is broken or behaving wrong.
+labels: [bug]
+body:
+  - type: dropdown
+    id: host
+    attributes:
+      label: Host
+      description: Which machine shows the problem? "not host-specific" covers repo/doc issues that are not about a machine.
+      options:
+        - "nire-durandal (workstation)"
+        - "nire-tenacity (handheld)"
+        - "nire-cube (mini PC / services)"
+        - "nire-lysithea (darwin laptop)"
+        - not host-specific
+    validations:
+      required: true
+
+  - type: dropdown
+    id: rung
+    attributes:
+      label: How far did it get?
+      description: The repo distinguishes evaluating from building from running -- say which rung you observed (see wiki/lessons-learned.md §18).
+      options:
+        - evaluation fails (nix eval / flake check errors)
+        - build fails
+        - switch/boot fails
+        - runs, but misbehaves
+        - docs are wrong (nothing was run)
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened vs what was expected
+      description: Actual behavior, expected behavior, and the exact command or URL that shows it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Error output or journal lines
+      description: The relevant tail of the command's output, or journalctl -u <unit> -n 50. Redact anything secret-shaped.
+      render: shell
+
+  - type: input
+    id: threads
+    attributes:
+      label: "just threads <keywords> result"
+      description: Whether this is already a known thread -- the output of `just threads "<keywords>"`, or "nothing found".

@@ -30,11 +30,12 @@ as a second recipe, not a flag, and errors).
 Skill `ship` (`.claude/skills/ship/SKILL.md`) — branch → PR → confirm →
 merge → confirm → delete-branch. Two confirmations, not one. Only for work
 headed to `experimental`; pushing a topic branch is just a push. "Push" in
-conversation means this flow, not `git push origin main` directly. Redirected
-from `main` to `experimental` 2026-08-25 — GitHub's default branch and its
-only branch ruleset are still `main`, so the flow states `--base
-experimental` explicitly; naming a branch outright (`main` included) means
-push directly there instead.
+conversation means this flow, not a direct trunk push. Redirected from
+`main` to `experimental` 2026-08-25; on 2026-09-03 `experimental` became
+the default branch (the PR/check ruleset follows the default branch), and
+`main` became the promoted known-good — it moves only via a PR from
+`experimental` after hardware verification ("promote to main"). Naming a
+branch outright means push directly there, except `main`.
 
 ## The GitHub repo was renamed; a checkout's `origin` doesn't follow
 

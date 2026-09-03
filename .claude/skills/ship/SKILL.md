@@ -19,15 +19,18 @@ Does **not** fire for other git work — do those normally:
 | "push this branch" | `git push` it. No PR, no gates. |
 | "open a PR" (no merge ask) | Open it and stop. Steps 3-4 are not yours to run. |
 | "commit this" | Commit. Pushing was not asked for. |
-| any branch named outright (`main`, `experimental`, anything) | Push directly there — see the last section. |
+| "promote to main" | Promotion flow — see "Promoting to `main`" below. Not a direct push; `main` carries its own ruleset. |
+| any other branch named outright | Push directly there — see the last section. |
 | fork, non-`origin` remote | Ordinary push. |
 
 If unsure whether an ask means `experimental`, ask. Assuming *no* is the
 mistake this file exists to prevent.
 
-**GitHub's default branch is still `main`**, so every PR needs `--base
-experimental` stated explicitly — `gh pr create`/`gh pr edit` silently
-default to `main` otherwise.
+**The default branch is `experimental`** (2026-09-03, trunk + promotion
+model — see the ruleset section at the bottom). `gh pr create` defaults to
+the right trunk now; stating `--base experimental` explicitly is kept as a
+harmless belt. `main` is the promoted known-good and moves only via a PR
+from `experimental`.
 
 There are **two** confirmations (merge, then branch deletion) — separate
 questions, never collapsed, never delegated to `--delete-branch`.
@@ -164,18 +167,38 @@ Both bit 2026-08-21 (#43/#44):
   which PR is stacked on which, so an incoherent answer is visibly
   incoherent.
 
-## The ruleset does not enforce this for you — and only covers `main`
+## The ruleset picture (trunk + promotion, 2026-09-03)
 
-`main` has a ruleset (2026-08-21): no deletion, no force-push, PR required
-(zero approvals — solo repo), plus the CI check as a required status
-(2026-08-25). **`experimental` has no ruleset** — nothing stops a direct
-push, force-push, or deletion; the two confirmations are the *entire* guard.
-And bypass is always possible anyway (`current_user_can_bypass: always` —
-Elly is the admin). If `experimental` should get equivalent protection, that
-is a deliberate GitHub-side change to ask about, not something to set up
-unasked.
+Two rulesets, both enforced by GitHub:
+
+- **`experimental` (the default branch)** — the ruleset added for `main`
+  2026-08-21 targets `~DEFAULT_BRANCH`, so it followed the default-branch
+  flip automatically: no deletion, no force-push, PR required (zero
+  approvals — solo repo), CI check required. The two conversational
+  confirmations remain the guard on *top* of this — they gate the merge
+  decision, the ruleset gates everything else.
+- **`main` (promoted known-good)** — protected by name: same rules. It
+  moves only via a PR from `experimental` (the promotion flow below), and
+  only for configs verified on hardware.
+
+## Promoting to `main`
+
+On a "promote to main"-shaped ask (not part of the ordinary flow above):
+
+```sh
+gh pr create --base main --head experimental \
+  --title "promote: <one line on what's verified>" \
+  --body "what landed since the last promotion, and where it was booted/switched"
+gh pr merge <n> --rebase    # experimental is strictly ahead; keeps history linear
+```
+
+The promotion PR is the record of *why* `main` moved — write what was
+verified on hardware, not just the commit range. Only promote after the
+config has actually booted/switched on the hosts it touches; an unverified
+trunk is what `experimental` is for.
 
 ## Only when Elly names a branch
 
-The one exception: Elly naming a branch outright for that push. A bare
-"push" is not that — it means the guarded flow above, onto `experimental`.
+Elly naming a branch outright for that push — any branch except `main`,
+which is promotion-only (see above). A bare "push" is not that; it means
+the guarded flow above, onto `experimental`.
