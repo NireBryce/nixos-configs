@@ -4,7 +4,7 @@
 
 - [How this differs from open-threads.md](#how-this-differs-from-open-threadsmd)
 - [1. Forgejo has no users, so nobody can log in](#1-forgejo-has-no-users-so-nobody-can-log-in)
-- [2. Nothing has been pushed to the forge, and what it's *for* isn't decided](#2-nothing-has-been-pushed-to-the-forge-and-what-its-for-isnt-decided)
+- [2. Decided: mirror, not origin — 2026-09-03](#2-decided-mirror-not-origin--2026-09-03)
 - [3. golink has no links yet](#3-golink-has-no-links-yet)
 - [4. No backups exist for any of it](#4-no-backups-exist-for-any-of-it)
 - [5. Grafana's admin credentials](#5-grafanas-admin-credentials)
@@ -45,27 +45,36 @@ manual command.
 2026-08-26: that manual step is now automated. `forgejo-admin-bootstrap`
 (see [git-forge](../categories/git-forge.md)) creates the `elly`/admin
 account declaratively on activation, password from this repo's sops
-secrets. `just preflight` passes, but this hasn't gone through a real
-`switch` on cube yet — the users API call above hasn't been re-run since.
+secrets.
 
-**Done when** you can sign in at
-`https://ts-cube.moose-micro.ts.net/git/user/login` and the users API returns
-something — re-check after the next `switch`, don't assume this item is
-closed just because the module landed.
+**Live-checked 2026-09-04**: `GET /git/api/v1/users/search` now returns
+the `elly` account — the bootstrap ran and cube has switched with it. But
+`last_login` on that account is the zero value
+(`0001-01-01T00:00:00Z`) — nobody has actually signed into the web UI yet
+— and the API's `is_admin` field reads `false` (likely just Forgejo
+masking that field for an unauthenticated caller, not necessarily meaning
+the bootstrap's `--admin` flag didn't take; unconfirmed either way without
+logging in).
+
+**Done when** you've actually signed in at
+`https://ts-cube.moose-micro.ts.net/git/user/login` and confirmed the
+account is really admin from inside the UI — the account existing isn't
+the same as that.
 
 Then, separately: add an SSH key under Settings → SSH keys if you want
 `forgejo@ts-cube:…` clones. See [using the forge](forgejo.md) for why that
 key authorizes `forgejo@ts-cube` and not `elly@ts-cube`.
 
-## 2. Nothing has been pushed to the forge, and what it's *for* isn't decided
-
-Zero repos. Worth settling before the first push, because it changes how much
-the missing backups matter:
+## 2. Decided: mirror, not origin — 2026-09-03
 
 - **As a mirror** — GitHub stays the origin, cube holds copies. Losing cube
-  costs nothing. This is the safe default while item 4 is open.
+  costs nothing. **Chosen**, while item 4 (backups) is still short of a
+  proven restore.
 - **As an origin** — things live here first. That's the useful version, and
   it's the one that shouldn't happen until backups exist.
+
+Still open: zero repos actually pushed yet, mirror or not — this item only
+settled *which mode*, not that anything's been done.
 
 ## 3. golink has no links yet
 
@@ -101,10 +110,11 @@ to SFTP instead, issue #87's original plan. SSH now works on the QNAP (a
 dedicated key for this, confirmed authenticating by hand), but:
 
 - ~~Neither sops secret has a value in this tree~~ — **set, 2026-08-30
-  (`restic-cube-password`) and 2026-08-31 (`restic-cube-ssh-key`)**,
-  confirmed present as ciphertext in `secrets.yaml`. Whether cube has been
-  switched onto a build carrying them, and whether a backup has actually
-  run, isn't confirmed yet — see the runbook.
+  (`restic-cube-password`) and 2026-08-31 (`restic-cube-ssh-key`)**, and
+  **live-confirmed working 2026-09-04**: the 2026-09-03 backup timer run
+  succeeded end to end. Cube hasn't switched onto the newer path move
+  (2026-09-03, `restic-backup` share) yet — see the runbook's step 4 for
+  the migration that implies.
 - **No QNAP-side snapshot schedule exists on the backup share** — the
   anti-deletion mitigation the module assumes but can't configure itself.
 - ~~QuTS hero has no toggle to force key-only SSH auth~~ — **mitigated,

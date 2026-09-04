@@ -61,10 +61,13 @@ connection.
 mitigation below needs are per-shared-folder, so that path would have
 required snapshotting every user's home directory just to cover this repo.
 `restic-backup` (Storage Pool 2) already exists as its own unused share, so
-the repo moved there. **Not yet confirmed live** — whether `nire` actually
-has write access to `restic-backup`, and whether anything was already
-backed up to the old path, are both unchecked; see `restic.nix`'s own
-header.
+the repo moved there. **Live-checked 2026-09-04**: cube is still running
+the pre-move build (`RESTIC_REPOSITORY` on the live unit is still the old
+`homes` path) — and that path has real data in it: the 2026-09-03 timer
+run succeeded, so there's a working repo with a real snapshot that needs
+migrating before cube switches, not abandoning. See
+`wiki/homelab/backup-runbook.md`'s step 4 for the migration command;
+`nire`'s write access to `restic-backup` itself is still unconfirmed.
 
 ## sqlite consistency
 
@@ -96,18 +99,18 @@ admin-console configuration; nothing in this repo can enforce or verify it.
 
 ## What isn't done yet
 
-As of 2026-08-31: SSH now works on the QNAP, the dedicated key
-authenticates, and the module points at the SFTP repository — but nothing
-has actually confirmed a real backup works end to end yet.
+Live-checked 2026-09-04, over ssh to `nire-cube.local`:
 
 - ~~Both sops secrets are declared but this tree can't set their
-  values~~ — **set, 2026-08-30 (`restic-cube-password`) and 2026-08-31
-  (`restic-cube-ssh-key`)**, confirmed present as ciphertext in
-  `secrets.yaml`. Whether cube has been switched onto a build carrying them
-  is still unconfirmed.
-- **The repository path moved** (2026-09-03, see above) — to a target
-  that's itself unverified live. This needs checking before the QNAP-side
-  snapshot schedule below is even worth setting up against it.
+  values~~ — **set, 2026-08-30/31**, and **confirmed working**: the
+  2026-09-03 backup timer run succeeded end to end
+  (`restic-backups-cube.service`, `status=0/SUCCESS`), the first real
+  proof of that, not just an evaluated config.
+- **The repository path moved** (2026-09-03) but cube hasn't switched onto
+  it yet — the running unit still targets the old `homes` path. That old
+  path now has a real, working repo in it that needs migrating rather than
+  starting fresh (see above and the runbook's step 4) before this switch
+  happens.
 - **The QNAP-side snapshot schedule** described above still hasn't been
   configured.
 - **SSH's own exposure is mitigated, as of 2026-08-31** — QuTS hero has no
