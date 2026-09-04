@@ -93,9 +93,11 @@ still **was** swept into the `homelab` aggregate cube imports, since
 nested category's root (`flake/doc/dirsAsCategory.md`'s History section has
 why — an earlier version lacking that silently dropped this exact file).
 
-Skill `nixos-vm-images` has the two real bugs this feature hit (nixpkgs'
-image-variant isolation not reaching a base config's toplevel;
-`image.filePath` relative rather than absolute).
+The two real bugs this feature hit (nixpkgs' image-variant isolation not
+reaching a base config's toplevel; `image.filePath` being relative rather
+than absolute) are in lessons-learned §36; the removed `nixos-vm-images`
+skill (`.claude/skills/nixos-vm-images`, git history) had the full
+image-building writeup if another VM ever gets wired up.
 
 ## Why this is its own category and not part of `system`
 
@@ -126,5 +128,6 @@ records durandal ever running a VM, so it was parity, not need (see
 - [../history.md](../history.md) — `nire-llm-sandbox`.
 - [virtualization-history.md](virtualization-history.md) — `nire-llm-sandbox`'s
   own `sshForward` verification, and the module-naming near-miss.
-- Skill `nixos-vm-images` — the full mechanism and traps behind the
-  generator.
+- The `nixos-vm-images` writeup — removed 2026-09-03 with the VM gone;
+  `git log -- .claude/skills/nixos-vm-images` has it, if another VM ever
+  gets wired up.

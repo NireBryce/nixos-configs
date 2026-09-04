@@ -15,7 +15,8 @@ undo once a service is live and has state.
 A service *is* a flake module, so `new-flake-module`'s rules still apply;
 this skill is the layer above — which category, which port, how it's
 reached, what "working" means. Also: `nirepackages-platform-support` for
-packages, `nixos-vm-images` for VMs, `new-host-config` for hosts.
+packages, `new-host-config` for hosts (VMs have no skill; see
+`wiki/categories/virtualization.md`).
 
 Three of the five existing services broke on first switch for reasons
 invisible to eval, build, and even reading the artifact — the secret file's

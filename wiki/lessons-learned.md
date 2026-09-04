@@ -656,8 +656,8 @@ the commit that matters.
 
 ## 36. Evaluating the Nix expression and building the artifact it describes are different tests, and only one of them was run
 
-Two real bugs surfaced building `nire-llm-sandbox` (a libvirt VM guest, see
-skill `nixos-vm-images`), and both share a shape worth naming on its own,
+Two real bugs surfaced building `nire-llm-sandbox` (a libvirt VM guest on
+cube), and both share a shape worth naming on its own,
 past what §25 ("running it is a rung of its own") already covered:
 
 1. Using `image.modules.qemu` (nixpkgs' image-*variant* system) instead of
@@ -1007,8 +1007,9 @@ was wrong, and stayed wrong for six more days of real commits to the file
 already existed) — adding a pattern to `.gitignore` does not untrack a file
 already in the index, and nobody ran the `git rm --cached` that would have.
 Caught while cleaning up an unrelated permission-allowlist diff; actually
-untracked that same session (`git rm --cached`). See
-`prune-permissions/SKILL.md` for the current, accurate state.
+untracked that same session (`git rm --cached`). The `prune-permissions`
+skill was removed 2026-09-03 — with the file untracked and machine-local,
+a repo skill for it had nothing repo-wide left to say.
 
 When a conflict or diff touches this file, take whichever resolution is
 simplest and move on; it is Elly's file to shape, not something to defend
