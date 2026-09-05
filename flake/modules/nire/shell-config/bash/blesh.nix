@@ -123,6 +123,30 @@
                     -C 'ble-bind -m emacs   -x C-r "__atuin_history --keymap-mode=emacs"' \
                     -C 'ble-bind -m vi_imap -x C-r "__atuin_history --keymap-mode=vim-insert"' \
                     ${pkgs.blesh}/share/blesh/contrib/integration/fzf-key-bindings.bash
+
+                # ─── keybindings ─────────────────────────────────────────────
+                # Both insert keymaps this config actually reaches (emacs is
+                # bash's default; vi_imap would apply if vi mode were ever
+                # turned on -- it isn't, see bash.nix) bind C-v to
+                # quoted-insert by default (keymap/emacs.sh, keymap/vi.sh):
+                # insert the next raw keystroke verbatim. Muscle-memory
+                # "paste" reflexes hit it constantly and it isn't wanted here.
+                # (vi's *other* keymaps -- vi_nmap/vi_omap/vi_xmap -- bind C-v
+                # to blockwise-visual-mode instead; unrelated, left alone.)
+                #
+                # Can't unbind this with a plain top-level ble-bind call in
+                # this file: .blerc is sourced by ble/base/load-rcfile, which
+                # runs *before* ble-attach calls ble/decode/attach -- the step
+                # that lazily loads keymap/emacs.sh and installs its default
+                # C-v binding in the first place (both in ble.sh's own
+                # source). A plain call here would run first and just get
+                # overwritten. `blehook ATTACH` fires from inside ble-attach
+                # itself, right after ble/decode/attach returns -- confirmed
+                # against ble.sh's source, not yet against a live shell -- so
+                # unlike the atuin rebind above (working around a *deferred*
+                # `-d` import that lands even later than that) this needs no
+                # ble-import trick, just the hook ble.sh already runs for it.
+                blehook ATTACH+='ble-bind -m emacs -f C-v -; ble-bind -m vi_imap -f C-v -'
             '';
         };
 }
