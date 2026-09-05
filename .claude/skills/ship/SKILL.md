@@ -1,6 +1,6 @@
 ---
 name: ship
-description: Branch -> PR -> confirm -> merge -> confirm -> delete-branch flow for landing work on experimental in this repo.
+description: Branch -> PR -> confirm merge-and-delete -> merge -> delete-branch flow for landing work on experimental in this repo.
 ---
 
 # Landing work on experimental in nixos-configs
@@ -17,7 +17,7 @@ Does **not** fire for other git work — do those normally:
 | ask | what to do |
 |---|---|
 | "push this branch" | `git push` it. No PR, no gates. |
-| "open a PR" (no merge ask) | Open it and stop. Steps 3-4 are not yours to run. |
+| "open a PR" (no merge ask) | Open it and stop. Steps 2-3 are not yours to run. |
 | "commit this" | Commit. Pushing was not asked for. |
 | "promote to main" | Promotion flow — see "Promoting to `main`" below. Not a direct push; `main` carries its own ruleset. |
 | any other branch named outright | Push directly there — see the last section. |
@@ -32,8 +32,14 @@ the right trunk now; stating `--base experimental` explicitly is kept as a
 harmless belt. `main` is the promoted known-good and moves only via a PR
 from `experimental`.
 
-There are **two** confirmations (merge, then branch deletion) — separate
-questions, never collapsed, never delegated to `--delete-branch`.
+**One** confirmation covers both actions, asked up front: "merge, and
+delete the branch afterward?" On yes, both happen in the same turn — no
+second round-trip before deleting. Still not `--delete-branch`: that flag
+only removes the remote branch, and this flow also wants the local branch
+gone and `experimental` checked out and pulled, so those stay explicit
+steps (2026-09-05: collapsed from the original two-confirmation design
+after landing two PRs back to back made the second ask pure overhead —
+the merge answer already implied it every time).
 
 ## 0. Fetch, then is it green?
 
@@ -105,7 +111,7 @@ Write the PR body like the commit messages: what changed, why, what was
 verified, what was left alone — matching `.github/PULL_REQUEST_TEMPLATE.md`'s
 headings.
 
-## 2. Preview, then ask — first confirmation
+## 2. Preview, then ask
 
 Read back what actually landed, never recall it:
 
@@ -117,28 +123,30 @@ git diff --stat origin/experimental...HEAD
 
 Check `mergeable` and that `baseRefName` is `experimental` **before** asking
 — a wrong base or unmergeable PR wastes the round-trip. Print the summary,
-include the merge method, ask whether to merge:
+include the merge method, and ask the one combined question — merge *and*
+delete the branch afterward:
 
 - **Single commit** (the common case): default `--rebase` — `--merge` is a
   bubble for nothing on a one-commit PR.
 - **Multiple commits**: default `--merge` — this repo puts real reasoning in
   individual commit messages; squashing flattens it.
 
-On **no**: leave the PR open, say so, stop. Do not close it, delete the
-branch, or clean up.
+On **no**: leave the PR open, say so, stop. Do not merge, close it, delete
+the branch, or clean up.
 
-## 3. Merge — on yes only
+## 3. Merge, then delete — on yes only
 
 ```sh
 gh pr merge <n> --rebase   # single-commit PR
 gh pr merge <n> --merge    # multi-commit PR
 ```
 
-**Never `--delete-branch`** — it silently removes the second confirmation.
+If the merge itself doesn't go through — unmergeable, a required check
+still pending, a ruleset block — stop there and say so. Don't delete a
+branch whose PR didn't actually merge; that's a fresh problem, not the
+"no" case above, so raise it rather than silently retrying or proceeding.
 
-## 4. Ask again, then delete — second confirmation
-
-A separate round-trip from the merge ask. On yes:
+Merge succeeded: delete immediately, no further ask.
 
 ```sh
 git checkout experimental && git pull
@@ -146,8 +154,12 @@ git branch -d <branch>
 git push origin --delete <branch>
 ```
 
-On no, leave it and say it is still there. Report the merge commit and the
-branch's fate; never report a commit range as if pushed to `experimental`.
+**Never `gh pr merge --delete-branch`** — it only removes the remote
+branch, skipping the local delete and the `experimental` checkout/pull
+this flow also does; run the explicit steps instead of the flag.
+
+Report the merge commit and the branch's fate; never report a commit range
+as if pushed to `experimental`.
 
 ## When one working tree becomes two PRs
 
@@ -160,12 +172,13 @@ Both bit 2026-08-21 (#43/#44):
   diff, not by anything the copy said — §1, a tool reporting success while
   wrong.
 - **A stacked PR is not retargeted when its base merges** (only when the base
-  *branch is deleted* — step 4, which needs its own confirmation). Retarget
-  explicitly before merging the child: `gh pr edit <child> --base
-  experimental`. Both gates still apply per PR, but a harness can batch the
-  two merge questions into one call — still one question per decision. Name
-  which PR is stacked on which, so an incoherent answer is visibly
-  incoherent.
+  *branch is deleted*, which now happens automatically right after merge —
+  there's no longer a gap between merge and delete to catch it in). Retarget
+  explicitly *before* merging the base: `gh pr edit <child> --base
+  experimental`. Each PR still gets its own merge-and-delete confirmation,
+  but a harness can batch several such questions into one call — still one
+  question per decision. Name which PR is stacked on which, so an
+  incoherent answer is visibly incoherent.
 
 ## The ruleset picture (trunk + promotion, 2026-09-03)
 
@@ -174,9 +187,9 @@ Two rulesets, both enforced by GitHub:
 - **`experimental` (the default branch)** — the ruleset added for `main`
   2026-08-21 targets `~DEFAULT_BRANCH`, so it followed the default-branch
   flip automatically: no deletion, no force-push, PR required (zero
-  approvals — solo repo), CI check required. The two conversational
-  confirmations remain the guard on *top* of this — they gate the merge
-  decision, the ruleset gates everything else.
+  approvals — solo repo), CI check required. The single conversational
+  confirmation remains the guard on *top* of this — it gates the
+  merge-and-delete decision, the ruleset gates everything else.
 - **`main` (promoted known-good)** — protected by name: same rules. It
   moves only via a PR from `experimental` (the promotion flow below), and
   only for configs verified on hardware.
