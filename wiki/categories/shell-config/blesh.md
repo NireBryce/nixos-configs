@@ -62,6 +62,18 @@ together external completion/history tools underneath ble.sh's UI:
   `ble-bind -x` calls in the same `-C` callback (rebinding rather than
   unbinding, because a ble.sh keymap with no entry for a key does nothing,
   not "fall through to atuin").
+- **C-v (quoted-insert) is unbound**, in both the `emacs` and `vi_imap`
+  keymaps (2026-09-05) — ble.sh binds it by default in both
+  (`keymap/emacs.sh`, `keymap/vi.sh`) to "insert the next raw keystroke",
+  which muscle-memory paste reflexes hit constantly. Unrelated to actual
+  clipboard paste, which goes through the separate `paste_begin` →
+  `bracketed-paste` binding and is untouched. Done via `blehook
+  ATTACH+='ble-bind -m emacs -f C-v -; ble-bind -m vi_imap -f C-v -'`
+  rather than a plain top-level `ble-bind` call, because `.blerc` is
+  sourced *before* `ble-attach` installs the keymaps' own default
+  bindings — a plain call here would run first and be overwritten;
+  `blehook ATTACH` runs at the end of `ble-attach`, after the keymaps are
+  in their final state.
 
 ## Bug: spurious `read: `': not a valid identifier` on Tab / auto-complete
 
