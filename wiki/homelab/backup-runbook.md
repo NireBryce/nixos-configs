@@ -16,34 +16,25 @@ up Forgejo/Grafana/golink's state and `/persist` to the QNAP NAS. That page
 covers *why* it's shaped this way; this page is *what to actually type*, on
 `nire-cube`, to finish setting it up, run it, check it, and restore from it.
 
-**Status as of 2026-09-04, live-checked over ssh to `nire-cube.local`:**
+**Status as of 2026-09-05, live-checked over ssh to `nire-cube.local`:**
 SFTP, not NFS (this module shipped with a local-path repository on an NFS
 mount; a real switch on cube hit `mount.nfs: access denied by server`, the
 QNAP's export permissions for the dedicated `restic-backup` share never
 included cube — chasing that down led to enabling SSH on the QNAP and
-switching to SFTP instead, issue #87's original plan). Both sops secrets
-are live on cube's current generation (`restic-cube-password`,
-`restic-cube-ssh-key`). **The backup actually works**: the timer's most
-recent run (2026-09-03, 03:30) succeeded end to end
-(`restic-backups-cube.service`, `status=0/SUCCESS`) — the first real
-confirmation of that, not just an evaluated config.
-
-**But cube hasn't switched onto the `restic-backup`-share path move
-(2026-09-03) yet.** The *running* unit's `RESTIC_REPOSITORY` is still
-`sftp:nire@ts-hive:/share/homes/nire/restic-cube` — the old path — so the
-successful backup above landed there, not at the new location. That means
-a real, working, already-populated repo now exists at the old path and
-needs migrating (see the new step 4 below) rather than being abandoned.
+switching to SFTP instead, issue #87's original plan). **Fully working
+end to end**: cube has switched onto the `restic-backup/cube` path (the
+2026-09-03 module change), the timer has fired successfully against it,
+and the pre-move repo's history (2026-08-31 through 2026-09-04, five
+snapshots) has been migrated in — six snapshots total at the current path,
+confirmed via a live `snapshots` listing, not just an evaluated config.
 
 The NFS-era troubleshooting this page used to carry is gone — it's history
 now, in the module's own header (`restic.nix`), not duplicated here.
 
 ## Before any of this works: five setup steps
 
-Tracked in [Pending setup](pending-setup.md) item 4. Steps 1 and 3 are
-done; 2 (QNAP snapshot schedule) isn't confirmed; 4 (migrating the old
-repo) is new, added once the live check above found real data sitting at
-the old path; 5 (switching cube) hasn't happened yet for this path move.
+Tracked in [Pending setup](pending-setup.md) item 4. Steps 1, 3, 4, and 5
+are done; only 2 (QNAP snapshot schedule) is still open.
 
 ### 1. Set the two sops secrets — done, 2026-08-30/31
 
@@ -156,60 +147,69 @@ level instead:
 - **QNAP brute-force protection (Network Access Protection) is on** —
   taken on confirmation, not independently checked.
 
-### 4. Migrate the pre-2026-09-03 repo before switching
+### 4. Migrate the pre-2026-09-03 repo — done, 2026-09-05
 
-Live-confirmed 2026-09-04: a real restic repository already exists at the
-old `sftp:nire@ts-hive:/share/homes/nire/restic-cube` path, with at least
-one successful backup in it (2026-09-03's timer run). Switching cube to
-the `restic-backup/cube` path (step 5) without migrating first abandons
-that history in favor of a fresh, empty repo.
+Cube switched onto the `restic-backup/cube` path (step 5) before this
+migration ran, not after — the timer had already fired once against the
+new path (2026-09-05, auto-`init`ed by the module's own `initialize =
+true`) by the time this was checked. Plan-vs-reality gap, not a problem:
+`init` isn't needed at all when the destination already has a repo, and
+`copy` doesn't care which side ran first. Order actually followed:
 
-This can run **today, before switching** — both secrets it needs are
-already live on cube's *current* generation, independent of the pending
-switch:
+**Plain `restic` wasn't on `$PATH`** — only the auto-generated
+`restic-cube` wrapper was (nixpkgs' own module mechanism, hardcoded to one
+repository/password pair, no good for a two-repo `copy`). `restic.nix`
+adds `pkgs.restic` to `environment.systemPackages`, but that fix hadn't
+reached cube's checkout yet, so the migration ran via `nix shell` instead,
+no rebuild required:
 
 ```sh
-sudo restic \
+sudo nix shell nixpkgs#restic --command restic \
     -o sftp.command='ssh -i /run/secrets/restic-cube-ssh-key -o IdentitiesOnly=yes nire@ts-hive -s sftp' \
-    --repo sftp:nire@ts-hive:/share/homes/nire/restic-cube \
+    --repo sftp:nire@ts-hive:/share/restic-backup/cube \
     --password-file /run/secrets/restic-cube-password \
     copy \
-    --to-repo sftp:nire@ts-hive:/share/restic-backup/cube \
-    --to-password-file /run/secrets/restic-cube-password
+    --from-repo sftp:nire@ts-hive:/share/homes/nire/restic-cube \
+    --from-password-file /run/secrets/restic-cube-password
 ```
 
-Both repos use the *same* sops secret for their password (the module
-declares one `restic-cube-password`, reused regardless of path), so
-`copy` needs no second password. **Confirm `nire` can write to
-`/share/restic-backup/cube` first** (`restic.nix`'s own comment has the
-`mkdir -p ... && chmod 700` command) — `copy` needs the parent directory
-to exist the same way `backup`/`init` do.
+**Verified against the real binary's `--help` before running** — an
+earlier draft of this command had `--to-repo`/`--to-password-file`, which
+don't exist. `restic copy`'s *destination* is the ordinary global
+`--repo`/`--password-file`; the *source* is
+`--from-repo`/`--from-password-file`. Both repos use the same sops secret
+for their password (the module declares one `restic-cube-password`,
+reused regardless of path), so the split flags don't mean two different
+passwords here.
 
-After a successful `copy`, verify the new repo actually has the migrated
-snapshot(s) before trusting it (`restic -r
-sftp:nire@ts-hive:/share/restic-backup/cube --password-file
-/run/secrets/restic-cube-password snapshots`), then leave the old
-`homes/nire/restic-cube` repo in place as a backstop rather than deleting
-it immediately — cheap insurance until the new path has its own proven
-track record.
+**Confirmed working, not just exit-code-clean**: `snapshots` against the
+new repo before the copy showed one entry (2026-09-05, the module's own
+first real run there); after, six — the five copied in from the old repo
+(2026-08-31 through 2026-09-04, longer unbroken history than the
+2026-09-03-only run originally spotted) plus the native one, none
+overwritten or lost. The old `homes/nire/restic-cube` repo was left in
+place afterward as a backstop rather than deleted — cheap insurance until
+the new path has its own longer track record.
 
-### 5. Switch cube
-
-Nothing above requires this to already be done, but nothing backs up onto
-the new path until it has:
+### 5. Switch cube — done, live-confirmed 2026-09-05
 
 ```sh
 cd ~/projects/nix/nixos-configs && git pull && just switch
 ```
 
-**Checkout trap, and it flipped**: cube has *two* clones of this repo.
-This page used to say `~/nixos-configs` was the stale one — live-checked
-2026-09-04, that's now backwards: `~/nixos-configs` was at `dab9c61e`,
-`~/projects/nix/nixos-configs` at the older `27e7f778`. Which clone is
-ahead depends on which one was last used, not on either path being
-inherently "the current one" — don't trust this page's memory of that,
-check both with `git log -1` before choosing which to `pull` and switch
-from (`restic.nix`'s own header has the fuller account of the original
+Live-checked 2026-09-05: `restic-backups-cube.service`'s `RESTIC_REPOSITORY`
+is the new `sftp:nire@ts-hive:/share/restic-backup/cube`, and its timer has
+already fired successfully against it. Whichever checkout was used to do
+this, it worked — no further action needed here unless a *future* change
+to this module needs its own switch.
+
+**Checkout trap, and it flipped at least once already**: cube has *two*
+clones of this repo. This page used to say `~/nixos-configs` was the stale
+one; a 2026-09-04 check found that backwards. Which clone is ahead depends
+on which one was last used, not on either path being inherently "the
+current one" — check both with `git log -1` before trusting either name,
+every time, rather than trusting this page's memory of which was ahead
+last (`restic.nix`'s own header has the fuller account of the original
 mixup this trap caused).
 
 `sudo` on cube needs a password, so this is a human step — an agent session

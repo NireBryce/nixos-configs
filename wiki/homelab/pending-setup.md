@@ -111,12 +111,14 @@ dedicated key for this, confirmed authenticating by hand), but:
 
 - ~~Neither sops secret has a value in this tree~~ — **set, 2026-08-30
   (`restic-cube-password`) and 2026-08-31 (`restic-cube-ssh-key`)**, and
-  **live-confirmed working 2026-09-04**: the 2026-09-03 backup timer run
-  succeeded end to end. Cube hasn't switched onto the newer path move
-  (2026-09-03, `restic-backup` share) yet — see the runbook's step 4 for
-  the migration that implies.
+  **live-confirmed working 2026-09-05**: cube has switched onto the
+  `restic-backup`-share path move, its timer has run successfully against
+  it, and the pre-move repo's history (five snapshots, 2026-08-31 through
+  2026-09-04) was migrated in with `restic copy` — six snapshots total,
+  confirmed via a live listing. See the runbook's step 4.
 - **No QNAP-side snapshot schedule exists on the backup share** — the
   anti-deletion mitigation the module assumes but can't configure itself.
+  The only item left open in this list.
 - ~~QuTS hero has no toggle to force key-only SSH auth~~ — **mitigated,
   2026-08-31**: port 22 is now LAN-blocked and tailnet-only (confirmed
   live), and QNAP's brute-force protection is on. See the runbook's setup

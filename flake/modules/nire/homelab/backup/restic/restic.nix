@@ -154,6 +154,18 @@
             programs.ssh.knownHosts."ts-hive".publicKey =
                 "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFyg7GFh4XWohudoODsdbzj8MtyymHChvk/BHvm+IRDU";
 
+            # Plain `restic` on PATH, not just the auto-generated
+            # `restic-cube` wrapper below (nixpkgs' services.restic module
+            # own mechanism, `createWrapper`) -- that wrapper hardcodes a
+            # single repository/password pair via env vars, which covers
+            # the single-repo ad hoc commands (`restic-cube snapshots`,
+            # `stats`, `check`) but not a `restic copy --repo B --from-repo
+            # A` between two repositories, needed once
+            # (`wiki/homelab/backup-runbook.md`'s migration step,
+            # 2026-09-04, moving the repo to the `restic-backup` share
+            # without losing what was already backed up to the old path).
+            environment.systemPackages = [ pkgs.restic ];
+
             # sopsFile unset -- defaults to `config.sops.defaultSopsFile`
             # (secrets.yaml, set in nire/system/secrets/sops.nix, imported
             # by every Linux host via `system`). Declared HERE, not beside
