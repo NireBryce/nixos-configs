@@ -306,10 +306,10 @@ last action, check `git reflog` before concluding anything is actually
 broken.
 
 **"push" means the `ship` skill, landing on `experimental`, the default
-branch** — branch, PR, ask before merging, ask again before deleting the
-branch. Elly naming a branch outright means push directly there — except
-`main`, promotion-only (PR from `experimental`, after hardware
-verification).
+branch** — branch, PR, one combined ask covering both merging and deleting
+the branch afterward. Elly naming a branch outright means push directly
+there — except `main`, promotion-only (PR from `experimental`, after
+hardware verification).
 
 **Never file anything outside `NireBryce/nixos-configs` — an issue or PR on
 nixpkgs, ble.sh, carapace, any other project — without Elly saying so
