@@ -27,11 +27,6 @@ that import it.
   describe a completely different, wrong-looking-but-correct disk layout —
   use `/proc/1/mountinfo`, `/dev/disk/by-uuid/`, `/run/current-system`
   instead.
-- **[impermanence-stage1-migration.md](impermanence-stage1-migration.md)**
-  — the move from scripted stage 1 to a systemd-initrd unit (done because
-  nixpkgs flipped `boot.initrd.systemd.enable` to default true). Evaluates,
-  was never booted before durandal/tenacity's first real boots confirmed the
-  rollback works — see [history.md](history.md) for that confirmation.
 - **Disk layout template** —
   [`../flake/doc/disko-impermanence-layout.md`](<../flake/doc/disko-impermanence-layout.md>),
   covered in more depth on [hosts.md](hosts.md).

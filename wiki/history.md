@@ -14,9 +14,10 @@
   the first session on real hardware, §§25–31 after it first booted, §32+
   later work on already-booted or newly-added hosts. `CLAUDE.md` has the
   rules this produced; this has the scar tissue behind them.
-- **[impermanence-stage1-migration.md](impermanence-stage1-migration.md)**
-  — the stage-1 impermanence migration specifically. Covered from the
-  impermanence angle on [impermanence-and-secrets.md](impermanence-and-secrets.md).
+- **`impermanence-stage1-migration.md` was removed 2026-09-05** — the
+  stage-1 migration writeup, moved in from `claude cave/` 2026-09-02; git
+  history has the page. Covered from the impermanence angle on
+  [impermanence-and-secrets.md](impermanence-and-secrets.md).
 - `claude cave/2026-08-09 things to look into eventually.md` (removed
   2026-09-01, no longer a link — still in git history if wanted again) —
   open questions rescued from a deleted `HANDOFF-tenacity.md`, partially
@@ -46,9 +47,9 @@
   infrastructure — see [virtualization](categories/virtualization.md).
 - **`claude cave/` itself was retired 2026-09-02.** Its four remaining
   files became real wiki pages — [lessons-learned.md](lessons-learned.md),
-  [impermanence-stage1-migration.md](impermanence-stage1-migration.md),
+  `impermanence-stage1-migration.md` (since removed — above),
   [module-style-guide.md](module-style-guide.md), and
-  [kde-to-wayland-migration.md](kde-to-wayland-migration.md) — the same
+  `kde-to-wayland-migration.md` (since removed — next entry) — the same
   "index over restatement, except here" shape `wiki/homelab/` pages and
   `categories/shell-config/`'s deep-dives already used, per
   [styleguide.md](styleguide.md). The one file that didn't get its own
@@ -58,6 +59,11 @@
   [categories/backup.md](categories/backup.md) — see that runbook section
   for why. Every reference to a `claude cave/...` path across `AGENTS.md`,
   the skills, and the module tree was repointed in the same change.
+- **`wiki/kde-to-wayland-migration.md` was removed 2026-09-05.** Research-stage
+  inventory toward moving durandal/tenacity off KDE Plasma onto a Wayland
+  tiling WM, moved in from `claude cave/` 2026-09-02; it was never explored —
+  no WM chosen, nothing implemented — and its dependency inventory was stale.
+  Git history has it if a migration ever starts.
 
 ## Confirmed-on-hardware facts, and how they were confirmed
 

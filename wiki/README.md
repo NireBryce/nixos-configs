@@ -79,10 +79,7 @@ or a skill (`.claude/skills/<name>/SKILL.md`) — nothing here is new content.
   `dirsAsCategory` mechanism, Home Manager integration, and package
   modules built on top of it.
 - [Impermanence, initrd & secrets](impermanence-and-secrets.md) — the
-  `/root`-wipe-on-boot mechanism, which hosts opt in, sops-nix. The stage-1
-  migration's own full writeup,
-  [impermanence-stage1-migration.md](impermanence-stage1-migration.md),
-  moved in from `claude cave/` 2026-09-02 and lives here too.
+  `/root`-wipe-on-boot mechanism, which hosts opt in, sops-nix.
 - [Traps & skills](traps-and-skills.md) — the mistakes that have actually
   happened here, and the skills that hold the long version of each.
 - [History & lessons learned](history.md) — the den → flake-parts port, the
@@ -91,11 +88,6 @@ or a skill (`.claude/skills/<name>/SKILL.md`) — nothing here is new content.
   "written by Claude Code, for Claude Code" — moved in from `claude cave/`
   2026-09-02; this page stays the index, that page stays the log, the same
   split as `categories/shell-config/README.md` and its deep-dives.
-- [KDE → Wayland migration](kde-to-wayland-migration.md) — research-stage
-  inventory toward moving `nire-durandal`/`nire-tenacity` off KDE Plasma
-  onto a Wayland tiling WM; nothing implemented yet. Also moved in from
-  `claude cave/` 2026-09-02, but as live research rather than a closed
-  record — see its own header before trusting anything on it as settled.
 - [Open threads](open-threads.md) — pending upstream bug reports, todos,
   half-formed ideas, and things-to-look-into notes left in various corners.
 

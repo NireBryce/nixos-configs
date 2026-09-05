@@ -66,12 +66,6 @@ specific report — not as a housekeeping pass over this list:
 
 ## Todos and ideas left next to the code
 
-- **[kde-to-wayland-migration.md](kde-to-wayland-migration.md)**
-  — research-stage inventory toward moving `nire-durandal` and
-  `nire-tenacity` off KDE Plasma onto a Wayland tiling WM (Hyprland/niri/
-  sway, not yet chosen). Every explicit and implicit KDE dependency found so
-  far, candidate replacements, and open questions — nothing implemented.
-  Cross-linked from [categories/desktop-env.md](categories/desktop-env.md).
 - **[`../flake/modules/nire/hardware/todo.md`](<../flake/modules/nire/hardware/todo.md>)**
   — eventually give the overarching `dirsAsCategory` mechanism flags so it
   can auto-import based on system type.
