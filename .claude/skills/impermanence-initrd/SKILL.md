@@ -13,8 +13,7 @@ boot. Use before touching anything under `nire/impermanence/`, any
 `boot.initrd` option, or before trusting `lsblk`/`findmnt`/mounted-`/etc`
 output on these hosts.
 
-**Read `WARN-impermanence.nix` and
-`wiki/impermanence-stage1-migration.md` before
+**Read `WARN-impermanence.nix` before
 changing anything near this.** This mechanism wipes `/root` on boot on most
 hosts in this repo — see `CLAUDE.md` Safety section for which ones, current
 as of the date on that file. Both of the following have actually happened
@@ -22,8 +21,7 @@ here.
 
 ## `@name@` inside an initrd hook string is a live template placeholder
 
-Applies to **scripted** stage 1, which this repo still uses as of the
-`lessons-learned-impermanence-stage1-migration.md` writeup (kept because the
+Applies to **scripted** stage 1, which this repo still uses (kept because the
 mechanism is one `boot.initrd.systemd.enable = false` away).
 
 `boot.initrd.postResumeCommands` and its siblings are pasted into

@@ -1,16 +1,15 @@
 # AGENTS.md
 
 > **Written by agents, for agents.** An agent's working notes, not
-> documentation — pitched at something with no memory between sessions, dwelling
-> on mistakes because repeating them is the failure mode it exists to prevent.
-> Elly has corrected the load-bearing claims; the framing is the machine's.
-> `README.md` is the human entry point.
+> documentation — pitched at something with no memory between sessions,
+> dwelling on mistakes because repeating them is the failure mode it exists
+> to prevent. Elly has corrected the load-bearing claims; the framing is the
+> machine's. `README.md` is the human entry point.
 >
-> This file is the canonical one; `CLAUDE.md` is a symlink to it, so every
-> "see CLAUDE.md" reference in this repo (skills, wiki, scripts) resolves here.
-> Skills referenced by name below are plain markdown at
-> `.claude/skills/<name>/SKILL.md` — any agent can read them as files, with or
-> without a harness that loads skills automatically.
+> This file is canonical; `CLAUDE.md` is a symlink to it, so every "see
+> CLAUDE.md" reference in this repo resolves here. Skills referenced by name
+> below are plain markdown at `.claude/skills/<name>/SKILL.md` — any agent
+> can read them as files, with or without a harness that loads skills.
 
 Landing work targets `experimental`, the default branch (see "push" under
 Working in this repo, and skill `ship`); `main` is the promoted known-good
@@ -19,70 +18,54 @@ Don't assume a branch — check `git branch --show-current`.
 
 ## Safety
 
-The README's warning is real: this config enables impermanence and wipes `/root`
-on boot on most hosts. Never suggest installing it wholesale on a machine, and
-be careful with anything touching `flake/modules/nire/impermanence/` or the
+This config enables impermanence and wipes `/root` on boot on most hosts.
+Never suggest installing it wholesale on a machine, and be careful with
+anything touching `flake/modules/nire/impermanence/` or the
 `fileSystems`/`boot` options in the host hardware modules.
 
-`WARN-impermanence.nix` (reached through the `impermanence` category; the
-category was named `boot` until 2026-08-11) deletes the `/root` btrfs subvolume
-in initrd on every boot and depends on a `root-blank` subvolume existing on the
-machine. **Two of the three NixOS hosts import it and wipe `/root` on boot:
-`nire-durandal`, `nire-tenacity`.** `nire-cube` deliberately does
-not — its real install is a plain persistent root, not LUKS+impermanence (see
-cube's own header; corrected in `2efca5e4`). Don't assume "every host wipes
-root" or "no host does" — check the specific host. Read `WARN-impermanence.nix`
-and `wiki/impermanence-stage1-migration.md` before changing anything near it.
+`WARN-impermanence.nix` (reached through the `impermanence` category; named
+`boot` until 2026-08-11) deletes the `/root` btrfs subvolume in initrd on
+every boot and needs a `root-blank` subvolume to exist. **Two of the three
+NixOS hosts import it and wipe `/root` on boot: `nire-durandal`,
+`nire-tenacity`.** `nire-cube` deliberately does not — plain persistent
+root, not LUKS+impermanence (see cube's own header; corrected in
+`2efca5e4`). Don't assume "every host wipes root" or "no host does" — check
+the specific host. Read `WARN-impermanence.nix` before changing anything
+near it.
 
-Secrets are sops-nix (`flake/modules/nire/system/secrets/`). `secrets.yaml` is
-encrypted and committed; that is deliberate, not a mistake to be "fixed".
+Secrets are sops-nix (`flake/modules/nire/system/secrets/`). `secrets.yaml`
+is encrypted and committed; that is deliberate, not a mistake to be "fixed".
 `.sops.yaml` (same directory) enrolls `nire-durandal`, `nire-lysithea`,
-`nire-tenacity`, and `nire-cube` — all live hosts with current config here, the
-normal case, not a leftover to prune. Read the file rather than this
+`nire-tenacity`, and `nire-cube` — all live hosts with current config here,
+the normal case, not a leftover to prune. Read the file rather than this
 paragraph — this paragraph has been stale before.
 
 ## State
 
-**Switch/boot state is deliberately not recorded in this repo.** Every
-entry used to rot within days — only a session standing on the machine at
-switch time can update it, and the old per-host table was stale the moment
-the next switch landed (all hosts have switched since 2026-08-26; many not
-to the current build). Whether a host is running what the tree evaluates
-to is a live question, answered on the host:
-
-```sh
-just baseline        # what the machine is REALLY running -- capture before switching
-just diff-deployed   # package-level diff, running vs new toplevel; needs `just build` first
-nix eval --raw .#nixosConfigurations.<host>.config.system.build.toplevel.outPath
-# then compare with readlink /run/current-system on the host
-```
+**Switch/boot state is deliberately not recorded in this repo** — it rots;
+only a session standing on the machine at switch time can update it.
+Whether a host runs what the tree evaluates to is a live question, answered
+on the host: `just baseline` and `just diff-deployed` (Commands below), or
+`nix eval --raw .#nixosConfigurations.<host>.config.system.build.toplevel.outPath`
+compared with `readlink /run/current-system`.
 
 Roster, class, and which hosts wipe `/root`: `nireHost/hosts.nix` (check it
 before stating any count) and `wiki/hosts.md`'s table. First-boot history
-(dates, generations, how the `/root` rollback was confirmed):
+(dates, generations, the `/root` rollback):
 `wiki/history.md`'s "Confirmed-on-hardware facts".
 
 - **Check `hostname` before assuming which machine the session is on.**
-  Sessions have run on `nire-lysithea`, directly on `nire-durandal`, and on
+  Sessions have run on `nire-lysithea`, `nire-durandal`, and
   `nire-tenacity`.
-- `nire-lego` (never built or switched) and `nire-installer` (live-USB
-  installer image) were removed 2026-08-27 — `wiki/history.md`. Git history
-  is the starting point if either is wanted again.
-- `nire-testbed` (2026-08-14→08-22, never on real hardware) is gone; same
-  rule, plus the `new-host-config` skill's Intel-host notes.
-- `nire-llm-sandbox` (libvirt VM on cube, removed 2026-08-28 — see
-  `wiki/history.md`). The generator it ran on, `VMs/_lib/libvirt-vm.nix`,
-  is kept as unexercised reusable infrastructure.
-- Switch state is not a wiki fact (see above); host *counts* in prose are
-  still claims about when someone last looked — check `hosts.nix`.
-- The den→flake-parts port is done; its planning docs were removed
-  2026-08-26 as superseded (`wiki/history.md`).
-- **`claude cave/` was retired 2026-09-02** — its four remaining files
-  became `wiki/` pages (`lessons-learned.md`,
-  `impermanence-stage1-migration.md`, `module-style-guide.md`,
-  `kde-to-wayland-migration.md`); the backup plan folded into
-  `wiki/homelab/backup-runbook.md`. A `claude cave/...` reference in an old
-  commit means the pre-move path; the directory no longer exists.
+- Removed (git history and `wiki/history.md` are the way back):
+  `nire-lego` and `nire-installer` (2026-08-27), `nire-testbed` (never on
+  real hardware; the `new-host-config` skill has its Intel-host notes),
+  `nire-llm-sandbox` (2026-08-28; its generator `VMs/_lib/libvirt-vm.nix`
+  is kept as unexercised infrastructure), the port's planning docs
+  (2026-08-26), `claude cave/` (2026-09-02, became `wiki/` pages).
+- A `claude cave/...` reference in an old commit means the pre-move path.
+- Host *counts* in prose are claims about when someone last looked — check
+  `hosts.nix`.
 
 ## Commands
 
@@ -93,10 +76,10 @@ just preflight       # check + modules + lint in one shot -- the ship skill's st
 just check           # nix flake check --all-systems --no-build
 just modules         # static module-tree check; the only one that means anything on darwin
 just lint            # statix + deadnix + oversized-file, ratcheted -- see flake/scripts/lint.py
-just wiki-lint       # wiki/AGENTS.md claims (imports, tables, links, recipes, skills, secrets, routes) vs the repo; not in preflight yet
+just wiki-lint       # wiki/ claims (imports, tables, links, recipes, skills, secrets, routes) vs the repo; not in preflight yet
 just wiki-churn      # rank wiki/ pages by git-log edit churn; reporting only, never fails
 just wiki-stale-refs # backtick file/path mentions with no matching tracked file; reporting only, heuristic
-just reach <host>    # ssh to durandal/tenacity/cube/lysithea, trying LAN mDNS then Tailscale then DNS
+just reach <host>    # ssh to durandal/tenacity/cube/lysithea: LAN mDNS, then Tailscale, then DNS
 just install-hooks   # one-time: run the checks locally pre-commit, plus the commit-trailer fixup
 just available <pkg> # can it build on aarch64-darwin, and does a cask install it too
 just available --duplicates   # only the ones homebrew ALSO installs, and what to do
@@ -108,18 +91,13 @@ just age-key         # a host's sops recipient key; --updatekeys re-encrypts sec
 just threads <term>  # search known threads: GitHub issues + wiki/ + lessons-learned.md
 ```
 
-On the hardware, and read-only:
+On the hardware, and read-only: `just hm-collisions` (files HM will take
+over, and whether any collide), `just root-drift` (what's on / that no
+persistence entry covers; needs sudo).
 
-```sh
-just baseline        # what the machine is REALLY running -- capture before switching
-just hm-collisions   # which files HM will take over, and whether any would collide
-just diff-deployed   # package-level diff, running vs new toplevel; needs `just build` first
-just root-drift      # what's on / that no persistence entry covers -- needs sudo
-```
-
-`host` derives from `hostname`, falling back to `nire-durandal` off-host. The
-override goes **before** the recipe name — `just host=nire-durandal build`;
-after it, just reads it as a second recipe name and errors.
+`host` derives from `hostname`, falling back to `nire-durandal` off-host.
+The override goes **before** the recipe name — `just host=nire-durandal
+build`; after it, just reads it as a second recipe name and errors.
 
 For iterating, evaluate directly from `flake/`:
 
@@ -131,258 +109,236 @@ nix eval --raw '.#nixosConfigurations.nire-durandal.config.home-manager.users.el
 `elly` is literal on purpose: it reads an *evaluated* config, where the
 attribute name is already resolved.
 
-`build`/`boot`/`switch` go through `scripts/rebuild.sh`, which asks the flake
-whether the host is a `darwinConfiguration` and calls `nh darwin` or `nh os`.
-On any real host, `just build`/`switch` there is a real test, not just
-evaluation. A NixOS host cannot be built from any other machine (no remote
-builder, no binfmt); `rebuild.sh` says so rather than failing inside nix.
+`build`/`boot`/`switch` go through `scripts/rebuild.sh` (picks `nh darwin`
+or `nh os` off the flake). On any real host, `just build`/`switch` is a
+real test, not just evaluation. A NixOS host cannot be built from any other
+machine (no remote builder, no binfmt); `rebuild.sh` says so rather than
+failing inside nix.
 
 ## Architecture
 
-`flake.nix` is a manifest. `(inputs.import-tree ./modules)` recursively imports
-every `.nix` file under `flake/modules/`, and
+`flake.nix` is a manifest. `(inputs.import-tree ./modules)` recursively
+imports every `.nix` file under `flake/modules/`, and
 `flake-parts.flakeModules.modules` declares the `flake.modules.<class>.<name>`
 option they all write into. **Every `.nix` file under `modules/` is a
-flake-parts module** — its top level is `{ flake.modules.<class>.<name> = …; }`
-or similar, never a bare NixOS or Home Manager module.
+flake-parts module** — top level `{ flake.modules.<class>.<name> = …; }` or
+similar, never a bare NixOS or Home Manager module.
 
 ### Membership is implicit, and comes from the directory
 
 Each category directory holds a `dirsAsCategory.nix` (a two-line shim over
-shared logic in `flake/modules/_lib/category-collector.nix` since 2026-08-27),
-which derives the category name from its own directory, collects the modules
-beneath it, and declares one aggregate per class. **A module belongs to the
-category of the directory it is filed in**; adding one is a one-file change.
-Read `flake/doc/dirsAsCategory.md` before changing any `dirsAsCategory.nix` —
-it covers the mechanism, what is load-bearing in it, and its history.
+`flake/modules/_lib/category-collector.nix` since 2026-08-27) that derives
+the category name from its own directory and collects the modules beneath
+it. **A module belongs to the category of the directory it is filed in**;
+adding one is a one-file change. Read `flake/doc/dirsAsCategory.md` before
+changing any `dirsAsCategory.nix`.
 
-Two consequences worth holding onto:
+- **A category collects from its *sub*directories only.** A `.nix` file
+  sitting directly in a category directory is collected by nothing.
+- **Entry points sit outside every category tree** — `modules/checks.nix`,
+  `nireHost/hosts.nix`, `nireHost/durandal-configuration.nix`, and
+  `nireUser/elly-home-manager.nix`; `just modules` relies on exactly this.
 
-- **A category collects from its *sub*directories only.** A `.nix` file sitting
-  directly in a category directory is collected by nothing.
-- **Entry points are defined by being outside every category tree.**
-  `modules/checks.nix`, `nireHost/hosts.nix`,
-  `nireHost/durandal-configuration.nix`, and
-  `nireUser/elly-home-manager.nix` all sit where `dirsAsCategory` cannot reach
-  them, deliberately; `just modules` relies on exactly this rule.
+Areas: `nire/` (shared system, incl. `nire/macos/` for darwin), `nireHost/`
+(per-host), `nirePackages/`, `nireUser/`.
 
-Areas: `nire/` (shared system, including a `nire/macos/` subarea for darwin),
-`nireHost/` (per-host), `nirePackages/` (packages), `nireUser/` (elly).
-
-**The category is how something shared stays optional** — nothing in this tree
-declares `mkEnableOption`. `kde-desktop` is the by-name variant of the same
-idea: one module imported directly while its category (`desktop-env`, which
-also holds `jovian`) is never imported whole.
+**The category is how something shared stays optional** — nothing in this
+tree declares `mkEnableOption`. `kde-desktop` is the by-name variant: one
+module imported directly while its category (`desktop-env`, which also
+holds `jovian`) is never imported whole.
 
 **`nire/homelab/` is an umbrella category (2026-08-27)** nesting
 `virtualization`, `containers`, `monitoring`, `git-forge`, `shortlinks`,
-`reverse-proxy`, `landing`, and (added 2026-08-28) `backup` — the same coarse-and-fine overlap as
-`nire/hardware`/`nire/hardware/amd`. Each nested category keeps its own name
-and is still individually importable (`tenacity` imports `containers`
-directly); `nire-cube` imports `homelab` as one line instead of eight. A bare
-`.nix` file sitting directly in a nested category's own root (out of that
-category's own aggregate, but swept into `homelab`'s) is a real quirk of the
-mechanism — see `category-collector.nix`'s history section for the bug it
-caused once — but nothing in the tree is currently filed that way. Full
-account: `wiki/categories/homelab.md`.
+`reverse-proxy`, `landing`, and `backup` (2026-08-28) — the same
+coarse-and-fine overlap as `nire/hardware`/`nire/hardware/amd`. Each keeps
+its own name and stays individually importable (`tenacity` imports
+`containers` directly; `nire-cube` imports `homelab` as one line instead of
+eight). A bare `.nix` in a nested category's own root is a real quirk of
+the mechanism (see `category-collector.nix`'s history section) — nothing is
+currently filed that way. Full account: `wiki/categories/homelab.md`.
 
 Categories under `homelab/`, all cube-only unless noted (each has a
-`wiki/categories/<name>.md` page; the "category isn't named after its module"
-renames all dodge the same silent-merge collision `just modules` catches):
+`wiki/categories/<name>.md` page; the "category isn't named after its
+module" renames all dodge the same silent-merge collision `just modules`
+catches):
 
-- **`virtualization`** — libvirt/QEMU VMs, cube-only; no VM currently
-  defined through it. `wiki/categories/virtualization.md`.
-- **`containers`** — podman + distrobox, cube and tenacity (not durandal).
-  **"virtualization" means VMs only** — containers is the separate category
-  despite the name overlap. `wiki/categories/containers.md`.
-- **`monitoring`** — Prometheus + Grafana, cube-only, behind Caddy at
-  `.../grafana/`. `wiki/categories/monitoring.md`.
-- **`git-forge`** — Forgejo, cube-only, behind Caddy at `.../git/`.
-  `wiki/categories/git-forge.md`.
+- **`virtualization`** — libvirt/QEMU VMs; no VM currently defined
+  through it.
+- **`containers`** — podman + distrobox, cube and tenacity.
+  **"virtualization" means VMs only** — containers is separate despite the
+  name overlap.
+- **`monitoring`** — Prometheus + Grafana, behind Caddy at `.../grafana/`.
+- **`git-forge`** — Forgejo, behind Caddy at `.../git/`.
 - **`shortlinks`** — golink. **Not a service on cube's network** — tsnet
   joins the tailnet as its own device `go`, no firewall rule, no host
   `tailscaled`. Usage: `wiki/homelab/golinks.md`.
 - **`reverse-proxy`** — Caddy, the single tailnet-facing HTTPS listener;
   per-app path-prefix handling differs and has bitten before.
-  `wiki/categories/reverse-proxy.md`.
 - **`landing`** — glance, what Caddy serves at `/`. A **pair** with
   reverse-proxy: drop it and the front page 502s.
-- **`backup`** (2026-08-28) — restic to the QNAP over SFTP, blocked on two
-  sops secrets nobody's set yet. `wiki/categories/backup.md`,
-  `wiki/homelab/pending-setup.md` item 4.
+- **`backup`** — restic to the QNAP over SFTP; both sops secrets set
+  2026-08-30/31, restore drill still pending
+  (`wiki/homelab/pending-setup.md` item 4).
 
 **Hosts**: `hosts.nix` declares one `darwinConfigurations` entry
-(`nire-lysithea`, aarch64-darwin) alongside three `nixosConfigurations`, all
-real hosts: `nire-durandal` workstation, `nire-tenacity` handheld, `nire-cube`
-mini PC. `hosts.nix` comments each right at the declaration; check it before
-stating any count.
+(`nire-lysithea`, aarch64-darwin) alongside three `nixosConfigurations`:
+`nire-durandal` workstation, `nire-tenacity` handheld, `nire-cube` mini PC.
+`hosts.nix` comments each right at the declaration.
 
 ### Home Manager is NixOS-integrated
 
-`home-manager.users.elly` is set from the NixOS side with `useGlobalPkgs` and
-`useUserPackages`, in `nire/system/home-manager/enable-home-manager.nix`. No
+`home-manager.users.elly` is set from the NixOS side with `useGlobalPkgs`
+and `useUserPackages`, in
+`nire/system/home-manager/enable-home-manager.nix`. No
 `homeConfigurations` output, no separate home switch; `just switch` applies
 both. `flake/doc/trailhead-home-manager-standalone.md` is the way back.
 
 - HM **rejects** `nixpkgs.*` under `useGlobalPkgs` — errors, not ignores.
   `allowUnfree` comes from the system side of `basic-nix-settings.nix`.
-- `home.profileDirectory` is `/etc/profiles/per-user/elly`, not `~/.nix-profile`.
+- `home.profileDirectory` is `/etc/profiles/per-user/elly`, not
+  `~/.nix-profile`.
 - Activation runs as a systemd unit, so its `PATH` is only
   coreutils/findutils/gnugrep/gnused/systemd.
 
 ### Platform support is derived; Homebrew overlap is not
 
 `ellyHomeManager` is shared verbatim by all five hosts including
-`nire-lysithea`, so everything in it has to survive darwin. Two questions when
-adding a package: can nixpkgs build it on darwin (answered automatically off
-`meta.platforms`), and does Homebrew already install it (never answered
-automatically). Skill `nirepackages-platform-support` has the full detail and
-worked examples.
+`nire-lysithea`, so everything in it has to survive darwin. Two questions
+when adding a package: can nixpkgs build it on darwin (answered
+automatically off `meta.platforms`), and does Homebrew already install it
+(never answered automatically). Skill `nirepackages-platform-support` has
+the full detail.
 
 ## Traps, all of which have actually happened here
 
-Short versions — the named skills have the full mechanism and worked examples;
-read the skill before doing the matching task.
+Short versions — the named skills have the full mechanism and worked
+examples; read the skill before doing the matching task.
 
 ### Writing or renaming a flake-parts module — skill `new-flake-module`
 
 `flake.modules` cannot live inside `perSystem` (no `<system>` axis, no
-`freeformType` there — 151 files got this wrong in the port). A module's
-declared name comes from its filename, so a rename silently drops it from its
-category if the two disagree. Hyphens are legal in Nix identifiers (`kde-base`
-is one token). Two modules sharing a name **merge** rather than conflict
-(`just modules` catches this). Module classes aren't validated at declaration —
-a wrong one fails later, at the import site. Raw `nixos-generate-config` output
-needs wrapping or evaluation dies with a misleading `infinite recursion` naming
-`modulesPath`.
+`freeformType` there). A module's declared name comes from its filename, so
+a rename silently drops it from its category if the two disagree; two
+modules sharing a name **merge** rather than conflict (`just modules`
+catches both). Hyphens are legal in Nix identifiers. Module classes aren't
+validated at declaration — a wrong one fails at the import site. Raw
+`nixos-generate-config` output needs wrapping or evaluation dies with a
+misleading `infinite recursion` naming `modulesPath`.
 
 ### Editing Home Manager shell/dotfile modules — skill `home-manager-dotfiles`
 
-`home.file.<n>.text` and `home.sessionPath` concatenate across modules rather
-than override — two modules writing the "same" file double it, silently.
-Reading a generated dotfile back is full of false negatives (wrong attribute
-name returns empty; some entries have `.source`, not `.text`). HM's rc ordering
-(`mkBefore` → `mkOrder 550` → `programs.zsh.plugins` → unordered) silently
-orphaned a hand-written `starship init` and a 1,659-line p10k config.
+`home.file.<n>.text` and `home.sessionPath` concatenate across modules
+rather than override — two modules writing the "same" file double it,
+silently. Reading a generated dotfile back is full of false negatives
+(wrong attribute name returns empty; some entries have `.source`, not
+`.text`). HM's rc ordering silently orphaned a hand-written `starship init`
+and a 1,659-line p10k config.
 
 ### Editing impermanence or initrd — skill `impermanence-initrd`
 
-Read `WARN-impermanence.nix` first regardless. In the scripted stage-1 hooks,
+Read `WARN-impermanence.nix` first regardless. In scripted stage-1 hooks,
 `@name@` inside a hook string — even in a comment — is a live template
-placeholder substituted in the same fixed pass, so naming one can paste a whole
-other script in and execute most of it. The shell's view of the machine
-(`lsblk`, `findmnt`, `/etc`) is scoped to its mount namespace and can look
-wrong while being correct — use `/proc/1/mountinfo`,
+placeholder substituted in the same fixed pass, so naming one can paste a
+whole other script in and execute most of it. The shell's view of the
+machine (`lsblk`, `findmnt`, `/etc`) is scoped to its mount namespace and
+can look wrong while being correct — use `/proc/1/mountinfo`,
 `/dev/disk/by-uuid/`, `/run/current-system` instead, all unprivileged.
 
 ### Adding or platform-gating a package — skill `nirepackages-platform-support`
 
-Can nixpkgs build it on darwin (automatic, via `drop-unsupported-packages.nix`
-— don't hand-restate with `lib.mkIf (!pkgs.stdenv.isDarwin)`) versus does
-Homebrew already install it (never automatic; `just available --duplicates`
-finds the overlap, which one wins is a judgement call). `obsidian.nix` is the
-worked example.
+Can nixpkgs build it on darwin (automatic, via
+`drop-unsupported-packages.nix` — don't hand-restate with
+`lib.mkIf (!pkgs.stdenv.isDarwin)`) versus does Homebrew already install it
+(never automatic; `just available --duplicates` finds the overlap).
+`obsidian.nix` is the worked example.
 
 ### Debugging "can't reach a host by tailscale name" — wiki `system.md`
 
 Neither trap is in this repo's config: tailnet device names don't match
-`networking.hostName` (`nire-cube` is `ts-cube`, fleet-wide), and a tailnet ACL
-can block peer-to-peer while every local firewall setting is right — fixed in
-Tailscale's admin console. Full mechanism: `networking/tailscale.nix`'s header,
-indexed at `wiki/categories/system.md`.
+`networking.hostName` (`nire-cube` is `ts-cube`, fleet-wide), and a tailnet
+ACL can block peer-to-peer while every local firewall setting is right.
+Full mechanism: `networking/tailscale.nix`'s header, indexed at
+`wiki/categories/system.md`.
 
 ### `${...}` inside a Nix `''` string is interpolation
 
-Writing `${terminfo[khome]}` in what you intend as a comment is an evaluation
-error. Escape as `''${...}` or reword. General to any `''` string, hence inline
-here rather than in a skill.
+Writing `${terminfo[khome]}` in what you intend as a comment is an
+evaluation error. Escape as `''${...}` or reword. General to any `''`
+string, hence inline here rather than in a skill.
 
 ## Working in this repo
 
-**`git add` before `nix eval`.** Flakes in a git repo ignore untracked files, so
-a new module silently does not exist. `just modules`' untracked check catches
-this mechanically now — this is the backstop for when it wasn't run.
+**`git add` before `nix eval`.** Flakes in a git repo ignore untracked
+files, so a new module silently does not exist. `just modules`' untracked
+check is the mechanical backstop.
 
 **Read upstream source rather than guessing at options.** It settled that
-`perSystem` has no `freeformType`, that `home.sessionPath` is `listOf str`, and
-that HM has no blesh module (so `programs.bash.blesh.enable` did nothing). For
-third-party packages, check the project's current source too — `handheld-daemon`
-got a bespoke shim for something upstream had already fixed.
+`perSystem` has no `freeformType`, that `home.sessionPath` is `listOf str`,
+and that HM has no blesh module. For third-party packages, check the
+project's current source too — `handheld-daemon` got a bespoke shim for
+something upstream had already fixed.
 
-**Verify refactors by fingerprint, but not only by fingerprint.** A differing
-hash doesn't prove breakage (reordering imports permutes
+**Verify refactors by fingerprint, but not only by fingerprint.** A
+differing hash doesn't prove breakage (reordering imports permutes
 `environment.systemPackages`), and an unchanged one can pass for the wrong
 reason — dead code looks exactly like safe code until you make it live
-(lessons-learned §43). Compare values with `just diff`, and make refactored
-paths actually run.
+(§43). Compare values with `just diff`, and make refactored paths run.
 
 **Bugs here serialize.** Evaluating a cheap attribute proves nothing;
-`networking.hostName` resolved happily while four separate things were broken.
-Force a toplevel — and know that eval and build both stop short of defects that
+`networking.hostName` resolved happily while four separate things were
+broken. Force a toplevel — eval and build both stop short of defects that
 only appear at runtime (§25, §37).
 
 **Ask "did it work before?" first.** `journalctl --list-boots` plus a grep
-settles regression-vs-always-broken faster than any argument about mechanism.
+settles regression-vs-always-broken faster than any argument about
+mechanism.
 
-**Calibrate severity.** Homelab, not production; the repo has gone six months
-between commits. "This is broken and here is the fix" beats incident framing.
+**Calibrate severity.** Homelab, not production; the repo has gone six
+months between commits. "This is broken and here is the fix" beats incident
+framing.
 
 **Default to a dedicated `git worktree` for any task that will branch,
-commit, or check out — skill `use-a-worktree`.** Not for read-only work;
-see that skill's own "Applies to" for the exceptions. A shared working
-directory can change underneath you with no warning: two sessions (or a
-session plus manual work) pointed at the same checkout see each other's
-`git checkout`/commit/branch delete immediately, mid-task. Hit 2026-08-30:
-files reverted to stale content, a different branch was suddenly checked
-out, and it took several turns to recognize "something external changed
-this" instead of "my last edit didn't take." If `git status`/`git branch
---show-current`/a file's content doesn't match what you expect from your
-own last action, check `git reflog` for a checkout or commit you didn't
-make before concluding anything is actually broken.
+commit, or check out — skill `use-a-worktree`.** Not for read-only work; a
+shared checkout can change underneath you mid-task (hit 2026-08-30: a
+session's files reverted and a different branch appeared). If `git
+status`/`git branch --show-current`/a file's content doesn't match your own
+last action, check `git reflog` before concluding anything is actually
+broken.
 
 **"push" means the `ship` skill, landing on `experimental`, the default
 branch** — branch, PR, ask before merging, ask again before deleting the
-branch. Elly naming a branch outright means push directly there, bypassing
-the flow — except `main`, which is promotion-only ("promote to main" = PR
-from `experimental`, after hardware verification). The skill has both flows
-and why.
+branch. Elly naming a branch outright means push directly there — except
+`main`, promotion-only (PR from `experimental`, after hardware
+verification).
 
 **Never file anything outside `NireBryce/nixos-configs` — an issue or PR on
 nixpkgs, ble.sh, carapace, any other project — without Elly saying so
-explicitly, in those words, unprompted.** A yes to a bundled "ok to do these
-four things" does not cover an upstream filing folded into it, even if it was
-one of the four and nothing was hidden. `propose-issue` only ever files in this
-repo, and `bugs pending submission/` plus `wiki/open-threads.md`'s "Pending
-upstream bug reports" are deliberately drafts nothing works through
-automatically — this rule is what keeps that true (lessons-learned #39).
+explicitly, in those words, unprompted.** A yes to a bundled list does not
+cover an upstream filing folded into it. `propose-issue` only ever files
+here; `bugs pending submission/` and `wiki/open-threads.md`'s drafts are
+deliberately not worked through automatically (lessons-learned #39).
 
-**Filing here can still reach another project's repo via GitHub autolinking.**
-A title or body containing `owner/repo#123` cross-references and pings that
-repo — a real ping, nothing filed there needed. Plain prose naming a project,
-even `akinomyoga/ble.sh` without a trailing `#number`, does not trigger it.
-Grep for the `owner/repo#number` shape before naming a specific upstream
-issue/PR in anything filed here.
+**Filing here can still reach another project's repo via GitHub
+autolinking**: a title or body containing `owner/repo#123` pings that repo.
+Grep for that shape before naming a specific upstream issue/PR in anything
+filed here.
 
 ## Conventions
 
 **Read `wiki/module-style-guide.md` before writing a new module.**
-Formatting is deliberate: aligned-`=` columns are intentional and `nix fmt` is
-deliberately not wired up because it would flatten them; module bodies sit one
-level deeper than needed (left over from unwrapping `perSystem`) and
-reindenting would risk the `''` strings in the shell modules.
+Formatting is deliberate: aligned-`=` columns are intentional and `nix fmt`
+is deliberately not wired up (it would flatten them); module bodies sit one
+level deeper than needed, and reindenting would risk the `''` strings in
+the shell modules.
 
 **Provenance trailer on every agent-authored commit:
-`Co-Authored-By: <agent>`, naming the agent that wrote it — no model name,
-no email.** Claude's canonical form is `Co-Authored-By: Claude`; any other
-agent uses the same shape with its own name. The reasoning generalizes: an
-agent cannot verify which model is executing it — the name comes from a
-system prompt that may be stale or generic, and the log holds dozens of
-wrong labels proving it — so the trailer records the agent, which it does
-know, and omits the model, which it doesn't. `.githooks/commit-msg` (active
-after `just install-hooks`) auto-corrects only the `Claude <model> <email>`
-shape to the canonical form; any other agent's trailer passes through
-untouched, so form it correctly at write time. Existing commits keep
-theirs.
+`Co-Authored-By: <agent>` — the agent that wrote it, no model name, no
+email.** An agent cannot verify which model is executing it (the log holds
+dozens of wrong labels proving it), so the trailer records what it knows.
+Claude's canonical form is `Co-Authored-By: Claude`. `.githooks/commit-msg`
+(active after `just install-hooks`) auto-corrects only the
+`Claude <model> <email>` shape; any other agent's trailer passes through,
+so form it correctly at write time.
 
 **Namespacing.** `nire` unless it needs a more specific tag; `nireHost`,
 `nireUser`, `nirePackages` otherwise.
@@ -390,13 +346,11 @@ theirs.
 **When a rename makes the old name ungreppable, say what it was** on the
 declaration — see `boot-durandal.nix`, `enable-home-manager.nix`.
 
-**A bug recorded in a comment stays in the file.** Nobody reads `git log`; the
-comment is what the next editor sees. Do not trim one because the fix landed.
-If a change strands a comment entirely, move it to a `history` heading at the
-bottom — still written to stand alone (dates, mechanism, what was tried,
-outcome), but under the same compression discipline as every other comment:
-facts kept, narration cut (`boot-durandal.nix`, `WARN-impermanence.nix`,
-`vscode.nix` have them).
+**A bug recorded in a comment stays in the file.** Nobody reads `git log`;
+do not trim one because the fix landed. If a change strands a comment, move
+it to a `history` heading at the bottom — still written to stand alone,
+under the same compression discipline: facts kept, narration cut
+(`boot-durandal.nix`, `WARN-impermanence.nix`, `vscode.nix` have them).
 
 **`elly` is hardcoded**, in `users.users.elly`, `home.username`, and
 `home-manager.users.elly`. The sibling branch has `nire.primaryUser`;
@@ -404,39 +358,27 @@ introducing it here is a separate change, not a tidy-up.
 
 **Check for an existing `programs.*` integration before hand-writing one.**
 
-**Don't bury Python inside a bash script.** `python3 -c '...'` heredocs get no
-highlighting, linting, or indentation help — exactly when quoting bugs stop
-being visible. A little Python: a real `.py` in `flake/scripts/util/`. Mostly
-Python: write the whole thing in Python (`modules.py` is the precedent). This
-rule exists because a bash-wrapping-Nix-wrapping-Python checker shipped both
-bugs the shape invites.
+**Don't bury Python inside a bash script.** `python3 -c '...'` heredocs get
+no highlighting, linting, or indentation help — exactly when quoting bugs
+stop being visible. A little Python: a real `.py` in
+`flake/scripts/util/`. Mostly Python: the whole thing in Python
+(`modules.py` is the precedent). This rule exists because a
+bash-wrapping-Nix-wrapping-Python checker shipped both bugs the shape
+invites.
 
 ## Docs
 
-- `wiki/README.md` — topic index over everything below and more. **Maintained
-  the same way this file is**: a change that makes a wiki page stale corrects
-  it in the same change, not as a follow-up (`just wiki-lint` checks the
-  mechanical claims).
-- `flake/doc/dirsAsCategory.md` — the category mechanism, what's load-bearing,
-  and its History section.
-- `flake/doc/disko-impermanence-layout.md` — reusable disko generator for the
-  LUKS+btrfs+impermanence layout durandal/tenacity run; the template if cube
-  ever adopts impermanence.
-- `wiki/impermanence-stage1-migration.md` — the root
-  rollback's move to systemd-initrd; evaluates, never booted. Read before
-  touching initrd.
-- `wiki/lessons-learned.md` — how the work went wrong in the doing.
-  §§1–18 port, §§19–31 first hardware, then: §32 manually pinned state, §33
-  removed nixpkgs options assert, §34/§35 category/module name collisions
-  merge silently, §36 read the built artifact, §37 some bugs need a real
-  `switch`, §38 scope the fix to the caller that needs it, §39 live pty repro
-  and newest-file bias, §40 unit failed ≠ resource down, §41 routing bugs
-  survive eval+build+artifact-read, §42 `settings.local.json` is not a Nix
-  module, §43 dead code passes fingerprints.
-- `flake/doc/trailhead-home-manager-standalone.md` — reversing the HM decision,
-  and the part that's one-way on the machine.
-- `git show origin/flake-parts:SESSION-HANDOFF.md` — the sibling branch's dead
-  ends and settled decisions (needs the `origin/` prefix; no local
+- `wiki/README.md` — topic index. **Maintained the same way this file is**:
+  a change that makes a wiki page stale corrects it in the same change
+  (`just wiki-lint` checks the mechanical claims).
+- `flake/doc/disko-impermanence-layout.md` — reusable disko generator for
+  the LUKS+btrfs+impermanence layout durandal/tenacity run; the template if
+  cube ever adopts impermanence.
+- `wiki/lessons-learned.md` — how the work went wrong in the doing;
+  §§1–18 the port, §§19–31 first hardware, §32+ one-liners in the page
+  itself.
+- `git show origin/flake-parts:SESSION-HANDOFF.md` — the sibling branch's
+  dead ends and settled decisions (needs the `origin/` prefix; no local
   `flake-parts` branch exists).
 - `git show origin/flake-parts:linux-flake/flake-parts-reference.md` —
   flake-parts machinery with upstream source behind each claim (that branch

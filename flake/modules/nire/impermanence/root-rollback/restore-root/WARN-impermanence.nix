@@ -168,7 +168,8 @@
                 # inside the initramfs. Similar names, unrelated options -- and
                 # the likeliest reason ad38ffb's first attempt looked finished.
                 #
-                # wiki/impermanence-stage1-migration.md is the working note.
+                # The working note, wiki/impermanence-stage1-migration.md,
+                # was removed 2026-09-05 -- git history has it.
                 systemd = {
                     enable = true;
 

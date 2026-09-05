@@ -29,14 +29,16 @@ separate tier for the *usage* side:
   tier), `history.md`, `impermanence-and-secrets.md`, `open-threads.md`,
   `traps-and-skills.md`, `conventions.md`, this file.
 
-  Four pages in this tier are the exception to "index over restatement"
-  below: `lessons-learned.md`, `impermanence-stage1-migration.md`,
-  `module-style-guide.md`, and `kde-to-wayland-migration.md` moved in
-  verbatim from `claude cave/` when that directory was retired 2026-09-02 —
-  real, synthesized content because there's nothing else for it to link to.
+  Two pages in this tier are the exception to "index over restatement"
+  below: `lessons-learned.md` and `module-style-guide.md` moved in verbatim
+  from `claude cave/` when that directory was retired 2026-09-02 (two
+  others moved with them — `impermanence-stage1-migration.md` and
+  `kde-to-wayland-migration.md` — and were removed 2026-09-05 —
+  `history.md`) — real, synthesized content because there's nothing else
+  for it to link to.
   `history.md` stays the index into `lessons-learned.md`;
-  `impermanence-and-secrets.md` and `conventions.md` stay the index into the
-  other two — the same split as a category page and its deep-dive.
+  `conventions.md` stays the index into `module-style-guide.md` — the same
+  split as a category page and its deep-dive.
 - **`wiki/categories/<name>.md`** — one page per real category, i.e. a
   directory under `flake/modules/` holding its own `dirsAsCategory.nix`
   (see [architecture.md](architecture.md)). Indexed in
