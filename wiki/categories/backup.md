@@ -5,7 +5,7 @@
 - [What's in it](#whats-in-it)
 - [Why the category isn't named `restic`](#why-the-category-isnt-named-restic)
 - [SFTP repository now, not local-path on NFS](#sftp-repository-now-not-local-path-on-nfs)
-- [The sqlite consistency bug](#the-sqlite-consistency-bug)
+- [The sqlite consistency bug — root-caused and fixed, 2026-09-06](#the-sqlite-consistency-bug--root-caused-and-fixed-2026-09-06)
 - [What's excluded, and why](#whats-excluded-and-why)
 - [Anti-deletion is not a Nix change](#anti-deletion-is-not-a-nix-change)
 - [What isn't done yet](#what-isnt-done-yet)
@@ -68,47 +68,55 @@ were migrated in with `restic copy` — six snapshots total, verified via a
 live `snapshots` listing. See `wiki/homelab/backup-runbook.md`'s step 4
 for exactly what ran.
 
-## The sqlite consistency bug
+## The sqlite consistency bug — root-caused and fixed, 2026-09-06
 
 Forgejo, Grafana and golink are all sqlite, and copying a live db file can
 capture a torn write mid-transaction that restic will store without
 complaint (issue #87's open question 1). `backupPrepareCommand` runs
-`sqlite3 <db> ".backup"` into a staging directory
-(`/var/cache/restic-backups-cube/sqlite-staging`) before each backup; the
-three live db files are `exclude`d, so it's meant to be the staged,
-consistent copy that actually gets backed up, not the live one.
+`sqlite3 <db> ".backup"` into a staging directory before each backup; the
+three live db files are `exclude`d, so it's the staged, consistent copy
+that actually gets backed up, not the live one.
 
-**It's never worked. Found 2026-09-06, doing the restore drill this page's
-own "done means" always said was the real bar.** `restic ls --recursive
+**It had never worked.** Found doing the restore drill this page's own
+"done means" always said was the real bar: `restic ls --recursive
 <snapshot> /var/cache/restic-backups-cube/sqlite-staging` against the
 repository's own metadata — not a restore, the repository directly —
-shows **zero file entries** in every real snapshot checked: 2026-09-01,
-2026-09-05, and two fresh on-demand runs on 2026-09-06, one of them
-immediately after a full reboot of cube. `/persist/secrets`,
-`/persist/passwords`, and the live Forgejo/Grafana/golink directories
-really are backed up; only this specific mechanism — the entire reason
-`backupPrepareCommand` exists — has silently protected nothing, this
-whole time.
+showed **zero file entries** in every real snapshot checked: 2026-09-01,
+2026-09-05, and two fresh on-demand runs on 2026-09-06, one immediately
+after a full reboot of cube. `/persist/secrets`, `/persist/passwords`,
+and the live Forgejo/Grafana/golink directories really were backed up;
+only this specific mechanism — the entire reason `backupPrepareCommand`
+exists — had silently protected nothing, the whole time.
 
-What's been ruled out, each confirmed by faithful reproduction rather than
-inference: sandboxing (`PrivateTmp`/`CacheDirectory`, reproduced via
-`systemd-run` with matching properties — works fine); exclude-pattern
-basename matching (a manual dry-run against the real `--exclude-file`
-correctly included the staged files); the real `--exclude-file`/
-`--files-from` combination with all six real paths at once (reproduced by
-hand, worked); switch-without-reboot cruft (a fresh reboot, zero prior
-state, still failed). `backupPrepareCommand`'s own commands and `restic
-backup` with the real flags both work correctly in isolation — only the
-real `ExecStartPre`→`ExecStart` sequence, in one unit activation, fails,
-every time it's been checked. The mechanism remains unexplained.
+**Root cause**: the staging directory lived at
+`/var/cache/restic-backups-cube/sqlite-staging` — *inside*
+`RESTIC_CACHE_DIR` (nixpkgs' restic module sets that to
+`/var/cache/restic-backups-<name>`, matching the systemd unit's own
+`CacheDirectory=` exactly). **restic refuses to back up its own cache
+directory.** Confirmed with a clean before/after test, not from docs: the
+identical `restic backup --dry-run` with the identical
+`--exclude-file`/`--files-from` processed 603 files (all three staged
+sqlite copies included) with `RESTIC_CACHE_DIR` unset, and exactly 600
+(all three silently dropped, no error) with it set to the real value —
+the one variable that changed. Everything else chased along the way and
+ruled out, each by faithful reproduction rather than inference: sandboxing
+(`PrivateTmp`/`CacheDirectory`, via `systemd-run` with matching
+properties); exclude-pattern basename matching; switch-without-reboot
+cruft (survived a fresh reboot). A `backupPrepareCommand`-added diagnostic
+log (`prepare.log`) proved the sqlite3 step itself always wrote real,
+correctly-sized files — the failure was 100% on restic's side.
 
-`restic.nix` now has `backupPrepareCommand` log its own behavior
-(timestamp, and each staged file's resulting size) to
-`/var/cache/restic-backups-cube/prepare.log` — a file that survives
-across runs, unlike `/run/restic-backups-cube/`'s ephemeral
-`RuntimeDirectory` — so the next real run can actually be inspected rather
-than reproduced from outside. This is diagnostic, not a fix; the bug is
-still open.
+**Fix**: `sqliteStagingDir` moved to `/var/lib/restic-backups-cube-sqlite-staging`
+— outside the cache directory entirely, a structural fix rather than an
+`--exclude-caches`-adjacent flag that would leave the directory choice
+still wrong.
+
+**What this means for existing backups**: every snapshot taken before
+this fix protects `/persist/secrets`, `/persist/passwords`, and the live
+service directories, but not the sqlite databases themselves — nothing
+past-tense is recoverable that wasn't already. Not yet independently
+confirmed live on cube (needs a switch, then a real run, then a real
+restore of the *new* staging path) — see the runbook.
 
 ## What's excluded, and why
 
@@ -144,8 +152,10 @@ Live-checked 2026-09-05/06, over ssh to `nire-cube.local`:
   **switched, and the pre-move repo's history migrated in** (see above).
 - ~~The QNAP-side snapshot schedule described above still hasn't been
   configured~~ — **done** (see above).
-- **The sqlite consistency bug** (above) — root cause still unknown,
-  the biggest open item in this whole category.
+- ~~The sqlite consistency bug — root cause unknown~~ — **root-caused and
+  fixed** (above): `sqliteStagingDir` moved outside `RESTIC_CACHE_DIR`.
+  **Not yet confirmed live** — needs a switch, a real run, and a real
+  restore of the new path before this is trusted.
 - **SSH's own exposure is mitigated, as of 2026-08-31** — QuTS hero has no
   toggle to force key-only auth, so this was done at the network level
   instead: port 22 is LAN-blocked and tailnet-only (confirmed live from
@@ -157,9 +167,11 @@ Live-checked 2026-09-05/06, over ssh to `nire-cube.local`:
 All of the above is genuinely done, and the restore drill has genuinely
 been performed — issue #87's own "done means" was followed exactly as
 written, and it did its job: it found that the sqlite consistency
-mechanism (above) has never worked, something no green timer ever would
-have caught. **This module still isn't done** — not because the drill
-wasn't run, but because of what it found.
+mechanism (above) had never worked, something no green timer ever would
+have caught, and the fix has landed. **This module still isn't fully
+done** — not because the drill wasn't run, but because the fix hasn't
+been confirmed live yet: a switch, a real run, and a real restore of the
+new staging path, none of which have happened.
 
 ## Imported by
 

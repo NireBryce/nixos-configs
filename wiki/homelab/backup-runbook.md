@@ -17,29 +17,26 @@ covers *why* it's shaped this way; this page is *what to actually type*, on
 `nire-cube`, to finish setting it up, run it, check it, and restore from it.
 
 **Correction, 2026-09-06 — the "fully working end to end" line below was
-wrong.** Actually performing the restore drill (the real "done" bar this
-page names below) surfaced a genuine bug: `sqlite-staging`, the directory
-`backupPrepareCommand` stages Forgejo/Grafana/golink's consistent sqlite
-copies into, has been backed up **completely empty in every real run
-checked** (2026-09-01, 2026-09-05, and two fresh on-demand runs on
-2026-09-06 including one right after a full reboot) — confirmed via
-`restic ls --recursive` against the repository's own metadata, not
-inferred from a restore. The plain files (`/persist/secrets`,
+wrong, and it's now fixed.** Actually performing the restore drill (the
+real "done" bar this page names below) surfaced a genuine bug:
+`sqlite-staging`, the directory `backupPrepareCommand` stages
+Forgejo/Grafana/golink's consistent sqlite copies into, had been backed up
+**completely empty in every real run checked** (2026-09-01, 2026-09-05,
+and two fresh on-demand runs on 2026-09-06 including one right after a
+full reboot) — confirmed via `restic ls --recursive` against the
+repository's own metadata, not inferred from a restore. Root cause: the
+staging directory lived *inside* `RESTIC_CACHE_DIR`
+(`/var/cache/restic-backups-cube`), and restic refuses to back up its own
+cache directory — confirmed with a clean before/after test (603 files
+processed with `RESTIC_CACHE_DIR` unset, exactly 600 with it set to the
+real value, nothing else changed). `sqliteStagingDir` has moved to
+`/var/lib/restic-backups-cube-sqlite-staging`, outside the cache
+directory entirely. The plain files (`/persist/secrets`,
 `/persist/passwords`) and the live Forgejo/Grafana/golink directories
-*are* genuinely backed up; only the sqlite consistency mechanism — the
-entire reason issue #87 asked for `backupPrepareCommand` in the first
-place — has silently never worked. `backupPrepareCommand`'s own commands
-reproduce correctly by hand and via a faithful `systemd-run` reproduction
-matching the real unit's `User`/`PrivateTmp`/`CacheDirectory`/
-`RuntimeDirectory`/environment; `restic backup` with the real
-`--exclude-file`/`--files-from` correctly includes pre-existing files
-there too. The failure is specific to the real `ExecStartPre`→`ExecStart`
-sequence in one unit activation, survives a full reboot (ruling out
-switch-without-reboot cruft), and remains unexplained. `restic.nix` now
-logs `backupPrepareCommand`'s own behavior to a persistent file
-(`/var/cache/restic-backups-cube/prepare.log`) so the next real run can
-actually be inspected. See `wiki/categories/backup.md`'s "The sqlite
-consistency bug" for the full incident.
+*were* genuinely backed up throughout; only the sqlite consistency
+mechanism was ever affected. See `wiki/categories/backup.md`'s "The
+sqlite consistency bug" for the full incident. **Not yet confirmed live**
+— needs a switch, a real run, and a real restore of the new path.
 
 **Superseded text, kept for what it got right:** SFTP, not NFS (this
 module shipped with a local-path repository on an NFS mount; a real
@@ -288,41 +285,43 @@ switch (confirmed `rustic 0.11.3` runs) — but its own env vars are
 
 ## Performing a restore — the actual bar for "done"
 
-Per issue #87's own "done means": a green timer proves nothing. **Actually
-run, 2026-09-05/06 — and it proved exactly that point**: the restic
-service had been green every day since 2026-08-31, and the restore drill
-found the sqlite consistency mechanism has never once worked (see this
-page's intro and `wiki/categories/backup.md`'s "The sqlite consistency
-bug"). The steps below are what to run; don't assume a clean run means
-what's inside is actually good — check it, the way this drill did.
+Per issue #87's own "done means": a green timer proves nothing. **Run
+2026-09-05/06, and it proved exactly that point**: the restic service had
+been green every day since 2026-08-31, and this drill found the sqlite
+consistency mechanism had never once worked — root-caused and fixed since
+(this page's intro, and `wiki/categories/backup.md`'s "The sqlite
+consistency bug"). The steps below now target the *new* staging path;
+**this exact sequence hasn't been re-run since the fix landed** — don't
+trust it works until it has been.
 
 ```sh
 sudo restic-cube snapshots                              # pick a snapshot ID, or use `latest`
 sudo mkdir -p /root/restore-test
-sudo restic-cube restore latest --target /root/restore-test --include /var/lib/forgejo --include /var/cache/restic-backups-cube/sqlite-staging
+sudo restic-cube restore latest --target /root/restore-test --include /var/lib/forgejo --include /var/lib/restic-backups-cube-sqlite-staging
 ```
 
 (`--include` the staging path too, not just `/var/lib/forgejo` — the live
 `forgejo.db` under `/var/lib/forgejo` is excluded from every backup on
-purpose; the *actual* consistent copy, if the backup is working, lives
-under `sqlite-staging`. Restoring only `/var/lib/forgejo` was this
-runbook's own mistake the first time through — it made the missing sqlite
-backup look like a restore-scope problem for several rounds before
-`restic ls --recursive` against the repository itself settled it.)
+purpose; the *actual* consistent copy lives under the staging path.
+Restoring only `/var/lib/forgejo` was this runbook's own mistake the
+first time through this drill — it made the missing sqlite backup look
+like a restore-scope problem for several rounds before `restic ls
+--recursive` against the repository itself settled it.)
 
 Then confirm it's actually usable, not just present — a file that restored
 successfully but won't open proves nothing more than the timer did:
 
 ```sh
-sudo ls -la /root/restore-test/var/cache/restic-backups-cube/sqlite-staging/
-sudo sqlite3 /root/restore-test/var/cache/restic-backups-cube/sqlite-staging/forgejo.db ".tables"
+sudo ls -la /root/restore-test/var/lib/restic-backups-cube-sqlite-staging/
+sudo sqlite3 /root/restore-test/var/lib/restic-backups-cube-sqlite-staging/forgejo.db ".tables"
 ```
 
-As of 2026-09-06 this fails — the directory restores empty. `restic
-ls --recursive <snapshot> /var/cache/restic-backups-cube/sqlite-staging`
-against the repository directly (no restore needed) confirms the same
-thing without the restore-scope trap above: zero file entries, in every
-snapshot checked.
+Before the fix (through 2026-09-06), this failed — the directory restored
+empty, because the old path (`/var/cache/restic-backups-cube/sqlite-staging`)
+sat inside restic's own cache directory and was never actually backed up.
+`restic ls --recursive <snapshot> <path>` against the repository directly
+(no restore needed) is the faster way to check either path without the
+restore-scope trap above.
 
 Clean up afterward:
 
@@ -332,7 +331,8 @@ sudo rm -rf /root/restore-test
 
 **This drill is genuinely why the bug was found** — a green timer, for
 weeks, said nothing about whether Forgejo's actual data was recoverable.
-It wasn't.
+It wasn't, until the fix. Re-run this whole section for real once cube has
+switched, to confirm that's actually true now rather than just evaluated.
 
 ## Troubleshooting
 
@@ -431,20 +431,24 @@ session had direct LAN reach to it, unlike 2026-08-31 above):**
   via a Snapshot Manager screenshot**: daily at 04:30, keeping 5 days,
   status Success, 2 snapshots taken, on the correct `restic-backup` share.
 
-**2026-09-06 — the restore drill ran, and found a real bug.** Full account
-in `wiki/categories/backup.md`'s "The sqlite consistency bug"; summary:
-`sqlite-staging` (the whole reason `backupPrepareCommand` exists) has
-backed up completely empty in every real run checked, including a fresh
-on-demand run right after a full reboot. `backupPrepareCommand`'s own
-commands and `restic backup` with the real flags both work correctly when
-reproduced in isolation; only the real combined unit run fails, and why
-remains unexplained after extensive reproduction attempts. `restic.nix`
-now logs to a persistent `prepare.log` so the next real run can be
-inspected directly.
+**2026-09-06 — the restore drill ran, found a real bug, and it's now
+root-caused and fixed.** Full account in `wiki/categories/backup.md`'s
+"The sqlite consistency bug"; summary: `sqlite-staging` (the whole reason
+`backupPrepareCommand` exists) had backed up completely empty in every
+real run checked, including a fresh on-demand run right after a full
+reboot. The `prepare.log` diagnostic proved `backupPrepareCommand`'s own
+commands always wrote real, correctly-sized files; a clean before/after
+`restic backup --dry-run` test (603 files vs. exactly 600, the only
+variable being `RESTIC_CACHE_DIR`) proved restic itself was silently
+refusing to back up its own cache directory — which is where
+`sqliteStagingDir` used to live. Fixed by moving it to
+`/var/lib/restic-backups-cube-sqlite-staging`, outside the cache
+directory.
 
-**Still open**: root-causing the bug above (the `prepare.log` change is
-diagnostic, not a fix), and, once that's done, actually confirming a
-restore recovers something real.
+**Still open**: none of this is confirmed live yet — needs a switch on
+cube, a real run, and a real restore against the new path (see
+"Performing a restore" above) before this is trusted rather than merely
+evaluated.
 
 ## See also
 

@@ -126,17 +126,18 @@ dedicated key for this, confirmed authenticating by hand), but:
   live), and QNAP's brute-force protection is on. See the runbook's setup
   step 3.
 
-**All setup is done, and the restore drill has been run — and it found a
-real bug.** The sqlite consistency mechanism (`backupPrepareCommand`,
-meant to protect Forgejo/Grafana/golink's databases specifically) has
-never actually worked: `restic ls --recursive` against the repository
-shows it's backed up completely empty in every real run checked,
-including a fresh reboot. The plain files and live directories genuinely
-are protected; the one thing #87 most wanted protected — Forgejo's actual
-data — currently isn't. Full account: **[backup
-runbook](backup-runbook.md)** and `wiki/categories/backup.md`'s "The
-sqlite consistency bug." A diagnostic (not a fix) has landed; root cause
-is still open.
+**All setup is done, and the restore drill has been run — it found a real
+bug, and that bug is now fixed.** The sqlite consistency mechanism
+(`backupPrepareCommand`, meant to protect Forgejo/Grafana/golink's
+databases specifically) had never actually worked: `restic ls --recursive`
+against the repository showed it backed up completely empty in every real
+run checked, including a fresh reboot. Root cause: the staging directory
+lived inside restic's own cache directory, which restic refuses to back
+up — confirmed with a clean before/after test. Fixed by moving it outside
+that directory. Full account: **[backup runbook](backup-runbook.md)** and
+`wiki/categories/backup.md`'s "The sqlite consistency bug." **Not yet
+confirmed live** — needs a switch on cube, a real run, and a real restore
+of the new path before this item actually closes.
 
 ## 5. Grafana's admin credentials
 
