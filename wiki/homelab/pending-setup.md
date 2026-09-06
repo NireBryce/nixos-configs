@@ -3,7 +3,7 @@
 ## Contents
 
 - [How this differs from open-threads.md](#how-this-differs-from-open-threadsmd)
-- [1. Forgejo has no users, so nobody can log in](#1-forgejo-has-no-users-so-nobody-can-log-in)
+- [1. Done — Elly is signed in, confirmed 2026-09-05](#1-done--elly-is-signed-in-confirmed-2026-09-05)
 - [2. Decided: mirror, not origin — 2026-09-03](#2-decided-mirror-not-origin--2026-09-03)
 - [3. golink has no links yet](#3-golink-has-no-links-yet)
 - [4. No backups exist for any of it](#4-no-backups-exist-for-any-of-it)
@@ -34,32 +34,33 @@ restore drill nobody has run.
 
 ---
 
-## 1. Forgejo has no users, so nobody can log in
+## 1. Done — Elly is signed in, confirmed 2026-09-05
 
-**Status: should be resolved by the next switch, not yet confirmed.** As of
-2026-08-24, `GET /git/api/v1/users/search` returned `{"data":[],"ok":true}`
-and `/git/api/v1/repos/search` an empty list — the forge up, serving, and
-completely empty, with registration closed so the first account needed a
-manual command.
+As of 2026-08-24, `GET /git/api/v1/users/search` returned
+`{"data":[],"ok":true}` — the forge up, serving, and completely empty,
+with registration closed so the first account needed a manual command.
+2026-08-26: `forgejo-admin-bootstrap` (see
+[git-forge](../categories/git-forge.md)) automated that, creating the
+`elly`/admin account declaratively on activation.
 
-2026-08-26: that manual step is now automated. `forgejo-admin-bootstrap`
-(see [git-forge](../categories/git-forge.md)) creates the `elly`/admin
-account declaratively on activation, password from this repo's sops
-secrets.
+**A real gap in how this was checked, caught 2026-09-05**: the unauthenticated
+`GET /git/api/v1/users/search` always reports `last_login` as the zero
+value (`0001-01-01T00:00:00Z`) and `is_admin`/`active` as `false` —
+Forgejo/Gitea's own anonymous-safe field masking, not a real read of
+account state. Two agent sessions (2026-09-04, 2026-09-05) took that zero
+value at face value and wrote "nobody has signed in yet" into this page
+and the backup runbook — wrong both times, since a same-day screenshot
+from Elly showed an active, logged-in session the whole time. The account
+existing was real; the "hasn't logged in" conclusion drawn from an
+anonymous API call was not. Re-running the same query afterward still
+returns the same zero value even with Elly actively logged in, confirming
+the field is simply not meaningful from this endpoint, not that anything
+changed.
 
-**Live-checked 2026-09-04**: `GET /git/api/v1/users/search` now returns
-the `elly` account — the bootstrap ran and cube has switched with it. But
-`last_login` on that account is the zero value
-(`0001-01-01T00:00:00Z`) — nobody has actually signed into the web UI yet
-— and the API's `is_admin` field reads `false` (likely just Forgejo
-masking that field for an unauthenticated caller, not necessarily meaning
-the bootstrap's `--admin` flag didn't take; unconfirmed either way without
-logging in).
-
-**Done when** you've actually signed in at
-`https://ts-cube.moose-micro.ts.net/git/user/login` and confirmed the
-account is really admin from inside the UI — the account existing isn't
-the same as that.
+**Still open**: whether the account is *really* admin (bootstrap's
+`--admin` flag) is unconfirmed either way — the masked `is_admin: false`
+never proved or disproved it. Confirming it means checking the Site
+Administration panel from inside the UI, not another anonymous API call.
 
 Then, separately: add an SSH key under Settings → SSH keys if you want
 `forgejo@ts-cube:…` clones. See [using the forge](forgejo.md) for why that
@@ -116,19 +117,26 @@ dedicated key for this, confirmed authenticating by hand), but:
   it, and the pre-move repo's history (five snapshots, 2026-08-31 through
   2026-09-04) was migrated in with `restic copy` — six snapshots total,
   confirmed via a live listing. See the runbook's step 4.
-- **No QNAP-side snapshot schedule exists on the backup share** — the
-  anti-deletion mitigation the module assumes but can't configure itself.
-  The only item left open in this list.
+- ~~No QNAP-side snapshot schedule exists on the backup share~~ — **done,
+  2026-09-05**, confirmed via a Snapshot Manager screenshot: daily at
+  04:30 on the `restic-backup` share, keeping 5 days, status Success, 2
+  snapshots already taken.
 - ~~QuTS hero has no toggle to force key-only SSH auth~~ — **mitigated,
   2026-08-31**: port 22 is now LAN-blocked and tailnet-only (confirmed
   live), and QNAP's brute-force protection is on. See the runbook's setup
   step 3.
 
-**The [backup runbook](backup-runbook.md) is the actual procedure** —
-including all three of the above, checking status, running an ad hoc
-backup, and the real "done" bar: **a restore actually performed**, one
-Forgejo repo recovered. A restore nobody has run isn't a backup. This entry
-stays the tracking summary; that page has the commands.
+**All setup is done, and the restore drill has been run — and it found a
+real bug.** The sqlite consistency mechanism (`backupPrepareCommand`,
+meant to protect Forgejo/Grafana/golink's databases specifically) has
+never actually worked: `restic ls --recursive` against the repository
+shows it's backed up completely empty in every real run checked,
+including a fresh reboot. The plain files and live directories genuinely
+are protected; the one thing #87 most wanted protected — Forgejo's actual
+data — currently isn't. Full account: **[backup
+runbook](backup-runbook.md)** and `wiki/categories/backup.md`'s "The
+sqlite consistency bug." A diagnostic (not a fix) has landed; root cause
+is still open.
 
 ## 5. Grafana's admin credentials
 

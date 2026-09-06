@@ -118,10 +118,15 @@ a password has nothing that breaks if it changes, and this repo's nix+sops
 config is the sole source of truth for it. The tradeoff: a hand change
 through the web UI is silently reverted on the next `just switch`.
 
-**Status: evaluates only, not yet switched on cube.** `just preflight`
-passes and durandal/tenacity's toplevels are unaffected beyond the expected
-drvPath move from `secrets.yaml` changing — but nobody has logged in with
-this account. Treat as unverified until a real `switch` and a login.
+**Status: switched and logged in, confirmed 2026-09-05.** Elly has signed
+in as `elly` and used the account directly (screenshot-confirmed) — the
+account and password both work as declared. Whether it's genuinely
+*admin* (the `--admin` flag) is still unconfirmed: Forgejo's
+unauthenticated `/api/v1/users/search` always reports `is_admin: false`
+regardless of the real value, so that field can't settle it — see
+[pending-setup.md](../homelab/pending-setup.md) item 1 for the fuller
+account of that trap. Checking from inside the UI (Site Administration
+panel) is the way to actually confirm it.
 
 ## No persistence entry, same reasoning as Grafana
 

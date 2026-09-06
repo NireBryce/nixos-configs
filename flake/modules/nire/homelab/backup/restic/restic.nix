@@ -261,11 +261,41 @@
                 # what actually gets backed up.
                 exclude = builtins.attrValues sqliteDbs;
 
+                # TEMPORARY DIAGNOSTIC, added 2026-09-06 -- every real
+                # backup run since at least 2026-09-01 has produced an
+                # EMPTY sqlite-staging directory in the snapshot (confirmed
+                # via `restic ls --recursive` against multiple real
+                # snapshots, and reconfirmed on an on-demand real run the
+                # same session), even though this exact command reliably
+                # produces real, correctly-sized files when reproduced by
+                # hand or via a faithful `systemd-run` matching the unit's
+                # User/PrivateTmp/CacheDirectory/RuntimeDirectory/env, and
+                # `restic backup` with the real `--exclude-file`/
+                # `--files-from` correctly picks up pre-existing files at
+                # this path when run manually. The failure is specific to
+                # the real ExecStartPre-then-ExecStart sequence within one
+                # unit activation; nothing reproduced externally explains
+                # it. Logging to a file that survives across runs (unlike
+                # `/run/restic-backups-cube/`'s ephemeral
+                # RuntimeDirectory) so the next real run's actual behavior
+                # can be inspected after the fact -- see
+                # `wiki/categories/backup.md` for the fuller incident
+                # writeup once this is root-caused. Full store paths for
+                # every command here (mkdir/date/stat), not bare names --
+                # this whole investigation kept hitting `command not
+                # found` from missing `$PATH` in ad hoc reproductions;
+                # not leaving that same trap in the actual module.
                 backupPrepareCommand = ''
-                    mkdir -p ${sqliteStagingDir}
-                    ${lib.concatStringsSep "\n" (lib.mapAttrsToList
-                        (name: db: "${pkgs.sqlite}/bin/sqlite3 ${db} \".backup '${sqliteStagingDir}/${name}.db'\"")
-                        sqliteDbs)}
+                    {
+                        ${pkgs.coreutils}/bin/echo "=== prepare run: $(${pkgs.coreutils}/bin/date -Iseconds) ==="
+                        ${pkgs.coreutils}/bin/mkdir -p ${sqliteStagingDir}
+                        ${lib.concatStringsSep "\n" (lib.mapAttrsToList
+                            (name: db: ''
+                                ${pkgs.sqlite}/bin/sqlite3 ${db} ".backup '${sqliteStagingDir}/${name}.db'"
+                                ${pkgs.coreutils}/bin/echo "${name}.db: $(${pkgs.coreutils}/bin/stat -c%s ${sqliteStagingDir}/${name}.db 2>&1 || ${pkgs.coreutils}/bin/echo MISSING) bytes"
+                            '')
+                            sqliteDbs)}
+                    } >> /var/cache/restic-backups-cube/prepare.log 2>&1
                 '';
 
                 # Starting point, not sized -- issue #87's open question 5
