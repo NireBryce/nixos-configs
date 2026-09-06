@@ -16,59 +16,49 @@ up Forgejo/Grafana/golink's state and `/persist` to the QNAP NAS. That page
 covers *why* it's shaped this way; this page is *what to actually type*, on
 `nire-cube`, to finish setting it up, run it, check it, and restore from it.
 
-**Correction, 2026-09-06 — the "fully working end to end" line below was
-wrong, and it's now fixed.** Actually performing the restore drill (the
-real "done" bar this page names below) surfaced a genuine bug:
-`sqlite-staging`, the directory `backupPrepareCommand` stages
-Forgejo/Grafana/golink's consistent sqlite copies into, had been backed up
-**completely empty in every real run checked** (2026-09-01, 2026-09-05,
-and two fresh on-demand runs on 2026-09-06 including one right after a
-full reboot) — confirmed via `restic ls --recursive` against the
-repository's own metadata, not inferred from a restore. Root cause: the
-staging directory lived *inside* `RESTIC_CACHE_DIR`
-(`/var/cache/restic-backups-cube`), and restic refuses to back up its own
-cache directory — confirmed with a clean before/after test (603 files
-processed with `RESTIC_CACHE_DIR` unset, exactly 600 with it set to the
-real value, nothing else changed). `sqliteStagingDir` has moved to
-`/var/lib/restic-backups-cube-sqlite-staging`, outside the cache
-directory entirely. The plain files (`/persist/secrets`,
-`/persist/passwords`) and the live Forgejo/Grafana/golink directories
-*were* genuinely backed up throughout; only the sqlite consistency
-mechanism was ever affected. See `wiki/categories/backup.md`'s "The
-sqlite consistency bug" for the full incident. **Not yet confirmed live**
-— needs a switch, a real run, and a real restore of the new path.
+**Status as of 2026-09-06: genuinely fully working end to end, confirmed
+live.** SFTP, not NFS (this module shipped with a local-path repository
+on an NFS mount; a real switch on cube hit `mount.nfs: access denied by
+server`, the QNAP's export permissions for the dedicated `restic-backup`
+share never included cube — chasing that down led to enabling SSH on the
+QNAP and switching to SFTP instead, issue #87's original plan). Cube has
+switched onto the `restic-backup/cube` path, the timer's runs complete
+their entire cycle successfully — pre-start, `backup`, `unlock`, `forget
+--prune`, post-stop, all `status=0/SUCCESS` — and, as of this fix, that
+success is finally trustworthy: a real restore of `/var/lib/restic-backups-cube-sqlite-staging`
+opened a genuine, complete Forgejo database, every expected table
+present.
 
-**Superseded text, kept for what it got right:** SFTP, not NFS (this
-module shipped with a local-path repository on an NFS mount; a real
-switch on cube hit `mount.nfs: access denied by server`, the QNAP's
-export permissions for the dedicated `restic-backup` share never included
-cube — chasing that down led to enabling SSH on the QNAP and switching to
-SFTP instead, issue #87's original plan). Cube has switched onto the
-`restic-backup/cube` path (the 2026-09-03 module change), and the timer's
-runs do complete their entire cycle successfully — pre-start, `backup`,
-`unlock`, `forget --prune`, post-stop, all `status=0/SUCCESS` — that part
-was accurate. The pre-move repo's history (2026-08-31 through 2026-09-04)
-was migrated in, and non-sqlite content really is protected. What was
-wrong was calling this "fully working end to end" before anyone had
-actually looked inside what got backed up.
+**This page previously called an earlier, buggy state "fully working end
+to end" too** — before the restore drill had actually run. That version
+was wrong: `sqlite-staging`, the directory `backupPrepareCommand` stages
+Forgejo/Grafana/golink's consistent sqlite copies into, had been backed
+up **completely empty in every real run checked** since the module's
+creation. Root cause: the staging directory lived *inside*
+`RESTIC_CACHE_DIR` (`/var/cache/restic-backups-cube`), and restic refuses
+to back up its own cache directory — confirmed with a clean before/after
+test (603 files processed with `RESTIC_CACHE_DIR` unset, exactly 600 with
+it set to the real value, nothing else changed). Fixed by moving
+`sqliteStagingDir` to `/var/lib/restic-backups-cube-sqlite-staging`,
+outside the cache directory entirely, then confirmed live: switch, real
+run, real restore, real `.tables` output. Full incident in
+`wiki/categories/backup.md`'s "The sqlite consistency bug." The lesson
+generalizes past this one bug: a claim like "fully working" needs the
+actual restore behind it, not just a green exit code, every time it's
+made — this page got burned by skipping that once already.
 
-**Not yet switched with the `pkgs.restic` package fix** (merged
-2026-09-05, PR #165) — cube's current generation still has no plain
-`restic` on `$PATH`, only the `restic-cube` wrapper; both of cube's
-checkouts are behind the merge. Harmless until the next ad hoc multi-repo
-need — `nix shell nixpkgs#restic` still works meanwhile, same as the
-migration used.
+`pkgs.restic` (PR #165, merged 2026-09-05) is on `$PATH` now too, as of
+this same switch — no more `nix shell` needed for ad hoc multi-repo work.
 
 The NFS-era troubleshooting this page used to carry is gone — it's history
 now, in the module's own header (`restic.nix`), not duplicated here.
 
 ## Before any of this works: five setup steps
 
-Tracked in [Pending setup](pending-setup.md) item 4. All five setup steps
-genuinely are done — but doing the restore drill they were building toward
-found a real bug in the module itself (this page's intro, and "Performing
-a restore" below). Setup being finished isn't the same as the backup
-actually protecting what it's supposed to.
+Tracked in [Pending setup](pending-setup.md) item 4. **All five setup
+steps, and the module itself, are done** — the restore drill they were
+building toward found a real bug (this page's intro, and "Performing a
+restore" below), and that bug is now fixed and confirmed live.
 
 ### 1. Set the two sops secrets — done, 2026-08-30/31
 
@@ -286,13 +276,15 @@ switch (confirmed `rustic 0.11.3` runs) — but its own env vars are
 ## Performing a restore — the actual bar for "done"
 
 Per issue #87's own "done means": a green timer proves nothing. **Run
-2026-09-05/06, and it proved exactly that point**: the restic service had
-been green every day since 2026-08-31, and this drill found the sqlite
-consistency mechanism had never once worked — root-caused and fixed since
-(this page's intro, and `wiki/categories/backup.md`'s "The sqlite
-consistency bug"). The steps below now target the *new* staging path;
-**this exact sequence hasn't been re-run since the fix landed** — don't
-trust it works until it has been.
+twice, 2026-09-05/06 — and it proved exactly that point, both times.**
+First run: the restic service had been green every day since 2026-08-31,
+and this drill found the sqlite consistency mechanism had never once
+worked (root cause and fix in this page's intro, and
+`wiki/categories/backup.md`'s "The sqlite consistency bug"). Second run,
+after the fix and a real switch: a real restore of the new staging path
+opened a real, complete Forgejo database — every expected table present.
+The steps below are exactly what confirmed that; re-run them anytime you
+want the same proof again, not just a green timer.
 
 ```sh
 sudo restic-cube snapshots                              # pick a snapshot ID, or use `latest`
@@ -319,9 +311,11 @@ sudo sqlite3 /root/restore-test/var/lib/restic-backups-cube-sqlite-staging/forge
 Before the fix (through 2026-09-06), this failed — the directory restored
 empty, because the old path (`/var/cache/restic-backups-cube/sqlite-staging`)
 sat inside restic's own cache directory and was never actually backed up.
-`restic ls --recursive <snapshot> <path>` against the repository directly
-(no restore needed) is the faster way to check either path without the
-restore-scope trap above.
+**After the fix, confirmed 2026-09-06**: `.tables` returns the full real
+Forgejo schema — `repository`, `user`, `issue`, `pull_request`, `webhook`,
+`action_run`, and dozens more. `restic ls --recursive <snapshot> <path>`
+against the repository directly (no restore needed) is the faster way to
+spot-check either path without the restore-scope trap above.
 
 Clean up afterward:
 
@@ -329,10 +323,10 @@ Clean up afterward:
 sudo rm -rf /root/restore-test
 ```
 
-**This drill is genuinely why the bug was found** — a green timer, for
-weeks, said nothing about whether Forgejo's actual data was recoverable.
-It wasn't, until the fix. Re-run this whole section for real once cube has
-switched, to confirm that's actually true now rather than just evaluated.
+**This drill is genuinely why the bug was found, and genuinely why it's
+trusted now.** A green timer, for weeks, said nothing about whether
+Forgejo's actual data was recoverable. It wasn't, until the fix — and now
+it demonstrably is.
 
 ## Troubleshooting
 
@@ -445,10 +439,11 @@ refusing to back up its own cache directory — which is where
 `/var/lib/restic-backups-cube-sqlite-staging`, outside the cache
 directory.
 
-**Still open**: none of this is confirmed live yet — needs a switch on
-cube, a real run, and a real restore against the new path (see
-"Performing a restore" above) before this is trusted rather than merely
-evaluated.
+**Confirmed live, same day**: cube switched, a real run produced a
+snapshot correctly listing `/var/lib/restic-backups-cube-sqlite-staging`
+with all three real files, and a real restore of it opened a genuine,
+complete Forgejo database (see "Performing a restore" above for the exact
+output). Nothing left open on this page.
 
 ## See also
 
