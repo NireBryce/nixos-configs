@@ -144,10 +144,6 @@ this has actually been checked, not once the machine merely boots.
 
 ## Traps
 
-- **`@name@` inside a stage-1 hook string is a live template placeholder,
-  even inside what reads like a comment** — naming one in a comment can
-  paste a whole other script in and execute most of it. Full mechanism:
-  skill `impermanence-initrd`.
 - **The shell's own view of the machine can be scoped wrong.** `lsblk`,
   `findmnt`, `/etc` are scoped to the running shell's mount namespace and
   can describe a completely different, wrong-looking-but-correct disk
