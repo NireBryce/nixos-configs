@@ -114,9 +114,16 @@ still wrong.
 **What this means for existing backups**: every snapshot taken before
 this fix protects `/persist/secrets`, `/persist/passwords`, and the live
 service directories, but not the sqlite databases themselves — nothing
-past-tense is recoverable that wasn't already. Not yet independently
-confirmed live on cube (needs a switch, then a real run, then a real
-restore of the *new* staging path) — see the runbook.
+past-tense is recoverable that wasn't already.
+
+**Confirmed live, 2026-09-06 — issue #87's actual "done means" bar,
+finally met for real.** Cube switched, a real run produced snapshot
+`095beb8e` with `/var/lib/restic-backups-cube-sqlite-staging` correctly
+listing all three real files, and a real restore of that path opened a
+genuine, complete Forgejo database — every expected table present
+(`repository`, `user`, `issue`, `pull_request`, `webhook`, `action_run`,
+and dozens more). Not just "backed up": recovered, and openable. This is
+the first time since the module's creation that's been true.
 
 ## What's excluded, and why
 
@@ -152,10 +159,9 @@ Live-checked 2026-09-05/06, over ssh to `nire-cube.local`:
   **switched, and the pre-move repo's history migrated in** (see above).
 - ~~The QNAP-side snapshot schedule described above still hasn't been
   configured~~ — **done** (see above).
-- ~~The sqlite consistency bug — root cause unknown~~ — **root-caused and
-  fixed** (above): `sqliteStagingDir` moved outside `RESTIC_CACHE_DIR`.
-  **Not yet confirmed live** — needs a switch, a real run, and a real
-  restore of the new path before this is trusted.
+- ~~The sqlite consistency bug — root cause unknown~~ — **root-caused,
+  fixed, and confirmed live** (above): a real restore of the new path
+  opened a genuine, complete Forgejo database.
 - **SSH's own exposure is mitigated, as of 2026-08-31** — QuTS hero has no
   toggle to force key-only auth, so this was done at the network level
   instead: port 22 is LAN-blocked and tailnet-only (confirmed live from
@@ -164,14 +170,12 @@ Live-checked 2026-09-05/06, over ssh to `nire-cube.local`:
   (taken on confirmation, not independently checked). See the runbook's
   setup step 3 for the full account.
 
-All of the above is genuinely done, and the restore drill has genuinely
-been performed — issue #87's own "done means" was followed exactly as
-written, and it did its job: it found that the sqlite consistency
-mechanism (above) had never worked, something no green timer ever would
-have caught, and the fix has landed. **This module still isn't fully
-done** — not because the drill wasn't run, but because the fix hasn't
-been confirmed live yet: a switch, a real run, and a real restore of the
-new staging path, none of which have happened.
+All of the above is genuinely done. The restore drill has genuinely been
+performed — issue #87's own "done means" was followed exactly as
+written, twice: once to find that the sqlite consistency mechanism
+(above) had never worked, something no green timer ever would have
+caught, and once more after the fix, to confirm a real restore recovers
+a real, openable Forgejo database. **This module is done.**
 
 ## Imported by
 

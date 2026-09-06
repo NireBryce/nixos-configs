@@ -6,7 +6,7 @@
 - [1. Done — Elly is signed in, confirmed 2026-09-05](#1-done--elly-is-signed-in-confirmed-2026-09-05)
 - [2. Decided: mirror, not origin — 2026-09-03](#2-decided-mirror-not-origin--2026-09-03)
 - [3. golink has no links yet](#3-golink-has-no-links-yet)
-- [4. No backups exist for any of it](#4-no-backups-exist-for-any-of-it)
+- [4. Done — backups exist, and a restore has actually recovered something](#4-done--backups-exist-and-a-restore-has-actually-recovered-something)
 - [5. Grafana's admin credentials](#5-grafanas-admin-credentials)
 - [6. Housekeeping on cube: one scratch directory left over](#6-housekeeping-on-cube-one-scratch-directory-left-over)
 - [What's verified here](#whats-verified-here)
@@ -28,9 +28,10 @@ This page tracks the *fleet's*: one-time operational setup that no commit
 will ever complete, because it lives in a service's own database rather than
 in Nix.
 
-An item can be on both. Backups are, because the tooling is a repo change
-(issue [#87](https://github.com/NireBryce/nixos-configs/issues/87)) *and* a
-restore drill nobody has run.
+An item can be on both. Backups were, until 2026-09-06 — the tooling was a
+repo change (issue [#87](https://github.com/NireBryce/nixos-configs/issues/87)),
+and the restore drill it needed has since actually been run (twice: once
+to find a real bug, once more to confirm the fix).
 
 ---
 
@@ -69,8 +70,9 @@ key authorizes `forgejo@ts-cube` and not `elly@ts-cube`.
 ## 2. Decided: mirror, not origin — 2026-09-03
 
 - **As a mirror** — GitHub stays the origin, cube holds copies. Losing cube
-  costs nothing. **Chosen**, while item 4 (backups) is still short of a
-  proven restore.
+  costs nothing. **Chosen**, 2026-09-03, before item 4's restore was
+  proven — worth revisiting now that a real restore has actually
+  succeeded, if an origin is wanted.
 - **As an origin** — things live here first. That's the useful version, and
   it's the one that shouldn't happen until backups exist.
 
@@ -96,12 +98,13 @@ traps first, both of which have teeth.
 **Done when** `go/dash` resolves from a second tailnet device, not just the
 one that created it.
 
-## 4. No backups exist for any of it
+## 4. Done — backups exist, and a restore has actually recovered something
 
 **The big one**, tracked as
-[#87](https://github.com/NireBryce/nixos-configs/issues/87). `/var/lib/forgejo`,
-`/var/lib/grafana`, `/var/lib/private/golink` and `/persist/` all have exactly
-one copy each, still — the module below doesn't change that yet.
+[#87](https://github.com/NireBryce/nixos-configs/issues/87), closed
+2026-09-06: a real restore of `/var/lib/forgejo`, `/persist/`, and
+Forgejo's actual sqlite database has been performed and confirmed
+recoverable — not just "a backup exists," the harder bar #87 always set.
 
 2026-08-28: the [backup](../categories/backup.md) category exists now
 (restic to the QNAP). Originally a local-path repo on the QNAP NFS mount —
@@ -126,18 +129,19 @@ dedicated key for this, confirmed authenticating by hand), but:
   live), and QNAP's brute-force protection is on. See the runbook's setup
   step 3.
 
-**All setup is done, and the restore drill has been run — it found a real
-bug, and that bug is now fixed.** The sqlite consistency mechanism
+**All setup is done, and the restore drill found a real bug — since fixed
+and confirmed live.** The sqlite consistency mechanism
 (`backupPrepareCommand`, meant to protect Forgejo/Grafana/golink's
 databases specifically) had never actually worked: `restic ls --recursive`
 against the repository showed it backed up completely empty in every real
 run checked, including a fresh reboot. Root cause: the staging directory
 lived inside restic's own cache directory, which restic refuses to back
 up — confirmed with a clean before/after test. Fixed by moving it outside
-that directory. Full account: **[backup runbook](backup-runbook.md)** and
-`wiki/categories/backup.md`'s "The sqlite consistency bug." **Not yet
-confirmed live** — needs a switch on cube, a real run, and a real restore
-of the new path before this item actually closes.
+that directory, then confirmed for real: a switch, a real backup run, and
+a real restore that opened a genuine, complete Forgejo database (every
+expected table present). Full account: **[backup
+runbook](backup-runbook.md)** and `wiki/categories/backup.md`'s "The
+sqlite consistency bug."
 
 ## 5. Grafana's admin credentials
 
