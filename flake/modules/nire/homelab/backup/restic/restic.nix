@@ -117,7 +117,30 @@
         # already backed up to it that would need migrating instead of a
         # fresh `init` here.
         sftpRepo          = "sftp:nire@ts-hive:/share/restic-backup/cube";
-        sqliteStagingDir  = "/var/cache/restic-backups-cube/sqlite-staging";
+
+        # ROOT CAUSE, FOUND 2026-09-06 (root-caused after the restore
+        # drill's own "done" bar caught the symptom): this used to be
+        # `/var/cache/restic-backups-cube/sqlite-staging` -- nested
+        # *inside* `RESTIC_CACHE_DIR` (nixpkgs' restic module sets that to
+        # `/var/cache/restic-backups-${name}`, matching `CacheDirectory=`
+        # on the systemd unit exactly). restic refuses to back up its own
+        # cache directory -- confirmed empirically, not from docs: the
+        # exact same `restic backup --dry-run` with the exact same
+        # `--exclude-file`/`--files-from` processed 603 files (all three
+        # staged sqlite copies included) with `RESTIC_CACHE_DIR` unset,
+        # and exactly 600 (all three silently dropped, no error, no log
+        # line) with it set to the real value -- the one difference. Every
+        # real backup since the module's creation nested this staging
+        # directory inside the excluded cache root, so the sqlite
+        # consistency mechanism issue #87 asked for never actually ran:
+        # `backupPrepareCommand` reliably wrote real files (proven by
+        # `prepare.log`, added earlier the same session as a diagnostic,
+        # kept now as a permanent sanity check), and restic reliably
+        # refused to back any of them up. Moved to `/var/lib`, a sibling
+        # of nothing restic considers its own, to fix it structurally
+        # rather than reach for an `--exclude-caches`-adjacent flag that
+        # would leave the *directory choice* still wrong.
+        sqliteStagingDir  = "/var/lib/restic-backups-cube-sqlite-staging";
 
         # The three sqlite dbs actually at risk (issue #87's table), and
         # where each one lives -- checked against the pinned nixpkgs
@@ -261,30 +284,23 @@
                 # what actually gets backed up.
                 exclude = builtins.attrValues sqliteDbs;
 
-                # TEMPORARY DIAGNOSTIC, added 2026-09-06 -- every real
-                # backup run since at least 2026-09-01 has produced an
-                # EMPTY sqlite-staging directory in the snapshot (confirmed
-                # via `restic ls --recursive` against multiple real
-                # snapshots, and reconfirmed on an on-demand real run the
-                # same session), even though this exact command reliably
-                # produces real, correctly-sized files when reproduced by
-                # hand or via a faithful `systemd-run` matching the unit's
-                # User/PrivateTmp/CacheDirectory/RuntimeDirectory/env, and
-                # `restic backup` with the real `--exclude-file`/
-                # `--files-from` correctly picks up pre-existing files at
-                # this path when run manually. The failure is specific to
-                # the real ExecStartPre-then-ExecStart sequence within one
-                # unit activation; nothing reproduced externally explains
-                # it. Logging to a file that survives across runs (unlike
-                # `/run/restic-backups-cube/`'s ephemeral
-                # RuntimeDirectory) so the next real run's actual behavior
-                # can be inspected after the fact -- see
-                # `wiki/categories/backup.md` for the fuller incident
-                # writeup once this is root-caused. Full store paths for
-                # every command here (mkdir/date/stat), not bare names --
-                # this whole investigation kept hitting `command not
-                # found` from missing `$PATH` in ad hoc reproductions;
-                # not leaving that same trap in the actual module.
+                # Added as a live diagnostic 2026-09-06 while root-causing
+                # the bug `sqliteStagingDir`'s own comment now explains in
+                # full -- every real run had this step writing real files
+                # (proven here: `prepare.log` logged correct sizes) while
+                # restic silently refused to back any of them up, because
+                # the staging directory used to live inside restic's own
+                # cache directory. Kept on as a permanent sanity check now
+                # that the actual fix is the directory move above, not
+                # this logging -- cheap, and it's what caught the module
+                # doing its job correctly while restic didn't. This log
+                # file itself sits under the (excluded) cache directory on
+                # purpose: it was never meant to be backed up remotely,
+                # only read locally. Full store paths for every command
+                # here (mkdir/date/stat), not bare names -- ad hoc
+                # reproductions of this exact script kept hitting `command
+                # not found` from a missing `$PATH` during the
+                # investigation; not leaving that same trap here.
                 backupPrepareCommand = ''
                     {
                         ${pkgs.coreutils}/bin/echo "=== prepare run: $(${pkgs.coreutils}/bin/date -Iseconds) ==="
