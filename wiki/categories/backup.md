@@ -65,8 +65,8 @@ the repo moved there. **Done, live-confirmed 2026-09-05**: cube switched
 onto this path, its own timer already ran successfully against it, and the
 five snapshots from the old `homes` path (2026-08-31 through 2026-09-04)
 were migrated in with `restic copy` — six snapshots total, verified via a
-live `snapshots` listing. See `wiki/homelab/backup-runbook.md`'s step 4
-for exactly what ran.
+live `snapshots` listing. See [backup-history.md](backup-history.md) for
+exactly what ran.
 
 ## The sqlite consistency bug — root-caused and fixed, 2026-09-06
 
@@ -167,8 +167,8 @@ Live-checked 2026-09-05/06, over ssh to `nire-cube.local`:
   instead: port 22 is LAN-blocked and tailnet-only (confirmed live from
   both lysithea and cube — the LAN address times out, `ts-hive`'s tailnet
   address still connects), and QNAP's own brute-force protection is on
-  (taken on confirmation, not independently checked). See the runbook's
-  setup step 3 for the full account.
+  (taken on confirmation, not independently checked). See
+  [backup-history.md](backup-history.md) for the full account.
 
 All of the above is genuinely done. The restore drill has genuinely been
 performed — issue #87's own "done means" was followed exactly as

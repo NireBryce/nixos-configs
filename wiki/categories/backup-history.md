@@ -4,6 +4,7 @@
 
 - [The original plan (2026-08-27)](#the-original-plan-2026-08-27)
 - [The QNAP mount predates this category by months, and was never dangling](#the-qnap-mount-predates-this-category-by-months-and-was-never-dangling)
+- [Getting the SFTP repository from "declared" to "actually working" (2026-08-30 through 2026-09-06)](#getting-the-sftp-repository-from-declared-to-actually-working-2026-08-30-through-2026-09-06)
 - [See also](#see-also)
 
 Resolved incidents and superseded design behind [backup](backup.md) and
@@ -62,6 +63,49 @@ with unrelated QNAP uses) → `/mnt/restic-backup` (dedicated). As of
 2026-08-31 the module doesn't use that mount at all — see [backup](backup.md)'s
 SFTP section — but `storage-NFS.nix` is untouched, still there for
 whatever else wants it.
+
+## Getting the SFTP repository from "declared" to "actually working" (2026-08-30 through 2026-09-06)
+
+Five separate one-time steps, each hit a real snag:
+
+1. **The two sops secrets** (`restic-cube-password`, `restic-cube-ssh-key`)
+   — set 2026-08-30/31. The SSH key specifically: generated on cube
+   (`~/.ssh/restic-cube-backup`), public half hand-appended to
+   `nire@ts-hive`'s `authorized_keys`, private half piped into `sops set`
+   from a session with decrypt access (`ssh nire-cube.local 'cat ...' |
+   jq -Rs . | xargs ... sops set ...`) since generating and decrypting
+   happened in different sessions.
+2. **QNAP-side snapshot schedule**, the anti-deletion mitigation — took
+   three tries to name the right share. Believed `restic-backup` (the
+   abandoned NFS-era mount name); then `/share/homes/nire/restic-cube`
+   (the `homes` share, live 2026-08-31 through 2026-09-02) — but QNAP
+   snapshots are per-share, so scheduling one there would've covered every
+   user's home directory just to protect this one repo. Moved for real,
+   2026-09-03, to `restic-backup` (Storage Pool 2), its own genuinely
+   dedicated share. Schedule confirmed live 2026-09-05 via a Snapshot
+   Manager screenshot: daily 04:30, keep 5 days.
+3. **SSH's own exposure on the QNAP** — QuTS hero has no toggle to force
+   key-only auth, so port 22 was LAN-blocked and made tailnet-only instead
+   (confirmed live both directions, 2026-08-31); QNAP's own brute-force
+   protection left on.
+4. **Migrating the pre-move repo** — the `restic-backup`-share path move
+   above meant a real, already-populated repo sat at the old `homes` path
+   (five real snapshots, 2026-08-31 through 2026-09-04) that would've been
+   abandoned by the switch. Copied in with `restic copy --from-repo
+   sftp:nire@ts-hive:/share/homes/nire/restic-cube --from-password-file
+   ...` (note: `copy`'s *destination* is the ordinary `--repo`, the
+   *source* is `--from-repo` — an earlier draft had invented
+   `--to-repo`/`--to-password-file`, which don't exist, verified against
+   the real `--help` before running for real). Landed after cube had
+   already switched onto the new path and auto-`init`ed a fresh repo
+   there — `copy` doesn't care which side ran first. Old repo left in
+   place afterward as a backstop.
+5. **Switching cube itself** — done 2026-09-05, but tripped the
+   "checkout trap" along the way: cube keeps two clones
+   (`~/nixos-configs`, `~/projects/nix/nixos-configs`), and which one is
+   ahead flips depending on which was last used, not on either path name
+   being inherently current. Check both with `git log -1` every time
+   rather than trusting memory of which was ahead last.
 
 ## See also
 

@@ -2,223 +2,28 @@
 
 ## Contents
 
-- [Before any of this works: five setup steps](#before-any-of-this-works-five-setup-steps)
 - [Checking status](#checking-status)
-- [Running a backup manually](#running-a-backup-manually)
-- [Ad hoc restic commands](#ad-hoc-restic-commands)
-- [Performing a restore — the actual bar for "done"](#performing-a-restore--the-actual-bar-for-done)
+- [Creating a snapshot](#creating-a-snapshot)
+- [Listing and inspecting snapshots](#listing-and-inspecting-snapshots)
+- [Restoring a snapshot](#restoring-a-snapshot)
+- [Deleting a snapshot](#deleting-a-snapshot)
+- [Rotating the secrets](#rotating-the-secrets)
 - [Troubleshooting](#troubleshooting)
-- [What's verified here](#whats-verified-here)
 - [See also](#see-also)
 
-Operating [backup](../categories/backup.md) — the restic category that backs
-up Forgejo/Grafana/golink's state and `/persist` to the QNAP NAS. That page
-covers *why* it's shaped this way; this page is *what to actually type*, on
-`nire-cube`, to finish setting it up, run it, check it, and restore from it.
+Commands for operating [backup](../categories/backup.md) — the restic
+category backing up Forgejo/Grafana/golink's state and `/persist` to the
+QNAP NAS over SFTP. That page covers the design and its history (including
+the sqlite consistency bug found and fixed 2026-09-06); this page is only
+what to actually type. Confirmed fully working end to end 2026-09-06: a
+real restore recovered a real, openable Forgejo database — see that
+page's "The sqlite consistency bug" for the account.
 
-**Status as of 2026-09-06: genuinely fully working end to end, confirmed
-live.** SFTP, not NFS (this module shipped with a local-path repository
-on an NFS mount; a real switch on cube hit `mount.nfs: access denied by
-server`, the QNAP's export permissions for the dedicated `restic-backup`
-share never included cube — chasing that down led to enabling SSH on the
-QNAP and switching to SFTP instead, issue #87's original plan). Cube has
-switched onto the `restic-backup/cube` path, the timer's runs complete
-their entire cycle successfully — pre-start, `backup`, `unlock`, `forget
---prune`, post-stop, all `status=0/SUCCESS` — and, as of this fix, that
-success is finally trustworthy: a real restore of `/var/lib/restic-backups-cube-sqlite-staging`
-opened a genuine, complete Forgejo database, every expected table
-present.
-
-**This page previously called an earlier, buggy state "fully working end
-to end" too** — before the restore drill had actually run. That version
-was wrong: `sqlite-staging`, the directory `backupPrepareCommand` stages
-Forgejo/Grafana/golink's consistent sqlite copies into, had been backed
-up **completely empty in every real run checked** since the module's
-creation. Root cause: the staging directory lived *inside*
-`RESTIC_CACHE_DIR` (`/var/cache/restic-backups-cube`), and restic refuses
-to back up its own cache directory — confirmed with a clean before/after
-test (603 files processed with `RESTIC_CACHE_DIR` unset, exactly 600 with
-it set to the real value, nothing else changed). Fixed by moving
-`sqliteStagingDir` to `/var/lib/restic-backups-cube-sqlite-staging`,
-outside the cache directory entirely, then confirmed live: switch, real
-run, real restore, real `.tables` output. Full incident in
-`wiki/categories/backup.md`'s "The sqlite consistency bug." The lesson
-generalizes past this one bug: a claim like "fully working" needs the
-actual restore behind it, not just a green exit code, every time it's
-made — this page got burned by skipping that once already.
-
-`pkgs.restic` (PR #165, merged 2026-09-05) is on `$PATH` now too, as of
-this same switch — no more `nix shell` needed for ad hoc multi-repo work.
-
-The NFS-era troubleshooting this page used to carry is gone — it's history
-now, in the module's own header (`restic.nix`), not duplicated here.
-
-## Before any of this works: five setup steps
-
-Tracked in [Pending setup](pending-setup.md) item 4. **All five setup
-steps, and the module itself, are done** — the restore drill they were
-building toward found a real bug (this page's intro, and "Performing a
-restore" below), and that bug is now fixed and confirmed live.
-
-### 1. Set the two sops secrets — done, 2026-08-30/31
-
-Both now have a value in this tree (confirmed by their ciphertext being
-present in `secrets.yaml`, not by decrypting) — kept below for reference in
-case either ever needs rotating; skip to step 2 for what's still open.
-
-**The repository password** (`restic-cube-password`) — generate fresh, or
-skip if it's already set elsewhere (check first: `grep
-restic-cube-password flake/modules/nire/system/secrets/secrets.yaml`, safe,
-only the ciphertext key name):
-
-```sh
-nix shell nixpkgs#sops nixpkgs#age --command \
-    sops set flake/modules/nire/system/secrets/secrets.yaml \
-    '["restic-cube-password"]' \
-    "\"$(openssl rand -base64 32)\""
-```
-
-**The SSH private key** (`restic-cube-ssh-key`) — a dedicated ed25519 key
-was generated on cube specifically for this
-(`~/.ssh/restic-cube-backup`, no passphrase — it has to work unattended)
-and its public half is already installed in `nire@ts-hive`'s
-`authorized_keys` on the QNAP, confirmed working by hand. What's left is
-getting the *private* half into `secrets.yaml`:
-
-```sh
-ssh nire-cube.local 'cat ~/.ssh/restic-cube-backup' \
-    | jq -Rs . \
-    | xargs -0 -I{} nix shell nixpkgs#sops nixpkgs#age \
-        --command sops set \
-        flake/modules/nire/system/secrets/secrets.yaml \
-        '["restic-cube-ssh-key"]' {}
-```
-
-`jq -Rs .` JSON-encodes the multi-line key (escaping newlines) into the
-scalar `sops set` expects as a value. Once this has run, `ssh nire-cube.local
-'rm ~/.ssh/restic-cube-backup*'` — that file's only job was carrying the key
-into secrets.yaml.
-
-Both values are generated/read inline, never a literal in the command text
-or anything that echoes back — see `.claude/skills/secrets-hygiene/SKILL.md`
-if running either from an agent session. Commit `secrets.yaml` after —
-safe, it's ciphertext, and this repo commits it encrypted on purpose
-(`AGENTS.md`, Safety section).
-
-**Losing the repository password loses the backups** — restic has no
-recovery path for a forgotten one; write it down somewhere that isn't cube
-and isn't this repo. Losing the SSH key is recoverable (generate a new one,
-re-authorize it on the QNAP) but breaks the backup until that's done.
-
-### 2. QNAP-side snapshot schedule on the backup share — done, 2026-09-05
-
-The anti-deletion mitigation: `nire` can write and prune within the repo
-over SFTP but shouldn't be able to erase the NAS's own snapshots of it.
-**History of this share, corrected in each turn rather than left to
-rot:** briefly believed to be `restic-backup` (the abandoned NFS-era mount
-point name); actually `/share/homes/nire/restic-cube` (the `homes` share)
-from the SFTP switch through 2026-09-02; **moved for real, 2026-09-03**,
-to `sftp:nire@ts-hive:/share/restic-backup/cube` (`restic.nix:95`) —
-`restic-backup` genuinely is its own dedicated share (Storage Pool 2), just
-not the one this repo actually pointed at until then.
-
-**Confirmed live via a QNAP Snapshot Manager screenshot, 2026-09-05**: a
-scheduled job exists on the `restic-backup` share (Storage Pool 2,
-correctly not `homes`) — **daily at 04:30** (comfortably after the restic
-timer's 03:30 + up to 30 min window, so it captures a completed backup
-rather than one mid-write), **keeping 5 days**, status **Success**, 2
-snapshots already taken, next run 2026-09-06 04:30:00. Matches this page's
-own recommendation exactly; nothing left to configure here.
-
-If the QNAP's snapshot granularity ever needs to be coarser than a single
-share, the remaining fallback from issue #87's list is `restic-rest-server`
-in append-only mode, if the QNAP has Container Station — not needed now.
-
-### 3. Mitigating SSH's own exposure — done, 2026-08-31
-
-QuTS hero has no toggle to force key-only SSH auth, so enabling it at all on
-the QNAP means password auth stays reachable too — mitigated at the network
-level instead:
-
-- **Port 22 is LAN-blocked, tailnet-only.** Confirmed live, both directions:
-  `192.168.0.200:22` times out from both lysithea and cube (neither can
-  reach it over the LAN anymore); `ts-hive`'s tailnet address
-  (`100.78.140.91:22`) still accepts a connection from cube.
-- **No further Tailscale ACL restriction** — a deliberate choice: the
-  existing tailnet policy already grants `autogroup:members` full
-  reachability to every member device, and narrowing it for `ts-hive`
-  would restructure a shared policy for marginal benefit once the LAN
-  block is in place.
-- **QNAP brute-force protection (Network Access Protection) is on** —
-  taken on confirmation, not independently checked.
-
-### 4. Migrate the pre-2026-09-03 repo — done, 2026-09-05
-
-Cube switched onto the `restic-backup/cube` path (step 5) before this
-migration ran, not after — the timer had already fired once against the
-new path (2026-09-05, auto-`init`ed by the module's own `initialize =
-true`) by the time this was checked. Plan-vs-reality gap, not a problem:
-`init` isn't needed at all when the destination already has a repo, and
-`copy` doesn't care which side ran first. Order actually followed:
-
-**Plain `restic` wasn't on `$PATH`** — only the auto-generated
-`restic-cube` wrapper was (nixpkgs' own module mechanism, hardcoded to one
-repository/password pair, no good for a two-repo `copy`). `restic.nix`
-adds `pkgs.restic` to `environment.systemPackages`, but that fix hadn't
-reached cube's checkout yet, so the migration ran via `nix shell` instead,
-no rebuild required:
-
-```sh
-sudo nix shell nixpkgs#restic --command restic \
-    -o sftp.command='ssh -i /run/secrets/restic-cube-ssh-key -o IdentitiesOnly=yes nire@ts-hive -s sftp' \
-    --repo sftp:nire@ts-hive:/share/restic-backup/cube \
-    --password-file /run/secrets/restic-cube-password \
-    copy \
-    --from-repo sftp:nire@ts-hive:/share/homes/nire/restic-cube \
-    --from-password-file /run/secrets/restic-cube-password
-```
-
-**Verified against the real binary's `--help` before running** — an
-earlier draft of this command had `--to-repo`/`--to-password-file`, which
-don't exist. `restic copy`'s *destination* is the ordinary global
-`--repo`/`--password-file`; the *source* is
-`--from-repo`/`--from-password-file`. Both repos use the same sops secret
-for their password (the module declares one `restic-cube-password`,
-reused regardless of path), so the split flags don't mean two different
-passwords here.
-
-**Confirmed working, not just exit-code-clean**: `snapshots` against the
-new repo before the copy showed one entry (2026-09-05, the module's own
-first real run there); after, six — the five copied in from the old repo
-(2026-08-31 through 2026-09-04, longer unbroken history than the
-2026-09-03-only run originally spotted) plus the native one, none
-overwritten or lost. The old `homes/nire/restic-cube` repo was left in
-place afterward as a backstop rather than deleted — cheap insurance until
-the new path has its own longer track record.
-
-### 5. Switch cube — done, live-confirmed 2026-09-05
-
-```sh
-cd ~/projects/nix/nixos-configs && git pull && just switch
-```
-
-Live-checked 2026-09-05: `restic-backups-cube.service`'s `RESTIC_REPOSITORY`
-is the new `sftp:nire@ts-hive:/share/restic-backup/cube`, and its timer has
-already fired successfully against it. Whichever checkout was used to do
-this, it worked — no further action needed here unless a *future* change
-to this module needs its own switch.
-
-**Checkout trap, and it flipped at least once already**: cube has *two*
-clones of this repo. This page used to say `~/nixos-configs` was the stale
-one; a 2026-09-04 check found that backwards. Which clone is ahead depends
-on which one was last used, not on either path being inherently "the
-current one" — check both with `git log -1` before trusting either name,
-every time, rather than trusting this page's memory of which was ahead
-last (`restic.nix`'s own header has the fuller account of the original
-mixup this trap caused).
-
-`sudo` on cube needs a password, so this is a human step — an agent session
-can build but not activate (`AGENTS.md`, Commands section).
+All commands below run on `nire-cube` itself, with `sudo` — `restic-cube`
+is a wrapper the module generates with `RESTIC_REPOSITORY`,
+`RESTIC_PASSWORD_FILE`, and the SFTP identity already baked in, and those
+resolve to root-owned `0400` files, so plain `restic` won't work
+unprivileged.
 
 ## Checking status
 
@@ -228,232 +33,167 @@ systemctl list-timers restic-backups-cube.timer
 journalctl -u restic-backups-cube -e
 ```
 
-The timer fires daily at 03:30 plus up to a 30-minute random delay
-(`timerConfig` in `restic.nix`) — `list-timers` shows the next scheduled run
-without waiting for it. `Loaded: ... linked` (not `enabled`) on the service
-itself is expected, not a sign of anything wrong — it's `wantedBy`d only by
-the timer, the same shape every other `services.restic.backups.*` unit has.
+`Loaded: ... linked` (not `enabled`) on the service is expected — it's
+`wantedBy`d only by the timer, same as every other
+`services.restic.backups.*` unit.
 
-## Running a backup manually
+## Creating a snapshot
+
+The timer fires daily at 03:30 plus up to a 30-minute random delay
+(`timerConfig` in `restic.nix`) and runs the full cycle:
+`backupPrepareCommand` (stages consistent sqlite copies of
+Forgejo/Grafana/golink's databases), `restic backup`, `restic unlock`,
+then `restic forget --prune` per `pruneOpts` (7 daily / 4 weekly / 6
+monthly).
+
+To run it on demand instead of waiting:
 
 ```sh
 sudo systemctl start restic-backups-cube.service
+journalctl -u restic-backups-cube -f     # in a second terminal, to watch it
 ```
 
-This runs the same unit the timer would — `backupPrepareCommand` (the
-sqlite `.backup` staging step), the actual `restic backup` over SFTP, then
-`restic forget --prune` per `pruneOpts`. Watch it with `journalctl -u
-restic-backups-cube -f` in a second terminal.
+`backupPrepareCommand` also logs its own run to a file that survives
+across activations (`prepare.log`, unlike `/run/restic-backups-cube/`'s
+ephemeral `RuntimeDirectory`) — useful for confirming the sqlite staging
+step actually produced real files without waiting for the next restore:
 
-## Ad hoc restic commands
+```sh
+sudo cat /var/cache/restic-backups-cube/prepare.log
+```
 
-The module generates a wrapper (`createWrapper`, restic's own default) with
-the same environment the systemd unit gets — `RESTIC_REPOSITORY`,
-`RESTIC_PASSWORD_FILE`, and the `-o sftp.command=...` flag pointing at the
-dedicated key, all baked in:
+## Listing and inspecting snapshots
 
 ```sh
 sudo restic-cube snapshots
+sudo restic-cube ls --recursive <snapshotID> [path]   # or 'latest'
 sudo restic-cube stats
 sudo restic-cube check
 ```
 
-`sudo` is required even though the wrapper itself is just a shell script —
-`RESTIC_PASSWORD_FILE` resolves to `/run/secrets/restic-cube-password`
-(confirmed by `nix eval
-.#nixosConfigurations.nire-cube.config.sops.secrets.restic-cube-password.path`
-— a path, not the secret value, safe to check this way), root-owned mode
-`0400` by sops-nix's own default. The SSH private key
-(`/run/secrets/restic-cube-ssh-key`) is the same shape. Reading either as
-any other user fails with a permission error, not a hang.
+`ls` without `--recursive` only shows a directory's own tree entry, not
+what's inside it — pass `--recursive` (with a path argument) whenever you
+actually want to know if a directory's contents made it into the
+snapshot, not just that the directory exists.
 
-An interactive alternative to typing these by hand exists —
-[rustic](rustic.md), on `elly`'s real `$PATH` on cube since the 2026-08-30
-switch (confirmed `rustic 0.11.3` runs) — but its own env vars are
-`RUSTIC_*`, not `RESTIC_*`, and it's unconfirmed whether it accepts the same
-`-o sftp.command=` shape restic does; see that page.
+An interactive alternative exists — [rustic](rustic.md), on `elly`'s
+`$PATH` on cube — but its env vars are `RUSTIC_*`, not `RESTIC_*`, and
+it's unconfirmed whether it accepts the same `-o sftp.command=` shape
+restic does.
 
-## Performing a restore — the actual bar for "done"
-
-Per issue #87's own "done means": a green timer proves nothing. **Run
-twice, 2026-09-05/06 — and it proved exactly that point, both times.**
-First run: the restic service had been green every day since 2026-08-31,
-and this drill found the sqlite consistency mechanism had never once
-worked (root cause and fix in this page's intro, and
-`wiki/categories/backup.md`'s "The sqlite consistency bug"). Second run,
-after the fix and a real switch: a real restore of the new staging path
-opened a real, complete Forgejo database — every expected table present.
-The steps below are exactly what confirmed that; re-run them anytime you
-want the same proof again, not just a green timer.
+## Restoring a snapshot
 
 ```sh
-sudo restic-cube snapshots                              # pick a snapshot ID, or use `latest`
 sudo mkdir -p /root/restore-test
-sudo restic-cube restore latest --target /root/restore-test --include /var/lib/forgejo --include /var/lib/restic-backups-cube-sqlite-staging
+sudo restic-cube restore latest --target /root/restore-test \
+    --include /var/lib/forgejo \
+    --include /var/lib/restic-backups-cube-sqlite-staging
 ```
 
-(`--include` the staging path too, not just `/var/lib/forgejo` — the live
-`forgejo.db` under `/var/lib/forgejo` is excluded from every backup on
-purpose; the *actual* consistent copy lives under the staging path.
-Restoring only `/var/lib/forgejo` was this runbook's own mistake the
-first time through this drill — it made the missing sqlite backup look
-like a restore-scope problem for several rounds before `restic ls
---recursive` against the repository itself settled it.)
+`--include` the staging path explicitly if you want Forgejo/Grafana/
+golink's actual database — the live `.db` files under `/var/lib/forgejo`
+etc. are excluded from every backup on purpose (a live sqlite file can be
+mid-write when restic reads it); the consistent, restorable copy lives
+under `/var/lib/restic-backups-cube-sqlite-staging` instead.
 
-Then confirm it's actually usable, not just present — a file that restored
-successfully but won't open proves nothing more than the timer did:
+Confirm it's actually usable, not just present:
 
 ```sh
-sudo ls -la /root/restore-test/var/lib/restic-backups-cube-sqlite-staging/
 sudo sqlite3 /root/restore-test/var/lib/restic-backups-cube-sqlite-staging/forgejo.db ".tables"
+sudo rm -rf /root/restore-test   # clean up after
 ```
 
-Before the fix (through 2026-09-06), this failed — the directory restored
-empty, because the old path (`/var/cache/restic-backups-cube/sqlite-staging`)
-sat inside restic's own cache directory and was never actually backed up.
-**After the fix, confirmed 2026-09-06**: `.tables` returns the full real
-Forgejo schema — `repository`, `user`, `issue`, `pull_request`, `webhook`,
-`action_run`, and dozens more. `restic ls --recursive <snapshot> <path>`
-against the repository directly (no restore needed) is the faster way to
-spot-check either path without the restore-scope trap above.
+A real table listing (`repository`, `user`, `issue`, ...) is the actual
+bar for "the backup works" — a green timer or a present-but-unopened file
+proves neither.
 
-Clean up afterward:
+## Deleting a snapshot
+
+The timer already runs `forget --prune` automatically per `pruneOpts`
+(above). To remove a specific snapshot by hand:
 
 ```sh
-sudo rm -rf /root/restore-test
+sudo restic-cube forget <snapshotID> --prune
 ```
 
-**This drill is genuinely why the bug was found, and genuinely why it's
-trusted now.** A green timer, for weeks, said nothing about whether
-Forgejo's actual data was recoverable. It wasn't, until the fix — and now
-it demonstrably is.
+`forget` alone marks a snapshot for removal without reclaiming space;
+`--prune` does both in one step. If a previous operation was interrupted
+and the repository reports itself locked:
+
+```sh
+sudo restic-cube unlock
+```
+
+## Rotating the secrets
+
+Both live in `flake/modules/nire/system/secrets/secrets.yaml`, declared
+in `restic.nix`. **Losing `restic-cube-password` loses the backups** —
+restic has no recovery path for a forgotten repository password; keep a
+copy somewhere that isn't cube and isn't this repo. Losing
+`restic-cube-ssh-key` is recoverable (generate a new one, re-authorize it
+on the QNAP) but breaks backups until that's done.
+
+```sh
+# Repository password
+nix shell nixpkgs#sops nixpkgs#age --command \
+    sops set flake/modules/nire/system/secrets/secrets.yaml \
+    '["restic-cube-password"]' \
+    "\"$(openssl rand -base64 32)\""
+
+# SSH private key -- generate a new ed25519 keypair on cube first, append
+# its public half to nire@ts-hive's authorized_keys, then:
+ssh nire-cube.local 'cat ~/.ssh/<new-key>' \
+    | jq -Rs . \
+    | xargs -0 -I{} nix shell nixpkgs#sops nixpkgs#age \
+        --command sops set \
+        flake/modules/nire/system/secrets/secrets.yaml \
+        '["restic-cube-ssh-key"]' {}
+```
+
+`jq -Rs .` JSON-encodes the multi-line key for `sops set`'s scalar
+argument. Both values are generated/read inline, never a literal in the
+command text — see `.claude/skills/secrets-hygiene/SKILL.md` if running
+either from an agent session. Commit `secrets.yaml` after (safe, it's
+ciphertext, committed encrypted on purpose — `AGENTS.md`, Safety
+section), then `just switch` on cube to pick it up.
 
 ## Troubleshooting
 
 - **`sops-install-secrets: ... the key 'restic-cube-ssh-key' cannot be
-  found` (or `restic-cube-password`)** — a real, seen error at
-  `just build`/`just switch`, build-time (sops-nix validates its manifest
-  as part of `system.build.toplevel`), not just runtime. The key genuinely
-  doesn't exist in whatever `secrets.yaml` is in the tree being built — see
-  setup step 1 above. If you believe a value was already set somewhere,
-  check for a *different* checkout with it before assuming it needs
-  regenerating — cube has two clones (see "Switch cube" above), and this
-  exact confusion happened once already with the password.
-- **`unable to open repository at ...: unable to open config file` at
-  runtime, after a successful build/switch** — the password file is empty,
-  or the SSH connection itself is failing before restic even gets to open
-  the repo. Test the connection in isolation:
-  `sudo -u root ssh -i /run/secrets/restic-cube-ssh-key nire@ts-hive
-  echo ok` (as root, since that's who owns the key file).
+  found` (or `restic-cube-password`)** at build/switch time — the key
+  genuinely doesn't exist in the `secrets.yaml` being built. Cube keeps
+  two checkouts (`~/nixos-configs`, `~/projects/nix/nixos-configs`); check
+  `git log -1` in both before assuming the secret needs regenerating —
+  one may just be stale.
+- **`unable to open repository at ...: unable to open config file`** at
+  runtime — the password file is empty, or the SSH connection is failing
+  before restic opens the repo. Test in isolation:
+  `sudo -u root ssh -i /run/secrets/restic-cube-ssh-key nire@ts-hive echo ok`.
 - **`Permission denied (publickey,password,keyboard-interactive)`** — the
-  key isn't authorized on the QNAP side, or `IdentitiesOnly=yes` is masking
-  a working key with a broken default one. Confirm the public half is still
-  in `nire@ts-hive`'s `~/.ssh/authorized_keys` (it was appended by hand,
-  2026-08-31, not managed by anything that could have reverted it) and that
-  `/run/secrets/restic-cube-ssh-key` actually decrypted (see the sops error
-  above if not).
+  key isn't authorized on the QNAP side, or `IdentitiesOnly=yes` is
+  masking a working key with a broken default one. Confirm the public
+  half is in `nire@ts-hive`'s `~/.ssh/authorized_keys` and that
+  `/run/secrets/restic-cube-ssh-key` actually decrypted.
 - **Host key verification failed** — the QNAP's SSH host key changed
   (reinstall, firmware reset) and no longer matches
   `programs.ssh.knownHosts."ts-hive"` in `restic.nix`. Re-run
-  `ssh-keyscan -t ed25519 ts-hive` against the real host, confirm the change
-  is expected, and update the pinned key in the module — don't just delete
-  the pin, that's what it exists to catch.
-- **A snapshot exists but a file inside looks unreadable/corrupt** — check
-  whether it's one of the three excluded live sqlite dbs by mistake (see
-  the restore section's parenthetical) before assuming the backup itself is
-  bad.
-
-## What's verified here
-
-Checked live against cube and the QNAP, 2026-08-31, over ssh (bounced
-through cube — this darwin machine has no Tailscale of its own, so `ts-hive`
-is only reachable via `ssh nire-cube.local 'ssh ... ts-hive ...'`):
-
-- **SSH now works on the QNAP.** `ssh nire@ts-hive` (as `nire`, not the
-  default `elly`) authenticates with cube's existing personal key with no
-  password prompt — a real change from before, when the port refused the
-  connection outright on both the LAN and the tailnet.
-- **The dedicated backup key works too.** `ssh -i
-  ~/.ssh/restic-cube-backup nire@ts-hive` authenticates cleanly, confirming
-  the public half landed correctly in `authorized_keys`.
-- **A real `just build` on cube with the SFTP module**: fails, but at
-  exactly the predicted point — `sops-install-secrets` can't find
-  `restic-cube-ssh-key`, since this session never had decrypt access to set
-  it. 21 other derivations built clean around that failure, including a
-  full, separate `home-manager-generation` build (`rustic` present and
-  confirmed running, `rustic --version` → `rustic 0.11.3`) — nothing else
-  about the SFTP switch is broken.
-- **The generated `sftp.command` is well-formed** — read back from the
-  evaluated `systemd.services."restic-backups-cube".preStart`, not just the
-  Nix source: `restic -o sftp.command='.../ssh -i /run/secrets/restic-cube-ssh-key
-  -o IdentitiesOnly=yes nire@ts-hive -s sftp' cat config > /dev/null ||
-  ... init`, matching nixpkgs' own documented shape for this option
-  exactly.
-- **durandal/tenacity/lysithea toplevels are byte-identical** before and
-  after the SFTP switch, confirmed by `git stash`-isolating just the
-  `restic.nix` change, not inferred from category scoping alone.
-
-- **SSH's LAN exposure is closed, tailnet-only now** — `192.168.0.200:22`
-  times out from both lysithea and cube; `ts-hive`'s tailnet address still
-  accepts a connection. See setup step 3 above for the full account,
-  including what's taken on confirmation rather than independently checked.
-
-**2026-09-05, live-checked directly against `nire-cube.local` (this
-session had direct LAN reach to it, unlike 2026-08-31 above):**
-
-- **A full backup cycle exits `status=0/SUCCESS`, repeatedly** — pre-start,
-  `backup`, `unlock`, `forget --prune`, post-stop. **This turned out to be
-  the trap, not the reassurance** — a clean exit code says nothing about
-  whether the sqlite consistency step actually staged real data; see
-  2026-09-06 below.
-- **The repository path move and migration both landed correctly** — the
-  live unit's `RESTIC_REPOSITORY` is the new `restic-backup/cube` path,
-  and a live `snapshots` listing shows all six expected snapshots (five
-  migrated from the old path, one native to the new one).
-- ~~Forgejo's `elly` account exists but has never been logged into~~ —
-  **wrong conclusion, corrected 2026-09-05**: Elly was actively logged in
-  the whole time (confirmed by screenshot) despite the users API showing
-  `last_login: "0001-01-01T00:00:00Z"` both before and after — that
-  endpoint masks `last_login`/`is_admin`/`active` for an unauthenticated
-  caller regardless of the real account state. Not a live signal at all
-  from this API; see [pending-setup.md](pending-setup.md) item 1 for the
-  full account.
-- **`pkgs.restic` (PR #165) hasn't reached cube yet** — no plain `restic`
-  on `$PATH`, both of cube's checkouts behind the merge. Not blocking:
-  `nix shell nixpkgs#restic` covers any ad hoc need meanwhile.
-- ~~The QNAP-side snapshot schedule is unconfigured~~ — **done, confirmed
-  via a Snapshot Manager screenshot**: daily at 04:30, keeping 5 days,
-  status Success, 2 snapshots taken, on the correct `restic-backup` share.
-
-**2026-09-06 — the restore drill ran, found a real bug, and it's now
-root-caused and fixed.** Full account in `wiki/categories/backup.md`'s
-"The sqlite consistency bug"; summary: `sqlite-staging` (the whole reason
-`backupPrepareCommand` exists) had backed up completely empty in every
-real run checked, including a fresh on-demand run right after a full
-reboot. The `prepare.log` diagnostic proved `backupPrepareCommand`'s own
-commands always wrote real, correctly-sized files; a clean before/after
-`restic backup --dry-run` test (603 files vs. exactly 600, the only
-variable being `RESTIC_CACHE_DIR`) proved restic itself was silently
-refusing to back up its own cache directory — which is where
-`sqliteStagingDir` used to live. Fixed by moving it to
-`/var/lib/restic-backups-cube-sqlite-staging`, outside the cache
-directory.
-
-**Confirmed live, same day**: cube switched, a real run produced a
-snapshot correctly listing `/var/lib/restic-backups-cube-sqlite-staging`
-with all three real files, and a real restore of it opened a genuine,
-complete Forgejo database (see "Performing a restore" above for the exact
-output). Nothing left open on this page.
+  `ssh-keyscan -t ed25519 ts-hive`, confirm the change is expected, and
+  update the pinned key — don't just delete the pin.
+- **A restored file looks empty or unopenable** — check whether it's one
+  of the three excluded live sqlite dbs (`/var/lib/forgejo/data/forgejo.db`
+  etc.) rather than the staged copy under
+  `/var/lib/restic-backups-cube-sqlite-staging` — see "Restoring a
+  snapshot" above.
 
 ## See also
 
-- [backup](../categories/backup.md) — the module, the NFS-to-SFTP switch
-  and why, and what it evaluates to.
-- [rustic](rustic.md) — a TUI that can browse and restore from this
-  repository interactively, installed but not yet run against it.
-- [Pending setup](pending-setup.md) — item 4, the tracking entry this
-  runbook is the procedure for.
-- [open-threads.md](../open-threads.md) — issue #87, the "Left open by the
-  cube service stack" section.
-- [../categories/backup-history.md](../categories/backup-history.md) — the
-  original plan this runbook implements.
+- [backup](../categories/backup.md) — the module's design, and the full
+  incident history (the SFTP/NFS switch, the repository-path migration,
+  the sqlite consistency bug).
+- [backup-history.md](../categories/backup-history.md) — the original
+  plan and every one-time setup snag, in full.
+- [rustic](rustic.md) — an interactive TUI alternative to the commands
+  above.
+- [Pending setup](pending-setup.md) — item 4, now closed; this page is
+  the procedure it points to.
+- [open-threads.md](../open-threads.md) — issue #87.

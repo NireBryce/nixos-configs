@@ -119,7 +119,8 @@ dedicated key for this, confirmed authenticating by hand), but:
   `restic-backup`-share path move, its timer has run successfully against
   it, and the pre-move repo's history (five snapshots, 2026-08-31 through
   2026-09-04) was migrated in with `restic copy` — six snapshots total,
-  confirmed via a live listing. See the runbook's step 4.
+  confirmed via a live listing. See
+  [backup-history.md](../categories/backup-history.md).
 - ~~No QNAP-side snapshot schedule exists on the backup share~~ — **done,
   2026-09-05**, confirmed via a Snapshot Manager screenshot: daily at
   04:30 on the `restic-backup` share, keeping 5 days, status Success, 2
