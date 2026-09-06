@@ -16,25 +16,62 @@ up Forgejo/Grafana/golink's state and `/persist` to the QNAP NAS. That page
 covers *why* it's shaped this way; this page is *what to actually type*, on
 `nire-cube`, to finish setting it up, run it, check it, and restore from it.
 
-**Status as of 2026-09-05, live-checked over ssh to `nire-cube.local`:**
-SFTP, not NFS (this module shipped with a local-path repository on an NFS
-mount; a real switch on cube hit `mount.nfs: access denied by server`, the
-QNAP's export permissions for the dedicated `restic-backup` share never
-included cube — chasing that down led to enabling SSH on the QNAP and
-switching to SFTP instead, issue #87's original plan). **Fully working
-end to end**: cube has switched onto the `restic-backup/cube` path (the
-2026-09-03 module change), the timer has fired successfully against it,
-and the pre-move repo's history (2026-08-31 through 2026-09-04, five
-snapshots) has been migrated in — six snapshots total at the current path,
-confirmed via a live `snapshots` listing, not just an evaluated config.
+**Correction, 2026-09-06 — the "fully working end to end" line below was
+wrong.** Actually performing the restore drill (the real "done" bar this
+page names below) surfaced a genuine bug: `sqlite-staging`, the directory
+`backupPrepareCommand` stages Forgejo/Grafana/golink's consistent sqlite
+copies into, has been backed up **completely empty in every real run
+checked** (2026-09-01, 2026-09-05, and two fresh on-demand runs on
+2026-09-06 including one right after a full reboot) — confirmed via
+`restic ls --recursive` against the repository's own metadata, not
+inferred from a restore. The plain files (`/persist/secrets`,
+`/persist/passwords`) and the live Forgejo/Grafana/golink directories
+*are* genuinely backed up; only the sqlite consistency mechanism — the
+entire reason issue #87 asked for `backupPrepareCommand` in the first
+place — has silently never worked. `backupPrepareCommand`'s own commands
+reproduce correctly by hand and via a faithful `systemd-run` reproduction
+matching the real unit's `User`/`PrivateTmp`/`CacheDirectory`/
+`RuntimeDirectory`/environment; `restic backup` with the real
+`--exclude-file`/`--files-from` correctly includes pre-existing files
+there too. The failure is specific to the real `ExecStartPre`→`ExecStart`
+sequence in one unit activation, survives a full reboot (ruling out
+switch-without-reboot cruft), and remains unexplained. `restic.nix` now
+logs `backupPrepareCommand`'s own behavior to a persistent file
+(`/var/cache/restic-backups-cube/prepare.log`) so the next real run can
+actually be inspected. See `wiki/categories/backup.md`'s "The sqlite
+consistency bug" for the full incident.
+
+**Superseded text, kept for what it got right:** SFTP, not NFS (this
+module shipped with a local-path repository on an NFS mount; a real
+switch on cube hit `mount.nfs: access denied by server`, the QNAP's
+export permissions for the dedicated `restic-backup` share never included
+cube — chasing that down led to enabling SSH on the QNAP and switching to
+SFTP instead, issue #87's original plan). Cube has switched onto the
+`restic-backup/cube` path (the 2026-09-03 module change), and the timer's
+runs do complete their entire cycle successfully — pre-start, `backup`,
+`unlock`, `forget --prune`, post-stop, all `status=0/SUCCESS` — that part
+was accurate. The pre-move repo's history (2026-08-31 through 2026-09-04)
+was migrated in, and non-sqlite content really is protected. What was
+wrong was calling this "fully working end to end" before anyone had
+actually looked inside what got backed up.
+
+**Not yet switched with the `pkgs.restic` package fix** (merged
+2026-09-05, PR #165) — cube's current generation still has no plain
+`restic` on `$PATH`, only the `restic-cube` wrapper; both of cube's
+checkouts are behind the merge. Harmless until the next ad hoc multi-repo
+need — `nix shell nixpkgs#restic` still works meanwhile, same as the
+migration used.
 
 The NFS-era troubleshooting this page used to carry is gone — it's history
 now, in the module's own header (`restic.nix`), not duplicated here.
 
 ## Before any of this works: five setup steps
 
-Tracked in [Pending setup](pending-setup.md) item 4. Steps 1, 3, 4, and 5
-are done; only 2 (QNAP snapshot schedule) is still open.
+Tracked in [Pending setup](pending-setup.md) item 4. All five setup steps
+genuinely are done — but doing the restore drill they were building toward
+found a real bug in the module itself (this page's intro, and "Performing
+a restore" below). Setup being finished isn't the same as the backup
+actually protecting what it's supposed to.
 
 ### 1. Set the two sops secrets — done, 2026-08-30/31
 
@@ -86,48 +123,29 @@ recovery path for a forgotten one; write it down somewhere that isn't cube
 and isn't this repo. Losing the SSH key is recoverable (generate a new one,
 re-authorize it on the QNAP) but breaks the backup until that's done.
 
-### 2. Configure a QNAP-side snapshot schedule on the backup share
+### 2. QNAP-side snapshot schedule on the backup share — done, 2026-09-05
 
 The anti-deletion mitigation: `nire` can write and prune within the repo
 over SFTP but shouldn't be able to erase the NAS's own snapshots of it.
 **History of this share, corrected in each turn rather than left to
 rot:** briefly believed to be `restic-backup` (the abandoned NFS-era mount
 point name); actually `/share/homes/nire/restic-cube` (the `homes` share)
-from the SFTP switch through 2026-09-02 — checked live via the QNAP's own
-Snapshot Manager, `homes` was the only match, and `homes` covers every
-user's home directory, not just this repo; **moved for real, 2026-09-03**,
+from the SFTP switch through 2026-09-02; **moved for real, 2026-09-03**,
 to `sftp:nire@ts-hive:/share/restic-backup/cube` (`restic.nix:95`) —
-`restic-backup` genuinely is its own dedicated share (Storage Pool 2,
-confirmed empty/unused in the Snapshot Manager screenshot), just not the
-one this repo actually pointed at until now.
+`restic-backup` genuinely is its own dedicated share (Storage Pool 2), just
+not the one this repo actually pointed at until then.
 
-**Updated 2026-09-04, live-checked:** the old `homes`-share path does have
-something backed up — a working repo with at least one successful
-snapshot (see this page's intro, and step 4 below for the migration this
-implies). `nire`'s write access to `restic-backup` itself is still
-unconfirmed; create the directory before relying on it:
+**Confirmed live via a QNAP Snapshot Manager screenshot, 2026-09-05**: a
+scheduled job exists on the `restic-backup` share (Storage Pool 2,
+correctly not `homes`) — **daily at 04:30** (comfortably after the restic
+timer's 03:30 + up to 30 min window, so it captures a completed backup
+rather than one mid-write), **keeping 5 days**, status **Success**, 2
+snapshots already taken, next run 2026-09-06 04:30:00. Matches this page's
+own recommendation exactly; nothing left to configure here.
 
-```sh
-ssh nire@ts-hive 'mkdir -p /share/restic-backup/cube && chmod 700 /share/restic-backup/cube'
-```
-
-Then, in the QNAP admin console:
-
-1. **Storage & Snapshots** app → **Snapshots** tab.
-2. Find or create a scheduled snapshot job for the **`restic-backup`**
-   shared folder (Storage Pool 2 in the Snapshot Manager's own listing) —
-   not `homes`. Since this share now holds nothing but backup data, the
-   schedule doesn't need to cover anything broader than that.
-3. A daily schedule with a few days/weeks of retention is enough to recover
-   from an accidental or malicious `restic forget --prune`; it doesn't need
-   to match restic's own retention. Time it comfortably after the restic
-   timer's window (03:30 + up to 30 min, `timerConfig` in `restic.nix`) —
-   e.g. 04:30 or later — so the snapshot captures a completed backup rather
-   than one mid-write.
-
-If the QNAP's snapshot granularity is coarser than a single share, the
-remaining fallback from issue #87's list is `restic-rest-server` in
-append-only mode, if the QNAP has Container Station.
+If the QNAP's snapshot granularity ever needs to be coarser than a single
+share, the remaining fallback from issue #87's list is `restic-rest-server`
+in append-only mode, if the QNAP has Container Station — not needed now.
 
 ### 3. Mitigating SSH's own exposure — done, 2026-08-31
 
@@ -270,30 +288,41 @@ switch (confirmed `rustic 0.11.3` runs) — but its own env vars are
 
 ## Performing a restore — the actual bar for "done"
 
-Per issue #87's own "done means": a green timer proves nothing. This is the
-step that does:
+Per issue #87's own "done means": a green timer proves nothing. **Actually
+run, 2026-09-05/06 — and it proved exactly that point**: the restic
+service had been green every day since 2026-08-31, and the restore drill
+found the sqlite consistency mechanism has never once worked (see this
+page's intro and `wiki/categories/backup.md`'s "The sqlite consistency
+bug"). The steps below are what to run; don't assume a clean run means
+what's inside is actually good — check it, the way this drill did.
 
 ```sh
 sudo restic-cube snapshots                              # pick a snapshot ID, or use `latest`
 sudo mkdir -p /root/restore-test
-sudo restic-cube restore latest --target /root/restore-test --include /var/lib/forgejo
+sudo restic-cube restore latest --target /root/restore-test --include /var/lib/forgejo --include /var/cache/restic-backups-cube/sqlite-staging
 ```
+
+(`--include` the staging path too, not just `/var/lib/forgejo` — the live
+`forgejo.db` under `/var/lib/forgejo` is excluded from every backup on
+purpose; the *actual* consistent copy, if the backup is working, lives
+under `sqlite-staging`. Restoring only `/var/lib/forgejo` was this
+runbook's own mistake the first time through — it made the missing sqlite
+backup look like a restore-scope problem for several rounds before
+`restic ls --recursive` against the repository itself settled it.)
 
 Then confirm it's actually usable, not just present — a file that restored
 successfully but won't open proves nothing more than the timer did:
 
 ```sh
-sudo ls -la /root/restore-test/var/lib/forgejo
-sudo sqlite3 /root/restore-test/var/lib/forgejo/data/forgejo.db ".tables"
+sudo ls -la /root/restore-test/var/cache/restic-backups-cube/sqlite-staging/
+sudo sqlite3 /root/restore-test/var/cache/restic-backups-cube/sqlite-staging/forgejo.db ".tables"
 ```
 
-(The restored `forgejo.db` here is the live one restic excluded from
-`paths` — it isn't in the backup. Restore
-`/var/cache/restic-backups-cube/sqlite-staging/forgejo.db`'s backed-up
-counterpart instead if checking the *staged* copy specifically; the `.db`
-under `/var/lib/forgejo/data/` in a restored snapshot will be whatever was
-already on disk when `paths` walked it, if anything — check
-`sqliteStagingDir`'s own backed-up path first.)
+As of 2026-09-06 this fails — the directory restores empty. `restic
+ls --recursive <snapshot> /var/cache/restic-backups-cube/sqlite-staging`
+against the repository directly (no restore needed) confirms the same
+thing without the restore-scope trap above: zero file entries, in every
+snapshot checked.
 
 Clean up afterward:
 
@@ -301,9 +330,9 @@ Clean up afterward:
 sudo rm -rf /root/restore-test
 ```
 
-Write the outcome up here (or on [backup](../categories/backup.md)'s
-"What isn't done yet") once this has actually run — that's what turns this
-module from configuration into a backup.
+**This drill is genuinely why the bug was found** — a green timer, for
+weeks, said nothing about whether Forgejo's actual data was recoverable.
+It wasn't.
 
 ## Troubleshooting
 
@@ -375,10 +404,47 @@ is only reachable via `ssh nire-cube.local 'ssh ... ts-hive ...'`):
   accepts a connection. See setup step 3 above for the full account,
   including what's taken on confirmation rather than independently checked.
 
-**Not verified**: anything past the SSH connection and the build — no
-backup has run, no snapshot exists, no restore has been attempted, and the
-QNAP snapshot schedule (setup step 2) is unconfirmed. This section gets
-filled in further the first time each of those does.
+**2026-09-05, live-checked directly against `nire-cube.local` (this
+session had direct LAN reach to it, unlike 2026-08-31 above):**
+
+- **A full backup cycle exits `status=0/SUCCESS`, repeatedly** — pre-start,
+  `backup`, `unlock`, `forget --prune`, post-stop. **This turned out to be
+  the trap, not the reassurance** — a clean exit code says nothing about
+  whether the sqlite consistency step actually staged real data; see
+  2026-09-06 below.
+- **The repository path move and migration both landed correctly** — the
+  live unit's `RESTIC_REPOSITORY` is the new `restic-backup/cube` path,
+  and a live `snapshots` listing shows all six expected snapshots (five
+  migrated from the old path, one native to the new one).
+- ~~Forgejo's `elly` account exists but has never been logged into~~ —
+  **wrong conclusion, corrected 2026-09-05**: Elly was actively logged in
+  the whole time (confirmed by screenshot) despite the users API showing
+  `last_login: "0001-01-01T00:00:00Z"` both before and after — that
+  endpoint masks `last_login`/`is_admin`/`active` for an unauthenticated
+  caller regardless of the real account state. Not a live signal at all
+  from this API; see [pending-setup.md](pending-setup.md) item 1 for the
+  full account.
+- **`pkgs.restic` (PR #165) hasn't reached cube yet** — no plain `restic`
+  on `$PATH`, both of cube's checkouts behind the merge. Not blocking:
+  `nix shell nixpkgs#restic` covers any ad hoc need meanwhile.
+- ~~The QNAP-side snapshot schedule is unconfigured~~ — **done, confirmed
+  via a Snapshot Manager screenshot**: daily at 04:30, keeping 5 days,
+  status Success, 2 snapshots taken, on the correct `restic-backup` share.
+
+**2026-09-06 — the restore drill ran, and found a real bug.** Full account
+in `wiki/categories/backup.md`'s "The sqlite consistency bug"; summary:
+`sqlite-staging` (the whole reason `backupPrepareCommand` exists) has
+backed up completely empty in every real run checked, including a fresh
+on-demand run right after a full reboot. `backupPrepareCommand`'s own
+commands and `restic backup` with the real flags both work correctly when
+reproduced in isolation; only the real combined unit run fails, and why
+remains unexplained after extensive reproduction attempts. `restic.nix`
+now logs to a persistent `prepare.log` so the next real run can be
+inspected directly.
+
+**Still open**: root-causing the bug above (the `prepare.log` change is
+diagnostic, not a fix), and, once that's done, actually confirming a
+restore recovers something real.
 
 ## See also
 

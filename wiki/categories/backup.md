@@ -5,7 +5,7 @@
 - [What's in it](#whats-in-it)
 - [Why the category isn't named `restic`](#why-the-category-isnt-named-restic)
 - [SFTP repository now, not local-path on NFS](#sftp-repository-now-not-local-path-on-nfs)
-- [sqlite consistency](#sqlite-consistency)
+- [The sqlite consistency bug](#the-sqlite-consistency-bug)
 - [What's excluded, and why](#whats-excluded-and-why)
 - [Anti-deletion is not a Nix change](#anti-deletion-is-not-a-nix-change)
 - [What isn't done yet](#what-isnt-done-yet)
@@ -68,15 +68,47 @@ were migrated in with `restic copy` — six snapshots total, verified via a
 live `snapshots` listing. See `wiki/homelab/backup-runbook.md`'s step 4
 for exactly what ran.
 
-## sqlite consistency
+## The sqlite consistency bug
 
 Forgejo, Grafana and golink are all sqlite, and copying a live db file can
 capture a torn write mid-transaction that restic will store without
 complaint (issue #87's open question 1). `backupPrepareCommand` runs
 `sqlite3 <db> ".backup"` into a staging directory
 (`/var/cache/restic-backups-cube/sqlite-staging`) before each backup; the
-three live db files are `exclude`d, so it's the staged, consistent copy that
-actually gets backed up, not the live one.
+three live db files are `exclude`d, so it's meant to be the staged,
+consistent copy that actually gets backed up, not the live one.
+
+**It's never worked. Found 2026-09-06, doing the restore drill this page's
+own "done means" always said was the real bar.** `restic ls --recursive
+<snapshot> /var/cache/restic-backups-cube/sqlite-staging` against the
+repository's own metadata — not a restore, the repository directly —
+shows **zero file entries** in every real snapshot checked: 2026-09-01,
+2026-09-05, and two fresh on-demand runs on 2026-09-06, one of them
+immediately after a full reboot of cube. `/persist/secrets`,
+`/persist/passwords`, and the live Forgejo/Grafana/golink directories
+really are backed up; only this specific mechanism — the entire reason
+`backupPrepareCommand` exists — has silently protected nothing, this
+whole time.
+
+What's been ruled out, each confirmed by faithful reproduction rather than
+inference: sandboxing (`PrivateTmp`/`CacheDirectory`, reproduced via
+`systemd-run` with matching properties — works fine); exclude-pattern
+basename matching (a manual dry-run against the real `--exclude-file`
+correctly included the staged files); the real `--exclude-file`/
+`--files-from` combination with all six real paths at once (reproduced by
+hand, worked); switch-without-reboot cruft (a fresh reboot, zero prior
+state, still failed). `backupPrepareCommand`'s own commands and `restic
+backup` with the real flags both work correctly in isolation — only the
+real `ExecStartPre`→`ExecStart` sequence, in one unit activation, fails,
+every time it's been checked. The mechanism remains unexplained.
+
+`restic.nix` now has `backupPrepareCommand` log its own behavior
+(timestamp, and each staged file's resulting size) to
+`/var/cache/restic-backups-cube/prepare.log` — a file that survives
+across runs, unlike `/run/restic-backups-cube/`'s ephemeral
+`RuntimeDirectory` — so the next real run can actually be inspected rather
+than reproduced from outside. This is diagnostic, not a fix; the bug is
+still open.
 
 ## What's excluded, and why
 
@@ -94,20 +126,26 @@ ascending-effort list — is a **QNAP-side native snapshot schedule on the
 `restic-backup` share itself** (the repo's own dedicated share as of
 2026-09-03, not a share shared with anything else), so cube can write and
 prune within the repository but can't touch the NAS's own snapshots. QNAP
-admin-console configuration; nothing in this repo can enforce or verify it.
+admin-console configuration, so nothing in this repo can enforce it — but
+**confirmed live, 2026-09-05**, via a Snapshot Manager screenshot: daily
+at 04:30, keeping 5 days, status Success, 2 snapshots taken.
 
 ## What isn't done yet
 
-Live-checked 2026-09-05, over ssh to `nire-cube.local`:
+Live-checked 2026-09-05/06, over ssh to `nire-cube.local`:
 
 - ~~Both sops secrets are declared but this tree can't set their
-  values~~ — **set, 2026-08-30/31**, and **confirmed working**: real
-  timer runs have succeeded end to end against both the old and new repo
-  paths, not just an evaluated config.
+  values~~ — **set, 2026-08-30/31**, and the shell-level mechanics work:
+  real timer runs exit `status=0/SUCCESS` end to end against both the old
+  and new repo paths. **Whether the content they produce is actually
+  correct is a separate question** — see "The sqlite consistency bug"
+  above.
 - ~~The repository path moved but cube hasn't switched onto it~~ —
   **switched, and the pre-move repo's history migrated in** (see above).
-- **The QNAP-side snapshot schedule** described above still hasn't been
-  configured — the only item in this section still open.
+- ~~The QNAP-side snapshot schedule described above still hasn't been
+  configured~~ — **done** (see above).
+- **The sqlite consistency bug** (above) — root cause still unknown,
+  the biggest open item in this whole category.
 - **SSH's own exposure is mitigated, as of 2026-08-31** — QuTS hero has no
   toggle to force key-only auth, so this was done at the network level
   instead: port 22 is LAN-blocked and tailnet-only (confirmed live from
@@ -116,10 +154,12 @@ Live-checked 2026-09-05, over ssh to `nire-cube.local`:
   (taken on confirmation, not independently checked). See the runbook's
   setup step 3 for the full account.
 
-Even once all of that's done, this module still isn't done — per issue
-#87's own "done means": a **restore actually performed** — one Forgejo repo
-recovered and confirmed to open — is the bar, not a working connection or
-even a real backup running once.
+All of the above is genuinely done, and the restore drill has genuinely
+been performed — issue #87's own "done means" was followed exactly as
+written, and it did its job: it found that the sqlite consistency
+mechanism (above) has never worked, something no green timer ever would
+have caught. **This module still isn't done** — not because the drill
+wasn't run, but because of what it found.
 
 ## Imported by
 
