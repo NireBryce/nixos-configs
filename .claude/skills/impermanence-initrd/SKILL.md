@@ -7,39 +7,16 @@ description: How to edit impermanence/initrd config in this repo, and read real 
 
 ## Applies to
 
-`flake/modules/nire/impermanence/`, any `boot.initrd.*` option, stage-1
-hooks, and reading disk/mount state on one of the hosts that wipes `/root` on
-boot. Use before touching anything under `nire/impermanence/`, any
-`boot.initrd` option, or before trusting `lsblk`/`findmnt`/mounted-`/etc`
-output on these hosts.
+`flake/modules/nire/impermanence/`, any `boot.initrd.*` option (systemd
+stage 1 here since 2026-08-10 — see History), and reading disk/mount state
+on one of the hosts that wipes `/root` on boot. Use before touching
+anything under `nire/impermanence/`, any `boot.initrd` option, or before
+trusting `lsblk`/`findmnt`/mounted-`/etc` output on these hosts.
 
 **Read `WARN-impermanence.nix` before
 changing anything near this.** This mechanism wipes `/root` on boot on most
 hosts in this repo — see `CLAUDE.md` Safety section for which ones, current
-as of the date on that file. Both of the following have actually happened
-here.
-
-## `@name@` inside an initrd hook string is a live template placeholder
-
-Applies to **scripted** stage 1, which this repo still uses (kept because the
-mechanism is one `boot.initrd.systemd.enable = false` away).
-
-`boot.initrd.postResumeCommands` and its siblings are pasted into
-`stage-1-init.sh` by a fixed sequence of 19 `substituteInPlace
---replace-fail` passes. `@postResumeCommands@` is the **10th**, so every
-placeholder substituted after it — `@preDeviceCommands@`, `@preFailCommands@`,
-`@preLVMCommands@`, `@resumeDevice@`, `@shell@`, `@udevRules@` — is still
-live in the text you just inserted.
-
-Naming `@preLVMCommands@` in a **comment** inside `postResumeCommands`
-therefore pastes the whole LUKS unlock script into that comment. Only its
-first line stays commented; the rest executes, in initrd, part-way through
-the `/root` rollback.
-
-**Text in these strings is not inert, and a comment is not a safe place to
-name things.** Refer to a hook in prose, never by its token. (Same family as
-the general Nix trap: `${...}` inside a `''` string is interpolation, even
-inside what you intend as a comment — escape as `''${...}` or reword.)
+as of the date on that file. The following has actually happened here.
 
 ## The shell's view of the machine is a mount namespace
 
@@ -71,3 +48,16 @@ neighbours is the rollback *demonstrably running*, a stronger fact than
 the delete-then-snapshot sequence rather than the mount — on durandal's
 first boot into this config; see `wiki/history.md`'s "Confirmed-on-hardware
 facts" for both.)
+
+## History
+
+**Scripted stage 1's `@name@` templating trap no longer applies — this repo
+migrated to systemd stage 1 on 2026-08-10** (nixpkgs deprecated scripted
+initrd the same week, removal scheduled for 26.11). Kept here in case
+`git log`/old docs surface `boot.initrd.postResumeCommands`-shaped code:
+its hook strings were pasted into `stage-1-init.sh` by a fixed sequence of
+`substituteInPlace --replace-fail` passes, so naming a *later* placeholder
+(e.g. `@preLVMCommands@`) inside an *earlier* one's string — even in a
+comment — pasted a whole other script in and executed most of it. Full
+account of the migration and what it changed: `wiki/lessons-learned.md`
+§28, `WARN-impermanence.nix`'s own history comments.

@@ -17,6 +17,13 @@ Home Manager is NixOS-integrated in this repo (`home-manager.users.elly` set
 from the NixOS side, no separate home switch — see `CLAUDE.md`). All of the
 following have actually happened here.
 
+Three facts about that integration worth knowing before editing anything
+under it: HM **rejects** `nixpkgs.*` under `useGlobalPkgs` — errors, not
+ignores (`allowUnfree` comes from the system side,
+`basic-nix-settings.nix`); `home.profileDirectory` is
+`/etc/profiles/per-user/elly`, not `~/.nix-profile`; and activation runs as
+a systemd unit, so its `PATH` is only coreutils/findutils/gnugrep/gnused/systemd.
+
 ## `home.file.<n>.text` concatenates; it does not override
 
 The type is `types.lines`, so two modules declaring the same file both

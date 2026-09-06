@@ -222,7 +222,7 @@ Cheap, and the difference between a recommendation and a guess.
 
 Three times Elly declined a fork and asked for a documented escape hatch:
 `dirsAsCategory.md`, `trailhead-home-manager-standalone.md`,
-`lessons-learned-impermanence-stage1-migration.md` (removed 2026-09-05).
+`impermanence-stage1-migration.md` (removed 2026-09-05).
 None had to be settled to make progress, and writing the reversal path while the
 consequences are in hand is cheap. **Ask whether a close decision needs deciding
 or documenting.**
