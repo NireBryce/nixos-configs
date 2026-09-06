@@ -69,31 +69,13 @@ before stating any count) and `wiki/hosts.md`'s table. First-boot history
 
 ## Commands
 
-`just` recipes live in the root `.justfile` and work from anywhere:
-
-```sh
-just preflight       # check + modules + lint in one shot -- the ship skill's step 0
-just check           # nix flake check --all-systems --no-build
-just modules         # static module-tree check; the only one that means anything on darwin
-just lint            # statix + deadnix + oversized-file, ratcheted -- see flake/scripts/lint.py
-just wiki-lint       # wiki/ claims (imports, tables, links, recipes, skills, secrets, routes) vs the repo; not in preflight yet
-just wiki-churn      # rank wiki/ pages by git-log edit churn; reporting only, never fails
-just wiki-stale-refs # backtick file/path mentions with no matching tracked file; reporting only, heuristic
-just reach <host>    # ssh to durandal/tenacity/cube/lysithea: LAN mDNS, then Tailscale, then DNS
-just install-hooks   # one-time: run the checks locally pre-commit, plus the commit-trailer fixup
-just available <pkg> # can it build on aarch64-darwin, and does a cask install it too
-just available --duplicates   # only the ones homebrew ALSO installs, and what to do
-just fingerprint     # drvPath of the host toplevel
-just dotfiles        # every generated dotfile's attribute name
-just diff HEAD~1     # what changed in a host's config, attribute by attribute
-just build / boot / switch   # dispatches per host class; `boot` activates nothing until you reboot
-just age-key         # a host's sops recipient key; --updatekeys re-encrypts secrets.yaml
-just threads <term>  # search known threads: GitHub issues + wiki/ + lessons-learned.md
-```
-
-On the hardware, and read-only: `just hm-collisions` (files HM will take
-over, and whether any collide), `just root-drift` (what's on / that no
-persistence entry covers; needs sudo).
+`just` recipes live in the root `.justfile` and work from anywhere. Run
+bare `just` (or `just` from any subdirectory) for the full list with a
+one-line summary per recipe — that list, not a copy of it here, is the
+source of truth, since `.justfile`'s own comments are what `just` actually
+reads. `just preflight` (check + modules + lint) is the ship skill's step
+0. `just hm-collisions` and `just root-drift` are read-only but only
+meaningful run on the hardware itself.
 
 `host` derives from `hostname`, falling back to `nire-durandal` off-host.
 The override goes **before** the recipe name — `just host=nire-durandal
