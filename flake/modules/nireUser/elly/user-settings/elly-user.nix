@@ -13,7 +13,9 @@
                     # group = "elly";
                     # shell = lib.mkDefault pkgs.bash;
                     isNormalUser = true;
-                    extraGroups = [ "wheel" "audio" "podman" ]; # Enable ‘sudo’ and deeper audio access
+                    extraGroups = [ "wheel" "audio" "podman" "kvm" ]; # Enable 'sudo', deeper audio access, and
+                                                                       # /dev/kvm (root:kvm 0660 by default) for
+                                                                       # hardware-accelerated Android emulation
                     hashedPasswordFile = "/persist/passwords/elly";
                     packages  = with pkgs; [ 
                         # Emergency packages if home-manager dies
