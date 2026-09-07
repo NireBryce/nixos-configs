@@ -1,5 +1,7 @@
 # `reverse-proxy` — history
 
+_Last modified: 2026-09-02_
+
 ## Contents
 
 - [Confirmed working end to end, 2026-08-24](#confirmed-working-end-to-end-2026-08-24)

@@ -1,5 +1,7 @@
 # Impermanence, initrd & secrets
 
+_Last modified: 2026-09-05_
+
 ## Contents
 
 - [Impermanence](#impermanence)

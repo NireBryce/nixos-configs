@@ -1,5 +1,7 @@
 # `backup` — history
 
+_Last modified: 2026-09-06_
+
 ## Contents
 
 - [The original plan (2026-08-27)](#the-original-plan-2026-08-27)

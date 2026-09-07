@@ -1,5 +1,7 @@
 # `landing` — `nire/homelab/landing/`
 
+_Last modified: 2026-09-02_
+
 ## Contents
 
 - [What's in it](#whats-in-it)

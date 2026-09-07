@@ -1,5 +1,7 @@
 # `system` — `nire/system/`
 
+_Last modified: 2026-09-02_
+
 ## Contents
 
 - [Subdirectories at a glance](#subdirectories-at-a-glance)

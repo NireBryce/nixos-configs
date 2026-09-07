@@ -1,5 +1,7 @@
 # Module style guide
 
+_Last modified: 2026-09-02_
+
 ## Contents
 
 - [Opening brackets go on the same line as whatever causes them](#opening-brackets-go-on-the-same-line-as-whatever-causes-them)

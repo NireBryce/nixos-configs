@@ -1,5 +1,7 @@
 # rustic — an interactive alternative to the plain `restic` CLI
 
+_Last modified: 2026-09-03_
+
 ## Contents
 
 - [What it is](#what-it-is)

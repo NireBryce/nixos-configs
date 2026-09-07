@@ -1,5 +1,7 @@
 # `virtualization` — `nire/homelab/virtualization/`
 
+_Last modified: 2026-09-04_
+
 ## Contents
 
 - [What's in it](#whats-in-it)

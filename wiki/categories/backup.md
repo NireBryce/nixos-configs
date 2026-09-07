@@ -1,5 +1,7 @@
 # `backup` — `nire/homelab/backup/`
 
+_Last modified: 2026-09-06_
+
 ## Contents
 
 - [What's in it](#whats-in-it)

@@ -1,5 +1,7 @@
 # `git-forge` — history
 
+_Last modified: 2026-09-02_
+
 ## Contents
 
 - [First switch and the move behind Caddy](#first-switch-and-the-move-behind-caddy)

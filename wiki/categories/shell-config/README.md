@@ -1,5 +1,7 @@
 # `shell-config` — `nire/shell-config/`
 
+_Last modified: 2026-09-01_
+
 ## Contents
 
 - [What's in it](#whats-in-it)

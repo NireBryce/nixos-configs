@@ -1,5 +1,7 @@
 # Pending setup
 
+_Last modified: 2026-09-06_
+
 ## Contents
 
 - [How this differs from open-threads.md](#how-this-differs-from-open-threadsmd)

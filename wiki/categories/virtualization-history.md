@@ -1,5 +1,7 @@
 # `virtualization` — history
 
+_Last modified: 2026-09-04_
+
 ## Contents
 
 - [`nire-llm-sandbox`'s `sshForward` verification](#nire-llm-sandboxs-sshforward-verification)

@@ -1,5 +1,7 @@
 # `reverse-proxy` — `nire/homelab/reverse-proxy/`
 
+_Last modified: 2026-09-02_
+
 ## Contents
 
 - [What's in it](#whats-in-it)

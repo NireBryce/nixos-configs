@@ -1,5 +1,7 @@
 # Traps & skills
 
+_Last modified: 2026-09-04_
+
 ## Contents
 
 - [Two traps general enough to stay inline in `CLAUDE.md` rather than a skill](#two-traps-general-enough-to-stay-inline-in-claudemd-rather-than-a-skill)

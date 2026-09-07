@@ -1,5 +1,7 @@
 # Creating go/ links
 
+_Last modified: 2026-09-01_
+
 ## Contents
 
 - [Where it is](#where-it-is)

@@ -1,5 +1,7 @@
 # Lessons from the den → flake-parts port
 
+_Last modified: 2026-09-05_
+
 ## Contents
 
 - [1. A tool that reports success has not thereby been tested](#1-a-tool-that-reports-success-has-not-thereby-been-tested)

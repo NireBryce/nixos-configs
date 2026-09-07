@@ -1,5 +1,7 @@
 # flake-parts
 
+_Last modified: 2026-09-02_
+
 ## Contents
 
 - [Why flake-parts](#why-flake-parts)

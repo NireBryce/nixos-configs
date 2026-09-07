@@ -1,5 +1,7 @@
 # `git-forge` — `nire/homelab/git-forge/`
 
+_Last modified: 2026-09-06_
+
 ## Contents
 
 - [What's in it](#whats-in-it)
