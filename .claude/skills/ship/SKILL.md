@@ -83,9 +83,18 @@ Never commit onto `experimental`. `git status -sb` (already fetched) first:
 - **Unpushed commits sitting on local `experimental`** (`[ahead N]`):
   ```sh
   git branch <branch>              # keep the commits
+  git status --short               # anything NOT part of those commits?
   git reset --hard origin/experimental
   git checkout <branch>
   ```
+  **Run that `git status --short` for real, right before the reset, and
+  read it** — don't rely on the git-guard hook to catch this: its `ask` is
+  a no-op under `--permission-mode auto`, confirmed 2026-09-06 (issue
+  #182). `git branch` only preserves the accidental *commit*; anything
+  else dirty in a shared checkout (someone else's in-progress, uncommitted
+  edit) is not a commit and `reset --hard` destroys it with no recovery
+  path. If the status shows anything beyond the commit(s) you're rescuing,
+  stop and ask rather than proceeding — don't assume it's yours to lose.
 
 Commit discipline:
 
