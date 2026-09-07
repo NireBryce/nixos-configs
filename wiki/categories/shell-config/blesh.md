@@ -75,7 +75,34 @@ together external completion/history tools underneath ble.sh's UI:
   sourced *before* `ble-attach` installs the keymaps' own default
   bindings — a plain call here would run first and be overwritten;
   `blehook ATTACH` runs at the end of `ble-attach`, after the keymaps are
-  in their final state.
+  in their final state. (Works for C-v because C-v's keycode is fixed;
+  see the focus/blur entry below for why that distinction matters.)
+- **focus/blur are bound to a no-op in readline, before `ble-attach`** —
+  in [`bash.nix`](../../../flake/modules/nire/shell-config/bash/bash.nix)'s
+  last initExtra block, not in this `.blerc` (2026-09-07). When anything
+  in a session enables mode 1004 focus reporting, konsole sends
+  `CSI I`/`CSI O` on every tab switch; ble.sh decodes them into the
+  synthetic keys `focus`/`blur`, binds them in no keymap of any version
+  (upstream master included), and every event lands in the decode-error
+  path — konsole audibly ringing plus a "unbound keyseq: focus" visible
+  bell on each switch. `ble-bind` cannot deliver these: synthetic-key
+  names get *dynamically assigned* keycodes in first-registration order,
+  so any `ble-bind` made before `ble-attach`'s final key-table build
+  (top-level in `.blerc`, `blehook ATTACH`, a `-C` deferred-import
+  callback — all three tested in a query-answering pty, the responder
+  itself now proposed as
+  [terminal-puppeteer#43](https://github.com/NireBryce/terminal-puppeteer/issues/43))
+  lands under a keycode that later gets reassigned and silently stops
+  matching the arriving key — which is why the C-v unbind above works
+  (fixed keycode) while these don't. Plain readline binds made
+  pre-attach are imported by `ble-attach` after the tables are final,
+  the same channel atuin's C-r rides; and it has to be a *real*
+  readline bind, so it can't live in `.blerc` either — ble.sh has
+  already wrapped the `bind` builtin by the time it sources that file
+  (tested; that route fails too). Verified in the pty repro: silent
+  from ~2s after attach, one residual bell in the first ~1s of
+  ble.sh's own startup settling. **Confirmed on hardware the same day
+  on nire-cube** — switched, then live konsole tab switches, no bell.
 
 ## Bug: spurious `read: `': not a valid identifier` on Tab / auto-complete
 
