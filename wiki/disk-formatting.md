@@ -1,5 +1,7 @@
 # New host disk formatting (LUKS + btrfs + impermanence)
 
+_Last modified: 2026-09-05_
+
 ## Contents
 
 - [What this is for](#what-this-is-for)

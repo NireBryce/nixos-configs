@@ -1,5 +1,7 @@
 # Wiki style guide
 
+_Last modified: 2026-09-06_
+
 ## Contents
 
 - [Directory hierarchy](#directory-hierarchy)
@@ -115,6 +117,26 @@ separate tier for the *usage* side:
 
 ## Content shape
 
+- **Every page opens with a `_Last modified: YYYY-MM-DD_` line**, right
+  after the title and before `## Contents` (added wiki-wide 2026-09-06):
+
+  ```
+  # Page title
+
+  _Last modified: 2026-09-06_
+
+  ## Contents
+  ```
+
+  Absolute date, same rule as everywhere else on this page — the point is a
+  reader can tell at a glance how stale a page might be without opening
+  `git log`. **Whoever edits a page's actual content bumps this line to
+  today in the same change**; a purely mechanical touch (a `gen-contents`
+  run, a typo fix) doesn't need to. `wiki/scripts/check_wiki.py dates`
+  checks that the line exists and is shaped right (part of `just
+  wiki-lint`), but — like every other date claim in this repo — can't check
+  that it's still *true*; that's on the editor, the same discipline skill
+  `wiki-sync` already asks for everywhere else on a page.
 - **Every page opens with a `## Contents`** — a bullet list of section links,
   one per `##` heading on the page, placed right after the title and before
   any intro prose (added wiki-wide 2026-09-01, for browsability: a reader

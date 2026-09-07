@@ -1,5 +1,7 @@
 # History & lessons learned
 
+_Last modified: 2026-09-05_
+
 ## Contents
 
 - [This repo's own history](#this-repos-own-history)

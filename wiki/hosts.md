@@ -1,5 +1,7 @@
 # Hosts & current state
 
+_Last modified: 2026-09-06_
+
 ## Contents
 
 - [The hosts](#the-hosts)

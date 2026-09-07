@@ -1,5 +1,7 @@
 # `shortlinks` — history
 
+_Last modified: 2026-09-02_
+
 ## Contents
 
 - [The first switch crash-looped](#the-first-switch-crash-looped)

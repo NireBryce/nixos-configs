@@ -1,5 +1,7 @@
 # carapace
 
+_Last modified: 2026-09-02_
+
 ## Contents
 
 - [The generated bash completer, read from its own output](#the-generated-bash-completer-read-from-its-own-output)

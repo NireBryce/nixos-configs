@@ -120,7 +120,19 @@ structured, extractable facts only:
             with no `## Contents` section rather than demanding one; that
             expectation lives in styleguide.md, not here.
 
-  check     Runs all ten of the above.
+  dates     Every page's `_Last modified: YYYY-MM-DD_` line (added
+            wiki-wide 2026-09-06, right after the title and before `##
+            Contents`, see styleguide.md) exists, matches that exact
+            format, and isn't a future date -- the same three things a
+            human proofreading it would check. It can't and doesn't check
+            that the date is *current* (whether the page's content has
+            actually changed since); that half is a human judgement call
+            each edit makes for itself, per skill `wiki-sync`, the same
+            division as `contents` catching a heading list going stale
+            mechanically while deciding *what belongs* on the page stays
+            manual.
+
+  check     Runs all eleven of the above.
 
     check_wiki.py imports       [repo-root]
     check_wiki.py table         [repo-root]
@@ -132,6 +144,7 @@ structured, extractable facts only:
     check_wiki.py links         [repo-root]
     check_wiki.py anchors       [repo-root]
     check_wiki.py contents      [repo-root]
+    check_wiki.py dates         [repo-root]
     check_wiki.py check         [repo-root]
     check_wiki.py gen-contents  <file.md> [file.md ...]
 
@@ -143,7 +156,7 @@ block in place to match that page's real headings, which is the actual fix
 for a `contents` finding (and, if the broken link was into the page's own
 Contents list rather than someone else's, an `anchors` finding too).
 """
-import re, sys, pathlib, urllib.parse
+import re, sys, pathlib, urllib.parse, datetime
 
 CATEGORY_FILE = 'dirsAsCategory.nix'
 # Same shape as modules.py's AGG -- `with config.flake.modules.<class>; [ ... ]`,
@@ -703,6 +716,12 @@ FENCE = re.compile(r'^(```|~~~)')
 HEADING = re.compile(r'^(#{1,6})\s+(.+?)\s*$')
 CONTENTS_HEADING = re.compile(r'^##\s+Contents\s*$', re.M)
 CONTENTS_ITEM = re.compile(r'^-\s+\[(?P<text>.+)\]\(#(?P<slug>[^)]+)\)\s*$', re.M)
+# The exact line styleguide.md requires right after a page's title:
+# `_Last modified: 2026-09-06_`. Anchored to the whole line -- a stray
+# trailing word or missing underscore is exactly the kind of drift this
+# check exists to catch, same reasoning as CONTENTS_ITEM being just as
+# strict about its own line shape.
+LAST_MODIFIED_LINE = re.compile(r'^_Last modified: (\d{4}-\d{2}-\d{2})_\s*$')
 
 
 def _iter_headings(text):
@@ -852,6 +871,39 @@ def check_contents(root):
     return findings
 
 
+def check_dates(root):
+    """Every page under wiki/ has a `_Last modified: YYYY-MM-DD_` line right
+    after its title, in exactly the format styleguide.md's Content-shape
+    section specifies, and that date isn't in the future. This is the
+    presence-and-shape half of the convention -- extractable and mechanical,
+    same as `contents`. It is NOT a claim that the date is still accurate:
+    telling whether a page's *content* has moved on since that date needs a
+    human reading the diff, which is what skill `wiki-sync` is for. A page
+    whose only heading is the title itself (none currently exist) still
+    needs the line -- there's no exemption for a short page."""
+    findings = []
+    today = datetime.date.today()
+    for path in sorted(root.joinpath('wiki').rglob('*.md')):
+        lines = path.read_text().splitlines()
+        if not lines or not lines[0].startswith('# '):
+            continue  # no title line to anchor the check against
+        i = 1
+        while i < len(lines) and lines[i].strip() == '':
+            i += 1
+        m = LAST_MODIFIED_LINE.match(lines[i]) if i < len(lines) else None
+        if not m:
+            findings.append(
+                f"MISSING LAST-MODIFIED  {path}: no `_Last modified: "
+                f"YYYY-MM-DD_` line right after the title")
+            continue
+        date = datetime.date.fromisoformat(m.group(1))
+        if date > today:
+            findings.append(
+                f"FUTURE DATE  {path}: Last modified says {date}, which is "
+                f"after today ({today})")
+    return findings
+
+
 CONTENTS_ITEM_LINE = re.compile(r'^-\s+\[.+\]\(#[^)]+\)\s*$')
 
 
@@ -897,6 +949,13 @@ def regenerate_contents(path):
         insert_at = 1
         while insert_at < len(lines) and lines[insert_at].strip() == '':
             insert_at += 1
+        # A `_Last modified: ..._` line (styleguide.md) sits between the
+        # title and Contents -- skip past it too, so a fresh Contents block
+        # lands after it rather than splitting title from date.
+        if insert_at < len(lines) and LAST_MODIFIED_LINE.match(lines[insert_at]):
+            insert_at += 1
+            while insert_at < len(lines) and lines[insert_at].strip() == '':
+                insert_at += 1
         new_text = ''.join(lines[:insert_at]) + block + '\n' + ''.join(lines[insert_at:])
     if new_text != text:
         path.write_text(new_text)
@@ -918,7 +977,7 @@ def main():
     root = repo_root([sys.argv[0]] + sys.argv[2:])
 
     cmds = ('imports', 'table', 'hosts', 'recipes', 'skills', 'secrets',
-            'routes', 'links', 'anchors', 'contents', 'check')
+            'routes', 'links', 'anchors', 'contents', 'dates', 'check')
     if cmd not in cmds:
         print(__doc__)
         sys.exit(2)
@@ -944,6 +1003,8 @@ def main():
         findings += check_anchors(root)
     if cmd in ('contents', 'check'):
         findings += check_contents(root)
+    if cmd in ('dates', 'check'):
+        findings += check_dates(root)
 
     for f in findings:
         print(f)

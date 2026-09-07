@@ -1,5 +1,7 @@
 # Reaching cube's services
 
+_Last modified: 2026-09-01_
+
 ## Contents
 
 - [The map](#the-map)

@@ -1,5 +1,7 @@
 # `desktop-env` — `nire/desktop-env/`
 
+_Last modified: 2026-09-05_
+
 ## Contents
 
 - [What's in it](#whats-in-it)

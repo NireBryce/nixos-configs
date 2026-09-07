@@ -1,5 +1,7 @@
 # Architecture & module system
 
+_Last modified: 2026-09-02_
+
 ## Contents
 
 - [The core mechanism](#the-core-mechanism)

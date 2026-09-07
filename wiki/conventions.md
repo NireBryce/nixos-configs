@@ -1,5 +1,7 @@
 # Conventions & workflow
 
+_Last modified: 2026-09-02_
+
 ## Contents
 
 - [Commands](#commands)

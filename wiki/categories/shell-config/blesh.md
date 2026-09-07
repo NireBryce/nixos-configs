@@ -1,5 +1,7 @@
 # blesh (bash line editor)
 
+_Last modified: 2026-09-05_
+
 ## Contents
 
 - [Plugins](#plugins)

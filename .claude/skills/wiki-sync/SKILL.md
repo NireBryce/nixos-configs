@@ -62,6 +62,12 @@ Two narrower cases have their own instructions — read those first:
    - kebab-case naming; `README.md` reserved for a directory's own index.
    - A fix ballooning into prose that argues a fact instead of linking to
      it means the fact belongs in the linked file's own header.
+   - **Bump the page's `_Last modified: YYYY-MM-DD_` line** (right after
+     the title) to today, on every page you actually edited in this step —
+     not on a page you only read and found still correct. `python3
+     wiki/scripts/check_wiki.py dates` (part of `just wiki-lint`) only
+     catches the line being missing or malformed, never a stale date left
+     behind; that half is this step.
 5. **If nothing in `wiki/` mentions what changed, say so and stop.** Don't
    manufacture an edit — most changes are exactly this case; the check
    itself is the value.

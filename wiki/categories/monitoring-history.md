@@ -1,5 +1,7 @@
 # `monitoring` — history
 
+_Last modified: 2026-09-02_
+
 ## Contents
 
 - [The `secret_key` regression, twice](#the-secret_key-regression-twice)

@@ -1,5 +1,7 @@
 # Backup runbook — restic on `nire-cube`
 
+_Last modified: 2026-09-06_
+
 ## Contents
 
 - [Checking status](#checking-status)

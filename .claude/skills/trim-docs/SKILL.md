@@ -33,6 +33,10 @@ edits must preserve them:
 - **`## Contents` blocks** must match the page's headings. After renaming,
   adding, or removing any heading, run `python3
   wiki/scripts/check_wiki.py gen-contents <page>`.
+- **The `_Last modified: YYYY-MM-DD_` line** right after the title. Don't
+  delete it while trimming intro prose; bump it to today on every page you
+  actually change text on (wiki-sync's rule applies here too) — but leave
+  it alone on a page you only re-read and left untouched.
 - **Anchors are GitHub slugs of headings.** Renaming a heading silently
   breaks every inbound `page.md#anchor` link — grep `page.md#` across wiki/
   and AGENTS.md before renaming, or don't rename.

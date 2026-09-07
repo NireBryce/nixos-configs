@@ -1,5 +1,7 @@
 # `hardware` — `nire/hardware/` (+ nested `amd`)
 
+_Last modified: 2026-09-01_
+
 ## Contents
 
 - [What's in it](#whats-in-it)
