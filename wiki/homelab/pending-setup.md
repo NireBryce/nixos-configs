@@ -8,7 +8,7 @@
 - [3. golink has no links yet](#3-golink-has-no-links-yet)
 - [4. Done — backups exist, and a restore has actually recovered something](#4-done--backups-exist-and-a-restore-has-actually-recovered-something)
 - [5. Grafana's admin credentials](#5-grafanas-admin-credentials)
-- [6. Housekeeping on cube: one scratch directory left over](#6-housekeeping-on-cube-one-scratch-directory-left-over)
+- [6. Housekeeping on cube: one scratch directory left over — done](#6-housekeeping-on-cube-one-scratch-directory-left-over--done)
 - [What's verified here](#whats-verified-here)
 - [See also](#see-also)
 
@@ -157,18 +157,13 @@ problem — while anything under `monitoring`'s `_dashboards/` is provisioned
 read-only from the Nix store. A dashboard you want to keep should end up in
 the repo, not just in the UI.
 
-## 6. Housekeeping on cube: one scratch directory left over
+## 6. Housekeeping on cube: one scratch directory left over — done
 
-Mostly done already. As of 2026-08-24, `~/nixos-configs` evaluated to
-exactly what was running (`toplevel.outPath` matched
-`/run/current-system`), and was one docs-only commit behind. The leftover:
-**`~/nixos-caddy-test`**, the rsync'd tree the Caddy/glance switches were
-activated from — nothing depends on it now.
-
-```sh
-cd ~/nixos-configs && git pull
-rm -rf ~/nixos-caddy-test           # after confirming outPath matches current-system
-```
+As of 2026-08-24, `~/nixos-configs` evaluated to exactly what was running
+(`toplevel.outPath` matched `/run/current-system`), and was one docs-only
+commit behind. The leftover, **`~/nixos-caddy-test`** (the rsync'd tree the
+Caddy/glance switches were activated from), has since been deleted, and the
+real checkout is caught up with `main`.
 
 ## What's verified here
 

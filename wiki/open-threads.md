@@ -27,13 +27,14 @@ repo's own tracker is the issue queue, not another markdown list.
 
 - **[#87 — no backups anywhere in the fleet; decide a scheme for cube's
   service state](https://github.com/NireBryce/nixos-configs/issues/87)** —
-  open, filed 2026-08-24. Nothing in `flake/` configures any backup tool at
-  all (verified by grep, not assumed), while `nire-cube` now holds a git
-  forge, a metrics db and a shortlink db that nothing else has a copy of. A
-  QNAP NAS on the network makes this mostly a matter of picking a tool;
-  the issue carries the restic-over-SFTP sketch, the sqlite-consistency
-  problem, and the four things that need deciding rather than defaulting.
-  **Done means a restore actually performed**, not a green timer.
+  **closed 2026-09-06.** restic-over-SFTP to the QNAP, with a real restore
+  drill performed twice (once found and fixed a real `backupPrepareCommand`
+  sqlite-staging bug, once more confirmed a clean restore) — the bar the
+  issue itself set for "done". Full account:
+  [backup.md](categories/backup.md) /
+  [backup-history.md](categories/backup-history.md). Extending the same
+  coverage to durandal/tenacity/lysithea is now
+  **[#130](https://github.com/NireBryce/nixos-configs/issues/130)**.
 - **[#75 — remove `carapace-completer-read-fix.bash` once ble.sh/carapace
   fix it upstream](https://github.com/NireBryce/nixos-configs/issues/75)**
   — open. The follow-on to #72 below: a local workaround stays in the tree
@@ -111,14 +112,13 @@ domain UUID) used to be recorded here; the VM itself was removed 2026-08-28
 Four things the reverse-proxy/glance work knowingly did not do. None is a
 bug; each is a decision someone might otherwise re-litigate from scratch.
 
-- **`nire-cube` is running a config activated from `~/nixos-caddy-test/`**, a
-  plain rsync of a working tree, while its real checkout at
-  `~/nixos-configs` sits several commits behind `main`. The running system is
-  byte-identical to what `main` evaluates to, so this is bookkeeping rather
-  than drift — but the next person to `just switch` from `~/nixos-configs`
-  should `git pull` first, and the test directory can be deleted once they
-  have. Sync-and-build-over-ssh exists because a darwin session cannot build
-  an `x86_64-linux` toplevel; see the `new-homelab-service` skill.
+- **Done.** `nire-cube` was running a config activated from
+  `~/nixos-caddy-test/`, a plain rsync of a working tree, while its real
+  checkout at `~/nixos-configs` sat several commits behind `main`. Both
+  since resolved: the checkout is caught up with `main` and `~/nixos-caddy-test`
+  has been deleted. Sync-and-build-over-ssh exists because a darwin session
+  cannot build an `x86_64-linux` toplevel; see the `new-homelab-service`
+  skill.
 - **Nothing backs up `/var/lib/forgejo`** — or anything else on cube.
   **Now tracked as
   [#87](https://github.com/NireBryce/nixos-configs/issues/87)** (whole
@@ -127,10 +127,16 @@ bug; each is a decision someone might otherwise re-litigate from scratch.
   durable storage. A [backup](categories/backup.md) category landed
   2026-08-28 implementing #87's scheme, switched and running on cube as of
   2026-08-30 — but as local-path restic over NFS, which failed for real (an
-  export ACL the QNAP never granted cube), so SFTP since 2026-08-31.
-  Blocked on two sops secrets nobody with decrypt access has set, plus no
-  anti-deletion snapshot. Still exactly one copy of everything until both
-  land and a restore is actually performed.
+  export ACL the QNAP never granted cube), so SFTP since 2026-08-31. **Done
+  as of 2026-09-06**: sops secrets set, anti-deletion snapshot schedule
+  confirmed live, and the restore drill (#87's own bar for "done") actually
+  run twice — once finding the `backupPrepareCommand` sqlite-staging bug
+  (never worked, staged inside restic's own cache dir), once more
+  confirming a real restore after the fix. See
+  [backup.md](categories/backup.md) and
+  [backup-history.md](categories/backup-history.md). What's still open is
+  extending backups past cube to the other three hosts
+  (**[#130](https://github.com/NireBryce/nixos-configs/issues/130)**).
 - **Tailscale Services (`svc:`) were weighed and deferred.** They would give
   each service its own tailnet DNS name (`https://grafana/` rather than a
   path prefix), which removes the whole prefix-handling problem
@@ -142,9 +148,12 @@ bug; each is a decision someone might otherwise re-litigate from scratch.
   annoying, is a real domain with split DNS and a wildcard certificate.
 - **Grafana dashboards edited in the UI are not in this repo.** Anything
   under `monitoring`'s `_dashboards/` is provisioned read-only from the
-  store; anything created through the web UI lives only in cube's sqlite db,
-  which is not backed up either. Writing up "how to add a dashboard that
-  survives a rebuild" is the missing piece.
+  store; anything created through the web UI lives only in cube's sqlite db.
+  That db is now backed up (`/var/lib/grafana` is one of #87's covered
+  paths, via the sqlite-staging fix), so a UI-created dashboard survives a
+  restore — but it still isn't declared as code, so it still can't survive
+  a rebuild that reprovisions `_dashboards/`. Writing up "how to add a
+  dashboard that survives a rebuild" is the remaining piece.
 
 ## Not covered here
 
