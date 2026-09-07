@@ -118,7 +118,7 @@
             # --replace-fail throughout, so a version that no longer matches
             # fails the build loudly rather than silently patching nothing.
             nixpkgs.overlays = [
-                (final: prev: {
+                (_: prev: {
                     handheld-daemon = prev.handheld-daemon.overridePythonAttrs (old: {
                         postPatch = (old.postPatch or "") + ''
                             substituteInPlace src/hhd/__main__.py \

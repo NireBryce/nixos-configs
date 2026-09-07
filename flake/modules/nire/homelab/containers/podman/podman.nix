@@ -55,64 +55,66 @@
 
             virtualisation.oci-containers.backend = "podman";
 
-            users.groups.container = { };
-            users.users.container = {
-                isNormalUser = true;
-                group        = "container";
-                home         = "/var/lib/container";
-                linger       = true;
-                createHome   = true;
+            users = {
+                groups.container = { };
+                users.container = {
+                    isNormalUser = true;
+                    group        = "container";
+                    home         = "/var/lib/container";
+                    linger       = true;
+                    createHome   = true;
 
-                # NOT autoSubUidGidRange: looks like the obvious thing to
-                # write, silently collides with elly below. nixpkgs allocates
-                # auto ranges in update-users-groups.pl's allocSubUid, which
-                # walks 100000, 165536, ... and skips only ranges *it*
-                # already handed out (%subUidsUsed) or on a previous
-                # activation (%subUidsPrevUsed, from
-                # /var/lib/nixos/auto-subuid-map); it never looks at
-                # explicitly-declared subUidRanges, so elly's hardcoded
-                # 100000 is invisible: on any fresh install both users get
-                # 100000:65536 in /etc/subuid and share a subordinate range.
-                # durandal escapes only by accident -- elly was auto-allocated
-                # 100000 before the pin below existed, so it is in the map
-                # and allocSubUid steps past it. Hence: pin explicitly.
-                subUidRanges = [
-                {
-                    startUid = 165536;
-                    count    = 65536;
-                }
-                ];
-                subGidRanges = [
-                {
-                    startGid = 165536;
-                    count    = 65536;
-                }
-                ];
-            };
+                    # NOT autoSubUidGidRange: looks like the obvious thing to
+                    # write, silently collides with elly below. nixpkgs allocates
+                    # auto ranges in update-users-groups.pl's allocSubUid, which
+                    # walks 100000, 165536, ... and skips only ranges *it*
+                    # already handed out (%subUidsUsed) or on a previous
+                    # activation (%subUidsPrevUsed, from
+                    # /var/lib/nixos/auto-subuid-map); it never looks at
+                    # explicitly-declared subUidRanges, so elly's hardcoded
+                    # 100000 is invisible: on any fresh install both users get
+                    # 100000:65536 in /etc/subuid and share a subordinate range.
+                    # durandal escapes only by accident -- elly was auto-allocated
+                    # 100000 before the pin below existed, so it is in the map
+                    # and allocSubUid steps past it. Hence: pin explicitly.
+                    subUidRanges = [
+                    {
+                        startUid = 165536;
+                        count    = 65536;
+                    }
+                    ];
+                    subGidRanges = [
+                    {
+                        startGid = 165536;
+                        count    = 65536;
+                    }
+                    ];
+                };
 
-            users.users.elly = {
-                # credit: https://github.com/NixOS/nixpkgs/issues/389088#issuecomment-3379482882
-                #
-                # Pinned rather than auto-allocated so the range cannot move
-                # out from under container storage already chowned into it --
-                # the fix nixpkgs itself prints when an auto range shifts.
-                #
-                # No extraGroups: elly is already in `podman` via
-                # nireUser/elly/user-settings/elly-user.nix, and extraGroups
-                # *concatenates* across modules rather than overriding --
-                # naming it in both places put "podman" in the list twice.
-                subUidRanges = [
-                {
-                    startUid = 100000;
-                    count    = 65536;
-                }
-                ];
-                subGidRanges = [
-                {
-                    startGid = 100000;
-                    count    = 65536;
-                }
-                ];
+                users.elly = {
+                    # credit: https://github.com/NixOS/nixpkgs/issues/389088#issuecomment-3379482882
+                    #
+                    # Pinned rather than auto-allocated so the range cannot move
+                    # out from under container storage already chowned into it --
+                    # the fix nixpkgs itself prints when an auto range shifts.
+                    #
+                    # No extraGroups: elly is already in `podman` via
+                    # nireUser/elly/user-settings/elly-user.nix, and extraGroups
+                    # *concatenates* across modules rather than overriding --
+                    # naming it in both places put "podman" in the list twice.
+                    subUidRanges = [
+                    {
+                        startUid = 100000;
+                        count    = 65536;
+                    }
+                    ];
+                    subGidRanges = [
+                    {
+                        startGid = 100000;
+                        count    = 65536;
+                    }
+                    ];
+                };
             };
 
             # # vscode devcontainers https://wiki.nixos.org/wiki/Podman

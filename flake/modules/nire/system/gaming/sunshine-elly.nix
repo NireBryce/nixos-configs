@@ -13,6 +13,8 @@
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
+        # `{ ... }:` kept over statix's suggested `_:` -- deliberate, see
+        # wiki/module-style-guide.md's "`{ ... }:` on an inner module lambda".
         flake.modules.nixos.${moduleName} = { ... }: {
             users.users.elly.extraGroups = [
                 "render" # /dev/dri/renderD* (root:render, 0660) -- VAAPI hardware encode.

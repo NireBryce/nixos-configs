@@ -23,11 +23,13 @@
             # find -- mesa's radeonsi bundles VAAPI for AMD, no extra package needed the
             # way Intel's does. See that file for the rest of the story (why the encoder
             # isn't forced) and sunshine-elly.nix for the device-permission groups it needs.
-            hardware.graphics.enable = true;
-            hardware.graphics.enable32Bit = true;
-            hardware.graphics.extraPackages = with pkgs; [
-                libva-utils
-                rocmPackages.clr.icd # https://nixos.org/manual/nixos/stable/#sec-gpu-accel-opencl-amd
-            ];
+            hardware.graphics = {
+                enable = true;
+                enable32Bit = true;
+                extraPackages = with pkgs; [
+                    libva-utils
+                    rocmPackages.clr.icd # https://nixos.org/manual/nixos/stable/#sec-gpu-accel-opencl-amd
+                ];
+            };
         };
 }
