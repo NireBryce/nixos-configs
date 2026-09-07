@@ -23,11 +23,7 @@ second skill.
 
 ## The shape
 
-Hand-written, not generated. `nirePackages/_lib/mkPkgModule.nix` exists as a
-generator for this exact shape (~70 files already match it, per
-`flake/scripts/mkPkgModule.md`) but is a **deliberately unused draft** —
-nothing in the tree calls it. Don't reach for it; follow a sibling file
-instead.
+Hand-written, not generated. Follow a sibling file:
 
 ```nix
 { lib, ... }:
@@ -123,8 +119,6 @@ branch.
 
 - `nirepackages-platform-support` — the platform/Homebrew decision in full,
   including the darwin-only mirror case this skill only summarizes.
-- `flake/scripts/mkPkgModule.md` — why the generator exists and why nothing
-  converts to it yet.
 - `new-flake-module` — filenames, classes, the two `config`s, category
   collisions.
 - `wiki/module-style-guide.md` — formatting (aligned `=` columns,

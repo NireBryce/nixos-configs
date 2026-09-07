@@ -83,7 +83,8 @@ Present but deliberately not one of the 4 members, and currently uncalled:
 a plain curried function (`{ name, image, ... }: { pkgs, lib, ... }: ...`),
 not a flake-parts module — it takes parameters, so `import-tree` would fail
 auto-importing it. Filed under `_lib/` because `import-tree` ignores any
-path containing `/_` (same as `nirePackages/_lib/mkPkgModule.nix`).
+path containing `/_` (same as
+`nire/impermanence/_disko/impermanence-luks-btrfs.nix`).
 
 Its one caller, `virtualization-cube.nix`, was removed with the VM
 2026-08-28. While it existed it illustrated a second dirsAsCategory

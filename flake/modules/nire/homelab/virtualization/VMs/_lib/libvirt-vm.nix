@@ -14,10 +14,10 @@
 # and auto-import would call it with flake-parts' module args
 # (`{ config, lib, pkgs, ... }`) against a closed pattern with no `...`,
 # failing evaluation outright, not merely landing in the wrong scope. Same
-# escape `_lib/mkPkgModule.nix` and `_disko/impermanence-luks-btrfs.nix`
-# use -- `dirsAsCategory`'s `collectModules` walks into `_`-prefixed
-# directories too, harmlessly: nothing under `_lib/` ever declares
-# `flake.modules.nixos.<that-name>`, since import-tree never touched it.
+# escape `_disko/impermanence-luks-btrfs.nix` uses -- `dirsAsCategory`'s
+# `collectModules` walks into `_`-prefixed directories too, harmlessly:
+# nothing under `_lib/` ever declares `flake.modules.nixos.<that-name>`,
+# since import-tree never touched it.
 #
 # Deliberately does NOT sit directly under nire/homelab/virtualization/VMs/:
 # a category collects every .nix file in every *sub*directory, and VMs/ is
