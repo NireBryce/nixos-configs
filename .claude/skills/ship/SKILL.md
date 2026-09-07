@@ -161,6 +161,27 @@ this flow also does; run the explicit steps instead of the flag.
 Report the merge commit and the branch's fate; never report a commit range
 as if pushed to `experimental`.
 
+**If the PR body contains a closing keyword ("Fixes #N", "Closes #N",
+"Resolves #N"), don't trust it — verify.** Confirmed broken 2026-09-06
+(issue #177): three separate PRs used correct closing-keyword syntax,
+merged into `experimental` (the actual default branch), and GitHub still
+didn't auto-close the referenced issue — `gh pr view <n> --json
+closingIssuesReferences` came back empty on all three, with no error
+anywhere. After merging:
+
+```sh
+gh issue view <N> --json state -q .state
+```
+
+If it says `OPEN`, close it explicitly:
+
+```sh
+gh issue close <N> --comment "..."   # what fixed it, which commit/PR
+```
+
+Do this for every issue number the merged PR's body claims to fix — the
+auto-link is not a given here.
+
 ## When one working tree becomes two PRs
 
 Both bit 2026-08-21 (#43/#44):

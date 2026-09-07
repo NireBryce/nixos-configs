@@ -43,8 +43,11 @@ status and what broke on the way:
   own device `go`, needing a one-time interactive login on first start.
 - [backup](categories/backup.md) — restic to the QNAP (2026-08-28, issue
   [#87](https://github.com/NireBryce/nixos-configs/issues/87)); local-path
-  over NFS failed for real, SFTP since 2026-08-31, still blocked on two sops
-  secrets. Runbook: [homelab/backup-runbook.md](homelab/backup-runbook.md).
+  over NFS failed for real, SFTP since 2026-08-31. **Done as of
+  2026-09-06**, restore drill included (run twice — found and fixed a real
+  sqlite-staging bug, then confirmed). Still no backups on durandal/
+  tenacity/lysithea ([#130](https://github.com/NireBryce/nixos-configs/issues/130)).
+  Runbook: [homelab/backup-runbook.md](homelab/backup-runbook.md).
 
 ## Where each fact lives
 
