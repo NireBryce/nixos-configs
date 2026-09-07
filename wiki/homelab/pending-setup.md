@@ -154,10 +154,14 @@ change on first sign-in. Worth confirming that happened, since the tailnet is
 the only thing in front of it.
 
 Related and worth knowing before you start building dashboards: anything
-edited in the Grafana UI lives **only** in cube's sqlite db — which is item 4's
-problem — while anything under `monitoring`'s `_dashboards/` is provisioned
-read-only from the Nix store. A dashboard you want to keep should end up in
-the repo, not just in the UI.
+edited in the Grafana UI lives **only** in cube's sqlite db, while anything
+under `monitoring`'s `_dashboards/` is provisioned read-only from the Nix
+store. That db is backed up now (item 4, done), so a UI dashboard survives
+a *restore* — but it still isn't declared as code, so it still can't
+survive a *rebuild* that reprovisions `_dashboards/`. A dashboard you want
+to keep permanently should end up in the repo:
+[monitoring.md](../categories/monitoring.md#adding-a-dashboard-that-survives-a-rebuild)
+has the how-to, not yet verified against a real UI export.
 
 ## 6. Housekeeping on cube: one scratch directory left over — done
 
