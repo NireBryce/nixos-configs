@@ -152,8 +152,10 @@ bug; each is a decision someone might otherwise re-litigate from scratch.
   That db is now backed up (`/var/lib/grafana` is one of #87's covered
   paths, via the sqlite-staging fix), so a UI-created dashboard survives a
   restore — but it still isn't declared as code, so it still can't survive
-  a rebuild that reprovisions `_dashboards/`. Writing up "how to add a
-  dashboard that survives a rebuild" is the remaining piece.
+  a rebuild that reprovisions `_dashboards/`. "How to add a dashboard that
+  survives a rebuild" is now written up:
+  [monitoring.md](categories/monitoring.md#adding-a-dashboard-that-survives-a-rebuild)
+  — not yet verified against a real UI export, per its own caveat.
 
 ## Not covered here
 
