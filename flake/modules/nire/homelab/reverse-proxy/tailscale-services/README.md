@@ -26,15 +26,17 @@ the script (`vip-put`/`apply`) to push an edit.
   config (nixpkgs' `services.tailscale.serve`), a different file
   entirely, confirmed the hard way before finding the right endpoint.
 
-## What's NOT done yet
+## Status: RUNTIME-VERIFIED end to end, 2026-09-07
 
-- No NixOS `services.tailscale.serve` config exists to back these with
-  the actual Grafana/Forgejo ports (3000/3001) -- see
-  [reverse-proxy.md](../../../../../../wiki/categories/reverse-proxy.md)
-  for the current Caddy-based routing this would replace.
-- Caddy's `@grafana`/`handle_path /git` routes in `caddy.nix` are
-  untouched and still serve the working `/grafana/`, `/git/` paths --
-  nothing here has cut over.
+Both services confirmed working on `nire-cube`: valid TLS (`tls_verify=0`)
+on `https://grafana.moose-micro.ts.net/` (`302 -> /login`, real Grafana
+content) and `https://git.moose-micro.ts.net/` (`200`, Forgejo's own
+generated links correctly using the new `ROOT_URL`); the old
+`ts-cube.../grafana/`, `.../git/` paths correctly `404`; backend ports
+3000/3001 still loopback-only. See `serve.nix`'s own history section for
+how the design got here (the first attempt didn't work) and
+[reverse-proxy.md](../../../../../../wiki/categories/reverse-proxy.md)
+for the full picture.
 
 ## Tagging a device drops it out of `autogroup:members` -- live incident, 2026-09-07
 
