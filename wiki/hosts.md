@@ -28,6 +28,12 @@ Removed, history not live hosts ([history.md](history.md)): `nire-testbed`
 (2026-08-27), `nire-llm-sandbox` (2026-08-28; the generic libvirt generator
 it ran on survives under [virtualization](categories/virtualization.md)).
 
+`nire-tenacity` known quirk: mouse/input feels unresponsive for ~4.5s after
+resume from suspend. Not a USB/kernel issue — `handheld-daemon`'s `adjustor`
+plugin deliberately delays reapplying TDP/GPU/governor settings after wake;
+see [desktop-env.md](categories/desktop-env.md#known-quirk-mouseinput-lag-for-45s-after-resume-on-tenacity)
+for the mechanism. Diagnosed 2026-09-06, not worth chasing.
+
 What cube runs, each with its own page — including per-service verification
 status and what broke on the way:
 
