@@ -23,12 +23,19 @@
 #     http://ts-cube:3000/  ->  https://ts-cube.moose-micro.ts.net/grafana/
 #     http://ts-cube:3001/  ->  https://ts-cube.moose-micro.ts.net/git/
 #
-# BOTH MOVED AGAIN, off this proxy entirely, onto their own Tailscale
-# Services names -- see reverse-proxy/tailscale-services/serve.nix (not
-# yet runtime-verified as of that move). The `/grafana/`/`/git/` paths
-# above are themselves now retired; this file's history section below
-# keeps the mechanism that made them work, in case that move needs
-# reverting.
+# BOTH MOVED AGAIN, off the shared `ts-cube` hostname onto their own
+# Tailscale Services names (`svc:grafana`, `svc:git`) -- but Caddy is
+# STILL the one terminating TLS for both, via the two vhosts below, not
+# tailscaled: Tailscale Services cannot terminate HTTPS declaratively as
+# of this tailscale version (confirmed upstream bug, see
+# tailscale-services/serve.nix's history section for the full trail).
+# `services.tailscale.serve` (serve.nix) does only raw TCP forwarding
+# from each service's virtual address to Caddy's own loopback listener,
+# unchanged in kind from what this proxy already did -- just reached via
+# a different tailnet address per app instead of a path under one shared
+# address. The `/grafana/`/`/git/` paths above are retired; this file's
+# history section below keeps the mechanism that made them work, in case
+# either move needs reverting.
 #
 # TAILSCALE ISSUES THE CERT, NO PLUGIN NEEDED -- checked in caddy 2.11.4's
 # source (pinned nixpkgs), not assumed: modules/caddyhttp/autohttps.go:884
@@ -113,6 +120,16 @@
         # See this file's header: verified against the live tailnet, and
         # duplicated (by necessity) in grafana.nix and forgejo.nix.
         tailnetFqdn = "ts-cube.moose-micro.ts.net";
+
+        # The two Tailscale Services' own DNS names -- duplicated in
+        # grafana.nix's root_url/domain and forgejo.nix's ROOT_URL, and in
+        # tailscale-services/serve.nix's raw-forward targets, same
+        # "nothing declares options" reasoning as tailnetFqdn above.
+        # Reached over the tailnet via each service's own virtual
+        # address, forwarded here at the TCP level -- Caddy itself only
+        # ever sees loopback connections, same as the tailnetFqdn vhost.
+        grafanaFqdn = "grafana.moose-micro.ts.net";
+        gitFqdn     = "git.moose-micro.ts.net";
     in {
         flake.modules.nixos.${moduleName} = {
             # # description = "caddy -- tailnet-only HTTPS front door, with certs from tailscaled";
@@ -120,46 +137,81 @@
             services.caddy = {
                 enable = true;
 
-                # The attribute name IS the site address (caddy's
-                # vhost-options.nix defaults `hostName` to it), and a bare
-                # `.ts.net` address is what triggers the tailscale cert
-                # manager -- see the header.
-                virtualHosts.${tailnetFqdn}.extraConfig = ''
-                    # Grafana and Forgejo moved OFF this proxy to their own
-                    # Tailscale Services names (`svc:grafana`, `svc:git`) --
-                    # see reverse-proxy/tailscale-services/serve.nix, not
-                    # yet runtime-verified as of that move. The `@grafana`/
-                    # `handle_path /git/*` routes that used to live here,
-                    # including the named-vs-inline-matcher asymmetry
-                    # between the two apps, are `git log`'s to find if this
-                    # ever needs reverting -- wiki/lessons-learned.md #41
-                    # still has the mechanism written up in full.
-                    #
-                    # Everything not claimed above goes to glance
-                    # (nire/landing/), the service index -- what's
-                    # running, whether it's up, how this machine is doing.
-                    # Replaced a plaintext `respond` placeholder here
-                    # 2026-08-24, the day it was written.
-                    #
-                    # The one route with no prefix question: glance serves
-                    # at `/`, nothing stripped or preserved. Its assets
-                    # (/static/..., /api/...) fall through here too --
-                    # not under a prefix either.
-                    handle {
-                        reverse_proxy 127.0.0.1:3002
-                    }
-                '';
+                # One set, not four separate `virtualHosts.X.extraConfig =`
+                # assignments -- statix (`just lint`) flags repeated
+                # top-level-key assignments as the same footgun that made
+                # `caddy`-the-category and `caddy`-the-module MERGE instead
+                # of erroring (this file's own header); harmless here since
+                # each key differs, but the ratchet doesn't know that.
+                virtualHosts = {
+                    # The attribute name IS the site address (caddy's
+                    # vhost-options.nix defaults `hostName` to it), and a
+                    # bare `.ts.net` address is what triggers the tailscale
+                    # cert manager -- see the header.
+                    ${tailnetFqdn}.extraConfig = ''
+                        # Grafana and Forgejo moved OFF this proxy to their
+                        # own Tailscale Services names (`svc:grafana`,
+                        # `svc:git`) -- see the two vhosts below and
+                        # reverse-proxy/tailscale-services/serve.nix. The
+                        # `@grafana`/`handle_path /git/*` routes that used
+                        # to live here, including the named-vs-inline-
+                        # matcher asymmetry between the two apps, are
+                        # `git log`'s to find if this ever needs
+                        # reverting -- wiki/lessons-learned.md #41 still has
+                        # the mechanism written up in full.
+                        #
+                        # Everything not claimed above goes to glance
+                        # (nire/landing/), the service index -- what's
+                        # running, whether it's up, how this machine is
+                        # doing. Replaced a plaintext `respond` placeholder
+                        # here 2026-08-24, the day it was written.
+                        #
+                        # The one route with no prefix question: glance
+                        # serves at `/`, nothing stripped or preserved. Its
+                        # assets (/static/..., /api/...) fall through here
+                        # too -- not under a prefix either.
+                        handle {
+                            reverse_proxy 127.0.0.1:3002
+                        }
+                    '';
 
-                # Bare MagicDNS name -> the real thing. `http://` is
-                # load-bearing: it marks the site HTTP-only and suppresses
-                # automatic HTTPS. Without the scheme, caddy would seek a
-                # cert for `ts-cube`, which is not a `.ts.net` domain, so
-                # the tailscale manager would decline it and it would fall
-                # through to caddy's internal CA -- an untrusted cert on a
-                # name that only needed to redirect.
-                virtualHosts."http://ts-cube".extraConfig = ''
-                    redir https://${tailnetFqdn}{uri} permanent
-                '';
+                    # Grafana and Forgejo's own vhosts. Same
+                    # `isTailscaleDomain` cert mechanism as `tailnetFqdn`
+                    # above -- these connections arrive over loopback
+                    # (tailscaled's raw TCP forward from each service's
+                    # virtual address, serve.nix), but Caddy asks
+                    # tailscaled for the cert using the SITE ADDRESS
+                    # (`grafana.moose-micro.ts.net`), not the connecting
+                    # address, so it doesn't matter that the socket peer is
+                    # 127.0.0.1 -- confirmed against caddytls/
+                    # certmanagers.go the same way tailnetFqdn's mechanism
+                    # was (see header).
+                    #
+                    # No path matcher needed, unlike the retired
+                    # /grafana//git/ routes -- each app gets its own vhost,
+                    # so it serves at plain `/`, matching what
+                    # serve_from_sub_path=false (grafana.nix) and the
+                    # unprefixed ROOT_URL (forgejo.nix) now expect.
+                    ${grafanaFqdn}.extraConfig = ''
+                        reverse_proxy 127.0.0.1:3000
+                    '';
+
+                    ${gitFqdn}.extraConfig = ''
+                        reverse_proxy 127.0.0.1:3001
+                    '';
+
+                    # Bare MagicDNS name -> the real thing. `http://` is
+                    # load-bearing: it marks the site HTTP-only and
+                    # suppresses automatic HTTPS. Without the scheme, caddy
+                    # would seek a cert for `ts-cube`, which is not a
+                    # `.ts.net` domain, so the tailscale manager would
+                    # decline it and it would fall through to caddy's
+                    # internal CA -- an untrusted cert on a name that only
+                    # needed to redirect.
+                    "http://ts-cube".extraConfig = ''
+                        redir https://${tailnetFqdn}{uri} permanent
+                    '';
+                };
             };
 
             # See the header: without this, tailscaled refuses to hand
