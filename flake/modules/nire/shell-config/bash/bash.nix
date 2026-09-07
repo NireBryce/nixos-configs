@@ -137,6 +137,43 @@
                     # Last. ble.sh absorbs the hooks every other integration
                     # installed, so this cannot move back into the block above.
                     (lib.mkOrder 2500 ''
+                        # konsole rings the bell and ble.sh flashes "unbound
+                        # keyseq: focus" on every tab switch (2026-09-07).
+                        # Once anything in a session enables mode 1004 focus
+                        # reporting, konsole sends CSI I / CSI O (focus in/out)
+                        # on each switch; ble.sh decodes them into the
+                        # synthetic keys focus/blur, which it binds in no
+                        # keymap of any version (checked keymap.emacs.sh,
+                        # keymap.vi.sh, and upstream master), so every event
+                        # lands in the decode-error path -- visible bell plus
+                        # audible bell, both ble.sh defaults. Swallow them by
+                        # binding the sequences to a no-op *in readline, before
+                        # ble-attach*. It has to be readline and not ble-bind:
+                        # synthetic-key names get dynamically assigned keycodes
+                        # in first-registration order, and every ble-bind route
+                        # that runs before ble-attach's final key-table build
+                        # (top-level in .blerc, blehook ATTACH, a -C
+                        # deferred-import callback -- all three tested in a
+                        # query-answering pty) lands under a code that later
+                        # gets reassigned, silently stopping matching the
+                        # arriving key. Readline binds made pre-attach are
+                        # imported by ble-attach itself after the tables are
+                        # final -- the same channel atuin's C-r rides. Also
+                        # why this lives here and not in .blerc: ble.sh has
+                        # already wrapped the bind builtin by the time it
+                        # sources .blerc, and that route fails too (tested).
+                        # emacs keymap only -- bash is never in vi mode.
+                        # Verified in the pty repro: silent from ~2s after
+                        # attach; one residual bell in the first ~1s while
+                        # ble.sh's own startup settles. Confirmed on
+                        # hardware 2026-09-07 (nire-cube, live konsole tab
+                        # switches after a real switch).
+                        if [[ -n "''${BLE_VERSION-}" ]]; then
+                            __nire_focus_nop() { :; }
+                            bind -m emacs -x '"\e[I": __nire_focus_nop'
+                            bind -m emacs -x '"\e[O": __nire_focus_nop'
+                        fi
+
                         [[ ! ''${BLE_VERSION-} ]] || ble-attach
                     '')
                 ];
