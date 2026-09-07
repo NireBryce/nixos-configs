@@ -133,7 +133,9 @@ let
 
 in
 {
-    flake.modules.nixos.${categoryName}.imports        = forClass "nixos";
-    flake.modules.homeManager.${categoryName}.imports  = forClass "homeManager";
-    flake.modules.darwin.${categoryName}.imports       = forClass "darwin";
+    flake.modules = {
+        nixos.${categoryName}.imports        = forClass "nixos";
+        homeManager.${categoryName}.imports  = forClass "homeManager";
+        darwin.${categoryName}.imports       = forClass "darwin";
+    };
 }

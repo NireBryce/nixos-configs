@@ -10,55 +10,60 @@
     in {
         flake.modules.nixos.${moduleName} = { config, ... }: {
 
-            boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
-            boot.initrd.kernelModules = [ ];
-            boot.kernelModules = [ "kvm-amd" ];
-            boot.extraModulePackages = [ ];
-
-            fileSystems."/" = { 
-                device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
-                fsType  = "btrfs";
-                options = [ "subvol=root" "compress=zstd" "noatime" ];
+            boot = {
+                initrd = {
+                    availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
+                    kernelModules = [ ];
+                    luks.devices."enc".device = "/dev/disk/by-uuid/23ae3533-e4ed-46d0-97a8-2fcd0c596526";
+                };
+                kernelModules = [ "kvm-amd" ];
+                extraModulePackages = [ ];
             };
 
-            boot.initrd.luks.devices."enc".device = "/dev/disk/by-uuid/23ae3533-e4ed-46d0-97a8-2fcd0c596526";
+            fileSystems = {
+                "/" = {
+                    device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
+                    fsType  = "btrfs";
+                    options = [ "subvol=root" "compress=zstd" "noatime" ];
+                };
 
-            fileSystems."/home" = {
-                device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
-                fsType  = "btrfs";
-                options = [ "subvol=home" "compress=zstd"];
-            };
+                "/home" = {
+                    device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
+                    fsType  = "btrfs";
+                    options = [ "subvol=home" "compress=zstd"];
+                };
 
-            fileSystems."/nix" = {
-                device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
-                fsType  = "btrfs";
-                options = [ "subvol=nix" "compress=zstd" "noatime" ];
-            };
+                "/nix" = {
+                    device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
+                    fsType  = "btrfs";
+                    options = [ "subvol=nix" "compress=zstd" "noatime" ];
+                };
 
-            fileSystems."/persist" = { 
-                device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
-                fsType  = "btrfs";
-                options = [ "subvol=persist" "compress=zstd" "noatime" ];
-                neededForBoot = true;
-            };
+                "/persist" = {
+                    device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
+                    fsType  = "btrfs";
+                    options = [ "subvol=persist" "compress=zstd" "noatime" ];
+                    neededForBoot = true;
+                };
 
-            fileSystems."/var/log" = { 
-                device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
-                fsType  = "btrfs";
-                options = [ "subvol=log" "compress=zstd" "noatime" ];
-                neededForBoot = true;
-            };
+                "/var/log" = {
+                    device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
+                    fsType  = "btrfs";
+                    options = [ "subvol=log" "compress=zstd" "noatime" ];
+                    neededForBoot = true;
+                };
 
-            fileSystems."/var/lib/sbctl" = { 
+                "/var/lib/sbctl" = {
                     device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
                     fsType  = "btrfs";
                     options = [ "subvol=secureboot" "compress=zstd" "noatime" ];
                     neededForBoot = true;
-            };
+                };
 
-            fileSystems."/boot" = { 
-                device  = "/dev/disk/by-uuid/B35C-D0E8";
-                fsType  = "vfat";
+                "/boot" = {
+                    device  = "/dev/disk/by-uuid/B35C-D0E8";
+                    fsType  = "vfat";
+                };
             };
 
             swapDevices =

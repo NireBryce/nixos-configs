@@ -1,12 +1,13 @@
 # Module style guide
 
-_Last modified: 2026-09-02_
+_Last modified: 2026-09-07_
 
 ## Contents
 
 - [Opening brackets go on the same line as whatever causes them](#opening-brackets-go-on-the-same-line-as-whatever-causes-them)
 - [Four-space indent](#four-space-indent)
 - [The module header — 151 of 151 files](#the-module-header--151-of-151-files)
+- [`{ ... }:` on an inner module lambda is sometimes deliberate](#---on-an-inner-module-lambda-is-sometimes-deliberate)
 - [`# # description = "..."` as the first line of the body — 70 files](#--description---as-the-first-line-of-the-body--70-files)
 - [Rationale goes inside the module body, not in a header block](#rationale-goes-inside-the-module-body-not-in-a-header-block)
 - [`with pkgs; [ ... ]` for package lists — 106 files](#with-pkgs----for-package-lists--106-files)
@@ -76,6 +77,29 @@ Which argument goes where is not cosmetic:
 
 `CLAUDE.md` has the two-`config` shadowing trap in full.
 
+## `{ ... }:` on an inner module lambda is sometimes deliberate
+
+`statix` flags a bare `{ ... }:` as its W10 "empty pattern" lint and suggests
+`_:` instead, since nothing is destructured out of the argument. Usually
+correct — but three modules keep `{ ... }:` on purpose, as a readability
+signal that the value being assigned is itself a NixOS module (something
+that will in turn receive `config`/`lib`/`pkgs`/etc., even though this
+particular one doesn't use any of them), not just an ignored argument:
+
+```nix
+flake.modules.nixos.${moduleName} = { ... }: {
+    # ...
+};
+```
+
+`_:` is technically equivalent and shorter, but reads as "argument
+deliberately unused" with no hint of what kind of function this is — the
+distinction that matters when skimming a file to tell "is this a module" from
+"is this a plain function". Left alone in `vm-networking.nix`,
+`sunshine-elly.nix`, and `sunshine.nix`; the corresponding statix findings are
+accepted into `lint-baseline.json` rather than fixed. Don't "fix" these on a
+lint pass without checking here first.
+
 ## `# # description = "..."` as the first line of the body — 70 files
 
 A one-line description of what the module is for, commented out, immediately
@@ -144,9 +168,11 @@ One package per line, no `pkgs.` prefix inside the `with`.
 Used where a run of related assignments reads better as a column:
 
 ```nix
-home.stateVersion   = lib.mkDefault "22.11";
-home.username       = lib.mkDefault "elly";
-home.homeDirectory  = lib.mkDefault "/home/elly";  # Darwin is different
+home = {
+    stateVersion   = lib.mkDefault "22.11";
+    username       = lib.mkDefault "elly";
+    homeDirectory  = lib.mkDefault "/home/elly";  # Darwin is different
+};
 ```
 
 Not applied everywhere — it is for runs of related settings, not every
