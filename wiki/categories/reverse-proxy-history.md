@@ -10,7 +10,7 @@ _Last modified: 2026-09-02_
 The verification record for [reverse-proxy](reverse-proxy.md)'s second
 switch, split out 2026-09-03. What actually broke on the first switch, and
 why, is still on the main page — [the two apps want opposite
-things](reverse-proxy.md#the-two-apps-want-opposite-things-from-the-proxy)
+things](reverse-proxy.md#the-two-apps-want-opposite-things-from-the-proxy-historical)
 — since that's current mechanism, not just history.
 
 ## Confirmed working end to end, 2026-08-24
@@ -39,7 +39,7 @@ The first switch was broken, instructively: `/grafana/` returned 200
 while `/git/` returned 404, because both routes had been given the same
 Caddy directive — every static check had passed first, including a real
 build and a read of the built artifact. See [the two apps want opposite
-things](reverse-proxy.md#the-two-apps-want-opposite-things-from-the-proxy)
+things](reverse-proxy.md#the-two-apps-want-opposite-things-from-the-proxy-historical)
 for the mechanism, and [`lessons-learned.md`](../lessons-learned.md) #41
 for the general shape of the mistake.
 

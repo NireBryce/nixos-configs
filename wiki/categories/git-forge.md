@@ -1,6 +1,6 @@
 # `git-forge` — `nire/homelab/git-forge/`
 
-_Last modified: 2026-09-06_
+_Last modified: 2026-09-07_
 
 ## Contents
 
@@ -16,11 +16,15 @@ _Last modified: 2026-09-06_
 - [See also](#see-also)
 
 Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only; nested under
-the `homelab` umbrella since 2026-08-27 (name unaffected). Reached at
-`https://ts-cube.moose-micro.ts.net/git/` through Caddy
-([reverse-proxy](reverse-proxy.md)), confirmed working end to end —
-[git-forge-history.md](git-forge-history.md) has the first-switch record
-and the move behind Caddy.
+the `homelab` umbrella since 2026-08-27 (name unaffected). As of 2026-09-07
+reached at `https://git.moose-micro.ts.net/` — its own Tailscale Services
+name, still fronted by Caddy ([reverse-proxy](reverse-proxy.md)) since
+Tailscale Services can't terminate HTTPS declaratively yet (confirmed
+upstream bug, see `tailscale-services/serve.nix`'s history section). The
+`.../git/`-path-under-`ts-cube` form no longer answers (404).
+[git-forge-history.md](git-forge-history.md) has the original first-switch
+record and the move behind Caddy; the move to its own service name is
+this category's newest change, not yet its own history entry.
 
 ## What's in it
 
@@ -58,9 +62,11 @@ existing key. Upstream `services.forgejo` ships that pattern;
 Forgejo binds `127.0.0.1:3001` (3000 is Grafana's), deliberately **not** in
 `networking.firewall.allowedTCPPorts` — the binding is what keeps it off
 the LAN, and the only client is Caddy ([reverse-proxy](reverse-proxy.md)).
-Caddy strips the `/git` prefix before proxying (`handle_path`), unlike
-Grafana's route, because Forgejo always serves at `/` regardless of
-`ROOT_URL` — the asymmetry is written up there.
+Forgejo has its own Caddy vhost now (`git.moose-micro.ts.net`, reached via
+its Tailscale Services name and a raw TCP forward -- see
+`tailscale-services/serve.nix`), so it's a plain `reverse_proxy` with no
+path prefix to strip — the `handle`/`handle_path` asymmetry with Grafana
+that this used to require is retired, kept as history in `caddy.nix`.
 
 It bound `0.0.0.0` briefly at first — [git-forge-history.md](git-forge-history.md)
 has that window and what it fixed quietly along the way.
@@ -84,11 +90,13 @@ This module set `DOMAIN`/`ROOT_URL` to `ts-cube` from the start, so clone
 URLs and redirect checks never hit it; `grafana.nix` left its defaults at
 first and sets both now.
 
-`DOMAIN` and `ROOT_URL` deliberately disagree as of 2026-08-24, which reads
-like a typo and isn't: `ROOT_URL` is what a browser sees — the full
-`https://ts-cube.moose-micro.ts.net/git/` — while `DOMAIN` is what SSH
-clone URLs are built from, and git+ssh doesn't go through Caddy at all, so
-it stays the short `ts-cube`.
+`DOMAIN` and `ROOT_URL` deliberately disagree, which reads like a typo and
+isn't: `ROOT_URL` is what a browser sees — `https://git.moose-micro.ts.net/`
+as of 2026-09-07's move to Forgejo's own Tailscale Services name (was
+`https://ts-cube.moose-micro.ts.net/git/` before) — while `DOMAIN` is what
+SSH clone URLs are built from, and git+ssh doesn't go through Caddy *or*
+Tailscale Serve, so it stays the short `ts-cube` regardless of what
+`ROOT_URL` does.
 
 ## Single-user, sqlite3, registration closed
 
