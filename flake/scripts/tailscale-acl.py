@@ -33,7 +33,7 @@ import json, os, subprocess, sys, urllib.request, urllib.error, difflib, pathlib
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 SECRETS_FILE = REPO_ROOT / "flake/modules/nire/system/secrets/secrets.yaml"
 TAILNET = os.environ.get("TAILSCALE_TAILNET", "moose-micro.ts.net")
-API = f"https://api.tailscale.com/api/v2/tailnet/{TAILNET}/policy"
+API = f"https://api.tailscale.com/api/v2/tailnet/{TAILNET}/acl"
 
 
 def get_token():
