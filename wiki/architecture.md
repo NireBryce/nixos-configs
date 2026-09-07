@@ -65,10 +65,6 @@ is the mechanism, not the inventory.
   single-package `home.packages` wrapper shape ~70 files under
   `nirePackages/` already share by hand, but nothing calls it yet. Explains
   why it's safe to sit unused and what adopting it would cost.
-- **[`../flake/modules/nirePackages/idea.md`](<../flake/modules/nirePackages/idea.md>)**
-  — one-line open idea: consider migrating more unconfigured packages from
-  Home Manager to plain `nix`/`environment.systemPackages`. Not decided,
-  not acted on.
 
 ## Related, easy to get backwards
 

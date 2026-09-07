@@ -1,6 +1,6 @@
 # Open threads
 
-_Last modified: 2026-09-06_
+_Last modified: 2026-09-07_
 
 ## Contents
 
@@ -69,12 +69,6 @@ specific report — not as a housekeeping pass over this list:
 
 ## Todos and ideas left next to the code
 
-- **[`../flake/modules/nire/hardware/todo.md`](<../flake/modules/nire/hardware/todo.md>)**
-  — eventually give the overarching `dirsAsCategory` mechanism flags so it
-  can auto-import based on system type.
-- **[`../flake/modules/nirePackages/idea.md`](<../flake/modules/nirePackages/idea.md>)**
-  — consider migrating more unconfigured packages from Home Manager to
-  plain `nix`. Also noted on [architecture.md](architecture.md).
 - **[`../flake/scripts/mkPkgModule.md`](<../flake/scripts/mkPkgModule.md>)**
   — a ready-but-unused generator for the ~70 single-package module files
   under `nirePackages/`; a trailhead with the adoption cost spelled out, not
