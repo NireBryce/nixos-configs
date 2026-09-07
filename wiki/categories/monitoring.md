@@ -7,6 +7,7 @@ _Last modified: 2026-09-02_
 - [What's in it](#whats-in-it)
 - [Tailnet-only access, not a new firewall mechanism](#tailnet-only-access-not-a-new-firewall-mechanism)
 - [The secret_key trap, and why it's now a unit instead of a warning](#the-secret_key-trap-and-why-its-now-a-unit-instead-of-a-warning)
+- [Adding a dashboard that survives a rebuild](#adding-a-dashboard-that-survives-a-rebuild)
 - [Why cube only, and why that's a category rather than a host-specific file](#why-cube-only-and-why-thats-a-category-rather-than-a-host-specific-file)
 - [Imported by](#imported-by)
 - [See also](#see-also)
@@ -111,6 +112,43 @@ the unit only ever *creates* a missing file and never regenerates one.
 Replaced a hand-fixed file that regressed twice before this landed —
 [monitoring-history.md](monitoring-history.md) has that chronology and the
 confirmation this unit actually fixed it.
+
+## Adding a dashboard that survives a rebuild
+
+The missing piece [open-threads.md](../open-threads.md) used to flag: a
+dashboard built in the Grafana UI lives only in cube's sqlite db (now
+[backed up](backup.md), but still not *declared* — a rebuild that
+reprovisions `_dashboards/` doesn't touch the db, but the db is still the
+only copy of anything not checked in here).
+
+`grafana.nix`'s `dashboards.settings.providers` points a `file` provider at
+`./_dashboards`, so getting a UI dashboard into the repo is exporting its
+JSON there — no extra plumbing needed:
+
+1. In the dashboard, **Settings → JSON Model** (or the export button) and
+   copy the JSON.
+2. Give it a **fixed `"uid"`** (a short slug, like the existing
+   `"nire-cube-overview"`) if the exported one is a random-looking string —
+   this is what makes reprovisioning it idempotent rather than creating a
+   duplicate every switch.
+3. **Drop the top-level `"id"` field entirely** if present — the existing
+   `nire-cube-overview.json` has none; Grafana's file provider keys on
+   `uid`, and a stale numeric `id` from the exported instance doesn't mean
+   anything on a fresh provision.
+4. Point every panel's `datasource.uid` at the fixed
+   `prometheusDatasourceUid` (`"prometheus-cube"`, declared once in
+   `grafana.nix`) instead of leaving Grafana's own `${DS_PROMETHEUS}`
+   template variable in the export — the existing dashboard does this
+   throughout (`grep -c '"uid": "prometheus-cube"'` on it agrees), and it's
+   *why* the datasource and dashboard can both be plain provisioned files
+   with nothing to resolve at import time.
+5. Save the file under `grafana/_dashboards/`, `just switch`, confirm the
+   dashboard reappears with its panels intact.
+
+**Not verified against a live export** — written from `grafana.nix`'s own
+mechanism and `nire-cube-overview.json`'s shape, not by actually exporting
+a UI-built dashboard and round-tripping it through a switch. Worth doing
+once before trusting this blindly.
 
 ## Why cube only, and why that's a category rather than a host-specific file
 
