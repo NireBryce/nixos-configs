@@ -69,10 +69,6 @@ specific report — not as a housekeeping pass over this list:
 
 ## Todos and ideas left next to the code
 
-- **[`../flake/scripts/mkPkgModule.md`](<../flake/scripts/mkPkgModule.md>)**
-  — a ready-but-unused generator for the ~70 single-package module files
-  under `nirePackages/`; a trailhead with the adoption cost spelled out, not
-  a plan anyone's committed to. Also on [architecture.md](architecture.md).
 - **[`../flake/scripts/script-wishlist.md`](<../flake/scripts/script-wishlist.md>)**
   — bare headings only (`vicinae`, `just`, `espanso`, `other`), no content
   yet. A placeholder for future script ideas, not current work.

@@ -60,12 +60,6 @@ is the mechanism, not the inventory.
   Homebrew already install it on lysithea (never automatic — `just available
   --duplicates` finds the overlap). Worked examples: `vicinae.nix`,
   `obsidian.nix`.
-- **[`../flake/scripts/mkPkgModule.md`](<../flake/scripts/mkPkgModule.md>)**
-  — a trailhead, not a conversion: a generator exists for the
-  single-package `home.packages` wrapper shape ~70 files under
-  `nirePackages/` already share by hand, but nothing calls it yet. Explains
-  why it's safe to sit unused and what adopting it would cost.
-
 ## Related, easy to get backwards
 
 Containers and VMs are separate categories here, and "virtualization" means

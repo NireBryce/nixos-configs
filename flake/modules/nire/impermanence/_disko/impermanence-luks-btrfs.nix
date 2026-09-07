@@ -7,7 +7,7 @@
 # get back a NORMAL nixosModule (a function of `{ lib, ... }`), which is
 # what a host's imports list wants. Safe under modules/ because import-tree
 # ignores any path containing "/_" -- the same rule
-# _templates/dirsAsCategory.nix and _lib/mkPkgModule.nix already rely on.
+# _templates/dirsAsCategory.nix already relies on.
 #
 # issue #103 asked for a dirsAsCategory.nix here too, mirroring
 # root-rollback/ (see that directory's own copy) so a host could opt into
