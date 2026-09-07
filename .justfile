@@ -197,6 +197,12 @@ age-key *args:
 threads *term:
     @{{scripts}}/threads.sh {{term}}
 
+# Tailnet policy file via API instead of the admin console: get/diff/apply
+tailscale-acl cmd *args:
+    # Needs tailscale_api_token in secrets.yaml (sops) -- see the script's
+    # own header. `diff`/`apply` take a local HuJSON file to compare against.
+    @{{scripts}}/tailscale-acl.py {{cmd}} {{args}}
+
 # Update inputs, then re-check
 update:
     cd {{flake}} && nix flake update
