@@ -1,6 +1,6 @@
 # Traps & skills
 
-_Last modified: 2026-09-04_
+_Last modified: 2026-09-07_
 
 ## Contents
 
@@ -24,6 +24,7 @@ one-liner.
 | Adding/platform-gating a package | `.claude/skills/nirepackages-platform-support/SKILL.md` |
 | Adding a new host | `.claude/skills/new-host-config/SKILL.md` |
 | Adding a homelab service (port, proxy route, verification) | `.claude/skills/new-homelab-service/SKILL.md` |
+| Giving a service its own Tailscale Services (`svc:`) hostname | `.claude/skills/new-tailscale-service/SKILL.md` |
 | Landing work on `experimental` | `.claude/skills/ship/SKILL.md` |
 | Filing a bug noticed while doing something else | `.claude/skills/propose-issue/SKILL.md` |
 | Checking whether a change left a `wiki/` page stale | `.claude/skills/wiki-sync/SKILL.md` |

@@ -1,6 +1,6 @@
 # Wiki
 
-_Last modified: 2026-09-05_
+_Last modified: 2026-09-07_
 
 ## Contents
 
@@ -55,6 +55,7 @@ or a skill (`.claude/skills/<name>/SKILL.md`) — nothing here is new content.
 | land a change on `experimental` | [conventions.md](conventions.md), skill [`ship`](../.claude/skills/ship/SKILL.md) |
 | check whether a bug is already a known thread | [open-threads.md](open-threads.md), skill [`investigate-bug`](../.claude/skills/investigate-bug/SKILL.md) |
 | add a self-hosted service to a host | [homelab/README.md](homelab/README.md), skill [`new-homelab-service`](../.claude/skills/new-homelab-service/SKILL.md) |
+| give a service its own Tailscale Services (`svc:`) hostname | [categories/reverse-proxy.md](categories/reverse-proxy.md), skill [`new-tailscale-service`](../.claude/skills/new-tailscale-service/SKILL.md) |
 | add a new host, or format its disk for impermanence | [disk-formatting.md](disk-formatting.md), skill [`new-host-config`](../.claude/skills/new-host-config/SKILL.md) |
 
 ## Pages
