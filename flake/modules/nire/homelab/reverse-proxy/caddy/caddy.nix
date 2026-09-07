@@ -17,11 +17,18 @@
 # `trustedInterfaces = [ "tailscale0" ]` (system/networking/networking.nix)
 # to keep the LAN out -- a firewall property, not a listener property, one
 # firewall mistake from being on the LAN. Loopback-only now, reachable
-# only through this proxy, so the firewall is no longer the only line.
-# The old URLs stop working, deliberately:
+# only through this proxy at the time, so the firewall was no longer the
+# only line. The old URLs stopped working, deliberately:
 #
 #     http://ts-cube:3000/  ->  https://ts-cube.moose-micro.ts.net/grafana/
 #     http://ts-cube:3001/  ->  https://ts-cube.moose-micro.ts.net/git/
+#
+# BOTH MOVED AGAIN, off this proxy entirely, onto their own Tailscale
+# Services names -- see reverse-proxy/tailscale-services/serve.nix (not
+# yet runtime-verified as of that move). The `/grafana/`/`/git/` paths
+# above are themselves now retired; this file's history section below
+# keeps the mechanism that made them work, in case that move needs
+# reverting.
 #
 # TAILSCALE ISSUES THE CERT, NO PLUGIN NEEDED -- checked in caddy 2.11.4's
 # source (pinned nixpkgs), not assumed: modules/caddyhttp/autohttps.go:884
@@ -60,20 +67,20 @@
 # no shared constant, nothing here declares options (CLAUDE.md,
 # Architecture) -- a change means editing those two.
 #
-# PATHS, NOT PORTS OR SUBDOMAINS, and that's forced: MagicDNS gives a
-# device ONE name, so `grafana.ts-cube...` does not resolve and can't be
-# made to without Tailscale Services (`svc:`, per-service admin approval)
-# or a real domain with split DNS. Both apps mount under a path prefix,
-# each told about it: grafana.nix sets `serve_from_sub_path` +
-# `root_url`, forgejo.nix sets `ROOT_URL`.
+# PATHS, NOT PORTS OR SUBDOMAINS, was the original constraint, and it's
+# gone for Grafana/Forgejo specifically: MagicDNS gives a device ONE name,
+# so a path prefix under `ts-cube...` was the only option without
+# Tailscale Services -- reopened 2026-09-07
+# (reverse-proxy/tailscale-services/), which is what moved both apps off
+# this proxy's routes entirely. Anything added to THIS proxy in the
+# future still has the same constraint, unless it also gets its own
+# service name.
 #
-# THE TWO APPS WANT OPPOSITE THINGS FROM THE PROXY -- the one thing
-# gotten wrong on the first live test (2026-08-24: /grafana/ 200, /git/
-# 404). Grafana, with `serve_from_sub_path`, serves UNDER the prefix and
-# needs it left on: `handle`. Forgejo has no equivalent, always serves at
-# `/`, needs the prefix STRIPPED: `handle_path`, while ROOT_URL keeps
-# `/git/` so its generated links still point through the prefix. Detail
-# at each route below.
+# THE TWO APPS WANTED OPPOSITE THINGS FROM THIS PROXY, back when both
+# routed through it -- the one thing gotten wrong on the first live test
+# (2026-08-24: /grafana/ 200, /git/ 404). Full mechanism moved to this
+# file's history section below along with the routes themselves; still
+# relevant if either app ever needs a path-prefix route added back here.
 #
 # NO FIREWALL CHANGE, on purpose: 443/80 are NOT added to
 # `networking.firewall.allowedTCPPorts`, same reasoning grafana.nix and
@@ -89,19 +96,16 @@
 # CAP_NET_BIND_SERVICE` (read from the dist tarball, not assumed).
 #
 # STATUS: RUNTIME-VERIFIED end to end on nire-cube from ANOTHER tailnet
-# host (lysithea), 2026-08-24: 200 over validated TLS on /grafana/, /git/
-# and / (the index route, proxying to glance, nire/landing/), plus both
-# 301 redirects; `tls_verify_result` 0 -- the tailscaled-issued cert
-# validated against the system trust store, which eval or a build could
-# not have shown. Forgejo's generated links checked (a stripped prefix
-# can proxy right yet emit links that 404 on the next click); `ss -ltn`:
-# 3000/3001 on 127.0.0.1 only, 80/443 the only tailnet-facing listeners.
-#
-# Took two switches: the first shipped `handle` for both apps and
-# Forgejo 404'd everything -- see the route comments and
-# `wiki/lessons-learned.md` #41; eval, `just modules`, `caddy
-# adapt`, a real build, and reading the artifact back all passed. Only a
-# live request found it.
+# host (lysithea), 2026-08-24, for the routes THIS FILE STILL HAS (glance
+# at `/`, the bare-name redirect): 200 over validated TLS,
+# `tls_verify_result` 0 -- the tailscaled-issued cert validated against
+# the system trust store, which eval or a build could not have shown;
+# `ss -ltn` confirmed 80/443 the only tailnet-facing listeners. The
+# `/grafana/`/`/git/` verification this section used to describe covered
+# routes that no longer exist here -- see the history section for what
+# was checked and how it was gotten wrong once (`wiki/lessons-learned.md`
+# #41) before reverse-proxy/tailscale-services/serve.nix replaced them,
+# not yet independently verified.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
@@ -121,48 +125,16 @@
                 # `.ts.net` address is what triggers the tailscale cert
                 # manager -- see the header.
                 virtualHosts.${tailnetFqdn}.extraConfig = ''
-                    # NAMED matchers, not inline: `handle` accepts at most
-                    # ONE matcher token, so `handle /grafana /grafana/*` is
-                    # a parse error ("wrong argument count or unexpected
-                    # line ending") -- caught by running the generated
-                    # Caddyfile through `caddy adapt` before shipping. The
-                    # two-path form is deliberate over `/grafana*`: that
-                    # also matches `/grafanafoo`.
-                    @grafana path /grafana /grafana/*
-                    handle @grafana {
-                        reverse_proxy 127.0.0.1:3000
-                    }
-
-                    # Forgejo is `handle_path`, NOT `handle` -- the
-                    # asymmetry with Grafana above is the whole point, and
-                    # getting it wrong is a 404, exactly how it was found
-                    # (first live test, 2026-08-24). Opposite things:
+                    # Grafana and Forgejo moved OFF this proxy to their own
+                    # Tailscale Services names (`svc:grafana`, `svc:git`) --
+                    # see reverse-proxy/tailscale-services/serve.nix, not
+                    # yet runtime-verified as of that move. The `@grafana`/
+                    # `handle_path /git/*` routes that used to live here,
+                    # including the named-vs-inline-matcher asymmetry
+                    # between the two apps, are `git log`'s to find if this
+                    # ever needs reverting -- wiki/lessons-learned.md #41
+                    # still has the mechanism written up in full.
                     #
-                    #   - Grafana, with serve_from_sub_path = true, SERVES
-                    #     under /grafana and wants the prefix left on.
-                    #   - Forgejo has no such option and always serves at
-                    #     `/` -- confirmed on the host (`curl
-                    #     127.0.0.1:3001/` 200, `curl
-                    #     127.0.0.1:3001/git/` 404) -- and expects the
-                    #     proxy to strip. ROOT_URL keeps `/git/`, which is
-                    #     what makes its GENERATED links point back through
-                    #     the prefix. Same shape as nginx's `proxy_pass
-                    #     http://…:3001/;` trailing-slash idiom.
-                    #
-                    # `handle_path /git/*` strips the `/git` prefix. It
-                    # takes an inline path matcher only -- a named matcher
-                    # is rejected -- so the bare `/git` can't ride along
-                    # the way @grafana's two paths do; its own redirect
-                    # below.
-                    @gitbare path /git
-                    handle @gitbare {
-                        redir https://${tailnetFqdn}/git/ permanent
-                    }
-
-                    handle_path /git/* {
-                        reverse_proxy 127.0.0.1:3001
-                    }
-
                     # Everything not claimed above goes to glance
                     # (nire/landing/), the service index -- what's
                     # running, whether it's up, how this machine is doing.
@@ -218,3 +190,58 @@
             };
         };
 }
+
+# ── history ─────────────────────────────────────────────────────────────────
+#
+# 2026-08-24 to 2026-09-07 — Grafana and Forgejo routed through here as
+# `/grafana/` and `/git/` path prefixes, retired by
+# reverse-proxy/tailscale-services/serve.nix (svc:grafana/svc:git, each
+# with its own tailnet name). Kept here in full since path-prefix routing
+# under one shared hostname is the fallback if that move doesn't hold up.
+#
+# THE TWO APPS WANTED OPPOSITE THINGS FROM THE PROXY, and getting it wrong
+# cost the first live switch (2026-08-24: /grafana/ 200, /git/ 404,
+# `wiki/lessons-learned.md` #41's general case):
+#
+#   - Grafana, with `serve_from_sub_path = true`, SERVED UNDER the prefix
+#     and needed it left ON: `handle`.
+#   - Forgejo had no equivalent option and always served at `/` --
+#     confirmed on the host (`curl 127.0.0.1:3001/` 200, `curl
+#     127.0.0.1:3001/git/` 404) -- so the proxy had to STRIP the prefix:
+#     `handle_path`. Its `ROOT_URL` kept `/git/` anyway, which is what
+#     made its GENERATED links point back through the prefix -- same
+#     shape as nginx's `proxy_pass http://…:3001/;` trailing-slash idiom.
+#
+# The actual routes:
+#
+#     @grafana path /grafana /grafana/*
+#     handle @grafana {
+#         reverse_proxy 127.0.0.1:3000
+#     }
+#
+#     @gitbare path /git
+#     handle @gitbare {
+#         redir https://${tailnetFqdn}/git/ permanent
+#     }
+#     handle_path /git/* {
+#         reverse_proxy 127.0.0.1:3001
+#     }
+#
+# NAMED matchers, not inline, for `@grafana`: `handle` accepts at most ONE
+# matcher token, so `handle /grafana /grafana/*` is a parse error ("wrong
+# argument count or unexpected line ending") -- caught by running the
+# generated Caddyfile through `caddy adapt` before shipping. The two-path
+# form was deliberate over `/grafana*`, which would also match
+# `/grafanafoo`. `handle_path` for Forgejo took an INLINE path matcher
+# only -- a named matcher was rejected -- so the bare `/git` couldn't ride
+# along the way `@grafana`'s two paths did, hence its own separate
+# redirect block above.
+#
+# RUNTIME-VERIFIED end to end on nire-cube from another tailnet host
+# (lysithea), 2026-08-24: 200 over validated TLS on /grafana/, /git/ and /
+# (glance); Forgejo's generated links specifically checked, since a
+# stripped prefix can proxy correctly yet still emit links that 404 on
+# the next click. Took two switches to get right -- eval, `just modules`,
+# `caddy adapt`, a real build, and reading the artifact back all passed
+# on the first; only a live request found the `handle`/`handle_path`
+# asymmetry.
