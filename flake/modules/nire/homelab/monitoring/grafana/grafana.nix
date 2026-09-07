@@ -4,10 +4,12 @@
 # `openFirewall`-style options belong here.
 #
 # As of 2026-08-24 not reached off-host DIRECTLY: every listener in this
-# stack is on loopback; nire/reverse-proxy/caddy.nix fronts it at
-# https://ts-cube.moose-micro.ts.net/grafana/ with a cert from tailscaled.
-# Two settings exist solely because of that (`http_addr`,
-# `root_url`/`serve_from_sub_path`).
+# stack is on loopback. Originally fronted by nire/reverse-proxy/caddy.nix
+# at https://ts-cube.moose-micro.ts.net/grafana/; as of the
+# tailscale-services/serve.nix move it's fronted by Tailscale Serve itself
+# at https://grafana.moose-micro.ts.net/ instead -- see that file's header
+# for why (not yet runtime-verified). `http_addr` stays loopback either
+# way; `root_url` moved, `serve_from_sub_path` is gone.
 #
 # RUNTIME-VERIFIED, 2026-08-23, on nire-cube: the first real switch failed
 # -- the secret_key file existed but was root:root, unreadable to the
@@ -97,27 +99,26 @@
                     # 0.0.0.0 -- see the history note at the bottom.
                     http_addr = "127.0.0.1";
 
-                    # BOTH, together, or the /grafana prefix breaks:
-                    # root_url drives redirects/emails; serve_from_sub_path
-                    # makes it serve assets under the prefix. Only the
-                    # first = a login page whose CSS and JS 404 --
-                    # broken-looking UI, not an obvious misconfiguration.
+                    # NO LONGER behind a path prefix, as of the
+                    # reverse-proxy/tailscale-services/serve.nix move:
+                    # Grafana has its own Tailscale Services name now
+                    # (`svc:grafana`), so it serves at plain root again --
+                    # `serve_from_sub_path` dropped (defaults false), and
+                    # `root_url` is the service's own `.ts.net` name, not
+                    # `ts-cube.../grafana/`. See serve.nix's header for
+                    # what this replaced and why it isn't runtime-verified
+                    # yet; caddy.nix's `@grafana` route is the fallback if
+                    # this doesn't check out on a real switch.
                     #
-                    # caddy.nix routes THIS ONE with `handle`, NOT
-                    # `handle_path`, so `/grafana/...` arrives with the
-                    # prefix intact, which serve_from_sub_path expects;
-                    # changing one side without the other breaks it.
-                    # Contrast forgejo.nix: `handle_path` (stripped)
-                    # because it has no serve_from_sub_path equivalent.
-                    #
-                    # `ts-cube.moose-micro.ts.net`, NOT `nire-cube` --
-                    # this tailnet renames devices fleet-wide
-                    # (networking/tailscale.nix's trap #1). The FQDN is
-                    # duplicated in caddy.nix and forgejo.nix, not shared
-                    # (no options in this tree, CLAUDE.md, Architecture);
-                    # all three move together.
-                    root_url            = "https://ts-cube.moose-micro.ts.net/grafana/";
-                    serve_from_sub_path = true;
+                    # The service hostname pattern (`<name>.<tailnet
+                    # MagicDNS suffix>`, i.e. NOT the device name
+                    # `ts-cube` the old prefix used) is asserted from
+                    # Tailscale's docs, not yet confirmed against a real
+                    # TLS handshake the way `ts-cube.moose-micro.ts.net`
+                    # was for the path-prefix version (reverse-proxy.md's
+                    # own "RUNTIME-VERIFIED" note) -- first thing to check
+                    # on the actual switch.
+                    root_url = "https://grafana.moose-micro.ts.net/";
 
                     # Not load-bearing while `enforce_domain` is false
                     # and `root_url` is a literal (nixpkgs leaves this
@@ -125,7 +126,7 @@
                     # default root_url). Set anyway so the two agree --
                     # flipping enforce_domain on later would otherwise
                     # reject every real request.
-                    domain              = "ts-cube.moose-micro.ts.net";
+                    domain   = "grafana.moose-micro.ts.net";
                 };
 
                 provision = {

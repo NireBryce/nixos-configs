@@ -1,14 +1,15 @@
 # `reverse-proxy` — `nire/homelab/reverse-proxy/`
 
-_Last modified: 2026-09-02_
+_Last modified: 2026-09-07_
 
 ## Contents
 
 - [What's in it](#whats-in-it)
 - [What it changed elsewhere](#what-it-changed-elsewhere)
 - [Certificates come from tailscaled, with no plugin](#certificates-come-from-tailscaled-with-no-plugin)
-- [Paths, not subdomains, and that's forced](#paths-not-subdomains-and-thats-forced)
-- [The two apps want opposite things from the proxy](#the-two-apps-want-opposite-things-from-the-proxy)
+- [Paths, not subdomains, was the original constraint — Tailscale Services lifted it, partially](#paths-not-subdomains-was-the-original-constraint--tailscale-services-lifted-it-partially)
+- [Fronting Tailscale Services with Caddy](#fronting-tailscale-services-with-caddy)
+- [The two apps want opposite things from the proxy (historical)](#the-two-apps-want-opposite-things-from-the-proxy-historical)
 - [Named matchers, not inline ones](#named-matchers-not-inline-ones)
 - [The redirect vhost needs its scheme spelled out](#the-redirect-vhost-needs-its-scheme-spelled-out)
 - [Firewall, and binding 443 as a non-root user](#firewall-and-binding-443-as-a-non-root-user)
@@ -24,32 +25,46 @@ the `homelab` umbrella since 2026-08-27 (name unaffected).
 
 **Confirmed working end to end, 2026-08-24**, on the second switch — the
 first served `/git/` a 404 through the wrong Caddy directive; see [the two
-apps want opposite things](#the-two-apps-want-opposite-things-from-the-proxy)
-below for that mechanism, and
+apps want opposite things](#the-two-apps-want-opposite-things-from-the-proxy-historical)
+below for that mechanism (now historical, see the next section), and
 [reverse-proxy-history.md](reverse-proxy-history.md) for the full
 verification checklist (TLS validation, generated-link checks, the exact
 requests tested).
 
+**Grafana and Forgejo moved again, 2026-09-07**, off the shared
+`ts-cube.../grafana/`, `.../git/` paths onto their own Tailscale Services
+names — `https://grafana.moose-micro.ts.net/`,
+`https://git.moose-micro.ts.net/`. Caddy is still what terminates TLS for
+both: Tailscale Services turned out not to support declarative HTTPS
+termination on this tailscale version (a confirmed upstream bug, not a
+config mistake — see `tailscale-services/serve.nix`'s history section for
+the full investigation, including the two tailscale/tailscale issue
+numbers). Confirmed working end to end the same day: valid TLS on both new
+names, old paths correctly 404, Forgejo's own generated links using the new
+`ROOT_URL`.
+
 ## What's in it
 
-One file, `nixos`-class: `caddy/caddy.nix`.
+Two files, `nixos`-class: `caddy/caddy.nix` and
+`tailscale-services/serve.nix` (the latter added 2026-09-07 — raw TCP
+forwarding only, not HTTPS termination; see below).
 
 ## What it changed elsewhere
 
-This category is not additive — it moved two existing services in the same
-change:
+This category is not additive — it moved two existing services, twice:
 
-| | Before | After |
+| | 2026-08-24 | 2026-09-07 |
 |---|---|---|
-| Grafana ([monitoring](monitoring.md)) | `0.0.0.0:3000`, `http://ts-cube:3000/` | `127.0.0.1:3000`, `https://ts-cube.moose-micro.ts.net/grafana/` |
-| Forgejo ([git-forge](git-forge.md)) | `0.0.0.0:3001`, `http://ts-cube:3001/` | `127.0.0.1:3001`, `https://ts-cube.moose-micro.ts.net/git/` |
+| Grafana ([monitoring](monitoring.md)) | `0.0.0.0:3000`, `http://ts-cube:3000/` → `127.0.0.1:3000`, `https://ts-cube.moose-micro.ts.net/grafana/` | → `https://grafana.moose-micro.ts.net/` (still `127.0.0.1:3000`) |
+| Forgejo ([git-forge](git-forge.md)) | `0.0.0.0:3001`, `http://ts-cube:3001/` → `127.0.0.1:3001`, `https://ts-cube.moose-micro.ts.net/git/` | → `https://git.moose-micro.ts.net/` (still `127.0.0.1:3001`) |
 
 Both used to listen on every interface and rely entirely on
 `trustedInterfaces = [ "tailscale0" ]` to keep the LAN out — a firewall
-property, not a listener property. They are on loopback now, reachable only
-through this proxy; the old URLs do not answer. `http://ts-cube/` (bare
-MagicDNS name) redirects to the HTTPS index, so the short name still lands
-somewhere useful.
+property, not a listener property. They've been on loopback since the first
+move; only the tailnet-facing name changed the second time. Every prior URL
+in the table above stopped answering (404) as of its own move.
+`http://ts-cube/` (bare MagicDNS name) redirects to the HTTPS index, so the
+short name still lands somewhere useful.
 
 The root route proxies to [glance](landing.md) — these two categories are a
 pair: dropping `landing` while keeping this one leaves the front page
@@ -85,22 +100,59 @@ Two prerequisites, neither in this repo:
 rights to a `caddy` user on hosts that don't run Caddy. Scope a change to
 the host that needs it.
 
-## Paths, not subdomains, and that's forced
+## Paths, not subdomains, was the original constraint — Tailscale Services lifted it, partially
 
-MagicDNS gives a device exactly **one** name. `grafana.ts-cube…` does not
-resolve and cannot be made to without either Tailscale Services (`svc:`,
-which needs per-service admin-console approval) or a real domain with split
-DNS. So both apps are mounted under a path prefix on the one hostname, and
-each has to be told about its own prefix:
+MagicDNS gives a device exactly **one** name, which is why both apps
+originally mounted under a path prefix on `ts-cube`'s one hostname
+(`root_url`/`serve_from_sub_path` for Grafana, `ROOT_URL` for Forgejo — see
+each app's own file for the by-then-retired mechanics, kept as history).
 
-- Grafana needs **both** `root_url` and `serve_from_sub_path`. `root_url`
-  alone gives a UI whose CSS and JS 404 — broken-looking, not obviously
-  misconfigured.
-- Forgejo needs `ROOT_URL` with the path and a trailing slash. Its `DOMAIN`
-  deliberately stays the short `ts-cube`, because that's what SSH clone URLs
-  are built from and git+ssh doesn't pass through Caddy at all.
+**Tailscale Services (`svc:`) reopened this 2026-09-07** — see
+`wiki/open-threads.md`'s entry and
+`flake/modules/nire/homelab/reverse-proxy/tailscale-services/README.md` for
+the ACL/tag/service-object side (a separate, API-managed resource, not
+declared in this repo's Nix). Each app now has its own tailnet DNS name
+with no path prefix. What Services did **not** solve, discovered live: it
+cannot terminate HTTPS declaratively on this tailscale version (confirmed
+upstream bug — `tailscale-services/serve.nix`'s history section has the
+full trail, including the exact failing commands and the two
+tailscale/tailscale issue numbers). So Caddy is still in the loop — see
+[fronting Tailscale Services with Caddy](#fronting-tailscale-services-with-caddy)
+below — just per-service instead of per-path.
 
-## The two apps want opposite things from the proxy
+## Fronting Tailscale Services with Caddy
+
+`tailscale-services/serve.nix` configures each service's `endpoints` with
+a `tcp://` backend scheme — raw byte forwarding, no HTTP interpretation —
+pointed at Caddy's own loopback address, `127.0.0.1:443`. tailscaled
+forwards the untouched TLS bytes (SNI ClientHello included) from each
+service's virtual address; Caddy picks the right vhost by SNI, same
+mechanism it already used to be the one thing on this host bound to 443,
+now serving three names instead of one
+(`ts-cube`/`grafana`/`git.moose-micro.ts.net`). Each new vhost is a plain
+`reverse_proxy` with no path matcher — the app has the whole vhost to
+itself, so `handle`/`handle_path` don't come up at all for these two.
+
+The obvious-looking alternative — `endpoints."tcp:443" = "http://127.0.0.1:
+PORT"`, pointed straight at Grafana/Forgejo, letting tailscaled terminate
+HTTPS itself the way it does for a device's own MagicDNS name — does not
+work. `tailscale serve status` showed plain `http://` on port 443, not a
+display quirk (confirmed: a raw HTTP request reached Grafana correctly,
+a TLS handshake against the same address:port failed outright). Root cause,
+confirmed against tailscale/tailscale's own tracker: **#18381** (open) —
+`serve set-config`/`get-config`, exactly what nixpkgs'
+`services.tailscale.serve` module uses, always drops HTTPS status to plain
+HTTP on round-trip; **#18219** confirms the raw CLI *can* set real HTTPS
+but that state doesn't survive `set-config` or a reboot. The fix,
+**PR #20116**, was an unmerged draft as of this check.
+
+## The two apps want opposite things from the proxy (historical)
+
+**Retired 2026-09-07** along with the path-prefix routes themselves —
+each app has its own vhost now, so there's no shared prefix for `handle`
+vs `handle_path` to disagree about. Kept for the mechanism, and in case
+either move ever needs reverting (`caddy.nix`'s own history section has
+the exact retired route blocks).
 
 This is the one thing that was actually gotten wrong, and it cost a switch.
 Both routes were given `handle`, which passes the matched path through

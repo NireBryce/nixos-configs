@@ -1,6 +1,6 @@
 # `monitoring` — `nire/homelab/monitoring/`
 
-_Last modified: 2026-09-02_
+_Last modified: 2026-09-07_
 
 ## Contents
 
@@ -16,12 +16,16 @@ Prometheus + Grafana, scraping this host's own resource metrics. Added
 2026-08-23, cube-only so far; nested under the `homelab` umbrella since
 2026-08-27 (name unaffected).
 
-As of 2026-08-24 Grafana is reached at
-`https://ts-cube.moose-micro.ts.net/grafana/`, through Caddy
-([reverse-proxy](reverse-proxy.md)) — **not** the `http://ts-cube:3000/`
-an earlier version of this page described, which no longer answers. Every
-listener in this category is on loopback now. Confirmed working the same
-day: 200 over validated TLS from another tailnet host.
+As of 2026-09-07 Grafana is reached at `https://grafana.moose-micro.ts.net/`
+— its own Tailscale Services name, still fronted by Caddy
+([reverse-proxy](reverse-proxy.md)) since Tailscale Services can't
+terminate HTTPS declaratively yet (a confirmed upstream bug, see
+`tailscale-services/serve.nix`'s history section). The
+`.../grafana/`-path-under-`ts-cube` form this page described from
+2026-08-24 no longer answers (404). Every listener in this category is on
+loopback either way. Confirmed working 2026-09-07: 200 over validated TLS
+from another tailnet host, Grafana's own login redirect (`302 -> /login`)
+observed correctly.
 
 ## What's in it
 
@@ -79,9 +83,11 @@ That rule still applies, to Caddy's 443 now
 `trustedInterfaces` trusts the *whole* interface, not one port — the blanket
 trust ssh/kde-connect already get on every host, not something this category
 introduces. What changed is that it is the second line rather than the only
-one. Two settings in `grafana.nix` exist purely because of the proxy
-(`http_addr`, and `root_url`/`serve_from_sub_path` for the `/grafana` path
-prefix); its own history note at the bottom of the file has the before/after.
+one. `http_addr` stays loopback in `grafana.nix` for this reason; `root_url`
+now points at `grafana.moose-micro.ts.net` (its own Tailscale Services name)
+instead of a path under `ts-cube` — `serve_from_sub_path` is gone, since
+Grafana has its own vhost rather than sharing one under a prefix. The
+file's own history note has the full before/after.
 
 ## The secret_key trap, and why it's now a unit instead of a warning
 

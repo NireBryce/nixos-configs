@@ -1,0 +1,92 @@
+// Example/default ACLs for unrestricted connections.
+{
+	// Declare static groups of users beyond those in the identity service.
+	"groups": {"group:golink-admins": ["nirebryce@github"]},
+
+	// Declare convenient hostname aliases to use in place of IP addresses.
+	"hosts": {"example-host-1": "100.100.100.100"},
+
+	// Access control lists.
+	"acls": [],
+
+	"ssh": [
+		// Allow all users to SSH into their own devices in check mode.
+		// Comment this section out if you want to define specific restrictions.
+		{
+			"action": "accept",
+			"src":    ["autogroup:members"],
+			"dst":    ["autogroup:self"],
+			"users":  ["autogroup:nonroot", "root"],
+		},
+	],
+
+	"nodeAttrs": [
+		{
+			// Funnel policy, which lets tailnet members control Funnel
+			// for their own devices.
+			// Learn more at https://tailscale.com/kb/1223/tailscale-funnel/
+			"target": ["autogroup:members"],
+
+			"attr": ["funnel"],
+		},
+	],
+
+	"tagOwners": {
+		"tag:golink-host": ["nirebryce@github"],
+		// nixos-configs' homelab (nire-cube): grafana/git-forge move off
+		// Caddy path prefixes onto their own Tailscale Services names.
+		// See wiki/open-threads.md and wiki/categories/reverse-proxy.md.
+		"tag:homelab-cube": ["nirebryce@github"],
+	},
+
+	// Pre-approves tag:homelab-cube to advertise these two services, so
+	// advertising them from nire-cube's tailscale config needs no manual
+	// click in this console -- the per-service approval step
+	// open-threads.md cited as one of the two costs of svc:.
+	"autoApprovers": {
+		"services": {
+			"svc:grafana": ["tag:homelab-cube"],
+			"svc:git":     ["tag:homelab-cube"],
+		},
+	},
+
+	"grants": [
+		{
+			"src": ["group:golink-admins"],
+			"dst": ["tag:golink-host"],
+			"app": {"tailscale.com/cap/golink": [{"admin": true}]},
+		},
+		// {"action": "accept", "src": ["autogroup:members"], "dst": ["autogroup:members"], "ip": ["*"]}
+		{
+			"src": ["autogroup:members"],
+			"dst": ["autogroup:members"],
+			"ip":  ["*"],
+		},
+		// Explicit grants for the two services: a virtual service IP is
+		// not necessarily covered by the autogroup:members->autogroup:members
+		// grant above (that targets real devices) -- verify this is even
+		// needed once Services is live; if the blanket grant already
+		// covers svc: destinations, these are redundant, not harmful.
+		{
+			"src": ["autogroup:members"],
+			"dst": ["svc:grafana"],
+			"ip":  ["*"],
+		},
+		// Restores general reachability to nire-cube itself: tagging it
+		// tag:homelab-cube moved it OUT of autogroup:members as a
+		// destination -- the blanket grant above no longer covers it.
+		// Found live, 2026-09-07: nire-cube dropped off every other
+		// tailnet member's peer list (not just offline -- absent),
+		// SSH included, within a minute of the tag taking effect.
+		{
+			"src": ["autogroup:members"],
+			"dst": ["tag:homelab-cube"],
+			"ip":  ["*"],
+		},
+		{
+			"src": ["autogroup:members"],
+			"dst": ["svc:git"],
+			"ip":  ["*"],
+		},
+	],
+}

@@ -129,15 +129,26 @@ bug; each is a decision someone might otherwise re-litigate from scratch.
   [backup-history.md](categories/backup-history.md). What's still open is
   extending backups past cube to the other three hosts
   (**[#130](https://github.com/NireBryce/nixos-configs/issues/130)**).
-- **Tailscale Services (`svc:`) were weighed and deferred.** They would give
-  each service its own tailnet DNS name (`https://grafana/` rather than a
-  path prefix), which removes the whole prefix-handling problem
-  [reverse-proxy](categories/reverse-proxy.md) documents, and they'd allow
-  per-service ACLs. The cost is a per-service approval step in the Tailscale
-  admin console, and state that lives in `tailscaled` rather than in the Nix
-  store. Path routing under one hostname won on "everything stays in the
-  repo". The other scaling path, if the service count makes prefixes
-  annoying, is a real domain with split DNS and a wildcard certificate.
+- **Tailscale Services (`svc:`) reopened 2026-09-07, in progress on
+  `feat/tailscale-services`.** The two costs originally cited here both
+  turned out to have real mitigations: the per-service admin-console
+  approval step is skippable via an `autoApprovers.services` policy entry,
+  and the policy file itself is API-scriptable
+  (`flake/scripts/tailscale-acl.py`, `just tailscale-acl`) rather than
+  console-hand-edited only — reviewed as a diff and applied from this repo,
+  same as everything else here. `svc:grafana` and `svc:git` exist on the
+  tailnet as of this branch (each with its own virtual address); the tag,
+  policy grants, and service objects are recorded under
+  `flake/modules/nire/homelab/reverse-proxy/tailscale-services/`, whose own
+  README lists what's still open — **`nire-cube` isn't tagged yet, there's
+  no NixOS `services.tailscale.serve` config backing either service with a
+  real port, and Caddy's existing `/grafana/`/`/git/` path routes
+  ([reverse-proxy](categories/reverse-proxy.md)) are untouched and still
+  what's actually serving traffic.** Two API endpoint names were wrong on
+  the first attempt in both directions (ACL: `/policy` vs the real `/acl`;
+  vip-services: `/by-name/{name}` vs the real `/vip-services/{name}`) —
+  see the script's own comments before assuming either path from memory
+  again.
 - **Grafana dashboards edited in the UI are not in this repo.** Anything
   under `monitoring`'s `_dashboards/` is provisioned read-only from the
   store; anything created through the web UI lives only in cube's sqlite db.

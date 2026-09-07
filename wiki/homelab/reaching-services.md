@@ -93,7 +93,7 @@ A 404 from a path that used to work is worth distinguishing from a dead
 service: if the page you get is the app's own 404 rather than glance's index,
 the request reached the app and the *routing* is wrong. That exact failure
 happened to `/git/` on 2026-08-24 —
-[reverse-proxy](../categories/reverse-proxy.md#the-two-apps-want-opposite-things-from-the-proxy)
+[reverse-proxy](../categories/reverse-proxy.md#the-two-apps-want-opposite-things-from-the-proxy-historical)
 has the mechanism.
 
 ## Adding another service to this

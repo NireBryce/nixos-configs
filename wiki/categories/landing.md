@@ -115,7 +115,7 @@ would use, rather than at `127.0.0.1:300x`. That makes the widget a test of
 the whole path — MagicDNS, the tailnet, Caddy's routing, the certificate, and
 the app — instead of the app alone. A Caddy misconfiguration shows up here;
 a loopback check would have hidden exactly the class of bug that actually
-happened ([the `/git` 404](reverse-proxy.md#the-two-apps-want-opposite-things-from-the-proxy)).
+happened ([the `/git` 404](reverse-proxy.md#the-two-apps-want-opposite-things-from-the-proxy-historical)).
 
 ## No firewall entry, no persistence entry
 
