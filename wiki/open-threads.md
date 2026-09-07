@@ -147,7 +147,9 @@ bug; each is a decision someone might otherwise re-litigate from scratch.
   a rebuild that reprovisions `_dashboards/`. "How to add a dashboard that
   survives a rebuild" is now written up:
   [monitoring.md](categories/monitoring.md#adding-a-dashboard-that-survives-a-rebuild)
-  — not yet verified against a real UI export, per its own caveat.
+  — not yet verified against a real UI export, per its own caveat. Now
+  tracked as
+  **[#190](https://github.com/NireBryce/nixos-configs/issues/190)**.
 
 ## Not covered here
 
