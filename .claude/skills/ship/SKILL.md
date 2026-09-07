@@ -88,9 +88,14 @@ Never commit onto `experimental`. `git status -sb` (already fetched) first:
   git checkout <branch>
   ```
   **Run that `git status --short` for real, right before the reset, and
-  read it** — don't rely on the git-guard hook to catch this: its `ask` is
-  a no-op under `--permission-mode auto`, confirmed 2026-09-06 (issue
-  #182). `git branch` only preserves the accidental *commit*; anything
+  read it** — don't rely on the git-guard hook alone to catch this: its
+  `ask` is a no-op under `--permission-mode auto`, confirmed 2026-09-06
+  (issue #182). The hook now also emits `systemMessage` on every flagged
+  destructive command, which — unlike `ask` — reaches the human's
+  transcript unconditionally regardless of permission mode; that makes the
+  warning visible, but doesn't stop an agent running in auto mode from
+  proceeding past it, so the manual check below is still the real
+  safeguard. `git branch` only preserves the accidental *commit*; anything
   else dirty in a shared checkout (someone else's in-progress, uncommitted
   edit) is not a commit and `reset --hard` destroys it with no recovery
   path. If the status shows anything beyond the commit(s) you're rescuing,

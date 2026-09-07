@@ -94,7 +94,14 @@ if [ -z "$reason" ] && grep -qE '\bstash\b' <<<"$command" && grep -qE '\b(drop|c
 fi
 
 if [ -n "$reason" ]; then
+    # permissionDecision "ask" only reaches a human in an interactive
+    # session -- under --permission-mode auto it's a silent no-op, which is
+    # exactly how the 2026-09-06 uncommitted-edit loss (issue #182) got past
+    # this hook unnoticed. systemMessage is the field that reaches the
+    # human's transcript unconditionally, regardless of permission mode, so
+    # the warning is never silent even when the ask itself is.
     jq -n --arg reason "$reason" '{
+        systemMessage: ("⚠️  DESTRUCTIVE GIT COMMAND: " + $reason),
         hookSpecificOutput: {
             hookEventName: "PreToolUse",
             permissionDecision: "ask",
