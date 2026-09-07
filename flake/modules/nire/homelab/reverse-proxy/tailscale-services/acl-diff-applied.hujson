@@ -32,13 +32,12 @@
 	],
 
 	"tagOwners": {
-		"tag:golink-host":   ["nirebryce@github"],
+		"tag:golink-host": ["nirebryce@github"],
 		// nixos-configs' homelab (nire-cube): grafana/git-forge move off
 		// Caddy path prefixes onto their own Tailscale Services names.
 		// See wiki/open-threads.md and wiki/categories/reverse-proxy.md.
-		"tag:homelab-cube":  ["nirebryce@github"],
+		"tag:homelab-cube": ["nirebryce@github"],
 	},
-
 
 	// Pre-approves tag:homelab-cube to advertise these two services, so
 	// advertising them from nire-cube's tailscale config needs no manual
@@ -71,6 +70,17 @@
 		{
 			"src": ["autogroup:members"],
 			"dst": ["svc:grafana"],
+			"ip":  ["*"],
+		},
+		// Restores general reachability to nire-cube itself: tagging it
+		// tag:homelab-cube moved it OUT of autogroup:members as a
+		// destination -- the blanket grant above no longer covers it.
+		// Found live, 2026-09-07: nire-cube dropped off every other
+		// tailnet member's peer list (not just offline -- absent),
+		// SSH included, within a minute of the tag taking effect.
+		{
+			"src": ["autogroup:members"],
+			"dst": ["tag:homelab-cube"],
 			"ip":  ["*"],
 		},
 		{

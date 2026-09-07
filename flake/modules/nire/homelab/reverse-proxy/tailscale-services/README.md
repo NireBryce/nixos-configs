@@ -28,9 +28,6 @@ the script (`vip-put`/`apply`) to push an edit.
 
 ## What's NOT done yet
 
-- `nire-cube` itself isn't tagged `tag:homelab-cube` -- nothing advertises
-  either service yet. That's either a console action or
-  `tailscale set --advertise-tags=tag:homelab-cube` run *on* cube.
 - No NixOS `services.tailscale.serve` config exists to back these with
   the actual Grafana/Forgejo ports (3000/3001) -- see
   [reverse-proxy.md](../../../../../../wiki/categories/reverse-proxy.md)
@@ -38,3 +35,31 @@ the script (`vip-put`/`apply`) to push an edit.
 - Caddy's `@grafana`/`handle_path /git` routes in `caddy.nix` are
   untouched and still serve the working `/grafana/`, `/git/` paths --
   nothing here has cut over.
+
+## Tagging a device drops it out of `autogroup:members` -- live incident, 2026-09-07
+
+`nire-cube` is now tagged `tag:homelab-cube` (`sudo tailscale up
+--advertise-tags=tag:homelab-cube` run on cube -- **not** `tailscale set`,
+which has no `--advertise-tags` flag on this tailscale version; only `up`
+does, and unlike `set`'s doc-comment framing it does NOT reset flags left
+unspecified). Within about a minute of that taking effect, `nire-cube`
+vanished from *every other tailnet member's* `tailscale status` peer list
+entirely -- not shown offline, absent -- and SSH to it failed
+(`Could not resolve hostname`, then connection timeout by IP). Cube's own
+`tailscale status` looked completely normal the whole time; this is
+peer-visibility-only, easy to misread as cube itself being down.
+
+Mechanism: a tagged device is owned by the tag, not by the user, for ACL
+purposes -- so it drops out of `autogroup:members` as a grant
+*destination*, same as any other member device would if nothing granted
+access to it. This tailnet's only broad grant was
+`autogroup:members -> autogroup:members`, which stopped covering cube the
+moment the tag applied. The fix was one more grant, matching the pattern
+`tag:golink-host` already uses in this same policy:
+
+    {"src": ["autogroup:members"], "dst": ["tag:homelab-cube"], "ip": ["*"]}
+
+**The rule this gives:** tagging ANY previously-untagged device needs its
+own reachability grant applied in the same change, not after -- adding the
+tag and the compensating grant are one atomic step, or the device drops off
+the tailnet for everyone else the moment the tag takes effect.
