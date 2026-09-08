@@ -4,12 +4,36 @@
 # change boot behavior on hosts that wipe /root), so the workflow only opens
 # the PR and a human reviews the lock diff and merges when wanted.
 #
-# Known caveat, accepted deliberately: PRs opened with the default
-# GITHUB_TOKEN do not trigger this repo's own pull_request workflows (GitHub
-# refuses the recursive run), so the flake-check check will show as missing
-# rather than green on these PRs. That is the token, not a broken flake --
-# run `just preflight` locally before merging, or push any commit to the
-# branch to trigger CI for real.
+# NEEDS `FLAKE_LOCK_TOKEN`, a repo secret holding a fine-grained PAT scoped
+# to this repo with `Contents: read/write` and `Pull requests: read/write`.
+# Without it the `token` line below falls back to GITHUB_TOKEN and the run
+# FAILS at PR creation with "GitHub Actions is not permitted to create or
+# approve pull requests" -- that is a repo setting (Settings > Actions >
+# General > Workflow permissions), off here on purpose, because it is a
+# single switch granting create AND approve and only create is wanted.
+#
+# The PAT is what buys the "send but not approve" split: it acts as the repo
+# owner, and GitHub refuses to let anyone approve a PR they authored, so the
+# identity that opens these PRs structurally cannot approve them. It also
+# fixes what the old header called an accepted caveat -- a GITHUB_TOKEN PR
+# does not trigger this repo's own pull_request workflows, so `nix flake
+# check + module tree` never reported, and that check is REQUIRED by the
+# experimental ruleset. A PAT-opened PR triggers CI normally and can
+# actually go green.
+#
+# Third-party actions are pinned by full SHA, not by branch: these run with
+# `contents: write` against this repo, and `@main` means running whatever
+# that repo's default branch says on Monday morning. actions/checkout stays
+# on @v4 -- GitHub's own, same as check.yml. Bump the pins deliberately.
+#
+# history
+#
+# Floated both DeterminateSystems actions on `@main` and had no `token`
+# line until 2026-09-08. First scheduled run (2026-09-07, the only run ever)
+# updated the lock and pushed `update_flake_lock_action` fine, then failed
+# at PR creation on the setting above; no PR was ever opened. The old header
+# documented the CI-doesn't-run caveat as accepted, which presumed a PR got
+# opened at all -- it never did.
 
 name: update-flake-lock
 
@@ -26,22 +50,35 @@ jobs:
   update-lock:
     runs-on: ubuntu-latest
     steps:
+      # `experimental` explicitly, not the default branch implicitly: this
+      # is the trunk landings target (AGENTS.md, skill `ship`), and `main`
+      # is promotion-only via a PR from here. Pairs with `base` below --
+      # checkout picks what gets updated, base picks what the PR targets.
       - uses: actions/checkout@v4
-
-      - uses: DeterminateSystems/nix-installer-action@main
-
-      - uses: DeterminateSystems/update-flake-lock@main
         with:
+          ref: experimental
+
+      - uses: DeterminateSystems/nix-installer-action@b074b4ad5f255f9c8a6a2414a2f07e7f4f2925a3 # 2026-09-08
+
+      - uses: DeterminateSystems/update-flake-lock@daaf842c7377c22fe4dec85d511edcf4d889844a # 2026-09-08
+        with:
+          # Falls back to GITHUB_TOKEN when the secret is unset, which fails
+          # at PR creation -- see the header. Not a silent degrade: the run
+          # goes red and says why.
+          token: ${{ secrets.FLAKE_LOCK_TOKEN || github.token }}
+          base: experimental
           path-to-flake-dir: flake
           pr-title: "chore: update flake.lock"
           pr-body: |
-            Automated weekly `nix flake update` (all inputs).
+            Automated weekly `nix flake update` (all inputs), targeting
+            `experimental`.
 
             The lock diff is the review: this repo pins nixpkgs deliberately,
             and an input bump can change what hosts build and boot. Check the
-            diff, run `just preflight` locally (CI does not run on
-            GITHUB_TOKEN-opened PRs -- see this workflow's header), and merge
-            through the normal ship flow when the change is wanted.
+            diff, confirm `nix flake check + module tree` went green, and
+            merge through the normal ship flow when the change is wanted.
+            `just preflight` locally is the stronger check -- CI does not
+            build a host toplevel on a linux runner for these.
 
             Auto-opened by the update-flake-lock workflow; close unmerged if
             the timing is wrong (mid-investigation, pre-boot-verification).

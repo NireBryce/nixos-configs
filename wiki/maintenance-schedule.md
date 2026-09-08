@@ -1,6 +1,6 @@
 # Maintenance schedule
 
-_Last modified: 2026-09-07_
+_Last modified: 2026-09-08_
 
 ## Contents
 
@@ -181,7 +181,10 @@ here, don't wrap this file in ciphertext to protect one row.
 ### 9. Syncthing device certificates
 
 - **What**: the `syncthing-*` secrets in `secrets.yaml` (one per device:
-  `durandal`, `galatea`, `lysithea`, `sif`, `iona`, `tenacity`).
+  `durandal`, `galatea`, `lysithea`, `sif`, `iona`, `tenacity`). **Declared
+  by no module since 2026-09-08** — `sops.nix` held five of them and now
+  holds no `sops.secrets.*` at all; the keys stay in `secrets.yaml`
+  unreferenced. Nothing decrypts them, so nothing breaks when they age.
 - **Expiry**: Syncthing generates its own self-signed device certificate
   with a long validity (on the order of decades) and doesn't require manual
   renewal in normal operation. Listed here for completeness, not because
@@ -189,6 +192,36 @@ here, don't wrap this file in ciphertext to protect one row.
   this fleet.
 - **Last checked**: 2026-09-07 (documentation check against Syncthing's own
   behavior, not a live cert inspection).
+
+### 10. `FLAKE_LOCK_TOKEN` — GitHub PAT for the weekly lock PR
+
+- **What**: a repo secret on `NireBryce/nixos-configs` (GitHub Actions
+  secret, *not* in `secrets.yaml`) holding a fine-grained PAT scoped to
+  this repo with `Contents: read/write` and `Pull requests: read/write`.
+  Read by
+  [`.github/workflows/update-flake-lock.yml`](../.github/workflows/update-flake-lock.yml)
+  as the `token` input to `DeterminateSystems/update-flake-lock`.
+- **Why a PAT and not `GITHUB_TOKEN`**: the repo setting that would let
+  Actions open PRs is a single switch granting create **and** approve, and
+  only create is wanted. A PAT acts as the repo owner, and GitHub refuses
+  to let anyone approve a PR they authored — so the identity opening these
+  PRs structurally cannot approve them. It also makes CI actually run on
+  them, which a `GITHUB_TOKEN`-opened PR does not.
+- **Expiry**: fine-grained PATs **must** carry an expiry; GitHub's own
+  maximum for a custom date is 366 days, and the UI's default when created
+  is 30 days. Whichever was picked, the date is visible at
+  [github.com/settings/personal-access-tokens](https://github.com/settings/personal-access-tokens)
+  — record it here once set.
+- **Failure mode if it expires**: the Monday run pushes the updated
+  `update_flake_lock_action` branch as normal and then fails at PR
+  creation, exactly as the 2026-09-07 run did for the permission reason.
+  **Silent unless someone looks** — a failed scheduled workflow emails the
+  repo owner, but nothing in the repo changes and no PR appears. The
+  symptom to recognise: a `update_flake_lock_action` branch ahead of
+  `experimental` with no PR attached.
+- **Last checked**: not yet created as of 2026-09-08 — the workflow was
+  wired for it in that change and falls back to `GITHUB_TOKEN` (and so
+  fails at PR creation) until the secret exists.
 
 ## Adding a new item
 
