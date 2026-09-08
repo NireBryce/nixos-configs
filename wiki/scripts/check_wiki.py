@@ -166,6 +166,10 @@ AGG = re.compile(r'with\s+config\.flake\.modules\.(\w+);\s*\[(.*?)\]', re.S)
 # `${moduleName}` template form ellyHomeManager's per-module files use), how a
 # module declares which class it belongs to.
 DECL = re.compile(r'flake\.modules\.(\w+)\.(?:\$\{moduleName\}|\w+)')
+# Declared inside a `flake.modules = { ... }` attrset, where each class
+# heads its own line without the prefix -- see the call site for why this
+# form exists and can't just be flattened away.
+DECL_ATTRSET = re.compile(r'(?m)^\s*(\w+)\.\$\{moduleName\}\s*=')
 COMMENT = re.compile(r'#[^\n]*')
 
 # host short-name -> its nireHost/*-configuration.nix. lysithea is darwin-class;
@@ -289,9 +293,21 @@ def category_classes(category_dir):
         # Comments stripped first: podman.nix has a commented-out
         # `flake.modules.homeManager.${moduleName}` stanza (never activated),
         # which is prose describing a possible module, not a declaration of
-        # one -- left uncounted, same as scanning wiki prose that merely
+         # one -- left uncounted, same as scanning wiki prose that merely
         # discusses `config.flake.modules` (see modules.py's `imported_names`).
-        classes.update(DECL.findall(COMMENT.sub('', p.read_text())))
+        text = COMMENT.sub('', p.read_text())
+        classes.update(DECL.findall(text))
+        # The attrset form -- `flake.modules = { homeManager.${moduleName} = ...;
+        # nixos.${moduleName} = ...; }` -- declares classes without repeating the
+        # `flake.modules.` prefix. One real module is shaped this way
+        # (basic-nix-settings.nix, three classes); the flat form three times in
+        # one file trips statix's repeated-`flake`-key rule, so the attrset is
+        # not simply expandable. Line-anchored so the leading `flake` of a flat
+        # `flake.modules.<class>...` line cannot match as a class name. Missed
+        # entirely by both checkers until 2026-09-08 -- the CLASSES check read
+        # the nix category as homeManager-only and failed against the README's
+        # correct row.
+        classes.update(DECL_ATTRSET.findall(text))
     return classes
 
 
@@ -516,11 +532,14 @@ def doc_files(root):
     return sorted(root.joinpath('wiki').rglob('*.md')) + [root / 'AGENTS.md']
 
 
-# A recipe header, e.g. `wiki-churn *args:` or `host=nire-durandal build`'s
-# own definition `build:` -- name, then zero or more space-separated
-# parameter/default tokens, then a bare `:`. `(?!=)` excludes a `name :=
-# value` variable assignment, just's *other* use of a leading identifier.
-JUST_RECIPE = re.compile(r'^([a-zA-Z][\w-]*)(?:\s+[\w=*-]+)*:(?!=)', re.M)
+# A recipe header, e.g. `wiki-churn *args:`, `host=nire-durandal build`'s
+# own definition `build:`, or `opencode-attach dir='.' *args:` -- name,
+# then zero or more space-separated parameter/default tokens (which may
+# quote defaults), then a bare `:`. `(?!=)` excludes a `name := value`
+# variable assignment, just's *other* use of a leading identifier.
+# Without the quote/dot in the token class, `dir='.'` made the whole
+# recipe invisible to this regex (false UNKNOWN RECIPE, hit 2026-09-08).
+JUST_RECIPE = re.compile(r'^([a-zA-Z][\w-]*)(?:\s+[\w=*."\'-]+)*:(?!=)', re.M)
 # A backtick-quoted invocation, e.g. `` `just wiki-lint` `` or
 # `` `just host=nire-durandal build` ``.
 JUST_MENTION = re.compile(r'`just ([^`]+)`')
