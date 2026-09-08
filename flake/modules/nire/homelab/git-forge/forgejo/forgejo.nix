@@ -127,12 +127,13 @@
             #
             # sopsFile unset -- defaults to `config.sops.defaultSopsFile`
             # (secrets.yaml, set in nire/system/secrets/sops.nix, imported
-            # by every Linux host via `system`). Declared HERE, not beside
-            # the syncthing-* secrets in sops.nix, on purpose: `git-forge`
-            # is cube-only, and a secret in sops.nix decrypts on every
-            # `system` host (durandal/tenacity included, neither running
-            # Forgejo); declaring it here means it decrypts only where
-            # imported.
+            # by every Linux host via `system`). Declared HERE and not in
+            # sops.nix on purpose: `git-forge` is cube-only, and a secret
+            # declared in sops.nix decrypts on every `system` host
+            # (durandal/tenacity included, neither running Forgejo);
+            # declaring it here means it decrypts only where imported.
+            # sops.nix holds no `sops.secrets.*` at all for this reason --
+            # its own history note says so.
             sops.secrets.forgejo-admin-password = {
                 owner = config.services.forgejo.user;
                 group = config.services.forgejo.group;

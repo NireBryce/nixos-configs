@@ -40,21 +40,27 @@
             # defaultSecretsMountPoint = "/run/user/1000/secrets.d";
         };
 
-        # Syncthing
-        sops.secrets.syncthing-durandal = {
-            sopsFile = "${secretsPath}";
-        };
-        sops.secrets.syncthing-galatea = {
-            sopsFile = "${secretsPath}";
-        };
-        sops.secrets.syncthing-lysithea = {
-            sopsFile = "${secretsPath}";
-        };
-        sops.secrets.syncthing-sif = {
-            sopsFile = "${secretsPath}";
-        };
-        sops.secrets.syncthing-iona = {
-            sopsFile = "${secretsPath}";
-        };
+        # No `sops.secrets.*` here on purpose -- this module only sets
+        # `defaultSopsFile` and the age keys. A secret declared HERE decrypts on
+        # every host importing `system`, i.e. all three Linux hosts; the
+        # cube-only ones are declared in the modules that actually use them
+        # (`forgejo.nix`, `restic.nix`), each of which says so. See history
+        # below for the five that used to sit here.
         };
 }
+
+# history
+#
+# Held five `sops.secrets.syncthing-*` declarations (durandal, galatea,
+# lysithea, sif, iona) until 2026-09-08, each setting only `sopsFile` to the
+# same `secretsPath` that `defaultSopsFile` already points at. Removed because
+# nothing consumed them: no `services.syncthing` anywhere in the tree, and
+# galatea/sif/iona are not hosts in `nireHost/hosts.nix`. Declaring them meant
+# decrypting five unused secrets on every `system` host at activation. The
+# removal was written on the `exp-module-cleanup` branch 2026-08-28 and never
+# landed there; that branch was deleted once this landed.
+#
+# `secrets.yaml` still HOLDS those keys, plus a `syncthing-tenacity` this file
+# never declared -- deliberately untouched, since an unreferenced key in an
+# encrypted file costs nothing and rewriting the file is a real re-encryption.
+# If syncthing ever comes back, the material is already there.
