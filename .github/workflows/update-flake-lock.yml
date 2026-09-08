@@ -4,22 +4,27 @@
 # change boot behavior on hosts that wipe /root), so the workflow only opens
 # the PR and a human reviews the lock diff and merges when wanted.
 #
-# NEEDS `FLAKE_LOCK_TOKEN`, a repo secret holding a fine-grained PAT scoped
-# to this repo with `Contents: read/write` and `Pull requests: read/write`.
-# Without it the `token` line below falls back to GITHUB_TOKEN and the run
-# FAILS at PR creation with "GitHub Actions is not permitted to create or
-# approve pull requests" -- that is a repo setting (Settings > Actions >
-# General > Workflow permissions), off here on purpose, because it is a
-# single switch granting create AND approve and only create is wanted.
+# DEPENDS ON a repo setting, not just on this file: Settings > Actions >
+# General > Workflow permissions > "Allow GitHub Actions to create and
+# approve pull requests", turned ON 2026-09-08. Without it PR creation
+# fails with "GitHub Actions is not permitted to create or approve pull
+# requests" while the branch push succeeds -- which is how this workflow
+# spent its whole life before that date. If these PRs ever stop appearing
+# while `update_flake_lock_action` keeps moving, check that box first.
 #
-# The PAT is what buys the "send but not approve" split: it acts as the repo
-# owner, and GitHub refuses to let anyone approve a PR they authored, so the
-# identity that opens these PRs structurally cannot approve them. It also
-# fixes what the old header called an accepted caveat -- a GITHUB_TOKEN PR
-# does not trigger this repo's own pull_request workflows, so `nix flake
-# check + module tree` never reported, and that check is REQUIRED by the
-# experimental ruleset. A PAT-opened PR triggers CI normally and can
-# actually go green.
+# It grants create AND approve together; there is no setting for one
+# without the other. Accepted here because approvals gate nothing in this
+# repo -- both rulesets carry `required_approving_review_count: 0`, so the
+# approve half bypasses no control that exists. Reconsider if a review
+# requirement is ever added to experimental or main.
+#
+# Known caveat, still accepted: PRs opened with the default GITHUB_TOKEN do
+# not trigger this repo's own pull_request workflows (GitHub refuses the
+# recursive run), so `nix flake check + module tree` shows as missing rather
+# than green -- and the experimental ruleset REQUIRES that check, so merging
+# needs either an admin bypass or a pushed commit to the branch to trigger
+# CI for real. Run `just preflight` locally either way; it is the stronger
+# check, since CI does not force a host toplevel on a linux runner.
 #
 # Third-party actions are pinned by full SHA, not by branch: these run with
 # `contents: write` against this repo, and `@main` means running whatever
@@ -28,12 +33,12 @@
 #
 # history
 #
-# Floated both DeterminateSystems actions on `@main` and had no `token`
-# line until 2026-09-08. First scheduled run (2026-09-07, the only run ever)
-# updated the lock and pushed `update_flake_lock_action` fine, then failed
-# at PR creation on the setting above; no PR was ever opened. The old header
-# documented the CI-doesn't-run caveat as accepted, which presumed a PR got
-# opened at all -- it never did.
+# Floated both DeterminateSystems actions on `@main` until 2026-09-08. The
+# first scheduled run (2026-09-07, the only run ever) updated the lock and
+# pushed `update_flake_lock_action` fine, then failed at PR creation on the
+# setting above; no PR was ever opened. The header at the time documented
+# the CI-doesn't-run caveat as accepted, which presumed a PR got opened at
+# all -- it never did.
 
 name: update-flake-lock
 
@@ -62,10 +67,6 @@ jobs:
 
       - uses: DeterminateSystems/update-flake-lock@daaf842c7377c22fe4dec85d511edcf4d889844a # 2026-09-08
         with:
-          # Falls back to GITHUB_TOKEN when the secret is unset, which fails
-          # at PR creation -- see the header. Not a silent degrade: the run
-          # goes red and says why.
-          token: ${{ secrets.FLAKE_LOCK_TOKEN || github.token }}
           base: experimental
           path-to-flake-dir: flake
           pr-title: "chore: update flake.lock"
@@ -75,10 +76,9 @@ jobs:
 
             The lock diff is the review: this repo pins nixpkgs deliberately,
             and an input bump can change what hosts build and boot. Check the
-            diff, confirm `nix flake check + module tree` went green, and
-            merge through the normal ship flow when the change is wanted.
-            `just preflight` locally is the stronger check -- CI does not
-            build a host toplevel on a linux runner for these.
+            diff, run `just preflight` locally (CI does not run on
+            GITHUB_TOKEN-opened PRs -- see this workflow's header), and merge
+            through the normal ship flow when the change is wanted.
 
             Auto-opened by the update-flake-lock workflow; close unmerged if
             the timing is wrong (mid-investigation, pre-boot-verification).
