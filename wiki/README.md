@@ -1,6 +1,6 @@
 # Wiki
 
-_Last modified: 2026-09-07_
+_Last modified: 2026-09-08_
 
 ## Contents
 
@@ -88,7 +88,7 @@ or a skill (`.claude/skills/<name>/SKILL.md`) — nothing here is new content.
   happened here, and the skills that hold the long version of each.
 - [History & lessons learned](history.md) — the den → flake-parts port, the
   first hardware boots, and the sibling branch's own notes. The full log
-  itself, [lessons-learned.md](lessons-learned.md) — numbered §1–43,
+  itself, [lessons-learned.md](lessons-learned.md) — numbered §1–45,
   "written by Claude Code, for Claude Code" — moved in from `claude cave/`
   2026-09-02; this page stays the index, that page stays the log, the same
   split as `categories/shell-config/README.md` and its deep-dives.
