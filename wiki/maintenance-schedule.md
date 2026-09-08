@@ -196,8 +196,8 @@ here, don't wrap this file in ciphertext to protect one row.
 ### 10. `FLAKE_LOCK_TOKEN` — GitHub PAT for the weekly lock PR
 
 - **What**: a GitHub Actions repo secret on `NireBryce/nixos-configs`
-  (**not** in `secrets.yaml` — it authenticates to GitHub, which is what
-  stores it), holding a fine-grained PAT scoped to this repo with
+  (**not** in `secrets.yaml` — see below), holding a fine-grained PAT
+  scoped to this repo with
   `Contents: read/write` and `Pull requests: read/write`. Read by
   [`../.github/workflows/update-flake-lock.yml`](<../.github/workflows/update-flake-lock.yml>)
   as the `token` input to `DeterminateSystems/update-flake-lock`.
@@ -210,6 +210,19 @@ here, don't wrap this file in ciphertext to protect one row.
   and it structurally cannot approve its own PRs (GitHub refuses
   self-approval). That setting is a single switch granting create **and**
   approve, with no way to have one without the other.
+- **Why not sops**, asked 2026-09-08 and worth not re-deriving: a runner
+  would need the age key to decrypt, and that key would itself have to be
+  a GitHub Actions secret — one GitHub-stored credential swapped for
+  another, plus a layer. Nor could a runner be enrolled: every key in
+  [`.sops.yaml`](<../flake/modules/nire/system/secrets/.sops.yaml>) is
+  derived from a *host's* `/etc/ssh/ssh_host_ed25519_key.pub`, and a
+  runner is an ephemeral VM with no persistent host key. And nothing in
+  the nix tree ever reads this token, so a `sops.secrets.*` entry for it
+  would decrypt on three hosts with no use for it — the shape #203
+  deleted. Minor point in the same direction: `secrets.yaml` is committed
+  to a *public* repo, so its ciphertext is permanently public; an Actions
+  secret is never published. The general rule this follows is the one in
+  "Why this file is plaintext" above — the consumer picks the store.
 - **Expiry**: fine-grained PATs must carry one. GitHub's maximum for a
   custom date is 366 days; the creation UI defaults to 30. **Record the
   actual date here once minted** — this entry deliberately does not guess
