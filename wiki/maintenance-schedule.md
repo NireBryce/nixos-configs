@@ -193,6 +193,60 @@ here, don't wrap this file in ciphertext to protect one row.
 - **Last checked**: 2026-09-07 (documentation check against Syncthing's own
   behavior, not a live cert inspection).
 
+### 10. `FLAKE_LOCK_TOKEN` — GitHub PAT for the weekly lock PR
+
+- **What**: a GitHub Actions repo secret on `NireBryce/nixos-configs`
+  (**not** in `secrets.yaml` — it authenticates to GitHub, which is what
+  stores it), holding a fine-grained PAT scoped to this repo with
+  `Contents: read/write` and `Pull requests: read/write`. Read by
+  [`../.github/workflows/update-flake-lock.yml`](<../.github/workflows/update-flake-lock.yml>)
+  as the `token` input to `DeterminateSystems/update-flake-lock`.
+- **Why a PAT rather than `GITHUB_TOKEN`**: chiefly so these PRs trigger
+  CI. A `GITHUB_TOKEN`-opened PR does not trigger this repo's own
+  `pull_request` workflows, so `nix flake check + module tree` never
+  reports — and the `experimental` ruleset *requires* it, making such a PR
+  unmergeable without an admin bypass. Secondarily, it keeps the repo-wide
+  "Allow GitHub Actions to create and approve pull requests" setting off,
+  and it structurally cannot approve its own PRs (GitHub refuses
+  self-approval). That setting is a single switch granting create **and**
+  approve, with no way to have one without the other.
+- **Expiry**: fine-grained PATs must carry one. GitHub's maximum for a
+  custom date is 366 days; the creation UI defaults to 30. **Record the
+  actual date here once minted** — this entry deliberately does not guess
+  it.
+- **This one fails loudly, by construction.** Unlike everything else on
+  this page, the workflow checks its own credential rather than relying on
+  someone reading this file:
+  - A **missing, revoked, or expired** token fails the run at its first
+    step with a `::error::` annotation naming the secret and what to do —
+    before the nix install and flake update, rather than as a bare 401
+    inside the action much later.
+  - **Within 30 days of expiry** it emits a `::warning::` and keeps going,
+    so the lock update still happens. The window is 30 days because the
+    workflow runs *weekly* — a shorter one could give only one or two
+    chances to notice.
+  - Either case also **opens an issue in this repo** (reusing one open
+    issue titled `update-flake-lock: weekly lock PR needs attention`
+    rather than filing weekly), because a red scheduled run only emails
+    the repo owner and that is easy to miss months later.
+  - One gap, stated rather than papered over: GitHub returns the
+    `github-authentication-token-expiration` header only for tokens that
+    *have* an expiry, so an absent header means "cannot tell", not
+    "healthy". That case emits a `::notice::` and does **not** fail — so
+    the early warning is best-effort, while the hard failure on an
+    already-dead token is not.
+- **Failure mode if it lapses anyway**: the run pushes the updated
+  `update_flake_lock_action` branch as normal and then fails at PR
+  creation. The symptom to recognise: that branch sitting ahead of
+  `experimental` with no PR attached — exactly the state the 2026-09-07
+  run left behind for the unrelated permission reason.
+- **Last checked**: 2026-09-08 — workflow wired and its preflight logic
+  verified against the live API (valid token → 200; revoked token → 401 →
+  hard fail; header parse confirmed against a simulated response, since no
+  expiring token was available to test with). **The secret itself did not
+  exist yet at that point**; until it does, every run fails at the
+  preflight step.
+
 ## Adding a new item
 
 When a change introduces a new credential, key, or certificate with any

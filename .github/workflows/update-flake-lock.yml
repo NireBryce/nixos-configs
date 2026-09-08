@@ -4,27 +4,27 @@
 # change boot behavior on hosts that wipe /root), so the workflow only opens
 # the PR and a human reviews the lock diff and merges when wanted.
 #
-# DEPENDS ON a repo setting, not just on this file: Settings > Actions >
-# General > Workflow permissions > "Allow GitHub Actions to create and
-# approve pull requests", turned ON 2026-09-08. Without it PR creation
-# fails with "GitHub Actions is not permitted to create or approve pull
-# requests" while the branch push succeeds -- which is how this workflow
-# spent its whole life before that date. If these PRs ever stop appearing
-# while `update_flake_lock_action` keeps moving, check that box first.
+# NEEDS the repo secret `FLAKE_LOCK_TOKEN`: a fine-grained PAT scoped to
+# this repo with `Contents: read/write` and `Pull requests: read/write`.
+# Not GITHUB_TOKEN, deliberately -- opening a PR with that requires the
+# repo setting "Allow GitHub Actions to create and approve pull requests",
+# which is a single switch granting create AND approve, and is off here.
 #
-# It grants create AND approve together; there is no setting for one
-# without the other. Accepted here because approvals gate nothing in this
-# repo -- both rulesets carry `required_approving_review_count: 0`, so the
-# approve half bypasses no control that exists. Reconsider if a review
-# requirement is ever added to experimental or main.
+# What the PAT buys, in order of how much it actually matters:
 #
-# Known caveat, still accepted: PRs opened with the default GITHUB_TOKEN do
-# not trigger this repo's own pull_request workflows (GitHub refuses the
-# recursive run), so `nix flake check + module tree` shows as missing rather
-# than green -- and the experimental ruleset REQUIRES that check, so merging
-# needs either an admin bypass or a pushed commit to the branch to trigger
-# CI for real. Run `just preflight` locally either way; it is the stronger
-# check, since CI does not force a host toplevel on a linux runner.
+#   1. These PRs trigger CI. A GITHUB_TOKEN-opened PR does not trigger this
+#      repo's own pull_request workflows (GitHub refuses the recursive
+#      run), so `nix flake check + module tree` never reports -- and the
+#      experimental ruleset REQUIRES that check, so such a PR cannot merge
+#      without an admin bypass. A PAT-opened one goes green normally.
+#   2. The repo-wide switch stays off, so no workflow here -- this one or
+#      any added later -- can open or approve PRs on its own.
+#   3. It cannot approve its own PRs. GitHub refuses to let anyone approve
+#      a PR they authored, and this token authors them.
+#
+# What it costs: a credential that expires and must be rotated. That is
+# what the preflight step below exists to make impossible to miss. See
+# wiki/maintenance-schedule.md item 10.
 #
 # Third-party actions are pinned by full SHA, not by branch: these run with
 # `contents: write` against this repo, and `@main` means running whatever
@@ -33,10 +33,11 @@
 #
 # history
 #
-# Floated both DeterminateSystems actions on `@main` until 2026-09-08. The
-# first scheduled run (2026-09-07, the only run ever) updated the lock and
-# pushed `update_flake_lock_action` fine, then failed at PR creation on the
-# setting above; no PR was ever opened. The header at the time documented
+# Floated both DeterminateSystems actions on `@main` and used GITHUB_TOKEN
+# until 2026-09-08. The first scheduled run (2026-09-07, the only run ever)
+# updated the lock and pushed `update_flake_lock_action` fine, then failed
+# at PR creation with "GitHub Actions is not permitted to create or approve
+# pull requests"; no PR was ever opened. The header at the time documented
 # the CI-doesn't-run caveat as accepted, which presumed a PR got opened at
 # all -- it never did.
 
@@ -50,11 +51,80 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  issues: write # only for the failure/expiry notice below
 
 jobs:
   update-lock:
     runs-on: ubuntu-latest
     steps:
+      # Fail FAST and legibly on a missing, revoked, or expired token,
+      # before spending a nix install and a flake update on a run that
+      # cannot open a PR anyway. Without this the failure lands much later,
+      # inside the action, as a bare 401/403 from the create-PR call.
+      #
+      # GitHub returns `github-authentication-token-expiration` on API
+      # responses for tokens that HAVE an expiry. Treated as best-effort:
+      # absent means "cannot tell" (a token with no expiry set, or GitHub
+      # changing the header), which is reported and NOT failed on -- a
+      # missing header is not evidence of a healthy token.
+      - name: Preflight FLAKE_LOCK_TOKEN
+        id: preflight
+        env:
+          TOKEN: ${{ secrets.FLAKE_LOCK_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -uo pipefail
+
+          if [[ -z "${TOKEN}" ]]; then
+            echo "::error title=FLAKE_LOCK_TOKEN missing::The repo secret FLAKE_LOCK_TOKEN is not set. Create a fine-grained PAT scoped to ${REPO} with Contents: read/write and Pull requests: read/write, then add it at Settings > Secrets and variables > Actions. See this workflow's header and wiki/maintenance-schedule.md item 10."
+            exit 1
+          fi
+
+          headers="$(curl -sS -D - -o /dev/null \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${REPO}")"
+
+          status="$(printf '%s' "${headers}" | awk '/^HTTP/{code=$2} END{print code}')"
+          if [[ "${status}" != "200" ]]; then
+            echo "::error title=FLAKE_LOCK_TOKEN rejected::GitHub answered HTTP ${status} for ${REPO} using FLAKE_LOCK_TOKEN. Expired, revoked, or no longer scoped to this repo -- mint a replacement and update the secret. See wiki/maintenance-schedule.md item 10."
+            echo "state=invalid" >> "${GITHUB_OUTPUT}"
+            exit 1
+          fi
+
+          expiry="$(printf '%s' "${headers}" \
+            | tr -d '\r' \
+            | awk -F': ' 'tolower($1)=="github-authentication-token-expiration"{print $2}')"
+
+          if [[ -z "${expiry}" ]]; then
+            echo "::notice title=Token expiry unknown::FLAKE_LOCK_TOKEN works, but GitHub returned no github-authentication-token-expiration header, so this run cannot tell when it lapses. Check the date by hand at https://github.com/settings/personal-access-tokens and record it in wiki/maintenance-schedule.md item 10."
+            echo "state=ok-unknown-expiry" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          now="$(date -u +%s)"
+          then_ts="$(date -u -d "${expiry}" +%s 2>/dev/null)" || then_ts=""
+          if [[ -z "${then_ts}" ]]; then
+            echo "::notice title=Token expiry unparsable::Header said '${expiry}', which this step could not parse as a date."
+            echo "state=ok-unknown-expiry" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          days=$(( (then_ts - now) / 86400 ))
+          echo "FLAKE_LOCK_TOKEN expires ${expiry} (${days} days)"
+          echo "days=${days}" >> "${GITHUB_OUTPUT}"
+          echo "expiry=${expiry}" >> "${GITHUB_OUTPUT}"
+
+          # 30 days is deliberately generous: this workflow runs WEEKLY, so
+          # a shorter window could give only one or two chances to notice
+          # before the token lapses between runs.
+          if (( days <= 30 )); then
+            echo "::warning title=FLAKE_LOCK_TOKEN expires in ${days} days::Expires ${expiry}. Mint a replacement and update the secret before then, or the weekly lock PR stops opening. An issue has been filed on this run."
+            echo "state=expiring" >> "${GITHUB_OUTPUT}"
+          else
+            echo "state=ok" >> "${GITHUB_OUTPUT}"
+          fi
+
       # `experimental` explicitly, not the default branch implicitly: this
       # is the trunk landings target (AGENTS.md, skill `ship`), and `main`
       # is promotion-only via a PR from here. Pairs with `base` below --
@@ -67,6 +137,7 @@ jobs:
 
       - uses: DeterminateSystems/update-flake-lock@daaf842c7377c22fe4dec85d511edcf4d889844a # 2026-09-08
         with:
+          token: ${{ secrets.FLAKE_LOCK_TOKEN }}
           base: experimental
           path-to-flake-dir: flake
           pr-title: "chore: update flake.lock"
@@ -76,9 +147,61 @@ jobs:
 
             The lock diff is the review: this repo pins nixpkgs deliberately,
             and an input bump can change what hosts build and boot. Check the
-            diff, run `just preflight` locally (CI does not run on
-            GITHUB_TOKEN-opened PRs -- see this workflow's header), and merge
-            through the normal ship flow when the change is wanted.
+            diff, confirm `nix flake check + module tree` went green, and
+            merge through the normal ship flow when the change is wanted.
+            `just preflight` locally is the stronger check -- CI does not
+            force a host toplevel for these.
 
             Auto-opened by the update-flake-lock workflow; close unmerged if
             the timing is wrong (mid-investigation, pre-boot-verification).
+
+      # A red scheduled run only emails the repo owner, which is easy to
+      # miss months later -- and the whole failure mode here is a credential
+      # quietly lapsing. So any failure, or a token inside the 30-day
+      # window, also lands as an ISSUE in this repo, where it is visible
+      # next to everything else.
+      #
+      # Reuses one issue rather than opening a new one weekly: it searches
+      # for an open issue with the marker title and comments on it if found.
+      # Uses GITHUB_TOKEN, not the PAT -- filing an issue needs neither the
+      # PAT nor the create-PR setting.
+      #
+      # Files ONLY in this repo, per AGENTS.md.
+      - name: Notice on failure or approaching expiry
+        if: ${{ failure() || steps.preflight.outputs.state == 'expiring' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          STATE: ${{ steps.preflight.outputs.state }}
+          DAYS: ${{ steps.preflight.outputs.days }}
+          EXPIRY: ${{ steps.preflight.outputs.expiry }}
+        run: |
+          set -uo pipefail
+          title="update-flake-lock: weekly lock PR needs attention"
+
+          if [[ "${STATE}" == "expiring" ]]; then
+            body="FLAKE_LOCK_TOKEN expires in ${DAYS} days (${EXPIRY}).
+
+          Mint a replacement fine-grained PAT scoped to \`${REPO}\` with Contents: read/write and Pull requests: read/write, then update the \`FLAKE_LOCK_TOKEN\` repo secret. When it lapses the weekly lock PR stops opening.
+
+          Run: ${RUN_URL}
+          Details: \`wiki/maintenance-schedule.md\` item 10."
+          else
+            body="The weekly update-flake-lock run failed.
+
+          Preflight state: \`${STATE:-unknown}\`. If it was \`invalid\`, FLAKE_LOCK_TOKEN is expired, revoked, or no longer scoped to this repo -- mint a replacement and update the secret.
+
+          Run: ${RUN_URL}
+          Details: \`wiki/maintenance-schedule.md\` item 10."
+          fi
+
+          existing="$(gh issue list --repo "${REPO}" --state open \
+            --search "\"${title}\" in:title" --limit 1 --json number --jq '.[0].number')"
+
+          if [[ -n "${existing}" ]]; then
+            gh issue comment "${existing}" --repo "${REPO}" --body "${body}"
+            echo "commented on existing issue #${existing}"
+          else
+            gh issue create --repo "${REPO}" --title "${title}" --body "${body}"
+          fi
