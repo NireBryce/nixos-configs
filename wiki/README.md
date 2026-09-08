@@ -57,6 +57,7 @@ or a skill (`.claude/skills/<name>/SKILL.md`) — nothing here is new content.
 | add a self-hosted service to a host | [homelab/README.md](homelab/README.md), skill [`new-homelab-service`](../.claude/skills/new-homelab-service/SKILL.md) |
 | give a service its own Tailscale Services (`svc:`) hostname | [categories/reverse-proxy.md](categories/reverse-proxy.md), skill [`new-tailscale-service`](../.claude/skills/new-tailscale-service/SKILL.md) |
 | add a new host, or format its disk for impermanence | [disk-formatting.md](disk-formatting.md), skill [`new-host-config`](../.claude/skills/new-host-config/SKILL.md) |
+| check what key/credential expiry is coming due | [maintenance-schedule.md](maintenance-schedule.md), skill [`maintenance-schedule`](../.claude/skills/maintenance-schedule/SKILL.md) |
 
 ## Pages
 
@@ -93,6 +94,10 @@ or a skill (`.claude/skills/<name>/SKILL.md`) — nothing here is new content.
   split as `categories/shell-config/README.md` and its deep-dives.
 - [Open threads](open-threads.md) — pending upstream bug reports, todos,
   half-formed ideas, and things-to-look-into notes left in various corners.
+- [Maintenance schedule](maintenance-schedule.md) — the fleet's keys,
+  credentials, and certificates that have an actual expiry, rotation
+  cadence, or silent-breakage property; tended by skill
+  [`maintenance-schedule`](../.claude/skills/maintenance-schedule/SKILL.md).
 
 ### Category reference (configuration)
 
