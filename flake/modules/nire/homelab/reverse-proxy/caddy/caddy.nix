@@ -211,6 +211,20 @@
                     "http://ts-cube".extraConfig = ''
                         redir https://${tailnetFqdn}{uri} permanent
                     '';
+
+                    # Short bare names for Tailscale Services, same redirect pattern
+                    "http://git".extraConfig = ''
+                        redir https://${gitFqdn}{uri} permanent
+                    '';
+
+                    "http://grafana".extraConfig = ''
+                        redir https://${grafanaFqdn}{uri} permanent
+                    '';
+
+                    # Landing/glance index
+                    "http://glance".extraConfig = ''
+                        redir https://${tailnetFqdn}{uri} permanent
+                    '';
                 };
             };
 
