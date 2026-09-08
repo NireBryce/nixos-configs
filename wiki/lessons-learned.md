@@ -49,6 +49,7 @@ _Last modified: 2026-09-08_
 - [43. A fingerprint check can pass for the wrong reason — dead code looks exactly like safe code until you make it live](#43-a-fingerprint-check-can-pass-for-the-wrong-reason--dead-code-looks-exactly-like-safe-code-until-you-make-it-live)
 - [44. A hook that runs `git` from a non-toplevel cwd needs `-C`, not a cleared GIT_DIR — the docs' own suggested fix broke the index lock instead](#44-a-hook-that-runs-git-from-a-non-toplevel-cwd-needs--c-not-a-cleared-git_dir--the-docs-own-suggested-fix-broke-the-index-lock-instead)
 - [45. NixOS `systemd.user.services` is global — every user manager reads it, and they all race to start it](#45-nixos-systemduserservices-is-global--every-user-manager-reads-it-and-they-all-race-to-start-it)
+- [46. "Enabled" is a claim about config, not about who holds the port](#46-enabled-is-a-claim-about-config-not-about-who-holds-the-port)
 
 > **Written by Claude Code, for Claude Code**, and largely a record of its own
 > mistakes. Written to be read by an agent starting cold, so the "I" throughout
@@ -65,6 +66,9 @@ collide with the module inside it"; §§36–38 (`nire-llm-sandbox`,
 `nire-cube`'s `monitoring` category) where evaluating and even building the
 artifact both stopped being enough — some bugs only exist once real
 filesystem/daemon state shows up at an actual `switch`, see §37.
+
+§46 is the one entry not lived here — a caveat adopted from an upstream bug
+report, labelled as such where it sits.
 
 Numbers are stable; §§2, 5, 7, 11, 14, 18, 24 and 25 are referenced elsewhere.
 Lived at `claude cave/lessons-learned.md` until 2026-09-02 — see
@@ -1195,3 +1199,45 @@ pinned it: the sole `serve` process's parent was `user@175.service`, and
 `unitConfig.ConditionUser = "elly"` — a no-op in every other user's
 manager. Rationale lives in the module comment
 (`nireHost/cube/configuration/opencode-server-cube.nix`).
+
+## 46. "Enabled" is a claim about config, not about who holds the port
+
+**Borrowed, not lived** — the one entry in this file that did not happen here.
+Adopted from a NixOS Discourse thread while enabling avahi and
+systemd-resolved together (2026-08-21, `nire/system/networking/`), kept
+because the shape is one this file already keeps hitting and because it is
+what the next `.local` bug on this fleet will look like.
+
+The report: `.local` names failing to resolve while `resolvectl status` showed
+mDNS enabled **both globally and per-interface**. Queries timed out with "All
+attempts to contact name servers or networks failed" while avahi resolved the
+same names on the same host; the suggested per-link `nmcli` fix changed
+nothing; the thread closed unresolved.
+
+mDNS is not a switch either daemon owns. It is a claim on UDP 5353, and only
+one listener receives the unicast replies — so a daemon can be configured
+correctly, report itself enabled, and answer nothing, because another process
+holds the socket. **Neither daemon's status output mentions the other.**
+`resolvectl status` will not say avahi has the port; `avahi-daemon` says so
+only in its own journal. Which makes "is it enabled?" the wrong question and
+"who holds 5353?" the right one:
+
+```sh
+sudo ss -ulpn 'sport = :5353'      # who actually has the socket
+resolvectl mdns                    # what resolved thinks, per link
+journalctl -u avahi-daemon | grep -i "another\|stack"
+```
+
+This tree settles the contention up front — resolved's `MulticastDNS = "no"`,
+global rather than per-link so NetworkManager's own `connection.mdns` cannot
+re-open it; the reasoning lives in `resolved.nix`/`avahi.nix`, not here. That
+is a claim about config too — if `.local` misbehaves, check the socket before
+concluding the Nix is wrong.
+
+Same family as §1 (a tool reporting success has not thereby been tested), §22
+(a zero is not evidence until you show the query can return non-zero) and §31
+(a count is only evidence if you know what it counts), generalised: **a
+configuration readout reports intent, and intent is exactly what is not in
+question when two things contend for one resource.** When two components can
+claim one resource, neither one's view of itself is diagnostic — go look at
+the resource.
