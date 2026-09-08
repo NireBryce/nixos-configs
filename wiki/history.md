@@ -1,6 +1,6 @@
 # History & lessons learned
 
-_Last modified: 2026-09-05_
+_Last modified: 2026-09-08_
 
 ## Contents
 
@@ -87,11 +87,21 @@ it work before?' first, via `journalctl --list-boots`" rules.
 
 ## The sibling branch
 
-- **`git show origin/flake-parts:SESSION-HANDOFF.md`** — that branch's own
-  notes on dead ends and decisions not to silently relitigate. Needs the
-  `origin/` prefix; there's no local `flake-parts` branch in a normal
-  checkout.
-- **`git show origin/flake-parts:linux-flake/flake-parts-reference.md`** —
-  flake-parts machinery reference with upstream source backing each claim.
-  That branch never went through this one's `linux-flake/` → `flake/`
-  rename, so the old path is correct *there* specifically.
+**The `flake-parts` branch was deleted 2026-09-08**, along with
+`exp-module-cleanup` and `backup-before-flake-parts-happened`. Its two
+files worth keeping were salvaged into
+[flake-parts-port-notes.md](flake-parts-port-notes.md) first — read that
+page, not a `git show origin/flake-parts:…`, which no longer resolves:
+
+- `SESSION-HANDOFF.md` — that branch's own notes on dead ends and
+  decisions not to silently relitigate. Its still-live half is that page's
+  first two sections.
+- `linux-flake/flake-parts-reference.md` — flake-parts machinery reference
+  with upstream source backing each claim, re-verified against the current
+  pin when it was moved. That page's third section.
+
+The branch tip was `cf9aea42`; both files are still readable there from a
+clone that fetched it, until the objects are garbage-collected. The port
+mechanics that page left behind were superseded by the port having
+happened — see [lessons-learned.md](lessons-learned.md) §§1–18, written as
+it went.

@@ -276,8 +276,10 @@ under the same compression discipline: facts kept, narration cut
 (`boot-durandal.nix`, `WARN-impermanence.nix`, `vscode.nix` have them).
 
 **`elly` is hardcoded**, in `users.users.elly`, `home.username`, and
-`home-manager.users.elly`. The sibling branch has `nire.primaryUser`;
-introducing it here is a separate change, not a tidy-up.
+`home-manager.users.elly`. The now-deleted `flake-parts` branch had a
+`nire.primaryUser` option instead; introducing it here is a separate
+change, not a tidy-up — `wiki/flake-parts-port-notes.md` has that branch's
+reasoning, including the grep-trail convention it came with.
 
 **Check for an existing `programs.*` integration before hand-writing one.**
 

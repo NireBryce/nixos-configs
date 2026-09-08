@@ -87,11 +87,16 @@ or a skill (`.claude/skills/<name>/SKILL.md`) — nothing here is new content.
 - [Traps & skills](traps-and-skills.md) — the mistakes that have actually
   happened here, and the skills that hold the long version of each.
 - [History & lessons learned](history.md) — the den → flake-parts port, the
-  first hardware boots, and the sibling branch's own notes. The full log
-  itself, [lessons-learned.md](lessons-learned.md) — numbered §1–45,
+  first hardware boots, and what became of the sibling branch. The full log
+  itself, [lessons-learned.md](lessons-learned.md) — numbered §1–46,
   "written by Claude Code, for Claude Code" — moved in from `claude cave/`
   2026-09-02; this page stays the index, that page stays the log, the same
   split as `categories/shell-config/README.md` and its deep-dives.
+- [flake-parts port notes](flake-parts-port-notes.md) — salvaged 2026-09-08
+  from the deleted `flake-parts` branch: the port's decisions-not-defaults,
+  its dead ends with the symptom that identified each, and a flake-parts
+  machinery reference backed by the pinned upstream source. Content, not an
+  index, because the branch it linked to is gone.
 - [Open threads](open-threads.md) — pending upstream bug reports, todos,
   half-formed ideas, and things-to-look-into notes left in various corners.
 - [Maintenance schedule](maintenance-schedule.md) — the fleet's keys,

@@ -191,14 +191,13 @@
 
             # sopsFile unset -- defaults to `config.sops.defaultSopsFile`
             # (secrets.yaml, set in nire/system/secrets/sops.nix, imported
-            # by every Linux host via `system`). Declared HERE, not beside
-            # the syncthing-*/forgejo-admin-password secrets in sops.nix,
-            # same reasoning forgejo-admin-password's own declaration
-            # gives: `backup` is cube-only, and a secret declared in
-            # sops.nix decrypts on every `system` host (durandal/tenacity
-            # included, neither backing up anything cube-shaped) --
-            # declaring it here means it decrypts only where this module
-            # is actually imported.
+            # by every Linux host via `system`). Declared HERE and not in
+            # sops.nix, same reasoning forgejo-admin-password's own
+            # declaration in forgejo.nix gives: `backup` is cube-only, and
+            # a secret declared in sops.nix decrypts on every `system`
+            # host (durandal/tenacity included, neither backing up
+            # anything cube-shaped) -- declaring it here means it decrypts
+            # only where this module is actually imported.
             #
             # owner/group/mode left at sops-nix's own defaults (uid 0, gid
             # 0, mode "0400" -- checked against the pinned sops-nix's
