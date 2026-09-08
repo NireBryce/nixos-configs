@@ -24,6 +24,12 @@ import re, sys, pathlib, subprocess
 
 CATEGORY_FILE = 'dirsAsCategory.nix'
 DECL = re.compile(r'flake\.modules\.(\w+)\.(?:\$\{moduleName\}|(\w+))')
+# Declared inside a `flake.modules = { ... }` attrset, where each class
+# heads its own line without the prefix. Line-anchored so the leading
+# `flake` of a flat `flake.modules.<class>...` line cannot match as a
+# class name. basic-nix-settings.nix is the one module shaped this way;
+# missed by this and check_wiki.py's CLASSES scan until 2026-09-08.
+DECL_ATTRSET = re.compile(r'(?m)^\s*(\w+)\.\$\{moduleName\}\s*=')
 # `with config.flake.modules.<class>; [ a b c ]` -- how the aggregates list members
 AGG = re.compile(r'with\s+config\.flake\.modules\.(\w+);\s*\[(.*?)\]', re.S)
 # `config.flake.modules.<class>.<name>` -- one module importing another directly,
@@ -53,6 +59,7 @@ def scan(root):
             categories[p.parent.name] = p
             continue
         classes = {m.group(1) for m in DECL.finditer(p.read_text())}
+        classes.update(DECL_ATTRSET.findall(p.read_text()))
         if classes:
             modules.setdefault(p.stem, []).append((p, classes))
     return categories, modules
