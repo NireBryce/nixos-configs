@@ -1,6 +1,6 @@
 # Hosts & current state
 
-_Last modified: 2026-09-06_
+_Last modified: 2026-09-07_
 
 ## Contents
 
@@ -56,6 +56,12 @@ status and what broke on the way:
   sqlite-staging bug, then confirmed). Still no backups on durandal/
   tenacity/lysithea ([#130](https://github.com/NireBryce/nixos-configs/issues/130)).
   Runbook: [homelab/backup-runbook.md](homelab/backup-runbook.md).
+- opencode server —
+  [`flake/modules/nireHost/cube/configuration/opencode-server-cube.nix`](<../flake/modules/nireHost/cube/configuration/opencode-server-cube.nix>)
+  (2026-09-07). Not a category: one personal dev tool, not part of the
+  self-hosted stack. Runs `opencode serve` as a systemd user service bound
+  to the tailnet IP only — `opencode attach http://ts-cube:3003`, `-c`
+  resumes the last session after a TUI exit.
 
 ## Where each fact lives
 
