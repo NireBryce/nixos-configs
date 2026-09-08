@@ -1,5 +1,7 @@
 # Wiki
 
+_Last modified: 2026-09-08_
+
 ## Contents
 
 - [Common tasks](#common-tasks)
@@ -7,10 +9,16 @@
 - [Keeping this from rotting](#keeping-this-from-rotting)
 
 A topic index over documentation that already exists scattered around this
-repo — `CLAUDE.md`, `claude cave/`, `flake/doc/`, `.claude/skills/`, stray
-`.md` files sitting next to the code they're about, and `bugs pending
-submission/`. Nothing has been moved here: every link below points at the
-file that's already the source for that fact.
+repo — `CLAUDE.md`, `flake/doc/`, `.claude/skills/`, stray `.md` files
+sitting next to the code they're about, and `bugs pending submission/`.
+Almost nothing has been moved here: every link below points at the file
+that's already the source for that fact. The exception is `claude cave/`'s
+four working-notes files, moved in as real pages 2026-09-02 when that
+directory was retired — the same "index over restatement, except here"
+shape `wiki/homelab/` pages and `categories/shell-config/`'s deep-dives
+already used; see [styleguide.md](styleguide.md)'s Directory hierarchy
+section for which tiers are allowed to hold synthesized content instead of
+links, and why.
 
 **Why a link layer and not a rewrite:** this repo has already been bitten,
 repeatedly, by the same fact living in two places and drifting — `CLAUDE.md`'s
@@ -47,7 +55,9 @@ or a skill (`.claude/skills/<name>/SKILL.md`) — nothing here is new content.
 | land a change on `experimental` | [conventions.md](conventions.md), skill [`ship`](../.claude/skills/ship/SKILL.md) |
 | check whether a bug is already a known thread | [open-threads.md](open-threads.md), skill [`investigate-bug`](../.claude/skills/investigate-bug/SKILL.md) |
 | add a self-hosted service to a host | [homelab/README.md](homelab/README.md), skill [`new-homelab-service`](../.claude/skills/new-homelab-service/SKILL.md) |
+| give a service its own Tailscale Services (`svc:`) hostname | [categories/reverse-proxy.md](categories/reverse-proxy.md), skill [`new-tailscale-service`](../.claude/skills/new-tailscale-service/SKILL.md) |
 | add a new host, or format its disk for impermanence | [disk-formatting.md](disk-formatting.md), skill [`new-host-config`](../.claude/skills/new-host-config/SKILL.md) |
+| check what key/credential expiry is coming due | [maintenance-schedule.md](maintenance-schedule.md), skill [`maintenance-schedule`](../.claude/skills/maintenance-schedule/SKILL.md) |
 
 ## Pages
 
@@ -64,16 +74,30 @@ or a skill (`.claude/skills/<name>/SKILL.md`) — nothing here is new content.
   impermanence disk layout runbook: what to decide before touching a real
   disk, what depends on disko actually having run, and how to confirm the
   `/root` rollback is really working rather than just booting.
-- [Architecture & module system](architecture.md) — flake-parts, the
-  `dirsAsCategory` mechanism, Home Manager integration, package modules.
+- [flake-parts](flake-parts.md) — why this repo runs flake-parts at all:
+  its `flake.modules.<class>.<name>` option lets a single file declare a
+  NixOS module and a Home Manager module for the same feature side by
+  side, instead of splitting one feature across two files tied together
+  only by a shared filename. Ahead of
+  [Architecture & module system](architecture.md), which is the
+  `dirsAsCategory` mechanism, Home Manager integration, and package
+  modules built on top of it.
 - [Impermanence, initrd & secrets](impermanence-and-secrets.md) — the
   `/root`-wipe-on-boot mechanism, which hosts opt in, sops-nix.
 - [Traps & skills](traps-and-skills.md) — the mistakes that have actually
   happened here, and the skills that hold the long version of each.
 - [History & lessons learned](history.md) — the den → flake-parts port, the
-  first hardware boots, and the sibling branch's own notes.
+  first hardware boots, and the sibling branch's own notes. The full log
+  itself, [lessons-learned.md](lessons-learned.md) — numbered §1–45,
+  "written by Claude Code, for Claude Code" — moved in from `claude cave/`
+  2026-09-02; this page stays the index, that page stays the log, the same
+  split as `categories/shell-config/README.md` and its deep-dives.
 - [Open threads](open-threads.md) — pending upstream bug reports, todos,
   half-formed ideas, and things-to-look-into notes left in various corners.
+- [Maintenance schedule](maintenance-schedule.md) — the fleet's keys,
+  credentials, and certificates that have an actual expiry, rotation
+  cadence, or silent-breakage property; tended by skill
+  [`maintenance-schedule`](../.claude/skills/maintenance-schedule/SKILL.md).
 
 ### Category reference (configuration)
 
@@ -107,7 +131,10 @@ or a skill (`.claude/skills/<name>/SKILL.md`) — nothing here is new content.
 ### Conventions & meta
 
 - [Conventions & workflow](conventions.md) — the *repo's* style guide: Nix
-  formatting, `just` commands, the `ship` flow, assorted fix snippets.
+  formatting, `just` commands, the `ship` flow, assorted fix snippets. Links
+  out to [module-style-guide.md](module-style-guide.md) for the full
+  `flake/modules/` conventions doc (aligned `=` columns, the module header,
+  why `nix fmt` isn't wired up) — moved in from `claude cave/` 2026-09-02.
 - [Wiki style guide](styleguide.md) — this wiki's *own* house style: the
   directory hierarchy above in full (when a category page earns its own
   subdirectory, like `shell-config` did), naming, linking, and how pages

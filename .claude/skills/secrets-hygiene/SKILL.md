@@ -24,58 +24,32 @@ decrypted.
 
 ## Why this exists
 
-2026-08-26, on `nire-tenacity`: mid-way through wiring a new sops secret for
-a Forgejo admin password, the question "can this session even decrypt
-`secrets.yaml`?" got answered with a bare `sops -d secrets.yaml` — no
-`--extract`, no output suppression. That prints the *entire* file. It
-printed `tailscale_key` and `atuin_key` in plaintext into the transcript,
-along with several lower-sensitivity SSH pubkeys and syncthing device IDs.
-Elly caught it, not Claude, before the reply that would have quoted it — a
-targeted check (`--extract`, or discarding stdout and reading `$?`) would
-have answered the same question with zero exposure. The fix afterward was
-"rotate the Tailscale key," not "redact the message" — output already sent
-can't be un-sent.
+2026-08-26, on `nire-tenacity`: "can this session even decrypt
+`secrets.yaml`?" was answered with a bare `sops -d secrets.yaml`, which
+prints the entire file — `tailscale_key` and `atuin_key` landed in the
+transcript. The fix was rotating the Tailscale key; output already sent
+can't be un-sent. A targeted check (`--extract`, or discard stdout and read
+`$?`) would have answered the same question with zero exposure.
 
 ## Enforced mechanically, not just by memory
 
-Prose guidance is exactly what failed on 2026-08-26 — the discipline below
-was already the obvious approach and got skipped anyway, under no real
-pressure, because nothing forced it. So the two most mechanically-checkable
-parts of this skill are wired as real hooks in `.claude/settings.json`
-(project-scoped, committed, applies every session in this repo — not
-something to re-derive from memory each time):
+Two hooks in `.claude/settings.json` (project-scoped, committed) wire the
+checkable parts:
 
-- **`.claude/hooks/secrets-guard-pretooluse.sh`** (`PreToolUse`, `Bash`
-  matcher) — pattern-matches the command *before* it runs. A bare `sops
-  -d`/`--decrypt` with no `--extract` and no `>/dev/null`, or a
-  `cat`/`bat`/`less`/`more`/`head`/`tail` reading a path under
-  `/run/secrets/`, triggers `permissionDecision: "ask"` with the narrower
-  alternative in the reason text — this is the exact command shape that
-  caused the leak.
-- **`.claude/hooks/secrets-guard-posttooluse.sh`** (`PostToolUse`, `Bash`
-  matcher) — scans the command's actual output *after* it runs, regardless
-  of which command produced it, for a Tailscale auth key (`tskey-...`), an
-  age secret key (`AGE-SECRET-KEY-...`), a private key block
-  (`-----BEGIN ... PRIVATE KEY-----`), or a bare (non-`ENC[...]`)
-  `tailscale_key`/`atuin_key` value. A hit returns `decision: "block"`,
-  which feeds a warning back into context immediately — before there's a
-  chance to quote the result in a reply.
+- **`.claude/hooks/secrets-guard-pretooluse.sh`** (`PreToolUse`, `Bash`) —
+  a bare `sops -d`/`--decrypt` with no `--extract` and no `>/dev/null`, or
+  a `cat`/`bat`/`less`/`more`/`head`/`tail` on a `/run/secrets/` path,
+  triggers `permissionDecision: "ask"` naming the narrower alternative.
+- **`.claude/hooks/secrets-guard-posttooluse.sh`** (`PostToolUse`, `Bash`) —
+  scans actual command output for a Tailscale auth key (`tskey-...`), an age
+  secret key (`AGE-SECRET-KEY-...`), a private key block (`-----BEGIN ...
+  PRIVATE KEY-----`), or a bare (non-`ENC[...]`)
+  `tailscale_key`/`atuin_key` value; a hit returns `decision: "block"`.
 
-Both were pipe-tested against synthetic hook input and proven to fire live
-in-session (a sentinel write appended on a real tool call, confirmed, then
-reverted) before being left in place — not just written and assumed to
-work.
-
-**Known limits, honestly**: both only match the `Bash` tool — a secret
-surfacing via `Read` on a decrypted file isn't caught by either. The
-post-use scanner's patterns are specific shapes plus this repo's two
-sensitive `secrets.yaml` key names; a secret that doesn't match one of
-those (a new kind of credential added later, a password with no
-recognizable prefix) won't be flagged. The pre-use guard only recognizes
-the `sops -d` / `/run/secrets/` shapes, not every way a secret could leak.
-The sections below are what's still judgment rather than pattern-match —
-read them for the cases the hooks don't cover, not as a first line of
-defense that's now redundant.
+Known limits: `Bash` tool only (a `Read` of a decrypted file is not
+caught); patterns are specific shapes plus this repo's two sensitive key
+names, so an unrecognized credential shape won't flag. The sections below
+are the judgment the hooks can't cover.
 
 ## Preventing it
 

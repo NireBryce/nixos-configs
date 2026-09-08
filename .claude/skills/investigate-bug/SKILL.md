@@ -17,30 +17,23 @@ specific cause or file — there's nothing to check for in that case.
 
 ## Why this exists
 
-A ble.sh/carapace completion bug was reported 2026-08-24 ("weird completion
-errors ... over ssh"). It got fully re-derived from a live pty session —
-tracing `read` calls through ble.sh's internals, hours of it — before
-anyone checked whether it was already known. It was: diagnosed and written
-up in `wiki/categories/shell-config/blesh.md` on **2026-08-22**, two days
-earlier, one link from `wiki/README.md`'s own top-level index. The
-sentence naming it was right there ("an open upstream bug found while
-diagnosing a spurious `read` error on Tab-completion") — never checked.
-Full account: `claude cave/lessons-learned.md` #39,
-[issue #72](https://github.com/NireBryce/nixos-configs/issues/72).
-
-That session had also just spent its whole diagnosis proving a piece of
-prose in `CLAUDE.md`/`wiki/README.md` ("check before re-deriving") isn't
-enough on its own to make the check actually happen — which is why this is
-a skill (a triggered, required step) instead of one more line added to
-those files.
+A ble.sh/carapace completion bug (2026-08-24) got fully re-derived from a
+live pty session — hours — before anyone checked whether it was already
+known. It was: diagnosed and written up in
+`wiki/categories/shell-config/blesh.md` on 2026-08-22, two days earlier,
+one link from `wiki/README.md`'s index. Full account: §39,
+[issue #72](https://github.com/NireBryce/nixos-configs/issues/72). Prose
+saying "check first" demonstrably wasn't enough to make the check happen —
+which is why this is a triggered skill rather than another line in
+`AGENTS.md`.
 
 ## Steps
 
 1. **Before reproducing anything**, run `just threads "<keywords>"` with a
    couple of guesses from the report's own wording (symptom text, error
    message, command name). It checks this repo's GitHub issues
-   (`gh issue list --search`) and greps `wiki/`,
-   `claude cave/lessons-learned.md`, and `bugs pending submission/` in one
+   (`gh issue list --search`) and greps `wiki/` (which includes
+   `wiki/lessons-learned.md`) and `bugs pending submission/` in one
    shot — see `flake/scripts/threads.sh` for exactly what it covers.
 2. **A hit means read it fully** — the issue and/or the linked wiki
    deep-dive — before doing anything else. Pick up from where it left off

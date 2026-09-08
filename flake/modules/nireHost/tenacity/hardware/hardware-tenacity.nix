@@ -16,58 +16,60 @@
         flake.modules.nixos.${moduleName} = { config, lib, modulesPath, ... }:
     {
       imports =
-        [ 
+        [
           (modulesPath + "/installer/scan/not-detected.nix")
         ];
 
-      boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usbhid" "usb_storage" "sd_mod" ];
-      boot.initrd.kernelModules = [ ];
-      boot.kernelModules = [ "kvm-amd" ];
-      boot.extraModulePackages = [ ];
-
-
-      fileSystems."/boot" =
-        { device = "/dev/disk/by-uuid/380C-3C39";
-          fsType = "vfat";
-          options = [ "fmask=0022" "dmask=0022" ];
+      boot = {
+        initrd = {
+          availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usbhid" "usb_storage" "sd_mod" ];
+          kernelModules = [ ];
+          luks.devices."enc".device = "/dev/disk/by-uuid/03b8f5c0-d846-4fde-b533-2a22e8e9975b";
         };
+        kernelModules = [ "kvm-amd" ];
+        extraModulePackages = [ ];
+      };
 
+      fileSystems = {
+        "/boot" =
+          { device = "/dev/disk/by-uuid/380C-3C39";
+            fsType = "vfat";
+            options = [ "fmask=0022" "dmask=0022" ];
+          };
 
+        "/" =
+          { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
+            fsType = "btrfs";
+            options = [ "subvol=root" "compress=zstd" "noatime" ];
+          };
 
-      fileSystems."/" =
-        { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
-          fsType = "btrfs";
-          options = [ "subvol=root" "compress=zstd" "noatime" ];
-        };
+        "/home" =
+          { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
+            fsType = "btrfs";
+            options = [ "compress=zstd" "subvol=home" ];
 
-      boot.initrd.luks.devices."enc".device = "/dev/disk/by-uuid/03b8f5c0-d846-4fde-b533-2a22e8e9975b";
+          };
 
-      fileSystems."/home" =
-        { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
-          fsType = "btrfs";
-          options = [ "compress=zstd" "subvol=home" ];
-      
-        };
+        "/nix" =
+          { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
+            fsType = "btrfs";
+            options = [ "subvol=nix" "noatime" "compress=zstd" ];
+          };
 
-      fileSystems."/nix" =
-        { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
-          fsType = "btrfs";
-          options = [ "subvol=nix" "noatime" "compress=zstd" ];
-        };
+        "/persist" =
+          { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
+            fsType = "btrfs";
+            options = [ "subvol=persist" "noatime" "compress=zstd" ];
+            neededForBoot = true;
+          };
 
-      fileSystems."/persist" =
-        { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
-          fsType = "btrfs";
-          options = [ "subvol=persist" "noatime" "compress=zstd" ];
-          neededForBoot = true; 
-        };
-
-      fileSystems."/var/log" =
-        { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
-          fsType = "btrfs";
-          options = [ "subvol=log" "noatime" "compress=zstd" ];
-          neededForBoot = true;
-        };
+        "/var/log" =
+          { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
+            fsType = "btrfs";
+            options = [ "subvol=log" "noatime" "compress=zstd" ];
+            neededForBoot = true;
+          };
+      };
 
       swapDevices = [ ];
 

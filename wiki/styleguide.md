@@ -1,5 +1,7 @@
 # Wiki style guide
 
+_Last modified: 2026-09-06_
+
 ## Contents
 
 - [Directory hierarchy](#directory-hierarchy)
@@ -22,18 +24,23 @@ Two tiers for the *configuration* side, plus one escape hatch — and one
 separate tier for the *usage* side:
 
 - **`wiki/*.md`** — cross-cutting topics that don't belong to one category:
-  `overview.md`, `architecture.md`, `hosts.md`, `disk-formatting.md`,
-  `history.md`, `impermanence-and-secrets.md`, `open-threads.md`,
-  `traps-and-skills.md`, `conventions.md`, this file. `overview.md` is the
-  one deliberately written to be read *before* the rest of this tier makes
-  sense — a newcomer's on-ramp, not a topic among equals; see its own
-  header. `disk-formatting.md` is the one runbook-shaped page in this tier
-  — ordered steps and safety warnings rather than a what/why/traps topic
-  article, closer in shape to a `homelab/` usage page than its siblings
-  here, but scoped to a `flake/modules/` mechanism (`impermanence`) rather
-  than a running service, so it stays in this tier instead of that one.
-  These span multiple categories or aren't tied to a `flake/modules/`
-  directory at all.
+  `overview.md` (the newcomer's on-ramp, deliberately written to be read
+  first), `architecture.md`, `hosts.md`, `disk-formatting.md` (the one
+  runbook-shaped page here — ordered steps, closer to a `homelab/` usage
+  page, but scoped to a `flake/modules/` mechanism so it stays in this
+  tier), `history.md`, `impermanence-and-secrets.md`, `open-threads.md`,
+  `traps-and-skills.md`, `conventions.md`, this file.
+
+  Two pages in this tier are the exception to "index over restatement"
+  below: `lessons-learned.md` and `module-style-guide.md` moved in verbatim
+  from `claude cave/` when that directory was retired 2026-09-02 (two
+  others moved with them — `impermanence-stage1-migration.md` and
+  `kde-to-wayland-migration.md` — and were removed 2026-09-05 —
+  `history.md`) — real, synthesized content because there's nothing else
+  for it to link to.
+  `history.md` stays the index into `lessons-learned.md`;
+  `conventions.md` stays the index into `module-style-guide.md` — the same
+  split as a category page and its deep-dive.
 - **`wiki/categories/<name>.md`** — one page per real category, i.e. a
   directory under `flake/modules/` holding its own `dirsAsCategory.nix`
   (see [architecture.md](architecture.md)). Indexed in
@@ -47,35 +54,25 @@ separate tier for the *usage* side:
 - **`wiki/homelab/`** — the usage tier, added 2026-08-24 with
   [golinks.md](homelab/golinks.md). Pages about operating a service this
   fleet runs, for a reader who wants to *do something with it* rather than
-  edit `flake/modules/`. Its `README.md` is the index; each service gets a
-  page named after the thing you'd search for, not after the module
-  (`golinks.md`, not `golink.md` or `shortlinks.md` — the module is
-  `golink`, the category is `shortlinks`, and the thing people say is
-  "go links"). Where the tool's own name *is* what you'd search for, that
-  wins: `forgejo.md`, even though the module is also `forgejo`.
+  edit `flake/modules/`. `README.md` is the index; each service gets a page
+  named after the thing you'd search for, not the module (`golinks.md`, not
+  `golink.md` — but `forgejo.md`, where the tool's name *is* what you'd
+  search for).
 
-  One page there isn't about a single service:
-  [reaching-services.md](homelab/reaching-services.md), added 2026-08-24
-  when everything on `nire-cube` moved behind one HTTPS hostname. A
-  cross-service page earns its place here when the *thing being explained
-  is the arrangement rather than any one service* — the URL map, why the
-  certificate is trusted, and which layer to suspect when something doesn't
-  answer, none of which belongs in three separate service pages. Prefer a
-  service page; reach for this shape only when the alternative is repeating
-  yourself.
+  [reaching-services.md](homelab/reaching-services.md) is the one page not
+  about a single service: a cross-service page earns its place here when
+  the *thing being explained is the arrangement* — the URL map, why the
+  certificate is trusted, which layer to suspect. Prefer a service page;
+  reach for this shape only when the alternative is repeating yourself.
 
-  It's a separate tier rather than more `wiki/*.md` pages because the two
-  rot differently: a category page goes stale when the config changes, a
-  usage page goes stale when the *service* changes under it — possibly
-  with no commit to this repo at all. Keeping them apart means "is this
-  still true?" has a different answer method for each, instead of one pile
-  where you have to work out which kind of page you're reading.
+  It's a separate tier from `categories/` because the two rot differently:
+  a category page goes stale when the config changes, a usage page when the
+  *service* changes — possibly with no commit to this repo at all.
 
-  **"Index over restatement" is relaxed here, with a condition.** For these
-  pages the real source is often the running service's own help endpoint
-  (`http://go/.help`), not a file in this repo, so there's nothing local to
-  link to. A page here may therefore hold synthesized content the way a
-  category deep-dive may — but it must say **what was verified against the
+  **"Index over restatement" is relaxed here, with a condition.** The real
+  source is often the running service's own help endpoint
+  (`http://go/.help`), not a file in this repo, so a page here may hold
+  synthesized content — but it must say **what was verified against the
   live service and what was only transcribed**, and point at the live
   source as canonical. `golinks.md`'s closing section is the pattern.
 - **`wiki/categories/<name>/`** — the escape hatch, used exactly once so
@@ -89,6 +86,26 @@ separate tier for the *usage* side:
   a third tier under that; if a deep-dive page itself needs to fork
   further, that's a sign the split is at the wrong level, not a reason to
   nest another directory.
+- **`wiki/categories/<name>-history.md`** — a sibling file rather than a
+  new directory, used when a category page has accumulated resolved
+  incidents (a first-switch failure since fixed, a superseded plan, a
+  regression that's been fixed twice) whose *outcome* still matters but
+  whose blow-by-blow doesn't need loading every time the category page is
+  read. Added 2026-09-03 across `backup`, `virtualization`, `shortlinks`,
+  `git-forge`, `monitoring`, `reverse-proxy` — `backup-history.md` also
+  absorbed what had been a "Background" section on
+  [homelab/backup-runbook.md](homelab/backup-runbook.md), so a usage-tier
+  page's history can live on its category's history page too rather than
+  needing its own. **Don't reach for this by default** — most of what
+  reads as "history" in a category page is actually mechanism explained
+  through its discovery, and that stays put; see "index over restatement"
+  below for why narrating *how* something was verified is not the same as
+  narrating *that* it used to be broken. The test: does understanding the
+  *current* setting/behavior require this paragraph, or only understanding
+  how it came to be that way? Only the second kind moves. The main page
+  keeps a one-to-two-sentence summary and a link — never a bare pointer
+  with nothing — so a reader loses no context skimming the main page, only
+  the full narrative.
 
 ## Naming
 
@@ -100,6 +117,26 @@ separate tier for the *usage* side:
 
 ## Content shape
 
+- **Every page opens with a `_Last modified: YYYY-MM-DD_` line**, right
+  after the title and before `## Contents` (added wiki-wide 2026-09-06):
+
+  ```
+  # Page title
+
+  _Last modified: 2026-09-06_
+
+  ## Contents
+  ```
+
+  Absolute date, same rule as everywhere else on this page — the point is a
+  reader can tell at a glance how stale a page might be without opening
+  `git log`. **Whoever edits a page's actual content bumps this line to
+  today in the same change**; a purely mechanical touch (a `gen-contents`
+  run, a typo fix) doesn't need to. `wiki/scripts/check_wiki.py dates`
+  checks that the line exists and is shaped right (part of `just
+  wiki-lint`), but — like every other date claim in this repo — can't check
+  that it's still *true*; that's on the editor, the same discipline skill
+  `wiki-sync` already asks for everywhere else on a page.
 - **Every page opens with a `## Contents`** — a bullet list of section links,
   one per `##` heading on the page, placed right after the title and before
   any intro prose (added wiki-wide 2026-09-01, for browsability: a reader
@@ -166,10 +203,12 @@ separate tier for the *usage* side:
 - Link in both directions: an index links down into a page, and that page
   links back up (`categories/README.md` ↔ a category page ↔ its
   deep-dive pages).
-- A path containing a space (anything under `claude cave/` or `bugs
-  pending submission/`) has to be wrapped in `<...>` for the markdown link
-  target to parse — see the entries in
-  [open-threads.md](open-threads.md) for the pattern.
+- A path containing a space (anything under `bugs pending submission/`) has
+  to be wrapped in `<...>` for the markdown link target to parse — see the
+  entries in [open-threads.md](open-threads.md) for the pattern. `claude
+  cave/` used to be the other example of this until it was retired
+  2026-09-02 and its files moved into `wiki/` proper, whose own paths never
+  have spaces.
 - Verify a link resolves before leaving it. There's no automated check for
   this (see below); a quick `[ -e "$(dirname "$file")/$link" ]` per link
   after any move or rename catches what proofreading misses.

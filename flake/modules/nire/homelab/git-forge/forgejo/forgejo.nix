@@ -43,33 +43,33 @@
                         HTTP_PORT = 3001; # monitoring's grafana.nix already
                                           # took 3000 on this host.
 
-                        # ts-cube, NOT nire-cube -- tailnet device names
-                        # don't match `networking.hostName`
-                        # (system/networking/tailscale.nix's "TWO REAL
-                        # TRAPS"). These deliberately DISAGREE; not a typo:
+                        # DOMAIN and ROOT_URL deliberately DISAGREE, still
+                        # -- not a typo, and not both moving to
+                        # `tailscale-services/serve.nix`'s new service
+                        # name the way grafana.nix's domain/root_url did:
                         #
-                        #   - ROOT_URL is what the browser sees: full
-                        #     https:// FQDN under the /git/ prefix caddy.nix
-                        #     mounts this at; trailing slash required --
-                        #     Forgejo appends every link to it. It does NOT
-                        #     make Forgejo serve under that prefix (no
-                        #     serve_from_sub_path; the app always serves at
-                        #     `/` -- live-verified 2026-08-24: `curl
-                        #     127.0.0.1:3001/` 200, `.../git/` 404), so
-                        #     caddy.nix STRIPS the prefix here (`handle_path`)
-                        #     but keeps it for Grafana (`handle`); without
-                        #     the strip, a 404 on every page -- how the
-                        #     asymmetry was found.
-                        #   - DOMAIN builds the SSH clone URLs (SSH_DOMAIN
-                        #     defaults to it); git+ssh bypasses caddy for the
-                        #     host's sshd on port 22 (below). Short `ts-cube`
-                        #     keeps clone URLs `forgejo@ts-cube:...`.
+                        #   - ROOT_URL is what the browser sees, so it
+                        #     followed the move -- HTTP(S) now goes through
+                        #     Tailscale Serve as `svc:git`, not caddy.nix's
+                        #     `/git/` prefix (that route is retired, see
+                        #     serve.nix's header; not yet runtime-verified).
+                        #   - DOMAIN stays the device name `ts-cube`,
+                        #     unchanged, because it builds the SSH clone
+                        #     URLs (SSH_DOMAIN defaults to it) and git+ssh
+                        #     bypasses BOTH caddy and Tailscale Serve --
+                        #     it's the host's own sshd on port 22 (below),
+                        #     which serve.nix's `tcp:443`-only config
+                        #     doesn't touch. Clone URLs stay
+                        #     `forgejo@ts-cube:...`.
                         #
-                        # The FQDN is duplicated in caddy.nix and grafana.nix
-                        # rather than shared (nothing declares options,
-                        # CLAUDE.md Architecture); all three move together.
+                        # `ts-cube`/`nire-cube` mismatch itself is
+                        # networking/tailscale.nix's "FOUR REAL TRAPS" #1;
+                        # the ROOT_URL FQDN is duplicated in serve.nix and
+                        # grafana.nix, not shared (no options in this
+                        # tree, CLAUDE.md Architecture) -- both move
+                        # together if the service name ever changes.
                         DOMAIN    = "ts-cube";
-                        ROOT_URL  = "https://ts-cube.moose-micro.ts.net/git/";
+                        ROOT_URL  = "https://git.moose-micro.ts.net/";
 
                         # DISABLE_SSH at default (false); START_SSH_SERVER
                         # unset, so false too -- git+ssh goes through the
@@ -112,7 +112,7 @@
             # No forgejo-persist.nix, same reasoning grafana.nix gives for
             # skipping one: cube has a plain persistent root
             # (cube-configuration.nix's header), not the
-            # durandal/tenacity/lego `/root` wipe, so /var/lib/forgejo
+            # durandal/tenacity `/root` wipe, so /var/lib/forgejo
             # (repos, sqlite db, self-generated secrets under
             # `custom/conf/`) survives reboots. If a host that DOES wipe
             # root ever imports this, add one first, modeled on
@@ -130,7 +130,7 @@
             # by every Linux host via `system`). Declared HERE, not beside
             # the syncthing-* secrets in sops.nix, on purpose: `git-forge`
             # is cube-only, and a secret in sops.nix decrypts on every
-            # `system` host (durandal/tenacity/lego included, none running
+            # `system` host (durandal/tenacity included, neither running
             # Forgejo); declaring it here means it decrypts only where
             # imported.
             sops.secrets.forgejo-admin-password = {

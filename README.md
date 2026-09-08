@@ -17,13 +17,19 @@ Layout
 
 `flake.nix` imports every `.nix` file under `flake/modules/` via
 `import-tree`, rather than wiring paths together by hand. Each file declares
-one `flake.modules.<class>.<name>` module. Which category it belongs to is
-decided by the directory it sits in, not by an explicit list, so moving a
-file between directories moves it between categories and nothing else has
-to change.
+one `flake.modules.<class>.<name>` module — `<class>` is `nixos`,
+`homeManager`, or `darwin`, so a single file can declare a NixOS module and
+a Home Manager module for the same feature side by side (`nixd.nix`
+installs the nixd LSP for both) instead of splitting one feature across two
+files that agree only by sharing a filename. Which category a module
+belongs to is decided by the directory it sits in, not by an explicit list,
+so moving a file between directories moves it between categories and
+nothing else has to change.
 
 This keeps the config easy to reshape and hard to browse from a directory
-listing alone. `flake/doc/dirsAsCategory.md` explains the mechanism.
+listing alone. `flake/doc/dirsAsCategory.md` explains that mechanism;
+`flake/doc/flake-parts-rationale.md` explains why flake-parts specifically,
+and what else of it this repo actually uses.
 
 Hosts
 -----
@@ -50,7 +56,7 @@ Using this
 Steal what's useful. Don't run `nixos-rebuild switch` against this as-is on
 a machine you are not prepared to lose `/root` on.
 
-`CLAUDE.md` and `claude cave/lessons-learned.md` are an AI agent's working notes,
+`CLAUDE.md` and `wiki/lessons-learned.md` are an AI agent's working notes,
 not documentation for a human reader — skip them unless you're the agent.
 
 `wiki/README.md` is a topic index over the docs scattered around this repo

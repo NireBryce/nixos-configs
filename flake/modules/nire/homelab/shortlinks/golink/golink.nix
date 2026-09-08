@@ -172,7 +172,7 @@
             # No golink-persist.nix, same reasoning as grafana.nix and
             # forgejo.nix: cube has a plain persistent root
             # (cube-configuration.nix's header), not the `/root` wipe
-            # durandal/tenacity/lego get, so /var/lib/private/golink (links
+            # durandal/tenacity get, so /var/lib/private/golink (links
             # database AND tsnet node key) survives reboots. If a host that
             # DOES wipe root ever imports this, add one first, modeled on
             # tailscale-persist.nix -- else every reboot loses every

@@ -27,4 +27,25 @@ if ! python3 scripts/lint.py check; then
     exit 1
 fi
 
-git add "${repo_root}/flake/scripts/lint-baseline.json"
+# `-C "$repo_root"` + a repo-root-relative path, not `cd` + an absolute one.
+# Git exports GIT_DIR into a hook's environment so a `git` command the hook
+# runs can find "the repository" without re-discovering it -- but in a
+# linked worktree that export is GIT_DIR alone, no matching GIT_WORK_TREE,
+# and once GIT_DIR is set explicitly `git` stops walking up from cwd to
+# find the work-tree root and falls back to cwd itself instead. Run from
+# inside flake/ (this hook `cd`s there, above, so lint.py runs the same way
+# `just lint` runs it), a plain `git add "$repo_root/flake/scripts/..."`
+# inherited that GIT_DIR, silently re-derived flake/ as the top, and staged
+# the given *absolute* path relative to that -- dropping the flake/ prefix
+# outright and creating a second, stray copy at scripts/lint-baseline.json.
+# No error at any layer; caught for real 2026-09-02, landing an unrelated
+# docs commit from a worktree (wiki/lessons-learned.md #44 has the full
+# repro). `-C "$repo_root"` sidesteps the whole GIT_DIR-vs-cwd question by
+# telling git directly what directory to treat as its starting point,
+# instead of leaving it to infer one -- githooks(5) itself suggests
+# `unset $(git rev-parse --local-env-vars)` for this class of problem, but
+# that also clears GIT_INDEX_FILE, which this git process needs to keep
+# pointed at the *same* index the outer `git commit` already has open, or
+# this `git add` fights it for the index lock instead (see #44's own
+# update for how that surfaced).
+git -C "${repo_root}" add flake/scripts/lint-baseline.json

@@ -5,7 +5,6 @@
 # function, `import`ed by path from each real `dirsAsCategory.nix`,
 # which stays a two-line shim. Safe under modules/ because import-tree
 # ignores any path containing "/_" -- same rule
-# `nirePackages/_lib/mkPkgModule.nix`,
 # `nirePackages/_templates/dirsAsCategory.nix` and
 # `nire/impermanence/_disko/impermanence-luks-btrfs.nix` rely on.
 #
@@ -13,9 +12,7 @@
 # time to wherever the token is written, not call-stack introspection --
 # `dirOf __curPos.file` in here would give every caller *this file's*
 # directory, collapsing every category to one named `_lib`. See
-# CLAUDE.md, "a module's name is its filename", and
-# `nirePackages/_lib/mkPkgModule.nix`'s header, which keeps `moduleName`
-# out of itself for the identical reason.
+# CLAUDE.md, "a module's name is its filename".
 #
 # Callers reach this file by walking up from their own directory to
 # `modules/`, not via `inputs.self + "/flake/modules/_lib/..."` -- the
@@ -133,7 +130,9 @@ let
 
 in
 {
-    flake.modules.nixos.${categoryName}.imports        = forClass "nixos";
-    flake.modules.homeManager.${categoryName}.imports  = forClass "homeManager";
-    flake.modules.darwin.${categoryName}.imports       = forClass "darwin";
+    flake.modules = {
+        nixos.${categoryName}.imports        = forClass "nixos";
+        homeManager.${categoryName}.imports  = forClass "homeManager";
+        darwin.${categoryName}.imports       = forClass "darwin";
+    };
 }

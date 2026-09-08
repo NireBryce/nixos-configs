@@ -1,8 +1,9 @@
 # restic: cube's only backup of its own service state, to the QNAP NAS
 # already on the network. Added 2026-08-28 against issue #87 ("no backups
-# anywhere in the fleet") and the plan at
-# `claude cave/plans/2026-08-27-1816-cube-qnap-backup-plan.md` -- read that
-# file for the reasoning this header only summarizes. Own category
+# anywhere in the fleet") and the original plan, folded into
+# `wiki/homelab/backup-runbook.md`'s "Background" section 2026-09-02 when
+# `claude cave/` was retired -- read that section for the reasoning this
+# header only summarizes. Own category
 # (`nire/homelab/backup/`), not `restic`: a category and its one module both
 # named `restic` would declare `flake.modules.nixos.restic` twice and
 # silently MERGE, the `containers`/`podman.nix` collision CLAUDE.md/AGENTS.md
@@ -45,6 +46,22 @@
 # below is about the NFS-era version of this module; treat it as history,
 # not current status.
 #
+# REPOSITORY MOVED OFF `nire`'S HOME, 2026-09-03 -- the QNAP's Snapshot
+# Manager (checked directly, screenshot in the session that made this
+# change) showed the anti-deletion mitigation below would have to target
+# the `homes` share to cover `/share/homes/nire/restic-cube`, and QNAP
+# snapshots are per-shared-folder: that would snapshot every user's home
+# directory on the NAS, not just this repo. `restic-backup` already exists
+# as its own share (Storage Pool 2, unused since the abandoned NFS plan --
+# see history below), so the repo now points there instead. UNVERIFIED:
+# whether the `nire` SFTP account actually has write access to
+# `restic-backup` (it was provisioned for NFS-era access, not SFTP to this
+# path) and whether anything was ever backed up to the old
+# `/share/homes/nire/restic-cube` path that needs migrating rather than
+# starting fresh -- neither has been checked against the real QNAP. Confirm
+# both by hand before trusting a build against this path; see sftpRepo's
+# own comment for the exact check.
+#
 # ── history: NFS era, 2026-08-28 through 2026-08-31 ──────────────────────
 #
 # THE PLAN DOC'S "storage-NFS.nix IS DANGLING" CLAIM WAS WRONG, corrected
@@ -81,18 +98,49 @@
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 
-        # `nire`'s home on the QNAP, confirmed live via
-        # `ssh nire@ts-hive 'echo $HOME'` -- `/share/homes/nire`, real path
-        # `/share/ZFS19_DATA/homes/nire`. `restic-cube` underneath it is a
-        # host-scoped subdirectory for the same reason the old NFS
-        # `repoRoot` had one: nothing stops another host getting its own
-        # backup category later, and this keeps repositories from
-        # colliding if one does. Pre-created by hand (`mkdir -p
-        # ~/restic-cube && chmod 700`) on the QNAP, since restic's SFTP
-        # backend needs the parent to exist even though it creates the
-        # repository structure itself on `init`.
-        sftpRepo          = "sftp:nire@ts-hive:/share/homes/nire/restic-cube";
-        sqliteStagingDir  = "/var/cache/restic-backups-cube/sqlite-staging";
+        # `restic-backup`, the QNAP's own dedicated share (Storage Pool 2),
+        # not `nire`'s home -- see the module header's 2026-09-03 entry for
+        # why this moved off `/share/homes/nire/restic-cube`. `cube`
+        # underneath it is a host-scoped subdirectory for the same reason
+        # the old NFS `repoRoot` had one: nothing stops another host
+        # getting its own backup category later, and this keeps
+        # repositories from colliding if one does.
+        #
+        # NOT CONFIRMED LIVE -- the old home-directory path was checked by
+        # hand (`ssh nire@ts-hive 'echo $HOME'`); this one hasn't been.
+        # Before building against it: confirm `nire` can write here
+        # (`ssh nire@ts-hive 'mkdir -p /share/restic-backup/cube && chmod
+        # 700 /share/restic-backup/cube'` -- restic's SFTP backend needs
+        # the parent directory to exist even though it creates the
+        # repository structure itself on `init`) and that
+        # `/share/homes/nire/restic-cube` (the old path) has nothing
+        # already backed up to it that would need migrating instead of a
+        # fresh `init` here.
+        sftpRepo          = "sftp:nire@ts-hive:/share/restic-backup/cube";
+
+        # ROOT CAUSE, FOUND 2026-09-06 (root-caused after the restore
+        # drill's own "done" bar caught the symptom): this used to be
+        # `/var/cache/restic-backups-cube/sqlite-staging` -- nested
+        # *inside* `RESTIC_CACHE_DIR` (nixpkgs' restic module sets that to
+        # `/var/cache/restic-backups-${name}`, matching `CacheDirectory=`
+        # on the systemd unit exactly). restic refuses to back up its own
+        # cache directory -- confirmed empirically, not from docs: the
+        # exact same `restic backup --dry-run` with the exact same
+        # `--exclude-file`/`--files-from` processed 603 files (all three
+        # staged sqlite copies included) with `RESTIC_CACHE_DIR` unset,
+        # and exactly 600 (all three silently dropped, no error, no log
+        # line) with it set to the real value -- the one difference. Every
+        # real backup since the module's creation nested this staging
+        # directory inside the excluded cache root, so the sqlite
+        # consistency mechanism issue #87 asked for never actually ran:
+        # `backupPrepareCommand` reliably wrote real files (proven by
+        # `prepare.log`, added earlier the same session as a diagnostic,
+        # kept now as a permanent sanity check), and restic reliably
+        # refused to back any of them up. Moved to `/var/lib`, a sibling
+        # of nothing restic considers its own, to fix it structurally
+        # rather than reach for an `--exclude-caches`-adjacent flag that
+        # would leave the *directory choice* still wrong.
+        sqliteStagingDir  = "/var/lib/restic-backups-cube-sqlite-staging";
 
         # The three sqlite dbs actually at risk (issue #87's table), and
         # where each one lives -- checked against the pinned nixpkgs
@@ -128,6 +176,18 @@
             # needed on that command line.
             programs.ssh.knownHosts."ts-hive".publicKey =
                 "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFyg7GFh4XWohudoODsdbzj8MtyymHChvk/BHvm+IRDU";
+
+            # Plain `restic` on PATH, not just the auto-generated
+            # `restic-cube` wrapper below (nixpkgs' services.restic module
+            # own mechanism, `createWrapper`) -- that wrapper hardcodes a
+            # single repository/password pair via env vars, which covers
+            # the single-repo ad hoc commands (`restic-cube snapshots`,
+            # `stats`, `check`) but not a `restic copy --repo B --from-repo
+            # A` between two repositories, needed once
+            # (`wiki/homelab/backup-runbook.md`'s migration step,
+            # 2026-09-04, moving the repo to the `restic-backup` share
+            # without losing what was already backed up to the old path).
+            environment.systemPackages = [ pkgs.restic ];
 
             # sopsFile unset -- defaults to `config.sops.defaultSopsFile`
             # (secrets.yaml, set in nire/system/secrets/sops.nix, imported
@@ -224,11 +284,34 @@
                 # what actually gets backed up.
                 exclude = builtins.attrValues sqliteDbs;
 
+                # Added as a live diagnostic 2026-09-06 while root-causing
+                # the bug `sqliteStagingDir`'s own comment now explains in
+                # full -- every real run had this step writing real files
+                # (proven here: `prepare.log` logged correct sizes) while
+                # restic silently refused to back any of them up, because
+                # the staging directory used to live inside restic's own
+                # cache directory. Kept on as a permanent sanity check now
+                # that the actual fix is the directory move above, not
+                # this logging -- cheap, and it's what caught the module
+                # doing its job correctly while restic didn't. This log
+                # file itself sits under the (excluded) cache directory on
+                # purpose: it was never meant to be backed up remotely,
+                # only read locally. Full store paths for every command
+                # here (mkdir/date/stat), not bare names -- ad hoc
+                # reproductions of this exact script kept hitting `command
+                # not found` from a missing `$PATH` during the
+                # investigation; not leaving that same trap here.
                 backupPrepareCommand = ''
-                    mkdir -p ${sqliteStagingDir}
-                    ${lib.concatStringsSep "\n" (lib.mapAttrsToList
-                        (name: db: "${pkgs.sqlite}/bin/sqlite3 ${db} \".backup '${sqliteStagingDir}/${name}.db'\"")
-                        sqliteDbs)}
+                    {
+                        ${pkgs.coreutils}/bin/echo "=== prepare run: $(${pkgs.coreutils}/bin/date -Iseconds) ==="
+                        ${pkgs.coreutils}/bin/mkdir -p ${sqliteStagingDir}
+                        ${lib.concatStringsSep "\n" (lib.mapAttrsToList
+                            (name: db: ''
+                                ${pkgs.sqlite}/bin/sqlite3 ${db} ".backup '${sqliteStagingDir}/${name}.db'"
+                                ${pkgs.coreutils}/bin/echo "${name}.db: $(${pkgs.coreutils}/bin/stat -c%s ${sqliteStagingDir}/${name}.db 2>&1 || ${pkgs.coreutils}/bin/echo MISSING) bytes"
+                            '')
+                            sqliteDbs)}
+                    } >> /var/cache/restic-backups-cube/prepare.log 2>&1
                 '';
 
                 # Starting point, not sized -- issue #87's open question 5
@@ -259,14 +342,17 @@
             # Anti-deletion (issue #87's open question 3: "push means cube
             # can delete its own backups") is NOT a Nix change, and
             # switching to SFTP didn't close it either -- `nire` can still
-            # delete anything it has permission to on `~/restic-cube` over
+            # delete anything it has permission to on `restic-backup` over
             # SFTP, same as it could over NFS. Still needs a QNAP-side
-            # native snapshot schedule on the share, so cube can write and
-            # prune within the restic repo but can't touch the NAS's own
-            # snapshots. Cheapest rung of the ascending-effort list #87
-            # proposes; see the plan doc. Nothing in this module enforces
-            # it, because nothing in this module *can* -- it's QNAP
-            # admin-console configuration, same category of gap as the
+            # native snapshot schedule on the `restic-backup` share itself
+            # (moved here from `nire`'s `homes` share 2026-09-03
+            # specifically so this snapshot schedule doesn't have to cover
+            # every user's home directory to cover this repo), so cube can
+            # write and prune within the restic repo but can't touch the
+            # NAS's own snapshots. Cheapest rung of the ascending-effort
+            # list #87 proposes; see the plan doc. Nothing in this module
+            # enforces it, because nothing in this module *can* -- it's
+            # QNAP admin-console configuration, same category of gap as the
             # two secret values above.
         };
 }

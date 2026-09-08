@@ -1,5 +1,7 @@
 # Traps & skills
 
+_Last modified: 2026-09-07_
+
 ## Contents
 
 - [Two traps general enough to stay inline in `CLAUDE.md` rather than a skill](#two-traps-general-enough-to-stay-inline-in-claudemd-rather-than-a-skill)
@@ -22,10 +24,11 @@ one-liner.
 | Adding/platform-gating a package | `.claude/skills/nirepackages-platform-support/SKILL.md` |
 | Adding a new host | `.claude/skills/new-host-config/SKILL.md` |
 | Adding a homelab service (port, proxy route, verification) | `.claude/skills/new-homelab-service/SKILL.md` |
-| Building a NixOS VM image / wiring a libvirt guest | `.claude/skills/nixos-vm-images/SKILL.md` |
+| Giving a service its own Tailscale Services (`svc:`) hostname | `.claude/skills/new-tailscale-service/SKILL.md` |
 | Landing work on `experimental` | `.claude/skills/ship/SKILL.md` |
 | Filing a bug noticed while doing something else | `.claude/skills/propose-issue/SKILL.md` |
 | Checking whether a change left a `wiki/` page stale | `.claude/skills/wiki-sync/SKILL.md` |
+| Tightening wiki/skill/AGENTS prose for conciseness | `.claude/skills/trim-docs/SKILL.md` |
 | Writing a new skill | `.claude/skills/new-skill/SKILL.md` |
 | Starting a task that will branch, commit, or check out | `.claude/skills/use-a-worktree/SKILL.md` |
 
@@ -50,7 +53,7 @@ these fits into the bigger picture; this page is just the index.
   what its `ROOT_URL` says, and Caddy must strip it. Both spellings are valid
   Caddy, both build, and the wrong one is a 404 on every page of the affected
   app. It cost a switch on 2026-08-24 —
-  [lessons-learned.md](<../claude cave/lessons-learned.md>) #41, with the
+  [lessons-learned.md](lessons-learned.md) #41, with the
   routing detail in [reverse-proxy](categories/reverse-proxy.md). The
   `new-homelab-service` skill has the two-`curl` test that settles it in
   seconds.
@@ -68,7 +71,7 @@ these fits into the bigger picture; this page is just the index.
 
 ## Style
 
-- **[`../claude cave/claude-style-guide.md`](<../claude cave/claude-style-guide.md>)**
+- **[module-style-guide.md](module-style-guide.md)**
   — conventions for `flake/modules/`: aligned-`=` columns are intentional,
   `nix fmt` is deliberately not wired up because it would flatten them.
   Counts in it are dated 2026-08-08 and checkable against the tree rather

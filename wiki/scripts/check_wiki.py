@@ -120,7 +120,19 @@ structured, extractable facts only:
             with no `## Contents` section rather than demanding one; that
             expectation lives in styleguide.md, not here.
 
-  check     Runs all ten of the above.
+  dates     Every page's `_Last modified: YYYY-MM-DD_` line (added
+            wiki-wide 2026-09-06, right after the title and before `##
+            Contents`, see styleguide.md) exists, matches that exact
+            format, and isn't a future date -- the same three things a
+            human proofreading it would check. It can't and doesn't check
+            that the date is *current* (whether the page's content has
+            actually changed since); that half is a human judgement call
+            each edit makes for itself, per skill `wiki-sync`, the same
+            division as `contents` catching a heading list going stale
+            mechanically while deciding *what belongs* on the page stays
+            manual.
+
+  check     Runs all eleven of the above.
 
     check_wiki.py imports       [repo-root]
     check_wiki.py table         [repo-root]
@@ -132,6 +144,7 @@ structured, extractable facts only:
     check_wiki.py links         [repo-root]
     check_wiki.py anchors       [repo-root]
     check_wiki.py contents      [repo-root]
+    check_wiki.py dates         [repo-root]
     check_wiki.py check         [repo-root]
     check_wiki.py gen-contents  <file.md> [file.md ...]
 
@@ -143,7 +156,7 @@ block in place to match that page's real headings, which is the actual fix
 for a `contents` finding (and, if the broken link was into the page's own
 Contents list rather than someone else's, an `anchors` finding too).
 """
-import re, sys, pathlib, urllib.parse
+import re, sys, pathlib, urllib.parse, datetime
 
 CATEGORY_FILE = 'dirsAsCategory.nix'
 # Same shape as modules.py's AGG -- `with config.flake.modules.<class>; [ ... ]`,
@@ -153,6 +166,10 @@ AGG = re.compile(r'with\s+config\.flake\.modules\.(\w+);\s*\[(.*?)\]', re.S)
 # `${moduleName}` template form ellyHomeManager's per-module files use), how a
 # module declares which class it belongs to.
 DECL = re.compile(r'flake\.modules\.(\w+)\.(?:\$\{moduleName\}|\w+)')
+# Declared inside a `flake.modules = { ... }` attrset, where each class
+# heads its own line without the prefix -- see the call site for why this
+# form exists and can't just be flattened away.
+DECL_ATTRSET = re.compile(r'(?m)^\s*(\w+)\.\$\{moduleName\}\s*=')
 COMMENT = re.compile(r'#[^\n]*')
 
 # host short-name -> its nireHost/*-configuration.nix. lysithea is darwin-class;
@@ -276,9 +293,21 @@ def category_classes(category_dir):
         # Comments stripped first: podman.nix has a commented-out
         # `flake.modules.homeManager.${moduleName}` stanza (never activated),
         # which is prose describing a possible module, not a declaration of
-        # one -- left uncounted, same as scanning wiki prose that merely
+         # one -- left uncounted, same as scanning wiki prose that merely
         # discusses `config.flake.modules` (see modules.py's `imported_names`).
-        classes.update(DECL.findall(COMMENT.sub('', p.read_text())))
+        text = COMMENT.sub('', p.read_text())
+        classes.update(DECL.findall(text))
+        # The attrset form -- `flake.modules = { homeManager.${moduleName} = ...;
+        # nixos.${moduleName} = ...; }` -- declares classes without repeating the
+        # `flake.modules.` prefix. One real module is shaped this way
+        # (basic-nix-settings.nix, three classes); the flat form three times in
+        # one file trips statix's repeated-`flake`-key rule, so the attrset is
+        # not simply expandable. Line-anchored so the leading `flake` of a flat
+        # `flake.modules.<class>...` line cannot match as a class name. Missed
+        # entirely by both checkers until 2026-09-08 -- the CLASSES check read
+        # the nix category as homeManager-only and failed against the README's
+        # correct row.
+        classes.update(DECL_ATTRSET.findall(text))
     return classes
 
 
@@ -503,11 +532,14 @@ def doc_files(root):
     return sorted(root.joinpath('wiki').rglob('*.md')) + [root / 'AGENTS.md']
 
 
-# A recipe header, e.g. `wiki-churn *args:` or `host=nire-durandal build`'s
-# own definition `build:` -- name, then zero or more space-separated
-# parameter/default tokens, then a bare `:`. `(?!=)` excludes a `name :=
-# value` variable assignment, just's *other* use of a leading identifier.
-JUST_RECIPE = re.compile(r'^([a-zA-Z][\w-]*)(?:\s+[\w=*-]+)*:(?!=)', re.M)
+# A recipe header, e.g. `wiki-churn *args:`, `host=nire-durandal build`'s
+# own definition `build:`, or `opencode-attach dir='.' *args:` -- name,
+# then zero or more space-separated parameter/default tokens (which may
+# quote defaults), then a bare `:`. `(?!=)` excludes a `name := value`
+# variable assignment, just's *other* use of a leading identifier.
+# Without the quote/dot in the token class, `dir='.'` made the whole
+# recipe invisible to this regex (false UNKNOWN RECIPE, hit 2026-09-08).
+JUST_RECIPE = re.compile(r'^([a-zA-Z][\w-]*)(?:\s+[\w=*."\'-]+)*:(?!=)', re.M)
 # A backtick-quoted invocation, e.g. `` `just wiki-lint` `` or
 # `` `just host=nire-durandal build` ``.
 JUST_MENTION = re.compile(r'`just ([^`]+)`')
@@ -703,6 +735,12 @@ FENCE = re.compile(r'^(```|~~~)')
 HEADING = re.compile(r'^(#{1,6})\s+(.+?)\s*$')
 CONTENTS_HEADING = re.compile(r'^##\s+Contents\s*$', re.M)
 CONTENTS_ITEM = re.compile(r'^-\s+\[(?P<text>.+)\]\(#(?P<slug>[^)]+)\)\s*$', re.M)
+# The exact line styleguide.md requires right after a page's title:
+# `_Last modified: 2026-09-06_`. Anchored to the whole line -- a stray
+# trailing word or missing underscore is exactly the kind of drift this
+# check exists to catch, same reasoning as CONTENTS_ITEM being just as
+# strict about its own line shape.
+LAST_MODIFIED_LINE = re.compile(r'^_Last modified: (\d{4}-\d{2}-\d{2})_\s*$')
 
 
 def _iter_headings(text):
@@ -852,6 +890,39 @@ def check_contents(root):
     return findings
 
 
+def check_dates(root):
+    """Every page under wiki/ has a `_Last modified: YYYY-MM-DD_` line right
+    after its title, in exactly the format styleguide.md's Content-shape
+    section specifies, and that date isn't in the future. This is the
+    presence-and-shape half of the convention -- extractable and mechanical,
+    same as `contents`. It is NOT a claim that the date is still accurate:
+    telling whether a page's *content* has moved on since that date needs a
+    human reading the diff, which is what skill `wiki-sync` is for. A page
+    whose only heading is the title itself (none currently exist) still
+    needs the line -- there's no exemption for a short page."""
+    findings = []
+    today = datetime.date.today()
+    for path in sorted(root.joinpath('wiki').rglob('*.md')):
+        lines = path.read_text().splitlines()
+        if not lines or not lines[0].startswith('# '):
+            continue  # no title line to anchor the check against
+        i = 1
+        while i < len(lines) and lines[i].strip() == '':
+            i += 1
+        m = LAST_MODIFIED_LINE.match(lines[i]) if i < len(lines) else None
+        if not m:
+            findings.append(
+                f"MISSING LAST-MODIFIED  {path}: no `_Last modified: "
+                f"YYYY-MM-DD_` line right after the title")
+            continue
+        date = datetime.date.fromisoformat(m.group(1))
+        if date > today:
+            findings.append(
+                f"FUTURE DATE  {path}: Last modified says {date}, which is "
+                f"after today ({today})")
+    return findings
+
+
 CONTENTS_ITEM_LINE = re.compile(r'^-\s+\[.+\]\(#[^)]+\)\s*$')
 
 
@@ -897,6 +968,13 @@ def regenerate_contents(path):
         insert_at = 1
         while insert_at < len(lines) and lines[insert_at].strip() == '':
             insert_at += 1
+        # A `_Last modified: ..._` line (styleguide.md) sits between the
+        # title and Contents -- skip past it too, so a fresh Contents block
+        # lands after it rather than splitting title from date.
+        if insert_at < len(lines) and LAST_MODIFIED_LINE.match(lines[insert_at]):
+            insert_at += 1
+            while insert_at < len(lines) and lines[insert_at].strip() == '':
+                insert_at += 1
         new_text = ''.join(lines[:insert_at]) + block + '\n' + ''.join(lines[insert_at:])
     if new_text != text:
         path.write_text(new_text)
@@ -918,7 +996,7 @@ def main():
     root = repo_root([sys.argv[0]] + sys.argv[2:])
 
     cmds = ('imports', 'table', 'hosts', 'recipes', 'skills', 'secrets',
-            'routes', 'links', 'anchors', 'contents', 'check')
+            'routes', 'links', 'anchors', 'contents', 'dates', 'check')
     if cmd not in cmds:
         print(__doc__)
         sys.exit(2)
@@ -944,6 +1022,8 @@ def main():
         findings += check_anchors(root)
     if cmd in ('contents', 'check'):
         findings += check_contents(root)
+    if cmd in ('dates', 'check'):
+        findings += check_dates(root)
 
     for f in findings:
         print(f)

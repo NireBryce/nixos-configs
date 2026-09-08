@@ -1,5 +1,7 @@
 # `landing` — `nire/homelab/landing/`
 
+_Last modified: 2026-09-02_
+
 ## Contents
 
 - [What's in it](#whats-in-it)
@@ -15,24 +17,20 @@
 
 [glance](https://github.com/glanceapp/glance), the service index for
 `nire-cube`: what's running, whether it's up, and how the machine itself is
-doing. Added 2026-08-24, cube-only. It is what
+doing. Added 2026-08-24, cube-only; nested under the `homelab` umbrella
+since 2026-08-27 (name unaffected). It is what
 `https://ts-cube.moose-micro.ts.net/` serves.
 
-Moved from `nire/landing/` to `nire/homelab/landing/` on 2026-08-27,
-nested under a new umbrella `homelab` category alongside six other
-self-hosted-service categories — see
-[categories/README.md](README.md). The category name is unaffected.
+**Confirmed working end to end, 2026-08-24**, first switch, no fixes:
+`glance.service` `active (running)` at `NRestarts=0`, 0 failed units, 3002
+bound to `127.0.0.1` only, root URL 200 over validated TLS from another
+tailnet host.
 
-**Confirmed working end to end, 2026-08-24**, on the first switch with no
-fixes needed. `glance.service` `active (running)` at `NRestarts=0`, 0 failed
-units, 3002 bound to `127.0.0.1` only, and the root URL returning 200 over
-validated TLS from another tailnet host with `<title>Home</title>`.
-
-Checking that the page returns 200 proves less than it looks like, though:
-glance renders widget content behind `/api/pages/home/content/`, not in the
-initial HTML. That endpoint reported all three monitored sites **OK**
-(65ms/62ms/68ms) with the server-stats widget rendering CPU/SWAP for
-`nire-cube` — which is the actual confirmation.
+A 200 from the page proves less than it looks like: glance renders widget
+content behind `/api/pages/home/content/`, not in the initial HTML. That
+endpoint reported all three monitored sites **OK** with the server-stats
+widget rendering CPU/SWAP for `nire-cube` — which is the actual
+confirmation.
 
 ## What's in it
 
@@ -117,7 +115,7 @@ would use, rather than at `127.0.0.1:300x`. That makes the widget a test of
 the whole path — MagicDNS, the tailnet, Caddy's routing, the certificate, and
 the app — instead of the app alone. A Caddy misconfiguration shows up here;
 a loopback check would have hidden exactly the class of bug that actually
-happened ([the `/git` 404](reverse-proxy.md#the-two-apps-want-opposite-things-from-the-proxy)).
+happened ([the `/git` 404](reverse-proxy.md#the-two-apps-want-opposite-things-from-the-proxy-historical)).
 
 ## No firewall entry, no persistence entry
 

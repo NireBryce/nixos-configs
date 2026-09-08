@@ -1,5 +1,7 @@
 # Architecture & module system
 
+_Last modified: 2026-09-02_
+
 ## Contents
 
 - [The core mechanism](#the-core-mechanism)
@@ -7,9 +9,12 @@
 - [Package modules](#package-modules)
 - [Related, easy to get backwards](#related-easy-to-get-backwards)
 
-For what's actually inside each individual category — members, which hosts
-import it, category-specific traps — see the [category reference](categories/README.md)
-instead of this page; this page is the mechanism, not the inventory.
+For *why* this repo runs flake-parts at all, see [flake-parts.md](flake-parts.md)
+first — this page is the mechanism built on top of that, not the reason for
+it. For what's actually inside each individual category — members, which
+hosts import it, category-specific traps — see the
+[category reference](categories/README.md) instead of this page; this page
+is the mechanism, not the inventory.
 
 ## The core mechanism
 
@@ -55,28 +60,15 @@ instead of this page; this page is the mechanism, not the inventory.
   Homebrew already install it on lysithea (never automatic — `just available
   --duplicates` finds the overlap). Worked examples: `vicinae.nix`,
   `obsidian.nix`.
-- **[`../flake/scripts/mkPkgModule.md`](<../flake/scripts/mkPkgModule.md>)**
-  — a trailhead, not a conversion: a generator exists for the
-  single-package `home.packages` wrapper shape ~70 files under
-  `nirePackages/` already share by hand, but nothing calls it yet. Explains
-  why it's safe to sit unused and what adopting it would cost.
-- **[`../flake/modules/nirePackages/idea.md`](<../flake/modules/nirePackages/idea.md>)**
-  — one-line open idea: consider migrating more unconfigured packages from
-  Home Manager to plain `nix`/`environment.systemPackages`. Not decided,
-  not acted on.
-
 ## Related, easy to get backwards
 
 Containers and VMs are separate categories here, and "virtualization" means
 only the VM one (`nire/homelab/virtualization/`: libvirt, virt-tools,
 vm-networking — optional, cube only). Podman/distrobox live in
-[`nire/homelab/containers/`](categories/containers.md) — its own category since
-2026-08-22 (moved out of `nire/system/containers/`; both it and
-`virtualization` moved again on 2026-08-27, nested under a new umbrella
-`homelab` category alongside five other self-hosted-service categories —
-see [`categories/homelab.md`](categories/homelab.md)), imported explicitly by
-tenacity and cube (durandal dropped it 2026-08-27, same day as
-`virtualization`) rather than reaching them through `system`. See
-[`../CLAUDE.md`](../CLAUDE.md)'s Architecture section for the file that's
-been renamed twice now and why a stale memory of "virtualization is the
-podman one" is exactly backwards regardless of which name you're picturing.
+[`nire/homelab/containers/`](categories/containers.md), its own category
+since 2026-08-22, nested under the `homelab` umbrella since 2026-08-27 —
+imported explicitly by tenacity and cube (durandal dropped it 2026-08-27,
+same day as `virtualization`). See
+[`categories/homelab.md`](categories/homelab.md) and `AGENTS.md`'s
+Architecture section. A stale memory of "virtualization is the podman one"
+is exactly backwards.

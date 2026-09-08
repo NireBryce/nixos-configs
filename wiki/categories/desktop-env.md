@@ -1,5 +1,7 @@
 # `desktop-env` — `nire/desktop-env/`
 
+_Last modified: 2026-09-06_
+
 ## Contents
 
 - [What's in it](#whats-in-it)
@@ -7,6 +9,7 @@
 - [Why the split happened](#why-the-split-happened)
 - [Why `jovian-persist.nix` isn't filed under `impermanence`](#why-jovian-persistnix-isnt-filed-under-impermanence)
 - [Imported by](#imported-by)
+- [Known quirk: mouse/input lag for ~4.5s after resume on tenacity](#known-quirk-mouseinput-lag-for-45s-after-resume-on-tenacity)
 - [See also](#see-also)
 
 ## What's in it
@@ -66,8 +69,39 @@ Not imported as a category by anyone. `kde-base` reached transitively via
 `services.xserver`/Plasma 6 itself always arrives through one of those two,
 never both.
 
+## Known quirk: mouse/input lag for ~4.5s after resume on tenacity
+
+Not a config bug, not USB/kernel-level — confirmed 2026-09-06 by reading the
+installed package source. Kernel-side suspend/resume on tenacity (s2idle)
+completes in well under 100ms, USB devices included. The lag comes from
+`handheld-daemon`'s `adjustor` plugin: on a wake event it deliberately holds
+off reapplying TDP/GPU/CPU-governor settings for a hardcoded delay —
+`adjustor/drivers/smu/__init__.py`'s `SLEEP_DELAY = 4` and
+`adjustor/drivers/gpu/__init__.py`'s `SLEEP_DELAY = 4.5` (package version
+4.1.10; no comment in source explaining the number, but it reads as a
+guard against writing to the SMU too soon after it resumes). Until that
+delay elapses, whatever conservative clock state the firmware itself
+resumed into is what the machine runs at — that's the felt "unresponsive
+mouse" window, not a stuck input device.
+
+Neither constant is exposed through `adjustor`'s `settings.yml` schemas or
+any hhd TOML/UI config — grepped all of them, no sleep/wake knob exists.
+The only ways to change it are patching the constant via a package
+override (fragile across hhd updates, and may reintroduce whatever
+instability the delay guards against) or an upstream ask to `hhd-dev`
+(not filed — skill `propose-issue` only ever files in this repo, not
+upstream). Decided not worth chasing; documented so a future session
+doesn't re-diagnose it as a USB or kernel resume bug.
+
 ## See also
 
 - [impermanence](impermanence.md) — `kde-sleepmode.nix` lives there, not
   here, even though it's KDE-specific — see that page for why.
 - [../hosts.md](../hosts.md) — which host runs which session.
+- `nireHost/tenacity/configuration/plasma-tenacity.nix` — this host's own
+  Plasma *preferences* (theme, kwin behavior, input devices, global
+  shortcuts) via plasma-manager, captured from tenacity's live `~/.config`
+  on 2026-09-01. A separate mechanism from everything above: home-manager
+  class, wired in only through `tenacityConfiguration`'s own
+  `home-manager.users.elly.imports`, not this category or `ellyHomeManager` —
+  durandal, lysithea and cube never load plasma-manager's HM module.

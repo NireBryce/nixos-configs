@@ -1,5 +1,7 @@
 # Open threads
 
+_Last modified: 2026-09-07_
+
 ## Contents
 
 - [Tracked as GitHub issues](#tracked-as-github-issues)
@@ -27,13 +29,14 @@ repo's own tracker is the issue queue, not another markdown list.
 
 - **[#87 — no backups anywhere in the fleet; decide a scheme for cube's
   service state](https://github.com/NireBryce/nixos-configs/issues/87)** —
-  open, filed 2026-08-24. Nothing in `flake/` configures any backup tool at
-  all (verified by grep, not assumed), while `nire-cube` now holds a git
-  forge, a metrics db and a shortlink db that nothing else has a copy of. A
-  QNAP NAS on the network makes this mostly a matter of picking a tool;
-  the issue carries the restic-over-SFTP sketch, the sqlite-consistency
-  problem, and the four things that need deciding rather than defaulting.
-  **Done means a restore actually performed**, not a green timer.
+  **closed 2026-09-06.** restic-over-SFTP to the QNAP, with a real restore
+  drill performed twice (once found and fixed a real `backupPrepareCommand`
+  sqlite-staging bug, once more confirmed a clean restore) — the bar the
+  issue itself set for "done". Full account:
+  [backup.md](categories/backup.md) /
+  [backup-history.md](categories/backup-history.md). Extending the same
+  coverage to durandal/tenacity/lysithea is now
+  **[#130](https://github.com/NireBryce/nixos-configs/issues/130)**.
 - **[#75 — remove `carapace-completer-read-fix.bash` once ble.sh/carapace
   fix it upstream](https://github.com/NireBryce/nixos-configs/issues/75)**
   — open. The follow-on to #72 below: a local workaround stays in the tree
@@ -66,16 +69,6 @@ specific report — not as a housekeeping pass over this list:
 
 ## Todos and ideas left next to the code
 
-- **[`../flake/modules/nire/hardware/todo.md`](<../flake/modules/nire/hardware/todo.md>)**
-  — eventually give the overarching `dirsAsCategory` mechanism flags so it
-  can auto-import based on system type.
-- **[`../flake/modules/nirePackages/idea.md`](<../flake/modules/nirePackages/idea.md>)**
-  — consider migrating more unconfigured packages from Home Manager to
-  plain `nix`. Also noted on [architecture.md](architecture.md).
-- **[`../flake/scripts/mkPkgModule.md`](<../flake/scripts/mkPkgModule.md>)**
-  — a ready-but-unused generator for the ~70 single-package module files
-  under `nirePackages/`; a trailhead with the adoption cost spelled out, not
-  a plan anyone's committed to. Also on [architecture.md](architecture.md).
 - **[`../flake/scripts/script-wishlist.md`](<../flake/scripts/script-wishlist.md>)**
   — bare headings only (`vicinae`, `just`, `espanso`, `other`), no content
   yet. A placeholder for future script ideas, not current work.
@@ -86,16 +79,13 @@ specific report — not as a housekeeping pass over this list:
   eventually.md` — itself removed 2026-09-01 (still in git history; also
   carried a security-hardening reference link, now only recoverable there).
 - `claude cave/2026-08-24-evaluation-self-hosted-booking.md` (removed
-  2026-09-01, no longer a link — still in git history if wanted again) —
-  Easy!Appointments vs LibreBooking, compared 2026-08-24 and then
-  explicitly not pursued. Nothing built, no host picked. Recorded which of
-  the two fits which problem (they aren't competitors — one books a
-  person's time, the other books a *thing*), that **neither is in nixpkgs
-  and neither has a NixOS module**, and the one design problem that would
-  actually need solving if it restarts: both are PHP apps wanting a
-  writable install dir, so podman-vs-hand-written-module was the unanswered
-  first question. Also corrected a from-memory claim about Cal.com's
-  license.
+  2026-09-01, still in git history if wanted) — Easy!Appointments vs
+  LibreBooking, compared 2026-08-24 and explicitly not pursued. What's
+  recorded: they aren't competitors (one books a person's time, the other
+  books a *thing*), **neither is in nixpkgs and neither has a NixOS
+  module**, and the unanswered first question if it restarts: both are PHP
+  apps wanting a writable install dir, so podman-vs-hand-written-module.
+  Also corrected a from-memory claim about Cal.com's license.
 - **[`../flake/doc/notes-and-fixes.md`](<../flake/doc/notes-and-fixes.md>)**
   ends with a "things to look into" list — MyNixOS, nixpkgs-wayland,
   nix-direnv, haumea, flakelight, flake-utils(-plus), devshell, devbox,
@@ -106,51 +96,71 @@ specific report — not as a housekeeping pass over this list:
 `nire-llm-sandbox`'s three runtime-verified `VMs/_lib/libvirt-vm.nix` fixes
 (default network never started, a nonexistent `virsh` flag, a missing fixed
 domain UUID) used to be recorded here; the VM itself was removed 2026-08-28
-— see [history.md](history.md) and `claude cave/lessons-learned.md` §40 for
-that detail now.
+— see [history.md](history.md) and [lessons-learned.md](lessons-learned.md)
+§40 for that detail now.
 
 ## Left open by the cube service stack, 2026-08-24
 
 Four things the reverse-proxy/glance work knowingly did not do. None is a
 bug; each is a decision someone might otherwise re-litigate from scratch.
 
-- **`nire-cube` is running a config activated from `~/nixos-caddy-test/`**, a
-  plain rsync of a working tree, while its real checkout at
-  `~/nixos-configs` sits several commits behind `main`. The running system is
-  byte-identical to what `main` evaluates to, so this is bookkeeping rather
-  than drift — but the next person to `just switch` from `~/nixos-configs`
-  should `git pull` first, and the test directory can be deleted once they
-  have. Sync-and-build-over-ssh exists because a darwin session cannot build
-  an `x86_64-linux` toplevel; see the `new-homelab-service` skill.
-- **Nothing backs up `/var/lib/forgejo`** — or anything else on cube. Repos,
-  the sqlite database, and Forgejo's self-generated secrets all live there
-  with exactly one copy. **Now tracked as
-  [#87](https://github.com/NireBryce/nixos-configs/issues/87)**, which covers
-  the whole fleet rather than just the forge; documented at
+- **Done.** `nire-cube` was running a config activated from
+  `~/nixos-caddy-test/`, a plain rsync of a working tree, while its real
+  checkout at `~/nixos-configs` sat several commits behind `main`. Both
+  since resolved: the checkout is caught up with `main` and `~/nixos-caddy-test`
+  has been deleted. Sync-and-build-over-ssh exists because a darwin session
+  cannot build an `x86_64-linux` toplevel; see the `new-homelab-service`
+  skill.
+- **Nothing backs up `/var/lib/forgejo`** — or anything else on cube.
+  **Now tracked as
+  [#87](https://github.com/NireBryce/nixos-configs/issues/87)** (whole
+  fleet, not just the forge); documented at
   [homelab/forgejo.md](homelab/forgejo.md) so nobody mistakes the forge for
-  durable storage in the meantime. **A [backup](categories/backup.md)
-  category landed 2026-08-28** implementing #87's scheme — doesn't move any
-  other host, switched and running on cube as of 2026-08-30. Shipped as
-  restic over a local-path NFS repo, which failed for real (an export ACL
-  the QNAP never granted cube); as of 2026-08-31 it's SFTP instead, #87's
-  original plan, now that SSH works on the QNAP. Blocked on two sops
-  secrets nobody with decrypt access has set yet and still no anti-deletion
-  snapshot configured. Still exactly one copy of everything until both
-  land and a restore is actually performed.
-- **Tailscale Services (`svc:`) were weighed and deferred.** They would give
-  each service its own tailnet DNS name (`https://grafana/` rather than a
-  path prefix), which removes the whole prefix-handling problem
-  [reverse-proxy](categories/reverse-proxy.md) documents, and they'd allow
-  per-service ACLs. The cost is a per-service approval step in the Tailscale
-  admin console, and state that lives in `tailscaled` rather than in the Nix
-  store. Path routing under one hostname won on "everything stays in the
-  repo". The other scaling path, if the service count makes prefixes
-  annoying, is a real domain with split DNS and a wildcard certificate.
+  durable storage. A [backup](categories/backup.md) category landed
+  2026-08-28 implementing #87's scheme, switched and running on cube as of
+  2026-08-30 — but as local-path restic over NFS, which failed for real (an
+  export ACL the QNAP never granted cube), so SFTP since 2026-08-31. **Done
+  as of 2026-09-06**: sops secrets set, anti-deletion snapshot schedule
+  confirmed live, and the restore drill (#87's own bar for "done") actually
+  run twice — once finding the `backupPrepareCommand` sqlite-staging bug
+  (never worked, staged inside restic's own cache dir), once more
+  confirming a real restore after the fix. See
+  [backup.md](categories/backup.md) and
+  [backup-history.md](categories/backup-history.md). What's still open is
+  extending backups past cube to the other three hosts
+  (**[#130](https://github.com/NireBryce/nixos-configs/issues/130)**).
+- **Tailscale Services (`svc:`) reopened 2026-09-07, in progress on
+  `feat/tailscale-services`.** The two costs originally cited here both
+  turned out to have real mitigations: the per-service admin-console
+  approval step is skippable via an `autoApprovers.services` policy entry,
+  and the policy file itself is API-scriptable
+  (`flake/scripts/tailscale-acl.py`, `just tailscale-acl`) rather than
+  console-hand-edited only — reviewed as a diff and applied from this repo,
+  same as everything else here. `svc:grafana` and `svc:git` exist on the
+  tailnet as of this branch (each with its own virtual address); the tag,
+  policy grants, and service objects are recorded under
+  `flake/modules/nire/homelab/reverse-proxy/tailscale-services/`, whose own
+  README lists what's still open — **`nire-cube` isn't tagged yet, there's
+  no NixOS `services.tailscale.serve` config backing either service with a
+  real port, and Caddy's existing `/grafana/`/`/git/` path routes
+  ([reverse-proxy](categories/reverse-proxy.md)) are untouched and still
+  what's actually serving traffic.** Two API endpoint names were wrong on
+  the first attempt in both directions (ACL: `/policy` vs the real `/acl`;
+  vip-services: `/by-name/{name}` vs the real `/vip-services/{name}`) —
+  see the script's own comments before assuming either path from memory
+  again.
 - **Grafana dashboards edited in the UI are not in this repo.** Anything
   under `monitoring`'s `_dashboards/` is provisioned read-only from the
-  store; anything created through the web UI lives only in cube's sqlite db,
-  which is not backed up either. Writing up "how to add a dashboard that
-  survives a rebuild" is the missing piece.
+  store; anything created through the web UI lives only in cube's sqlite db.
+  That db is now backed up (`/var/lib/grafana` is one of #87's covered
+  paths, via the sqlite-staging fix), so a UI-created dashboard survives a
+  restore — but it still isn't declared as code, so it still can't survive
+  a rebuild that reprovisions `_dashboards/`. "How to add a dashboard that
+  survives a rebuild" is now written up:
+  [monitoring.md](categories/monitoring.md#adding-a-dashboard-that-survives-a-rebuild)
+  — not yet verified against a real UI export, per its own caveat. Now
+  tracked as
+  **[#190](https://github.com/NireBryce/nixos-configs/issues/190)**.
 
 ## Not covered here
 

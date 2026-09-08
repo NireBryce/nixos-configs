@@ -1,5 +1,7 @@
 # History & lessons learned
 
+_Last modified: 2026-09-05_
+
 ## Contents
 
 - [This repo's own history](#this-repos-own-history)
@@ -8,22 +10,16 @@
 
 ## This repo's own history
 
-- **[`../claude cave/lessons-learned.md`](<../claude cave/lessons-learned.md>)**
+- **[lessons-learned.md](lessons-learned.md)**
   — "Written by Claude Code, for Claude Code, and largely a record of its
   own mistakes." The main one. §§1–18 the den → flake-parts port, §§19–24
-  the first session on real hardware, §§25–31 after it first booted, §§32–38
-  later work on already-booted or newly-added hosts (auto-allocators can't
-  see manually pinned ranges; a removed nixpkgs option asserts rather than
-  being ignored; a module name that collides with its own category *merges*
-  invisibly, three separate times; a well-typed value can still be
-  semantically wrong, so build the artifact and read it back; some bugs need
-  real filesystem/daemon state that only exists once an actual `switch` runs
-  — invisible to evaluation *and* to reading back a built artifact; a fix
-  scoped to the caller that needs it beats a general one). `CLAUDE.md` has
-  the rules this produced; this has the scar tissue behind them.
-- **[`../claude cave/lessons-learned-impermanence-stage1-migration.md`](<../claude cave/lessons-learned-impermanence-stage1-migration.md>)**
-  — the stage-1 impermanence migration specifically. Covered from the
-  impermanence angle on [impermanence-and-secrets.md](impermanence-and-secrets.md).
+  the first session on real hardware, §§25–31 after it first booted, §32+
+  later work on already-booted or newly-added hosts. `CLAUDE.md` has the
+  rules this produced; this has the scar tissue behind them.
+- **`impermanence-stage1-migration.md` was removed 2026-09-05** — the
+  stage-1 migration writeup, moved in from `claude cave/` 2026-09-02; git
+  history has the page. Covered from the impermanence angle on
+  [impermanence-and-secrets.md](impermanence-and-secrets.md).
 - `claude cave/2026-08-09 things to look into eventually.md` (removed
   2026-09-01, no longer a link — still in git history if wanted again) —
   open questions rescued from a deleted `HANDOFF-tenacity.md`, partially
@@ -35,41 +31,59 @@
   plan/prompt files) were removed 2026-08-26, their useful content already
   superseded by `lessons-learned.md`, `CLAUDE.md`'s State section, and this
   page. Still in git history if one of them is ever needed again.
-- `nire-lego` (a handheld, Legion Go, added to config but never built or
-  switched) and `nire-installer` (the generic live-USB installer image,
-  generalized 2026-08-22 from what originally installed `nire-testbed`) were
-  both removed 2026-08-27, along with their `nireHost/lego/`,
-  `nireHost/lego-configuration.nix`, and `nireHost/installer/` files and
-  `hosts.nix` entries. Neither had ever run against real hardware. The
-  live-USB mechanism itself (embedded flake, patched Calamares, unattended
-  `nixos-install`) isn't disproven or abandoned, just not carried in this
-  tree any more — its last version is in git history if it's ever needed
-  again, same as `nire-testbed`'s.
-- `nire-llm-sandbox` (a `nixosConfigurations` entry that built a qcow2 image
-  and ran it persistently as a libvirt VM on `nire-cube`, sandboxing an LLM
-  coding agent away from the real host) was removed 2026-08-28, along with
-  its `nireHost/llm-sandbox/` files, its `hosts.nix` entry, and
-  `virtualization-cube.nix` (the cube-side wiring that defined the guest
-  domain). It had been confirmed booted and staying up on real hardware as
-  of 2026-08-24 — see the "Confirmed-on-hardware facts" section below for
-  what that confirmation actually checked, and
-  [`../claude cave/lessons-learned.md`](<../claude cave/lessons-learned.md>)
-  §40 for the three runtime-only bugs its first switch hit. The generic
-  generator it ran on, `VMs/_lib/libvirt-vm.nix`, is kept as unexercised
-  reusable infrastructure — see [virtualization](categories/virtualization.md);
-  the sandbox's own last full config is in git history if a VM like it is
-  wanted again.
+- `nire-lego` (a handheld, Legion Go, never built or switched) and
+  `nire-installer` (the generic live-USB installer image, generalized
+  2026-08-22 from what installed `nire-testbed`) were both removed
+  2026-08-27 with their `nireHost/` files and `hosts.nix` entries. Neither
+  ever ran on real hardware. The live-USB mechanism (embedded flake,
+  patched Calamares, unattended `nixos-install`) isn't disproven, just not
+  carried any more — git history has the last version, same as
+  `nire-testbed`'s.
+- `nire-llm-sandbox` (a qcow2-building `nixosConfigurations` entry run
+  persistently as a libvirt VM on `nire-cube`, sandboxing an LLM coding
+  agent) was removed 2026-08-28 with its `nireHost/llm-sandbox/` files,
+  `hosts.nix` entry, and `virtualization-cube.nix`. Confirmed booted and
+  staying up 2026-08-24 (see "Confirmed-on-hardware facts" below);
+  §  §40 has the three runtime-only bugs its first switch hit. The generator
+  it ran on, `VMs/_lib/libvirt-vm.nix`, is kept as unexercised reusable
+  infrastructure — see [virtualization](categories/virtualization.md).
+- **`claude cave/` itself was retired 2026-09-02.** Its four remaining
+  files became real wiki pages — [lessons-learned.md](lessons-learned.md),
+  `impermanence-stage1-migration.md` (since removed — above),
+  [module-style-guide.md](module-style-guide.md), and
+  `kde-to-wayland-migration.md` (since removed — next entry) — the same
+  "index over restatement, except here" shape `wiki/homelab/` pages and
+  `categories/shell-config/`'s deep-dives already used, per
+  [styleguide.md](styleguide.md). The one file that didn't get its own
+  page, the cube/QNAP backup plan, was folded into
+  [homelab/backup-runbook.md](homelab/backup-runbook.md)'s own "Background"
+  section instead, since its content was already superseded by
+  [categories/backup.md](categories/backup.md) — see that runbook section
+  for why. Every reference to a `claude cave/...` path across `AGENTS.md`,
+  the skills, and the module tree was repointed in the same change.
+- **`wiki/kde-to-wayland-migration.md` was removed 2026-09-05.** Research-stage
+  inventory toward moving durandal/tenacity off KDE Plasma onto a Wayland
+  tiling WM, moved in from `claude cave/` 2026-09-02; it was never explored —
+  no WM chosen, nothing implemented — and its dependency inventory was stale.
+  Git history has it if a migration ever starts.
 
 ## Confirmed-on-hardware facts, and how they were confirmed
+
+First boots onto this config, as first-boot records (not current status —
+all hosts have switched repeatedly since; what a host is running now is a
+live check, see [`AGENTS.md`](../AGENTS.md)'s State section):
+
+- **tenacity** — booted 2026-08-10, generation 62, systemd stage 1.
+- **durandal** — booted 2026-08-14, generation 222.
+- **lysithea** — switched 2026-08-12 (generation 52, darwin).
+- **cube** — switched 2026-08-23 (plain persistent root, no impermanence).
 
 Both durandal's and tenacity's first-boot `/root` rollbacks were confirmed
 by reading the journal and checking the btrfs subvolid actually changed
 (607 → 622 for tenacity; 1426 deleted / 1431 mounted for durandal) — not
-merely by the machine coming back up. See
-[`../CLAUDE.md`](../CLAUDE.md)'s State section for the dates and
-generations. This is the concrete example behind the repo's own
-"treat an undated 'verified' as *evaluates*" and "ask 'did it work before?'
-first, via `journalctl --list-boots`" rules.
+merely by the machine coming back up. This is the concrete example behind
+the repo's own "treat an undated 'verified' as *evaluates*" and "ask 'did
+it work before?' first, via `journalctl --list-boots`" rules.
 
 ## The sibling branch
 

@@ -72,6 +72,19 @@
         # configuration -- confirmed directly (`sudo sops secrets.yaml`,
         # no env vars, succeeded once this file existed).
         #
+        # `environment.variables.EDITOR`/`VISUAL` below IS exported
+        # system-wide, unlike SOPS_AGE_KEY_FILE above -- and that's fine
+        # here, unlike there: SOPS_AGE_KEY_FILE would have to point at a
+        # ROOT-owned path, wrong for elly's own unprivileged `sops` calls,
+        # but "micro" is the same correct value for every user on this
+        # config (elly's own copy comes from shell-env.nix's
+        # `home.sessionVariables`, a Home Manager option that only lands in
+        # HER shell -- root has no Home Manager profile at all, so without
+        # this, `sudo sops secrets.yaml` falls through to sops's built-in
+        # default, vi, silently inconsistent with elly's configured editor).
+        # Filed as issue #118, found while checking cube's interactive sops
+        # flow end to end.
+        #
         # NIX STORE SAFETY, read before touching this file: the `script`
         # below is pure shell text -- literal commands and file PATHS, no
         # key material -- so only that inert logic ever lands in the store.
@@ -85,6 +98,14 @@
         # binary cache -- a categorically worse exposure than "root-only on
         # this one machine," which is all this module is meant to stay.
         flake.modules.nixos.${moduleName} = { config, lib, pkgs, ... }: {
+            # Root has no Home Manager profile, so elly's `EDITOR = "micro"`
+            # (shell-env.nix) never reaches it -- see the header comment.
+            # Same value, exported system-wide instead of per-user.
+            environment.variables = {
+                EDITOR = "micro";
+                VISUAL = "micro";
+            };
+
             # mkIf on the VALUE, not a config-conditioned module shape --
             # the latter is exactly the "config referenced in imports"
             # infinite-recursion trap NixOS's own module system warns about

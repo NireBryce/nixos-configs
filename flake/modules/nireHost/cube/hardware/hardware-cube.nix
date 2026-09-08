@@ -35,58 +35,64 @@
 # host's fileSystems into durandal's under the same attribute instead of
 # erroring, the same collision tenacity's suffixed filename exists to avoid.
 # See CLAUDE.md's new-flake-module trap notes.
-{ config, lib, ... }:
+{ lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.nixos.${moduleName} = { config, lib, pkgs, modulesPath, ... }:
+        flake.modules.nixos.${moduleName} = { config, lib, modulesPath, ... }:
     {
       imports =
         [ (modulesPath + "/installer/scan/not-detected.nix")
         ];
 
-      boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
-      boot.initrd.kernelModules = [ ];
-      boot.kernelModules = [ "kvm-amd" ];
-      boot.extraModulePackages = [ ];
-
-      fileSystems."/" =
-        { device = "/dev/disk/by-uuid/63dae095-fe6b-425e-90ec-5978a475d45e";
-          fsType = "btrfs";
-          options = [ "subvol=root" "compress=zstd" ];
+      boot = {
+        initrd = {
+          availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
+          kernelModules = [ ];
         };
+        kernelModules = [ "kvm-amd" ];
+        extraModulePackages = [ ];
+      };
 
-      fileSystems."/nix" =
-        { device = "/dev/disk/by-uuid/63dae095-fe6b-425e-90ec-5978a475d45e";
-          fsType = "btrfs";
-          options = [ "subvol=nix" "compress=zstd" ];
-        };
+      fileSystems = {
+        "/" =
+          { device = "/dev/disk/by-uuid/63dae095-fe6b-425e-90ec-5978a475d45e";
+            fsType = "btrfs";
+            options = [ "subvol=root" "compress=zstd" ];
+          };
 
-      fileSystems."/persist" =
-        { device = "/dev/disk/by-uuid/63dae095-fe6b-425e-90ec-5978a475d45e";
-          fsType = "btrfs";
-          options = [ "subvol=persist" "compress=zstd" ];
-          neededForBoot = true;
-        };
+        "/nix" =
+          { device = "/dev/disk/by-uuid/63dae095-fe6b-425e-90ec-5978a475d45e";
+            fsType = "btrfs";
+            options = [ "subvol=nix" "compress=zstd" ];
+          };
 
-      fileSystems."/var/log" =
-        { device = "/dev/disk/by-uuid/63dae095-fe6b-425e-90ec-5978a475d45e";
-          fsType = "btrfs";
-          options = [ "subvol=log" "compress=zstd" ];
-          neededForBoot = true;
-        };
+        "/persist" =
+          { device = "/dev/disk/by-uuid/63dae095-fe6b-425e-90ec-5978a475d45e";
+            fsType = "btrfs";
+            options = [ "subvol=persist" "compress=zstd" ];
+            neededForBoot = true;
+          };
 
-      fileSystems."/home" =
-        { device = "/dev/disk/by-uuid/63dae095-fe6b-425e-90ec-5978a475d45e";
-          fsType = "btrfs";
-          options = [ "subvol=home" "compress=zstd" ];
-        };
+        "/var/log" =
+          { device = "/dev/disk/by-uuid/63dae095-fe6b-425e-90ec-5978a475d45e";
+            fsType = "btrfs";
+            options = [ "subvol=log" "compress=zstd" ];
+            neededForBoot = true;
+          };
 
-      fileSystems."/boot" =
-        { device = "/dev/disk/by-uuid/8857-B380";
-          fsType = "vfat";
-          options = [ "fmask=0022" "dmask=0022" ];
-        };
+        "/home" =
+          { device = "/dev/disk/by-uuid/63dae095-fe6b-425e-90ec-5978a475d45e";
+            fsType = "btrfs";
+            options = [ "subvol=home" "compress=zstd" ];
+          };
+
+        "/boot" =
+          { device = "/dev/disk/by-uuid/8857-B380";
+            fsType = "vfat";
+            options = [ "fmask=0022" "dmask=0022" ];
+          };
+      };
 
       swapDevices =
         [ { device = "/dev/disk/by-uuid/0eb40248-55cf-444a-b8ed-ede4c35da60b"; }

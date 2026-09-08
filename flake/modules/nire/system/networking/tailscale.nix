@@ -20,7 +20,7 @@
 # peers by MagicDNS name via nsswitch -> resolve -> systemd-resolved ->
 # tailscale0's D-Bus split-DNS. That mechanism was never the problem (below).
 #
-# THREE REAL TRAPS, the first two found diagnosing "nire-cube unreachable
+# FOUR REAL TRAPS, the first two found diagnosing "nire-cube unreachable
 # from nire-tenacity" that day, the third found separately 2026-08-30 --
 # none a bug in this file or in resolved.nix/avahi.nix:
 #
@@ -66,6 +66,24 @@
 # trying all of a host's real names so this doesn't have to be re-derived
 # by hand again -- see its own header for the current order (its own to
 # maintain, not restated here); `just reach <host>` is the front door.
+#
+# A FOURTH TRAP, 2026-09-07, applying tag:homelab-cube to nire-cube for
+# Tailscale Services (see flake/modules/nire/homelab/reverse-proxy/
+# tailscale-services/README.md for the full incident): a TAGGED device is
+# owned by the tag, not the user, for ACL purposes -- it drops out of
+# autogroup:members as a grant DESTINATION the moment the tag takes
+# effect. This tailnet's only broad grant was
+# autogroup:members -> autogroup:members, so nire-cube vanished from every
+# other peer's `tailscale status` entirely (not offline -- absent) within
+# about a minute of tagging, SSH included, while cube's own `tailscale
+# status` looked completely normal throughout -- a peer-visibility problem
+# that looks exactly like the tagged host itself going down.
+#
+# THE RULE THIS GIVES: tagging any previously-untagged device and adding
+# its compensating reachability grant (`{"src": ["autogroup:members"],
+# "dst": ["tag:whatever"], "ip": ["*"]}`, same pattern tag:golink-host
+# already uses here) are ONE atomic change, never staged -- tag first,
+# grant later means the device is unreachable for everyone in between.
 #
 # Diagnostic trick worth keeping: to check whether a *local* NixOS firewall
 # rule is really the problem, no root needed -- `openFirewall` and

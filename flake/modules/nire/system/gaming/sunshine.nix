@@ -56,6 +56,8 @@
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
+        # `{ ... }:` kept over statix's suggested `_:` -- deliberate, see
+        # wiki/module-style-guide.md's "`{ ... }:` on an inner module lambda".
         flake.modules.nixos.${moduleName} = { ... }: {
             # # description = "Sunshine: host a Moonlight game-stream session, reachable only over Tailscale";
             services.sunshine = {

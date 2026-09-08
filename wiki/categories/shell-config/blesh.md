@@ -1,5 +1,7 @@
 # blesh (bash line editor)
 
+_Last modified: 2026-09-05_
+
 ## Contents
 
 - [Plugins](#plugins)
@@ -31,8 +33,7 @@ together external completion/history tools underneath ble.sh's UI:
   ordering note below for how it wins that key back from fzf. Package and
   config: [`atuin.nix`](../../../flake/modules/nirePackages/shell-apps/history/atuin.nix).
 - **bash-completion** / **nix-completion** — ble.sh's own contrib
-  integrations, loaded first per ble.sh's own note that bash-completion
-  must come before the fzf integrations.
+  integrations, loaded first.
 
 ## What the `.blerc` actually wires together
 
@@ -63,28 +64,60 @@ together external completion/history tools underneath ble.sh's UI:
   `ble-bind -x` calls in the same `-C` callback (rebinding rather than
   unbinding, because a ble.sh keymap with no entry for a key does nothing,
   not "fall through to atuin").
+- **C-v (quoted-insert) is unbound**, in both the `emacs` and `vi_imap`
+  keymaps (2026-09-05) — ble.sh binds it by default in both
+  (`keymap/emacs.sh`, `keymap/vi.sh`) to "insert the next raw keystroke",
+  which muscle-memory paste reflexes hit constantly. Unrelated to actual
+  clipboard paste, which goes through the separate `paste_begin` →
+  `bracketed-paste` binding and is untouched. Done via `blehook
+  ATTACH+='ble-bind -m emacs -f C-v -; ble-bind -m vi_imap -f C-v -'`
+  rather than a plain top-level `ble-bind` call, because `.blerc` is
+  sourced *before* `ble-attach` installs the keymaps' own default
+  bindings — a plain call here would run first and be overwritten;
+  `blehook ATTACH` runs at the end of `ble-attach`, after the keymaps are
+  in their final state. (Works for C-v because C-v's keycode is fixed;
+  see the focus/blur entry below for why that distinction matters.)
+- **focus/blur are bound to a no-op in readline, before `ble-attach`** —
+  in [`bash.nix`](../../../flake/modules/nire/shell-config/bash/bash.nix)'s
+  last initExtra block, not in this `.blerc` (2026-09-07). When anything
+  in a session enables mode 1004 focus reporting, konsole sends
+  `CSI I`/`CSI O` on every tab switch; ble.sh decodes them into the
+  synthetic keys `focus`/`blur`, binds them in no keymap of any version
+  (upstream master included), and every event lands in the decode-error
+  path — konsole audibly ringing plus a "unbound keyseq: focus" visible
+  bell on each switch. `ble-bind` cannot deliver these: synthetic-key
+  names get *dynamically assigned* keycodes in first-registration order,
+  so any `ble-bind` made before `ble-attach`'s final key-table build
+  (top-level in `.blerc`, `blehook ATTACH`, a `-C` deferred-import
+  callback — all three tested in a query-answering pty, the responder
+  itself now proposed as
+  [terminal-puppeteer#43](https://github.com/NireBryce/terminal-puppeteer/issues/43))
+  lands under a keycode that later gets reassigned and silently stops
+  matching the arriving key — which is why the C-v unbind above works
+  (fixed keycode) while these don't. Plain readline binds made
+  pre-attach are imported by `ble-attach` after the tables are final,
+  the same channel atuin's C-r rides; and it has to be a *real*
+  readline bind, so it can't live in `.blerc` either — ble.sh has
+  already wrapped the `bind` builtin by the time it sources that file
+  (tested; that route fails too). Verified in the pty repro: silent
+  from ~2s after attach, one residual bell in the first ~1s of
+  ble.sh's own startup settling. **Confirmed on hardware the same day
+  on nire-cube** — switched, then live konsole tab switches, no bell.
 
 ## Bug: spurious `read: `': not a valid identifier` on Tab / auto-complete
 
-Seen on `nire-cube`'s real terminal (VSCode's integrated terminal) as a
-stray `bash: read: `': not a valid identifier` line printed alongside an
-otherwise-correct completion menu, on both explicit Tab and ble.sh's
-inline auto-complete-as-you-type. First diagnosed 2026-08-22 by actually
-reproducing it — not just reading source — with a scripted pty (Python's
-`pty` module driving a real interactive `bash -i`), per this repo's own
-"evaluating proves nothing, force a real run" convention
-([CLAUDE.md](../../../CLAUDE.md), [history.md](../../history.md) §25); that
-session pinned the bug as far as "somewhere inside ble.sh's global `read`
-override" but no further (see history below). Reopened 2026-08-24 when it
-was reported by a user typing over SSH — reproduced again with the same pty
-technique, packaged that same day as a reusable tool
-(`flake/scripts/ssh-pty-drive.py` at the time, since generalized beyond SSH
-and moved out to its own repo,
-[`terminal-puppeteer`](https://github.com/NireBryce/terminal-puppeteer) —
-not part of this repo any more, kept here only as the "how this was found"
-credit),
-and pinned the rest of the way to a specific line and a working fix. Full
-session account: [lessons-learned.md](../../../claude%20cave/lessons-learned.md) §39.
+Seen on `nire-cube`'s real terminal as a stray `bash: read: `': not a valid
+identifier` line alongside an otherwise-correct completion menu, on both
+explicit Tab and auto-complete-as-you-type. First diagnosed 2026-08-22 by
+reproducing it with a scripted pty (Python's `pty` module driving a real
+`bash -i`) — per this repo's "evaluating proves nothing, force a real run"
+convention ([history.md](../../history.md) §25); that session pinned it to
+"somewhere inside ble.sh's global `read` override" and no further.
+Reopened 2026-08-24 when reported over SSH, reproduced the same way, and
+pinned the rest of the way to a specific line and a working fix (the pty
+tool has since left this repo as
+[`terminal-puppeteer`](https://github.com/NireBryce/terminal-puppeteer)).
+Full session account: [lessons-learned.md](../../lessons-learned.md) §39.
 
 **Root cause**: ble.sh's own auto-complete/progcomp machinery installs a
 cancellation safety net, `_ble_builtin_read_hook`, while any registered

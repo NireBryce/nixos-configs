@@ -1,0 +1,47 @@
+# Weekly flake.lock update PRs, the standard flake-repo pattern
+# (DeterminateSystems/update-flake-lock). The PR is a *decision*, not an
+# auto-merge: this repo's nixpkgs pin moves deliberately (a lock update can
+# change boot behavior on hosts that wipe /root), so the workflow only opens
+# the PR and a human reviews the lock diff and merges when wanted.
+#
+# Known caveat, accepted deliberately: PRs opened with the default
+# GITHUB_TOKEN do not trigger this repo's own pull_request workflows (GitHub
+# refuses the recursive run), so the flake-check check will show as missing
+# rather than green on these PRs. That is the token, not a broken flake --
+# run `just preflight` locally before merging, or push any commit to the
+# branch to trigger CI for real.
+
+name: update-flake-lock
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 9 * * 1' # Mondays 09:00 UTC
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      - uses: DeterminateSystems/update-flake-lock@main
+        with:
+          path-to-flake-dir: flake
+          pr-title: "chore: update flake.lock"
+          pr-body: |
+            Automated weekly `nix flake update` (all inputs).
+
+            The lock diff is the review: this repo pins nixpkgs deliberately,
+            and an input bump can change what hosts build and boot. Check the
+            diff, run `just preflight` locally (CI does not run on
+            GITHUB_TOKEN-opened PRs -- see this workflow's header), and merge
+            through the normal ship flow when the change is wanted.
+
+            Auto-opened by the update-flake-lock workflow; close unmerged if
+            the timing is wrong (mid-investigation, pre-boot-verification).
