@@ -1,6 +1,6 @@
 # Lessons from the den → flake-parts port
 
-_Last modified: 2026-09-05_
+_Last modified: 2026-09-08_
 
 ## Contents
 
@@ -48,6 +48,7 @@ _Last modified: 2026-09-05_
 - [42. Not every file git tracks deserves the same scrutiny — `.claude/settings.local.json` is Elly's, not a config artifact to protect](#42-not-every-file-git-tracks-deserves-the-same-scrutiny--claudesettingslocaljson-is-ellys-not-a-config-artifact-to-protect)
 - [43. A fingerprint check can pass for the wrong reason — dead code looks exactly like safe code until you make it live](#43-a-fingerprint-check-can-pass-for-the-wrong-reason--dead-code-looks-exactly-like-safe-code-until-you-make-it-live)
 - [44. A hook that runs `git` from a non-toplevel cwd needs `-C`, not a cleared GIT_DIR — the docs' own suggested fix broke the index lock instead](#44-a-hook-that-runs-git-from-a-non-toplevel-cwd-needs--c-not-a-cleared-git_dir--the-docs-own-suggested-fix-broke-the-index-lock-instead)
+- [45. NixOS `systemd.user.services` is global — every user manager reads it, and they all race to start it](#45-nixos-systemduserservices-is-global--every-user-manager-reads-it-and-they-all-race-to-start-it)
 
 > **Written by Claude Code, for Claude Code**, and largely a record of its own
 > mistakes. Written to be read by an agent starting cold, so the "I" throughout
@@ -1180,3 +1181,17 @@ A plain, non-worktree checkout never hit any of this — `git rev-parse
 cwd-walking finds the real top on its own — which is exactly why it went
 unnoticed through every prior session that installed the hook and
 committed from the main checkout.
+
+## 45. NixOS `systemd.user.services` is global — every user manager reads it, and they all race to start it
+
+2026-09-08, cube (PR #196's `opencode-server`). A NixOS user unit lands
+in `/etc/systemd/user` and `wantedBy` enables it in *every* manager —
+including sddm's (`user@175`, alive whenever the greeter session is).
+sddm's copy bound port 3003 first; elly's crash-looped on `ServeError`,
+and `opencode attach` reached a server running as sddm (cwd
+`/var/lib/sddm` — attach defaults to the server process's cwd). What
+pinned it: the sole `serve` process's parent was `user@175.service`, and
+`ss -tlnp` showed the listener was not elly's. Fix:
+`unitConfig.ConditionUser = "elly"` — a no-op in every other user's
+manager. Rationale lives in the module comment
+(`nireHost/cube/configuration/opencode-server-cube.nix`).
