@@ -107,6 +107,10 @@
         nix-index-database.url                     = "github:nix-community/nix-index-database";
         nix-index-database.inputs.nixpkgs.follows  = "nixpkgs";
 
+        # ── AI agents and coding tools ────────────────────────────────────────────
+        llm-agents.url                             = "github:numtide/llm-agents.nix";
+        llm-agents.inputs.nixpkgs.follows          = "nixpkgs";
+
     };
 
 
