@@ -8,8 +8,8 @@
                 # one: nireHost/cube/configuration/opencode-server-cube.nix
                 # runs `opencode serve` as a systemd user service on
                 # nire-cube, bound tailnet-only. Attach with
-                # `opencode attach http://ts-cube:3003` (`-c` resumes the
-                # last session after a TUI exit).
+                # `just opencode-attach` (`-c` resumes the last session
+                # after a TUI exit).
                 home.packages = with pkgs; [
                     opencode
                 ];

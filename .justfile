@@ -118,6 +118,16 @@ switch:
     @echo "==> ACTIVATING {{host}} now, home-manager included"
     @{{scripts}}/rebuild.sh switch {{flake}} {{host}}
 
+# Attach the TUI to cube's opencode server (tailnet-only, port 3003)
+opencode-attach dir='.' *args:
+    # Cube-only server -- nireHost/cube/configuration/opencode-server-cube.nix.
+    # `ts-cube` is cube's tailnet DEVICE name, not its hostname (tailscale.nix
+    # trap #1), and resolves from any tailnet member, including cube itself.
+    # First arg is the project dir (default `.`); extra args pass through:
+    # `just opencode-attach . -c` resumes the last session after a TUI exit
+    # (that is the whole point of the server).
+    @opencode attach --dir {{dir}} http://ts-cube:3003 {{args}}
+
 # SSH to another host by short name (durandal/tenacity/cube/lysithea),
 # trying LAN mDNS then Tailscale then plain DNS -- see reach-host.sh
 reach *args:

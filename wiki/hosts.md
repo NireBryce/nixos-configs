@@ -60,8 +60,8 @@ status and what broke on the way:
   [`flake/modules/nireHost/cube/configuration/opencode-server-cube.nix`](<../flake/modules/nireHost/cube/configuration/opencode-server-cube.nix>)
   (2026-09-07). Not a category: one personal dev tool, not part of the
   self-hosted stack. Runs `opencode serve` as a systemd user service bound
-  to the tailnet IP only — `opencode attach http://ts-cube:3003`, `-c`
-  resumes the last session after a TUI exit.
+  to the tailnet IP only — `just opencode-attach` (`-c` resumes the last
+  session after a TUI exit).
 
 ## Where each fact lives
 
