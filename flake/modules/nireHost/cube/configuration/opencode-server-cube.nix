@@ -24,8 +24,9 @@
 # the tailscale IP at start (`tailscale ip -4`) and `serve --hostname` binds
 # ONLY that address -- nothing listens on a LAN or public interface, so
 # "only reachable via tailscale" is a property of the socket itself. Reach
-# it with `opencode attach http://ts-cube:3003` (`ts-cube` is this host's
-# tailnet device name -- tailscale.nix's trap #1, not networking.hostName).
+# it with `just opencode-attach` (`opencode attach http://ts-cube:3003`;
+# `ts-cube` is this host's tailnet device name -- tailscale.nix's trap #1,
+# not networking.hostName).
 # Why not the repo's usual loopback-behind-a-proxy shape:
 #
 #   - `opencode attach` is an HTTP/WebSocket client speaking at the root of
