@@ -48,6 +48,7 @@
                 "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILqzV9o32OsJdkCfDJhR5X4uSu1nzRzrL/2gBWLp9QyX elly@nire-cube"
                 "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFFfyxNzG07CdeNEZof+l49+fqx+2E79gmYvnRqiGdNp elly@nire-tenacity"
                 "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFwOpjlybwn/ebH4KKoAcsVQ41wxeqD41CyfIALkV61t8BXV2Wf2pdnrBMxLuHHi9+uq7DlGs2nrW938WtaHvRo= elly@deja"
+                "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMbt2aSZdU5732g4yNXo/pOnl2DZDMKKP4cPPHyAcIkF elly@nire-iona-termius"
                 ];
             };
         };
