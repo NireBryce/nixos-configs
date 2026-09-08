@@ -1,6 +1,6 @@
 # Open threads
 
-_Last modified: 2026-09-07_
+_Last modified: 2026-09-08_
 
 ## Contents
 
@@ -27,6 +27,22 @@ repo's own tracker is the issue queue, not another markdown list.
 
 ## Tracked as GitHub issues
 
+- **[#205 — build the `flake.lock` bump on cube before proposing it,
+  instead of only evaluating it in
+  CI](https://github.com/NireBryce/nixos-configs/issues/205)** — open,
+  filed 2026-09-08. The weekly lock workflow (#204) can only *evaluate*:
+  `nix flake check + module tree` forces each host's toplevel as an
+  evaluation, and CI never builds it, so an input bump that evaluates fine
+  and breaks a host stays invisible until someone runs `just switch` on
+  real hardware — §§36–37 exactly. cube is `x86_64-linux` and already runs
+  scheduled work against a sops credential
+  ([restic.nix](../flake/modules/nire/homelab/backup/restic/restic.nix) is
+  the precedent for the whole shape), so it can do what a runner
+  structurally cannot. Note this **relocates** the PAT rather than removing
+  it — same scopes, same expiry, `/run/secrets/` instead of a GitHub
+  Actions secret — so it is a wash on credential hygiene, and
+  [maintenance-schedule.md](maintenance-schedule.md) item 10's "Why not
+  sops" reasoning would need rewriting if it lands.
 - **[#87 — no backups anywhere in the fleet; decide a scheme for cube's
   service state](https://github.com/NireBryce/nixos-configs/issues/87)** —
   **closed 2026-09-06.** restic-over-SFTP to the QNAP, with a real restore
