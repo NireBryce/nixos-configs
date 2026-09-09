@@ -165,6 +165,22 @@
                                             }
                                         ];
                                     }
+
+                                    {
+                                        # Added 2026-09-09 (issue #207).
+                                        # DATE GRID ONLY: glance's calendar
+                                        # widget takes no event feed/ICS
+                                        # property at all (checked the
+                                        # v0.8.5 docs) -- it cannot show
+                                        # the household events #230 wants;
+                                        # that needs a custom-api/backend
+                                        # decision. `first-day-of-week`
+                                        # left at glance's default
+                                        # (`monday`), which matches nothing
+                                        # in particular -- change here if
+                                        # it should be sunday.
+                                        type = "calendar";
+                                    }
                                 ];
                             }
                         ];
