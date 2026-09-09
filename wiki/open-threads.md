@@ -108,6 +108,26 @@ specific report — not as a housekeeping pass over this list:
   devenv, nixos-shell, nix-index, nix-prefetch — and an unanswered "learn
   what `outputs @ inputs:` means and figure out specialArgs" note. Also
   covered from the fix-snippet angle on [conventions.md](conventions.md).
+- **Forgejo: no local CI/CD yet.** `pending-setup.md` and `forgejo.md` cover
+  getting the forge itself usable; running Forgejo Actions against it (to
+  mirror what GitHub Actions does in `.github/workflows/`, on
+  locally-hosted infrastructure instead) hasn't been started. Rescued
+  2026-09-08 from a removed notebook TODO, itself already superseded on its
+  other point (the "manual migration steps" question — answered by
+  `pending-setup.md`'s mirror decision).
+- **CI's lint step re-fetches `nixpkgs#statix nixpkgs#deadnix` from the
+  binary cache on every run** (`.github/workflows/check.yml`), rather than
+  reusing the flake's own nixpkgs input (already in the tree as
+  home-manager packages, per `nirePackages/nix-utils/`). Cheap today; worth
+  pinning if CI minutes ever start mattering. Rescued 2026-09-08 from a
+  removed notebook.
+- **QNAP NAS: no way to disable SSH password authentication in the QNAP's
+  own OS (QuTS hero) if SSH access to it is ever enabled there** — separate
+  from the restic-over-SFTP credentials in
+  [maintenance-schedule.md](maintenance-schedule.md) item 5, which cover
+  `nire-cube`'s side of that connection, not the NAS's own sshd config.
+  Mitigations undecided; rescued 2026-09-08 from a removed notebook,
+  unanswered there too.
 
 `nire-llm-sandbox`'s three runtime-verified `VMs/_lib/libvirt-vm.nix` fixes
 (default network never started, a nonexistent `virsh` flag, a missing fixed
