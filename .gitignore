@@ -4,6 +4,6 @@
 .history/
 result
 .DS_Store
-.claude/settings.local.json
+.agents/settings.local.json
 _lab-notebook-nixos/.obsidian/workspace.json
 _lab-notebook-nixos/.trash/

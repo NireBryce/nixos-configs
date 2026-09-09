@@ -2,7 +2,7 @@
 # PreToolUse hook (Bash matcher). Deterministic guard against destructive git
 # actions -- ones that discard commits, working-tree changes, stashes, or
 # branches with no straightforward undo. Same shape as
-# .claude/hooks/secrets-guard-pretooluse.sh: pattern-matches the command
+# .agents/hooks/secrets-guard-pretooluse.sh: pattern-matches the command
 # before it runs and asks for confirmation rather than hard-denying, because
 # every pattern here has a real legitimate use. Notably the `ship` skill
 # itself runs `git reset --hard origin/experimental` as its documented

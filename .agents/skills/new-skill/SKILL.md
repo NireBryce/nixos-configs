@@ -7,7 +7,7 @@ description: How to write a new SKILL.md in this repo, keeping its frontmatter d
 
 ## Applies to
 
-Creating a new `.claude/skills/<name>/SKILL.md` in this repo, or editing an
+Creating a new `.agents/skills/<name>/SKILL.md` in this repo, or editing an
 existing one's frontmatter `description`. Not for editing a skill's body
 content alone — only touch this when the description needs to change too.
 
@@ -32,7 +32,7 @@ literal "How to" wording is fine (`ship`'s) as long as it states purpose.
 ## Steps
 
 1. **Pick a name**: kebab-case, matching the directory exactly
-   (`.claude/skills/<name>/SKILL.md`). One `SKILL.md` per directory; no
+   (`.agents/skills/<name>/SKILL.md`). One `SKILL.md` per directory; no
    registry to update — discovery is automatic (confirmed: `wiki-sync`
    appeared in the live listing the turn after its directory was created).
 2. **Draft the description first, alone.** One sentence. Test: covering the
@@ -65,7 +65,7 @@ Good:
 
 ## See also
 
-- Any existing `.claude/skills/*/SKILL.md` in this repo — read a couple
+- Any existing `.agents/skills/*/SKILL.md` in this repo — read a couple
   before writing a new one; they're the worked examples, not this file's
   prose about them.
 - `wiki-sync` skill — if the new skill's task touches something `wiki/`

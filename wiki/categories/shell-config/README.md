@@ -74,7 +74,7 @@ separate, platform-specific concern handled by [macos](../macos.md)'s
   not a valid identifier` on Tab/auto-complete) traced into ble.sh's
   carapace/progcomp interaction.
 - Skill `home-manager-dotfiles`
-  (`.claude/skills/home-manager-dotfiles/SKILL.md`) — the general form of
+  (`.agents/skills/home-manager-dotfiles/SKILL.md`) — the general form of
   the concatenation trap above.
 - [macos](../macos.md) — darwin-side shell registration.
 - [../../architecture.md](../../architecture.md) — the `ellyHomeManager`

@@ -68,7 +68,7 @@ structured, extractable facts only:
             someone actually tried it.
 
   skills    Every "skill `name`"/"`name` skill" mention across wiki/ and
-            AGENTS.md against real `.claude/skills/<name>/` directories --
+            AGENTS.md against real `.agents/skills/<name>/` directories --
             same shape as `recipes`, for a skill rename instead.
 
   secrets   The "`.sops.yaml` ... enrolls `host`, `host`, ... —" claim
@@ -581,10 +581,10 @@ SKILL_MENTION = re.compile(r'[Ss]kill `([a-zA-Z][\w-]*)`|`([a-zA-Z][\w-]*)` skil
 
 def check_skills(root):
     """Every "skill `name`" / "`name` skill" mention across wiki/ and
-    AGENTS.md against real `.claude/skills/<name>/` directories -- same
+    AGENTS.md against real `.agents/skills/<name>/` directories -- same
     shape and motivation as `recipes`, for a skill rename instead of a
     recipe rename."""
-    skills_dir = root / '.claude' / 'skills'
+    skills_dir = root / '.agents' / 'skills'
     real = ({p.name for p in skills_dir.iterdir() if p.is_dir()}
             if skills_dir.exists() else set())
 
@@ -595,7 +595,7 @@ def check_skills(root):
             if name not in real:
                 findings.append(
                     f"UNKNOWN SKILL  {path}: '{name}' has no "
-                    f".claude/skills/{name}/ directory")
+                    f".agents/skills/{name}/ directory")
     return findings
 
 

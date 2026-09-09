@@ -96,6 +96,6 @@ just never asked for in the first place.
 - [shell-config](shell-config/README.md) — where zsh/bash themselves are actually
   configured.
 - The `nirepackages-platform-support` skill
-  (`.claude/skills/nirepackages-platform-support/SKILL.md`) — the
+  (`.agents/skills/nirepackages-platform-support/SKILL.md`) — the
   build-support-vs-Homebrew-overlap distinction that governs everything in
   `ellyHomeManager`, separate from this category.

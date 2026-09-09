@@ -18,19 +18,19 @@ one-liner.
 
 | Task | Skill |
 |---|---|
-| Writing/renaming a flake-parts module | `.claude/skills/new-flake-module/SKILL.md` |
-| Editing HM shell/dotfile modules | `.claude/skills/home-manager-dotfiles/SKILL.md` |
-| Editing impermanence or initrd | `.claude/skills/impermanence-initrd/SKILL.md` |
-| Adding/platform-gating a package | `.claude/skills/nirepackages-platform-support/SKILL.md` |
-| Adding a new host | `.claude/skills/new-host-config/SKILL.md` |
-| Adding a homelab service (port, proxy route, verification) | `.claude/skills/new-homelab-service/SKILL.md` |
-| Giving a service its own Tailscale Services (`svc:`) hostname | `.claude/skills/new-tailscale-service/SKILL.md` |
-| Landing work on `experimental` | `.claude/skills/ship/SKILL.md` |
-| Filing a bug noticed while doing something else | `.claude/skills/propose-issue/SKILL.md` |
-| Checking whether a change left a `wiki/` page stale | `.claude/skills/wiki-sync/SKILL.md` |
-| Tightening wiki/skill/AGENTS prose for conciseness | `.claude/skills/trim-docs/SKILL.md` |
-| Writing a new skill | `.claude/skills/new-skill/SKILL.md` |
-| Starting a task that will branch, commit, or check out | `.claude/skills/use-a-worktree/SKILL.md` |
+| Writing/renaming a flake-parts module | `.agents/skills/new-flake-module/SKILL.md` |
+| Editing HM shell/dotfile modules | `.agents/skills/home-manager-dotfiles/SKILL.md` |
+| Editing impermanence or initrd | `.agents/skills/impermanence-initrd/SKILL.md` |
+| Adding/platform-gating a package | `.agents/skills/nirepackages-platform-support/SKILL.md` |
+| Adding a new host | `.agents/skills/new-host-config/SKILL.md` |
+| Adding a homelab service (port, proxy route, verification) | `.agents/skills/new-homelab-service/SKILL.md` |
+| Giving a service its own Tailscale Services (`svc:`) hostname | `.agents/skills/new-tailscale-service/SKILL.md` |
+| Landing work on `experimental` | `.agents/skills/ship/SKILL.md` |
+| Filing a bug noticed while doing something else | `.agents/skills/propose-issue/SKILL.md` |
+| Checking whether a change left a `wiki/` page stale | `.agents/skills/wiki-sync/SKILL.md` |
+| Tightening wiki/skill/AGENTS prose for conciseness | `.agents/skills/trim-docs/SKILL.md` |
+| Writing a new skill | `.agents/skills/new-skill/SKILL.md` |
+| Starting a task that will branch, commit, or check out | `.agents/skills/use-a-worktree/SKILL.md` |
 
 See [architecture.md](architecture.md) and
 [impermanence-and-secrets.md](impermanence-and-secrets.md) for where each of

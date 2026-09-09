@@ -33,14 +33,14 @@ can't be un-sent. A targeted check (`--extract`, or discard stdout and read
 
 ## Enforced mechanically, not just by memory
 
-Two hooks in `.claude/settings.json` (project-scoped, committed) wire the
+Two hooks in `.agents/settings.json` (project-scoped, committed) wire the
 checkable parts:
 
-- **`.claude/hooks/secrets-guard-pretooluse.sh`** (`PreToolUse`, `Bash`) —
+- **`.agents/hooks/secrets-guard-pretooluse.sh`** (`PreToolUse`, `Bash`) —
   a bare `sops -d`/`--decrypt` with no `--extract` and no `>/dev/null`, or
   a `cat`/`bat`/`less`/`more`/`head`/`tail` on a `/run/secrets/` path,
   triggers `permissionDecision: "ask"` naming the narrower alternative.
-- **`.claude/hooks/secrets-guard-posttooluse.sh`** (`PostToolUse`, `Bash`) —
+- **`.agents/hooks/secrets-guard-posttooluse.sh`** (`PostToolUse`, `Bash`) —
   scans actual command output for a Tailscale auth key (`tskey-...`), an age
   secret key (`AGE-SECRET-KEY-...`), a private key block (`-----BEGIN ...
   PRIVATE KEY-----`), or a bare (non-`ENC[...]`)
@@ -107,9 +107,9 @@ are the judgment the hooks can't cover.
 
 ## See also
 
-- `.claude/hooks/secrets-guard-pretooluse.sh` and
-  `.claude/hooks/secrets-guard-posttooluse.sh` — the actual enforcement,
-  wired in `.claude/settings.json`'s `hooks.PreToolUse`/`hooks.PostToolUse`.
+- `.agents/hooks/secrets-guard-pretooluse.sh` and
+  `.agents/hooks/secrets-guard-posttooluse.sh` — the actual enforcement,
+  wired in `.agents/settings.json`'s `hooks.PreToolUse`/`hooks.PostToolUse`.
   Read these before assuming a new risky-command shape is covered; if it
   isn't, extend the pattern match rather than only adding prose here.
 - `CLAUDE.md`'s Safety section — why `secrets.yaml` is encrypted-but-committed

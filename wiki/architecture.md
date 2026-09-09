@@ -30,7 +30,7 @@ is the mechanism, not the inventory.
   every host (`virtualization` is the running example — cube only as of
   2026-08-27, deliberately absent on the handhelds and, since that date, on
   durandal too — see [`categories/virtualization.md`](categories/virtualization.md)).
-- **Skill `new-flake-module`** (`.claude/skills/new-flake-module/SKILL.md`)
+- **Skill `new-flake-module`** (`.agents/skills/new-flake-module/SKILL.md`)
   — the traps in *writing* one: `flake.modules` can't live inside
   `perSystem`, a module's name comes from its filename so a rename can
   silently drop it from its category, two modules with the same name merge
@@ -44,7 +44,7 @@ is the mechanism, not the inventory.
   not as a standalone `homeConfigurations` output. This doc is the trailhead
   back to standalone if that's ever wanted.
 - **Skill `home-manager-dotfiles`**
-  (`.claude/skills/home-manager-dotfiles/SKILL.md`) — traps specific to
+  (`.agents/skills/home-manager-dotfiles/SKILL.md`) — traps specific to
   shell/dotfile modules: `home.file.<n>.text` and `home.sessionPath`
   concatenate rather than override across modules, reading a generated
   dotfile back has false negatives, and shell rc ordering
@@ -54,7 +54,7 @@ is the mechanism, not the inventory.
 ## Package modules
 
 - **Skill `nirepackages-platform-support`**
-  (`.claude/skills/nirepackages-platform-support/SKILL.md`) — the two
+  (`.agents/skills/nirepackages-platform-support/SKILL.md`) — the two
   different questions that both show up as an `isDarwin` guard: can nixpkgs
   build it on darwin at all (automatic, from `meta.platforms`) vs. does
   Homebrew already install it on lysithea (never automatic — `just available

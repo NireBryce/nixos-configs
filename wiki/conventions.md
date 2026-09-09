@@ -29,7 +29,7 @@ as a second recipe, not a flag, and errors).
 
 ## Landing changes on `experimental`
 
-Skill `ship` (`.claude/skills/ship/SKILL.md`) — branch → PR → confirm →
+Skill `ship` (`.agents/skills/ship/SKILL.md`) — branch → PR → confirm →
 merge → confirm → delete-branch. Two confirmations, not one. Only for work
 headed to `experimental`; pushing a topic branch is just a push. "Push" in
 conversation means this flow, not a direct trunk push. Redirected from

@@ -47,4 +47,4 @@ invisibly. Caught and renamed before it shipped.
 - [virtualization](virtualization.md) — the category as it works today.
 - [../history.md](../history.md) — `nire-llm-sandbox`'s removal.
 - The `nixos-vm-images` writeup — removed 2026-09-03 with the VM gone;
-  `git log -- .claude/skills/nixos-vm-images` has it.
+  `git log -- .agents/skills/nixos-vm-images` has it.

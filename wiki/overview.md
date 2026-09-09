@@ -67,7 +67,7 @@ switched versus only evaluated.
   service. They go stale on different triggers (a config change vs. the
   service itself changing), which is why they're kept apart rather than
   combined. [homelab/README.md](homelab/README.md) has the full reasoning.
-- **This wiki, `AGENTS.md`, and the `.claude/skills/` are working notes as
+- **This wiki, `AGENTS.md`, and the `.agents/skills/` are working notes as
   much as documentation** — written for an agent with no memory between
   sessions as much as for a human. [traps-and-skills.md](traps-and-skills.md)
   is the short version of why that shapes how things are written here.
