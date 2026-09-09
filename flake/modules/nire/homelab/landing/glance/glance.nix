@@ -165,6 +165,36 @@
                                             }
                                         ];
                                     }
+
+                                    {
+                                        # Added 2026-09-09 (issue #226).
+                                        # Keyless: glance's weather widget
+                                        # fetches from open-meteo.com, no
+                                        # API key property exists (checked
+                                        # the v0.8.5 docs, matching the
+                                        # pinned package -- `nix eval
+                                        # .#...services.glance.package`).
+                                        # An invalid location is a glance
+                                        # STARTUP error, not a broken
+                                        # widget, so the city has to
+                                        # actually resolve in open-meteo's
+                                        # geocoder.
+                                        type = "weather";
+
+                                        # The one location fact this repo
+                                        # holds: tz.nix's fleet default
+                                        # `time.timeZone =
+                                        # "America/New_York"`. Change here
+                                        # if the dashboard should show
+                                        # somewhere else -- nothing else
+                                        # in the config pins a city.
+                                        location = "New York, United States";
+
+                                        # en_US locale, per locale.nix's
+                                        # `i18n.defaultLocale`; glance's
+                                        # own default is metric.
+                                        units = "imperial";
+                                    }
                                 ];
                             }
                         ];
