@@ -19,27 +19,26 @@ Does **not** fire for other git work — do those normally:
 | "push this branch" | `git push` it. No PR, no gates. |
 | "open a PR" (no merge ask) | Open it and stop. Steps 2-3 are not yours to run. |
 | "commit this" | Commit. Pushing was not asked for. |
-| "promote to main" | Promotion flow — see "Promoting to `main`" below. Not a direct push; `main` carries its own ruleset. |
-| any other branch named outright | Push directly there — see the last section. |
+| "promote to main" | Promotion flow — [side-flows.md](side-flows.md), not a direct push; `main` carries its own ruleset. |
+| any other branch named outright | Push directly there — [side-flows.md](side-flows.md). |
 | fork, non-`origin` remote | Ordinary push. |
 
 If unsure whether an ask means `experimental`, ask. Assuming *no* is the
 mistake this file exists to prevent.
 
 **The default branch is `experimental`** (2026-09-03, trunk + promotion
-model — see the ruleset section at the bottom). `gh pr create` defaults to
-the right trunk now; stating `--base experimental` explicitly is kept as a
-harmless belt. `main` is the promoted known-good and moves only via a PR
-from `experimental`.
+model — [side-flows.md](side-flows.md) has the ruleset picture). `gh pr
+create` defaults to the right trunk now; stating `--base experimental`
+explicitly is kept as a harmless belt. `main` is the promoted known-good
+and moves only via a PR from `experimental`.
 
 **One** confirmation covers both actions, asked up front: "merge, and
 delete the branch afterward?" On yes, both happen in the same turn — no
 second round-trip before deleting. Still not `--delete-branch`: that flag
 only removes the remote branch, and this flow also wants the local branch
 gone and `experimental` checked out and pulled, so those stay explicit
-steps (2026-09-05: collapsed from the original two-confirmation design
-after landing two PRs back to back made the second ask pure overhead —
-the merge answer already implied it every time).
+steps (collapsed from two asks 2026-09-05 — the merge answer already
+implied the deletion every time).
 
 ## 0. Fetch, then is it green?
 
@@ -88,15 +87,12 @@ Never commit onto `experimental`. `git status -sb` (already fetched) first:
   git checkout <branch>
   ```
   **Run that `git status --short` for real, right before the reset, and
-  read it** — don't rely on the git-guard hook alone to catch this: its
-  `ask` is a no-op under `--permission-mode auto`, confirmed 2026-09-06
-  (issue #182). The hook now also emits `systemMessage` on every flagged
-  destructive command, which — unlike `ask` — reaches the human's
-  transcript unconditionally regardless of permission mode; that makes the
-  warning visible, but doesn't stop an agent running in auto mode from
-  proceeding past it, so the manual check below is still the real
-  safeguard. `git branch` only preserves the accidental *commit*; anything
-  else dirty in a shared checkout (someone else's in-progress, uncommitted
+  read it** — don't rely on the git-guard hook: its `ask` is a no-op under
+  `--permission-mode auto` (2026-09-06, issue #182), and its
+  `systemMessage` warning, while it reaches the human's transcript
+  unconditionally, doesn't stop an auto-mode agent from proceeding past
+  it. `git branch` only preserves the accidental *commit*; anything else
+  dirty in a shared checkout (someone else's in-progress, uncommitted
   edit) is not a commit and `reset --hard` destroys it with no recovery
   path. If the status shows anything beyond the commit(s) you're rescuing,
   stop and ask rather than proceeding — don't assume it's yours to lose.
@@ -199,57 +195,8 @@ loop for you: it refuses anything not merged, unions the linked issues
 with the body's own keyword mentions, and closes only the still-OPEN
 ones, each with a comment saying it was a hand close (#177).
 
-## When one working tree becomes two PRs
+## Other flows
 
-Both bit 2026-08-21 (#43/#44):
-
-- **`cp` is aliased `cp -i` here** (`~/.zshrc`, HM-generated). Non-interactive,
-  it answers its own prompt and **exits 0 without copying**. Use `cat src >
-  dst` or `command cp` when reconstructing file states. (Written `alias --
-  cp='cp -i'`, so `grep 'alias cp='` misses it.) Caught by an empty staged
-  diff, not by anything the copy said — §1, a tool reporting success while
-  wrong.
-- **A stacked PR is not retargeted when its base merges** (only when the base
-  *branch is deleted*, which now happens automatically right after merge —
-  there's no longer a gap between merge and delete to catch it in). Retarget
-  explicitly *before* merging the base: `gh pr edit <child> --base
-  experimental`. Each PR still gets its own merge-and-delete confirmation,
-  but a harness can batch several such questions into one call — still one
-  question per decision. Name which PR is stacked on which, so an
-  incoherent answer is visibly incoherent.
-
-## The ruleset picture (trunk + promotion, 2026-09-03)
-
-Two rulesets, both enforced by GitHub:
-
-- **`experimental` (the default branch)** — the ruleset added for `main`
-  2026-08-21 targets `~DEFAULT_BRANCH`, so it followed the default-branch
-  flip automatically: no deletion, no force-push, PR required (zero
-  approvals — solo repo), CI check required. The single conversational
-  confirmation remains the guard on *top* of this — it gates the
-  merge-and-delete decision, the ruleset gates everything else.
-- **`main` (promoted known-good)** — protected by name: same rules. It
-  moves only via a PR from `experimental` (the promotion flow below), and
-  only for configs verified on hardware.
-
-## Promoting to `main`
-
-On a "promote to main"-shaped ask (not part of the ordinary flow above):
-
-```sh
-gh pr create --base main --head experimental \
-  --title "promote: <one line on what's verified>" \
-  --body "what landed since the last promotion, and where it was booted/switched"
-gh pr merge <n> --rebase    # experimental is strictly ahead; keeps history linear
-```
-
-The promotion PR is the record of *why* `main` moved — write what was
-verified on hardware, not just the commit range. Only promote after the
-config has actually booted/switched on the hosts it touches; an unverified
-trunk is what `experimental` is for.
-
-## Only when Elly names a branch
-
-Elly naming a branch outright for that push — any branch except `main`,
-which is promotion-only (see above). A bare "push" is not that; it means
-the guarded flow above, onto `experimental`.
+Promotion to `main`, the branch rulesets behind trunk + promotion, the
+one-working-tree-becomes-two-PRs traps, and the named-branch exception:
+[side-flows.md](side-flows.md).

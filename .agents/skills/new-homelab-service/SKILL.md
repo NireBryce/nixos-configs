@@ -122,7 +122,9 @@ Root 200 + prefix 404 → `handle_path`. Caddyfile mechanics that bite:
 `handle` takes **one** matcher token (`handle /a /a/*` is a parse error;
 two paths need a named matcher `@a path /a /a/*`), and `handle_path` takes
 an inline path matcher only, so a bare `/a` needs its own `redir` to `/a/`.
-A service at `/` (glance) sidesteps all of this.
+A service at `/` (glance) sidesteps all of this. The other direction —
+giving the service its own `svc:` hostname instead of any path prefix —
+is `new-tailscale-service`.
 
 ## 6. Does the upstream module handle its own secrets?
 
@@ -194,7 +196,7 @@ service's reach changes, its page and module header are stale too.
 
 ## 10. Ship
 
-`ship` skill: branch, PR, ask before merging, ask again before deleting.
+`ship` skill: branch, PR, one combined merge-and-delete ask.
 
 ## See also
 

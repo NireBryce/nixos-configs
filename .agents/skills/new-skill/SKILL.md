@@ -1,6 +1,6 @@
 ---
 name: new-skill
-description: How to write a new SKILL.md in this repo, keeping its frontmatter description concise and accurate and its scope details elsewhere.
+description: How to write a new SKILL.md in this repo, or fix an existing skill's frontmatter description that undersells or overclaims it.
 ---
 
 # Writing a new skill

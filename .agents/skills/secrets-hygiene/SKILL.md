@@ -1,6 +1,6 @@
 ---
 name: secrets-hygiene
-description: How to avoid printing sops-managed secret values into the conversation in this repo, hook-enforced where the pattern is checkable, and what to do when one leaks anyway.
+description: How to avoid printing sops-managed secret values into the conversation in this repo, and what to do when one leaks anyway.
 ---
 
 # Handling sops secrets without leaking them
