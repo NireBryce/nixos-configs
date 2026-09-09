@@ -36,14 +36,27 @@
                 enable = true;
 
                 services = {
-                    # Key becomes svc:grafana/svc:git -- the module adds
-                    # the prefix, see its own option doc. `tcp://` value
-                    # scheme, NOT `http://` -- see this file's header and
-                    # history for why the obvious-looking form doesn't
-                    # work. Target is Caddy's own loopback listener, not
-                    # Grafana/Forgejo directly.
+                    # Key becomes svc:grafana/svc:git/svc:glance -- the
+                    # module adds the prefix, see its own option doc.
+                    # `tcp://` value scheme, NOT `http://` -- see this
+                    # file's header and history for why the obvious-looking
+                    # form doesn't work. Target is Caddy's own loopback
+                    # listener, not Grafana/Forgejo/Glance directly.
                     grafana.endpoints."tcp:443" = "tcp://127.0.0.1:443";
                     git.endpoints."tcp:443"     = "tcp://127.0.0.1:443";
+
+                    # Added 2026-09-08: glance had no Tailscale Service of
+                    # its own -- caddy.nix's `http://glance` bare-name
+                    # redirect (added same day, f478494a) pointed at
+                    # `ts-cube.moose-micro.ts.net` instead, which worked for
+                    # THAT redirect but left `glance` itself unresolvable
+                    # (no DNS record existed for the bare name at all --
+                    # confirmed with `getent hosts glance` failing outright,
+                    # distinct from the git/grafana SSL-alert bug below).
+                    # This gives it the same real MagicDNS name as its two
+                    # neighbours; caddy.nix's `glanceFqdn` vhost is the
+                    # other half.
+                    glance.endpoints."tcp:443"  = "tcp://127.0.0.1:443";
                 };
             };
         };

@@ -130,6 +130,14 @@
         # ever sees loopback connections, same as the tailnetFqdn vhost.
         grafanaFqdn = "grafana.moose-micro.ts.net";
         gitFqdn     = "git.moose-micro.ts.net";
+
+        # Added 2026-09-08, same shape as the two above: glance gets its
+        # own Tailscale Service (`svc:glance`, serve.nix) instead of being
+        # reached only via tailnetFqdn's `/` route -- see this file's
+        # `glanceFqdn` vhost below and serve.nix's history note for why the
+        # bare `http://glance` redirect needed it (the name didn't resolve
+        # at all without a real Service behind it).
+        glanceFqdn  = "glance.moose-micro.ts.net";
     in {
         flake.modules.nixos.${moduleName} = {
             # # description = "caddy -- tailnet-only HTTPS front door, with certs from tailscaled";
@@ -200,6 +208,14 @@
                         reverse_proxy 127.0.0.1:3001
                     '';
 
+                    # Added 2026-09-08. Same mechanism as the two vhosts
+                    # above: reached over loopback via serve.nix's raw TCP
+                    # forward, tailscale issues the cert for the SITE
+                    # ADDRESS regardless of the connecting address.
+                    ${glanceFqdn}.extraConfig = ''
+                        reverse_proxy 127.0.0.1:3002
+                    '';
+
                     # Bare MagicDNS name -> the real thing. `http://` is
                     # load-bearing: it marks the site HTTP-only and
                     # suppresses automatic HTTPS. Without the scheme, caddy
@@ -221,9 +237,63 @@
                         redir https://${grafanaFqdn}{uri} permanent
                     '';
 
-                    # Landing/glance index
+                    # Landing/glance index -- now its own Service (see
+                    # glanceFqdn above), not tailnetFqdn; ts-cube's `/`
+                    # still works directly, this is just the short name.
                     "http://glance".extraConfig = ''
-                        redir https://${tailnetFqdn}{uri} permanent
+                        redir https://${glanceFqdn}{uri} permanent
+                    '';
+
+                    # HTTPS twins of the three bare-name redirects above.
+                    # Added 2026-09-08, the day the HTTP-only versions
+                    # turned out to be half the fix.
+                    #
+                    # A browser hitting `https://git` (no scheme typed,
+                    # HTTPS-first browser behaviour, or just a bookmark)
+                    # sends TLS SNI = the literal string "git" -- NOT
+                    # "git.moose-micro.ts.net", even though the OS resolver
+                    # silently completes the bare name to the FQDN for DNS
+                    # purposes via tailscale0's search domain. SNI is fixed
+                    # by the browser before that completion is visible to
+                    # anything downstream. Caddy had no vhost matching that
+                    # SNI (only the HTTP-only ones above, plus the three
+                    # FQDN vhosts), so it fell to its default automatic-
+                    # HTTPS behaviour: try to get a publicly-issued cert for
+                    # "git", which cannot ever succeed (not a real
+                    # ACME-validatable domain) -- confirmed live,
+                    # `curl -v https://git/` returned a raw
+                    # `TLSv1.3 (IN), TLS alert, internal error (592)`,
+                    # Firefox's SSL_ERROR_INTERNAL_ERROR_ALERT.
+                    #
+                    # `tls internal` forces Caddy's own local CA instead of
+                    # its default (ACME) issuer for JUST these three site
+                    # addresses -- scoped per-vhost, does not touch
+                    # automatic_https globally or the tailscale cert
+                    # manager the FQDN vhosts above still use (that's keyed
+                    # off the `.ts.net`-suffixed site address, unaffected
+                    # by what any other vhost does). Trades the previous
+                    # unrecoverable TLS handshake failure for a normal
+                    # untrusted-cert warning a browser lets you click
+                    # through -- exactly what the tailnetFqdn header
+                    # predicted would happen for `ts-cube` if it dropped
+                    # its own `http://` scheme; same mechanism, applied here
+                    # on purpose instead of avoided. `ts-cube` itself still
+                    # has the same underlying gap (no `https://ts-cube`
+                    # vhost) -- not touched here, nobody's hit it in
+                    # practice; same fix if it ever comes up.
+                    "https://git".extraConfig = ''
+                        tls internal
+                        redir https://${gitFqdn}{uri} permanent
+                    '';
+
+                    "https://grafana".extraConfig = ''
+                        tls internal
+                        redir https://${grafanaFqdn}{uri} permanent
+                    '';
+
+                    "https://glance".extraConfig = ''
+                        tls internal
+                        redir https://${glanceFqdn}{uri} permanent
                     '';
                 };
             };
