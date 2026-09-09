@@ -4,7 +4,8 @@
     in {
         flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
             home.packages = with pkgs; [
-                inputs.llm-agents.packages.${pkgs.system}.zcode
+                # pkgs.system is the deprecated alias of this (2026-09-09, issue #233)
+                inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.zcode
             ];
         };
 }
