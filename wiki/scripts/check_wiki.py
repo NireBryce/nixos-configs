@@ -935,7 +935,7 @@ def regenerate_contents(path):
     link points at the page's own Contents block rather than someone else's
     -- not run automatically by `check`, since it writes files rather than
     reporting, the same reasoning that keeps `--fix` flows in this repo
-    (`code-review`, `simplify`) separate from the check itself.
+    separate from the check itself.
 
     Replaces ONLY the contiguous run of `- [text](#slug)` lines right after
     the `## Contents` heading -- never "everything up to the next `##`
