@@ -40,7 +40,11 @@ that import it.
 ## Secrets
 
 - **sops-nix**, `flake/modules/nire/system/secrets/`. `secrets.yaml` is
-  encrypted and committed in the repo on purpose.
+  encrypted and committed in the repo on purpose. Key *names* are plaintext
+  in that ciphertext — `just read-sops-names` lists them without
+  decrypting, which is the only safe way to answer "which secrets exist?"
+  (decrypting to grep for them leaked values twice: 2026-08-26 and
+  2026-09-09, see skill `secrets-hygiene`).
 - **`.sops.yaml`** enrolls `nire-durandal`, `nire-lysithea`, `nire-tenacity`,
   `nire-cube` — read the file directly for the current list rather than
   trusting a count here; [`../CLAUDE.md`](../CLAUDE.md)'s Safety section has

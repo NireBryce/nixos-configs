@@ -187,6 +187,15 @@ Can nixpkgs build it on darwin (automatic, via
 (never automatic; `just available --duplicates` finds the overlap).
 `obsidian.nix` is the worked example.
 
+### Printing sops values — skill `secrets-hygiene`
+
+`sops -d` prints every secret in the file; never pipe it through anything,
+and never count `2>/dev/null` as protection — that's stderr, stdout still
+flows. Hit 2026-08-26 and again 2026-09-09 (three values, both times
+answering "which secrets exist?" by decrypting). That question is
+`just read-sops-names`, which reads the committed ciphertext and cannot
+print a value.
+
 ### `${...}` inside a Nix `''` string is interpolation
 
 Writing `${terminfo[khome]}` in what you intend as a comment is an
