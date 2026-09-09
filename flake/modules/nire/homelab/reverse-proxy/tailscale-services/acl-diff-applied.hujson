@@ -47,6 +47,11 @@
 		"services": {
 			"svc:grafana": ["tag:homelab-cube"],
 			"svc:git":     ["tag:homelab-cube"],
+			// Added 2026-09-09: PR #211 added the serve.nix forward for
+			// glance but neither this approver nor svc-glance.json --
+			// confirmed live 2026-09-09, glance.moose-micro.ts.net does
+			// not resolve tailnet-wide while git/grafana do (#220).
+			"svc:glance":  ["tag:homelab-cube"],
 		},
 	},
 

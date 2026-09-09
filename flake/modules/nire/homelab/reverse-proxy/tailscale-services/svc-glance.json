@@ -1,0 +1,1 @@
+{"name": "svc:glance", "tags": ["tag:homelab-cube"], "ports": ["tcp:443"], "comment": "nixos-configs: nire-cube glance landing page, own Tailscale Service (PR #211's serve.nix half landed, this object did not)"}
