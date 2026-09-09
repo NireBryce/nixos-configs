@@ -39,10 +39,10 @@ hand with `grep -rl --include='*.nix' -- <pattern> flake/modules | wc -l`.
 
 | What | Files |
 |---|---|
-| total `.nix` files under `flake/modules/` | 263 |
-| module header (`moduleName = lib.removeSuffix ...`) | 213 |
+| total `.nix` files under `flake/modules/` | 262 |
+| module header (`moduleName = lib.removeSuffix ...`) | 212 |
 | `# # description` as first body line | 20 |
-| `with pkgs;` package lists | 120 |
+| `with pkgs;` package lists | 119 |
 
 ---
 
