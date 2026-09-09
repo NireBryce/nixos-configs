@@ -7,3 +7,9 @@ result
 .agents/settings.local.json
 # python bytecode cache -- any py_compile/import run leaves one behind
 __pycache__/
+# per-session agent state -- harness output, never repo content. The tracked
+# .agents/completed_todos/*.md files are a deliberate convention, which is why
+# only the plans/checkpoint dirs are ignored, not .agents/ wholesale.
+/.agents/plans/
+/.zcode/plans/
+/.zcode/completed_todos/
