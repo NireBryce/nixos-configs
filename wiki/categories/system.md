@@ -59,7 +59,7 @@ for `lysithea` — it's what actually brings packages and dotfiles to a darwin
 host, not anything under [macos](macos.md).
 
 `home-manager/drop-unsupported-packages.nix` is the platform-support
-counterpart: `ellyHomeManager` is shared verbatim across all five hosts, so
+counterpart: `ellyHomeManager` is shared verbatim across all four hosts, so
 every package in it has to survive `aarch64-darwin`. Eleven didn't (`vlc`,
 `gimp`, `libreoffice-qt`, `github-desktop`, `piper`, `qpwgraph`, `strace`,
 `ltrace`, `iotop`, `sysstat`, `ethtool`), each previously guarded by a

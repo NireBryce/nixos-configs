@@ -76,11 +76,14 @@ name: flake-check
 on:
   pull_request:
   push:
-    # `main` because that's what the branch ruleset actually protects;
-    # `experimental` added 2026-08-25 alongside the `ship` skill's redirect
-    # to it (see CLAUDE.md, "push") so a direct push/merge landing there
-    # still gets checked, even though `experimental` has no ruleset of its
-    # own to make that a requirement.
+    # Both branches are ruleset-covered since the 2026-09-03 default-branch
+    # flip: the ruleset added for `main` 2026-08-21 targets ~DEFAULT_BRANCH,
+    # so it followed the flip onto `experimental` -- no deletion, no
+    # force-push, PR required, and this check required. `main` is also
+    # protected by name (promotion-only, via a PR from `experimental`; see
+    # skill `ship`). `experimental` was added to this list 2026-08-25, back
+    # when it had no ruleset of its own -- the comment said so until the
+    # flip made it false.
     branches: [main, experimental]
 
 jobs:
