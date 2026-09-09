@@ -207,6 +207,13 @@ age-key *args:
 threads *term:
     @{{scripts}}/threads.sh {{term}}
 
+# After merging a PR whose body says Fixes/Closes/Resolves #N, close any of
+# those issues GitHub's keyword silently left open (the #177 failure).
+# Refuses to touch anything unless the PR is actually merged.
+# Close issues a merged PR's closing keywords missed: just close-fixed <PR#>
+close-fixed pr:
+    @{{scripts}}/close-fixed.sh {{pr}}
+
 # Tailnet policy file via API instead of the admin console: get/diff/apply
 tailscale-acl cmd *args:
     # Needs tailscale_api_token in secrets.yaml (sops) -- see the script's
