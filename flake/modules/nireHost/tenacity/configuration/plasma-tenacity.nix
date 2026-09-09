@@ -293,6 +293,17 @@
                             # default
                             krohnkiteEnabled = false;
                         };
+                        # Touchscreen edge swipes -> Overview, from both the
+                        # left and right edges. plasma-manager has no typed
+                        # option for touch screen edges (its kwin module stops
+                        # at edgeBarrier/cornerBarrier), so this is the
+                        # overview effect's own kcfg key: an IntList of
+                        # ElectricBorder values, where 2 = right and 6 = left.
+                        # Written as a string because configFile values are
+                        # scalars only (plasma-manager's basicSettingsType).
+                        # Matches tenacity's live kwinrc, set by hand in
+                        # System Settings on 2026-09-08.
+                        "Effect-overview".TouchBorderActivate = "2,6";
                         # alt-tab visual style
                         TabBoxAlternative.LayoutName = "coverswitch";
                         "org.kde.kdecoration2".BorderSizeAuto = false;
