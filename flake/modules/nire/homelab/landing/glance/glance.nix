@@ -167,6 +167,47 @@
                                     }
                                 ];
                             }
+
+                            {
+                                # The four to-do lists of issue #209, in
+                                # their own trailing small column. Two
+                                # properties worth knowing before
+                                # extending (checked against the v0.8.5
+                                # docs, matching the pinned package):
+                                #
+                                #   - Distinct `id`s are what makes this
+                                #     four lists rather than one; there is
+                                #     no title/label property, so the
+                                #     "categories" the issue asks for are
+                                #     only distinguishable by position and
+                                #     content.
+                                #   - Tasks live in each BROWSER's local
+                                #     storage -- per-device, not shared,
+                                #     and lost if that browser's storage
+                                #     is cleared. Right for a personal
+                                #     dashboard; wrong for the shared
+                                #     household tracking #230 wants, which
+                                #     needs a real backend.
+                                size = "small";
+                                widgets = [
+                                    {
+                                        type = "to-do";
+                                        id   = "1";
+                                    }
+                                    {
+                                        type = "to-do";
+                                        id   = "2";
+                                    }
+                                    {
+                                        type = "to-do";
+                                        id   = "3";
+                                    }
+                                    {
+                                        type = "to-do";
+                                        id   = "4";
+                                    }
+                                ];
+                            }
                         ];
                     }
                 ];
