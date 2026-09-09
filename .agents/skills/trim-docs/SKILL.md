@@ -8,7 +8,7 @@ description: How to tighten wiki pages, skills, and AGENTS.md prose for concisen
 ## Applies to
 
 Asked to "lint", "tighten", "trim", or "make more concise" the wiki,
-`.claude/skills/*/SKILL.md`, or `AGENTS.md`. Not: fixing a fact that went
+`.agents/skills/*/SKILL.md`, or `AGENTS.md`. Not: fixing a fact that went
 stale (`wiki-sync`), writing a new page (`wiki/styleguide.md` has the shape
 rules), or module code comments (`wiki/module-style-guide.md`).
 

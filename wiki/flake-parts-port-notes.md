@@ -100,7 +100,7 @@ produced no error, or an error naming the wrong thing.
   activation becomes a systemd unit whose `PATH` is only
   coreutils/findutils/gnugrep/gnused/systemd with
   `QT_QPA_PLATFORM=offscreen` — anything assuming a login shell will not
-  see it. Skill [`home-manager-dotfiles`](../.claude/skills/home-manager-dotfiles/SKILL.md)
+  see it. Skill [`home-manager-dotfiles`](../.agents/skills/home-manager-dotfiles/SKILL.md)
   carries these now.
 - **starship silently beat powerlevel10k for a whole session.** In the
   generated `.zshrc` the p10k theme was at line 289 and its settings at
@@ -270,7 +270,7 @@ error: infinite recursion encountered
 — pointing at `modulesPath`, `_module.args`, and a `config` reference in
 `imports`, none of which is the cause. Always wrap:
 `{ ... }: { flake.modules.nixos.<name> = <the original module>; }`. Skill
-[`new-flake-module`](../.claude/skills/new-flake-module/SKILL.md) carries
+[`new-flake-module`](../.agents/skills/new-flake-module/SKILL.md) carries
 this.
 
 ### `flake.nixosConfigurations`

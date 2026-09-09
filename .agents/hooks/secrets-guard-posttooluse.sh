@@ -4,7 +4,7 @@
 # PreToolUse guard (secrets-guard-pretooluse.sh), or from a command that
 # guard doesn't cover -- flag it immediately rather than relying on the model
 # noticing on its own before quoting the result. See
-# .claude/skills/secrets-hygiene/SKILL.md and the 2026-08-26 incident it
+# .agents/skills/secrets-hygiene/SKILL.md and the 2026-08-26 incident it
 # documents (tailscale_key/atuin_key leaked via a bare `sops -d`).
 #
 # Deliberately narrow: matches known secret *shapes* (a Tailscale auth key,
@@ -42,7 +42,7 @@ grep -qE 'tskey-[A-Za-z0-9_-]+' <<<"$text" && hit="a Tailscale auth key (tskey-.
 if [ -n "$hit" ]; then
     jq -n --arg hit "$hit" '{
         decision: "block",
-        reason: ("This tool output looks like it contains " + $hit + " in plaintext. STOP before quoting or summarizing it in your reply: refer to it by name only, tell the user it leaked, and recommend rotation rather than continuing the original task as if nothing happened. See .claude/skills/secrets-hygiene/SKILL.md."),
+        reason: ("This tool output looks like it contains " + $hit + " in plaintext. STOP before quoting or summarizing it in your reply: refer to it by name only, tell the user it leaked, and recommend rotation rather than continuing the original task as if nothing happened. See .agents/skills/secrets-hygiene/SKILL.md."),
         hookSpecificOutput: {
             hookEventName: "PostToolUse",
             additionalContext: ("secrets-hygiene guard: possible plaintext secret (" + $hit + ") detected in this tool output. Do not repeat it in your reply; name it only, and flag rotation.")

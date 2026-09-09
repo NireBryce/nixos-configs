@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # PreToolUse hook (Bash matcher). Deterministic guard for the exact mistake
-# documented in .claude/skills/secrets-hygiene/SKILL.md: on 2026-08-26 a bare
+# documented in .agents/skills/secrets-hygiene/SKILL.md: on 2026-08-26 a bare
 # `sops -d secrets.yaml` dumped the whole plaintext file -- tailscale_key and
 # atuin_key included -- into the transcript, when only an exit-code check was
 # needed. This is a pattern match, not a judgment call, so it runs every time
@@ -24,13 +24,13 @@ reason=""
 if grep -qE '\bsops\b' <<<"$command" && grep -qE '(\s|^)-d\b|--decrypt\b' <<<"$command"; then
     if ! grep -qE -- '--extract\b' <<<"$command"; then
         if ! grep -qE '>\s*/dev/null' <<<"$command"; then
-            reason="Bare 'sops -d' prints the WHOLE decrypted secrets.yaml into the transcript -- this is exactly the 2026-08-26 tailscale_key/atuin_key leak. Use \`sops -d --extract '[\"key\"]' <file>\` for one value, or \`sops -d <file> >/dev/null 2>&1; echo \$?\` to just test decrypt access. See .claude/skills/secrets-hygiene/SKILL.md."
+            reason="Bare 'sops -d' prints the WHOLE decrypted secrets.yaml into the transcript -- this is exactly the 2026-08-26 tailscale_key/atuin_key leak. Use \`sops -d --extract '[\"key\"]' <file>\` for one value, or \`sops -d <file> >/dev/null 2>&1; echo \$?\` to just test decrypt access. See .agents/skills/secrets-hygiene/SKILL.md."
         fi
     fi
 fi
 
 if [ -z "$reason" ] && grep -qE '\b(cat|bat|less|more|head|tail)\b[^|;&]*/run/secrets/' <<<"$command"; then
-    reason="Reading a decrypted secret file directly prints its plaintext into the transcript. If you just need to confirm it exists/was written, use \`test -s <path>\`, \`stat <path>\`, or \`ls -la\` on its directory instead. See .claude/skills/secrets-hygiene/SKILL.md."
+    reason="Reading a decrypted secret file directly prints its plaintext into the transcript. If you just need to confirm it exists/was written, use \`test -s <path>\`, \`stat <path>\`, or \`ls -la\` on its directory instead. See .agents/skills/secrets-hygiene/SKILL.md."
 fi
 
 if [ -n "$reason" ]; then

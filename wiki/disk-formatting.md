@@ -171,10 +171,10 @@ this has actually been checked, not once the machine merely boots.
   (`flake/modules/nire/impermanence/root-rollback/WARN-impermanence.nix`) —
   the rollback module this disk layout exists to support; read before
   changing anything near it, every time.
-- Skill `new-host-config` (`.claude/skills/new-host-config/SKILL.md`) — the
+- Skill `new-host-config` (`.agents/skills/new-host-config/SKILL.md`) — the
   full host-adding decision tree this page is one piece of.
 - Skill `impermanence-initrd`
-  (`.claude/skills/impermanence-initrd/SKILL.md`) — the initrd-specific sharp
+  (`.agents/skills/impermanence-initrd/SKILL.md`) — the initrd-specific sharp
   edges referenced above.
 - [categories/impermanence.md](categories/impermanence.md) — what's in the
   category, which hosts import it today.

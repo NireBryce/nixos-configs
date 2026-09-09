@@ -8,7 +8,7 @@
 >
 > This file is canonical; `CLAUDE.md` is a symlink to it, so every "see
 > CLAUDE.md" reference in this repo resolves here. Skills referenced by name
-> below are plain markdown at `.claude/skills/<name>/SKILL.md` — any agent
+> below are plain markdown at `.agents/skills/<name>/SKILL.md` — any agent
 > can read them as files, with or without a harness that loads skills.
 
 Landing work targets `experimental`, the default branch (see "push" under

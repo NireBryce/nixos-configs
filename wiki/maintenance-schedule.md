@@ -16,7 +16,7 @@ A checklist of this fleet's credentials, keys, and certificates that have
 **an actual expiry, a recommended rotation cadence, or a "will silently
 break later" property** — as opposed to `secrets.yaml`'s full inventory,
 which is every secret regardless of whether it ever needs attention. Tended
-by skill [`maintenance-schedule`](../.claude/skills/maintenance-schedule/SKILL.md).
+by skill [`maintenance-schedule`](../.agents/skills/maintenance-schedule/SKILL.md).
 
 Each item states what it actually is, what's known about its expiry (not
 guessed — "unverified" is written down as such rather than invented), and
@@ -270,10 +270,10 @@ doesn't belong on this page; it just lives in `secrets.yaml`.
 
 ## See also
 
-- Skill [`maintenance-schedule`](../.claude/skills/maintenance-schedule/SKILL.md)
+- Skill [`maintenance-schedule`](../.agents/skills/maintenance-schedule/SKILL.md)
   — how to work through this page on a review pass, and what to do with
   each kind of finding.
-- Skill [`secrets-hygiene`](../.claude/skills/secrets-hygiene/SKILL.md) —
+- Skill [`secrets-hygiene`](../.agents/skills/secrets-hygiene/SKILL.md) —
   how to check or touch any of the underlying secrets without printing
   their plaintext.
 - [Impermanence, initrd & secrets](impermanence-and-secrets.md) — the sops

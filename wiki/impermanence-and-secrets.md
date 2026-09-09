@@ -22,7 +22,7 @@ that import it.
   for the current, correctable-in-place list — don't assume "every host" or
   "no host" without checking the specific one.
 - **Skill `impermanence-initrd`**
-  (`.claude/skills/impermanence-initrd/SKILL.md`) — the sharp edge: the
+  (`.agents/skills/impermanence-initrd/SKILL.md`) — the sharp edge: the
   shell's own view of the machine (`lsblk`, `findmnt`, `/etc`) is scoped to
   its mount namespace and can describe a completely different,
   wrong-looking-but-correct disk layout — use `/proc/1/mountinfo`,

@@ -9,7 +9,7 @@ _Last modified: 2026-09-08_
 - [Keeping this from rotting](#keeping-this-from-rotting)
 
 A topic index over documentation that already exists scattered around this
-repo — `CLAUDE.md`, `flake/doc/`, `.claude/skills/`, stray `.md` files
+repo — `CLAUDE.md`, `flake/doc/`, `.agents/skills/`, stray `.md` files
 sitting next to the code they're about, and `bugs pending submission/`.
 Almost nothing has been moved here: every link below points at the file
 that's already the source for that fact. The exception is `claude cave/`'s
@@ -44,20 +44,20 @@ trying to do? Skip straight to Common tasks below.
 
 A task-shaped way in, for when you already know what you're about to *do*
 rather than what category it falls under. Every row points at a page above
-or a skill (`.claude/skills/<name>/SKILL.md`) — nothing here is new content.
+or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
 
 | I want to... | Start here |
 |---|---|
 | reach or debug a service running on cube | [homelab/reaching-services.md](homelab/reaching-services.md) |
-| add, rename, or wire a flake-parts module | [architecture.md](architecture.md), skill [`new-flake-module`](../.claude/skills/new-flake-module/SKILL.md) |
-| touch impermanence or initrd | [impermanence-and-secrets.md](impermanence-and-secrets.md), skill [`impermanence-initrd`](../.claude/skills/impermanence-initrd/SKILL.md) |
-| add or platform-gate a package | [categories/README.md](categories/README.md), skill [`nirepackages-platform-support`](../.claude/skills/nirepackages-platform-support/SKILL.md) |
-| land a change on `experimental` | [conventions.md](conventions.md), skill [`ship`](../.claude/skills/ship/SKILL.md) |
-| check whether a bug is already a known thread | [open-threads.md](open-threads.md), skill [`investigate-bug`](../.claude/skills/investigate-bug/SKILL.md) |
-| add a self-hosted service to a host | [homelab/README.md](homelab/README.md), skill [`new-homelab-service`](../.claude/skills/new-homelab-service/SKILL.md) |
-| give a service its own Tailscale Services (`svc:`) hostname | [categories/reverse-proxy.md](categories/reverse-proxy.md), skill [`new-tailscale-service`](../.claude/skills/new-tailscale-service/SKILL.md) |
-| add a new host, or format its disk for impermanence | [disk-formatting.md](disk-formatting.md), skill [`new-host-config`](../.claude/skills/new-host-config/SKILL.md) |
-| check what key/credential expiry is coming due | [maintenance-schedule.md](maintenance-schedule.md), skill [`maintenance-schedule`](../.claude/skills/maintenance-schedule/SKILL.md) |
+| add, rename, or wire a flake-parts module | [architecture.md](architecture.md), skill [`new-flake-module`](../.agents/skills/new-flake-module/SKILL.md) |
+| touch impermanence or initrd | [impermanence-and-secrets.md](impermanence-and-secrets.md), skill [`impermanence-initrd`](../.agents/skills/impermanence-initrd/SKILL.md) |
+| add or platform-gate a package | [categories/README.md](categories/README.md), skill [`nirepackages-platform-support`](../.agents/skills/nirepackages-platform-support/SKILL.md) |
+| land a change on `experimental` | [conventions.md](conventions.md), skill [`ship`](../.agents/skills/ship/SKILL.md) |
+| check whether a bug is already a known thread | [open-threads.md](open-threads.md), skill [`investigate-bug`](../.agents/skills/investigate-bug/SKILL.md) |
+| add a self-hosted service to a host | [homelab/README.md](homelab/README.md), skill [`new-homelab-service`](../.agents/skills/new-homelab-service/SKILL.md) |
+| give a service its own Tailscale Services (`svc:`) hostname | [categories/reverse-proxy.md](categories/reverse-proxy.md), skill [`new-tailscale-service`](../.agents/skills/new-tailscale-service/SKILL.md) |
+| add a new host, or format its disk for impermanence | [disk-formatting.md](disk-formatting.md), skill [`new-host-config`](../.agents/skills/new-host-config/SKILL.md) |
+| check what key/credential expiry is coming due | [maintenance-schedule.md](maintenance-schedule.md), skill [`maintenance-schedule`](../.agents/skills/maintenance-schedule/SKILL.md) |
 
 ## Pages
 
@@ -102,7 +102,7 @@ or a skill (`.claude/skills/<name>/SKILL.md`) — nothing here is new content.
 - [Maintenance schedule](maintenance-schedule.md) — the fleet's keys,
   credentials, and certificates that have an actual expiry, rotation
   cadence, or silent-breakage property; tended by skill
-  [`maintenance-schedule`](../.claude/skills/maintenance-schedule/SKILL.md).
+  [`maintenance-schedule`](../.agents/skills/maintenance-schedule/SKILL.md).
 
 ### Category reference (configuration)
 

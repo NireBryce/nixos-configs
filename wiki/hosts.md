@@ -73,7 +73,7 @@ status and what broke on the way:
   `flake/modules/nireHost/cube-configuration.nix` header, and `AGENTS.md`'s
   Safety section.
 - **Adding a new host** — skill `new-host-config`
-  (`.claude/skills/new-host-config/SKILL.md`).
+  (`.agents/skills/new-host-config/SKILL.md`).
 - **Disk layout (LUKS + btrfs + impermanence)** —
   [`../flake/doc/disko-impermanence-layout.md`](<../flake/doc/disko-impermanence-layout.md>)
   — the generator durandal/tenacity run, the template if cube ever adopts

@@ -154,7 +154,7 @@ ssh nire-cube.local 'cat ~/.ssh/<new-key>' \
 
 `jq -Rs .` JSON-encodes the multi-line key for `sops set`'s scalar
 argument. Both values are generated/read inline, never a literal in the
-command text — see `.claude/skills/secrets-hygiene/SKILL.md` if running
+command text — see `.agents/skills/secrets-hygiene/SKILL.md` if running
 either from an agent session. Commit `secrets.yaml` after (safe, it's
 ciphertext, committed encrypted on purpose — `AGENTS.md`, Safety
 section), then `just switch` on cube to pick it up.
