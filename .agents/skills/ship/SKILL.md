@@ -194,7 +194,10 @@ gh issue close <N> --comment "..."   # what fixed it, which commit/PR
 ```
 
 Do this for every issue number the merged PR's body claims to fix — the
-auto-link is not a given here.
+auto-link is not a given here. `just close-fixed <pr-number>` runs that
+loop for you: it refuses anything not merged, unions the linked issues
+with the body's own keyword mentions, and closes only the still-OPEN
+ones, each with a comment saying it was a hand close (#177).
 
 ## When one working tree becomes two PRs
 
