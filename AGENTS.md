@@ -138,7 +138,7 @@ back; skill `home-manager-dotfiles` has the traps and integration specifics
 
 ### Platform support is derived; Homebrew overlap is not
 
-`ellyHomeManager` is shared verbatim by all five hosts including
+`ellyHomeManager` is shared verbatim by all four hosts including
 `nire-lysithea`, so everything in it has to survive darwin. Two questions
 when adding a package: can nixpkgs build it on darwin (answered
 automatically off `meta.platforms`), and does Homebrew already install it

@@ -63,7 +63,7 @@ own header has the two earlier names it carried
 
 ## Imported by
 
-`tenacity`, `cube`. All four NixOS hosts on the tree at the time (durandal,
+`tenacity`, `cube`. Every NixOS host then on the tree (durandal,
 tenacity, lego, cube) imported it 2026-08-22→08-27, when durandal dropped
 it: nothing in this repo's history records durandal actually running a
 container or distrobox, unlike cube's confirmed homelab usage — parity, not

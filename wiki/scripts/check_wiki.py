@@ -132,7 +132,19 @@ structured, extractable facts only:
             mechanically while deciding *what belongs* on the page stays
             manual.
 
-  check     Runs all eleven of the above.
+  counts    The counts table in wiki/module-style-guide.md (## Counts) and
+            the host-count claims phrased as "all N hosts" / "all N NixOS
+            hosts" / "M of the N NixOS hosts" in wiki/ + AGENTS.md, against
+            recomputation: the table rows against grep over flake/modules/,
+            the prose claims against hosts.nix's actual entry count (split
+            by class, via the same actual_hosts the `hosts` check uses).
+            Added 2026-09-09 after the style-guide's 2026-08-08 counts
+            (151/70/106) and AGENTS.md's "all five hosts" both went quietly
+            false -- same failure mode as `table`'s removed Members column,
+            but these live in prose rather than a table the tree can't see,
+            which is why they need their own subcheck.
+
+  check     Runs all twelve of the above.
 
     check_wiki.py imports       [repo-root]
     check_wiki.py table         [repo-root]
@@ -145,6 +157,7 @@ structured, extractable facts only:
     check_wiki.py anchors       [repo-root]
     check_wiki.py contents      [repo-root]
     check_wiki.py dates         [repo-root]
+    check_wiki.py counts        [repo-root]
     check_wiki.py check         [repo-root]
     check_wiki.py gen-contents  <file.md> [file.md ...]
 
@@ -890,6 +903,124 @@ def check_contents(root):
     return findings
 
 
+# wiki/module-style-guide.md's `## Counts` table -- one row per convention
+# this page once stated as an inline count. Each row is recomputed by
+# scanning every .nix file under flake/modules/ with the same pattern the
+# page's own "recompute by hand" line gives a human; a row whose number
+# doesn't match its recomputation is a hard finding.
+STYLEGUIDE_COUNTS = pathlib.Path('wiki/module-style-guide.md')
+MODULES_DIR = pathlib.Path('flake/modules')
+COUNT_ROW = re.compile(r'^\|\s*(.+?)\s*\|\s*(\d+)\s*\|\s*$', re.M)
+# The three recomputable rows, keyed by an unambiguous prefix of their label.
+# `total` has no pattern -- it is the count of .nix files itself.
+COUNT_DEFS = [
+    ('total `.nix` files',
+     None),
+    ('module header',
+     'moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);'),
+    ('`# # description`',
+     re.compile(r'(?m)^\s*# # description')),
+    ('`with pkgs;`',
+     'with pkgs;'),
+]
+# Number words a prose host-count claim can use, and the class-scoped
+# variants: "all five hosts", "all 4 hosts", "all three NixOS hosts",
+# "Two of the three NixOS hosts". Deliberately requires "all"/"of the" --
+# historical prose ("three hosts were removed") doesn't match.
+NUM = r'(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|\d+)'
+NUMWORD = {'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6,
+           'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10, 'eleven': 11,
+           'twelve': 12}
+HOST_COUNT_CLAIMS = [
+    # "all five hosts", "all 4 hosts" -> claim checked against the total
+    (re.compile(rf'\ball ({NUM}) hosts\b', re.I), 'total'),
+    # "all three NixOS hosts" -> against that class's count
+    (re.compile(rf'\ball ({NUM}) (nixos|darwin) hosts\b', re.I), 'class'),
+    # "Two of the three NixOS hosts" -> N against the class count; the
+    # leading M is only checked for not exceeding N, since what M counts
+    # (here: hosts that wipe /root) is claim-specific prose
+    (re.compile(rf'\b({NUM}) of the ({NUM}) (nixos|darwin) hosts\b', re.I),
+     'of-class'),
+]
+
+
+def _host_num(word):
+    return NUMWORD.get(word.lower()) or int(word)
+
+
+def check_counts(root):
+    """Two shapes of count claim, both of which actually went stale here:
+
+    - wiki/module-style-guide.md's `## Counts` table, one row per
+      convention the page used to state as an inline count. Recomputed
+      against flake/modules/ on every run -- the page's numbers are now a
+      view of the tree, not a snapshot of it.
+    - "all N hosts"-shaped prose across wiki/ + AGENTS.md, the exact claim
+      AGENTS.md's Platform-support section got wrong ("all five hosts"
+      when hosts.nix defines four). Class-scoped variants
+      ("all three NixOS hosts", "Two of the three NixOS hosts") are checked
+      against that class's own count.
+    """
+    findings = []
+
+    text = (root / STYLEGUIDE_COUNTS).read_text()
+    rows = {}
+    for label, n in COUNT_ROW.findall(text):
+        for key, _ in COUNT_DEFS:
+            if label.startswith(key):
+                rows[key] = int(n)
+                break
+    files = sorted((root / MODULES_DIR).rglob('*.nix'))
+    for key, pattern in COUNT_DEFS:
+        if key not in rows:
+            continue  # a removed row is a page edit, not drift
+        if pattern is None:
+            actual = len(files)
+        elif isinstance(pattern, re.Pattern):
+            actual = sum(1 for f in files if pattern.search(f.read_text()))
+        else:
+            actual = sum(1 for f in files if pattern in f.read_text())
+        if rows[key] != actual:
+            findings.append(
+                f"STALE    {root / STYLEGUIDE_COUNTS}: counts table says "
+                f"{rows[key]} for '{key}' but recomputed {actual}")
+
+    hosts = actual_hosts(root)
+    class_count = {'nixos': sum(1 for c in hosts.values() if c == 'nixos'),
+                   'darwin': sum(1 for c in hosts.values() if c == 'darwin')}
+    for path in doc_files(root):
+        text = path.read_text()
+        for rx, kind in HOST_COUNT_CLAIMS:
+            for m in rx.finditer(text):
+                if kind == 'total':
+                    claimed, actual = _host_num(m.group(1)), len(hosts)
+                    if claimed != actual:
+                        findings.append(
+                            f"STALE    {path}: '{m.group(0)}' says "
+                            f"{claimed} hosts but hosts.nix defines {actual}")
+                elif kind == 'class':
+                    cls = m.group(2).lower()
+                    claimed, actual = _host_num(m.group(1)), class_count[cls]
+                    if claimed != actual:
+                        findings.append(
+                            f"STALE    {path}: '{m.group(0)}' says "
+                            f"{claimed} {cls} hosts but hosts.nix defines "
+                            f"{actual}")
+                else:
+                    lead, total = _host_num(m.group(1)), _host_num(m.group(2))
+                    cls = m.group(3).lower()
+                    if lead > total:
+                        findings.append(
+                            f"STALE    {path}: '{m.group(0)}' -- {lead} "
+                            f"exceeds {total}")
+                    if total != class_count[cls]:
+                        findings.append(
+                            f"STALE    {path}: '{m.group(0)}' says {total} "
+                            f"{cls} hosts but hosts.nix defines "
+                            f"{class_count[cls]}")
+    return findings
+
+
 def check_dates(root):
     """Every page under wiki/ has a `_Last modified: YYYY-MM-DD_` line right
     after its title, in exactly the format styleguide.md's Content-shape
@@ -996,7 +1127,8 @@ def main():
     root = repo_root([sys.argv[0]] + sys.argv[2:])
 
     cmds = ('imports', 'table', 'hosts', 'recipes', 'skills', 'secrets',
-            'routes', 'links', 'anchors', 'contents', 'dates', 'check')
+            'routes', 'links', 'anchors', 'contents', 'dates', 'counts',
+            'check')
     if cmd not in cmds:
         print(__doc__)
         sys.exit(2)
@@ -1024,6 +1156,8 @@ def main():
         findings += check_contents(root)
     if cmd in ('dates', 'check'):
         findings += check_dates(root)
+    if cmd in ('counts', 'check'):
+        findings += check_counts(root)
 
     for f in findings:
         print(f)

@@ -15,7 +15,8 @@ care about.
 Layout
 ------
 
-`flake.nix` imports every `.nix` file under `flake/modules/` via
+The flake entry point is `flake/flake.nix` -- the repo root has none. It
+imports every `.nix` file under `flake/modules/` via
 `import-tree`, rather than wiring paths together by hand. Each file declares
 one `flake.modules.<class>.<name>` module — `<class>` is `nixos`,
 `homeManager`, or `darwin`, so a single file can declare a NixOS module and
@@ -34,15 +35,12 @@ and what else of it this repo actually uses.
 Hosts
 -----
 
-- `nire-durandal` — workstation
-- `nire-tenacity` — handheld, Jovian/SteamOS
-- `nire-cube` — workstation (GMKtec mini PC)
-
-`nire-durandal` and `nire-tenacity` wipe `/root` on boot;
-`nire-cube` deliberately does not (see
-`flake/modules/nireHost/cube-configuration.nix` for why). `nire-tenacity`
-is currently the one this branch actually runs on; check `CLAUDE.md`'s State
-section for the others' current status.
+Four hosts: `nire-durandal`, `nire-tenacity`, `nire-cube` (NixOS) and
+`nire-lysithea` (darwin). [wiki/hosts.md](wiki/hosts.md) is the table --
+roster, class, role, and which wipe `/root` -- and is checked against
+`hosts.nix` mechanically, so it can't drift the way a second list here
+did. Which one this branch actually runs on is a live question for the
+host itself; see `AGENTS.md`'s State section.
 
 Secrets
 -------

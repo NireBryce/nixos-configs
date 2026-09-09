@@ -58,7 +58,8 @@ writes to `.blerc`, `.zshrc`, or similar in this category.
 
 ## Imported by
 
-All four NixOS hosts directly. `lysithea` doesn't list `shell-config` in its
+`durandal`, `tenacity`, and `cube` -- all three NixOS hosts -- directly.
+`lysithea` doesn't list `shell-config` in its
 own imports, but reaches the `homeManager`-class content anyway (`bash`,
 `blesh`, `shell-env`, `zsh`) via `nireUser/elly-home-manager.nix`'s shared
 `ellyHomeManager` bundle, which every host's Home Manager config points at
