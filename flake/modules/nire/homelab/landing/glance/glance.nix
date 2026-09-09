@@ -66,12 +66,38 @@
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 
-        # Written out rather than shared, same as reverse-proxy/caddy.nix,
-        # monitoring/grafana.nix and git-forge/forgejo.nix: nothing declares
-        # options (CLAUDE.md, Architecture) -- four copies, moved together.
-        tailnetFqdn = "ts-cube.moose-micro.ts.net";
+        # The monitor's rows for services THIS host proxies, derived from
+        # caddy's own vhost table (issue #221): the attribute names of
+        # `services.caddy.virtualHosts` ARE the public site addresses
+        # (caddy.nix), so a rename there flows into these URLs instead of
+        # leaving a stale, silently-wrong monitor behind -- which is
+        # exactly what the hand-copied form did when the 2026-09-07 route
+        # move retired the /grafana/ and /git/ prefixes these used to
+        # point at. Keyed by a substring unique to the wanted vhost (the
+        # FQDN form, not the bare `http://<name>` redirect vhosts -- those
+        # keys contain no dot); a label matching nothing is an EVAL ERROR,
+        # not an empty row, so removing a service forces a glance edit in
+        # the same change. The one hand-written row is golink, which is
+        # not this host's vhost at all (own tailnet device, golink.nix).
+        monitored = {
+            grafana = "Grafana";
+            git     = "Forgejo";
+        };
+
+        monitoredSite = vhosts: label: title:
+            let
+                matches = builtins.filter
+                    (v: lib.hasInfix label v && lib.hasInfix "." v)
+                    vhosts;
+            in
+                if matches == []
+                then builtins.throw "glance monitor: no caddy vhost matches '${label}' -- the service moved or was renamed; update glance.nix's `monitored` in the same change (issue #221)"
+                else {
+                    inherit title;
+                    url = "https://${builtins.head matches}/";
+                };
     in {
-        flake.modules.nixos.${moduleName} = {
+        flake.modules.nixos.${moduleName} = { config, ... }: {
             # # description = "glance -- the service index for this host: what's running, whether it's up";
 
             services.glance = {
@@ -122,15 +148,17 @@
                                         # here; a loopback check would hide
                                         # exactly the bug that actually
                                         # happened (the /git 404).
-                                        sites = [
-                                            {
-                                                title = "Grafana";
-                                                url   = "https://${tailnetFqdn}/grafana/";
-                                            }
-                                            {
-                                                title = "Forgejo";
-                                                url   = "https://${tailnetFqdn}/git/";
-                                            }
+                                        #
+                                        # Derived from caddy's vhost table --
+                                        # see `monitored` above for why and
+                                        # for the throw-on-orphan guarantee.
+                                        sites = (map
+                                            (label: monitoredSite
+                                                (builtins.attrNames
+                                                    config.services.caddy.virtualHosts)
+                                                label
+                                                monitored.${label})
+                                            (builtins.attrNames monitored)) ++ [
                                             {
                                                 # Its own tailnet device
                                                 # (shortlinks/golink.nix
