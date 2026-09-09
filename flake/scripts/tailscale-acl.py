@@ -42,7 +42,7 @@ extracts one key. TAILNET defaults to the tailnet this repo's hosts are
 already on (see wiki/categories/reverse-proxy.md) but can be overridden
 with $TAILSCALE_TAILNET for a different one.
 """
-import json, os, subprocess, sys, urllib.request, urllib.error, difflib, pathlib
+import os, subprocess, sys, urllib.request, urllib.error, difflib, pathlib
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 SECRETS_FILE = REPO_ROOT / "flake/modules/nire/system/secrets/secrets.yaml"

@@ -12,7 +12,7 @@ similar — a deliberate, standalone pass looking for `boyscouting`-shaped
 opportunities across files you weren't already editing for another task.
 Not: a fix noticed while doing something else (that's `boyscouting`
 itself, landed in that task's commit); a correctness/simplification review
-of a diff (`code-review`, `simplify`); a docs-conciseness pass
+of a diff; a docs-conciseness pass
 (`trim-docs`); a stale factual claim (`wiki-sync`); anything with a real
 failure scenario (`propose-issue`).
 
@@ -77,7 +77,5 @@ running a full audit under a friendlier name.
 ## See also
 
 - `boyscouting` — the eligibility bar this skill reuses verbatim.
-- `code-review` / `simplify` — for correctness or simplification work that
-  needs actual judgment, not this skill's mechanical bar.
 - `propose-issue` — where anything with a failure scenario goes instead.
 - `use-a-worktree`, `ship` — mechanics for running and landing the sweep.

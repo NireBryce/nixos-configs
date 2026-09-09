@@ -61,7 +61,7 @@ run_ssh_to_age() {
         ssh-to-age
     else
         nix --extra-experimental-features 'nix-command flakes' \
-            run nixpkgs#ssh-to-age -- "$@"
+            run nixpkgs#ssh-to-age
     fi
 }
 

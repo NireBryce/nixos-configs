@@ -7,3 +7,5 @@ result
 .agents/settings.local.json
 _lab-notebook-nixos/.obsidian/workspace.json
 _lab-notebook-nixos/.trash/
+# python bytecode cache -- any py_compile/import run leaves one behind
+__pycache__/
