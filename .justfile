@@ -85,6 +85,14 @@ wiki-churn *args:
 wiki-stale-refs:
     python3 wiki/scripts/wiki_stale_refs.py
 
+# Where the same prose shows up in two of AGENTS.md / skills / wiki -- the
+# mechanical half of "one pointer per fact". Deliberately not in wiki-lint:
+# overlap between lessons-learned.md and its lessons-learned/ articles is by
+# design, and a shared table may be a fact's one true home -- read the spans.
+# Reporting only, never fails -- word-8-gram overlap across the doc layers
+wiki-restatement *args:
+    python3 wiki/scripts/check_restatement.py {{args}}
+
 # Point git at .githooks/: lint ratchet pre-commit, trailer fixup commit-msg
 install-hooks:
     git config core.hooksPath .githooks
