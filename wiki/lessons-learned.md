@@ -1,55 +1,6 @@
 # Lessons from the den → flake-parts port
 
-_Last modified: 2026-09-08_
-
-## Contents
-
-- [1. A tool that reports success has not thereby been tested](#1-a-tool-that-reports-success-has-not-thereby-been-tested)
-- [2. The repo is not the machine](#2-the-repo-is-not-the-machine)
-- [3. When a tool contradicts you, suspect yourself first](#3-when-a-tool-contradicts-you-suspect-yourself-first)
-- [4. An unchanged fingerprint can mean the code is inert](#4-an-unchanged-fingerprint-can-mean-the-code-is-inert)
-- [5. Writing a trap down does not stop you walking into it](#5-writing-a-trap-down-does-not-stop-you-walking-into-it)
-- [6. Bugs serialise](#6-bugs-serialise)
-- [7. Cross-module side effects are invisible without a fingerprint](#7-cross-module-side-effects-are-invisible-without-a-fingerprint)
-- [8. A built-in option existing is not the same as it fitting](#8-a-built-in-option-existing-is-not-the-same-as-it-fitting)
-- [9. Caches in nix have three placements, and the default is the expensive one](#9-caches-in-nix-have-three-placements-and-the-default-is-the-expensive-one)
-- [10. Reading upstream source settled things guessing would have got wrong](#10-reading-upstream-source-settled-things-guessing-would-have-got-wrong)
-- [11. Read the links in a comment before deleting the code they annotate](#11-read-the-links-in-a-comment-before-deleting-the-code-they-annotate)
-- [12. Verify the mechanism before betting a refactor on it](#12-verify-the-mechanism-before-betting-a-refactor-on-it)
-- [13. Reversibility can stand in for a decision](#13-reversibility-can-stand-in-for-a-decision)
-- [14. Read the repo's own conventions before writing into it](#14-read-the-repos-own-conventions-before-writing-into-it)
-- [15. Commit hygiene](#15-commit-hygiene)
-- [16. When the user redirects, the redirect carries information](#16-when-the-user-redirects-the-redirect-carries-information)
-- [17. The record may already exist](#17-the-record-may-already-exist)
-- [18. Say which rung you mean](#18-say-which-rung-you-mean)
-- [19. The machine's own tools can lie about the machine](#19-the-machines-own-tools-can-lie-about-the-machine)
-- [20. A pipeline reports the exit status of its last command](#20-a-pipeline-reports-the-exit-status-of-its-last-command)
-- [21. An environment failure can wear a config failure's clothes](#21-an-environment-failure-can-wear-a-config-failures-clothes)
-- [22. Name matching fails silently, and reads exactly like a real negative](#22-name-matching-fails-silently-and-reads-exactly-like-a-real-negative)
-- [23. When a check fires on new work, fix its model before reaching for the flag](#23-when-a-check-fires-on-new-work-fix-its-model-before-reaching-for-the-flag)
-- [24. Compare against what is deployed, not against the last commit](#24-compare-against-what-is-deployed-not-against-the-last-commit)
-- [25. Running it is a rung of its own, and finds a different class](#25-running-it-is-a-rung-of-its-own-and-finds-a-different-class)
-- [26. "Did it work before?" is one command, and it beats reasoning](#26-did-it-work-before-is-one-command-and-it-beats-reasoning)
-- [27. Check whether upstream already fixed it before writing the patch](#27-check-whether-upstream-already-fixed-it-before-writing-the-patch)
-- [28. A guard keyed on a signal that never fires is worse than no guard](#28-a-guard-keyed-on-a-signal-that-never-fires-is-worse-than-no-guard)
-- [29. Ordering fixes do not reach code that schedules itself later](#29-ordering-fixes-do-not-reach-code-that-schedules-itself-later)
-- [30. Removing a capability does not make its consumers degrade gracefully](#30-removing-a-capability-does-not-make-its-consumers-degrade-gracefully)
-- [31. Count the thing you mean, and check the cleaner before declaring there is none](#31-count-the-thing-you-mean-and-check-the-cleaner-before-declaring-there-is-none)
-- [32. An auto-allocator that cannot see manual entries will collide with them](#32-an-auto-allocator-that-cannot-see-manual-entries-will-collide-with-them)
-- [33. A removed option is not an ignored option, and defaults are worth reading](#33-a-removed-option-is-not-an-ignored-option-and-defaults-are-worth-reading)
-- [34. The dangerous name collision is the one where both halves work](#34-the-dangerous-name-collision-is-the-one-where-both-halves-work)
-- [35. The same collision, a third time — caught immediately because the tool was actually run](#35-the-same-collision-a-third-time--caught-immediately-because-the-tool-was-actually-run)
-- [36. Evaluating the Nix expression and building the artifact it describes are different tests, and only one of them was run](#36-evaluating-the-nix-expression-and-building-the-artifact-it-describes-are-different-tests-and-only-one-of-them-was-run)
-- [37. Some bugs need real system state to exist at all — no amount of building or reading the artifact finds them](#37-some-bugs-need-real-system-state-to-exist-at-all--no-amount-of-building-or-reading-the-artifact-finds-them)
-- [38. A fix scoped to what actually asked for it beats a general one — asking "does this affect the host that didn't ask" caught it before writing the wrong mechanism](#38-a-fix-scoped-to-what-actually-asked-for-it-beats-a-general-one--asking-does-this-affect-the-host-that-didnt-ask-caught-it-before-writing-the-wrong-mechanism)
-- [39. A live interactive bug needs a live interactive repro — `ssh host 'cmd'` is not the same session a human types into](#39-a-live-interactive-bug-needs-a-live-interactive-repro--ssh-host-cmd-is-not-the-same-session-a-human-types-into)
-- [40. A failed systemd unit doesn't mean the thing it manages is down — check the resource, not just the unit](#40-a-failed-systemd-unit-doesnt-mean-the-thing-it-manages-is-down--check-the-resource-not-just-the-unit)
-- [41. A proxy config can be valid, buildable, *and* wrong per-app — two apps behind one prefix wanted opposite prefix handling](#41-a-proxy-config-can-be-valid-buildable-and-wrong-per-app--two-apps-behind-one-prefix-wanted-opposite-prefix-handling)
-- [42. Not every file git tracks deserves the same scrutiny — `.claude/settings.local.json` is Elly's, not a config artifact to protect](#42-not-every-file-git-tracks-deserves-the-same-scrutiny--claudesettingslocaljson-is-ellys-not-a-config-artifact-to-protect)
-- [43. A fingerprint check can pass for the wrong reason — dead code looks exactly like safe code until you make it live](#43-a-fingerprint-check-can-pass-for-the-wrong-reason--dead-code-looks-exactly-like-safe-code-until-you-make-it-live)
-- [44. A hook that runs `git` from a non-toplevel cwd needs `-C`, not a cleared GIT_DIR — the docs' own suggested fix broke the index lock instead](#44-a-hook-that-runs-git-from-a-non-toplevel-cwd-needs--c-not-a-cleared-git_dir--the-docs-own-suggested-fix-broke-the-index-lock-instead)
-- [45. NixOS `systemd.user.services` is global — every user manager reads it, and they all race to start it](#45-nixos-systemduserservices-is-global--every-user-manager-reads-it-and-they-all-race-to-start-it)
-- [46. "Enabled" is a claim about config, not about who holds the port](#46-enabled-is-a-claim-about-config-not-about-who-holds-the-port)
+_Last modified: 2026-09-09_
 
 > **Written by Claude Code, for Claude Code**, and largely a record of its own
 > mistakes. Written to be read by an agent starting cold, so the "I" throughout
@@ -69,6 +20,11 @@ filesystem/daemon state shows up at an actual `switch`, see §37.
 
 §46 is the one entry not lived here — a caveat adopted from an upstream bug
 report, labelled as such where it sits.
+
+Entries whose full account runs long keep that account in
+[lessons-learned/](lessons-learned/) (`<n>-<slug>.md`, one article per §,
+linked from its summary below) so a full read of this page stays cheap; the
+page keeps every § number and its one-line version either way.
 
 Numbers are stable; §§2, 5, 7, 11, 14, 18, 24 and 25 are referenced elsewhere.
 Lived at `claude cave/lessons-learned.md` until 2026-09-02 — see
@@ -663,80 +619,15 @@ the commit that matters.
 
 ## 36. Evaluating the Nix expression and building the artifact it describes are different tests, and only one of them was run
 
-Two real bugs surfaced building `nire-llm-sandbox` (a libvirt VM guest on
-cube), and both share a shape worth naming on its own,
-past what §25 ("running it is a rung of its own") already covered:
+Two `nire-llm-sandbox` build bugs: one evaluation caught (missing `fileSystems` assertion), one only building the generated script and reading it back caught — a well-typed relative path that was semantically wrong. When a value's correctness depends on more than its type, build the thing that consumes it and read the result.
 
-1. Using `image.modules.qemu` (nixpkgs' image-*variant* system) instead of
-   importing `virtualisation/disk-image.nix` directly. This one WAS caught
-   by evaluation — `nix eval` on `system.build.toplevel` failed outright,
-   with a real assertion naming the missing `fileSystems`/`grub.devices`.
-   Forcing every touched host's toplevel (this repo's own standing rule,
-   `checks.nix`'s whole reason for existing) is what caught it, immediately,
-   before anything was built.
-2. Using `config.image.filePath` as if it were already an absolute path,
-   when it's documented as relative to the image derivation's own `$out`.
-   This one was NOT caught by evaluation — `nix eval` on the consuming
-   systemd unit's `ExecStart` returned a perfectly well-typed store path to
-   a generated script. The script's own *content* was wrong (a bare filename
-   in an `[ -e ... ]` check, certain to fail under systemd's cwd), and
-   nothing about evaluating the expression that produced it revealed that —
-   only building the script and reading it back did.
-
-**Bug #1 is the "evaluates ≠ works" lesson this file already has (§25),
-found the normal way. Bug #2 is one level past it: a value can be
-well-typed, evaluate cleanly, and still be semantically wrong — and no
-amount of `nix eval` on the *consumer* finds that, because the consumer
-faithfully substituted a bad string into a syntactically fine derivation.**
-The only thing that caught it was `nix build`-ing the specific derivation
-whose *string content* mattered and reading the file back — the same
-`Read`-the-artifact discipline this repo already applies to generated
-dotfiles (`home-manager-dotfiles` skill) and rendered firewall scripts
-(wiki `system.md`'s Tailscale section), just not yet named as a general
-rule. Worth generalizing: **when a value is a path, a filename, or anything
-else whose correctness depends on more than its type, build the thing that
-consumes it and read the result — don't stop at the expression type-checking.**
+Full account: [36-evaluating-vs-building.md](lessons-learned/36-evaluating-vs-building.md).
 
 ## 37. Some bugs need real system state to exist at all — no amount of building or reading the artifact finds them
 
-`nire-cube`'s first real `just switch` with the `monitoring` category and
-`nire-llm-sandbox`'s network fix both wired in (2026-08-23) failed two
-units, and both bugs share a shape one level past §36's: not "the built
-artifact's content is wrong" but "the artifact is exactly right, and the bug
-only exists once real system state it depends on shows up at runtime."
+Cube's 2026-08-23 switch failed two units whose bugs existed only in runtime state — a Grafana secret file with the wrong owner (set by `install` outside Nix) and libvirt's defined-vs-started network state. Eval, build, and reading the artifact all stop short: for state a *service* or *daemon* holds, the test is the switch plus `systemctl`/`journalctl` after it.
 
-1. Grafana's `secret_key` pointed at
-   `$__file{/persist/secrets/grafana-secret-key}` — correct syntax, and the
-   nixpkgs assertion requiring *some* value for the option was satisfied.
-   `grafana.service` still failed, because the file `sudo install -D -m600`
-   created was `root:root`, and `services.grafana` runs as `User =
-   "grafana"` (a fact about the *systemd unit*, nowhere near the Nix
-   expression that set the option). No `nix eval`, and no reading back the
-   generated config file, would have shown this — the config file's
-   *content* was correct throughout; only the *filesystem permissions* on a
-   path outside the Nix store, set by a command run outside of Nix
-   entirely, were wrong.
-2. `libvirt-vm-llm-sandbox.service` failed with `network 'default' is not
-   active` despite `virsh define` succeeding immediately before it in the
-   same script. The domain XML was correct, the activation script was
-   correct — the failure depended on libvirtd's own *runtime* network
-   state (defined vs. started), which is neither part of the Nix
-   expression nor visible in any built artifact, only in `virsh net-list`
-   against a live daemon.
-
-**Both bugs were only visible by actually running `just switch` on the real
-host and reading `systemctl status`/`journalctl` afterward — not by
-evaluating, not by building, not by reading back a generated file.** That's
-a third rung past §25 ("evaluates ≠ works") and §36 ("a well-typed value can
-still be wrong, build and read the artifact"): some correctness depends on
-state that doesn't exist anywhere until the real activation runs on the
-real machine — a service's runtime UID, a daemon's own runtime object
-state. For anything shaped like that (a file a *service* reads rather than
-Nix, a resource a *daemon* manages rather than a NixOS option), the only
-real test is the switch itself, and `systemctl status`/`journalctl` after
-it — matching this repo's own standing rule ("did it work before?", "force a
-toplevel") one step further: even a forced toplevel and a successful
-activation don't prove every unit inside it actually started.
+Full account: [37-bugs-that-need-real-system-state.md](lessons-learned/37-bugs-that-need-real-system-state.md).
 
 ## 38. A fix scoped to what actually asked for it beats a general one — asking "does this affect the host that didn't ask" caught it before writing the wrong mechanism
 
@@ -770,421 +661,39 @@ membership itself.
 
 ## 39. A live interactive bug needs a live interactive repro — `ssh host 'cmd'` is not the same session a human types into
 
-Reported 2026-08-24: "weird completion errors" over SSH to `nire-cube`,
-`-bash: read: `': not a valid identifier`, appearing while typing (before
-any Tab) and sometimes on Tab itself, for ordinary commands like `git co`.
+The ble.sh × carapace `read: ''': not a valid identifier` storm only reproduced through a real pty — `ssh host 'cmd'` never fires ble.sh's interactive attach — and the trigger was an invisible SOH byte in carapace's generated completer. Fixed by `carapace-completer-read-fix.bash` sidestepping the read-shadow; confirmed through a real `just switch` and live keystrokes.
 
-The instinct was to read `bash.nix`/`blesh.nix`/`carapace-desc.bash` and
-reason about it, but reading found nothing wrong, and `ssh nire-cube 'bash -ic
-"..."'` couldn't reproduce it either — no pty, so `[[ $- == *i* ]]` in
-bash.nix's own ble.sh-attach line never fires, exactly the trap that line's
-own neighboring comments don't warn about because nobody had hit it yet.
-Getting a real pty (`ssh -tt`) and typing real keystrokes into it (built as
-`ssh-pty-drive.py` this session, later generalized beyond SSH, renamed and
-published as [`terminal-puppeteer`](https://github.com/NireBryce/terminal-puppeteer)
-— see its own README) reproduced the exact error on the first try.
-
-Tracing (monkey-patching `ble/bash/read` live to log every real `read`
-builtin call and its caller stack, then reproducing again) found the actual
-call chain: ble.sh's own auto-complete/progcomp machinery globally shadows
-the `read` builtin, and while a registered completer is running it installs
-`_ble_builtin_read_hook`, a safety net that periodically checks whether the
-user has kept typing (`ble/complete/progcomp/.check-limits`, tripped every
-`bleopt_complete_polling_cycle` reads — 50 by default — precisely the "am I
-being too slow, is there more input already queued" check ble.sh runs
-*constantly* during normal-speed typing, not a rare edge case) and, if so,
-redirects the in-flight `read` to `/dev/null` and cancels. carapace's own
-generated `_carapace_completer` (`source <(carapace _carapace bash)` in
-`bash.nix` — third-party output, not this repo's code) has exactly one
-`read` call in it, and its visible form — `IFS='' read -r -d '' nospace data
-<<< "${data}"` — is a misread that survived several rounds of this exact
-tracing before `od -c` caught it: that first `''` is not empty, it's two
-single quotes around a literal SOH (0x01) control byte that a terminal
-just doesn't render, so it *looks* like an empty string in every plain
-`echo`/`grep`/`type` capture, including the ones this session took first.
-When that read call is the one caught by the cancellation fallback, its
-args come back corrupted — split character-by-character rather than into
-the two variable names — which is what produces
-`read: `': not a valid identifier`, repeatedly, for any carapace-routed
-command, on any keystroke fast enough to leave more input queued when the
-50-read check lands.
-
-**This is not `carapace-desc.bash`'s bug.** That file (added the day before,
-2026-08-22, and flagged in its own header as unverified against a live Tab
-press) was the first suspect precisely because it was newest and explicitly
-marked unverified. Confirmed innocent by removing its advice and
-re-`source`-ing carapace's completer plain: the error still fires with zero
-of this repo's completion code involved. It is a genuine interaction bug
-between carapace's stock bash completer and ble.sh's own live-typing
-cancellation path, exposed by this repo wiring carapace into `complete -F`
-for the first time — not introduced by anything added on top of it.
-
-Also worth naming plainly: **this exact bug was already found and written
-up two days earlier**, 2026-08-22, in
-[`wiki/categories/shell-config/blesh.md`](../wiki/categories/shell-config/blesh.md)
-— pinned to "somewhere inside ble.sh's global `read` override" and left
-open. This session re-derived the whole thing from a live pty before
-checking whether the wiki already had it, which cost real effort the
-earlier session's own diagnosis would have saved. `wiki/README.md` exists
-specifically so a finding like that isn't rediscovered by grepping the
-tree — check it before re-deriving, not after.
-
-The fix that tested clean against carapace's real generated function on
-`nire-cube` (avoid ever calling `read` for that line —
-`nospace=${data##*$sep}; data=${data%$sep*}`, `$sep` the real SOH byte,
-instead of `IFS=$sep read -r -d '' nospace data <<< "${data}"`) sidesteps
-ble.sh's read-shadow entirely rather than trying to out-think it, and is now
-in the tree:
-`flake/modules/nire/shell-config/bash/carapace-completer-read-fix.bash`,
-sourced from `bash.nix` right after `source <(carapace _carapace bash)`,
-patching `_carapace_completer`'s own body via `declare -f` plus a textual
-substitution — with a loud stderr warning if the line it's looking for ever
-stops matching, so carapace changing its generated template doesn't make
-this silently do nothing. Confirmed three ways: evaluates and renders into
-`programs.bash.initExtra` correctly with `just modules` clean; the
-substitution reproduces the real SOH byte exactly when checked with `od -c`
-against carapace's actual output, not by eye; and applied live, by hand, to
-the real `_carapace_completer` on `nire-cube` and driven through four
-different completions (`git co`, `git commit --amend --no-e`, `git checkout
--`, `git log --pretty=onel`, each Tab-completed) with zero `read` errors,
-where every one of those reliably produced the error before the fix.
-**Confirmed through a real `just switch`, same day.** `nixos-rebuild
-list-generations` on `nire-cube` shows generation 10 (built/switched
-2026-08-24 04:34) as current, and its toplevel matches evaluating
-`nire-cube` fresh off the merged `main` exactly — not just a generation
-that happened to get built, actually switched to and active. Re-ran the
-same live repro against the switched host with `terminal-puppeteer`
-(`git co`, `git commit --amend --no-e`, `git checkout -`,
-`git log --pretty=onel`, `git diff --sta`, each Tab-completed, several
-passes): zero `read` errors, where every one of those reliably produced
-the error before the fix. Also checked the fix's own tripwire — the
-`expected line not found` warning it prints if its textual substitution
-ever stops matching carapace's generated function — and it doesn't fire on
-a fresh shell, meaning the patch is actually applying, not silently
-skipping while the bug happens to not trigger this time. This is the
-"evaluating and building both stop short of runtime behaviour" pattern
-(§25, §36, §37) resolved the ordinary way: build, switch, then check the
-real thing, not the artifact.
+Full account: [39-live-interactive-repro.md](lessons-learned/39-live-interactive-repro.md).
 
 ## 40. A failed systemd unit doesn't mean the thing it manages is down — check the resource, not just the unit
 
-`nire-llm-sandbox` finally got a real end-to-end test 2026-08-23/24: `just
-switch` on `nire-cube`, watching `libvirt-vm-llm-sandbox.service`. It failed.
-Then, after a fix, it failed again, differently. Then, after a second fix,
-it failed a third time, differently again. Each time the instinct was "the
-VM isn't coming up" — wrong every time after the first. `virsh dominfo
-llm-sandbox` on the real host showed `State: running` with climbing CPU
-time through fixes two and three both: the guest booted once, on the first
-successful `virsh define` + `virsh start`, and stayed up continuously while
-the *systemd unit* kept failing on an unrelated step (`virsh define`
-re-run, idempotency of the redefine) on every activation after that.
+Across three different `libvirt-vm-llm-sandbox.service` failures on 2026-08-23/24, `virsh dominfo` showed the guest running the whole time — each failure was the unit tripping on an activation step (network not started, a virsh flag that doesn't exist, a re-minted UUID). Check the resource a failing unit manages, not just the unit.
 
-The three failures, in order, and why none of them were visible to `nix
-eval` or a build — only to reading `journalctl`/`systemctl status` against
-the real host:
-
-1. `error: Requested operation is not valid: network 'default' is not
-   active` — libvirt ships its default NAT network *defined* but never
-   *started*; nothing in NixOS's own libvirtd module starts it. Fixed by
-   having the VM's own activation script start it when needed
-   (`VMs/_lib/libvirt-vm.nix`), scoped per-VM rather than host-wide per
-   lesson #38's reasoning.
-2. `error: command 'net-list' doesn't support option --state-active` — the
-   fix for (1) checked "is the network already active" with a flag that
-   doesn't exist on virsh 12.4.0. The check errored, `set -e`-adjacent logic
-   fell through to an unconditional `net-start`, which then failed with
-   `network is already active` on every activation after the first. Fixed
-   by dropping the nonexistent flag — plain `net-list --name` already lists
-   active-only networks with neither `--all` nor `--inactive` given.
-3. `error: operation failed: domain 'llm-sandbox' already exists with uuid
-   ...` — the domain XML had no `<uuid>`. Omitting it doesn't mean "keep
-   whatever UUID is already registered under this name"; it means libvirt
-   generates a *brand new random UUID on every single parse*, so the second
-   and every later `virsh define` collided with the domain object the first
-   one created. Fixed by giving the generator a required `uuid` parameter
-   and, for the already-running `llm-sandbox`, adopting the UUID libvirt
-   had already assigned rather than minting a fresh one — the fix a human
-   would reach for on reflex (regenerate a clean UUID) would have collided
-   with the running guest exactly the way (3) itself did.
-
-None of these three would have been caught by evaluating the module,
-building the toplevel, or even reading the generated activation script by
-eye — each is a fact about how the *real* `virsh` on the *real* host
-behaves (a flag it does or doesn't support, whether a network is already
-up, what UUID a domain is already registered under), true only at runtime.
-Consistent with lesson #37. What's new here: **when a unit fails, check
-what it manages before assuming the failure means that thing isn't
-running.** `systemctl status` alone said "failed" three times in a row;
-`virsh dominfo` said "running" for two of those three, with a real host
-walked to over SSH (`ts-cube` via Tailscale) precisely so the check wasn't
-taken on faith. Confirmed clean end state, 2026-08-24: `systemctl status
-libvirt-vm-llm-sandbox.service` is `active (exited)` / exit 0, `virsh
-dominfo llm-sandbox` shows `running`, `Persistent: yes`. Each of the three
-fixes was also confirmed not to touch `nire-durandal` (byte-identical
-toplevel drvPath) before being applied to cube, same discipline as #38.
+Full account: [40-check-the-resource-not-the-unit.md](lessons-learned/40-check-the-resource-not-the-unit.md).
 
 ## 41. A proxy config can be valid, buildable, *and* wrong per-app — two apps behind one prefix wanted opposite prefix handling
 
-`nire/reverse-proxy/caddy.nix`, 2026-08-24. Grafana and Forgejo were both
-mounted under a path prefix on the same hostname
-(`/grafana`, `/git`), and both were given the same Caddy directive,
-`handle`, which passes the matched path through untouched.
+Grafana needed `handle` (prefix kept), Forgejo `handle_path` (prefix stripped) — valid, buildable, symmetric-looking config that still 404'd one app, found only by `curl`-ing the app itself. A shared mechanism does not imply shared configuration.
 
-Everything static passed, at four separate levels:
-
-- `nix eval` of `nire-cube`'s toplevel — fine.
-- `just modules` — no findings.
-- `caddy adapt` on the generated Caddyfile, with the real 2.11.4 binary —
-  clean, and it *had* already caught a different bug (`handle` takes at
-  most one matcher token, so `handle /grafana /grafana/*` is a parse
-  error).
-- A real `just build` on the real x86_64-linux host, then reading the built
-  artifact back: the rendered Caddyfile, the unit drop-in
-  (`After=tailscaled.service`, the overridden `ExecStart`), the retained
-  `AmbientCapabilities`, and `TS_PERMIT_CERT_UID=caddy` in tailscaled's own
-  drop-in. All correct.
-
-Then the first live request: `/grafana/` returned 200, `/git/` returned
-**404**. Both halves of the config were valid Caddy; one of them was the
-wrong choice for the app behind it.
-
-The two apps want opposite things, and nothing in the config can tell you
-which:
-
-- **Grafana** has `serve_from_sub_path`, so it genuinely serves *under*
-  `/grafana` and needs the prefix left on — `handle`.
-- **Forgejo** has no equivalent. It always serves at `/`, and expects the
-  proxy to strip — `handle_path`. Its `ROOT_URL` carrying `/git/` only
-  controls the links it *generates*; it does not change what paths it
-  answers on. This is the same thing Gitea/Forgejo's nginx docs encode in
-  the trailing slash of `proxy_pass http://…:3001/;`, which is easy to read
-  as cosmetic.
-
-What settled it was one command against the running service, not more
-reading: `curl 127.0.0.1:3001/` → 200, `curl 127.0.0.1:3001/git/` → 404.
-That took seconds and was decisive, where the config itself could be
-stared at indefinitely.
-
-Two things to carry forward. **A shared mechanism does not imply shared
-configuration** — "both are web apps behind the same proxy under the same
-kind of prefix" hid a per-app requirement that runs in opposite
-directions, and the symmetry of the two config blocks is exactly what made
-it look right. And **the check that finds this is a request to the app
-itself, not to the proxy**: the 404 was Forgejo's, not Caddy's, and
-proving that (the fallback route would have returned the index text with
-200 instead) is what pointed at the app rather than the routing.
-
-Related to #36 (evaluating and building are different tests) and #37 (some
-bugs need real runtime state) — this is the next rung: the artifact was
-built *and* read *and* correct, and the defect was still only visible in
-a response from the running service.
+Full account: [41-per-app-prefix-handling.md](lessons-learned/41-per-app-prefix-handling.md).
 
 ## 42. Not every file git tracks deserves the same scrutiny — `.claude/settings.local.json` is Elly's, not a config artifact to protect
 
-2026-08-26, landing PRs #94 and #95. Several stash/cherry-pick/rebase steps
-in that session touched `.claude/settings.local.json` alongside real code
-changes, and every merge conflict in it got resolved with the same
-protect-the-semantics discipline this file applies to an actual Nix module —
-including reinstating, unprompted, a removal of a redundant permission entry
-that PR #95's own point was to make, after being told once already to stop
-caring about the file's contents.
+Agents kept resolving merge conflicts in `.claude/settings.local.json` as if it were shipped config; it's Elly's local prompt-allowlist — take the simplest resolution and move on. Includes a correction: adding a `.gitignore` entry never untracked the file; `git rm --cached` did.
 
-The correction had to be given twice. First, plainly: "who cares its in
-gitignore." Second, more bluntly, after it happened again: "stop caring
-about policing settings.local.json contents and then getting annoyed you
-did." Asked afterward whether some check was misfiring: no. Checked
-`.claude/settings.json` and every skill that touches this file
-(`prune-permissions` included) — nothing hooks into it, nothing runs
-automatically. The behavior was self-imposed, not triggered by any
-mechanism in the repo.
-
-Why it happened anyway: working the same session on a branch literally
-named for deduplicating this file's entries (plus the `prune-permissions`
-skill's own framing) primed every subsequent diff in it to pattern-match as
-"protect this file's correctness," the same reflex this repo rightly wants
-for `flake/modules/`. That reflex doesn't transfer here. This file is a
-local permission allowlist for reducing prompts, not a piece of the system
-this repo ships — it having been tracked in git never meant its content
-earned review-grade care.
-
-**Correction, 2026-09-02:** this section originally claimed tracking
-"stopped the same day, via the `.gitignore` entry added alongside it." That
-was wrong, and stayed wrong for six more days of real commits to the file
-(`git log` shows three on 2026-08-26 alone, after the `.gitignore` entry
-already existed) — adding a pattern to `.gitignore` does not untrack a file
-already in the index, and nobody ran the `git rm --cached` that would have.
-Caught while cleaning up an unrelated permission-allowlist diff; actually
-untracked that same session (`git rm --cached`). The `prune-permissions`
-skill was removed 2026-09-03 — with the file untracked and machine-local,
-a repo skill for it had nothing repo-wide left to say.
-
-When a conflict or diff touches this file, take whichever resolution is
-simplest and move on; it is Elly's file to shape, not something to defend
-from redundancy or drift on their behalf.
+Full account: [42-settings-local-json.md](lessons-learned/42-settings-local-json.md).
 
 ## 43. A fingerprint check can pass for the wrong reason — dead code looks exactly like safe code until you make it live
 
-2026-08-27, the `dirsAsCategory.nix` deduplication (`flake/doc/dirsAsCategory.md`'s
-History section has the full account; this is the general shape). 37
-byte-identical copies of the category-collection logic got factored into one
-shared file, `modules/_lib/category-collector.nix`. Verified properly for
-that part: fingerprints (`drvPath`) taken for `nire-durandal` and
-`nire-cube` before touching anything, one file converted and re-checked
-before rolling out to the other 36, `just modules` clean throughout, every
-host's `drvPath` byte-identical after. That part of the change was fine.
+The `category-collector.nix` dedup's `drvPath` check passed a second time because the new delegation code was entirely dead — `modulesOf` calls the collector from inside each subdirectory, so its boundary check never saw one — and making it live surfaced that delegation silently dropped `libvirt-vm-llm-sandbox` from cube. Trace that the changed path actually runs, then diff the real attribute sets; a matching fingerprint alone proves nothing.
 
-While the logic was already in one place, adding "stop at a nested
-category's own boundary and reference its aggregate by name, instead of
-re-walking its files from scratch" looked like the obvious next
-improvement — cheap to write once, and `nire/hardware/amd` plus `homelab`'s
-seven children were sitting right there as real nested categories to apply
-it to. Wrote it, and the same `drvPath` fingerprint check that had just
-verified the refactor passed again, unchanged.
-
-It should not have. The check passing meant nothing here, for a specific,
-findable reason: `modulesOf` (the function that walks a category's immediate
-subdirectories) calls the collection function already *inside* each
-subdirectory, so a boundary check placed inside that function never gets a
-chance to examine an immediate subdirectory — like `amd` or
-`virtualization` — as something to delegate to. Every nested category this
-repo has is exactly one level deep. The delegation code was real, compiled,
-and syntactically what I'd described to Elly in conversation — and entirely
-dead, for a reason that took tracing the actual call graph to see, not
-reasoning from the diff. The fingerprint check "passed" because nothing had
-actually changed, not because the change was safe.
-
-Went back and made it live — applying the same check one level higher, so it
-would actually fire at the depth this repo has — specifically to find out
-whether it *was* safe, rather than leaving the question open. It wasn't:
-`homelab` delegating to `virtualization`'s aggregate instead of walking it
-independently silently dropped `libvirt-vm-llm-sandbox` from `nire-cube`'s
-`systemd.services`. Cause: `virtualization-cube.nix` sits bare in
-`virtualization/`'s own root, deliberately excluded from `virtualization`'s
-*own* aggregate (a category collects from subdirectories only), but reaches
-`nire-cube` today only because `homelab` walks into `virtualization/`
-independently, as *its own* subdirectory, where that same file is not
-excluded (`wiki/categories/virtualization.md` already documented this exact
-quirk, from the 2026-08-24 `homelab` consolidation — I had read that page
-earlier the same session and still nearly re-broke the thing it describes).
-Delegating collapses that independence: `homelab` would then get only what
-`virtualization`'s own aggregate decided to include, which is deliberately
-short one file. `drvPath` alone would not have shown this either, cheaply —
-what actually surfaced it was evaluating `config.systemd.services` directly
-and checking for the one service name that mattered, before and after.
-
-Reverted the delegation entirely at first, on the reasoning that no
-measurable performance difference had ever been established to justify
-carrying the risk (a full toplevel eval here is ~8s, dominated by evaluating
-real NixOS/HM modules, not by re-walking a handful of category directories
-twice) — until asked, in this same conversation, whether the near-miss could
-be fixed instead of just avoided. It could: `homelab`'s independent walk
-into `virtualization/` was the *only* reason `virtualization-cube.nix`
-reached `nire-cube` at all, so the fix isn't "don't delegate," it's
-"delegate to the child's aggregate for what it collects, but separately
-re-collect any bare files sitting in its own root too" — the exact two
-things a plain recursive walk used to do at once, split back into two
-explicit steps instead of one implicit one. Verified properly this time,
-not just on the one host that had already broken: a full attribute-set diff
-(`environment.systemPackages`, `systemd.services`, `users.users`) against
-the pre-refactor baseline, on all six configurations in the repo, not only
-`nire-cube`. All identical; `libvirt-vm-llm-sandbox` included.
-
-Three things to carry forward, not just about this mechanism. **A
-fingerprint matching proves the version you ran it against, and says nothing
-about whether the code path it's meant to guard actually executed** — trace
-whether new logic is reachable before trusting a green check that could
-easily be green because the logic never ran. **"Looks like the obvious next
-optimization" is exactly the moment to check for a documented quirk the
-optimization would collapse**, not proceed because the refactor immediately
-upstream just verified clean — `wiki/categories/virtualization.md` had the
-answer already written down, from three days earlier, and reading it after
-the fact (once the regression was already suspected) rather than before
-writing the code is what let it get built at all. And **finding a real bug
-in an optimization is not automatically a reason to drop the optimization**
-— reverting outright was the right call the moment the bug was found and
-nothing more was known, but it was a first move, not the last one: the
-actual defect (delegation losing a category's own bare files) had a specific,
-narrow fix once named, and it was only right to stop there because someone
-asked "can this be fixed instead" rather than accepting "revert" as the
-finished answer.
+Full account: [43-fingerprint-passed-for-the-wrong-reason.md](lessons-learned/43-fingerprint-passed-for-the-wrong-reason.md).
 
 ## 44. A hook that runs `git` from a non-toplevel cwd needs `-C`, not a cleared GIT_DIR — the docs' own suggested fix broke the index lock instead
 
-2026-09-02, landing an unrelated docs commit from a worktree
-(`docs/claude-cave-to-wiki`, PR #149). `.githooks/pre-commit` re-stages
-`flake/scripts/lint-baseline.json` with `git add
-"${repo_root}/flake/scripts/lint-baseline.json"` — an absolute path,
-computed from `repo_root="$(git rev-parse --show-toplevel)"` at the top of
-the hook. It had run this way in every prior session without incident. This
-time the commit came back with a second, stray copy of the file at
-`scripts/lint-baseline.json` — no `flake/` prefix, same content, not staged
-by anything I'd run. Re-running the hook script *by hand* from the same
-worktree never reproduced it; only a real `git commit` did.
+In worktrees, `.githooks/pre-commit`'s absolute-path `git add` from a non-toplevel cwd silently restaged the baseline file at a stripped path — inherited `GIT_DIR` without `GIT_WORK_TREE` makes cwd the root. `githooks(5)`'s own suggested fix (clear the env vars) is worse — it also clears `GIT_INDEX_FILE` and collides with the outer commit's index lock; `git -C "$repo_root" add <relative path>` holds.
 
-The tool reporting success — `git add`'s own exit code, `set -euo
-pipefail` not tripping anywhere — proved nothing (§1's shape exactly).
-Traced it by patching a throwaway copy of the hook to print `git status
---short` and `git ls-files -s` immediately after the `git add` line, then
-triggering it with a real commit rather than a manual invocation, since that
-distinction was itself the reproduction condition. The index right after
-`git add` already had two entries with the *identical blob hash* — one at
-`flake/scripts/lint-baseline.json` (correct), one at
-`scripts/lint-baseline.json` (staged as added, missing from the working
-tree — `AD` in `--short`). Minimal repro, no hook involved at all: `cd
-<worktree>/flake && GIT_DIR=<worktree's-own-gitdir> git add
-<worktree>/flake/scripts/lint-baseline.json` stages it at
-`scripts/lint-baseline.json`.
-
-The mechanism, confirmed against `githooks(5)` rather than guessed: Git
-exports `GIT_DIR` (and `GIT_WORK_TREE`, `GIT_INDEX_FILE`, etc.) into a
-hook's environment so a `git` command the hook runs can find "the
-repository" without re-discovering it — but in a linked worktree that
-export is `GIT_DIR` alone, no matching `GIT_WORK_TREE`. Once `GIT_DIR` is
-set explicitly, `git` stops walking up from cwd to find the work-tree root
-and falls back to treating cwd itself as that root. The hook's own `cd
-"${repo_root}/flake"` (so `lint.py` runs the same way `just lint` runs it)
-put the inherited-`GIT_DIR`, no-`GIT_WORK_TREE` `git add` in exactly that
-situation: it silently re-derived "flake/" as the top, and the absolute
-path it was given got reinterpreted relative to that — the leading
-`flake/` stripped, not preserved. No error at any layer; the given path
-existed, the blob was real, the add "succeeded."
-
-`githooks(5)`, "Environment Variables and Foreign Repository Access", says
-this exact thing and gives a fix: "if your hook needs to invoke Git
-commands in a foreign repository or in a different working tree of the
-same repository, then it should clear these environment variables so they
-do not interfere" — `unset $(git rev-parse --local-env-vars)`, run once at
-the top of the hook before anything else touches `git`.
-
-Applied that literally first, and it made things *worse*, not better: the
-next real `git commit` failed outright with `fatal: Unable to create
-'.../index.lock': File exists`, reproducibly, every single retry. The
-docs' own suggested one-liner clears every "local" env var as a set,
-`GIT_INDEX_FILE` included — and `GIT_INDEX_FILE` isn't part of this bug at
-all; it's how the outer `git commit` process tells the hook's own `git
-add` which *already-open* index file to write into. Unset it, and that
-`git add` re-derives a index path via ordinary discovery instead — which
-still *resolves* to the same file, but no longer as "the same open
-session," so it collides with the outer commit process's own lock on it.
-Applying a real fix without testing it against a real `git commit` — not
-just re-reasoning that the docs' own example must be safe — would have
-shipped a second, worse bug in the same commit as fixing the first one.
-
-The fix that actually holds up under a real `git commit`, retried several
-times: don't touch the environment at all. `git -C "$repo_root" add
-flake/scripts/lint-baseline.json` — an explicit `-C` plus a path relative
-to it, instead of a `cd` plus an absolute one — sidesteps the whole
-GIT_DIR-vs-cwd question directly rather than reasoning about which env
-vars are and aren't safe to clear. `GIT_INDEX_FILE` stays exactly as git
-set it. Confirmed clean over several real `git commit`s in the same
-worktree, not just the manual hook invocation that never reproduced the
-original bug either.
-
-A plain, non-worktree checkout never hit any of this — `git rev-parse
---show-toplevel` there has no `GIT_DIR` override to contend with,
-cwd-walking finds the real top on its own — which is exactly why it went
-unnoticed through every prior session that installed the hook and
-committed from the main checkout.
+Full account: [44-git-in-hooks-needs-c.md](lessons-learned/44-git-in-hooks-needs-c.md).
 
 ## 45. NixOS `systemd.user.services` is global — every user manager reads it, and they all race to start it
 
@@ -1202,42 +711,7 @@ manager. Rationale lives in the module comment
 
 ## 46. "Enabled" is a claim about config, not about who holds the port
 
-**Borrowed, not lived** — the one entry in this file that did not happen here.
-Adopted from a NixOS Discourse thread while enabling avahi and
-systemd-resolved together (2026-08-21, `nire/system/networking/`), kept
-because the shape is one this file already keeps hitting and because it is
-what the next `.local` bug on this fleet will look like.
+Borrowed from an upstream mDNS thread: a daemon can report itself enabled and answer nothing, because another process holds UDP 5353 — neither daemon's status output mentions the other. When two components can claim one resource, ask "who holds the socket?", not "is it enabled?".
 
-The report: `.local` names failing to resolve while `resolvectl status` showed
-mDNS enabled **both globally and per-interface**. Queries timed out with "All
-attempts to contact name servers or networks failed" while avahi resolved the
-same names on the same host; the suggested per-link `nmcli` fix changed
-nothing; the thread closed unresolved.
+Full account: [46-enabled-vs-socket-holder.md](lessons-learned/46-enabled-vs-socket-holder.md).
 
-mDNS is not a switch either daemon owns. It is a claim on UDP 5353, and only
-one listener receives the unicast replies — so a daemon can be configured
-correctly, report itself enabled, and answer nothing, because another process
-holds the socket. **Neither daemon's status output mentions the other.**
-`resolvectl status` will not say avahi has the port; `avahi-daemon` says so
-only in its own journal. Which makes "is it enabled?" the wrong question and
-"who holds 5353?" the right one:
-
-```sh
-sudo ss -ulpn 'sport = :5353'      # who actually has the socket
-resolvectl mdns                    # what resolved thinks, per link
-journalctl -u avahi-daemon | grep -i "another\|stack"
-```
-
-This tree settles the contention up front — resolved's `MulticastDNS = "no"`,
-global rather than per-link so NetworkManager's own `connection.mdns` cannot
-re-open it; the reasoning lives in `resolved.nix`/`avahi.nix`, not here. That
-is a claim about config too — if `.local` misbehaves, check the socket before
-concluding the Nix is wrong.
-
-Same family as §1 (a tool reporting success has not thereby been tested), §22
-(a zero is not evidence until you show the query can return non-zero) and §31
-(a count is only evidence if you know what it counts), generalised: **a
-configuration readout reports intent, and intent is exactly what is not in
-question when two things contend for one resource.** When two components can
-claim one resource, neither one's view of itself is diagnostic — go look at
-the resource.
