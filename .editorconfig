@@ -1,0 +1,42 @@
+# Editor-wide conventions, read by editors and many formatters/linters.
+# Deliberately NOT a formatter and enforces nothing by itself -- `nix fmt`
+# stays unwired for the aligned-`=`-columns reason in
+# wiki/module-style-guide.md. Indent sizes mirror what the tree already
+# does: Nix modules 4 (that page's own rule), .justfile 4, YAML 2 (the
+# workflows), JSON 2 (package-lock.json and friends), Python 4 (PEP 8;
+# flake/scripts and wiki/scripts).
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.nix]
+indent_style = space
+indent_size = 4
+
+[*.just]
+indent_style = space
+indent_size = 4
+
+[{*.yml,*.yaml}]
+indent_style = space
+indent_size = 2
+
+[*.json]
+indent_style = space
+indent_size = 2
+
+[*.py]
+indent_style = space
+indent_size = 4
+
+# Prose: hard-wrapped lines, so trailing whitespace is never load-bearing
+# here either -- but some editors use two trailing spaces as a line break,
+# and wiki/ predates this file; leave it alone.
+[*.md]
+indent_style = space
+indent_size = 2
+trim_trailing_whitespace = false
