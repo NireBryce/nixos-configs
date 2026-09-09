@@ -292,6 +292,23 @@
                             # explicit rather than relying on the package's own
                             # default
                             krohnkiteEnabled = false;
+
+                            # No zoomEnabled=false here, deliberately (2026-09-09,
+                            # issue #228). The three-finger touchpad pinch that
+                            # zooms the desktop is unwanted, but it can't be
+                            # switched off on its own: kwin's zoom effect
+                            # registers it unconditionally in its constructor
+                            # (6.7.4 src/plugins/zoom/zoom.cpp:70,75,
+                            # registerTouchpadPinchShortcut, Expanding and
+                            # Contracting, 3 fingers) with no config key of its
+                            # own, and there's no per-device pinch toggle in
+                            # kcminputrc either. Disabling the effect is the only
+                            # lever, and it would also take the wanted
+                            # Meta+Ctrl+scroll zoom, which the same effect builds
+                            # from PointerAxisGestureModifiers (zoom.cpp:167).
+                            # So the pinch stays. plasma-manager does have a typed
+                            # option for the off switch (kwin.effects.zoom.enable);
+                            # not using it is the point.
                         };
                         # Touchscreen edge swipes -> Overview, from both the
                         # left and right edges. plasma-manager has no typed
