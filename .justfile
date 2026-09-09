@@ -225,6 +225,34 @@ threads *term:
 close-fixed pr:
     @{{scripts}}/close-fixed.sh {{pr}}
 
+# Deliberately bare -- for findings that need no template, not a replacement
+# for the issue templates. --repo is pinned so a fork or renamed remote can
+# never file it anywhere but this repo (AGENTS.md's filing rule). desc
+# defaults to title itself (just's own default-parameter expression, not a
+# bash fallback) so an omitted --desc= just repeats the title as before.
+# title and desc are each quoted separately ({{quote()}} per parameter,
+# never a raw {{args}} splice) -- an unquoted variadic splice here would
+# let a desc containing `$(...)` execute, verified against the fix in
+# `just issue`'s own history.
+# Open a bare GitHub issue: just issue "title" [--desc="body text"]
+issue title desc=title:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    title={{quote(title)}}
+    desc={{quote(desc)}}
+    body="$desc"
+    if [ "$desc" != "$title" ]; then
+        case "$desc" in
+            --desc=*) body="${desc#--desc=}" ;;
+            *)
+                echo 'just issue: second argument must be --desc="..."' >&2
+                exit 1
+                ;;
+        esac
+    fi
+    gh issue create --repo NireBryce/nixos-configs \
+        --title "$title" --body "$body"
+
 # Tailnet policy file via API instead of the admin console: get/diff/apply
 tailscale-acl cmd *args:
     # Needs tailscale_api_token in secrets.yaml (sops) -- see the script's
