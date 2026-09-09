@@ -195,6 +195,15 @@ available *pkgs:
     # reading meta.platforms a question that used to be settled by eye, wrongly.
     @{{scripts}}/pkg-availability.py {{pkgs}}
 
+# The safe answer to "which secrets exist?" -- reads the committed
+# ciphertext (names are plaintext, values are ENC[...]) and never decrypts,
+# so it cannot print a value. This question leaked twice when answered
+# with `sops -d | grep` instead (2026-08-26, 2026-09-09). Optional arg: a
+# different sops-encrypted file to list.
+# List sops secret key NAMES without decrypting: just read-sops-names
+read-sops-names *args:
+    @{{scripts}}/sops-names.sh {{args}}
+
 # A host's sops recipient key: bare for this machine, a hostname to scan it
 # remotely, --pubkey-file <path>, or --updatekeys to re-encrypt secrets.yaml
 age-key *args:

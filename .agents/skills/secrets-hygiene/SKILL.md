@@ -31,6 +31,18 @@ transcript. The fix was rotating the Tailscale key; output already sent
 can't be un-sent. A targeted check (`--extract`, or discard stdout and read
 `$?`) would have answered the same question with zero exposure.
 
+It happened again 2026-09-09, same host, same question ("which secrets
+exist?"), different hole: `sops -d … 2>/dev/null | grep -E "^[a-z_]+:"` —
+the `2>/dev/null` satisfied this hook's `/dev/null` exemption while the
+whole decrypted file flowed through **stdout** into grep, and three values
+(`tailscale_key`, `tailscale_api_token`, `atuin_key`) landed in the
+transcript. Only regex luck kept the hyphenated names (`ssh-*`,
+`restic-*`, `forgejo-admin-password`) out — their values were one
+character-class away from printing too. All three were rotated same-day.
+Two lessons now baked in: the exemption requires an explicit **stdout**
+redirect and **no pipe** (hook fix, same commit), and "which keys exist"
+has a dedicated zero-decryption answer, `just read-sops-names`.
+
 ## Enforced mechanically, not just by memory
 
 Two hooks in `.agents/settings.json` (project-scoped, committed) wire the
@@ -48,11 +60,21 @@ checkable parts:
 
 Known limits: `Bash` tool only (a `Read` of a decrypted file is not
 caught); patterns are specific shapes plus this repo's two sensitive key
-names, so an unrecognized credential shape won't flag. The sections below
-are the judgment the hooks can't cover.
+names, so an unrecognized credential shape won't flag. And the big one,
+found 2026-09-09 by probing with a fake `tskey-…` string: **the ZCode
+harness did not fire these hooks at all** — the probe sailed through
+unflagged — so under that harness the hooks are decoration and the
+sections below are the ONLY enforcement. Never assume a guard caught
+something; check the output yourself. The sections below are the judgment
+the hooks can't cover.
 
 ## Preventing it
 
+0. **"Which secrets exist?" never needs decryption:** `just read-sops-names`
+   reads the committed ciphertext, where sops leaves key names as plaintext
+   next to `ENC[...]` values — it cannot print a value by construction.
+   Reaching for `sops -d` plus grep to answer it is how both leaks
+   happened.
 1. **Before running a command against a secrets file, ask: does its
    default output include plaintext I don't actually need?** Testing
    decrypt access needs only an exit code:
