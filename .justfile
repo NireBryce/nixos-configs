@@ -63,7 +63,9 @@ lint:
 # (MISSING/STALE/EXTRA/DIRECTORY/CLASSES/WIPES ROOT/UNKNOWN RECIPE/UNKNOWN
 # SKILL/BROKEN LINK/no-Imported-by-section); a REVIEW-only result (heuristic,
 # needs a human look -- see the script's own docstring) prints but exits 0.
-# Static check: wiki/ and AGENTS.md claims vs the repo -- not yet in `preflight`
+# Static check: wiki/ and AGENTS.md claims vs the repo -- in CI
+# (.github/workflows/check.yml) since 2026-09-09, still not in `preflight`
+# deliberately (issue #217): fold it in once it has been green there a while
 wiki-lint:
     python3 wiki/scripts/check_wiki.py check
 

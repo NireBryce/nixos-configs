@@ -1,10 +1,12 @@
 name: flake-check
 
-# Mirrors `just check` + `just modules` + `just lint` exactly (see
-# .justfile) rather than inventing separate CI-only logic -- what runs
-# here is what any session already runs by hand before opening a PR (the
-# ship skill's own step 0), just automated instead of relying on that
-# being remembered every time.
+# Mirrors `just check` + `just modules` + `just lint` + `just wiki-lint`
+# exactly (see .justfile) rather than inventing separate CI-only logic --
+# what runs here is what any session already runs by hand before opening a
+# PR (the ship skill's own step 0), just automated instead of relying on
+# that being remembered every time. wiki-lint is not in `preflight` yet
+# (its recipe comment says so) -- CI runs it first so the class of breakage
+# it catches fails before the nix install even starts.
 #
 # `just lint` (statix + deadnix + an oversized-file check, ratcheted
 # against flake/scripts/lint-baseline.json) is the backstop for the local
@@ -89,13 +91,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: DeterminateSystems/nix-installer-action@main
+      # First, before the nix install: stdlib Python against the checkout,
+      # needs no nix at all, so a broken wiki claim fails in seconds instead
+      # of after the toolchain setup. `just wiki-lint` runs nowhere else
+      # automatic (not in `preflight` yet, issue #217) -- this is what keeps
+      # a refactor that breaks a wiki claim from landing green.
+      - name: wiki lint (just wiki-lint)
+        run: python3 wiki/scripts/check_wiki.py check
 
+      # Pinned by full SHA, same as update-flake-lock.yml pins its actions:
+      # `@main` means running whatever upstream's default branch says on
+      # Monday morning, and one broken push there goes every PR red.
+      # Bump the pin deliberately, like the other workflow's.
+      - uses: DeterminateSystems/nix-installer-action@b074b4ad5f255f9c8a6a2414a2f07e7f4f2925a3 # 2026-09-08
+
+      # All four hosts .sops.yaml enrolls, including the darwinConfigurations
+      # entry -- nire-lysithea's config touches secrets.yaml too
+      # (nire/system/secrets/sops-darwin.nix), so --all-systems evaluating the
+      # darwin config below hits the same store race this warmup exists for.
       - name: warm up sops-enrolled hosts' secrets.yaml store registration
         run: |
           cd flake
-          for host in nire-durandal nire-tenacity nire-cube; do
-            nix eval --raw ".#nixosConfigurations.$host.config.system.build.toplevel.drvPath" > /dev/null
+          for ref in \
+            nixosConfigurations.nire-durandal \
+            nixosConfigurations.nire-tenacity \
+            nixosConfigurations.nire-cube \
+            darwinConfigurations.nire-lysithea; do
+            nix eval --raw ".#$ref.config.system.build.toplevel.drvPath" > /dev/null
           done
 
       - name: nix flake check --all-systems --no-build
