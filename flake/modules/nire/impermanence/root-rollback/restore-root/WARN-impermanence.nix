@@ -313,127 +313,53 @@
 
 # ── history ─────────────────────────────────────────────────────────────────
 #
-# 2026-08-10 — what the move to systemd stage 1 took out with it
+# 2026-08-10 — the stage-1 migration (ad38ffb) took three scripted-stage-1
+# behaviours with it; recorded because a revert would bring the mechanism
+# back.
 #
-# Three things were true only of scripted stage 1; recorded because the
-# mechanism could come back if the migration is ever reverted.
+# - `udevadm settle` guarded the mount: the scripted initrd hardcoded
+#   /dev/mapper/enc (created synchronously by cryptsetup), while
+#   fileSystems."/" is a by-uuid path udev creates asynchronously — the
+#   rollback raced udev, and losing the race was a silent non-wipe. After=
+#   the device units above fixes it structurally.
+# - `boot.kernelParams = [ "boot.shell_on_fail" ]` was what made
+#   stage-1-init.sh's fail() offer an interactive shell; OnFailure=
+#   emergency.target above is the systemd equivalent.
+# - The `if ! mount ...; then fail; fi` guards died with `set -e`: systemd
+#   job scripts (makeJobScript) abort on first failure, so OnFailure= fires.
 #
-# `udevadm settle` before the mount. The deployed initrd hardcoded
-# /dev/mapper/enc, which cryptsetup creates synchronously; fileSystems."/".device
-# is a /dev/disk/by-uuid path, and udev creates that symlink asynchronously,
-# with no settle or waitDevice between the LUKS open and postResumeCommands.
-# The rollback raced udev; losing the race meant a failed mount and a wipe
-# that silently did not happen. The systemd unit fixes this structurally:
-# After= the device units means udev has finished with the device by
-# definition.
+# emergencyAccess = true was carried for the first boot of this branch
+# (debugging a systemd stage-1 failure pre-LUKS needs an unauthenticated
+# shell — a knowingly-accepted hole) and removed 2026-08-10 once the
+# rollback was confirmed by subvolid.
 #
-# `boot.kernelParams = [ "boot.shell_on_fail" ]`, and the `fail` calls that
-# needed it. stage-1-init.sh defines fail(), but it only offers an interactive
-# shell when `allowShell` is set, and that comes from that kernel parameter.
-# Without it fail() still prompts and blocks on `read -n 1`, but the only
-# choices are `r` to reboot or any other key to continue. The systemd
-# equivalent is OnFailure=emergency.target, still set above.
+# The scripted-stage-1 template-injection trap — never write an
+# @placeholder@ token inside a scripted hook string, comments included;
+# 19 substituteInPlace passes assemble stage-1-init.sh and a later pass
+# expands it — died with the mechanism. Full account: skill
+# `impermanence-initrd`.
 #
+# 2026-08-09 — the commented-out fileSystems block: this module and the
+# host hardware configs both declared mount options, and `options` is
+# `listOf str`, so the definitions concatenated (every option twice —
+# harmless to mount, but the one-owning-module rule broken). The hardware
+# config owns them: it knows the subvol names. Nothing was lost — the
+# option *set* verified unchanged with `just diff`. Before re-enabling any
+# line above, check what the host hwconfig already declares for that mount.
 #
-# 2026-08-10 (later the same day) — emergencyAccess, set and then removed
+# 2026-08-09 — the ordering fix in ad38ffb: the old unit hardcoded
+# `requires = [ "dev-mapper-enc.device" ]`, `after = [ "dev-mapper-enc.device"
+# "systemd-cryptsetup@nire-durandal.service" ]`, and mounted /dev/mapper/enc.
+# The crypt unit is named after the *volume*, not the host (luksroot.nix,
+# stage1Crypttab), so systemd-cryptsetup@nire-durandal.service never existed
+# anywhere — the After= was a silent no-op (dev-mapper-enc.device beside it
+# was what actually ordered things), and interpolating networking.hostName
+# would have been wrong the same way on tenacity. Deriving from
+# boot.initrd.luks.devices above fixed it; durandal's generated values came
+# out byte-identical (`just diff`).
 #
-# The migration carried `boot.initrd.systemd.emergencyAccess = true` so the
-# first-ever boot of this branch was debuggable -- systemd stage 1, a
-# rewritten rollback and a nixpkgs release jump all landed together, and a
-# failure would have needed inspecting from inside the initrd. `true` makes
-# OnFailure=emergency.target's password prompt unauthenticated, and under
-# systemd stage 1 that prompt is reachable *before* the LUKS volume is open,
-# so "whoever reaches it already typed the passphrase" stops being true: a
-# real hole, accepted knowingly, for exactly one boot. Removed once the
-# rollback was confirmed by subvolid. Nothing depended on it -- the value of
-# OnFailure is halting the boot, not the shell; recovery is picking the
-# previous generation in the boot menu. If an initrd shell is ever genuinely
-# needed, set the option to a password hash (`oneOf [ bool (nullOr
-# (passwdEntry str)) ]`), strictly better than what was here.
-#
-# The explicit `if ! mount ...; then ... fail; fi` guards: with no `set -e`
-# in stage-1-init.sh, a failed mount left every later command failing
-# harmlessly against an empty /mnt -- looking exactly like a working system
-# until the disk fills. systemd job scripts (makeJobScript, writeShellScriptBin
-# over `set -e`) abort on first failure, so the guards were redundant; see
-# above.
-#
-# One trap that died with the mechanism, kept because it cost a near-miss:
-# never write an at-sign placeholder token inside a scripted stage-1 hook
-# string, comments included. stage-1-init.sh is assembled by 19 sequential
-# substituteInPlace --replace-fail passes and the one pasting postResumeCommands
-# in runs 10th, so any such token survives insertion and is expanded by a later
-# pass -- naming the pre-LVM hook in a comment would have pasted the whole LUKS
-# unlock script into the comment, only its first line commented out. Full
-# account: AGENTS.md, skill `impermanence-initrd`.
-#
-#
-# 2026-08-09 — why the fileSystems block at the top is commented out
-#
-# This module and each host's hardware-configuration.nix both declared mount
-# options for /, /home, /nix, /persist and /var/log, and
-# `fileSystems.<n>.options` is `listOf str` -- the definitions concatenated,
-# every option appearing twice (e.g. /: "compress=zstd" "noatime" doubled).
-# Harmless in practice -- mount accepts a repeated option, last wins -- but
-# it is the one-owning-module rule broken, the same way `.blerc` and
-# `home.sessionPath` were; the hardware config knows the subvol names, so it
-# owns the options too. Nothing was lost: every option above, and
-# `neededForBoot` for /persist and /var/log, was already declared in the
-# hwconfigs -- verified with `just diff`, option *set* unchanged, only the
-# repeats gone.
-#
-# If you re-enable any of these, check what the host hwconfig already declares
-# for that mount first.
-#
-#
-# 2026-08-09 — restore-root's ordering, and the unit that never existed
-#
-# The dependencies were, verbatim: `requires = [ "dev-mapper-enc.device" ]`;
-# `after = [ "dev-mapper-enc.device" "systemd-cryptsetup@nire-durandal.service" ]`
-# (with a `#TODO: fix me to be general`); and the script mounted a hardcoded
-# `/dev/mapper/enc`.
-#
-# `systemd-cryptsetup@nire-durandal.service` is not a unit that exists. systemd
-# names the unit after the *volume*, not the host: nixpkgs writes
-# boot.initrd.luks.devices.<n> as field 1 of the initrd crypttab
-# (luksroot.nix, stage1Crypttab), and systemd-cryptsetup-generator derives
-# systemd-cryptsetup@<that field>.service from it. Both machines set
-# boot.initrd.luks.devices."enc", so the real unit is
-# systemd-cryptsetup@enc.service on each -- the After= line had been doing
-# nothing at all, a silent no-op on durandal as much as anywhere; what held
-# the ordering was dev-mapper-enc.device beside it.
-#
-# All three are now derived from boot.initrd.luks.devices and fileSystems."/",
-# so nothing names a host or assumes a mapper name; both machines use `enc`,
-# so durandal's generated values are unchanged -- confirmed with `just diff`,
-# byte-identical toplevel. Interpolating networking.hostName instead would
-# have been wrong the same way: systemd-cryptsetup@nire-tenacity.service on
-# the second host, a second nonexistent unit, a second silent no-op.
-#
-#
-# 2026-08-10 — hibernation: outstanding, then resolved
-#
-# `boot.initrd.postResumeCommands`, which ad38ffb replaced with this service,
-# ran *after* the resume attempt, so a successful hibernation resume skipped
-# the wipe; this service has no equivalent guard. RESOLVED 2026-08-10 by
-# `boot.kernelParams = [ "nohibernate" ]` above. The assessment that stood
-# here first is kept because the way it was wrong is the point:
-#
-#   "Neither host puts `resume` on the kernel command line today -- durandal has
-#    a swap device but no boot.resumeDevice, tenacity has no swap -- so nothing
-#    is wrong now."
-#
-# Two errors in one sentence, both from reading the config instead of the
-# machine, and both written into the module that deletes /root:
-#
-# 1. Tenacity has 20G of swap on nvme0n1p6, plus zram. `swapDevices = [ ]` in
-#    hardware-tenacity.nix describes what the config declares, not what the
-#    machine runs -- systemd-gpt-auto-generator activates the partition on its
-#    own, by GPT type UUID.
-# 2. "No `resume=` on the kernel command line" was true and irrelevant.
-#    /sys/power/resume was already set to 259:6 anyway, because systemd does not
-#    need the parameter. So ConditionKernelCommandLine = [ "!resume" ], added as
-#    the fix for this very note, would have passed and let the wipe proceed.
-#
-# lessons-learned.md §2 ("the repo is not the machine") and §24 ("compare
-# against what is deployed"), both demonstrated here.
+# 2026-08-10 — the hibernation hazard closed by nohibernate and the
+# ConditionKernelCommandLine notes above also came from ad38ffb:
+# postResumeCommands ran after the resume attempt, so a successful
+# hibernation resume skipped the wipe. The wrong assessment that started it
+# ("tenacity has no swap") and the full story: lessons-learned §28.
