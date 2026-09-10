@@ -674,7 +674,7 @@ def caddy_routes(root):
     """path-prefix name -> True if Caddy strips it before reaching the app,
     False if it's kept -- read straight out of caddy.nix's own embedded
     Caddyfile string rather than assumed (the "read the built artifact,
-    don't guess" reasoning lessons-learned #41 is about, applied statically
+    don't guess" reasoning lessons-learned.md §41 is about, applied statically
     here instead of via `caddy adapt`). Cube-only and there's exactly one
     caddy.nix, so no need for find_categories-style generality."""
     p = root / CADDY_NIX
