@@ -22,10 +22,9 @@ Three related but distinct things:
    module, an option, a secret — mentioned in a comment as a currently-true
    fact ("X and Y both do Z"), where the thing referenced can be renamed
    or removed by a *later, unrelated* change that has no reason to know
-   this comment exists. Unlike a module rename (`just modules` catches a
-   name mismatch mechanically) or a wiki claim (`wiki-sync`'s job),
-   nothing checks a plain-English mention in a `.nix` comment against the
-   thing it names.
+   this comment exists. Unlike a module rename (`just modules` catches it)
+   or a wiki claim (`wiki-sync`'s job), nothing checks a plain-English
+   mention in a `.nix` comment.
 
 **Not this skill, write these freely and generously — this is most of
 what a good comment or history section actually is:**
@@ -58,12 +57,10 @@ on 2026-08-30 and 2026-08-31 — and all three had a date attached that made
 them read as recently verified. None of them was; the date recorded when
 the line was *written*, not when it was last *true*. The staleness was
 caught by accident, grepping `secrets.yaml` for an unrelated reason, not
-by anyone re-checking the dated claims themselves. This is a direct
-extension of AGENTS.md's State section (switch/boot state is deliberately
-never recorded because it rots this exact way) — except that rule was
-scoped to switch/boot status specifically, and the same rot hit three
-other unrelated docs the same day. The mechanism generalizes past what
-AGENTS.md currently names.
+by anyone re-checking the dated claims themselves. AGENTS.md's State
+section (switch/boot state is deliberately never recorded because it rots
+this exact way) is the narrower version of the same rule — this rot hit
+three unrelated docs in one day, well past that scope.
 
 **The unconfirmed-specific trap (category 1), same session.** An early
 comment called the QNAP's `restic-backup` share "dedicated to this

@@ -36,8 +36,10 @@ Secrets are sops-nix (`flake/modules/nire/system/secrets/`). `secrets.yaml`
 is encrypted and committed; that is deliberate, not a mistake to be "fixed".
 `.sops.yaml` (same directory) enrolls `nire-durandal`, `nire-lysithea`,
 `nire-tenacity`, and `nire-cube` — all live hosts with current config here,
-the normal case, not a leftover to prune. Read the file rather than this
-paragraph — this paragraph has been stale before.
+the normal case, not a leftover to prune. That host list is checked against
+`.sops.yaml` by `just wiki-lint`, so it cannot rot silently. "Which secrets
+exist?" is `just read-sops-names` — names only, never values; everything
+else about printing sops output is skill `secrets-hygiene` (Traps below).
 
 ## State
 
@@ -234,12 +236,10 @@ months between commits. "This is broken and here is the fix" beats incident
 framing.
 
 **Default to a dedicated `git worktree` for any task that will branch,
-commit, or check out — skill `use-a-worktree`.** Not for read-only work; a
-shared checkout can change underneath you mid-task (hit 2026-08-30: a
-session's files reverted and a different branch appeared). If `git
-status`/`git branch --show-current`/a file's content doesn't match your own
-last action, check `git reflog` before concluding anything is actually
-broken.
+commit, or check out — skill `use-a-worktree` (not for read-only work; there
+since the 2026-08-30 shared-checkout incident).** If git state doesn't match
+your own last action, check `git reflog` before concluding anything is
+actually broken.
 
 **"push" means the `ship` skill, landing on `experimental`, the default
 branch** — branch, PR, one combined ask covering both merging and deleting
@@ -306,5 +306,6 @@ invites.
   a change that makes a wiki page stale corrects it in the same change
   (`just wiki-lint` checks the mechanical claims).
 - `wiki/lessons-learned.md` — how the work went wrong in the doing;
-  §§1–18 the port, §§19–31 first hardware, §32+ one-liners in the page
-  itself.
+  §§1–18 the port, §§19–31 first hardware. Long entries are per-§ articles
+  under `wiki/lessons-learned/`; the page keeps every § number and a
+  one-line version of each.

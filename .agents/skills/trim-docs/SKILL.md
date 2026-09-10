@@ -74,4 +74,5 @@ worst offenders, targeted edits where the file is already tight. Read the
 whole file before editing — much of this repo's prose is load-bearing in
 the ways listed above. Factual drift noticed in passing gets fixed in the
 same change and called out in the commit message (wiki-sync's rule applies
-to trims too).
+to trims too). After a big trim, `just wiki-restatement` shows where the
+same prose now lives in two layers — the next session's stale-claim risk.

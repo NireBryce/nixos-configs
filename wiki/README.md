@@ -1,6 +1,6 @@
 # Wiki
 
-_Last modified: 2026-09-08_
+_Last modified: 2026-09-09_
 
 ## Contents
 
@@ -88,10 +88,12 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   happened here, and the skills that hold the long version of each.
 - [History & lessons learned](history.md) — the den → flake-parts port, the
   first hardware boots, and what became of the sibling branch. The full log
-  itself, [lessons-learned.md](lessons-learned.md) — numbered §1–46,
-  "written by Claude Code, for Claude Code" — moved in from `claude cave/`
-  2026-09-02; this page stays the index, that page stays the log, the same
-  split as `categories/shell-config/README.md` and its deep-dives.
+  itself, [lessons-learned.md](lessons-learned.md) — numbered §1–46 with a
+  one-line summary each, long entries broken out into `lessons-learned/`
+  articles (2026-09-09), "written by Claude Code, for Claude Code" — moved
+  in from `claude cave/` 2026-09-02; this page stays the index, that page
+  stays the log, the same split as `categories/shell-config/README.md` and
+  its deep-dives.
 - [flake-parts port notes](flake-parts-port-notes.md) — salvaged 2026-09-08
   from the deleted `flake-parts` branch: the port's decisions-not-defaults,
   its dead ends with the symptom that identified each, and a flake-parts

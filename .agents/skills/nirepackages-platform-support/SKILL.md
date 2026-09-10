@@ -1,6 +1,6 @@
 ---
 name: nirepackages-platform-support
-description: How platform support and Homebrew overlap work for packages in ellyHomeManager in this repo.
+description: How to tell whether nixpkgs can build a package on darwin and whether Homebrew already installs it, when adding or platform-gating a package in this repo.
 ---
 
 # Adding or platform-gating a package
@@ -8,11 +8,11 @@ description: How platform support and Homebrew overlap work for packages in elly
 ## Applies to
 
 Packages in `ellyHomeManager` (`nirePackages/`, `nireUser/`), shared across
-all five hosts including darwin. Use before adding a package module, adding
+all four hosts including darwin. Use before adding a package module, adding
 an `isDarwin`/platform guard, or deciding whether a cask duplicates a
 nixpkgs package.
 
-`ellyHomeManager` is shared verbatim by all five hosts, including
+`ellyHomeManager` is shared verbatim by all four hosts, including
 `nire-lysithea` (aarch64-darwin), so everything in it has to survive darwin.
 Two different questions come up here, they look identical in the config, and
 only one of them is answered for you automatically.

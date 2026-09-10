@@ -1,6 +1,6 @@
 # Wiki style guide
 
-_Last modified: 2026-09-06_
+_Last modified: 2026-09-09_
 
 ## Contents
 
@@ -40,7 +40,10 @@ separate tier for the *usage* side:
   for it to link to.
   `history.md` stays the index into `lessons-learned.md`;
   `conventions.md` stays the index into `module-style-guide.md` — the same
-  split as a category page and its deep-dive.
+  split as a category page and its deep-dive. `lessons-learned.md`'s long
+  entries live as per-§ articles in `wiki/lessons-learned/` (added
+  2026-09-09, `<n>-<slug>.md`): the page keeps every § number and a
+  one-line summary linking to each article.
 - **`wiki/categories/<name>.md`** — one page per real category, i.e. a
   directory under `flake/modules/` holding its own `dirsAsCategory.nix`
   (see [architecture.md](architecture.md)). Indexed in
@@ -159,6 +162,13 @@ separate tier for the *usage* side:
   no-op. This exists because a hand-derived anchor already got it wrong once
   — `categories/homelab.md`'s link into `virtualization.md`'s `` `VMs/_lib/
   libvirt-vm.nix` `` heading — and sat wrong until `anchors` caught it.
+
+  **Exception: `lessons-learned.md` and `lessons-learned/` articles carry no
+  Contents block** (relaxed 2026-09-09). Entries there are located by §
+  number — grep `## 43\.` — so a 46-line anchor list was paid on every full
+  read of the wiki's largest page for no navigational gain. The `contents`
+  check only validates pages that have a Contents block, so this needed no
+  linter change, only this sentence.
 - Category pages follow **what's in it → mechanism notes specific to that
   category, if any → imported by → see also**. This is the same
   what/why/traps depth the rest of the wiki holds itself to, per
