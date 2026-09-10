@@ -1,6 +1,6 @@
 # Traps & skills
 
-_Last modified: 2026-09-07_
+_Last modified: 2026-09-10_
 
 ## Contents
 
@@ -29,6 +29,7 @@ one-liner.
 | Filing a bug noticed while doing something else | `.agents/skills/propose-issue/SKILL.md` |
 | Checking whether a change left a `wiki/` page stale | `.agents/skills/wiki-sync/SKILL.md` |
 | Tightening wiki/skill/AGENTS prose for conciseness | `.agents/skills/trim-docs/SKILL.md` |
+| Compressing a module's history section | `.agents/skills/trim-history/SKILL.md` |
 | Writing a new skill | `.agents/skills/new-skill/SKILL.md` |
 | Starting a task that will branch, commit, or check out | `.agents/skills/use-a-worktree/SKILL.md` |
 

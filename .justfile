@@ -226,6 +226,12 @@ age-key *args:
 threads *term:
     @{{scripts}}/threads.sh {{term}}
 
+# Line number of a .nix module's history section -- read only above it when
+# browsing for something; editing the module is when the history gets read.
+# No history section: silent exit 1. See skill `trim-history`.
+history-line file:
+    @{{scripts}}/history-line.sh {{file}}
+
 # After merging a PR whose body says Fixes/Closes/Resolves #N, close any of
 # those issues GitHub's keyword silently left open (the #177 failure).
 # Refuses to touch anything unless the PR is actually merged.
