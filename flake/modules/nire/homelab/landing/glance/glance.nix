@@ -19,7 +19,7 @@
 #
 # SITS AT `/`, THE ONE ROUTE WITH NO PREFIX PROBLEM. reverse-proxy/caddy.nix
 # mounts Grafana at /grafana and Forgejo at /git with OPPOSITE prefix
-# handling (`handle` vs `handle_path`; that file, lessons-learned #41).
+# handling (`handle` vs `handle_path`; that file, lessons-learned.md §41).
 # glance is the fallback `handle` at the vhost root: nothing stripped,
 # `base-url` unset. Under a prefix, glance's docs require `base-url` set
 # AND the proxy stripping -- Forgejo's shape, not Grafana's.
