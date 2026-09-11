@@ -13,6 +13,16 @@ the script (`vip-put`/`apply`) to push an edit.
   per-service console click wiki/open-threads.md's Tailscale Services
   entry cited as a cost), and explicit grants for the two service
   destinations.
+- `svc-glance.json` -- the third Service object, PUT 2026-09-10, long after
+  its `serve.nix` forward and Caddy vhost landed in PR #211. Neither the
+  policy file nor the Service object had ever been pushed, so
+  `glance.moose-micro.ts.net` did not resolve at all while git and grafana
+  did. Note the API path takes the **`svc:`-prefixed** name:
+  `vip-get svc:glance`, not `vip-get glance` -- the bare form 404s for
+  every service, including ones that demonstrably exist, which makes it a
+  useless existence check. (`tailscale-acl.py`'s own usage line still
+  documents the older `by-name/NAME` path; the code at `vip_api()` is
+  right, the docstring is stale.)
 - `svc-grafana.json`, `svc-git.json` -- the two Tailscale Service objects
   (name/tags/ports/comment), created via `vip-put` against
   `/api/v2/tailnet/{tailnet}/vip-services/{name}` -- **not**
@@ -26,7 +36,45 @@ the script (`vip-put`/`apply`) to push an edit.
   config (nixpkgs' `services.tailscale.serve`), a different file
   entirely, confirmed the hard way before finding the right endpoint.
 
-## Status: RUNTIME-VERIFIED end to end, 2026-09-07
+## Status: grafana/git RUNTIME-VERIFIED 2026-09-07; glance NOT YET
+
+**2026-09-10:** `svc:glance` created and the policy file re-POSTed (the
+`svc:glance` autoApprover plus the `grants` entry svc:grafana/svc:git each
+had and it didn't). `just tailscale-acl diff` reports **"no difference"** --
+this directory and the live tailnet agree, which had not been true since
+2026-09-09. `glance.moose-micro.ts.net` resolves tailnet-wide.
+
+Finished 2026-09-11, but restarting `tailscale-serve` was NOT what
+finished it -- that was tried twice (23:38, 23:59), both clean, and changed
+nothing. cube already advertised `svc:glance`, the control-plane object was
+identical in shape to the two that worked, and the policy file carried its
+autoApprover and grant, yet the VIP refused connections **from cube
+itself**.
+
+**The rule this gives:** re-running `serve set-config` against an
+already-standing advertisement does not activate a newly-created Service.
+cube had carried `svc:glance` in its serve config since 2026-09-09, long
+before the object existed to approve it against, so each `set-config`
+re-sent an unchanged advertisement the control plane had no reason to act
+on. A fresh registration is what it acts on:
+
+```sh
+systemctl restart tailscaled        # then, in this order:
+systemctl restart tailscale-serve   # issue #267 -- it races tailscaled on boot
+```
+
+`CertDomains` then gained `glance.moose-micro.ts.net` and the VIP began
+answering. Note the first request after activation fails the handshake
+(`http=000`) while caddy fetches the cert -- retry, it is not a failure
+state.
+
+## Status: all three RUNTIME-VERIFIED; grafana/git 2026-09-07, glance 2026-09-11
+
+Verified from tenacity 2026-09-11, all with `tls_verify_result` 0:
+`glance` 200, `ts-cube` 200, `grafana` 302 (its real `/login`), `git` 200.
+glance's cert is a real Let's Encrypt one issued through tailscaled.
+
+## Status: grafana/git RUNTIME-VERIFIED end to end, 2026-09-07
 
 Both services confirmed working on `nire-cube`: valid TLS (`tls_verify=0`)
 on `https://grafana.moose-micro.ts.net/` (`302 -> /login`, real Grafana
