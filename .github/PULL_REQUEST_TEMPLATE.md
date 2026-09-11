@@ -3,6 +3,12 @@ Codifies the shape the `ship` skill's own PR-body guidance already asks
 for by hand: what changed, why, what was verified, what was deliberately
 left alone. Delete a section if it genuinely doesn't apply -- don't leave
 placeholder text.
+
+If an agent authored or materially assisted this PR, its disclosure line
+(e.g. "🤖 Generated with Claude Code") goes both here at the top, before
+"What changed", and at the bottom of the body -- harness-injected
+attribution footers land at the bottom regardless, so top and bottom both
+carry the disclosure rather than one replacing the other.
 -->
 
 ## What changed
