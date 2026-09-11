@@ -307,10 +307,32 @@ invites.
 
 ## Docs
 
-- `wiki/README.md` — topic index. **Maintained the same way this file is**:
-  a change that makes a wiki page stale corrects it in the same change
-  (`just wiki-lint` checks the mechanical claims).
+**Every long wiki page is a pair. Read the `-for-agents.md` half.**
+`<page>.md` is explanation written for a human reading cold;
+`<page>-for-agents.md` is the same ground at maximum information density —
+paths, option names, commands, host lists, every trap as one line, no
+narrative. Both exist for the same subject, so loading the human page to
+answer a question the sibling already answers is paying for prose you don't
+need. Start at `wiki/README-for-agents.md`, which routes by task.
+
+The tradeoff, stated so nobody has to rediscover it: this is deliberate
+duplication, against the "index over restatement" rule the rest of the wiki
+runs on, and `wiki/README.md` says outright that this repo has been bitten
+repeatedly by one fact living in two places. It is allowed here because it
+is the one duplication with a mechanical guard — **`check_wiki.py siblings`
+fails when a sibling's `_Last modified:_` predates its source's**, so
+editing a page without following in its sibling, in the same change, breaks
+`just wiki-lint` and names the pair. Don't satisfy that by bumping the
+sibling's date; that converts a caught omission into a silent one. Full rule
+and the cut list: `wiki/styleguide.md`'s "Two audiences per page"; the
+procedure is skill `wiki-sync`, step 5.
+
+- `wiki/README.md` — topic index (`README-for-agents.md` condensed).
+  **Maintained the same way this file is**: a change that makes a wiki page
+  stale corrects it in the same change (`just wiki-lint` checks the
+  mechanical claims).
 - `wiki/lessons-learned.md` — how the work went wrong in the doing;
   §§1–18 the port, §§19–31 first hardware. Long entries are per-§ articles
   under `wiki/lessons-learned/`; the page keeps every § number and a
-  one-line version of each.
+  one-line version of each. No `-for-agents` sibling, deliberately: it is
+  already written agent-facing and located by § number, not read through.

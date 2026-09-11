@@ -151,7 +151,21 @@ structured, extractable facts only:
             but these live in prose rather than a table the tree can't see,
             which is why they need their own subcheck.
 
-  check     Runs all twelve of the above.
+  siblings  The `<page>.md` / `<page>-for-agents.md` pairs (styleguide.md,
+            "Two audiences per page"): every sibling has a source page, every
+            page over 1,000 words has a sibling unless exempt, each sibling
+            is inside a 50% word budget (REVIEW only -- density is the goal,
+            and a fact always beats the number), and the two link to each
+            other. The real
+            work is the staleness half: a sibling whose `_Last modified:_`
+            predates its source's means the source was edited alone, which is
+            the two-copies-one-lying failure this wiki spent its whole
+            existence avoiding until the split deliberately introduced it.
+            Every other duplication rule in this repo is a convention someone
+            has to remember; this one is the only one worth spending a check
+            on, because the split is only as good as the guard under it.
+
+  check     Runs all thirteen of the above.
 
     check_wiki.py imports       [repo-root]
     check_wiki.py table         [repo-root]
@@ -165,6 +179,7 @@ structured, extractable facts only:
     check_wiki.py contents      [repo-root]
     check_wiki.py dates         [repo-root]
     check_wiki.py counts        [repo-root]
+    check_wiki.py siblings      [repo-root]
     check_wiki.py check         [repo-root]
     check_wiki.py gen-contents  <file.md> [file.md ...]
 
@@ -450,15 +465,31 @@ def check_imports(root):
         page = cat_pages_dir / f'{category}.md'
         if not page.exists():
             continue  # no page to check this category against
-        text = page.read_text()
-        m = IMPORTED_BY_HEADING.search(text)
-        if not m:
-            findings.append(f"NO 'Imported by' SECTION  {page}")
-            continue
-        rest = text[m.end():]
-        end = NEXT_HEADING.search(rest)
-        section = rest[:end.start()] if end else rest
-        findings += _imported_by_findings(page, category, hosts, section)
+        # A category page's `-for-agents` sibling (styleguide.md, "Two
+        # audiences per page") is where the import list is most useful, so
+        # it may carry its own "## Imported by" -- and then BOTH copies are
+        # checked, rather than the sibling's going unwatched. Only the
+        # absence from both is a finding: one page of the pair may carry it
+        # alone.
+        sib = cat_pages_dir / f'{category}{SIBLING_SUFFIX}.md'
+        checked = False
+        for candidate in (page, sib):
+            if not candidate.exists():
+                continue
+            text = candidate.read_text()
+            m = IMPORTED_BY_HEADING.search(text)
+            if not m:
+                continue
+            checked = True
+            rest = text[m.end():]
+            end = NEXT_HEADING.search(rest)
+            section = rest[:end.start()] if end else rest
+            findings += _imported_by_findings(
+                candidate, category, hosts, section)
+        if not checked:
+            findings.append(
+                f"NO 'Imported by' SECTION  {page}"
+                + (f" (nor {sib})" if sib.exists() else ""))
     return findings
 
 
@@ -1074,6 +1105,147 @@ def check_counts(root):
     return findings
 
 
+# The two-audience split (styleguide.md, "Two audiences per page"): a long
+# wiki page is explanation for a human, and its `<page>-for-agents.md`
+# sibling is the same ground compressed for something loading it mid-task.
+# Deliberate duplication, against this wiki's own "index over restatement"
+# rule, which is exactly why it is the one duplication in here with a
+# mechanical staleness guard instead of a convention.
+SIBLING_SUFFIX = '-for-agents'
+# A source page at or above this many words (`wc -w`, whole file) must have
+# a sibling. Below it, one is allowed but not required -- the sibling's own
+# title, `_Last modified:_` line and back-link start to outweigh what
+# compressing a short page saves.
+SIBLING_REQUIRED_WORDS = 1000
+# Word budget for a sibling, as a fraction of its source. A soft signal,
+# not a rule -- over-budget is a REVIEW finding, so it never fails a run.
+# The goal is information density: only what an agent needs on task, no
+# narration. Where dropping the next word would drop a fact -- a page that
+# is mostly irreducible commands, or an option name with a real trap
+# attached -- the fact wins and the budget loses, deliberately. What this
+# number is actually for is catching the other failure: a sibling quietly
+# growing narrative back until it is a second copy of the page, which is
+# the drift `wiki/README.md` warns about. The siblings written when this
+# landed came in at 21-48% of their sources, most around 30%.
+SIBLING_BUDGET = 0.50
+# Exempt from *requiring* a sibling (each may still have one):
+#   lessons-learned.md and lessons-learned/  -- already written agent-facing
+#     and located by section number, not read front-to-back
+#   *-history.md                             -- resolved incidents; already
+#     the moved-out-of-the-way tier, rarely loaded on task
+SIBLING_EXEMPT = (
+    re.compile(r'^wiki/lessons-learned(\.md|/)'),
+    re.compile(r'-history\.md$'),
+)
+
+
+def _words(text):
+    """Word count matching `wc -w`, so a human can check a budget finding
+    with one shell command rather than rerunning this script."""
+    return len(text.split())
+
+
+def _last_modified(text):
+    """The page's `_Last modified:_` date, or None. check_dates is what
+    reports a page missing the line at all; this just can't compare without
+    it."""
+    lines = text.splitlines()
+    for line in lines[:6]:
+        m = LAST_MODIFIED_LINE.match(line)
+        if m:
+            return datetime.date.fromisoformat(m.group(1))
+    return None
+
+
+def sibling_pairs(root):
+    """(source_path, sibling_path) for every `<page>-for-agents.md` under
+    wiki/, sibling first-class even when its source doesn't exist yet (the
+    orphan case check_siblings reports)."""
+    pairs = []
+    for path in sorted(root.joinpath('wiki').rglob(f'*{SIBLING_SUFFIX}.md')):
+        source = path.with_name(
+            path.name[:-len(f'{SIBLING_SUFFIX}.md')] + '.md')
+        pairs.append((source, path))
+    return pairs
+
+
+def check_siblings(root):
+    """The `<page>.md` / `<page>-for-agents.md` pairing, four ways:
+
+    - **orphan** -- a sibling whose source page doesn't exist (a rename that
+      moved one half of the pair).
+    - **missing** -- a page over SIBLING_REQUIRED_WORDS with no sibling, and
+      not on the exempt list.
+    - **stale** -- the guard the whole split rests on. Both pages carry
+      `_Last modified:_` (checked for shape by `dates`); editing a page's
+      content bumps it, per styleguide.md. So a sibling dated EARLIER than
+      its source means the source was edited and the sibling wasn't, which
+      is the failure mode `wiki/README.md`'s "why a link layer, not a
+      rewrite" section warns about -- one fact, two copies, one of them now
+      lying. Equal dates pass: that's the same-change edit the rule asks for.
+      This can't tell a same-day sibling update that was actually made from
+      one that was skipped after a same-day source edit -- no date check can.
+      It catches the one that sat for a week, which is the one that bites.
+    - **budget** -- a sibling over SIBLING_BUDGET of its source's words.
+      REVIEW only: the point of a sibling is information density, and a
+      page that is mostly commands has a floor no amount of editing gets
+      under. Losing a fact to hit a number is the worse outcome.
+
+    Plus both back-links: the source names its sibling so a human lands on
+    the dense version when they want it, and the sibling names its source so
+    an agent that needs the reasoning knows where it went."""
+    findings = []
+    have_sibling = set()
+
+    for source, sib in sibling_pairs(root):
+        rel_sib = sib.relative_to(root).as_posix()
+        rel_src = source.relative_to(root).as_posix()
+        if not source.exists():
+            findings.append(
+                f"ORPHAN SIBLING  {rel_sib}: no {rel_src} for it to condense")
+            continue
+        have_sibling.add(source)
+        src_text, sib_text = source.read_text(), sib.read_text()
+
+        src_date, sib_date = _last_modified(src_text), _last_modified(sib_text)
+        if src_date and sib_date and sib_date < src_date:
+            findings.append(
+                f"STALE SIBLING  {rel_sib}: Last modified {sib_date} is older "
+                f"than {rel_src}'s {src_date} -- that page was edited without "
+                f"its condensed sibling following in the same change")
+
+        src_words, sib_words = _words(src_text), _words(sib_text)
+        budget = int(src_words * SIBLING_BUDGET)
+        if sib_words > budget:
+            findings.append(
+                f"REVIEW   {rel_sib}: {sib_words} words against a "
+                f"{budget}-word budget ({int(SIBLING_BUDGET * 100)}% of "
+                f"{rel_src}'s {src_words}) -- cut narration, not facts; if "
+                f"what's left is all load-bearing, over is the right answer")
+
+        if sib.name not in src_text:
+            findings.append(
+                f"NO SIBLING LINK  {rel_src}: doesn't link to {sib.name}")
+        if source.name not in sib_text:
+            findings.append(
+                f"NO SOURCE LINK  {rel_sib}: doesn't link back to "
+                f"{source.name}")
+
+    for path in sorted(root.joinpath('wiki').rglob('*.md')):
+        rel = path.relative_to(root).as_posix()
+        if path.name.endswith(f'{SIBLING_SUFFIX}.md') or path in have_sibling:
+            continue
+        if any(rx.search(rel) for rx in SIBLING_EXEMPT):
+            continue
+        words = _words(path.read_text())
+        if words >= SIBLING_REQUIRED_WORDS:
+            findings.append(
+                f"MISSING SIBLING  {rel}: {words} words, over the "
+                f"{SIBLING_REQUIRED_WORDS}-word line, but has no "
+                f"{path.stem}{SIBLING_SUFFIX}.md")
+    return findings
+
+
 def check_dates(root):
     """Every page under wiki/ has a `_Last modified: YYYY-MM-DD_` line right
     after its title, in exactly the format styleguide.md's Content-shape
@@ -1181,7 +1353,7 @@ def main():
 
     cmds = ('imports', 'table', 'hosts', 'recipes', 'skills', 'secrets',
             'routes', 'links', 'anchors', 'contents', 'dates', 'counts',
-            'check')
+            'siblings', 'check')
     if cmd not in cmds:
         print(__doc__)
         sys.exit(2)
@@ -1211,6 +1383,8 @@ def main():
         findings += check_dates(root)
     if cmd in ('counts', 'check'):
         findings += check_counts(root)
+    if cmd in ('siblings', 'check'):
+        findings += check_siblings(root)
 
     for f in findings:
         print(f)

@@ -19,12 +19,23 @@ Read the spans, decide which copy dies.
 Excluded from matching by design: fenced code blocks (commands legitimately
 repeat) and H1 lines (article titles deliberately repeat their § heading).
 
+Ranked separately, not excluded: a `<page>.md` / `<page>-for-agents.md`
+pair (wiki/styleguide.md, "Two audiences per page"). That overlap is the
+whole point of the split -- the sibling restates its source on purpose,
+densely -- so counting it as a finding would bury every real one; all 19
+pairs outranked the top genuine hit when the split landed. They are held
+back behind --siblings instead of dropped, because the ONE thing worth
+seeing there is a sibling whose overlap has grown large enough that it is
+turning back into a copy of the page, which is exactly what
+`check_wiki.py siblings`' word budget is watching for from the other side.
+
 Usage:
-    check_restatement.py [--min-words N] [--top N] [--all]
+    check_restatement.py [--min-words N] [--top N] [--all] [--siblings]
 
     --min-words  minimum overlapping words for a pair to be reported (12)
     --top        how many pairs to show (15; most-overlapping first)
     --all        show every pair, not just the top
+    --siblings   rank the by-design -for-agents pairs in too
 """
 
 import argparse
@@ -38,6 +49,19 @@ FENCE = re.compile(r"^(```|~~~)")
 HEADING = re.compile(r"^#+\s")
 CONTENTS = re.compile(r"^##\s+Contents\s*$")
 WORD = re.compile(r"[a-z0-9_]['a-z0-9_.-]*")
+
+
+SIBLING_SUFFIX = "-for-agents.md"
+
+
+def is_sibling_pair(a, b):
+    """True when these two paths are a `<page>.md` / `<page>-for-agents.md`
+    pair. Only the pair itself -- a sibling against some OTHER page's source
+    is an ordinary hit and stays ranked."""
+    for x, y in ((a, b), (b, a)):
+        if x.endswith(SIBLING_SUFFIX) and x[: -len(SIBLING_SUFFIX)] + ".md" == y:
+            return True
+    return False
 
 
 def doc_paths():
@@ -92,6 +116,7 @@ def main():
     ap.add_argument("--min-words", type=int, default=12)
     ap.add_argument("--top", type=int, default=15)
     ap.add_argument("--all", action="store_true")
+    ap.add_argument("--siblings", action="store_true")
     args = ap.parse_args()
 
     files = {}
@@ -122,12 +147,18 @@ def main():
         words = sum(n + NGRAM - 1 for _, _, n in spans)
         return words, spans
 
-    hits = []
+    hits, sibling_hits = [], []
     for pair in pairs:
         total, spans = rel(pair)
-        if total >= args.min_words:
-            hits.append((total, pair, spans))
+        if total < args.min_words:
+            continue
+        entry = (total, pair, spans)
+        if not args.siblings and is_sibling_pair(*pair):
+            sibling_hits.append(entry)
+        else:
+            hits.append(entry)
     hits.sort(reverse=True)
+    sibling_hits.sort(reverse=True)
 
     shown = hits if args.all else hits[: args.top]
     if not shown:
@@ -138,6 +169,13 @@ def main():
         f"{len(hits)} pair(s) share {args.min_words}+ words "
         f"(shingle={NGRAM}; lessons-learned.md ↔ its articles is by design)"
     )
+    if sibling_hits:
+        worst = sibling_hits[0]
+        print(
+            f"  + {len(sibling_hits)} -for-agents sibling pair(s) held back "
+            f"as by-design (--siblings to rank them in); most-overlapping "
+            f"is {worst[1][0]} ↔ {worst[1][1]} at ~{worst[0]}w"
+        )
     for total, (a, b), spans in shown:
         print(f"\n{a}  ↔  {b}  — ~{total}w in {len(spans)} span(s)")
         words_a, lines_a = files[a][1], files[a][0]
