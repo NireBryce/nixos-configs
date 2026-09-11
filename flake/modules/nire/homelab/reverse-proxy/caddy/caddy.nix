@@ -156,17 +156,25 @@
 # #41) before reverse-proxy/tailscale-services/serve.nix replaced them,
 # not yet independently verified.
 #
-# STATUS OF THE 2026-09-10 `get_certificate tailscale` FIX: NOT YET
-# RUNTIME-VERIFIED -- it has not been switched onto nire-cube. What WAS
-# checked: the break reproduced on all four `.ts.net` names both from
-# another tailnet host and locally on cube (`tlsv1 alert internal error`);
-# caddy's LIVE admin API (`/config/apps/tls`) showed the issuer-less
-# policy; `caddy adapt` on the real generated Caddyfile, with and without
-# the fix, showed the policy gaining `get_certificate: [{via: tailscale}]`;
-# and the mechanism was read out of caddy 2.11.4's source. A handshake is
-# the only thing that proves it -- `just switch` on cube, then from another
-# tailnet host expect `tls_verify_result` 0 on
-# https://ts-cube|grafana|git.moose-micro.ts.net/.
+# STATUS OF THE 2026-09-10 `get_certificate tailscale` FIX: RUNTIME-VERIFIED
+# on hardware 2026-09-11, after `just switch` on cube. From tenacity, every
+# name this file serves returns validated TLS (`tls_verify_result` 0):
+# ts-cube 200, git 200, grafana 302 (its real `/login`), glance 200. Before
+# the switch: the break reproduced on all four names both from another
+# tailnet host and locally on cube (`tlsv1 alert internal error`); caddy's
+# LIVE admin API (`/config/apps/tls`) showed the issuer-less policy;
+# `caddy adapt` on the real generated Caddyfile, with and without the fix,
+# showed the policy gaining `get_certificate: [{via: tailscale}]`; and the
+# mechanism was read out of caddy 2.11.4's source.
+#
+# THE BARE-NAME VHOSTS BEHAVE AS DESIGNED, which looks like a bug and isn't:
+# `https://git` (and grafana/glance) serve Caddy's own local CA, so a
+# browser shows SEC_ERROR_UNKNOWN_ISSUER. That is what `tls internal` is
+# FOR -- see those vhosts below. It cannot be improved without either
+# trusting Caddy's local CA on every client (that CA can then mint a
+# trusted cert for any name on those machines) or dropping the vhosts and
+# going back to a hard failure. The bare names only redirect to the FQDNs,
+# so the FQDN is the answer; nothing here needs changing.
 #
 # `glance.moose-micro.ts.net` NEEDED ONE MORE THING than the fix above, and
 # the Service object behind it had never existed. `svc:glance` was created
@@ -186,32 +194,34 @@
 # record and the tailnet agree. `glance.moose-micro.ts.net` resolves
 # tailnet-wide again.
 #
-# STILL BROKEN as of 2026-09-11, and NOT for want of restarting
-# tailscale-serve -- that was tried and was not enough. Where it actually
-# stands, measured rather than assumed:
+# RUNTIME-VERIFIED 2026-09-11, but it took a tailscaled restart, not just
+# the `tailscale-serve` restart first assumed. Restarting tailscale-serve
+# twice (2026-09-10 23:38, 23:59) was clean and changed nothing: cube
+# already advertised svc:glance, the control-plane object was identical in
+# shape to the two that worked, and the policy file carried its autoApprover
+# and grant -- yet the VIP 100.79.200.215:443 refused connections from cube
+# ITSELF as well as from peers.
 #
-#   - cube DOES advertise it: `tailscale debug prefs` AdvertiseServices is
-#     [svc:git, svc:glance, svc:grafana], and tailscale-serve re-ran clean.
-#   - The control plane has the object, identical in shape to the two that
-#     work (`GET /vip-services` -- same tags, same ports:[tcp:443]), and the
-#     policy file carries its autoApprover and grant (`diff` = no
-#     difference).
-#   - Yet its VIP (100.79.200.215:443) refuses connections from cube ITSELF
-#     as well as from other tailnet hosts, while svc:grafana's VIP on the
-#     same host answers. So this is not routing, not DNS (the name resolves
-#     tailnet-wide), and not caddy -- nothing ever reaches caddy.
+# THE RULE: re-running `serve set-config` against an ALREADY STANDING
+# advertisement does not get a newly-created Service activated. cube had
+# carried svc:glance in its serve config since 2026-09-09, long before the
+# object existed to approve it against, so every `serve set-config` was a
+# no-op that re-sent an unchanged advertisement. A fresh registration is
+# what the control plane acts on:
 #
-# Best current reading: the control plane never activated cube as a host
-# for this service, and re-running `serve set-config` with an ALREADY
-# STANDING advertisement doesn't re-trigger approval -- cube had svc:glance
-# in its serve config since 2026-09-09, months before the object existed to
-# approve it against. If that's right the fix is forcing a fresh
-# registration (`systemctl restart tailscaled` on cube), NOT another
-# tailscale-serve restart. Unconfirmed: the devices API exposes no
-# service-approval field to check it against, so this is inference from the
-# grafana/glance asymmetry, not something read off the control plane.
-# Note restarting tailscaled will likely trip issue #267 on the way back
-# up, so tailscale-serve needs restarting after it, in that order.
+#     systemctl restart tailscaled        # then, in this order:
+#     systemctl restart tailscale-serve   # (issue #267 -- it races on boot)
+#
+# After that, `CertDomains` gained glance.moose-micro.ts.net and the VIP
+# started answering. Verified from tenacity: all four names 200/302 with
+# `tls_verify_result` 0, glance's cert a real Let's Encrypt one issued
+# THROUGH tailscaled (`subject: CN=glance.moose-micro.ts.net`, SAN matches,
+# chain verified) -- which is also the cleanest proof the
+# `get_certificate tailscale` fix above does what this header claims.
+#
+# One gotcha worth not re-diagnosing: the FIRST request after activation
+# returned `http=000` with the handshake failing, because caddy was still
+# fetching the cert from tailscaled. It is not a failure state; retry.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);

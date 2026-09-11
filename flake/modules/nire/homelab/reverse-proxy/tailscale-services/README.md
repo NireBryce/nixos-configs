@@ -44,25 +44,35 @@ had and it didn't). `just tailscale-acl diff` reports **"no difference"** --
 this directory and the live tailnet agree, which had not been true since
 2026-09-09. `glance.moose-micro.ts.net` resolves tailnet-wide.
 
-Not finished, and restarting `tailscale-serve` did NOT finish it -- that
-was tried 2026-09-10 23:38 and 23:59, both clean, and changed nothing.
-Measured state as of 2026-09-11: cube advertises it (`tailscale debug
-prefs` AdvertiseServices includes `svc:glance`), the control plane holds an
-object identical in shape to the two that work, and the policy file carries
-its autoApprover and grant -- yet the VIP `100.79.200.215:443` refuses
-connections **from cube itself** as well as from peers, while
-`svc:grafana`'s VIP answers. Not DNS, not routing, not Caddy; nothing
-reaches Caddy at all.
+Finished 2026-09-11, but restarting `tailscale-serve` was NOT what
+finished it -- that was tried twice (23:38, 23:59), both clean, and changed
+nothing. cube already advertised `svc:glance`, the control-plane object was
+identical in shape to the two that worked, and the policy file carried its
+autoApprover and grant, yet the VIP refused connections **from cube
+itself**.
 
-Best reading: the control plane never activated cube as a host for this
-service, and re-running `serve set-config` against an already-standing
-advertisement does not re-trigger approval (cube has carried `svc:glance`
-in its serve config since 2026-09-09, long before the object existed).
-If so the fix is a fresh registration -- `systemctl restart tailscaled` --
-not another `tailscale-serve` restart, and #267 means `tailscale-serve`
-then needs restarting after it, in that order. Unconfirmed: the devices
-API exposes no service-approval field, so this is inference from the
-grafana/glance asymmetry.
+**The rule this gives:** re-running `serve set-config` against an
+already-standing advertisement does not activate a newly-created Service.
+cube had carried `svc:glance` in its serve config since 2026-09-09, long
+before the object existed to approve it against, so each `set-config`
+re-sent an unchanged advertisement the control plane had no reason to act
+on. A fresh registration is what it acts on:
+
+```sh
+systemctl restart tailscaled        # then, in this order:
+systemctl restart tailscale-serve   # issue #267 -- it races tailscaled on boot
+```
+
+`CertDomains` then gained `glance.moose-micro.ts.net` and the VIP began
+answering. Note the first request after activation fails the handshake
+(`http=000`) while caddy fetches the cert -- retry, it is not a failure
+state.
+
+## Status: all three RUNTIME-VERIFIED; grafana/git 2026-09-07, glance 2026-09-11
+
+Verified from tenacity 2026-09-11, all with `tls_verify_result` 0:
+`glance` 200, `ts-cube` 200, `grafana` 302 (its real `/login`), `git` 200.
+glance's cert is a real Let's Encrypt one issued through tailscaled.
 
 ## Status: grafana/git RUNTIME-VERIFIED end to end, 2026-09-07
 

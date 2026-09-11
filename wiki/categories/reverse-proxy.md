@@ -55,8 +55,16 @@ public Let's Encrypt, which can never issue for a tailnet name. Every
 `ts-cube.moose-micro.ts.net`, which no commit had touched. `caddy.nix`'s
 header has the full mechanism, read out of caddy 2.11.4's source; the fix
 is naming `get_certificate tailscale` on each `.ts.net` vhost explicitly
-rather than relying on the detection. **Not yet runtime-verified** — the
-fix has not been switched onto cube.
+rather than relying on the detection. **Runtime-verified on hardware
+2026-09-11**: from tenacity, every name returns validated TLS
+(`tls_verify_result` 0) — `ts-cube` 200, `git` 200, `grafana` 302, `glance`
+200.
+
+The bare-name vhosts (`https://git` and friends) still show
+`SEC_ERROR_UNKNOWN_ISSUER` in a browser, and that is `tls internal` working
+as designed, not a leftover bug — they serve Caddy's own local CA. Short of
+trusting that CA on every client, the FQDN is the answer; the bare names
+only redirect to it anyway.
 
 Two things the same investigation turned up, both still open:
 
@@ -67,17 +75,18 @@ Two things the same investigation turned up, both still open:
   `glance.moose-micro.ts.net` did not resolve at all while git and grafana
   did. Now created, along with the `grants` entry the other two services
   each had; `just tailscale-acl diff` reports "no difference" for the first
-  time since 2026-09-09, and the name resolves tailnet-wide. Still broken,
-  and restarting `tailscale-serve` did not fix it (tried twice, both clean):
-  cube advertises the service and the control-plane object is identical in
-  shape to the two that work, yet its VIP refuses connections from cube
-  itself as well as from peers. Best reading is that the control plane never
-  activated cube as a host for it, and re-running `serve set-config` against
-  an already-standing advertisement doesn't re-trigger approval — so the
-  next thing to try is `systemctl restart tailscaled` (then
-  `tailscale-serve` after it, per #267), not another serve restart. Beware
-  `vip-get glance` as an existence check: the API path wants the `svc:`
-  prefix, and without it every service 404s, `svc:grafana` included.
+  time since 2026-09-09, and the name resolves tailnet-wide. Fixed 2026-09-11,
+  but restarting `tailscale-serve` was not what fixed it (tried twice, both
+  clean, no change). Re-running `serve set-config` against an
+  already-standing advertisement does not activate a newly-created
+  Service — cube had carried `svc:glance` in its serve config since
+  2026-09-09, long before the object existed to approve it against. A fresh
+  registration is what the control plane acts on: `systemctl restart
+  tailscaled`, then `tailscale-serve` after it (per #267). All four names
+  now return validated TLS. Beware `vip-get glance` as an existence check:
+  the API path wants the `svc:` prefix, and without it every service 404s,
+  `svc:grafana` included.
+
 - **`tailscale-serve.service` loses the race on boot** — issue #267. It
   failed `unexpected state: NoState` 34ms into the 2026-09-09 boot and,
   being a `oneshot` with no retry, stayed failed for 9.5 hours until a
