@@ -61,6 +61,10 @@ deliberate duplication rather than a future stale claim:
 - **the sibling's `_Last modified:_` must not predate its source's** — edit
   both in the same change or the run fails and names the pair. This is the
   point; the rest is bookkeeping.
+- **escape hatch for a no-op source edit** (reorder, typo): a
+  `_Sibling reviewed: YYYY-MM-DD -- <reason>_` line on the sibling, dated at
+  or after the source's. Reason mandatory; future date is a finding. Never
+  bump the sibling's `_Last modified:_` to clear a stale finding.
 - every sibling has a source; every page over the line has a sibling
 - each links to the other
 - sibling within **50%** of the source's `wc -w` — **REVIEW only, never a

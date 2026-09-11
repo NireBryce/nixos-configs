@@ -3,10 +3,23 @@
 _Last modified: 2026-09-11_
 
 Condensed from [module-style-guide.md](module-style-guide.md), which keeps
-the reasoning, the declined alternatives and the `## Counts` table (the only
-place those numbers are checked — don't copy them here). Rules only.
+the reasoning and the declined alternatives. Rules only.
 
 Applies to every module under `flake/modules/`, not just packages.
+
+## Counts
+
+Every count module-style-guide.md used to state inline, in the one place
+the `counts` subcheck of `wiki/scripts/check_wiki.py` watches — moved here
+2026-09-11. Recompute by hand with
+`grep -rl --include='*.nix' -- <pattern> flake/modules | wc -l`.
+
+| What | Files |
+|---|---|
+| total `.nix` files under `flake/modules/` | 262 |
+| module header (`moduleName = lib.removeSuffix ...`) | 212 |
+| `# # description` as first body line | 20 |
+| `with pkgs;` package lists | 119 |
 
 ## The header
 

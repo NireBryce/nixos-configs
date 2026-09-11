@@ -319,9 +319,11 @@ is the one duplication with a mechanical guard — **`check_wiki.py siblings`
 fails when a sibling's `_Last modified:_` predates its source's**, so
 editing a page without following in its sibling, in the same change, breaks
 `just wiki-lint` and names the pair. Don't satisfy that by bumping the
-sibling's date; that converts a caught omission into a silent one. Full rule
-and the cut list: `wiki/styleguide.md`'s "Two audiences per page"; the
-procedure is skill `wiki-sync`, step 5.
+sibling's date; that converts a caught omission into a silent one. When the
+edit genuinely has nothing to sync, a dated `_Sibling reviewed:_` line with
+a reason, on the sibling, is the way to say so. Full rule and the cut list:
+`wiki/styleguide.md`'s "Two audiences per page"; the procedure is skill
+`wiki-sync`, step 5.
 
 - `wiki/README.md` — topic index (`README-for-agents.md` condensed).
   **Maintained the same way this file is**:
