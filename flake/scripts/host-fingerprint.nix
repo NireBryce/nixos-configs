@@ -16,6 +16,9 @@ let
   user = "elly";
   sortStr = builtins.sort (a: b: a < b);
   names = ps: sortStr (map (p: p.name or "?") ps);
+  # nire-cube deliberately has no impermanence (plain persistent root), so
+  # `environment.persistence."/persist"` doesn't exist in its config
+  hasPersist = cfg.environment.persistence ? "/persist";
 in
 {
   toplevel = cfg.system.build.toplevel.drvPath;
@@ -89,12 +92,17 @@ in
   # `--json` serialization the moment anything forces it, toJSON included. The
   # projection reads the path and drops the rest, same as this file already
   # does by not hashing fileSystemOptions' submodule internals.
-  persistedDirectories = sortStr (
-    map (d: d.directory or d) cfg.environment.persistence."/persist".directories
-  );
-  persistedFiles = sortStr (
-    map (f: f.file or f) cfg.environment.persistence."/persist".files
-  );
+  # Guarded on the attribute existing rather than on host identity, so the
+  # next host without impermanence just works. Empty lists rather than absent
+  # keys, so both sides of a diff always carry the same attribute set.
+  persistedDirectories =
+    if hasPersist
+    then sortStr (map (d: d.directory or d) cfg.environment.persistence."/persist".directories)
+    else [];
+  persistedFiles =
+    if hasPersist
+    then sortStr (map (f: f.file or f) cfg.environment.persistence."/persist".files)
+    else [];
   fonts = names cfg.fonts.packages;
   kernelModules = sortStr cfg.boot.kernelModules;
   sessionVariables = builtins.attrNames cfg.environment.sessionVariables;
