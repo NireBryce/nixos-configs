@@ -91,6 +91,48 @@ specific report — not as a housekeeping pass over this list:
 
 ## Todos and ideas left next to the code
 
+- **Three findings from a 2026-09-11 read of every human-facing half of a
+  `-for-agents` pair, none acted on.** The pages were checked for the
+  failure the split invites — the explanation half decaying into a second
+  copy of its sibling — and it is not happening: verbatim line overlap
+  between halves is 0–5% across all 19 pairs, and nearly every section
+  heading is a *why* rather than a *what*. What's left:
+  - **All 19 pages open with ~16 lines of machinery before a sentence of
+    orientation** — `## Contents`, then the "Condensed version" blockquote,
+    with the paragraph saying what the page *is* landing at line 17–23 on
+    every one. Backwards for the one reader this half exists for: a TOC is
+    useful after you know you're on the right page, and "go read the
+    condensed version instead" is an odd first thing to tell a human. Fix
+    is mechanical across all 19 — orientation paragraph above both, the
+    blockquote under it. Now cheap to land: a pure reorder is a
+    `_Sibling reviewed:_` no-op (styleguide.md, "Two audiences per page").
+  - **[categories/system.md](categories/system.md)'s "Subdirectories at a
+    glance" table is the one genuinely what/where section found.** Five of
+    19 rows are the directory name with `.nix` appended (`flatpak/` |
+    `flatpak.nix`, same for `bluetooth`, `nix-ld`, `ssh`, `wayland`) —
+    nothing `ls` doesn't give — and they bury the rows that do earn their
+    place (`impermanence/`'s "not the impermanence category", `secrets/`'s
+    three files for three different problems). The table is the shape the
+    sibling exists to carry; the human page wants prose on the three or
+    four subdirectories with something to say.
+  - **[disk-formatting.md](disk-formatting.md) defers the one step a human
+    is on the page for.** "Actually formatting the disk" step 3 describes
+    the disko invocation rather than giving it, and neither half carries
+    the command. Every other destructive detail on that page is concrete
+    (the fake-device-path rule, the subvolid check with real numbers). The
+    honest fix is the command with an explicit "not run here, from disko's
+    docs" label — a labelled command beats a description of one when
+    someone is standing at a live USB.
+
+  A fourth finding, the `## Counts` table sitting on the human style guide,
+  was fixed the same day rather than listed (it moved to the sibling; the
+  `counts` subcheck follows `STYLEGUIDE_COUNTS`). Two judgment calls were
+  left alone deliberately: the `homelab/` pages carry an explicit "What's
+  verified here" section and the `categories/` pages carry the same facts
+  inline instead, which is arguably better writing at the cost of a full
+  read to answer "is this known to work?"; and the "Condensed version"
+  blockquote ends with an instruction to whoever *edits* the page, sitting
+  in the header of the page a human *reads*.
 - **[`../flake/scripts/script-wishlist.md`](<../flake/scripts/script-wishlist.md>)**
   — bare headings only (`vicinae`, `just`, `espanso`, `other`), no content
   yet. A placeholder for future script ideas, not current work.
