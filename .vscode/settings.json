@@ -33,16 +33,31 @@
             "nixpkgs": {
                 "expr": "import (builtins.getFlake \"${workspaceFolder}/flake\").inputs.nixpkgs {}"
             },
+            // The KEY NAMES here must match the ones in the user-level settings.json,
+            // which carry the same three entries as fallbacks pointing at
+            // "${workspaceFolder}" (right for a repo whose flake sits at the workspace
+            // root, wrong for this one). VS Code MERGES object settings across scopes
+            // key by key rather than replacing them wholesale, so a workspace entry
+            // under a *different* name does not shadow the user-level one -- it just
+            // adds a second option provider beside it, and nixd keeps evaluating the
+            // broken fallback. That is not theory: with these named nixos/home-manager/
+            // nix-darwin, ~/.config/Code/logs/*/window*/exthost/jnoortheen.nix-ide/Nix.log
+            // showed, per session,
+            //   nixos-durandal eval expr: path '/nix/store/...-source/flake.nix'
+            //   does not exist
+            // for all three user-level names -- the repo-root-instead-of-flake/ mistake
+            // the getFlake note above describes, arriving from the other settings file.
+            // Matching the names makes these values win and the errors stop.
             "options": {
                 // <name> in the upstream README is a placeholder, not syntax. One host.
-                "nixos": {
+                "nixos-durandal": {
                     "expr": "(builtins.getFlake \"${workspaceFolder}/flake\").nixosConfigurations.nire-durandal.options"
                 },
                 // Home Manager is a NixOS module here (useGlobalPkgs/useUserPackages), so
                 // there is no `homeConfigurations` output at all -- reaching for one returns
                 // an attribute error and nixd silently serves no HM options. Options have to
                 // be dug out of the NixOS config's submodule type instead.
-                "home-manager": {
+                "homeManager-elly-durandal": {
                     "expr": "(builtins.getFlake \"${workspaceFolder}/flake\").nixosConfigurations.nire-durandal.options.home-manager.users.type.getSubOptions []"
                 },
                 // Restored 2026-08-14. Removed once on the belief that this flake has no
@@ -64,7 +79,7 @@
                 // by reading it: it returns the darwin option tree (environment, homebrew,
                 // launchd, system, ...), and does so from x86_64-linux, so the entry is
                 // checkable off the darwin host.
-                "nix-darwin": {
+                "nix-darwin-lysithea": {
                     "expr": "(builtins.getFlake \"${workspaceFolder}/flake\").darwinConfigurations.nire-lysithea.options"
                 }
             }
