@@ -1,7 +1,7 @@
 # Drop packages nixpkgs cannot build on this system, once, instead of guarding
 # them one module at a time.
 #
-# ellyHomeManager is shared verbatim by all three hosts, so every package in it
+# ellyHomeManager is shared verbatim by all four hosts, so every package in it
 # has to survive aarch64-darwin as well as x86_64-linux. Eleven did not -- vlc,
 # gimp, libreoffice-qt, github-desktop, piper, qpwgraph, strace, ltrace, iotop,
 # sysstat, ethtool -- and each one carried a hand-written

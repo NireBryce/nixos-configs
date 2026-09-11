@@ -54,8 +54,6 @@ before stating any count) and `wiki/hosts.md`'s table. First-boot history
 `wiki/history.md`'s "Confirmed-on-hardware facts".
 
 - **Check `hostname` before assuming which machine the session is on.**
-  Sessions have run on `nire-lysithea`, `nire-durandal`, and
-  `nire-tenacity`.
 - Host *counts* in prose are claims about when someone last looked — check
   `hosts.nix`.
 
@@ -99,7 +97,7 @@ similar, never a bare NixOS or Home Manager module.
 
 ### Membership is implicit, and comes from the directory
 
-Each category directory holds a `dirsAsCategory.nix` (a two-line shim over
+Each category directory holds a `dirsAsCategory.nix` (a shim over
 `flake/modules/_lib/category-collector.nix` since 2026-08-27) that derives
 the category name from its own directory and collects the modules beneath
 it. **A module belongs to the category of the directory it is filed in**;
@@ -177,9 +175,7 @@ and a 1,659-line p10k config.
 The shell's view of the machine (`lsblk`, `findmnt`, `/etc`) is scoped to
 its mount namespace and can look wrong while being correct — use
 `/proc/1/mountinfo`, `/dev/disk/by-uuid/`, `/run/current-system` instead,
-all unprivileged. (This repo moved to systemd stage 1 2026-08-10; the
-skill's History section has the scripted-stage-1 template-injection trap
-that mechanism retired.)
+all unprivileged.
 
 ### Adding or platform-gating a package — skill `nirepackages-platform-support`
 
@@ -300,7 +296,7 @@ reasoning, including the grep-trail convention it came with.
 **Don't bury Python inside a bash script.** `python3 -c '...'` heredocs get
 no highlighting, linting, or indentation help — exactly when quoting bugs
 stop being visible. A little Python: a real `.py` in
-`flake/scripts/util/`. Mostly Python: the whole thing in Python
+`flake/scripts/`. Mostly Python: the whole thing in Python
 (`modules.py` is the precedent). This rule exists because a
 bash-wrapping-Nix-wrapping-Python checker shipped both bugs the shape
 invites.
@@ -310,7 +306,8 @@ invites.
 - `wiki/README.md` — topic index. **Maintained the same way this file is**:
   a change that makes a wiki page stale corrects it in the same change
   (`just wiki-lint` checks the mechanical claims).
-- `wiki/lessons-learned.md` — how the work went wrong in the doing;
-  §§1–18 the port, §§19–31 first hardware. Long entries are per-§ articles
+- `wiki/lessons-learned.md` — how the work went wrong in the doing; its
+  own header maps the eras the § numbers span, which is the only copy of
+  that mapping. Long entries are per-§ articles
   under `wiki/lessons-learned/`; the page keeps every § number and a
   one-line version of each.
