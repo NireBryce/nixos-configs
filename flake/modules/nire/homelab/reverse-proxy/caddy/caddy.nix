@@ -186,14 +186,32 @@
 # record and the tailnet agree. `glance.moose-micro.ts.net` resolves
 # tailnet-wide again.
 #
-# STILL PENDING as of 2026-09-10: cube is not ADVERTISING the service yet,
-# so it is absent from `CertDomains` and this vhost still has no cert.
-# tailscaled applied its serve config (2026-09-09 11:03) while svc:glance
-# did not exist, and it does not re-advertise on its own -- watched for
-# two minutes after creating it, no change. `systemctl restart
-# tailscale-serve` on cube is the missing step. Worth knowing that the
-# unit will not do this for itself after a reboot either, for a separate
-# reason: issue #267, it races tailscaled on boot and stays failed.
+# STILL BROKEN as of 2026-09-11, and NOT for want of restarting
+# tailscale-serve -- that was tried and was not enough. Where it actually
+# stands, measured rather than assumed:
+#
+#   - cube DOES advertise it: `tailscale debug prefs` AdvertiseServices is
+#     [svc:git, svc:glance, svc:grafana], and tailscale-serve re-ran clean.
+#   - The control plane has the object, identical in shape to the two that
+#     work (`GET /vip-services` -- same tags, same ports:[tcp:443]), and the
+#     policy file carries its autoApprover and grant (`diff` = no
+#     difference).
+#   - Yet its VIP (100.79.200.215:443) refuses connections from cube ITSELF
+#     as well as from other tailnet hosts, while svc:grafana's VIP on the
+#     same host answers. So this is not routing, not DNS (the name resolves
+#     tailnet-wide), and not caddy -- nothing ever reaches caddy.
+#
+# Best current reading: the control plane never activated cube as a host
+# for this service, and re-running `serve set-config` with an ALREADY
+# STANDING advertisement doesn't re-trigger approval -- cube had svc:glance
+# in its serve config since 2026-09-09, months before the object existed to
+# approve it against. If that's right the fix is forcing a fresh
+# registration (`systemctl restart tailscaled` on cube), NOT another
+# tailscale-serve restart. Unconfirmed: the devices API exposes no
+# service-approval field to check it against, so this is inference from the
+# grafana/glance asymmetry, not something read off the control plane.
+# Note restarting tailscaled will likely trip issue #267 on the way back
+# up, so tailscale-serve needs restarting after it, in that order.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
