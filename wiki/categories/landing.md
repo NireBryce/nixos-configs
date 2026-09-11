@@ -1,6 +1,6 @@
 # `landing` — `nire/homelab/landing/`
 
-_Last modified: 2026-09-02_
+_Last modified: 2026-09-11_
 
 ## Contents
 
@@ -19,7 +19,10 @@ _Last modified: 2026-09-02_
 `nire-cube`: what's running, whether it's up, and how the machine itself is
 doing. Added 2026-08-24, cube-only; nested under the `homelab` umbrella
 since 2026-08-27 (name unaffected). It is what
-`https://ts-cube.moose-micro.ts.net/` serves.
+`https://ts-cube.moose-micro.ts.net/` serves, and since 2026-09-11 it also
+has a Tailscale Services name of its own,
+`https://glance.moose-micro.ts.net/` (short: `http://glance/`) — two ways in
+to the same app, both live.
 
 **Confirmed working end to end, 2026-08-24**, first switch, no fixes:
 `glance.service` `active (running)` at `NRestarts=0`, 0 failed units, 3002
@@ -110,8 +113,8 @@ health check, actively misleading as a UI. Their health surfaces in Grafana,
 which is listed. Don't add them here without also giving them a URL a browser
 on another host can follow.
 
-The three sites are checked **through the proxy**, at the same URLs a person
-would use, rather than at `127.0.0.1:300x`. That makes the widget a test of
+The monitored sites are checked **through the proxy**, at the same URLs a
+person would use, rather than at `127.0.0.1:300x`. That makes the widget a test of
 the whole path — MagicDNS, the tailnet, Caddy's routing, the certificate, and
 the app — instead of the app alone. A Caddy misconfiguration shows up here;
 a loopback check would have hidden exactly the class of bug that actually

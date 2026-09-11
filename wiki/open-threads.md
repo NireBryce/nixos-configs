@@ -1,6 +1,6 @@
 # Open threads
 
-_Last modified: 2026-09-08_
+_Last modified: 2026-09-11_
 
 ## Contents
 
@@ -165,26 +165,42 @@ bug; each is a decision someone might otherwise re-litigate from scratch.
   [backup-history.md](categories/backup-history.md). What's still open is
   extending backups past cube to the other three hosts
   (**[#130](https://github.com/NireBryce/nixos-configs/issues/130)**).
-- **Tailscale Services (`svc:`) reopened 2026-09-07, in progress on
-  `feat/tailscale-services`.** The two costs originally cited here both
-  turned out to have real mitigations: the per-service admin-console
-  approval step is skippable via an `autoApprovers.services` policy entry,
-  and the policy file itself is API-scriptable
+- **Tailscale Services (`svc:`) — done, 2026-09-11.** Both costs
+  originally cited here had real mitigations: the per-service
+  admin-console approval is skippable via an `autoApprovers.services`
+  policy entry, and the policy file is API-scriptable
   (`flake/scripts/tailscale-acl.py`, `just tailscale-acl`) rather than
-  console-hand-edited only — reviewed as a diff and applied from this repo,
-  same as everything else here. `svc:grafana` and `svc:git` exist on the
-  tailnet as of this branch (each with its own virtual address); the tag,
-  policy grants, and service objects are recorded under
-  `flake/modules/nire/homelab/reverse-proxy/tailscale-services/`, whose own
-  README lists what's still open — **`nire-cube` isn't tagged yet, there's
-  no NixOS `services.tailscale.serve` config backing either service with a
-  real port, and Caddy's existing `/grafana/`/`/git/` path routes
-  ([reverse-proxy](categories/reverse-proxy.md)) are untouched and still
-  what's actually serving traffic.** Two API endpoint names were wrong on
-  the first attempt in both directions (ACL: `/policy` vs the real `/acl`;
-  vip-services: `/by-name/{name}` vs the real `/vip-services/{name}`) —
-  see the script's own comments before assuming either path from memory
-  again.
+  console-only — reviewed as a diff and applied from this repo, same as
+  everything else. `svc:grafana`, `svc:git` and `svc:glance` are live,
+  each with its own tailnet name and certificate; `nire-cube` is tagged
+  `tag:homelab-cube`; `services.tailscale.serve` backs all three on
+  `tcp:443` and `tcp:80`; and Caddy's old `/grafana/`/`/git/` path routes
+  are retired. URLs are in
+  [homelab/reaching-services.md](homelab/reaching-services.md), the build
+  in [reverse-proxy](categories/reverse-proxy.md).
+
+  Four traps this turned up, all now written up where they'd be hit rather
+  than only here:
+
+  - **Two API endpoint names were wrong in both directions** on the first
+    attempt (ACL: `/policy` vs the real `/acl`; vip-services:
+    `/by-name/{name}` vs the real `/vip-services/{name}`). Read the
+    script's own comments before assuming either path again — and note
+    `vip-get` needs the **`svc:`-prefixed** name, or every service 404s
+    including ones that exist.
+  - **A recorded change is not an applied change.** `svc:glance`'s
+    autoApprover sat in this repo's copy of the policy file for a day
+    without ever being POSTed, and the Service object was never created at
+    all, so the name didn't resolve. `just tailscale-acl diff` is the
+    check that catches it.
+  - **Creating and updating a Service want different bodies** — an update
+    400s without the `addrs` the control plane assigned. Those are
+    deliberately not committed (they'd rot on any recreate); `vip-put`
+    merges them.
+  - **A new Service is not activated by re-running `serve set-config`**
+    against an already-standing advertisement. It needs a fresh
+    registration: restart `tailscaled`, then `tailscale-serve` after it.
+
 - **Grafana dashboards edited in the UI are not in this repo.** Anything
   under `monitoring`'s `_dashboards/` is provisioned read-only from the
   store; anything created through the web UI lives only in cube's sqlite db.

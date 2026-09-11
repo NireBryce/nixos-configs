@@ -1,6 +1,6 @@
 # Lessons from the den → flake-parts port
 
-_Last modified: 2026-09-09_
+_Last modified: 2026-09-11_
 
 > **Written by Claude Code, for Claude Code**, and largely a record of its own
 > mistakes. Written to be read by an agent starting cold, so the "I" throughout
@@ -715,3 +715,13 @@ Borrowed from an upstream mDNS thread: a daemon can report itself enabled and an
 
 Full account: [46-enabled-vs-socket-holder.md](lessons-learned/46-enabled-vs-socket-holder.md).
 
+
+## 47. An explicit setting can switch off an implicit one — auto-detection only fires where nothing is declared
+
+2026-09-08, cube. Adding `tls internal` to three *bare-name* Caddy vhosts took HTTPS down on four *unrelated* `.ts.net` vhosts for two days, including one no commit had touched. The Caddyfile adapter emits automation policies for every site as soon as any site declares `tls`, and Caddy's "this is a Tailscale domain, ask tailscaled for a cert" detection only runs for names with no policy — so declaring a setting for A silently disabled a default for B. Every check passed: the generated config was valid, it just meant something else.
+
+Full account: [47-explicit-setting-disables-implicit-one.md](lessons-learned/47-explicit-setting-disables-implicit-one.md).
+
+## 48. A recorded change is not an applied change, when the thing changed lives outside the repo
+
+2026-09-10, cube. `acl-diff-applied.hujson` recorded a `svc:glance` autoApprover that had never been POSTed, and `svc-glance.json` described a Service object that had never been created — so `glance.moose-micro.ts.net` didn't resolve anywhere while the repo looked complete and a merged PR claimed the work was done. A file named for what *was applied* is still just a file; only the control plane knows. The fix is a command that asks it (`just tailscale-acl diff`, now reporting "no difference"), not a more carefully written record. Generalizes past this repo: any state whose home is an external API needs a diff against the API, not a checked-in mirror trusted on sight.

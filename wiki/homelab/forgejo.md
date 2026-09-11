@@ -23,7 +23,7 @@ how it's configured and why its two hostnames disagree, see
 
 | | |
 |---|---|
-| Web | `https://git.moose-micro.ts.net/` |
+| Web | `https://git.moose-micro.ts.net/` (short: `http://git/`) |
 | Clone over HTTPS | `https://git.moose-micro.ts.net/<user>/<repo>.git` |
 | Clone over SSH | `forgejo@ts-cube:<user>/<repo>.git` |
 
