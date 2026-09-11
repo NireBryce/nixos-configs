@@ -1,6 +1,6 @@
 # `monitoring` — `nire/homelab/monitoring/`
 
-_Last modified: 2026-09-07_
+_Last modified: 2026-09-11_
 
 ## Contents
 
@@ -56,9 +56,12 @@ Five files, all `nixos`-class:
   Prometheus directly either.
 - **`grafana/grafana.nix`** — the one service in this stack meant to be
   reached off-host, and the only piece with anything non-obvious in it (see
-  below). Ships one provisioned dashboard,
+  below). Ships two provisioned dashboards,
   `grafana/_dashboards/nire-cube-overview.json` — three rows (system basics,
-  libvirt/QEMU VMs, podman containers). The dashboards directory is
+  libvirt/QEMU VMs, podman containers) — and
+  `grafana/_dashboards/roundtrip-check.json`, one panel, the artifact of the
+  live-export verification described under "Adding a dashboard that survives
+  a rebuild". The dashboards directory is
   underscore-prefixed for the same reason `VMs/_lib/` is in
   [virtualization](virtualization.md): `import-tree` ignores any path
   containing `/_`, so the JSON in there is never mistaken for a flake-parts
@@ -151,10 +154,20 @@ JSON there — no extra plumbing needed:
 5. Save the file under `grafana/_dashboards/`, `just switch`, confirm the
    dashboard reappears with its panels intact.
 
-**Not verified against a live export** — written from `grafana.nix`'s own
-mechanism and `nire-cube-overview.json`'s shape, not by actually exporting
-a UI-built dashboard and round-tripping it through a switch. Worth doing
-once before trusting this blindly.
+**Export leg verified 2026-09-11; switch leg still to run.** A dashboard
+shaped like a UI build — Grafana-assigned random uid, top-level numeric
+`id`, panels pointing at the `${DS_PROMETHEUS}` template variable — was
+created on cube over the API (`127.0.0.1:3000` over SSH), exported, and
+carried through steps 2–4 into `roundtrip-check.json`; the db copy was
+deleted afterwards, so the only copy of that dashboard is the file in this
+repo. Exactly the transformations the steps predict were needed: wrapper
+`dashboard`/`meta` unwrapped, `id` dropped, `adsllh` → `roundtrip-check`,
+`${DS_PROMETHEUS}` → the fixed `prometheus-cube` uid, template variable
+removed. The datasource-proxy query path through Grafana was confirmed live
+the same day (`up` returning cube's exporters). Still unverified: the
+`just switch` on cube (needs an interactive sudo) showing the dashboard
+reappear exactly once under its fixed uid with the panel rendering — the
+one leg an agent without cube's sudo password could not run.
 
 ## Why cube only, and why that's a category rather than a host-specific file
 

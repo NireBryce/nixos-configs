@@ -1,0 +1,23 @@
+{
+  "uid": "roundtrip-check",
+  "title": "round-trip check",
+  "tags": ["cube", "round-trip"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "panels": [
+    {
+      "id": 1, "type": "stat", "title": "Uptime",
+      "gridPos": { "h": 4, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-cube" },
+      "targets": [
+        { "expr": "(time() - node_boot_time_seconds) / 86400", "legendFormat": "uptime" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "d" }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    }
+  ]
+}
