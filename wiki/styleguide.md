@@ -1,15 +1,22 @@
 # Wiki style guide
 
-_Last modified: 2026-09-09_
+_Last modified: 2026-09-11_
 
 ## Contents
 
 - [Directory hierarchy](#directory-hierarchy)
 - [Naming](#naming)
 - [Content shape](#content-shape)
+- [Two audiences per page](#two-audiences-per-page)
 - [Linking](#linking)
 - [Keeping this from rotting](#keeping-this-from-rotting)
 - [See also](#see-also)
+
+> **Condensed version:**
+> [styleguide-for-agents.md](styleguide-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
 
 How this wiki itself is organized and written — as opposed to
 [conventions.md](conventions.md), which is the *repo's* style guide (Nix
@@ -89,6 +96,11 @@ separate tier for the *usage* side:
   a third tier under that; if a deep-dive page itself needs to fork
   further, that's a sign the split is at the wrong level, not a reason to
   nest another directory.
+- **`wiki/<any page>-for-agents.md`** — the condensed sibling of a long
+  page, added wiki-wide 2026-09-11. Same subject, written for something
+  loading it mid-task rather than reading it: facts, paths, option names,
+  commands, traps as one-liners, and nothing else. Full rule:
+  [Two audiences per page](#two-audiences-per-page) below.
 - **`wiki/categories/<name>-history.md`** — a sibling file rather than a
   new directory, used when a category page has accumulated resolved
   incidents (a first-switch failure since fixed, a superseded plan, a
@@ -163,8 +175,10 @@ separate tier for the *usage* side:
   — `categories/homelab.md`'s link into `virtualization.md`'s `` `VMs/_lib/
   libvirt-vm.nix` `` heading — and sat wrong until `anchors` caught it.
 
-  **Exception: `lessons-learned.md` and `lessons-learned/` articles carry no
-  Contents block** (relaxed 2026-09-09). Entries there are located by §
+  **Exception: `lessons-learned.md`, `lessons-learned/` articles, and
+  `-for-agents.md` siblings carry no Contents block** (the first two relaxed
+  2026-09-09, siblings 2026-09-11 — on a page whose whole purpose is
+  information density, an anchor list is the first thing that has to go). Entries there are located by §
   number — grep `## 43\.` — so a 46-line anchor list was paid on every full
   read of the wiki's largest page for no navigational gain. The `contents`
   check only validates pages that have a Contents block, so this needed no
@@ -202,6 +216,67 @@ separate tier for the *usage* side:
   outward to the general form of a trap where one exists — a skill, most
   often (e.g. `shell-config` → the `home-manager-dotfiles` skill). The wiki
   page stays the specific instance; the skill stays the reusable lesson.
+
+## Two audiences per page
+
+A page over **1,000 words** gets a `<page>-for-agents.md` sibling. The
+original stays what it is — explanation, for a human reading it cold. The
+sibling is the same ground at maximum information density, for an agent that
+loaded it to get one thing done and pays for every token of narrative around
+that thing.
+
+**What goes in the sibling**: the file paths, option and flag names, exact
+commands, the shape of a config block, host lists, and every trap as a single
+declarative line. Tables over prose wherever a table fits.
+
+**What does not**: how something came to be, what was tried first, who
+confirmed it and when, the reasoning behind a choice, meta-commentary about
+where else a thing is written down, and see-also sprawl. One see-also line,
+pointing back at the human page and at two or three real siblings.
+
+**One thing that looks like narration and isn't**: a qualifier on a claim —
+`UNVERIFIED`, `not confirmed live`, `not exercised`, `last checked <date>`.
+*Who* verified something and *by what method* is narration and goes;
+*whether it was verified at all* is part of the fact and stays. A sibling
+that drops those states a guess as settled in the copy most likely to be
+acted on. Skill `fact-hygiene` #6.
+
+Exempt from *needing* one: [lessons-learned.md](lessons-learned.md) and its
+`lessons-learned/` articles (already written agent-facing, located by §
+number rather than read front-to-back) and `<name>-history.md` pages
+(resolved incidents — already the moved-out-of-the-way tier). A page under
+1,000 words *may* have one, but usually shouldn't: at that size the
+sibling's own title, date line and back-link start to outweigh what
+compressing it saves. `homelab/README.md` was tried and dropped for exactly
+that reason.
+
+### This is deliberate duplication, and it is the only kind here
+
+[README.md](README.md)'s "why a link layer and not a rewrite" section says
+in as many words that this repo has been bitten repeatedly by one fact
+living in two places and drifting. That objection is correct. The split is
+worth it anyway — the two readers genuinely want different documents — but
+only because it is the one duplication in this wiki with a **mechanical**
+guard under it rather than a convention someone has to remember:
+
+`check_wiki.py siblings` (part of `just wiki-lint`) checks that
+
+- every sibling has a source page, and every page over the line has a
+  sibling;
+- **the sibling's `_Last modified:_` does not predate its source's** — so
+  editing a page's content without following in its sibling, in the same
+  change, fails the run and names the pair. This is the whole point of the
+  check; everything else it does is bookkeeping.
+- the two link to each other;
+- the sibling fits a 50% word budget — a **REVIEW** finding only, never a
+  failure. Density is the goal, and a page that is mostly irreducible
+  commands has a floor. Losing a fact to hit the number is the worse
+  outcome; cut narration instead, and if what's left is all load-bearing,
+  over budget is the right answer.
+
+A category page's `## Imported by` section may live on **either** page of
+the pair, or both — `check_imports` checks whichever ones exist — so the
+import list doesn't have to be written twice to stay watched.
 
 ## Linking
 

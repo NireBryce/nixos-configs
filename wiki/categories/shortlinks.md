@@ -1,6 +1,6 @@
 # `shortlinks` — `nire/homelab/shortlinks/`
 
-_Last modified: 2026-09-02_
+_Last modified: 2026-09-11_
 
 ## Contents
 
@@ -14,6 +14,12 @@ _Last modified: 2026-09-02_
 - [No persistence entry](#no-persistence-entry)
 - [Imported by](#imported-by)
 - [See also](#see-also)
+
+> **Condensed version:**
+> [shortlinks-for-agents.md](shortlinks-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
 
 [golink](https://github.com/tailscale/golink), Tailscale's `go/foo`
 shortlink service. Added 2026-08-24, cube-only; nested under the `homelab`

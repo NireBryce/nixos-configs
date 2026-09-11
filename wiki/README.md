@@ -8,6 +8,12 @@ _Last modified: 2026-09-11_
 - [Pages](#pages)
 - [Keeping this from rotting](#keeping-this-from-rotting)
 
+> **Condensed version:**
+> [README-for-agents.md](README-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
 A topic index over documentation that already exists scattered around this
 repo — `CLAUDE.md`, `flake/doc/`, `.agents/skills/`, stray `.md` files
 sitting next to the code they're about, and `bugs pending submission/`.
@@ -35,6 +41,13 @@ This wiki exists for the "where do I even look" problem once you already
 know roughly what you're after — a human skimming for the right doc, or an
 agent trying to find the one file that actually answers a question instead
 of re-deriving it.
+
+**Every long page here has two versions.** `<page>.md` is the explanation;
+`<page>-for-agents.md` is the same ground condensed to facts, for an agent
+(or anyone) loading it to get one thing done rather than to read it. The
+rule, and the lint check that keeps the pair in step, is
+[styleguide.md](styleguide.md)'s
+[Two audiences per page](styleguide.md#two-audiences-per-page).
 
 **Don't know what you're after yet?** Start with [Overview](overview.md) —
 the 2-minute mental model this index assumes. Already know what you're

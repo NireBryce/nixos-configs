@@ -1,6 +1,6 @@
 # `system` — `nire/system/`
 
-_Last modified: 2026-09-02_
+_Last modified: 2026-09-11_
 
 ## Contents
 
@@ -12,6 +12,12 @@ _Last modified: 2026-09-02_
 - [Tailscale: MagicDNS names, and the ACL lives outside this repo](#tailscale-magicdns-names-and-the-acl-lives-outside-this-repo)
 - [Imported by](#imported-by)
 - [See also](#see-also)
+
+> **Condensed version:**
+> [system-for-agents.md](system-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
 
 The largest category by far — across 19 subdirectories, no per-file count
 kept here on purpose (see categories/README.md's Index section for why) —

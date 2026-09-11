@@ -15,6 +15,12 @@ _Last modified: 2026-09-11_
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
+> **Condensed version:**
+> [landing-for-agents.md](landing-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
 [glance](https://github.com/glanceapp/glance), the service index for
 `nire-cube`: what's running, whether it's up, and how the machine itself is
 doing. Added 2026-08-24, cube-only; nested under the `homelab` umbrella

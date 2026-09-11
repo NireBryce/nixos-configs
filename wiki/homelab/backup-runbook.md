@@ -1,6 +1,6 @@
 # Backup runbook — restic on `nire-cube`
 
-_Last modified: 2026-09-06_
+_Last modified: 2026-09-11_
 
 ## Contents
 
@@ -12,6 +12,12 @@ _Last modified: 2026-09-06_
 - [Rotating the secrets](#rotating-the-secrets)
 - [Troubleshooting](#troubleshooting)
 - [See also](#see-also)
+
+> **Condensed version:**
+> [backup-runbook-for-agents.md](backup-runbook-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
 
 Commands for operating [backup](../categories/backup.md) — the restic
 category backing up Forgejo/Grafana/golink's state and `/persist` to the

@@ -1,6 +1,6 @@
 # `backup` — `nire/homelab/backup/`
 
-_Last modified: 2026-09-06_
+_Last modified: 2026-09-11_
 
 ## Contents
 
@@ -13,6 +13,12 @@ _Last modified: 2026-09-06_
 - [What isn't done yet](#what-isnt-done-yet)
 - [Imported by](#imported-by)
 - [See also](#see-also)
+
+> **Condensed version:**
+> [backup-for-agents.md](backup-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
 
 [restic](https://restic.net/), backing up `nire-cube`'s own service state to
 the QNAP NAS already on the network. Added 2026-08-28, cube-only, against

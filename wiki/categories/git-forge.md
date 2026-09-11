@@ -1,6 +1,6 @@
 # `git-forge` — `nire/homelab/git-forge/`
 
-_Last modified: 2026-09-07_
+_Last modified: 2026-09-11_
 
 ## Contents
 
@@ -14,6 +14,12 @@ _Last modified: 2026-09-07_
 - [No persistence entry, same reasoning as Grafana](#no-persistence-entry-same-reasoning-as-grafana)
 - [Imported by](#imported-by)
 - [See also](#see-also)
+
+> **Condensed version:**
+> [git-forge-for-agents.md](git-forge-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
 
 Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only; nested under
 the `homelab` umbrella since 2026-08-27 (name unaffected). As of 2026-09-07
