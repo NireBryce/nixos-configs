@@ -119,7 +119,11 @@ Commit discipline:
 Then `git push -u origin <branch>` and `gh pr create --base experimental`.
 Write the PR body like the commit messages: what changed, why, what was
 verified, what was left alone — matching `.github/PULL_REQUEST_TEMPLATE.md`'s
-headings.
+headings. **The LLM-disclosure line (e.g. "🤖 Generated with Claude Code")
+goes at both the top of the body (before "What changed") and the bottom**
+— top so it's the first thing a reviewer sees, bottom because a
+harness-injected attribution footer lands there regardless — per the
+template's own comment.
 
 ## 2. Preview, then ask
 
