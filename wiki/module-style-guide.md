@@ -1,6 +1,6 @@
 # Module style guide
 
-_Last modified: 2026-09-09_
+_Last modified: 2026-09-11_
 
 ## Contents
 
@@ -16,6 +16,12 @@ _Last modified: 2026-09-09_
 - [When a rename makes the old name ungreppable, say what it was](#when-a-rename-makes-the-old-name-ungreppable-say-what-it-was)
 - [A bug recorded in a comment stays in the file](#a-bug-recorded-in-a-comment-stays-in-the-file)
 - [File placement is load-bearing](#file-placement-is-load-bearing)
+
+> **Condensed version:**
+> [module-style-guide-for-agents.md](module-style-guide-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
 
 Conventions for `flake/modules/`. "How many files do this" used to be
 stated as inline counts per section, dated 2026-08-08 -- and by 2026-09-09

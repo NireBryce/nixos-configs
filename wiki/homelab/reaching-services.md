@@ -12,6 +12,12 @@ _Last modified: 2026-09-11_
 - [What's verified here](#whats-verified-here)
 - [See also](#see-also)
 
+> **Condensed version:**
+> [reaching-services-for-agents.md](reaching-services-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
 Each web service on `nire-cube` has **its own tailnet hostname and its own
 certificate**. That is a change from the original design — one hostname with
 path prefixes — which this page described until 2026-09-11 and which is now

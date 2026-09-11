@@ -37,6 +37,11 @@ edits must preserve them:
   delete it while trimming intro prose; bump it to today on every page you
   actually change text on (wiki-sync's rule applies here too) — but leave
   it alone on a page you only re-read and left untouched.
+- **`<page>-for-agents.md` siblings.** A sibling dated earlier than its
+  source is a hard finding, so trimming a page and bumping its date means
+  checking the sibling in the same pass. The back-link between the two
+  (`check_wiki.py siblings` requires both directions) is not trimmable
+  cross-reference spray — it is checked.
 - **Anchors are GitHub slugs of headings.** Renaming a heading silently
   breaks every inbound `page.md#anchor` link — grep `page.md#` across wiki/
   and AGENTS.md before renaming, or don't rename.
@@ -60,12 +65,32 @@ per-app asymmetries, verification methods and what was actually verified,
 and every checkable claim shape above. When unsure whether a sentence is
 load-bearing, it is.
 
+## Trimming a pair
+
+A page with a `-for-agents.md` sibling is trimmed from opposite directions,
+and conflating them is the mistake to avoid:
+
+- **The human page** keeps its prose. Cut narration, repeated incidents and
+  cross-reference spray — not the explanation. It is allowed to be long;
+  being long is not what a sibling exists to fix.
+- **The sibling** is trimmed toward information density: only what a reader
+  needs to act, no story. Its 50% word budget is a **REVIEW** finding, never
+  a failure — `wiki/styleguide.md`'s "Two audiences per page" says outright
+  that a fact beats the number, so don't cut a command or an option name to
+  get under it.
+
+**Never move a fact from the human page to the sibling to shorten the human
+page.** That is not a trim, it is retargeting the page at the wrong reader,
+and it leaves the explanation with a hole in it.
+
 ## Calibrate
 
 - The metric is facts per sentence, not word count. Dense is not verbose:
   don't gut lessons-learned's numbered lessons or a skill made of real
   incidents for marginal savings — trim their narration and intros instead.
-- Wiki pages stay human-readable prose; skills may be terser.
+- Wiki pages stay human-readable prose; skills may be terser; a
+  `-for-agents.md` sibling is terser still and is the one place in `wiki/`
+  where prose readability is deliberately not the goal.
 
 ## Method
 

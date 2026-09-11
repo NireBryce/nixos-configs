@@ -137,7 +137,11 @@ shows:
 
 ## Docs
 
-Run `wiki-sync`. Likely stale after this: `wiki/categories/reverse-proxy.md`,
+Run `wiki-sync`, including its step 5 — three of the pages below have a
+`-for-agents.md` sibling carrying the same URL map and the same traps, and
+`just wiki-lint` fails if a page's date moves without its sibling's.
+
+Likely stale after this: `wiki/categories/reverse-proxy.md`,
 `tailscale-services/README.md`, `wiki/homelab/reaching-services.md`'s URL
 map, and `wiki/open-threads.md`'s Tailscale Services entry if this closes
 what it lists as still open.

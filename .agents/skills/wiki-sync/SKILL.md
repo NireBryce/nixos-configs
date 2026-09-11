@@ -32,7 +32,8 @@ Two narrower cases have their own instructions — read those first:
 
 - **Module added/removed/renamed, or a category's membership changed** —
   `new-flake-module`'s "Keep the wiki in sync": update that category's
-  `wiki/categories/<name>.md` and `wiki/categories/README.md`'s table.
+  `wiki/categories/<name>.md`, its `-for-agents.md` sibling if it has one,
+  and `wiki/categories/README.md`'s table.
 - **Host added, or its category imports changed** — `new-host-config`'s
   wiring step: `wiki/hosts.md`'s table plus the "Imported by" line on every
   affected `wiki/categories/*.md`.
@@ -68,13 +69,42 @@ Two narrower cases have their own instructions — read those first:
      wiki/scripts/check_wiki.py dates` (part of `just wiki-lint`) only
      catches the line being missing or malformed, never a stale date left
      behind; that half is this step.
-5. **If nothing in `wiki/` mentions what changed, say so and stop.** Don't
+5. **Edit the `-for-agents` sibling of every page you touched, in the same
+   change.** Long wiki pages come in pairs — `<page>.md` is the explanation,
+   `<page>-for-agents.md` is the same ground condensed to facts
+   (`wiki/styleguide.md`'s "Two audiences per page"). A fact that changed on
+   one side has almost always changed on the other, and the sibling is the
+   copy an agent actually reads, so leaving it stale is the worse half to
+   leave stale.
+
+   `check_wiki.py siblings` (part of `just wiki-lint`) catches the common
+   miss mechanically: it fails when a sibling's `_Last modified:_` predates
+   its source's, which is exactly what bumping step 4's date on the human
+   page alone produces. **Don't satisfy it by bumping the sibling's date** —
+   that turns a caught omission into a silent one. Make the edit, then bump.
+
+   Two asymmetries worth knowing rather than re-deriving:
+
+   - **Narrative changes are one-sided.** Adding the account of how
+     something was verified belongs on the human page only; the sibling
+     carries the conclusion, not the story. Bumping the human page's date
+     for that still trips the check, so bump the sibling too — after
+     confirming it genuinely needs no edit.
+   - **A category page's `## Imported by` may live on either page, or
+     both.** `check_imports` checks whichever exist, so update every copy
+     that's there; grep rather than assuming which page has it.
+
+6. **If nothing in `wiki/` mentions what changed, say so and stop.** Don't
    manufacture an edit — most changes are exactly this case; the check
    itself is the value.
 
 ## See also
 
-- `wiki/styleguide.md` — the house rules this skill's edits have to follow.
+- `wiki/styleguide.md` — the house rules this skill's edits have to follow,
+  including "Two audiences per page" (what belongs in a `-for-agents`
+  sibling and what deliberately doesn't).
+- `wiki/styleguide-for-agents.md` — those rules condensed, if you only need
+  the checklist.
 - `wiki/README.md` — why the wiki is a link layer, and "keeping this from
   rotting".
 - `new-flake-module` skill — the specific module/category-membership case.

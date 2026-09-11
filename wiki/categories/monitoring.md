@@ -12,6 +12,12 @@ _Last modified: 2026-09-11_
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
+> **Condensed version:**
+> [monitoring-for-agents.md](monitoring-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
 Prometheus + Grafana, scraping this host's own resource metrics. Added
 2026-08-23, cube-only so far; nested under the `homelab` umbrella since
 2026-08-27 (name unaffected).

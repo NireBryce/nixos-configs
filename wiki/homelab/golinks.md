@@ -1,6 +1,6 @@
 # Creating go/ links
 
-_Last modified: 2026-09-01_
+_Last modified: 2026-09-11_
 
 ## Contents
 
@@ -13,6 +13,12 @@ _Last modified: 2026-09-01_
 - [Backups](#backups)
 - [What's verified here](#whats-verified-here)
 - [See also](#see-also)
+
+> **Condensed version:**
+> [golinks-for-agents.md](golinks-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
 
 `go/foo` shortlinks, served by [golink](https://github.com/tailscale/golink)
 on `nire-cube`. This page is about **using** it. For how it's configured,

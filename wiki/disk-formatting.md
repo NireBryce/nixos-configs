@@ -1,6 +1,6 @@
 # New host disk formatting (LUKS + btrfs + impermanence)
 
-_Last modified: 2026-09-05_
+_Last modified: 2026-09-11_
 
 ## Contents
 
@@ -12,6 +12,12 @@ _Last modified: 2026-09-05_
 - [Confirming the rollback actually works](#confirming-the-rollback-actually-works)
 - [Traps](#traps)
 - [See also](#see-also)
+
+> **Condensed version:**
+> [disk-formatting-for-agents.md](disk-formatting-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
 
 The runbook-shaped piece of adding a new host: **the actual disk step**, not
 the Nix config around it. Skill `new-host-config` covers the whole

@@ -19,6 +19,12 @@ _Last modified: 2026-09-11_
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
+> **Condensed version:**
+> [reverse-proxy-for-agents.md](reverse-proxy-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
 [Caddy](https://caddyserver.com/), one tailnet-only HTTPS front door for
 every web service on `nire-cube`. Added 2026-08-24, cube-only; nested under
 the `homelab` umbrella since 2026-08-27 (name unaffected).

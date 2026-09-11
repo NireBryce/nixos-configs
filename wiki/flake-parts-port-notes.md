@@ -1,6 +1,6 @@
 # flake-parts port notes
 
-_Last modified: 2026-09-08_
+_Last modified: 2026-09-11_
 
 ## Contents
 
@@ -8,6 +8,12 @@ _Last modified: 2026-09-08_
 - [Dead ends, with the symptom that identified them](#dead-ends-with-the-symptom-that-identified-them)
 - [flake-parts machinery, with the upstream source behind each claim](#flake-parts-machinery-with-the-upstream-source-behind-each-claim)
 - [See also](#see-also)
+
+> **Condensed version:**
+> [flake-parts-port-notes-for-agents.md](flake-parts-port-notes-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
 
 Salvaged 2026-09-08 from the `flake-parts` branch, which was deleted the
 same day. That branch was the sibling of this one — the 2026-08 den →

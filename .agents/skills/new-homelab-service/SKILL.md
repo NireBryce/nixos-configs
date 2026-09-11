@@ -194,6 +194,14 @@ the URL in `wiki/homelab/README.md`; a paragraph in `AGENTS.md`'s
 Architecture section (where the category list lives). If an existing
 service's reach changes, its page and module header are stale too.
 
+**Every long page you touch here has a `-for-agents.md` sibling** — the
+condensed half, and the one an agent actually loads
+(`wiki/styleguide.md`'s "Two audiences per page"). `wiki-sync` step 5
+covers it, and `just wiki-lint` fails if you bump a page's date without
+following in its sibling. A brand-new category page only needs one once it
+passes 1,000 words, which a service page usually does by its second real
+incident.
+
 ## 10. Ship
 
 `ship` skill: branch, PR, one combined merge-and-delete ask.

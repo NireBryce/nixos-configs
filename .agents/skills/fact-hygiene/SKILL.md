@@ -143,7 +143,18 @@ it" #6 for the concrete grep.
    not a feature, in text that reads as settled.** The vaguer true
    statement (or the explicitly-marked-stale one) outlives the sharper
    false one.
-6. **When removing or renaming something with a name other code might
+6. **Condensing a page into its `-for-agents.md` sibling strips
+   qualifiers first, because they read as hedging.** `UNVERIFIED`, `not
+   confirmed live`, `assumed from ...`, `last checked <date>, unconfirmed
+   since` and `not exercised` are **facts about the claim's confidence**,
+   not narration — a sibling that drops them states a guess as settled, in
+   the copy an agent is most likely to act on, which is strictly worse than
+   the original. Category 1's "in the same sentence" rule is what makes
+   this survivable: a qualifier welded to its claim gets carried across
+   with it, while one parked in a separate caveat paragraph is exactly what
+   a condensation pass deletes. Carry every marker over verbatim, and if
+   the sibling has no room for a claim *and* its qualifier, drop the claim.
+7. **When removing or renaming something with a name other code might
    mention** (a host, a module, a secret, an option), grep for that exact
    name across `flake/modules` — not just `wiki/`, not just the files the
    change itself touches — before considering the removal finished. A
@@ -169,9 +180,15 @@ it" #6 for the concrete grep.
 ## See also
 
 - `wiki-sync` skill — the mechanical half for `wiki/`: once a fact is
-  known stale, find and fix every page it reached. Scoped to `wiki/` only;
-  category 3 above is the same principle applied to `flake/` code
-  comments, which that skill doesn't cover.
+  known stale, find and fix every page it reached, `-for-agents.md`
+  siblings included. Scoped to `wiki/` only; category 3 above is the same
+  principle applied to `flake/` code comments, which that skill doesn't
+  cover.
+- `wiki/styleguide.md`'s "Two audiences per page" — what a sibling is for,
+  and the lint check that fails when a page is edited without it. Note its
+  cut-list ("who confirmed it and when") and #6 above are about different
+  things: *who verified it and by what method* is narration and goes, while
+  *whether it was verified at all* is a qualifier and stays.
 - `AGENTS.md`'s "State" section — the existing, narrower version of
   category 2's rule, scoped to switch/boot status; this skill generalizes
   it to any dated snapshot of mutable external state.
