@@ -13,6 +13,16 @@ the script (`vip-put`/`apply`) to push an edit.
   per-service console click wiki/open-threads.md's Tailscale Services
   entry cited as a cost), and explicit grants for the two service
   destinations.
+- `svc-glance.json` -- the third Service object, PUT 2026-09-10, long after
+  its `serve.nix` forward and Caddy vhost landed in PR #211. Neither the
+  policy file nor the Service object had ever been pushed, so
+  `glance.moose-micro.ts.net` did not resolve at all while git and grafana
+  did. Note the API path takes the **`svc:`-prefixed** name:
+  `vip-get svc:glance`, not `vip-get glance` -- the bare form 404s for
+  every service, including ones that demonstrably exist, which makes it a
+  useless existence check. (`tailscale-acl.py`'s own usage line still
+  documents the older `by-name/NAME` path; the code at `vip_api()` is
+  right, the docstring is stale.)
 - `svc-grafana.json`, `svc-git.json` -- the two Tailscale Service objects
   (name/tags/ports/comment), created via `vip-put` against
   `/api/v2/tailnet/{tailnet}/vip-services/{name}` -- **not**
@@ -26,7 +36,22 @@ the script (`vip-put`/`apply`) to push an edit.
   config (nixpkgs' `services.tailscale.serve`), a different file
   entirely, confirmed the hard way before finding the right endpoint.
 
-## Status: RUNTIME-VERIFIED end to end, 2026-09-07
+## Status: grafana/git RUNTIME-VERIFIED 2026-09-07; glance NOT YET
+
+**2026-09-10:** `svc:glance` created and the policy file re-POSTed (the
+`svc:glance` autoApprover plus the `grants` entry svc:grafana/svc:git each
+had and it didn't). `just tailscale-acl diff` reports **"no difference"** --
+this directory and the live tailnet agree, which had not been true since
+2026-09-09. `glance.moose-micro.ts.net` resolves tailnet-wide.
+
+Not finished: cube is not advertising the service yet, so it is absent from
+`CertDomains` and Caddy cannot get it a cert. tailscaled applied its serve
+config while `svc:glance` did not exist and does not re-advertise on its
+own; `systemctl restart tailscale-serve` on cube is the missing step. The
+same unit also races tailscaled on boot and stays failed (issue #267), so
+it will not self-heal across a reboot either.
+
+## Status: grafana/git RUNTIME-VERIFIED end to end, 2026-09-07
 
 Both services confirmed working on `nire-cube`: valid TLS (`tls_verify=0`)
 on `https://grafana.moose-micro.ts.net/` (`302 -> /login`, real Grafana

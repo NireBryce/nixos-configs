@@ -168,16 +168,32 @@
 # tailnet host expect `tls_verify_result` 0 on
 # https://ts-cube|grafana|git.moose-micro.ts.net/.
 #
-# `glance.moose-micro.ts.net` WILL STILL FAIL after this fix, for an
-# unrelated reason: `svc:glance` is not live on the tailnet. Confirmed
-# 2026-09-10 -- the name has no MagicDNS record at all (`getent hosts
-# glance` and the FQDN both fail; tailscale status' `ExtraRecords` lists
-# only git and grafana) and cube's `CertDomains` is
-# [ts-cube, grafana, git], so tailscaled cannot issue for it and this
-# vhost has nothing to serve. tailscale-services/acl-diff-applied.hujson
-# records the `svc:glance` autoApprover but the tailnet was evidently
-# never re-POSTed (`just tailscale-acl`), and unlike svc:grafana/svc:git
-# that file has no `grants` entry for `svc:glance` either.
+# `glance.moose-micro.ts.net` NEEDED ONE MORE THING than the fix above, and
+# the Service object behind it had never existed. `svc:glance` was created
+# 2026-09-10; PR #211 had landed serve.nix's forward and this vhost, and
+# acl-diff-applied.hujson had recorded the autoApprover, but the tailnet
+# itself was never POSTed and the `svc:` object was never PUT -- the repo's
+# record was a day ahead of reality. What settled it, since a bare
+# `vip-get glance` is misleading here (the API path wants the `svc:`
+# prefix; WITHOUT it every service 404s, svc:grafana included):
+#
+#     vip-get svc:glance   -> 404 {"message":"service not found"}
+#     vip-get svc:grafana  -> a real object, with addrs
+#
+# Applied since: the autoApprover, plus a `grants` entry for `svc:glance`
+# that svc:grafana/svc:git each had and it didn't, and the Service object
+# itself. `just tailscale-acl diff` now reports "no difference" -- the
+# record and the tailnet agree. `glance.moose-micro.ts.net` resolves
+# tailnet-wide again.
+#
+# STILL PENDING as of 2026-09-10: cube is not ADVERTISING the service yet,
+# so it is absent from `CertDomains` and this vhost still has no cert.
+# tailscaled applied its serve config (2026-09-09 11:03) while svc:glance
+# did not exist, and it does not re-advertise on its own -- watched for
+# two minutes after creating it, no change. `systemctl restart
+# tailscale-serve` on cube is the missing step. Worth knowing that the
+# unit will not do this for itself after a reboot either, for a separate
+# reason: issue #267, it races tailscaled on boot and stays failed.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);

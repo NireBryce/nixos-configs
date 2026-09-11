@@ -39,7 +39,7 @@
 		"tag:homelab-cube": ["nirebryce@github"],
 	},
 
-	// Pre-approves tag:homelab-cube to advertise these two services, so
+	// Pre-approves tag:homelab-cube to advertise these services, so
 	// advertising them from nire-cube's tailscale config needs no manual
 	// click in this console -- the per-service approval step
 	// open-threads.md cited as one of the two costs of svc:.
@@ -47,11 +47,15 @@
 		"services": {
 			"svc:grafana": ["tag:homelab-cube"],
 			"svc:git":     ["tag:homelab-cube"],
-			// Added 2026-09-09: PR #211 added the serve.nix forward for
-			// glance but neither this approver nor svc-glance.json --
-			// confirmed live 2026-09-09, glance.moose-micro.ts.net does
-			// not resolve tailnet-wide while git/grafana do (#220).
-			"svc:glance":  ["tag:homelab-cube"],
+			// Added 2026-09-09, APPLIED 2026-09-10: PR #211 added the
+			// serve.nix forward for glance but neither this approver nor
+			// svc-glance.json -- and this file recorded the approver for
+			// a day without it ever being POSTed, so the record was ahead
+			// of the tailnet (`just tailscale-acl diff` showed exactly
+			// these lines as the only drift). Confirmed before applying:
+			// `vip-get svc:glance` -> 404 "service not found" while
+			// `vip-get svc:grafana` returned a real object with addrs.
+			"svc:glance": ["tag:homelab-cube"],
 		},
 	},
 
@@ -91,6 +95,17 @@
 		{
 			"src": ["autogroup:members"],
 			"dst": ["svc:git"],
+			"ip":  ["*"],
+		},
+		// Same shape as the svc:grafana/svc:git grants above, added
+		// 2026-09-10 with the approver. Whether svc: destinations need
+		// their own grant is still the open question the comment above
+		// raises -- but the two services that demonstrably work each have
+		// one, so glance gets one too rather than being the odd case out
+		// while its reachability is being debugged.
+		{
+			"src": ["autogroup:members"],
+			"dst": ["svc:glance"],
 			"ip":  ["*"],
 		},
 	],
