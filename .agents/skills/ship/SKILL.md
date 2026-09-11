@@ -172,6 +172,15 @@ git push origin --delete <branch>
 branch, skipping the local delete and the `experimental` checkout/pull
 this flow also does; run the explicit steps instead of the flag.
 
+**If the merge happened outside this flow** — Elly merged in the web UI,
+or another session did, so step 3's delete never ran — the branch stays
+behind. `just branches` finds those: it classifies every local branch by
+patch-id, which is what catches a rebased merge (`git branch --merged`
+does not, since rebasing gives the landed commits new SHAs, and that is
+exactly how 11 stale branches accumulated by 2026-09-11 while hiding 3
+unmerged ones). `just branches prune` deletes the landed ones only. Worth
+a glance at session start, same as `git worktree list`.
+
 Report the merge commit and the branch's fate; never report a commit range
 as if pushed to `experimental`.
 

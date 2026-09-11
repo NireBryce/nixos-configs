@@ -84,7 +84,11 @@ git worktree remove --force <path>
 ```
 
 `git branch -d` fails with "used by worktree at ..." until the worktree is
-removed — worktree first, then branch. `git worktree list` (visible from
+removed — worktree first, then branch. Note `-d` also refuses a branch whose
+PR was merged by REBASE (its commits have new SHAs upstream, so git sees them
+as unmerged); `just branches` settles that by patch-id rather than by
+guessing, and `just branches prune` deletes only the ones it can prove
+landed. `git worktree list` (visible from
 any worktree) shows what's outstanding; glance at session start for
 orphans, and don't remove one you don't recognize without checking (`git
 -C <path> status`, its mtime) — it may belong to a session running now.
