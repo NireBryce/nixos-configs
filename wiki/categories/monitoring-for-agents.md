@@ -20,7 +20,7 @@ on loopback**:
 | `cadvisor/cadvisor.nix` | podman containers | not runtime-verified against podman; falls back to walking cgroups, so containers show by cgroup path not name unless `virtualisation.podman.dockerSocket` is wired |
 | `libvirt-exporter/libvirt-exporter.nix` | libvirt/QEMU guests via `qemu:///system` | **overrides `group` to `libvirtd`** — its default group can't read `/run/libvirt/libvirt-sock` and it then serves an empty metrics page instead of failing |
 | `prometheus/prometheus.nix` | the three above, over loopback | |
-| `grafana/grafana.nix` | — | the only off-host-facing piece |
+| `grafana/grafana.nix` | — | the only off-host-facing piece. Ships two provisioned dashboards: `nire-cube-overview.json` (three rows) and `roundtrip-check.json` (one panel, the export-verification artifact) |
 
 `grafana/_dashboards/` is underscore-prefixed because `import-tree` ignores
 any path containing `/_` — otherwise the JSON would be taken for a module.
@@ -57,8 +57,13 @@ so exporting the JSON there is the whole job:
    Grafana's `${DS_PROMETHEUS}` template variable.
 5. Save under `grafana/_dashboards/`, `just switch`, confirm panels intact.
 
-**Not verified against a live export** — written from the module's
-mechanism, not a real round-trip. Worth doing once before trusting it.
+**Export leg verified 2026-09-11 — the switch leg is not.** A UI-shaped
+dashboard (random uid, top-level `id`, `${DS_PROMETHEUS}` panels) was
+created on cube over the API, exported, and carried through steps 2–4 into
+`roundtrip-check.json`; every transformation the steps predict was the one
+needed. **Still unverified**: the `just switch` showing it reappear exactly
+once under its fixed uid with the panel rendering — that leg needs cube's
+interactive sudo.
 
 A UI-built dashboard lives only in cube's sqlite db. It is backed up, but
 not declared.
