@@ -95,9 +95,14 @@ running:
 
 | Short | Target |
 |---|---|
-| `go/dash` | `https://ts-cube.moose-micro.ts.net/` |
-| `go/git` | `https://ts-cube.moose-micro.ts.net/git/` |
-| `go/graf` | `https://ts-cube.moose-micro.ts.net/grafana/` |
+| `go/dash` | `https://glance.moose-micro.ts.net/` |
+| `go/git` | `https://git.moose-micro.ts.net/` |
+| `go/graf` | `https://grafana.moose-micro.ts.net/` |
+
+These targets were updated 2026-09-11 from the retired path-prefix URLs
+(`ts-cube.moose-micro.ts.net/git/` and friends) to each service's own
+Tailscale Services name. Nothing needed re-pointing: `http://go/.export`
+is still empty, so these remain proposals rather than links that exist.
 
 Creating them is the web UI at `http://go/`, or the `curl` form in
 [creating go/ links](golinks.md) — read that page's `--post302` and delete

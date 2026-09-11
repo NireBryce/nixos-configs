@@ -1,6 +1,6 @@
 # Homelab services
 
-_Last modified: 2026-09-01_
+_Last modified: 2026-09-11_
 
 ## Contents
 
@@ -51,7 +51,7 @@ covering configuration but no usage page here yet.
 
 | Service | Reach it at | Configuration |
 |---|---|---|
-| Grafana — dashboards over cube's own metrics | `https://ts-cube.moose-micro.ts.net/grafana/` | [monitoring](../categories/monitoring.md) |
+| Grafana — dashboards over cube's own metrics | `https://grafana.moose-micro.ts.net/` (short: `http://grafana/`) | [monitoring](../categories/monitoring.md) |
 
 Grafana mostly doesn't need one: you log in and look at the dashboards
 [monitoring](../categories/monitoring.md) provisions. What *would* be worth
@@ -59,13 +59,20 @@ writing up is adding a dashboard that survives a rebuild — anything edited in
 the UI lives only in cube's sqlite db, while anything under the module's
 `_dashboards/` is provisioned read-only from the store.
 
-**Those URLs changed on 2026-08-24**, and the old ones
-(`http://ts-cube:3000/`, `http://ts-cube:3001/`) no longer answer at all.
-Both services moved to loopback and are now reached through Caddy, which
-holds a real TLS certificate issued by tailscaled — see
-[reverse-proxy](../categories/reverse-proxy.md). `http://ts-cube/`
-redirects to the Grafana/Forgejo index, so the short name is still a usable
-starting point.
+**Those URLs have changed twice.** The port forms
+(`http://ts-cube:3000/`, `http://ts-cube:3001/`) stopped answering
+2026-08-24, when both services moved to loopback behind Caddy; the path
+forms (`https://ts-cube.moose-micro.ts.net/grafana/`, `/git/`) stopped
+answering 2026-09-07, when each app got its own Tailscale Services hostname
+and certificate. Caddy still terminates TLS for all of them, with certs
+issued by `tailscaled` — see
+[reverse-proxy](../categories/reverse-proxy.md).
+
+The short names (`http://grafana/`, `http://git/`, `http://glance/`) redirect
+to the full ones. Use `http://`, not `https://`: the bare names cannot have a
+publicly-trusted certificate, so the `https://` form shows a browser warning
+by design. Full map and the reasoning:
+[reaching-services](reaching-services.md).
 
 `ts-cube`, **not** `nire-cube`: this tailnet's device names don't match
 `networking.hostName`. That trip-up has its own writeup in

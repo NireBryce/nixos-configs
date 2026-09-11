@@ -1,6 +1,6 @@
 # Hosts & current state
 
-_Last modified: 2026-09-07_
+_Last modified: 2026-09-11_
 
 ## Contents
 
@@ -41,10 +41,11 @@ status and what broke on the way:
   the Grafana secret-key fix took two rounds — the hand fix regressed).
 - [git-forge](categories/git-forge.md) — Forgejo (2026-08-24).
 - [reverse-proxy](categories/reverse-proxy.md) — Caddy, the single
-  tailnet-facing HTTPS listener with a `tailscaled`-issued cert. Grafana and
-  Forgejo are `https://ts-cube.moose-micro.ts.net/grafana/` and `/git/` since
-  2026-08-24; the first switch served Forgejo an un-stripped prefix and 404'd
-  everything ([lessons-learned.md](lessons-learned.md) #41).
+  tailnet-facing HTTPS listener, with certs issued by `tailscaled`. Each web
+  service has its own tailnet name since 2026-09-07
+  (`grafana.`/`git.`/`glance.moose-micro.ts.net`); the `/grafana/` and
+  `/git/` path prefixes they used from 2026-08-24 are retired. URLs:
+  [homelab/reaching-services.md](homelab/reaching-services.md).
 - [landing](categories/landing.md) — glance at `/` (2026-08-24).
 - [shortlinks](categories/shortlinks.md) — golink (2026-08-24). Not behind
   Caddy and not a host service: it embeds tsnet and joins the tailnet as its

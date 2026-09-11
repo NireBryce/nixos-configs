@@ -1,6 +1,6 @@
 # Traps & skills
 
-_Last modified: 2026-09-10_
+_Last modified: 2026-09-11_
 
 ## Contents
 
@@ -58,6 +58,19 @@ these fits into the bigger picture; this page is just the index.
   routing detail in [reverse-proxy](categories/reverse-proxy.md). The
   `new-homelab-service` skill has the two-`curl` test that settles it in
   seconds.
+
+- **Adding an explicit `tls` directive to one Caddy vhost changes the
+  issuer for every other vhost.** The Caddyfile adapter emits automation
+  policies for *all* sites as soon as *any* site declares `tls`, and Caddy's
+  Tailscale-certificate auto-detection only runs for names that have no
+  policy — so `tls internal` on three bare-name redirects silently pointed
+  four unrelated `.ts.net` vhosts at public Let's Encrypt, which can never
+  issue for a tailnet name. Two days of `SSL_ERROR_INTERNAL_ERROR_ALERT` on
+  names no commit had touched, 2026-09-08. Eval, build, `just modules` and
+  `caddy adapt` all pass — the config is valid, it just means something
+  else; only a real handshake finds it. The general shape, and the questions
+  to ask before adding an explicit setting anywhere:
+  [lessons-learned.md](lessons-learned.md) §47.
 
 ## A trap that points at the wiki instead of a skill
 
