@@ -59,6 +59,39 @@
                     glance.endpoints."tcp:443"  = "tcp://127.0.0.1:443";
                 };
             };
+
+            # Added 2026-09-11 (issue #267): the upstream unit
+            # (nixos/modules/services/networking/tailscale-serve.nix) has
+            # no readiness gate on tailscaled's *backend* state, only an
+            # `After=`/`Wants=` on the daemon *process*. On a real boot the
+            # daemon can be up but still report `NoState` -- `serve
+            # set-config` then fails outright ("unexpected state:
+            # NoState"), and because the unit is `Type=oneshot` with no
+            # `Restart=`, that single early failure is terminal: it stays
+            # `failed` (no svc: forwards at all) until something else
+            # happens to re-run it, e.g. the next `just switch`. Confirmed
+            # live on nire-cube 2026-09-10, stayed failed 9.5 hours.
+            #
+            # `Restart=on-failure` IS legal on `Type=oneshot` (only
+            # `always`/`on-success` are rejected -- checked against `man 5
+            # systemd.service`), and a clean exit stops the restarts, so
+            # this self-heals on the next race without looping once
+            # tailscaled reaches `Running`. `StartLimitIntervalSec`/
+            # `StartLimitBurst` bound it so a *persistent* failure (e.g.
+            # tailscaled itself broken) still gives up instead of retrying
+            # forever.
+            #
+            # Retry only, not a readiness-poll `ExecStartPre` -- smaller,
+            # and self-heals the actual observed failure (a transient race)
+            # rather than replacing `After=` with a hand-rolled wait loop.
+            systemd.services.tailscale-serve = {
+                serviceConfig = {
+                    Restart              = "on-failure";
+                    RestartSec           = 5;
+                    StartLimitIntervalSec = 60;
+                    StartLimitBurst      = 6;
+                };
+            };
         };
 }
 
