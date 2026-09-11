@@ -60,11 +60,22 @@ rather than relying on the detection. **Runtime-verified on hardware
 (`tls_verify_result` 0) — `ts-cube` 200, `git` 200, `grafana` 302, `glance`
 200.
 
-The bare-name vhosts (`https://git` and friends) still show
-`SEC_ERROR_UNKNOWN_ISSUER` in a browser, and that is `tls internal` working
-as designed, not a leftover bug — they serve Caddy's own local CA. Short of
-trusting that CA on every client, the FQDN is the answer; the bare names
-only redirect to it anyway.
+The bare-name vhosts come in two flavours, and the difference matters:
+
+- **`http://git`** and friends redirect with no certificate involved at
+  all, landing on the real publicly-valid tailnet cert — no warning
+  anywhere. These were *unreachable* from the day they were written until
+  2026-09-11 (issue #272): a `svc:` name is a Service VIP that answers only
+  on the ports its Service object and `serve.nix` both declare, and all
+  three declared `tcp:443` only. `http://ts-cube` worked throughout, being
+  a real device address where Caddy binds 80 directly — which is what made
+  the gap easy to miss. Fixed by adding `tcp:80` to both halves.
+- **`https://git`** and friends show `SEC_ERROR_UNKNOWN_ISSUER`, and that
+  is `tls internal` working as designed, not a leftover bug — they serve
+  Caddy's own local CA. They exist to catch browsers that force HTTPS
+  before the `http://` redirect gets a chance. Short of trusting that CA on
+  every client there is no improving them, and they were deliberately kept
+  rather than dropped once `http://` worked.
 
 Two things the same investigation turned up, both still open:
 

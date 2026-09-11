@@ -45,6 +45,38 @@
                     grafana.endpoints."tcp:443" = "tcp://127.0.0.1:443";
                     git.endpoints."tcp:443"     = "tcp://127.0.0.1:443";
 
+                    # PORT 80 TOO, added 2026-09-11 (issue #272), and it is
+                    # not optional decoration: caddy.nix has had
+                    # `http://git`/`http://grafana`/`http://glance`
+                    # bare-name redirect vhosts since f478494a, and without
+                    # a `tcp:80` forward NOTHING EVER REACHES THEM. A
+                    # `svc:` name resolves to a Service VIP, and a VIP only
+                    # answers on the ports its Service object and this
+                    # endpoint set declare -- unlike `ts-cube`, which is a
+                    # real device address where caddy binds 80 directly and
+                    # so has always worked. Measured before the fix:
+                    # `http://git|grafana|glance` all timed out while
+                    # `http://ts-cube` returned its 301, and port 80 was
+                    # open on cube's device IP but unreachable on every
+                    # service VIP.
+                    #
+                    # The ports here must match the Service objects' own
+                    # `ports` list (svc-*.json, re-`vip-put` after editing)
+                    # -- two separate resources that both have to agree,
+                    # same split this directory's README describes for the
+                    # policy file.
+                    #
+                    # Worth keeping straight WHY the `http://` route is
+                    # wanted at all when the `https://` twins exist: those
+                    # serve caddy's local CA (`tls internal`), so a browser
+                    # hits SEC_ERROR_UNKNOWN_ISSUER and clicks through a
+                    # warning only to be redirected. The `http://` path has
+                    # no certificate in it at all and lands on the real,
+                    # publicly-valid tailnet cert -- strictly the nicer
+                    # door, and the one that was silently broken.
+                    grafana.endpoints."tcp:80"  = "tcp://127.0.0.1:80";
+                    git.endpoints."tcp:80"      = "tcp://127.0.0.1:80";
+
                     # Added 2026-09-08: glance had no Tailscale Service of
                     # its own -- caddy.nix's `http://glance` bare-name
                     # redirect (added same day, f478494a) pointed at
@@ -57,6 +89,7 @@
                     # neighbours; caddy.nix's `glanceFqdn` vhost is the
                     # other half.
                     glance.endpoints."tcp:443"  = "tcp://127.0.0.1:443";
+                    glance.endpoints."tcp:80"   = "tcp://127.0.0.1:80";
                 };
             };
 

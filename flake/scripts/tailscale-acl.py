@@ -42,7 +42,7 @@ extracts one key. TAILNET defaults to the tailnet this repo's hosts are
 already on (see wiki/categories/reverse-proxy.md) but can be overridden
 with $TAILSCALE_TAILNET for a different one.
 """
-import os, subprocess, sys, urllib.request, urllib.error, difflib, pathlib
+import os, subprocess, sys, urllib.request, urllib.error, difflib, pathlib, json
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 SECRETS_FILE = REPO_ROOT / "flake/modules/nire/system/secrets/secrets.yaml"
@@ -72,7 +72,7 @@ def get_token():
     return out.stdout.strip()
 
 
-def request(url, method, body=None, content_type="application/hujson"):
+def request(url, method, body=None, content_type="application/hujson", allow_404=False):
     token = get_token()
     req = urllib.request.Request(url, method=method)
     req.add_header("Authorization", f"Bearer {token}")
@@ -84,6 +84,12 @@ def request(url, method, body=None, content_type="application/hujson"):
         with urllib.request.urlopen(req, data=data) as resp:
             return resp.read().decode()
     except urllib.error.HTTPError as e:
+        # `allow_404` is for callers that ASK a question a 404 answers --
+        # "does this service exist yet?" -- rather than callers that hit an
+        # error. Without it every 404 is fatal here, which is right for
+        # every other caller.
+        if allow_404 and e.code == 404:
+            return None
         # Never echo headers -- the request carried the bearer token.
         sys.exit(f"Tailscale API error {e.code}: {e.read().decode()[:500]}")
 
@@ -131,6 +137,27 @@ def cmd_vip_put(args):
         sys.exit("usage: tailscale-acl.py vip-put NAME FILE")
     name, file = args[0], args[1]
     body = pathlib.Path(file).read_text()
+
+    # CREATE and UPDATE want different bodies, found the hard way 2026-09-11
+    # adding tcp:80 to the three existing services (issue #272): a create
+    # assigns the VIPs itself and rejects nothing, but an update of an
+    # existing service fails with
+    #
+    #     400 {"message":"when updating a service, addrs must contain 2 elements"}
+    #
+    # -- it wants the v4 and v6 VIPs the control plane already handed out.
+    # Those are assigned state, not something to author, so they are NOT
+    # kept in the svc-*.json files: committing them would put a value that
+    # changes on any delete/recreate into the repo, where nothing would
+    # notice it going stale. Fetched and merged here instead, so the files
+    # stay a description of what we want and the API gets what it needs.
+    current = request(vip_api(name), "GET", allow_404=True)
+    existing = json.loads(current) if current else None
+    if existing and "addrs" in existing:
+        payload = json.loads(body)
+        payload.setdefault("addrs", existing["addrs"])
+        body = json.dumps(payload, indent=2)
+
     print(f"PUT {vip_api(name)}\n{body}")
     reply = input(f"Create/update service {name} as shown above? [y/N] ")
     if reply.lower() != "y":
