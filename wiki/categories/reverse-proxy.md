@@ -43,6 +43,35 @@ numbers). Confirmed working end to end the same day: valid TLS on both new
 names, old paths correctly 404, Forgejo's own generated links using the new
 `ROOT_URL`.
 
+**Then all tailnet HTTPS on cube broke, 2026-09-08 to 2026-09-10**, and the
+two "confirmed working" snapshots above are both older than the break. The
+bare-name convenience vhosts added 2026-09-08 (`https://git` and friends,
+each with `tls internal`) made Caddy's Caddyfile adapter emit an explicit
+`automation.policies` entry covering the `.ts.net` names too — and an
+explicit policy suppresses Caddy's automatic "this is a Tailscale domain,
+ask tailscaled for the cert" detection, leaving those names pointed at
+public Let's Encrypt, which can never issue for a tailnet name. Every
+`.ts.net` handshake died with `SSL_ERROR_INTERNAL_ERROR_ALERT`, including
+`ts-cube.moose-micro.ts.net`, which no commit had touched. `caddy.nix`'s
+header has the full mechanism, read out of caddy 2.11.4's source; the fix
+is naming `get_certificate tailscale` on each `.ts.net` vhost explicitly
+rather than relying on the detection. **Not yet runtime-verified** — the
+fix has not been switched onto cube.
+
+Two things the same investigation turned up, both still open:
+
+- **`svc:glance` is not live on the tailnet.** `glance.moose-micro.ts.net`
+  has no MagicDNS record at all and is absent from cube's `CertDomains`, so
+  its Caddy vhost cannot get a cert even once the fix above lands.
+  `acl-diff-applied.hujson` records the autoApprover but has no `grants`
+  entry for `svc:glance` (unlike `svc:grafana`/`svc:git`), and the policy
+  file looks never to have been re-POSTed with it.
+- **`tailscale-serve.service` loses the race on boot.** It failed
+  `unexpected state: NoState` at the 2026-09-09 boot and, being a
+  `oneshot` with no retry, stayed failed — the serve config was only
+  restored hours later when a switch happened to re-run it. Nothing about
+  the unit makes this self-healing across a reboot.
+
 ## What's in it
 
 Two files, `nixos`-class: `caddy/caddy.nix` and
