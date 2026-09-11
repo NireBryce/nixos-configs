@@ -46,6 +46,48 @@
 # credentials, or xcaddy rebuild -- ordinary `pkgs.caddy` and a `.ts.net`
 # site address is the whole mechanism.
 #
+# AN EXPLICIT `tls` DIRECTIVE ANYWHERE DISABLES THAT AUTO-DETECTION, for
+# EVERY site in this file, which is why the `.ts.net` vhosts below now name
+# `get_certificate tailscale` themselves instead of relying on it. This
+# broke all tailnet HTTPS on this host 2026-09-08 -> 2026-09-10 and the
+# mechanism is entirely non-obvious, so, read from caddy 2.11.4's source
+# and confirmed by adapting the real generated Caddyfile both ways:
+#
+#   - The Caddyfile ADAPTER emits `apps.tls.automation.policies` as soon as
+#     ANY site carries a `tls` directive -- and not just for that site. It
+#     emits a policy listing every OTHER site's subjects too, with no
+#     issuers and no managers. Adding `tls internal` to the three bare-name
+#     vhosts below (2026-09-08, d7af47c5) is what created a policy whose
+#     subjects were the four `.ts.net` names. Verified by A/B: delete the
+#     `tls internal` lines and `caddy adapt` emits `"tls": null`.
+#   - Auto-detection only fires for names with NO existing policy.
+#     autohttps.go's `uniqueDomainsLoop` does `continue uniqueDomainsLoop`
+#     the moment an explicit policy claims the name (:295), so the
+#     `isTailscaleDomain` branch at :328 -- the one that would have
+#     attached `tls.get_certificate.tailscale` -- was never reached.
+#   - The empty policy then falls back to PUBLIC ACME. `Issuers == nil`
+#     gets filled with `DefaultIssuersProvisioned` (caddytls/
+#     automation.go:238), so caddy spent two days asking Let's Encrypt for
+#     `*.moose-micro.ts.net` certs and getting NXDOMAIN -- tailnet names
+#     have no public DNS. No cert, so every handshake died with a bare
+#     `tlsv1 alert internal error` (Firefox: SSL_ERROR_INTERNAL_ERROR_ALERT)
+#     on ALL FOUR names, `ts-cube` included, which no commit had touched.
+#
+# Naming the manager explicitly is strictly better than the auto-detection
+# it replaces, not just a workaround: `implicitTailscaleManagersOnly()`
+# (automation.go:434) skips the default-ACME fill-in for a policy whose
+# subjects are ALL `.ts.net` and which has a Tailscale manager, so there is
+# no public-CA fallback left to fail -- a name tailscaled won't issue for
+# now fails closed and quietly instead of hammering Let's Encrypt.
+#
+# WHY IT WASN'T CAUGHT: eval, build, `just modules` and `caddy adapt` all
+# pass -- the generated Caddyfile is VALID, it just means something else
+# than intended. Only a real handshake shows it (`wiki/lessons-learned.md`
+# §25/§37, "force a toplevel"). It was also invisible in the logs:
+# nixpkgs' `services.caddy.logFormat` defaults to `level ERROR`, which
+# suppresses the one WARN the tailscale cert manager emits
+# (certmanagers.go:49, "could not get status; will try anyway").
+#
 # `services.tailscale.permitCertUid = "caddy"` below is what makes that
 # request succeed, NOT optional: tailscaled refuses cert requests from
 # non-root local-API clients unless the peer's uid matches
@@ -113,6 +155,29 @@
 # was checked and how it was gotten wrong once (`wiki/lessons-learned.md`
 # #41) before reverse-proxy/tailscale-services/serve.nix replaced them,
 # not yet independently verified.
+#
+# STATUS OF THE 2026-09-10 `get_certificate tailscale` FIX: NOT YET
+# RUNTIME-VERIFIED -- it has not been switched onto nire-cube. What WAS
+# checked: the break reproduced on all four `.ts.net` names both from
+# another tailnet host and locally on cube (`tlsv1 alert internal error`);
+# caddy's LIVE admin API (`/config/apps/tls`) showed the issuer-less
+# policy; `caddy adapt` on the real generated Caddyfile, with and without
+# the fix, showed the policy gaining `get_certificate: [{via: tailscale}]`;
+# and the mechanism was read out of caddy 2.11.4's source. A handshake is
+# the only thing that proves it -- `just switch` on cube, then from another
+# tailnet host expect `tls_verify_result` 0 on
+# https://ts-cube|grafana|git.moose-micro.ts.net/.
+#
+# `glance.moose-micro.ts.net` WILL STILL FAIL after this fix, for an
+# unrelated reason: `svc:glance` is not live on the tailnet. Confirmed
+# 2026-09-10 -- the name has no MagicDNS record at all (`getent hosts
+# glance` and the FQDN both fail; tailscale status' `ExtraRecords` lists
+# only git and grafana) and cube's `CertDomains` is
+# [ts-cube, grafana, git], so tailscaled cannot issue for it and this
+# vhost has nothing to serve. tailscale-services/acl-diff-applied.hujson
+# records the `svc:glance` autoApprover but the tailnet was evidently
+# never re-POSTed (`just tailscale-acl`), and unlike svc:grafana/svc:git
+# that file has no `grants` entry for `svc:glance` either.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
@@ -138,6 +203,19 @@
         # bare `http://glance` redirect needed it (the name didn't resolve
         # at all without a real Service behind it).
         glanceFqdn  = "glance.moose-micro.ts.net";
+
+        # EVERY `.ts.net` vhost below MUST carry this, and the duplication
+        # is the point of binding it once here: a `.ts.net` site that
+        # omits it silently loses HTTPS entirely (see the header's
+        # "AN EXPLICIT `tls` DIRECTIVE ANYWHERE DISABLES TAILSCALE CERT
+        # AUTO-DETECTION"), and the failure is a bare TLS alert with
+        # nothing wrong-looking in this file -- exactly the shape that
+        # cost 2026-09-08 to 2026-09-10.
+        tailscaleCert = ''
+            tls {
+                get_certificate tailscale
+            }
+        '';
     in {
         flake.modules.nixos.${moduleName} = {
             # # description = "caddy -- tailnet-only HTTPS front door, with certs from tailscaled";
@@ -157,6 +235,7 @@
                     # bare `.ts.net` address is what triggers the tailscale
                     # cert manager -- see the header.
                     ${tailnetFqdn}.extraConfig = ''
+                        ${tailscaleCert}
                         # Grafana and Forgejo moved OFF this proxy to their
                         # own Tailscale Services names (`svc:grafana`,
                         # `svc:git`) -- see the two vhosts below and
@@ -201,10 +280,12 @@
                     # serve_from_sub_path=false (grafana.nix) and the
                     # unprefixed ROOT_URL (forgejo.nix) now expect.
                     ${grafanaFqdn}.extraConfig = ''
+                        ${tailscaleCert}
                         reverse_proxy 127.0.0.1:3000
                     '';
 
                     ${gitFqdn}.extraConfig = ''
+                        ${tailscaleCert}
                         reverse_proxy 127.0.0.1:3001
                     '';
 
@@ -213,6 +294,7 @@
                     # forward, tailscale issues the cert for the SITE
                     # ADDRESS regardless of the connecting address.
                     ${glanceFqdn}.extraConfig = ''
+                        ${tailscaleCert}
                         reverse_proxy 127.0.0.1:3002
                     '';
 
@@ -267,11 +349,17 @@
                     #
                     # `tls internal` forces Caddy's own local CA instead of
                     # its default (ACME) issuer for JUST these three site
-                    # addresses -- scoped per-vhost, does not touch
-                    # automatic_https globally or the tailscale cert
-                    # manager the FQDN vhosts above still use (that's keyed
-                    # off the `.ts.net`-suffixed site address, unaffected
-                    # by what any other vhost does). Trades the previous
+                    # addresses. It does NOT, however, leave the FQDN
+                    # vhosts above alone, which this comment claimed until
+                    # 2026-09-10 and which was the whole bug: adding these
+                    # three `tls` directives made the adapter emit an
+                    # explicit automation policy for the `.ts.net` names
+                    # too, which suppressed tailscale cert auto-detection
+                    # and broke HTTPS on every one of them. The header's
+                    # "AN EXPLICIT `tls` DIRECTIVE ANYWHERE DISABLES THAT
+                    # AUTO-DETECTION" has the mechanism; those vhosts now
+                    # name `get_certificate tailscale` explicitly, which is
+                    # what makes these three safe to keep. Trades the previous
                     # unrecoverable TLS handshake failure for a normal
                     # untrusted-cert warning a browser lets you click
                     # through -- exactly what the tailnetFqdn header
