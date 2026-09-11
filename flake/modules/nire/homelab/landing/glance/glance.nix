@@ -193,6 +193,93 @@
                                             }
                                         ];
                                     }
+
+                                    {
+                                        # Added 2026-09-09 (issue #226).
+                                        # Keyless: glance's weather widget
+                                        # fetches from open-meteo.com, no
+                                        # API key property exists (checked
+                                        # the v0.8.5 docs, matching the
+                                        # pinned package -- `nix eval
+                                        # .#...services.glance.package`).
+                                        # An invalid location is a glance
+                                        # STARTUP error, not a broken
+                                        # widget, so the city has to
+                                        # actually resolve in open-meteo's
+                                        # geocoder.
+                                        type = "weather";
+
+                                        # The one location fact this repo
+                                        # holds: tz.nix's fleet default
+                                        # `time.timeZone =
+                                        # "America/New_York"`. Change here
+                                        # if the dashboard should show
+                                        # somewhere else -- nothing else
+                                        # in the config pins a city.
+                                        location = "New York, United States";
+
+                                        # en_US locale, per locale.nix's
+                                        # `i18n.defaultLocale`; glance's
+                                        # own default is metric.
+                                        units = "imperial";
+                                    }
+
+                                    {
+                                        # Added 2026-09-09 (issue #207).
+                                        # DATE GRID ONLY: glance's calendar
+                                        # widget takes no event feed/ICS
+                                        # property at all (checked the
+                                        # v0.8.5 docs) -- it cannot show
+                                        # the household events #230 wants;
+                                        # that needs a custom-api/backend
+                                        # decision. `first-day-of-week`
+                                        # left at glance's default
+                                        # (`monday`), which matches nothing
+                                        # in particular -- change here if
+                                        # it should be sunday.
+                                        type = "calendar";
+                                    }
+                                ];
+                            }
+
+                            {
+                                # The four to-do lists of issue #209, in
+                                # their own trailing small column. Two
+                                # properties worth knowing before
+                                # extending (checked against the v0.8.5
+                                # docs, matching the pinned package):
+                                #
+                                #   - Distinct `id`s are what makes this
+                                #     four lists rather than one; there is
+                                #     no title/label property, so the
+                                #     "categories" the issue asks for are
+                                #     only distinguishable by position and
+                                #     content.
+                                #   - Tasks live in each BROWSER's local
+                                #     storage -- per-device, not shared,
+                                #     and lost if that browser's storage
+                                #     is cleared. Right for a personal
+                                #     dashboard; wrong for the shared
+                                #     household tracking #230 wants, which
+                                #     needs a real backend.
+                                size = "small";
+                                widgets = [
+                                    {
+                                        type = "to-do";
+                                        id   = "1";
+                                    }
+                                    {
+                                        type = "to-do";
+                                        id   = "2";
+                                    }
+                                    {
+                                        type = "to-do";
+                                        id   = "3";
+                                    }
+                                    {
+                                        type = "to-do";
+                                        id   = "4";
+                                    }
                                 ];
                             }
                         ];
