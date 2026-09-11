@@ -1,12 +1,12 @@
 # Pending setup
 
-_Last modified: 2026-09-06_
+_Last modified: 2026-09-11_
 
 ## Contents
 
 - [How this differs from open-threads.md](#how-this-differs-from-open-threadsmd)
 - [1. Done — Elly is signed in, confirmed 2026-09-05](#1-done--elly-is-signed-in-confirmed-2026-09-05)
-- [2. Decided: mirror, not origin — 2026-09-03](#2-decided-mirror-not-origin--2026-09-03)
+- [2. Done — mirror, not origin, and now a real mirror — 2026-09-11](#2-done--mirror-not-origin-and-now-a-real-mirror--2026-09-11)
 - [3. golink has no links yet](#3-golink-has-no-links-yet)
 - [4. Done — backups exist, and a restore has actually recovered something](#4-done--backups-exist-and-a-restore-has-actually-recovered-something)
 - [5. Grafana's admin credentials](#5-grafanas-admin-credentials)
@@ -69,7 +69,7 @@ Then, separately: add an SSH key under Settings → SSH keys if you want
 `forgejo@ts-cube:…` clones. See [using the forge](forgejo.md) for why that
 key authorizes `forgejo@ts-cube` and not `elly@ts-cube`.
 
-## 2. Decided: mirror, not origin — 2026-09-03
+## 2. Done — mirror, not origin, and now a real mirror — 2026-09-11
 
 - **As a mirror** — GitHub stays the origin, cube holds copies. Losing cube
   costs nothing. **Chosen**, 2026-09-03, before item 4's restore was
@@ -78,8 +78,14 @@ key authorizes `forgejo@ts-cube` and not `elly@ts-cube`.
 - **As an origin** — things live here first. That's the useful version, and
   it's the one that shouldn't happen until backups exist.
 
-Still open: zero repos actually pushed yet, mirror or not — this item only
-settled *which mode*, not that anything's been done.
+**2026-09-11: this repo itself is now the first one actually mirrored.**
+`elly/nixos-configs` was created as a genuine Forgejo pull mirror (migrate
+API, `mirror: true`, `mirror_interval: 8h0m0s`, authenticated with the
+`forgejo_api_key` sops secret) of
+`https://github.com/NireBryce/nixos-configs.git`. GitHub stays canonical;
+Forgejo re-pulls on its own schedule, no cron in this repo. Confirmed live:
+all 7 branches present and matching GitHub's own branch list. See
+[forgejo.md](forgejo.md#this-repo-is-mirrored-here).
 
 ## 3. golink has no links yet
 

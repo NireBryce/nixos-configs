@@ -1,6 +1,6 @@
 # Using the forge
 
-_Last modified: 2026-09-01_
+_Last modified: 2026-09-11_
 
 ## Contents
 
@@ -8,28 +8,31 @@ _Last modified: 2026-09-01_
 - [Signing in, and why there's no sign-up](#signing-in-and-why-theres-no-sign-up)
 - [SSH keys, and the second user on this host](#ssh-keys-and-the-second-user-on-this-host)
 - [Database and backups](#database-and-backups)
+- [This repo is mirrored here](#this-repo-is-mirrored-here)
 - [What's verified here](#whats-verified-here)
 - [See also](#see-also)
 
 [Forgejo](https://forgejo.org/) on `nire-cube`, at
-`https://ts-cube.moose-micro.ts.net/git/`. This page is about **using** it —
-signing in, cloning, pushing. For how it's configured and why its two
-hostnames disagree, see [git-forge](../categories/git-forge.md).
+`https://git.moose-micro.ts.net/` — its own Tailscale Services name as of
+2026-09-07 (was `https://ts-cube.moose-micro.ts.net/git/`; that path 404s
+now). This page is about **using** it — signing in, cloning, pushing. For
+how it's configured and why its two hostnames disagree, see
+[git-forge](../categories/git-forge.md).
 
 ## Where it is
 
 | | |
 |---|---|
-| Web | `https://ts-cube.moose-micro.ts.net/git/` |
-| Clone over HTTPS | `https://ts-cube.moose-micro.ts.net/git/<user>/<repo>.git` |
+| Web | `https://git.moose-micro.ts.net/` |
+| Clone over HTTPS | `https://git.moose-micro.ts.net/<user>/<repo>.git` |
 | Clone over SSH | `forgejo@ts-cube:<user>/<repo>.git` |
 
 **Those two hostnames are different on purpose, and it isn't a typo.** Web
-traffic goes through Caddy, which needs the full FQDN for its certificate.
-Git-over-SSH does *not* go through Caddy at all — it goes to cube's ordinary
-`sshd` on port 22 — so its clone URLs use the short `ts-cube`. Forgejo builds
-each from a separate setting (`ROOT_URL` and `DOMAIN`), which is why they can
-and do differ.
+traffic goes through Caddy on Forgejo's own Tailscale Services vhost, which
+needs the full FQDN for its certificate. Git-over-SSH does *not* go through
+Caddy at all — it goes to cube's ordinary `sshd` on port 22 — so its clone
+URLs use the short `ts-cube`. Forgejo builds each from a separate setting
+(`ROOT_URL` and `DOMAIN`), which is why they can and do differ.
 
 Copy clone URLs from the repo page rather than typing them; Forgejo generates
 both correctly.
@@ -52,8 +55,10 @@ open — read the page, not the status code.
 password from this repo's sops secrets rather than typed by hand. It
 resets that password to the sops value on every `switch`, so changing it
 through the web UI won't stick — change it in `secrets.yaml` instead if it
-ever needs to change. Not yet switched on cube or confirmed by an actual
-login; treat as unverified until then.
+ever needs to change. **Switched and logged in, confirmed 2026-09-05**;
+whether the account is genuinely *admin* is still unconfirmed (see
+[git-forge](../categories/git-forge.md)'s account of the masked-field
+trap).
 
 To add a *second* user, on cube:
 
@@ -96,19 +101,32 @@ of a repo is a repo you have one copy of. Push anything you care about
 somewhere else as well, or treat this as a mirror rather than an origin,
 until [#87](https://github.com/NireBryce/nixos-configs/issues/87) lands.
 
+## This repo is mirrored here
+
+`elly/nixos-configs` — `https://git.moose-micro.ts.net/elly/nixos-configs`
+— is a real Forgejo pull mirror of
+`https://github.com/NireBryce/nixos-configs.git`, created 2026-09-11 via
+the migrate API (`mirror: true`, `mirror_interval: 8h0m0s`) using the
+`forgejo_api_key` sops secret. GitHub stays canonical; Forgejo re-pulls on
+its own schedule. Confirmed live: all 7 branches present and matching
+GitHub's own branch list, default branch `experimental`. This is the first
+repo actually pushed/mirrored here — see
+[pending-setup.md](pending-setup.md) item 2.
+
 ## What's verified here
 
 Exercised against the live instance on 2026-08-24 from `nire-lysithea`, over
-the tailnet: `/git/` returning `HTTP 200` over validated TLS with Forgejo's
-own page title, `/git/explore/repos` and `/git/user/login` both 200,
-`/git/user/sign_up` 200 with the registration-disabled text and no form
-fields, and Forgejo's generated links carrying the `/git/` prefix
-(`href="/git/explore/repos"`).
+the tailnet, against the now-retired `ts-cube.../git/` path: `HTTP 200` over
+validated TLS with Forgejo's own page title, `/explore/repos` and
+`/user/login` both 200, `/user/sign_up` 200 with the registration-disabled
+text and no form fields. Re-verified 2026-09-11 against the current
+`git.moose-micro.ts.net` hostname: root, `/explore/repos`, and `/user/login`
+all still 200.
 
-**Not exercised:** creating a user, cloning or pushing over either protocol,
-or adding an SSH key. The clone URL shapes above come from the module's
-`DOMAIN`/`ROOT_URL` settings and Forgejo's own behaviour, not from a clone
-run here. Nothing has been pushed to this instance yet.
+**Not exercised:** adding an SSH key, or a clone/push over SSH specifically
+(the mirror above was created and synced entirely over HTTPS via the API).
+The SSH clone URL shape comes from the module's `DOMAIN` setting and
+Forgejo's own behaviour, not from a clone run here.
 
 ## See also
 
