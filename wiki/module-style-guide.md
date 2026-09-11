@@ -4,7 +4,6 @@ _Last modified: 2026-09-11_
 
 ## Contents
 
-- [Counts](#counts)
 - [Opening brackets go on the same line as whatever causes them](#opening-brackets-go-on-the-same-line-as-whatever-causes-them)
 - [Four-space indent](#four-space-indent)
 - [The module header](#the-module-header)
@@ -26,9 +25,12 @@ _Last modified: 2026-09-11_
 Conventions for `flake/modules/`. "How many files do this" used to be
 stated as inline counts per section, dated 2026-08-08 -- and by 2026-09-09
 every one of them had gone quietly false as the tree grew from 151 to 263
-files. Counts now live in one table below ([Counts](#counts)), and
-`check_wiki.py`'s `counts` subcheck recomputes each row against the tree
-and fails on drift, so they stay true instead of merely having been.
+files. Counts now live in one table, on
+[module-style-guide-for-agents.md](module-style-guide-for-agents.md#counts)
+— they are bookkeeping rather than a rule, and the sibling is where
+facts-to-look-up belong. `check_wiki.py`'s `counts` subcheck recomputes
+each row against the tree and fails on drift, so they stay true instead of
+merely having been.
 
 This file used to live at `modules/nirePackages/style-guide.md`, where its
 location implied it governed only package modules, and later at `claude
@@ -36,21 +38,6 @@ cave/claude-style-guide.md` until that directory was retired 2026-09-02. It
 applies to every module — see [history.md](history.md) and
 [styleguide.md](styleguide.md) for why it counts as an exception to this
 wiki's usual "index over restatement" rule.
-
-## Counts
-
-Every count this page used to state inline, in the one place the
-`counts` subcheck of `wiki/scripts/check_wiki.py` watches. Recompute by
-hand with `grep -rl --include='*.nix' -- <pattern> flake/modules | wc -l`.
-
-| What | Files |
-|---|---|
-| total `.nix` files under `flake/modules/` | 262 |
-| module header (`moduleName = lib.removeSuffix ...`) | 212 |
-| `# # description` as first body line | 20 |
-| `with pkgs;` package lists | 119 |
-
----
 
 ## Opening brackets go on the same line as whatever causes them
 

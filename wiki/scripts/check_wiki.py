@@ -139,7 +139,8 @@ structured, extractable facts only:
             mechanically while deciding *what belongs* on the page stays
             manual.
 
-  counts    The counts table in wiki/module-style-guide.md (## Counts) and
+  counts    The counts table in wiki/module-style-guide-for-agents.md
+            (## Counts) and
             the host-count claims phrased as "all N hosts" / "all N NixOS
             hosts" / "M of the N NixOS hosts" in wiki/ + AGENTS.md, against
             recomputation: the table rows against grep over flake/modules/,
@@ -987,12 +988,20 @@ def check_contents(root):
     return findings
 
 
-# wiki/module-style-guide.md's `## Counts` table -- one row per convention
-# this page once stated as an inline count. Each row is recomputed by
-# scanning every .nix file under flake/modules/ with the same pattern the
-# page's own "recompute by hand" line gives a human; a row whose number
-# doesn't match its recomputation is a hard finding.
-STYLEGUIDE_COUNTS = pathlib.Path('wiki/module-style-guide.md')
+# The `## Counts` table -- one row per convention module-style-guide.md once
+# stated as an inline count. Each row is recomputed by scanning every .nix
+# file under flake/modules/ with the same pattern the table's own "recompute
+# by hand" line gives a reader; a row whose number doesn't match its
+# recomputation is a hard finding.
+#
+# The table lives on the *-for-agents sibling, not on module-style-guide.md
+# where it sat until 2026-09-11. Grep `STYLEGUIDE_COUNTS` finds it either
+# way. It moved because it is bookkeeping, not a rule: four numbers nobody
+# reads to learn the style, sitting between the human page's intro and its
+# first actual convention. The sibling is where facts-to-look-up belong, and
+# the check doesn't care which page it parses -- only that exactly one page
+# carries the rows.
+STYLEGUIDE_COUNTS = pathlib.Path('wiki/module-style-guide-for-agents.md')
 MODULES_DIR = pathlib.Path('flake/modules')
 COUNT_ROW = re.compile(r'^\|\s*(.+?)\s*\|\s*(\d+)\s*\|\s*$', re.M)
 # The three recomputable rows, keyed by an unambiguous prefix of their label.
@@ -1035,10 +1044,10 @@ def _host_num(word):
 def check_counts(root):
     """Two shapes of count claim, both of which actually went stale here:
 
-    - wiki/module-style-guide.md's `## Counts` table, one row per
-      convention the page used to state as an inline count. Recomputed
-      against flake/modules/ on every run -- the page's numbers are now a
-      view of the tree, not a snapshot of it.
+    - the `## Counts` table (on module-style-guide-for-agents.md, see
+      STYLEGUIDE_COUNTS), one row per convention module-style-guide.md used
+      to state as an inline count. Recomputed against flake/modules/ on
+      every run -- the rows are a view of the tree, not a snapshot of it.
     - "all N hosts"-shaped prose across wiki/ + AGENTS.md, the exact claim
       AGENTS.md's Platform-support section got wrong ("all five hosts"
       when hosts.nix defines four). Class-scoped variants
