@@ -32,7 +32,7 @@ retired. For how it's built, see
 | Grafana | `https://grafana.moose-micro.ts.net/` | `http://grafana/` |
 | Forgejo | `https://git.moose-micro.ts.net/` | `http://git/` |
 | cube itself (also glance) | `https://ts-cube.moose-micro.ts.net/` | `http://ts-cube/` |
-| golink (**not** on cube) | `http://go/` — see [creating go/ links](golinks.md) | |
+| golink (**not** on cube) | `http://go/` — see [creating go/ links](creating-golinks.md) | |
 
 **Type the short form with `http://`, not `https://`.** Both work, but they
 behave differently and only one is pleasant — see

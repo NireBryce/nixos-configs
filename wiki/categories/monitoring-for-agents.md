@@ -57,13 +57,15 @@ so exporting the JSON there is the whole job:
    Grafana's `${DS_PROMETHEUS}` template variable.
 5. Save under `grafana/_dashboards/`, `just switch`, confirm panels intact.
 
-**Export leg verified 2026-09-11 — the switch leg is not.** A UI-shaped
-dashboard (random uid, top-level `id`, `${DS_PROMETHEUS}` panels) was
-created on cube over the API, exported, and carried through steps 2–4 into
-`roundtrip-check.json`; every transformation the steps predict was the one
-needed. **Still unverified**: the `just switch` showing it reappear exactly
-once under its fixed uid with the panel rendering — that leg needs cube's
-interactive sudo.
+**Verified end to end 2026-09-11.** A UI-shaped dashboard (random uid,
+top-level `id`, `${DS_PROMETHEUS}` panels) was created on cube over the API,
+exported, and carried through steps 2–4 into `roundtrip-check.json`; every
+transformation the steps predict was the one needed. The switch leg then ran
+on cube: Grafana's API lists exactly two dashboards (no duplicate),
+`roundtrip-check` reports `provisioned: True` with `provisionedExternalId:
+roundtrip-check.json` (file-sourced, not a db leftover), the panel queries
+live through the datasource proxy, and `nix store diff-closures` shows the
+deployed generation matching the tree.
 
 A UI-built dashboard lives only in cube's sqlite db. It is backed up, but
 not declared.

@@ -15,7 +15,7 @@ _Last modified: 2026-09-11_
 - [See also](#see-also)
 
 > **Condensed version:**
-> [golinks-for-agents.md](golinks-for-agents.md) — the same
+> [creating-golinks-for-agents.md](creating-golinks-for-agents.md) — the same
 > ground with the narrative stripped out, for an agent (or a human in
 > a hurry) loading it mid-task. Both siblings get edited in the same
 > change.

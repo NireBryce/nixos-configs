@@ -32,7 +32,7 @@ section](#dynamicuser-deliberately) for the setting, and
 [shortlinks-history.md](shortlinks-history.md) for the crash-loop and the
 fix in full.
 
-Usage — creating and managing links — is [homelab/golinks.md](../homelab/golinks.md).
+Usage — creating and managing links — is [homelab/creating-golinks.md](../homelab/creating-golinks.md).
 This page stays the configuration side.
 
 ## What's in it
@@ -186,7 +186,7 @@ and after this change.
   sidesteps here.
 - [system](system.md) — `tailscale.nix`, for the host daemon, the auth-key
   decision this module mirrors, and the two tailnet traps.
-- [homelab/golinks.md](../homelab/golinks.md) — the usage side: creating
+- [homelab/creating-golinks.md](../homelab/creating-golinks.md) — the usage side: creating
   links, the template syntax, and the `curl` traps.
 - [hosts.md](../hosts.md) — current switch/verification status for
   `nire-cube`.

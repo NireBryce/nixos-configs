@@ -29,7 +29,7 @@ under it, which can happen with no commit to this repo at all.
 |---|---|---|---|
 | *(all of cube's web services)* | `nire-cube` | `https://ts-cube.moose-micro.ts.net/` | [Reaching cube's services](reaching-services.md) |
 | *(what's still unfinished)* | `nire-cube` | — | [Pending setup](pending-setup.md) |
-| golink — `go/` shortlinks | `nire-cube` | `http://go/` | [Creating go/ links](golinks.md) |
+| golink — `go/` shortlinks | `nire-cube` | `http://go/` | [Creating go/ links](creating-golinks.md) |
 | Forgejo — self-hosted git forge | `nire-cube` | `.../git/` | [Using the forge](forgejo.md) |
 | glance — the service index | `nire-cube` | `.../` (the root) | [Reaching cube's services](reaching-services.md); [landing](../categories/landing.md) covers config |
 | restic — backups to the QNAP | `nire-cube` | — (no URL; a timer, not a listener) | [Backup runbook](backup-runbook.md) |
@@ -102,7 +102,7 @@ source" is often **the running service's own help page**, not a file in this
 repo — `http://go/.help` for golink, for instance. So a page here may hold
 real synthesized content, the way a category deep-dive is allowed to, but it
 should say what it verified against the live service and what it merely
-transcribed. [golinks.md](golinks.md) ends with exactly that split.
+transcribed. [creating-golinks.md](creating-golinks.md) ends with exactly that split.
 
 ## See also
 

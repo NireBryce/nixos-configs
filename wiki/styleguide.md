@@ -62,12 +62,19 @@ separate tier for the *usage* side:
   `nireHost/*` per-host bundles (host definitions, not categories — see
   [hosts.md](hosts.md) instead).
 - **`wiki/homelab/`** — the usage tier, added 2026-08-24 with
-  [golinks.md](homelab/golinks.md). Pages about operating a service this
-  fleet runs, for a reader who wants to *do something with it* rather than
-  edit `flake/modules/`. `README.md` is the index; each service gets a page
-  named after the thing you'd search for, not the module (`golinks.md`, not
-  `golink.md` — but `forgejo.md`, where the tool's name *is* what you'd
-  search for).
+  [creating-golinks.md](homelab/creating-golinks.md). Pages about operating
+  a service this fleet runs, for a reader who wants to *do something with
+  it* rather than edit `flake/modules/`. `README.md` is the index.
+
+  **Name a page for what the reader wants to do, not for the module.**
+  `forgejo.md` works as a bare noun because the tool's name is what you'd
+  search for and the page is about the whole service. A plural noun does
+  not: `golinks.md` read as *a list of the fleet's go/ links* — which is a
+  thing that could plausibly exist and isn't what the page is — so it was
+  renamed `creating-golinks.md` on 2026-09-11, taking the verb-phrase shape
+  [reaching-services.md](homelab/reaching-services.md) already used. When a
+  noun name would name a collection the reader might expect to be listed
+  there, use the verb.
 
   [reaching-services.md](homelab/reaching-services.md) is the one page not
   about a single service: a cross-service page earns its place here when
@@ -84,7 +91,7 @@ separate tier for the *usage* side:
   (`http://go/.help`), not a file in this repo, so a page here may hold
   synthesized content — but it must say **what was verified against the
   live service and what was only transcribed**, and point at the live
-  source as canonical. `golinks.md`'s closing section is the pattern.
+  source as canonical. `creating-golinks.md`'s closing section is the pattern.
 - **`wiki/categories/<name>/`** — the escape hatch, used exactly once so
   far ([shell-config](categories/shell-config/README.md)). A category
   outgrows a single file not by being long, but by one specific *member*

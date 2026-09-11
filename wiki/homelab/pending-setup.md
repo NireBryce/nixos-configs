@@ -111,7 +111,7 @@ Tailscale Services name. Nothing needed re-pointing: `http://go/.export`
 is still empty, so these remain proposals rather than links that exist.
 
 Creating them is the web UI at `http://go/`, or the `curl` form in
-[creating go/ links](golinks.md) — read that page's `--post302` and delete
+[creating go/ links](creating-golinks.md) — read that page's `--post302` and delete
 traps first, both of which have teeth.
 
 **Done when** `go/dash` resolves from a second tailnet device, not just the
@@ -206,6 +206,6 @@ written from each service's own documentation and this repo's modules.
   check when one doesn't answer.
 - [Using the forge](forgejo.md) — clone URLs, sign-in, and the SSH key
   detail item 1 hands off to.
-- [Creating go/ links](golinks.md) — the traps item 3 hands off to.
+- [Creating go/ links](creating-golinks.md) — the traps item 3 hands off to.
 - [open-threads.md](../open-threads.md) — the repo-side counterpart to this
   page.
