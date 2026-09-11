@@ -22,9 +22,16 @@ structured, extractable facts only:
             the page's "## Imported by" section text mentions the host by
             name, and flags a host name mentioned there that the host's
             actual import list does not contain. Heuristic, not exact --
-            prose is matched by substring, so a page phrasing a host's
-            *absence* ("not durandal") will mention the name too; read a
-            finding before trusting it, same as `modules.py`'s own tools ask.
+            prose is matched by substring. A mention governed by an
+            exclusion cue in its own clause ("not durandal", "cube only
+            (not the handheld)") or by an indirect-path cue ("reaches
+            lysithea via `ellyHomeManager`") is NOT flagged: this wiki
+            states absences deliberately, with drvPath evidence, and
+            flagging all of them produced 25 permanent findings that were
+            every one of them correct prose (narrowed 2026-09-11). What
+            survives is a mention with no such cue nearby, which is what a
+            genuinely stale inclusion looks like. Still read a finding
+            before trusting it, same as `modules.py`'s own tools ask.
             Categories with no wiki page (nirePackages/* subcategories,
             nireHost/* bundles -- see categories/README.md's own exclusion
             list) are silently skipped: nothing to check them against.
@@ -195,6 +202,39 @@ COMMENT = re.compile(r'#[^\n]*')
 # its removal 2026-08-27 -- see wiki/history.md.)
 HOSTS = ['durandal', 'tenacity', 'cube', 'lysithea']
 
+# Cues that a host named in an "Imported by" section is being named to say
+# it does NOT import the category, or that it gets the category by some
+# other route than a direct import. Deliberately narrow: these suppress a
+# REVIEW finding, so a cue that fires too easily would hide a real stale
+# inclusion. "only" is NOT a cue -- it appears in "cube only", which says
+# nothing about the host actually named in the same clause.
+EXCLUSION_CUE = re.compile(
+    r"\b(?:not|never|neither|nor|without|exclude[sd]?|excluded|absent|absence)\b",
+    re.I)
+# "reaches lysithea via `ellyHomeManager`" -- a true statement about a
+# different mechanism, not a claim of direct import.
+INDIRECT_CUE = re.compile(r"\bvia\b", re.I)
+
+# A clause, for the purpose above: the run of prose around a mention,
+# bounded by sentence/clause punctuation, a blank line, or a table-cell
+# pipe. Narrower than the whole section on purpose -- "cube imports this.
+# durandal does not." must not let the second sentence's "not" excuse the
+# first sentence's mention, and one table cell's "not" must not excuse the
+# next cell's.
+#
+# A BARE newline is deliberately NOT a boundary: this wiki hard-wraps
+# prose, so "Confirmed not to move durandal,\ntenacity or lysithea" is one
+# sentence split across lines, and treating the wrap as a clause break left
+# `tenacity or lysithea` looking like an unexcused mention. That mistake
+# accounted for 12 of the 25 findings this narrowing set out to remove.
+_CLAUSE_SPLIT = re.compile(r'(?:[.;]\s+|\n\s*\n|\|)')
+
+
+def _clauses_mentioning(section, host):
+    """Every clause of `section` that names `host`."""
+    return [c for c in _CLAUSE_SPLIT.split(section) if host in c]
+
+
 IMPORTED_BY_HEADING = re.compile(r'^##\s+Imported by\s*$', re.M)
 NEXT_HEADING = re.compile(r'^##\s+', re.M)
 
@@ -362,14 +402,27 @@ def _imported_by_findings(where, category, hosts, section):
                 f"'{host}' but the host isn't named in Imported by")
 
     # reverse direction: a host named in the section this category's
-    # actual importers don't include. Heuristic -- prose can legitimately
-    # name a host to say it does NOT import the category ("not durandal").
+    # actual importers don't include. Heuristic -- prose legitimately names
+    # a host to say it does NOT import the category, and this repo does
+    # that constantly and on purpose ("cube only (not durandal)", "Confirmed
+    # not to move durandal, tenacity or lysithea" -- the drvPath evidence
+    # for an exclusion is worth more than the noise it used to cost).
+    #
+    # So only flag a mention that ISN'T governed by an exclusion or
+    # indirect-path cue in its own clause. Before this narrowing (2026-09-11)
+    # every such page reported one finding per excluded host -- 25 of them,
+    # all correct prose, which is exactly the volume that trains a reader to
+    # skim past the one real stale inclusion.
     for host in HOSTS:
-        if host in section and host not in hosts:
-            findings.append(
-                f"REVIEW   {where}: '{host}' is named in Imported by but "
-                f"does not actually import '{category}' -- confirm this "
-                f"is phrased as an exclusion, not a stale inclusion")
+        if host not in hosts:
+            for clause in _clauses_mentioning(section, host):
+                if EXCLUSION_CUE.search(clause) or INDIRECT_CUE.search(clause):
+                    continue
+                findings.append(
+                    f"REVIEW   {where}: '{host}' is named in Imported by but "
+                    f"does not actually import '{category}' -- confirm this "
+                    f"is phrased as an exclusion, not a stale inclusion")
+                break
     return findings
 
 
