@@ -23,6 +23,23 @@ the script (`vip-put`/`apply`) to push an edit.
   useless existence check. (`tailscale-acl.py`'s own usage line still
   documents the older `by-name/NAME` path; the code at `vip_api()` is
   right, the docstring is stale.)
+- **A Service answers only on the ports it declares, and the two halves
+  must agree.** Each `svc-*.json`'s `ports` and the matching
+  `endpoints."tcp:N"` in `serve.nix` both have to list a port before
+  anything reaches Caddy on it. All three services declared `tcp:443`
+  only until 2026-09-11, which left Caddy's `http://git`/`http://grafana`/
+  `http://glance` redirect vhosts unreachable from the day they were
+  written (issue #272) -- `http://ts-cube` worked throughout, because that
+  is a real device address where Caddy binds 80 directly, which is what
+  made the gap easy to miss.
+- **`vip-put` needs `addrs` to UPDATE, but not to CREATE.** Updating an
+  existing service 400s with `when updating a service, addrs must contain
+  2 elements` -- it wants the v4/v6 VIPs the control plane already
+  assigned. Those are assigned state, so they are deliberately NOT kept in
+  the `svc-*.json` files (they would change on any delete/recreate and
+  nothing would notice them going stale); `tailscale-acl.py`'s `vip-put`
+  fetches and merges them instead, so these files stay a description of
+  what is wanted.
 - `svc-grafana.json`, `svc-git.json` -- the two Tailscale Service objects
   (name/tags/ports/comment), created via `vip-put` against
   `/api/v2/tailnet/{tailnet}/vip-services/{name}` -- **not**

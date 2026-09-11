@@ -1,1 +1,1 @@
-{"name": "svc:git", "tags": ["tag:homelab-cube"], "ports": ["tcp:443"], "comment": "nixos-configs: nire-cube Forgejo, off Caddy path prefix"}
+{"name": "svc:git", "tags": ["tag:homelab-cube"], "ports": ["tcp:443", "tcp:80"], "comment": "nixos-configs: nire-cube Forgejo, off Caddy path prefix"}

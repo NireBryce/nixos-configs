@@ -1,1 +1,1 @@
-{"name": "svc:grafana", "tags": ["tag:homelab-cube"], "ports": ["tcp:443"], "comment": "nixos-configs: nire-cube Grafana, off Caddy path prefix"}
+{"name": "svc:grafana", "tags": ["tag:homelab-cube"], "ports": ["tcp:443", "tcp:80"], "comment": "nixos-configs: nire-cube Grafana, off Caddy path prefix"}

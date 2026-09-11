@@ -354,7 +354,23 @@
                         redir https://${tailnetFqdn}{uri} permanent
                     '';
 
-                    # Short bare names for Tailscale Services, same redirect pattern
+                    # Short bare names for Tailscale Services, same redirect
+                    # pattern -- but UNLIKE `http://ts-cube` above, these
+                    # three only work because serve.nix forwards `tcp:80`
+                    # to this listener. `ts-cube` is a real device address
+                    # where caddy binds 80 itself; a `svc:` name is a
+                    # Service VIP that answers ONLY on the ports its
+                    # Service object and serve.nix both declare. These
+                    # three vhosts sat here unreachable from f478494a until
+                    # 2026-09-11 (issue #272) for exactly that reason --
+                    # dead config that looked fine. Deleting a `tcp:80`
+                    # endpoint silently returns them to it.
+                    #
+                    # These are the NICE door, worth keeping working: no
+                    # certificate is involved, so they redirect straight to
+                    # the real publicly-valid tailnet cert, where the
+                    # `https://` twins below can only offer caddy's local
+                    # CA and a browser warning.
                     "http://git".extraConfig = ''
                         redir https://${gitFqdn}{uri} permanent
                     '';
@@ -366,6 +382,8 @@
                     # Landing/glance index -- now its own Service (see
                     # glanceFqdn above), not tailnetFqdn; ts-cube's `/`
                     # still works directly, this is just the short name.
+                    # Needs serve.nix's `tcp:80` forward like its two
+                    # neighbours -- see the note above them.
                     "http://glance".extraConfig = ''
                         redir https://${glanceFqdn}{uri} permanent
                     '';
