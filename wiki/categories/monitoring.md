@@ -160,20 +160,21 @@ JSON there — no extra plumbing needed:
 5. Save the file under `grafana/_dashboards/`, `just switch`, confirm the
    dashboard reappears with its panels intact.
 
-**Export leg verified 2026-09-11; switch leg still to run.** A dashboard
-shaped like a UI build — Grafana-assigned random uid, top-level numeric
-`id`, panels pointing at the `${DS_PROMETHEUS}` template variable — was
-created on cube over the API (`127.0.0.1:3000` over SSH), exported, and
-carried through steps 2–4 into `roundtrip-check.json`; the db copy was
-deleted afterwards, so the only copy of that dashboard is the file in this
-repo. Exactly the transformations the steps predict were needed: wrapper
-`dashboard`/`meta` unwrapped, `id` dropped, `adsllh` → `roundtrip-check`,
-`${DS_PROMETHEUS}` → the fixed `prometheus-cube` uid, template variable
-removed. The datasource-proxy query path through Grafana was confirmed live
-the same day (`up` returning cube's exporters). Still unverified: the
-`just switch` on cube (needs an interactive sudo) showing the dashboard
-reappear exactly once under its fixed uid with the panel rendering — the
-one leg an agent without cube's sudo password could not run.
+**Verified end to end 2026-09-11.** A dashboard shaped like a UI build —
+Grafana-assigned random uid, top-level numeric `id`, panels pointing at the
+`${DS_PROMETHEUS}` template variable — was created on cube over the API
+(`127.0.0.1:3000` over SSH), exported, and carried through steps 2–4 into
+`roundtrip-check.json`; the db copy was deleted afterwards, so the only copy
+of that dashboard is the file in this repo. Exactly the transformations the
+steps predict were needed: wrapper `dashboard`/`meta` unwrapped, `id`
+dropped, `adsllh` → `roundtrip-check`, `${DS_PROMETHEUS}` → the fixed
+`prometheus-cube` uid, template variable removed. The switch leg then ran
+for real, a few hours later: after `just switch` on cube, Grafana's API
+lists exactly two dashboards — no duplicate — `roundtrip-check`'s meta
+reports `provisioned: True` with `provisionedExternalId:
+roundtrip-check.json` (file-sourced, not a db leftover), the panel's uptime
+query returns live data through the datasource proxy, and `nix store
+diff-closures` shows the deployed generation matches the tree exactly.
 
 ## Why cube only, and why that's a category rather than a host-specific file
 
