@@ -63,6 +63,14 @@ lint:
 # (MISSING/STALE/EXTRA/DIRECTORY/CLASSES/WIPES ROOT/UNKNOWN RECIPE/UNKNOWN
 # SKILL/BROKEN LINK/no-Imported-by-section); a REVIEW-only result (heuristic,
 # needs a human look -- see the script's own docstring) prints but exits 0.
+# Uses patch-id, NOT `git branch --merged` -- this repo rebases on merge, so a
+# landed branch's SHAs change and --merged calls it unmerged (which is why 11 of
+# them piled up by 2026-09-11). `prune` deletes the landed ones and never the
+# others; args pass through (`just branches prune --yes`, `--no-pr`, `--depth N`).
+# Which local branches are fully landed (deletable) vs still holding work
+branches cmd="check" *args:
+    @{{scripts}}/branches.py {{cmd}} {{args}}
+
 # Static check: wiki/ and AGENTS.md claims vs the repo -- in CI
 # (.github/workflows/check.yml) since 2026-09-09, still not in `preflight`
 # deliberately (issue #217): fold it in once it has been green there a while
