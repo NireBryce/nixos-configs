@@ -274,6 +274,22 @@ guard under it rather than a convention someone has to remember:
   editing a page's content without following in its sibling, in the same
   change, fails the run and names the pair. This is the whole point of the
   check; everything else it does is bookkeeping.
+- **or the sibling carries a `_Sibling reviewed:_` line** dated at or after
+  its source's, with a reason:
+
+  ```
+  _Sibling reviewed: 2026-09-11 -- header reorder, no facts moved_
+  ```
+
+  That is the one legitimate way to land a source edit with genuinely
+  nothing to sync — a reorder, a typo, a rewording of something the sibling
+  already states its own way. It means someone read the source as of that
+  date and confirmed this page needs no change. **Don't reach for it to
+  avoid the work**; a real fact in a source edit belongs in both halves, and
+  the reason you write is what a reviewer checks that against. Added
+  2026-09-11: before it, the only way to land a no-op source edit was to bump
+  the sibling's date, which the paragraph below tells you not to do and which
+  no check could ever catch. A future-dated review is itself a finding.
 - the two link to each other;
 - the sibling fits a 50% word budget — a **REVIEW** finding only, never a
   failure. Density is the goal, and a page that is mostly irreducible

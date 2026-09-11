@@ -83,13 +83,29 @@ Two narrower cases have their own instructions — read those first:
    page alone produces. **Don't satisfy it by bumping the sibling's date** —
    that turns a caught omission into a silent one. Make the edit, then bump.
 
+   When the source edit genuinely has nothing to sync — a reorder, a typo,
+   a rewording of a fact the sibling states its own way — say so on the
+   sibling instead, under its `_Last modified:_` line:
+
+   ```
+   _Sibling reviewed: 2026-09-11 -- header reorder, no facts moved_
+   ```
+
+   A reviewed date at or after the source's clears the finding without
+   touching the sibling's own modification date. The reason is mandatory and
+   a future date is itself a finding, because the whole value of this over a
+   silent date bump is that the claim is auditable in the diff.
+
    Two asymmetries worth knowing rather than re-deriving:
 
    - **Narrative changes are one-sided.** Adding the account of how
      something was verified belongs on the human page only; the sibling
      carries the conclusion, not the story. Bumping the human page's date
-     for that still trips the check, so bump the sibling too — after
-     confirming it genuinely needs no edit.
+     for that still trips the check — which is the `_Sibling reviewed:_`
+     case above, once you've confirmed the sibling genuinely needs no edit.
+     (Until 2026-09-11 this said to bump the sibling's date instead, which
+     contradicted the paragraph above telling you never to do that; there
+     was no third option to point at yet.)
    - **A category page's `## Imported by` may live on either page, or
      both.** `check_imports` checks whichever exist, so update every copy
      that's there; grep rather than assuming which page has it.

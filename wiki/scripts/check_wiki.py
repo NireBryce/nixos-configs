@@ -165,6 +165,11 @@ structured, extractable facts only:
             Every other duplication rule in this repo is a convention someone
             has to remember; this one is the only one worth spending a check
             on, because the split is only as good as the guard under it.
+            A source edit with nothing to sync (a reorder, a typo) is landed
+            with a `_Sibling reviewed: <date> -- <reason>_` line on the
+            sibling, added 2026-09-11 -- the alternative on offer until then
+            was bumping the sibling's date, which styleguide.md forbids for
+            good reason and which this check could never have caught.
 
   check     Runs all thirteen of the above.
 
@@ -1137,6 +1142,29 @@ SIBLING_REQUIRED_WORDS = 1000
 # the drift `wiki/README.md` warns about. The siblings written when this
 # landed came in at 21-48% of their sources, most around 30%.
 SIBLING_BUDGET = 0.50
+# The escape hatch for a source edit that genuinely has nothing to sync --
+# reordering a page's header, fixing a typo, rewording a sentence whose
+# facts the sibling already states differently. Written on the sibling,
+# under its `_Last modified:_` line:
+#
+#     _Sibling reviewed: 2026-09-11 -- header reorder, no facts moved_
+#
+# It means: someone read the source as of that date and confirmed nothing
+# here needs to change. A reviewed date at or after the source's date
+# satisfies the staleness guard without touching this page's own
+# `_Last modified:_`, which would be a lie about when the content changed.
+#
+# Why this exists rather than "just bump the sibling's date": styleguide.md
+# tells you not to, and it is right -- a bumped date converts a caught
+# omission into a silent one. But before 2026-09-11 the rule had no way to
+# say "edited, nothing to sync", so the only way to land a no-op source edit
+# was to do the thing the styleguide forbids. This makes the no-op case
+# expressible and, more to the point, *auditable*: the claim is dated,
+# attributed to a reason, and sits in the diff where a reviewer sees it.
+# A reason is mandatory for exactly that -- "reviewed" with nothing after it
+# is the silent bump wearing a badge.
+SIBLING_REVIEWED_LINE = re.compile(
+    r'^_Sibling reviewed: (\d{4}-\d{2}-\d{2})\s*(?:--|—)\s*(\S.*?)_\s*$')
 # Exempt from *requiring* a sibling (each may still have one):
 #   lessons-learned.md and lessons-learned/  -- already written agent-facing
 #     and located by section number, not read front-to-back
@@ -1164,6 +1192,17 @@ def _last_modified(text):
         if m:
             return datetime.date.fromisoformat(m.group(1))
     return None
+
+
+def _sibling_reviewed(text):
+    """The sibling's `_Sibling reviewed:_` date and reason, or (None, None).
+    Read from the same head-of-file window as `_last_modified` so the two
+    lines stay visually adjacent -- a reader hitting one sees the other."""
+    for line in text.splitlines()[:8]:
+        m = SIBLING_REVIEWED_LINE.match(line)
+        if m:
+            return datetime.date.fromisoformat(m.group(1)), m.group(2).strip()
+    return None, None
 
 
 def sibling_pairs(root):
@@ -1195,6 +1234,13 @@ def check_siblings(root):
       This can't tell a same-day sibling update that was actually made from
       one that was skipped after a same-day source edit -- no date check can.
       It catches the one that sat for a week, which is the one that bites.
+
+      An older sibling is also satisfied by a `_Sibling reviewed:_` line
+      dated at or after the source's (see SIBLING_REVIEWED_LINE), which is
+      how a source edit with genuinely nothing to sync gets landed without
+      either lying about the sibling's own modification date or leaving the
+      run red. The reason is mandatory and the date can't be in the future --
+      a forged future date would silence this pair permanently.
     - **budget** -- a sibling over SIBLING_BUDGET of its source's words.
       REVIEW only: the point of a sibling is information density, and a
       page that is mostly commands has a floor no amount of editing gets
@@ -1217,11 +1263,30 @@ def check_siblings(root):
         src_text, sib_text = source.read_text(), sib.read_text()
 
         src_date, sib_date = _last_modified(src_text), _last_modified(sib_text)
-        if src_date and sib_date and sib_date < src_date:
+        rev_date, rev_reason = _sibling_reviewed(sib_text)
+        if rev_date and rev_date > datetime.date.today():
             findings.append(
-                f"STALE SIBLING  {rel_sib}: Last modified {sib_date} is older "
-                f"than {rel_src}'s {src_date} -- that page was edited without "
-                f"its condensed sibling following in the same change")
+                f"FUTURE REVIEW  {rel_sib}: Sibling reviewed says {rev_date}, "
+                f"which is after today ({datetime.date.today()}) -- a future "
+                f"date would satisfy this pair's staleness guard forever")
+            rev_date = None
+        if src_date and sib_date and sib_date < src_date:
+            if rev_date and rev_date >= src_date:
+                pass  # declared no-op: read as of rev_date, nothing to sync
+            elif rev_date:
+                findings.append(
+                    f"STALE SIBLING  {rel_sib}: Sibling reviewed {rev_date} "
+                    f"({rev_reason}) predates {rel_src}'s {src_date} -- that "
+                    f"page has been edited again since the review; re-read it "
+                    f"and either follow the edit here or re-date the review")
+            else:
+                findings.append(
+                    f"STALE SIBLING  {rel_sib}: Last modified {sib_date} is "
+                    f"older than {rel_src}'s {src_date} -- that page was "
+                    f"edited without its condensed sibling following in the "
+                    f"same change. If the edit genuinely had nothing to sync, "
+                    f"say so with a `_Sibling reviewed: {src_date} -- "
+                    f"<reason>_` line here rather than bumping the date above")
 
         src_words, sib_words = _words(src_text), _words(sib_text)
         budget = int(src_words * SIBLING_BUDGET)
