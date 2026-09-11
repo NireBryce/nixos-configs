@@ -79,7 +79,7 @@ config-vs-usage split. "—" means no service exists to write one about yet.
 | landing | [homelab/reaching-services.md](../homelab/reaching-services.md) (glance is the front page itself, not a separate page) |
 | monitoring | not yet written up — see [homelab/README.md](../homelab/README.md)'s "Also running, not yet written up" |
 | reverse-proxy | [homelab/reaching-services.md](../homelab/reaching-services.md) (the arrangement all the others sit behind) |
-| shortlinks | [homelab/golinks.md](../homelab/golinks.md) |
+| shortlinks | [homelab/creating-golinks.md](../homelab/creating-golinks.md) |
 | virtualization | — (`nire-llm-sandbox` removed 2026-08-28; see the category's own page) |
 
 No per-category file count here on purpose (removed 2026-08-29, with the

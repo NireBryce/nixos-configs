@@ -7,7 +7,7 @@ and the narrative. Facts only here.
 
 golink (Tailscale's `go/foo` service) on `nire-cube`. Added 2026-08-24,
 nested under `homelab` 2026-08-27. Usage is
-[../homelab/golinks.md](../homelab/golinks.md).
+[../homelab/creating-golinks.md](../homelab/creating-golinks.md).
 
 ## What's in it
 
@@ -77,6 +77,6 @@ IP. Its listeners are not on any of cube's interfaces.
 ## See also
 
 [shortlinks.md](shortlinks.md) ·
-[../homelab/golinks.md](../homelab/golinks.md) ·
+[../homelab/creating-golinks.md](../homelab/creating-golinks.md) ·
 [git-forge.md](git-forge.md) · [system.md](system.md) ·
 [shortlinks-history.md](shortlinks-history.md)

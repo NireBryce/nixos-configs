@@ -141,7 +141,7 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   since everything moved behind one HTTPS hostname on 2026-08-24, and what
   to check when something doesn't answer),
   [using the forge](homelab/forgejo.md), and
-  [creating go/ links](homelab/golinks.md), plus
+  [creating go/ links](homelab/creating-golinks.md), plus
   [pending setup](homelab/pending-setup.md) — the services that are running
   but not finished (no Forgejo users, no go/ links, no backups). Grafana is
   listed but not written up. A different tier from the category pages, and the one place a

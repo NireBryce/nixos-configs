@@ -77,7 +77,7 @@ than copying it in. Four exceptions, each on stated terms:
 - `flake-parts-port-notes.md` — the branch it indexed is gone.
 - `wiki/homelab/` — the source is often the live service, so synthesized
   content is allowed **if the page says what was verified against the live
-  service and what was only transcribed**. `golinks.md`'s closing section is
+  service and what was only transcribed**. `creating-golinks.md`'s closing section is
   the pattern.
 - deep-dive pages (`blesh.md`, `carapace.md`) — a cross-tool finding with no
   single code comment to live in.
@@ -90,6 +90,10 @@ belongs in the linked file's own header.
 - kebab-case, matching the subject exactly.
 - `README.md` is reserved for a directory's index — never a single-topic
   page.
+- **Name a usage page for the reader's task, not the module.** A plural noun
+  reads as a list of the things: `golinks.md` → `creating-golinks.md`
+  (2026-09-11), matching `reaching-services.md`. A bare noun is fine when
+  the page is about the whole service (`forgejo.md`).
 - **Dates absolute**, never "today" or "last week".
 - Relative paths, recomputed for actual depth. Moving a page means walking
   every link in it.

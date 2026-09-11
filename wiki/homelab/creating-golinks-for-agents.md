@@ -2,7 +2,7 @@
 
 _Last modified: 2026-09-11_
 
-Condensed from [golinks.md](golinks.md). Config side:
+Condensed from [creating-golinks.md](creating-golinks.md). Config side:
 [../categories/shortlinks-for-agents.md](../categories/shortlinks-for-agents.md).
 
 `http://go/` from any tailnet device. `http://go/.help` is the canonical
@@ -97,5 +97,5 @@ from upstream's help page and source at the pinned revision, not a run here.
 
 ## See also
 
-[golinks.md](golinks.md) ·
+[creating-golinks.md](creating-golinks.md) ·
 [../categories/shortlinks-for-agents.md](../categories/shortlinks-for-agents.md)

@@ -28,7 +28,7 @@ own database. The repo-side counterpart is
    | `go/graf` | `https://grafana.moose-micro.ts.net/` |
 
    Create in the web UI at `http://go/`, or the `curl` form in
-   [golinks.md](golinks.md) — **read that page's `--post302` and delete
+   [creating-golinks.md](creating-golinks.md) — **read that page's `--post302` and delete
    traps first, both have teeth.** Done when `go/dash` resolves from a
    *second* tailnet device.
 3. **Grafana admin credentials** — ships a default `admin` account and
@@ -63,5 +63,5 @@ endpoint cannot answer either question.
 
 [pending-setup.md](pending-setup.md) ·
 [reaching-services-for-agents.md](reaching-services-for-agents.md) ·
-[golinks-for-agents.md](golinks-for-agents.md) ·
+[creating-golinks-for-agents.md](creating-golinks-for-agents.md) ·
 [backup-runbook-for-agents.md](backup-runbook-for-agents.md)
