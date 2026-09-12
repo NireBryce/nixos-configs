@@ -129,6 +129,13 @@ separate tier for the *usage* side:
   with nothing — so a reader loses no context skimming the main page, only
   the full narrative.
 
+  **The procedure is skill `wiki-history-sweep`**, and
+  `just wiki-history-candidates` ranks sections that might qualify
+  (reporting only, never fails, and most hits are wrong by design). Both
+  added 2026-09-11, because this pattern was created in one pass on
+  2026-09-02 and extracted into exactly once since — a destination nothing
+  routed to, with no procedure written down. Issue #288.
+
 ## Naming
 
 - kebab-case, matching the category or subject exactly
