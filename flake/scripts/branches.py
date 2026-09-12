@@ -27,7 +27,9 @@ regardless of what the SHAs say.
 Limits worth knowing before trusting a MERGED verdict: patch-id is computed
 over the diff, so a commit that landed upstream in a SQUASHED or reworked form
 will not match and is reported UNMERGED (safe direction -- it asks rather than
-deletes). Merge commits are skipped by `git patch-id`. And only the trunk's
+deletes). Merge commits produce no patch-id at all, so they are excluded from
+the verdict rather than counted either way: a branch of nothing but merges is
+UNMERGED, since there is nothing readable to verify. And only the trunk's
 most recent --depth commits are indexed, so a branch merged long ago can fall
 off the back; raise --depth if a known-merged branch reports UNMERGED.
 
@@ -106,13 +108,24 @@ def classify(depth):
         if b in PROTECTED:
             continue
         commits = git('log', '--format=%H', f'{TRUNK}..{b}').splitlines()
-        landed, unlanded = 0, []
+        landed, unlanded, opaque = 0, [], 0
         for c in commits:
             p = patch_id(c)
-            if p is None or p in trunk_ids:
+            if p is None:
+                # `git patch-id` emits nothing for a merge commit, so we
+                # cannot tell whether its content is in the trunk. Until
+                # 2026-09-12 that counted as LANDED, which is the unsafe
+                # direction and contradicted this script's own docstring
+                # listing merges among the limits that "report UNMERGED".
+                # A branch whose only commits were merges was therefore
+                # MERGED and deletable -- and a merge commit can carry real
+                # conflict resolutions that exist nowhere else.
+                opaque += 1
+            elif p in trunk_ids:
                 landed += 1
             else:
                 unlanded.append(git('log', '-1', '--format=%s', c))
+        classifiable = len(commits) - opaque
         if not commits:
             # Nothing ahead of the trunk yet. Until 2026-09-12 this fell into
             # the MERGED arm and was reported deletable, which is exactly
@@ -124,9 +137,13 @@ def classify(depth):
             # later. Its worktree is what saved it; a branch created without
             # one would have been force-deleted.
             verdict = 'NEW'
-        elif landed == len(commits):
+        elif classifiable and landed == classifiable:
+            # Every commit we can actually read is in the trunk. Merge
+            # commits alongside them are noise once the real work landed.
             verdict = 'MERGED'
         else:
+            # Includes the all-merges case (classifiable == 0): nothing to
+            # verify, so it is not deletable.
             verdict = 'UNMERGED'
         if b == current:
             verdict += ' (current)'
