@@ -973,20 +973,49 @@ def actual_contents_items(text):
             for mm in CONTENTS_ITEM.finditer(section)]
 
 
+# Pages styleguide.md's Content-shape section exempts from carrying a
+# `## Contents` block at all. NOT the same set as SIBLING_EXEMPT, and
+# conflating the two is a mistake that has already been made here:
+# `-history.md` is exempt from needing a *sibling* but still carries a
+# Contents block like any other page, and reverse-proxy-history.md lost its
+# one on 2026-09-12 on the strength of that confusion. Keep the two lists
+# apart and named for what they exempt.
+CONTENTS_EXEMPT = (
+    re.compile(r'^wiki/lessons-learned(\.md|/)'),
+    re.compile(r'-for-agents\.md$'),
+)
+
+
 def check_contents(root):
-    """Every page's `## Contents` block matches what `expected_contents_items`
-    would generate from its own headings right now -- catches the drift this
-    whole mechanism exists to prevent: a heading renamed, added, or removed
-    without updating the list above it. Skips a page with no `## Contents`
-    section (nothing to check against) rather than demanding every page have
-    one; `styleguide.md` is where that expectation is written down instead."""
+    """Two halves, both about a page's `## Contents` block.
+
+    - **stale**: a page that has one, whose list no longer matches its own
+      headings -- a heading renamed, added, or removed without regenerating.
+    - **missing** (added 2026-09-12): a page that should have one and
+      doesn't. This used to be skipped outright, on the reasoning that
+      styleguide.md is where the expectation is written down -- which left
+      the failure it was silent about indistinguishable from correct
+      behaviour: a page whose block was *deleted* looked exactly like a page
+      correctly exempt. That is not hypothetical; reverse-proxy-history.md
+      lost its block on 2026-09-12 and `check` stayed green.
+
+    A page with no `##` headings at all is skipped either way -- there is
+    nothing to list, and `gen-contents` declines to write an empty block."""
     findings = []
     for path in sorted(root.joinpath('wiki').rglob('*.md')):
+        rel = path.relative_to(root).as_posix()
         text = path.read_text()
         actual = actual_contents_items(text)
+        expected = expected_contents_items(text)
         if actual is None:
+            if expected and not any(rx.search(rel) for rx in CONTENTS_EXEMPT):
+                findings.append(
+                    f"MISSING CONTENTS  {path}: has {len(expected)} `##` "
+                    f"headings but no '## Contents' block, and isn't exempt "
+                    f"(styleguide.md, Content shape) -- add one with "
+                    f"`gen-contents {path}`")
             continue
-        if actual != expected_contents_items(text):
+        if actual != expected:
             findings.append(
                 f"STALE CONTENTS  {path}: its '## Contents' list doesn't "
                 f"match its own headings -- fix with `gen-contents {path}`")
@@ -1068,6 +1097,25 @@ def check_counts(root):
             if label.startswith(key):
                 rows[key] = int(n)
                 break
+    if not rows:
+        # Zero rows parsed means the table is gone, moved to another page, or
+        # its labels drifted out of COUNT_DEFS' reach -- and until 2026-09-12
+        # every one of those read as "no findings", because the per-key loop
+        # below skips a key it cannot find. A check that silently stops
+        # checking is worse than no check: the page keeps four numbers that
+        # nothing recomputes while `wiki-lint` stays green. Same shape as the
+        # MISSING CONTENTS gap fixed the same day.
+        #
+        # Deliberately only fires when ALL rows are missing. Removing ONE row
+        # stays a page edit rather than drift, which is what the `continue`
+        # below is for.
+        findings.append(
+            f"MISSING COUNTS TABLE  {root / STYLEGUIDE_COUNTS}: no rows "
+            f"matched any of {[k for k, _ in COUNT_DEFS]} -- the counts "
+            f"table is gone or its labels drifted, so `counts` is silently "
+            f"checking nothing. Point STYLEGUIDE_COUNTS at its new home, or "
+            f"update COUNT_DEFS' labels.")
+        return findings + _host_count_findings(root)
     files = sorted((root / MODULES_DIR).rglob('*.nix'))
     for key, pattern in COUNT_DEFS:
         if key not in rows:
@@ -1083,6 +1131,14 @@ def check_counts(root):
                 f"STALE    {root / STYLEGUIDE_COUNTS}: counts table says "
                 f"{rows[key]} for '{key}' but recomputed {actual}")
 
+    return findings + _host_count_findings(root)
+
+
+def _host_count_findings(root):
+    """The "all N hosts"-shaped prose half of `counts`, split out 2026-09-12
+    so the counts-table half can return early on a missing table without
+    silently skipping this too."""
+    findings = []
     hosts = actual_hosts(root)
     class_count = {'nixos': sum(1 for c in hosts.values() if c == 'nixos'),
                    'darwin': sum(1 for c in hosts.values() if c == 'darwin')}

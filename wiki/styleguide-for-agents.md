@@ -1,6 +1,6 @@
 # Wiki style guide, for agents
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-12_
 
 Condensed from [styleguide.md](styleguide.md), which keeps the reasoning and
 the precedents. Rules only here. The *repo's* style guide is
@@ -39,7 +39,10 @@ gen-contents <page>` after adding, renaming, or removing any heading; it's
 idempotent. A hand-derived anchor already got it wrong once.
 
 Exempt from `## Contents`: `lessons-learned.md`, `lessons-learned/`
-articles, and `-for-agents.md` siblings.
+articles, and `-for-agents.md` siblings. **Not the same list as the sibling
+exemption** — `-history.md` needs no sibling but does carry a Contents
+block. A non-exempt page with headings and no block is a MISSING CONTENTS
+finding (2026-09-12).
 
 ## Two audiences per page
 
