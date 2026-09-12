@@ -19,12 +19,12 @@ checked, so a stale entry can be re-tested rather than guessed at.
 ## Contents
 
 - [How this differs from open-threads.md](#how-this-differs-from-open-threadsmd)
-- [1. Done — Elly is signed in, confirmed 2026-09-05](#1-done--elly-is-signed-in-confirmed-2026-09-05)
-- [2. Done — mirror, not origin, and now a real mirror — 2026-09-11](#2-done--mirror-not-origin-and-now-a-real-mirror--2026-09-11)
+- [1. Is the admin account actually an admin?](#1-is-the-admin-account-actually-an-admin)
+- [2. Mirror, or origin?](#2-mirror-or-origin)
 - [3. golink has no links yet](#3-golink-has-no-links-yet)
 - [4. Done — backups exist, and a restore has actually recovered something](#4-done--backups-exist-and-a-restore-has-actually-recovered-something)
 - [5. Grafana's admin credentials](#5-grafanas-admin-credentials)
-- [6. Housekeeping on cube: one scratch directory left over — done](#6-housekeeping-on-cube-one-scratch-directory-left-over--done)
+- [6. Done — housekeeping on cube, 2026-08-24](#6-done--housekeeping-on-cube-2026-08-24)
 - [7. Homepage's calendar feeds](#7-homepages-calendar-feeds)
 - [What's verified here](#whats-verified-here)
 - [See also](#see-also)
@@ -44,55 +44,37 @@ to find a real bug, once more to confirm the fix).
 
 ---
 
-## 1. Done — Elly is signed in, confirmed 2026-09-05
+## 1. Is the admin account actually an admin?
 
-As of 2026-08-24, `GET /git/api/v1/users/search` returned
-`{"data":[],"ok":true}` — the forge up, serving, and completely empty,
-with registration closed so the first account needed a manual command.
-2026-08-26: `forgejo-admin-bootstrap` (see
-[git-forge](../categories/git-forge.md)) automated that, creating the
-`elly`/admin account declaratively on activation.
+The setup half is done and its story moved to
+[git-forge-history.md](../categories/git-forge-history.md#the-admin-account-and-an-anonymous-api-that-reports-zeroes)
+2026-09-12: the `elly` account is bootstrapped declaratively, Elly is signed
+in (confirmed 2026-09-05), and the anonymous API that made two sessions
+report otherwise is documented there.
 
-**A real gap in how this was checked, caught 2026-09-05**: the unauthenticated
-`GET /git/api/v1/users/search` always reports `last_login` as the zero
-value (`0001-01-01T00:00:00Z`) and `is_admin`/`active` as `false` —
-Forgejo/Gitea's own anonymous-safe field masking, not a real read of
-account state. Two agent sessions (2026-09-04, 2026-09-05) took that zero
-value at face value and wrote "nobody has signed in yet" into this page
-and the backup runbook — wrong both times, since a same-day screenshot
-from Elly showed an active, logged-in session the whole time. The account
-existing was real; the "hasn't logged in" conclusion drawn from an
-anonymous API call was not. Re-running the same query afterward still
-returns the same zero value even with Elly actively logged in, confirming
-the field is simply not meaningful from this endpoint, not that anything
-changed.
+**What is still open:** whether the account really carries admin rights
+(`forgejo-admin-bootstrap`'s `--admin` flag) is unconfirmed either way. The
+masked `is_admin: false` from the anonymous endpoint neither proved nor
+disproved it. Settling it means opening Site Administration from inside the
+UI — not another anonymous API call.
 
-**Still open**: whether the account is *really* admin (bootstrap's
-`--admin` flag) is unconfirmed either way — the masked `is_admin: false`
-never proved or disproved it. Confirming it means checking the Site
-Administration panel from inside the UI, not another anonymous API call.
+Separately, and also still open: add an SSH key under Settings → SSH keys if
+you want `forgejo@ts-cube:…` clones. See [using the forge](forgejo.md) for
+why that key authorizes `forgejo@ts-cube` and not `elly@ts-cube`.
 
-Then, separately: add an SSH key under Settings → SSH keys if you want
-`forgejo@ts-cube:…` clones. See [using the forge](forgejo.md) for why that
-key authorizes `forgejo@ts-cube` and not `elly@ts-cube`.
+## 2. Mirror, or origin?
 
-## 2. Done — mirror, not origin, and now a real mirror — 2026-09-11
+The "is anything actually mirrored" half is done and moved to
+[git-forge-history.md](../categories/git-forge-history.md#mirror-not-origin--and-the-first-real-mirror)
+2026-09-12: this repo is a genuine Forgejo pull mirror as of 2026-09-11, all
+7 branches confirmed matching GitHub.
 
-- **As a mirror** — GitHub stays the origin, cube holds copies. Losing cube
-  costs nothing. **Chosen**, 2026-09-03, before item 4's restore was
-  proven — worth revisiting now that a real restore has actually
-  succeeded, if an origin is wanted.
-- **As an origin** — things live here first. That's the useful version, and
-  it's the one that shouldn't happen until backups exist.
-
-**2026-09-11: this repo itself is now the first one actually mirrored.**
-`elly/nixos-configs` was created as a genuine Forgejo pull mirror (migrate
-API, `mirror: true`, `mirror_interval: 8h0m0s`, authenticated with the
-`forgejo_api_key` sops secret) of
-`https://github.com/NireBryce/nixos-configs.git`. GitHub stays canonical;
-Forgejo re-pulls on its own schedule, no cron in this repo. Confirmed live:
-all 7 branches present and matching GitHub's own branch list. See
-[forgejo.md](forgejo.md#this-repo-is-mirrored-here).
+**What is still open:** mirror was chosen 2026-09-03 explicitly *before*
+item 4's restore was proven, on the reasoning that an origin shouldn't exist
+until backups do. Backups now exist and a real restore has recovered a real
+database, so the condition that decided this has been met — worth revisiting
+if an origin is wanted. Nothing forces the change; it is a live option, not
+a task.
 
 ## 3. golink has no links yet
 
@@ -123,49 +105,17 @@ one that created it.
 
 ## 4. Done — backups exist, and a restore has actually recovered something
 
-**The big one**, tracked as
-[#87](https://github.com/NireBryce/nixos-configs/issues/87), closed
-2026-09-06: a real restore of `/var/lib/forgejo`, `/persist/`, and
-Forgejo's actual sqlite database has been performed and confirmed
-recoverable — not just "a backup exists," the harder bar #87 always set.
+Closed 2026-09-06, tracked as
+[#87](https://github.com/NireBryce/nixos-configs/issues/87). A real restore
+of `/var/lib/forgejo`, `/persist/` and Forgejo's actual sqlite database was
+performed and confirmed recoverable — the harder bar #87 always set, not
+merely "a backup exists". The drill found a real bug in the sqlite staging
+mechanism, since fixed and confirmed live.
 
-2026-08-28: the [backup](../categories/backup.md) category exists now
-(restic to the QNAP). Originally a local-path repo on the QNAP NFS mount —
-that failed for real (`mount.nfs: access denied by server`, the share's
-export ACL never included cube), and as of 2026-08-31 the module switched
-to SFTP instead, issue #87's original plan. SSH now works on the QNAP (a
-dedicated key for this, confirmed authenticating by hand), but:
-
-- ~~Neither sops secret has a value in this tree~~ — **set, 2026-08-30
-  (`restic-cube-password`) and 2026-08-31 (`restic-cube-ssh-key`)**, and
-  **live-confirmed working 2026-09-05**: cube has switched onto the
-  `restic-backup`-share path move, its timer has run successfully against
-  it, and the pre-move repo's history (five snapshots, 2026-08-31 through
-  2026-09-04) was migrated in with `restic copy` — six snapshots total,
-  confirmed via a live listing. See
-  [backup-history.md](../categories/backup-history.md).
-- ~~No QNAP-side snapshot schedule exists on the backup share~~ — **done,
-  2026-09-05**, confirmed via a Snapshot Manager screenshot: daily at
-  04:30 on the `restic-backup` share, keeping 5 days, status Success, 2
-  snapshots already taken.
-- ~~QuTS hero has no toggle to force key-only SSH auth~~ — **mitigated,
-  2026-08-31**: port 22 is now LAN-blocked and tailnet-only (confirmed
-  live), and QNAP's brute-force protection is on. See the runbook's setup
-  step 3.
-
-**All setup is done, and the restore drill found a real bug — since fixed
-and confirmed live.** The sqlite consistency mechanism
-(`backupPrepareCommand`, meant to protect Forgejo/Grafana/golink's
-databases specifically) had never actually worked: `restic ls --recursive`
-against the repository showed it backed up completely empty in every real
-run checked, including a fresh reboot. Root cause: the staging directory
-lived inside restic's own cache directory, which restic refuses to back
-up — confirmed with a clean before/after test. Fixed by moving it outside
-that directory, then confirmed for real: a switch, a real backup run, and
-a real restore that opened a genuine, complete Forgejo database (every
-expected table present). Full account: **[backup
-runbook](backup-runbook.md)** and `wiki/categories/backup.md`'s "The
-sqlite consistency bug."
+The full setup account — the two sops secrets, the QNAP snapshot schedule,
+the SSH-auth limitation — moved to
+[backup-history.md](../categories/backup-history.md#the-setup-checklist-closed-out-2026-08-28-through-2026-09-06)
+2026-09-12. The procedure is [backup-runbook.md](backup-runbook.md).
 
 ## 5. Grafana's admin credentials
 
@@ -184,13 +134,12 @@ to keep permanently should end up in the repo:
 [monitoring.md](../categories/monitoring.md#adding-a-dashboard-that-survives-a-rebuild)
 has the how-to, not yet verified against a real UI export.
 
-## 6. Housekeeping on cube: one scratch directory left over — done
+## 6. Done — housekeeping on cube, 2026-08-24
 
-As of 2026-08-24, `~/nixos-configs` evaluated to exactly what was running
-(`toplevel.outPath` matched `/run/current-system`), and was one docs-only
-commit behind. The leftover, **`~/nixos-caddy-test`** (the rsync'd tree the
-Caddy/glance switches were activated from), has since been deleted, and the
-real checkout is caught up with `main`.
+`~/nixos-caddy-test` (the rsync'd tree the Caddy/glance switches were
+activated from) has been deleted, and the real checkout is caught up. Kept
+as a one-line record rather than moved: there is no `housekeeping` category
+for it to have a history page in, and the outcome is the whole story.
 
 ## 7. Homepage's calendar feeds
 

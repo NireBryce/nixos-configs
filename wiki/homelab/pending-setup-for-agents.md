@@ -52,7 +52,11 @@ returns `last_login` as `0001-01-01T00:00:00Z` and `is_admin`/`active` as
 Two agent sessions (2026-09-04, 2026-09-05) read that zero value as "nobody
 has signed in yet" and wrote it into this page *and* the backup runbook.
 Both wrong: a same-day screenshot showed an active session throughout. The
-endpoint cannot answer either question.
+endpoint cannot answer either question. **Consequence, still open (item 1):**
+whether the `elly` account actually carries admin rights is unconfirmed
+either way — settle it in Site Administration in the UI, never from this
+endpoint. Full account moved 2026-09-12 to
+[../categories/git-forge-history.md](../categories/git-forge-history.md).
 
 ## Done, but load-bearing to know
 
