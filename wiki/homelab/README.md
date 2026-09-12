@@ -1,6 +1,6 @@
 # Homelab services
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-12_
 
 ## Contents
 
@@ -31,7 +31,7 @@ under it, which can happen with no commit to this repo at all.
 | *(what's still unfinished)* | `nire-cube` | — | [Pending setup](pending-setup.md) |
 | golink — `go/` shortlinks | `nire-cube` | `http://go/` | [Creating go/ links](creating-golinks.md) |
 | Forgejo — self-hosted git forge | `nire-cube` | `.../git/` | [Using the forge](forgejo.md) |
-| glance — the service index | `nire-cube` | `.../` (the root) | [Reaching cube's services](reaching-services.md); [landing](../categories/landing.md) covers config |
+| homepage — the landing page: services, status, weather, calendar | `nire-cube` | `https://homepage.moose-micro.ts.net/` (short: `http://homepage/`; also `.../` on cube's own name) | [Reaching cube's services](reaching-services.md); [landing](../categories/landing.md) covers config |
 | restic — backups to the QNAP | `nire-cube` | — (no URL; a timer, not a listener) | [Backup runbook](backup-runbook.md) |
 
 **Not a service of its own, but related**: [rustic](rustic.md) — a TUI that
@@ -68,7 +68,7 @@ and certificate. Caddy still terminates TLS for all of them, with certs
 issued by `tailscaled` — see
 [reverse-proxy](../categories/reverse-proxy.md).
 
-The short names (`http://grafana/`, `http://git/`, `http://glance/`) redirect
+The short names (`http://grafana/`, `http://git/`, `http://homepage/`) redirect
 to the full ones. Use `http://`, not `https://`: the bare names cannot have a
 publicly-trusted certificate, so the `https://` form shows a browser warning
 by design. Full map and the reasoning:

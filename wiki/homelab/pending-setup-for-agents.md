@@ -1,6 +1,6 @@
 # Pending setup, for agents
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-12_
 
 Condensed from [pending-setup.md](pending-setup.md), which keeps the closed
 items and their full accounts. Open work and the traps only here.
@@ -23,7 +23,7 @@ own database. The repo-side counterpart is
 
    | Short | Target |
    |---|---|
-   | `go/dash` | `https://glance.moose-micro.ts.net/` |
+   | `go/dash` | `https://homepage.moose-micro.ts.net/` |
    | `go/git` | `https://git.moose-micro.ts.net/` |
    | `go/graf` | `https://grafana.moose-micro.ts.net/` |
 
@@ -34,6 +34,15 @@ own database. The repo-side counterpart is
 3. **Grafana admin credentials** — ships a default `admin` account and
    prompts for a change on first sign-in. Not verifiable without logging in;
    confirm it happened. The tailnet is the only thing in front of it.
+4. **Homepage's calendar feeds** (#291, 2026-09-12) — plumbing all landed;
+   the gcal **secret iCal addresses** don't exist yet (IDs deliberately
+   unassigned). Until filled in the calendars render bare-grid + empty
+   agenda, plus a small API-error band per card (the placeholder URL
+   403ing) — **by design, not a bug**. Fill-in: edit sops key
+   `homepage-env` (a systemd EnvironmentFile), one
+   `HOMEPAGE_VAR_ICAL_<NAME>=<secret-ics-url>` line per calendar; add a
+   `calendars` entry in `homepage.nix` for each new NAME. Details:
+   [../categories/landing.md](../categories/landing.md#how-the-gcal-calendar-feeds-work).
 
 ## The trap that produced a wrong answer twice
 

@@ -222,6 +222,16 @@
 # One gotcha worth not re-diagnosing: the FIRST request after activation
 # returned `http=000` with the handshake failing, because caddy was still
 # fetching the cert from tailscaled. It is not a failure state; retry.
+#
+# 2026-09-12, issue #291: homepage replaced glance as the landing page.
+# The ts-cube `/` route keeps proxying to 3002 (homepage kept glance's
+# port); the `glanceFqdn` vhost and its bare-name redirects became
+# `homepageFqdn`/`http://homepage`/`https://homepage`. The control-plane
+# half is NOT in this repo: `svc:homepage` must be vip-put (and `svc:glance`
+# vip-deleted, with the ACL file's approver/grant diff-applied) at switch
+# time -- until then `homepage.moose-micro.ts.net` does not resolve, which
+# is a missing Service object, not a broken caddy. Module: nire/landing/
+# homepage/homepage.nix; its history section holds the rollout order.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
@@ -240,13 +250,15 @@
         grafanaFqdn = "grafana.moose-micro.ts.net";
         gitFqdn     = "git.moose-micro.ts.net";
 
-        # Added 2026-09-08, same shape as the two above: glance gets its
-        # own Tailscale Service (`svc:glance`, serve.nix) instead of being
-        # reached only via tailnetFqdn's `/` route -- see this file's
-        # `glanceFqdn` vhost below and serve.nix's history note for why the
-        # bare `http://glance` redirect needed it (the name didn't resolve
-        # at all without a real Service behind it).
-        glanceFqdn  = "glance.moose-micro.ts.net";
+        # Added 2026-09-08 as `glanceFqdn` -- glance's own Tailscale
+        # Service (`svc:glance`), reached via serve.nix like the two above
+        # instead of only via tailnetFqdn's `/` route (the bare name
+        # didn't resolve at all without a real Service behind it). Renamed
+        # 2026-09-12 when homepage replaced glance as the landing page
+        # (issue #291): same vhost shape, new name, and a NEW Service
+        # object (`svc:homepage`) -- a rename here does not rename the
+        # control-plane object; see serve.nix and acl-diff-applied.hujson.
+        homepageFqdn = "homepage.moose-micro.ts.net";
 
         # EVERY `.ts.net` vhost below MUST carry this, and the duplication
         # is the point of binding it once here: a `.ts.net` site that
@@ -291,16 +303,18 @@
                         # reverting -- wiki/lessons-learned.md #41 still has
                         # the mechanism written up in full.
                         #
-                        # Everything not claimed above goes to glance
-                        # (nire/landing/), the service index -- what's
-                        # running, whether it's up, how this machine is
-                        # doing. Replaced a plaintext `respond` placeholder
-                        # here 2026-08-24, the day it was written.
+                        # Everything not claimed above goes to the landing
+                        # page -- homepage (nire/landing/) since 2026-09-12
+                        # (issue #291), glance before it, which is also why
+                        # this target is still port 3002: homepage kept
+                        # glance's slot. What's running, whether it's up,
+                        # how this machine is doing, the household
+                        # calendar.
                         #
-                        # The one route with no prefix question: glance
-                        # serves at `/`, nothing stripped or preserved. Its
-                        # assets (/static/..., /api/...) fall through here
-                        # too -- not under a prefix either.
+                        # The one route with no prefix question: the page
+                        # serves at `/`, nothing stripped or preserved.
+                        # Its assets fall through here too -- not under a
+                        # prefix either.
                         handle {
                             reverse_proxy 127.0.0.1:3002
                         }
@@ -333,11 +347,12 @@
                         reverse_proxy 127.0.0.1:3001
                     '';
 
-                    # Added 2026-09-08. Same mechanism as the two vhosts
-                    # above: reached over loopback via serve.nix's raw TCP
+                    # Renamed from the `glanceFqdn` vhost 2026-09-12 (issue
+                    # #291). Same mechanism as the two vhosts above:
+                    # reached over loopback via serve.nix's raw TCP
                     # forward, tailscale issues the cert for the SITE
                     # ADDRESS regardless of the connecting address.
-                    ${glanceFqdn}.extraConfig = ''
+                    ${homepageFqdn}.extraConfig = ''
                         ${tailscaleCert}
                         reverse_proxy 127.0.0.1:3002
                     '';
@@ -379,13 +394,17 @@
                         redir https://${grafanaFqdn}{uri} permanent
                     '';
 
-                    # Landing/glance index -- now its own Service (see
-                    # glanceFqdn above), not tailnetFqdn; ts-cube's `/`
-                    # still works directly, this is just the short name.
-                    # Needs serve.nix's `tcp:80` forward like its two
-                    # neighbours -- see the note above them.
-                    "http://glance".extraConfig = ''
-                        redir https://${glanceFqdn}{uri} permanent
+                    # The landing page's short name -- homepage since
+                    # 2026-09-12 (glance's `http://glance` retired with
+                    # it). Its own Service (see homepageFqdn above), not
+                    # tailnetFqdn; ts-cube's `/` still works directly, this
+                    # is just the short name. Needs serve.nix's `tcp:80`
+                    # forward like its two neighbours -- see the note above
+                    # them -- AND the control-plane Service object
+                    # (svc-homepage.json): until that is vip-put, this
+                    # redirects to a name that does not resolve.
+                    "http://homepage".extraConfig = ''
+                        redir https://${homepageFqdn}{uri} permanent
                     '';
 
                     # HTTPS twins of the three bare-name redirects above.
@@ -441,9 +460,9 @@
                         redir https://${grafanaFqdn}{uri} permanent
                     '';
 
-                    "https://glance".extraConfig = ''
+                    "https://homepage".extraConfig = ''
                         tls internal
-                        redir https://${glanceFqdn}{uri} permanent
+                        redir https://${homepageFqdn}{uri} permanent
                     '';
                 };
             };

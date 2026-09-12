@@ -132,9 +132,13 @@ in the table above stopped answering (404) as of its own move.
 `http://ts-cube/` (bare MagicDNS name) redirects to the HTTPS index, so the
 short name still lands somewhere useful.
 
-The root route proxies to [glance](landing.md) — these two categories are a
-pair: dropping `landing` while keeping this one leaves the front page
-returning 502.
+The root route proxies to the landing page — [homepage](landing.md) since
+2026-09-12 (issue #291; glance before it), on the same port 3002 — these
+two categories are a pair: dropping `landing` while keeping this one leaves
+the front page returning 502. The landing page's own Service name is
+`svc:homepage`; like `svc:glance` before it, the Service object and its ACL
+entries are the control-plane half this repo only records — the
+`homepage.nix` history section holds the rollout order.
 
 ## Certificates come from tailscaled, with no plugin
 

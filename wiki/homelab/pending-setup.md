@@ -1,6 +1,6 @@
 # Pending setup
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-12_
 
 Services that are **running but not finished** — configured, switched,
 reachable, and still missing the human step that makes them useful. Every
@@ -25,6 +25,7 @@ checked, so a stale entry can be re-tested rather than guessed at.
 - [4. Done — backups exist, and a restore has actually recovered something](#4-done--backups-exist-and-a-restore-has-actually-recovered-something)
 - [5. Grafana's admin credentials](#5-grafanas-admin-credentials)
 - [6. Housekeeping on cube: one scratch directory left over — done](#6-housekeeping-on-cube-one-scratch-directory-left-over--done)
+- [7. Homepage's calendar feeds](#7-homepages-calendar-feeds)
 - [What's verified here](#whats-verified-here)
 - [See also](#see-also)
 
@@ -101,14 +102,17 @@ running:
 
 | Short | Target |
 |---|---|
-| `go/dash` | `https://glance.moose-micro.ts.net/` |
+| `go/dash` | `https://homepage.moose-micro.ts.net/` |
 | `go/git` | `https://git.moose-micro.ts.net/` |
 | `go/graf` | `https://grafana.moose-micro.ts.net/` |
 
 These targets were updated 2026-09-11 from the retired path-prefix URLs
 (`ts-cube.moose-micro.ts.net/git/` and friends) to each service's own
-Tailscale Services name. Nothing needed re-pointing: `http://go/.export`
-is still empty, so these remain proposals rather than links that exist.
+Tailscale Services name, and `go/dash` re-pointed 2026-09-12 from the
+retired `glance.` name to homepage (issue #291). Nothing needed
+re-pointing for real: `http://go/.export` is still empty, so these remain
+proposals rather than links that exist. One homepage-specific item joined
+this list with #291 — see the calendar-feeds entry below.
 
 Creating them is the web UI at `http://go/`, or the `curl` form in
 [creating go/ links](creating-golinks.md) — read that page's `--post302` and delete
@@ -187,6 +191,27 @@ As of 2026-08-24, `~/nixos-configs` evaluated to exactly what was running
 commit behind. The leftover, **`~/nixos-caddy-test`** (the rsync'd tree the
 Caddy/glance switches were activated from), has since been deleted, and the
 real checkout is caught up with `main`.
+
+## 7. Homepage's calendar feeds
+
+Configured end to end with #291 — the calendar/agenda widgets, the
+`homepage-env` sops key, the `{{HOMEPAGE_VAR_ICAL_*}}` plumbing — except the
+one thing only a human can supply: the **actual gcal secret iCal
+addresses**. Calendar IDs were deliberately not assigned at implementation.
+Until they are, the calendars render as a bare month grid and an empty
+agenda, and each calendar card carries a small API-error band — the
+placeholder URL 403ing, gone the moment a real address takes its place
+(the secret's `restartUnits` bounces homepage at the next switch).
+
+The fill-in: `sops <repo>/flake/modules/nire/system/secrets/secrets.yaml`,
+edit the `homepage-env` value to one
+`HOMEPAGE_VAR_ICAL_<NAME>=<secret-ics-url>` line per calendar (`family`
+exists as the placeholder name; more names mean adding entries to
+`homepage.nix`'s `calendars` attrset too). The secret's `restartUnits`
+bounces homepage-dashboard on the next switch; events then appear with no
+further commit. Where the addresses come from: Google Calendar → Settings
+→ "Secret address in iCal format", per calendar. Mechanism and traps:
+[categories/landing.md](../categories/landing.md#how-the-gcal-calendar-feeds-work).
 
 ## What's verified here
 

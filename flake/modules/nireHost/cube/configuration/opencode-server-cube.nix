@@ -43,7 +43,9 @@
 #     trustedInterfaces), and no other interface has anything listening.
 #
 # PORT 3003: next free 300x on this host -- 3000 grafana, 3001 forgejo,
-# 3002 glance (caddy.nix proxies to all three).
+# 3002 the landing page (glance until 2026-09-12, then homepage, issue
+# #291, which is also why the slot number survived the swap;
+# caddy.nix proxies to all three).
 #
 # STATE: opencode keeps everything under ~/.local/share/opencode (sessions,
 # auth). Cube has a plain persistent root (cube-configuration.nix header),

@@ -1,0 +1,1 @@
+{"name": "svc:homepage", "tags": ["tag:homelab-cube"], "ports": ["tcp:443", "tcp:80"], "comment": "nixos-configs: nire-cube homepage (gethomepage) landing page -- replaced glance and its svc:glance object 2026-09-12, issue #291 (issue #291's own rollout note carries the vip-put/vip-delete order)"}

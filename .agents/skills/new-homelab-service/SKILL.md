@@ -8,8 +8,9 @@ description: How to add a self-hosted network service to a host in this repo and
 ## Applies to
 
 Adding a service that listens on a port and is meant to be reached from
-another machine — Grafana, Forgejo, golink, glance, Caddy (all on
-`nire-cube`). Use before creating the category: some decisions are hard to
+another machine — Grafana, Forgejo, golink, the landing page, Caddy (all
+on `nire-cube`; the landing page is homepage since 2026-09-12, glance
+before, issue #291). Use before creating the category: some decisions are hard to
 undo once a service is live and has state.
 
 A service *is* a flake module, so `new-flake-module`'s rules still apply;
@@ -55,7 +56,7 @@ A category and module sharing a name both declare
 | `git-forge` | `forgejo` | `forgejo`/`forgejo` merges |
 | `shortlinks` | `golink` | and not `golinks` — one letter off reads as a typo |
 | `reverse-proxy` | `caddy` | `caddy`/`caddy` merges |
-| `landing` | `glance` | and not `dashboard` — `monitoring` is full of Grafana dashboards |
+| `landing` | `homepage` | and not `dashboard` — `monitoring` is full of Grafana dashboards (`glance` held this slot until #291 replaced it) |
 | `monitoring` | 5 modules | — |
 
 Run `just modules` immediately after creating the directory; it's the only
@@ -70,7 +71,7 @@ it until the switch.
 |---|---|---|
 | 3000 | Grafana | loopback |
 | 3001 | Forgejo | loopback |
-| 3002 | glance | loopback |
+| 3002 | homepage (landing; glance's old slot) | loopback |
 | 8080 | cadvisor | loopback |
 | 9090 | Prometheus | loopback |
 | 9100 | node-exporter | loopback |
@@ -84,8 +85,8 @@ this table:
 grep -rnE '\b(30[0-9]{2}|80[0-9]{2}|9[0-9]{3})\b' flake/modules/nire/ | grep -iE 'port'
 ```
 
-Never accept a tool's default unchecked — glance defaults to 8080, which
-cadvisor already holds.
+Never accept a tool's default unchecked — glance defaulted to 8080, which
+cadvisor already holds; homepage-dashboard defaults to 8082, next to it.
 
 ## 4. Bind loopback, add nothing to the firewall
 
@@ -122,7 +123,7 @@ Root 200 + prefix 404 → `handle_path`. Caddyfile mechanics that bite:
 `handle` takes **one** matcher token (`handle /a /a/*` is a parse error;
 two paths need a named matcher `@a path /a /a/*`), and `handle_path` takes
 an inline path matcher only, so a bare `/a` needs its own `redir` to `/a/`.
-A service at `/` (glance) sidesteps all of this. The other direction —
+A service at `/` (the landing page) sidesteps all of this. The other direction —
 giving the service its own `svc:` hostname instead of any path prefix —
 is `new-tailscale-service`.
 
@@ -179,8 +180,9 @@ Skipping rungs is fine; claiming a rung you didn't run is not.
    between restarts); `systemctl list-units --state=failed`; `ss -ltn` for
    the binding.
 9. **Check what the service renders, not just the status code.** glance
-   serves widgets from `/api/pages/<page>/content/`, so a 200 on `/` proved
-   nothing; Forgejo can proxy fine and still emit 404 links. §40's version:
+   served widgets from `/api/pages/<page>/content/`, so a 200 on `/` proved
+   nothing (homepage is client-side — check the rendered page and its
+   widgets in a browser); Forgejo can proxy fine and still emit 404 links. §40's version:
    a failed unit ≠ the thing it manages is down, and vice versa.
 
 Strongest end state, worth stating in the commit when true: the tree being

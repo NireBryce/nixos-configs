@@ -1,6 +1,6 @@
 # Hosts & current state
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-12_
 
 ## Contents
 
@@ -43,10 +43,12 @@ status and what broke on the way:
 - [reverse-proxy](categories/reverse-proxy.md) — Caddy, the single
   tailnet-facing HTTPS listener, with certs issued by `tailscaled`. Each web
   service has its own tailnet name since 2026-09-07
-  (`grafana.`/`git.`/`glance.moose-micro.ts.net`); the `/grafana/` and
+  (`grafana.`/`git.moose-micro.ts.net`; `homepage.` since 2026-09-12,
+  when it replaced glance — `glance.` retired). the `/grafana/` and
   `/git/` path prefixes they used from 2026-08-24 are retired. URLs:
   [homelab/reaching-services.md](homelab/reaching-services.md).
-- [landing](categories/landing.md) — glance at `/` (2026-08-24).
+- [landing](categories/landing.md) — the landing page at `/` (2026-08-24;
+  homepage since 2026-09-12, glance before, issue #291).
 - [shortlinks](categories/shortlinks.md) — golink (2026-08-24). Not behind
   Caddy and not a host service: it embeds tsnet and joins the tailnet as its
   own device `go`, needing a one-time interactive login on first start.

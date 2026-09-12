@@ -1,6 +1,6 @@
 # Category reference
 
-_Last modified: 2026-09-02_
+_Last modified: 2026-09-12_
 
 ## Contents
 
@@ -76,7 +76,7 @@ config-vs-usage split. "—" means no service exists to write one about yet.
 | backup | [homelab/backup-runbook.md](../homelab/backup-runbook.md) (+ [rustic.md](../homelab/rustic.md) for browsing/restoring) |
 | containers | — (podman/distrobox, no fleet-facing service) |
 | git-forge | [homelab/forgejo.md](../homelab/forgejo.md) |
-| landing | [homelab/reaching-services.md](../homelab/reaching-services.md) (glance is the front page itself, not a separate page) |
+| landing | [homelab/reaching-services.md](../homelab/reaching-services.md) (homepage — the front page itself, not a separate page) |
 | monitoring | not yet written up — see [homelab/README.md](../homelab/README.md)'s "Also running, not yet written up" |
 | reverse-proxy | [homelab/reaching-services.md](../homelab/reaching-services.md) (the arrangement all the others sit behind) |
 | shortlinks | [homelab/creating-golinks.md](../homelab/creating-golinks.md) |
