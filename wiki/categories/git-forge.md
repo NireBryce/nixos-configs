@@ -1,6 +1,6 @@
 # `git-forge` — `nire/homelab/git-forge/`
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-12_
 
 Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only; nested under
 the `homelab` umbrella since 2026-08-27 (name unaffected). As of 2026-09-07
@@ -140,8 +140,9 @@ account and password both work as declared. Whether it's genuinely
 *admin* (the `--admin` flag) is still unconfirmed: Forgejo's
 unauthenticated `/api/v1/users/search` always reports `is_admin: false`
 regardless of the real value, so that field can't settle it — see
-[pending-setup.md](../homelab/pending-setup.md) item 1 for the fuller
-account of that trap. Checking from inside the UI (Site Administration
+[git-forge-history.md](git-forge-history.md#the-admin-account-and-an-anonymous-api-that-reports-zeroes)
+for the fuller account of that trap (moved there from `pending-setup.md`
+item 1, 2026-09-12), which still tracks the open question. Checking from inside the UI (Site Administration
 panel) is the way to actually confirm it.
 
 ## No persistence entry, same reasoning as Grafana

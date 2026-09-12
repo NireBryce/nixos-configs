@@ -1,12 +1,13 @@
 # `backup` — history
 
-_Last modified: 2026-09-06_
+_Last modified: 2026-09-12_
 
 ## Contents
 
 - [The original plan (2026-08-27)](#the-original-plan-2026-08-27)
 - [The QNAP mount predates this category by months, and was never dangling](#the-qnap-mount-predates-this-category-by-months-and-was-never-dangling)
 - [Getting the SFTP repository from "declared" to "actually working" (2026-08-30 through 2026-09-06)](#getting-the-sftp-repository-from-declared-to-actually-working-2026-08-30-through-2026-09-06)
+- [The setup checklist, closed out (2026-08-28 through 2026-09-06)](#the-setup-checklist-closed-out-2026-08-28-through-2026-09-06)
 - [See also](#see-also)
 
 Resolved incidents and superseded design behind [backup](backup.md) and
@@ -108,6 +109,39 @@ Five separate one-time steps, each hit a real snag:
    ahead flips depending on which was last used, not on either path name
    being inherently current. Check both with `git log -1` every time
    rather than trusting memory of which was ahead last.
+
+## The setup checklist, closed out (2026-08-28 through 2026-09-06)
+
+Moved here 2026-09-12 from `homelab/pending-setup.md` item 4, which is
+fully resolved. Tracked as
+[#87](https://github.com/NireBryce/nixos-configs/issues/87), closed
+2026-09-06 against the harder bar it always set — not "a backup exists" but
+a real restore of `/var/lib/forgejo`, `/persist/` and Forgejo's actual
+sqlite database, confirmed recoverable.
+
+The three sub-items that had to close first, all of which did:
+
+- **Neither sops secret had a value in this tree** — set 2026-08-30
+  (`restic-cube-password`) and 2026-08-31 (`restic-cube-ssh-key`), and
+  live-confirmed working 2026-09-05: cube switched onto the
+  `restic-backup`-share path move, its timer ran successfully against it,
+  and the pre-move repository's history (five snapshots, 2026-08-31 through
+  2026-09-04) was migrated in with `restic copy` — six snapshots total,
+  confirmed by a live listing.
+- **No QNAP-side snapshot schedule on the backup share** — done 2026-09-05,
+  confirmed via a Snapshot Manager screenshot: daily at 04:30 on the
+  `restic-backup` share, keeping 5 days, status Success.
+- **QuTS hero has no toggle to force key-only SSH auth** — mitigated
+  2026-08-31: port 22 is LAN-blocked and tailnet-only (confirmed live), and
+  QNAP's brute-force protection is on. Still a standing limitation rather
+  than a fix, and it is listed as such on
+  [open-threads.md](../open-threads.md).
+
+The restore drill is what made this worth doing: it found a real bug, since
+fixed and confirmed live. Full account in "Getting the SFTP repository from
+'declared' to 'actually working'" above and in
+[backup.md](backup.md)'s "The sqlite consistency bug"; the procedure is
+[backup-runbook.md](../homelab/backup-runbook.md).
 
 ## See also
 

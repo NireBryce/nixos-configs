@@ -1,6 +1,7 @@
 # `git-forge`, for agents
 
 _Last modified: 2026-09-11_
+_Sibling reviewed: 2026-09-12 -- git-forge.md only retargeted where the users/search trap's fuller account lives (pending-setup.md item 1 -> git-forge-history.md); this page states the trap itself and links to neither._
 
 Condensed from [git-forge.md](git-forge.md), which keeps the reasoning and
 the narrative. Facts only here.
