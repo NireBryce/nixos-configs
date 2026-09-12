@@ -1370,14 +1370,32 @@ def regenerate_contents(path):
     Replaces ONLY the contiguous run of `- [text](#slug)` lines right after
     the `## Contents` heading -- never "everything up to the next `##`
     heading" the way `check_table`'s NEXT_HEADING trick does elsewhere in
-    this file. Several pages put a line or two of intro prose between the
-    Contents heading and the first real section (deliberately -- title,
-    Contents, intro, first heading); an earlier version of this function
-    used the NEXT_HEADING span and silently deleted that prose on every
-    such page the first time it ran. Bullet-list-only replacement can't
-    repeat that mistake no matter what sits after the list."""
+    this file. An earlier version used the NEXT_HEADING span and silently
+    deleted the intro prose that used to sit between the Contents heading
+    and the first real section, on every such page the first time it ran.
+    Bullet-list-only replacement can't repeat that mistake no matter what
+    sits after the list -- which is still the guarantee that matters even
+    though the 2026-09-11 reorder moved that prose above the Contents
+    block (styleguide.md, Content shape), leaving nothing between the list
+    and the first heading on a paired page.
+
+    Position-independent by construction: when a `## Contents` heading
+    already exists this rewrites it in place, wherever it sits. The
+    insert-from-scratch path puts a new block immediately before the page's
+    first real `##` heading, which is where styleguide.md's Content shape
+    section wants it -- below the title, the date, the intro prose and the
+    condensed-version pointer. It lands after the date instead only on a
+    page with no `##` heading at all to sit above."""
     text = path.read_text()
     items = expected_contents_items(text)
+    if not items and not CONTENTS_HEADING.search(text):
+        # Nothing to list and no block to rewrite: inserting an empty
+        # `## Contents` heading here is worse than leaving the page alone.
+        # `check_contents` passes either way (it compares an empty list
+        # against an empty list), so this is only about not writing
+        # something a reader has to wonder about.
+        print(f"SKIP {path}: no `##` headings to list")
+        return
     block = '## Contents\n\n' + '\n'.join(f'- [{t}](#{s})' for t, s in items) + '\n'
     m = CONTENTS_HEADING.search(text)
     if m:
@@ -1405,6 +1423,13 @@ def regenerate_contents(path):
             insert_at += 1
             while insert_at < len(lines) and lines[insert_at].strip() == '':
                 insert_at += 1
+        # Past the intro prose too, to just above the first real section --
+        # the title/date position above is only the floor, used when the page
+        # has no `##` heading to sit in front of.
+        first_heading = next((i for i, l in enumerate(lines)
+                              if i >= insert_at and l.startswith('## ')), None)
+        if first_heading is not None:
+            insert_at = first_heading
         new_text = ''.join(lines[:insert_at]) + block + '\n' + ''.join(lines[insert_at:])
     if new_text != text:
         path.write_text(new_text)

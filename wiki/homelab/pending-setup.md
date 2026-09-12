@@ -2,6 +2,20 @@
 
 _Last modified: 2026-09-11_
 
+Services that are **running but not finished** — configured, switched,
+reachable, and still missing the human step that makes them useful. Every
+item here is something to do *to a live service*, in a browser or over ssh,
+not a change to `flake/modules/`.
+
+Verified against the live instances on 2026-08-24; each item says how it was
+checked, so a stale entry can be re-tested rather than guessed at.
+
+> **Condensed version:**
+> [pending-setup-for-agents.md](pending-setup-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
 ## Contents
 
 - [How this differs from open-threads.md](#how-this-differs-from-open-threadsmd)
@@ -13,20 +27,6 @@ _Last modified: 2026-09-11_
 - [6. Housekeeping on cube: one scratch directory left over — done](#6-housekeeping-on-cube-one-scratch-directory-left-over--done)
 - [What's verified here](#whats-verified-here)
 - [See also](#see-also)
-
-> **Condensed version:**
-> [pending-setup-for-agents.md](pending-setup-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
-Services that are **running but not finished** — configured, switched,
-reachable, and still missing the human step that makes them useful. Every
-item here is something to do *to a live service*, in a browser or over ssh,
-not a change to `flake/modules/`.
-
-Verified against the live instances on 2026-08-24; each item says how it was
-checked, so a stale entry can be re-tested rather than guessed at.
 
 ## How this differs from open-threads.md
 

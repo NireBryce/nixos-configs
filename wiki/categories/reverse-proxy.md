@@ -2,29 +2,6 @@
 
 _Last modified: 2026-09-11_
 
-## Contents
-
-- [What's in it](#whats-in-it)
-- [What it changed elsewhere](#what-it-changed-elsewhere)
-- [Certificates come from tailscaled, with no plugin](#certificates-come-from-tailscaled-with-no-plugin)
-- [Paths, not subdomains, was the original constraint — Tailscale Services lifted it, partially](#paths-not-subdomains-was-the-original-constraint--tailscale-services-lifted-it-partially)
-- [Fronting Tailscale Services with Caddy](#fronting-tailscale-services-with-caddy)
-- [The two apps want opposite things from the proxy (historical)](#the-two-apps-want-opposite-things-from-the-proxy-historical)
-- [Named matchers, not inline ones](#named-matchers-not-inline-ones)
-- [The redirect vhost needs its scheme spelled out](#the-redirect-vhost-needs-its-scheme-spelled-out)
-- [Firewall, and binding 443 as a non-root user](#firewall-and-binding-443-as-a-non-root-user)
-- [Ordering against tailscaled](#ordering-against-tailscaled)
-- [No persistence entry](#no-persistence-entry)
-- [Why the category isn't named `caddy`](#why-the-category-isnt-named-caddy)
-- [Imported by](#imported-by)
-- [See also](#see-also)
-
-> **Condensed version:**
-> [reverse-proxy-for-agents.md](reverse-proxy-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
 [Caddy](https://caddyserver.com/), one tailnet-only HTTPS front door for
 every web service on `nire-cube`. Added 2026-08-24, cube-only; nested under
 the `homelab` umbrella since 2026-08-27 (name unaffected).
@@ -110,6 +87,29 @@ Two things the same investigation turned up, both still open:
   switch happened to re-run it. Nothing about the unit makes this
   self-healing across a reboot, which also means the glance step above
   will not survive one.
+
+> **Condensed version:**
+> [reverse-proxy-for-agents.md](reverse-proxy-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
+## Contents
+
+- [What's in it](#whats-in-it)
+- [What it changed elsewhere](#what-it-changed-elsewhere)
+- [Certificates come from tailscaled, with no plugin](#certificates-come-from-tailscaled-with-no-plugin)
+- [Paths, not subdomains, was the original constraint — Tailscale Services lifted it, partially](#paths-not-subdomains-was-the-original-constraint--tailscale-services-lifted-it-partially)
+- [Fronting Tailscale Services with Caddy](#fronting-tailscale-services-with-caddy)
+- [The two apps want opposite things from the proxy (historical)](#the-two-apps-want-opposite-things-from-the-proxy-historical)
+- [Named matchers, not inline ones](#named-matchers-not-inline-ones)
+- [The redirect vhost needs its scheme spelled out](#the-redirect-vhost-needs-its-scheme-spelled-out)
+- [Firewall, and binding 443 as a non-root user](#firewall-and-binding-443-as-a-non-root-user)
+- [Ordering against tailscaled](#ordering-against-tailscaled)
+- [No persistence entry](#no-persistence-entry)
+- [Why the category isn't named `caddy`](#why-the-category-isnt-named-caddy)
+- [Imported by](#imported-by)
+- [See also](#see-also)
 
 ## What's in it
 

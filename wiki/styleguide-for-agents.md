@@ -30,7 +30,9 @@ A category page's order: **what's in it → category-specific mechanism notes
 2. `_Last modified: YYYY-MM-DD_` — **bump it in the same change you edit
    content in.** A purely mechanical touch doesn't need it. This line is
    load-bearing for the `siblings` check.
-3. `## Contents` — one bullet per `##` heading.
+3. intro prose (what this page is), then the condensed-version blockquote
+4. `## Contents` — one bullet per `##` heading, **after** the intro, not
+   before it (moved 2026-09-11; it sat under the title until then).
 
 **Don't hand-derive anchors.** Run `python3 wiki/scripts/check_wiki.py
 gen-contents <page>` after adding, renaming, or removing any heading; it's

@@ -2,6 +2,23 @@
 
 _Last modified: 2026-09-11_
 
+Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only; nested under
+the `homelab` umbrella since 2026-08-27 (name unaffected). As of 2026-09-07
+reached at `https://git.moose-micro.ts.net/` — its own Tailscale Services
+name, still fronted by Caddy ([reverse-proxy](reverse-proxy.md)) since
+Tailscale Services can't terminate HTTPS declaratively yet (confirmed
+upstream bug, see `tailscale-services/serve.nix`'s history section). The
+`.../git/`-path-under-`ts-cube` form no longer answers (404).
+[git-forge-history.md](git-forge-history.md) has the original first-switch
+record and the move behind Caddy; the move to its own service name is
+this category's newest change, not yet its own history entry.
+
+> **Condensed version:**
+> [git-forge-for-agents.md](git-forge-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
 ## Contents
 
 - [What's in it](#whats-in-it)
@@ -14,23 +31,6 @@ _Last modified: 2026-09-11_
 - [No persistence entry, same reasoning as Grafana](#no-persistence-entry-same-reasoning-as-grafana)
 - [Imported by](#imported-by)
 - [See also](#see-also)
-
-> **Condensed version:**
-> [git-forge-for-agents.md](git-forge-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
-Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only; nested under
-the `homelab` umbrella since 2026-08-27 (name unaffected). As of 2026-09-07
-reached at `https://git.moose-micro.ts.net/` — its own Tailscale Services
-name, still fronted by Caddy ([reverse-proxy](reverse-proxy.md)) since
-Tailscale Services can't terminate HTTPS declaratively yet (confirmed
-upstream bug, see `tailscale-services/serve.nix`'s history section). The
-`.../git/`-path-under-`ts-cube` form no longer answers (404).
-[git-forge-history.md](git-forge-history.md) has the original first-switch
-record and the move behind Caddy; the move to its own service name is
-this category's newest change, not yet its own history entry.
 
 ## What's in it
 

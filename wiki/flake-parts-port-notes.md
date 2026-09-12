@@ -2,19 +2,6 @@
 
 _Last modified: 2026-09-11_
 
-## Contents
-
-- [Decisions, not defaults](#decisions-not-defaults)
-- [Dead ends, with the symptom that identified them](#dead-ends-with-the-symptom-that-identified-them)
-- [flake-parts machinery, with the upstream source behind each claim](#flake-parts-machinery-with-the-upstream-source-behind-each-claim)
-- [See also](#see-also)
-
-> **Condensed version:**
-> [flake-parts-port-notes-for-agents.md](flake-parts-port-notes-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
 Salvaged 2026-09-08 from the `flake-parts` branch, which was deleted the
 same day. That branch was the sibling of this one — the 2026-08 den →
 flake-parts port, done on a darwin laptop against a tree that could only be
@@ -41,6 +28,19 @@ cf9aea42:SESSION-HANDOFF.md` and `git show
 cf9aea42:linux-flake/flake-parts-reference.md` still work in a clone that
 has fetched it — but a deleted branch's commits are unreferenced and
 eventually garbage-collected, which is the reason for this page.
+
+> **Condensed version:**
+> [flake-parts-port-notes-for-agents.md](flake-parts-port-notes-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
+## Contents
+
+- [Decisions, not defaults](#decisions-not-defaults)
+- [Dead ends, with the symptom that identified them](#dead-ends-with-the-symptom-that-identified-them)
+- [flake-parts machinery, with the upstream source behind each claim](#flake-parts-machinery-with-the-upstream-source-behind-each-claim)
+- [See also](#see-also)
 
 ## Decisions, not defaults
 

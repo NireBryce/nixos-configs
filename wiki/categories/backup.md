@@ -2,24 +2,6 @@
 
 _Last modified: 2026-09-11_
 
-## Contents
-
-- [What's in it](#whats-in-it)
-- [Why the category isn't named `restic`](#why-the-category-isnt-named-restic)
-- [SFTP repository now, not local-path on NFS](#sftp-repository-now-not-local-path-on-nfs)
-- [The sqlite consistency bug — root-caused and fixed, 2026-09-06](#the-sqlite-consistency-bug--root-caused-and-fixed-2026-09-06)
-- [What's excluded, and why](#whats-excluded-and-why)
-- [Anti-deletion is not a Nix change](#anti-deletion-is-not-a-nix-change)
-- [What isn't done yet](#what-isnt-done-yet)
-- [Imported by](#imported-by)
-- [See also](#see-also)
-
-> **Condensed version:**
-> [backup-for-agents.md](backup-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
 [restic](https://restic.net/), backing up `nire-cube`'s own service state to
 the QNAP NAS already on the network. Added 2026-08-28, cube-only, against
 issue [#87](https://github.com/NireBryce/nixos-configs/issues/87) ("no
@@ -31,6 +13,24 @@ Nested under [homelab](homelab.md) the same way the other seven are — see
 that page's own note on this one being the odd member out functionally
 (nothing to reach over the tailnet; a timer, not a listener) but structurally
 identical.
+
+> **Condensed version:**
+> [backup-for-agents.md](backup-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
+## Contents
+
+- [What's in it](#whats-in-it)
+- [Why the category isn't named `restic`](#why-the-category-isnt-named-restic)
+- [SFTP repository now, not local-path on NFS](#sftp-repository-now-not-local-path-on-nfs)
+- [The sqlite consistency bug — root-caused and fixed, 2026-09-06](#the-sqlite-consistency-bug--root-caused-and-fixed-2026-09-06)
+- [What's excluded, and why](#whats-excluded-and-why)
+- [Anti-deletion is not a Nix change](#anti-deletion-is-not-a-nix-change)
+- [What isn't done yet](#what-isnt-done-yet)
+- [Imported by](#imported-by)
+- [See also](#see-also)
 
 ## What's in it
 

@@ -2,23 +2,6 @@
 
 _Last modified: 2026-09-11_
 
-## Contents
-
-- [Checking status](#checking-status)
-- [Creating a snapshot](#creating-a-snapshot)
-- [Listing and inspecting snapshots](#listing-and-inspecting-snapshots)
-- [Restoring a snapshot](#restoring-a-snapshot)
-- [Deleting a snapshot](#deleting-a-snapshot)
-- [Rotating the secrets](#rotating-the-secrets)
-- [Troubleshooting](#troubleshooting)
-- [See also](#see-also)
-
-> **Condensed version:**
-> [backup-runbook-for-agents.md](backup-runbook-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
 Commands for operating [backup](../categories/backup.md) — the restic
 category backing up Forgejo/Grafana/golink's state and `/persist` to the
 QNAP NAS over SFTP. That page covers the design and its history (including
@@ -32,6 +15,23 @@ is a wrapper the module generates with `RESTIC_REPOSITORY`,
 `RESTIC_PASSWORD_FILE`, and the SFTP identity already baked in, and those
 resolve to root-owned `0400` files, so plain `restic` won't work
 unprivileged.
+
+> **Condensed version:**
+> [backup-runbook-for-agents.md](backup-runbook-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
+## Contents
+
+- [Checking status](#checking-status)
+- [Creating a snapshot](#creating-a-snapshot)
+- [Listing and inspecting snapshots](#listing-and-inspecting-snapshots)
+- [Restoring a snapshot](#restoring-a-snapshot)
+- [Deleting a snapshot](#deleting-a-snapshot)
+- [Rotating the secrets](#rotating-the-secrets)
+- [Troubleshooting](#troubleshooting)
+- [See also](#see-also)
 
 ## Checking status
 

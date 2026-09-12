@@ -2,25 +2,6 @@
 
 _Last modified: 2026-09-11_
 
-## Contents
-
-- [What's in it](#whats-in-it)
-- [What it is not](#what-it-is-not)
-- [Why the category isn't `dashboard` (or `glance`)](#why-the-category-isnt-dashboard-or-glance)
-- [The one route with no prefix problem](#the-one-route-with-no-prefix-problem)
-- [Two things that could have gone quietly wrong, and didn't](#two-things-that-could-have-gone-quietly-wrong-and-didnt)
-- [No icons, deliberately](#no-icons-deliberately)
-- [Only clickable services are listed](#only-clickable-services-are-listed)
-- [No firewall entry, no persistence entry](#no-firewall-entry-no-persistence-entry)
-- [Imported by](#imported-by)
-- [See also](#see-also)
-
-> **Condensed version:**
-> [landing-for-agents.md](landing-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
 [glance](https://github.com/glanceapp/glance), the service index for
 `nire-cube`: what's running, whether it's up, and how the machine itself is
 doing. Added 2026-08-24, cube-only; nested under the `homelab` umbrella
@@ -40,6 +21,25 @@ content behind `/api/pages/home/content/`, not in the initial HTML. That
 endpoint reported all three monitored sites **OK** with the server-stats
 widget rendering CPU/SWAP for `nire-cube` — which is the actual
 confirmation.
+
+> **Condensed version:**
+> [landing-for-agents.md](landing-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
+## Contents
+
+- [What's in it](#whats-in-it)
+- [What it is not](#what-it-is-not)
+- [Why the category isn't `dashboard` (or `glance`)](#why-the-category-isnt-dashboard-or-glance)
+- [The one route with no prefix problem](#the-one-route-with-no-prefix-problem)
+- [Two things that could have gone quietly wrong, and didn't](#two-things-that-could-have-gone-quietly-wrong-and-didnt)
+- [No icons, deliberately](#no-icons-deliberately)
+- [Only clickable services are listed](#only-clickable-services-are-listed)
+- [No firewall entry, no persistence entry](#no-firewall-entry-no-persistence-entry)
+- [Imported by](#imported-by)
+- [See also](#see-also)
 
 ## What's in it
 

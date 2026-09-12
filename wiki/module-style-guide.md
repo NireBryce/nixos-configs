@@ -2,26 +2,6 @@
 
 _Last modified: 2026-09-11_
 
-## Contents
-
-- [Opening brackets go on the same line as whatever causes them](#opening-brackets-go-on-the-same-line-as-whatever-causes-them)
-- [Four-space indent](#four-space-indent)
-- [The module header](#the-module-header)
-- [`{ ... }:` on an inner module lambda is sometimes deliberate](#---on-an-inner-module-lambda-is-sometimes-deliberate)
-- [`# # description = "..."` as the first line of the body](#--description---as-the-first-line-of-the-body)
-- [Rationale goes inside the module body, not in a header block](#rationale-goes-inside-the-module-body-not-in-a-header-block)
-- [`with pkgs; [ ... ]` for package lists](#with-pkgs----for-package-lists)
-- [Aligned `=` columns](#aligned--columns)
-- [When a rename makes the old name ungreppable, say what it was](#when-a-rename-makes-the-old-name-ungreppable-say-what-it-was)
-- [A bug recorded in a comment stays in the file](#a-bug-recorded-in-a-comment-stays-in-the-file)
-- [File placement is load-bearing](#file-placement-is-load-bearing)
-
-> **Condensed version:**
-> [module-style-guide-for-agents.md](module-style-guide-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
 Conventions for `flake/modules/`. "How many files do this" used to be
 stated as inline counts per section, dated 2026-08-08 -- and by 2026-09-09
 every one of them had gone quietly false as the tree grew from 151 to 263
@@ -38,6 +18,26 @@ cave/claude-style-guide.md` until that directory was retired 2026-09-02. It
 applies to every module — see [history.md](history.md) and
 [styleguide.md](styleguide.md) for why it counts as an exception to this
 wiki's usual "index over restatement" rule.
+
+> **Condensed version:**
+> [module-style-guide-for-agents.md](module-style-guide-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
+## Contents
+
+- [Opening brackets go on the same line as whatever causes them](#opening-brackets-go-on-the-same-line-as-whatever-causes-them)
+- [Four-space indent](#four-space-indent)
+- [The module header](#the-module-header)
+- [`{ ... }:` on an inner module lambda is sometimes deliberate](#---on-an-inner-module-lambda-is-sometimes-deliberate)
+- [`# # description = "..."` as the first line of the body](#--description---as-the-first-line-of-the-body)
+- [Rationale goes inside the module body, not in a header block](#rationale-goes-inside-the-module-body-not-in-a-header-block)
+- [`with pkgs; [ ... ]` for package lists](#with-pkgs----for-package-lists)
+- [Aligned `=` columns](#aligned--columns)
+- [When a rename makes the old name ungreppable, say what it was](#when-a-rename-makes-the-old-name-ungreppable-say-what-it-was)
+- [A bug recorded in a comment stays in the file](#a-bug-recorded-in-a-comment-stays-in-the-file)
+- [File placement is load-bearing](#file-placement-is-load-bearing)
 
 ## Opening brackets go on the same line as whatever causes them
 

@@ -2,23 +2,6 @@
 
 _Last modified: 2026-09-11_
 
-## Contents
-
-- [What this is for](#what-this-is-for)
-- [Decide before touching a disk](#decide-before-touching-a-disk)
-- [Wiring the layout in](#wiring-the-layout-in)
-- [Actually formatting the disk](#actually-formatting-the-disk)
-- [What depends on this having actually run](#what-depends-on-this-having-actually-run)
-- [Confirming the rollback actually works](#confirming-the-rollback-actually-works)
-- [Traps](#traps)
-- [See also](#see-also)
-
-> **Condensed version:**
-> [disk-formatting-for-agents.md](disk-formatting-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
 The runbook-shaped piece of adding a new host: **the actual disk step**, not
 the Nix config around it. Skill `new-host-config` covers the whole
 host-adding decision tree; [flake/doc/disko-impermanence-layout.md](<../flake/doc/disko-impermanence-layout.md>)
@@ -30,6 +13,23 @@ operations and the safety warnings that are otherwise scattered across both
 [`../CLAUDE.md`](../CLAUDE.md)'s Safety section before running any of this
 against real hardware, and see the placeholder-device rule below before
 touching a device path at all.
+
+> **Condensed version:**
+> [disk-formatting-for-agents.md](disk-formatting-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
+## Contents
+
+- [What this is for](#what-this-is-for)
+- [Decide before touching a disk](#decide-before-touching-a-disk)
+- [Wiring the layout in](#wiring-the-layout-in)
+- [Actually formatting the disk](#actually-formatting-the-disk)
+- [What depends on this having actually run](#what-depends-on-this-having-actually-run)
+- [Confirming the rollback actually works](#confirming-the-rollback-actually-works)
+- [Traps](#traps)
+- [See also](#see-also)
 
 ## What this is for
 
