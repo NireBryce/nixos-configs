@@ -1,18 +1,18 @@
 # `reverse-proxy` — `nire/homelab/reverse-proxy/`
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-12_
 
 [Caddy](https://caddyserver.com/), one tailnet-only HTTPS front door for
 every web service on `nire-cube`. Added 2026-08-24, cube-only; nested under
 the `homelab` umbrella since 2026-08-27 (name unaffected).
 
 **Confirmed working end to end, 2026-08-24**, on the second switch — the
-first served `/git/` a 404 through the wrong Caddy directive; see [the two
-apps want opposite things](#the-two-apps-want-opposite-things-from-the-proxy-historical)
-below for that mechanism (now historical, see the next section), and
-[reverse-proxy-history.md](reverse-proxy-history.md) for the full
-verification checklist (TLS validation, generated-link checks, the exact
-requests tested).
+first served `/git/` a 404 through the wrong Caddy directive, because
+Grafana and Forgejo wanted opposite `handle`/`handle_path` treatment for
+the path prefix they then shared; see
+[reverse-proxy-history.md](reverse-proxy-history.md#the-two-apps-want-opposite-things-from-the-proxy-historical)
+for that mechanism and the full verification checklist (TLS validation,
+generated-link checks, the exact requests tested).
 
 **Grafana and Forgejo moved again, 2026-09-07**, off the shared
 `ts-cube.../grafana/`, `.../git/` paths onto their own Tailscale Services
@@ -99,9 +99,7 @@ Two things the same investigation turned up, both still open:
 - [What's in it](#whats-in-it)
 - [What it changed elsewhere](#what-it-changed-elsewhere)
 - [Certificates come from tailscaled, with no plugin](#certificates-come-from-tailscaled-with-no-plugin)
-- [Paths, not subdomains, was the original constraint — Tailscale Services lifted it, partially](#paths-not-subdomains-was-the-original-constraint--tailscale-services-lifted-it-partially)
 - [Fronting Tailscale Services with Caddy](#fronting-tailscale-services-with-caddy)
-- [The two apps want opposite things from the proxy (historical)](#the-two-apps-want-opposite-things-from-the-proxy-historical)
 - [Named matchers, not inline ones](#named-matchers-not-inline-ones)
 - [The redirect vhost needs its scheme spelled out](#the-redirect-vhost-needs-its-scheme-spelled-out)
 - [Firewall, and binding 443 as a non-root user](#firewall-and-binding-443-as-a-non-root-user)
@@ -168,27 +166,15 @@ Two prerequisites, neither in this repo:
 rights to a `caddy` user on hosts that don't run Caddy. Scope a change to
 the host that needs it.
 
-## Paths, not subdomains, was the original constraint — Tailscale Services lifted it, partially
-
-MagicDNS gives a device exactly **one** name, which is why both apps
-originally mounted under a path prefix on `ts-cube`'s one hostname
-(`root_url`/`serve_from_sub_path` for Grafana, `ROOT_URL` for Forgejo — see
-each app's own file for the by-then-retired mechanics, kept as history).
-
-**Tailscale Services (`svc:`) reopened this 2026-09-07** — see
-`wiki/open-threads.md`'s entry and
-`flake/modules/nire/homelab/reverse-proxy/tailscale-services/README.md` for
-the ACL/tag/service-object side (a separate, API-managed resource, not
-declared in this repo's Nix). Each app now has its own tailnet DNS name
-with no path prefix. What Services did **not** solve, discovered live: it
-cannot terminate HTTPS declaratively on this tailscale version (confirmed
-upstream bug — `tailscale-services/serve.nix`'s history section has the
-full trail, including the exact failing commands and the two
-tailscale/tailscale issue numbers). So Caddy is still in the loop — see
-[fronting Tailscale Services with Caddy](#fronting-tailscale-services-with-caddy)
-below — just per-service instead of per-path.
-
 ## Fronting Tailscale Services with Caddy
+
+MagicDNS's one-name-per-device limit is why both apps originally shared a
+path prefix on `ts-cube`'s one hostname; Tailscale Services (`svc:`) lifted
+that 2026-09-07, giving each its own tailnet DNS name with no prefix — see
+[reverse-proxy-history.md](reverse-proxy-history.md#paths-not-subdomains-was-the-original-constraint--tailscale-services-lifted-it-partially)
+for the original per-path mechanics and what Services did and didn't solve.
+Caddy stays in the loop regardless, since Services can't terminate HTTPS
+declaratively on this tailscale version.
 
 `tailscale-services/serve.nix` configures each service's `endpoints` with
 a `tcp://` backend scheme — raw byte forwarding, no HTTP interpretation —
@@ -214,34 +200,13 @@ HTTP on round-trip; **#18219** confirms the raw CLI *can* set real HTTPS
 but that state doesn't survive `set-config` or a reboot. The fix,
 **PR #20116**, was an unmerged draft as of this check.
 
-## The two apps want opposite things from the proxy (historical)
-
-**Retired 2026-09-07** along with the path-prefix routes themselves —
-each app has its own vhost now, so there's no shared prefix for `handle`
-vs `handle_path` to disagree about. Kept for the mechanism, and in case
-either move ever needs reverting (`caddy.nix`'s own history section has
-the exact retired route blocks).
-
-This is the one thing that was actually gotten wrong, and it cost a switch.
-Both routes were given `handle`, which passes the matched path through
-untouched. `/grafana/` returned 200; `/git/` returned **404**.
-
-- **Grafana**, with `serve_from_sub_path`, genuinely serves *under*
-  `/grafana`, so the prefix must be **left on** → `handle`.
-- **Forgejo** has no equivalent option. It always serves at `/` — confirmed
-  on the host rather than inferred: `curl 127.0.0.1:3001/` is 200,
-  `curl 127.0.0.1:3001/git/` is 404 — so the prefix must be **stripped** →
-  `handle_path`. Its `ROOT_URL` still carries `/git/`, which is what makes
-  the links it *generates* point back through the prefix. Same thing
-  Gitea/Forgejo's own nginx docs encode in the trailing slash of
-  `proxy_pass http://…:3001/;`, which reads as cosmetic and isn't.
-
-`handle_path` takes an inline path matcher only — a named matcher is
-rejected — so the bare `/git` can't ride along in one matcher the way
-`@grafana`'s two paths do, and gets its own `redir` to `/git/` instead.
-
-The general form of the mistake, and why every static check missed it, is
-[`lessons-learned.md`](../lessons-learned.md) #41.
+Grafana and Forgejo wanted opposite `handle`/`handle_path` treatment for
+the path prefix they used to share — retired 2026-09-07 along with the
+prefix routes themselves, once each app got its own vhost with no prefix
+left to disagree about. See
+[reverse-proxy-history.md](reverse-proxy-history.md#the-two-apps-want-opposite-things-from-the-proxy-historical)
+for the mechanism (which app needed which directive and why) and the
+first-switch failure it caused.
 
 ## Named matchers, not inline ones
 

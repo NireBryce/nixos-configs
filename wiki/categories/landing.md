@@ -1,6 +1,6 @@
 # `landing` — `nire/homelab/landing/`
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-12_
 
 [glance](https://github.com/glanceapp/glance), the service index for
 `nire-cube`: what's running, whether it's up, and how the machine itself is
@@ -124,7 +124,7 @@ person would use, rather than at `127.0.0.1:300x`. That makes the widget a test 
 the whole path — MagicDNS, the tailnet, Caddy's routing, the certificate, and
 the app — instead of the app alone. A Caddy misconfiguration shows up here;
 a loopback check would have hidden exactly the class of bug that actually
-happened ([the `/git` 404](reverse-proxy.md#the-two-apps-want-opposite-things-from-the-proxy-historical)).
+happened ([the `/git` 404](reverse-proxy-history.md#the-two-apps-want-opposite-things-from-the-proxy-historical)).
 
 ## No firewall entry, no persistence entry
 
