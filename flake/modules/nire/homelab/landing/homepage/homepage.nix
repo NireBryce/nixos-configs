@@ -219,14 +219,21 @@
                     # The one place the host's own name shows on the page,
                     # as glance's server-stats widget did.
                     title = "nire-cube";
+
+                    # The `Calendar` service GROUP renders one column, so
+                    # the two calendar cards get the group's full width
+                    # instead of splitting a row -- the monthly grid is
+                    # the widest thing on the page. Keys here are group
+                    # names exactly as spelled in `services` below.
+                    layout.Calendar = {
+                        columns = 1;
+                    };
                 };
 
-                # Info widgets. Arrangement is upstream's auto-grid
-                # (first four across the top); if the two calendars ever
-                # need their own row, `settings.layout` is the knob -- not
-                # pre-tuned here because it is cosmetic and
-                # runtime-visible, exactly the kind of thing a switch and
-                # a look settle better than a guess.
+                # Info widgets, upstream's auto-grid across the top. The
+                # two calendar views are NOT here -- see the closing
+                # comment of this list for the calendar-widget trap and
+                # the `Calendar` service group below for where they live.
                 widgets = [
                     {
                         # Replaces glance's server-stats. The nixpkgs
@@ -262,40 +269,16 @@
                         };
                     }
 
-                    {
-                        # Month grid WITH events -- the capability #289
-                        # proposed patching into glance, met natively. The
-                        # integrations themselves are declared on the
-                        # `Calendar` service entry below (homepage's
-                        # documented pattern: the widget reads them from
-                        # there, and the calendar proxy fetches the feeds
-                        # server-side, URL never reaching the browser).
-                        #
-                        # `timezone` pins "today" to the fleet's zone
-                        # (tz.nix's `time.timeZone` default) rather than
-                        # each viewer's browser. sunday first: en_US
-                        # locale (locale.nix) -- glance defaulted monday
-                        # "matching nothing in particular"; here it is
-                        # chosen, and change it here if that flips.
-                        calendar = {
-                            view           = "monthly";
-                            firstDayInWeek = "sunday";
-                            showTime       = true;
-                            timezone       = "America/New_York";
-                        };
-                    }
-
-                    {
-                        # Agenda view -- the #290 capability, free here:
-                        # upcoming events, time-sorted, same feeds. (One
-                        # widget per view is how homepage splits the two;
-                        # there is no combined view.)
-                        calendar = {
-                            view     = "agenda";
-                            showTime = true;
-                            timezone = "America/New_York";
-                        };
-                    }
+                    # NOT here. THE CALENDAR WIDGET TRAP, found on the
+                    # first live render (#291): `calendar` is NOT an info
+                    # widget -- the info-widget registry
+                    # (components/widgets/widget.jsx, v1.13.2) has no
+                    # calendar entry, and a `calendar` line in widgets.yaml
+                    # renders the literal fallback "Missing calendar", no
+                    # error anywhere. Calendar views are SERVICE widgets
+                    # (docs/widgets/services/calendar.md): declared under a
+                    # service entry's `widget.` attrset, one entry per view
+                    # -- see the `Calendar` group below.
                 ];
 
                 services = let
@@ -320,21 +303,55 @@
                                 };
                             }
                             {
-                                # Integration carrier, homepage's documented
-                                # pattern: the calendar widgets read their
-                                # feeds from a service entry. No href -- the
-                                # card exists to hold `integrations`, and
-                                # the feeds are fetched server-side (see
-                                # this file's header), so there is nothing
-                                # for a browser to open.
-                                Calendar = {
-                                    description = "household calendars -- feeds the widgets above";
-                                    # The YAML key must be `integrations`
-                                    # (service-helpers.js reads exactly
-                                    # that off the service entry);
-                                    # calendarIntegrations is only the Nix-
-                                    # side name.
-                                    integrations = calendarIntegrations;
+                                # The calendars as SERVICE widgets -- see
+                                # the widgets block above for why they are
+                                # not in widgets.yaml. One entry per view
+                                # (monthly grid, agenda list); there is no
+                                # combined view. Each carries the same
+                                # integrations -- two feed fetches, 5 min
+                                # apart at most, for clean separation of
+                                # the two views. The YAML key must be
+                                # `integrations` (service-helpers.js reads
+                                # exactly that off the widget);
+                                # calendarIntegrations is only the Nix-
+                                # side name. `timezone` pins "today" to
+                                # the fleet's zone (tz.nix's
+                                # `time.timeZone` default) rather than
+                                # each viewer's browser. sunday first: en_US
+                                # locale (locale.nix) -- glance defaulted
+                                # monday "matching nothing in particular";
+                                # here it is chosen, and change it here if
+                                # that flips.
+                                "Month grid" = {
+                                    description = "the household calendars";
+                                    widget = {
+                                        type           = "calendar";
+                                        view           = "monthly";
+                                        firstDayInWeek = "sunday";
+                                        showTime       = true;
+                                        timezone       = "America/New_York";
+                                        # The YAML key must be `integrations`
+                                        # (service-helpers.js reads exactly
+                                        # that off the widget);
+                                        # calendarIntegrations is only the
+                                        # Nix-side name.
+                                        integrations = calendarIntegrations;
+                                    };
+                                };
+                            }
+
+                            {
+                                # Second view = second entry; see the
+                                # sibling above for the shared comments.
+                                "Upcoming" = {
+                                    description = "the same feeds, time-sorted";
+                                    widget = {
+                                        type     = "calendar";
+                                        view     = "agenda";
+                                        showTime = true;
+                                        timezone = "America/New_York";
+                                        integrations = calendarIntegrations;
+                                    };
                                 };
                             }
                         ];
