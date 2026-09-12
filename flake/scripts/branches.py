@@ -35,8 +35,14 @@ off the back; raise --depth if a known-merged branch reports UNMERGED.
     branches.py prune              # delete the MERGED ones (asks first)
     branches.py prune --yes        # ... without asking
 
-Never deletes an UNMERGED branch, `main`, the trunk, or the current branch --
-not even with --yes. Those need a human looking at them.
+Never deletes an UNMERGED branch, a NEW one (nothing ahead of the trunk yet
+-- almost always a branch someone just created), a branch checked out in any
+worktree, `main`, the trunk, or the current branch -- not even with --yes.
+Those need a human looking at them.
+
+Only an exact MERGED verdict is deletable, which is why every other state
+carries a suffix rather than its own arm: `MERGED (worktree)` is not
+`MERGED`.
 """
 import argparse, subprocess, sys
 
@@ -69,10 +75,32 @@ def trunk_patch_ids(depth):
     return ids
 
 
+def worktree_branches():
+    """{branch: worktree path} for every branch checked out in ANY worktree of
+    this repo, not just the one we were invoked from.
+
+    Added 2026-09-12. `b == current` below only ever saw the invoking
+    checkout's HEAD, so a branch another session had checked out in its own
+    worktree was classified as though nobody held it -- and the summary line
+    counted it under "still holding work or checked out" while reporting
+    zero of them. git itself refuses `branch -D` on such a branch ("cannot
+    delete branch 'x' used by worktree at ..."), which is what actually kept
+    prune honest here; this makes the script stop proposing what git would
+    then refuse."""
+    held, path = {}, None
+    for line in git('worktree', 'list', '--porcelain').splitlines():
+        if line.startswith('worktree '):
+            path = line[len('worktree '):]
+        elif line.startswith('branch '):
+            held[line[len('branch refs/heads/'):]] = path
+    return held
+
+
 def classify(depth):
     """-> list of (branch, verdict, landed, total, unlanded_subjects)."""
     trunk_ids = trunk_patch_ids(depth)
     current = git('rev-parse', '--abbrev-ref', 'HEAD')
+    held = worktree_branches()
     rows = []
     for b in git('for-each-ref', '--format=%(refname:short)', 'refs/heads/').splitlines():
         if b in PROTECTED:
@@ -85,10 +113,25 @@ def classify(depth):
                 landed += 1
             else:
                 unlanded.append(git('log', '-1', '--format=%s', c))
-        verdict = 'MERGED' if commits and landed == len(commits) else (
-            'MERGED' if not commits else 'UNMERGED')
+        if not commits:
+            # Nothing ahead of the trunk yet. Until 2026-09-12 this fell into
+            # the MERGED arm and was reported deletable, which is exactly
+            # backwards: a branch with no commits is almost always one another
+            # session just created and has not committed on yet, and `prune`
+            # deletes with `branch -D`. Observed live -- `landing-homepage`
+            # read `MERGED (0/0 landed)` in the window between another agent
+            # branching and its first commit, then `UNMERGED (0/1)` minutes
+            # later. Its worktree is what saved it; a branch created without
+            # one would have been force-deleted.
+            verdict = 'NEW'
+        elif landed == len(commits):
+            verdict = 'MERGED'
+        else:
+            verdict = 'UNMERGED'
         if b == current:
             verdict += ' (current)'
+        elif b in held:
+            verdict += ' (worktree)'
         rows.append((b, verdict, landed, len(commits), unlanded))
     return rows
 
@@ -117,13 +160,16 @@ def cmd_check(args):
         for s in unlanded:
             print(f'{"":<18}   unlanded: {s[:66]}')
     n = sum(1 for r in rows if r[1] == 'MERGED')
-    print(f'\n{n} deletable, {len(rows) - n} still holding work or checked out.')
+    print(f'\n{n} deletable, {len(rows) - n} still holding work, newly '
+          f'created, or checked out.')
     if n:
         print('`just branches prune` deletes the MERGED ones.')
     return 0
 
 
 def cmd_prune(args):
+    # Exact match only: 'MERGED (current)' and 'MERGED (worktree)' must not
+    # pass, and neither must 'NEW'. See classify().
     rows = [r for r in classify(args.depth) if r[1] == 'MERGED']
     if not rows:
         print('nothing to prune')
