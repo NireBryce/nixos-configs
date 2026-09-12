@@ -1,6 +1,6 @@
 # Wiki style guide
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-12_
 
 How this wiki itself is organized and written — as opposed to
 [conventions.md](conventions.md), which is the *repo's* style guide (Nix
@@ -200,6 +200,15 @@ separate tier for the *usage* side:
   no-op. This exists because a hand-derived anchor already got it wrong once
   — `categories/homelab.md`'s link into `virtualization.md`'s `` `VMs/_lib/
   libvirt-vm.nix` `` heading — and sat wrong until `anchors` caught it.
+
+  Enforced since 2026-09-12: `check_contents` reports **MISSING CONTENTS**
+  for a non-exempt page with headings and no block. Before that it only
+  checked a block it found, so a page that *lost* one was indistinguishable
+  from a page correctly exempt — which is how `reverse-proxy-history.md`
+  lost its own that day. **Note the exempt list below is not the same set as
+  the `-for-agents` sibling exemption**; `-history.md` pages are exempt from
+  needing a sibling and still carry a Contents block, and conflating the two
+  is what caused that.
 
   **Exception: `lessons-learned.md`, `lessons-learned/` articles, and
   `-for-agents.md` siblings carry no Contents block** (the first two relaxed
