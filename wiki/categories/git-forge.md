@@ -137,13 +137,13 @@ through the web UI is silently reverted on the next `just switch`.
 **Status: switched and logged in, confirmed 2026-09-05.** Elly has signed
 in as `elly` and used the account directly (screenshot-confirmed) — the
 account and password both work as declared. Whether it's genuinely
-*admin* (the `--admin` flag) is still unconfirmed: Forgejo's
-unauthenticated `/api/v1/users/search` always reports `is_admin: false`
-regardless of the real value, so that field can't settle it — see
+*admin* (the `--admin` flag) is **confirmed: it took** — checked from
+inside the UI and reported by Elly 2026-09-12. That was the only way to
+check it: Forgejo's unauthenticated `/api/v1/users/search` always reports
+`is_admin: false` regardless of the real value, so that field never could
+settle it, and reading it as an answer produced a wrong one twice. See
 [git-forge-history.md](git-forge-history.md#the-admin-account-and-an-anonymous-api-that-reports-zeroes)
-for the fuller account of that trap (moved there from `pending-setup.md`
-item 1, 2026-09-12), which still tracks the open question. Checking from inside the UI (Site Administration
-panel) is the way to actually confirm it.
+for the fuller account of that trap.
 
 ## No persistence entry, same reasoning as Grafana
 

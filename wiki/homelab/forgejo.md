@@ -56,9 +56,10 @@ password from this repo's sops secrets rather than typed by hand. It
 resets that password to the sops value on every `switch`, so changing it
 through the web UI won't stick — change it in `secrets.yaml` instead if it
 ever needs to change. **Switched and logged in, confirmed 2026-09-05**;
-whether the account is genuinely *admin* is still unconfirmed (see
-[git-forge](../categories/git-forge.md)'s account of the masked-field
-trap).
+genuinely *admin*, confirmed by Elly 2026-09-12 from the
+Site Administration panel (see
+[git-forge](../categories/git-forge.md)'s account of the masked-field trap
+for why no API call could have told you).
 
 To add a *second* user, on cube:
 

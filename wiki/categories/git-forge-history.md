@@ -67,10 +67,10 @@ same zeroes, confirming the field is not meaningful from this endpoint rather
 than that anything changed. The account existing was real; the conclusion
 drawn from an anonymous call was not.
 
-Whether the account is *really* admin is still unconfirmed and stays on
-[pending-setup.md](../homelab/pending-setup.md) as item 1 — the masked
-`is_admin: false` neither proved nor disproved it, and settling it means the
-Site Administration panel from inside the UI, not another anonymous call.
+**The account is admin — confirmed by Elly 2026-09-12**, from the Site
+Administration panel, which was the only place that could answer it. The
+masked `is_admin: false` neither proved nor disproved anything; two
+sessions treating it as an answer is what this section exists to record.
 
 ## Mirror, not origin — and the first real mirror
 

@@ -1,7 +1,6 @@
 # `git-forge`, for agents
 
-_Last modified: 2026-09-11_
-_Sibling reviewed: 2026-09-12 -- git-forge.md only retargeted where the users/search trap's fuller account lives (pending-setup.md item 1 -> git-forge-history.md); this page states the trap itself and links to neither._
+_Last modified: 2026-09-12_
 
 Condensed from [git-forge.md](git-forge.md), which keeps the reasoning and
 the narrative. Facts only here.
@@ -51,6 +50,8 @@ real while writing this category.
 - **Unauthenticated `/api/v1/users/search` always reports
   `is_admin: false`** regardless of the real value — it cannot settle
   whether an account is admin. Check the Site Administration panel.
+  `elly` **is** admin (confirmed there 2026-09-12); the endpoint still
+  reports otherwise, so don't re-derive the answer from it.
 
 ## Imported by
 

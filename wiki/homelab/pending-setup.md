@@ -19,7 +19,7 @@ checked, so a stale entry can be re-tested rather than guessed at.
 ## Contents
 
 - [How this differs from open-threads.md](#how-this-differs-from-open-threadsmd)
-- [1. Is the admin account actually an admin?](#1-is-the-admin-account-actually-an-admin)
+- [1. An SSH key, if you want `forgejo@ts-cube` clones](#1-an-ssh-key-if-you-want-forgejots-cube-clones)
 - [2. Mirror, or origin?](#2-mirror-or-origin)
 - [3. golink has no links yet](#3-golink-has-no-links-yet)
 - [4. Done — backups exist, and a restore has actually recovered something](#4-done--backups-exist-and-a-restore-has-actually-recovered-something)
@@ -44,23 +44,17 @@ to find a real bug, once more to confirm the fix).
 
 ---
 
-## 1. Is the admin account actually an admin?
+## 1. An SSH key, if you want `forgejo@ts-cube` clones
 
-The setup half is done and its story moved to
-[git-forge-history.md](../categories/git-forge-history.md#the-admin-account-and-an-anonymous-api-that-reports-zeroes)
-2026-09-12: the `elly` account is bootstrapped declaratively, Elly is signed
-in (confirmed 2026-09-05), and the anonymous API that made two sessions
-report otherwise is documented there.
+**The admin question is settled: `elly` is admin — confirmed by Elly
+2026-09-12.** `forgejo-admin-bootstrap`'s `--admin` flag took. The account
+bootstrap and the anonymous API that made two sessions report otherwise are
+recorded in
+[git-forge-history.md](../categories/git-forge-history.md#the-admin-account-and-an-anonymous-api-that-reports-zeroes).
 
-**What is still open:** whether the account really carries admin rights
-(`forgejo-admin-bootstrap`'s `--admin` flag) is unconfirmed either way. The
-masked `is_admin: false` from the anonymous endpoint neither proved nor
-disproved it. Settling it means opening Site Administration from inside the
-UI — not another anonymous API call.
-
-Separately, and also still open: add an SSH key under Settings → SSH keys if
-you want `forgejo@ts-cube:…` clones. See [using the forge](forgejo.md) for
-why that key authorizes `forgejo@ts-cube` and not `elly@ts-cube`.
+**What is still open:** add an SSH key under Settings → SSH keys if you want
+`forgejo@ts-cube:…` clones. See [using the forge](forgejo.md) for why that
+key authorizes `forgejo@ts-cube` and not `elly@ts-cube`.
 
 ## 2. Mirror, or origin?
 
