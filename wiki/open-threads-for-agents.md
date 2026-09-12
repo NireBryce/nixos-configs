@@ -1,9 +1,11 @@
 # Open threads, for agents
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-12_
+_Sibling reviewed: 2026-09-12 — the source's only edit was the live `svc:` list (svc:glance → svc:homepage, issue #291's rollout), nothing this page restates_
 
 Condensed from [open-threads.md](open-threads.md), which keeps the closed
 items, the reasoning and the full accounts. Live threads only here.
+
 
 **Before investigating any symptom: `just threads "<keywords>"`** — it
 covers GitHub issues plus `wiki/`, `lessons-learned.md` and

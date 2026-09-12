@@ -1,7 +1,6 @@
 # `reverse-proxy`, for agents
 
-_Last modified: 2026-09-11_
-_Sibling reviewed: 2026-09-12 -- reverse-proxy.md moved its path-prefix/`handle`-vs-`handle_path` narrative into reverse-proxy-history.md; this page already states the current names/rules with no path-prefix content to update._
+_Last modified: 2026-09-12_
 
 Condensed from [reverse-proxy.md](reverse-proxy.md), which keeps the
 reasoning, the verification narrative and the links out. Facts only here.
@@ -23,8 +22,8 @@ nested under `homelab` 2026-08-27.
 |---|---|---|
 | `https://grafana.moose-micro.ts.net/` | `127.0.0.1:3000` | own `svc:`, no path prefix |
 | `https://git.moose-micro.ts.net/` | `127.0.0.1:3001` | own `svc:`, no path prefix |
-| `https://glance.moose-micro.ts.net/` | glance | own `svc:`, created 2026-09-10, live 2026-09-11 |
-| `https://ts-cube.moose-micro.ts.net/` | glance at `/` | device name, not a `svc:` |
+| `https://homepage.moose-micro.ts.net/` | homepage | own `svc:`; glance's `svc:glance` renamed by #291, 2026-09-12 (object re-made at switch time) |
+| `https://ts-cube.moose-micro.ts.net/` | homepage at `/` | device name, not a `svc:` |
 
 Path-prefix routes are retired (2026-09-07) and 404. `http://<bare name>`
 redirects; `https://<bare name>` serves Caddy's local CA and shows
@@ -57,8 +56,9 @@ redirects; `https://<bare name>` serves Caddy's local CA and shows
   `caddy.service`'s `AmbientCapabilities`.
 - No `environment.persistence` entry — cube has a persistent root. A host
   that wipes `/root` would need one for `/var/lib/caddy` first.
-- `landing` is a hard dependency: the root route proxies to glance, so
-  dropping `landing` leaves `/` at 502.
+- `landing` is a hard dependency: the root route proxies to the landing
+  page (homepage since #291, port 3002 unchanged), so dropping `landing`
+  leaves `/` at 502.
 
 ## Out-of-repo prerequisites
 

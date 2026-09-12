@@ -55,7 +55,14 @@
 			// these lines as the only drift). Confirmed before applying:
 			// `vip-get svc:glance` -> 404 "service not found" while
 			// `vip-get svc:grafana` returned a real object with addrs.
-			"svc:glance": ["tag:homelab-cube"],
+			//
+			// 2026-09-12 (issue #291): glance's approver below became
+			// homepage's -- svc:glance is retired with glance, svc:homepage
+			// takes its place. Applied at SWITCH time, not before: apply +
+			// vip-put svc:homepage + vip-delete svc:glance, in the order
+			// homepage.nix's history section gives, so the record and the
+			// tailnet move together (the svc:glance story above is why).
+			"svc:homepage": ["tag:homelab-cube"],
 		},
 	},
 
@@ -97,15 +104,14 @@
 			"dst": ["svc:git"],
 			"ip":  ["*"],
 		},
-		// Same shape as the svc:grafana/svc:git grants above, added
-		// 2026-09-10 with the approver. Whether svc: destinations need
-		// their own grant is still the open question the comment above
-		// raises -- but the two services that demonstrably work each have
-		// one, so glance gets one too rather than being the odd case out
-		// while its reachability is being debugged.
+		// Same shape as the svc:grafana/svc:git grants above. Was
+		// `svc:glance` from 2026-09-10 until 2026-09-12, when homepage
+		// replaced glance as the landing page (issue #291) -- same
+		// reachability need, new name, applied at switch time together
+		// with the approver above (see its comment for why not before).
 		{
 			"src": ["autogroup:members"],
-			"dst": ["svc:glance"],
+			"dst": ["svc:homepage"],
 			"ip":  ["*"],
 		},
 	],

@@ -1,6 +1,6 @@
 # Open threads
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-12_
 
 Todos, half-formed ideas, and things-to-look-into notes left in various
 corners of the tree, plus upstream bugs found here but not yet filed. None
@@ -219,9 +219,12 @@ bug; each is a decision someone might otherwise re-litigate from scratch.
   policy entry, and the policy file is API-scriptable
   (`flake/scripts/tailscale-acl.py`, `just tailscale-acl`) rather than
   console-only — reviewed as a diff and applied from this repo, same as
-  everything else. `svc:grafana`, `svc:git` and `svc:glance` are live,
-  each with its own tailnet name and certificate; `nire-cube` is tagged
-  `tag:homelab-cube`; `services.tailscale.serve` backs all three on
+  everything else. `svc:grafana` and `svc:git` are live; `svc:glance` was,
+  until homepage replaced glance as the landing page (issue #291,
+  2026-09-12) and the Service object became `svc:homepage` — same
+  mechanism, new name, applied at switch time per the rollout order in
+  `landing/homepage/homepage.nix`'s history section. `nire-cube` is tagged
+  `tag:homelab-cube`; `services.tailscale.serve` backs each on
   `tcp:443` and `tcp:80`; and Caddy's old `/grafana/`/`/git/` path routes
   are retired. URLs are in
   [homelab/reaching-services.md](homelab/reaching-services.md), the build

@@ -1,6 +1,6 @@
 # Reaching cube's services, for agents
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-12_
 
 Condensed from [reaching-services.md](reaching-services.md), which keeps the
 reasoning, the retired-URL history and the verification record. Facts only
@@ -14,17 +14,24 @@ not Funnel. Build side: [reverse-proxy](../categories/reverse-proxy.md).
 
 | What | Full name | Short |
 |---|---|---|
-| glance (service index) | `https://glance.moose-micro.ts.net/` | `http://glance/` |
+| homepage (landing page) | `https://homepage.moose-micro.ts.net/` | `http://homepage/` |
 | Grafana | `https://grafana.moose-micro.ts.net/` | `http://grafana/` |
 | Forgejo | `https://git.moose-micro.ts.net/` | `http://git/` |
-| cube itself (also glance) | `https://ts-cube.moose-micro.ts.net/` | `http://ts-cube/` |
+| cube itself (also the landing page) | `https://ts-cube.moose-micro.ts.net/` | `http://ts-cube/` |
 | golink (**not** on cube) | `http://go/` | — |
+
+Homepage replaced glance 2026-09-12 (issue #291). The `homepage` name needs
+the `svc:homepage` Service object applied at switch time (commands in
+`homepage.nix`'s history section) — until then `homepage...` doesn't
+resolve and cube's own root is the working door.
 
 `ts-cube`, **not** `nire-cube` — this tailnet renames its devices.
 
 Retired and 404/dead: `http://ts-cube:3000/` and `:3001/` (2026-08-24, both
 apps moved to loopback); `.../grafana/` and `.../git/` path prefixes
-(2026-09-07).
+(2026-09-07); `https://glance.moose-micro.ts.net/` and `http://glance/`
+(2026-09-12, glance → homepage). Port URLs are still dead for
+homepage-dashboard too: it binds loopback, reachable only through Caddy.
 
 ## Certificates
 
@@ -58,7 +65,7 @@ Ordered by what is most often actually wrong.
    not in the app.
 6. Over ssh:
    ```sh
-   systemctl status caddy grafana forgejo glance tailscale-serve
+   systemctl status caddy grafana forgejo homepage-dashboard tailscale-serve
    systemctl list-units --state=failed
    ```
    **Look at `NRestarts`, not just `active`** — a crash-loop reports `active`

@@ -13,12 +13,17 @@ the script (`vip-put`/`apply`) to push an edit.
   per-service console click wiki/open-threads.md's Tailscale Services
   entry cited as a cost), and explicit grants for the two service
   destinations.
-- `svc-glance.json` -- the third Service object, PUT 2026-09-10, long after
-  its `serve.nix` forward and Caddy vhost landed in PR #211. Neither the
-  policy file nor the Service object had ever been pushed, so
-  `glance.moose-micro.ts.net` did not resolve at all while git and grafana
-  did. Note the API path takes the **`svc:`-prefixed** name:
-  `vip-get svc:glance`, not `vip-get glance` -- the bare form 404s for
+- `svc-homepage.json` -- the third Service object. The first one under
+  this name: `svc-glance.json` (deleted 2026-09-12, issue #291) was PUT
+  2026-09-10, long after its `serve.nix` forward and Caddy vhost landed in
+  PR #211 -- neither the policy file nor the Service object had ever been
+  pushed, so `glance.moose-micro.ts.net` did not resolve at all while git
+  and grafana did. Issue #291 renamed the landing page's service, which
+  means a NEW object (`svc:homepage`) plus `vip-delete svc:glance` -- a
+  rename in serve.nix is a fresh advertisement, not a rename on the
+  control plane; the rollout order is in `landing/homepage/homepage.nix`'s
+  history section. Note the API path takes the **`svc:`-prefixed** name:
+  `vip-get svc:homepage`, not `vip-get homepage` -- the bare form 404s for
   every service, including ones that demonstrably exist, which makes it a
   useless existence check. (`tailscale-acl.py`'s own usage line still
   documents the older `by-name/NAME` path; the code at `vip_api()` is
@@ -52,6 +57,17 @@ the script (`vip-put`/`apply`) to push an edit.
   `unknown field "services"`; that key belongs to the per-node *serve*
   config (nixpkgs' `services.tailscale.serve`), a different file
   entirely, confirmed the hard way before finding the right endpoint.
+
+## Status: svc:homepage created 2026-09-12 in this repo, APPLIED at switch time
+
+Issue #291 renamed the landing page's Service. Everything in-repo moved
+together (serve.nix `homepage` endpoints, caddy.nix `homepageFqdn` vhost,
+this directory's `svc-homepage.json`, the ACL approver+grant in
+`acl-diff-applied.hujson`); the tailnet moves at switch time -- apply, then
+`vip-put svc:homepage`, then `vip-delete svc:glance`. Until then the record
+here is AHEAD of the tailnet on exactly this one line, which the
+`svc:glance` story below is the cautionary tale for -- `just tailscale-acl
+diff` is what closes the gap.
 
 ## Status: grafana/git RUNTIME-VERIFIED 2026-09-07; glance NOT YET
 

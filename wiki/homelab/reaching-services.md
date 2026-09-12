@@ -1,6 +1,6 @@
 # Reaching cube's services
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-12_
 
 Each web service on `nire-cube` has **its own tailnet hostname and its own
 certificate**. That is a change from the original design — one hostname with
@@ -28,20 +28,22 @@ retired. For how it's built, see
 
 | What | URL | Short form |
 |---|---|---|
-| Service index (glance) | `https://glance.moose-micro.ts.net/` | `http://glance/` |
+| Landing page (homepage) | `https://homepage.moose-micro.ts.net/` | `http://homepage/` |
 | Grafana | `https://grafana.moose-micro.ts.net/` | `http://grafana/` |
 | Forgejo | `https://git.moose-micro.ts.net/` | `http://git/` |
-| cube itself (also glance) | `https://ts-cube.moose-micro.ts.net/` | `http://ts-cube/` |
+| cube itself (also the landing page) | `https://ts-cube.moose-micro.ts.net/` | `http://ts-cube/` |
 | golink (**not** on cube) | `http://go/` — see [creating go/ links](creating-golinks.md) | |
 
 **Type the short form with `http://`, not `https://`.** Both work, but they
 behave differently and only one is pleasant — see
 [the warning section](#why-its-https-and-the-one-warning-you-will-still-see).
 
-**Start at glance.** It lists the services, live-checks each one, and shows
-cube's CPU/memory/disk — so "what's running and is it up" is answered by
-looking, not by reading this page. It answers on both its own name and
-cube's.
+**Start at the landing page.** It lists the services, live-checks each one,
+shows cube's CPU/memory/disk and the household calendar — so "what's running
+and is it up" is answered by looking, not by reading this page. It answers on
+both its own name and cube's. (Homepage since 2026-09-12, issue #291; the
+`homepage...` short name needs the `svc:homepage` Service object applied at
+switch time — until then use cube's own name, which needs nothing new.)
 
 `ts-cube`, **not** `nire-cube`: this tailnet renames its devices. That trap
 has its own writeup in `system/networking/tailscale.nix`, indexed from
@@ -55,6 +57,7 @@ has its own writeup in `system/networking/tailscale.nix`, indexed from
 | `http://ts-cube:3001/` | `https://git.moose-micro.ts.net/` | 2026-08-24 |
 | `https://ts-cube.moose-micro.ts.net/grafana/` | `https://grafana.moose-micro.ts.net/` | 2026-09-07 |
 | `https://ts-cube.moose-micro.ts.net/git/` | `https://git.moose-micro.ts.net/` | 2026-09-07 |
+| `https://glance.moose-micro.ts.net/`, `http://glance/` | `https://homepage.moose-micro.ts.net/` (or cube's own root, unchanged) | 2026-09-12 |
 
 The port URLs went away because both apps moved to loopback — reachable only
 through Caddy, so a firewall mistake no longer exposes them. The path
@@ -113,7 +116,7 @@ Work down this list; it's ordered by what's most often actually wrong.
    policy file (`just tailscale-acl`), not in the app.
 6. **Ask the host**, over ssh:
    ```sh
-   systemctl status caddy grafana forgejo glance tailscale-serve
+   systemctl status caddy grafana forgejo homepage-dashboard tailscale-serve
    systemctl list-units --state=failed
    ```
    `NRestarts` is the number to look at, not just `active` — a service that
@@ -149,8 +152,12 @@ over the tailnet:
   presented.
 - All four short `http://` names return `301` to their full name, and
   following the redirect lands on `200` with `ssl_verify_result 0`.
-- glance answers on both `ts-cube.moose-micro.ts.net` and its own name,
-  assets included.
+- glance answered on both `ts-cube.moose-micro.ts.net` and its own name,
+  assets included. **Superseded 2026-09-12**: homepage replaced glance
+  (issue #291) — the homepage-shaped list above is what this page now
+  describes, and its live checks re-run after the switch (the `homepage`
+  short name additionally needs the `svc:homepage` Service object, see
+  [the map](#the-map)).
 
 **Not exercised:** the failure-mode steps above — they're derived from
 failures that actually happened, not from breaking things deliberately
@@ -162,7 +169,7 @@ afterwards.
   mechanism, and the Tailscale Services split.
 - [reverse-proxy-history](../categories/reverse-proxy-history.md) — the
   retired path-prefix design and why it went.
-- [landing](../categories/landing.md) — glance, the index.
+- [landing](../categories/landing.md) — homepage, the index.
 - [Using the forge](forgejo.md) — cloning, and the hostnames Forgejo hands out.
 - [homelab README](README.md) — the other services on this tailnet.
 - [hosts.md](../hosts.md) — `nire-cube` itself.

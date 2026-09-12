@@ -36,18 +36,19 @@
                 enable = true;
 
                 services = {
-                    # Key becomes svc:grafana/svc:git/svc:glance -- the
+                    # Key becomes svc:grafana/svc:git/svc:homepage -- the
                     # module adds the prefix, see its own option doc.
                     # `tcp://` value scheme, NOT `http://` -- see this
                     # file's header and history for why the obvious-looking
                     # form doesn't work. Target is Caddy's own loopback
-                    # listener, not Grafana/Forgejo/Glance directly.
+                    # listener, not Grafana/Forgejo/the landing page
+                    # directly.
                     grafana.endpoints."tcp:443" = "tcp://127.0.0.1:443";
                     git.endpoints."tcp:443"     = "tcp://127.0.0.1:443";
 
                     # PORT 80 TOO, added 2026-09-11 (issue #272), and it is
                     # not optional decoration: caddy.nix has had
-                    # `http://git`/`http://grafana`/`http://glance`
+                    # `http://git`/`http://grafana`/`http://homepage`
                     # bare-name redirect vhosts since f478494a, and without
                     # a `tcp:80` forward NOTHING EVER REACHES THEM. A
                     # `svc:` name resolves to a Service VIP, and a VIP only
@@ -77,19 +78,24 @@
                     grafana.endpoints."tcp:80"  = "tcp://127.0.0.1:80";
                     git.endpoints."tcp:80"      = "tcp://127.0.0.1:80";
 
-                    # Added 2026-09-08: glance had no Tailscale Service of
-                    # its own -- caddy.nix's `http://glance` bare-name
-                    # redirect (added same day, f478494a) pointed at
+                    # Added 2026-09-08 as `glance` (glance's landing page had
+                    # no Tailscale Service of its own -- caddy.nix's
+                    # `http://glance` bare-name redirect pointed at
                     # `ts-cube.moose-micro.ts.net` instead, which worked for
-                    # THAT redirect but left `glance` itself unresolvable
-                    # (no DNS record existed for the bare name at all --
-                    # confirmed with `getent hosts glance` failing outright,
-                    # distinct from the git/grafana SSL-alert bug below).
-                    # This gives it the same real MagicDNS name as its two
-                    # neighbours; caddy.nix's `glanceFqdn` vhost is the
-                    # other half.
-                    glance.endpoints."tcp:443"  = "tcp://127.0.0.1:443";
-                    glance.endpoints."tcp:80"   = "tcp://127.0.0.1:80";
+                    # THAT redirect but left `glance` itself unresolvable:
+                    # no DNS record existed for the bare name at all,
+                    # `getent hosts glance` failing outright, distinct from
+                    # the git/grafana SSL-alert bug below). Renamed to
+                    # `homepage` 2026-09-12 when homepage replaced glance as
+                    # the landing page (issue #291) -- caddy.nix's
+                    # `homepageFqdn` vhost is the other half. A RENAME HERE
+                    # IS A NEW SERVICE to tailscaled: the serve config drops
+                    # one advertisement and adds another, and the
+                    # control-plane object must be re-made to match
+                    # (vip-put svc-homepage.json, vip-delete svc:glance) --
+                    # see homepage.nix's history section for the order.
+                    homepage.endpoints."tcp:443" = "tcp://127.0.0.1:443";
+                    homepage.endpoints."tcp:80"  = "tcp://127.0.0.1:80";
                 };
             };
 
