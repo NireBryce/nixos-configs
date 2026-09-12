@@ -199,7 +199,9 @@ Configured end to end with #291 — the calendar/agenda widgets, the
 one thing only a human can supply: the **actual gcal secret iCal
 addresses**. Calendar IDs were deliberately not assigned at implementation.
 Until they are, the calendars render as a bare month grid and an empty
-agenda (the integration fails quiet — no error chip — by design).
+agenda, and each calendar card carries a small API-error band — the
+placeholder URL 403ing, gone the moment a real address takes its place
+(the secret's `restartUnits` bounces homepage at the next switch).
 
 The fill-in: `sops <repo>/flake/modules/nire/system/secrets/secrets.yaml`,
 edit the `homepage-env` value to one

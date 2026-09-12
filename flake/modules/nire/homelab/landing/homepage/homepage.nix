@@ -66,9 +66,17 @@
 # monitor rows give (it tests MagicDNS, tailnet, caddy, TLS and app
 # together, not the app alone).
 #
-# STATUS: config landed 2026-09-12; runtime verification pending the
-# switch on cube (issue #291's acceptance list). Until then the live page
-# is still glance.
+# STATUS: RUNTIME-VERIFIED on hardware 2026-09-12 (two switches; the
+# second landed the calendar service-widget fix -- see the widgets-block
+# comment). From tenacity: 200 over validated TLS on ts-cube root and the
+# homepage name, short door redirects and lands, unit active NRestarts=0,
+# 3002 loopback-only, glance gone; rendered in a real browser: resources,
+# weather, cards, both calendar views draw, the grid sunday-first with
+# today highlighted. Two live caveats, both recorded not hidden: card
+# status badges for git/grafana read failure until #298 (cube's tailscaled
+# serves no svc: DNS records; hard-IP curl reaches every VIP, so it is the
+# name layer only), and each calendar card shows an API-error band until
+# real feeds land in the sops value (placeholder URL 403s -- by design).
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
@@ -414,3 +422,10 @@
 # the verification ladder in the new-homelab-service skill, and `go/dash`
 # (a golink DB row, outside this repo) repointed at whichever URL should
 # be shortlinked.
+#
+# 2026-09-12, what the rollout actually did (all of it): switch -> ACL
+# apply -> vip-put svc:homepage -> vip-delete svc:glance -> one
+# tailscaled+tailscale-serve restart on cube (the standing-advertisement
+# activation gap; tailscale-serve's Restart=on-failure from issue #267
+# absorbed the first racing attempt on its own) -> verified. The one
+# open failure mode found is #298, not homepage's.

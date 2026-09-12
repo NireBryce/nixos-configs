@@ -153,11 +153,15 @@ over the tailnet:
 - All four short `http://` names return `301` to their full name, and
   following the redirect lands on `200` with `ssl_verify_result 0`.
 - glance answered on both `ts-cube.moose-micro.ts.net` and its own name,
-  assets included. **Superseded 2026-09-12**: homepage replaced glance
-  (issue #291) — the homepage-shaped list above is what this page now
-  describes, and its live checks re-run after the switch (the `homepage`
-  short name additionally needs the `svc:homepage` Service object, see
-  [the map](#the-map)).
+  assets included. **Superseded 2026-09-12** by homepage (issue #291),
+  re-verified the same day from `nire-tenacity`: all homepage doors —
+  `ts-cube.../`, `homepage.moose-micro.ts.net/`, and
+  `http://homepage/` redirect-and-follow — return 200 over validated TLS
+  (`ssl_verify_result 0`), and the rendered page draws its widgets in a
+  real browser. The `homepage` Service needed its control-plane object
+  plus one tailscaled/tailscale-serve restart to activate (the
+  `svc:glance` story in [reverse-proxy](../categories/reverse-proxy.md),
+  replayed identically).
 
 **Not exercised:** the failure-mode steps above — they're derived from
 failures that actually happened, not from breaking things deliberately

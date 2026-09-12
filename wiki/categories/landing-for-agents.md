@@ -12,9 +12,11 @@ nested under `homelab` 2026-08-27. One file, `nixos`-class:
 `services.homepage-dashboard` (attrsets → `/etc/homepage-dashboard/*.yaml`).
 
 Served at `https://ts-cube.moose-micro.ts.net/` (the root route) and at its
-own `https://homepage.moose-micro.ts.net/` (short: `http://homepage/` —
-pending the `svc:homepage` vip-put; see [Route](#route) below). Port
-3002, loopback.
+own `https://homepage.moose-micro.ts.net/` (short: `http://homepage/`).
+Port 3002, loopback. **Runtime-verified 2026-09-12** from tenacity
+(200/validated TLS on all doors, unit clean, 3002 loopback-only) and in a
+real browser (widgets, cards, both calendar views draw; month grid
+sunday-first).
 
 ## Facts
 
@@ -47,9 +49,15 @@ pending the `svc:homepage` vip-put; see [Route](#route) below). Port
 - Calendar integrations: names in `homepage.nix`'s `calendars` attrset;
   services.yaml carries literal `{{HOMEPAGE_VAR_ICAL_FAMILY}}` placeholders
   homepage substitutes at load. Fetched **server-side**; the proxy strips
-  the URL from client responses. Fetch failure is **quiet** — bare grid +
-  empty agenda, no error chip — so an unfilled secret looks like "no
-  events", not breakage.
+  the URL from client responses. Data path fails **quiet** (agenda "No
+  events", bare grid) but each calendar card shows a small **API-error
+  band** until the sops value holds real URLs — expected, not breakage.
+- **`calendar` is a SERVICE widget, not an info widget** (found on the
+  first live render): `widget: { type = "calendar"; view = ...; }` under a
+  service entry, one entry per view in a `layout.Calendar.columns = 1`
+  group. A `calendar` line in widgets.yaml renders "Missing calendar" —
+  the info-widget registry (components/widgets/widget.jsx) has no such
+  entry and nothing errors.
 - Service cards derive from `services.caddy.virtualHosts` (throw-on-orphan,
   issue #221); golink hand-written (own tailnet device). Checks go through
   the proxy at person-URLs; homepage follows redirects explicitly
@@ -65,9 +73,14 @@ pending the `svc:homepage` vip-put; see [Route](#route) below). Port
 
 - **All-interfaces by default** — see the loopback bullet above; the one
   thing to re-check on a homepage-dashboard/next bump.
-- **Until the sops value has real URLs the calendars show no events and
-  no error** — that's by design (quiet ical failures), not a bug to
+- **Until the sops value has real URLs the calendars show no events**
+  (plus the small API-error band per card) — by design, not a bug to
   chase.
+- **Service-card status badges for git/grafana read failure** —
+  [#298](https://github.com/NireBryce/nixos-configs/issues/298): cube's
+  tailscaled serves no `svc:` DNS records, and `siteMonitor` fetches from
+  cube. Hard-IP curl from cube reaches every VIP with validated TLS, so
+  it is purely the name layer; golink (a device name) is unaffected.
 - **`homepage.moose-micro.ts.net` not resolving** post-switch means the
   `svc:homepage` Service object was never vip-put (or the ACL
   approver/grant never applied) — the rollout commands are in

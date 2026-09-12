@@ -37,7 +37,8 @@ own database. The repo-side counterpart is
 4. **Homepage's calendar feeds** (#291, 2026-09-12) — plumbing all landed;
    the gcal **secret iCal addresses** don't exist yet (IDs deliberately
    unassigned). Until filled in the calendars render bare-grid + empty
-   agenda, **quietly — no error chip, not a bug**. Fill-in: edit sops key
+   agenda, plus a small API-error band per card (the placeholder URL
+   403ing) — **by design, not a bug**. Fill-in: edit sops key
    `homepage-env` (a systemd EnvironmentFile), one
    `HOMEPAGE_VAR_ICAL_<NAME>=<secret-ics-url>` line per calendar; add a
    `calendars` entry in `homepage.nix` for each new NAME. Details:

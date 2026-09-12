@@ -12,10 +12,21 @@ calendar widget natively renders events from iCal feeds in a month grid
 *and* an agenda view, which glance could not be configured to do at all
 and which #208/#289/#290 existed to patch it into.
 
-**Runtime status: config landed 2026-09-12, switch pending.** The build
-against cube is green and the generated files are verified (unit
-environment, YAML, Caddyfile all read back); the live-service checks fill
-in after `just switch`. Until then the running page is still glance.
+**Runtime-verified on hardware, 2026-09-12** (two switches — the second
+landing the calendar fix below). From `nire-tenacity`: both
+`ts-cube.moose-micro.ts.net/` and `homepage.moose-micro.ts.net/` return 200
+over validated TLS, the short `http://homepage/` door redirects and lands,
+git/grafana are unaffected, `homepage-dashboard` is active with
+`NRestarts=0`, `glance.service` is gone, and 3002 is bound to 127.0.0.1
+only. Rendered in a real browser: resources, weather, the service cards
+and both calendar views draw correctly, the month grid sunday-first with
+today highlighted. Two live caveats, both recorded rather than hidden:
+the service cards' status badges for git/grafana read failure until
+[#298](https://github.com/NireBryce/nixos-configs/issues/298) (cube's own
+tailscaled serves no `svc:` DNS records, so server-side checks from cube
+cannot resolve the person-URLs), and each calendar card shows a small
+API-error band until real feeds land in the sops value (the placeholder
+URL 403s — by design, gone the moment it's filled).
 
 > **Condensed version:**
 > [landing-for-agents.md](landing-for-agents.md) — the same
@@ -74,8 +85,7 @@ is where you go to read graphs.
 | service cards + `siteMonitor` | Grafana, Forgejo, golink — status and latency, checked **through the proxy** at the URLs a person uses | `monitor` rows (same derivation from `services.caddy.virtualHosts`, throw-on-orphan, issue #221) |
 | `resources` | cube's CPU / memory / disk / uptime | `server-stats` |
 | `openmeteo` | New York weather, imperial, keyless (same api.open-meteo.com source) | `weather` (#226) |
-| `calendar` (`view: monthly`) | month grid **with events** | `calendar` (#207 — bare grid, no events possible) |
-| `calendar` (`view: agenda`) | upcoming events, time-sorted | *(nothing — #290's ask, met natively)* |
+| `calendar` service widgets — *not* info widgets | **Month grid** (full-width, sunday-first) and **Upcoming** (agenda), one service entry per view in a one-column `Calendar` group | `calendar` (#207 — bare grid, no events possible); agenda is #290's ask, met natively |
 
 The service-card list is **derived** from caddy's vhost table — a vhost
 renamed there flows into these URLs, and a vhost removed forces an edit here
@@ -101,15 +111,23 @@ compromise (the source decision recorded in #208/#289/#290). The plumbing:
   it strips the URL from anything sent to the browser — the page can be
   viewed by anything on the tailnet without the secret addresses leaving
   the host.
-- Until real URLs are filled in, an integration fetch fails **quiet** (no
-  error chip): the calendar renders as a bare grid plus an empty agenda.
-  Filling in the sops value and bouncing homepage (the secret's
-  `restartUnits` does it at the next switch) turns events on with no
-  further commit.
+- Until real URLs are filled in, an integration fetch fails quietly in
+  the data path (the agenda shows its "No events" empty state, the grid
+  draws bare) — but each calendar card does show a small **API-error
+  band** where the events would attach. That band is the placeholder
+  URL 403ing; it disappears the moment the sops value holds real URLs
+  (the secret's `restartUnits` bounces homepage at the next switch).
 - **Adding a calendar is one line in each place**: an entry in
   `homepage.nix`'s `calendars`, a line in the sops value. Calendar IDs were
   deliberately not assigned at implementation — that's the one human step
   left, tracked in [homelab/pending-setup.md](../homelab/pending-setup.md).
+
+The schema trap this section sits on: `calendar` is a **service widget**
+(`widget:` under a service entry, one entry per view), *not* an info widget
+— the info-widget registry has no calendar entry, and a `calendar` line in
+widgets.yaml renders the literal fallback "Missing calendar" with no error
+anywhere. Found on the first live render; the config got it wrong before
+that.
 
 ## Loopback bind is not free here
 
