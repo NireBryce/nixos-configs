@@ -2,12 +2,12 @@
 
 _Last modified: 2026-09-11_
 
-## Contents
-
-- [Plugins](#plugins)
-- [What the `.blerc` actually wires together](#what-the-blerc-actually-wires-together)
-- [Bug: spurious `read: `': not a valid identifier` on Tab / auto-complete](#bug-spurious-read--not-a-valid-identifier-on-tab--auto-complete)
-- [See also](#see-also)
+`ble.sh` is wired up by hand for bash — there's no Home Manager option for
+it (`programs.bash.blesh.enable` doesn't exist; see
+[shell-config](README.md)). The package, `source ble.sh
+--attach=none` early in `initContent`, and `ble-attach` at the end all live
+in `bash.nix`; the `.blerc` config itself is owned by
+[`bash/blesh.nix`](../../../flake/modules/nire/shell-config/bash/blesh.nix).
 
 > **Condensed version:**
 > [blesh-for-agents.md](blesh-for-agents.md) — the same
@@ -15,12 +15,12 @@ _Last modified: 2026-09-11_
 > a hurry) loading it mid-task. Both siblings get edited in the same
 > change.
 
-`ble.sh` is wired up by hand for bash — there's no Home Manager option for
-it (`programs.bash.blesh.enable` doesn't exist; see
-[shell-config](README.md)). The package, `source ble.sh
---attach=none` early in `initContent`, and `ble-attach` at the end all live
-in `bash.nix`; the `.blerc` config itself is owned by
-[`bash/blesh.nix`](../../../flake/modules/nire/shell-config/bash/blesh.nix).
+## Contents
+
+- [Plugins](#plugins)
+- [What the `.blerc` actually wires together](#what-the-blerc-actually-wires-together)
+- [Bug: spurious `read: `': not a valid identifier` on Tab / auto-complete](#bug-spurious-read--not-a-valid-identifier-on-tab--auto-complete)
+- [See also](#see-also)
 
 ## Plugins
 

@@ -2,25 +2,6 @@
 
 _Last modified: 2026-09-11_
 
-## Contents
-
-- [What's in it](#whats-in-it)
-- [Why the category isn't named `golink`](#why-the-category-isnt-named-golink)
-- [It hand-writes a systemd unit, which is unusual here](#it-hand-writes-a-systemd-unit-which-is-unusual-here)
-- [It is not a service on this host's network](#it-is-not-a-service-on-this-hosts-network)
-- [First run needs a one-time interactive login](#first-run-needs-a-one-time-interactive-login)
-- [The node must stay named `go`](#the-node-must-stay-named-go)
-- [`DynamicUser`, deliberately](#dynamicuser-deliberately)
-- [No persistence entry](#no-persistence-entry)
-- [Imported by](#imported-by)
-- [See also](#see-also)
-
-> **Condensed version:**
-> [shortlinks-for-agents.md](shortlinks-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
 [golink](https://github.com/tailscale/golink), Tailscale's `go/foo`
 shortlink service. Added 2026-08-24, cube-only; nested under the `homelab`
 umbrella since 2026-08-27 (name unaffected).
@@ -34,6 +15,25 @@ fix in full.
 
 Usage — creating and managing links — is [homelab/creating-golinks.md](../homelab/creating-golinks.md).
 This page stays the configuration side.
+
+> **Condensed version:**
+> [shortlinks-for-agents.md](shortlinks-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
+## Contents
+
+- [What's in it](#whats-in-it)
+- [Why the category isn't named `golink`](#why-the-category-isnt-named-golink)
+- [It hand-writes a systemd unit, which is unusual here](#it-hand-writes-a-systemd-unit-which-is-unusual-here)
+- [It is not a service on this host's network](#it-is-not-a-service-on-this-hosts-network)
+- [First run needs a one-time interactive login](#first-run-needs-a-one-time-interactive-login)
+- [The node must stay named `go`](#the-node-must-stay-named-go)
+- [`DynamicUser`, deliberately](#dynamicuser-deliberately)
+- [No persistence entry](#no-persistence-entry)
+- [Imported by](#imported-by)
+- [See also](#see-also)
 
 ## What's in it
 

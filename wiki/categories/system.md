@@ -2,6 +2,21 @@
 
 _Last modified: 2026-09-11_
 
+The largest category by far — across 19 subdirectories, no per-file count
+kept here on purpose (see categories/README.md's Index section for why) —
+and the one every Linux host in this repo imports whole, with no way to opt
+out of any piece of it. That property is exactly why
+[virtualization](virtualization.md) and [containers](containers.md) got
+split into their own categories instead of living here: anything that needs
+to be optional for some hosts (or just optional in principle) can't be filed
+under `system`.
+
+> **Condensed version:**
+> [system-for-agents.md](system-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
 ## Contents
 
 - [Subdirectories at a glance](#subdirectories-at-a-glance)
@@ -12,21 +27,6 @@ _Last modified: 2026-09-11_
 - [Tailscale: MagicDNS names, and the ACL lives outside this repo](#tailscale-magicdns-names-and-the-acl-lives-outside-this-repo)
 - [Imported by](#imported-by)
 - [See also](#see-also)
-
-> **Condensed version:**
-> [system-for-agents.md](system-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
-The largest category by far — across 19 subdirectories, no per-file count
-kept here on purpose (see categories/README.md's Index section for why) —
-and the one every Linux host in this repo imports whole, with no way to opt
-out of any piece of it. That property is exactly why
-[virtualization](virtualization.md) and [containers](containers.md) got
-split into their own categories instead of living here: anything that needs
-to be optional for some hosts (or just optional in principle) can't be filed
-under `system`.
 
 ## Subdirectories at a glance
 

@@ -2,6 +2,19 @@
 
 _Last modified: 2026-09-11_
 
+How this wiki itself is organized and written — as opposed to
+[conventions.md](conventions.md), which is the *repo's* style guide (Nix
+formatting, `just` commands, the `ship` flow). Read this before adding a
+page, splitting one into a subdirectory, or reorganizing links; it's the
+place the reasoning behind [README.md](README.md)'s "why a link layer, not
+a rewrite" gets turned into concrete rules.
+
+> **Condensed version:**
+> [styleguide-for-agents.md](styleguide-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
 ## Contents
 
 - [Directory hierarchy](#directory-hierarchy)
@@ -11,19 +24,6 @@ _Last modified: 2026-09-11_
 - [Linking](#linking)
 - [Keeping this from rotting](#keeping-this-from-rotting)
 - [See also](#see-also)
-
-> **Condensed version:**
-> [styleguide-for-agents.md](styleguide-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
-How this wiki itself is organized and written — as opposed to
-[conventions.md](conventions.md), which is the *repo's* style guide (Nix
-formatting, `just` commands, the `ship` flow). Read this before adding a
-page, splitting one into a subdirectory, or reorganizing links; it's the
-place the reasoning behind [README.md](README.md)'s "why a link layer, not
-a rewrite" gets turned into concrete rules.
 
 ## Directory hierarchy
 
@@ -129,6 +129,13 @@ separate tier for the *usage* side:
   with nothing — so a reader loses no context skimming the main page, only
   the full narrative.
 
+  **The procedure is skill `wiki-history-sweep`**, and
+  `just wiki-history-candidates` ranks sections that might qualify
+  (reporting only, never fails, and most hits are wrong by design). Both
+  added 2026-09-11, because this pattern was created in one pass on
+  2026-09-02 and extracted into exactly once since — a destination nothing
+  routed to, with no procedure written down. Issue #288.
+
 ## Naming
 
 - kebab-case, matching the category or subject exactly
@@ -140,12 +147,16 @@ separate tier for the *usage* side:
 ## Content shape
 
 - **Every page opens with a `_Last modified: YYYY-MM-DD_` line**, right
-  after the title and before `## Contents` (added wiki-wide 2026-09-06):
+  after the title (added wiki-wide 2026-09-06):
 
   ```
   # Page title
 
   _Last modified: 2026-09-06_
+
+  <intro prose: what this page is>
+
+  > **Condensed version:** ...
 
   ## Contents
   ```
@@ -159,10 +170,18 @@ separate tier for the *usage* side:
   wiki-lint`), but — like every other date claim in this repo — can't check
   that it's still *true*; that's on the editor, the same discipline skill
   `wiki-sync` already asks for everywhere else on a page.
-- **Every page opens with a `## Contents`** — a bullet list of section links,
-  one per `##` heading on the page, placed right after the title and before
-  any intro prose (added wiki-wide 2026-09-01, for browsability: a reader
-  lands knowing the page's shape before reading a word of it). Each link's
+- **Every page carries a `## Contents`** — a bullet list of section links,
+  one per `##` heading on the page, placed **after** the intro prose and the
+  condensed-version pointer, immediately before the first real section.
+  Added wiki-wide 2026-09-01 directly after the title, for browsability — a
+  reader lands knowing the page's shape before reading a word of it — and
+  moved below the intro 2026-09-11, across all 18 pages that had one. The
+  original reasoning has the order backwards for the reader this half of a
+  pair exists for: a section list is useful once you know you're on the
+  right page, and the sentence saying what the page *is* is what settles
+  that. Before the move, that sentence landed at line 17–23 on every paired
+  page, under a bullet list and a pointer telling a human to go read the
+  agent's copy instead. Each link's
   target is GitHub's own heading-slug algorithm applied to that heading's
   text: lowercase, strip everything that isn't a letter/digit/space/hyphen/
   underscore (backticks, colons, periods, em-dashes, quotes all disappear; a

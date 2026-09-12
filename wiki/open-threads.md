@@ -2,20 +2,6 @@
 
 _Last modified: 2026-09-11_
 
-## Contents
-
-- [Tracked as GitHub issues](#tracked-as-github-issues)
-- [Pending upstream bug reports](#pending-upstream-bug-reports)
-- [Todos and ideas left next to the code](#todos-and-ideas-left-next-to-the-code)
-- [Left open by the cube service stack, 2026-08-24](#left-open-by-the-cube-service-stack-2026-08-24)
-- [Not covered here](#not-covered-here)
-
-> **Condensed version:**
-> [open-threads-for-agents.md](open-threads-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
 Todos, half-formed ideas, and things-to-look-into notes left in various
 corners of the tree, plus upstream bugs found here but not yet filed. None
 of this is acted on just by being listed here — this page exists so these
@@ -30,6 +16,20 @@ independently rediscovered once, at real cost, before it was tracked this
 way. `bugs pending submission/` (next section) is still the write-up stage
 for a bug against a *third-party* project, before it's filed there; this
 repo's own tracker is the issue queue, not another markdown list.
+
+> **Condensed version:**
+> [open-threads-for-agents.md](open-threads-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
+## Contents
+
+- [Tracked as GitHub issues](#tracked-as-github-issues)
+- [Pending upstream bug reports](#pending-upstream-bug-reports)
+- [Todos and ideas left next to the code](#todos-and-ideas-left-next-to-the-code)
+- [Left open by the cube service stack, 2026-08-24](#left-open-by-the-cube-service-stack-2026-08-24)
+- [Not covered here](#not-covered-here)
 
 ## Tracked as GitHub issues
 

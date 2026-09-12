@@ -1,6 +1,7 @@
 # `reverse-proxy`, for agents
 
 _Last modified: 2026-09-11_
+_Sibling reviewed: 2026-09-12 -- reverse-proxy.md moved its path-prefix/`handle`-vs-`handle_path` narrative into reverse-proxy-history.md; this page already states the current names/rules with no path-prefix content to update._
 
 Condensed from [reverse-proxy.md](reverse-proxy.md), which keeps the
 reasoning, the verification narrative and the links out. Facts only here.

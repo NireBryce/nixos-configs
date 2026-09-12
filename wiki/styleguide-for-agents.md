@@ -14,7 +14,7 @@ the precedents. Rules only here. The *repo's* style guide is
 | `wiki/*.md` | cross-cutting topics belonging to no one category |
 | `wiki/categories/<name>.md` | one page per real category — a directory under `flake/modules/` with its own `dirsAsCategory.nix`. Indexed in [categories/README.md](categories/README.md)'s table. |
 | `wiki/categories/<name>/` | escape hatch, used once (`shell-config`). Triggered by one *member* accumulating an investigation, not by length. `README.md` becomes the category article; each deep-dive is named after its subject. **No third tier under it.** |
-| `wiki/categories/<name>-history.md` | resolved incidents whose *outcome* matters but whose blow-by-blow shouldn't load every read. **Not the default** — the test is whether understanding the *current* behavior needs the paragraph. |
+| `wiki/categories/<name>-history.md` | resolved incidents whose *outcome* matters but whose blow-by-blow shouldn't load every read. **Not the default** — the test is whether understanding the *current* behavior needs the paragraph. One companion per **category**, not per page. Procedure: skill `wiki-history-sweep`; candidates: `just wiki-history-candidates`. |
 | `wiki/homelab/` | usage tier: operating a service, for a reader who wants to *do something with it*. |
 | `<page>-for-agents.md` | the condensed sibling; see below. |
 
@@ -30,7 +30,9 @@ A category page's order: **what's in it → category-specific mechanism notes
 2. `_Last modified: YYYY-MM-DD_` — **bump it in the same change you edit
    content in.** A purely mechanical touch doesn't need it. This line is
    load-bearing for the `siblings` check.
-3. `## Contents` — one bullet per `##` heading.
+3. intro prose (what this page is), then the condensed-version blockquote
+4. `## Contents` — one bullet per `##` heading, **after** the intro, not
+   before it (moved 2026-09-11; it sat under the title until then).
 
 **Don't hand-derive anchors.** Run `python3 wiki/scripts/check_wiki.py
 gen-contents <page>` after adding, renaming, or removing any heading; it's

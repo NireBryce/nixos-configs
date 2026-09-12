@@ -2,6 +2,18 @@
 
 _Last modified: 2026-09-11_
 
+Each web service on `nire-cube` has **its own tailnet hostname and its own
+certificate**. That is a change from the original design — one hostname with
+path prefixes — which this page described until 2026-09-11 and which is now
+retired. For how it's built, see
+[reverse-proxy](../categories/reverse-proxy.md).
+
+> **Condensed version:**
+> [reaching-services-for-agents.md](reaching-services-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
 ## Contents
 
 - [The map](#the-map)
@@ -11,18 +23,6 @@ _Last modified: 2026-09-11_
 - [Adding another service to this](#adding-another-service-to-this)
 - [What's verified here](#whats-verified-here)
 - [See also](#see-also)
-
-> **Condensed version:**
-> [reaching-services-for-agents.md](reaching-services-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
-Each web service on `nire-cube` has **its own tailnet hostname and its own
-certificate**. That is a change from the original design — one hostname with
-path prefixes — which this page described until 2026-09-11 and which is now
-retired. For how it's built, see
-[reverse-proxy](../categories/reverse-proxy.md).
 
 ## The map
 

@@ -2,22 +2,6 @@
 
 _Last modified: 2026-09-11_
 
-## Contents
-
-- [What's in it](#whats-in-it)
-- [Tailnet-only access, not a new firewall mechanism](#tailnet-only-access-not-a-new-firewall-mechanism)
-- [The secret_key trap, and why it's now a unit instead of a warning](#the-secret_key-trap-and-why-its-now-a-unit-instead-of-a-warning)
-- [Adding a dashboard that survives a rebuild](#adding-a-dashboard-that-survives-a-rebuild)
-- [Why cube only, and why that's a category rather than a host-specific file](#why-cube-only-and-why-thats-a-category-rather-than-a-host-specific-file)
-- [Imported by](#imported-by)
-- [See also](#see-also)
-
-> **Condensed version:**
-> [monitoring-for-agents.md](monitoring-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
 Prometheus + Grafana, scraping this host's own resource metrics. Added
 2026-08-23, cube-only so far; nested under the `homelab` umbrella since
 2026-08-27 (name unaffected).
@@ -32,6 +16,22 @@ terminate HTTPS declaratively yet (a confirmed upstream bug, see
 loopback either way. Confirmed working 2026-09-07: 200 over validated TLS
 from another tailnet host, Grafana's own login redirect (`302 -> /login`)
 observed correctly.
+
+> **Condensed version:**
+> [monitoring-for-agents.md](monitoring-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
+## Contents
+
+- [What's in it](#whats-in-it)
+- [Tailnet-only access, not a new firewall mechanism](#tailnet-only-access-not-a-new-firewall-mechanism)
+- [The secret_key trap, and why it's now a unit instead of a warning](#the-secret_key-trap-and-why-its-now-a-unit-instead-of-a-warning)
+- [Adding a dashboard that survives a rebuild](#adding-a-dashboard-that-survives-a-rebuild)
+- [Why cube only, and why that's a category rather than a host-specific file](#why-cube-only-and-why-thats-a-category-rather-than-a-host-specific-file)
+- [Imported by](#imported-by)
+- [See also](#see-also)
 
 ## What's in it
 

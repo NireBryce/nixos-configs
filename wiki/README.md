@@ -2,18 +2,6 @@
 
 _Last modified: 2026-09-11_
 
-## Contents
-
-- [Common tasks](#common-tasks)
-- [Pages](#pages)
-- [Keeping this from rotting](#keeping-this-from-rotting)
-
-> **Condensed version:**
-> [README-for-agents.md](README-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
 A topic index over documentation that already exists scattered around this
 repo — `CLAUDE.md`, `flake/doc/`, `.agents/skills/`, stray `.md` files
 sitting next to the code they're about, and `bugs pending submission/`.
@@ -52,6 +40,18 @@ rule, and the lint check that keeps the pair in step, is
 **Don't know what you're after yet?** Start with [Overview](overview.md) —
 the 2-minute mental model this index assumes. Already know what you're
 trying to do? Skip straight to Common tasks below.
+
+> **Condensed version:**
+> [README-for-agents.md](README-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
+## Contents
+
+- [Common tasks](#common-tasks)
+- [Pages](#pages)
+- [Keeping this from rotting](#keeping-this-from-rotting)
 
 ## Common tasks
 

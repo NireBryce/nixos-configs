@@ -1,6 +1,7 @@
 # `landing`, for agents
 
 _Last modified: 2026-09-11_
+_Sibling reviewed: 2026-09-12 -- landing.md's change was only retargeting a link (the `/git` 404 anchor moved from reverse-proxy.md to reverse-proxy-history.md); this page doesn't cite that anchor and needs no change._
 
 Condensed from [landing.md](landing.md), which keeps the reasoning and the
 verification narrative. Facts only here.

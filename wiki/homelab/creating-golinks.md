@@ -2,6 +2,17 @@
 
 _Last modified: 2026-09-11_
 
+`go/foo` shortlinks, served by [golink](https://github.com/tailscale/golink)
+on `nire-cube`. This page is about **using** it. For how it's configured,
+why it needed an `AF_NETLINK` fix, and why it's a tailnet device rather than
+a port on cube — see [shortlinks](../categories/shortlinks.md).
+
+> **Condensed version:**
+> [creating-golinks-for-agents.md](creating-golinks-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
 ## Contents
 
 - [Where it is](#where-it-is)
@@ -13,17 +24,6 @@ _Last modified: 2026-09-11_
 - [Backups](#backups)
 - [What's verified here](#whats-verified-here)
 - [See also](#see-also)
-
-> **Condensed version:**
-> [creating-golinks-for-agents.md](creating-golinks-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
-`go/foo` shortlinks, served by [golink](https://github.com/tailscale/golink)
-on `nire-cube`. This page is about **using** it. For how it's configured,
-why it needed an `AF_NETLINK` fix, and why it's a tailnet device rather than
-a port on cube — see [shortlinks](../categories/shortlinks.md).
 
 ## Where it is
 

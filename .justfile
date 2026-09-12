@@ -93,6 +93,16 @@ wiki-churn *args:
 wiki-stale-refs:
     python3 wiki/scripts/wiki_stale_refs.py
 
+# Sections that read like resolved-incident narrative and may belong in a
+# <name>-history.md companion (styleguide.md, Directory hierarchy).
+# Deliberately not in wiki-lint and never fails: what qualifies is a
+# judgement no regex makes -- mechanism explained through its discovery
+# looks identical and must stay. Expect most hits to be wrong; read the
+# script's docstring and skill `wiki-history-sweep` first. Issue #288.
+# Reporting only, never fails -- ranked candidate sections, heuristic
+wiki-history-candidates *args:
+    python3 wiki/scripts/history_candidates.py {{args}}
+
 # Where the same prose shows up in two of AGENTS.md / skills / wiki -- the
 # mechanical half of "one pointer per fact". Deliberately not in wiki-lint:
 # overlap between lessons-learned.md and its lessons-learned/ articles is by

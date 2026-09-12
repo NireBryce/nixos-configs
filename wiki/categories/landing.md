@@ -1,25 +1,6 @@
 # `landing` — `nire/homelab/landing/`
 
-_Last modified: 2026-09-11_
-
-## Contents
-
-- [What's in it](#whats-in-it)
-- [What it is not](#what-it-is-not)
-- [Why the category isn't `dashboard` (or `glance`)](#why-the-category-isnt-dashboard-or-glance)
-- [The one route with no prefix problem](#the-one-route-with-no-prefix-problem)
-- [Two things that could have gone quietly wrong, and didn't](#two-things-that-could-have-gone-quietly-wrong-and-didnt)
-- [No icons, deliberately](#no-icons-deliberately)
-- [Only clickable services are listed](#only-clickable-services-are-listed)
-- [No firewall entry, no persistence entry](#no-firewall-entry-no-persistence-entry)
-- [Imported by](#imported-by)
-- [See also](#see-also)
-
-> **Condensed version:**
-> [landing-for-agents.md](landing-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
+_Last modified: 2026-09-12_
 
 [glance](https://github.com/glanceapp/glance), the service index for
 `nire-cube`: what's running, whether it's up, and how the machine itself is
@@ -40,6 +21,25 @@ content behind `/api/pages/home/content/`, not in the initial HTML. That
 endpoint reported all three monitored sites **OK** with the server-stats
 widget rendering CPU/SWAP for `nire-cube` — which is the actual
 confirmation.
+
+> **Condensed version:**
+> [landing-for-agents.md](landing-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
+## Contents
+
+- [What's in it](#whats-in-it)
+- [What it is not](#what-it-is-not)
+- [Why the category isn't `dashboard` (or `glance`)](#why-the-category-isnt-dashboard-or-glance)
+- [The one route with no prefix problem](#the-one-route-with-no-prefix-problem)
+- [Two things that could have gone quietly wrong, and didn't](#two-things-that-could-have-gone-quietly-wrong-and-didnt)
+- [No icons, deliberately](#no-icons-deliberately)
+- [Only clickable services are listed](#only-clickable-services-are-listed)
+- [No firewall entry, no persistence entry](#no-firewall-entry-no-persistence-entry)
+- [Imported by](#imported-by)
+- [See also](#see-also)
 
 ## What's in it
 
@@ -124,7 +124,7 @@ person would use, rather than at `127.0.0.1:300x`. That makes the widget a test 
 the whole path — MagicDNS, the tailnet, Caddy's routing, the certificate, and
 the app — instead of the app alone. A Caddy misconfiguration shows up here;
 a loopback check would have hidden exactly the class of bug that actually
-happened ([the `/git` 404](reverse-proxy.md#the-two-apps-want-opposite-things-from-the-proxy-historical)).
+happened ([the `/git` 404](reverse-proxy-history.md#the-two-apps-want-opposite-things-from-the-proxy-historical)).
 
 ## No firewall entry, no persistence entry
 
