@@ -1097,6 +1097,25 @@ def check_counts(root):
             if label.startswith(key):
                 rows[key] = int(n)
                 break
+    if not rows:
+        # Zero rows parsed means the table is gone, moved to another page, or
+        # its labels drifted out of COUNT_DEFS' reach -- and until 2026-09-12
+        # every one of those read as "no findings", because the per-key loop
+        # below skips a key it cannot find. A check that silently stops
+        # checking is worse than no check: the page keeps four numbers that
+        # nothing recomputes while `wiki-lint` stays green. Same shape as the
+        # MISSING CONTENTS gap fixed the same day.
+        #
+        # Deliberately only fires when ALL rows are missing. Removing ONE row
+        # stays a page edit rather than drift, which is what the `continue`
+        # below is for.
+        findings.append(
+            f"MISSING COUNTS TABLE  {root / STYLEGUIDE_COUNTS}: no rows "
+            f"matched any of {[k for k, _ in COUNT_DEFS]} -- the counts "
+            f"table is gone or its labels drifted, so `counts` is silently "
+            f"checking nothing. Point STYLEGUIDE_COUNTS at its new home, or "
+            f"update COUNT_DEFS' labels.")
+        return findings + _host_count_findings(root)
     files = sorted((root / MODULES_DIR).rglob('*.nix'))
     for key, pattern in COUNT_DEFS:
         if key not in rows:
@@ -1112,6 +1131,14 @@ def check_counts(root):
                 f"STALE    {root / STYLEGUIDE_COUNTS}: counts table says "
                 f"{rows[key]} for '{key}' but recomputed {actual}")
 
+    return findings + _host_count_findings(root)
+
+
+def _host_count_findings(root):
+    """The "all N hosts"-shaped prose half of `counts`, split out 2026-09-12
+    so the counts-table half can return early on a missing table without
+    silently skipping this too."""
+    findings = []
     hosts = actual_hosts(root)
     class_count = {'nixos': sum(1 for c in hosts.values() if c == 'nixos'),
                    'darwin': sum(1 for c in hosts.values() if c == 'darwin')}
