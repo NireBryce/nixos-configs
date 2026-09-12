@@ -131,9 +131,15 @@ words, no longer load-bearing.
   **exempt** from carrying a Contents block, and the insert path will
   happily add one to each. Hit 2026-09-11, ~20 pages, reverted by hand.
   Pass only the pages you actually changed.
-- **A `-history.md` page needs no `-for-agents` sibling** and no
-  `## Contents` — it is already the moved-out-of-the-way tier
-  (`SIBLING_EXEMPT` in `check_wiki.py`).
+- **A `-history.md` page needs no `-for-agents` sibling, but it DOES keep a
+  `## Contents`.** Two different exemption lists, easy to conflate:
+  `SIBLING_EXEMPT` in `check_wiki.py` covers `-history.md`, but
+  styleguide.md's Contents exception covers only `lessons-learned*` and
+  `-for-agents.md` siblings. All six history pages carry a Contents block.
+  Nothing catches a missing one — `check_contents` skips a page that has
+  none — so this is on you. An earlier version of this skill got it
+  backwards and `reverse-proxy-history.md` lost its block on 2026-09-12 as
+  a direct result; restored with `gen-contents`.
 - **The script can't see a justification that expired.** It scores words,
   and the `reverse-proxy.md` case above had identical words before and
   after it became history. Only a human reading the current config knows.

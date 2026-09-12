@@ -8,6 +8,13 @@ switch, split out 2026-09-03, plus the path-prefix routing design (retired
 Services vhost and there was no longer a shared prefix for the design to
 justify).
 
+## Contents
+
+- [Confirmed working end to end, 2026-08-24](#confirmed-working-end-to-end-2026-08-24)
+- [Paths, not subdomains, was the original constraint — Tailscale Services lifted it, partially](#paths-not-subdomains-was-the-original-constraint--tailscale-services-lifted-it-partially)
+- [The two apps want opposite things from the proxy (historical)](#the-two-apps-want-opposite-things-from-the-proxy-historical)
+- [See also](#see-also)
+
 ## Confirmed working end to end, 2026-08-24
 
 On the second switch. `just switch` came up with 0 failed units,
