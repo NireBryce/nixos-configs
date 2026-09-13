@@ -19,8 +19,8 @@ checked, so a stale entry can be re-tested rather than guessed at.
 ## Contents
 
 - [How this differs from open-threads.md](#how-this-differs-from-open-threadsmd)
-- [1. Is the admin account actually an admin?](#1-is-the-admin-account-actually-an-admin)
-- [2. Mirror, or origin?](#2-mirror-or-origin)
+- [1. An SSH key, if you want `forgejo@ts-cube` clones](#1-an-ssh-key-if-you-want-forgejots-cube-clones)
+- [2. Done — mirror, reaffirmed 2026-09-12](#2-done--mirror-reaffirmed-2026-09-12)
 - [3. golink has no links yet](#3-golink-has-no-links-yet)
 - [4. Done — backups exist, and a restore has actually recovered something](#4-done--backups-exist-and-a-restore-has-actually-recovered-something)
 - [5. Grafana's admin credentials](#5-grafanas-admin-credentials)
@@ -44,37 +44,30 @@ to find a real bug, once more to confirm the fix).
 
 ---
 
-## 1. Is the admin account actually an admin?
+## 1. An SSH key, if you want `forgejo@ts-cube` clones
 
-The setup half is done and its story moved to
-[git-forge-history.md](../categories/git-forge-history.md#the-admin-account-and-an-anonymous-api-that-reports-zeroes)
-2026-09-12: the `elly` account is bootstrapped declaratively, Elly is signed
-in (confirmed 2026-09-05), and the anonymous API that made two sessions
-report otherwise is documented there.
+**The admin question is settled: `elly` is admin — confirmed by Elly
+2026-09-12.** `forgejo-admin-bootstrap`'s `--admin` flag took. The account
+bootstrap and the anonymous API that made two sessions report otherwise are
+recorded in
+[git-forge-history.md](../categories/git-forge-history.md#the-admin-account-and-an-anonymous-api-that-reports-zeroes).
 
-**What is still open:** whether the account really carries admin rights
-(`forgejo-admin-bootstrap`'s `--admin` flag) is unconfirmed either way. The
-masked `is_admin: false` from the anonymous endpoint neither proved nor
-disproved it. Settling it means opening Site Administration from inside the
-UI — not another anonymous API call.
+**What is still open:** add an SSH key under Settings → SSH keys if you want
+`forgejo@ts-cube:…` clones. See [using the forge](forgejo.md) for why that
+key authorizes `forgejo@ts-cube` and not `elly@ts-cube`.
 
-Separately, and also still open: add an SSH key under Settings → SSH keys if
-you want `forgejo@ts-cube:…` clones. See [using the forge](forgejo.md) for
-why that key authorizes `forgejo@ts-cube` and not `elly@ts-cube`.
+## 2. Done — mirror, reaffirmed 2026-09-12
 
-## 2. Mirror, or origin?
+**Cube stays a mirror. GitHub remains canonical.** Decided 2026-09-03 and
+reaffirmed by Elly 2026-09-12 — this time with the condition that had
+gated it actually met, rather than in place of it: an origin was always
+held back until backups existed, and a real restore has since recovered a
+real database (item 4). The answer did not change.
 
-The "is anything actually mirrored" half is done and moved to
-[git-forge-history.md](../categories/git-forge-history.md#mirror-not-origin--and-the-first-real-mirror)
-2026-09-12: this repo is a genuine Forgejo pull mirror as of 2026-09-11, all
-7 branches confirmed matching GitHub.
-
-**What is still open:** mirror was chosen 2026-09-03 explicitly *before*
-item 4's restore was proven, on the reasoning that an origin shouldn't exist
-until backups do. Backups now exist and a real restore has recovered a real
-database, so the condition that decided this has been met — worth revisiting
-if an origin is wanted. Nothing forces the change; it is a live option, not
-a task.
+The record — the choice, and this repo becoming the first thing actually
+mirrored on 2026-09-11 — is in
+[git-forge-history.md](../categories/git-forge-history.md#mirror-not-origin--and-the-first-real-mirror).
+Reopening it is a fresh decision, not an outstanding one.
 
 ## 3. golink has no links yet
 

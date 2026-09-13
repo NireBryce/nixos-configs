@@ -12,10 +12,9 @@ own database. The repo-side counterpart is
 
 ## Still open
 
-1. **Forgejo: is `elly` really admin?** `forgejo-admin-bootstrap` passes
-   `--admin`, but nothing has confirmed it took. Check the **Site
-   Administration panel from inside the UI** — see the API trap below.
-   Separately, add an SSH key under Settings → SSH keys for
+1. **Forgejo SSH key.** (`elly` *is* admin — confirmed by Elly 2026-09-12;
+   `forgejo-admin-bootstrap`'s `--admin` took. The API below still cannot
+   show it.) Add an SSH key under Settings → SSH keys for
    `forgejo@ts-cube:…` clones ([forgejo.md](forgejo.md) explains why that
    key authorizes `forgejo@ts-cube`, not `elly@ts-cube`).
 2. **golink has no links.** `http://go/.export` returns empty. Proposed
@@ -52,11 +51,10 @@ returns `last_login` as `0001-01-01T00:00:00Z` and `is_admin`/`active` as
 Two agent sessions (2026-09-04, 2026-09-05) read that zero value as "nobody
 has signed in yet" and wrote it into this page *and* the backup runbook.
 Both wrong: a same-day screenshot showed an active session throughout. The
-endpoint cannot answer either question. **Consequence, still open (item 1):**
-whether the `elly` account actually carries admin rights is unconfirmed
-either way — settle it in Site Administration in the UI, never from this
-endpoint. Full account moved 2026-09-12 to
-[../categories/git-forge-history.md](../categories/git-forge-history.md).
+endpoint cannot answer either question. It was settled the only way it
+could be — from inside the UI: **`elly` is admin, confirmed by Elly
+2026-09-12.** The masked `is_admin: false` was never evidence either way.
+Full account: [../categories/git-forge-history.md](../categories/git-forge-history.md).
 
 ## Done, but load-bearing to know
 
@@ -66,8 +64,8 @@ endpoint. Full account moved 2026-09-12 to
   [../categories/backup-for-agents.md](../categories/backup-for-agents.md).
 - **This repo is a Forgejo pull mirror**, not an origin — `elly/nixos-configs`,
   `mirror_interval: 8h0m0s`, authenticated with the `forgejo_api_key` sops
-  secret. GitHub stays canonical; no cron in this repo. Worth revisiting now
-  that a restore is proven, if an origin is wanted.
+  secret. GitHub stays canonical; no cron in this repo. **Settled** — mirror
+  reaffirmed 2026-09-12 with backups proven; not an open question.
 - **A Grafana dashboard edited in the UI lives only in cube's sqlite db.**
   Backed up, so it survives a *restore* — but not a *rebuild* that
   reprovisions `_dashboards/`.
