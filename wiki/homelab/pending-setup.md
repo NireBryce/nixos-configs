@@ -1,6 +1,6 @@
 # Pending setup
 
-_Last modified: 2026-09-12_
+_Last modified: 2026-09-13_
 
 Services that are **running but not finished** — configured, switched,
 reachable, and still missing the human step that makes them useful. Every
@@ -19,7 +19,7 @@ checked, so a stale entry can be re-tested rather than guessed at.
 ## Contents
 
 - [How this differs from open-threads.md](#how-this-differs-from-open-threadsmd)
-- [1. An SSH key, if you want `forgejo@ts-cube` clones](#1-an-ssh-key-if-you-want-forgejots-cube-clones)
+- [1. Done — SSH key added, clone over SSH confirmed 2026-09-13](#1-done--ssh-key-added-clone-over-ssh-confirmed-2026-09-13)
 - [2. Done — mirror, reaffirmed 2026-09-12](#2-done--mirror-reaffirmed-2026-09-12)
 - [3. golink has no links yet](#3-golink-has-no-links-yet)
 - [4. Done — backups exist, and a restore has actually recovered something](#4-done--backups-exist-and-a-restore-has-actually-recovered-something)
@@ -44,17 +44,30 @@ to find a real bug, once more to confirm the fix).
 
 ---
 
-## 1. An SSH key, if you want `forgejo@ts-cube` clones
+## 1. Done — SSH key added, clone over SSH confirmed 2026-09-13
 
-**The admin question is settled: `elly` is admin — confirmed by Elly
-2026-09-12.** `forgejo-admin-bootstrap`'s `--admin` flag took. The account
-bootstrap and the anonymous API that made two sessions report otherwise are
-recorded in
-[git-forge-history.md](../categories/git-forge-history.md#the-admin-account-and-an-anonymous-api-that-reports-zeroes).
+Elly's key was already added; auth and a real clone were both exercised from
+`nire-tenacity` on 2026-09-13:
 
-**What is still open:** add an SSH key under Settings → SSH keys if you want
-`forgejo@ts-cube:…` clones. See [using the forge](forgejo.md) for why that
-key authorizes `forgejo@ts-cube` and not `elly@ts-cube`.
+```
+$ ssh -T forgejo@ts-cube
+Hi there, elly! You've successfully authenticated with the key named
+elly@nire-tenacity, but Forgejo does not provide shell access.
+$ git clone --depth 1 forgejo@ts-cube:elly/nixos-configs.git
+```
+
+The key is `~/.ssh/id_ed25519` (`elly@nire-tenacity`), not a dedicated one,
+and no `ssh_config` block was needed. **Push over SSH is still untested.**
+
+**It is your own key, not a key belonging to the `forgejo` account** — the
+`forgejo@` in the clone URL is the account SSH connects *to*, which has no
+keypair of its own. Procedure, for the next key or the next person:
+[forgejo.md → Adding one](forgejo.md#adding-one).
+
+(The admin half of this item is settled — `elly` is admin, confirmed
+2026-09-12; the account bootstrap and the anonymous API that reported
+otherwise are in
+[git-forge-history.md](../categories/git-forge-history.md#the-admin-account-and-an-anonymous-api-that-reports-zeroes).)
 
 ## 2. Done — mirror, reaffirmed 2026-09-12
 
