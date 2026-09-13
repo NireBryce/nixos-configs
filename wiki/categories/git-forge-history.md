@@ -74,13 +74,17 @@ sessions treating it as an answer is what this section exists to record.
 
 ## Mirror, not origin — and the first real mirror
 
-Moved here 2026-09-12 from `homelab/pending-setup.md` item 2, whose
-"is anything actually mirrored" half is finished. Whether cube should hold
-mirrors or become an origin stays open there.
+Moved here 2026-09-12 from `homelab/pending-setup.md` item 2, which is
+settled: mirror, reaffirmed the same day.
 
 **Mirror was chosen 2026-09-03** — GitHub stays the origin, cube holds
 copies, so losing cube costs nothing. The alternative (things live here
-first) was explicitly gated on backups existing, which they now do.
+first) was explicitly gated on backups existing, which they now do — and
+the choice was **reaffirmed 2026-09-12 anyway**, with the gate met rather
+than pending. Worth recording because the original decision and the
+reaffirmed one look identical while resting on different evidence: the
+first was made because an origin was too risky, the second with that risk
+actually retired.
 
 **2026-09-11: this repo itself became the first thing actually mirrored.**
 `elly/nixos-configs` was created as a genuine Forgejo pull mirror (migrate

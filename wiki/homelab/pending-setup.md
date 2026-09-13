@@ -20,7 +20,7 @@ checked, so a stale entry can be re-tested rather than guessed at.
 
 - [How this differs from open-threads.md](#how-this-differs-from-open-threadsmd)
 - [1. An SSH key, if you want `forgejo@ts-cube` clones](#1-an-ssh-key-if-you-want-forgejots-cube-clones)
-- [2. Mirror, or origin?](#2-mirror-or-origin)
+- [2. Done — mirror, reaffirmed 2026-09-12](#2-done--mirror-reaffirmed-2026-09-12)
 - [3. golink has no links yet](#3-golink-has-no-links-yet)
 - [4. Done — backups exist, and a restore has actually recovered something](#4-done--backups-exist-and-a-restore-has-actually-recovered-something)
 - [5. Grafana's admin credentials](#5-grafanas-admin-credentials)
@@ -56,19 +56,18 @@ recorded in
 `forgejo@ts-cube:…` clones. See [using the forge](forgejo.md) for why that
 key authorizes `forgejo@ts-cube` and not `elly@ts-cube`.
 
-## 2. Mirror, or origin?
+## 2. Done — mirror, reaffirmed 2026-09-12
 
-The "is anything actually mirrored" half is done and moved to
-[git-forge-history.md](../categories/git-forge-history.md#mirror-not-origin--and-the-first-real-mirror)
-2026-09-12: this repo is a genuine Forgejo pull mirror as of 2026-09-11, all
-7 branches confirmed matching GitHub.
+**Cube stays a mirror. GitHub remains canonical.** Decided 2026-09-03 and
+reaffirmed by Elly 2026-09-12 — this time with the condition that had
+gated it actually met, rather than in place of it: an origin was always
+held back until backups existed, and a real restore has since recovered a
+real database (item 4). The answer did not change.
 
-**What is still open:** mirror was chosen 2026-09-03 explicitly *before*
-item 4's restore was proven, on the reasoning that an origin shouldn't exist
-until backups do. Backups now exist and a real restore has recovered a real
-database, so the condition that decided this has been met — worth revisiting
-if an origin is wanted. Nothing forces the change; it is a live option, not
-a task.
+The record — the choice, and this repo becoming the first thing actually
+mirrored on 2026-09-11 — is in
+[git-forge-history.md](../categories/git-forge-history.md#mirror-not-origin--and-the-first-real-mirror).
+Reopening it is a fresh decision, not an outstanding one.
 
 ## 3. golink has no links yet
 

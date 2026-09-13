@@ -113,8 +113,8 @@ its own schedule. Confirmed live: all 7 branches present and matching
 GitHub's own branch list, default branch `experimental`. This is the first
 repo actually pushed/mirrored here — see
 [git-forge-history.md](../categories/git-forge-history.md#mirror-not-origin--and-the-first-real-mirror)
-for the record, and [pending-setup.md](pending-setup.md) item 2 for the
-still-open mirror-or-origin question.
+for the record. Mirror-or-origin is settled (mirror, reaffirmed
+2026-09-12) — [pending-setup.md](pending-setup.md) item 2.
 
 ## What's verified here
 

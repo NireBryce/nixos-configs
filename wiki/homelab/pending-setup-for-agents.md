@@ -64,8 +64,8 @@ Full account: [../categories/git-forge-history.md](../categories/git-forge-histo
   [../categories/backup-for-agents.md](../categories/backup-for-agents.md).
 - **This repo is a Forgejo pull mirror**, not an origin — `elly/nixos-configs`,
   `mirror_interval: 8h0m0s`, authenticated with the `forgejo_api_key` sops
-  secret. GitHub stays canonical; no cron in this repo. Worth revisiting now
-  that a restore is proven, if an origin is wanted.
+  secret. GitHub stays canonical; no cron in this repo. **Settled** — mirror
+  reaffirmed 2026-09-12 with backups proven; not an open question.
 - **A Grafana dashboard edited in the UI lives only in cube's sqlite db.**
   Backed up, so it survives a *restore* — but not a *rebuild* that
   reprovisions `_dashboards/`.
