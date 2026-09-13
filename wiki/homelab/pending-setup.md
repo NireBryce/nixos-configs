@@ -1,6 +1,6 @@
 # Pending setup
 
-_Last modified: 2026-09-12_
+_Last modified: 2026-09-13_
 
 Services that are **running but not finished** — configured, switched,
 reachable, and still missing the human step that makes them useful. Every
@@ -46,15 +46,16 @@ to find a real bug, once more to confirm the fix).
 
 ## 1. An SSH key, if you want `forgejo@ts-cube` clones
 
-**The admin question is settled: `elly` is admin — confirmed by Elly
-2026-09-12.** `forgejo-admin-bootstrap`'s `--admin` flag took. The account
-bootstrap and the anonymous API that made two sessions report otherwise are
-recorded in
-[git-forge-history.md](../categories/git-forge-history.md#the-admin-account-and-an-anonymous-api-that-reports-zeroes).
-
-**What is still open:** add an SSH key under Settings → SSH keys if you want
-`forgejo@ts-cube:…` clones. See [using the forge](forgejo.md) for why that
+Only needed if you want to clone or push over SSH; HTTPS works today without
+it. The procedure — which key to paste, where, the `IdentitiesOnly` trap and
+how to tell it worked — is
+[forgejo.md → Adding one](forgejo.md#adding-one). That page also has why the
 key authorizes `forgejo@ts-cube` and not `elly@ts-cube`.
+
+(The admin half of this item is settled — `elly` is admin, confirmed
+2026-09-12; the account bootstrap and the anonymous API that reported
+otherwise are in
+[git-forge-history.md](../categories/git-forge-history.md#the-admin-account-and-an-anonymous-api-that-reports-zeroes).)
 
 ## 2. Done — mirror, reaffirmed 2026-09-12
 

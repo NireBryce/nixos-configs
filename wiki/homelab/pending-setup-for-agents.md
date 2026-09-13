@@ -1,6 +1,6 @@
 # Pending setup, for agents
 
-_Last modified: 2026-09-12_
+_Last modified: 2026-09-13_
 
 Condensed from [pending-setup.md](pending-setup.md), which keeps the closed
 items and their full accounts. Open work and the traps only here.
@@ -14,7 +14,11 @@ own database. The repo-side counterpart is
 
 1. **Forgejo SSH key.** (`elly` *is* admin — confirmed by Elly 2026-09-12;
    `forgejo-admin-bootstrap`'s `--admin` took. The API below still cannot
-   show it.) Add an SSH key under Settings → SSH keys for
+   show it.) Procedure: [forgejo.md](forgejo.md#adding-one) — paste a public
+   key in the web UI, `IdentitiesOnly yes` if it is a dedicated one, verify
+   with `ssh -T forgejo@ts-cube` (a greeting that closes *is* success; that
+   account has no shell). Not run here. Add a key under Settings → SSH keys
+   for
    `forgejo@ts-cube:…` clones ([forgejo.md](forgejo.md) explains why that
    key authorizes `forgejo@ts-cube`, not `elly@ts-cube`).
 2. **golink has no links.** `http://go/.export` returns empty. Proposed

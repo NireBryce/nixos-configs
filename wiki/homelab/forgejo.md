@@ -1,6 +1,19 @@
 # Using the forge
 
-_Last modified: 2026-09-12_
+_Last modified: 2026-09-13_
+
+[Forgejo](https://forgejo.org/) on `nire-cube`, at
+`https://git.moose-micro.ts.net/` — its own Tailscale Services name as of
+2026-09-07 (was `https://ts-cube.moose-micro.ts.net/git/`; that path 404s
+now). This page is about **using** it — signing in, cloning, pushing. For
+how it's configured and why its two hostnames disagree, see
+[git-forge](../categories/git-forge.md).
+
+> **Condensed version:**
+> [forgejo-for-agents.md](forgejo-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
 
 ## Contents
 
@@ -11,13 +24,6 @@ _Last modified: 2026-09-12_
 - [This repo is mirrored here](#this-repo-is-mirrored-here)
 - [What's verified here](#whats-verified-here)
 - [See also](#see-also)
-
-[Forgejo](https://forgejo.org/) on `nire-cube`, at
-`https://git.moose-micro.ts.net/` — its own Tailscale Services name as of
-2026-09-07 (was `https://ts-cube.moose-micro.ts.net/git/`; that path 404s
-now). This page is about **using** it — signing in, cloning, pushing. For
-how it's configured and why its two hostnames disagree, see
-[git-forge](../categories/git-forge.md).
 
 ## Where it is
 
@@ -89,18 +95,78 @@ Two consequences:
   `elly@ts-cube`.** They're separate accounts with separate
   `authorized_keys`; adding one doesn't grant the other.
 
+### Adding one
+
+**You do not generate a key "for the `forgejo` user."** `forgejo` is the
+account you SSH *to* on cube, not the key's owner. You add your own public
+key through the web UI and Forgejo writes it into
+`~forgejo/.ssh/authorized_keys` itself — never edit that file by hand.
+
+An existing key is fine; there is no reason to mint a per-forge one unless
+you want it separable. Either way, what you paste is the **public** half:
+
+```sh
+cat ~/.ssh/id_ed25519.pub          # or any existing key
+# or, for a dedicated one:
+ssh-keygen -t ed25519 -f ~/.ssh/id_forgejo -C "elly@forgejo"
+```
+
+Paste it into the web UI → **Settings → SSH keys → Add key**. A
+YubiKey-backed `sk-ssh-ed25519@openssh.com` key works too, and asks for a
+touch on every auth.
+
+If you used a dedicated key, tell ssh which one to offer:
+
+```
+Host ts-cube
+    User forgejo
+    IdentityFile ~/.ssh/id_forgejo
+    IdentitiesOnly yes
+```
+
+**`IdentitiesOnly yes` is the part worth not skipping.** Without it ssh
+offers every identity it has and a different key can match first — the same
+failure that made the QNAP restic key look broken when it wasn't (see the
+[backup runbook](backup-runbook.md)'s troubleshooting).
+
+Then check it:
+
+```sh
+ssh -T forgejo@ts-cube
+```
+
+**A greeting that closes the connection is success.** The `forgejo` account
+has no shell, so there is nothing to land in. A password prompt means the key
+did not take — and would fail regardless, since `PasswordAuthentication` is
+off on every host here (`ssh.nix`).
+
+Clone with `forgejo@ts-cube:<user>/<repo>.git` — the short name, not the web
+FQDN; see "Where it is" above for why those differ. Copy the URL from the
+repo page rather than typing it.
+
+**None of this subsection has been run here** — it follows from the module's
+configuration and Forgejo's documented behaviour, not from a clone performed
+on this fleet. See "What's verified here".
+
 ## Database and backups
 
 sqlite3, at `/var/lib/forgejo/`, along with the repos themselves and the
 secrets Forgejo generates on first run. Cube has a plain persistent root, so
 this survives reboots with nothing special configured.
 
-**There is no backup of any of this.** Nothing in this repo backs
-`/var/lib/forgejo` up anywhere — verified 2026-08-24 by grepping the whole
-tree for backup tooling, which found none — and a homelab forge with one copy
-of a repo is a repo you have one copy of. Push anything you care about
-somewhere else as well, or treat this as a mirror rather than an origin,
-until [#87](https://github.com/NireBryce/nixos-configs/issues/87) lands.
+**This is backed up, as of 2026-09-06.** It was not until then, and this
+paragraph said so — [#87](https://github.com/NireBryce/nixos-configs/issues/87)
+closed with restic backing `/var/lib/forgejo` and `/persist` to the QNAP,
+and a real restore that opened a complete Forgejo database rather than
+merely producing files. See [backup](../categories/backup.md) and the
+[backup runbook](backup-runbook.md).
+
+One caveat that survives: the live `.db` files under `/var/lib/forgejo` are
+**excluded** from every snapshot on purpose, because a live sqlite file can
+be mid-write when restic reads it. The restorable copy is the staged one
+under `/var/lib/restic-backups-cube-sqlite-staging`, and restoring the
+wrong path gets you a file that looks present and opens as nothing. The
+runbook's "Restoring a snapshot" covers it.
 
 ## This repo is mirrored here
 
