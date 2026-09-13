@@ -33,6 +33,12 @@ how it's configured and why its two hostnames disagree, see
 | Clone over HTTPS | `https://git.moose-micro.ts.net/<user>/<repo>.git` |
 | Clone over SSH | `forgejo@ts-cube:<user>/<repo>.git` |
 
+**`forgejo@` is the account you connect to, not a key owner.** Nothing here
+uses a key belonging to the `forgejo` user — it has none. Git-over-SSH to any
+Forgejo reaches one shared system account, and Forgejo works out *which*
+person you are from the key you present. See
+[Adding one](#adding-one).
+
 **Those two hostnames are different on purpose, and it isn't a typo.** Web
 traffic goes through Caddy on Forgejo's own Tailscale Services vhost, which
 needs the full FQDN for its certificate. Git-over-SSH does *not* go through

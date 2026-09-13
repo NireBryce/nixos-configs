@@ -19,7 +19,7 @@ checked, so a stale entry can be re-tested rather than guessed at.
 ## Contents
 
 - [How this differs from open-threads.md](#how-this-differs-from-open-threadsmd)
-- [1. An SSH key, if you want `forgejo@ts-cube` clones](#1-an-ssh-key-if-you-want-forgejots-cube-clones)
+- [1. Add your SSH key to your Forgejo account](#1-add-your-ssh-key-to-your-forgejo-account)
 - [2. Done — mirror, reaffirmed 2026-09-12](#2-done--mirror-reaffirmed-2026-09-12)
 - [3. golink has no links yet](#3-golink-has-no-links-yet)
 - [4. Done — backups exist, and a restore has actually recovered something](#4-done--backups-exist-and-a-restore-has-actually-recovered-something)
@@ -44,7 +44,13 @@ to find a real bug, once more to confirm the fix).
 
 ---
 
-## 1. An SSH key, if you want `forgejo@ts-cube` clones
+## 1. Add your SSH key to your Forgejo account
+
+**It is your own key, not a key belonging to the `forgejo` account.** The
+`forgejo@` in `forgejo@ts-cube:…` is the account SSH connects *to* on cube —
+nothing is generated for it, and it has no keypair of its own. You paste your
+public key into your own profile in the web UI; Forgejo writes its
+`authorized_keys` for you.
 
 Only needed if you want to clone or push over SSH; HTTPS works today without
 it. The procedure — which key to paste, where, the `IdentitiesOnly` trap and
