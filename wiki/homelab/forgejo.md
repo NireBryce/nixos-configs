@@ -150,9 +150,11 @@ Clone with `forgejo@ts-cube:<user>/<repo>.git` — the short name, not the web
 FQDN; see "Where it is" above for why those differ. Copy the URL from the
 repo page rather than typing it.
 
-**None of this subsection has been run here** — it follows from the module's
-configuration and Forgejo's documented behaviour, not from a clone performed
-on this fleet. See "What's verified here".
+**Exercised 2026-09-13** from `nire-tenacity`: `ssh -T forgejo@ts-cube`
+returned the greeting naming the key (`elly@nire-tenacity`), and
+`git clone --depth 1 forgejo@ts-cube:elly/nixos-configs.git` succeeded
+against the mirror. A plain `~/.ssh/id_ed25519` with no `ssh_config` block
+was enough. **Push over SSH is still untested.**
 
 ## Database and backups
 
@@ -198,10 +200,15 @@ text and no form fields. Re-verified 2026-09-11 against the current
 `git.moose-micro.ts.net` hostname: root, `/explore/repos`, and `/user/login`
 all still 200.
 
-**Not exercised:** adding an SSH key, or a clone/push over SSH specifically
-(the mirror above was created and synced entirely over HTTPS via the API).
-The SSH clone URL shape comes from the module's `DOMAIN` setting and
-Forgejo's own behaviour, not from a clone run here.
+**Exercised 2026-09-13**, from `nire-tenacity` over the tailnet: key-based
+auth to `forgejo@ts-cube` (greeting names the key, confirming Forgejo
+identifies the person from the key rather than the username), and a real
+`git clone` over SSH of `elly/nixos-configs`, which came down at the
+mirror's then-current commit.
+
+**Still not exercised:** a **push** over SSH. The mirror above was created
+and synced entirely over HTTPS via the API, and a pull mirror is read-only
+on the Forgejo side, so a push would need a non-mirror repo to aim at.
 
 ## See also
 

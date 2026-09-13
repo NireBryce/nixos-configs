@@ -19,7 +19,7 @@ checked, so a stale entry can be re-tested rather than guessed at.
 ## Contents
 
 - [How this differs from open-threads.md](#how-this-differs-from-open-threadsmd)
-- [1. Add your SSH key to your Forgejo account](#1-add-your-ssh-key-to-your-forgejo-account)
+- [1. Done — SSH key added, clone over SSH confirmed 2026-09-13](#1-done--ssh-key-added-clone-over-ssh-confirmed-2026-09-13)
 - [2. Done — mirror, reaffirmed 2026-09-12](#2-done--mirror-reaffirmed-2026-09-12)
 - [3. golink has no links yet](#3-golink-has-no-links-yet)
 - [4. Done — backups exist, and a restore has actually recovered something](#4-done--backups-exist-and-a-restore-has-actually-recovered-something)
@@ -44,19 +44,25 @@ to find a real bug, once more to confirm the fix).
 
 ---
 
-## 1. Add your SSH key to your Forgejo account
+## 1. Done — SSH key added, clone over SSH confirmed 2026-09-13
 
-**It is your own key, not a key belonging to the `forgejo` account.** The
-`forgejo@` in `forgejo@ts-cube:…` is the account SSH connects *to* on cube —
-nothing is generated for it, and it has no keypair of its own. You paste your
-public key into your own profile in the web UI; Forgejo writes its
-`authorized_keys` for you.
+Elly's key was already added; auth and a real clone were both exercised from
+`nire-tenacity` on 2026-09-13:
 
-Only needed if you want to clone or push over SSH; HTTPS works today without
-it. The procedure — which key to paste, where, the `IdentitiesOnly` trap and
-how to tell it worked — is
-[forgejo.md → Adding one](forgejo.md#adding-one). That page also has why the
-key authorizes `forgejo@ts-cube` and not `elly@ts-cube`.
+```
+$ ssh -T forgejo@ts-cube
+Hi there, elly! You've successfully authenticated with the key named
+elly@nire-tenacity, but Forgejo does not provide shell access.
+$ git clone --depth 1 forgejo@ts-cube:elly/nixos-configs.git
+```
+
+The key is `~/.ssh/id_ed25519` (`elly@nire-tenacity`), not a dedicated one,
+and no `ssh_config` block was needed. **Push over SSH is still untested.**
+
+**It is your own key, not a key belonging to the `forgejo` account** — the
+`forgejo@` in the clone URL is the account SSH connects *to*, which has no
+keypair of its own. Procedure, for the next key or the next person:
+[forgejo.md → Adding one](forgejo.md#adding-one).
 
 (The admin half of this item is settled — `elly` is admin, confirmed
 2026-09-12; the account bootstrap and the anonymous API that reported

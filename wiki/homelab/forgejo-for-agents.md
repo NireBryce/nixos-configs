@@ -64,8 +64,10 @@ Verify with `ssh -T forgejo@ts-cube`: **a greeting that closes is success**
 (no shell on that account). A password prompt means the key didn't take, and
 would fail anyway — `PasswordAuthentication` is off fleet-wide.
 
-**Not exercised here**: adding a key, or any clone/push over SSH. The
-procedure follows from config and Forgejo's documented behaviour.
+**Exercised 2026-09-13** from tenacity: auth (greeting names the key) and a
+real `git clone` over SSH, with a plain `~/.ssh/id_ed25519` and no
+`ssh_config` block. **Push over SSH still untested** — the mirror is
+read-only on the Forgejo side.
 
 ## Storage and backups
 

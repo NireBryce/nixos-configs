@@ -12,13 +12,12 @@ own database. The repo-side counterpart is
 
 ## Still open
 
-1. **Forgejo SSH key.** (`elly` *is* admin — confirmed by Elly 2026-09-12;
-   `forgejo-admin-bootstrap`'s `--admin` took. The API below still cannot
-   show it.) Procedure: [forgejo.md](forgejo.md#adding-one) — paste a public
-   key in the web UI, `IdentitiesOnly yes` if it is a dedicated one, verify
-   with `ssh -T forgejo@ts-cube` (a greeting that closes *is* success; that
-   account has no shell). Not run here. Add a key under Settings → SSH keys
-   for
+1. ~~**Forgejo SSH key.**~~ **Done 2026-09-13** — auth and a real clone over
+   SSH confirmed from tenacity with `~/.ssh/id_ed25519`; push still
+   untested. (`elly` *is* admin — confirmed 2026-09-12; the API below still
+   cannot show it.) Procedure, for the next one:
+   [forgejo.md](forgejo.md#adding-one). The key is **yours**, not the
+   `forgejo` account's; that account has no keypair. Formerly: add a key for
    `forgejo@ts-cube:…` clones ([forgejo.md](forgejo.md) explains why that
    key authorizes `forgejo@ts-cube`, not `elly@ts-cube`).
 2. **golink has no links.** `http://go/.export` returns empty. Proposed
