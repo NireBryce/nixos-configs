@@ -1,6 +1,6 @@
 # Maintenance schedule, for agents
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-13_
 
 Condensed from [maintenance-schedule.md](maintenance-schedule.md), which
 keeps each item's reasoning, rejected alternatives and evidence. Facts only
@@ -22,10 +22,17 @@ and dates are not values.
 | 5 | `restic-cube-ssh-key` / `restic-cube-password` | on suspicion / QNAP re-image | backup runs fail | 2026-08-31 |
 | 6 | QNAP SSH host key pin | none; breaks on re-image | backup runs fail | untracked |
 | 7 | `forgejo-admin-password` | none enforced; never rotated | — | — |
-| 8 | Grafana admin credentials | **still on initial setup** | — | 2026-09-07 |
+| 8 | Grafana admin credentials | **stock `admin`/`admin` is LIVE** — no `admin_password` in `grafana.nix` | anyone on the tailnet has Grafana admin, silently | 2026-09-13 |
 | 9 | Syncthing device certs | decades; **declared by no module since 2026-09-08** | nothing | 2026-09-07 |
 | 10 | `FLAKE_LOCK_TOKEN` | fine-grained PAT, **must** carry one (366d max) | fails loudly by construction, see below | 2026-09-08 |
 | 11 | Atuin account key | none; on suspicion only | — | 2026-09-09 |
+
+**Row 8 is a live credential, not a missing one.** Default credentials mean
+a working admin account with a published password — never write one up as
+"not set up yet" (that wording misled a reader 2026-09-13). A stock password
+is also invisible from the repo: the *absence* of an `admin_password`
+setting is what leaves it stock, so only signing in settles it. Skill
+`maintenance-schedule` has the required row shape.
 
 ## The rows with a live action attached
 

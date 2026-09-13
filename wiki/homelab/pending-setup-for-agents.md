@@ -33,9 +33,14 @@ own database. The repo-side counterpart is
    [creating-golinks.md](creating-golinks.md) — **read that page's `--post302` and delete
    traps first, both have teeth.** Done when `go/dash` resolves from a
    *second* tailnet device.
-3. **Grafana admin credentials** — ships a default `admin` account and
-   prompts for a change on first sign-in. Not verifiable without logging in;
-   confirm it happened. The tailnet is the only thing in front of it.
+3. **Grafana admin credentials** — **assume `admin`/`admin` is live.**
+   `grafana.nix` sets `secret_key` but no `admin_password`, so the stock
+   account works; this is a live credential, not an unset one. Not
+   checkable from config — a stock password is invisible there, since the
+   missing setting is what leaves it stock. The tailnet is the only thing
+   in front of it, so anyone on the tailnet has Grafana admin. Sign in to
+   settle it; close [../maintenance-schedule.md](../maintenance-schedule.md)
+   item 8 in the same change.
 4. **Homepage's calendar feeds** (#291, 2026-09-12) — plumbing all landed;
    the gcal **secret iCal addresses** don't exist yet (IDs deliberately
    unassigned). Until filled in the calendars render bare-grid + empty

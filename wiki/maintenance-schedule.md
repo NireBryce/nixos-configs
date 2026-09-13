@@ -1,6 +1,6 @@
 # Maintenance schedule
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-13_
 
 ## Contents
 
@@ -175,14 +175,32 @@ here, don't wrap this file in ciphertext to protect one row.
 
 ### 8. Grafana admin credentials
 
-- **What**: still on initial/default setup — this is not yet a "rotate
-  periodically" item because it hasn't had its one-time setup done at all.
-- **Status**: see [homelab/pending-setup.md](homelab/pending-setup.md#5-grafanas-admin-credentials)
-  for the current state. Once real credentials are set, add them here with
-  the same shape as `forgejo-admin-password` above — this row should stop
-  saying "pending" the same change that closes that pending-setup item.
-- **Last checked**: 2026-09-07 (cross-referenced against pending-setup.md,
-  not the live instance).
+- **What**: **a live admin account whose password is Grafana's published
+  default.** Not an unset credential — `grafana.nix` sets `secret_key` but no
+  `admin_password`, so the stock `admin`/`admin` account is working right
+  now and anyone who can open the page can sign in as admin. (An earlier
+  version of this row said "still on initial setup ... hasn't had its
+  one-time setup done at all", which reads as *absent* and misled its only
+  reader, 2026-09-13.)
+- **What it grants**: admin on cube's Grafana — dashboards, and the
+  datasource config that `secret_key` exists to encrypt.
+- **What's in front of it**: the tailnet, and nothing else. Grafana binds
+  loopback behind Caddy on its own Services name; there is no second
+  factor and no allowlist beyond tailnet membership. That is the whole
+  mitigation — judge it accordingly.
+- **Not checkable from the config.** A stock password is invisible in the
+  repo, because the *absence* of an `admin_password` setting is precisely
+  what leaves it stock. Confirming it means signing in.
+- **What closes it**: sign in at `https://grafana.moose-micro.ts.net/`,
+  change the password if it is still stock, then rewrite this row with the
+  same shape as `forgejo-admin-password` above — in the same change that
+  closes [pending-setup.md](homelab/pending-setup.md#5-grafanas-admin-credentials)
+  item 5. Setting it declaratively (a `$__file{}` provider, as
+  `secret_key` already uses) is the durable version and a real change, not
+  a tidy-up.
+- **Last checked**: 2026-09-13 (read against `grafana.nix`, which confirms
+  no `admin_password` is set; the live instance has still not been signed
+  into to check whether the password was ever changed by hand).
 
 ### 9. Syncthing device certificates
 
@@ -293,6 +311,11 @@ expiry, rotation cadence, or silent-breakage property — add a row here in
 the **same change**, same discipline `wiki-sync` already asks for elsewhere.
 A secret with no such property (a static API token that never expires, say)
 doesn't belong on this page; it just lives in `secrets.yaml`.
+
+**A service left on vendor-default credentials belongs here too, and is
+written as a live credential rather than a missing one** — it is a working
+admin account with a publicly-known password, not an absence. Skill
+`maintenance-schedule` has the required shape and why it exists.
 
 ## See also
 

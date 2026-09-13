@@ -52,6 +52,44 @@ re-deriving it from `secrets.yaml` and module comments each time.
    confirmed) — update the item's own text, not just the date, so the page
    doesn't keep saying "pending" past the point it's true.
 
+## Default credentials are a live credential, not a missing one
+
+**Never write a default-credential row as though nothing is set up yet.**
+"Still on initial setup", "hasn't had its one-time setup done", "pending" and
+"not yet configured" all describe an *absence*. A service shipping stock
+credentials is the opposite: there is a working admin account right now, its
+password is in the vendor's public documentation, and anyone who can reach
+the service already has it.
+
+This is not hypothetical phrasing advice. `maintenance-schedule.md` item 8
+said Grafana was "still on initial/default setup — this is not yet a 'rotate
+periodically' item because it hasn't had its one-time setup done at all",
+and Elly read it as the credentials being *unset* rather than *default and
+live* (2026-09-13). The row was accurate and still misled its only reader.
+
+A row for stock credentials states, in this order:
+
+1. **That the account is live and its password is publicly known** — say
+   `admin`/`admin`, or whatever the vendor ships, in as many words.
+2. **What it currently grants** — admin on which service, holding what.
+3. **What is actually in front of it** — a tailnet, a LAN, a firewall rule.
+   Name it, because that is the entire mitigation and the reader needs to
+   judge it.
+4. **What closes it**, and that the answer needs a live check rather than
+   repo state — a stock password is invisible from the config, since the
+   absence of an `admin_password` setting is exactly what leaves it stock.
+
+Two related traps worth not re-deriving:
+
+- **A credential set declaratively and a credential left at default look
+  identical in `secrets.yaml`** — both are absent from it. Forgejo's admin
+  password is a sops secret; Grafana's is stock. Nothing in `secrets.yaml`
+  distinguishes those, so check the module for an `admin_password`-shaped
+  setting rather than concluding from the secret store.
+- **"Not yet rotated since initial setup" is a different status** and is
+  fine — it means a real credential exists and has never been changed
+  (item 7, Forgejo). Don't collapse the two into one wording.
+
 ## Adding a new item
 
 When a change introduces a new credential, key, or certificate with an

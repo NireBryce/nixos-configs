@@ -125,10 +125,24 @@ the SSH-auth limitation — moved to
 
 ## 5. Grafana's admin credentials
 
-Not verifiable from outside without logging in, so this is a "confirm",
-not a finding: Grafana ships with a default `admin` account and prompts for a
-change on first sign-in. Worth confirming that happened, since the tailnet is
-the only thing in front of it.
+**Assume `admin`/`admin` works until someone signs in and proves it
+doesn't.** `grafana.nix` sets `secret_key` but no `admin_password`, so
+Grafana's published default account is live — this is a working admin login
+with a known password, not a credential waiting to be created. Grafana
+prompts for a change on first sign-in, but nothing here records whether
+anyone ever completed that prompt.
+
+**The tailnet is the only thing in front of it**, so the exposure is
+"anyone already on the tailnet has Grafana admin" — narrow, and not nothing.
+It can't be settled from the repo: a stock password is invisible in config,
+because the absence of an `admin_password` setting is exactly what leaves it
+stock. Sign in at `https://grafana.moose-micro.ts.net/` to find out.
+
+Closing it means changing the password if it is still stock, and rewriting
+[maintenance-schedule.md](../maintenance-schedule.md) item 8 in the same
+change. Setting it declaratively — a `$__file{}` provider, the shape
+`secret_key` already uses — is the durable version, and a real change rather
+than a tidy-up.
 
 Related and worth knowing before you start building dashboards: anything
 edited in the Grafana UI lives **only** in cube's sqlite db, while anything
