@@ -1,97 +1,59 @@
 # Tailscale, as an actual service rather than just the CLI on PATH.
+# Imported by every Linux host via the `system` category.
 #
-# vpn.nix had `tailscale` in environment.systemPackages with `# TODO: move to
-# module` next to it: the binary existed, nothing ran it -- `systemctl
-# is-enabled tailscaled` answered "not-found" (no unit, not a stopped one).
-# services.tailscale.enable generates the unit and installs the CLI itself
-# (`environment.systemPackages = [ cfg.package ]`,
-# nixos/modules/services/networking/tailscale.nix), so vpn.nix's copy was
-# dropped rather than left to shadow this one.
+# FOUR REAL TRAPS, none of them a bug in this file or in
+# resolved.nix/avahi.nix, and this header is where they live: wiki's
+# categories/system.md, traps-and-skills.md and name-resolution.md all point
+# HERE for the mechanism rather than restating it. Keep it that way -- if a
+# trap ever moves to the wiki, those pointers move with it.
 #
-# networking.nix carried two `# TODO: move to tailscale-autoconnect` markers
-# for a module never written. Upstream now covers both: `openFirewall` opens
-# the daemon's UDP port; an autoconnect unit comes free with `authKeyFile`
-# if ever wanted. Same shape as the handheld-daemon shim that turned out
-# unnecessary -- check upstream before hand-writing.
-#
-# DNS split-DNS (resolved.nix/avahi.nix) RUNTIME-VERIFIED 2026-08-22 on
-# nire-tenacity, upgraded from the "evaluation only" status those files were
-# added under (2026-08-21): `getent hosts`, `ping`, and `ssh` all resolved
-# peers by MagicDNS name via nsswitch -> resolve -> systemd-resolved ->
-# tailscale0's D-Bus split-DNS. That mechanism was never the problem (below).
-#
-# FOUR REAL TRAPS, the first two found diagnosing "nire-cube unreachable
-# from nire-tenacity" that day, the third found separately 2026-08-30 --
-# none a bug in this file or in resolved.nix/avahi.nix:
-#
-# 1. Tailnet device names do NOT match `networking.hostName`: the NixOS host
-#    is `nire-cube`, its Tailscale device (and MagicDNS name) is `ts-cube` --
+# 1. TAILNET DEVICE NAMES DO NOT MATCH `networking.hostName`. The NixOS host
+#    is `nire-cube`, its Tailscale device and MagicDNS name is `ts-cube` --
 #    fleet-wide (`ts-durandal`, `ts-lysithea`, `ts-tenacity`, ...).
-#    `nire-cube.<tailnet>.ts.net` never resolves; it isn't a name that
-#    exists. Costly to rediscover: it looks exactly like a DNS failure
-#    (NXDOMAIN-shaped) until you check `tailscale status`.
+#    `nire-cube.<tailnet>.ts.net` never resolves; it is not a name that
+#    exists. Expensive to rediscover because it looks exactly like a DNS
+#    failure (NXDOMAIN-shaped) until you check `tailscale status`.
 #
-# 2. Even with the right name, connections (ssh, ping) timed out -- dropped,
-#    not refused -- while `tailscale ping` succeeded (direct LAN) and
-#    tailscaled's PeerAPI port answered. That asymmetry -- control-plane
-#    traffic through, peer-to-peer app traffic not -- is the signature of a
-#    TAILNET ACL PROBLEM, not a host firewall problem: this repo's
-#    `networking.firewall.trustedInterfaces = [ "tailscale0" ]`
-#    (networking.nix) is provably not the cause (per-host NixOS setting;
-#    the ACL lives in Tailscale's admin console, outside this repo). The
-#    fault: the tailnet's "match everything" rule had
-#    `"dst": ["autogroup:internet"]` instead of `["autogroup:members"]` --
-#    `autogroup:internet` only grants internet *through* an exit node,
-#    nothing between members, despite the rule comment saying "Match
-#    absolutely everything." No rule covered member-to-member traffic, so
-#    every peer connection was silently denied at the mesh layer, before any
-#    host's own firewall. Fixed in the admin console -- nothing to change
-#    here.
+# 2. PEER TRAFFIC TIMING OUT WHILE `tailscale ping` WORKS IS AN ACL PROBLEM,
+#    not a host firewall problem. Control-plane traffic through and
+#    peer-to-peer app traffic dropped (not refused) is the signature. This
+#    repo's `trustedInterfaces = [ "tailscale0" ]` (networking.nix) is
+#    provably not the cause -- it is a per-host NixOS setting, while the ACL
+#    lives in Tailscale's admin console, outside this repo. The real fault,
+#    2026-08-22: the tailnet's "match everything" rule had
+#    `"dst": ["autogroup:internet"]` where it needed
+#    `["autogroup:members"]`. `autogroup:internet` grants internet THROUGH an
+#    exit node and nothing between members, despite the rule's own comment
+#    reading "Match absolutely everything", so every peer connection was
+#    denied at the mesh layer before reaching any host firewall.
 #
-# A THIRD TRAP, found 2026-08-30 on a session working from nire-lysithea:
-# `ssh ts-cube` (the right tailnet name, per trap 1 above) failed with a
-# plain resolution error -- not a timeout, not NXDOMAIN-for-the-wrong-name,
-# just "could not resolve hostname" -- because Tailscale itself wasn't
-# connected on the CLIENT machine. Several turns went into diagnosing
-# Tailscale's own health (`tailscale status`, whether the app was even
-# running) before trying the other real name this host answers to:
-# `nire-cube.local`, plain LAN mDNS/Avahi (avahi.nix, system category),
-# which needs no Tailscale at all and was reachable the entire time.
+# 3. A NAME THAT FLAT-OUT WILL NOT RESOLVE means check whether Tailscale is
+#    up ON THE MACHINE YOU ARE RUNNING FROM -- distinct from trap 1, where
+#    the wrong name resolves to nothing. Hit 2026-08-30 from lysithea, where
+#    several turns went into diagnosing cube's health before trying
+#    `nire-cube.local`, plain LAN mDNS via avahi.nix, which needs no
+#    Tailscale and had been reachable the whole time. `just reach <host>`
+#    (flake/scripts/reach-host.sh) tries all of a host's real names so this
+#    does not get re-derived by hand.
 #
-# THE RULE THIS GIVES: a tailnet name that flat-out won't resolve (as
-# opposed to trap 1's "resolves to nothing because it's the wrong name")
-# means check whether Tailscale is UP ON THE MACHINE YOU'RE RUNNING FROM,
-# and try the `.local` name meanwhile -- not "debug why the tailnet name is
-# broken". `flake/scripts/reach-host.sh` (added the same day) automates
-# trying all of a host's real names so this doesn't have to be re-derived
-# by hand again -- see its own header for the current order (its own to
-# maintain, not restated here); `just reach <host>` is the front door.
+# 4. TAGGING A DEVICE DROPS IT OUT OF `autogroup:members` as a grant
+#    DESTINATION, because a tagged device is owned by the tag rather than
+#    the user. Applying tag:homelab-cube on 2026-09-07 made nire-cube vanish
+#    from every other peer's `tailscale status` within a minute -- absent,
+#    not offline, SSH included -- while cube's own status looked normal
+#    throughout. THE RULE: tagging a previously-untagged device and adding
+#    its compensating grant (`{"src": ["autogroup:members"], "dst":
+#    ["tag:whatever"], "ip": ["*"]}`) are ONE atomic change, never staged.
+#    Its source-side twin -- a tagged host receiving no `svc:` DNS records
+#    for what it advertises, issue #298 -- is in
+#    homelab/reverse-proxy/tailscale-services/README.md with both fixes.
 #
-# A FOURTH TRAP, 2026-09-07, applying tag:homelab-cube to nire-cube for
-# Tailscale Services (see flake/modules/nire/homelab/reverse-proxy/
-# tailscale-services/README.md for the full incident): a TAGGED device is
-# owned by the tag, not the user, for ACL purposes -- it drops out of
-# autogroup:members as a grant DESTINATION the moment the tag takes
-# effect. This tailnet's only broad grant was
-# autogroup:members -> autogroup:members, so nire-cube vanished from every
-# other peer's `tailscale status` entirely (not offline -- absent) within
-# about a minute of tagging, SSH included, while cube's own `tailscale
-# status` looked completely normal throughout -- a peer-visibility problem
-# that looks exactly like the tagged host itself going down.
-#
-# THE RULE THIS GIVES: tagging any previously-untagged device and adding
-# its compensating reachability grant (`{"src": ["autogroup:members"],
-# "dst": ["tag:whatever"], "ip": ["*"]}`, same pattern tag:golink-host
-# already uses here) are ONE atomic change, never staged -- tag first,
-# grant later means the device is unreachable for everyone in between.
-#
-# Diagnostic trick worth keeping: to check whether a *local* NixOS firewall
-# rule is really the problem, no root needed -- `openFirewall` and
-# `trustedInterfaces` compile down to a plain shell script (`systemctl show
-# firewall.service -p ExecStart`, then read that store path) holding the
-# literal, in-order `iptables` commands applied at boot, world-readable;
-# settles rule-ordering questions ("is trustedInterfaces really first")
-# without querying the live table.
+# DIAGNOSTIC WORTH KEEPING, no root needed: `openFirewall` and
+# `trustedInterfaces` compile down to a plain shell script
+# (`systemctl show firewall.service -p ExecStart`, then read that store
+# path) holding the literal, in-order `iptables` commands applied at boot,
+# world-readable. Settles "is trustedInterfaces really first" without
+# querying the live table.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
@@ -120,3 +82,22 @@
             };
         };
 }
+
+# ── history ─────────────────────────────────────────────────────────────────
+#
+# Added because `tailscale` sat in vpn.nix's environment.systemPackages under
+# a `# TODO: move to module`: the binary existed and nothing ran it
+# (`systemctl is-enabled tailscaled` answered "not-found" -- no unit at all).
+# `services.tailscale.enable` generates the unit AND installs the CLI itself,
+# so vpn.nix's copy was dropped rather than left to shadow this one.
+# networking.nix's two `# TODO: move to tailscale-autoconnect` markers went
+# the same way: upstream `openFirewall` opens the daemon's UDP port and an
+# autoconnect unit comes free with `authKeyFile` -- check upstream before
+# hand-writing a shim, the same lesson handheld-daemon taught.
+#
+# 2026-08-22 — split-DNS (resolved.nix/avahi.nix) runtime-verified on
+# nire-tenacity, upgrading those files from the evaluation-only status they
+# were added under the day before: `getent hosts`, `ping` and `ssh` all
+# resolved peers by MagicDNS name through nsswitch -> resolve ->
+# systemd-resolved -> tailscale0's D-Bus split-DNS. That mechanism was never
+# the problem -- traps 1 and 2 above were.

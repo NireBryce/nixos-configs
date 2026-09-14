@@ -1,68 +1,27 @@
 # opencode serve, as a detachable backend for elly's opencode TUI sessions --
 # cube-only, filed next to cube's other host-specific config.
 #
-# WHY THIS EXISTS: a plain `opencode` TUI exit kills in-flight work. With the
-# server running under systemd, the TUI is just a client (`opencode attach`)
-# -- exiting it (ctrl+c) detaches, sessions keep going server-side, and are
-# resumed with `opencode attach -c` / `-s <id>`. This is opencode's
-# serve+attach workflow, made to survive reboots.
+# WHY: a plain `opencode` TUI exit kills in-flight work. Under systemd the
+# TUI is just a client (`opencode attach`, or `just opencode-attach`) --
+# exiting detaches, sessions keep running server-side and resume with
+# `-c`/`-s <id>`, across reboots.
 #
-# FILE PLACEMENT: lives in nireHost/cube/configuration/, where the `cube`
-# category's collector picks it up from its subdirectory -- there is no
-# import line anywhere; adding the file IS the wiring. `-cube` suffix per
-# this directory's convention (nixpkgs-hostPlatform-cube, ...): a module's
-# name is its filename, and same-name modules in the same class merge
-# silently rather than erroring.
-#
-# DELIBERATELY NOT a `nire/homelab/` category service: it is one personal
-# dev tool for one user, not part of the self-hosted stack (no Caddy route,
-# no wiki/categories/ page, nothing here for the other hosts). The homelab
-# umbrella exists to make shared services optional per host; this is
-# host-private instead.
-#
-# TAILNET-ONLY BY BIND ADDRESS, not by firewall or proxy: ExecStart resolves
-# the tailscale IP at start (`tailscale ip -4`) and `serve --hostname` binds
-# ONLY that address -- nothing listens on a LAN or public interface, so
-# "only reachable via tailscale" is a property of the socket itself. Reach
-# it with `just opencode-attach` (`opencode attach http://ts-cube:3003`;
-# `ts-cube` is this host's tailnet device name -- tailscale.nix's trap #1,
-# not networking.hostName).
-# Why not the repo's usual loopback-behind-a-proxy shape:
-#
-#   - `opencode attach` is an HTTP/WebSocket client speaking at the root of
-#     its URL; it takes bare host:port, so a Caddy path prefix would need
-#     stripping that its client never asks for.
-#   - Per-node `tailscale serve` (the classic non-svc: kind) would expose a
-#     loopback bind cleanly, BUT tailscale-serve.service -- the nixpkgs
-#     module behind reverse-proxy/tailscale-services/serve.nix -- re-runs
-#     `tailscale serve set-config --all` at every boot, replacing the
-#     per-node serve config; a CLI-set entry would not survive, and a user
-#     unit cannot order itself After a system unit to reapply it.
-#   - Binding the 100.x address needs no firewall change: traffic arriving
-#     over tailscale0 is already trusted (networking.nix's
-#     trustedInterfaces), and no other interface has anything listening.
-#
-# PORT 3003: was the next free 300x when written -- 3000 grafana,
-# 3001 forgejo, 3002 the landing page (glance until 2026-09-12, then
-# homepage, issue #291; 3004 went to glance's 2026-09-13 return for the
-# landing evaluation -- caddy.nix proxies to all four).
-#
-# STATE: opencode keeps everything under ~/.local/share/opencode (sessions,
-# auth). Cube has a plain persistent root (cube-configuration.nix header),
-# so no *-persist.nix -- same reasoning golink.nix documents. If a host
-# that wipes /root ever imports this, a persistence entry is the first
-# thing to add, modeled on tailscale-persist.nix.
-#
-# NOT HARDENED on purpose: the point of the server is that sessions read
-# and edit files across elly's home and run shells/build tools;
-# ProtectHome or RestrictAddressFamilies-style sandboxing would break the
-# tool it exists to serve. Same call sunshine.nix made.
+# FILE PLACEMENT: nireHost/cube/configuration/ is collected by the `cube`
+# category from its subdirectory -- there is no import line, adding the file
+# IS the wiring, and the `-cube` suffix follows this directory's convention
+# (a module's name is its filename, and same-name modules merge silently
+# rather than erroring). Deliberately NOT a `nire/homelab/` service: one
+# personal dev tool for one user, not part of the self-hosted stack, so no
+# Caddy route and no wiki/categories/ page.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
         flake.modules.nixos.${moduleName} = { pkgs, lib, ... }: {
             # # description = "opencode serve: detachable TUI sessions for elly, bound tailnet-only";
+
+            # PORT 3003 -- caddy.nix owns the 300x map for this host and
+            # proxies the rest; this one is deliberately not behind it.
 
             # A systemd --user manager only runs while its user is logged in
             # WITHOUT linger, so the unit would never auto-start at boot.
@@ -77,6 +36,28 @@
                 description = "opencode serve -- detachable opencode sessions, tailnet-only";
                 wantedBy    = [ "default.target" ];
 
+                # TAILNET-ONLY BY BIND ADDRESS, not by firewall or proxy:
+                # ExecStart resolves the tailscale IP at start and binds ONLY
+                # that address, so "only reachable over tailscale" is a
+                # property of the socket, not of a rule elsewhere. Needs no
+                # firewall change either -- traffic over tailscale0 is already
+                # trusted (networking.nix) and nothing else listens.
+                #
+                # Not the repo's usual loopback-behind-Caddy shape because
+                # `opencode attach` speaks at the ROOT of its URL and takes a
+                # bare host:port, so a path prefix would need stripping its
+                # client never asks for; and per-node `tailscale serve` would
+                # not survive, since tailscale-serve.service re-runs `serve
+                # set-config --all` at every boot and a user unit cannot order
+                # itself after a system one to reapply.
+                #
+                # NOT HARDENED on purpose: sessions read and edit files across
+                # elly's home and run shells and build tools, so ProtectHome
+                # or RestrictAddressFamilies would break the tool this exists
+                # to serve. Same call sunshine.nix made. State lives in
+                # ~/.local/share/opencode and needs no *-persist.nix while
+                # cube has a persistent root -- a root-wiping host importing
+                # this would need one first.
                 serviceConfig = {
                     Type = "simple";
 

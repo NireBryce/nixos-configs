@@ -1,68 +1,44 @@
 # Drop packages nixpkgs cannot build on this system, once, instead of guarding
-# them one module at a time.
+# them one module at a time. ellyHomeManager is shared verbatim by all four
+# hosts, so everything in it has to survive aarch64-darwin as well as
+# x86_64-linux; eleven packages each carried a hand-written
+# `lib.mkIf (!pkgs.stdenv.isDarwin)` before this existed. All eleven were
+# correct, and all eleven were facts about a package restated by hand.
+# Skill `nirepackages-platform-support` has that story and `just available`.
 #
-# ellyHomeManager is shared verbatim by all four hosts, so every package in it
-# has to survive aarch64-darwin as well as x86_64-linux. Eleven did not -- vlc,
-# gimp, libreoffice-qt, github-desktop, piper, qpwgraph, strace, ltrace, iotop,
-# sysstat, ethtool -- and each one carried a hand-written
-# `lib.mkIf (!pkgs.stdenv.isDarwin)`. That works, and all eleven were correct,
-# but it is a fact about the package restated by hand in the config, which is
-# the shape that eventually disagrees with reality. `just available --all`
-# was written because checking those claims by hand was tedious enough that
-# nobody did it; this makes the claims unnecessary instead.
+# nixpkgs already knows: meta.platforms/meta.badPlatforms are the flag and
+# `lib.meta.availableOn` is the reader. It reads meta WITHOUT forcing the
+# derivation, which is what makes filtering possible at all -- forcing
+# `pkgs.vlc.outPath` on aarch64-darwin genuinely throws, so a filter that
+# touched rejected packages would fail exactly where it is needed.
 #
-# nixpkgs already knows. meta.platforms and meta.badPlatforms are the flag, and
-# lib.meta.availableOn is the reader. Critically it reads meta WITHOUT forcing
-# the derivation, which is what makes filtering possible at all: forcing
-# pkgs.vlc.outPath on aarch64-darwin genuinely throws, so a filter that touched
-# rejected packages would fail exactly where it is needed.
+# WHAT THIS DOES NOT CATCH: `meta.broken`. availableOn reads platforms and
+# badPlatforms and nothing else (nixpkgs lib/meta.nix:368-369), so a package
+# broken on this platform passes the filter and then fails evaluation anyway
+# ("Refusing to evaluate package ... because it has problems: - broken").
+# `cod` is the live example (`meta.broken = stdenv.hostPlatform.isDarwin`),
+# which is why shell-config's zsh.nix and bash.nix still guard their `cod`
+# lines by hand and must keep doing so -- doubly outside this filter's reach,
+# since those are `${pkgs.cod}` interpolations in a shell rc string rather
+# than home.packages entries.
 #
-# ── what this does NOT catch ─────────────────────────────────────────────────
+# DARWIN ONLY, deliberately: on Linux an unsupported package should stay a
+# loud error, because durandal and tenacity are what this config is written
+# for and a package that cannot build there is a mistake worth stopping on.
+# And it WARNS by name for every package dropped, which is the only reason
+# this is a partition rather than a filter -- dropping something silently is
+# how an hour goes into debugging a missing command.
 #
-# `meta.broken`. availableOn reads platforms and badPlatforms and nothing else
-# (nixpkgs lib/meta.nix:368-369), so a package marked broken on this platform
-# passes the filter and then fails evaluation anyway, with "Refusing to
-# evaluate package ... because it has problems: - broken". `cod` is the live
-# example -- `meta.broken = stdenv.hostPlatform.isDarwin` in its package.nix --
-# which is why nire/shell-config/{zsh,bash}.nix still guard their `cod` lines
-# by hand and must keep doing so. That guard is also outside this filter's
-# reach for a second reason: it is a ${pkgs.cod} interpolation inside a shell
-# rc string, not an entry in home.packages.
-#
-# (Briefly gone from this tree entirely on 2026-08-22, replaced by carapace
-# -- came back the same day, kept alongside it; see cod-completions.nix.
-# carapace itself is not meta.broken anywhere, for what it's worth.)
-#
-# ── how it attaches ──────────────────────────────────────────────────────────
-#
-# By re-declaring home.packages to add an `apply`. Home Manager declares it as a
-# plain `types.listOf types.package` with no apply of its own
-# (home-manager/modules/home-environment.nix), and the module system merges a
-# second declaration that adds one. Everything reading config.home.packages --
-# home.path's buildEnv included -- sees the filtered list.
-#
-# This is a value-level filter, not an imports-level one, and it has to be.
-# Conditioning `imports` on pkgs is a real infinite recursion under
-# useGlobalPkgs; nireUser/elly-home-manager.nix records someone hitting it. It
-# also cannot be done from flake-parts: flake.modules.<class>.<name> has no
-# <system> axis, and under useGlobalPkgs these modules are evaluated inside the
-# host, which chooses its own pkgs.
-#
-# ── why darwin only ──────────────────────────────────────────────────────────
-#
-# On Linux an unsupported package should stay a loud error. durandal and
-# tenacity are the platforms this config is actually written for, so a package
-# that cannot build there is a mistake worth stopping on, not something to
-# quietly route around. Filtering everywhere would turn that into a silent
-# omission -- the same failure mode CLAUDE.md warns about for module names that
-# disagree with their filename.
-#
-# ── and why it still warns ───────────────────────────────────────────────────
-#
-# Dropping a package without saying so is how you end up debugging a missing
-# command for an hour. The warning names every package removed, so `nh darwin
-# build` says what happened. It is the only reason this is a partition rather
-# than a filter.
+# VALUE-LEVEL, NOT IMPORTS-LEVEL, and it has to be: conditioning `imports` on
+# pkgs is a real infinite recursion under useGlobalPkgs (nireUser/
+# elly-home-manager.nix records someone hitting it), and flake-parts cannot
+# do it either -- `flake.modules.<class>.<name>` has no `<system>` axis, and
+# under useGlobalPkgs these are evaluated inside the host, which picks its own
+# pkgs. It attaches by re-declaring home.packages to add an `apply`: HM
+# declares it as a plain `types.listOf types.package` with no apply of its
+# own, and the module system merges a second declaration that adds one, so
+# everything reading config.home.packages (home.path's buildEnv included)
+# sees the filtered list.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);

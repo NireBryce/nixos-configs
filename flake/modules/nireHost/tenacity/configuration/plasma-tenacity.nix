@@ -4,56 +4,20 @@
 #
 # Home-manager class, but deliberately NOT part of `ellyHomeManager` --
 # imported only via tenacityConfiguration's `home-manager.users.elly.imports`
-# (see the bottom of tenacity-configuration.nix), so plasma-manager's own HM
+# (the bottom of tenacity-configuration.nix), so plasma-manager's own HM
 # module never loads on durandal, lysithea or cube. Filed under
-# tenacity/configuration/ rather than a shared `desktop-env`-style category:
-# this is one host's live preferences, not something a second KDE host would
-# necessarily want verbatim.
+# tenacity/configuration/ rather than a shared category: one host's live
+# preferences, not something a second KDE host would want verbatim.
 #
-# Deliberately a CURATED subset, not a 1:1 dump of every rc file:
+# A CURATED SUBSET, not a 1:1 dump. What was excluded and why, and the
+# column-1-vs-column-2 diffing trick that recovers which shortcuts were
+# actually changed out of kglobalshortcutsrc's ~350 dumped lines, are in
+# wiki/categories/desktop-env.md -- read that before re-capturing, or the
+# exclusions get silently swept back in.
 #
-#   - plasma-org.kde.plasma.desktop-appletsrc (panel/widget layout) is left
-#     out. plasma-manager can express panels/widgets, but the live layout
-#     here is two floating panels the user still rearranges by hand; pinning
-#     it declaratively would just fight that.
-#   - kwinrulesrc's one window rule is keyed by a random per-install UUID and
-#     isn't even referenced by [General] rules= in the live file (orphaned
-#     even in the state being captured) -- not worth carrying forward.
-#   - kwinrc's [Tiling][<uuid>] sections are per-virtual-desktop generated
-#     layouts, not preferences; [Desktops] Id_N uuids are generated identity,
-#     not configuration -- only Number/Rows are.
-#
-# A second pass (still 2026-09-01) swept every other file under ~/.config
-# matching kde/plasma-*/k* for anything missed the first time -- found
-# powerdevilrc (real power-button/lid/sleep behavior, below) and kaccessrc's
-# StickyKeys. Also found and deliberately left out:
-#   - the desktop wallpaper (plasma-org.kde.plasma.desktop-appletsrc's
-#     Containments/1/Wallpaper) points at ~/Downloads/"vim motion wallpaper
-#     less good.png" -- a personal file outside the repo, not something a
-#     Nix path can reference reproducibly, and its own filename says it's
-#     still being decided anyway.
-#   - kactivitymanagerd-statsrc's kickoff favorites ordering -- this is
-#     launcher/widget config, the same category as the appletsrc panel
-#     layout already excluded above.
-#   - bluedevilglobalrc's per-adapter powered= state is keyed by this
-#     machine's Bluetooth adapter MAC addresses, not portable; kwalletrc's
-#     "never auto-lock the wallet" settings and plasma-nm's connection
-#     applet settings both read as plausible stock defaults for Plasma 6,
-#     not confidently a deliberate customization one way or the other, so
-#     left out rather than guessed at.
-#
-# kglobalshortcutsrc itself is ~350 lines because KDE dumps the *entire*
-# default shortcut set to disk the first time anything touches it, not
-# because the user rebound 350 actions -- BUT each line is actually
-# `active,default,description`, so the file records its own upstream default
-# right next to whatever's live. Diffing column 1 against column 2 (rather
-# than guessing at stock KDE from memory) turned up the real story: almost
-# every default Meta-based kwin/plasmashell shortcut on this machine has been
-# deliberately unbound, not left alone. Nothing in this repo says why (not a
-# jovian/gamescope Meta-key claim -- grepped for one, found nothing); this
-# only captures the fact of it, observed on 2026-09-01. All of those are
-# still worth pinning: an unbind is as much a real customization as a
-# rebind, and both currently live only in this machine's mutable state.
+# The one fact worth carrying here: nearly every default Meta-based
+# kwin/plasmashell shortcut on this machine is deliberately UNBOUND, and
+# that is captured as configuration. Nothing in this repo says why.
 { lib, inputs, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);

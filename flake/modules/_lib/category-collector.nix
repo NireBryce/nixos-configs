@@ -1,75 +1,25 @@
-# The actual dirsAsCategory logic, factored out of the ~38 identical
-# copies (see git history before this file existed -- each
-# `dirsAsCategory.nix` was a byte-for-byte duplicate, save a couple
-# drifted by a comment word). Not a flake-parts module -- a plain
-# function, `import`ed by path from each real `dirsAsCategory.nix`,
-# which stays a two-line shim. Safe under modules/ because import-tree
-# ignores any path containing "/_" -- same rule
-# `nirePackages/_templates/dirsAsCategory.nix` and
-# `nire/impermanence/_disko/impermanence-luks-btrfs.nix` rely on.
+# The actual dirsAsCategory logic, factored out of the ~38 byte-for-byte
+# identical copies each `dirsAsCategory.nix` used to hold. Not a flake-parts
+# module -- a plain function, `import`ed by path from each real
+# `dirsAsCategory.nix`, which stays a two-line shim. Safe under modules/
+# because import-tree ignores any path containing "/_".
 #
-# categoryDir must stay a parameter: `__curPos.file` resolves at PARSE
-# time to wherever the token is written, not call-stack introspection --
-# `dirOf __curPos.file` in here would give every caller *this file's*
-# directory, collapsing every category to one named `_lib`. See
-# CLAUDE.md, "a module's name is its filename".
+# READ flake/doc/dirsAsCategory.md BEFORE CHANGING ANY OF THIS. It is this
+# file's companion and carries the full mechanism: why callers walk up to
+# `modules/` instead of using `inputs.self` (which forces the very fixed
+# point the shim contributes to -- `infinite recursion` out of
+# call-flake.nix), how nested categories are referenced by name rather than
+# re-derived, why every class is defined even when empty, and the two wrong
+# versions this went through -- the second of which silently dropped a
+# module from a host because a nested category's bare root files are
+# collected by its parent but excluded from its own aggregate. That is what
+# `bareModulesOf` exists for; both wrong versions were caught by evaluating,
+# not by reading the diff.
 #
-# Callers reach this file by walking up from their own directory to
-# `modules/`, not via `inputs.self + "/flake/modules/_lib/..."` -- the
-# obvious depth-independent path, and it does NOT work: a NixOS module's
-# `inputs.self` is evaluated downstream once `self` exists, but every
-# `dirsAsCategory.nix` shim is itself one of the flake-parts modules
-# composing `flake.modules`, which composes `self` -- `inputs.self`
-# there forces the very fixed point the shim contributes to, failing as
-# `infinite recursion encountered` at
-# `outputs = flake.outputs (inputs // { self = result; })` in
-# call-flake.nix.
-#
-# A nested category (one whose directory owns its own dirsAsCategory.nix
-# -- `nire/hardware/amd`, `nire/homelab/virtualization`,
-# `nirePackages/development/langs`, ...) is referenced by name
-# (`walkSubdir`) instead of having its files re-derived by every
-# ancestor. `forClass` resolves a nested category's name exactly like a
-# plain module's (same `flake.modules.<class>` namespace), and "always
-# define all three classes, even empty" (below) guarantees the reference
-# resolves.
-#
-# This went through two wrong versions before landing here -- both
-# caught by evaluating, not by reasoning about the diff:
-#
-# 1. A first version put the boundary check only inside `collectModules`,
-#    which `modulesOf` invokes already *inside* categoryDir's immediate
-#    subdirectories -- the check never examined an immediate subdirectory
-#    as a delegation candidate, only third-level nesting that doesn't
-#    exist in this repo. Dead code: the verifying `drvPath` fingerprint
-#    came back byte-identical only because nothing had changed.
-# 2. Making the check fire at the depth that exists (applying it in
-#    `allModules` too, as below) without `bareModulesOf` silently dropped
-#    `libvirt-vm-llm-sandbox` from `nire-cube`'s `systemd.services`:
-#    `virtualization-cube.nix` (nire-llm-sandbox's cube wiring, both since
-#    removed -- see wiki/history.md) sat bare in
-#    `nire/homelab/virtualization/`'s own root -- deliberately excluded from
-#    the `virtualization` category's *own* aggregate (a category collects
-#    from subdirectories only), but reaching `nire-cube` only because
-#    `homelab` walks into `virtualization/` as *its* subdirectory, where a
-#    bare file one level in was never excluded (see
-#    `wiki/categories/virtualization.md`'s "This exclusion is
-#    category-scoped, not tree-scoped"). Delegating straight to
-#    `virtualization`'s aggregate collapsed that independence and lost
-#    exactly that file. `bareModulesOf` is the fix: at every nested-category
-#    boundary, delegate to the child's own aggregate for what IT collects,
-#    but also separately collect bare `.nix` files in the child's own root --
-#    the files its own collector deliberately leaves out, that a plain
-#    recursive walk would still sweep in.
-#    Verified against all six configurations then present (`nire-durandal`,
-#    `nire-cube`, `nire-tenacity`, `nire-lego`, `nire-llm-sandbox`,
-#    `nire-lysithea` -- `nire-lego` and `nire-llm-sandbox` both since
-#    removed): `environment.systemPackages`, `systemd.services` and
-#    `users.users` identical to the pre-refactor baseline,
-#    `libvirt-vm-llm-sandbox` included; `drvPath` shifts on most hosts --
-#    expected per flake/doc/dirsAsCategory.md's "Expect drvPath to change
-#    from import reordering alone", since a nested category is now
-#    referenced once instead of its modules listed twice.
+# `categoryDir` MUST STAY A PARAMETER: `__curPos.file` resolves at PARSE
+# time to wherever the token is written, so `dirOf __curPos.file` in here
+# would hand every caller THIS file's directory and collapse every category
+# into one named `_lib`.
 { config, lib, categoryDir }:
 let
     categoryName = baseNameOf categoryDir;

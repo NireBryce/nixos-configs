@@ -1,36 +1,21 @@
 # DRAFT -- no current caller. A generator for a persistent, libvirt-managed
-# QEMU guest backed by an immutable qcow2 base image from the Nix store.
-# Its one caller, virtualization-cube.nix (nire-llm-sandbox, a sandboxed-LLM-
-# agent VM on nire-cube), was removed 2026-08-28 -- see wiki/history.md; this
-# generator itself was kept as reusable infrastructure for the same reason
-# nire/impermanence/_disko/impermanence-luks-btrfs.nix gives: a VM here is a
-# real possibility, and hand-deriving one from scratch is worse than
-# parameterizing once. Unexercised entirely until a new caller shows up --
-# nothing here has been evaluated, let alone built or booted, since removal.
+# QEMU guest backed by an immutable qcow2 base image from the Nix store. Its
+# one caller (virtualization-cube.nix, for nire-llm-sandbox) was removed
+# 2026-08-28 and nothing here has been evaluated, built or booted since.
+# Kept as reusable infrastructure for the same reason
+# _disko/impermanence-luks-btrfs.nix is.
 #
-# Not a flake-parts module -- a plain function, `import`ed by path. Filed
-# under `_lib/` because `import-tree` ignores any path containing `/_`: a
-# plain function lacks the `{ flake.modules.<class>.<name> = ...; }` shape,
-# and auto-import would call it with flake-parts' module args
-# (`{ config, lib, pkgs, ... }`) against a closed pattern with no `...`,
-# failing evaluation outright, not merely landing in the wrong scope. Same
-# escape `_disko/impermanence-luks-btrfs.nix` uses -- `dirsAsCategory`'s
-# `collectModules` walks into `_`-prefixed directories too, harmlessly:
-# nothing under `_lib/` ever declares `flake.modules.nixos.<that-name>`,
-# since import-tree never touched it.
+# Not a flake-parts module -- a plain function `import`ed by path, filed
+# under `_lib/` because import-tree ignores any path containing `/_`.
+# Auto-importing it would call a closed argument pattern with flake-parts'
+# module args and fail evaluation outright, not merely land in the wrong
+# scope. It must NOT sit directly under `VMs/` either: a category collects
+# every `.nix` in every SUBdirectory, so a module there joins the shared
+# `virtualization` aggregate and reaches every host importing it.
 #
-# Deliberately does NOT sit directly under nire/homelab/virtualization/VMs/:
-# a category collects every .nix file in every *sub*directory, and VMs/ is
-# a subdirectory of `virtualization`, so a module there would be swept into
-# the shared `flake.modules.nixos.virtualization` aggregate -- reaching
-# every host that imports `virtualization` whole, not just whichever one
-# a caller means it for. The one caller this generator ever had
-# (virtualization-cube.nix, bare in nire/homelab/virtualization/ for the
-# opposite reason -- see this file's own top comment) kept its VM
-# cube-exclusive that way even while durandal still imported
-# `virtualization` too; keeping the generator under `_lib/`, invoked only
-# from a bare-in-category-root file like that one, is what any future
-# caller wants for the same reason `boot`/`boot-durandal` almost merged.
+# wiki/categories/virtualization.md has the placement mechanism and the
+# default-network trap in full; `virtualization-history.md` has the
+# sshForward verification record from when it had a caller.
 { name
 , uuid            # a fixed libvirt domain UUID, standard 8-4-4-4-12 hex format.
                    # Pin explicitly rather than let libvirt generate one --
