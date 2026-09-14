@@ -1,100 +1,108 @@
 # Auto-suspend hang on nire-durandal
 
-_Last modified: 2026-09-13_
+_Last modified: 2026-09-14_
 
-`nire-durandal` hangs when PowerDevil's idle timeout suspends it, and suspends
-normally when a person asks. **Status: instrumented and under test, not
-diagnosed** — nothing on this page is a fix, and the mechanism is still
-unknown. What it records is the evidence gathered on 2026-09-13, what that
-evidence rules out, and what is currently running to catch the failure.
+`nire-durandal` suspends into S3 and then cannot be woken — keyboard, power
+button, nothing — until power is physically removed at the PSU. **Status:
+mechanism partly identified, cause not. One mitigation under test.** Recovery
+is a timed PSU cut that resets the GPU while DRAM stays alive on standby; hold
+it too long and RAM goes, taking the session.
 
 ## Contents
 
-- [Symptom](#symptom)
-- [What is established](#what-is-established)
+- [Two failure shapes](#two-failure-shapes)
+- [The machine is asleep, not wedged](#the-machine-is-asleep-not-wedged)
+- [Established](#established)
 - [Ruled out](#ruled-out)
 - [Under test](#under-test)
 - [Reading the dumps](#reading-the-dumps)
-- [Not the b550 wakeup fix](#not-the-b550-wakeup-fix)
 - [See also](#see-also)
+## Two failure shapes
 
-## Symptom
+Instrumented cycles so far separate into two, and they are not the same bug:
 
-This is not a spurious wake. The machine does not come back on its own — it
-wedges during the transition and needs power physically removed at the PSU,
-timed to drop the stuck device while DRAM stays alive on standby. Held off too
-long, the RAM contents go and the session with them.
+| shape | what the kernel sees | recovery |
+|---|---|---|
+| **SMU timeout** | `resume of IP block <smu> failed -62` (`-ETIME`), `last_failed_dev = 0000:07:00.0` | PSU cut; RAM often lost |
+| **no-wake** | **nothing — reports `success`** | PSU cut; RAM usually kept |
 
-## What is established
+The second is the common one and the reason this is hard.
 
-All 35 suspends of the boot beginning 2026-08-22, labelled by `logind`
-requester:
+## The machine is asleep, not wedged
 
-| requester | count | trigger | outcome |
-|---|---|---|---|
-| `org_kde_powerdevil` | 13 | idle timeout | hangs |
-| `plasmashell` | 15 | menu | fine |
-| `kscreenlocker` | 7 | lock screen | fine |
+Measured 2026-09-14. Across one boot's cycles, `CLOCK_BOOTTIME` minus
+`CLOCK_MONOTONIC` accounted for 2473.6 s of a 2491 s total pre-to-post window —
+a 17 s remainder across three cycles, which is ordinary device suspend/resume
+overhead.
 
-The 13 PowerDevil suspends are exactly the 13 preceded, one second earlier, by
-`org.kde.powerdevil.wakeupsourcehelper`. No manual suspend invokes it.
+So during a hang **the CPU is not running.** The machine is genuinely in S3 and
+will not come out. It is not a kernel wedge partway through resume, which is
+what the identical resume logs had suggested.
 
-Logs cannot see the hang. journald never writes, `/sys/power/suspend_stats`
-reports 35 success / 0 fail, and a hang that gets power-cycled the next morning
-is indistinguishable in the journal from an ordinary overnight sleep. Duration
-analysis therefore proves nothing either way.
+Two consequences, both load-bearing:
+
+- **The OS cannot detect this from inside**, because nothing is executing while
+  it is stuck. No probe cleverness changes that.
+- **`/sys/power/suspend_stats` is not a hang detector.** It logged two
+  known hangs as `success`. Only the SMU variant lands there, because that one
+  happens inside a resume the kernel is awake for.
+
+## Established
+
+- **Auto-suspends are identifiable**: `logind` requester `org_kde_powerdevil`
+  is the idle timeout; `plasmashell` / `kscreenlocker` mean a person asked.
+- **Manual suspend works.** A 50-minute manual cycle resumed cleanly.
+- **`Refused to change power state from D0 to D3hot` + `MODE1 reset` fires on
+  every suspend**, on every boot back to July. The Navi 22 (`1002:73df`) never
+  leaves D0 across S3. This is the standing suspect — a GPU held in D0 through
+  S3 is a known way to be unable to resume — but it is *not* a discriminator,
+  since it also fires on every successful cycle.
 
 ## Ruled out
 
-- **Resizable BAR** — off. BAR0 on the GPU is 256 MB.
-- **amdgpu memory eviction** (upstream `drm/amd: Fail the suspend if resources
-  can't be evicted`) — zero occurrences, and 27 GB of swap is present, so the
-  precondition does not hold.
-- **amdgpu ring timeouts, reset failures, VM faults** — zero across four boots
-  back to July.
-- **`Refused to change power state from D0 to D3hot` + `MODE1 reset`** — fires
-  on 100% of suspends in every boot. Normal BACO behaviour for this card (Navi
-  22, `1002:73df`), not a discriminator. An earlier pass flagged these lines as
-  significant and it was a dead end.
-- **The BIOS update, as a cause of spurious wakes** — F18d → F21c, flashed
-  2026-08-22; the short-sleep rate is ~3% either side of it. That measures
-  *wakes*, not hangs, so it does **not** clear F21c of causing this.
+- **`wakeupsourcehelper`** — it runs before PowerDevil suspends and not before
+  manual ones, which looked like the difference. Pre/post diffs show no wakeup
+  state change attributable to it.
+- **s2idle** — tested 2026-09-13. The SMU failure happened *under* s2idle, so
+  it is not protective; and there is no `amd_pmc` module, no `amd_pmc` debugfs
+  and no `s0i3` support on this desktop part, so it cannot reach hardware sleep
+  at all and costs near-idle power for nothing. Reverted; do not retry.
+- **The BIOS.** F18d → F21c was flashed 2026-08-22, and journal counts appeared
+  to implicate it. They cannot: 0 failures in 27 F18d suspends is ~46% likely at
+  the observed rate even if nothing changed. Elly confirms the bug predates
+  F21c (2026-09-14).
+- **Resizable BAR** — off; GPU BAR0 is 256 MB.
+- **amdgpu memory eviction**, **ring timeouts, reset failures, VM faults** —
+  zero occurrences; 27 GB of swap present, so the eviction precondition fails.
+- **PTXH as a rogue wake source.** `01:00.0` is the only device with wakeup
+  activity, but that is because **it is the keyboard wake path** — a keypress
+  arrives as a controller-level PME, never as the Moonlander's own remote
+  wakeup, so `1-6/power/wakeup_count` stays 0 and means nothing. Disabling PTXH
+  would cost wake-on-keyboard for real. Not a fault.
 
 ## Under test
 
-- **s2idle instead of S3.** Set live 2026-09-13 via
-  `echo s2idle > /sys/power/mem_sleep`. **Reverts on reboot** — not in config.
+- **`amdgpu.runpm=0`** —
+  [amdgpu-runpm-durandal.nix](../../flake/modules/nireHost/durandal/fixes/amdgpu-runpm-durandal.nix),
+  added 2026-09-14. Unproven hypothesis aimed at the D0-across-S3 suspicion.
+  Revert by deleting the file.
 - **[suspend-probe-durandal.nix](../../flake/modules/nireHost/durandal/fixes/suspend-probe-durandal.nix)**
-  — dumps wakeup and GPE state to `/var/log/suspend-probe/` before suspend and
-  after resume, with an explicit `sync` so it survives the power cut. `/var/log`
-  is its own btrfs subvolume, outside the wiped root. Switched 2026-09-13.
+  — dumps wakeup, GPE and drive state to `/var/log/suspend-probe/` around every
+  suspend, `sync`'d so it survives the power cut. `/var/log` is its own btrfs
+  subvolume, outside the wiped root.
 
 ## Reading the dumps
 
-A `-pre` with a matching `-post` is a cycle that completed on its own. **A
-`-pre` with no `-post` is the hang, captured** — the first direct evidence of
-it, since nothing else survives.
+**Pair files by order, not timestamp** — `pre` is stamped at suspend and `post`
+at resume, so a pair never shares a stamp.
 
-Each file's `## requester` section labels the cycle auto or manual without
-needing the journal; `## sleep mode` records whether it ran s2idle or deep.
-
-`diff` a pre against its post to settle whether `wakeupsourcehelper` changes
-wakeup state on auto-suspend but not on manual.
-
-## Not the b550 wakeup fix
-
-[b550-suspend-fix.nix](../../flake/modules/nireHost/durandal/fixes/b550-suspend-fix.nix)
-is unrelated and intact — both `1022:1483` bridges read `disabled`.
-
-One unapplied finding from the same investigation: `PTXH` (`01:00.0`,
-`1022:43ee`, the 500-series xHCI) is the only device on the machine with any
-wakeup activity — 32 events, matching `gpe08` and `sci` exactly, over 23 days.
-Disabling it would cost wake-on-keyboard, as the Moonlander sits on that
-controller while the mouse does not. Parked deliberately: it addresses wake
-sources, and this page is about a hang.
+`## requester` labels the cycle auto or manual. `## drive power cycles` is the
+only in-band evidence of a no-wake hang: recovering from one means cutting PSU
+power, and the drives count that. **A cycle where the count moves is a cycle
+that hung.** Added 2026-09-14 and not yet observed across a real hang.
 
 ## See also
 
-- [hosts.md](../hosts.md) — the host roster and what each machine is.
-- [lessons-learned.md](../lessons-learned.md) — including the KDE hybrid-sleep
-  trap, a different suspend failure on this fleet.
+- [hosts.md](../hosts.md) — the host roster.
+- [lessons-learned.md](../lessons-learned.md) — the KDE hybrid-sleep trap, a
+  different suspend failure on this fleet.

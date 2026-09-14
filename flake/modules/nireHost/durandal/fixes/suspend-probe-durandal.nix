@@ -5,7 +5,7 @@
         flake.modules.nixos.${moduleName} = { pkgs, ... }:
             let
                 probe = phase: ''
-                    export PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.systemd ]}:$PATH
+                    export PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.systemd pkgs.smartmontools ]}:$PATH
 
                     dir=/var/log/suspend-probe
                     mkdir -p "$dir" || exit 0
@@ -22,7 +22,7 @@
                         # later: org_kde_powerdevil means the idle timeout fired,
                         # plasmashell/kscreenlocker mean a person asked.
                         echo "## requester"
-                        timeout 5 journalctl -b 0 -u systemd-logind -n 200 --no-pager -o short-iso 2>/dev/null \
+                        timeout 15 journalctl -b 0 --since -10min --no-pager -o short-iso 2>/dev/null \
                             | grep "suspend requested from client" | tail -1
                         echo
 
@@ -76,6 +76,21 @@
                                 "$(cat "$w/event_count" 2>/dev/null)" \
                                 "$(cat "$w/active_count" 2>/dev/null)"
                         done
+                        echo
+
+                        # The only detector that works for the no-wake hang. The OS
+                        # cannot see that failure from inside -- nothing is executing
+                        # while it is stuck -- but recovering from it means cutting
+                        # power at the PSU, and that drops the drives too. A count
+                        # that moves across a cycle is a cycle that was power-cycled.
+                        echo "## drive power cycles"
+                        for dev in /dev/nvme0 /dev/sda /dev/sdb; do
+                            [ -e "$dev" ] || continue
+                            n=$(timeout 10 smartctl -A "$dev" 2>/dev/null \
+                                | grep -iE "^ *12 +Power_Cycle_Count|^Power Cycles:" \
+                                | tr -d ',' | grep -oE "[0-9]+$" | tail -1)
+                            printf '%-12s power_cycles=%s\n' "$dev" "''${n:-unreadable}"
+                        done
                     } > "$out" 2>&1
 
                     # The whole point: the machine may lose power before anything
@@ -115,15 +130,29 @@
                 # wakeupsourcehelper, last scripted point before the kernel suspends.
                 # powerUpCommands is deprecated for removal in 26.11; these two are not.
                 #
-                # Reads the pre/post pair to answer: does the helper change wakeup state
-                # on auto-suspend only? A `pre` file with no matching `post` is a cycle
-                # that never came back on its own.
+                # UPDATED 2026-09-14, first data in. The wakeupsourcehelper lead did
+                # not survive: pre/post diffs show no wakeup-state change attributable
+                # to it. Two failure shapes are now distinguished:
+                #
+                #   SMU timeout   kernel is awake and records it -- resume of IP block
+                #                 <smu> failed -62, last_failed_dev 0000:07:00.0.
+                #   no-wake       machine sits in S3 and will not come out. CLOCK_BOOTTIME
+                #                 minus CLOCK_MONOTONIC accounts for the whole pre-to-post
+                #                 window, so the CPU is not running. Invisible from inside
+                #                 the OS, and /sys/power/suspend_stats calls it a success.
+                #
+                # Pair files by ORDER, not by timestamp -- pre is stamped at suspend and
+                # post at resume, so a pair never shares a stamp. The `drive power cycles`
+                # section is the only in-band evidence of the no-wake variant: recovering
+                # from it means cutting PSU power, which the drives count.
                 #
                 # Deliberately cannot fail the suspend: no `set -e`, every read tolerates
                 # absence, journalctl is bounded by `timeout`, and the script ends `true`.
                 #
                 # Diagnostic, not a fix. b550-suspend-fix.nix in this directory is the
                 # actual wakeup fix and is unrelated to the hang.
+                environment.systemPackages = [ pkgs.smartmontools ];
+
                 powerManagement.powerDownCommands = probe "pre";
                 powerManagement.resumeCommands    = probe "post";
             };
