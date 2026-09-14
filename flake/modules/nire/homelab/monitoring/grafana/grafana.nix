@@ -1,58 +1,15 @@
 # Grafana: the one piece of this stack (prometheus.nix, node-exporter.nix,
 # cadvisor.nix, libvirt-exporter.nix) meant to be reached off-host, and then
-# only over the tailnet -- see the firewall comment below before assuming
-# `openFirewall`-style options belong here.
+# only over the tailnet. Every listener in the stack, this one included, is
+# on LOOPBACK: Grafana is reached at https://grafana.moose-micro.ts.net/,
+# its own Tailscale Services name, and Caddy is what terminates TLS for it
+# (serve.nix only raw-forwards TCP -- Tailscale Services cannot terminate
+# HTTPS declaratively on this version). Confirmed working 2026-09-07.
 #
-# As of 2026-08-24 not reached off-host DIRECTLY: every listener in this
-# stack is on loopback. Originally fronted by nire/reverse-proxy/caddy.nix
-# at https://ts-cube.moose-micro.ts.net/grafana/; as of the
-# tailscale-services/serve.nix move it's fronted by Tailscale Serve itself
-# at https://grafana.moose-micro.ts.net/ instead -- see that file's header
-# for why (not yet runtime-verified). `http_addr` stays loopback either
-# way; `root_url` moved, `serve_from_sub_path` is gone.
-#
-# RUNTIME-VERIFIED, 2026-08-23, on nire-cube: the first real switch failed
-# -- the secret_key file existed but was root:root, unreadable to the
-# `grafana` user. Fixed by hand; RE-BROKE the same way, found on a live
-# re-check 2026-08-24 (`root:root` again, grafana.service crash-looping on
-# the same permission-denied error) -- the hand fix didn't persist, and
-# nothing caught the regression until someone happened to check
-# `systemctl status`.
-#
-# `grafana-secret-key-setup` below is the fix: not a one-time manual step
-# (not the `warnings` entry pointing at a manual command that used to sit
-# here) but a oneshot unit running before `grafana.service` on EVERY
-# activation, re-asserting ownership and permissions unconditionally -- a
-# `root:root` regression, whatever causes it, self-heals on the next
-# switch instead of recurring until someone looks. Modeled on forgejo's
-# upstream `forgejo-secrets.service` (nixpkgs
-# nixos/modules/services/misc/forgejo.nix) for the generate-if-missing
-# shape, but NOT idiomatic to `services.grafana`: upstream REMOVED
-# `security.secretKeyFile` in favor of the manual file-provider, its
-# assertion telling the deployer to generate one -- "we won't manage this
-# for you," not "we forgot to." Two load-bearing consequences in the
-# script below:
-#   - Only CREATE the file if missing, never regenerate. Upstream's
-#     assertion warns there's no official rotation path as of 26.05 --
-#     rotating breaks re-decryption of what's already in Grafana's
-#     database (datasource passwords, etc), so a generator that
-#     "self-heals" by overwriting is actively destructive, not redundant.
-#   - Ownership/permissions ARE safe to reassert unconditionally, every
-#     activation -- no rotation-style downside, and exactly the part that
-#     kept regressing.
-#
-# No `grafana-persist.nix` alongside this the way tailscale.nix has
-# tailscale-persist.nix: cube-configuration.nix's header says this host
-# has a plain persistent root, not the `/root` wipe durandal/tenacity
-# get, so /var/lib/grafana (sqlite db; provisioned dashboards are
-# read-only file-provider entries here, not writes) survives reboots. If
-# a root-wiping host ever imports this module, add one first, modeled on
-# tailscale-persist.nix -- else every UI dashboard edit (anything not
-# sourced from _dashboards/) is gone on reboot. secret_key itself needs
-# no persistence entry: it lives at /persist/secrets/grafana-secret-key,
-# not a root-relative path environment.persistence would bind-mount back
-# -- same reasoning as elly's hashedPasswordFile at
-# /persist/passwords/elly.
+# Kept in the wiki, not restated here: the secret_key trap's full account
+# and both of Grafana's passwords, wiki/categories/monitoring.md,
+# `-for-agents.md` and `monitoring-history.md`; how to actually sign in,
+# wiki/homelab/grafana.md. Traps sit next to the options.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
@@ -135,24 +92,19 @@
                         http_addr = "127.0.0.1";
 
                         # NO LONGER behind a path prefix, as of the
-                        # reverse-proxy/tailscale-services/serve.nix move:
-                        # Grafana has its own Tailscale Services name now
-                        # (`svc:grafana`), so it serves at plain root again --
-                        # `serve_from_sub_path` dropped (defaults false), and
-                        # `root_url` is the service's own `.ts.net` name, not
-                        # `ts-cube.../grafana/`. See serve.nix's header for
-                        # what this replaced and why it isn't runtime-verified
-                        # yet; caddy.nix's `@grafana` route is the fallback if
-                        # this doesn't check out on a real switch.
+                        # Grafana has its own Tailscale Services name
+                        # (`svc:grafana`), so it serves at plain root --
+                        # `serve_from_sub_path` dropped (defaults false),
+                        # and `root_url` is that name, not
+                        # `ts-cube.../grafana/`. Verified end to end
+                        # 2026-09-07; the retired path-prefix route is in
+                        # wiki/categories/reverse-proxy-history.md if this
+                        # ever needs reverting.
                         #
-                        # The service hostname pattern (`<name>.<tailnet
-                        # MagicDNS suffix>`, i.e. NOT the device name
-                        # `ts-cube` the old prefix used) is asserted from
-                        # Tailscale's docs, not yet confirmed against a real
-                        # TLS handshake the way `ts-cube.moose-micro.ts.net`
-                        # was for the path-prefix version (reverse-proxy.md's
-                        # own "RUNTIME-VERIFIED" note) -- first thing to check
-                        # on the actual switch.
+                        # The service hostname is `<name>.<tailnet MagicDNS
+                        # suffix>`, NOT the device name `ts-cube` the old
+                        # prefix used -- confirmed against a real TLS
+                        # handshake from another tailnet host, 2026-09-07.
                         root_url = "https://grafana.moose-micro.ts.net/";
 
                         # Not load-bearing while `enforce_domain` is false
