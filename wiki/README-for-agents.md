@@ -1,6 +1,6 @@
 # Wiki index, for agents
 
-_Last modified: 2026-09-13_
+_Last modified: 2026-09-14_
 
 Condensed from [README.md](README.md), which keeps the orientation prose and
 the "why a link layer, not a rewrite" reasoning. Routing only here.
@@ -24,6 +24,7 @@ that sibling; load the human page only for the *why*.
 | give a service its own `svc:` hostname | [categories/reverse-proxy-for-agents.md](categories/reverse-proxy-for-agents.md), skill `new-tailscale-service` |
 | add a host, or format its disk | [disk-formatting-for-agents.md](disk-formatting-for-agents.md), skill `new-host-config` |
 | check credential expiry | [maintenance-schedule-for-agents.md](maintenance-schedule-for-agents.md), skill `maintenance-schedule` |
+| run the fleet's periodic upkeep | [maintenance-for-agents.md](maintenance-for-agents.md) |
 | reach or debug a cube service | [homelab/reaching-services-for-agents.md](homelab/reaching-services-for-agents.md) |
 | write or tighten a wiki page | [styleguide-for-agents.md](styleguide-for-agents.md), skills `wiki-sync`, `trim-docs`, `fact-hygiene` |
 | write a module | [module-style-guide-for-agents.md](module-style-guide-for-agents.md) |
