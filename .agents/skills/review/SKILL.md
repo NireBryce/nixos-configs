@@ -29,7 +29,8 @@ A diff read is never enough here; bugs serialize. Run, in this order:
 2. `git status --short` — **`git add` before `nix eval`**: a new file that
    is untracked does not exist to the flake. An eval that "passes" may have
    never seen the change.
-3. `just preflight` — check + modules + lint (statix/deadnix ratchet).
+3. `just preflight` — check + modules + lint (statix/deadnix ratchet) +
+   branches-test (the branches.py classifier's fixture test).
 4. A **forced toplevel** per host the change could touch:
    `nix eval --raw '.#nixosConfigurations.<host>.config.system.build.toplevel.drvPath'`
    (darwin:

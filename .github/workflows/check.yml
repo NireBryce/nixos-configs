@@ -1,7 +1,8 @@
 name: flake-check
 
-# Mirrors `just check` + `just modules` + `just lint` + `just wiki-lint`
-# exactly (see .justfile) rather than inventing separate CI-only logic --
+# Mirrors `just check` + `just modules` + `just lint` + `just wiki-lint` +
+# `just branches-test` exactly (see .justfile) rather than inventing
+# separate CI-only logic --
 # what runs here is what any session already runs by hand before opening a
 # PR (the ship skill's own step 0), just automated instead of relying on
 # that being remembered every time. wiki-lint is not in `preflight` yet
@@ -101,6 +102,15 @@ jobs:
       # a refactor that breaks a wiki claim from landing green.
       - name: wiki lint (just wiki-lint)
         run: python3 wiki/scripts/check_wiki.py check
+
+      # Same stdlib-Python, no-nix-needed shape as wiki-lint above:
+      # branches.py's classifier decides what `just branches prune`
+      # force-deletes, and the two #300 misclassifications it covers would
+      # each have deleted a real branch (issue #303). The test builds its
+      # own throwaway git repo, so unlike the `branches` command itself it
+      # means exactly as much in CI as on a host.
+      - name: branches classifier tests (just branches-test)
+        run: python3 flake/scripts/test_branches.py
 
       # Pinned by full SHA, same as update-flake-lock.yml pins its actions:
       # `@main` means running whatever upstream's default branch says on
