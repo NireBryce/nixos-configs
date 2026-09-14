@@ -1,6 +1,6 @@
 # Wiki style guide, for agents
 
-_Last modified: 2026-09-13_
+_Last modified: 2026-09-14_
 
 Condensed from [styleguide.md](styleguide.md), which keeps the reasoning and
 the precedents. Rules only here. The *repo's* style guide is
@@ -99,7 +99,11 @@ belongs in the linked file's own header.
 
 - kebab-case, matching the subject exactly.
 - `00-INDEX.md` is reserved for a directory's index — never a single-topic
-  page.
+  page. Renamed from `README.md` 2026-09-14; it sorts first.
+- Each such directory also holds a `README.md` symlink to its
+  `00-INDEX.md`, for GitHub's benefit. Edit the target, not the symlink;
+  don't link to `README.md`. `check_wiki.py`'s `wiki_md()` skips symlinks,
+  and every wiki-walking check goes through it.
 - **Name a usage page for the reader's task, not the module.** A plural noun
   reads as a list of the things: `golinks.md` → `creating-golinks.md`
   (2026-09-11), matching `reaching-services.md`. A bare noun is fine when

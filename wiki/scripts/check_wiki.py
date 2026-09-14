@@ -627,12 +627,33 @@ def check_hosts(root):
     return findings
 
 
+def wiki_md(root, pattern='*.md'):
+    """Every real markdown file under wiki/, symlinks excluded.
+
+    Each wiki directory carries a README.md symlink to its 00-INDEX.md so
+    GitHub still sees a filename it recognizes. Those are the same bytes
+    under a second name: scanned as documents they double every word
+    count and invent a README.md/README-for-agents.md sibling pair nobody
+    wrote. Every check that walks wiki/ goes through here so a new one
+    can't reintroduce that by globbing directly.
+    """
+    return sorted(
+        p for p in root.joinpath('wiki').rglob(pattern) if not p.is_symlink()
+    )
+
+
 def doc_files(root):
     """Every markdown file the three checks below scan: all of wiki/
     (recursive) plus AGENTS.md itself -- the one file outside wiki/ that
     duplicates wiki-shaped claims verbatim (CLAUDE.md is a symlink to it, so
-    checking the symlink's target once covers both names)."""
-    return sorted(root.joinpath('wiki').rglob('*.md')) + [root / 'AGENTS.md']
+    checking the symlink's target once covers both names).
+
+    Symlinks under wiki/ are skipped for that same reason: each directory's
+    README.md is a symlink to its 00-INDEX.md, kept so GitHub still has a
+    filename it recognizes. Scanned as documents they would double every
+    page's word count and invent a README.md/README-for-agents.md sibling
+    pair that no one wrote."""
+    return wiki_md(root) + [root / 'AGENTS.md']
 
 
 # A recipe header, e.g. `wiki-churn *args:`, `host=nire-durandal build`'s
@@ -1017,7 +1038,7 @@ def check_contents(root):
     A page with no `##` headings at all is skipped either way -- there is
     nothing to list, and `gen-contents` declines to write an empty block."""
     findings = []
-    for path in sorted(root.joinpath('wiki').rglob('*.md')):
+    for path in wiki_md(root):
         rel = path.relative_to(root).as_posix()
         text = path.read_text()
         actual = actual_contents_items(text)
@@ -1281,7 +1302,7 @@ def sibling_pairs(root):
     wiki/, sibling first-class even when its source doesn't exist yet (the
     orphan case check_siblings reports)."""
     pairs = []
-    for path in sorted(root.joinpath('wiki').rglob(f'*{SIBLING_SUFFIX}.md')):
+    for path in wiki_md(root, f'*{SIBLING_SUFFIX}.md'):
         source = path.with_name(
             path.name[:-len(f'{SIBLING_SUFFIX}.md')] + '.md')
         pairs.append((source, path))
@@ -1376,7 +1397,7 @@ def check_siblings(root):
                 f"NO SOURCE LINK  {rel_sib}: doesn't link back to "
                 f"{source.name}")
 
-    for path in sorted(root.joinpath('wiki').rglob('*.md')):
+    for path in wiki_md(root):
         rel = path.relative_to(root).as_posix()
         if path.name.endswith(f'{SIBLING_SUFFIX}.md') or path in have_sibling:
             continue
@@ -1403,7 +1424,7 @@ def check_dates(root):
     needs the line -- there's no exemption for a short page."""
     findings = []
     today = datetime.date.today()
-    for path in sorted(root.joinpath('wiki').rglob('*.md')):
+    for path in wiki_md(root):
         lines = path.read_text().splitlines()
         if not lines or not lines[0].startswith('# '):
             continue  # no title line to anchor the check against

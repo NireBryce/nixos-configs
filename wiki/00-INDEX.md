@@ -4,9 +4,10 @@ _Last modified: 2026-09-14_
 
 A topic index over documentation that already exists scattered around this
 repo — `CLAUDE.md`, `flake/doc/`, `.agents/skills/`, stray `.md` files
-sitting next to the code they're about, and `bugs pending submission/`.
-Almost nothing has been moved here: every link below points at the file
-that's already the source for that fact. The exception is `claude cave/`'s
+sitting next to the code they're about, and
+`_loose-ends/bugs-pending-submission/`. Almost nothing has been moved
+here: every link below points at the file that's already the source for
+that fact. The exception is `claude cave/`'s
 four working-notes files, moved in as real pages 2026-09-02 when that
 directory was retired — the same "index over restatement, except here"
 shape `wiki/homelab/` pages and `categories/shell-config/`'s deep-dives

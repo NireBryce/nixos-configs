@@ -13,8 +13,8 @@ addition to grepping this page.** As of 2026-08-24 this repo actually files
 GitHub issues (see below) rather than leaving everything here as prose —
 started specifically because the ble.sh/carapace bug below had already been
 independently rediscovered once, at real cost, before it was tracked this
-way. `bugs pending submission/` (next section) is still the write-up stage
-for a bug against a *third-party* project, before it's filed there; this
+way. `_loose-ends/bugs-pending-submission/` (next section) is still the
+write-up stage for a bug against a *third-party* project, before it's filed there; this
 repo's own tracker is the issue queue, not another markdown list.
 
 > **Condensed version:**
@@ -76,17 +76,17 @@ repo's own tracker is the issue queue, not another markdown list.
 
 ## Pending upstream bug reports
 
-`bugs pending submission/` — written up, not yet filed against the
-third-party project itself, and **not filed by anyone here on their own
+`_loose-ends/bugs-pending-submission/` — written up, not yet filed against
+the third-party project itself, and **not filed by anyone here on their own
 initiative**: per `CLAUDE.md`, filing outside `NireBryce/nixos-configs`
 happens only when Elly says so explicitly, in those words, for that
 specific report — not as a housekeeping pass over this list:
 
-- **[nixpkgs: vscode ≥ 1.129 patches the wrong ripgrep on Linux](<../bugs pending submission/2026-08-11-bugreport-nixpkgs-vscode-ripgrep.md>)**
+- **[nixpkgs: vscode ≥ 1.129 patches the wrong ripgrep on Linux](../_loose-ends/bugs-pending-submission/2026-08-11-bugreport-nixpkgs-vscode-ripgrep.md)**
   (2026-08-11, still present on nixpkgs `master` as of that date).
-- **[amd-s2idle: hardware sleep residency reported 100× too high](<../bugs pending submission/2026-08-12-bugreport-amd-s2idle-residency-percent.md>)**
+- **[amd-s2idle: hardware sleep residency reported 100× too high](../_loose-ends/bugs-pending-submission/2026-08-12-bugreport-amd-s2idle-residency-percent.md)**
   (2026-08-12, against `amd-debug-tools` 0.2.20).
-- **[Jovian-NixOS: `amd_iommu=off` blocks s0i3 on non-Deck handhelds with an NPU](<../bugs pending submission/2026-08-12-bugreport-jovian-amd-iommu-s0i3.md>)**
+- **[Jovian-NixOS: `amd_iommu=off` blocks s0i3 on non-Deck handhelds with an NPU](../_loose-ends/bugs-pending-submission/2026-08-12-bugreport-jovian-amd-iommu-s0i3.md)**
   (2026-08-12, found on a GPD G1617-02-L).
 
 ## Todos and ideas left next to the code

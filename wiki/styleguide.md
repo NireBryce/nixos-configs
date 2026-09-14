@@ -1,6 +1,6 @@
 # Wiki style guide
 
-_Last modified: 2026-09-13_
+_Last modified: 2026-09-14_
 
 How this wiki itself is organized and written — as opposed to
 [conventions.md](conventions.md), which is the *repo's* style guide (Nix
@@ -156,7 +156,14 @@ separate tier for the *usage* side:
   (`shell-config.md`/`shell-config/`, `blesh.md`, `carapace.md`).
 - `00-INDEX.md` is reserved for the index file of a directory
   (`categories/00-INDEX.md`, `categories/shell-config/00-INDEX.md`) — never
-  used as a single-topic page name.
+  used as a single-topic page name. It sorts to the top of the directory
+  listing, which `README.md` (its name until 2026-09-14) did not.
+- **Each of those directories also carries a `README.md` symlink to its
+  `00-INDEX.md`**, so the name GitHub looks for still exists. Edit the
+  `00-INDEX.md`; never write through the symlink, and never link to
+  `README.md` from a page. `check_wiki.py`'s `wiki_md()` skips symlinks so
+  the same bytes aren't scanned twice — every check that walks `wiki/` goes
+  through it for that reason.
 
 ## Content shape
 
@@ -237,9 +244,9 @@ separate tier for the *usage* side:
   what/why/traps depth the rest of the wiki holds itself to, per
   [categories/00-INDEX.md](categories/00-INDEX.md).
 - **Index over restatement.** Link to the real source — a module's own
-  header comment, `CLAUDE.md`, a skill, a `bugs pending submission/`
-  writeup — rather than copying its content into the wiki page. When in
-  doubt, the wiki page should be short and the linked file should be where
+  header comment, `CLAUDE.md`, a skill, a
+  `_loose-ends/bugs-pending-submission/` writeup — rather than copying its
+  content into the wiki page. When in doubt, the wiki page should be short and the linked file should be where
   the reader actually ends up.
 - **`wiki/homelab/` pages are the other exception**, on the terms in the
   hierarchy section above: synthesized content is allowed because the
@@ -353,12 +360,14 @@ import list doesn't have to be written twice to stay watched.
 - Link in both directions: an index links down into a page, and that page
   links back up (`categories/00-INDEX.md` ↔ a category page ↔ its
   deep-dive pages).
-- A path containing a space (anything under `bugs pending submission/`) has
-  to be wrapped in `<...>` for the markdown link target to parse — see the
-  entries in [open-threads.md](open-threads.md) for the pattern. `claude
-  cave/` used to be the other example of this until it was retired
-  2026-09-02 and its files moved into `wiki/` proper, whose own paths never
-  have spaces.
+- **No path in this repo contains a space**, so no markdown link target
+  needs the `<...>` wrapper a space forces. Both paths that once did are
+  gone: `claude cave/` was retired 2026-09-02 into `wiki/` proper, and
+  `bugs pending submission/` became `_loose-ends/bugs-pending-submission/`
+  2026-09-14. Keep it that way; if a spaced path ever comes back, every
+  link target pointing at it has to be wrapped in angle brackets or the
+  markdown won't parse — and this checker's own link regex reads such a
+  wrapper as a live link, so it can't be shown inline here as an example.
 - Verify a link resolves before leaving it. There's no automated check for
   this (see below); a quick `[ -e "$(dirname "$file")/$link" ]` per link
   after any move or rename catches what proofreading misses.

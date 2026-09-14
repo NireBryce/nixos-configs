@@ -33,8 +33,8 @@ which is why this is a triggered skill rather than another line in
    couple of guesses from the report's own wording (symptom text, error
    message, command name). It checks this repo's GitHub issues
    (`gh issue list --search`) and greps `wiki/` (which includes
-   `wiki/lessons-learned.md`) and `bugs pending submission/` in one
-   shot — see `flake/scripts/threads.sh` for exactly what it covers.
+   `wiki/lessons-learned.md`) and `_loose-ends/bugs-pending-submission/`
+   in one shot — see `flake/scripts/threads.sh` for exactly what it covers.
 2. **A hit means read it fully** — the issue and/or the linked wiki
    deep-dive — before doing anything else. Pick up from where it left off
    (an untested fix, an open question, a "not yet confirmed" status) rather

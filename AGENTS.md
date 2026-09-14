@@ -253,8 +253,9 @@ hardware verification).
 nixpkgs, ble.sh, carapace, any other project — without Elly saying so
 explicitly, in those words, unprompted.** A yes to a bundled list does not
 cover an upstream filing folded into it. `propose-issue` only ever files
-here; `bugs pending submission/` and `wiki/open-threads.md`'s drafts are
-deliberately not worked through automatically (`wiki/lessons-learned.md` §39). Filing
+here; `_loose-ends/bugs-pending-submission/` and `wiki/open-threads.md`'s
+drafts are deliberately not worked through automatically
+(`wiki/lessons-learned.md` §39). Filing
 here can still reach another project via GitHub autolinking — a title or
 body containing `owner/repo#123` pings that repo — so grep for that shape
 before naming a specific upstream issue/PR in anything filed here.
