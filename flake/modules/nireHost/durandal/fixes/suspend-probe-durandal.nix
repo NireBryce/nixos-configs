@@ -107,44 +107,49 @@
             in {
                 # # description = "Dump wakeup/GPE state around every suspend on durandal, to survive a hang";
 
-                # nire-durandal hangs on auto-suspend (PowerDevil's idle timeout) but
-                # suspends fine when a person asks -- confirmed 2026-09-13 by labelling
-                # all 35 suspends of the current boot by logind requester:
-                #
-                #     org_kde_powerdevil   13   idle timeout   <- hangs
-                #     plasmashell          15   menu           ok
-                #     kscreenlocker         7   lock screen    ok
-                #
-                # and the 13 PowerDevil ones are exactly the 13 preceded, one second
-                # earlier, by org.kde.powerdevil.wakeupsourcehelper. Recovery is a PSU
-                # power-cycle timed to reset the wedged device while DRAM stays alive on
-                # standby, so the hang destroys its own evidence: journald never writes,
-                # /sys/power/suspend_stats reports 35 success / 0 fail, and a hang that
-                # gets power-cycled the next morning is indistinguishable in the journal
-                # from an ordinary overnight sleep.
+                # nire-durandal suspends into S3 and then will not wake by any input
+                # -- keyboard, power button, nothing. Only a PSU power cut recovers it,
+                # timed so DRAM survives on standby. The hang destroys its own evidence:
+                # journald never writes, and /sys/power/suspend_stats calls it a success.
                 #
                 # Hence dumping to disk with an explicit sync instead of logging. Runs
                 # via powerManagement rather than a hand-written /etc/systemd/system-sleep
                 # hook because sleep-actions is already ordered `before sleep.target`
-                # (nixpkgs nixos/modules/config/power-management.nix) -- after the
-                # wakeupsourcehelper, last scripted point before the kernel suspends.
-                # powerUpCommands is deprecated for removal in 26.11; these two are not.
+                # (nixpkgs nixos/modules/config/power-management.nix) -- the last
+                # scripted point before the kernel suspends. powerUpCommands is
+                # deprecated for removal in 26.11; these two are not.
                 #
-                # UPDATED 2026-09-14, first data in. The wakeupsourcehelper lead did
-                # not survive: pre/post diffs show no wakeup-state change attributable
-                # to it. Two failure shapes are now distinguished:
+                # Two failure shapes:
                 #
                 #   SMU timeout   kernel is awake and records it -- resume of IP block
                 #                 <smu> failed -62, last_failed_dev 0000:07:00.0.
                 #   no-wake       machine sits in S3 and will not come out. CLOCK_BOOTTIME
                 #                 minus CLOCK_MONOTONIC accounts for the whole pre-to-post
                 #                 window, so the CPU is not running. Invisible from inside
-                #                 the OS, and /sys/power/suspend_stats calls it a success.
+                #                 the OS, and suspend_stats calls it a success.
                 #
-                # Pair files by ORDER, not by timestamp -- pre is stamped at suspend and
-                # post at resume, so a pair never shares a stamp. The `drive power cycles`
-                # section is the only in-band evidence of the no-wake variant: recovering
-                # from it means cutting PSU power, which the drives count.
+                # 2026-09-14, the detector's first real hang, and it works: nvme0
+                # 2854 -> 2857 and sda 6162 -> 6165 across one 58s window. Three power
+                # cuts, recorded without anyone having to remember them. `drive power
+                # cycles` is the only in-band evidence of the no-wake shape.
+                #
+                # That same cycle falsified two things this file used to assert:
+                #
+                #   - "hangs on auto-suspend, fine when a person asks" is WRONG. It was
+                #     a MANUAL suspend (.plasmashell-wr). An earlier 35-suspend requester
+                #     tally made auto look like the discriminator. It is not -- it is
+                #     just what gets hit most often.
+                #   - "a pre with no post is a hang" is WRONG. powerDownCommands fires on
+                #     shutdown too, so every reboot leaves an orphan pre. Use the
+                #     power-cycle delta, never the pairing.
+                #
+                # Pair files by ORDER, not timestamp -- pre is stamped at suspend and
+                # post at resume, so a pair never shares one.
+                #
+                # amdgpu.runpm=0 was tried 2026-09-14 and removed the same day: the
+                # machine hung with it active, and it did not even change the "Refused to
+                # change power state from D0 to D3hot" it was aimed at. Full account:
+                # wiki/experiments/durandal-auto-suspend-hang.md.
                 #
                 # Deliberately cannot fail the suspend: no `set -e`, every read tolerates
                 # absence, journalctl is bounded by `timeout`, and the script ends `true`.

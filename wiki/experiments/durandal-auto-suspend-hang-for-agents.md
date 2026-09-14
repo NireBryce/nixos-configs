@@ -4,8 +4,8 @@ _Last modified: 2026-09-14_
 
 Condensed from
 [durandal-auto-suspend-hang.md](durandal-auto-suspend-hang.md), which keeps the
-reasoning and the cycle log. **Status: mechanism partly identified, cause not.
-One UNPROVEN mitigation under test.**
+reasoning and the cycle log. **Status: mechanism partly identified, cause
+not. Nothing under test — `amdgpu.runpm=0` was tried 2026-09-14 and failed.**
 
 ## Symptom
 
@@ -36,9 +36,16 @@ timed so DRAM survives on standby; held too long, RAM and the session go.
   every cycle**, successes included, on every boot back to July. Standing
   suspect (Navi 22 `1002:73df` held in D0 across S3), never a discriminator.
 - Resume logs for a hang and a clean cycle are byte-identical.
+- **Auto vs manual is NOT the discriminator.** Both hang; a manual cycle hung
+  2026-09-14. An early 35-suspend requester tally made auto look causal.
+- **"A `pre` with no `post` is a hang" is WRONG.** `powerDownCommands` fires on
+  shutdown too, so every reboot leaves an orphan `pre`. Use the power-cycle
+  delta.
 
 ## Ruled out
 
+**`amdgpu.runpm=0`** (tried and removed 2026-09-14; hung with it active, and
+it did not change the `D0 to D3hot` refusal it targeted) ·
 `wakeupsourcehelper` (no wakeup-state change in pre/post diffs) · **s2idle**
 (SMU failure occurred under it; no `amd_pmc`, no `s0i3` on this desktop part,
 so it cannot reach hardware sleep and costs near-idle power) · **BIOS** (bug
@@ -50,17 +57,14 @@ the keyboard wake path; disabling it costs wake-on-keyboard).
 
 ## Under test
 
-| what | where | notes |
-|---|---|---|
-| `amdgpu.runpm=0` | [amdgpu-runpm-durandal.nix](../../flake/modules/nireHost/durandal/fixes/amdgpu-runpm-durandal.nix) | UNPROVEN. Needs a reboot. Revert by deleting the file. |
-| state probe | [suspend-probe-durandal.nix](../../flake/modules/nireHost/durandal/fixes/suspend-probe-durandal.nix) | writes `/var/log/suspend-probe/`, `sync`'d; `/var/log` is its own btrfs subvolume, outside the wiped root |
+Nothing. Instrumentation only:
+[suspend-probe-durandal.nix](../../flake/modules/nireHost/durandal/fixes/suspend-probe-durandal.nix)
+— writes `/var/log/suspend-probe/`, `sync`'d; `/var/log` is its own btrfs
+subvolume, outside the wiped root.
 
-Live since the 2026-09-14 02:24 reboot.
-
-**Confound:** that reboot also moved the kernel 6.18.43 → 6.18.51 (via a
-`flake.lock` update, not deliberately). Two variables changed together. Bites
-only if hangs **stop** — the cause is then unattributable; boot the previous
-generation once to separate them. If hangs continue, neither worked.
+**Kernel confound resolved.** The 02:24 reboot made `runpm=0` live and moved
+the kernel 6.18.43 → 6.18.51 together. The hang continued, so neither worked
+and no reboot need be spent separating them. Kernel 6.18.51 from here.
 
 ## Reading the dumps
 
@@ -68,7 +72,8 @@ generation once to separate them. If hangs continue, neither worked.
   `plasmashell` / `kscreenlocker` = a person asked.
 - `## drive power cycles` — **count moves = that cycle hung**, since recovery
   means cutting PSU power. Only in-band evidence of the no-wake shape.
-  **Not yet observed against a real hang.**
+  **Validated 2026-09-14**: `nvme0` 2854→2857, `sda` 6162→6165 over one 58 s
+  window (three cuts). Counters are cumulative — only deltas carry signal.
 
 ## See also
 
