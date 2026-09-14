@@ -26,30 +26,21 @@
 #     diagnose it fresh and add a `cube`-specific fix the same way durandal's
 #     was added, rather than assuming this one applies.
 #
-#   - Disk layout comes from a captured hardware-configuration, not disko.
-#     cube/hardware/disko-cube.nix used to wire in
-#     nire/impermanence/_disko/impermanence-luks-btrfs.nix against a
-#     deliberate placeholder device, from when this host had not been
-#     installed yet. It was installed by hand instead, off the stock NixOS
-#     live ISO -- plain persistent btrfs root, no LUKS -- so that file was
-#     deleted and replaced with cube/hardware/hardware-cube.nix, a real
-#     nixos-generate-config capture. See that file's own header and history
-#     note for the full story.
+#   - Disk layout comes from a captured hardware-configuration, not disko:
+#     installed by hand off the stock live ISO, so the placeholder
+#     disko-cube.nix was replaced by a real nixos-generate-config capture.
+#     cube/hardware/hardware-cube.nix's header and history have the story.
 #
-# WITHOUT impermanence, unlike durandal: this host was installed with a plain
-# persistent root, not the `/root`-wipe durandal and tenacity have.
-# `impermanence` is deliberately NOT in this file's imports below.
-# invariants.nix's rollback, hibernation, and persistence checks are gated on
-# the restore-root initrd unit existing (see its "hosts without impermanence
-# opt out" header) so they don't apply here. WARN-password-required.nix would
-# otherwise fire its warning on this host for the same reason --
-# elly-user.nix's hashedPasswordFile still points at /persist/passwords/elly
-# unconditionally, and nothing in this repo creates that file -- but it's
-# specifically excluded by hostname there: the hash was created by hand on
-# the real machine before this was ever switched to, and cube's plain
-# persistent root never wipes it back out, so the reminder has nothing left
-# to remind about. Read WARN-impermanence.nix and README.md's safety section
-# before assuming any of that has changed for cube specifically.
+# WITHOUT impermanence, unlike durandal and tenacity: plain persistent root,
+# and `impermanence` is deliberately NOT in this file's imports below. Two
+# things opt out on that basis rather than by naming cube -- invariants.nix's
+# rollback/hibernation/persistence checks, gated on the restore-root initrd
+# unit existing (its "hosts without impermanence opt out" header), and
+# WARN-password-required.nix, which excludes this hostname explicitly because
+# elly-user.nix's hashedPasswordFile points at /persist/passwords/elly on
+# every host and cube's root never wipes the hand-made hash back out. Read
+# WARN-impermanence.nix and README.md's safety section before assuming any of
+# that has changed for cube.
 { config, ... }:
 {
     flake.modules.nixos.cubeConfiguration.imports =

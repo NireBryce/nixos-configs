@@ -1,6 +1,6 @@
 # `desktop-env` — `nire/desktop-env/`
 
-_Last modified: 2026-09-06_
+_Last modified: 2026-09-14_
 
 ## Contents
 
@@ -105,3 +105,28 @@ doesn't re-diagnose it as a USB or kernel resume bug.
   class, wired in only through `tenacityConfiguration`'s own
   `home-manager.users.elly.imports`, not this category or `ellyHomeManager` —
   durandal, lysithea and cube never load plasma-manager's HM module.
+
+  **It is a curated subset, not a 1:1 dump**, and what was left out was
+  decided deliberately rather than missed. Excluded: the panel/widget layout
+  (`plasma-org.kde.plasma.desktop-appletsrc`), because the live layout is two
+  floating panels still rearranged by hand and pinning it would fight that;
+  one `kwinrulesrc` window rule keyed by a per-install UUID that the live
+  file's own `rules=` doesn't even reference; `kwinrc`'s `[Tiling]` and
+  `[Desktops] Id_N` entries, which are generated identity rather than
+  preference; the desktop wallpaper, which points at a file in `~/Downloads`
+  that no Nix path can reference reproducibly; kickoff favourites ordering,
+  same category as the panel layout; and `bluedevilglobalrc`'s per-adapter
+  state, keyed to this machine's Bluetooth MACs. `kwalletrc` and plasma-nm's
+  applet settings read as plausible Plasma 6 stock defaults, so they were
+  left out rather than guessed at.
+
+  **How the shortcuts were read**, which is the part worth not re-deriving:
+  `kglobalshortcutsrc` runs ~350 lines because KDE dumps its entire default
+  set to disk the first time anything touches it — not because 350 actions
+  were rebound. Each line is `active,default,description`, so **diffing
+  column 1 against column 2** recovers what actually changed, instead of
+  guessing at stock KDE from memory. Doing that turned up the real story:
+  nearly every default Meta-based kwin/plasmashell shortcut on tenacity has
+  been deliberately *unbound*. Nothing in the repo records why (checked for a
+  jovian/gamescope Meta-key claim; there isn't one), and an unbind is as much
+  a customization as a rebind, so all of them are pinned.
