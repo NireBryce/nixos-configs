@@ -1,32 +1,14 @@
 # services.tailscale.serve: raw TCP forwarding ONLY, from each Tailscale
-# Service's own virtual address to Caddy's existing loopback listener.
-# Grafana and Forgejo get their own tailnet DNS names (`svc:grafana`,
-# `svc:git`) instead of a Caddy path prefix under
-# ts-cube.moose-micro.ts.net -- but Caddy is still what terminates TLS,
-# same as it always has for ts-cube itself, just for two more names now.
+# Service's virtual address to caddy's existing loopback listener, so each
+# app gets its own tailnet DNS name instead of a path prefix under
+# ts-cube.moose-micro.ts.net. Caddy still terminates TLS -- caddy.nix's
+# `.ts.net` vhosts are the other half. Added 2026-09-07.
 #
-# THIS IS NOT THE ORIGINAL DESIGN, and the difference is load-bearing --
-# see history below for what was tried first and why it didn't work.
-# `endpoints."tcp:443"` here uses the `tcp://` backend scheme (raw byte
-# forwarding, no HTTP interpretation at all), pointed at Caddy's own
-# loopback address -- NOT `http://127.0.0.1:PORT` pointed directly at
-# Grafana/Forgejo. tailscaled forwards the untouched TLS bytes (SNI
-# ClientHello included) to Caddy; Caddy picks the right vhost by SNI, the
-# same mechanism it already uses to be the ONE thing on this host that can
-# bind 443 across every incoming name. See caddy.nix's new
-# grafana./git.moose-micro.ts.net vhosts for the other half.
-#
-# UPSTREAM MODULE, NOT HAND-ROLLED: nixos/modules/services/networking/
-# tailscale-serve.nix (pinned nixpkgs). Renders `services` below to a JSON
-# file (svc:-prefixed automatically, do not add the prefix yourselves) and
-# runs `tailscale serve set-config --all <file>` as a oneshot ordered
-# after tailscaled.
-#
-# WHAT THIS REPLACES: caddy.nix's original `@grafana`/`handle_path
-# /git/*` path-prefix routes (retired in caddy.nix's own history
-# section), and the serve_from_sub_path/ROOT_URL path-prefix settings in
-# grafana.nix/forgejo.nix -- both now point at their own service hostname
-# instead of a path under ts-cube's.
+# Kept elsewhere, not restated here: the design and the current names,
+# wiki/categories/reverse-proxy.md and its `-for-agents.md`; the first
+# attempt and why it failed, `reverse-proxy-history.md`; the control-plane
+# half (Service objects, ACL entries, `vip-put` traps, what is applied
+# live), this directory's README.md. Traps sit next to the options.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
@@ -35,106 +17,70 @@
             services.tailscale.serve = {
                 enable = true;
 
+                # Upstream module, not hand-rolled
+                # (nixos/modules/services/networking/tailscale-serve.nix):
+                # renders this to JSON and runs `tailscale serve set-config
+                # --all` as a oneshot after tailscaled. Each key becomes
+                # `svc:<key>` -- the module adds the prefix, don't.
                 services = {
-                    # Key becomes svc:grafana/svc:git/svc:homepage -- the
-                    # module adds the prefix, see its own option doc.
-                    # `tcp://` value scheme, NOT `http://` -- see this
-                    # file's header and history for why the obvious-looking
-                    # form doesn't work. Target is Caddy's own loopback
-                    # listener, not Grafana/Forgejo/the landing page
-                    # directly.
+                    # `tcp://`, NOT `http://`: raw byte forwarding with no
+                    # HTTP interpretation, aimed at caddy's own 443, not at
+                    # the app's port. tailscaled hands the untouched TLS
+                    # bytes (SNI ClientHello included) to caddy, which picks
+                    # the vhost by SNI. The obvious `http://127.0.0.1:PORT`
+                    # form -- what the upstream option doc's example uses --
+                    # cannot give these names HTTPS at all; see history.
                     grafana.endpoints."tcp:443" = "tcp://127.0.0.1:443";
                     git.endpoints."tcp:443"     = "tcp://127.0.0.1:443";
 
-                    # PORT 80 TOO, added 2026-09-11 (issue #272), and it is
-                    # not optional decoration: caddy.nix has had
-                    # `http://git`/`http://grafana`/`http://homepage`
-                    # bare-name redirect vhosts since f478494a, and without
-                    # a `tcp:80` forward NOTHING EVER REACHES THEM. A
-                    # `svc:` name resolves to a Service VIP, and a VIP only
-                    # answers on the ports its Service object and this
-                    # endpoint set declare -- unlike `ts-cube`, which is a
-                    # real device address where caddy binds 80 directly and
-                    # so has always worked. Measured before the fix:
-                    # `http://git|grafana|glance` all timed out while
-                    # `http://ts-cube` returned its 301, and port 80 was
-                    # open on cube's device IP but unreachable on every
-                    # service VIP.
-                    #
-                    # The ports here must match the Service objects' own
-                    # `ports` list (svc-*.json, re-`vip-put` after editing)
-                    # -- two separate resources that both have to agree,
-                    # same split this directory's README describes for the
-                    # policy file.
-                    #
-                    # Worth keeping straight WHY the `http://` route is
-                    # wanted at all when the `https://` twins exist: those
-                    # serve caddy's local CA (`tls internal`), so a browser
-                    # hits SEC_ERROR_UNKNOWN_ISSUER and clicks through a
-                    # warning only to be redirected. The `http://` path has
-                    # no certificate in it at all and lands on the real,
-                    # publicly-valid tailnet cert -- strictly the nicer
-                    # door, and the one that was silently broken.
+                    # PORT 80 IS NOT DECORATION. A `svc:` name resolves to a
+                    # Service VIP, which answers only on ports declared in
+                    # BOTH this endpoint set and the Service object's own
+                    # `ports` list (svc-*.json, re-`vip-put` after editing).
+                    # Declaring 443 alone left caddy.nix's `http://git` etc.
+                    # bare-name redirects unreachable from the day they were
+                    # written until 2026-09-11 (issue #272) -- and those are
+                    # the doors worth keeping, being the ones with no
+                    # certificate in the path and so no local-CA warning.
+                    # `http://ts-cube` worked throughout, being a device
+                    # address where caddy binds 80 directly, which is what
+                    # made the gap easy to miss.
                     grafana.endpoints."tcp:80"  = "tcp://127.0.0.1:80";
                     git.endpoints."tcp:80"      = "tcp://127.0.0.1:80";
 
-                    # Added 2026-09-08 as `glance` (glance's landing page had
-                    # no Tailscale Service of its own -- caddy.nix's
-                    # `http://glance` bare-name redirect pointed at
-                    # `ts-cube.moose-micro.ts.net` instead, which worked for
-                    # THAT redirect but left `glance` itself unresolvable:
-                    # no DNS record existed for the bare name at all,
-                    # `getent hosts glance` failing outright, distinct from
-                    # the git/grafana SSL-alert bug below). Renamed to
-                    # `homepage` 2026-09-12 when homepage replaced glance as
-                    # the landing page (issue #291) -- caddy.nix's
-                    # `homepageFqdn` vhost is the other half. A RENAME HERE
-                    # IS A NEW SERVICE to tailscaled: the serve config drops
-                    # one advertisement and adds another, and the
-                    # control-plane object must be re-made to match
-                    # (vip-put svc-homepage.json, vip-delete svc:glance) --
-                    # see homepage.nix's history section for the order.
+                    # A RENAME HERE IS A NEW SERVICE to tailscaled -- the
+                    # serve config drops one advertisement and adds another,
+                    # and the control-plane object has to be re-made to
+                    # match (`vip-put`/`vip-delete`, README.md). Renamed
+                    # from `glance` 2026-09-12 with the landing page (issue
+                    # #291); homepage.nix's history has the rollout order.
                     homepage.endpoints."tcp:443" = "tcp://127.0.0.1:443";
                     homepage.endpoints."tcp:80"  = "tcp://127.0.0.1:80";
 
-                    # Back 2026-09-13 with glance itself (the landing
-                    # evaluation): same raw-forward shape as its two
-                    # neighbours, now to caddy's listener for the name
-                    # `glance.moose-micro.ts.net` (port 3004 behind
-                    # caddy, not this node's business). The svc:glance
-                    # Service object was vip-deleted 2026-09-12 and must
-                    # be vip-put again -- object BEFORE advertisement
-                    # this time, which is the order that activates
-                    # without the restart dance (homepage.nix history).
+                    # Back with glance itself 2026-09-13 for the landing
+                    # evaluation. Which port sits behind caddy for a given
+                    # name is caddy.nix's business, not this file's -- every
+                    # endpoint here forwards to the same two caddy ports.
                     glance.endpoints."tcp:443" = "tcp://127.0.0.1:443";
                     glance.endpoints."tcp:80"  = "tcp://127.0.0.1:80";
                 };
             };
 
-            # Added 2026-09-11 (issue #267): the upstream unit
-            # (nixos/modules/services/networking/tailscale-serve.nix) has
-            # no readiness gate on tailscaled's *backend* state, only an
-            # `After=`/`Wants=` on the daemon *process*. On a real boot the
-            # daemon can be up but still report `NoState` -- `serve
-            # set-config` then fails outright ("unexpected state:
-            # NoState"), and because the unit is `Type=oneshot` with no
-            # `Restart=`, that single early failure is terminal: it stays
-            # `failed` (no svc: forwards at all) until something else
-            # happens to re-run it, e.g. the next `just switch`. Confirmed
-            # live on nire-cube 2026-09-10, stayed failed 9.5 hours.
+            # Added 2026-09-11 (issue #267). The upstream unit gates on
+            # tailscaled the PROCESS, not on its backend state, so on a real
+            # boot `serve set-config` can hit a daemon reporting `NoState`
+            # and fail outright -- and `Type=oneshot` with no `Restart=`
+            # makes that terminal: no svc: forwards at all until something
+            # re-runs the unit. Confirmed live on cube 2026-09-10, failed
+            # for 9.5 hours.
             #
             # `Restart=on-failure` IS legal on `Type=oneshot` (only
             # `always`/`on-success` are rejected -- checked against `man 5
-            # systemd.service`), and a clean exit stops the restarts, so
-            # this self-heals on the next race without looping once
-            # tailscaled reaches `Running`. `StartLimitIntervalSec`/
-            # `StartLimitBurst` bound it so a *persistent* failure (e.g.
-            # tailscaled itself broken) still gives up instead of retrying
-            # forever.
-            #
-            # Retry only, not a readiness-poll `ExecStartPre` -- smaller,
-            # and self-heals the actual observed failure (a transient race)
-            # rather than replacing `After=` with a hand-rolled wait loop.
+            # systemd.service`), and a clean exit ends the retries, so this
+            # self-heals the race without looping. The StartLimit pair
+            # bounds it, so a persistent failure still gives up. Retry
+            # rather than a readiness-polling `ExecStartPre`: smaller, and
+            # it fixes the failure actually observed.
             systemd.services.tailscale-serve = {
                 serviceConfig = {
                     Restart              = "on-failure";
@@ -148,43 +94,18 @@
 
 # ── history ─────────────────────────────────────────────────────────────────
 #
-# 2026-09-07 — first attempt: `endpoints."tcp:443" = "http://127.0.0.1:PORT"`,
-# pointed directly at Grafana/Forgejo, no Caddy involved. This is the
-# form the upstream NixOS module's own option doc's example uses, and
-# what the design assumed would get free HTTPS from tailscaled the same
-# way caddy.nix's `isTailscaleDomain` mechanism does for ts-cube.
+# 2026-09-07 — the first attempt pointed `endpoints."tcp:443"` straight at
+# Grafana/Forgejo as `http://127.0.0.1:PORT`, expecting tailscaled to
+# terminate HTTPS the way it does for a device's own MagicDNS name. It
+# cannot: `serve set-config`/`get-config`, the exact mechanism nixpkgs'
+# module is built on, round-trips every endpoint back to plain HTTP
+# (tailscale/tailscale#18381, open; #18219 confirms the raw CLI can set real
+# HTTPS but that it doesn't survive set-config or a reboot; the fix, PR
+# #20116, was an unmerged draft against a tailscale newer than the pinned
+# 1.102.2). Symptoms, the CLI attempt, and the exact failing commands:
+# wiki/categories/reverse-proxy-history.md.
 #
-# It did not: `tailscale serve status` showed
-# `http://grafana.moose-micro.ts.net:443`, plain HTTP, confirmed by a raw
-# (non-TLS) HTTP request actually reaching Grafana correctly (a real
-# `302 -> /login`) while a TLS handshake against the same address:port
-# failed outright ("wrong version number" -- nothing speaking TLS there
-# at all). Tried the CLI directly too
-# (`tailscale serve --service=svc:grafana --bg --https=443
-# http://127.0.0.1:3000`, run with sudo on cube, not reachable from a
-# non-interactive session) -- `tailscale serve status` still showed
-# `http://`, no change.
-#
-# Root cause, confirmed against tailscale/tailscale's own issue tracker,
-# not guessed: **tailscale/tailscale#18381** (open as of 2026-09-07) --
-# `serve set-config`/`get-config`, the exact JSON-file mechanism this
-# NixOS module uses, always round-trips a service's endpoint as
-# `"tcp:443": "http://..."`, discarding HTTPS status regardless of what
-# was actually configured. **#18219** (closed as a duplicate of the
-# above) confirms the raw CLI *can* set real HTTPS
-# (`tailscale serve --service=X --https=443 target` produces
-# `"HTTPS": true`) but that state doesn't survive being read back through
-# `get-config`/written through `set-config`, and per the reporter doesn't
-# reliably survive a reboot either -- useless for a declarative Nix
-# config either way. The proposed fix, **PR #20116**, was still an
-# unmerged draft as of this check, nowhere near the pinned tailscale
-# (1.102.2).
-#
-# THE RULE THIS GIVES: Tailscale Services cannot terminate HTTPS
-# declaratively today (2026-09), on this tailscale version, via the
-# config-file mechanism nixpkgs' `services.tailscale.serve` module is
-# built on. Anything needing real HTTPS on a `svc:` name needs its own
-# TLS terminator behind a `tcp://` raw forward, same as this file now
-# does -- not the endpoint's `http://`/`https://` schemes, which only
-# describe HOW TAILSCALED TALKS TO ITS OWN BACKEND when it (not always
-# successfully) tries to terminate TLS itself.
+# THE RULE THAT GIVES, still live: a `svc:` name needing real HTTPS needs
+# its own TLS terminator behind a `tcp://` raw forward, as here. An
+# endpoint's `http://`/`https://` scheme only describes how tailscaled
+# talks to its own backend when it tries to terminate TLS itself.
