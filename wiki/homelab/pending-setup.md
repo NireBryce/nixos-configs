@@ -147,9 +147,24 @@ mechanism (a oneshot running `grafana-cli admin reset-admin-password`, the
 shape `forgejo-admin-bootstrap` uses), which would overwrite a hand-set
 password on every switch. Not done on purpose.
 
-**Not yet switched on cube** — the change is committed and cube's toplevel
-builds, but nothing has applied it there, so the sops value has never been
-exercised by a real first start.
+**Switched on cube 2026-09-13.** What that confirmed, checked on the host
+rather than inferred:
+
+- `/run/secrets/grafana-admin-password` exists as `grafana:grafana` mode
+  `400` — the `owner =` in the module is right in practice, not just in
+  `nix eval`, which is the half this module's `secret_key` history got
+  wrong once.
+- Grafana's live `config.ini` carries
+  `admin_password=$__file{/run/secrets/grafana-admin-password}`.
+- `grafana.service` is active with `NRestarts=0`, so it took the new config
+  without crash-looping.
+- `/run/current-system` matches what `experimental` evaluates to.
+
+**The first-start path is still unexercised, and that is expected.** Cube's
+admin user predates this, so Grafana has never read the file. The sops value
+has never been consumed by anything; it is deployed, not proven. Only a
+fresh instance — a rebuilt cube, or a wiped `/var/lib/grafana` — actually
+uses it.
 
 Related and worth knowing before you start building dashboards: anything
 edited in the Grafana UI lives **only** in cube's sqlite db, while anything

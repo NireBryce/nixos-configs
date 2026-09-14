@@ -32,6 +32,9 @@ and dates are not values.
 `grafana-admin-password` (sops) feeds `settings.security.admin_password`,
 which Grafana applies **at first start only** — it stops a rebuilt instance
 coming up on stock `admin`/`admin`; it does not manage the live password.
+Deployed and checked on cube 2026-09-13 (`grafana:grafana` 400, referenced
+by the live `config.ini`, unit clean) but **never consumed**: the admin user
+predates it.
 `grafana-cli admin reset-admin-password` per activation is what would unify
 them, and is deliberately not done.
 
