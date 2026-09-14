@@ -1,6 +1,6 @@
 # `reverse-proxy` — `nire/homelab/reverse-proxy/`
 
-_Last modified: 2026-09-13_
+_Last modified: 2026-09-14_
 
 [Caddy](https://caddyserver.com/), one tailnet-only HTTPS front door for
 every web service on `nire-cube`. Added 2026-08-24, cube-only; nested under
@@ -68,7 +68,7 @@ The bare-name vhosts come in two flavours, and the difference matters:
   every client there is no improving them, and they were deliberately kept
   rather than dropped once `http://` worked.
 
-Two things the same investigation turned up, both still open:
+Two things the same investigation turned up:
 
 - **`svc:glance` never existed — created 2026-09-10, one step still
   pending.** PR #211 landed the `serve.nix` forward and the Caddy vhost, and
@@ -89,12 +89,18 @@ Two things the same investigation turned up, both still open:
   the API path wants the `svc:` prefix, and without it every service 404s,
   `svc:grafana` included.
 
-- **`tailscale-serve.service` loses the race on boot** — issue #267. It
-  failed `unexpected state: NoState` 34ms into the 2026-09-09 boot and,
-  being a `oneshot` with no retry, stayed failed for 9.5 hours until a
-  switch happened to re-run it. Nothing about the unit makes this
-  self-healing across a reboot, which also means the glance step above
-  will not survive one.
+- **`tailscale-serve.service` lost the race on boot** — issue #267, fixed
+  2026-09-11 and closed. It failed `unexpected state: NoState` 34ms into the
+  2026-09-09 boot and, being a `oneshot` with no retry, stayed failed for
+  9.5 hours until a switch happened to re-run it: no `svc:` forwards at all
+  in the meantime, while cube's own name kept working. `serve.nix` now sets
+  `Restart=on-failure` with a `StartLimit` pair — legal on `Type=oneshot`
+  (only `always`/`on-success` are rejected), so it retries the race and
+  still gives up on a persistent failure. The upstream unit gates on
+  tailscaled the *process*, not its backend state, which is what makes the
+  race possible at all. **Not yet observed self-healing on a real boot** —
+  the fix is reasoned from `systemd.service(5)` and the failure it
+  reproduces, not from watching a reboot recover.
 
 > **Condensed version:**
 > [reverse-proxy-for-agents.md](reverse-proxy-for-agents.md) — the same

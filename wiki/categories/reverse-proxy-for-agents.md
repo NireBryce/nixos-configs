@@ -1,6 +1,6 @@
 # `reverse-proxy`, for agents
 
-_Last modified: 2026-09-13_
+_Last modified: 2026-09-14_
 
 Condensed from [reverse-proxy.md](reverse-proxy.md), which keeps the
 reasoning, the verification narrative and the links out. Facts only here.
@@ -72,12 +72,15 @@ redirects; `https://<bare name>` serves Caddy's local CA and shows
 - Service objects, ACL tags and autoApprovers are API-managed, not in Nix.
   `just tailscale-acl diff` is the reconciliation check.
 
-## Known open
+## Known issues
 
-- **#267** — `tailscale-serve.service` is a `oneshot` with no retry and
-  loses the boot race against tailscaled (`unexpected state: NoState`).
-  Stayed failed 9.5 hours on 2026-09-09. Nothing here survives a reboot
-  self-healing.
+- **#267 — fixed 2026-09-11, closed.** `tailscale-serve.service` is a
+  `oneshot` that lost the boot race against tailscaled's backend state
+  (`unexpected state: NoState`) and, with no `Restart=`, stayed failed 9.5
+  hours on 2026-09-09. `serve.nix` now sets `Restart=on-failure` +
+  `StartLimitIntervalSec`/`StartLimitBurst` — legal on `oneshot`, only
+  `always`/`on-success` are rejected. Not yet seen recovering on a real
+  boot.
 - Tailscale Services cannot terminate HTTPS declaratively on this version —
   upstream bugs, not a config mistake. Caddy stays in the loop.
 

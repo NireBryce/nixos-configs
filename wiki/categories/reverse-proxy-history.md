@@ -1,6 +1,6 @@
 # `reverse-proxy` — history
 
-_Last modified: 2026-09-13_
+_Last modified: 2026-09-14_
 
 The verification record for [reverse-proxy](reverse-proxy.md)'s second
 switch, split out 2026-09-03, plus the path-prefix routing design (retired
@@ -14,6 +14,7 @@ justify).
 - [Paths, not subdomains, was the original constraint — Tailscale Services lifted it, partially](#paths-not-subdomains-was-the-original-constraint--tailscale-services-lifted-it-partially)
 - [The two apps want opposite things from the proxy (historical)](#the-two-apps-want-opposite-things-from-the-proxy-historical)
 - [The retired routes, as they were](#the-retired-routes-as-they-were)
+- [The first Tailscale Services attempt, 2026-09-07](#the-first-tailscale-services-attempt-2026-09-07)
 - [See also](#see-also)
 
 ## Confirmed working end to end, 2026-08-24
@@ -129,6 +130,46 @@ Getting the two live took two switches. `nix eval`, `just modules`,
 `caddy adapt`, a real build and reading the built artifact back all passed
 on the first one; only a live request found the `handle`/`handle_path`
 asymmetry.
+
+## The first Tailscale Services attempt, 2026-09-07
+
+Moved out of `serve.nix`'s history section 2026-09-14. The **rule** this
+produced is live and lives on [reverse-proxy.md](reverse-proxy.md#fronting-tailscale-services-with-caddy);
+what follows is how it was established, kept because "just point the endpoint
+at the app" is the obvious thing to try again.
+
+The first version set each service's endpoint to `http://127.0.0.1:PORT`,
+pointed straight at Grafana and Forgejo with no Caddy involved — the form the
+upstream NixOS module's own option documentation uses as its example. The
+design assumed tailscaled would terminate HTTPS for a `svc:` name the same
+way it does for a device's own MagicDNS name.
+
+It does not. `tailscale serve status` showed
+`http://grafana.moose-micro.ts.net:443` — plain HTTP, and not a display
+quirk: a raw non-TLS HTTP request reached Grafana correctly (a real
+`302 → /login`) while a TLS handshake against the same address and port
+failed with *"wrong version number"*, nothing speaking TLS there at all.
+Setting it through the CLI directly rather than the config file —
+`tailscale serve --service=svc:grafana --bg --https=443 http://127.0.0.1:3000`,
+run with sudo on cube — left `tailscale serve status` showing `http://`
+unchanged.
+
+Root cause, confirmed against tailscale/tailscale's tracker rather than
+guessed:
+
+- **#18381** (open at the time) — `serve set-config`/`get-config`, the exact
+  JSON-file mechanism nixpkgs' `services.tailscale.serve` uses, always
+  round-trips a service endpoint back as `"tcp:443": "http://..."`,
+  discarding HTTPS status regardless of what was configured.
+- **#18219** (closed as a duplicate) — the raw CLI *can* set real HTTPS
+  (`"HTTPS": true`), but that state survives neither a `get-config`/
+  `set-config` round trip nor, per the reporter, a reboot. Useless for a
+  declarative config either way.
+- **PR #20116**, the proposed fix, was an unmerged draft against a tailscale
+  newer than the pinned 1.102.2.
+
+Hence the shape `serve.nix` has now: `tcp://` raw forwarding to Caddy's
+loopback listener, with Caddy terminating TLS and picking the vhost by SNI.
 
 ## See also
 
