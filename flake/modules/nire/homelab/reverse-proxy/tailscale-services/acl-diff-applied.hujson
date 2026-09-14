@@ -105,6 +105,24 @@
 			"dst": ["tag:homelab-cube"],
 			"ip":  ["*"],
 		},
+		// The tagged advertiser needs to reach its own services by name:
+		// tagging dropped cube out of autogroup:members as a SOURCE too,
+		// so with every svc: grant's src being autogroup:members, no grant
+		// matched cube and the control plane sent it no svc: records at
+		// all -- netmap ExtraRecords came back null and MagicDNS answered
+		// NXDOMAIN for git/grafana/homepage/glance on cube only, while
+		// every member host resolved fine (hard-IP curl still worked:
+		// self-terminated VIP traffic never goes through this grant).
+		// Homepage's server-side siteMonitor fetches were the first thing
+		// on cube to resolve svc: names. Found live 2026-09-14, issue
+		// #298; applied and verified same day (cube's netmap ExtraRecords
+		// repopulated, MagicDNS NOERROR from cube). Mechanism in this
+		// directory's README.
+		{
+			"src": ["tag:homelab-cube"],
+			"dst": ["svc:git", "svc:grafana", "svc:homepage", "svc:glance"],
+			"ip":  ["*"],
+		},
 		{
 			"src": ["autogroup:members"],
 			"dst": ["svc:git"],

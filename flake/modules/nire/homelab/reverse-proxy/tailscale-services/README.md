@@ -156,3 +156,33 @@ moment the tag applied. The fix was one more grant, matching the pattern
 own reachability grant applied in the same change, not after -- adding the
 tag and the compensating grant are one atomic step, or the device drops off
 the tailnet for everyone else the moment the tag takes effect.
+
+## Tagging also drops the device out of `autogroup:members` as a grant SOURCE -- svc: DNS records never reach the tagged host, live incident, 2026-09-14
+
+The destination-side incident above has a source-side twin, and it is why
+`nire-cube` could not resolve `git`/`grafana`/`homepage`/`glance`
+`.moose-micro.ts.net` while every member host could (issue #298): every
+`svc:` grant in the policy had `src: ["autogroup:members"]`, so the one
+host whose source identity is a tag matched none of them -- and the
+control plane delivers Service records only inside a node's netmap DNS
+`ExtraRecords`, which the grant computation gates. Cube's netmap carried
+none (`tailscale status --json` → `ExtraRecords: null`; tenacity's listed
+all four), MagicDNS on cube answered NXDOMAIN, and hard-IP curl to the VIP
+still returned 200 -- self-terminated VIP traffic never crosses the grant,
+only the *record* was hidden. Homepage's server-side siteMonitor fetches
+were the first thing on cube to resolve `svc:` names, which is how it
+surfaced. Restarting tailscaled does nothing: there is no client-side
+table to re-sync, the control plane just isn't sending the records.
+
+Fix, applied 2026-09-14 and verified the same hour (ExtraRecords
+repopulated on cube, `dig @100.100.100.100` NOERROR, `curl` from cube
+`200 ssl_verify=0`):
+
+    {"src": ["tag:homelab-cube"], "dst": ["svc:git", "svc:grafana", "svc:homepage", "svc:glance"], "ip": ["*"]}
+
+**The rule this gives:** a tagged service host is a different ACL subject
+from the members that consume its services. Anything the host itself
+fetches by `svc:` name (a landing page's monitors) needs a grant with the
+tag as `src`, applied in the same change as the tag -- and "netmap
+ExtraRecords null on exactly one host, NXDOMAIN only from that host" is
+the signature to check first.
