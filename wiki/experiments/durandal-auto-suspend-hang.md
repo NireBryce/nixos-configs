@@ -4,7 +4,8 @@ _Last modified: 2026-09-14_
 
 `nire-durandal` suspends into S3 and then cannot be woken — keyboard, power
 button, nothing — until power is physically removed at the PSU. **Status:
-mechanism partly identified, cause not. One mitigation under test.** Recovery
+mechanism partly identified, cause not. Nothing currently under test —
+`amdgpu.runpm=0` was tried and failed.** Recovery
 is a timed PSU cut that resets the GPU while DRAM stays alive on standby; hold
 it too long and RAM goes, taking the session.
 
@@ -57,7 +58,10 @@ Two consequences, both load-bearing:
 
 - **Auto-suspends are identifiable**: `logind` requester `org_kde_powerdevil`
   is the idle timeout; `plasmashell` / `kscreenlocker` mean a person asked.
-- **Manual suspend works.** A 50-minute manual cycle resumed cleanly.
+- **Both auto and manual suspends hang.** A manual cycle hung on 2026-09-14
+  (`plasmashell`), falsifying the earlier reading that PowerDevil's idle
+  timeout was the discriminator. An earlier 35-suspend requester tally made
+  auto look causal; it is just the trigger hit most often.
 - **`Refused to change power state from D0 to D3hot` + `MODE1 reset` fires on
   every suspend**, on every boot back to July. The Navi 22 (`1002:73df`) never
   leaves D0 across S3. This is the standing suspect — a GPU held in D0 through
@@ -77,6 +81,9 @@ Two consequences, both load-bearing:
   to implicate it. They cannot: 0 failures in 27 F18d suspends is ~46% likely at
   the observed rate even if nothing changed. Elly confirms the bug predates
   F21c (2026-09-14).
+- **`amdgpu.runpm=0`** — tried 2026-09-14, removed the same day. The machine
+  hung with it active, and it did not even change the `Refused to change power
+  state from D0 to D3hot` it was aimed at.
 - **Resizable BAR** — off; GPU BAR0 is 256 MB.
 - **amdgpu memory eviction**, **ring timeouts, reset failures, VM faults** —
   zero occurrences; 27 GB of swap present, so the eviction precondition fails.
@@ -88,10 +95,8 @@ Two consequences, both load-bearing:
 
 ## Under test
 
-- **`amdgpu.runpm=0`** —
-  [amdgpu-runpm-durandal.nix](../../flake/modules/nireHost/durandal/fixes/amdgpu-runpm-durandal.nix),
-  added 2026-09-14. Unproven hypothesis aimed at the D0-across-S3 suspicion.
-  Revert by deleting the file.
+Nothing is being tested right now. Instrumentation only:
+
 - **[suspend-probe-durandal.nix](../../flake/modules/nireHost/durandal/fixes/suspend-probe-durandal.nix)**
   — dumps wakeup, GPE and drive state to `/var/log/suspend-probe/` around every
   suspend, `sync`'d so it survives the power cut. `/var/log` is its own btrfs
@@ -99,20 +104,20 @@ Two consequences, both load-bearing:
 
 ## Progress
 
-**All live since the 2026-09-14 02:24 reboot**: the probe (2026-09-13), plus
-`amdgpu.runpm=0` and smartmontools from
-[#320](https://github.com/NireBryce/nixos-configs/pull/320). Confirmed in
-`/proc/cmdline` and `/sys/module/amdgpu/parameters/runpm`. The power-cycle
-detector has still never run against a real hang, so the first one tests the
-detector as much as the machine — and the first dump only sets the per-drive
-baseline, since the counters are cumulative.
+**The probe and smartmontools are live** (2026-09-13 / 2026-09-14).
+`amdgpu.runpm=0` was live from the 02:24 reboot until it was removed the same
+day, having failed.
 
-**Confounded from the 2026-09-14 02:24 reboot on.** That reboot made
-`amdgpu.runpm=0` live *and* moved the kernel 6.18.43 → 6.18.51, the latter
-arriving with a `flake.lock` update rather than deliberately. Two variables, one
-change. It only matters if the hangs **stop** — then the cause is unattributable
-between the two, and booting the previous generation once is what separates
-them. If hangs continue, neither worked and the confound is moot.
+**The power-cycle detector is validated.** Cycle 7 moved `nvme0` 2854 → 2857
+and `sda` 6162 → 6165 across one 58 s window — three power cuts, recorded
+without anyone having to remember them. Counters are cumulative, so only
+*deltas* carry signal.
+
+**The kernel confound resolved itself.** That reboot made `amdgpu.runpm=0`
+live *and* moved the kernel 6.18.43 → 6.18.51 (the latter via a `flake.lock`
+update, not deliberately), which would have made a success unattributable. The
+hang continued, so neither worked and no reboot needs to be spent separating
+them. Kernel is 6.18.51 from here on.
 
 Cycles, all 2026-09-14 UTC. Outcomes are Elly's — nothing in the dumps yet
 separates a hang from a clean resume:
@@ -125,20 +130,29 @@ separates a hang from a clean resume:
 | 4 | 04:34→04:46 | deep | auto | 11 m | clean, woke on keyboard |
 | 5 | 04:54→04:55 | deep | auto | 21 s | clean |
 | 6 | 05:07→05:57 | deep | **manual** | 50 m | clean |
+| 7 | 06:52→06:53 | deep | **manual** | 58 s | **hang** — PSU race ×3, RAM kept, `runpm=0` active |
 
-Three hangs in six, all on auto-suspend; the one manual cycle was clean. Too
-few to call auto-vs-manual settled, and cycles 4 and 5 show auto succeeding.
-Only cycle 1 was visible to `suspend_stats`.
+Four hangs in seven. Cycle 7 is the one that matters: a **manual** suspend,
+hung, with `amdgpu.runpm=0` active — killing both the auto-vs-manual
+hypothesis and the mitigation in a single cycle. It is also the first cycle
+labelled by the detector rather than from memory. Only cycle 1 was ever
+visible to `suspend_stats`.
 
 ## Reading the dumps
 
-**Pair files by order, not timestamp** — `pre` is stamped at suspend and `post`
-at resume, so a pair never shares a stamp.
+**`## drive power cycles` is the signal.** A cycle whose count moves is a
+cycle that hung, because recovering from one means cutting PSU power and the
+drives count that. Validated against a real hang 2026-09-14.
 
-`## requester` labels the cycle auto or manual. `## drive power cycles` is the
-only in-band evidence of a no-wake hang: recovering from one means cutting PSU
-power, and the drives count that. **A cycle where the count moves is a cycle
-that hung.** Added 2026-09-14 and not yet observed across a real hang.
+**Do not use pre/post pairing as a hang signal.** "A `pre` with no `post` is a
+hang" was written here and is wrong: `powerDownCommands` fires on shutdown as
+well as sleep, so **every reboot leaves an orphan `pre`**. Pair by order when
+you do pair — `pre` is stamped at suspend and `post` at resume, so a pair never
+shares a stamp.
+
+`## requester` labels the cycle auto or manual. Worth having even though auto
+turned out not to be the discriminator — it is what caught cycle 7 being
+manual.
 
 ## See also
 
