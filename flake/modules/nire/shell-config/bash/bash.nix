@@ -80,7 +80,7 @@
                     # anything reaching for it dies instead of falling back
                     # to a terminal prompt -- ksshaskpass needs a Qt/X11
                     # platform that isn't there. zsh.nix carries the same
-                    # three lines; wiki/categories/shell-config/README.md
+                    # three lines; wiki/categories/shell-config/00-INDEX.md
                     # has the incident. Notes live HERE, not inside the
                     # string below: `#` in a `''` string is shell text and
                     # ships into ~/.bashrc verbatim.

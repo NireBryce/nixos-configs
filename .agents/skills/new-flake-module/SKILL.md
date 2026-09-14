@@ -131,7 +131,7 @@ args, and bound `nixCategory = config.flake.modules.nixos.nix` in an outer
 
 If this change adds, removes, or renames a module in a category with an
 article under `wiki/categories/` — or edits a `dirsAsCategory.nix` — update
-that article and `wiki/categories/README.md`'s table in the same change.
+that article and `wiki/categories/00-INDEX.md`'s table in the same change.
 The wiki is only useful if corrected by whoever's change made it stale.
 
 ## Further reading
@@ -140,5 +140,5 @@ The wiki is only useful if corrected by whoever's change made it stale.
   trailhead to per-module opt-in if that's ever wanted.
 - `wiki/module-style-guide.md` — formatting conventions (aligned `=`
   columns are deliberate; `nix fmt` is deliberately not wired up).
-- `wiki/categories/README.md` — the category reference this skill's changes
+- `wiki/categories/00-INDEX.md` — the category reference this skill's changes
   should keep current.

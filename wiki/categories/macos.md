@@ -27,7 +27,7 @@ section for the general pattern this fits into.
 - **`shells/shells.nix`** — system-level shell registration only (`/etc/shells`,
   stopping the system's own zsh completion setup from fighting Home
   Manager's). zsh itself is configured through Home Manager, same as the
-  Linux hosts — see [shell-config](shell-config/README.md).
+  Linux hosts — see [shell-config](shell-config/00-INDEX.md).
 - **`system-settings/darwin-system.nix`** — `system.primaryUser = "elly"`
   (hardcoded, same as `users.users.elly` and `home.username` everywhere else
   in this tree — nix-darwin needs it for homebrew and launchd
@@ -93,7 +93,7 @@ just never asked for in the first place.
 
 - [nix](nix.md) — `basic-nix-settings.nix` also has a `darwin`-class block,
   the other place platform-specific nix settings live.
-- [shell-config](shell-config/README.md) — where zsh/bash themselves are actually
+- [shell-config](shell-config/00-INDEX.md) — where zsh/bash themselves are actually
   configured.
 - The `nirepackages-platform-support` skill
   (`.agents/skills/nirepackages-platform-support/SKILL.md`) — the

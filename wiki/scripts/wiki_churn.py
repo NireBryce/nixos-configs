@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Rank wiki/ pages by edit churn, to catch a page that's turning into
 hand-maintained toil before it becomes another instance of what
-categories/README.md's "Members" column and categories/system.md's "Files"
+categories/00-INDEX.md's "Members" column and categories/system.md's "Files"
 column already were: a claim that needed a human to remember to touch it on
 every unrelated change nearby, until the toil outweighed what the claim told
 a reader that reading the source directly didn't already (removed

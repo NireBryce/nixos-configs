@@ -4,7 +4,7 @@ _Last modified: 2026-09-11_
 
 `ble.sh` is wired up by hand for bash — there's no Home Manager option for
 it (`programs.bash.blesh.enable` doesn't exist; see
-[shell-config](README.md)). The package, `source ble.sh
+[shell-config](00-INDEX.md)). The package, `source ble.sh
 --attach=none` early in `initContent`, and `ble-attach` at the end all live
 in `bash.nix`; the `.blerc` config itself is owned by
 [`bash/blesh.nix`](../../../flake/modules/nire/shell-config/bash/blesh.nix).
@@ -192,7 +192,7 @@ or otherwise — is tracked separately as
 - [carapace](carapace.md) — the completion engine underneath most of this,
   its generated bash completer's internals, and its `cod`-clobbering
   registration race.
-- [shell-config](README.md) — the category this all lives
+- [shell-config](00-INDEX.md) — the category this all lives
   in, and the `home.file`/`home.sessionPath` concatenation trap that
   `blesh.nix`'s own header is the worked example of.
 - [open-threads.md](../../open-threads.md) — where unresolved upstream

@@ -8,7 +8,7 @@ description: Check whether a change you just made leaves a wiki/ article stale, 
 ## Applies to
 
 Run at the end of any change that could make something `wiki/` states no
-longer true. The rule (wiki/README.md, styleguide.md): *whichever session's
+longer true. The rule (wiki/00-INDEX.md, styleguide.md): *whichever session's
 change makes a page stale corrects it in the same change, not as a
 follow-up.* Skip it when the change touches nothing the wiki describes —
 most small single-module internal edits; grep first rather than reflexively
@@ -33,7 +33,7 @@ Two narrower cases have their own instructions — read those first:
 - **Module added/removed/renamed, or a category's membership changed** —
   `new-flake-module`'s "Keep the wiki in sync": update that category's
   `wiki/categories/<name>.md`, its `-for-agents.md` sibling if it has one,
-  and `wiki/categories/README.md`'s table.
+  and `wiki/categories/00-INDEX.md`'s table.
 - **Host added, or its category imports changed** — `new-host-config`'s
   wiring step: `wiki/hosts.md`'s table plus the "Imported by" line on every
   affected `wiki/categories/*.md`.
@@ -50,7 +50,7 @@ Two narrower cases have their own instructions — read those first:
    ```sh
    grep -rln "<old-name-or-path-or-fact>" wiki/
    ```
-   `wiki/categories/README.md` (the category table), `wiki/hosts.md` (the
+   `wiki/categories/00-INDEX.md` (the category table), `wiki/hosts.md` (the
    host table), and `wiki/architecture.md` are the usual hits for anything
    structural; `wiki/open-threads.md` for anything that was tracked as
    pending.
@@ -60,7 +60,7 @@ Two narrower cases have their own instructions — read those first:
 4. **Edit stale pages in the same change**, following `wiki/styleguide.md`:
    - Dates absolute (`2026-08-23`), never relative.
    - Relative links recomputed for the file depth; verify each resolves.
-   - kebab-case naming; `README.md` reserved for a directory's own index.
+   - kebab-case naming; `00-INDEX.md` reserved for a directory's own index.
    - A fix ballooning into prose that argues a fact instead of linking to
      it means the fact belongs in the linked file's own header.
    - **Bump the page's `_Last modified: YYYY-MM-DD_` line** (right after
@@ -121,7 +121,7 @@ Two narrower cases have their own instructions — read those first:
   sibling and what deliberately doesn't).
 - `wiki/styleguide-for-agents.md` — those rules condensed, if you only need
   the checklist.
-- `wiki/README.md` — why the wiki is a link layer, and "keeping this from
+- `wiki/00-INDEX.md` — why the wiki is a link layer, and "keeping this from
   rotting".
 - `new-flake-module` skill — the specific module/category-membership case.
 - `new-host-config` skill — the specific host-addition case.

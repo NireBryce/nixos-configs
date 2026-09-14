@@ -60,7 +60,7 @@ load-bearing in the tree today:
   desktop GUI set on purpose.
 - **starship as the prompt for every shell**, powerlevel10k and its
   1,659-line config deleted. See
-  [categories/shell-config/](categories/shell-config/README.md).
+  [categories/shell-config/](categories/shell-config/00-INDEX.md).
 - **Full per-file dendritic conversion of the package modules**, chosen
   over role-assignable groups and over a structural tidy, boilerplate
   accepted. That is why `nirePackages/` is one file per package.

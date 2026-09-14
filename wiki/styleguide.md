@@ -1,12 +1,12 @@
 # Wiki style guide
 
-_Last modified: 2026-09-13_
+_Last modified: 2026-09-14_
 
 How this wiki itself is organized and written — as opposed to
 [conventions.md](conventions.md), which is the *repo's* style guide (Nix
 formatting, `just` commands, the `ship` flow). Read this before adding a
 page, splitting one into a subdirectory, or reorganizing links; it's the
-place the reasoning behind [README.md](README.md)'s "why a link layer, not
+place the reasoning behind [00-INDEX.md](00-INDEX.md)'s "why a link layer, not
 a rewrite" gets turned into concrete rules.
 
 > **Condensed version:**
@@ -54,7 +54,7 @@ separate tier for the *usage* side:
 - **`wiki/categories/<name>.md`** — one page per real category, i.e. a
   directory under `flake/modules/` holding its own `dirsAsCategory.nix`
   (see [architecture.md](architecture.md)). Indexed in
-  [categories/README.md](categories/README.md)'s table (`Category |
+  [categories/00-INDEX.md](categories/00-INDEX.md)'s table (`Category |
   Directory | Class(es) | Imported by` — deliberately no per-category file
   count column; see that page's own note on why). Deliberately *not*
   covered by their own category page: `nirePackages/*` subcategories
@@ -64,7 +64,7 @@ separate tier for the *usage* side:
 - **`wiki/homelab/`** — the usage tier, added 2026-08-24 with
   [creating-golinks.md](homelab/creating-golinks.md). Pages about operating
   a service this fleet runs, for a reader who wants to *do something with
-  it* rather than edit `flake/modules/`. `README.md` is the index.
+  it* rather than edit `flake/modules/`. `00-INDEX.md` is the index.
 
   **Name a page for what the reader wants to do, not for the module.**
   `forgejo.md` works as a bare noun because the tool's name is what you'd
@@ -107,11 +107,11 @@ separate tier for the *usage* side:
   category page and the experiment page goes; a page here that has quietly
   become true is a page in the wrong tier.
 - **`wiki/categories/<name>/`** — the escape hatch, used exactly once so
-  far ([shell-config](categories/shell-config/README.md)). A category
+  far ([shell-config](categories/shell-config/00-INDEX.md)). A category
   outgrows a single file not by being long, but by one specific *member*
   of it accumulating an investigation or set of findings that don't belong
   in the category-level summary. When that happens: the directory's
-  `README.md` becomes the category article (what `<name>.md` used to be),
+  `00-INDEX.md` becomes the category article (what `<name>.md` used to be),
   and each deep-dive gets its own sibling page named after its subject —
   `blesh.md`, `carapace.md`, not `notes.md` or `deep-dive-1.md`. Don't add
   a third tier under that; if a deep-dive page itself needs to fork
@@ -154,9 +154,16 @@ separate tier for the *usage* side:
 
 - kebab-case, matching the category or subject exactly
   (`shell-config.md`/`shell-config/`, `blesh.md`, `carapace.md`).
-- `README.md` is reserved for the index file of a directory
-  (`categories/README.md`, `categories/shell-config/README.md`) — never
-  used as a single-topic page name.
+- `00-INDEX.md` is reserved for the index file of a directory
+  (`categories/00-INDEX.md`, `categories/shell-config/00-INDEX.md`) — never
+  used as a single-topic page name. It sorts to the top of the directory
+  listing, which `README.md` (its name until 2026-09-14) did not.
+- **Each of those directories also carries a `README.md` symlink to its
+  `00-INDEX.md`**, so the name GitHub looks for still exists. Edit the
+  `00-INDEX.md`; never write through the symlink, and never link to
+  `README.md` from a page. `check_wiki.py`'s `wiki_md()` skips symlinks so
+  the same bytes aren't scanned twice — every check that walks `wiki/` goes
+  through it for that reason.
 
 ## Content shape
 
@@ -235,11 +242,11 @@ separate tier for the *usage* side:
 - Category pages follow **what's in it → mechanism notes specific to that
   category, if any → imported by → see also**. This is the same
   what/why/traps depth the rest of the wiki holds itself to, per
-  [categories/README.md](categories/README.md).
+  [categories/00-INDEX.md](categories/00-INDEX.md).
 - **Index over restatement.** Link to the real source — a module's own
-  header comment, `CLAUDE.md`, a skill, a `bugs pending submission/`
-  writeup — rather than copying its content into the wiki page. When in
-  doubt, the wiki page should be short and the linked file should be where
+  header comment, `CLAUDE.md`, a skill, a
+  `_loose-ends/bugs-pending-submission/` writeup — rather than copying its
+  content into the wiki page. When in doubt, the wiki page should be short and the linked file should be where
   the reader actually ends up.
 - **`wiki/homelab/` pages are the other exception**, on the terms in the
   hierarchy section above: synthesized content is allowed because the
@@ -296,12 +303,12 @@ number rather than read front-to-back) and `<name>-history.md` pages
 (resolved incidents — already the moved-out-of-the-way tier). A page under
 1,000 words *may* have one, but usually shouldn't: at that size the
 sibling's own title, date line and back-link start to outweigh what
-compressing it saves. `homelab/README.md` was tried and dropped for exactly
+compressing it saves. `homelab/00-INDEX.md` was tried and dropped for exactly
 that reason.
 
 ### This is deliberate duplication, and it is the only kind here
 
-[README.md](README.md)'s "why a link layer and not a rewrite" section says
+[00-INDEX.md](00-INDEX.md)'s "why a link layer and not a rewrite" section says
 in as many words that this repo has been bitten repeatedly by one fact
 living in two places and drifting. That objection is correct. The split is
 worth it anyway — the two readers genuinely want different documents — but
@@ -351,14 +358,16 @@ import list doesn't have to be written twice to stay watched.
   page means walking every link in it, not just the ones that "looked"
   affected.
 - Link in both directions: an index links down into a page, and that page
-  links back up (`categories/README.md` ↔ a category page ↔ its
+  links back up (`categories/00-INDEX.md` ↔ a category page ↔ its
   deep-dive pages).
-- A path containing a space (anything under `bugs pending submission/`) has
-  to be wrapped in `<...>` for the markdown link target to parse — see the
-  entries in [open-threads.md](open-threads.md) for the pattern. `claude
-  cave/` used to be the other example of this until it was retired
-  2026-09-02 and its files moved into `wiki/` proper, whose own paths never
-  have spaces.
+- **No path in this repo contains a space**, so no markdown link target
+  needs the `<...>` wrapper a space forces. Both paths that once did are
+  gone: `claude cave/` was retired 2026-09-02 into `wiki/` proper, and
+  `bugs pending submission/` became `_loose-ends/bugs-pending-submission/`
+  2026-09-14. Keep it that way; if a spaced path ever comes back, every
+  link target pointing at it has to be wrapped in angle brackets or the
+  markdown won't parse — and this checker's own link regex reads such a
+  wrapper as a live link, so it can't be shown inline here as an example.
 - Verify a link resolves before leaving it. There's no automated check for
   this (see below); a quick `[ -e "$(dirname "$file")/$link" ]` per link
   after any move or rename catches what proofreading misses.
@@ -378,9 +387,9 @@ guarantee about the tree today.
 
 ## See also
 
-- [README.md](README.md) — the wiki's own top-level index and the "why a
+- [00-INDEX.md](00-INDEX.md) — the wiki's own top-level index and the "why a
   link layer, not a rewrite" reasoning this style guide turns into rules.
-- [categories/README.md](categories/README.md) — the category-index page,
+- [categories/00-INDEX.md](categories/00-INDEX.md) — the category-index page,
   and the concrete precedent note for the `shell-config/` split.
 - [conventions.md](conventions.md) — the repo's own style guide (Nix
   formatting, comments, `just`), as distinct from this page.

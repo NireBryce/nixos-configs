@@ -37,8 +37,8 @@ so explicitly, in those words, unprompted — not satisfied by this skill's
 own step 3 ask-the-user confirmation, and not satisfied by folding it into some
 other approval. If a bug genuinely belongs upstream, this skill still
 applies for tracking it *here* (`bug` label, or note it in
-`wiki/open-threads.md`/`bugs pending submission/` if a draft write-up is
-what's actually ready); filing it at the third-party project is a separate
+`wiki/open-threads.md`/`_loose-ends/bugs-pending-submission/` if a draft
+write-up is what's actually ready); filing it at the third-party project is a separate
 ask you make by name, not a step of this flow.
 
 ## Why propose instead of just filing

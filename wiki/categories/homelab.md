@@ -73,5 +73,5 @@ the move and stays so.
 - [../architecture.md](../architecture.md) — the `dirsAsCategory` mechanism
   generally, and the "Related, and a live trap" note on `virtualization`/
   `containers` history.
-- [README.md](README.md) — the full category index and table.
+- [00-INDEX.md](00-INDEX.md) — the full category index and table.
 - [../hosts.md](../hosts.md) — `nire-cube`'s full host page.

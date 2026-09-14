@@ -33,10 +33,10 @@ structured, extractable facts only:
             genuinely stale inclusion looks like. Still read a finding
             before trusting it, same as `modules.py`'s own tools ask.
             Categories with no wiki page (nirePackages/* subcategories,
-            nireHost/* bundles -- see categories/README.md's own exclusion
+            nireHost/* bundles -- see categories/00-INDEX.md's own exclusion
             list) are silently skipped: nothing to check them against.
 
-  table     Checks categories/README.md's "## Index" table -- the one place
+  table     Checks categories/00-INDEX.md's "## Index" table -- the one place
             that summarizes every category in one row each -- against the
             tree. Directory and Class(es) are fully mechanical (a path, and
             the union of `flake.modules.<class>` declarations found anywhere
@@ -218,7 +218,7 @@ COMMENT = re.compile(r'#[^\n]*')
 # (removed 2026-08-27 and 2026-08-28 respectively -- see wiki/history.md; both
 # were deliberately excluded even while they existed) are not listed here --
 # CLAUDE.md's Architecture section is explicit that neither counted as "a
-# host" the way these four do, and categories/README.md's "Imported by"
+# host" the way these four do, and categories/00-INDEX.md's "Imported by"
 # columns never name either one. (nire-lego was a fifth real host here until
 # its removal 2026-08-27 -- see wiki/history.md.)
 HOSTS = ['durandal', 'tenacity', 'cube', 'lysithea']
@@ -309,7 +309,7 @@ def host_imports(root, categories):
 def find_categories(root):
     """category name -> its directory, for every dirsAsCategory.nix under
     flake/modules/nire/ and flake/modules/nireUser/ -- the two areas
-    categories/README.md actually indexes (nirePackages/* and nireHost/*
+    categories/00-INDEX.md actually indexes (nirePackages/* and nireHost/*
     are deliberately excluded there, see that file's own header, so this
     check has nothing to compare them against and doesn't look).
     """
@@ -379,8 +379,8 @@ def category_classes(category_dir):
         # not simply expandable. Line-anchored so the leading `flake` of a flat
         # `flake.modules.<class>...` line cannot match as a class name. Missed
         # entirely by both checkers until 2026-09-08 -- the CLASSES check read
-        # the nix category as homeManager-only and failed against the README's
-        # correct row.
+        # the nix category as homeManager-only and failed against the
+        # 00-INDEX's correct row.
         classes.update(DECL_ATTRSET.findall(text))
     return classes
 
@@ -502,7 +502,7 @@ def check_imports(root):
 INDEX_HEADING = re.compile(r'^##\s+Index\s*$', re.M)
 # One Index table row: `| [name](link) | dir cell | class cell | imported-by
 # cell |`. The name comes from the link TEXT, not its target -- shell-config's
-# row links to `shell-config/README.md`, not `shell-config.md`, so matching
+# row links to `shell-config/00-INDEX.md`, not `shell-config.md`, so matching
 # the target would miss it.
 INDEX_ROW = re.compile(
     r'^\|\s*\[(?P<name>[\w-]+)\]\([^)]*\)\s*\|(?P<dir>[^|]*)\|'
@@ -511,17 +511,17 @@ BACKTICK = re.compile(r'`([^`]+)`')
 
 
 def check_table(root):
-    """Checks categories/README.md's "## Index" table against the tree --
+    """Checks categories/00-INDEX.md's "## Index" table against the tree --
     see this module's docstring for what each column can and can't be
     checked mechanically."""
     categories = find_categories(root)
     by_category = _by_category(root, categories)
 
-    readme = root / 'wiki' / 'categories' / 'README.md'
-    text = readme.read_text()
+    index_page = root / 'wiki' / 'categories' / '00-INDEX.md'
+    text = index_page.read_text()
     m = INDEX_HEADING.search(text)
     if not m:
-        return [f"NO 'Index' SECTION  {readme}"]
+        return [f"NO 'Index' SECTION  {index_page}"]
     rest = text[m.end():]
     end = NEXT_HEADING.search(rest)
     section = rest[:end.start()] if end else rest
@@ -542,7 +542,7 @@ def check_table(root):
         if not spans or spans[0] != expected_dir:
             got = spans[0] if spans else '(none)'
             findings.append(
-                f"DIRECTORY  {readme}: '{name}' row says {got!r}, tree has "
+                f"DIRECTORY  {index_page}: '{name}' row says {got!r}, tree has "
                 f"{expected_dir!r}")
 
         # Class(es) column -- fully mechanical, so any mismatch is real.
@@ -550,12 +550,12 @@ def check_table(root):
         claimed_classes = {c.strip() for c in row.group('cls').split(',') if c.strip()}
         if claimed_classes != expected_classes:
             findings.append(
-                f"CLASSES    {readme}: '{name}' row says "
+                f"CLASSES    {index_page}: '{name}' row says "
                 f"{sorted(claimed_classes)}, tree declares "
                 f"{sorted(expected_classes)}")
 
         findings += _imported_by_findings(
-            f"{readme} row for '{name}'", name, by_category.get(name, set()),
+            f"{index_page} row for '{name}'", name, by_category.get(name, set()),
             row.group('imp'))
 
     # A category with its own page that never made it into the table row set
@@ -566,7 +566,7 @@ def check_table(root):
         page = root / 'wiki' / 'categories' / f'{name}.md'
         if page.exists():
             findings.append(
-                f"MISSING ROW  {readme}: '{name}' has {page} but no Index "
+                f"MISSING ROW  {index_page}: '{name}' has {page} but no Index "
                 f"table row")
     return findings
 
@@ -627,12 +627,33 @@ def check_hosts(root):
     return findings
 
 
+def wiki_md(root, pattern='*.md'):
+    """Every real markdown file under wiki/, symlinks excluded.
+
+    Each wiki directory carries a README.md symlink to its 00-INDEX.md so
+    GitHub still sees a filename it recognizes. Those are the same bytes
+    under a second name: scanned as documents they double every word
+    count and invent a README.md/README-for-agents.md sibling pair nobody
+    wrote. Every check that walks wiki/ goes through here so a new one
+    can't reintroduce that by globbing directly.
+    """
+    return sorted(
+        p for p in root.joinpath('wiki').rglob(pattern) if not p.is_symlink()
+    )
+
+
 def doc_files(root):
     """Every markdown file the three checks below scan: all of wiki/
     (recursive) plus AGENTS.md itself -- the one file outside wiki/ that
     duplicates wiki-shaped claims verbatim (CLAUDE.md is a symlink to it, so
-    checking the symlink's target once covers both names)."""
-    return sorted(root.joinpath('wiki').rglob('*.md')) + [root / 'AGENTS.md']
+    checking the symlink's target once covers both names).
+
+    Symlinks under wiki/ are skipped for that same reason: each directory's
+    README.md is a symlink to its 00-INDEX.md, kept so GitHub still has a
+    filename it recognizes. Scanned as documents they would double every
+    page's word count and invent a README.md/README-for-agents.md sibling
+    pair that no one wrote."""
+    return wiki_md(root) + [root / 'AGENTS.md']
 
 
 # A recipe header, e.g. `wiki-churn *args:`, `host=nire-durandal build`'s
@@ -758,7 +779,7 @@ CADDY_KEPT_PATH = re.compile(r'path\s+/([\w-]+)\s+/\1/\*')
 CADDY_STRIPPED_PATH = re.compile(r'handle_path\s+/([\w-]+)/\*')
 # The two forms this wiki actually writes a routed URL in: the full FQDN
 # (reaching-services.md, categories/monitoring.md) or the `.../name/`
-# shorthand (homelab/README.md) -- deliberately NOT a bare `/name/` pattern,
+# shorthand (homelab/00-INDEX.md) -- deliberately NOT a bare `/name/` pattern,
 # which would also match ordinary filesystem paths like `/root/` or
 # `/persist/` that have nothing to do with Caddy.
 ROUTE_MENTION = re.compile(r'ts-cube\.moose-micro\.ts\.net/([\w-]+)/|`\.\.\./([\w-]+)/`')
@@ -1017,7 +1038,7 @@ def check_contents(root):
     A page with no `##` headings at all is skipped either way -- there is
     nothing to list, and `gen-contents` declines to write an empty block."""
     findings = []
-    for path in sorted(root.joinpath('wiki').rglob('*.md')):
+    for path in wiki_md(root):
         rel = path.relative_to(root).as_posix()
         text = path.read_text()
         actual = actual_contents_items(text)
@@ -1210,7 +1231,7 @@ SIBLING_REQUIRED_WORDS = 1000
 # attached -- the fact wins and the budget loses, deliberately. What this
 # number is actually for is catching the other failure: a sibling quietly
 # growing narrative back until it is a second copy of the page, which is
-# the drift `wiki/README.md` warns about. The siblings written when this
+# the drift `wiki/00-INDEX.md` warns about. The siblings written when this
 # landed came in at 21-48% of their sources, most around 30%.
 SIBLING_BUDGET = 0.50
 # The escape hatch for a source edit that genuinely has nothing to sync --
@@ -1281,7 +1302,7 @@ def sibling_pairs(root):
     wiki/, sibling first-class even when its source doesn't exist yet (the
     orphan case check_siblings reports)."""
     pairs = []
-    for path in sorted(root.joinpath('wiki').rglob(f'*{SIBLING_SUFFIX}.md')):
+    for path in wiki_md(root, f'*{SIBLING_SUFFIX}.md'):
         source = path.with_name(
             path.name[:-len(f'{SIBLING_SUFFIX}.md')] + '.md')
         pairs.append((source, path))
@@ -1299,7 +1320,7 @@ def check_siblings(root):
       `_Last modified:_` (checked for shape by `dates`); editing a page's
       content bumps it, per styleguide.md. So a sibling dated EARLIER than
       its source means the source was edited and the sibling wasn't, which
-      is the failure mode `wiki/README.md`'s "why a link layer, not a
+      is the failure mode `wiki/00-INDEX.md`'s "why a link layer, not a
       rewrite" section warns about -- one fact, two copies, one of them now
       lying. Equal dates pass: that's the same-change edit the rule asks for.
       This can't tell a same-day sibling update that was actually made from
@@ -1376,7 +1397,7 @@ def check_siblings(root):
                 f"NO SOURCE LINK  {rel_sib}: doesn't link back to "
                 f"{source.name}")
 
-    for path in sorted(root.joinpath('wiki').rglob('*.md')):
+    for path in wiki_md(root):
         rel = path.relative_to(root).as_posix()
         if path.name.endswith(f'{SIBLING_SUFFIX}.md') or path in have_sibling:
             continue
@@ -1403,7 +1424,7 @@ def check_dates(root):
     needs the line -- there's no exemption for a short page."""
     findings = []
     today = datetime.date.today()
-    for path in sorted(root.joinpath('wiki').rglob('*.md')):
+    for path in wiki_md(root):
         lines = path.read_text().splitlines()
         if not lines or not lines[0].startswith('# '):
             continue  # no title line to anchor the check against

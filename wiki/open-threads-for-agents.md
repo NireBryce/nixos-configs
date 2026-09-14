@@ -8,8 +8,8 @@ items, the reasoning and the full accounts. Live threads only here.
 
 **Before investigating any symptom: `just threads "<keywords>"`** — it
 covers GitHub issues plus `wiki/`, `lessons-learned.md` and
-`bugs pending submission/` at once. Skill `investigate-bug`. This page is
-not a tracker; this repo's GitHub issues are.
+`_loose-ends/bugs-pending-submission/` at once. Skill `investigate-bug`.
+This page is not a tracker; this repo's GitHub issues are.
 
 ## Open issues worth knowing before you start work
 
@@ -35,8 +35,8 @@ not a tracker; this repo's GitHub issues are.
 
 ## Written up, deliberately not filed
 
-`bugs pending submission/` holds three reports against third-party
-projects. **Filing outside `NireBryce/nixos-configs` happens only when Elly
+`_loose-ends/bugs-pending-submission/` holds three reports against
+third-party projects. **Filing outside `NireBryce/nixos-configs` happens only when Elly
 says so explicitly, in those words, for that specific report** — never as a
 housekeeping pass over this list.
 

@@ -253,8 +253,9 @@ hardware verification).
 nixpkgs, ble.sh, carapace, any other project — without Elly saying so
 explicitly, in those words, unprompted.** A yes to a bundled list does not
 cover an upstream filing folded into it. `propose-issue` only ever files
-here; `bugs pending submission/` and `wiki/open-threads.md`'s drafts are
-deliberately not worked through automatically (`wiki/lessons-learned.md` §39). Filing
+here; `_loose-ends/bugs-pending-submission/` and `wiki/open-threads.md`'s
+drafts are deliberately not worked through automatically
+(`wiki/lessons-learned.md` §39). Filing
 here can still reach another project via GitHub autolinking — a title or
 body containing `owner/repo#123` pings that repo — so grep for that shape
 before naming a specific upstream issue/PR in anything filed here.
@@ -310,11 +311,11 @@ invites.
 paths, option names, commands, host lists, every trap as one line, no
 narrative. Both exist for the same subject, so loading the human page to
 answer a question the sibling already answers is paying for prose you don't
-need. Start at `wiki/README-for-agents.md`, which routes by task.
+need. Start at `wiki/00-INDEX-for-agents.md`, which routes by task.
 
 The tradeoff, stated so nobody has to rediscover it: this is deliberate
 duplication, against the "index over restatement" rule the rest of the wiki
-runs on, and `wiki/README.md` says outright that this repo has been bitten
+runs on, and `wiki/00-INDEX.md` says outright that this repo has been bitten
 repeatedly by one fact living in two places. It is allowed here because it
 is the one duplication with a mechanical guard — **`check_wiki.py siblings`
 fails when a sibling's `_Last modified:_` predates its source's**, so
@@ -326,7 +327,7 @@ a reason, on the sibling, is the way to say so. Full rule and the cut list:
 `wiki/styleguide.md`'s "Two audiences per page"; the procedure is skill
 `wiki-sync`, step 5.
 
-- `wiki/README.md` — topic index (`README-for-agents.md` condensed).
+- `wiki/00-INDEX.md` — topic index (`00-INDEX-for-agents.md` condensed).
   **Maintained the same way this file is**:
   a change that makes a wiki page stale corrects it in the same change
   (`just wiki-lint` checks the mechanical claims).

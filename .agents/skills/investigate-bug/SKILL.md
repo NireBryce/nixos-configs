@@ -21,7 +21,7 @@ A ble.sh/carapace completion bug (2026-08-24) got fully re-derived from a
 live pty session — hours — before anyone checked whether it was already
 known. It was: diagnosed and written up in
 `wiki/categories/shell-config/blesh.md` on 2026-08-22, two days earlier,
-one link from `wiki/README.md`'s index. Full account: §39,
+one link from `wiki/00-INDEX.md`'s index. Full account: §39,
 [issue #72](https://github.com/NireBryce/nixos-configs/issues/72). Prose
 saying "check first" demonstrably wasn't enough to make the check happen —
 which is why this is a triggered skill rather than another line in
@@ -33,8 +33,8 @@ which is why this is a triggered skill rather than another line in
    couple of guesses from the report's own wording (symptom text, error
    message, command name). It checks this repo's GitHub issues
    (`gh issue list --search`) and greps `wiki/` (which includes
-   `wiki/lessons-learned.md`) and `bugs pending submission/` in one
-   shot — see `flake/scripts/threads.sh` for exactly what it covers.
+   `wiki/lessons-learned.md`) and `_loose-ends/bugs-pending-submission/`
+   in one shot — see `flake/scripts/threads.sh` for exactly what it covers.
 2. **A hit means read it fully** — the issue and/or the linked wiki
    deep-dive — before doing anything else. Pick up from where it left off
    (an untested fix, an open question, a "not yet confirmed" status) rather

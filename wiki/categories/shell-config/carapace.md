@@ -110,7 +110,7 @@ session, the next time you happen to run `<carapace-covered-command>
 - [blesh](blesh.md) — how ble.sh layers a description column and an fzf
   menu on top of carapace's plain-word completions, and the open upstream
   bug found in that interaction.
-- [shell-config](README.md) — the category `bash.nix` (the
+- [shell-config](00-INDEX.md) — the category `bash.nix` (the
   sourcing side) lives in.
 - [`carapace-completions.nix`](../../../flake/modules/nirePackages/shell-apps/completions/carapace-completions.nix)
   and [`cod-completions.nix`](../../../flake/modules/nirePackages/shell-apps/completions/cod-completions.nix)
