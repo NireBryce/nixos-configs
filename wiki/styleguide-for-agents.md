@@ -1,6 +1,6 @@
 # Wiki style guide, for agents
 
-_Last modified: 2026-09-12_
+_Last modified: 2026-09-13_
 
 Condensed from [styleguide.md](styleguide.md), which keeps the reasoning and
 the precedents. Rules only here. The *repo's* style guide is
@@ -16,6 +16,7 @@ the precedents. Rules only here. The *repo's* style guide is
 | `wiki/categories/<name>/` | escape hatch, used once (`shell-config`). Triggered by one *member* accumulating an investigation, not by length. `README.md` becomes the category article; each deep-dive is named after its subject. **No third tier under it.** |
 | `wiki/categories/<name>-history.md` | resolved incidents whose *outcome* matters but whose blow-by-blow shouldn't load every read. **Not the default** — the test is whether understanding the *current* behavior needs the paragraph. One companion per **category**, not per page. Procedure: skill `wiki-history-sweep`; candidates: `just wiki-history-candidates`. |
 | `wiki/homelab/` | usage tier: operating a service, for a reader who wants to *do something with it*. |
+| `wiki/experiments/` | open questions: one page per problem **instrumented but not yet diagnosed** — symptom, established, ruled out, under test. Must mark settled vs under-test claims (`fact-hygiene`). On resolution the outcome moves to `lessons-learned.md` or the category page and the page goes. |
 | `<page>-for-agents.md` | the condensed sibling; see below. |
 
 No per-category page for `nirePackages/*` subcategories or `nireHost/*`

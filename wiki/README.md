@@ -149,6 +149,17 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   page may hold real content rather than links — because its source is
   often the running service's own help page, not a file in this repo.
 
+### Experiments (open questions)
+
+- [Experiments](experiments/) — one page per problem that is **instrumented
+  but not yet diagnosed**, kept separate from the category pages so that
+  "we're still measuring this" never gets read as settled config:
+  [durandal's auto-suspend hang](experiments/durandal-auto-suspend-hang.md)
+  (hangs on PowerDevil's idle timeout, fine when a person asks; s2idle and an
+  on-disk state probe currently under test). When a question closes, the
+  outcome moves to [lessons-learned.md](lessons-learned.md) or the relevant
+  category page and the experiment page goes.
+
 ### Conventions & meta
 
 - [Conventions & workflow](conventions.md) — the *repo's* style guide: Nix

@@ -1,6 +1,6 @@
 # Wiki style guide
 
-_Last modified: 2026-09-12_
+_Last modified: 2026-09-13_
 
 How this wiki itself is organized and written — as opposed to
 [conventions.md](conventions.md), which is the *repo's* style guide (Nix
@@ -92,6 +92,20 @@ separate tier for the *usage* side:
   synthesized content — but it must say **what was verified against the
   live service and what was only transcribed**, and point at the live
   source as canonical. `creating-golinks.md`'s closing section is the pattern.
+- **`wiki/experiments/`** — the open-question tier, added 2026-09-13 with
+  [durandal-auto-suspend-hang.md](experiments/durandal-auto-suspend-hang.md).
+  One page per problem that is *instrumented but not yet diagnosed*: the
+  symptom, what has been established, what has been ruled out, and what is
+  currently under test. Distinct from `categories/`, which documents config
+  that works, and from [lessons-learned.md](lessons-learned.md), which records
+  what was learned once it's over.
+
+  **A page here must say which claims are settled and which are still being
+  tested.** It exists precisely because the answer isn't known, so its most
+  likely failure is reading as though it were — skill `fact-hygiene`. When the
+  question closes, the outcome moves to `lessons-learned.md` or the relevant
+  category page and the experiment page goes; a page here that has quietly
+  become true is a page in the wrong tier.
 - **`wiki/categories/<name>/`** — the escape hatch, used exactly once so
   far ([shell-config](categories/shell-config/README.md)). A category
   outgrows a single file not by being long, but by one specific *member*
