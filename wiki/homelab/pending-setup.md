@@ -125,24 +125,31 @@ the SSH-auth limitation — moved to
 
 ## 5. Grafana's admin credentials
 
-**Assume `admin`/`admin` works until someone signs in and proves it
-doesn't.** `grafana.nix` sets `secret_key` but no `admin_password`, so
-Grafana's published default account is live — this is a working admin login
-with a known password, not a credential waiting to be created. Grafana
-prompts for a change on first sign-in, but nothing here records whether
-anyone ever completed that prompt.
+**Both halves done 2026-09-13.**
 
-**The tailnet is the only thing in front of it**, so the exposure is
-"anyone already on the tailnet has Grafana admin" — narrow, and not nothing.
-It can't be settled from the repo: a stock password is invisible in config,
-because the absence of an `admin_password` setting is exactly what leaves it
-stock. Sign in at `https://grafana.moose-micro.ts.net/` to find out.
+**The live password was changed by hand**, by Elly, through the UI. It
+persists: `grafana.nix` declares no drift enforcement, cube has a plain
+persistent root, so `/var/lib/grafana`'s sqlite db keeps it across reboots
+and rebuilds, and restic covers it.
 
-Closing it means changing the password if it is still stock, and rewriting
-[maintenance-schedule.md](../maintenance-schedule.md) item 8 in the same
-change. Setting it declaratively — a `$__file{}` provider, the shape
-`secret_key` already uses — is the durable version, and a real change rather
-than a tidy-up.
+**A fresh instance can no longer fail open.** `grafana.nix` now sets
+`settings.security.admin_password` from the new `grafana-admin-password`
+sops secret via Grafana's `$__file{}` provider. Before this, a rebuilt or
+newly-provisioned Grafana came up on the published `admin`/`admin` with only
+the tailnet in front of it, and stayed there until a human noticed.
+
+**What this deliberately does not do:** manage the running instance's
+password. Grafana's own `defaults.ini` says `admin_password` "can be changed
+before first start of grafana, or in profile settings" — it applies when
+Grafana *creates* the admin user, so on an instance that already has one it
+is inert. Making sops authoritative over a live password needs a different
+mechanism (a oneshot running `grafana-cli admin reset-admin-password`, the
+shape `forgejo-admin-bootstrap` uses), which would overwrite a hand-set
+password on every switch. Not done on purpose.
+
+**Not yet switched on cube** — the change is committed and cube's toplevel
+builds, but nothing has applied it there, so the sops value has never been
+exercised by a real first start.
 
 Related and worth knowing before you start building dashboards: anything
 edited in the Grafana UI lives **only** in cube's sqlite db, while anything

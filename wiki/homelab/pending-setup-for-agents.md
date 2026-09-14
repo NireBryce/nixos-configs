@@ -33,14 +33,13 @@ own database. The repo-side counterpart is
    [creating-golinks.md](creating-golinks.md) — **read that page's `--post302` and delete
    traps first, both have teeth.** Done when `go/dash` resolves from a
    *second* tailnet device.
-3. **Grafana admin credentials** — **assume `admin`/`admin` is live.**
-   `grafana.nix` sets `secret_key` but no `admin_password`, so the stock
-   account works; this is a live credential, not an unset one. Not
-   checkable from config — a stock password is invisible there, since the
-   missing setting is what leaves it stock. The tailnet is the only thing
-   in front of it, so anyone on the tailnet has Grafana admin. Sign in to
-   settle it; close [../maintenance-schedule.md](../maintenance-schedule.md)
-   item 8 in the same change.
+3. ~~**Grafana admin credentials**~~ **Done 2026-09-13.** Live password
+   changed by hand (UI); persists in cube's sqlite db, not reproducible.
+   Separately `grafana.nix` now sets `settings.security.admin_password`
+   from the `grafana-admin-password` sops secret — **first start only**
+   (Grafana `defaults.ini`: "can be changed before first start"), so it
+   stops a rebuilt instance coming up on stock `admin`/`admin` but does
+   not manage the live password. **Cube not switched yet.**
 4. **Homepage's calendar feeds** (#291, 2026-09-12) — plumbing all landed;
    the gcal **secret iCal addresses** don't exist yet (IDs deliberately
    unassigned). Until filled in the calendars render bare-grid + empty

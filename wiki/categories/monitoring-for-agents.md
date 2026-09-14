@@ -1,6 +1,6 @@
 # `monitoring`, for agents
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-13_
 
 Condensed from [monitoring.md](monitoring.md), which keeps the reasoning
 and the narrative. Facts only here.
@@ -38,6 +38,12 @@ any path containing `/_` — otherwise the JSON would be taken for a module.
   `forgejo-secrets.service`.
 - Secret is read by Grafana, not Nix:
   `$__file{/persist/secrets/grafana-secret-key}`. Not sops.
+- **`admin_password` IS sops** (`grafana-admin-password`, `owner = "grafana"`,
+  added 2026-09-13) via the same `$__file{}` provider. **First start only** —
+  Grafana's `defaults.ini`: "can be changed before first start". Stops a
+  rebuilt instance coming up on stock `admin`/`admin`; does not manage a live
+  password. `grafana-cli admin reset-admin-password` per activation is what
+  would, and is deliberately not done.
 - `http_addr` stays loopback; `root_url` is the Tailscale Services name.
   `serve_from_sub_path` is gone with the path prefix.
 - No firewall port. Access is restricted by the **binding**, not by

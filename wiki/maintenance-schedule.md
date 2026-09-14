@@ -175,32 +175,27 @@ here, don't wrap this file in ciphertext to protect one row.
 
 ### 8. Grafana admin credentials
 
-- **What**: **a live admin account whose password is Grafana's published
-  default.** Not an unset credential — `grafana.nix` sets `secret_key` but no
-  `admin_password`, so the stock `admin`/`admin` account is working right
-  now and anyone who can open the page can sign in as admin. (An earlier
-  version of this row said "still on initial setup ... hasn't had its
-  one-time setup done at all", which reads as *absent* and misled its only
-  reader, 2026-09-13.)
-- **What it grants**: admin on cube's Grafana — dashboards, and the
-  datasource config that `secret_key` exists to encrypt.
-- **What's in front of it**: the tailnet, and nothing else. Grafana binds
-  loopback behind Caddy on its own Services name; there is no second
-  factor and no allowlist beyond tailnet membership. That is the whole
-  mitigation — judge it accordingly.
-- **Not checkable from the config.** A stock password is invisible in the
-  repo, because the *absence* of an `admin_password` setting is precisely
-  what leaves it stock. Confirming it means signing in.
-- **What closes it**: sign in at `https://grafana.moose-micro.ts.net/`,
-  change the password if it is still stock, then rewrite this row with the
-  same shape as `forgejo-admin-password` above — in the same change that
-  closes [pending-setup.md](homelab/pending-setup.md#5-grafanas-admin-credentials)
-  item 5. Setting it declaratively (a `$__file{}` provider, as
-  `secret_key` already uses) is the durable version and a real change, not
-  a tidy-up.
-- **Last checked**: 2026-09-13 (read against `grafana.nix`, which confirms
-  no `admin_password` is set; the live instance has still not been signed
-  into to check whether the password was ever changed by hand).
+- **What**: a real admin password, **set by hand through the UI 2026-09-13**
+  (Elly). Not stock any more. Lives only in cube's Grafana sqlite db at
+  `/var/lib/grafana` — covered by restic, but not reproducible: nothing
+  re-applies it, so it is a credential that exists in exactly one place.
+- **Also, separately**: `grafana-admin-password` now exists in
+  `secrets.yaml` and `grafana.nix` wires it to
+  `settings.security.admin_password` via Grafana's `$__file{}` provider.
+  **That governs first start only** — Grafana's `defaults.ini`: "can be
+  changed before first start of grafana, or in profile settings". Its job is
+  that a fresh or rebuilt instance never comes up on the published
+  `admin`/`admin` again; it does **not** manage the password above.
+- **Rotation**: none enforced. To rotate the live one, change it in the UI.
+  To rotate what a rebuilt instance would get, `sops set` the secret.
+  The two are independent, which is the cost of first-start-only semantics.
+- **What would make them one thing**: a oneshot running `grafana-cli admin
+  reset-admin-password` from the sops file per activation — the shape
+  `forgejo-admin-bootstrap` uses for item 7. Deliberately not done: it
+  overwrites a hand-set password on every switch.
+- **Last checked**: 2026-09-13 (live password changed by Elly; the sops
+  secret exists and cube's toplevel builds with it, but **cube has not been
+  switched**, so the first-start path has never actually run).
 
 ### 9. Syncthing device certificates
 

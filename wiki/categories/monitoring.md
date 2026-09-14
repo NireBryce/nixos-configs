@@ -1,6 +1,6 @@
 # `monitoring` — `nire/homelab/monitoring/`
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-13_
 
 Prometheus + Grafana, scraping this host's own resource metrics. Added
 2026-08-23, cube-only so far; nested under the `homelab` umbrella since
@@ -207,9 +207,15 @@ design reason rules them out, it just hasn't been asked for there yet.
   and the unrelated network-start bug found in the same activation.
 - [containers](containers.md) — what `cadvisor.nix` scrapes.
 - [impermanence-and-secrets.md](../impermanence-and-secrets.md) — why
-  `grafana.nix`'s `secret_key` doesn't go through sops either (cube has no
+  `grafana.nix`'s `secret_key` doesn't go through sops (cube has no
   impermanence to lose the file to), and how that's diverged from elly's
-  `hashedPasswordFile`, the other file in that category.
+  `hashedPasswordFile`, the other file in that category. **Note this is now
+  a per-secret call, not a category-wide one:** as of 2026-09-13 the module
+  *does* declare one sops secret, `grafana-admin-password`, feeding
+  `settings.security.admin_password`. Grafana applies that at **first start
+  only**, so its job is that a rebuilt instance never comes up on the
+  published `admin`/`admin` — not managing the live password. See
+  [../maintenance-schedule.md](../maintenance-schedule.md) item 8.
 - [git-forge](git-forge.md) — `forgejo-secrets.service`, the upstream
   pattern `grafana-secret-key-setup.service` above is modeled on.
 - [hosts.md](../hosts.md) — current switch/verification status for
