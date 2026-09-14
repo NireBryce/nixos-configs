@@ -275,9 +275,6 @@ Claude's canonical form is `Co-Authored-By: Claude`. `.githooks/commit-msg`
 `Claude <model> <email>` shape; any other agent's trailer passes through,
 so form it correctly at write time.
 
-**Namespacing.** `nire` unless it needs a more specific tag; `nireHost`,
-`nireUser`, `nirePackages` otherwise.
-
 **When a rename makes the old name ungreppable, say what it was** on the
 declaration — see `boot-durandal.nix`, `enable-home-manager.nix`.
 

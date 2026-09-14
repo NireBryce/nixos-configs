@@ -59,8 +59,6 @@ Nothing breaks by leaving it — courtesy, not a bug with consequences.
 
 - **[module-style-guide.md](module-style-guide.md)**
   — the full conventions doc for `flake/modules/`.
-- **Namespacing** — `nire` unless something needs a more specific tag;
-  `hosts`, `users`, `packages` otherwise.
 - **Renames** — when a rename makes the old name ungreppable, say what it
   was on the declaration (`boot-durandal.nix`, `enable-home-manager.nix` are
   the worked examples).
