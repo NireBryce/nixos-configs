@@ -67,8 +67,9 @@ running but unfinished.
 [experiments/](experiments/) — one page per problem **instrumented but not yet
 diagnosed**, so "still measuring" is never read as settled config. Current:
 [durandal-auto-suspend-hang.md](experiments/durandal-auto-suspend-hang.md) —
-hangs on PowerDevil's idle timeout, fine when a person asks; s2idle and an
-on-disk state probe under test. On resolution the outcome moves to
+sleeps into S3 and will not wake without a PSU power cut. `suspend_stats`
+reports those as `success`; s2idle and the BIOS are ruled out; `amdgpu.runpm=0`
+and an on-disk probe are under test. On resolution the outcome moves to
 [lessons-learned.md](lessons-learned.md) or the category page and the page goes.
 
 ## Rotting
