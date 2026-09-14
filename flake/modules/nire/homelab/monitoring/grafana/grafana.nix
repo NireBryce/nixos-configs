@@ -71,8 +71,19 @@
         # into `_module.args` at this scope (evaluating it errors:
         # "attribute 'pkgs' missing"). Same pattern
         # zsh.nix/bash.nix/pipewire.nix/etc. use throughout this tree.
-        flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+        flake.modules.nixos.${moduleName} = { pkgs, config, ... }: {
             # # description = "grafana -- dashboards over the tailnet only, for the metrics prometheus.nix collects";
+
+            # `owner`, not the root:root default -- grafana.service runs as
+            # the `grafana` user and reads this file itself at start, the
+            # same way it reads secretKeyPath. Getting that wrong is the
+            # exact failure this module's header records for secret_key:
+            # the file existed, was root:root, and Grafana could not read
+            # it. Do not drop the owner and assume 0400 root is fine.
+            sops.secrets.grafana-admin-password = {
+                owner = "grafana";
+            };
+
             services.grafana = {
                 enable = true;
 
@@ -87,46 +98,71 @@
                 # starts; `grafana-secret-key-setup` below guarantees
                 # that every activation. See the header for why a
                 # oneshot unit, not a `warnings` entry.
-                settings.security.secret_key = "$__file{${secretKeyPath}}";
+                settings = {
+                    security.secret_key       = "$__file{${secretKeyPath}}";
 
-                settings.server = {
-                    http_port = 3000;
-
-                    # Loopback, like the rest of this stack. As of
-                    # 2026-08-24 nothing off-host talks to this port
-                    # directly: reverse-proxy/caddy.nix terminates TLS on
-                    # the tailnet and is the only client. Used to be
-                    # 0.0.0.0 -- see the history note at the bottom.
-                    http_addr = "127.0.0.1";
-
-                    # NO LONGER behind a path prefix, as of the
-                    # reverse-proxy/tailscale-services/serve.nix move:
-                    # Grafana has its own Tailscale Services name now
-                    # (`svc:grafana`), so it serves at plain root again --
-                    # `serve_from_sub_path` dropped (defaults false), and
-                    # `root_url` is the service's own `.ts.net` name, not
-                    # `ts-cube.../grafana/`. See serve.nix's header for
-                    # what this replaced and why it isn't runtime-verified
-                    # yet; caddy.nix's `@grafana` route is the fallback if
-                    # this doesn't check out on a real switch.
+                    # **First start only, and that is the entire point.**
+                    # Grafana's own defaults.ini says so outright: "default
+                    # admin password, can be changed before first start of
+                    # grafana, or in profile settings". It is read when Grafana
+                    # CREATES the admin user; on an instance whose admin user
+                    # already exists it does nothing at all.
                     #
-                    # The service hostname pattern (`<name>.<tailnet
-                    # MagicDNS suffix>`, i.e. NOT the device name
-                    # `ts-cube` the old prefix used) is asserted from
-                    # Tailscale's docs, not yet confirmed against a real
-                    # TLS handshake the way `ts-cube.moose-micro.ts.net`
-                    # was for the path-prefix version (reverse-proxy.md's
-                    # own "RUNTIME-VERIFIED" note) -- first thing to check
-                    # on the actual switch.
-                    root_url = "https://grafana.moose-micro.ts.net/";
+                    # So this does NOT manage cube's current password (changed
+                    # by hand 2026-09-13) and is not drift enforcement. What it
+                    # removes is the fail-open window: before this, a fresh or
+                    # rebuilt instance came up on Grafana's published
+                    # `admin`/`admin` with only the tailnet in front of it, and
+                    # stayed there until a human noticed. Now it comes up on a
+                    # sops value instead.
+                    #
+                    # Making sops authoritative over the LIVE password is a
+                    # different mechanism -- a oneshot running `grafana-cli
+                    # admin reset-admin-password` per activation, the shape
+                    # forgejo-admin-bootstrap uses. Deliberately not done here:
+                    # it would overwrite a hand-set password on every switch.
+                    security.admin_password =
+                        "$__file{${config.sops.secrets.grafana-admin-password.path}}";
 
-                    # Not load-bearing while `enforce_domain` is false
-                    # and `root_url` is a literal (nixpkgs leaves this
-                    # at "localhost"; Grafana only uses it to BUILD a
-                    # default root_url). Set anyway so the two agree --
-                    # flipping enforce_domain on later would otherwise
-                    # reject every real request.
-                    domain   = "grafana.moose-micro.ts.net";
+                    server = {
+                        http_port = 3000;
+
+                        # Loopback, like the rest of this stack. As of
+                        # 2026-08-24 nothing off-host talks to this port
+                        # directly: reverse-proxy/caddy.nix terminates TLS on
+                        # the tailnet and is the only client. Used to be
+                        # 0.0.0.0 -- see the history note at the bottom.
+                        http_addr = "127.0.0.1";
+
+                        # NO LONGER behind a path prefix, as of the
+                        # reverse-proxy/tailscale-services/serve.nix move:
+                        # Grafana has its own Tailscale Services name now
+                        # (`svc:grafana`), so it serves at plain root again --
+                        # `serve_from_sub_path` dropped (defaults false), and
+                        # `root_url` is the service's own `.ts.net` name, not
+                        # `ts-cube.../grafana/`. See serve.nix's header for
+                        # what this replaced and why it isn't runtime-verified
+                        # yet; caddy.nix's `@grafana` route is the fallback if
+                        # this doesn't check out on a real switch.
+                        #
+                        # The service hostname pattern (`<name>.<tailnet
+                        # MagicDNS suffix>`, i.e. NOT the device name
+                        # `ts-cube` the old prefix used) is asserted from
+                        # Tailscale's docs, not yet confirmed against a real
+                        # TLS handshake the way `ts-cube.moose-micro.ts.net`
+                        # was for the path-prefix version (reverse-proxy.md's
+                        # own "RUNTIME-VERIFIED" note) -- first thing to check
+                        # on the actual switch.
+                        root_url = "https://grafana.moose-micro.ts.net/";
+
+                        # Not load-bearing while `enforce_domain` is false
+                        # and `root_url` is a literal (nixpkgs leaves this
+                        # at "localhost"; Grafana only uses it to BUILD a
+                        # default root_url). Set anyway so the two agree --
+                        # flipping enforce_domain on later would otherwise
+                        # reject every real request.
+                        domain   = "grafana.moose-micro.ts.net";
+                    };
                 };
 
                 provision = {

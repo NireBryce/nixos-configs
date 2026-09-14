@@ -1,6 +1,6 @@
 # Maintenance schedule
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-13_
 
 ## Contents
 
@@ -175,14 +175,27 @@ here, don't wrap this file in ciphertext to protect one row.
 
 ### 8. Grafana admin credentials
 
-- **What**: still on initial/default setup — this is not yet a "rotate
-  periodically" item because it hasn't had its one-time setup done at all.
-- **Status**: see [homelab/pending-setup.md](homelab/pending-setup.md#5-grafanas-admin-credentials)
-  for the current state. Once real credentials are set, add them here with
-  the same shape as `forgejo-admin-password` above — this row should stop
-  saying "pending" the same change that closes that pending-setup item.
-- **Last checked**: 2026-09-07 (cross-referenced against pending-setup.md,
-  not the live instance).
+- **What**: a real admin password, **set by hand through the UI 2026-09-13**
+  (Elly). Not stock any more. Lives only in cube's Grafana sqlite db at
+  `/var/lib/grafana` — covered by restic, but not reproducible: nothing
+  re-applies it, so it is a credential that exists in exactly one place.
+- **Also, separately**: `grafana-admin-password` now exists in
+  `secrets.yaml` and `grafana.nix` wires it to
+  `settings.security.admin_password` via Grafana's `$__file{}` provider.
+  **That governs first start only** — Grafana's `defaults.ini`: "can be
+  changed before first start of grafana, or in profile settings". Its job is
+  that a fresh or rebuilt instance never comes up on the published
+  `admin`/`admin` again; it does **not** manage the password above.
+- **Rotation**: none enforced. To rotate the live one, change it in the UI.
+  To rotate what a rebuilt instance would get, `sops set` the secret.
+  The two are independent, which is the cost of first-start-only semantics.
+- **What would make them one thing**: a oneshot running `grafana-cli admin
+  reset-admin-password` from the sops file per activation — the shape
+  `forgejo-admin-bootstrap` uses for item 7. Deliberately not done: it
+  overwrites a hand-set password on every switch.
+- **Last checked**: 2026-09-13 (live password changed by Elly; the sops
+  secret exists and cube's toplevel builds with it, but **cube has not been
+  switched**, so the first-start path has never actually run).
 
 ### 9. Syncthing device certificates
 
@@ -293,6 +306,11 @@ expiry, rotation cadence, or silent-breakage property — add a row here in
 the **same change**, same discipline `wiki-sync` already asks for elsewhere.
 A secret with no such property (a static API token that never expires, say)
 doesn't belong on this page; it just lives in `secrets.yaml`.
+
+**A service left on vendor-default credentials belongs here too, and is
+written as a live credential rather than a missing one** — it is a working
+admin account with a publicly-known password, not an absence. Skill
+`maintenance-schedule` has the required shape and why it exists.
 
 ## See also
 

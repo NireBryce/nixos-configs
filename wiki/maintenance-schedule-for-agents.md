@@ -1,6 +1,6 @@
 # Maintenance schedule, for agents
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-13_
 
 Condensed from [maintenance-schedule.md](maintenance-schedule.md), which
 keeps each item's reasoning, rejected alternatives and evidence. Facts only
@@ -22,10 +22,24 @@ and dates are not values.
 | 5 | `restic-cube-ssh-key` / `restic-cube-password` | on suspicion / QNAP re-image | backup runs fail | 2026-08-31 |
 | 6 | QNAP SSH host key pin | none; breaks on re-image | backup runs fail | untracked |
 | 7 | `forgejo-admin-password` | none enforced; never rotated | — | — |
-| 8 | Grafana admin credentials | **still on initial setup** | — | 2026-09-07 |
+| 8 | Grafana admin credentials | real password, set by hand 2026-09-13; **not** reproducible | lives only in cube's sqlite db | 2026-09-13 |
 | 9 | Syncthing device certs | decades; **declared by no module since 2026-09-08** | nothing | 2026-09-07 |
 | 10 | `FLAKE_LOCK_TOKEN` | fine-grained PAT, **must** carry one (366d max) | fails loudly by construction, see below | 2026-09-08 |
 | 11 | Atuin account key | none; on suspicion only | — | 2026-09-09 |
+
+**Row 8, two independent things.** The live password was set by hand
+2026-09-13 and exists only in cube's sqlite db. Separately,
+`grafana-admin-password` (sops) feeds `settings.security.admin_password`,
+which Grafana applies **at first start only** — it stops a rebuilt instance
+coming up on stock `admin`/`admin`; it does not manage the live password.
+`grafana-cli admin reset-admin-password` per activation is what would unify
+them, and is deliberately not done.
+
+**General rule this came from:** default credentials are a *live* credential
+with a published password, never "not set up yet" — that wording misled a
+reader 2026-09-13. A stock password is also invisible from the repo, since
+the *absence* of an `admin_password` setting is what leaves it stock. Skill
+`maintenance-schedule` has the required row shape.
 
 ## The rows with a live action attached
 
