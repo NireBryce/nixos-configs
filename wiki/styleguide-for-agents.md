@@ -12,8 +12,8 @@ the precedents. Rules only here. The *repo's* style guide is
 | Tier | Holds |
 |---|---|
 | `wiki/*.md` | cross-cutting topics belonging to no one category |
-| `wiki/categories/<name>.md` | one page per real category — a directory under `flake/modules/` with its own `dirsAsCategory.nix`. Indexed in [categories/README.md](categories/README.md)'s table. |
-| `wiki/categories/<name>/` | escape hatch, used once (`shell-config`). Triggered by one *member* accumulating an investigation, not by length. `README.md` becomes the category article; each deep-dive is named after its subject. **No third tier under it.** |
+| `wiki/categories/<name>.md` | one page per real category — a directory under `flake/modules/` with its own `dirsAsCategory.nix`. Indexed in [categories/00-INDEX.md](categories/00-INDEX.md)'s table. |
+| `wiki/categories/<name>/` | escape hatch, used once (`shell-config`). Triggered by one *member* accumulating an investigation, not by length. `00-INDEX.md` becomes the category article; each deep-dive is named after its subject. **No third tier under it.** |
 | `wiki/categories/<name>-history.md` | resolved incidents whose *outcome* matters but whose blow-by-blow shouldn't load every read. **Not the default** — the test is whether understanding the *current* behavior needs the paragraph. One companion per **category**, not per page. Procedure: skill `wiki-history-sweep`; candidates: `just wiki-history-candidates`. |
 | `wiki/homelab/` | usage tier: operating a service, for a reader who wants to *do something with it*. |
 | `wiki/experiments/` | open questions: one page per problem **instrumented but not yet diagnosed** — symptom, established, ruled out, under test. Must mark settled vs under-test claims (`fact-hygiene`). On resolution the outcome moves to `lessons-learned.md` or the category page and the page goes. |
@@ -58,7 +58,7 @@ host lists, each trap as one declarative line. Tables wherever one fits.
 the reasoning behind a choice, meta-commentary, see-also sprawl.
 
 Exempt from needing one: `lessons-learned*`, `*-history.md`. Under 1,000
-words it's allowed but usually a loss — `homelab/README.md` was tried and
+words it's allowed but usually a loss — `homelab/00-INDEX.md` was tried and
 dropped.
 
 Checked by `check_wiki.py siblings`, which is what makes this the wiki's one
@@ -98,7 +98,7 @@ belongs in the linked file's own header.
 ## Naming and linking
 
 - kebab-case, matching the subject exactly.
-- `README.md` is reserved for a directory's index — never a single-topic
+- `00-INDEX.md` is reserved for a directory's index — never a single-topic
   page.
 - **Name a usage page for the reader's task, not the module.** A plural noun
   reads as a list of the things: `golinks.md` → `creating-golinks.md`
@@ -121,5 +121,5 @@ whichever change makes a page stale corrects it in the same change. Skill
 
 ## See also
 
-[styleguide.md](styleguide.md) · [README.md](README.md) ·
-[categories/README.md](categories/README.md)
+[styleguide.md](styleguide.md) · [00-INDEX.md](00-INDEX.md) ·
+[categories/00-INDEX.md](categories/00-INDEX.md)

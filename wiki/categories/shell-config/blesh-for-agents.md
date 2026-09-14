@@ -74,5 +74,5 @@ string.** Check with `od -c`; misreading it derailed this diagnosis once.
 
 ## See also
 
-[blesh.md](blesh.md) · [carapace.md](carapace.md) · [README.md](README.md) ·
+[blesh.md](blesh.md) · [carapace.md](carapace.md) · [00-INDEX.md](00-INDEX.md) ·
 [../../open-threads.md](../../open-threads.md)

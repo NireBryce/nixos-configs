@@ -173,5 +173,5 @@ drifted.
 
 - [shortlinks](../categories/shortlinks.md) — the module, the `AF_NETLINK`
   first-switch failure, and why golink is its own tailnet device.
-- [homelab README](README.md) — the other services on this tailnet.
+- [homelab index](00-INDEX.md) — the other services on this tailnet.
 - [hosts.md](../hosts.md) — `nire-cube`, which runs it.

@@ -43,7 +43,7 @@ the split is presentation only, nothing about the schema changes.
 | [macos](macos.md) | `nire/macos/` | darwin | lysithea |
 | [nix](nix.md) | `nire/nix/` | nixos, homeManager, darwin | all 4 hosts |
 | [peripherals](peripherals.md) | `nire/peripherals/` | nixos | all 3 NixOS hosts |
-| [shell-config](shell-config/README.md) | `nire/shell-config/` | nixos, homeManager | all 3 NixOS hosts directly; reaches lysithea via `ellyHomeManager` |
+| [shell-config](shell-config/00-INDEX.md) | `nire/shell-config/` | nixos, homeManager | all 3 NixOS hosts directly; reaches lysithea via `ellyHomeManager` |
 | [system](system.md) | `nire/system/` | nixos, homeManager, darwin | all 3 NixOS hosts + lysithea (partially) |
 | [elly](elly.md) | `nireUser/elly/` | nixos, homeManager, darwin | all 4 hosts |
 
@@ -68,7 +68,7 @@ matching "how do I use this, not configure it" page where one exists.
 ## Usage pages
 
 The homelab categories above are configuration; these are the matching
-usage-tier pages, per [homelab/README.md](../homelab/README.md)'s
+usage-tier pages, per [homelab/00-INDEX.md](../homelab/00-INDEX.md)'s
 config-vs-usage split. "—" means no service exists to write one about yet.
 
 | Category | Usage page |
@@ -77,7 +77,7 @@ config-vs-usage split. "—" means no service exists to write one about yet.
 | containers | — (podman/distrobox, no fleet-facing service) |
 | git-forge | [homelab/forgejo.md](../homelab/forgejo.md) |
 | landing | [homelab/reaching-services.md](../homelab/reaching-services.md) (homepage is the front page; glance beside it since 2026-09-13 for the evaluation) |
-| monitoring | not yet written up — see [homelab/README.md](../homelab/README.md)'s "Also running, not yet written up" |
+| monitoring | not yet written up — see [homelab/00-INDEX.md](../homelab/00-INDEX.md)'s "Also running, not yet written up" |
 | reverse-proxy | [homelab/reaching-services.md](../homelab/reaching-services.md) (the arrangement all the others sit behind) |
 | shortlinks | [homelab/creating-golinks.md](../homelab/creating-golinks.md) |
 | virtualization | — (`nire-llm-sandbox` removed 2026-08-28; see the category's own page) |
@@ -87,7 +87,7 @@ No per-category file count here on purpose (removed 2026-08-29, with the
 directory rather than trusting a number here.
 
 `shell-config` is the one category grown into its own directory —
-`shell-config/README.md` is the category article proper, with `blesh.md` /
+`shell-config/00-INDEX.md` is the category article proper, with `blesh.md` /
 `carapace.md` as deep-dives on two specific members. If another category
 grows a deep-dive worth splitting out, that's the precedent — see
 [../styleguide.md](../styleguide.md) for the general rule.

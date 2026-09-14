@@ -191,8 +191,8 @@ shipped evaluates to a **byte-identical `outPath`** to what's running.
 ## 9. Docs, in the same change
 
 Run `wiki-sync`. For a new service: a new `wiki/categories/<category>.md`;
-an alphabetical row in `wiki/categories/README.md`'s table; `wiki/hosts.md`;
-the URL in `wiki/homelab/README.md`; a paragraph in `AGENTS.md`'s
+an alphabetical row in `wiki/categories/00-INDEX.md`'s table; `wiki/hosts.md`;
+the URL in `wiki/homelab/00-INDEX.md`; a paragraph in `AGENTS.md`'s
 Architecture section (where the category list lives). If an existing
 service's reach changes, its page and module header are stale too.
 

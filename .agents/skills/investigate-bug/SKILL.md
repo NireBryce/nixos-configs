@@ -21,7 +21,7 @@ A ble.sh/carapace completion bug (2026-08-24) got fully re-derived from a
 live pty session — hours — before anyone checked whether it was already
 known. It was: diagnosed and written up in
 `wiki/categories/shell-config/blesh.md` on 2026-08-22, two days earlier,
-one link from `wiki/README.md`'s index. Full account: §39,
+one link from `wiki/00-INDEX.md`'s index. Full account: §39,
 [issue #72](https://github.com/NireBryce/nixos-configs/issues/72). Prose
 saying "check first" demonstrably wasn't enough to make the check happen —
 which is why this is a triggered skill rather than another line in

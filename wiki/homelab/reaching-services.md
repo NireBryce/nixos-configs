@@ -183,5 +183,5 @@ afterwards.
 - [landing](../categories/landing.md) — homepage and, for the evaluation,
   glance.
 - [Using the forge](forgejo.md) — cloning, and the hostnames Forgejo hands out.
-- [homelab README](README.md) — the other services on this tailnet.
+- [homelab index](00-INDEX.md) — the other services on this tailnet.
 - [hosts.md](../hosts.md) — `nire-cube` itself.

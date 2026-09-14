@@ -56,7 +56,7 @@ lint:
     # plain pass/fail, and `just install-hooks` for enforcing it pre-commit.
     cd {{flake}} && python3 scripts/lint.py check
 
-# Checks import lists, categories/README.md's Index table, hosts.md's host
+# Checks import lists, categories/00-INDEX.md's Index table, hosts.md's host
 # table, every `just <recipe>`/skill-name/markdown-link reference, and the
 # .sops.yaml enrollment claim -- catches any of those going stale after a
 # refactor, a rename, or a re-enrollment. Exits non-zero on a hard finding
@@ -88,7 +88,7 @@ wiki-lint:
 
 # Spots a page turning into hand-maintained toil (a stale-prone claim nearby
 # things keep forcing edits to) before it becomes another categories/
-# README.md-Members-column situation (removed 2026-08-29). Pass args through,
+# 00-INDEX.md-Members-column situation (removed 2026-08-29). Pass args through,
 # e.g. `just wiki-churn --top 5` or `just wiki-churn --since "3 weeks ago"`.
 # Reporting only, never fails -- ranks wiki/ pages by git-log edit churn
 wiki-churn *args:

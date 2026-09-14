@@ -75,7 +75,7 @@ request reporting status and latency; it does not scrape, store, alert,
 or retain anything. [monitoring](monitoring.md)'s Prometheus is still what
 knows what CPU usage was an hour ago. This answers *"is it up right now,
 and what's the URL"* — the question
-[homelab/README.md](../homelab/README.md) answers for humans.
+[homelab/00-INDEX.md](../homelab/00-INDEX.md) answers for humans.
 
 ## Why the module isn't `dashboard` (or `landing`)
 
@@ -271,7 +271,7 @@ What retired with it:
   deliberately not a replacement for.
 - [shortlinks](shortlinks.md) — golink, one of the listed services and the
   only one that isn't on this host.
-- [homelab/README.md](../homelab/README.md) — the human-facing version of
+- [homelab/00-INDEX.md](../homelab/00-INDEX.md) — the human-facing version of
   the same index.
 - [hosts.md](../hosts.md) — current switch/verification status for
   `nire-cube`.

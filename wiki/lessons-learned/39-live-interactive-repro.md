@@ -59,7 +59,7 @@ up two days earlier**, 2026-08-22, in
 — pinned to "somewhere inside ble.sh's global `read` override" and left
 open. This session re-derived the whole thing from a live pty before
 checking whether the wiki already had it, which cost real effort the
-earlier session's own diagnosis would have saved. `wiki/README.md` exists
+earlier session's own diagnosis would have saved. `wiki/00-INDEX.md` exists
 specifically so a finding like that isn't rediscovered by grepping the
 tree — check it before re-deriving, not after.
 

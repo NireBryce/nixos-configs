@@ -321,7 +321,7 @@ before and after this change.
   device.
 - [system](system.md) — `tailscale.nix`, for the firewall rule this rests
   on and the two out-of-repo tailnet traps.
-- [homelab/README.md](../homelab/README.md) — the usage side: the current
+- [homelab/00-INDEX.md](../homelab/00-INDEX.md) — the usage side: the current
   URLs for everything on cube.
 - [hosts.md](../hosts.md) — current switch/verification status for
   `nire-cube`.

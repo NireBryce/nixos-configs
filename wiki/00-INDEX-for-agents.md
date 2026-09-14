@@ -2,7 +2,7 @@
 
 _Last modified: 2026-09-14_
 
-Condensed from [README.md](README.md), which keeps the orientation prose and
+Condensed from [00-INDEX.md](00-INDEX.md), which keeps the orientation prose and
 the "why a link layer, not a rewrite" reasoning. Routing only here.
 
 `CLAUDE.md` is still the cold-start read. This page answers "which file
@@ -15,12 +15,12 @@ that sibling; load the human page only for the *why*.
 |---|---|
 | add, rename, or wire a flake-parts module | [architecture.md](architecture.md), skill `new-flake-module` |
 | touch impermanence or initrd | [impermanence-and-secrets.md](impermanence-and-secrets.md), skill `impermanence-initrd` |
-| add or platform-gate a package | [categories/README.md](categories/README.md), skill `nirepackages-platform-support` |
+| add or platform-gate a package | [categories/00-INDEX.md](categories/00-INDEX.md), skill `nirepackages-platform-support` |
 | add a package to a user's environment | skill `new-package` |
 | land a change on `experimental` | [conventions.md](conventions.md), skill `ship` |
 | work without clobbering another session | skill `use-a-worktree` |
 | check whether a bug is already tracked | [open-threads-for-agents.md](open-threads-for-agents.md), skill `investigate-bug` |
-| add a self-hosted service | [homelab/README.md](homelab/README.md), skill `new-homelab-service` |
+| add a self-hosted service | [homelab/00-INDEX.md](homelab/00-INDEX.md), skill `new-homelab-service` |
 | give a service its own `svc:` hostname | [categories/reverse-proxy-for-agents.md](categories/reverse-proxy-for-agents.md), skill `new-tailscale-service` |
 | add a host, or format its disk | [disk-formatting-for-agents.md](disk-formatting-for-agents.md), skill `new-host-config` |
 | check credential expiry | [maintenance-schedule-for-agents.md](maintenance-schedule-for-agents.md), skill `maintenance-schedule` |
@@ -51,7 +51,7 @@ that sibling; load the human page only for the *why*.
 
 ## Category reference
 
-[categories/README.md](categories/README.md) — one page per real category:
+[categories/00-INDEX.md](categories/00-INDEX.md) — one page per real category:
 what's in it, which hosts import it, its own traps. `shell-config` is the
 one with a subdirectory ([blesh](categories/shell-config/blesh-for-agents.md),
 [carapace](categories/shell-config/carapace.md)). A `<name>-history.md`
@@ -59,7 +59,7 @@ sibling holds resolved incidents and is rarely what you want.
 
 ## Homelab (usage, not config)
 
-[homelab/README.md](homelab/README.md) — reaching
+[homelab/00-INDEX.md](homelab/00-INDEX.md) — reaching
 services, the forge, [Grafana](homelab/grafana.md), go/ links, and what's
 running but unfinished.
 
@@ -80,4 +80,4 @@ Whichever change makes a page stale fixes it in the same change.
 
 ## See also
 
-[README.md](README.md) · [styleguide-for-agents.md](styleguide-for-agents.md)
+[00-INDEX.md](00-INDEX.md) · [styleguide-for-agents.md](styleguide-for-agents.md)

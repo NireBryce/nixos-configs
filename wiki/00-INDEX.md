@@ -42,7 +42,7 @@ the 2-minute mental model this index assumes. Already know what you're
 trying to do? Skip straight to Common tasks below.
 
 > **Condensed version:**
-> [README-for-agents.md](README-for-agents.md) — the same
+> [00-INDEX-for-agents.md](00-INDEX-for-agents.md) — the same
 > ground with the narrative stripped out, for an agent (or a human in
 > a hurry) loading it mid-task. Both siblings get edited in the same
 > change.
@@ -64,10 +64,10 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
 | reach or debug a service running on cube | [homelab/reaching-services.md](homelab/reaching-services.md) |
 | add, rename, or wire a flake-parts module | [architecture.md](architecture.md), skill [`new-flake-module`](../.agents/skills/new-flake-module/SKILL.md) |
 | touch impermanence or initrd | [impermanence-and-secrets.md](impermanence-and-secrets.md), skill [`impermanence-initrd`](../.agents/skills/impermanence-initrd/SKILL.md) |
-| add or platform-gate a package | [categories/README.md](categories/README.md), skill [`nirepackages-platform-support`](../.agents/skills/nirepackages-platform-support/SKILL.md) |
+| add or platform-gate a package | [categories/00-INDEX.md](categories/00-INDEX.md), skill [`nirepackages-platform-support`](../.agents/skills/nirepackages-platform-support/SKILL.md) |
 | land a change on `experimental` | [conventions.md](conventions.md), skill [`ship`](../.agents/skills/ship/SKILL.md) |
 | check whether a bug is already a known thread | [open-threads.md](open-threads.md), skill [`investigate-bug`](../.agents/skills/investigate-bug/SKILL.md) |
-| add a self-hosted service to a host | [homelab/README.md](homelab/README.md), skill [`new-homelab-service`](../.agents/skills/new-homelab-service/SKILL.md) |
+| add a self-hosted service to a host | [homelab/00-INDEX.md](homelab/00-INDEX.md), skill [`new-homelab-service`](../.agents/skills/new-homelab-service/SKILL.md) |
 | give a service its own Tailscale Services (`svc:`) hostname | [categories/reverse-proxy.md](categories/reverse-proxy.md), skill [`new-tailscale-service`](../.agents/skills/new-tailscale-service/SKILL.md) |
 | add a new host, or format its disk for impermanence | [disk-formatting.md](disk-formatting.md), skill [`new-host-config`](../.agents/skills/new-host-config/SKILL.md) |
 | check what key/credential expiry is coming due | [maintenance-schedule.md](maintenance-schedule.md), skill [`maintenance-schedule`](../.agents/skills/maintenance-schedule/SKILL.md) |
@@ -107,7 +107,7 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   one-line summary each, long entries broken out into `lessons-learned/`
   articles (2026-09-09), "written by Claude Code, for Claude Code" — moved
   in from `claude cave/` 2026-09-02; this page stays the index, that page
-  stays the log, the same split as `categories/shell-config/README.md` and
+  stays the log, the same split as `categories/shell-config/00-INDEX.md` and
   its deep-dives.
 - [flake-parts port notes](flake-parts-port-notes.md) — salvaged 2026-09-08
   from the deleted `flake-parts` branch: the port's decisions-not-defaults,
@@ -130,10 +130,10 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
 
 ### Category reference (configuration)
 
-- [Category reference](categories/README.md) — one article per real
+- [Category reference](categories/00-INDEX.md) — one article per real
   category (`nire/system`, `nire/impermanence`, `nire/homelab/virtualization`, …):
   what's in it, which hosts import it, and the traps specific to that one.
-  [shell-config](categories/shell-config/README.md) is the one category
+  [shell-config](categories/shell-config/00-INDEX.md) is the one category
   that's grown its own subdirectory, with deep-dives on
   [blesh](categories/shell-config/blesh.md) (the hand-wired bash line
   editor config, and an open upstream bug found while diagnosing a
@@ -144,7 +144,7 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
 
 ### Homelab (usage)
 
-- [Homelab services](homelab/README.md) — how to *use* what the fleet
+- [Homelab services](homelab/00-INDEX.md) — how to *use* what the fleet
   actually runs, as opposed to how it's configured:
   [reaching cube's services](homelab/reaching-services.md) (the URL map
   since everything moved behind one HTTPS hostname on 2026-08-24, and what

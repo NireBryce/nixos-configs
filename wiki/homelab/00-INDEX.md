@@ -6,7 +6,7 @@ How to **use** the services this fleet runs, as opposed to how they're
 configured. Everything here is reachable over the tailnet and nowhere else.
 
 This is a different tier from the rest of the wiki, and deliberately so. The
-[category pages](../categories/README.md) answer *"how is this built, and
+[category pages](../categories/00-INDEX.md) answer *"how is this built, and
 what breaks"* — they're for whoever is editing `flake/modules/`. These pages
 answer *"I want to do a thing with the running service"* — no Nix involved,
 and useful on a phone.
@@ -93,4 +93,4 @@ transcribed. [creating-golinks.md](creating-golinks.md) ends with exactly that s
 ## See also
 
 - [hosts.md](../hosts.md) — which host runs what, and current switch status.
-- [categories/README.md](../categories/README.md) — the configuration side.
+- [categories/00-INDEX.md](../categories/00-INDEX.md) — the configuration side.

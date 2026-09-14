@@ -3,7 +3,7 @@
 _Last modified: 2026-09-11_
 
 The largest category by far — across 19 subdirectories, no per-file count
-kept here on purpose (see categories/README.md's Index section for why) —
+kept here on purpose (see categories/00-INDEX.md's Index section for why) —
 and the one every Linux host in this repo imports whole, with no way to opt
 out of any piece of it. That property is exactly why
 [virtualization](virtualization.md) and [containers](containers.md) got
@@ -152,7 +152,7 @@ Both rely on `environment.persistence."/persist".directories` being
 `listOf` and therefore concatenating across every file that appends to it —
 same merge behavior as `environment.systemPackages` and the same one that
 makes `home.file.<n>.text` a trap on the Home Manager side (see
-[shell-config](shell-config/README.md)). See
+[shell-config](shell-config/00-INDEX.md)). See
 `nire/system/impermanence/declare-persistence-option.nix`'s own header (and
 [impermanence](impermanence.md)) for why that option has to be declared
 unconditionally even on hosts where nothing populates it.

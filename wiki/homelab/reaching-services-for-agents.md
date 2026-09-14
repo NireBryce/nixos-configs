@@ -96,4 +96,4 @@ the Service object, `serve.nix`'s endpoints (**both `tcp:443` and
 
 [reaching-services.md](reaching-services.md) ·
 [../categories/reverse-proxy-for-agents.md](../categories/reverse-proxy-for-agents.md)
-· [forgejo.md](forgejo.md) · [README.md](README.md)
+· [forgejo.md](forgejo.md) · [00-INDEX.md](00-INDEX.md)
