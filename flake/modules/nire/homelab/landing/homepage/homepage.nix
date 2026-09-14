@@ -72,11 +72,12 @@
 # homepage name, short door redirects and lands, unit active NRestarts=0,
 # 3002 loopback-only, glance gone; rendered in a real browser: resources,
 # weather, cards, both calendar views draw, the grid sunday-first with
-# today highlighted. Two live caveats, both recorded not hidden: card
-# status badges for git/grafana read failure until #298 (cube's tailscaled
-# serves no svc: DNS records; hard-IP curl reaches every VIP, so it is the
-# name layer only), and each calendar card shows an API-error band until
-# real feeds land in the sops value (placeholder URL 403s -- by design).
+# today highlighted. The card status badges for git/grafana read failure
+# until #298 was fixed 2026-09-14 (cube's tailscaled served no svc: DNS
+# records, a missing tailnet grant from tag:homelab-cube to its own svc:
+# destinations -- acl-diff-applied.hujson carries the grant and the
+# verification). One caveat stands: each calendar card shows an API-error
+# band until real feeds land in the sops value (placeholder URL 403s).
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
@@ -435,4 +436,4 @@
 # tailscaled+tailscale-serve restart on cube (the standing-advertisement
 # activation gap; tailscale-serve's Restart=on-failure from issue #267
 # absorbed the first racing attempt on its own) -> verified. The one
-# open failure mode found is #298, not homepage's.
+# failure mode found was #298, not homepage's -- fixed 2026-09-14.

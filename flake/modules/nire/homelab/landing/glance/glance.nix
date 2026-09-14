@@ -52,9 +52,10 @@
 # STATUS: re-added 2026-09-13; verification post-switch. The 2026-08-24
 # first-switch record (active, NRestarts=0, no fixes) is in git history.
 # One inherited caveat, not glance's: its monitor rows check
-# git/grafana through the proxy at svc: hostnames, so from cube they fail
-# while #298 stands (cube's tailscaled serves no svc: DNS records) --
-# homepage's cards carry the identical failure.
+# git/grafana through the proxy at svc: hostnames, which failed from cube
+# until #298 was fixed 2026-09-14 (a missing tailnet grant from
+# tag:homelab-cube to its own svc: destinations) -- homepage's cards
+# carried the identical failure.
 #
 # Widget content renders behind `/api/pages/home/content/`, not the initial
 # HTML -- a page 200 proves almost nothing; that endpoint is where to look

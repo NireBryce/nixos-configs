@@ -1,6 +1,6 @@
 # `landing` — `nire/homelab/landing/`
 
-_Last modified: 2026-09-12_
+_Last modified: 2026-09-14_
 
 [Homepage (gethomepage)](https://gethomepage.dev), the landing page for
 `nire-cube`: what's running, whether it's up, how the machine itself is
@@ -26,10 +26,15 @@ git/grafana are unaffected, `homepage-dashboard` is active with
 only. Rendered in a real browser: resources, weather, the service cards
 and both calendar views draw correctly, the month grid sunday-first with
 today highlighted. Two live caveats, both recorded rather than hidden:
-the service cards' status badges for git/grafana read failure until
-[#298](https://github.com/NireBryce/nixos-configs/issues/298) (cube's own
-tailscaled serves no `svc:` DNS records, so server-side checks from cube
-cannot resolve the person-URLs), and each calendar card shows a small
+the service cards' status badges for git/grafana read failure while
+[#298](https://github.com/NireBryce/nixos-configs/issues/298) stood (cube's
+own tailscaled served no `svc:` DNS records, so server-side checks from cube
+could not resolve the per-service hostnames) — **fixed 2026-09-14**, one ACL
+grant giving `tag:homelab-cube` access to its own `svc:` destinations, since
+a tagged device is owned by the tag and every `svc:` grant named
+`autogroup:members` as source. Verified the same hour: cube's netmap
+`ExtraRecords` repopulated and MagicDNS answers NOERROR from cube. The other
+caveat stands — each calendar card shows a small
 API-error band until real feeds land in the sops value (the placeholder
 URL 403s — by design, gone the moment it's filled).
 
@@ -222,8 +227,9 @@ lists), so the comparison is apples-to-apples: everything this page
 documents about homepage's calendar events, agenda view and
 service-card latency badges is what glance cannot do natively. Two
 known-inherited warts show in BOTH pages during the evaluation: the
-git/grafana status checks fail from cube while [#298](https://github.com/NireBryce/nixos-configs/issues/298)
-stands, and glance's calendar is a bare grid because it takes no feed
+git/grafana status checks failed from cube until
+[#298](https://github.com/NireBryce/nixos-configs/issues/298) was fixed
+2026-09-14, and glance's calendar is a bare grid because it takes no feed
 at all. The evaluation's end is one clean deletion (module, caddy
 vhosts, serve.nix endpoints, `svc-*.json`, ACL entries) — #291 in
 reverse.

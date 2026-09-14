@@ -24,10 +24,12 @@ not a tracker; this repo's GitHub issues are.
 - **#75** — remove `carapace-completer-read-fix.bash` once ble.sh or carapace
   fix the bug upstream. Check its own "how to check" steps before assuming
   it's still needed.
-- **#298** — cube's tailscaled serves no `svc:` MagicDNS records, so any
-  server-side fetch ON cube of a per-service hostname fails
-  (homepage/glance status checks included; hard-IP curl reaches every
-  VIP). Diagnosed 2026-09-12 in the issue; not fixed.
+- ~~**#298**~~ — **fixed 2026-09-14, closed.** Cube's tailscaled served no
+  `svc:` MagicDNS records, so any server-side fetch ON cube of a per-service
+  hostname failed (homepage/glance status checks included; hard-IP curl
+  reached every VIP). Diagnosed 2026-09-12; cause was a missing tailnet grant
+  from `tag:homelab-cube` to its own `svc:` destinations, every existing
+  grant having named `autogroup:members` as source.
 - **#299** — homepage's gcal secret iCal addresses (the one human input
   the calendar widgets still wait on; sops key `homepage-env`).
 
