@@ -29,7 +29,7 @@ that sibling; load the human page only for the *why*.
 | reach or debug a cube service | [homelab/reaching-services-for-agents.md](homelab/reaching-services-for-agents.md) |
 | write or tighten a wiki page | [styleguide-for-agents.md](styleguide-for-agents.md), skills `wiki-sync`, `trim-docs`, `fact-hygiene` |
 | write a module | [module-style-guide-for-agents.md](module-style-guide-for-agents.md) |
-| pick up an open, undiagnosed problem | [experiments/](experiments/) |
+| pick up an open, undiagnosed problem | [experiments/](experiments/), e.g. [durandal-auto-suspend-hang-for-agents.md](experiments/durandal-auto-suspend-hang-for-agents.md) |
 
 ## Cross-cutting pages
 
@@ -67,7 +67,7 @@ running but unfinished.
 
 [experiments/](experiments/) — one page per problem **instrumented but not yet
 diagnosed**, so "still measuring" is never read as settled config. Current:
-[durandal-auto-suspend-hang.md](experiments/durandal-auto-suspend-hang.md) —
+[durandal-auto-suspend-hang-for-agents.md](experiments/durandal-auto-suspend-hang-for-agents.md) —
 sleeps into S3 and will not wake without a PSU power cut. `suspend_stats`
 reports those as `success`; s2idle and the BIOS are ruled out; `amdgpu.runpm=0`
 and an on-disk probe are under test. On resolution the outcome moves to
