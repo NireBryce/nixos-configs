@@ -1,6 +1,6 @@
 # Open threads
 
-_Last modified: 2026-09-12_
+_Last modified: 2026-09-14_
 
 Todos, half-formed ideas, and things-to-look-into notes left in various
 corners of the tree, plus upstream bugs found here but not yet filed. None
@@ -258,13 +258,16 @@ bug; each is a decision someone might otherwise re-litigate from scratch.
   store; anything created through the web UI lives only in cube's sqlite db.
   That db is now backed up (`/var/lib/grafana` is one of #87's covered
   paths, via the sqlite-staging fix), so a UI-created dashboard survives a
-  restore — but it still isn't declared as code, so it still can't survive
-  a rebuild that reprovisions `_dashboards/`. "How to add a dashboard that
-  survives a rebuild" is now written up:
+  restore — but it isn't declared as code, so it can't survive a rebuild
+  that reprovisions `_dashboards/` until the export procedure is run on it.
+  That procedure —
   [monitoring.md](categories/monitoring.md#adding-a-dashboard-that-survives-a-rebuild)
-  — not yet verified against a real UI export, per its own caveat. Now
-  tracked as
-  **[#190](https://github.com/NireBryce/nixos-configs/issues/190)**.
+  — is verified end to end as of 2026-09-11: a UI-shaped dashboard
+  (random uid, numeric `id`, `${DS_PROMETHEUS}` variable) was carried
+  through the export into `_dashboards/` and then survived a real
+  `just switch` with no duplicate provisioned —
+  **[#190](https://github.com/NireBryce/nixos-configs/issues/190)**,
+  closed 2026-09-11.
 
 ## Not covered here
 

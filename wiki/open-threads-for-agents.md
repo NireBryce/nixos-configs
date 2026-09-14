@@ -1,7 +1,6 @@
 # Open threads, for agents
 
-_Last modified: 2026-09-12_
-_Sibling reviewed: 2026-09-12 — the source's only edit was the live `svc:` list (svc:glance → svc:homepage, issue #291's rollout), nothing this page restates_
+_Last modified: 2026-09-14_
 
 Condensed from [open-threads.md](open-threads.md), which keeps the closed
 items, the reasoning and the full accounts. Live threads only here.
@@ -22,9 +21,6 @@ not a tracker; this repo's GitHub issues are.
   10's "Why not sops" reasoning needs rewriting** — it relocates the PAT
   rather than removing it.
 - **#130** — extend backups past cube to durandal/tenacity/lysithea.
-- **#190** — a Grafana dashboard built in the UI lives only in cube's sqlite
-  db. Backed up, but still not declared, so it can't survive a rebuild that
-  reprovisions `_dashboards/`.
 - **#75** — remove `carapace-completer-read-fix.bash` once ble.sh or carapace
   fix the bug upstream. Check its own "how to check" steps before assuming
   it's still needed.
