@@ -55,7 +55,12 @@ the keyboard wake path; disabling it costs wake-on-keyboard).
 | `amdgpu.runpm=0` | [amdgpu-runpm-durandal.nix](../../flake/modules/nireHost/durandal/fixes/amdgpu-runpm-durandal.nix) | UNPROVEN. Needs a reboot. Revert by deleting the file. |
 | state probe | [suspend-probe-durandal.nix](../../flake/modules/nireHost/durandal/fixes/suspend-probe-durandal.nix) | writes `/var/log/suspend-probe/`, `sync`'d; `/var/log` is its own btrfs subvolume, outside the wiped root |
 
-Not live until `just switch`, and the kernel parameter until a reboot.
+Live since the 2026-09-14 02:24 reboot.
+
+**Confound:** that reboot also moved the kernel 6.18.43 → 6.18.51 (via a
+`flake.lock` update, not deliberately). Two variables changed together. Bites
+only if hangs **stop** — the cause is then unattributable; boot the previous
+generation once to separate them. If hangs continue, neither worked.
 
 ## Reading the dumps
 
