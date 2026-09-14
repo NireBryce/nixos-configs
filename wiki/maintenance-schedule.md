@@ -242,10 +242,11 @@ here, don't wrap this file in ciphertext to protect one row.
   to a *public* repo, so its ciphertext is permanently public; an Actions
   secret is never published. The general rule this follows is the one in
   "Why this file is plaintext" above — the consumer picks the store.
-- **Expiry**: fine-grained PATs must carry one. GitHub's maximum for a
-  custom date is 366 days; the creation UI defaults to 30. **Record the
-  actual date here once minted** — this entry deliberately does not guess
-  it.
+- **Expiry**: **2027-09-12** (minted 2026-09-13 as a custom date; GitHub's
+  maximum is 366 days and the creation UI defaults to 30). The creation UI
+  also offers "No expiration" for fine-grained tokens — chosen against:
+  a no-expiry token gets no expiry header, so the weekly check would
+  degrade to the "cannot tell" notice below forever.
 - **This one fails loudly, by construction.** Unlike everything else on
   this page, the workflow checks its own credential rather than relying on
   someone reading this file:
@@ -272,12 +273,16 @@ here, don't wrap this file in ciphertext to protect one row.
   creation. The symptom to recognise: that branch sitting ahead of
   `experimental` with no PR attached — exactly the state the 2026-09-07
   run left behind for the unrelated permission reason.
-- **Last checked**: 2026-09-08 — workflow wired and its preflight logic
-  verified against the live API (valid token → 200; revoked token → 401 →
-  hard fail; header parse confirmed against a simulated response, since no
-  expiring token was available to test with). **The secret itself did not
-  exist yet at that point**; until it does, every run fails at the
-  preflight step.
+- **Last checked**: 2026-09-13 — the secret exists and the pipeline is
+  verified end to end: a manual `workflow_dispatch` run passed preflight
+  (printing the expiry line above), pushed `update_flake_lock_action`, and
+  opened
+  [#308](https://github.com/NireBryce/nixos-configs/pull/308) with
+  `nix flake check + module tree` running on it — the PR-triggers-CI
+  property this PAT exists for, seen live for the first time. (2026-09-08:
+  preflight logic verified against the live API before the secret existed
+  — valid token → 200; revoked token → 401 → hard fail; header parse
+  confirmed against a simulated response.)
 
 ### 11. Atuin account encryption key
 
