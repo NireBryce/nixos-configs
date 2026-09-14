@@ -1,6 +1,6 @@
 # Wiki
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-13_
 
 A topic index over documentation that already exists scattered around this
 repo — `CLAUDE.md`, `flake/doc/`, `.agents/skills/`, stray `.md` files
@@ -140,11 +140,12 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   [reaching cube's services](homelab/reaching-services.md) (the URL map
   since everything moved behind one HTTPS hostname on 2026-08-24, and what
   to check when something doesn't answer),
-  [using the forge](homelab/forgejo.md), and
+  [using the forge](homelab/forgejo.md),
+  [using Grafana](homelab/grafana.md), and
   [creating go/ links](homelab/creating-golinks.md), plus
-  [pending setup](homelab/pending-setup.md) — the services that are running
-  but not finished (no Forgejo users, no go/ links, no backups). Grafana is
-  listed but not written up. A different tier from the category pages, and the one place a
+  [pending setup](homelab/pending-setup.md) — what's running but not
+  finished, now down to go/ links, homepage's calendar feeds, and the
+  mirror-or-origin question. A different tier from the category pages, and the one place a
   page may hold real content rather than links — because its source is
   often the running service's own help page, not a file in this repo.
 

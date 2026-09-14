@@ -39,7 +39,10 @@ own database. The repo-side counterpart is
    from the `grafana-admin-password` sops secret — **first start only**
    (Grafana `defaults.ini`: "can be changed before first start"), so it
    stops a rebuilt instance coming up on stock `admin`/`admin` but does
-   not manage the live password. **Cube not switched yet.**
+   not manage the live password. **Switched 2026-09-13**: secret present as `grafana:grafana` 400, live
+   `config.ini` references it, unit active `NRestarts=0`. **Never
+   consumed** — the admin user predates it, so only a fresh instance
+   would read it.
 4. **Homepage's calendar feeds** (#291, 2026-09-12) — plumbing all landed;
    the gcal **secret iCal addresses** don't exist yet (IDs deliberately
    unassigned). Until filled in the calendars render bare-grid + empty

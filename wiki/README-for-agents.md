@@ -1,6 +1,6 @@
 # Wiki index, for agents
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-13_
 
 Condensed from [README.md](README.md), which keeps the orientation prose and
 the "why a link layer, not a rewrite" reasoning. Routing only here.
@@ -57,7 +57,8 @@ sibling holds resolved incidents and is rarely what you want.
 ## Homelab (usage, not config)
 
 [homelab/README.md](homelab/README.md) — reaching
-services, the forge, go/ links, and what's running but unfinished.
+services, the forge, [Grafana](homelab/grafana.md), go/ links, and what's
+running but unfinished.
 
 ## Rotting
 

@@ -193,9 +193,14 @@ here, don't wrap this file in ciphertext to protect one row.
   reset-admin-password` from the sops file per activation — the shape
   `forgejo-admin-bootstrap` uses for item 7. Deliberately not done: it
   overwrites a hand-set password on every switch.
-- **Last checked**: 2026-09-13 (live password changed by Elly; the sops
-  secret exists and cube's toplevel builds with it, but **cube has not been
-  switched**, so the first-start path has never actually run).
+- **Last checked**: 2026-09-13. Live password changed by Elly. Cube
+  **switched** the same day and the deployment was checked on the host:
+  `/run/secrets/grafana-admin-password` is `grafana:grafana` mode `400`,
+  the live `config.ini` references it, `grafana.service` is active with
+  `NRestarts=0`, and `/run/current-system` matches what `experimental`
+  evaluates to. **The value has still never been consumed** — cube's admin
+  user predates it, so Grafana has not read the file and only a fresh
+  instance would.
 
 ### 9. Syncthing device certificates
 
