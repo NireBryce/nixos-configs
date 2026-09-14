@@ -34,12 +34,21 @@
 # history
 #
 # Floated both DeterminateSystems actions on `@main` and used GITHUB_TOKEN
-# until 2026-09-08. The first scheduled run (2026-09-07, the only run ever)
-# updated the lock and pushed `update_flake_lock_action` fine, then failed
-# at PR creation with "GitHub Actions is not permitted to create or approve
-# pull requests"; no PR was ever opened. The header at the time documented
-# the CI-doesn't-run caveat as accepted, which presumed a PR got opened at
-# all -- it never did.
+# until 2026-09-08. The first scheduled run (2026-09-07, then the only run
+# ever) updated the lock and pushed `update_flake_lock_action` fine, then
+# failed at PR creation with "GitHub Actions is not permitted to create or
+# approve pull requests"; no PR was opened by it. The header at the time
+# documented the CI-doesn't-run caveat as accepted, which presumed a PR got
+# opened at all -- it never did.
+#
+# 2026-09-13 -- first successful run, first PR: FLAKE_LOCK_TOKEN existed by
+# then, and a manual workflow_dispatch passed preflight (printing the
+# expiry: 2027-09-12), pushed `update_flake_lock_action`, and opened #308
+# with `nix flake check + module tree` running on it -- the
+# PR-triggers-CI property in "what the PAT buys", seen live. So both
+# "only run ever" and "no PR was ever opened" above are true only up to
+# this date. Wiki side: wiki/maintenance-schedule.md item 10 carries the
+# expiry; issue #219 tracked the whole mint-store-verify loop.
 
 name: update-flake-lock
 
