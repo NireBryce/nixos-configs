@@ -1,11 +1,13 @@
 # `shell-config` — `nire/shell-config/`
 
-_Last modified: 2026-09-01_
+_Last modified: 2026-09-14_
 
 ## Contents
 
 - [What's in it](#whats-in-it)
 - [The `home.file`/`home.sessionPath` concatenation trap, live in this category](#the-homefilehomesessionpath-concatenation-trap-live-in-this-category)
+- [`SSH_ASKPASS` is unset for sessions with no display](#ssh_askpass-is-unset-for-sessions-with-no-display)
+- [Comments inside a `''` string ship into the dotfile](#comments-inside-a--string-ship-into-the-dotfile)
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
@@ -55,6 +57,41 @@ Home Manager options merge silently across every module that touches them,
 so two modules writing what looks like the same file double it rather than
 one overriding the other. Worth knowing before adding a second thing that
 writes to `.blerc`, `.zshrc`, or similar in this category.
+
+## `SSH_ASKPASS` is unset for sessions with no display
+
+Both `bash.nix` and `zsh.nix` open their init with the same three lines:
+if neither `DISPLAY` nor `WAYLAND_DISPLAY` is set, `unset SSH_ASKPASS`.
+
+nixpkgs' `programs.ssh` module exports `SSH_ASKPASS` globally whenever
+`services.xserver.enable` is true — which `kde-desktop` makes true on
+durandal and cube — and offers no way to scope it to sessions that actually
+have a display. Over plain SSH, anything that reaches for it (`git push`
+against an HTTPS remote, say) crashes instead of falling back to a terminal
+prompt, because `ksshaskpass` needs a Qt/X11 platform that isn't there.
+Found 2026-08-26 on cube: `git push` died with `ksshaskpass died of signal 6`
+before it ever asked for a username.
+
+It is a no-op on a host that never had the variable set (tenacity, which
+imports no xserver-enabling desktop) and in a real graphical session. The
+duplication across the two shells is deliberate — they are separate init
+files, and neither sources the other.
+
+## Comments inside a `''` string ship into the dotfile
+
+`#` inside a Nix `''` string is **shell text, not a Nix comment**: it is
+emitted verbatim into whatever file the string becomes, and a reader of
+`~/.bashrc` sees it on every shell start. This category is where that
+matters most, since nearly every module here generates a dotfile.
+
+It had gone wrong twice by 2026-09-14: once historically, when fourteen
+lines of maintenance notes shipped into `~/.zshrc` (the incident
+`module-style-guide.md` records), and again when the notes accumulated
+back — `~/.bashrc` reached 44 comment lines out of 107 and `~/.blerc` 100
+out of 121, including dated incident narrative and nixpkgs-module
+archaeology. **Rationale for the `.nix` editor goes above the string;
+inside it, keep only what a person reading the generated dotfile needs.**
+`zsh.nix`'s aliases block carries a standing note to this effect.
 
 ## Imported by
 

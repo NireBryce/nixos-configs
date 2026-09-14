@@ -171,18 +171,17 @@
                 ## .zshrc
                 #! FOOTGUN: if you comment out a nix variable pointing to .filecontents, '#' only comments out the first line
                 initContent = lib.mkMerge [
+                    # Same SSH_ASKPASS unset as bash.nix's initExtra, for the
+                    # same reason: nixpkgs' programs.ssh exports it globally
+                    # wherever services.xserver.enable is true, and over plain
+                    # SSH ksshaskpass crashes instead of falling back to a
+                    # terminal prompt. wiki/categories/shell-config/README.md
+                    # has the incident. Kept out here rather than inside the
+                    # string, per this file's own note below the aliases.
                     (lib.mkBefore ''
                     zmodload zsh/zprof                                # zsh profiler
 
-                    # nixpkgs' programs.ssh module exports SSH_ASKPASS globally
-                    # whenever services.xserver.enable is true (kde-desktop,
-                    # so durandal and cube), with no way to scope it to
-                    # sessions that have a display. Over plain SSH anything
-                    # using it crashes instead of falling back to a terminal
-                    # prompt -- ksshaskpass needs a Qt/X11 platform that isn't
-                    # there. Same fix as bash.nix's initExtra, which has the
-                    # 2026-08-26 incident. Harmless no-op on a host that never
-                    # had it set, or a real graphical session.
+                    # No display: ksshaskpass would crash, prompt instead.
                     if [[ -z "''${DISPLAY:-}''${WAYLAND_DISPLAY:-}" ]]; then
                         unset SSH_ASKPASS
                     fi
