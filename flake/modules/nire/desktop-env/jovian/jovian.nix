@@ -82,61 +82,6 @@
                 };
             };
 
-            # DELETE THIS OVERLAY once nixpkgs carries handheld-daemon >= 4.1.12.
-            #
-            # hhd 4.1.10 -- what nixpkgs pins as of the 2026-08-07 bump -- opens
-            # src/hhd/__main__.py with `import pkg_resources`; setuptools 81
-            # deprecated that module and 83 removed it outright, and the
-            # setuptools in the store ships only _distutils_hack,
-            # distutils-precedence.pth and setuptools itself. So hhd exits 1
-            # on startup and systemd restart-loops it every 10s.
-            #
-            # Not a config bug and not a missing dependency: nixpkgs lists
-            # setuptools in both build-system and dependencies, and hhd's own
-            # pyproject.toml asks for setuptools>=65.5.0 expecting pkg_resources
-            # to come with it -- the module is gone from setuptools, so neither
-            # helps.
-            #
-            # The tell is that it worked before the nixpkgs bump: 26.05 carried
-            # a setuptools that still had pkg_resources, and the journal has hhd
-            # running its full plugin set (adjustor_smu, adjustor_ppd,
-            # gpd_win_controllers, powerbuttond, controller_rgb) right up to
-            # the reboot on 2026-08-10. Nothing to do with the stage-1
-            # migration -- hhd is an ordinary stage-2 service.
-            #
-            # What is below is upstream's own fix, backported verbatim rather
-            # than invented here: hhd master (4.1.12) replaced pkg_resources
-            # with importlib.metadata and dropped setuptools from its runtime
-            # dependencies entirely, so every replacement here is one of
-            # theirs and this deletes cleanly when nixpkgs catches up, instead
-            # of having to be reconciled.
-            #
-            # src/hhd/, not hhd/: pyproject.toml says
-            # `[tool.setuptools.packages.find] where = ["src"]`, so the package
-            # sits under src/ in the tree even though it imports as `hhd`.
-            #
-            # --replace-fail throughout, so a version that no longer matches
-            # fails the build loudly rather than silently patching nothing.
-            nixpkgs.overlays = [
-                (_: prev: {
-                    handheld-daemon = prev.handheld-daemon.overridePythonAttrs (old: {
-                        postPatch = (old.postPatch or "") + ''
-                            substituteInPlace src/hhd/__main__.py \
-                                --replace-fail 'import pkg_resources' \
-                                               'from importlib.metadata import entry_points' \
-                                --replace-fail 'pkg_resources.iter_entry_points("hhd.plugins")' \
-                                               'entry_points(group="hhd.plugins")' \
-                                --replace-fail 'pkg_resources.iter_entry_points("hhd.i18n")' \
-                                               'entry_points(group="hhd.i18n")' \
-                                --replace-fail 'autodetect.resolve()' \
-                                               'autodetect.load()' \
-                                --replace-fail 'register.resolve()' \
-                                               'register.load()'
-                        '';
-                    });
-                })
-            ];
-
             # needed for tdp adjustor
             boot.extraModulePackages = [ config.boot.kernelPackages.acpi_call ];
 
@@ -190,3 +135,22 @@
 # more examples:
 # https://github.com/gradientvera/GradientOS/blob/adcc4892703dc2129fc8f16d0bce56c2146cd788/mixins/jovian-decky-loader.nix#L5
 # https://github.com/ciarandg/portfolio/blob/a45bfbd2ba95148a6df6cfcbba62b3e814364d4c/content/posts/nixos-steam-box/index.md?plain=1#L81
+#
+# ── history ─────────────────────────────────────────────────────────────────
+#
+# 2026-08-10 to 2026-09-13 -- the file carried an overlay backporting hhd
+# master's fix onto nixpkgs' handheld-daemon 4.1.10: hhd opened
+# src/hhd/__main__.py with `import pkg_resources`, setuptools 81 deprecated
+# that module and 83 removed it outright, so hhd exited 1 on startup and
+# systemd restart-looped it every 10s. Not a config bug and not a missing
+# dependency -- the tell was that it worked before the 2026-08-07 nixpkgs
+# bump: 26.05's setuptools still had pkg_resources, and the journal had hhd
+# running its full plugin set right up to the 2026-08-10 reboot. The
+# overlay replaced five strings with upstream 4.1.12's own
+# importlib.metadata versions, --replace-fail throughout so a future
+# mismatch would fail the build loudly. That failure arrived on schedule:
+# nixpkgs carried 4.1.12 as of the 2026-09-11 lock bump (#308), the first
+# --replace-fail matched nothing, and the tenacity build died in patchPhase
+# -- CI had evaluated green, exactly the §§36–37 gap the pre-merge build
+# exists for. Overlay deleted per its own instruction; upstream's fix is
+# now in the package itself.
