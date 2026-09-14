@@ -1,6 +1,6 @@
 # `reverse-proxy` — `nire/homelab/reverse-proxy/`
 
-_Last modified: 2026-09-12_
+_Last modified: 2026-09-13_
 
 [Caddy](https://caddyserver.com/), one tailnet-only HTTPS front door for
 every web service on `nire-cube`. Added 2026-08-24, cube-only; nested under
@@ -36,7 +36,9 @@ ask tailscaled for the cert" detection, leaving those names pointed at
 public Let's Encrypt, which can never issue for a tailnet name. Every
 `.ts.net` handshake died with `SSL_ERROR_INTERNAL_ERROR_ALERT`, including
 `ts-cube.moose-micro.ts.net`, which no commit had touched. `caddy.nix`'s
-header has the full mechanism, read out of caddy 2.11.4's source; the fix
+`tailscaleCert` binding carries the mechanism with `file:line` references
+into caddy 2.11.4's source; [§47](../lessons-learned/47-explicit-setting-disables-implicit-one.md)
+is the full account. The fix
 is naming `get_certificate tailscale` on each `.ts.net` vhost explicitly
 rather than relying on the detection. **Runtime-verified on hardware
 2026-09-11**: from tenacity, every name returns validated TLS
@@ -56,7 +58,13 @@ The bare-name vhosts come in two flavours, and the difference matters:
 - **`https://git`** and friends show `SEC_ERROR_UNKNOWN_ISSUER`, and that
   is `tls internal` working as designed, not a leftover bug — they serve
   Caddy's own local CA. They exist to catch browsers that force HTTPS
-  before the `http://` redirect gets a chance. Short of trusting that CA on
+  before the `http://` redirect gets a chance: such a browser sends TLS SNI
+  = the literal string `git`, **not** the FQDN, even though the OS resolver
+  completes the bare name for DNS purposes via `tailscale0`'s search domain
+  — SNI is fixed before that completion is visible downstream. With no vhost
+  matching that SNI, Caddy falls back to trying for a publicly-issued cert
+  for `git`, which can never succeed (confirmed live: `curl -v https://git/`
+  returned a raw `TLSv1.3 (IN), TLS alert, internal error (592)`). Short of trusting that CA on
   every client there is no improving them, and they were deliberately kept
   rather than dropped once `http://` worked.
 

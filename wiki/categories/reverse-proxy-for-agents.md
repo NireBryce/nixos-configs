@@ -1,6 +1,6 @@
 # `reverse-proxy`, for agents
 
-_Last modified: 2026-09-12_
+_Last modified: 2026-09-13_
 
 Condensed from [reverse-proxy.md](reverse-proxy.md), which keeps the
 reasoning, the verification narrative and the links out. Facts only here.
@@ -45,6 +45,11 @@ redirects; `https://<bare name>` serves Caddy's local CA and shows
 - **`handle_path` rejects a named matcher** — inline path matcher only.
 - **Bare-name vhosts must spell out `http://`**, or Caddy tries to certify a
   non-`.ts.net` name and falls through to its internal CA.
+- **A `https://<bare name>` request carries SNI = the literal bare name**,
+  not the FQDN the resolver completes it to. Without a vhost matching that
+  SNI, Caddy tries for a public cert on an unissuable name and the handshake
+  dies (`TLS alert, internal error (592)`); the `tls internal` twins exist
+  for exactly that.
 - **A new `svc:` port needs declaring twice** — in the Service object and in
   `serve.nix`. `tcp:443` alone means `http://<name>` never answers.
 - **Creating a `svc:` needs `systemctl restart tailscaled`, then

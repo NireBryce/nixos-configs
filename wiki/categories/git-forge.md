@@ -1,6 +1,6 @@
 # `git-forge` — `nire/homelab/git-forge/`
 
-_Last modified: 2026-09-12_
+_Last modified: 2026-09-13_
 
 Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only; nested under
 the `homelab` umbrella since 2026-08-27 (name unaffected). As of 2026-09-07
@@ -72,7 +72,8 @@ Forgejo has its own Caddy vhost now (`git.moose-micro.ts.net`, reached via
 its Tailscale Services name and a raw TCP forward -- see
 `tailscale-services/serve.nix`), so it's a plain `reverse_proxy` with no
 path prefix to strip — the `handle`/`handle_path` asymmetry with Grafana
-that this used to require is retired, kept as history in `caddy.nix`.
+that this used to require is retired, kept as history in
+[reverse-proxy-history.md](reverse-proxy-history.md#the-retired-routes-as-they-were).
 
 It bound `0.0.0.0` briefly at first — [git-forge-history.md](git-forge-history.md)
 has that window and what it fixed quietly along the way.

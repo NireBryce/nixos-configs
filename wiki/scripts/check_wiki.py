@@ -744,6 +744,10 @@ def check_secrets(root):
 
 
 CADDY_NIX = pathlib.Path('flake/modules/nire/homelab/reverse-proxy/caddy/caddy.nix')
+# Where the retired path-prefix routes live since 2026-09-13 -- moved out of
+# caddy.nix's history section, still the record of what `/grafana/` and
+# `/git/` were.
+CADDY_RETIRED = pathlib.Path('wiki/categories/reverse-proxy-history.md')
 # `@grafana path /grafana /grafana/*` then plain `handle` -- Grafana serves
 # UNDER the prefix (serve_from_sub_path) and needs it left on. The `\1`
 # backreference is what `caddy adapt` itself would reject a mismatched pair
@@ -766,13 +770,24 @@ def caddy_routes(root):
     Caddyfile string rather than assumed (the "read the built artifact,
     don't guess" reasoning lessons-learned.md §41 is about, applied statically
     here instead of via `caddy adapt`). Cube-only and there's exactly one
-    caddy.nix, so no need for find_categories-style generality."""
-    p = root / CADDY_NIX
-    if not p.exists():
-        return {}
-    text = p.read_text()
-    routes = {name: False for name in CADDY_KEPT_PATH.findall(text)}
-    routes.update({name: True for name in CADDY_STRIPPED_PATH.findall(text)})
+    caddy.nix, so no need for find_categories-style generality.
+
+    CADDY_RETIRED is read for the same names because the wiki legitimately
+    documents routes that are gone (`/grafana/`, `/git/`, retired 2026-09-07)
+    and the mention check would otherwise flag every one of them. Those
+    blocks used to sit in caddy.nix's own history section, which is why this
+    passed before they moved to the wiki 2026-09-13 -- the set of names has
+    not changed, only where the file holding them lives. This has never
+    distinguished live from retired: it catches a doc naming a prefix that
+    exists nowhere at all, which is the check's whole claim."""
+    routes = {}
+    for rel in (CADDY_NIX, CADDY_RETIRED):
+        p = root / rel
+        if not p.exists():
+            continue
+        text = p.read_text()
+        routes.update({name: False for name in CADDY_KEPT_PATH.findall(text)})
+        routes.update({name: True for name in CADDY_STRIPPED_PATH.findall(text)})
     return routes
 
 

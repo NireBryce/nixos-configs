@@ -1,6 +1,6 @@
 # Reaching cube's services, for agents
 
-_Last modified: 2026-09-12_
+_Last modified: 2026-09-13_
 
 Condensed from [reaching-services.md](reaching-services.md), which keeps the
 reasoning, the retired-URL history and the verification record. Facts only
@@ -75,6 +75,10 @@ Ordered by what is most often actually wrong.
    name goes dark at once while cube's own name keeps working.
 7. `journalctl -u <unit> -n 50`. **Caddy's log level is `ERROR` by default**,
    which hides the warning it emits when `tailscaled` declines a certificate.
+
+**The first request after a `svc:` name is activated may return `000`**
+with a failed handshake — Caddy is still fetching that name's certificate
+from `tailscaled`. Retry; not a failure state.
 
 **A TLS error is not a dead service.**
 `SSL_ERROR_INTERNAL_ERROR_ALERT` on a `.ts.net` name means Caddy has no
