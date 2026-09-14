@@ -1,6 +1,6 @@
 # Wiki
 
-_Last modified: 2026-09-13_
+_Last modified: 2026-09-14_
 
 A topic index over documentation that already exists scattered around this
 repo — `CLAUDE.md`, `flake/doc/`, `.agents/skills/`, stray `.md` files
@@ -71,6 +71,7 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
 | give a service its own Tailscale Services (`svc:`) hostname | [categories/reverse-proxy.md](categories/reverse-proxy.md), skill [`new-tailscale-service`](../.agents/skills/new-tailscale-service/SKILL.md) |
 | add a new host, or format its disk for impermanence | [disk-formatting.md](disk-formatting.md), skill [`new-host-config`](../.agents/skills/new-host-config/SKILL.md) |
 | check what key/credential expiry is coming due | [maintenance-schedule.md](maintenance-schedule.md), skill [`maintenance-schedule`](../.agents/skills/maintenance-schedule/SKILL.md) |
+| run the fleet's periodic upkeep — lock PR, deploys, store hygiene | [maintenance.md](maintenance.md) |
 
 ## Pages
 
@@ -118,6 +119,9 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   credentials, and certificates that have an actual expiry, rotation
   cadence, or silent-breakage property; tended by skill
   [`maintenance-schedule`](../.agents/skills/maintenance-schedule/SKILL.md).
+- [Fleet maintenance](maintenance.md) — the recurring upkeep beyond
+  credentials: the weekly flake.lock PR, deploying and the verification
+  habit around it, and store hygiene (what runs itself, what doesn't).
 
 ### Category reference (configuration)
 
