@@ -27,6 +27,7 @@ that sibling; load the human page only for the *why*.
 | reach or debug a cube service | [homelab/reaching-services-for-agents.md](homelab/reaching-services-for-agents.md) |
 | write or tighten a wiki page | [styleguide-for-agents.md](styleguide-for-agents.md), skills `wiki-sync`, `trim-docs`, `fact-hygiene` |
 | write a module | [module-style-guide-for-agents.md](module-style-guide-for-agents.md) |
+| pick up an open, undiagnosed problem | [experiments/](experiments/) |
 
 ## Cross-cutting pages
 
@@ -59,6 +60,15 @@ sibling holds resolved incidents and is rarely what you want.
 [homelab/README.md](homelab/README.md) — reaching
 services, the forge, [Grafana](homelab/grafana.md), go/ links, and what's
 running but unfinished.
+
+## Experiments (open questions)
+
+[experiments/](experiments/) — one page per problem **instrumented but not yet
+diagnosed**, so "still measuring" is never read as settled config. Current:
+[durandal-auto-suspend-hang.md](experiments/durandal-auto-suspend-hang.md) —
+hangs on PowerDevil's idle timeout, fine when a person asks; s2idle and an
+on-disk state probe under test. On resolution the outcome moves to
+[lessons-learned.md](lessons-learned.md) or the category page and the page goes.
 
 ## Rotting
 
