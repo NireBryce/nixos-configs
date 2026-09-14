@@ -25,127 +25,82 @@
             # `source ble.sh --attach=none` early in initContent, and
             # `ble-attach` at the end.
 
+            # WHY THE PIECES BELOW ARE SHAPED THE WAY THEY ARE. This is the
+            # `.nix` editor's copy; `#` inside the `''` string is shell text
+            # that ships into ~/.blerc verbatim, so the string keeps only what
+            # a reader of the dotfile needs. Full account of all of it, with
+            # the upstream bug found along the way:
+            # wiki/categories/shell-config/blesh.md.
+            #
+            #   - `complete_auto_menu` MUST NOT be set. It reads like a boolean
+            #     and is an idle DELAY (`until=$((_ble_idle_clock_start +
+            #     bleopt_complete_auto_menu))`, lib/core-complete.sh), fired
+            #     from ble/widget/self-insert -- ordinary typing. Set to 1 with
+            #     fzf-menu imported, fzf took over the terminal on every
+            #     keystroke on real hardware. The inline grey suggestion that
+            #     makes it feel live is complete_auto_complete, on by default.
+            #   - bash-completion imports BEFORE the fzf integrations, per
+            #     ble.sh's own note.
+            #   - The atuin C-r rebind must be a `-C` callback on the fzf
+            #     import, not ble-bind lines in this file: `-d` defers loading
+            #     to idle, so fzf-key-bindings lands after .bashrc, after
+            #     atuin's readline bind, after ble-attach -- fzf wins by
+            #     arriving last, and -C is the only hook that follows it. It
+            #     REBINDS rather than unbinds because ble.sh replaces readline
+            #     outright, so an unbound key does nothing rather than falling
+            #     back. Two -C options, not one with an embedded newline: the
+            #     option repeats (`[-C CALLBACK]+`) and each callback stays one
+            #     command. If C-r ever goes dead, check that __atuin_history
+            #     still takes --keymap-mode.
+            #   - C-v is unbound through `blehook ATTACH`, not a top-level
+            #     ble-bind: .blerc is sourced by ble/base/load-rcfile, which
+            #     runs BEFORE ble-attach calls ble/decode/attach -- the step
+            #     that lazily loads keymap/emacs.sh and installs C-v's default
+            #     quoted-insert binding. A plain call here would be overwritten.
+            #     Read from ble.sh's source, not verified against a live menu.
             home.file.".blerc".text = ''
                 # ─── completion behaviour ────────────────────────────────────
-                # Most of the zsh-like behaviour is already ble.sh's default:
-                #   complete_auto_complete=1   inline grey suggestion (like zsh-autosuggestions)
-                #   complete_menu_complete=1   TAB cycles through candidates
-                #   complete_menu_filter=1     typing narrows the open menu
-                #   complete_ambiguous=1       ambiguous/partial matching
-                #   complete_menu_color=on     coloured candidates
-                # so only the gaps are set here.
-
-                # complete_auto_menu is NOT set, and must not be set to 1.
+                # ble.sh already defaults to most of the zsh-like behaviour
+                # (inline suggestion, TAB menu, narrowing, ambiguous matching,
+                # coloured candidates); only the gaps are set here.
                 #
-                # It reads like a boolean and is an idle *delay*. ble.sh uses it
-                # as `until=$((_ble_idle_clock_start + bleopt_complete_auto_menu))`
-                # (lib/core-complete.sh), and the surrounding case fires on
-                # ble/widget/self-insert -- ordinary typing. So `=1` means "open
-                # the menu one tick after every character", and with
-                # fzf-menu.bash imported below, that menu is fzf. This file did
-                # set it to 1, meaning "on", the way zsh-autocomplete works on
-                # the zsh side; on the hardware fzf took over the terminal on
-                # every keystroke, as though TAB were held down. Unset, the
-                # menu is TAB-driven -- the zsh-fzf-tab behaviour, which is
-                # what pairing it with fzf-menu wanted in the first place.
-                #
-                # The inline grey suggestion that made zsh-autocomplete feel
-                # live is a different option, complete_auto_complete, already
-                # on by default.
-                #
-                # If a delay is ever genuinely wanted, it is a number of
-                # milliseconds and wants to be in the hundreds or thousands --
-                # and check it against fzf-menu, which renders full-screen.
+                # NOTE: do not set complete_auto_menu -- it is an idle delay,
+                # not a boolean, and =1 opens the fzf menu on every keystroke.
 
                 # Candidates with their descriptions alongside, like zsh's
                 # completion descriptions.
                 bleopt complete_menu_style=desc
 
                 # ─── completion sources ──────────────────────────────────────
-                # bash-completion must be imported *before* the fzf integrations,
-                # per ble.sh's own note. The contrib integration is the right way
-                # in (the old commented-out line here sourced etc/bash_completion
-                # directly).
+                # bash-completion first: the fzf integrations below expect it.
                 ble-import -d ${pkgs.blesh}/share/blesh/contrib/integration/bash-completion.bash
 
                 # nix/nixos/nix-shell completions -- the counterpart to
                 # nix-zsh-completions on the zsh side.
                 ble-import -d ${pkgs.blesh}/share/blesh/contrib/integration/nix-completion.bash
 
-                # carapace's own bash completer only emits plain candidate
-                # words (bash's COMPREPLY has no description slot); this
-                # advises it to pull real descriptions from a separate
-                # carapace mode and feed them through ble.sh's own candidate
-                # list instead. See carapace-desc.bash for the full mechanism
-                # and its 2026-08-22 caveats -- checked against ble.sh's
-                # source, not yet against the live menu.
+                # Real descriptions for carapace candidates, which its own
+                # bash completer cannot emit. See carapace-desc.bash.
                 ble-import -d ${carapaceDescBash}
 
                 # ─── fzf ─────────────────────────────────────────────────────
                 _ble_contrib_fzf_base=${pkgs.fzf}/share/fzf
 
-                # fzf-menu renders the completion menu through fzf, which is the
-                # closest equivalent to the zsh config's zsh-fzf-tab.
+                # The completion menu through fzf: the zsh-fzf-tab equivalent.
                 ble-import -d ${pkgs.blesh}/share/blesh/contrib/integration/fzf-menu.bash
                 ble-import -d ${pkgs.blesh}/share/blesh/contrib/integration/fzf-completion.bash
 
-                # Ctrl-R is atuin's. fzf-key-bindings keeps Ctrl-T and Alt-C.
-                #
-                # This has to be a -C callback on the import, not a couple of
-                # ble-bind lines further down this file, because -d means
-                # "register for later loading in idle time" -- ble.sh's own
-                # --help -- so the module lands *after* everything in .bashrc,
-                # including ble-attach. The order actually is:
-                #
-                #   .bashrc:35  ble.sh sourced, this file registers the deferred import
-                #   .bashrc:49  atuin binds C-r, via readline `bind -m`
-                #   .bashrc:75  ble-attach imports atuin's readline binding
-                #   idle        fzf-key-bindings loads and overwrites C-r
-                #
-                # fzf wins by arriving last. -C runs "when all of SCRIPTFILEs
-                # are loaded", so it is the only hook that reliably follows it.
-                #
-                # It rebinds rather than unbinds: ble.sh replaces readline
-                # outright, so a key with no entry in its keymap does nothing --
-                # removing fzf's binding would leave Ctrl-R dead rather than
-                # falling back to atuin's.
-                #
-                # The commands are what atuin's own atuin-bind maps
-                # atuin-search-emacs and atuin-search-viins to; atuin binds
-                # through readline rather than ble-bind, so there is no widget
-                # name to reuse. If Ctrl-R ever starts doing nothing, check
-                # that __atuin_history still takes --keymap-mode.
-                # Two -C options rather than one carrying an embedded newline:
-                # ble.sh's usage line is `[-C CALLBACK|--callback=CALLBACK]+`,
-                # so the option repeats, and each callback stays a single
-                # command.
+                # Ctrl-R stays atuin's; fzf-key-bindings keeps Ctrl-T, Alt-C.
+                # The -C callbacks are load-bearing -- see blesh.nix.
                 ble-import -d \
                     -C 'ble-bind -m emacs   -x C-r "__atuin_history --keymap-mode=emacs"' \
                     -C 'ble-bind -m vi_imap -x C-r "__atuin_history --keymap-mode=vim-insert"' \
                     ${pkgs.blesh}/share/blesh/contrib/integration/fzf-key-bindings.bash
 
                 # ─── keybindings ─────────────────────────────────────────────
-                # Both insert keymaps this config actually reaches (emacs is
-                # bash's default; vi_imap would apply if vi mode were ever
-                # turned on -- it isn't, see bash.nix) bind C-v to
-                # quoted-insert by default (keymap/emacs.sh, keymap/vi.sh):
-                # insert the next raw keystroke verbatim. Muscle-memory
-                # "paste" reflexes hit it constantly and it isn't wanted here.
-                # (vi's *other* keymaps -- vi_nmap/vi_omap/vi_xmap -- bind C-v
-                # to blockwise-visual-mode instead; unrelated, left alone.)
-                #
-                # Can't unbind this with a plain top-level ble-bind call in
-                # this file: .blerc is sourced by ble/base/load-rcfile, which
-                # runs *before* ble-attach calls ble/decode/attach -- the step
-                # that lazily loads keymap/emacs.sh and installs its default
-                # C-v binding in the first place (both in ble.sh's own
-                # source). A plain call here would run first and just get
-                # overwritten. `blehook ATTACH` fires from inside ble-attach
-                # itself, right after ble/decode/attach returns -- confirmed
-                # against ble.sh's source, not yet against a live shell -- so
-                # unlike the atuin rebind above (working around a *deferred*
-                # `-d` import that lands even later than that) this needs no
-                # ble-import trick, just the hook ble.sh already runs for it.
+                # C-v is quoted-insert by default in both insert keymaps, and
+                # muscle-memory "paste" hits it constantly. Unbound via ATTACH
+                # because .blerc is sourced before the keymaps load.
                 blehook ATTACH+='ble-bind -m emacs -f C-v -; ble-bind -m vi_imap -f C-v -'
             '';
         };
