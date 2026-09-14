@@ -15,6 +15,7 @@ not Funnel. Build side: [reverse-proxy](../categories/reverse-proxy.md).
 | What | Full name | Short |
 |---|---|---|
 | homepage (landing page) | `https://homepage.moose-micro.ts.net/` | `http://homepage/` |
+| glance (back 2026-09-13, landing evaluation) | `https://glance.moose-micro.ts.net/` | `http://glance/` |
 | Grafana | `https://grafana.moose-micro.ts.net/` | `http://grafana/` |
 | Forgejo | `https://git.moose-micro.ts.net/` | `http://git/` |
 | cube itself (also the landing page) | `https://ts-cube.moose-micro.ts.net/` | `http://ts-cube/` |
@@ -29,9 +30,10 @@ resolve and cube's own root is the working door.
 
 Retired and 404/dead: `http://ts-cube:3000/` and `:3001/` (2026-08-24, both
 apps moved to loopback); `.../grafana/` and `.../git/` path prefixes
-(2026-09-07); `https://glance.moose-micro.ts.net/` and `http://glance/`
-(2026-09-12, glance → homepage). Port URLs are still dead for
-homepage-dashboard too: it binds loopback, reachable only through Caddy.
+(2026-09-07); glance's own name died 2026-09-12 with the homepage swap and
+came back 2026-09-13 for the evaluation (glance on port **3004** now, not
+3002 — homepage kept that slot). Port URLs are still dead for every app:
+they all bind loopback, reachable only through Caddy.
 
 ## Certificates
 
@@ -65,7 +67,7 @@ Ordered by what is most often actually wrong.
    not in the app.
 6. Over ssh:
    ```sh
-   systemctl status caddy grafana forgejo homepage-dashboard tailscale-serve
+   systemctl status caddy grafana forgejo homepage-dashboard glance tailscale-serve
    systemctl list-units --state=failed
    ```
    **Look at `NRestarts`, not just `active`** — a crash-loop reports `active`

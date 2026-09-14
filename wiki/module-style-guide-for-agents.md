@@ -1,6 +1,6 @@
 # Module style guide, for agents
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-13_
 
 Condensed from [module-style-guide.md](module-style-guide.md), which keeps
 the reasoning and the declined alternatives. Rules only.
@@ -16,9 +16,9 @@ the `counts` subcheck of `wiki/scripts/check_wiki.py` watches — moved here
 
 | What | Files |
 |---|---|
-| total `.nix` files under `flake/modules/` | 262 |
-| module header (`moduleName = lib.removeSuffix ...`) | 212 |
-| `# # description` as first body line | 20 |
+| total `.nix` files under `flake/modules/` | 263 |
+| module header (`moduleName = lib.removeSuffix ...`) | 213 |
+| `# # description` as first body line | 21 |
 | `with pkgs;` package lists | 119 |
 
 ## The header

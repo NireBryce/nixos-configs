@@ -12,6 +12,11 @@ calendar widget natively renders events from iCal feeds in a month grid
 *and* an agenda view, which glance could not be configured to do at all
 and which #208/#289/#290 existed to patch it into.
 
+**Also in this category since 2026-09-13: [glance](#glance-again-2026-09-13) is
+back, alongside, for a live side-by-side evaluation.** Homepage keeps the
+ts-cube root and its own name; glance answers at
+`glance.moose-micro.ts.net` (short `http://glance/`) on port 3004.
+
 **Runtime-verified on hardware, 2026-09-12** (two switches — the second
 landing the calendar fix below). From `nire-tenacity`: both
 `ts-cube.moose-micro.ts.net/` and `homepage.moose-micro.ts.net/` return 200
@@ -47,6 +52,7 @@ URL 403s — by design, gone the moment it's filled).
 - [Only clickable services are listed](#only-clickable-services-are-listed)
 - [No firewall entry, no persistence entry](#no-firewall-entry-no-persistence-entry)
 - [Imported by](#imported-by)
+- [glance, again 2026-09-13](#glance-again-2026-09-13)
 - [glance, retired 2026-09-12](#glance-retired-2026-09-12)
 - [See also](#see-also)
 
@@ -204,6 +210,23 @@ store.
 [reverse-proxy](reverse-proxy.md)'s are a **pair** — Caddy's root route
 proxies to `127.0.0.1:3002`, so dropping `landing` while keeping
 `reverse-proxy` leaves the site's front page returning 502.
+
+## glance, again 2026-09-13
+
+`glance/glance.nix` rejoined the category (port 3004 — 3002 stayed
+homepage's; 3003 is opencode) so both contestants can be tried live
+before picking one. It answers at its own name only — the ts-cube root
+stays homepage's for the duration. Its widgets are exactly the #291-era
+set (monitor, server-stats, weather, bare calendar, the four to-do
+lists), so the comparison is apples-to-apples: everything this page
+documents about homepage's calendar events, agenda view and
+service-card latency badges is what glance cannot do natively. Two
+known-inherited warts show in BOTH pages during the evaluation: the
+git/grafana status checks fail from cube while [#298](https://github.com/NireBryce/nixos-configs/issues/298)
+stands, and glance's calendar is a bare grid because it takes no feed
+at all. The evaluation's end is one clean deletion (module, caddy
+vhosts, serve.nix endpoints, `svc-*.json`, ACL entries) — #291 in
+reverse.
 
 ## glance, retired 2026-09-12
 

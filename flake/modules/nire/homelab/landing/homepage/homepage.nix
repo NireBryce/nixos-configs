@@ -423,6 +423,13 @@
 # (a golink DB row, outside this repo) repointed at whichever URL should
 # be shortlinked.
 #
+# 2026-09-13 -- glance came back alongside (glance/glance.nix, port
+# 3004, its own name again): Elly's landing evaluation, both pages live
+# at once. Homepage keeps the ts-cube root and homepage.moose-micro.ts.net;
+# nothing in this module changed but this note. The evaluation's end is
+# one clean deletion (module + caddy vhosts + serve.nix endpoints +
+# svc-*.json + ACL entries) exactly like #291's, in reverse.
+#
 # 2026-09-12, what the rollout actually did (all of it): switch -> ACL
 # apply -> vip-put svc:homepage -> vip-delete svc:glance -> one
 # tailscaled+tailscale-serve restart on cube (the standing-advertisement

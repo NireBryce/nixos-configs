@@ -29,6 +29,7 @@ retired. For how it's built, see
 | What | URL | Short form |
 |---|---|---|
 | Landing page (homepage) | `https://homepage.moose-micro.ts.net/` | `http://homepage/` |
+| glance — back for the landing evaluation | `https://glance.moose-micro.ts.net/` | `http://glance/` |
 | Grafana | `https://grafana.moose-micro.ts.net/` | `http://grafana/` |
 | Forgejo | `https://git.moose-micro.ts.net/` | `http://git/` |
 | cube itself (also the landing page) | `https://ts-cube.moose-micro.ts.net/` | `http://ts-cube/` |
@@ -57,7 +58,7 @@ has its own writeup in `system/networking/tailscale.nix`, indexed from
 | `http://ts-cube:3001/` | `https://git.moose-micro.ts.net/` | 2026-08-24 |
 | `https://ts-cube.moose-micro.ts.net/grafana/` | `https://grafana.moose-micro.ts.net/` | 2026-09-07 |
 | `https://ts-cube.moose-micro.ts.net/git/` | `https://git.moose-micro.ts.net/` | 2026-09-07 |
-| `https://glance.moose-micro.ts.net/`, `http://glance/` | `https://homepage.moose-micro.ts.net/` (or cube's own root, unchanged) | 2026-09-12 |
+| `https://glance.moose-micro.ts.net/`, `http://glance/` | retired 2026-09-12 → **reinstated 2026-09-13** for the evaluation (glance on its own name again; port 3004) | — |
 
 The port URLs went away because both apps moved to loopback — reachable only
 through Caddy, so a firewall mistake no longer exposes them. The path
@@ -116,7 +117,7 @@ Work down this list; it's ordered by what's most often actually wrong.
    policy file (`just tailscale-acl`), not in the app.
 6. **Ask the host**, over ssh:
    ```sh
-   systemctl status caddy grafana forgejo homepage-dashboard tailscale-serve
+   systemctl status caddy grafana forgejo homepage-dashboard glance tailscale-serve
    systemctl list-units --state=failed
    ```
    `NRestarts` is the number to look at, not just `active` — a service that
@@ -173,7 +174,8 @@ afterwards.
   mechanism, and the Tailscale Services split.
 - [reverse-proxy-history](../categories/reverse-proxy-history.md) — the
   retired path-prefix design and why it went.
-- [landing](../categories/landing.md) — homepage, the index.
+- [landing](../categories/landing.md) — homepage and, for the evaluation,
+  glance.
 - [Using the forge](forgejo.md) — cloning, and the hostnames Forgejo hands out.
 - [homelab README](README.md) — the other services on this tailnet.
 - [hosts.md](../hosts.md) — `nire-cube` itself.

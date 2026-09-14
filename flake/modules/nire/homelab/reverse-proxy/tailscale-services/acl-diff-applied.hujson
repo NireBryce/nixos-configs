@@ -63,6 +63,12 @@
 			// homepage.nix's history section gives, so the record and the
 			// tailnet move together (the svc:glance story above is why).
 			"svc:homepage": ["tag:homelab-cube"],
+			// 2026-09-13: svc:glance's approver is BACK -- glance was
+			// re-added alongside homepage for the landing evaluation,
+			// so its Service object gets re-made (vip-put; it was
+			// vip-deleted 2026-09-12). Same at-switch-time rule as
+			// above: apply together with the switch, not before.
+			"svc:glance": ["tag:homelab-cube"],
 		},
 	},
 
@@ -112,6 +118,13 @@
 		{
 			"src": ["autogroup:members"],
 			"dst": ["svc:homepage"],
+			"ip":  ["*"],
+		},
+		// glance's grant, back 2026-09-13 with glance itself (the
+		// evaluation): same shape, same switch-time application rule.
+		{
+			"src": ["autogroup:members"],
+			"dst": ["svc:glance"],
 			"ip":  ["*"],
 		},
 	],

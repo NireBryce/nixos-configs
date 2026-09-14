@@ -1,0 +1,1 @@
+{"name": "svc:glance", "tags": ["tag:homelab-cube"], "ports": ["tcp:443", "tcp:80"], "comment": "nixos-configs: nire-cube glance, re-added 2026-09-13 alongside homepage for the landing evaluation (issue #291 retired it 2026-09-12; vip-put again after the switch, before-or-after per serve.nix comment)"}
