@@ -30,11 +30,14 @@
                 #
                 # Checking first makes the normal case need no network at all.
                 #
-                # Deliberately NOT `wants = [ "network-online.target" ]`: nothing
-                # on this host currently pulls that target up, so wanting it
-                # would add NetworkManager-wait-online to every boot of a
-                # handheld that is often offline, to fix a case that only arises
-                # on a fresh install. If the remote is ever genuinely missing and
+                # Deliberately NOT `wants = [ "network-online.target" ]`. This
+                # module is in the `system` category, so it lands on the
+                # handhelds too, and there nothing else pulls that target up:
+                # wanting it would add NetworkManager-wait-online to every boot
+                # of a machine that is often offline, to fix a case that only
+                # arises on a fresh install. (On cube the target IS already
+                # pulled up, by golink.nix since 2026-08-24, so the cost
+                # argument is about durandal and tenacity specifically.) If the remote is ever genuinely missing and
                 # the machine boots offline, this still fails -- run
                 # `systemctl start flatpak-repo` once there is a network.
                 script = ''
