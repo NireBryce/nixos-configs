@@ -44,11 +44,13 @@ status and what broke on the way:
   tailnet-facing HTTPS listener, with certs issued by `tailscaled`. Each web
   service has its own tailnet name since 2026-09-07
   (`grafana.`/`git.moose-micro.ts.net`; `homepage.` since 2026-09-12,
-  when it replaced glance — `glance.` retired). the `/grafana/` and
+  when it replaced glance; `glance.` back 2026-09-13 for the landing
+  evaluation). the `/grafana/` and
   `/git/` path prefixes they used from 2026-08-24 are retired. URLs:
   [homelab/reaching-services.md](homelab/reaching-services.md).
-- [landing](categories/landing.md) — the landing page at `/` (2026-08-24;
-  homepage since 2026-09-12, glance before, issue #291).
+- [landing](categories/landing.md) — the landing page at `/`
+  (homepage since 2026-09-12, issue #291; glance alongside again
+  2026-09-13 for the evaluation, at its own name on port 3004).
 - [shortlinks](categories/shortlinks.md) — golink (2026-08-24). Not behind
   Caddy and not a host service: it embeds tsnet and joins the tailnet as its
   own device `go`, needing a one-time interactive login on first start.

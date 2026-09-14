@@ -11,6 +11,15 @@ nested under `homelab` 2026-08-27. One file, `nixos`-class:
 `nire/homelab/landing/homepage/homepage.nix`, nixpkgs option family
 `services.homepage-dashboard` (attrsets → `/etc/homepage-dashboard/*.yaml`).
 
+**Since 2026-09-13 the category has two modules**: `glance/glance.nix`
+(glance 0.8.5, port **3004**, loopback) rejoined for the landing
+evaluation — homepage keeps ts-cube root + `homepage.moose-micro.ts.net`,
+glance answers at `glance.moose-micro.ts.net` (`http://glance/`) only.
+Both pages' git/grafana status checks fail from cube until #298 is fixed
+(same URLs, same resolver). End of evaluation = delete the loser's
+module + caddy vhosts + serve.nix endpoints + `svc-*.json` + ACL
+entries.
+
 Served at `https://ts-cube.moose-micro.ts.net/` (the root route) and at its
 own `https://homepage.moose-micro.ts.net/` (short: `http://homepage/`).
 Port 3002, loopback. **Runtime-verified 2026-09-12** from tenacity

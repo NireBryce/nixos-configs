@@ -32,6 +32,7 @@ under it, which can happen with no commit to this repo at all.
 | golink — `go/` shortlinks | `nire-cube` | `http://go/` | [Creating go/ links](creating-golinks.md) |
 | Forgejo — self-hosted git forge | `nire-cube` | `.../git/` | [Using the forge](forgejo.md) |
 | homepage — the landing page: services, status, weather, calendar | `nire-cube` | `https://homepage.moose-micro.ts.net/` (short: `http://homepage/`; also `.../` on cube's own name) | [Reaching cube's services](reaching-services.md); [landing](../categories/landing.md) covers config |
+| glance — the old index, back for the landing evaluation | `nire-cube` | `https://glance.moose-micro.ts.net/` (short: `http://glance/`) | [landing](../categories/landing.md) |
 | restic — backups to the QNAP | `nire-cube` | — (no URL; a timer, not a listener) | [Backup runbook](backup-runbook.md) |
 
 **Not a service of its own, but related**: [rustic](rustic.md) — a TUI that

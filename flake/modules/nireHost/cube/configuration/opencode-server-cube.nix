@@ -42,10 +42,10 @@
 #     over tailscale0 is already trusted (networking.nix's
 #     trustedInterfaces), and no other interface has anything listening.
 #
-# PORT 3003: next free 300x on this host -- 3000 grafana, 3001 forgejo,
-# 3002 the landing page (glance until 2026-09-12, then homepage, issue
-# #291, which is also why the slot number survived the swap;
-# caddy.nix proxies to all three).
+# PORT 3003: was the next free 300x when written -- 3000 grafana,
+# 3001 forgejo, 3002 the landing page (glance until 2026-09-12, then
+# homepage, issue #291; 3004 went to glance's 2026-09-13 return for the
+# landing evaluation -- caddy.nix proxies to all four).
 #
 # STATE: opencode keeps everything under ~/.local/share/opencode (sessions,
 # auth). Cube has a plain persistent root (cube-configuration.nix header),

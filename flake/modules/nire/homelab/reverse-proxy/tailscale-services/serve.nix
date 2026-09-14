@@ -96,6 +96,18 @@
                     # see homepage.nix's history section for the order.
                     homepage.endpoints."tcp:443" = "tcp://127.0.0.1:443";
                     homepage.endpoints."tcp:80"  = "tcp://127.0.0.1:80";
+
+                    # Back 2026-09-13 with glance itself (the landing
+                    # evaluation): same raw-forward shape as its two
+                    # neighbours, now to caddy's listener for the name
+                    # `glance.moose-micro.ts.net` (port 3004 behind
+                    # caddy, not this node's business). The svc:glance
+                    # Service object was vip-deleted 2026-09-12 and must
+                    # be vip-put again -- object BEFORE advertisement
+                    # this time, which is the order that activates
+                    # without the restart dance (homepage.nix history).
+                    glance.endpoints."tcp:443" = "tcp://127.0.0.1:443";
+                    glance.endpoints."tcp:80"  = "tcp://127.0.0.1:80";
                 };
             };
 

@@ -223,6 +223,12 @@
 # returned `http=000` with the handshake failing, because caddy was still
 # fetching the cert from tailscaled. It is not a failure state; retry.
 #
+# 2026-09-13: glance RE-ADDED alongside homepage for the landing
+# evaluation -- `glanceFqdn` and its bare-name redirects are back, on port
+# 3004 (homepage kept 3002). The ts-cube `/` root stays homepage's.
+# Control plane: svc:glance re-made (vip-put) after the switch, same
+# order as homepage.nix's history section gives.
+#
 # 2026-09-12, issue #291: homepage replaced glance as the landing page.
 # The ts-cube `/` route keeps proxying to 3002 (homepage kept glance's
 # port); the `glanceFqdn` vhost and its bare-name redirects became
@@ -259,6 +265,14 @@
         # object (`svc:homepage`) -- a rename here does not rename the
         # control-plane object; see serve.nix and acl-diff-applied.hujson.
         homepageFqdn = "homepage.moose-micro.ts.net";
+
+        # Back 2026-09-13, same mechanism: glance re-added alongside
+        # homepage for the side-by-side evaluation -- its own name again,
+        # its own port (3004; homepage kept glance's old 3002). The
+        # control-plane object svc:glance is re-made with it (deleted
+        # 2026-09-12, recreated 2026-09-13 -- a fresh vip-put, see
+        # acl-diff-applied.hujson's comment).
+        glanceFqdn   = "glance.moose-micro.ts.net";
 
         # EVERY `.ts.net` vhost below MUST carry this, and the duplication
         # is the point of binding it once here: a `.ts.net` site that
@@ -357,6 +371,15 @@
                         reverse_proxy 127.0.0.1:3002
                     '';
 
+                    # Re-added 2026-09-13 for the evaluation (was retired
+                    # with glance 2026-09-12). Same mechanism as every
+                    # `.ts.net` vhost above; the landing evaluation's
+                    # second contestant, at its own name and port.
+                    ${glanceFqdn}.extraConfig = ''
+                        ${tailscaleCert}
+                        reverse_proxy 127.0.0.1:3004
+                    '';
+
                     # Bare MagicDNS name -> the real thing. `http://` is
                     # load-bearing: it marks the site HTTP-only and
                     # suppresses automatic HTTPS. Without the scheme, caddy
@@ -405,6 +428,13 @@
                     # redirects to a name that does not resolve.
                     "http://homepage".extraConfig = ''
                         redir https://${homepageFqdn}{uri} permanent
+                    '';
+
+                    # glance's short door, back with glance itself
+                    # (2026-09-13). Same needs as its neighbours: the
+                    # serve.nix tcp:80 forward and a live Service object.
+                    "http://glance".extraConfig = ''
+                        redir https://${glanceFqdn}{uri} permanent
                     '';
 
                     # HTTPS twins of the three bare-name redirects above.
@@ -463,6 +493,11 @@
                     "https://homepage".extraConfig = ''
                         tls internal
                         redir https://${homepageFqdn}{uri} permanent
+                    '';
+
+                    "https://glance".extraConfig = ''
+                        tls internal
+                        redir https://${glanceFqdn}{uri} permanent
                     '';
                 };
             };

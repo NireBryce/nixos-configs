@@ -13,15 +13,16 @@ the script (`vip-put`/`apply`) to push an edit.
   per-service console click wiki/open-threads.md's Tailscale Services
   entry cited as a cost), and explicit grants for the two service
   destinations.
-- `svc-homepage.json` -- the third Service object. The first one under
-  this name: `svc-glance.json` (deleted 2026-09-12, issue #291) was PUT
-  2026-09-10, long after its `serve.nix` forward and Caddy vhost landed in
-  PR #211 -- neither the policy file nor the Service object had ever been
-  pushed, so `glance.moose-micro.ts.net` did not resolve at all while git
-  and grafana did. Issue #291 renamed the landing page's service, which
-  means a NEW object (`svc:homepage`) plus `vip-delete svc:glance` -- a
-  rename in serve.nix is a fresh advertisement, not a rename on the
-  control plane; the rollout order is in `landing/homepage/homepage.nix`'s
+- `svc-homepage.json`, `svc-glance.json` -- the third and fourth Service
+  objects. `svc-glance.json` was the third once: PUT 2026-09-10, long
+  after its `serve.nix` forward and Caddy vhost landed in PR #211 --
+  neither the policy file nor the Service object had ever been pushed, so
+  `glance.moose-micro.ts.net` did not resolve at all while git and grafana
+  did. Issue #291 swapped the landing page's service (svc:glance
+  vip-deleted, svc:homepage vip-put -- a rename in serve.nix is a fresh
+  advertisement, not a rename on the control plane); 2026-09-13 glance
+  came back for the landing evaluation and svc:glance is vip-put again.
+  The rollout order for all of it is in `landing/homepage/homepage.nix`'s
   history section. Note the API path takes the **`svc:`-prefixed** name:
   `vip-get svc:homepage`, not `vip-get homepage` -- the bare form 404s for
   every service, including ones that demonstrably exist, which makes it a
@@ -57,6 +58,15 @@ the script (`vip-put`/`apply`) to push an edit.
   `unknown field "services"`; that key belongs to the per-node *serve*
   config (nixpkgs' `services.tailscale.serve`), a different file
   entirely, confirmed the hard way before finding the right endpoint.
+
+## Status: svc:glance re-made 2026-09-13 (evaluation), applied at switch time
+
+The landing evaluation re-adds glance (port 3004), so svc:glance returns:
+ACL approver + grant re-added to `acl-diff-applied.hujson`, Service object
+re-put. Order that worked for svc:homepage: switch, apply, vip-put,
+restart tailscaled + tailscale-serve if the VIP doesn't wake. Putting the
+object BEFORE the switch's fresh registration may skip the restart -- its
+absence at advertisement time was svc:glance 1.0's failure mode.
 
 ## Status: svc:homepage created 2026-09-12 in this repo, APPLIED at switch time
 
