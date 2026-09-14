@@ -1,6 +1,6 @@
 # `landing`, for agents
 
-_Last modified: 2026-09-12_
+_Last modified: 2026-09-14_
 
 Condensed from [landing.md](landing.md), which keeps the reasoning and the
 verification narrative. Facts only here.
@@ -15,8 +15,8 @@ nested under `homelab` 2026-08-27. One file, `nixos`-class:
 (glance 0.8.5, port **3004**, loopback) rejoined for the landing
 evaluation — homepage keeps ts-cube root + `homepage.moose-micro.ts.net`,
 glance answers at `glance.moose-micro.ts.net` (`http://glance/`) only.
-Both pages' git/grafana status checks fail from cube until #298 is fixed
-(same URLs, same resolver). End of evaluation = delete the loser's
+Both pages' git/grafana status checks failed from cube until #298 was
+fixed 2026-09-14 (one ACL grant; see below). End of evaluation = delete the loser's
 module + caddy vhosts + serve.nix endpoints + `svc-*.json` + ACL
 entries.
 
@@ -86,10 +86,15 @@ sunday-first).
   (plus the small API-error band per card) — by design, not a bug to
   chase.
 - **Service-card status badges for git/grafana read failure** —
-  [#298](https://github.com/NireBryce/nixos-configs/issues/298): cube's
-  tailscaled serves no `svc:` DNS records, and `siteMonitor` fetches from
-  cube. Hard-IP curl from cube reaches every VIP with validated TLS, so
-  it is purely the name layer; golink (a device name) is unaffected.
+  [#298](https://github.com/NireBryce/nixos-configs/issues/298), **fixed
+  2026-09-14**. Cube's tailscaled served no `svc:` MagicDNS records while
+  `siteMonitor` fetches run from cube; hard-IP curl reached every VIP with
+  validated TLS, so it was purely the name layer (golink, a device name, was
+  unaffected). Cause: a tagged device is owned by its tag, and every `svc:`
+  grant named `autogroup:members` as source, so cube — the only tagged host
+  and the only `svc:` advertiser — had no grant to its own destinations. One
+  grant for `tag:homelab-cube` fixed it; netmap `ExtraRecords` repopulated
+  and MagicDNS answers NOERROR from cube.
 - **`homepage.moose-micro.ts.net` not resolving** post-switch means the
   `svc:homepage` Service object was never vip-put (or the ACL
   approver/grant never applied) — the rollout commands are in
