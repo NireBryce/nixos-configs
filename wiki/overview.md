@@ -2,19 +2,19 @@
 
 _Last modified: 2026-09-02_
 
-## Contents
-
-- [What this is](#what-this-is)
-- [The shape of it](#the-shape-of-it)
-- [What's distinctive here](#whats-distinctive-here)
-- [Where to go next](#where-to-go-next)
-
 The orientation page — read this first if you don't yet know what you're
 looking for. [README.md](README.md) is the index once you do; this page is
 the 2-minute mental model that makes the index make sense. Like the rest of
 this wiki, it's short on its own facts and long on pointers — a checkable
 claim (a host count, a category list) belongs on the page that owns it, not
 copied here to drift.
+
+## Contents
+
+- [What this is](#what-this-is)
+- [The shape of it](#the-shape-of-it)
+- [What's distinctive here](#whats-distinctive-here)
+- [Where to go next](#where-to-go-next)
 
 ## What this is
 

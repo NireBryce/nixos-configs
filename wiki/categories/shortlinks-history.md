@@ -2,16 +2,16 @@
 
 _Last modified: 2026-09-02_
 
-## Contents
-
-- [The first switch crash-looped](#the-first-switch-crash-looped)
-- [See also](#see-also)
-
 The first-switch incident behind [shortlinks](shortlinks.md)'s
 `AF_NETLINK` requirement, split out 2026-09-03 so that page stays about the
 module as it works today. The setting itself, and why it stays, is still
 on the main page's "`DynamicUser`, deliberately" section — this is only
 the story of how it was found.
+
+## Contents
+
+- [The first switch crash-looped](#the-first-switch-crash-looped)
+- [See also](#see-also)
 
 ## The first switch crash-looped
 

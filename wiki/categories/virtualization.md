@@ -2,6 +2,12 @@
 
 _Last modified: 2026-09-04_
 
+Libvirt/QEMU VMs, and *only* that — see [containers](containers.md) for why
+podman and distrobox (OCI containers) are a different category. Nested under
+the `homelab` umbrella since 2026-08-27 (moved from `nire/virtualization/`;
+name and by-name importability unaffected). `nire-llm-sandbox`, the one VM
+this category ran, was removed 2026-08-28 — [history.md](../history.md).
+
 ## Contents
 
 - [What's in it](#whats-in-it)
@@ -11,12 +17,6 @@ _Last modified: 2026-09-04_
 - [Why this is its own category and not part of `system`](#why-this-is-its-own-category-and-not-part-of-system)
 - [Imported by](#imported-by)
 - [See also](#see-also)
-
-Libvirt/QEMU VMs, and *only* that — see [containers](containers.md) for why
-podman and distrobox (OCI containers) are a different category. Nested under
-the `homelab` umbrella since 2026-08-27 (moved from `nire/virtualization/`;
-name and by-name importability unaffected). `nire-llm-sandbox`, the one VM
-this category ran, was removed 2026-08-28 — [history.md](../history.md).
 
 ## What's in it
 

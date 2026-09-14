@@ -2,11 +2,6 @@
 
 _Last modified: 2026-09-12_
 
-## Contents
-
-- [Index](#index)
-- [Usage pages](#usage-pages)
-
 One article per real category — a directory holding its own
 `dirsAsCategory.nix` under `flake/modules/`. See
 [../architecture.md](../architecture.md) for the mechanism itself; these
@@ -24,6 +19,11 @@ articles. Not covered here, deliberately:
 - **`nireHost/*` per-host bundles** (`durandal`, `tenacity`, `cube`,
   `lysithea`) — these are host definitions, not conceptual categories; see
   [../hosts.md](../hosts.md).
+
+## Contents
+
+- [Index](#index)
+- [Usage pages](#usage-pages)
 
 ## Index
 

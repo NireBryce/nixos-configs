@@ -2,19 +2,19 @@
 
 _Last modified: 2026-09-02_
 
-## Contents
-
-- [The core mechanism](#the-core-mechanism)
-- [Home Manager integration](#home-manager-integration)
-- [Package modules](#package-modules)
-- [Related, easy to get backwards](#related-easy-to-get-backwards)
-
 For *why* this repo runs flake-parts at all, see [flake-parts.md](flake-parts.md)
 first — this page is the mechanism built on top of that, not the reason for
 it. For what's actually inside each individual category — members, which
 hosts import it, category-specific traps — see the
 [category reference](categories/README.md) instead of this page; this page
 is the mechanism, not the inventory.
+
+## Contents
+
+- [The core mechanism](#the-core-mechanism)
+- [Home Manager integration](#home-manager-integration)
+- [Package modules](#package-modules)
+- [Related, easy to get backwards](#related-easy-to-get-backwards)
 
 ## The core mechanism
 

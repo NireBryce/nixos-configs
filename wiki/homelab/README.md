@@ -2,13 +2,6 @@
 
 _Last modified: 2026-09-13_
 
-## Contents
-
-- [Pages](#pages)
-- [Half-finished is the normal state here](#half-finished-is-the-normal-state-here)
-- [Index over restatement still applies, with one carve-out](#index-over-restatement-still-applies-with-one-carve-out)
-- [See also](#see-also)
-
 How to **use** the services this fleet runs, as opposed to how they're
 configured. Everything here is reachable over the tailnet and nowhere else.
 
@@ -21,6 +14,13 @@ and useful on a phone.
 The split matters because the two rot differently. A category page goes stale
 when the config changes; a page here goes stale when the *service* changes
 under it, which can happen with no commit to this repo at all.
+
+## Contents
+
+- [Pages](#pages)
+- [Half-finished is the normal state here](#half-finished-is-the-normal-state-here)
+- [Index over restatement still applies, with one carve-out](#index-over-restatement-still-applies-with-one-carve-out)
+- [See also](#see-also)
 
 ## Pages
 

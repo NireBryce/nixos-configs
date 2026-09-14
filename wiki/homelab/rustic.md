@@ -2,14 +2,6 @@
 
 _Last modified: 2026-09-03_
 
-## Contents
-
-- [What it is](#what-it-is)
-- [Getting it](#getting-it)
-- [Pointing it at this repo's repository](#pointing-it-at-this-repos-repository)
-- [What's verified here](#whats-verified-here)
-- [See also](#see-also)
-
 [rustic](https://github.com/rustic-rs/rustic) (the `rustic-rs` project, not
 the unrelated `bnavetta/rustic` "restic wrapper" that shares its name in
 search results) — a client tool for the repository
@@ -17,6 +9,14 @@ search results) — a client tool for the repository
 Installed 2026-08-28 in
 `nirePackages/shell-apps/backup-tools/rustic.nix`, so it's on every host
 `ellyHomeManager` reaches.
+
+## Contents
+
+- [What it is](#what-it-is)
+- [Getting it](#getting-it)
+- [Pointing it at this repo's repository](#pointing-it-at-this-repos-repository)
+- [What's verified here](#whats-verified-here)
+- [See also](#see-also)
 
 ## What it is
 
