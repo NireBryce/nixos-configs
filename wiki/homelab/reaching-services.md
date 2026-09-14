@@ -1,6 +1,6 @@
 # Reaching cube's services
 
-_Last modified: 2026-09-12_
+_Last modified: 2026-09-13_
 
 Each web service on `nire-cube` has **its own tailnet hostname and its own
 certificate**. That is a change from the original design — one hostname with
@@ -128,6 +128,12 @@ Work down this list; it's ordered by what's most often actually wrong.
    50`. Certificate problems show up in `caddy`'s journal — but note its log
    level is `ERROR` by default, which hides the warning Caddy emits when
    `tailscaled` declines to give it a certificate.
+
+**A brand-new service's first request is allowed to fail.** Right after a
+`svc:` name is activated, one request can come back with no HTTP status at
+all (`curl` reports `000`) and a failed handshake, because Caddy is still
+fetching that name's certificate from `tailscaled`. Retry before treating it
+as broken.
 
 **A TLS error is not a dead service.** `SSL_ERROR_INTERNAL_ERROR_ALERT` on a
 `.ts.net` name means Caddy has no certificate to offer and is usually a

@@ -1,6 +1,6 @@
 # `reverse-proxy` — history
 
-_Last modified: 2026-09-12_
+_Last modified: 2026-09-13_
 
 The verification record for [reverse-proxy](reverse-proxy.md)'s second
 switch, split out 2026-09-03, plus the path-prefix routing design (retired
@@ -13,6 +13,7 @@ justify).
 - [Confirmed working end to end, 2026-08-24](#confirmed-working-end-to-end-2026-08-24)
 - [Paths, not subdomains, was the original constraint — Tailscale Services lifted it, partially](#paths-not-subdomains-was-the-original-constraint--tailscale-services-lifted-it-partially)
 - [The two apps want opposite things from the proxy (historical)](#the-two-apps-want-opposite-things-from-the-proxy-historical)
+- [The retired routes, as they were](#the-retired-routes-as-they-were)
 - [See also](#see-also)
 
 ## Confirmed working end to end, 2026-08-24
@@ -70,8 +71,8 @@ tailscale/tailscale issue numbers). So Caddy is still in the loop — see
 **Retired 2026-09-07** along with the path-prefix routes themselves —
 each app has its own vhost now, so there's no shared prefix for `handle`
 vs `handle_path` to disagree about. Kept for the mechanism, and in case
-either move ever needs reverting (`caddy.nix`'s own history section has
-the exact retired route blocks).
+either move ever needs reverting — [the routes themselves](#the-retired-routes-as-they-were)
+are below, moved out of `caddy.nix`'s header 2026-09-13.
 
 This is the one thing that was actually gotten wrong, and it cost a switch.
 Both routes were given `handle`, which passes the matched path through
@@ -94,6 +95,44 @@ rejected — so the bare `/git` can't ride along in one matcher the way
 The general form of the mistake, and why every static check missed it, is
 [`lessons-learned.md`](../lessons-learned.md) #41.
 
+## The retired routes, as they were
+
+Verbatim from `caddy.nix`'s `ts-cube.moose-micro.ts.net` vhost, as it stood
+2026-08-24 to 2026-09-07. `${tailnetFqdn}` is the Nix binding for that same
+name:
+
+```caddyfile
+@grafana path /grafana /grafana/*
+handle @grafana {
+    reverse_proxy 127.0.0.1:3000
+}
+
+@gitbare path /git
+handle @gitbare {
+    redir https://${tailnetFqdn}/git/ permanent
+}
+handle_path /git/* {
+    reverse_proxy 127.0.0.1:3001
+}
+```
+
+**Named matchers, not inline ones, for `@grafana`**: `handle` accepts at
+most *one* matcher token, so `handle /grafana /grafana/*` is a parse error
+(*"wrong argument count or unexpected line ending"*) — caught by running the
+generated Caddyfile through `caddy adapt` before shipping. The two-path form
+was deliberate over `/grafana*`, which would also match `/grafanafoo`.
+`handle_path` took an **inline** path matcher only — a named matcher was
+rejected — so the bare `/git` couldn't ride along the way `@grafana`'s two
+paths did, hence its own `redir` block.
+
+Getting the two live took two switches. `nix eval`, `just modules`,
+`caddy adapt`, a real build and reading the built artifact back all passed
+on the first one; only a live request found the `handle`/`handle_path`
+asymmetry.
+
 ## See also
 
 - [reverse-proxy](reverse-proxy.md) — the mechanism as it works today.
+- [`caddy.nix`](../../flake/modules/nire/homelab/reverse-proxy/caddy/caddy.nix)
+  — its header carries the live mechanism; this page carries what it
+  stopped doing.
