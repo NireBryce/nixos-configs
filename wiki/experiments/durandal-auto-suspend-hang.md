@@ -99,12 +99,20 @@ Two consequences, both load-bearing:
 
 ## Progress
 
-**Deployed:** the probe, 2026-09-13. **Not live as of 2026-09-14:**
-`amdgpu.runpm=0` and smartmontools landed in
-[#320](https://github.com/NireBryce/nixos-configs/pull/320) but need a
-`just switch`, and the kernel parameter a **reboot**. Until both, a hang still
-tests the old configuration. The power-cycle detector has never run against a
-real hang, so the first one tests it too.
+**All live since the 2026-09-14 02:24 reboot**: the probe (2026-09-13), plus
+`amdgpu.runpm=0` and smartmontools from
+[#320](https://github.com/NireBryce/nixos-configs/pull/320). Confirmed in
+`/proc/cmdline` and `/sys/module/amdgpu/parameters/runpm`. The power-cycle
+detector has still never run against a real hang, so the first one tests the
+detector as much as the machine — and the first dump only sets the per-drive
+baseline, since the counters are cumulative.
+
+**Confounded from the 2026-09-14 02:24 reboot on.** That reboot made
+`amdgpu.runpm=0` live *and* moved the kernel 6.18.43 → 6.18.51, the latter
+arriving with a `flake.lock` update rather than deliberately. Two variables, one
+change. It only matters if the hangs **stop** — then the cause is unattributable
+between the two, and booting the previous generation once is what separates
+them. If hangs continue, neither worked and the confound is moot.
 
 Cycles, all 2026-09-14 UTC. Outcomes are Elly's — nothing in the dumps yet
 separates a hang from a clean resume:
