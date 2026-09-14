@@ -1,83 +1,19 @@
 # homepage (gethomepage): the landing page for this host -- what's running,
 # whether it's up, how the machine is doing, and the household calendar.
-# Replaced glance here 2026-09-12 (issue #291); cube-only, same category
-# (`nire/landing/`) -- the category-as-optionality mechanism CLAUDE.md's
-# Architecture section gives `monitoring`, `git-forge`, `shortlinks` and
-# `reverse-proxy`. The category kept the name `landing`; only the module
-# underneath it changed.
+# Replaced glance here 2026-09-12 (issue #291), cube-only; glance rejoined
+# 2026-09-13 at its own name for the evaluation, so the category has two
+# modules until that closes.
 #
-# Named `homepage`, NOT `dashboard`. Not `landing` for the collision reason
-# `git-forge` isn't `forgejo` (category + module sharing a name declare the
-# same `flake.modules.nixos.<name>` and silently MERGE). Not `dashboard`
-# because `monitoring` next door is full of Grafana dashboards; this is the
-# page you LAND on, Grafana is where you read graphs.
+# Named `homepage`, NOT `landing` (a category and its module sharing a name
+# declare the same `flake.modules.nixos.<name>` and silently MERGE) and NOT
+# `dashboard` (`monitoring` next door is full of Grafana dashboards; this is
+# the page you LAND on).
 #
-# WHY HOMEPAGE OVER GLANCE: its calendar widget natively renders events
-# from iCal feeds -- including gcal's SECRET iCal address, so no API key
-# and no public-calendar compromise -- in a month grid AND an agenda view.
-# glance's calendar is a bare date grid that takes no feed at all, which is
-# what #208/#289/#290 (custom-api designs, a patched glance) existed to
-# work around; all three closed as superseded when this landed.
-#
-# NOT a second monitoring system, same as glance before it: a service
-# entry's `siteMonitor` is one HTTP HEAD per refresh reporting status and
-# latency -- no scraping, storage, alerting, retention. prometheus.nix is
-# what knows what CPU was an hour ago; this answers "is it up right now,
-# and what's the URL", the question `wiki/homelab/README.md` answers for
-# humans.
-#
-# EVERYTHING FETCHES SERVER-SIDE, which is the security shape of the whole
-# page: `siteMonitor` pings, the calendar's iCal pulls and openmeteo's
-# weather all run from this host (verified against homepage v1.13.2's
-# source, matching the pinned package -- calendar/proxy.js, pages/api/
-# siteMonitor.js). The browser never sees an ICS URL: the config files
-# carry `{{HOMEPAGE_VAR_...}}` placeholders that homepage substitutes from
-# its own environment (utils/config/config.js) AFTER reading them, and the
-# calendar proxy strips the URL from anything it hands the client.
-#
-# SECRETS: the sops key `homepage-env` below IS a systemd EnvironmentFile
-# -- plaintext lines of `HOMEPAGE_VAR_<NAME>=<value>`, one per calendar.
-# gcal's secret iCal addresses go THERE, never in this file, the store, or
-# the repo. systemd reads EnvironmentFile= itself as root before the
-# DynamicUser drops privileges, so the secret's default 0400 root owner
-# needs no override. Until real URLs are filled in, the ical integration
-# fails QUIET (integrations/ical.jsx early-returns on fetch error, no
-# error chip): the calendar renders as a bare grid + empty agenda, and
-# events appear the moment the sops value gains real URLs and the secret's
-# restartUnits bounces the service. Calendar IDs were deliberately not
-# assigned at implementation (#289/#290's recorded decision) -- adding one
-# is one entry in `calendars` below plus one line in the sops value.
-#
-# NO ICONS, DELIBERATELY -- now doubly so: every icon form homepage
-# understands resolves via cdn.jsdelivr.net (resolvedicon.jsx: `mdi:`/
-# `si:`/`sh:` prefixes AND the bare `name.png`/`.svg`/`.webp` fallback),
-# and services with no `icon` set render none at all. A page whose point
-# is not leaving the tailnet must not pull icons from a CDN on every load.
-# If icons are ever wanted, homepage serves a local directory the same way
-# glance's `assets-path` did -- upstream's `public/icons/` mechanism.
-#
-# ONLY CLICKABLE SERVICES ARE LISTED, carried over from glance: a
-# loopback-only service (prometheus, node-exporter, cadvisor,
-# libvirt-exporter) would render as a card whose link 404s in the reader's
-# browser -- fine as a health check, misleading as a UI. Their health is
-# in Grafana, which IS listed. Don't add them without a
-# browser-followable URL. The siteMonitor checks go through the PROXY, at
-# the URLs a person uses, not 127.0.0.1:300x -- same reasoning glance's
-# monitor rows give (it tests MagicDNS, tailnet, caddy, TLS and app
-# together, not the app alone).
-#
-# STATUS: RUNTIME-VERIFIED on hardware 2026-09-12 (two switches; the
-# second landed the calendar service-widget fix -- see the widgets-block
-# comment). From tenacity: 200 over validated TLS on ts-cube root and the
-# homepage name, short door redirects and lands, unit active NRestarts=0,
-# 3002 loopback-only, glance gone; rendered in a real browser: resources,
-# weather, cards, both calendar views draw, the grid sunday-first with
-# today highlighted. The card status badges for git/grafana read failure
-# until #298 was fixed 2026-09-14 (cube's tailscaled served no svc: DNS
-# records, a missing tailnet grant from tag:homelab-cube to its own svc:
-# destinations -- acl-diff-applied.hujson carries the grant and the
-# verification). One caveat stands: each calendar card shows an API-error
-# band until real feeds land in the sops value (placeholder URL 403s).
+# Kept in the wiki, not restated here: why homepage over glance, what this
+# deliberately is not, the widget inventory, the icon and clickable-service
+# rules, and the verification record -- wiki/categories/landing.md and its
+# `-for-agents.md`. Usage and URLs: wiki/homelab/reaching-services.md.
+# Traps sit next to the options.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
@@ -179,35 +115,21 @@
                 # Restart=on-failure would self-heal the race regardless.
                 listenPort = 3002;
 
-                # LOOPBACK BIND IS THE SECURITY MODEL, as it was glance's --
-                # but it does NOT come free here, and the difference is the
-                # one thing to re-check on a package bump: glance had a
-                # `host` option; this module exposes only `listenPort`
-                # (PORT env), and `next start`'s own `--hostname` flag has
-                # NO env binding in next 16 (bin/next.ts: `--port` carries
-                # `.env('PORT')`, `--hostname` carries nothing) -- so the
-                # service would bind 0.0.0.0 by default and, worse, the
-                # firewall is not the backstop it looks like:
-                # trustedInterfaces (system/networking/networking.nix)
-                # lets tailnet traffic bypass the allow-list, so an
-                # all-interfaces bind is directly reachable from the
-                # tailnet, skipping caddy and its TLS entirely -- exactly
-                # the shape grafana.nix and forgejo.nix were moved OFF in
-                # 2026-08-24 (caddy.nix's header).
-                #
-                # The fix reads out of what the package actually runs:
-                # nixpkgs' homepage-dashboard bin is `node .../server.js`,
-                # the next STANDALONE template, whose bind line is
-                # `process.env.HOSTNAME || '0.0.0.0'` (verified against
-                # next 16.2.6, the version bundled with homepage-dashboard
-                # 1.13.2 in this pin). Setting HOSTNAME in the unit
-                # environment (below) is therefore a true loopback bind --
-                # application-level, like glance's `host`, but reaching it
-                # through systemd because no option path exposes it. If a
-                # future next version changes that template line, the bind
-                # silently WIDENS -- no error anywhere -- so `ss -ltn | grep
-                # 3002` belongs in the post-bump checklist (wiki landing
-                # page carries it).
+                # LOOPBACK BIND DOES NOT COME FREE HERE, and this is the
+                # one thing to re-check on a package bump. No option path
+                # exposes a bind host (the module has `listenPort` only;
+                # next 16's `--hostname` has no env binding), so the
+                # service binds 0.0.0.0 by default -- and the firewall is
+                # NOT the backstop it looks like, since trustedInterfaces
+                # lets tailnet traffic bypass the allow-list and reach it
+                # directly, skipping caddy and its TLS. What makes it
+                # loopback is HOSTNAME in the unit environment below,
+                # because next's standalone server.js binds
+                # `process.env.HOSTNAME || '0.0.0.0'` (read from next
+                # 16.2.6, bundled with homepage-dashboard 1.13.2 here). A
+                # future next changing that line widens the bind SILENTLY,
+                # no error anywhere -- hence `ss -ltn | grep 3002` in
+                # landing.md's post-bump checklist.
 
                 # Host-header EXACT match (src/middleware.js, v1.13.2):
                 # every name that routes here must be listed, portless
@@ -386,30 +308,15 @@
 
 # ── history ─────────────────────────────────────────────────────────────────
 #
-# 2026-08-24 to 2026-09-12 — glance (glanceapp/glance) was the landing
-# page, module `landing/glance/glance.nix` (deleted here; `git log --follow`
-# finds it). What this module inherited vs. dropped:
+# 2026-08-24 to 2026-09-12 — glance was the landing page (issue #291
+# replaced it; glance rejoined 2026-09-13 at its own name for the
+# evaluation, so both are live). What carried over and what was dropped --
+# including the four to-do lists (#209), obsolete by construction since
+# homepage has no to-do widget and they were per-browser localStorage --
+# is in wiki/categories/landing.md's "glance, retired 2026-09-12".
 #
-#   - INHERITED: the `landing` category and its naming reasoning; the port
-#     (3002); loopback + no-firewall + no-persist shape; the
-#     derive-from-caddy-vhosts throw-on-orphan mechanism (#221); the
-#     no-CDN-icons rule; "only clickable services listed"; the
-#     through-the-proxy monitoring URLs.
-#   - DROPPED with glance, obsolete by construction: the four to-do lists
-#     (#209). Homepage has no to-do widget, the lists were per-BROWSER
-#     localStorage (per-device, not shared, lost on storage clear), and
-#     #209's "categories" were distinguishable only by position. Decided
-#     at implementation (#291 decision 2): drop, not replace. Anyone who
-#     kept real tasks there will find them gone with the glance data.
-#   - DROPPED: glance's own traps -- the monitor row that depended on Go's
-#     redirect-following (homepage's siteMonitor follows redirects
-#     explicitly, utils/proxy/http.js uses follow-redirects, so Grafana's
-#     302 -> /login reads 200), and the `/api/pages/.../content/`
-#     endpoint trick for verifying widget content (homepage is a
-#     client-side app; what to check instead is on the wiki landing page).
-#
-# ROLLOUT, the half that is not in this repo (the caddy.nix svc:glance
-# lesson: the record must not get ahead of reality):
+# ROLLOUT, the half that is NOT in this repo, kept here because the record
+# must not get ahead of reality (the svc:glance lesson):
 #
 #     just switch                                  # on cube
 #     just tailscale-acl diff acl-diff-applied.hujson
@@ -417,23 +324,13 @@
 #     just tailscale-acl vip-put svc:homepage svc-homepage.json
 #     just tailscale-acl vip-delete svc:glance
 #
-# `homepage.moose-micro.ts.net` does not resolve until the vip-put, and if
-# the name still fails after it, the caddy.nix header has the restart
-# order (tailscaled, then tailscale-serve) that woke svc:glance up. Then
-# the verification ladder in the new-homelab-service skill, and `go/dash`
-# (a golink DB row, outside this repo) repointed at whichever URL should
-# be shortlinked.
+# The name does not resolve until the vip-put; if it still fails after it,
+# caddy.nix has the restart order (tailscaled, then tailscale-serve) that
+# woke svc:glance. Then the new-homelab-service skill's verification
+# ladder, and `go/dash` (a golink DB row, outside this repo) repointed.
 #
-# 2026-09-13 -- glance came back alongside (glance/glance.nix, port
-# 3004, its own name again): Elly's landing evaluation, both pages live
-# at once. Homepage keeps the ts-cube root and homepage.moose-micro.ts.net;
-# nothing in this module changed but this note. The evaluation's end is
-# one clean deletion (module + caddy vhosts + serve.nix endpoints +
-# svc-*.json + ACL entries) exactly like #291's, in reverse.
-#
-# 2026-09-12, what the rollout actually did (all of it): switch -> ACL
-# apply -> vip-put svc:homepage -> vip-delete svc:glance -> one
-# tailscaled+tailscale-serve restart on cube (the standing-advertisement
-# activation gap; tailscale-serve's Restart=on-failure from issue #267
-# absorbed the first racing attempt on its own) -> verified. The one
+# 2026-09-12, what the rollout did: switch -> ACL apply -> vip-put -> vip-
+# delete -> one tailscaled+tailscale-serve restart (the standing-
+# advertisement activation gap; tailscale-serve's Restart=on-failure from
+# issue #267 absorbed the first racing attempt) -> verified. The one
 # failure mode found was #298, not homepage's -- fixed 2026-09-14.

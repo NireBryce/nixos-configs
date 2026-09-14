@@ -1,80 +1,21 @@
-# glance: the service index for this host -- what's running, whether it's
-# up, how the machine is doing. Added 2026-08-24, cube-only; RE-ADDED
-# 2026-09-13 to share the `landing` category with homepage (which replaced
-# it here 2026-09-12, issue #291) so both can be tried live, side by side,
-# before picking one: homepage keeps the ts-cube root and its own name,
-# this answers at its own name only. This is an evaluation arrangement --
-# the loser's module, vhosts and Service object delete cleanly, and #291's
-# history (here and in caddy.nix) is the record of how each half moved.
+# glance: the second landing page for this host, running beside homepage
+# (which replaced it 2026-09-12, issue #291) since 2026-09-13 so both can
+# be tried live before picking one. Cube-only. homepage keeps the ts-cube
+# root and its own name; this answers at `glance.moose-micro.ts.net` ONLY
+# (short `http://glance/`), serving at `/` of its own vhost, so `base-url`
+# stays unset. An evaluation arrangement: the loser's module, vhosts and
+# Service object delete cleanly.
 #
-# (Historically it was its own category -- the category-as-optionality
-# mechanism CLAUDE.md's Architecture section gives `monitoring`,
-# `git-forge`, `shortlinks` and `reverse-proxy` -- until #291 merged the
-# service categories into `nire/homelab/`.)
+# The CATEGORY is `landing`, not `glance` or `dashboard` -- a category and
+# a module sharing a name declare the same `flake.modules.nixos.<name>` and
+# silently MERGE, which is what lets this sit beside homepage.nix in one
+# category without meeting it.
 #
-# Named for the collision rule: the CATEGORY is `landing`, NOT `dashboard`,
-# not `glance` (category + module sharing a name declare the same
-# `flake.modules.nixos.<name>` and silently MERGE) -- which is why this
-# module can sit beside homepage.nix in one category without meeting.
-# Not `dashboard` because `monitoring` next door is full of Grafana
-# dashboards; this is the page you LAND on, Grafana is where you read
-# graphs.
-#
-# NOT a second monitoring system: the `monitor` widget does an HTTP GET and
-# reports the status code -- no scraping, storage, alerting, retention.
-# prometheus.nix is what knows what CPU was an hour ago; this answers "is
-# it up right now, and what's the URL", the question `wiki/homelab/
-# README.md` answers for humans.
-#
-# ANSWERS AT ITS OWN NAME ONLY, not at `/` any more: the ts-cube root is
-# homepage's during the evaluation. Same shape the svc migration gave it
-# 2026-09-08..09-12 (own name plus the root); now own name only --
-# `https://glance.moose-micro.ts.net/`, short `http://glance/`. It serves
-# at `/` of its own vhost, so there is still no prefix question, and
-# `base-url` stays unset.
-#
-# `proxied = true` is not cosmetic: glance then trusts `X-Forwarded-*` and
-# sees the real client instead of 127.0.0.1; without it every visitor looks
-# like the proxy.
-#
-# NO ICONS, DELIBERATELY. `si:`/`sh:`/`di:`/`mdi:` icons "are loaded
-# externally and are hosted on cdn.jsdelivr.net" (glance's own docs). A
-# page whose point is not leaving the tailnet must not pull icons from a
-# CDN on every load; if ever wanted, `assets-path` serves a local
-# directory under /assets/.
-#
-# ONLY CLICKABLE SERVICES ARE LISTED: the monitor widget's title IS the
-# link, so a loopback-only service (prometheus 127.0.0.1:9090,
-# node-exporter, cadvisor, libvirt-exporter) would render as a 404 link --
-# fine as a health check, misleading as a UI. Their health is in Grafana,
-# which IS listed. Don't add them without a browser-followable URL.
-#
-# STATUS: re-added 2026-09-13; verification post-switch. The 2026-08-24
-# first-switch record (active, NRestarts=0, no fixes) is in git history.
-# One inherited caveat, not glance's: its monitor rows check
-# git/grafana through the proxy at svc: hostnames, which failed from cube
-# until #298 was fixed 2026-09-14 (a missing tailnet grant from
-# tag:homelab-cube to its own svc: destinations) -- homepage's cards
-# carried the identical failure.
-#
-# Widget content renders behind `/api/pages/home/content/`, not the initial
-# HTML -- a page 200 proves almost nothing; that endpoint is where to look
-# (all three sites OK; server-stats rendering CPU/SWAP for `nire-cube`).
-#
-# Two facts reasoned from source; both would have been quiet wrong-looking
-# output, not errors:
-#
-#   - Grafana answers /grafana/ with a 302 to /grafana/login, and
-#     `statusCodeToText` treats ONLY 200 (or an explicit `alt-status-codes`
-#     entry) as OK. It reads OK because glance's `defaultHTTPClient`
-#     (widget-utils.go) sets no `CheckRedirect`, so Go's
-#     follow-up-to-10 default applies. If a future glance stops following
-#     redirects, the row goes red with nothing broken -- fix is
-#     `alt-status-codes: [302]`, not a Grafana change.
-#   - `http://go/` reads OK, i.e. golink answers a request from cube --
-#     genuinely uncertain beforehand: golink is a separate tailnet device
-#     (tsnet), so this needed MagicDNS resolving `go` from cube AND golink
-#     serving that node without interactive auth.
+# Kept in the wiki, not restated here: what this deliberately is not, the
+# icon and clickable-service rules, the widget inventory, and the
+# verification record -- wiki/categories/landing.md and `-for-agents.md`.
+# Usage and URLs: wiki/homelab/reaching-services.md. Traps sit next to the
+# options.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
@@ -145,6 +86,39 @@
                                 size = "full";
                                 widgets = [
                                     {
+                                        # TWO ROWS READ OK FOR NON-OBVIOUS
+                                        # REASONS, both reasoned from
+                                        # source, both of which would go
+                                        # red with nothing actually broken:
+                                        #
+                                        #  - Grafana answers with a 302 to
+                                        #    its /login, and
+                                        #    `statusCodeToText` treats only
+                                        #    200 (or an explicit
+                                        #    `alt-status-codes` entry) as
+                                        #    OK. It reads OK because
+                                        #    glance's `defaultHTTPClient`
+                                        #    (widget-utils.go) sets no
+                                        #    `CheckRedirect`, so Go follows
+                                        #    up to 10. A glance that stops
+                                        #    following wants
+                                        #    `alt-status-codes: [302]`, not
+                                        #    a Grafana change.
+                                        #  - `http://go/` reads OK, i.e.
+                                        #    golink answers a request from
+                                        #    cube -- uncertain beforehand,
+                                        #    since golink is a SEPARATE
+                                        #    tailnet device (tsnet): it
+                                        #    needs MagicDNS resolving `go`
+                                        #    from cube AND golink serving
+                                        #    that node without interactive
+                                        #    auth.
+                                        #
+                                        # Widget content renders behind
+                                        # `/api/pages/home/content/`, not
+                                        # the initial HTML -- a page 200
+                                        # proves almost nothing; that
+                                        # endpoint is where to verify.
                                         type  = "monitor";
                                         title = "Services";
 
