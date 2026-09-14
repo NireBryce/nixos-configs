@@ -1,18 +1,18 @@
-# Forgejo: a self-hosted git forge, tailnet-only. Added 2026-08-24,
-# cube-only, own category (`nire/git-forge/`) -- the category-as-optionality
-# mechanism CLAUDE.md's Architecture section gives `monitoring` and
-# `virtualization`; nothing here for the handhelds, and no reason to force
-# durandal to carry it. Named `git-forge`, not `forgejo`: both category and
-# module named `forgejo` would declare `flake.modules.nixos.forgejo` twice
-# and silently merge (the `containers`/`podman.nix` collision CLAUDE.md
-# documents; `just modules` caught it pre-ship).
+# Forgejo: a self-hosted git forge, tailnet-only, at
+# https://git.moose-micro.ts.net/. Added 2026-08-24, cube-only. Named
+# `git-forge`, not `forgejo`: a category and a module sharing a name declare
+# the same `flake.modules.nixos.<name>` and silently MERGE (`just modules`
+# caught it pre-ship).
 #
-# Checked against pinned nixpkgs' actual
-# nixos/modules/services/misc/forgejo.nix for whether Forgejo needs
-# grafana.nix's hand-created-secret dance. It does not: `services.forgejo`
-# ships `forgejo-secrets.service`, a oneshot generating
-# SECRET_KEY/INTERNAL_TOKEN/JWT_SECRET under `${customDir}/conf/` on first
-# run, no-op if the files exist. Nothing hand-created, no `warnings` entry.
+# No hand-created secrets here, unlike grafana.nix -- checked against the
+# pinned nixpkgs module: `services.forgejo` ships `forgejo-secrets.service`,
+# a oneshot generating SECRET_KEY/INTERNAL_TOKEN/JWT_SECRET under
+# `${customDir}/conf/` on first run and a no-op once they exist.
+#
+# Kept in the wiki, not restated here: the access model, the admin-account
+# bootstrap and the verification record -- wiki/categories/git-forge.md,
+# `-for-agents.md` and `git-forge-history.md`; cloning and day-to-day use,
+# wiki/homelab/forgejo.md. Traps sit next to the options.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
@@ -93,21 +93,14 @@
                 };
             };
 
-            # STILL no 3001 in networking.firewall.allowedTCPPorts
-            # (system/networking/networking.nix) -- but since 2026-08-24 the
-            # loopback bind above is what keeps this off the LAN, not the
-            # firewall (now the second line). The tailnet-facing port is
-            # caddy's 443; reverse-proxy/caddy.nix carries that reasoning:
-            # its `trustedInterfaces = [ "tailscale0" ]` lets tailnet
-            # traffic bypass the allow-list, anything else hits
-            # default-deny. Port 22 IS in the allow-list on every NixOS host
-            # for ordinary ssh -- git+ssh rides that existing exposure, not
-            # a new one.
-            #
-            # Same caveat grafana.nix documents: trustedInterfaces trusts
-            # the WHOLE tailscale0 interface, not just this port -- the
-            # host's existing security model, not something this module
-            # adds.
+            # No 3001 in networking.firewall.allowedTCPPorts: the
+            # loopback bind above is what keeps this off the LAN, with the
+            # firewall as the second line. The tailnet-facing port is
+            # caddy's 443, and `trustedInterfaces = [ "tailscale0" ]`
+            # trusts that WHOLE interface rather than a port -- the host's
+            # existing model, not something this module adds. Port 22 is
+            # already open on every NixOS host, so git+ssh rides existing
+            # exposure rather than new.
 
             # No forgejo-persist.nix, same reasoning grafana.nix gives for
             # skipping one: cube has a plain persistent root
