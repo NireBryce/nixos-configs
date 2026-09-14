@@ -66,7 +66,7 @@ subtraction needs spaces around the operator. Two consequences here:
 ## Names share one namespace per class, and collisions merge
 
 Two modules with the same name do not conflict; they **merge**. `boot` was
-both the `nire/boot/` category and `nireHost/durandal/hardware/boot.nix`, so
+both the `system/boot/` category and `hosts/durandal/hardware/boot.nix`, so
 importing the category also applied durandal's bootloader — and importing
 the bootloader applied an impermanence rollback. `just modules` checks for
 this; run it after adding or renaming anything.
@@ -120,7 +120,7 @@ evaluation dies with `infinite recursion encountered` — naming
 ;}
 ```
 
-`nireHost/llm-sandbox/llm-sandbox-configuration.nix` (removed 2026-08-28,
+`hosts/llm-sandbox/llm-sandbox-configuration.nix` (removed 2026-08-28,
 still in git history — see `wiki/history.md`) was a worked example of both
 this trap and the `config`-shadowing one: it imported upstream's
 `virtualisation/disk-image.nix` via `modulesPath` from the *inner* module's

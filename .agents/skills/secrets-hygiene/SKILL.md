@@ -7,7 +7,7 @@ description: How to avoid printing sops-managed secret values into the conversat
 
 ## Applies to
 
-Any command that touches `flake/modules/nire/system/secrets/secrets.yaml`
+Any command that touches `flake/modules/system/system/secrets/secrets.yaml`
 or a decrypted secret on a live host (`/run/secrets/...`) — checking
 whether decrypt access works, reading a value, adding or rotating one,
 verifying `sops updatekeys` picked up a new host. Also applies more
@@ -136,5 +136,5 @@ the hooks can't cover.
   isn't, extend the pattern match rather than only adding prose here.
 - `CLAUDE.md`'s Safety section — why `secrets.yaml` is encrypted-but-committed
   on purpose, and which hosts are enrolled.
-- `flake/modules/nire/system/secrets/sops.nix` — how secrets are declared
+- `flake/modules/system/system/secrets/sops.nix` — how secrets are declared
   and wired to services in this repo.

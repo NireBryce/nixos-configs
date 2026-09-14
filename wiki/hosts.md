@@ -62,7 +62,7 @@ status and what broke on the way:
   tenacity/lysithea ([#130](https://github.com/NireBryce/nixos-configs/issues/130)).
   Runbook: [homelab/backup-runbook.md](homelab/backup-runbook.md).
 - opencode server —
-  [`flake/modules/nireHost/cube/configuration/opencode-server-cube.nix`](<../flake/modules/nireHost/cube/configuration/opencode-server-cube.nix>)
+  [`flake/modules/hosts/cube/configuration/opencode-server-cube.nix`](<../flake/modules/hosts/cube/configuration/opencode-server-cube.nix>)
   (2026-09-07). Not a category: one personal dev tool, not part of the
   self-hosted stack. Runs `opencode serve` as a systemd user service bound
   to the tailnet IP only — `just opencode-attach` (`-c` resumes the last
@@ -75,7 +75,7 @@ status and what broke on the way:
   `outPath` vs `/run/current-system` comparison in
   [`AGENTS.md`](../AGENTS.md)'s State section.
 - **Why `nire-cube` doesn't wipe `/root`** —
-  `flake/modules/nireHost/cube-configuration.nix` header, and `AGENTS.md`'s
+  `flake/modules/hosts/cube-configuration.nix` header, and `AGENTS.md`'s
   Safety section.
 - **Adding a new host** — skill `new-host-config`
   (`.agents/skills/new-host-config/SKILL.md`).

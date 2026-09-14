@@ -8,7 +8,7 @@ description: How to add a package to a user's environment in this repo and verif
 ## Applies to
 
 Adding `pkgs.<name>` (or a small handful) to `ellyHomeManager` via
-`flake/modules/nirePackages/`. Use before writing the module — `just
+`flake/modules/packages/`. Use before writing the module — `just
 modules`/`just check` catch outright collisions, not a wrong category
 choice.
 
@@ -39,14 +39,14 @@ Hand-written, not generated. Follow a sibling file:
 }
 ```
 
-File it at `nirePackages/<category>/<tool>/<tool>.nix` (some categories are
+File it at `packages/<category>/<tool>/<tool>.nix` (some categories are
 flatter — `nix-utils/nixfmt/nixfmt.nix`, `terminals/kitty/kitty.nix`,
 `development/tools/ai-tools/herdr.nix` are all real, current examples; skim
 a few in the target category before picking the exact depth).
 
 Wiring is automatic **once the category is already imported**:
 `dirsAsCategory` makes the new file a member of whatever category directory
-it's filed under, and `nireUser/elly-home-manager.nix` already imports the
+it's filed under, and `users/elly-home-manager.nix` already imports the
 coarse categories that exist today (`development`, `editors`, `gui-other`,
 `linux-utils`, `nix-utils`, `shell-apps`, `terminals`, plus the non-package
 ones). Check that file before assuming a new category reaches anywhere — an

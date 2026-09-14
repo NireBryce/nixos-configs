@@ -5,7 +5,7 @@ _Last modified: 2026-09-11_
 Condensed from [system.md](system.md), which keeps the reasoning and the
 narrative. Facts only here.
 
-`nire/system/`, 19 subdirectories. The largest category, imported whole by
+`system/system/`, 19 subdirectories. The largest category, imported whole by
 every Linux host with **no opt-out for any piece of it** — that property is
 the reason `virtualization` and `containers` are separate categories.
 Anything that must be optional cannot be filed here.

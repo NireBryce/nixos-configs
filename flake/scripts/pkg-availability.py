@@ -2,7 +2,7 @@
 """Can this package build on this system, and is Homebrew already installing it?
 
 Exists because the alternative is guessing, and guessing is what happened. Every
-Linux-only guard in nirePackages/ is a claim about platform support, but
+Linux-only guard in packages/ is a claim about platform support, but
 `lib.mkIf (!pkgs.stdenv.isDarwin)` gets reached for whenever a shared module
 looks Linux-shaped -- a different question from whether the pinned nixpkgs can
 build it on aarch64-darwin. Checking by hand meant writing the same expression
@@ -16,7 +16,7 @@ out again each time, so mostly nobody did.
 Two questions, and they are NOT the same one:
 
   can it build here      meta.platforms. Answered, and acted on, automatically:
-                         nire/system/home-manager/drop-unsupported-packages.nix
+                         system/system/home-manager/drop-unsupported-packages.nix
                          drops unavailable packages on darwin and warns. Nothing
                          needs a hand-written guard for this any more, and the
                          default table is how you check its work.
@@ -43,7 +43,7 @@ Columns:
             lib/meta.nix checks platforms and badPlatforms only -- so a package
             can read `available` and still refuse to build without allowBroken.
 
-  CASK      a cask in nire/macos/homebrew/homebrew.nix installing the same
+  CASK      a cask in system/macos/homebrew/homebrew.nix installing the same
             thing, with the signal that identified it. See match_cask.
 
 `available` PLUS a cask hit is the interesting case, and the one no
@@ -63,7 +63,7 @@ import argparse, json, pathlib, re, subprocess, sys, tempfile
 
 HERE     = pathlib.Path(__file__).resolve().parent
 FLAKE    = HERE.parent
-HOMEBREW = FLAKE / 'modules/nire/macos/homebrew/homebrew.nix'
+HOMEBREW = FLAKE / 'modules/system/macos/homebrew/homebrew.nix'
 
 # Homebrew's own cache of the cask API -- every cask's token and homepage,
 # offline. Read directly rather than shelling out to `brew info --json=v2`,
@@ -152,7 +152,7 @@ def scan_packages():
     them. Anything under a `_` directory is skipped, matching import-tree.
     """
     found = {}
-    for p in sorted((FLAKE / 'modules/nirePackages').rglob('*.nix')):
+    for p in sorted((FLAKE / 'modules/packages').rglob('*.nix')):
         if any(part.startswith('_') for part in p.parts):
             continue
         rel  = p.relative_to(FLAKE / 'modules')
@@ -321,7 +321,7 @@ def main():
     ap.add_argument('names', nargs='*', help='package attribute paths')
     ap.add_argument('--system', default='aarch64-darwin')
     ap.add_argument('--all', action='store_true',
-                    help='derive the list from home.packages across nirePackages/')
+                    help='derive the list from home.packages across packages/')
     ap.add_argument('--duplicates', action='store_true',
                     help='report packages a homebrew cask ALSO installs, and what to do')
     args = ap.parse_args()

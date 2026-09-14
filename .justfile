@@ -23,7 +23,7 @@ user    := "elly"
 # tenacity spent an hour building the wrong machine and said nothing about it.
 #
 # Derived from the host configs on disk rather than a hardcoded list of
-# hostnames: `nire-tenacity` -> nireHost/tenacity-configuration.nix. A third
+# hostnames: `nire-tenacity` -> hosts/tenacity-configuration.nix. A third
 # host is picked up by existing, with no edit here -- which matters, because
 # the failure mode of forgetting is the silent wrong-machine build this exists
 # to prevent. Anywhere with no matching config -- the darwin laptop, a
@@ -33,7 +33,7 @@ user    := "elly"
 #     just host=nire-durandal build
 # `just build host=nire-durandal` is not a variant of that; just reads it as a
 # second recipe name and errors.
-host := `h=$(hostname); [ -e "flake/modules/nireHost/${h#nire-}-configuration.nix" ] && echo "$h" || echo nire-durandal`
+host := `h=$(hostname); [ -e "flake/modules/hosts/${h#nire-}-configuration.nix" ] && echo "$h" || echo nire-durandal`
 
 _default:
     @just --list
@@ -49,7 +49,7 @@ modules:
 
 # statix + deadnix + an oversized-file check, ratcheted against a committed baseline
 lint:
-    # Needs statix/deadnix on PATH -- already there via nirePackages/nix-utils/
+    # Needs statix/deadnix on PATH -- already there via packages/nix-utils/
     # on a real host; `nix shell nixpkgs#statix nixpkgs#deadnix` first otherwise.
     # A commit can lower the finding count but never raise it -- see
     # flake/scripts/lint.py's own header for why this is a ratchet and not a
@@ -160,7 +160,7 @@ switch:
 
 # Attach the TUI to cube's opencode server (tailnet-only, port 3003)
 opencode-attach dir='.' *args:
-    # Cube-only server -- nireHost/cube/configuration/opencode-server-cube.nix.
+    # Cube-only server -- hosts/cube/configuration/opencode-server-cube.nix.
     # `ts-cube` is cube's tailnet DEVICE name, not its hostname (tailscale.nix
     # trap #1), and resolves from any tailnet member, including cube itself.
     # First arg is the project dir (default `.`); extra args pass through:

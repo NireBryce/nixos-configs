@@ -4,7 +4,7 @@
 # host's own ed25519 SSH host key, converted with ssh-to-age. That's what
 # sops.age.sshKeyPaths (sops.nix) points at on the decrypting side, and what
 # .sops.yaml's `keys:` list holds on the encrypting side -- see
-# flake/modules/nire/system/secrets/.sops.yaml for durandal/lysithea/tenacity/
+# flake/modules/system/system/secrets/.sops.yaml for durandal/lysithea/tenacity/
 # cube's existing entries -- run this any time a fifth host needs one.
 #
 #   host-age-key.sh                        # this machine's own host key
@@ -54,7 +54,7 @@ done
 
 script_dir=$(cd -- "$(dirname -- "$0")" && pwd)
 flake_dir=$(dirname -- "$script_dir")
-secrets_dir="$flake_dir/modules/nire/system/secrets"
+secrets_dir="$flake_dir/modules/system/system/secrets"
 
 run_ssh_to_age() {
     if command -v ssh-to-age >/dev/null 2>&1; then

@@ -16,7 +16,7 @@ host's `drvPath` byte-identical after. That part of the change was fine.
 While the logic was already in one place, adding "stop at a nested
 category's own boundary and reference its aggregate by name, instead of
 re-walking its files from scratch" looked like the obvious next
-improvement — cheap to write once, and `nire/hardware/amd` plus `homelab`'s
+improvement — cheap to write once, and `system/hardware/amd` plus `homelab`'s
 seven children were sitting right there as real nested categories to apply
 it to. Wrote it, and the same `drvPath` fingerprint check that had just
 verified the refactor passed again, unchanged.

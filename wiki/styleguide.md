@@ -57,9 +57,9 @@ separate tier for the *usage* side:
   [categories/00-INDEX.md](categories/00-INDEX.md)'s table (`Category |
   Directory | Class(es) | Imported by` — deliberately no per-category file
   count column; see that page's own note on why). Deliberately *not*
-  covered by their own category page: `nirePackages/*` subcategories
+  covered by their own category page: `packages/*` subcategories
   (single-package files, already self-explanatory from a glance) and
-  `nireHost/*` per-host bundles (host definitions, not categories — see
+  `hosts/*` per-host bundles (host definitions, not categories — see
   [hosts.md](hosts.md) instead).
 - **`wiki/homelab/`** — the usage tier, added 2026-08-24 with
   [creating-golinks.md](homelab/creating-golinks.md). Pages about operating

@@ -25,8 +25,8 @@ is the mechanism, not the inventory.
   declared explicitly. Read this before touching any `dirsAsCategory.nix`.
 - **[`../CLAUDE.md`](../CLAUDE.md), Architecture section** — the prose
   overview: `import-tree`, entry points that sit outside every category tree
-  (`modules/checks.nix`, `nireHost/hosts.nix`, the per-host configs,
-  `nireUser/elly-home-manager.nix`), and which categories aren't imported by
+  (`modules/checks.nix`, `hosts/hosts.nix`, the per-host configs,
+  `users/elly-home-manager.nix`), and which categories aren't imported by
   every host (`virtualization` is the running example — cube only as of
   2026-08-27, deliberately absent on the handhelds and, since that date, on
   durandal too — see [`categories/virtualization.md`](categories/virtualization.md)).
@@ -63,9 +63,9 @@ is the mechanism, not the inventory.
 ## Related, easy to get backwards
 
 Containers and VMs are separate categories here, and "virtualization" means
-only the VM one (`nire/homelab/virtualization/`: libvirt, virt-tools,
+only the VM one (`system/homelab/virtualization/`: libvirt, virt-tools,
 vm-networking — optional, cube only). Podman/distrobox live in
-[`nire/homelab/containers/`](categories/containers.md), its own category
+[`system/homelab/containers/`](categories/containers.md), its own category
 since 2026-08-22, nested under the `homelab` umbrella since 2026-08-27 —
 imported explicitly by tenacity and cube (durandal dropped it 2026-08-27,
 same day as `virtualization`). See

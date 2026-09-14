@@ -4,7 +4,7 @@ baseline so a commit can lower the finding count but never raise it.
 
 Neither `nix flake check` nor `modules.py` catches nix-antipattern lint
 (statix) or dead code (deadnix) -- both were already installed as home-manager
-packages (nirePackages/nix-utils/{statix,deadnix}/) for a human to run by
+packages (packages/nix-utils/{statix,deadnix}/) for a human to run by
 hand, but nothing ran them. Wired in here rather than as a bare `nix flake
 check` addition because a lint tool, unlike an evaluator, has an opinion --
 running it once and requiring a clean tree would mean fixing (or `-i`-globbing
@@ -59,7 +59,7 @@ def run_tool(argv, tool_name):
         return subprocess.run(argv, capture_output=True, text=True, cwd=FLAKE_ROOT)
     except FileNotFoundError:
         print(f"lint.py: {tool_name!r} not on PATH -- it's a home-manager package "
-              f"(nirePackages/nix-utils/{tool_name}/) on a real host, but CI and a "
+              f"(packages/nix-utils/{tool_name}/) on a real host, but CI and a "
               f"bare devshell need `nix shell nixpkgs#{tool_name}` first.",
               file=sys.stderr)
         sys.exit(2)

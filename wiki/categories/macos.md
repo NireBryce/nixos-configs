@@ -1,4 +1,4 @@
-# `macos` — `nire/macos/`
+# `macos` — `system/macos/`
 
 _Last modified: 2026-09-01_
 
@@ -39,7 +39,7 @@ section for the general pattern this fits into.
 
 Found 2026-08-31 on `nire-lysithea` diagnosing "the Tailscale service won't
 install". Not a bug in this repo — `tailscale.nix`
-(`nire/system/networking/`) is `flake.modules.nixos`-only and never reaches
+(`system/system/networking/`) is `flake.modules.nixos`-only and never reaches
 darwin; on lysithea, Tailscale is entirely the `tailscale-app` cask in
 `homebrew.nix`, unmanaged by Nix past that one line.
 

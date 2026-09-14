@@ -15,7 +15,7 @@
 #
 #   what IS the host   whether the flake declares darwinConfigurations.<host>.
 #                      Cheap -- that attrset is a plain attrset in
-#                      nireHost/hosts.nix, so attrNames does not force any
+#                      hosts/hosts.nix, so attrNames does not force any
 #                      configuration. ~0.1s.
 #
 #   can we build it    uname. There is no remote builder and no binfmt here, so

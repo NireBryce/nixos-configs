@@ -194,7 +194,7 @@ agenda, and each calendar card carries a small API-error band — the
 placeholder URL 403ing, gone the moment a real address takes its place
 (the secret's `restartUnits` bounces homepage at the next switch).
 
-The fill-in: `sops <repo>/flake/modules/nire/system/secrets/secrets.yaml`,
+The fill-in: `sops <repo>/flake/modules/system/system/secrets/secrets.yaml`,
 edit the `homepage-env` value to one
 `HOMEPAGE_VAR_ICAL_<NAME>=<secret-ics-url>` line per calendar (`family`
 exists as the placeholder name; more names mean adding entries to

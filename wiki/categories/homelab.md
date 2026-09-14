@@ -1,4 +1,4 @@
-# `homelab` — `nire/homelab/`
+# `homelab` — `system/homelab/`
 
 _Last modified: 2026-09-02_
 
@@ -26,12 +26,12 @@ An eighth, [backup](backup.md), joined 2026-08-28 the same way — restic,
 backing up the state the other seven produce to the QNAP NAS already on the
 network. It's the odd one out functionally (nothing to reach over the
 tailnet, no port, no Caddy route — a timer, not a listener) but structurally
-identical: its own `dirsAsCategory.nix` under `nire/homelab/backup/`,
+identical: its own `dirsAsCategory.nix` under `system/homelab/backup/`,
 cube-only, folded in by the same delegation this page describes below.
 
 ## Nested categories overlap their parents on purpose
 
-Same mechanism [hardware](hardware.md) documents for `nire/hardware/amd/`:
+Same mechanism [hardware](hardware.md) documents for `system/hardware/amd/`:
 `homelab`'s `dirsAsCategory.nix` references each nested category by name
 (via `modules/_lib/category-collector.nix` — see that doc's History
 section) rather than re-deriving their modules, giving one coarse handle

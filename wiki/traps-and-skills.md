@@ -92,6 +92,6 @@ these fits into the bigger picture; this page is just the index.
   than asserted as current.
 - **Conventions section of [`../CLAUDE.md`](../CLAUDE.md)** — commit
   trailer wording (and why it deliberately omits a model name — see the
-  section for the reasoning), namespacing (`nire`/`nireHost`/`nireUser`/
-  `nirePackages`), the "say what it was" rule for renames, the "don't bury
+  section for the reasoning), namespacing (`nire`/`hosts`/`users`/
+  `packages`), the "say what it was" rule for renames, the "don't bury
   Python in bash" rule with its two ways out.

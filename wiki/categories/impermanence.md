@@ -1,4 +1,4 @@
-# `impermanence` — `nire/impermanence/`
+# `impermanence` — `system/impermanence/`
 
 _Last modified: 2026-09-02_
 
@@ -68,19 +68,19 @@ further in, under `restore-root/` (named for the systemd service
 every boot. `nire-cube` does **not** — its real install is a plain
 persistent root, not LUKS+impermanence (corrected 2026-08-21). That absence
 is why two other things exist:
-[`nireUser/elly/user-settings/WARN-password-required.nix`](elly.md), which
+[`users/elly/user-settings/WARN-password-required.nix`](elly.md), which
 warns that a non-impermanence host has no login-password help here (cube
 itself is excluded by hostname as of 2026-09-01 — its password was set by
 hand before it was switched), and
-`nire/system/impermanence/declare-persistence-option.nix` — a **different,
+`system/system/impermanence/declare-persistence-option.nix` — a **different,
 easily confused file**, next section.
 
 ## The other "impermanence" — don't confuse the two
 
-`nire/system/impermanence/declare-persistence-option.nix` is **not** part of
-this category. It's a subdirectory of `nire/system/` that happens to share
+`system/system/impermanence/declare-persistence-option.nix` is **not** part of
+this category. It's a subdirectory of `system/system/` that happens to share
 the word "impermanence" in its path, collected into the `system` category
-aggregate like everything else under `nire/system/`, not into this one. It
+aggregate like everything else under `system/system/`, not into this one. It
 declares the `environment.persistence` *option* (not any actual persisted
 paths) for every NixOS host unconditionally — including `cube`, which
 doesn't wipe anything — specifically so that `tailscale-persist.nix`,
@@ -97,7 +97,7 @@ though the *value* doesn't.
 
 Only `kde-sleepmode.nix` is `homeManager`-class; the rest of this category
 is `nixos`-class and doesn't reach Home Manager. It rides into every host
-via `nireUser/elly-home-manager.nix` (the shared `ellyHomeManager` bundle,
+via `users/elly-home-manager.nix` (the shared `ellyHomeManager` bundle,
 outside every category tree — see [../architecture.md](../architecture.md)),
 not through each host's own per-host imports list.
 

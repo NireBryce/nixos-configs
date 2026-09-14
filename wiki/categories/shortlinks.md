@@ -1,4 +1,4 @@
-# `shortlinks` — `nire/homelab/shortlinks/`
+# `shortlinks` — `system/homelab/shortlinks/`
 
 _Last modified: 2026-09-11_
 

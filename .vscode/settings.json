@@ -61,7 +61,7 @@
                     "expr": "(builtins.getFlake \"${workspaceFolder}/flake\").nixosConfigurations.nire-durandal.options.home-manager.users.type.getSubOptions []"
                 },
                 // Restored 2026-08-14. Removed once on the belief that this flake has no
-                // darwinConfigurations -- it does: `nireHost/hosts.nix` declares
+                // darwinConfigurations -- it does: `hosts/hosts.nix` declares
                 // nire-lysithea (aarch64-darwin) via `mkDarwinHost`, alongside the two
                 // nixosConfigurations. That is the same wrong reading CLAUDE.md records
                 // under "three hosts, not two".

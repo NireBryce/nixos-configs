@@ -38,16 +38,16 @@ and the NixOS side knew nothing about it.
 
 ## The three files that would change
 
-### 1. `modules/nire/system/home-manager/enable-home-manager.nix` — delete it
+### 1. `modules/system/system/home-manager/enable-home-manager.nix` — delete it
 
 This is the whole of the integration: it imports
 `inputs.home-manager.nixosModules.home-manager` and sets `home-manager.users.elly`
 to `ellyHomeManager`. Nothing else references it.
 
-It lives under `nire/system/` so the `system` category carries it to durandal.
+It lives under `system/system/` (the `system/` directory's own `system/` subdirectory) so the `system` category carries it to durandal.
 Deleting the file removes it from that category automatically — no host edit.
 
-### 2. `modules/nireUser/elly-home-manager.nix` — keep, and build a configuration from it
+### 2. `modules/users/elly-home-manager.nix` — keep, and build a configuration from it
 
 `ellyHomeManager` is the module aggregate and is **independent of how it gets
 applied**. It is the same value either way; only the consumer changes. Add a
@@ -75,7 +75,7 @@ Two things to get right here:
 - **`withSystem` requires the system to be listed in `systems`** in `flake.nix`.
   `x86_64-linux` is, today.
 
-### 3. `modules/nire/nix/nix-settings/basic-nix-settings.nix` — restore the block
+### 3. `modules/system/nix/nix-settings/basic-nix-settings.nix` — restore the block
 
 Standalone permits `nixpkgs.*` in home modules again, so this can go back:
 
@@ -140,7 +140,7 @@ dotfile HM wants to own and finds already present.
 ## What does *not* change
 
 - `ellyHomeManager` itself, and every module it imports. The whole
-  `modules/nirePackages/` tree, `nire/shell-config/`, `nireUser/elly/` — all of it
+  `modules/packages/` tree, `system/shell-config/`, `users/elly/` — all of it
   is untouched by this decision. That is the point of the aggregate being a plain
   `deferredModule`: it does not know or care who evaluates it.
 - Anything about categories, `dirsAsCategory`, or the host wiring.

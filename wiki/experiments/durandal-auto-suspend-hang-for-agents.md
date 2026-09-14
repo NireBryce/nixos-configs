@@ -58,7 +58,7 @@ the keyboard wake path; disabling it costs wake-on-keyboard).
 ## Under test
 
 Nothing. Instrumentation only:
-[suspend-probe-durandal.nix](../../flake/modules/nireHost/durandal/fixes/suspend-probe-durandal.nix)
+[suspend-probe-durandal.nix](../../flake/modules/hosts/durandal/fixes/suspend-probe-durandal.nix)
 — writes `/var/log/suspend-probe/`, `sync`'d; `/var/log` is its own btrfs
 subvolume, outside the wiped root.
 

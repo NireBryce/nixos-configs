@@ -1,4 +1,4 @@
-# `hardware` — `nire/hardware/` (+ nested `amd`)
+# `hardware` — `system/hardware/` (+ nested `amd`)
 
 _Last modified: 2026-09-01_
 
@@ -19,8 +19,8 @@ this repo is AMD, so that's the entire category so far.
 
 ## Nested categories overlap their parents on purpose
 
-`nire/hardware/amd/` has its **own** `dirsAsCategory.nix`, nested inside
-`nire/hardware/`'s. `hardware`'s own aggregate ends up referencing `amd`'s
+`system/hardware/amd/` has its **own** `dirsAsCategory.nix`, nested inside
+`system/hardware/`'s. `hardware`'s own aggregate ends up referencing `amd`'s
 aggregate by name rather than re-deriving `amdcpu`/`amdgpu` independently
 (as of the 2026-08-27 refactor into `modules/_lib/category-collector.nix` —
 see that doc's History section) — a coarse handle (`hardware`, what every

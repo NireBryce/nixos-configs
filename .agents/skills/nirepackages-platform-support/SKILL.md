@@ -7,7 +7,7 @@ description: How to tell whether nixpkgs can build a package on darwin and wheth
 
 ## Applies to
 
-Packages in `ellyHomeManager` (`nirePackages/`, `nireUser/`), shared across
+Packages in `ellyHomeManager` (`packages/`, `users/`), shared across
 all four hosts including darwin. Use before adding a package module, adding
 an `isDarwin`/platform guard, or deciding whether a cask duplicates a
 nixpkgs package.
@@ -19,7 +19,7 @@ only one of them is answered for you automatically.
 
 ## Can nixpkgs build it here? Answered automatically.
 
-`nire/system/home-manager/drop-unsupported-packages.nix` re-declares
+`system/system/home-manager/drop-unsupported-packages.nix` re-declares
 `home.packages` with an `apply` that filters by `lib.meta.availableOn`, **on
 darwin only**, and warns naming everything it dropped. So:
 
@@ -37,7 +37,7 @@ darwin only**, and warns naming everything it dropped. So:
 ## Does Homebrew already install it? Never answered automatically.
 
 `meta.platforms` has no opinion about Homebrew and never will.
-`homebrew.nix` (`flake/modules/nire/macos/homebrew/`) installs 59 casks, and
+`homebrew.nix` (`flake/modules/system/macos/homebrew/`) installs 59 casks, and
 some of them are also nixpkgs packages in `ellyHomeManager` — lysithea gets
 two copies of each when that happens. Run:
 
@@ -48,7 +48,7 @@ just available --duplicates   # only the ones homebrew ALSO installs, and what t
 Deciding which one wins is a judgement call per app. `obsidian.nix` is the
 worked example, and its `isDarwin` test means *"on darwin, homebrew.nix owns
 this app"* — **not** *"Linux-only"*. Read every remaining `isDarwin` in
-`nirePackages/` that way and check which of the two questions above it's
+`packages/` that way and check which of the two questions above it's
 actually answering before copying it.
 
 ## Is it darwin-only? The one case where restating the platform IS correct.

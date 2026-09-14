@@ -20,7 +20,7 @@ Don't assume a branch — check `git branch --show-current`.
 
 This config enables impermanence and wipes `/root` on boot on most hosts.
 Never suggest installing it wholesale; be careful touching
-`flake/modules/nire/impermanence/` or `fileSystems`/`boot` in the host
+`flake/modules/system/impermanence/` or `fileSystems`/`boot` in the host
 hardware modules.
 
 `WARN-impermanence.nix` (reached through the `impermanence` category)
@@ -32,7 +32,7 @@ root, not LUKS+impermanence. Don't assume "every host wipes root" or "no host do
 the specific host. Read `WARN-impermanence.nix` before changing anything
 near it.
 
-Secrets are sops-nix (`flake/modules/nire/system/secrets/`). `secrets.yaml`
+Secrets are sops-nix (`flake/modules/system/system/secrets/`). `secrets.yaml`
 is encrypted and committed; that is deliberate, not a mistake to be "fixed".
 `.sops.yaml` (same directory) enrolls `nire-durandal`, `nire-lysithea`,
 `nire-tenacity`, and `nire-cube` — all live hosts with current config here,
@@ -48,7 +48,7 @@ Whether a host runs what the tree evaluates to is a live question, answered
 only on the host: `just baseline`, `just diff-deployed`, or a forced
 toplevel eval against `/run/current-system`.
 
-Roster, class, and which hosts wipe `/root`: `nireHost/hosts.nix` (check it
+Roster, class, and which hosts wipe `/root`: `hosts/hosts.nix` (check it
 before stating any count) and `wiki/hosts.md`'s table. First-boot history
 (dates, generations, the `/root` rollback):
 `wiki/history.md`'s "Confirmed-on-hardware facts".
@@ -108,30 +108,30 @@ changing any `dirsAsCategory.nix`.
 - **A category collects from its *sub*directories only.** A `.nix` file
   sitting directly in a category directory is collected by nothing.
 - **Entry points sit outside every category tree** — `modules/checks.nix`,
-  `nireHost/hosts.nix`, `nireHost/durandal-configuration.nix`, and
-  `nireUser/elly-home-manager.nix`; `just modules` relies on exactly this.
+  `hosts/hosts.nix`, `hosts/durandal-configuration.nix`, and
+  `users/elly-home-manager.nix`; `just modules` relies on exactly this.
 
-Areas: `nire/` (shared system, incl. `nire/macos/` for darwin), `nireHost/`
-(per-host), `nirePackages/`, `nireUser/`.
+Areas: `system/` (shared system, incl. `system/macos/` for darwin), `hosts/`
+(per-host), `packages/`, `users/`.
 
 **The category is how something shared stays optional** — nothing in this
 tree declares `mkEnableOption`. `kde-desktop` is the by-name variant: one
 module imported directly while its category (`desktop-env`, which also
 holds `jovian`) is never imported whole.
 
-**`nire/homelab/` is an umbrella category (2026-08-27)** nesting several
+**`system/homelab/` is an umbrella category (2026-08-27)** nesting several
 cube-only categories, same coarse-and-fine overlap as
-`nire/hardware`/`nire/hardware/amd`. Full account, including the nested
+`system/hardware`/`system/hardware/amd`. Full account, including the nested
 categories' names and a real collector quirk: `wiki/categories/homelab.md`.
 
-**Hosts**: roster and class are `nireHost/hosts.nix` (commented at each
+**Hosts**: roster and class are `hosts/hosts.nix` (commented at each
 declaration) and `wiki/hosts.md`'s table — don't restate the list here, it
 only rots.
 
 ### Home Manager is NixOS-integrated
 
 `home-manager.users.elly` is set from the NixOS side with `useGlobalPkgs`
-and `useUserPackages`, in `nire/system/home-manager/enable-home-manager.nix`.
+and `useUserPackages`, in `system/system/home-manager/enable-home-manager.nix`.
 No `homeConfigurations` output, no separate home switch; `just switch`
 applies both. `flake/doc/trailhead-home-manager-standalone.md` is the way
 back; skill `home-manager-dotfiles` has the traps and integration specifics

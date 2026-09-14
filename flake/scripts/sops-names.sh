@@ -20,7 +20,7 @@
 set -euo pipefail
 
 repo_root=$(cd -- "$(dirname -- "$0")/../.." && pwd)
-file="${1:-$repo_root/flake/modules/nire/system/secrets/secrets.yaml}"
+file="${1:-$repo_root/flake/modules/system/system/secrets/secrets.yaml}"
 
 if [ ! -f "$file" ]; then
     echo "no secrets file at $file" >&2

@@ -42,7 +42,7 @@ needed its own task.
    the tree, exactly the shared-checkout risk that skill exists for.
 2. **Scope the sweep before starting.** "Whole repo" is rarely what's
    wanted — confirm with Elly whether it's everything, one area
-   (`flake/modules/nire/`, `wiki/`, one host), or one class of finding
+   (`flake/modules/system/`, `wiki/`, one host), or one class of finding
    (dead imports, stale comments, unused variables). A vague ask is worth
    one clarifying question rather than guessing at the diff size.
 3. **Search, don't skim.** Grep for the concrete shapes that
