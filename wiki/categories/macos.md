@@ -2,6 +2,11 @@
 
 _Last modified: 2026-09-01_
 
+`darwin`-class only, throughout — the one category in this repo that is
+entirely platform-specific rather than shared-with-a-guard. See
+[../architecture.md](../architecture.md)'s "Platform support is derived"
+section for the general pattern this fits into.
+
 ## Contents
 
 - [What's in it](#whats-in-it)
@@ -9,11 +14,6 @@ _Last modified: 2026-09-01_
 - [Why `hardware`/`desktop-env`/`peripherals` are absent from lysithea instead of guarded here](#why-hardwaredesktop-envperipherals-are-absent-from-lysithea-instead-of-guarded-here)
 - [Imported by](#imported-by)
 - [See also](#see-also)
-
-`darwin`-class only, throughout — the one category in this repo that is
-entirely platform-specific rather than shared-with-a-guard. See
-[../architecture.md](../architecture.md)'s "Platform support is derived"
-section for the general pattern this fits into.
 
 ## What's in it
 

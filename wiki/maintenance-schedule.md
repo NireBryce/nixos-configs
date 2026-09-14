@@ -2,6 +2,12 @@
 
 _Last modified: 2026-09-13_
 
+> **Condensed version:**
+> [maintenance-schedule-for-agents.md](maintenance-schedule-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
 ## Contents
 
 - [What this is](#what-this-is)
@@ -9,12 +15,6 @@ _Last modified: 2026-09-13_
 - [Items](#items)
 - [Adding a new item](#adding-a-new-item)
 - [See also](#see-also)
-
-> **Condensed version:**
-> [maintenance-schedule-for-agents.md](maintenance-schedule-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
 
 ## What this is
 

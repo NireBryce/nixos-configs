@@ -2,6 +2,13 @@
 
 _Last modified: 2026-09-02_
 
+**Read `WARN-impermanence.nix` itself before changing anything here — this
+page is an index, not a substitute.** See
+[../impermanence-and-secrets.md](../impermanence-and-secrets.md) for the
+cross-cutting version of this topic (which hosts wipe `/root`, the initrd
+sharp edges); this page is specifically about what lives in the category
+directory.
+
 ## Contents
 
 - [What's in it](#whats-in-it)
@@ -9,13 +16,6 @@ _Last modified: 2026-09-02_
 - [The other "impermanence" — don't confuse the two](#the-other-impermanence--dont-confuse-the-two)
 - [Reaching the home-manager side](#reaching-the-home-manager-side)
 - [See also](#see-also)
-
-**Read `WARN-impermanence.nix` itself before changing anything here — this
-page is an index, not a substitute.** See
-[../impermanence-and-secrets.md](../impermanence-and-secrets.md) for the
-cross-cutting version of this topic (which hosts wipe `/root`, the initrd
-sharp edges); this page is specifically about what lives in the category
-directory.
 
 ## What's in it
 

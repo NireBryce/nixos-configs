@@ -2,16 +2,16 @@
 
 _Last modified: 2026-09-04_
 
+Resolved incidents and a removed VM's own verification record, split out of
+[virtualization](virtualization.md) 2026-09-03 so that page stays about the
+generator as it exists today. `nire-llm-sandbox` itself was removed
+2026-08-28 — [../history.md](../history.md).
+
 ## Contents
 
 - [`nire-llm-sandbox`'s `sshForward` verification](#nire-llm-sandboxs-sshforward-verification)
 - [The near-miss this category's own header records](#the-near-miss-this-categorys-own-header-records)
 - [See also](#see-also)
-
-Resolved incidents and a removed VM's own verification record, split out of
-[virtualization](virtualization.md) 2026-09-03 so that page stays about the
-generator as it exists today. `nire-llm-sandbox` itself was removed
-2026-08-28 — [../history.md](../history.md).
 
 ## `nire-llm-sandbox`'s `sshForward` verification
 

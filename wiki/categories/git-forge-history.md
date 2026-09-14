@@ -2,6 +2,10 @@
 
 _Last modified: 2026-09-12_
 
+Verification record for [git-forge](git-forge.md) as it was first switched
+and then re-routed, split out 2026-09-03 so that page stays about the
+category as it works today.
+
 ## Contents
 
 - [First switch and the move behind Caddy](#first-switch-and-the-move-behind-caddy)
@@ -9,10 +13,6 @@ _Last modified: 2026-09-12_
 - [The admin account, and an anonymous API that reports zeroes](#the-admin-account-and-an-anonymous-api-that-reports-zeroes)
 - [Mirror, not origin — and the first real mirror](#mirror-not-origin--and-the-first-real-mirror)
 - [See also](#see-also)
-
-Verification record for [git-forge](git-forge.md) as it was first switched
-and then re-routed, split out 2026-09-03 so that page stays about the
-category as it works today.
 
 ## First switch and the move behind Caddy
 

@@ -2,13 +2,6 @@
 
 _Last modified: 2026-09-11_
 
-## Contents
-
-- [Two traps general enough to stay inline in `CLAUDE.md` rather than a skill](#two-traps-general-enough-to-stay-inline-in-claudemd-rather-than-a-skill)
-- [A trap worth knowing before it's needed](#a-trap-worth-knowing-before-its-needed)
-- [A trap that points at the wiki instead of a skill](#a-trap-that-points-at-the-wiki-instead-of-a-skill)
-- [Style](#style)
-
 [`../CLAUDE.md`](../CLAUDE.md)'s own "Traps" section carries a one-line
 summary of each; the full mechanism, code, and worked examples live in the
 matching skill, loaded only when the matching task comes up so it doesn't
@@ -36,6 +29,13 @@ one-liner.
 See [architecture.md](architecture.md) and
 [impermanence-and-secrets.md](impermanence-and-secrets.md) for where each of
 these fits into the bigger picture; this page is just the index.
+
+## Contents
+
+- [Two traps general enough to stay inline in `CLAUDE.md` rather than a skill](#two-traps-general-enough-to-stay-inline-in-claudemd-rather-than-a-skill)
+- [A trap worth knowing before it's needed](#a-trap-worth-knowing-before-its-needed)
+- [A trap that points at the wiki instead of a skill](#a-trap-that-points-at-the-wiki-instead-of-a-skill)
+- [Style](#style)
 
 ## Two traps general enough to stay inline in `CLAUDE.md` rather than a skill
 

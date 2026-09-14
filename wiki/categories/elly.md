@@ -2,17 +2,17 @@
 
 _Last modified: 2026-09-01_
 
-## Contents
-
-- [What's in it](#whats-in-it)
-- [Imported by](#imported-by)
-- [See also](#see-also)
-
 The one category under `nireUser/` — the "for the user" area, as opposed to
 `nire/` (shared system) or `nirePackages/` (packages). Don't confuse this
 category with `nireUser/elly-home-manager.nix`, the entry point one level up
 that assembles the *whole* `ellyHomeManager` bundle out of this category
 plus several others — see [../architecture.md](../architecture.md).
+
+## Contents
+
+- [What's in it](#whats-in-it)
+- [Imported by](#imported-by)
+- [See also](#see-also)
 
 ## What's in it
 

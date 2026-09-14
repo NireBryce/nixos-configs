@@ -2,6 +2,11 @@
 
 _Last modified: 2026-09-12_
 
+Resolved incidents and superseded design behind [backup](backup.md) and
+[../homelab/backup-runbook.md](../homelab/backup-runbook.md) — split out
+2026-09-03 so those pages stay about the backend as it actually works today.
+Nothing here changes what to type or how the module is shaped now.
+
 ## Contents
 
 - [The original plan (2026-08-27)](#the-original-plan-2026-08-27)
@@ -9,11 +14,6 @@ _Last modified: 2026-09-12_
 - [Getting the SFTP repository from "declared" to "actually working" (2026-08-30 through 2026-09-06)](#getting-the-sftp-repository-from-declared-to-actually-working-2026-08-30-through-2026-09-06)
 - [The setup checklist, closed out (2026-08-28 through 2026-09-06)](#the-setup-checklist-closed-out-2026-08-28-through-2026-09-06)
 - [See also](#see-also)
-
-Resolved incidents and superseded design behind [backup](backup.md) and
-[../homelab/backup-runbook.md](../homelab/backup-runbook.md) — split out
-2026-09-03 so those pages stay about the backend as it actually works today.
-Nothing here changes what to type or how the module is shaped now.
 
 ## The original plan (2026-08-27)
 
