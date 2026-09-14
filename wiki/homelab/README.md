@@ -1,11 +1,10 @@
 # Homelab services
 
-_Last modified: 2026-09-12_
+_Last modified: 2026-09-13_
 
 ## Contents
 
 - [Pages](#pages)
-- [Also running, not yet written up](#also-running-not-yet-written-up)
 - [Half-finished is the normal state here](#half-finished-is-the-normal-state-here)
 - [Index over restatement still applies, with one carve-out](#index-over-restatement-still-applies-with-one-carve-out)
 - [See also](#see-also)
@@ -33,6 +32,7 @@ under it, which can happen with no commit to this repo at all.
 | Forgejo — self-hosted git forge | `nire-cube` | `.../git/` | [Using the forge](forgejo.md) |
 | homepage — the landing page: services, status, weather, calendar | `nire-cube` | `https://homepage.moose-micro.ts.net/` (short: `http://homepage/`; also `.../` on cube's own name) | [Reaching cube's services](reaching-services.md); [landing](../categories/landing.md) covers config |
 | glance — the old index, back for the landing evaluation | `nire-cube` | `https://glance.moose-micro.ts.net/` (short: `http://glance/`) | [landing](../categories/landing.md) |
+| Grafana — dashboards over cube's own metrics | `nire-cube` | `https://grafana.moose-micro.ts.net/` (short: `http://grafana/`) | [Using Grafana](grafana.md) |
 | restic — backups to the QNAP | `nire-cube` | — (no URL; a timer, not a listener) | [Backup runbook](backup-runbook.md) |
 
 **Not a service of its own, but related**: [rustic](rustic.md) — a TUI that
@@ -44,21 +44,6 @@ itself isn't working yet either (see the runbook).
 **Start at that second one if you don't know what's running.** It lists the
 services below, live-checks each one, and shows how cube itself is doing —
 so it answers "what's on here and is it up" without reading this page.
-
-## Also running, not yet written up
-
-On `nire-cube`, reachable over the tailnet only, with a category page
-covering configuration but no usage page here yet.
-
-| Service | Reach it at | Configuration |
-|---|---|---|
-| Grafana — dashboards over cube's own metrics | `https://grafana.moose-micro.ts.net/` (short: `http://grafana/`) | [monitoring](../categories/monitoring.md) |
-
-Grafana mostly doesn't need one: you log in and look at the dashboards
-[monitoring](../categories/monitoring.md) provisions. What *would* be worth
-writing up is adding a dashboard that survives a rebuild — anything edited in
-the UI lives only in cube's sqlite db, while anything under the module's
-`_dashboards/` is provisioned read-only from the store.
 
 **Those URLs have changed twice.** The port forms
 (`http://ts-cube:3000/`, `http://ts-cube:3001/`) stopped answering

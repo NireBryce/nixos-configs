@@ -195,10 +195,10 @@ design reason rules them out, it just hasn't been asked for there yet.
 
 ## See also
 
-- [homelab/README.md](../homelab/README.md) — Grafana is listed there under
-  "Also running, not yet written up": reachable and confirmed working, just
-  no usage-tier page yet since logging in and reading the provisioned
-  dashboards needs little explaining.
+- [homelab/grafana.md](../homelab/grafana.md) — the usage-tier page, written
+  2026-09-13: signing in (and the two passwords that don't reconcile), what
+  happens to a dashboard edited in the UI, and what a restore actually gets
+  you. This page is the configuration half.
 - [reverse-proxy](reverse-proxy.md) — Caddy, how Grafana is reached as of
   2026-08-24, and where its TLS certificate comes from.
 - [system](system.md) — `tailscale.nix`, the firewall rule this category's
