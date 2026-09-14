@@ -72,6 +72,7 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
 | add a new host, or format its disk for impermanence | [disk-formatting.md](disk-formatting.md), skill [`new-host-config`](../.agents/skills/new-host-config/SKILL.md) |
 | check what key/credential expiry is coming due | [maintenance-schedule.md](maintenance-schedule.md), skill [`maintenance-schedule`](../.agents/skills/maintenance-schedule/SKILL.md) |
 | run the fleet's periodic upkeep — lock PR, deploys, store hygiene | [maintenance.md](maintenance.md) |
+| work out which name or IP answers for what (forward, reverse, `.local`, `svc:`) | [name-resolution.md](name-resolution.md) |
 
 ## Pages
 
@@ -122,6 +123,10 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
 - [Fleet maintenance](maintenance.md) — the recurring upkeep beyond
   credentials: the weekly flake.lock PR, deploying and the verification
   habit around it, and store hygiene (what runs itself, what doesn't).
+- [Name resolution & reverse DNS](name-resolution.md) — which name
+  source answers for what (MagicDNS devices vs `svc:` VIPs, `.local`,
+  golink's device), what PTR returns for tailnet IPs, and where those
+  names render — including why Caddy's logs never show a peer address.
 
 ### Category reference (configuration)
 
