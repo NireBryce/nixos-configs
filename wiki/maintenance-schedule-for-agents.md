@@ -24,7 +24,7 @@ and dates are not values.
 | 7 | `forgejo-admin-password` | none enforced; never rotated | — | — |
 | 8 | Grafana admin credentials | real password, set by hand 2026-09-13; **not** reproducible | lives only in cube's sqlite db | 2026-09-13 |
 | 9 | Syncthing device certs | decades; **declared by no module since 2026-09-08** | nothing | 2026-09-07 |
-| 10 | `FLAKE_LOCK_TOKEN` | fine-grained PAT, **must** carry one (366d max) | fails loudly by construction, see below | 2026-09-08 |
+| 10 | `FLAKE_LOCK_TOKEN` | expires 2027-09-12; custom date ≤366d | fails loudly by construction, see below | 2026-09-13 |
 | 11 | Atuin account key | none; on suspicion only | — | 2026-09-09 |
 
 **Row 8, two independent things.** The live password was set by hand
@@ -50,8 +50,6 @@ the *absence* of an `admin_password` setting is what leaves it stock. Skill
   a silent lapse takes every service with it. `nire-lysithea` appears
   **twice**, both offline, two different expiry dates: a stale duplicate
   registration worth pruning. Read live with `tailscale status --json`.
-- **#10** — **the secret did not exist yet as of 2026-09-08**; until it
-  does, every weekly run fails at preflight.
 
 ## Procedures live elsewhere
 
@@ -62,6 +60,10 @@ the *absence* of an `admin_password` setting is what leaves it stock. Skill
 | 11 | `nirePackages/shell-apps/history/atuin-key-rotation.md` |
 
 ## `FLAKE_LOCK_TOKEN` specifics
+
+Minted 2026-09-13, expires 2027-09-12. Verified end to end same day: a
+manual `workflow_dispatch` run passed preflight and opened #308 with
+`nix flake check + module tree` running on it.
 
 GitHub Actions repo secret, **not** `secrets.yaml` — a runner has no
 persistent host key to enrol, and `secrets.yaml` is committed to a public
