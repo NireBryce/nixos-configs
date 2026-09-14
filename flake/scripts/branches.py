@@ -37,6 +37,10 @@ off the back; raise --depth if a known-merged branch reports UNMERGED.
     branches.py prune              # delete the MERGED ones (asks first)
     branches.py prune --yes        # ... without asking
 
+`prune` with no `--yes` needs a terminal to ask in. Run without one (an agent
+session, a hook, CI) it says so and exits 2 rather than dying on `input()`'s
+EOFError, which is what it did until 2026-09-14.
+
 Never deletes an UNMERGED branch, a NEW one (nothing ahead of the trunk yet
 -- almost always a branch someone just created), a branch checked out in any
 worktree, `main`, the trunk, or the current branch -- not even with --yes.
@@ -180,7 +184,8 @@ def cmd_check(args):
     print(f'\n{n} deletable, {len(rows) - n} still holding work, newly '
           f'created, or checked out.')
     if n:
-        print('`just branches prune` deletes the MERGED ones.')
+        print('`just branches prune` deletes the MERGED ones '
+              '(add --yes when nothing can answer a prompt).')
     return 0
 
 
@@ -194,6 +199,14 @@ def cmd_prune(args):
     for b, _, landed, total, _ in sorted(rows):
         print(f'  {b}  ({landed}/{total} commits already in {TRUNK})')
     if not args.yes:
+        # Non-interactive callers (agent sessions, hooks, CI) get a usable
+        # message instead of EOFError's traceback -- the prompt below has no
+        # stdin to read and the verdict above is the part worth keeping.
+        if not sys.stdin.isatty():
+            print(f'\nnot a terminal, so nothing was deleted: re-run as '
+                  f'`just branches prune --yes` to delete these {len(rows)}.',
+                  file=sys.stderr)
+            return 2
         if input(f'\nDelete these {len(rows)} local branches? [y/N] ').lower() != 'y':
             sys.exit('aborted')
     for b, *_ in rows:
