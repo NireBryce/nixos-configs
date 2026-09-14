@@ -71,6 +71,15 @@ lint:
 branches cmd="check" *args:
     @{{scripts}}/branches.py {{cmd}} {{args}}
 
+# branches.py's classifier decides what `branches prune` force-deletes with
+# `branch -D`; this is the fixture test issue #303 asked for -- the two #300
+# misclassifications it covers would each have deleted a real branch, and
+# nothing would have caught either. Builds every verdict state in a temp repo
+# and asserts the verdicts plus exactly what prune deletes.
+# Pure git in a temp repo -- no fleet state; runs in preflight and CI
+branches-test:
+    python3 {{scripts}}/test_branches.py
+
 # Static check: wiki/ and AGENTS.md claims vs the repo -- in CI
 # (.github/workflows/check.yml) since 2026-09-09, still not in `preflight`
 # deliberately (issue #217): fold it in once it has been green there a while
@@ -117,8 +126,11 @@ install-hooks:
     @echo "==> git will now run .githooks/pre-commit and .githooks/commit-msg"
 
 # Short of the per-host forced toplevel eval, which still needs picking a host
-# check + modules + lint in one shot -- the ship skill's step 0
+# branches-test first: it fails in ~2s, where check spends minutes before the
+# same class of local-state regression would surface
+# check + modules + lint + branches-test in one shot -- the ship skill's step 0
 preflight:
+    @just branches-test
     @just check
     @just modules
     @just lint

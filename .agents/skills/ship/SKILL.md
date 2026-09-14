@@ -51,7 +51,7 @@ Then check before opening a PR. CI (`.github/workflows/check.yml`:
 not a substitute:
 
 ```sh
-just preflight    # check + modules + lint in one shot; from repo root, not flake/
+just preflight    # check + modules + lint + branches-test in one shot; from repo root, not flake/
 ```
 
 plus a forced toplevel per config the change could touch:
