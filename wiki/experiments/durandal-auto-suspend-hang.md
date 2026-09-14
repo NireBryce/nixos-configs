@@ -8,6 +8,11 @@ mechanism partly identified, cause not. One mitigation under test.** Recovery
 is a timed PSU cut that resets the GPU while DRAM stays alive on standby; hold
 it too long and RAM goes, taking the session.
 
+> **Condensed version:**
+> [durandal-auto-suspend-hang-for-agents.md](durandal-auto-suspend-hang-for-agents.md)
+> — the same ground with the narrative stripped out, for an agent (or a human
+> in a hurry) loading it mid-task. Both siblings get edited in the same change.
+
 ## Contents
 
 - [Two failure shapes](#two-failure-shapes)
@@ -15,6 +20,7 @@ it too long and RAM goes, taking the session.
 - [Established](#established)
 - [Ruled out](#ruled-out)
 - [Under test](#under-test)
+- [Progress](#progress)
 - [Reading the dumps](#reading-the-dumps)
 - [See also](#see-also)
 ## Two failure shapes
@@ -90,6 +96,31 @@ Two consequences, both load-bearing:
   — dumps wakeup, GPE and drive state to `/var/log/suspend-probe/` around every
   suspend, `sync`'d so it survives the power cut. `/var/log` is its own btrfs
   subvolume, outside the wiped root.
+
+## Progress
+
+**Deployed:** the probe, 2026-09-13. **Not live as of 2026-09-14:**
+`amdgpu.runpm=0` and smartmontools landed in
+[#320](https://github.com/NireBryce/nixos-configs/pull/320) but need a
+`just switch`, and the kernel parameter a **reboot**. Until both, a hang still
+tests the old configuration. The power-cycle detector has never run against a
+real hang, so the first one tests it too.
+
+Cycles, all 2026-09-14 UTC. Outcomes are Elly's — nothing in the dumps yet
+separates a hang from a clean resume:
+
+| # | window | mode | trigger | slept | outcome |
+|---|---|---|---|---|---|
+| 1 | 03:21→03:44 | s2idle | auto | 23 m | **hang** — SMU `-ETIME`, cold boot, RAM lost |
+| 2 | 03:52→04:20 | deep | auto | 29 m | **hang** — PSU race, RAM kept |
+| 3 | 04:28→04:29 | deep | auto | 70 s | **hang** — PSU race, RAM kept |
+| 4 | 04:34→04:46 | deep | auto | 11 m | clean, woke on keyboard |
+| 5 | 04:54→04:55 | deep | auto | 21 s | clean |
+| 6 | 05:07→05:57 | deep | **manual** | 50 m | clean |
+
+Three hangs in six, all on auto-suspend; the one manual cycle was clean. Too
+few to call auto-vs-manual settled, and cycles 4 and 5 show auto succeeding.
+Only cycle 1 was visible to `suspend_stats`.
 
 ## Reading the dumps
 
