@@ -16,7 +16,7 @@ out again each time, so mostly nobody did.
 Two questions, and they are NOT the same one:
 
   can it build here      meta.platforms. Answered, and acted on, automatically:
-                         system/system/home-manager/drop-unsupported-packages.nix
+                         config-system/system/home-manager/drop-unsupported-packages.nix
                          drops unavailable packages on darwin and warns. Nothing
                          needs a hand-written guard for this any more, and the
                          default table is how you check its work.
@@ -43,7 +43,7 @@ Columns:
             lib/meta.nix checks platforms and badPlatforms only -- so a package
             can read `available` and still refuse to build without allowBroken.
 
-  CASK      a cask in system/macos/homebrew/homebrew.nix installing the same
+  CASK      a cask in config-system/macos/homebrew/homebrew.nix installing the same
             thing, with the signal that identified it. See match_cask.
 
 `available` PLUS a cask hit is the interesting case, and the one no
@@ -63,7 +63,7 @@ import argparse, json, pathlib, re, subprocess, sys, tempfile
 
 HERE     = pathlib.Path(__file__).resolve().parent
 FLAKE    = HERE.parent
-HOMEBREW = FLAKE / 'modules/system/macos/homebrew/homebrew.nix'
+HOMEBREW = FLAKE / 'modules/config-system/macos/homebrew/homebrew.nix'
 
 # Homebrew's own cache of the cask API -- every cask's token and homepage,
 # offline. Read directly rather than shelling out to `brew info --json=v2`,

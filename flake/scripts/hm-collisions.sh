@@ -84,7 +84,7 @@ if collisions:
         print(f"    {p}")
     print()
     print("Not fatal. home-manager.backupFileExtension is set permanently to")
-    print("\"hm-bak\" in modules/system/system/home-manager/enable-home-manager.nix,")
+    print("\"hm-bak\" in modules/config-system/system/home-manager/enable-home-manager.nix,")
     print("so activation renames each of these to <file>.hm-bak and carries on")
     print("rather than aborting half-applied. Switch, then read the .hm-bak")
     print("files: they are untracked state worth understanding, not noise.")

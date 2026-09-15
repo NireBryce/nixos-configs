@@ -32,7 +32,7 @@
 # different questions -- see CLAUDE.md, "Platform support is derived; Homebrew
 # overlap is not":
 #
-#   can't build there   nothing to do. system/system/home-manager/
+#   can't build there   nothing to do. config-system/system/home-manager/
 #                       drop-unsupported-packages.nix filters home.packages by
 #                       meta.platforms on darwin and warns about what it took.
 #
@@ -65,9 +65,9 @@
                         # virtualization" -- virtualization.nix's homeManager
                         # block was, and still is, commented out, so it never
                         # contributed one. That file is now
-                        # system/containers/podman/podman.nix (moved out of
+                        # config-system/containers/podman/podman.nix (moved out of
                         # `system` entirely 2026-08-22, after an earlier stop
-                        # at system/system/containers/containers.nix); the word
+                        # at config-system/system/containers/containers.nix); the word
                         # `virtualization` moved to a category of its own,
                         # which is nixos-class throughout and imported by only
                         # three hosts, so it never reaches this list either.

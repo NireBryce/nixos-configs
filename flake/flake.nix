@@ -92,7 +92,7 @@
         # Declarative disk partitioning. Not used by any host's own config yet --
         # durandal and tenacity were hand-partitioned, then captured after the
         # fact by nixos-generate-config. Added for
-        # system/impermanence/_disko/impermanence-luks-btrfs.nix, a reusable
+        # config-system/impermanence/_disko/impermanence-luks-btrfs.nix, a reusable
         # template for the LUKS+btrfs+impermanence layout those two hosts already
         # use by hand. See flake/doc/disko-impermanence-layout.md.
         disko.url                                  = "github:nix-community/disko";

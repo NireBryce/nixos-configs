@@ -2,7 +2,7 @@
 
 > **Written by Claude Code.** A working note, not documentation.
 
-`modules/system/impermanence/_disko/impermanence-luks-btrfs.nix` is a generator
+`modules/config-system/impermanence/_disko/impermanence-luks-btrfs.nix` is a generator
 for the disk layout durandal and tenacity already run, by hand, today: one
 LUKS-encrypted partition, btrfs inside it, subvolumes for `root` / `home` /
 `nix` / `persist` / `log`, and an unmounted `root-blank` subvolume that
@@ -27,7 +27,7 @@ list actually wants:
 
 ```nix
 imports = [
-    (import ../../system/impermanence/_disko/impermanence-luks-btrfs.nix {
+    (import ../../config-system/impermanence/_disko/impermanence-luks-btrfs.nix {
         device = "/dev/nvme0n1";
     })
 ];

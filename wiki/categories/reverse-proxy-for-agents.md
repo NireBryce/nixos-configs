@@ -10,7 +10,7 @@ nested under `homelab` 2026-08-27.
 
 ## Files
 
-`system/homelab/reverse-proxy/`, both `nixos`-class:
+`config-system/homelab/reverse-proxy/`, both `nixos`-class:
 
 - `caddy/caddy.nix` — the Caddyfile, `permitCertUid`, systemd ordering.
 - `tailscale-services/serve.nix` — `svc:` endpoints. Raw TCP forwarding
@@ -38,7 +38,7 @@ redirects; `https://<bare name>` serves Caddy's local CA and shows
   Let's Encrypt, which can never issue for a tailnet name. Symptom:
   `SSL_ERROR_INTERNAL_ERROR_ALERT` on names no commit touched.
 - **`services.tailscale.permitCertUid = "caddy"` stays in `caddy.nix`**, not
-  in `system/networking/tailscale.nix` — that file is imported by every
+  in `config-system/networking/tailscale.nix` — that file is imported by every
   Linux host.
 - **`handle` takes at most one matcher token.** Two paths need a named
   matcher (`@name path /x /x/*`), not `handle /x /x/*`.

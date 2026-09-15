@@ -8,7 +8,7 @@ and neither produces an error -- the tree evaluates perfectly happily with eithe
   collisions  A module whose filename equals a category name declares into the
               same attribute as that category, and same-named modules MERGE
               rather than conflicting. This is how `boot` came to mean both
-              system/boot/ (which wipes /root on boot) and durandal's bootloader.
+              config-system/boot/ (which wipes /root on boot) and durandal's bootloader.
 
   orphans     A module in a category that no host or home aggregate imports is
               valid, evaluates, and installs nothing.

@@ -1,6 +1,6 @@
-# `monitoring` — `system/homelab/monitoring/`
+# `monitoring` — `config-system/homelab/monitoring/`
 
-_Last modified: 2026-09-13_
+_Last modified: 2026-09-14_
 
 Prometheus + Grafana, scraping this host's own resource metrics. Added
 2026-08-23, cube-only so far; nested under the `homelab` umbrella since
@@ -179,7 +179,7 @@ diff-closures` shows the deployed generation matches the tree exactly.
 ## Why cube only, and why that's a category rather than a host-specific file
 
 Same reasoning [virtualization](virtualization.md) and
-[containers](containers.md) already give: `system/system/` is imported whole
+[containers](containers.md) already give: `config-system/system/` is imported whole
 by every Linux host with no way to opt a piece of it out, so anything that
 should be optional needs its own category (see
 [../architecture.md](../architecture.md), "if something shared needs to be

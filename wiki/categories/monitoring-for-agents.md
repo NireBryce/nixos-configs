@@ -1,6 +1,6 @@
 # `monitoring`, for agents
 
-_Last modified: 2026-09-13_
+_Last modified: 2026-09-14_
 
 Condensed from [monitoring.md](monitoring.md), which keeps the reasoning
 and the narrative. Facts only here.
@@ -11,7 +11,7 @@ since 2026-09-07; the old `.../grafana/` path 404s.
 
 ## What's in it
 
-`system/homelab/monitoring/`, five files, all `nixos`-class, **every listener
+`config-system/homelab/monitoring/`, five files, all `nixos`-class, **every listener
 on loopback**:
 
 | File | Scrapes | Note |

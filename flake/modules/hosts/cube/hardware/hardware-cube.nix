@@ -111,7 +111,7 @@
 #
 # From cube's addition (2026-08-15) until then, this host's hardware module
 # was disko-cube.nix: a disko template wiring in
-# system/impermanence/_disko/impermanence-luks-btrfs.nix, with an intentionally
+# config-system/impermanence/_disko/impermanence-luks-btrfs.nix, with an intentionally
 # fake device path ("/dev/disk/by-id/REPLACE-ME-before-running-disko") -- the
 # machine hadn't been installed yet. It was installed by hand off the stock
 # NixOS live ISO instead (plain persistent root, no LUKS, not through this

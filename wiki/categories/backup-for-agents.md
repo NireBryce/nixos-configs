@@ -1,6 +1,7 @@
 # `backup`, for agents
 
 _Last modified: 2026-09-11_
+_Sibling reviewed: 2026-09-14 -- backup.md only renamed `system/` path shorthand to `config-system/`; no facts moved_
 
 Condensed from [backup.md](backup.md), which keeps the investigation
 narrative and the verification trail. Facts only here.

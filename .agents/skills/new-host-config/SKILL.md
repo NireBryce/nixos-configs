@@ -28,7 +28,7 @@ match.)
   file's header like `cube-configuration.nix` does, including the
   `invariants.nix` interaction.
 - **CPU/GPU?** AMD hosts import the shared `hardware` category (`amdcpu`,
-  `amdgpu`). **Never add an `intel` sibling under `system/hardware/`** —
+  `amdgpu`). **Never add an `intel` sibling under `config-system/hardware/`** —
   `dirsAsCategory` recurses into subdirectories, so it would apply to the AMD
   hosts too. An Intel host skips `hardware` and pulls a `nixos-hardware`
   module for the exact machine (e.g. `lenovo-thinkpad-x270`) from its own
@@ -51,7 +51,7 @@ as-is makes flake-parts resolve `modulesPath` itself and dies with a
 misleading `infinite recursion` (`new-flake-module` has the wrapping shape).
 
 **No hardware yet**: use the disko generator
-`system/impermanence/_disko/impermanence-luks-btrfs.nix` (curried over
+`config-system/impermanence/_disko/impermanence-luks-btrfs.nix` (curried over
 `device`, `includeSecureboot`, `swapSize`; explained with a call-site example
 in `flake/doc/disko-impermanence-layout.md`) instead of inventing a
 `hardware-configuration.nix`. Nothing in the tree currently calls it; the

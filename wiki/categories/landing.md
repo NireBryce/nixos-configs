@@ -1,4 +1,4 @@
-# `landing` — `system/homelab/landing/`
+# `landing` — `config-system/homelab/landing/`
 
 _Last modified: 2026-09-14_
 

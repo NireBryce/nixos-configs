@@ -1,6 +1,7 @@
 # Reaching cube's services, for agents
 
 _Last modified: 2026-09-13_
+_Sibling reviewed: 2026-09-14 -- only a `system/`→`config-system/` path rename_
 
 Condensed from [reaching-services.md](reaching-services.md), which keeps the
 reasoning, the retired-URL history and the verification record. Facts only

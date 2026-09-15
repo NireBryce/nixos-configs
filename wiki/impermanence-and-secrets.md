@@ -9,7 +9,7 @@ _Last modified: 2026-09-05_
 
 ## Impermanence
 
-**Read `flake/modules/system/impermanence/root-rollback/WARN-impermanence.nix`
+**Read `flake/modules/config-system/impermanence/root-rollback/WARN-impermanence.nix`
 before changing anything near this, every time — no exceptions, per
 [`../CLAUDE.md`](../CLAUDE.md)'s Safety section.** It's the module that
 deletes the `/root` btrfs subvolume in initrd on every boot for the hosts
@@ -39,7 +39,7 @@ that import it.
 
 ## Secrets
 
-- **sops-nix**, `flake/modules/system/system/secrets/`. `secrets.yaml` is
+- **sops-nix**, `flake/modules/config-system/system/secrets/`. `secrets.yaml` is
   encrypted and committed in the repo on purpose. Key *names* are plaintext
   in that ciphertext — `just read-sops-names` lists them without
   decrypting, which is the only safe way to answer "which secrets exist?"

@@ -8,7 +8,7 @@
         # state -- unlike cod, which is a completion *daemon* learning at
         # runtime by watching for `--help` invocations and needs the system
         # install cod-completions.nix reasons about. So carapace lives in
-        # home.packages instead, like the rest of system/shell-config's
+        # home.packages instead, like the rest of config-system/shell-config's
         # tooling, and (unlike cod, whose nixpkgs derivation sets
         # meta.broken on darwin -- see the history note in
         # drop-unsupported-packages.nix) it builds cleanly on

@@ -8,7 +8,7 @@ One article per real category — a directory holding its own
 pages are the "what's actually in it, and why is it shaped this way" detail
 for each one, at the same what/why/traps depth as the rest of this wiki.
 
-Scoped to the `system/*` system-ish categories plus `users/elly` — 19
+Scoped to the `config-system/*` system-ish categories plus `users/elly` — 19
 articles. Not covered here, deliberately:
 
 - **`packages/*` subcategories** (`editors`, `terminals`, `gui-other`,
@@ -28,7 +28,7 @@ articles. Not covered here, deliberately:
 ## Index
 
 Two tables, split by shape rather than alphabetically: categories any host
-might import directly, and the `system/homelab/` nested set that's cube-only
+might import directly, and the `config-system/homelab/` nested set that's cube-only
 by construction (see [homelab](homelab.md)). Same four columns in both —
 the split is presentation only, nothing about the schema changes.
 
@@ -36,34 +36,34 @@ the split is presentation only, nothing about the schema changes.
 
 | Category | Directory | Class(es) | Imported by |
 |---|---|---|---|
-| [boot](boot.md) | `system/boot/` | nixos | all 3 NixOS hosts |
-| [desktop-env](desktop-env.md) | `system/desktop-env/` | nixos | never imported whole — hosts take `jovian` or `kde-desktop` by name |
-| [hardware](hardware.md) | `system/hardware/` (+ nested `amd`) | nixos | all 3 NixOS hosts |
-| [impermanence](impermanence.md) | `system/impermanence/` | nixos, homeManager | durandal, tenacity (not cube) |
-| [macos](macos.md) | `system/macos/` | darwin | lysithea |
-| [nix](nix.md) | `system/nix/` | nixos, homeManager, darwin | all 4 hosts |
-| [peripherals](peripherals.md) | `system/peripherals/` | nixos | all 3 NixOS hosts |
-| [shell-config](shell-config/00-INDEX.md) | `system/shell-config/` | nixos, homeManager | all 3 NixOS hosts directly; reaches lysithea via `ellyHomeManager` |
-| [system](system.md) | `system/system/` | nixos, homeManager, darwin | all 3 NixOS hosts + lysithea (partially) |
+| [boot](boot.md) | `config-system/boot/` | nixos | all 3 NixOS hosts |
+| [desktop-env](desktop-env.md) | `config-system/desktop-env/` | nixos | never imported whole — hosts take `jovian` or `kde-desktop` by name |
+| [hardware](hardware.md) | `config-system/hardware/` (+ nested `amd`) | nixos | all 3 NixOS hosts |
+| [impermanence](impermanence.md) | `config-system/impermanence/` | nixos, homeManager | durandal, tenacity (not cube) |
+| [macos](macos.md) | `config-system/macos/` | darwin | lysithea |
+| [nix](nix.md) | `config-system/nix/` | nixos, homeManager, darwin | all 4 hosts |
+| [peripherals](peripherals.md) | `config-system/peripherals/` | nixos | all 3 NixOS hosts |
+| [shell-config](shell-config/00-INDEX.md) | `config-system/shell-config/` | nixos, homeManager | all 3 NixOS hosts directly; reaches lysithea via `ellyHomeManager` |
+| [system](system.md) | `config-system/system/` | nixos, homeManager, darwin | all 3 NixOS hosts + lysithea (partially) |
 | [elly](elly.md) | `users/elly/` | nixos, homeManager, darwin | all 4 hosts |
 
 ### Homelab categories
 
-Nested under `system/homelab/`, cube-only — see [homelab](homelab.md) for the
+Nested under `config-system/homelab/`, cube-only — see [homelab](homelab.md) for the
 umbrella mechanism, and the [Usage pages](#usage-pages) table below for the
 matching "how do I use this, not configure it" page where one exists.
 
 | Category | Directory | Class(es) | Imported by |
 |---|---|---|---|
-| [backup](backup.md) | `system/homelab/backup/` | nixos | cube only |
-| [containers](containers.md) | `system/homelab/containers/` | nixos | tenacity, cube (not durandal) |
-| [git-forge](git-forge.md) | `system/homelab/git-forge/` | nixos | cube only |
-| [homelab](homelab.md) | `system/homelab/` (+ 8 nested) | nixos | cube only |
-| [landing](landing.md) | `system/homelab/landing/` | nixos | cube only |
-| [monitoring](monitoring.md) | `system/homelab/monitoring/` | nixos | cube only |
-| [reverse-proxy](reverse-proxy.md) | `system/homelab/reverse-proxy/` | nixos | cube only |
-| [shortlinks](shortlinks.md) | `system/homelab/shortlinks/` | nixos | cube only |
-| [virtualization](virtualization.md) | `system/homelab/virtualization/` | nixos | cube only (not durandal, not the handheld) |
+| [backup](backup.md) | `config-system/homelab/backup/` | nixos | cube only |
+| [containers](containers.md) | `config-system/homelab/containers/` | nixos | tenacity, cube (not durandal) |
+| [git-forge](git-forge.md) | `config-system/homelab/git-forge/` | nixos | cube only |
+| [homelab](homelab.md) | `config-system/homelab/` (+ 8 nested) | nixos | cube only |
+| [landing](landing.md) | `config-system/homelab/landing/` | nixos | cube only |
+| [monitoring](monitoring.md) | `config-system/homelab/monitoring/` | nixos | cube only |
+| [reverse-proxy](reverse-proxy.md) | `config-system/homelab/reverse-proxy/` | nixos | cube only |
+| [shortlinks](shortlinks.md) | `config-system/homelab/shortlinks/` | nixos | cube only |
+| [virtualization](virtualization.md) | `config-system/homelab/virtualization/` | nixos | cube only (not durandal, not the handheld) |
 
 ## Usage pages
 

@@ -1,6 +1,6 @@
-# `system` — `system/system/`
+# `system` — `config-system/system/`
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-14_
 
 The largest category by far — across 19 subdirectories, no per-file count
 kept here on purpose (see categories/00-INDEX.md's Index section for why) —
@@ -57,7 +57,7 @@ under `system`.
 `home-manager/enable-home-manager.nix` is *the* module that wires
 `home-manager.users.elly` to the shared `ellyHomeManager` bundle with
 `useGlobalPkgs`/`useUserPackages` — see
-[../architecture.md](../architecture.md). It's filed under `system/system/`
+[../architecture.md](../architecture.md). It's filed under `config-system/system/`
 specifically so the `system` category picks it up and every host that
 imports `system` gets it automatically, rather than each host wiring HM in
 by hand. `enable-home-manager-darwin.nix` is the nix-darwin-side equivalent
@@ -112,7 +112,7 @@ from which hosts import these modules.
 
 ## Containers vs. virtualization — the live trap, and no longer filed here
 
-Podman and distrobox — OCI containers — moved out of `system/containers/`
+Podman and distrobox — OCI containers — moved out of `config-system/containers/`
 2026-08-22 into their own category: see [containers](containers.md). This
 pointer stays because the trap is live and this is where someone remembering
 the old location will look: "virtualization" means only
@@ -153,7 +153,7 @@ Both rely on `environment.persistence."/persist".directories` being
 same merge behavior as `environment.systemPackages` and the same one that
 makes `home.file.<n>.text` a trap on the Home Manager side (see
 [shell-config](shell-config/00-INDEX.md)). See
-`system/system/impermanence/declare-persistence-option.nix`'s own header (and
+`config-system/system/impermanence/declare-persistence-option.nix`'s own header (and
 [impermanence](impermanence.md)) for why that option has to be declared
 unconditionally even on hosts where nothing populates it.
 

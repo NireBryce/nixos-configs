@@ -63,9 +63,9 @@ is the mechanism, not the inventory.
 ## Related, easy to get backwards
 
 Containers and VMs are separate categories here, and "virtualization" means
-only the VM one (`system/homelab/virtualization/`: libvirt, virt-tools,
+only the VM one (`config-system/homelab/virtualization/`: libvirt, virt-tools,
 vm-networking — optional, cube only). Podman/distrobox live in
-[`system/homelab/containers/`](categories/containers.md), its own category
+[`config-system/homelab/containers/`](categories/containers.md), its own category
 since 2026-08-22, nested under the `homelab` umbrella since 2026-08-27 —
 imported explicitly by tenacity and cube (durandal dropped it 2026-08-27,
 same day as `virtualization`). See

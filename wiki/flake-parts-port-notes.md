@@ -1,6 +1,6 @@
 # flake-parts port notes
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-14_
 
 Salvaged 2026-09-08 from the `flake-parts` branch, which was deleted the
 same day. That branch was the sibling of this one — the 2026-08 den →
@@ -50,7 +50,7 @@ silently would be worse than either answer." Still true, and several are
 load-bearing in the tree today:
 
 - **Home Manager NixOS-integrated**, chosen over standalone and over
-  keeping both. Live: `system/system/home-manager/enable-home-manager.nix`,
+  keeping both. Live: `config-system/system/home-manager/enable-home-manager.nix`,
   and [`../flake/doc/trailhead-home-manager-standalone.md`](<../flake/doc/trailhead-home-manager-standalone.md>)
   is the documented way back.
 - **Package parity across hosts.** Offered a role split so the handheld

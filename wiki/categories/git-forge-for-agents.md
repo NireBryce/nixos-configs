@@ -1,6 +1,6 @@
 # `git-forge`, for agents
 
-_Last modified: 2026-09-12_
+_Last modified: 2026-09-14_
 _Sibling reviewed: 2026-09-14 -- git-forge.md only reworded "Elly" prose mentions to "the user"; no facts moved_
 
 Condensed from [git-forge.md](git-forge.md), which keeps the reasoning and
@@ -12,7 +12,7 @@ the old `.../git/` path 404s.
 
 ## What's in it
 
-One file, `nixos`-class: `system/homelab/git-forge/forgejo/forgejo.nix`.
+One file, `nixos`-class: `config-system/homelab/git-forge/forgejo/forgejo.nix`.
 
 Category isn't named `forgejo` because category-and-module sharing a name
 both declare `flake.modules.nixos.forgejo` and silently **merge**. Hit for
@@ -47,7 +47,7 @@ real while writing this category.
   by the next `just switch`. Deliberate, unlike the create-once shape the
   signing-key units use.
 - The `forgejo-admin-password` sops secret is declared **in this module**,
-  not in `system/secrets/sops.nix`, so it only decrypts on cube.
+  not in `config-system/secrets/sops.nix`, so it only decrypts on cube.
 - **Unauthenticated `/api/v1/users/search` always reports
   `is_admin: false`** regardless of the real value — it cannot settle
   whether an account is admin. Check the Site Administration panel.
