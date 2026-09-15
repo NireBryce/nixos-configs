@@ -125,3 +125,5 @@ Two narrower cases have their own instructions — read those first:
   rotting".
 - `new-flake-module` skill — the specific module/category-membership case.
 - `new-host-config` skill — the specific host-addition case.
+- `new-wiki-page` skill — creating a page in the first place; this skill
+  starts from a page that already exists to go stale.

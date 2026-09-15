@@ -1,6 +1,6 @@
 ---
 name: maintenance-schedule
-description: How to review and keep current wiki/maintenance-schedule.md, the fleet's key/credential expiry and rotation checklist.
+description: How to review and keep current the fleet's key/credential expiry and rotation checklist.
 ---
 
 # Tending the maintenance schedule

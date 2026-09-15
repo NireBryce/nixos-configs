@@ -16,7 +16,7 @@ step, since that step is for the case where triage below says it's new.
 
 ## Why this exists
 
-2026-09-15: a `git remote prune origin` / `git show 449d158` sequence
+2026-09-14: a `git remote prune origin` / `git show 449d158` sequence
 re-flagged a Tailscale auth key that turned out to be ~2 years dead —
 committed in `449d158f` (`nire-galatea/tskey`), deleted from the tree one
 commit later in `8b78516d`, but still reachable from history, so any

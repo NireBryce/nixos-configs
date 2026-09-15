@@ -76,17 +76,17 @@ different, older comment and stated with the same confidence as the part
 that was checked.
 
 **The cross-reference trap (category 3), found sweeping the tree for the
-above two, same day.** `nire-lego` was removed 2026-08-27
-(`wiki/history.md`). Four `.nix` comments elsewhere — `forgejo.nix` (two
-spots), `golink.nix`, `bash.nix` — still named it in present tense
-("durandal/tenacity/lego get [the `/root` wipe]", "no desktop imported —
-tenacity, lego") a week later, because the commit that removed `lego`
-touched `hosts.nix` and the modules `lego` itself had imported, not these
-four unrelated files that merely *mentioned* it in passing. Contrast with
-every other removed-host reference in the tree (`podman.nix`, `hosts.nix`,
-`invariants.nix`, `category-collector.nix`), which all correctly say
-"since removed" — proof this is preventable, not inherent to mentioning a
-host name at all.
+above two, 2026-09-03 (`216a5ae7`).** The issue itself: a removal or
+rename commit doesn't touch the files that merely *mention* the name in
+passing comments, and nothing checks those mentions — so present-tense
+cross-references outlive the change that invalidated them. Seen live a
+week after `nire-lego`'s removal (2026-08-27, `55084225` —
+`wiki/history.md`): four such comments — `forgejo.nix` (twice),
+`golink.nix`, `bash.nix` — still named it, while every other removed-host
+reference carried an explicit removal note. That contrast is the point:
+preventable, not inherent. The four were deleted in that sweep rather
+than rewritten, so this paragraph is their only surviving record; the
+verbatim comments are visible in `216a5ae7`'s diff.
 
 All three traps share a root cause: once something is phrased as settled
 — narrated history, a dated status line, or a passing mention of another
@@ -117,7 +117,7 @@ unconfirmed since") rather than letting the date alone imply currency.
 durable fact ("hosts A/B/C do X") is a live pointer, not prose that stays
 true on its own — a later, unrelated change can invalidate it the way a
 symlink can dangle, with nothing watching for the break. See "Preventing
-it" #6 for the concrete grep.
+it" #7 for the concrete grep.
 
 ## Preventing it
 
@@ -196,7 +196,15 @@ it" #6 for the concrete grep.
   `wiki/homelab/backup-runbook.md`, `wiki/homelab/pending-setup.md` — the
   categories 1/2 worked (mis)examples, including the `UNVERIFIED` markers
   and corrected dates added once each pattern was caught.
-- `forgejo.nix`, `golink.nix`, `bash.nix` (their `/root`-wipe and
-  desktop-import comments) vs. `podman.nix`/`hosts.nix`/`invariants.nix`/
-  `category-collector.nix` — category 3's broken and correct examples,
-  found in the same 2026-09-03 sweep.
+- `podman.nix`, `hosts.nix`, `invariants.nix` — the correct style: an
+  explicit removal note ("lego removed the same day", "were both removed
+  2026-08-27", "since removed"). The four broken mentions (`forgejo.nix`
+  twice, `golink.nix`, `bash.nix`) were deleted outright in the same
+  2026-09-03 sweep rather than rewritten — the incident paragraph under
+  "Why this exists" is their only surviving record. The sweep's fourth
+  named correct example, `category-collector.nix`, holds no such comment
+  today.
+- skill `git-archaeology` — finding the commit behind a date or hash
+  claim when the file has since moved; a path-scoped log coming back
+  empty usually means the rename, not the absence. (Hit 2026-09-15
+  verifying this file's own examples.)

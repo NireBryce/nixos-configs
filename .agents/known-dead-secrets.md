@@ -14,4 +14,4 @@ safe.
 
 | Type | Found in (commit, path) | Removed in | Confirmed dead | Notes |
 |---|---|---|---|---|
-| Tailscale auth key (`tskey-...`) | `449d158f` (`nire-galatea/tskey`) | `8b78516d` | 2026-09-15 | ~2-year-old key from Jan 2024 ("struggling with sops again"); `nire-galatea` isn't a host in this repo's current roster (`hosts/hosts.nix`). Deleted from the tree one commit later but the blob is still reachable from history, so `git show`/`git log -p`/anything walking that commit or blob can re-surface it. |
+| Tailscale auth key (`tskey-...`) | `449d158f` (`nire-galatea/tskey`) | `8b78516d` | 2026-09-14 | ~2-year-old key from Jan 2024 ("struggling with sops again"); `nire-galatea` isn't a host in this repo's current roster (`hosts/hosts.nix`). Deleted from the tree one commit later but the blob is still reachable from history, so `git show`/`git log -p`/anything walking that commit or blob can re-surface it. |
