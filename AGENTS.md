@@ -2,7 +2,7 @@
 
 > **Written by agents, for agents.** An agent's working notes, not
 > documentation — pitched at something with no memory between sessions;
-> repeating a mistake is the failure mode it exists to prevent. Elly has
+> repeating a mistake is the failure mode it exists to prevent. The user has
 > corrected the load-bearing claims; the framing is the machine's.
 > `README.md` is the human entry point.
 >
@@ -260,12 +260,12 @@ actually broken.
 
 **"push" means the `ship` skill, landing on `experimental`, the default
 branch** — branch, PR, one combined ask covering both merging and deleting
-the branch afterward. Elly naming a branch outright means push directly
+the branch afterward. The user naming a branch outright means push directly
 there — except `main`, promotion-only (PR from `experimental`, after
 hardware verification).
 
 **Never file anything outside `NireBryce/nixos-configs` — an issue or PR on
-nixpkgs, ble.sh, carapace, any other project — without Elly saying so
+nixpkgs, ble.sh, carapace, any other project — without the user saying so
 explicitly, in those words, unprompted.** A yes to a bundled list does not
 cover an upstream filing folded into it. `propose-issue` only ever files
 here; `_loose-ends/bugs-pending-submission/` and `wiki/open-threads.md`'s
@@ -304,6 +304,14 @@ under the same compression discipline: facts kept, narration cut
 `nire.primaryUser` option instead; introducing it here is a separate
 change, not a tidy-up — `wiki/flake-parts-port-notes.md` has that branch's
 reasoning, including the grep-trail convention it came with.
+
+**Prose that means the person says "the user," never the name.** `elly` in
+an identifier is the account this config builds; in prose it reads as a
+claim about who runs this repo, which doesn't hold for a fork or a fresh
+session. A 2026-09-14/15 pass cleared the last person-references (skills,
+wiki, flake comments, this file, the git-guard hook); the `_Sibling
+reviewed:` lines quoting "Elly" are records of that pass, not references
+to copy.
 
 **Check for an existing `programs.*` integration before hand-writing one.**
 
