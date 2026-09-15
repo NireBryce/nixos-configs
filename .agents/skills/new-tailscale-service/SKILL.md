@@ -1,6 +1,6 @@
 ---
 name: new-tailscale-service
-description: How to give a homelab service its own Tailscale Services (svc:) hostname, fronted by Caddy for TLS, instead of a Caddy path prefix under the host's shared name.
+description: How to give a homelab service its own Tailscale Services hostname fronted by Caddy for TLS.
 ---
 
 # Giving a homelab service its own Tailscale Services hostname

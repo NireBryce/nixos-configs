@@ -78,6 +78,28 @@ structured, extractable facts only:
             AGENTS.md against real `.agents/skills/<name>/` directories --
             same shape as `recipes`, for a skill rename instead.
 
+  skill-files
+            The `.agents/skills/**/*.md` files themselves, turned inward --
+            skill prose is re-read even less than wiki/ (loaded on trigger,
+            written once) and rots the same way, so the same lookups apply
+            to it: `just <recipe>` mentions (backticked anywhere, bare
+            inside fenced code blocks -- a raw-text scan would drown in
+            prose like "just say what you're doing", so prose is
+            deliberately not scanned) against .justfile, the same lookup
+            `recipes` does; "skill `name`"/"`name` skill" mentions against
+            real skill directories, the same lookup `skills` does for wiki/
+            and AGENTS.md; every relative markdown link resolving to a real
+            file, the same lookup `links` does; and every repo-rooted
+            backtick path (wiki/, flake/, .agents/, .github/, scripts/) --
+            prefix-scoped because prefix-less names like `hosts.nix` are
+            prose shorthand this repo writes several ways, the judgement
+            call `wiki_stale_refs.py` exists for. Plus the two things only
+            a SKILL.md has: frontmatter `name` matching its directory, and
+            a `description` keeping the shape skill `new-skill` specifies
+            (one sentence, no repo paths, no parentheticals -- hard
+            findings; wordiness is REVIEW only, density is a human call
+            the way it is for siblings).
+
   secrets   The "`.sops.yaml` ... enrolls `host`, `host`, ... —" claim
             (wiki/impermanence-and-secrets.md and AGENTS.md's Safety section
             both make it, in the same shape, and AGENTS.md's own text admits
@@ -171,13 +193,14 @@ structured, extractable facts only:
             was bumping the sibling's date, which styleguide.md forbids for
             good reason and which this check could never have caught.
 
-  check     Runs all thirteen of the above.
+  check     Runs all fourteen of the above.
 
     check_wiki.py imports       [repo-root]
     check_wiki.py table         [repo-root]
     check_wiki.py hosts         [repo-root]
     check_wiki.py recipes       [repo-root]
     check_wiki.py skills        [repo-root]
+    check_wiki.py skill-files   [repo-root]
     check_wiki.py secrets       [repo-root]
     check_wiki.py routes        [repo-root]
     check_wiki.py links         [repo-root]
@@ -720,6 +743,149 @@ def check_skills(root):
                 findings.append(
                     f"UNKNOWN SKILL  {path}: '{name}' has no "
                     f".agents/skills/{name}/ directory")
+    return findings
+
+
+# -- skill files themselves (the `skill-files` check) -----------------------
+
+FRONTMATTER_NAME = re.compile(r'^name: (.+)$', re.M)
+FRONTMATTER_DESC = re.compile(r'^description: (.+)$', re.M)
+# A description may not carry a repo path (skill `new-skill`'s rule); this
+# matches the shapes that read as one -- a repo top-level prefix or a
+# leading ./ ../ -- without firing on topic shorthand like
+# "impermanence/initrd" or a mount point like "/root".
+DESC_PATH = re.compile(
+    r'(?:\.{1,2}/|(?:wiki|flake|\.agents|\.github|scripts)/[\w./-]+)')
+DESC_SENTENCE_END = re.compile(r'[.!?](?:\s|$)')
+DESC_MAX_WORDS = 30  # REVIEW only: the rule is one sentence of purpose;
+                     # the ceiling just names the outliers worth re-reading.
+# Repo-rooted backtick paths worth existing-checking inside skill prose.
+# Prefix-scoped on purpose: bare names (`hosts.nix`, `serve.nix`) are
+# shorthand for paths this repo writes several ways, and checking them
+# needs exactly the judgement calls `wiki_stale_refs.py` exists for.
+ROOTED_PATH = re.compile(
+    r'`((?:wiki|flake|\.agents|\.github|scripts)/[\w./-]+)`')
+MD_LINK = re.compile(r'\]\(([^)\s]+)\)')
+FENCE = re.compile(r'\s*```')
+BARE_JUST = re.compile(r'\bjust ([a-z][\w-]*)')
+
+
+def _just_mentions_in_skill(text):
+    """`just <recipe>` mentions in a skill file: backticked anywhere, bare
+    inside fenced code blocks. Prose ("just say what you're doing") sits
+    outside both, which is what keeps this free of the false positives a
+    raw-text scan drowns in."""
+    found = [m.group(1) for m in JUST_MENTION.finditer(text)]
+    in_fence = False
+    for line in text.splitlines():
+        if FENCE.match(line):
+            in_fence = not in_fence
+        elif in_fence:
+            found.extend(m.group(1) for m in BARE_JUST.finditer(line))
+    return found
+
+
+def check_skill_files(root):
+    """The `.agents/skills/**/*.md` files themselves -- see `skill-files` in
+    the module docstring for why. Four lookups shared with the wiki-side
+    checks (recipes, skill mentions, links, and a prefix-scoped form of
+    links' path existence), plus the two only a SKILL.md has: frontmatter
+    name/directory agreement and the description shape skill `new-skill`
+    specifies."""
+    skills_dir = root / '.agents' / 'skills'
+    if not skills_dir.exists():
+        return []
+    recipes = set(JUST_RECIPE.findall(
+        COMMENT.sub('', (root / '.justfile').read_text())))
+    real = {p.name for p in skills_dir.iterdir() if p.is_dir()}
+
+    findings = []
+    for path in sorted(skills_dir.rglob('*.md')):
+        rel = path.relative_to(root)
+        text = path.read_text()
+
+        for m in MD_LINK.finditer(text):
+            target = m.group(1).split('#', 1)[0]
+            if (not target or '<' in target or '*' in target
+                    or target.startswith(('http://', 'https://', 'mailto:'))):
+                continue
+            if not (path.parent / target).resolve().exists():
+                findings.append(
+                    f"MISSING LINK  {rel}: ({m.group(1)}) resolves to nothing")
+
+        seen = set()
+        for mention in _just_mentions_in_skill(text):
+            if mention in seen:
+                continue
+            seen.add(mention)
+            tokens = mention.split()
+            if not tokens or '<' in mention:
+                continue
+            name = (tokens[1] if '=' in tokens[0] and len(tokens) > 1
+                    else tokens[0])
+            if name not in recipes:
+                findings.append(
+                    f"UNKNOWN RECIPE  {rel}: `just {mention}` -- "
+                    f"'{name}' is not a recipe in .justfile")
+
+        for m in ROOTED_PATH.finditer(text):
+            candidate = m.group(1).rstrip('/')
+            if '<' in candidate or '*' in candidate:
+                continue
+            if not (root / candidate).exists():
+                findings.append(
+                    f"MISSING PATH  {rel}: `{candidate}` does not exist "
+                    f"at the repo root")
+
+        for m in SKILL_MENTION.finditer(text):
+            name = m.group(1) or m.group(2)
+            if name not in real:
+                findings.append(
+                    f"UNKNOWN SKILL  {rel}: '{name}' has no "
+                    f".agents/skills/{name}/ directory")
+
+        if path.name != 'SKILL.md':
+            continue
+        if not text.startswith('---'):
+            findings.append(
+                f"NO FRONTMATTER  {rel}: SKILL.md must open with a "
+                f"--- name/description block")
+            continue
+        head = text.split('---', 2)[1]
+        name_m = FRONTMATTER_NAME.search(head)
+        desc_m = FRONTMATTER_DESC.search(head)
+        if not name_m:
+            findings.append(f"NO NAME  {rel}: frontmatter has no name:")
+            continue
+        if name_m.group(1).strip() != path.parent.name:
+            findings.append(
+                f"NAME MISMATCH  {rel}: frontmatter name "
+                f"'{name_m.group(1).strip()}' != directory "
+                f"'{path.parent.name}'")
+        if not desc_m:
+            findings.append(
+                f"NO DESCRIPTION  {rel}: frontmatter has no description:")
+            continue
+        desc = desc_m.group(1).strip()
+        why = (" -- skill `new-skill`'s description rule, enforced here "
+               "so it stays true")
+        if DESC_PATH.search(desc):
+            findings.append(
+                f"DESCRIPTION SHAPE  {rel}: description contains a repo "
+                f"path{why}")
+        if '(' in desc:
+            findings.append(
+                f"DESCRIPTION SHAPE  {rel}: parenthetical in "
+                f"description{why}")
+        if len(DESC_SENTENCE_END.findall(desc)) > 1:
+            findings.append(
+                f"DESCRIPTION SHAPE  {rel}: description is more than one "
+                f"sentence{why}")
+        if len(desc.split()) > DESC_MAX_WORDS:
+            findings.append(
+                f"REVIEW   {rel}: description is {len(desc.split())} words "
+                f"(over {DESC_MAX_WORDS}) -- scope detail that belongs in "
+                f"## Applies to")
     return findings
 
 
@@ -1542,9 +1708,9 @@ def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else 'check'
     root = repo_root([sys.argv[0]] + sys.argv[2:])
 
-    cmds = ('imports', 'table', 'hosts', 'recipes', 'skills', 'secrets',
-            'routes', 'links', 'anchors', 'contents', 'dates', 'counts',
-            'siblings', 'check')
+    cmds = ('imports', 'table', 'hosts', 'recipes', 'skills', 'skill-files',
+            'secrets', 'routes', 'links', 'anchors', 'contents', 'dates',
+            'counts', 'siblings', 'check')
     if cmd not in cmds:
         print(__doc__)
         sys.exit(2)
@@ -1560,6 +1726,8 @@ def main():
         findings += check_recipes(root)
     if cmd in ('skills', 'check'):
         findings += check_skills(root)
+    if cmd in ('skill-files', 'check'):
+        findings += check_skill_files(root)
     if cmd in ('secrets', 'check'):
         findings += check_secrets(root)
     if cmd in ('routes', 'check'):

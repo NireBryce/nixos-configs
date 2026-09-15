@@ -23,6 +23,11 @@ deciding whether to load a skill. Scope caveats there read as noise. The
 body, by contrast, loads in full once the skill fires — trigger detail in
 `## Applies to` costs nothing there.
 
+`just wiki-lint`'s `skill-files` check enforces the mechanical half of
+this — one sentence, no repo paths, no parentheticals (wordiness is a
+REVIEW finding only) — so a description that drifts from the rule fails
+the run instead of waiting for a reader to notice.
+
 Prefer active "How to `<verb>`…" phrasing for a procedural skill over a
 "Known traps in…" noun phrase — "traps" reads as scope, not purpose (the user
 rejected the latter for `new-flake-module` on 2026-08-22; the accepted form

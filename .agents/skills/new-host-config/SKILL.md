@@ -1,6 +1,6 @@
 ---
 name: new-host-config
-description: How to add a new host (nixosConfigurations or darwinConfigurations entry) to this repo.
+description: How to add a new host to this repo.
 ---
 
 # Adding a new host
