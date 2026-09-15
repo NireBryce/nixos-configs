@@ -104,6 +104,11 @@ the hooks can't cover.
 
 ## Catching it when something slips through anyway
 
+0. **Check `.agents/known-dead-secrets.md` before treating a hit as a
+   fresh incident** — skill `triage-flagged-secrets` has the full
+   procedure. A hook can re-flag a secret that's already confirmed dead
+   from old git history; matching that first avoids a rotation-panic cycle
+   over something inert.
 1. Before quoting or summarizing a tool result that came from any command
    in the categories above, scan it for secret-shaped content: a Tailscale
    auth key (`tskey-...`), an age key (`age1...` as a *secret*, or
@@ -129,6 +134,9 @@ the hooks can't cover.
 
 ## See also
 
+- `triage-flagged-secrets` skill and `.agents/known-dead-secrets.md` — the
+  registry of secrets already confirmed dead, for telling a fresh hit from
+  a known one before this file's "say so immediately" step.
 - `.agents/hooks/secrets-guard-pretooluse.sh` and
   `.agents/hooks/secrets-guard-posttooluse.sh` — the actual enforcement,
   wired in `.agents/settings.json`'s `hooks.PreToolUse`/`hooks.PostToolUse`.
