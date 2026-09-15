@@ -204,3 +204,7 @@ it" #7 for the concrete grep.
   "Why this exists" is their only surviving record. The sweep's fourth
   named correct example, `category-collector.nix`, holds no such comment
   today.
+- skill `git-archaeology` — finding the commit behind a date or hash
+  claim when the file has since moved; a path-scoped log coming back
+  empty usually means the rename, not the absence. (Hit 2026-09-15
+  verifying this file's own examples.)
