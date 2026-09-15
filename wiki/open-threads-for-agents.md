@@ -50,6 +50,10 @@ housekeeping pass over this list.
 - Are the `peripherals` modules (`logitech-g600`/`zsa-moonlander`) still
   wanted on a handheld? Is full desktop package parity still wanted on
   tenacity?
+- **User split, not started**: `elly` (experimental) → `nire`
+  (user-package material) → dedicated non-interactive accounts, as a
+  confused-deputy mitigation, once the config stabilizes. See
+  [categories/elly.md](categories/elly.md#elly-as-the-experimental-user).
 - **QNAP (QuTS hero) has no way to disable SSH password authentication** if
   SSH is ever enabled there. Separate from cube's side of the restic
   connection. Mitigations undecided.
