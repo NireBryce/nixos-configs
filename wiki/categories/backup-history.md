@@ -1,6 +1,6 @@
 # `backup` — history
 
-_Last modified: 2026-09-12_
+_Last modified: 2026-09-14_
 
 Resolved incidents and superseded design behind [backup](backup.md) and
 [../homelab/backup-runbook.md](../homelab/backup-runbook.md) — split out
@@ -63,9 +63,14 @@ plan: nothing had ever exercised that mount against the real QNAP, so
 
 The mount point itself moved 2026-08-28: `/mnt/qnap-erin` (a share shared
 with unrelated QNAP uses) → `/mnt/restic-backup` (dedicated). As of
-2026-08-31 the module doesn't use that mount at all — see [backup](backup.md)'s
-SFTP section — but `storage-NFS.nix` is untouched, still there for
-whatever else wants it.
+2026-08-31 the module didn't use that mount at all — see [backup](backup.md)'s
+SFTP section — and `storage-NFS.nix` sat there unused on all three Linux
+hosts until it was **deleted 2026-09-14**. Nothing referenced
+`/mnt/restic-backup` after the SFTP move, and leaving it meant three hosts
+held IP-trusted NFS write access to the backup repository — the exact
+property (NFS export trust is host-IP based, not keyed) that moving to SFTP
+was meant to end. If general QNAP access is ever wanted again, it wants a
+mount at a general share, not at the backup repo.
 
 ## Getting the SFTP repository from "declared" to "actually working" (2026-08-30 through 2026-09-06)
 

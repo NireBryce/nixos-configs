@@ -231,16 +231,19 @@
 # switch on cube hit `mount.nfs: access denied by server`, and the QNAP admin
 # console has no menu for forcing key-only SSH, so the weaker option was also
 # the broken one. SFTP with a dedicated key replaced it 2026-08-31, which is
-# what issue #87 had originally suggested. `storage-NFS.nix` still exists and
-# is still imported by every Linux host -- nothing else stopped using it.
+# what issue #87 had originally suggested. `storage-NFS.nix`, the mount it
+# used, outlived it unused on all three Linux hosts until 2026-09-14 and is
+# now deleted -- nothing referenced /mnt/restic-backup once this module went
+# SFTP.
 #
 # Two corrections from that era worth not re-making: the plan doc claimed
-# `storage-NFS.nix` was dangling, and it was not (no `dirsAsCategory.nix` in
-# `system/system/storage/`, so it collects straight into the shared `system`
-# aggregate -- checked by evaluating `config.fileSystems` on all three Linux
-# hosts); and a build failed on `sops.secrets.restic-cube-password` having no
-# value, at BUILD time rather than runtime, because a second checkout on cube
-# held the only secrets.yaml that had it.
+# `storage-NFS.nix` was dangling, and it was not -- `system/storage/` has no
+# `dirsAsCategory.nix`, so its files collect straight into the shared
+# `system` aggregate that every Linux host imports (checked by evaluating
+# `config.fileSystems` on all three). And a build failed on
+# `sops.secrets.restic-cube-password` having no value, at BUILD time rather
+# than runtime, because a second checkout on cube held the only secrets.yaml
+# that had it.
 #
 # 2026-09-03 to 2026-09-06 — the repo moved off `nire`'s home to the
 # `restic-backup` share, cube switched onto it, the old path's five snapshots

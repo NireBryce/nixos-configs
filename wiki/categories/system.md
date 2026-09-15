@@ -48,7 +48,7 @@ under `system`.
 | `security/` | `yubikey.nix`. |
 | `sound/` | `pipewire.nix`. |
 | `ssh/` | `ssh.nix`. |
-| `storage/` | `coredump-limit.nix`, `storage-NFS.nix`. |
+| `storage/` | `coredump-limit.nix`. |
 | `wayland/` | `wayland.nix`. |
 | `xdg/` | `xdg.nix`, `xdg-portals.nix`. |
 
