@@ -1,6 +1,6 @@
 # Hosts & current state
 
-_Last modified: 2026-09-12_
+_Last modified: 2026-09-14_
 
 This page is a map of where to look for each host. **Switch state is not
 recorded anywhere in the repo** — it rots faster than any session can
@@ -19,9 +19,16 @@ on the host (`just baseline`, `just diff-deployed`, or comparing `nix eval
 | Host | Class | Role | Wipes `/root`? |
 |---|---|---|---|
 | `nire-durandal` | nixos | workstation | yes |
-| `nire-tenacity` | nixos | handheld (Jovian/SteamOS) | yes |
+| `nire-tenacity` | nixos | handheld (Jovian/SteamOS) — testbed for rapid prototyping | yes |
 | `nire-cube` | nixos | mini PC (GMKtec) | **no** — deliberately, see below |
 | `nire-lysithea` | darwin | laptop | n/a |
+
+`nire-tenacity` being a handheld — picked up and put down constantly — is
+why it's usually the first host new config lands on and is checked
+against: that constant handling surfaces breakage fast. The other hosts
+usually lag behind it, not ahead. See top-level
+[../README.md](../README.md)'s Hosts section for the same point stated for
+a human reader.
 
 Removed, history not live hosts ([history.md](history.md)): `nire-testbed`
 (2026-08-14→08-22, never on real hardware), `nire-lego` and `nire-installer`

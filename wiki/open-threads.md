@@ -142,6 +142,17 @@ specific report — not as a housekeeping pass over this list:
   handoff doc into `claude cave/2026-08-09 things to look into
   eventually.md` — itself removed 2026-09-01 (still in git history; also
   carried a security-hardening reference link, now only recoverable there).
+- **User split, not yet started.** `elly` is deliberately the experimental
+  user — everything lands there first. Plan: offload what's really
+  user-package material onto `nire`, then, once the config has stabilized,
+  split anything that doesn't need direct human invocation into its own
+  dedicated user account, as a confused-deputy mitigation (a compromised or
+  misbehaving program running as one of those users shouldn't inherit the
+  whole of `elly`'s authority). Recorded now, rather than left purely
+  aspirational, because an LLM driving `just switch` on real hardware makes
+  the actual migration cheap enough to eventually just do — see
+  [categories/elly.md](categories/elly.md#elly-as-the-experimental-user)
+  and top-level [../README.md](../README.md)'s Users section.
 - `claude cave/2026-08-24-evaluation-self-hosted-booking.md` (removed
   2026-09-01, still in git history if wanted) — Easy!Appointments vs
   LibreBooking, compared 2026-08-24 and explicitly not pursued. What's

@@ -1,6 +1,6 @@
 # `elly` — `nireUser/elly/`
 
-_Last modified: 2026-09-01_
+_Last modified: 2026-09-14_
 
 The one category under `nireUser/` — the "for the user" area, as opposed to
 `nire/` (shared system) or `nirePackages/` (packages). Don't confuse this
@@ -12,6 +12,7 @@ plus several others — see [../architecture.md](../architecture.md).
 
 - [What's in it](#whats-in-it)
 - [Imported by](#imported-by)
+- [`elly` as the experimental user](#elly-as-the-experimental-user)
 - [See also](#see-also)
 
 ## What's in it
@@ -59,6 +60,27 @@ darwin host lists `elly` in its own per-host imports for the `nixos`/`darwin`-cl
 content (the account, darwin fonts); the `homeManager`-class content
 (`elly-git`, `hm-config`) reaches every host via the shared
 `ellyHomeManager` bundle regardless.
+
+## `elly` as the experimental user
+
+`elly` is deliberately the *experimental* user — everything new lands here
+first, not on a separate stable account. The long-term plan (not yet
+started) is a two-step split: offload what's really user-package material
+onto `nire`, then, once the config has stabilized, split anything that
+doesn't need direct human invocation into its own dedicated user account —
+a confused-deputy mitigation, so a compromised or misbehaving program
+running as one of those users doesn't inherit the whole of `elly`'s
+authority. `nire.primaryUser` from the deleted `flake-parts` branch
+(see [../flake-parts-port-notes.md](../flake-parts-port-notes.md)) is
+adjacent but not the same thing — that was about which user's config gets
+built, not about isolating non-interactive programs from `elly`.
+
+Noted here rather than deferred indefinitely because rebuilding and
+switching a host is now cheap enough for an agent to do routinely — the
+migration was previously gated on how much manual effort a user split
+would cost to land and verify, and an LLM driving `just switch` on real
+hardware removes most of that cost. See top-level [../../README.md](../../README.md)'s
+Users section for the same plan stated for a human reader.
 
 ## See also
 
