@@ -117,7 +117,7 @@ unconfirmed since") rather than letting the date alone imply currency.
 durable fact ("hosts A/B/C do X") is a live pointer, not prose that stays
 true on its own — a later, unrelated change can invalidate it the way a
 symlink can dangle, with nothing watching for the break. See "Preventing
-it" #6 for the concrete grep.
+it" #7 for the concrete grep.
 
 ## Preventing it
 
@@ -196,7 +196,11 @@ it" #6 for the concrete grep.
   `wiki/homelab/backup-runbook.md`, `wiki/homelab/pending-setup.md` — the
   categories 1/2 worked (mis)examples, including the `UNVERIFIED` markers
   and corrected dates added once each pattern was caught.
-- `forgejo.nix`, `golink.nix`, `bash.nix` (their `/root`-wipe and
-  desktop-import comments) vs. `podman.nix`/`hosts.nix`/`invariants.nix`/
-  `category-collector.nix` — category 3's broken and correct examples,
-  found in the same 2026-09-03 sweep.
+- `podman.nix`, `hosts.nix`, `invariants.nix` — the correct style: an
+  explicit removal note ("lego removed the same day", "were both removed
+  2026-08-27", "since removed"). The four broken mentions (`forgejo.nix`
+  twice, `golink.nix`, `bash.nix`) were deleted outright in the same
+  2026-09-03 sweep rather than rewritten — the incident paragraph under
+  "Why this exists" is their only surviving record. The sweep's fourth
+  named correct example, `category-collector.nix`, holds no such comment
+  today.
