@@ -12,7 +12,7 @@
 # they just aren't wrong to run. This is a mechanical backstop for
 # CLAUDE.md's general "confirm first" stance on anything hard to reverse,
 # not a replacement for judgment, and it does not gate on branch name --
-# that policy (only push directly to a branch Elly named outright) is
+# that policy (only push directly to a branch the user named outright) is
 # already the ship skill's job, not this hook's.
 #
 # Deliberately "ask", never "deny": every pattern below is something a real
