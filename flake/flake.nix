@@ -63,7 +63,7 @@
 
         # Declarative KDE Plasma (kwinrc, kglobalshortcutsrc, kcminputrc, ...) via
         # a home-manager module. Its HM module is imported only from
-        # nireHost/tenacity/configuration/plasma-tenacity.nix, not from
+        # hosts/tenacity/configuration/plasma-tenacity.nix, not from
         # enable-home-manager.nix -- durandal, lysithea and cube never load it.
         # One nested attrset rather than the flat `plasma-manager.inputs.X.follows`
         # shape used above: statix flags three assignments to the same
@@ -92,7 +92,7 @@
         # Declarative disk partitioning. Not used by any host's own config yet --
         # durandal and tenacity were hand-partitioned, then captured after the
         # fact by nixos-generate-config. Added for
-        # nire/impermanence/_disko/impermanence-luks-btrfs.nix, a reusable
+        # config-system/impermanence/_disko/impermanence-luks-btrfs.nix, a reusable
         # template for the LUKS+btrfs+impermanence layout those two hosts already
         # use by hand. See flake/doc/disko-impermanence-layout.md.
         disko.url                                  = "github:nix-community/disko";
@@ -106,6 +106,10 @@
         nixos-hardware.url                         = "github:NixOS/nixos-hardware/master";
         nix-index-database.url                     = "github:nix-community/nix-index-database";
         nix-index-database.inputs.nixpkgs.follows  = "nixpkgs";
+
+        # ── AI agents and coding tools ────────────────────────────────────────────
+        llm-agents.url                             = "github:numtide/llm-agents.nix";
+        llm-agents.inputs.nixpkgs.follows          = "nixpkgs";
 
     };
 

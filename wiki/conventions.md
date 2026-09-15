@@ -29,7 +29,7 @@ as a second recipe, not a flag, and errors).
 
 ## Landing changes on `experimental`
 
-Skill `ship` (`.claude/skills/ship/SKILL.md`) — branch → PR → confirm →
+Skill `ship` (`.agents/skills/ship/SKILL.md`) — branch → PR → confirm →
 merge → confirm → delete-branch. Two confirmations, not one. Only for work
 headed to `experimental`; pushing a topic branch is just a push. "Push" in
 conversation means this flow, not a direct trunk push. Redirected from
@@ -59,8 +59,6 @@ Nothing breaks by leaving it — courtesy, not a bug with consequences.
 
 - **[module-style-guide.md](module-style-guide.md)**
   — the full conventions doc for `flake/modules/`.
-- **Namespacing** — `nire` unless something needs a more specific tag;
-  `nireHost`, `nireUser`, `nirePackages` otherwise.
 - **Renames** — when a rename makes the old name ungreppable, say what it
   was on the declaration (`boot-durandal.nix`, `enable-home-manager.nix` are
   the worked examples).

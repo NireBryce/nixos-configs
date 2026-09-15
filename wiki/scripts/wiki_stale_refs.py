@@ -8,7 +8,7 @@ nothing catches it"). `check_wiki.py links` already covers the reliable
 half of this idea -- a real markdown link target either resolves or it
 doesn't, no judgement call needed. This script covers the OTHER half: a
 bare filename mentioned in backticks with no link at all (`elly-user.nix`,
-`nireHost/hosts.nix`), which is common in this wiki's prose but genuinely
+`hosts/hosts.nix`), which is common in this wiki's prose but genuinely
 ambiguous to check mechanically, for reasons a first pass at this idea ran
 into directly:
 
@@ -20,10 +20,10 @@ into directly:
     will never resolve, and correctly so.
   - **Shortened paths are a real, intentional convention here.** This wiki
     routinely gives a path relative to `flake/modules/` or shorter still
-    (`nireHost/hosts.nix`, `restic/restic.nix`) rather than the full
+    (`hosts/hosts.nix`, `restic/restic.nix`) rather than the full
     repo-relative one -- resolved below by matching a tracked path's
     *suffix*, not requiring an exact match, but a path that additionally
-    skips a middle directory (`flake/modules/nire/impermanence/
+    skips a middle directory (`flake/modules/config-system/impermanence/
     WARN-impermanence.nix`, skipping the real `root-rollback/` component)
     defeats even that and still won't match.
   - **Some backtick spans aren't this repo's files at all** --

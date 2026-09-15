@@ -1,6 +1,13 @@
-# `containers` — `nire/homelab/containers/`
+# `containers` — `config-system/homelab/containers/`
 
 _Last modified: 2026-09-02_
+
+Podman and distrobox — OCI containers — and *only* that. See
+[virtualization](virtualization.md) for why libvirt/QEMU is a different
+category despite "virtualization" sounding like it should cover this too.
+Nested under the `homelab` umbrella since 2026-08-27 (name unaffected);
+durandal stopped importing it the same day — see
+[Imported by](#imported-by).
 
 ## Contents
 
@@ -9,13 +16,6 @@ _Last modified: 2026-09-02_
 - [The collision this move hit for real](#the-collision-this-move-hit-for-real)
 - [Imported by](#imported-by)
 - [See also](#see-also)
-
-Podman and distrobox — OCI containers — and *only* that. See
-[virtualization](virtualization.md) for why libvirt/QEMU is a different
-category despite "virtualization" sounding like it should cover this too.
-Nested under the `homelab` umbrella since 2026-08-27 (name unaffected);
-durandal stopped importing it the same day — see
-[Imported by](#imported-by).
 
 ## What's in it
 
@@ -42,7 +42,7 @@ One file, `podman/podman.nix`, `nixos`-class:
 ## Why it's its own category, and why that didn't change anything
 
 Split out of `system` 2026-08-22, structurally the same move
-[virtualization](virtualization.md) got the day before: `nire/system/` is
+[virtualization](virtualization.md) got the day before: `config-system/system/` is
 imported whole by every Linux host, and splitting a module into its own
 category is this repo's only mechanism for making something optional
 ([../architecture.md](../architecture.md)). At split time no host declined
@@ -63,7 +63,7 @@ own header has the two earlier names it carried
 
 ## Imported by
 
-`tenacity`, `cube`. All four NixOS hosts on the tree at the time (durandal,
+`tenacity`, `cube`. Every NixOS host then on the tree (durandal,
 tenacity, lego, cube) imported it 2026-08-22→08-27, when durandal dropped
 it: nothing in this repo's history records durandal actually running a
 container or distrobox, unlike cube's confirmed homelab usage — parity, not

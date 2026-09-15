@@ -2,16 +2,16 @@
 
 _Last modified: 2026-09-02_
 
+How [monitoring](monitoring.md)'s `grafana-secret-key-setup.service` came
+to exist, split out 2026-09-03 so that page's "The `secret_key` trap"
+section can stay about the mechanism as it works today rather than the
+road to it.
+
 ## Contents
 
 - [The `secret_key` regression, twice](#the-secret_key-regression-twice)
 - [An unrelated failure in the same activation](#an-unrelated-failure-in-the-same-activation)
 - [See also](#see-also)
-
-How [monitoring](monitoring.md)'s `grafana-secret-key-setup.service` came
-to exist, split out 2026-09-03 so that page's "The `secret_key` trap"
-section can stay about the mechanism as it works today rather than the
-road to it.
 
 ## The `secret_key` regression, twice
 

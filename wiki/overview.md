@@ -2,19 +2,19 @@
 
 _Last modified: 2026-09-02_
 
+The orientation page — read this first if you don't yet know what you're
+looking for. [00-INDEX.md](00-INDEX.md) is the index once you do; this page is
+the 2-minute mental model that makes the index make sense. Like the rest of
+this wiki, it's short on its own facts and long on pointers — a checkable
+claim (a host count, a category list) belongs on the page that owns it, not
+copied here to drift.
+
 ## Contents
 
 - [What this is](#what-this-is)
 - [The shape of it](#the-shape-of-it)
 - [What's distinctive here](#whats-distinctive-here)
 - [Where to go next](#where-to-go-next)
-
-The orientation page — read this first if you don't yet know what you're
-looking for. [README.md](README.md) is the index once you do; this page is
-the 2-minute mental model that makes the index make sense. Like the rest of
-this wiki, it's short on its own facts and long on pointers — a checkable
-claim (a host count, a category list) belongs on the page that owns it, not
-copied here to drift.
 
 ## What this is
 
@@ -39,7 +39,7 @@ switched versus only evaluated.
 - **Which category a module belongs to is decided by its directory, not a
   declaration.** A category is a directory that opts something shared
   (system config, a package, a piece of Home Manager) into being optional
-  per-host. [categories/README.md](categories/README.md) is one article per
+  per-host. [categories/00-INDEX.md](categories/00-INDEX.md) is one article per
   category; [architecture.md](architecture.md) explains the mechanism itself.
 - **Home Manager rides inside NixOS**, not as a separate tool with its own
   switch command — one `just switch` applies both. See
@@ -48,7 +48,7 @@ switched versus only evaluated.
   forge, monitoring, a shortlink service, a landing page, backups — behind
   one reverse proxy, reachable only over Tailscale.
   [categories/homelab.md](categories/homelab.md) is the umbrella category;
-  [homelab/README.md](homelab/README.md) is how to actually use what's
+  [homelab/00-INDEX.md](homelab/00-INDEX.md) is how to actually use what's
   running, as opposed to how it's built.
 
 ## What's distinctive here
@@ -66,16 +66,16 @@ switched versus only evaluated.
   `homelab/` page is *usage* — what to actually do with the running
   service. They go stale on different triggers (a config change vs. the
   service itself changing), which is why they're kept apart rather than
-  combined. [homelab/README.md](homelab/README.md) has the full reasoning.
-- **This wiki, `AGENTS.md`, and the `.claude/skills/` are working notes as
+  combined. [homelab/00-INDEX.md](homelab/00-INDEX.md) has the full reasoning.
+- **This wiki, `AGENTS.md`, and the `.agents/skills/` are working notes as
   much as documentation** — written for an agent with no memory between
   sessions as much as for a human. [traps-and-skills.md](traps-and-skills.md)
   is the short version of why that shapes how things are written here.
 
 ## Where to go next
 
-- Already know what you're trying to do → [README.md](README.md)'s Common
+- Already know what you're trying to do → [00-INDEX.md](00-INDEX.md)'s Common
   tasks table.
-- Want the full map of pages → [README.md](README.md)'s Pages section.
+- Want the full map of pages → [00-INDEX.md](00-INDEX.md)'s Pages section.
 - About to touch impermanence, secrets, or anything host-hardware-shaped →
   `../CLAUDE.md`'s Safety section, read cold, before anything else.

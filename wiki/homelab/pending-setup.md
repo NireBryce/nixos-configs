@@ -1,18 +1,6 @@
 # Pending setup
 
-_Last modified: 2026-09-06_
-
-## Contents
-
-- [How this differs from open-threads.md](#how-this-differs-from-open-threadsmd)
-- [1. Done — Elly is signed in, confirmed 2026-09-05](#1-done--elly-is-signed-in-confirmed-2026-09-05)
-- [2. Decided: mirror, not origin — 2026-09-03](#2-decided-mirror-not-origin--2026-09-03)
-- [3. golink has no links yet](#3-golink-has-no-links-yet)
-- [4. Done — backups exist, and a restore has actually recovered something](#4-done--backups-exist-and-a-restore-has-actually-recovered-something)
-- [5. Grafana's admin credentials](#5-grafanas-admin-credentials)
-- [6. Housekeeping on cube: one scratch directory left over — done](#6-housekeeping-on-cube-one-scratch-directory-left-over--done)
-- [What's verified here](#whats-verified-here)
-- [See also](#see-also)
+_Last modified: 2026-09-14_
 
 Services that are **running but not finished** — configured, switched,
 reachable, and still missing the human step that makes them useful. Every
@@ -21,6 +9,25 @@ not a change to `flake/modules/`.
 
 Verified against the live instances on 2026-08-24; each item says how it was
 checked, so a stale entry can be re-tested rather than guessed at.
+
+> **Condensed version:**
+> [pending-setup-for-agents.md](pending-setup-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
+## Contents
+
+- [How this differs from open-threads.md](#how-this-differs-from-open-threadsmd)
+- [1. Done — SSH key added, clone over SSH confirmed 2026-09-13](#1-done--ssh-key-added-clone-over-ssh-confirmed-2026-09-13)
+- [2. Done — mirror, reaffirmed 2026-09-12](#2-done--mirror-reaffirmed-2026-09-12)
+- [3. golink has no links yet](#3-golink-has-no-links-yet)
+- [4. Done — backups exist, and a restore has actually recovered something](#4-done--backups-exist-and-a-restore-has-actually-recovered-something)
+- [5. Grafana's admin credentials](#5-grafanas-admin-credentials)
+- [6. Done — housekeeping on cube, 2026-08-24](#6-done--housekeeping-on-cube-2026-08-24)
+- [7. Homepage's calendar feeds](#7-homepages-calendar-feeds)
+- [What's verified here](#whats-verified-here)
+- [See also](#see-also)
 
 ## How this differs from open-threads.md
 
@@ -37,49 +44,43 @@ to find a real bug, once more to confirm the fix).
 
 ---
 
-## 1. Done — Elly is signed in, confirmed 2026-09-05
+## 1. Done — SSH key added, clone over SSH confirmed 2026-09-13
 
-As of 2026-08-24, `GET /git/api/v1/users/search` returned
-`{"data":[],"ok":true}` — the forge up, serving, and completely empty,
-with registration closed so the first account needed a manual command.
-2026-08-26: `forgejo-admin-bootstrap` (see
-[git-forge](../categories/git-forge.md)) automated that, creating the
-`elly`/admin account declaratively on activation.
+The user's key was already added; auth and a real clone were both exercised from
+`nire-tenacity` on 2026-09-13:
 
-**A real gap in how this was checked, caught 2026-09-05**: the unauthenticated
-`GET /git/api/v1/users/search` always reports `last_login` as the zero
-value (`0001-01-01T00:00:00Z`) and `is_admin`/`active` as `false` —
-Forgejo/Gitea's own anonymous-safe field masking, not a real read of
-account state. Two agent sessions (2026-09-04, 2026-09-05) took that zero
-value at face value and wrote "nobody has signed in yet" into this page
-and the backup runbook — wrong both times, since a same-day screenshot
-from Elly showed an active, logged-in session the whole time. The account
-existing was real; the "hasn't logged in" conclusion drawn from an
-anonymous API call was not. Re-running the same query afterward still
-returns the same zero value even with Elly actively logged in, confirming
-the field is simply not meaningful from this endpoint, not that anything
-changed.
+```
+$ ssh -T forgejo@ts-cube
+Hi there, elly! You've successfully authenticated with the key named
+elly@nire-tenacity, but Forgejo does not provide shell access.
+$ git clone --depth 1 forgejo@ts-cube:elly/nixos-configs.git
+```
 
-**Still open**: whether the account is *really* admin (bootstrap's
-`--admin` flag) is unconfirmed either way — the masked `is_admin: false`
-never proved or disproved it. Confirming it means checking the Site
-Administration panel from inside the UI, not another anonymous API call.
+The key is `~/.ssh/id_ed25519` (`elly@nire-tenacity`), not a dedicated one,
+and no `ssh_config` block was needed. **Push over SSH is still untested.**
 
-Then, separately: add an SSH key under Settings → SSH keys if you want
-`forgejo@ts-cube:…` clones. See [using the forge](forgejo.md) for why that
-key authorizes `forgejo@ts-cube` and not `elly@ts-cube`.
+**It is your own key, not a key belonging to the `forgejo` account** — the
+`forgejo@` in the clone URL is the account SSH connects *to*, which has no
+keypair of its own. Procedure, for the next key or the next person:
+[forgejo.md → Adding one](forgejo.md#adding-one).
 
-## 2. Decided: mirror, not origin — 2026-09-03
+(The admin half of this item is settled — `elly` is admin, confirmed
+2026-09-12; the account bootstrap and the anonymous API that reported
+otherwise are in
+[git-forge-history.md](../categories/git-forge-history.md#the-admin-account-and-an-anonymous-api-that-reports-zeroes).)
 
-- **As a mirror** — GitHub stays the origin, cube holds copies. Losing cube
-  costs nothing. **Chosen**, 2026-09-03, before item 4's restore was
-  proven — worth revisiting now that a real restore has actually
-  succeeded, if an origin is wanted.
-- **As an origin** — things live here first. That's the useful version, and
-  it's the one that shouldn't happen until backups exist.
+## 2. Done — mirror, reaffirmed 2026-09-12
 
-Still open: zero repos actually pushed yet, mirror or not — this item only
-settled *which mode*, not that anything's been done.
+**Cube stays a mirror. GitHub remains canonical.** Decided 2026-09-03 and
+reaffirmed by the user 2026-09-12 — this time with the condition that had
+gated it actually met, rather than in place of it: an origin was always
+held back until backups existed, and a real restore has since recovered a
+real database (item 4). The answer did not change.
+
+The record — the choice, and this repo becoming the first thing actually
+mirrored on 2026-09-11 — is in
+[git-forge-history.md](../categories/git-forge-history.md#mirror-not-origin--and-the-first-real-mirror).
+Reopening it is a fresh decision, not an outstanding one.
 
 ## 3. golink has no links yet
 
@@ -89,12 +90,20 @@ running:
 
 | Short | Target |
 |---|---|
-| `go/dash` | `https://ts-cube.moose-micro.ts.net/` |
-| `go/git` | `https://ts-cube.moose-micro.ts.net/git/` |
-| `go/graf` | `https://ts-cube.moose-micro.ts.net/grafana/` |
+| `go/dash` | `https://homepage.moose-micro.ts.net/` |
+| `go/git` | `https://git.moose-micro.ts.net/` |
+| `go/graf` | `https://grafana.moose-micro.ts.net/` |
+
+These targets were updated 2026-09-11 from the retired path-prefix URLs
+(`ts-cube.moose-micro.ts.net/git/` and friends) to each service's own
+Tailscale Services name, and `go/dash` re-pointed 2026-09-12 from the
+retired `glance.` name to homepage (issue #291). Nothing needed
+re-pointing for real: `http://go/.export` is still empty, so these remain
+proposals rather than links that exist. One homepage-specific item joined
+this list with #291 — see the calendar-feeds entry below.
 
 Creating them is the web UI at `http://go/`, or the `curl` form in
-[creating go/ links](golinks.md) — read that page's `--post302` and delete
+[creating go/ links](creating-golinks.md) — read that page's `--post302` and delete
 traps first, both of which have teeth.
 
 **Done when** `go/dash` resolves from a second tailnet device, not just the
@@ -102,56 +111,60 @@ one that created it.
 
 ## 4. Done — backups exist, and a restore has actually recovered something
 
-**The big one**, tracked as
-[#87](https://github.com/NireBryce/nixos-configs/issues/87), closed
-2026-09-06: a real restore of `/var/lib/forgejo`, `/persist/`, and
-Forgejo's actual sqlite database has been performed and confirmed
-recoverable — not just "a backup exists," the harder bar #87 always set.
+Closed 2026-09-06, tracked as
+[#87](https://github.com/NireBryce/nixos-configs/issues/87). A real restore
+of `/var/lib/forgejo`, `/persist/` and Forgejo's actual sqlite database was
+performed and confirmed recoverable — the harder bar #87 always set, not
+merely "a backup exists". The drill found a real bug in the sqlite staging
+mechanism, since fixed and confirmed live.
 
-2026-08-28: the [backup](../categories/backup.md) category exists now
-(restic to the QNAP). Originally a local-path repo on the QNAP NFS mount —
-that failed for real (`mount.nfs: access denied by server`, the share's
-export ACL never included cube), and as of 2026-08-31 the module switched
-to SFTP instead, issue #87's original plan. SSH now works on the QNAP (a
-dedicated key for this, confirmed authenticating by hand), but:
-
-- ~~Neither sops secret has a value in this tree~~ — **set, 2026-08-30
-  (`restic-cube-password`) and 2026-08-31 (`restic-cube-ssh-key`)**, and
-  **live-confirmed working 2026-09-05**: cube has switched onto the
-  `restic-backup`-share path move, its timer has run successfully against
-  it, and the pre-move repo's history (five snapshots, 2026-08-31 through
-  2026-09-04) was migrated in with `restic copy` — six snapshots total,
-  confirmed via a live listing. See
-  [backup-history.md](../categories/backup-history.md).
-- ~~No QNAP-side snapshot schedule exists on the backup share~~ — **done,
-  2026-09-05**, confirmed via a Snapshot Manager screenshot: daily at
-  04:30 on the `restic-backup` share, keeping 5 days, status Success, 2
-  snapshots already taken.
-- ~~QuTS hero has no toggle to force key-only SSH auth~~ — **mitigated,
-  2026-08-31**: port 22 is now LAN-blocked and tailnet-only (confirmed
-  live), and QNAP's brute-force protection is on. See the runbook's setup
-  step 3.
-
-**All setup is done, and the restore drill found a real bug — since fixed
-and confirmed live.** The sqlite consistency mechanism
-(`backupPrepareCommand`, meant to protect Forgejo/Grafana/golink's
-databases specifically) had never actually worked: `restic ls --recursive`
-against the repository showed it backed up completely empty in every real
-run checked, including a fresh reboot. Root cause: the staging directory
-lived inside restic's own cache directory, which restic refuses to back
-up — confirmed with a clean before/after test. Fixed by moving it outside
-that directory, then confirmed for real: a switch, a real backup run, and
-a real restore that opened a genuine, complete Forgejo database (every
-expected table present). Full account: **[backup
-runbook](backup-runbook.md)** and `wiki/categories/backup.md`'s "The
-sqlite consistency bug."
+The full setup account — the two sops secrets, the QNAP snapshot schedule,
+the SSH-auth limitation — moved to
+[backup-history.md](../categories/backup-history.md#the-setup-checklist-closed-out-2026-08-28-through-2026-09-06)
+2026-09-12. The procedure is [backup-runbook.md](backup-runbook.md).
 
 ## 5. Grafana's admin credentials
 
-Not verifiable from outside without logging in, so this is a "confirm",
-not a finding: Grafana ships with a default `admin` account and prompts for a
-change on first sign-in. Worth confirming that happened, since the tailnet is
-the only thing in front of it.
+**Both halves done 2026-09-13.**
+
+**The live password was changed by hand**, by the user, through the UI. It
+persists: `grafana.nix` declares no drift enforcement, cube has a plain
+persistent root, so `/var/lib/grafana`'s sqlite db keeps it across reboots
+and rebuilds, and restic covers it.
+
+**A fresh instance can no longer fail open.** `grafana.nix` now sets
+`settings.security.admin_password` from the new `grafana-admin-password`
+sops secret via Grafana's `$__file{}` provider. Before this, a rebuilt or
+newly-provisioned Grafana came up on the published `admin`/`admin` with only
+the tailnet in front of it, and stayed there until a human noticed.
+
+**What this deliberately does not do:** manage the running instance's
+password. Grafana's own `defaults.ini` says `admin_password` "can be changed
+before first start of grafana, or in profile settings" — it applies when
+Grafana *creates* the admin user, so on an instance that already has one it
+is inert. Making sops authoritative over a live password needs a different
+mechanism (a oneshot running `grafana-cli admin reset-admin-password`, the
+shape `forgejo-admin-bootstrap` uses), which would overwrite a hand-set
+password on every switch. Not done on purpose.
+
+**Switched on cube 2026-09-13.** What that confirmed, checked on the host
+rather than inferred:
+
+- `/run/secrets/grafana-admin-password` exists as `grafana:grafana` mode
+  `400` — the `owner =` in the module is right in practice, not just in
+  `nix eval`, which is the half this module's `secret_key` history got
+  wrong once.
+- Grafana's live `config.ini` carries
+  `admin_password=$__file{/run/secrets/grafana-admin-password}`.
+- `grafana.service` is active with `NRestarts=0`, so it took the new config
+  without crash-looping.
+- `/run/current-system` matches what `experimental` evaluates to.
+
+**The first-start path is still unexercised, and that is expected.** Cube's
+admin user predates this, so Grafana has never read the file. The sops value
+has never been consumed by anything; it is deployed, not proven. Only a
+fresh instance — a rebuilt cube, or a wiped `/var/lib/grafana` — actually
+uses it.
 
 Related and worth knowing before you start building dashboards: anything
 edited in the Grafana UI lives **only** in cube's sqlite db, while anything
@@ -163,13 +176,33 @@ to keep permanently should end up in the repo:
 [monitoring.md](../categories/monitoring.md#adding-a-dashboard-that-survives-a-rebuild)
 has the how-to, not yet verified against a real UI export.
 
-## 6. Housekeeping on cube: one scratch directory left over — done
+## 6. Done — housekeeping on cube, 2026-08-24
 
-As of 2026-08-24, `~/nixos-configs` evaluated to exactly what was running
-(`toplevel.outPath` matched `/run/current-system`), and was one docs-only
-commit behind. The leftover, **`~/nixos-caddy-test`** (the rsync'd tree the
-Caddy/glance switches were activated from), has since been deleted, and the
-real checkout is caught up with `main`.
+`~/nixos-caddy-test` (the rsync'd tree the Caddy/glance switches were
+activated from) has been deleted, and the real checkout is caught up. Kept
+as a one-line record rather than moved: there is no `housekeeping` category
+for it to have a history page in, and the outcome is the whole story.
+
+## 7. Homepage's calendar feeds
+
+Configured end to end with #291 — the calendar/agenda widgets, the
+`homepage-env` sops key, the `{{HOMEPAGE_VAR_ICAL_*}}` plumbing — except the
+one thing only a human can supply: the **actual gcal secret iCal
+addresses**. Calendar IDs were deliberately not assigned at implementation.
+Until they are, the calendars render as a bare month grid and an empty
+agenda, and each calendar card carries a small API-error band — the
+placeholder URL 403ing, gone the moment a real address takes its place
+(the secret's `restartUnits` bounces homepage at the next switch).
+
+The fill-in: `sops <repo>/flake/modules/config-system/system/secrets/secrets.yaml`,
+edit the `homepage-env` value to one
+`HOMEPAGE_VAR_ICAL_<NAME>=<secret-ics-url>` line per calendar (`family`
+exists as the placeholder name; more names mean adding entries to
+`homepage.nix`'s `calendars` attrset too). The secret's `restartUnits`
+bounces homepage-dashboard on the next switch; events then appear with no
+further commit. Where the addresses come from: Google Calendar → Settings
+→ "Secret address in iCal format", per calendar. Mechanism and traps:
+[categories/landing.md](../categories/landing.md#how-the-gcal-calendar-feeds-work).
 
 ## What's verified here
 
@@ -189,6 +222,6 @@ written from each service's own documentation and this repo's modules.
   check when one doesn't answer.
 - [Using the forge](forgejo.md) — clone URLs, sign-in, and the SSH key
   detail item 1 hands off to.
-- [Creating go/ links](golinks.md) — the traps item 3 hands off to.
+- [Creating go/ links](creating-golinks.md) — the traps item 3 hands off to.
 - [open-threads.md](../open-threads.md) — the repo-side counterpart to this
   page.

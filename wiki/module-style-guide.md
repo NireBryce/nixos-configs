@@ -1,32 +1,43 @@
 # Module style guide
 
-_Last modified: 2026-09-07_
+_Last modified: 2026-09-14_
 
-## Contents
+Conventions for `flake/modules/`. "How many files do this" used to be
+stated as inline counts per section, dated 2026-08-08 -- and by 2026-09-09
+every one of them had gone quietly false as the tree grew from 151 to 263
+files. Counts now live in one table, on
+[module-style-guide-for-agents.md](module-style-guide-for-agents.md#counts)
+— they are bookkeeping rather than a rule, and the sibling is where
+facts-to-look-up belong. `check_wiki.py`'s `counts` subcheck recomputes
+each row against the tree and fails on drift, so they stay true instead of
+merely having been.
 
-- [Opening brackets go on the same line as whatever causes them](#opening-brackets-go-on-the-same-line-as-whatever-causes-them)
-- [Four-space indent](#four-space-indent)
-- [The module header — 151 of 151 files](#the-module-header--151-of-151-files)
-- [`{ ... }:` on an inner module lambda is sometimes deliberate](#---on-an-inner-module-lambda-is-sometimes-deliberate)
-- [`# # description = "..."` as the first line of the body — 70 files](#--description---as-the-first-line-of-the-body--70-files)
-- [Rationale goes inside the module body, not in a header block](#rationale-goes-inside-the-module-body-not-in-a-header-block)
-- [`with pkgs; [ ... ]` for package lists — 106 files](#with-pkgs----for-package-lists--106-files)
-- [Aligned `=` columns](#aligned--columns)
-- [When a rename makes the old name ungreppable, say what it was](#when-a-rename-makes-the-old-name-ungreppable-say-what-it-was)
-- [A bug recorded in a comment stays in the file](#a-bug-recorded-in-a-comment-stays-in-the-file)
-- [File placement is load-bearing](#file-placement-is-load-bearing)
-
-Conventions for `flake/modules/`. Counts are from the tree as of
-2026-08-08, so "how many files do this" is checkable rather than asserted.
-
-This file used to live at `modules/nirePackages/style-guide.md`, where its
+This file used to live at `modules/packages/style-guide.md`, where its
 location implied it governed only package modules, and later at `claude
 cave/claude-style-guide.md` until that directory was retired 2026-09-02. It
 applies to every module — see [history.md](history.md) and
 [styleguide.md](styleguide.md) for why it counts as an exception to this
 wiki's usual "index over restatement" rule.
 
----
+> **Condensed version:**
+> [module-style-guide-for-agents.md](module-style-guide-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
+## Contents
+
+- [Opening brackets go on the same line as whatever causes them](#opening-brackets-go-on-the-same-line-as-whatever-causes-them)
+- [Four-space indent](#four-space-indent)
+- [The module header](#the-module-header)
+- [`{ ... }:` on an inner module lambda is sometimes deliberate](#---on-an-inner-module-lambda-is-sometimes-deliberate)
+- [`# # description = "..."` as the first line of the body](#--description---as-the-first-line-of-the-body)
+- [Rationale goes inside the module body, not in a header block](#rationale-goes-inside-the-module-body-not-in-a-header-block)
+- [`with pkgs; [ ... ]` for package lists](#with-pkgs----for-package-lists)
+- [Aligned `=` columns](#aligned--columns)
+- [When a rename makes the old name ungreppable, say what it was](#when-a-rename-makes-the-old-name-ungreppable-say-what-it-was)
+- [A bug recorded in a comment stays in the file](#a-bug-recorded-in-a-comment-stays-in-the-file)
+- [File placement is load-bearing](#file-placement-is-load-bearing)
 
 ## Opening brackets go on the same line as whatever causes them
 
@@ -52,7 +63,7 @@ they strictly need to, left over from moving `flake.modules` out of `perSystem`
 without reflowing — reindenting would risk the `''` strings in the shell
 modules, so it was left alone.
 
-## The module header — 151 of 151 files
+## The module header
 
 Every module derives its own name from its filename rather than repeating it:
 
@@ -100,7 +111,7 @@ distinction that matters when skimming a file to tell "is this a module" from
 accepted into `lint-baseline.json` rather than fixed. Don't "fix" these on a
 lint pass without checking here first.
 
-## `# # description = "..."` as the first line of the body — 70 files
+## `# # description = "..."` as the first line of the body
 
 A one-line description of what the module is for, commented out, immediately
 inside the module body:
@@ -134,7 +145,7 @@ informally.
 A typed registry (`flake.moduleDescriptions.${moduleName}`, `attrsOf str`)
 would be queryable and would **error** on two modules setting the same key
 differently, catching the module-name collision class for free. Declined:
-70 files to edit for something working; `just modules` already detects
+a tree-wide edit for something already working; `just modules` already detects
 collisions for all names; identical descriptions would still merge silently;
 one more `unknown flake output` warning; and a registry can go stale
 silently. **Do not "upgrade" this to an option without a reason beyond
@@ -152,7 +163,7 @@ emitted verbatim into the generated dotfile — fourteen lines of maintenance
 notes once shipped into `~/.zshrc` this way. Notes meant for whoever edits the
 `.nix` go *above* the string, where they are Nix comments.
 
-## `with pkgs; [ ... ]` for package lists — 106 files
+## `with pkgs; [ ... ]` for package lists
 
 ```nix
 home.packages = with pkgs; [
@@ -192,7 +203,7 @@ contain the string so a search lands here.
 
 ```nix
 # renamed from `boot.nix`, which declared `flake.modules.nixos.boot` and so
-# merged with the `nire/boot/` category of the same name
+# merged with the `config-system/boot/` category of the same name
 ```
 
 ```nix
@@ -200,8 +211,8 @@ contain the string so a search lands here.
 # hardcoded, as it is in users.users.elly and home.username
 ```
 
-Both live in the tree: `nireHost/durandal/hardware/boot-durandal.nix` and
-`nire/system/home-manager/enable-home-manager.nix`.
+Both live in the tree: `hosts/durandal/hardware/boot-durandal.nix` and
+`config-system/system/home-manager/enable-home-manager.nix`.
 
 ## A bug recorded in a comment stays in the file
 

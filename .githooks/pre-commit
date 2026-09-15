@@ -14,7 +14,7 @@ repo_root="$(git rev-parse --show-toplevel)"
 if ! command -v statix >/dev/null || ! command -v deadnix >/dev/null; then
     echo "pre-commit: statix/deadnix not on PATH -- skipping the lint ratchet." >&2
     echo "  (nix shell nixpkgs#statix nixpkgs#deadnix, or run on a host with" >&2
-    echo "  nirePackages/nix-utils/ installed, to get this check locally)" >&2
+    echo "  packages/nix-utils/ installed, to get this check locally)" >&2
     exit 0
 fi
 

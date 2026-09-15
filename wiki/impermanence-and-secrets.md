@@ -9,7 +9,7 @@ _Last modified: 2026-09-05_
 
 ## Impermanence
 
-**Read `flake/modules/nire/impermanence/root-rollback/WARN-impermanence.nix`
+**Read `flake/modules/config-system/impermanence/root-rollback/WARN-impermanence.nix`
 before changing anything near this, every time — no exceptions, per
 [`../CLAUDE.md`](../CLAUDE.md)'s Safety section.** It's the module that
 deletes the `/root` btrfs subvolume in initrd on every boot for the hosts
@@ -22,7 +22,7 @@ that import it.
   for the current, correctable-in-place list — don't assume "every host" or
   "no host" without checking the specific one.
 - **Skill `impermanence-initrd`**
-  (`.claude/skills/impermanence-initrd/SKILL.md`) — the sharp edge: the
+  (`.agents/skills/impermanence-initrd/SKILL.md`) — the sharp edge: the
   shell's own view of the machine (`lsblk`, `findmnt`, `/etc`) is scoped to
   its mount namespace and can describe a completely different,
   wrong-looking-but-correct disk layout — use `/proc/1/mountinfo`,
@@ -39,8 +39,12 @@ that import it.
 
 ## Secrets
 
-- **sops-nix**, `flake/modules/nire/system/secrets/`. `secrets.yaml` is
-  encrypted and committed in the repo on purpose.
+- **sops-nix**, `flake/modules/config-system/system/secrets/`. `secrets.yaml` is
+  encrypted and committed in the repo on purpose. Key *names* are plaintext
+  in that ciphertext — `just read-sops-names` lists them without
+  decrypting, which is the only safe way to answer "which secrets exist?"
+  (decrypting to grep for them leaked values twice: 2026-08-26 and
+  2026-09-09, see skill `secrets-hygiene`).
 - **`.sops.yaml`** enrolls `nire-durandal`, `nire-lysithea`, `nire-tenacity`,
   `nire-cube` — read the file directly for the current list rather than
   trusting a count here; [`../CLAUDE.md`](../CLAUDE.md)'s Safety section has

@@ -1,6 +1,12 @@
-# `virtualization` — `nire/homelab/virtualization/`
+# `virtualization` — `config-system/homelab/virtualization/`
 
 _Last modified: 2026-09-04_
+
+Libvirt/QEMU VMs, and *only* that — see [containers](containers.md) for why
+podman and distrobox (OCI containers) are a different category. Nested under
+the `homelab` umbrella since 2026-08-27 (moved from `config-system/virtualization/`;
+name and by-name importability unaffected). `nire-llm-sandbox`, the one VM
+this category ran, was removed 2026-08-28 — [history.md](../history.md).
 
 ## Contents
 
@@ -11,12 +17,6 @@ _Last modified: 2026-09-04_
 - [Why this is its own category and not part of `system`](#why-this-is-its-own-category-and-not-part-of-system)
 - [Imported by](#imported-by)
 - [See also](#see-also)
-
-Libvirt/QEMU VMs, and *only* that — see [containers](containers.md) for why
-podman and distrobox (OCI containers) are a different category. Nested under
-the `homelab` umbrella since 2026-08-27 (moved from `nire/virtualization/`;
-name and by-name importability unaffected). `nire-llm-sandbox`, the one VM
-this category ran, was removed 2026-08-28 — [history.md](../history.md).
 
 ## What's in it
 
@@ -84,11 +84,11 @@ a plain curried function (`{ name, image, ... }: { pkgs, lib, ... }: ...`),
 not a flake-parts module — it takes parameters, so `import-tree` would fail
 auto-importing it. Filed under `_lib/` because `import-tree` ignores any
 path containing `/_` (same as
-`nire/impermanence/_disko/impermanence-luks-btrfs.nix`).
+`config-system/impermanence/_disko/impermanence-luks-btrfs.nix`).
 
 Its one caller, `virtualization-cube.nix`, was removed with the VM
 2026-08-28. While it existed it illustrated a second dirsAsCategory
-exclusion worth knowing: a file sitting bare in `nire/homelab/virtualization/`
+exclusion worth knowing: a file sitting bare in `config-system/homelab/virtualization/`
 itself (not in a subdirectory) is collected by nothing — which kept the VM
 out of this category's aggregate back when durandal imported it too. It
 still **was** swept into the `homelab` aggregate cube imports, since
@@ -99,12 +99,12 @@ why — an earlier version lacking that silently dropped this exact file).
 The two real bugs this feature hit (nixpkgs' image-variant isolation not
 reaching a base config's toplevel; `image.filePath` being relative rather
 than absolute) are in lessons-learned §36; the removed `nixos-vm-images`
-skill (`.claude/skills/nixos-vm-images`, git history) had the full
+skill (`.agents/skills/nixos-vm-images`, git history) had the full
 image-building writeup if another VM ever gets wired up.
 
 ## Why this is its own category and not part of `system`
 
-So the handhelds can decline it: `nire/system/` is imported whole by every
+So the handhelds can decline it: `config-system/system/` is imported whole by every
 Linux host, and a boot-time daemon like `libvirtd` has no business on a
 gamescope handheld. Needs `security.polkit.enable`, which `kde-desktop`
 already brings on the hosts that import it.
@@ -132,5 +132,5 @@ records durandal ever running a VM, so it was parity, not need (see
 - [virtualization-history.md](virtualization-history.md) — `nire-llm-sandbox`'s
   own `sshForward` verification, and the module-naming near-miss.
 - The `nixos-vm-images` writeup — removed 2026-09-03 with the VM gone;
-  `git log -- .claude/skills/nixos-vm-images` has it, if another VM ever
+  `git log -- .agents/skills/nixos-vm-images` has it, if another VM ever
   gets wired up.

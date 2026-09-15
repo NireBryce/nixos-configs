@@ -23,7 +23,7 @@ user    := "elly"
 # tenacity spent an hour building the wrong machine and said nothing about it.
 #
 # Derived from the host configs on disk rather than a hardcoded list of
-# hostnames: `nire-tenacity` -> nireHost/tenacity-configuration.nix. A third
+# hostnames: `nire-tenacity` -> hosts/tenacity-configuration.nix. A third
 # host is picked up by existing, with no edit here -- which matters, because
 # the failure mode of forgetting is the silent wrong-machine build this exists
 # to prevent. Anywhere with no matching config -- the darwin laptop, a
@@ -33,7 +33,7 @@ user    := "elly"
 #     just host=nire-durandal build
 # `just build host=nire-durandal` is not a variant of that; just reads it as a
 # second recipe name and errors.
-host := `h=$(hostname); [ -e "flake/modules/nireHost/${h#nire-}-configuration.nix" ] && echo "$h" || echo nire-durandal`
+host := `h=$(hostname); [ -e "flake/modules/hosts/${h#nire-}-configuration.nix" ] && echo "$h" || echo nire-durandal`
 
 _default:
     @just --list
@@ -49,27 +49,49 @@ modules:
 
 # statix + deadnix + an oversized-file check, ratcheted against a committed baseline
 lint:
-    # Needs statix/deadnix on PATH -- already there via nirePackages/nix-utils/
+    # Needs statix/deadnix on PATH -- already there via packages/nix-utils/
     # on a real host; `nix shell nixpkgs#statix nixpkgs#deadnix` first otherwise.
     # A commit can lower the finding count but never raise it -- see
     # flake/scripts/lint.py's own header for why this is a ratchet and not a
     # plain pass/fail, and `just install-hooks` for enforcing it pre-commit.
     cd {{flake}} && python3 scripts/lint.py check
 
-# Checks import lists, categories/README.md's Index table, hosts.md's host
+# Checks import lists, categories/00-INDEX.md's Index table, hosts.md's host
 # table, every `just <recipe>`/skill-name/markdown-link reference, and the
 # .sops.yaml enrollment claim -- catches any of those going stale after a
 # refactor, a rename, or a re-enrollment. Exits non-zero on a hard finding
 # (MISSING/STALE/EXTRA/DIRECTORY/CLASSES/WIPES ROOT/UNKNOWN RECIPE/UNKNOWN
 # SKILL/BROKEN LINK/no-Imported-by-section); a REVIEW-only result (heuristic,
 # needs a human look -- see the script's own docstring) prints but exits 0.
-# Static check: wiki/ and AGENTS.md claims vs the repo -- not yet in `preflight`
+# Uses patch-id, NOT `git branch --merged` -- this repo rebases on merge, so a
+# landed branch's SHAs change and --merged calls it unmerged (which is why 11 of
+# them piled up by 2026-09-11). A branch landed by a MERGE commit (#334, the
+# ship skill's --merge default) has no commits ahead and no patch-id; it reads
+# MERGED on the forge's PR record, never on ancestry alone. `prune` deletes
+# the landed ones and never the
+# others; args pass through (`just branches prune --yes`, `--no-pr`, `--depth N`).
+# Which local branches are fully landed (deletable) vs still holding work
+branches cmd="check" *args:
+    @{{scripts}}/branches.py {{cmd}} {{args}}
+
+# branches.py's classifier decides what `branches prune` force-deletes with
+# `branch -D`; this is the fixture test issue #303 asked for -- the two #300
+# misclassifications it covers would each have deleted a real branch, and
+# nothing would have caught either. Builds every verdict state in a temp repo
+# and asserts the verdicts plus exactly what prune deletes.
+# Pure git in a temp repo -- no fleet state; runs in preflight and CI
+branches-test:
+    python3 {{scripts}}/test_branches.py
+
+# Static check: wiki/ and AGENTS.md claims vs the repo -- in CI
+# (.github/workflows/check.yml) since 2026-09-09, still not in `preflight`
+# deliberately (issue #217): fold it in once it has been green there a while
 wiki-lint:
     python3 wiki/scripts/check_wiki.py check
 
 # Spots a page turning into hand-maintained toil (a stale-prone claim nearby
 # things keep forcing edits to) before it becomes another categories/
-# README.md-Members-column situation (removed 2026-08-29). Pass args through,
+# 00-INDEX.md-Members-column situation (removed 2026-08-29). Pass args through,
 # e.g. `just wiki-churn --top 5` or `just wiki-churn --since "3 weeks ago"`.
 # Reporting only, never fails -- ranks wiki/ pages by git-log edit churn
 wiki-churn *args:
@@ -83,14 +105,35 @@ wiki-churn *args:
 wiki-stale-refs:
     python3 wiki/scripts/wiki_stale_refs.py
 
+# Sections that read like resolved-incident narrative and may belong in a
+# <name>-history.md companion (styleguide.md, Directory hierarchy).
+# Deliberately not in wiki-lint and never fails: what qualifies is a
+# judgement no regex makes -- mechanism explained through its discovery
+# looks identical and must stay. Expect most hits to be wrong; read the
+# script's docstring and skill `wiki-history-sweep` first. Issue #288.
+# Reporting only, never fails -- ranked candidate sections, heuristic
+wiki-history-candidates *args:
+    python3 wiki/scripts/history_candidates.py {{args}}
+
+# Where the same prose shows up in two of AGENTS.md / skills / wiki -- the
+# mechanical half of "one pointer per fact". Deliberately not in wiki-lint:
+# overlap between lessons-learned.md and its lessons-learned/ articles is by
+# design, and a shared table may be a fact's one true home -- read the spans.
+# Reporting only, never fails -- word-8-gram overlap across the doc layers
+wiki-restatement *args:
+    python3 wiki/scripts/check_restatement.py {{args}}
+
 # Point git at .githooks/: lint ratchet pre-commit, trailer fixup commit-msg
 install-hooks:
     git config core.hooksPath .githooks
     @echo "==> git will now run .githooks/pre-commit and .githooks/commit-msg"
 
 # Short of the per-host forced toplevel eval, which still needs picking a host
-# check + modules + lint in one shot -- the ship skill's step 0
+# branches-test first: it fails in ~2s, where check spends minutes before the
+# same class of local-state regression would surface
+# check + modules + lint + branches-test in one shot -- the ship skill's step 0
 preflight:
+    @just branches-test
     @just check
     @just modules
     @just lint
@@ -120,7 +163,7 @@ switch:
 
 # Attach the TUI to cube's opencode server (tailnet-only, port 3003)
 opencode-attach dir='.' *args:
-    # Cube-only server -- nireHost/cube/configuration/opencode-server-cube.nix.
+    # Cube-only server -- hosts/cube/configuration/opencode-server-cube.nix.
     # `ts-cube` is cube's tailnet DEVICE name, not its hostname (tailscale.nix
     # trap #1), and resolves from any tailnet member, including cube itself.
     # First arg is the project dir (default `.`); extra args pass through:
@@ -195,6 +238,15 @@ available *pkgs:
     # reading meta.platforms a question that used to be settled by eye, wrongly.
     @{{scripts}}/pkg-availability.py {{pkgs}}
 
+# The safe answer to "which secrets exist?" -- reads the committed
+# ciphertext (names are plaintext, values are ENC[...]) and never decrypts,
+# so it cannot print a value. This question leaked twice when answered
+# with `sops -d | grep` instead (2026-08-26, 2026-09-09). Optional arg: a
+# different sops-encrypted file to list.
+# List sops secret key NAMES without decrypting: just read-sops-names
+read-sops-names *args:
+    @{{scripts}}/sops-names.sh {{args}}
+
 # A host's sops recipient key: bare for this machine, a hostname to scan it
 # remotely, --pubkey-file <path>, or --updatekeys to re-encrypt secrets.yaml
 age-key *args:
@@ -206,6 +258,47 @@ age-key *args:
 # Has this already been seen? GitHub issues + wiki/ + lessons-learned.md
 threads *term:
     @{{scripts}}/threads.sh {{term}}
+
+# Line number of a .nix module's history section -- read only above it when
+# browsing for something; editing the module is when the history gets read.
+# No history section: silent exit 1. See skill `trim-history`.
+history-line file:
+    @{{scripts}}/history-line.sh {{file}}
+
+# After merging a PR whose body says Fixes/Closes/Resolves #N, close any of
+# those issues GitHub's keyword silently left open (the #177 failure).
+# Refuses to touch anything unless the PR is actually merged.
+# Close issues a merged PR's closing keywords missed: just close-fixed <PR#>
+close-fixed pr:
+    @{{scripts}}/close-fixed.sh {{pr}}
+
+# Deliberately bare -- for findings that need no template, not a replacement
+# for the issue templates. --repo is pinned so a fork or renamed remote can
+# never file it anywhere but this repo (AGENTS.md's filing rule). desc
+# defaults to title itself (just's own default-parameter expression, not a
+# bash fallback) so an omitted --desc= just repeats the title as before.
+# title and desc are each quoted separately ({{quote()}} per parameter,
+# never a raw {{args}} splice) -- an unquoted variadic splice here would
+# let a desc containing `$(...)` execute, verified against the fix in
+# `just issue`'s own history.
+# Open a bare GitHub issue: just issue "title" [--desc="body text"]
+issue title desc=title:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    title={{quote(title)}}
+    desc={{quote(desc)}}
+    body="$desc"
+    if [ "$desc" != "$title" ]; then
+        case "$desc" in
+            --desc=*) body="${desc#--desc=}" ;;
+            *)
+                echo 'just issue: second argument must be --desc="..."' >&2
+                exit 1
+                ;;
+        esac
+    fi
+    gh issue create --repo NireBryce/nixos-configs \
+        --title "$title" --body "$body"
 
 # Tailnet policy file via API instead of the admin console: get/diff/apply
 tailscale-acl cmd *args:

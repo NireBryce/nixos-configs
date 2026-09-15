@@ -1,16 +1,6 @@
-# `monitoring` — `nire/homelab/monitoring/`
+# `monitoring` — `config-system/homelab/monitoring/`
 
-_Last modified: 2026-09-07_
-
-## Contents
-
-- [What's in it](#whats-in-it)
-- [Tailnet-only access, not a new firewall mechanism](#tailnet-only-access-not-a-new-firewall-mechanism)
-- [The secret_key trap, and why it's now a unit instead of a warning](#the-secret_key-trap-and-why-its-now-a-unit-instead-of-a-warning)
-- [Adding a dashboard that survives a rebuild](#adding-a-dashboard-that-survives-a-rebuild)
-- [Why cube only, and why that's a category rather than a host-specific file](#why-cube-only-and-why-thats-a-category-rather-than-a-host-specific-file)
-- [Imported by](#imported-by)
-- [See also](#see-also)
+_Last modified: 2026-09-14_
 
 Prometheus + Grafana, scraping this host's own resource metrics. Added
 2026-08-23, cube-only so far; nested under the `homelab` umbrella since
@@ -26,6 +16,22 @@ terminate HTTPS declaratively yet (a confirmed upstream bug, see
 loopback either way. Confirmed working 2026-09-07: 200 over validated TLS
 from another tailnet host, Grafana's own login redirect (`302 -> /login`)
 observed correctly.
+
+> **Condensed version:**
+> [monitoring-for-agents.md](monitoring-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
+## Contents
+
+- [What's in it](#whats-in-it)
+- [Tailnet-only access, not a new firewall mechanism](#tailnet-only-access-not-a-new-firewall-mechanism)
+- [The secret_key trap, and why it's now a unit instead of a warning](#the-secret_key-trap-and-why-its-now-a-unit-instead-of-a-warning)
+- [Adding a dashboard that survives a rebuild](#adding-a-dashboard-that-survives-a-rebuild)
+- [Why cube only, and why that's a category rather than a host-specific file](#why-cube-only-and-why-thats-a-category-rather-than-a-host-specific-file)
+- [Imported by](#imported-by)
+- [See also](#see-also)
 
 ## What's in it
 
@@ -56,9 +62,12 @@ Five files, all `nixos`-class:
   Prometheus directly either.
 - **`grafana/grafana.nix`** — the one service in this stack meant to be
   reached off-host, and the only piece with anything non-obvious in it (see
-  below). Ships one provisioned dashboard,
+  below). Ships two provisioned dashboards,
   `grafana/_dashboards/nire-cube-overview.json` — three rows (system basics,
-  libvirt/QEMU VMs, podman containers). The dashboards directory is
+  libvirt/QEMU VMs, podman containers) — and
+  `grafana/_dashboards/roundtrip-check.json`, one panel, the artifact of the
+  live-export verification described under "Adding a dashboard that survives
+  a rebuild". The dashboards directory is
   underscore-prefixed for the same reason `VMs/_lib/` is in
   [virtualization](virtualization.md): `import-tree` ignores any path
   containing `/_`, so the JSON in there is never mistaken for a flake-parts
@@ -151,15 +160,26 @@ JSON there — no extra plumbing needed:
 5. Save the file under `grafana/_dashboards/`, `just switch`, confirm the
    dashboard reappears with its panels intact.
 
-**Not verified against a live export** — written from `grafana.nix`'s own
-mechanism and `nire-cube-overview.json`'s shape, not by actually exporting
-a UI-built dashboard and round-tripping it through a switch. Worth doing
-once before trusting this blindly.
+**Verified end to end 2026-09-11.** A dashboard shaped like a UI build —
+Grafana-assigned random uid, top-level numeric `id`, panels pointing at the
+`${DS_PROMETHEUS}` template variable — was created on cube over the API
+(`127.0.0.1:3000` over SSH), exported, and carried through steps 2–4 into
+`roundtrip-check.json`; the db copy was deleted afterwards, so the only copy
+of that dashboard is the file in this repo. Exactly the transformations the
+steps predict were needed: wrapper `dashboard`/`meta` unwrapped, `id`
+dropped, `adsllh` → `roundtrip-check`, `${DS_PROMETHEUS}` → the fixed
+`prometheus-cube` uid, template variable removed. The switch leg then ran
+for real, a few hours later: after `just switch` on cube, Grafana's API
+lists exactly two dashboards — no duplicate — `roundtrip-check`'s meta
+reports `provisioned: True` with `provisionedExternalId:
+roundtrip-check.json` (file-sourced, not a db leftover), the panel's uptime
+query returns live data through the datasource proxy, and `nix store
+diff-closures` shows the deployed generation matches the tree exactly.
 
 ## Why cube only, and why that's a category rather than a host-specific file
 
 Same reasoning [virtualization](virtualization.md) and
-[containers](containers.md) already give: `nire/system/` is imported whole
+[containers](containers.md) already give: `config-system/system/` is imported whole
 by every Linux host with no way to opt a piece of it out, so anything that
 should be optional needs its own category (see
 [../architecture.md](../architecture.md), "if something shared needs to be
@@ -175,10 +195,10 @@ design reason rules them out, it just hasn't been asked for there yet.
 
 ## See also
 
-- [homelab/README.md](../homelab/README.md) — Grafana is listed there under
-  "Also running, not yet written up": reachable and confirmed working, just
-  no usage-tier page yet since logging in and reading the provisioned
-  dashboards needs little explaining.
+- [homelab/grafana.md](../homelab/grafana.md) — the usage-tier page, written
+  2026-09-13: signing in (and the two passwords that don't reconcile), what
+  happens to a dashboard edited in the UI, and what a restore actually gets
+  you. This page is the configuration half.
 - [reverse-proxy](reverse-proxy.md) — Caddy, how Grafana is reached as of
   2026-08-24, and where its TLS certificate comes from.
 - [system](system.md) — `tailscale.nix`, the firewall rule this category's
@@ -187,9 +207,15 @@ design reason rules them out, it just hasn't been asked for there yet.
   and the unrelated network-start bug found in the same activation.
 - [containers](containers.md) — what `cadvisor.nix` scrapes.
 - [impermanence-and-secrets.md](../impermanence-and-secrets.md) — why
-  `grafana.nix`'s `secret_key` doesn't go through sops either (cube has no
+  `grafana.nix`'s `secret_key` doesn't go through sops (cube has no
   impermanence to lose the file to), and how that's diverged from elly's
-  `hashedPasswordFile`, the other file in that category.
+  `hashedPasswordFile`, the other file in that category. **Note this is now
+  a per-secret call, not a category-wide one:** as of 2026-09-13 the module
+  *does* declare one sops secret, `grafana-admin-password`, feeding
+  `settings.security.admin_password`. Grafana applies that at **first start
+  only**, so its job is that a rebuilt instance never comes up on the
+  published `admin`/`admin` — not managing the live password. See
+  [../maintenance-schedule.md](../maintenance-schedule.md) item 8.
 - [git-forge](git-forge.md) — `forgejo-secrets.service`, the upstream
   pattern `grafana-secret-key-setup.service` above is modeled on.
 - [hosts.md](../hosts.md) — current switch/verification status for

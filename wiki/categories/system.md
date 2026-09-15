@@ -1,6 +1,21 @@
-# `system` — `nire/system/`
+# `system` — `config-system/system/`
 
-_Last modified: 2026-09-02_
+_Last modified: 2026-09-14_
+
+The largest category by far — across 19 subdirectories, no per-file count
+kept here on purpose (see categories/00-INDEX.md's Index section for why) —
+and the one every Linux host in this repo imports whole, with no way to opt
+out of any piece of it. That property is exactly why
+[virtualization](virtualization.md) and [containers](containers.md) got
+split into their own categories instead of living here: anything that needs
+to be optional for some hosts (or just optional in principle) can't be filed
+under `system`.
+
+> **Condensed version:**
+> [system-for-agents.md](system-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
 
 ## Contents
 
@@ -12,15 +27,6 @@ _Last modified: 2026-09-02_
 - [Tailscale: MagicDNS names, and the ACL lives outside this repo](#tailscale-magicdns-names-and-the-acl-lives-outside-this-repo)
 - [Imported by](#imported-by)
 - [See also](#see-also)
-
-The largest category by far — across 19 subdirectories, no per-file count
-kept here on purpose (see categories/README.md's Index section for why) —
-and the one every Linux host in this repo imports whole, with no way to opt
-out of any piece of it. That property is exactly why
-[virtualization](virtualization.md) and [containers](containers.md) got
-split into their own categories instead of living here: anything that needs
-to be optional for some hosts (or just optional in principle) can't be filed
-under `system`.
 
 ## Subdirectories at a glance
 
@@ -42,7 +48,7 @@ under `system`.
 | `security/` | `yubikey.nix`. |
 | `sound/` | `pipewire.nix`. |
 | `ssh/` | `ssh.nix`. |
-| `storage/` | `coredump-limit.nix`, `storage-NFS.nix`. |
+| `storage/` | `coredump-limit.nix`. |
 | `wayland/` | `wayland.nix`. |
 | `xdg/` | `xdg.nix`, `xdg-portals.nix`. |
 
@@ -51,7 +57,7 @@ under `system`.
 `home-manager/enable-home-manager.nix` is *the* module that wires
 `home-manager.users.elly` to the shared `ellyHomeManager` bundle with
 `useGlobalPkgs`/`useUserPackages` — see
-[../architecture.md](../architecture.md). It's filed under `nire/system/`
+[../architecture.md](../architecture.md). It's filed under `config-system/system/`
 specifically so the `system` category picks it up and every host that
 imports `system` gets it automatically, rather than each host wiring HM in
 by hand. `enable-home-manager-darwin.nix` is the nix-darwin-side equivalent
@@ -59,7 +65,7 @@ for `lysithea` — it's what actually brings packages and dotfiles to a darwin
 host, not anything under [macos](macos.md).
 
 `home-manager/drop-unsupported-packages.nix` is the platform-support
-counterpart: `ellyHomeManager` is shared verbatim across all five hosts, so
+counterpart: `ellyHomeManager` is shared verbatim across all four hosts, so
 every package in it has to survive `aarch64-darwin`. Eleven didn't (`vlc`,
 `gimp`, `libreoffice-qt`, `github-desktop`, `piper`, `qpwgraph`, `strace`,
 `ltrace`, `iotop`, `sysstat`, `ethtool`), each previously guarded by a
@@ -106,7 +112,7 @@ from which hosts import these modules.
 
 ## Containers vs. virtualization — the live trap, and no longer filed here
 
-Podman and distrobox — OCI containers — moved out of `system/containers/`
+Podman and distrobox — OCI containers — moved out of `config-system/containers/`
 2026-08-22 into their own category: see [containers](containers.md). This
 pointer stays because the trap is live and this is where someone remembering
 the old location will look: "virtualization" means only
@@ -146,8 +152,8 @@ Both rely on `environment.persistence."/persist".directories` being
 `listOf` and therefore concatenating across every file that appends to it —
 same merge behavior as `environment.systemPackages` and the same one that
 makes `home.file.<n>.text` a trap on the Home Manager side (see
-[shell-config](shell-config/README.md)). See
-`nire/system/impermanence/declare-persistence-option.nix`'s own header (and
+[shell-config](shell-config/00-INDEX.md)). See
+`config-system/system/impermanence/declare-persistence-option.nix`'s own header (and
 [impermanence](impermanence.md)) for why that option has to be declared
 unconditionally even on hosts where nothing populates it.
 

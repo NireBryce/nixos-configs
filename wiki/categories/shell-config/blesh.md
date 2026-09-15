@@ -1,6 +1,20 @@
 # blesh (bash line editor)
 
-_Last modified: 2026-09-05_
+_Last modified: 2026-09-14_
+_Sibling reviewed: 2026-09-14 -- blesh-for-agents.md only renamed `system/` path shorthand to `config-system/`; no facts moved_
+
+`ble.sh` is wired up by hand for bash — there's no Home Manager option for
+it (`programs.bash.blesh.enable` doesn't exist; see
+[shell-config](00-INDEX.md)). The package, `source ble.sh
+--attach=none` early in `initContent`, and `ble-attach` at the end all live
+in `bash.nix`; the `.blerc` config itself is owned by
+[`bash/blesh.nix`](../../../flake/modules/config-system/shell-config/bash/blesh.nix).
+
+> **Condensed version:**
+> [blesh-for-agents.md](blesh-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
 
 ## Contents
 
@@ -8,13 +22,6 @@ _Last modified: 2026-09-05_
 - [What the `.blerc` actually wires together](#what-the-blerc-actually-wires-together)
 - [Bug: spurious `read: `': not a valid identifier` on Tab / auto-complete](#bug-spurious-read--not-a-valid-identifier-on-tab--auto-complete)
 - [See also](#see-also)
-
-`ble.sh` is wired up by hand for bash — there's no Home Manager option for
-it (`programs.bash.blesh.enable` doesn't exist; see
-[shell-config](README.md)). The package, `source ble.sh
---attach=none` early in `initContent`, and `ble-attach` at the end all live
-in `bash.nix`; the `.blerc` config itself is owned by
-[`bash/blesh.nix`](../../../flake/modules/nire/shell-config/bash/blesh.nix).
 
 ## Plugins
 
@@ -28,10 +35,10 @@ together external completion/history tools underneath ble.sh's UI:
   [carapace](carapace.md).
 - **fzf** — renders the completion menu (`fzf-menu.bash`) and keeps its own
   Ctrl-T/Alt-C bindings, but not Ctrl-R (see atuin below). Package and
-  config: [`fzf.nix`](../../../flake/modules/nirePackages/shell-apps/find/fzf.nix).
+  config: [`fzf.nix`](../../../flake/modules/packages/shell-apps/find/fzf.nix).
 - **atuin** — owns Ctrl-R for history search; see the `-C` callback
   ordering note below for how it wins that key back from fzf. Package and
-  config: [`atuin.nix`](../../../flake/modules/nirePackages/shell-apps/history/atuin.nix).
+  config: [`atuin.nix`](../../../flake/modules/packages/shell-apps/history/atuin.nix).
 - **bash-completion** / **nix-completion** — ble.sh's own contrib
   integrations, loaded first.
 
@@ -40,7 +47,7 @@ together external completion/history tools underneath ble.sh's UI:
 - **`bash-completion.bash`** and **`nix-completion.bash`** — loaded first,
   per ble.sh's own note that bash-completion must come before the fzf
   integrations.
-- **[`carapace-desc.bash`](../../../flake/modules/nire/shell-config/bash/carapace-desc.bash)**
+- **[`carapace-desc.bash`](../../../flake/modules/config-system/shell-config/bash/carapace-desc.bash)**
   (this repo, 2026-08-22) — advises carapace's `_carapace_completer` with
   ble.sh's `after`-type function advice, so that after carapace's plain
   `COMPREPLY` word list comes back, it re-derives per-candidate descriptions
@@ -78,7 +85,7 @@ together external completion/history tools underneath ble.sh's UI:
   in their final state. (Works for C-v because C-v's keycode is fixed;
   see the focus/blur entry below for why that distinction matters.)
 - **focus/blur are bound to a no-op in readline, before `ble-attach`** —
-  in [`bash.nix`](../../../flake/modules/nire/shell-config/bash/bash.nix)'s
+  in [`bash.nix`](../../../flake/modules/config-system/shell-config/bash/bash.nix)'s
   last initExtra block, not in this `.blerc` (2026-09-07). When anything
   in a session enables mode 1004 focus reporting, konsole sends
   `CSI I`/`CSI O` on every tab switch; ble.sh decodes them into the
@@ -148,9 +155,9 @@ it.
 **Fix, in the tree as of 2026-08-24, confirmed via a real `just switch`**: don't call `read`
 for that line at all, so there's nothing for ble.sh's global override to
 catch —
-[`carapace-completer-read-fix.bash`](../../../flake/modules/nire/shell-config/bash/carapace-completer-read-fix.bash)
+[`carapace-completer-read-fix.bash`](../../../flake/modules/config-system/shell-config/bash/carapace-completer-read-fix.bash)
 (see
-[`carapace-read-fix.md`](../../../flake/modules/nire/shell-config/bash/carapace-read-fix.md)
+[`carapace-read-fix.md`](../../../flake/modules/config-system/shell-config/bash/carapace-read-fix.md)
 next to it for the operator-facing summary and how to undo it)
 patches `_carapace_completer`'s body via `declare -f` plus a textual
 substitution, replacing the `read` with parameter expansion split on the
@@ -176,7 +183,7 @@ Still worth filing upstream — this repo's fix is a local workaround, not a
 change to carapace or ble.sh — but low priority now that it no longer
 produces wrong output, only (until switched) the cosmetic stray line. Not
 filed, and not something to file on the strength of this page alone: per
-`CLAUDE.md`, filing against either project needs Elly to say so explicitly
+`CLAUDE.md`, filing against either project needs the user to say so explicitly
 first. Removing the workaround once it's no longer needed — upstream fix
 or otherwise — is tracked separately as
 [issue #75](https://github.com/NireBryce/nixos-configs/issues/75).
@@ -186,7 +193,7 @@ or otherwise — is tracked separately as
 - [carapace](carapace.md) — the completion engine underneath most of this,
   its generated bash completer's internals, and its `cod`-clobbering
   registration race.
-- [shell-config](README.md) — the category this all lives
+- [shell-config](00-INDEX.md) — the category this all lives
   in, and the `home.file`/`home.sessionPath` concatenation trap that
   `blesh.nix`'s own header is the worked example of.
 - [open-threads.md](../../open-threads.md) — where unresolved upstream

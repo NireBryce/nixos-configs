@@ -1,11 +1,6 @@
 # Hosts & current state
 
-_Last modified: 2026-09-07_
-
-## Contents
-
-- [The hosts](#the-hosts)
-- [Where each fact lives](#where-each-fact-lives)
+_Last modified: 2026-09-14_
 
 This page is a map of where to look for each host. **Switch state is not
 recorded anywhere in the repo** — it rots faster than any session can
@@ -14,14 +9,26 @@ on the host (`just baseline`, `just diff-deployed`, or comparing `nix eval
 ...toplevel.outPath` against `readlink /run/current-system`); see
 [`AGENTS.md`'s State section](../AGENTS.md#state).
 
+## Contents
+
+- [The hosts](#the-hosts)
+- [Where each fact lives](#where-each-fact-lives)
+
 ## The hosts
 
 | Host | Class | Role | Wipes `/root`? |
 |---|---|---|---|
 | `nire-durandal` | nixos | workstation | yes |
-| `nire-tenacity` | nixos | handheld (Jovian/SteamOS) | yes |
+| `nire-tenacity` | nixos | handheld (Jovian/SteamOS) — testbed for rapid prototyping | yes |
 | `nire-cube` | nixos | mini PC (GMKtec) | **no** — deliberately, see below |
 | `nire-lysithea` | darwin | laptop | n/a |
+
+`nire-tenacity` being a handheld — picked up and put down constantly — is
+why it's usually the first host new config lands on and is checked
+against: that constant handling surfaces breakage fast. The other hosts
+usually lag behind it, not ahead. See top-level
+[../README.md](../README.md)'s Hosts section for the same point stated for
+a human reader.
 
 Removed, history not live hosts ([history.md](history.md)): `nire-testbed`
 (2026-08-14→08-22, never on real hardware), `nire-lego` and `nire-installer`
@@ -41,11 +48,16 @@ status and what broke on the way:
   the Grafana secret-key fix took two rounds — the hand fix regressed).
 - [git-forge](categories/git-forge.md) — Forgejo (2026-08-24).
 - [reverse-proxy](categories/reverse-proxy.md) — Caddy, the single
-  tailnet-facing HTTPS listener with a `tailscaled`-issued cert. Grafana and
-  Forgejo are `https://ts-cube.moose-micro.ts.net/grafana/` and `/git/` since
-  2026-08-24; the first switch served Forgejo an un-stripped prefix and 404'd
-  everything ([lessons-learned.md](lessons-learned.md) #41).
-- [landing](categories/landing.md) — glance at `/` (2026-08-24).
+  tailnet-facing HTTPS listener, with certs issued by `tailscaled`. Each web
+  service has its own tailnet name since 2026-09-07
+  (`grafana.`/`git.moose-micro.ts.net`; `homepage.` since 2026-09-12,
+  when it replaced glance; `glance.` back 2026-09-13 for the landing
+  evaluation). the `/grafana/` and
+  `/git/` path prefixes they used from 2026-08-24 are retired. URLs:
+  [homelab/reaching-services.md](homelab/reaching-services.md).
+- [landing](categories/landing.md) — the landing page at `/`
+  (homepage since 2026-09-12, issue #291; glance alongside again
+  2026-09-13 for the evaluation, at its own name on port 3004).
 - [shortlinks](categories/shortlinks.md) — golink (2026-08-24). Not behind
   Caddy and not a host service: it embeds tsnet and joins the tailnet as its
   own device `go`, needing a one-time interactive login on first start.
@@ -57,7 +69,7 @@ status and what broke on the way:
   tenacity/lysithea ([#130](https://github.com/NireBryce/nixos-configs/issues/130)).
   Runbook: [homelab/backup-runbook.md](homelab/backup-runbook.md).
 - opencode server —
-  [`flake/modules/nireHost/cube/configuration/opencode-server-cube.nix`](<../flake/modules/nireHost/cube/configuration/opencode-server-cube.nix>)
+  [`flake/modules/hosts/cube/configuration/opencode-server-cube.nix`](<../flake/modules/hosts/cube/configuration/opencode-server-cube.nix>)
   (2026-09-07). Not a category: one personal dev tool, not part of the
   self-hosted stack. Runs `opencode serve` as a systemd user service bound
   to the tailnet IP only — `just opencode-attach` (`-c` resumes the last
@@ -70,10 +82,10 @@ status and what broke on the way:
   `outPath` vs `/run/current-system` comparison in
   [`AGENTS.md`](../AGENTS.md)'s State section.
 - **Why `nire-cube` doesn't wipe `/root`** —
-  `flake/modules/nireHost/cube-configuration.nix` header, and `AGENTS.md`'s
+  `flake/modules/hosts/cube-configuration.nix` header, and `AGENTS.md`'s
   Safety section.
 - **Adding a new host** — skill `new-host-config`
-  (`.claude/skills/new-host-config/SKILL.md`).
+  (`.agents/skills/new-host-config/SKILL.md`).
 - **Disk layout (LUKS + btrfs + impermanence)** —
   [`../flake/doc/disko-impermanence-layout.md`](<../flake/doc/disko-impermanence-layout.md>)
   — the generator durandal/tenacity run, the template if cube ever adopts

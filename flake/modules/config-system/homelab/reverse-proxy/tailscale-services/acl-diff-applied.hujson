@@ -1,0 +1,149 @@
+// Example/default ACLs for unrestricted connections.
+{
+	// Declare static groups of users beyond those in the identity service.
+	"groups": {"group:golink-admins": ["nirebryce@github"]},
+
+	// Declare convenient hostname aliases to use in place of IP addresses.
+	"hosts": {"example-host-1": "100.100.100.100"},
+
+	// Access control lists.
+	"acls": [],
+
+	"ssh": [
+		// Allow all users to SSH into their own devices in check mode.
+		// Comment this section out if you want to define specific restrictions.
+		{
+			"action": "accept",
+			"src":    ["autogroup:members"],
+			"dst":    ["autogroup:self"],
+			"users":  ["autogroup:nonroot", "root"],
+		},
+	],
+
+	"nodeAttrs": [
+		{
+			// Funnel policy, which lets tailnet members control Funnel
+			// for their own devices.
+			// Learn more at https://tailscale.com/kb/1223/tailscale-funnel/
+			"target": ["autogroup:members"],
+
+			"attr": ["funnel"],
+		},
+	],
+
+	"tagOwners": {
+		"tag:golink-host": ["nirebryce@github"],
+		// nixos-configs' homelab (nire-cube): grafana/git-forge move off
+		// Caddy path prefixes onto their own Tailscale Services names.
+		// See wiki/open-threads.md and wiki/categories/reverse-proxy.md.
+		"tag:homelab-cube": ["nirebryce@github"],
+	},
+
+	// Pre-approves tag:homelab-cube to advertise these services, so
+	// advertising them from nire-cube's tailscale config needs no manual
+	// click in this console -- the per-service approval step
+	// open-threads.md cited as one of the two costs of svc:.
+	"autoApprovers": {
+		"services": {
+			"svc:grafana": ["tag:homelab-cube"],
+			"svc:git":     ["tag:homelab-cube"],
+			// Added 2026-09-09, APPLIED 2026-09-10: PR #211 added the
+			// serve.nix forward for glance but neither this approver nor
+			// svc-glance.json -- and this file recorded the approver for
+			// a day without it ever being POSTed, so the record was ahead
+			// of the tailnet (`just tailscale-acl diff` showed exactly
+			// these lines as the only drift). Confirmed before applying:
+			// `vip-get svc:glance` -> 404 "service not found" while
+			// `vip-get svc:grafana` returned a real object with addrs.
+			//
+			// 2026-09-12 (issue #291): glance's approver below became
+			// homepage's -- svc:glance is retired with glance, svc:homepage
+			// takes its place. Applied at SWITCH time, not before: apply +
+			// vip-put svc:homepage + vip-delete svc:glance, in the order
+			// homepage.nix's history section gives, so the record and the
+			// tailnet move together (the svc:glance story above is why).
+			"svc:homepage": ["tag:homelab-cube"],
+			// 2026-09-13: svc:glance's approver is BACK -- glance was
+			// re-added alongside homepage for the landing evaluation,
+			// so its Service object gets re-made (vip-put; it was
+			// vip-deleted 2026-09-12). Same at-switch-time rule as
+			// above: apply together with the switch, not before.
+			"svc:glance": ["tag:homelab-cube"],
+		},
+	},
+
+	"grants": [
+		{
+			"src": ["group:golink-admins"],
+			"dst": ["tag:golink-host"],
+			"app": {"tailscale.com/cap/golink": [{"admin": true}]},
+		},
+		// {"action": "accept", "src": ["autogroup:members"], "dst": ["autogroup:members"], "ip": ["*"]}
+		{
+			"src": ["autogroup:members"],
+			"dst": ["autogroup:members"],
+			"ip":  ["*"],
+		},
+		// Explicit grants for the two services: a virtual service IP is
+		// not necessarily covered by the autogroup:members->autogroup:members
+		// grant above (that targets real devices) -- verify this is even
+		// needed once Services is live; if the blanket grant already
+		// covers svc: destinations, these are redundant, not harmful.
+		{
+			"src": ["autogroup:members"],
+			"dst": ["svc:grafana"],
+			"ip":  ["*"],
+		},
+		// Restores general reachability to nire-cube itself: tagging it
+		// tag:homelab-cube moved it OUT of autogroup:members as a
+		// destination -- the blanket grant above no longer covers it.
+		// Found live, 2026-09-07: nire-cube dropped off every other
+		// tailnet member's peer list (not just offline -- absent),
+		// SSH included, within a minute of the tag taking effect.
+		{
+			"src": ["autogroup:members"],
+			"dst": ["tag:homelab-cube"],
+			"ip":  ["*"],
+		},
+		// The tagged advertiser needs to reach its own services by name:
+		// tagging dropped cube out of autogroup:members as a SOURCE too,
+		// so with every svc: grant's src being autogroup:members, no grant
+		// matched cube and the control plane sent it no svc: records at
+		// all -- netmap ExtraRecords came back null and MagicDNS answered
+		// NXDOMAIN for git/grafana/homepage/glance on cube only, while
+		// every member host resolved fine (hard-IP curl still worked:
+		// self-terminated VIP traffic never goes through this grant).
+		// Homepage's server-side siteMonitor fetches were the first thing
+		// on cube to resolve svc: names. Found live 2026-09-14, issue
+		// #298; applied and verified same day (cube's netmap ExtraRecords
+		// repopulated, MagicDNS NOERROR from cube). Mechanism in this
+		// directory's README.
+		{
+			"src": ["tag:homelab-cube"],
+			"dst": ["svc:git", "svc:grafana", "svc:homepage", "svc:glance"],
+			"ip":  ["*"],
+		},
+		{
+			"src": ["autogroup:members"],
+			"dst": ["svc:git"],
+			"ip":  ["*"],
+		},
+		// Same shape as the svc:grafana/svc:git grants above. Was
+		// `svc:glance` from 2026-09-10 until 2026-09-12, when homepage
+		// replaced glance as the landing page (issue #291) -- same
+		// reachability need, new name, applied at switch time together
+		// with the approver above (see its comment for why not before).
+		{
+			"src": ["autogroup:members"],
+			"dst": ["svc:homepage"],
+			"ip":  ["*"],
+		},
+		// glance's grant, back 2026-09-13 with glance itself (the
+		// evaluation): same shape, same switch-time application rule.
+		{
+			"src": ["autogroup:members"],
+			"dst": ["svc:glance"],
+			"ip":  ["*"],
+		},
+	],
+}

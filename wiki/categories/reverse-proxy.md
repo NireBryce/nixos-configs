@@ -1,35 +1,18 @@
-# `reverse-proxy` — `nire/homelab/reverse-proxy/`
+# `reverse-proxy` — `config-system/homelab/reverse-proxy/`
 
-_Last modified: 2026-09-07_
-
-## Contents
-
-- [What's in it](#whats-in-it)
-- [What it changed elsewhere](#what-it-changed-elsewhere)
-- [Certificates come from tailscaled, with no plugin](#certificates-come-from-tailscaled-with-no-plugin)
-- [Paths, not subdomains, was the original constraint — Tailscale Services lifted it, partially](#paths-not-subdomains-was-the-original-constraint--tailscale-services-lifted-it-partially)
-- [Fronting Tailscale Services with Caddy](#fronting-tailscale-services-with-caddy)
-- [The two apps want opposite things from the proxy (historical)](#the-two-apps-want-opposite-things-from-the-proxy-historical)
-- [Named matchers, not inline ones](#named-matchers-not-inline-ones)
-- [The redirect vhost needs its scheme spelled out](#the-redirect-vhost-needs-its-scheme-spelled-out)
-- [Firewall, and binding 443 as a non-root user](#firewall-and-binding-443-as-a-non-root-user)
-- [Ordering against tailscaled](#ordering-against-tailscaled)
-- [No persistence entry](#no-persistence-entry)
-- [Why the category isn't named `caddy`](#why-the-category-isnt-named-caddy)
-- [Imported by](#imported-by)
-- [See also](#see-also)
+_Last modified: 2026-09-14_
 
 [Caddy](https://caddyserver.com/), one tailnet-only HTTPS front door for
 every web service on `nire-cube`. Added 2026-08-24, cube-only; nested under
 the `homelab` umbrella since 2026-08-27 (name unaffected).
 
 **Confirmed working end to end, 2026-08-24**, on the second switch — the
-first served `/git/` a 404 through the wrong Caddy directive; see [the two
-apps want opposite things](#the-two-apps-want-opposite-things-from-the-proxy-historical)
-below for that mechanism (now historical, see the next section), and
-[reverse-proxy-history.md](reverse-proxy-history.md) for the full
-verification checklist (TLS validation, generated-link checks, the exact
-requests tested).
+first served `/git/` a 404 through the wrong Caddy directive, because
+Grafana and Forgejo wanted opposite `handle`/`handle_path` treatment for
+the path prefix they then shared; see
+[reverse-proxy-history.md](reverse-proxy-history.md#the-two-apps-want-opposite-things-from-the-proxy-historical)
+for that mechanism and the full verification checklist (TLS validation,
+generated-link checks, the exact requests tested).
 
 **Grafana and Forgejo moved again, 2026-09-07**, off the shared
 `ts-cube.../grafana/`, `.../git/` paths onto their own Tailscale Services
@@ -42,6 +25,103 @@ the full investigation, including the two tailscale/tailscale issue
 numbers). Confirmed working end to end the same day: valid TLS on both new
 names, old paths correctly 404, Forgejo's own generated links using the new
 `ROOT_URL`.
+
+**Then all tailnet HTTPS on cube broke, 2026-09-08 to 2026-09-10**, and the
+two "confirmed working" snapshots above are both older than the break. The
+bare-name convenience vhosts added 2026-09-08 (`https://git` and friends,
+each with `tls internal`) made Caddy's Caddyfile adapter emit an explicit
+`automation.policies` entry covering the `.ts.net` names too — and an
+explicit policy suppresses Caddy's automatic "this is a Tailscale domain,
+ask tailscaled for the cert" detection, leaving those names pointed at
+public Let's Encrypt, which can never issue for a tailnet name. Every
+`.ts.net` handshake died with `SSL_ERROR_INTERNAL_ERROR_ALERT`, including
+`ts-cube.moose-micro.ts.net`, which no commit had touched. `caddy.nix`'s
+`tailscaleCert` binding carries the mechanism with `file:line` references
+into caddy 2.11.4's source; [§47](../lessons-learned/47-explicit-setting-disables-implicit-one.md)
+is the full account. The fix
+is naming `get_certificate tailscale` on each `.ts.net` vhost explicitly
+rather than relying on the detection. **Runtime-verified on hardware
+2026-09-11**: from tenacity, every name returns validated TLS
+(`tls_verify_result` 0) — `ts-cube` 200, `git` 200, `grafana` 302, `glance`
+200.
+
+The bare-name vhosts come in two flavours, and the difference matters:
+
+- **`http://git`** and friends redirect with no certificate involved at
+  all, landing on the real publicly-valid tailnet cert — no warning
+  anywhere. These were *unreachable* from the day they were written until
+  2026-09-11 (issue #272): a `svc:` name is a Service VIP that answers only
+  on the ports its Service object and `serve.nix` both declare, and all
+  three declared `tcp:443` only. `http://ts-cube` worked throughout, being
+  a real device address where Caddy binds 80 directly — which is what made
+  the gap easy to miss. Fixed by adding `tcp:80` to both halves.
+- **`https://git`** and friends show `SEC_ERROR_UNKNOWN_ISSUER`, and that
+  is `tls internal` working as designed, not a leftover bug — they serve
+  Caddy's own local CA. They exist to catch browsers that force HTTPS
+  before the `http://` redirect gets a chance: such a browser sends TLS SNI
+  = the literal string `git`, **not** the FQDN, even though the OS resolver
+  completes the bare name for DNS purposes via `tailscale0`'s search domain
+  — SNI is fixed before that completion is visible downstream. With no vhost
+  matching that SNI, Caddy falls back to trying for a publicly-issued cert
+  for `git`, which can never succeed (confirmed live: `curl -v https://git/`
+  returned a raw `TLSv1.3 (IN), TLS alert, internal error (592)`). Short of trusting that CA on
+  every client there is no improving them, and they were deliberately kept
+  rather than dropped once `http://` worked.
+
+Two things the same investigation turned up:
+
+- **`svc:glance` never existed — created 2026-09-10, one step still
+  pending.** PR #211 landed the `serve.nix` forward and the Caddy vhost, and
+  `acl-diff-applied.hujson` recorded the autoApprover, but the policy file
+  was never POSTed and the `svc:` object was never PUT, so
+  `glance.moose-micro.ts.net` did not resolve at all while git and grafana
+  did. Now created, along with the `grants` entry the other two services
+  each had; `just tailscale-acl diff` reports "no difference" for the first
+  time since 2026-09-09, and the name resolves tailnet-wide. Fixed 2026-09-11,
+  but restarting `tailscale-serve` was not what fixed it (tried twice, both
+  clean, no change). Re-running `serve set-config` against an
+  already-standing advertisement does not activate a newly-created
+  Service — cube had carried `svc:glance` in its serve config since
+  2026-09-09, long before the object existed to approve it against. A fresh
+  registration is what the control plane acts on: `systemctl restart
+  tailscaled`, then `tailscale-serve` after it (per #267). All four names
+  now return validated TLS. Beware `vip-get glance` as an existence check:
+  the API path wants the `svc:` prefix, and without it every service 404s,
+  `svc:grafana` included.
+
+- **`tailscale-serve.service` lost the race on boot** — issue #267, fixed
+  2026-09-11 and closed. It failed `unexpected state: NoState` 34ms into the
+  2026-09-09 boot and, being a `oneshot` with no retry, stayed failed for
+  9.5 hours until a switch happened to re-run it: no `svc:` forwards at all
+  in the meantime, while cube's own name kept working. `serve.nix` now sets
+  `Restart=on-failure` with a `StartLimit` pair — legal on `Type=oneshot`
+  (only `always`/`on-success` are rejected), so it retries the race and
+  still gives up on a persistent failure. The upstream unit gates on
+  tailscaled the *process*, not its backend state, which is what makes the
+  race possible at all. **Not yet observed self-healing on a real boot** —
+  the fix is reasoned from `systemd.service(5)` and the failure it
+  reproduces, not from watching a reboot recover.
+
+> **Condensed version:**
+> [reverse-proxy-for-agents.md](reverse-proxy-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
+## Contents
+
+- [What's in it](#whats-in-it)
+- [What it changed elsewhere](#what-it-changed-elsewhere)
+- [Certificates come from tailscaled, with no plugin](#certificates-come-from-tailscaled-with-no-plugin)
+- [Fronting Tailscale Services with Caddy](#fronting-tailscale-services-with-caddy)
+- [Named matchers, not inline ones](#named-matchers-not-inline-ones)
+- [The redirect vhost needs its scheme spelled out](#the-redirect-vhost-needs-its-scheme-spelled-out)
+- [Firewall, and binding 443 as a non-root user](#firewall-and-binding-443-as-a-non-root-user)
+- [Ordering against tailscaled](#ordering-against-tailscaled)
+- [No persistence entry](#no-persistence-entry)
+- [Why the category isn't named `caddy`](#why-the-category-isnt-named-caddy)
+- [Imported by](#imported-by)
+- [See also](#see-also)
 
 ## What's in it
 
@@ -66,9 +146,13 @@ in the table above stopped answering (404) as of its own move.
 `http://ts-cube/` (bare MagicDNS name) redirects to the HTTPS index, so the
 short name still lands somewhere useful.
 
-The root route proxies to [glance](landing.md) — these two categories are a
-pair: dropping `landing` while keeping this one leaves the front page
-returning 502.
+The root route proxies to the landing page — [homepage](landing.md) since
+2026-09-12 (issue #291; glance before it), on the same port 3002 — these
+two categories are a pair: dropping `landing` while keeping this one leaves
+the front page returning 502. The landing page's own Service name is
+`svc:homepage`; like `svc:glance` before it, the Service object and its ACL
+entries are the control-plane half this repo only records — the
+`homepage.nix` history section holds the rollout order.
 
 ## Certificates come from tailscaled, with no plugin
 
@@ -95,32 +179,20 @@ Two prerequisites, neither in this repo:
   out-of-repo trap [system](system.md)'s `tailscale.nix` documents.
 
 `permitCertUid` is set in `caddy.nix` rather than in
-`system/networking/tailscale.nix` — that file is in the `system` category
+`config-system/networking/tailscale.nix` — that file is in the `system` category
 *every* Linux host imports, and setting it there would grant cert-fetching
 rights to a `caddy` user on hosts that don't run Caddy. Scope a change to
 the host that needs it.
 
-## Paths, not subdomains, was the original constraint — Tailscale Services lifted it, partially
-
-MagicDNS gives a device exactly **one** name, which is why both apps
-originally mounted under a path prefix on `ts-cube`'s one hostname
-(`root_url`/`serve_from_sub_path` for Grafana, `ROOT_URL` for Forgejo — see
-each app's own file for the by-then-retired mechanics, kept as history).
-
-**Tailscale Services (`svc:`) reopened this 2026-09-07** — see
-`wiki/open-threads.md`'s entry and
-`flake/modules/nire/homelab/reverse-proxy/tailscale-services/README.md` for
-the ACL/tag/service-object side (a separate, API-managed resource, not
-declared in this repo's Nix). Each app now has its own tailnet DNS name
-with no path prefix. What Services did **not** solve, discovered live: it
-cannot terminate HTTPS declaratively on this tailscale version (confirmed
-upstream bug — `tailscale-services/serve.nix`'s history section has the
-full trail, including the exact failing commands and the two
-tailscale/tailscale issue numbers). So Caddy is still in the loop — see
-[fronting Tailscale Services with Caddy](#fronting-tailscale-services-with-caddy)
-below — just per-service instead of per-path.
-
 ## Fronting Tailscale Services with Caddy
+
+MagicDNS's one-name-per-device limit is why both apps originally shared a
+path prefix on `ts-cube`'s one hostname; Tailscale Services (`svc:`) lifted
+that 2026-09-07, giving each its own tailnet DNS name with no prefix — see
+[reverse-proxy-history.md](reverse-proxy-history.md#paths-not-subdomains-was-the-original-constraint--tailscale-services-lifted-it-partially)
+for the original per-path mechanics and what Services did and didn't solve.
+Caddy stays in the loop regardless, since Services can't terminate HTTPS
+declaratively on this tailscale version.
 
 `tailscale-services/serve.nix` configures each service's `endpoints` with
 a `tcp://` backend scheme — raw byte forwarding, no HTTP interpretation —
@@ -146,34 +218,13 @@ HTTP on round-trip; **#18219** confirms the raw CLI *can* set real HTTPS
 but that state doesn't survive `set-config` or a reboot. The fix,
 **PR #20116**, was an unmerged draft as of this check.
 
-## The two apps want opposite things from the proxy (historical)
-
-**Retired 2026-09-07** along with the path-prefix routes themselves —
-each app has its own vhost now, so there's no shared prefix for `handle`
-vs `handle_path` to disagree about. Kept for the mechanism, and in case
-either move ever needs reverting (`caddy.nix`'s own history section has
-the exact retired route blocks).
-
-This is the one thing that was actually gotten wrong, and it cost a switch.
-Both routes were given `handle`, which passes the matched path through
-untouched. `/grafana/` returned 200; `/git/` returned **404**.
-
-- **Grafana**, with `serve_from_sub_path`, genuinely serves *under*
-  `/grafana`, so the prefix must be **left on** → `handle`.
-- **Forgejo** has no equivalent option. It always serves at `/` — confirmed
-  on the host rather than inferred: `curl 127.0.0.1:3001/` is 200,
-  `curl 127.0.0.1:3001/git/` is 404 — so the prefix must be **stripped** →
-  `handle_path`. Its `ROOT_URL` still carries `/git/`, which is what makes
-  the links it *generates* point back through the prefix. Same thing
-  Gitea/Forgejo's own nginx docs encode in the trailing slash of
-  `proxy_pass http://…:3001/;`, which reads as cosmetic and isn't.
-
-`handle_path` takes an inline path matcher only — a named matcher is
-rejected — so the bare `/git` can't ride along in one matcher the way
-`@grafana`'s two paths do, and gets its own `redir` to `/git/` instead.
-
-The general form of the mistake, and why every static check missed it, is
-[`lessons-learned.md`](../lessons-learned.md) #41.
+Grafana and Forgejo wanted opposite `handle`/`handle_path` treatment for
+the path prefix they used to share — retired 2026-09-07 along with the
+prefix routes themselves, once each app got its own vhost with no prefix
+left to disagree about. See
+[reverse-proxy-history.md](reverse-proxy-history.md#the-two-apps-want-opposite-things-from-the-proxy-historical)
+for the mechanism (which app needed which directive and why) and the
+first-switch failure it caused.
 
 ## Named matchers, not inline ones
 
@@ -270,7 +321,7 @@ before and after this change.
   device.
 - [system](system.md) — `tailscale.nix`, for the firewall rule this rests
   on and the two out-of-repo tailnet traps.
-- [homelab/README.md](../homelab/README.md) — the usage side: the current
+- [homelab/00-INDEX.md](../homelab/00-INDEX.md) — the usage side: the current
   URLs for everything on cube.
 - [hosts.md](../hosts.md) — current switch/verification status for
   `nire-cube`.

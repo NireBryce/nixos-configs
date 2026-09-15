@@ -2,19 +2,19 @@
 
 _Last modified: 2026-09-02_
 
+For *why* this repo runs flake-parts at all, see [flake-parts.md](flake-parts.md)
+first — this page is the mechanism built on top of that, not the reason for
+it. For what's actually inside each individual category — members, which
+hosts import it, category-specific traps — see the
+[category reference](categories/00-INDEX.md) instead of this page; this page
+is the mechanism, not the inventory.
+
 ## Contents
 
 - [The core mechanism](#the-core-mechanism)
 - [Home Manager integration](#home-manager-integration)
 - [Package modules](#package-modules)
 - [Related, easy to get backwards](#related-easy-to-get-backwards)
-
-For *why* this repo runs flake-parts at all, see [flake-parts.md](flake-parts.md)
-first — this page is the mechanism built on top of that, not the reason for
-it. For what's actually inside each individual category — members, which
-hosts import it, category-specific traps — see the
-[category reference](categories/README.md) instead of this page; this page
-is the mechanism, not the inventory.
 
 ## The core mechanism
 
@@ -25,12 +25,12 @@ is the mechanism, not the inventory.
   declared explicitly. Read this before touching any `dirsAsCategory.nix`.
 - **[`../CLAUDE.md`](../CLAUDE.md), Architecture section** — the prose
   overview: `import-tree`, entry points that sit outside every category tree
-  (`modules/checks.nix`, `nireHost/hosts.nix`, the per-host configs,
-  `nireUser/elly-home-manager.nix`), and which categories aren't imported by
+  (`modules/checks.nix`, `hosts/hosts.nix`, the per-host configs,
+  `users/elly-home-manager.nix`), and which categories aren't imported by
   every host (`virtualization` is the running example — cube only as of
   2026-08-27, deliberately absent on the handhelds and, since that date, on
   durandal too — see [`categories/virtualization.md`](categories/virtualization.md)).
-- **Skill `new-flake-module`** (`.claude/skills/new-flake-module/SKILL.md`)
+- **Skill `new-flake-module`** (`.agents/skills/new-flake-module/SKILL.md`)
   — the traps in *writing* one: `flake.modules` can't live inside
   `perSystem`, a module's name comes from its filename so a rename can
   silently drop it from its category, two modules with the same name merge
@@ -44,7 +44,7 @@ is the mechanism, not the inventory.
   not as a standalone `homeConfigurations` output. This doc is the trailhead
   back to standalone if that's ever wanted.
 - **Skill `home-manager-dotfiles`**
-  (`.claude/skills/home-manager-dotfiles/SKILL.md`) — traps specific to
+  (`.agents/skills/home-manager-dotfiles/SKILL.md`) — traps specific to
   shell/dotfile modules: `home.file.<n>.text` and `home.sessionPath`
   concatenate rather than override across modules, reading a generated
   dotfile back has false negatives, and shell rc ordering
@@ -54,7 +54,7 @@ is the mechanism, not the inventory.
 ## Package modules
 
 - **Skill `nirepackages-platform-support`**
-  (`.claude/skills/nirepackages-platform-support/SKILL.md`) — the two
+  (`.agents/skills/nirepackages-platform-support/SKILL.md`) — the two
   different questions that both show up as an `isDarwin` guard: can nixpkgs
   build it on darwin at all (automatic, from `meta.platforms`) vs. does
   Homebrew already install it on lysithea (never automatic — `just available
@@ -63,9 +63,9 @@ is the mechanism, not the inventory.
 ## Related, easy to get backwards
 
 Containers and VMs are separate categories here, and "virtualization" means
-only the VM one (`nire/homelab/virtualization/`: libvirt, virt-tools,
+only the VM one (`config-system/homelab/virtualization/`: libvirt, virt-tools,
 vm-networking — optional, cube only). Podman/distrobox live in
-[`nire/homelab/containers/`](categories/containers.md), its own category
+[`config-system/homelab/containers/`](categories/containers.md), its own category
 since 2026-08-22, nested under the `homelab` umbrella since 2026-08-27 —
 imported explicitly by tenacity and cube (durandal dropped it 2026-08-27,
 same day as `virtualization`). See

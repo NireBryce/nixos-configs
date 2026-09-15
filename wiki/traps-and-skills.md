@@ -1,13 +1,6 @@
 # Traps & skills
 
-_Last modified: 2026-09-07_
-
-## Contents
-
-- [Two traps general enough to stay inline in `CLAUDE.md` rather than a skill](#two-traps-general-enough-to-stay-inline-in-claudemd-rather-than-a-skill)
-- [A trap worth knowing before it's needed](#a-trap-worth-knowing-before-its-needed)
-- [A trap that points at the wiki instead of a skill](#a-trap-that-points-at-the-wiki-instead-of-a-skill)
-- [Style](#style)
+_Last modified: 2026-09-11_
 
 [`../CLAUDE.md`](../CLAUDE.md)'s own "Traps" section carries a one-line
 summary of each; the full mechanism, code, and worked examples live in the
@@ -18,23 +11,31 @@ one-liner.
 
 | Task | Skill |
 |---|---|
-| Writing/renaming a flake-parts module | `.claude/skills/new-flake-module/SKILL.md` |
-| Editing HM shell/dotfile modules | `.claude/skills/home-manager-dotfiles/SKILL.md` |
-| Editing impermanence or initrd | `.claude/skills/impermanence-initrd/SKILL.md` |
-| Adding/platform-gating a package | `.claude/skills/nirepackages-platform-support/SKILL.md` |
-| Adding a new host | `.claude/skills/new-host-config/SKILL.md` |
-| Adding a homelab service (port, proxy route, verification) | `.claude/skills/new-homelab-service/SKILL.md` |
-| Giving a service its own Tailscale Services (`svc:`) hostname | `.claude/skills/new-tailscale-service/SKILL.md` |
-| Landing work on `experimental` | `.claude/skills/ship/SKILL.md` |
-| Filing a bug noticed while doing something else | `.claude/skills/propose-issue/SKILL.md` |
-| Checking whether a change left a `wiki/` page stale | `.claude/skills/wiki-sync/SKILL.md` |
-| Tightening wiki/skill/AGENTS prose for conciseness | `.claude/skills/trim-docs/SKILL.md` |
-| Writing a new skill | `.claude/skills/new-skill/SKILL.md` |
-| Starting a task that will branch, commit, or check out | `.claude/skills/use-a-worktree/SKILL.md` |
+| Writing/renaming a flake-parts module | `.agents/skills/new-flake-module/SKILL.md` |
+| Editing HM shell/dotfile modules | `.agents/skills/home-manager-dotfiles/SKILL.md` |
+| Editing impermanence or initrd | `.agents/skills/impermanence-initrd/SKILL.md` |
+| Adding/platform-gating a package | `.agents/skills/nirepackages-platform-support/SKILL.md` |
+| Adding a new host | `.agents/skills/new-host-config/SKILL.md` |
+| Adding a homelab service (port, proxy route, verification) | `.agents/skills/new-homelab-service/SKILL.md` |
+| Giving a service its own Tailscale Services (`svc:`) hostname | `.agents/skills/new-tailscale-service/SKILL.md` |
+| Landing work on `experimental` | `.agents/skills/ship/SKILL.md` |
+| Filing a bug noticed while doing something else | `.agents/skills/propose-issue/SKILL.md` |
+| Checking whether a change left a `wiki/` page stale | `.agents/skills/wiki-sync/SKILL.md` |
+| Tightening wiki/skill/AGENTS prose for conciseness | `.agents/skills/trim-docs/SKILL.md` |
+| Compressing a module's history section | `.agents/skills/trim-history/SKILL.md` |
+| Writing a new skill | `.agents/skills/new-skill/SKILL.md` |
+| Starting a task that will branch, commit, or check out | `.agents/skills/use-a-worktree/SKILL.md` |
 
 See [architecture.md](architecture.md) and
 [impermanence-and-secrets.md](impermanence-and-secrets.md) for where each of
 these fits into the bigger picture; this page is just the index.
+
+## Contents
+
+- [Two traps general enough to stay inline in `CLAUDE.md` rather than a skill](#two-traps-general-enough-to-stay-inline-in-claudemd-rather-than-a-skill)
+- [A trap worth knowing before it's needed](#a-trap-worth-knowing-before-its-needed)
+- [A trap that points at the wiki instead of a skill](#a-trap-that-points-at-the-wiki-instead-of-a-skill)
+- [Style](#style)
 
 ## Two traps general enough to stay inline in `CLAUDE.md` rather than a skill
 
@@ -58,6 +59,19 @@ these fits into the bigger picture; this page is just the index.
   `new-homelab-service` skill has the two-`curl` test that settles it in
   seconds.
 
+- **Adding an explicit `tls` directive to one Caddy vhost changes the
+  issuer for every other vhost.** The Caddyfile adapter emits automation
+  policies for *all* sites as soon as *any* site declares `tls`, and Caddy's
+  Tailscale-certificate auto-detection only runs for names that have no
+  policy — so `tls internal` on three bare-name redirects silently pointed
+  four unrelated `.ts.net` vhosts at public Let's Encrypt, which can never
+  issue for a tailnet name. Two days of `SSL_ERROR_INTERNAL_ERROR_ALERT` on
+  names no commit had touched, 2026-09-08. Eval, build, `just modules` and
+  `caddy adapt` all pass — the config is valid, it just means something
+  else; only a real handshake finds it. The general shape, and the questions
+  to ask before adding an explicit setting anywhere:
+  [lessons-learned.md](lessons-learned.md) §47.
+
 ## A trap that points at the wiki instead of a skill
 
 - **Debugging "can't reach a host by tailscale name"** — no skill for this
@@ -78,6 +92,5 @@ these fits into the bigger picture; this page is just the index.
   than asserted as current.
 - **Conventions section of [`../CLAUDE.md`](../CLAUDE.md)** — commit
   trailer wording (and why it deliberately omits a model name — see the
-  section for the reasoning), namespacing (`nire`/`nireHost`/`nireUser`/
-  `nirePackages`), the "say what it was" rule for renames, the "don't bury
-  Python in bash" rule with its two ways out.
+  section for the reasoning), the "say what it was" rule for renames, the
+  "don't bury Python in bash" rule with its two ways out.

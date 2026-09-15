@@ -1,6 +1,23 @@
-# `git-forge` — `nire/homelab/git-forge/`
+# `git-forge` — `config-system/homelab/git-forge/`
 
-_Last modified: 2026-09-07_
+_Last modified: 2026-09-14_
+
+Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only; nested under
+the `homelab` umbrella since 2026-08-27 (name unaffected). As of 2026-09-07
+reached at `https://git.moose-micro.ts.net/` — its own Tailscale Services
+name, still fronted by Caddy ([reverse-proxy](reverse-proxy.md)) since
+Tailscale Services can't terminate HTTPS declaratively yet (confirmed
+upstream bug, see `tailscale-services/serve.nix`'s history section). The
+`.../git/`-path-under-`ts-cube` form no longer answers (404).
+[git-forge-history.md](git-forge-history.md) has the original first-switch
+record and the move behind Caddy; the move to its own service name is
+this category's newest change, not yet its own history entry.
+
+> **Condensed version:**
+> [git-forge-for-agents.md](git-forge-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
 
 ## Contents
 
@@ -14,17 +31,6 @@ _Last modified: 2026-09-07_
 - [No persistence entry, same reasoning as Grafana](#no-persistence-entry-same-reasoning-as-grafana)
 - [Imported by](#imported-by)
 - [See also](#see-also)
-
-Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only; nested under
-the `homelab` umbrella since 2026-08-27 (name unaffected). As of 2026-09-07
-reached at `https://git.moose-micro.ts.net/` — its own Tailscale Services
-name, still fronted by Caddy ([reverse-proxy](reverse-proxy.md)) since
-Tailscale Services can't terminate HTTPS declaratively yet (confirmed
-upstream bug, see `tailscale-services/serve.nix`'s history section). The
-`.../git/`-path-under-`ts-cube` form no longer answers (404).
-[git-forge-history.md](git-forge-history.md) has the original first-switch
-record and the move behind Caddy; the move to its own service name is
-this category's newest change, not yet its own history entry.
 
 ## What's in it
 
@@ -66,7 +72,8 @@ Forgejo has its own Caddy vhost now (`git.moose-micro.ts.net`, reached via
 its Tailscale Services name and a raw TCP forward -- see
 `tailscale-services/serve.nix`), so it's a plain `reverse_proxy` with no
 path prefix to strip — the `handle`/`handle_path` asymmetry with Grafana
-that this used to require is retired, kept as history in `caddy.nix`.
+that this used to require is retired, kept as history in
+[reverse-proxy-history.md](reverse-proxy-history.md#the-retired-routes-as-they-were).
 
 It bound `0.0.0.0` briefly at first — [git-forge-history.md](git-forge-history.md)
 has that window and what it fixed quietly along the way.
@@ -75,7 +82,7 @@ to Caddy's 443 now, as the second line.
 
 Git over SSH is a partial exception, deliberately: Forgejo's built-in SSH
 server stays disabled (`START_SSH_SERVER` unset), so `git+ssh` rides the
-**host's own OpenSSH** (`system/ssh/ssh.nix`) instead of a second port.
+**host's own OpenSSH** (`config-system/ssh/ssh.nix`) instead of a second port.
 Forgejo manages `~forgejo/.ssh/authorized_keys` itself as keys are added
 through the web UI; ordinary sshd lookup does the rest. Clone URLs are
 `forgejo@ts-cube:...`, port 22 — already open. The module adds no new port,
@@ -119,7 +126,7 @@ creates the *first* account either — before this, that was a manual
 `admin user create --admin` for `elly`, falling back to `admin user
 change-password` if the user already exists. The password comes from a sops
 secret, `forgejo-admin-password`, declared **in this module** rather than
-centralized in `system/secrets/sops.nix` — so it only decrypts on cube,
+centralized in `config-system/secrets/sops.nix` — so it only decrypts on cube,
 where `git-forge` is imported.
 
 **This resets the password to the sops value on every activation** — a
@@ -128,15 +135,16 @@ a password has nothing that breaks if it changes, and this repo's nix+sops
 config is the sole source of truth for it. The tradeoff: a hand change
 through the web UI is silently reverted on the next `just switch`.
 
-**Status: switched and logged in, confirmed 2026-09-05.** Elly has signed
+**Status: switched and logged in, confirmed 2026-09-05.** The user has signed
 in as `elly` and used the account directly (screenshot-confirmed) — the
 account and password both work as declared. Whether it's genuinely
-*admin* (the `--admin` flag) is still unconfirmed: Forgejo's
-unauthenticated `/api/v1/users/search` always reports `is_admin: false`
-regardless of the real value, so that field can't settle it — see
-[pending-setup.md](../homelab/pending-setup.md) item 1 for the fuller
-account of that trap. Checking from inside the UI (Site Administration
-panel) is the way to actually confirm it.
+*admin* (the `--admin` flag) is **confirmed: it took** — checked from
+inside the UI and reported by the user 2026-09-12. That was the only way to
+check it: Forgejo's unauthenticated `/api/v1/users/search` always reports
+`is_admin: false` regardless of the real value, so that field never could
+settle it, and reading it as an answer produced a wrong one twice. See
+[git-forge-history.md](git-forge-history.md#the-admin-account-and-an-anonymous-api-that-reports-zeroes)
+for the fuller account of that trap.
 
 ## No persistence entry, same reasoning as Grafana
 

@@ -1,18 +1,19 @@
 # `backup` — history
 
-_Last modified: 2026-09-06_
+_Last modified: 2026-09-14_
+
+Resolved incidents and superseded design behind [backup](backup.md) and
+[../homelab/backup-runbook.md](../homelab/backup-runbook.md) — split out
+2026-09-03 so those pages stay about the backend as it actually works today.
+Nothing here changes what to type or how the module is shaped now.
 
 ## Contents
 
 - [The original plan (2026-08-27)](#the-original-plan-2026-08-27)
 - [The QNAP mount predates this category by months, and was never dangling](#the-qnap-mount-predates-this-category-by-months-and-was-never-dangling)
 - [Getting the SFTP repository from "declared" to "actually working" (2026-08-30 through 2026-09-06)](#getting-the-sftp-repository-from-declared-to-actually-working-2026-08-30-through-2026-09-06)
+- [The setup checklist, closed out (2026-08-28 through 2026-09-06)](#the-setup-checklist-closed-out-2026-08-28-through-2026-09-06)
 - [See also](#see-also)
-
-Resolved incidents and superseded design behind [backup](backup.md) and
-[../homelab/backup-runbook.md](../homelab/backup-runbook.md) — split out
-2026-09-03 so those pages stay about the backend as it actually works today.
-Nothing here changes what to type or how the module is shaped now.
 
 ## The original plan (2026-08-27)
 
@@ -50,9 +51,9 @@ section when `claude cave/` was retired; moved here 2026-09-03.
 
 ## The QNAP mount predates this category by months, and was never dangling
 
-The plan doc above described `nire/system/storage/storage-NFS.nix` (the
+The plan doc above described `config-system/system/storage/storage-NFS.nix` (the
 NFS mount to the QNAP) as an unused module. It isn't:
-`nire/system/storage/` has no `dirsAsCategory.nix` of its own, so the
+`config-system/system/storage/` has no `dirsAsCategory.nix` of its own, so the
 module is collected straight into the shared `system` aggregate, which
 every Linux host imports — confirmed via `nix eval
 .#nixosConfigurations.<host>.config.fileSystems` on all three NixOS hosts,
@@ -62,9 +63,14 @@ plan: nothing had ever exercised that mount against the real QNAP, so
 
 The mount point itself moved 2026-08-28: `/mnt/qnap-erin` (a share shared
 with unrelated QNAP uses) → `/mnt/restic-backup` (dedicated). As of
-2026-08-31 the module doesn't use that mount at all — see [backup](backup.md)'s
-SFTP section — but `storage-NFS.nix` is untouched, still there for
-whatever else wants it.
+2026-08-31 the module didn't use that mount at all — see [backup](backup.md)'s
+SFTP section — and `storage-NFS.nix` sat there unused on all three Linux
+hosts until it was **deleted 2026-09-14**. Nothing referenced
+`/mnt/restic-backup` after the SFTP move, and leaving it meant three hosts
+held IP-trusted NFS write access to the backup repository — the exact
+property (NFS export trust is host-IP based, not keyed) that moving to SFTP
+was meant to end. If general QNAP access is ever wanted again, it wants a
+mount at a general share, not at the backup repo.
 
 ## Getting the SFTP repository from "declared" to "actually working" (2026-08-30 through 2026-09-06)
 
@@ -108,6 +114,39 @@ Five separate one-time steps, each hit a real snag:
    ahead flips depending on which was last used, not on either path name
    being inherently current. Check both with `git log -1` every time
    rather than trusting memory of which was ahead last.
+
+## The setup checklist, closed out (2026-08-28 through 2026-09-06)
+
+Moved here 2026-09-12 from `homelab/pending-setup.md` item 4, which is
+fully resolved. Tracked as
+[#87](https://github.com/NireBryce/nixos-configs/issues/87), closed
+2026-09-06 against the harder bar it always set — not "a backup exists" but
+a real restore of `/var/lib/forgejo`, `/persist/` and Forgejo's actual
+sqlite database, confirmed recoverable.
+
+The three sub-items that had to close first, all of which did:
+
+- **Neither sops secret had a value in this tree** — set 2026-08-30
+  (`restic-cube-password`) and 2026-08-31 (`restic-cube-ssh-key`), and
+  live-confirmed working 2026-09-05: cube switched onto the
+  `restic-backup`-share path move, its timer ran successfully against it,
+  and the pre-move repository's history (five snapshots, 2026-08-31 through
+  2026-09-04) was migrated in with `restic copy` — six snapshots total,
+  confirmed by a live listing.
+- **No QNAP-side snapshot schedule on the backup share** — done 2026-09-05,
+  confirmed via a Snapshot Manager screenshot: daily at 04:30 on the
+  `restic-backup` share, keeping 5 days, status Success.
+- **QuTS hero has no toggle to force key-only SSH auth** — mitigated
+  2026-08-31: port 22 is LAN-blocked and tailnet-only (confirmed live), and
+  QNAP's brute-force protection is on. Still a standing limitation rather
+  than a fix, and it is listed as such on
+  [open-threads.md](../open-threads.md).
+
+The restore drill is what made this worth doing: it found a real bug, since
+fixed and confirmed live. Full account in "Getting the SFTP repository from
+'declared' to 'actually working'" above and in
+[backup.md](backup.md)'s "The sqlite consistency bug"; the procedure is
+[backup-runbook.md](../homelab/backup-runbook.md).
 
 ## See also
 

@@ -1,6 +1,11 @@
-# `macos` — `nire/macos/`
+# `macos` — `config-system/macos/`
 
 _Last modified: 2026-09-01_
+
+`darwin`-class only, throughout — the one category in this repo that is
+entirely platform-specific rather than shared-with-a-guard. See
+[../architecture.md](../architecture.md)'s "Platform support is derived"
+section for the general pattern this fits into.
 
 ## Contents
 
@@ -9,11 +14,6 @@ _Last modified: 2026-09-01_
 - [Why `hardware`/`desktop-env`/`peripherals` are absent from lysithea instead of guarded here](#why-hardwaredesktop-envperipherals-are-absent-from-lysithea-instead-of-guarded-here)
 - [Imported by](#imported-by)
 - [See also](#see-also)
-
-`darwin`-class only, throughout — the one category in this repo that is
-entirely platform-specific rather than shared-with-a-guard. See
-[../architecture.md](../architecture.md)'s "Platform support is derived"
-section for the general pattern this fits into.
 
 ## What's in it
 
@@ -27,7 +27,7 @@ section for the general pattern this fits into.
 - **`shells/shells.nix`** — system-level shell registration only (`/etc/shells`,
   stopping the system's own zsh completion setup from fighting Home
   Manager's). zsh itself is configured through Home Manager, same as the
-  Linux hosts — see [shell-config](shell-config/README.md).
+  Linux hosts — see [shell-config](shell-config/00-INDEX.md).
 - **`system-settings/darwin-system.nix`** — `system.primaryUser = "elly"`
   (hardcoded, same as `users.users.elly` and `home.username` everywhere else
   in this tree — nix-darwin needs it for homebrew and launchd
@@ -39,7 +39,7 @@ section for the general pattern this fits into.
 
 Found 2026-08-31 on `nire-lysithea` diagnosing "the Tailscale service won't
 install". Not a bug in this repo — `tailscale.nix`
-(`nire/system/networking/`) is `flake.modules.nixos`-only and never reaches
+(`config-system/system/networking/`) is `flake.modules.nixos`-only and never reaches
 darwin; on lysithea, Tailscale is entirely the `tailscale-app` cask in
 `homebrew.nix`, unmanaged by Nix past that one line.
 
@@ -93,9 +93,9 @@ just never asked for in the first place.
 
 - [nix](nix.md) — `basic-nix-settings.nix` also has a `darwin`-class block,
   the other place platform-specific nix settings live.
-- [shell-config](shell-config/README.md) — where zsh/bash themselves are actually
+- [shell-config](shell-config/00-INDEX.md) — where zsh/bash themselves are actually
   configured.
 - The `nirepackages-platform-support` skill
-  (`.claude/skills/nirepackages-platform-support/SKILL.md`) — the
+  (`.agents/skills/nirepackages-platform-support/SKILL.md`) — the
   build-support-vs-Homebrew-overlap distinction that governs everything in
   `ellyHomeManager`, separate from this category.

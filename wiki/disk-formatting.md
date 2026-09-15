@@ -1,17 +1,6 @@
 # New host disk formatting (LUKS + btrfs + impermanence)
 
-_Last modified: 2026-09-05_
-
-## Contents
-
-- [What this is for](#what-this-is-for)
-- [Decide before touching a disk](#decide-before-touching-a-disk)
-- [Wiring the layout in](#wiring-the-layout-in)
-- [Actually formatting the disk](#actually-formatting-the-disk)
-- [What depends on this having actually run](#what-depends-on-this-having-actually-run)
-- [Confirming the rollback actually works](#confirming-the-rollback-actually-works)
-- [Traps](#traps)
-- [See also](#see-also)
+_Last modified: 2026-09-14_
 
 The runbook-shaped piece of adding a new host: **the actual disk step**, not
 the Nix config around it. Skill `new-host-config` covers the whole
@@ -25,6 +14,23 @@ operations and the safety warnings that are otherwise scattered across both
 against real hardware, and see the placeholder-device rule below before
 touching a device path at all.
 
+> **Condensed version:**
+> [disk-formatting-for-agents.md](disk-formatting-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
+## Contents
+
+- [What this is for](#what-this-is-for)
+- [Decide before touching a disk](#decide-before-touching-a-disk)
+- [Wiring the layout in](#wiring-the-layout-in)
+- [Actually formatting the disk](#actually-formatting-the-disk)
+- [What depends on this having actually run](#what-depends-on-this-having-actually-run)
+- [Confirming the rollback actually works](#confirming-the-rollback-actually-works)
+- [Traps](#traps)
+- [See also](#see-also)
+
 ## What this is for
 
 For a **new** host that will wipe `/root` on every boot — durandal and
@@ -36,7 +42,7 @@ exist yet. If the new host is opting *out* the way `nire-cube` and the
 handhelds do, none of this page applies — say so in the host's own header
 instead, the way `cube-configuration.nix` does.
 
-`nire/impermanence/_disko/impermanence-luks-btrfs.nix` reproduces durandal
+`config-system/impermanence/_disko/impermanence-luks-btrfs.nix` reproduces durandal
 and tenacity's hand-run layout as a reusable generator: one LUKS-encrypted
 partition, btrfs inside it, subvolumes for `root`/`home`/`nix`/`persist`/`log`,
 and an unmounted `root-blank` subvolume. **Nothing in this repo currently
@@ -69,7 +75,7 @@ Call the generator curried with this host's own parameters, in its
 
 ```nix
 imports = [
-    (import ../../nire/impermanence/_disko/impermanence-luks-btrfs.nix {
+    (import ../../config-system/impermanence/_disko/impermanence-luks-btrfs.nix {
         device = "/dev/disk/by-id/REPLACE-ME-before-running-disko";
     })
 ];
@@ -168,13 +174,13 @@ this has actually been checked, not once the machine merely boots.
   — the generator itself: what it produces, what it deliberately leaves out,
   and exactly how it was verified (and how it wasn't).
 - `WARN-impermanence.nix`
-  (`flake/modules/nire/impermanence/root-rollback/WARN-impermanence.nix`) —
+  (`flake/modules/config-system/impermanence/root-rollback/WARN-impermanence.nix`) —
   the rollback module this disk layout exists to support; read before
   changing anything near it, every time.
-- Skill `new-host-config` (`.claude/skills/new-host-config/SKILL.md`) — the
+- Skill `new-host-config` (`.agents/skills/new-host-config/SKILL.md`) — the
   full host-adding decision tree this page is one piece of.
 - Skill `impermanence-initrd`
-  (`.claude/skills/impermanence-initrd/SKILL.md`) — the initrd-specific sharp
+  (`.agents/skills/impermanence-initrd/SKILL.md`) — the initrd-specific sharp
   edges referenced above.
 - [categories/impermanence.md](categories/impermanence.md) — what's in the
   category, which hosts import it today.

@@ -1,6 +1,12 @@
 # Maintenance schedule
 
-_Last modified: 2026-09-07_
+_Last modified: 2026-09-14_
+
+> **Condensed version:**
+> [maintenance-schedule-for-agents.md](maintenance-schedule-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
 
 ## Contents
 
@@ -16,7 +22,7 @@ A checklist of this fleet's credentials, keys, and certificates that have
 **an actual expiry, a recommended rotation cadence, or a "will silently
 break later" property** — as opposed to `secrets.yaml`'s full inventory,
 which is every secret regardless of whether it ever needs attention. Tended
-by skill [`maintenance-schedule`](../.claude/skills/maintenance-schedule/SKILL.md).
+by skill [`maintenance-schedule`](../.agents/skills/maintenance-schedule/SKILL.md).
 
 Each item states what it actually is, what's known about its expiry (not
 guessed — "unverified" is written down as such rather than invented), and
@@ -46,7 +52,7 @@ here, don't wrap this file in ciphertext to protect one row.
 ### 1. `tailscale_key` — Tailscale auth key
 
 - **What**: an auth key stored in `secrets.yaml`, undeclared and unused —
-  see [`tailscale.nix`](../flake/modules/nire/system/networking/tailscale.nix)'s
+  see [`tailscale.nix`](../flake/modules/config-system/system/networking/tailscale.nix)'s
   header comment.
 - **Expiry**: Tailscale auth keys expire at **90 days maximum** from
   creation. This one predates the flake-parts port (so it's already stale)
@@ -112,7 +118,7 @@ here, don't wrap this file in ciphertext to protect one row.
 ### 4. sops age recipients — derived from host SSH host keys
 
 - **What**: `.sops.yaml`'s four `age1...` recipient lines
-  (`flake/modules/nire/system/secrets/.sops.yaml`) are each derived from
+  (`flake/modules/config-system/system/secrets/.sops.yaml`) are each derived from
   that host's own `/etc/ssh/ssh_host_ed25519_key.pub` via `just age-key`
   (`flake/scripts/host-age-key.sh`) — not standalone `age-keygen` keypairs.
 - **Expiry**: none in the usual sense — SSH host keys don't expire on a
@@ -169,19 +175,40 @@ here, don't wrap this file in ciphertext to protect one row.
 
 ### 8. Grafana admin credentials
 
-- **What**: still on initial/default setup — this is not yet a "rotate
-  periodically" item because it hasn't had its one-time setup done at all.
-- **Status**: see [homelab/pending-setup.md](homelab/pending-setup.md#5-grafanas-admin-credentials)
-  for the current state. Once real credentials are set, add them here with
-  the same shape as `forgejo-admin-password` above — this row should stop
-  saying "pending" the same change that closes that pending-setup item.
-- **Last checked**: 2026-09-07 (cross-referenced against pending-setup.md,
-  not the live instance).
+- **What**: a real admin password, **set by hand through the UI 2026-09-13**
+  (by the user). Not stock any more. Lives only in cube's Grafana sqlite db at
+  `/var/lib/grafana` — covered by restic, but not reproducible: nothing
+  re-applies it, so it is a credential that exists in exactly one place.
+- **Also, separately**: `grafana-admin-password` now exists in
+  `secrets.yaml` and `grafana.nix` wires it to
+  `settings.security.admin_password` via Grafana's `$__file{}` provider.
+  **That governs first start only** — Grafana's `defaults.ini`: "can be
+  changed before first start of grafana, or in profile settings". Its job is
+  that a fresh or rebuilt instance never comes up on the published
+  `admin`/`admin` again; it does **not** manage the password above.
+- **Rotation**: none enforced. To rotate the live one, change it in the UI.
+  To rotate what a rebuilt instance would get, `sops set` the secret.
+  The two are independent, which is the cost of first-start-only semantics.
+- **What would make them one thing**: a oneshot running `grafana-cli admin
+  reset-admin-password` from the sops file per activation — the shape
+  `forgejo-admin-bootstrap` uses for item 7. Deliberately not done: it
+  overwrites a hand-set password on every switch.
+- **Last checked**: 2026-09-13. Live password changed by the user. Cube
+  **switched** the same day and the deployment was checked on the host:
+  `/run/secrets/grafana-admin-password` is `grafana:grafana` mode `400`,
+  the live `config.ini` references it, `grafana.service` is active with
+  `NRestarts=0`, and `/run/current-system` matches what `experimental`
+  evaluates to. **The value has still never been consumed** — cube's admin
+  user predates it, so Grafana has not read the file and only a fresh
+  instance would.
 
 ### 9. Syncthing device certificates
 
 - **What**: the `syncthing-*` secrets in `secrets.yaml` (one per device:
-  `durandal`, `galatea`, `lysithea`, `sif`, `iona`, `tenacity`).
+  `durandal`, `galatea`, `lysithea`, `sif`, `iona`, `tenacity`). **Declared
+  by no module since 2026-09-08** — `sops.nix` held five of them and now
+  holds no `sops.secrets.*` at all; the keys stay in `secrets.yaml`
+  unreferenced. Nothing decrypts them, so nothing breaks when they age.
 - **Expiry**: Syncthing generates its own self-signed device certificate
   with a long validity (on the order of decades) and doesn't require manual
   renewal in normal operation. Listed here for completeness, not because
@@ -189,6 +216,124 @@ here, don't wrap this file in ciphertext to protect one row.
   this fleet.
 - **Last checked**: 2026-09-07 (documentation check against Syncthing's own
   behavior, not a live cert inspection).
+
+### 10. `FLAKE_LOCK_TOKEN` — GitHub PAT for the weekly lock PR
+
+- **What**: a GitHub Actions repo secret on `NireBryce/nixos-configs`
+  (**not** in `secrets.yaml` — see below), holding a fine-grained PAT
+  scoped to this repo with
+  `Contents: read/write` and `Pull requests: read/write`. Read by
+  [`../.github/workflows/update-flake-lock.yml`](<../.github/workflows/update-flake-lock.yml>)
+  as the `token` input to `DeterminateSystems/update-flake-lock`.
+- **Why a PAT rather than `GITHUB_TOKEN`**: chiefly so these PRs trigger
+  CI. A `GITHUB_TOKEN`-opened PR does not trigger this repo's own
+  `pull_request` workflows, so `nix flake check + module tree` never
+  reports — and the `experimental` ruleset *requires* it, making such a PR
+  unmergeable without an admin bypass. Secondarily, it keeps the repo-wide
+  "Allow GitHub Actions to create and approve pull requests" setting off,
+  and it structurally cannot approve its own PRs (GitHub refuses
+  self-approval). That setting is a single switch granting create **and**
+  approve, with no way to have one without the other.
+- **Why not sops**, asked 2026-09-08 and worth not re-deriving: a runner
+  would need the age key to decrypt, and that key would itself have to be
+  a GitHub Actions secret — one GitHub-stored credential swapped for
+  another, plus a layer. Nor could a runner be enrolled: every key in
+  [`.sops.yaml`](<../flake/modules/config-system/system/secrets/.sops.yaml>) is
+  derived from a *host's* `/etc/ssh/ssh_host_ed25519_key.pub`, and a
+  runner is an ephemeral VM with no persistent host key. And nothing in
+  the nix tree ever reads this token, so a `sops.secrets.*` entry for it
+  would decrypt on three hosts with no use for it — the shape #203
+  deleted. Minor point in the same direction: `secrets.yaml` is committed
+  to a *public* repo, so its ciphertext is permanently public; an Actions
+  secret is never published. The general rule this follows is the one in
+  "Why this file is plaintext" above — the consumer picks the store.
+- **Expiry**: **2027-09-12** (minted 2026-09-13 as a custom date; GitHub's
+  maximum is 366 days and the creation UI defaults to 30). The creation UI
+  also offers "No expiration" for fine-grained tokens — chosen against:
+  a no-expiry token gets no expiry header, so the weekly check would
+  degrade to the "cannot tell" notice below forever.
+- **This one fails loudly, by construction.** Unlike everything else on
+  this page, the workflow checks its own credential rather than relying on
+  someone reading this file:
+  - A **missing, revoked, or expired** token fails the run at its first
+    step with a `::error::` annotation naming the secret and what to do —
+    before the nix install and flake update, rather than as a bare 401
+    inside the action much later.
+  - **Within 30 days of expiry** it emits a `::warning::` and keeps going,
+    so the lock update still happens. The window is 30 days because the
+    workflow runs *weekly* — a shorter one could give only one or two
+    chances to notice.
+  - Either case also **opens an issue in this repo** (reusing one open
+    issue titled `update-flake-lock: weekly lock PR needs attention`
+    rather than filing weekly), because a red scheduled run only emails
+    the repo owner and that is easy to miss months later.
+  - One gap, stated rather than papered over: GitHub returns the
+    `github-authentication-token-expiration` header only for tokens that
+    *have* an expiry, so an absent header means "cannot tell", not
+    "healthy". That case emits a `::notice::` and does **not** fail — so
+    the early warning is best-effort, while the hard failure on an
+    already-dead token is not.
+- **Failure mode if it lapses anyway**: the run pushes the updated
+  `update_flake_lock_action` branch as normal and then fails at PR
+  creation. The symptom to recognise: that branch sitting ahead of
+  `experimental` with no PR attached — exactly the state the 2026-09-07
+  run left behind for the unrelated permission reason.
+- **Last checked**: 2026-09-13 — the secret exists and the pipeline is
+  verified end to end: a manual `workflow_dispatch` run passed preflight
+  (printing the expiry line above), pushed `update_flake_lock_action`, and
+  opened
+  [#308](https://github.com/NireBryce/nixos-configs/pull/308) with
+  `nix flake check + module tree` running on it — the PR-triggers-CI
+  property this PAT exists for, seen live for the first time. (2026-09-08:
+  preflight logic verified against the live API before the secret existed
+  — valid token → 200; revoked token → 401 → hard fail; header parse
+  confirmed against a simulated response.)
+
+### 11. Atuin account encryption key
+
+- **What**: the local key (`~/.local/share/atuin/key`) that encrypts shell
+  history before it's synced through Atuin's zero-knowledge server. Not in
+  `secrets.yaml` — generated by `atuin register`, not sops-managed. Config
+  lives in
+  [`packages/shell-apps/history/atuin.nix`](../flake/modules/packages/shell-apps/history/atuin.nix).
+- **Expiry**: none — doesn't expire, but the server has no key of its own
+  to rotate, so "rotate the account's key" means wipe-and-re-push, not a
+  server-side operation. See the procedure below for why.
+- **Procedure**:
+  [`atuin-key-rotation.md`](../flake/modules/packages/shell-apps/history/atuin-key-rotation.md),
+  tucked next to `atuin.nix` above — the full `atuin account delete` /
+  `atuin register` / `atuin sync` sequence lives there, not duplicated
+  here.
+- **Cadence**: no fixed schedule; rotate on suspicion of compromise (a
+  device the key lived on lost or stolen), same as items 5 and 6 above.
+- **Last checked**: 2026-09-09 — no rotation has happened yet; this is the
+  first time the procedure was written down.
+
+### 12. `nire-galatea/tskey` — a dead Tailscale auth key in git history
+
+- **What**: an auth key file committed 2024-01-29 (`449d158`, "struggling
+  with sops again") while `nire-galatea/` — a host long since removed from
+  the fleet — was still in the tree; the file left the tree again later
+  that year. It exists only in git history now, reachable from every
+  branch. Listed here so the next scanner flag finds a decision instead of
+  re-deriving one — not because anything is due, the same shape as item 9.
+- **Expiry**: dead twice over. Rotated at the time (2024, per the user),
+  and Tailscale auth keys can't outlive 90 days regardless. The repo is
+  public, so the blob has been public since the day it was pushed — the
+  exposure window closed years before anyone flagged it again.
+- **Decision, 2026-09-14: left in place; history rewrite considered and
+  rejected.** Purging it means force-pushing `main` and `experimental`
+  (both ruleset-protected), invalidating every commit-SHA reference made
+  since January 2024, and dropping the rewrite under whatever sessions are
+  in flight — for a credential that cannot authenticate, in a repo where
+  the old objects survive in existing clones and GitHub's caches no matter
+  what (a true purge is a GitHub Support ticket even after a rewrite). The
+  same public-repo permanence item 10 records for `secrets.yaml`'s
+  ciphertext applies here.
+- **What to do when a scanner flags it**: mark it rotated/false-positive
+  and move on. The flag is expected noise, not a finding.
+- **Last checked**: 2026-09-14 — decision made; no key material read, per
+  `secrets-hygiene`.
 
 ## Adding a new item
 
@@ -198,12 +343,17 @@ the **same change**, same discipline `wiki-sync` already asks for elsewhere.
 A secret with no such property (a static API token that never expires, say)
 doesn't belong on this page; it just lives in `secrets.yaml`.
 
+**A service left on vendor-default credentials belongs here too, and is
+written as a live credential rather than a missing one** — it is a working
+admin account with a publicly-known password, not an absence. Skill
+`maintenance-schedule` has the required shape and why it exists.
+
 ## See also
 
-- Skill [`maintenance-schedule`](../.claude/skills/maintenance-schedule/SKILL.md)
+- Skill [`maintenance-schedule`](../.agents/skills/maintenance-schedule/SKILL.md)
   — how to work through this page on a review pass, and what to do with
   each kind of finding.
-- Skill [`secrets-hygiene`](../.claude/skills/secrets-hygiene/SKILL.md) —
+- Skill [`secrets-hygiene`](../.agents/skills/secrets-hygiene/SKILL.md) —
   how to check or touch any of the underlying secrets without printing
   their plaintext.
 - [Impermanence, initrd & secrets](impermanence-and-secrets.md) — the sops

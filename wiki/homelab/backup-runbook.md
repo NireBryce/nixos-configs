@@ -1,17 +1,6 @@
 # Backup runbook — restic on `nire-cube`
 
-_Last modified: 2026-09-06_
-
-## Contents
-
-- [Checking status](#checking-status)
-- [Creating a snapshot](#creating-a-snapshot)
-- [Listing and inspecting snapshots](#listing-and-inspecting-snapshots)
-- [Restoring a snapshot](#restoring-a-snapshot)
-- [Deleting a snapshot](#deleting-a-snapshot)
-- [Rotating the secrets](#rotating-the-secrets)
-- [Troubleshooting](#troubleshooting)
-- [See also](#see-also)
+_Last modified: 2026-09-11_
 
 Commands for operating [backup](../categories/backup.md) — the restic
 category backing up Forgejo/Grafana/golink's state and `/persist` to the
@@ -26,6 +15,23 @@ is a wrapper the module generates with `RESTIC_REPOSITORY`,
 `RESTIC_PASSWORD_FILE`, and the SFTP identity already baked in, and those
 resolve to root-owned `0400` files, so plain `restic` won't work
 unprivileged.
+
+> **Condensed version:**
+> [backup-runbook-for-agents.md](backup-runbook-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
+## Contents
+
+- [Checking status](#checking-status)
+- [Creating a snapshot](#creating-a-snapshot)
+- [Listing and inspecting snapshots](#listing-and-inspecting-snapshots)
+- [Restoring a snapshot](#restoring-a-snapshot)
+- [Deleting a snapshot](#deleting-a-snapshot)
+- [Rotating the secrets](#rotating-the-secrets)
+- [Troubleshooting](#troubleshooting)
+- [See also](#see-also)
 
 ## Checking status
 
@@ -128,7 +134,7 @@ sudo restic-cube unlock
 
 ## Rotating the secrets
 
-Both live in `flake/modules/nire/system/secrets/secrets.yaml`, declared
+Both live in `flake/modules/config-system/system/secrets/secrets.yaml`, declared
 in `restic.nix`. **Losing `restic-cube-password` loses the backups** —
 restic has no recovery path for a forgotten repository password; keep a
 copy somewhere that isn't cube and isn't this repo. Losing
@@ -138,7 +144,7 @@ on the QNAP) but breaks backups until that's done.
 ```sh
 # Repository password
 nix shell nixpkgs#sops nixpkgs#age --command \
-    sops set flake/modules/nire/system/secrets/secrets.yaml \
+    sops set flake/modules/config-system/system/secrets/secrets.yaml \
     '["restic-cube-password"]' \
     "\"$(openssl rand -base64 32)\""
 
@@ -148,13 +154,13 @@ ssh nire-cube.local 'cat ~/.ssh/<new-key>' \
     | jq -Rs . \
     | xargs -0 -I{} nix shell nixpkgs#sops nixpkgs#age \
         --command sops set \
-        flake/modules/nire/system/secrets/secrets.yaml \
+        flake/modules/config-system/system/secrets/secrets.yaml \
         '["restic-cube-ssh-key"]' {}
 ```
 
 `jq -Rs .` JSON-encodes the multi-line key for `sops set`'s scalar
 argument. Both values are generated/read inline, never a literal in the
-command text — see `.claude/skills/secrets-hygiene/SKILL.md` if running
+command text — see `.agents/skills/secrets-hygiene/SKILL.md` if running
 either from an agent session. Commit `secrets.yaml` after (safe, it's
 ciphertext, committed encrypted on purpose — `AGENTS.md`, Safety
 section), then `just switch` on cube to pick it up.

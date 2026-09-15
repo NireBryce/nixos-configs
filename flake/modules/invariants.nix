@@ -47,7 +47,7 @@
 #
 # The gate is the unit's *existence*, deliberately not a marker option
 # and deliberately not `environment.persistence ? "/persist"` --
-# nire/system/impermanence/declare-persistence-option.nix now declares
+# config-system/system/impermanence/declare-persistence-option.nix now declares
 # that option on every NixOS host so tailscale-persist.nix and
 # jovian-persist.nix have somewhere valid to write even when they write
 # nothing; it no longer distinguishes an impermanence host from one

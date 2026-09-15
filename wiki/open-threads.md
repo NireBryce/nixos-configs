@@ -1,14 +1,6 @@
 # Open threads
 
-_Last modified: 2026-09-07_
-
-## Contents
-
-- [Tracked as GitHub issues](#tracked-as-github-issues)
-- [Pending upstream bug reports](#pending-upstream-bug-reports)
-- [Todos and ideas left next to the code](#todos-and-ideas-left-next-to-the-code)
-- [Left open by the cube service stack, 2026-08-24](#left-open-by-the-cube-service-stack-2026-08-24)
-- [Not covered here](#not-covered-here)
+_Last modified: 2026-09-14_
 
 Todos, half-formed ideas, and things-to-look-into notes left in various
 corners of the tree, plus upstream bugs found here but not yet filed. None
@@ -21,12 +13,42 @@ addition to grepping this page.** As of 2026-08-24 this repo actually files
 GitHub issues (see below) rather than leaving everything here as prose —
 started specifically because the ble.sh/carapace bug below had already been
 independently rediscovered once, at real cost, before it was tracked this
-way. `bugs pending submission/` (next section) is still the write-up stage
-for a bug against a *third-party* project, before it's filed there; this
+way. `_loose-ends/bugs-pending-submission/` (next section) is still the
+write-up stage for a bug against a *third-party* project, before it's filed there; this
 repo's own tracker is the issue queue, not another markdown list.
+
+> **Condensed version:**
+> [open-threads-for-agents.md](open-threads-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
+## Contents
+
+- [Tracked as GitHub issues](#tracked-as-github-issues)
+- [Pending upstream bug reports](#pending-upstream-bug-reports)
+- [Todos and ideas left next to the code](#todos-and-ideas-left-next-to-the-code)
+- [Left open by the cube service stack, 2026-08-24](#left-open-by-the-cube-service-stack-2026-08-24)
+- [Not covered here](#not-covered-here)
 
 ## Tracked as GitHub issues
 
+- **[#205 — build the `flake.lock` bump on cube before proposing it,
+  instead of only evaluating it in
+  CI](https://github.com/NireBryce/nixos-configs/issues/205)** — open,
+  filed 2026-09-08. The weekly lock workflow (#204) can only *evaluate*:
+  `nix flake check + module tree` forces each host's toplevel as an
+  evaluation, and CI never builds it, so an input bump that evaluates fine
+  and breaks a host stays invisible until someone runs `just switch` on
+  real hardware — §§36–37 exactly. cube is `x86_64-linux` and already runs
+  scheduled work against a sops credential
+  ([restic.nix](../flake/modules/config-system/homelab/backup/restic/restic.nix) is
+  the precedent for the whole shape), so it can do what a runner
+  structurally cannot. Note this **relocates** the PAT rather than removing
+  it — same scopes, same expiry, `/run/secrets/` instead of a GitHub
+  Actions secret — so it is a wash on credential hygiene, and
+  [maintenance-schedule.md](maintenance-schedule.md) item 10's "Why not
+  sops" reasoning would need rewriting if it lands.
 - **[#87 — no backups anywhere in the fleet; decide a scheme for cube's
   service state](https://github.com/NireBryce/nixos-configs/issues/87)** —
   **closed 2026-09-06.** restic-over-SFTP to the QNAP, with a real restore
@@ -54,21 +76,63 @@ repo's own tracker is the issue queue, not another markdown list.
 
 ## Pending upstream bug reports
 
-`bugs pending submission/` — written up, not yet filed against the
-third-party project itself, and **not filed by anyone here on their own
+`_loose-ends/bugs-pending-submission/` — written up, not yet filed against
+the third-party project itself, and **not filed by anyone here on their own
 initiative**: per `CLAUDE.md`, filing outside `NireBryce/nixos-configs`
-happens only when Elly says so explicitly, in those words, for that
+happens only when the user says so explicitly, in those words, for that
 specific report — not as a housekeeping pass over this list:
 
-- **[nixpkgs: vscode ≥ 1.129 patches the wrong ripgrep on Linux](<../bugs pending submission/2026-08-11-bugreport-nixpkgs-vscode-ripgrep.md>)**
+- **[nixpkgs: vscode ≥ 1.129 patches the wrong ripgrep on Linux](../_loose-ends/bugs-pending-submission/2026-08-11-bugreport-nixpkgs-vscode-ripgrep.md)**
   (2026-08-11, still present on nixpkgs `master` as of that date).
-- **[amd-s2idle: hardware sleep residency reported 100× too high](<../bugs pending submission/2026-08-12-bugreport-amd-s2idle-residency-percent.md>)**
+- **[amd-s2idle: hardware sleep residency reported 100× too high](../_loose-ends/bugs-pending-submission/2026-08-12-bugreport-amd-s2idle-residency-percent.md)**
   (2026-08-12, against `amd-debug-tools` 0.2.20).
-- **[Jovian-NixOS: `amd_iommu=off` blocks s0i3 on non-Deck handhelds with an NPU](<../bugs pending submission/2026-08-12-bugreport-jovian-amd-iommu-s0i3.md>)**
+- **[Jovian-NixOS: `amd_iommu=off` blocks s0i3 on non-Deck handhelds with an NPU](../_loose-ends/bugs-pending-submission/2026-08-12-bugreport-jovian-amd-iommu-s0i3.md)**
   (2026-08-12, found on a GPD G1617-02-L).
 
 ## Todos and ideas left next to the code
 
+- **Three findings from a 2026-09-11 read of every human-facing half of a
+  `-for-agents` pair, none acted on.** The pages were checked for the
+  failure the split invites — the explanation half decaying into a second
+  copy of its sibling — and it is not happening: verbatim line overlap
+  between halves is 0–5% across all 19 pairs, and nearly every section
+  heading is a *why* rather than a *what*. What's left:
+  - **All 19 pages open with ~16 lines of machinery before a sentence of
+    orientation** — `## Contents`, then the "Condensed version" blockquote,
+    with the paragraph saying what the page *is* landing at line 17–23 on
+    every one. Backwards for the one reader this half exists for: a TOC is
+    useful after you know you're on the right page, and "go read the
+    condensed version instead" is an odd first thing to tell a human. Fix
+    is mechanical across all 19 — orientation paragraph above both, the
+    blockquote under it. Now cheap to land: a pure reorder is a
+    `_Sibling reviewed:_` no-op (styleguide.md, "Two audiences per page").
+  - **[categories/system.md](categories/system.md)'s "Subdirectories at a
+    glance" table is the one genuinely what/where section found.** Five of
+    19 rows are the directory name with `.nix` appended (`flatpak/` |
+    `flatpak.nix`, same for `bluetooth`, `nix-ld`, `ssh`, `wayland`) —
+    nothing `ls` doesn't give — and they bury the rows that do earn their
+    place (`impermanence/`'s "not the impermanence category", `secrets/`'s
+    three files for three different problems). The table is the shape the
+    sibling exists to carry; the human page wants prose on the three or
+    four subdirectories with something to say.
+  - **[disk-formatting.md](disk-formatting.md) defers the one step a human
+    is on the page for.** "Actually formatting the disk" step 3 describes
+    the disko invocation rather than giving it, and neither half carries
+    the command. Every other destructive detail on that page is concrete
+    (the fake-device-path rule, the subvolid check with real numbers). The
+    honest fix is the command with an explicit "not run here, from disko's
+    docs" label — a labelled command beats a description of one when
+    someone is standing at a live USB.
+
+  A fourth finding, the `## Counts` table sitting on the human style guide,
+  was fixed the same day rather than listed (it moved to the sibling; the
+  `counts` subcheck follows `STYLEGUIDE_COUNTS`). Two judgment calls were
+  left alone deliberately: the `homelab/` pages carry an explicit "What's
+  verified here" section and the `categories/` pages carry the same facts
+  inline instead, which is arguably better writing at the cost of a full
+  read to answer "is this known to work?"; and the "Condensed version"
+  blockquote ends with an instruction to whoever *edits* the page, sitting
+  in the header of the page a human *reads*.
 - **[`../flake/scripts/script-wishlist.md`](<../flake/scripts/script-wishlist.md>)**
   — bare headings only (`vicinae`, `just`, `espanso`, `other`), no content
   yet. A placeholder for future script ideas, not current work.
@@ -78,6 +142,17 @@ specific report — not as a housekeeping pass over this list:
   handoff doc into `claude cave/2026-08-09 things to look into
   eventually.md` — itself removed 2026-09-01 (still in git history; also
   carried a security-hardening reference link, now only recoverable there).
+- **User split, not yet started.** `elly` is deliberately the experimental
+  user — everything lands there first. Plan: offload what's really
+  user-package material onto `nire`, then, once the config has stabilized,
+  split anything that doesn't need direct human invocation into its own
+  dedicated user account, as a confused-deputy mitigation (a compromised or
+  misbehaving program running as one of those users shouldn't inherit the
+  whole of `elly`'s authority). Recorded now, rather than left purely
+  aspirational, because an LLM driving `just switch` on real hardware makes
+  the actual migration cheap enough to eventually just do — see
+  [categories/elly.md](categories/elly.md#elly-as-the-experimental-user)
+  and top-level [../README.md](../README.md)'s Users section.
 - `claude cave/2026-08-24-evaluation-self-hosted-booking.md` (removed
   2026-09-01, still in git history if wanted) — Easy!Appointments vs
   LibreBooking, compared 2026-08-24 and explicitly not pursued. What's
@@ -92,6 +167,26 @@ specific report — not as a housekeeping pass over this list:
   devenv, nixos-shell, nix-index, nix-prefetch — and an unanswered "learn
   what `outputs @ inputs:` means and figure out specialArgs" note. Also
   covered from the fix-snippet angle on [conventions.md](conventions.md).
+- **Forgejo: no local CI/CD yet.** `pending-setup.md` and `forgejo.md` cover
+  getting the forge itself usable; running Forgejo Actions against it (to
+  mirror what GitHub Actions does in `.github/workflows/`, on
+  locally-hosted infrastructure instead) hasn't been started. Rescued
+  2026-09-08 from a removed notebook TODO, itself already superseded on its
+  other point (the "manual migration steps" question — answered by
+  `pending-setup.md`'s mirror decision).
+- **CI's lint step re-fetches `nixpkgs#statix nixpkgs#deadnix` from the
+  binary cache on every run** (`.github/workflows/check.yml`), rather than
+  reusing the flake's own nixpkgs input (already in the tree as
+  home-manager packages, per `packages/nix-utils/`). Cheap today; worth
+  pinning if CI minutes ever start mattering. Rescued 2026-09-08 from a
+  removed notebook.
+- **QNAP NAS: no way to disable SSH password authentication in the QNAP's
+  own OS (QuTS hero) if SSH access to it is ever enabled there** — separate
+  from the restic-over-SFTP credentials in
+  [maintenance-schedule.md](maintenance-schedule.md) item 5, which cover
+  `nire-cube`'s side of that connection, not the NAS's own sshd config.
+  Mitigations undecided; rescued 2026-09-08 from a removed notebook,
+  unanswered there too.
 
 `nire-llm-sandbox`'s three runtime-verified `VMs/_lib/libvirt-vm.nix` fixes
 (default network never started, a nonexistent `virsh` flag, a missing fixed
@@ -129,38 +224,61 @@ bug; each is a decision someone might otherwise re-litigate from scratch.
   [backup-history.md](categories/backup-history.md). What's still open is
   extending backups past cube to the other three hosts
   (**[#130](https://github.com/NireBryce/nixos-configs/issues/130)**).
-- **Tailscale Services (`svc:`) reopened 2026-09-07, in progress on
-  `feat/tailscale-services`.** The two costs originally cited here both
-  turned out to have real mitigations: the per-service admin-console
-  approval step is skippable via an `autoApprovers.services` policy entry,
-  and the policy file itself is API-scriptable
+- **Tailscale Services (`svc:`) — done, 2026-09-11.** Both costs
+  originally cited here had real mitigations: the per-service
+  admin-console approval is skippable via an `autoApprovers.services`
+  policy entry, and the policy file is API-scriptable
   (`flake/scripts/tailscale-acl.py`, `just tailscale-acl`) rather than
-  console-hand-edited only — reviewed as a diff and applied from this repo,
-  same as everything else here. `svc:grafana` and `svc:git` exist on the
-  tailnet as of this branch (each with its own virtual address); the tag,
-  policy grants, and service objects are recorded under
-  `flake/modules/nire/homelab/reverse-proxy/tailscale-services/`, whose own
-  README lists what's still open — **`nire-cube` isn't tagged yet, there's
-  no NixOS `services.tailscale.serve` config backing either service with a
-  real port, and Caddy's existing `/grafana/`/`/git/` path routes
-  ([reverse-proxy](categories/reverse-proxy.md)) are untouched and still
-  what's actually serving traffic.** Two API endpoint names were wrong on
-  the first attempt in both directions (ACL: `/policy` vs the real `/acl`;
-  vip-services: `/by-name/{name}` vs the real `/vip-services/{name}`) —
-  see the script's own comments before assuming either path from memory
-  again.
+  console-only — reviewed as a diff and applied from this repo, same as
+  everything else. `svc:grafana` and `svc:git` are live; `svc:glance` was
+  retired with glance 2026-09-12 (issue #291, replaced by `svc:homepage`)
+  and re-made 2026-09-13 when glance rejoined homepage for the landing
+  evaluation — same mechanism throughout, applied at switch time per the
+  rollout order in `landing/homepage/homepage.nix`'s history section.
+  `nire-cube` is tagged
+  `tag:homelab-cube`; `services.tailscale.serve` backs each on
+  `tcp:443` and `tcp:80`; and Caddy's old `/grafana/`/`/git/` path routes
+  are retired. URLs are in
+  [homelab/reaching-services.md](homelab/reaching-services.md), the build
+  in [reverse-proxy](categories/reverse-proxy.md).
+
+  Four traps this turned up, all now written up where they'd be hit rather
+  than only here:
+
+  - **Two API endpoint names were wrong in both directions** on the first
+    attempt (ACL: `/policy` vs the real `/acl`; vip-services:
+    `/by-name/{name}` vs the real `/vip-services/{name}`). Read the
+    script's own comments before assuming either path again — and note
+    `vip-get` needs the **`svc:`-prefixed** name, or every service 404s
+    including ones that exist.
+  - **A recorded change is not an applied change.** `svc:glance`'s
+    autoApprover sat in this repo's copy of the policy file for a day
+    without ever being POSTed, and the Service object was never created at
+    all, so the name didn't resolve. `just tailscale-acl diff` is the
+    check that catches it.
+  - **Creating and updating a Service want different bodies** — an update
+    400s without the `addrs` the control plane assigned. Those are
+    deliberately not committed (they'd rot on any recreate); `vip-put`
+    merges them.
+  - **A new Service is not activated by re-running `serve set-config`**
+    against an already-standing advertisement. It needs a fresh
+    registration: restart `tailscaled`, then `tailscale-serve` after it.
+
 - **Grafana dashboards edited in the UI are not in this repo.** Anything
   under `monitoring`'s `_dashboards/` is provisioned read-only from the
   store; anything created through the web UI lives only in cube's sqlite db.
   That db is now backed up (`/var/lib/grafana` is one of #87's covered
   paths, via the sqlite-staging fix), so a UI-created dashboard survives a
-  restore — but it still isn't declared as code, so it still can't survive
-  a rebuild that reprovisions `_dashboards/`. "How to add a dashboard that
-  survives a rebuild" is now written up:
+  restore — but it isn't declared as code, so it can't survive a rebuild
+  that reprovisions `_dashboards/` until the export procedure is run on it.
+  That procedure —
   [monitoring.md](categories/monitoring.md#adding-a-dashboard-that-survives-a-rebuild)
-  — not yet verified against a real UI export, per its own caveat. Now
-  tracked as
-  **[#190](https://github.com/NireBryce/nixos-configs/issues/190)**.
+  — is verified end to end as of 2026-09-11: a UI-shaped dashboard
+  (random uid, numeric `id`, `${DS_PROMETHEUS}` variable) was carried
+  through the export into `_dashboards/` and then survived a real
+  `just switch` with no duplicate provisioned —
+  **[#190](https://github.com/NireBryce/nixos-configs/issues/190)**,
+  closed 2026-09-11.
 
 ## Not covered here
 

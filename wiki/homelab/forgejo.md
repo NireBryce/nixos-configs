@@ -1,6 +1,19 @@
 # Using the forge
 
-_Last modified: 2026-09-01_
+_Last modified: 2026-09-14_
+
+[Forgejo](https://forgejo.org/) on `nire-cube`, at
+`https://git.moose-micro.ts.net/` — its own Tailscale Services name as of
+2026-09-07 (was `https://ts-cube.moose-micro.ts.net/git/`; that path 404s
+now). This page is about **using** it — signing in, cloning, pushing. For
+how it's configured and why its two hostnames disagree, see
+[git-forge](../categories/git-forge.md).
+
+> **Condensed version:**
+> [forgejo-for-agents.md](forgejo-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
 
 ## Contents
 
@@ -8,28 +21,30 @@ _Last modified: 2026-09-01_
 - [Signing in, and why there's no sign-up](#signing-in-and-why-theres-no-sign-up)
 - [SSH keys, and the second user on this host](#ssh-keys-and-the-second-user-on-this-host)
 - [Database and backups](#database-and-backups)
+- [This repo is mirrored here](#this-repo-is-mirrored-here)
 - [What's verified here](#whats-verified-here)
 - [See also](#see-also)
-
-[Forgejo](https://forgejo.org/) on `nire-cube`, at
-`https://ts-cube.moose-micro.ts.net/git/`. This page is about **using** it —
-signing in, cloning, pushing. For how it's configured and why its two
-hostnames disagree, see [git-forge](../categories/git-forge.md).
 
 ## Where it is
 
 | | |
 |---|---|
-| Web | `https://ts-cube.moose-micro.ts.net/git/` |
-| Clone over HTTPS | `https://ts-cube.moose-micro.ts.net/git/<user>/<repo>.git` |
+| Web | `https://git.moose-micro.ts.net/` (short: `http://git/`) |
+| Clone over HTTPS | `https://git.moose-micro.ts.net/<user>/<repo>.git` |
 | Clone over SSH | `forgejo@ts-cube:<user>/<repo>.git` |
 
+**`forgejo@` is the account you connect to, not a key owner.** Nothing here
+uses a key belonging to the `forgejo` user — it has none. Git-over-SSH to any
+Forgejo reaches one shared system account, and Forgejo works out *which*
+person you are from the key you present. See
+[Adding one](#adding-one).
+
 **Those two hostnames are different on purpose, and it isn't a typo.** Web
-traffic goes through Caddy, which needs the full FQDN for its certificate.
-Git-over-SSH does *not* go through Caddy at all — it goes to cube's ordinary
-`sshd` on port 22 — so its clone URLs use the short `ts-cube`. Forgejo builds
-each from a separate setting (`ROOT_URL` and `DOMAIN`), which is why they can
-and do differ.
+traffic goes through Caddy on Forgejo's own Tailscale Services vhost, which
+needs the full FQDN for its certificate. Git-over-SSH does *not* go through
+Caddy at all — it goes to cube's ordinary `sshd` on port 22 — so its clone
+URLs use the short `ts-cube`. Forgejo builds each from a separate setting
+(`ROOT_URL` and `DOMAIN`), which is why they can and do differ.
 
 Copy clone URLs from the repo page rather than typing them; Forgejo generates
 both correctly.
@@ -37,7 +52,7 @@ both correctly.
 ## Signing in, and why there's no sign-up
 
 **Registration is closed.** `DISABLE_REGISTRATION = true` — a single-user
-homelab forge on a tailnet only Elly's devices reach has nothing to gain from
+homelab forge on a tailnet only the user's devices reach has nothing to gain from
 open self-registration.
 
 A detail that will mislead a status check: `/git/user/sign_up` returns **HTTP
@@ -52,8 +67,11 @@ open — read the page, not the status code.
 password from this repo's sops secrets rather than typed by hand. It
 resets that password to the sops value on every `switch`, so changing it
 through the web UI won't stick — change it in `secrets.yaml` instead if it
-ever needs to change. Not yet switched on cube or confirmed by an actual
-login; treat as unverified until then.
+ever needs to change. **Switched and logged in, confirmed 2026-09-05**;
+genuinely *admin*, confirmed by the user 2026-09-12 from the
+Site Administration panel (see
+[git-forge](../categories/git-forge.md)'s account of the masked-field trap
+for why no API call could have told you).
 
 To add a *second* user, on cube:
 
@@ -83,32 +101,114 @@ Two consequences:
   `elly@ts-cube`.** They're separate accounts with separate
   `authorized_keys`; adding one doesn't grant the other.
 
+### Adding one
+
+**You do not generate a key "for the `forgejo` user."** `forgejo` is the
+account you SSH *to* on cube, not the key's owner. You add your own public
+key through the web UI and Forgejo writes it into
+`~forgejo/.ssh/authorized_keys` itself — never edit that file by hand.
+
+An existing key is fine; there is no reason to mint a per-forge one unless
+you want it separable. Either way, what you paste is the **public** half:
+
+```sh
+cat ~/.ssh/id_ed25519.pub          # or any existing key
+# or, for a dedicated one:
+ssh-keygen -t ed25519 -f ~/.ssh/id_forgejo -C "elly@forgejo"
+```
+
+Paste it into the web UI → **Settings → SSH keys → Add key**. A
+YubiKey-backed `sk-ssh-ed25519@openssh.com` key works too, and asks for a
+touch on every auth.
+
+If you used a dedicated key, tell ssh which one to offer:
+
+```
+Host ts-cube
+    User forgejo
+    IdentityFile ~/.ssh/id_forgejo
+    IdentitiesOnly yes
+```
+
+**`IdentitiesOnly yes` is the part worth not skipping.** Without it ssh
+offers every identity it has and a different key can match first — the same
+failure that made the QNAP restic key look broken when it wasn't (see the
+[backup runbook](backup-runbook.md)'s troubleshooting).
+
+Then check it:
+
+```sh
+ssh -T forgejo@ts-cube
+```
+
+**A greeting that closes the connection is success.** The `forgejo` account
+has no shell, so there is nothing to land in. A password prompt means the key
+did not take — and would fail regardless, since `PasswordAuthentication` is
+off on every host here (`ssh.nix`).
+
+Clone with `forgejo@ts-cube:<user>/<repo>.git` — the short name, not the web
+FQDN; see "Where it is" above for why those differ. Copy the URL from the
+repo page rather than typing it.
+
+**Exercised 2026-09-13** from `nire-tenacity`: `ssh -T forgejo@ts-cube`
+returned the greeting naming the key (`elly@nire-tenacity`), and
+`git clone --depth 1 forgejo@ts-cube:elly/nixos-configs.git` succeeded
+against the mirror. A plain `~/.ssh/id_ed25519` with no `ssh_config` block
+was enough. **Push over SSH is still untested.**
+
 ## Database and backups
 
 sqlite3, at `/var/lib/forgejo/`, along with the repos themselves and the
 secrets Forgejo generates on first run. Cube has a plain persistent root, so
 this survives reboots with nothing special configured.
 
-**There is no backup of any of this.** Nothing in this repo backs
-`/var/lib/forgejo` up anywhere — verified 2026-08-24 by grepping the whole
-tree for backup tooling, which found none — and a homelab forge with one copy
-of a repo is a repo you have one copy of. Push anything you care about
-somewhere else as well, or treat this as a mirror rather than an origin,
-until [#87](https://github.com/NireBryce/nixos-configs/issues/87) lands.
+**This is backed up, as of 2026-09-06.** It was not until then, and this
+paragraph said so — [#87](https://github.com/NireBryce/nixos-configs/issues/87)
+closed with restic backing `/var/lib/forgejo` and `/persist` to the QNAP,
+and a real restore that opened a complete Forgejo database rather than
+merely producing files. See [backup](../categories/backup.md) and the
+[backup runbook](backup-runbook.md).
+
+One caveat that survives: the live `.db` files under `/var/lib/forgejo` are
+**excluded** from every snapshot on purpose, because a live sqlite file can
+be mid-write when restic reads it. The restorable copy is the staged one
+under `/var/lib/restic-backups-cube-sqlite-staging`, and restoring the
+wrong path gets you a file that looks present and opens as nothing. The
+runbook's "Restoring a snapshot" covers it.
+
+## This repo is mirrored here
+
+`elly/nixos-configs` — `https://git.moose-micro.ts.net/elly/nixos-configs`
+— is a real Forgejo pull mirror of
+`https://github.com/NireBryce/nixos-configs.git`, created 2026-09-11 via
+the migrate API (`mirror: true`, `mirror_interval: 8h0m0s`) using the
+`forgejo_api_key` sops secret. GitHub stays canonical; Forgejo re-pulls on
+its own schedule. Confirmed live: all 7 branches present and matching
+GitHub's own branch list, default branch `experimental`. This is the first
+repo actually pushed/mirrored here — see
+[git-forge-history.md](../categories/git-forge-history.md#mirror-not-origin--and-the-first-real-mirror)
+for the record. Mirror-or-origin is settled (mirror, reaffirmed
+2026-09-12) — [pending-setup.md](pending-setup.md) item 2.
 
 ## What's verified here
 
 Exercised against the live instance on 2026-08-24 from `nire-lysithea`, over
-the tailnet: `/git/` returning `HTTP 200` over validated TLS with Forgejo's
-own page title, `/git/explore/repos` and `/git/user/login` both 200,
-`/git/user/sign_up` 200 with the registration-disabled text and no form
-fields, and Forgejo's generated links carrying the `/git/` prefix
-(`href="/git/explore/repos"`).
+the tailnet, against the now-retired `ts-cube.../git/` path: `HTTP 200` over
+validated TLS with Forgejo's own page title, `/explore/repos` and
+`/user/login` both 200, `/user/sign_up` 200 with the registration-disabled
+text and no form fields. Re-verified 2026-09-11 against the current
+`git.moose-micro.ts.net` hostname: root, `/explore/repos`, and `/user/login`
+all still 200.
 
-**Not exercised:** creating a user, cloning or pushing over either protocol,
-or adding an SSH key. The clone URL shapes above come from the module's
-`DOMAIN`/`ROOT_URL` settings and Forgejo's own behaviour, not from a clone
-run here. Nothing has been pushed to this instance yet.
+**Exercised 2026-09-13**, from `nire-tenacity` over the tailnet: key-based
+auth to `forgejo@ts-cube` (greeting names the key, confirming Forgejo
+identifies the person from the key rather than the username), and a real
+`git clone` over SSH of `elly/nixos-configs`, which came down at the
+mirror's then-current commit.
+
+**Still not exercised:** a **push** over SSH. The mirror above was created
+and synced entirely over HTTPS via the API, and a pull mirror is read-only
+on the Forgejo side, so a push would need a non-mirror repo to aim at.
 
 ## See also
 

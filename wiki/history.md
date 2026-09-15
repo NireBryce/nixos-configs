@@ -1,6 +1,6 @@
 # History & lessons learned
 
-_Last modified: 2026-09-05_
+_Last modified: 2026-09-08_
 
 ## Contents
 
@@ -34,14 +34,14 @@ _Last modified: 2026-09-05_
 - `nire-lego` (a handheld, Legion Go, never built or switched) and
   `nire-installer` (the generic live-USB installer image, generalized
   2026-08-22 from what installed `nire-testbed`) were both removed
-  2026-08-27 with their `nireHost/` files and `hosts.nix` entries. Neither
+  2026-08-27 with their `hosts/` files and `hosts.nix` entries. Neither
   ever ran on real hardware. The live-USB mechanism (embedded flake,
   patched Calamares, unattended `nixos-install`) isn't disproven, just not
   carried any more — git history has the last version, same as
   `nire-testbed`'s.
 - `nire-llm-sandbox` (a qcow2-building `nixosConfigurations` entry run
   persistently as a libvirt VM on `nire-cube`, sandboxing an LLM coding
-  agent) was removed 2026-08-28 with its `nireHost/llm-sandbox/` files,
+  agent) was removed 2026-08-28 with its `hosts/llm-sandbox/` files,
   `hosts.nix` entry, and `virtualization-cube.nix`. Confirmed booted and
   staying up 2026-08-24 (see "Confirmed-on-hardware facts" below);
   §  §40 has the three runtime-only bugs its first switch hit. The generator
@@ -87,11 +87,21 @@ it work before?' first, via `journalctl --list-boots`" rules.
 
 ## The sibling branch
 
-- **`git show origin/flake-parts:SESSION-HANDOFF.md`** — that branch's own
-  notes on dead ends and decisions not to silently relitigate. Needs the
-  `origin/` prefix; there's no local `flake-parts` branch in a normal
-  checkout.
-- **`git show origin/flake-parts:linux-flake/flake-parts-reference.md`** —
-  flake-parts machinery reference with upstream source backing each claim.
-  That branch never went through this one's `linux-flake/` → `flake/`
-  rename, so the old path is correct *there* specifically.
+**The `flake-parts` branch was deleted 2026-09-08**, along with
+`exp-module-cleanup` and `backup-before-flake-parts-happened`. Its two
+files worth keeping were salvaged into
+[flake-parts-port-notes.md](flake-parts-port-notes.md) first — read that
+page, not a `git show origin/flake-parts:…`, which no longer resolves:
+
+- `SESSION-HANDOFF.md` — that branch's own notes on dead ends and
+  decisions not to silently relitigate. Its still-live half is that page's
+  first two sections.
+- `linux-flake/flake-parts-reference.md` — flake-parts machinery reference
+  with upstream source backing each claim, re-verified against the current
+  pin when it was moved. That page's third section.
+
+The branch tip was `cf9aea42`; both files are still readable there from a
+clone that fetched it, until the objects are garbage-collected. The port
+mechanics that page left behind were superseded by the port having
+happened — see [lessons-learned.md](lessons-learned.md) §§1–18, written as
+it went.

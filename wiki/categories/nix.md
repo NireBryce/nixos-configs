@@ -1,4 +1,4 @@
-# `nix` — `nire/nix/`
+# `nix` — `config-system/nix/`
 
 _Last modified: 2026-09-01_
 
@@ -45,7 +45,7 @@ category list; `lysithea` imports it too, under its `darwin`-class list —
 which works precisely because `basic-nix-settings.nix` declares a real
 `darwin` block, unlike most modules in this tree. `manconfig.nix` (homeManager-only)
 reaches every host, lysithea included, via the shared `ellyHomeManager`
-bundle (`nireUser/elly-home-manager.nix`) rather than through any host's own
+bundle (`users/elly-home-manager.nix`) rather than through any host's own
 category imports — see [../architecture.md](../architecture.md).
 
 ## See also

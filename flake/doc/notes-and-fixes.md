@@ -1,5 +1,3 @@
-`nire` should be the namespace of every module that does not need a more specific narrowing tag, and you should start broad and go narrow as things make themselves clear
-
 ## **Fixes**
 
 ### `SteamTinkerLaunch` requires some workarounds
@@ -100,4 +98,4 @@ which is why the just recipes exist.)
 
 
 
-## Learn what outputs @ inputs: means and figure out specialargs
+

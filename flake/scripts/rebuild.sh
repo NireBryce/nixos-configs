@@ -15,7 +15,7 @@
 #
 #   what IS the host   whether the flake declares darwinConfigurations.<host>.
 #                      Cheap -- that attrset is a plain attrset in
-#                      nireHost/hosts.nix, so attrNames does not force any
+#                      hosts/hosts.nix, so attrNames does not force any
 #                      configuration. ~0.1s.
 #
 #   can we build it    uname. There is no remote builder and no binfmt here, so
@@ -65,7 +65,13 @@ if [ "$class" = darwin ]; then
         echo "  to check it compiles without activating." >&2
         exit 1
     fi
-    exec nh darwin "$action" "$flake" --hostname "$host"
+    # -o pins nh's result link to <flake>/result. nh's own default is a
+    # scratch directory nobody can find afterwards, and a bare `nix build`
+    # run from the repo root paints ./result instead (where the root result
+    # of 2026-09-09 came from -- nothing in this repo creates one).
+    # `result` is gitignored at any depth, so the link never enters the
+    # flake's store copy.
+    exec nh darwin "$action" "$flake" --hostname "$host" -o "$flake/result"
 fi
 
-exec nh os "$action" "$flake" --hostname "$host"
+exec nh os "$action" "$flake" --hostname "$host" -o "$flake/result"

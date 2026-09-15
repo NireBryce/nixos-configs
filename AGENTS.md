@@ -8,7 +8,7 @@
 >
 > This file is canonical; `CLAUDE.md` is a symlink to it, so every "see
 > CLAUDE.md" reference in this repo resolves here. Skills referenced by name
-> below are plain markdown at `.claude/skills/<name>/SKILL.md` — any agent
+> below are plain markdown at `.agents/skills/<name>/SKILL.md` — any agent
 > can read them as files, with or without a harness that loads skills.
 
 Landing work targets `experimental`, the default branch (see "push" under
@@ -20,7 +20,7 @@ Don't assume a branch — check `git branch --show-current`.
 
 This config enables impermanence and wipes `/root` on boot on most hosts.
 Never suggest installing it wholesale; be careful touching
-`flake/modules/nire/impermanence/` or `fileSystems`/`boot` in the host
+`flake/modules/config-system/impermanence/` or `fileSystems`/`boot` in the host
 hardware modules.
 
 `WARN-impermanence.nix` (reached through the `impermanence` category)
@@ -32,12 +32,14 @@ root, not LUKS+impermanence. Don't assume "every host wipes root" or "no host do
 the specific host. Read `WARN-impermanence.nix` before changing anything
 near it.
 
-Secrets are sops-nix (`flake/modules/nire/system/secrets/`). `secrets.yaml`
+Secrets are sops-nix (`flake/modules/config-system/system/secrets/`). `secrets.yaml`
 is encrypted and committed; that is deliberate, not a mistake to be "fixed".
 `.sops.yaml` (same directory) enrolls `nire-durandal`, `nire-lysithea`,
 `nire-tenacity`, and `nire-cube` — all live hosts with current config here,
-the normal case, not a leftover to prune. Read the file rather than this
-paragraph — this paragraph has been stale before.
+the normal case, not a leftover to prune. That host list is checked against
+`.sops.yaml` by `just wiki-lint`, so it cannot rot silently. "Which secrets
+exist?" is `just read-sops-names` — names only, never values; everything
+else about printing sops output is skill `secrets-hygiene` (Traps below).
 
 ## State
 
@@ -46,14 +48,12 @@ Whether a host runs what the tree evaluates to is a live question, answered
 only on the host: `just baseline`, `just diff-deployed`, or a forced
 toplevel eval against `/run/current-system`.
 
-Roster, class, and which hosts wipe `/root`: `nireHost/hosts.nix` (check it
+Roster, class, and which hosts wipe `/root`: `hosts/hosts.nix` (check it
 before stating any count) and `wiki/hosts.md`'s table. First-boot history
 (dates, generations, the `/root` rollback):
 `wiki/history.md`'s "Confirmed-on-hardware facts".
 
 - **Check `hostname` before assuming which machine the session is on.**
-  Sessions have run on `nire-lysithea`, `nire-durandal`, and
-  `nire-tenacity`.
 - Host *counts* in prose are claims about when someone last looked — check
   `hosts.nix`.
 
@@ -63,8 +63,9 @@ before stating any count) and `wiki/hosts.md`'s table. First-boot history
 bare `just` for the full list with a one-line summary per recipe; that
 list, not a copy of it here, is the source of truth, since `.justfile`'s
 own comments are what `just` actually reads. `just preflight` (check +
-modules + lint) is the ship skill's step 0. `just hm-collisions` and `just
-root-drift` are read-only, and only meaningful on the hardware itself.
+modules + lint + branches-test) is the ship skill's step 0. `just
+hm-collisions` and `just root-drift` are read-only, and only meaningful on
+the hardware itself.
 
 `host` derives from `hostname`, falling back to `nire-durandal` off-host.
 The override goes **before** the recipe name — `just host=nire-durandal
@@ -97,7 +98,7 @@ similar, never a bare NixOS or Home Manager module.
 
 ### Membership is implicit, and comes from the directory
 
-Each category directory holds a `dirsAsCategory.nix` (a two-line shim over
+Each category directory holds a `dirsAsCategory.nix` (a shim over
 `flake/modules/_lib/category-collector.nix` since 2026-08-27) that derives
 the category name from its own directory and collects the modules beneath
 it. **A module belongs to the category of the directory it is filed in**;
@@ -107,30 +108,32 @@ changing any `dirsAsCategory.nix`.
 - **A category collects from its *sub*directories only.** A `.nix` file
   sitting directly in a category directory is collected by nothing.
 - **Entry points sit outside every category tree** — `modules/checks.nix`,
-  `nireHost/hosts.nix`, `nireHost/durandal-configuration.nix`, and
-  `nireUser/elly-home-manager.nix`; `just modules` relies on exactly this.
+  `hosts/hosts.nix`, `hosts/durandal-configuration.nix`, and
+  `users/elly-home-manager.nix`; `just modules` relies on exactly this.
 
-Areas: `nire/` (shared system, incl. `nire/macos/` for darwin), `nireHost/`
-(per-host), `nirePackages/`, `nireUser/`.
+Areas: `config-system/` (shared system, incl. `config-system/macos/` for
+darwin), `hosts/` (per-host), `packages/`, `users/`.
 
 **The category is how something shared stays optional** — nothing in this
 tree declares `mkEnableOption`. `kde-desktop` is the by-name variant: one
 module imported directly while its category (`desktop-env`, which also
 holds `jovian`) is never imported whole.
 
-**`nire/homelab/` is an umbrella category (2026-08-27)** nesting several
-cube-only categories, same coarse-and-fine overlap as
-`nire/hardware`/`nire/hardware/amd`. Full account, including the nested
-categories' names and a real collector quirk: `wiki/categories/homelab.md`.
+**`config-system/homelab/` is an umbrella category (2026-08-27)** nesting
+several cube-only categories, same coarse-and-fine overlap as
+`config-system/hardware`/`config-system/hardware/amd`. Full account,
+including the nested categories' names and a real collector quirk:
+`wiki/categories/homelab.md`.
 
-**Hosts**: roster and class are `nireHost/hosts.nix` (commented at each
+**Hosts**: roster and class are `hosts/hosts.nix` (commented at each
 declaration) and `wiki/hosts.md`'s table — don't restate the list here, it
 only rots.
 
 ### Home Manager is NixOS-integrated
 
 `home-manager.users.elly` is set from the NixOS side with `useGlobalPkgs`
-and `useUserPackages`, in `nire/system/home-manager/enable-home-manager.nix`.
+and `useUserPackages`, in
+`config-system/system/home-manager/enable-home-manager.nix`.
 No `homeConfigurations` output, no separate home switch; `just switch`
 applies both. `flake/doc/trailhead-home-manager-standalone.md` is the way
 back; skill `home-manager-dotfiles` has the traps and integration specifics
@@ -138,7 +141,7 @@ back; skill `home-manager-dotfiles` has the traps and integration specifics
 
 ### Platform support is derived; Homebrew overlap is not
 
-`ellyHomeManager` is shared verbatim by all five hosts including
+`ellyHomeManager` is shared verbatim by all four hosts including
 `nire-lysithea`, so everything in it has to survive darwin. Two questions
 when adding a package: can nixpkgs build it on darwin (answered
 automatically off `meta.platforms`), and does Homebrew already install it
@@ -175,9 +178,7 @@ and a 1,659-line p10k config.
 The shell's view of the machine (`lsblk`, `findmnt`, `/etc`) is scoped to
 its mount namespace and can look wrong while being correct — use
 `/proc/1/mountinfo`, `/dev/disk/by-uuid/`, `/run/current-system` instead,
-all unprivileged. (This repo moved to systemd stage 1 2026-08-10; the
-skill's History section has the scripted-stage-1 template-injection trap
-that mechanism retired.)
+all unprivileged.
 
 ### Adding or platform-gating a package — skill `nirepackages-platform-support`
 
@@ -187,11 +188,33 @@ Can nixpkgs build it on darwin (automatic, via
 (never automatic; `just available --duplicates` finds the overlap).
 `obsidian.nix` is the worked example.
 
+### Printing sops values — skill `secrets-hygiene`
+
+`sops -d` prints every secret in the file; never pipe it through anything,
+and never count `2>/dev/null` as protection — that's stderr, stdout still
+flows. Hit 2026-08-26 and again 2026-09-09 (three values, both times
+answering "which secrets exist?" by decrypting). That question is
+`just read-sops-names`, which reads the committed ciphertext and cannot
+print a value.
+
 ### `${...}` inside a Nix `''` string is interpolation
 
 Writing `${terminfo[khome]}` in what you intend as a comment is an
 evaluation error. Escape as `''${...}` or reword. General to any `''`
 string, hence inline here rather than in a skill.
+
+### An option that renders into a generated file can swallow a wrong key silently
+
+Freeform settings options (typed `attrsOf …` with a `freeformType`, like
+`security.pam.u2f.settings`) render any key verbatim into the generated
+config — a misspelled or renamed key evals clean and the consumer discards
+it. `settings.authFile` (camelCase of nixpkgs' `authfile`) was ignored by
+pam_u2f for five months, masked by the value coinciding with the consumer's
+default — §49. Eval passing is a claim about the type, not about the
+consumer: read the rendered artifact (`/etc/pam.d/<service>` on the host, or
+eval `config.security.pam.services.<name>.text`) when a change touches one.
+Reading the nixpkgs module's `mkRenamedOptionModule` block first is the
+write-time half — §33.
 
 ## Working in this repo
 
@@ -224,13 +247,16 @@ mechanism.
 months between commits. "This is broken and here is the fix" beats incident
 framing.
 
+**Browsing modules to find something — not editing them?** `just
+history-line <file>` prints the line where the module's history section
+starts; read up to it and skip the rest. Editing the module is different:
+the history is there to be read before changing what it describes.
+
 **Default to a dedicated `git worktree` for any task that will branch,
-commit, or check out — skill `use-a-worktree`.** Not for read-only work; a
-shared checkout can change underneath you mid-task (hit 2026-08-30: a
-session's files reverted and a different branch appeared). If `git
-status`/`git branch --show-current`/a file's content doesn't match your own
-last action, check `git reflog` before concluding anything is actually
-broken.
+commit, or check out — skill `use-a-worktree` (not for read-only work; there
+since the 2026-08-30 shared-checkout incident).** If git state doesn't match
+your own last action, check `git reflog` before concluding anything is
+actually broken.
 
 **"push" means the `ship` skill, landing on `experimental`, the default
 branch** — branch, PR, one combined ask covering both merging and deleting
@@ -242,8 +268,9 @@ hardware verification).
 nixpkgs, ble.sh, carapace, any other project — without Elly saying so
 explicitly, in those words, unprompted.** A yes to a bundled list does not
 cover an upstream filing folded into it. `propose-issue` only ever files
-here; `bugs pending submission/` and `wiki/open-threads.md`'s drafts are
-deliberately not worked through automatically (lessons-learned #39). Filing
+here; `_loose-ends/bugs-pending-submission/` and `wiki/open-threads.md`'s
+drafts are deliberately not worked through automatically
+(`wiki/lessons-learned.md` §39). Filing
 here can still reach another project via GitHub autolinking — a title or
 body containing `owner/repo#123` pings that repo — so grep for that shape
 before naming a specific upstream issue/PR in anything filed here.
@@ -263,9 +290,6 @@ Claude's canonical form is `Co-Authored-By: Claude`. `.githooks/commit-msg`
 `Claude <model> <email>` shape; any other agent's trailer passes through,
 so form it correctly at write time.
 
-**Namespacing.** `nire` unless it needs a more specific tag; `nireHost`,
-`nireUser`, `nirePackages` otherwise.
-
 **When a rename makes the old name ungreppable, say what it was** on the
 declaration — see `boot-durandal.nix`, `enable-home-manager.nix`.
 
@@ -276,24 +300,52 @@ under the same compression discipline: facts kept, narration cut
 (`boot-durandal.nix`, `WARN-impermanence.nix`, `vscode.nix` have them).
 
 **`elly` is hardcoded**, in `users.users.elly`, `home.username`, and
-`home-manager.users.elly`. The sibling branch has `nire.primaryUser`;
-introducing it here is a separate change, not a tidy-up.
+`home-manager.users.elly`. The now-deleted `flake-parts` branch had a
+`nire.primaryUser` option instead; introducing it here is a separate
+change, not a tidy-up — `wiki/flake-parts-port-notes.md` has that branch's
+reasoning, including the grep-trail convention it came with.
 
 **Check for an existing `programs.*` integration before hand-writing one.**
 
 **Don't bury Python inside a bash script.** `python3 -c '...'` heredocs get
 no highlighting, linting, or indentation help — exactly when quoting bugs
 stop being visible. A little Python: a real `.py` in
-`flake/scripts/util/`. Mostly Python: the whole thing in Python
+`flake/scripts/`. Mostly Python: the whole thing in Python
 (`modules.py` is the precedent). This rule exists because a
 bash-wrapping-Nix-wrapping-Python checker shipped both bugs the shape
 invites.
 
 ## Docs
 
-- `wiki/README.md` — topic index. **Maintained the same way this file is**:
+**Every long wiki page is a pair. Read the `-for-agents.md` half.**
+`<page>.md` is explanation written for a human reading cold;
+`<page>-for-agents.md` is the same ground at maximum information density —
+paths, option names, commands, host lists, every trap as one line, no
+narrative. Both exist for the same subject, so loading the human page to
+answer a question the sibling already answers is paying for prose you don't
+need. Start at `wiki/00-INDEX-for-agents.md`, which routes by task.
+
+The tradeoff, stated so nobody has to rediscover it: this is deliberate
+duplication, against the "index over restatement" rule the rest of the wiki
+runs on, and `wiki/00-INDEX.md` says outright that this repo has been bitten
+repeatedly by one fact living in two places. It is allowed here because it
+is the one duplication with a mechanical guard — **`check_wiki.py siblings`
+fails when a sibling's `_Last modified:_` predates its source's**, so
+editing a page without following in its sibling, in the same change, breaks
+`just wiki-lint` and names the pair. Don't satisfy that by bumping the
+sibling's date; that converts a caught omission into a silent one. When the
+edit genuinely has nothing to sync, a dated `_Sibling reviewed:_` line with
+a reason, on the sibling, is the way to say so. Full rule and the cut list:
+`wiki/styleguide.md`'s "Two audiences per page"; the procedure is skill
+`wiki-sync`, step 5.
+
+- `wiki/00-INDEX.md` — topic index (`00-INDEX-for-agents.md` condensed).
+  **Maintained the same way this file is**:
   a change that makes a wiki page stale corrects it in the same change
   (`just wiki-lint` checks the mechanical claims).
-- `wiki/lessons-learned.md` — how the work went wrong in the doing;
-  §§1–18 the port, §§19–31 first hardware, §32+ one-liners in the page
-  itself.
+- `wiki/lessons-learned.md` — how the work went wrong in the doing; its
+  own header maps the eras the § numbers span, which is the only copy of
+  that mapping. Long entries are per-§ articles
+  under `wiki/lessons-learned/`; the page keeps every § number and a
+  one-line version of each. No `-for-agents` sibling, deliberately: it is
+  already written agent-facing and located by § number, not read through.

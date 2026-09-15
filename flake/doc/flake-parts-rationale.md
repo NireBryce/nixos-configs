@@ -18,7 +18,7 @@ attributes of the same attrset. That's the payoff: a single `.nix` file
 can hold both a NixOS module and a Home Manager module for the same
 feature, instead of a NixOS-side file and a Home-Manager-side file tied
 together by nothing but a shared filename.
-`flake/modules/nirePackages/nix-utils/nixd/nixd.nix` in full:
+`flake/modules/packages/nix-utils/nixd/nixd.nix` in full:
 
 ```nix
 { lib, ... }:
@@ -67,7 +67,7 @@ would need separate files with no mechanism tying them together.
   Neither uses `inputs'`/`self'`. The `checks.<system>.*` flake output
   comes from flake-parts' own perSystem→flake merge — nothing else here
   does that.
-- **`withSystem`** — one call site, `modules/nireHost/hosts.nix`, to get
+- **`withSystem`** — one call site, `modules/hosts/hosts.nix`, to get
   `self'`/`inputs'` for `specialArgs`. Deliberately **not** used for
   `pkgs`: `nixosSystem`/`darwinSystem` build their own `pkgs` from the
   host's own `nixpkgs.config`, and `perSystem`'s default

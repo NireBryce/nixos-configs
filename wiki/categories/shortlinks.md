@@ -1,6 +1,26 @@
-# `shortlinks` — `nire/homelab/shortlinks/`
+# `shortlinks` — `config-system/homelab/shortlinks/`
 
-_Last modified: 2026-09-02_
+_Last modified: 2026-09-14_
+
+[golink](https://github.com/tailscale/golink), Tailscale's `go/foo`
+shortlink service. Added 2026-08-24, cube-only; nested under the `homelab`
+umbrella since 2026-08-27 (name unaffected).
+
+**It failed its first real switch, then was fixed and confirmed working
+end to end the same day (2026-08-24)** — a missing `AF_NETLINK` in this
+module's own `RestrictAddressFamilies`; see [the hardening
+section](#dynamicuser-deliberately) for the setting, and
+[shortlinks-history.md](shortlinks-history.md) for the crash-loop and the
+fix in full.
+
+Usage — creating and managing links — is [homelab/creating-golinks.md](../homelab/creating-golinks.md).
+This page stays the configuration side.
+
+> **Condensed version:**
+> [shortlinks-for-agents.md](shortlinks-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
 
 ## Contents
 
@@ -14,20 +34,6 @@ _Last modified: 2026-09-02_
 - [No persistence entry](#no-persistence-entry)
 - [Imported by](#imported-by)
 - [See also](#see-also)
-
-[golink](https://github.com/tailscale/golink), Tailscale's `go/foo`
-shortlink service. Added 2026-08-24, cube-only; nested under the `homelab`
-umbrella since 2026-08-27 (name unaffected).
-
-**It failed its first real switch, then was fixed and confirmed working
-end to end the same day (2026-08-24)** — a missing `AF_NETLINK` in this
-module's own `RestrictAddressFamilies`; see [the hardening
-section](#dynamicuser-deliberately) for the setting, and
-[shortlinks-history.md](shortlinks-history.md) for the crash-loop and the
-fix in full.
-
-Usage — creating and managing links — is [homelab/golinks.md](../homelab/golinks.md).
-This page stays the configuration side.
 
 ## What's in it
 
@@ -111,7 +117,7 @@ tsnet writes its node key into the config-dir and reauthenticates from it
 on every later boot — once per machine, the same shape `sudo tailscale up`
 has. (tsnet ignores a later-wired authkey when state exists, so there's
 still no reason to wire one. To revisit anyway: mint a key, add
-`sops.secrets.tailscale_key` in `system/secrets/sops.nix`, pass it as an
+`sops.secrets.tailscale_key` in `config-system/secrets/sops.nix`, pass it as an
 `EnvironmentFile`.)
 
 ## The node must stay named `go`
@@ -180,7 +186,7 @@ and after this change.
   sidesteps here.
 - [system](system.md) — `tailscale.nix`, for the host daemon, the auth-key
   decision this module mirrors, and the two tailnet traps.
-- [homelab/golinks.md](../homelab/golinks.md) — the usage side: creating
+- [homelab/creating-golinks.md](../homelab/creating-golinks.md) — the usage side: creating
   links, the template syntax, and the `curl` traps.
 - [hosts.md](../hosts.md) — current switch/verification status for
   `nire-cube`.
