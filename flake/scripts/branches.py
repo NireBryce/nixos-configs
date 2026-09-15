@@ -24,6 +24,20 @@ message, so a rebased commit keeps it. If every commit on a branch has its
 patch-id somewhere in the trunk's recent history, the branch's work is landed
 regardless of what the SHAs say.
 
+Patch-id covers the rebased shape of landing; the forge's PR RECORD covers
+the merged shape (#334). A PR merged with `--merge` (the ship skill's
+default for multi-commit PRs) preserves the branch's SHAs as merge parents,
+so the branch is an ancestor of the trunk and `log TRUNK..b` comes back
+empty -- nothing for patch-id to match. Until 2026-09-14 that read NEW, so
+prune never offered merge-landed branches and landed work accumulated
+looking like live work. They are MERGED when `gh` records their PR MERGED
+-- the record that landed the branch is the evidence it landed. Ancestry
+alone was considered and rejected while fixing this: it cannot tell a
+merge-landed branch from a fresh one whose base the trunk has since
+advanced past, which is #300's window exactly. One gh call is spent per
+empty-log branch (rare); offline or on gh failure the verdict degrades to
+NEW -- asks rather than deletes.
+
 Limits worth knowing before trusting a MERGED verdict: patch-id is computed
 over the diff, so a commit that landed upstream in a SQUASHED or reworked form
 will not match and is reported UNMERGED (safe direction -- it asks rather than
@@ -41,9 +55,10 @@ off the back; raise --depth if a known-merged branch reports UNMERGED.
 session, a hook, CI) it says so and exits 2 rather than dying on `input()`'s
 EOFError, which is what it did until 2026-09-14.
 
-Never deletes an UNMERGED branch, a NEW one (nothing ahead of the trunk yet
--- almost always a branch someone just created), a branch checked out in any
-worktree, `main`, the trunk, or the current branch -- not even with --yes.
+Never deletes an UNMERGED branch, a NEW one (nothing ahead of the trunk
+that the forge doesn't record as a merged PR -- almost always a branch
+someone just created), a branch checked out in any worktree, `main`, the
+trunk, or the current branch -- not even with --yes.
 Those need a human looking at them.
 
 Only an exact MERGED verdict is deletable, which is why every other state
@@ -55,9 +70,11 @@ branches-test`, part of `just preflight` and CI): every verdict state built
 in a throwaway repo, asserting the verdicts and exactly what prune deletes.
 It exists because #300 shipped two misclassifications -- a no-commits branch
 reading MERGED, an all-merges branch reading MERGED -- either of which would
-have force-deleted a real branch, and nothing would have caught either.
-Change classify() only with that test green; it is the safety net this
-script otherwise lacks.
+have force-deleted a real branch, and nothing would have caught either; #334
+a third, a merge-landed branch reading NEW so landed work accumulated
+invisibly (the failure mode this script exists to prevent, in the safe
+direction). Change classify() only with that test green; it is the safety
+net this script otherwise lacks.
 """
 import argparse, subprocess, sys
 
@@ -114,6 +131,7 @@ def worktree_branches():
 def classify(depth):
     """-> list of (branch, verdict, landed, total, unlanded_subjects)."""
     trunk_ids = trunk_patch_ids(depth)
+    trunk_tip = git('rev-parse', TRUNK)
     current = git('rev-parse', '--abbrev-ref', 'HEAD')
     held = worktree_branches()
     rows = []
@@ -140,16 +158,33 @@ def classify(depth):
                 unlanded.append(git('log', '-1', '--format=%s', c))
         classifiable = len(commits) - opaque
         if not commits:
-            # Nothing ahead of the trunk yet. Until 2026-09-12 this fell into
-            # the MERGED arm and was reported deletable, which is exactly
-            # backwards: a branch with no commits is almost always one another
-            # session just created and has not committed on yet, and `prune`
-            # deletes with `branch -D`. Observed live -- `landing-homepage`
-            # read `MERGED (0/0 landed)` in the window between another agent
-            # branching and its first commit, then `UNMERGED (0/1)` minutes
-            # later. Its worktree is what saved it; a branch created without
-            # one would have been force-deleted.
-            verdict = 'NEW'
+            # An empty `log TRUNK..b` proves the head is an ancestor of the
+            # trunk -- and that is ALL it proves. Two states hide in it: a
+            # branch just created and holding nothing, and a branch fully
+            # landed by a MERGE commit (#334 -- the ship skill's default for
+            # multi-commit PRs preserves the branch's SHAs, so there is
+            # nothing for patch-id to match). Until 2026-09-14 this whole
+            # arm read NEW, so merge-landed branches accumulated looking
+            # like live work. Until 2026-09-12 it read MERGED, which is
+            # #300: a fresh branch was offered to `branch -D` in exactly
+            # the window between another session branching and its first
+            # commit, observed live on `landing-homepage`.
+            #
+            # Pure git cannot tell the two apart. The obvious tip check goes
+            # STALE the moment the trunk advances past a fresh branch's base
+            # -- that is #300's window again, a routine occurrence with
+            # concurrent sessions -- so ancestry alone was rejected when
+            # this was fixed: it re-opens #300 to fix #334. The forge's PR
+            # record is the discriminator: `--merge` landing happens through
+            # a PR, so the record that landed the branch is the evidence it
+            # landed. MERGED only on that record; no PR, OPEN, CLOSED, or
+            # gh unavailable all read NEW -- the safe direction.
+            if git('rev-parse', b) == trunk_tip:
+                verdict = 'NEW'
+            elif pr_merged(b):
+                verdict = 'MERGED'
+            else:
+                verdict = 'NEW'
         elif classifiable and landed == classifiable:
             # Every commit we can actually read is in the trunk. Merge
             # commits alongside them are noise once the real work landed.
@@ -179,6 +214,13 @@ def pr_state(branch):
     return '' if out in ('', 'null', '#null null') else out
 
 
+def pr_merged(branch):
+    """True when the branch's most recent PR is recorded MERGED. Empty or a
+    gh failure reads False: the ambiguous arm classifies NEW, the safe
+    direction (asks rather than deletes)."""
+    return pr_state(branch).endswith('MERGED')
+
+
 def cmd_check(args):
     rows = classify(args.depth)
     if not rows:
@@ -186,7 +228,16 @@ def cmd_check(args):
         return 0
     for b, verdict, landed, total, unlanded in sorted(rows):
         pr = pr_state(b) if args.pr else ''
-        print(f'{verdict:<18} {b:<34} ({landed}/{total} landed) {pr}')
+        if landed == total == 0:
+            # A no-commits branch: `(0/0 landed)` is what both the #300 and
+            # #334 confusion printed, and it explains neither verdict. Say
+            # what each one actually means.
+            detail = ('landed by merge commit'
+                      if verdict.startswith('MERGED')
+                      else 'nothing ahead of trunk yet')
+            print(f'{verdict:<18} {b:<34} ({detail}) {pr}')
+        else:
+            print(f'{verdict:<18} {b:<34} ({landed}/{total} landed) {pr}')
         for s in unlanded:
             print(f'{"":<18}   unlanded: {s[:66]}')
     n = sum(1 for r in rows if r[1] == 'MERGED')
@@ -206,7 +257,12 @@ def cmd_prune(args):
         print('nothing to prune')
         return 0
     for b, _, landed, total, _ in sorted(rows):
-        print(f'  {b}  ({landed}/{total} commits already in {TRUNK})')
+        if landed == total == 0:
+            # #334's merge-landed case: no commits ahead to count -- say
+            # how it landed, not a ratio that explains nothing.
+            print(f'  {b}  (landed by merge commit)')
+        else:
+            print(f'  {b}  ({landed}/{total} commits already in {TRUNK})')
     if not args.yes:
         # Non-interactive callers (agent sessions, hooks, CI) get a usable
         # message instead of EOFError's traceback -- the prompt below has no
@@ -219,9 +275,10 @@ def cmd_prune(args):
         if input(f'\nDelete these {len(rows)} local branches? [y/N] ').lower() != 'y':
             sys.exit('aborted')
     for b, *_ in rows:
-        # -D, not -d: these are verified landed by patch-id, and -d refuses a
-        # rebased branch precisely because its SHAs differ. The verification
-        # above is what makes that safe; do not weaken it.
+        # -D, not -d: these are verified landed -- by patch-id, or (#334)
+        # by the forge's PR record -- and -d refuses a rebased branch
+        # precisely because its SHAs differ. The verification above is what
+        # makes that safe; do not weaken it.
         print(git('branch', '-D', b))
     print(f'\n{len(rows)} deleted. `git remote prune origin` clears stale '
           'remote-tracking refs separately.')
