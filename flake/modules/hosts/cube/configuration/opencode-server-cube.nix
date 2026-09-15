@@ -10,7 +10,7 @@
 # category from its subdirectory -- there is no import line, adding the file
 # IS the wiring, and the `-cube` suffix follows this directory's convention
 # (a module's name is its filename, and same-name modules merge silently
-# rather than erroring). Deliberately NOT a `system/homelab/` service: one
+# rather than erroring). Deliberately NOT a `config-system/homelab/` service: one
 # personal dev tool for one user, not part of the self-hosted stack, so no
 # Caddy route and no wiki/categories/ page.
 { lib, ... }:

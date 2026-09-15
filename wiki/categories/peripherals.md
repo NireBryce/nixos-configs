@@ -1,4 +1,4 @@
-# `peripherals` — `system/peripherals/`
+# `peripherals` — `config-system/peripherals/`
 
 _Last modified: 2026-09-01_
 

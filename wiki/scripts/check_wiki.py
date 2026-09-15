@@ -308,13 +308,13 @@ def host_imports(root, categories):
 
 def find_categories(root):
     """category name -> its directory, for every dirsAsCategory.nix under
-    flake/modules/system/ and flake/modules/users/ -- the two areas
+    flake/modules/config-system/ and flake/modules/users/ -- the two areas
     categories/00-INDEX.md actually indexes (packages/* and hosts/*
     are deliberately excluded there, see that file's own header, so this
     check has nothing to compare them against and doesn't look).
     """
     cats = {}
-    for area in ('system', 'users'):
+    for area in ('config-system', 'users'):
         base = root / 'flake' / 'modules' / area
         if not base.exists():
             continue
@@ -733,7 +733,7 @@ def enrolled_hosts(root):
     """host names anchored under .sops.yaml's own `keys:` list -- the actual
     enrollment, independent of the "enrolls ..." prose that names the same
     set by hand in more than one doc."""
-    p = root / 'flake' / 'modules' / 'system' / 'system' / 'secrets' / '.sops.yaml'
+    p = root / 'flake' / 'modules' / 'config-system' / 'system' / 'secrets' / '.sops.yaml'
     return set(re.findall(r'&(nire-[\w-]+)', COMMENT.sub('', p.read_text())))
 
 
@@ -764,7 +764,7 @@ def check_secrets(root):
     return findings
 
 
-CADDY_NIX = pathlib.Path('flake/modules/system/homelab/reverse-proxy/caddy/caddy.nix')
+CADDY_NIX = pathlib.Path('flake/modules/config-system/homelab/reverse-proxy/caddy/caddy.nix')
 # Where the retired path-prefix routes live since 2026-09-13 -- moved out of
 # caddy.nix's history section, still the record of what `/grafana/` and
 # `/git/` were.

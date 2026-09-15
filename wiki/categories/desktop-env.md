@@ -1,4 +1,4 @@
-# `desktop-env` — `system/desktop-env/`
+# `desktop-env` — `config-system/desktop-env/`
 
 _Last modified: 2026-09-14_
 

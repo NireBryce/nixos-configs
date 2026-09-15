@@ -7,10 +7,10 @@ description: How to edit impermanence/initrd config in this repo, and read real 
 
 ## Applies to
 
-`flake/modules/system/impermanence/`, any `boot.initrd.*` option (systemd
+`flake/modules/config-system/impermanence/`, any `boot.initrd.*` option (systemd
 stage 1 here since 2026-08-10 — see History), and reading disk/mount state
 on one of the hosts that wipes `/root` on boot. Use before touching
-anything under `system/impermanence/`, any `boot.initrd` option, or before
+anything under `config-system/impermanence/`, any `boot.initrd` option, or before
 trusting `lsblk`/`findmnt`/mounted-`/etc` output on these hosts.
 
 **Read `WARN-impermanence.nix` before

@@ -6,7 +6,7 @@ _Last modified: 2026-09-09_
 
 **Borrowed, not lived** — the one entry in this file that did not happen here.
 Adopted from a NixOS Discourse thread while enabling avahi and
-systemd-resolved together (2026-08-21, `system/system/networking/`), kept
+systemd-resolved together (2026-08-21, `config-system/system/networking/`), kept
 because the shape is one this file already keeps hitting and because it is
 what the next `.local` bug on this fleet will look like.
 

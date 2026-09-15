@@ -27,7 +27,7 @@ checklist below is mostly their accrued cost.
 
 ## The shape
 
-One commit: a category dir `flake/modules/system/<category>/` with a copy of
+One commit: a category dir `flake/modules/config-system/<category>/` with a copy of
 `dirsAsCategory.nix`; one module `<category>/<tool>/<tool>.nix`; one
 commented line in the host's config; a Caddy route if HTTP; docs
 (`wiki/categories/<category>.md` + indexes).
@@ -82,7 +82,7 @@ Take the next free `300x` for anything user-facing. Grep before trusting
 this table:
 
 ```sh
-grep -rnE '\b(30[0-9]{2}|80[0-9]{2}|9[0-9]{3})\b' flake/modules/system/ | grep -iE 'port'
+grep -rnE '\b(30[0-9]{2}|80[0-9]{2}|9[0-9]{3})\b' flake/modules/config-system/ | grep -iE 'port'
 ```
 
 Never accept a tool's default unchecked — glance defaulted to 8080, which
@@ -145,7 +145,7 @@ command is not a fix — that's what regressed before.
 its own, none of the five modules has a `*-persist.nix`. If a host that
 wipes `/root` (durandal, tenacity) ever imports a service module, add a
 persistence entry **first**, modeled on `tailscale-persist.nix`, filed next
-to the module (not under `system/impermanence/` — see `WARN-impermanence.nix`).
+to the module (not under `config-system/impermanence/` — see `WARN-impermanence.nix`).
 All five module headers state which case applies; keep that.
 
 ## 8. Verify, in the order that finds things
@@ -214,6 +214,6 @@ incident.
   this checklist is made of.
 - `wiki/categories/reverse-proxy.md` — the routing layer, including the
   prefix asymmetry in full.
-- `flake/modules/system/system/networking/tailscale.nix` — tailnet device
+- `flake/modules/config-system/system/networking/tailscale.nix` — tailnet device
   names ≠ `networking.hostName`; an ACL can block everything with perfect
   config.

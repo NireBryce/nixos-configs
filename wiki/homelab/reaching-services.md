@@ -1,6 +1,6 @@
 # Reaching cube's services
 
-_Last modified: 2026-09-13_
+_Last modified: 2026-09-14_
 
 Each web service on `nire-cube` has **its own tailnet hostname and its own
 certificate**. That is a change from the original design — one hostname with
@@ -47,7 +47,7 @@ both its own name and cube's. (Homepage since 2026-09-12, issue #291; the
 switch time — until then use cube's own name, which needs nothing new.)
 
 `ts-cube`, **not** `nire-cube`: this tailnet renames its devices. That trap
-has its own writeup in `system/networking/tailscale.nix`, indexed from
+has its own writeup in `config-system/networking/tailscale.nix`, indexed from
 [system](../categories/system.md).
 
 ## Muscle memory: what stopped answering, and when

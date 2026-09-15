@@ -1,6 +1,6 @@
 # flake-parts port notes, for agents
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-14_
 
 Condensed from [flake-parts-port-notes.md](flake-parts-port-notes.md), which
 keeps the salvage story, the decision reasoning and the upstream file/line
@@ -14,7 +14,7 @@ Each was an explicit choice, not a default. Re-deciding them silently is
 worse than either answer.
 
 - **Home Manager NixOS-integrated**, not standalone.
-  `system/system/home-manager/enable-home-manager.nix`;
+  `config-system/system/home-manager/enable-home-manager.nix`;
   [`../flake/doc/trailhead-home-manager-standalone.md`](<../flake/doc/trailhead-home-manager-standalone.md>)
   is the way back.
 - **Package parity across hosts** — no role split. The handheld gets the full

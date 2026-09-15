@@ -1,6 +1,7 @@
 # Wiki index, for agents
 
 _Last modified: 2026-09-14_
+_Sibling reviewed: 2026-09-14 -- 00-INDEX.md only renamed `system/` path shorthand to `config-system/`; no facts moved_
 
 Condensed from [00-INDEX.md](00-INDEX.md), which keeps the orientation prose and
 the "why a link layer, not a rewrite" reasoning. Routing only here.

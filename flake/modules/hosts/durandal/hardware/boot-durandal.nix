@@ -1,5 +1,5 @@
 # renamed from `boot.nix`, which declared `flake.modules.nixos.boot` and so
-# merged with the `system/boot/` category of the same name
+# merged with the `config-system/boot/` category of the same name
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
@@ -20,7 +20,7 @@
 # 2026-08-08 — why this file is not called `boot.nix`
 #
 # It was, and its filename made it declare `flake.modules.nixos.boot` — the
-# same name dirsAsCategory gives the `system/boot/` category. Same-named
+# same name dirsAsCategory gives the `config-system/boot/` category. Same-named
 # modules MERGE rather than conflict, so the two silently became one, and
 # both directions were wrong:
 #

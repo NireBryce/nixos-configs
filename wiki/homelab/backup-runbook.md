@@ -134,7 +134,7 @@ sudo restic-cube unlock
 
 ## Rotating the secrets
 
-Both live in `flake/modules/system/system/secrets/secrets.yaml`, declared
+Both live in `flake/modules/config-system/system/secrets/secrets.yaml`, declared
 in `restic.nix`. **Losing `restic-cube-password` loses the backups** —
 restic has no recovery path for a forgotten repository password; keep a
 copy somewhere that isn't cube and isn't this repo. Losing
@@ -144,7 +144,7 @@ on the QNAP) but breaks backups until that's done.
 ```sh
 # Repository password
 nix shell nixpkgs#sops nixpkgs#age --command \
-    sops set flake/modules/system/system/secrets/secrets.yaml \
+    sops set flake/modules/config-system/system/secrets/secrets.yaml \
     '["restic-cube-password"]' \
     "\"$(openssl rand -base64 32)\""
 
@@ -154,7 +154,7 @@ ssh nire-cube.local 'cat ~/.ssh/<new-key>' \
     | jq -Rs . \
     | xargs -0 -I{} nix shell nixpkgs#sops nixpkgs#age \
         --command sops set \
-        flake/modules/system/system/secrets/secrets.yaml \
+        flake/modules/config-system/system/secrets/secrets.yaml \
         '["restic-cube-ssh-key"]' {}
 ```
 

@@ -1,4 +1,4 @@
-# `impermanence` — `system/impermanence/`
+# `impermanence` — `config-system/impermanence/`
 
 _Last modified: 2026-09-02_
 
@@ -72,15 +72,15 @@ is why two other things exist:
 warns that a non-impermanence host has no login-password help here (cube
 itself is excluded by hostname as of 2026-09-01 — its password was set by
 hand before it was switched), and
-`system/system/impermanence/declare-persistence-option.nix` — a **different,
+`config-system/system/impermanence/declare-persistence-option.nix` — a **different,
 easily confused file**, next section.
 
 ## The other "impermanence" — don't confuse the two
 
-`system/system/impermanence/declare-persistence-option.nix` is **not** part of
-this category. It's a subdirectory of `system/system/` that happens to share
+`config-system/system/impermanence/declare-persistence-option.nix` is **not** part of
+this category. It's a subdirectory of `config-system/system/` that happens to share
 the word "impermanence" in its path, collected into the `system` category
-aggregate like everything else under `system/system/`, not into this one. It
+aggregate like everything else under `config-system/system/`, not into this one. It
 declares the `environment.persistence` *option* (not any actual persisted
 paths) for every NixOS host unconditionally — including `cube`, which
 doesn't wipe anything — specifically so that `tailscale-persist.nix`,

@@ -66,7 +66,7 @@ subtraction needs spaces around the operator. Two consequences here:
 ## Names share one namespace per class, and collisions merge
 
 Two modules with the same name do not conflict; they **merge**. `boot` was
-both the `system/boot/` category and `hosts/durandal/hardware/boot.nix`, so
+both the `config-system/boot/` category and `hosts/durandal/hardware/boot.nix`, so
 importing the category also applied durandal's bootloader — and importing
 the bootloader applied an impermanence rollback. `just modules` checks for
 this; run it after adding or renaming anything.

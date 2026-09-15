@@ -2,7 +2,7 @@
 # this file.
 #
 # Split 2026-08-12 so that the darwin question below never has to touch the
-# keybindings. system/macos/homebrew/homebrew.nix installs the `kitty` cask, so
+# keybindings. config-system/macos/homebrew/homebrew.nix installs the `kitty` cask, so
 # lysithea had two copies -- and the obvious fix, wrapping the whole module in
 # lib.mkIf (!pkgs.stdenv.isDarwin), would have thrown the config away with the
 # package. Keeping the two concerns in separate files makes that mistake

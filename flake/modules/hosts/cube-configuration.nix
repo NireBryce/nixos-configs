@@ -76,15 +76,16 @@
         # Every self-hosted/homelab service this host runs, as one aggregate
         # -- added 2026-08-27, folding what used to be seven separate
         # imports here (virtualization, containers, monitoring, git-forge,
-        # shortlinks, reverse-proxy, landing) into `system/homelab/`. Each of
-        # those is still its own category nested under it
-        # (`system/homelab/<name>/`, each keeping its own `dirsAsCategory.nix`)
+        # shortlinks, reverse-proxy, landing) into `config-system/homelab/`.
+        # Each of those is still its own category nested under it
+        # (`config-system/homelab/<name>/`, each keeping its own
+        # `dirsAsCategory.nix`)
         # and still individually importable by name -- tenacity still pulls
         # `containers` directly, unaffected by this move (durandal dropped
         # both `virtualization` and `containers` 2026-08-27, the same day
         # this move landed; cube's own copies come through `homelab` now),
-        # per the same coarse-and-fine nesting `system/hardware`/
-        # `system/hardware/amd` already established (see
+        # per the same coarse-and-fine nesting `config-system/hardware`/
+        # `config-system/hardware/amd` already established (see
         # flake/doc/dirsAsCategory.md). All of it was cube-only before this
         # move and stays cube-only now -- nothing here belongs on the
         # handhelds, which is the reason each got its own category in the

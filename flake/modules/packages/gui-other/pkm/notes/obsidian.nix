@@ -3,7 +3,7 @@
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
         flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }:
-            # Excluded on darwin because system/macos/homebrew/homebrew.nix already
+            # Excluded on darwin because config-system/macos/homebrew/homebrew.nix already
             # installs the `obsidian` cask, so lysithea was getting two copies.
             #
             # Same SHAPE as vicinae.nix and the linux-utils modules, but NOT the

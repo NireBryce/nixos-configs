@@ -500,7 +500,7 @@ not a safety measure.**
 
 ## 32. An auto-allocator that cannot see manual entries will collide with them
 
-`system/system/containers/containers.nix` (then `virtualization.nix`) set
+`config-system/system/containers/containers.nix` (then `virtualization.nix`) set
 `autoSubUidGidRange = true` on a `container` user while pinning
 `subUidRanges = [{ startUid = 100000; ... }]` on `elly` four lines below. It
 evaluated. It had evaluated for a week. Both users would have shared one
@@ -563,13 +563,13 @@ options a stale guide will tell you to set.
 
 ## 34. The dangerous name collision is the one where both halves work
 
-CLAUDE.md's `boot` story — the `system/boot/` category and durandal's
+CLAUDE.md's `boot` story — the `config-system/boot/` category and durandal's
 `boot.nix` merging into one name — has an obvious tell: importing a bootloader
 got you an impermanence rollback, which is startling enough to investigate.
 
 Moving the VM modules into a category directory of their own set up the same
 collision in a shape with no tell. The directory would have been
-`system/virtualization/`, so `dirsAsCategory` would declare
+`config-system/virtualization/`, so `dirsAsCategory` would declare
 `flake.modules.nixos.virtualization`; the file inside it was `virtualization.nix`,
 which declares `flake.modules.nixos.virtualization` from its own filename.
 They **merge**. And both halves are libvirt config, so importing either name
@@ -588,7 +588,7 @@ name for the file, leaving the general one to the category that hosts import.
 
 ## 35. The same collision, a third time — caught immediately because the tool was actually run
 
-`containers.nix`, moved into its own category (`system/containers/`) on
+`containers.nix`, moved into its own category (`config-system/containers/`) on
 2026-08-22 for the same reason `virtualization` split off `system` a day
 earlier, walked straight into §34's exact trap: the new category's
 `dirsAsCategory.nix` derives `flake.modules.nixos.containers` from the

@@ -1,13 +1,14 @@
 # blesh (bash line editor)
 
 _Last modified: 2026-09-14_
+_Sibling reviewed: 2026-09-14 -- blesh-for-agents.md only renamed `system/` path shorthand to `config-system/`; no facts moved_
 
 `ble.sh` is wired up by hand for bash — there's no Home Manager option for
 it (`programs.bash.blesh.enable` doesn't exist; see
 [shell-config](00-INDEX.md)). The package, `source ble.sh
 --attach=none` early in `initContent`, and `ble-attach` at the end all live
 in `bash.nix`; the `.blerc` config itself is owned by
-[`bash/blesh.nix`](../../../flake/modules/system/shell-config/bash/blesh.nix).
+[`bash/blesh.nix`](../../../flake/modules/config-system/shell-config/bash/blesh.nix).
 
 > **Condensed version:**
 > [blesh-for-agents.md](blesh-for-agents.md) — the same
@@ -46,7 +47,7 @@ together external completion/history tools underneath ble.sh's UI:
 - **`bash-completion.bash`** and **`nix-completion.bash`** — loaded first,
   per ble.sh's own note that bash-completion must come before the fzf
   integrations.
-- **[`carapace-desc.bash`](../../../flake/modules/system/shell-config/bash/carapace-desc.bash)**
+- **[`carapace-desc.bash`](../../../flake/modules/config-system/shell-config/bash/carapace-desc.bash)**
   (this repo, 2026-08-22) — advises carapace's `_carapace_completer` with
   ble.sh's `after`-type function advice, so that after carapace's plain
   `COMPREPLY` word list comes back, it re-derives per-candidate descriptions
@@ -84,7 +85,7 @@ together external completion/history tools underneath ble.sh's UI:
   in their final state. (Works for C-v because C-v's keycode is fixed;
   see the focus/blur entry below for why that distinction matters.)
 - **focus/blur are bound to a no-op in readline, before `ble-attach`** —
-  in [`bash.nix`](../../../flake/modules/system/shell-config/bash/bash.nix)'s
+  in [`bash.nix`](../../../flake/modules/config-system/shell-config/bash/bash.nix)'s
   last initExtra block, not in this `.blerc` (2026-09-07). When anything
   in a session enables mode 1004 focus reporting, konsole sends
   `CSI I`/`CSI O` on every tab switch; ble.sh decodes them into the
@@ -154,9 +155,9 @@ it.
 **Fix, in the tree as of 2026-08-24, confirmed via a real `just switch`**: don't call `read`
 for that line at all, so there's nothing for ble.sh's global override to
 catch —
-[`carapace-completer-read-fix.bash`](../../../flake/modules/system/shell-config/bash/carapace-completer-read-fix.bash)
+[`carapace-completer-read-fix.bash`](../../../flake/modules/config-system/shell-config/bash/carapace-completer-read-fix.bash)
 (see
-[`carapace-read-fix.md`](../../../flake/modules/system/shell-config/bash/carapace-read-fix.md)
+[`carapace-read-fix.md`](../../../flake/modules/config-system/shell-config/bash/carapace-read-fix.md)
 next to it for the operator-facing summary and how to undo it)
 patches `_carapace_completer`'s body via `declare -f` plus a textual
 substitution, replacing the `read` with parameter expansion split on the

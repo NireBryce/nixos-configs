@@ -1,6 +1,6 @@
 # New host disk formatting, for agents
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-14_
 
 Condensed from [disk-formatting.md](disk-formatting.md), which keeps the
 reasoning and the full warnings. Facts only here.
@@ -13,7 +13,7 @@ section first. Skill `new-host-config` is the surrounding decision tree.
 Only for a new host that will wipe `/root` on every boot — durandal and
 tenacity's shape. A host opting out (cube, the handhelds) uses none of this.
 
-`system/impermanence/_disko/impermanence-luks-btrfs.nix`: one LUKS partition,
+`config-system/impermanence/_disko/impermanence-luks-btrfs.nix`: one LUKS partition,
 btrfs inside, subvolumes `root`/`home`/`nix`/`persist`/`log`, plus an
 unmounted `root-blank`. **Nothing in this repo calls it today** — every live
 host has hand-written `hardware-*.nix` from a real install, or (cube) never
@@ -34,7 +34,7 @@ adopted the layout. Evaluation-verified only, never run against hardware.
 
 ```nix
 imports = [
-    (import ../../system/impermanence/_disko/impermanence-luks-btrfs.nix {
+    (import ../../config-system/impermanence/_disko/impermanence-luks-btrfs.nix {
         device = "/dev/disk/by-id/REPLACE-ME-before-running-disko";
     })
 ];

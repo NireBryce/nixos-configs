@@ -42,7 +42,7 @@ repo's own tracker is the issue queue, not another markdown list.
   and breaks a host stays invisible until someone runs `just switch` on
   real hardware — §§36–37 exactly. cube is `x86_64-linux` and already runs
   scheduled work against a sops credential
-  ([restic.nix](../flake/modules/system/homelab/backup/restic/restic.nix) is
+  ([restic.nix](../flake/modules/config-system/homelab/backup/restic/restic.nix) is
   the precedent for the whole shape), so it can do what a runner
   structurally cannot. Note this **relocates** the PAT rather than removing
   it — same scopes, same expiry, `/run/secrets/` instead of a GitHub

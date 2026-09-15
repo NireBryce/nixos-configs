@@ -8,7 +8,7 @@
             # asserts `meta.platforms`, a hard eval failure rather than
             # something that would merely install nothing. Hit evaluating this
             # shared module for nire-lysithea (aarch64-darwin) -- Raycast,
-            # already in system/macos/homebrew/homebrew.nix, is the real
+            # already in config-system/macos/homebrew/homebrew.nix, is the real
             # equivalent on that machine, which is what the "Like raycast for
             # linux" description below was already saying.
             lib.mkIf (!pkgs.stdenv.isDarwin) {

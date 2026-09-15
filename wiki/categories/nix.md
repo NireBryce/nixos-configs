@@ -1,4 +1,4 @@
-# `nix` — `system/nix/`
+# `nix` — `config-system/nix/`
 
 _Last modified: 2026-09-01_
 

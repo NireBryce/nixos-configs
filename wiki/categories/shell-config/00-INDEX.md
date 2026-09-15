@@ -1,4 +1,4 @@
-# `shell-config` — `system/shell-config/`
+# `shell-config` — `config-system/shell-config/`
 
 _Last modified: 2026-09-14_
 

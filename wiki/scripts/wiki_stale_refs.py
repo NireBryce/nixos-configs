@@ -23,7 +23,7 @@ into directly:
     (`hosts/hosts.nix`, `restic/restic.nix`) rather than the full
     repo-relative one -- resolved below by matching a tracked path's
     *suffix*, not requiring an exact match, but a path that additionally
-    skips a middle directory (`flake/modules/system/impermanence/
+    skips a middle directory (`flake/modules/config-system/impermanence/
     WARN-impermanence.nix`, skipping the real `root-rollback/` component)
     defeats even that and still won't match.
   - **Some backtick spans aren't this repo's files at all** --

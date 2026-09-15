@@ -52,7 +52,7 @@ here, don't wrap this file in ciphertext to protect one row.
 ### 1. `tailscale_key` — Tailscale auth key
 
 - **What**: an auth key stored in `secrets.yaml`, undeclared and unused —
-  see [`tailscale.nix`](../flake/modules/system/system/networking/tailscale.nix)'s
+  see [`tailscale.nix`](../flake/modules/config-system/system/networking/tailscale.nix)'s
   header comment.
 - **Expiry**: Tailscale auth keys expire at **90 days maximum** from
   creation. This one predates the flake-parts port (so it's already stale)
@@ -118,7 +118,7 @@ here, don't wrap this file in ciphertext to protect one row.
 ### 4. sops age recipients — derived from host SSH host keys
 
 - **What**: `.sops.yaml`'s four `age1...` recipient lines
-  (`flake/modules/system/system/secrets/.sops.yaml`) are each derived from
+  (`flake/modules/config-system/system/secrets/.sops.yaml`) are each derived from
   that host's own `/etc/ssh/ssh_host_ed25519_key.pub` via `just age-key`
   (`flake/scripts/host-age-key.sh`) — not standalone `age-keygen` keypairs.
 - **Expiry**: none in the usual sense — SSH host keys don't expire on a
@@ -238,7 +238,7 @@ here, don't wrap this file in ciphertext to protect one row.
   would need the age key to decrypt, and that key would itself have to be
   a GitHub Actions secret — one GitHub-stored credential swapped for
   another, plus a layer. Nor could a runner be enrolled: every key in
-  [`.sops.yaml`](<../flake/modules/system/system/secrets/.sops.yaml>) is
+  [`.sops.yaml`](<../flake/modules/config-system/system/secrets/.sops.yaml>) is
   derived from a *host's* `/etc/ssh/ssh_host_ed25519_key.pub`, and a
   runner is an ephemeral VM with no persistent host key. And nothing in
   the nix tree ever reads this token, so a `sops.secrets.*` entry for it

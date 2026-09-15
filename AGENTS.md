@@ -20,7 +20,7 @@ Don't assume a branch — check `git branch --show-current`.
 
 This config enables impermanence and wipes `/root` on boot on most hosts.
 Never suggest installing it wholesale; be careful touching
-`flake/modules/system/impermanence/` or `fileSystems`/`boot` in the host
+`flake/modules/config-system/impermanence/` or `fileSystems`/`boot` in the host
 hardware modules.
 
 `WARN-impermanence.nix` (reached through the `impermanence` category)
@@ -32,7 +32,7 @@ root, not LUKS+impermanence. Don't assume "every host wipes root" or "no host do
 the specific host. Read `WARN-impermanence.nix` before changing anything
 near it.
 
-Secrets are sops-nix (`flake/modules/system/system/secrets/`). `secrets.yaml`
+Secrets are sops-nix (`flake/modules/config-system/system/secrets/`). `secrets.yaml`
 is encrypted and committed; that is deliberate, not a mistake to be "fixed".
 `.sops.yaml` (same directory) enrolls `nire-durandal`, `nire-lysithea`,
 `nire-tenacity`, and `nire-cube` — all live hosts with current config here,
@@ -111,18 +111,19 @@ changing any `dirsAsCategory.nix`.
   `hosts/hosts.nix`, `hosts/durandal-configuration.nix`, and
   `users/elly-home-manager.nix`; `just modules` relies on exactly this.
 
-Areas: `system/` (shared system, incl. `system/macos/` for darwin), `hosts/`
-(per-host), `packages/`, `users/`.
+Areas: `config-system/` (shared system, incl. `config-system/macos/` for
+darwin), `hosts/` (per-host), `packages/`, `users/`.
 
 **The category is how something shared stays optional** — nothing in this
 tree declares `mkEnableOption`. `kde-desktop` is the by-name variant: one
 module imported directly while its category (`desktop-env`, which also
 holds `jovian`) is never imported whole.
 
-**`system/homelab/` is an umbrella category (2026-08-27)** nesting several
-cube-only categories, same coarse-and-fine overlap as
-`system/hardware`/`system/hardware/amd`. Full account, including the nested
-categories' names and a real collector quirk: `wiki/categories/homelab.md`.
+**`config-system/homelab/` is an umbrella category (2026-08-27)** nesting
+several cube-only categories, same coarse-and-fine overlap as
+`config-system/hardware`/`config-system/hardware/amd`. Full account,
+including the nested categories' names and a real collector quirk:
+`wiki/categories/homelab.md`.
 
 **Hosts**: roster and class are `hosts/hosts.nix` (commented at each
 declaration) and `wiki/hosts.md`'s table — don't restate the list here, it
@@ -131,7 +132,8 @@ only rots.
 ### Home Manager is NixOS-integrated
 
 `home-manager.users.elly` is set from the NixOS side with `useGlobalPkgs`
-and `useUserPackages`, in `system/system/home-manager/enable-home-manager.nix`.
+and `useUserPackages`, in
+`config-system/system/home-manager/enable-home-manager.nix`.
 No `homeConfigurations` output, no separate home switch; `just switch`
 applies both. `flake/doc/trailhead-home-manager-standalone.md` is the way
 back; skill `home-manager-dotfiles` has the traps and integration specifics

@@ -1,4 +1,4 @@
-# `reverse-proxy` — `system/homelab/reverse-proxy/`
+# `reverse-proxy` — `config-system/homelab/reverse-proxy/`
 
 _Last modified: 2026-09-14_
 
@@ -179,7 +179,7 @@ Two prerequisites, neither in this repo:
   out-of-repo trap [system](system.md)'s `tailscale.nix` documents.
 
 `permitCertUid` is set in `caddy.nix` rather than in
-`system/networking/tailscale.nix` — that file is in the `system` category
+`config-system/networking/tailscale.nix` — that file is in the `system` category
 *every* Linux host imports, and setting it there would grant cert-fetching
 rights to a `caddy` user on hosts that don't run Caddy. Scope a change to
 the host that needs it.
