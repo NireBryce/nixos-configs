@@ -74,6 +74,11 @@ Per changed file, the question that catches each:
   automatic; `just available --duplicates`. (`nirepackages-platform-support`.)
 - **Was an existing `programs.*` integration missed?** Check before a
   hand-rolled dotfile/bundle survives review.
+- **Does the diff add or run anything that can print a secret?** A bare
+  `sops -d`, `journalctl`/`ps` near a unit that takes a secret on its
+  command line, a credential landing anywhere outside `secrets.yaml`.
+  (`secrets-hygiene`; if a flag fires, `triage-flagged-secrets` settles
+  fresh-vs-known before any rotation talk.)
 
 ## Conventions worth flagging as findings
 
@@ -102,9 +107,9 @@ an eval is the exact overclaim this repo keeps teaching not to make.
 
 ## See also
 
-- The four trap skills (`new-flake-module`, `home-manager-dotfiles`,
-  `impermanence-initrd`, `nirepackages-platform-support`) — the worked
-  examples this checklist compresses.
+- The five trap skills (`new-flake-module`, `home-manager-dotfiles`,
+  `impermanence-initrd`, `nirepackages-platform-support`,
+  `secrets-hygiene`) — the worked examples this checklist compresses.
 - `ship` skill — the pre-PR gate this review complements; its step 0 is
   the "Run first" list above, from the author's side.
 - `wiki/lessons-learned.md` — every § above earned its place the hard way.

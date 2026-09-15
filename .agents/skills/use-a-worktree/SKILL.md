@@ -51,7 +51,9 @@ git -C <repo> fetch origin
 git -C <repo> worktree add <scratchpad>/wt-<branch> -b <branch> origin/experimental
 ```
 
-`<scratchpad>` is the scratchpad directory named in your own system prompt;
+`<scratchpad>` is the scratchpad directory named in your own system prompt
+— a harness that names none can use `/tmp` (a worktree's checkout is
+self-contained; objects and refs stay in the repo's `.git`);
 `<branch>` is the real branch the task ships under, not a throwaway label.
 Then work in it exactly as from the main checkout — `just` recipes, `nix
 eval`, `gh pr create` all work identically. **Verify you're actually in it**

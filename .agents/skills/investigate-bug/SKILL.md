@@ -41,8 +41,9 @@ which is why this is a triggered skill rather than another line in
    than re-deriving from zero. If it's stale or wrong, fix *that* rather
    than starting a parallel investigation.
 3. **No hit**: proceed as normal — reproduce for real rather than reasoning
-   from source (`CLAUDE.md`'s "evaluating proves nothing, force a real
-   run"). Once something is actually diagnosed, don't leave it only in your
+   from source (`AGENTS.md`'s "Bugs here serialize": evaluating a cheap
+   attribute proves nothing). Once something is actually diagnosed, don't
+   leave it only in your
    reply: follow `propose-issue`'s flow to file or track it, and
    `wiki-sync` for anything a wiki page should now say.
 4. **State fixed vs. verified precisely**, the same discipline the rest of
