@@ -48,32 +48,32 @@ what a good comment or history section actually is:**
 ## Why this exists
 
 **The dated-snapshot trap (category 2) — the one that actually bit
-repeatedly, 2026-09-03.** `wiki/homelab/pending-setup.md` item 4,
-`wiki/homelab/backup-runbook.md`'s intro, and `wiki/categories/backup.md`'s
-"What isn't done yet" section *each independently* carried a "Status as of
-2026-08-24" / "as of 2026-08-31" line stating the two restic sops secrets
-had no value in the tree. All three were wrong — both secrets had been set
-on 2026-08-30 and 2026-08-31 — and all three had a date attached that made
-them read as recently verified. None of them was; the date recorded when
-the line was *written*, not when it was last *true*. The staleness was
-caught by accident, grepping `secrets.yaml` for an unrelated reason, not
-by anyone re-checking the dated claims themselves. AGENTS.md's State
-section (switch/boot state is deliberately never recorded because it rots
-this exact way) is the narrower version of the same rule — this rot hit
-three unrelated docs in one day, well past that scope.
+repeatedly.** The issue itself: a "Status as of `<date>`" line records
+when the sentence was *written*, not when it was last *true*, and
+nothing re-checks it — the date makes stale text read as freshly
+verified. Seen live 2026-09-03 (`216a5ae7`): three unrelated docs —
+`wiki/homelab/pending-setup.md` item 4, `wiki/homelab/backup-runbook.md`'s
+intro, and `wiki/categories/backup.md`'s "What isn't done yet" — each
+carried an as-of line stating the two restic sops secrets had no value
+in the tree, days after both had been set. The staleness surfaced by
+accident, grepping `secrets.yaml` for an unrelated reason; no one had
+re-checked any dated claim. AGENTS.md's State section is the narrower
+version of the same rule — this rot ran well past that scope.
 
-**The unconfirmed-specific trap (category 1), same session.** An early
-comment called the QNAP's `restic-backup` share "dedicated to this
-module" — never independently checked, carried forward from an even
-earlier NFS-era comment about a differently-named mount point — and got
-copied into `restic.nix`'s header, `wiki/categories/backup.md`, and
-`wiki/homelab/backup-runbook.md` before a screenshot of the QNAP's actual
-Snapshot Manager showed the repo really lived under a share called
-`homes`. Separately, a path was written as directly confirmed ("real path
-`/share/ZFS19_DATA/homes/nire`") when only `/share/homes/nire` had
-actually been observed over ssh — `ZFS19_DATA` was inferred from a
-different, older comment and stated with the same confidence as the part
-that was checked.
+**The unconfirmed-specific trap (category 1), same day.** The issue
+itself: a detail carried forward from an older comment, or inferred
+from a similar system, gets stated in the same confident voice as what
+was actually watched — and the confident form is the one that gets
+copied. Seen live, same sweep: a comment calling the QNAP's
+`restic-backup` share "dedicated to this module" — never independently
+checked, inherited from an NFS-era comment about a differently-named
+mount point — had spread into `restic.nix`'s header,
+`wiki/categories/backup.md`, and `wiki/homelab/backup-runbook.md`
+before a Snapshot Manager screenshot showed the repo living under a
+share called `homes`. And a path written as directly confirmed
+(`real path /share/ZFS19_DATA/homes/nire`) fused a volume label from
+one old comment with a path observed over ssh (`/share/homes/nire`) —
+neither observation actually said that together.
 
 **The cross-reference trap (category 3), found sweeping the tree for the
 above two, 2026-09-03 (`216a5ae7`).** The issue itself: a removal or
