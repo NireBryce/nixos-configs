@@ -2,6 +2,8 @@
 
 _Last modified: 2026-09-13_
 
+_Sibling reviewed: 2026-09-14 -- maintenance-schedule.md only reworded two "Elly" prose mentions to "the user"; no facts moved_
+
 Condensed from [maintenance-schedule.md](maintenance-schedule.md), which
 keeps each item's reasoning, rejected alternatives and evidence. Facts only
 here. Tended by skill

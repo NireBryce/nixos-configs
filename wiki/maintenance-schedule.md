@@ -1,6 +1,6 @@
 # Maintenance schedule
 
-_Last modified: 2026-09-13_
+_Last modified: 2026-09-14_
 
 > **Condensed version:**
 > [maintenance-schedule-for-agents.md](maintenance-schedule-for-agents.md) — the same
@@ -176,7 +176,7 @@ here, don't wrap this file in ciphertext to protect one row.
 ### 8. Grafana admin credentials
 
 - **What**: a real admin password, **set by hand through the UI 2026-09-13**
-  (Elly). Not stock any more. Lives only in cube's Grafana sqlite db at
+  (by the user). Not stock any more. Lives only in cube's Grafana sqlite db at
   `/var/lib/grafana` — covered by restic, but not reproducible: nothing
   re-applies it, so it is a credential that exists in exactly one place.
 - **Also, separately**: `grafana-admin-password` now exists in
@@ -193,7 +193,7 @@ here, don't wrap this file in ciphertext to protect one row.
   reset-admin-password` from the sops file per activation — the shape
   `forgejo-admin-bootstrap` uses for item 7. Deliberately not done: it
   overwrites a hand-set password on every switch.
-- **Last checked**: 2026-09-13. Live password changed by Elly. Cube
+- **Last checked**: 2026-09-13. Live password changed by the user. Cube
   **switched** the same day and the deployment was checked on the host:
   `/run/secrets/grafana-admin-password` is `grafana:grafana` mode `400`,
   the live `config.ini` references it, `grafana.service` is active with

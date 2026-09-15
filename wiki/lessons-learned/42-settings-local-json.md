@@ -1,8 +1,8 @@
-# 42. Not every file git tracks deserves the same scrutiny — `.claude/settings.local.json` is Elly's, not a config artifact to protect
+# 42. Not every file git tracks deserves the same scrutiny — `.claude/settings.local.json` is the user's, not a config artifact to protect
 
-_Last modified: 2026-09-09_
+_Last modified: 2026-09-14_
 
-§42 of [lessons-learned.md](../lessons-learned.md#42-not-every-file-git-tracks-deserves-the-same-scrutiny--claudesettingslocaljson-is-ellys-not-a-config-artifact-to-protect) — that page keeps the one-line version of every lesson; this is §42's full account.
+§42 of [lessons-learned.md](../lessons-learned.md#42-not-every-file-git-tracks-deserves-the-same-scrutiny--claudesettingslocaljson-is-the-users-not-a-config-artifact-to-protect) — that page keeps the one-line version of every lesson; this is §42's full account.
 
 2026-08-26, landing PRs #94 and #95. Several stash/cherry-pick/rebase steps
 in that session touched `.claude/settings.local.json` alongside real code
@@ -42,5 +42,5 @@ skill was removed 2026-09-03 — with the file untracked and machine-local,
 a repo skill for it had nothing repo-wide left to say.
 
 When a conflict or diff touches this file, take whichever resolution is
-simplest and move on; it is Elly's file to shape, not something to defend
+simplest and move on; it is the user's file to shape, not something to defend
 from redundancy or drift on their behalf.

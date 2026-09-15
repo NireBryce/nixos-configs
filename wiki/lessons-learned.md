@@ -1,6 +1,6 @@
 # Lessons from the den → flake-parts port
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-14_
 
 > **Written by Claude Code, for Claude Code**, and largely a record of its own
 > mistakes. Written to be read by an agent starting cold, so the "I" throughout
@@ -167,7 +167,7 @@ rather than rebuilds, which is what makes the other two viable.
 ## 11. Read the links in a comment before deleting the code they annotate
 
 I was about to replace a `requires`/`after` block whose lines carried a
-systemd.unit(5) URL. Elly asked whether I had read it. I had not.
+systemd.unit(5) URL. The user asked whether I had read it. I had not.
 
 `Requires=` is an activation dependency, `After=` is ordering, neither implies
 the other, and the manual says to pair them. Dropping `requires` would have
@@ -183,7 +183,7 @@ Cheap, and the difference between a recommendation and a guess.
 
 ## 13. Reversibility can stand in for a decision
 
-Three times Elly declined a fork and asked for a documented escape hatch:
+Three times the user declined a fork and asked for a documented escape hatch:
 `dirsAsCategory.md`, `trailhead-home-manager-standalone.md`,
 `impermanence-stage1-migration.md` (removed 2026-09-05).
 None had to be settled to make progress, and writing the reversal path while the
@@ -209,7 +209,7 @@ the package modules with nothing linking to it. `grep -ri 'style\|convention'
   landed checker-first; the other order leaves an intermediate commit where
   `just modules` fails. Verified in a throwaway worktree.
 - **Git authorship does not say who wrote it.** Every commit here is authored by
-  Elly, including ones written by an agent.
+  the user, including ones written by an agent.
 
 ## 16. When the user redirects, the redirect carries information
 
@@ -243,7 +243,7 @@ say which you have. Treat an undated "verified" in this repo as *evaluates*.
 
 **And scope the claim.** For most of the port I wrote "nothing in this
 repository has ever been built or switched", which is false and reached seven
-files before Elly caught it. `origin/main` was deployed and already flake-parts;
+files before the user caught it. `origin/main` was deployed and already flake-parts;
 what was unproven was this branch's 172 commits on top. "This has never worked"
 and "this is a large untested delta on something that works" call for different
 caution. An overclaim in the safe-sounding direction is still an overclaim.
@@ -381,7 +381,7 @@ first line it executed, because a missing import is a runtime event.
 ## 26. "Did it work before?" is one command, and it beats reasoning
 
 Twice I built a causal story the journal demolished. Vicinae crash-looping was
-not what made the machine unusable — Elly had driven a rollback from a working
+not what made the machine unusable — the user had driven a rollback from a working
 session. The stage-1 migration did not cause the suspend hang — hybrid-sleep had
 been writing 2.1G images for months under scripted stage 1.
 
@@ -451,7 +451,7 @@ Nothing performs that fallback. KDE's PowerDevil had `SleepMode=2`
 (`HybridSuspend`; the enum is `SuspendToRam = 1, HybridSuspend = 2,
 SuspendThenHibernate = 3`). It asked logind for hybrid sleep, logind answered
 `CanHybridSleep=no`, and the request was dropped. **Suspend stopped working
-entirely**, and Elly found it, not me.
+entirely**, and the user found it, not me.
 
 The capability was never gone: `CanSuspend` stayed `yes` and `/sys/power/state`
 kept offering `freeze mem` throughout. Only the thing being *asked for* was
@@ -677,9 +677,9 @@ Grafana needed `handle` (prefix kept), Forgejo `handle_path` (prefix stripped) �
 
 Full account: [41-per-app-prefix-handling.md](lessons-learned/41-per-app-prefix-handling.md).
 
-## 42. Not every file git tracks deserves the same scrutiny — `.claude/settings.local.json` is Elly's, not a config artifact to protect
+## 42. Not every file git tracks deserves the same scrutiny — `.claude/settings.local.json` is the user's, not a config artifact to protect
 
-Agents kept resolving merge conflicts in `.claude/settings.local.json` as if it were shipped config; it's Elly's local prompt-allowlist — take the simplest resolution and move on. Includes a correction: adding a `.gitignore` entry never untracked the file; `git rm --cached` did.
+Agents kept resolving merge conflicts in `.claude/settings.local.json` as if it were shipped config; it's the user's local prompt-allowlist — take the simplest resolution and move on. Includes a correction: adding a `.gitignore` entry never untracked the file; `git rm --cached` did.
 
 Full account: [42-settings-local-json.md](lessons-learned/42-settings-local-json.md).
 

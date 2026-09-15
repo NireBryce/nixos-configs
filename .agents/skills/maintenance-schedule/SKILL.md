@@ -64,7 +64,7 @@ the service already has it.
 This is not hypothetical phrasing advice. `maintenance-schedule.md` item 8
 said Grafana was "still on initial/default setup — this is not yet a 'rotate
 periodically' item because it hasn't had its one-time setup done at all",
-and Elly read it as the credentials being *unset* rather than *default and
+and the user read it as the credentials being *unset* rather than *default and
 live* (2026-09-13). The row was accurate and still misled its only reader.
 
 A row for stock credentials states, in this order:

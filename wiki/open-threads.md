@@ -79,7 +79,7 @@ repo's own tracker is the issue queue, not another markdown list.
 `_loose-ends/bugs-pending-submission/` — written up, not yet filed against
 the third-party project itself, and **not filed by anyone here on their own
 initiative**: per `CLAUDE.md`, filing outside `NireBryce/nixos-configs`
-happens only when Elly says so explicitly, in those words, for that
+happens only when the user says so explicitly, in those words, for that
 specific report — not as a housekeeping pass over this list:
 
 - **[nixpkgs: vscode ≥ 1.129 patches the wrong ripgrep on Linux](../_loose-ends/bugs-pending-submission/2026-08-11-bugreport-nixpkgs-vscode-ripgrep.md)**

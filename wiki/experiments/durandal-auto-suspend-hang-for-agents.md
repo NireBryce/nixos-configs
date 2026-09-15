@@ -49,7 +49,7 @@ it did not change the `D0 to D3hot` refusal it targeted) ·
 `wakeupsourcehelper` (no wakeup-state change in pre/post diffs) · **s2idle**
 (SMU failure occurred under it; no `amd_pmc`, no `s0i3` on this desktop part,
 so it cannot reach hardware sleep and costs near-idle power) · **BIOS** (bug
-predates F21c per Elly, 2026-09-14; the journal counts never supported it —
+predates F21c per the user, 2026-09-14; the journal counts never supported it —
 0-in-27 under F18d is ~46% likely at the observed rate) · Resizable BAR (off,
 BAR0 256 MB) · amdgpu memory eviction (0, and 27 GB swap present) · ring
 timeouts, reset failures, VM faults (0) · PTXH as a rogue wake source (it is

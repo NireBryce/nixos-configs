@@ -53,8 +53,8 @@ Both bit 2026-08-21 (#43/#44):
   question per decision. Name which PR is stacked on which, so an
   incoherent answer is visibly incoherent.
 
-## Only when Elly names a branch
+## Only when the user names a branch
 
-Elly naming a branch outright for that push — any branch except `main`,
+The user naming a branch outright for that push — any branch except `main`,
 which is promotion-only (see above). A bare "push" is not that; it means
 the guarded flow in `SKILL.md`, onto `experimental`.

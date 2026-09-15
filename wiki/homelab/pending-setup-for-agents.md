@@ -1,6 +1,6 @@
 # Pending setup, for agents
 
-_Last modified: 2026-09-13_
+_Last modified: 2026-09-14_
 
 Condensed from [pending-setup.md](pending-setup.md), which keeps the closed
 items and their full accounts. Open work and the traps only here.
@@ -62,7 +62,7 @@ Two agent sessions (2026-09-04, 2026-09-05) read that zero value as "nobody
 has signed in yet" and wrote it into this page *and* the backup runbook.
 Both wrong: a same-day screenshot showed an active session throughout. The
 endpoint cannot answer either question. It was settled the only way it
-could be — from inside the UI: **`elly` is admin, confirmed by Elly
+could be — from inside the UI: **`elly` is admin, confirmed by the user
 2026-09-12.** The masked `is_admin: false` was never evidence either way.
 Full account: [../categories/git-forge-history.md](../categories/git-forge-history.md).
 

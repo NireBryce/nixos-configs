@@ -1,6 +1,6 @@
 # blesh (bash line editor)
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-14_
 
 `ble.sh` is wired up by hand for bash — there's no Home Manager option for
 it (`programs.bash.blesh.enable` doesn't exist; see
@@ -182,7 +182,7 @@ Still worth filing upstream — this repo's fix is a local workaround, not a
 change to carapace or ble.sh — but low priority now that it no longer
 produces wrong output, only (until switched) the cosmetic stray line. Not
 filed, and not something to file on the strength of this page alone: per
-`CLAUDE.md`, filing against either project needs Elly to say so explicitly
+`CLAUDE.md`, filing against either project needs the user to say so explicitly
 first. Removing the workaround once it's no longer needed — upstream fix
 or otherwise — is tracked separately as
 [issue #75](https://github.com/NireBryce/nixos-configs/issues/75).

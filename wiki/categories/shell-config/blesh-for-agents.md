@@ -1,6 +1,6 @@
 # blesh, for agents
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-14_
 
 Condensed from [blesh.md](blesh.md), which keeps the diagnosis narrative and
 the evidence trail. Facts only here.
@@ -69,7 +69,7 @@ upstream fixes the bug is issue #75.
 **carapace's visible `IFS=''` is an invisible SOH byte, not an empty
 string.** Check with `od -c`; misreading it derailed this diagnosis once.
 
-**Do not file this upstream** without Elly saying so explicitly first
+**Do not file this upstream** without the user saying so explicitly first
 (`AGENTS.md`).
 
 ## See also

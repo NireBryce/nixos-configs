@@ -1,6 +1,6 @@
 # Using the forge
 
-_Last modified: 2026-09-13_
+_Last modified: 2026-09-14_
 
 [Forgejo](https://forgejo.org/) on `nire-cube`, at
 `https://git.moose-micro.ts.net/` — its own Tailscale Services name as of
@@ -52,7 +52,7 @@ both correctly.
 ## Signing in, and why there's no sign-up
 
 **Registration is closed.** `DISABLE_REGISTRATION = true` — a single-user
-homelab forge on a tailnet only Elly's devices reach has nothing to gain from
+homelab forge on a tailnet only the user's devices reach has nothing to gain from
 open self-registration.
 
 A detail that will mislead a status check: `/git/user/sign_up` returns **HTTP
@@ -68,7 +68,7 @@ password from this repo's sops secrets rather than typed by hand. It
 resets that password to the sops value on every `switch`, so changing it
 through the web UI won't stick — change it in `secrets.yaml` instead if it
 ever needs to change. **Switched and logged in, confirmed 2026-09-05**;
-genuinely *admin*, confirmed by Elly 2026-09-12 from the
+genuinely *admin*, confirmed by the user 2026-09-12 from the
 Site Administration panel (see
 [git-forge](../categories/git-forge.md)'s account of the masked-field trap
 for why no API call could have told you).

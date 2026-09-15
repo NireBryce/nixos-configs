@@ -41,7 +41,7 @@ needed its own task.
 1. **Use a worktree** (`use-a-worktree`) — this touches many files across
    the tree, exactly the shared-checkout risk that skill exists for.
 2. **Scope the sweep before starting.** "Whole repo" is rarely what's
-   wanted — confirm with Elly whether it's everything, one area
+   wanted — confirm with the user whether it's everything, one area
    (`flake/modules/system/`, `wiki/`, one host), or one class of finding
    (dead imports, stale comments, unused variables). A vague ask is worth
    one clarifying question rather than guessing at the diff size.

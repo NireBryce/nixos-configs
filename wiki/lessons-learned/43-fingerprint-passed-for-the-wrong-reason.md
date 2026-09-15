@@ -1,6 +1,6 @@
 # 43. A fingerprint check can pass for the wrong reason — dead code looks exactly like safe code until you make it live
 
-_Last modified: 2026-09-09_
+_Last modified: 2026-09-14_
 
 §43 of [lessons-learned.md](../lessons-learned.md#43-a-fingerprint-check-can-pass-for-the-wrong-reason--dead-code-looks-exactly-like-safe-code-until-you-make-it-live) — that page keeps the one-line version of every lesson; this is §43's full account.
 
@@ -28,7 +28,7 @@ subdirectory, so a boundary check placed inside that function never gets a
 chance to examine an immediate subdirectory — like `amd` or
 `virtualization` — as something to delegate to. Every nested category this
 repo has is exactly one level deep. The delegation code was real, compiled,
-and syntactically what I'd described to Elly in conversation — and entirely
+and syntactically what I'd described to the user in conversation — and entirely
 dead, for a reason that took tracing the actual call graph to see, not
 reasoning from the diff. The fingerprint check "passed" because nothing had
 actually changed, not because the change was safe.

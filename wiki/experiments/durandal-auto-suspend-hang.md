@@ -79,7 +79,7 @@ Two consequences, both load-bearing:
   at all and costs near-idle power for nothing. Reverted; do not retry.
 - **The BIOS.** F18d → F21c was flashed 2026-08-22, and journal counts appeared
   to implicate it. They cannot: 0 failures in 27 F18d suspends is ~46% likely at
-  the observed rate even if nothing changed. Elly confirms the bug predates
+  the observed rate even if nothing changed. The user confirms the bug predates
   F21c (2026-09-14).
 - **`amdgpu.runpm=0`** — tried 2026-09-14, removed the same day. The machine
   hung with it active, and it did not even change the `Refused to change power
@@ -119,7 +119,7 @@ update, not deliberately), which would have made a success unattributable. The
 hang continued, so neither worked and no reboot needs to be spent separating
 them. Kernel is 6.18.51 from here on.
 
-Cycles, all 2026-09-14 UTC. Outcomes are Elly's — nothing in the dumps yet
+Cycles, all 2026-09-14 UTC. Outcomes are the user's — nothing in the dumps yet
 separates a hang from a clean resume:
 
 | # | window | mode | trigger | slept | outcome |

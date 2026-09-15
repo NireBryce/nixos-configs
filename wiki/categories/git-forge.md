@@ -1,6 +1,6 @@
 # `git-forge` — `system/homelab/git-forge/`
 
-_Last modified: 2026-09-13_
+_Last modified: 2026-09-14_
 
 Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only; nested under
 the `homelab` umbrella since 2026-08-27 (name unaffected). As of 2026-09-07
@@ -135,11 +135,11 @@ a password has nothing that breaks if it changes, and this repo's nix+sops
 config is the sole source of truth for it. The tradeoff: a hand change
 through the web UI is silently reverted on the next `just switch`.
 
-**Status: switched and logged in, confirmed 2026-09-05.** Elly has signed
+**Status: switched and logged in, confirmed 2026-09-05.** The user has signed
 in as `elly` and used the account directly (screenshot-confirmed) — the
 account and password both work as declared. Whether it's genuinely
 *admin* (the `--admin` flag) is **confirmed: it took** — checked from
-inside the UI and reported by Elly 2026-09-12. That was the only way to
+inside the UI and reported by the user 2026-09-12. That was the only way to
 check it: Forgejo's unauthenticated `/api/v1/users/search` always reports
 `is_admin: false` regardless of the real value, so that field never could
 settle it, and reading it as an answer produced a wrong one twice. See

@@ -1,6 +1,6 @@
 # `git-forge` — history
 
-_Last modified: 2026-09-12_
+_Last modified: 2026-09-14_
 
 Verification record for [git-forge](git-forge.md) as it was first switched
 and then re-routed, split out 2026-09-03 so that page stays about the
@@ -61,13 +61,13 @@ account declaratively on activation.
 anonymous-safe field masking, not a read of account state. Two agent sessions
 (2026-09-04, 2026-09-05) took the zero value at face value and wrote "nobody
 has signed in yet" into `pending-setup.md` and the backup runbook. Wrong both
-times: a same-day screenshot from Elly showed an active, logged-in session
-throughout. Re-running the query with Elly actively logged in returns the
+times: a same-day screenshot from the user showed an active, logged-in session
+throughout. Re-running the query with the user actively logged in returns the
 same zeroes, confirming the field is not meaningful from this endpoint rather
 than that anything changed. The account existing was real; the conclusion
 drawn from an anonymous call was not.
 
-**The account is admin — confirmed by Elly 2026-09-12**, from the Site
+**The account is admin — confirmed by the user 2026-09-12**, from the Site
 Administration panel, which was the only place that could answer it. The
 masked `is_admin: false` neither proved nor disproved anything; two
 sessions treating it as an answer is what this section exists to record.

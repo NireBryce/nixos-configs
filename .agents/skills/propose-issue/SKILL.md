@@ -32,7 +32,7 @@ Every `gh issue create` in this skill hardcodes `--repo
 NireBryce/nixos-configs`. That's not incidental — this skill files in this
 repo only, full stop, even for a bug whose real fix belongs upstream (in
 nixpkgs, ble.sh, carapace, whatever). Filing there instead is a different,
-heavier action with its own rule in `CLAUDE.md`: never without Elly saying
+heavier action with its own rule in `CLAUDE.md`: never without the user saying
 so explicitly, in those words, unprompted — not satisfied by this skill's
 own step 3 ask-the-user confirmation, and not satisfied by folding it into some
 other approval. If a bug genuinely belongs upstream, this skill still
@@ -83,4 +83,4 @@ closing a wrongly-filed issue costs nothing the way an unwound merge does.
 commits." Propose for what would actually bite someone on the next session
 or the next boot — not every small wart noticed in passing. Mention the
 minor ones in your reply and leave it at that; run this flow only on things
-worth Elly's round-trip.
+worth the user's round-trip.

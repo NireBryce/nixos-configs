@@ -1,7 +1,7 @@
 # `git-forge`, for agents
 
 _Last modified: 2026-09-12_
-_Sibling reviewed: 2026-09-13 -- git-forge.md only retargeted a pointer at the retired `/git/` prefix routes, which moved from `caddy.nix` to reverse-proxy-history.md; this page names neither_
+_Sibling reviewed: 2026-09-14 -- git-forge.md only reworded "Elly" prose mentions to "the user"; no facts moved_
 
 Condensed from [git-forge.md](git-forge.md), which keeps the reasoning and
 the narrative. Facts only here.

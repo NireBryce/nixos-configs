@@ -172,7 +172,7 @@ git push origin --delete <branch>
 branch, skipping the local delete and the `experimental` checkout/pull
 this flow also does; run the explicit steps instead of the flag.
 
-**If the merge happened outside this flow** — Elly merged in the web UI,
+**If the merge happened outside this flow** — the user merged in the web UI,
 or another session did, so step 3's delete never ran — the branch stays
 behind. `just branches` finds those: it classifies every local branch by
 patch-id, which is what catches a rebased merge (`git branch --merged`

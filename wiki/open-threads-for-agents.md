@@ -36,7 +36,7 @@ This page is not a tracker; this repo's GitHub issues are.
 ## Written up, deliberately not filed
 
 `_loose-ends/bugs-pending-submission/` holds three reports against
-third-party projects. **Filing outside `NireBryce/nixos-configs` happens only when Elly
+third-party projects. **Filing outside `NireBryce/nixos-configs` happens only when the user
 says so explicitly, in those words, for that specific report** — never as a
 housekeeping pass over this list.
 
