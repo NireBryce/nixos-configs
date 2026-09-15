@@ -29,6 +29,8 @@ state, no network, no `gh` (only `check` talks to gh, and the test drives
 classify()/prune directly). Runs via `just branches-test`, part of `just
 preflight` and CI.
 """
+import contextlib
+import io
 import os
 import shutil
 import subprocess
@@ -36,6 +38,7 @@ import sys
 import tempfile
 import unittest
 from argparse import Namespace
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import branches
@@ -51,6 +54,16 @@ class ClassifierTests(unittest.TestCase):
         os.mkdir(self.worktrees)
         self.addCleanup(os.chdir, os.getcwd())
         os.chdir(self.repo)
+
+        # The PR record is forge state a temp repo cannot have, so the
+        # ambiguous arm's gh lookup is stubbed: no branch has a record
+        # unless a test opts it in via self.pr_records. classify() reads it
+        # through branches.pr_state; nothing else touches gh.
+        self.pr_records = {}
+        patcher = mock.patch.object(branches, 'pr_state',
+                                    lambda b: self.pr_records.get(b, ''))
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
         self.git('init', '-q', '-b', 'experimental')
         # commit.gpgsign=false because a global sign-everything setting would
@@ -89,6 +102,28 @@ class ClassifierTests(unittest.TestCase):
         self.git('checkout', '-q', 'merge-only')
         self.git('merge', '--no-ff', '-q', '-m', 'catch up with trunk',
                  'experimental')
+
+        # MERGED by PR record (#334): the branch's commit landed via a
+        # MERGE commit, which PRESERVES its SHA -- the branch is an ancestor
+        # of the trunk and `log TRUNK..b` comes back empty, so patch-id
+        # never sees anything. Until 2026-09-14 this read NEW and prune
+        # never offered it. Its git shape alone is NOT the evidence -- a
+        # fresh branch whose base the trunk advanced past looks identical
+        # (#300's window) -- so the verdict rides the forge's PR record,
+        # stubbed here with what --merge landing leaves behind.
+        self.git('checkout', '-q', '-b', 'merge-landed', 'experimental')
+        self.commit_file('merge-landed.txt', 'via merge\n',
+                         'landed by merge commit')
+        self.git('checkout', '-q', 'experimental')
+        self.git('merge', '--no-ff', '-q', '-m',
+                 'land a branch by merging it (ship --merge default)',
+                 'merge-landed')
+        self.pr_records['merge-landed'] = '#334 MERGED'
+
+        # Same strict-ancestor shape, no PR record: created behind the
+        # trunk and never landed. Reads NEW -- ancestry is not evidence
+        # enough on its own, which is the whole point of the record rule.
+        self.git('branch', 'backdated', 'experimental~2')
 
         # MERGED despite a merge commit alongside: the real work landed, and
         # a merge next to landed work is noise, not evidence against.
@@ -151,6 +186,12 @@ class ClassifierTests(unittest.TestCase):
         self.assertEqual(rows['merge-only'][0], 'UNMERGED')
         self.assertEqual(rows['merged-with-merge'][0], 'MERGED')
         self.assertEqual(rows['partial'][0], 'UNMERGED')
+        # #334: landed by a merge commit, no commits ahead, PR record
+        # MERGED -- deletable, and prune must offer it.
+        self.assertEqual(rows['merge-landed'][0], 'MERGED')
+        # Ancestor shape without a record: NOT deletable, however
+        # merge-shaped its git state looks.
+        self.assertEqual(rows['backdated'][0], 'NEW')
         # The suffixes are load-bearing: prune deletes on an exact match
         # against 'MERGED', so 'MERGED (worktree)' must not equal it.
         self.assertEqual(rows['held-merged'][0], 'MERGED (worktree)')
@@ -164,9 +205,39 @@ class ClassifierTests(unittest.TestCase):
         self.assertEqual(rows['merge-only'][1:3], (0, 1))
         self.assertEqual(rows['merged-with-merge'][1:3], (1, 2))
         self.assertEqual(rows['partial'][1:3], (1, 2))
+        # Ancestry-landed has no commits ahead to count: the display sites
+        # must not print this as a ratio.
+        self.assertEqual(rows['merge-landed'][1:3], (0, 0))
 
     def test_partial_names_the_unlanded_commit(self):
         self.assertEqual(self.rows()['partial'][3], ['partial unlanded'])
+
+    def test_pr_record_is_the_discriminator(self):
+        # Ancestry alone must not be enough: the same empty-log shape that
+        # a --merge landing leaves is what a fresh branch grows into the
+        # moment the trunk advances past its base (#300's window, routine
+        # with concurrent sessions). No record -> NEW; a CLOSED (rejected)
+        # PR also keeps the branch.
+        self.pr_records['merge-landed'] = ''
+        self.pr_records['backdated'] = '#998 CLOSED'
+        rows = self.rows()
+        self.assertEqual(rows['merge-landed'][0], 'NEW')
+        self.assertEqual(rows['backdated'][0], 'NEW')
+        self.assertEqual(rows['fresh'][0], 'NEW')
+
+    def test_check_labels_the_merge_landed_case(self):
+        # `(0/0 landed)` is exactly what the #300/#334 confusion printed;
+        # a MERGED no-commits branch landed through a merge commit, and
+        # check says that instead of a count that explains nothing.
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            branches.cmd_check(Namespace(command='check', depth=400,
+                                         pr=False))
+        out = buf.getvalue()
+        self.assertIn('MERGED', out)
+        self.assertIn('landed by merge commit', out)
+        self.assertIn('nothing ahead of trunk yet', out)
+        self.assertNotIn('(0/0 landed)', out)
 
     def test_prune_deletes_exactly_the_merged_verdicts(self):
         self.assertEqual(
@@ -177,10 +248,12 @@ class ClassifierTests(unittest.TestCase):
             'refs/heads/').splitlines()
         self.assertNotIn('rebased-landed', remaining)
         self.assertNotIn('merged-with-merge', remaining)
+        self.assertNotIn('merge-landed', remaining)
         # Everything else survives -- every non-MERGED state, both suffixed
-        # MERGEDs, and the protected trunk.
-        for survivor in ('fresh', 'unlanded', 'merge-only', 'partial',
-                         'held-merged', 'current-landed', 'experimental'):
+        # MERGEDs, the no-record ancestors, and the protected trunk.
+        for survivor in ('fresh', 'backdated', 'unlanded', 'merge-only',
+                         'partial', 'held-merged', 'current-landed',
+                         'experimental'):
             self.assertIn(survivor, remaining)
 
 

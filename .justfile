@@ -65,7 +65,10 @@ lint:
 # needs a human look -- see the script's own docstring) prints but exits 0.
 # Uses patch-id, NOT `git branch --merged` -- this repo rebases on merge, so a
 # landed branch's SHAs change and --merged calls it unmerged (which is why 11 of
-# them piled up by 2026-09-11). `prune` deletes the landed ones and never the
+# them piled up by 2026-09-11). A branch landed by a MERGE commit (#334, the
+# ship skill's --merge default) has no commits ahead and no patch-id; it reads
+# MERGED on the forge's PR record, never on ancestry alone. `prune` deletes
+# the landed ones and never the
 # others; args pass through (`just branches prune --yes`, `--no-pr`, `--depth N`).
 # Which local branches are fully landed (deletable) vs still holding work
 branches cmd="check" *args:
