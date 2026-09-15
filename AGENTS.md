@@ -203,6 +203,19 @@ Writing `${terminfo[khome]}` in what you intend as a comment is an
 evaluation error. Escape as `''${...}` or reword. General to any `''`
 string, hence inline here rather than in a skill.
 
+### An option that renders into a generated file can swallow a wrong key silently
+
+Freeform settings options (typed `attrsOf …` with a `freeformType`, like
+`security.pam.u2f.settings`) render any key verbatim into the generated
+config — a misspelled or renamed key evals clean and the consumer discards
+it. `settings.authFile` (camelCase of nixpkgs' `authfile`) was ignored by
+pam_u2f for five months, masked by the value coinciding with the consumer's
+default — §49. Eval passing is a claim about the type, not about the
+consumer: read the rendered artifact (`/etc/pam.d/<service>` on the host, or
+eval `config.security.pam.services.<name>.text`) when a change touches one.
+Reading the nixpkgs module's `mkRenamedOptionModule` block first is the
+write-time half — §33.
+
 ## Working in this repo
 
 **`git add` before `nix eval`.** Flakes in a git repo ignore untracked
