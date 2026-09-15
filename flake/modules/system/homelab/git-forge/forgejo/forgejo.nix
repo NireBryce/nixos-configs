@@ -85,7 +85,7 @@
                     };
 
                     service = {
-                        # Single-user instance behind a tailnet only elly's
+                        # Single-user instance behind a tailnet only the user's
                         # devices reach -- self-registration stays closed. A
                         # new user is a `forgejo admin user create` away.
                         DISABLE_REGISTRATION = true;
