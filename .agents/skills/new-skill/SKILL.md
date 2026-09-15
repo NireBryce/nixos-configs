@@ -24,7 +24,7 @@ body, by contrast, loads in full once the skill fires — trigger detail in
 `## Applies to` costs nothing there.
 
 Prefer active "How to `<verb>`…" phrasing for a procedural skill over a
-"Known traps in…" noun phrase — "traps" reads as scope, not purpose (Elly
+"Known traps in…" noun phrase — "traps" reads as scope, not purpose (the user
 rejected the latter for `new-flake-module` on 2026-08-22; the accepted form
 is that skill's current description). A short flow description without
 literal "How to" wording is fine (`ship`'s) as long as it states purpose.

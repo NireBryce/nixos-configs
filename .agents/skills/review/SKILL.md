@@ -91,7 +91,7 @@ Per changed file, the question that catches each:
   the change being reviewed?
 - **Wiki touched?** `wiki-sync` is part of the same change, not a follow-up.
 - **Filing bugs upstream** (nixpkgs, ble.sh, …): never in this repo's name
-  without Elly saying so explicitly. Even filings *here* can ping upstream
+  without the user saying so explicitly. Even filings *here* can ping upstream
   via `owner/repo#123` autolinking — grep the draft.
 
 ## Saying the outcome

@@ -41,7 +41,7 @@ rather than folded in silently.
 ## What doesn't
 
 - **A real bug**, even a tiny one, once it has a failure scenario — that's
-  `propose-issue`, not a drive-by fix, unless Elly is right there and says
+  `propose-issue`, not a drive-by fix, unless the user is right there and says
   fix it now.
 - **A stale wiki/AGENTS.md claim** your change makes true or false —
   that's `wiki-sync`'s job specifically, in the same change, but follow
@@ -59,7 +59,7 @@ rather than folded in silently.
 
 This repo is homelab-scale and reviewed by one person (`AGENTS.md`:
 "Homelab, not production"). A diff that quietly grew past its stated
-purpose is harder for Elly to review, not easier — a "fix the sops path"
+purpose is harder for the user to review, not easier — a "fix the sops path"
 PR that also silently reformats an unrelated module hides the actual
 change inside noise. Small and honestly-labeled is what keeps this useful
 instead of becoming the thing `ship`'s single-purpose-branch discipline

@@ -1,6 +1,7 @@
 # Using the forge, for agents
 
 _Last modified: 2026-09-13_
+_Sibling reviewed: 2026-09-14 -- forgejo.md only reworded "Elly" prose mentions to "the user"; no facts moved_
 
 Condensed from [forgejo.md](forgejo.md), which keeps the reasoning and the
 verification trail. Facts only here.

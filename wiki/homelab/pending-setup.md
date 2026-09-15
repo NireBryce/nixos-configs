@@ -1,6 +1,6 @@
 # Pending setup
 
-_Last modified: 2026-09-13_
+_Last modified: 2026-09-14_
 
 Services that are **running but not finished** — configured, switched,
 reachable, and still missing the human step that makes them useful. Every
@@ -46,7 +46,7 @@ to find a real bug, once more to confirm the fix).
 
 ## 1. Done — SSH key added, clone over SSH confirmed 2026-09-13
 
-Elly's key was already added; auth and a real clone were both exercised from
+The user's key was already added; auth and a real clone were both exercised from
 `nire-tenacity` on 2026-09-13:
 
 ```
@@ -72,7 +72,7 @@ otherwise are in
 ## 2. Done — mirror, reaffirmed 2026-09-12
 
 **Cube stays a mirror. GitHub remains canonical.** Decided 2026-09-03 and
-reaffirmed by Elly 2026-09-12 — this time with the condition that had
+reaffirmed by the user 2026-09-12 — this time with the condition that had
 gated it actually met, rather than in place of it: an origin was always
 held back until backups existed, and a real restore has since recovered a
 real database (item 4). The answer did not change.
@@ -127,7 +127,7 @@ the SSH-auth limitation — moved to
 
 **Both halves done 2026-09-13.**
 
-**The live password was changed by hand**, by Elly, through the UI. It
+**The live password was changed by hand**, by the user, through the UI. It
 persists: `grafana.nix` declares no drift enforcement, cube has a plain
 persistent root, so `/var/lib/grafana`'s sqlite db keeps it across reboots
 and rebuilds, and restic covers it.

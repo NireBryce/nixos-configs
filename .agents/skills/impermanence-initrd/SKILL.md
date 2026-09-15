@@ -34,7 +34,7 @@ Sources that are not rewritten, all unprivileged:
 - `/dev/disk/by-uuid/` — udev's symlinks, so LUKS and filesystem UUIDs resolve
 - `/run/current-system/…` and any `/nix/store` path — for what `/etc` should hold
 
-`btrfs subvolume list` needs privileges and is worth asking Elly to run; it
+`btrfs subvolume list` needs privileges and is worth asking the user to run; it
 answers whether `root-blank` exists without mounting anything:
 
 ```sh
