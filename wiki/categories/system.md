@@ -1,4 +1,4 @@
-# `system` — `nire/system/`
+# `system` — `system/system/`
 
 _Last modified: 2026-09-11_
 
@@ -57,7 +57,7 @@ under `system`.
 `home-manager/enable-home-manager.nix` is *the* module that wires
 `home-manager.users.elly` to the shared `ellyHomeManager` bundle with
 `useGlobalPkgs`/`useUserPackages` — see
-[../architecture.md](../architecture.md). It's filed under `nire/system/`
+[../architecture.md](../architecture.md). It's filed under `system/system/`
 specifically so the `system` category picks it up and every host that
 imports `system` gets it automatically, rather than each host wiring HM in
 by hand. `enable-home-manager-darwin.nix` is the nix-darwin-side equivalent
@@ -153,7 +153,7 @@ Both rely on `environment.persistence."/persist".directories` being
 same merge behavior as `environment.systemPackages` and the same one that
 makes `home.file.<n>.text` a trap on the Home Manager side (see
 [shell-config](shell-config/00-INDEX.md)). See
-`nire/system/impermanence/declare-persistence-option.nix`'s own header (and
+`system/system/impermanence/declare-persistence-option.nix`'s own header (and
 [impermanence](impermanence.md)) for why that option has to be declared
 unconditionally even on hosts where nothing populates it.
 

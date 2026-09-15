@@ -1,4 +1,4 @@
-# `reverse-proxy` — `nire/homelab/reverse-proxy/`
+# `reverse-proxy` — `system/homelab/reverse-proxy/`
 
 _Last modified: 2026-09-14_
 

@@ -1,4 +1,4 @@
-# `landing` — `nire/homelab/landing/`
+# `landing` — `system/homelab/landing/`
 
 _Last modified: 2026-09-14_
 

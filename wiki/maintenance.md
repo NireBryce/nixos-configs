@@ -102,7 +102,7 @@ deploy matters more than any schedule:
 Half automatic, half not:
 
 - **Automatic, user profiles.** The home-manager nh module
-  (`flake/modules/nirePackages/nix-utils/nh/nh.nix`) sets
+  (`flake/modules/packages/nix-utils/nh/nh.nix`) sets
   `programs.nh.clean` for elly on all four hosts (verified by eval on
   each host's config, 2026-09-14), which wires a systemd **user** timer:
   `nh-clean.timer` runs weekly, Mondays 00:00, `Persistent=true`, and

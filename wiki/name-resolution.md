@@ -53,7 +53,7 @@ differently under the hood — as netmap `ExtraRecords`, which are
 **visibility-granted**: a host whose only identity is a tag never
 receives them without a grant whose `src` is that tag (found live,
 issue #298; full story in
-[../flake/modules/nire/homelab/reverse-proxy/tailscale-services/README.md](../flake/modules/nire/homelab/reverse-proxy/tailscale-services/README.md)).
+[../flake/modules/system/homelab/reverse-proxy/tailscale-services/README.md](../flake/modules/system/homelab/reverse-proxy/tailscale-services/README.md)).
 
 ## Reverse DNS (PTR)
 
@@ -113,17 +113,17 @@ not grep against `networking.hostName` — that gap is trap 1 in
 The config rationale and the four hard-won traps live in the modules —
 read these before changing anything:
 
-- `flake/modules/nire/system/networking/tailscale.nix` — the
+- `flake/modules/system/system/networking/tailscale.nix` — the
   `ts-`-vs-`nire-` device-name trap, the ACL-vs-firewall signature,
   the "tailnet name won't resolve → is Tailscale up on *your* machine?"
   rule and the `.local` fallback, and the tagging visibility incident.
   `flake/scripts/reach-host.sh` (`just reach <host>`) automates trying
   every real name a host answers to.
-- `flake/modules/nire/system/networking/resolved.nix` — why resolved
+- `flake/modules/system/system/networking/resolved.nix` — why resolved
   has mDNS off globally (the 5353 coupling), and why tailscaled ends up
   in D-Bus/link-DNS mode instead of rewriting `/etc/resolv.conf`.
-- `flake/modules/nire/system/networking/avahi.nix` — the `.local` half
+- `flake/modules/system/system/networking/avahi.nix` — the `.local` half
   and the publish settings that make hosts answer for their own names.
-- `flake/modules/nire/homelab/reverse-proxy/tailscale-services/README.md`
+- `flake/modules/system/homelab/reverse-proxy/tailscale-services/README.md`
   — the `svc:` layer: Service objects, the tag/grant visibility rule
   (#298), and the activation dance.

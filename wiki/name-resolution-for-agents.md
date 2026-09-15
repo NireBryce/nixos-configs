@@ -4,8 +4,8 @@ _Last modified: 2026-09-14_
 
 Condensed from [name-resolution.md](name-resolution.md). Config rationale
 and the four name traps live in the modules — `tailscale.nix`,
-`resolved.nix`, `avahi.nix` (all under `flake/modules/nire/system/networking/`)
-and `flake/modules/nire/homelab/reverse-proxy/tailscale-services/README.md`
+`resolved.nix`, `avahi.nix` (all under `flake/modules/system/system/networking/`)
+and `flake/modules/system/homelab/reverse-proxy/tailscale-services/README.md`
 — not restated here. All behavioral claims probed live 2026-09-14 on
 nire-tenacity unless a qualifier says otherwise.
 

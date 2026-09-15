@@ -42,7 +42,7 @@ repo's own tracker is the issue queue, not another markdown list.
   and breaks a host stays invisible until someone runs `just switch` on
   real hardware — §§36–37 exactly. cube is `x86_64-linux` and already runs
   scheduled work against a sops credential
-  ([restic.nix](../flake/modules/nire/homelab/backup/restic/restic.nix) is
+  ([restic.nix](../flake/modules/system/homelab/backup/restic/restic.nix) is
   the precedent for the whole shape), so it can do what a runner
   structurally cannot. Note this **relocates** the PAT rather than removing
   it — same scopes, same expiry, `/run/secrets/` instead of a GitHub
@@ -177,7 +177,7 @@ specific report — not as a housekeeping pass over this list:
 - **CI's lint step re-fetches `nixpkgs#statix nixpkgs#deadnix` from the
   binary cache on every run** (`.github/workflows/check.yml`), rather than
   reusing the flake's own nixpkgs input (already in the tree as
-  home-manager packages, per `nirePackages/nix-utils/`). Cheap today; worth
+  home-manager packages, per `packages/nix-utils/`). Cheap today; worth
   pinning if CI minutes ever start mattering. Rescued 2026-09-08 from a
   removed notebook.
 - **QNAP NAS: no way to disable SSH password authentication in the QNAP's

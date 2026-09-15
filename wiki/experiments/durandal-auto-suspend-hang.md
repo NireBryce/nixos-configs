@@ -97,7 +97,7 @@ Two consequences, both load-bearing:
 
 Nothing is being tested right now. Instrumentation only:
 
-- **[suspend-probe-durandal.nix](../../flake/modules/nireHost/durandal/fixes/suspend-probe-durandal.nix)**
+- **[suspend-probe-durandal.nix](../../flake/modules/hosts/durandal/fixes/suspend-probe-durandal.nix)**
   — dumps wakeup, GPE and drive state to `/var/log/suspend-probe/` around every
   suspend, `sync`'d so it survives the power cut. `/var/log` is its own btrfs
   subvolume, outside the wiped root.

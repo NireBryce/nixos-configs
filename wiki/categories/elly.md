@@ -1,10 +1,10 @@
-# `elly` — `nireUser/elly/`
+# `elly` — `users/elly/`
 
 _Last modified: 2026-09-14_
 
-The one category under `nireUser/` — the "for the user" area, as opposed to
-`nire/` (shared system) or `nirePackages/` (packages). Don't confuse this
-category with `nireUser/elly-home-manager.nix`, the entry point one level up
+The one category under `users/` — the "for the user" area, as opposed to
+`system/` (shared system) or `packages/` (packages). Don't confuse this
+category with `users/elly-home-manager.nix`, the entry point one level up
 that assembles the *whole* `ellyHomeManager` bundle out of this category
 plus several others — see [../architecture.md](../architecture.md).
 
@@ -42,13 +42,13 @@ plus several others — see [../architecture.md](../architecture.md).
   `boot.initrd.systemd.services ? restore-root` existing (the unit only
   `WARN-impermanence.nix` creates) rather than on
   `environment.persistence`, because that option is declared for *every*
-  host regardless, via `nire/system/impermanence/declare-persistence-option.nix`
+  host regardless, via `system/system/impermanence/declare-persistence-option.nix`
   (see [system](system.md)) — so it wouldn't distinguish anything. `nire-cube`
   is additionally excluded by hostname: the module used to fire on cube too,
   but its password hash was created by hand on the real machine before cube
   was ever switched, and a plain persistent root never wipes it back out, so
   the reminder had nothing left to remind about there (fixed 2026-09-01).
-  Filed under `nireUser/elly/` specifically so it rides the `elly` category
+  Filed under `users/elly/` specifically so it rides the `elly` category
   into every host automatically — including any *future* non-impermanence
   host, which would still get the warning — rather than needing to be wired
   in by hand.
@@ -88,6 +88,6 @@ Users section for the same plan stated for a human reader.
   `WARN-password-required.nix` exists to flag (cube itself is now excluded
   by hostname, since its password was already solved by hand).
 - [system](system.md) — `declare-persistence-option.nix`, referenced above.
-- [../architecture.md](../architecture.md) — `nireUser/elly-home-manager.nix`,
+- [../architecture.md](../architecture.md) — `users/elly-home-manager.nix`,
   the entry point that assembles this category into the full bundle every
   host's Home Manager actually uses.

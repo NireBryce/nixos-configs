@@ -1,4 +1,4 @@
-# `containers` — `nire/homelab/containers/`
+# `containers` — `system/homelab/containers/`
 
 _Last modified: 2026-09-02_
 
@@ -42,7 +42,7 @@ One file, `podman/podman.nix`, `nixos`-class:
 ## Why it's its own category, and why that didn't change anything
 
 Split out of `system` 2026-08-22, structurally the same move
-[virtualization](virtualization.md) got the day before: `nire/system/` is
+[virtualization](virtualization.md) got the day before: `system/system/` is
 imported whole by every Linux host, and splitting a module into its own
 category is this repo's only mechanism for making something optional
 ([../architecture.md](../architecture.md)). At split time no host declined

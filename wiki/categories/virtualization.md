@@ -1,10 +1,10 @@
-# `virtualization` — `nire/homelab/virtualization/`
+# `virtualization` — `system/homelab/virtualization/`
 
 _Last modified: 2026-09-04_
 
 Libvirt/QEMU VMs, and *only* that — see [containers](containers.md) for why
 podman and distrobox (OCI containers) are a different category. Nested under
-the `homelab` umbrella since 2026-08-27 (moved from `nire/virtualization/`;
+the `homelab` umbrella since 2026-08-27 (moved from `system/virtualization/`;
 name and by-name importability unaffected). `nire-llm-sandbox`, the one VM
 this category ran, was removed 2026-08-28 — [history.md](../history.md).
 
@@ -84,11 +84,11 @@ a plain curried function (`{ name, image, ... }: { pkgs, lib, ... }: ...`),
 not a flake-parts module — it takes parameters, so `import-tree` would fail
 auto-importing it. Filed under `_lib/` because `import-tree` ignores any
 path containing `/_` (same as
-`nire/impermanence/_disko/impermanence-luks-btrfs.nix`).
+`system/impermanence/_disko/impermanence-luks-btrfs.nix`).
 
 Its one caller, `virtualization-cube.nix`, was removed with the VM
 2026-08-28. While it existed it illustrated a second dirsAsCategory
-exclusion worth knowing: a file sitting bare in `nire/homelab/virtualization/`
+exclusion worth knowing: a file sitting bare in `system/homelab/virtualization/`
 itself (not in a subdirectory) is collected by nothing — which kept the VM
 out of this category's aggregate back when durandal imported it too. It
 still **was** swept into the `homelab` aggregate cube imports, since
@@ -104,7 +104,7 @@ image-building writeup if another VM ever gets wired up.
 
 ## Why this is its own category and not part of `system`
 
-So the handhelds can decline it: `nire/system/` is imported whole by every
+So the handhelds can decline it: `system/system/` is imported whole by every
 Linux host, and a boot-time daemon like `libvirtd` has no business on a
 gamescope handheld. Needs `security.polkit.enable`, which `kde-desktop`
 already brings on the hosts that import it.

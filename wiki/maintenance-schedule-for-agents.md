@@ -60,7 +60,7 @@ the *absence* of an `admin_password` setting is what leaves it stock. Skill
 |---|---|
 | 4 | `just age-key` → update `.sops.yaml` → `sops updatekeys secrets.yaml`; [impermanence-and-secrets.md](impermanence-and-secrets.md) |
 | 5, 6 | [homelab/backup-runbook.md](homelab/backup-runbook.md) |
-| 11 | `nirePackages/shell-apps/history/atuin-key-rotation.md` |
+| 11 | `packages/shell-apps/history/atuin-key-rotation.md` |
 
 ## `FLAKE_LOCK_TOKEN` specifics
 

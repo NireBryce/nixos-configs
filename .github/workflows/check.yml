@@ -120,7 +120,7 @@ jobs:
 
       # All four hosts .sops.yaml enrolls, including the darwinConfigurations
       # entry -- nire-lysithea's config touches secrets.yaml too
-      # (nire/system/secrets/sops-darwin.nix), so --all-systems evaluating the
+      # (system/system/secrets/sops-darwin.nix), so --all-systems evaluating the
       # darwin config below hits the same store race this warmup exists for.
       - name: warm up sops-enrolled hosts' secrets.yaml store registration
         run: |

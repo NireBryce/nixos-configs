@@ -34,14 +34,14 @@ _Last modified: 2026-09-08_
 - `nire-lego` (a handheld, Legion Go, never built or switched) and
   `nire-installer` (the generic live-USB installer image, generalized
   2026-08-22 from what installed `nire-testbed`) were both removed
-  2026-08-27 with their `nireHost/` files and `hosts.nix` entries. Neither
+  2026-08-27 with their `hosts/` files and `hosts.nix` entries. Neither
   ever ran on real hardware. The live-USB mechanism (embedded flake,
   patched Calamares, unattended `nixos-install`) isn't disproven, just not
   carried any more — git history has the last version, same as
   `nire-testbed`'s.
 - `nire-llm-sandbox` (a qcow2-building `nixosConfigurations` entry run
   persistently as a libvirt VM on `nire-cube`, sandboxing an LLM coding
-  agent) was removed 2026-08-28 with its `nireHost/llm-sandbox/` files,
+  agent) was removed 2026-08-28 with its `hosts/llm-sandbox/` files,
   `hosts.nix` entry, and `virtualization-cube.nix`. Confirmed booted and
   staying up 2026-08-24 (see "Confirmed-on-hardware facts" below);
   §  §40 has the three runtime-only bugs its first switch hit. The generator

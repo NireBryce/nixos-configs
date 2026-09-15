@@ -1,4 +1,4 @@
-# `git-forge` — `nire/homelab/git-forge/`
+# `git-forge` — `system/homelab/git-forge/`
 
 _Last modified: 2026-09-13_
 

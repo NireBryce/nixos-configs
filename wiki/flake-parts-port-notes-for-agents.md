@@ -14,7 +14,7 @@ Each was an explicit choice, not a default. Re-deciding them silently is
 worse than either answer.
 
 - **Home Manager NixOS-integrated**, not standalone.
-  `nire/system/home-manager/enable-home-manager.nix`;
+  `system/system/home-manager/enable-home-manager.nix`;
   [`../flake/doc/trailhead-home-manager-standalone.md`](<../flake/doc/trailhead-home-manager-standalone.md>)
   is the way back.
 - **Package parity across hosts** — no role split. The handheld gets the full
@@ -22,7 +22,7 @@ worse than either answer.
 - **starship for every shell**; powerlevel10k and its 1,659-line config
   deleted.
 - **Full per-file dendritic conversion** of package modules, boilerplate
-  accepted. That is why `nirePackages/` is one file per package.
+  accepted. That is why `packages/` is one file per package.
 - **The grep-trail convention**, since promoted into `AGENTS.md`.
 - Roles `base`/`desktop`/`handheld` — **superseded** by `dirsAsCategory`
   categories.

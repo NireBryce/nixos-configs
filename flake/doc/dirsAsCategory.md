@@ -19,7 +19,7 @@ Every category directory holds a copy of `dirsAsCategory.nix`. As of
 2026-08-27 that copy is a two-line shim — the actual logic lives once, in
 `modules/_lib/category-collector.nix`, and every copy is now byte-identical
 (confirmed by hashing all of them; before this change three had drifted by a
-comment word, and `nirePackages/_templates/dirsAsCategory.nix`, inert because
+comment word, and `packages/_templates/dirsAsCategory.nix`, inert because
 `import-tree` ignores `/_` paths, carried an extra header paragraph — see
 `history` below for why that drift didn't need fixing on its own):
 
@@ -73,8 +73,8 @@ forClass = class:
 directory it is filed in.** Adding a module is a one-file change — create the
 file in the right place and it is in. That is the mechanism's whole appeal.
 
-**A nested category (`nire/hardware/amd/`, `homelab`'s seven children,
-`nirePackages/development/langs`, ...) is referenced by name instead of
+**A nested category (`system/hardware/amd/`, `homelab`'s seven children,
+`packages/development/langs`, ...) is referenced by name instead of
 walked from scratch by every ancestor.** If a subdirectory owns its own
 `dirsAsCategory.nix`, the collector adds that subdirectory's own name to the
 list — `forClass` then resolves it exactly like a plain module name, because
@@ -101,7 +101,7 @@ logic out:
   silently dropped `libvirt-vm-llm-sandbox` from `nire-cube`'s
   `systemd.services` entirely. Cause: `virtualization-cube.nix` (the
   `nire-llm-sandbox` VM's cube wiring — both since removed, 2026-08-28; see
-  `wiki/history.md`) sat bare in `nire/homelab/virtualization/`'s own root,
+  `wiki/history.md`) sat bare in `system/homelab/virtualization/`'s own root,
   deliberately excluded from the
   `virtualization` category's own aggregate (a `.nix` file bare in a
   category's own root is collected by nothing — see "Things that are
@@ -138,8 +138,8 @@ once instead of having its modules listed a second time.
   declares. `micro.nix` declares only `homeManager`; without the filter,
   `flake.modules.nixos.editors` asks for `config.flake.modules.nixos.micro`,
   which does not exist.
-- **Nested categories overlap their parents on purpose.** `nire/hardware` and
-  `nire/hardware/amd` both collect `amdcpu` and `amdgpu`, because `collectModules`
+- **Nested categories overlap their parents on purpose.** `system/hardware` and
+  `system/hardware/amd` both collect `amdcpu` and `amdgpu`, because `collectModules`
   recurses. That gives coarse and fine handles on the same modules. It looks
   like a bug and is not.
 - **The name filter must match the current filename.** It excluded
@@ -230,7 +230,7 @@ Order matters; each step's precondition is the previous one.
 
 2. **Decide the aggregate names before touching files.** The natural choice is
    to keep the existing category names — `development`, `editors`, `gui-other`,
-   `linux-utils`, `nix-utils`, `shell-apps`, `terminals`, and the `nire/*` ones —
+   `linux-utils`, `nix-utils`, `shell-apps`, `terminals`, and the `system/*` ones —
    so the conversion changes only *how* membership is established, not what the
    groups are called. `aspect-durandal.nix`'s `moduleList` is then still the
    host's roster, unchanged. Renaming at the same time makes the diff
@@ -282,12 +282,12 @@ logic — so none of it needed preserving as `history` anywhere: it was drift
 in wording, not a stranded decision or a bug.
 
 The refactor moves the logic into `modules/_lib/category-collector.nix`
-(kept out of `import-tree`'s sweep the same way `nirePackages/_lib/` and
-`nirePackages/_templates/` already are — any path containing `/_`), leaving
+(kept out of `import-tree`'s sweep the same way `packages/_lib/` and
+`packages/_templates/` already are — any path containing `/_`), leaving
 each copy as the two-line shim shown above. Verified by getting `drvPath`
 fingerprints for `nire-durandal` and `nire-cube` (the deepest nested-category
 user, via `homelab`) before touching anything, converting one file
-(`nire/boot/`) first and re-checking before rolling out to the rest, and
+(`system/boot/`) first and re-checking before rolling out to the rest, and
 confirming both hosts' `drvPath` came back **byte-identical**, not just
 attribute-equal, after all 37 were converted. `just modules` stayed clean
 throughout.
@@ -295,7 +295,7 @@ throughout.
 Reaching the shared file was tried via `inputs.self` first, specifically
 because it looked like the obvious depth-independent path; it isn't one, for
 the reason in the code comment above, and cost one throwaway single-file
-test (`nire/boot/`, still under version control at that point so nothing was
+test (`system/boot/`, still under version control at that point so nothing was
 lost) to find out before it would have been baked into all 37.
 
 **The same session also added nested-category delegation, in three passes**

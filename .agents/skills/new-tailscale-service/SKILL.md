@@ -26,7 +26,7 @@ Grafana and Forgejo moved off `ts-cube.../grafana/` and `ts-cube.../git/`
 onto `grafana.<tailnet-domain>`/`git.<tailnet-domain>` the same day
 Tailscale Services (`svc:`) opened up on this tailnet — full account in
 `wiki/categories/reverse-proxy.md` and
-`flake/modules/nire/homelab/reverse-proxy/tailscale-services/`. That move is
+`flake/modules/system/homelab/reverse-proxy/tailscale-services/`. That move is
 the worked example this skill generalizes; read `serve.nix`'s history
 section once for the failed first design, since it's the trap most likely to
 be re-invented.
@@ -150,10 +150,10 @@ what it lists as still open.
 
 - `new-homelab-service` — the broader checklist this extends; do that one
   first if the service isn't already running behind Caddy.
-- `flake/modules/nire/homelab/reverse-proxy/tailscale-services/serve.nix` —
+- `flake/modules/system/homelab/reverse-proxy/tailscale-services/serve.nix` —
   the worked example, including the failed first design in its history
   section.
-- `flake/modules/nire/homelab/reverse-proxy/tailscale-services/README.md` —
+- `flake/modules/system/homelab/reverse-proxy/tailscale-services/README.md` —
   the ACL/tag/service-object side, and the tagging incident in full.
 - `wiki/categories/reverse-proxy.md` — Caddy's half of this, including the
   cert mechanism and why `permitCertUid` is scoped where it is.

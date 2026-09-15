@@ -4,7 +4,7 @@ _Last modified: 2026-09-09_
 
 §41 of [lessons-learned.md](../lessons-learned.md#41-a-proxy-config-can-be-valid-buildable-and-wrong-per-app--two-apps-behind-one-prefix-wanted-opposite-prefix-handling) — that page keeps the one-line version of every lesson; this is §41's full account.
 
-`nire/reverse-proxy/caddy.nix`, 2026-08-24. Grafana and Forgejo were both
+`system/reverse-proxy/caddy.nix`, 2026-08-24. Grafana and Forgejo were both
 mounted under a path prefix on the same hostname
 (`/grafana`, `/git`), and both were given the same Caddy directive,
 `handle`, which passes the matched path through untouched.

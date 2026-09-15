@@ -7,7 +7,7 @@ the unrelated `bnavetta/rustic` "restic wrapper" that shares its name in
 search results) — a client tool for the repository
 [backup](../categories/backup.md) writes, not a service this fleet runs.
 Installed 2026-08-28 in
-`nirePackages/shell-apps/backup-tools/rustic.nix`, so it's on every host
+`packages/shell-apps/backup-tools/rustic.nix`, so it's on every host
 `ellyHomeManager` reaches.
 
 ## Contents
@@ -44,7 +44,7 @@ one caveat: don't run `prune` from both at the same time.
 
 **Installed, 2026-08-28**: `pkgs.rustic` (pname `rustic`, v0.11.3,
 `mainProgram = "rustic"`) via
-`nirePackages/shell-apps/backup-tools/rustic.nix` — a plain `home.packages`
+`packages/shell-apps/backup-tools/rustic.nix` — a plain `home.packages`
 entry, no `programs.*`/`services.*` module exists for it. It's in
 `ellyHomeManager`, which every host shares, rather than gated to cube: it's
 a generally useful restic-repository browser, not tied to this one

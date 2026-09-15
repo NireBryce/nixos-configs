@@ -69,7 +69,7 @@ The fix that tested clean against carapace's real generated function on
 instead of `IFS=$sep read -r -d '' nospace data <<< "${data}"`) sidesteps
 ble.sh's read-shadow entirely rather than trying to out-think it, and is now
 in the tree:
-`flake/modules/nire/shell-config/bash/carapace-completer-read-fix.bash`,
+`flake/modules/system/shell-config/bash/carapace-completer-read-fix.bash`,
 sourced from `bash.nix` right after `source <(carapace _carapace bash)`,
 patching `_carapace_completer`'s own body via `declare -f` plus a textual
 substitution — with a loud stderr warning if the line it's looking for ever

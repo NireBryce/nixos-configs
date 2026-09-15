@@ -12,7 +12,7 @@ the old `.../git/` path 404s.
 
 ## What's in it
 
-One file, `nixos`-class: `nire/homelab/git-forge/forgejo/forgejo.nix`.
+One file, `nixos`-class: `system/homelab/git-forge/forgejo/forgejo.nix`.
 
 Category isn't named `forgejo` because category-and-module sharing a name
 both declare `flake.modules.nixos.forgejo` and silently **merge**. Hit for

@@ -1,4 +1,4 @@
-# `backup` — `nire/homelab/backup/`
+# `backup` — `system/homelab/backup/`
 
 _Last modified: 2026-09-11_
 

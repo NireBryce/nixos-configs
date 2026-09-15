@@ -1,4 +1,4 @@
-# `peripherals` — `nire/peripherals/`
+# `peripherals` — `system/peripherals/`
 
 _Last modified: 2026-09-01_
 

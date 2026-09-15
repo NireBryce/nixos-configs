@@ -7,9 +7,9 @@ description: How to add a new host (nixosConfigurations or darwinConfigurations 
 
 ## Applies to
 
-Adding a machine to this repo: a `nireHost/<name>-configuration.nix` entry
-point, a `nireHost/<name>/` directory of host-specific modules, and a line in
-`hosts.nix`. The entry point sits directly under `nireHost/`, outside every
+Adding a machine to this repo: a `hosts/<name>-configuration.nix` entry
+point, a `hosts/<name>/` directory of host-specific modules, and a line in
+`hosts.nix`. The entry point sits directly under `hosts/`, outside every
 category tree on purpose (`new-flake-module` skill has why); the directory is
 collected by its own `dirsAsCategory.nix` copy. Worked examples: durandal,
 tenacity, cube, lysithea (darwin) — read the closest one first. (`nire-lego`
@@ -28,7 +28,7 @@ match.)
   file's header like `cube-configuration.nix` does, including the
   `invariants.nix` interaction.
 - **CPU/GPU?** AMD hosts import the shared `hardware` category (`amdcpu`,
-  `amdgpu`). **Never add an `intel` sibling under `nire/hardware/`** —
+  `amdgpu`). **Never add an `intel` sibling under `system/hardware/`** —
   `dirsAsCategory` recurses into subdirectories, so it would apply to the AMD
   hosts too. An Intel host skips `hardware` and pulls a `nixos-hardware`
   module for the exact machine (e.g. `lenovo-thinkpad-x270`) from its own
@@ -51,7 +51,7 @@ as-is makes flake-parts resolve `modulesPath` itself and dies with a
 misleading `infinite recursion` (`new-flake-module` has the wrapping shape).
 
 **No hardware yet**: use the disko generator
-`nire/impermanence/_disko/impermanence-luks-btrfs.nix` (curried over
+`system/impermanence/_disko/impermanence-luks-btrfs.nix` (curried over
 `device`, `includeSecureboot`, `swapSize`; explained with a call-site example
 in `flake/doc/disko-impermanence-layout.md`) instead of inventing a
 `hardware-configuration.nix`. Nothing in the tree currently calls it; the
@@ -103,8 +103,8 @@ worked example of recording a deliberate omission).
 
 ## Wiring
 
-1. `nireHost/<name>-configuration.nix` — imports + `networking.hostName`.
-2. `nireHost/<name>/` with a verbatim copy of `dirsAsCategory.nix` and the
+1. `hosts/<name>-configuration.nix` — imports + `networking.hostName`.
+2. `hosts/<name>/` with a verbatim copy of `dirsAsCategory.nix` and the
    `configuration/`, `hardware/`, `fixes/` subdirs the host needs.
 3. `hosts.nix`: `mkHost` line in `flake.nixosConfigurations` (or
    `mkDarwinHost` in `darwinConfigurations`), pointing at
@@ -124,7 +124,7 @@ worked example of recording a deliberate omission).
 tree silently doesn't exist until staged.
 
 ```sh
-git add -A flake/modules/nireHost/<name> flake/modules/nireHost/<name>-configuration.nix flake/modules/nireHost/hosts.nix
+git add -A flake/modules/hosts/<name> flake/modules/hosts/<name>-configuration.nix flake/modules/hosts/hosts.nix
 just modules      # category-membership check; catches name collisions
 cd flake && nix eval --raw .#nixosConfigurations.<name>.config.system.build.toplevel.drvPath
 ```

@@ -4,11 +4,11 @@ _Last modified: 2026-09-02_
 
 A completion engine used as the primary source of shell completions across
 this repo: `pkgs.carapace` in `home.packages`
-([`carapace-completions.nix`](../../../flake/modules/nirePackages/shell-apps/completions/carapace-completions.nix)),
+([`carapace-completions.nix`](../../../flake/modules/packages/shell-apps/completions/carapace-completions.nix)),
 sourced into bash via `source <(carapace _carapace bash)` in `bash.nix`, and
 layered under ble.sh's own menu in
-[`blesh.nix`](../../../flake/modules/nire/shell-config/bash/blesh.nix) /
-[`carapace-desc.bash`](../../../flake/modules/nire/shell-config/bash/carapace-desc.bash)
+[`blesh.nix`](../../../flake/modules/system/shell-config/bash/blesh.nix) /
+[`carapace-desc.bash`](../../../flake/modules/system/shell-config/bash/carapace-desc.bash)
 (see [blesh.md](blesh.md)). Unlike `cod` (below), carapace has no daemon and
 no system-wide state: it's a binary invoked synchronously per completion
 request, which is why it lives in `home.packages` rather than needing a
@@ -71,7 +71,7 @@ As of 2026-08-22 it does, in order:
 
 ## The `cod` registration race, and how it's resolved
 
-`cod` ([`cod-completions.nix`](../../../flake/modules/nirePackages/shell-apps/completions/cod-completions.nix))
+`cod` ([`cod-completions.nix`](../../../flake/modules/packages/shell-apps/completions/cod-completions.nix))
 is a *different* completion mechanism — a daemon that learns completions at
 runtime by watching for a command's `--help` invocation, needs a system
 install (hence `environment.systemPackages`, not `home.packages`), and was
@@ -112,6 +112,6 @@ session, the next time you happen to run `<carapace-covered-command>
   bug found in that interaction.
 - [shell-config](00-INDEX.md) — the category `bash.nix` (the
   sourcing side) lives in.
-- [`carapace-completions.nix`](../../../flake/modules/nirePackages/shell-apps/completions/carapace-completions.nix)
-  and [`cod-completions.nix`](../../../flake/modules/nirePackages/shell-apps/completions/cod-completions.nix)
+- [`carapace-completions.nix`](../../../flake/modules/packages/shell-apps/completions/carapace-completions.nix)
+  and [`cod-completions.nix`](../../../flake/modules/packages/shell-apps/completions/cod-completions.nix)
   — the modules themselves, with the fuller history in their own comments.

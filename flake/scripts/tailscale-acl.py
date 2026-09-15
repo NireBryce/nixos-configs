@@ -45,7 +45,7 @@ with $TAILSCALE_TAILNET for a different one.
 import os, subprocess, sys, urllib.request, urllib.error, difflib, pathlib, json
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
-SECRETS_FILE = REPO_ROOT / "flake/modules/nire/system/secrets/secrets.yaml"
+SECRETS_FILE = REPO_ROOT / "flake/modules/system/system/secrets/secrets.yaml"
 TAILNET = os.environ.get("TAILSCALE_TAILNET", "moose-micro.ts.net")
 BASE = f"https://api.tailscale.com/api/v2/tailnet/{TAILNET}"
 ACL_API = f"{BASE}/acl"

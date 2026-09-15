@@ -11,7 +11,7 @@ nested under `homelab` 2026-08-27. Usage is
 
 ## What's in it
 
-One file, `nixos`-class: `nire/homelab/shortlinks/golink/golink.nix`.
+One file, `nixos`-class: `system/homelab/shortlinks/golink/golink.nix`.
 
 Named `shortlinks`, not `golink`/`golinks`: category-and-module sharing a
 name silently **merge**, and a name one letter off its module reads as a

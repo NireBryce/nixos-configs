@@ -19,7 +19,7 @@ the precedents. Rules only here. The *repo's* style guide is
 | `wiki/experiments/` | open questions: one page per problem **instrumented but not yet diagnosed** — symptom, established, ruled out, under test. Must mark settled vs under-test claims (`fact-hygiene`). On resolution the outcome moves to `lessons-learned.md` or the category page and the page goes. |
 | `<page>-for-agents.md` | the condensed sibling; see below. |
 
-No per-category page for `nirePackages/*` subcategories or `nireHost/*`
+No per-category page for `packages/*` subcategories or `hosts/*`
 bundles.
 
 A category page's order: **what's in it → category-specific mechanism notes
