@@ -63,8 +63,8 @@
         # NOT mirroring sops-darwin.nix's `environment.variables
         # SOPS_AGE_KEY_FILE` here on purpose: that variable is exported
         # system-wide, to every user's shell -- fine on darwin, where it
-        # points at elly's own home directory. Here it would have to point
-        # at a ROOT-owned path, and setting that globally would hand elly's
+        # points at the user's own home directory. Here it would have to point
+        # at a ROOT-owned path, and setting that globally would hand the user's
         # own (unprivileged, unrelated) `sops` invocations a path they can't
         # read instead of leaving them alone. No env var needed anyway:
         # sops's default identity-file lookup already resolves per-$HOME on
@@ -75,13 +75,13 @@
         # `environment.variables.EDITOR`/`VISUAL` below IS exported
         # system-wide, unlike SOPS_AGE_KEY_FILE above -- and that's fine
         # here, unlike there: SOPS_AGE_KEY_FILE would have to point at a
-        # ROOT-owned path, wrong for elly's own unprivileged `sops` calls,
+        # ROOT-owned path, wrong for the user's own unprivileged `sops` calls,
         # but "micro" is the same correct value for every user on this
-        # config (elly's own copy comes from shell-env.nix's
+        # config (the user's own copy comes from shell-env.nix's
         # `home.sessionVariables`, a Home Manager option that only lands in
-        # HER shell -- root has no Home Manager profile at all, so without
+        # the user's shell -- root has no Home Manager profile at all, so without
         # this, `sudo sops secrets.yaml` falls through to sops's built-in
-        # default, vi, silently inconsistent with elly's configured editor).
+        # default, vi, silently inconsistent with the user's configured editor).
         # Filed as issue #118, found while checking cube's interactive sops
         # flow end to end.
         #
@@ -98,7 +98,7 @@
         # binary cache -- a categorically worse exposure than "root-only on
         # this one machine," which is all this module is meant to stay.
         flake.modules.nixos.${moduleName} = { config, lib, pkgs, ... }: {
-            # Root has no Home Manager profile, so elly's `EDITOR = "micro"`
+            # Root has no Home Manager profile, so the user's `EDITOR = "micro"`
             # (shell-env.nix) never reaches it -- see the header comment.
             # Same value, exported system-wide instead of per-user.
             environment.variables = {
