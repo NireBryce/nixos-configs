@@ -309,6 +309,32 @@ here, don't wrap this file in ciphertext to protect one row.
 - **Last checked**: 2026-09-09 — no rotation has happened yet; this is the
   first time the procedure was written down.
 
+### 12. `nire-galatea/tskey` — a dead Tailscale auth key in git history
+
+- **What**: an auth key file committed 2024-01-29 (`449d158`, "struggling
+  with sops again") while `nire-galatea/` — a host long since removed from
+  the fleet — was still in the tree; the file left the tree again later
+  that year. It exists only in git history now, reachable from every
+  branch. Listed here so the next scanner flag finds a decision instead of
+  re-deriving one — not because anything is due, the same shape as item 9.
+- **Expiry**: dead twice over. Rotated at the time (2024, per the user),
+  and Tailscale auth keys can't outlive 90 days regardless. The repo is
+  public, so the blob has been public since the day it was pushed — the
+  exposure window closed years before anyone flagged it again.
+- **Decision, 2026-09-14: left in place; history rewrite considered and
+  rejected.** Purging it means force-pushing `main` and `experimental`
+  (both ruleset-protected), invalidating every commit-SHA reference made
+  since January 2024, and dropping the rewrite under whatever sessions are
+  in flight — for a credential that cannot authenticate, in a repo where
+  the old objects survive in existing clones and GitHub's caches no matter
+  what (a true purge is a GitHub Support ticket even after a rewrite). The
+  same public-repo permanence item 10 records for `secrets.yaml`'s
+  ciphertext applies here.
+- **What to do when a scanner flags it**: mark it rotated/false-positive
+  and move on. The flag is expected noise, not a finding.
+- **Last checked**: 2026-09-14 — decision made; no key material read, per
+  `secrets-hygiene`.
+
 ## Adding a new item
 
 When a change introduces a new credential, key, or certificate with any

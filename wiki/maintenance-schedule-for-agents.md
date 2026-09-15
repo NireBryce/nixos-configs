@@ -1,8 +1,6 @@
 # Maintenance schedule, for agents
 
-_Last modified: 2026-09-13_
-
-_Sibling reviewed: 2026-09-14 -- maintenance-schedule.md only reworded two "Elly" prose mentions to "the user"; no facts moved_
+_Last modified: 2026-09-14_
 
 Condensed from [maintenance-schedule.md](maintenance-schedule.md), which
 keeps each item's reasoning, rejected alternatives and evidence. Facts only
@@ -28,6 +26,15 @@ and dates are not values.
 | 9 | Syncthing device certs | decades; **declared by no module since 2026-09-08** | nothing | 2026-09-07 |
 | 10 | `FLAKE_LOCK_TOKEN` | expires 2027-09-12; custom date ≤366d | fails loudly by construction, see below | 2026-09-13 |
 | 11 | Atuin account key | none; on suspicion only | — | 2026-09-09 |
+| 12 | `nire-galatea/tskey` (git history only) | dead — rotated 2024; auth keys ≤90d anyway | nothing — history fossil, not a credential | 2026-09-14 |
+
+**Row 12, decided not pended.** A Tailscale auth key committed 2024-01-29
+(`449d158`) while the removed `nire-galatea` host still existed; left in
+git history deliberately (rewrite rejected 2026-09-14: public repo, the
+exposure window closed years ago, and the cost is force-pushing both
+protected branches plus every SHA reference since January 2024). When a
+scanner flags it: mark rotated/false-positive, move on — it is noise, not
+a finding.
 
 **Row 8, two independent things.** The live password was set by hand
 2026-09-13 and exists only in cube's sqlite db. Separately,
