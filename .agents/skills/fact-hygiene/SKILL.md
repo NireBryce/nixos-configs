@@ -76,17 +76,17 @@ different, older comment and stated with the same confidence as the part
 that was checked.
 
 **The cross-reference trap (category 3), found sweeping the tree for the
-above two, same day.** `nire-lego` was removed 2026-08-27
-(`wiki/history.md`). Four `.nix` comments elsewhere — `forgejo.nix` (two
-spots), `golink.nix`, `bash.nix` — still named it in present tense
-("durandal/tenacity/lego get [the `/root` wipe]", "no desktop imported —
-tenacity, lego") a week later, because the commit that removed `lego`
-touched `hosts.nix` and the modules `lego` itself had imported, not these
-four unrelated files that merely *mentioned* it in passing. Contrast with
-every other removed-host reference in the tree (`podman.nix`, `hosts.nix`,
-`invariants.nix`, `category-collector.nix`), which all correctly say
-"since removed" — proof this is preventable, not inherent to mentioning a
-host name at all.
+above two, 2026-09-03 (`216a5ae7`).** The issue itself: a removal or
+rename commit doesn't touch the files that merely *mention* the name in
+passing comments, and nothing checks those mentions — so present-tense
+cross-references outlive the change that invalidated them. Seen live a
+week after `nire-lego`'s removal (2026-08-27, `55084225` —
+`wiki/history.md`): four such comments — `forgejo.nix` (twice),
+`golink.nix`, `bash.nix` — still named it, while every other removed-host
+reference carried an explicit removal note. That contrast is the point:
+preventable, not inherent. The four were deleted in that sweep rather
+than rewritten, so this paragraph is their only surviving record; the
+verbatim comments are visible in `216a5ae7`'s diff.
 
 All three traps share a root cause: once something is phrased as settled
 — narrated history, a dated status line, or a passing mention of another
