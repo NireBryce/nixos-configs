@@ -2,6 +2,13 @@
 
 _Last modified: 2026-09-14_
 
+The `flake/` folder is meant to be browsed by its file tree rather than
+traced through by following code paths. The heavy modularization
+([architecture.md](architecture.md)) exists to make documenting
+functionality in-situ possible, and to keep the context any single
+reader -- agent or human -- has to load down to just the chunk they're
+looking at, instead of the whole tree.
+
 A topic index over documentation that already exists scattered around this
 repo — `CLAUDE.md`, `flake/doc/`, `.agents/skills/`, stray `.md` files
 sitting next to the code they're about, and

@@ -4,13 +4,20 @@ nixos-configs
 Personal NixOS + Home Manager configuration, built with flake-parts. Not a
 generalist template.
 
+Most of the prose in this repo -- commit messages, docs, comments -- is
+written by coding agents, with human review before it lands.
+
+The `flake/` folder is meant to be browsed by its file tree rather than
+traced through by following code paths. The heavy modularization (see
+Layout below) exists to make documenting functionality in-situ possible,
+and to keep the context any single reader -- agent or human -- has to
+load down to just the chunk they're looking at, instead of the whole
+tree.
+
 [wiki/00-INDEX.md](wiki/00-INDEX.md) is the topic index over the docs
 scattered around this repo -- start there if you're looking for a
 specific thing. The wiki itself is machine-generated, human-vetted
 descriptions of component behavior and how it evolved.
-
-Most of the prose in this repo -- commit messages, docs, comments -- is
-written by coding agents, with human review before it lands.
 
 Do not install this blindly
 ----------------------------
@@ -46,7 +53,7 @@ belongs to is decided by the directory it sits in, not by an explicit list,
 so moving a file between directories moves it between categories and
 nothing else has to change.
 
-This keeps the config easy to reshape and hard to browse from a directory
+This keeps the config easy to reshape and confusing to browse from a directory
 listing alone. `flake/doc/dirsAsCategory.md` explains that mechanism;
 `flake/doc/flake-parts-rationale.md` explains why flake-parts specifically,
 and what else of it this repo actually uses.

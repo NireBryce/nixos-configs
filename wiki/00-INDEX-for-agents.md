@@ -5,6 +5,11 @@ _Last modified: 2026-09-14_
 Condensed from [00-INDEX.md](00-INDEX.md), which keeps the orientation prose and
 the "why a link layer, not a rewrite" reasoning. Routing only here.
 
+`flake/` is meant to be browsed by file tree, not traced through code
+paths -- modularization ([architecture.md](architecture.md)) exists to
+document functionality in-situ and cap the context any one reader has to
+load per chunk.
+
 `CLAUDE.md` is still the cold-start read. This page answers "which file
 actually holds the answer". A page with a `-for-agents` sibling is listed by
 that sibling; load the human page only for the *why*.
