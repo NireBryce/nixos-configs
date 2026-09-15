@@ -79,14 +79,12 @@ neither observation actually said that together.
 above two, 2026-09-03 (`216a5ae7`).** The issue itself: a removal or
 rename commit doesn't touch the files that merely *mention* the name in
 passing comments, and nothing checks those mentions — so present-tense
-cross-references outlive the change that invalidated them. Seen live a
-week after `nire-lego`'s removal (2026-08-27, `55084225` —
-`wiki/history.md`): four such comments — `forgejo.nix` (twice),
-`golink.nix`, `bash.nix` — still named it, while every other removed-host
-reference carried an explicit removal note. That contrast is the point:
-preventable, not inherent. The four were deleted in that sweep rather
-than rewritten, so this paragraph is their only surviving record; the
-verbatim comments are visible in `216a5ae7`'s diff.
+cross-references outlive the change that invalidated them. Seen live in
+that sweep: four passing comments still named a host removed a week
+earlier, while every other removed-host reference carried an explicit
+removal note — preventable, not inherent. Which host, which files, and
+the verbatim comments are all in `216a5ae7`'s diff; the comments were
+deleted in the sweep rather than rewritten.
 
 All three traps share a root cause: once something is phrased as settled
 — narrated history, a dated status line, or a passing mention of another
@@ -198,12 +196,10 @@ it" #7 for the concrete grep.
   and corrected dates added once each pattern was caught.
 - `podman.nix`, `hosts.nix`, `invariants.nix` — the correct style: an
   explicit removal note ("lego removed the same day", "were both removed
-  2026-08-27", "since removed"). The four broken mentions (`forgejo.nix`
-  twice, `golink.nix`, `bash.nix`) were deleted outright in the same
-  2026-09-03 sweep rather than rewritten — the incident paragraph under
-  "Why this exists" is their only surviving record. The sweep's fourth
-  named correct example, `category-collector.nix`, holds no such comment
-  today.
+  2026-08-27", "since removed"). The sweep's four broken mentions were
+  deleted outright rather than rewritten — which files, and the verbatim
+  comments, are in `216a5ae7`'s diff. Its fourth named correct example,
+  `category-collector.nix`, holds no such comment today.
 - skill `git-archaeology` — finding the commit behind a date or hash
   claim when the file has since moved; a path-scoped log coming back
   empty usually means the rename, not the absence. (Hit 2026-09-15
