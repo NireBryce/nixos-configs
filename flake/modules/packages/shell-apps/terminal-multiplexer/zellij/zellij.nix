@@ -15,7 +15,7 @@
                     # clipboard" enabled in iTerm2 prefs to land in the real
                     # clipboard. See config.kdl's own copy_command comment.
                     text = builtins.readFile ./config/config.kdl
-                        + lib.optionalString pkgs.stdenv.isDarwin ''
+                        + lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
                             copy_command "pbcopy"
                         '';
                 };

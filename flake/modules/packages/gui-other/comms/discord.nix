@@ -16,7 +16,7 @@
             # the other two duplicates and were left alone: both are free and
             # come from the cache, so they cost build time rather than
             # risking the build.
-            lib.mkIf (!pkgs.stdenv.isDarwin) {
+            lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin) {
             # discord gamer chat app that broke containment
             home.packages = with pkgs; [
                 discord

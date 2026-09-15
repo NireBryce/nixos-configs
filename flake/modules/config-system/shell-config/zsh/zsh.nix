@@ -263,7 +263,7 @@
                     # output shows them for free -- no equivalent of blesh.nix's
                     # carapace-desc advice hook is needed here.
                     ''
-                    ${lib.optionalString (!pkgs.stdenv.isDarwin) "source <(${pkgs.cod}/bin/cod init $$ zsh)"}
+                    ${lib.optionalString (!pkgs.stdenv.hostPlatform.isDarwin) "source <(${pkgs.cod}/bin/cod init $$ zsh)"}
                     source <(${pkgs.carapace}/bin/carapace _carapace zsh)
 
                     # Free up bindings for zellij
