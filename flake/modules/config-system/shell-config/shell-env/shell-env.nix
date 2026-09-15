@@ -60,7 +60,7 @@
                 # window -- typing it produced zsh's `correct 'discord' to
                 # 'Discord'` prompt. Reverting the guards would not have fixed
                 # that; these aliases are lowercase deliberately.
-                // lib.optionalAttrs pkgs.stdenv.isDarwin {
+                // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
                     discord                 = "open -a Discord";
                     google-chrome           = "open -a 'Google Chrome'";
                 };

@@ -11,7 +11,7 @@
             # already in config-system/macos/homebrew/homebrew.nix, is the real
             # equivalent on that machine, which is what the "Like raycast for
             # linux" description below was already saying.
-            lib.mkIf (!pkgs.stdenv.isDarwin) {
+            lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin) {
             # Like raycast for linux
             programs.vicinae = {
                 enable = true;

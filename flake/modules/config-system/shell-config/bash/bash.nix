@@ -109,7 +109,7 @@
                     # registration this session. Sourcing carapace after cod
                     # leaves carapace's bulk registration standing at shell
                     # startup for every command they both know.
-                    (lib.optionalString (!pkgs.stdenv.isDarwin) ''
+                    (lib.optionalString (!pkgs.stdenv.hostPlatform.isDarwin) ''
                         source <(cod init ''$''$ bash)
                     '')
 

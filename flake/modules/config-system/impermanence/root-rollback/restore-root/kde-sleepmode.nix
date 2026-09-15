@@ -26,7 +26,7 @@
             # on pkgs.stdenv.isLinux without an infinite recursion under
             # useGlobalPkgs -- see elly-home-manager.nix's own comment on
             # exactly this.
-            lib.mkIf (!pkgs.stdenv.isDarwin) {
+            lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin) {
             # KDE sleep mode, kept in step with nohibernate
 
             # kwriteconfig6 rather than home.file, deliberately.

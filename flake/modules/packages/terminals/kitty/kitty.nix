@@ -4,7 +4,7 @@
 # Split 2026-08-12 so that the darwin question below never has to touch the
 # keybindings. config-system/macos/homebrew/homebrew.nix installs the `kitty` cask, so
 # lysithea had two copies -- and the obvious fix, wrapping the whole module in
-# lib.mkIf (!pkgs.stdenv.isDarwin), would have thrown the config away with the
+# lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin), would have thrown the config away with the
 # package. Keeping the two concerns in separate files makes that mistake
 # harder to make.
 #
@@ -31,6 +31,6 @@
             # `optional (cfg.package != null)`, so this drops the binary and
             # generates the config regardless -- which is what darwin wants,
             # since the Homebrew kitty reads the same ~/.config/kitty.
-            programs.kitty.package = lib.mkIf pkgs.stdenv.isDarwin null;
+            programs.kitty.package = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin null;
         };
 }

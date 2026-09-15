@@ -38,7 +38,7 @@
             # this module. Note that path already holds espanso's own stock
             # default.yml, so Home Manager would refuse to clobber it and fail
             # activation until that file is moved out of the way.
-            lib.mkIf (!pkgs.stdenv.isDarwin) {
+            lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin) {
             # espanso is a text expansion tool that turns a trigger phrase into text
 
             # TODO 2026-08-11: espanso crashes once per boot and then works.
