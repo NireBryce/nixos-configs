@@ -308,6 +308,9 @@ manual.
 
 ## See also
 
+- [durandal-suspend-instrumentation-state.md](durandal-suspend-instrumentation-state.md)
+  — every step run against the machine, what survives a reboot, and how to
+  verify each rather than trust it.
 - [hosts.md](../hosts.md) — the host roster.
 - [lessons-learned.md](../lessons-learned.md) — the KDE hybrid-sleep trap, a
   different suspend failure on this fleet.
