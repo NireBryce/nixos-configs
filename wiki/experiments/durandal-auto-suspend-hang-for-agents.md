@@ -5,7 +5,13 @@ _Last modified: 2026-09-14_
 Condensed from
 [durandal-auto-suspend-hang.md](durandal-auto-suspend-hang.md), which keeps the
 reasoning and the cycle log. **Status: mechanism partly identified, cause
-not. Nothing under test — `amdgpu.runpm=0` was tried 2026-09-14 and failed.**
+not. Nothing under test.** `amdgpu.runpm=0` tried 2026-09-14, failed.
+
+**Probably not an OS bug.** Elly reports the same hang under Windows on this
+hardware years ago (recollection, not measurement), and the GPP0/GPP8
+mitigation worked for years before failing in the last few months. Treat every
+amdgpu finding below as symptom, not cause; suspect firmware or wear (PSU caps,
+CMOS battery — unmeasured).
 
 ## Symptom
 
@@ -35,9 +41,29 @@ timed so DRAM survives on standby; held too long, RAM and the session go.
 - **`Refused to change power state from D0 to D3hot` + `MODE1 reset` fire on
   every cycle**, successes included, on every boot back to July. Standing
   suspect (Navi 22 `1002:73df` held in D0 across S3), never a discriminator.
-- Resume logs for a hang and a clean cycle are byte-identical.
+- Resume logs for a hang and a clean cycle are byte-identical. **So is the
+  descent** (compared 2026-09-16 against a menu-suspend/keyboard-wake control):
+  only device-resume ordering differs. Finer resolution needed for any signal.
+- **Why hangs leave no evidence:** `printk: Suspending console(s)` — after that
+  point messages go to the RAM ring buffer and only reach disk if the machine
+  resumes. Lost means unflushed, not unprinted.
+- **A serial console may still capture nothing.** The CPU is not executing
+  during a hang, and nothing records what nothing prints. Serial helps only if
+  the kernel is running and printing into a torn-down console.
+- Nothing else in the repo touches the suspend path: the only
+  `powerDownCommands`/`resumeCommands` are the probe's, `sleep.target` has one
+  dependency, no `/etc/systemd/system-sleep` hooks.
 - **Auto vs manual is NOT the discriminator.** Both hang; a manual cycle hung
   2026-09-14. An early 35-suspend requester tally made auto look causal.
+- **`/etc` IS NOT EVIDENCE HERE.** An agent shell runs in its own mount
+  namespace (65 mounts vs PID 1's 44) with a synthetic `/etc`: on 2026-09-16
+  `/etc/profile` resolved into a VS Code FHS store path and
+  `systemd-analyze cat-config` called every systemd config "not found" — both
+  artifacts, neither true of the machine. Use `/run/current-system/etc/...`
+  and `/proc/1/mountinfo`.
+- **Drive power-cycle counts survive across generations** (counter is in drive
+  firmware), so a generation with no probe can still be tested: note count,
+  boot it, suspend, return, compare delta against suspend count.
 - **"A `pre` with no `post` is a hang" is WRONG.** `powerDownCommands` fires on
   shutdown too, so every reboot leaves an orphan `pre`. Use the power-cycle
   delta.
@@ -49,7 +75,15 @@ timed so DRAM survives on standby; held too long, RAM and the session go.
 ## Ruled out
 
 **`amdgpu.runpm=0`** (tried and removed 2026-09-14; hung with it active, and
-it did not change the `D0 to D3hot` refusal it targeted) ·
+it did not change the `D0 to D3hot` refusal it targeted) · **dying CMOS
+battery / gross standby-rail failure** (2026-09-16 IT8688E: `Vbat` 3.19 V,
+`3VSB` 3.26 V, `+12V` 12.18 V, `+5V` 5.01 V, all healthy — but sampled AWAKE
+only, so wear generally is NOT cleared; PSU substitution still undone;
+transcript:
+[durandal-superio-probe-runbook-2026-09-16.md](durandal-superio-probe-runbook-2026-09-16.md))
+· **the 2026-08-10 stage-1/hibernation migration** (abrupt-ending boots run
+back to 2025-12-02, the retention limit, and do not cluster after August; and
+S3 resumes from RAM, never entering an initrd) ·
 `wakeupsourcehelper` (no wakeup-state change in pre/post diffs) · **s2idle**
 (SMU failure occurred under it; no `amd_pmc`, no `s0i3` on this desktop part,
 so it cannot reach hardware sleep and costs near-idle power) · **BIOS** (bug
@@ -69,6 +103,51 @@ subvolume, outside the wiped root.
 **Kernel confound resolved.** The 02:24 reboot made `runpm=0` live and moved
 the kernel 6.18.43 → 6.18.51 together. The hang continued, so neither worked
 and no reboot need be spent separating them. Kernel 6.18.51 from here.
+
+## Instrumentation
+
+Per cycle: requester, sleep mode, `suspend_stats`, `/proc/acpi/wakeup`, GPE
+counters, PCI + USB wakeup, `/sys/class/wakeup`, drive power cycles, and (from
+2026-09-15) **GPU state** — `power_dpm_state`, forced perf level, all
+`pp_dpm_*` with active marker, busy%, link speed/width, hwmon power/temp/volts.
+Added because nothing else in the dump differs between hang and clean.
+`pm_print_times=1` via tmpfiles logs per-device suspend/resume durations.
+
+Not done: **`/sys/power/pm_test`** (`core`/`platform`/`devices`/`freezer` —
+bisects where suspend fails without entering S3; if `devices`+`platform` pass
+while real S3 hangs, the fault is beyond the kernel) · **serial console +
+`no_console_suspend=1`** (`/dev/ttyS0`, 16550A at 0x3f8 — the only way to
+observe the failure, since the CPU is not executing during it; needs a cable
+and a second machine) · **`umr`** (packaged, but near-useless here: needs the
+GPU to respond, which is what fails).
+
+## 26.05 -> 26.11 boundary
+
+75-day generation gap: **221** (2026-05-30, `26.05.20260523`) -> **222**
+(2026-08-13, `26.11.20260807`). Both closures still in the store.
+
+| | 221 | 222 |
+|---|---|---|
+| `sleep.conf` | `[Sleep]` only | 3x `Allow*=false` |
+| `nohibernate` | no | yes |
+| kernel | 6.18.33 | 6.18.43 |
+| **powerdevil** | **6.6.5** | **6.7.4** |
+| systemd | 260.1 | 261.1 |
+
+b550 udev rule present in 221/222/227 — not lost here. The `sleep.conf` change
+is the documented hybrid-sleep breakage, closed by `SleepMode=1` (still in
+`powerdevilrc`). **PowerDevil 6.6.5 -> 6.7.4 is untested** and is what
+initiates auto-suspend.
+
+**Gens 218-221 are bootable**, but **not being chased (2026-09-16)**: config
+and hardware hypotheses each failed, effort stays on logging. Pre-upgrade tree
+is recoverable from git, not the boot menu — gen 221 ~`887cdc6f` (2026-05-30),
+gen 222 just before the 2026-08-14 cluster. Skill `git-archaeology` for the
+renames both predate.
+
+**Caveat:** abrupt-ending boots appear from 2025-12-02, including two
+pre-boundary 26.05 boots. Data cannot say whether the boundary caused it or
+worsened it.
 
 ## Reading the dumps
 

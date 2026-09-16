@@ -78,6 +78,33 @@
                         done
                         echo
 
+                        # Added 2026-09-15. The one thing that could discriminate a
+                        # hang from a clean cycle: if the card sits at a different DPM
+                        # level, link speed or busy% going into suspend, it shows here.
+                        # Nothing else in this dump differs between the two.
+                        echo "## GPU state"
+                        for g in /sys/class/drm/card*/device; do
+                            [ -e "$g/power_dpm_state" ] || continue
+                            echo "  $(basename "$(readlink -f "$g")")"
+                            for f in power_dpm_state power_dpm_force_performance_level \
+                                     gpu_busy_percent mem_busy_percent \
+                                     current_link_speed current_link_width power_state; do
+                                printf '    %-36s %s\n' "$f" "$(head -1 "$g/$f" 2>/dev/null)"
+                            done
+                            for f in "$g"/pp_dpm_*; do
+                                [ -e "$f" ] || continue
+                                printf '    %-36s %s\n' "$(basename "$f")" "$(tr '\n' ' ' < "$f")"
+                            done
+                            for h in "$g"/hwmon/hwmon*; do
+                                [ -d "$h" ] || continue
+                                for f in power1_average temp1_input freq1_input in0_input; do
+                                    v=$(cat "$h/$f" 2>/dev/null)
+                                    [ -n "$v" ] && printf '    %-36s %s\n' "$f" "$v"
+                                done
+                            done
+                        done
+                        echo
+
                         # The only detector that works for the no-wake hang. The OS
                         # cannot see that failure from inside -- nothing is executing
                         # while it is stuck -- but recovering from it means cutting
@@ -171,6 +198,11 @@
                 # Diagnostic, not a fix. b550-suspend-fix.nix in this directory is the
                 # actual wakeup fix and is unrelated to the hang.
                 environment.systemPackages = [ pkgs.smartmontools ];
+
+                # Makes the kernel log every device's suspend and resume duration, so
+                # an amdgpu that is abnormally slow on the cycles around a hang is
+                # visible. Costs a few lines of dmesg per cycle and nothing else.
+                systemd.tmpfiles.rules = [ "w /sys/power/pm_print_times - - - - 1" ];
 
                 powerManagement.powerDownCommands = probe "pre";
                 powerManagement.resumeCommands    = probe "post";
