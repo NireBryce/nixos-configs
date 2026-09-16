@@ -98,6 +98,21 @@ Two consequences, both load-bearing:
 - **`amdgpu.runpm=0`** — tried 2026-09-14, removed the same day. The machine
   hung with it active, and it did not even change the `Refused to change power
   state from D0 to D3hot` it was aimed at.
+- **A dying CMOS battery, and gross standby-rail failure.** Measured
+  2026-09-16 with the IT8688E superio: `Vbat` 3.19 V, `3VSB` 3.26 V, `+12V`
+  12.18 V, `+5V` 5.01 V — all healthy. Transcript:
+  [durandal-superio-probe-runbook-2026-09-16.md](durandal-superio-probe-runbook-2026-09-16.md).
+  This does **not** clear wear generally: every reading was taken while the
+  machine was awake, and nothing can sample during S3. PSU substitution is
+  still the only decisive test and has not been done.
+- **The 2026-08-10 stage-1 / hibernation migration.** Plausible on timing, but
+  boots ending abruptly (no shutdown sequence — the shape a lost PSU race
+  leaves) run back to **2025-12-02**, the limit of journal retention, and do
+  not cluster after August. Mechanically it could not have mattered either:
+  S3 resumes from RAM and never enters an initrd. Nothing else in the repo
+  touches the suspend path — the only `powerDownCommands`/`resumeCommands` are
+  the probe's, `sleep.target` has one dependency, and there are no
+  `/etc/systemd/system-sleep` hooks.
 - **Resizable BAR** — off; GPU BAR0 is 256 MB.
 - **amdgpu memory eviction**, **ring timeouts, reset failures, VM faults** —
   zero occurrences; 27 GB of swap present, so the eviction precondition fails.
@@ -170,6 +185,25 @@ suspend in a different state, this is where it would show.
 
 `pm_print_times` is enabled via tmpfiles, so the kernel logs every device's
 suspend and resume duration.
+
+**Why a hang leaves no evidence, precisely.** The descent logs
+`printk: Suspending console(s)`, after which kernel messages go to the RAM ring
+buffer and only reach disk *if the machine resumes*. When it doesn't, they are
+lost — not unprinted, unflushed. The kernel may well be saying what is wrong,
+into a buffer nobody gets to read.
+
+**But the gap may genuinely be empty.** `CLOCK_BOOTTIME` minus
+`CLOCK_MONOTONIC` showed the CPU is not executing during a hang, and nothing
+can record what nothing is printing. A serial console only helps in the case
+where the kernel *is* running and printing into a torn-down console; on the
+cycles observed so far it would likely have captured nothing. That is an
+argument against buying the cable first, not for it.
+
+**The descent is identical between a hang and a clean cycle** at current
+logging detail — compared 2026-09-16, hang cycle against the
+menu-suspend/keyboard-wake control. The only differences were device resume
+*ordering* and one incidental slab warning. Any signal there needs finer
+resolution than is currently enabled.
 
 **Available and not done**, with what each would buy:
 

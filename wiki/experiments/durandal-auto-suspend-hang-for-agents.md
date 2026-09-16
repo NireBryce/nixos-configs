@@ -41,7 +41,18 @@ timed so DRAM survives on standby; held too long, RAM and the session go.
 - **`Refused to change power state from D0 to D3hot` + `MODE1 reset` fire on
   every cycle**, successes included, on every boot back to July. Standing
   suspect (Navi 22 `1002:73df` held in D0 across S3), never a discriminator.
-- Resume logs for a hang and a clean cycle are byte-identical.
+- Resume logs for a hang and a clean cycle are byte-identical. **So is the
+  descent** (compared 2026-09-16 against a menu-suspend/keyboard-wake control):
+  only device-resume ordering differs. Finer resolution needed for any signal.
+- **Why hangs leave no evidence:** `printk: Suspending console(s)` — after that
+  point messages go to the RAM ring buffer and only reach disk if the machine
+  resumes. Lost means unflushed, not unprinted.
+- **A serial console may still capture nothing.** The CPU is not executing
+  during a hang, and nothing records what nothing prints. Serial helps only if
+  the kernel is running and printing into a torn-down console.
+- Nothing else in the repo touches the suspend path: the only
+  `powerDownCommands`/`resumeCommands` are the probe's, `sleep.target` has one
+  dependency, no `/etc/systemd/system-sleep` hooks.
 - **Auto vs manual is NOT the discriminator.** Both hang; a manual cycle hung
   2026-09-14. An early 35-suspend requester tally made auto look causal.
 - **"A `pre` with no `post` is a hang" is WRONG.** `powerDownCommands` fires on
@@ -55,7 +66,15 @@ timed so DRAM survives on standby; held too long, RAM and the session go.
 ## Ruled out
 
 **`amdgpu.runpm=0`** (tried and removed 2026-09-14; hung with it active, and
-it did not change the `D0 to D3hot` refusal it targeted) ·
+it did not change the `D0 to D3hot` refusal it targeted) · **dying CMOS
+battery / gross standby-rail failure** (2026-09-16 IT8688E: `Vbat` 3.19 V,
+`3VSB` 3.26 V, `+12V` 12.18 V, `+5V` 5.01 V, all healthy — but sampled AWAKE
+only, so wear generally is NOT cleared; PSU substitution still undone;
+transcript:
+[durandal-superio-probe-runbook-2026-09-16.md](durandal-superio-probe-runbook-2026-09-16.md))
+· **the 2026-08-10 stage-1/hibernation migration** (abrupt-ending boots run
+back to 2025-12-02, the retention limit, and do not cluster after August; and
+S3 resumes from RAM, never entering an initrd) ·
 `wakeupsourcehelper` (no wakeup-state change in pre/post diffs) · **s2idle**
 (SMU failure occurred under it; no `amd_pmc`, no `s0i3` on this desktop part,
 so it cannot reach hardware sleep and costs near-idle power) · **BIOS** (bug
