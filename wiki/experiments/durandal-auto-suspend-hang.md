@@ -108,10 +108,10 @@ Nothing is being tested right now. Instrumentation only:
 `amdgpu.runpm=0` was live from the 02:24 reboot until it was removed the same
 day, having failed.
 
-**The power-cycle detector is validated.** Cycle 7 moved `nvme0` 2854 → 2857
-and `sda` 6162 → 6165 across one 58 s window — three power cuts, recorded
-without anyone having to remember them. Counters are cumulative, so only
-*deltas* carry signal.
+**The power-cycle detector works, once read correctly.** Cycle 7 moved `nvme0`
+2854 → 2857 across a 58 s window — `+3`, i.e. two PSU cuts above the `+1`
+baseline. Counters are cumulative, so only *deltas* carry signal, and only
+deltas **above 1** mean anything.
 
 **The kernel confound resolved itself.** That reboot made `amdgpu.runpm=0`
 live *and* moved the kernel 6.18.43 → 6.18.51 (the latter via a `flake.lock`
@@ -132,17 +132,37 @@ separates a hang from a clean resume:
 | 6 | 05:07→05:57 | deep | **manual** | 50 m | clean |
 | 7 | 06:52→06:53 | deep | **manual** | 58 s | **hang** — PSU race ×3, RAM kept, `runpm=0` active |
 
-Four hangs in seven. Cycle 7 is the one that matters: a **manual** suspend,
-hung, with `amdgpu.runpm=0` active — killing both the auto-vs-manual
-hypothesis and the mitigation in a single cycle. It is also the first cycle
-labelled by the detector rather than from memory. Only cycle 1 was ever
-visible to `suspend_stats`.
+Cycle 7 is the one that matters: a **manual** suspend, hung, with
+`amdgpu.runpm=0` active — killing both the auto-vs-manual hypothesis and the
+mitigation in one cycle. Only cycle 1 was ever visible to `suspend_stats`.
+
+**Detector-labelled cycles since** (2026-09-14 → 15): **one hang (cycle 7),
+six clean.** Cycles 1–6 predate smartmontools and are labelled from memory
+only — they can never be verified. Hangs are therefore much rarer than the
+early "every auto-suspend" reading suggested, and short sleeps are not
+inherently suspicious: 14 s, 51 s and 450 s cycles all read clean.
 
 ## Reading the dumps
 
-**`## drive power cycles` is the signal.** A cycle whose count moves is a
-cycle that hung, because recovering from one means cutting PSU power and the
-drives count that. Validated against a real hang 2026-09-14.
+**`## drive power cycles` is the signal — but `+1` is the baseline, not a
+hang.** This board removes drive power on every S3 suspend (NVMe fully
+re-inits, SATA links drop, root hubs lose power, all on every cycle), so a
+clean suspend already costs one.
+
+| delta | meaning |
+|---|---|
+| `0` | not a suspend — a reboot does this |
+| `+1` | **clean suspend** |
+| `+N > 1` | hang; `N − 1` PSU cuts |
+
+Measured with a controlled menu-suspend/keyboard-wake on 2026-09-15 (`nvme0`
+2862 → 2863, `sda` 6170 → 6171), so the baseline is confirmed rather than
+assumed.
+
+The rule first written here was "a cycle whose count moves is a cycle that
+hung", which would flag **every** suspend this machine makes. It surfaced only
+because Elly reported as successful a run of cycles the rule had called hangs —
+the instrument disagreeing with the human was the instrument being wrong.
 
 **Do not use pre/post pairing as a hang signal.** "A `pre` with no `post` is a
 hang" was written here and is wrong: `powerDownCommands` fires on shutdown as

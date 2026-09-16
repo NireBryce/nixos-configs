@@ -41,6 +41,10 @@ timed so DRAM survives on standby; held too long, RAM and the session go.
 - **"A `pre` with no `post` is a hang" is WRONG.** `powerDownCommands` fires on
   shutdown too, so every reboot leaves an orphan `pre`. Use the power-cycle
   delta.
+- **"Power-cycle count moved = hang" is WRONG** (corrected 2026-09-15). `+1` is
+  baseline; it would flag every suspend. Only `> 1` is a hang.
+- Detector-labelled totals 2026-09-14→15: **1 hang, 6 clean.** Cycles predating
+  smartmontools are memory-labelled and unverifiable.
 
 ## Ruled out
 
@@ -70,10 +74,18 @@ and no reboot need be spent separating them. Kernel 6.18.51 from here.
 
 - `## requester` — `org_kde_powerdevil` = idle timeout (auto);
   `plasmashell` / `kscreenlocker` = a person asked.
-- `## drive power cycles` — **count moves = that cycle hung**, since recovery
-  means cutting PSU power. Only in-band evidence of the no-wake shape.
-  **Validated 2026-09-14**: `nvme0` 2854→2857, `sda` 6162→6165 over one 58 s
-  window (three cuts). Counters are cumulative — only deltas carry signal.
+- `## drive power cycles` — only in-band evidence of the no-wake shape.
+  Counters are cumulative; read **deltas**, and **`+1` is baseline, not a
+  hang** — this board removes drive power on every S3 suspend.
+
+  | delta | meaning |
+  |---|---|
+  | `0` | not a suspend (reboot) |
+  | `+1` | clean suspend |
+  | `+N > 1` | hang; `N − 1` PSU cuts |
+
+  Baseline measured with a controlled menu-suspend/keyboard-wake 2026-09-15
+  (`nvme0` 2862→2863). Cycle 7 was `+3` = two cuts.
 
 ## See also
 

@@ -81,8 +81,15 @@
                         # The only detector that works for the no-wake hang. The OS
                         # cannot see that failure from inside -- nothing is executing
                         # while it is stuck -- but recovering from it means cutting
-                        # power at the PSU, and that drops the drives too. A count
-                        # that moves across a cycle is a cycle that was power-cycled.
+                        # power at the PSU, and that drops the drives too.
+                        #
+                        # +1 PER CYCLE IS BASELINE, NOT A HANG. This board removes
+                        # drive power on every S3 suspend (NVMe fully re-inits, SATA
+                        # links drop, root hubs lose power -- all on every cycle), so a
+                        # clean suspend already costs one. Measured with a controlled
+                        # menu-suspend/keyboard-wake on 2026-09-15: nvme0 2862 -> 2863,
+                        # sda 6170 -> 6171. A reboot, by contrast, is +0. Read
+                        # delta > 1 as a hang, with delta - 1 = the number of PSU cuts.
                         echo "## drive power cycles"
                         for dev in /dev/nvme0 /dev/sda /dev/sdb; do
                             [ -e "$dev" ] || continue
@@ -128,10 +135,17 @@
                 #                 window, so the CPU is not running. Invisible from inside
                 #                 the OS, and suspend_stats calls it a success.
                 #
-                # 2026-09-14, the detector's first real hang, and it works: nvme0
-                # 2854 -> 2857 and sda 6162 -> 6165 across one 58s window. Three power
-                # cuts, recorded without anyone having to remember them. `drive power
-                # cycles` is the only in-band evidence of the no-wake shape.
+                # 2026-09-14, the detector's first real hang: nvme0 2854 -> 2857 and
+                # sda 6162 -> 6165 across one 58s window. `drive power cycles` is the
+                # only in-band evidence of the no-wake shape.
+                #
+                # CORRECTED 2026-09-15. That was first read as "three power cuts" and
+                # the rule written here as "count moves = hang", which is wrong and
+                # would flag EVERY suspend this machine makes: +1 is the baseline (see
+                # the detector's own comment above), so that cycle was two extra cuts.
+                # The error surfaced only because Elly reported cycles as mostly
+                # successful that the rule had labelled hangs -- the instrument
+                # disagreeing with the human was the instrument being wrong.
                 #
                 # That same cycle falsified two things this file used to assert:
                 #
