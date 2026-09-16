@@ -1,6 +1,6 @@
 # Fleet maintenance
 
-_Last modified: 2026-09-16_
+_Last modified: 2026-09-14_
 
 The fleet's recurring upkeep in one place: the weekly flake.lock PR,
 deploying to a host and the verification habit around it, and store
@@ -40,38 +40,33 @@ this page links to the others rather than restating them:
 
 ## Lockfile updates
 
-The dedicated page for this whole topic is
-[flake-lock.md](flake-lock.md) — mechanism, credential, history. The short
-version: the weekly PR — cube's `flake-lock-bump` timer runs Mondays 09:00 UTC
-(#205 — moved off `.github/workflows/update-flake-lock.yml`, deleted
-2026-09-16, because a runner can only *evaluate* a bump and never build
-it). The run updates the lock, preflights it (`nix flake check` + module
-tree + lint), **builds nire-cube's toplevel on real hardware**, pushes
-the `update_flake_lock_action` branch, and opens a PR titled
+The dedicated page for this topic is [flake-lock.md](flake-lock.md).
+The weekly PR: `.github/workflows/update-flake-lock.yml` runs Mondays
+09:00 UTC (also on demand via `workflow_dispatch`), pushes the
+`update_flake_lock_action` branch, and opens a PR titled
 `chore: update flake.lock` against `experimental`.
 
 The PR is a decision, not an auto-merge. This repo pins nixpkgs
 deliberately — a lock bump can change what hosts build and boot,
 including the hosts that wipe `/root` at every boot — so the lock diff
-is the review: read it, confirm CI went green on the PR, and merge
-through the normal ship flow when the change is wanted. CI still does
-not force a toplevel for the hosts cube cannot build, so `just
-preflight` plus a real build on durandal and tenacity is the stronger
-check before merging.
+is the review: read it, confirm `nix flake check + module tree` went
+green, and merge through the normal ship flow when the change is
+wanted. CI does not force a host toplevel for these PRs, so `just
+preflight` locally is the stronger check.
 
-The credential is elly's existing `gh auth` login on cube — nothing
-was minted or stored for this (#205's cutover; the obsolete
-`FLAKE_LOCK_TOKEN` Actions secret gets deleted after cube's first
-successful run). The run preflights the credential, and files an issue
-titled `update-flake-lock: weekly lock PR needs attention` on any
-failure — that issue, not the journal, is the thing to watch.
+The workflow needs the `FLAKE_LOCK_TOKEN` repo secret — a fine-grained
+PAT whose expiry and rotation belong to
+[maintenance-schedule.md](maintenance-schedule.md) item 10, not here.
+It preflights the token on every run, warns inside a 30-day expiry
+window, and files an issue titled `update-flake-lock: weekly lock PR
+needs attention` on any failure — that issue, not the Actions log, is
+the thing to watch.
 
 **Branch ahead, no PR attached** is the signature of a run that pushed
-the lock but failed at PR creation (a missing or rejected credential —
-usually the gh login). Fix the cause first (`gh auth login` as elly on
-cube if so), then rerun (`systemctl start flake-lock-bump` on cube
-reuses the branch), or open the PR by hand from
-`update_flake_lock_action` to `experimental`.
+the lock but failed at PR creation (a missing or lapsed token). Fix the
+cause first, then re-run the workflow (`workflow_dispatch` reuses the
+branch), or open the PR by hand from `update_flake_lock_action` to
+`experimental`.
 
 By hand instead: `just update` — `nix flake update` for every input,
 then `just check`.

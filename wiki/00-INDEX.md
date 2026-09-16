@@ -129,7 +129,7 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   cadence, or silent-breakage property; tended by skill
   [`maintenance-schedule`](../.agents/skills/maintenance-schedule/SKILL.md).
 - [flake.lock updates](flake-lock.md) — the weekly bump and the PR that
-  lands it; where the GitHub credential for it lives, and how that changed.
+  lands it; where the GitHub credential for it lives.
 - [Fleet maintenance](maintenance.md) — the recurring upkeep beyond
   credentials: the weekly flake.lock PR, deploying and the verification
   habit around it, and store hygiene (what runs itself, what doesn't).

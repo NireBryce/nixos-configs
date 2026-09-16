@@ -1,6 +1,6 @@
 # Maintenance schedule, for agents
 
-_Last modified: 2026-09-16_
+_Last modified: 2026-09-14_
 
 Condensed from [maintenance-schedule.md](maintenance-schedule.md), which
 keeps each item's reasoning, rejected alternatives and evidence. Facts only
@@ -24,7 +24,7 @@ and dates are not values.
 | 7 | `forgejo-admin-password` | none enforced; never rotated | — | — |
 | 8 | Grafana admin credentials | real password, set by hand 2026-09-13; **not** reproducible | lives only in cube's sqlite db | 2026-09-13 |
 | 9 | Syncthing device certs | decades; **declared by no module since 2026-09-08** | nothing | 2026-09-07 |
-| 10 | elly's `gh auth` OAuth login on cube | no expiry; breaks only on `gh auth logout` | fails loudly by construction, see below | 2026-09-16 |
+| 10 | `FLAKE_LOCK_TOKEN` | expires 2027-09-12; custom date ≤366d | fails loudly by construction, see below | 2026-09-13 |
 | 11 | Atuin account key | none; on suspicion only | — | 2026-09-09 |
 | 12 | `nire-galatea/tskey` (git history only) | dead — rotated 2024; auth keys ≤90d anyway | nothing — history fossil, not a credential | 2026-09-14 |
 
@@ -71,25 +71,27 @@ the *absence* of an `admin_password` setting is what leaves it stock. Skill
 | 5, 6 | [homelab/backup-runbook.md](homelab/backup-runbook.md) |
 | 11 | `packages/shell-apps/history/atuin-key-rotation.md` |
 
-## Weekly-lock credential specifics
+## `FLAKE_LOCK_TOKEN` specifics
 
-Since 2026-09-16 (#205): elly's `gh auth` OAuth login on cube
-(`repo`/`workflow` scopes, `push: true` verified), read by
-`lock-bump.sh` via `gh auth token` — no sops key, no dedicated PAT. The
-FLAKE_LOCK_TOKEN Actions secret it replaced (fine-grained PAT,
-2026-09-13/14, proven by lock PRs #308/#333) was write-only; delete it
-after cube's first successful run. Trades accepted: `repo` is broader
-than a repo-scoped PAT; no expiry, so the preflight's early warning
-degrades to "cannot tell" (notice, not failure).
+Minted 2026-09-13, expires 2027-09-12. Verified end to end same day: a
+manual `workflow_dispatch` run passed preflight and opened #308 with
+`nix flake check + module tree` running on it.
 
-`lock-bump.sh` preflights every run: dead/rejected credential → hard
-fail before any nix work; `OnFailure=` files the reusable issue
-`update-flake-lock: weekly lock PR needs attention`. If the gh login is
-gone entirely, the alert says so in the journal and files nothing.
+GitHub Actions repo secret, **not** `secrets.yaml` — a runner has no
+persistent host key to enrol, and `secrets.yaml` is committed to a public
+repo. A PAT rather than `GITHUB_TOKEN` because a `GITHUB_TOKEN`-opened PR
+does not trigger `pull_request` workflows, and the `experimental` ruleset
+requires that check.
 
-Lapse symptom: `update_flake_lock_action` ahead of `experimental` with
-no PR attached. Fix: `gh auth login` as elly on cube, rerun
-`systemctl start flake-lock-bump`.
+The workflow checks its own credential: missing/revoked/expired → hard fail
+with a `::error::` at the first step, plus an issue opened in this repo
+(reusing one titled `update-flake-lock: weekly lock PR needs attention`).
+Within 30 days of expiry → `::warning::`, keeps going. **Gap**: GitHub
+returns the expiry header only for tokens that have one, so an absent header
+means "cannot tell" — that emits a `::notice::` and does not fail.
+
+Lapse symptom to recognise: the `update_flake_lock_action` branch sitting
+ahead of `experimental` with no PR attached.
 
 ## Adding an item
 

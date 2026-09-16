@@ -1,6 +1,6 @@
 # Maintenance schedule
 
-_Last modified: 2026-09-16_
+_Last modified: 2026-09-14_
 
 > **Condensed version:**
 > [maintenance-schedule-for-agents.md](maintenance-schedule-for-agents.md) — the same
@@ -217,48 +217,77 @@ here, don't wrap this file in ciphertext to protect one row.
 - **Last checked**: 2026-09-07 (documentation check against Syncthing's own
   behavior, not a live cert inspection).
 
-### 10. GitHub credential for the weekly lock PR
+### 10. `FLAKE_LOCK_TOKEN` — GitHub PAT for the weekly lock PR
 
-- **What (since 2026-09-16)**: elly's existing `gh auth` OAuth login on
-  `nire-cube` (`hosts.yml`, scopes `repo`, `workflow`, `gist`,
-  `read:org`), consumed where it already lived by
-  [flake/scripts/lock-bump.sh](<../flake/scripts/lock-bump.sh>) — the
-  weekly `flake.lock` bump that runs as cube's `flake-lock-bump` timer
-  ([lock-bump.md](categories/lock-bump.md), #205) and opens the
-  `chore: update flake.lock` PR against `experimental`. `push: true` on
-  this repo, verified 2026-09-16.
-- **What it replaced, in two hops**: the `update-flake-lock` workflow
-  (2026-09-08 → 2026-09-16, deleted by #205) read the repo secret
-  `FLAKE_LOCK_TOKEN` — a fine-grained PAT, minted 2026-09-13, updated
-  2026-09-14, expiry 2027-09-12, proven by lock PRs #308 and #333 both
-  merging. The first #205 design moved that PAT into `secrets.yaml` as
-  `flake-lock-token`; superseded the same day by the gh-login design, so
-  **no sops key was ever added** and no PAT needs minting.
-- **Why gh's login and not a dedicated PAT**: the write-only Actions
-  secret could not be read back, so the sops shape meant minting yet
-  another PAT and hand-setting it before cube's next build would succeed —
-  while a working credential with the needed scopes already sat on the
-  same box, in the same user's config, for the same person. Reusing it
-  adds no new exposure and deletes the manual step. Trade accepted:
-  `repo` is broader than a repo-scoped fine-grained PAT; and the OAuth
-  token has no expiry, so the weekly preflight's early warning degrades
-  to "cannot tell" (logged notice, not a failure — the same best-effort
-  gap the workflow documented for no-expiry tokens).
-- **This one still fails loudly, by construction** — ported into
-  `lock-bump.sh`: dead/rejected credential → hard fail at the token
-  preflight before any nix work; `OnFailure=` → an alert unit files the
-  reusable issue `update-flake-lock: weekly lock PR needs attention`.
-  If the gh login itself is gone, the alert says so in the journal (it
-  cannot file an issue without a token).
-- **Failure mode if it lapses anyway**: `update_flake_lock_action` ahead
-  of `experimental` with no PR attached, plus that issue. Fix:
-  `gh auth login` as elly on cube, rerun `systemctl start
-  flake-lock-bump`.
-- **Cleanup owed**: delete the `FLAKE_LOCK_TOKEN` Actions secret after
-  cube's first successful run (kept as rollback until then).
-- **Last checked**: 2026-09-16 — gh login verified (`gh auth status`,
-  API permissions); the sops redesign was backed out before it ever
-  shipped; end-to-end on cube still pending first scheduled run.
+- **What**: a GitHub Actions repo secret on `NireBryce/nixos-configs`
+  (**not** in `secrets.yaml` — see below), holding a fine-grained PAT
+  scoped to this repo with
+  `Contents: read/write` and `Pull requests: read/write`. Read by
+  [`../.github/workflows/update-flake-lock.yml`](<../.github/workflows/update-flake-lock.yml>)
+  as the `token` input to `DeterminateSystems/update-flake-lock`.
+- **Why a PAT rather than `GITHUB_TOKEN`**: chiefly so these PRs trigger
+  CI. A `GITHUB_TOKEN`-opened PR does not trigger this repo's own
+  `pull_request` workflows, so `nix flake check + module tree` never
+  reports — and the `experimental` ruleset *requires* it, making such a PR
+  unmergeable without an admin bypass. Secondarily, it keeps the repo-wide
+  "Allow GitHub Actions to create and approve pull requests" setting off,
+  and it structurally cannot approve its own PRs (GitHub refuses
+  self-approval). That setting is a single switch granting create **and**
+  approve, with no way to have one without the other.
+- **Why not sops**, asked 2026-09-08 and worth not re-deriving: a runner
+  would need the age key to decrypt, and that key would itself have to be
+  a GitHub Actions secret — one GitHub-stored credential swapped for
+  another, plus a layer. Nor could a runner be enrolled: every key in
+  [`.sops.yaml`](<../flake/modules/config-system/system/secrets/.sops.yaml>) is
+  derived from a *host's* `/etc/ssh/ssh_host_ed25519_key.pub`, and a
+  runner is an ephemeral VM with no persistent host key. And nothing in
+  the nix tree ever reads this token, so a `sops.secrets.*` entry for it
+  would decrypt on three hosts with no use for it — the shape #203
+  deleted. Minor point in the same direction: `secrets.yaml` is committed
+  to a *public* repo, so its ciphertext is permanently public; an Actions
+  secret is never published. The general rule this follows is the one in
+  "Why this file is plaintext" above — the consumer picks the store.
+- **Expiry**: **2027-09-12** (minted 2026-09-13 as a custom date; GitHub's
+  maximum is 366 days and the creation UI defaults to 30). The creation UI
+  also offers "No expiration" for fine-grained tokens — chosen against:
+  a no-expiry token gets no expiry header, so the weekly check would
+  degrade to the "cannot tell" notice below forever.
+- **This one fails loudly, by construction.** Unlike everything else on
+  this page, the workflow checks its own credential rather than relying on
+  someone reading this file:
+  - A **missing, revoked, or expired** token fails the run at its first
+    step with a `::error::` annotation naming the secret and what to do —
+    before the nix install and flake update, rather than as a bare 401
+    inside the action much later.
+  - **Within 30 days of expiry** it emits a `::warning::` and keeps going,
+    so the lock update still happens. The window is 30 days because the
+    workflow runs *weekly* — a shorter one could give only one or two
+    chances to notice.
+  - Either case also **opens an issue in this repo** (reusing one open
+    issue titled `update-flake-lock: weekly lock PR needs attention`
+    rather than filing weekly), because a red scheduled run only emails
+    the repo owner and that is easy to miss months later.
+  - One gap, stated rather than papered over: GitHub returns the
+    `github-authentication-token-expiration` header only for tokens that
+    *have* an expiry, so an absent header means "cannot tell", not
+    "healthy". That case emits a `::notice::` and does **not** fail — so
+    the early warning is best-effort, while the hard failure on an
+    already-dead token is not.
+- **Failure mode if it lapses anyway**: the run pushes the updated
+  `update_flake_lock_action` branch as normal and then fails at PR
+  creation. The symptom to recognise: that branch sitting ahead of
+  `experimental` with no PR attached — exactly the state the 2026-09-07
+  run left behind for the unrelated permission reason.
+- **Last checked**: 2026-09-13 — the secret exists and the pipeline is
+  verified end to end: a manual `workflow_dispatch` run passed preflight
+  (printing the expiry line above), pushed `update_flake_lock_action`, and
+  opened
+  [#308](https://github.com/NireBryce/nixos-configs/pull/308) with
+  `nix flake check + module tree` running on it — the PR-triggers-CI
+  property this PAT exists for, seen live for the first time. (2026-09-08:
+  preflight logic verified against the live API before the secret existed
+  — valid token → 200; revoked token → 401 → hard fail; header parse
+  confirmed against a simulated response.)
 
 ### 11. Atuin account encryption key
 
