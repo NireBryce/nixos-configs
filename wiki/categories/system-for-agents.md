@@ -1,6 +1,6 @@
 # `system`, for agents
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-16_
 
 Condensed from [system.md](system.md), which keeps the reasoning and the
 narrative. Facts only here.
@@ -26,7 +26,7 @@ Anything that must be optional cannot be filed here.
 | `home-manager/drop-unsupported-packages.nix` | reads `meta.platforms`/`meta.badPlatforms` and drops what darwin can't build, with a warning. **Don't hand-write `lib.mkIf (!pkgs.stdenv.isDarwin)`.** |
 | `secrets/sops.nix` | sops-nix, key path derived from the host's own ed25519 SSH host key. `nixos` class only. |
 | `secrets/sops-darwin.nix` | points `SOPS_AGE_KEY_FILE` at the Linux-XDG path; darwin's default lookup is `~/Library/Application Support/...`. |
-| `secrets/sops-interactive-key.nix` | oneshot, every boot, converts the host ed25519 key to a native age identity. Unconditional on purpose — self-healing on hosts that wipe `/root`. |
+| `secrets/sops-interactive-key.nix` | oneshot, every boot, converts the host ed25519 key to a native age identity. Unconditional on purpose — self-healing on hosts that wipe `/root`. Also sets `security.sudo.extraConfig` `env_keep += "EDITOR VISUAL"` — `environment.variables.EDITOR="micro"` alone doesn't reach `sudo sops` because sudo's `env_reset` strips it before exec. |
 | `impermanence/declare-persistence-option.nix` | **not** the [impermanence](impermanence.md) category. Declares the option unconditionally, even where nothing populates it. |
 
 ## Traps

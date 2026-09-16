@@ -79,9 +79,13 @@
         # but "micro" is the same correct value for every user on this
         # config (the user's own copy comes from shell-env.nix's
         # `home.sessionVariables`, a Home Manager option that only lands in
-        # the user's shell -- root has no Home Manager profile at all, so without
-        # this, `sudo sops secrets.yaml` falls through to sops's built-in
-        # default, vi, silently inconsistent with the user's configured editor).
+        # the user's shell -- root has no Home Manager profile at all).
+        # That alone turned out NOT to be sufficient for `sudo sops` (see the
+        # security.sudo.extraConfig block below) -- `sudo`'s env_reset
+        # discards it before exec, so without also keeping EDITOR/VISUAL in
+        # sudo's env_keep, `sudo sops secrets.yaml` still fell through to
+        # sops's built-in default, vi, silently inconsistent with the user's
+        # configured editor.
         # Filed as issue #118, found while checking cube's interactive sops
         # flow end to end.
         #
@@ -105,6 +109,23 @@
                 EDITOR = "micro";
                 VISUAL = "micro";
             };
+
+            # environment.variables above is NOT enough on its own: `sudo`
+            # defaults to `env_reset`, which throws away the invoking shell's
+            # environment -- including EDITOR/VISUAL -- and rebuilds a fresh
+            # one from sudoers' env_keep list before exec'ing the command.
+            # Neither the user's `EDITOR=micro` (home-manager) nor root's own
+            # (environment.variables, above -- that only reaches root's *own*
+            # login shell, never a `sudo`-constructed one) survives that
+            # reset, so `sudo sops secrets.yaml` fell through to sops's
+            # built-in default, vi/vim -- confirmed 2026-09-16, `sudo sops`
+            # opened vim despite both EDITOR settings existing. Explicitly
+            # keeping EDITOR/VISUAL in sudo's env_keep list makes it pass the
+            # invoking user's own EDITOR (micro) through instead of
+            # resetting it away.
+            security.sudo.extraConfig = ''
+                Defaults env_keep += "EDITOR VISUAL"
+            '';
 
             # mkIf on the VALUE, not a config-conditioned module shape --
             # the latter is exactly the "config referenced in imports"

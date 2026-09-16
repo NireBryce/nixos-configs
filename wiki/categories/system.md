@@ -1,6 +1,6 @@
 # `system` — `config-system/system/`
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-16_
 
 The largest category by far — across 19 subdirectories, no per-file count
 kept here on purpose (see categories/00-INDEX.md's Index section for why) —
@@ -105,6 +105,16 @@ identity at the Linux default location. Unconditional (contrast
 pure derivation of an existing key, self-healing because durandal/tenacity
 wipe `/root` every boot. See the module header for the nix-store-safety
 reasoning.
+
+The same module also fixes which editor `sudo sops secrets.yaml` opens.
+Setting `environment.variables.EDITOR = "micro"` system-wide was not
+sufficient on its own — confirmed 2026-09-16, `sudo sops` still opened
+vi/vim despite it — because `sudo`'s default `env_reset` discards the
+invoking environment (including EDITOR/VISUAL) before exec, and that reset
+happens independently of a target-user shell ever sourcing
+`environment.variables`. The fix is `security.sudo.extraConfig = ''Defaults
+env_keep += "EDITOR VISUAL"'';`, which makes sudo pass the invoking user's
+own EDITOR through instead of resetting it away.
 
 See [../impermanence-and-secrets.md](../impermanence-and-secrets.md) for
 which hosts are actually enrolled in `.sops.yaml` — that's tracked separately
