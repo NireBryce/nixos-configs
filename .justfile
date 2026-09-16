@@ -47,6 +47,13 @@ modules:
     # Platform independent, so this is the one check that means anything on darwin.
     cd {{flake}} && python3 scripts/modules.py check modules
 
+# Scaffold a new module: just add-module <class> <category>/<subdir>/<name> ["one-line description"]
+# Class is nixos/homeManager/flake/generic/darwin; the path is relative to
+# flake/modules/ and must sit in a subdirectory of a category dir (see
+# skill new-flake-module for why). git-adds the file and runs the checks.
+add-module class target *desc:
+    cd {{flake}} && python3 scripts/modules.py add modules {{class}} {{target}} {{desc}}
+
 # statix + deadnix + an oversized-file check, ratcheted against a committed baseline
 lint:
     # Needs statix/deadnix on PATH -- already there via packages/nix-utils/
