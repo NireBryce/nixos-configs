@@ -5,7 +5,13 @@ _Last modified: 2026-09-14_
 Condensed from
 [durandal-auto-suspend-hang.md](durandal-auto-suspend-hang.md), which keeps the
 reasoning and the cycle log. **Status: mechanism partly identified, cause
-not. Nothing under test — `amdgpu.runpm=0` was tried 2026-09-14 and failed.**
+not. Nothing under test.** `amdgpu.runpm=0` tried 2026-09-14, failed.
+
+**Probably not an OS bug.** Elly reports the same hang under Windows on this
+hardware years ago (recollection, not measurement), and the GPP0/GPP8
+mitigation worked for years before failing in the last few months. Treat every
+amdgpu finding below as symptom, not cause; suspect firmware or wear (PSU caps,
+CMOS battery — unmeasured).
 
 ## Symptom
 
@@ -69,6 +75,23 @@ subvolume, outside the wiped root.
 **Kernel confound resolved.** The 02:24 reboot made `runpm=0` live and moved
 the kernel 6.18.43 → 6.18.51 together. The hang continued, so neither worked
 and no reboot need be spent separating them. Kernel 6.18.51 from here.
+
+## Instrumentation
+
+Per cycle: requester, sleep mode, `suspend_stats`, `/proc/acpi/wakeup`, GPE
+counters, PCI + USB wakeup, `/sys/class/wakeup`, drive power cycles, and (from
+2026-09-15) **GPU state** — `power_dpm_state`, forced perf level, all
+`pp_dpm_*` with active marker, busy%, link speed/width, hwmon power/temp/volts.
+Added because nothing else in the dump differs between hang and clean.
+`pm_print_times=1` via tmpfiles logs per-device suspend/resume durations.
+
+Not done: **`/sys/power/pm_test`** (`core`/`platform`/`devices`/`freezer` —
+bisects where suspend fails without entering S3; if `devices`+`platform` pass
+while real S3 hangs, the fault is beyond the kernel) · **serial console +
+`no_console_suspend=1`** (`/dev/ttyS0`, 16550A at 0x3f8 — the only way to
+observe the failure, since the CPU is not executing during it; needs a cable
+and a second machine) · **`umr`** (packaged, but near-useless here: needs the
+GPU to respond, which is what fails).
 
 ## Reading the dumps
 

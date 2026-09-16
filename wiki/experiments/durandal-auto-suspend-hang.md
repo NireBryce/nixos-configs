@@ -4,8 +4,10 @@ _Last modified: 2026-09-14_
 
 `nire-durandal` suspends into S3 and then cannot be woken — keyboard, power
 button, nothing — until power is physically removed at the PSU. **Status:
-mechanism partly identified, cause not. Nothing currently under test —
-`amdgpu.runpm=0` was tried and failed.** Recovery
+mechanism partly identified, cause not. Nothing under test.** Elly reports the
+same failure under **Windows** on this hardware years ago, which — if it holds
+— makes this firmware or hardware, not an OS bug, and makes every amdgpu
+finding below a symptom rather than a cause. Recovery
 is a timed PSU cut that resets the GPU while DRAM stays alive on standby; hold
 it too long and RAM goes, taking the session.
 
@@ -22,6 +24,7 @@ it too long and RAM goes, taking the session.
 - [Ruled out](#ruled-out)
 - [Under test](#under-test)
 - [Progress](#progress)
+- [Instrumentation](#instrumentation)
 - [Reading the dumps](#reading-the-dumps)
 - [See also](#see-also)
 ## Two failure shapes
@@ -62,6 +65,17 @@ Two consequences, both load-bearing:
   (`plasmashell`), falsifying the earlier reading that PowerDevil's idle
   timeout was the discriminator. An earlier 35-suspend requester tally made
   auto look causal; it is just the trigger hit most often.
+- **It predates Linux.** Elly recalls the same hang under Windows while
+  dual-booting, and it is part of why this machine moved to Linux. Recorded as
+  recollection, not measurement — but if right, no driver-level explanation can
+  be the root cause, and `resume of IP block <smu> failed -62` is the driver
+  *reporting* unresponsive hardware rather than causing it.
+- **The GPP0/GPP8 mitigation worked for years and stopped in the last few
+  months.** A long-standing fault adequately masked, recently crossing a
+  threshold where the mask stopped sufficing. Things that change on that
+  timescale are wear, not software — PSU capacitors (S3 is a very low-load
+  state, and the recovery *is* cutting PSU power), CMOS battery, board caps.
+  None of this is measured yet.
 - **`Refused to change power state from D0 to D3hot` + `MODE1 reset` fires on
   every suspend**, on every boot back to July. The Navi 22 (`1002:73df`) never
   leaves D0 across S3. This is the standing suspect — a GPU held in D0 through
@@ -141,6 +155,29 @@ six clean.** Cycles 1–6 predate smartmontools and are labelled from memory
 only — they can never be verified. Hangs are therefore much rarer than the
 early "every auto-suspend" reading suggested, and short sleeps are not
 inherently suspicious: 14 s, 51 s and 450 s cycles all read clean.
+
+## Instrumentation
+
+**Recorded per cycle** by
+[suspend-probe-durandal.nix](../../flake/modules/hosts/durandal/fixes/suspend-probe-durandal.nix):
+requester, sleep mode, `suspend_stats`, `/proc/acpi/wakeup`, GPE counters, PCI
+and USB wakeup state, `/sys/class/wakeup`, drive power cycles, and — added
+2026-09-15 — **GPU state**: `power_dpm_state`, forced performance level, every
+`pp_dpm_*` table with its active marker, `gpu_busy_percent`, link speed and
+width, and hwmon power/temp/voltage. That last one exists because nothing else
+in the dump differs between a hang and a clean cycle; if the card goes into
+suspend in a different state, this is where it would show.
+
+`pm_print_times` is enabled via tmpfiles, so the kernel logs every device's
+suspend and resume duration.
+
+**Available and not done**, with what each would buy:
+
+| option | buys | cost |
+|---|---|---|
+| `/sys/power/pm_test` (`core`/`platform`/`devices`/`freezer`) | bisects *where* suspend fails without entering S3. If `devices` and `platform` pass while real S3 hangs, the failure is beyond the kernel — closing off a lot of speculation | minutes, run by hand |
+| serial console + `no_console_suspend=1` | the **only** way to observe the failure, since the CPU is not executing during it. `/dev/ttyS0` is real hardware here (16550A at 0x3f8) | a cable and a second machine |
+| `umr` (packaged in nixpkgs) | AMD register-level debugging | **near-zero here** — it needs the GPU to respond, which is exactly what fails |
 
 ## Reading the dumps
 
