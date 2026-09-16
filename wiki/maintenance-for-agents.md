@@ -1,6 +1,6 @@
 # Fleet maintenance, for agents
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-16_
 
 Condensed from [maintenance.md](maintenance.md). Credentials →
 maintenance-schedule.md; backups → homelab/backup-runbook.md; one-time
@@ -9,22 +9,24 @@ restated here.
 
 ## Lockfile updates
 
-- `.github/workflows/update-flake-lock.yml`: cron `0 9 * * 1` (Mondays
-  09:00 UTC) + `workflow_dispatch`; pushes branch
-  `update_flake_lock_action`; opens PR `chore: update flake.lock` →
+- cube's `flake-lock-bump` timer (moved off
+  `.github/workflows/update-flake-lock.yml` 2026-09-16, #205): Mondays
+  09:00 UTC; updates the lock, preflights (`nix flake check` + module
+  tree + lint), builds nire-cube's toplevel on cube, pushes branch
+  `update_flake_lock_action`, opens PR `chore: update flake.lock` →
   `experimental`.
-- The PR is a decision: review the lock diff, require green
-  `nix flake check + module tree`, merge via skill `ship`. CI does not
-  force a host toplevel for these; `just preflight` locally is stronger.
-- Needs repo secret `FLAKE_LOCK_TOKEN` (fine-grained PAT) — expiry and
-  rotation are maintenance-schedule.md item 10. Every run preflights the
-  token, warns inside a 30-day expiry window, files issue
-  `update-flake-lock: weekly lock PR needs attention` on failure/expiry —
-  watch that issue, not the Actions log.
+- The PR is a decision: review the lock diff, require green CI, merge
+  via skill `ship`. CI does not force a toplevel for the hosts cube
+  cannot build; `just preflight` locally is stronger.
+- Token: the `flake-lock-token` sops key on cube —
+  maintenance-schedule.md item 10. Every run preflights it, warns
+  inside a 30-day expiry window, and (via `OnFailure=`) files issue
+  `update-flake-lock: weekly lock PR needs attention` on
+  failure/expiry — watch that issue, not the journal.
 - Branch `update_flake_lock_action` ahead of `experimental` with no PR =
-  the run pushed the lock, then PR creation failed (token missing/lapsed).
-  Fix the cause, then re-run `workflow_dispatch` (reuses the branch), or
-  open the PR by hand to `experimental`.
+  the run pushed the lock, then PR creation failed (token missing/
+  lapsed). Fix the cause, then `systemctl start flake-lock-bump` on
+  cube (reuses the branch), or open the PR by hand to `experimental`.
 - By hand: `just update`.
 
 ## Deploying

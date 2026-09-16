@@ -1,6 +1,6 @@
 # Maintenance schedule, for agents
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-16_
 
 Condensed from [maintenance-schedule.md](maintenance-schedule.md), which
 keeps each item's reasoning, rejected alternatives and evidence. Facts only
@@ -24,7 +24,7 @@ and dates are not values.
 | 7 | `forgejo-admin-password` | none enforced; never rotated | — | — |
 | 8 | Grafana admin credentials | real password, set by hand 2026-09-13; **not** reproducible | lives only in cube's sqlite db | 2026-09-13 |
 | 9 | Syncthing device certs | decades; **declared by no module since 2026-09-08** | nothing | 2026-09-07 |
-| 10 | `FLAKE_LOCK_TOKEN` | expires 2027-09-12; custom date ≤366d | fails loudly by construction, see below | 2026-09-13 |
+| 10 | `flake-lock-token` (sops, cube only) | new PAT pending mint; old one expired 2027-09-12, revoke after cube's first success | fails loudly by construction, see below | 2026-09-16 |
 | 11 | Atuin account key | none; on suspicion only | — | 2026-09-09 |
 | 12 | `nire-galatea/tskey` (git history only) | dead — rotated 2024; auth keys ≤90d anyway | nothing — history fossil, not a credential | 2026-09-14 |
 
@@ -71,24 +71,23 @@ the *absence* of an `admin_password` setting is what leaves it stock. Skill
 | 5, 6 | [homelab/backup-runbook.md](homelab/backup-runbook.md) |
 | 11 | `packages/shell-apps/history/atuin-key-rotation.md` |
 
-## `FLAKE_LOCK_TOKEN` specifics
+## `flake-lock-token` specifics
 
-Minted 2026-09-13, expires 2027-09-12. Verified end to end same day: a
-manual `workflow_dispatch` run passed preflight and opened #308 with
-`nix flake check + module tree` running on it.
+The weekly lock PR's PAT. Was the `FLAKE_LOCK_TOKEN` Actions secret until
+2026-09-16 (#205 moved the job to cube); that secret was write-only, so
+the move needed a fresh mint — old token stays in Actions until cube's
+first scheduled run succeeds, then gets revoked. Same PAT-not-GITHUB_TOKEN
+reasoning (the PR must trigger `pull_request` workflows the `experimental`
+ruleset requires). Now a sops key because the consumer is cube, an
+enrolled sops host — the old "runners can't be enrolled" reasoning died
+with the move, and the accepted cost is that secrets.yaml ciphertext is
+permanently public.
 
-GitHub Actions repo secret, **not** `secrets.yaml` — a runner has no
-persistent host key to enrol, and `secrets.yaml` is committed to a public
-repo. A PAT rather than `GITHUB_TOKEN` because a `GITHUB_TOKEN`-opened PR
-does not trigger `pull_request` workflows, and the `experimental` ruleset
-requires that check.
-
-The workflow checks its own credential: missing/revoked/expired → hard fail
-with a `::error::` at the first step, plus an issue opened in this repo
-(reusing one titled `update-flake-lock: weekly lock PR needs attention`).
-Within 30 days of expiry → `::warning::`, keeps going. **Gap**: GitHub
-returns the expiry header only for tokens that have one, so an absent header
-means "cannot tell" — that emits a `::notice::` and does not fail.
+`lock-bump.sh` preflights it every run: dead token → hard fail before any
+nix work; within 30 days of expiry → warn, still open the PR, then exit
+non-zero; either way `OnFailure=` files the reusable issue
+`update-flake-lock: weekly lock PR needs attention`. Kept gap: absent
+expiry header means "cannot tell" — notice, not failure.
 
 Lapse symptom to recognise: the `update_flake_lock_action` branch sitting
 ahead of `experimental` with no PR attached.
