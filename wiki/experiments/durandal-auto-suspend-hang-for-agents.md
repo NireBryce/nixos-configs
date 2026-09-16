@@ -168,5 +168,5 @@ worsened it.
 
 ## See also
 
-[durandal-auto-suspend-hang.md](durandal-auto-suspend-hang.md) ·
+[durandal-auto-suspend-hang.md](durandal-auto-suspend-hang.md) · [durandal-suspend-instrumentation-state.md](durandal-suspend-instrumentation-state.md) (what is running on the machine) ·
 [hosts.md](../hosts.md) · [lessons-learned.md](../lessons-learned.md)
