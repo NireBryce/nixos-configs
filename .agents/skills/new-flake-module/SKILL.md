@@ -19,6 +19,18 @@ NixOS or Home Manager module. Category membership is derived from directory
 declares the option they all write into. All of the following have actually
 happened in this repo.
 
+## The scaffolder does the mechanical part
+
+`just add-module <class> <category>/<subdir>/<name> ["one-line description"]`
+creates the file where the collector will actually find it, emits this file's
+header boilerplate (`wiki/module-style-guide.md` formatting), `git add`s it —
+flakes ignore untracked files — and runs the collisions/orphans/untracked
+checks on the spot (`flake/scripts/modules.py add`; #293). It refuses the
+placements that produce no error: outside every category tree, directly
+inside a category dir, and any name that would silently merge (same
+class+name, or a category name). What it cannot decide is what the module
+should *say* — the rest of this skill still applies.
+
 ## `flake.modules` cannot live inside `perSystem`
 
 **`perSystem` itself is fine and is used** — `checks.nix` is built on it, and

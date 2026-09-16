@@ -19,6 +19,15 @@ Both are platform independent, so unlike the host checks they also run on darwin
     modules.py orphans    <modules-dir>
     modules.py untracked  <modules-dir>     # untracked .nix files -- invisible to flakes
     modules.py check      <modules-dir>     # all three; non-zero exit on any finding
+
+    modules.py add <modules-dir> <class> <category>/<subdir>/<name>.nix [description words...]
+                           # scaffold a new module where the collector will
+                           # actually find it, with boilerplate per
+                           # wiki/module-style-guide.md; `git add`s the file
+                           # (flakes ignore untracked ones) and runs the
+                           # checks above immediately. The new module is
+                           # reported as an ORPHAN on purpose -- nothing
+                           # imports it yet.
 """
 import re, sys, pathlib, subprocess
 
@@ -198,10 +207,159 @@ def untracked(root):
     return hits
 
 
+# The classes that mean anything (new-flake-module skill): flake-parts stamps
+# whatever class is declared straight into `_class` and validates nothing, so
+# a typo here declares fine and fails much later, at the import site. `darwin`
+# works only because nix-darwin sets that `_class` itself.
+CLASSES = ('nixos', 'homeManager', 'flake', 'generic', 'darwin')
+
+# wiki/module-style-guide.md's module header: name derived from the filename
+# (never hardcoded), opening brackets on the same line, four-space indent, and
+# the `# # description` comment as the first line of the body. The inner
+# lambda is `_:` rather than `{ ... }:` -- statix flags the empty pattern and
+# a fresh file would raise the lint ratchet; whoever fleshes the module out
+# will destructure `config`/`pkgs` anyway. No history heading: that is added
+# when there is something historical to record, not at birth.
+#
+# Tokens, not str.format: the text is full of literal Nix braces, and every
+# one of them is a format field waiting to KeyError.
+BOILERPLATE = '''{ lib, ... }:
+    let
+        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    in {
+        flake.modules.@CLASS@.${moduleName} = _: {
+            # # description = "@DESC@";
+        };
+}
+'''
+
+
+def add(root, cls, target, description):
+    """Scaffold a module file where the collector will actually find it.
+
+    Every rule enforced here is one that has silently bitten (the
+    new-flake-module skill collects them): the declared name comes from the
+    filename, never hardcoded; the target must sit in a subdirectory of a
+    category, because a category collects from its subdirectories only and a
+    file directly in the category dir is collected by nothing; the class must
+    be one that means something; and a name that already exists is refused or
+    warned about, because same-named declarations merge instead of
+    conflicting. The file is `git add`-ed -- flakes in a git repo ignore
+    untracked files -- and the checks run immediately, so a mistake is caught
+    this second rather than at the next build.
+    """
+    if cls not in CLASSES:
+        print(f"error: class {cls!r} is not one that means anything here "
+              f"({', '.join(CLASSES)}); a wrong class declares fine and "
+              f"fails only at the import site", file=sys.stderr)
+        return 1
+    target = pathlib.Path(target)
+    if target.is_absolute() or '..' in target.parts:
+        print(f"error: target must be a relative path under {root}",
+              file=sys.stderr)
+        return 1
+    if target.suffix != '.nix' or len(target.parts) < 2:
+        print("error: target must name a .nix file inside a subdirectory of "
+              "a category, e.g. "
+              "config-system/system/my-thing/my-thing.nix", file=sys.stderr)
+        return 1
+    description = ' '.join(description) if description else "TODO: one line"
+    if '"' in description or '${' in description:
+        # Either would break the "..." string in the generated Nix: a quote
+        # terminates it, `${` interpolates.
+        print('error: description must not contain `"` or `${`',
+              file=sys.stderr)
+        return 1
+
+    root = pathlib.Path(root)
+    path = root / target
+    if path.exists():
+        print(f"error: {path} already exists", file=sys.stderr)
+        return 1
+
+    categories, modules = scan(root)
+    catdirs = {p.parent: name for name, p in categories.items()}
+
+    category = next((catdirs[anc] for anc in path.parents if anc in catdirs),
+                    None)
+    if category is None:
+        print(f"error: {target} sits outside every category tree; a module "
+              f"must be under a directory holding a dirsAsCategory.nix (only "
+              f"entry points live outside, and they are not collected)",
+              file=sys.stderr)
+        return 1
+    if path.parent in catdirs:
+        print(f"error: {path.parent} is the category dir itself, and a "
+              f"category collects from its subdirectories only -- a file "
+              f"sitting directly in it is collected by nothing. Put the file "
+              f"in a subdirectory of it", file=sys.stderr)
+        return 1
+
+    name = target.stem
+    for existing_path, existing_classes in modules.get(name, []):
+        if cls in existing_classes:
+            print(f"error: {cls}.{name} is already declared by "
+                  f"{existing_path}; two same-named modules of one class "
+                  f"MERGE silently rather than conflicting -- pick another "
+                  f"name", file=sys.stderr)
+            return 1
+    if name in modules:
+        others = ', '.join(sorted(
+            f"{'/'.join(sorted(c))}.{name} ({p})"
+            for p, c in modules[name]))
+        print(f"warning: the name {name!r} already exists as {others}; a "
+              f"different class declares cleanly, but grep for the name "
+              f"before keeping it")
+    if name in categories:
+        print(f"error: {name!r} is also a category "
+              f"({categories[name].parent}/); declaring a module of the same "
+              f"name merges the two attributes -- this is exactly how `boot` "
+              f"came to mean two different things. Pick another name",
+              file=sys.stderr)
+        return 1
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        BOILERPLATE.replace('@CLASS@', cls).replace('@DESC@', description))
+    repo = pathlib.Path(subprocess.run(
+        ['git', 'rev-parse', '--show-toplevel'],
+        cwd=root, capture_output=True, text=True, check=True).stdout.strip())
+    # `git -C <repo>` interprets pathspecs against the repo root, so hand it
+    # the repo-relative form -- not the modules-dir-relative one.
+    subprocess.run(['git', '-C', str(repo), 'add', '--',
+                    str(path.resolve().relative_to(repo))], check=True)
+    print(f"created {path} -- declares {cls}.{name}, collected via category "
+          f"{category!r}; `git add`-ed")
+
+    # The new module is imported by nothing yet, so `orphans` listing it is
+    # the expected outcome, not a finding. Anything ELSE it reports was
+    # already wrong before this command ran -- say so and fail rather than
+    # let the new file hide in noise.
+    new = {str(path)}
+    findings = bool(collisions(root)) | bool(untracked(root))
+    orphaned = orphans(root)
+    stale = [f for f in orphaned if str(f[1]) not in new]
+    if {str(f[1]) for f in orphaned} & new:
+        print("ORPHAN (expected -- brand new): import it from a host or "
+              "another module, or it installs nothing")
+    if findings or stale:
+        print("error: the checks above did not come back clean -- fix what "
+              "they report before scaffolding here", file=sys.stderr)
+        return 1
+    return 0
+
+
 def main():
+    if len(sys.argv) < 2:
+        print(__doc__); sys.exit(2)
+    cmd = sys.argv[1]
+    if cmd == 'add':
+        if len(sys.argv) < 5:
+            print(__doc__); sys.exit(2)
+        sys.exit(add(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5:]))
     if len(sys.argv) != 3:
         print(__doc__); sys.exit(2)
-    cmd, root = sys.argv[1], sys.argv[2]
+    root = sys.argv[2]
     if cmd == 'collisions':
         sys.exit(1 if collisions(root) else 0)
     if cmd == 'orphans':
@@ -214,5 +372,7 @@ def main():
         sys.exit(1 if bad else 0)
     print(__doc__); sys.exit(2)
 
-
-main()
+# Guarded so `add` (and the checks) stay importable for testing; nothing in
+# the tree imports this module today, but unguarded main() made that impossible.
+if __name__ == '__main__':
+    main()
