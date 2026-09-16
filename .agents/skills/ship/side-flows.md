@@ -26,13 +26,22 @@ On a "promote to main"-shaped ask (not part of the ordinary flow in
 gh pr create --base main --head experimental \
   --title "promote: <one line on what's verified>" \
   --body "what landed since the last promotion, and where it was booted/switched"
-gh pr merge <n> --rebase    # experimental is strictly ahead; keeps history linear
+gh pr merge <n> --merge     # a merge commit -- never --rebase, see below
 ```
 
 The promotion PR is the record of *why* `main` moved — write what was
 verified on hardware, not just the commit range. Only promote after the
 config has actually booted/switched on the hosts it touches; an unverified
 trunk is what `experimental` is for.
+
+**Merge, never rebase.** This section prescribed `--rebase` from
+2026-09-03, and no promotion has ever used it — #201 (2026-09-08) and
+#354 (2026-09-15) both merge. Rebase rewrites every promoted commit with
+a new SHA on `main`, so `main..experimental` counts them as unpromoted
+forever and every parity/delta check needs patch-id machinery; a merge
+commit is what made `main..experimental` read as exactly
+commits-since-last-promotion after #354, which is the number the PR
+body above asks you to summarize.
 
 ## When one working tree becomes two PRs
 
