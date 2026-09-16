@@ -40,7 +40,9 @@ this page links to the others rather than restating them:
 
 ## Lockfile updates
 
-The weekly PR: cube's `flake-lock-bump` timer runs Mondays 09:00 UTC
+The dedicated page for this whole topic is
+[flake-lock.md](flake-lock.md) — mechanism, credential, history. The short
+version: the weekly PR — cube's `flake-lock-bump` timer runs Mondays 09:00 UTC
 (#205 — moved off `.github/workflows/update-flake-lock.yml`, deleted
 2026-09-16, because a runner can only *evaluate* a bump and never build
 it). The run updates the lock, preflights it (`nix flake check` + module

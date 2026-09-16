@@ -90,6 +90,8 @@ categories.
 
 ## See also
 
+- [flake-lock.md](../flake-lock.md) — the dedicated page for the whole
+  topic: mechanism, credential storage, history.
 - [maintenance.md](../maintenance.md)'s "Lockfile updates" section — the
   user-facing run story.
 - [maintenance-schedule.md](../maintenance-schedule.md) item 10 — the
