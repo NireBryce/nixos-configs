@@ -1,6 +1,6 @@
 # Open threads, for agents
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-16_
 
 Condensed from [open-threads.md](open-threads.md), which keeps the closed
 items, the reasoning and the full accounts. Live threads only here.
@@ -40,7 +40,9 @@ third-party projects. **Filing outside `NireBryce/nixos-configs` happens only wh
 says so explicitly, in those words, for that specific report** — never as a
 housekeeping pass over this list.
 
-- nixpkgs: vscode ≥ 1.129 patches the wrong ripgrep on Linux (2026-08-11).
+- nixpkgs: vscode ≥ 1.129 patches the wrong ripgrep on Linux (2026-08-11;
+  re-checked 2026-09-16 — fleet's 1.136.1 unaffected, `master` still carries
+  the Darwin-only conditional).
 - amd-s2idle: sleep residency reported 100× too high (2026-08-12).
 - Jovian-NixOS: `amd_iommu=off` blocks s0i3 on non-Deck handhelds with an
   NPU (2026-08-12).
@@ -54,9 +56,11 @@ housekeeping pass over this list.
   (user-package material) → dedicated non-interactive accounts, as a
   confused-deputy mitigation, once the config stabilizes. See
   [categories/elly.md](categories/elly.md#elly-as-the-experimental-user).
-- **QNAP (QuTS hero) has no way to disable SSH password authentication** if
-  SSH is ever enabled there. Separate from cube's side of the restic
-  connection. Mitigations undecided.
+- **QNAP (QuTS hero) SSH password auth: cannot be disabled — confirmed
+  impossible 2026-09-16.** Decided, not pending: no such setting exists in
+  QuTS hero. Password auth is a permanent condition of restic-over-SFTP to
+  the NAS; further mitigation (firewalling, idle SSH) is QNAP
+  admin-console territory, outside this repo.
 - **Forgejo has no local CI/CD yet** — mirroring `.github/workflows/` onto
   Forgejo Actions hasn't been started.
 - CI's lint step re-fetches `nixpkgs#statix nixpkgs#deadnix` on every run

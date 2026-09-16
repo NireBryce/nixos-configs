@@ -1,6 +1,6 @@
 # Open threads
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-16_
 
 Todos, half-formed ideas, and things-to-look-into notes left in various
 corners of the tree, plus upstream bugs found here but not yet filed. None
@@ -180,13 +180,17 @@ specific report — not as a housekeeping pass over this list:
   home-manager packages, per `packages/nix-utils/`). Cheap today; worth
   pinning if CI minutes ever start mattering. Rescued 2026-09-08 from a
   removed notebook.
-- **QNAP NAS: no way to disable SSH password authentication in the QNAP's
-  own OS (QuTS hero) if SSH access to it is ever enabled there** — separate
+- **QNAP NAS: SSH password authentication cannot be disabled in the QNAP's
+  own OS (QuTS hero) — confirmed impossible, 2026-09-16** — separate
   from the restic-over-SFTP credentials in
   [maintenance-schedule.md](maintenance-schedule.md) item 5, which cover
   `nire-cube`'s side of that connection, not the NAS's own sshd config.
-  Mitigations undecided; rescued 2026-09-08 from a removed notebook,
-  unanswered there too.
+  Decided, not pending: there is no mitigation to choose, because QuTS hero
+  offers no such setting at all. Password auth on the NAS's sshd is a
+  permanent condition of running restic-over-SFTP to it; anything further
+  (firewalling, disabling SSH when idle) is QNAP admin-console territory,
+  outside this repo. Rescued 2026-09-08 from a removed notebook; closed
+  2026-09-16.
 
 `nire-llm-sandbox`'s three runtime-verified `VMs/_lib/libvirt-vm.nix` fixes
 (default network never started, a nonexistent `virsh` flag, a missing fixed
