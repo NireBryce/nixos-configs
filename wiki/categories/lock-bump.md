@@ -14,7 +14,7 @@ the other nine.
 
 - [Why it moved off Actions](#why-it-moved-off-actions)
 - [What the run does](#what-the-run-does)
-- [The credential, and what is still manual](#the-credential-and-what-is-still-manual)
+- [The credential](#the-credential)
 - [Imported by](#imported-by)
 - [See also](#see-also)
 ## Why it moved off Actions
@@ -58,30 +58,29 @@ A fresh nixpkgs can make step 5 a real build; `TimeoutStartSec = 4h`. Most
 weeks everything is substitutable and the run is minutes. Store growth from
 accumulated toplevels is what `nix store gc` is for.
 
-## The credential, and what is still manual
+## The credential
 
-The PAT is the `flake-lock-token` key in `secrets.yaml`, decrypted to
-`/run/secrets/flake-lock-token` on cube; expiry and rotation discipline is
-[maintenance-schedule.md](../maintenance-schedule.md) item 10. **As of
-2026-09-16 the value has not been minted yet** — the old Actions secret was
-write-only, so the move needed a fresh PAT by definition. Until it is added:
+The pushes and the PR are authenticated with **elly's existing `gh auth`
+login on cube** (`hosts.yml`, `repo` + `workflow` scopes) — not a sops key
+and not a dedicated PAT. Decided 2026-09-16, after the original design here
+declared a `sops.secrets.flake-lock-token`: the PAT had already been rotated
+into the `FLAKE_LOCK_TOKEN` Actions secret (updated 2026-09-14, proven by
+lock PRs #308 and #333 both merging), but that secret is write-only, so the
+sops shape required minting yet another PAT and hand-setting it before
+cube's next build would even succeed — while a working, already-on-the-box
+credential sat in elly's gh config. Using it adds no new exposure and
+deletes the manual step entirely. Trade accepted: `repo` scope is broader
+than a repo-scoped fine-grained PAT would be, and there is no expiry, so
+the weekly preflight's early warning degrades to "cannot tell" (logged as a
+notice, not a failure — the same gap the workflow documented).
 
-- cube's next build/switch **fails at the sops manifest** (a declared secret
-  with no value — the restic-cube-password failure mode). That is the
-  designed loud prompt, not an accident.
-- The timer, if it fires before then, fails at token preflight and the alert
-  unit files the issue.
+The now-obsolete `FLAKE_LOCK_TOKEN` Actions secret stays until a cube run
+has succeeded, then gets deleted (rollback path first, hygiene second).
 
-First-run checklist, in order:
+First-run checklist:
 
-1. Mint a fine-grained PAT (this repo; `Contents: read/write`,
-   `Pull requests: read/write`), record its expiry in maintenance-schedule
-   item 10, and `sops set` it into `secrets.yaml` as `flake-lock-token`
-   from a session that can decrypt.
-2. `just switch` cube (builds clean now), then
-   `systemctl start flake-lock-bump` for an immediate first run, watched.
-3. After that first success: revoke the old `FLAKE_LOCK_TOKEN` Actions
-   secret (kept until then as the rollback path).
+1. `just switch` cube, then `systemctl start flake-lock-bump`, watched.
+2. After that first success: `gh secret delete FLAKE_LOCK_TOKEN`.
 
 ## Imported by
 

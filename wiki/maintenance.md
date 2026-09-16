@@ -57,17 +57,17 @@ not force a toplevel for the hosts cube cannot build, so `just
 preflight` plus a real build on durandal and tenacity is the stronger
 check before merging.
 
-The token it pushes with is the `flake-lock-token` sops key on cube —
-expiry and rotation belong to
-[maintenance-schedule.md](maintenance-schedule.md) item 10, not here.
-The run preflights the token, warns inside a 30-day expiry window, and
-files an issue titled `update-flake-lock: weekly lock PR needs
-attention` on any failure — that issue, not the journal, is the thing
-to watch.
+The credential is elly's existing `gh auth` login on cube — nothing
+was minted or stored for this (#205's cutover; the obsolete
+`FLAKE_LOCK_TOKEN` Actions secret gets deleted after cube's first
+successful run). The run preflights the credential, and files an issue
+titled `update-flake-lock: weekly lock PR needs attention` on any
+failure — that issue, not the journal, is the thing to watch.
 
 **Branch ahead, no PR attached** is the signature of a run that pushed
-the lock but failed at PR creation (a missing or lapsed token). Fix the
-cause first, then rerun (`systemctl start flake-lock-bump` on cube
+the lock but failed at PR creation (a missing or rejected credential —
+usually the gh login). Fix the cause first (`gh auth login` as elly on
+cube if so), then rerun (`systemctl start flake-lock-bump` on cube
 reuses the branch), or open the PR by hand from
 `update_flake_lock_action` to `experimental`.
 

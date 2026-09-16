@@ -18,15 +18,15 @@ restated here.
 - The PR is a decision: review the lock diff, require green CI, merge
   via skill `ship`. CI does not force a toplevel for the hosts cube
   cannot build; `just preflight` locally is stronger.
-- Token: the `flake-lock-token` sops key on cube —
-  maintenance-schedule.md item 10. Every run preflights it, warns
-  inside a 30-day expiry window, and (via `OnFailure=`) files issue
-  `update-flake-lock: weekly lock PR needs attention` on
-  failure/expiry — watch that issue, not the journal.
+- Credential: elly's `gh auth` login on cube, read via `gh auth token`
+  — maintenance-schedule.md item 10. Every run preflights it and (via
+  `OnFailure=`) files issue `update-flake-lock: weekly lock PR needs
+  attention` on failure — watch that issue, not the journal.
 - Branch `update_flake_lock_action` ahead of `experimental` with no PR =
-  the run pushed the lock, then PR creation failed (token missing/
-  lapsed). Fix the cause, then `systemctl start flake-lock-bump` on
-  cube (reuses the branch), or open the PR by hand to `experimental`.
+  the run pushed the lock, then PR creation failed (credential missing/
+  rejected — usually the gh login: `gh auth login` as elly). Then
+  `systemctl start flake-lock-bump` on cube (reuses the branch), or
+  open the PR by hand to `experimental`.
 - By hand: `just update`.
 
 ## Deploying

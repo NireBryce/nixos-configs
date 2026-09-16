@@ -9,9 +9,12 @@
 # from that workflow's steps.
 #
 # Runs as the flake-lock-bump systemd timer
-# (config-system/homelab/lock-bump/). The token lives in secrets.yaml as
-# `flake-lock-token`, decrypted to /run/secrets/flake-lock-token -- see
-# wiki/maintenance-schedule.md item 10.
+# (config-system/homelab/lock-bump/), as user `elly`. The credential is
+# elly's existing `gh auth` login on this host (hosts.yml) -- #205's cutover
+# deliberately consumes what the box already had rather than minting and
+# storing a second PAT; the FLAKE_LOCK_TOKEN Actions secret this replaces was
+# obsoleted 2026-09-16 and can be deleted once a cube run has succeeded.
+# \$FLAKE_LOCK_TOKEN overrides, for testing.
 #
 # `alert` mode (a separate unit, wired via OnFailure=): files into one
 # reusable GitHub issue, what the workflow's notice step did. Necessary
@@ -23,19 +26,23 @@ repo_url="https://github.com/NireBryce/nixos-configs"
 api_url="https://api.github.com/repos/NireBryce/nixos-configs"
 branch="update_flake_lock_action"
 state_dir="/var/lib/flake-lock-bump"
-token_file="/run/secrets/flake-lock-token"
 expire_warn_days=30
 alert_title="update-flake-lock: weekly lock PR needs attention"
 
 log() { printf '[lock-bump] %s\n' "$*"; }
 
 # --------------------------------- alert mode --------------------------------
-# Deliberately accepts an empty-issue-run too: this fires on ANY failure of
-# the main unit, including "token was already dead", so it must not itself
-# require more than the token file and gh.
+# Deliberately tolerates an empty-issue-run too: this fires on ANY failure of
+# the main unit. Without a gh login it cannot file anything -- say so loudly
+# and fail, so the journal carries the reason (the journal is where a human
+# will look when the issue never appeared).
 if [[ "${1:-}" == "alert" ]]; then
-    GH_TOKEN="$(cat "$token_file")"
+    GH_TOKEN="$(gh auth token 2>/dev/null || true)"
     export GH_TOKEN
+    if [[ -z "$GH_TOKEN" ]]; then
+        log "ERROR: cannot file the alert issue: \`gh auth token\` gave nothing -- log in as elly on this host, then \`systemctl start flake-lock-bump-alert\`"
+        exit 1
+    fi
     journal="$(journalctl -u flake-lock-bump.service -n 40 --no-pager 2>&1 || true)"
     body="$(printf '%s\n' \
         "cube's \`flake-lock-bump\` run failed, or its GitHub token is within" \
@@ -43,11 +50,10 @@ if [[ "${1:-}" == "alert" ]]; then
         "only then exits non-zero on a near-expiry token, so a PR may still" \
         "have appeared this week." \
         "" \
-        "If it is the token: mint a replacement fine-grained PAT scoped to" \
-        "\`NireBryce/nixos-configs\` (\`Contents: read/write\`, \`Pull" \
-        "requests: read/write\`), put it into \`secrets.yaml\` as" \
-        "\`flake-lock-token\` with \`sops\` from a session that can decrypt," \
-        "then switch cube. Details: \`wiki/maintenance-schedule.md\` item 10." \
+        "If it is the credential: \`gh auth token\` on cube produced nothing" \
+        "or GitHub rejected it -- re-login (\`gh auth login\` as elly on" \
+        "cube) and rerun \`systemctl start flake-lock-bump\`. Details:" \
+        "\`wiki/maintenance-schedule.md\` item 10." \
         "" \
         "Last journal lines:" \
         "" \
@@ -70,13 +76,14 @@ fi
 # Ported from the workflow's preflight step: fail fast and legibly on a dead
 # token instead of after the flake update, and warn inside 30 days of expiry.
 # GitHub sends `github-authentication-token-expiration` only for tokens that
-# HAVE an expiry, so an absent header means "cannot tell", not "healthy".
+# HAVE an expiry, so an absent header means "cannot tell", not "healthy" --
+# gh OAuth logins are in that no-expiry class.
 token="${FLAKE_LOCK_TOKEN:-}"
-if [[ -z "$token" && -r "$token_file" ]]; then
-    token="$(cat "$token_file")"
+if [[ -z "$token" ]]; then
+    token="$(gh auth token 2>/dev/null || true)"
 fi
 if [[ -z "$token" ]]; then
-    log "ERROR: no token: \$FLAKE_LOCK_TOKEN unset and ${token_file} unreadable"
+    log "ERROR: no token: \$FLAKE_LOCK_TOKEN unset and \`gh auth token\` gave nothing -- is elly's gh logged in on this host?"
     exit 1
 fi
 
