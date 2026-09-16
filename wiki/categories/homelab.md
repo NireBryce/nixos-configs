@@ -1,6 +1,6 @@
 # `homelab` — `config-system/homelab/`
 
-_Last modified: 2026-09-16_
+_Last modified: 2026-09-02_
 
 ## Contents
 
@@ -28,12 +28,6 @@ network. It's the odd one out functionally (nothing to reach over the
 tailnet, no port, no Caddy route — a timer, not a listener) but structurally
 identical: its own `dirsAsCategory.nix` under `config-system/homelab/backup/`,
 cube-only, folded in by the same delegation this page describes below.
-
-A ninth, [lock-bump](lock-bump.md), joined 2026-09-16 in backup's image —
-another timer, not a listener: the weekly `flake.lock` bump moved off
-GitHub's runner (#205) so the update is built on cube before its PR is
-proposed. Its own `dirsAsCategory.nix` under
-`config-system/homelab/lock-bump/`, cube-only, same delegation.
 
 ## Nested categories overlap their parents on purpose
 
