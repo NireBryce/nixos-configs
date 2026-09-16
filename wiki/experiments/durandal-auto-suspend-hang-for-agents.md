@@ -55,6 +55,15 @@ timed so DRAM survives on standby; held too long, RAM and the session go.
   dependency, no `/etc/systemd/system-sleep` hooks.
 - **Auto vs manual is NOT the discriminator.** Both hang; a manual cycle hung
   2026-09-14. An early 35-suspend requester tally made auto look causal.
+- **`/etc` IS NOT EVIDENCE HERE.** An agent shell runs in its own mount
+  namespace (65 mounts vs PID 1's 44) with a synthetic `/etc`: on 2026-09-16
+  `/etc/profile` resolved into a VS Code FHS store path and
+  `systemd-analyze cat-config` called every systemd config "not found" — both
+  artifacts, neither true of the machine. Use `/run/current-system/etc/...`
+  and `/proc/1/mountinfo`.
+- **Drive power-cycle counts survive across generations** (counter is in drive
+  firmware), so a generation with no probe can still be tested: note count,
+  boot it, suspend, return, compare delta against suspend count.
 - **"A `pre` with no `post` is a hang" is WRONG.** `powerDownCommands` fires on
   shutdown too, so every reboot leaves an orphan `pre`. Use the power-cycle
   delta.
@@ -111,6 +120,34 @@ while real S3 hangs, the fault is beyond the kernel) · **serial console +
 observe the failure, since the CPU is not executing during it; needs a cable
 and a second machine) · **`umr`** (packaged, but near-useless here: needs the
 GPU to respond, which is what fails).
+
+## 26.05 -> 26.11 boundary
+
+75-day generation gap: **221** (2026-05-30, `26.05.20260523`) -> **222**
+(2026-08-13, `26.11.20260807`). Both closures still in the store.
+
+| | 221 | 222 |
+|---|---|---|
+| `sleep.conf` | `[Sleep]` only | 3x `Allow*=false` |
+| `nohibernate` | no | yes |
+| kernel | 6.18.33 | 6.18.43 |
+| **powerdevil** | **6.6.5** | **6.7.4** |
+| systemd | 260.1 | 261.1 |
+
+b550 udev rule present in 221/222/227 — not lost here. The `sleep.conf` change
+is the documented hybrid-sleep breakage, closed by `SleepMode=1` (still in
+`powerdevilrc`). **PowerDevil 6.6.5 -> 6.7.4 is untested** and is what
+initiates auto-suspend.
+
+**Gens 218-221 are bootable**, but **not being chased (2026-09-16)**: config
+and hardware hypotheses each failed, effort stays on logging. Pre-upgrade tree
+is recoverable from git, not the boot menu — gen 221 ~`887cdc6f` (2026-05-30),
+gen 222 just before the 2026-08-14 cluster. Skill `git-archaeology` for the
+renames both predate.
+
+**Caveat:** abrupt-ending boots appear from 2025-12-02, including two
+pre-boundary 26.05 boots. Data cannot say whether the boundary caused it or
+worsened it.
 
 ## Reading the dumps
 

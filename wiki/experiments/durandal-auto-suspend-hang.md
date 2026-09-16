@@ -25,6 +25,7 @@ it too long and RAM goes, taking the session.
 - [Under test](#under-test)
 - [Progress](#progress)
 - [Instrumentation](#instrumentation)
+- [The 26.05 -> 26.11 boundary](#the-2605---2611-boundary)
 - [Reading the dumps](#reading-the-dumps)
 - [See also](#see-also)
 ## Two failure shapes
@@ -213,6 +214,51 @@ resolution than is currently enabled.
 | serial console + `no_console_suspend=1` | the **only** way to observe the failure, since the CPU is not executing during it. `/dev/ttyS0` is real hardware here (16550A at 0x3f8) | a cable and a second machine |
 | `umr` (packaged in nixpkgs) | AMD register-level debugging | **near-zero here** — it needs the GPU to respond, which is exactly what fails |
 
+## The 26.05 -> 26.11 boundary
+
+Elly recalls the hangs starting at a NixOS upgrade that forced a boot-type
+change. Generation timestamps place it exactly: a **75-day gap** between
+gen 221 (2026-05-30, `26.05.20260523`) and gen 222 (2026-08-13,
+`26.11.20260807`). Both closures survive in the store, so this is a real
+before/after pair rather than inference.
+
+| | gen 221 (pre) | gen 222 (post) |
+|---|---|---|
+| `sleep.conf` | `[Sleep]` only | `AllowHibernation=false`, `AllowHybridSleep=false`, `AllowSuspendThenHibernate=false` |
+| `nohibernate` kernel param | no | yes |
+| kernel | 6.18.33 | 6.18.43 |
+| **PowerDevil** | **6.6.5** | **6.7.4** |
+| systemd | 260.1 | 261.1 |
+
+The b550 udev rule is present in 221, 222 **and** 227 — it was not lost here.
+
+The `sleep.conf` change is the one [lessons-learned.md](../lessons-learned.md)
+records as having broken suspend outright (logind answering
+`CanHybridSleep=no` and *dropping* the request), fixed with `SleepMode=1`,
+which `powerdevilrc` still carries. That is closed. **PowerDevil's own
+6.6.5 -> 6.7.4 jump at the same moment is not** — it is what initiates
+auto-suspend, and nobody has looked at it. The earlier diagnosis may have been
+correct but incomplete.
+
+**Generations 218-221 are still bootable**, so the boundary is directly
+testable — see Reading the dumps for why drive power-cycle counts make that
+test work even on a generation with no probe.
+
+**Not being chased further (decided 2026-09-16).** Booting gen 221 would test
+this directly, but the hardware and config hypotheses have each failed in turn
+and the instrumentation is what has actually produced results. Effort stays on
+logging. If the boundary ever needs revisiting, the pre-upgrade tree is
+recoverable from git rather than from the boot menu — gen 221 was built
+2026-05-30, putting it at or just before `887cdc6f` ("changed a lot of
+modules"); gen 222 was built 2026-08-13, just before the 2026-08-14 cluster
+(`76f3b0ed`, `d6f8b8ad`). Skill `git-archaeology` covers finding a file across
+the renames both dates predate.
+
+**Timeline caveat:** boots ending abruptly appear from 2025-12-02, and boots
+`-9` and `-8` (both pre-boundary, on 26.05, 53 and 60 suspends) end abruptly
+too. Either abrupt endings have other causes, or the problem predates the
+boundary and the upgrade worsened it. The data cannot separate those.
+
 ## Reading the dumps
 
 **`## drive power cycles` is the signal — but `+1` is the baseline, not a
@@ -240,6 +286,21 @@ hang" was written here and is wrong: `powerDownCommands` fires on shutdown as
 well as sleep, so **every reboot leaves an orphan `pre`**. Pair by order when
 you do pair — `pre` is stamped at suspend and `post` at resume, so a pair never
 shares a stamp.
+
+**`/etc` is not evidence on this machine.** An agent shell here runs in its own
+mount namespace (65 mounts against PID 1's 44) with a synthetic `/etc` — on
+2026-09-16 `/etc/profile` resolved into a VS Code FHS store path, and
+`systemd-analyze cat-config` reported every systemd config "not found", which
+was an artifact of that namespace and not true of the machine. Read
+`/run/current-system/etc/...` (a store path, namespace-independent) and
+`/proc/1/mountinfo` instead. `AGENTS.md` and skill `impermanence-initrd` state
+this for disks and mounts; it applies to `/etc` just as hard.
+
+**Drive power-cycle counts work across generations.** The counter lives in the
+drive's own firmware, so a hang during a session on an older generation — one
+with no probe installed — is still recorded. Note the count before, boot the
+other generation, suspend a few times, come back, and compare the delta against
+the number of suspends.
 
 `## requester` labels the cycle auto or manual. Worth having even though auto
 turned out not to be the discriminator — it is what caught cycle 7 being
