@@ -4,6 +4,26 @@ Written 2026-08-11 against nixpkgs `f13ff45afd1bb73e640eaa08a7066dbed07e3238`,
 on x86_64-linux, vscode 1.130.0. Still present on `master` as of the same date,
 so a channel bump does not fix it.
 
+**Re-checked 2026-09-16** (from `nire-cube`, fleet lock = nixos-unstable
+`e4bae1bd`, installed vscode 1.136.1):
+
+- **The fleet is not affected at 1.136.1, verified live.** Upstream moved the
+  native binaries BACK into plain `node_modules` (the app tree has no
+  `node_modules.asar.unpacked` at all), and the only `@vscode/ripgrep-universal`
+  rg in the tree — the one Electron resolves — is nixpkgs' replacement: a
+  symlink to `ripgrep-15.2.0` that runs clean (`--version` exits 0). The
+  lock's `generic.nix` is the pre-refactor shape whose Linux branch points at
+  exactly that path, so patch and layout agree again.
+- **Upstream `master` still carries the asymmetry this report is about:**
+  `nodeModulesPath` (now around line 438) still puts the 1.129 check inside
+  the `isDarwin` branch, with an unconditional Linux `node_modules`. Whether
+  it *bites* depends on the layout of whatever vscode master ships next —
+  untested, since that means building master's vscode. The suggested fix
+  below stands: lift the version check out of the platform conditional.
+
+Everything below "Describe the bug" remains accurate as of 2026-08-11 and
+describes the mechanism; the line numbers are from that nixpkgs revision.
+
 Paste-ready for <https://github.com/NixOS/nixpkgs/issues>. Everything below the
 "Describe the bug" heading is the report; the last section is local notes and
 should be dropped before filing.
