@@ -1,6 +1,6 @@
 # Impermanence, initrd & secrets
 
-_Last modified: 2026-09-05_
+_Last modified: 2026-09-17_
 
 ## Contents
 
@@ -83,6 +83,19 @@ that import it.
   generated and ownership-reasserted by `grafana-secret-key-setup.service`,
   declared by the module itself. Neither goes through sops: cube has no
   impermanence to lose the file to.
+- **A second, user-keyed sops file** — `secrets/low-side/secrets.yaml`
+  (2026-09-17), recipient is a personal SSH key (`ssh-to-age`), not any
+  host key, for secrets that don't need NixOS activation and whose real
+  access boundary is already enforced elsewhere (a tailnet ACL, an
+  already-scoped API token). Decrypts ad hoc by whatever runs as that
+  user, no sudo. `.sops.yaml`'s `creation_rules` order matters here in a
+  way it didn't with only one file: neither `path` is `^`-anchored, so the
+  general `./secrets.yaml$` rule also matches a nested
+  `low-side/secrets.yaml`, and sops takes the first match — the specific
+  rule has to be listed first or a new nested file silently encrypts for
+  every host key instead of the one recipient intended. Full pattern,
+  including the matching `ssh-to-age`-vs-`SOPS_AGE_SSH_PRIVATE_KEY_FILE`
+  decrypt trap from the bullet above, skill `low-side-secrets`.
 - **A full `nix flake check`/`just preflight` can fail with `error: path
   '<hash>-secrets.yaml' is not valid` in some eval environments** (seen in a
   sandboxed agent session, 2026-09-01, on a clean tree). `secrets/sops.nix`'s

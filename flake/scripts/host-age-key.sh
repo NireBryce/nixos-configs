@@ -21,6 +21,11 @@
 # text-munging YAML. Paste the printed line in by hand, then re-run this
 # script with --updatekeys.
 #
+# --pubkey-file also works for a USER key (e.g. ~/.ssh/id_ed25519.pub), not
+# just a host's -- see skill `low-side-secrets` for the full pattern and
+# sops-user-identity.sh for the private-key half this script deliberately
+# never touches.
+#
 # THE REMOTE-HOST CASE IS UNAUTHENTICATED. `ssh-keyscan` fetches whatever key
 # the host offers on port 22 without checking it against any known_hosts entry
 # -- that is what makes it work without an interactive login, and also what

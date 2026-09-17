@@ -1,6 +1,6 @@
 # `system`, for agents
 
-_Last modified: 2026-09-16_
+_Last modified: 2026-09-17_
 
 Condensed from [system.md](system.md), which keeps the reasoning and the
 narrative. Facts only here.
@@ -27,6 +27,7 @@ Anything that must be optional cannot be filed here.
 | `secrets/sops.nix` | sops-nix, key path derived from the host's own ed25519 SSH host key. `nixos` class only. |
 | `secrets/sops-darwin.nix` | points `SOPS_AGE_KEY_FILE` at the Linux-XDG path; darwin's default lookup is `~/Library/Application Support/...`. |
 | `secrets/sops-interactive-key.nix` | oneshot, every boot, converts the host ed25519 key to a native age identity. Unconditional on purpose — self-healing on hosts that wipe `/root`. Also sets `security.sudo.extraConfig` `env_keep += "EDITOR VISUAL"` — `environment.variables.EDITOR="micro"` alone doesn't reach `sudo sops` because sudo's `env_reset` strips it before exec. |
+| `secrets/low-side/secrets.yaml` | not a module — `.sops.yaml`-only, keyed to a personal SSH key instead of a host key, no `sops.secrets.*`, no NixOS activation. Skill `low-side-secrets`. |
 | `impermanence/declare-persistence-option.nix` | **not** the [impermanence](impermanence.md) category. Declares the option unconditionally, even where nothing populates it. |
 
 ## Traps
@@ -51,6 +52,12 @@ Anything that must be optional cannot be filed here.
 - Which hosts are enrolled in `.sops.yaml` is tracked separately from which
   import these modules — see
   [../impermanence-and-secrets.md](../impermanence-and-secrets.md).
+- **`.sops.yaml`'s `creation_rules` `path` isn't `^`-anchored** — a Go
+  regexp, so `./secrets.yaml$` also matches the tail of any nested path
+  ending in `/secrets.yaml` (e.g. `low-side/secrets.yaml`). sops takes the
+  first matching rule: list a nested file's specific rule before the
+  general one, or it silently encrypts for the general rule's (wrong)
+  recipients. Skill `low-side-secrets`.
 
 ## Useful
 
