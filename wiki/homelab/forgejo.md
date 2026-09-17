@@ -1,6 +1,6 @@
 # Using the forge
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-16_
 
 [Forgejo](https://forgejo.org/) on `nire-cube`, at
 `https://git.moose-micro.ts.net/` — its own Tailscale Services name as of
@@ -20,6 +20,7 @@ how it's configured and why its two hostnames disagree, see
 - [Where it is](#where-it-is)
 - [Signing in, and why there's no sign-up](#signing-in-and-why-theres-no-sign-up)
 - [SSH keys, and the second user on this host](#ssh-keys-and-the-second-user-on-this-host)
+- [Creating a repo](#creating-a-repo)
 - [Database and backups](#database-and-backups)
 - [This repo is mirrored here](#this-repo-is-mirrored-here)
 - [What's verified here](#whats-verified-here)
@@ -155,6 +156,48 @@ returned the greeting naming the key (`elly@nire-tenacity`), and
 `git clone --depth 1 forgejo@ts-cube:elly/nixos-configs.git` succeeded
 against the mirror. A plain `~/.ssh/id_ed25519` with no `ssh_config` block
 was enough. **Push over SSH is still untested.**
+
+## Creating a repo
+
+**Push-to-create is off**, so `git push` to a repo that doesn't exist yet
+fails with `Forgejo: Push to create is not enabled for users.` — verified
+2026-09-16 from tenacity, over SSH, as `elly`. The repo has to exist
+server-side first. Two ways:
+
+- **The web UI**, at `https://git.moose-micro.ts.net/repo/create`.
+- **The REST API**, with the `forgejo_api_key` sops secret — the same
+  credential that created the `nixos-configs` mirror:
+
+  ```sh
+  curl -sS -X POST \
+      -H "Authorization: token $(cat /run/secrets/forgejo_api_key)" \
+      -H 'Content-Type: application/json' \
+      -d '{"name": "<repo>", "private": true, "auto_init": false}' \
+      https://git.moose-micro.ts.net/api/v1/user/repos
+  ```
+
+  `/run/secrets/forgejo_api_key` exists on all three Linux hosts, owned by
+  `elly`, mode `0400`, since 2026-09-16 — `forgejo-api-key.nix` in
+  [system](../categories/system.md)'s `secrets/`. Nothing needs `sudo` or an
+  interactive `sops -d` to use it.
+
+Then add the remote and push, using the SSH clone URL form from
+[Where it is](#where-it-is):
+
+```sh
+git remote add origin forgejo@ts-cube:elly/<repo>.git
+git push -u origin main
+```
+
+**On CLIs, because the obvious one is the wrong project:** `tea` is
+*Gitea's* official client (gitea.com/gitea/tea), and it works against
+Forgejo only because the API is still Gitea-compatible. Forgejo's own is
+`forgejo-cli`, binary `fj` (codeberg.org/forgejo-contrib/forgejo-cli) —
+both are in nixpkgs, neither is installed on any host here. The catch as of
+`fj` 0.6.0: **`fj repo` has no `create`** (view/clone/delete/edit/units,
+but not create), while `tea repo create` does exist. So `fj` is the
+Forgejo-native tool and still can't do this particular job; the `curl`
+above needs no package at all.
 
 ## Database and backups
 

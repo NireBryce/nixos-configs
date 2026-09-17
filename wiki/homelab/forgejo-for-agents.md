@@ -1,7 +1,6 @@
 # Using the forge, for agents
 
-_Last modified: 2026-09-13_
-_Sibling reviewed: 2026-09-14 -- forgejo.md only reworded "Elly" prose mentions to "the user"; no facts moved_
+_Last modified: 2026-09-16_
 
 Condensed from [forgejo.md](forgejo.md), which keeps the reasoning and the
 verification trail. Facts only here.
@@ -32,6 +31,23 @@ for its certificate. Git-over-SSH bypasses Caddy entirely — cube's ordinary
 - **Registration is closed** (`DISABLE_REGISTRATION = true`).
   `/user/sign_up` returns **200** with a "registration is disabled" body and
   no form fields — status code is not evidence here, read the page.
+
+## Creating a repo
+
+- **Push-to-create is OFF** — `git push` to a nonexistent repo fails
+  `Forgejo: Push to create is not enabled for users.` (verified 2026-09-16,
+  tenacity, SSH, as `elly`). Create it server-side first.
+- Token: `/run/secrets/forgejo_api_key`, owner `elly`, mode `0400`, on all
+  three Linux hosts since 2026-09-16 (`secrets/forgejo-api-key.nix`, the
+  `system` category). No `sudo`, no interactive `sops -d`.
+- `POST /api/v1/user/repos`, header `Authorization: token <key>`, body
+  `{"name": …, "private": true, "auto_init": false}`. Then
+  `git remote add origin forgejo@ts-cube:elly/<repo>.git` (short host — SSH
+  bypasses Caddy).
+- **CLIs**: `tea` is *Gitea's* client, works only via API compatibility;
+  Forgejo's own is `forgejo-cli`/`fj`. **`fj` 0.6.0 has no `repo create`**
+  (`tea repo create` does). Neither is installed on any host here; the raw
+  API call needs nothing.
 
 ## SSH keys
 

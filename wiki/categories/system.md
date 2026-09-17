@@ -44,7 +44,7 @@ under `system`.
 | `locale-tz-etc/` | `locale.nix`, `tz.nix`. |
 | `networking/` | tailscale, vpn, wifi, avahi, base `networking.nix`, `resolved.nix`, and two `*-persist.nix` siblings. See below — MagicDNS naming and the ACL trap especially. |
 | `nix-ld/` | `nix-ld.nix`. |
-| `secrets/` | `sops.nix` — sops-nix wiring (nixos-only). `sops-darwin.nix` — the darwin key-file-path fix. `sops-interactive-key.nix` — the nixos interactive-`sops` fix. See below. |
+| `secrets/` | `sops.nix` — sops-nix wiring (nixos-only). `sops-darwin.nix` — the darwin key-file-path fix. `sops-interactive-key.nix` — the nixos interactive-`sops` fix. `forgejo-api-key.nix` — the one `sops.secrets.*` declared category-wide. See below. |
 | `security/` | `yubikey.nix`. |
 | `sound/` | `pipewire.nix`. |
 | `ssh/` | `ssh.nix`. |
@@ -115,6 +115,29 @@ happens independently of a target-user shell ever sourcing
 `environment.variables`. The fix is `security.sudo.extraConfig = ''Defaults
 env_keep += "EDITOR VISUAL"'';`, which makes sudo pass the invoking user's
 own EDITOR through instead of resetting it away.
+
+`secrets/forgejo-api-key.nix` (2026-09-16) is the only module in this
+category that declares a `sops.secrets.*` entry, and the exception it makes
+is deliberate. `sops.nix` holds none — a secret declared there decrypts on
+every `system` host — and [git-forge](git-forge.md)'s `forgejo-admin-password`
+follows that rule by being declared in `forgejo.nix`, cube-only, where the
+service that reads it runs.
+
+`forgejo_api_key` is a **client** credential instead: it authenticates the
+user (or an agent acting for them) against the forge's REST API from
+whichever host they are working from, so "where it's used" is durandal or
+tenacity on any given day rather than one fixed host. Rendering it on all
+three Linux hosts is the cheaper answer than two per-host declarations that
+drift apart; cube picking it up as a side effect changes what is rendered at
+activation, not who could decrypt it — every host is enrolled in `.sops.yaml`
+already. `owner = "elly"` is the point of the module: at the default
+root-owned mode, reading it needs `sudo`, and an interactive
+`sops -d --extract` stays the path of least resistance (skill
+`secrets-hygiene` exists because that path has leaked twice). The key name is
+spelled with underscores to match `secrets.yaml`'s own, since sops-nix
+derives `.key` from the attribute name — a hyphenated spelling fails at
+activation, not at eval. Consumed at
+`/run/secrets/forgejo_api_key`; see [../homelab/forgejo.md](../homelab/forgejo.md).
 
 See [../impermanence-and-secrets.md](../impermanence-and-secrets.md) for
 which hosts are actually enrolled in `.sops.yaml` — that's tracked separately
