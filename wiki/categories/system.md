@@ -1,6 +1,6 @@
 # `system` — `config-system/system/`
 
-_Last modified: 2026-09-16_
+_Last modified: 2026-09-17_
 
 The largest category by far — across 19 subdirectories, no per-file count
 kept here on purpose (see categories/00-INDEX.md's Index section for why) —
@@ -44,7 +44,7 @@ under `system`.
 | `locale-tz-etc/` | `locale.nix`, `tz.nix`. |
 | `networking/` | tailscale, vpn, wifi, avahi, base `networking.nix`, `resolved.nix`, and two `*-persist.nix` siblings. See below — MagicDNS naming and the ACL trap especially. |
 | `nix-ld/` | `nix-ld.nix`. |
-| `secrets/` | `sops.nix` — sops-nix wiring (nixos-only). `sops-darwin.nix` — the darwin key-file-path fix. `sops-interactive-key.nix` — the nixos interactive-`sops` fix. See below. |
+| `secrets/` | `sops.nix` — sops-nix wiring (nixos-only). `sops-darwin.nix` — the darwin key-file-path fix. `sops-interactive-key.nix` — the nixos interactive-`sops` fix. `low-side/` — a user-keyed sops file, no `.nix` module at all. See below. |
 | `security/` | `yubikey.nix`. |
 | `sound/` | `pipewire.nix`. |
 | `ssh/` | `ssh.nix`. |
@@ -119,6 +119,11 @@ own EDITOR through instead of resetting it away.
 See [../impermanence-and-secrets.md](../impermanence-and-secrets.md) for
 which hosts are actually enrolled in `.sops.yaml` — that's tracked separately
 from which hosts import these modules.
+
+`secrets/low-side/` (2026-09-17) is not a fourth module and declares no
+`sops.secrets.*` — it's `.sops.yaml`-only, a file keyed to a personal SSH
+key instead of a host key, for secrets that don't need NixOS activation at
+all. Skill `low-side-secrets` has the pattern and its two sharp edges.
 
 ## Containers vs. virtualization — the live trap, and no longer filed here
 

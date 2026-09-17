@@ -262,6 +262,14 @@ age-key *args:
     # it prints after the key.
     @{{scripts}}/host-age-key.sh {{args}}
 
+# The private-key half of enrolling a USER key as a sops recipient (see
+# skill `low-side-secrets`): converts your own SSH key to a native age
+# identity at ~/.config/sops/age/keys.txt, the path sops actually reads
+# from. Default key: ~/.ssh/id_ed25519. -i <path> for a different one,
+# --force to overwrite an existing keys.txt.
+sops-user-identity *args:
+    @{{scripts}}/sops-user-identity.sh {{args}}
+
 # Has this already been seen? GitHub issues + wiki/ + lessons-learned.md
 threads *term:
     @{{scripts}}/threads.sh {{term}}
