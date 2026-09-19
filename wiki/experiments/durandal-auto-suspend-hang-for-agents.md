@@ -149,6 +149,22 @@ renames both predate.
 pre-boundary 26.05 boots. Data cannot say whether the boundary caused it or
 worsened it.
 
+## Per-device timing baseline
+
+`pm_print_times` live since 2026-09-16. First 3 cycles: **1140 callbacks, zero
+non-zero returns** either direction.
+
+| device | callback | measured |
+|---|---|---|
+| `0000:07:00.0` GPU | `pci_pm_suspend_noirq` | **522 / 521 / 515 ms** |
+| `0000:07:00.0` GPU | `pci_pm_resume` | 471 ms |
+
+GPU is the **slowest device on the descent**; `suspend_noirq` is the last
+device phase before firmware handoff. ~1% spread = baseline, not anomaly — a
+hang showing seconds there, or no return, is the signal. USB `usb_dev_resume`
+times (1-2 1.7s, 1-1 1.6s, 1-10 1.27s) are post-resume re-enumeration, **not
+suspects**.
+
 ## Reading the dumps
 
 - `## requester` — `org_kde_powerdevil` = idle timeout (auto);

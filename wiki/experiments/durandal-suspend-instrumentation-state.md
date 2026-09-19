@@ -42,6 +42,11 @@ grep -c "GPU state" "$(grep -oE '/nix/store/[a-z0-9]+-unit-script-sleep-actions-
 | 5 | `just switch` 2026-09-16 — GPU state per cycle (DPM levels, link speed, busy%, hwmon) | yes, config | `grep -c "GPU state" <probe script>` |
 | 6 | same switch — `pm_print_times=1` via tmpfiles, per-device suspend/resume timings. Took effect immediately, no reboot | yes, config | `cat /sys/power/pm_print_times` |
 
+Steps 5-6 confirmed producing data 2026-09-18: GPU state present in dumps from
+`20260916T082142Z` onward, and 1140 device callbacks recorded. Note the kernel
+format is `<dev>: PM: <callback> returned <err> after <N> usecs` — grepping for
+`"call ... returned"` finds nothing and looks like a failure when it is not.
+
 `/var/log` is its own btrfs subvolume, outside the wiped root, so dumps survive
 both the `/root` wipe and a lost PSU race.
 

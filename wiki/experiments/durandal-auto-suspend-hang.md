@@ -26,6 +26,7 @@ it too long and RAM goes, taking the session.
 - [Progress](#progress)
 - [Instrumentation](#instrumentation)
 - [The 26.05 -> 26.11 boundary](#the-2605---2611-boundary)
+- [Per-device timing baseline](#per-device-timing-baseline)
 - [Reading the dumps](#reading-the-dumps)
 - [See also](#see-also)
 ## Two failure shapes
@@ -258,6 +259,30 @@ the renames both dates predate.
 `-9` and `-8` (both pre-boundary, on 26.05, 53 and 60 suspends) end abruptly
 too. Either abrupt endings have other causes, or the problem predates the
 boundary and the upgrade worsened it. The data cannot separate those.
+
+## Per-device timing baseline
+
+`pm_print_times` went live 2026-09-16. First three cycles under it recorded
+**1140 device callbacks**, and **zero returned non-zero** in either direction.
+
+The number to compare against:
+
+| device | callback | measured |
+|---|---|---|
+| `0000:07:00.0` (GPU) | `pci_pm_suspend_noirq` | **522 / 521 / 515 ms** |
+| `0000:07:00.0` (GPU) | `pci_pm_resume` | 471 ms |
+
+**The GPU is the slowest device on the descent**, taking over half a second in
+the `noirq` suspend phase — the last device phase before the platform hands off
+to firmware for S3 entry, which is the neighbourhood where this machine stops
+coming back. The ~1% spread across clean cycles is what makes it useful: it is
+a **baseline, not an anomaly**, so the same callback at seconds, or never
+returning, would be unmistakable. The earlier descent comparison came back
+"identical" only because it compared summaries.
+
+USB numbers look worse (`1-2` 1.7 s, `1-1` 1.6 s, `1-10` 1.27 s) but are all
+`usb_dev_resume` — re-enumeration *after* the system is already back, past
+where a hang can occur. Not suspects.
 
 ## Reading the dumps
 
