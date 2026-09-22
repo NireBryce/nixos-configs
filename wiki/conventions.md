@@ -1,6 +1,6 @@
 # Conventions & workflow
 
-_Last modified: 2026-09-02_
+_Last modified: 2026-09-22_
 
 ## Contents
 
@@ -21,7 +21,7 @@ claims and category member counts against the real module tree — added
 `just available <pkg>` / `--duplicates`, `just build`/`boot`/`switch`
 (dispatch per host class via `scripts/rebuild.sh`), and the
 hardware-only, read-only `just baseline` / `hm-collisions` /
-`diff-deployed` / `root-drift`.
+`diff-deployed` / `root-drift` / `home-drift`.
 
 `host` derives from `hostname`; override with `just host=<name> <recipe>`
 (the override goes *before* the recipe name — `just build host=…` is parsed
