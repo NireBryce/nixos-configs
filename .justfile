@@ -141,6 +141,7 @@ install-hooks:
 # check + modules + lint + branches-test in one shot -- the ship skill's step 0
 preflight:
     @just branches-test
+    @just keybindings-test
     @just check
     @just modules
     @just lint
@@ -244,6 +245,24 @@ available *pkgs:
     # homebrew cask ALSO installs, and says what to do about each. Answers by
     # reading meta.platforms a question that used to be settled by eye, wrongly.
     @{{scripts}}/pkg-availability.py {{pkgs}}
+
+# Normalized keybinding cheat sheet per tool (kitty/zsh/bash), repo overrides on top
+keybindings *args:
+    # Reads the repo's own bindings out of the declaring modules (issue #371),
+    # merges them over upstream defaults parsed from an optional input file
+    # (pasted docs table, kitty definition.py, bindkey -L, ble-bind dump --
+    # format auto-detected), normalizes chord notation, and renders markdown.
+    # `just keybindings kitty`, or add an input: `just keybindings zsh dump.txt`.
+    # The skill `keybinding-cheatsheet` walks through adding a new format.
+    @{{scripts}}/keybinding-cheatsheet.py {{args}}
+
+# Fixture tests for keybinding-cheatsheet.py's parsers and chord normalizer
+keybindings-test:
+    # A wrong parse reads exactly like a correct one -- the sheet is a claim
+    # about what a key does on these hosts -- and the read_repo_* readers are
+    # regex-coupled to the declaring modules' exact shapes. Pure stdlib; runs
+    # in preflight and CI.
+    python3 {{scripts}}/test_keybinding_cheatsheet.py
 
 # The safe answer to "which secrets exist?" -- reads the committed
 # ciphertext (names are plaintext, values are ENC[...]) and never decrypts,
