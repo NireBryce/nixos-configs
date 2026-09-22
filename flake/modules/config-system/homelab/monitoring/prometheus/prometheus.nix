@@ -1,6 +1,6 @@
-# Prometheus itself: scrapes the three loopback-only exporters
-# (node-exporter.nix, cadvisor.nix, libvirt-exporter.nix) and stores the time
-# series grafana.nix's dashboard reads from.
+# Prometheus itself: scrapes the four loopback-only exporters
+# (node-exporter.nix, cadvisor.nix, libvirt-exporter.nix, smartctl-exporter.nix)
+# and stores the time series grafana.nix's dashboard reads from.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
@@ -32,6 +32,10 @@
                     {
                         job_name        = "libvirt";
                         static_configs  = [ { targets = [ "127.0.0.1:9177" ]; } ]; # libvirt-exporter.nix's default port
+                    }
+                    {
+                        job_name        = "smartctl";
+                        static_configs  = [ { targets = [ "127.0.0.1:9633" ]; } ]; # smartctl-exporter.nix's default port
                     }
                 ];
             };

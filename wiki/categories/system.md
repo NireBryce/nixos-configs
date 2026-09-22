@@ -1,6 +1,6 @@
 # `system` — `config-system/system/`
 
-_Last modified: 2026-09-17_
+_Last modified: 2026-09-21_
 
 The largest category by far — across 19 subdirectories, no per-file count
 kept here on purpose (see categories/00-INDEX.md's Index section for why) —
@@ -48,7 +48,7 @@ under `system`.
 | `security/` | `yubikey.nix`. |
 | `sound/` | `pipewire.nix`. |
 | `ssh/` | `ssh.nix`. |
-| `storage/` | `coredump-limit.nix`. |
+| `storage/` | `coredump-limit.nix`, `smartd.nix` — smartmontools + scheduled S.M.A.R.T. self-tests, general-purpose disk wear/failure monitoring for every host. |
 | `wayland/` | `wayland.nix`. |
 | `xdg/` | `xdg.nix`, `xdg-portals.nix`. |
 

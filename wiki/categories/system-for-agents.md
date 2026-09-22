@@ -1,6 +1,7 @@
 # `system`, for agents
 
 _Last modified: 2026-09-17_
+_Sibling reviewed: 2026-09-21 -- system.md's storage/ row gained smartd.nix; this page only lists subdirectory names, not per-file contents, so nothing here moved_
 
 Condensed from [system.md](system.md), which keeps the reasoning and the
 narrative. Facts only here.

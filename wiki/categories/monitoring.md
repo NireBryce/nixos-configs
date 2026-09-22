@@ -1,6 +1,6 @@
 # `monitoring` — `config-system/homelab/monitoring/`
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-21_
 
 Prometheus + Grafana, scraping this host's own resource metrics. Added
 2026-08-23, cube-only so far; nested under the `homelab` umbrella since
@@ -35,7 +35,7 @@ observed correctly.
 
 ## What's in it
 
-Five files, all `nixos`-class:
+Six files, all `nixos`-class:
 
 - **`node-exporter/node-exporter.nix`** — host CPU/memory/disk/network
   metrics. Loopback-only (`127.0.0.1`); nothing outside the host queries it
@@ -57,7 +57,15 @@ Five files, all `nixos`-class:
   (`/run/libvirt/libvirt-sock`, group `libvirtd`, mode `0770`), so without
   this it starts and silently serves an empty metrics page rather than
   failing loudly.
-- **`prometheus/prometheus.nix`** — scrapes the three exporters above over
+- **`smartctl-exporter/smartctl-exporter.nix`** — per-disk SMART/NVMe wear
+  metrics (health status, percentage used, media errors, temperature),
+  autodiscovering every SMART/NVMe-capable block device rather than naming
+  cube's disks by path. Also loopback-only. No Grafana panel yet — added
+  2026-09-21 without one deliberately, since its `smartctl_device_*` metric
+  names weren't confirmed against this host's own `/metrics` output before
+  landing; check that first, then add a "Storage" row the same way
+  `libvirt-exporter.nix`'s metrics became the "libvirt / QEMU VMs" row.
+- **`prometheus/prometheus.nix`** — scrapes the four exporters above over
   loopback. Also loopback-only itself; nothing outside the host queries
   Prometheus directly either.
 - **`grafana/grafana.nix`** — the one service in this stack meant to be

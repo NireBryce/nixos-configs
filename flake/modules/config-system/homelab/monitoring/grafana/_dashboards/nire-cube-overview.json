@@ -92,7 +92,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 17 },
       "datasource": { "type": "prometheus", "uid": "prometheus-cube" },
       "targets": [
-        { "expr": "up{job=~\"node|cadvisor|libvirt\"}", "legendFormat": "{{ job }}" }
+        { "expr": "up{job=~\"node|cadvisor|libvirt|smartctl\"}", "legendFormat": "{{ job }}" }
       ],
       "fieldConfig": { "defaults": {
         "unit": "short", "min": 0, "max": 1,

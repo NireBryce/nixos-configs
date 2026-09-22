@@ -1,6 +1,6 @@
 # `monitoring`, for agents
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-21_
 
 Condensed from [monitoring.md](monitoring.md), which keeps the reasoning
 and the narrative. Facts only here.
@@ -11,7 +11,7 @@ since 2026-09-07; the old `.../grafana/` path 404s.
 
 ## What's in it
 
-`config-system/homelab/monitoring/`, five files, all `nixos`-class, **every listener
+`config-system/homelab/monitoring/`, six files, all `nixos`-class, **every listener
 on loopback**:
 
 | File | Scrapes | Note |
@@ -19,7 +19,8 @@ on loopback**:
 | `node-exporter/node-exporter.nix` | host CPU/mem/disk/net | |
 | `cadvisor/cadvisor.nix` | podman containers | not runtime-verified against podman; falls back to walking cgroups, so containers show by cgroup path not name unless `virtualisation.podman.dockerSocket` is wired |
 | `libvirt-exporter/libvirt-exporter.nix` | libvirt/QEMU guests via `qemu:///system` | **overrides `group` to `libvirtd`** — its default group can't read `/run/libvirt/libvirt-sock` and it then serves an empty metrics page instead of failing |
-| `prometheus/prometheus.nix` | the three above, over loopback | |
+| `smartctl-exporter/smartctl-exporter.nix` | per-disk SMART/NVMe wear (health, percentage used, media errors, temperature) | added 2026-09-21; `devices` left `[]` (autodiscover). **No dashboard panel yet** — `smartctl_device_*` metric names weren't confirmed against live `/metrics` before landing this; check that on cube first |
+| `prometheus/prometheus.nix` | the four above, over loopback | |
 | `grafana/grafana.nix` | — | the only off-host-facing piece. Ships two provisioned dashboards: `nire-cube-overview.json` (three rows) and `roundtrip-check.json` (one panel, the export-verification artifact) |
 
 `grafana/_dashboards/` is underscore-prefixed because `import-tree` ignores
