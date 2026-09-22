@@ -112,6 +112,14 @@ jobs:
       - name: branches classifier tests (just branches-test)
         run: python3 flake/scripts/test_branches.py
 
+      # Same stdlib shape again (issue #371): keybinding-cheatsheet.py's
+      # parsers and chord normalizer decide what the cheat sheet claims a key
+      # does, and its repo readers are regex-coupled to the declaring
+      # modules' exact shapes. Pure text-in/objects-out, so it means exactly
+      # as much in CI as on a host.
+      - name: keybinding cheatsheet parser tests (just keybindings-test)
+        run: python3 flake/scripts/test_keybinding_cheatsheet.py
+
       # Pinned by full SHA, same as update-flake-lock.yml pins its actions:
       # `@main` means running whatever upstream's default branch says on
       # Monday morning, and one broken push there goes every PR red.
