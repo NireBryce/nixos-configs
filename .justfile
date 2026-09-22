@@ -201,6 +201,14 @@ root-drift:
     # CLAUDE.md, Safety.
     @{{scripts}}/root-drift.sh
 
+# What's in /home that neither /persist nor home-manager covers -- needs sudo
+home-drift:
+    # The pre-wipe audit for /home: /home is a plain persistent subvolume
+    # today, and this lists the real content nothing is backing -- the list
+    # to drive to zero (or into persistence entries) before ever wiping home.
+    # Read-only, meaningful on every host.
+    @{{scripts}}/home-drift.sh
+
 # Which files home-manager will take over, and whether any would collide
 hm-collisions:
     # Run before the first switch on a host. Classifies by where each path

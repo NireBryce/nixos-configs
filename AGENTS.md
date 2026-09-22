@@ -64,8 +64,8 @@ bare `just` for the full list with a one-line summary per recipe; that
 list, not a copy of it here, is the source of truth, since `.justfile`'s
 own comments are what `just` actually reads. `just preflight` (check +
 modules + lint + branches-test) is the ship skill's step 0. `just
-hm-collisions` and `just root-drift` are read-only, and only meaningful on
-the hardware itself.
+hm-collisions`, `just root-drift`, and `just home-drift` are read-only,
+and only meaningful on the hardware itself.
 
 `host` derives from `hostname`, falling back to `nire-durandal` off-host.
 The override goes **before** the recipe name — `just host=nire-durandal

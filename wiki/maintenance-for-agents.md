@@ -1,6 +1,6 @@
 # Fleet maintenance, for agents
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-22_
 
 Condensed from [maintenance.md](maintenance.md). Credentials →
 maintenance-schedule.md; backups → homelab/backup-runbook.md; one-time
@@ -42,7 +42,9 @@ restated here.
   diff-deployed` (package-level, running vs would-be) → `just
   hm-collisions` before a host's first switch → `just root-drift` (sudo;
   meaningful only where impermanence is imported: durandal and tenacity;
-  cube deliberately keeps persistent root).
+  cube deliberately keeps persistent root) → `just home-drift` (sudo;
+  what neither /persist nor home-manager handles — pre-wipe audit for
+  home).
 
 ## Store hygiene
 

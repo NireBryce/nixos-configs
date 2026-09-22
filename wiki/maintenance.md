@@ -1,6 +1,6 @@
 # Fleet maintenance
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-22_
 
 The fleet's recurring upkeep in one place: the weekly flake.lock PR,
 deploying to a host and the verification habit around it, and store
@@ -97,6 +97,10 @@ deploy matters more than any schedule:
 - `just root-drift` — what `/` carries that no persistence entry covers
   (sudo; meaningful only on the hosts that import impermanence:
   durandal and tenacity — cube deliberately keeps persistent root).
+- `just home-drift` — what `/home` carries that neither a `/persist`
+  entry nor home-manager is handling: real content a future home wipe
+  would delete (sudo; the pre-wipe audit for home, meaningful on every
+  host).
 
 ## Store hygiene
 
