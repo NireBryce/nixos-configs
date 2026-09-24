@@ -50,6 +50,11 @@
             virtualisation.podman = {
                 enable = true;
                 dockerCompat = true;
+                # NOTE: NOT dockerSocket.enable here -- `containers` is
+                # imported whole by tenacity too, and the only current
+                # consumer of the /run/docker.sock symlink is cube-only
+                # (git-forge/forgejo/actions-runner.nix), which sets it
+                # itself. Move it here if a second consumer appears.
                 defaultNetwork.settings.dns_enabled = true; # Required for containers under podman-compose to be able to talk to each other.
             };
 

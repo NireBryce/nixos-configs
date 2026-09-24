@@ -1,6 +1,6 @@
 # `git-forge` — `config-system/homelab/git-forge/`
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-24_
 
 Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only; nested under
 the `homelab` umbrella since 2026-08-27 (name unaffected). As of 2026-09-07
@@ -24,6 +24,7 @@ this category's newest change, not yet its own history entry.
 - [What's in it](#whats-in-it)
 - [Why the category isn't named `forgejo`](#why-the-category-isnt-named-forgejo)
 - [Zero-touch secrets, built in rather than hand-rolled](#zero-touch-secrets-built-in-rather-than-hand-rolled)
+- [Actions and the runner](#actions-and-the-runner)
 - [Tailnet-only access, same mechanism as Grafana](#tailnet-only-access-same-mechanism-as-grafana)
 - [The tailnet device-name trap, avoided rather than hit](#the-tailnet-device-name-trap-avoided-rather-than-hit)
 - [Single-user, sqlite3, registration closed](#single-user-sqlite3-registration-closed)
@@ -34,7 +35,8 @@ this category's newest change, not yet its own history entry.
 
 ## What's in it
 
-One file, `nixos`-class: `forgejo/forgejo.nix`.
+Two files, `nixos`-class: `forgejo/forgejo.nix` (the forge) and
+`forgejo/actions-runner.nix` (the CI worker, added 2026-09-24).
 
 ## Why the category isn't named `forgejo`
 
@@ -62,6 +64,56 @@ generate-if-missing, reassert ownership unconditionally, never regenerate an
 existing key. Upstream `services.forgejo` ships that pattern;
 `services.grafana`'s deliberately doesn't (nixpkgs removed its
 `secretKeyFile` option).
+
+## Actions and the runner
+
+Added 2026-09-24. Forgejo Actions (GitHub-Actions-compatible workflow YAML)
+is enabled instance-wide (`settings.actions.ENABLED`), with one runner
+defined in `forgejo/actions-runner.nix`:
+`services.forgejo-runner.instances.cube`, unit `forgejo-runner-cube.service`.
+
+The runner is an **outbound-only worker** — the category's first non-listener
+service: it dials the forge's loopback API (`127.0.0.1:3001`) for jobs, has
+no port, no firewall entry, and no Caddy route. Docker-executor jobs speak
+the docker API to podman, which is why the module sets
+`virtualisation.podman.dockerSocket.enable` itself — the `/run/docker.sock`
+symlink `dockerCompat` does not provide — rather than putting it in
+`podman.nix`, which tenacity also imports (`containers` is a whole-category
+import there; keeping it here leaves tenacity byte-identical).
+
+Labels decide which jobs it accepts (`runs-on:`): `ubuntu-latest` and
+`ubuntu-24.04` (both `docker://node:24-bookworm`, GitHub-style names so
+familiar workflows run unmodified — the runner daemon clones with its own
+git, so the job image needs node but not git), and `nix:host`, which runs a
+job directly on the host with nix in `PATH` — what CI for this repo's own
+configs wants. Usage: [homelab/forgejo.md](../homelab/forgejo.md).
+
+**Registration** is the offline scheme (Forgejo v11+ / runner v9+): a
+40-char hex secret whose first 16 characters, read as raw ASCII bytes, ARE
+the runner's UUID (`models/actions/forgejo.go`, `google/uuid.FromBytes`);
+the deprecated registration token is not supported. The secret is the sops
+key `forgejo-runner-secret`, declared in the module (cube-only decryption,
+same reasoning as `forgejo-admin-password`); the UUID is pinned as a literal
+in the module, because it must reach the runner's generated `config.yaml` at
+build time and the runner has no `uuid_url` file indirection — nixpkgs'
+`secrets.*.uuid_url` templating renders a key runner v13 silently drops,
+the swallowed-key shape, which is why it's written out here. Two
+consequences worth keeping:
+
+- **Filling both values is a one-time human step** (a sops edit needs a key
+  holder; deriving the UUID needs the value) — [pending-setup](../homelab/pending-setup.md)
+  item 8 has the exact commands. Until then the module's eval-time
+  assertion fails the build with a pointer there, on purpose: an empty
+  UUID would otherwise render clean and only fail in the runner's journal.
+- **`forgejo-runner-registration.service`** re-runs the server-side
+  `forgejo forgejo-cli actions register --secret-file …` on every
+  activation — idempotent by design (same secret → same UUID → existing
+  row, no-op'd by token-hash compare) — and is what creates the row the
+  runner authenticates against. Rotating the secret rotates the identity:
+  new UUID, orphaned old row to delete in the admin UI.
+
+**Status: merged to the tree, never switched.** Nothing here is confirmed
+against the live instance yet — unlike everything above it on this page.
 
 ## Tailnet-only access, same mechanism as Grafana
 

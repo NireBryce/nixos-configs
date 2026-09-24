@@ -90,6 +90,15 @@
                         # new user is a `forgejo admin user create` away.
                         DISABLE_REGISTRATION = true;
                     };
+
+                    actions = {
+                        # Instance-wide switch for Forgejo Actions (CI) --
+                        # the jobs server, executed by actions-runner.nix's
+                        # runner. Repos can still toggle Actions off
+                        # individually; a repo created BEFORE this landed
+                        # may need its Settings toggle flipped once.
+                        ENABLED = true;
+                    };
                 };
             };
 

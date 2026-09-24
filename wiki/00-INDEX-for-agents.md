@@ -1,7 +1,6 @@
 # Wiki index, for agents
 
-_Last modified: 2026-09-14_
-_Sibling reviewed: 2026-09-14 -- 00-INDEX.md only renamed `system/` path shorthand to `config-system/`; no facts moved_
+_Last modified: 2026-09-24_
 
 Condensed from [00-INDEX.md](00-INDEX.md), which keeps the orientation prose and
 the "why a link layer, not a rewrite" reasoning. Routing only here.
@@ -66,7 +65,9 @@ sibling holds resolved incidents and is rarely what you want.
 ## Homelab (usage, not config)
 
 [homelab/00-INDEX.md](homelab/00-INDEX.md) — reaching
-services, the forge, [Grafana](homelab/grafana.md), go/ links, and what's
+services, the forge
+([practice loop](homelab/practice-environment.md) included),
+[Grafana](homelab/grafana.md), go/ links, and what's
 running but unfinished.
 
 ## Experiments (open questions)

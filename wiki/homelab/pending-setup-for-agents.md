@@ -1,6 +1,6 @@
 # Pending setup, for agents
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-24_
 
 Condensed from [pending-setup.md](pending-setup.md), which keeps the closed
 items and their full accounts. Open work and the traps only here.
@@ -52,6 +52,18 @@ own database. The repo-side counterpart is
    `HOMEPAGE_VAR_ICAL_<NAME>=<secret-ics-url>` line per calendar; add a
    `calendars` entry in `homepage.nix` for each new NAME. Details:
    [../categories/landing.md](../categories/landing.md#how-the-gcal-calendar-feeds-work).
+5. **Forgejo Actions runner needs its secret + UUID** (2026-09-24, never
+   switched). Runner fully declared in
+   `git-forge/forgejo/actions-runner.nix`; the tree **refuses to build**
+   until done (sops manifest check + eval-time assertion — deliberate).
+   Fill-in: sops key `forgejo-runner-secret` = `openssl rand -hex 20`;
+   UUID = that value's first 16 chars as ASCII bytes
+   (`python3 -c 'import uuid,sys; print(uuid.UUID(bytes=sys.stdin.read().strip()[:16].encode()))'`)
+   pasted into the module's `uuid = "";`; then build + switch on cube.
+   Exact commands: [pending-setup.md](pending-setup.md#8-forgejo-actions-runner-secret-and-uuid).
+   **Done when** the runner shows `cube`/`Idle` in Site Administration →
+   Actions → Runners and a workflow run goes green. Rotation = new secret
+   → new UUID → delete the orphaned runner row.
 
 ## The trap that produced a wrong answer twice
 

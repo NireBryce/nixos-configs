@@ -1,6 +1,6 @@
 # Using the forge
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-24_
 
 [Forgejo](https://forgejo.org/) on `nire-cube`, at
 `https://git.moose-micro.ts.net/` — its own Tailscale Services name as of
@@ -20,6 +20,7 @@ how it's configured and why its two hostnames disagree, see
 - [Where it is](#where-it-is)
 - [Signing in, and why there's no sign-up](#signing-in-and-why-theres-no-sign-up)
 - [SSH keys, and the second user on this host](#ssh-keys-and-the-second-user-on-this-host)
+- [CI: Forgejo Actions](#ci-forgejo-actions)
 - [Database and backups](#database-and-backups)
 - [This repo is mirrored here](#this-repo-is-mirrored-here)
 - [What's verified here](#whats-verified-here)
@@ -156,6 +157,32 @@ returned the greeting naming the key (`elly@nire-tenacity`), and
 against the mirror. A plain `~/.ssh/id_ed25519` with no `ssh_config` block
 was enough. **Push over SSH is still untested.**
 
+## CI: Forgejo Actions
+
+Added 2026-09-24, wired through [git-forge](../categories/git-forge.md)'s
+runner module. **Not live yet** — the runner needs a one-time secret +
+UUID fill ([pending-setup](pending-setup.md) item 8) before its first
+switch; everything below describes the shape once it is.
+
+Workflows live at `.forgejo/workflows/*.yaml` in each repo and use
+GitHub-Actions syntax: `on: [push, pull_request]`, `jobs.<id>.runs-on`,
+`steps` with `uses:`/`run:`. A job lands on this runner when its
+`runs-on:` matches one of its labels:
+
+| `runs-on:` | Executes where | Good for |
+|---|---|---|
+| `ubuntu-latest`, `ubuntu-24.04` | a `node:24-bookworm` container via podman | anything GitHub-shaped; the runner clones the repo itself, the image only needs to provide node |
+| `nix:host` | directly on cube, nix in `PATH` | building this repo's configs — `nix flake check`, a toplevel build |
+
+Runs appear per-repo under the **Actions** tab (and instance-wide in Site
+Administration → Actions → Runners, where the runner shows as `cube`). A
+repo created before Actions was enabled may need its Settings →
+Repository → Units toggle flipped once; new repos have it on.
+
+The workflow-flavored way to practice a workplace submit loop with this —
+branch protection, required checks, review before merge — is
+[practicing a workplace coding environment](practice-environment.md).
+
 ## Database and backups
 
 sqlite3, at `/var/lib/forgejo/`, along with the repos themselves and the
@@ -214,6 +241,8 @@ on the Forgejo side, so a push would need a non-mirror repo to aim at.
 
 - [git-forge](../categories/git-forge.md) — the module, the zero-touch secret
   handling, and why `DOMAIN` and `ROOT_URL` disagree.
+- [Practicing a workplace coding environment](practice-environment.md) —
+  what the forge plus the runner is *for*, beyond hosting mirrors.
 - [Reaching cube's services](reaching-services.md) — the URL map and what to
   check when something doesn't answer.
 - [system](../categories/system.md) — `ssh.nix`, the host sshd git+ssh rides

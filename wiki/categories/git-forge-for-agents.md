@@ -1,7 +1,6 @@
 # `git-forge`, for agents
 
-_Last modified: 2026-09-14_
-_Sibling reviewed: 2026-09-14 -- git-forge.md only reworded "Elly" prose mentions to "the user"; no facts moved_
+_Last modified: 2026-09-24_
 
 Condensed from [git-forge.md](git-forge.md), which keeps the reasoning and
 the narrative. Facts only here.
@@ -12,7 +11,9 @@ the old `.../git/` path 404s.
 
 ## What's in it
 
-One file, `nixos`-class: `config-system/homelab/git-forge/forgejo/forgejo.nix`.
+Two files, `nixos`-class, under `config-system/homelab/git-forge/forgejo/`:
+`forgejo.nix` (the forge) and `actions-runner.nix` (the CI runner,
+2026-09-24).
 
 Category isn't named `forgejo` because category-and-module sharing a name
 both declare `flake.modules.nixos.forgejo` and silently **merge**. Hit for
@@ -28,6 +29,20 @@ real while writing this category.
 | Registration | `DISABLE_REGISTRATION = true` |
 | Secrets | upstream `forgejo-secrets.service` generates `SECRET_KEY`/`INTERNAL_TOKEN`/`JWT_SECRET` on first run. **Nothing to create by hand.** |
 | Persistence | none needed — cube has a persistent root |
+| Actions | `settings.actions.ENABLED = true`; runner in `actions-runner.nix` |
+
+## The runner (added 2026-09-24, never switched)
+
+| | |
+|---|---|
+| Instance | `services.forgejo-runner.instances.cube`; unit `forgejo-runner-cube.service` |
+| Direction | outbound-only worker — dials `127.0.0.1:3001`; no port, no firewall, no Caddy |
+| Labels | `ubuntu-latest` / `ubuntu-24.04` → `docker://node:24-bookworm`; `nix:host` = job on host with nix |
+| Docker jobs | module sets `virtualisation.podman.dockerSocket.enable` itself (the `/run/docker.sock` symlink); deliberately NOT in `podman.nix` — tenacity imports `containers` too |
+| Secret | sops key `forgejo-runner-secret`, declared in the module |
+| UUID | pinned literal in the module; = runner secret's first 16 chars as ASCII bytes (`google/uuid.FromBytes`) |
+| Registration | `forgejo-runner-registration.service` re-runs idempotent `forgejo forgejo-cli actions register --secret-file` per activation; creates the row the runner authenticates against |
+| Bootstrap | one-time human step (sops + UUID paste): [../homelab/pending-setup.md](../homelab/pending-setup.md) item 8; an eval-time assertion fails the build until done |
 
 ## Traps
 
@@ -48,6 +63,14 @@ real while writing this category.
   signing-key units use.
 - The `forgejo-admin-password` sops secret is declared **in this module**,
   not in `config-system/secrets/sops.nix`, so it only decrypts on cube.
+- **The runner has no `uuid_url` indirection** — runner v13's connection
+  schema only knows `url`/`uuid`/`token`/`token_url`; nixpkgs'
+  `secrets.*.uuid_url` templating renders a key the runner silently drops
+  (the swallowed-key shape). Hence the UUID is a pinned literal, and only
+  the token rides `LoadCredential`.
+- **Rotating `forgejo-runner-secret` rotates the runner's identity** (UUID
+  is derived from it): update the pinned UUID and delete the orphaned old
+  runner row in the admin UI.
 - **Unauthenticated `/api/v1/users/search` always reports
   `is_admin: false`** regardless of the real value — it cannot settle
   whether an account is admin. Check the Site Administration panel.

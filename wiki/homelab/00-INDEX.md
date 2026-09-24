@@ -1,6 +1,6 @@
 # Homelab services
 
-_Last modified: 2026-09-13_
+_Last modified: 2026-09-24_
 
 How to **use** the services this fleet runs, as opposed to how they're
 configured. Everything here is reachable over the tailnet and nowhere else.
@@ -29,7 +29,8 @@ under it, which can happen with no commit to this repo at all.
 | *(all of cube's web services)* | `nire-cube` | `https://ts-cube.moose-micro.ts.net/` | [Reaching cube's services](reaching-services.md) |
 | *(what's still unfinished)* | `nire-cube` | — | [Pending setup](pending-setup.md) |
 | golink — `go/` shortlinks | `nire-cube` | `http://go/` | [Creating go/ links](creating-golinks.md) |
-| Forgejo — self-hosted git forge | `nire-cube` | `.../git/` | [Using the forge](forgejo.md) |
+| Forgejo — self-hosted git forge | `nire-cube` | `https://git.moose-micro.ts.net/` (short: `http://git/`) | [Using the forge](forgejo.md) |
+| practice loop — using the forge + CI like a workplace | `nire-cube` | — | [Practicing a workplace coding environment](practice-environment.md) |
 | homepage — the landing page: services, status, weather, calendar | `nire-cube` | `https://homepage.moose-micro.ts.net/` (short: `http://homepage/`; also `.../` on cube's own name) | [Reaching cube's services](reaching-services.md); [landing](../categories/landing.md) covers config |
 | glance — the old index, back for the landing evaluation | `nire-cube` | `https://glance.moose-micro.ts.net/` (short: `http://glance/`) | [landing](../categories/landing.md) |
 | Grafana — dashboards over cube's own metrics | `nire-cube` | `https://grafana.moose-micro.ts.net/` (short: `http://grafana/`) | [Using Grafana](grafana.md) |
