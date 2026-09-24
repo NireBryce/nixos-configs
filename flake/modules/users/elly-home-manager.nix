@@ -38,10 +38,10 @@
 #
 #   won't work there    an explicit `lib.mkIf (!pkgs.stdenv.isDarwin) { ... }`
 #                       in the module, because the package builds and the
-#                       objection is behavioural. kde-sleepmode.nix and
-#                       vicinae.nix are the two, both option-shaped: the HM
-#                       module asserts before any package list exists, so the
-#                       filter cannot reach them.
+#                       objection is behavioural. kde-sleepmode.nix,
+#                       vicinae.nix and kde-connect.nix are the three, all
+#                       option-shaped: the HM module asserts before any
+#                       package list exists, so the filter cannot reach them.
 { config, ... }:
 {
     flake.modules.homeManager.ellyHomeManager.imports =
