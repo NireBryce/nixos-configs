@@ -35,19 +35,6 @@
         sops = {
             age.sshKeyPaths = map getKeyPath keys;
             defaultSopsFile = "${secretsPath}";
-            # `sops.package` in sops-nix's module is NOT the `sops` CLI above
-            # (that one is nixpkgs' and evals fine) -- it is sops-install-secrets,
-            # the Go helper that decrypts at activation. Upstream pins
-            # buildGo125Module there, which nixpkgs removed when Go 1.25 went
-            # EOL (landed here with the 2026-09-22 lock bump), so the option's
-            # default fails eval on every host importing this module. Call the
-            # package directly and hand it the current builder; vendorHash is
-            # sops-nix's own default, from its root default.nix. Remove when
-            # upstream unpins the EOL builder -- issue #373 tracks that.
-            package = pkgs.callPackage (inputs.sops-nix + "/pkgs/sops-install-secrets") {
-                buildGo125Module = pkgs.buildGoLatestModule;
-                vendorHash       = "sha256-SXOd+0yh0DQr3uLVQBdw07J9j5HNuFJSOajDul1B1qo=";
-            };
             # TODO: what did this do
             # defaultSymlinkPath = "/run/user/1000/secrets";
             # defaultSecretsMountPoint = "/run/user/1000/secrets.d";
@@ -77,3 +64,11 @@
 # never declared -- deliberately untouched, since an unreferenced key in an
 # encrypted file costs nothing and rewriting the file is a real re-encryption.
 # If syncthing ever comes back, the material is already there.
+#
+# Carried a `sops.package` callPackage override 2026-09-22 to 2026-09-24:
+# sops-nix 13616fff pinned the buildGo125Module builder in
+# sops-install-secrets, and nixpkgs removed that builder with Go 1.25's EOL,
+# so the option's own default failed toplevel eval on every `system` host.
+# The override called the package directly with the current builder.
+# Removed once the sops-nix input moved past the pin (2bd00bd9, plain
+# buildGoModule) -- issue #373.
