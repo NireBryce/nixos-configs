@@ -93,44 +93,57 @@
             # which lands in the journal -- fine, it is not secret. Ordered
             # after forgejo.service (needs the migrated DB, same reasoning
             # as forgejo.nix's admin-bootstrap).
+            #
+            # TRAP, hit on the first real switch 2026-09-25: the main
+            # script runs as the forgejo user, and the forgejo user cannot
+            # talk to the system libvirtd -- virsh dies with
+            # "authentication unavailable: no polkit agent available"
+            # (org.libvirt.unix.manage), which took the whole unit down
+            # and, cascading, left the VM without its share dir and
+            # filter. So BOTH privileged halves live in root-privileged
+            # ExecStartPosts ("+" prefix, listed in execution order, run
+            # only after the register succeeded); the forgejo-user script
+            # does only what needs the forge user.
             systemd.services.forgejo-runner-registration = {
                 description = "Register the Forgejo Actions runner against the forge";
                 after      = [ "forgejo.service" ];
                 wants      = [ "forgejo.service" ];
                 wantedBy   = [ "multi-user.target" ];
-                path       = with pkgs; [ config.services.forgejo.package coreutils libvirt ];
+                path       = with pkgs; [ config.services.forgejo.package coreutils ];
 
                 script = ''
                     set -euo pipefail
                     CONFIG=${config.services.forgejo.customDir}/conf/app.ini
                     SECRET_FILE=${config.sops.secrets.forgejo-runner-secret.path}
 
-                    # Idempotent define of the runner VM's egress filter:
-                    # libvirtd auto-loads /etc/libvirt/nwfilter at startup,
-                    # but a SWITCH writes the file while libvirtd is already
-                    # running, so define it here -- this unit runs before
-                    # libvirt-vm-forge-runner, whose domain references the
-                    # filter and cannot define without it.
-                    virsh -c qemu:///system nwfilter-define \
-                        /etc/libvirt/nwfilter/forge-runner-egress.xml
-
                     forgejo --config "$CONFIG" forgejo-cli actions register \
                         --name forge-runner \
                         --secret-file "$SECRET_FILE"
                 '';
 
-                # Root-privileged stage of the guest's token copy (the "+"
-                # prefix runs this ExecStartPost as root, outside the
-                # User=/Group= above): the share dir holds ONLY this file,
-                # root:root 0600, which is what virtiofs passthrough shows
-                # the guest -- guest root (systemd, reading LoadCredential)
-                # can read it; no one else on either side needs to.
                 serviceConfig = {
                     Type            = "oneshot";
                     RemainAfterExit = true;
                     User            = config.services.forgejo.user;
                     Group           = config.services.forgejo.group;
-                    ExecStartPost   = "+${pkgs.runtimeShell} -c 'install -d -m 0700 /var/lib/forgejo-runner-share && install -m 0600 ${config.sops.secrets.forgejo-runner-secret.path} /var/lib/forgejo-runner-share/forgejo-runner-secret'";
+                    ExecStartPost   = [
+                        # Stage the guest's token copy (the "+" prefix runs
+                        # an ExecStartPost as root, outside User=/Group=):
+                        # the share dir holds ONLY this file, root:root 0600,
+                        # which is what virtiofs passthrough shows the guest
+                        # -- guest root (systemd, reading LoadCredential)
+                        # can read it; no one else on either side needs to.
+                        "+${pkgs.runtimeShell} -c 'install -d -m 0700 /var/lib/forgejo-runner-share && install -m 0600 ${config.sops.secrets.forgejo-runner-secret.path} /var/lib/forgejo-runner-share/forgejo-runner-secret'"
+
+                        # Idempotent define of the runner VM's egress filter:
+                        # libvirtd auto-loads /etc/libvirt/nwfilter at
+                        # startup, but a SWITCH writes the file while
+                        # libvirtd is already running, so define it here --
+                        # this unit runs before libvirt-vm-forge-runner,
+                        # whose domain references the filter and cannot
+                        # define without it.
+                        "+${pkgs.libvirt}/bin/virsh -c qemu:///system nwfilter-define /etc/libvirt/nwfilter/forge-runner-egress.xml"
+                    ];
                 };
             };
 
