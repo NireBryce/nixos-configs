@@ -76,10 +76,9 @@ read-only on the Forgejo side.
   switched** (original fill-in:
   [pending-setup.md](pending-setup.md) item 8).
 - Workflows: `.forgejo/workflows/*.yaml`, GitHub-Actions syntax.
-- Runner labels for `runs-on:`: `ubuntu-latest` / `ubuntu-24.04`
-  (`docker://node:24-bookworm` container via the VM's own podman; runner
-  does the cloning, image needs node only) and `nix:host` (job inside the
-  runner VM, its nix in `PATH` — for building this repo's configs).
+- Runner label for `runs-on:`: `nix:host` only (job inside the runner
+  VM, its nix in `PATH`). No container runtime in the guest —
+  `container:`-executed jobs and `docker://` actions find no runner.
 - Runs: repo **Actions** tab; runner named `cube` under Site
   Administration → Actions → Runners. Pre-existing repos may need the
   Settings → Repository → Units Actions toggle flipped once; new repos

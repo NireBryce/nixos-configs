@@ -37,9 +37,9 @@ All of it is repo settings and files in the repo — not infrastructure:
    direct pushes, require a pull request, require status checks to pass,
    require one approval.
 2. **CI** — `.forgejo/workflows/ci.yaml`, GitHub-Actions syntax.
-   `runs-on: ubuntu-latest` for anything application-shaped (the job runs
-   in a node container via the runner VM's podman); `runs-on: nix:host`
-   when the check is nix (this repo's own configs). Workflow mechanics:
+   `runs-on: nix:host` for everything (jobs run directly in the runner
+   VM; declare toolchains with nix profiles or setup-* actions). Workflow
+   mechanics:
    [forgejo.md → CI](forgejo.md#ci-forgejo-actions).
 3. **Scaffolding** — issue and PR templates, and the habit of `fixes #N`
    in the PR body so the merge closes the issue.
