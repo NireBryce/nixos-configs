@@ -1,6 +1,6 @@
 # Pending setup
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-25_
 
 Services that are **running but not finished** — configured, switched,
 reachable, and still missing the human step that makes them useful. Every
@@ -26,6 +26,7 @@ checked, so a stale entry can be re-tested rather than guessed at.
 - [5. Grafana's admin credentials](#5-grafanas-admin-credentials)
 - [6. Done — housekeeping on cube, 2026-08-24](#6-done--housekeeping-on-cube-2026-08-24)
 - [7. Homepage's calendar feeds](#7-homepages-calendar-feeds)
+- [8. Forgejo Actions runner: secret and UUID](#8-forgejo-actions-runner-secret-and-uuid)
 - [What's verified here](#whats-verified-here)
 - [See also](#see-also)
 
@@ -203,6 +204,45 @@ bounces homepage-dashboard on the next switch; events then appear with no
 further commit. Where the addresses come from: Google Calendar → Settings
 → "Secret address in iCal format", per calendar. Mechanism and traps:
 [categories/landing.md](../categories/landing.md#how-the-gcal-calendar-feeds-work).
+
+## 8. Forgejo Actions runner: secret and UUID
+
+Added 2026-09-24 with [git-forge](../categories/git-forge.md)'s runner
+module. **Secret and UUID landed 2026-09-25** — the tree builds again.
+What remains is the switch on cube and the done-when checks below. (For
+the record, until 2026-09-25 the tree refused to build on purpose: sops'
+manifest check and an eval-time assertion named this item, on the
+reasoning that a runner rendering clean and failing only in its journal
+is the worse failure.)
+
+The fill-in, from any machine with the sops key (keep the value in a shell
+var; never put it on a command line you didn't just create):
+
+```sh
+SECRET=$(openssl rand -hex 20)
+echo "$SECRET"        # you'll paste this into the sops editor; unset after
+sops flake/modules/config-system/system/secrets/secrets.yaml
+#   add the line:  forgejo-runner-secret: <paste>
+
+# UUID = the secret's first 16 characters, read as raw ASCII bytes
+# (google/uuid.FromBytes — see git-forge.md's runner section):
+python3 -c 'import uuid,sys; print(uuid.UUID(bytes=sys.stdin.read().strip()[:16].encode()))' <<< "$SECRET"
+```
+
+Paste the printed UUID into
+`git-forge/forgejo/actions-runner.nix`'s `uuid = "";` (one line — the one
+item on this page that also touches `flake/modules/`), then `just build`
+and `just switch` **on cube**. `unset SECRET` when done.
+
+**Done when:** on cube, `forgejo-runner-registration.service` and
+`libvirt-vm-forge-runner.service` have both succeeded, `virsh
+nwfilter-list` shows `forge-runner-egress`, the guest is up (`virsh
+domstate forge-runner` → running; SSH for debugging via
+`ssh -p 2223 root@ts-cube`, tailnet-only), the runner shows as
+`forge-runner` and `Idle` under Site Administration → Actions → Runners,
+and a real workflow run has gone green. Rotation note: a new secret means
+a new UUID (it is derived from the secret) and an orphaned runner row to
+delete in that admin panel.
 
 ## What's verified here
 

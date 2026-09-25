@@ -23,6 +23,15 @@ on the host (`just baseline`, `just diff-deployed`, or comparing `nix eval
 | `nire-cube` | nixos | mini PC (GMKtec) | **no** — deliberately, see below |
 | `nire-lysithea` | darwin | laptop | n/a |
 
+**One guest, not in the table on purpose:** `forge-runner` (2026-09-25) —
+the libvirt VM on `nire-cube` that runs the Forgejo Actions runner. It has
+a `nixosConfigurations` entry but no `nire-` prefix, deliberately: that
+prefix names the fleet machines these host-count claims are about, and the
+guest is a component of cube (it comes up with cube's libvirtd, imports
+none of the shared categories, holds no sops key). Architecture:
+[git-forge](categories/git-forge.md) and
+[virtualization](categories/virtualization.md).
+
 `nire-tenacity` being a handheld — picked up and put down constantly — is
 why it's usually the first host new config lands on and is checked
 against: that constant handling surfaces breakage fast. The other hosts

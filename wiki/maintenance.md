@@ -1,6 +1,6 @@
 # Fleet maintenance
 
-_Last modified: 2026-09-22_
+_Last modified: 2026-09-25_
 
 The fleet's recurring upkeep in one place: the weekly flake.lock PR,
 deploying to a host and the verification habit around it, and store
@@ -23,6 +23,7 @@ there.
 - [Lockfile updates](#lockfile-updates)
 - [Deploying, and the verification habit](#deploying-and-the-verification-habit)
 - [Store hygiene](#store-hygiene)
+- [The runner VM](#the-runner-vm)
 
 ## What lives here and what doesn't
 
@@ -122,3 +123,30 @@ Half automatic, half not:
   `nire-cube`, which runs the homelab services.
 - No disk-space watch is configured anywhere in the tree. `df -h /`
   around a clean is the check.
+
+## The runner VM
+
+`forge-runner`, the libvirt guest on `nire-cube` that runs the Forgejo
+Actions runner
+([git-forge](categories/git-forge.md)), has one quirk with a security
+edge: its overlay qcow2 pins its base image at first creation, so later
+flake updates build a NEW base image (and GC-root it) that the guest
+never actually boots — guest kernel and packages age in place,
+indefinitely, across lock bumps.
+
+**Periodically — after a few lock bumps, or whenever the guest's age
+bothers you — recreate the overlay**, which resets the guest to the
+current base image (state is disposable by design: the runner token is
+staged from cube at boot, not stored in the guest):
+
+```sh
+# on nire-cube
+sudo virsh destroy forge-runner          # if running
+sudo rm /var/lib/libvirt/images/forge-runner.qcow2
+sudo systemctl restart libvirt-vm-forge-runner   # re-creates overlay from the current base, defines + starts
+```
+
+What the wipe costs: the guest's SSH host keys regenerate (update
+`known_hosts`; the debug forward is `ssh -p 2223 root@ts-cube`), podman
+image cache and the guest nix store warm-up are lost (they refill from
+the cache on the next run). Nothing else lives in the guest.

@@ -1,7 +1,6 @@
 # `git-forge`, for agents
 
-_Last modified: 2026-09-14_
-_Sibling reviewed: 2026-09-14 -- git-forge.md only reworded "Elly" prose mentions to "the user"; no facts moved_
+_Last modified: 2026-09-25_
 
 Condensed from [git-forge.md](git-forge.md), which keeps the reasoning and
 the narrative. Facts only here.
@@ -12,7 +11,9 @@ the old `.../git/` path 404s.
 
 ## What's in it
 
-One file, `nixos`-class: `config-system/homelab/git-forge/forgejo/forgejo.nix`.
+Two files, `nixos`-class, under `config-system/homelab/git-forge/forgejo/`:
+`forgejo.nix` (the forge) and `actions-runner.nix` (the CI runner,
+2026-09-24).
 
 Category isn't named `forgejo` because category-and-module sharing a name
 both declare `flake.modules.nixos.forgejo` and silently **merge**. Hit for
@@ -28,6 +29,28 @@ real while writing this category.
 | Registration | `DISABLE_REGISTRATION = true` |
 | Secrets | upstream `forgejo-secrets.service` generates `SECRET_KEY`/`INTERNAL_TOKEN`/`JWT_SECRET` on first run. **Nothing to create by hand.** |
 | Persistence | none needed — cube has a persistent root |
+| Actions | `settings.actions.ENABLED = true`; runner in `actions-runner.nix` |
+
+## The runner (added 2026-09-24; in a VM since 2026-09-25; never switched)
+
+The runner is the libvirt guest `forge-runner` on cube —
+`virtualization/virtualization-cube.nix` instantiates it, guest config
+`hosts/forge-runner-configuration.nix`. cube-side support only in
+`git-forge/forgejo/actions-runner.nix`: the sops secret, the registration
+oneshot, the token staging. Containment is the point: job code with
+docker/podman access roots the VM, not cube.
+
+| | |
+|---|---|
+| Instance | `services.forgejo-runner.instances.forge-runner` in the GUEST; unit `forgejo-runner-forge\x2drunner.service` |
+| Direction | outbound-only worker; dials `https://git.moose-micro.ts.net/` — no port, no tailnet membership; egress nwfilter (`forge-runner-egress`: gateway DNS/DHCP + forge 443, private ranges + tailnet dropped, internet allowed) |
+| Job→forge | guest `/etc/hosts` pins the FQDN to `192.168.122.1` (virbr0 gw, trusted by `vm-networking.nix`); Caddy TLS → loopback Forgejo. 3001 unreachable from the guest, by design |
+| Labels | `ubuntu-latest` / `ubuntu-24.04` → `docker://node:24-bookworm` on the guest's own podman; `nix:host` = job inside the VM, guest nix |
+| Secret | sops key `forgejo-runner-secret` (main secrets.yaml, cube-only decryption); staged root:root 0600 into `/var/lib/forgejo-runner-share/` by the registration unit's root `ExecStartPost` |
+| Into the guest | virtiofs share (generator `shares` param), read-only at guest `/mnt/runner-secret`; guest runs no sops, no key |
+| UUID | pinned literal in the GUEST config; = runner secret's first 16 chars as ASCII bytes (`google/uuid.FromBytes`) |
+| Registration | `forgejo-runner-registration.service` on cube re-runs idempotent `forgejo forgejo-cli actions register --secret-file` per activation, plus `virsh nwfilter-define` of the egress filter; `libvirt-vm-forge-runner` ordered After= it |
+| Bootstrap | done 2026-09-25 (secret in sops, UUID pinned; guest image + cube toplevel both build). Remains: switch on cube + verify. Original procedure: [../homelab/pending-setup.md](../homelab/pending-setup.md) item 8 |
 
 ## Traps
 
@@ -48,6 +71,18 @@ real while writing this category.
   signing-key units use.
 - The `forgejo-admin-password` sops secret is declared **in this module**,
   not in `config-system/secrets/sops.nix`, so it only decrypts on cube.
+- **The runner has no `uuid_url` indirection** — runner v13's connection
+  schema only knows `url`/`uuid`/`token`/`token_url`; nixpkgs'
+  `secrets.*.uuid_url` templating renders a key the runner silently drops
+  (the swallowed-key shape). Hence the UUID is a pinned literal, and only
+  the token rides `LoadCredential`.
+- **Rotating `forgejo-runner-secret` rotates the runner's identity** (UUID
+  is derived from it): update the pinned UUID in the GUEST config and
+  delete the orphaned old runner row in the admin UI.
+- **Unit names escape instance-name dashes**: instance `forge-runner` →
+  unit `forgejo-runner-forge\x2drunner.service`. Targeting the plain
+  spelling in `systemd.services` silently creates an empty second unit
+  (evals clean, does nothing). Caught by reading the rendered unit.
 - **Unauthenticated `/api/v1/users/search` always reports
   `is_admin: false`** regardless of the real value — it cannot settle
   whether an account is admin. Check the Site Administration panel.

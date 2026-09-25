@@ -1,7 +1,6 @@
 # Using the forge, for agents
 
-_Last modified: 2026-09-13_
-_Sibling reviewed: 2026-09-14 -- forgejo.md only reworded "Elly" prose mentions to "the user"; no facts moved_
+_Last modified: 2026-09-25_
 
 Condensed from [forgejo.md](forgejo.md), which keeps the reasoning and the
 verification trail. Facts only here.
@@ -69,6 +68,24 @@ would fail anyway — `PasswordAuthentication` is off fleet-wide.
 real `git clone` over SSH, with a plain `~/.ssh/id_ed25519` and no
 `ssh_config` block. **Push over SSH still untested** — the mirror is
 read-only on the Forgejo side.
+
+## CI (Forgejo Actions)
+
+- Added 2026-09-24; since 2026-09-25 the runner is the libvirt guest
+  `forge-runner` on cube. Bootstrap landed 2026-09-25; **not yet
+  switched** (original fill-in:
+  [pending-setup.md](pending-setup.md) item 8).
+- Workflows: `.forgejo/workflows/*.yaml`, GitHub-Actions syntax.
+- Runner labels for `runs-on:`: `ubuntu-latest` / `ubuntu-24.04`
+  (`docker://node:24-bookworm` container via the VM's own podman; runner
+  does the cloning, image needs node only) and `nix:host` (job inside the
+  runner VM, its nix in `PATH` — for building this repo's configs).
+- Runs: repo **Actions** tab; runner named `cube` under Site
+  Administration → Actions → Runners. Pre-existing repos may need the
+  Settings → Repository → Units Actions toggle flipped once; new repos
+  default on.
+- Config side: [../categories/git-forge.md](../categories/git-forge.md).
+  Practice loop: [practice-environment.md](practice-environment.md).
 
 ## Storage and backups
 

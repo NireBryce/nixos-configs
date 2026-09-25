@@ -1,6 +1,6 @@
 # `git-forge` — `config-system/homelab/git-forge/`
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-25_
 
 Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only; nested under
 the `homelab` umbrella since 2026-08-27 (name unaffected). As of 2026-09-07
@@ -24,6 +24,7 @@ this category's newest change, not yet its own history entry.
 - [What's in it](#whats-in-it)
 - [Why the category isn't named `forgejo`](#why-the-category-isnt-named-forgejo)
 - [Zero-touch secrets, built in rather than hand-rolled](#zero-touch-secrets-built-in-rather-than-hand-rolled)
+- [Actions and the runner](#actions-and-the-runner)
 - [Tailnet-only access, same mechanism as Grafana](#tailnet-only-access-same-mechanism-as-grafana)
 - [The tailnet device-name trap, avoided rather than hit](#the-tailnet-device-name-trap-avoided-rather-than-hit)
 - [Single-user, sqlite3, registration closed](#single-user-sqlite3-registration-closed)
@@ -34,7 +35,8 @@ this category's newest change, not yet its own history entry.
 
 ## What's in it
 
-One file, `nixos`-class: `forgejo/forgejo.nix`.
+Two files, `nixos`-class: `forgejo/forgejo.nix` (the forge) and
+`forgejo/actions-runner.nix` (the CI worker, added 2026-09-24).
 
 ## Why the category isn't named `forgejo`
 
@@ -62,6 +64,78 @@ generate-if-missing, reassert ownership unconditionally, never regenerate an
 existing key. Upstream `services.forgejo` ships that pattern;
 `services.grafana`'s deliberately doesn't (nixpkgs removed its
 `secretKeyFile` option).
+
+## Actions and the runner
+
+Added 2026-09-24 on the host; moved into a VM 2026-09-25. Forgejo Actions
+(GitHub-Actions-compatible workflow YAML) is enabled instance-wide
+(`settings.actions.ENABLED`); the runner itself is the libvirt guest
+`forge-runner` on cube — instantiated by
+`virtualization/virtualization-cube.nix` through the VM generator, guest
+config in `hosts/forge-runner-configuration.nix` (no `nire-` prefix:
+that names the fleet machines, and this is a component of cube). What
+stays on the host (`forgejo/actions-runner.nix`) is only what must be
+here: the sops secret, the registration oneshot, and the staged token
+copy the guest mounts.
+
+The containment is the point: workflow code with podman/docker access is
+one escape from whatever holds it, and cube holds everything sops
+decrypts. In the VM it holds one secret — its own runner token. The VM
+adds no listening port either way; it is dial-out, like the runner was
+on the host — and its egress is nwfilter-scoped (guest NIC filter
+`forge-runner-egress`: gateway DNS/DHCP and the forge's 443 only, all
+private ranges and the tailnet dropped, open internet allowed), because
+libvirt's own FORWARD jumps would otherwise let guest traffic bypass
+nixos-firewall rules entirely.
+
+**Job → forge, without tailscaled.** The guest is not on the tailnet. Its
+`/etc/hosts` pins `git.moose-micro.ts.net` to `192.168.122.1` (the virbr0
+gateway); `vm-networking.nix` already trusts that bridge and Caddy's cert
+for the name is publicly trusted, so the connection URL is the ordinary
+ROOT_URL over validated TLS, Caddy → loopback Forgejo. Forgejo's own
+127.0.0.1:3001 stays unreachable from the guest, by design — Caddy is
+the door. Labels decide which jobs it accepts (`runs-on:`): the same
+`ubuntu-latest`/`ubuntu-24.04`/`nix:host` set as before, now executed by
+the guest's own podman and the guest's own nix. Usage:
+[homelab/forgejo.md](../homelab/forgejo.md).
+
+**Token delivery, without a guest key.** cube's decrypted
+`/run/secrets/forgejo-runner-secret` is staged (root:root 0600, by the
+registration unit's root-privileged `ExecStartPost`) into
+`/var/lib/forgejo-runner-share/`, which virtiofs mounts read-only into
+the guest at `/mnt/runner-secret`. The guest runs no sops and has no
+key; the share holds only that one file.
+
+**Registration** is the offline scheme (Forgejo v11+ / runner v9+): a
+40-char hex secret whose first 16 characters, read as raw ASCII bytes,
+ARE the runner's UUID (`models/actions/forgejo.go`,
+`google/uuid.FromBytes`); the deprecated registration token is not
+supported. The secret is the sops key `forgejo-runner-secret`; the UUID
+is pinned as a literal in the guest config, because it must reach the
+runner's generated `config.yaml` at build time and the runner has no
+`uuid_url` file indirection — nixpkgs' `secrets.*.uuid_url` templating
+renders a key runner v13 silently drops, the swallowed-key shape, which
+is why it's written out here.
+
+`forgejo-runner-registration.service` re-runs the server-side
+`forgejo forgejo-cli actions register --secret-file …` on every
+activation — idempotent by design (same secret → same UUID → existing
+row, no-op'd by token-hash compare) — and is what creates the row the
+runner authenticates against. `libvirt-vm-forge-runner` is ordered
+After= it. Rotating the secret rotates the identity: new UUID pin in the
+guest config, orphaned old row to delete in the admin UI.
+
+Two guest-side traps hit on day one, both caught by reading rendered
+artifacts: the instance name's dash escapes into the unit name
+(`forge-runner` → unit `forgejo-runner-forge\x2drunner.service`, so
+targeting the plain spelling silently creates an empty second unit), and
+`modulesPath` belongs to the inner NixOS module lambda, not the outer
+flake-parts one.
+
+**Status: bootstrap values landed 2026-09-25** (secret in sops, UUID
+pinned; cube's toplevel and the 3 GB guest image both build) — but
+**never switched**: nothing here is confirmed against the live instance
+yet, unlike everything above it on this page.
 
 ## Tailnet-only access, same mechanism as Grafana
 

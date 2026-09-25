@@ -1,6 +1,6 @@
 # Fleet maintenance, for agents
 
-_Last modified: 2026-09-22_
+_Last modified: 2026-09-25_
 
 Condensed from [maintenance.md](maintenance.md). Credentials →
 maintenance-schedule.md; backups → homelab/backup-runbook.md; one-time
@@ -26,6 +26,18 @@ restated here.
   Fix the cause, then re-run `workflow_dispatch` (reuses the branch), or
   open the PR by hand to `experimental`.
 - By hand: `just update`.
+
+## The runner VM
+
+- `forge-runner` (libvirt guest on cube, Forgejo Actions runner): its
+  overlay pins the base image at first creation — flake updates build a
+  new base the guest NEVER boots; guest packages age in place.
+- Periodic reset (after a few lock bumps): on cube, `sudo virsh destroy
+  forge-runner` → `sudo rm /var/lib/libvirt/images/forge-runner.qcow2` →
+  `sudo systemctl restart libvirt-vm-forge-runner` (re-creates overlay
+  from the current base + starts). Costs: guest SSH host keys regenerate
+  (known_hosts), podman/nix caches refill. Token is staged from cube at
+  boot — nothing secret is lost.
 
 ## Deploying
 

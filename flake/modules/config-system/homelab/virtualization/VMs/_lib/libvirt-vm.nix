@@ -1,8 +1,9 @@
-# DRAFT -- no current caller. A generator for a persistent, libvirt-managed
-# QEMU guest backed by an immutable qcow2 base image from the Nix store. Its
-# one caller (virtualization-cube.nix, for nire-llm-sandbox) was removed
-# 2026-08-28 and nothing here has been evaluated, built or booted since.
-# Kept as reusable infrastructure for the same reason
+# A generator for a persistent, libvirt-managed QEMU guest backed by an
+# immutable qcow2 base image from the Nix store. Exercised as of
+# 2026-09-25 by forge-runner (virtualization-cube.nix, the Forgejo Actions
+# runner VM) after sitting DRAFT with no caller since its first one
+# (virtualization-cube.nix, for nire-llm-sandbox) was removed 2026-08-28.
+# Kept as a generator, not a module, for the same reason
 # _disko/impermanence-luks-btrfs.nix is.
 #
 # Not a flake-parts module -- a plain function `import`ed by path, filed
@@ -15,7 +16,7 @@
 #
 # wiki/categories/virtualization.md has the placement mechanism and the
 # default-network trap in full; `virtualization-history.md` has the
-# sshForward verification record from when it had a caller.
+# sshForward verification record from the llm-sandbox era.
 { name
 , uuid            # a fixed libvirt domain UUID, standard 8-4-4-4-12 hex format.
                    # Pin explicitly rather than let libvirt generate one --
@@ -73,6 +74,33 @@
     # real, unchecked collision -- no auto-allocator on purpose; avoiding
     # it is on whoever wires up the second VM, like a `subUidRanges`
     # collision.
+
+, shares ? []
+    # Optional virtiofs mounts, host directory -> guest, each
+    # `{ source = "/absolute/host/dir"; tag = "guest-tag"; }`. The guest
+    # mounts it by the tag with fileSystems `fsType = "virtiofs"`
+    # (device = the tag); the host directory should exist before the
+    # domain starts and hold ONLY what the guest genuinely needs -- a
+    # virtiofs share is a live window into the host filesystem, not a
+    # copy (the intended delivery channel for single secrets a guest
+    # needs without giving it a sops key; see virtualization-cube.nix).
+    #
+    # Non-empty shares switch the domain to shared memory
+    # (<memoryBacking> memfd + shared access), which libvirt requires
+    # for virtiofs, and libvirt spawns one virtiofsd per share --
+    # `vhostUserPackages` on the host side is what makes that work
+    # (libvirt/libvirt.nix).
+
+, egressFilter ? null
+    # Optional name of an nwfilter (its XML lives in the host's
+    # /etc/libvirt/nwfilter/; whoever declares the filter also defines it
+    # into libvirt) attached to the guest's NIC. This is the ONE egress
+    # control that actually holds for a guest: libvirt inserts its own
+    # LIBVIRT_* jumps at the top of the host's FORWARD chain, so
+    # nixos-firewall rules appended there never see guest traffic --
+    # nwfilter rules are enforced per-interface and precede all of it.
+    # Without it, a NAT guest can reach anything the host can, including
+    # the LAN and the tailnet.
 }:
 { pkgs, lib, ... }:
 let
@@ -94,6 +122,7 @@ let
         <source network='default'/>
         <model type='virtio'/>
         ${lib.optionalString (sshForward != null) "<mac address='${guestMac}'/>"}
+        ${lib.optionalString (egressFilter != null) "<filterref filter='${egressFilter}'/>"}
       </interface>
     '';
 
@@ -118,6 +147,30 @@ let
         if sshForward != null
         then sshForward.sourceCidrs or defaultAllowedSourceCidrs
         else [ ]; # never read -- extraCommands below is gated on sshForward != null too
+
+    # One <filesystem> per share, inside <devices>. `accessmode='passthrough'`
+    # presents host ownership as-is (a root:root 0600 secret stays
+    # root-only in the guest, where guest-root can read it and nothing
+    # else can) -- the right mode for the single-secret delivery these
+    # exist for; a multi-user guest would want 'mapped' instead.
+    sharesXml = lib.concatMapStrings (share: ''
+          <filesystem type='mount' accessmode='passthrough'>
+            <driver type='virtiofs'/>
+            <source dir='${share.source}'/>
+            <target dir='${share.tag}'/>
+          </filesystem>
+    '') shares;
+
+    # libvirt requires shared memory for virtiofs; memfd is the backend
+    # its own docs use. Only emitted when there is something to share --
+    # a plain NAT VM keeps the default (non-shared) memory so the element
+    # order below never has an empty gap to reason about.
+    memoryBackingXml = lib.optionalString (shares != [ ]) ''
+        <memoryBacking>
+          <source type='memfd'/>
+          <access mode='shared'/>
+        </memoryBacking>
+    '';
 
     # machine='pc' (i440fx), not 'q35': the older chipset defaults
     # unambiguously to SeaBIOS with no <loader> element, matching
@@ -146,6 +199,7 @@ let
         <on_poweroff>destroy</on_poweroff>
         <on_reboot>restart</on_reboot>
         <on_crash>destroy</on_crash>
+        ${memoryBackingXml}
         <devices>
           <emulator>${pkgs.qemu}/bin/qemu-system-x86_64</emulator>
           <disk type='file' device='disk'>
@@ -154,6 +208,7 @@ let
             <target dev='vda' bus='virtio'/>
           </disk>
           ${interfaceXml}
+          ${sharesXml}
           <console type='pty'>
             <target type='serial' port='0'/>
           </console>

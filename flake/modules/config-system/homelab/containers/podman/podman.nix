@@ -50,6 +50,12 @@
             virtualisation.podman = {
                 enable = true;
                 dockerCompat = true;
+                # NOTE: NOT dockerSocket.enable here -- `containers` is
+                # imported whole by tenacity too. The only docker-API
+                # consumer was the Forgejo runner, which moved into a VM
+                # 2026-09-25 (virtualization-cube.nix) and enables the
+                # option on ITS OWN podman. Move it here if a host-side
+                # consumer ever appears.
                 defaultNetwork.settings.dns_enabled = true; # Required for containers under podman-compose to be able to talk to each other.
             };
 
