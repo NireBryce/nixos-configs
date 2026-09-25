@@ -124,15 +124,6 @@
             options = [ "ro" "nodev" "nosuid" ];
         };
 
-        # The guest's own podman, for docker-executor jobs. Self-contained:
-        # the docker socket this enables is the GUEST's, not cube's -- on
-        # cube that option is deliberately absent (see podman.nix's note).
-        virtualisation.podman = {
-            enable              = true;
-            dockerCompat        = true;
-            dockerSocket.enable = true;
-        };
-
         # Nix hardening for a CI guest. Jobs are supposed to build what
         # their own lockfiles pin -- these settings close the AD-HOC
         # channels:
@@ -164,13 +155,11 @@
 
             settings = {
                 runner = {
-                    # Same labels as the runner had when it lived on cube:
-                    # GitHub-style names over the guest's own podman, and a
-                    # host executor -- `nix:host` now means this VM's host,
-                    # i.e. nix builds happen in the VM, not on cube.
+                    # The only label: jobs run directly in the VM with
+                    # nix in PATH. There is no container runtime in this
+                    # guest, so `runs-on: ubuntu-latest`-style container
+                    # jobs find no runner here by design.
                     labels = [
-                        "ubuntu-latest:docker://node:24-bookworm"
-                        "ubuntu-24.04:docker://node:24-bookworm"
                         "nix:host"
                     ];
                 };
@@ -195,7 +184,8 @@
                 "/mnt/runner-secret/forgejo-runner-secret";
 
             # `nix:host` jobs get the VM's nix; default list restated (the
-            # option replaces, not appends).
+            # option replaces, not appends). tar/unzip: setup-* actions
+            # extract their toolchain archives with them.
             hostPackages = with pkgs; [
                 bash
                 coreutils
@@ -204,6 +194,8 @@
                 gnused
                 nodejs
                 nix
+                gnutar
+                unzip
                 wget
             ];
         };

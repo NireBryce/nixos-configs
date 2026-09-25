@@ -97,10 +97,9 @@ gateway); `vm-networking.nix` already trusts that bridge and Caddy's cert
 for the name is publicly trusted, so the connection URL is the ordinary
 ROOT_URL over validated TLS, Caddy → loopback Forgejo. Forgejo's own
 127.0.0.1:3001 stays unreachable from the guest, by design — Caddy is
-the door. Labels decide which jobs it accepts (`runs-on:`): the same
-`ubuntu-latest`/`ubuntu-24.04`/`nix:host` set as before, now executed by
-the guest's own podman and the guest's own nix. Usage:
-[homelab/forgejo.md](../homelab/forgejo.md).
+the door. One label decides which jobs it accepts (`runs-on: nix:host`) — jobs
+run directly in the guest with nix in `PATH`; there is no container
+runtime in the guest. Usage: [homelab/forgejo.md](../homelab/forgejo.md).
 
 **Token delivery, without a guest key.** cube's decrypted
 `/run/secrets/forgejo-runner-secret` is staged (root:root 0600, by the

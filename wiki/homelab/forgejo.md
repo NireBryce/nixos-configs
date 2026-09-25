@@ -172,8 +172,12 @@ GitHub-Actions syntax: `on: [push, pull_request]`, `jobs.<id>.runs-on`,
 
 | `runs-on:` | Executes where | Good for |
 |---|---|---|
-| `ubuntu-latest`, `ubuntu-24.04` | a `node:24-bookworm` container via the runner VM's own podman | anything GitHub-shaped; the runner clones the repo itself, the image only needs to provide node |
-| `nix:host` | directly in the runner VM, its nix in `PATH` | building this repo's configs — `nix flake check`, a toplevel build |
+| `nix:host` | directly in the runner VM, its nix in `PATH` | every job on this runner — `run:` steps, JS `uses:` actions (the guest has node), and `nix flake check` / toplevel builds for this repo's configs |
+
+There is no container-executor label: the guest runs no container
+runtime. Workflows written for `ubuntu-latest` container jobs need their
+`runs-on:` changed to `nix:host` and their environments declared (nix
+profiles or setup-* actions, which fetch their own toolchains).
 
 Runs appear per-repo under the **Actions** tab (and instance-wide in Site
 Administration → Actions → Runners, where the runner shows as `cube`). A
