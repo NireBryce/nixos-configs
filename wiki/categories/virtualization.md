@@ -107,14 +107,15 @@ collector separately gathers bare `.nix` files directly in each nested
 category's root (`flake/doc/dirsAsCategory.md`'s History section has why —
 an earlier version lacking that silently dropped this exact file).
 
-2026-09-25 the generator gained two parameters for `forge-runner`:
-`shares ? []` (virtiofs mounts, `{ source, tag }` per share, plus the
-shared-memory backing libvirt requires) so the guest can receive its
-runner token from cube's decrypted `/run/secrets` without running sops
-itself, and `egressFilter ? []` (an nwfilter name attached to the guest
-NIC — the only egress control that holds for a guest, since libvirt's
-own FORWARD jumps precede nixos-firewall rules) so job code cannot pivot
-to the LAN/NAS/tailnet.
+2026-09-25 the generator gained a `shares ? []` parameter (virtiofs
+mounts, `{ source, tag }` per share, plus the shared-memory backing
+libvirt requires) so the guest can receive its runner token from cube's
+decrypted `/run/secrets` without running sops itself. An `egressFilter`
+nwfilter parameter was attempted the same day and abandoned: nwfilter
+out-direction drops in libvirt 12.7 enforce against inbound traffic too
+(five rule variants tested, all breaking the guest's inbound), so egress
+is enforced guest-locally instead — see
+[git-forge](git-forge.md).
 
 The overlay-pinning design has a maintenance consequence rather than a
 trap: a rebuilt base image is GC-rooted but never reaches an existing

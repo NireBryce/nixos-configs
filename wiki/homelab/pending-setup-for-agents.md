@@ -57,11 +57,11 @@ own database. The repo-side counterpart is
    2026-09-24 build gate is gone — the tree builds; guest image + cube
    toplevel both build). What remains: `just build` + `just switch` on
    cube, then the done-when: `forgejo-runner-registration.service` and
-   `libvirt-vm-forge-runner.service` succeeded, `virsh nwfilter-list`
-   shows `forge-runner-egress`, guest running (debug SSH:
+   `libvirt-vm-forge-runner.service` succeeded, guest running (debug SSH:
    `ssh -p 2223 root@ts-cube`, tailnet-only), runner shows
    `forge-runner`/`Idle` in Site Administration → Actions → Runners, and a
-   workflow run goes green. Rotation = new `forgejo-runner-secret` → new
+   workflow run goes green. Egress check from inside the guest: forge 443
+   answers; LAN/tailnet addresses time out (guest-local OUTPUT rules). Rotation = new `forgejo-runner-secret` → new
    derived UUID pinned in the guest config → delete the orphaned runner
    row. Original fill-in procedure:
    [pending-setup.md](pending-setup.md#8-forgejo-actions-runner-secret-and-uuid).

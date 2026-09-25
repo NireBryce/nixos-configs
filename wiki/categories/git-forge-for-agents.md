@@ -43,13 +43,13 @@ docker/podman access roots the VM, not cube.
 | | |
 |---|---|
 | Instance | `services.forgejo-runner.instances.forge-runner` in the GUEST; unit `forgejo-runner-forge\x2drunner.service` |
-| Direction | outbound-only worker; dials `https://git.moose-micro.ts.net/` — no port, no tailnet membership; egress nwfilter (`forge-runner-egress`: gateway DNS/DHCP + forge 443, private ranges + tailnet dropped, internet allowed) |
+| Direction | outbound-only worker; dials `https://git.moose-micro.ts.net/` — no port, no tailnet membership; egress enforced by the GUEST's own firewall (gateway DNS/DHCP + forge 443 allowed, private ranges + tailnet dropped; nwfilter attempt abandoned — its drops broke inbound, see virtualization-for-agents) |
 | Job→forge | guest `/etc/hosts` pins the FQDN to `192.168.122.1` (virbr0 gw, trusted by `vm-networking.nix`); Caddy TLS → loopback Forgejo. 3001 unreachable from the guest, by design |
 | Labels | `ubuntu-latest` / `ubuntu-24.04` → `docker://node:24-bookworm` on the guest's own podman; `nix:host` = job inside the VM, guest nix |
 | Secret | sops key `forgejo-runner-secret` (main secrets.yaml, cube-only decryption); staged root:root 0600 into `/var/lib/forgejo-runner-share/` by the registration unit's root `ExecStartPost` |
 | Into the guest | virtiofs share (generator `shares` param), read-only at guest `/mnt/runner-secret`; guest runs no sops, no key |
 | UUID | pinned literal in the GUEST config; = runner secret's first 16 chars as ASCII bytes (`google/uuid.FromBytes`) |
-| Registration | `forgejo-runner-registration.service` on cube re-runs idempotent `forgejo forgejo-cli actions register --secret-file` per activation, plus `virsh nwfilter-define` of the egress filter; `libvirt-vm-forge-runner` ordered After= it |
+| Registration | `forgejo-runner-registration.service` on cube re-runs idempotent `forgejo forgejo-cli actions register --secret-file` per activation; `libvirt-vm-forge-runner` ordered After= it |
 | Bootstrap | done 2026-09-25 (secret in sops, UUID pinned; guest image + cube toplevel both build). Remains: switch on cube + verify. Original procedure: [../homelab/pending-setup.md](../homelab/pending-setup.md) item 8 |
 
 ## Traps

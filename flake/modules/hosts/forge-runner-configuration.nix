@@ -54,6 +54,30 @@
             hostName = "forge-runner";
             useDHCP  = lib.mkDefault true;
             firewall.allowedTCPPorts = [ 22 ];
+
+            # Egress policy for job code, enforced LOCALLY (guest iptables
+            # OUTPUT): no pivoting to the LAN/NAS/tailnet. A host-side
+            # nwfilter was attempted first and abandoned the same day --
+            # its out-direction drops in libvirt 12.7 enforce against
+            # inbound traffic as well, breaking the guest's own inbound
+            # (five rule variants tested, all failing). Residual: VM-root
+            # can flush these rules; the hard containment layer is the VM
+            # boundary itself. Order is load-bearing: accepts before
+            # drops; unmatched traffic falls to the OUTPUT policy (ACCEPT
+            # -- the open internet). DHCP is unaffected either way (the
+            # client uses packet sockets).
+            firewall.extraCommands = ''
+                iptables -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+                iptables -A OUTPUT -d 192.168.122.1 -p udp --dport 53 -j ACCEPT
+                iptables -A OUTPUT -d 192.168.122.1 -p tcp --dport 53 -j ACCEPT
+                iptables -A OUTPUT -d 192.168.122.1 -p udp --dport 67 -j ACCEPT
+                iptables -A OUTPUT -d 192.168.122.1 -p tcp --dport 443 -j ACCEPT
+                iptables -A OUTPUT -d 10.0.0.0/8 -j DROP
+                iptables -A OUTPUT -d 172.16.0.0/12 -j DROP
+                iptables -A OUTPUT -d 192.168.0.0/16 -j DROP
+                iptables -A OUTPUT -d 100.64.0.0/10 -j DROP
+            '';
+
             hosts = {
                 # The forge, via Caddy on the virbr0 gateway. WITHOUT this
                 # pin the name is unresolvable from the guest (MagicDNS
