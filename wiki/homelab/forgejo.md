@@ -1,6 +1,6 @@
 # Using the forge
 
-_Last modified: 2026-09-24_
+_Last modified: 2026-09-25_
 
 [Forgejo](https://forgejo.org/) on `nire-cube`, at
 `https://git.moose-micro.ts.net/` — its own Tailscale Services name as of
@@ -160,9 +160,9 @@ was enough. **Push over SSH is still untested.**
 ## CI: Forgejo Actions
 
 Added 2026-09-24, wired through [git-forge](../categories/git-forge.md)'s
-runner module. **Not live yet** — the runner needs a one-time secret +
-UUID fill ([pending-setup](pending-setup.md) item 8) before its first
-switch; everything below describes the shape once it is.
+runner module. Bootstrap values landed 2026-09-25
+([pending-setup](pending-setup.md) item 8) — **not yet switched**;
+everything below describes the shape once it is.
 
 Workflows live at `.forgejo/workflows/*.yaml` in each repo and use
 GitHub-Actions syntax: `on: [push, pull_request]`, `jobs.<id>.runs-on`,

@@ -1,6 +1,6 @@
 # Pending setup
 
-_Last modified: 2026-09-24_
+_Last modified: 2026-09-25_
 
 Services that are **running but not finished** — configured, switched,
 reachable, and still missing the human step that makes them useful. Every
@@ -208,12 +208,12 @@ further commit. Where the addresses come from: Google Calendar → Settings
 ## 8. Forgejo Actions runner: secret and UUID
 
 Added 2026-09-24 with [git-forge](../categories/git-forge.md)'s runner
-module. The runner is fully declared but **has never switched** — it needs
-a 40-char hex secret in sops and its derived UUID pasted into the module,
-and only a key holder can do the first. Until both land, the tree
-**refuses to build** — sops' manifest check fails on the missing key, and
-an eval-time assertion names this item — which is deliberate: the
-alternative is a runner that renders clean and fails only in its journal.
+module. **Secret and UUID landed 2026-09-25** — the tree builds again.
+What remains is the switch on cube and the done-when checks below. (For
+the record, until 2026-09-25 the tree refused to build on purpose: sops'
+manifest check and an eval-time assertion named this item, on the
+reasoning that a runner rendering clean and failing only in its journal
+is the worse failure.)
 
 The fill-in, from any machine with the sops key (keep the value in a shell
 var; never put it on a command line you didn't just create):

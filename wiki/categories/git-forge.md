@@ -1,6 +1,6 @@
 # `git-forge` — `config-system/homelab/git-forge/`
 
-_Last modified: 2026-09-24_
+_Last modified: 2026-09-25_
 
 Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only; nested under
 the `homelab` umbrella since 2026-08-27 (name unaffected). As of 2026-09-07
@@ -112,8 +112,10 @@ consequences worth keeping:
   runner authenticates against. Rotating the secret rotates the identity:
   new UUID, orphaned old row to delete in the admin UI.
 
-**Status: merged to the tree, never switched.** Nothing here is confirmed
-against the live instance yet — unlike everything above it on this page.
+**Status: bootstrap values landed 2026-09-25** (secret in sops, UUID
+pinned, the tree builds) — but **never switched**: nothing here is
+confirmed against the live instance yet, unlike everything above it on
+this page.
 
 ## Tailnet-only access, same mechanism as Grafana
 

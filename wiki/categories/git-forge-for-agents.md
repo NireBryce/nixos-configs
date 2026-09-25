@@ -1,6 +1,6 @@
 # `git-forge`, for agents
 
-_Last modified: 2026-09-24_
+_Last modified: 2026-09-25_
 
 Condensed from [git-forge.md](git-forge.md), which keeps the reasoning and
 the narrative. Facts only here.
@@ -31,7 +31,7 @@ real while writing this category.
 | Persistence | none needed — cube has a persistent root |
 | Actions | `settings.actions.ENABLED = true`; runner in `actions-runner.nix` |
 
-## The runner (added 2026-09-24, never switched)
+## The runner (added 2026-09-24; bootstrap landed 2026-09-25, never switched)
 
 | | |
 |---|---|
@@ -42,7 +42,7 @@ real while writing this category.
 | Secret | sops key `forgejo-runner-secret`, declared in the module |
 | UUID | pinned literal in the module; = runner secret's first 16 chars as ASCII bytes (`google/uuid.FromBytes`) |
 | Registration | `forgejo-runner-registration.service` re-runs idempotent `forgejo forgejo-cli actions register --secret-file` per activation; creates the row the runner authenticates against |
-| Bootstrap | one-time human step (sops + UUID paste): [../homelab/pending-setup.md](../homelab/pending-setup.md) item 8; an eval-time assertion fails the build until done |
+| Bootstrap | done 2026-09-25 (secret in sops, UUID pinned); remains: switch on cube + verify. Original procedure: [../homelab/pending-setup.md](../homelab/pending-setup.md) item 8 |
 
 ## Traps
 

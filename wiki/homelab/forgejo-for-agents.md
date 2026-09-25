@@ -1,6 +1,6 @@
 # Using the forge, for agents
 
-_Last modified: 2026-09-24_
+_Last modified: 2026-09-25_
 
 Condensed from [forgejo.md](forgejo.md), which keeps the reasoning and the
 verification trail. Facts only here.
@@ -71,8 +71,8 @@ read-only on the Forgejo side.
 
 ## CI (Forgejo Actions)
 
-- Added 2026-09-24. **Not live yet** — needs the one-time secret + UUID
-  fill ([pending-setup.md](pending-setup.md) item 8) before first switch.
+- Added 2026-09-24. Bootstrap landed 2026-09-25; **not yet switched**
+  (original fill-in: [pending-setup.md](pending-setup.md) item 8).
 - Workflows: `.forgejo/workflows/*.yaml`, GitHub-Actions syntax.
 - Runner labels for `runs-on:`: `ubuntu-latest` / `ubuntu-24.04`
   (`docker://node:24-bookworm` container via podman; runner does the

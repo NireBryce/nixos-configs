@@ -22,13 +22,11 @@
 # `secrets.*.uuid_url` templating renders a key the runner DROPS -- the
 # §49 swallowed-key shape, which is why this comment exists).
 #
-# ONE-TIME HAND STEP, the only one (see wiki/homelab/forgejo.md):
-#   1. add `forgejo-runner-secret: <openssl rand -hex 20>` to
-#      system/secrets/secrets.yaml via sops
-#   2. derive the UUID from that same value and paste it into the pinned
-#      `uuid` below (one python line, same wiki page).
-# Until both are done the eval-time assertion below fails the build, on
-# purpose: an empty UUID is a runtime-only auth failure otherwise.
+# ONE-TIME HAND STEP, the only one -- DONE 2026-09-25 (secret in sops,
+# UUID pinned below; procedure kept in wiki/homelab/pending-setup.md
+# item 8 for rotation). Until the two values existed, the eval-time
+# assertion below failed the build on purpose: an empty UUID is a
+# runtime-only auth failure otherwise.
 #
 # forgejo-runner-registration below re-runs the server-side register on
 # every activation -- idempotent by design (same secret -> same UUID ->
