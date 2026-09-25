@@ -14,18 +14,22 @@
             # packets, so the symptom is a guest that boots fine, gets no lease,
             # and looks like a broken NIC rather than a firewall problem.
             #
-            # trustedInterfaces is `listOf str` and concatenates rather than
-            # overrides, so this adds to the tailscale0/lo already set elsewhere
-            # instead of replacing them -- the same merge behaviour that made the
-            # duplicate "podman" group in system/containers/podman/podman.nix
-            # (system/system/containers/ until 2026-08-22), useful here.
-            #
-            # The tradeoff is real and worth knowing: trusting the interface means
-            # the host accepts *anything* from a guest on it, so a compromised
-            # guest reaches every port on the host. Homelab call. The narrower
-            # version is to leave it untrusted and open only 53 and 67 on virbr0
-            # with networking.firewall.interfaces."virbr0".allowedUDPPorts.
-            networking.firewall.trustedInterfaces = [ "virbr0" ];
+            # 2026-09-25: narrowed from `trustedInterfaces = [ "virbr0" ]`
+            # (concatenating, additive to tailscale0/lo) when the runner VM
+            # landed -- blanket trust meant a compromised guest reached
+            # every port on the host, and this host now RUNS job code.
+            # Guests get exactly: DHCP leases and DNS from libvirt's
+            # dnsmasq, and Caddy's 80/443 (the forge door). Per-interface
+            # options scope the accepts to virbr0 traffic only; everything
+            # else a guest sends the host hits the firewall's default
+            # reject. Established/related replies pass as always. Guest
+            # egress (the other direction) is the runner guest's own
+            # OUTPUT policy -- git-forge/forgejo/actions-runner.nix's
+            # guest config, not this module.
+            networking.firewall.interfaces."virbr0" = {
+                allowedUDPPorts = [ 53 67 ];   # dnsmasq: DNS + DHCP
+                allowedTCPPorts = [ 80 443 ];  # Caddy: the forge door
+            };
 
             # Two things this module deliberately does NOT set:
             #

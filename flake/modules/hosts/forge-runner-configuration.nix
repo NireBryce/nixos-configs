@@ -133,7 +133,31 @@
             dockerSocket.enable = true;
         };
 
-        nix.settings.experimental-features = [ "nix-command" "flakes" ];
+        # Nix hardening for a CI guest. Jobs are supposed to build what
+        # their own lockfiles pin -- these settings close the AD-HOC
+        # channels:
+        #   - no channels (kills <nixpkgs> from NIX_PATH, so nix-shell -p
+        #     has nothing to draw from),
+        #   - no flake registry (kills the `nixpkgs#pkg` shorthand; a
+        #     flake input must come from the repo's own lock or a typed
+        #     full URL),
+        #   - daily GC so ad-hoc store paths don't accumulate.
+        # The daemon-side rule that matters most is the one NOT set: the
+        # runner user must never land in nix.settings.trusted-users --
+        # a malicious practice repo's flake could then redirect the
+        # daemon at an attacker-controlled substituter.
+        nix = {
+            settings = {
+                experimental-features = [ "nix-command" "flakes" ];
+                flake-registry        = "";
+            };
+            channel.enable = false;
+            gc = {
+                automatic = true;
+                dates     = "daily";
+                options   = "--delete-older-than 7d";
+            };
+        };
 
         services.forgejo-runner.instances.forge-runner = {
             enable = true;
@@ -195,8 +219,31 @@
         # and targeting the plain "forge-runner" spelling silently creates
         # an EMPTY second unit (caught by reading the rendered unit, not
         # by eval).
-        systemd.services."forgejo-runner-forge\\x2drunner".unitConfig.RequiresMountsFor =
-            "/mnt/runner-secret";
+        # Sandboxing for the runner unit -- and therefore every job, since
+        # host-executor jobs are children of it (nix run included). The
+        # filesystem goes read-only except the state dir and private /tmp;
+        # kernel interfaces and privilege transitions are closed. This is
+        # what bounds an ad-hoc `nix run` of something hostile: it runs,
+        # but it cannot write the system, load modules, or flip kernel
+        # knobs. Deliberately NOT set: MemoryDenyWriteExecute (breaks
+        # node/v8 JIT, which actions need). Network stays open -- the
+        # egress policy above is its bound.
+        systemd.services."forgejo-runner-forge\\x2drunner" = {
+            unitConfig.RequiresMountsFor =
+                "/mnt/runner-secret";
+            serviceConfig = {
+                NoNewPrivileges       = true;
+                ProtectSystem         = "strict";
+                PrivateTmp            = true;
+                ProtectKernelTunables = true;
+                ProtectKernelModules  = true;
+                ProtectKernelLogs     = true;
+                ProtectControlGroups  = true;
+                RestrictSUIDSGID      = true;
+                RestrictRealtime      = true;
+                LockPersonality       = true;
+            };
+        };
 
         # SSH for debugging a headless worker VM (the serial console is the
         # other way, and it is no fun). Reaches the guest through the
