@@ -252,6 +252,8 @@ history-line <file>` prints the line where the module's history section
 starts; read up to it and skip the rest. Editing the module is different:
 the history is there to be read before changing what it describes.
 
+**Security/threat-model analysis for public-facing infra goes in the private `elly/infra-notes` repo on the forge (tailnet-only), not in public PR prose or wiki pages -- keep public descriptions mechanical (what changed, verified how) so they don't read as reconnaissance. Context for review stays intact in the private notes.** (Since 2026-09-25; the merged public history through #380 predates it.)
+
 **Default to a dedicated `git worktree` for any task that will branch,
 commit, or check out — skill `use-a-worktree` (not for read-only work; there
 since the 2026-08-30 shared-checkout incident).** If git state doesn't match
