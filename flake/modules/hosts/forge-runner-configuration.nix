@@ -68,6 +68,14 @@
         # module and the mount unit comes from the fileSystems entry; the
         # runner unit below is ordered after it via RequiresMountsFor.
         boot.kernelModules = [ "virtiofs" ];
+
+        # Eyes on the guest. The generator wires a serial console (pty),
+        # but the base image's kernel only talks to VGA unless told
+        # otherwise -- without this, a guest that fails to boot fails
+        # SILENTLY from the host's `virsh console` (hit on first boot
+        # 2026-09-25: guest running, no DHCP lease, vnet1 tx_packets=0,
+        # console dark).
+        boot.kernelParams = [ "console=ttyS0,115200n8" ];
         fileSystems."/mnt/runner-secret" = {
             device  = "runner-secret";
             fsType  = "virtiofs";
