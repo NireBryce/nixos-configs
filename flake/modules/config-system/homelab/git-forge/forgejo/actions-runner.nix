@@ -87,11 +87,12 @@
                         # the command). NOT a secret: it is displayed in the
                         # admin UI; only the pairing must be exact.
                         #
-                        # Left empty on first land (2026-09-24): filling it
-                        # needs the sops value, and only a key holder can add
-                        # that. The assertion below fails the build until it
-                        # is filled.
-                        uuid = "";
+                        # Pinned by hand 2026-09-25 from the sops value --
+                        # every byte decodes to an ASCII hex char, the
+                        # self-check for a correct derivation (a canonical
+                        # pretty UUID here would mean the derivation was
+                        # wrong, since FromBytes does no bit-setting).
+                        uuid = "30343634-3961-3333-6665-303732653263";
 
                         # token is NOT set inline -- it comes from sops via
                         # `secrets` below, which nixpkgs renders as a systemd
