@@ -44,6 +44,51 @@
                 mode  = "0400";
             };
 
+            # Egress policy for the runner VM. The one egress control that
+            # holds for a guest: libvirt's own LIBVIRT_* jumps sit at the
+            # top of the host FORWARD chain and accept guest NAT traffic
+            # before any nixos-firewall rule is consulted, so this is
+            # enforced per-interface by nwfilter instead. Policy, in rule
+            # order (lower priority evaluates first): DHCP + DNS to the
+            # libvirt gateway only; the forge's 443 on the gateway (Caddy,
+            # for the git.moose-micro.ts.net hosts-pin); then DROP all
+            # private ranges and the tailnet -- no LAN/NAS/tailnet pivot
+            # from job code; then accept everything else, which is now
+            # only the open internet (NTP, job downloads, git fetches).
+            # nwfilter is stateful -- replies need no rules of their own.
+            environment.etc."libvirt/nwfilter/forge-runner-egress.xml".source =
+                pkgs.writeText "forge-runner-egress-nwfilter.xml" ''
+                    <filter name='forge-runner-egress' chain='root'>
+                      <rule action='accept' direction='out' priority='100'>
+                        <udp dstipaddr='192.168.122.1' dstportstart='67' dstportend='68'/>
+                      </rule>
+                      <rule action='accept' direction='out' priority='110'>
+                        <udp dstipaddr='192.168.122.1' dstportstart='53'/>
+                      </rule>
+                      <rule action='accept' direction='out' priority='111'>
+                        <tcp dstipaddr='192.168.122.1' dstportstart='53'/>
+                      </rule>
+                      <rule action='accept' direction='out' priority='120'>
+                        <tcp dstipaddr='192.168.122.1' dstportstart='443'/>
+                      </rule>
+                      <rule action='drop' direction='out' priority='200'>
+                        <ip dstipaddr='10.0.0.0' dstipmask='255.0.0.0'/>
+                      </rule>
+                      <rule action='drop' direction='out' priority='201'>
+                        <ip dstipaddr='172.16.0.0' dstipmask='255.240.0.0'/>
+                      </rule>
+                      <rule action='drop' direction='out' priority='202'>
+                        <ip dstipaddr='192.168.0.0' dstipmask='255.255.0.0'/>
+                      </rule>
+                      <rule action='drop' direction='out' priority='203'>
+                        <ip dstipaddr='100.64.0.0' dstipmask='255.192.0.0'/>
+                      </rule>
+                      <rule action='accept' direction='out' priority='500'>
+                        <all/>
+                      </rule>
+                    </filter>
+                '';
+
             # Idempotent on every activation; prints the UUID to stdout,
             # which lands in the journal -- fine, it is not secret. Ordered
             # after forgejo.service (needs the migrated DB, same reasoning
@@ -53,12 +98,21 @@
                 after      = [ "forgejo.service" ];
                 wants      = [ "forgejo.service" ];
                 wantedBy   = [ "multi-user.target" ];
-                path       = with pkgs; [ config.services.forgejo.package coreutils ];
+                path       = with pkgs; [ config.services.forgejo.package coreutils libvirt ];
 
                 script = ''
                     set -euo pipefail
                     CONFIG=${config.services.forgejo.customDir}/conf/app.ini
                     SECRET_FILE=${config.sops.secrets.forgejo-runner-secret.path}
+
+                    # Idempotent define of the runner VM's egress filter:
+                    # libvirtd auto-loads /etc/libvirt/nwfilter at startup,
+                    # but a SWITCH writes the file while libvirtd is already
+                    # running, so define it here -- this unit runs before
+                    # libvirt-vm-forge-runner, whose domain references the
+                    # filter and cannot define without it.
+                    virsh -c qemu:///system nwfilter-define \
+                        /etc/libvirt/nwfilter/forge-runner-egress.xml
 
                     forgejo --config "$CONFIG" forgejo-cli actions register \
                         --name forge-runner \

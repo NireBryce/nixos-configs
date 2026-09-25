@@ -107,10 +107,19 @@ collector separately gathers bare `.nix` files directly in each nested
 category's root (`flake/doc/dirsAsCategory.md`'s History section has why —
 an earlier version lacking that silently dropped this exact file).
 
-2026-09-25 the generator gained a `shares ? []` parameter (virtiofs
-mounts, `{ source, tag }` per share, plus the shared-memory backing
-libvirt requires) so `forge-runner` can receive its runner token from
-cube's decrypted `/run/secrets` without running sops itself.
+2026-09-25 the generator gained two parameters for `forge-runner`:
+`shares ? []` (virtiofs mounts, `{ source, tag }` per share, plus the
+shared-memory backing libvirt requires) so the guest can receive its
+runner token from cube's decrypted `/run/secrets` without running sops
+itself, and `egressFilter ? []` (an nwfilter name attached to the guest
+NIC — the only egress control that holds for a guest, since libvirt's
+own FORWARD jumps precede nixos-firewall rules) so job code cannot pivot
+to the LAN/NAS/tailnet.
+
+The overlay-pinning design has a maintenance consequence rather than a
+trap: a rebuilt base image is GC-rooted but never reaches an existing
+guest — reset the overlay periodically; procedure in
+[maintenance.md](../maintenance.md#the-runner-vm).
 
 The two real bugs this feature hit the first time (nixpkgs'
 image-variant isolation not reaching a base config's toplevel;

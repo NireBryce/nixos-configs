@@ -82,7 +82,11 @@ The containment is the point: workflow code with podman/docker access is
 one escape from whatever holds it, and cube holds everything sops
 decrypts. In the VM it holds one secret — its own runner token. The VM
 adds no listening port either way; it is dial-out, like the runner was
-on the host.
+on the host — and its egress is nwfilter-scoped (guest NIC filter
+`forge-runner-egress`: gateway DNS/DHCP and the forge's 443 only, all
+private ranges and the tailnet dropped, open internet allowed), because
+libvirt's own FORWARD jumps would otherwise let guest traffic bypass
+nixos-firewall rules entirely.
 
 **Job → forge, without tailscaled.** The guest is not on the tailnet. Its
 `/etc/hosts` pins `git.moose-micro.ts.net` to `192.168.122.1` (the virbr0

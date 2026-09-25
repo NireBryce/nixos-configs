@@ -62,6 +62,10 @@ inactive, DHCP-reserves the guest IP, then `virsh define` + start.
 - **GC the base image = VM cannot start** — overlays reference the
   backing file by path; the generator's GC root is the fix, removing it
   is a deliberate step.
+- **Overlays pin their base at creation** — a rebuilt base image never
+  reaches an existing guest; guest packages age in place. Periodic
+  overlay reset (destroy + rm overlay + restart the VM unit): procedure
+  in [../maintenance.md](../maintenance.md#the-runner-vm).
 - **Boot-time start is a oneshot, not crash-restart** — no `Restart=`; a
   dead guest stays dead until next boot/switch.
 

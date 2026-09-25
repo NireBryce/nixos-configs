@@ -235,8 +235,9 @@ item on this page that also touches `flake/modules/`), then `just build`
 and `just switch` **on cube**. `unset SECRET` when done.
 
 **Done when:** on cube, `forgejo-runner-registration.service` and
-`libvirt-vm-forge-runner.service` have both succeeded, the guest is up
-(`virsh domstate forge-runner` → running; SSH for debugging via
+`libvirt-vm-forge-runner.service` have both succeeded, `virsh
+nwfilter-list` shows `forge-runner-egress`, the guest is up (`virsh
+domstate forge-runner` → running; SSH for debugging via
 `ssh -p 2223 root@ts-cube`, tailnet-only), the runner shows as
 `forge-runner` and `Idle` under Site Administration → Actions → Runners,
 and a real workflow run has gone green. Rotation note: a new secret means

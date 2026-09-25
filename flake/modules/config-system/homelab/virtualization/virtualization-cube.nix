@@ -47,6 +47,12 @@
                     sourceCidrs = [ "100.64.0.0/10" ];
                 };
 
+                # Job code must not pivot to the LAN/NAS/tailnet. The
+                # filter's XML lives in git-forge/forgejo/actions-runner.nix,
+                # which also defines it into libvirt and which this VM is
+                # ordered After=.
+                egressFilter = "forge-runner-egress";
+
                 # The runner's token, staged by
                 # git-forge/forgejo/actions-runner.nix's tmpfiles rule from
                 # the sops-decrypted /run/secrets copy. This is the whole

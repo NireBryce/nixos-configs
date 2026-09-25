@@ -160,9 +160,11 @@
             # Duplicated from system/ssh/ssh.nix rather than shared: the
             # guest imports no repo category (importing `system` would pull
             # in tailscaled, sops and the rest, none of which a runner VM
-            # wants). Keep the two lists in step; ssh.nix's own comments
-            # explain the near-duplicate lysithea entries.
-            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILk2lST7kOSRlanAKhl42b9IQib1hzrbxlR5pve/X37D elly@nire-lysithea"
+            # wants). Keep the two lists in step, with ONE deliberate
+            # exception: the bare `elly@nire-lysithea` key is NOT here --
+            # ssh.nix documents it as having no known private half, and a
+            # new root login should not be backed by a key nobody can
+            # account for. Everything below has a known owner.
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIACfyClu9egyamrth/SspY6wPA78o8sJuSR7jyBX42ex elly@nire-lysithea.local"
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL0sEOPmravXojxuKqN3XwplTbuz2p36UDTxmUthktnX elly@durandal"
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII/CCC9LRJdjqLqq5t1a0wN1cbw2fmxs2Yxi1grl/nRw elly@nire-sif"

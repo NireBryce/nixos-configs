@@ -90,6 +90,17 @@
     # for virtiofs, and libvirt spawns one virtiofsd per share --
     # `vhostUserPackages` on the host side is what makes that work
     # (libvirt/libvirt.nix).
+
+, egressFilter ? null
+    # Optional name of an nwfilter (its XML lives in the host's
+    # /etc/libvirt/nwfilter/; whoever declares the filter also defines it
+    # into libvirt) attached to the guest's NIC. This is the ONE egress
+    # control that actually holds for a guest: libvirt inserts its own
+    # LIBVIRT_* jumps at the top of the host's FORWARD chain, so
+    # nixos-firewall rules appended there never see guest traffic --
+    # nwfilter rules are enforced per-interface and precede all of it.
+    # Without it, a NAT guest can reach anything the host can, including
+    # the LAN and the tailnet.
 }:
 { pkgs, lib, ... }:
 let
@@ -111,6 +122,7 @@ let
         <source network='default'/>
         <model type='virtio'/>
         ${lib.optionalString (sshForward != null) "<mac address='${guestMac}'/>"}
+        ${lib.optionalString (egressFilter != null) "<filterref filter='${egressFilter}'/>"}
       </interface>
     '';
 
