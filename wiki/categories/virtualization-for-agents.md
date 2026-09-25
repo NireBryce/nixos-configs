@@ -66,6 +66,11 @@ inactive, DHCP-reserves the guest IP, then `virsh define` + start.
   reaches an existing guest; guest packages age in place. Periodic
   overlay reset (destroy + rm overlay + restart the VM unit): procedure
   in [../maintenance.md](../maintenance.md#the-runner-vm).
+- **nwfilter egress drops break inbound** (libvirt 12.7): out-direction
+  drops match inbound traffic too; five variants tested 2026-09-25, all
+  dropping the guest's inbound. Egress is enforced guest-locally
+  (`networking.firewall.extraCommands`) instead; residual — VM-root can
+  flush it.
 - **Boot-time start is a oneshot, not crash-restart** — no `Restart=`; a
   dead guest stays dead until next boot/switch.
 
