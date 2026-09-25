@@ -1,12 +1,20 @@
 # `virtualization` — `config-system/homelab/virtualization/`
 
-_Last modified: 2026-09-04_
+_Last modified: 2026-09-25_
+
+> **Condensed version:**
+> [virtualization-for-agents.md](virtualization-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in a
+> hurry) loading it mid-task. Both siblings get edited in the same change.
 
 Libvirt/QEMU VMs, and *only* that — see [containers](containers.md) for why
 podman and distrobox (OCI containers) are a different category. Nested under
 the `homelab` umbrella since 2026-08-27 (moved from `config-system/virtualization/`;
 name and by-name importability unaffected). `nire-llm-sandbox`, the one VM
-this category ran, was removed 2026-08-28 — [history.md](../history.md).
+this category ran until 2026-08-28, has a successor: `forge-runner`
+(2026-09-25, the Forgejo Actions runner VM — [git-forge](git-forge.md)
+tells the runner half; no `nire-` prefix, deliberately — that prefix names
+the fleet machines, and this is a component of cube) — the category's first second life.
 
 ## Contents
 
@@ -73,34 +81,45 @@ Design choices, if extending to another VM:
   (`192.168.122.<guestId>`), so the forwarded port has a stable
   destination.
 
-`nire-llm-sandbox` was the one caller, before its removal 2026-08-28; the
-mechanism is unexercised until another one exists — full verification
-record on [virtualization-history.md](virtualization-history.md).
+`nire-llm-sandbox` was the first caller, before its removal 2026-08-28;
+the successor VM `forge-runner` (2026-09-25) uses the same shape —
+guestId 11, hostPort 2223, tailnet-only. Full verification record from
+the first era on
+[virtualization-history.md](virtualization-history.md).
 
 ## `VMs/_lib/libvirt-vm.nix` — a generator, not a category member
 
-Present but deliberately not one of the 4 members, and currently uncalled:
-a plain curried function (`{ name, image, ... }: { pkgs, lib, ... }: ...`),
-not a flake-parts module — it takes parameters, so `import-tree` would fail
-auto-importing it. Filed under `_lib/` because `import-tree` ignores any
-path containing `/_` (same as
+A plain curried function (`{ name, image, ... }: { pkgs, lib, ... }: ...`),
+not a flake-parts module — it takes parameters, so `import-tree` would
+fail auto-importing it. Filed under `_lib/` because `import-tree` ignores
+any path containing `/_` (same as
 `config-system/impermanence/_disko/impermanence-luks-btrfs.nix`).
 
-Its one caller, `virtualization-cube.nix`, was removed with the VM
-2026-08-28. While it existed it illustrated a second dirsAsCategory
-exclusion worth knowing: a file sitting bare in `config-system/homelab/virtualization/`
-itself (not in a subdirectory) is collected by nothing — which kept the VM
-out of this category's aggregate back when durandal imported it too. It
-still **was** swept into the `homelab` aggregate cube imports, since
-`homelab`'s collector separately gathers bare `.nix` files directly in each
-nested category's root (`flake/doc/dirsAsCategory.md`'s History section has
-why — an earlier version lacking that silently dropped this exact file).
+Called today by `virtualization-cube.nix` (bare in this directory, for
+`forge-runner` — see below); earlier by the same-named file for
+`nire-llm-sandbox`, removed with that VM 2026-08-28. The bare-in-category
+placement is a second dirsAsCategory exclusion worth knowing: a file
+sitting directly in `config-system/homelab/virtualization/` (not in a
+subdirectory) is collected by nothing — which kept the VM out of this
+category's aggregate back when durandal imported it too. It still **is**
+swept into the `homelab` aggregate cube imports, since `homelab`'s
+collector separately gathers bare `.nix` files directly in each nested
+category's root (`flake/doc/dirsAsCategory.md`'s History section has why —
+an earlier version lacking that silently dropped this exact file).
 
-The two real bugs this feature hit (nixpkgs' image-variant isolation not
-reaching a base config's toplevel; `image.filePath` being relative rather
-than absolute) are in lessons-learned §36; the removed `nixos-vm-images`
-skill (`.agents/skills/nixos-vm-images`, git history) had the full
-image-building writeup if another VM ever gets wired up.
+2026-09-25 the generator gained a `shares ? []` parameter (virtiofs
+mounts, `{ source, tag }` per share, plus the shared-memory backing
+libvirt requires) so `forge-runner` can receive its runner token from
+cube's decrypted `/run/secrets` without running sops itself.
+
+The two real bugs this feature hit the first time (nixpkgs'
+image-variant isolation not reaching a base config's toplevel;
+`image.filePath` being relative rather than absolute) are in
+lessons-learned §36; a new one joined them the same day the second VM
+landed: a runner instance name containing a dash escapes into the unit
+name (`forge-runner` → `forge\x2drunner`), so wiring that targets the
+plain spelling silently creates an empty second unit — caught by reading
+the rendered unit, not by eval.
 
 ## Why this is its own category and not part of `system`
 

@@ -52,13 +52,17 @@ own database. The repo-side counterpart is
    `HOMEPAGE_VAR_ICAL_<NAME>=<secret-ics-url>` line per calendar; add a
    `calendars` entry in `homepage.nix` for each new NAME. Details:
    [../categories/landing.md](../categories/landing.md#how-the-gcal-calendar-feeds-work).
-5. **Forgejo Actions runner**: secret + UUID **landed 2026-09-25** (the
-   2026-09-24 build gate is gone — the tree builds). What remains:
-   `just build` + `just switch` on cube, then the done-when: runner shows
-   `cube`/`Idle` in Site Administration → Actions → Runners and a workflow
-   run goes green. Rotation = new `forgejo-runner-secret` → new derived
-   UUID pinned in `actions-runner.nix` → delete the orphaned runner row.
-   Original fill-in procedure:
+5. **Forgejo Actions runner** (guest `forge-runner` in a libvirt VM on
+   cube since 2026-09-25): secret + UUID **landed 2026-09-25** (the
+   2026-09-24 build gate is gone — the tree builds; guest image + cube
+   toplevel both build). What remains: `just build` + `just switch` on
+   cube, then the done-when: `forgejo-runner-registration.service` and
+   `libvirt-vm-forge-runner.service` succeeded, guest running (debug SSH:
+   `ssh -p 2223 root@ts-cube`, tailnet-only), runner shows
+   `forge-runner`/`Idle` in Site Administration → Actions → Runners, and a
+   workflow run goes green. Rotation = new `forgejo-runner-secret` → new
+   derived UUID pinned in the guest config → delete the orphaned runner
+   row. Original fill-in procedure:
    [pending-setup.md](pending-setup.md#8-forgejo-actions-runner-secret-and-uuid).
 
 ## The trap that produced a wrong answer twice

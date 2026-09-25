@@ -31,18 +31,26 @@ real while writing this category.
 | Persistence | none needed — cube has a persistent root |
 | Actions | `settings.actions.ENABLED = true`; runner in `actions-runner.nix` |
 
-## The runner (added 2026-09-24; bootstrap landed 2026-09-25, never switched)
+## The runner (added 2026-09-24; in a VM since 2026-09-25; never switched)
+
+The runner is the libvirt guest `forge-runner` on cube —
+`virtualization/virtualization-cube.nix` instantiates it, guest config
+`hosts/forge-runner-configuration.nix`. cube-side support only in
+`git-forge/forgejo/actions-runner.nix`: the sops secret, the registration
+oneshot, the token staging. Containment is the point: job code with
+docker/podman access roots the VM, not cube.
 
 | | |
 |---|---|
-| Instance | `services.forgejo-runner.instances.cube`; unit `forgejo-runner-cube.service` |
-| Direction | outbound-only worker — dials `127.0.0.1:3001`; no port, no firewall, no Caddy |
-| Labels | `ubuntu-latest` / `ubuntu-24.04` → `docker://node:24-bookworm`; `nix:host` = job on host with nix |
-| Docker jobs | module sets `virtualisation.podman.dockerSocket.enable` itself (the `/run/docker.sock` symlink); deliberately NOT in `podman.nix` — tenacity imports `containers` too |
-| Secret | sops key `forgejo-runner-secret`, declared in the module |
-| UUID | pinned literal in the module; = runner secret's first 16 chars as ASCII bytes (`google/uuid.FromBytes`) |
-| Registration | `forgejo-runner-registration.service` re-runs idempotent `forgejo forgejo-cli actions register --secret-file` per activation; creates the row the runner authenticates against |
-| Bootstrap | done 2026-09-25 (secret in sops, UUID pinned); remains: switch on cube + verify. Original procedure: [../homelab/pending-setup.md](../homelab/pending-setup.md) item 8 |
+| Instance | `services.forgejo-runner.instances.forge-runner` in the GUEST; unit `forgejo-runner-forge\x2drunner.service` |
+| Direction | outbound-only worker; dials `https://git.moose-micro.ts.net/` — no port, no firewall, no tailnet membership |
+| Job→forge | guest `/etc/hosts` pins the FQDN to `192.168.122.1` (virbr0 gw, trusted by `vm-networking.nix`); Caddy TLS → loopback Forgejo. 3001 unreachable from the guest, by design |
+| Labels | `ubuntu-latest` / `ubuntu-24.04` → `docker://node:24-bookworm` on the guest's own podman; `nix:host` = job inside the VM, guest nix |
+| Secret | sops key `forgejo-runner-secret` (main secrets.yaml, cube-only decryption); staged root:root 0600 into `/var/lib/forgejo-runner-share/` by the registration unit's root `ExecStartPost` |
+| Into the guest | virtiofs share (generator `shares` param), read-only at guest `/mnt/runner-secret`; guest runs no sops, no key |
+| UUID | pinned literal in the GUEST config; = runner secret's first 16 chars as ASCII bytes (`google/uuid.FromBytes`) |
+| Registration | `forgejo-runner-registration.service` on cube re-runs idempotent `forgejo forgejo-cli actions register --secret-file` per activation; `libvirt-vm-forge-runner` ordered After= it |
+| Bootstrap | done 2026-09-25 (secret in sops, UUID pinned; guest image + cube toplevel both build). Remains: switch on cube + verify. Original procedure: [../homelab/pending-setup.md](../homelab/pending-setup.md) item 8 |
 
 ## Traps
 
@@ -69,8 +77,12 @@ real while writing this category.
   (the swallowed-key shape). Hence the UUID is a pinned literal, and only
   the token rides `LoadCredential`.
 - **Rotating `forgejo-runner-secret` rotates the runner's identity** (UUID
-  is derived from it): update the pinned UUID and delete the orphaned old
-  runner row in the admin UI.
+  is derived from it): update the pinned UUID in the GUEST config and
+  delete the orphaned old runner row in the admin UI.
+- **Unit names escape instance-name dashes**: instance `forge-runner` →
+  unit `forgejo-runner-forge\x2drunner.service`. Targeting the plain
+  spelling in `systemd.services` silently creates an empty second unit
+  (evals clean, does nothing). Caught by reading the rendered unit.
 - **Unauthenticated `/api/v1/users/search` always reports
   `is_admin: false`** regardless of the real value — it cannot settle
   whether an account is admin. Check the Site Administration panel.

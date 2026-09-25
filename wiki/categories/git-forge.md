@@ -67,55 +67,71 @@ existing key. Upstream `services.forgejo` ships that pattern;
 
 ## Actions and the runner
 
-Added 2026-09-24. Forgejo Actions (GitHub-Actions-compatible workflow YAML)
-is enabled instance-wide (`settings.actions.ENABLED`), with one runner
-defined in `forgejo/actions-runner.nix`:
-`services.forgejo-runner.instances.cube`, unit `forgejo-runner-cube.service`.
+Added 2026-09-24 on the host; moved into a VM 2026-09-25. Forgejo Actions
+(GitHub-Actions-compatible workflow YAML) is enabled instance-wide
+(`settings.actions.ENABLED`); the runner itself is the libvirt guest
+`forge-runner` on cube — instantiated by
+`virtualization/virtualization-cube.nix` through the VM generator, guest
+config in `hosts/forge-runner-configuration.nix` (no `nire-` prefix:
+that names the fleet machines, and this is a component of cube). What
+stays on the host (`forgejo/actions-runner.nix`) is only what must be
+here: the sops secret, the registration oneshot, and the staged token
+copy the guest mounts.
 
-The runner is an **outbound-only worker** — the category's first non-listener
-service: it dials the forge's loopback API (`127.0.0.1:3001`) for jobs, has
-no port, no firewall entry, and no Caddy route. Docker-executor jobs speak
-the docker API to podman, which is why the module sets
-`virtualisation.podman.dockerSocket.enable` itself — the `/run/docker.sock`
-symlink `dockerCompat` does not provide — rather than putting it in
-`podman.nix`, which tenacity also imports (`containers` is a whole-category
-import there; keeping it here leaves tenacity byte-identical).
+The containment is the point: workflow code with podman/docker access is
+one escape from whatever holds it, and cube holds everything sops
+decrypts. In the VM it holds one secret — its own runner token. The VM
+adds no listening port either way; it is dial-out, like the runner was
+on the host.
 
-Labels decide which jobs it accepts (`runs-on:`): `ubuntu-latest` and
-`ubuntu-24.04` (both `docker://node:24-bookworm`, GitHub-style names so
-familiar workflows run unmodified — the runner daemon clones with its own
-git, so the job image needs node but not git), and `nix:host`, which runs a
-job directly on the host with nix in `PATH` — what CI for this repo's own
-configs wants. Usage: [homelab/forgejo.md](../homelab/forgejo.md).
+**Job → forge, without tailscaled.** The guest is not on the tailnet. Its
+`/etc/hosts` pins `git.moose-micro.ts.net` to `192.168.122.1` (the virbr0
+gateway); `vm-networking.nix` already trusts that bridge and Caddy's cert
+for the name is publicly trusted, so the connection URL is the ordinary
+ROOT_URL over validated TLS, Caddy → loopback Forgejo. Forgejo's own
+127.0.0.1:3001 stays unreachable from the guest, by design — Caddy is
+the door. Labels decide which jobs it accepts (`runs-on:`): the same
+`ubuntu-latest`/`ubuntu-24.04`/`nix:host` set as before, now executed by
+the guest's own podman and the guest's own nix. Usage:
+[homelab/forgejo.md](../homelab/forgejo.md).
+
+**Token delivery, without a guest key.** cube's decrypted
+`/run/secrets/forgejo-runner-secret` is staged (root:root 0600, by the
+registration unit's root-privileged `ExecStartPost`) into
+`/var/lib/forgejo-runner-share/`, which virtiofs mounts read-only into
+the guest at `/mnt/runner-secret`. The guest runs no sops and has no
+key; the share holds only that one file.
 
 **Registration** is the offline scheme (Forgejo v11+ / runner v9+): a
-40-char hex secret whose first 16 characters, read as raw ASCII bytes, ARE
-the runner's UUID (`models/actions/forgejo.go`, `google/uuid.FromBytes`);
-the deprecated registration token is not supported. The secret is the sops
-key `forgejo-runner-secret`, declared in the module (cube-only decryption,
-same reasoning as `forgejo-admin-password`); the UUID is pinned as a literal
-in the module, because it must reach the runner's generated `config.yaml` at
-build time and the runner has no `uuid_url` file indirection — nixpkgs'
-`secrets.*.uuid_url` templating renders a key runner v13 silently drops,
-the swallowed-key shape, which is why it's written out here. Two
-consequences worth keeping:
+40-char hex secret whose first 16 characters, read as raw ASCII bytes,
+ARE the runner's UUID (`models/actions/forgejo.go`,
+`google/uuid.FromBytes`); the deprecated registration token is not
+supported. The secret is the sops key `forgejo-runner-secret`; the UUID
+is pinned as a literal in the guest config, because it must reach the
+runner's generated `config.yaml` at build time and the runner has no
+`uuid_url` file indirection — nixpkgs' `secrets.*.uuid_url` templating
+renders a key runner v13 silently drops, the swallowed-key shape, which
+is why it's written out here.
 
-- **Filling both values is a one-time human step** (a sops edit needs a key
-  holder; deriving the UUID needs the value) — [pending-setup](../homelab/pending-setup.md)
-  item 8 has the exact commands. Until then the module's eval-time
-  assertion fails the build with a pointer there, on purpose: an empty
-  UUID would otherwise render clean and only fail in the runner's journal.
-- **`forgejo-runner-registration.service`** re-runs the server-side
-  `forgejo forgejo-cli actions register --secret-file …` on every
-  activation — idempotent by design (same secret → same UUID → existing
-  row, no-op'd by token-hash compare) — and is what creates the row the
-  runner authenticates against. Rotating the secret rotates the identity:
-  new UUID, orphaned old row to delete in the admin UI.
+`forgejo-runner-registration.service` re-runs the server-side
+`forgejo forgejo-cli actions register --secret-file …` on every
+activation — idempotent by design (same secret → same UUID → existing
+row, no-op'd by token-hash compare) — and is what creates the row the
+runner authenticates against. `libvirt-vm-forge-runner` is ordered
+After= it. Rotating the secret rotates the identity: new UUID pin in the
+guest config, orphaned old row to delete in the admin UI.
+
+Two guest-side traps hit on day one, both caught by reading rendered
+artifacts: the instance name's dash escapes into the unit name
+(`forge-runner` → unit `forgejo-runner-forge\x2drunner.service`, so
+targeting the plain spelling silently creates an empty second unit), and
+`modulesPath` belongs to the inner NixOS module lambda, not the outer
+flake-parts one.
 
 **Status: bootstrap values landed 2026-09-25** (secret in sops, UUID
-pinned, the tree builds) — but **never switched**: nothing here is
-confirmed against the live instance yet, unlike everything above it on
-this page.
+pinned; cube's toplevel and the 3 GB guest image both build) — but
+**never switched**: nothing here is confirmed against the live instance
+yet, unlike everything above it on this page.
 
 ## Tailnet-only access, same mechanism as Grafana
 

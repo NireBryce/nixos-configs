@@ -30,6 +30,15 @@ in
         nire-tenacity = mkHost "x86_64-linux" config.flake.modules.nixos.tenacityConfiguration;
         nire-cube     = mkHost "x86_64-linux" config.flake.modules.nixos.cubeConfiguration;
 
+        # A GUEST, not a machine -- hence no `nire-` prefix: that prefix
+        # names the fleet (the machines the host-count claims in wiki/ and
+        # AGENTS.md are about), and this is a component instantiated on
+        # nire-cube by config-system/homelab/virtualization/
+        # virtualization-cube.nix through the VM generator. Its config:
+        # hosts/forge-runner-configuration.nix. Not in .sops.yaml, and not
+        # switched from this repo -- it comes up with cube's libvirtd.
+        forge-runner = mkHost "x86_64-linux" config.flake.modules.nixos.forgeRunnerConfiguration;
+
         # nire-lego (never built or switched) and nire-installer (the generic
         # live-USB installer image) were both removed 2026-08-27 -- see
         # wiki/history.md. nire-installer's mechanism (embedded flake, patched

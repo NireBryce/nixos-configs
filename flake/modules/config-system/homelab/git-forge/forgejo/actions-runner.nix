@@ -1,139 +1,42 @@
-# Forgejo Actions runner: the CI worker for the forge in forgejo.nix.
-# Added 2026-09-24, cube-only, part of the `git-forge` category like the
-# forge itself. GitHub-Actions-compatible workflow YAML; a job picks this
-# runner by `runs-on:` matching a label below.
+# Cube-side host support for the Forgejo Actions runner, which runs in a
+# VM (forge-runner, instantiated by virtualization-cube.nix; its
+# config is hosts/forge-runner-configuration.nix). This module is what
+# remains on the HOST, and everything here exists for one of three
+# reasons:
 #
-# An outbound-only worker, unlike every other service in this category:
-# no listening port, no firewall entry, no Caddy route. It dials Forgejo's
-# loopback API (127.0.0.1:3001) for jobs, and docker-executor jobs then
-# speak the docker API to podman -- `containers/podman/podman.nix` provides
-# the /run/docker.sock symlink (`dockerSocket.enable`).
+#   - the sops secret decrypts on cube (host-key recipient; the VM has no
+#     key and deliberately runs no sops),
+#   - the server-side registration must run where the forge is (the CLI
+#     talks to the local DB), and
+#   - the guest gets its token by virtiofs from a staged copy of the
+#     decrypted secret, so cube stages that copy.
 #
-# Registration is the offline scheme (Forgejo v11+ / runner v9+): a 40-char
-# hex shared secret whose FIRST 16 CHARACTERS, read as raw ASCII bytes, ARE
-# the runner UUID (models/actions/forgejo.go, RegisterRunner ->
-# google/uuid.FromBytes). The deprecated registration token is NOT
-# supported by the connections config. The secret lives in sops as
-# `forgejo-runner-secret` (declared below); the UUID is derived from it and
-# PINNED as a literal, because it is not secret (it shows in the admin UI)
-# but must reach the runner's generated config.yaml at build time --
-# the runner has no `uuid_url` file indirection, only `token_url`
-# (checked in runner v13.2.0's serializedConnectionSettings; nixpkgs'
-# `secrets.*.uuid_url` templating renders a key the runner DROPS -- the
-# §49 swallowed-key shape, which is why this comment exists).
+# The runner process itself -- services.forgejo-runner, its labels, its
+# pinned UUID -- lives in the guest configuration, not here. Same split
+# as when this was the host runner (2026-09-24): the token rides
+# `secrets.*.token_url` as a systemd LoadCredential, never inline,
+# because runner v13 has no `uuid_url` file indirection -- nixpkgs'
+# `secrets.*.uuid_url` templating renders a key the runner silently
+# drops, the §49 swallowed-key shape, which is why the UUID is a pinned
+# literal in the guest config. It is not secret (the admin UI shows it);
+# only the pairing with the secret's first 16 characters must be exact
+# (models/actions/forgejo.go, google/uuid.FromBytes -- the deprecated
+# registration token is not supported).
 #
-# ONE-TIME HAND STEP, the only one -- DONE 2026-09-25 (secret in sops,
-# UUID pinned below; procedure kept in wiki/homelab/pending-setup.md
-# item 8 for rotation). Until the two values existed, the eval-time
-# assertion below failed the build on purpose: an empty UUID is a
-# runtime-only auth failure otherwise.
+# The registration oneshot is idempotent by design (same secret -> same
+# UUID -> existing row, no-op'd by token-hash compare) and is what
+# creates the row the runner authenticates against. Ordering sees the
+# guest not start before registration ran: libvirt-vm-forge-runner is
+# After= this unit.
 #
-# forgejo-runner-registration below re-runs the server-side register on
-# every activation -- idempotent by design (same secret -> same UUID ->
-# existing runner row, no-op'd by a token-hash compare), and it is what
-# creates the runner row the runner then authenticates against.
-#
-# Kept in the wiki, not restated here: labels at work, writing workflows,
-# the run loop, recovery -- wiki/categories/git-forge.md and sibling,
-# wiki/homelab/forgejo.md.
+# Kept in the wiki, not restated here: the run loop, labels, recovery --
+# wiki/categories/git-forge.md and sibling, wiki/homelab/forgejo.md.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
         flake.modules.nixos.${moduleName} = { pkgs, config, ... }: {
-            # # description = "Forgejo Actions CI runner for the cube forge";
-
-            # Docker-API socket for docker-executor jobs. `podman.nix`'s
-            # dockerCompat is only the CLI alias; this is the
-            # /run/docker.sock -> podman.socket symlink (SocketGroup podman,
-            # which the runner unit is added to by the nixpkgs module). Set
-            # HERE and not in podman.nix because `containers` is imported
-            # whole by tenacity, and this consumer is cube-only -- keeps
-            # tenacity byte-identical.
-            virtualisation.podman.dockerSocket.enable = true;
-
-            services.forgejo-runner.instances.cube = {
-                enable = true;
-
-                settings = {
-                    runner = {
-                        # Labels decide which jobs this runner accepts
-                        # (workflow `runs-on:`). The ubuntu-* names exist so
-                        # GitHub-style workflows run unmodified; plain node
-                        # images are the runner project's own recommendation
-                        # -- the runner daemon clones with its own git (the
-                        # unit always gets gitMinimal in path), so the job
-                        # image needs node but not git. `nix:host` runs the
-                        # job directly on the host -- what building THIS
-                        # repo's configs wants (host nix store/daemon).
-                        labels = [
-                            "ubuntu-latest:docker://node:24-bookworm"
-                            "ubuntu-24.04:docker://node:24-bookworm"
-                            "nix:host"
-                        ];
-                    };
-
-                    server.connections.default = {
-                        # Loopback: forgejo.nix's listener. ROOT_URL's FQDN is
-                        # irrelevant here -- the runner talks to the listener,
-                        # not through Caddy or Tailscale Serve.
-                        url = "http://127.0.0.1:3001/";
-
-                        # Pinned runner UUID -- derived from
-                        # `forgejo-runner-secret`'s first 16 characters (see
-                        # the file header for the derivation and the wiki for
-                        # the command). NOT a secret: it is displayed in the
-                        # admin UI; only the pairing must be exact.
-                        #
-                        # Pinned by hand 2026-09-25 from the sops value --
-                        # every byte decodes to an ASCII hex char, the
-                        # self-check for a correct derivation (a canonical
-                        # pretty UUID here would mean the derivation was
-                        # wrong, since FromBytes does no bit-setting).
-                        uuid = "30343634-3961-3333-6665-303732653263";
-
-                        # token is NOT set inline -- it comes from sops via
-                        # `secrets` below, which nixpkgs renders as a systemd
-                        # LoadCredential + `token_url: file:...` indirection,
-                        # keeping the value out of the world-readable store.
-                    };
-                };
-
-                # Paths handed to the unit as systemd credentials. The key
-                # names must spell the settings path they feed
-                # (`token_url` -> settings.server.connections.default.token_url);
-                # deliberately NOT `uuid_url` -- the runner drops that key
-                # (file header).
-                secrets.server.connections.default.token_url =
-                    config.sops.secrets.forgejo-runner-secret.path;
-
-                # Packages for `nix:host` jobs -- the default list restated
-                # plus nix, since setting the option replaces, not appends.
-                hostPackages = with pkgs; [
-                    bash
-                    coreutils
-                    curl
-                    gawk
-                    gnused
-                    nodejs
-                    nix
-                    wget
-                ];
-            };
-
-            # Fail the BUILD, not the runner's first start: an empty pin
-            # would otherwise render clean and only surface as an auth
-            # failure in the runner's journal.
-            assertions = [
-                {
-                    assertion =
-                        config.services.forgejo-runner.instances.cube.settings.server.connections.default.uuid != "";
-                    message =
-                        "actions-runner: the pinned runner UUID is empty. Add the sops secret "
-                        + "`forgejo-runner-secret` and derive the UUID from its first 16 characters "
-                        + "-- one-time steps documented in wiki/homelab/forgejo.md.";
-                }
-            ];
+            # # description = "cube-side support for the Forgejo Actions runner VM";
 
             sops.secrets.forgejo-runner-secret = {
                 owner = config.services.forgejo.user;
@@ -141,20 +44,16 @@
                 mode  = "0400";
             };
 
-            # Creates the runner row server-side from the sops secret.
-            # Idempotent on every activation (file header); prints the UUID
-            # to stdout, which lands in the journal -- fine, it is not
-            # secret. Ordered after forgejo.service (needs the migrated DB,
-            # same reasoning as forgejo.nix's admin-bootstrap) and before
-            # the runner (whose auth against a not-yet-created row would
-            # fail until this has run once).
+            # Idempotent on every activation; prints the UUID to stdout,
+            # which lands in the journal -- fine, it is not secret. Ordered
+            # after forgejo.service (needs the migrated DB, same reasoning
+            # as forgejo.nix's admin-bootstrap).
             systemd.services.forgejo-runner-registration = {
                 description = "Register the Forgejo Actions runner against the forge";
                 after      = [ "forgejo.service" ];
                 wants      = [ "forgejo.service" ];
-                before     = [ "forgejo-runner-cube.service" ];
                 wantedBy   = [ "multi-user.target" ];
-                path       = [ config.services.forgejo.package ];
+                path       = with pkgs; [ config.services.forgejo.package coreutils ];
 
                 script = ''
                     set -euo pipefail
@@ -162,22 +61,36 @@
                     SECRET_FILE=${config.sops.secrets.forgejo-runner-secret.path}
 
                     forgejo --config "$CONFIG" forgejo-cli actions register \
-                        --name cube \
+                        --name forge-runner \
                         --secret-file "$SECRET_FILE"
                 '';
 
+                # Root-privileged stage of the guest's token copy (the "+"
+                # prefix runs this ExecStartPost as root, outside the
+                # User=/Group= above): the share dir holds ONLY this file,
+                # root:root 0600, which is what virtiofs passthrough shows
+                # the guest -- guest root (systemd, reading LoadCredential)
+                # can read it; no one else on either side needs to.
                 serviceConfig = {
                     Type            = "oneshot";
                     RemainAfterExit = true;
                     User            = config.services.forgejo.user;
                     Group           = config.services.forgejo.group;
+                    ExecStartPost   = "+${pkgs.runtimeShell} -c 'install -d -m 0700 /var/lib/forgejo-runner-share && install -m 0600 ${config.sops.secrets.forgejo-runner-secret.path} /var/lib/forgejo-runner-share/forgejo-runner-secret'";
                 };
             };
 
+            # The guest must not boot before its token copy is staged and
+            # registration has run; its runner unit additionally
+            # self-heals (Restart=on-failure) if the window is ever lost.
+            systemd.services."libvirt-vm-forge-runner".after =
+                [ "forgejo-runner-registration.service" ];
+
             # No persistence entry, same reasoning as forgejo.nix: cube has
             # a plain persistent root (cube-configuration.nix's header), so
-            # /var/lib/forgejo-runner/cube (the runner's state dir) survives
-            # reboots on its own. If a /root-wiping host ever imports this,
-            # add one first, modeled on tailscale-persist.nix.
+            # /var/lib/forgejo-runner-share and the VM's overlay disk under
+            # /var/lib/libvirt/images survive reboots on their own. If a
+            # /root-wiping host ever imports this, add one first, modeled
+            # on tailscale-persist.nix.
         };
 }

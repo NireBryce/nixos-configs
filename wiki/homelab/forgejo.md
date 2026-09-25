@@ -159,8 +159,9 @@ was enough. **Push over SSH is still untested.**
 
 ## CI: Forgejo Actions
 
-Added 2026-09-24, wired through [git-forge](../categories/git-forge.md)'s
-runner module. Bootstrap values landed 2026-09-25
+Added 2026-09-24; since 2026-09-25 the runner lives in a libvirt VM on
+cube ([git-forge](../categories/git-forge.md) has the architecture —
+containment is the point). Bootstrap values landed the same day
 ([pending-setup](pending-setup.md) item 8) — **not yet switched**;
 everything below describes the shape once it is.
 
@@ -171,8 +172,8 @@ GitHub-Actions syntax: `on: [push, pull_request]`, `jobs.<id>.runs-on`,
 
 | `runs-on:` | Executes where | Good for |
 |---|---|---|
-| `ubuntu-latest`, `ubuntu-24.04` | a `node:24-bookworm` container via podman | anything GitHub-shaped; the runner clones the repo itself, the image only needs to provide node |
-| `nix:host` | directly on cube, nix in `PATH` | building this repo's configs — `nix flake check`, a toplevel build |
+| `ubuntu-latest`, `ubuntu-24.04` | a `node:24-bookworm` container via the runner VM's own podman | anything GitHub-shaped; the runner clones the repo itself, the image only needs to provide node |
+| `nix:host` | directly in the runner VM, its nix in `PATH` | building this repo's configs — `nix flake check`, a toplevel build |
 
 Runs appear per-repo under the **Actions** tab (and instance-wide in Site
 Administration → Actions → Runners, where the runner shows as `cube`). A
