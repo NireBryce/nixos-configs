@@ -15,6 +15,20 @@
                 # string interpolation at all.
                 carapaceDescBash = pkgs.writeText "carapace-desc.bash"
                     (builtins.readFile ./carapace-desc.bash);
+
+                # Same reasoning, same shape, for cod's completions (the
+                # package comes from
+                # packages/shell-apps/completions/cod-completions.nix). cod
+                # stores no descriptions anywhere, so the data is ours:
+                # cod-desc.tsv is a curated command<TAB>candidate<TAB>
+                # description table (extend via `just cod-desc draft` --
+                # skill cod-completions has the workflow), the advice reads
+                # it at completion time through NIRE_COD_DESC_TSV, set in
+                # the .blerc string below before the deferred import fires.
+                codDescTsv = pkgs.writeText "cod-desc.tsv"
+                    (builtins.readFile ./cod-desc.tsv);
+                codDescBash = pkgs.writeText "cod-desc.bash"
+                    (builtins.readFile ./cod-desc.bash);
             in {
             # bash line editor, allows zsh-like line editor tricks and bindings.
             #
@@ -82,6 +96,15 @@
                 # Real descriptions for carapace candidates, which its own
                 # bash completer cannot emit. See carapace-desc.bash.
                 ble-import -d ${carapaceDescBash}
+
+                # Same for cod candidates, which cod cannot emit either -- it
+                # stores no descriptions at all. The table is this repo's:
+                # NIRE_COD_DESC_TSV must be set before the deferred import
+                # runs. A command absent from the table is untouched, so
+                # ble.sh's mandb enrichment keeps working there. See
+                # cod-desc.bash.
+                NIRE_COD_DESC_TSV=${codDescTsv}
+                ble-import -d ${codDescBash}
 
                 # ─── fzf ─────────────────────────────────────────────────────
                 _ble_contrib_fzf_base=${pkgs.fzf}/share/fzf

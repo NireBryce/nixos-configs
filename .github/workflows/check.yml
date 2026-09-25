@@ -119,6 +119,8 @@ jobs:
       # as much in CI as on a host.
       - name: keybinding cheatsheet parser tests (just keybindings-test)
         run: python3 flake/scripts/test_keybinding_cheatsheet.py
+      - name: cod completion descriptions tests (just cod-desc-test)
+        run: python3 flake/scripts/test_cod_desc.py
 
       # Pinned by full SHA, same as update-flake-lock.yml pins its actions:
       # `@main` means running whatever upstream's default branch says on

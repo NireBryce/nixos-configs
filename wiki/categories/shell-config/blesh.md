@@ -1,6 +1,6 @@
 # blesh (bash line editor)
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-25_
 _Sibling reviewed: 2026-09-14 -- blesh-for-agents.md only renamed `system/` path shorthand to `config-system/`; no facts moved_
 
 `ble.sh` is wired up by hand for bash — there's no Home Manager option for
@@ -57,6 +57,15 @@ together external completion/history tools underneath ble.sh's UI:
   ever fails, `COMPREPLY` is left untouched and candidates silently fall
   back to carapace's plain word list — same as before this file existed.
   Full detail on what it's advising and why: [carapace](carapace.md).
+- **[`cod-desc.bash`](../../../flake/modules/config-system/shell-config/bash/cod-desc.bash)**
+  (this repo, 2026-09-25) — the same advice pattern for cod's
+  `__cod_complete_bash`, with one difference that changes where the
+  descriptions come from: carapace keeps real descriptions internally and
+  `export` re-derives them, while cod stores none anywhere, so the data is
+  a curated table in this repo (`cod-desc.tsv`) pointed at through
+  `NIRE_COD_DESC_TSV`. Candidates outside the table leave `COMPREPLY`
+  untouched, so mandb enrichment still applies there. Full detail:
+  [cod completion descriptions](cod-desc.md).
 - **`fzf-menu.bash`** / **`fzf-completion.bash`** — render the completion
   menu through fzf (the zsh-fzf-tab equivalent). `complete_auto_menu` must
   stay unset here — it's an idle-delay knob, not a boolean, and setting it
@@ -193,6 +202,8 @@ or otherwise — is tracked separately as
 - [carapace](carapace.md) — the completion engine underneath most of this,
   its generated bash completer's internals, and its `cod`-clobbering
   registration race.
+- [cod completion descriptions](cod-desc.md) — the table + advice bridge
+  that gives cod's completions menu descriptions carapace gets for free.
 - [shell-config](00-INDEX.md) — the category this all lives
   in, and the `home.file`/`home.sessionPath` concatenation trap that
   `blesh.nix`'s own header is the worked example of.

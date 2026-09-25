@@ -1,6 +1,6 @@
 # carapace
 
-_Last modified: 2026-09-02_
+_Last modified: 2026-09-25_
 
 A completion engine used as the primary source of shell completions across
 this repo: `pkgs.carapace` in `home.packages`
@@ -9,7 +9,7 @@ sourced into bash via `source <(carapace _carapace bash)` in `bash.nix`, and
 layered under ble.sh's own menu in
 [`blesh.nix`](../../../flake/modules/config-system/shell-config/bash/blesh.nix) /
 [`carapace-desc.bash`](../../../flake/modules/config-system/shell-config/bash/carapace-desc.bash)
-(see [blesh.md](blesh.md)). Unlike `cod` (below), carapace has no daemon and
+(see [blesh.md](blesh.md)). Unlike `cod` (below, and in [cod-desc.md](cod-desc.md)), carapace has no daemon and
 no system-wide state: it's a binary invoked synchronously per completion
 request, which is why it lives in `home.packages` rather than needing a
 system install.
