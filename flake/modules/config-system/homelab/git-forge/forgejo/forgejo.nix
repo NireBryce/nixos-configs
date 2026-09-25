@@ -181,7 +181,8 @@
                     then
                         forgejo --config "$CONFIG" admin user change-password \
                             --username "$USERNAME" \
-                            --password "$(cat "$PASSWORD_FILE")"
+                            --password "$(cat "$PASSWORD_FILE")" \
+                            --must-change-password=false
                     fi
                 '';
 
