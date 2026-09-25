@@ -1,0 +1,157 @@
+# cod-desc.tsv -- descriptions for cod's completions in the ble.sh menu.
+#
+# cod serves its learned completions as bare words and stores no
+# descriptions anywhere (sqlite columns: Flag, Context), so the menu
+# descriptions come from this table: cod-desc.bash advises cod's completer
+# and looks candidates up here, keyed command<TAB>candidate<TAB>description.
+# The wiring lives in blesh.nix; the format is pinned by
+# flake/scripts/test_cod_desc.py, which runs in `just preflight`.
+#
+# To extend: teach cod the command (`cod learn -- <cmd> --help` -- its
+# help-execution timeout is 1s, so slow-starting commands never learn),
+# then `just cod-desc draft <cmd>` drafts rows parsed from the help text.
+# Drafts are a starting point: review every line before adding it here.
+# Candidates are keyed WITHOUT any trailing = (the advice strips one
+# before lookup, so a row keyed with one could never match). Sorted by
+# command, then candidate; keep it that way (test_cod_desc.py enforces).
+
+cod	--help	Show context-sensitive help (also try --help-long and --help-man).
+cod	--help-long	generate the long help page
+cod	--help-man	generate a man page
+cod	--version	Show application version.
+cod	daemon	run the completion daemon (usually via cod init)
+cod	example-config	print an example config.toml
+cod	help	show help for a command
+cod	init	print the shell integration preamble
+cod	learn	learn completions from a help command
+cod	list	list learned commands
+cod	remove	remove learned completions
+cod	update	re-learn a command from its help text
+sops	--add-age	Add the provided comma-separated list of age recipients fingerprints to the list of master keys on the given file
+sops	--add-azure-kv	Add the provided comma-separated list of Azure Key Vault key URLs to the list of master keys on the given file
+sops	--add-gcp-kms	Add the provided comma-separated list of GCP KMS key resource IDs to the list of master keys on the given file
+sops	--add-hc-vault-transit	Add the provided comma-separated list of Vault's URI key to the list of master keys on the given file ( eg. https://vault.example.org:8200/v1/transit/keys/dev)
+sops	--add-hckms	Add the provided comma-separated list of HuaweiCloud KMS key IDs (format: region:key-uuid) to the list of master keys on the given file
+sops	--add-kms	Add the provided comma-separated list of KMS ARNs to the list of master keys on the given file
+sops	--add-pgp	Add the provided comma-separated list of PGP fingerprints to the list of master keys on the given file
+sops	--age	Comma separated list of age recipients
+sops	--aws-profile	The AWS profile to use for requests to AWS
+sops	--azure-kv	Comma separated list of Azure Key Vault URLs
+sops	--check-for-updates	Do check whether the current version is latest during --version
+sops	--config	Path to sops' config file. If set, sops will not search for the config file recursively.
+sops	--decrypt	Decrypt a file and output the result to stdout
+sops	--decryption-order	Comma separated list of decryption key types
+sops	--disable-version-check	Do not check whether the current version is latest during --version
+sops	--enable-local-keyservice	Use local key service
+sops	--encrypt	Encrypt a file and output the result to stdout
+sops	--encrypted-comment-regex	Set the encrypted comment suffix. When specified, only keys that have comment matching the regex will be encrypted.
+sops	--encrypted-regex	Set the encrypted key regex. When specified, only keys matching the regex will be encrypted.
+sops	--encrypted-suffix	Override the encrypted key suffix. When empty, all keys will be encrypted, unless otherwise marked with unencrypted-suffix.
+sops	--encryption-context	Comma separated list of KMS encryption context key:value pairs
+sops	--extract	Extract a specific key or branch from the input document. Decrypt mode only. Example: --extract '["somekey"][0]'
+sops	--filename-override	Use this filename instead of the provided argument for loading configuration, and for determining input type and output type
+sops	--gcp-kms	Comma separated list of GCP KMS resource IDs
+sops	--hc-vault-transit	Comma separated list of vault's key URI (e.g. 'https://vault.example.org:8200/v1/transit/keys/dev')
+sops	--hckms	Comma separated list of HuaweiCloud KMS key IDs (format: region:key-uuid)
+sops	--help	Show help
+sops	--ignore-mac	Ignore Message Authentication Code during decryption
+sops	--in-place	Write output back to the same file instead of stdout
+sops	--indent	The number of spaces to indent YAML or JSON encoded file
+sops	--input-type	Currently json, yaml, dotenv, ini and binary are supported. If not set, sops will use the file's extension to determine the type
+sops	--keyservice	Specify the key services to use in addition to the local one. Can be specified more than once. Syntax: protocol://address. Example: tcp://myserver.com:5000
+sops	--kms	Comma separated list of KMS ARNs
+sops	--mac-only-encrypted	Compute MAC only over values which end up encrypted
+sops	--output	Save the output after encryption or decryption to the file specified
+sops	--output-type	Currently json, yaml, dotenv, ini and binary are supported. If not set, sops will use the input file's extension to determine the output format
+sops	--pgp	Comma separated list of PGP fingerprints
+sops	--rm-age	Remove the provided comma-separated list of age recipients from the list of master keys on the given file
+sops	--rm-azure-kv	Remove the provided comma-separated list of Azure Key Vault key URLs from the list of master keys on the given file
+sops	--rm-gcp-kms	Remove the provided comma-separated list of GCP KMS key resource IDs from the list of master keys on the given file
+sops	--rm-hc-vault-transit	Remove the provided comma-separated list of Vault's URI key from the list of master keys on the given file ( eg. https://vault.example.org:8200/v1/transit/keys/dev)
+sops	--rm-hckms	Remove the provided comma-separated list of HuaweiCloud KMS key IDs (format: region:key-uuid) from the list of master keys on the given file
+sops	--rm-kms	Remove the provided comma-separated list of KMS ARNs from the list of master keys on the given file
+sops	--rm-pgp	Remove the provided comma-separated list of PGP fingerprints from the list of master keys on the given file
+sops	--rotate	Generate a new data encryption key and reencrypt all values with the new key
+sops	--set	Set a specific key or branch in the input document. value must be a json encoded string. (edit mode only). eg. --set '["somekey"][0] {"somevalue":true}'
+sops	--shamir-secret-sharing-threshold	The number of master keys required to retrieve the data key with shamir
+sops	--show-master-keys	Display master encryption keys in the file during editing
+sops	--unencrypted-comment-regex	Set the unencrypted comment suffix. When specified, only keys that have comment matching the regex will be left unencrypted.
+sops	--unencrypted-regex	Set the unencrypted key regex. When specified, only keys matching the regex will be left unencrypted.
+sops	--unencrypted-suffix	Override the unencrypted key suffix.
+sops	--value-file	read the value for `set` from a file instead of an argument
+sops	--value-stdin	read the value for `set` from stdin instead of an argument
+sops	--verbose	Enable verbose logging output
+sops	--version	Print the version
+sops	-a	Comma separated list of age recipients
+sops	-d	Decrypt a file and output the result to stdout
+sops	-e	Encrypt a file and output the result to stdout
+sops	-h	Show help
+sops	-i	Write output back to the same file instead of stdout
+sops	-k	Comma separated list of KMS ARNs
+sops	-p	Comma separated list of PGP fingerprints
+sops	-r	Generate a new data encryption key and reencrypt all values with the new key
+sops	-s	Display master encryption keys in the file during editing
+sops	-v	Print the version
+sops	completion	Generate shell completion scripts
+sops	decrypt	Decrypt a file, and output the results to stdout. If no filename is provided, stdin will be used.
+sops	edit	Edit an encrypted file
+sops	encrypt	Encrypt a file, and output the results to stdout. If no filename is provided, stdin will be used.
+sops	exec-env	Execute a command with decrypted values inserted into the environment
+sops	exec-file	Execute a command with the decrypted contents as a temporary file
+sops	filestatus	Check the status of the file, returning encryption status
+sops	groups	Modify the groups on a SOPS file
+sops	help	Shows a list of commands or help for one command
+sops	keyservice	Start a SOPS key service server
+sops	publish	Publish sops file or directory to a configured destination
+sops	rotate	Generate a new data encryption key and reencrypt all values with the new key
+sops	set	Set a specific key or branch in the input document. value must be a JSON encoded string, for example '/path/to/file ["somekey"][0] {"somevalue":true}', or a path if --value-file is used, or omitted if --value-stdin is used
+sops	unset	Unset a specific key or branch in the input document.
+sops	updatekeys	Update the keys of SOPS files using the config file
+tailscale	--help	show tailscale help
+tailscale	--socket	path to the tailscaled Unix socket
+uv	--allow-insecure-host	Allow insecure connections to a host
+uv	--cache-dir	Path to the cache directory
+uv	--color	Control the use of color in output
+uv	--config-file	The path to a `uv.toml` file to use for configuration
+uv	--directory	Change to the given directory prior to running the command
+uv	--help	Display the concise help for this command
+uv	--managed-python	Require use of uv-managed Python versions
+uv	--no-cache	Avoid reading from or writing to the cache, instead using a temporary directory for the duration of the operation
+uv	--no-config	Avoid discovering configuration files (`pyproject.toml`, `uv.toml`)
+uv	--no-managed-python	Disable use of uv-managed Python versions
+uv	--no-progress	Hide all progress outputs
+uv	--no-python-downloads	Disable automatic downloads of Python.
+uv	--offline	Disable network access
+uv	--project	Discover a project in the given directory
+uv	--quiet	Use quiet output
+uv	--system-certs	Whether to load TLS certificates from the platform's native certificate store
+uv	--verbose	Use verbose output
+uv	--version	Display the uv version
+uv	-V	Display the uv version
+uv	-h	Display the concise help for this command
+uv	-n	Avoid reading from or writing to the cache, instead using a temporary
+uv	-q	Use quiet output
+uv	-v	Use verbose output
+uv	add	Add dependencies to the project
+uv	audit	Audit the project's dependencies
+uv	auth	Manage authentication
+uv	build	Build Python packages into source distributions and wheels
+uv	cache	Manage uv's cache
+uv	check	Run checks on the project
+uv	export	Export the project's lockfile to an alternate format
+uv	format	Format Python code in the project
+uv	help	Display documentation for a command
+uv	init	Create a new project
+uv	lock	Update the project's lockfile
+uv	pip	Manage Python packages with a pip-compatible interface
+uv	publish	Upload distributions to an index
+uv	python	Manage Python versions and installations
+uv	remove	Remove dependencies from the project
+uv	run	Run a command or script
+uv	self	Manage the uv executable
+uv	sync	Update the project's environment
+uv	tool	Run and install commands provided by Python packages
+uv	tree	Display the project's dependency tree
+uv	venv	Create a virtual environment
+uv	version	Read or update the project's version
+uv	workspace	Inspect uv workspaces

@@ -1,6 +1,6 @@
 # blesh, for agents
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-25_
 
 Condensed from [blesh.md](blesh.md), which keeps the diagnosis narrative and
 the evidence trail. Facts only here.
@@ -17,6 +17,7 @@ is `config-system/shell-config/bash/blesh.nix`.
 | carapace | most completion candidates — see [carapace.md](carapace.md) |
 | fzf | the completion menu (`fzf-menu.bash`), Ctrl-T, Alt-C |
 | atuin | Ctrl-R |
+| `carapace-desc.bash` / `cod-desc.bash` | menu descriptions: carapace's via its `export` mode, cod's from the curated `cod-desc.tsv` — see [cod-desc.md](cod-desc.md) |
 | bash-completion / nix-completion | ble.sh contrib, loaded **first** |
 
 ## Load-order rules

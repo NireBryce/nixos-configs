@@ -150,7 +150,9 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   spurious `read` error on Tab-completion) and
   [carapace](categories/shell-config/carapace.md) (the completion engine
   blesh layers a menu on top of, and how it avoids clobbering — and being
-  clobbered by — `cod`'s daemon-based completions).
+  clobbered by — `cod`'s daemon-based completions), and
+  [cod-desc](categories/shell-config/cod-desc.md) (menu descriptions for
+  those `cod` completions, which store none anywhere).
 
 ### Homelab (usage)
 

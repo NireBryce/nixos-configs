@@ -1,6 +1,6 @@
 # `shell-config` — `config-system/shell-config/`
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-25_
 
 ## Contents
 
@@ -27,7 +27,9 @@ _Last modified: 2026-09-14_
   escaping as `''${...}` inside a Nix `''` string otherwise — content read
   from disk is never touched by Nix's own interpolation at all. Full
   writeup, including the carapace/fzf/atuin integrations it wires together
-  and an open upstream bug found in them: [blesh](blesh.md).
+  and an open upstream bug found in them: [blesh](blesh.md). Also renders
+  the cod completion-description bridge (`cod-desc.tsv` + `cod-desc.bash`):
+  [cod-desc](cod-desc.md).
 - **`shell-env/shell-env.nix`** — `homeManager`-only: `home.shellAliases`
   (the everyday `ll`, `cp -i`, `lcd`, `img-cat`, `kssh`, etc.), plus
   `home.sessionVariables` and `home.sessionPath`. Since 2026-08-24 it also

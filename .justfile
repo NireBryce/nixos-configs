@@ -142,6 +142,7 @@ install-hooks:
 preflight:
     @just branches-test
     @just keybindings-test
+    @just cod-desc-test
     @just check
     @just modules
     @just lint
@@ -271,6 +272,24 @@ keybindings-test:
     # regex-coupled to the declaring modules' exact shapes. Pure stdlib; runs
     # in preflight and CI.
     python3 {{scripts}}/test_keybinding_cheatsheet.py
+
+# Draft / audit / check the cod completion descriptions table (cod-desc.tsv)
+cod-desc *args:
+    # `draft <cmd>...` runs each command's --help, parses flag descriptions,
+    # and prints TSV rows for curation (review before adding to the table --
+    # the draft is not authoritative). `audit` compares cod's learned
+    # commands against the table (--used adds the atuin/carapace gap
+    # analysis). `check` validates the committed table's shape. The whole
+    # workflow: skill cod-completions.
+    @{{scripts}}/cod-desc.py {{args}}
+
+# Fixture tests for cod-desc.py's parsers, the committed table, and wiring
+cod-desc-test:
+    # A wrong parse reads exactly like a correct one -- draft rows land in
+    # cod-desc.tsv looking authoritative -- and the wiring checks are
+    # regex-coupled to blesh.nix's and cod-desc.bash's exact shapes. Pure
+    # stdlib; runs in preflight and CI.
+    python3 {{scripts}}/test_cod_desc.py
 
 # The safe answer to "which secrets exist?" -- reads the committed
 # ciphertext (names are plaintext, values are ENC[...]) and never decrypts,
