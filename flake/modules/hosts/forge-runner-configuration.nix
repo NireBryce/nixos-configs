@@ -64,18 +64,36 @@
             };
         };
 
-        # virtiofs share of the runner token, read-only. systemd loads the
-        # module and the mount unit comes from the fileSystems entry; the
-        # runner unit below is ordered after it via RequiresMountsFor.
-        boot.kernelModules = [ "virtiofs" ];
+        boot = {
+            # virtiofs share of the runner token, read-only. systemd loads
+            # the module and the mount unit comes from the fileSystems
+            # entry; the runner unit below is ordered after it via
+            # RequiresMountsFor.
+            kernelModules = [ "virtiofs" ];
 
-        # Eyes on the guest. The generator wires a serial console (pty),
-        # but the base image's kernel only talks to VGA unless told
-        # otherwise -- without this, a guest that fails to boot fails
-        # SILENTLY from the host's `virsh console` (hit on first boot
-        # 2026-09-25: guest running, no DHCP lease, vnet1 tx_packets=0,
-        # console dark).
-        boot.kernelParams = [ "console=ttyS0,115200n8" ];
+            # The initrd NEEDS these: importing disk-image.nix alone pulls
+            # in only the generic hardware-detection module set (ahci,
+            # nvme, usb -- no virtio anything), so stage-1 waits forever
+            # on /dev/disk/by-label/nixos on a virtio disk and the guest
+            # hangs at "Starting initrd.target" (hit on first boot
+            # 2026-09-25; the same latent gap llm-sandbox carried, whose
+            # boot was never verified). virtio_net is the NIC, virtio_blk
+            # the root disk, virtio_pci the bus.
+            initrd.availableKernelModules = lib.mkAfter [
+                "virtio_pci"
+                "virtio_blk"
+                "virtio_net"
+            ];
+
+            # Eyes on the guest. The generator wires a serial console
+            # (pty), but the base image's kernel only talks to VGA unless
+            # told otherwise -- without this, a guest that fails to boot
+            # fails SILENTLY from the host's `virsh console` (hit on first
+            # boot 2026-09-25: guest running, no DHCP lease, vnet1
+            # tx_packets=0, console dark).
+            kernelParams = [ "console=ttyS0,115200n8" ];
+        };
+
         fileSystems."/mnt/runner-secret" = {
             device  = "runner-secret";
             fsType  = "virtiofs";
