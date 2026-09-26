@@ -52,12 +52,13 @@
             # "gamescope-wayland" with autologin.
             jovian
 
-            # podman + distrobox. Its own category as of 2026-08-22, split out of
-            # `system` the same way `virtualization` was (see
-            # durandal-configuration.nix) -- but unlike `virtualization`, this one
-            # is NOT handheld-exclusive: all four NixOS hosts import it, tenacity
-            # included, so this line preserves what `system` already gave it.
-            containers
+            # Deliberately NOT `containers` (podman + distrobox) as of
+            # 2026-09-26. It enables podman's rootful socket, and the `podman`
+            # group that can reach it is root-equivalent with no password
+            # (nixpkgs' own dockerSocket docs say so) -- so any process
+            # running as the user could read swap, or anything else. Same
+            # decision durandal made 2026-08-27; `containers` is now cube only.
+            # Was imported here since 2026-08-22, when it split out of `system`.
 
             # ── packages ──────────────────────────────────────────────────────────
             # Full parity with durandal, deliberately. The sibling branch was offered

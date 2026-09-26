@@ -1,12 +1,12 @@
 # `containers` — `config-system/homelab/containers/`
 
-_Last modified: 2026-09-02_
+_Last modified: 2026-09-26_
 
 Podman and distrobox — OCI containers — and *only* that. See
 [virtualization](virtualization.md) for why libvirt/QEMU is a different
 category despite "virtualization" sounding like it should cover this too.
 Nested under the `homelab` umbrella since 2026-08-27 (name unaffected);
-durandal stopped importing it the same day — see
+durandal stopped importing it the same day, tenacity 2026-09-26 — see
 [Imported by](#imported-by).
 
 ## Contents
@@ -63,12 +63,16 @@ own header has the two earlier names it carried
 
 ## Imported by
 
-`tenacity`, `cube`. Every NixOS host then on the tree (durandal,
+`cube` only. Every NixOS host then on the tree (durandal,
 tenacity, lego, cube) imported it 2026-08-22→08-27, when durandal dropped
 it: nothing in this repo's history records durandal actually running a
 container or distrobox, unlike cube's confirmed homelab usage — parity, not
 need (see `durandal-configuration.nix`'s comment at the removal point).
-`lego` was removed the same day ([../history.md](../history.md)). Not
+`lego` was removed the same day ([../history.md](../history.md)).
+tenacity dropped it 2026-09-26: podman's rootful socket makes the
+`podman` group root-equivalent with no password, and the user was in it on
+every host. The group now comes from `podman.nix` itself, so it exists
+only where podman does (see `tenacity-configuration.nix`). Not
 `lysithea` — the module is `nixos`-class only.
 
 ## See also

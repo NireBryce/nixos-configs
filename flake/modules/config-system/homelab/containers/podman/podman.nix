@@ -103,10 +103,14 @@
                     # out from under container storage already chowned into it --
                     # the fix nixpkgs itself prints when an auto range shifts.
                     #
-                    # No extraGroups: elly is already in `podman` via
-                    # users/elly/user-settings/elly-user.nix, and extraGroups
-                    # *concatenates* across modules rather than overriding --
-                    # naming it in both places put "podman" in the list twice.
+                    # The group lives here, not in elly-user.nix (moved
+                    # 2026-09-26): `podman` reaches the rootful socket, so it
+                    # is root-equivalent and belongs only where podman runs --
+                    # the same both-ends ownership as libvirt.nix's
+                    # `libvirtd`. extraGroups *concatenates* across modules
+                    # rather than overriding; naming it in both places once
+                    # put "podman" in the list twice.
+                    extraGroups = [ "podman" ];
                     subUidRanges = [
                     {
                         startUid = 100000;

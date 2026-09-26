@@ -1,6 +1,6 @@
 # Category reference
 
-_Last modified: 2026-09-12_
+_Last modified: 2026-09-26_
 
 One article per real category — a directory holding its own
 `dirsAsCategory.nix` under `flake/modules/`. See
@@ -56,7 +56,7 @@ matching "how do I use this, not configure it" page where one exists.
 | Category | Directory | Class(es) | Imported by |
 |---|---|---|---|
 | [backup](backup.md) | `config-system/homelab/backup/` | nixos | cube only |
-| [containers](containers.md) | `config-system/homelab/containers/` | nixos | tenacity, cube (not durandal) |
+| [containers](containers.md) | `config-system/homelab/containers/` | nixos | cube only |
 | [git-forge](git-forge.md) | `config-system/homelab/git-forge/` | nixos | cube only |
 | [homelab](homelab.md) | `config-system/homelab/` (+ 8 nested) | nixos | cube only |
 | [landing](landing.md) | `config-system/homelab/landing/` | nixos | cube only |
