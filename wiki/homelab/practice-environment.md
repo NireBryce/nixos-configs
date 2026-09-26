@@ -1,6 +1,6 @@
 # Practicing a workplace coding environment
 
-_Last modified: 2026-09-24_
+_Last modified: 2026-09-26_
 
 What cube's forge ([forgejo.md](forgejo.md)) plus its Actions runner
 ([git-forge](../categories/git-forge.md)'s runner module) is *for*, beyond
@@ -37,7 +37,8 @@ All of it is repo settings and files in the repo — not infrastructure:
    direct pushes, require a pull request, require status checks to pass,
    require one approval.
 2. **CI** — `.forgejo/workflows/ci.yaml`, GitHub-Actions syntax.
-   `runs-on: nix:host` for everything (jobs run directly in the runner
+   `runs-on: nix` for everything (the runner's label `nix:host` is name
+   `nix`, executor `host`) (jobs run directly in the runner
    VM; declare toolchains with nix profiles or setup-* actions). Workflow
    mechanics:
    [forgejo.md → CI](forgejo.md#ci-forgejo-actions).

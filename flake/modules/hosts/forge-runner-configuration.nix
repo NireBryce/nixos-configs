@@ -155,8 +155,9 @@
         #     registry (/etc/nix/registry.json), which kept
         #     `nixpkgs#pkg` working until setFlakeRegistry went too
         #     (setNixPath requires it),
-        #   - no silent fallback to unsandboxed builds, and a ceiling on
-        #     hung or runaway ones,
+        #   - no silent fallback to unsandboxed builds, a ceiling on
+        #     hung or runaway ones, and GC during builds before the disk
+        #     fills,
         #   - daily GC so ad-hoc store paths don't accumulate.
         # The daemon-side rule that matters most is the one NOT set: the
         # runner user must never land in nix.settings.trusted-users --
@@ -169,6 +170,10 @@
                 sandbox-fallback      = false;
                 max-silent-time       = 3600;   # 1h with no output
                 timeout               = 14400;  # 4h per build
+                # 30G overlay: collect garbage mid-build below 2G free,
+                # up to 6G free.
+                min-free              = 2 * 1024 * 1024 * 1024;
+                max-free              = 6 * 1024 * 1024 * 1024;
             };
             channel.enable = false;
             gc = {
@@ -191,10 +196,26 @@
                     # nix in PATH. There is no container runtime in this
                     # guest, so `runs-on: ubuntu-latest`-style container
                     # jobs find no runner here by design.
+                    #
+                    # TRAP: a label is `<name>:<executor>`, so this is the
+                    # label `nix` run by the `host` executor. Workflows say
+                    # `runs-on: nix`; `runs-on: nix:host` matches nothing
+                    # and the job sits in "Waiting" forever (the first real
+                    # run, 2026-09-26, did exactly that).
                     labels = [
                         "nix:host"
                     ];
+                    # One job at a time (the runner's default, pinned):
+                    # concurrent jobs would share this guest's user and
+                    # state with each other.
+                    capacity = 1;
                 };
+
+                # No actions cache server. With it on, the runner listens in
+                # the guest and every job until the next reset shares one
+                # cache -- one repo's job can seed entries another restores.
+                # Nothing here uses `actions/cache`; turn it back on per need.
+                cache.enabled = false;
 
                 server.connections.default = {
                     url = "https://git.moose-micro.ts.net/";
@@ -215,7 +236,7 @@
             secrets.server.connections.default.token_url =
                 "/mnt/runner-secret/forgejo-runner-secret";
 
-            # `nix:host` jobs get the VM's nix; default list restated (the
+            # `runs-on: nix` jobs get the VM's nix; default list restated (the
             # option replaces, not appends). tar/unzip: setup-* actions
             # extract their toolchain archives with them.
             hostPackages = with pkgs; [
