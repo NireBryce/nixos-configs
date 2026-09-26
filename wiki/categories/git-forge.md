@@ -112,44 +112,47 @@ is the label `nix` with the `host` executor, so workflows say
 run directly in the guest with nix in `PATH`; there is no container
 runtime in the guest. Usage: [homelab/forgejo.md](../homelab/forgejo.md).
 
-**Token delivery, without a guest key.** cube's decrypted
-`/run/secrets/forgejo-runner-secret` is staged (root:root 0600, by the
-registration unit's root-privileged `ExecStartPost`) into
-`/var/lib/forgejo-runner-share/`, which virtiofs shares read-only (on the
-host side, `<readonly/>`) into the guest at `/mnt/runner-secret`. The guest runs no sops and has no
-key; the share holds only that one file.
+**One VM and one registration per job** (since 2026-09-26).
+`forge-runner-cycle` on cube (`git-forge/forgejo/actions-runner.nix`)
+loops forever: it generates a random 40-hex secret on tmpfs, registers it
+with `forgejo forgejo-cli actions register --ephemeral --scope elly
+--secret-file …` (as the forgejo user; after `forgejo-admin-bootstrap`,
+which creates `elly`), stages it into `/var/lib/forgejo-runner-share/`
+(root 0600, shared into the guest read-only at `/mnt/runner-secret`),
+drops the VM generator's reset stamp and restarts
+`libvirt-vm-forge-runner` — a guest recreated from its base image — then
+waits until the guest powers off, or destroys it after 4.5 h. Two cycles in a row
+shorter than two minutes (a guest dying at boot) back off for one; a
+single short cycle is usually just a quick job.
 
-**Registration** is the offline scheme (Forgejo v11+ / runner v9+): a
-40-char hex secret whose first 16 characters, read as raw ASCII bytes,
-ARE the runner's UUID (`models/actions/forgejo.go`,
-`google/uuid.FromBytes`); the deprecated registration token is not
-supported. The secret is the sops key `forgejo-runner-secret`; the UUID
-is pinned as a literal in the guest config, because it must reach the
-runner's generated `config.yaml` at build time and the runner has no
-`uuid_url` file indirection — nixpkgs' `secrets.*.uuid_url` templating
-renders a key runner v13 silently drops, the swallowed-key shape, which
-is why it's written out here.
+In the guest, a hand-written `forgejo-runner.service` runs
+`forgejo-runner one-job --wait` with the UUID derived from the staged
+secret (the first 16 characters as raw ASCII bytes are the UUID,
+`models/actions/forgejo.go`, `google/uuid.FromBytes`) and
+`SuccessAction`/`FailureAction = poweroff`: one job, then the guest is
+gone. Forgejo deletes an ephemeral runner when its job completes, so a
+token a job reads is dead afterwards; registrations that never took a job
+are swept by `cron.cleanup_offline_runners` (`forgejo.nix`,
+`GLOBAL_SCOPE_ONLY = false`, 24 h). The runner is scoped to the user
+`elly`, takes one job at a time, and runs no actions cache server; new
+repos start with Actions off (`repository.DEFAULT_REPO_UNITS`).
 
-`forgejo-runner-registration.service` re-runs the server-side
-`forgejo forgejo-cli actions register --scope elly --secret-file …` on
-every activation (after `forgejo-admin-bootstrap`, which creates that
-user) — idempotent by design (same secret → same UUID → existing
-row, no-op'd by token-hash compare) — and is what creates the row the
-runner authenticates against. `libvirt-vm-forge-runner` is ordered
-After= it. Rotating the secret rotates the identity: new UUID pin in the
-guest config, orphaned old row to delete in the admin UI.
+Why not nixpkgs' `services.forgejo-runner`: it runs daemon mode, which
+refuses ephemeral runners (`internal/app/cmd/daemon.go`), and it writes a
+`server.connections` entry into `config.yaml`, which `one-job` refuses
+next to its own `--url`/`--uuid`/`--token-url` ("server connection
+conflict", `internal/app/cmd/args.go`).
 
-Two guest-side traps hit on day one, both caught by reading rendered
-artifacts: the instance name's dash escapes into the unit name
-(`forge-runner` → unit `forgejo-runner-forge\x2drunner.service`, so
-targeting the plain spelling silently creates an empty second unit), and
-`modulesPath` belongs to the inner NixOS module lambda, not the outer
-flake-parts one.
+A switch never restarts the guest (`autostart = false` on the generator:
+not wanted at boot, `restartIfChanged = false`); a guest change lands on
+the next cycle, and a running job is never killed by it. A change to the
+cycle script restarts the loop, whose first step recreates the guest.
+Each job starts with a cold guest nix store.
 
-**Status: bootstrap values landed 2026-09-25** (secret in sops, UUID
-pinned; cube's toplevel and the 3 GB guest image both build) — but
-**never switched**: nothing here is confirmed against the live instance
-yet, unlike everything above it on this page.
+The single long-lived runner this replaced, its pinned UUID and its
+day-one traps: [git-forge-history.md](git-forge-history.md#the-long-lived-runner-2026-09-24-to-2026-09-26).
+The sops secret `forgejo-runner-secret` is still declared, unused, as a
+way back; remove it with its `secrets.yaml` entry.
 
 ## Tailnet-only access, same mechanism as Grafana
 

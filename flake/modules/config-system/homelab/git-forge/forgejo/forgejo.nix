@@ -100,6 +100,19 @@
                         ENABLED = true;
                     };
 
+                    # Sweep runners that were registered but never came
+                    # online, or went offline, a day ago: the per-job
+                    # registrations of actions-runner.nix's cycle whose
+                    # guest never took a job. Used ephemeral runners are
+                    # deleted by Forgejo itself when their job completes.
+                    # GLOBAL_SCOPE_ONLY defaults true, which would skip
+                    # them (they are scoped to `elly`).
+                    "cron.cleanup_offline_runners" = {
+                        ENABLED           = true;
+                        GLOBAL_SCOPE_ONLY = false;
+                        OLDER_THAN        = "24h";
+                    };
+
                     repository = {
                         # Forgejo 15's built-in default (models/unit/unit.go
                         # DefaultRepoUnits) minus `repo.actions`: a NEW repo

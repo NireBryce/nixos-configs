@@ -83,7 +83,10 @@ read-only on the Forgejo side.
   Administration → Actions → Runners. New repos default Actions OFF
   (`DEFAULT_REPO_UNITS`): Settings → Repository → Units to enable.
 - Runner scope `elly` (that user's repos only), `capacity = 1`, no
-  actions cache server.
+  actions cache server. Fresh VM + single-use registration per job
+  (`forge-runner-cycle`): no state between jobs, cold nix store, ~20–40 s
+  boot before a job starts; a new `forge-runner` runner row per job,
+  deleted when it completes.
 - Config side: [../categories/git-forge.md](../categories/git-forge.md).
   Practice loop: [practice-environment.md](practice-environment.md).
 

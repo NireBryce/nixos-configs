@@ -1,23 +1,21 @@
 # The Forgejo Actions runner VM -- a NixOS guest on nire-cube, instantiated
 # by virtualization-cube.nix through VMs/_lib/libvirt-vm.nix. This file is
-# the guest's whole config; cube-side support (the sops secret, the share
-# staging, the registration against the forge) lives in
-# git-forge/forgejo/actions-runner.nix.
+# the guest's whole config; cube-side support (the per-job registration,
+# the share staging, the cycle that recreates this guest after every job)
+# lives in git-forge/forgejo/actions-runner.nix.
 #
 # Why a VM at all: a CI runner executes workflow code, and workflow code on
 # a runner with podman/docker access is one container escape away from the
 # host. On cube that escape would land root access to everything sops
-# decrypts there; in here it lands a disposable-ish VM that holds exactly
-# one secret (its own runner token) -- GitHub's ephemeral-runner model,
-# minus the ephemerality.
+# decrypts there; in here it lands a VM that runs ONE job and is then
+# thrown away -- GitHub's ephemeral-runner model. The only secret it ever
+# holds is that one job's single-use runner token.
 #
 # The guest deliberately runs NO sops-nix, no Home Manager, and no user
-# account -- same shape llm-sandbox used. Its one secret arrives over
-# virtiofs (tag `runner-secret`, read-only on the host side and mounted
-# read-only at /mnt/runner-secret)
-# from cube's already-decrypted /run/secrets copy; the mount is the guest's
-# entire trust surface from the host side, and the runner token is the only
-# thing that crosses.
+# account -- same shape llm-sandbox used. Its secret arrives over virtiofs
+# (tag `runner-secret`, read-only on the host side and mounted read-only
+# at /mnt/runner-secret), staged there by cube for this boot only; the
+# mount is the guest's entire trust surface from the host side.
 #
 # Networking, without tailscaled: the guest is NOT on the tailnet. It
 # reaches the forge through Caddy on the virbr0 gateway (192.168.122.1),
@@ -187,59 +185,80 @@
             setFlakeRegistry = false;
         };
 
-        services.forgejo-runner.instances.forge-runner = {
-            enable = true;
-
-            settings = {
-                runner = {
-                    # The only label: jobs run directly in the VM with
-                    # nix in PATH. There is no container runtime in this
-                    # guest, so `runs-on: ubuntu-latest`-style container
-                    # jobs find no runner here by design.
-                    #
-                    # TRAP: a label is `<name>:<executor>`, so this is the
-                    # label `nix` run by the `host` executor. Workflows say
-                    # `runs-on: nix`; `runs-on: nix:host` matches nothing
-                    # and the job sits in "Waiting" forever (the first real
-                    # run, 2026-09-26, did exactly that).
-                    labels = [
-                        "nix:host"
-                    ];
-                    # One job at a time (the runner's default, pinned):
-                    # concurrent jobs would share this guest's user and
-                    # state with each other.
-                    capacity = 1;
-                };
-
-                # No actions cache server. With it on, the runner listens in
-                # the guest and every job until the next reset shares one
-                # cache -- one repo's job can seed entries another restores.
-                # Nothing here uses `actions/cache`; turn it back on per need.
+        # The runner: ONE job per boot, then the guest powers off and cube
+        # recreates it from the base image with a new single-use
+        # registration (git-forge/forgejo/actions-runner.nix's
+        # forge-runner-cycle). A hand-written unit rather than nixpkgs'
+        # services.forgejo-runner: that module asserts a
+        # `server.connections` entry and writes it into config.yaml, and
+        # `one-job` refuses a config that defines a connection when its
+        # own --url/--uuid/--token-url are given ("server connection
+        # conflict", internal/app/cmd/args.go). Daemon mode, what the
+        # module runs, refuses ephemeral runners outright
+        # (internal/app/cmd/daemon.go). The module was used until
+        # 2026-09-26, as instance `forge-runner` -- unit
+        # "forgejo-runner-forge\x2drunner" (utils.escapeSystemdPath).
+        #
+        # The share holds this boot's 40-hex secret. Its UUID is derived
+        # the way Forgejo derives it (models/actions/forgejo.go: the first
+        # 16 characters as raw ASCII bytes, google/uuid.FromBytes), so
+        # nothing about the runner's identity is baked into this config.
+        #
+        # SuccessAction/FailureAction power the guest off when the job
+        # ends, or when the runner fails to start: systemd (PID 1) does
+        # it, so the job's own sandbox needs no power to. cube sees the
+        # domain shut off and starts the next cycle.
+        systemd.services.forgejo-runner = let
+            # Only `runner` and `cache` -- the connection comes from the
+            # command line (see above).
+            runnerConfig = (pkgs.formats.yaml { }).generate "forgejo-runner.yaml" {
+                # One job at a time. one-job takes exactly one anyway.
+                runner.capacity = 1;
+                # No actions cache server: nothing here uses
+                # `actions/cache`, and a fresh guest per job has nothing to
+                # share. Turn it on per need.
                 cache.enabled = false;
+            };
+            start = pkgs.writeShellScript "forgejo-runner-one-job" ''
+                set -euo pipefail
+                secret_file="$CREDENTIALS_DIRECTORY/runner-secret"
+                secret="$(${pkgs.coreutils}/bin/head -c 16 "$secret_file")"
+                hex="$(printf '%s' "$secret" | ${pkgs.coreutils}/bin/od -An -tx1 | ${pkgs.coreutils}/bin/tr -d ' \n')"
+                uuid="''${hex:0:8}-''${hex:8:4}-''${hex:12:4}-''${hex:16:4}-''${hex:20:12}"
+                exec ${lib.getExe pkgs.forgejo-runner} one-job --wait \
+                    --config ${runnerConfig} \
+                    --url https://git.moose-micro.ts.net/ \
+                    --uuid "$uuid" \
+                    --token-url "file:$secret_file" \
+                    --label nix:host
+            '';
+        in {
+            description = "Forgejo Runner (one job, then power off)";
+            wants    = [ "network-online.target" ];
+            after    = [ "network-online.target" ];
+            wantedBy = [ "multi-user.target" ];
 
-                server.connections.default = {
-                    url = "https://git.moose-micro.ts.net/";
+            # TRAP: `--label nix:host` is the label `nix` run by the `host`
+            # executor. Workflows say `runs-on: nix`; `runs-on: nix:host`
+            # matches nothing and the job sits in "Waiting" forever (the
+            # first real run, 2026-09-26, did exactly that). No container
+            # runtime in this guest, so `ubuntu-latest`-style container
+            # jobs find no runner here by design.
 
-                    # Pinned 2026-09-25, derived from forgejo-runner-secret
-                    # (the pairing the forge enforces: first 16 secret chars
-                    # as ASCII bytes, google/uuid.FromBytes -- see the cube
-                    # module's header for why this cannot ride the same
-                    # secrets mechanism as the token).
-                    uuid = "30343634-3961-3333-6665-303732653263";
-                };
+            # The credential source must be mounted first: LoadCredential
+            # on a not-yet-mounted path is a hard start failure, and the
+            # mount is NOT implicitly ordered before an unrelated service.
+            unitConfig = {
+                RequiresMountsFor = "/mnt/runner-secret";
+                SuccessAction     = "poweroff";
+                FailureAction     = "poweroff";
             };
 
-            # The token, over the virtiofs share. nixpkgs renders this as
-            # `token_url: file:$CREDENTIALS_DIRECTORY/...` + a
-            # LoadCredential of this path, so the value never enters a
-            # store path or the guest's config.yaml.
-            secrets.server.connections.default.token_url =
-                "/mnt/runner-secret/forgejo-runner-secret";
-
-            # `runs-on: nix` jobs get the VM's nix; default list restated (the
-            # option replaces, not appends). tar/unzip: setup-* actions
-            # extract their toolchain archives with them.
-            hostPackages = with pkgs; [
+            environment.HOME = "/var/lib/forgejo-runner";
+            # What `runs-on: nix` jobs find in PATH. tar/unzip: setup-*
+            # actions extract their toolchain archives with them. git: the
+            # runner itself uses it (nixpkgs' module always added it).
+            path = with pkgs; [
                 bash
                 coreutils
                 curl
@@ -250,37 +269,28 @@
                 gnutar
                 unzip
                 wget
+                gitMinimal
             ];
-        };
 
-        # The runner unit must not start before its credential source is
-        # mounted; LoadCredential on a not-yet-mounted path is a hard
-        # start failure, and the mount is NOT implicitly ordered before
-        # an unrelated service.
-        #
-        # TRAP: the unit name escapes the instance name -- nixpkgs runs it
-        # through utils.escapeSystemdPath, which turns the dash into a
-        # literal `\x2d`, so the unit is "forgejo-runner-forge\x2drunner"
-        # and targeting the plain "forge-runner" spelling silently creates
-        # an EMPTY second unit (caught by reading the rendered unit, not
-        # by eval).
-        # Sandboxing for the runner unit -- and therefore every job, since
-        # host-executor jobs are children of it. The filesystem goes
-        # read-only except the state dir and private /tmp; kernel
-        # interfaces and privilege transitions are closed: no writing the
-        # system, loading modules, or flipping kernel knobs. Deliberately
-        # NOT set: MemoryDenyWriteExecute (breaks
-        # node/v8 JIT, which actions need). Network stays open -- the
-        # egress policy above is its bound. nixpkgs' unit already sets
-        # DynamicUser plus most of the list below; restating those keeps
-        # the bound readable here. The two blocks after them are additions:
-        # no device nodes beyond the pseudo-devices, an empty capability
-        # bounding set, native syscalls only, and no clock or hostname
-        # changes; then no namespaces and a short socket-family list.
-        systemd.services."forgejo-runner-forge\\x2drunner" = {
-            unitConfig.RequiresMountsFor =
-                "/mnt/runner-secret";
+            # Sandboxing for the runner unit -- and therefore every job,
+            # since host-executor jobs are children of it. The filesystem
+            # goes read-only except the state dir and private /tmp; kernel
+            # interfaces and privilege transitions are closed: no writing
+            # the system, loading modules, or flipping kernel knobs.
+            # Deliberately NOT set: MemoryDenyWriteExecute (breaks node/v8
+            # JIT, which actions need). Network stays open -- the egress
+            # policy above, and cube's, are its bound.
             serviceConfig = {
+                ExecStart        = start;
+                Restart          = "no";
+                DynamicUser      = true;
+                StateDirectory   = "forgejo-runner";
+                WorkingDirectory = "/var/lib/forgejo-runner";
+                # DynamicUser's state dir is mounted noexec otherwise, and
+                # host jobs run scripts from it.
+                ExecPaths        = [ "/var/lib/forgejo-runner" ];
+                LoadCredential   = "runner-secret:/mnt/runner-secret/forgejo-runner-secret";
+
                 NoNewPrivileges       = true;
                 ProtectSystem         = "strict";
                 PrivateTmp            = true;

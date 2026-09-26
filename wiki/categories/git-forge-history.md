@@ -1,6 +1,6 @@
 # `git-forge` — history
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-26_
 
 Verification record for [git-forge](git-forge.md) as it was first switched
 and then re-routed, split out 2026-09-03 so that page stays about the
@@ -12,6 +12,7 @@ category as it works today.
 - [The brief `0.0.0.0` window](#the-brief-0000-window)
 - [The admin account, and an anonymous API that reports zeroes](#the-admin-account-and-an-anonymous-api-that-reports-zeroes)
 - [Mirror, not origin — and the first real mirror](#mirror-not-origin--and-the-first-real-mirror)
+- [The long-lived runner, 2026-09-24 to 2026-09-26](#the-long-lived-runner-2026-09-24-to-2026-09-26)
 - [See also](#see-also)
 
 ## First switch and the move behind Caddy
@@ -94,6 +95,34 @@ API, `mirror: true`, `mirror_interval: 8h0m0s`, authenticated with the
 Forgejo re-pulls on its own schedule, with no cron in this repo. Confirmed
 live: all 7 branches present and matching GitHub's own branch list. See
 [forgejo.md](../homelab/forgejo.md#this-repo-is-mirrored-here).
+
+## The long-lived runner, 2026-09-24 to 2026-09-26
+
+Before the per-job cycle, one runner served every job. Its 40-hex secret
+was the sops key `forgejo-runner-secret`, and a oneshot,
+`forgejo-runner-registration.service`, re-ran
+`forgejo forgejo-cli actions register --secret-file …` on every
+activation: same secret, same UUID, existing row, no-op'd by token-hash
+compare. A root `ExecStartPost` staged the decrypted secret into the
+virtiofs share. The guest ran nixpkgs' `services.forgejo-runner` in daemon
+mode, instance `forge-runner`, with the UUID
+(`30343634-3961-3333-6665-303732653263`) pinned as a literal: runner v13
+has no `uuid_url` file indirection, and nixpkgs' `secrets.*.uuid_url`
+templating renders a key the runner silently drops (the swallowed-key
+shape). Rotating the secret meant a new UUID pin in the guest config and
+deleting the orphaned row in the admin UI.
+
+Every job could read that token, and it stayed valid across jobs; the
+guest was reused until an overlay reset. That is what the per-job cycle
+replaced.
+
+Traps from its first day, both caught by reading rendered artifacts: the
+instance name's dash escapes into the unit name (`forge-runner` →
+`forgejo-runner-forge\x2drunner.service`; targeting the plain spelling
+silently creates an empty second unit), and `modulesPath` belongs to the
+inner NixOS module lambda, not the outer flake-parts one. Its one real
+job, `elly/nire-skills` run 2, passed on 2026-09-26 after run 1 sat in
+Waiting on `runs-on: nix:host`.
 
 ## See also
 

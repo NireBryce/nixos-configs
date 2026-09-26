@@ -1,6 +1,6 @@
 # `virtualization`, for agents
 
-_Last modified: 2026-09-25_
+_Last modified: 2026-09-26_
 
 Condensed from [virtualization.md](virtualization.md), which keeps the
 narrative and verification records. Facts only here.
@@ -65,11 +65,14 @@ DHCP-reserves the guest IP, then `virsh define` + start. Shares carry
   with "network 'default' is not active" without the activation script's
   guarded start; `net-list --name` lists active-only (no
   `--state-active` flag exists). Both runtime-verified 2026-08-23.
-- **Instance-name dashes escape in unit names**: guest instance
-  `forge-runner` → unit `forgejo-runner-forge\x2drunner.service`
-  (`utils.escapeSystemdPath`). Targeting the plain spelling in
-  `systemd.services` silently creates an EMPTY second unit — evals clean,
-  does nothing. Catch by reading the rendered unit.
+- **Instance-name dashes escape in unit names** (nixpkgs modules that
+  name units from an instance, via `utils.escapeSystemdPath`): the
+  runner's old nixpkgs instance `forge-runner` was unit
+  `forgejo-runner-forge\x2drunner.service`, and targeting the plain
+  spelling silently creates an EMPTY second unit. The guest now uses its
+  own `forgejo-runner.service`; the trap applies to any such module.
+- **`autostart = false`** on a generated VM: unit not wanted at boot and
+  `restartIfChanged = false`; a driver restarts it (forge-runner-cycle).
 - **`image.modules.qemu`-style guests break toplevel checks** — import
   `modulesPath + "/virtualisation/disk-image.nix"` DIRECTLY in the guest
   config, and read `image.filePath` relative to the image derivation

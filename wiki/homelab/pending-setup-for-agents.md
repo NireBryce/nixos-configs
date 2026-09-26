@@ -1,6 +1,6 @@
 # Pending setup, for agents
 
-_Last modified: 2026-09-25_
+_Last modified: 2026-09-26_
 
 Condensed from [pending-setup.md](pending-setup.md), which keeps the closed
 items and their full accounts. Open work and the traps only here.
@@ -52,19 +52,11 @@ own database. The repo-side counterpart is
    `HOMEPAGE_VAR_ICAL_<NAME>=<secret-ics-url>` line per calendar; add a
    `calendars` entry in `homepage.nix` for each new NAME. Details:
    [../categories/landing.md](../categories/landing.md#how-the-gcal-calendar-feeds-work).
-5. **Forgejo Actions runner** (guest `forge-runner` in a libvirt VM on
-   cube since 2026-09-25): secret + UUID **landed 2026-09-25** (the
-   2026-09-24 build gate is gone — the tree builds; guest image + cube
-   toplevel both build). What remains: `just build` + `just switch` on
-   cube, then the done-when: `forgejo-runner-registration.service` and
-   `libvirt-vm-forge-runner.service` succeeded, guest running (debug SSH:
-   `ssh -t ts-cube ssh forge-runner`, cube's key only), runner shows
-   `forge-runner`/`Idle` in Site Administration → Actions → Runners, and a
-   workflow run goes green. Egress check from inside the guest: forge 443
-   answers; LAN/tailnet addresses time out (guest-local OUTPUT rules). Rotation = new `forgejo-runner-secret` → new
-   derived UUID pinned in the guest config → delete the orphaned runner
-   row. Original fill-in procedure:
-   [pending-setup.md](pending-setup.md#8-forgejo-actions-runner-secret-and-uuid).
+5. ~~Forgejo Actions runner~~ — **done 2026-09-26** (first green run,
+   `elly/nire-skills` run 2). No fill-in remains: cube mints a single-use
+   secret per job (`forge-runner-cycle`). sops `forgejo-runner-secret` is
+   unused, due for removal.
+   [pending-setup.md](pending-setup.md#8-done--forgejo-actions-runner-first-green-run-2026-09-26).
 
 ## The trap that produced a wrong answer twice
 
