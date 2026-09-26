@@ -33,9 +33,11 @@ reviewer — see [the review gap](#the-review-gap).
 
 All of it is repo settings and files in the repo — not infrastructure:
 
-1. **Branch protection** — repo → Settings → Branch: protect `main`, disallow
-   direct pushes, require a pull request, require status checks to pass,
-   require one approval.
+1. **Branch protection** — repo → Settings → Branches: protect `main`,
+   whitelist-restricted or disabled push (never plain "Enable push", which
+   lets CI jobs push too), required status checks, and one approval if
+   there's a second account to give it. Every setting, and why:
+   [forgejo.md → Branch protection](forgejo.md#branch-protection).
 2. **CI** — `.forgejo/workflows/ci.yaml`, GitHub-Actions syntax.
    `runs-on: nix` for everything (the runner's label `nix:host` is name
    `nix`, executor `host`) (jobs run directly in the runner

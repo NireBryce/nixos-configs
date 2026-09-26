@@ -90,6 +90,30 @@ read-only on the Forgejo side.
 - Config side: [../categories/git-forge.md](../categories/git-forge.md).
   Practice loop: [practice-environment.md](practice-environment.md).
 
+## Branch protection
+
+- Per repo: Settings → Branches → Add new rule; pattern `main`.
+- Push: **Whitelist restricted push** (users: `elly`) or **Disable push**
+  (PR-only). NOT **Enable push**: that admits anyone with write access,
+  including the Actions job token (write on its own repo), so a workflow
+  could push to the branch. The whitelist checks listed user/team IDs
+  only; the Actions user is never in it (`models/git/protected_branch.go`
+  `CanUserPush`). Deploy-key whitelist off unless needed.
+- **Enable status check**: pattern on Actions contexts, formatted
+  `<workflow> / <job> (<event>)` (`services/actions/commit_status.go`),
+  e.g. `ci / *`. A context appears in the picker only after a run.
+- **Required approvals**: can't self-approve; single account ⇒ 0, or 1
+  with a second account
+  ([practice-environment](practice-environment.md#the-review-gap)).
+  With approvals: **Dismiss stale approvals** and **Block merge if pull
+  request is outdated** on.
+- **Enforce this rule for repository admins**: on (`elly` is admin).
+- **Require signed commits**: only if all committers sign.
+- Merge whitelist: off.
+- Workflows: plain `pull_request`, not `pull_request_target` (runs
+  base-branch code with base token/secrets for fork PRs). No Actions
+  secrets in repos that don't need them.
+
 ## Storage and backups
 
 sqlite3 at `/var/lib/forgejo/`, with the repos and Forgejo's generated

@@ -21,6 +21,7 @@ how it's configured and why its two hostnames disagree, see
 - [Signing in, and why there's no sign-up](#signing-in-and-why-theres-no-sign-up)
 - [SSH keys, and the second user on this host](#ssh-keys-and-the-second-user-on-this-host)
 - [CI: Forgejo Actions](#ci-forgejo-actions)
+- [Branch protection](#branch-protection)
 - [Database and backups](#database-and-backups)
 - [This repo is mirrored here](#this-repo-is-mirrored-here)
 - [What's verified here](#whats-verified-here)
@@ -195,6 +196,53 @@ each gone once its job finishes.
 The workflow-flavored way to practice a workplace submit loop with this —
 branch protection, required checks, review before merge — is
 [practicing a workplace coding environment](practice-environment.md).
+
+## Branch protection
+
+Per repo, under **Settings → Branches → Add new rule** (Forgejo 15; the
+labels below are its own). One rule per branch pattern; for most repos
+that's just `main`.
+
+- **Protected branch name pattern:** `main` (globs work: `release/**`).
+- **Push:** choose **Whitelist restricted push** and list only yourself
+  (`elly`), or **Disable push** if every change should arrive by pull
+  request. Don't choose **Enable push**. That lets anything with write
+  access to the repo push, and a CI job's automatic token has write
+  access to its own repo, so a workflow could push to `main`. The
+  whitelist admits only the users and teams named in it, and the Actions
+  job user is never one of them. Leave **Whitelist deploy keys** off
+  unless a deploy key really needs to push.
+- **Enable status check**, with a pattern for the CI checks that must
+  pass. Actions reports each job as `<workflow name> / <job name>
+  (<event>)`, for example `ci / test (pull_request)`, so `ci / *` covers
+  every job of a workflow named `ci`. The list under the patterns shows
+  the checks Forgejo has seen on the repo in the last week, which is the
+  easy way to get the names right. A check only appears there after the
+  workflow has run once.
+- **Required approvals:** how many approving reviews a pull request needs.
+  You can't approve your own pull request, so with only the `elly`
+  account anything above 0 blocks every merge. Use 1 with a second
+  account ([practice-environment](practice-environment.md#the-review-gap)
+  covers that tradeoff), otherwise 0.
+- **Dismiss stale approvals** and **Block merge if pull request is
+  outdated:** on, when approvals are required. They make an approval
+  cover what actually gets merged.
+- **Enforce this rule for repository admins:** on. `elly` is an admin,
+  and without this the rule doesn't apply to the one account that
+  pushes.
+- **Require signed commits:** only if every committer signs. Otherwise it
+  rejects their pushes.
+
+Leave the merge whitelist off: with it off, anyone with write access
+can merge once the checks and approvals pass.
+
+Workflow triggers matter as much as the rule. Forgejo's
+`pull_request_target` runs a workflow from the base branch with the base
+repo's token and secrets, even for a pull request from someone else's
+fork. Use plain `pull_request` unless you've read what the target variant
+exposes. Keep Actions secrets out of repos that don't need them; this
+runner's jobs are single-use, but a secret handed to a job is still
+readable by that job's code.
 
 ## Database and backups
 
