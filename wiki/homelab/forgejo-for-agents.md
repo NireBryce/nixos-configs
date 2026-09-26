@@ -40,7 +40,9 @@ for its certificate. Git-over-SSH bypasses Caddy entirely — cube's ordinary
 keypair, and none is generated for it. One shared system account serves every
 person; Forgejo identifies you by the key you present. Add your **public**
 key in the web UI (Settings → SSH keys); Forgejo writes
-`~forgejo/.ssh/authorized_keys` itself — never hand-edit it.
+`~forgejo/.ssh/authorized_keys` itself — never hand-edit it. sshd reads that
+file only via `forgejo.nix`'s `Match User forgejo` block; home-dir key files
+are off for every other account (`ssh.nix`).
 
 A real reader misread `forgejo@ts-cube` as "the forgejo user's key" three
 times from these docs (2026-09-13), which is why it is stated this plainly.

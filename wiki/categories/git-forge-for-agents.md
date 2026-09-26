@@ -63,7 +63,11 @@ docker/podman access roots the VM, not cube.
   never hit it.
 - **Forgejo's built-in SSH server stays disabled** (`START_SSH_SERVER`
   unset). git+ssh rides the host's own OpenSSH; Forgejo manages
-  `~forgejo/.ssh/authorized_keys` itself. Clone URLs are
+  `~forgejo/.ssh/authorized_keys` itself. sshd reads it only because of
+  `forgejo.nix`'s `Match User forgejo` → `AuthorizedKeysFile
+  %h/.ssh/authorized_keys` (`lib.mkAfter`) — `ssh.nix` sets
+  `authorizedKeysInHomedir = false` for everyone else. Drop that block and
+  git+ssh fails silently. Clone URLs are
   `forgejo@ts-cube:...`, port 22. No new port.
 - **`forgejo-admin-bootstrap` resets elly's password to the sops value on
   every activation.** A change made through the web UI is silently reverted

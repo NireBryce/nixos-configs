@@ -29,6 +29,12 @@
                 # nixpkgs and throws on eval, so most guides and forum answers
                 # about this setting no longer apply verbatim.
                 settings.Resolve.MulticastDNS = "no";
+
+                # LLMNR is resolved's other multicast name protocol, on by
+                # default and answering on 5355. Nothing here uses it --
+                # avahi covers `.local`, tailscale MagicDNS the rest -- and
+                # it is the protocol LAN name-spoofing tools answer. Off.
+                settings.Resolve.LLMNR = "no";
             };
 
             # What this buys tailscale, which is half the reason it is here.

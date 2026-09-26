@@ -17,11 +17,30 @@
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.nixos.${moduleName} = { pkgs, lib, ... }: {
-            # # description = "opencode serve: detachable TUI sessions for elly, bound tailnet-only";
+        flake.modules.nixos.${moduleName} = { config, pkgs, lib, ... }: {
+            # # description = "opencode serve: detachable TUI sessions for elly, bound tailnet-only, basic-auth";
 
             # PORT 3003 -- caddy.nix owns the 300x map for this host and
             # proxies the rest; this one is deliberately not behind it.
+
+            # BASIC AUTH, 2026-09-26. Tailnet-only is not access control:
+            # without OPENCODE_SERVER_PASSWORD, `opencode serve` answers
+            # every request unauthenticated, and its API runs shells and
+            # reads files as the user -- so every tailnet device the ACL
+            # lets reach cube had a shell here. Username is `opencode`
+            # (the default; `opencode attach` hardcodes it, so don't set
+            # OPENCODE_SERVER_USERNAME). The sops VALUE is the bare
+            # password; the template turns it into the `KEY=value` line
+            # EnvironmentFile wants. Owned by the user because a USER
+            # manager reads EnvironmentFile as that user, not as root the
+            # way a system unit does. Clients: `just opencode-attach`
+            # passes it via the environment, prompting when unset.
+            sops.secrets."OPENCODE_SERVER_PASSWORD" = { };
+            sops.templates."opencode-server.env" = {
+                owner   = "elly";
+                mode    = "0400";
+                content = "OPENCODE_SERVER_PASSWORD=${config.sops.placeholder."OPENCODE_SERVER_PASSWORD"}\n";
+            };
 
             # A systemd --user manager only runs while its user is logged in
             # WITHOUT linger, so the unit would never auto-start at boot.
@@ -84,6 +103,11 @@
                     # need the system and HM profiles. ExecStart itself is
                     # absolute store paths either way.
                     Environment = "PATH=/run/wrappers/bin:/etc/profiles/per-user/elly/bin:/run/current-system/sw/bin";
+
+                    # The basic-auth password -- see BASIC AUTH above. No
+                    # `-` prefix: a missing file must fail the start, not
+                    # bring the server up open.
+                    EnvironmentFile = config.sops.templates."opencode-server.env".path;
                 };
 
                 # NixOS systemd.user.services is GLOBAL: the unit lands in

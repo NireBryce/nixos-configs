@@ -17,10 +17,10 @@ the `counts` subcheck of `wiki/scripts/check_wiki.py` watches — moved here
 
 | What | Files |
 |---|---|
-| total `.nix` files under `flake/modules/` | 271 |
-| module header (`moduleName = lib.removeSuffix ...`) | 220 |
-| `# # description` as first body line | 27 |
-| `with pkgs;` package lists | 123 |
+| total `.nix` files under `flake/modules/` | 274 |
+| module header (`moduleName = lib.removeSuffix ...`) | 223 |
+| `# # description` as first body line | 29 |
+| `with pkgs;` package lists | 122 |
 
 ## The header
 

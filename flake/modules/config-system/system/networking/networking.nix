@@ -12,16 +12,12 @@
             # Firewall
             networking.firewall = {
                 enable = true;
-                # TCP
-                allowedTCPPorts = [
-                22 # ssh
-                ];
-                allowedTCPPortRanges = [
-                    {
-                        from = 1714;
-                        to = 1764;
-                    } # kde-connect TCP
-                ];
+                # TCP: nothing here. ssh's port 22 comes from
+                # services.openssh.openFirewall (default true), so a host can
+                # close it with that one option -- tenacity does
+                # (ssh-tailnet-only-tenacity.nix); listing 22 here too would
+                # reopen it. KDE Connect's 1714-1764 (TCP and UDP) come from
+                # programs.kdeconnect (kde-connect.nix).
                 # UDP
                 allowedUDPPorts = [
                     5353 # mdns
@@ -31,11 +27,6 @@
                     # in tailscale.nix, not listed here.
                 ];
                 allowedUDPPortRanges = [
-                    {
-                        # kde-connect UDP
-                        from = 1714;
-                        to = 1764;
-                    }
                     {
                         # planetside2
                         from = 20040;
