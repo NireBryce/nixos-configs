@@ -1,6 +1,6 @@
 # Using the forge, for agents
 
-_Last modified: 2026-09-25_
+_Last modified: 2026-09-26_
 
 Condensed from [forgejo.md](forgejo.md), which keeps the reasoning and the
 verification trail. Facts only here.
@@ -75,7 +75,8 @@ read-only on the Forgejo side.
   `forge-runner` on cube, live since 2026-09-25 (original fill-in:
   [pending-setup.md](pending-setup.md) item 8).
 - Workflows: `.forgejo/workflows/*.yaml`, GitHub-Actions syntax.
-- Runner label for `runs-on:`: `nix:host` only (job inside the runner
+- Workflows say `runs-on: nix` — the runner's label is `nix:host`, i.e.
+  name `nix`, executor `host`; `runs-on: nix:host` waits forever (job inside the runner
   VM, its nix in `PATH`). No container runtime in the guest —
   `container:`-executed jobs and `docker://` actions find no runner.
 - Runs: repo **Actions** tab; runner named `forge-runner` under Site

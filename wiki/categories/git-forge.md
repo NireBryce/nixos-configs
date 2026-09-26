@@ -1,6 +1,6 @@
 # `git-forge` — `config-system/homelab/git-forge/`
 
-_Last modified: 2026-09-25_
+_Last modified: 2026-09-26_
 
 Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only; nested under
 the `homelab` umbrella since 2026-08-27 (name unaffected). As of 2026-09-07
@@ -106,7 +106,9 @@ only (`vmDeny` in `caddy.nix`), and its cert for the name is publicly
 trusted, so the connection URL is the ordinary
 ROOT_URL over validated TLS, Caddy → loopback Forgejo. Forgejo's own
 127.0.0.1:3001 stays unreachable from the guest, by design — Caddy is
-the door. One label decides which jobs it accepts (`runs-on: nix:host`) — jobs
+the door. One label decides which jobs it accepts: the runner's `nix:host`
+is the label `nix` with the `host` executor, so workflows say
+`runs-on: nix` (`nix:host` there matches nothing and waits forever) — jobs
 run directly in the guest with nix in `PATH`; there is no container
 runtime in the guest. Usage: [homelab/forgejo.md](../homelab/forgejo.md).
 

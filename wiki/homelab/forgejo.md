@@ -1,6 +1,6 @@
 # Using the forge
 
-_Last modified: 2026-09-25_
+_Last modified: 2026-09-26_
 
 [Forgejo](https://forgejo.org/) on `nire-cube`, at
 `https://git.moose-micro.ts.net/` — its own Tailscale Services name as of
@@ -167,15 +167,17 @@ containment is the point). Bootstrap values landed the same day
 Workflows live at `.forgejo/workflows/*.yaml` in each repo and use
 GitHub-Actions syntax: `on: [push, pull_request]`, `jobs.<id>.runs-on`,
 `steps` with `uses:`/`run:`. A job lands on this runner when its
-`runs-on:` matches one of its labels:
+`runs-on:` matches the NAME part of one of its labels — the runner declares
+`nix:host`, which is the label `nix` run by the `host` executor, so
+`runs-on: nix` (not `nix:host`, which matches nothing and waits forever):
 
 | `runs-on:` | Executes where | Good for |
 |---|---|---|
-| `nix:host` | directly in the runner VM, its nix in `PATH` | every job on this runner — `run:` steps, JS `uses:` actions (the guest has node), and `nix flake check` / toplevel builds for this repo's configs |
+| `nix` | directly in the runner VM, its nix in `PATH` | every job on this runner — `run:` steps, JS `uses:` actions (the guest has node), and `nix flake check` / toplevel builds for this repo's configs |
 
 There is no container-executor label: the guest runs no container
 runtime. Workflows written for `ubuntu-latest` container jobs need their
-`runs-on:` changed to `nix:host` and their environments declared (nix
+`runs-on:` changed to `nix` and their environments declared (nix
 profiles or setup-* actions, which fetch their own toolchains).
 
 Runs appear per-repo under the **Actions** tab (and instance-wide in Site

@@ -1,6 +1,6 @@
 # `git-forge`, for agents
 
-_Last modified: 2026-09-25_
+_Last modified: 2026-09-26_
 
 Condensed from [git-forge.md](git-forge.md), which keeps the reasoning and
 the narrative. Facts only here.
@@ -45,7 +45,7 @@ docker/podman access roots the VM, not cube.
 | Instance | `services.forgejo-runner.instances.forge-runner` in the GUEST; unit `forgejo-runner-forge\x2drunner.service` |
 | Direction | outbound-only worker; dials `https://git.moose-micro.ts.net/` — no port, no tailnet membership; egress enforced by the GUEST's own firewall (gateway DHCP + forge 443 allowed, public DNS resolvers, host DNS dropped both sides, private ranges + tailnet dropped, repeated host-side in cube's `mangle` FORWARD; nwfilter attempt abandoned — its drops broke inbound, see virtualization-for-agents) |
 | Job→forge | guest `/etc/hosts` pins the FQDN to `192.168.122.1` (virbr0 gw; `vm-networking.nix` opens only 443 + DHCP there); Caddy TLS → loopback Forgejo; every other `.ts.net` vhost aborts guest-subnet requests (`vmDeny`). 3001 unreachable from the guest, by design |
-| Labels | `nix:host` only — jobs run in the VM with guest nix; no container runtime in the guest |
+| Labels | `nix:host` only = label `nix`, `host` executor — workflows say `runs-on: nix` (`nix:host` matches nothing, job waits forever); jobs run in the VM with guest nix; no container runtime in the guest |
 | Secret | sops key `forgejo-runner-secret` (main secrets.yaml, cube-only decryption); staged root:root 0600 into `/var/lib/forgejo-runner-share/` by the registration unit's root `ExecStartPost` |
 | Into the guest | virtiofs share (generator `shares` param), `<readonly/>` host-side, mounted at guest `/mnt/runner-secret`; guest runs no sops, no key |
 | UUID | pinned literal in the GUEST config; = runner secret's first 16 chars as ASCII bytes (`google/uuid.FromBytes`) |

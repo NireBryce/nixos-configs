@@ -196,6 +196,12 @@
                     # nix in PATH. There is no container runtime in this
                     # guest, so `runs-on: ubuntu-latest`-style container
                     # jobs find no runner here by design.
+                    #
+                    # TRAP: a label is `<name>:<executor>`, so this is the
+                    # label `nix` run by the `host` executor. Workflows say
+                    # `runs-on: nix`; `runs-on: nix:host` matches nothing
+                    # and the job sits in "Waiting" forever (the first real
+                    # run, 2026-09-26, did exactly that).
                     labels = [
                         "nix:host"
                     ];
@@ -230,7 +236,7 @@
             secrets.server.connections.default.token_url =
                 "/mnt/runner-secret/forgejo-runner-secret";
 
-            # `nix:host` jobs get the VM's nix; default list restated (the
+            # `runs-on: nix` jobs get the VM's nix; default list restated (the
             # option replaces, not appends). tar/unzip: setup-* actions
             # extract their toolchain archives with them.
             hostPackages = with pkgs; [
