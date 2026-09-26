@@ -109,6 +109,14 @@
     # guests pull caches and toolchains, and those are big. peak and
     # burst are set to twice the average.
 
+, autostart ? true
+    # false: the `libvirt-vm-<name>` unit is not wanted by multi-user.target
+    # and a switch never restarts it (restartIfChanged = false) -- some
+    # other unit drives it with `systemctl restart`, e.g. a job loop that
+    # recreates the guest per job (git-forge/forgejo/actions-runner.nix).
+    # A restart after a switch runs the NEW unit, so guest changes land on
+    # the driver's next restart instead of killing a running guest.
+
 , ephemeral ? false
     # true: the guest's overlay is discarded and recreated from the
     # current base image whenever the base image or the domain XML
@@ -365,7 +373,8 @@ in
         description = "Define and start the ${name} libvirt VM";
         after       = [ "libvirtd.service" ];
         requires    = [ "libvirtd.service" ];
-        wantedBy    = [ "multi-user.target" ];
+        wantedBy    = lib.optional autostart "multi-user.target";
+        restartIfChanged = autostart;
         serviceConfig = {
             Type            = "oneshot";
             RemainAfterExit = true;

@@ -58,11 +58,15 @@
                 bandwidth = { outboundKBps = 4096; };
 
                 # Job code runs in here, so nothing it leaves behind
-                # should outlive a cube boot or a guest change -- and a
-                # switch that changes the guest then reaches it with no
-                # manual overlay reset (the generator's `ephemeral`
-                # comment). The guest's nix store starts cold each time.
+                # outlives the job: `ephemeral` recreates the overlay on
+                # every start, and `autostart = false` hands starting to
+                # actions-runner.nix's forge-runner-cycle, which restarts
+                # this unit once per job (the guest powers itself off after
+                # one). A switch never restarts it mid-job; guest changes
+                # land on the next cycle. The guest's nix store starts cold
+                # each time.
                 ephemeral = true;
+                autostart = false;
 
                 # The runner's token, staged by
                 # git-forge/forgejo/actions-runner.nix's registration

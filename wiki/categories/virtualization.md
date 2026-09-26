@@ -1,6 +1,6 @@
 # `virtualization` — `config-system/homelab/virtualization/`
 
-_Last modified: 2026-09-25_
+_Last modified: 2026-09-26_
 
 > **Condensed version:**
 > [virtualization-for-agents.md](virtualization-for-agents.md) — the same
@@ -148,7 +148,13 @@ lessons-learned §36; a new one joined them the same day the second VM
 landed: a runner instance name containing a dash escapes into the unit
 name (`forge-runner` → `forge\x2drunner`), so wiring that targets the
 plain spelling silently creates an empty second unit — caught by reading
-the rendered unit, not by eval.
+the rendered unit, not by eval. (The guest has since moved to its own
+`forgejo-runner.service`; the trap stands for any nixpkgs module that
+names units from an instance.)
+
+The generator's `autostart = false` leaves a VM's unit unwanted at boot
+and never restarted by a switch, for a VM some other unit drives:
+forge-runner, which `forge-runner-cycle` restarts once per job.
 
 ## Why this is its own category and not part of `system`
 

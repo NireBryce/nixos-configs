@@ -185,7 +185,12 @@ Administration → Actions → Runners, where the runner shows as
 `forge-runner`). **New repos start with Actions off**: turn it on under
 Settings → Repository → Units before a workflow will run. The runner only
 takes jobs from repos owned by `elly`, one at a time, and runs no actions
-cache server (`actions/cache` finds nothing to talk to).
+cache server (`actions/cache` finds nothing to talk to). Every job gets a
+freshly created VM that is thrown away afterwards: nothing carries over
+between jobs, and each one starts with an empty nix store, so the first
+steps of a job re-download what it needs. Expect 20–40 s before a queued
+job starts. The runners list shows a new `forge-runner` entry per job,
+each gone once its job finishes.
 
 The workflow-flavored way to practice a workplace submit loop with this —
 branch protection, required checks, review before merge — is

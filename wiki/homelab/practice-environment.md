@@ -80,7 +80,7 @@ reviewer. Two free ways to get a real one:
 
 - [forgejo.md](forgejo.md) — the forge itself: signing in, cloning, CI
   workflows.
-- [pending-setup.md](pending-setup.md) — item 8, the one-time runner
+- [pending-setup.md](pending-setup.md) — item 8, the (now done) one-time runner
   bootstrap.
 - [git-forge](../categories/git-forge.md) — the runner's configuration and
   registration scheme.

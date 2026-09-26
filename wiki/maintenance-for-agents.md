@@ -1,6 +1,6 @@
 # Fleet maintenance, for agents
 
-_Last modified: 2026-09-25_
+_Last modified: 2026-09-26_
 
 Condensed from [maintenance.md](maintenance.md). Credentials →
 maintenance-schedule.md; backups → homelab/backup-runbook.md; one-time
@@ -30,16 +30,15 @@ restated here.
 ## The runner VM
 
 - `forge-runner` (libvirt guest on cube, Forgejo Actions runner) is
-  `ephemeral = true` (VMs/_lib/libvirt-vm.nix): overlay recreated from the
-  current base on every cube boot and on any switch changing the base
-  image or domain XML (stamp: `/run/libvirt-vm/forge-runner.stamp`). No
-  periodic reset; a switch that changes the guest kills a running job.
-- Force a reset: `sudo rm /run/libvirt-vm/forge-runner.stamp && sudo
-  systemctl restart libvirt-vm-forge-runner`. Costs: guest SSH host keys
-  regenerate (known_hosts), nix caches refill; debug SSH from cube only
-  (`ssh -t ts-cube ssh forge-runner`; alias in actions-runner.nix, host-key
-  checking off since keys regenerate per reset; the guest trusts cube's key). Token is staged from cube
-  at boot — nothing secret is lost.
+  recreated per JOB by `forge-runner-cycle` (actions-runner.nix):
+  single-use registration, fresh overlay, guest powers off after one job.
+  No periodic reset. A switch never restarts the guest (`autostart =
+  false`); guest changes land next cycle. Changing the cycle script
+  restarts the loop → recreates the guest.
+- Recreate an idle guest now: `sudo systemctl restart forge-runner-cycle`.
+  Per-cycle log: `journalctl -u forge-runner-cycle`. Debug SSH from cube
+  only (`ssh forge-runner`; `ssh -t ts-cube ssh forge-runner` elsewhere).
+  Cold guest nix store every job.
 
 ## Deploying
 

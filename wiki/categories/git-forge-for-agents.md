@@ -26,7 +26,7 @@ real while writing this category.
 | Binding | `127.0.0.1:3001` (3000 is Grafana) |
 | Firewall | no port opened; the binding is what keeps it off the LAN |
 | Database | `sqlite3` (nixpkgs default) |
-| Registration | `DISABLE_REGISTRATION = true` |
+| Registration | `forge-runner-cycle.service` on cube (root; register runs as the forgejo user): `forgejo-cli actions register --name forge-runner --scope elly --ephemeral --secret-file`, then drop `/run/libvirt-vm/forge-runner.stamp`, restart `libvirt-vm-forge-runner`, wait for `shut off` (destroy after 16200 s), back off 60 s if the cycle took under 120 s. Forgejo deletes the runner when its job completes; never-used ones go via `cron.cleanup_offline_runners` (GLOBAL_SCOPE_ONLY=false, 24h). Runner settings `capacity = 1`, `cache.enabled = false`; new repos' Actions unit off (`DEFAULT_REPO_UNITS`) |
 | Secrets | upstream `forgejo-secrets.service` generates `SECRET_KEY`/`INTERNAL_TOKEN`/`JWT_SECRET` on first run. **Nothing to create by hand.** |
 | Persistence | none needed — cube has a persistent root |
 | Actions | `settings.actions.ENABLED = true`; runner in `actions-runner.nix` |
@@ -36,21 +36,21 @@ real while writing this category.
 The runner is the libvirt guest `forge-runner` on cube —
 `virtualization/virtualization-cube.nix` instantiates it, guest config
 `hosts/forge-runner-configuration.nix`. cube-side support only in
-`git-forge/forgejo/actions-runner.nix`: the sops secret, the registration
-oneshot, the token staging. Containment is the point: job code with
+`git-forge/forgejo/actions-runner.nix`: `forge-runner-cycle`, one fresh
+guest and one single-use registration per job. Containment is the point: job code with
 docker/podman access roots the VM, not cube.
 
 | | |
 |---|---|
-| Instance | `services.forgejo-runner.instances.forge-runner` in the GUEST; unit `forgejo-runner-forge\x2drunner.service` |
+| Runner | hand-written `forgejo-runner.service` in the GUEST: `forgejo-runner one-job --wait --url … --uuid <derived> --token-url file:$CREDENTIALS_DIRECTORY/runner-secret --label nix:host`, `SuccessAction`/`FailureAction = poweroff`. Not nixpkgs' `services.forgejo-runner` (daemon mode refuses ephemeral runners; its `config.yaml` connection conflicts with one-job's flags) |
 | Direction | outbound-only worker; dials `https://git.moose-micro.ts.net/` — no port, no tailnet membership; egress enforced by the GUEST's own firewall (gateway DHCP + forge 443 allowed, public DNS resolvers, host DNS dropped both sides, private ranges + tailnet dropped, repeated host-side in cube's `mangle` FORWARD; nwfilter attempt abandoned — its drops broke inbound, see virtualization-for-agents) |
 | Job→forge | guest `/etc/hosts` pins the FQDN to `192.168.122.1` (virbr0 gw; `vm-networking.nix` opens only 443 + DHCP there); Caddy TLS → loopback Forgejo; every other `.ts.net` vhost aborts guest-subnet requests (`vmDeny`). 3001 unreachable from the guest, by design |
 | Labels | `nix:host` only = label `nix`, `host` executor — workflows say `runs-on: nix` (`nix:host` matches nothing, job waits forever); jobs run in the VM with guest nix; no container runtime in the guest |
-| Secret | sops key `forgejo-runner-secret` (main secrets.yaml, cube-only decryption); staged root:root 0600 into `/var/lib/forgejo-runner-share/` by the registration unit's root `ExecStartPost` |
+| Secret | per job: 40 hex from `/dev/urandom` on cube (tmpfs `/run/forge-runner-cycle`), staged root 0600 into `/var/lib/forgejo-runner-share/`, removed when the guest stops. sops `forgejo-runner-secret` is declared but UNUSED since 2026-09-26 (rollback; remove with its secrets.yaml entry) |
 | Into the guest | virtiofs share (generator `shares` param), `<readonly/>` host-side, mounted at guest `/mnt/runner-secret`; guest runs no sops, no key |
-| UUID | pinned literal in the GUEST config; = runner secret's first 16 chars as ASCII bytes (`google/uuid.FromBytes`) |
+| UUID | derived in the guest from the staged secret: first 16 chars as ASCII bytes (`google/uuid.FromBytes`), formatted 8-4-4-4-12. New every job |
 | Registration | `forgejo-runner-registration.service` on cube re-runs idempotent `forgejo forgejo-cli actions register --scope elly --secret-file` per activation (after `forgejo-admin-bootstrap`; re-registering rewrites owner/repo scope in place); runner settings `capacity = 1`, `cache.enabled = false`; new repos' Actions unit off (`DEFAULT_REPO_UNITS`); `libvirt-vm-forge-runner` ordered After= it |
-| Bootstrap | done 2026-09-25 (secret in sops, UUID pinned; guest image + cube toplevel both build). Remains: switch on cube + verify. Original procedure: [../homelab/pending-setup.md](../homelab/pending-setup.md) item 8 |
+| Status | live since 2026-09-25; per-job cycle since 2026-09-26. Long-lived-runner era: [git-forge-history.md](git-forge-history.md#the-long-lived-runner-2026-09-24-to-2026-09-26) |
 
 ## Traps
 
@@ -71,18 +71,16 @@ docker/podman access roots the VM, not cube.
   signing-key units use.
 - The `forgejo-admin-password` sops secret is declared **in this module**,
   not in `config-system/secrets/sops.nix`, so it only decrypts on cube.
-- **The runner has no `uuid_url` indirection** — runner v13's connection
-  schema only knows `url`/`uuid`/`token`/`token_url`; nixpkgs'
-  `secrets.*.uuid_url` templating renders a key the runner silently drops
-  (the swallowed-key shape). Hence the UUID is a pinned literal, and only
-  the token rides `LoadCredential`.
-- **Rotating `forgejo-runner-secret` rotates the runner's identity** (UUID
-  is derived from it): update the pinned UUID in the GUEST config and
-  delete the orphaned old runner row in the admin UI.
-- **Unit names escape instance-name dashes**: instance `forge-runner` →
-  unit `forgejo-runner-forge\x2drunner.service`. Targeting the plain
-  spelling in `systemd.services` silently creates an empty second unit
-  (evals clean, does nothing). Caught by reading the rendered unit.
+- **`one-job` refuses a config that defines a connection** when its own
+  `--url`/`--uuid`/`--token-url` are given ("server connection conflict");
+  the guest's runner config holds only `runner` and `cache`.
+- **Daemon mode refuses ephemeral runners** — ephemeral registration only
+  works with `one-job`.
+- **A switch never restarts the guest** (`autostart = false`:
+  `restartIfChanged = false`, not wanted at boot); guest changes land on
+  the next cycle. Changing the cycle script restarts the loop, which
+  recreates the guest (kills a running job).
+- **`runs-on: nix`, not `nix:host`** — label is `<name>:<executor>`.
 - **Unauthenticated `/api/v1/users/search` always reports
   `is_admin: false`** regardless of the real value — it cannot settle
   whether an account is admin. Check the Site Administration panel.
