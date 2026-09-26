@@ -370,13 +370,10 @@ in
     # this used to give -- `trustedInterfaces = [ "virbr0" ]` accepts
     # everything to/from the bridge -- never held: trustedInterfaces
     # feeds the INPUT chain (nixos-fw), not FORWARD, and it was narrowed
-    # away 2026-09-25 (vm-networking.nix). Whether the DNAT'd packet
-    # crosses FORWARD is up to libvirt's own chains (cube runs its
-    # iptables backend, whose LIBVIRT_FWI admits only established
-    # traffic into the guest subnet) -- no connection through this
-    # forward has ever been made (virtualization-history.md). If it
-    # refuses, `ssh -J <host> root@<guestIp>` reaches the guest from the
-    # host side without it.
+    # away 2026-09-25 (vm-networking.nix). The DNAT'd connection
+    # crosses FORWARD on libvirt's own chains' terms, and does: first
+    # made 2026-09-25, `ssh -p 2223 root@ts-cube` from the tailnet into
+    # forge-runner. `ssh -J <host> root@<guestIp>` is the other way in.
     networking.firewall.extraCommands = lib.optionalString (sshForward != null) (
         lib.concatMapStringsSep "\n"
             (cidr: "iptables -t nat -A PREROUTING -s ${cidr} -p tcp --dport ${toString sshForward.hostPort} -j DNAT --to-destination ${guestIp}:22")
