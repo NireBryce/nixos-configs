@@ -62,7 +62,10 @@ structured, extractable facts only:
             exists for a narrower reason and is a second hand-maintained
             list this incidentally cross-checks) and, for Wipes `/root`?,
             against whether the host's own import list actually contains
-            `impermanence`. Role is free prose and not checked. This is the
+            `impermanence`. Tailnet name must be `ts-<x>` for `nire-<x>` --
+            the rule tailnet-hosts.nix derives ssh entries from; checked
+            against the rule, since the tailnet itself is outside the repo.
+            Role is free prose and not checked. This is the
             table CLAUDE.md's Safety section calls out by name as something
             to read rather than trust a stale copy of -- exactly the kind of
             claim worth making a script watch instead of a human remembering
@@ -596,7 +599,8 @@ def check_table(root):
 
 HOSTS_TABLE_ROW = re.compile(
     r'^\|\s*`(?P<host>nire-[\w-]+)`\s*\|\s*(?P<class>\w+)\s*\|'
-    r'(?P<role>[^|]*)\|(?P<wipes>[^|]*)\|\s*$', re.M)
+    r'(?P<role>[^|]*)\|(?P<wipes>[^|]*)\|'
+    r'(?P<tailnet>[^|]*)\|\s*$', re.M)
 
 
 def check_hosts(root):
@@ -629,6 +633,14 @@ def check_hosts(root):
             findings.append(
                 f"CLASS      {page}: '{name}' row says {claimed_class!r}, "
                 f"hosts.nix declares it {hosts[name]!r}")
+
+        expected_tailnet = 'ts-' + name.removeprefix('nire-')
+        claimed_tailnet = row.group('tailnet').strip().strip('`')
+        if claimed_tailnet != expected_tailnet:
+            findings.append(
+                f"TAILNET    {page}: '{name}' row says {claimed_tailnet!r}, "
+                f"the nire-<x> -> ts-<x> rule (tailnet-hosts.nix) gives "
+                f"{expected_tailnet!r}")
 
         # Wipes /root? is only meaningful for nixos-class hosts -- darwin has
         # no initrd stage this repo touches, hence hosts.md's own "n/a".

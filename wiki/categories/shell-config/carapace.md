@@ -1,6 +1,6 @@
 # carapace
 
-_Last modified: 2026-09-25_
+_Last modified: 2026-09-26_
 
 A completion engine used as the primary source of shell completions across
 this repo: `pkgs.carapace` in `home.packages`
@@ -18,6 +18,7 @@ system install.
 
 - [The generated bash completer, read from its own output](#the-generated-bash-completer-read-from-its-own-output)
 - [The `cod` registration race, and how it's resolved](#the-cod-registration-race-and-how-its-resolved)
+- [ssh hosts: where carapace looks, and the overlay](#ssh-hosts-where-carapace-looks-and-the-overlay)
 - [See also](#see-also)
 
 ## The generated bash completer, read from its own output
@@ -104,6 +105,18 @@ startup, regardless of what's already sitting in cod's local
 only has to stop cod from winning that race *again*, later in the same
 session, the next time you happen to run `<carapace-covered-command>
 --help` and cod's hook fires.
+
+## ssh hosts: where carapace looks, and the overlay
+
+ssh host candidates come only from `~/.ssh/config` `Host` patterns and
+`known_hosts`, never `/etc/ssh/ssh_config`, and carry no descriptions.
+carapace finds `~/.ssh/config` via passwd, not `$HOME`, so a scratch
+`HOME` doesn't isolate a test (`XDG_CONFIG_HOME` does move the overlay
+dir). [`tailnet-hosts.nix`](../../../flake/modules/config-system/system/networking/tailnet-hosts.nix)
+writes `Host ts-<x>` blocks plus an `ssh` overlay with a description per
+name. Overlays add to the built-in completer, and duplicates dedupe to the
+described copy (checked 2026-09-26). After `user@`, names complete
+undescribed.
 
 ## See also
 

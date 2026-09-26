@@ -13,6 +13,9 @@
 #    `nire-cube.<tailnet>.ts.net` never resolves; it is not a name that
 #    exists. Expensive to rediscover because it looks exactly like a DNS
 #    failure (NXDOMAIN-shaped) until you check `tailscale status`.
+#    tailnet-hosts.nix (next to this file) derives the `ts-<x>` name for
+#    every `nire-<x>` in hosts.nix into ~/.ssh/config and ssh's Tab
+#    completion.
 #
 # 2. PEER TRAFFIC TIMING OUT WHILE `tailscale ping` WORKS IS AN ACL PROBLEM,
 #    not a host firewall problem. Control-plane traffic through and

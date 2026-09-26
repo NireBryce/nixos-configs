@@ -28,7 +28,9 @@
 # <host> is whatever comes after "nire-"/"ts-" -- durandal, tenacity, cube,
 # lysithea. Not validated against hosts.nix: this only ever tries three
 # derived DNS names and lets ssh's own connection attempt be the judge, so a
-# fifth host works the day it's added with no edit here.
+# fifth host works the day it's added with no edit here. The same
+# nire-<x> -> ts-<x> rule, as Nix, is tailnet-hosts.nix (ssh config and
+# completion); the two are independent derivations of one convention.
 set -euo pipefail
 
 resolve_only=false
