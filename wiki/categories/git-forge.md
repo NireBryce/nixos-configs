@@ -87,9 +87,15 @@ decrypts. In the VM it holds one secret — its own runner token. The VM
 adds no listening port either way; it is dial-out, like the runner was
 on the host. Its egress is scoped by the GUEST's own firewall
 (`networking.firewall.extraCommands` in the guest config: gateway DHCP
-and the forge's 443 only, all private ranges and the tailnet dropped,
-open internet allowed). It resolves names through public resolvers, not
-cube's dnsmasq (which forwards to MagicDNS); cube drops guest DNS too.
+and the forge's 443 only, all private ranges and the tailnet dropped).
+Beyond that it reaches an **allowlist** only, enforced on cube: every
+guest DNS query is redirected to a resolver
+(`virtualization/libvirt/vm-egress-dns.nix`) that answers nixos.org,
+forgejo.org, GitHub, PyPI and npm names and refuses everything else, and
+records the addresses it hands out in an ipset that cube's `mangle`
+FORWARD requires for any new guest connection. A job that needs another
+domain fails with a name-resolution error; add the domain to that
+file's `allowedDomains`. The set is emptied before each job.
 Root SSH into the guest trusts cube's key only — `ssh forge-runner` on
 cube (an `ssh_config` alias with host-key checking off, since the key
 regenerates on every reset), no tailnet port forward. A host-side nwfilter was attempted

@@ -19,9 +19,12 @@ Libvirt/QEMU VMs on `nire-cube` only — podman/distrobox are the separate
   doesn't apply qemu.conf changes** (libvirtd is X-RestartIfChanged=false;
   libvirtd-config copies qemu.conf only as its dependency): `sudo systemctl
   restart libvirtd-config libvirtd`, then restart running domains.
-- `vm-networking.nix` — `virbr0` opens UDP 67 + TCP 443 (to
-  192.168.122.1 only); guest DNS to the host dropped in `mangle` INPUT
-  (dnsmasq forwards to MagicDNS);
+- `vm-networking.nix` — `virbr0` opens UDP 67 + TCP 443/5354 (to
+  192.168.122.1 only); guest DNS DNAT'd to 5354 (nat chain
+  `vm-egress-dns`), port 53 dropped in `mangle` INPUT (libvirt's dnsmasq
+  forwards to MagicDNS); new egress needs ipset `vm-egress-allow`;
+- `vm-egress-dns.nix` — allowlisting dnsmasq on 192.168.122.1:5354 that
+  fills that ipset (no cache, else NXDOMAIN);
   `cube-vm-in` (jumped first in nixos-fw) refuses the host's global ports
   there; `mangle` FORWARD chain `cube-vm-egress` drops guest→RFC1918/
   100.64/10 (filter FORWARD is libvirt's iptables-backend chains, whose

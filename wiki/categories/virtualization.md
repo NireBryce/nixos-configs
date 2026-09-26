@@ -38,10 +38,17 @@ All four files live under `libvirt/` and are all `nixos`-class:
 - **`vm-networking.nix`** — lets libvirt's default NAT bridge (`virbr0`,
   with libvirt's dnsmasq) past the host firewall. Without it the symptom is
   a guest that boots, gets no DHCP lease, and looks like a broken NIC. It
-  opens only DHCP/DNS and Caddy's 443 to guests (the host's globally
-  opened ports are refused on `virbr0` by its own `cube-vm-in` chain), and
-  drops guest traffic routed toward RFC1918/tailnet ranges in `mangle`
-  FORWARD — `filter` FORWARD is libvirt's, and its accepts come first.
+  opens only DHCP, Caddy's 443 and the allowlist resolver's 5354 to guests
+  (the host's globally opened ports are refused on `virbr0` by its own
+  `cube-vm-in` chain), and drops guest traffic routed toward RFC1918/tailnet
+  ranges in `mangle` FORWARD — `filter` FORWARD is libvirt's, and its
+  accepts come first. Past those, a new guest connection must go to an
+  address in the ipset `vm-egress-allow`.
+- **`vm-egress-dns.nix`** — the allowlisting resolver that fills that set:
+  a dnsmasq on 192.168.122.1:5354 that answers a short list of domains and
+  returns NXDOMAIN for the rest. Every guest DNS query is DNAT'd to it,
+  whatever server the guest asked. Its cache is off, because dnsmasq only
+  adds to the set when it forwards a query.
   Does **not** start the network — next section.
 - **`libvirt-persist.nix`** — persists
   `/var/lib/libvirt/secrets/secrets-encryption-key` only (libvirtd's other

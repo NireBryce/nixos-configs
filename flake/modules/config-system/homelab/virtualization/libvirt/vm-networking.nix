@@ -24,12 +24,15 @@
             # host's LAN or tailnet addresses. Established/related replies
             # pass as always.
             #
-            # No DNS: dnsmasq forwards to this host's resolver, which is
-            # MagicDNS, so a guest could resolve tailnet names. Guests use
-            # public resolvers instead (the runner guest sets its own). The
-            # drop is in `mangle` INPUT because libvirt's iptables backend
-            # puts its own DNS/DHCP ACCEPTs at the top of filter INPUT,
-            # ahead of nixos-fw.
+            # DNS goes to vm-egress-dns.nix's allowlisting resolver on port
+            # 5354, never to libvirt's dnsmasq on 53: that one forwards to
+            # this host's resolver, which is MagicDNS, so a guest could
+            # resolve tailnet names. Every guest DNS query, whatever server
+            # it names, is DNAT'd to 5354 (nat chain `vm-egress-dns`). The
+            # port-53 drop in `mangle` INPUT stays as a backstop -- it's in
+            # mangle because libvirt's iptables backend puts its own
+            # DNS/DHCP ACCEPTs at the top of filter INPUT, ahead of
+            # nixos-fw -- and DNAT has already rewritten the port by then.
             #
             # The per-interface options alone did NOT make that "exactly":
             # the host's global allowedTCPPorts/allowedUDPPorts (22, KDE
@@ -40,8 +43,8 @@
             # RETURNs the rest to nixos-fw's normal accepts.
             networking.firewall = {
                 interfaces."virbr0" = {
-                    allowedUDPPorts = [ 67 ];   # dnsmasq: DHCP
-                    allowedTCPPorts = [ 443 ];  # Caddy
+                    allowedUDPPorts = [ 67 5354 ];   # libvirt dnsmasq: DHCP; vm-egress-dns
+                    allowedTCPPorts = [ 443 5354 ];  # Caddy; vm-egress-dns
                 };
 
                 # Guest -> LAN/tailnet, enforced on THIS side of the VM
@@ -58,6 +61,15 @@
                 # Nothing here covers guest <-> guest on the same bridge (L2,
                 # never routed).
                 #
+                # Past the private ranges, a new guest connection must go to
+                # an address in the ipset `vm-egress-allow`, which only
+                # vm-egress-dns.nix's resolver fills -- with the addresses it
+                # just resolved for an allowlisted domain. So a guest reaches
+                # allowlisted names and nothing else, including by raw IP.
+                # actions-runner.nix's cycle empties the set before each job.
+                # Addresses are shared by CDNs: allowing cache.nixos.org's
+                # Fastly IPs allows whatever else Fastly serves on them.
+                #
                 # TRAP: cube-vm-in ends in a plain DROP, never
                 # `-j nixos-fw-refuse`. It outlives nixos-fw across a firewall
                 # restart, and firewall-start's teardown loop cannot `-X` a
@@ -72,6 +84,8 @@
                     iptables -w -A cube-vm-in -m conntrack --ctstate ESTABLISHED,RELATED -j RETURN
                     iptables -w -A cube-vm-in -p udp --dport 67 -j RETURN
                     iptables -w -A cube-vm-in -p tcp --dport 443 -d 192.168.122.1 -j RETURN
+                    iptables -w -A cube-vm-in -p udp --dport 5354 -d 192.168.122.1 -j RETURN
+                    iptables -w -A cube-vm-in -p tcp --dport 5354 -d 192.168.122.1 -j RETURN
                     iptables -w -A cube-vm-in -p icmp -j RETURN
                     iptables -w -A cube-vm-in -j DROP
                     iptables -w -I nixos-fw 1 -i virbr0 -j cube-vm-in
@@ -88,7 +102,17 @@
                     iptables -w -t mangle -A cube-vm-egress -d 172.16.0.0/12  -j DROP
                     iptables -w -t mangle -A cube-vm-egress -d 192.168.0.0/16 -j DROP
                     iptables -w -t mangle -A cube-vm-egress -d 100.64.0.0/10  -j DROP
+                    ipset -exist create vm-egress-allow hash:ip family inet
+                    iptables -w -t mangle -A cube-vm-egress -m set ! --match-set vm-egress-allow dst -j DROP
                     iptables -w -t mangle -I FORWARD 1 -i virbr0 -j cube-vm-egress
+
+                    iptables -w -t nat -D PREROUTING -i virbr0 -j vm-egress-dns 2>/dev/null || true
+                    iptables -w -t nat -F vm-egress-dns 2>/dev/null || true
+                    iptables -w -t nat -X vm-egress-dns 2>/dev/null || true
+                    iptables -w -t nat -N vm-egress-dns
+                    iptables -w -t nat -A vm-egress-dns -p udp --dport 53 -j DNAT --to-destination 192.168.122.1:5354
+                    iptables -w -t nat -A vm-egress-dns -p tcp --dport 53 -j DNAT --to-destination 192.168.122.1:5354
+                    iptables -w -t nat -I PREROUTING 1 -i virbr0 -j vm-egress-dns
 
                     iptables -w -t mangle -D INPUT -i virbr0 -p udp --dport 53 -j DROP 2>/dev/null || true
                     iptables -w -t mangle -D INPUT -i virbr0 -p tcp --dport 53 -j DROP 2>/dev/null || true
@@ -110,6 +134,9 @@
                     ip6tables -w -t mangle -D FORWARD -i virbr0 -j DROP 2>/dev/null || true
                     iptables -w -t mangle -D INPUT -i virbr0 -p udp --dport 53 -j DROP 2>/dev/null || true
                     iptables -w -t mangle -D INPUT -i virbr0 -p tcp --dport 53 -j DROP 2>/dev/null || true
+                    iptables -w -t nat -D PREROUTING -i virbr0 -j vm-egress-dns 2>/dev/null || true
+                    iptables -w -t nat -F vm-egress-dns 2>/dev/null || true
+                    iptables -w -t nat -X vm-egress-dns 2>/dev/null || true
                 '';
             };
 

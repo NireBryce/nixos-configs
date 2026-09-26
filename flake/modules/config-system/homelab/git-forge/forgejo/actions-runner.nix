@@ -51,7 +51,7 @@
                 wants    = [ "forgejo.service" "forgejo-admin-bootstrap.service" ];
                 requires = [ "libvirtd.service" ];
                 wantedBy = [ "multi-user.target" ];
-                path     = with pkgs; [ coreutils util-linux libvirt systemd config.services.forgejo.package ];
+                path     = with pkgs; [ coreutils util-linux libvirt systemd ipset config.services.forgejo.package ];
 
                 script = ''
                     set -euo pipefail
@@ -89,6 +89,11 @@
                         echo
                         rm -f "$RUNDIR/secret"
                         mv -f "$SHARE/forgejo-runner-secret.new" "$SHARE/forgejo-runner-secret"
+
+                        # Empty the egress allowlist's address set
+                        # (vm-networking.nix, vm-egress-dns.nix): each job
+                        # starts able to reach only what it resolves itself.
+                        ipset flush vm-egress-allow 2>/dev/null || true
 
                         # Fresh guest: dropping the stamp makes the
                         # `ephemeral` activation destroy any running domain,
