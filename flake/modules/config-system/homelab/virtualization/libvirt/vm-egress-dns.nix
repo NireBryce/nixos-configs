@@ -35,6 +35,10 @@
                 # so a cached answer would hand out an address the firewall
                 # then refuses (the cycle empties the set every job).
                 cache-size=0
+                # One journal line per query; runner-alerts.nix counts the
+                # "config <name> is NXDOMAIN" ones (refused lookups), and
+                # `journalctl -u vm-egress-dns` shows which names they were.
+                log-queries
                 # Everything not listed below: NXDOMAIN.
                 address=/#/
                 ${lib.concatMapStringsSep "\n" (d:

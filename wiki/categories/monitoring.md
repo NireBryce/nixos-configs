@@ -1,6 +1,6 @@
 # `monitoring` — `config-system/homelab/monitoring/`
 
-_Last modified: 2026-09-21_
+_Last modified: 2026-09-26_
 
 Prometheus + Grafana, scraping this host's own resource metrics. Added
 2026-08-23, cube-only so far; nested under the `homelab` umbrella since
@@ -35,7 +35,7 @@ observed correctly.
 
 ## What's in it
 
-Six files, all `nixos`-class:
+Seven files, all `nixos`-class:
 
 - **`node-exporter/node-exporter.nix`** — host CPU/memory/disk/network
   metrics. Loopback-only (`127.0.0.1`); nothing outside the host queries it
@@ -80,6 +80,16 @@ Six files, all `nixos`-class:
   [virtualization](virtualization.md): `import-tree` ignores any path
   containing `/_`, so the JSON in there is never mistaken for a flake-parts
   module to import.
+- **`runner-alerts/runner-alerts.nix`** — metrics and alert rules for the
+  Forgejo runner VM ([git-forge](git-forge.md)). It turns on node-exporter's
+  textfile collector (`/var/lib/node-exporter-textfile`) and its systemd
+  collector, limited to the runner's units. A one-minute timer writes the
+  guest egress drop counters and the resolver's refused-lookup count; the
+  runner's cycle loop writes its own gauges. Five Grafana alert rules are
+  provisioned in folder `forge-runner`: blocked connections outside the
+  allowlist or into private ranges, refused DNS, a guest failing to boot,
+  and the cycle or resolver not running. They are Grafana-evaluated (no
+  Alertmanager); where notifications go is Grafana's contact points.
 
 ## Tailnet-only access, not a new firewall mechanism
 
