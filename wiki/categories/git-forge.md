@@ -121,8 +121,9 @@ which creates `elly`), stages it into `/var/lib/forgejo-runner-share/`
 (root 0600, shared into the guest read-only at `/mnt/runner-secret`),
 drops the VM generator's reset stamp and restarts
 `libvirt-vm-forge-runner` — a guest recreated from its base image — then
-waits until the guest powers off, or destroys it after 4.5 h. A cycle
-shorter than two minutes backs off for one.
+waits until the guest powers off, or destroys it after 4.5 h. Two cycles in a row
+shorter than two minutes (a guest dying at boot) back off for one; a
+single short cycle is usually just a quick job.
 
 In the guest, a hand-written `forgejo-runner.service` runs
 `forgejo-runner one-job --wait` with the UUID derived from the staged

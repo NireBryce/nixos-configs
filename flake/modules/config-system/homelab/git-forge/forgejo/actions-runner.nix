@@ -72,6 +72,7 @@
                     MAX_SECONDS=16200
 
                     install -d -m 0700 "$SHARE"
+                    short=0
                     install -d -m 0700 -o ${config.services.forgejo.user} -g ${config.services.forgejo.group} "$RUNDIR"
 
                     while true; do
@@ -92,6 +93,9 @@
                                 --scope elly \
                                 --ephemeral \
                                 --secret-file "$RUNDIR/secret"
+                        # The CLI prints the UUID with no trailing newline;
+                        # without this, journald holds it until the next line.
+                        echo
                         rm -f "$RUNDIR/secret"
                         mv -f "$SHARE/forgejo-runner-secret.new" "$SHARE/forgejo-runner-secret"
 
@@ -114,8 +118,11 @@
                         elapsed=$(( $(date +%s) - started ))
                         echo "forge-runner cycle ended after ''${elapsed}s"
                         # A guest that dies at boot would otherwise spin a
-                        # registration every few seconds.
-                        if [ "$elapsed" -lt 120 ]; then sleep 60; fi
+                        # registration every half-minute. One short cycle is
+                        # usually a quick real job (31 s, 2026-09-26), so only
+                        # the second short cycle in a row backs off.
+                        if [ "$elapsed" -lt 120 ]; then short=$(( short + 1 )); else short=0; fi
+                        if [ "$short" -ge 2 ]; then sleep 60; fi
                     done
                 '';
 
