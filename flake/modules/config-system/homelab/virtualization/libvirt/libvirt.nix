@@ -49,6 +49,16 @@
                     # helper binary in this list; without it a <filesystem
                     # type='mount' driver='virtiofs'> device fails to start.
                     vhostUserPackages = with pkgs; [ virtiofsd ];
+
+                    # QEMU as `qemu-libvirtd`, not root (nixpkgs' default is
+                    # root). cube runs CI job code in a guest, so a QEMU
+                    # escape should land unprivileged. libvirt's DAC driver
+                    # chowns each domain's writable images to that user at
+                    # start and skips read-only store paths (EROFS is
+                    # logged and ignored, security_dac.c); store images are
+                    # world-readable anyway. virtiofsd is spawned by
+                    # libvirtd itself and still runs as root.
+                    runAsRoot = false;
                 };
             };
 

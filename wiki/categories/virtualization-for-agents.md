@@ -14,7 +14,11 @@ Libvirt/QEMU VMs on `nire-cube` only — podman/distrobox are the separate
 - `libvirt.nix` — `virtualisation.libvirtd`; also virtiofsd
   (`vhostUserPackages`, required for virtiofs shares), virt-manager,
   `elly` in `libvirtd`. No `ovmf` (removed option, eval fails).
-- `vm-networking.nix` — `virbr0` opens UDP 53/67 + TCP 53/443 only;
+- `libvirt.nix` sets `qemu.runAsRoot = false` (QEMU as `qemu-libvirtd`;
+  DAC chowns writable images, skips read-only store paths).
+- `vm-networking.nix` — `virbr0` opens UDP 67 + TCP 443 (to
+  192.168.122.1 only); guest DNS to the host dropped in `mangle` INPUT
+  (dnsmasq forwards to MagicDNS);
   `cube-vm-in` (jumped first in nixos-fw) refuses the host's global ports
   there; `mangle` FORWARD chain `cube-vm-egress` drops guest→RFC1918/
   100.64/10 (filter FORWARD is libvirt's iptables-backend chains, whose

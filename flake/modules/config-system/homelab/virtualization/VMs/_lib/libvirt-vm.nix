@@ -62,6 +62,8 @@
     # to forward hostPort on THIS HOST to the guest's SSH port. `sourceCidrs`
     # defaults to LAN-or-Tailscale (`defaultAllowedSourceCidrs` below); pass
     # `tailnetOnlyCidrs` (also below) for tailnet-only, or a bespoke list.
+    # `sourceCidrs = [ ]` forwards nothing but keeps the fixed MAC/IP and
+    # DHCP reservation below -- a guest reachable only from this host.
     #
     # `guestId` is a plain human-assigned integer, not derived or
     # auto-allocated -- same "pin explicitly, a human reasons about
@@ -99,6 +101,14 @@
     # directory. Pass `readonly = false;` on a share that genuinely needs
     # writes back.
 
+, bandwidth ? null
+    # null (no limit), or `{ outboundKBps = <int>; }` -- caps what the
+    # guest SENDS, in kilobytes/s, via libvirt's <bandwidth><outbound>
+    # on its interface (a tc ingress policer on the host's vnet device;
+    # `tc -s qdisc show dev vnetN` shows it). Downloads are left alone:
+    # guests pull caches and toolchains, and those are big. peak and
+    # burst are set to twice the average.
+
 , ephemeral ? false
     # true: the guest's overlay is discarded and recreated from the
     # current base image whenever the base image or the domain XML
@@ -134,6 +144,8 @@ let
         <source network='default'/>
         <model type='virtio'/>
         ${lib.optionalString (sshForward != null) "<mac address='${guestMac}'/>"}
+        ${lib.optionalString (bandwidth != null) (let a = toString bandwidth.outboundKBps; p = toString (2 * bandwidth.outboundKBps); in
+          "<bandwidth><outbound average='${a}' peak='${p}' burst='${p}'/></bandwidth>")}
       </interface>
     '';
 
@@ -373,7 +385,8 @@ in
     # away 2026-09-25 (vm-networking.nix). The DNAT'd connection
     # crosses FORWARD on libvirt's own chains' terms, and does: first
     # made 2026-09-25, `ssh -p 2223 root@ts-cube` from the tailnet into
-    # forge-runner. `ssh -J <host> root@<guestIp>` is the other way in.
+    # forge-runner, which dropped the forward the same day (cube-only
+    # SSH; `sourceCidrs = [ ]`).
     networking.firewall.extraCommands = lib.optionalString (sshForward != null) (
         lib.concatMapStringsSep "\n"
             (cidr: "iptables -t nat -A PREROUTING -s ${cidr} -p tcp --dport ${toString sshForward.hostPort} -j DNAT --to-destination ${guestIp}:22")

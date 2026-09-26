@@ -56,21 +56,27 @@
             useDHCP  = lib.mkDefault true;
             firewall.allowedTCPPorts = [ 22 ];
 
+            # Public resolvers, and the DHCP-offered one ignored: cube's
+            # dnsmasq forwards to cube's own resolver, which is MagicDNS
+            # and would answer for tailnet names. cube drops guest DNS on
+            # its side too (vm-networking.nix). The forge's name comes
+            # from the /etc/hosts pin below, not DNS.
+            nameservers = [ "9.9.9.9" "1.1.1.1" ];
+            dhcpcd.extraConfig = "nooption domain_name_servers, domain_name, domain_search";
+
             # Egress policy for job code, enforced LOCALLY (guest iptables
             # OUTPUT): no pivoting to the LAN/NAS/tailnet. A host-side
             # nwfilter was attempted first and abandoned the same day --
             # its out-direction drops in libvirt 12.7 enforce against
             # inbound traffic as well, breaking the guest's own inbound
-            # (five rule variants tested, all failing). Residual: VM-root
-            # can flush these rules; the hard containment layer is the VM
-            # boundary itself. Order is load-bearing: accepts before
+            # (five rule variants tested, all failing). VM-root can flush
+            # these, so cube repeats the private-range and tailnet drops
+            # on its own side (vm-networking.nix). Order is load-bearing: accepts before
             # drops; unmatched traffic falls to the OUTPUT policy (ACCEPT
             # -- the open internet). DHCP is unaffected either way (the
             # client uses packet sockets).
             firewall.extraCommands = ''
                 iptables -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-                iptables -A OUTPUT -d 192.168.122.1 -p udp --dport 53 -j ACCEPT
-                iptables -A OUTPUT -d 192.168.122.1 -p tcp --dport 53 -j ACCEPT
                 iptables -A OUTPUT -d 192.168.122.1 -p udp --dport 67 -j ACCEPT
                 iptables -A OUTPUT -d 192.168.122.1 -p tcp --dport 443 -j ACCEPT
                 iptables -A OUTPUT -d 10.0.0.0/8 -j DROP
@@ -117,6 +123,19 @@
             # boot 2026-09-25: guest running, no DHCP lease, vnet1
             # tx_packets=0, console dark).
             kernelParams = [ "console=ttyS0,115200n8" ];
+
+            # Kernel surface job code doesn't need: unprivileged BPF,
+            # ptrace outside CAP_SYS_PTRACE (so one job can't read another
+            # process's memory, the runner daemon's included), and kernel
+            # pointers/dmesg for non-root. Unprivileged user namespaces
+            # stay on here -- nix-daemon's build sandbox uses them -- and
+            # are closed per-unit instead (RestrictNamespaces below).
+            kernel.sysctl = {
+                "kernel.unprivileged_bpf_disabled" = 1;
+                "kernel.yama.ptrace_scope"         = 2;
+                "kernel.kptr_restrict"             = 2;
+                "kernel.dmesg_restrict"            = 1;
+            };
         };
 
         fileSystems."/mnt/runner-secret" = {
@@ -233,10 +252,10 @@
         # node/v8 JIT, which actions need). Network stays open -- the
         # egress policy above is its bound. nixpkgs' unit already sets
         # DynamicUser plus most of the list below; restating those keeps
-        # the bound readable here. The last five are the additions:
+        # the bound readable here. The two blocks after them are additions:
         # no device nodes beyond the pseudo-devices, an empty capability
         # bounding set, native syscalls only, and no clock or hostname
-        # changes.
+        # changes; then no namespaces and a short socket-family list.
         systemd.services."forgejo-runner-forge\\x2drunner" = {
             unitConfig.RequiresMountsFor =
                 "/mnt/runner-secret";
@@ -257,35 +276,30 @@
                 SystemCallArchitectures = "native";
                 ProtectClock            = true;
                 ProtectHostname         = true;
+
+                # No new namespaces of any kind (most guest-kernel local
+                # privilege escalations go through unprivileged user
+                # namespaces), and sockets limited to what node, git and
+                # nix's client use.
+                RestrictNamespaces      = true;
+                RestrictAddressFamilies = [ "AF_UNIX" "AF_INET" "AF_INET6" "AF_NETLINK" ];
             };
         };
 
         # SSH for debugging a headless worker VM (the serial console is the
-        # other way, and it is no fun). Reaches the guest through the
-        # generator's sshForward DNAT: host port 2223, tailnet-only, to
-        # 192.168.122.11:22 -- `ssh -p 2223 root@<cube>`.
+        # other way, and it is no fun). From cube only: `ssh
+        # root@192.168.122.11` on cube, or `ssh -t ts-cube ssh
+        # root@192.168.122.11` from elsewhere. Only cube's key is trusted,
+        # so guest access is never wider than access to cube itself, and
+        # there is no tailnet port forward (virtualization-cube.nix).
+        # Until 2026-09-25 this list was the whole fleet's (duplicated from
+        # system/ssh/ssh.nix), reached through a tailnet DNAT on port 2223.
         services.openssh = {
             enable = true;
             settings.PasswordAuthentication = false;
         };
         users.users.root.openssh.authorizedKeys.keys = [
-            # Duplicated from system/ssh/ssh.nix rather than shared: the
-            # guest imports no repo category (importing `system` would pull
-            # in tailscaled, sops and the rest, none of which a runner VM
-            # wants). Keep the two lists in step, with ONE deliberate
-            # exception: the bare `elly@nire-lysithea` key is NOT here --
-            # ssh.nix documents it as having no known private half, and a
-            # new root login should not be backed by a key nobody can
-            # account for. Everything below has a known owner.
-            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIACfyClu9egyamrth/SspY6wPA78o8sJuSR7jyBX42ex elly@nire-lysithea.local"
-            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL0sEOPmravXojxuKqN3XwplTbuz2p36UDTxmUthktnX elly@durandal"
-            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII/CCC9LRJdjqLqq5t1a0wN1cbw2fmxs2Yxi1grl/nRw elly@nire-sif"
-            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFrut9Gg3TR5omT4yWXBQhifKh6ksT46FWTYA1Gj9YpJ u0_a377@localhost"
-            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJFTe27f8e8B4DpqQYHFK7I7Pg3ZK12W7LqIrdI+ChI1 elly@nire-galatea"
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILqzV9o32OsJdkCfDJhR5X4uSu1nzRzrL/2gBWLp9QyX elly@nire-cube"
-            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFFfyxNzG07CdeNEZof+l49+fqx+2E79gmYvnRqiGdNp elly@nire-tenacity"
-            "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFwOpjlybwn/ebH4KKoAcsVQ41wxeqD41CyfIALkV61t8BXV2Wf2pdnrBMxLuHHi9+uq7DlGs2nrW938WtaHvRo= elly@deja"
-            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMbt2aSZdU5732g4yNXo/pOnl2DZDMKKP4cPPHyAcIkF elly@nire-iona-termius"
         ];
     };
 }
