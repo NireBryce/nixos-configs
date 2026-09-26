@@ -7,21 +7,20 @@
           isEd25519 = k: k.type == "ed25519";
           getKeyPath = k: k.path;
           keys = builtins.filter isEd25519 config.services.openssh.hostKeys;
-          # `"${secretsPath}"` below hands sops-nix a string with context, not
-          # a plain path: sops-nix's own manifest-for.nix validates every
-          # sops.secrets.*.sopsFile with `builtins.pathExists`, which forces
-          # that context to be realised (the file copied into the store as
-          # its own path) before it can even check the file is there. In some
-          # eval environments -- seen from a sandboxed agent session, 2026-09,
-          # on a fully clean tree, so not caused by an uncommitted change --
-          # that realisation silently fails and throws `path '<hash>-
-          # secrets.yaml' is not valid`, even though the file is present,
-          # tracked, and unmodified. Not a bug in this repo or in
-          # secrets.yaml itself; see wiki/impermanence-and-secrets.md's
-          # Secrets section for the full writeup. Affects any
-          # `nix flake check`/`just preflight` run in such a session against
-          # a host that imports this module -- doesn't affect a real
-          # `just build`/`switch` on the host itself.
+          # A plain path value, deliberately NOT interpolated -- the string
+          # form (`"${secretsPath}"`) hands sops-nix a string with context.
+          # sops-nix's manifest-for.nix validates every sopsFile with
+          # `builtins.pathExists`, and on a string-with-context that forces
+          # the file to be realised into the store as its own path -- which
+          # `nix flake check`'s read-only lazy-trees evaluation cannot do, so
+          # any preflight run before something else realised the current
+          # secrets.yaml (e.g. right after a re-encrypt changes its store
+          # path) died with `path '<hash>-secrets.yaml' is not valid`. The
+          # path value needs no store copy until a derivation consumes it,
+          # and passes sops-nix's own `builtins.isPath` branch of the same
+          # validation. Seen 2026-09-01, root-caused and fixed 2026-09-26
+          # with a fresh-file before/after repro; full writeup in
+          # wiki/impermanence-and-secrets.md's Secrets section.
           secretsPath = ./secrets.yaml;
         in {
             imports = [
@@ -34,7 +33,7 @@
 
         sops = {
             age.sshKeyPaths = map getKeyPath keys;
-            defaultSopsFile = "${secretsPath}";
+            defaultSopsFile = secretsPath;
             # TODO: what did this do
             # defaultSymlinkPath = "/run/user/1000/secrets";
             # defaultSecretsMountPoint = "/run/user/1000/secrets.d";
