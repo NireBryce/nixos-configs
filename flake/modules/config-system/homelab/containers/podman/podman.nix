@@ -50,13 +50,20 @@
             virtualisation.podman = {
                 enable = true;
                 dockerCompat = true;
-                # NOTE: NOT dockerSocket.enable here -- `containers` is
-                # imported whole by tenacity too. No consumer anywhere:
+                # NOTE: NOT dockerSocket.enable here -- `containers` was
+                # imported whole by tenacity too, until 2026-09-26. No consumer anywhere:
                 # the Forgejo runner runs in a VM (virtualization-cube.nix)
                 # with no container runtime, and enables the option on its
                 # own podman only if one ever returns.
                 defaultNetwork.settings.dns_enabled = true; # Required for containers under podman-compose to be able to talk to each other.
             };
+
+            # The rootful API socket, off (2026-09-26). nixpkgs enables it
+            # with SocketGroup=podman, and access to it is root access.
+            # Nothing here uses it: oci-containers run the podman CLI from
+            # root-owned units, and cadvisor walks cgroups (cadvisor.nix).
+            # Rootless podman keeps its own per-user socket.
+            systemd.sockets.podman.wantedBy = lib.mkForce [ ];
 
             virtualisation.oci-containers.backend = "podman";
 
@@ -103,14 +110,13 @@
                     # out from under container storage already chowned into it --
                     # the fix nixpkgs itself prints when an auto range shifts.
                     #
-                    # The group lives here, not in elly-user.nix (moved
-                    # 2026-09-26): `podman` reaches the rootful socket, so it
-                    # is root-equivalent and belongs only where podman runs --
-                    # the same both-ends ownership as libvirt.nix's
-                    # `libvirtd`. extraGroups *concatenates* across modules
-                    # rather than overriding; naming it in both places once
-                    # put "podman" in the list twice.
-                    extraGroups = [ "podman" ];
+                    # Deliberately NOT in the `podman` group (2026-09-26; was
+                    # in elly-user.nix on every host). It reaches the rootful
+                    # socket, so membership was passwordless root; the socket
+                    # is now off too (above). Admin: `sudo podman ...`.
+                    # History: extraGroups *concatenates* across modules --
+                    # naming "podman" here and in elly-user.nix once listed
+                    # it twice.
                     subUidRanges = [
                     {
                         startUid = 100000;

@@ -85,14 +85,16 @@
             # "Redirect USB device" menu does nothing without it.
             virtualisation.spiceUSBRedirection.enable = true;
 
-            # elly needs to be in `libvirtd` to reach qemu:///system without
-            # authenticating for every action. Declared here rather than in
-            # users/elly/user-settings/elly-user.nix on purpose: extraGroups
-            # concatenates across modules instead of overriding, so naming a group
-            # in two files puts it in the list twice -- which is exactly what
-            # happened with "podman", see containers.nix. The group itself is
-            # created by the libvirtd module above, so this module owns both ends.
-            users.users.elly.extraGroups = [ "libvirtd" ];
+            # elly is deliberately NOT in `libvirtd` (removed 2026-09-26).
+            # Membership reaches qemu:///system without authenticating, and a
+            # member can define a guest with any host block device attached
+            # -- root-equivalent with no password. Nothing needed it: every
+            # automated virsh call runs as root in a system service, and
+            # libvirt-exporter joins the group itself. Interactive use is
+            # `sudo virsh ...`, or polkit's auth_admin prompt. Was
+            # `users.users.elly.extraGroups = [ "libvirtd" ];` here, kept out
+            # of elly-user.nix because extraGroups concatenates across modules
+            # (naming "podman" in two files once listed it twice).
 
             # libvirtd's assertion requires polkit; it is already on via the
             # desktop on every host here, so this is a note rather than a setting.

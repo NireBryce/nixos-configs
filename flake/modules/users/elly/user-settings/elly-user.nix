@@ -16,9 +16,10 @@
                     extraGroups = [ "wheel" "audio" "kvm" ]; # Enable 'sudo', deeper audio access, and
                                                               # /dev/kvm (root:kvm 0660 by default) for
                                                               # hardware-accelerated Android emulation.
-                                                              # `podman` moved to podman.nix 2026-09-26:
-                                                              # it is root-equivalent, so only hosts
-                                                              # that run podman should grant it.
+                                                              # No `podman` (removed 2026-09-26): the
+                                                              # group reaches podman's rootful socket,
+                                                              # i.e. passwordless root. Same for
+                                                              # `libvirtd` -- see podman.nix, libvirt.nix.
                     hashedPasswordFile = "/persist/passwords/elly";
                     packages  = with pkgs; [ 
                         # Emergency packages if home-manager dies

@@ -71,8 +71,9 @@ need (see `durandal-configuration.nix`'s comment at the removal point).
 `lego` was removed the same day ([../history.md](../history.md)).
 tenacity dropped it 2026-09-26: podman's rootful socket makes the
 `podman` group root-equivalent with no password, and the user was in it on
-every host. The group now comes from `podman.nix` itself, so it exists
-only where podman does (see `tenacity-configuration.nix`). Not
+every host. Same day, on cube: the user left the `podman` group and the
+rootful socket was turned off (nothing used it; admin is `sudo podman`).
+See `podman.nix` and `tenacity-configuration.nix`. Not
 `lysithea` — the module is `nixos`-class only.
 
 ## See also

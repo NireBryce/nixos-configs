@@ -27,8 +27,8 @@ plus several others — see [../architecture.md](../architecture.md).
   meant to be overridden per-platform if one ever needs to).
 - **`user-settings/elly-user.nix`** — both `nixos`- and `darwin`-class: the
   account itself on the NixOS side (`users.mutableUsers = false`,
-  `isNormalUser = true`, `extraGroups = [ "wheel" "audio" "kvm" ]`; `podman` moved to
-  `podman.nix` 2026-09-26, root-equivalent so granted only where podman runs) and,
+  `isNormalUser = true`, `extraGroups = [ "wheel" "audio" "kvm" ]`; no `podman` or
+  `libvirtd` since 2026-09-26: both were passwordless root) and,
   on darwin, the nerd-font packages Home Manager's terminal config expects
   to already be on the system. Carries its own open TODO ("these modules
   should be stored outside of the users folder, so it's clearer when it's
