@@ -19,16 +19,83 @@
             # landed -- blanket trust meant a compromised guest reached
             # every port on the host, and this host now RUNS job code.
             # Guests get exactly: DHCP leases and DNS from libvirt's
-            # dnsmasq, and Caddy's 80/443 (the forge door). Per-interface
-            # options scope the accepts to virbr0 traffic only; everything
-            # else a guest sends the host hits the firewall's default
-            # reject. Established/related replies pass as always. Guest
-            # egress (the other direction) is the runner guest's own
-            # OUTPUT policy -- git-forge/forgejo/actions-runner.nix's
-            # guest config, not this module.
-            networking.firewall.interfaces."virbr0" = {
-                allowedUDPPorts = [ 53 67 ];   # dnsmasq: DNS + DHCP
-                allowedTCPPorts = [ 80 443 ];  # Caddy: the forge door
+            # dnsmasq, and Caddy's 443 (the forge door; which vhosts
+            # answer a guest is caddy.nix's `vmDeny`). Established/related
+            # replies pass as always.
+            #
+            # The per-interface options alone did NOT make that "exactly":
+            # the host's global allowedTCPPorts/allowedUDPPorts (22, KDE
+            # Connect, Steam, ... in system/networking) are rendered with
+            # no `-i`, so they accepted on virbr0 too. The `cube-vm-in`
+            # chain below closes that: jumped to FIRST in nixos-fw, it
+            # refuses any new virbr0 connection outside the list and
+            # RETURNs the rest to nixos-fw's normal accepts.
+            networking.firewall = {
+                interfaces."virbr0" = {
+                    allowedUDPPorts = [ 53 67 ];   # dnsmasq: DNS + DHCP
+                    allowedTCPPorts = [ 53 443 ];  # dnsmasq over TCP; Caddy
+                };
+
+                # Guest -> LAN/tailnet, enforced on THIS side of the VM
+                # boundary (a guest's own OUTPUT rules are flushable by guest
+                # root). In `mangle` FORWARD, not `filter`: cube's libvirt
+                # uses its iptables backend, which keeps its own jumps at the
+                # top of filter FORWARD and ACCEPTs everything from the guest
+                # subnet there -- a filter rule of ours would never be reached,
+                # and libvirtd re-asserts that order on every restart. mangle
+                # FORWARD runs before filter and libvirt doesn't touch it.
+                # Replies (ESTABLISHED/RELATED) pass, so the sshForward DNAT's
+                # return traffic to the tailnet still flows. Guest -> the
+                # host's own addresses is INPUT, the chain above, not this.
+                # Nothing here covers guest <-> guest on the same bridge (L2,
+                # never routed).
+                #
+                # TRAP: cube-vm-in ends in a plain DROP, never
+                # `-j nixos-fw-refuse`. It outlives nixos-fw across a firewall
+                # restart, and firewall-start's teardown loop cannot `-X` a
+                # chain something still jumps to -- that failure is swallowed,
+                # and the `-N nixos-fw-refuse` after it then aborts the whole
+                # start.
+                extraCommands = ''
+                    iptables -w -D nixos-fw -i virbr0 -j cube-vm-in 2>/dev/null || true
+                    iptables -w -F cube-vm-in 2>/dev/null || true
+                    iptables -w -X cube-vm-in 2>/dev/null || true
+                    iptables -w -N cube-vm-in
+                    iptables -w -A cube-vm-in -m conntrack --ctstate ESTABLISHED,RELATED -j RETURN
+                    iptables -w -A cube-vm-in -p udp -m multiport --dports 53,67 -j RETURN
+                    iptables -w -A cube-vm-in -p tcp -m multiport --dports 53,443 -j RETURN
+                    iptables -w -A cube-vm-in -p icmp -j RETURN
+                    iptables -w -A cube-vm-in -j DROP
+                    iptables -w -I nixos-fw 1 -i virbr0 -j cube-vm-in
+
+                    ip6tables -w -D nixos-fw -i virbr0 -m conntrack --ctstate NEW -j DROP 2>/dev/null || true
+                    ip6tables -w -I nixos-fw 1 -i virbr0 -m conntrack --ctstate NEW -j DROP
+
+                    iptables -w -t mangle -D FORWARD -i virbr0 -j cube-vm-egress 2>/dev/null || true
+                    iptables -w -t mangle -F cube-vm-egress 2>/dev/null || true
+                    iptables -w -t mangle -X cube-vm-egress 2>/dev/null || true
+                    iptables -w -t mangle -N cube-vm-egress
+                    iptables -w -t mangle -A cube-vm-egress -m conntrack --ctstate ESTABLISHED,RELATED -j RETURN
+                    iptables -w -t mangle -A cube-vm-egress -d 10.0.0.0/8     -j DROP
+                    iptables -w -t mangle -A cube-vm-egress -d 172.16.0.0/12  -j DROP
+                    iptables -w -t mangle -A cube-vm-egress -d 192.168.0.0/16 -j DROP
+                    iptables -w -t mangle -A cube-vm-egress -d 100.64.0.0/10  -j DROP
+                    iptables -w -t mangle -I FORWARD 1 -i virbr0 -j cube-vm-egress
+
+                    ip6tables -w -t mangle -D FORWARD -i virbr0 -j DROP 2>/dev/null || true
+                    ip6tables -w -t mangle -I FORWARD 1 -i virbr0 -j DROP
+                '';
+                # The firewall tears down nixos-fw (and so the jump into
+                # cube-vm-in) itself; both chains are ours to remove, so
+                # "firewall stopped" leaves nothing of this behind.
+                extraStopCommands = ''
+                    iptables -w -F cube-vm-in 2>/dev/null || true
+                    iptables -w -X cube-vm-in 2>/dev/null || true
+                    iptables -w -t mangle -D FORWARD -i virbr0 -j cube-vm-egress 2>/dev/null || true
+                    iptables -w -t mangle -F cube-vm-egress 2>/dev/null || true
+                    iptables -w -t mangle -X cube-vm-egress 2>/dev/null || true
+                    ip6tables -w -t mangle -D FORWARD -i virbr0 -j DROP 2>/dev/null || true
+                '';
             };
 
             # Two things this module deliberately does NOT set:
@@ -51,7 +118,7 @@
             # here: VMs/_lib/libvirt-vm.nix's activation script starts the
             # default network itself when a VM declares `networked = true`,
             # rather than a host-wide unit unconditionally bringing up
-            # virbr0 (and the trustedInterfaces trust above) on every boot
+            # virbr0 (and the guest-facing rules above) on every boot
             # regardless of whether anything ever uses it. A VM started by
             # hand instead -- outside that generator, e.g. via virt-manager
             # directly on durandal today -- still needs the old manual step:

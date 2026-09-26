@@ -128,25 +128,25 @@ Half automatic, half not:
 
 `forge-runner`, the libvirt guest on `nire-cube` that runs the Forgejo
 Actions runner
-([git-forge](categories/git-forge.md)), has one quirk with a security
-edge: its overlay qcow2 pins its base image at first creation, so later
-flake updates build a NEW base image (and GC-root it) that the guest
-never actually boots — guest kernel and packages age in place,
-indefinitely, across lock bumps.
+([git-forge](categories/git-forge.md)), is `ephemeral` in the VM
+generator's sense: its overlay qcow2 is thrown away and recreated from
+the current base image on every cube boot, and on any switch that
+changes the guest image or its domain XML. There is no periodic reset to
+remember — a lock bump reaches the guest at the next `just switch` on
+cube. The flip side: a switch that changes the guest kills a running job.
 
-**Periodically — after a few lock bumps, or whenever the guest's age
-bothers you — recreate the overlay**, which resets the guest to the
-current base image (state is disposable by design: the runner token is
-staged from cube at boot, not stored in the guest):
+Before 2026-09-25 the overlay pinned its base at first creation and a
+manual reset was the maintenance step. To force a reset by hand anyway
+(the stamp lives on tmpfs, so removing it is enough):
 
 ```sh
 # on nire-cube
-sudo virsh destroy forge-runner          # if running
-sudo rm /var/lib/libvirt/images/forge-runner.qcow2
-sudo systemctl restart libvirt-vm-forge-runner   # re-creates overlay from the current base, defines + starts
+sudo rm /run/libvirt-vm/forge-runner.stamp
+sudo systemctl restart libvirt-vm-forge-runner   # destroys, recreates the overlay, defines + starts
 ```
 
-What the wipe costs: the guest's SSH host keys regenerate (update
-`known_hosts`; the debug forward is `ssh -p 2223 root@ts-cube`), podman
-image cache and the guest nix store warm-up are lost (they refill from
-the cache on the next run). Nothing else lives in the guest.
+What each reset costs: the guest's SSH host keys regenerate (update
+`known_hosts`; the debug forward is `ssh -p 2223 root@ts-cube`, or
+`ssh -J ts-cube root@192.168.122.11` from cube's side), and the guest nix
+store's warm-up is lost (it refills from the cache on the next run).
+Nothing else lives in the guest.

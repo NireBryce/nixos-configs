@@ -14,8 +14,13 @@ Libvirt/QEMU VMs on `nire-cube` only — podman/distrobox are the separate
 - `libvirt.nix` — `virtualisation.libvirtd`; also virtiofsd
   (`vhostUserPackages`, required for virtiofs shares), virt-manager,
   `elly` in `libvirtd`. No `ovmf` (removed option, eval fails).
-- `vm-networking.nix` — `trustedInterfaces = [ "virbr0" ]` so guests get
-  DHCP/DNS past the firewall. Does NOT start the default network.
+- `vm-networking.nix` — `virbr0` opens UDP 53/67 + TCP 53/443 only;
+  `cube-vm-in` (jumped first in nixos-fw) refuses the host's global ports
+  there; `mangle` FORWARD chain `cube-vm-egress` drops guest→RFC1918/
+  100.64/10 (filter FORWARD is libvirt's iptables-backend chains, whose
+  accepts come first). Chain ends in DROP, never `nixos-fw-refuse` (it
+  would block firewall-start's teardown). Does NOT start the default
+  network.
 - `virt-tools.nix` — client tooling only.
 - `libvirt-persist.nix` — persists the libvirtd secrets key on
   impermanence hosts only; no-op on cube.
@@ -41,8 +46,11 @@ memory).
 Produces: domain XML at `/etc/libvirt/qemu/<name>.xml` + a oneshot
 `libvirt-vm-<name>` unit (after/requires `libvirtd`, wantedBy
 multi-user) that GC-roots the base image, creates the COW overlay only if
-missing (rebuilds never wipe guest state), starts the default network if
-inactive, DHCP-reserves the guest IP, then `virsh define` + start.
+missing (rebuilds never wipe guest state — unless `ephemeral`: overlay
+recreated on host boot or base-image/XML change, stamp
+`/run/libvirt-vm/<name>.stamp`), starts the default network if inactive,
+DHCP-reserves the guest IP, then `virsh define` + start. Shares carry
+`<readonly/>` unless `readonly = false`.
 
 ## Traps
 
@@ -63,9 +71,8 @@ inactive, DHCP-reserves the guest IP, then `virsh define` + start.
   backing file by path; the generator's GC root is the fix, removing it
   is a deliberate step.
 - **Overlays pin their base at creation** — a rebuilt base image never
-  reaches an existing guest; guest packages age in place. Periodic
-  overlay reset (destroy + rm overlay + restart the VM unit): procedure
-  in [../maintenance.md](../maintenance.md#the-runner-vm).
+  reaches an existing guest unless it is `ephemeral` (forge-runner is);
+  manual reset: [../maintenance.md](../maintenance.md#the-runner-vm).
 - **nwfilter egress drops break inbound** (libvirt 12.7): out-direction
   drops match inbound traffic too; five variants tested 2026-09-25, all
   dropping the guest's inbound. Egress is enforced guest-locally

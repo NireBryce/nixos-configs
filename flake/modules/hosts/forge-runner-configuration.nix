@@ -13,14 +13,15 @@
 #
 # The guest deliberately runs NO sops-nix, no Home Manager, and no user
 # account -- same shape llm-sandbox used. Its one secret arrives over
-# virtiofs (tag `runner-secret`, mounted read-only at /mnt/runner-secret)
+# virtiofs (tag `runner-secret`, read-only on the host side and mounted
+# read-only at /mnt/runner-secret)
 # from cube's already-decrypted /run/secrets copy; the mount is the guest's
 # entire trust surface from the host side, and the runner token is the only
 # thing that crosses.
 #
 # Networking, without tailscaled: the guest is NOT on the tailnet. It
 # reaches the forge through Caddy on the virbr0 gateway (192.168.122.1),
-# which vm-networking.nix already trusts and whose cert for
+# the one host port vm-networking.nix opens to guests, and whose cert for
 # git.moose-micro.ts.net is a real publicly-trusted one -- so the
 # connection URL is the ordinary ROOT_URL and TLS validates against system
 # CAs. The /etc/hosts pin below is what makes the name resolve at all
@@ -127,11 +128,17 @@
         # Nix hardening for a CI guest. Jobs are supposed to build what
         # their own lockfiles pin -- these settings close the AD-HOC
         # channels:
-        #   - no channels (kills <nixpkgs> from NIX_PATH, so nix-shell -p
-        #     has nothing to draw from),
-        #   - no flake registry (kills the `nixpkgs#pkg` shorthand; a
-        #     flake input must come from the repo's own lock or a typed
-        #     full URL),
+        #   - no channels, and no `nixpkgs=flake:nixpkgs` NIX_PATH entry
+        #     (setNixPath) -- so `<nixpkgs>` and `nix-shell -p` have
+        #     nothing to draw from,
+        #   - no flake registry: `flake-registry = ""` drops only the
+        #     GLOBAL one; nixosSystem also pins `nixpkgs` in the SYSTEM
+        #     registry (/etc/nix/registry.json), which kept
+        #     `nixpkgs#pkg` working until setFlakeRegistry went too
+        #     (setNixPath requires it). A flake input must now come from
+        #     the repo's own lock or a typed full URL,
+        #   - no silent fallback to unsandboxed builds, and a ceiling on
+        #     hung or runaway ones,
         #   - daily GC so ad-hoc store paths don't accumulate.
         # The daemon-side rule that matters most is the one NOT set: the
         # runner user must never land in nix.settings.trusted-users --
@@ -141,6 +148,9 @@
             settings = {
                 experimental-features = [ "nix-command" "flakes" ];
                 flake-registry        = "";
+                sandbox-fallback      = false;
+                max-silent-time       = 3600;   # 1h with no output
+                timeout               = 14400;  # 4h per build
             };
             channel.enable = false;
             gc = {
@@ -148,6 +158,10 @@
                 dates     = "daily";
                 options   = "--delete-older-than 7d";
             };
+        };
+        nixpkgs.flake = {
+            setNixPath       = false;
+            setFlakeRegistry = false;
         };
 
         services.forgejo-runner.instances.forge-runner = {
@@ -219,7 +233,12 @@
         # but it cannot write the system, load modules, or flip kernel
         # knobs. Deliberately NOT set: MemoryDenyWriteExecute (breaks
         # node/v8 JIT, which actions need). Network stays open -- the
-        # egress policy above is its bound.
+        # egress policy above is its bound. nixpkgs' unit already sets
+        # DynamicUser plus most of the list below; restating those keeps
+        # the bound readable here. The last five are the additions:
+        # no device nodes beyond the pseudo-devices, an empty capability
+        # bounding set, native syscalls only, and no clock or hostname
+        # changes.
         systemd.services."forgejo-runner-forge\\x2drunner" = {
             unitConfig.RequiresMountsFor =
                 "/mnt/runner-secret";
@@ -234,6 +253,12 @@
                 RestrictSUIDSGID      = true;
                 RestrictRealtime      = true;
                 LockPersonality       = true;
+
+                PrivateDevices          = true;
+                CapabilityBoundingSet   = "";
+                SystemCallArchitectures = "native";
+                ProtectClock            = true;
+                ProtectHostname         = true;
             };
         };
 

@@ -55,6 +55,22 @@
                 get_certificate tailscale
             }
         '';
+        # Every vhost EXCEPT git's carries this. Caddy binds all
+        # interfaces, and vm-networking.nix lets libvirt guests (the
+        # Actions runner VM) reach 443 on the virbr0 gateway so they can
+        # reach the forge -- with a Host/SNI of their choosing. The guest
+        # subnet is libvirt's default network's. `handle`, not a bare
+        # `abort @vm`: Caddyfile directive order puts `handle` ahead of
+        # `abort`, so the landing vhost's own catch-all `handle` would win
+        # over a bare abort; a matcher-carrying `handle` sorts ahead of the
+        # matcherless one. Tailnet traffic arrives from loopback
+        # (serve.nix) or tailscale0 addresses, never this range.
+        vmDeny = ''
+            @vm remote_ip 192.168.122.0/24
+            handle @vm {
+                abort
+            }
+        '';
     in {
         flake.modules.nixos.${moduleName} = {
             # # description = "caddy -- tailnet-only HTTPS front door, with certs from tailscaled";
@@ -77,6 +93,7 @@
                     # assets under it.
                     ${tailnetFqdn}.extraConfig = ''
                         ${tailscaleCert}
+                        ${vmDeny}
                         handle {
                             reverse_proxy 127.0.0.1:3002
                         }
@@ -88,6 +105,7 @@
                     # unprefixed ROOT_URL (forgejo.nix) expect.
                     ${grafanaFqdn}.extraConfig = ''
                         ${tailscaleCert}
+                        ${vmDeny}
                         reverse_proxy 127.0.0.1:3000
                     '';
 
@@ -98,11 +116,13 @@
 
                     ${homepageFqdn}.extraConfig = ''
                         ${tailscaleCert}
+                        ${vmDeny}
                         reverse_proxy 127.0.0.1:3002
                     '';
 
                     ${glanceFqdn}.extraConfig = ''
                         ${tailscaleCert}
+                        ${vmDeny}
                         reverse_proxy 127.0.0.1:3004
                     '';
 
@@ -165,16 +185,19 @@
 
                     "https://grafana".extraConfig = ''
                         tls internal
+                        ${vmDeny}
                         redir https://${grafanaFqdn}{uri} permanent
                     '';
 
                     "https://homepage".extraConfig = ''
                         tls internal
+                        ${vmDeny}
                         redir https://${homepageFqdn}{uri} permanent
                     '';
 
                     "https://glance".extraConfig = ''
                         tls internal
+                        ${vmDeny}
                         redir https://${glanceFqdn}{uri} permanent
                     '';
                 };

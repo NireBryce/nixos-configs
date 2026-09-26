@@ -47,10 +47,16 @@
                     sourceCidrs = [ "100.64.0.0/10" ];
                 };
 
-
+                # Job code runs in here, so nothing it leaves behind
+                # should outlive a cube boot or a guest change -- and a
+                # switch that changes the guest then reaches it with no
+                # manual overlay reset (the generator's `ephemeral`
+                # comment). The guest's nix store starts cold each time.
+                ephemeral = true;
 
                 # The runner's token, staged by
-                # git-forge/forgejo/actions-runner.nix's tmpfiles rule from
+                # git-forge/forgejo/actions-runner.nix's registration
+                # unit (a root ExecStartPost) from
                 # the sops-decrypted /run/secrets copy. This is the whole
                 # delivery mechanism -- the guest runs no sops and has no
                 # key; see the guest configuration's header for why the
