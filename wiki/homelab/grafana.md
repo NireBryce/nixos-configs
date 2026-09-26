@@ -80,8 +80,9 @@ real UI export**, so expect to correct it the first time someone tries.
 
 ## Alerts
 
-**Alerting → Alert rules**, folder `forge-runner`, has five provisioned
-rules about the Forgejo runner VM, defined in
+**Alerting → Alert rules** has six provisioned rules. Folder `cube` has one:
+cube's root filesystem under 10% free. Folder `forge-runner` has five
+about the Forgejo runner VM. All are defined in
 `monitoring/runner-alerts/runner-alerts.nix`:
 
 - a job connecting outside the egress allowlist;

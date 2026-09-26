@@ -1,6 +1,6 @@
 # `reverse-proxy` — `config-system/homelab/reverse-proxy/`
 
-_Last modified: 2026-09-25_
+_Last modified: 2026-09-26_
 
 [Caddy](https://caddyserver.com/), one tailnet-only HTTPS front door for
 every web service on `nire-cube`. Added 2026-08-24, cube-only; nested under
@@ -275,6 +275,16 @@ catch-all `handle` would win otherwise (checked with `caddy adapt`,
 2.11.4). The bare-name `https://` twins don't carry it: `redir` sorts
 ahead of `handle` as well, so there it would never run, and all they give
 a guest is a 301 to a name that does.
+
+`git.` itself carries `vmRunnerPathsOnly` instead: guests reach only the
+paths CI uses — `/api/actions/`, `/api/actions_pipeline/`, the v4 artifact
+service under `/twirp/github.actions.results.api.v1.ArtifactService/`,
+`/api/v1/`, and git over HTTPS (`<owner>/<repo>/info/refs`,
+`git-upload-pack`, `git-receive-pack`, `info/lfs/`) — as a `not
+path_regexp` inside a `remote_ip` matcher, handled with `abort`. The web UI,
+login form included, is out of a job's reach. The path list comes from
+Forgejo 15's `routers/init.go` and was checked against a local Caddy with
+both allowed and refused paths.
 
 Caddy itself still binds every interface, because it can't bind the tailnet
 address — that IP is assigned at runtime by tailscaled and isn't knowable at

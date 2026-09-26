@@ -145,6 +145,27 @@
                             description = "systemctl status forge-runner-cycle vm-egress-dns on cube.";
                         })
                     ];
+                  }
+                  # Host-wide, but here because the likeliest filler is the
+                  # forge: Actions artifacts and logs land in
+                  # /var/lib/forgejo on cube's root filesystem (forgejo.nix
+                  # caps them with a quota and retention).
+                  {
+                    orgId    = 1;
+                    name     = "cube";
+                    folder   = "cube";
+                    interval = "5m";
+                    rules = [
+                        (rule {
+                            uid = "cube-root-disk-low";
+                            title = "cube: root filesystem under 10% free";
+                            expr = ''min(node_filesystem_avail_bytes{mountpoint="/",fstype!="tmpfs"} / node_filesystem_size_bytes{mountpoint="/",fstype!="tmpfs"})'';
+                            op = "lt"; threshold = 0.10;
+                            for = "15m"; noData = "Alerting";
+                            summary = "cube's / has less than 10% free.";
+                            description = "Check du -sh /var/lib/forgejo /var/lib/libvirt/images /nix/store on cube; nix-collect-garbage if the store is the cause.";
+                        })
+                    ];
                 } ];
             };
         };

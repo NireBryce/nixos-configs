@@ -27,7 +27,9 @@ for its certificate. Git-over-SSH bypasses Caddy entirely — cube's ordinary
 - **Unauthenticated `/api/v1/users/search` masks fields**: always
   `last_login: 0001-01-01T00:00:00Z` and `is_admin`/`active` false,
   regardless of truth. It cannot answer either question; reading it as an
-  answer produced a wrong one twice. Don't re-derive from it.
+  answer produced a wrong one twice. Don't re-derive from it. Since
+  2026-09-26 anonymous access is off entirely (`REQUIRE_SIGNIN_VIEW`):
+  browsing, the API and HTTPS clones all need a login or token.
 - **Registration is closed** (`DISABLE_REGISTRATION = true`).
   `/user/sign_up` returns **200** with a "registration is disabled" body and
   no form fields — status code is not evidence here, read the page.

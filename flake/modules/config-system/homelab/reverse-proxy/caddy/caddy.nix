@@ -70,6 +70,22 @@
         # redirect to a `.ts.net` name that does carry it (a guest gets
         # the 301, then nothing; verified from the runner guest
         # 2026-09-25).
+        # The git vhost's version of `vmDeny`: guests (the runner VM) get
+        # only what CI needs -- the runner protocol (/api/actions/), artifact
+        # uploads (/api/actions_pipeline/, and the v4 twirp service), git
+        # over HTTPS for any repo (info/refs, upload-pack, receive-pack,
+        # LFS), and the REST API, which jobs call with their job token. Not
+        # the web UI -- so no login form. Path list read from Forgejo 15's
+        # routers/init.go; `[^/]+/[^/]+` also matches `repo.git`.
+        vmRunnerPathsOnly = ''
+            @vmNotRunnerPath {
+                remote_ip 192.168.122.0/24
+                not path_regexp ^/(api/actions/|api/actions_pipeline/|twirp/github\.actions\.results\.api\.v1\.ArtifactService/|api/v1/|[^/]+/[^/]+/(info/refs|git-upload-pack|git-receive-pack|info/lfs/))
+            }
+            handle @vmNotRunnerPath {
+                abort
+            }
+        '';
         vmDeny = ''
             @vm remote_ip 192.168.122.0/24
             handle @vm {
@@ -116,6 +132,7 @@
 
                     ${gitFqdn}.extraConfig = ''
                         ${tailscaleCert}
+                        ${vmRunnerPathsOnly}
                         reverse_proxy 127.0.0.1:3001
                     '';
 

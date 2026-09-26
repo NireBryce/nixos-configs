@@ -25,6 +25,7 @@ this category's newest change, not yet its own history entry.
 - [Why the category isn't named `forgejo`](#why-the-category-isnt-named-forgejo)
 - [Zero-touch secrets, built in rather than hand-rolled](#zero-touch-secrets-built-in-rather-than-hand-rolled)
 - [Actions and the runner](#actions-and-the-runner)
+- [Hardening settings](#hardening-settings)
 - [Tailnet-only access, same mechanism as Grafana](#tailnet-only-access-same-mechanism-as-grafana)
 - [The tailnet device-name trap, avoided rather than hit](#the-tailnet-device-name-trap-avoided-rather-than-hit)
 - [Single-user, sqlite3, registration closed](#single-user-sqlite3-registration-closed)
@@ -110,7 +111,9 @@ and tailnet drops on its own side, in `mangle` FORWARD
 `/etc/hosts` pins `git.moose-micro.ts.net` to `192.168.122.1` (the virbr0
 gateway); `vm-networking.nix` opens Caddy's 443 on that bridge (and
 nothing else beyond DHCP/DNS), Caddy answers guests on the git vhost
-only (`vmDeny` in `caddy.nix`), and its cert for the name is publicly
+only (`vmDeny` in `caddy.nix`) and, there, only on the paths CI uses —
+the runner protocol, artifact uploads, git over HTTPS and the REST API,
+not the web UI or its login form (`vmRunnerPathsOnly`) — and its cert for the name is publicly
 trusted, so the connection URL is the ordinary
 ROOT_URL over validated TLS, Caddy → loopback Forgejo. Forgejo's own
 127.0.0.1:3001 stays unreachable from the guest, by design — Caddy is
@@ -161,6 +164,27 @@ The single long-lived runner this replaced, its pinned UUID and its
 day-one traps: [git-forge-history.md](git-forge-history.md#the-long-lived-runner-2026-09-24-to-2026-09-26).
 Nothing about the runner lives in sops any more: the old
 `forgejo-runner-secret` key and its declaration were removed 2026-09-26.
+
+## Hardening settings
+
+Set in `forgejo.nix`, 2026-09-26:
+
+- **Nothing is readable without signing in** (`service.REQUIRE_SIGNIN_VIEW`):
+  repos, users, the explore pages and the anonymous API all need a login
+  or a token, from the tailnet and from CI jobs alike. HTTPS clones need
+  credentials (a password or an access token); SSH clones are unaffected.
+- **Storage quota:** `quota.ENABLED` with `[quota.default] TOTAL = 10GiB`
+  per user, counting repos, LFS, packages, attachments and Actions
+  artifacts. Forgejo reads an unparseable size as "unlimited" without a
+  word, so keep the `10GiB` form.
+- **Actions retention:** artifacts 14 days, logs 90 (defaults 90 and 365).
+- **`session.COOKIE_SECURE = true`**: every browser reaches the forge over
+  HTTPS.
+
+Two-factor authentication for `elly` is set in the UI (Settings →
+Security), not here; the admin bootstrap only ever resets the password
+(`admin user change-password` updates the password and the
+must-change flag, nothing else), so enrolled 2FA survives every switch.
 
 ## Tailnet-only access, same mechanism as Grafana
 
@@ -241,7 +265,7 @@ account and password both work as declared. Whether it's genuinely
 inside the UI and reported by the user 2026-09-12. That was the only way to
 check it: Forgejo's unauthenticated `/api/v1/users/search` always reports
 `is_admin: false` regardless of the real value, so that field never could
-settle it, and reading it as an answer produced a wrong one twice. See
+settle it, and reading it as an answer produced a wrong one twice. (Since 2026-09-26 it doesn't answer at all without signing in: `REQUIRE_SIGNIN_VIEW`.) See
 [git-forge-history.md](git-forge-history.md#the-admin-account-and-an-anonymous-api-that-reports-zeroes)
 for the fuller account of that trap.
 

@@ -89,7 +89,31 @@
                         # devices reach -- self-registration stays closed. A
                         # new user is a `forgejo admin user create` away.
                         DISABLE_REGISTRATION = true;
+                        # Nothing readable without signing in: repos, users,
+                        # the explore pages, the anonymous API. Everyone who
+                        # can reach the forge (the tailnet, and CI jobs on the
+                        # runner VM) otherwise reads every public repo and the
+                        # user list. Jobs still check out their own repo --
+                        # that uses the job's token.
+                        REQUIRE_SIGNIN_VIEW  = true;
                     };
+
+                    # Every browser reaches the forge over HTTPS (Caddy); the
+                    # plain-HTTP vhosts only redirect. nixpkgs leaves this
+                    # false.
+                    session.COOKIE_SECURE = true;
+
+                    # A per-user cap on stored data -- repos, LFS, packages,
+                    # attachments and Actions artifacts together (the
+                    # built-in default group's one "size:all" rule,
+                    # models/quota/default.go). What a runner job uploads is
+                    # counted against the repo owner, so a job can't fill
+                    # cube's disk. Raise it here if a real repo outgrows it.
+                    # TRAP: an unparseable TOTAL is silently "unlimited"
+                    # (config_provider.go mustBytes returns -1); go-humanize
+                    # reads `10GiB`.
+                    quota.ENABLED           = true;
+                    "quota.default".TOTAL   = "10GiB";
 
                     actions = {
                         # Instance-wide switch for Forgejo Actions (CI) --
@@ -98,6 +122,11 @@
                         # individually; a repo created BEFORE this landed
                         # may need its Settings toggle flipped once.
                         ENABLED = true;
+                        # Defaults are 90 and 365 days. Artifacts are
+                        # throwaway build output here; logs are small but
+                        # add up.
+                        ARTIFACT_RETENTION_DAYS = 14;
+                        LOG_RETENTION_DAYS      = 90;
                     };
 
                     # Sweep runners that were registered but never came
