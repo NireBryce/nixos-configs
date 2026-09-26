@@ -1,6 +1,6 @@
 # `reverse-proxy`, for agents
 
-_Last modified: 2026-09-25_
+_Last modified: 2026-09-26_
 
 Condensed from [reverse-proxy.md](reverse-proxy.md), which keeps the
 reasoning, the verification narrative and the links out. Facts only here.
@@ -65,6 +65,9 @@ redirects; `https://<bare name>` serves Caddy's local CA and shows
   vhost's catch-all `handle` would otherwise win. Not on the bare
   `https://` twins — `redir` sorts ahead of `handle`; they only 301 to a
   `.ts.net` name that carries it.
+- `git.` carries `vmRunnerPathsOnly` instead: guest requests abort unless
+  `path_regexp ^/(api/actions/|api/actions_pipeline/|twirp/github\.actions\.results\.api\.v1\.ArtifactService/|api/v1/|[^/]+/[^/]+/(info/refs|git-upload-pack|git-receive-pack|info/lfs/))`
+  (Forgejo 15 `routers/init.go`). No web UI/login for jobs.
 - No `environment.persistence` entry — cube has a persistent root. A host
   that wipes `/root` would need one for `/var/lib/caddy` first.
 - `landing` is a hard dependency: the root route proxies to the landing

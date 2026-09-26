@@ -85,11 +85,14 @@ Seven files, all `nixos`-class:
   textfile collector (`/var/lib/node-exporter-textfile`) and its systemd
   collector, limited to the runner's units. A one-minute timer writes the
   guest egress drop counters and the resolver's refused-lookup count; the
-  runner's cycle loop writes its own gauges. Five Grafana alert rules are
-  provisioned in folder `forge-runner`: blocked connections outside the
+  runner's cycle loop writes its own gauges. Six Grafana alert rules are
+  provisioned: blocked connections outside the
   allowlist or into private ranges, refused DNS, a guest failing to boot,
-  and the cycle or resolver not running. They are Grafana-evaluated (no
-  Alertmanager); where notifications go is Grafana's contact points.
+  and the cycle or resolver not running (folder `forge-runner`), plus cube's
+  root filesystem under 10% free (folder `cube`) — there because Actions
+  artifacts and logs are the likeliest thing to fill it. They are
+  Grafana-evaluated (no Alertmanager); where notifications go is Grafana's
+  contact points.
 
 ## Tailnet-only access, not a new firewall mechanism
 

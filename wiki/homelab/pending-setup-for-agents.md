@@ -63,6 +63,7 @@ own database. The repo-side counterpart is
 **Unauthenticated `GET /git/api/v1/users/search` masks fields.** It always
 returns `last_login` as `0001-01-01T00:00:00Z` and `is_admin`/`active` as
 `false`, regardless of the truth — Forgejo/Gitea's anonymous-safe masking.
+(Anonymous calls stopped working altogether 2026-09-26: `REQUIRE_SIGNIN_VIEW`.)
 Two agent sessions (2026-09-04, 2026-09-05) read that zero value as "nobody
 has signed in yet" and wrote it into this page *and* the backup runbook.
 Both wrong: a same-day screenshot showed an active session throughout. The

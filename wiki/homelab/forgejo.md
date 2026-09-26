@@ -32,7 +32,7 @@ how it's configured and why its two hostnames disagree, see
 | | |
 |---|---|
 | Web | `https://git.moose-micro.ts.net/` (short: `http://git/`) |
-| Clone over HTTPS | `https://git.moose-micro.ts.net/<user>/<repo>.git` |
+| Clone over HTTPS | `https://git.moose-micro.ts.net/<user>/<repo>.git` — asks for credentials, even for public repos |
 | Clone over SSH | `forgejo@ts-cube:<user>/<repo>.git` |
 
 **`forgejo@` is the account you connect to, not a key owner.** Nothing here
@@ -56,6 +56,12 @@ both correctly.
 **Registration is closed.** `DISABLE_REGISTRATION = true` — a single-user
 homelab forge on a tailnet only the user's devices reach has nothing to gain from
 open self-registration.
+
+**Nothing is visible without signing in** (since 2026-09-26): not repos,
+not users, not the API. An HTTPS clone asks for your username and a
+password or access token (a token is the better choice for anything
+scripted); SSH clones work as before. Turn on two-factor authentication
+under Settings → Security; a switch never removes it.
 
 A detail that will mislead a status check: `/git/user/sign_up` returns **HTTP
 200**, not a 403 or a redirect. The page renders "Registration is disabled.

@@ -44,7 +44,7 @@ docker/podman access roots the VM, not cube.
 |---|---|
 | Runner | hand-written `forgejo-runner.service` in the GUEST: `forgejo-runner one-job --wait --url … --uuid <derived> --token-url file:$CREDENTIALS_DIRECTORY/runner-secret --label nix:host`, `SuccessAction`/`FailureAction = poweroff`. Not nixpkgs' `services.forgejo-runner` (daemon mode refuses ephemeral runners; its `config.yaml` connection conflicts with one-job's flags) |
 | Direction | outbound-only worker; dials `https://git.moose-micro.ts.net/` — no port, no tailnet membership; egress enforced by the GUEST's own firewall (gateway DHCP + forge 443 allowed, private ranges + tailnet dropped, repeated host-side in cube's `mangle` FORWARD) plus a cube-side ALLOWLIST: all guest DNS DNAT'd to `vm-egress-dns` (:5354; nixos.org, forgejo.org, github.com, githubusercontent.com, pypi.org, pythonhosted.org, npmjs.org; else NXDOMAIN), which fills ipset `vm-egress-allow`; `cube-vm-egress` drops new connections to anything outside it; cycle flushes it per job. Add domains in `vm-egress-dns.nix` `allowedDomains` (; nwfilter attempt abandoned — its drops broke inbound, see virtualization-for-agents) |
-| Job→forge | guest `/etc/hosts` pins the FQDN to `192.168.122.1` (virbr0 gw; `vm-networking.nix` opens only 443 + DHCP there); Caddy TLS → loopback Forgejo; every other `.ts.net` vhost aborts guest-subnet requests (`vmDeny`). 3001 unreachable from the guest, by design |
+| Job→forge | guest `/etc/hosts` pins the FQDN to `192.168.122.1` (virbr0 gw; `vm-networking.nix` opens only 443 + DHCP there); Caddy TLS → loopback Forgejo; on the git vhost guests reach only `/api/actions/`, `/api/actions_pipeline/`, the v4 artifact twirp service, `/api/v1/` and git-over-HTTPS paths (`vmRunnerPathsOnly`, no web UI/login); every other `.ts.net` vhost aborts guest-subnet requests (`vmDeny`). 3001 unreachable from the guest, by design |
 | Labels | `nix:host` only = label `nix`, `host` executor — workflows say `runs-on: nix` (`nix:host` matches nothing, job waits forever); jobs run in the VM with guest nix; no container runtime in the guest |
 | Secret | per job: 40 hex from `/dev/urandom` on cube (tmpfs `/run/forge-runner-cycle`), staged root 0600 into `/var/lib/forgejo-runner-share/`, removed when the guest stops. Nothing in sops: the old `forgejo-runner-secret` key + declaration were removed 2026-09-26 |
 | Into the guest | virtiofs share (generator `shares` param), `<readonly/>` host-side, mounted at guest `/mnt/runner-secret`; guest runs no sops, no key |
@@ -85,7 +85,13 @@ docker/podman access roots the VM, not cube.
   `is_admin: false`** regardless of the real value — it cannot settle
   whether an account is admin. Check the Site Administration panel.
   `elly` **is** admin (confirmed there 2026-09-12); the endpoint still
-  reports otherwise, so don't re-derive the answer from it.
+  reports otherwise, so don't re-derive the answer from it. Since
+  2026-09-26 it needs a login anyway (`REQUIRE_SIGNIN_VIEW`).
+- **Hardening (forgejo.nix):** `REQUIRE_SIGNIN_VIEW = true` (HTTPS clones
+  need credentials); `quota.ENABLED`, `[quota.default] TOTAL = 10GiB`
+  (unparseable ⇒ silently unlimited); artifacts 14 d, logs 90 d;
+  `COOKIE_SECURE = true`. 2FA is UI-side; the admin bootstrap's
+  `change-password` doesn't touch it.
 
 ## Imported by
 
