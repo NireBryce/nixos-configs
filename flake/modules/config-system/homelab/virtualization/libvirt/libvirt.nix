@@ -58,6 +58,17 @@
                     # logged and ignored, security_dac.c); store images are
                     # world-readable anyway. virtiofsd is spawned by
                     # libvirtd itself and still runs as root.
+                    #
+                    # TRAP: a switch does NOT apply this, or any qemu.conf
+                    # change. nixpkgs marks libvirtd X-RestartIfChanged=false
+                    # (restarting it mid-switch would be disruptive), and
+                    # libvirtd-config -- which copies qemu.conf into
+                    # /var/lib/libvirt -- runs only as its dependency. Hit
+                    # 2026-09-25: the switch landed, the guest reset, and
+                    # QEMU still started as root. Apply by hand, then
+                    # restart any running domain (running ones keep their
+                    # user): `sudo systemctl restart libvirtd-config
+                    # libvirtd`. A reboot also does it.
                     runAsRoot = false;
                 };
             };

@@ -130,6 +130,7 @@ let
     baseImg  = imagePath;
     xmlPath  = "/etc/libvirt/qemu/${name}.xml";
     stamp    = "/run/libvirt-vm/${name}.stamp";
+    sshChain = "vm-${name}-ssh";
 
     hex2 = n: lib.fixedWidthString 2 "0" (lib.toLower (lib.toHexString n));
     # Only meaningful (and evaluated) when sshForward != null -- guarded
@@ -387,9 +388,36 @@ in
     # made 2026-09-25, `ssh -p 2223 root@ts-cube` from the tailnet into
     # forge-runner, which dropped the forward the same day (cube-only
     # SSH; `sourceCidrs = [ ]`).
+    #
+    # In its own nat chain, `vm-<name>-ssh`, rebuilt on every firewall
+    # start and removed on stop. Until 2026-09-25 the rules went straight
+    # into PREROUTING, which the firewall never flushes (it clears only
+    # its own nixos-* chains): every reload appended another copy, and
+    # dropping the forward from config left the old rule live --
+    # forge-runner's 2223 still reached its sshd after its forward was
+    # removed. The `while ... -D` loop clears that legacy shape, for any
+    # of the default source ranges, on every start.
     networking.firewall.extraCommands = lib.optionalString (sshForward != null) (
-        lib.concatMapStringsSep "\n"
-            (cidr: "iptables -t nat -A PREROUTING -s ${cidr} -p tcp --dport ${toString sshForward.hostPort} -j DNAT --to-destination ${guestIp}:22")
-            effectiveSourceCidrs
+        let
+            port = toString sshForward.hostPort;
+            dnat = cidr: "-s ${cidr} -p tcp --dport ${port} -j DNAT --to-destination ${guestIp}:22";
+        in ''
+            for cidr in ${lib.concatStringsSep " " defaultAllowedSourceCidrs}; do
+                while iptables -w -t nat -D PREROUTING -s "$cidr" -p tcp --dport ${port} -j DNAT --to-destination ${guestIp}:22 2>/dev/null; do :; done
+            done
+            iptables -w -t nat -D PREROUTING -j ${sshChain} 2>/dev/null || true
+            iptables -w -t nat -F ${sshChain} 2>/dev/null || true
+            iptables -w -t nat -X ${sshChain} 2>/dev/null || true
+        '' + lib.optionalString (effectiveSourceCidrs != [ ]) ''
+            iptables -w -t nat -N ${sshChain}
+            ${lib.concatMapStringsSep "
+" (cidr: "iptables -w -t nat -A ${sshChain} ${dnat cidr}") effectiveSourceCidrs}
+            iptables -w -t nat -A PREROUTING -j ${sshChain}
+        ''
     );
+    networking.firewall.extraStopCommands = lib.optionalString (sshForward != null) ''
+        iptables -w -t nat -D PREROUTING -j ${sshChain} 2>/dev/null || true
+        iptables -w -t nat -F ${sshChain} 2>/dev/null || true
+        iptables -w -t nat -X ${sshChain} 2>/dev/null || true
+    '';
 }
