@@ -32,15 +32,6 @@
         flake.modules.nixos.${moduleName} = { pkgs, config, ... }: {
             # # description = "cube-side support for the Forgejo Actions runner VM";
 
-            # UNUSED since 2026-09-26 -- the long-lived runner secret from
-            # before per-job registration, kept one release as a way back.
-            # Remove it together with its secrets.yaml entry.
-            sops.secrets.forgejo-runner-secret = {
-                owner = config.services.forgejo.user;
-                group = config.services.forgejo.group;
-                mode  = "0400";
-            };
-
             # Runs as root: virsh needs the system libvirtd, which the
             # forgejo user cannot reach (polkit refuses it -- hit
             # 2026-09-25, "authentication unavailable: no polkit agent
@@ -168,4 +159,5 @@
 # Only the pairing with the secret's first 16 characters had to be exact
 # (models/actions/forgejo.go, google/uuid.FromBytes). Every job could read
 # that token, and it stayed valid across jobs. Its root halves ran as "+"
-# ExecStartPosts after the same polkit trap noted above.
+# ExecStartPosts after the same polkit trap noted above. The sops key and
+# its declaration were removed 2026-09-26, once the per-job cycle had run.

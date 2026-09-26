@@ -212,8 +212,8 @@ The runner VM went live on cube 2026-09-25, and its first real job
 by hand: since 2026-09-26 cube generates a fresh single-use secret for
 every job (`forge-runner-cycle`, [git-forge](../categories/git-forge.md)),
 so the one-time secret-and-UUID procedure this item used to hold no
-longer applies. The sops key `forgejo-runner-secret` it created is unused
-and due for removal.
+longer applies. The sops key `forgejo-runner-secret` it created was
+removed 2026-09-26.
 
 ## What's verified here
 

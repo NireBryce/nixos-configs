@@ -54,8 +54,8 @@ own database. The repo-side counterpart is
    [../categories/landing.md](../categories/landing.md#how-the-gcal-calendar-feeds-work).
 5. ~~Forgejo Actions runner~~ — **done 2026-09-26** (first green run,
    `elly/nire-skills` run 2). No fill-in remains: cube mints a single-use
-   secret per job (`forge-runner-cycle`). sops `forgejo-runner-secret` is
-   unused, due for removal.
+   secret per job (`forge-runner-cycle`). sops `forgejo-runner-secret`
+   removed 2026-09-26.
    [pending-setup.md](pending-setup.md#8-done--forgejo-actions-runner-first-green-run-2026-09-26).
 
 ## The trap that produced a wrong answer twice
