@@ -95,7 +95,9 @@ forgejo.org, GitHub, PyPI and npm names and refuses everything else, and
 records the addresses it hands out in an ipset that cube's `mangle`
 FORWARD requires for any new guest connection. A job that needs another
 domain fails with a name-resolution error; add the domain to that
-file's `allowedDomains`. The set is emptied before each job.
+file's `allowedDomains`. The set is emptied before each job. The guest
+runs no NTP client (its clock is kvm-clock; timesyncd's pool.ntp.org
+lookups were being refused every few seconds).
 Root SSH into the guest trusts cube's key only — `ssh forge-runner` on
 cube (an `ssh_config` alias with host-key checking off, since the key
 regenerates on every reset), no tailnet port forward. A host-side nwfilter was attempted

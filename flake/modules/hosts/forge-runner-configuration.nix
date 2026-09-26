@@ -95,6 +95,12 @@
             };
         };
 
+        # No NTP. The guest lives for one job, its clock comes from the host
+        # (kvm-clock), and cube's egress allowlist refuses pool.ntp.org --
+        # timesyncd retrying it every few seconds kept runner-alerts.nix's
+        # refused-DNS rule firing (seen 2026-09-26).
+        services.timesyncd.enable = false;
+
         boot = {
             # virtiofs share of the runner token, read-only. systemd loads
             # the module and the mount unit comes from the fileSystems
