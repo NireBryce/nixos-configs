@@ -58,7 +58,9 @@ of the parameters it actually takes, and fail.
   `/var/lib/sbctl`, matching durandal's own addition. Off by default because
   it is durandal's, not universal.
 - `swapSize` (default `null`, meaning no swap) adds a btrfs swapfile subvolume
-  when set. `null` matches tenacity, which has none at all.
+  when set, inside the LUKS container. Neither durandal nor tenacity matches
+  either choice: both have a raw swap partition outside LUKS, declared with
+  `randomEncryption` in their `hardware-*.nix`.
 - No LUKS `keyFile` or `passwordFile` anywhere. disko's own `luks` type
   defaults `askPassword` to true whenever none of
   `keyFile`/`passwordFile`/`enrollFido2` are set (its `lib/types/luks.nix`),

@@ -45,9 +45,10 @@
                             # look like the other two.
 , espSize ? "512M"
 , includeSecureboot ? false # durandal-specific (sbctl, /var/lib/sbctl).
-, swapSize ? null           # null = no swap partition, matching tenacity.
-                            # Set e.g. "8G" for a durandal-style swap file
-                            # subvolume instead.
+, swapSize ? null           # null = no swap. Set e.g. "8G" for a swapfile
+                            # subvolume -- inside LUKS, unlike durandal's and
+                            # tenacity's own swap, which is a raw partition
+                            # outside it (hence randomEncryption there).
 }:
 { lib, ... }:
     let

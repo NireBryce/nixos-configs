@@ -1,6 +1,6 @@
 # New host disk formatting (LUKS + btrfs + impermanence)
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-26_
 
 The runbook-shaped piece of adding a new host: **the actual disk step**, not
 the Nix config around it. Skill `new-host-config` covers the whole
@@ -58,9 +58,10 @@ Per the disko doc and the `new-host-config` skill, in order:
    `ls /dev/disk/by-id/`) — not guessed from another host's layout.
 2. **`includeSecureboot`** (default off) — durandal's own addition
    (`/var/lib/sbctl`), not universal. Decide for this host explicitly.
-3. **`swapSize`** (default `null`, no swap) — tenacity has none; durandal's
-   shape is the one with swap. Decide for this host explicitly, don't
-   silently inherit either default.
+3. **`swapSize`** (default `null`, no swap) — set, it makes a swapfile
+   inside LUKS. Durandal and tenacity both instead have a raw swap partition
+   outside LUKS, which is why their `swapDevices` use `randomEncryption`.
+   Decide for this host explicitly, don't silently inherit either default.
 4. **LUKS unlock method** — the generator sets none of `keyFile` /
    `passwordFile` / `enrollFido2`, so disko's own default applies:
    interactive passphrase, at partition time and at every later boot. That's
