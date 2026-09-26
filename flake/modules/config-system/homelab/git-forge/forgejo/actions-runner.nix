@@ -61,8 +61,10 @@
             # does only what needs the forge user.
             systemd.services.forgejo-runner-registration = {
                 description = "Register the Forgejo Actions runner against the forge";
-                after      = [ "forgejo.service" ];
-                wants      = [ "forgejo.service" ];
+                # After the admin bootstrap too: `--scope elly` below names
+                # a user that must already exist (forgejo.nix creates it).
+                after      = [ "forgejo.service" "forgejo-admin-bootstrap.service" ];
+                wants      = [ "forgejo.service" "forgejo-admin-bootstrap.service" ];
                 wantedBy   = [ "multi-user.target" ];
                 path       = with pkgs; [ config.services.forgejo.package coreutils ];
 
@@ -71,8 +73,15 @@
                     CONFIG=${config.services.forgejo.customDir}/conf/app.ini
                     SECRET_FILE=${config.sops.secrets.forgejo-runner-secret.path}
 
+                    # `--scope elly`: the forge hands this runner jobs from
+                    # repos owned by that user only, not the whole instance
+                    # (it was global until 2026-09-25). Re-registering an
+                    # existing runner rewrites owner_id/repo_id in place
+                    # (models/actions/forgejo.go RegisterRunner) -- same
+                    # UUID, same token, no admin-UI cleanup.
                     forgejo --config "$CONFIG" forgejo-cli actions register \
                         --name forge-runner \
+                        --scope elly \
                         --secret-file "$SECRET_FILE"
                 '';
 

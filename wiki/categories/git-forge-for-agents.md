@@ -49,7 +49,7 @@ docker/podman access roots the VM, not cube.
 | Secret | sops key `forgejo-runner-secret` (main secrets.yaml, cube-only decryption); staged root:root 0600 into `/var/lib/forgejo-runner-share/` by the registration unit's root `ExecStartPost` |
 | Into the guest | virtiofs share (generator `shares` param), `<readonly/>` host-side, mounted at guest `/mnt/runner-secret`; guest runs no sops, no key |
 | UUID | pinned literal in the GUEST config; = runner secret's first 16 chars as ASCII bytes (`google/uuid.FromBytes`) |
-| Registration | `forgejo-runner-registration.service` on cube re-runs idempotent `forgejo forgejo-cli actions register --secret-file` per activation; `libvirt-vm-forge-runner` ordered After= it |
+| Registration | `forgejo-runner-registration.service` on cube re-runs idempotent `forgejo forgejo-cli actions register --scope elly --secret-file` per activation (after `forgejo-admin-bootstrap`; re-registering rewrites owner/repo scope in place); runner settings `capacity = 1`, `cache.enabled = false`; new repos' Actions unit off (`DEFAULT_REPO_UNITS`); `libvirt-vm-forge-runner` ordered After= it |
 | Bootstrap | done 2026-09-25 (secret in sops, UUID pinned; guest image + cube toplevel both build). Remains: switch on cube + verify. Original procedure: [../homelab/pending-setup.md](../homelab/pending-setup.md) item 8 |
 
 ## Traps

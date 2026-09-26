@@ -99,6 +99,23 @@
                         # may need its Settings toggle flipped once.
                         ENABLED = true;
                     };
+
+                    repository = {
+                        # Forgejo 15's built-in default (models/unit/unit.go
+                        # DefaultRepoUnits) minus `repo.actions`: a NEW repo
+                        # starts with Actions off, so nothing reaches the
+                        # runner VM until a repo's Settings turn it on.
+                        # Repos that existed before this keep their toggle.
+                        DEFAULT_REPO_UNITS = lib.concatStringsSep "," [
+                            "repo.code"
+                            "repo.issues"
+                            "repo.pulls"
+                            "repo.releases"
+                            "repo.wiki"
+                            "repo.projects"
+                            "repo.packages"
+                        ];
+                    };
                 };
             };
 

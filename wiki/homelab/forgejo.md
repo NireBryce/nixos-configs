@@ -162,8 +162,7 @@ was enough. **Push over SSH is still untested.**
 Added 2026-09-24; since 2026-09-25 the runner lives in a libvirt VM on
 cube ([git-forge](../categories/git-forge.md) has the architecture —
 containment is the point). Bootstrap values landed the same day
-([pending-setup](pending-setup.md) item 8) — **not yet switched**;
-everything below describes the shape once it is.
+([pending-setup](pending-setup.md) item 8) and are live on cube.
 
 Workflows live at `.forgejo/workflows/*.yaml` in each repo and use
 GitHub-Actions syntax: `on: [push, pull_request]`, `jobs.<id>.runs-on`,
@@ -180,9 +179,11 @@ runtime. Workflows written for `ubuntu-latest` container jobs need their
 profiles or setup-* actions, which fetch their own toolchains).
 
 Runs appear per-repo under the **Actions** tab (and instance-wide in Site
-Administration → Actions → Runners, where the runner shows as `cube`). A
-repo created before Actions was enabled may need its Settings →
-Repository → Units toggle flipped once; new repos have it on.
+Administration → Actions → Runners, where the runner shows as
+`forge-runner`). **New repos start with Actions off**: turn it on under
+Settings → Repository → Units before a workflow will run. The runner only
+takes jobs from repos owned by `elly`, one at a time, and runs no actions
+cache server (`actions/cache` finds nothing to talk to).
 
 The workflow-flavored way to practice a workplace submit loop with this —
 branch protection, required checks, review before merge — is

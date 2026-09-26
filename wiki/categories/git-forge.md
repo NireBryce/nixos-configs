@@ -69,7 +69,10 @@ existing key. Upstream `services.forgejo` ships that pattern;
 
 Added 2026-09-24 on the host; moved into a VM 2026-09-25. Forgejo Actions
 (GitHub-Actions-compatible workflow YAML) is enabled instance-wide
-(`settings.actions.ENABLED`); the runner itself is the libvirt guest
+(`settings.actions.ENABLED`), but a new repo starts with its Actions unit
+off (`repository.DEFAULT_REPO_UNITS` omits `repo.actions`) and is opted in
+from its Settings. The runner is registered scoped to the user `elly`
+(`--scope elly`): it takes jobs from that user's repos only. The runner itself is the libvirt guest
 `forge-runner` on cube — instantiated by
 `virtualization/virtualization-cube.nix` through the VM generator, guest
 config in `hosts/forge-runner-configuration.nix` (no `nire-` prefix:
@@ -126,8 +129,9 @@ renders a key runner v13 silently drops, the swallowed-key shape, which
 is why it's written out here.
 
 `forgejo-runner-registration.service` re-runs the server-side
-`forgejo forgejo-cli actions register --secret-file …` on every
-activation — idempotent by design (same secret → same UUID → existing
+`forgejo forgejo-cli actions register --scope elly --secret-file …` on
+every activation (after `forgejo-admin-bootstrap`, which creates that
+user) — idempotent by design (same secret → same UUID → existing
 row, no-op'd by token-hash compare) — and is what creates the row the
 runner authenticates against. `libvirt-vm-forge-runner` is ordered
 After= it. Rotating the secret rotates the identity: new UUID pin in the
