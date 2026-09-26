@@ -1,6 +1,6 @@
 # Impermanence, initrd & secrets
 
-_Last modified: 2026-09-17_
+_Last modified: 2026-09-26_
 
 ## Contents
 
@@ -96,12 +96,22 @@ that import it.
   every host key instead of the one recipient intended. Full pattern,
   including the matching `ssh-to-age`-vs-`SOPS_AGE_SSH_PRIVATE_KEY_FILE`
   decrypt trap from the bullet above, skill `low-side-secrets`.
-- **A full `nix flake check`/`just preflight` can fail with `error: path
-  '<hash>-secrets.yaml' is not valid` in some eval environments** (seen in a
-  sandboxed agent session, 2026-09-01, on a clean tree). `secrets/sops.nix`'s
-  `secretsPath = ./secrets.yaml` carries string context; sops-nix's manifest
-  validation calls `builtins.pathExists` on it first, forcing the store copy,
-  which silently fails in that kind of session. Hits eval of any host
-  importing `secrets/sops.nix` (all three NixOS hosts, via the shared
-  `system` category). Doesn't affect a real `just build`/`switch` on the
-  host, nor `just modules`/`just lint`. Not a bug in this repo.
+- **`nix flake check`/`just preflight` failing with `error: path
+  '<hash>-secrets.yaml' is not valid`** — fixed 2026-09-26, kept here for
+  symptom recognition on older revisions and in other repos carrying the
+  same shape. Root cause: `secrets/sops.nix` handed sops-nix
+  `"${secretsPath}"` — a string with context — and sops-nix's manifest
+  validation runs `builtins.pathExists` on every sopsFile; on the string
+  form that forces the file to be realised into the store as its own
+  path, which `nix flake check`'s read-only lazy-trees evaluation cannot
+  perform for a git-sourced file nothing has realised yet. First seen
+  2026-09-01 (mis-read then as a sandbox-only artifact) and re-seen
+  2026-09-26 immediately after a sops re-encrypt changed secrets.yaml's
+  store path; reproduced on demand by pointing `defaultSopsFile` at a
+  fresh probe file, and fixed by passing the plain path value instead —
+  sops-nix's own validation has an explicit `builtins.isPath` branch for
+  exactly that form, and a path needs no store copy until a derivation
+  consumes it. On unfixed revisions the failure hits any host importing
+  `secrets/sops.nix` (all three NixOS hosts, via the shared `system`
+  category) and clears only once something realises the file (a real
+  `just build`/`switch`, or any eval that forces the manifest).
