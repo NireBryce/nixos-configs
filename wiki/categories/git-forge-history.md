@@ -114,7 +114,7 @@ deleting the orphaned row in the admin UI.
 
 Every job could read that token, and it stayed valid across jobs; the
 guest was reused until an overlay reset. That is what the per-job cycle
-replaced.
+replaced; the sops key and its declaration were removed the same day.
 
 Traps from its first day, both caught by reading rendered artifacts: the
 instance name's dash escapes into the unit name (`forge-runner` →

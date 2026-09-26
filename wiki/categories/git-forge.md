@@ -151,8 +151,8 @@ Each job starts with a cold guest nix store.
 
 The single long-lived runner this replaced, its pinned UUID and its
 day-one traps: [git-forge-history.md](git-forge-history.md#the-long-lived-runner-2026-09-24-to-2026-09-26).
-The sops secret `forgejo-runner-secret` is still declared, unused, as a
-way back; remove it with its `secrets.yaml` entry.
+Nothing about the runner lives in sops any more: the old
+`forgejo-runner-secret` key and its declaration were removed 2026-09-26.
 
 ## Tailnet-only access, same mechanism as Grafana
 
