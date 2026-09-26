@@ -82,10 +82,9 @@ status and what broke on the way:
   sqlite-staging bug, then confirmed). Still no backups on durandal/
   tenacity/lysithea ([#130](https://github.com/NireBryce/nixos-configs/issues/130)).
   Runbook: [homelab/backup-runbook.md](homelab/backup-runbook.md).
-- opencode server —
-  [`flake/modules/hosts/cube/configuration/opencode-server-cube.nix`](<../flake/modules/hosts/cube/configuration/opencode-server-cube.nix>)
-  (2026-09-07). Not a category: one personal dev tool, not part of the
-  self-hosted stack. Runs `opencode serve` as a systemd user service bound
+- [coding-agent](categories/coding-agent.md) — opencode (2026-09-07; its
+  own category since 2026-09-26, and cube is now the only NixOS host with
+  the CLI at all). Runs `opencode serve` as a systemd user service bound
   to the tailnet IP only, with HTTP basic auth since 2026-09-26 (sops
   `OPENCODE_SERVER_PASSWORD`; username `opencode`) — `just opencode-attach`
   prompts for it unless `OPENCODE_SERVER_PASSWORD` is set (`-c` resumes the

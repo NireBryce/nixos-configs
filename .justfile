@@ -172,7 +172,8 @@ switch:
 # Attach the TUI to cube's opencode server (tailnet-only, port 3003)
 opencode-attach dir='.' *args:
     #!/usr/bin/env bash
-    # Cube-only server -- hosts/cube/configuration/opencode-server-cube.nix.
+    # Server and CLI are cube-only (lysithea has Homebrew's CLI):
+    # config-system/homelab/coding-agent/opencode/opencode-server.nix.
     # `ts-cube` is cube's tailnet DEVICE name, not its hostname (tailscale.nix
     # trap #1), and resolves from any tailnet member, including cube itself.
     # First arg is the project dir (default `.`); extra args pass through:

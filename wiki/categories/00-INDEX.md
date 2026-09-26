@@ -56,9 +56,10 @@ matching "how do I use this, not configure it" page where one exists.
 | Category | Directory | Class(es) | Imported by |
 |---|---|---|---|
 | [backup](backup.md) | `config-system/homelab/backup/` | nixos | cube only |
+| [coding-agent](coding-agent.md) | `config-system/homelab/coding-agent/` | nixos | cube only |
 | [containers](containers.md) | `config-system/homelab/containers/` | nixos | cube only |
 | [git-forge](git-forge.md) | `config-system/homelab/git-forge/` | nixos | cube only |
-| [homelab](homelab.md) | `config-system/homelab/` (+ 8 nested) | nixos | cube only |
+| [homelab](homelab.md) | `config-system/homelab/` (+ 9 nested) | nixos | cube only |
 | [landing](landing.md) | `config-system/homelab/landing/` | nixos | cube only |
 | [monitoring](monitoring.md) | `config-system/homelab/monitoring/` | nixos | cube only |
 | [reverse-proxy](reverse-proxy.md) | `config-system/homelab/reverse-proxy/` | nixos | cube only |
