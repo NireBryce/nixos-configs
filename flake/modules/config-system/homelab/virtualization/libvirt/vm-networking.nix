@@ -8,8 +8,8 @@
             # # description = "let libvirt's NAT bridge past the host firewall";
 
             # libvirt's default network is NAT behind `virbr0`, with libvirt's own
-            # dnsmasq handing out DHCP leases and answering DNS on the bridge
-            # address. The host firewall is on here (networking.firewall.enable is
+            # dnsmasq handing out DHCP leases (and DNS, which guests here are
+            # refused -- below) on the bridge address. The host firewall is on here (networking.firewall.enable is
             # true on every host in this repo), and it drops those guest-to-host
             # packets, so the symptom is a guest that boots fine, gets no lease,
             # and looks like a broken NIC rather than a firewall problem.
@@ -18,10 +18,18 @@
             # (concatenating, additive to tailscale0/lo) when the runner VM
             # landed -- blanket trust meant a compromised guest reached
             # every port on the host, and this host now RUNS job code.
-            # Guests get exactly: DHCP leases and DNS from libvirt's
-            # dnsmasq, and Caddy's 443 (the forge door; which vhosts
-            # answer a guest is caddy.nix's `vmDeny`). Established/related
-            # replies pass as always.
+            # Guests get exactly: DHCP leases from libvirt's dnsmasq, and
+            # Caddy's 443 on the bridge address only (the forge door; which
+            # vhosts answer a guest is caddy.nix's `vmDeny`) -- not on the
+            # host's LAN or tailnet addresses. Established/related replies
+            # pass as always.
+            #
+            # No DNS: dnsmasq forwards to this host's resolver, which is
+            # MagicDNS, so a guest could resolve tailnet names. Guests use
+            # public resolvers instead (the runner guest sets its own). The
+            # drop is in `mangle` INPUT because libvirt's iptables backend
+            # puts its own DNS/DHCP ACCEPTs at the top of filter INPUT,
+            # ahead of nixos-fw.
             #
             # The per-interface options alone did NOT make that "exactly":
             # the host's global allowedTCPPorts/allowedUDPPorts (22, KDE
@@ -32,8 +40,8 @@
             # RETURNs the rest to nixos-fw's normal accepts.
             networking.firewall = {
                 interfaces."virbr0" = {
-                    allowedUDPPorts = [ 53 67 ];   # dnsmasq: DNS + DHCP
-                    allowedTCPPorts = [ 53 443 ];  # dnsmasq over TCP; Caddy
+                    allowedUDPPorts = [ 67 ];   # dnsmasq: DHCP
+                    allowedTCPPorts = [ 443 ];  # Caddy
                 };
 
                 # Guest -> LAN/tailnet, enforced on THIS side of the VM
@@ -62,8 +70,8 @@
                     iptables -w -X cube-vm-in 2>/dev/null || true
                     iptables -w -N cube-vm-in
                     iptables -w -A cube-vm-in -m conntrack --ctstate ESTABLISHED,RELATED -j RETURN
-                    iptables -w -A cube-vm-in -p udp -m multiport --dports 53,67 -j RETURN
-                    iptables -w -A cube-vm-in -p tcp -m multiport --dports 53,443 -j RETURN
+                    iptables -w -A cube-vm-in -p udp --dport 67 -j RETURN
+                    iptables -w -A cube-vm-in -p tcp --dport 443 -d 192.168.122.1 -j RETURN
                     iptables -w -A cube-vm-in -p icmp -j RETURN
                     iptables -w -A cube-vm-in -j DROP
                     iptables -w -I nixos-fw 1 -i virbr0 -j cube-vm-in
@@ -82,6 +90,11 @@
                     iptables -w -t mangle -A cube-vm-egress -d 100.64.0.0/10  -j DROP
                     iptables -w -t mangle -I FORWARD 1 -i virbr0 -j cube-vm-egress
 
+                    iptables -w -t mangle -D INPUT -i virbr0 -p udp --dport 53 -j DROP 2>/dev/null || true
+                    iptables -w -t mangle -D INPUT -i virbr0 -p tcp --dport 53 -j DROP 2>/dev/null || true
+                    iptables -w -t mangle -I INPUT 1 -i virbr0 -p udp --dport 53 -j DROP
+                    iptables -w -t mangle -I INPUT 1 -i virbr0 -p tcp --dport 53 -j DROP
+
                     ip6tables -w -t mangle -D FORWARD -i virbr0 -j DROP 2>/dev/null || true
                     ip6tables -w -t mangle -I FORWARD 1 -i virbr0 -j DROP
                 '';
@@ -95,6 +108,8 @@
                     iptables -w -t mangle -F cube-vm-egress 2>/dev/null || true
                     iptables -w -t mangle -X cube-vm-egress 2>/dev/null || true
                     ip6tables -w -t mangle -D FORWARD -i virbr0 -j DROP 2>/dev/null || true
+                    iptables -w -t mangle -D INPUT -i virbr0 -p udp --dport 53 -j DROP 2>/dev/null || true
+                    iptables -w -t mangle -D INPUT -i virbr0 -p tcp --dport 53 -j DROP 2>/dev/null || true
                 '';
             };
 

@@ -58,7 +58,7 @@ own database. The repo-side counterpart is
    toplevel both build). What remains: `just build` + `just switch` on
    cube, then the done-when: `forgejo-runner-registration.service` and
    `libvirt-vm-forge-runner.service` succeeded, guest running (debug SSH:
-   `ssh -p 2223 root@ts-cube`, tailnet-only), runner shows
+   `ssh -t ts-cube ssh forge-runner`, cube's key only), runner shows
    `forge-runner`/`Idle` in Site Administration → Actions → Runners, and a
    workflow run goes green. Egress check from inside the guest: forge 443
    answers; LAN/tailnet addresses time out (guest-local OUTPUT rules). Rotation = new `forgejo-runner-secret` → new

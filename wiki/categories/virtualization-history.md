@@ -34,7 +34,9 @@ connection through this forward was never made before the VM was removed.
 `forge-runner` (2026-09-25) is its second caller — `guestId = 11`,
 `hostPort = 2223`, tailnet-only — and the first connection through the
 forward was made on 2026-09-25: `ssh -p 2223 root@ts-cube` from a tailnet
-host reached the guest.
+host reached the guest. The same day, forge-runner narrowed its SSH to
+cube's key and dropped the forward (`sourceCidrs = [ ]`), leaving
+`sshForward` only its fixed-address half.
 
 ## The near-miss this category's own header records
 

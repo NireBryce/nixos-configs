@@ -237,7 +237,7 @@ and `just switch` **on cube**. `unset SECRET` when done.
 **Done when:** on cube, `forgejo-runner-registration.service` and
 `libvirt-vm-forge-runner.service` have both succeeded, the guest is up
 (`virsh domstate forge-runner` → running; SSH for debugging via
-`ssh -p 2223 root@ts-cube`, tailnet-only), the runner shows as
+`ssh -t ts-cube ssh forge-runner`, cube's key only), the runner shows as
 `forge-runner` and `Idle` under Site Administration → Actions → Runners,
 and a real workflow run has gone green. From inside the guest, the
 egress policy should hold: the forge answers over 443 while

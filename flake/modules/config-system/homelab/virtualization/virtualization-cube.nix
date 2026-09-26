@@ -36,16 +36,26 @@
                 vcpus     = 2;
                 networked = true;
 
-                # SSH in for debugging, from the tailnet only. guestId 11 /
-                # port 2223 deliberately don't reuse llm-sandbox's 10/2222:
-                # stale libvirt state on cube (defined domains, dhcp-host
-                # entries) outlives its config, and the point of the fresh
-                # identity is never meeting it.
+                # Fixed address for SSH from cube only: `ssh forge-runner` on
+                # cube (actions-runner.nix's alias; the guest trusts only
+                # cube's key). `sourceCidrs =
+                # [ ]` keeps the DHCP reservation and forwards nothing --
+                # until 2026-09-25 this forwarded host port 2223 from the
+                # tailnet (`sourceCidrs = [ "100.64.0.0/10" ]`). guestId 11
+                # deliberately doesn't reuse llm-sandbox's 10: stale libvirt
+                # state on cube (defined domains, dhcp-host entries) outlives
+                # its config, and the point of the fresh identity is never
+                # meeting it. hostPort is unused with no source ranges.
                 sshForward = {
                     guestId     = 11;
                     hostPort    = 2223;
-                    sourceCidrs = [ "100.64.0.0/10" ];
+                    sourceCidrs = [ ];
                 };
+
+                # What the guest can send, not receive: ~32 Mbit/s average.
+                # Its uploads are pushes to the forge and job output; its
+                # downloads (caches, toolchains) are unlimited.
+                bandwidth = { outboundKBps = 4096; };
 
                 # Job code runs in here, so nothing it leaves behind
                 # should outlive a cube boot or a guest change -- and a

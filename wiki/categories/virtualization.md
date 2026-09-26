@@ -86,8 +86,20 @@ Design choices, if extending to another VM:
   destination.
 
 `nire-llm-sandbox` was the first caller, before its removal 2026-08-28;
-the successor VM `forge-runner` (2026-09-25) uses the same shape —
-guestId 11, hostPort 2223, tailnet-only. Full verification record from
+the successor VM `forge-runner` (2026-09-25) keeps guestId 11 for its
+fixed address but forwards nothing (`sourceCidrs = [ ]`): its SSH is from
+cube only. It also sets the generator's `bandwidth` (an outbound cap), and
+cube runs QEMU unprivileged (`runAsRoot = false` in `libvirt.nix`) —
+which, like any `qemu.conf` change, takes a manual `sudo systemctl
+restart libvirtd-config libvirtd` to apply, since a switch never restarts
+libvirtd.
+
+The forward itself lives in a nat chain, `vm-<name>-ssh`, rebuilt on each
+firewall start. Its first form appended raw `PREROUTING` rules, which the
+NixOS firewall never flushes: every reload stacked another copy, and
+dropping the forward from config left it live (forge-runner's 2223 kept
+reaching the guest's sshd after its forward was removed). Each start
+still deletes that old shape. Full verification record from
 the first era on
 [virtualization-history.md](virtualization-history.md).
 

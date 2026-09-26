@@ -83,9 +83,13 @@ one escape from whatever holds it, and cube holds everything sops
 decrypts. In the VM it holds one secret — its own runner token. The VM
 adds no listening port either way; it is dial-out, like the runner was
 on the host. Its egress is scoped by the GUEST's own firewall
-(`networking.firewall.extraCommands` in the guest config: gateway
-DNS/DHCP and the forge's 443 only, all private ranges and the tailnet
-dropped, open internet allowed). A host-side nwfilter was attempted
+(`networking.firewall.extraCommands` in the guest config: gateway DHCP
+and the forge's 443 only, all private ranges and the tailnet dropped,
+open internet allowed). It resolves names through public resolvers, not
+cube's dnsmasq (which forwards to MagicDNS); cube drops guest DNS too.
+Root SSH into the guest trusts cube's key only — `ssh forge-runner` on
+cube (an `ssh_config` alias with host-key checking off, since the key
+regenerates on every reset), no tailnet port forward. A host-side nwfilter was attempted
 first and abandoned the same day — its out-direction drops in libvirt
 12.7 enforce against inbound traffic too. cube repeats the private-range
 and tailnet drops on its own side, in `mangle` FORWARD

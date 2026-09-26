@@ -14,7 +14,14 @@ Libvirt/QEMU VMs on `nire-cube` only — podman/distrobox are the separate
 - `libvirt.nix` — `virtualisation.libvirtd`; also virtiofsd
   (`vhostUserPackages`, required for virtiofs shares), virt-manager,
   `elly` in `libvirtd`. No `ovmf` (removed option, eval fails).
-- `vm-networking.nix` — `virbr0` opens UDP 53/67 + TCP 53/443 only;
+- `libvirt.nix` sets `qemu.runAsRoot = false` (QEMU as `qemu-libvirtd`;
+  DAC chowns writable images, skips read-only store paths). **A switch
+  doesn't apply qemu.conf changes** (libvirtd is X-RestartIfChanged=false;
+  libvirtd-config copies qemu.conf only as its dependency): `sudo systemctl
+  restart libvirtd-config libvirtd`, then restart running domains.
+- `vm-networking.nix` — `virbr0` opens UDP 67 + TCP 443 (to
+  192.168.122.1 only); guest DNS to the host dropped in `mangle` INPUT
+  (dnsmasq forwards to MagicDNS);
   `cube-vm-in` (jumped first in nixos-fw) refuses the host's global ports
   there; `mangle` FORWARD chain `cube-vm-egress` drops guest→RFC1918/
   100.64/10 (filter FORWARD is libvirt's iptables-backend chains, whose
@@ -73,6 +80,10 @@ DHCP-reserves the guest IP, then `virsh define` + start. Shares carry
 - **Overlays pin their base at creation** — a rebuilt base image never
   reaches an existing guest unless it is `ephemeral` (forge-runner is);
   manual reset: [../maintenance.md](../maintenance.md#the-runner-vm).
+- **sshForward DNAT lives in nat chain `vm-<name>-ssh`**, rebuilt per
+  firewall start. Before 2026-09-25 it was raw PREROUTING rules the
+  firewall never flushes: reloads stacked duplicates, and removing a
+  forward left it live. Each start still deletes that legacy shape.
 - **nwfilter egress drops break inbound** (libvirt 12.7): out-direction
   drops match inbound traffic too; five variants tested 2026-09-25, all
   dropping the guest's inbound. Egress is enforced guest-locally

@@ -36,8 +36,9 @@ restated here.
   periodic reset; a switch that changes the guest kills a running job.
 - Force a reset: `sudo rm /run/libvirt-vm/forge-runner.stamp && sudo
   systemctl restart libvirt-vm-forge-runner`. Costs: guest SSH host keys
-  regenerate (known_hosts), nix caches refill; debug SSH `-p 2223 root@ts-cube`
-  or `-J ts-cube root@192.168.122.11`. Token is staged from cube
+  regenerate (known_hosts), nix caches refill; debug SSH from cube only
+  (`ssh -t ts-cube ssh forge-runner`; alias in actions-runner.nix, host-key
+  checking off since keys regenerate per reset; the guest trusts cube's key). Token is staged from cube
   at boot — nothing secret is lost.
 
 ## Deploying
