@@ -37,7 +37,8 @@ restated here.
 - Force a reset: `sudo rm /run/libvirt-vm/forge-runner.stamp && sudo
   systemctl restart libvirt-vm-forge-runner`. Costs: guest SSH host keys
   regenerate (known_hosts), nix caches refill; debug SSH from cube only
-  (`ssh -t ts-cube ssh root@192.168.122.11`; the guest trusts cube's key). Token is staged from cube
+  (`ssh -t ts-cube ssh forge-runner`; alias in actions-runner.nix, host-key
+  checking off since keys regenerate per reset; the guest trusts cube's key). Token is staged from cube
   at boot — nothing secret is lost.
 
 ## Deploying

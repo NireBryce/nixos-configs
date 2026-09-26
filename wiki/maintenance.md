@@ -146,7 +146,8 @@ sudo systemctl restart libvirt-vm-forge-runner   # destroys, recreates the overl
 ```
 
 What each reset costs: the guest's SSH host keys regenerate (update
-`known_hosts` on cube; the guest trusts cube's key only, so it's
-`ssh -t ts-cube ssh root@192.168.122.11`), and the guest nix
+nothing to update: cube's `ssh forge-runner` alias skips host-key
+checking for that address; the guest trusts cube's key only, so from
+elsewhere it's `ssh -t ts-cube ssh forge-runner`), and the guest nix
 store's warm-up is lost (it refills from the cache on the next run).
 Nothing else lives in the guest.

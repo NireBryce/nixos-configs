@@ -36,8 +36,9 @@
                 vcpus     = 2;
                 networked = true;
 
-                # Fixed address for SSH from cube only: `ssh root@192.168.122.11`
-                # on cube (the guest trusts only cube's key). `sourceCidrs =
+                # Fixed address for SSH from cube only: `ssh forge-runner` on
+                # cube (actions-runner.nix's alias; the guest trusts only
+                # cube's key). `sourceCidrs =
                 # [ ]` keeps the DHCP reservation and forwards nothing --
                 # until 2026-09-25 this forwarded host port 2223 from the
                 # tailnet (`sourceCidrs = [ "100.64.0.0/10" ]`). guestId 11

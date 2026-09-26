@@ -99,6 +99,21 @@
             systemd.services."libvirt-vm-forge-runner".after =
                 [ "forgejo-runner-registration.service" ];
 
+            # `ssh forge-runner` on cube -- the only place the guest takes
+            # SSH from (its authorized key is cube's). The guest is
+            # ephemeral, so its host key regenerates on every reset and a
+            # remembered one would refuse every time; host-key checking is
+            # off for this one bridge address instead. Intercepting
+            # virbr0 already takes root on cube.
+            programs.ssh.extraConfig = ''
+                Host forge-runner 192.168.122.11
+                    HostName 192.168.122.11
+                    User root
+                    StrictHostKeyChecking no
+                    UserKnownHostsFile /dev/null
+                    LogLevel ERROR
+            '';
+
             # No persistence entry, same reasoning as forgejo.nix: cube has
             # a plain persistent root (cube-configuration.nix's header), so
             # /var/lib/forgejo-runner-share and the VM's overlay disk under

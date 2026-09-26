@@ -87,8 +87,9 @@ on the host. Its egress is scoped by the GUEST's own firewall
 and the forge's 443 only, all private ranges and the tailnet dropped,
 open internet allowed). It resolves names through public resolvers, not
 cube's dnsmasq (which forwards to MagicDNS); cube drops guest DNS too.
-Root SSH into the guest trusts cube's key only — `ssh root@192.168.122.11`
-from cube, no tailnet port forward. A host-side nwfilter was attempted
+Root SSH into the guest trusts cube's key only — `ssh forge-runner` on
+cube (an `ssh_config` alias with host-key checking off, since the key
+regenerates on every reset), no tailnet port forward. A host-side nwfilter was attempted
 first and abandoned the same day — its out-direction drops in libvirt
 12.7 enforce against inbound traffic too. cube repeats the private-range
 and tailnet drops on its own side, in `mangle` FORWARD

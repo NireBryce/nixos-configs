@@ -287,9 +287,9 @@
         };
 
         # SSH for debugging a headless worker VM (the serial console is the
-        # other way, and it is no fun). From cube only: `ssh
-        # root@192.168.122.11` on cube, or `ssh -t ts-cube ssh
-        # root@192.168.122.11` from elsewhere. Only cube's key is trusted,
+        # other way, and it is no fun). From cube only: `ssh forge-runner`
+        # on cube (actions-runner.nix's alias), or `ssh -t ts-cube ssh
+        # forge-runner` from elsewhere. Only cube's key is trusted,
         # so guest access is never wider than access to cube itself, and
         # there is no tailnet port forward (virtualization-cube.nix).
         # Until 2026-09-25 this list was the whole fleet's (duplicated from
