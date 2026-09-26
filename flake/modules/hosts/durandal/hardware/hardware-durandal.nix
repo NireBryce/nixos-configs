@@ -66,8 +66,18 @@
                 };
             };
 
+            # nvme0n1p2 (27G) sits outside the LUKS container, so page-out
+            # landed there in plaintext; randomEncryption wraps it in dmcrypt
+            # with a per-boot key. Was `/dev/disk/by-uuid/2aa9fe35-...`:
+            # mkswap through the mapper overwrites the on-disk signature with
+            # ciphertext, so that filesystem UUID dies on the first encrypted
+            # boot -- nixpkgs asserts against by-uuid here. The GPT entry
+            # survives. An ephemeral key rules out hibernation, which
+            # nohibernate (WARN-impermanence.nix) already forbids.
             swapDevices =
-            [ { device = "/dev/disk/by-uuid/2aa9fe35-f090-45e4-9432-3cd17dc0ff9d"; }
+            [ { device = "/dev/disk/by-partuuid/956635cb-8253-4f62-956d-e1dc3065880a";
+                randomEncryption = true;
+              }
             ];
 
             # Enables DHCP on each ethernet and wireless interface. In case of scripted networking

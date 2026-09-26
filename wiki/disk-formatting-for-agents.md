@@ -1,6 +1,6 @@
 # New host disk formatting, for agents
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-26_
 
 Condensed from [disk-formatting.md](disk-formatting.md), which keeps the
 reasoning and the full warnings. Facts only here.
@@ -25,7 +25,9 @@ adopted the layout. Evaluation-verified only, never run against hardware.
    `ls /dev/disk/by-id/`). Never inferred from another host.
 2. **`includeSecureboot`** — default off; durandal's addition
    (`/var/lib/sbctl`), not universal.
-3. **`swapSize`** — default `null`; tenacity has none, durandal does.
+3. **`swapSize`** — default `null` (no swap); set = swapfile inside LUKS.
+   Durandal and tenacity each have a raw swap partition outside LUKS
+   instead, declared with `randomEncryption`.
 4. **LUKS unlock** — the generator sets no `keyFile`/`passwordFile`/
    `enrollFido2`, so disko's default applies: interactive passphrase at
    partition time and every boot.

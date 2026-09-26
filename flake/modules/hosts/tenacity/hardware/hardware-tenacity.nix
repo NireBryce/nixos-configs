@@ -71,7 +71,22 @@
           };
       };
 
-      swapDevices = [ ];
+      # nvme0n1p6 carries a GPT swap type UUID, so systemd-gpt-auto-generator
+      # finds and activates it with no configuration at all -- found live
+      # 2026-09-25: /proc/swaps listed it while swapDevices was []. Declaring
+      # it takes it away from that discovery; randomEncryption wraps it in
+      # dmcrypt with a per-boot key, because this partition sits outside the
+      # LUKS container and page-out was landing there in plaintext.
+      # PARTUUID, not UUID: mkswap through the mapper overwrites the on-disk
+      # signature with ciphertext, so a filesystem UUID dies on the first
+      # encrypted boot -- nixpkgs asserts against by-uuid here. The GPT entry
+      # survives. An ephemeral key rules out hibernation, which nohibernate
+      # (WARN-impermanence.nix) already forbids.
+      swapDevices =
+        [ { device = "/dev/disk/by-partuuid/5e2b1c4c-3c14-49b4-b311-b176c1a1118c";
+            randomEncryption = true;
+          }
+        ];
 
       # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
       # (the default) this is the recommended approach. When using systemd-networkd it's
