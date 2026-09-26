@@ -135,8 +135,7 @@
         #     GLOBAL one; nixosSystem also pins `nixpkgs` in the SYSTEM
         #     registry (/etc/nix/registry.json), which kept
         #     `nixpkgs#pkg` working until setFlakeRegistry went too
-        #     (setNixPath requires it). A flake input must now come from
-        #     the repo's own lock or a typed full URL,
+        #     (setNixPath requires it),
         #   - no silent fallback to unsandboxed builds, and a ceiling on
         #     hung or runaway ones,
         #   - daily GC so ad-hoc store paths don't accumulate.
@@ -226,12 +225,11 @@
         # an EMPTY second unit (caught by reading the rendered unit, not
         # by eval).
         # Sandboxing for the runner unit -- and therefore every job, since
-        # host-executor jobs are children of it (nix run included). The
-        # filesystem goes read-only except the state dir and private /tmp;
-        # kernel interfaces and privilege transitions are closed. This is
-        # what bounds an ad-hoc `nix run` of something hostile: it runs,
-        # but it cannot write the system, load modules, or flip kernel
-        # knobs. Deliberately NOT set: MemoryDenyWriteExecute (breaks
+        # host-executor jobs are children of it. The filesystem goes
+        # read-only except the state dir and private /tmp; kernel
+        # interfaces and privilege transitions are closed: no writing the
+        # system, loading modules, or flipping kernel knobs. Deliberately
+        # NOT set: MemoryDenyWriteExecute (breaks
         # node/v8 JIT, which actions need). Network stays open -- the
         # egress policy above is its bound. nixpkgs' unit already sets
         # DynamicUser plus most of the list below; restating those keeps
