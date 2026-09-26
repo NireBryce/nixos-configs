@@ -1,6 +1,6 @@
 # `reverse-proxy`, for agents
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-25_
 
 Condensed from [reverse-proxy.md](reverse-proxy.md), which keeps the
 reasoning, the verification narrative and the links out. Facts only here.
@@ -59,6 +59,12 @@ redirects; `https://<bare name>` serves Caddy's local CA and shows
 - No firewall ports. `trustedInterfaces = [ "tailscale0" ]` (from `system`)
   is what lets tailnet traffic in; 443 binds unprivileged via upstream
   `caddy.service`'s `AmbientCapabilities`.
+- `virbr0` reaches 443 too (runner VM). Every `.ts.net` vhost but `git.` carries
+  `vmDeny` (`@vm remote_ip 192.168.122.0/24` + `handle @vm { abort }`);
+  `handle`, not bare `abort`, since `handle` sorts first and the landing
+  vhost's catch-all `handle` would otherwise win. Not on the bare
+  `https://` twins — `redir` sorts ahead of `handle`; they only 301 to a
+  `.ts.net` name that carries it.
 - No `environment.persistence` entry — cube has a persistent root. A host
   that wipes `/root` would need one for `/var/lib/caddy` first.
 - `landing` is a hard dependency: the root route proxies to the landing

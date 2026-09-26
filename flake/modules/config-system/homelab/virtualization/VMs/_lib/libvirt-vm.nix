@@ -90,6 +90,27 @@
     # for virtiofs, and libvirt spawns one virtiofsd per share --
     # `vhostUserPackages` on the host side is what makes that work
     # (libvirt/libvirt.nix).
+    #
+    # Read-only ON THE HOST by default (`<readonly/>`, which libvirt
+    # turns into virtiofsd's `--readonly`): a guest-side `ro` mount
+    # option is the guest's own choice, and guest root can remount rw.
+    # With passthrough and a root virtiofsd, a writable share lets guest
+    # root create root-owned files -- setuid ones included -- in the host
+    # directory. Pass `readonly = false;` on a share that genuinely needs
+    # writes back.
+
+, ephemeral ? false
+    # true: the guest's overlay is discarded and recreated from the
+    # current base image whenever the base image or the domain XML
+    # changes, and on every host boot -- the guest never carries state
+    # across either. The activation script compares a stamp under /run
+    # (tmpfs, so missing after a boot) against the current base image and
+    # domain XML store paths, and on a mismatch destroys the running
+    # domain, deletes the overlay, and lets the normal create/define/start
+    # path below rebuild it. A switch that changes the guest therefore
+    # kills whatever it was running. Without this, a new guest image
+    # never reaches a running overlay (the overlay pins its base at
+    # creation) and new domain XML waits for a manual `virsh destroy`.
 
 }:
 { pkgs, lib, ... }:
@@ -98,6 +119,7 @@ let
     overlay  = "${diskDir}/${name}.qcow2";
     baseImg  = imagePath;
     xmlPath  = "/etc/libvirt/qemu/${name}.xml";
+    stamp    = "/run/libvirt-vm/${name}.stamp";
 
     hex2 = n: lib.fixedWidthString 2 "0" (lib.toLower (lib.toHexString n));
     # Only meaningful (and evaluated) when sshForward != null -- guarded
@@ -147,6 +169,7 @@ let
             <driver type='virtiofs'/>
             <source dir='${share.source}'/>
             <target dir='${share.tag}'/>
+            ${lib.optionalString (share.readonly or true) "<readonly/>"}
           </filesystem>
     '') shares;
 
@@ -214,7 +237,8 @@ let
     # because `domainXml` now carries a fixed `uuid` (see that parameter's
     # comment for the trap hit when it didn't):
     #   - the overlay is only ever CREATED if missing, so a rebuild never
-    #     wipes a VM's accumulated state;
+    #     wipes a VM's accumulated state -- unless `ephemeral`, which
+    #     deletes it on purpose first;
     #   - `virsh define` redefining an already-running domain's persistent
     #     config, UUID unchanged, does not stop or restart it (standard
     #     libvirt semantics);
@@ -237,6 +261,21 @@ let
       mkdir -p /nix/var/nix/gcroots/libvirt-vms
       ln -sfn "${image}" "/nix/var/nix/gcroots/libvirt-vms/${name}-base"
 
+      ${lib.optionalString ephemeral ''
+      # `ephemeral` (parameter comment): reset on a new base image, new
+      # domain XML, or a fresh boot (the stamp lives on tmpfs). This
+      # script's own store path embeds both paths, so any change that
+      # matters here also changes ExecStart and makes switch re-run it.
+      want="${baseImg} ${domainXml}"
+      if [ "$(cat "${stamp}" 2>/dev/null || true)" != "$want" ]; then
+        echo "libvirt-vm-${name}: ephemeral reset (base image, domain XML, or boot changed)"
+        state="$(${pkgs.libvirt}/bin/virsh -c qemu:///system domstate ${name} 2>/dev/null || true)"
+        if [ -n "$state" ] && [ "$state" != "shut off" ]; then
+          ${pkgs.libvirt}/bin/virsh -c qemu:///system destroy ${name}
+        fi
+        rm -f "${overlay}"
+      fi
+      ''}
       mkdir -p "${diskDir}"
       if [ ! -e "${overlay}" ]; then
         ${pkgs.qemu}/bin/qemu-img create -f qcow2 -F qcow2 -b "${baseImg}" "${overlay}"
@@ -291,6 +330,12 @@ let
       if [ "$state" != "running" ]; then
         ${pkgs.libvirt}/bin/virsh -c qemu:///system start ${name}
       fi
+      ${lib.optionalString ephemeral ''
+
+      # Written last, so a failed start above resets again next run.
+      mkdir -p "$(dirname "${stamp}")"
+      echo "$want" > "${stamp}"
+      ''}
     '';
 in
 {
@@ -321,11 +366,14 @@ in
     # `extraCommands` is `lines`-typed (concatenates across modules), so
     # this is additive with any other VM's forward, not an override.
     #
-    # PREROUTING DNAT only, deliberately no explicit FORWARD rule:
-    # `vm-networking.nix`'s `trustedInterfaces = [ "virbr0" ]` already
-    # accepts everything to/from that bridge, which is what a DNAT'd
-    # packet needs to cross once its destination is rewritten to the guest
-    # -- a narrower second FORWARD rule would be redundant, not additive.
+    # PREROUTING DNAT only, no FORWARD rule of its own. The reasoning
+    # this used to give -- `trustedInterfaces = [ "virbr0" ]` accepts
+    # everything to/from the bridge -- never held: trustedInterfaces
+    # feeds the INPUT chain (nixos-fw), not FORWARD, and it was narrowed
+    # away 2026-09-25 (vm-networking.nix). The DNAT'd connection
+    # crosses FORWARD on libvirt's own chains' terms, and does: first
+    # made 2026-09-25, `ssh -p 2223 root@ts-cube` from the tailnet into
+    # forge-runner. `ssh -J <host> root@<guestIp>` is the other way in.
     networking.firewall.extraCommands = lib.optionalString (sshForward != null) (
         lib.concatMapStringsSep "\n"
             (cidr: "iptables -t nat -A PREROUTING -s ${cidr} -p tcp --dport ${toString sshForward.hostPort} -j DNAT --to-destination ${guestIp}:22")

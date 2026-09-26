@@ -1,6 +1,6 @@
 # `reverse-proxy` — `config-system/homelab/reverse-proxy/`
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-25_
 
 [Caddy](https://caddyserver.com/), one tailnet-only HTTPS front door for
 every web service on `nire-cube`. Added 2026-08-24, cube-only; nested under
@@ -264,6 +264,17 @@ out for their own ports: `trustedInterfaces = [ "tailscale0" ]` lets tailnet
 traffic bypass the allow-list, everything arriving on another interface hits
 the default-deny. The usual caveat applies unchanged: that trusts the whole
 interface, not a port.
+
+The one other interface that reaches 443 is libvirt's `virbr0`, opened
+for the Actions runner VM ([virtualization](virtualization.md)). Every
+`.ts.net` vhost except `git.` carries `vmDeny` — a
+`remote_ip 192.168.122.0/24` matcher in a `handle` that aborts — so a
+guest sending another Host/SNI gets nothing. It is a `handle`, not a bare
+`abort`, because `handle` sorts ahead of `abort` and the landing vhost's
+catch-all `handle` would win otherwise (checked with `caddy adapt`,
+2.11.4). The bare-name `https://` twins don't carry it: `redir` sorts
+ahead of `handle` as well, so there it would never run, and all they give
+a guest is a 301 to a name that does.
 
 Caddy itself still binds every interface, because it can't bind the tailnet
 address — that IP is assigned at runtime by tailscaled and isn't knowable at

@@ -29,15 +29,16 @@ restated here.
 
 ## The runner VM
 
-- `forge-runner` (libvirt guest on cube, Forgejo Actions runner): its
-  overlay pins the base image at first creation — flake updates build a
-  new base the guest NEVER boots; guest packages age in place.
-- Periodic reset (after a few lock bumps): on cube, `sudo virsh destroy
-  forge-runner` → `sudo rm /var/lib/libvirt/images/forge-runner.qcow2` →
-  `sudo systemctl restart libvirt-vm-forge-runner` (re-creates overlay
-  from the current base + starts). Costs: guest SSH host keys regenerate
-  (known_hosts), podman/nix caches refill. Token is staged from cube at
-  boot — nothing secret is lost.
+- `forge-runner` (libvirt guest on cube, Forgejo Actions runner) is
+  `ephemeral = true` (VMs/_lib/libvirt-vm.nix): overlay recreated from the
+  current base on every cube boot and on any switch changing the base
+  image or domain XML (stamp: `/run/libvirt-vm/forge-runner.stamp`). No
+  periodic reset; a switch that changes the guest kills a running job.
+- Force a reset: `sudo rm /run/libvirt-vm/forge-runner.stamp && sudo
+  systemctl restart libvirt-vm-forge-runner`. Costs: guest SSH host keys
+  regenerate (known_hosts), nix caches refill; debug SSH `-p 2223 root@ts-cube`
+  or `-J ts-cube root@192.168.122.11`. Token is staged from cube
+  at boot — nothing secret is lost.
 
 ## Deploying
 

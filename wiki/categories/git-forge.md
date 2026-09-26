@@ -87,14 +87,16 @@ on the host. Its egress is scoped by the GUEST's own firewall
 DNS/DHCP and the forge's 443 only, all private ranges and the tailnet
 dropped, open internet allowed). A host-side nwfilter was attempted
 first and abandoned the same day — its out-direction drops in libvirt
-12.7 enforce against inbound traffic too — the guest-local residual is
-that VM-root can flush those rules; the hard containment layer is the
-VM boundary itself.
+12.7 enforce against inbound traffic too. cube repeats the private-range
+and tailnet drops on its own side, in `mangle` FORWARD
+(`vm-networking.nix`), where guest root can't reach them.
 
 **Job → forge, without tailscaled.** The guest is not on the tailnet. Its
 `/etc/hosts` pins `git.moose-micro.ts.net` to `192.168.122.1` (the virbr0
-gateway); `vm-networking.nix` already trusts that bridge and Caddy's cert
-for the name is publicly trusted, so the connection URL is the ordinary
+gateway); `vm-networking.nix` opens Caddy's 443 on that bridge (and
+nothing else beyond DHCP/DNS), Caddy answers guests on the git vhost
+only (`vmDeny` in `caddy.nix`), and its cert for the name is publicly
+trusted, so the connection URL is the ordinary
 ROOT_URL over validated TLS, Caddy → loopback Forgejo. Forgejo's own
 127.0.0.1:3001 stays unreachable from the guest, by design — Caddy is
 the door. One label decides which jobs it accepts (`runs-on: nix:host`) — jobs
@@ -104,8 +106,8 @@ runtime in the guest. Usage: [homelab/forgejo.md](../homelab/forgejo.md).
 **Token delivery, without a guest key.** cube's decrypted
 `/run/secrets/forgejo-runner-secret` is staged (root:root 0600, by the
 registration unit's root-privileged `ExecStartPost`) into
-`/var/lib/forgejo-runner-share/`, which virtiofs mounts read-only into
-the guest at `/mnt/runner-secret`. The guest runs no sops and has no
+`/var/lib/forgejo-runner-share/`, which virtiofs shares read-only (on the
+host side, `<readonly/>`) into the guest at `/mnt/runner-secret`. The guest runs no sops and has no
 key; the share holds only that one file.
 
 **Registration** is the offline scheme (Forgejo v11+ / runner v9+): a

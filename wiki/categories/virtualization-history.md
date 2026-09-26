@@ -1,6 +1,6 @@
 # `virtualization` — history
 
-_Last modified: 2026-09-04_
+_Last modified: 2026-09-25_
 
 Resolved incidents and a removed VM's own verification record, split out of
 [virtualization](virtualization.md) 2026-09-03 so that page stays about the
@@ -31,8 +31,10 @@ scoped to `100.64.0.0/10`, no LAN range. The domain itself was confirmed
 booted and staying up on `nire-cube` (2026-08-24 — see
 [../lessons-learned.md](../lessons-learned.md) §40), but an actual SSH
 connection through this forward was never made before the VM was removed.
-No caller uses `sshForward` today; the mechanism is unexercised until one
-does.
+`forge-runner` (2026-09-25) is its second caller — `guestId = 11`,
+`hostPort = 2223`, tailnet-only — and the first connection through the
+forward was made on 2026-09-25: `ssh -p 2223 root@ts-cube` from a tailnet
+host reached the guest.
 
 ## The near-miss this category's own header records
 
