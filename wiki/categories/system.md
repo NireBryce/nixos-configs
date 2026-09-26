@@ -1,6 +1,6 @@
 # `system` — `config-system/system/`
 
-_Last modified: 2026-09-21_
+_Last modified: 2026-09-26_
 
 The largest category by far — across 19 subdirectories, no per-file count
 kept here on purpose (see categories/00-INDEX.md's Index section for why) —
@@ -42,10 +42,10 @@ under `system`.
 | `impermanence/` | `declare-persistence-option.nix` — **not** the [impermanence](impermanence.md) category; see that page's "don't confuse the two" section. |
 | `kdeconnect/` | `kde-connect.nix`. |
 | `locale-tz-etc/` | `locale.nix`, `tz.nix`. |
-| `networking/` | tailscale, vpn, wifi, avahi, base `networking.nix`, `resolved.nix`, and two `*-persist.nix` siblings. See below — MagicDNS naming and the ACL trap especially. |
+| `networking/` | tailscale, vpn, wifi, avahi, base `networking.nix`, `resolved.nix`, and three `*-persist.nix` siblings (tailscale, networkmanager, mullvad). See below — MagicDNS naming and the ACL trap especially. |
 | `nix-ld/` | `nix-ld.nix`. |
 | `secrets/` | `sops.nix` — sops-nix wiring (nixos-only). `sops-darwin.nix` — the darwin key-file-path fix. `sops-interactive-key.nix` — the nixos interactive-`sops` fix. `low-side/` — a user-keyed sops file, no `.nix` module at all. See below. |
-| `security/` | `yubikey.nix`. |
+| `security/` | `yubikey.nix`, `sudo-wheel-only.nix` (`security.sudo.execWheelOnly`). |
 | `sound/` | `pipewire.nix`. |
 | `ssh/` | `ssh.nix`. |
 | `storage/` | `coredump-limit.nix`, `smartd.nix` — smartmontools + scheduled S.M.A.R.T. self-tests, general-purpose disk wear/failure monitoring for every host. |
@@ -138,8 +138,8 @@ which of the module's three names you're picturing.
 
 ## The `*-persist.nix` sibling-file convention
 
-`networking/tailscale-persist.nix` and `networking/networkmanager-persist.nix`
-are the `system`-category examples of a convention that recurs across
+`networking/tailscale-persist.nix`, `networking/networkmanager-persist.nix`
+and `networking/mullvad-persist.nix` are the `system`-category examples of a convention that recurs across
 several categories: persistence for state that matters to one specific
 thing is filed as a sibling of the module that generates it, not
 centralized under [impermanence](impermanence.md).
@@ -148,6 +148,9 @@ centralized under [impermanence](impermanence.md).
   — without it, Tailscale needs re-authenticating on every boot, since node
   identity lives under `/var/lib` and both hosts that import this roll `/`
   back on every boot.
+- **`mullvad-persist.nix`** persists `/etc/mullvad-vpn` (account, device,
+  settings) — without it the Mullvad daemon (`vpn.nix`, enabled 2026-09-26)
+  logs out and registers a new device on every boot.
 - **`networkmanager-persist.nix`** persists
   `/var/lib/NetworkManager/secret_key` — the key encrypting NetworkManager's
   stored connection secrets. `/etc/NetworkManager/system-connections` was

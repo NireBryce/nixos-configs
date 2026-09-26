@@ -1,32 +1,59 @@
-# opencode serve, as a detachable backend for the user's opencode TUI sessions --
-# cube-only, filed next to cube's other host-specific config.
+# opencode on nire-cube: the CLI, and `opencode serve` as a detachable
+# backend for the user's opencode TUI sessions. Cube-only, and the only
+# host with opencode at all -- lysithea has Homebrew's copy (homebrew.nix),
+# nothing else does.
 #
 # WHY: a plain `opencode` TUI exit kills in-flight work. Under systemd the
 # TUI is just a client (`opencode attach`, or `just opencode-attach`) --
 # exiting detaches, sessions keep running server-side and resume with
 # `-c`/`-s <id>`, across reboots.
 #
-# FILE PLACEMENT: hosts/cube/configuration/ is collected by the `cube`
-# category from its subdirectory -- there is no import line, adding the file
-# IS the wiring, and the `-cube` suffix follows this directory's convention
-# (a module's name is its filename, and same-name modules merge silently
-# rather than erroring). Deliberately NOT a `config-system/homelab/` service: one
-# personal dev tool for one user, not part of the self-hosted stack, so no
-# Caddy route and no wiki/categories/ page.
+# FILE PLACEMENT, 2026-09-26: moved here from
+# hosts/cube/configuration/opencode-server-cube.nix (module name
+# `opencode-server-cube`), and the Home Manager module
+# packages/development/tools/ai-tools/opencode.nix (name `opencode`), which
+# put the CLI on every host, was deleted -- an agent that can run shells as
+# the user belongs on the one machine set up to host it. Category
+# `coding-agent`, not `opencode`: a category and its module sharing a name
+# silently MERGE. Reaches cube through the `homelab` umbrella.
 { lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
-        flake.modules.nixos.${moduleName} = { pkgs, lib, ... }: {
-            # # description = "opencode serve: detachable TUI sessions for elly, bound tailnet-only";
+        flake.modules.nixos.${moduleName} = { config, pkgs, lib, ... }: {
+            # # description = "opencode serve: detachable TUI sessions for elly, bound tailnet-only, basic-auth";
 
             # PORT 3003 -- caddy.nix owns the 300x map for this host and
             # proxies the rest; this one is deliberately not behind it.
+
+            # BASIC AUTH, 2026-09-26. Tailnet-only is not access control:
+            # without OPENCODE_SERVER_PASSWORD, `opencode serve` answers
+            # every request unauthenticated, and its API runs shells and
+            # reads files as the user -- so every tailnet device the ACL
+            # lets reach cube had a shell here. Username is `opencode`
+            # (the default; `opencode attach` hardcodes it, so don't set
+            # OPENCODE_SERVER_USERNAME). The sops VALUE is the bare
+            # password; the template turns it into the `KEY=value` line
+            # EnvironmentFile wants. Owned by the user because a USER
+            # manager reads EnvironmentFile as that user, not as root the
+            # way a system unit does. Clients: `just opencode-attach`
+            # passes it via the environment, prompting when unset.
+            sops.secrets."OPENCODE_SERVER_PASSWORD" = { };
+            sops.templates."opencode-server.env" = {
+                owner   = "elly";
+                mode    = "0400";
+                content = "OPENCODE_SERVER_PASSWORD=${config.sops.placeholder."OPENCODE_SERVER_PASSWORD"}\n";
+            };
 
             # A systemd --user manager only runs while its user is logged in
             # WITHOUT linger, so the unit would never auto-start at boot.
             # This is the declarative form of `loginctl enable-linger elly`.
             users.users.elly.linger = true;
+
+            # The CLI, for `opencode attach` from a shell on cube. Per-user
+            # rather than systemPackages: it's the user's tool, and the
+            # server's ExecStart uses the store path directly either way.
+            users.users.elly.packages = [ pkgs.opencode ];
 
             # A user (not system) unit: the state is the user's
             # (~/.local/share), and `systemctl --user` needs no sudo, which
@@ -84,6 +111,11 @@
                     # need the system and HM profiles. ExecStart itself is
                     # absolute store paths either way.
                     Environment = "PATH=/run/wrappers/bin:/etc/profiles/per-user/elly/bin:/run/current-system/sw/bin";
+
+                    # The basic-auth password -- see BASIC AUTH above. No
+                    # `-` prefix: a missing file must fail the start, not
+                    # bring the server up open.
+                    EnvironmentFile = config.sops.templates."opencode-server.env".path;
                 };
 
                 # NixOS systemd.user.services is GLOBAL: the unit lands in

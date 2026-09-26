@@ -170,6 +170,18 @@
             # already open on every NixOS host, so git+ssh rides existing
             # exposure rather than new.
 
+            # ssh.nix sets authorizedKeysInHomedir = false (2026-09-26), so
+            # sshd reads only /etc/ssh/authorized_keys.d/%u -- which would
+            # silently drop the Forgejo-written ~forgejo/.ssh/authorized_keys
+            # above and break git+ssh. This re-allows the home-dir file for
+            # the `forgejo` account only. mkAfter because a `Match` block
+            # swallows every directive after it: ssh.nix's global
+            # extraConfig lines must render first.
+            services.openssh.extraConfig = lib.mkAfter ''
+                Match User ${config.services.forgejo.user}
+                    AuthorizedKeysFile %h/.ssh/authorized_keys
+            '';
+
             # No forgejo-persist.nix, same reasoning grafana.nix gives for
             # skipping one: cube has a plain persistent root
             # (cube-configuration.nix's header), not the

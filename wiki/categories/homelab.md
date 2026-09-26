@@ -1,6 +1,6 @@
 # `homelab` — `config-system/homelab/`
 
-_Last modified: 2026-09-02_
+_Last modified: 2026-09-26_
 
 ## Contents
 
@@ -28,6 +28,10 @@ network. It's the odd one out functionally (nothing to reach over the
 tailnet, no port, no Caddy route — a timer, not a listener) but structurally
 identical: its own `dirsAsCategory.nix` under `config-system/homelab/backup/`,
 cube-only, folded in by the same delegation this page describes below.
+
+A ninth, [coding-agent](coding-agent.md), joined 2026-09-26: opencode's CLI
+and server, moved out of `hosts/cube/configuration/` (and out of every
+other host's Home Manager) so cube is the only host with it.
 
 ## Nested categories overlap their parents on purpose
 

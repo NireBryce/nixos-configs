@@ -207,8 +207,11 @@ Git over SSH is a partial exception, deliberately: Forgejo's built-in SSH
 server stays disabled (`START_SSH_SERVER` unset), so `git+ssh` rides the
 **host's own OpenSSH** (`config-system/ssh/ssh.nix`) instead of a second port.
 Forgejo manages `~forgejo/.ssh/authorized_keys` itself as keys are added
-through the web UI; ordinary sshd lookup does the rest. Clone URLs are
-`forgejo@ts-cube:...`, port 22 — already open. The module adds no new port,
+through the web UI. `ssh.nix` stops sshd reading `~/.ssh/authorized_keys`
+fleet-wide (`authorizedKeysInHomedir = false`, 2026-09-26), so `forgejo.nix`
+re-allows it for this one account with a `Match User forgejo` block
+(`lib.mkAfter`, so it renders after the global lines). Clone URLs are
+`forgejo@ts-cube:...`, port 22 — already open on cube. The module adds no new port,
 only a user (`forgejo`) that can authenticate against the already-reachable
 sshd.
 

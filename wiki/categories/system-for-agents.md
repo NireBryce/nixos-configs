@@ -1,6 +1,6 @@
 # `system`, for agents
 
-_Last modified: 2026-09-17_
+_Last modified: 2026-09-26_
 _Sibling reviewed: 2026-09-21 -- system.md's storage/ row gained smartd.nix; this page only lists subdirectory names, not per-file contents, so nothing here moved_
 
 Condensed from [system.md](system.md), which keeps the reasoning and the
@@ -40,7 +40,8 @@ Anything that must be optional cannot be filed here.
   `impermanence`: `networking/tailscale-persist.nix`
   (`/var/lib/tailscale/tailscaled.state`),
   `networking/networkmanager-persist.nix`
-  (`/var/lib/NetworkManager/secret_key`). Both rely on
+  (`/var/lib/NetworkManager/secret_key`),
+  `networking/mullvad-persist.nix` (`/etc/mullvad-vpn`). All rely on
   `environment.persistence."/persist".directories` being `listOf` and
   concatenating across files.
 - **`environment.persistence` refuses to bind-mount over a live file.**

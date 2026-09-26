@@ -1,6 +1,6 @@
 # Hosts & current state
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-26_
 
 This page is a map of where to look for each host. **Switch state is not
 recorded anywhere in the repo** — it rots faster than any session can
@@ -38,6 +38,11 @@ against: that constant handling surfaces breakage fast. The other hosts
 usually lag behind it, not ahead. See top-level
 [../README.md](../README.md)'s Hosts section for the same point stated for
 a human reader.
+
+`nire-tenacity`'s sshd is tailnet-only (2026-09-26,
+`hosts/tenacity/configuration/ssh-tailnet-only-tenacity.nix`): port 22 is
+closed on every other interface, so `ssh ts-tenacity` works and
+`nire-tenacity.local` from the LAN does not. durandal and cube still open 22.
 
 Removed, history not live hosts ([history.md](history.md)): `nire-testbed`
 (2026-08-14→08-22, never on real hardware), `nire-lego` and `nire-installer`
@@ -77,12 +82,13 @@ status and what broke on the way:
   sqlite-staging bug, then confirmed). Still no backups on durandal/
   tenacity/lysithea ([#130](https://github.com/NireBryce/nixos-configs/issues/130)).
   Runbook: [homelab/backup-runbook.md](homelab/backup-runbook.md).
-- opencode server —
-  [`flake/modules/hosts/cube/configuration/opencode-server-cube.nix`](<../flake/modules/hosts/cube/configuration/opencode-server-cube.nix>)
-  (2026-09-07). Not a category: one personal dev tool, not part of the
-  self-hosted stack. Runs `opencode serve` as a systemd user service bound
-  to the tailnet IP only — `just opencode-attach` (`-c` resumes the last
-  session after a TUI exit).
+- [coding-agent](categories/coding-agent.md) — opencode (2026-09-07; its
+  own category since 2026-09-26, and cube is now the only NixOS host with
+  the CLI at all). Runs `opencode serve` as a systemd user service bound
+  to the tailnet IP only, with HTTP basic auth since 2026-09-26 (sops
+  `OPENCODE_SERVER_PASSWORD`; username `opencode`) — `just opencode-attach`
+  prompts for it unless `OPENCODE_SERVER_PASSWORD` is set (`-c` resumes the
+  last session after a TUI exit).
 
 ## Where each fact lives
 

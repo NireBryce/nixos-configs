@@ -95,14 +95,16 @@ untested.
 ## SSH keys, and the second user on this host
 
 Forgejo manages `~forgejo/.ssh/authorized_keys` itself as keys are added
-through the web UI (Settings → SSH keys). Cube's own `sshd` does the rest
-with ordinary per-user `authorized_keys` lookup — there's no
+through the web UI (Settings → SSH keys). Cube's own `sshd` does the rest,
+reading that file through a `Match User forgejo` block in `forgejo.nix` —
+every other account on the fleet is limited to its declared keys
+(`authorizedKeysInHomedir = false`, `ssh.nix`, 2026-09-26). There's no
 `AuthorizedKeysCommand` and no second SSH daemon on a second port.
 
 Two consequences:
 
-- **Git-over-SSH rides on port 22**, which is already open on the LAN as well
-  as the tailnet, on every NixOS host here. This module didn't add a port; it
+- **Git-over-SSH rides on port 22**, which is already open on cube's LAN as
+  well as the tailnet. This module didn't add a port; it
   added a user (`forgejo`) that can authenticate to the sshd that was already
   reachable.
 - **A key added in the web UI takes effect for `forgejo@ts-cube`, not for
