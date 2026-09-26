@@ -13,7 +13,9 @@ Libvirt/QEMU VMs on `nire-cube` only — podman/distrobox are the separate
 
 - `libvirt.nix` — `virtualisation.libvirtd`; also virtiofsd
   (`vhostUserPackages`, required for virtiofs shares), virt-manager,
-  `elly` in `libvirtd`. No `ovmf` (removed option, eval fails).
+  and deliberately *not* `elly` in `libvirtd` (removed 2026-09-26:
+  passwordless root-equivalent; use `sudo virsh`). No `ovmf` (removed
+  option, eval fails).
 - `libvirt.nix` sets `qemu.runAsRoot = false` (QEMU as `qemu-libvirtd`;
   DAC chowns writable images, skips read-only store paths). **A switch
   doesn't apply qemu.conf changes** (libvirtd is X-RestartIfChanged=false;

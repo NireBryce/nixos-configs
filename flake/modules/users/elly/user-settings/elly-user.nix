@@ -13,9 +13,13 @@
                     # group = "elly";
                     # shell = lib.mkDefault pkgs.bash;
                     isNormalUser = true;
-                    extraGroups = [ "wheel" "audio" "podman" "kvm" ]; # Enable 'sudo', deeper audio access, and
-                                                                       # /dev/kvm (root:kvm 0660 by default) for
-                                                                       # hardware-accelerated Android emulation
+                    extraGroups = [ "wheel" "audio" "kvm" ]; # Enable 'sudo', deeper audio access, and
+                                                              # /dev/kvm (root:kvm 0660 by default) for
+                                                              # hardware-accelerated Android emulation.
+                                                              # No `podman` (removed 2026-09-26): the
+                                                              # group reaches podman's rootful socket,
+                                                              # i.e. passwordless root. Same for
+                                                              # `libvirtd` -- see podman.nix, libvirt.nix.
                     hashedPasswordFile = "/persist/passwords/elly";
                     packages  = with pkgs; [ 
                         # Emergency packages if home-manager dies

@@ -30,7 +30,11 @@ the fleet machines, and this is a component of cube) — the category's first se
 
 All four files live under `libvirt/` and are all `nixos`-class:
 
-- **`libvirt.nix`** — `virtualisation.libvirtd`, the daemon itself.
+- **`libvirt.nix`** — `virtualisation.libvirtd`, the daemon itself. The
+  user is deliberately not in the `libvirtd` group (since 2026-09-26): a
+  member can attach any host disk to a guest without a password, so
+  membership is root. Every automated `virsh` runs as root anyway;
+  interactively, `sudo virsh`.
 - **`virt-tools.nix`** — client/disk-image tooling that runs *against*
   libvirtd. Deliberately adds no `libvirt`/`qemu` packages — the `libvirtd`
   module already puts `cfg.package`/`cfg.qemu.package` on
