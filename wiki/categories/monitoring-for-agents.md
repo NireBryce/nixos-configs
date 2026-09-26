@@ -1,6 +1,6 @@
 # `monitoring`, for agents
 
-_Last modified: 2026-09-21_
+_Last modified: 2026-09-26_
 
 Condensed from [monitoring.md](monitoring.md), which keeps the reasoning
 and the narrative. Facts only here.
@@ -11,7 +11,7 @@ since 2026-09-07; the old `.../grafana/` path 404s.
 
 ## What's in it
 
-`config-system/homelab/monitoring/`, six files, all `nixos`-class, **every listener
+`config-system/homelab/monitoring/`, seven files, all `nixos`-class, **every listener
 on loopback**:
 
 | File | Scrapes | Note |
@@ -21,6 +21,7 @@ on loopback**:
 | `libvirt-exporter/libvirt-exporter.nix` | libvirt/QEMU guests via `qemu:///system` | **overrides `group` to `libvirtd`** — its default group can't read `/run/libvirt/libvirt-sock` and it then serves an empty metrics page instead of failing |
 | `smartctl-exporter/smartctl-exporter.nix` | per-disk SMART/NVMe wear (health, percentage used, media errors, temperature) | added 2026-09-21; `devices` left `[]` (autodiscover). **No dashboard panel yet** — `smartctl_device_*` metric names weren't confirmed against live `/metrics` before landing this; check that on cube first |
 | `prometheus/prometheus.nix` | the four above, over loopback | |
+| `runner-alerts/runner-alerts.nix` | textfile metrics (`/var/lib/node-exporter-textfile`: `forge_runner_egress_dropped_packets_total{reason}`, `forge_runner_dns_refused_5m`, cycle gauges from actions-runner.nix) + systemd collector (unit-include: forge-runner-cycle, vm-egress-dns, libvirt-vm-forge-runner) | 5 provisioned Grafana alert rules, folder `forge-runner`; datasource UID looked up from grafana.nix's provisioned datasources; checked by loading the built provisioning into Grafana 13.1.6 locally |
 | `grafana/grafana.nix` | — | the only off-host-facing piece. Ships two provisioned dashboards: `nire-cube-overview.json` (three rows) and `roundtrip-check.json` (one panel, the export-verification artifact) |
 
 `grafana/_dashboards/` is underscore-prefixed because `import-tree` ignores

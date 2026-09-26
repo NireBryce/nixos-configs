@@ -1,6 +1,6 @@
 # Using Grafana
 
-_Last modified: 2026-09-13_
+_Last modified: 2026-09-26_
 
 Grafana on `nire-cube`, showing the metrics
 [monitoring](../categories/monitoring.md) collects. This page is about
@@ -12,6 +12,7 @@ page is how it's configured and why.
 - [Where it is](#where-it-is)
 - [Signing in: two passwords that don't talk to each other](#signing-in-two-passwords-that-dont-talk-to-each-other)
 - [A dashboard you edit in the UI is not in the repo](#a-dashboard-you-edit-in-the-ui-is-not-in-the-repo)
+- [Alerts](#alerts)
 - [What's backed up](#whats-backed-up)
 - [What's verified here](#whats-verified-here)
 - [See also](#see-also)
@@ -76,6 +77,23 @@ to end up in the repo:
 [monitoring.md's how-to](../categories/monitoring.md#adding-a-dashboard-that-survives-a-rebuild)
 covers exporting it to JSON and adding it — **not yet verified against a
 real UI export**, so expect to correct it the first time someone tries.
+
+## Alerts
+
+**Alerting → Alert rules**, folder `forge-runner`, has five provisioned
+rules about the Forgejo runner VM, defined in
+`monitoring/runner-alerts/runner-alerts.nix`:
+
+- a job connecting outside the egress allowlist;
+- a job connecting to a private or tailnet range;
+- refused DNS lookups;
+- the guest failing to boot;
+- the runner cycle or its DNS resolver not running.
+
+Each rule's description says where to look next, usually a `journalctl`
+command on cube. Provisioned rules can't be edited in the UI; change them
+in that file. Which contact point receives them is set under
+**Alerting → Contact points**.
 
 ## What's backed up
 

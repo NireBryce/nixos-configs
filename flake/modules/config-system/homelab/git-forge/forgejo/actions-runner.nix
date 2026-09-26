@@ -51,7 +51,7 @@
                 wants    = [ "forgejo.service" "forgejo-admin-bootstrap.service" ];
                 requires = [ "libvirtd.service" ];
                 wantedBy = [ "multi-user.target" ];
-                path     = with pkgs; [ coreutils util-linux libvirt systemd config.services.forgejo.package ];
+                path     = with pkgs; [ coreutils util-linux libvirt systemd ipset config.services.forgejo.package ];
 
                 script = ''
                     set -euo pipefail
@@ -64,6 +64,24 @@
 
                     install -d -m 0700 "$SHARE"
                     short=0
+
+                    # Gauges for runner-alerts.nix, via node-exporter's
+                    # textfile collector. Best effort: never stops the loop.
+                    write_metrics() {
+                        local dir=/var/lib/node-exporter-textfile
+                        {
+                            echo "# TYPE forge_runner_last_cycle_seconds gauge"
+                            echo "forge_runner_last_cycle_seconds $1"
+                            echo "# TYPE forge_runner_short_cycle_streak gauge"
+                            echo "forge_runner_short_cycle_streak $short"
+                            echo "# TYPE forge_runner_last_cycle_end_timestamp_seconds gauge"
+                            echo "forge_runner_last_cycle_end_timestamp_seconds $(date +%s)"
+                        } > "$dir/.forge_runner_cycle.prom.tmp" 2>/dev/null \
+                            && chmod 0644 "$dir/.forge_runner_cycle.prom.tmp" \
+                            && mv -f "$dir/.forge_runner_cycle.prom.tmp" "$dir/forge_runner_cycle.prom" \
+                            || true
+                    }
+                    write_metrics 0
                     install -d -m 0700 -o ${config.services.forgejo.user} -g ${config.services.forgejo.group} "$RUNDIR"
 
                     while true; do
@@ -90,6 +108,11 @@
                         rm -f "$RUNDIR/secret"
                         mv -f "$SHARE/forgejo-runner-secret.new" "$SHARE/forgejo-runner-secret"
 
+                        # Empty the egress allowlist's address set
+                        # (vm-networking.nix, vm-egress-dns.nix): each job
+                        # starts able to reach only what it resolves itself.
+                        ipset flush vm-egress-allow 2>/dev/null || true
+
                         # Fresh guest: dropping the stamp makes the
                         # `ephemeral` activation destroy any running domain,
                         # recreate the overlay, and start it.
@@ -113,6 +136,7 @@
                         # usually a quick real job (31 s, 2026-09-26), so only
                         # the second short cycle in a row backs off.
                         if [ "$elapsed" -lt 120 ]; then short=$(( short + 1 )); else short=0; fi
+                        write_metrics "$elapsed"
                         if [ "$short" -ge 2 ]; then sleep 60; fi
                     done
                 '';

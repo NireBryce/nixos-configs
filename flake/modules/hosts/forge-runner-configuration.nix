@@ -54,11 +54,13 @@
             useDHCP  = lib.mkDefault true;
             firewall.allowedTCPPorts = [ 22 ];
 
-            # Public resolvers, and the DHCP-offered one ignored: cube's
-            # dnsmasq forwards to cube's own resolver, which is MagicDNS
-            # and would answer for tailnet names. cube drops guest DNS on
-            # its side too (vm-networking.nix). The forge's name comes
-            # from the /etc/hosts pin below, not DNS.
+            # Public resolvers, and the DHCP-offered one ignored. cube
+            # redirects every guest DNS query, whichever server it names,
+            # to its allowlisting resolver (vm-egress-dns.nix), which
+            # answers only allowlisted domains -- so these addresses are
+            # nominal. They stay public rather than libvirt's dnsmasq,
+            # which forwards to MagicDNS. The forge's name comes from the
+            # /etc/hosts pin below, not DNS.
             nameservers = [ "9.9.9.9" "1.1.1.1" ];
             dhcpcd.extraConfig = "nooption domain_name_servers, domain_name, domain_search";
 
@@ -92,6 +94,12 @@
                 "192.168.122.1" = [ "git.moose-micro.ts.net" ];
             };
         };
+
+        # No NTP. The guest lives for one job, its clock comes from the host
+        # (kvm-clock), and cube's egress allowlist refuses pool.ntp.org --
+        # timesyncd retrying it every few seconds kept runner-alerts.nix's
+        # refused-DNS rule firing (seen 2026-09-26).
+        services.timesyncd.enable = false;
 
         boot = {
             # virtiofs share of the runner token, read-only. systemd loads
