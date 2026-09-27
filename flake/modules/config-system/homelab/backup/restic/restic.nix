@@ -170,10 +170,19 @@
                 # paths for every command, not bare names: this script runs
                 # with no useful `$PATH`, and ad hoc reproductions of it
                 # kept hitting `command not found`.
+                #
+                # umask 077 and a 0700 staging dir: the copies are whole
+                # forgejo/grafana/golink dbs (account hashes included), and
+                # under the default 022 they landed 0644 in a 0755 dir,
+                # readable by every account on cube while the live dbs sit
+                # in 0700/0750 dirs. `install -d -m` also tightens the dir
+                # when it already exists. restic runs as root, so nothing
+                # it reads changes.
                 backupPrepareCommand = ''
+                    umask 077
                     {
                         ${pkgs.coreutils}/bin/echo "=== prepare run: $(${pkgs.coreutils}/bin/date -Iseconds) ==="
-                        ${pkgs.coreutils}/bin/mkdir -p ${sqliteStagingDir}
+                        ${pkgs.coreutils}/bin/install -d -m 0700 ${sqliteStagingDir}
                         ${lib.concatStringsSep "\n" (lib.mapAttrsToList
                             (name: db: ''
                                 ${pkgs.sqlite}/bin/sqlite3 ${db} ".backup '${sqliteStagingDir}/${name}.db'"

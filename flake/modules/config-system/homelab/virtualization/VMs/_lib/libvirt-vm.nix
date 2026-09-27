@@ -297,9 +297,16 @@ let
         rm -f "${overlay}"
       fi
       ''}
-      mkdir -p "${diskDir}"
+      # 0711 dir, 0600 overlay: under the default umask these came out
+      # 0755/0644, so every account on the host could read a guest's disk
+      # (the runner's holds each job's workspace). 0711 is libvirt's own
+      # default for this dir: qemu-libvirtd still traverses to the file,
+      # and libvirt's dynamic_ownership chowns the overlay to it at start.
+      # `install -d -m` also tightens an existing dir.
+      install -d -m 0711 "${diskDir}"
       if [ ! -e "${overlay}" ]; then
-        ${pkgs.qemu}/bin/qemu-img create -f qcow2 -F qcow2 -b "${baseImg}" "${overlay}"
+        ( umask 077
+          ${pkgs.qemu}/bin/qemu-img create -f qcow2 -F qcow2 -b "${baseImg}" "${overlay}" )
       fi
 
       ${lib.optionalString networked ''

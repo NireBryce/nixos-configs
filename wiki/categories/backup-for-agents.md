@@ -1,6 +1,6 @@
 # `backup`, for agents
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-09-27_
 _Sibling reviewed: 2026-09-14 -- backup.md only renamed `system/` path shorthand to `config-system/`; no facts moved_
 
 Condensed from [backup.md](backup.md), which keeps the investigation
@@ -27,7 +27,7 @@ same reason `git-forge` isn't `forgejo`.
 | Repository | `sftp:nire@ts-hive:/share/restic-backup/cube` |
 | Auth | dedicated ed25519 key `~/.ssh/restic-cube-backup`, not the personal key |
 | Host key | pinned in Nix via `programs.ssh.knownHosts`, not TOFU |
-| sqlite staging | `/var/lib/restic-backups-cube-sqlite-staging` |
+| sqlite staging | `/var/lib/restic-backups-cube-sqlite-staging`, dir 0700 / copies 0600 (umask 077 in `backupPrepareCommand`; was 0755/0644 until 2026-09-27) |
 | Excluded | Prometheus TSDB (biggest, least valuable, regenerable); the three live sqlite db files |
 
 ## The two traps this module was built out of
