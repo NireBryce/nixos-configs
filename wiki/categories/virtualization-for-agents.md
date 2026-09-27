@@ -1,6 +1,7 @@
 # `virtualization`, for agents
 
 _Last modified: 2026-09-27_
+_Sibling reviewed: 2026-09-27 -- condensed-version pointer moved below the intro on the source; no facts moved_
 
 Condensed from [virtualization.md](virtualization.md), which keeps the
 narrative and verification records. Facts only here.

@@ -1,6 +1,7 @@
 # Maintenance schedule, for agents
 
 _Last modified: 2026-09-14_
+_Sibling reviewed: 2026-09-27 -- the source's "What this is" section moved above its header machinery as intro prose, heading dropped; no facts moved_
 
 Condensed from [maintenance-schedule.md](maintenance-schedule.md), which
 keeps each item's reasoning, rejected alternatives and evidence. Facts only

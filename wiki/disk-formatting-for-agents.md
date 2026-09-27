@@ -1,6 +1,6 @@
 # New host disk formatting, for agents
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-09-27_
 
 Condensed from [disk-formatting.md](disk-formatting.md), which keeps the
 reasoning and the full warnings. Facts only here.
@@ -57,8 +57,18 @@ removed 2026-08-27. Standard disko interface:
 1. Boot install media.
 2. Get the flake onto it with the new host committed — **`git add` first**,
    flakes ignore untracked files.
-3. Run disko in `disko` mode against the real device, pointed at the host's
-   `nixosConfigurations` entry.
+3. From the repo's `flake/` directory (the flake root; the repo root has
+   none), run disko — its documented invocation, not run on any host here:
+
+   ```sh
+   sudo nix --experimental-features "nix-command flakes" run \
+     github:nix-community/disko/latest -- --mode destroy,format,mount \
+     --flake .#<new-host-name>
+   ```
+
+   `--flake` resolves `diskoConfigurations.<name>`, or else the disko
+   module of `nixosConfigurations.<name>` — the fallback is this repo's
+   shape.
 4. `nixos-install` against the flake.
 
 ## Runtime facts eval cannot prove

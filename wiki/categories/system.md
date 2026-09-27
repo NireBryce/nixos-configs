@@ -1,6 +1,6 @@
 # `system` — `config-system/system/`
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-09-27_
 
 The largest category by far — across 19 subdirectories, no per-file count
 kept here on purpose (see categories/00-INDEX.md's Index section for why) —
@@ -19,7 +19,7 @@ under `system`.
 
 ## Contents
 
-- [Subdirectories at a glance](#subdirectories-at-a-glance)
+- [Subdirectories](#subdirectories)
 - [Home Manager integration lives here](#home-manager-integration-lives-here)
 - [Secrets](#secrets)
 - [Containers vs. virtualization — the live trap, and no longer filed here](#containers-vs-virtualization--the-live-trap-and-no-longer-filed-here)
@@ -28,29 +28,23 @@ under `system`.
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
-## Subdirectories at a glance
+## Subdirectories
 
-| Subdirectory | What it is |
-|---|---|
-| `base-system-packages/` | `core-utilities`, `fallback-editors`, `performance`, `sensors` — baseline `environment.systemPackages` every host wants. |
-| `bluetooth/` | `bluetooth.nix`. |
-| `firmware/` | `firmware-all.nix`, `fwupd.nix`. |
-| `flatpak/` | `flatpak.nix`. |
-| `font/` | `font.nix` — reaches every host via `ellyHomeManager`, see below. |
-| `gaming/` | `gaming.nix`, `sunshine.nix`, `sunshine-elly.nix`. |
-| `home-manager/` | The NixOS↔Home Manager wiring itself. See below. |
-| `impermanence/` | `declare-persistence-option.nix` — **not** the [impermanence](impermanence.md) category; see that page's "don't confuse the two" section. |
-| `kdeconnect/` | `kde-connect.nix`. |
-| `locale-tz-etc/` | `locale.nix`, `tz.nix`. |
-| `networking/` | tailscale, vpn, wifi, avahi, base `networking.nix`, `resolved.nix`, and three `*-persist.nix` siblings (tailscale, networkmanager, mullvad). See below — MagicDNS naming and the ACL trap especially. |
-| `nix-ld/` | `nix-ld.nix`. |
-| `secrets/` | `sops.nix` — sops-nix wiring (nixos-only). `sops-darwin.nix` — the darwin key-file-path fix. `sops-interactive-key.nix` — the nixos interactive-`sops` fix. `low-side/` — a user-keyed sops file, no `.nix` module at all. See below. |
-| `security/` | `yubikey.nix`, `sudo-wheel-only.nix` (`security.sudo.execWheelOnly`). |
-| `sound/` | `pipewire.nix`. |
-| `ssh/` | `ssh.nix`. |
-| `storage/` | `coredump-limit.nix`, `smartd.nix` — smartmontools + scheduled S.M.A.R.T. self-tests, general-purpose disk wear/failure monitoring for every host. |
-| `wayland/` | `wayland.nix`. |
-| `xdg/` | `xdg.nix`, `xdg-portals.nix`. |
+Most are what their names say; the full list is on
+[system-for-agents.md](system-for-agents.md), alongside that page's table
+of the files that matter off-category. Four repay reading before reaching
+into them, and each has its own section below:
+
+- **`home-manager/`** — the NixOS↔Home Manager wiring itself, not user
+  dotfiles ([below](#home-manager-integration-lives-here)).
+- **`secrets/`** — three sops modules for three different problems, plus
+  `low-side/`, which is not a module at all ([below](#secrets)).
+- **`networking/`** — tailscale, vpn, wifi, the resolved/avahi split, and
+  three `*-persist.nix` sibling files
+  ([below](#tailscale-magicdns-names-and-the-acl-lives-outside-this-repo)).
+- **`impermanence/`** — **not** the [impermanence](impermanence.md)
+  category: it only declares the persistence option. That page's "don't
+  confuse the two" section has the full note.
 
 ## Home Manager integration lives here
 

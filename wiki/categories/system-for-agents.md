@@ -1,7 +1,6 @@
 # `system`, for agents
 
-_Last modified: 2026-09-26_
-_Sibling reviewed: 2026-09-21 -- system.md's storage/ row gained smartd.nix; this page only lists subdirectory names, not per-file contents, so nothing here moved_
+_Last modified: 2026-09-27_
 
 Condensed from [system.md](system.md), which keeps the reasoning and the
 narrative. Facts only here.
@@ -30,6 +29,8 @@ Anything that must be optional cannot be filed here.
 | `secrets/sops-interactive-key.nix` | oneshot, every boot, converts the host ed25519 key to a native age identity. Unconditional on purpose — self-healing on hosts that wipe `/root`. Also sets `security.sudo.extraConfig` `env_keep += "EDITOR VISUAL"` — `environment.variables.EDITOR="micro"` alone doesn't reach `sudo sops` because sudo's `env_reset` strips it before exec. |
 | `secrets/low-side/secrets.yaml` | not a module — `.sops.yaml`-only, keyed to a personal SSH key instead of a host key, no `sops.secrets.*`, no NixOS activation. Skill `low-side-secrets`. |
 | `impermanence/declare-persistence-option.nix` | **not** the [impermanence](impermanence.md) category. Declares the option unconditionally, even where nothing populates it. |
+| `security/sudo-wheel-only.nix` | sets `security.sudo.execWheelOnly` — `sudo` executable by wheel-group members only. |
+| `storage/smartd.nix` | smartmontools + scheduled S.M.A.R.T. self-tests — disk wear/failure monitoring on every host. |
 
 ## Traps
 
