@@ -63,6 +63,10 @@
                 "/boot" = {
                     device  = "/dev/disk/by-uuid/B35C-D0E8";
                     fsType  = "vfat";
+                    # root-only: /boot/loader/random-seed lives here. With no
+                    # options the mount came up fmask=0022 and bootctl logged
+                    # the seed as world accessible every boot.
+                    options = [ "fmask=0077" "dmask=0077" ];
                 };
             };
 

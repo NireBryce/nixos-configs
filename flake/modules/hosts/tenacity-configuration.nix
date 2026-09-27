@@ -20,7 +20,7 @@
             tenacity
 
             # ── shared ────────────────────────────────────────────────────────────
-            boot            # common boot options: boot-generations
+            boot            # common boot options: boot-generations, boot-editor
 
             # WARN-impermanence -- wipes /root on boot, see the module. Was the
             # `boot` category until 2026-08-11; renamed because `boot` had come to

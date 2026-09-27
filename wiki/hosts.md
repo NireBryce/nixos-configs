@@ -1,6 +1,6 @@
 # Hosts & current state
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-09-27_
 
 This page is a map of where to look for each host. **Switch state is not
 recorded anywhere in the repo** — it rots faster than any session can
@@ -25,7 +25,8 @@ on the host (`just baseline`, `just diff-deployed`, or comparing `nix eval
 
 **Two names per machine.** `nire-<x>` is the host's `networking.hostName`
 and its name in `hosts.nix`; on the LAN it answers as `nire-<x>.local`
-(mDNS, `avahi.nix`). `ts-<x>` is its Tailscale device and MagicDNS name
+(mDNS, `avahi.nix`) — except tenacity, which publishes nothing
+(`mdns-quiet-tenacity.nix`, 2026-09-27). `ts-<x>` is its Tailscale device and MagicDNS name
 (FQDN `ts-<x>.moose-micro.ts.net`) — `nire-<x>` never resolves over the
 tailnet (`tailscale.nix`'s trap #1). **To ssh over the tailnet, use
 `ts-<x>`**; `just reach <x>` tries all the names in turn.
@@ -57,7 +58,8 @@ closed on every other interface, so `ssh ts-tenacity` works and
 `nire-tenacity.local` from the LAN does not. durandal and cube still open 22.
 KDE Connect and Steam Remote Play/transfer ports are closed on its LAN side
 too (`lan-ports-closed-tenacity.nix`); both work over the tailnet, with the
-peer added by name rather than found by broadcast.
+peer added by name rather than found by broadcast. cube has the same ports
+closed (`lan-ports-closed-cube.nix`, 2026-09-27); durandal keeps them open.
 
 Removed, history not live hosts ([history.md](history.md)): `nire-testbed`
 (2026-08-14→08-22, never on real hardware), `nire-lego` and `nire-installer`
