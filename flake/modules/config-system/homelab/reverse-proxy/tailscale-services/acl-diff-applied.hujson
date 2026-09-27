@@ -31,6 +31,13 @@
 		},
 	],
 
+	// Device posture from the default `node:os` attribute (all plans).
+	// Laptops and desktops: durandal, tenacity, cube, lysithea. Phones and
+	// the iPad report ios/android and fall outside it.
+	"postures": {
+		"posture:workstation": ["node:os IN ['linux', 'macos']"],
+	},
+
 	"tagOwners": {
 		"tag:golink-host": ["nirebryce@github"],
 		// nixos-configs' homelab (nire-cube): grafana/git-forge move off
@@ -100,10 +107,31 @@
 		// Found live, 2026-09-07: nire-cube dropped off every other
 		// tailnet member's peer list (not just offline -- absent),
 		// SSH included, within a minute of the tag taking effect.
+		//
+		// Narrowed 2026-09-26 from `ip: ["*"]` to the ports actually used,
+		// split in two: everything a phone needs, and opencode (3003) for
+		// laptops/desktops only. `tailscale0` is a trusted interface on
+		// cube (networking.nix), so this grant is the only thing deciding
+		// which cube ports a tailnet device reaches. A new tailnet-facing
+		// service on cube needs its port added here.
 		{
+			// SSH (incl. Forgejo git+ssh), Caddy, mosh, KDE Connect,
+			// Moonlight -> Sunshine.
 			"src": ["autogroup:members"],
 			"dst": ["tag:homelab-cube"],
-			"ip":  ["*"],
+			"ip":  [
+				"tcp:22", "tcp:80", "tcp:443", "udp:60000-61000",
+				"tcp:1714-1764", "udp:1714-1764",
+				"tcp:47984", "tcp:47989", "tcp:47990", "tcp:48010",
+				"udp:47998-48000", "udp:48002", "udp:48010",
+			],
+		},
+		{
+			// opencode serve (coding-agent/opencode/opencode-server.nix).
+			"src":        ["autogroup:members"],
+			"srcPosture": ["posture:workstation"],
+			"dst":        ["tag:homelab-cube"],
+			"ip":         ["tcp:3003"],
 		},
 		// The tagged advertiser needs to reach its own services by name:
 		// tagging dropped cube out of autogroup:members as a SOURCE too,
