@@ -87,6 +87,11 @@ on:
     # flip made it false.
     branches: [main, experimental]
 
+# Read-only token: this workflow only checks out and evaluates. Without the
+# block the token gets the repo's default workflow permissions.
+permissions:
+  contents: read
+
 jobs:
   eval-and-modules:
     name: nix flake check + module tree

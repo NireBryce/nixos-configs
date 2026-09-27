@@ -1,6 +1,6 @@
 # Module style guide, for agents
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-09-27_
 _Sibling reviewed: 2026-09-14 -- module-style-guide.md only renamed `system/` path shorthand to `config-system/`; no facts moved_
 
 Condensed from [module-style-guide.md](module-style-guide.md), which keeps
@@ -17,8 +17,8 @@ the `counts` subcheck of `wiki/scripts/check_wiki.py` watches — moved here
 
 | What | Files |
 |---|---|
-| total `.nix` files under `flake/modules/` | 276 |
-| module header (`moduleName = lib.removeSuffix ...`) | 224 |
+| total `.nix` files under `flake/modules/` | 277 |
+| module header (`moduleName = lib.removeSuffix ...`) | 225 |
 | `# # description` as first body line | 30 |
 | `with pkgs;` package lists | 121 |
 

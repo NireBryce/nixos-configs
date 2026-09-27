@@ -90,7 +90,7 @@
         "/boot" =
           { device = "/dev/disk/by-uuid/8857-B380";
             fsType = "vfat";
-            options = [ "fmask=0022" "dmask=0022" ];
+            options = [ "fmask=0077" "dmask=0077" ]; # root-only: /boot/loader/random-seed lives here
           };
       };
 

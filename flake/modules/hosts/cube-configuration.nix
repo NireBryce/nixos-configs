@@ -53,7 +53,7 @@
         cube
 
         # ── shared ────────────────────────────────────────────────────────────
-        boot            # common boot options: boot-generations
+        boot            # common boot options: boot-generations, boot-editor
 
         # Deliberately NOT `impermanence` -- see the header above. This host
         # keeps a plain persistent root, not the `/root` wipe
