@@ -1,22 +1,6 @@
 # Maintenance schedule
 
-_Last modified: 2026-09-14_
-
-> **Condensed version:**
-> [maintenance-schedule-for-agents.md](maintenance-schedule-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
-## Contents
-
-- [What this is](#what-this-is)
-- [Why this file is plaintext, not sops-encrypted](#why-this-file-is-plaintext-not-sops-encrypted)
-- [Items](#items)
-- [Adding a new item](#adding-a-new-item)
-- [See also](#see-also)
-
-## What this is
+_Last modified: 2026-09-27_
 
 A checklist of this fleet's credentials, keys, and certificates that have
 **an actual expiry, a recommended rotation cadence, or a "will silently
@@ -29,6 +13,19 @@ guessed — "unverified" is written down as such rather than invented), and
 where the real rotation procedure lives if there is one. This page is the
 index that says *something is due*; `backup-runbook.md` and similar own the
 *how*.
+
+> **Condensed version:**
+> [maintenance-schedule-for-agents.md](maintenance-schedule-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
+## Contents
+
+- [Why this file is plaintext, not sops-encrypted](#why-this-file-is-plaintext-not-sops-encrypted)
+- [Items](#items)
+- [Adding a new item](#adding-a-new-item)
+- [See also](#see-also)
 
 ## Why this file is plaintext, not sops-encrypted
 

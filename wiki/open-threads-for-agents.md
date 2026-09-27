@@ -1,6 +1,6 @@
 # Open threads, for agents
 
-_Last modified: 2026-09-16_
+_Last modified: 2026-09-27_
 
 Condensed from [open-threads.md](open-threads.md), which keeps the closed
 items, the reasoning and the full accounts. Live threads only here.
@@ -67,13 +67,11 @@ housekeeping pass over this list.
   rather than reusing the flake's own nixpkgs input. Cheap today; worth
   pinning if CI minutes start mattering.
 - **Human halves of `-for-agents` pairs, read 2026-09-11** — no decay into
-  duplicate siblings (0–5% verbatim overlap across all 19 pairs). Three
-  unacted findings: all 19 open with TOC + condensed-version blockquote
-  before any orientation prose (line 17–23); `categories/system.md`'s
-  subdirectory table is what/where, 5 of 19 rows being the dirname plus
-  `.nix`; `disk-formatting.md`'s "Actually formatting the disk" step 3
-  describes the disko invocation instead of giving it, and neither half has
-  the command.
+  duplicate siblings (0–5% verbatim overlap across all 19 pairs). All
+  three findings fixed: intro-first header order wiki-wide (#292, #302;
+  two stragglers closed out 2026-09-27), `categories/system.md`'s
+  subdirectory table replaced by prose plus a sibling pointer, and
+  `disk-formatting.md` carrying the disko command on both halves.
 - Idea placeholders with no content:
   [`../flake/scripts/script-wishlist.md`](<../flake/scripts/script-wishlist.md>),
   and the "things to look into" list at the end of

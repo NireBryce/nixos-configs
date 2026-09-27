@@ -2,11 +2,6 @@
 
 _Last modified: 2026-09-27_
 
-> **Condensed version:**
-> [virtualization-for-agents.md](virtualization-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in a
-> hurry) loading it mid-task. Both siblings get edited in the same change.
-
 Libvirt/QEMU VMs, and *only* that — see [containers](containers.md) for why
 podman and distrobox (OCI containers) are a different category. Nested under
 the `homelab` umbrella since 2026-08-27 (moved from `config-system/virtualization/`;
@@ -15,6 +10,11 @@ this category ran until 2026-08-28, has a successor: `forge-runner`
 (2026-09-25, the Forgejo Actions runner VM — [git-forge](git-forge.md)
 tells the runner half; no `nire-` prefix, deliberately — that prefix names
 the fleet machines, and this is a component of cube) — the category's first second life.
+
+> **Condensed version:**
+> [virtualization-for-agents.md](virtualization-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in a
+> hurry) loading it mid-task. Both siblings get edited in the same change.
 
 ## Contents
 

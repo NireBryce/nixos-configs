@@ -1,6 +1,6 @@
 # New host disk formatting (LUKS + btrfs + impermanence)
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-09-27_
 
 The runbook-shaped piece of adding a new host: **the actual disk step**, not
 the Nix config around it. Skill `new-host-config` covers the whole
@@ -109,9 +109,20 @@ verified" section), never against real hardware.
    with the new host's config, including the wired-in generator above,
    already committed — `git add` first, since flakes in a git repo ignore
    untracked files.
-3. Run disko in `disko` mode against the real device, pointed at this host's
-   own `nixosConfigurations` entry — disko's own documented invocation
-   shape, not a command this repo has its own wrapper for.
+3. Run disko against the real device — the command quoted from disko's
+   docs, **not run end to end on any host in this repo**. From the repo's
+   `flake/` directory (the flake lives there, not at the repo root):
+
+   ```sh
+   sudo nix --experimental-features "nix-command flakes" run \
+     github:nix-community/disko/latest -- --mode destroy,format,mount \
+     --flake .#<new-host-name>
+   ```
+
+   `--flake` resolves the host's `diskoConfigurations.<name>` output, or
+   else the disko module of its `nixosConfigurations.<name>` entry — the
+   fallback is this repo's shape, since the generator is wired into the
+   host config itself.
 4. Once partitioned and mounted, install normally (`nixos-install` or
    equivalent) against the flake.
 
