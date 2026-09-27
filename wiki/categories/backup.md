@@ -1,6 +1,6 @@
 # `backup` — `config-system/homelab/backup/`
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-26_
 
 [restic](https://restic.net/), backing up `nire-cube`'s own service state to
 the QNAP NAS already on the network. Added 2026-08-28, cube-only, against
@@ -177,6 +177,13 @@ Live-checked 2026-09-05/06, over ssh to `nire-cube.local`:
   address still connects), and QNAP's own brute-force protection is on
   (taken on confirmation, not independently checked). See
   [backup-history.md](backup-history.md) for the full account.
+- **Tailnet-only means the tailnet policy has to let cube in.** cube has
+  been tagged `tag:homelab-cube` since 2026-09-07, and a tagged device is
+  outside `autogroup:members` as a source, so the member-to-member grant
+  never covered cube → ts-hive. Backups failed nightly from then until a
+  dedicated `tag:homelab-cube → ts-hive, tcp:22` grant was added
+  2026-09-26 — found by accident while narrowing the policy, since nothing
+  alerts on a failed backup run.
 
 All of the above is genuinely done. The restore drill has genuinely been
 performed — issue #87's own "done means" was followed exactly as

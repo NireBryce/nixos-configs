@@ -1,6 +1,6 @@
 # `backup`, for agents
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-26_
 _Sibling reviewed: 2026-09-14 -- backup.md only renamed `system/` path shorthand to `config-system/`; no facts moved_
 
 Condensed from [backup.md](backup.md), which keeps the investigation
@@ -52,6 +52,13 @@ here can enforce it. Confirmed live 2026-09-05: daily 04:30, keep 5 days.
 
 QNAP SSH has no key-only-auth toggle; mitigated at the network level
 instead — port 22 LAN-blocked, tailnet-only.
+
+**cube reaches ts-hive only through the tailnet grant `tag:homelab-cube →
+ts-hive, tcp:22`** (`acl-diff-applied.hujson`, alias `ts-hive` in `hosts`).
+cube is tagged, so no `autogroup:members` grant covers it as a source.
+Missing 2026-09-07 → 2026-09-26: every nightly run failed `ssh: connect to
+host ts-hive`, with nothing alerting. `journalctl -u restic-backups-cube`
+is the check.
 
 ## Imported by
 
