@@ -1,35 +1,24 @@
-// Example/default ACLs for unrestricted connections.
+// Tailnet policy -- the repo copy of what is applied (see README.md).
 {
 	// Declare static groups of users beyond those in the identity service.
 	"groups": {"group:golink-admins": ["nirebryce@github"]},
 
 	// Declare convenient hostname aliases to use in place of IP addresses.
-	"hosts": {"example-host-1": "100.100.100.100"},
+	"hosts": {
+		"example-host-1": "100.100.100.100",
+		// The QNAP (ts-hive), backup target for cube's restic. A grant dst
+		// cannot name a device, so it gets an alias. Re-check if the NAS is
+		// ever re-registered and its 100.x address changes.
+		"ts-hive": "100.78.140.91",
+	},
 
 	// Access control lists.
 	"acls": [],
 
-	"ssh": [
-		// Allow all users to SSH into their own devices in check mode.
-		// Comment this section out if you want to define specific restrictions.
-		{
-			"action": "accept",
-			"src":    ["autogroup:members"],
-			"dst":    ["autogroup:self"],
-			"users":  ["autogroup:nonroot", "root"],
-		},
-	],
-
-	"nodeAttrs": [
-		{
-			// Funnel policy, which lets tailnet members control Funnel
-			// for their own devices.
-			// Learn more at https://tailscale.com/kb/1223/tailscale-funnel/
-			"target": ["autogroup:members"],
-
-			"attr": ["funnel"],
-		},
-	],
+	// No "ssh" block (Tailscale SSH; no host runs it) and no Funnel
+	// `nodeAttrs` -- both were the policy's stock defaults, removed
+	// 2026-09-26: the ssh block allowed root, and Funnel let any member
+	// device publish a local port to the public internet.
 
 	// Device posture from the default `node:os` attribute (all plans).
 	// Laptops and desktops: durandal, tenacity, cube, lysithea. Phones and
@@ -85,11 +74,28 @@
 			"dst": ["tag:golink-host"],
 			"app": {"tailscale.com/cap/golink": [{"admin": true}]},
 		},
-		// {"action": "accept", "src": ["autogroup:members"], "dst": ["autogroup:members"], "ip": ["*"]}
+		// Device to device (untagged members, incl. homeassistant, ts-hive
+		// and golink's `go` node). Was `ip: ["*"]` until 2026-09-26; now
+		// the ports in use. A service reached over the tailnet on a member
+		// device needs its port here, or it times out.
 		{
 			"src": ["autogroup:members"],
 			"dst": ["autogroup:members"],
-			"ip":  ["*"],
+			"ip":  [
+				// SSH (and ts-hive SFTP), mosh
+				"tcp:22", "udp:60000-61000",
+				// HTTP/HTTPS: golink `go`, homeassistant, ts-hive UI
+				"tcp:80", "tcp:443",
+				// homeassistant UI/app, ts-hive QTS UI
+				"tcp:8123", "tcp:8080",
+				// KDE Connect
+				"tcp:1714-1764", "udp:1714-1764",
+				// Moonlight -> Sunshine
+				"tcp:47984", "tcp:47989", "tcp:47990", "tcp:48010",
+				"udp:47998-48000", "udp:48002", "udp:48010",
+				// Steam Remote Play between devices
+				"tcp:27036-27037", "udp:27031-27036",
+			],
 		},
 		// Explicit grants for the two services: a virtual service IP is
 		// not necessarily covered by the autogroup:members->autogroup:members
@@ -150,6 +156,15 @@
 			"src": ["tag:homelab-cube"],
 			"dst": ["svc:git", "svc:grafana", "svc:homepage", "svc:glance"],
 			"ip":  ["*"],
+		},
+		// cube's restic backup (sftp:nire@ts-hive) -- cube is tagged, so no
+		// autogroup:members grant covers it as a SOURCE (README, the
+		// 2026-09-14 section). Missing from 2026-09-07 (the tag) until
+		// 2026-09-26: every nightly backup failed "connect to host ts-hive".
+		{
+			"src": ["tag:homelab-cube"],
+			"dst": ["ts-hive"],
+			"ip":  ["tcp:22"],
 		},
 		{
 			"src": ["autogroup:members"],

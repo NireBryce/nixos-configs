@@ -34,6 +34,11 @@
                     # extraOptions = "experimental-features = 'nix-command flakes'";
                     settings = {
                         trusted-users = [ "root" ];
+                        # Who may talk to the Nix daemon at all (default "*").
+                        # wheel only, 2026-09-26: service accounts (cube's
+                        # `container`, DynamicUser units) have no business
+                        # building or fetching. root is always allowed.
+                        allowed-users = [ "@wheel" ];
                         experimental-features = [
                         # duplicated in extraOptions?
                         "nix-command"

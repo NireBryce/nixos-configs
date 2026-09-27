@@ -7,7 +7,9 @@
             programs.steam = {
                 enable = true;
                 remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
-                dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
+                # Off 2026-09-26: no host runs a Source dedicated server, and this opened
+                # 27015 TCP+UDP on every interface. Uncomment when one does.
+                # dedicatedServer.openFirewall = true;
                 gamescopeSession.enable = true; # third party gamescope compositor
                 localNetworkGameTransfers.openFirewall = true;
                 protontricks.enable = true;
