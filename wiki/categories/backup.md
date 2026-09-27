@@ -1,6 +1,6 @@
 # `backup` — `config-system/homelab/backup/`
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-09-27_
 
 [restic](https://restic.net/), backing up `nire-cube`'s own service state to
 the QNAP NAS already on the network. Added 2026-08-28, cube-only, against
@@ -83,7 +83,11 @@ capture a torn write mid-transaction that restic will store without
 complaint (issue #87's open question 1). `backupPrepareCommand` runs
 `sqlite3 <db> ".backup"` into a staging directory before each backup; the
 three live db files are `exclude`d, so it's the staged, consistent copy
-that actually gets backed up, not the live one.
+that actually gets backed up, not the live one. The prepare step runs under
+`umask 077` and creates the staging directory 0700: the copies are whole
+databases, account hashes included, and until 2026-09-27 they sat 0644 in
+a 0755 directory, readable by every account on cube while the live ones
+sit in 0700/0750 service directories.
 
 **It had never worked.** Found doing the restore drill this page's own
 "done means" always said was the real bar: `restic ls --recursive

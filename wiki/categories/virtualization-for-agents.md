@@ -1,6 +1,6 @@
 # `virtualization`, for agents
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-09-27_
 
 Condensed from [virtualization.md](virtualization.md), which keeps the
 narrative and verification records. Facts only here.
@@ -57,7 +57,8 @@ memory).
 
 Produces: domain XML at `/etc/libvirt/qemu/<name>.xml` + a oneshot
 `libvirt-vm-<name>` unit (after/requires `libvirtd`, wantedBy
-multi-user) that GC-roots the base image, creates the COW overlay only if
+multi-user) that GC-roots the base image, creates the COW overlay (0600,
+in a 0711 `/var/lib/libvirt/images`; 0644/0755 until 2026-09-27) only if
 missing (rebuilds never wipe guest state — unless `ephemeral`: overlay
 recreated on host boot or base-image/XML change, stamp
 `/run/libvirt-vm/<name>.stamp`), starts the default network if inactive,

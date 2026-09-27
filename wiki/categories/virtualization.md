@@ -1,6 +1,6 @@
 # `virtualization` — `config-system/homelab/virtualization/`
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-09-27_
 
 > **Condensed version:**
 > [virtualization-for-agents.md](virtualization-for-agents.md) — the same
@@ -151,6 +151,10 @@ recreated on every host boot and whenever the base image or domain XML
 changes (a stamp under `/run/libvirt-vm/`). `forge-runner` sets it; see
 [maintenance.md](../maintenance.md#the-runner-vm). Shares are read-only
 on the host side by default (`<readonly/>`, virtiofsd `--readonly`).
+Overlays are created 0600 in a 0711 `/var/lib/libvirt/images` (libvirt's
+own default; qemu-libvirtd still reaches the file, and libvirt chowns it
+to that user at start). Until 2026-09-27 they came out 0644 in a 0755
+directory, so any account on cube could read a guest's disk.
 
 The two real bugs this feature hit the first time (nixpkgs'
 image-variant isolation not reaching a base config's toplevel;
