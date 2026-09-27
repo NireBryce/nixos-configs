@@ -37,8 +37,8 @@ sharing a name silently merge ([../architecture.md](../architecture.md)).
 
 `just opencode-attach [dir] [args]` from a shell on cube or lysithea. It
 prompts for the password unless `OPENCODE_SERVER_PASSWORD` is set; `-c`
-resumes the last session. The unit and its traps (ConditionUser, the
-`sh -c` bind-address lookup) are commented in the module itself.
+resumes the last session. The unit and its traps (ConditionUser; the start script, which exits 1 until tailscaled
+reports an IP, so a boot never leaves it bound to loopback) are commented in the module itself.
 
 ## Imported by
 
