@@ -88,21 +88,27 @@
                 serviceConfig = {
                     Type = "simple";
 
-                    # The sh -c is load-bearing: ExecStart does no command
-                    # substitution, and the bind address has to be resolved
-                    # at start -- hardcoding the 100.x address here would
-                    # break silently the day the tailnet reissues it.
-                    # `exec` keeps the shell from wrapping the server
-                    # process. The tailscaled control socket is
-                    # world-connectable, so this works from the user
-                    # manager (verified: `tailscale ip -4` as the user on cube).
-                    ExecStart = "${pkgs.runtimeShell} -c 'exec ${lib.getExe pkgs.opencode} serve --hostname $(${lib.getExe pkgs.tailscale} ip -4) --port 3003'";
+                    # The bind address is resolved at start -- hardcoding
+                    # the 100.x address would break silently the day the
+                    # tailnet reissues it. The script EXITS 1 when the
+                    # lookup fails or comes back empty, so systemd retries
+                    # (below): `--hostname` given an empty string makes
+                    # opencode bind its default, 127.0.0.1, and start
+                    # "successfully" where nothing off-host can reach it.
+                    # `exec` keeps the shell from wrapping the server. The
+                    # tailscaled control socket is world-connectable, so the
+                    # lookup works from the user manager.
+                    ExecStart = pkgs.writeShellScript "opencode-serve-tailnet" ''
+                        ip=$(${lib.getExe pkgs.tailscale} ip -4) && [ -n "$ip" ] || exit 1
+                        exec ${lib.getExe pkgs.opencode} serve --hostname "$ip" --port 3003
+                    '';
 
                     # No After=/Wants= on tailscaled: the user manager
-                    # cannot order against system units at all. If the
-                    # `tailscale ip -4` above runs before tailscaled is
-                    # answering, ExecStart fails -- Restart=on-failure
-                    # retries every 5s until it isn't.
+                    # cannot order against system units at all. At boot the
+                    # lookup above usually runs before tailscaled answers;
+                    # the exit 1 plus Restart=on-failure retries every 5s
+                    # until it does. 5s apart stays under the default start
+                    # limit (5 starts in 10s), so it retries indefinitely.
                     Restart    = "on-failure";
                     RestartSec = "5s";
 
@@ -132,3 +138,12 @@
             };
         };
 }
+
+# ── history ─────────────────────────────────────────────────────────────────
+#
+# 2026-09-26 — until then ExecStart was `sh -c 'exec opencode serve
+# --hostname $(tailscale ip -4) ...'`, with a comment claiming a failed
+# lookup fails the start. It didn't: a failing `$(...)` inside the command
+# line doesn't fail the command, so on the 20:34 boot (tailscaled not up
+# yet) opencode got `--hostname ''`, bound 127.0.0.1, and stayed there --
+# "connection refused" from every tailnet device until a manual restart.
