@@ -25,6 +25,10 @@ let
         });
 in
 {
+    # `nire-<x>` is each machine's networking.hostName; its Tailscale device
+    # is `ts-<x>`. config-system/system/networking/tailnet-hosts.nix derives
+    # the ssh entries from the `nire-*` names below -- a new host gets one
+    # with no edit there.
     flake.nixosConfigurations = {
         nire-durandal = mkHost "x86_64-linux" config.flake.modules.nixos.durandalConfiguration;
         nire-tenacity = mkHost "x86_64-linux" config.flake.modules.nixos.tenacityConfiguration;

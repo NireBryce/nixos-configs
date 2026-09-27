@@ -54,6 +54,10 @@ before stating any count) and `wiki/hosts.md`'s table. First-boot history
 `wiki/history.md`'s "Confirmed-on-hardware facts".
 
 - **Check `hostname` before assuming which machine the session is on.**
+- **ssh to another host over the tailnet as `ts-<x>`, never `nire-<x>`** —
+  `nire-<x>` is the hostname (`nire-<x>.local` on the LAN only), and
+  tenacity's sshd is tailnet-only. `just reach <x>` tries every name. Rule
+  and table: `wiki/hosts.md`; as code: `tailnet-hosts.nix`.
 - Host *counts* in prose are claims about when someone last looked — check
   `hosts.nix`.
 

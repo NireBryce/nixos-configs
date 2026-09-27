@@ -16,12 +16,24 @@ on the host (`just baseline`, `just diff-deployed`, or comparing `nix eval
 
 ## The hosts
 
-| Host | Class | Role | Wipes `/root`? |
-|---|---|---|---|
-| `nire-durandal` | nixos | workstation | yes |
-| `nire-tenacity` | nixos | handheld (Jovian/SteamOS) — testbed for rapid prototyping | yes |
-| `nire-cube` | nixos | mini PC (GMKtec) | **no** — deliberately, see below |
-| `nire-lysithea` | darwin | laptop | n/a |
+| Host | Class | Role | Wipes `/root`? | Tailnet name |
+|---|---|---|---|---|
+| `nire-durandal` | nixos | workstation | yes | `ts-durandal` |
+| `nire-tenacity` | nixos | handheld (Jovian/SteamOS) — testbed for rapid prototyping | yes | `ts-tenacity` |
+| `nire-cube` | nixos | mini PC (GMKtec) | **no** — deliberately, see below | `ts-cube` |
+| `nire-lysithea` | darwin | laptop | n/a | `ts-lysithea` |
+
+**Two names per machine.** `nire-<x>` is the host's `networking.hostName`
+and its name in `hosts.nix`; on the LAN it answers as `nire-<x>.local`
+(mDNS, `avahi.nix`). `ts-<x>` is its Tailscale device and MagicDNS name
+(FQDN `ts-<x>.moose-micro.ts.net`) — `nire-<x>` never resolves over the
+tailnet (`tailscale.nix`'s trap #1). **To ssh over the tailnet, use
+`ts-<x>`**; `just reach <x>` tries all the names in turn.
+`config-system/system/networking/tailnet-hosts.nix` derives a `Host ts-<x>`
+entry (and a described Tab-completion candidate) for every `nire-*` host,
+so ssh completes them on every machine. The `ts-` names themselves are set
+in the Tailscale admin console; `just wiki-lint` checks the column above
+against the rule, not against the tailnet.
 
 **One guest, not in the table on purpose:** `forge-runner` (2026-09-25) —
 the libvirt VM on `nire-cube` that runs the Forgejo Actions runner. It has
