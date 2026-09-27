@@ -55,6 +55,9 @@ a human reader.
 `hosts/tenacity/configuration/ssh-tailnet-only-tenacity.nix`): port 22 is
 closed on every other interface, so `ssh ts-tenacity` works and
 `nire-tenacity.local` from the LAN does not. durandal and cube still open 22.
+KDE Connect and Steam Remote Play/transfer ports are closed on its LAN side
+too (`lan-ports-closed-tenacity.nix`); both work over the tailnet, with the
+peer added by name rather than found by broadcast.
 
 Removed, history not live hosts ([history.md](history.md)): `nire-testbed`
 (2026-08-14→08-22, never on real hardware), `nire-lego` and `nire-installer`

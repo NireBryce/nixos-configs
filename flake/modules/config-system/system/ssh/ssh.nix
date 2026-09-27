@@ -27,21 +27,8 @@
             };
             users.users.elly = {
                 openssh.authorizedKeys.keys = [
-                # The two nire-lysithea entries are DIFFERENT KEYS, not a
-                # duplicate to tidy up. They differ only by a `.local` suffix in
-                # the comment field, which is how the gap below went unnoticed.
-                #
-                # This one -- bare `elly@nire-lysithea` -- has no private half on
-                # nire-lysithea as of 2026-08-21: no matching file in ~/.ssh
-                # (id_ed25519 is the only keypair there, dated Sep 2024) and
-                # `ssh-add -l` reports no identities. Where it went is unknown;
-                # it predates the flake-parts port. Kept rather than deleted
-                # because it cannot be proven dead from lysithea, and removing an
-                # authorized key you cannot account for is how you discover it
-                # was load-bearing. Delete it once you know what held it.
-                "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILk2lST7kOSRlanAKhl42b9IQib1hzrbxlR5pve/X37D elly@nire-lysithea"
 
-                # The key actually on nire-lysithea, added 2026-08-21.
+                # The key on nire-lysithea, added 2026-08-21.
                 # SHA256:fUxn4S79MlIYFrd4yKKy0d8RmE0J59bdeGXg36c6dgw
                 # Until this landed, the laptop this repo is edited from could not
                 # ssh to ANY host in the fleet -- publickey is the only accepted
@@ -60,3 +47,12 @@
             };
         };
 }
+
+# ── history ─────────────────────────────────────────────────────────────────
+#
+# 2026-09-26 — removed a second lysithea key, bare `elly@nire-lysithea`
+# (ssh-ed25519 ...AAAAILk2lST7), next to the `.local` one above. It differed
+# only by that suffix in the comment field, which is how it went unnoticed,
+# and had no private half on lysithea as of 2026-08-21 (id_ed25519 was the
+# only keypair there, `ssh-add -l` empty). Predated the flake-parts port;
+# nothing ever accounted for it.
