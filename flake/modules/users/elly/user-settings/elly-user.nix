@@ -32,6 +32,18 @@
                     ];
                 };
             };
+
+            # The hash file is made by hand, and all three hosts had it 0644
+            # in a 0755 dir -- a login hash every account could read, the
+            # thing /etc/shadow's 0640 exists to prevent. Only root reads it
+            # (users-groups activation). `d` also tightens an existing dir;
+            # `z` adjusts an existing file and creates nothing. Applied at
+            # every boot and switch, so a hand-made file can't drift back.
+            # Added 2026-09-27.
+            systemd.tmpfiles.rules = [
+                "d /persist/passwords      0700 root root -"
+                "z /persist/passwords/elly 0600 root root -"
+            ];
         };
 
         flake.modules.darwin.${moduleName} = { pkgs, ... }: {
