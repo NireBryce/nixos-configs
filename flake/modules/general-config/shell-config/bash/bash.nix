@@ -93,7 +93,7 @@
                         [[ ''$- == *i* ]] && source -- ${pkgs.blesh}/share/blesh/ble.sh --attach=none
                     '')
 
-                    # cod (packages/shell-apps/completions/cod-completions.nix
+                    # cod (packages-config/shell-apps/completions/cod-completions.nix
                     # provides it on PATH, nixos-class only) is broken on
                     # darwin -- nixpkgs: meta.broken = stdenv.hostPlatform.isDarwin
                     # -- and isn't imported there either way, so this would be
@@ -113,7 +113,7 @@
                         source <(cod init ''$''$ bash)
                     '')
 
-                    # carapace (packages/shell-apps/completions/carapace-completions.nix
+                    # carapace (packages-config/shell-apps/completions/carapace-completions.nix
                     # provides it, home.packages, all platforms). Registers
                     # `complete -F _carapace_completer` for every command
                     # carapace has a spec for (~1000, `carapace --list`);

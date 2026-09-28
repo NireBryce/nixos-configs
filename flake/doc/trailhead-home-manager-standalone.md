@@ -47,7 +47,7 @@ to `ellyHomeManager`. Nothing else references it.
 It lives under `general-config/system/` (the `general-config/` directory's own `system/` subdirectory) so the `system` category carries it to durandal.
 Deleting the file removes it from that category automatically — no host edit.
 
-### 2. `modules/users/elly-home-manager.nix` — keep, and build a configuration from it
+### 2. `modules/users-config/elly-home-manager.nix` — keep, and build a configuration from it
 
 `ellyHomeManager` is the module aggregate and is **independent of how it gets
 applied**. It is the same value either way; only the consumer changes. Add a
@@ -140,7 +140,7 @@ dotfile HM wants to own and finds already present.
 ## What does *not* change
 
 - `ellyHomeManager` itself, and every module it imports. The whole
-  `modules/packages/` tree, `general-config/shell-config/`, `users/elly/` — all of it
+  `modules/packages-config/` tree, `general-config/shell-config/`, `users-config/elly/` — all of it
   is untouched by this decision. That is the point of the aggregate being a plain
   `deferredModule`: it does not know or care who evaluates it.
 - Anything about categories, `dirsAsCategory`, or the host wiring.

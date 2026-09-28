@@ -18,7 +18,7 @@
 
                 # Same reasoning, same shape, for cod's completions (the
                 # package comes from
-                # packages/shell-apps/completions/cod-completions.nix). cod
+                # packages-config/shell-apps/completions/cod-completions.nix). cod
                 # stores no descriptions anywhere, so the data is ours:
                 # cod-desc.tsv is a curated command<TAB>candidate<TAB>
                 # description table (extend via `just cod-desc draft` --

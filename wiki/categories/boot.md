@@ -39,7 +39,7 @@ conflict. That merge is invisible: both halves would probably look like they
 work. This is literally the trap `CLAUDE.md`'s Traps section cites by name
 ("This is how `boot` came to mean both `general-config/boot/` ... and durandal's
 bootloader"), and it's also why
-`hosts/durandal/hardware/boot-durandal.nix` and the other hosts'
+`host-config/durandal/hardware/boot-durandal.nix` and the other hosts'
 per-host boot files (`hardware/boot-tenacity.nix`, `hardware/boot-cube.nix`)
 carry a host-suffixed name instead of the generic one they'd naturally want.
 

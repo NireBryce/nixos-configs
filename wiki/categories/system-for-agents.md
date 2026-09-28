@@ -22,7 +22,7 @@ Anything that must be optional cannot be filed here.
 | File | Why you'd care |
 |---|---|
 | `home-manager/enable-home-manager.nix` | *the* NixOS↔HM wiring (`useGlobalPkgs`, `useUserPackages`). Filed here so importing `system` is enough. |
-| `home-manager/enable-home-manager-darwin.nix` | the darwin equivalent — what actually brings packages/dotfiles to `lysithea`. Not anything under `macos`. |
+| `home-manager/enable-home-manager-darwin.nix` | the darwin equivalent — what actually brings packages-config/dotfiles to `lysithea`. Not anything under `macos`. |
 | `home-manager/drop-unsupported-packages.nix` | reads `meta.platforms`/`meta.badPlatforms` and drops what darwin can't build, with a warning. **Don't hand-write `lib.mkIf (!pkgs.stdenv.isDarwin)`.** |
 | `secrets/sops.nix` | sops-nix, key path derived from the host's own ed25519 SSH host key. `nixos` class only. |
 | `secrets/sops-darwin.nix` | points `SOPS_AGE_KEY_FILE` at the Linux-XDG path; darwin's default lookup is `~/Library/Application Support/...`. |

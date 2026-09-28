@@ -22,7 +22,7 @@ worse than either answer.
 - **starship for every shell**; powerlevel10k and its 1,659-line config
   deleted.
 - **Full per-file dendritic conversion** of package modules, boilerplate
-  accepted. That is why `packages/` is one file per package.
+  accepted. That is why `packages-config/` is one file per package.
 - **The grep-trail convention**, since promoted into `AGENTS.md`.
 - Roles `base`/`desktop`/`handheld` — **superseded** by `dirsAsCategory`
   categories.

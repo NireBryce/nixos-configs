@@ -707,7 +707,7 @@ pinned it: the sole `serve` process's parent was `user@175.service`, and
 `ss -tlnp` showed the listener was not elly's. Fix:
 `unitConfig.ConditionUser = "elly"` — a no-op in every other user's
 manager. Rationale lives in the module comment
-(`hosts/cube/configuration/opencode-server-cube.nix`; since 2026-09-26
+(`host-config/cube/configuration/opencode-server-cube.nix`; since 2026-09-26
 `general-config/homelab/coding-agent/opencode/opencode-server.nix`).
 
 ## 46. "Enabled" is a claim about config, not about who holds the port

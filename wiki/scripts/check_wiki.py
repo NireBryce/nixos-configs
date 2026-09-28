@@ -32,8 +32,8 @@ structured, extractable facts only:
             survives is a mention with no such cue nearby, which is what a
             genuinely stale inclusion looks like. Still read a finding
             before trusting it, same as `modules.py`'s own tools ask.
-            Categories with no wiki page (packages/* subcategories,
-            hosts/* bundles -- see categories/00-INDEX.md's own exclusion
+            Categories with no wiki page (packages-config/* subcategories,
+            host-config/* bundles -- see categories/00-INDEX.md's own exclusion
             list) are silently skipped: nothing to check them against.
 
   table     Checks categories/00-INDEX.md's "## Index" table -- the one place
@@ -56,7 +56,7 @@ structured, extractable facts only:
             a-refactor case this whole script exists for.
 
   hosts     Checks wiki/hosts.md's "The hosts" table -- Host, Class, and
-            Wipes `/root`? -- against `hosts/hosts.nix` (the actual
+            Wipes `/root`? -- against `host-config/hosts.nix` (the actual
             `nixosConfigurations`/`darwinConfigurations` entries, read
             independently of this script's own HOSTS constant below, which
             exists for a narrower reason and is a second hand-maintained
@@ -239,7 +239,7 @@ DECL = re.compile(r'flake\.modules\.(\w+)\.(?:\$\{moduleName\}|\w+)')
 DECL_ATTRSET = re.compile(r'(?m)^\s*(\w+)\.\$\{moduleName\}\s*=')
 COMMENT = re.compile(r'#[^\n]*')
 
-# host short-name -> its hosts/*-configuration.nix. lysithea is darwin-class;
+# host short-name -> its host-config/*-configuration.nix. lysithea is darwin-class;
 # every other host is nixos-class. nire-installer and nire-llm-sandbox
 # (removed 2026-08-27 and 2026-08-28 respectively -- see wiki/history.md; both
 # were deliberately excluded even while they existed) are not listed here --
@@ -317,7 +317,7 @@ def host_imports(root, categories):
     umbrella category among them (see nested_category_names)."""
     out = {}
     for host in HOSTS:
-        p = root / 'flake' / 'modules' / 'hosts' / f'{host}-configuration.nix'
+        p = root / 'flake' / 'modules' / 'host-config' / f'{host}-configuration.nix'
         if not p.exists():
             print(f"WARN  expected host file missing: {p}")
             continue
@@ -334,13 +334,13 @@ def host_imports(root, categories):
 
 def find_categories(root):
     """category name -> its directory, for every dirsAsCategory.nix under
-    flake/modules/general-config/ and flake/modules/users/ -- the two areas
-    categories/00-INDEX.md actually indexes (packages/* and hosts/*
+    flake/modules/general-config/ and flake/modules/users-config/ -- the two areas
+    categories/00-INDEX.md actually indexes (packages-config/* and host-config/*
     are deliberately excluded there, see that file's own header, so this
     check has nothing to compare them against and doesn't look).
     """
     cats = {}
-    for area in ('general-config', 'users'):
+    for area in ('general-config', 'users-config'):
         base = root / 'flake' / 'modules' / area
         if not base.exists():
             continue
@@ -366,7 +366,7 @@ def actual_hosts(root):
     principle drift from hosts.nix; going back to the source here means
     check_hosts also catches that, not just wiki/hosts.md's own table.
     """
-    p = root / 'flake' / 'modules' / 'hosts' / 'hosts.nix'
+    p = root / 'flake' / 'modules' / 'host-config' / 'hosts.nix'
     text = COMMENT.sub('', p.read_text())
     return {name: ('darwin' if ctor == 'mkDarwinHost' else 'nixos')
             for name, ctor in HOST_LINE.findall(text)}

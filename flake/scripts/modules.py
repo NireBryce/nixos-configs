@@ -78,8 +78,8 @@ def imported_names(root):
     """Names anything imports, by class.
 
     Two forms count. Aggregates list members with `with config.flake.modules.
-    <class>; [ ... ]`; they live directly under a namespace dir (hosts/,
-    users/), where dirsAsCategory cannot collect them -- which is also what
+    <class>; [ ... ]`; they live directly under a namespace dir (host-config/,
+    users-config/), where dirsAsCategory cannot collect them -- which is also what
     makes them findable as 'not in a category dir'.
 
     A module can also import another module directly, by naming it as

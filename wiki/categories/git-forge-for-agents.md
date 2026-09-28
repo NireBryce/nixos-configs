@@ -35,7 +35,7 @@ real while writing this category.
 
 The runner is the libvirt guest `forge-runner` on cube —
 `virtualization/virtualization-cube.nix` instantiates it, guest config
-`hosts/forge-runner-configuration.nix`. cube-side support only in
+`host-config/forge-runner-configuration.nix`. cube-side support only in
 `git-forge/forgejo/actions-runner.nix`: `forge-runner-cycle`, one fresh
 guest and one single-use registration per job. Containment is the point: job code with
 docker/podman access roots the VM, not cube.

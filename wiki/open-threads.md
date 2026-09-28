@@ -169,7 +169,7 @@ specific report — not as a housekeeping pass over this list:
 - **CI's lint step re-fetches `nixpkgs#statix nixpkgs#deadnix` from the
   binary cache on every run** (`.github/workflows/check.yml`), rather than
   reusing the flake's own nixpkgs input (already in the tree as
-  home-manager packages, per `packages/nix-utils/`). Cheap today; worth
+  home-manager packages, per `packages-config/nix-utils/`). Cheap today; worth
   pinning if CI minutes ever start mattering. Rescued 2026-09-08 from a
   removed notebook.
 - **QNAP NAS: SSH password authentication cannot be disabled in the QNAP's

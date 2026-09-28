@@ -1,6 +1,6 @@
 # Cube-side host support for the Forgejo Actions runner, which runs in a
 # VM (forge-runner, instantiated by virtualization-cube.nix; its
-# config is hosts/forge-runner-configuration.nix). This module is what
+# config is host-config/forge-runner-configuration.nix). This module is what
 # remains on the HOST: the loop that gives every job a fresh VM and a
 # fresh single-use runner registration.
 #

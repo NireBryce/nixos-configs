@@ -100,7 +100,7 @@ inside it, keep only what a person reading the generated dotfile needs.**
 `durandal`, `tenacity`, and `cube` -- all three NixOS hosts -- directly.
 `lysithea` doesn't list `shell-config` in its
 own imports, but reaches the `homeManager`-class content anyway (`bash`,
-`blesh`, `shell-env`, `zsh`) via `users/elly-home-manager.nix`'s shared
+`blesh`, `shell-env`, `zsh`) via `users-config/elly-home-manager.nix`'s shared
 `ellyHomeManager` bundle, which every host's Home Manager config points at
 regardless of what that host's own `nixos`/`darwin` import list says. System
 shell *registration* on darwin (which shells exist in `/etc/shells`) is a

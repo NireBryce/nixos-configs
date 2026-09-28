@@ -2,6 +2,8 @@
 
 _Last modified: 2026-09-27_
 
+_Sibling reviewed: 2026-09-27 -- source updated for the hosts/users/packages area-dir rename; no mention of those paths on this page_
+
 Condensed from [open-threads.md](open-threads.md), which keeps the closed
 items, the reasoning and the full accounts. Live threads only here.
 

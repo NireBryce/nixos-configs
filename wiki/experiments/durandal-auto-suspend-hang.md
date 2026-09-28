@@ -1,6 +1,6 @@
 # Auto-suspend hang on nire-durandal
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-27_
 
 `nire-durandal` suspends into S3 and then cannot be woken — keyboard, power
 button, nothing — until power is physically removed at the PSU. **Status:
@@ -128,7 +128,7 @@ Two consequences, both load-bearing:
 
 Nothing is being tested right now. Instrumentation only:
 
-- **[suspend-probe-durandal.nix](../../flake/modules/hosts/durandal/fixes/suspend-probe-durandal.nix)**
+- **[suspend-probe-durandal.nix](../../flake/modules/host-config/durandal/fixes/suspend-probe-durandal.nix)**
   — dumps wakeup, GPE and drive state to `/var/log/suspend-probe/` around every
   suspend, `sync`'d so it survives the power cut. `/var/log` is its own btrfs
   subvolume, outside the wiped root.
@@ -176,7 +176,7 @@ inherently suspicious: 14 s, 51 s and 450 s cycles all read clean.
 ## Instrumentation
 
 **Recorded per cycle** by
-[suspend-probe-durandal.nix](../../flake/modules/hosts/durandal/fixes/suspend-probe-durandal.nix):
+[suspend-probe-durandal.nix](../../flake/modules/host-config/durandal/fixes/suspend-probe-durandal.nix):
 requester, sleep mode, `suspend_stats`, `/proc/acpi/wakeup`, GPE counters, PCI
 and USB wakeup state, `/sys/class/wakeup`, drive power cycles, and — added
 2026-09-15 — **GPU state**: `power_dpm_state`, forced performance level, every

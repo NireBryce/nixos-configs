@@ -98,7 +98,7 @@ doesn't re-diagnose it as a USB or kernel resume bug.
 - [impermanence](impermanence.md) — `kde-sleepmode.nix` lives there, not
   here, even though it's KDE-specific — see that page for why.
 - [../hosts.md](../hosts.md) — which host runs which session.
-- `hosts/tenacity/configuration/plasma-tenacity.nix` — this host's own
+- `host-config/tenacity/configuration/plasma-tenacity.nix` — this host's own
   Plasma *preferences* (theme, kwin behavior, input devices, global
   shortcuts) via plasma-manager, captured from tenacity's live `~/.config`
   on 2026-09-01. A separate mechanism from everything above: home-manager

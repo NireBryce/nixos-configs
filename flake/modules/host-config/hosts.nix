@@ -39,7 +39,7 @@ in
         # AGENTS.md are about), and this is a component instantiated on
         # nire-cube by general-config/homelab/virtualization/
         # virtualization-cube.nix through the VM generator. Its config:
-        # hosts/forge-runner-configuration.nix. Not in .sops.yaml, and not
+        # host-config/forge-runner-configuration.nix. Not in .sops.yaml, and not
         # switched from this repo -- it comes up with cube's libvirtd.
         forge-runner = mkHost "x86_64-linux" config.flake.modules.nixos.forgeRunnerConfiguration;
 
@@ -47,7 +47,7 @@ in
         # live-USB installer image) were both removed 2026-08-27 -- see
         # wiki/history.md. nire-installer's mechanism (embedded flake, patched
         # Calamares, unattended nixos-install) is not gone conceptually, just
-        # not carried in this tree; hosts/installer/liveusb-installer.md's
+        # not carried in this tree; host-config/installer/liveusb-installer.md's
         # last version (git history) is the starting point if it returns.
 
         # nire-llm-sandbox (a libvirt VM on nire-cube sandboxing an LLM coding

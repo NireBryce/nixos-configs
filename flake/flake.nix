@@ -63,7 +63,7 @@
 
         # Declarative KDE Plasma (kwinrc, kglobalshortcutsrc, kcminputrc, ...) via
         # a home-manager module. Its HM module is imported only from
-        # hosts/tenacity/configuration/plasma-tenacity.nix, not from
+        # host-config/tenacity/configuration/plasma-tenacity.nix, not from
         # enable-home-manager.nix -- durandal, lysithea and cube never load it.
         # One nested attrset rather than the flat `plasma-manager.inputs.X.follows`
         # shape used above: statix flags three assignments to the same

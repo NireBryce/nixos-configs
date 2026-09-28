@@ -8,7 +8,7 @@
 # this host takes the shared `hardware` category (amdcpu, amdgpu) same as
 # it does.
 #
-# This file sits directly under hosts/ rather than in a category directory,
+# This file sits directly under host-config/ rather than in a category directory,
 # because dirsAsCategory only collects from *sub*directories -- a host
 # definition should not become a member of anything.
 #
@@ -46,7 +46,7 @@
     flake.modules.nixos.cubeConfiguration.imports =
     with config.flake.modules.nixos; [
         # ── this machine ──────────────────────────────────────────────────────
-        # hosts/cube/: hardware-cube, boot-cube, nixpkgs-hostPlatform-cube,
+        # host-config/cube/: hardware-cube, boot-cube, nixpkgs-hostPlatform-cube,
         # nixpkgs-stateVersion-cube -- suffixed for the same reason
         # tenacity's are: a module's name is its filename, and
         # same name in the same class merges rather than erroring.

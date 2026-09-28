@@ -8,17 +8,17 @@ One article per real category — a directory holding its own
 pages are the "what's actually in it, and why is it shaped this way" detail
 for each one, at the same what/why/traps depth as the rest of this wiki.
 
-Scoped to the `general-config/*` system-ish categories plus `users/elly` — 19
+Scoped to the `general-config/*` system-ish categories plus `users-config/elly` — 19
 articles. (`general-config/` was `config-system/` until 2026-09-27 — same
 categories, directory renamed; `git log --follow` across the rename when
 dating anything older.) Not covered here, deliberately:
 
-- **`packages/*` subcategories** (`editors`, `terminals`, `gui-other`,
+- **`packages-config/*` subcategories** (`editors`, `terminals`, `gui-other`,
   `linux-utils`, `nix-utils`, `shell-apps`, `development`, …) — mostly
   single-package wrapper files that are already self-explanatory from their
   filename and a glance at the file itself; see
   [../architecture.md](../architecture.md)'s package-modules section instead.
-- **`hosts/*` per-host bundles** (`durandal`, `tenacity`, `cube`,
+- **`host-config/*` per-host bundles** (`durandal`, `tenacity`, `cube`,
   `lysithea`) — these are host definitions, not conceptual categories; see
   [../hosts.md](../hosts.md).
 
@@ -47,7 +47,7 @@ the split is presentation only, nothing about the schema changes.
 | [peripherals](peripherals.md) | `general-config/peripherals/` | nixos | all 3 NixOS hosts |
 | [shell-config](shell-config/00-INDEX.md) | `general-config/shell-config/` | nixos, homeManager | all 3 NixOS hosts directly; reaches lysithea via `ellyHomeManager` |
 | [system](system.md) | `general-config/system/` | nixos, homeManager, darwin | all 3 NixOS hosts + lysithea (partially) |
-| [elly](elly.md) | `users/elly/` | nixos, homeManager, darwin | all 4 hosts |
+| [elly](elly.md) | `users-config/elly/` | nixos, homeManager, darwin | all 4 hosts |
 
 ### Homelab categories
 

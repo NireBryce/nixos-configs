@@ -25,8 +25,8 @@ is the mechanism, not the inventory.
   declared explicitly. Read this before touching any `dirsAsCategory.nix`.
 - **[`../CLAUDE.md`](../CLAUDE.md), Architecture section** — the prose
   overview: `import-tree`, entry points that sit outside every category tree
-  (`modules/checks.nix`, `hosts/hosts.nix`, the per-host configs,
-  `users/elly-home-manager.nix`), and which categories aren't imported by
+  (`modules/checks.nix`, `host-config/hosts.nix`, the per-host configs,
+  `users-config/elly-home-manager.nix`), and which categories aren't imported by
   every host (`virtualization` is the running example — cube only as of
   2026-08-27, deliberately absent on the handhelds and, since that date, on
   durandal too — see [`categories/virtualization.md`](categories/virtualization.md)).
