@@ -9,9 +9,9 @@
 # `-c`/`-s <id>`, across reboots.
 #
 # FILE PLACEMENT, 2026-09-26: moved here from
-# host-config/cube/configuration/opencode-server-cube.nix (module name
+# hosts/cube/configuration/opencode-server-cube.nix (module name
 # `opencode-server-cube`), and the Home Manager module
-# packages-config/development/tools/ai-tools/opencode.nix (name `opencode`), which
+# packages/development/tools/ai-tools/opencode.nix (name `opencode`), which
 # put the CLI on every host, was deleted -- an agent that can run shells as
 # the user belongs on the one machine set up to host it. Category
 # `coding-agent`, not `opencode`: a category and its module sharing a name

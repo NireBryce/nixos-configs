@@ -47,7 +47,7 @@ in
         # live-USB installer image) were both removed 2026-08-27 -- see
         # wiki/history.md. nire-installer's mechanism (embedded flake, patched
         # Calamares, unattended nixos-install) is not gone conceptually, just
-        # not carried in this tree; host-config/installer/liveusb-installer.md's
+        # not carried in this tree; nireHost/installer/liveusb-installer.md's
         # last version (git history) is the starting point if it returns.
 
         # nire-llm-sandbox (a libvirt VM on nire-cube sandboxing an LLM coding

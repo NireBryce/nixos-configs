@@ -19,11 +19,11 @@ One module, `opencode/opencode-server.nix`:
 
 - **The CLI**: `users.users.elly.packages`. No other NixOS host has
   opencode. Until 2026-09-26 a Home Manager module
-  (`packages-config/development/tools/ai-tools/opencode.nix`) put it on every host;
+  (`packages/development/tools/ai-tools/opencode.nix`) put it on every host;
   that was deleted. lysithea still has Homebrew's copy (`homebrew.nix`).
 - **The server**: `opencode serve` on port 3003, bound to cube's tailnet
   IP only, lingering user unit. Before the move it lived at
-  `host-config/cube/configuration/opencode-server-cube.nix`.
+  `hosts/cube/configuration/opencode-server-cube.nix`.
 - **HTTP basic auth**: username `opencode`, password from the sops key
   `OPENCODE_SERVER_PASSWORD` (the bare password; a sops template writes the
   `KEY=value` EnvironmentFile, owned by the user because a user manager

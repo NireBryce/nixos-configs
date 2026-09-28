@@ -20,7 +20,7 @@
             # NOT account creation -- nix-darwin does not create macOS user
             # accounts, only describes an existing one. Without this,
             # `users.users.elly.home` stays at its own default of `null`
-            # (modules/users-config/user.nix: "This defaults to null... if the user
+            # (modules/users/user.nix: "This defaults to null... if the user
             # has not been created yet"), and home-manager's own
             # nixos/common.nix derives `home.homeDirectory` directly from
             # `config.users.users.${name}.home` -- so home.homeDirectory
