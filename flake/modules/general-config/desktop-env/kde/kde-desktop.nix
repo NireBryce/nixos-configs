@@ -15,7 +15,7 @@
         # Bound out here, before the module body, on purpose. Inside the body
         # `config` is the *NixOS* config, and `config.flake.modules...` silently
         # stops resolving. Same reasoning as
-        # system/system/home-manager/enable-home-manager.nix.
+        # general-config/system/home-manager/enable-home-manager.nix.
         kdeBase = config.flake.modules.nixos.kde-base;
     in {
         flake.modules.nixos.${moduleName} = {

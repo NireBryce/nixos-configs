@@ -186,7 +186,7 @@ this has actually been checked, not once the machine merely boots.
   — the generator itself: what it produces, what it deliberately leaves out,
   and exactly how it was verified (and how it wasn't).
 - `WARN-impermanence.nix`
-  (`flake/modules/general-config/impermanence/root-rollback/WARN-impermanence.nix`) —
+  (`flake/modules/general-config/impermanence/root-rollback/restore-root/WARN-impermanence.nix`) —
   the rollback module this disk layout exists to support; read before
   changing anything near it, every time.
 - Skill `new-host-config` (`.agents/skills/new-host-config/SKILL.md`) — the

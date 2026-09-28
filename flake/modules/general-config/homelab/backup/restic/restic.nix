@@ -2,7 +2,7 @@
 # already on the network. Added 2026-08-28 against issue #87 ("no backups
 # anywhere in the fleet"), which is closed: a real restore drill on
 # 2026-09-06 opened a genuine, complete Forgejo database out of the repo.
-# Own category (`system/homelab/backup/`), not `restic`: a category and its
+# Own category (`general-config/homelab/backup/`), not `restic`: a category and its
 # one module both named `restic` would declare `flake.modules.nixos.restic`
 # twice and silently MERGE, the `containers`/`podman.nix` collision
 # AGENTS.md documents -- same reason `git-forge` isn't `forgejo`.
@@ -89,7 +89,7 @@
             environment.systemPackages = [ pkgs.restic ];
 
             # sopsFile unset -- defaults to `config.sops.defaultSopsFile`
-            # (secrets.yaml, set in system/system/secrets/sops.nix, imported
+            # (secrets.yaml, set in general-config/system/secrets/sops.nix, imported
             # by every Linux host via `system`). Declared HERE and not in
             # sops.nix, same reasoning forgejo-admin-password's own
             # declaration in forgejo.nix gives: `backup` is cube-only, and

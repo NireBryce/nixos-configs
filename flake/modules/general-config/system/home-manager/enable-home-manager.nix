@@ -1,6 +1,6 @@
 # Home Manager, managed from the NixOS side.
 #
-# Lives under system/system/ so the `system` category picks it up and durandal gets
+# Lives under general-config/system/ so the `system` category picks it up and durandal gets
 # it with everything else. There is no homeConfigurations output and no separate
 # home switch: `nh os switch` applies both.
 #
@@ -23,7 +23,7 @@
                 # Use the system's nixpkgs rather than a second instantiation.
                 # This is what makes HM reject any `nixpkgs.*` option set inside a
                 # home module -- allowUnfree has to come from the system, and does,
-                # in system/nix/nix-settings/basic-nix-settings.nix.
+                # in general-config/nix/nix-settings/basic-nix-settings.nix.
                 useGlobalPkgs = true;
 
                 # Packages land in /etc/profiles/per-user/<name> instead of a

@@ -91,7 +91,7 @@
             # file's header: secret URLs stay out of the repo and the
             # store). sopsFile unset -- defaults to
             # `config.sops.defaultSopsFile` (secrets.yaml, set in
-            # system/system/secrets/sops.nix). Declared HERE and not in
+            # general-config/system/secrets/sops.nix). Declared HERE and not in
             # sops.nix, on forgejo.nix's reasoning: `landing` is cube-only,
             # so the secret decrypts only where imported. restartUnits so
             # an edited calendar list reaches the running page without a

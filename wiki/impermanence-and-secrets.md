@@ -9,7 +9,7 @@ _Last modified: 2026-09-27_
 
 ## Impermanence
 
-**Read `flake/modules/general-config/impermanence/root-rollback/WARN-impermanence.nix`
+**Read `flake/modules/general-config/impermanence/root-rollback/restore-root/WARN-impermanence.nix`
 before changing anything near this, every time — no exceptions, per
 [`../CLAUDE.md`](../CLAUDE.md)'s Safety section.** It's the module that
 deletes the `/root` btrfs subvolume in initrd on every boot for the hosts

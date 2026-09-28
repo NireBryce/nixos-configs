@@ -117,7 +117,7 @@ tsnet writes its node key into the config-dir and reauthenticates from it
 on every later boot — once per machine, the same shape `sudo tailscale up`
 has. (tsnet ignores a later-wired authkey when state exists, so there's
 still no reason to wire one. To revisit anyway: mint a key, add
-`sops.secrets.tailscale_key` in `general-config/secrets/sops.nix`, pass it as an
+`sops.secrets.tailscale_key` in `general-config/system/secrets/sops.nix`, pass it as an
 `EnvironmentFile`.)
 
 ## The node must stay named `go`

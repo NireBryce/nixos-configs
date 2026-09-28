@@ -222,7 +222,7 @@
 # libvirt-exporter/prometheus, with "tailnet only" enforced at the firewall.
 # True at the time: nothing else on the host could accept the connection, so
 # `trustedInterfaces = [ "tailscale0" ]` was the ONLY thing between port
-# 3000 and the LAN. Adding system/reverse-proxy/caddy.nix removed that
+# 3000 and the LAN. Adding general-config/homelab/reverse-proxy/caddy/caddy.nix removed that
 # constraint -- caddy accepts on the tailnet, terminates TLS with a cert
 # from tailscaled, connects over loopback -- so the listener moved back in
 # line with the rest of the stack.

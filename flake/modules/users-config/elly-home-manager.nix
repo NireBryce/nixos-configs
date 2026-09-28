@@ -65,7 +65,7 @@
                         # virtualization" -- virtualization.nix's homeManager
                         # block was, and still is, commented out, so it never
                         # contributed one. That file is now
-                        # general-config/containers/podman/podman.nix (moved out of
+                        # general-config/homelab/containers/podman/podman.nix (moved out of
                         # `system` entirely 2026-08-22, after an earlier stop
                         # at nire/system/containers/containers.nix); the word
                         # `virtualization` moved to a category of its own,

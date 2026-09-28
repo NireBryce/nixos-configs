@@ -66,5 +66,5 @@
 # (spectacle and qttools it already had; Plasma 6 pulls those in).
 #
 # Not a gap: networkmanager.enable is mkDefault here, but both hosts get it
-# as `true` from system/system/networking/wifi.nix -- tenacity was never
+# as `true` from general-config/system/networking/wifi.nix -- tenacity was never
 # without networking.

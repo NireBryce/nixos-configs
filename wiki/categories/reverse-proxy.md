@@ -179,7 +179,7 @@ Two prerequisites, neither in this repo:
   out-of-repo trap [system](system.md)'s `tailscale.nix` documents.
 
 `permitCertUid` is set in `caddy.nix` rather than in
-`general-config/networking/tailscale.nix` — that file is in the `system` category
+`general-config/system/networking/tailscale.nix` — that file is in the `system` category
 *every* Linux host imports, and setting it there would grant cert-fetching
 rights to a `caddy` user on hosts that don't run Caddy. Scope a change to
 the host that needs it.
