@@ -89,24 +89,33 @@
                     };
 
                     # kcminputrc [Libinput][<vendor>][<product>][<name>]
-                    # sections -- vendorId/productId here are the decimal
-                    # values kcminputrc itself uses as the group key (matches
-                    # plasma-manager's own touchpad example verbatim:
-                    # 2321/21128 is 0x911/0x5288). 1133/49738 is the Logitech
-                    # G600; 1118/9 is a Microsoft-branded mouse.
+                    # sections. plasma-manager runs vendorId/productId through
+                    # fromHexString and writes the decimal result as the group
+                    # key kwin reads -- so these carry the USB ID in hex
+                    # (0x0911/0x5288 -> [Libinput][2321][21128]). plasma-manager's
+                    # own touchpad example gets this backwards, showing the
+                    # decimal strings, and the 2026-09-01 capture copied it
+                    # verbatim: every declared setting then landed in a parallel
+                    # [Libinput][8993][135464]/[4403]/[4376] group kwin ignores,
+                    # which the live kcminputrc carried until 2026-09-28. Those
+                    # groups are inert (kwin never reads them) and nothing cleans
+                    # them up -- plasma-manager keeps no last_run state for this
+                    # file. The ID fix picks the same values that were already
+                    # hand-set under the decimal keys, so the first switch that
+                    # actually writes these declarations is a no-op.
                     mice = [
                         {
                             # Gaming mouse: raw/1:1 movement, no acceleration curve.
                             name                = "Logitech Gaming Mouse G600";
-                            vendorId            = "1133";
-                            productId           = "49738";
+                            vendorId            = "046d";
+                            productId           = "c24a";
                             accelerationProfile = "none";
                         }
                         {
                             # A spare mouse kept configured left-handed; name is
                             # copied verbatim from kcminputrc, leading spaces included.
                             name       = "  Mouse for Windows";
-                            vendorId   = "1118";
+                            vendorId   = "045e";
                             productId  = "9";
                             leftHanded = true;
                         }
@@ -114,10 +123,15 @@
 
                     touchpads = [
                         {
-                            name         = "HTIX5288:00 0911:5288 Touchpad";
-                            vendorId     = "2321";
-                            productId    = "21128";
-                            pointerSpeed = 0.200;
+                            name               = "HTIX5288:00 0911:5288 Touchpad";
+                            vendorId           = "0911";
+                            productId          = "5288";
+                            pointerSpeed       = 0.200;
+                            # libinput's default for an internal touchpad is to
+                            # disable it while typing; deliberately not wanted
+                            # here. Hand-set in System Settings after the capture
+                            # and now pinned: DisableWhileTyping=false.
+                            disableWhileTyping = false;
                         }
                     ];
                 };
