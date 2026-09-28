@@ -1,7 +1,7 @@
 # elly's whole Home Manager config, as one module.
 #
-# The home-side counterpart to hosts/durandal-configuration.nix, and it sits
-# directly under users/ for the same reason: dirsAsCategory only collects from
+# The home-side counterpart to host-config/durandal-configuration.nix, and it sits
+# directly under users-config/ for the same reason: dirsAsCategory only collects from
 # *sub*directories, so a file here does not become a member of anything.
 #
 # Only the categories that actually contain homeManager modules are listed. Every

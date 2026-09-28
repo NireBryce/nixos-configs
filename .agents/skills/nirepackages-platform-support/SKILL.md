@@ -7,7 +7,7 @@ description: How to tell whether nixpkgs can build a package on darwin and wheth
 
 ## Applies to
 
-Packages in `ellyHomeManager` (`packages/`, `users/`), shared across
+Packages in `ellyHomeManager` (`packages-config/`, `users-config/`), shared across
 all four hosts including darwin. Use before adding a package module, adding
 an `isDarwin`/platform guard, or deciding whether a cask duplicates a
 nixpkgs package.
@@ -48,7 +48,7 @@ just available --duplicates   # only the ones homebrew ALSO installs, and what t
 Deciding which one wins is a judgement call per app. `obsidian.nix` is the
 worked example, and its `isDarwin` test means *"on darwin, homebrew.nix owns
 this app"* — **not** *"Linux-only"*. Read every remaining `isDarwin` in
-`packages/` that way and check which of the two questions above it's
+`packages-config/` that way and check which of the two questions above it's
 actually answering before copying it.
 
 ## Is it darwin-only? The one case where restating the platform IS correct.

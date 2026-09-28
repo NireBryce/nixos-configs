@@ -2,7 +2,7 @@
 """Can this package build on this system, and is Homebrew already installing it?
 
 Exists because the alternative is guessing, and guessing is what happened. Every
-Linux-only guard in packages/ is a claim about platform support, but
+Linux-only guard in packages-config/ is a claim about platform support, but
 `lib.mkIf (!pkgs.stdenv.isDarwin)` gets reached for whenever a shared module
 looks Linux-shaped -- a different question from whether the pinned nixpkgs can
 build it on aarch64-darwin. Checking by hand meant writing the same expression
@@ -152,7 +152,7 @@ def scan_packages():
     them. Anything under a `_` directory is skipped, matching import-tree.
     """
     found = {}
-    for p in sorted((FLAKE / 'modules/packages').rglob('*.nix')):
+    for p in sorted((FLAKE / 'modules/packages-config').rglob('*.nix')):
         if any(part.startswith('_') for part in p.parts):
             continue
         rel  = p.relative_to(FLAKE / 'modules')
@@ -321,7 +321,7 @@ def main():
     ap.add_argument('names', nargs='*', help='package attribute paths')
     ap.add_argument('--system', default='aarch64-darwin')
     ap.add_argument('--all', action='store_true',
-                    help='derive the list from home.packages across packages/')
+                    help='derive the list from home.packages across packages-config/')
     ap.add_argument('--duplicates', action='store_true',
                     help='report packages a homebrew cask ALSO installs, and what to do')
     args = ap.parse_args()

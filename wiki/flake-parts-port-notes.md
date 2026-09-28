@@ -63,7 +63,7 @@ load-bearing in the tree today:
   [categories/shell-config/](categories/shell-config/00-INDEX.md).
 - **Full per-file dendritic conversion of the package modules**, chosen
   over role-assignable groups and over a structural tidy, boilerplate
-  accepted. That is why `packages/` is one file per package.
+  accepted. That is why `packages-config/` is one file per package.
 - **The grep-trail convention** — when a literal name becomes dynamic,
   leave the old string in a comment so the old form still greps to
   somewhere. `AGENTS.md`'s "When a rename makes the old name ungreppable,
@@ -240,7 +240,7 @@ withSystem = system: f: f (getSystem system).allModuleArgs;
 where `allModuleArgs = config._module.args // specialArgs // { inherit
 config options; }`. So it applies your function to that system's
 `perSystem` module arguments, and `config` inside the callback is the
-**perSystem** config, not the top-level one. `hosts/hosts.nix` uses it
+**perSystem** config, not the top-level one. `host-config/hosts.nix` uses it
 for exactly one thing: getting `self'`/`inputs'` into `specialArgs`.
 `specialArgs` rather than `_module.args` is what makes them usable inside
 `imports`, which is evaluated before `config`.

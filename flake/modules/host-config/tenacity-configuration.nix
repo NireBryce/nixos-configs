@@ -1,6 +1,6 @@
 # What nire-tenacity is made of. Handheld, Jovian/SteamOS.
 #
-# Sits directly under hosts/ rather than in a category directory, because
+# Sits directly under host-config/ rather than in a category directory, because
 # dirsAsCategory only collects from *sub*directories -- a host definition should
 # not become a member of anything.
 { config, ... }:
@@ -9,7 +9,7 @@
         imports =
         with config.flake.modules.nixos; [
             # ── this machine ──────────────────────────────────────────────────────
-            # hosts/tenacity/: hardware-tenacity, boot-tenacity,
+            # host-config/tenacity/: hardware-tenacity, boot-tenacity,
             # touchscreen-wakeup-tenacity, iommu-tenacity,
             # nixpkgs-hostPlatform-tenacity, nixpkgs-stateVersion-tenacity -- suffixed
             # because a module's name is its filename: two nixos hosts both

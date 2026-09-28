@@ -35,10 +35,10 @@ together external completion/history tools underneath ble.sh's UI:
   [carapace](carapace.md).
 - **fzf** — renders the completion menu (`fzf-menu.bash`) and keeps its own
   Ctrl-T/Alt-C bindings, but not Ctrl-R (see atuin below). Package and
-  config: [`fzf.nix`](../../../flake/modules/packages/shell-apps/find/fzf.nix).
+  config: [`fzf.nix`](../../../flake/modules/packages-config/shell-apps/find/fzf.nix).
 - **atuin** — owns Ctrl-R for history search; see the `-C` callback
   ordering note below for how it wins that key back from fzf. Package and
-  config: [`atuin.nix`](../../../flake/modules/packages/shell-apps/history/atuin.nix).
+  config: [`atuin.nix`](../../../flake/modules/packages-config/shell-apps/history/atuin.nix).
 - **bash-completion** / **nix-completion** — ble.sh's own contrib
   integrations, loaded first.
 

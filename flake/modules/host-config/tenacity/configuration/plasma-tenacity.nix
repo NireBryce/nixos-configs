@@ -126,7 +126,7 @@
                     # ── real additions: apps with no upstream default to diff against ──
                     #
                     # vicinae is this repo's own command-runner package
-                    # (packages/gui-other/command-runners/vicinae). Its
+                    # (packages-config/gui-other/command-runners/vicinae). Its
                     # Meta+Backspace alternate is the exact key kwin's own "Window
                     # Restore" gave up below -- reassigned, not a coincidence.
                     "services/net.local.vicinae.desktop"."_launch" = [

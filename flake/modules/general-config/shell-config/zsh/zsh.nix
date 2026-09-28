@@ -233,7 +233,7 @@
                     # flagged command from programs.eza.extraOptions -- and
                     # re-adding `ls` would *break* that chain, dropping
                     # --color, --git and -1. Change the flags in
-                    # packages/shell-apps/navigation/eza.nix instead.
+                    # packages-config/shell-apps/navigation/eza.nix instead.
                     #
                     # `rustdevshell` did survive, nothing else defining it, but
                     # was stale twice over: the checkout is nixos-configs, and

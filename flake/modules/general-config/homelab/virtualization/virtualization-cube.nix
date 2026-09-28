@@ -11,8 +11,8 @@
 # The guest itself: forge-runner (deliberately NOT nire-prefixed -- that
 # prefix names the fleet machines, and this is a component of cube;
 # hosts.nix's entry says so) -- declared in
-# hosts/forge-runner-configuration.nix and instantiated as a
-# nixosConfiguration in hosts/hosts.nix -- same shape llm-sandbox used.
+# host-config/forge-runner-configuration.nix and instantiated as a
+# nixosConfiguration in host-config/hosts.nix -- same shape llm-sandbox used.
 { config, lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);

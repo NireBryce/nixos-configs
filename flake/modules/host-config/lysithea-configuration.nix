@@ -1,6 +1,6 @@
 # What nire-lysithea is made of. M3 MacBook Air, aarch64-darwin.
 #
-# Sits directly under hosts/ rather than in a category directory, same
+# Sits directly under host-config/ rather than in a category directory, same
 # reason as durandal-configuration.nix and tenacity-configuration.nix:
 # dirsAsCategory only collects from *sub*directories, so a host definition
 # should not become a member of anything.
@@ -23,7 +23,7 @@
     flake.modules.darwin.lysitheaConfiguration.imports =
     with config.flake.modules.darwin; [
         # ── this machine ────────────────────────────────────────────────────────
-        # hosts/lysithea/: nixpkgs-hostPlatform-lysithea, nixpkgs-stateVersion-lysithea
+        # host-config/lysithea/: nixpkgs-hostPlatform-lysithea, nixpkgs-stateVersion-lysithea
         # -- suffixed 2026-08-12 for consistency with durandal/tenacity, though
         # darwin is its own module class here, so nothing would actually have
         # collided yet.

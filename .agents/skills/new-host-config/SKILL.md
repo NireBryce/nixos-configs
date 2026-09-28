@@ -7,9 +7,9 @@ description: How to add a new host to this repo.
 
 ## Applies to
 
-Adding a machine to this repo: a `hosts/<name>-configuration.nix` entry
-point, a `hosts/<name>/` directory of host-specific modules, and a line in
-`hosts.nix`. The entry point sits directly under `hosts/`, outside every
+Adding a machine to this repo: a `host-config/<name>-configuration.nix` entry
+point, a `host-config/<name>/` directory of host-specific modules, and a line in
+`hosts.nix`. The entry point sits directly under `host-config/`, outside every
 category tree on purpose (`new-flake-module` skill has why); the directory is
 collected by its own `dirsAsCategory.nix` copy. Worked examples: durandal,
 tenacity, cube, lysithea (darwin) — read the closest one first. (`nire-lego`
@@ -106,8 +106,8 @@ worked example of recording a deliberate omission).
 
 ## Wiring
 
-1. `hosts/<name>-configuration.nix` — imports + `networking.hostName`.
-2. `hosts/<name>/` with a verbatim copy of `dirsAsCategory.nix` and the
+1. `host-config/<name>-configuration.nix` — imports + `networking.hostName`.
+2. `host-config/<name>/` with a verbatim copy of `dirsAsCategory.nix` and the
    `configuration/`, `hardware/`, `fixes/` subdirs the host needs.
 3. `hosts.nix`: `mkHost` line in `flake.nixosConfigurations` (or
    `mkDarwinHost` in `darwinConfigurations`), pointing at
@@ -127,7 +127,7 @@ worked example of recording a deliberate omission).
 tree silently doesn't exist until staged.
 
 ```sh
-git add -A flake/modules/hosts/<name> flake/modules/hosts/<name>-configuration.nix flake/modules/hosts/hosts.nix
+git add -A flake/modules/host-config/<name> flake/modules/host-config/<name>-configuration.nix flake/modules/host-config/hosts.nix
 just modules      # category-membership check; catches name collisions
 cd flake && nix eval --raw .#nixosConfigurations.<name>.config.system.build.toplevel.drvPath
 ```

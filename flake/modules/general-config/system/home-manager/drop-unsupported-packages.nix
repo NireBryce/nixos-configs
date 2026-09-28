@@ -30,7 +30,7 @@
 # how an hour goes into debugging a missing command.
 #
 # VALUE-LEVEL, NOT IMPORTS-LEVEL, and it has to be: conditioning `imports` on
-# pkgs is a real infinite recursion under useGlobalPkgs (users/
+# pkgs is a real infinite recursion under useGlobalPkgs (users-config/
 # elly-home-manager.nix records someone hitting it), and flake-parts cannot
 # do it either -- `flake.modules.<class>.<name>` has no `<system>` axis, and
 # under useGlobalPkgs these are evaluated inside the host, which picks its own

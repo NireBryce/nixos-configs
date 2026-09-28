@@ -1,6 +1,6 @@
 # What nire-durandal is made of.
 #
-# This file sits directly under hosts/ rather than in a category directory,
+# This file sits directly under host-config/ rather than in a category directory,
 # because dirsAsCategory only collects from *sub*directories -- a host definition
 # should not become a member of anything.
 #
@@ -11,7 +11,7 @@
     flake.modules.nixos.durandalConfiguration.imports =
     with config.flake.modules.nixos; [
         # ── this machine ──────────────────────────────────────────────────────
-        # hosts/durandal/: hardware-durandal, boot-durandal,
+        # host-config/durandal/: hardware-durandal, boot-durandal,
         # b550-suspend-fix, suspend-probe-durandal,
         # nixpkgs-hostPlatform-durandal, nixpkgs-stateVersion-durandal
         # -- suffixed 2026-08-12 so a second nixos host's copies (tenacity's)

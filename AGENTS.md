@@ -48,7 +48,7 @@ Whether a host runs what the tree evaluates to is a live question, answered
 only on the host: `just baseline`, `just diff-deployed`, or a forced
 toplevel eval against `/run/current-system`.
 
-Roster, class, and which hosts wipe `/root`: `hosts/hosts.nix` (check it
+Roster, class, and which hosts wipe `/root`: `host-config/hosts.nix` (check it
 before stating any count) and `wiki/hosts.md`'s table. First-boot history
 (dates, generations, the `/root` rollback):
 `wiki/history.md`'s "Confirmed-on-hardware facts".
@@ -112,11 +112,14 @@ changing any `dirsAsCategory.nix`.
 - **A category collects from its *sub*directories only.** A `.nix` file
   sitting directly in a category directory is collected by nothing.
 - **Entry points sit outside every category tree** — `modules/checks.nix`,
-  `hosts/hosts.nix`, `hosts/durandal-configuration.nix`, and
-  `users/elly-home-manager.nix`; `just modules` relies on exactly this.
+  `host-config/hosts.nix`, `host-config/durandal-configuration.nix`, and
+  `users-config/elly-home-manager.nix`; `just modules` relies on exactly this.
 
 Areas: `general-config/` (shared system, incl. `general-config/macos/` for
-darwin), `hosts/` (per-host), `packages/`, `users/`.
+darwin), `host-config/` (per-host), `packages-config/`, `users-config/`.
+The three were `hosts/`, `packages/`, `users/` until 2026-09-27 — renamed
+so no area can share a name a module or category might take: module names
+share one namespace per class, and a same-named pair merges silently.
 
 **The category is how something shared stays optional** — nothing in this
 tree declares `mkEnableOption`. `kde-desktop` is the by-name variant: one
@@ -129,7 +132,7 @@ several cube-only categories, same coarse-and-fine overlap as
 including the nested categories' names and a real collector quirk:
 `wiki/categories/homelab.md`.
 
-**Hosts**: roster and class are `hosts/hosts.nix` (commented at each
+**Hosts**: roster and class are `host-config/hosts.nix` (commented at each
 declaration) and `wiki/hosts.md`'s table — don't restate the list here, it
 only rots.
 

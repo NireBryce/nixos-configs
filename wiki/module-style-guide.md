@@ -12,7 +12,7 @@ facts-to-look-up belong. `check_wiki.py`'s `counts` subcheck recomputes
 each row against the tree and fails on drift, so they stay true instead of
 merely having been.
 
-This file used to live at `modules/packages/style-guide.md`, where its
+This file used to live at `modules/packages-config/style-guide.md`, where its
 location implied it governed only package modules, and later at `claude
 cave/claude-style-guide.md` until that directory was retired 2026-09-02. It
 applies to every module — see [history.md](history.md) and
@@ -211,7 +211,7 @@ contain the string so a search lands here.
 # hardcoded, as it is in users.users.elly and home.username
 ```
 
-Both live in the tree: `hosts/durandal/hardware/boot-durandal.nix` and
+Both live in the tree: `host-config/durandal/hardware/boot-durandal.nix` and
 `general-config/system/home-manager/enable-home-manager.nix`.
 
 ## A bug recorded in a comment stays in the file

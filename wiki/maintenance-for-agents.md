@@ -1,6 +1,6 @@
 # Fleet maintenance, for agents
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-09-27_
 
 Condensed from [maintenance.md](maintenance.md). Credentials →
 maintenance-schedule.md; backups → homelab/backup-runbook.md; one-time
@@ -62,7 +62,7 @@ restated here.
 ## Store hygiene
 
 - **Automatic, user profiles:** home-manager nh module
-  `flake/modules/packages/nix-utils/nh/nh.nix` — `programs.nh.clean`
+  `flake/modules/packages-config/nix-utils/nh/nh.nix` — `programs.nh.clean`
   enabled for elly on all four hosts (eval-verified per host,
   2026-09-14); systemd **user** timer `nh-clean.timer`, weekly Mondays
   00:00 local, `Persistent=true`, running `nh clean user --keep-since

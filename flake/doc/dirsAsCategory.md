@@ -19,7 +19,7 @@ Every category directory holds a copy of `dirsAsCategory.nix`. As of
 2026-08-27 that copy is a two-line shim — the actual logic lives once, in
 `modules/_lib/category-collector.nix`, and every copy is now byte-identical
 (confirmed by hashing all of them; before this change three had drifted by a
-comment word, and `packages/_templates/dirsAsCategory.nix`, inert because
+comment word, and `packages-config/_templates/dirsAsCategory.nix`, inert because
 `import-tree` ignores `/_` paths, carried an extra header paragraph — see
 `history` below for why that drift didn't need fixing on its own):
 
@@ -74,7 +74,7 @@ directory it is filed in.** Adding a module is a one-file change — create the
 file in the right place and it is in. That is the mechanism's whole appeal.
 
 **A nested category (`general-config/hardware/amd/`, `homelab`'s seven children,
-`packages/development/langs`, ...) is referenced by name instead of
+`packages-config/development/langs`, ...) is referenced by name instead of
 walked from scratch by every ancestor.** If a subdirectory owns its own
 `dirsAsCategory.nix`, the collector adds that subdirectory's own name to the
 list — `forClass` then resolves it exactly like a plain module name, because
@@ -282,8 +282,8 @@ logic — so none of it needed preserving as `history` anywhere: it was drift
 in wording, not a stranded decision or a bug.
 
 The refactor moves the logic into `modules/_lib/category-collector.nix`
-(kept out of `import-tree`'s sweep the same way `packages/_lib/` and
-`packages/_templates/` already are — any path containing `/_`), leaving
+(kept out of `import-tree`'s sweep the same way `packages-config/_lib/` and
+`packages-config/_templates/` already are — any path containing `/_`), leaving
 each copy as the two-line shim shown above. Verified by getting `drvPath`
 fingerprints for `nire-durandal` and `nire-cube` (the deepest nested-category
 user, via `homelab`) before touching anything, converting one file

@@ -76,7 +76,7 @@ from its Settings. The runner is registered scoped to the user `elly`
 (`--scope elly`): it takes jobs from that user's repos only. The runner itself is the libvirt guest
 `forge-runner` on cube — instantiated by
 `virtualization/virtualization-cube.nix` through the VM generator, guest
-config in `hosts/forge-runner-configuration.nix` (no `nire-` prefix:
+config in `host-config/forge-runner-configuration.nix` (no `nire-` prefix:
 that names the fleet machines, and this is a component of cube). What
 stays on the host (`forgejo/actions-runner.nix`) is only what must be
 here: the sops secret, the registration oneshot, and the staged token

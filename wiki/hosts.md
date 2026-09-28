@@ -53,7 +53,7 @@ usually lag behind it, not ahead. See top-level
 a human reader.
 
 `nire-tenacity`'s sshd is tailnet-only (2026-09-26,
-`hosts/tenacity/configuration/ssh-tailnet-only-tenacity.nix`): port 22 is
+`host-config/tenacity/configuration/ssh-tailnet-only-tenacity.nix`): port 22 is
 closed on every other interface, so `ssh ts-tenacity` works and
 `nire-tenacity.local` from the LAN does not. durandal and cube still open 22.
 KDE Connect and Steam Remote Play/transfer ports are closed on its LAN side
@@ -114,7 +114,7 @@ status and what broke on the way:
   `outPath` vs `/run/current-system` comparison in
   [`AGENTS.md`](../AGENTS.md)'s State section.
 - **Why `nire-cube` doesn't wipe `/root`** —
-  `flake/modules/hosts/cube-configuration.nix` header, and `AGENTS.md`'s
+  `flake/modules/host-config/cube-configuration.nix` header, and `AGENTS.md`'s
   Safety section.
 - **Adding a new host** — skill `new-host-config`
   (`.agents/skills/new-host-config/SKILL.md`).

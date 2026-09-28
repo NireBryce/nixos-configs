@@ -1,10 +1,10 @@
-# `elly` — `users/elly/`
+# `elly` — `users-config/elly/`
 
 _Last modified: 2026-09-27_
 
-The one category under `users/` — the "for the user" area, as opposed to
-`general-config/` (shared system) or `packages/` (packages). Don't confuse this
-category with `users/elly-home-manager.nix`, the entry point one level up
+The one category under `users-config/` — the "for the user" area, as opposed to
+`general-config/` (shared system) or `packages-config/` (packages). Don't confuse this
+category with `users-config/elly-home-manager.nix`, the entry point one level up
 that assembles the *whole* `ellyHomeManager` bundle out of this category
 plus several others — see [../architecture.md](../architecture.md).
 
@@ -51,7 +51,7 @@ plus several others — see [../architecture.md](../architecture.md).
   but its password hash was created by hand on the real machine before cube
   was ever switched, and a plain persistent root never wipes it back out, so
   the reminder had nothing left to remind about there (fixed 2026-09-01).
-  Filed under `users/elly/` specifically so it rides the `elly` category
+  Filed under `users-config/elly/` specifically so it rides the `elly` category
   into every host automatically — including any *future* non-impermanence
   host, which would still get the warning — rather than needing to be wired
   in by hand.
@@ -91,6 +91,6 @@ Users section for the same plan stated for a human reader.
   `WARN-password-required.nix` exists to flag (cube itself is now excluded
   by hostname, since its password was already solved by hand).
 - [system](system.md) — `declare-persistence-option.nix`, referenced above.
-- [../architecture.md](../architecture.md) — `users/elly-home-manager.nix`,
+- [../architecture.md](../architecture.md) — `users-config/elly-home-manager.nix`,
   the entry point that assembles this category into the full bundle every
   host's Home Manager actually uses.

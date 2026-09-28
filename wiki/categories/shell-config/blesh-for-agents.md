@@ -2,6 +2,8 @@
 
 _Last modified: 2026-09-27_
 
+_Sibling reviewed: 2026-09-27 -- source updated for the hosts/users/packages area-dir rename; no mention of those paths on this page_
+
 Condensed from [blesh.md](blesh.md), which keeps the diagnosis narrative and
 the evidence trail. Facts only here.
 

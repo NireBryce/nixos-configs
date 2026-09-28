@@ -68,7 +68,7 @@ further in, under `restore-root/` (named for the systemd service
 every boot. `nire-cube` does **not** — its real install is a plain
 persistent root, not LUKS+impermanence (corrected 2026-08-21). That absence
 is why two other things exist:
-[`users/elly/user-settings/WARN-password-required.nix`](elly.md), which
+[`users-config/elly/user-settings/WARN-password-required.nix`](elly.md), which
 warns that a non-impermanence host has no login-password help here (cube
 itself is excluded by hostname as of 2026-09-01 — its password was set by
 hand before it was switched), and
@@ -97,7 +97,7 @@ though the *value* doesn't.
 
 Only `kde-sleepmode.nix` is `homeManager`-class; the rest of this category
 is `nixos`-class and doesn't reach Home Manager. It rides into every host
-via `users/elly-home-manager.nix` (the shared `ellyHomeManager` bundle,
+via `users-config/elly-home-manager.nix` (the shared `ellyHomeManager` bundle,
 outside every category tree — see [../architecture.md](../architecture.md)),
 not through each host's own per-host imports list.
 

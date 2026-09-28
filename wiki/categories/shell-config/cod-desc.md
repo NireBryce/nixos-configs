@@ -5,7 +5,7 @@ _Last modified: 2026-09-27_
 How [cod](carapace.md)'s completions get their descriptions in the ble.sh
 menu — the one part cod cannot do for itself, bridged with a curated table
 in this repo and a ble.sh advice hook. cod (the completion daemon,
-[`cod-completions.nix`](../../../flake/modules/packages/shell-apps/completions/cod-completions.nix))
+[`cod-completions.nix`](../../../flake/modules/packages-config/shell-apps/completions/cod-completions.nix))
 covers exactly the commands [carapace](carapace.md) doesn't: its config
 ignores everything in carapace's spec list, and learns the rest at runtime
 from `--help` output. Those commands (`sops`, `uv`, `tailscale`, `cod`

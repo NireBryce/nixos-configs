@@ -1,7 +1,7 @@
 # Module style guide, for agents
 
 _Last modified: 2026-09-27_
-_Sibling reviewed: 2026-09-14 -- module-style-guide.md only renamed `system/` path shorthand to `config-system/`; no facts moved_
+_Sibling reviewed: 2026-09-27 -- source updated for the hosts/users/packages area-dir rename; no mention of those paths on this page (its 2026-09-14 review covered the earlier system/ shorthand rename)_
 
 Condensed from [module-style-guide.md](module-style-guide.md), which keeps
 the reasoning and the declined alternatives. Rules only.

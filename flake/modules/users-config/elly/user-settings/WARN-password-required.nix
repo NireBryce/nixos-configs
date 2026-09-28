@@ -12,7 +12,7 @@
 # `environment.persistence` (declared for
 # every host regardless -- general-config/system/impermanence/declare-persistence-option.nix).
 #
-# Filed under users/elly/, so it rides the `elly` category into every host
+# Filed under users-config/elly/, so it rides the `elly` category into every host
 # automatically rather than being wired into a specific host's config by
 # hand. Stays silent for durandal/tenacity, and fires on its own for any
 # future host that also skips impermanence.

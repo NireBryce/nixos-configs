@@ -51,7 +51,7 @@ from html.parser import HTMLParser
 HERE  = pathlib.Path(__file__).resolve().parent
 FLAKE = HERE.parent
 
-KITTY_CONFIG = FLAKE / 'modules/packages/terminals/kitty/kitty-config.nix'
+KITTY_CONFIG = FLAKE / 'modules/packages-config/terminals/kitty/kitty-config.nix'
 ZSH_BINDINGS = [FLAKE / 'modules/general-config/shell-config/zsh/config/initial-bindings.zsh',
                 FLAKE / 'modules/general-config/shell-config/zsh/config/free-zellij-keys.zsh']
 BLESH_NIX    = FLAKE / 'modules/general-config/shell-config/bash/blesh.nix'
