@@ -1,6 +1,6 @@
 # New host disk formatting, for agents
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-28_
 
 Condensed from [disk-formatting.md](disk-formatting.md), which keeps the
 reasoning and the full warnings. Facts only here.
@@ -77,7 +77,7 @@ removed 2026-08-27. Standard disko interface:
   `root-blank` subvolume at the btrfs top level, which only exists once disko
   has run. Note it in the host's header if wired before the disk step.
 - **First boot needs the KDE hibernation half** —
-  `root-rollback/kde-sleepmode.nix` sets `SleepMode=1` in `powerdevil.rc`,
+  `root-rollback/restore-root/kde-sleepmode.nix` sets `SleepMode=1` in `powerdevil.rc`,
   matching the `nohibernate` kernel parameter, or suspend breaks outright.
   `homeManager`-class, arrives via `ellyHomeManager`.
 

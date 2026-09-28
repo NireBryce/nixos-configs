@@ -1,6 +1,6 @@
 # `nix` — `general-config/nix/`
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-28_
 
 ## Contents
 
@@ -22,7 +22,9 @@ _Last modified: 2026-09-27_
     upstream Home Manager issue #2942 is gone — if unfree packages start
     failing in home config, that block is the first thing to check.
   - `nixos` — `nix.nixPath`, `nix.settings.trusted-users`/
-    `experimental-features`, `nix.channel.enable = false` (paired with
+    `experimental-features`, `nix.settings.allowed-users = [ "@wheel" ]`
+    (since 2026-09-26: service accounts don't reach the daemon),
+    `nix.channel.enable = false` (paired with
     fixes for `comma` and `nix-index` not wanting channel-based lookups),
     and `nixpkgs.config.allowUnfree = true`.
   - `darwin` — the same shape minus `nix.channel.enable`, left out rather
