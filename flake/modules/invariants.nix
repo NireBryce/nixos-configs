@@ -6,7 +6,7 @@
 # when a module moved, an initrd unit nothing wants, hibernation creeping
 # back onto a machine that cannot survive it -- what tenacity's first
 # boot found, about which a green `nix flake check` said nothing
-# (lessons.md 25).
+# (wiki/lessons-learned.md §25).
 #
 # WHY THIS THROWS RATHER THAN FAILING A BUILD
 #
@@ -23,7 +23,7 @@
 #
 # Useful from darwin, unlike the host checks: `--all-systems` evaluates
 # every system's checks, and these throw during evaluation, so `just
-# check` on lysithea enforces both Linux hosts -- evaluation is this
+# check` on lysithea enforces every NixOS host -- evaluation is this
 # machine's only lever on hosts it cannot build. The aarch64-darwin
 # instance is vacuous (filters nixosConfigurations by system; lysithea
 # is a darwinConfiguration, so "0 invariants held across 0 host(s)") --
@@ -52,8 +52,10 @@
 # jovian-persist.nix have somewhere valid to write even when they write
 # nothing; it no longer distinguishes an impermanence host from one
 # merely declaring the option. restore-root is the one thing only
-# WARN-impermanence.nix creates. (tailscale-persist.nix is gated on the
-# same check -- see that file.)
+# WARN-impermanence.nix creates. (The *-persist.nix modules --
+# tailscale, mullvad, networkmanager, libvirt -- and
+# WARN-password-required.nix gate on the same check; tailscale-persist.nix
+# explains why.)
 #
 # No weakening of what the file catches: a host silently losing part of
 # its OWN impermanence setup while restore-root exists -- wantedBy
@@ -64,17 +66,18 @@
 #
 # The useGlobalPkgs invariant is NOT gated on usesImpermanence -- it
 # holds for every NixOS host, cube included. It IS gated on the host
-# having home-manager at all (`c ? home-manager`), added for
-# nire-installer (live-USB image, removed 2026-08-27): no `elly` user,
-# no home-manager closure, so it never imported enable-home-manager.nix
-# and had no `home-manager` namespace; nire-llm-sandbox (a libvirt VM
-# image, removed 2026-08-28) was the same shape. Kept general rather than
-# special-cased to either, since every host currently in hosts.nix does
-# have home-manager. Same principle as the impermanence gate -- check the
-# real thing's existence, not the host's name -- and not vacuous:
-# enable-home-manager.nix is the only setter of useGlobalPkgs, but a
-# later import flipping it back to false on a host that DOES have
-# home-manager is exactly the regression this still catches.
+# having home-manager at all (`c ? home-manager`). forge-runner (the
+# guest VM cube runs) is the current host without it: no `elly` user, no
+# home-manager closure, so it never imports enable-home-manager.nix and
+# has no `home-manager` namespace. The gate was added for nire-installer
+# (live-USB image, removed 2026-08-27); nire-llm-sandbox (a libvirt VM
+# image, removed 2026-08-28) was the same shape. Same principle as the
+# impermanence gate -- check the real thing's existence, not the host's
+# name -- and not vacuous: enable-home-manager.nix is the only NixOS-side
+# setter of useGlobalPkgs (enable-home-manager-darwin.nix is lysithea's,
+# outside this file's reach), but a later import flipping it back to
+# false on a host that DOES have home-manager is exactly the regression
+# this still catches.
 { config, lib, ... }:
 {
     perSystem = { system, pkgs, ... }:
@@ -111,11 +114,9 @@
             usesImpermanence = rollback != null;
 
             # Whether this host imported enable-home-manager.nix at all --
-            # see the header's opt-in addendum. nire-installer (removed
-            # 2026-08-27) and nire-llm-sandbox (removed 2026-08-28) both had
-            # no `elly` user and never did; no host currently in hosts.nix
-            # is this shape, but the gate stays general for the next one
-            # that is.
+            # see the header's opt-in addendum. forge-runner has no `elly`
+            # user and doesn't; nire-installer and nire-llm-sandbox (both
+            # removed) were the same shape.
             usesHomeManager = c ? home-manager;
 
             impermanenceInvariants = [
@@ -147,7 +148,7 @@
                 # three when they go.
                 ok  = c.boot.initrd.systemd.enable;
                 msg = "${name}: boot.initrd.systemd.enable is false, but the rollback is a "
-                    + "systemd stage-1 unit -- see flake/doc/impermanence-stage1.md";
+                    + "systemd stage-1 unit -- see WARN-impermanence.nix";
             }
             {
                 # supportedFilesystems is `attrsOf bool` now and only
@@ -222,8 +223,7 @@
             # NOT gated on usesImpermanence: holds for every NixOS host
             # that has home-manager at all, cube included. See
             # usesHomeManager for what a host without one looks like --
-            # none currently in hosts.nix is, but nire-llm-sandbox (removed
-            # 2026-08-28) was.
+            # forge-runner is one.
             ++ (if usesHomeManager then homeManagerInvariants else [ ]);
 
         failures = lib.concatLists (lib.mapAttrsToList
