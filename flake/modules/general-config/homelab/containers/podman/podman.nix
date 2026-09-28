@@ -6,12 +6,12 @@
         # `flake.modules.nixos.virtualization`. Everything here is OCI
         # containers -- podman and distrobox -- and never was anything else;
         # `virtualization` now names the VM category (libvirt/QEMU) at
-        # system/virtualization/. Directory was `system/system/virtualization/`
+        # system/virtualization/. Directory was `nire/system/virtualization/`
         # until 2026-08-21 for the same reason.
         #
-        # MOVED AGAIN, 2026-08-22: out of `system/system/containers/` (under
+        # MOVED AGAIN, 2026-08-22: out of `nire/system/containers/` (under
         # `system`, imported whole by every Linux host, no opt-out) into its
-        # own category, `system/containers/` -- the split `virtualization` got
+        # own category, `nire/containers/` -- the split `virtualization` got
         # 2026-08-21. Unexercised at move time: all four NixOS hosts then
         # (durandal, tenacity, lego, cube) imported `containers` explicitly
         # in place of `system`'s implicit coverage -- no package set changed.
@@ -21,7 +21,7 @@
         # RENAMED IN THE SAME MOVE, `containers.nix` -> `podman.nix`: the
         # exact near-miss `virtualization`'s header records, hit for real.
         # The category's `dirsAsCategory.nix` derives its aggregate name from
-        # its directory `system/containers/`, declaring
+        # its directory `nire/containers/`, declaring
         # `flake.modules.nixos.containers` -- the same attribute a file still
         # named `containers.nix` would declare from ITS filename; the two
         # would merge invisibly, not conflict, and `just modules` caught it.

@@ -500,7 +500,7 @@ not a safety measure.**
 
 ## 32. An auto-allocator that cannot see manual entries will collide with them
 
-`general-config/system/containers/containers.nix` (then `virtualization.nix`) set
+`nire/system/containers/containers.nix` (then `virtualization.nix`) set
 `autoSubUidGidRange = true` on a `container` user while pinning
 `subUidRanges = [{ startUid = 100000; ... }]` on `elly` four lines below. It
 evaluated. It had evaluated for a week. Both users would have shared one
@@ -569,7 +569,7 @@ got you an impermanence rollback, which is startling enough to investigate.
 
 Moving the VM modules into a category directory of their own set up the same
 collision in a shape with no tell. The directory would have been
-`general-config/virtualization/`, so `dirsAsCategory` would declare
+`nire/virtualization/`, so `dirsAsCategory` would declare
 `flake.modules.nixos.virtualization`; the file inside it was `virtualization.nix`,
 which declares `flake.modules.nixos.virtualization` from its own filename.
 They **merge**. And both halves are libvirt config, so importing either name
@@ -588,7 +588,7 @@ name for the file, leaving the general one to the category that hosts import.
 
 ## 35. The same collision, a third time — caught immediately because the tool was actually run
 
-`containers.nix`, moved into its own category (`general-config/containers/`) on
+`containers.nix`, moved into its own category (`nire/containers/`) on
 2026-08-22 for the same reason `virtualization` split off `system` a day
 earlier, walked straight into §34's exact trap: the new category's
 `dirsAsCategory.nix` derives `flake.modules.nixos.containers` from the
@@ -601,8 +601,8 @@ than conflict.
 The difference from both those cases: this one never shipped even briefly.
 `just modules` was run as a matter of course before committing (not because
 anything looked wrong) and reported it flatly —
-`COLLISION 'containers': category modules/system/containers/ and module
-modules/system/containers/containers/containers.nix declare the same
+`COLLISION 'containers': category modules/nire/containers/ and module
+modules/nire/containers/containers/containers.nix declare the same
 attribute; they merge` — and it was renamed to `podman.nix` (the actual
 technology, same reasoning `libvirt.nix` isn't named `virtualization.nix`)
 before any commit existed with the collision in it.

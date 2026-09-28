@@ -121,7 +121,7 @@ all. Skill `low-side-secrets` has the pattern and its two sharp edges.
 
 ## Containers vs. virtualization — the live trap, and no longer filed here
 
-Podman and distrobox — OCI containers — moved out of `general-config/containers/`
+Podman and distrobox — OCI containers — moved out of `nire/system/containers/`
 2026-08-22 into their own category: see [containers](containers.md). This
 pointer stays because the trap is live and this is where someone remembering
 the old location will look: "virtualization" means only

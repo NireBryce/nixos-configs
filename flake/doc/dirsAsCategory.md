@@ -282,8 +282,8 @@ logic — so none of it needed preserving as `history` anywhere: it was drift
 in wording, not a stranded decision or a bug.
 
 The refactor moves the logic into `modules/_lib/category-collector.nix`
-(kept out of `import-tree`'s sweep the same way `packages/_lib/` and
-`packages/_templates/` already are — any path containing `/_`), leaving
+(kept out of `import-tree`'s sweep the same way `nirePackages/_lib/` and
+`nirePackages/_templates/` already are — any path containing `/_`), leaving
 each copy as the two-line shim shown above. Verified by getting `drvPath`
 fingerprints for `nire-durandal` and `nire-cube` (the deepest nested-category
 user, via `homelab`) before touching anything, converting one file
