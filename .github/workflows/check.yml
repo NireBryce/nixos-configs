@@ -102,9 +102,9 @@ jobs:
 
       # First, before the nix install: stdlib Python against the checkout,
       # needs no nix at all, so a broken wiki claim fails in seconds instead
-      # of after the toolchain setup. `just wiki-lint` runs nowhere else
-      # automatic (not in `preflight` yet, issue #217) -- this is what keeps
-      # a refactor that breaks a wiki claim from landing green.
+      # of after the toolchain setup. `just preflight` runs it too (since
+      # 2026-09-28, issue #217); this is the backstop for a PR that skipped
+      # preflight, keeping a refactor that breaks a wiki claim from landing green.
       - name: wiki lint (just wiki-lint)
         run: python3 wiki/scripts/check_wiki.py check
 

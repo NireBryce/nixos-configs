@@ -51,7 +51,7 @@ Then check before opening a PR. CI (`.github/workflows/check.yml`:
 not a substitute:
 
 ```sh
-just preflight    # check + modules + lint + branches-test in one shot; from repo root, not flake/
+just preflight    # every step CI runs, wiki-lint included; from repo root, not flake/
 ```
 
 plus a forced toplevel per config the change could touch:
@@ -133,13 +133,20 @@ is accurate by construction and is no reason to name that harness up top.
 Read back what actually landed, never recall it:
 
 ```sh
-gh pr view --json url,title,additions,deletions,changedFiles,mergeable,baseRefName
+gh pr checks <n> --watch --interval 20   # wait for CI; minutes, not optional
+gh pr view --json url,title,additions,deletions,changedFiles,mergeable,mergeStateStatus,baseRefName
 git log --oneline origin/experimental..HEAD
 git diff --stat origin/experimental...HEAD
 ```
 
-Check `mergeable` and that `baseRefName` is `experimental` **before** asking
-— a wrong base or unmergeable PR wastes the round-trip. Print the summary,
+Check `mergeStateStatus` is `CLEAN` and `baseRefName` is `experimental`
+**before** asking — a wrong base or red PR wastes the round-trip.
+**`mergeable` is not the CI answer**: it only means "no conflicts", and read
+`MERGEABLE` on #413 (2026-09-28) while its CI was red and
+`mergeStateStatus` was `BLOCKED` — the ask went out calling it mergeable.
+A red check: read `gh run view <run> --log-failed`, fix, push, re-watch;
+if `just preflight` passed locally, the step it missed belongs in
+`preflight` too. Print the summary,
 include the merge method, and ask the one combined question — merge *and*
 delete the branch afterward:
 
