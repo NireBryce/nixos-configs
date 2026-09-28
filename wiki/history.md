@@ -1,6 +1,6 @@
 # History & lessons learned
 
-_Last modified: 2026-09-08_
+_Last modified: 2026-09-28_
 
 ## Contents
 
@@ -66,6 +66,19 @@ _Last modified: 2026-09-08_
   tiling WM, moved in from `claude cave/` 2026-09-02; it was never explored —
   no WM chosen, nothing implemented — and its dependency inventory was stale.
   Git history has it if a migration ever starts.
+
+- **The collector's subdirectories-only rule was removed 2026-09-28.** From
+  the first version of `dirsAsCategory` (2026-04-11) a category skipped the
+  `.nix` files sitting directly in its own directory — a leftover of
+  per-subdirectory handles the flake-parts port dropped. It made such a file
+  silently reach no host, and forced `bareModulesOf` onto the collector
+  once nested categories delegated by name. Both are gone; cube's VM wiring,
+  which relied on the rule to stay out of `virtualization`, moved to
+  `host-config/cube/vms/virtualization-cube.nix`. Why it existed, what was
+  checked before removing it, and how it was verified:
+  `flake/doc/dirsAsCategory.md`'s History;
+  [categories/virtualization-history.md](categories/virtualization-history.md#where-the-vm-wiring-used-to-live)
+  for the VM file's side.
 
 ## Confirmed-on-hardware facts, and how they were confirmed
 

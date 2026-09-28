@@ -51,9 +51,8 @@ A diff read is never enough here; bugs serialize. Run, in this order:
 Per changed file, the question that catches each:
 
 - **Is it filed in the right directory?** Category membership comes from
-  the directory; a module one level off is collected by nothing, no error.
-  A `.nix` file *directly in* a category directory is also collected by
-  nothing. (`new-flake-module` skill has the full mechanism.)
+  the directory; a module outside every category tree is collected by
+  nothing, no error. (`new-flake-module` skill has the full mechanism.)
 - **Do two files write the "same" file?** `home.file.<n>.text` and
   `home.sessionPath` **concatenate** across modules — a second writer
   doubles the output silently. Reading a generated dotfile back is full of

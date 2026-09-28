@@ -1,6 +1,6 @@
 # `virtualization` — history
 
-_Last modified: 2026-09-25_
+_Last modified: 2026-09-28_
 
 Resolved incidents and a removed VM's own verification record, split out of
 [virtualization](virtualization.md) 2026-09-03 so that page stays about the
@@ -11,6 +11,7 @@ generator as it exists today. `nire-llm-sandbox` itself was removed
 
 - [`nire-llm-sandbox`'s `sshForward` verification](#nire-llm-sandboxs-sshforward-verification)
 - [The near-miss this category's own header records](#the-near-miss-this-categorys-own-header-records)
+- [Where the VM wiring used to live](#where-the-vm-wiring-used-to-live)
 - [See also](#see-also)
 
 ## `nire-llm-sandbox`'s `sshForward` verification
@@ -45,6 +46,23 @@ For about an hour on 2026-08-21, `libvirt.nix` was named
 the exact attribute this category's `dirsAsCategory.nix` declares for its
 aggregate. Both would have written to the same name and **merged**
 invisibly. Caught and renamed before it shipped.
+
+## Where the VM wiring used to live
+
+Until 2026-09-28 the file that instantiates cube's VMs,
+`virtualization-cube.nix` (for `nire-llm-sandbox`, then `forge-runner`),
+sat directly in `general-config/homelab/virtualization/`, not in a
+subdirectory. That was deliberate: the collector then skipped `.nix` files
+sitting straight in a category's own directory, so the file stayed out of
+the `virtualization` aggregate — which durandal imported at the time, and
+should not have started cube's VM — while `homelab`, which only cube
+imports, still collected it (through `bareModulesOf`).
+
+The collector rule was removed 2026-09-28, which would have put the VM
+wiring into `virtualization`, so the file moved to
+`host-config/cube/vms/virtualization-cube.nix`, cube-only because only
+cube's configuration imports the `cube` category. Full account:
+`flake/doc/dirsAsCategory.md`'s History.
 
 ## See also
 

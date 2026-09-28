@@ -110,8 +110,10 @@ it. **A module belongs to the category of the directory it is filed in**;
 adding one is a one-file change. Read `flake/doc/dirsAsCategory.md` before
 changing any `dirsAsCategory.nix`.
 
-- **A category collects from its *sub*directories only.** A `.nix` file
-  sitting directly in a category directory is collected by nothing.
+- **A category collects every `.nix` file under its directory**, at any
+  depth, directly beside its `dirsAsCategory.nix` included (since
+  2026-09-28; before that, files there were skipped). To keep a module out
+  of a category, file it outside the category's tree.
 - **Entry points sit outside every category tree** — `modules/checks.nix`,
   `host-config/hosts.nix`, `host-config/durandal-configuration.nix`, and
   `users-config/elly-home-manager.nix`; `just modules` relies on exactly this.

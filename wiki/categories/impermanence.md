@@ -1,6 +1,6 @@
 # `impermanence` — `general-config/impermanence/`
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-28_
 
 **Read `WARN-impermanence.nix` itself before changing anything here — this
 page is an index, not a substitute.** See
@@ -24,8 +24,8 @@ added for issue #103) rather than two bare files — a host can import
 `root-rollback` directly instead of the whole `impermanence` umbrella, the
 same handle homelab's children give theirs. Its actual modules sit one level
 further in, under `restore-root/` (named for the systemd service
-`WARN-impermanence.nix` declares), because a category collects from its
-*sub*directories only — see `flake/doc/dirsAsCategory.md`.
+`WARN-impermanence.nix` declares) — a subdirectory the collector required
+until 2026-09-28, grouping only since (`flake/doc/dirsAsCategory.md`).
 
 - **`root-rollback/restore-root/WARN-impermanence.nix`** — the module.
   Deletes the `/root` btrfs subvolume in initrd on every boot and snapshots a

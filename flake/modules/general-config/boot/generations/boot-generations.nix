@@ -1,8 +1,8 @@
 # How many generations the bootloader keeps.
 #
-# In a subdirectory, not directly in general-config/boot/, because a category collects
-# from its *sub*directories only -- a .nix file sitting straight in the category
-# directory is collected by nothing. And named boot-generations rather than
+# In a subdirectory, not directly in general-config/boot/: required until
+# 2026-09-28, when a category still skipped .nix files sitting straight in its
+# own directory; grouping only since. And named boot-generations rather than
 # boot.nix: a module's name is its filename, so boot.nix would declare
 # flake.modules.nixos.boot, which is this category's own name, and the two would
 # silently MERGE rather than conflict. That exact collision is why

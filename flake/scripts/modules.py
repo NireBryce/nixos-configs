@@ -166,19 +166,15 @@ def orphans(root):
             # purpose. Nothing is meant to import them.
             continue
 
-        # A category collects from its *sub*directories only, so a file sitting
-        # directly in the category dir is not collected by it. Excluding the
-        # immediate parent is what catches that.
-        reaching = [catdirs[d] for d in ancestors if d != path.parent]
+        # Every category above the file collects it, including the one whose
+        # directory it sits directly in (category-collector.nix).
+        reaching = [catdirs[d] for d in ancestors]
         if not any(c in all_imported for c in reaching):
             findings.append((name, path, reaching))
 
     for name, path, reaching in findings:
-        via = (' / '.join(reaching) if reaching
-               else 'none -- it sits directly in a category dir, which collects '
-                    'only from subdirectories')
         print(f"ORPHAN     {name!r} ({path}) is imported by nothing; "
-              f"reachable via: {via}")
+              f"reachable via: {' / '.join(reaching)}")
     return findings
 
 
@@ -239,9 +235,9 @@ def add(root, cls, target, description):
 
     Every rule enforced here is one that has silently bitten (the
     new-flake-module skill collects them): the declared name comes from the
-    filename, never hardcoded; the target must sit in a subdirectory of a
-    category, because a category collects from its subdirectories only and a
-    file directly in the category dir is collected by nothing; the class must
+    filename, never hardcoded; the target must sit inside a category's tree,
+    since entry points outside every category are collected by nothing; the
+    class must
     be one that means something; and a name that already exists is refused or
     warned about, because same-named declarations merge instead of
     conflicting. The file is `git add`-ed -- flakes in a git repo ignore
@@ -259,8 +255,7 @@ def add(root, cls, target, description):
               file=sys.stderr)
         return 1
     if target.suffix != '.nix' or len(target.parts) < 2:
-        print("error: target must name a .nix file inside a subdirectory of "
-              "a category, e.g. "
+        print("error: target must name a .nix file inside a category, e.g. "
               "general-config/system/my-thing/my-thing.nix", file=sys.stderr)
         return 1
     description = ' '.join(description) if description else "TODO: one line"
@@ -287,12 +282,6 @@ def add(root, cls, target, description):
               f"must be under a directory holding a dirsAsCategory.nix (only "
               f"entry points live outside, and they are not collected)",
               file=sys.stderr)
-        return 1
-    if path.parent in catdirs:
-        print(f"error: {path.parent} is the category dir itself, and a "
-              f"category collects from its subdirectories only -- a file "
-              f"sitting directly in it is collected by nothing. Put the file "
-              f"in a subdirectory of it", file=sys.stderr)
         return 1
 
     name = target.stem

@@ -1,6 +1,6 @@
 # `virtualization` — `general-config/homelab/virtualization/`
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-28_
 
 Libvirt/QEMU VMs, and *only* that — see [containers](containers.md) for why
 podman and distrobox (OCI containers) are a different category. Nested under
@@ -122,17 +122,14 @@ fail auto-importing it. Filed under `_lib/` because `import-tree` ignores
 any path containing `/_` (same as
 `general-config/impermanence/_disko/impermanence-luks-btrfs.nix`).
 
-Called today by `virtualization-cube.nix` (bare in this directory, for
-`forge-runner` — see below); earlier by the same-named file for
-`nire-llm-sandbox`, removed with that VM 2026-08-28. The bare-in-category
-placement is a second dirsAsCategory exclusion worth knowing: a file
-sitting directly in `general-config/homelab/virtualization/` (not in a
-subdirectory) is collected by nothing — which kept the VM out of this
-category's aggregate back when durandal imported it too. It still **is**
-swept into the `homelab` aggregate cube imports, since `homelab`'s
-collector separately gathers bare `.nix` files directly in each nested
-category's root (`flake/doc/dirsAsCategory.md`'s History section has why —
-an earlier version lacking that silently dropped this exact file).
+Called today by `host-config/cube/vms/virtualization-cube.nix` (for
+`forge-runner` — see below); earlier by a same-named file for
+`nire-llm-sandbox`, removed with that VM 2026-08-28. The caller lives under
+cube's host directory, not in this category, so it is cube-only by
+construction: a host importing `virtualization` for libvirt gets no VM
+definitions. Until 2026-09-28 it sat directly in this directory, kept out
+of the aggregate by a collector rule since removed —
+[virtualization-history.md](virtualization-history.md#where-the-vm-wiring-used-to-live).
 
 2026-09-25 the generator gained a `shares ? []` parameter (virtiofs
 mounts, `{ source, tag }` per share, plus the shared-memory backing

@@ -87,8 +87,9 @@ option without a reason beyond tidiness.
 
 ## File placement produces no error when wrong
 
-- A category collects from its **subdirectories only**. A `.nix` file
-  directly in a category directory is collected by nothing.
+- A category collects **every `.nix` file under its directory**, any
+  depth, beside the shim included (since 2026-09-28). Keep a module out ->
+  file it outside the tree. Diagram: `category-collector.nix` header.
 - Entry points sit outside every category tree: `checks.nix`, `hosts.nix`,
   `durandal-configuration.nix`, `elly-home-manager.nix`.
 - A filename becomes the attribute name, and names **merge** rather than

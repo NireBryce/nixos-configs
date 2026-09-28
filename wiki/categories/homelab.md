@@ -1,6 +1,6 @@
 # `homelab` — `general-config/homelab/`
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-28_
 
 ## Contents
 
@@ -43,17 +43,14 @@ section) rather than re-deriving their modules, giving one coarse handle
 importable (`tenacity` imports `containers` and must not get the rest).
 `flake/doc/dirsAsCategory.md` documents this as load-bearing, not a bug.
 
-**One real behavioral consequence:** the collector explicitly re-collects a
-nested category's own *bare* files (sitting directly in its root, which
-that category's own aggregate excludes) alongside delegating to its
-aggregate — `bareModulesOf` in `category-collector.nix`. Plain delegation
-once silently dropped exactly such a file (`virtualization-cube.nix`, the
-`nire-llm-sandbox` wiring, both since removed): `homelab` only got what
-`virtualization`'s own aggregate included, and that deliberately excludes
-bare files. Confirmed by evaluating `config.systemd.services` before and
-after, not reasoned about. The mechanism is live but currently unexercised —
-see
-[virtualization.md](virtualization.md#vms_liblibvirt-vmnix--a-generator-not-a-category-member).
+**A behavioral consequence, since removed:** until 2026-09-28 a category
+skipped the files sitting directly in its own directory, so `homelab`'s
+collector had to add a nested category's such files back itself
+(`bareModulesOf`). Plain delegation once silently dropped exactly such a
+file from cube (`virtualization-cube.nix`, then the `nire-llm-sandbox`
+wiring), caught by evaluating `config.systemd.services` before and after.
+The rule and `bareModulesOf` are both gone — `flake/doc/dirsAsCategory.md`'s
+History has the account.
 
 ## Why one category for all seven
 

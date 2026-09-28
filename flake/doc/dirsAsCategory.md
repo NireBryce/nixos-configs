@@ -73,6 +73,12 @@ forClass = class:
 directory it is filed in.** Adding a module is a one-file change — create the
 file in the right place and it is in. That is the mechanism's whole appeal.
 
+**Every `.nix` file under the directory counts, at any depth** — including
+one sitting directly beside the shim, which is skipped by name. Subdirectories
+are grouping only. (Until 2026-09-28 files directly in a category's own
+directory were skipped; see History.) `category-collector.nix`'s header has a
+worked tree diagram.
+
 **A nested category (`general-config/hardware/amd/`, `homelab`'s seven children,
 `packages-config/development/langs`, ...) is referenced by name instead of
 walked from scratch by every ancestor.** If a subdirectory owns its own
@@ -83,49 +89,8 @@ namespace a leaf module's does, and the "always define all three classes,
 even empty" rule below guarantees it exists for every class regardless of
 what that subtree actually collected.
 
-This took two wrong attempts to get right, both caught by evaluating rather
-than by reasoning about the diff, in the same session that factored the
-logic out:
-
-- **First version: dead code.** The boundary check lived only inside
-  `collectModules`, which `modulesOf` invokes already *inside* each of
-  `categoryDir`'s immediate subdirectories — so the check never got to
-  examine an immediate subdirectory as a delegation candidate, only a third
-  level of nesting this repo doesn't have anywhere. The `drvPath` fingerprint
-  used to verify the refactor came back byte-identical for this version too,
-  for the mundane reason that nothing had actually changed, not because it
-  was safe.
-- **Second version: live, but silently wrong.** Applying the same check one
-  level up (so `hardware` delegates to `amd`'s aggregate and `homelab`
-  delegates to `virtualization`'s) made it fire at the real depth, and
-  silently dropped `libvirt-vm-llm-sandbox` from `nire-cube`'s
-  `systemd.services` entirely. Cause: `virtualization-cube.nix` (the
-  `nire-llm-sandbox` VM's cube wiring — both since removed, 2026-08-28; see
-  `wiki/history.md`) sat bare in `general-config/homelab/virtualization/`'s own root,
-  deliberately excluded from the
-  `virtualization` category's own aggregate (a `.nix` file bare in a
-  category's own root is collected by nothing — see "Things that are
-  load-bearing" below) — but it reached `nire-cube` at all only because
-  `homelab` used to walk into `virtualization/` independently, as *its*
-  subdirectory, where a bare file one level in was never excluded (see
-  `wiki/categories/virtualization.md`'s "This exclusion is category-scoped,
-  not tree-scoped" section). Delegating straight to `virtualization`'s
-  aggregate collapsed that independence and lost exactly that file.
-  Confirmed by evaluating `nire-cube`'s `config.systemd.services` before and
-  after, not just reasoned about.
-
-The fix that actually shipped delegates AND separately re-collects any bare
-`.nix` files sitting directly in the nested category's own root — the files
-its own aggregate deliberately excludes, that a plain recursive walk would
-otherwise still have swept in. That's `bareModulesOf` in
-`category-collector.nix`. Verified against all six configurations
-(`nire-durandal`, `nire-cube`, `nire-tenacity`, `nire-lego`,
-`nire-llm-sandbox`, `nire-lysithea`): `environment.systemPackages`,
-`systemd.services`, and `users.users` all came back exactly identical to the
-pre-refactor baseline, `libvirt-vm-llm-sandbox` included. `drvPath` itself
-does shift on most hosts — expected, per "Expect `drvPath` to change from
-import reordering alone" below, since a nested category is now referenced
-once instead of having its modules listed a second time.
+Getting delegation right took two wrong attempts, both caught by
+evaluating rather than by reading the diff — History has both.
 
 ### Things that are load-bearing
 
@@ -300,8 +265,7 @@ lost) to find out before it would have been baked into all 37.
 
 **The same session also added nested-category delegation, in three passes**
 — see "A nested category ... is referenced by name" above for the mechanism
-that shipped, and `category-collector.nix`'s own header for the two wrong
-versions in full. Worth recording here specifically because of how close it
+that shipped; the two wrong versions follow this paragraph. Worth recording here specifically because of how close it
 came to shipping quietly wrong at each intermediate step: the first version
 was dead code (never fired at this repo's actual nesting depth), which meant
 the very fingerprint checks that verified the rest of this refactor —
@@ -320,6 +284,104 @@ fingerprint check proves the version you ran it against; it says nothing
 about the next edit, which is why the fix got the same treatment as the bug
 that preceded it, not just a spot-check on the one host already known to be
 at risk.
+
+The two wrong versions:
+
+- **First version: dead code.** The boundary check lived only inside
+  `collectModules`, which `modulesOf` invokes already *inside* each of
+  `categoryDir`'s immediate subdirectories — so the check never got to
+  examine an immediate subdirectory as a delegation candidate, only a third
+  level of nesting this repo doesn't have anywhere. The `drvPath` fingerprint
+  used to verify the refactor came back byte-identical for this version too,
+  for the mundane reason that nothing had actually changed, not because it
+  was safe.
+- **Second version: live, but silently wrong.** Applying the same check one
+  level up (so `hardware` delegates to `amd`'s aggregate and `homelab`
+  delegates to `virtualization`'s) made it fire at the real depth, and
+  silently dropped `libvirt-vm-llm-sandbox` from `nire-cube`'s
+  `systemd.services` entirely. Cause: `virtualization-cube.nix` (the
+  `nire-llm-sandbox` VM's cube wiring — both since removed, 2026-08-28; see
+  `wiki/history.md`) sat bare in `general-config/homelab/virtualization/`'s own root,
+  deliberately excluded from the
+  `virtualization` category's own aggregate (a `.nix` file bare in a
+  category's own root was then collected by nothing — the rule removed
+  2026-09-28, below) — but it reached `nire-cube` at all only because
+  `homelab` used to walk into `virtualization/` independently, as *its*
+  subdirectory, where a bare file one level in was never excluded (see
+  `wiki/categories/virtualization.md`'s "This exclusion is category-scoped,
+  not tree-scoped" section). Delegating straight to `virtualization`'s
+  aggregate collapsed that independence and lost exactly that file.
+  Confirmed by evaluating `nire-cube`'s `config.systemd.services` before and
+  after, not just reasoned about.
+
+The fix that actually shipped delegates AND separately re-collects any bare
+`.nix` files sitting directly in the nested category's own root — the files
+its own aggregate deliberately excludes, that a plain recursive walk would
+otherwise still have swept in. That's `bareModulesOf` in
+`category-collector.nix`. Verified against all six configurations
+(`nire-durandal`, `nire-cube`, `nire-tenacity`, `nire-lego`,
+`nire-llm-sandbox`, `nire-lysithea`): `environment.systemPackages`,
+`systemd.services`, and `users.users` all came back exactly identical to the
+pre-refactor baseline, `libvirt-vm-llm-sandbox` included. `drvPath` itself
+does shift on most hosts — expected, per "Expect `drvPath` to change from
+import reordering alone" below, since a nested category is now referenced
+once instead of having its modules listed a second time.
+
+**2026-09-28 — the subdirectories-only exception removed.** From the first
+version (`54a8f036`, 2026-04-11) a category skipped the `.nix` files sitting
+directly in its own directory. That version also exposed each subdirectory
+as its own handle (`<category>/<subdir>`), so a module had to sit in a
+subdirectory to have a handle to join, and the category directory was
+expected to hold only the shim. The per-subdirectory handles didn't survive
+the flake-parts port; the exception did, unremarked, and cost two
+workarounds:
+
+- A file directly in a top-level category reached no host, with no error.
+  AGENTS.md, both module style guides, `modules.py add` (which refused such
+  paths) and `modules.py orphans` (which excluded a file's own category from
+  what reaches it) all carried the rule so nobody would trip on it.
+- When nested categories switched to delegation by name (2026-08-27, above),
+  a nested category's own top-level files — excluded from its aggregate —
+  would have reached nothing at all, so the collector gained `bareModulesOf`
+  to add them back into the parent.
+
+It was also used on purpose once: `virtualization-cube.nix`, cube's VM
+wiring, sat directly in `general-config/homelab/virtualization/` so it
+reached cube through `homelab` without joining `virtualization`, which
+durandal imported at the time (lessons-learned §38 on why a VM definition
+shouldn't ride along with shared libvirt setup).
+
+Checked before removing it:
+
+- **Nested categories never depended on it.** The first nested shims
+  (`0c0b5f06`, 2026-06-02) came seven weeks after the exception. Without it,
+  a nested category's top-level files are in its own aggregate and reach
+  the parent through that, so `bareModulesOf` has nothing left to do.
+- **Only seven files were affected**, all directly in nested categories:
+  `virtualization-cube.nix`, `terminal-multiplexer/tmux.nix`, and five in
+  `shell-apps/text-tools/`. Found by running the old and new collector
+  over all 40 category directories and diffing the collected names.
+- **No host imports a parent category together with one nested under it,**
+  and none imports those three nested categories directly. That matters
+  because flake-parts sets no `key` on `flake.modules` entries
+  (`extras/modules.nix`: `# TODO: set key?`), so a module reached twice is
+  evaluated twice.
+- **No new name collisions.** Names come from filenames whichever category
+  collects a file; `just modules` checks them the same way either way
+  (lessons-learned §34, §35).
+
+The change: the collector lost the exception and `bareModulesOf`;
+`virtualization-cube.nix` moved to `host-config/cube/vms/`, cube-only
+because only cube's configuration imports the `cube` category; `modules.py`
+`orphans` and `add` dropped their copies of the rule. Verified with
+`scripts/host-fingerprint.nix` on every configuration (`nire-durandal`,
+`nire-cube`, `nire-tenacity`, `forge-runner`, `nire-lysithea`): every sampled
+attribute identical before and after, `libvirt-vm-forge-runner` included.
+Every toplevel `drvPath` moved; `nix-diff` traced each one to Home Manager's
+package environment (`home-manager-path`, plus `-fonts` and
+`-applications` on lysithea), whose `chosenOutputs` held the same entries
+in a different order — import reordering, per "Expect `drvPath` to change"
+above.
 
 ## Related reading
 
