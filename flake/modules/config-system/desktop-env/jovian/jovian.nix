@@ -82,6 +82,13 @@
                 };
             };
 
+            # Jovian brings its own gamescope, and the security wrapper that
+            # puts it first on PATH. gaming.nix's gamescopeSession.enable has
+            # nixpkgs' steam module mkDefault programs.gamescope on, which
+            # added nixpkgs' gamescope to systemPackages as a second, unused
+            # build (until 2026-09-27). Durandal and cube keep theirs.
+            programs.gamescope.enable = false;
+
             # needed for tdp adjustor
             boot.extraModulePackages = [ config.boot.kernelPackages.acpi_call ];
 

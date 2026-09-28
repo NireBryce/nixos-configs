@@ -49,6 +49,9 @@ actually booted this config is a live question — ask, or check on the host
 wrapped as a flake-parts module — the raw generated file under `modules/`
 as-is makes flake-parts resolve `modulesPath` itself and dies with a
 misleading `infinite recursion` (`new-flake-module` has the wrapping shape).
+Two things generated output may lack that `invariants.nix` fails `just
+check` over: `options = [ "fmask=0077" "dmask=0077" ]` on a vfat `/boot`,
+and, on an impermanence host, `neededForBoot = true` on `/persist`.
 
 **No hardware yet**: use the disko generator
 `config-system/impermanence/_disko/impermanence-luks-btrfs.nix` (curried over

@@ -12,6 +12,10 @@
                 # dedicatedServer.openFirewall = true;
                 gamescopeSession.enable = true; # third party gamescope compositor
                 localNetworkGameTransfers.openFirewall = true;
+                # Installs protontricks overridden with extraCompatPaths. Listing
+                # pkgs.protontricks in systemPackages as well (until 2026-09-27)
+                # put a second, plain build beside it, both claiming
+                # bin/protontricks.
                 protontricks.enable = true;
                 extraCompatPackages = with pkgs; [
                     steamtinkerlaunch
@@ -20,7 +24,6 @@
 
             environment.systemPackages = with pkgs; [
                 protonup-qt
-                protontricks
                 mangohud
                 steamtinkerlaunch
 
