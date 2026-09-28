@@ -174,7 +174,7 @@ switch:
 opencode-attach dir='.' *args:
     #!/usr/bin/env bash
     # Server and CLI are cube-only (lysithea has Homebrew's CLI):
-    # config-system/homelab/coding-agent/opencode/opencode-server.nix.
+    # general-config/homelab/coding-agent/opencode/opencode-server.nix.
     # `ts-cube` is cube's tailnet DEVICE name, not its hostname (tailscale.nix
     # trap #1), and resolves from any tailnet member, including cube itself.
     # First arg is the project dir (default `.`); extra args pass through:

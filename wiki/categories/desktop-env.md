@@ -1,6 +1,6 @@
-# `desktop-env` — `config-system/desktop-env/`
+# `desktop-env` — `general-config/desktop-env/`
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-27_
 
 ## Contents
 

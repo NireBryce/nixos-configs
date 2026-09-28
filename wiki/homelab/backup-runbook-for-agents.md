@@ -2,6 +2,8 @@
 
 _Last modified: 2026-09-11_
 
+_Sibling reviewed: 2026-09-27 -- source updated for the config-system→general-config directory rename; no mention of the old path on this page_
+
 Condensed from [backup-runbook.md](backup-runbook.md); design is
 [../categories/backup-for-agents.md](../categories/backup-for-agents.md).
 

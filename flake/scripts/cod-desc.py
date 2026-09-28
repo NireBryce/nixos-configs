@@ -48,7 +48,7 @@ import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
 FLAKE = HERE.parent
-DATA = FLAKE / 'modules/config-system/shell-config/bash/cod-desc.tsv'
+DATA = FLAKE / 'modules/general-config/shell-config/bash/cod-desc.tsv'
 
 COD_DB = pathlib.Path('~/.local/share/cod/db.sqlite3').expanduser()
 

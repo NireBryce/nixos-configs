@@ -1,6 +1,6 @@
 # blesh, for agents
 
-_Last modified: 2026-09-25_
+_Last modified: 2026-09-27_
 
 Condensed from [blesh.md](blesh.md), which keeps the diagnosis narrative and
 the evidence trail. Facts only here.
@@ -8,7 +8,7 @@ the evidence trail. Facts only here.
 `ble.sh` is wired by hand — **there is no `programs.bash.blesh.enable` in
 Home Manager.** Package, `source ble.sh --attach=none` early in
 `initContent`, and `ble-attach` at the end live in `bash.nix`; the `.blerc`
-is `config-system/shell-config/bash/blesh.nix`.
+is `general-config/shell-config/bash/blesh.nix`.
 
 ## What it wires together
 

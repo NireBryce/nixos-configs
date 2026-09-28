@@ -1,6 +1,6 @@
 # 43. A fingerprint check can pass for the wrong reason — dead code looks exactly like safe code until you make it live
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-27_
 
 §43 of [lessons-learned.md](../lessons-learned.md#43-a-fingerprint-check-can-pass-for-the-wrong-reason--dead-code-looks-exactly-like-safe-code-until-you-make-it-live) — that page keeps the one-line version of every lesson; this is §43's full account.
 
@@ -16,7 +16,7 @@ host's `drvPath` byte-identical after. That part of the change was fine.
 While the logic was already in one place, adding "stop at a nested
 category's own boundary and reference its aggregate by name, instead of
 re-walking its files from scratch" looked like the obvious next
-improvement — cheap to write once, and `config-system/hardware/amd` plus `homelab`'s
+improvement — cheap to write once, and `general-config/hardware/amd` plus `homelab`'s
 seven children were sitting right there as real nested categories to apply
 it to. Wrote it, and the same `drvPath` fingerprint check that had just
 verified the refactor passed again, unchanged.

@@ -1,6 +1,6 @@
 # 39. A live interactive bug needs a live interactive repro — `ssh host 'cmd'` is not the same session a human types into
 
-_Last modified: 2026-09-09_
+_Last modified: 2026-09-27_
 
 §39 of [lessons-learned.md](../lessons-learned.md#39-a-live-interactive-bug-needs-a-live-interactive-repro--ssh-host-cmd-is-not-the-same-session-a-human-types-into) — that page keeps the one-line version of every lesson; this is §39's full account.
 
@@ -69,7 +69,7 @@ The fix that tested clean against carapace's real generated function on
 instead of `IFS=$sep read -r -d '' nospace data <<< "${data}"`) sidesteps
 ble.sh's read-shadow entirely rather than trying to out-think it, and is now
 in the tree:
-`flake/modules/config-system/shell-config/bash/carapace-completer-read-fix.bash`,
+`flake/modules/general-config/shell-config/bash/carapace-completer-read-fix.bash`,
 sourced from `bash.nix` right after `source <(carapace _carapace bash)`,
 patching `_carapace_completer`'s own body via `declare -f` plus a textual
 substitution — with a loud stderr warning if the line it's looking for ever

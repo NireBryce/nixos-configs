@@ -8,7 +8,7 @@ and neither produces an error -- the tree evaluates perfectly happily with eithe
   collisions  A module whose filename equals a category name declares into the
               same attribute as that category, and same-named modules MERGE
               rather than conflicting. This is how `boot` came to mean both
-              config-system/boot/ (which wipes /root on boot) and durandal's bootloader.
+              general-config/boot/ (which wipes /root on boot) and durandal's bootloader.
 
   orphans     A module in a category that no host or home aggregate imports is
               valid, evaluates, and installs nothing.
@@ -261,7 +261,7 @@ def add(root, cls, target, description):
     if target.suffix != '.nix' or len(target.parts) < 2:
         print("error: target must name a .nix file inside a subdirectory of "
               "a category, e.g. "
-              "config-system/system/my-thing/my-thing.nix", file=sys.stderr)
+              "general-config/system/my-thing/my-thing.nix", file=sys.stderr)
         return 1
     description = ' '.join(description) if description else "TODO: one line"
     if '"' in description or '${' in description:

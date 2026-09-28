@@ -1,6 +1,6 @@
 # cod completion descriptions
 
-_Last modified: 2026-09-25_
+_Last modified: 2026-09-27_
 
 How [cod](carapace.md)'s completions get their descriptions in the ble.sh
 menu — the one part cod cannot do for itself, bridged with a curated table
@@ -33,13 +33,13 @@ and the live schema. Its own `--help` parser, which sees the very
 description lines a human reads, throws them away. carapace had the same
 bash-protocol gap but keeps real descriptions internally
 (`carapace <cmd> export` re-derives them as JSON — see
-[`carapace-desc.bash`](../../../flake/modules/config-system/shell-config/bash/carapace-desc.bash));
+[`carapace-desc.bash`](../../../flake/modules/general-config/shell-config/bash/carapace-desc.bash));
 cod has no richer mode at all, so the descriptions are data this repo owns.
 
 ## The mechanism
 
 Three pieces, all under
-[`config-system/shell-config/bash/`](../../../flake/modules/config-system/shell-config/bash/):
+[`general-config/shell-config/bash/`](../../../flake/modules/general-config/shell-config/bash/):
 
 1. **`cod-desc.tsv`** — the curated table: one
    `command<TAB>candidate<TAB>description` per line, `#` comments allowed,

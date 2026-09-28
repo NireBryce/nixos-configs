@@ -8,7 +8,7 @@ description: How to add and maintain a sops file keyed to a personal SSH key ins
 ## Applies to
 
 Adding a new `<name>/secrets.yaml` under
-`flake/modules/config-system/system/secrets/` whose recipient is a
+`flake/modules/general-config/system/secrets/` whose recipient is a
 personal SSH key (converted with `ssh-to-age`) rather than any host's SSH
 host key — the pattern this repo calls "low-side": a secret whose real
 access boundary is already enforced somewhere else (network ACLs, an

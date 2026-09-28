@@ -1,12 +1,12 @@
 # 46. "Enabled" is a claim about config, not about who holds the port
 
-_Last modified: 2026-09-09_
+_Last modified: 2026-09-27_
 
 §46 of [lessons-learned.md](../lessons-learned.md#46-enabled-is-a-claim-about-config-not-about-who-holds-the-port) — that page keeps the one-line version of every lesson; this is §46's full account.
 
 **Borrowed, not lived** — the one entry in this file that did not happen here.
 Adopted from a NixOS Discourse thread while enabling avahi and
-systemd-resolved together (2026-08-21, `config-system/system/networking/`), kept
+systemd-resolved together (2026-08-21, `general-config/system/networking/`), kept
 because the shape is one this file already keeps hitting and because it is
 what the next `.local` bug on this fleet will look like.
 

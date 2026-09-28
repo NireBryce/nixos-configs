@@ -30,7 +30,7 @@ and its name in `hosts.nix`; on the LAN it answers as `nire-<x>.local`
 (FQDN `ts-<x>.moose-micro.ts.net`) — `nire-<x>` never resolves over the
 tailnet (`tailscale.nix`'s trap #1). **To ssh over the tailnet, use
 `ts-<x>`**; `just reach <x>` tries all the names in turn.
-`config-system/system/networking/tailnet-hosts.nix` derives a `Host ts-<x>`
+`general-config/system/networking/tailnet-hosts.nix` derives a `Host ts-<x>`
 entry (and a described Tab-completion candidate) for every `nire-*` host,
 so ssh completes them on every machine. The `ts-` names themselves are set
 in the Tailscale admin console; `just wiki-lint` checks the column above

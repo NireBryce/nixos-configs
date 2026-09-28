@@ -1,6 +1,6 @@
-# `landing` — `config-system/homelab/landing/`
+# `landing` — `general-config/homelab/landing/`
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-27_
 
 [Homepage (gethomepage)](https://gethomepage.dev), the landing page for
 `nire-cube`: what's running, whether it's up, how the machine itself is

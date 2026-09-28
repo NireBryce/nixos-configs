@@ -2,6 +2,8 @@
 
 _Last modified: 2026-09-24_
 
+_Sibling reviewed: 2026-09-27 -- source updated for the config-system→general-config directory rename; no mention of the old path on this page_
+
 Condensed from [00-INDEX.md](00-INDEX.md), which keeps the orientation prose and
 the "why a link layer, not a rewrite" reasoning. Routing only here.
 

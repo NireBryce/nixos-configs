@@ -1,6 +1,6 @@
 # Pending setup
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-09-27_
 
 Services that are **running but not finished** — configured, switched,
 reachable, and still missing the human step that makes them useful. Every
@@ -195,7 +195,7 @@ agenda, and each calendar card carries a small API-error band — the
 placeholder URL 403ing, gone the moment a real address takes its place
 (the secret's `restartUnits` bounces homepage at the next switch).
 
-The fill-in: `sops <repo>/flake/modules/config-system/system/secrets/secrets.yaml`,
+The fill-in: `sops <repo>/flake/modules/general-config/system/secrets/secrets.yaml`,
 edit the `homepage-env` value to one
 `HOMEPAGE_VAR_ICAL_<NAME>=<secret-ics-url>` line per calendar (`family`
 exists as the placeholder name; more names mean adding entries to

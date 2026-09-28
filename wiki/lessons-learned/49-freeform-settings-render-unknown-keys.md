@@ -1,13 +1,13 @@
 # 49. A freeform `settings.*` option renders unknown keys verbatim — eval passing is not evidence a setting is consumed
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-27_
 
 §49 of [lessons-learned.md](../lessons-learned.md) — that page keeps the
 one-line version of every lesson; this is §49's full account.
 
 ## What happened
 
-2026-09-14, reviewing `config-system/system/security/yubikey.nix` on
+2026-09-14, reviewing `general-config/system/security/yubikey.nix` on
 `nire-tenacity`. The module set `security.pam.u2f.settings.authFile` —
 camelCase — and YubiKey login worked, so the setting looked live. It was
 dead: nixpkgs had renamed the option to `settings.authfile` (lowercase, via
@@ -102,5 +102,5 @@ beat an assumption that felt safe because it usually holds.
 - §24, §2 — compare against what is deployed; the repo is not the machine.
 - §43, §47 — more checks that pass without proving what they seem to prove;
   §47's Caddyfile is the same "valid generated config, wrong meaning" shape.
-- `config-system/system/security/yubikey.nix` — the fix, the module comment
+- `general-config/system/security/yubikey.nix` — the fix, the module comment
   on `authfile`, and the history section recording what was dead.

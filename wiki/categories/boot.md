@@ -1,4 +1,4 @@
-# `boot` — `config-system/boot/`
+# `boot` — `general-config/boot/`
 
 _Last modified: 2026-09-27_
 
@@ -25,7 +25,7 @@ Two files:
 ## Why each file needs a subdirectory
 
 `dirsAsCategory` only collects from *sub*directories of the category
-directory — a `.nix` file sitting straight in `config-system/boot/` would be
+directory — a `.nix` file sitting straight in `general-config/boot/` would be
 collected by nothing (see [../architecture.md](../architecture.md)). Hence
 `generations/` and `editor/`.
 
@@ -37,7 +37,7 @@ exact attribute name this category's own `dirsAsCategory.nix` already
 declares for its aggregate — and same-named modules **merge** rather than
 conflict. That merge is invisible: both halves would probably look like they
 work. This is literally the trap `CLAUDE.md`'s Traps section cites by name
-("This is how `boot` came to mean both `config-system/boot/` ... and durandal's
+("This is how `boot` came to mean both `general-config/boot/` ... and durandal's
 bootloader"), and it's also why
 `hosts/durandal/hardware/boot-durandal.nix` and the other hosts'
 per-host boot files (`hardware/boot-tenacity.nix`, `hardware/boot-cube.nix`)
@@ -45,7 +45,7 @@ carry a host-suffixed name instead of the generic one they'd naturally want.
 
 ## Don't confuse this with the impermanence category
 
-`config-system/boot/` is genuinely about the bootloader (generation count,
+`general-config/boot/` is genuinely about the bootloader (generation count,
 menu editor). It is
 **not** the category that wipes `/root` — that's [impermanence](impermanence.md),
 named `boot` itself until 2026-08-11, which is exactly the confusion the

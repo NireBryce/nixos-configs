@@ -52,9 +52,9 @@ HERE  = pathlib.Path(__file__).resolve().parent
 FLAKE = HERE.parent
 
 KITTY_CONFIG = FLAKE / 'modules/packages/terminals/kitty/kitty-config.nix'
-ZSH_BINDINGS = [FLAKE / 'modules/config-system/shell-config/zsh/config/initial-bindings.zsh',
-                FLAKE / 'modules/config-system/shell-config/zsh/config/free-zellij-keys.zsh']
-BLESH_NIX    = FLAKE / 'modules/config-system/shell-config/bash/blesh.nix'
+ZSH_BINDINGS = [FLAKE / 'modules/general-config/shell-config/zsh/config/initial-bindings.zsh',
+                FLAKE / 'modules/general-config/shell-config/zsh/config/free-zellij-keys.zsh']
+BLESH_NIX    = FLAKE / 'modules/general-config/shell-config/bash/blesh.nix'
 
 # kitty's own default, applied when neither the input nor the repo config
 # sets kitty_mod

@@ -42,7 +42,7 @@ exist yet. If the new host is opting *out* the way `nire-cube` and the
 handhelds do, none of this page applies — say so in the host's own header
 instead, the way `cube-configuration.nix` does.
 
-`config-system/impermanence/_disko/impermanence-luks-btrfs.nix` reproduces durandal
+`general-config/impermanence/_disko/impermanence-luks-btrfs.nix` reproduces durandal
 and tenacity's hand-run layout as a reusable generator: one LUKS-encrypted
 partition, btrfs inside it, subvolumes for `root`/`home`/`nix`/`persist`/`log`,
 and an unmounted `root-blank` subvolume. **Nothing in this repo currently
@@ -76,7 +76,7 @@ Call the generator curried with this host's own parameters, in its
 
 ```nix
 imports = [
-    (import ../../config-system/impermanence/_disko/impermanence-luks-btrfs.nix {
+    (import ../../general-config/impermanence/_disko/impermanence-luks-btrfs.nix {
         device = "/dev/disk/by-id/REPLACE-ME-before-running-disko";
     })
 ];
@@ -186,7 +186,7 @@ this has actually been checked, not once the machine merely boots.
   — the generator itself: what it produces, what it deliberately leaves out,
   and exactly how it was verified (and how it wasn't).
 - `WARN-impermanence.nix`
-  (`flake/modules/config-system/impermanence/root-rollback/WARN-impermanence.nix`) —
+  (`flake/modules/general-config/impermanence/root-rollback/WARN-impermanence.nix`) —
   the rollback module this disk layout exists to support; read before
   changing anything near it, every time.
 - Skill `new-host-config` (`.agents/skills/new-host-config/SKILL.md`) — the

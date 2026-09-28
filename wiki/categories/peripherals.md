@@ -1,6 +1,6 @@
-# `peripherals` — `config-system/peripherals/`
+# `peripherals` — `general-config/peripherals/`
 
-_Last modified: 2026-09-01_
+_Last modified: 2026-09-27_
 
 ## Contents
 

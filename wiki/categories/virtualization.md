@@ -1,10 +1,10 @@
-# `virtualization` — `config-system/homelab/virtualization/`
+# `virtualization` — `general-config/homelab/virtualization/`
 
 _Last modified: 2026-09-27_
 
 Libvirt/QEMU VMs, and *only* that — see [containers](containers.md) for why
 podman and distrobox (OCI containers) are a different category. Nested under
-the `homelab` umbrella since 2026-08-27 (moved from `config-system/virtualization/`;
+the `homelab` umbrella since 2026-08-27 (moved from `general-config/virtualization/`;
 name and by-name importability unaffected). `nire-llm-sandbox`, the one VM
 this category ran until 2026-08-28, has a successor: `forge-runner`
 (2026-09-25, the Forgejo Actions runner VM — [git-forge](git-forge.md)
@@ -120,13 +120,13 @@ A plain curried function (`{ name, image, ... }: { pkgs, lib, ... }: ...`),
 not a flake-parts module — it takes parameters, so `import-tree` would
 fail auto-importing it. Filed under `_lib/` because `import-tree` ignores
 any path containing `/_` (same as
-`config-system/impermanence/_disko/impermanence-luks-btrfs.nix`).
+`general-config/impermanence/_disko/impermanence-luks-btrfs.nix`).
 
 Called today by `virtualization-cube.nix` (bare in this directory, for
 `forge-runner` — see below); earlier by the same-named file for
 `nire-llm-sandbox`, removed with that VM 2026-08-28. The bare-in-category
 placement is a second dirsAsCategory exclusion worth knowing: a file
-sitting directly in `config-system/homelab/virtualization/` (not in a
+sitting directly in `general-config/homelab/virtualization/` (not in a
 subdirectory) is collected by nothing — which kept the VM out of this
 category's aggregate back when durandal imported it too. It still **is**
 swept into the `homelab` aggregate cube imports, since `homelab`'s
@@ -173,7 +173,7 @@ forge-runner, which `forge-runner-cycle` restarts once per job.
 
 ## Why this is its own category and not part of `system`
 
-So the handhelds can decline it: `config-system/system/` is imported whole by every
+So the handhelds can decline it: `general-config/system/` is imported whole by every
 Linux host, and a boot-time daemon like `libvirtd` has no business on a
 gamescope handheld. Needs `security.polkit.enable`, which `kde-desktop`
 already brings on the hosts that import it.

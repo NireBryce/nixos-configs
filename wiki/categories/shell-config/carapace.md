@@ -1,14 +1,14 @@
 # carapace
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-09-27_
 
 A completion engine used as the primary source of shell completions across
 this repo: `pkgs.carapace` in `home.packages`
 ([`carapace-completions.nix`](../../../flake/modules/packages/shell-apps/completions/carapace-completions.nix)),
 sourced into bash via `source <(carapace _carapace bash)` in `bash.nix`, and
 layered under ble.sh's own menu in
-[`blesh.nix`](../../../flake/modules/config-system/shell-config/bash/blesh.nix) /
-[`carapace-desc.bash`](../../../flake/modules/config-system/shell-config/bash/carapace-desc.bash)
+[`blesh.nix`](../../../flake/modules/general-config/shell-config/bash/blesh.nix) /
+[`carapace-desc.bash`](../../../flake/modules/general-config/shell-config/bash/carapace-desc.bash)
 (see [blesh.md](blesh.md)). Unlike `cod` (below, and in [cod-desc.md](cod-desc.md)), carapace has no daemon and
 no system-wide state: it's a binary invoked synchronously per completion
 request, which is why it lives in `home.packages` rather than needing a
@@ -112,7 +112,7 @@ ssh host candidates come only from `~/.ssh/config` `Host` patterns and
 `known_hosts`, never `/etc/ssh/ssh_config`, and carry no descriptions.
 carapace finds `~/.ssh/config` via passwd, not `$HOME`, so a scratch
 `HOME` doesn't isolate a test (`XDG_CONFIG_HOME` does move the overlay
-dir). [`tailnet-hosts.nix`](../../../flake/modules/config-system/system/networking/tailnet-hosts.nix)
+dir). [`tailnet-hosts.nix`](../../../flake/modules/general-config/system/networking/tailnet-hosts.nix)
 writes `Host ts-<x>` blocks plus an `ssh` overlay with a description per
 name. Overlays add to the built-in completer, and duplicates dedupe to the
 described copy (checked 2026-09-26). After `user@`, names complete

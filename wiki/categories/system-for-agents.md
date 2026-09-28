@@ -5,7 +5,7 @@ _Last modified: 2026-09-27_
 Condensed from [system.md](system.md), which keeps the reasoning and the
 narrative. Facts only here.
 
-`config-system/system/`, 19 subdirectories. The largest category, imported whole by
+`general-config/system/`, 19 subdirectories. The largest category, imported whole by
 every Linux host with **no opt-out for any piece of it** — that property is
 the reason `virtualization` and `containers` are separate categories.
 Anything that must be optional cannot be filed here.

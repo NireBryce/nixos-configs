@@ -1,6 +1,6 @@
 # `landing`, for agents
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-27_
 
 Condensed from [landing.md](landing.md), which keeps the reasoning and the
 verification narrative. Facts only here.
@@ -8,7 +8,7 @@ verification narrative. Facts only here.
 Homepage (gethomepage), the landing page for `nire-cube` — replaced glance
 2026-09-12 (issue #291); category `landing` itself dates to 2026-08-24,
 nested under `homelab` 2026-08-27. One file, `nixos`-class:
-`config-system/homelab/landing/homepage/homepage.nix`, nixpkgs option family
+`general-config/homelab/landing/homepage/homepage.nix`, nixpkgs option family
 `services.homepage-dashboard` (attrsets → `/etc/homepage-dashboard/*.yaml`).
 
 **Since 2026-09-13 the category has two modules**: `glance/glance.nix`
