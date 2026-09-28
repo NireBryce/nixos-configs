@@ -339,6 +339,14 @@ threads *term:
 history-line file:
     @{{scripts}}/history-line.sh {{file}}
 
+# A `# ── title ───…` comment heading at the house width (78):
+# just ruled-heading history   /   just ruled-heading --indent 8 "Home Manager"
+# positional-arguments: `{{args}}` would be pasted into the shell line
+# unquoted, so a title like "aren't" breaks the recipe; "$@" passes it intact.
+[positional-arguments]
+ruled-heading *args:
+    @python3 {{scripts}}/ruled-heading.py "$@"
+
 # After merging a PR whose body says Fixes/Closes/Resolves #N, close any of
 # those issues GitHub's keyword silently left open (the #177 failure).
 # Refuses to touch anything unless the PR is actually merged.
