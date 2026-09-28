@@ -90,9 +90,10 @@ branches cmd="check" *args:
 branches-test:
     python3 {{scripts}}/test_branches.py
 
-# Static check: wiki/ and AGENTS.md claims vs the repo -- in CI
-# (.github/workflows/check.yml) since 2026-09-09, still not in `preflight`
-# deliberately (issue #217): fold it in once it has been green there a while
+# In CI (.github/workflows/check.yml) since 2026-09-09, in `preflight` since
+# 2026-09-28 (issue #217's "once green a while"): until then a stale wiki
+# count surfaced only as a red PR, minutes after an agent reported it green
+# Static check: wiki/ and AGENTS.md claims vs the repo -- in preflight and CI
 wiki-lint:
     python3 wiki/scripts/check_wiki.py check
 
@@ -136,10 +137,12 @@ install-hooks:
     @echo "==> git will now run .githooks/pre-commit and .githooks/commit-msg"
 
 # Short of the per-host forced toplevel eval, which still needs picking a host
-# branches-test first: it fails in ~2s, where check spends minutes before the
-# same class of local-state regression would surface
-# check + modules + lint + branches-test in one shot -- the ship skill's step 0
+# wiki-lint and branches-test first: each fails in ~2s, where check spends
+# minutes. Mirrors check.yml's steps -- a CI step missing here is a failure an
+# agent only learns about from a red PR
+# wiki-lint + tests + check + modules + lint in one shot -- the ship skill's step 0
 preflight:
+    @just wiki-lint
     @just branches-test
     @just keybindings-test
     @just cod-desc-test

@@ -1,6 +1,6 @@
 # Conventions & workflow
 
-_Last modified: 2026-09-22_
+_Last modified: 2026-09-28_
 
 ## Contents
 
@@ -17,7 +17,7 @@ _Last modified: 2026-09-22_
 exist: `just check`, `just modules` (the only static check that means
 anything on darwin), `just wiki-lint` (checks this wiki's own "Imported by"
 claims and category member counts against the real module tree — added
-2026-08-27, `wiki/scripts/check_wiki.py`; not yet part of `preflight`),
+2026-08-27, `wiki/scripts/check_wiki.py`; part of `preflight` since 2026-09-28),
 `just available <pkg>` / `--duplicates`, `just build`/`boot`/`switch`
 (dispatch per host class via `scripts/rebuild.sh`), and the
 hardware-only, read-only `just baseline` / `hm-collisions` /

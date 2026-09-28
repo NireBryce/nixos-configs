@@ -66,8 +66,9 @@ before stating any count) and `wiki/hosts.md`'s table. First-boot history
 `just` recipes live in the root `.justfile` and work from anywhere — run
 bare `just` for the full list with a one-line summary per recipe; that
 list, not a copy of it here, is the source of truth, since `.justfile`'s
-own comments are what `just` actually reads. `just preflight` (check +
-modules + lint + branches-test) is the ship skill's step 0. `just
+own comments are what `just` actually reads. `just preflight` (wiki-lint +
+check + modules + lint + the script tests -- every step CI runs) is the ship
+skill's step 0. `just
 hm-collisions`, `just root-drift`, and `just home-drift` are read-only,
 and only meaningful on the hardware itself.
 

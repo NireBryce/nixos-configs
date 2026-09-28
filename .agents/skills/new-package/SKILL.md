@@ -93,7 +93,9 @@ Each step catches something the ones before it can't:
 1. `git add -A` first — flakes ignore untracked files, so a new module
    silently doesn't exist yet.
 2. `just modules` — category/module name collisions and orphans.
-3. `just check` (or `just preflight`, which bundles this with the next two)
+3. `just check` (or `just preflight`, which bundles this with the next two
+   and `just wiki-lint` -- a new `.nix` file moves the counts table in
+   `wiki/module-style-guide-for-agents.md`; bump it in the same change)
    — evaluates every host across `--all-systems`. This is what actually
    catches the darwin-only-package-on-Linux mistake above; a narrower check
    against just the target host would miss it.
