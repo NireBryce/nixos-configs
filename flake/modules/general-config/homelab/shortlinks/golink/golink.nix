@@ -1,5 +1,5 @@
 # golink: tailscale's `go/foo` shortlink service, run as its OWN node on the
-# tailnet. Added 2026-08-24, cube-only, own category (`system/shortlinks/`) --
+# tailnet. Added 2026-08-24, cube-only, own category (`general-config/homelab/shortlinks/`) --
 # the category-as-optionality mechanism CLAUDE.md's Architecture section
 # gives `monitoring` and `virtualization`; nothing here for the handhelds,
 # and durandal has not asked for it.

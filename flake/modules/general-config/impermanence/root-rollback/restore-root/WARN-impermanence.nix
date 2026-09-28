@@ -44,7 +44,7 @@
 
             # The impermanence NixOS module itself (the environment.persistence
             # declaration) is NOT imported here. It lives in
-            # system/system/impermanence/declare-persistence-option.nix, imported
+            # general-config/system/impermanence/declare-persistence-option.nix, imported
             # unconditionally via the `system` category, so the option is
             # declared once for every host -- including ones that wipe nothing
             # (originally nire-testbed, since removed; nire-cube is the current

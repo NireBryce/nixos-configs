@@ -28,8 +28,9 @@
                 settings = {
                     server = {
                         # Loopback since 2026-08-24: nothing off-host
-                        # connects here. system/reverse-proxy/caddy.nix accepts
-                        # on the tailnet, terminates TLS from tailscaled's
+                        # connects here.
+                        # general-config/homelab/reverse-proxy/caddy/caddy.nix
+                        # accepts on the tailnet, terminates TLS from tailscaled's
                         # cert, proxies to this port over 127.0.0.1. Used to
                         # be 0.0.0.0 -- history note at the bottom.
                         #
@@ -199,7 +200,7 @@
             # sops, not one-off machine state.
             #
             # sopsFile unset -- defaults to `config.sops.defaultSopsFile`
-            # (secrets.yaml, set in system/system/secrets/sops.nix, imported
+            # (secrets.yaml, set in general-config/system/secrets/sops.nix, imported
             # by every Linux host via `system`). Declared HERE and not in
             # sops.nix on purpose: `git-forge` is cube-only, and a secret
             # declared in sops.nix decrypts on every `system` host
@@ -272,7 +273,7 @@
 # 2026-08-24 — this used to listen on 0.0.0.0 with a plain-HTTP ROOT_URL
 #
 # For the few hours between this file being written and
-# system/reverse-proxy/caddy.nix being added, `settings.server` read
+# general-config/homelab/reverse-proxy/caddy/caddy.nix being added, `settings.server` read
 # HTTP_ADDR = "0.0.0.0" -- commented as the one service in the category
 # meant to be reached off-host at all (over Tailscale), "tailnet only"
 # enforced at the firewall, grafana.nix's reasoning at the time -- and

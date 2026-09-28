@@ -74,7 +74,7 @@ docker/podman access roots the VM, not cube.
   by the next `just switch`. Deliberate, unlike the create-once shape the
   signing-key units use.
 - The `forgejo-admin-password` sops secret is declared **in this module**,
-  not in `general-config/secrets/sops.nix`, so it only decrypts on cube.
+  not in `general-config/system/secrets/sops.nix`, so it only decrypts on cube.
 - **`one-job` refuses a config that defines a connection** when its own
   `--url`/`--uuid`/`--token-url` are given ("server connection conflict");
   the guest's runner config holds only `runner` and `cache`.

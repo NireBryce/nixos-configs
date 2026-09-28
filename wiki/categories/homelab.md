@@ -30,7 +30,7 @@ identical: its own `dirsAsCategory.nix` under `general-config/homelab/backup/`,
 cube-only, folded in by the same delegation this page describes below.
 
 A ninth, [coding-agent](coding-agent.md), joined 2026-09-26: opencode's CLI
-and server, moved out of `host-config/cube/configuration/` (and out of every
+and server, moved out of `hosts/cube/configuration/` (and out of every
 other host's Home Manager) so cube is the only host with it.
 
 ## Nested categories overlap their parents on purpose

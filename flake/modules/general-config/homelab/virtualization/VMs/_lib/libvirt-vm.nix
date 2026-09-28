@@ -67,7 +67,7 @@
     #
     # `guestId` is a plain human-assigned integer, not derived or
     # auto-allocated -- same "pin explicitly, a human reasons about
-    # collisions" reasoning as `system/containers/podman/podman.nix`'s
+    # collisions" reasoning as `general-config/homelab/containers/podman/podman.nix`'s
     # `subUidRanges` (see its incident comment). It
     # fixes the guest's MAC (`52:54:00:00:00:<guestId, hex>`) and
     # DHCP-reserved IP (`192.168.122.<guestId>`) on libvirt's default

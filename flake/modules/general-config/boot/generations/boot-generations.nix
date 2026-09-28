@@ -1,6 +1,6 @@
 # How many generations the bootloader keeps.
 #
-# In a subdirectory, not directly in system/boot/, because a category collects
+# In a subdirectory, not directly in general-config/boot/, because a category collects
 # from its *sub*directories only -- a .nix file sitting straight in the category
 # directory is collected by nothing. And named boot-generations rather than
 # boot.nix: a module's name is its filename, so boot.nix would declare

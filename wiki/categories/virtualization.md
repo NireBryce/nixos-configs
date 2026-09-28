@@ -4,7 +4,7 @@ _Last modified: 2026-09-27_
 
 Libvirt/QEMU VMs, and *only* that — see [containers](containers.md) for why
 podman and distrobox (OCI containers) are a different category. Nested under
-the `homelab` umbrella since 2026-08-27 (moved from `general-config/virtualization/`;
+the `homelab` umbrella since 2026-08-27 (moved from `nire/virtualization/`;
 name and by-name importability unaffected). `nire-llm-sandbox`, the one VM
 this category ran until 2026-08-28, has a successor: `forge-runner`
 (2026-09-25, the Forgejo Actions runner VM — [git-forge](git-forge.md)

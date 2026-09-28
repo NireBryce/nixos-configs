@@ -30,7 +30,7 @@
 # impermanence flake). Wrong warning for a host with no wipe to worry about.
 #
 # `environment.persistence` itself is declared for every NixOS host regardless
-# -- see system/system/impermanence/declare-persistence-option.nix -- so this
+# -- see general-config/system/impermanence/declare-persistence-option.nix -- so this
 # module no longer risks an option-does-not-exist error either way. What it
 # guards now is a non-impermanence host getting an entry, and the warning, for
 # no reason.

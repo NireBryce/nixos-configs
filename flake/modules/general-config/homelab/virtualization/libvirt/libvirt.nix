@@ -24,7 +24,7 @@
             # deliberately declined by tenacity, the handheld (the one that imports
             # `jovian`). libvirtd is a boot-time daemon and a gamescope
             # handheld will never open virt-manager. Before 2026-08-21 these modules
-            # lived under `system/system/`, which every Linux host imports whole, so
+            # lived under `nire/system/`, which every Linux host imports whole, so
             # they did land on the handhelds; moving them to their own category is
             # what fixed that. A new host opts in by adding `virtualization` to its
             # list, which is also where the polkit note at the bottom of this file

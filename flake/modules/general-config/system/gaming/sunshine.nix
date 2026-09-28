@@ -26,7 +26,7 @@
 # Hardware encode: nothing to set here. `capSysAdmin` (below) covers KMS
 # screen *capture*; the actual *encode* is VAAPI, which comes from
 # `hardware.graphics.enable` -- already `true` on all four AMD hosts via
-# system/hardware/amd/amdgpu/amdgpu.nix (mesa's radeonsi driver bundles VAAPI,
+# general-config/hardware/amd/amdgpu/amdgpu.nix (mesa's radeonsi driver bundles VAAPI,
 # no separate package needed the way Intel's does). This module deliberately
 # does not force `services.sunshine.settings.encoder = "vaapi"`: sunshine
 # already prefers a hardware encoder when one is usable and falls back to

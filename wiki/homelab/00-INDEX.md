@@ -63,7 +63,7 @@ by design. Full map and the reasoning:
 
 `ts-cube`, **not** `nire-cube`: this tailnet's device names don't match
 `networking.hostName`. That trip-up has its own writeup in
-`general-config/networking/tailscale.nix`'s header, indexed from
+`general-config/system/networking/tailscale.nix`'s header, indexed from
 [system](../categories/system.md).
 
 golink is the exception to that pattern rather than a naming inconsistency —

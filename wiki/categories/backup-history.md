@@ -51,7 +51,7 @@ section when `claude cave/` was retired; moved here 2026-09-03.
 
 ## The QNAP mount predates this category by months, and was never dangling
 
-The plan doc above described `general-config/system/storage/storage-NFS.nix` (the
+The plan doc above described `nire/system/storage/storage-NFS.nix` (the
 NFS mount to the QNAP) as an unused module. It isn't:
 `general-config/system/storage/` has no `dirsAsCategory.nix` of its own, so the
 module is collected straight into the shared `system` aggregate, which
