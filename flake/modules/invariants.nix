@@ -78,6 +78,17 @@
 # outside this file's reach), but a later import flipping it back to
 # false on a host that DOES have home-manager is exactly the regression
 # this still catches.
+#
+# HOST-WIDE AND PER-USER GROUPS (2026-09-27)
+#
+# hostInvariants apply to every NixOS host, each one gated on the thing
+# it guards existing there (u2f on, a vfat /boot, systemd-boot) rather
+# than on a host name -- forge-runner has none of those and passes them
+# vacuously. ellyInvariants are gated on `users.users ? elly`, which
+# forge-runner also lacks. Considered and left out: firewall port pins
+# (hardcode nixpkgs' port numbers, visible to a scan anyway), hostName
+# matching the flake attribute (loud at the prompt), sessionPath
+# duplicates (harmless).
 { config, lib, ... }:
 {
     perSystem = { system, pkgs, ... }:
@@ -118,6 +129,35 @@
             # user and doesn't; nire-installer and nire-llm-sandbox (both
             # removed) were the same shape.
             usesHomeManager = c ? home-manager;
+
+            # Absent on forge-runner (no `elly` user); see the header's
+            # HOST-WIDE AND PER-USER GROUPS.
+            usesElly = c.users.users ? elly;
+
+            sleep    = c.systemd.sleep.settings.Sleep or { };
+            sleepOn  = lib.filter (k: (sleep.${k} or true) != false)
+                           [ "AllowHibernation" "AllowHybridSleep" "AllowSuspendThenHibernate" ];
+
+            # Every openssh host key, private and public half. Derived from
+            # hostKeys rather than listing paths, so a changed key set is
+            # checked as it is, not as it was.
+            sshKeyFiles = lib.concatMap (k: [ k.path "${k.path}.pub" ])
+                              (c.services.openssh.hostKeys or [ ]);
+            sopsKeys    = c.sops.age.sshKeyPaths or [ ];
+
+            # Lines of every rendered PAM service that load pam_u2f.
+            u2fLines = lib.concatMap
+                (s: lib.filter (lib.hasInfix "pam_u2f.so")
+                        (lib.splitString "\n" (if (s.text or null) == null then "" else s.text)))
+                (lib.attrValues (c.security.pam.services or { }));
+
+            userList   = lib.attrValues (c.users.users or { });
+            anyAutoSub = lib.any (u: u.autoSubUidGidRange or false) userList;
+            anyPinSub  = lib.any (u: (u.subUidRanges or [ ]) != [ ] || (u.subGidRanges or [ ]) != [ ]) userList;
+
+            boot     = c.fileSystems."/boot" or null;
+            bootOpts = if boot == null then [ ] else boot.options or [ ];
+            vfatBoot = boot != null && (boot.fsType or "") == "vfat";
 
             impermanenceInvariants = [
             # -- the root rollback actually runs ------------------------------
@@ -174,24 +214,80 @@
                     + "cannot survive resuming into a / that was rolled back";
             }
             {
-                ok  = (c.systemd.sleep.settings.Sleep.AllowHibernation or true) == false;
-                msg = "${name}: systemd.sleep.settings.Sleep.AllowHibernation is not false, so "
-                    + "logind still offers an option the kernel will refuse";
+                # All three, not just AllowHibernation: HybridSleep and
+                # SuspendThenHibernate both write a hibernation image too,
+                # and PowerDevil asking for a state logind no longer offers
+                # is how suspend silently stopped working once (§30).
+                ok  = sleepOn == [ ];
+                msg = "${name}: systemd.sleep.settings.Sleep.{${lib.concatStringsSep "," sleepOn}} "
+                    + "not false -- logind still offers a sleep state that writes a "
+                    + "hibernation image the kernel will refuse";
             }
 
             # -- persistence -------------------------------------------------
+            {
+                # /persist has to be up in stage 1: machine-id, the ssh host
+                # keys and the password hash are bind-mounted from it before
+                # anything reads them. disko does not set this; each host's
+                # hardware file adds it by hand.
+                ok  = c.fileSystems."/persist".neededForBoot or false;
+                msg = "${name}: fileSystems.\"/persist\".neededForBoot is not true -- /persist "
+                    + "mounts after stage 1, too late for everything persisted from it";
+            }
+            {
+                ok  = toString (c.environment.etc."machine-id".source or "") == "/persist/etc/machine-id";
+                msg = "${name}: /etc/machine-id no longer sourced from /persist -- a new "
+                    + "machine-id every boot, so journalctl --list-boots silently shows only "
+                    + "the current boot (the journal directory is per machine-id)";
+            }
             {
                 ok  = lib.elem "/var/lib/tailscale" dirs;
                 msg = "${name}: /var/lib/tailscale not persisted -- tailscale needs "
                     + "re-authenticating on every boot (see tailscale-persist.nix)";
             }
             {
-                ok  = lib.all (f: lib.elem f files) [
-                          "/etc/ssh/ssh_host_ed25519_key"
-                          "/etc/ssh/ssh_host_rsa_key"
-                      ];
-                msg = "${name}: ssh host keys not persisted -- the host identity changes on "
-                    + "every boot and every client warns about a changed key";
+                # Replaced a hardcoded ed25519+rsa list (2026-09-27), which
+                # could not see a change to hostKeys and skipped the .pub
+                # halves.
+                ok  = lib.all (f: lib.elem f files) sshKeyFiles;
+                msg = "${name}: ssh host keys not persisted ("
+                    + lib.concatStringsSep ", " (lib.filter (f: !lib.elem f files) sshKeyFiles)
+                    + ") -- the host identity changes on every boot and every client "
+                    + "warns about a changed key";
+            }
+            {
+                # Same paths as the ed25519 host key today (sops.nix derives
+                # them from hostKeys); checked separately because the
+                # consumer is different and so is the failure.
+                ok  = lib.all (f: lib.elem f files) sopsKeys;
+                msg = "${name}: a sops.age.sshKeyPaths entry is not persisted -- every "
+                    + "sops secret fails to decrypt at activation after the boot that wiped it";
+            }
+
+            # Each *-persist.nix sibling, checked against the service that
+            # owns the state rather than against the file that persists it:
+            # the sibling is gated only on restore-root, so this is what
+            # notices a service whose state nobody persists.
+            {
+                ok  = !(c.networking.networkmanager.enable or false)
+                      || (lib.elem "/etc/NetworkManager/system-connections" dirs
+                          && lib.elem "/var/lib/NetworkManager/secret_key" files);
+                msg = "${name}: NetworkManager runs but its connections or secret_key are not "
+                    + "persisted -- saved networks and their secrets are lost every boot";
+            }
+            {
+                ok  = !(c.services.mullvad-vpn.enable or false) || lib.elem "/etc/mullvad-vpn" dirs;
+                msg = "${name}: mullvad-vpn runs but /etc/mullvad-vpn is not persisted -- the "
+                    + "device registration is lost every boot";
+            }
+            {
+                # Vacuous today: libvirtd runs only on cube, which does not
+                # wipe /. Break-tested 2026-09-27 by enabling libvirtd on
+                # durandal; kept for the first impermanence host that runs it.
+                ok  = !(c.virtualisation.libvirtd.enable or false)
+                      || lib.elem "/var/lib/libvirt/secrets/secrets-encryption-key" files;
+                msg = "${name}: libvirtd runs but its secrets-encryption-key is not persisted -- "
+                    + "every libvirt secret it encrypted becomes unreadable after a boot";
             }
             {
                 # States the scoping rule, not the hosts, so it keeps
@@ -218,13 +314,70 @@
                     + "nixpkgs and lose the system's allowUnfree";
             }
         ];
+            hostInvariants = [
+            {
+                # Reads the rendered PAM text, not the option: settings is
+                # freeform, so a misspelled key evaluates clean and pam_u2f
+                # discards it as an unknown argument. `authFile=` did exactly
+                # that for five months, masked by matching pam_u2f's
+                # default path (§49, yubikey.nix).
+                ok  = !(c.security.pam.u2f.enable or false)
+                      || (u2fLines != [ ]
+                          && lib.all (l: lib.hasInfix " authfile=" l && !lib.hasInfix "authFile=" l) u2fLines);
+                msg = "${name}: a rendered pam_u2f line lacks authfile= (or carries the camelCase "
+                    + "authFile=, which pam_u2f ignores) -- u2f silently falls back to its "
+                    + "built-in key path";
+            }
+            {
+                # nixpkgs' auto allocator never looks at pinned ranges, so a
+                # host mixing the two hands both users 100000:65536 on a
+                # fresh install (podman.nix, "NOT autoSubUidGidRange"; §32).
+                ok  = !(anyAutoSub && anyPinSub);
+                msg = "${name}: a user has autoSubUidGidRange while another has pinned "
+                    + "subUidRanges/subGidRanges -- the allocator cannot see the pins, and a "
+                    + "fresh install gives two users one subordinate range";
+            }
+            {
+                # nixpkgs mounts vfat /boot 0022 when no options are given;
+                # durandal did, and bootctl logged /boot/loader/random-seed
+                # as world accessible (08098b13). Set per host in each
+                # hardware file, so a new or regenerated one drops it.
+                ok  = !vfatBoot
+                      || lib.elem "umask=0077" bootOpts
+                      || (lib.elem "fmask=0077" bootOpts && lib.elem "dmask=0077" bootOpts);
+                msg = "${name}: vfat /boot mounted without fmask=0077,dmask=0077 -- the loader "
+                    + "entries and random-seed are readable by every local user";
+            }
+            {
+                # nixpkgs defaults this to true; boot-editor.nix sets it once
+                # for every host through the `boot` category, so losing that
+                # import is silent. On cube (no LUKS) an editable command line
+                # is a root shell over the whole disk.
+                ok  = !(c.boot.loader.systemd-boot.enable or false)
+                      || !(c.boot.loader.systemd-boot.editor or true);
+                msg = "${name}: systemd-boot's editor is on -- anyone at the console can boot "
+                    + "with init=/bin/sh (see boot-editor.nix)";
+            }
+            ];
+            ellyInvariants = [
+            {
+                ok  = !c.users.mutableUsers
+                      && lib.hasPrefix "/persist/" (toString (c.users.users.elly.hashedPasswordFile or ""));
+                msg = "${name}: users.mutableUsers is true or elly's hashedPasswordFile is outside "
+                    + "/persist -- passwd changes revert on switch, or a host that wipes / "
+                    + "loses the hash and locks the user out (elly-user.nix, "
+                    + "WARN-password-required.nix)";
+            }
+            ];
         in
             (if usesImpermanence then impermanenceInvariants else [ ])
             # NOT gated on usesImpermanence: holds for every NixOS host
             # that has home-manager at all, cube included. See
             # usesHomeManager for what a host without one looks like --
             # forge-runner is one.
-            ++ (if usesHomeManager then homeManagerInvariants else [ ]);
+            ++ (if usesHomeManager then homeManagerInvariants else [ ])
+            ++ hostInvariants
+            ++ (if usesElly then ellyInvariants else [ ]);
 
         failures = lib.concatLists (lib.mapAttrsToList
             (name: host: lib.filter (i: !i.ok) (invariantsFor name host))
