@@ -1,6 +1,6 @@
-# `shortlinks` — `config-system/homelab/shortlinks/`
+# `shortlinks` — `general-config/homelab/shortlinks/`
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-27_
 
 [golink](https://github.com/tailscale/golink), Tailscale's `go/foo`
 shortlink service. Added 2026-08-24, cube-only; nested under the `homelab`
@@ -117,7 +117,7 @@ tsnet writes its node key into the config-dir and reauthenticates from it
 on every later boot — once per machine, the same shape `sudo tailscale up`
 has. (tsnet ignores a later-wired authkey when state exists, so there's
 still no reason to wire one. To revisit anyway: mint a key, add
-`sops.secrets.tailscale_key` in `config-system/secrets/sops.nix`, pass it as an
+`sops.secrets.tailscale_key` in `general-config/secrets/sops.nix`, pass it as an
 `EnvironmentFile`.)
 
 ## The node must stay named `go`

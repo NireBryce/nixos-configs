@@ -1,6 +1,6 @@
-# `reverse-proxy` — `config-system/homelab/reverse-proxy/`
+# `reverse-proxy` — `general-config/homelab/reverse-proxy/`
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-09-27_
 
 [Caddy](https://caddyserver.com/), one tailnet-only HTTPS front door for
 every web service on `nire-cube`. Added 2026-08-24, cube-only; nested under
@@ -179,7 +179,7 @@ Two prerequisites, neither in this repo:
   out-of-repo trap [system](system.md)'s `tailscale.nix` documents.
 
 `permitCertUid` is set in `caddy.nix` rather than in
-`config-system/networking/tailscale.nix` — that file is in the `system` category
+`general-config/networking/tailscale.nix` — that file is in the `system` category
 *every* Linux host imports, and setting it there would grant cert-fetching
 rights to a `caddy` user on hosts that don't run Caddy. Scope a change to
 the host that needs it.

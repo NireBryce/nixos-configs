@@ -1,6 +1,6 @@
-# `nix` — `config-system/nix/`
+# `nix` — `general-config/nix/`
 
-_Last modified: 2026-09-01_
+_Last modified: 2026-09-27_
 
 ## Contents
 

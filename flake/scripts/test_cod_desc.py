@@ -30,9 +30,9 @@ import unittest
 
 HERE = pathlib.Path(__file__).resolve().parent
 FLAKE = HERE.parent
-DATA = FLAKE / 'modules/config-system/shell-config/bash/cod-desc.tsv'
-BLESH = FLAKE / 'modules/config-system/shell-config/bash/blesh.nix'
-ADVICE = FLAKE / 'modules/config-system/shell-config/bash/cod-desc.bash'
+DATA = FLAKE / 'modules/general-config/shell-config/bash/cod-desc.tsv'
+BLESH = FLAKE / 'modules/general-config/shell-config/bash/blesh.nix'
+ADVICE = FLAKE / 'modules/general-config/shell-config/bash/cod-desc.bash'
 
 _spec = importlib.util.spec_from_file_location('cod_desc', HERE / 'cod-desc.py')
 cod_desc = importlib.util.module_from_spec(_spec)

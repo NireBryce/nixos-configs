@@ -2,6 +2,8 @@
 
 _Last modified: 2026-09-26_
 
+_Sibling reviewed: 2026-09-27 -- source updated for the config-system→general-config directory rename; no mention of the old path on this page_
+
 Condensed from [pending-setup.md](pending-setup.md), which keeps the closed
 items and their full accounts. Open work and the traps only here.
 

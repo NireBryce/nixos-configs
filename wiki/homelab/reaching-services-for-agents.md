@@ -1,6 +1,6 @@
 # Reaching cube's services, for agents
 
-_Last modified: 2026-09-13_
+_Last modified: 2026-09-27_
 _Sibling reviewed: 2026-09-14 -- only a `system/`→`config-system/` path rename_
 
 Condensed from [reaching-services.md](reaching-services.md), which keeps the

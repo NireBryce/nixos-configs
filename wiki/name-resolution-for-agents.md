@@ -1,11 +1,11 @@
 # Name resolution & reverse DNS, for agents
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-27_
 
 Condensed from [name-resolution.md](name-resolution.md). Config rationale
 and the four name traps live in the modules — `tailscale.nix`,
-`resolved.nix`, `avahi.nix` (all under `flake/modules/config-system/system/networking/`)
-and `flake/modules/config-system/homelab/reverse-proxy/tailscale-services/README.md`
+`resolved.nix`, `avahi.nix` (all under `flake/modules/general-config/system/networking/`)
+and `flake/modules/general-config/homelab/reverse-proxy/tailscale-services/README.md`
 — not restated here. All behavioral claims probed live 2026-09-14 on
 nire-tenacity unless a qualifier says otherwise.
 

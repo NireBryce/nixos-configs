@@ -1,6 +1,6 @@
 # 47. An explicit setting can switch off an implicit one — auto-detection only fires where nothing is declared
 
-_Last modified: 2026-09-13_
+_Last modified: 2026-09-27_
 
 §47 of [lessons-learned.md](../lessons-learned.md#47-an-explicit-setting-can-switch-off-an-implicit-one--auto-detection-only-fires-where-nothing-is-declared) — that page keeps the one-line version of every lesson; this is §47's full account.
 
@@ -98,6 +98,6 @@ version never was.
   two-flavour bare-name situation this left behind.
 - §37, §43 — the other two entries about checks that pass without proving
   what you wanted proved.
-- `flake/modules/config-system/homelab/reverse-proxy/caddy/caddy.nix` — its
+- `flake/modules/general-config/homelab/reverse-proxy/caddy/caddy.nix` — its
   `tailscaleCert` binding carries the mechanism with `file:line` references
   into Caddy 2.11.4 (moved off the file header 2026-09-13).

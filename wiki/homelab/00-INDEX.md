@@ -1,6 +1,6 @@
 # Homelab services
 
-_Last modified: 2026-09-24_
+_Last modified: 2026-09-27_
 
 How to **use** the services this fleet runs, as opposed to how they're
 configured. Everything here is reachable over the tailnet and nowhere else.
@@ -63,7 +63,7 @@ by design. Full map and the reasoning:
 
 `ts-cube`, **not** `nire-cube`: this tailnet's device names don't match
 `networking.hostName`. That trip-up has its own writeup in
-`config-system/networking/tailscale.nix`'s header, indexed from
+`general-config/networking/tailscale.nix`'s header, indexed from
 [system](../categories/system.md).
 
 golink is the exception to that pattern rather than a naming inconsistency —

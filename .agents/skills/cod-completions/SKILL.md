@@ -33,9 +33,9 @@ This skill is the runnable procedure.
 
 | File | Role |
 | --- | --- |
-| `flake/modules/config-system/shell-config/bash/cod-desc.tsv` | the descriptions (curated data — the only place they exist) |
-| `flake/modules/config-system/shell-config/bash/cod-desc.bash` | ble.sh `after`-advice on cod's `__cod_complete_bash`; reads the table via `NIRE_COD_DESC_TSV` |
-| `flake/modules/config-system/shell-config/bash/blesh.nix` | renders both into the store and imports the advice from `.blerc` |
+| `flake/modules/general-config/shell-config/bash/cod-desc.tsv` | the descriptions (curated data — the only place they exist) |
+| `flake/modules/general-config/shell-config/bash/cod-desc.bash` | ble.sh `after`-advice on cod's `__cod_complete_bash`; reads the table via `NIRE_COD_DESC_TSV` |
+| `flake/modules/general-config/shell-config/bash/blesh.nix` | renders both into the store and imports the advice from `.blerc` |
 | `flake/scripts/cod-desc.py` | `draft` / `audit` / `check`; `just cod-desc` dispatches to it |
 
 ## Extending coverage

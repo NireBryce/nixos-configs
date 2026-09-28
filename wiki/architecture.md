@@ -1,6 +1,6 @@
 # Architecture & module system
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-09-27_
 
 For *why* this repo runs flake-parts at all, see [flake-parts.md](flake-parts.md)
 first — this page is the mechanism built on top of that, not the reason for
@@ -63,9 +63,9 @@ is the mechanism, not the inventory.
 ## Related, easy to get backwards
 
 Containers and VMs are separate categories here, and "virtualization" means
-only the VM one (`config-system/homelab/virtualization/`: libvirt, virt-tools,
+only the VM one (`general-config/homelab/virtualization/`: libvirt, virt-tools,
 vm-networking — optional, cube only). Podman/distrobox live in
-[`config-system/homelab/containers/`](categories/containers.md), its own category
+[`general-config/homelab/containers/`](categories/containers.md), its own category
 since 2026-08-22, nested under the `homelab` umbrella since 2026-08-27 —
 imported by cube only (durandal dropped it 2026-08-27, same day as
 `virtualization`; tenacity 2026-09-26). See

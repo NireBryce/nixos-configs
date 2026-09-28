@@ -1,6 +1,6 @@
-# `macos` — `config-system/macos/`
+# `macos` — `general-config/macos/`
 
-_Last modified: 2026-09-01_
+_Last modified: 2026-09-27_
 
 `darwin`-class only, throughout — the one category in this repo that is
 entirely platform-specific rather than shared-with-a-guard. See
@@ -39,7 +39,7 @@ section for the general pattern this fits into.
 
 Found 2026-08-31 on `nire-lysithea` diagnosing "the Tailscale service won't
 install". Not a bug in this repo — `tailscale.nix`
-(`config-system/system/networking/`) is `flake.modules.nixos`-only and never reaches
+(`general-config/system/networking/`) is `flake.modules.nixos`-only and never reaches
 darwin; on lysithea, Tailscale is entirely the `tailscale-app` cask in
 `homebrew.nix`, unmanaged by Nix past that one line.
 

@@ -1,6 +1,6 @@
 # Wiki
 
-_Last modified: 2026-09-24_
+_Last modified: 2026-09-27_
 
 The `flake/` folder is meant to be browsed by its file tree rather than
 traced through by following code paths. The heavy modularization
@@ -141,7 +141,7 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
 ### Category reference (configuration)
 
 - [Category reference](categories/00-INDEX.md) — one article per real
-  category (`config-system/system`, `config-system/impermanence`, `config-system/homelab/virtualization`, …):
+  category (`general-config/system`, `general-config/impermanence`, `general-config/homelab/virtualization`, …):
   what's in it, which hosts import it, and the traps specific to that one.
   [shell-config](categories/shell-config/00-INDEX.md) is the one category
   that's grown its own subdirectory, with deep-dives on

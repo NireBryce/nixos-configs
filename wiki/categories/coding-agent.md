@@ -1,6 +1,6 @@
-# `coding-agent` — `config-system/homelab/coding-agent/`
+# `coding-agent` — `general-config/homelab/coding-agent/`
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-09-27_
 
 opencode, the AI coding agent, on `nire-cube` only: the CLI and `opencode
 serve` as a systemd user service, so TUI sessions survive a TUI exit.

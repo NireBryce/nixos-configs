@@ -1,6 +1,6 @@
 # `backup` — history
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-27_
 
 Resolved incidents and superseded design behind [backup](backup.md) and
 [../homelab/backup-runbook.md](../homelab/backup-runbook.md) — split out
@@ -51,9 +51,9 @@ section when `claude cave/` was retired; moved here 2026-09-03.
 
 ## The QNAP mount predates this category by months, and was never dangling
 
-The plan doc above described `config-system/system/storage/storage-NFS.nix` (the
+The plan doc above described `general-config/system/storage/storage-NFS.nix` (the
 NFS mount to the QNAP) as an unused module. It isn't:
-`config-system/system/storage/` has no `dirsAsCategory.nix` of its own, so the
+`general-config/system/storage/` has no `dirsAsCategory.nix` of its own, so the
 module is collected straight into the shared `system` aggregate, which
 every Linux host imports — confirmed via `nix eval
 .#nixosConfigurations.<host>.config.fileSystems` on all three NixOS hosts,

@@ -1,6 +1,6 @@
 # Named boot-cube.nix, not boot.nix, for the same reason boot-durandal.nix
 # is not called boot.nix: a module's filename is its attribute name, and
-# `config-system/boot/` is a category of that same name. See boot-durandal.nix's own
+# `general-config/boot/` is a category of that same name. See boot-durandal.nix's own
 # history note for what merging the two silently did there.
 #
 # GMKtec Nucbox G11 is UEFI-capable, so systemd-boot rather than grub, same

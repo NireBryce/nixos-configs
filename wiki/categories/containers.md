@@ -1,6 +1,6 @@
-# `containers` — `config-system/homelab/containers/`
+# `containers` — `general-config/homelab/containers/`
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-09-27_
 
 Podman and distrobox — OCI containers — and *only* that. See
 [virtualization](virtualization.md) for why libvirt/QEMU is a different
@@ -42,7 +42,7 @@ One file, `podman/podman.nix`, `nixos`-class:
 ## Why it's its own category, and why that didn't change anything
 
 Split out of `system` 2026-08-22, structurally the same move
-[virtualization](virtualization.md) got the day before: `config-system/system/` is
+[virtualization](virtualization.md) got the day before: `general-config/system/` is
 imported whole by every Linux host, and splitting a module into its own
 category is this repo's only mechanism for making something optional
 ([../architecture.md](../architecture.md)). At split time no host declined

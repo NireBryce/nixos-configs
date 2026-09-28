@@ -1,6 +1,6 @@
 # `reverse-proxy` — history
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-27_
 
 The verification record for [reverse-proxy](reverse-proxy.md)'s second
 switch, split out 2026-09-03, plus the path-prefix routing design (retired
@@ -56,7 +56,7 @@ each app's own file for the by-then-retired mechanics, kept as history).
 
 **Tailscale Services (`svc:`) reopened this 2026-09-07** — see
 `wiki/open-threads.md`'s entry and
-`flake/modules/config-system/homelab/reverse-proxy/tailscale-services/README.md` for
+`flake/modules/general-config/homelab/reverse-proxy/tailscale-services/README.md` for
 the ACL/tag/service-object side (a separate, API-managed resource, not
 declared in this repo's Nix). Each app now has its own tailnet DNS name
 with no path prefix. What Services did **not** solve, discovered live: it
@@ -174,6 +174,6 @@ loopback listener, with Caddy terminating TLS and picking the vhost by SNI.
 ## See also
 
 - [reverse-proxy](reverse-proxy.md) — the mechanism as it works today.
-- [`caddy.nix`](../../flake/modules/config-system/homelab/reverse-proxy/caddy/caddy.nix)
+- [`caddy.nix`](../../flake/modules/general-config/homelab/reverse-proxy/caddy/caddy.nix)
   — its header carries the live mechanism; this page carries what it
   stopped doing.

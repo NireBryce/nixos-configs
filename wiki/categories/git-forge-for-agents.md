@@ -1,6 +1,6 @@
 # `git-forge`, for agents
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-09-27_
 
 Condensed from [git-forge.md](git-forge.md), which keeps the reasoning and
 the narrative. Facts only here.
@@ -11,7 +11,7 @@ the old `.../git/` path 404s.
 
 ## What's in it
 
-Two files, `nixos`-class, under `config-system/homelab/git-forge/forgejo/`:
+Two files, `nixos`-class, under `general-config/homelab/git-forge/forgejo/`:
 `forgejo.nix` (the forge) and `actions-runner.nix` (the CI runner,
 2026-09-24).
 
@@ -74,7 +74,7 @@ docker/podman access roots the VM, not cube.
   by the next `just switch`. Deliberate, unlike the create-once shape the
   signing-key units use.
 - The `forgejo-admin-password` sops secret is declared **in this module**,
-  not in `config-system/secrets/sops.nix`, so it only decrypts on cube.
+  not in `general-config/secrets/sops.nix`, so it only decrypts on cube.
 - **`one-job` refuses a config that defines a connection** when its own
   `--url`/`--uuid`/`--token-url` are given ("server connection conflict");
   the guest's runner config holds only `runner` and `cache`.

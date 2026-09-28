@@ -1,6 +1,6 @@
-# `shell-config` — `config-system/shell-config/`
+# `shell-config` — `general-config/shell-config/`
 
-_Last modified: 2026-09-25_
+_Last modified: 2026-09-27_
 
 ## Contents
 

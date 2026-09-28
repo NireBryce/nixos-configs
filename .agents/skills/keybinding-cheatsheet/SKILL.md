@@ -65,8 +65,8 @@ The generator reads these directly; grep them when auditing by hand.
 | Tool | Files | What's there |
 | --- | --- | --- |
 | kitty | `flake/modules/packages/terminals/kitty/kitty-config.nix` | `programs.kitty.keybindings` attrset; `kitty_mod` is a *setting* in `extraConfig`, resolved by the script, never a chord prefix to take literally |
-| zsh | `flake/modules/config-system/shell-config/zsh/config/initial-bindings.zsh` and `.../free-zellij-keys.zsh` | the bindkey blocks; interpolated into `programs.zsh.initContent` in `zsh.nix` via `lib.fileContents`, so grep the `config/` files, not only `zsh.nix` |
-| bash | `flake/modules/config-system/shell-config/bash/blesh.nix` | ble-bind inside `-C` callbacks of a `ble-import` and a `blehook ATTACH+=` string; nested quoting, so a line-start grep for `ble-bind` finds nothing |
+| zsh | `flake/modules/general-config/shell-config/zsh/config/initial-bindings.zsh` and `.../free-zellij-keys.zsh` | the bindkey blocks; interpolated into `programs.zsh.initContent` in `zsh.nix` via `lib.fileContents`, so grep the `config/` files, not only `zsh.nix` |
+| bash | `flake/modules/general-config/shell-config/bash/blesh.nix` | ble-bind inside `-C` callbacks of a `ble-import` and a `blehook ATTACH+=` string; nested quoting, so a line-start grep for `ble-bind` finds nothing |
 
 Traps that have bitten here:
 

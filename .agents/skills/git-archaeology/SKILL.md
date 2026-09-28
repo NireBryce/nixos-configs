@@ -17,9 +17,11 @@ this": emptiness usually indicts the pathspec, not the history.
 ## The issue
 
 This repo renames areas wholesale (`modules/system` became
-`modules/config-system` in `e03027a0`, 2026-09-14; the homelab
-categories consolidated 2026-08-27), so a file's current path often
-postdates the change you're looking for — sometimes by a single day.
+`modules/config-system` in `e03027a0`, 2026-09-14;
+`modules/config-system` became `modules/general-config` on 2026-09-27;
+the homelab categories consolidated 2026-08-27), so a file's current
+path often postdates the change you're looking for — sometimes by a
+single day.
 `git log -- <path>` lists only commits where *that exact path* changed:
 a commit that changed `old/area/file.nix` does not match
 `new/area/file.nix`, and the same holds for a pickaxe (`-S`/`-G`) given

@@ -1,6 +1,6 @@
 # Module style guide
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-27_
 
 Conventions for `flake/modules/`. "How many files do this" used to be
 stated as inline counts per section, dated 2026-08-08 -- and by 2026-09-09
@@ -203,7 +203,7 @@ contain the string so a search lands here.
 
 ```nix
 # renamed from `boot.nix`, which declared `flake.modules.nixos.boot` and so
-# merged with the `config-system/boot/` category of the same name
+# merged with the `general-config/boot/` category of the same name
 ```
 
 ```nix
@@ -212,7 +212,7 @@ contain the string so a search lands here.
 ```
 
 Both live in the tree: `hosts/durandal/hardware/boot-durandal.nix` and
-`config-system/system/home-manager/enable-home-manager.nix`.
+`general-config/system/home-manager/enable-home-manager.nix`.
 
 ## A bug recorded in a comment stays in the file
 

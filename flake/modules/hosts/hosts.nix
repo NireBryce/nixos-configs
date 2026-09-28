@@ -26,7 +26,7 @@ let
 in
 {
     # `nire-<x>` is each machine's networking.hostName; its Tailscale device
-    # is `ts-<x>`. config-system/system/networking/tailnet-hosts.nix derives
+    # is `ts-<x>`. general-config/system/networking/tailnet-hosts.nix derives
     # the ssh entries from the `nire-*` names below -- a new host gets one
     # with no edit there.
     flake.nixosConfigurations = {
@@ -37,7 +37,7 @@ in
         # A GUEST, not a machine -- hence no `nire-` prefix: that prefix
         # names the fleet (the machines the host-count claims in wiki/ and
         # AGENTS.md are about), and this is a component instantiated on
-        # nire-cube by config-system/homelab/virtualization/
+        # nire-cube by general-config/homelab/virtualization/
         # virtualization-cube.nix through the VM generator. Its config:
         # hosts/forge-runner-configuration.nix. Not in .sops.yaml, and not
         # switched from this repo -- it comes up with cube's libvirtd.
