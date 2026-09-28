@@ -18,6 +18,7 @@
 
             home.packages = with pkgs; [
                 just
+                just-lsp # language server; nefrob.vscode-just-syntax runs `just-lsp` off PATH by default (vscode-just.lspPath)
             ];
         };
 }
