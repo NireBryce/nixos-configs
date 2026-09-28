@@ -26,6 +26,15 @@
 # Taking over ~/.ssh/config: Home Manager moves any hand-written file to
 # ~/.ssh/config.hm-bak on first activation (backupFileExtension). Entries
 # worth keeping go in `settings` below, not back in the file.
+#
+# ~/.ssh/config is a real file, not HM's usual store symlink: programs.ssh
+# renders it, the home.file entry is disabled, and activation installs the
+# rendered text as a user-owned 0600 file. ssh refuses a config not owned
+# by the user or root, and inside vscode-fhs's bwrap user namespace only
+# uid 1000 is mapped -- root-owned store files show as `nobody`, so every
+# ssh/git-over-ssh from VS Code's terminal, git integration, and agent
+# sessions died with "Bad owner or permissions on ~/.ssh/config" (hit
+# 2026-09-28). Hand edits to the file last only until the next switch.
 { config, lib, ... }:
     let
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
@@ -46,7 +55,9 @@
             ];
         };
     in {
-        flake.modules.homeManager.${moduleName} = {
+        # Inner `config`/`lib` are Home Manager's (`fleet` above already read
+        # the outer config; only HM's lib has `lib.hm.dag`).
+        flake.modules.homeManager.${moduleName} = { config, lib, pkgs, ... }: {
             # # description = "ts-<x> tailnet names for every nire-<x> host, in ~/.ssh/config and ssh completion";
             programs.ssh = {
                 enable              = true;
@@ -60,6 +71,14 @@
                 settings            = lib.genAttrs (map tailnetName fleet)
                     (name: { HostName = name; });
             };
+
+            # Real file, not a symlink -- see the header.
+            home.file.".ssh/config".enable = false;
+            home.activation.sshConfigRealFile =
+                lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+                    run ${pkgs.coreutils}/bin/install -m 0600 \
+                        ${config.home.file.".ssh/config".source} "$HOME/.ssh/config"
+                '';
 
             # JSON is valid YAML, and toJSON gets the "\t" escape right.
             xdg.configFile."carapace/overlays/ssh.yaml".text = builtins.toJSON sshOverlay;
