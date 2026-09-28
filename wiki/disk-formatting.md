@@ -1,6 +1,6 @@
 # New host disk formatting (LUKS + btrfs + impermanence)
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-28_
 
 The runbook-shaped piece of adding a new host: **the actual disk step**, not
 the Nix config around it. Skill `new-host-config` covers the whole
@@ -136,7 +136,7 @@ it. Say so in the new host's header if wired in before the disk step, the
 way `nire-lego`'s did (git history).
 
 First boot also needs the KDE half of the hibernation guard —
-`root-rollback/kde-sleepmode.nix` sets `SleepMode=1` in `powerdevil.rc`,
+`root-rollback/restore-root/kde-sleepmode.nix` sets `SleepMode=1` in `powerdevil.rc`,
 matching `WARN-impermanence.nix`'s `nohibernate` kernel parameter, or
 suspend breaks outright. It's `homeManager`-class and reaches every desktop
 host through `ellyHomeManager` automatically.
