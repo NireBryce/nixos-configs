@@ -40,7 +40,8 @@ Same mechanism [hardware](hardware.md) documents for `general-config/hardware/am
 (via `modules/_lib/category-collector.nix` — see that doc's History
 section) rather than re-deriving their modules, giving one coarse handle
 (`homelab`, what cube imports) and fine ones that stay individually
-importable (`tenacity` imports `containers` and must not get the rest).
+importable — a host can take one child, e.g. `containers`, without the
+rest (tenacity did exactly that until it dropped podman 2026-09-26).
 `flake/doc/dirsAsCategory.md` documents this as load-bearing, not a bug.
 
 **A behavioral consequence, since removed:** until 2026-09-28 a category
