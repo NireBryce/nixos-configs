@@ -254,10 +254,18 @@
                     # GestureConfirmation came along with it as one settings
                     # group; no recorded default to diff either against
                     # (kaccessrc doesn't carry one the way kglobalshortcutsrc does).
+                    #
+                    # StickyKeysLockWindow is a repo-carried kwin patch
+                    # (kde-base.nix), not an upstream key: milliseconds within
+                    # which a second press of a latched modifier counts as a
+                    # deliberate double-tap and LOCKS it; a later second press
+                    # unlatches instead. Upstream (0) locks on any second press
+                    # however late.
                     kaccessrc.Keyboard = {
-                        AccessXBeep        = false;
-                        GestureConfirmation = true;
-                        StickyKeys          = true;
+                        AccessXBeep          = false;
+                        GestureConfirmation  = true;
+                        StickyKeys           = true;
+                        StickyKeysLockWindow = 175;
                     };
 
                     kwinrc = {
