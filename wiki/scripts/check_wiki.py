@@ -225,7 +225,22 @@ Contents list rather than someone else's, an `anchors` finding too).
 """
 import re, sys, pathlib, urllib.parse, datetime
 
-CATEGORY_FILE = 'dirsAsCategory.nix'
+# Category shims are found by what they import, not by filename -- same as
+# flake/scripts/modules.py and the collector itself, so renaming every shim
+# needs no change here.
+SHIM = re.compile(r'import\s*\(.*"/_lib/category-collector\.nix"\)')
+
+
+def is_shim(path):
+    return bool(SHIM.search(re.sub(r'#[^\n]*', '', path.read_text())))
+
+
+def shims_under(base):
+    """Every category shim under `base`, skipping `_` paths the way
+    import-tree does."""
+    return [p for p in base.rglob('*.nix')
+            if not any(part.startswith('_') for part in p.relative_to(base).parts)
+            and is_shim(p)]
 # Same shape as modules.py's AGG -- `with config.flake.modules.<class>; [ ... ]`,
 # the form every host aggregate and every dirsAsCategory.nix output uses.
 AGG = re.compile(r'with\s+config\.flake\.modules\.(\w+);\s*\[(.*?)\]', re.S)
@@ -305,7 +320,7 @@ def nested_category_names(categories, name):
     if name not in categories:
         return {name}
     result = {name}
-    for child in categories[name].rglob(CATEGORY_FILE):
+    for child in shims_under(categories[name]):
         if child.parent != categories[name]:
             result.add(child.parent.name)
     return result
@@ -344,7 +359,7 @@ def find_categories(root):
         base = root / 'flake' / 'modules' / area
         if not base.exists():
             continue
-        for p in base.rglob(CATEGORY_FILE):
+        for p in shims_under(base):
             cats[p.parent.name] = p.parent
     return cats
 
@@ -388,7 +403,7 @@ def category_classes(category_dir):
     """
     classes = set()
     for p in category_dir.rglob('*.nix'):
-        if p.name == CATEGORY_FILE:
+        if is_shim(p):
             continue
         # Comments stripped first: podman.nix has a commented-out
         # `flake.modules.homeManager.${moduleName}` stanza (never activated),

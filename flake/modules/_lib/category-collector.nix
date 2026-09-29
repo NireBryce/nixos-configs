@@ -25,8 +25,8 @@
 # is the whole edit. Add one by dropping it in a folder. No host file is
 # touched in any of these.
 #
-# Each `dirsAsCategory.nix` is a two-line shim that says "here's my
-# directory" and hands it to this file, which does the actual work: one
+# Each `dirsAsCategory.nix` is a small shim that says "here's where I am"
+# and hands its own path to this file, which does the actual work: one
 # copy of the logic, ~40 folders using it. (This file isn't itself a
 # module, just a function. It can sit under modules/ because the tool that
 # auto-loads everything there, import-tree, skips any path containing
@@ -73,8 +73,11 @@
 #           └── bat.nix              in shell-apps and text-tools
 #
 # Folders are just for tidiness -- `find/` and `pagers/` mean nothing to the
-# code. The only way to keep a module *out* of a category is to put it
-# outside that folder. Something only one machine needs goes under
+# code. The one exception is a name starting with `_` (`_lib/`,
+# `_templates/`): import-tree never loads those as modules, so the collector
+# doesn't look in them either -- that's where helper functions live. The
+# only way to keep a module *out* of a category is to put it outside that
+# folder. Something only one machine needs goes under
 # host-config/<that host>/, which only that host imports.
 #
 # Three smaller things follow from how this works:
@@ -83,8 +86,9 @@
 #   `ripgrep`, and that's the name we look up. Every module file gets this
 #   for free by computing its name from its own filename (the
 #   `moduleName = ... __curPos.file` line at the top of each one). Hardcode
-#   a different name instead and the lookup silently misses it -- nothing
-#   checks for that, so keep the line.
+#   a different name instead and the lookup silently misses it. Keep the
+#   line; `just modules` reports a module whose declared name isn't its
+#   filename.
 # - A module only shows up in the kinds of config it actually provides. The
 #   micro editor only has user config, so it appears in `editors` for
 #   homeManager and simply isn't there for nixos. A folder can't know what
@@ -120,8 +124,8 @@
 #
 # These look like obvious cleanups. Both break things.
 #
-# 1. Q: The shim works out its own directory and passes it in as
-#       `categoryDir`. Why not work it out in here instead?
+# 1. Q: The shim works out its own path and passes it in as `shimFile`.
+#       Why not work it out in here instead?
 #
 #    A: The trick it uses, `__curPos.file`, answers "which file is this
 #       line of code written in?" -- and it's answered when the file is
@@ -137,40 +141,50 @@
 #       inside one is asking for something that's only finished once
 #       you're done -- Nix reports `infinite recursion`.
 #
-# ── one trap worth knowing ──────────────────────────────────────────────────
+# ── why the shim's own name is never written down here ──────────────────────
 #
-# The shim gets skipped because we compare against its exact filename,
-# "dirsAsCategory.nix", in collectModules. Rename the shim someday and
-# forget this spot, and every category starts collecting a module called
-# `dirsAsCategory`. Nothing will complain: forClass drops names that no
-# module declares, which hides the mistake rather than catching it. It has
-# happened before, during a rename from `dirsAsProvides.nix`.
+# The collector has to recognise shims twice: to skip them while collecting
+# (they aren't modules), and to spot a subfolder that is itself a category.
+# Both use the filename the calling shim reports about itself (`shimName`),
+# not a hardcoded "dirsAsCategory.nix". Rename every shim consistently and
+# nothing here needs to change.
+#
+# That's not hypothetical: when the shim was renamed from
+# `dirsAsProvides.nix`, a hardcoded name here was missed, and every category
+# quietly collected a module called `dirsAsCategory`. Nothing complained --
+# forClass drops names no module declares, which hides a mistake like that
+# rather than catching it. `just modules` also reports shims whose names or
+# contents have drifted apart.
 #
 # If you change the logic here: read flake/doc/dirsAsCategory.md first, and
 # check your work by comparing each host's actual config before and after
 # (scripts/host-fingerprint.nix), not just whether the hashes match. The
 # history section at the bottom is why.
-{ config, lib, categoryDir }:
+{ config, lib, shimFile }:
 let
+    categoryDir = dirOf shimFile;
     categoryName = baseNameOf categoryDir;
+    shimName = baseNameOf shimFile;
     stripNix = name: lib.removeSuffix ".nix" name;
 
     # For one folder, at any depth: if it's a category, contribute its name
     # (see "categories inside categories"); otherwise walk into it.
     walkSubdir = subdir: name:
-        if builtins.pathExists (subdir + "/dirsAsCategory.nix")
+        if builtins.pathExists (subdir + "/${shimName}")
         then [ name ]
         else collectModules subdir;
 
     # List every module name in a folder: each `.nix` file becomes its
     # filename minus `.nix`, and each subfolder adds whatever walkSubdir
     # says. Called on the category's own folder to start things off.
+    # Anything starting with `_` is skipped, same as import-tree does.
     collectModules = dir:
         lib.concatMap
             ({ name, value }:
-                if value == "directory"
+                if lib.hasPrefix "_" name then [ ]
+                else if value == "directory"
                 then walkSubdir (dir + "/${name}") name
-                else lib.optional (lib.hasSuffix ".nix" name && name != "dirsAsCategory.nix") (stripNix name))
+                else lib.optional (lib.hasSuffix ".nix" name && name != shimName) (stripNix name))
             (lib.mapAttrsToList lib.nameValuePair (builtins.readDir dir));
 
     # Turn the list of names into actual modules, for one kind of config.

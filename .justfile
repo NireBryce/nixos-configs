@@ -47,6 +47,12 @@ modules:
     # Platform independent, so this is the one check that means anything on darwin.
     cd {{flake}} && python3 scripts/modules.py check modules
 
+# Fixture tests for modules.py's shim detection and names/shims checks:
+# breaks throwaway module trees on purpose and asserts each check fires.
+# Pure stdlib; runs in preflight and CI
+modules-test:
+    python3 {{scripts}}/test_modules.py
+
 # Scaffold a new module: just add-module <class> <category>/<subdir>/<name> ["one-line description"]
 # Class is nixos/homeManager/flake/generic/darwin; the path is relative to
 # flake/modules/ and must sit in a subdirectory of a category dir (see
@@ -146,6 +152,7 @@ preflight:
     @just branches-test
     @just keybindings-test
     @just cod-desc-test
+    @just modules-test
     @just check
     @just modules
     @just lint

@@ -175,8 +175,16 @@ Merge succeeded: delete immediately, no further ask.
 ```sh
 git checkout experimental && git pull
 git branch -d <branch>
-git push origin --delete <branch>
+git ls-remote --exit-code --heads origin <branch> >/dev/null \
+  && git push origin --delete <branch>
 ```
+
+The repo has GitHub's "Automatically delete head branches" on
+(`delete_branch_on_merge`), so the remote branch is normally gone by the
+time this runs — a bare `git push origin --delete` then fails with
+`failed to push some refs` (every ship since at least #416, 2026-09-28).
+The `ls-remote` guard deletes only if it's still there, e.g. when that
+setting is off.
 
 **Never `gh pr merge --delete-branch`** — it only removes the remote
 branch, skipping the local delete and the `experimental` checkout/pull

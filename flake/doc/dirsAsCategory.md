@@ -15,8 +15,8 @@ someone who wasn't there, not to argue against it.
 
 ## How it works
 
-Every category directory holds a copy of `dirsAsCategory.nix`. As of
-2026-08-27 that copy is a two-line shim — the actual logic lives once, in
+Every category directory holds a copy of `dirsAsCategory.nix`. Since
+2026-08-27 that copy is a small shim — the actual logic lives once, in
 `modules/_lib/category-collector.nix`, and every copy is now byte-identical
 (confirmed by hashing all of them; before this change three had drifted by a
 comment word, and `packages-config/_templates/dirsAsCategory.nix`, inert because
@@ -26,20 +26,28 @@ comment word, and `packages-config/_templates/dirsAsCategory.nix`, inert because
 ```nix
 { config, lib, ... }:
 let
-  categoryDir = dirOf __curPos.file;
+  shimFile = __curPos.file;
   findModulesRoot = dir: if baseNameOf dir == "modules" then dir else findModulesRoot (dirOf dir);
 in
-import (findModulesRoot categoryDir + "/_lib/category-collector.nix") {
-  inherit config lib categoryDir;
+import (findModulesRoot (dirOf shimFile) + "/_lib/category-collector.nix") {
+  inherit config lib shimFile;
 }
 ```
 
-`categoryDir = dirOf __curPos.file` has to stay in the shim, not move into the
+(Code only; every copy also carries the same short header comment.)
+
+`shimFile = __curPos.file` has to stay in the shim, not move into the
 shared file: `__curPos.file` resolves to wherever that token is written in
 source, at parse time, so if the shared file computed it, every category would
-resolve to the shared file's own directory instead of the caller's. `findModulesRoot`
+resolve to the shared file's own path instead of the caller's. The collector
+derives two things from it: the category's directory (`dirOf`) and **the
+shim's own filename** (`baseNameOf`), which it uses both to skip the shim and
+to recognise a nested category. No shim filename is written down in the
+collector, `modules.py` or `check_wiki.py` (the scripts find shims by their
+`_lib/category-collector.nix` import), so renaming every shim together needs
+no other change. `findModulesRoot`
 walks up to find `modules/` so the shim can reach `_lib/` from any nesting
-depth with the same two lines everywhere — **not** via `inputs.self`, which
+depth with the same text everywhere — **not** via `inputs.self`, which
 looks like the obvious depth-independent path and does not work here: unlike
 a NixOS module's use of `inputs.self` (evaluated downstream once `self`
 already exists), a `dirsAsCategory.nix` shim is itself one of the flake-parts
@@ -48,12 +56,12 @@ forces the very fixed point it contributes to and fails as `infinite
 recursion encountered`. Confirmed by trying it before writing the walk-up
 version.
 
-The shared file derives the category name from the directory it's handed,
-walks the subdirectories collecting `.nix` filenames, and declares one
-aggregate per module class:
+The shared file derives the category name from the shim's directory, walks
+it collecting `.nix` filenames (skipping anything whose name starts with `_`,
+as import-tree does), and declares one aggregate per module class:
 
 ```nix
-categoryName = baseNameOf categoryDir;
+categoryName = baseNameOf categoryDir;   # categoryDir = dirOf shimFile
 # …
 flake.modules.nixos.${categoryName}.imports       = forClass "nixos";
 flake.modules.homeManager.${categoryName}.imports = forClass "homeManager";
@@ -66,7 +74,7 @@ name that class does not declare:
 ```nix
 forClass = class:
     map (n: config.flake.modules.${class}.${n})
-        (lib.filter (n: config.flake.modules.${class} ? ${n}) allModules);
+        (lib.filter (n: config.flake.modules.${class} ? ${n}) (collectModules categoryDir));
 ```
 
 **Membership is therefore implicit: a module belongs to the category of the
@@ -107,11 +115,17 @@ evaluating rather than by reading the diff — History has both.
   `general-config/hardware/amd` both collect `amdcpu` and `amdgpu`, because `collectModules`
   recurses. That gives coarse and fine handles on the same modules. It looks
   like a bug and is not.
-- **The name filter must match the current filename.** It excluded
-  `dirsAsProvides.nix` for a while after the file was renamed to
-  `dirsAsCategory.nix`, so nested categories collected a phantom module called
-  `dirsAsCategory`. The class filter masks that symptom, which is exactly why
-  the filter itself has to be right.
+- **Every shim must share one filename.** The collector recognises a nested
+  category by the *calling* shim's own filename, so a lone renamed shim stops
+  being seen as a category by its parent. (Until 2026-09-28 the name was
+  hardcoded in the collector instead, and a rename from `dirsAsProvides.nix`
+  once left it stale: nested categories collected a phantom module called
+  `dirsAsCategory`, masked by the class filter.) `just modules`' `shims`
+  check reports a shim whose name or contents drifted from the rest.
+- **Modules must take their name from their filename.** The collector looks
+  each file up as `<filename minus .nix>`, so a module declaring a hardcoded,
+  different name is in no category and nothing errors. `just modules`'
+  `names` check reports one.
 
 ### Verifying a change to it
 
@@ -382,6 +396,19 @@ package environment (`home-manager-path`, plus `-fonts` and
 `-applications` on lysithea), whose `chosenOutputs` held the same entries
 in a different order — import reordering, per "Expect `drvPath` to change"
 above.
+
+**2026-09-28 — the shim names itself; `_` paths skipped.** The collector
+used to hardcode `"dirsAsCategory.nix"` twice (to skip the shim, and to spot
+a nested category), and `modules.py`/`check_wiki.py` hardcoded it again.
+Now each shim passes its own path (`shimFile`) and the collector takes the
+filename from it; the scripts find shims by their import of
+`_lib/category-collector.nix`. The walk also skips `_`-prefixed entries,
+matching import-tree: helpers like `VMs/_lib/libvirt-vm.nix` used to be
+collected as names (`libvirt-vm`) and dropped only because no module
+declared them. `modules.py` gained `names` and `shims` checks, with fixture
+tests (`just modules-test`). Verified: every configuration's fingerprint,
+`drvPath` included, byte-identical before and after; the renamed-shim and
+`_`-skip paths exercised directly against a throwaway tree.
 
 ## Related reading
 
