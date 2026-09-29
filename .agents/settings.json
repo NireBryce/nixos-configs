@@ -1,9 +1,6 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(HM=/nix/store/2wcgpwi76kxfh27vghs1wnfp5ycfwcqs-source; echo \"=== zoxide bash init ordering ===\"; grep -n -B6 'zoxide init bash' $HM/modules/programs/zoxide.nix | head -14)",
-      "Read(//nix/store/2wcgpwi76kxfh27vghs1wnfp5ycfwcqs-source/modules/programs/**)"
-    ]
+    "allow": []
   },
   "hooks": {
     "PreToolUse": [
@@ -17,6 +14,19 @@
           {
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/git-guard-pretooluse.sh\" 2>/dev/null || true"
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/nix-untracked-guard-pretooluse.sh\" 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/impermanence-edit-guard-pretooluse.sh\" 2>/dev/null || true"
           }
         ]
       }

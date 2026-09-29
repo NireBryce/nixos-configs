@@ -6,7 +6,12 @@
 #
 # Runs the same steps in the same order, read from the `preflight` recipe
 # itself (`just --show preflight`), so a step added there is picked up
-# here with no edit. Like preflight, stops at the first failure and then
+# here with no edit. That read is verbatim -- `--show` does not apply
+# `{{...}}` substitutions, and these lines are eval'd as printed -- so a
+# preflight step must use literal paths (`@flake/scripts/x.sh`, like the
+# recurring-test step), or the eval dies with `{{: command not found`.
+# Found live, 2026-09-29, by this script failing exactly that way on a
+# `{{scripts}}` step. Like preflight, stops at the first failure and then
 # prints that step's last 30 lines. wiki-lint's REVIEW notes don't fail
 # it; they're counted on its line so they aren't silently lost.
 set -uo pipefail
@@ -24,6 +29,10 @@ for step in "${steps[@]}"; do
         notes=$(grep -c '^REVIEW' "$log")
         printf 'ok    %-44s %4ss%s\n' "$step" $((SECONDS - start)) \
             "$([[ $notes -gt 0 ]] && echo "  ($notes REVIEW notes)")"
+        # A step can print a warn-only NOTE (hooks-path-note.sh) that does
+        # not affect its exit code; without this it never survives the
+        # brief -- which is the tool the ship skill actually runs.
+        grep '^NOTE' "$log" | sed 's/^/      /' || true
     else
         printf 'FAIL  %s\n\n' "$step"
         tail -n 30 "$log"

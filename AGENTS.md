@@ -62,7 +62,9 @@ NixOS hosts import it and wipe `/root` on boot: `nire-durandal`,
 `nire-tenacity`.** `nire-cube` deliberately does not — plain persistent
 root, not LUKS+impermanence. Don't assume "every host wipes root" or "no host does" — check
 the specific host. Read `WARN-impermanence.nix` before changing anything
-near it.
+near it. A PreToolUse hook (`.agents/hooks/impermanence-edit-guard-pretooluse.sh`)
+warns when a file edit lands in that tree or a host hardware module — a
+signal to read this section first, not a block.
 
 Secrets are sops-nix (`flake/modules/general-config/system/secrets/`). `secrets.yaml`
 is encrypted and committed; that is deliberate, not a mistake to be "fixed".
@@ -198,7 +200,8 @@ restates one reads as a decision nobody made, so leave it out.
 
 **`git add` before `nix eval`.** Flakes in a git repo ignore untracked
 files, so a new module silently does not exist. `just modules`' untracked
-check is the mechanical backstop.
+check is the mechanical backstop; `.agents/hooks/nix-untracked-guard-pretooluse.sh`
+also warns at eval time, when the untracked file is about to matter.
 
 **Read upstream source rather than guessing at options.** It settled that
 `perSystem` has no `freeformType`, that `home.sessionPath` is `listOf str`,

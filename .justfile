@@ -145,12 +145,37 @@ install-hooks:
     git config core.hooksPath .githooks
     @echo "==> git will now run .githooks/pre-commit and .githooks/commit-msg"
 
+# Fixture tests for the guard hooks (.agents/hooks/ + .githooks/commit-msg):
+# synthetic stdin through each, asserting what trips and what passes, plus
+# `bash -n` over every hook and a wiring check against .agents/settings.json.
+# The guards are pattern-matchers gating safety prompts -- each has already
+# gone subtly wrong once in production (the 2>/dev/null sops miss, the jq
+# tostring newline bug) and a guard that stops matching protects nothing.
+# Fixture tests for the guard hooks; jq required, skips without it; in preflight and CI
+guards-test:
+    python3 {{scripts}}/test_guards.py
+
+# preflight's step list and check.yml's are one checklist kept twice by
+# hand; this is the mechanical form of the preflight comment "mirrors
+# check.yml's steps" and fails when the two sides drift. The test is
+# itself on both lists, so adding a check to one side without the other
+# fails here.
+# preflight and CI run the same check-set, or this fails; pure stdlib; in preflight and CI
+preflight-mirror-test:
+    python3 {{scripts}}/test_preflight_mirror.py
+
 # Short of the per-host forced toplevel eval, which still needs picking a host
 # wiki-lint and branches-test first: each fails in ~2s, where check spends
-# minutes. Mirrors check.yml's steps -- a CI step missing here is a failure an
-# agent only learns about from a red PR
+# minutes. Mirrors check.yml's steps -- held mechanically by
+# preflight-mirror-test now, but the cost of a miss is unchanged: a CI step
+# missing here is a failure an agent only learns about from a red PR
 # wiki-lint + tests + check + modules + lint in one shot -- the ship skill's step 0
 preflight:
+    # Warn-only, never fails (CI has no hooksPath); why it exists and why
+    # it is a script: flake/scripts/hooks-path-note.sh's own header.
+    # Literal path, not {{scripts}}: preflight-brief.sh evals these steps
+    # verbatim from `just --show`, which does not apply substitutions.
+    @flake/scripts/hooks-path-note.sh
     @just wiki-lint
     @just branches-test
     @just keybindings-test
@@ -158,6 +183,8 @@ preflight:
     @just modules-test
     @just pinned-packages-test
     @python3 .agents/scripts/test_recurring.py
+    @just guards-test
+    @just preflight-mirror-test
     @just check
     @just modules
     @just lint

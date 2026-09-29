@@ -40,6 +40,7 @@ Usage:
 
 import argparse
 import collections
+import os
 import pathlib
 import re
 
@@ -66,8 +67,20 @@ def is_sibling_pair(a, b):
 
 def doc_paths():
     yield ROOT / "AGENTS.md"
-    yield from sorted((ROOT / ".agents" / "skills").rglob("*.md"))
-    yield from sorted((ROOT / "wiki").rglob("*.md"))
+    # README.md is a symlink of 00-INDEX.md in wiki/, wiki/categories/, and
+    # wiki/homelab/, so rglob yields the same file twice under two names and
+    # every such pair reported as a full-file restatement -- the four largest
+    # "findings" in a default run were all symlink shadows (~7.5k words for
+    # wiki/ alone), burying the real overlaps underneath. Dedupe by realpath,
+    # keeping the sorted-first name; the symlink's content is not a second
+    # copy anyone would edit separately, so it has nothing to restate.
+    seen = set()
+    for p in sorted((ROOT / ".agents" / "skills").rglob("*.md")) + \
+             sorted((ROOT / "wiki").rglob("*.md")):
+        real = os.path.realpath(p)
+        if real not in seen:
+            seen.add(real)
+            yield p
 
 
 def normalize(path):
