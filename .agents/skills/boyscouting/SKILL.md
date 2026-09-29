@@ -7,83 +7,38 @@ description: How to leave code you're already touching a little better than you 
 
 ## Applies to
 
-You're editing a file for an actual task and notice something small and
-local you could fix in passing — a stale comment, a dead import, a
-misnamed variable, a duplicated three-liner, a missing `.gitignore` entry
-next to code you're already changing. Not: a defect worth its own tracking
-(that's `propose-issue`), a stale factual claim in `wiki/`/`AGENTS.md`
-(`wiki-sync`), or a deliberate broad tidy-up pass (`trim-docs`, or just say
-what you're doing and do it as the actual task).
+Editing a file for a real task and noticing something small and local to fix in passing — stale comment, dead import, misnamed variable, duplicated three-liner, missing `.gitignore` entry next to code you're changing. Not: a defect worth tracking (`propose-issue`), a stale factual claim in `wiki/`/`AGENTS.md` (`wiki-sync`), or a deliberate broad tidy-up (`trim-docs`, or state it and make it the actual task).
 
 ## The rule
 
-**Leave the code better than you found it — the campsite rule — but only
-the ground you're already standing on.** The scope is "touched by this
-diff or immediately adjacent to it," not "anything in this repo I noticed
-is imperfect." A boyscouting fix rides in the same commit as the task that
-motivated it, described honestly in the commit message as incidental
-rather than folded in silently.
+Campsite rule, but only the ground you're standing on: scope is "touched by this diff or immediately adjacent," not "anything imperfect I noticed." The fix rides in the same commit as the motivating task, labeled incidental in the commit message, not folded in silently.
 
 ## What qualifies
 
-- Small, obviously correct, and reviewable in seconds alongside the real
-  change — a typo, an unused variable, a comment that describes code three
-  edits ago, a formatting inconsistency in a block you already rewrote.
-- Confined to a file (or a couple of adjacent lines) you're editing for the
-  actual task anyway. If you'd have to open a file you otherwise wouldn't,
-  it's not boyscouting anymore — it's a separate task.
-- Doesn't change behavior, an interface, or anything another module
-  depends on. If you're not sure it's behavior-neutral, it needs the same
-  verification as the main change, which usually means it isn't a quick
-  tidy — see "bugs here serialize" in `AGENTS.md`: a small nearby edit can
-  still combine badly with something else.
+- Small, obviously correct, reviewable in seconds beside the real change (typo, unused variable, comment describing code three edits ago, formatting inconsistency in a block you already rewrote).
+- Confined to a file (or adjacent lines) you're editing anyway. Needing to open a file you otherwise wouldn't makes it a separate task.
+- Doesn't change behavior, an interface, or anything another module depends on. If not sure it's behavior-neutral, it needs the main change's verification, so it isn't a quick tidy ("bugs here serialize", `AGENTS.md`).
 
 ## What doesn't
 
-- **A real bug**, even a tiny one, once it has a failure scenario — that's
-  `propose-issue`, not a drive-by fix, unless the user is right there and says
-  fix it now.
-- **A stale wiki/AGENTS.md claim** your change makes true or false —
-  that's `wiki-sync`'s job specifically, in the same change, but follow
-  that skill's steps rather than freelancing the wording.
-- **Renaming or restructuring** something just because you'd have written
-  it differently — no failure scenario, no incidental fix, just opinion;
-  skip it or mention it and move on.
-- **Anything that touches a file you weren't already going to touch.**
-  That's scope creep wearing boyscouting's name — a separate task (or
-  `propose-issue` if it's a bug, or a mention in your reply if it's not).
-- **A module-style-guide violation found while merely reading**, not
-  editing, the file — mention it, don't fix it uninvited.
+- **A real bug**, even tiny, once it has a failure scenario: `propose-issue`, unless the user is present and says fix it now.
+- **A stale wiki/AGENTS.md claim** your change causes: `wiki-sync`, in the same change, following its steps.
+- **Renaming/restructuring** because you'd have written it differently: opinion; skip or mention.
+- **Any file you weren't already going to touch**: scope creep; separate task, `propose-issue` if a bug, else a mention in your reply.
+- **A module-style-guide violation found while only reading** the file: mention, don't fix.
 
-## Why the boundary matters here
+## Why the boundary
 
-This repo is homelab-scale and reviewed by one person (`AGENTS.md`:
-"Homelab, not production"). A diff that quietly grew past its stated
-purpose is harder for the user to review, not easier — a "fix the sops path"
-PR that also silently reformats an unrelated module hides the actual
-change inside noise. Small and honestly-labeled is what keeps this useful
-instead of becoming the thing `ship`'s single-purpose-branch discipline
-exists to prevent.
+Homelab-scale, one reviewer (`AGENTS.md`: "Homelab, not production"). A diff that grew past its purpose is harder to review: a "fix the sops path" PR that also reformats an unrelated module hides the change in noise. Small and labeled is what stays consistent with `ship`'s single-purpose-branch discipline.
 
 ## Steps
 
-1. Notice something small while editing a file you're already changing.
-2. Ask "does fixing this need a file I wasn't already opening, or change
-   behavior?" If yes to either, stop — it's not boyscouting; use
-   `propose-issue`, `wiki-sync`, or a plain mention instead.
+1. Notice something small in a file you're already changing.
+2. Needs a file you weren't opening, or changes behavior? Stop: use `propose-issue`, `wiki-sync`, or a plain mention.
 3. Make the fix, minimal and local.
-4. Say so plainly when you report the change — "also fixed an unused
-   import in the same file" — rather than letting it pass silently inside
-   a diff described as doing only the main task. The commit message gets
-   this too: a short trailing clause, not folded into the main summary
-   line.
-5. If the cleanup is real but bigger than a drive-by (more than a few
-   lines, or a second file), stop and propose it as its own thing instead
-   of doing it anyway.
+4. Say so when reporting ("also fixed an unused import in the same file") and in the commit message as a short trailing clause, not in the main summary line.
+5. Real but bigger than a drive-by (more than a few lines, or a second file): propose it separately.
 
 ## See also
 
-- `propose-issue` — for anything you noticed but didn't fix.
-- `wiki-sync` — for docs that went stale because of your change.
-- `trim-docs` — for a deliberate, scoped conciseness pass, not an
-  incidental one.
+`propose-issue` (noticed, not fixed), `wiki-sync` (docs staled by your change), `trim-docs` (deliberate scoped conciseness pass).

@@ -8,85 +8,61 @@ description: How to create, rename, or wire a flake-parts module in this repo.
 ## Applies to
 
 A file under `flake/modules/` declaring `flake.modules.<class>.<name>`. Use
-before adding a new `.nix` file under `flake/modules/`, renaming an existing
-one, editing a `dirsAsCategory.nix`, or debugging why a module doesn't seem
-to be applying.
+before adding a new `.nix` file there, renaming one, editing a
+`dirsAsCategory.nix`, or debugging a module that doesn't seem to apply.
 
-Background: every `.nix` file under `flake/modules/` is a flake-parts module
-— its top level is `{ flake.modules.<class>.<name> = …; }`, never a bare
-NixOS or Home Manager module. Category membership is derived from directory
-(`flake/doc/dirsAsCategory.md`), and `flake-parts.flakeModules.modules`
-declares the option they all write into. All of the following have actually
-happened in this repo.
+Every `.nix` under `flake/modules/` is a flake-parts module: top level
+`{ flake.modules.<class>.<name> = …; }`, never a bare NixOS/HM module.
+Category membership comes from directory (`flake/doc/dirsAsCategory.md`).
+Every trap below has happened here.
 
-## The scaffolder does the mechanical part
+## Scaffolder
 
 `just add-module <class> <category>/<subdir>/<name> ["one-line description"]`
-creates the file where the collector will actually find it, emits this file's
-header boilerplate (`wiki/module-style-guide.md` formatting), `git add`s it —
-flakes ignore untracked files — and runs the collisions/orphans/untracked
-checks on the spot (`flake/scripts/modules.py add`; #293). It refuses the
-placements that produce no error: outside every category tree, and any
-name that would silently merge (same
-class+name, or a category name). What it cannot decide is what the module
-should *say* — the rest of this skill still applies.
+creates the file where the collector finds it, writes the header
+boilerplate (`wiki/module-style-guide.md` formatting), `git add`s it (flakes
+ignore untracked files), and runs collisions/orphans/untracked checks
+(`flake/scripts/modules.py add`; #293). It refuses silent-failure
+placements: outside every category tree, and names that would merge (same
+class+name, or a category name). It cannot decide what the module *says*.
 
 ## `flake.modules` cannot live inside `perSystem`
 
-**`perSystem` itself is fine and is used** — `checks.nix` is built on it, and
-it is core flake-parts, not a den concept.
-
-What does not work is putting `flake.modules` inside it. `perSystem` is
-evaluated once per system and its outputs are transposed to
-`flake.<output>.<system>.*`. `flake.modules.<class>.<name>` has no `<system>`
-axis: it is one system-independent definition declared at the top level as
+`perSystem` itself is fine (`checks.nix` uses it). But it is evaluated per
+system and transposed to `flake.<output>.<system>.*`;
+`flake.modules.<class>.<name>` has no `<system>` axis — it is a top-level
 `lazyAttrsOf (lazyAttrsOf deferredModule)` (`flake-parts/extras/modules.nix:33`).
-There is no `freeformType` on `perSystem` to let it through — the only one in
-flake-parts is on the top-level `flake` option. This is what 151 files got
-wrong during the original port.
+`perSystem` has no `freeformType` (the only one is on top-level `flake`).
+151 files got this wrong in the original port.
 
 ## A module's name is its filename
 
-`moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file)` in every
-module, so **renaming a file renames the attribute it declares.**
+`moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file)`, so
+**renaming a file renames the attribute.** `dirsAsCategory` also derives
+members from filenames, so membership survives a rename; literal-name
+references (host imports, other modules' `imports`) break loudly.
 
-That is usually harmless, because `dirsAsCategory` also derives its member
-list from filenames — the two move together and category membership
-survives a rename. What does not survive is anything referring to the module
-by literal name: a host config importing it, or another module's `imports`.
-Those break loudly, which is the good case.
-
-The bad case is hardcoding a name that then disagrees with the filename. The
-category looks up members by filename stem and filters with `? ${n}`, so a
-module whose declared name no longer matches its file is **silently
-dropped** — valid, evaluated, and absent. Keep declared names derived, or
-keep them in sync deliberately and say so in the file.
+Bad case: a hardcoded name that disagrees with the filename. The category
+looks up members by filename stem and filters with `? ${n}`, so the module
+is **silently dropped** — valid, evaluated, absent. Keep declared names
+derived, or in sync deliberately with a comment.
 
 ## Hyphens are legal in Nix identifiers
 
-`kde-base` is **one** attribute name, not `kde` minus `base`. A Nix
-identifier is `[a-zA-Z_][a-zA-Z0-9_'-]*`, so `a-b` is a single token and
-subtraction needs spaces around the operator. Two consequences here:
+`kde-base` is one attribute (`[a-zA-Z_][a-zA-Z0-9_'-]*`); subtraction needs
+spaces. So `with config.flake.modules.nixos; [ kde-desktop ]` works bare.
+**Any regex over this tree matching module names with `\w+` is wrong**:
+`modules.py` read `config.flake.modules.nixos.kde-base` as `kde` and
+reported `kde-base` an orphan. It uses `[\w-]+` now.
 
-- `with config.flake.modules.nixos; [ kde-desktop ]` resolves the whole
-  hyphenated name, which is why a host config can list it bare.
-- **Any regex over this tree that matches module names with `\w+` is
-  wrong.** `modules.py` did, and read `config.flake.modules.nixos.kde-base`
-  as a reference to `kde` — which left `kde-base` reported as an orphan the
-  same hour it was created. It matches `[\w-]+` now.
+## Names share one namespace per class; collisions merge
 
-## Names share one namespace per class, and collisions merge
+Same-named modules **merge**, not conflict. `boot` was both the
+`nire/boot/` category and `nireHost/durandal/hardware/boot.nix`: importing
+the category applied durandal's bootloader, and importing the bootloader
+applied an impermanence rollback. Run `just modules` after adding/renaming.
 
-Two modules with the same name do not conflict; they **merge**. `boot` was
-both the `nire/boot/` category and `nireHost/durandal/hardware/boot.nix`, so
-importing the category also applied durandal's bootloader — and importing
-the bootloader applied an impermanence rollback. `just modules` checks for
-this; run it after adding or renaming anything.
-
-## There are two different `config`s, and they shadow
-
-Every file has an outer flake-parts scope and an inner NixOS/HM module. Both
-call their argument `config`, and they are not the same thing:
+## Two `config`s, and they shadow
 
 ```nix
 { config, ... }:                       # flake-parts: config.flake.modules.*
@@ -99,29 +75,26 @@ call their argument `config`, and they are not the same thing:
 }
 ```
 
-A module written as a bare attrset has **no inner scope**, so `config` in it
-still means the flake-parts one, and adding an argument list silently
-repoints every existing `config`. Bind what you need in a `let` above the
-declaration — `enable-home-manager.nix` does exactly this and says why.
+A bare-attrset module has **no inner scope**, so `config` is the
+flake-parts one; adding an argument list silently repoints every `config`.
+Bind what you need in a `let` above the declaration
+(`enable-home-manager.nix` does, and says why).
 
 ## Module classes are not validated
 
-flake-parts stamps the outer attribute name on as `_class` verbatim and
-checks nothing, so a wrong class declares fine and fails much later at the
-import site. It sets `_file` to `<flake>#modules.<class>.<name>`, so the
-error names its own declaration site. Only `nixos`, `homeManager`, `flake`
-and `generic` are meaningful; `darwin` works because nix-darwin sets that
-`_class` itself.
-
-Related: a module can declare a *valid* class and still be wrong. `jq` and
-`bitwarden` declared `flake.modules.nixos` bodies full of `home.packages`.
+flake-parts stamps the outer attribute name as `_class` verbatim; a wrong
+class declares fine and fails at the import site (`_file` =
+`<flake>#modules.<class>.<name>` names the declaration). Meaningful classes:
+`nixos`, `homeManager`, `flake`, `generic`; `darwin` works because
+nix-darwin sets `_class` itself. A *valid* class can still be wrong: `jq`
+and `bitwarden` declared `flake.modules.nixos` bodies full of `home.packages`.
 
 ## Raw NixOS modules in the import-tree path
 
-Dropping fresh `nixos-generate-config` output into `modules/` makes
-flake-parts resolve its `modulesPath` through its own `_module.args`, and
-evaluation dies with `infinite recursion encountered` — naming
-`modulesPath`, which is not the cause. Wrap it in the same commit:
+Raw `nixos-generate-config` output dropped into `modules/` dies with
+`infinite recursion encountered` naming `modulesPath` (not the cause;
+flake-parts resolves it via its own `_module.args`). Wrap it in the same
+commit:
 
 ```nix
 { ... }:
@@ -132,25 +105,17 @@ evaluation dies with `infinite recursion encountered` — naming
 ;}
 ```
 
-`nireHost/llm-sandbox/llm-sandbox-configuration.nix` (removed 2026-08-28,
-still in git history — see `wiki/history.md`) was a worked example of both
-this trap and the `config`-shadowing one: it imported upstream's
-`virtualisation/disk-image.nix` via `modulesPath` from the *inner* module's
-args, and bound `nixCategory = config.flake.modules.nixos.nix` in an outer
-`let` rather than adding `config` to the inner module's argument list.
+Worked example of this and the `config`-shadowing trap:
+`nireHost/llm-sandbox/llm-sandbox-configuration.nix` (removed 2026-08-28;
+`wiki/history.md`) imported `virtualisation/disk-image.nix` via `modulesPath`
+from the *inner* module's args and bound `nixCategory =
+config.flake.modules.nixos.nix` in an outer `let`.
 
-## Keep the wiki in sync
+## Wiki sync
 
-If this change adds, removes, or renames a module in a category with an
-article under `wiki/categories/` — or edits a `dirsAsCategory.nix` — update
-that article and `wiki/categories/00-INDEX.md`'s table in the same change.
-The wiki is only useful if corrected by whoever's change made it stale.
+Adding/removing/renaming a module in a category with an article under
+`wiki/categories/`, or editing a `dirsAsCategory.nix`: update that article
+and `wiki/categories/00-INDEX.md`'s table in the same change.
 
-## Further reading
-
-- `flake/doc/dirsAsCategory.md` — the category mechanism itself, and the
-  trailhead to per-module opt-in if that's ever wanted.
-- `wiki/module-style-guide.md` — formatting conventions (aligned `=`
-  columns are deliberate; `nix fmt` is deliberately not wired up).
-- `wiki/categories/00-INDEX.md` — the category reference this skill's changes
-  should keep current.
+Further reading: `flake/doc/dirsAsCategory.md`, `wiki/module-style-guide.md`
+(aligned `=` columns deliberate; `nix fmt` deliberately not wired up).

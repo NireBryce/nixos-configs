@@ -7,108 +7,84 @@ description: How to review a change in this repo — the repo-specific checks an
 
 ## Applies to
 
-You're asked to review a PR, a branch, or a colleague's (or your own
-earlier) commit in this repo — or you're about to say "done" about your own
-change and want the same gate a reviewer would apply. Supplements, not
-replaces, a generic code-review pass: it catches the failure modes this
-repo's own history has already hit once, which are exactly the ones a
-general nix/git reviewer won't know to look for (issue #223, 2026-09-09).
-
-Does not fire for writing a module in the first place — the trap-specific
-skills below own their tasks end to end; this file is their review-side
-compression, not a duplicate.
+Asked to review a PR, branch, or commit (yours or another's) — or about to
+say "done" on your own change and want the reviewer's gate. Supplements a
+generic code-review pass with failure modes this repo's history already hit
+(issue #223, 2026-09-09). Not for writing a module — the trap skills below
+own that; this file is their review-side compression.
 
 ## Run first — the mechanical checks
 
-A diff read is never enough here; bugs serialize. Run, in this order:
+A diff read is never enough (bugs serialize). In order:
 
-1. `just modules` — catches two shapes a diff alone hides: a module renamed
-   out of agreement with its category (silently collected by *nothing*), and
-   two modules declaring the same `flake.modules.<class>.<name>` (they
-   **merge**, they don't conflict). Also nags untracked files.
-2. `git status --short` — **`git add` before `nix eval`**: a new file that
-   is untracked does not exist to the flake. An eval that "passes" may have
-   never seen the change.
+1. `just modules` — catches a module renamed out of agreement with its
+   category (collected by *nothing*), and two modules declaring the same
+   `flake.modules.<class>.<name>` (they **merge**). Nags untracked files.
+2. `git status --short` — **`git add` before `nix eval`**: an untracked new
+   file doesn't exist to the flake; a passing eval may never have seen it.
 3. `just preflight` — wiki-lint + check + modules + lint (statix/deadnix
-   ratchet) + the script fixture tests; the same steps CI runs.
-4. A **forced toplevel** per host the change could touch:
+   ratchet) + script fixture tests; what CI runs.
+4. **Forced toplevel** per host the change could touch:
    `nix eval --raw '.#nixosConfigurations.<host>.config.system.build.toplevel.drvPath'`
-   (darwin:
-   `.#darwinConfigurations.nire-lysithea.…`). A cheap attribute evaluating
-   proves nothing — `networking.hostName` resolved happily once while four
-   separate things were broken.
+   (darwin: `.#darwinConfigurations.nire-lysithea.…`). A cheap attribute
+   proves nothing (`networking.hostName` resolved while four things were broken).
 5. `just wiki-lint` — if the change touches `wiki/`, `AGENTS.md`, recipes,
-   skills, host lists, or counts, this is the only thing reading those
-   claims against the tree.
-6. If a drvPath moved: `just diff <ref>` — a permuted
-   `environment.systemPackages` is not a value change, and a same-looking
-   hash can hide dead code. (Known gap #242: `diff` fails on cube — the
-   fingerprint assumes impermanence's `/persist`; fall back to
-   `nix eval --json` of the specific options on both sides.)
+   skills, host lists, or counts; the only reader of those claims.
+6. drvPath moved: `just diff <ref>` — permuted `environment.systemPackages`
+   is not a value change; a same-looking hash can hide dead code. (Known gap
+   #242: `diff` fails on cube — fingerprint assumes impermanence's
+   `/persist`; fall back to `nix eval --json` of the specific options on both
+   sides.)
 
-## Read for — the traps a diff can't show
+## Read for — traps a diff can't show
 
-Per changed file, the question that catches each:
+- **Filed in the right directory?** Category = directory; a module outside
+  every category tree is collected by nothing, no error (`new-flake-module`).
+- **Two files writing the "same" file?** `home.file.<n>.text` and
+  `home.sessionPath` **concatenate** across modules — silent doubling.
+  Reading a generated dotfile back gives false negatives; eval the
+  attribute (`home-manager-dotfiles`).
+- **`${…}` inside a `''` string?** Meant as shell text/comment → must be
+  `''${…}`; else Nix interpolation, usually an eval error (or silent).
+- **`flake.modules` inside `perSystem`?** No `<system>` axis; can't work.
+- **Touches impermanence, initrd, `fileSystems`, boot?** Read
+  `impermanence-initrd` first (shell mount views mislead; use
+  `/proc/1/mountinfo`, `/dev/disk/by-uuid/`). Check `hosts.nix` for which
+  host wipes `/root`; not all do.
+- **Platform gating?** Support is *derived* off `meta.platforms`; a
+  hand-written `lib.mkIf (!pkgs.stdenv.isDarwin)` is a finding. Homebrew
+  overlap is never automatic: `just available --duplicates`
+  (`package-platform-support`).
+- **Existing `programs.*` integration missed?** Flag hand-rolled dotfiles.
+- **Anything that can print a secret?** Bare `sops -d`, `journalctl`/`ps`
+  near a unit with a secret on its command line, a credential outside
+  `secrets.yaml` (`secrets-hygiene`; flagged hit → `triage-flagged-secrets`
+  before rotation talk).
 
-- **Is it filed in the right directory?** Category membership comes from
-  the directory; a module outside every category tree is collected by
-  nothing, no error. (`new-flake-module` skill has the full mechanism.)
-- **Do two files write the "same" file?** `home.file.<n>.text` and
-  `home.sessionPath` **concatenate** across modules — a second writer
-  doubles the output silently. Reading a generated dotfile back is full of
-  false negatives; eval the attribute instead. (`home-manager-dotfiles`.)
-- **Any `${…}` inside a `''` string?** If it's meant as shell text or a
-  comment, it must be `''${…}` — unescaped, it's Nix interpolation and
-  usually an eval error (or worse, a silent one).
-- **Does anything put `flake.modules` inside `perSystem`?** No `<system>`
-  axis there; it cannot work.
-- **Does the change touch impermanence, initrd, `fileSystems`, or boot?**
-  Slow down and read the `impermanence-initrd` skill before judging — the
-  shell's view of mounts can be wrong while looking right
-  (`/proc/1/mountinfo`, `/dev/disk/by-uuid/` instead). Check which host
-  wipes `/root` in `hosts.nix` before reasoning about impact; not all do.
-- **Platform gating done right?** Platform support is *derived* (off
-  `meta.platforms`); a hand-written `lib.mkIf (!pkgs.stdenv.isDarwin)`
-  restating it is a finding. The other half — Homebrew overlap — is never
-  automatic; `just available --duplicates`. (`package-platform-support`.)
-- **Was an existing `programs.*` integration missed?** Check before a
-  hand-rolled dotfile/bundle survives review.
-- **Does the diff add or run anything that can print a secret?** A bare
-  `sops -d`, `journalctl`/`ps` near a unit that takes a secret on its
-  command line, a credential landing anywhere outside `secrets.yaml`.
-  (`secrets-hygiene`; if a flag fires, `triage-flagged-secrets` settles
-  fresh-vs-known before any rotation talk.)
+## Conventions worth flagging
 
-## Conventions worth flagging as findings
-
-- **Provenance trailer** on agent-authored commits: `Co-Authored-By: <agent>`,
-  agent name only, no model, no email. Conventional-Commits prefix on the
-  first line only.
-- **A bug recorded in a comment stays in the file** — a diff deleting a
-  "why" comment needs a reason, and a stranded one should move to a
-  `history` heading, not vanish.
-- **Renamed away an old name?** The declaration should say what it was,
-  or it's ungreppable.
-- **Dated "as of" claims in docs/comments**: a date is when someone last
-  checked, not proof it's still true (`fact-hygiene`). Present-tense
-  claims about other files' contents are live pointers — will they survive
-  the change being reviewed?
-- **Wiki touched?** `wiki-sync` is part of the same change, not a follow-up.
-- **Filing bugs upstream** (nixpkgs, ble.sh, …): never in this repo's name
-  without the user saying so explicitly. Even filings *here* can ping upstream
-  via `owner/repo#123` autolinking — grep the draft.
+- **Trailer** on agent commits: `Co-Authored-By: <agent>`, name only, no
+  model/email. Conventional-Commits prefix on the first line only.
+- **A bug recorded in a comment stays in the file** — deleting a "why"
+  comment needs a reason; a stranded one moves to a `history` heading.
+- **Renamed-away name**: the declaration should say what it was.
+- **Dated "as of" claims**: a date is when someone last checked, not proof
+  (`fact-hygiene`). Present-tense claims about other files are live pointers
+  — will they survive this change?
+- **Wiki touched?** `wiki-sync` belongs in the same change.
+- **Upstream filings** (nixpkgs, ble.sh, …): never without the user saying
+  so explicitly; even filings *here* can ping upstream via `owner/repo#123`
+  autolinking — grep the draft.
 
 ## Saying the outcome
 
-Treat an undated "verified" as *evaluates* — say which it was: in the tree,
-or switched and checked live (`investigate-bug`'s step 4). "It works" from
-an eval is the exact overclaim this repo keeps teaching not to make.
+An undated "verified" means *evaluates*. Say which: in the tree, or
+switched and checked live (`investigate-bug` step 4). "It works" from an
+eval is the overclaim this repo keeps teaching against.
 
 ## See also
 
-- The five trap skills (`new-flake-module`, `home-manager-dotfiles`,
-  `impermanence-initrd`, `package-platform-support`,
-  `secrets-hygiene`) — the worked examples this checklist compresses.
-- `ship` skill — the pre-PR gate this review complements; its step 0 is
-  the "Run first" list above, from the author's side.
-- `wiki/lessons-learned.md` — every § above earned its place the hard way.
+- Trap skills: `new-flake-module`, `home-manager-dotfiles`,
+  `impermanence-initrd`, `package-platform-support`, `secrets-hygiene`.
+- `ship` — pre-PR gate; its step 0 is "Run first" from the author's side.
+- `wiki/lessons-learned.md` — every § earned the hard way.

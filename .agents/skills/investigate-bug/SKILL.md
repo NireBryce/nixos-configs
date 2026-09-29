@@ -7,56 +7,38 @@ description: How to check whether a reported bug or symptom is already a known, 
 
 ## Applies to
 
-Someone reports an error, a crash, or unexpected/"weird" behavior in this
-repo or on one of its hosts, and you're about to start reproducing or
-diagnosing it. Run this **before** that — not after you've already found
-something and are deciding whether to write it up (that's the
-`propose-issue` skill, the filing side of this same problem; this is the
-checking side). Doesn't apply when the user already points you at the
-specific cause or file — there's nothing to check for in that case.
+Someone reports an error, crash, or "weird" behavior in this repo or on a
+host and you're about to reproduce/diagnose it. Run **before** that. Not for
+deciding whether to write up something you already found (`propose-issue`,
+the filing side). Not when the user already points at the specific cause or
+file.
 
-## Why this exists
+## Why
 
-A ble.sh/carapace completion bug (2026-08-24) got fully re-derived from a
-live pty session — hours — before anyone checked whether it was already
-known. It was: diagnosed and written up in
-`wiki/categories/shell-config/blesh.md` on 2026-08-22, two days earlier,
-one link from `wiki/00-INDEX.md`'s index. Full account: §39,
-[issue #72](https://github.com/NireBryce/nixos-configs/issues/72). Prose
-saying "check first" demonstrably wasn't enough to make the check happen —
-which is why this is a triggered skill rather than another line in
-`AGENTS.md`.
+2026-08-24: a ble.sh/carapace completion bug was re-derived from a live pty
+session (hours) though already written up 2026-08-22 in
+`wiki/categories/shell-config/blesh.md`, one link from `wiki/00-INDEX.md`.
+§39, [issue #72](https://github.com/NireBryce/nixos-configs/issues/72).
+Prose saying "check first" didn't make the check happen; hence a triggered
+skill.
 
 ## Steps
 
-1. **Before reproducing anything**, run `just threads "<keywords>"` with a
-   couple of guesses from the report's own wording (symptom text, error
-   message, command name). It checks this repo's GitHub issues
-   (`gh issue list --search`) and greps `wiki/` (which includes
-   `wiki/lessons-learned.md`) and `_loose-ends/bugs-pending-submission/`
-   in one shot — see `flake/scripts/threads.sh` for exactly what it covers.
-2. **A hit means read it fully** — the issue and/or the linked wiki
-   deep-dive — before doing anything else. Pick up from where it left off
-   (an untested fix, an open question, a "not yet confirmed" status) rather
-   than re-deriving from zero. If it's stale or wrong, fix *that* rather
-   than starting a parallel investigation.
-3. **No hit**: proceed as normal — reproduce for real rather than reasoning
-   from source (`AGENTS.md`'s "Bugs here serialize": evaluating a cheap
-   attribute proves nothing). Once something is actually diagnosed, don't
-   leave it only in your
-   reply: follow `propose-issue`'s flow to file or track it, and
-   `wiki-sync` for anything a wiki page should now say.
-4. **State fixed vs. verified precisely**, the same discipline the rest of
-   this repo holds itself to (`CLAUDE.md`: "treat an undated 'verified' as
-   *evaluates*"). A fix that hasn't been through a real `just switch` and a
-   live re-check is *in the tree*, not *fixed* — say which one, in the
-   issue and the wiki page both, not just in the conversation.
+1. **Before reproducing**, `just threads "<keywords>"` with a couple of
+   guesses from the report's wording (symptom, error text, command). It
+   searches GitHub issues (`gh issue list --search`) and greps `wiki/`
+   (incl. `lessons-learned.md`) and `_loose-ends/bugs-pending-submission/`;
+   see `flake/scripts/threads.sh`.
+2. **Hit: read it fully** (issue and/or linked wiki deep-dive) and resume
+   from where it left off (untested fix, open question, "not yet
+   confirmed"). If stale or wrong, fix *that*; no parallel investigation.
+3. **No hit**: reproduce for real, not from source (`AGENTS.md` "Bugs here
+   serialize"). Once diagnosed, don't leave it only in your reply: file or
+   track via `propose-issue`, update wiki pages via `wiki-sync`.
+4. **State fixed vs. verified precisely** (`CLAUDE.md`: treat an undated
+   "verified" as *evaluates*). Without a real `just switch` and live
+   re-check a fix is *in the tree*, not *fixed*; say which, in the issue and
+   wiki page both.
 
-## See also
-
-- `propose-issue` skill — the filing side of this same problem, for a bug
-  you noticed rather than one that was reported to you.
-- `wiki-sync` skill — keeping the linked wiki page current once you've
-  acted, so the next check in step 1 finds the real state.
-- `flake/scripts/threads.sh` / `just threads` — the actual command step 1
-  runs.
+See also: `propose-issue`, `wiki-sync`, `just threads` /
+`flake/scripts/threads.sh`.

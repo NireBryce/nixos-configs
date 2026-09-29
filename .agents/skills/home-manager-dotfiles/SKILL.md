@@ -7,55 +7,30 @@ description: How to edit Home Manager shell/dotfile modules in this repo, and re
 
 ## Applies to
 
-Home Manager shell/dotfile modules in this repo — zsh, bash, starship, prompt
-config, anything under `home.file` or shell `initContent` — and reading a
-generated dotfile back to check it. Use before editing shell rc content,
-`home.file`, `home.sessionPath`, or when a generated dotfile looks wrong or
-empty.
+Home Manager shell/dotfile modules (zsh, bash, starship, prompt config, anything under `home.file` or shell `initContent`) and reading a generated dotfile back. Use before editing shell rc content, `home.file`, `home.sessionPath`, or when a generated dotfile looks wrong or empty.
 
-Home Manager is NixOS-integrated in this repo (`home-manager.users.elly` set
-from the NixOS side, no separate home switch — see `CLAUDE.md`). All of the
-following have actually happened here.
+HM is NixOS-integrated (`home-manager.users.elly` from the NixOS side, no separate home switch; `CLAUDE.md`). Integration facts:
 
-Three facts about that integration worth knowing before editing anything
-under it: HM **rejects** `nixpkgs.*` under `useGlobalPkgs` — errors, not
-ignores (`allowUnfree` comes from the system side,
-`basic-nix-settings.nix`); `home.profileDirectory` is
-`/etc/profiles/per-user/elly`, not `~/.nix-profile`; and activation runs as
-a systemd unit, so its `PATH` is only coreutils/findutils/gnugrep/gnused/systemd.
+- HM **rejects** `nixpkgs.*` under `useGlobalPkgs` (error, not ignored); `allowUnfree` comes from the system side, `basic-nix-settings.nix`.
+- `home.profileDirectory` is `/etc/profiles/per-user/elly`, not `~/.nix-profile`.
+- Activation runs as a systemd unit; its `PATH` is only coreutils/findutils/gnugrep/gnused/systemd.
 
 ## `home.file.<n>.text` concatenates; it does not override
 
-The type is `types.lines`, so two modules declaring the same file both
-contribute. `.blerc` was declared by `bash.nix` and `blesh.nix` with
-identical content, which would have run every `ble-import` twice. Give each
-generated file one owning module. `home.sessionPath` is `listOf str` and
-behaves the same way — `shell-env.nix` and `elly-session.nix` doubled every
-PATH entry between them.
+Type is `types.lines`: two modules declaring one file both contribute. `.blerc` was declared by `bash.nix` and `blesh.nix` with identical content (every `ble-import` would run twice). One owning module per generated file. `home.sessionPath` (`listOf str`) behaves the same: `shell-env.nix` and `elly-session.nix` doubled every PATH entry.
 
-## Reading a generated dotfile is full of false negatives
+## Reading a generated dotfile: false negatives
 
-Most shell bugs are invisible in the `.nix` and obvious in the output, but:
+- **Attribute names are inconsistent**: `".zshrc"`, `"./.zshrc"`, and full `/home/elly/...` all occur. A wrong name returns **empty, not an error**, indistinguishable from a real negative. Run `just dotfiles` first for actual names.
+- **Some entries have no `.text`**, only `.source` (`.bashrc`). Read the owning option instead (`programs.bash.initExtra`).
 
-- **The attribute name is inconsistent.** `".zshrc"` and `"./.zshrc"` and
-  full `/home/elly/...` paths all occur in this repo. A wrong name returns
-  **empty rather than erroring**, which reads exactly like a real negative.
-  Run `just dotfiles` first to get the actual attribute names.
-- **Some entries have no `.text` at all** and are built from `.source`.
-  `.bashrc` is one. Read the owning option instead — `programs.bash.initExtra`.
+Both hit minutes apart during the original port, by someone who had already written them down.
 
-Both of these were hit during the original port, minutes apart, by someone
-who had already written them down.
+## rc ordering is load-bearing
 
-## Order in generated shell rc files is load-bearing
+HM emits `initContent` `mkBefore`, then `mkOrder 550`, then `programs.zsh.plugins`, then unordered `initContent`. Anything that must run after a plugin can't sit at 550. Later definitions win: a hand-written `starship init bash` and a 1,659-line p10k config were both silently overridden, not erroring.
 
-Home Manager emits `initContent` `mkBefore`, then `mkOrder 550`, then
-`programs.zsh.plugins`, then unordered `initContent`. Anything that must run
-after a plugin cannot sit at 550. Later definitions win, which is how a
-hand-written `starship init bash` and a 1,659-line p10k config both turned
-out to be dead weight — silently overridden, not erroring.
-
-## Useful commands
+## Commands
 
 ```sh
 just dotfiles        # every generated dotfile's attribute name
