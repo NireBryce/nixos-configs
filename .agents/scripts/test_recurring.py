@@ -16,8 +16,11 @@ the fix (`-uadmin`, `for host in`, `sudo -u host`, `env -C /x/dir`,
 right, multi-line and heredoc commit messages included. Stdlib only; the
 command allowlist is pinned so results don't depend on the host's PATH.
 """
+import json
 import re
+import sqlite3
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -91,11 +94,18 @@ LEAKS = [
     ('for id in 1 2; do echo $id; done', ['id']),
     ('sudo -u host git status', ['host']),
     ('env -C /secret/dir git status', ['dir', 'secret']),
-    ('host() { echo hi; }; host', []),
+    ('host() { echo hi; }; host', ['host']),   # the call, too: a user-chosen name
     ('case "$x" in host) echo;; esac', ['host']),
     ('cat <<END-OF\nsecret body\nEND-OF', ['OF', 'secret', 'body']),
     (f"bash -c 'curl -u{USERPASS} x'", ['admin', 'hunter2']),
     ('echo $(git log)|head foo', ['foo']),
+    # from auditing the first real export (2026-09-29): prose in quoted
+    # bodies parsed as commands whenever a word was also a real program
+    ('gh issue comment 1 --body "a \"quoted\" word\n\nsketch (shape only) \\`id\\` done"',
+     ['shape', 'sketch', 'quoted', 'id']),
+    ('gh pr create --body "run `grep x` then (shape only)"', ['shape', 'grep x']),
+    ('for f in a; do n=$(awk -F\'"\' \'{print}\' $f | wc -w); echo "$(wc -w < $f) w $f"; done',
+     [' w ', 'awk -F']),
 ]
 
 SHAPES = [
@@ -159,6 +169,82 @@ class ShapeLeaks(unittest.TestCase):
         for cmd, want in PIPELINES:
             with self.subTest(cmd=cmd):
                 self.assertEqual(r.pipelines(cmd), want)
+
+
+
+class Export(unittest.TestCase):
+    """What leaves the machine: an export file. Same closed vocabulary as
+    the shapes, session ids hashed, nothing else."""
+
+    def rows(self):
+        return [(f'sess-{i % 3}', c) for i, c in enumerate(all_cases())]
+
+    def test_export_is_vocabulary_only(self):
+        doc = r.to_json(r.collect(self.rows(), 'claude'))
+        for h in doc['sessions']:
+            self.assertRegex(h, r'^[0-9a-f]{12}$')
+        for kind in ('chains', 'pipes'):
+            for key, hashes in doc[kind].items():
+                for tok in key.replace('\t', ' ').split():
+                    with self.subTest(kind=kind, token=tok):
+                        self.assertTrue(tok in VOCAB or FLAG_FORMS.match(tok),
+                                        f'{tok!r} would be exported')
+                self.assertTrue(set(hashes) <= set(doc['sessions']))
+        self.assertNotIn('sess-', json.dumps(doc))   # raw session ids stay home
+        for cmd, literals in LEAKS:    # each case alone: literals are per case
+            blob = json.dumps(r.to_json(r.collect([('s', cmd)], 'claude')))
+            for lit in literals:
+                with self.subTest(cmd=cmd, literal=lit):
+                    self.assertNotIn(lit, blob)
+
+    def test_json_roundtrip_and_merge(self):
+        a = r.collect(self.rows()[:10], 'claude')
+        b = r.collect(self.rows()[5:], 'claude')
+        merged = r.merge(r.from_json(json.loads(json.dumps(r.to_json(a)))), b)
+        whole = r.collect(self.rows(), 'claude')
+        self.assertEqual(r.to_json(merged)['chains'], r.to_json(whole)['chains'])
+        self.assertEqual(set(merged['sessions']), set(whole['sessions']))
+
+    def test_rank_counts_sessions_not_uses(self):
+        rows = [('s1', 'git fetch origin && git status -sb')] * 5 + \
+               [('s2', 'git fetch up && git status -sb')]
+        seq = r.rank(r.collect(rows, 'claude'), 1, 5, 4)['sequences']
+        self.assertEqual(seq, [{'sessions': 2,
+                                'chain': ['git fetch <word>', 'git status -sb']}])
+
+
+class SqliteReader(unittest.TestCase):
+    """OpenCode and zcode: `part` rows, tool bash or Bash, sessions
+    filtered to this repo by directory."""
+
+    def test_reads_bash_parts_in_this_repo_only(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / 'db.sqlite'
+            db = sqlite3.connect(path)
+            db.execute('create table session (id text, directory text)')
+            db.execute('create table part (id text, session_id text, data text)')
+            db.executemany('insert into session values (?, ?)', [
+                ('s1', '/home/u/nixos-configs'), ('s2', '/home/u/elsewhere')])
+            part = lambda tool, cmd: json.dumps(
+                {'type': 'tool', 'tool': tool, 'callID': 'c',
+                 'state': {'input': {'command': cmd}}})
+            db.executemany('insert into part values (?, ?, ?)', [
+                ('p1', 's1', part('bash', 'git status')),     # opencode
+                ('p2', 's1', part('Bash', 'ls')),             # zcode
+                ('p3', 's1', part('edit', 'not a command')),
+                ('p4', 's2', part('bash', 'other repo')),
+                ('p5', 's1', 'not json'),
+            ])
+            db.commit()
+            db.close()
+            self.assertEqual(list(r.sqlite_rows(path)),
+                             [('s1', 'git status'), ('s1', 'ls')])
+
+    def test_unreadable_db_yields_nothing(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / 'empty.sqlite'
+            sqlite3.connect(path).close()      # no tables
+            self.assertEqual(list(r.sqlite_rows(path)), [])
 
 
 if __name__ == '__main__':
