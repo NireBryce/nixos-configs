@@ -1,6 +1,6 @@
 {
   "name": "@z_ai/coding-helper",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.1",
   "description": "GLM Coding Plan Helper for managing multi coding tools",
   "main": "dist/index.js",
   "bin": {

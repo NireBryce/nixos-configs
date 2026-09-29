@@ -1,6 +1,6 @@
 # Fleet maintenance
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-28_
 
 The fleet's recurring upkeep in one place: the weekly flake.lock PR,
 deploying to a host and the verification habit around it, and store
@@ -71,6 +71,13 @@ branch), or open the PR by hand from `update_flake_lock_action` to
 
 By hand instead: `just update` — `nix flake update` for every input,
 then `just check`.
+
+A lock update never touches the few packages fetched straight from
+upstream with a version and hash written into their module. Those go
+stale silently, so `just pinned-packages` checks them against upstream and
+asks whether nixpkgs or llm-agents has started packaging them; skill
+[`pinned-packages`](../.agents/skills/pinned-packages/SKILL.md) is the
+procedure.
 
 ## Deploying, and the verification habit
 

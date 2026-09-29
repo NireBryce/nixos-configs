@@ -1,6 +1,6 @@
 # Fleet maintenance, for agents
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-28_
 
 Condensed from [maintenance.md](maintenance.md). Credentials →
 maintenance-schedule.md; backups → homelab/backup-runbook.md; one-time
@@ -26,6 +26,7 @@ restated here.
   Fix the cause, then re-run `workflow_dispatch` (reuses the branch), or
   open the PR by hand to `experimental`.
 - By hand: `just update`.
+- Hand-pinned packages don't move with the lock: skill `pinned-packages`.
 
 ## The runner VM
 

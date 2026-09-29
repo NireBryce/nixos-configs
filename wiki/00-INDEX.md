@@ -81,6 +81,7 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
 | add a new host, or format its disk for impermanence | [disk-formatting.md](disk-formatting.md), skill [`new-host-config`](../.agents/skills/new-host-config/SKILL.md) |
 | check what key/credential expiry is coming due | [maintenance-schedule.md](maintenance-schedule.md), skill [`maintenance-schedule`](../.agents/skills/maintenance-schedule/SKILL.md) |
 | run the fleet's periodic upkeep — lock PR, deploys, store hygiene | [maintenance.md](maintenance.md), [flake-lock.md](flake-lock.md) |
+| bump a package pinned by hand from upstream, or retire the pin once nixpkgs/llm-agents packages it | skill [`pinned-packages`](../.agents/skills/pinned-packages/SKILL.md) |
 | work out which name or IP answers for what (forward, reverse, `.local`, `svc:`) | [name-resolution.md](name-resolution.md) |
 
 ## Pages
