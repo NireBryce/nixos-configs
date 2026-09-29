@@ -67,8 +67,8 @@ before stating any count) and `wiki/hosts.md`'s table. First-boot history
 bare `just` for the full list with a one-line summary per recipe; that
 list, not a copy of it here, is the source of truth, since `.justfile`'s
 own comments are what `just` actually reads. `just preflight` (wiki-lint +
-check + modules + lint + the script tests -- every step CI runs) is the ship
-skill's step 0. `just
+branches-test + check + modules + lint + the script tests -- every step CI
+runs) is the ship skill's step 0. `just
 hm-collisions`, `just root-drift`, and `just home-drift` are read-only,
 and only meaningful on the hardware itself.
 
@@ -86,7 +86,7 @@ nix eval --raw '.#nixosConfigurations.nire-durandal.config.home-manager.users.el
 `elly` is literal on purpose: it reads an *evaluated* config, where the
 attribute name is already resolved.
 
-`build`/`boot`/`switch` go through `scripts/rebuild.sh` (picks `nh darwin`
+`build`/`boot`/`switch` go through `flake/scripts/rebuild.sh` (picks `nh darwin`
 or `nh os` off the flake). On any real host, `just build`/`switch` is a
 real test, not just evaluation. A NixOS host cannot be built from any other
 machine (no remote builder, no binfmt); `rebuild.sh` says so rather than
@@ -115,7 +115,8 @@ changing any `dirsAsCategory.nix`.
   2026-09-28; before that, files there were skipped). To keep a module out
   of a category, file it outside the category's tree.
 - **Entry points sit outside every category tree** — `modules/checks.nix`,
-  `host-config/hosts.nix`, `host-config/durandal-configuration.nix`, and
+  `modules/invariants.nix`, `host-config/hosts.nix` and the
+  `<host>-configuration.nix` files beside it, and
   `users-config/elly-home-manager.nix`; `just modules` relies on exactly this.
 
 Areas: `general-config/` (shared system, incl. `general-config/macos/` for
@@ -135,9 +136,9 @@ several cube-only categories, same coarse-and-fine overlap as
 including the nested categories' names and a real collector quirk:
 `wiki/categories/homelab.md`.
 
-**Hosts**: roster and class are `host-config/hosts.nix` (commented at each
-declaration) and `wiki/hosts.md`'s table — don't restate the list here, it
-only rots.
+**Hosts**: roster and class are `host-config/hosts.nix` (its comments explain
+the naming rule, the forge-runner guest, and the removed hosts) and
+`wiki/hosts.md`'s table — don't restate the list here, it only rots.
 
 ### Home Manager is NixOS-integrated
 
@@ -244,10 +245,10 @@ differing hash doesn't prove breakage (reordering imports permutes
 reason — dead code looks exactly like safe code until you make it live
 (§43). Compare values with `just diff`, and make refactored paths run.
 
-**Bugs here serialize.** Evaluating a cheap attribute proves nothing;
-`networking.hostName` resolved happily while four separate things were
-broken. Force a toplevel — eval and build both stop short of defects that
-only appear at runtime (§25, §37).
+**Bugs here serialize.** Evaluating a cheap attribute proves nothing — §25
+records four things that got past both a clean eval and a clean build.
+Force a toplevel — eval and build both stop short of defects that only
+appear at runtime (§25, §37).
 
 **Ask "did it work before?" first.** `journalctl --list-boots` plus a grep
 settles regression-vs-always-broken faster than any argument about
@@ -281,8 +282,8 @@ nixpkgs, ble.sh, carapace, any other project — without the user saying so
 explicitly, in those words, unprompted.** A yes to a bundled list does not
 cover an upstream filing folded into it. `propose-issue` only ever files
 here; `_loose-ends/bugs-pending-submission/` and `wiki/open-threads.md`'s
-drafts are deliberately not worked through automatically
-(`wiki/lessons-learned.md` §39). Filing
+drafts are deliberately not worked through automatically —
+`wiki/open-threads.md` says so itself. Filing
 here can still reach another project via GitHub autolinking — a title or
 body containing `owner/repo#123` pings that repo — so grep for that shape
 before naming a specific upstream issue/PR in anything filed here.
@@ -303,7 +304,7 @@ Claude's canonical form is `Co-Authored-By: Claude`. `.githooks/commit-msg`
 so form it correctly at write time.
 
 **When a rename makes the old name ungreppable, say what it was** on the
-declaration — see `boot-durandal.nix`, `enable-home-manager.nix`.
+declaration — see `boot-durandal.nix`, `boot-cube.nix`.
 
 **A bug recorded in a comment stays in the file.** Nobody reads `git log`;
 do not trim one because the fix landed. If a change strands a comment, move
@@ -320,10 +321,11 @@ reasoning, including the grep-trail convention it came with.
 **Prose that means the person says "the user," never the name.** `elly` in
 an identifier is the account this config builds; in prose it reads as a
 claim about who runs this repo, which doesn't hold for a fork or a fresh
-session. A 2026-09-14/15 pass cleared the last person-references (skills,
-wiki, flake comments, this file, the git-guard hook); the `_Sibling
-reviewed:` lines quoting "Elly" are records of that pass, not references
-to copy.
+session. A 2026-09-14/15 pass genericized person-references (skills, wiki,
+flake comments, this file, the git-guard hook); the `_Sibling reviewed:`
+lines quoting "Elly" that it left as records were overwritten by later wiki
+passes, and person-references persist in `wiki/experiments/` and one
+durandal module comment.
 
 **Check for an existing `programs.*` integration before hand-writing one.**
 
@@ -368,8 +370,7 @@ a reason, on the sibling, is the way to say so. Full rule and the cut list:
   a change that makes a wiki page stale corrects it in the same change
   (`just wiki-lint` checks the mechanical claims).
 - `wiki/lessons-learned.md` — how the work went wrong in the doing; its
-  own header maps the eras the § numbers span, which is the only copy of
-  that mapping. Long entries are per-§ articles
+  own header maps the eras the § numbers span. Long entries are per-§ articles
   under `wiki/lessons-learned/`; the page keeps every § number and a
   one-line version of each. No `-for-agents` sibling, deliberately: it is
   already written agent-facing and located by § number, not read through.
