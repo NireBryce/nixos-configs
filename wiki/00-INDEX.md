@@ -1,6 +1,6 @@
 # Wiki
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-28_
 
 The `flake/` folder is meant to be browsed by its file tree rather than
 traced through by following code paths. The heavy modularization
@@ -71,6 +71,7 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
 |---|---|
 | reach or debug a service running on cube | [homelab/reaching-services.md](homelab/reaching-services.md) |
 | add, rename, or wire a flake-parts module | [architecture.md](architecture.md), skill [`new-flake-module`](../.agents/skills/new-flake-module/SKILL.md) |
+| decide where a new module goes (shared, host, or user) | [where-modules-go.md](where-modules-go.md) |
 | touch impermanence or initrd | [impermanence-and-secrets.md](impermanence-and-secrets.md), skill [`impermanence-initrd`](../.agents/skills/impermanence-initrd/SKILL.md) |
 | add or platform-gate a package | [categories/00-INDEX.md](categories/00-INDEX.md), skill [`nirepackages-platform-support`](../.agents/skills/nirepackages-platform-support/SKILL.md) |
 | land a change on `experimental` | [conventions.md](conventions.md), skill [`ship`](../.agents/skills/ship/SKILL.md) |

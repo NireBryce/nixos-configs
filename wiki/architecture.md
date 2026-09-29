@@ -1,6 +1,6 @@
 # Architecture & module system
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-28_
 
 For *why* this repo runs flake-parts at all, see [flake-parts.md](flake-parts.md)
 first — this page is the mechanism built on top of that, not the reason for
@@ -30,6 +30,10 @@ is the mechanism, not the inventory.
   every host (`virtualization` is the running example — cube only as of
   2026-08-27, deliberately absent on the handhelds and, since that date, on
   durandal too — see [`categories/virtualization.md`](categories/virtualization.md)).
+- **[where-modules-go.md](where-modules-go.md)** — which of the three
+  places a module belongs in: the shared tree (`general-config/`,
+  `packages-config/`), a host's directory under `host-config/`, or a
+  user's under `users-config/` — and the naming rule that goes with each.
 - **Skill `new-flake-module`** (`.agents/skills/new-flake-module/SKILL.md`)
   — the traps in *writing* one: `flake.modules` can't live inside
   `perSystem`, a module's name comes from its filename so a rename can
