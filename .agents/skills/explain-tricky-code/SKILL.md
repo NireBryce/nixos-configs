@@ -7,7 +7,7 @@ description: How to write comments that teach a user or contributor a module or 
 
 The technique: write the comments the way you'd give a conference talk on
 the code to an audience of mixed skill levels — start from the problem,
-build up, show diagrams, answer the questions a smart listener would ask.
+build up, show diagrams, and explain what the code alone doesn't show.
 (Was `talk-style-explainer` until 2026-09-28, named for that technique
 rather than for when to reach for it.)
 
@@ -44,6 +44,13 @@ Each part is a ruled section (`just ruled-heading "<title>"`, 78 wide — the
 house heading width), in this order. Skip a part the subject doesn't need;
 don't reorder.
 
+**Title each section after what it describes** ("where restore-root sits
+in the boot", "categories inside categories"), not after its part below
+and not with a judgment ("the clever part", "the surprising bits",
+"things you can't move"). An evaluative label tells the next reader — an
+LLM agent included — how to weigh the section before they've read it, and
+biases what they do with the code beneath it.
+
 1. **Self-introduction, on its own line, by full path.** "This file,
    `modules/_lib/category-collector.nix`, is the logic that every
    `dirsAsCategory.nix` runs." A reader who landed here from a grep knows
@@ -64,22 +71,20 @@ don't reorder.
    repeat back ("a category imports every `.nix` module under its folder,
    however deep"), followed by a tree of *real* paths annotated with what
    happens to each. Then the consequences, as a short list.
-5. **The clever part.** The non-obvious mechanism (nested categories
-   referenced by name instead of re-walked), introduced from the reader's
-   likely first guess ("it could walk in and list everything by hand. But
-   …"), with a small flow diagram.
-6. **Things that look movable and aren't — as Q&A.** Each is a cleanup a
-   smart reader would attempt. Write the question they'd ask, then the
-   answer, visibly separated:
-
-   ```
-   # 1. Q: The shim passes in `shimFile`. Why not work it out in here?
-   #
-   #    A: `__curPos.file` is answered when the file is *read* ...
-   ```
-
-   The Q/A split matters: the earlier prose version buried which sentence
-   was the question.
+5. **The core mechanism.** The part that does the work and isn't
+   obvious from the code (nested categories referenced by name instead of
+   re-walked), introduced from the reader's likely first guess ("it could
+   walk in and list everything by hand. But …"), with a small flow
+   diagram.
+6. **Reasons the code can't show — kept where they apply.** Some lines
+   exist because of something outside the file: a systemd behaviour, a
+   second module declaring the same option, a machine that did something
+   the config never asked for. Explain each one *at the line it concerns*
+   (or in the section it belongs to), as what depends on what — not
+   gathered into a list of things not to change. A separate section only
+   when several share one cause and the header is where that cause is
+   explained. If an explanation exists mainly to defend dead code ("why
+   is this commented out?"), delete the code and put a line in `history`.
 7. **Traps.** What fails silently, and what (if anything) catches it.
 8. **How to change it safely.** Which doc to read first and how to verify
    (a fingerprint diff, an attribute-set diff) — the one paragraph a
@@ -97,8 +102,9 @@ obvious thing" that belongs at that line specifically.
 - **Real examples from this tree, never placeholders.** `fzf.nix` in
   `find/`, not `foo.nix` in `bar/`. A real path can be checked; a made-up one
   can't.
-- **Lead with the reader's question.** "Why not just hand over the names?"
-  then the answer. Questions are how a talk keeps a mixed room with it.
+- **Start from what the reader would expect.** "You'd think it could
+  just hand over the names — it can't, and here's why." Starting from
+  the natural guess is how a talk keeps a mixed room with it.
 - **Plain words where they're exact.** "Folder" is fine; so is "the
   collector looks each name up". Keep the precise term too when it's the
   one they'll grep for (`forClass`, `imports`).
