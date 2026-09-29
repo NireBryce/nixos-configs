@@ -335,6 +335,10 @@ stop being visible. A little Python: a real `.py` in
 bash-wrapping-Nix-wrapping-Python checker shipped both bugs the shape
 invites.
 
+**Before hand-building a multi-step pipeline, check `just agent`** —
+agent-written scripts for recurring lookups, any language (the Python rule
+above doesn't bind there). Adding one: skill `agent-scripts`.
+
 ## Docs
 
 **Every long wiki page is a pair. Read the `-for-agents.md` half.**

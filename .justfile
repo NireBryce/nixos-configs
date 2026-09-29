@@ -38,6 +38,9 @@ host := `h=$(hostname); [ -e "flake/modules/host-config/${h#nire-}-configuration
 _default:
     @just --list
 
+# Agent-written helpers for recurring lookups: `just agent` lists them
+mod agent '.agents/scripts/agent.just'
+
 # Evaluate every output without building anything -- the real check
 check:
     cd {{flake}} && nix flake check --all-systems --no-build
@@ -154,6 +157,7 @@ preflight:
     @just cod-desc-test
     @just modules-test
     @just pinned-packages-test
+    @python3 .agents/scripts/test_recurring.py
     @just check
     @just modules
     @just lint

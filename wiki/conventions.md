@@ -1,6 +1,6 @@
 # Conventions & workflow
 
-_Last modified: 2026-09-28_
+_Last modified: 2026-09-29_
 
 ## Contents
 
@@ -75,6 +75,15 @@ Nothing breaks by leaving it — courtesy, not a bug with consequences.
   out of a package-availability checker that shipped both bugs this
   shape invites (env vars read where argv was expected, a mangled line
   nothing highlighted).
+- **Agent scripts** — agents generalize command patterns they keep
+  re-typing into scripts under `.agents/scripts/`, dispatched through the
+  just module `.agents/scripts/agent.just` so `just agent` lists them apart
+  from the main recipes (added 2026-09-29). Any language; the rule above
+  doesn't bind there. Evidence that a pattern recurs comes from
+  `just agent recurring`, which mines local Claude transcripts for command
+  fragments agents re-type across sessions. Skill `agent-scripts`. First
+  two extracted: `just agent show` (several files/ranges, a header each)
+  and `just agent preflight-brief` (preflight, one line per step).
 
 ## Fix snippets & one-offs
 

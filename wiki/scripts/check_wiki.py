@@ -714,6 +714,17 @@ def doc_files(root):
 # Without the quote/dot in the token class, `dir='.'` made the whole
 # recipe invisible to this regex (false UNKNOWN RECIPE, hit 2026-09-08).
 JUST_RECIPE = re.compile(r'^([a-zA-Z][\w-]*)(?:\s+[\w=*."\'-]+)*:(?!=)', re.M)
+# A just module declaration, e.g. `mod agent '.agents/scripts/agent.just'`
+# (optionally `mod?`). `just agent` / `just agent <recipe>` dispatch through
+# it, so the module name counts as a recipe for mention-checking; its own
+# recipes aren't looked up (added 2026-09-29 with the agent module).
+JUST_MOD = re.compile(r'^mod\??\s+([a-zA-Z][\w-]*)', re.M)
+
+
+def justfile_recipes(root):
+    """Recipe names plus module names from the root .justfile."""
+    text = COMMENT.sub('', (root / '.justfile').read_text())
+    return set(JUST_RECIPE.findall(text)) | set(JUST_MOD.findall(text))
 # A backtick-quoted invocation, e.g. `` `just wiki-lint` `` or
 # `` `just host=nire-durandal build` ``.
 JUST_MENTION = re.compile(r'`just ([^`]+)`')
@@ -727,8 +738,7 @@ def check_recipes(root):
     section documents it) by checking the token after the `key=value`
     override, not the override itself.
     """
-    justfile = root / '.justfile'
-    recipes = set(JUST_RECIPE.findall(COMMENT.sub('', justfile.read_text())))
+    recipes = justfile_recipes(root)
 
     findings = []
     for path in doc_files(root):
@@ -822,8 +832,7 @@ def check_skill_files(root):
     skills_dir = root / '.agents' / 'skills'
     if not skills_dir.exists():
         return []
-    recipes = set(JUST_RECIPE.findall(
-        COMMENT.sub('', (root / '.justfile').read_text())))
+    recipes = justfile_recipes(root)
     real = {p.name for p in skills_dir.iterdir() if p.is_dir()}
 
     findings = []
