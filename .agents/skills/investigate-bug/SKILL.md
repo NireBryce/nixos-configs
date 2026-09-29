@@ -27,15 +27,18 @@ skill.
 1. **Before reproducing**, `just threads "<keywords>"` with a couple of
    guesses from the report's wording (symptom, error text, command). It
    searches GitHub issues (`gh issue list --search`) and greps `wiki/`
-   (incl. `lessons-learned.md`) and `_loose-ends/bugs-pending-submission/`;
+   (incl. `lessons-learned/`) and `_loose-ends/bugs-pending-submission/`;
    see `flake/scripts/threads.sh`.
+   A design question ("why is it shaped like this?") may be settled in
+   an earlier session's transcript; `just agent` has scripts that read
+   them (§17).
 2. **Hit: read it fully** (issue and/or linked wiki deep-dive) and resume
    from where it left off (untested fix, open question, "not yet
    confirmed"). If stale or wrong, fix *that*; no parallel investigation.
 3. **No hit**: reproduce for real, not from source (`AGENTS.md` "Bugs here
    serialize"). Once diagnosed, don't leave it only in your reply: file or
    track via `propose-issue`, update wiki pages via `wiki-sync`.
-4. **State fixed vs. verified precisely** (`CLAUDE.md`: treat an undated
+4. **State fixed vs. verified precisely** (`AGENTS.md` "Before calling it done": treat an undated
    "verified" as *evaluates*). Without a real `just switch` and live
    re-check a fix is *in the tree*, not *fixed*; say which, in the issue and
    wiki page both.

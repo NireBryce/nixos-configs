@@ -40,9 +40,9 @@ is the cold-start read; this page says which file holds the answer. Pages with a
 - [flake-parts.md](flake-parts.md) → [architecture.md](architecture.md) —
   why flake-parts, then the `dirsAsCategory` mechanism on top of it.
 - [traps-and-skills.md](traps-and-skills.md) — real past mistakes, and which skill holds each.
-- [lessons-learned.md](lessons-learned.md) — §1–49, one line each, long
-  entries broken out into `lessons-learned/`. **Located by § number** — grep
-  `## 43\.`, don't read front to back. No sibling.
+- [lessons-learned.md](lessons-learned.md) — every § as one line (rule,
+  Home, Enforced), grouped by when it applies: read your task's group. By
+  number: `ls wiki/lessons-learned/43-*`. No sibling.
 - [history.md](history.md) — the index into the above.
 - [flake-parts-port-notes-for-agents.md](flake-parts-port-notes-for-agents.md)
   — salvaged from the deleted `flake-parts` branch.

@@ -1,8 +1,8 @@
 # 46. "Enabled" is a claim about config, not about who holds the port
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-29_
 
-§46 of [lessons-learned.md](../lessons-learned.md#46-enabled-is-a-claim-about-config-not-about-who-holds-the-port) — that page keeps the one-line version of every lesson; this is §46's full account.
+§46 of [lessons-learned.md](../lessons-learned.md) — that page keeps the one-line version of every lesson; this is §46's full account.
 
 **Borrowed, not lived** — the one entry in this file that did not happen here.
 Adopted from a NixOS Discourse thread while enabling avahi and

@@ -1,8 +1,8 @@
 # 39. A live interactive bug needs a live interactive repro — `ssh host 'cmd'` is not the same session a human types into
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-29_
 
-§39 of [lessons-learned.md](../lessons-learned.md#39-a-live-interactive-bug-needs-a-live-interactive-repro--ssh-host-cmd-is-not-the-same-session-a-human-types-into) — that page keeps the one-line version of every lesson; this is §39's full account.
+§39 of [lessons-learned.md](../lessons-learned.md) — that page keeps the one-line version of every lesson; this is §39's full account.
 
 Reported 2026-08-24: "weird completion errors" over SSH to `nire-cube`,
 `-bash: read: `': not a valid identifier`, appearing while typing (before

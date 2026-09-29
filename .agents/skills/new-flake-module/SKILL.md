@@ -62,6 +62,11 @@ Same-named modules **merge**, not conflict. `boot` was both the
 the category applied durandal's bootloader, and importing the bootloader
 applied an impermanence rollback. Run `just modules` after adding/renaming.
 
+Splitting a module into its own category makes the new directory's
+basename a reserved name for every module under it; the moved file usually
+still has that name (`containers/containers.nix`, the third time, §35).
+Rename the file for the specific thing (`podman.nix`) in the same move.
+
 ## Two `config`s, and they shadow
 
 ```nix

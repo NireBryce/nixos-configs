@@ -14,7 +14,8 @@ _Last modified: 2026-09-29_
   — "Written by Claude Code, for Claude Code, and largely a record of its
   own mistakes." The main one. §§1–18 the den → flake-parts port, §§19–24
   the first session on real hardware, §§25–31 after it first booted, §32+
-  later work on already-booted or newly-added hosts. `CLAUDE.md` has the
+  later work on already-booted or newly-added hosts; the page itself files
+  them by when they apply, not by era, since 2026-09-29. `CLAUDE.md` has the
   rules this produced; this has the scar tissue behind them.
 - **`impermanence-stage1-migration.md` was removed 2026-09-05** — the
   stage-1 migration writeup, moved in from `claude cave/` 2026-09-02; git

@@ -78,8 +78,9 @@ written to a file, then used) are ship step 1.
    the caller's directory: a script taking paths gets
    `cd "{{invocation_directory()}}" &&` first (`show` does); `{{repo}}` is
    the root.
-3. Run it on a real case, then commit it **on its own**, in the current
-   branch/PR: `feat(agent-scripts): <name>`. No separate PR.
+3. Run it on a real case, and on one where it should find something and
+   check it does: a script that reports success has not been tested (§1).
+   Then commit it **on its own**, in the current branch/PR: `feat(agent-scripts): <name>`. No separate PR.
 4. Skill `wiki-sync` covers naming it on its topic's wiki page. If a skill
    spells out the steps the script replaces (ship's preview, the cleanup),
    point that skill at the script.

@@ -1,6 +1,6 @@
 # Wiki style guide
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-29_
 
 How this wiki itself is organized and written — as opposed to
 [conventions.md](conventions.md), which is the *repo's* style guide (Nix
@@ -47,10 +47,11 @@ separate tier for the *usage* side:
   for it to link to.
   `history.md` stays the index into `lessons-learned.md`;
   `conventions.md` stays the index into `module-style-guide.md` — the same
-  split as a category page and its deep-dive. `lessons-learned.md`'s long
-  entries live as per-§ articles in `wiki/lessons-learned/` (added
-  2026-09-09, `<n>-<slug>.md`): the page keeps every § number and a
-  one-line summary linking to each article.
+  split as a category page and its deep-dive. Every lesson's full account
+  is a per-§ article in `wiki/lessons-learned/` (`<n>-<slug>.md`; long ones
+  from 2026-09-09, all of them from 2026-09-29), and `lessons-learned.md`
+  is the index: one entry per §, grouped by the moment it applies, naming
+  the rule's Home and what Enforced it (`check_wiki.py lessons`).
 - **`wiki/categories/<name>.md`** — one page per real category, i.e. a
   directory under `flake/modules/` holding its own `dirsAsCategory.nix`
   (see [architecture.md](architecture.md)). Indexed in
@@ -234,9 +235,10 @@ separate tier for the *usage* side:
   **Exception: `lessons-learned.md`, `lessons-learned/` articles, and
   `-for-agents.md` siblings carry no Contents block** (the first two relaxed
   2026-09-09, siblings 2026-09-11 — on a page whose whole purpose is
-  information density, an anchor list is the first thing that has to go). Entries there are located by §
-  number — grep `## 43\.` — so a 46-line anchor list was paid on every full
-  read of the wiki's largest page for no navigational gain. The `contents`
+  information density, an anchor list is the first thing that has to go). Entries there are located by
+  group or by § number — `ls wiki/lessons-learned/43-*` — so a 46-line
+  anchor list was paid on every full read of the wiki's largest page for no
+  navigational gain. The `contents`
   check only validates pages that have a Contents block, so this needed no
   linter change, only this sentence.
 - Category pages follow **what's in it → mechanism notes specific to that
@@ -298,8 +300,8 @@ that drops those states a guess as settled in the copy most likely to be
 acted on. Skill `fact-hygiene` #6.
 
 Exempt from *needing* one: [lessons-learned.md](lessons-learned.md) and its
-`lessons-learned/` articles (already written agent-facing, located by §
-number rather than read front-to-back) and `<name>-history.md` pages
+`lessons-learned/` articles (already written agent-facing; the index is
+one line per lesson, and an article is found by § number) and `<name>-history.md` pages
 (resolved incidents — already the moved-out-of-the-way tier). A page under
 1,000 words *may* have one, but usually shouldn't: at that size the
 sibling's own title, date line and back-link start to outweigh what

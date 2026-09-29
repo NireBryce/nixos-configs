@@ -3,7 +3,7 @@
 # Scripts that generalize a command pattern agents kept re-typing. Same
 # contract as the root .justfile -- one line of dispatch plus a one-line
 # summary per recipe; logic lives in the script beside this file. Any
-# language, unlike flake/scripts/ -- see AGENTS.md's "Agent scripts" entry.
+# language, unlike flake/scripts/ -- see AGENTS.md "Before you start".
 #
 # Recipes in a module run from this directory, not the caller's: a script
 # that takes paths gets `cd "{{invocation_directory()}}"` first. `repo`

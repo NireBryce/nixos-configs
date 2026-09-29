@@ -1,8 +1,8 @@
 # 37. Some bugs need real system state to exist at all — no amount of building or reading the artifact finds them
 
-_Last modified: 2026-09-09_
+_Last modified: 2026-09-29_
 
-§37 of [lessons-learned.md](../lessons-learned.md#37-some-bugs-need-real-system-state-to-exist-at-all--no-amount-of-building-or-reading-the-artifact-finds-them) — that page keeps the one-line version of every lesson; this is §37's full account.
+§37 of [lessons-learned.md](../lessons-learned.md) — that page keeps the one-line version of every lesson; this is §37's full account.
 
 `nire-cube`'s first real `just switch` with the `monitoring` category and
 `nire-llm-sandbox`'s network fix both wired in (2026-08-23) failed two

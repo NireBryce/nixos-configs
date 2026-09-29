@@ -1,8 +1,8 @@
 # 43. A fingerprint check can pass for the wrong reason — dead code looks exactly like safe code until you make it live
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-29_
 
-§43 of [lessons-learned.md](../lessons-learned.md#43-a-fingerprint-check-can-pass-for-the-wrong-reason--dead-code-looks-exactly-like-safe-code-until-you-make-it-live) — that page keeps the one-line version of every lesson; this is §43's full account.
+§43 of [lessons-learned.md](../lessons-learned.md) — that page keeps the one-line version of every lesson; this is §43's full account.
 
 2026-08-27, the `dirsAsCategory.nix` deduplication (`flake/doc/dirsAsCategory.md`'s
 History section has the full account; this is the general shape). 37

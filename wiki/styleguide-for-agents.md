@@ -82,6 +82,7 @@ Link to the real source — a module header, `CLAUDE.md`, a skill — rather
 than copying it in. Four exceptions, each on stated terms:
 
 - `lessons-learned.md` and `module-style-guide.md` — nothing to link to.
+- `lessons-learned.md` is an index: one `- **§N**` line per lesson (title linking `lessons-learned/<N>-<slug>.md`, the rule, `Home:`, `Enforced:`), under the group where it applies; the article holds the account. The rule also goes in its Home. `check_wiki.py lessons` enforces the shape.
 - `flake-parts-port-notes.md` — the branch it indexed is gone.
 - `wiki/homelab/` — the source is often the live service, so synthesized
   content is allowed **if the page says what was verified against the live
