@@ -1,11 +1,8 @@
 # blesh, for agents
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-29_
 
-_Sibling reviewed: 2026-09-27 -- source updated for the hosts/users/packages area-dir rename; no mention of those paths on this page_
-
-Condensed from [blesh.md](blesh.md), which keeps the diagnosis narrative and
-the evidence trail. Facts only here.
+Source: [blesh.md](blesh.md).
 
 `ble.sh` is wired by hand — **there is no `programs.bash.blesh.enable` in
 Home Manager.** Package, `source ble.sh --attach=none` early in
@@ -59,11 +56,9 @@ Cause: ble.sh's `_ble_builtin_read_hook` cancellation net redirects any
 in-flight `read` through `ble/bash/read "$@" < /dev/null; return 148` when
 the user is still typing — the **common** case during fast typing, not an
 edge case. Caught against carapace's own read line, `"$@"` comes back split
-character-by-character. **Not caused by `carapace-desc.bash`** — confirmed
-twice, independently.
+character-by-character. **Not caused by `carapace-desc.bash`** — confirmed twice, independently.
 
-Fix, in the tree and switch-confirmed:
-`carapace-completer-read-fix.bash` patches `_carapace_completer` via
+Fix (in tree, switch-confirmed): `carapace-completer-read-fix.bash` patches `_carapace_completer` via
 `declare -f` plus textual substitution, replacing the `read` with parameter
 expansion. Sourced from `bash.nix` after `source <(carapace _carapace bash)`
 and before `carapace-desc.bash`. Closed as issue #72; removing it once
@@ -77,5 +72,4 @@ string.** Check with `od -c`; misreading it derailed this diagnosis once.
 
 ## See also
 
-[blesh.md](blesh.md) · [carapace.md](carapace.md) · [00-INDEX.md](00-INDEX.md) ·
-[../../open-threads.md](../../open-threads.md)
+[carapace.md](carapace.md) · [../../open-threads.md](../../open-threads.md)

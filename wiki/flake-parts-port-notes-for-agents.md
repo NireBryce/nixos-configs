@@ -1,17 +1,13 @@
 # flake-parts port notes, for agents
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-29_
 
-Condensed from [flake-parts-port-notes.md](flake-parts-port-notes.md), which
-keeps the salvage story, the decision reasoning and the upstream file/line
-citations behind each claim. Facts only here.
-
+Condensed from [flake-parts-port-notes.md](flake-parts-port-notes.md).
 Salvaged 2026-09-08 from the deleted `flake-parts` branch (tip `cf9aea42`).
 
 ## Decisions that are still load-bearing
 
-Each was an explicit choice, not a default. Re-deciding them silently is
-worse than either answer.
+Explicit choices; don't re-decide silently.
 
 - **Home Manager NixOS-integrated**, not standalone.
   `general-config/system/home-manager/enable-home-manager.nix`;
@@ -27,41 +23,38 @@ worse than either answer.
 - Roles `base`/`desktop`/`handheld` — **superseded** by `dirsAsCategory`
   categories.
 
-**den and flake-aspects were never evaluated, tried, or rejected.** They
-were commented out before that session began. Plain flake-parts +
-`import-tree` is a feasibility data point *without* den, not an argument
-against it.
+**den and flake-aspects were never evaluated, tried, or rejected** (commented
+out before the session). Plain flake-parts + `import-tree` is not an argument
+against them.
 
 ## Traps that produced no error, or named the wrong thing
 
 - **The two `config`s.** A bare-attrset module's `config` is the flake-parts
   one; adding an argument list to reach the NixOS `config` silently repoints
-  every existing `config` in the file and `config.flake.modules.*` stops
-  resolving. Bind what you need from the outer scope in a `let` above the
-  declaration.
+  every `config` in the file and `config.flake.modules.*` stops resolving.
+  Bind what you need in a `let` above the declaration.
 - **`useGlobalPkgs` makes HM reject `nixpkgs.*` outright.**
   `home.profileDirectory` moves to `/etc/profiles/per-user/<user>`, and
   activation's `PATH` is only coreutils/findutils/gnugrep/gnused/systemd with
   `QT_QPA_PLATFORM=offscreen`. Skill `home-manager-dotfiles` owns this.
 - **Read the generated dotfile, not the module.** starship's init landed at
-  line 2025 of `.zshrc` and ran last; p10k's 1,660 lines at 289–1991 did
-  nothing, for a whole session, invisibly.
+  `.zshrc` line 2025 and ran last; p10k's 1,660 lines (289–1991) silently did
+  nothing.
 - **`home.file.<n>.text` is `types.lines`** — it concatenates, not overrides.
   One owning module per generated file.
 - **`ble-import` with an absolute path needs the `.bash` extension** — the
   extension fallback applies only to relative module names. All five imports
-  would have failed silently. Caught by reading source.
+  would have failed silently.
 - **`modules.py`'s `tree` and `orphans` use different edge models on
-  purpose.** Segment-scoped edges reported 119 of 160 modules as orphans,
-  because a name bound in a `let` above the first declaration belongs to no
-  segment. Don't unify them.
-- **Omit an opt-in line and *nothing happens*** — valid Nix, clean eval,
-  installs nothing, no error possible. Hence the orphan check as a flake
-  check.
+  purpose.** Segment-scoped edges reported 119 of 160 modules as orphans (a
+  name bound in a `let` above the first declaration belongs to no segment).
+  Don't unify them.
+- **Omit an opt-in line and *nothing happens*** (clean eval, no error);
+  hence the orphan check as a flake check.
 
 ## flake-parts machinery
 
-Read out of the pinned `flake-parts`, re-verified 2026-09-08.
+From the pinned `flake-parts`, re-verified 2026-09-08.
 
 - **`flake.modules` is
   `lazyAttrsOf (lazyAttrsOf deferredModule)`**, declared in
@@ -71,9 +64,9 @@ Read out of the pinned `flake-parts`, re-verified 2026-09-08.
   site. Meaningful classes: `nixos`, `homeManager`, `flake`, `generic`
   (special-cased to set no class, so it loads anywhere). `darwin` works
   because nix-darwin sets the matching `_class`.
-- **`deferredModule` merges.** Several files defining the same attribute are
-  merged, not conflicted — the mechanism behind every category here, and
-  behind the copy-paste collision trap.
+- **`deferredModule` merges.** Same-named attributes across files merge, not
+  conflict — the mechanism behind every category and the copy-paste
+  collision trap.
 - **Prefer `config.flake.modules.…` over `self.modules.…`** — same data, but
   `self.modules` routes out through `outputs` and back, a common source of
   confusing recursion.
@@ -90,9 +83,8 @@ Read out of the pinned `flake-parts`, re-verified 2026-09-08.
   config. `hosts.nix` uses it for one thing — getting `self'`/`inputs'` into
   `specialArgs`, which (unlike `_module.args`) is usable inside `imports`.
   **Fails on a system not in `systems`.**
-- **Deliberately not done: `nixpkgs.pkgs = pkgs` from perSystem** — it would
-  drop `allowUnfree`. The cost accepted instead is a second nixpkgs
-  instantiation.
+- **Deliberately not done: `nixpkgs.pkgs = pkgs` from perSystem** (drops
+  `allowUnfree`); accepted cost: a second nixpkgs instantiation.
 - **`import-tree`** imports every `.nix` file under `modules/` recursively, so
   paths carry no meaning to Nix. Non-`.nix` files ignored; paths containing
   `/_` excluded (which is what makes `_lib/` work).
@@ -104,8 +96,5 @@ Read out of the pinned `flake-parts`, re-verified 2026-09-08.
   configurations go in `flake.modules.nixos.*` as modules, per its own
   docstring.
 
-## See also
-
-[flake-parts-port-notes.md](flake-parts-port-notes.md) ·
-[flake-parts.md](flake-parts.md) · [architecture.md](architecture.md) ·
+See also: [flake-parts.md](flake-parts.md) · [architecture.md](architecture.md) ·
 [lessons-learned.md](lessons-learned.md) §§1–18

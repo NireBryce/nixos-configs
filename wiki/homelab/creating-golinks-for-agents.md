@@ -1,14 +1,13 @@
 # Creating go/ links, for agents
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-29_
 
 Condensed from [creating-golinks.md](creating-golinks.md). Config side:
 [../categories/shortlinks-for-agents.md](../categories/shortlinks-for-agents.md).
 
-`http://go/` from any tailnet device. `http://go/.help` is the canonical
-upstream help, and right about the running build when this page has drifted.
-**`http://go/` 302s to the HTTPS cert domain** (golink's `redirectHandler`) —
-the source of the `curl` trap below.
+`http://go/` from any tailnet device; `http://go/.help` is canonical upstream
+help (right about the running build when this page drifts).
+**`http://go/` 302s to the HTTPS cert domain** (`redirectHandler`).
 
 golink is its own tailnet device named `go`; if `go/` stops resolving check
 that device before suspecting cube. **The name is the feature — don't rename
@@ -26,8 +25,7 @@ curl -L --post302 -H Sec-Golink:1 \
 
 All three flags are load-bearing:
 
-- **`-L`** — follows the HTTPS redirect. Without it you get the redirect
-  stub, not your data.
+- **`-L`** — follows the HTTPS redirect (else you get the stub).
 - **`--post302`** — re-sends the POST body across that redirect. **`-L` alone
   turns the 302 into a GET and silently drops the form fields.**
 - **`-H Sec-Golink:1`** — golink's XSRF bypass for non-browser clients; a
@@ -67,9 +65,8 @@ curl -L http://go/.export      # every link, JSON Lines
 
 ## Traps
 
-- **`curl` without `-L` looks like an empty or broken response** — you get
-  the 302 and a one-line `Found` body. Use `-L` unconditionally, so a later
-  HTTPS flip doesn't break scripts.
+- **`curl` without `-L` looks empty/broken** — a 302 with a one-line `Found`
+  body. Always use `-L`.
 - **Deleting from the command line has never worked.** `serveDelete` always
   requires a browser XSRF token; `Sec-Golink` does **not** satisfy it — only
   create/update accept that bypass, deliberately per upstream's source.
@@ -88,14 +85,9 @@ curl -L http://go/.export      # every link, JSON Lines
 one (`-snapshot links.json`, adds only links that don't exist) and can
 resolve offline against one (`-resolve-from-backup links.json go/foo`).
 
-**Nothing in this repo automates that** — no timer, no export job, no
-committed snapshot. Cube's persistent root means the db survives reboots, so
-nothing forces the gap into view.
+**Nothing in this repo automates that** — no timer, export job, or committed
+snapshot.
 
 **Not exercised**: creating, editing, deleting a link, and the templates —
 from upstream's help page and source at the pinned revision, not a run here.
 
-## See also
-
-[creating-golinks.md](creating-golinks.md) ·
-[../categories/shortlinks-for-agents.md](../categories/shortlinks-for-agents.md)

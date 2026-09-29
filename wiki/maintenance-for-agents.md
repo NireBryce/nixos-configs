@@ -1,11 +1,10 @@
 # Fleet maintenance, for agents
 
-_Last modified: 2026-09-28_
+_Last modified: 2026-09-29_
 
 Condensed from [maintenance.md](maintenance.md). Credentials →
 maintenance-schedule.md; backups → homelab/backup-runbook.md; one-time
-setup → homelab/pending-setup.md; fleet history → history.md. Never
-restated here.
+setup → homelab/pending-setup.md; fleet history → history.md.
 
 ## Lockfile updates
 

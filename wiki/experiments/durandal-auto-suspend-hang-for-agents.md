@@ -1,22 +1,20 @@
 # Auto-suspend hang on nire-durandal, for agents
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-29_
 
-Condensed from
-[durandal-auto-suspend-hang.md](durandal-auto-suspend-hang.md), which keeps the
-reasoning and the cycle log. **Status: mechanism partly identified, cause
+Source: [durandal-auto-suspend-hang.md](durandal-auto-suspend-hang.md).
+**Status: mechanism partly identified, cause
 not. Nothing under test.** `amdgpu.runpm=0` tried 2026-09-14, failed.
 
-**Probably not an OS bug.** Elly reports the same hang under Windows on this
-hardware years ago (recollection, not measurement), and the GPP0/GPP8
-mitigation worked for years before failing in the last few months. Treat every
-amdgpu finding below as symptom, not cause; suspect firmware or wear (PSU caps,
-CMOS battery — unmeasured).
+**Probably not an OS bug.** The user recalls the same hang under Windows on
+this hardware years ago (recollection, not measurement); the GPP0/GPP8
+mitigation worked for years, then failed. Treat amdgpu findings as symptom;
+suspect firmware or wear (PSU caps, CMOS battery — unmeasured).
 
 ## Symptom
 
-Enters S3, then will not wake by any input. Only a PSU power cut recovers it —
-timed so DRAM survives on standby; held too long, RAM and the session go.
+Enters S3, will not wake by any input. Only a PSU power cut recovers it; held
+too long, RAM and the session are lost.
 
 ## Two failure shapes
 
@@ -27,48 +25,44 @@ timed so DRAM survives on standby; held too long, RAM and the session go.
 
 ## Traps
 
-- **`/sys/power/suspend_stats` is not a hang detector.** It logged two known
-  hangs as `success`. Only the SMU shape lands there.
-- **The OS cannot detect the no-wake shape from inside.** `CLOCK_BOOTTIME`
-  minus `CLOCK_MONOTONIC` accounted for 2473.6 s of a 2491 s pre-to-post window
-  (17 s remainder across three cycles = normal overhead), so the CPU is not
-  running during a hang. Not a resume-path wedge.
-- **Pair dumps by order, not timestamp** — `pre` is stamped at suspend, `post`
-  at resume; a pair never shares a stamp.
-- **`1-6/power/wakeup_count` is always 0 and means nothing.** Keyboard wake
-  arrives as a controller-level PME on `01:00.0`, never as the Moonlander's own
-  remote wakeup.
+- **`/sys/power/suspend_stats` is not a hang detector** (logged two known
+  hangs as `success`); only the SMU shape lands there.
+- **The OS cannot detect the no-wake shape from inside.** `CLOCK_BOOTTIME` -
+  `CLOCK_MONOTONIC` covered 2473.6 s of a 2491 s pre-to-post window (rest =
+  normal overhead): the CPU is not running during a hang, not a resume-path
+  wedge.
+- **Pair dumps by order, not timestamp** (`pre` stamped at suspend, `post` at
+  resume).
+- **`1-6/power/wakeup_count` is always 0, meaningless.** Keyboard wake is a
+  controller-level PME on `01:00.0`, never the Moonlander's own remote wakeup.
 - **`Refused to change power state from D0 to D3hot` + `MODE1 reset` fire on
   every cycle**, successes included, on every boot back to July. Standing
   suspect (Navi 22 `1002:73df` held in D0 across S3), never a discriminator.
-- Resume logs for a hang and a clean cycle are byte-identical. **So is the
-  descent** (compared 2026-09-16 against a menu-suspend/keyboard-wake control):
-  only device-resume ordering differs. Finer resolution needed for any signal.
-- **Why hangs leave no evidence:** `printk: Suspending console(s)` — after that
-  point messages go to the RAM ring buffer and only reach disk if the machine
-  resumes. Lost means unflushed, not unprinted.
-- **A serial console may still capture nothing.** The CPU is not executing
-  during a hang, and nothing records what nothing prints. Serial helps only if
-  the kernel is running and printing into a torn-down console.
-- Nothing else in the repo touches the suspend path: the only
-  `powerDownCommands`/`resumeCommands` are the probe's, `sleep.target` has one
-  dependency, no `/etc/systemd/system-sleep` hooks.
-- **Auto vs manual is NOT the discriminator.** Both hang; a manual cycle hung
-  2026-09-14. An early 35-suspend requester tally made auto look causal.
-- **`/etc` IS NOT EVIDENCE HERE.** An agent shell runs in its own mount
-  namespace (65 mounts vs PID 1's 44) with a synthetic `/etc`: on 2026-09-16
-  `/etc/profile` resolved into a VS Code FHS store path and
-  `systemd-analyze cat-config` called every systemd config "not found" — both
-  artifacts, neither true of the machine. Use `/run/current-system/etc/...`
-  and `/proc/1/mountinfo`.
-- **Drive power-cycle counts survive across generations** (counter is in drive
-  firmware), so a generation with no probe can still be tested: note count,
-  boot it, suspend, return, compare delta against suspend count.
+- Resume logs for hang and clean cycle are byte-identical, **as is the
+  descent** (vs a menu-suspend/keyboard-wake control, 2026-09-16); only
+  device-resume ordering differs. Finer resolution needed for any signal.
+- **Why hangs leave no evidence:** after `printk: Suspending console(s)`
+  messages go to the RAM ring buffer and reach disk only if the machine
+  resumes. Lost = unflushed, not unprinted.
+- **A serial console may capture nothing**: the CPU is not executing during a
+  hang. It helps only if the kernel runs and prints into a torn-down console.
+- Nothing else in the repo touches the suspend path: only the probe's
+  `powerDownCommands`/`resumeCommands`; `sleep.target` has one dependency; no
+  `/etc/systemd/system-sleep` hooks.
+- **Auto vs manual is NOT the discriminator.** Both hang (manual hung
+  2026-09-14); an early 35-suspend tally made auto look causal.
+- **`/etc` IS NOT EVIDENCE HERE.** An agent shell has its own mount namespace
+  (65 mounts vs PID 1's 44) and synthetic `/etc` (`/etc/profile` resolved into
+  a VS Code FHS store path; `systemd-analyze cat-config` said every config
+  "not found"). Use `/run/current-system/etc/...` and `/proc/1/mountinfo`.
+- **Drive power-cycle counts survive across generations** (drive firmware), so
+  a probe-less generation can still be tested: note count, boot, suspend,
+  return, compare delta against suspend count.
 - **"A `pre` with no `post` is a hang" is WRONG.** `powerDownCommands` fires on
   shutdown too, so every reboot leaves an orphan `pre`. Use the power-cycle
   delta.
-- **"Power-cycle count moved = hang" is WRONG** (corrected 2026-09-15). `+1` is
-  baseline; it would flag every suspend. Only `> 1` is a hang.
+- **"Power-cycle count moved = hang" is WRONG** (corrected 2026-09-15): `+1`
+  is baseline; only `> 1` is a hang.
 - Detector-labelled totals 2026-09-14→15: **1 hang, 6 clean.** Cycles predating
   smartmontools are memory-labelled and unverifiable.
 
@@ -100,9 +94,8 @@ Nothing. Instrumentation only:
 — writes `/var/log/suspend-probe/`, `sync`'d; `/var/log` is its own btrfs
 subvolume, outside the wiped root.
 
-**Kernel confound resolved.** The 02:24 reboot made `runpm=0` live and moved
-the kernel 6.18.43 → 6.18.51 together. The hang continued, so neither worked
-and no reboot need be spent separating them. Kernel 6.18.51 from here.
+**Kernel confound resolved:** `runpm=0` and kernel 6.18.43 → 6.18.51 went live together at the 02:24 reboot
+and the hang continued, so neither worked. Kernel 6.18.51 from here.
 
 ## Instrumentation
 
@@ -139,11 +132,10 @@ is the documented hybrid-sleep breakage, closed by `SleepMode=1` (still in
 `powerdevilrc`). **PowerDevil 6.6.5 -> 6.7.4 is untested** and is what
 initiates auto-suspend.
 
-**Gens 218-221 are bootable**, but **not being chased (2026-09-16)**: config
-and hardware hypotheses each failed, effort stays on logging. Pre-upgrade tree
-is recoverable from git, not the boot menu — gen 221 ~`887cdc6f` (2026-05-30),
-gen 222 just before the 2026-08-14 cluster. Skill `git-archaeology` for the
-renames both predate.
+**Gens 218-221 are bootable**, **not being chased (2026-09-16)**: effort stays
+on logging. Pre-upgrade tree is in git, not the boot menu — gen 221
+~`887cdc6f` (2026-05-30), gen 222 just before the 2026-08-14 cluster (skill
+`git-archaeology` for the renames both predate).
 
 **Caveat:** abrupt-ending boots appear from 2025-12-02, including two
 pre-boundary 26.05 boots. Data cannot say whether the boundary caused it or
@@ -160,10 +152,9 @@ non-zero returns** either direction.
 | `0000:07:00.0` GPU | `pci_pm_resume` | 471 ms |
 
 GPU is the **slowest device on the descent**; `suspend_noirq` is the last
-device phase before firmware handoff. ~1% spread = baseline, not anomaly — a
-hang showing seconds there, or no return, is the signal. USB `usb_dev_resume`
-times (1-2 1.7s, 1-1 1.6s, 1-10 1.27s) are post-resume re-enumeration, **not
-suspects**.
+device phase before firmware handoff. ~1% spread = baseline; seconds there or
+no return = signal. USB `usb_dev_resume` times (1-2 1.7s, 1-1 1.6s, 1-10
+1.27s) are re-enumeration, **not suspects**.
 
 ## Reading the dumps
 
@@ -179,10 +170,9 @@ suspects**.
   | `+1` | clean suspend |
   | `+N > 1` | hang; `N − 1` PSU cuts |
 
-  Baseline measured with a controlled menu-suspend/keyboard-wake 2026-09-15
-  (`nvme0` 2862→2863). Cycle 7 was `+3` = two cuts.
+  Baseline: controlled menu-suspend/keyboard-wake 2026-09-15 (`nvme0`
+  2862→2863). Cycle 7 was `+3` = two cuts.
 
 ## See also
 
-[durandal-auto-suspend-hang.md](durandal-auto-suspend-hang.md) · [durandal-suspend-instrumentation-state.md](durandal-suspend-instrumentation-state.md) (what is running on the machine) ·
-[hosts.md](../hosts.md) · [lessons-learned.md](../lessons-learned.md)
+[durandal-suspend-instrumentation-state.md](durandal-suspend-instrumentation-state.md) (what is running on the machine) · [hosts.md](../hosts.md)

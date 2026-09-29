@@ -1,9 +1,8 @@
 # Wiki style guide, for agents
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-29_
 
-Condensed from [styleguide.md](styleguide.md), which keeps the reasoning and
-the precedents. Rules only here. The *repo's* style guide is
+Condensed from [styleguide.md](styleguide.md). Rules only here. The *repo's* style guide is
 [conventions.md](conventions.md); module formatting is
 [module-style-guide.md](module-style-guide.md).
 
@@ -33,7 +32,7 @@ A category page's order: **what's in it → category-specific mechanism notes
    load-bearing for the `siblings` check.
 3. intro prose (what this page is), then the condensed-version blockquote
 4. `## Contents` — one bullet per `##` heading, **after** the intro, not
-   before it (moved 2026-09-11; it sat under the title until then).
+   before it.
 
 **Don't hand-derive anchors.** Run `python3 wiki/scripts/check_wiki.py
 gen-contents <page>` after adding, renaming, or removing any heading; it's
@@ -43,7 +42,7 @@ Exempt from `## Contents`: `lessons-learned.md`, `lessons-learned/`
 articles, and `-for-agents.md` siblings. **Not the same list as the sibling
 exemption** — `-history.md` needs no sibling but does carry a Contents
 block. A non-exempt page with headings and no block is a MISSING CONTENTS
-finding (2026-09-12).
+finding.
 
 ## Two audiences per page
 
@@ -58,8 +57,7 @@ host lists, each trap as one declarative line. Tables wherever one fits.
 the reasoning behind a choice, meta-commentary, see-also sprawl.
 
 Exempt from needing one: `lessons-learned*`, `*-history.md`. Under 1,000
-words it's allowed but usually a loss — `homelab/00-INDEX.md` was tried and
-dropped.
+words it's allowed but usually a loss.
 
 Checked by `check_wiki.py siblings`, which is what makes this the wiki's one
 deliberate duplication rather than a future stale claim:
@@ -99,14 +97,14 @@ belongs in the linked file's own header.
 
 - kebab-case, matching the subject exactly.
 - `00-INDEX.md` is reserved for a directory's index — never a single-topic
-  page. Renamed from `README.md` 2026-09-14; it sorts first.
+  page.
 - Each such directory also holds a `README.md` symlink to its
   `00-INDEX.md`, for GitHub's benefit. Edit the target, not the symlink;
   don't link to `README.md`. `check_wiki.py`'s `wiki_md()` skips symlinks,
   and every wiki-walking check goes through it.
 - **Name a usage page for the reader's task, not the module.** A plural noun
-  reads as a list of the things: `golinks.md` → `creating-golinks.md`
-  (2026-09-11), matching `reaching-services.md`. A bare noun is fine when
+  reads as a list of the things: `golinks.md` → `creating-golinks.md`,
+  matching `reaching-services.md`. A bare noun is fine when
   the page is about the whole service (`forgejo.md`).
 - **Dates absolute**, never "today" or "last week".
 - Relative paths, recomputed for actual depth. Moving a page means walking
@@ -119,11 +117,9 @@ belongs in the linked file's own header.
 
 ## Rotting
 
-No CI ties links to what they point at beyond `just wiki-lint`. The rule:
-whichever change makes a page stale corrects it in the same change. Skill
-`wiki-sync`.
+Whichever change makes a page stale corrects it in the same change (skill
+`wiki-sync`); only `just wiki-lint` checks links.
 
 ## See also
 
-[styleguide.md](styleguide.md) · [00-INDEX.md](00-INDEX.md) ·
-[categories/00-INDEX.md](categories/00-INDEX.md)
+[styleguide.md](styleguide.md) · [00-INDEX.md](00-INDEX.md)

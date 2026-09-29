@@ -1,9 +1,8 @@
 # `monitoring`, for agents
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-29_
 
-Condensed from [monitoring.md](monitoring.md), which keeps the reasoning
-and the narrative. Facts only here.
+Condensed from [monitoring.md](monitoring.md).
 
 Prometheus + Grafana on `nire-cube`. Added 2026-08-23, nested under
 `homelab` 2026-08-27. Reached at `https://grafana.moose-micro.ts.net/`
@@ -65,26 +64,12 @@ so exporting the JSON there is the whole job:
    Grafana's `${DS_PROMETHEUS}` template variable.
 5. Save under `grafana/_dashboards/`, `just switch`, confirm panels intact.
 
-**Verified end to end 2026-09-11.** A UI-shaped dashboard (random uid,
-top-level `id`, `${DS_PROMETHEUS}` panels) was created on cube over the API,
-exported, and carried through steps 2–4 into `roundtrip-check.json`; every
-transformation the steps predict was the one needed. The switch leg then ran
-on cube: Grafana's API lists exactly two dashboards (no duplicate),
-`roundtrip-check` reports `provisioned: True` with `provisionedExternalId:
-roundtrip-check.json` (file-sourced, not a db leftover), the panel queries
-live through the datasource proxy, and `nix store diff-closures` shows the
-deployed generation matching the tree.
+Verified end to end on cube 2026-09-11 (`roundtrip-check.json`): no
+duplicate dashboard, `provisioned: True`, panel queries live.
 
 A UI-built dashboard lives only in cube's sqlite db. It is backed up, but
 not declared.
 
 ## Imported by
 
-`nire-cube` only. Not durandal or tenacity — no design reason, just
-unasked-for.
-
-## See also
-
-[monitoring.md](monitoring.md) · [reverse-proxy.md](reverse-proxy.md) ·
-[git-forge.md](git-forge.md) · [system.md](system.md) ·
-[monitoring-history.md](monitoring-history.md)
+`nire-cube` only.

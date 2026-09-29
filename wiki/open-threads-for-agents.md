@@ -1,12 +1,8 @@
 # Open threads, for agents
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-29_
 
-_Sibling reviewed: 2026-09-27 -- source updated for the hosts/users/packages area-dir rename; no mention of those paths on this page_
-
-Condensed from [open-threads.md](open-threads.md), which keeps the closed
-items, the reasoning and the full accounts. Live threads only here.
-
+Condensed from [open-threads.md](open-threads.md). Live threads only.
 
 **Before investigating any symptom: `just threads "<keywords>"`** — it
 covers GitHub issues plus `wiki/`, `lessons-learned.md` and
@@ -16,22 +12,20 @@ This page is not a tracker; this repo's GitHub issues are.
 ## Open issues worth knowing before you start work
 
 - **#205** — CI can only *evaluate*. `nix flake check + module tree` forces
-  each host's toplevel as an evaluation and never builds it, so an input
-  bump that evaluates fine and breaks a host stays invisible until
-  `just switch` on real hardware (§§36–37). Proposal: build on cube.
-  **If it lands, [maintenance-schedule.md](maintenance-schedule.md) item
-  10's "Why not sops" reasoning needs rewriting** — it relocates the PAT
-  rather than removing it.
+  each host's toplevel as an evaluation, never builds it; a bump that
+  evaluates but breaks a host stays invisible until `just switch` (§§36–37).
+  Proposal: build on cube. **If it lands, rewrite
+  [maintenance-schedule.md](maintenance-schedule.md) item 10's "Why not
+  sops"** — it relocates the PAT rather than removing it.
 - **#130** — extend backups past cube to durandal/tenacity/lysithea.
 - **#75** — remove `carapace-completer-read-fix.bash` once ble.sh or carapace
   fix the bug upstream. Check its own "how to check" steps before assuming
   it's still needed.
 - ~~**#298**~~ — **fixed 2026-09-14, closed.** Cube's tailscaled served no
-  `svc:` MagicDNS records, so any server-side fetch ON cube of a per-service
-  hostname failed (homepage/glance status checks included; hard-IP curl
-  reached every VIP). Diagnosed 2026-09-12; cause was a missing tailnet grant
-  from `tag:homelab-cube` to its own `svc:` destinations, every existing
-  grant having named `autogroup:members` as source.
+  `svc:` MagicDNS records, so server-side fetches ON cube of per-service
+  hostnames failed (hard-IP curl worked). Cause: no tailnet grant from
+  `tag:homelab-cube` to its own `svc:` destinations (existing grants all
+  named `autogroup:members`).
 - **#299** — homepage's gcal secret iCal addresses (the one human input
   the calendar widgets still wait on; sops key `homepage-env`).
 
@@ -68,21 +62,12 @@ housekeeping pass over this list.
 - CI's lint step re-fetches `nixpkgs#statix nixpkgs#deadnix` on every run
   rather than reusing the flake's own nixpkgs input. Cheap today; worth
   pinning if CI minutes start mattering.
-- **Human halves of `-for-agents` pairs, read 2026-09-11** — no decay into
-  duplicate siblings (0–5% verbatim overlap across all 19 pairs). All
-  three findings fixed: intro-first header order wiki-wide (#292, #302;
-  two stragglers closed out 2026-09-27), `categories/system.md`'s
-  subdirectory table replaced by prose plus a sibling pointer, and
-  `disk-formatting.md` carrying the disko command on both halves.
 - Idea placeholders with no content:
   [`../flake/scripts/script-wishlist.md`](<../flake/scripts/script-wishlist.md>),
   and the "things to look into" list at the end of
   [`../flake/doc/notes-and-fixes.md`](<../flake/doc/notes-and-fixes.md>).
 
 ## Tailscale Services traps (the `svc:` work, done 2026-09-11)
-
-Each is written up where it'd be hit; repeated here because all four cost
-time:
 
 - **Two API endpoint names are counter-intuitive** — ACL is `/acl`, not
   `/policy`; vip-services is `/vip-services/{name}`, not `/by-name/{name}`.
@@ -101,8 +86,3 @@ time:
 
 Anything under an `ignore`/`IGNORE`-prefixed path (`ignore/`,
 `flake/!IGNORE-maybe-useful-chunks/`) is a retired experiment.
-
-## See also
-
-[open-threads.md](open-threads.md) · skill `investigate-bug` · skill
-`propose-issue` · [lessons-learned.md](lessons-learned.md)

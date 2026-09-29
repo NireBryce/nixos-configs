@@ -1,10 +1,8 @@
 # Reaching cube's services, for agents
 
-_Last modified: 2026-09-28_
+_Last modified: 2026-09-29_
 
-Condensed from [reaching-services.md](reaching-services.md), which keeps the
-reasoning, the retired-URL history and the verification record. Facts only
-here.
+Condensed from [reaching-services.md](reaching-services.md).
 
 Every web service on `nire-cube` has its own tailnet hostname and its own
 certificate. Tailnet-only; nothing is exposed to the internet, and this is
@@ -21,19 +19,16 @@ not Funnel. Build side: [reverse-proxy](../categories/reverse-proxy.md).
 | cube itself (also the landing page) | `https://ts-cube.moose-micro.ts.net/` | `http://ts-cube/` |
 | golink (**not** on cube) | `http://go/` | — |
 
-Homepage replaced glance 2026-09-12 (issue #291). The `homepage` name needs
+The `homepage` name needs
 the `svc:homepage` Service object applied at switch time (commands in
 `homepage.nix`'s history section) — until then `homepage...` doesn't
 resolve and cube's own root is the working door.
 
 `ts-cube`, **not** `nire-cube` — this tailnet renames its devices.
 
-Retired and 404/dead: `http://ts-cube:3000/` and `:3001/` (2026-08-24, both
-apps moved to loopback); `.../grafana/` and `.../git/` path prefixes
-(2026-09-07); glance's own name died 2026-09-12 with the homepage swap and
-came back 2026-09-13 for the evaluation (glance on port **3004** now, not
-3002 — homepage kept that slot). Port URLs are still dead for every app:
-they all bind loopback, reachable only through Caddy.
+Dead: `http://ts-cube:3000/` and `:3001/` (and every port URL: apps bind
+loopback, reachable only through Caddy); `.../grafana/` and `.../git/` path
+prefixes. glance is on port **3004** (homepage holds 3002).
 
 ## Certificates
 
@@ -82,8 +77,7 @@ from `tailscaled`. Retry; not a failure state.
 
 **A TLS error is not a dead service.**
 `SSL_ERROR_INTERNAL_ERROR_ALERT` on a `.ts.net` name means Caddy has no
-certificate to offer — usually a config bug, not an outage. That exact
-failure took down all four names for two days in September 2026.
+certificate to offer — usually a config bug, not an outage.
 
 ## Adding a service
 
@@ -92,8 +86,5 @@ the Service object, `serve.nix`'s endpoints (**both `tcp:443` and
 `tcp:80`**), and a Caddy vhost. Skill `new-tailscale-service`; skill
 `new-homelab-service` for writing the module first.
 
-## See also
-
 [reaching-services.md](reaching-services.md) ·
 [../categories/reverse-proxy-for-agents.md](../categories/reverse-proxy-for-agents.md)
-· [forgejo.md](forgejo.md) · [00-INDEX.md](00-INDEX.md)
