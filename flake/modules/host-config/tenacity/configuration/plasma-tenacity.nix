@@ -266,7 +266,7 @@
                         AccessXBeep          = false;
                         GestureConfirmation  = true;
                         StickyKeys           = true;
-                        StickyKeysLockWindow = 175;
+                        StickyKeysLockWindow = 230;
                     };
 
                     kwinrc = {
