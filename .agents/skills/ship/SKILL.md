@@ -100,7 +100,8 @@ Commit discipline:
   green (§15); one coherent commit beats two artificial ones.
 
 Then `just agent recurring export` (one line: this host's command shapes
-to the private command log, skill `agent-scripts`; "not set up" is fine),
+to the private command log, skill `agent-scripts`; "not set up" or a
+failure is reported, not a reason to stop),
 `git push -u origin <branch>`, and `gh pr create --base experimental
 --body-file - <<'EOF'` (body on stdin, same reason as the commit message).
 PR body: what changed, why, what was verified, what was left alone, under

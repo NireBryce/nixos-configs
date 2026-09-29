@@ -93,8 +93,14 @@ means adding a hostile case to `LEAKS` in `test_recurring.py` (runs in
 `just preflight` and CI), which checks every shape token against the
 closed vocabulary. It holds what leaked before: grep-pattern pieces as
 fake commands (`git.moose"`), then value-glued flags (`-uadmin`), loop
-variables (`for host in`), wrapper options (`sudo -u host`). Residual
-(docstring): an unquoted 1-3 letter word after `-`.
+variables (`for host in`), wrapper options (`sudo -u host`), prose from
+quoted `--body "..."` text, `<<\EOF` heredoc bodies. Residual
+(docstring): an unquoted 1-3 letter word after `-`, and unquoted
+`--long-flag` names.
+
+**Bump `FORMAT` whenever shaping gets stricter.** Exports merge, so keys
+written under looser rules would otherwise persist; files of another
+format are skipped on read and rebuilt on that host's next export.
 
 Never commit transcript lines or raw commands: this repo is public, and
 they carry hostnames, ports, and paths. The export is the only thing that
