@@ -1,79 +1,212 @@
+# WARNING: IMPORTING THIS DELETES / ON EVERY BOOT. If your disk looks like
+# the one described below, it will delete yours. Know what you're doing.
+#
+# This file, flake/modules/general-config/impermanence/root-rollback/
+# restore-root/WARN-impermanence.nix, is the module that wipes the root
+# filesystem at boot on the hosts that import the `impermanence` category.
+#
+# ── what this does, and why ─────────────────────────────────────────────────
+#
+# On every boot, before the real root filesystem is mounted, this deletes
+# the btrfs subvolume that `/` lives on and replaces it with a fresh copy of
+# an empty one. Whatever the last boot wrote to `/` is gone. What survives
+# is only what is stored somewhere else on purpose: /nix, /home, /var/log,
+# and a list of individual paths kept on /persist and mounted back into
+# place (the `environment.persistence` block below).
+#
+# Why do that to a machine on purpose? Because a normal root filesystem
+# collects state nobody asked for, and nothing tells you:
+#
+# - A tool writes a config file under /etc by hand, the machine depends on
+#   it, and the Nix config no longer describes the machine.
+# - A service keeps something important in /var/lib, and nobody knows it's
+#   important until a reinstall loses it.
+# - Leftovers from things removed months ago keep running or keep being read.
+#
+# With the wipe, anything not declared is gone at the next boot, so every
+# piece of state that matters has to be written down in this repo -- the
+# persistence lists are that written-down list. Forgetting one fails loudly
+# and early (the wifi password is gone tomorrow), instead of silently and
+# years later.
+#
+# Which hosts: the ones whose host-config/*-configuration.nix imports the
+# `impermanence` category -- nire-durandal and nire-tenacity. nire-cube
+# deliberately does not (plain persistent root; see its header). Hosts reach
+# this file only through the category, never by its module name, so
+# renaming the file changes no host file. host-config/hosts.nix and the
+# host files are the current answer; this list is as of 2026-09-28.
+#
+# ── background: the disk, and the boot it runs in ───────────────────────────
+#
+# Both hosts that import this share one layout: a LUKS-encrypted partition
+# (the LUKS *volume* is named `enc`; opened, it appears as /dev/mapper/enc)
+# holding one btrfs filesystem. btrfs splits that filesystem into
+# *subvolumes* -- separately mountable trees that share the disk's space.
+# The host's hardware file (host-config/<host>/hardware/hardware-<host>.nix)
+# mounts them, and owns their mount options:
+#
+#   btrfs top level (subvol=/)       never mounted normally
+#   ├── root         ->  /           WIPED: deleted and re-copied each boot
+#   ├── root-blank                   the empty snapshot `root` is copied from
+#   ├── nix          ->  /nix        kept: the store
+#   ├── home         ->  /home       kept
+#   ├── log          ->  /var/log    kept
+#   ├── persist      ->  /persist    kept: the paths listed below live here
+#   └── secureboot   ->  /var/lib/sbctl   kept (durandal only)
+#
+# `root-blank` must exist, and no host's config creates it -- it is made
+# once, at install time, by hand (_disko/impermanence-luks-btrfs.nix
+# describes the layout but no host imports it). Without it the rollback
+# deletes /root and then fails to replace it.
+#
+# The wipe has to happen at a precise moment: after the disk is unlocked,
+# before `/` is mounted. That moment only exists inside the *initrd* -- the
+# small temporary filesystem the kernel boots first, whose one job is to
+# unlock the disk and mount the real root at /sysroot before handing over.
+# Here the initrd runs systemd ("systemd stage 1"), so the wipe is an
+# ordinary systemd service, `restore-root`, that the initrd starts at the
+# right point. (Not to be confused with boot.loader.systemd-boot, the EFI
+# boot menu, which both hosts also use. Similar names, unrelated things.)
+#
+# The other half is the impermanence NixOS module, from the `impermanence`
+# flake input. It provides `environment.persistence`: for every path listed
+# there, it bind-mounts /persist/<path> over <path> during activation, so
+# the file looks like it never left. This file uses that option without
+# importing the module. general-config/system/impermanence/
+# declare-persistence-option.nix imports it once, for every NixOS host --
+# nire-cube included, since its *-persist.nix modules need the option to
+# exist even when they set nothing. A second import from here would be a
+# second declaration of the same option (two different modules importing
+# one file aren't deduplicated), and evaluation stops with "The option
+# `environment.persistence' ... is already declared".
+#
+# ── where restore-root sits in the boot ─────────────────────────────────────
+#
+# restore-root runs once the root device exists and before anything mounts
+# it. Everything in the `services.restore-root` block below is making that
+# one sentence true. The initrd's boot, with this unit in it:
+#
+#   kernel starts initrd systemd
+#     │
+#     ├─ systemd-cryptsetup@enc.service   asks for the passphrase, unlocks
+#     ├─ dev-mapper-enc.device            /dev/mapper/enc exists
+#     ├─ initrd-root-device.target        the root device exists and udev
+#     │                                   has finished with it
+#     │
+#     ├─ restore-root.service  ◀── HERE   mount top level at /mnt,
+#     │                                   delete root, snapshot root-blank
+#     │                                   as root, unmount
+#     │
+#     ├─ sysroot.mount                    the new, empty root at /sysroot
+#     └─ switch to the real system  ->  activation bind-mounts /persist/...
+#
+# What follows from that:
+#
+# - Ordered too early (before the device), it fails; too late (after
+#   sysroot.mount), it deletes a mounted root. Both edges are pinned below.
+# - If it fails, the boot has to stop. A failed unit nothing depends on is
+#   invisible: the machine boots with / un-wiped and looks perfectly fine.
+#   OnFailure = emergency.target turns a failure into a halted boot.
+# - If the machine is *resuming from hibernation*, it must not run at all:
+#   the saved memory image expects the old / to still be there. The
+#   "hibernation stays off" block below covers how, and why that took more
+#   than one setting.
+#
+# ── how the unit finds the LUKS units ───────────────────────────────────────
+#
+# To order itself after the unlock, the unit needs the names of two units
+# systemd *generates*: dev-mapper-<volume>.device and
+# systemd-cryptsetup@<volume>.service. You'd expect to just write them in.
+# The catch is that ordering After= a unit that doesn't exist is not an
+# error -- systemd ignores it. Write the wrong name and the ordering
+# silently vanishes, with nothing to say so.
+#
+# So the names are built from the same option that makes systemd generate
+# the units in the first place:
+#
+#   boot.initrd.luks.devices.enc            (host's hardware file)
+#     -> field 1 of the initrd's crypttab   (nixpkgs luksroot.nix)
+#     -> systemd-cryptsetup@enc.service     (systemd-cryptsetup-generator)
+#
+#   this file reads the same attribute names -> luksDeviceUnits,
+#                                               luksCryptUnits
+#
+# It's the volume name, not the hostname: the unit is named after field 1
+# of the crypttab line, which is the attribute name. A host that renames
+# its volume gets the right ordering with no edit here. Evaluated on both
+# hosts, 2026-09-28: requires = [ dev-mapper-enc.device ], after =
+# [ initrd-root-device.target dev-mapper-enc.device
+#   systemd-cryptsetup@enc.service ].
+#
+# The device to mount is derived the same way: rootDevice is whatever the
+# host's fileSystems."/" says (a /dev/disk/by-uuid/... path), so this file
+# names no host's device.
+#
+# ── what fails silently ─────────────────────────────────────────────────────
+#
+# - A rollback that stops running looks like a working machine. invariants.nix
+#   catches the structural ways it can stop: restore-root gone, not wanted
+#   by initrd.target, not before sysroot.mount, systemd stage 1 off, btrfs
+#   missing from the initrd. It gates all of these on restore-root
+#   existing, so a host that never imported this is exempt.
+# - Hibernation has a desktop half. With the kernel refusing hibernation,
+#   KDE's PowerDevil asking for hybrid sleep (suspend + hibernation image)
+#   gets CanHybridSleep=no from logind and *drops the request* -- suspend
+#   stops working entirely, no fallback to plain suspend. kde-sleepmode.nix,
+#   beside this file, pins PowerDevil's SleepMode to 1 (suspend to RAM);
+#   the two have to agree. invariants.nix checks nohibernate and all three
+#   Allow* settings.
+# - New state is lost quietly. A service added later whose state lives
+#   under / starts fresh every boot until someone persists it. `just
+#   root-drift`, on the host with sudo, lists what's on / that no
+#   persistence entry covers.
+# - `${...}` inside the script string is Nix interpolation, comments
+#   included. `${rootDevice}` is meant; anything else is a bug.
+#
+# ── how to change this safely ───────────────────────────────────────────────
+#
+# Read skill `impermanence-initrd` first -- the shell's view of disks and
+# mounts on these hosts is namespaced and misleading. Then:
+#
+# 1. Evaluate both hosts' toplevel and run `just check` (invariants.nix
+#    throws during eval). Compare the unit before/after with `just diff`,
+#    not only the hash.
+# 2. On hardware, confirm the wipe actually ran: `sudo btrfs subvolume list
+#    -a /` shows /root with a subvolid far above its neighbours after each
+#    boot, and the boot journal shows the "deleting /root subvolume..."
+#    lines from the script below.
+# 3. If a boot stops at emergency, pick the previous generation in the
+#    systemd-boot menu.
 { lib, ... }:
     let
-        # The attribute name comes from the filename -- renaming this file
-        # renames the module, and dirsAsCategory follows the filename, so
-        # category membership moves with it. But anything importing it by
-        # literal name would break: relevant, for a module that deletes /root.
-        # See AGENTS.md, "A module's name is its filename".
         moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     in {
         flake.modules.nixos.${moduleName} = { config, ... }:
         let
-            # The filesystem holding the root subvolume. The script mounts its
-            # btrfs top level to reach the subvolumes; taking it from fileSystems
-            # stays unambiguous even if a host ever unlocks more than one volume.
-            rootDevice = config.fileSystems."/".device;
-
-            # Ordering for the rollback unit. systemd names the crypt unit after
-            # the *volume*, not the host: boot.initrd.luks.devices.<n> becomes
-            # field 1 of the initrd crypttab (nixpkgs luksroot.nix,
-            # stage1Crypttab) and systemd-cryptsetup-generator derives
-            # systemd-cryptsetup@<that field>.service from it. Deriving rather
-            # than hardcoding is what keeps a host from ordering After= a unit
-            # that is never generated -- a silent no-op, not an error. That
-            # happened once (ad38ffb); see the history section at the bottom.
+            # Every name here comes from the host's own config, so this file
+            # names no host, volume, or device -- "how the unit finds the
+            # LUKS units" above.
+            rootDevice      = config.fileSystems."/".device;
             luksVolumes     = builtins.attrNames config.boot.initrd.luks.devices;
             luksDeviceUnits = map (v: "dev-mapper-${v}.device") luksVolumes;
             luksCryptUnits  = map (v: "systemd-cryptsetup@${v}.service") luksVolumes;
         in {
-            # WARNING: IF YOU HAVE A SIMILAR LAYOUT TO MY LUKS SETUP, IMPORTING THIS WILL DELETE YOUR ROOT ON BOOT, so like, know what you're doing
+            # ── persistence ─────────────────────────────────────────────────
 
-            # filesystems -- disabled 2026-08-09, the host hardware configs own
-            # these now. They concatenated rather than overrode; see history at
-            # the bottom of this file before re-enabling any of them.
-            #
-            # fileSystems."/".options                     = [ "compress=zstd" "noatime" ];
-            # fileSystems."/home".options                 = [ "compress=zstd" ];
-            # fileSystems."/nix".options                  = [ "compress=zstd" "noatime" ];
-            # fileSystems."/persist".options              = [ "compress=zstd" "noatime" ];
-            # fileSystems."/persist".neededForBoot        = true;
-            # fileSystems."/var/log".options              = [ "compress=zstd" "noatime" ];
-            # fileSystems."/var/log".neededForBoot        = true;
-            # fileSystems."/var/lib/sbctl".options        = [ "compress=zstd" "noatime" ];
-            # fileSystems."/var/lib/sbctl".neededForBoot  = true;
-
-            # The impermanence NixOS module itself (the environment.persistence
-            # declaration) is NOT imported here. It lives in
-            # general-config/system/impermanence/declare-persistence-option.nix, imported
-            # unconditionally via the `system` category, so the option is
-            # declared once for every host -- including ones that wipe nothing
-            # (originally nire-testbed, since removed; nire-cube is the current
-            # example).
-            #
-            # Do not import it from here as well. Two DIFFERENT named modules
-            # each importing inputs.impermanence.nixosModule are two distinct
-            # declaration sites as far as the module system is concerned --
-            # not deduplicated the way two categories resolving to the literal
-            # same flake.modules.nixos.<name> are -- and evaluation fails with
-            # "The option `environment.persistence' ... is already declared".
-            # Confirmed on durandal with both imports present. Nothing else
-            # changes: persistence.<...> below works exactly as before, the
-            # option is just declared from the other file now.
+            # A new machine-id every boot would make each boot a stranger to
+            # the journal (its directory is per machine-id).
             environment.etc.machine-id.source = "/persist/etc/machine-id";
 
-            # This is not the only definition of this option. Host-specific
-            # persistence -- state that only matters to a particular category,
-            # not to every host importing `impermanence` -- is declared next to
-            # what generates it instead, in a `<name>-persist.nix` sibling of
-            # the module that owns the state:
-            #
-            #   desktop-env/jovian/jovian-persist.nix     /etc/hhd
-            #   system/networking/tailscale-persist.nix   /var/lib/tailscale
-            #
-            # Filing them as siblings is what scopes them: each is collected by
-            # the same category as the module it belongs to, so /etc/hhd
-            # persists only on hosts that actually run handheld-daemon.
-            # `directories` is `listOf`, so entries from every file concatenate.
+            # The state every impermanence host needs. State that belongs to
+            # one service lives in a `<name>-persist.nix` beside that
+            # service's module instead -- desktop-env/jovian/
+            # jovian-persist.nix holds /etc/hhd, system/networking/
+            # tailscale-persist.nix holds /var/lib/tailscale, and there are a
+            # few more (`find -name '*-persist.nix'`). Filed as a sibling,
+            # each is collected by the same category as its service, so
+            # /etc/hhd persists only on hosts that run handheld-daemon.
+            # `directories` and `files` are lists, so their entries join
+            # these.
             environment.persistence."/persist" = {
                 directories = [
                     "/var/lib/bluetooth"
@@ -90,58 +223,31 @@
                 ];
             };
 
-            # impermanence-style wiping root results in sudo lectures after each reboot
+            # sudo's first-use lecture is remembered under /var/db/sudo,
+            # which the wipe forgets -- so it would lecture after every boot.
             security.sudo.extraConfig = ''
                 Defaults lecture = never
             '';
-            # Hibernation is disabled, and on a host that wipes /root it has to
-            # be: a hibernation image is a snapshot of a system whose /root
-            # existed, and resuming it after the rollback has deleted and
-            # recreated that subvolume restores a kernel holding open files
-            # that are gone.
+
+            # ── hibernation stays off ───────────────────────────────────────
             #
-            # Nothing in this config asks for hibernation, and it still had a
-            # live target on tenacity (2026-08-10): systemd-gpt-auto-generator
-            # finds swap partitions by GPT type UUID, activates them with no
-            # configuration at all, and sets the resume device to match --
-            # /proc/swaps showed nvme0n1p6 active and /sys/power/resume pointed
-            # at it, with no `resume=` anywhere and `swapDevices = []`. Read
-            # the machine, not the config (lessons-learned §2, §24).
+            # A hibernation image is a snapshot of a system whose / is about
+            # to be deleted and re-copied; resuming it restores a kernel
+            # holding open files that are gone.
             #
-            # It surfaced as "suspend hangs with the fan on": KDE asked for
-            # hybrid-sleep -- suspend *plus* writing a hibernation image -- and
-            # systemd-hybrid-sleep.service spent ~19s of wall clock and ~2.3G
-            # of writes. That hang is NOT a regression from the stage-1
-            # migration (the journal shows the same behaviour under scripted
-            # stage 1); what the migration DID change is the guard.
-            # `postResumeCommands` ran *after* the resume attempt, so a
-            # successful resume skipped the wipe by construction;
-            # restore-root.service has no such ordering and can race ahead of
-            # a resuming boot, deleting the /root the restored image expects.
-            # Reachable on a handheld specifically: a flat battery during
-            # suspend is exactly the case that resumes from disk. It has never
-            # fired -- but it was one dead battery away.
+            # Nothing in this config asks for hibernation, and there's no
+            # swap configured, so this looks like it should already be off.
+            # It wasn't: on tenacity, systemd-gpt-auto-generator found a
+            # swap partition by its GPT type, turned it on, and pointed the
+            # resume device at it -- with `swapDevices = []` and no `resume=`
+            # anywhere (seen in /proc/swaps and /sys/power/resume). So the
+            # off switch has to hold whatever systemd discovers, and
+            # `nohibernate` is the kernel's own. The sleep.conf entries make
+            # logind stop *offering* these states rather than failing them;
+            # the KDE half is under "what fails silently" above.
             #
-            # REQUIRES A MATCHING CHANGE IN KDE. `~/.config/powerdevil.rc` must
-            # have `SleepMode=1` -- PowerDevil's enum is
-            # `SuspendToRam = 1, HybridSuspend = 2, SuspendThenHibernate = 3`
-            # (plasma/powerdevil, daemon/powerdevilenums.h), and it was set to
-            # 2. Nothing falls back: PowerDevil asks logind for HybridSleep,
-            # logind answers CanHybridSleep=no, and the request is simply
-            # dropped, so suspend stops working entirely until the KDE setting
-            # changes. An earlier version of this comment claimed disabling
-            # hibernation would degrade such a request to plain s2idle; it does
-            # not. logind still reports CanSuspend=yes and /sys/power/state
-            # still offers `freeze mem` throughout -- only the request was
-            # gone. s2idle is the only mem_sleep this hardware advertises
-            # anyway (/sys/power/mem_sleep is `[s2idle]`, no `deep`).
-            #
-            # nohibernate is the kernel-level switch, so it holds regardless of
-            # what systemd discovers; the sleep.conf entries are so logind and
-            # powerdevil stop offering the options rather than failing them.
-            #
-            # settings.Sleep, not extraConfig: `systemd.sleep.extraConfig` was
-            # removed in 26.11 and errors out by name rather than being ignored.
+            # settings.Sleep because `systemd.sleep.extraConfig` was removed
+            # in 26.11.
             boot.kernelParams = [ "nohibernate" ];
             systemd.sleep.settings.Sleep = {
                 AllowHibernation          = false;
@@ -149,145 +255,93 @@
                 AllowSuspendThenHibernate = false;
             };
 
-            # reset / at each boot, under systemd stage 1
+            # ── the rollback unit ───────────────────────────────────────────
             boot.initrd = {
                 enable = true;
+                # Puts the btrfs tools in the initrd, for the script.
                 supportedFilesystems = [ "btrfs" ];
 
-                # Migrated from boot.initrd.postResumeCommands on 2026-08-10.
-                #
-                # The 2026-08-07 nixpkgs flipped boot.initrd.systemd.enable to
-                # default true and warns "Scripted initrd is deprecated and
-                # scheduled for removal in 26.11" -- and the same bump moved
-                # both hosts to 26.11. postResumeCommands is a scripted stage-1
-                # mechanism which systemd stage 1 rejects with a failed
-                # assertion, so the two cannot overlap and the switch is atomic.
-                #
-                # Not to be confused with boot.loader.systemd-boot, which both
-                # hosts also set. That is the EFI bootloader; this is systemd
-                # inside the initramfs. Similar names, unrelated options -- and
-                # the likeliest reason ad38ffb's first attempt looked finished.
-                #
-                # The working note, wiki/impermanence-stage1-migration.md,
-                # was removed 2026-09-05 -- git history has it.
                 systemd = {
                     enable = true;
 
-                    # emergencyAccess is deliberately NOT set -- the default
-                    # (false) is what we want. `true` means an
-                    # *unauthenticated* root shell from emergency.target,
-                    # which under systemd stage 1 can be reached before the
-                    # LUKS volume is open: a root shell for anyone holding the
-                    # handheld. It was carried for exactly one boot, to make
-                    # the first-ever boot of this branch debuggable (see
-                    # history).
-                    #
-                    # OnFailure = emergency.target below still does its job
-                    # without it: the point was never the shell, it was
-                    # stopping a failed rollback from being a failed unit
-                    # nothing depends on, with the boot carrying on and /root
-                    # quietly un-wiped. The prompt is unenterable anyway --
-                    # root has no password on either host
-                    # (users.mutableUsers = false; only elly has a
-                    # hashedPasswordFile). Recovery picks the previous
-                    # generation in the systemd-boot menu -- the same
-                    # recovery step this repo has always pointed at. If an
-                    # initrd shell is ever genuinely needed, set this to a
-                    # password hash rather
-                    # than `true` -- the option takes
-                    # `oneOf [ bool (nullOr (passwdEntry str)) ]`, so
-                    # authenticated access is available without reopening the
-                    # unauthenticated hole.
+                    # emergencyAccess is left at its default, false. `true`
+                    # would give an *unauthenticated* root shell, reachable
+                    # before the LUKS volume is open -- a root shell for
+                    # anyone holding the handheld. OnFailure below halts the
+                    # boot either way, which is what matters, and root has no
+                    # password to type anyway (users.mutableUsers = false;
+                    # no root hash is set). Recovery is the previous
+                    # generation in the systemd-boot menu. If an initrd shell
+                    # is ever really needed, the option also takes a password
+                    # hash: `oneOf [ bool (nullOr (passwdEntry str)) ]`.
 
                     services.restore-root = {
                         description = "Roll /root back to the blank btrfs snapshot";
 
-                        # initrd-root-device.target is the host-generic
-                        # synchronisation point: reached once the root block
-                        # device exists, after LUKS unlock, whatever the volume
-                        # is called. It also replaces the scripted version's
-                        # `udevadm settle`: rootDevice is a /dev/disk/by-uuid
-                        # path, that symlink is udev's work, and a systemd
-                        # .device unit only becomes active once udev has
-                        # finished with the device -- so ordering after these
-                        # is a real barrier, not the poll it replaces.
+                        # The diagram in "where restore-root sits in the
+                        # boot", as unit ordering.
                         #
-                        # Requires= and After= are independent -- activation
-                        # dependency versus pure ordering -- and systemd.unit(5)
-                        # says to pair them. Requires= alone can run before the
-                        # device exists; After= alone runs the service anyway
-                        # and lets it fail.
+                        # initrd-root-device.target is the host-generic
+                        # point: reached once the root device exists,
+                        # whatever the volume is called. Being After= a
+                        # .device unit also means udev has finished with it,
+                        # so the /dev/disk/by-uuid symlink in rootDevice
+                        # exists -- a real barrier, not a poll.
+                        #
+                        # Both requires and after on the device, because in
+                        # systemd they're independent: Requires= pulls a unit
+                        # in, After= orders against it, and systemd.unit(5)
+                        # says to pair them. Requires= alone can start before
+                        # the device is there; After= alone runs anyway and
+                        # fails.
                         wantedBy = [ "initrd.target" ];
                         requires = luksDeviceUnits;
                         after    = [ "initrd-root-device.target" ] ++ luksDeviceUnits ++ luksCryptUnits;
                         before   = [ "sysroot.mount" ];
 
                         unitConfig = {
+                            # Opt out of systemd's implicit ordering (after
+                            # sysinit.target and basic.target) so the only
+                            # ordering is the explicit one above.
                             DefaultDependencies = "no";
 
-                            # The safety property postResumeCommands gave for
-                            # free, and the one thing this conversion would
-                            # otherwise silently drop: that option ran *after*
-                            # the resume attempt, so a successful resume
-                            # skipped the wipe. A plain initrd.target unit has
-                            # no equivalent and would delete the root the
-                            # restored memory image expects. Fails in the safe
-                            # direction -- stops wiping rather than wiping a
-                            # resuming system.
-                            #
-                            # NOT the real defence, and on its own it does not
-                            # work here: it keys on a kernel command line
-                            # parameter, and systemd does not need one. On
-                            # tenacity (2026-08-10) /sys/power/resume was
-                            # already 259:6 -- nvme0n1p6 -- with no `resume=`
-                            # anywhere, because systemd-gpt-auto-generator
-                            # discovered the swap partition by GPT type and
-                            # wired it up. This condition would have passed and
-                            # the wipe gone ahead. `nohibernate` above is what
-                            # actually closes it; this stays as a second line
-                            # only.
+                            # Skips the wipe when the kernel command line
+                            # has `resume=`. A second line only: as the
+                            # hibernation block above describes, systemd
+                            # can set up resume without that parameter, and
+                            # on tenacity this condition would have passed
+                            # and let the wipe go ahead. nohibernate is what
+                            # closes it.
                             ConditionKernelCommandLine = [ "!resume" ];
 
-                            # Otherwise a failed rollback is just a failed unit
-                            # that nothing depends on: the boot carries on with
-                            # /root un-wiped, which looks exactly like a working
-                            # system until the disk fills.
+                            # A failed rollback halts the boot instead of
+                            # quietly leaving / un-wiped.
                             OnFailure = "emergency.target";
                         };
 
                         serviceConfig.Type = "oneshot";
 
-                        # Runs under `set -e` -- the opposite of the scripted
-                        # stage-1 code it replaced, where a failed mount left
-                        # every later command failing harmlessly against an
-                        # empty /mnt and the rollback silently not happening
-                        # (nixpkgs builds job scripts with makeJobScript,
-                        # writeShellScriptBin over `set -e` --
-                        # nixos/lib/systemd-lib.nix). The first failure now
-                        # aborts the unit and OnFailure turns it into
-                        # emergency. The tools are all present: btrfs because
-                        # boot.initrd.supportedFilesystems includes btrfs;
-                        # mount/umount from systemd's own extraBin; coreutils,
-                        # for cut, from initrdBin. PATH in the initrd is
-                        # /bin:/sbin.
+                        # Runs under `set -e` (nixpkgs wraps every unit
+                        # script that way: makeJobScript in
+                        # nixos/lib/systemd-lib.nix), so the first failing
+                        # command fails the unit and OnFailure fires. The
+                        # tools are there: btrfs via supportedFilesystems,
+                        # mount/umount from systemd's extraBin, cut from
+                        # coreutils in initrdBin. PATH is /bin:/sbin.
+                        #
+                        # The loop comes first because by this point root/
+                        # holds nested subvolumes (observed: srv,
+                        # var/lib/portables, var/lib/machines, var/tmp), and
+                        # `btrfs subvolume delete` refuses a subvolume that
+                        # has others inside it. Deleting them has caused
+                        # nothing worse than harmless-looking
+                        # systemd-tmpfiles errors.
                         script = ''
                             mkdir -p /mnt
 
-                            # Mount the btrfs top level to /mnt so we can
-                            # manipulate subvolumes. ${rootDevice} rather than
-                            # a hardcoded /dev/mapper/enc: taken from this
-                            # host's own fileSystems, so the module carries no
-                            # host-specific device name.
+                            # The top level, where the subvolumes are visible.
                             mount -o subvol=/ ${rootDevice} /mnt
 
-                            # /root is already populated with nested subvolumes
-                            # at this point, which makes `btrfs subvolume
-                            # delete` fail, so remove them first. Observed on
-                            # the machine 2026-08-10: srv, var/lib/portables,
-                            # var/lib/machines, var/tmp -- the middle two
-                            # probably systemd-nspawn-related, unused here.
-                            # Deleting them has caused no issues beyond
-                            # benign-looking systemd-tmpfiles errors.
                             btrfs subvolume list -o /mnt/root |
                             cut -f9 -d' ' |
                             while read subvolume; do
@@ -301,8 +355,6 @@
                             echo "restoring blank /root subvolume..."
                             btrfs subvolume snapshot /mnt/root-blank /mnt/root
 
-                            # Once we're done rolling back to a blank snapshot,
-                            # we can unmount /mnt and continue on the boot process.
                             umount /mnt
                         '';
                     };
@@ -313,53 +365,78 @@
 
 # ── history ─────────────────────────────────────────────────────────────────
 #
-# 2026-08-10 — the stage-1 migration (ad38ffb) took three scripted-stage-1
-# behaviours with it; recorded because a revert would bring the mechanism
-# back.
+# 2026-08-10 — migrated from boot.initrd.postResumeCommands (scripted stage
+# 1) to the systemd unit, forced by the 2026-08-07 nixpkgs bump: it made
+# boot.initrd.systemd.enable default true, deprecated scripted initrd (removal
+# in 26.11), and systemd stage 1 fails an assertion on postResumeCommands, so
+# the switch was atomic. The working note, wiki/impermanence-stage1-
+# migration.md, was removed 2026-09-05 (git history). What the old mechanism
+# did that a revert would bring back:
 #
-# - `udevadm settle` guarded the mount: the scripted initrd hardcoded
+# - `udevadm settle` guarded the mount: scripted stage 1 hardcoded
 #   /dev/mapper/enc (created synchronously by cryptsetup), while
-#   fileSystems."/" is a by-uuid path udev creates asynchronously — the
-#   rollback raced udev, and losing the race was a silent non-wipe. After=
-#   the device units above fixes it structurally.
-# - `boot.kernelParams = [ "boot.shell_on_fail" ]` was what made
-#   stage-1-init.sh's fail() offer an interactive shell; OnFailure=
-#   emergency.target above is the systemd equivalent.
-# - The `if ! mount ...; then fail; fi` guards died with `set -e`: systemd
-#   job scripts (makeJobScript) abort on first failure, so OnFailure= fires.
+#   fileSystems."/" is a by-uuid path udev creates asynchronously -- losing
+#   that race was a silent non-wipe. After= the device units replaced it.
+# - `boot.kernelParams = [ "boot.shell_on_fail" ]` made stage-1-init.sh's
+#   fail() offer a shell; OnFailure = emergency.target replaced it.
+# - `if ! mount ...; then fail; fi` guards: without them a failed mount left
+#   every later command failing harmlessly against an empty /mnt. `set -e`
+#   replaced them.
+# - postResumeCommands ran *after* the resume attempt, so a successful
+#   hibernation resume skipped the wipe for free. The unit has no such
+#   ordering and could race a resuming boot -- hence
+#   ConditionKernelCommandLine, then nohibernate once tenacity showed resume
+#   set up with no `resume=` (found 2026-08-10). Never fired; one flat
+#   battery during suspend away. lessons-learned §28 (including the wrong
+#   "tenacity has no swap" assessment that started it).
+# - The template-injection trap (never write an @placeholder@ token in a
+#   scripted hook string, comments included -- a later substituteInPlace
+#   pass expands it) died with the mechanism. Full account: skill
+#   `impermanence-initrd`.
 #
-# emergencyAccess = true was carried for the first boot of this branch
-# (debugging a systemd stage-1 failure pre-LUKS needs an unauthenticated
-# shell — a knowingly-accepted hole) and removed 2026-08-10 once the
+# 2026-08-10 — emergencyAccess = true was carried for the first boot of the
+# systemd-stage-1 branch (debugging a pre-LUKS failure needs an
+# unauthenticated shell -- a knowingly-accepted hole), removed once the
 # rollback was confirmed by subvolid.
 #
-# The scripted-stage-1 template-injection trap — never write an
-# @placeholder@ token inside a scripted hook string, comments included;
-# 19 substituteInPlace passes assemble stage-1-init.sh and a later pass
-# expands it — died with the mechanism. Full account: skill
-# `impermanence-initrd`.
+# 2026-08-10 — the suspend hang on tenacity ("suspend hangs with the fan
+# on"): KDE requested hybrid sleep, systemd-hybrid-sleep.service took ~19s
+# and ~2.3G of writes. Not a regression from the migration (the journal
+# shows the same under scripted stage 1). Disabling hibernation then broke
+# suspend entirely until PowerDevil's SleepMode changed from 2 to 1
+# (lessons-learned §30). An earlier version of this comment claimed a
+# refused hybrid-sleep request degrades to plain s2idle; it does not --
+# logind still reported CanSuspend=yes and /sys/power/state `freeze mem`,
+# only the request was dropped. /sys/power/mem_sleep on tenacity is
+# `[s2idle]` alone, no `deep`.
 #
-# 2026-08-09 — the commented-out fileSystems block: this module and the
-# host hardware configs both declared mount options, and `options` is
-# `listOf str`, so the definitions concatenated (every option twice —
+# 2026-08-10 — the nested subvolumes under root/ (srv, var/lib/portables,
+# var/lib/machines, var/tmp) were observed on the machine, which is why the
+# delete loop exists.
+#
+# 2026-08-09 — fileSystems options moved out: this module and the host
+# hardware configs both declared mount options, and `options` is
+# `listOf str`, so the definitions concatenated (every option twice --
 # harmless to mount, but the one-owning-module rule broken). The hardware
-# config owns them: it knows the subvol names. Nothing was lost — the
-# option *set* verified unchanged with `just diff`. Before re-enabling any
-# line above, check what the host hwconfig already declares for that mount.
+# configs own them; verified unchanged with `just diff`. The disabled block
+# stayed here commented out until 2026-09-28, then was deleted: compress=zstd
+# on /, /home, /nix, /persist, /var/log, /var/lib/sbctl (plus noatime on all
+# but /home), and neededForBoot on /persist, /var/log, /var/lib/sbctl.
+# Adding any of it back here doubles what the hardware file declares.
 #
 # 2026-08-09 — the ordering fix in ad38ffb: the old unit hardcoded
 # `requires = [ "dev-mapper-enc.device" ]`, `after = [ "dev-mapper-enc.device"
 # "systemd-cryptsetup@nire-durandal.service" ]`, and mounted /dev/mapper/enc.
 # The crypt unit is named after the *volume*, not the host (luksroot.nix,
 # stage1Crypttab), so systemd-cryptsetup@nire-durandal.service never existed
-# anywhere — the After= was a silent no-op (dev-mapper-enc.device beside it
+# anywhere -- the After= was a silent no-op (dev-mapper-enc.device beside it
 # was what actually ordered things), and interpolating networking.hostName
 # would have been wrong the same way on tenacity. Deriving from
-# boot.initrd.luks.devices above fixed it; durandal's generated values came
-# out byte-identical (`just diff`).
+# boot.initrd.luks.devices fixed it; durandal's generated values came out
+# byte-identical (`just diff`). The confusion with boot.loader.systemd-boot
+# is the likeliest reason ad38ffb's first attempt looked finished.
 #
-# 2026-08-10 — the hibernation hazard closed by nohibernate and the
-# ConditionKernelCommandLine notes above also came from ad38ffb:
-# postResumeCommands ran after the resume attempt, so a successful
-# hibernation resume skipped the wipe. The wrong assessment that started it
-# ("tenacity has no swap") and the full story: lessons-learned §28.
+# 2026-09-28 — rewritten as a talk-style explanation (skill
+# `explain-tricky-code`): the body's comments were reorganised into the
+# header and next to the lines they explain, and the dated incident detail
+# moved here from the body.
