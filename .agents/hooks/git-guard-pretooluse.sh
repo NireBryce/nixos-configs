@@ -8,7 +8,8 @@
 # itself runs `git reset --hard origin/experimental` as its documented
 # recovery step for an accidental commit to the protected branch, and
 # `git push origin --delete <branch-name>` as its routine post-merge
-# cleanup (SKILL.md) -- both should still get a confirmation prompt here,
+# cleanup (SKILL.md), and `use-a-worktree`'s cleanup step is `git worktree
+# remove --force` -- all should still get a confirmation prompt here,
 # they just aren't wrong to run. This is a mechanical backstop for
 # CLAUDE.md's general "confirm first" stance on anything hard to reverse,
 # not a replacement for judgment, and it does not gate on branch name --
@@ -91,6 +92,42 @@ fi
 # git stash drop / clear
 if [ -z "$reason" ] && grep -qE '\bstash\b' <<<"$command" && grep -qE '\b(drop|clear)\b' <<<"$command"; then
     reason="This permanently discards stashed changes with no undo. Confirm the stash isn't still needed."
+fi
+
+# git restore onto the working tree -- the modern spelling of `checkout -- .`,
+# which is matched above. A bare-dot target asks regardless of the other
+# flags on it, including --staged: telling `--staged .` (which only unstages)
+# apart from the destructive shapes needs segment-scoped parsing this hook
+# deliberately doesn't do -- a whole-command `--staged` carve-out leaked
+# across `&&` and suppressed the ask for `git restore .` after a
+# `--staged` earlier in the same line (found in review, 2026-09-29), and
+# over-asking is the safe direction for an ask. --worktree/-w asks even on
+# a single file, for symmetry with the checkout force gate.
+# `restore` is anchored to a following space/EOL, not `\brestore\b`, so a
+# path like .../restore-root/ doesn't read as the verb.
+if [ -z "$reason" ] && grep -qE '\brestore([[:space:]]|$)' <<<"$command" \
+    && { grep -qE -- '(^|[[:space:]])--worktree([[:space:]]|$)|(^|[[:space:]])-[wW]([[:space:]]|$)' <<<"$command" \
+         || grep -qE '\brestore([[:space:]]([^;|&]*[[:space:]])?)\.([[:space:]]|$)' <<<"$command"; }; then
+    reason="'git restore' onto the working tree discards uncommitted changes with no undo -- the modern spelling of 'git checkout -- .', which this hook also catches. Confirm nothing uncommitted is about to be lost ('--staged .' only unstages but trips too; '--staged <file>' without a dot does not trip)."
+fi
+
+# git worktree remove --force: deletes a worktree even when it holds
+# uncommitted or unpushed work. Plain `remove` refuses those -- which is what
+# makes the forced form worth a pause, and why only it is matched. This is
+# also `use-a-worktree`'s documented cleanup step, so expect it when tearing
+# down a finished worktree.
+if [ -z "$reason" ] && grep -qE '\bworktree([[:space:]]|$)' <<<"$command" \
+    && grep -qE '\bremove([[:space:]]|$)' <<<"$command" \
+    && grep -qE -- "$force_flag_re" <<<"$command"; then
+    reason="'git worktree remove --force' deletes a worktree even when it holds uncommitted or unpushed changes -- plain 'remove' refuses those. Confirm the worktree has nothing unsaved (this is also the use-a-worktree skill's documented cleanup step, so it's expected then)."
+fi
+
+# git push --mirror: makes the remote exactly match local, deleting every
+# remote branch and tag that does not exist locally -- far wider than
+# --force, which only rewrites the refs actually named.
+if [ -z "$reason" ] && grep -qE '\bpush\b' <<<"$command" \
+    && grep -qE -- '(^|[[:space:]])--mirror([[:space:]]|$)' <<<"$command"; then
+    reason="'git push --mirror' makes the remote exactly match local -- it deletes every remote branch and tag that does not exist locally, not just the refs named. Confirm that is really intended."
 fi
 
 if [ -n "$reason" ]; then

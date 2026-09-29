@@ -134,6 +134,23 @@ jobs:
       # literal from a hostile command survives into a shape.
       - name: agent recurring shape leak tests
         run: python3 .agents/scripts/test_recurring.py
+      # The guard hooks (.agents/hooks/, .githooks/commit-msg) are
+      # pattern-matchers gating safety prompts -- the same class
+      # branches.py's classifier was fixture-tested for (#303) -- and each
+      # has already gone subtly wrong once in production (the 2>/dev/null
+      # sops miss, the posttooluse jq tostring bug). A guard that stops
+      # matching fails silently: with settings.json's `|| true`, a broken
+      # hook is indistinguishable from no hook. Skips itself without jq,
+      # like the pre-commit hook does without statix.
+      - name: guard hook fixture tests (just guards-test)
+        run: python3 flake/scripts/test_guards.py
+      # preflight's step list and this workflow's are one checklist kept
+      # twice by hand; this is the mechanical form of the preflight
+      # recipe's "mirrors check.yml's steps" comment, and it covers these
+      # two steps too -- adding a check to one side without the other
+      # fails here, in the no-nix prefix, in seconds.
+      - name: preflight/CI mirror check (just preflight-mirror-test)
+        run: python3 flake/scripts/test_preflight_mirror.py
 
       # Pinned by full SHA, same as update-flake-lock.yml pins its actions:
       # `@main` means running whatever upstream's default branch says on
