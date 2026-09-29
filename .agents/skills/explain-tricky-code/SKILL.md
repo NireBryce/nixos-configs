@@ -73,7 +73,7 @@ don't reorder.
    answer, visibly separated:
 
    ```
-   # 1. Q: The shim passes in `categoryDir`. Why not work it out in here?
+   # 1. Q: The shim passes in `shimFile`. Why not work it out in here?
    #
    #    A: `__curPos.file` is answered when the file is *read* ...
    ```
