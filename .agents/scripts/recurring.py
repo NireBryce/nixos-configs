@@ -3,9 +3,27 @@
 
 Answers skill agent-scripts' question "is this worth a script?" with
 evidence instead of a guess: an agent has no memory between sessions, but
-this machine's Claude transcripts for the repo (~/.claude/projects/
-*nixos-configs*/) do. Only the Bash command field is read, never tool
-output.
+its harness keeps history. Only the Bash command field is read, never tool
+output. Sources (HARNESSES), sessions filtered to this repo:
+
+  claude     ~/.claude/projects/*nixos-configs*/*.jsonl
+  opencode   ~/.local/share/opencode/opencode*.db   (sqlite, read-only)
+  zcode      ~/.zcode/cli/db/db.sqlite               (an OpenCode fork:
+             same schema, tool named `Bash` rather than `bash`)
+
+Each prints its own session count in the report, so a reader broken by a
+format change shows as 0 rather than silently shrinking the totals.
+
+Across hosts: `export` writes this host's observations -- shapes and
+hashed session ids only, never a command -- to <host>.<harness>.json in a
+clone of the private forge repo elly/agent-command-log, merging into what
+is already there (so history outlives the harness's own retention), then
+commits and pushes. The report merges every exported file with local
+data -- this host's own export included, since it keeps sessions the
+harness has since pruned -- and marks a source not exported in STALE_DAYS
+(skill ship runs `export` before each PR, so STALE means that host and
+harness haven't shipped lately). Files of an older FORMAT are skipped. Git runs with
+BatchMode ssh, so a missing key fails fast instead of prompting.
 
 Agents rarely repeat a whole command line; they reassemble the same
 pieces. Each command is parsed into pipelines (a producer, then the filters
@@ -49,6 +67,8 @@ sensitive:
   - flags: a standalone 1-3 letter cluster (`-rn`) or find's long options
     survive; longer or value-glued short flags keep one letter (`-uadmin`
     -> `-u`); `--x=y` -> `--x=<arg>`; `-20` -> `-N`; after `--`, all <arg>.
+    Unquoted `--long-flag` names survive verbatim: a real, exported
+    literal class, acceptable because flag names are what a script needs.
   - subcommand words survive only from a closed list per tool
     (SUBCOMMANDS), so `git checkout experimental` is `git checkout <arg>`.
 
@@ -67,20 +87,40 @@ real command name in command position still reads as one.
 
 `just` invocations (already scripts) and <cmd> segments are skipped.
 
-    recurring.py [--min-sessions N] [--top N] [--max-len N] [--json]
+    recurring.py [--min-sessions N] [--top N] [--max-len N] [--json] [--no-sync]
     recurring.py --session <id-prefix>     # audit: one session's shapes
+    recurring.py export                    # this host -> the forge repo
+    recurring.py setup                     # clone the forge repo (once per host)
 """
 import argparse
+import datetime
+import hashlib
 import json
 import os
 import re
 import shlex
 import shutil
+import socket
+import sqlite3
+import subprocess
+import sys
 from collections import Counter, defaultdict
 from functools import lru_cache
 from pathlib import Path
 
-PROJECTS = Path.home() / '.claude' / 'projects'
+PROJECTS   = Path.home() / '.claude' / 'projects'
+REMOTE     = 'forgejo@ts-cube:elly/agent-command-log.git'
+STATE      = Path(os.environ.get('XDG_STATE_HOME', Path.home() / '.local' / 'state'))
+LOG_DIR    = STATE / 'nixos-configs' / 'agent-command-log'
+STALE_DAYS = 21
+MAX_LEN    = 4                         # longest sequence recorded
+# Bumped whenever shaping gets stricter: a file written under older rules
+# may hold keys the current ones would have dropped, and merging would keep
+# them forever. Files of another format are skipped when reading and
+# rebuilt, not merged, on the host's next export.
+FORMAT     = 2
+GIT_ENV    = {**os.environ,
+              'GIT_SSH_COMMAND': 'ssh -o BatchMode=yes -o ConnectTimeout=8'}
 
 # Per tool, the subcommand words worth keeping, as a closed list: an open
 # "any bareword" rule kept branch names and unit names. Two-level tools
@@ -126,7 +166,7 @@ PUNCT      = set(';&|()<>\n')
 REDIRECT   = re.compile(r'^(?:[<>]+&?|&>+|>&|<&)$')
 ENV_ASSIGN = re.compile(r'^[A-Za-z_][A-Za-z0-9_]*=')
 NAME       = re.compile(r'^[A-Za-z_][\w.+-]*$')
-HEREDOC    = re.compile(r"(?<!<)<<-?\s*(['\"]?)([\w-]+)\1")
+HEREDOC    = re.compile(r"(?<!<)<<-?\s*\\?(['\"]?)([\w-]+)\1")  # <<EOF <<'EOF' <<\EOF
 # Short flags survive only as a 1-3 letter cluster standing alone (`-rn`,
 # `-sb`); anything longer or with a value glued on (`-uadmin`, `-A4`) is
 # cut to its first letter. find's single-dash long options are listed.
@@ -152,8 +192,12 @@ BUILTINS = {'cd', 'echo', 'printf', 'test', '[', 'read', 'export', 'set',
             'local', 'shift', 'exit', 'return', 'type', 'hash', 'pwd'}
 
 
-def commands():
-    """(session, command) for every Bash tool call in the transcripts."""
+def warn(msg):
+    print(f'warning: {msg}', file=sys.stderr)
+
+
+def claude_rows():
+    """(session, command) from Claude Code's JSONL transcripts."""
     seen = set()
     for path in sorted(PROJECTS.glob('*nixos-configs*/*.jsonl')):
         for line in path.read_text(errors='replace').splitlines():
@@ -174,6 +218,59 @@ def commands():
                     cmd = inp.get('command') if isinstance(inp, dict) else None
                     if isinstance(cmd, str) and cmd:
                         yield e.get('sessionId'), cmd
+
+
+def sqlite_rows(path):
+    """(session, command) from an OpenCode-schema database: Bash calls are
+    `part` rows with type `tool`, tool `bash`/`Bash`, the command at
+    state.input.command. Opened read-only; a harness writing to it
+    concurrently is fine (WAL)."""
+    try:
+        db = sqlite3.connect(f'file:{path}?mode=ro', uri=True)
+        rows = db.execute(
+            "select p.session_id, p.data from part p join session s"
+            " on s.id = p.session_id where s.directory like '%nixos-configs%'"
+            # json_valid first: one malformed row must not fail the query
+            " and case when json_valid(p.data)"
+            "     then json_extract(p.data, '$.type') end = 'tool'"
+            " order by p.rowid"        # insertion order: sequences need it
+        ).fetchall()
+    except sqlite3.Error as e:
+        warn(f'{path}: {e}')
+        return
+    for session, data in rows:
+        try:
+            d = json.loads(data)
+        except (TypeError, ValueError):
+            continue
+        if (not isinstance(d, dict) or d.get('type') != 'tool'
+                or str(d.get('tool')).lower() != 'bash'):
+            continue
+        st = d.get('state')
+        inp = st.get('input') if isinstance(st, dict) else None
+        cmd = inp.get('command') if isinstance(inp, dict) else None
+        if isinstance(cmd, str) and cmd:
+            yield session, cmd
+
+
+def opencode_rows():
+    for path in sorted(Path.home().glob('.local/share/opencode/opencode*.db')):
+        yield from sqlite_rows(path)
+
+
+def zcode_rows():
+    path = Path.home() / '.zcode' / 'cli' / 'db' / 'db.sqlite'
+    if path.exists():
+        yield from sqlite_rows(path)
+
+
+HARNESSES = {'claude': claude_rows, 'opencode': opencode_rows, 'zcode': zcode_rows}
+
+
+def commands():
+    """(session, command) across every harness, for --session."""
+    for rows in HARNESSES.values():
+        yield from rows()
 
 
 HEREDOC_MARK = '__HEREDOC__'   # where a body was cut; renders as <heredoc>
@@ -228,7 +325,16 @@ def tokenize(cmd):
     flag), punctuation runs as their own tokens, newline included. None if
     the command doesn't parse. Commands containing `case` are dropped:
     their pattern words (`host)`) sit where commands do."""
-    cmd = strip_heredocs(cmd).replace('\\\n', ' ').replace('`', ' ; ')
+    # Backticks are left alone: pre-splitting on them also split the ones
+    # inside quoted strings (markdown in a `gh ... --body "..."`), and the
+    # prose between them parsed as commands. Unquoted, a backtick stays
+    # inside its token, which then can't pass as a command name.
+    cmd = strip_heredocs(cmd).replace('\\\n', ' ')
+    # Non-POSIX shlex keeps quotes but doesn't process escapes, so a `\"`
+    # inside a double-quoted body ended the string early and the prose
+    # after it parsed as commands. Escaped characters are content, and
+    # content is discarded anyway: neutralize them.
+    cmd = re.sub(r'\\.', '_', cmd)
     lex = shlex.shlex(cmd, posix=False, punctuation_chars=''.join(PUNCT))
     lex.whitespace = ' \t\r'
     lex.whitespace_split = True
@@ -237,7 +343,25 @@ def tokenize(cmd):
         tokens = list(lex)
     except ValueError:
         return None
-    return None if 'case' in tokens else tokens
+    if 'case' in tokens or any(unbalanced(t) for t in tokens):
+        return None
+    # A `<<` left after strip_heredocs is a heredoc form HEREDOC doesn't
+    # know (`<<$T`, `<<'A B'`), whose body would parse as commands -- or a
+    # shift in `$(( ))`. Either way, dropping the command is the safe side.
+    if any(is_punct(t) and '<<' in t.replace('<<<', '') for t in tokens):
+        return None
+    return tokens
+
+
+def unbalanced(tok):
+    """A token whose quotes don't pair up means shlex and the shell
+    disagree about where strings end -- `"...$(awk -F'"' ...)..."` nests
+    quotes shlex can't follow, leaving tokens like `$f"`. Guessing is how
+    prose leaked, so the whole command is dropped instead."""
+    outer = tok[:1] if tok[:1] in ('"', "'") else None
+    if outer and (len(tok) < 2 or tok[-1] != outer):
+        return True
+    return any(tok.count(q) % 2 for q in ('"', "'") if q != outer)
 
 
 def is_punct(tok):
@@ -318,6 +442,7 @@ def pipelines(cmd):
     if tokens is None:
         return []
     out, pipe, cur, skip_next = [], [], [], False
+    defined = set()                    # functions defined in this command
     for tok in tokens + ['\n']:
         if skip_next:
             skip_next = False
@@ -331,7 +456,10 @@ def pipelines(cmd):
                 cur.pop()              # and the fd in `2>&1`
             continue
         if tok.startswith('(') and len(cur) == 1 and NAME.match(cur[0]):
+            defined.add(cur[0])
             cur = ['function']         # `name() {`: a definition, not a call
+        if cur and cur[0] in defined:
+            cur = ['./fn']             # a call to it: its name is a literal -> <cmd>
         s = segment_shape(cur) if cur else None
         if s:
             pipe.append(s)
@@ -380,34 +508,150 @@ def absorb(counts, min_sessions, top):
                   key=lambda f: (-kept[f], -len(f)))[:top], kept
 
 
-def analyze(min_sessions, top, max_len):
-    chains, pipes = defaultdict(set), defaultdict(set)
-    variants = defaultdict(Counter)    # untyped key -> typed renderings
-    batch, headers, total, ncmds = set(), set(), set(), 0
-    for session, cmd in commands():
-        total.add(session)
-        ncmds += 1
+def host():
+    return socket.gethostname().split('.')[0]
+
+
+def session_key(harness, session):
+    """Session ids leave the machine hashed: enough to count distinct
+    sessions across hosts, nothing to look up."""
+    return hashlib.sha256(f'{harness}:{session}'.encode()).hexdigest()[:12]
+
+
+def empty_obs():
+    return {'sessions': {}, 'chains': defaultdict(set), 'pipes': defaultdict(set)}
+
+
+def collect(rows, harness):
+    """Observations from (session, command) rows: per hashed session its
+    command count and batch/header flags; per typed sequence and pipeline
+    shape (tab-joined), the sessions it appeared in. This is all an export
+    carries, and all ranking needs."""
+    obs = empty_obs()
+    for session, cmd in rows:
+        h = session_key(harness, session)
+        meta = obs['sessions'].setdefault(h, {'commands': 0, 'batch': False,
+                                              'headers': False})
+        meta['commands'] += 1
         ps = pipelines(cmd)
         if any(is_header(p) for p in ps) and len(ps) > 2:
-            headers.add(session)
+            meta['headers'] = True
         producers = [p[0] for p in ps
                      if not is_header(p) and cmd_name(p[0]) not in ('just', '<cmd>')]
         if sum(cmd_name(x) in READERS for x in producers) >= 2:
-            batch.add(session)
+            meta['batch'] = True
         for p in ps:
             if len(p) > 1 and cmd_name(p[0]) not in ('just', '<cmd>'):
-                typed = (p[0], tuple(filter_name(f) for f in p[1:]))
-                key = (untyped(p[0]), tuple(untyped(f) for f in typed[1]))
-                pipes[key].add(session)
-                variants[key][typed] += 1
-        for n in range(2, max_len + 1):
+                obs['pipes']['\t'.join([p[0], *map(filter_name, p[1:])])].add(h)
+        for n in range(2, MAX_LEN + 1):
             for i in range(len(producers) - n + 1):
-                frag = tuple(producers[i:i + n])
-                if all(cmd_name(x) in READERS for x in frag):
-                    continue           # batch reads: counted above
-                key = tuple(untyped(x) for x in frag)
-                chains[key].add(session)
-                variants[key][frag] += 1
+                frag = producers[i:i + n]
+                if not all(cmd_name(x) in READERS for x in frag):
+                    obs['chains']['\t'.join(frag)].add(h)
+    return obs
+
+
+def merge(a, b):
+    """Union of two observation sets; a session seen in both keeps the
+    larger count and either's flags."""
+    out = empty_obs()
+    for src in (a, b):
+        for h, m in src['sessions'].items():
+            cur = out['sessions'].setdefault(h, {'commands': 0, 'batch': False,
+                                                 'headers': False})
+            cur['commands'] = max(cur['commands'], m['commands'])
+            cur['batch'] |= m['batch']
+            cur['headers'] |= m['headers']
+        for kind in ('chains', 'pipes'):
+            for k, hs in src[kind].items():
+                out[kind][k] |= set(hs)
+    return out
+
+
+def to_json(obs):
+    return {'sessions': dict(sorted(obs['sessions'].items())),
+            'chains': {k: sorted(v) for k, v in sorted(obs['chains'].items())},
+            'pipes':  {k: sorted(v) for k, v in sorted(obs['pipes'].items())}}
+
+
+def from_json(d):
+    """Observations from an export file; ValueError on anything that isn't
+    the shape to_json writes, so one bad file is skipped, not fatal."""
+    try:
+        obs = empty_obs()
+        for h, m in d['sessions'].items():
+            obs['sessions'][str(h)] = {'commands': int(m['commands']),
+                                       'batch': bool(m['batch']),
+                                       'headers': bool(m['headers'])}
+        for kind in ('chains', 'pipes'):
+            for k, hs in d[kind].items():
+                if not isinstance(k, str) or not isinstance(hs, list):
+                    raise TypeError(kind)
+                obs[kind][k] = set(map(str, hs))
+        return obs
+    except (KeyError, TypeError, AttributeError, ValueError) as e:
+        raise ValueError(f'not an export file ({e!r})') from None
+
+
+def git(*args):
+    """git in the log clone; never raises -- a timeout or missing git is a
+    failed result, so the ship step reports it instead of tracebacking."""
+    try:
+        return subprocess.run(['git', '-C', str(LOG_DIR), *args], env=GIT_ENV,
+                              capture_output=True, text=True, timeout=60)
+    except (OSError, subprocess.SubprocessError) as e:
+        return subprocess.CompletedProcess(args, 1, '', str(e))
+
+
+def pull():
+    r = git('pull', '-q', '--rebase')
+    if r.returncode:
+        warn(f'could not pull the command log ({r.stderr.strip()[:120]}); '
+             'using the local copy')
+
+
+def load(path):
+    """(document, obs) for a current-format export file; ValueError if it
+    is malformed or another format."""
+    try:
+        d = json.loads(path.read_text())
+    except (OSError, ValueError) as e:
+        raise ValueError(f'unreadable ({e})') from None
+    if not isinstance(d, dict):
+        raise ValueError('not an export file')
+    if d.get('format') != FORMAT:
+        raise ValueError(f'format {d.get("format")!r}, not {FORMAT}: rebuilt '
+                         f'at that host\'s next export')
+    return d, from_json(d)
+
+
+def exported():
+    """(label, obs, updated) for each usable file in the log clone -- this
+    host's own included: it holds history the harness may have pruned."""
+    for path in sorted(LOG_DIR.glob('*.json')) if LOG_DIR.exists() else []:
+        try:
+            d, obs = load(path)
+        except ValueError as e:
+            warn(f'{path.name}: {e}; skipped')
+            continue
+        yield f'{d.get("harness")}@{d.get("host")}', obs, d.get('updated')
+
+
+def rank(obs, min_sessions, top, max_len):
+    chains, pipes = defaultdict(set), defaultdict(set)
+    variants = defaultdict(Counter)    # untyped key -> typed renderings
+    for k, hs in obs['chains'].items():
+        frag = tuple(k.split('\t'))
+        if len(frag) <= max_len:
+            key = tuple(untyped(x) for x in frag)
+            chains[key] |= hs
+            variants[key][frag] += len(hs)
+    for k, hs in obs['pipes'].items():
+        prod, *filt = k.split('\t')
+        typed = (prod, tuple(filt))
+        key = (untyped(prod), tuple(untyped(f) for f in filt))
+        pipes[key] |= hs
+        variants[key][typed] += len(hs)
 
     seq, seq_n = absorb({f: len(s) for f, s in chains.items()}, min_sessions, top)
     by_producer = defaultdict(list)
@@ -416,9 +660,12 @@ def analyze(min_sessions, top, max_len):
             prod, filt = variants[key].most_common(1)[0][0]
             by_producer[untyped(prod)].append((len(s), prod, ' | '.join(filt)))
     producers = sorted(by_producer, key=lambda p: -max(n for n, *_ in by_producer[p]))[:top]
+    meta = obs['sessions'].values()
     return {
-        'sessions': len(total), 'commands': ncmds,
-        'header_sessions': len(headers), 'batch_read_sessions': len(batch),
+        'sessions': len(obs['sessions']),
+        'commands': sum(m['commands'] for m in meta),
+        'header_sessions': sum(m['headers'] for m in meta),
+        'batch_read_sessions': sum(m['batch'] for m in meta),
         'sequences': [{'sessions': seq_n[f],
                        'chain': list(variants[f].most_common(1)[0][0])}
                       for f in seq],
@@ -429,9 +676,45 @@ def analyze(min_sessions, top, max_len):
     }
 
 
+def analyze(min_sessions, top, max_len, sync=True):
+    """Local harnesses read live, plus every export (this host's too)."""
+    obs, sources = empty_obs(), []
+    for harness, rows in HARNESSES.items():
+        o = collect(rows(), harness)
+        sources.append({'source': f'{harness}@{host()}', 'local': True,
+                        'sessions': len(o['sessions'])})
+        obs = merge(obs, o)
+    if (LOG_DIR / '.git').exists():
+        if sync:
+            pull()
+        today = datetime.date.today()
+        for label, o, updated in exported():
+            try:
+                age = (today - datetime.date.fromisoformat(updated)).days
+            except (TypeError, ValueError):
+                age = None
+            sources.append({'source': label, 'local': False,
+                            'sessions': len(o['sessions']), 'age_days': age,
+                            'stale': age is None or age > STALE_DAYS})
+            obs = merge(obs, o)
+    else:
+        warn('command log not set up on this host (`just agent recurring setup`);'
+             ' local sessions only')
+    return {'sources': sources, **rank(obs, min_sessions, top, max_len)}
+
+
 def report(a):
     pct = lambda n: f'{100 * n // max(a["sessions"], 1)}%'
-    print(f'{a["sessions"]} sessions, {a["commands"]} commands\n')
+    def src(x):
+        if x['local']:
+            return f'{x["source"]} {x["sessions"]}'
+        age = '?' if x['age_days'] is None else f'{x["age_days"]}d'
+        return f'{x["source"]} {x["sessions"]} ({age}{" STALE" if x["stale"] else ""})'
+    local = [src(x) for x in a['sources'] if x['local']]
+    other = [src(x) for x in a['sources'] if not x['local']]
+    print(f'{a["sessions"]} sessions, {a["commands"]} commands')
+    print(f'  local:    {", ".join(local)}')
+    print(f'  exported: {", ".join(other) or "(none)"}\n')
     print('SEQUENCES  commands run one after another -- script candidates')
     for s in a['sequences'] or [{'sessions': 0, 'chain': ['(none)']}]:
         print(f'  {s["sessions"]:3d}  ' + '  ->  '.join(s['chain'])[:150])
@@ -455,18 +738,85 @@ def show_session(prefix):
         print('  ' + row[:150])
 
 
+def setup():
+    if (LOG_DIR / '.git').exists():
+        print(f'already set up: {LOG_DIR}')
+        return 0
+    LOG_DIR.parent.mkdir(parents=True, exist_ok=True)
+    r = subprocess.run(['git', 'clone', '-q', REMOTE, str(LOG_DIR)], env=GIT_ENV,
+                       capture_output=True, text=True, timeout=60)
+    if r.returncode:
+        print(f'clone failed: {r.stderr.strip()} -- does this host have a forge '
+              f'key? (wiki/homelab/forgejo-for-agents.md)', file=sys.stderr)
+        return 1
+    print(f'cloned {REMOTE} to {LOG_DIR}')
+    return 0
+
+
+def export():
+    """Merge this host's observations into its files in the log repo,
+    commit, push. One line of output: skill ship runs it every PR. Exit 1
+    on a failure, which the ship step reports but doesn't stop for."""
+    if not (LOG_DIR / '.git').exists():
+        print('export skipped: command log not set up on this host '
+              '(`just agent recurring setup`)')
+        return 0
+    pull()
+    written, files = [], []
+    for harness, rows in HARNESSES.items():
+        obs = collect(rows(), harness)
+        path = LOG_DIR / f'{host()}.{harness}.json'
+        if path.exists():
+            try:
+                obs = merge(load(path)[1], obs)
+            except ValueError as e:
+                warn(f'{path.name}: {e}; rebuilding from live data')
+        elif not obs['sessions']:
+            continue                   # nothing here, nothing before
+        # Rewritten even with no new sessions, so `updated` means "this
+        # source was exported", and STALE means it wasn't.
+        path.write_text(json.dumps({'format': FORMAT, 'host': host(),
+                                    'harness': harness,
+                                    'updated': datetime.date.today().isoformat(),
+                                    **to_json(obs)}, indent=1) + '\n')
+        written.append(f'{harness} {len(obs["sessions"])}')
+        files.append(path.name)
+    if not files:
+        print(f'export: no sessions on {host()}')
+        return 0
+    git('add', '--', *files)
+    if git('diff', '--cached', '--quiet', '--', *files).returncode:
+        r = git('commit', '-qm', f'{host()}: export {datetime.date.today()}', '--', *files)
+        if r.returncode:
+            print(f'export failed: commit: {r.stderr.strip()[:200]}')
+            return 1
+    r = git('push', '-q')
+    status = '' if r.returncode == 0 else \
+        f' (committed locally; push failed, next export retries: {r.stderr.strip()[:120]})'
+    print(f'exported {", ".join(written)} sessions from {host()}{status}')
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
+    ap.add_argument('action', nargs='?', choices=['export', 'setup'])
     ap.add_argument('--min-sessions', type=int, default=3)
     ap.add_argument('--top', type=int, default=15)
-    ap.add_argument('--max-len', type=int, default=4)
+    ap.add_argument('--max-len', type=int, default=MAX_LEN)
     ap.add_argument('--json', action='store_true')
+    ap.add_argument('--no-sync', action='store_true',
+                    help="don't pull the command log first")
     ap.add_argument('--session', metavar='ID',
                     help='one session: each command as its shape, in order')
     args = ap.parse_args()
+    if args.action == 'setup':
+        return setup()
+    if args.action == 'export':
+        return export()
     if args.session:
         return show_session(args.session)
-    a = analyze(args.min_sessions, args.top, args.max_len)
+    a = analyze(args.min_sessions, args.top, min(args.max_len, MAX_LEN),
+                sync=not args.no_sync)
     if args.json:
         print(json.dumps(a, indent=1))
     else:
@@ -474,4 +824,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

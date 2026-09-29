@@ -14,8 +14,16 @@ the patterns move over months. Not for scripts humans run: those go in
 
 ## Find candidates
 
-`just agent recurring` reads this machine's Claude transcripts for the
-repo (command field only, never output). Removed text prints as its
+`just agent recurring` reads this host's agent history for the repo --
+Claude Code, OpenCode, and zcode, command field only, never output -- plus
+every other host's export from the private forge repo
+`elly/agent-command-log`. Its header lists each source's session count (a
+reader at 0 after a harness upgrade is a format change, not quiet) and
+marks an export older than 21 days STALE: that host isn't exporting.
+Exports carry shapes and hashed session ids only; skill `ship` runs
+`just agent recurring export` before each PR. New host: `just agent
+recurring setup` once (needs a forge key, `wiki/homelab/forgejo-for-agents.md`).
+Removed text prints as its
 category: `<path>`, `<n>`, `<str>` (quoted), `<var>`, `<url>`, `<word>`;
 `-u<val>` means a value was glued to the flag; `<heredoc>`/`<loop>`/`<func>`
 mark dropped structure. Every token is checked against a closed vocabulary
@@ -85,8 +93,18 @@ means adding a hostile case to `LEAKS` in `test_recurring.py` (runs in
 `just preflight` and CI), which checks every shape token against the
 closed vocabulary. It holds what leaked before: grep-pattern pieces as
 fake commands (`git.moose"`), then value-glued flags (`-uadmin`), loop
-variables (`for host in`), wrapper options (`sudo -u host`). Residual
-(docstring): an unquoted 1-3 letter word after `-`.
+variables (`for host in`), wrapper options (`sudo -u host`), prose from
+quoted `--body "..."` text, `<<\EOF` heredoc bodies. Residual
+(docstring): an unquoted 1-3 letter word after `-`, and unquoted
+`--long-flag` names.
+
+**Bump `FORMAT` whenever shaping gets stricter.** Exports merge, so keys
+written under looser rules would otherwise persist; files of another
+format are skipped on read and rebuilt on that host's next export.
 
 Never commit transcript lines or raw commands: this repo is public, and
-they carry hostnames, ports, and paths.
+they carry hostnames, ports, and paths. The export is the only thing that
+leaves a host; `test_recurring.py`'s `Export` case checks it against the
+same vocabulary. Commands whose quoting shlex can't follow (escaped or
+nested quotes) are dropped whole, about 4% at 2026-09-29: prose in
+`gh ... --body "..."` leaked as commands before that.

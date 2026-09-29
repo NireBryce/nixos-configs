@@ -16,8 +16,15 @@ the fix (`-uadmin`, `for host in`, `sudo -u host`, `env -C /x/dir`,
 right, multi-line and heredoc commit messages included. Stdlib only; the
 command allowlist is pinned so results don't depend on the host's PATH.
 """
+import contextlib
+import io
+import json
+import os
 import re
+import sqlite3
+import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -91,11 +98,22 @@ LEAKS = [
     ('for id in 1 2; do echo $id; done', ['id']),
     ('sudo -u host git status', ['host']),
     ('env -C /secret/dir git status', ['dir', 'secret']),
-    ('host() { echo hi; }; host', []),
+    ('host() { echo hi; }; host', ['host']),   # the call, too: a user-chosen name
     ('case "$x" in host) echo;; esac', ['host']),
     ('cat <<END-OF\nsecret body\nEND-OF', ['OF', 'secret', 'body']),
     (f"bash -c 'curl -u{USERPASS} x'", ['admin', 'hunter2']),
     ('echo $(git log)|head foo', ['foo']),
+    # heredoc forms HEREDOC once missed: bodies parsed as commands
+    ('cat <<\\EOF\nfile secret here\nEOF\nls', ['secret', 'file']),
+    ('cat <<$T\nfile secret here\n$T', ['secret', 'file']),
+    ("cat <<'A B'\nfile secret here\nA B", ['secret', 'file']),
+    # from auditing the first real export (2026-09-29): prose in quoted
+    # bodies parsed as commands whenever a word was also a real program
+    ('gh issue comment 1 --body "a \"quoted\" word\n\nsketch (shape only) \\`id\\` done"',
+     ['shape', 'sketch', 'quoted', 'id']),
+    ('gh pr create --body "run `grep x` then (shape only)"', ['shape', 'grep x']),
+    ('for f in a; do n=$(awk -F\'"\' \'{print}\' $f | wc -w); echo "$(wc -w < $f) w $f"; done',
+     [' w ', 'awk -F']),
 ]
 
 SHAPES = [
@@ -159,6 +177,166 @@ class ShapeLeaks(unittest.TestCase):
         for cmd, want in PIPELINES:
             with self.subTest(cmd=cmd):
                 self.assertEqual(r.pipelines(cmd), want)
+
+
+
+class Export(unittest.TestCase):
+    """What leaves the machine: an export file. Same closed vocabulary as
+    the shapes, session ids hashed, nothing else."""
+
+    def rows(self):
+        return [(f'sess-{i % 3}', c) for i, c in enumerate(all_cases())]
+
+    def test_export_is_vocabulary_only(self):
+        doc = r.to_json(r.collect(self.rows(), 'claude'))
+        for h in doc['sessions']:
+            self.assertRegex(h, r'^[0-9a-f]{12}$')
+        for kind in ('chains', 'pipes'):
+            for key, hashes in doc[kind].items():
+                for tok in key.replace('\t', ' ').split():
+                    with self.subTest(kind=kind, token=tok):
+                        self.assertTrue(tok in VOCAB or FLAG_FORMS.match(tok),
+                                        f'{tok!r} would be exported')
+                self.assertTrue(set(hashes) <= set(doc['sessions']))
+        self.assertNotIn('sess-', json.dumps(doc))   # raw session ids stay home
+        for cmd, literals in LEAKS:    # each case alone: literals are per case
+            blob = json.dumps(r.to_json(r.collect([('s', cmd)], 'claude')))
+            for lit in literals:
+                with self.subTest(cmd=cmd, literal=lit):
+                    self.assertNotIn(lit, blob)
+
+    def test_json_roundtrip_and_merge(self):
+        a = r.collect(self.rows()[:10], 'claude')
+        b = r.collect(self.rows()[5:], 'claude')
+        merged = r.merge(r.from_json(json.loads(json.dumps(r.to_json(a)))), b)
+        whole = r.collect(self.rows(), 'claude')
+        self.assertEqual(r.to_json(merged)['chains'], r.to_json(whole)['chains'])
+        self.assertEqual(set(merged['sessions']), set(whole['sessions']))
+
+    def test_rank_counts_sessions_not_uses(self):
+        rows = [('s1', 'git fetch origin && git status -sb')] * 5 + \
+               [('s2', 'git fetch up && git status -sb')]
+        seq = r.rank(r.collect(rows, 'claude'), 1, 5, 4)['sequences']
+        self.assertEqual(seq, [{'sessions': 2,
+                                'chain': ['git fetch <word>', 'git status -sb']}])
+
+
+class SqliteReader(unittest.TestCase):
+    """OpenCode and zcode: `part` rows, tool bash or Bash, sessions
+    filtered to this repo by directory."""
+
+    def test_reads_bash_parts_in_this_repo_only(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / 'db.sqlite'
+            db = sqlite3.connect(path)
+            db.execute('create table session (id text, directory text)')
+            db.execute('create table part (id text, session_id text, data text)')
+            db.executemany('insert into session values (?, ?)', [
+                ('s1', '/home/u/nixos-configs'), ('s2', '/home/u/elsewhere')])
+            part = lambda tool, cmd: json.dumps(
+                {'type': 'tool', 'tool': tool, 'callID': 'c',
+                 'state': {'input': {'command': cmd}}})
+            db.executemany('insert into part values (?, ?, ?)', [
+                ('p1', 's1', part('bash', 'git status')),     # opencode
+                ('p2', 's1', part('Bash', 'ls')),             # zcode
+                ('p3', 's1', part('edit', 'not a command')),
+                ('p4', 's2', part('bash', 'other repo')),
+                ('p5', 's1', 'not json'),
+            ])
+            db.commit()
+            db.close()
+            self.assertEqual(list(r.sqlite_rows(path)),
+                             [('s1', 'git status'), ('s1', 'ls')])
+
+    def test_unreadable_db_yields_nothing(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / 'empty.sqlite'
+            sqlite3.connect(path).close()      # no tables
+            self.assertEqual(list(r.sqlite_rows(path)), [])
+
+
+
+class ExportFlow(unittest.TestCase):
+    """setup/export/analyze against a throwaway bare repo standing in for
+    the forge: what actually gets committed, and what the report reads."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        d = Path(self.tmp.name)
+        self.saved = (r.REMOTE, r.LOG_DIR, r.GIT_ENV, r.HARNESSES)
+        env = {**os.environ, 'GIT_CONFIG_GLOBAL': os.devnull,
+               'GIT_AUTHOR_NAME': 't', 'GIT_AUTHOR_EMAIL': 't@t',
+               'GIT_COMMITTER_NAME': 't', 'GIT_COMMITTER_EMAIL': 't@t'}
+        run = lambda *a, cwd=None: subprocess.run(a, cwd=cwd, env=env, check=True,
+                                                  capture_output=True)
+        run('git', 'init', '-q', '--bare', '-b', 'main', str(d / 'forge.git'))
+        run('git', 'init', '-q', '-b', 'main', str(d / 'seed'))
+        (d / 'seed' / 'README.md').write_text('log\n')
+        run('git', 'add', 'README.md', cwd=d / 'seed')
+        run('git', 'commit', '-qm', 'init', cwd=d / 'seed')
+        run('git', 'push', '-q', str(d / 'forge.git'), 'main', cwd=d / 'seed')
+        r.REMOTE, r.LOG_DIR, r.GIT_ENV = str(d / 'forge.git'), d / 'clone', env
+        self.forge = d / 'forge.git'
+        self.rows = [(f's{i}', 'git fetch origin && git status -sb') for i in range(4)]
+        r.HARNESSES = {'claude': lambda: iter(self.rows)}
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(r.setup(), 0)
+
+    def tearDown(self):
+        r.REMOTE, r.LOG_DIR, r.GIT_ENV, r.HARNESSES = self.saved
+        self.tmp.cleanup()
+
+    def export(self):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(io.StringIO()):
+            rc = r.export()
+        return rc, out.getvalue()
+
+    def test_export_file_and_push(self):
+        rc, out = self.export()
+        self.assertEqual(rc, 0, out)
+        self.assertIn('exported claude 4', out)
+        self.assertNotIn('failed', out)
+        doc = json.loads((r.LOG_DIR / f'{r.host()}.claude.json').read_text())
+        self.assertEqual(set(doc), {'format', 'host', 'harness', 'updated',
+                                    'sessions', 'chains', 'pipes'})
+        self.assertEqual(doc['format'], r.FORMAT)
+        log = subprocess.run(['git', '--git-dir', str(self.forge), 'log', '--oneline'],
+                             capture_output=True, text=True).stdout
+        self.assertIn(f'{r.host()}: export', log)
+
+    def test_history_outlives_live_rows(self):
+        self.export()
+        self.rows = self.rows[:1]              # harness pruned three sessions
+        self.export()
+        doc = json.loads((r.LOG_DIR / f'{r.host()}.claude.json').read_text())
+        self.assertEqual(len(doc['sessions']), 4)
+        with contextlib.redirect_stderr(io.StringIO()):
+            a = r.analyze(1, 5, 4, sync=True)
+        self.assertEqual(a['sessions'], 4)     # own export counted, not skipped
+
+    def test_bad_files_are_skipped_not_fatal(self):
+        self.export()
+        (r.LOG_DIR / 'junk.json').write_text('[]')
+        (r.LOG_DIR / 'half.json').write_text('{"format": %d, "sessions": null}' % r.FORMAT)
+        (r.LOG_DIR / 'old.json').write_text(json.dumps(
+            {'host': 'x', 'harness': 'claude', 'updated': '2026-01-01',
+             'sessions': {'abc': {'commands': 1, 'batch': False, 'headers': False}},
+             'chains': {'leaky\tword': ['abc']}, 'pipes': {}}))   # no format
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            a = r.analyze(1, 50, 4, sync=False)
+        self.assertEqual(a['sessions'], 4)
+        self.assertNotIn('leaky', json.dumps(a))
+        self.assertEqual(err.getvalue().count('skipped'), 3)
+
+    def test_old_format_own_file_is_rebuilt_not_merged(self):
+        path = r.LOG_DIR / f'{r.host()}.claude.json'
+        path.write_text(json.dumps({'format': 1, 'sessions': {}, 'pipes': {},
+                                    'chains': {'leaky\tword': ['abc']}}))
+        rc, _ = self.export()
+        self.assertEqual(rc, 0)
+        self.assertNotIn('leaky', path.read_text())
 
 
 if __name__ == '__main__':
