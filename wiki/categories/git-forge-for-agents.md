@@ -1,6 +1,6 @@
 # `git-forge`, for agents
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-28_
 
 Condensed from [git-forge.md](git-forge.md), which keeps the reasoning and
 the narrative. Facts only here.
@@ -34,7 +34,7 @@ real while writing this category.
 ## The runner (added 2026-09-24; in a VM since 2026-09-25; never switched)
 
 The runner is the libvirt guest `forge-runner` on cube —
-`virtualization/virtualization-cube.nix` instantiates it, guest config
+`host-config/cube/vms/virtualization-cube.nix` instantiates it, guest config
 `host-config/forge-runner-configuration.nix`. cube-side support only in
 `git-forge/forgejo/actions-runner.nix`: `forge-runner-cycle`, one fresh
 guest and one single-use registration per job. Containment is the point: job code with

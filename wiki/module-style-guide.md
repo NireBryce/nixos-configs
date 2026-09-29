@@ -1,6 +1,6 @@
 # Module style guide
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-28_
 
 Conventions for `flake/modules/`. "How many files do this" used to be
 stated as inline counts per section, dated 2026-08-08 -- and by 2026-09-09
@@ -226,8 +226,11 @@ next to. `boot-durandal.nix` has one. See `CLAUDE.md` for the rule in full.
 
 Not formatting, but it belongs here because getting it wrong produces no error:
 
-- A category collects from its **subdirectories only**. A `.nix` file placed
-  directly in a category directory is collected by nothing.
+- A category collects **every `.nix` file under its directory**, at any
+  depth — including one placed directly beside its `dirsAsCategory.nix`
+  (skipped until 2026-09-28). Subdirectories are grouping only. To keep a
+  module out of a category, file it outside that category's tree;
+  `category-collector.nix`'s header has a worked tree diagram.
 - Entry points — `checks.nix`, `hosts.nix`, `durandal-configuration.nix`,
   `elly-home-manager.nix` — sit outside every category tree deliberately.
 - A module's filename becomes its attribute name, and names **merge** rather

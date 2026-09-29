@@ -1,12 +1,15 @@
 # nire-cube's VM wiring -- every libvirt VM on cube is instantiated here,
-# one import of VMs/_lib/libvirt-vm.nix per VM. Revives the name of the
-# llm-sandbox-era wiring file (removed 2026-08-28 with that VM); the file
-# is BARE in virtualization/ on purpose -- a category collects from its
-# subdirectories only, so this reaches cube through `homelab`'s
-# bareModulesOf sweep (wiki/categories/virtualization.md has the
-# mechanism), and NOT through the shared `virtualization` aggregate,
-# which is exactly why tenacity, importing `containers` but not the VM
-# half, stays unaffected.
+# one import of the generator (general-config/homelab/virtualization/
+# VMs/_lib/libvirt-vm.nix) per VM. Revives the name of the llm-sandbox-era
+# wiring file (removed 2026-08-28 with that VM).
+#
+# Lives under host-config/cube/ so it is cube-only by construction: only
+# cube-configuration.nix imports the `cube` category. Not in the shared
+# `virtualization` category, whose libvirt setup any host may import --
+# a VM definition there would start cube's runner on that host too.
+# (Was general-config/homelab/virtualization/virtualization-cube.nix until
+# 2026-09-28, kept out of `virtualization` by a collector rule since
+# removed -- flake/doc/dirsAsCategory.md's History.)
 #
 # The guest itself: forge-runner (deliberately NOT nire-prefixed -- that
 # prefix names the fleet machines, and this is a component of cube;
@@ -19,7 +22,7 @@
         runnerCfg = config.flake.nixosConfigurations.forge-runner.config;
     in {
         flake.modules.nixos.${moduleName} =
-            import ./VMs/_lib/libvirt-vm.nix {
+            import ../../../general-config/homelab/virtualization/VMs/_lib/libvirt-vm.nix {
                 name  = "forge-runner";
                 # `uuidgen` once, pinned forever -- libvirt's redefinition
                 # trap is the generator's `uuid` parameter comment. No

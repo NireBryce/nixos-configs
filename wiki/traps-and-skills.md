@@ -1,6 +1,6 @@
 # Traps & skills
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-09-28_
 
 [`../CLAUDE.md`](../CLAUDE.md)'s own "Traps" section carries a one-line
 summary of each; the full mechanism, code, and worked examples live in the
@@ -24,6 +24,7 @@ one-liner.
 | Tightening wiki/skill/AGENTS prose for conciseness | `.agents/skills/trim-docs/SKILL.md` |
 | Compressing a module's history section | `.agents/skills/trim-history/SKILL.md` |
 | Writing a new skill | `.agents/skills/new-skill/SKILL.md` |
+| Explaining a complicated module/lib function for a mixed audience | `.agents/skills/talk-style-explainer/SKILL.md` |
 | Starting a task that will branch, commit, or check out | `.agents/skills/use-a-worktree/SKILL.md` |
 
 See [architecture.md](architecture.md) and

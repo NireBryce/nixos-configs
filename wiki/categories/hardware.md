@@ -1,6 +1,6 @@
 # `hardware` — `general-config/hardware/` (+ nested `amd`)
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-28_
 
 ## Contents
 
@@ -46,8 +46,9 @@ from `nire-cube`'s `systemd.services` — the equivalent delegation one
 category over, `homelab` → `virtualization`, collapsing the exact
 independent-walk quirk that used to deliver that VM's wiring. See
 [homelab.md](homelab.md#nested-categories-overlap-their-parents-on-purpose)
-for that account and `category-collector.nix`'s own header for the fix
-(`bareModulesOf`) that made delegation safe here too.
+for that account. The fix, `bareModulesOf`, was retired 2026-09-28 along
+with the rule that made it necessary (`flake/doc/dirsAsCategory.md`'s
+History).
 
 ## Imported by
 

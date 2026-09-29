@@ -1,11 +1,11 @@
 # `boot` — `general-config/boot/`
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-28_
 
 ## Contents
 
 - [What's in it](#whats-in-it)
-- [Why each file needs a subdirectory](#why-each-file-needs-a-subdirectory)
+- [Why each file sits in a subdirectory](#why-each-file-sits-in-a-subdirectory)
 - [The name trap this category is the origin of](#the-name-trap-this-category-is-the-origin-of)
 - [Don't confuse this with the impermanence category](#dont-confuse-this-with-the-impermanence-category)
 - [Imported by](#imported-by)
@@ -22,12 +22,13 @@ Two files:
   shell). Recovery parameters now go through `boot.kernelParams` and a
   rebuild, an older generation, or a live USB.
 
-## Why each file needs a subdirectory
+## Why each file sits in a subdirectory
 
-`dirsAsCategory` only collects from *sub*directories of the category
-directory — a `.nix` file sitting straight in `general-config/boot/` would be
-collected by nothing (see [../architecture.md](../architecture.md)). Hence
-`generations/` and `editor/`.
+Until 2026-09-28 `dirsAsCategory` skipped `.nix` files sitting straight in a
+category's own directory, so a module directly in `general-config/boot/`
+reached nothing — hence `generations/` and `editor/`. That rule is gone
+(`flake/doc/dirsAsCategory.md`'s History); the subdirectories stay as
+grouping.
 
 ## The name trap this category is the origin of
 

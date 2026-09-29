@@ -26,8 +26,8 @@ creates the file where the collector will actually find it, emits this file's
 header boilerplate (`wiki/module-style-guide.md` formatting), `git add`s it —
 flakes ignore untracked files — and runs the collisions/orphans/untracked
 checks on the spot (`flake/scripts/modules.py add`; #293). It refuses the
-placements that produce no error: outside every category tree, directly
-inside a category dir, and any name that would silently merge (same
+placements that produce no error: outside every category tree, and any
+name that would silently merge (same
 class+name, or a category name). What it cannot decide is what the module
 should *say* — the rest of this skill still applies.
 
