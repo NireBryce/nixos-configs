@@ -9,63 +9,53 @@ description: Branch -> PR -> confirm merge-and-delete -> merge -> delete-branch 
 
 Fires only when the ask is to get changes onto `experimental`: a bare "push",
 "ship it", "land this", "merge this". Established 2026-08-21 after a session
-read a bare "push" as license for a direct push to `main`; the flow targets
+read a bare "push" as license for a direct push to `main`; targets
 `experimental` since 2026-08-25.
 
-Does **not** fire for other git work — do those normally:
+Does **not** fire for other git work:
 
 | ask | what to do |
 |---|---|
 | "push this branch" | `git push` it. No PR, no gates. |
 | "open a PR" (no merge ask) | Open it and stop. Steps 2-3 are not yours to run. |
 | "commit this" | Commit. Pushing was not asked for. |
-| "promote to main" | Promotion flow — [side-flows.md](side-flows.md), not a direct push; `main` carries its own ruleset. |
+| "promote to main" | Promotion flow — [side-flows.md](side-flows.md), not a direct push; `main` has its own ruleset. |
 | any other branch named outright | Push directly there — [side-flows.md](side-flows.md). |
 | fork, non-`origin` remote | Ordinary push. |
 
 If unsure whether an ask means `experimental`, ask. Assuming *no* is the
 mistake this file exists to prevent.
 
-**The default branch is `experimental`** (2026-09-03, trunk + promotion
-model — [side-flows.md](side-flows.md) has the ruleset picture). `gh pr
-create` defaults to the right trunk now; stating `--base experimental`
-explicitly is kept as a harmless belt. `main` is the promoted known-good
-and moves only via a PR from `experimental`.
+`experimental` is the default branch (2026-09-03, trunk + promotion; ruleset
+picture in [side-flows.md](side-flows.md)); `gh pr create` defaults to it,
+`--base experimental` stays as a harmless belt. `main` moves only via a PR
+from `experimental`.
 
-**One** confirmation covers both actions, asked up front: "merge, and
-delete the branch afterward?" On yes, both happen in the same turn — no
-second round-trip before deleting. Still not `--delete-branch`: that flag
-only removes the remote branch, and this flow also wants the local branch
-gone and `experimental` checked out and pulled, so those stay explicit
-steps (collapsed from two asks 2026-09-05 — the merge answer already
-implied the deletion every time).
+**One** confirmation, asked up front, covers both actions: "merge, and delete
+the branch afterward?" On yes both happen in the same turn. Not
+`--delete-branch` (removes only the remote branch; the flow also wants the
+local branch gone and `experimental` checked out and pulled). Collapsed from
+two asks 2026-09-05.
 
 ## 0. Fetch, then is it green?
 
-`git fetch origin` before anything else — other sessions land PRs
-concurrently, and a branch cut from stale `experimental` makes the step-2
-comparisons meaningless.
+`git fetch origin` first — other sessions land PRs concurrently; a branch cut
+from stale `experimental` makes step-2 comparisons meaningless.
 
-Then check before opening a PR. CI (`.github/workflows/check.yml`:
-`just check` + `just modules` + `just lint`) is a minutes-later backstop,
-not a substitute:
+Then, before opening a PR (CI, `.github/workflows/check.yml`: `just check` +
+`just modules` + `just lint`, is a minutes-later backstop only):
 
 ```sh
 just preflight    # every step CI runs, wiki-lint included; from repo root, not flake/
+nix eval --raw '.#nixosConfigurations.<host>.config.system.build.toplevel.drvPath'   # forced toplevel per config the change could touch
 ```
 
-plus a forced toplevel per config the change could touch:
-
-```sh
-nix eval --raw '.#nixosConfigurations.<host>.config.system.build.toplevel.drvPath'
-```
-
-Evaluating a cheap attribute proves nothing (`AGENTS.md`, "Bugs here
-serialize"). If a drvPath moved, say *what* changed with `just diff HEAD` —
-a permuted `systemPackages` order is not a value change.
+A cheap-attribute eval proves nothing (`AGENTS.md`, "Bugs here serialize").
+If a drvPath moved, say *what* changed with `just diff HEAD` — a permuted
+`systemPackages` order is not a value change.
 
 Multi-commit change: check **each** commit is green (`lessons-learned.md`
-§15), via a throwaway worktree:
+§15) in a throwaway worktree:
 
 ```sh
 git worktree add -q --detach /tmp/wt <sha> && cd /tmp/wt/flake
@@ -75,62 +65,50 @@ git worktree remove --force /tmp/wt
 
 ## 1. Branch, push, open the PR
 
-Never commit onto `experimental`. `git status -sb` (already fetched) first:
+Never commit onto `experimental`. `git status -sb` first:
 
-- **Dirty tree on `experimental`**: `git checkout -b <branch>` and commit
-  there. Nothing to rescue.
-- **Unpushed commits sitting on local `experimental`** (`[ahead N]`):
+- **Dirty tree on `experimental`**: `git checkout -b <branch>`, commit there.
+- **Unpushed commits on local `experimental`** (`[ahead N]`):
   ```sh
   git branch <branch>              # keep the commits
   git status --short               # anything NOT part of those commits?
   git reset --hard origin/experimental
   git checkout <branch>
   ```
-  **Run that `git status --short` for real, right before the reset, and
-  read it** — don't rely on the git-guard hook: its `ask` is a no-op under
-  `--permission-mode auto` (2026-09-06, issue #182), and its
-  `systemMessage` warning, while it reaches the human's transcript
-  unconditionally, doesn't stop an auto-mode agent from proceeding past
-  it. `git branch` only preserves the accidental *commit*; anything else
-  dirty in a shared checkout (someone else's in-progress, uncommitted
-  edit) is not a commit and `reset --hard` destroys it with no recovery
-  path. If the status shows anything beyond the commit(s) you're rescuing,
-  stop and ask rather than proceeding — don't assume it's yours to lose.
+  **Run and read that `git status --short` right before the reset** — the
+  git-guard hook's `ask` is a no-op under `--permission-mode auto`
+  (2026-09-06, issue #182) and its `systemMessage` warning doesn't stop an
+  auto-mode agent. `git branch` preserves only the commit; other dirty state
+  (someone else's uncommitted edit) is destroyed by `reset --hard` with no
+  recovery. Anything beyond your commits: stop and ask.
 
 Commit discipline:
 
-- **Explicit pathspec, always** — `git commit -F <file> -- <paths...>`, and
-  `--amend` re-commits whatever is staged *right now*, not "previous commit
-  plus message". Hit twice 2026-08-30, both times sweeping up unrelated
-  staged files. To undo a bad commit: `git reset --soft HEAD~1`, check `git
-  status --short`, recommit with the right pathspec.
-- **Backticks / `$(...)` in a message written inline get executed by the
-  shell before git sees them** (hit 2026-08-30: a backtick span silently
-  became empty output). Write the message to a file and `git commit -F
-  <file>`; fix a mangled one with `--amend -F <file>`.
-- **Provenance trailer**: `Co-Authored-By: <the agent you are>` — agent
-  name only, no model, no email. Claude's canonical form is `Co-Authored-By:
-  Claude`.
-- Branch name and first commit-message line get a `feat/`/`fix/`/`docs:`
-  prefix (Conventional-Commits style on the first line only; the body stays
-  this repo's narrative what/why/verified style). Order commits so each is
-  green (§15) — one coherent commit beats two artificial ones.
+- **Explicit pathspec, always** — `git commit -F <file> -- <paths...>`;
+  `--amend` re-commits whatever is staged *right now*. Hit twice 2026-08-30,
+  sweeping up unrelated staged files. Undo: `git reset --soft HEAD~1`, check
+  `git status --short`, recommit with the right pathspec.
+- **Backticks / `$(...)` in an inline message are executed by the shell**
+  (2026-08-30: a backtick span became empty). Write the message to a file,
+  `git commit -F <file>`; fix a mangled one with `--amend -F <file>`.
+- **Trailer**: `Co-Authored-By: <the agent you are>` — name only, no model,
+  no email (Claude: `Co-Authored-By: Claude`).
+- Branch name and first commit line get a `feat/`/`fix/`/`docs:` prefix
+  (first line only; body stays what/why/verified narrative). Each commit
+  green (§15); one coherent commit beats two artificial ones.
 
 Then `git push -u origin <branch>` and `gh pr create --base experimental`.
-Write the PR body like the commit messages: what changed, why, what was
-verified, what was left alone — matching `.github/PULL_REQUEST_TEMPLATE.md`'s
-headings. **The LLM-disclosure line goes at both the top of the body
-(before "What changed") and the bottom** — top so it's the first thing a
-reviewer sees, bottom because a harness-injected attribution footer lands
-there regardless — per the template's own comment. The line is the
-model-agnostic `🤖 Generated by an LLM agent` (`propose-issue`'s
-reasoning: an agent can't verify which model or harness is executing it,
-the same rule as the commit trailer); a footer the harness itself injects
-is accurate by construction and is no reason to name that harness up top.
+PR body: what changed, why, what was verified, what was left alone, under
+`.github/PULL_REQUEST_TEMPLATE.md`'s headings. **LLM-disclosure line at both
+top (before "What changed") and bottom** — a harness footer lands at the
+bottom regardless. Use the model-agnostic `🤖 Generated by an LLM agent`
+(`propose-issue`'s reasoning: an agent can't verify its model/harness); a
+harness-injected footer is accurate by construction, no reason to name it up
+top.
 
 ## 2. Preview, then ask
 
-Read back what actually landed, never recall it:
+Read back what landed, never recall it:
 
 ```sh
 gh pr checks <n> --watch --interval 20   # wait for CI; minutes, not optional
@@ -139,24 +117,19 @@ git log --oneline origin/experimental..HEAD
 git diff --stat origin/experimental...HEAD
 ```
 
-Check `mergeStateStatus` is `CLEAN` and `baseRefName` is `experimental`
-**before** asking — a wrong base or red PR wastes the round-trip.
-**`mergeable` is not the CI answer**: it only means "no conflicts", and read
-`MERGEABLE` on #413 (2026-09-28) while its CI was red and
-`mergeStateStatus` was `BLOCKED` — the ask went out calling it mergeable.
-A red check: read `gh run view <run> --log-failed`, fix, push, re-watch;
-if `just preflight` passed locally, the step it missed belongs in
-`preflight` too. Print the summary,
-include the merge method, and ask the one combined question — merge *and*
-delete the branch afterward:
+`mergeStateStatus` must be `CLEAN` and `baseRefName` `experimental`
+**before** asking. **`mergeable` is not the CI answer** (only "no
+conflicts"): #413 (2026-09-28) read `MERGEABLE` with red CI and
+`mergeStateStatus` `BLOCKED`, and the ask went out calling it mergeable.
+Red check: `gh run view <run> --log-failed`, fix, push, re-watch; if `just
+preflight` passed locally, the step it missed belongs in `preflight` too.
+Print the summary with the merge method and ask the one combined question:
 
-- **Single commit** (the common case): default `--rebase` — `--merge` is a
-  bubble for nothing on a one-commit PR.
-- **Multiple commits**: default `--merge` — this repo puts real reasoning in
-  individual commit messages; squashing flattens it.
+- **Single commit** (common): default `--rebase`.
+- **Multiple commits**: default `--merge` — individual commit messages carry
+  real reasoning; squashing flattens it.
 
-On **no**: leave the PR open, say so, stop. Do not merge, close it, delete
-the branch, or clean up.
+**No**: leave the PR open, say so, stop. Don't merge, close, delete, or clean up.
 
 ## 3. Merge, then delete — on yes only
 
@@ -165,12 +138,9 @@ gh pr merge <n> --rebase   # single-commit PR
 gh pr merge <n> --merge    # multi-commit PR
 ```
 
-If the merge itself doesn't go through — unmergeable, a required check
-still pending, a ruleset block — stop there and say so. Don't delete a
-branch whose PR didn't actually merge; that's a fresh problem, not the
-"no" case above, so raise it rather than silently retrying or proceeding.
-
-Merge succeeded: delete immediately, no further ask.
+Merge fails (unmergeable, required check pending, ruleset block): stop and
+say so. Don't delete a branch whose PR didn't merge; raise it, don't retry
+silently. On success delete immediately, no further ask:
 
 ```sh
 git checkout experimental && git pull
@@ -179,58 +149,41 @@ git ls-remote --exit-code --heads origin <branch> >/dev/null \
   && git push origin --delete <branch>
 ```
 
-The repo has GitHub's "Automatically delete head branches" on
-(`delete_branch_on_merge`), so the remote branch is normally gone by the
-time this runs — a bare `git push origin --delete` then fails with
-`failed to push some refs` (every ship since at least #416, 2026-09-28).
-The `ls-remote` guard deletes only if it's still there, e.g. when that
-setting is off.
+`delete_branch_on_merge` is on, so the remote branch is normally already
+gone and a bare `git push origin --delete` fails with `failed to push some
+refs` (every ship since at least #416, 2026-09-28); the `ls-remote` guard
+deletes only if it's still there.
 
-**Never `gh pr merge --delete-branch`** — it only removes the remote
-branch, skipping the local delete and the `experimental` checkout/pull
-this flow also does; run the explicit steps instead of the flag.
+**Never `gh pr merge --delete-branch`** — use the explicit steps above.
 
-**If the merge happened outside this flow** — the user merged in the web UI,
-or another session did, so step 3's delete never ran — the branch stays
-behind. `just branches` finds those: it classifies every local branch by
-patch-id, which is what catches a rebased merge (`git branch --merged`
-does not, since rebasing gives the landed commits new SHAs, and that is
-exactly how 11 stale branches accumulated by 2026-09-11 while hiding 3
-unmerged ones). `just branches prune` deletes the landed ones only, and
-asks first -- **an agent session has no terminal to answer that prompt, so
-pass `--yes`** (`just branches prune --yes`); without it, prune prints the
-verdict and exits 2 having deleted nothing. Worth
-a glance at session start, same as `git worktree list`.
+**Merged outside this flow** (web UI, another session): the branch stays.
+`just branches` classifies local branches by patch-id, which catches rebased
+merges (`git branch --merged` doesn't — rebasing gives new SHAs; 11 stale
+branches accumulated by 2026-09-11 hiding 3 unmerged). `just branches prune`
+deletes landed ones only and asks first — **agent sessions have no terminal
+for the prompt, so pass `--yes`**; without it prune prints the verdict and
+exits 2 deleting nothing. Glance at it at session start, like `git worktree
+list`.
 
 Report the merge commit and the branch's fate; never report a commit range
 as if pushed to `experimental`.
 
-**If the PR body contains a closing keyword ("Fixes #N", "Closes #N",
-"Resolves #N"), don't trust it — verify.** Confirmed broken 2026-09-06
-(issue #177): three separate PRs used correct closing-keyword syntax,
-merged into `experimental` (the actual default branch), and GitHub still
-didn't auto-close the referenced issue — `gh pr view <n> --json
-closingIssuesReferences` came back empty on all three, with no error
-anywhere. After merging:
+**Closing keywords ("Fixes #N", "Closes #N", "Resolves #N") — verify.**
+Broken 2026-09-06 (issue #177): three PRs with correct syntax merged into
+`experimental`, GitHub didn't auto-close, `gh pr view <n> --json
+closingIssuesReferences` empty, no error. After merging, for every issue the
+body claims to fix:
 
 ```sh
 gh issue view <N> --json state -q .state
+gh issue close <N> --comment "..."   # if OPEN: what fixed it, which commit/PR
 ```
 
-If it says `OPEN`, close it explicitly:
-
-```sh
-gh issue close <N> --comment "..."   # what fixed it, which commit/PR
-```
-
-Do this for every issue number the merged PR's body claims to fix — the
-auto-link is not a given here. `just close-fixed <pr-number>` runs that
-loop for you: it refuses anything not merged, unions the linked issues
-with the body's own keyword mentions, and closes only the still-OPEN
-ones, each with a comment saying it was a hand close (#177).
+`just close-fixed <pr-number>` loops this: refuses unmerged PRs, unions
+linked issues with the body's keyword mentions, closes only still-OPEN ones
+with a comment saying it was a hand close (#177).
 
 ## Other flows
 
-Promotion to `main`, the branch rulesets behind trunk + promotion, the
-one-working-tree-becomes-two-PRs traps, and the named-branch exception:
-[side-flows.md](side-flows.md).
+Promotion to `main`, branch rulesets, one-tree-two-PRs traps, named-branch
+exception: [side-flows.md](side-flows.md).

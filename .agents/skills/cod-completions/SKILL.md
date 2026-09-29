@@ -24,10 +24,8 @@ just cod-desc draft <cmd>         # draft TSV rows parsed from --help
 just cod-desc-test                # fixture tests + committed-table check
 ```
 
-Full background — why cod cannot carry descriptions, the advice mechanism,
-the table format — is
-[wiki/categories/shell-config/cod-desc.md](../../../wiki/categories/shell-config/cod-desc.md).
-This skill is the runnable procedure.
+Background (why cod can't carry descriptions, advice mechanism, table format):
+[wiki/categories/shell-config/cod-desc.md](../../../wiki/categories/shell-config/cod-desc.md). This skill is the procedure.
 
 ## The pieces, and which to touch
 
@@ -59,12 +57,7 @@ This skill is the runnable procedure.
 
 ## Verification limits
 
-The advice was verified 2026-09-25 by driving the real `__cod_complete_bash`
-(daemon and all) under a real ble.sh with only the candidate-yield layer
-stubbed to a log — descriptions attached, trailing-`=` resolved through the
-stripped key, unknown commands left untouched. What that cannot cover: the
-menu actually painting the desc column under a live attach. If a user
-reports descriptions not showing: check `complete -p <cmd>` really names
+Verified 2026-09-25 by driving the real `__cod_complete_bash` (daemon and all) under a real ble.sh with only the candidate-yield layer stubbed to a log: descriptions attached, trailing-`=` resolved via the stripped key, unknown commands untouched. Not covered: the menu painting the desc column under a live attach. If descriptions don't show, check `complete -p <cmd>` really names
 `__cod_complete_bash` (cod registers per learned command only), that
 `NIRE_COD_DESC_TSV` is set in the shell (plain variable, set by `.blerc`),
 and that the command has rows in `cod-desc.tsv` — everything else falls

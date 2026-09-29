@@ -7,142 +7,109 @@ description: How to avoid printing sops-managed secret values into the conversat
 
 ## Applies to
 
-Any command that touches `flake/modules/general-config/system/secrets/secrets.yaml`
-or a decrypted secret on a live host (`/run/secrets/...`) — checking
-whether decrypt access works, reading a value, adding or rotating one,
-verifying `sops updatekeys` picked up a new host. Also applies more
-broadly to anything else that can carry a credential in cleartext:
-`env`/`printenv`, `journalctl` near a unit that takes a secret on its
-command line, `ps aux` near one that does the same, an `EnvironmentFile`.
+Any command touching `flake/modules/general-config/system/secrets/secrets.yaml`
+or a decrypted secret on a live host (`/run/secrets/...`): checking decrypt
+access, reading a value, adding/rotating one, verifying `sops updatekeys`
+picked up a host. Also anything else that can carry a cleartext credential:
+`env`/`printenv`, `journalctl` or `ps aux` near a unit that takes a secret
+on its command line, an `EnvironmentFile`.
 
-**Not** a concern for the *encrypted* form of `secrets.yaml` itself —
-`ENC[AES256_GCM,data:...]` blocks are ciphertext, safe to `cat`, `git
-show`, or `git diff`, and are deliberately committed per `CLAUDE.md`'s
-Safety section. The danger is exclusively in anything that has already
-been through `sops -d`, or a live `/run/secrets/` path, or otherwise
-decrypted.
+**Not** a concern for the *encrypted* `secrets.yaml`: `ENC[AES256_GCM,data:...]`
+blocks are ciphertext, safe to `cat`, `git show`, `git diff`, and
+deliberately committed (`CLAUDE.md` Safety). Danger is only in what has been
+through `sops -d`, or a live `/run/secrets/` path.
 
 ## Why this exists
 
-2026-08-26, on `nire-tenacity`: "can this session even decrypt
-`secrets.yaml`?" was answered with a bare `sops -d secrets.yaml`, which
-prints the entire file — `tailscale_key` and `atuin_key` landed in the
-transcript. The fix was rotating the Tailscale key; output already sent
-can't be un-sent. A targeted check (`--extract`, or discard stdout and read
-`$?`) would have answered the same question with zero exposure.
-
-It happened again 2026-09-09, same host, same question ("which secrets
-exist?"), different hole: `sops -d … 2>/dev/null | grep -E "^[a-z_]+:"` —
-the `2>/dev/null` satisfied this hook's `/dev/null` exemption while the
-whole decrypted file flowed through **stdout** into grep, and three values
-(`tailscale_key`, `tailscale_api_token`, `atuin_key`) landed in the
-transcript. Only regex luck kept the hyphenated names (`ssh-*`,
-`restic-*`, `forgejo-admin-password`) out — their values were one
-character-class away from printing too. All three were rotated same-day.
-Two lessons now baked in: the exemption requires an explicit **stdout**
-redirect and **no pipe** (hook fix, same commit), and "which keys exist"
-has a dedicated zero-decryption answer, `just read-sops-names`.
+- **2026-08-26, `nire-tenacity`**: "can this session decrypt `secrets.yaml`?"
+  answered with bare `sops -d secrets.yaml`, printing the whole file;
+  `tailscale_key` and `atuin_key` landed in the transcript. Fix: rotate the
+  Tailscale key — sent output can't be un-sent. `--extract`, or discarding
+  stdout and reading `$?`, answers it with zero exposure.
+- **2026-09-09, same host**, question "which secrets exist?":
+  `sops -d … 2>/dev/null | grep -E "^[a-z_]+:"`. `2>/dev/null` satisfied the
+  hook's `/dev/null` exemption while the decrypted file flowed through
+  **stdout** into grep; `tailscale_key`, `tailscale_api_token`, `atuin_key`
+  leaked (hyphenated names `ssh-*`, `restic-*`, `forgejo-admin-password`
+  escaped only by regex luck). All rotated same-day. Result: the exemption
+  needs an explicit **stdout** redirect and **no pipe** (hook fix), and
+  "which keys exist" has a zero-decryption answer, `just read-sops-names`.
 
 ## Enforced mechanically, not just by memory
 
-Two hooks in `.agents/settings.json` (project-scoped, committed) wire the
-checkable parts:
+Hooks wired in `.agents/settings.json` (project-scoped, committed):
 
-- **`.agents/hooks/secrets-guard-pretooluse.sh`** (`PreToolUse`, `Bash`) —
-  a bare `sops -d`/`--decrypt` with no `--extract` and no `>/dev/null`, or
-  a `cat`/`bat`/`less`/`more`/`head`/`tail` on a `/run/secrets/` path,
-  triggers `permissionDecision: "ask"` naming the narrower alternative.
-- **`.agents/hooks/secrets-guard-posttooluse.sh`** (`PostToolUse`, `Bash`) —
-  scans actual command output for a Tailscale auth key (`tskey-...`), an age
-  secret key (`AGE-SECRET-KEY-...`), a private key block (`-----BEGIN ...
-  PRIVATE KEY-----`), or a bare (non-`ENC[...]`)
-  `tailscale_key`/`atuin_key` value; a hit returns `decision: "block"`.
+- **`.agents/hooks/secrets-guard-pretooluse.sh`** (`PreToolUse`, `Bash`):
+  bare `sops -d`/`--decrypt` with no `--extract` and no `>/dev/null`, or
+  `cat`/`bat`/`less`/`more`/`head`/`tail` on a `/run/secrets/` path →
+  `permissionDecision: "ask"` naming the narrower alternative.
+- **`.agents/hooks/secrets-guard-posttooluse.sh`** (`PostToolUse`, `Bash`):
+  scans command output for a Tailscale auth key (`tskey-...`), age secret key
+  (`AGE-SECRET-KEY-...`), private key block (`-----BEGIN ... PRIVATE KEY-----`),
+  or a bare (non-`ENC[...]`) `tailscale_key`/`atuin_key` value → `decision:
+  "block"`. It also fires on prose that merely quotes a marker (e.g. reading
+  this file, 2026-09-29) — a false positive; check no real value
+  printed.
 
-Known limits: `Bash` tool only (a `Read` of a decrypted file is not
-caught); patterns are specific shapes plus this repo's two sensitive key
-names, so an unrecognized credential shape won't flag. And the big one,
-found 2026-09-09 by probing with a fake `tskey-…` string: **the ZCode
-harness did not fire these hooks at all** — the probe sailed through
-unflagged — so under that harness the hooks are decoration and the
-sections below are the ONLY enforcement. Never assume a guard caught
-something; check the output yourself. The sections below are the judgment
-the hooks can't cover.
+Limits: `Bash` only (a `Read` of a decrypted file isn't caught); only
+specific shapes plus those two key names, so unrecognized credential shapes
+pass. Found 2026-09-09 with a fake `tskey-…` probe: **the ZCode harness
+didn't fire these hooks at all**, so there the prose below is the ONLY
+enforcement. Never assume a guard caught something; check output yourself.
 
 ## Preventing it
 
 0. **"Which secrets exist?" never needs decryption:** `just read-sops-names`
-   reads the committed ciphertext, where sops leaves key names as plaintext
-   next to `ENC[...]` values — it cannot print a value by construction.
-   Reaching for `sops -d` plus grep to answer it is how both leaks
-   happened.
-1. **Before running a command against a secrets file, ask: does its
-   default output include plaintext I don't actually need?** Testing
-   decrypt access needs only an exit code:
+   reads the committed ciphertext (key names are plaintext beside `ENC[...]`
+   values); it cannot print a value. `sops -d` + grep caused both leaks.
+1. **Before running a command against a secrets file, ask whether its default
+   output includes plaintext you don't need.** Decrypt access needs only an
+   exit code; one value needs only that key:
    ```sh
    sops -d secrets.yaml >/dev/null 2>&1; echo $?
-   ```
-   Reading one value needs only that key:
-   ```sh
    sops -d --extract '["tailscale_key"]' secrets.yaml
    ```
-   Never run a bare `sops -d secrets.yaml` (or `cat` a decrypted
-   `/run/secrets/...` path) when a narrower form answers the actual
-   question.
-2. **When a value genuinely must be read** (to hand to `sops set`, to
-   compare against something), still extract just that one key rather than
-   the whole file — the other keys in `secrets.yaml` aren't relevant to the
-   task and don't need to be in the transcript to accomplish it.
-3. **When a command's output size or content isn't predictable up front**,
-   redirect it to a file first and inspect that narrowly (`grep`, `wc -l`)
-   rather than letting the raw output land directly in a reply.
-4. **This applies to the same class of command even when secrets aren't
-   the obvious subject** — `env`, `journalctl -u <unit that takes a
-   secret as an argv or EnvironmentFile>`, `ps aux` near such a unit. The
-   test is the same: does this command's default output plausibly include
-   something that isn't meant to be read back, and is there a narrower way
-   to get the answer.
+   Never bare `sops -d secrets.yaml` (or `cat` a `/run/secrets/...` path)
+   when a narrower form answers the question.
+2. **Value genuinely needed** (for `sops set`, a comparison): still extract
+   just that key, not the whole file.
+3. **Unpredictable output size/content**: redirect to a file, inspect
+   narrowly (`grep`, `wc -l`).
+4. **Same rule for non-obvious carriers** — `env`, `journalctl -u <unit with
+   a secret in argv/EnvironmentFile>`, `ps aux` near one: is there a
+   narrower way to get the answer?
 
 ## Catching it when something slips through anyway
 
-0. **Check `.agents/known-dead-secrets.md` before treating a hit as a
-   fresh incident** — skill `triage-flagged-secrets` has the full
-   procedure. A hook can re-flag a secret that's already confirmed dead
-   from old git history; matching that first avoids a rotation-panic cycle
-   over something inert.
-1. Before quoting or summarizing a tool result that came from any command
-   in the categories above, scan it for secret-shaped content: a Tailscale
-   auth key (`tskey-...`), an age key (`age1...` as a *secret*, or
-   `AGE-SECRET-KEY-...`), an SSH private key block
-   (`-----BEGIN OPENSSH PRIVATE KEY-----`), a recovery phrase (a run of
-   plain words next to a key name like `atuin_key`), or any
+0. **Check `.agents/known-dead-secrets.md` before treating a hit as fresh**
+   — skill `triage-flagged-secrets` has the procedure. Hooks can re-flag a
+   secret already confirmed dead in old git history; matching first avoids a
+   rotation-panic over something inert.
+1. Before quoting/summarizing output from any command above, scan for
+   secret-shaped content: Tailscale auth key (`tskey-...`), age key (`age1...`
+   as a *secret*, or `AGE-SECRET-KEY-...`), SSH private key block, recovery
+   phrase (plain words next to a key name like `atuin_key`), or any
    `secrets.yaml` key name (`tailscale_key`, `atuin_key`, `syncthing-*`,
-   `ssh-*`) sitting next to a value rather than `ENC[...]`.
-2. If a tool result already contains one of these, don't requote it in
-   your own reply — refer to it by name only ("the `tailscale_key`
-   value"). The moment it appeared in any tool output it's already
-   exposed; repeating it in prose adds nothing but more copies.
-3. If a secret did leak, say so immediately, in the same turn, rather than
-   continuing whatever task was in progress as if nothing happened. Name
-   exactly which secret(s) leaked and recommend rotation — a new
-   Tailscale key, a regenerated recovery phrase, a changed password.
-   Don't offer to "remove it from the transcript" — that isn't something
-   available, and implying otherwise understates what actually happened.
-4. Judge sensitivity honestly rather than flagging everything: public SSH
-   keys and syncthing device IDs aren't secrets even in plaintext — don't
-   claim a rotation is needed for those, but don't skip flagging the ones
-   that are (auth keys, passwords, recovery phrases, private keys).
+   `ssh-*`) beside a value rather than `ENC[...]`.
+2. Don't requote a leaked value; refer to it by name ("the `tailscale_key`
+   value"). Repeating it only adds copies.
+3. If a secret leaked, say so immediately, same turn, naming exactly which
+   and recommending rotation (new Tailscale key, regenerated recovery
+   phrase, changed password). Don't offer to "remove it from the transcript"
+   — impossible; implying otherwise understates it.
+4. Judge honestly: public SSH keys and syncthing device IDs aren't secrets
+   in plaintext — no rotation claim for those; don't skip auth keys,
+   passwords, recovery phrases, private keys.
 
 ## See also
 
-- `triage-flagged-secrets` skill and `.agents/known-dead-secrets.md` — the
-  registry of secrets already confirmed dead, for telling a fresh hit from
-  a known one before this file's "say so immediately" step.
-- `.agents/hooks/secrets-guard-pretooluse.sh` and
-  `.agents/hooks/secrets-guard-posttooluse.sh` — the actual enforcement,
-  wired in `.agents/settings.json`'s `hooks.PreToolUse`/`hooks.PostToolUse`.
-  Read these before assuming a new risky-command shape is covered; if it
-  isn't, extend the pattern match rather than only adding prose here.
-- `CLAUDE.md`'s Safety section — why `secrets.yaml` is encrypted-but-committed
-  on purpose, and which hosts are enrolled.
-- `flake/modules/general-config/system/secrets/sops.nix` — how secrets are declared
-  and wired to services in this repo.
+- `triage-flagged-secrets` skill and `.agents/known-dead-secrets.md` —
+  registry of confirmed-dead secrets.
+- The two hook scripts above (wired in `.agents/settings.json`
+  `hooks.PreToolUse`/`hooks.PostToolUse`): read before assuming a new
+  risky-command shape is covered; if not, extend the pattern match, not just
+  this prose.
+- `CLAUDE.md` Safety — why `secrets.yaml` is encrypted-but-committed, which
+  hosts are enrolled.
+- `flake/modules/general-config/system/secrets/sops.nix` — how secrets are
+  declared and wired to services.

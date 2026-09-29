@@ -24,24 +24,21 @@ just keybindings bash --format bindkey - --out sheet.md   # stdin, explicit form
 just keybindings-test             # the fixture tests
 ```
 
-Tools: `kitty`, `zsh`, `bash` (aliases `ble`, `blesh`). Input format is
-auto-sniffed; `--format` overrides. Chords render normalized
-(`kitty_mod+s`, `C-r`, `^[[1;5C` all resolve to the same notation), repo
-overrides win per chord, and an override that unbinds shows as an explicit
-`*(unbound)*` row instead of silently dropping the upstream default.
+Tools: `kitty`, `zsh`, `bash` (aliases `ble`, `blesh`). Format auto-sniffed;
+`--format` overrides. Chords render normalized (`kitty_mod+s`, `C-r`,
+`^[[1;5C` share one notation); repo overrides win per chord; an unbinding
+override shows as an explicit `*(unbound)*` row.
 
 ## Finding upstream defaults
 
-1. **Prefer the pinned version.** Upstream HEAD lies about what these hosts
-   run. Resolve the rev first:
+1. **Use the pinned version** (HEAD lies about what hosts run). Resolve the rev:
 
    ```sh
    jq -r '.nodes["root"].inputs.nixpkgs as $id | .nodes[$id].locked.rev' flake/flake.lock
    ```
 
-   Fetch the tool's source at that rev (GitHub tarball pinned to it), not a
-   fresh clone. For tools not packaged via nixpkgs (ble.sh via its own
-   input), the same lookup works on its input name.
+   Fetch source at that rev (GitHub tarball), not a fresh clone. Non-nixpkgs
+   tools (ble.sh): same lookup on its own input name.
 
 2. **Per tool, the defaults live here:**
    - *kitty* — `map(...)` entries in `kitty/options/definition.py` of the
@@ -55,12 +52,12 @@ overrides win per chord, and an override that unbinds shows as an explicit
      actual shape on-host first** — if it differs, that is a new format
      (walkthrough below), not a reason to eyeball the sheet.
 
-3. A live dump beats source reading whenever the tool resolves keys
-   dynamically (terminfo lookups, terminal protocol variants).
+3. Live dump beats source when keys resolve dynamically (terminfo, terminal
+   protocol variants).
 
 ## This repo's overrides — where to look
 
-The generator reads these directly; grep them when auditing by hand.
+The generator reads these; grep them when auditing by hand.
 
 | Tool | Files | What's there |
 | --- | --- | --- |
@@ -83,17 +80,16 @@ Traps that have bitten here:
   `flake/modules/packages-config/shell-apps/find/fzf.nix`) in favor of atuin's
   `__atuin_history`, which is what the blesh `-C` callbacks bind. If a
   pasted fzf doc lists C-r, the sheet correctly shows the repo's override.
-- **Reading the generated dotfile back is a false-negative machine** —
-  wrong attribute names return empty, some entries are `.source` not
-  `.text`, and `types.lines` concatenation means one dotfile is not one
-  module. Skill `home-manager-dotfiles` holds the full mechanism; for
-  reading generated output use `just dotfiles` / `just dotfile ./.zshrc`.
+- **Reading a generated dotfile back gives false negatives** (wrong
+  attribute names return empty; some entries are `.source` not `.text`;
+  `types.lines` concatenation means one dotfile is not one module). Skill
+  `home-manager-dotfiles`; use `just dotfiles` / `just dotfile ./.zshrc`.
 
 ## Adding a new input format
 
-1. **Nail the format's quirks first** (quote style, key notation, mode
-   prefixes, unbind syntax, ordering semantics like `bindkey -d`), from a
-   real sample — a fixture of imagination passes while the real doc fails.
+1. **Nail the quirks first** (quote style, key notation, mode prefixes,
+   unbind syntax, ordering like `bindkey -d`) from a real sample — an
+   imagined fixture passes while the real doc fails.
 2. **Write a parser** in `flake/scripts/keybinding-cheatsheet.py`:
    `parse_<format>(text, tool, source, **_) -> [Binding]`, and register it
    in the `PARSERS` dict — registration is what adds the `--format` choice.
@@ -109,9 +105,7 @@ Traps that have bitten here:
    keybindings-test`; `just preflight` runs it from now on.
 5. **Teach the sniffer** (`sniff_format` in the same file) if the format is
    detectable; otherwise `--format` carries the weight.
-6. **Record the quirks here**, under Format quirks below — the next agent
-   should not rediscover that `-C` callbacks nest quotes or that ESC +
-   uppercase letter means alt+shift.
+6. **Record the quirks** under Format quirks below.
 
 ## Format quirks
 

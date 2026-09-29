@@ -7,117 +7,50 @@ description: How to review and keep current the fleet's key/credential expiry an
 
 ## Applies to
 
-Any request to "check what's due", "review key expiry", or similar against
-[wiki/maintenance-schedule.md](../../../wiki/maintenance-schedule.md); also
-triggers any time a change introduces or rotates a credential, key, or
-certificate with an expiry, rotation cadence, or silent-breakage property —
-that page needs a matching update in the same change, the same discipline
-`wiki-sync` asks for elsewhere. Not for the secret *values* themselves —
-that's `secrets-hygiene`.
+Requests to "check what's due", "review key expiry", or similar against [wiki/maintenance-schedule.md](../../../wiki/maintenance-schedule.md); also any change that introduces or rotates a credential, key, or certificate with an expiry, rotation cadence, or silent-breakage property — the page needs a matching update in the same change (`wiki-sync` discipline). Not for secret *values* (`secrets-hygiene`).
 
-## Why this exists
+## Why
 
-`tailscale_key` sat in `secrets.yaml` past its 90-day validity, unused,
-because nothing prompted anyone to look at it again after the flake-parts
-port. A credential with an expiry that nobody is looking at is
-indistinguishable from one that doesn't exist until it fails — usually as a
-service going unreachable with no matching commit to explain why. The page
-exists so "is anything about to expire" has one place to check instead of
-re-deriving it from `secrets.yaml` and module comments each time.
+`tailscale_key` sat in `secrets.yaml` past its 90-day validity, unused, because nothing prompted a re-look after the flake-parts port. An unwatched expiring credential looks like a nonexistent one until it fails, usually as an unreachable service with no matching commit. The page is the one place to check instead of re-deriving from `secrets.yaml` and module comments.
 
 ## Reviewing the page
 
-1. **Read `wiki/maintenance-schedule.md` in full** — it's short by design;
-   don't grep for one item when reviewing.
-2. **For each item, check its actual current state** where that's possible
-   without decrypting anything unnecessary:
-   - A live check (Tailscale admin console, a service's own settings page)
-     beats inferring from repo state.
-   - A `secrets.yaml` key's *existence* is fine to check (`grep '^key-name:'
-     secrets.yaml`); its *value* is not needed to know whether it's
-     rotated — follow `secrets-hygiene` if a value genuinely must be read.
-   - Some items (SSH host key pins, Syncthing certs) have no live check
-     worth doing on a routine pass — the page says so; don't invent one.
-3. **Update each item's "Last checked" date** to today, whether or not
-   anything changed. An unchanged date is what makes a stale item visible
-   later.
-4. **If something is actually due** (an expired or soon-to-expire key, a
-   credential overdue for rotation): follow that item's linked procedure
-   (`backup-runbook.md`'s rotating-the-secrets section, for example) rather
-   than improvising a new one, and use `secrets-hygiene` practices while
-   doing the rotation itself. Update the item's rotation-history line
-   afterward.
-5. **If a status changed from "pending"/"unverified" to something concrete**
-   (Grafana credentials finally set, a Tailscale admin-console setting
-   confirmed) — update the item's own text, not just the date, so the page
-   doesn't keep saying "pending" past the point it's true.
+1. **Read `wiki/maintenance-schedule.md` in full** (short by design); don't grep for one item.
+2. **Check each item's actual current state** without decrypting more than needed:
+   - Live check (Tailscale admin console, a service's settings page) beats inferring from repo state.
+   - A `secrets.yaml` key's *existence* is checkable (`grep '^key-name:' secrets.yaml`); its value isn't needed to know if it's rotated (else `secrets-hygiene`).
+   - Some items (SSH host key pins, Syncthing certs) have no worthwhile live check on a routine pass; the page says so; don't invent one.
+3. **Set each item's "Last checked" to today**, changed or not — an unchanged date is what makes staleness visible.
+4. **If something is due** (expired/soon-expiring, overdue rotation): follow the item's linked procedure (e.g. `backup-runbook.md`'s "Rotating the secrets"), don't improvise; use `secrets-hygiene` while rotating; update the rotation-history line.
+5. **If status moved from "pending"/"unverified" to concrete**, update the item text, not just the date.
 
 ## Default credentials are a live credential, not a missing one
 
-**Never write a default-credential row as though nothing is set up yet.**
-"Still on initial setup", "hasn't had its one-time setup done", "pending" and
-"not yet configured" all describe an *absence*. A service shipping stock
-credentials is the opposite: there is a working admin account right now, its
-password is in the vendor's public documentation, and anyone who can reach
-the service already has it.
+Never word a stock-credential row as an absence ("still on initial setup", "pending", "not yet configured"). A service shipping stock credentials has a working admin account now, its password is in public vendor docs, and anyone who can reach the service has it. Precedent: `maintenance-schedule.md` item 8 (Grafana) once said "still on initial/default setup ... hasn't had its one-time setup done", and the user read it as *unset* rather than *default and live* (2026-09-13). Accurate, still misleading.
 
-This is not hypothetical phrasing advice. `maintenance-schedule.md` item 8
-said Grafana was "still on initial/default setup — this is not yet a 'rotate
-periodically' item because it hasn't had its one-time setup done at all",
-and the user read it as the credentials being *unset* rather than *default and
-live* (2026-09-13). The row was accurate and still misled its only reader.
+A stock-credential row states, in order:
 
-A row for stock credentials states, in this order:
+1. The account is live and the password publicly known (`admin`/`admin` or the vendor's, in as many words).
+2. What it grants (admin on which service, holding what).
+3. What is in front of it (tailnet, LAN, firewall rule) — the entire mitigation; name it.
+4. What closes it, and that this needs a live check: a stock password is invisible from config (absence of an `admin_password` setting is what leaves it stock).
 
-1. **That the account is live and its password is publicly known** — say
-   `admin`/`admin`, or whatever the vendor ships, in as many words.
-2. **What it currently grants** — admin on which service, holding what.
-3. **What is actually in front of it** — a tailnet, a LAN, a firewall rule.
-   Name it, because that is the entire mitigation and the reader needs to
-   judge it.
-4. **What closes it**, and that the answer needs a live check rather than
-   repo state — a stock password is invisible from the config, since the
-   absence of an `admin_password` setting is exactly what leaves it stock.
+Traps:
 
-Two related traps worth not re-deriving:
-
-- **A credential set declaratively and a credential left at default look
-  identical in `secrets.yaml`** — both are absent from it. Forgejo's admin
-  password is a sops secret; Grafana's is stock. Nothing in `secrets.yaml`
-  distinguishes those, so check the module for an `admin_password`-shaped
-  setting rather than concluding from the secret store.
-- **"Not yet rotated since initial setup" is a different status** and is
-  fine — it means a real credential exists and has never been changed
-  (item 7, Forgejo). Don't collapse the two into one wording.
+- **Declaratively-set and left-at-default credentials look identical in `secrets.yaml`** (both absent). Check the module for an `admin_password`-shaped setting, not the secret store. Forgejo's admin password is a sops secret (item 7, `forgejo-admin-bootstrap`); Grafana's (item 8) was set by hand in the UI 2026-09-13, and `grafana-admin-password` in sops is separate: applied at first start only, so never consumed (the admin user predates it) — read item 8 before wording anything about it.
+- **"Not yet rotated since initial setup" is a different, fine status**: a real credential exists, never changed (item 7). Don't collapse the two wordings.
 
 ## Adding a new item
 
-When a change introduces a new credential, key, or certificate with an
-expiry, rotation cadence, or silent-breakage property, add a row to
-`maintenance-schedule.md` in the *same* change — see that page's own
-"Adding a new item" section for the shape (what/expiry/procedure or
-recommendation/last checked) and what does *not* qualify (a secret with no
-such property just lives in `secrets.yaml`, no row needed).
+Add a row in the *same* change; the page's own "Adding a new item" section has the shape (what/expiry/procedure or recommendation/last checked) and what doesn't qualify (a secret with no expiry/rotation/silent-breakage property just lives in `secrets.yaml`).
 
 ## Don't sops-encrypt this file
 
-`maintenance-schedule.md`'s own "Why this file is plaintext" section has
-the reasoning: key names, dates, and durations aren't the secret values
-themselves, and encrypting a page meant to be checked on a cadence works
-against its purpose. That judgment is per-row, not per-file — if a future
-row would need to hold real key material to be useful, encrypt *that
-value* with sops and reference it, don't wrap the whole page in ciphertext.
-Don't reverse this call without re-reading that section; it's not an
-oversight to "fix".
+The page's "Why this file is plaintext" section has the reasoning: key names, dates, durations aren't secret values, and encrypting a page meant for cadence checks defeats it. Judgment is per-row: if a row would need real key material, sops-encrypt *that value* and reference it, not the whole page. Not an oversight to "fix"; re-read that section before reversing.
 
 ## See also
 
-- [wiki/maintenance-schedule.md](../../../wiki/maintenance-schedule.md) —
-  the page itself.
-- `secrets-hygiene` skill — how to check or touch the underlying secrets
-  without printing plaintext.
-- `wiki-sync` skill — the general discipline this skill specializes for
-  one page.
-- `homelab/backup-runbook.md`'s "Rotating the secrets" section — the
-  worked example of an actual rotation procedure this page points at
-  rather than duplicates.
+- [wiki/maintenance-schedule.md](../../../wiki/maintenance-schedule.md) — the page.
+- `secrets-hygiene` — touch secrets without printing plaintext.
+- `wiki-sync` — the general discipline this specializes.
+- `homelab/backup-runbook.md` "Rotating the secrets" — worked rotation procedure this page points to.

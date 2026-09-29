@@ -7,57 +7,49 @@ description: How to edit impermanence/initrd config in this repo, and read real 
 
 ## Applies to
 
-`flake/modules/general-config/impermanence/`, any `boot.initrd.*` option (systemd
-stage 1 here since 2026-08-10 — see History), and reading disk/mount state
-on one of the hosts that wipes `/root` on boot. Use before touching
-anything under `general-config/impermanence/`, any `boot.initrd` option, or before
-trusting `lsblk`/`findmnt`/mounted-`/etc` output on these hosts.
+`flake/modules/general-config/impermanence/`, any `boot.initrd.*` option
+(systemd stage 1 since 2026-08-10 — see History), and reading disk/mount
+state on a host that wipes `/root` on boot. Use before touching those, or
+before trusting `lsblk`/`findmnt`/mounted-`/etc` output on these hosts.
 
-**Read `WARN-impermanence.nix` before
-changing anything near this.** This mechanism wipes `/root` on boot on most
-hosts in this repo — see `CLAUDE.md` Safety section for which ones, current
-as of the date on that file. The following has actually happened here.
+**Read `WARN-impermanence.nix` before changing anything near this.** Which
+hosts wipe `/root`: `CLAUDE.md` Safety section.
 
-## The shell's view of the machine is a mount namespace
+## The shell's view is a mount namespace
 
-`lsblk`, `findmnt` and `/etc` all describe **that** namespace — faithfully,
-and about the wrong world. On tenacity they reported `/` as a tmpfs,
-`/dev/mapper/enc` mounted at `/etc/xdg`, empty UUID columns, and an `/etc`
-that is missing files the system definitely has. Read literally, the first
-of those says *the disk does not match the hardware module*, which is a
-stop-and-ask condition. It matched perfectly — the shell was just looking at
-the wrong namespace.
+`lsblk`, `findmnt` and `/etc` describe **that** namespace — faithfully, about
+the wrong world. On tenacity they showed `/` as tmpfs, `/dev/mapper/enc` at
+`/etc/xdg`, empty UUID columns, and an `/etc` missing files the system has.
+Read literally that says *the disk does not match the hardware module* (a
+stop-and-ask condition); it matched perfectly.
 
-Sources that are not rewritten, all unprivileged:
+Unrewritten sources, all unprivileged:
 
-- `/proc/1/mountinfo` — PID 1's mount table, the host's
-- `/dev/disk/by-uuid/` — udev's symlinks, so LUKS and filesystem UUIDs resolve
-- `/run/current-system/…` and any `/nix/store` path — for what `/etc` should hold
+- `/proc/1/mountinfo` — PID 1's (the host's) mount table
+- `/dev/disk/by-uuid/` — udev symlinks; LUKS and filesystem UUIDs resolve
+- `/run/current-system/…`, any `/nix/store` path — what `/etc` should hold
 
-`btrfs subvolume list` needs privileges and is worth asking the user to run; it
-answers whether `root-blank` exists without mounting anything:
+`btrfs subvolume list` needs privileges; ask the user to run it. It shows
+whether `root-blank` exists without mounting:
 
 ```sh
 sudo btrfs subvolume list -a /
 ```
 
-Read the subvolids as well as the names — a `/root` far above its
-neighbours is the rollback *demonstrably running*, a stronger fact than
-`root-blank` merely existing. (Confirmed this way on tenacity: 607 vs.
-257–265 on first boot. Confirmed a second way — reading the boot journal for
-the delete-then-snapshot sequence rather than the mount — on durandal's
-first boot into this config; see `wiki/history.md`'s "Confirmed-on-hardware
-facts" for both.)
+Read subvolids too: a `/root` far above its neighbours is the rollback
+*demonstrably running*, stronger than `root-blank` merely existing
+(tenacity: 607 vs. 257–265 on first boot). Second method: boot journal for
+the delete-then-snapshot sequence (durandal's first boot into this config).
+Both: `wiki/history.md`'s "Confirmed-on-hardware facts".
 
 ## History
 
-**Scripted stage 1's `@name@` templating trap no longer applies — this repo
-migrated to systemd stage 1 on 2026-08-10** (nixpkgs deprecated scripted
-initrd the same week, removal scheduled for 26.11). Kept here in case
-`git log`/old docs surface `boot.initrd.postResumeCommands`-shaped code:
-its hook strings were pasted into `stage-1-init.sh` by a fixed sequence of
+**Scripted stage 1's `@name@` templating trap no longer applies** — migrated
+to systemd stage 1 2026-08-10 (nixpkgs deprecated scripted initrd that week;
+removal scheduled 26.11). For old `boot.initrd.postResumeCommands`-shaped
+code: hook strings were pasted into `stage-1-init.sh` by a fixed sequence of
 `substituteInPlace --replace-fail` passes, so naming a *later* placeholder
 (e.g. `@preLVMCommands@`) inside an *earlier* one's string — even in a
 comment — pasted a whole other script in and executed most of it. Full
-account of the migration and what it changed: `wiki/lessons-learned.md`
-§28, `WARN-impermanence.nix`'s own history comments.
+account: `wiki/lessons-learned.md` §28, `WARN-impermanence.nix` history
+comments.

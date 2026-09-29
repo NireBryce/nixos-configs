@@ -1,69 +1,61 @@
 # ship — side flows
 
-Companion to `SKILL.md`, which links here for everything that isn't the
-ordinary push → PR → merge-and-delete flow. Each section stands alone.
+Companion to `SKILL.md`; everything that isn't the ordinary push → PR →
+merge-and-delete flow. Each section stands alone.
 
 ## The ruleset picture (trunk + promotion, 2026-09-03)
 
-Two rulesets, both enforced by GitHub:
+Two GitHub-enforced rulesets:
 
-- **`experimental` (the default branch)** — the ruleset added for `main`
+- **`experimental` (default branch)** — the ruleset added for `main`
   2026-08-21 targets `~DEFAULT_BRANCH`, so it followed the default-branch
-  flip automatically: no deletion, no force-push, PR required (zero
-  approvals — solo repo), CI check required. The single conversational
-  confirmation remains the guard on *top* of this — it gates the
-  merge-and-delete decision, the ruleset gates everything else.
-- **`main` (promoted known-good)** — protected by name: same rules. It
-  moves only via a PR from `experimental` (the promotion flow below), and
-  only for configs verified on hardware.
+  flip: no deletion, no force-push, PR required (zero approvals, solo repo),
+  CI check required. The conversational confirmation is a guard on top: it
+  gates merge-and-delete, the ruleset gates the rest.
+- **`main` (promoted known-good)** — protected by name, same rules. Moves
+  only via a PR from `experimental` (below), only for configs verified on
+  hardware.
 
 ## Promoting to `main`
 
-On a "promote to main"-shaped ask (not part of the ordinary flow in
-`SKILL.md`):
+On a "promote to main"-shaped ask:
 
 ```sh
 gh pr create --base main --head experimental \
   --title "promote: <one line on what's verified>" \
   --body "what landed since the last promotion, and where it was booted/switched"
-gh pr merge <n> --merge     # a merge commit -- never --rebase, see below
+gh pr merge <n> --merge     # a merge commit -- never --rebase
 ```
 
-The promotion PR is the record of *why* `main` moved — write what was
-verified on hardware, not just the commit range. Only promote after the
-config has actually booted/switched on the hosts it touches; an unverified
-trunk is what `experimental` is for.
+The PR records *why* `main` moved: write what was verified on hardware, not
+just the commit range. Promote only after the config has booted/switched on
+the hosts it touches.
 
-**Merge, never rebase.** This section prescribed `--rebase` from
-2026-09-03, and no promotion has ever used it — #201 (2026-09-08) and
-#354 (2026-09-15) both merge. Rebase rewrites every promoted commit with
-a new SHA on `main`, so `main..experimental` counts them as unpromoted
-forever and every parity/delta check needs patch-id machinery; a merge
-commit is what made `main..experimental` read as exactly
-commits-since-last-promotion after #354, which is the number the PR
-body above asks you to summarize.
+**Merge, never rebase.** This section prescribed `--rebase` from 2026-09-03;
+no promotion ever used it — #201 (2026-09-08) and #354 (2026-09-15) merged.
+Rebase gives every promoted commit a new SHA on `main`, so `main..experimental`
+counts them unpromoted forever and parity checks need patch-id machinery; a
+merge commit made `main..experimental` read as exactly
+commits-since-last-promotion after #354.
 
 ## When one working tree becomes two PRs
 
 Both bit 2026-08-21 (#43/#44):
 
-- **`cp` is aliased `cp -i` here** (`~/.zshrc`, HM-generated). Non-interactive,
-  it answers its own prompt and **exits 0 without copying**. Use `cat src >
-  dst` or `command cp` when reconstructing file states. (Written `alias --
-  cp='cp -i'`, so `grep 'alias cp='` misses it.) Caught by an empty staged
-  diff, not by anything the copy said — §1, a tool reporting success while
-  wrong.
-- **A stacked PR is not retargeted when its base merges** (only when the base
-  *branch is deleted*, which now happens automatically right after merge —
-  there's no longer a gap between merge and delete to catch it in). Retarget
-  explicitly *before* merging the base: `gh pr edit <child> --base
-  experimental`. Each PR still gets its own merge-and-delete confirmation,
-  but a harness can batch several such questions into one call — still one
-  question per decision. Name which PR is stacked on which, so an
-  incoherent answer is visibly incoherent.
+- **`cp` is aliased `cp -i`** (`~/.zshrc`, HM-generated; written `alias --
+  cp='cp -i'`, so `grep 'alias cp='` misses it). Non-interactive, it answers
+  its own prompt and **exits 0 without copying**. Use `cat src > dst` or
+  `command cp`. Caught by an empty staged diff, not by the copy — §1, a tool
+  reporting success while wrong.
+- **A stacked PR is retargeted only when its base *branch is deleted*** (now
+  automatic right after merge — no gap to catch it in), not when the base
+  merges. Retarget *before* merging the base: `gh pr edit <child> --base
+  experimental`. Each PR still gets its own merge-and-delete confirmation
+  (a harness may batch the questions — still one per decision). Name which
+  PR is stacked on which.
 
 ## Only when the user names a branch
 
-The user naming a branch outright for that push — any branch except `main`,
-which is promotion-only (see above). A bare "push" is not that; it means
-the guarded flow in `SKILL.md`, onto `experimental`.
+The user names a branch outright for that push — any branch except `main`
+(promotion-only). A bare "push" is not that; it means the guarded flow in
+`SKILL.md`, onto `experimental`.
