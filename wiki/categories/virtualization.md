@@ -1,6 +1,6 @@
 # `virtualization` — `general-config/homelab/virtualization/`
 
-_Last modified: 2026-09-28_
+_Last modified: 2026-09-29_
 
 Libvirt/QEMU VMs, and *only* that — see [containers](containers.md) for why
 podman and distrobox (OCI containers) are a different category. Nested under
@@ -122,7 +122,7 @@ fail auto-importing it. Filed under `_lib/` because `import-tree` ignores
 any path containing `/_` (same as
 `general-config/impermanence/_disko/impermanence-luks-btrfs.nix`).
 
-Called today by `host-config/cube/vms/virtualization-cube.nix` (for
+Called today by `host-config/cube/cube-vm/virtualization-cube.nix` (for
 `forge-runner` — see below); earlier by a same-named file for
 `nire-llm-sandbox`, removed with that VM 2026-08-28. The caller lives under
 cube's host directory, not in this category, so it is cube-only by
