@@ -68,7 +68,7 @@ rots until a fresh machine or a GC turns it into a build failure.
      `# ── history ──` heading at the bottom (AGENTS.md, "A bug recorded in
      a comment stays in the file").
    - Also check for Homebrew overlap on lysithea: `just available <attr>`
-     (skill `nirepackages-platform-support`).
+     (skill `package-platform-support`).
 
 3. **Otherwise, bump.**
 
@@ -139,5 +139,5 @@ rots until a fresh machine or a GC turns it into a build failure.
   bump semantics in more detail.
 - Skill `new-package` — adding a package at all. This skill only applies
   once the package has to be pinned by hand.
-- Skill `nirepackages-platform-support` — darwin buildability and Homebrew
+- Skill `package-platform-support` — darwin buildability and Homebrew
   overlap, for when a pin retires onto a packaged attribute.

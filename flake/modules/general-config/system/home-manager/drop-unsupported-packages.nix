@@ -4,7 +4,7 @@
 # x86_64-linux; eleven packages each carried a hand-written
 # `lib.mkIf (!pkgs.stdenv.isDarwin)` before this existed. All eleven were
 # correct, and all eleven were facts about a package restated by hand.
-# Skill `nirepackages-platform-support` has that story and `just available`.
+# Skill `package-platform-support` has that story and `just available`.
 #
 # nixpkgs already knows: meta.platforms/meta.badPlatforms are the flag and
 # `lib.meta.availableOn` is the reader. It reads meta WITHOUT forcing the

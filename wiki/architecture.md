@@ -1,6 +1,6 @@
 # Architecture & module system
 
-_Last modified: 2026-09-28_
+_Last modified: 2026-09-29_
 
 For *why* this repo runs flake-parts at all, see [flake-parts.md](flake-parts.md)
 first — this page is the mechanism built on top of that, not the reason for
@@ -57,8 +57,8 @@ is the mechanism, not the inventory.
 
 ## Package modules
 
-- **Skill `nirepackages-platform-support`**
-  (`.agents/skills/nirepackages-platform-support/SKILL.md`) — the two
+- **Skill `package-platform-support`**
+  (`.agents/skills/package-platform-support/SKILL.md`) — the two
   different questions that both show up as an `isDarwin` guard: can nixpkgs
   build it on darwin at all (automatic, from `meta.platforms`) vs. does
   Homebrew already install it on lysithea (never automatic — `just available

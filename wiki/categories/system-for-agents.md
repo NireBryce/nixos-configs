@@ -2,6 +2,8 @@
 
 _Last modified: 2026-09-27_
 
+_Sibling reviewed: 2026-09-29 -- source updated for the nirepackages-platform-support→package-platform-support skill rename; no mention of the skill on this page_
+
 Condensed from [system.md](system.md), which keeps the reasoning and the
 narrative. Facts only here.
 

@@ -13,7 +13,7 @@ modules`/`just check` catch outright collisions, not a wrong category
 choice.
 
 Not this skill: platform support and Homebrew overlap in detail →
-`nirepackages-platform-support`; a network service → `new-homelab-service`;
+`package-platform-support`; a network service → `new-homelab-service`;
 one module file's mechanics → `new-flake-module` (those rules still apply
 here); a whole host → `new-host-config`.
 
@@ -69,7 +69,7 @@ their guard.
 Run `just available <pkg>` and, if it's a GUI app, `just available
 --duplicates` **before** writing the module — full mechanism, and the
 `obsidian.nix`/`vicinae.nix` worked examples, are in skill
-`nirepackages-platform-support`. Short version:
+`package-platform-support`. Short version:
 
 - **Can nixpkgs build it on darwin?** Answered automatically by
   `drop-unsupported-packages.nix`, darwin only. Don't hand-restate with
@@ -119,7 +119,7 @@ branch.
 
 ## See also
 
-- `nirepackages-platform-support` — the platform/Homebrew decision in full,
+- `package-platform-support` — the platform/Homebrew decision in full,
   including the darwin-only mirror case this skill only summarizes.
 - `new-flake-module` — filenames, classes, the two `config`s, category
   collisions.

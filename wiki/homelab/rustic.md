@@ -1,6 +1,6 @@
 # rustic — an interactive alternative to the plain `restic` CLI
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-29_
 
 [rustic](https://github.com/rustic-rs/rustic) (the `rustic-rs` project, not
 the unrelated `bnavetta/rustic` "restic wrapper" that shares its name in
@@ -132,5 +132,5 @@ the source, not proven.
 - [rustic-rs/rustic](https://github.com/rustic-rs/rustic) and
   [rustic.cli.rs](https://rustic.cli.rs/) — the live, canonical source;
   right about the current build even when this page has drifted.
-- Skill `nirepackages-platform-support` — the process the package addition
+- Skill `package-platform-support` — the process the package addition
   followed (platform check, Homebrew-duplicate check).

@@ -1,6 +1,6 @@
 # Traps & skills
 
-_Last modified: 2026-09-28_
+_Last modified: 2026-09-29_
 
 [`../CLAUDE.md`](../CLAUDE.md)'s own "Traps" section carries a one-line
 summary of each; the full mechanism, code, and worked examples live in the
@@ -14,7 +14,7 @@ one-liner.
 | Writing/renaming a flake-parts module | `.agents/skills/new-flake-module/SKILL.md` |
 | Editing HM shell/dotfile modules | `.agents/skills/home-manager-dotfiles/SKILL.md` |
 | Editing impermanence or initrd | `.agents/skills/impermanence-initrd/SKILL.md` |
-| Adding/platform-gating a package | `.agents/skills/nirepackages-platform-support/SKILL.md` |
+| Adding/platform-gating a package | `.agents/skills/package-platform-support/SKILL.md` |
 | Adding a new host | `.agents/skills/new-host-config/SKILL.md` |
 | Adding a homelab service (port, proxy route, verification) | `.agents/skills/new-homelab-service/SKILL.md` |
 | Giving a service its own Tailscale Services (`svc:`) hostname | `.agents/skills/new-tailscale-service/SKILL.md` |

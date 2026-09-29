@@ -1,6 +1,6 @@
 # `system` — `general-config/system/`
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-29_
 
 The largest category by far — across 19 subdirectories, no per-file count
 kept here on purpose (see categories/00-INDEX.md's Index section for why) —
@@ -66,7 +66,7 @@ every package in it has to survive `aarch64-darwin`. Eleven didn't (`vlc`,
 hand-written `lib.mkIf (!pkgs.stdenv.isDarwin)` — a restated fact that can
 drift. This file reads `meta.platforms`/`meta.badPlatforms` and drops what
 can't build, once, with a warning naming what it dropped. See skill
-`nirepackages-platform-support` for the full
+`package-platform-support` for the full
 build-support-vs-Homebrew-overlap distinction this is one half of.
 
 ## Secrets

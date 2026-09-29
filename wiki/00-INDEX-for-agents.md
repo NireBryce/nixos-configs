@@ -1,6 +1,6 @@
 # Wiki index, for agents
 
-_Last modified: 2026-09-28_
+_Last modified: 2026-09-29_
 
 _Sibling reviewed: 2026-09-27 -- source updated for the config-system→general-config directory rename; no mention of the old path on this page_
 
@@ -23,7 +23,7 @@ that sibling; load the human page only for the *why*.
 | add, rename, or wire a flake-parts module | [architecture.md](architecture.md), skill `new-flake-module` |
 | place a new module: shared / host / user | [where-modules-go.md](where-modules-go.md) |
 | touch impermanence or initrd | [impermanence-and-secrets.md](impermanence-and-secrets.md), skill `impermanence-initrd` |
-| add or platform-gate a package | [categories/00-INDEX.md](categories/00-INDEX.md), skill `nirepackages-platform-support` |
+| add or platform-gate a package | [categories/00-INDEX.md](categories/00-INDEX.md), skill `package-platform-support` |
 | add a package to a user's environment | skill `new-package` |
 | land a change on `experimental` | [conventions.md](conventions.md), skill `ship` |
 | work without clobbering another session | skill `use-a-worktree` |
