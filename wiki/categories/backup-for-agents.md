@@ -1,24 +1,20 @@
 # `backup`, for agents
 
-_Last modified: 2026-09-27_
-_Sibling reviewed: 2026-09-14 -- backup.md only renamed `system/` path shorthand to `config-system/`; no facts moved_
+_Last modified: 2026-09-29_
 
-Condensed from [backup.md](backup.md), which keeps the investigation
-narrative and the verification trail. Facts only here.
+Condensed from [backup.md](backup.md). Facts only here.
 
-restic, backing up `nire-cube`'s service state to the QNAP NAS. Added
-2026-08-28 against issue #87, nested under [homelab](homelab.md).
-**Module is done** — restore drill performed twice, a real restore opened a
-complete Forgejo database (2026-09-06).
+restic, backing up `nire-cube`'s service state to the QNAP NAS, nested under
+[homelab](homelab.md) (issue #87). **Module is done** — restore drill performed twice; a
+real restore opened a complete Forgejo database (2026-09-06).
 
 ## What's in it
 
 One file, `nixos`-class: `restic/restic.nix`, declaring
 `services.restic.backups.cube`.
 
-Category isn't named `restic` because a category and its one module sharing
-a name both declare `flake.modules.nixos.restic` and silently **merge** —
-same reason `git-forge` isn't `forgejo`.
+Category isn't named `restic`: category and module sharing a name both
+declare `flake.modules.nixos.restic` and silently **merge**.
 
 ## Current shape
 
@@ -35,9 +31,8 @@ same reason `git-forge` isn't `forgejo`.
 - **restic silently refuses to back up anything inside its own
   `RESTIC_CACHE_DIR`** — nixpkgs sets that to
   `/var/cache/restic-backups-<name>`. The sqlite staging directory lived
-  there and protected nothing for the module's entire life, with no error
-  and green timers throughout. Proven by a `--dry-run` pair: 603 files with
-  the variable unset, 600 with it set, nothing else changed. **Never stage
+  there and protected nothing, with no error and green timers. `--dry-run`
+  pair: 603 files with the variable unset, 600 set. **Never stage
   anything under `/var/cache/restic-backups-*`.**
 - **A green timer proves nothing about content.** The bar is a restore
   drill against the repository's own metadata: `restic ls --recursive
@@ -62,8 +57,7 @@ is the check.
 
 ## Imported by
 
-`nire-cube` only, via `homelab`. Confirmed not to move durandal, tenacity
-or lysithea.
+`nire-cube` only, via `homelab`. Confirmed not to move durandal, tenacity or lysithea.
 
 ## See also
 

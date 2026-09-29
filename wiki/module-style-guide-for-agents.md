@@ -1,18 +1,14 @@
 # Module style guide, for agents
 
 _Last modified: 2026-09-29_
-_Sibling reviewed: 2026-09-27 -- source updated for the hosts/users/packages area-dir rename; no mention of those paths on this page (its 2026-09-14 review covered the earlier system/ shorthand rename)_
 
-Condensed from [module-style-guide.md](module-style-guide.md), which keeps
-the reasoning and the declined alternatives. Rules only.
+Condensed from [module-style-guide.md](module-style-guide.md). Rules only.
 
 Applies to every module under `flake/modules/`, not just packages.
 
 ## Counts
 
-Every count module-style-guide.md used to state inline, in the one place
-the `counts` subcheck of `wiki/scripts/check_wiki.py` watches — moved here
-2026-09-11. Recompute by hand with
+Watched by `check_wiki.py`'s `counts` subcheck. Recompute with
 `grep -rl --include='*.nix' -- <pattern> flake/modules | wc -l`.
 
 | What | Files |
@@ -75,8 +71,7 @@ option without a reason beyond tidiness.
 - Rationale goes **inside the module body**, next to the option it concerns —
   not in a header block above the argument list.
 - **`#` inside a `''` string is shell text, not a Nix comment.** It is
-  emitted verbatim into the generated dotfile; fourteen lines of maintenance
-  notes once shipped into `~/.zshrc` this way. Notes for the `.nix` editor go
+  emitted verbatim into the generated dotfile. Notes for the `.nix` editor go
   *above* the string.
 - **When a rename makes the old name ungreppable, say what it was** on the
   declaration — one line containing the old string, so a search lands there.
@@ -96,9 +91,3 @@ option without a reason beyond tidiness.
   conflict — a file named the same as a category silently combines with it.
 
 `just modules` checks the last two.
-
-## See also
-
-[module-style-guide.md](module-style-guide.md) ·
-[conventions.md](conventions.md) · [styleguide.md](styleguide.md) (the
-wiki's own house style, a different thing)

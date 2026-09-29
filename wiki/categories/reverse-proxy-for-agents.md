@@ -1,9 +1,8 @@
 # `reverse-proxy`, for agents
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-29_
 
-Condensed from [reverse-proxy.md](reverse-proxy.md), which keeps the
-reasoning, the verification narrative and the links out. Facts only here.
+Condensed from [reverse-proxy.md](reverse-proxy.md).
 
 Caddy, one tailnet-only HTTPS front door on `nire-cube`. Added 2026-08-24,
 nested under `homelab` 2026-08-27.
@@ -50,12 +49,12 @@ redirects; `https://<bare name>` serves Caddy's local CA and shows
   SNI, Caddy tries for a public cert on an unissuable name and the handshake
   dies (`TLS alert, internal error (592)`); the `tls internal` twins exist
   for exactly that.
+- **`vip-get` wants the `svc:` prefix** — without it every service 404s.
 - **A new `svc:` port needs declaring twice** — in the Service object and in
   `serve.nix`. `tcp:443` alone means `http://<name>` never answers.
 - **Creating a `svc:` needs `systemctl restart tailscaled`, then
   `tailscale-serve`.** Re-running `serve set-config` against a standing
   advertisement does not activate a newly-created Service.
-- **`vip-get` wants the `svc:` prefix** — without it every service 404s.
 - No firewall ports. `trustedInterfaces = [ "tailscale0" ]` (from `system`)
   is what lets tailnet traffic in; 443 binds unprivileged via upstream
   `caddy.service`'s `AmbientCapabilities`.
@@ -95,11 +94,4 @@ redirects; `https://<bare name>` serves Caddy's local CA and shows
 
 ## Imported by
 
-`nire-cube` only. Confirmed not to move durandal, tenacity or lysithea.
-
-## See also
-
-[reverse-proxy.md](reverse-proxy.md) · [monitoring.md](monitoring.md) ·
-[git-forge.md](git-forge.md) · [shortlinks.md](shortlinks.md) ·
-[system.md](system.md) ·
-[reverse-proxy-history.md](reverse-proxy-history.md)
+`nire-cube` only.

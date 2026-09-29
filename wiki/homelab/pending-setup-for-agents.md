@@ -1,27 +1,19 @@
 # Pending setup, for agents
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-09-29_
 
-_Sibling reviewed: 2026-09-27 -- source updated for the config-system→general-config directory rename; no mention of the old path on this page_
+Condensed from [pending-setup.md](pending-setup.md). Open work and traps only.
 
-Condensed from [pending-setup.md](pending-setup.md), which keeps the closed
-items and their full accounts. Open work and the traps only here.
-
-Scope: one-time operational work on a **live** service — a browser or ssh,
-never `flake/modules/`. No commit can complete it; it lives in a service's
-own database. The repo-side counterpart is
-[open-threads.md](../open-threads.md).
+Scope: one-time operational work on a **live** service (browser/ssh, never
+`flake/modules/`); lives in the service's own database. Repo-side
+counterpart: [open-threads.md](../open-threads.md).
 
 ## Still open
 
-1. ~~**Forgejo SSH key.**~~ **Done 2026-09-13** — auth and a real clone over
-   SSH confirmed from tenacity with `~/.ssh/id_ed25519`; push still
-   untested. (`elly` *is* admin — confirmed 2026-09-12; the API below still
-   cannot show it.) Procedure, for the next one:
-   [forgejo.md](forgejo.md#adding-one). The key is **yours**, not the
-   `forgejo` account's; that account has no keypair. Formerly: add a key for
-   `forgejo@ts-cube:…` clones ([forgejo.md](forgejo.md) explains why that
-   key authorizes `forgejo@ts-cube`, not `elly@ts-cube`).
+1. ~~**Forgejo SSH key.**~~ **Done 2026-09-13** — auth and real clone over
+   SSH confirmed from tenacity with `~/.ssh/id_ed25519`; push untested.
+   `elly` *is* admin (2026-09-12). Next key: [forgejo.md](forgejo.md#adding-one);
+   the key is the user's, not the `forgejo` account's (no keypair).
 2. **golink has no links.** `http://go/.export` returns empty. Proposed
    first three:
 
@@ -32,47 +24,37 @@ own database. The repo-side counterpart is
    | `go/graf` | `https://grafana.moose-micro.ts.net/` |
 
    Create in the web UI at `http://go/`, or the `curl` form in
-   [creating-golinks.md](creating-golinks.md) — **read that page's `--post302` and delete
-   traps first, both have teeth.** Done when `go/dash` resolves from a
-   *second* tailnet device.
-3. ~~**Grafana admin credentials**~~ **Done 2026-09-13.** Live password
-   changed by hand (UI); persists in cube's sqlite db, not reproducible.
-   Separately `grafana.nix` now sets `settings.security.admin_password`
-   from the `grafana-admin-password` sops secret — **first start only**
-   (Grafana `defaults.ini`: "can be changed before first start"), so it
-   stops a rebuilt instance coming up on stock `admin`/`admin` but does
-   not manage the live password. **Switched 2026-09-13**: secret present as `grafana:grafana` 400, live
-   `config.ini` references it, unit active `NRestarts=0`. **Never
-   consumed** — the admin user predates it, so only a fresh instance
-   would read it.
-4. **Homepage's calendar feeds** (#291, 2026-09-12) — plumbing all landed;
-   the gcal **secret iCal addresses** don't exist yet (IDs deliberately
-   unassigned). Until filled in the calendars render bare-grid + empty
-   agenda, plus a small API-error band per card (the placeholder URL
-   403ing) — **by design, not a bug**. Fill-in: edit sops key
-   `homepage-env` (a systemd EnvironmentFile), one
-   `HOMEPAGE_VAR_ICAL_<NAME>=<secret-ics-url>` line per calendar; add a
-   `calendars` entry in `homepage.nix` for each new NAME. Details:
+   [creating-golinks.md](creating-golinks.md) — **read its `--post302` and
+   delete traps first.** Done when `go/dash` resolves from a *second* tailnet
+   device.
+3. ~~**Grafana admin credentials**~~ **Done 2026-09-13.** Live password set
+   by hand, only in cube's sqlite db. `grafana.nix` sets
+   `settings.security.admin_password` from sops `grafana-admin-password`,
+   **first start only**: stops a rebuilt instance coming up on `admin`/`admin`,
+   doesn't manage the live password. Switched 2026-09-13 (`grafana:grafana`
+   400, in live `config.ini`, unit active `NRestarts=0`); **never consumed**
+   (admin user predates it).
+4. **Homepage's calendar feeds** (#291, 2026-09-12) — plumbing landed; gcal
+   **secret iCal addresses** don't exist yet (IDs unassigned). Until filled:
+   bare-grid calendars, empty agenda, small API-error band per card (placeholder
+   URL 403ing) — **by design**. Fill-in: sops key `homepage-env`
+   (EnvironmentFile), one `HOMEPAGE_VAR_ICAL_<NAME>=<secret-ics-url>` line per
+   calendar, plus a `calendars` entry in `homepage.nix` per NAME. Details:
    [../categories/landing.md](../categories/landing.md#how-the-gcal-calendar-feeds-work).
 5. ~~Forgejo Actions runner~~ — **done 2026-09-26** (first green run,
-   `elly/nire-skills` run 2). No fill-in remains: cube mints a single-use
-   secret per job (`forge-runner-cycle`). sops `forgejo-runner-secret`
-   removed 2026-09-26.
-   [pending-setup.md](pending-setup.md#8-done--forgejo-actions-runner-first-green-run-2026-09-26).
+   `elly/nire-skills` run 2). Nothing to fill in: cube mints a single-use
+   secret per job (`forge-runner-cycle`); sops `forgejo-runner-secret`
+   removed. [pending-setup.md](pending-setup.md#8-done--forgejo-actions-runner-first-green-run-2026-09-26).
 
-## The trap that produced a wrong answer twice
+## Trap: unauthenticated `GET /git/api/v1/users/search` masks fields
 
-**Unauthenticated `GET /git/api/v1/users/search` masks fields.** It always
-returns `last_login` as `0001-01-01T00:00:00Z` and `is_admin`/`active` as
-`false`, regardless of the truth — Forgejo/Gitea's anonymous-safe masking.
-(Anonymous calls stopped working altogether 2026-09-26: `REQUIRE_SIGNIN_VIEW`.)
-Two agent sessions (2026-09-04, 2026-09-05) read that zero value as "nobody
-has signed in yet" and wrote it into this page *and* the backup runbook.
-Both wrong: a same-day screenshot showed an active session throughout. The
-endpoint cannot answer either question. It was settled the only way it
-could be — from inside the UI: **`elly` is admin, confirmed by the user
-2026-09-12.** The masked `is_admin: false` was never evidence either way.
-Full account: [../categories/git-forge-history.md](../categories/git-forge-history.md).
+Always returns `last_login` `0001-01-01T00:00:00Z` and `is_admin`/`active`
+`false` regardless of truth. Two sessions (2026-09-04/05) misread it as
+"nobody has signed in" and wrote it into this page and the backup runbook.
+It answers neither question; settled from the UI: **`elly` is admin
+(2026-09-12).** Anonymous calls stopped working 2026-09-26
+(`REQUIRE_SIGNIN_VIEW`). Account:
+[../categories/git-forge-history.md](../categories/git-forge-history.md).
 
 ## Done, but load-bearing to know
 
@@ -88,9 +70,6 @@ Full account: [../categories/git-forge-history.md](../categories/git-forge-histo
   Backed up, so it survives a *restore* — but not a *rebuild* that
   reprovisions `_dashboards/`.
 
-## See also
-
-[pending-setup.md](pending-setup.md) ·
-[reaching-services-for-agents.md](reaching-services-for-agents.md) ·
+See also: [reaching-services-for-agents.md](reaching-services-for-agents.md) ·
 [creating-golinks-for-agents.md](creating-golinks-for-agents.md) ·
 [backup-runbook-for-agents.md](backup-runbook-for-agents.md)

@@ -1,14 +1,11 @@
 # Using the forge, for agents
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-09-29_
 
-Condensed from [forgejo.md](forgejo.md), which keeps the reasoning and the
-verification trail. Facts only here.
+Condensed from [forgejo.md](forgejo.md). Forgejo on `nire-cube`, single-user,
+sqlite3, tailnet-only. Module: [../categories/git-forge.md](../categories/git-forge.md).
 
-Forgejo on `nire-cube`, single-user, sqlite3, tailnet-only. Module design and
-history: [../categories/git-forge.md](../categories/git-forge.md).
-
-## Addresses — the two hostnames differ on purpose
+## Addresses
 
 | | |
 |---|---|
@@ -16,43 +13,27 @@ history: [../categories/git-forge.md](../categories/git-forge.md).
 | Clone HTTPS | `https://git.moose-micro.ts.net/<user>/<repo>.git` |
 | Clone SSH | `forgejo@ts-cube:<user>/<repo>.git` |
 
-Web goes through Caddy on a Tailscale Services vhost, which needs the FQDN
-for its certificate. Git-over-SSH bypasses Caddy entirely — cube's ordinary
-`sshd`, port 22 — so it uses the short `ts-cube`. Separate Forgejo settings
-(`ROOT_URL` vs `DOMAIN`). Copy clone URLs from the repo page.
+Web = Caddy Tailscale Services vhost (FQDN for cert; `ROOT_URL`). SSH bypasses
+Caddy: cube's `sshd`, port 22, short name (`DOMAIN`). Copy clone URLs from the repo page.
 
 ## Accounts
 
-- `elly` is **admin** — confirmed 2026-09-12 from Site Administration.
-- **Unauthenticated `/api/v1/users/search` masks fields**: always
-  `last_login: 0001-01-01T00:00:00Z` and `is_admin`/`active` false,
-  regardless of truth. It cannot answer either question; reading it as an
-  answer produced a wrong one twice. Don't re-derive from it. Since
-  2026-09-26 anonymous access is off entirely (`REQUIRE_SIGNIN_VIEW`):
-  browsing, the API and HTTPS clones all need a login or token.
-- **Registration is closed** (`DISABLE_REGISTRATION = true`).
-  `/user/sign_up` returns **200** with a "registration is disabled" body and
-  no form fields — status code is not evidence here, read the page.
+- `elly` is **admin** (confirmed 2026-09-12, Site Administration).
+- Unauthenticated `/api/v1/users/search` masks fields (`last_login: 0001-01-01T00:00:00Z`,
+  `is_admin`/`active` false always): answers neither question.
+- Anonymous access off since 2026-09-26 (`REQUIRE_SIGNIN_VIEW`): browsing, API, HTTPS clones need login or token.
+- Registration closed (`DISABLE_REGISTRATION = true`). `/user/sign_up` returns **200**
+  with a "registration is disabled" body, no form: read the page, not the status.
 
 ## SSH keys
 
-`forgejo` is the account you SSH **to**, not the key's owner — it has no
-keypair, and none is generated for it. One shared system account serves every
-person; Forgejo identifies you by the key you present. Add your **public**
-key in the web UI (Settings → SSH keys); Forgejo writes
-`~forgejo/.ssh/authorized_keys` itself — never hand-edit it. sshd reads that
-file only via `forgejo.nix`'s `Match User forgejo` block; home-dir key files
-are off for every other account (`ssh.nix`).
-
-A real reader misread `forgejo@ts-cube` as "the forgejo user's key" three
-times from these docs (2026-09-13), which is why it is stated this plainly.
-
-A key added there authorizes `forgejo@ts-cube` **only**, not
-`elly@ts-cube` — separate accounts, separate `authorized_keys`.
-
-Any existing key works, including `sk-ssh-ed25519@openssh.com` (touch per
-auth). For a dedicated key, `ssh-keygen -t ed25519 -f ~/.ssh/id_forgejo`,
-then:
+- `forgejo` is the account you SSH **to**, not a key owner; no keypair. One shared
+  system account for everyone; Forgejo identifies you by the key presented.
+- Add your **public** key in web UI (Settings → SSH keys). Forgejo writes
+  `~forgejo/.ssh/authorized_keys`: never hand-edit. sshd reads it only via
+  `forgejo.nix`'s `Match User forgejo`; home-dir key files off for all other accounts (`ssh.nix`).
+- Authorizes `forgejo@ts-cube` only, not `elly@ts-cube`.
+- Any key works, incl. `sk-ssh-ed25519@openssh.com`. Dedicated: `ssh-keygen -t ed25519 -f ~/.ssh/id_forgejo`, then:
 
 ```
 Host ts-cube
@@ -61,85 +42,58 @@ Host ts-cube
     IdentitiesOnly yes
 ```
 
-`IdentitiesOnly yes` matters — without it ssh offers every identity and a
-wrong one can match first.
-
-Verify with `ssh -T forgejo@ts-cube`: **a greeting that closes is success**
-(no shell on that account). A password prompt means the key didn't take, and
-would fail anyway — `PasswordAuthentication` is off fleet-wide.
-
-**Exercised 2026-09-13** from tenacity: auth (greeting names the key) and a
-real `git clone` over SSH, with a plain `~/.ssh/id_ed25519` and no
-`ssh_config` block. **Push over SSH still untested** — the mirror is
-read-only on the Forgejo side.
+- `IdentitiesOnly yes` needed: else ssh offers every identity, a wrong one may match first.
+- Verify `ssh -T forgejo@ts-cube`: a greeting that closes = success (no shell). Password
+  prompt = key didn't take (`PasswordAuthentication` off fleet-wide).
+- Exercised 2026-09-13 from tenacity: auth and `git clone` over SSH with plain
+  `~/.ssh/id_ed25519`, no `ssh_config` block. **Push over SSH untested** (mirror read-only).
 
 ## CI (Forgejo Actions)
 
-- Added 2026-09-24; since 2026-09-25 the runner is the libvirt guest
-  `forge-runner` on cube, live since 2026-09-25 (original fill-in:
-  [pending-setup.md](pending-setup.md) item 8).
+- Runner: libvirt guest `forge-runner` on cube, live since 2026-09-25.
 - Workflows: `.forgejo/workflows/*.yaml`, GitHub-Actions syntax.
-- Workflows say `runs-on: nix` — the runner's label is `nix:host`, i.e.
-  name `nix`, executor `host`; `runs-on: nix:host` waits forever (job inside the runner
-  VM, its nix in `PATH`). No container runtime in the guest —
-  `container:`-executed jobs and `docker://` actions find no runner.
-- Runs: repo **Actions** tab; runner named `forge-runner` under Site
-  Administration → Actions → Runners. New repos default Actions OFF
-  (`DEFAULT_REPO_UNITS`): Settings → Repository → Units to enable.
-- Runner scope `elly` (that user's repos only), `capacity = 1`, no
-  actions cache server. Fresh VM + single-use registration per job
-  (`forge-runner-cycle`): no state between jobs, cold nix store, ~20–40 s
-  boot before a job starts; a new `forge-runner` runner row per job,
-  deleted when it completes.
-- Config side: [../categories/git-forge.md](../categories/git-forge.md).
-  Practice loop: [practice-environment.md](practice-environment.md).
+- `runs-on: nix` (runner label `nix:host`: name `nix`, executor `host`); `runs-on: nix:host`
+  waits forever. Job runs inside the VM with its nix in `PATH`. No container runtime:
+  `container:` jobs and `docker://` actions find no runner.
+- Runs: repo **Actions** tab; runner under Site Administration → Actions → Runners.
+  New repos default Actions OFF (`DEFAULT_REPO_UNITS`): Settings → Repository → Units.
+- Runner scope `elly` (that user's repos), `capacity = 1`, no actions cache server.
+  Fresh VM + single-use registration per job (`forge-runner-cycle`): no state between
+  jobs, cold nix store, ~20–40 s boot; a `forge-runner` row per job, deleted on completion.
+- See [pending-setup.md](pending-setup.md) item 8, [practice-environment.md](practice-environment.md).
 
 ## Branch protection
 
-- Per repo: Settings → Branches → Add new rule; pattern `main`.
-- Push: **Whitelist restricted push** (users: `elly`) or **Disable push**
-  (PR-only). NOT **Enable push**: that admits anyone with write access,
-  including the Actions job token (write on its own repo), so a workflow
-  could push to the branch. The whitelist checks listed user/team IDs
-  only; the Actions user is never in it (`models/git/protected_branch.go`
-  `CanUserPush`). Deploy-key whitelist off unless needed.
-- **Enable status check**: pattern on Actions contexts, formatted
-  `<workflow> / <job> (<event>)` (`services/actions/commit_status.go`),
-  e.g. `ci / *`. A context appears in the picker only after a run.
-- **Required approvals**: can't self-approve; single account ⇒ 0, or 1
-  with a second account
-  ([practice-environment](practice-environment.md#the-review-gap)).
-  With approvals: **Dismiss stale approvals** and **Block merge if pull
-  request is outdated** on.
+Per repo: Settings → Branches → Add new rule; pattern `main`.
+
+- Push: **Whitelist restricted push** (users: `elly`) or **Disable push** (PR-only).
+  NOT **Enable push**: admits anyone with write, incl. the Actions job token, so a workflow
+  could push. Whitelist checks listed user/team IDs only; Actions user never in it
+  (`models/git/protected_branch.go` `CanUserPush`). Deploy-key whitelist off unless needed.
+- **Enable status check**: pattern on contexts `<workflow> / <job> (<event>)`
+  (`services/actions/commit_status.go`), e.g. `ci / *`. Context appears in picker only after a run.
+- **Required approvals**: no self-approve; single account ⇒ 0, or 1 with a second account
+  ([practice-environment](practice-environment.md#the-review-gap)). With approvals:
+  **Dismiss stale approvals** and **Block merge if pull request is outdated** on.
 - **Enforce this rule for repository admins**: on (`elly` is admin).
-- **Require signed commits**: only if all committers sign.
-- Merge whitelist: off.
-- Workflows: plain `pull_request`, not `pull_request_target` (runs
-  base-branch code with base token/secrets for fork PRs). No Actions
-  secrets in repos that don't need them.
+- **Require signed commits**: only if all committers sign. Merge whitelist: off.
+- Workflows: `pull_request`, not `pull_request_target` (runs base code with base
+  token/secrets for fork PRs). No Actions secrets in repos that don't need them.
 
 ## Storage and backups
 
-sqlite3 at `/var/lib/forgejo/`, with the repos and Forgejo's generated
-secrets. Cube has a plain persistent root — survives reboots unconfigured.
-
-Backed up since **2026-09-06** (#87): restic to the QNAP, with a real
-restore that opened a complete database. **The live `.db` files under
-`/var/lib/forgejo` are excluded from every snapshot on purpose** (a live
-sqlite file can be mid-write); the restorable copy is
-`/var/lib/restic-backups-cube-sqlite-staging`. Restoring the wrong path
-yields a file that is present and opens as nothing.
+- sqlite3 at `/var/lib/forgejo/` with repos and generated secrets. Cube has persistent root.
+- Backed up since 2026-09-06 (#87): restic to the QNAP; restore verified (opened a complete DB).
+- **Live `.db` files under `/var/lib/forgejo` are excluded from every snapshot on purpose**;
+  restorable copy is `/var/lib/restic-backups-cube-sqlite-staging`. Wrong path restores a file that opens as nothing.
 
 ## Mirroring
 
-`elly/nixos-configs` is a real pull mirror of the GitHub repo, created
-2026-09-11 (migrate API, `mirror: true`, `mirror_interval: 8h0m0s`,
-`forgejo_api_key` sops secret). All 7 branches confirmed matching; default
-branch `experimental`. **Mirror-or-origin is settled** — mirror, reaffirmed
-2026-09-12. GitHub stays canonical.
+`elly/nixos-configs` is a pull mirror of the GitHub repo (created 2026-09-11; migrate API,
+`mirror: true`, `mirror_interval: 8h0m0s`, `forgejo_api_key` sops secret). All 7 branches
+matched; default branch `experimental`. GitHub stays canonical; mirror-not-origin settled 2026-09-12.
 
 ## See also
 
-- [forgejo.md](forgejo.md) — the reasoning and what was verified when.
-- [../categories/git-forge.md](../categories/git-forge.md) — the module.
-- [pending-setup.md](pending-setup.md) — item 1, the SSH key, still open.
+[forgejo.md](forgejo.md) · [../categories/git-forge.md](../categories/git-forge.md) ·
+[pending-setup.md](pending-setup.md) (item 1, SSH key, still open)

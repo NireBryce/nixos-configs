@@ -2,19 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-_Sibling reviewed: 2026-09-27 -- source updated for the config-system→general-config directory rename; no mention of the old path on this page_
+Condensed from [00-INDEX.md](00-INDEX.md). Routing only.
 
-Condensed from [00-INDEX.md](00-INDEX.md), which keeps the orientation prose and
-the "why a link layer, not a rewrite" reasoning. Routing only here.
-
-`flake/` is meant to be browsed by file tree, not traced through code
-paths -- modularization ([architecture.md](architecture.md)) exists to
-document functionality in-situ and cap the context any one reader has to
-load per chunk.
-
-`CLAUDE.md` is still the cold-start read. This page answers "which file
-actually holds the answer". A page with a `-for-agents` sibling is listed by
-that sibling; load the human page only for the *why*.
+`flake/` is browsed by file tree ([architecture.md](architecture.md)). `CLAUDE.md`
+is the cold-start read; this page says which file holds the answer. Pages with a
+`-for-agents` sibling are listed by the sibling; load the human page only for the *why*.
 
 ## By task
 
@@ -43,15 +35,13 @@ that sibling; load the human page only for the *why*.
 ## Cross-cutting pages
 
 - [overview.md](overview.md) — 2-minute mental model.
-- [hosts.md](hosts.md) — the roster, and what's actually been switched vs.
-  only evaluated.
+- [hosts.md](hosts.md) — the roster.
 - [flake-parts.md](flake-parts.md) → [architecture.md](architecture.md) —
   why flake-parts, then the `dirsAsCategory` mechanism on top of it.
-- [traps-and-skills.md](traps-and-skills.md) — mistakes that have actually
-  happened here, and which skill holds each.
-- [lessons-learned.md](lessons-learned.md) — §1–48, one line each, long
+- [traps-and-skills.md](traps-and-skills.md) — real past mistakes, and which skill holds each.
+- [lessons-learned.md](lessons-learned.md) — §1–49, one line each, long
   entries broken out into `lessons-learned/`. **Located by § number** — grep
-  `## 43\.`, don't read it front to back. Already agent-facing; no sibling.
+  `## 43\.`, don't read front to back. No sibling.
 - [history.md](history.md) — the index into the above.
 - [flake-parts-port-notes-for-agents.md](flake-parts-port-notes-for-agents.md)
   — salvaged from the deleted `flake-parts` branch.
@@ -60,11 +50,9 @@ that sibling; load the human page only for the *why*.
 
 ## Category reference
 
-[categories/00-INDEX.md](categories/00-INDEX.md) — one page per real category:
-what's in it, which hosts import it, its own traps. `shell-config` is the
+[categories/00-INDEX.md](categories/00-INDEX.md) — one page per category: contents, importers, traps. `shell-config` is the
 one with a subdirectory ([blesh](categories/shell-config/blesh-for-agents.md),
-[carapace](categories/shell-config/carapace.md)). A `<name>-history.md`
-sibling holds resolved incidents and is rarely what you want.
+[carapace](categories/shell-config/carapace.md)). `<name>-history.md` holds resolved incidents; rarely wanted.
 
 ## Homelab (usage, not config)
 
@@ -77,11 +65,11 @@ running but unfinished.
 ## Experiments (open questions)
 
 [experiments/](experiments/) — one page per problem **instrumented but not yet
-diagnosed**, so "still measuring" is never read as settled config. Current:
+diagnosed**; "still measuring" is not settled config. Current:
 [durandal-auto-suspend-hang-for-agents.md](experiments/durandal-auto-suspend-hang-for-agents.md) —
 sleeps into S3 and will not wake without a PSU power cut. `suspend_stats`
 reports those as `success`; s2idle and the BIOS are ruled out; `amdgpu.runpm=0`
-and an on-disk probe are under test. On resolution the outcome moves to
+tried 2026-09-14, failed; nothing under test, cause not found. On resolution the outcome moves to
 [lessons-learned.md](lessons-learned.md) or the category page and the page goes.
 
 ## Rotting

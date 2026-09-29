@@ -1,12 +1,11 @@
 # New host disk formatting, for agents
 
-_Last modified: 2026-09-28_
+_Last modified: 2026-09-29_
 
-Condensed from [disk-formatting.md](disk-formatting.md), which keeps the
-reasoning and the full warnings. Facts only here.
+Condensed from [disk-formatting.md](disk-formatting.md).
 
 **Destructive.** `disko` partitions a real disk. Read `CLAUDE.md`'s Safety
-section first. Skill `new-host-config` is the surrounding decision tree.
+section first. Skill `new-host-config` is the decision tree.
 
 ## Scope
 
@@ -15,9 +14,7 @@ tenacity's shape. A host opting out (cube, the handhelds) uses none of this.
 
 `general-config/impermanence/_disko/impermanence-luks-btrfs.nix`: one LUKS partition,
 btrfs inside, subvolumes `root`/`home`/`nix`/`persist`/`log`, plus an
-unmounted `root-blank`. **Nothing in this repo calls it today** — every live
-host has hand-written `hardware-*.nix` from a real install, or (cube) never
-adopted the layout. Evaluation-verified only, never run against hardware.
+unmounted `root-blank`. **Nothing in this repo calls it today** (live hosts have hand-written `hardware-*.nix`; cube never adopted it). Evaluation-verified only, never run on hardware.
 
 ## Decide explicitly, four things
 
@@ -51,8 +48,7 @@ imports = [
 
 ## Formatting
 
-No live install runbook in this repo — the `nire-installer` mechanism was
-removed 2026-08-27. Standard disko interface:
+No install runbook here (`nire-installer` removed 2026-08-27). Standard disko interface:
 
 1. Boot install media.
 2. Get the flake onto it with the new host committed — **`git add` first**,
@@ -83,7 +79,7 @@ removed 2026-08-27. Standard disko interface:
 
 ## Confirming the rollback runs
 
-The machine booting proves nothing. Compare `/root`'s **subvolid across a
+Booting proves nothing. Compare `/root`'s **subvolid across a
 reboot**:
 
 ```sh

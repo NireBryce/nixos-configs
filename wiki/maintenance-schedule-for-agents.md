@@ -1,12 +1,9 @@
 # Maintenance schedule, for agents
 
-_Last modified: 2026-09-27_
-_Sibling reviewed: 2026-09-27 -- the source's "What this is" section moved above its header machinery as intro prose, heading dropped; no facts moved_
+_Last modified: 2026-09-29_
 
-Condensed from [maintenance-schedule.md](maintenance-schedule.md), which
-keeps each item's reasoning, rejected alternatives and evidence. Facts only
-here. Tended by skill
-[`maintenance-schedule`](../.agents/skills/maintenance-schedule/SKILL.md).
+Condensed from [maintenance-schedule.md](maintenance-schedule.md). Tended by
+skill [`maintenance-schedule`](../.agents/skills/maintenance-schedule/SKILL.md).
 
 Scope: credentials with a real expiry, rotation cadence, or silent-breakage
 property. Not an inventory of `secrets.yaml`. Plaintext on purpose — names
@@ -29,30 +26,24 @@ and dates are not values.
 | 11 | Atuin account key | none; on suspicion only | — | 2026-09-09 |
 | 12 | `nire-galatea/tskey` (git history only) | dead — rotated 2024; auth keys ≤90d anyway | nothing — history fossil, not a credential | 2026-09-14 |
 
-**Row 12, decided not pended.** A Tailscale auth key committed 2024-01-29
-(`449d158`) while the removed `nire-galatea` host still existed; left in
-git history deliberately (rewrite rejected 2026-09-14: public repo, the
-exposure window closed years ago, and the cost is force-pushing both
-protected branches plus every SHA reference since January 2024). When a
-scanner flags it: mark rotated/false-positive, move on — it is noise, not
-a finding.
+**Row 12, decided not pended.** Auth key committed 2024-01-29 (`449d158`)
+for the removed `nire-galatea`; left in git history deliberately (rewrite
+rejected 2026-09-14: public repo, window closed, force-push of both protected
+branches too costly). Scanner flags it: mark rotated/false-positive, move on.
 
-**Row 8, two independent things.** The live password was set by hand
-2026-09-13 and exists only in cube's sqlite db. Separately,
-`grafana-admin-password` (sops) feeds `settings.security.admin_password`,
-which Grafana applies **at first start only** — it stops a rebuilt instance
-coming up on stock `admin`/`admin`; it does not manage the live password.
-Deployed and checked on cube 2026-09-13 (`grafana:grafana` 400, referenced
-by the live `config.ini`, unit clean) but **never consumed**: the admin user
-predates it.
-`grafana-cli admin reset-admin-password` per activation is what would unify
-them, and is deliberately not done.
+**Row 8.** Live password set by hand 2026-09-13, only in cube's sqlite db.
+Separately `grafana-admin-password` (sops) feeds
+`settings.security.admin_password`, applied **at first start only** (stops a
+rebuilt instance coming up on stock `admin`/`admin`); it does not manage the
+live password. Deployed, checked on cube 2026-09-13 (`grafana:grafana` 400,
+in live `config.ini`, unit clean) but **never consumed**: admin user
+predates it. `grafana-cli admin reset-admin-password` per activation would
+unify them; deliberately not done.
 
-**General rule this came from:** default credentials are a *live* credential
-with a published password, never "not set up yet" — that wording misled a
-reader 2026-09-13. A stock password is also invisible from the repo, since
-the *absence* of an `admin_password` setting is what leaves it stock. Skill
-`maintenance-schedule` has the required row shape.
+**Rule:** default credentials are a *live* credential with a published
+password, never "not set up yet"; the *absence* of an `admin_password`
+setting is what leaves it stock. Skill `maintenance-schedule` has the row
+shape.
 
 ## The rows with a live action attached
 
@@ -74,35 +65,27 @@ the *absence* of an `admin_password` setting is what leaves it stock. Skill
 
 ## `FLAKE_LOCK_TOKEN` specifics
 
-Minted 2026-09-13, expires 2027-09-12. Verified end to end same day: a
-manual `workflow_dispatch` run passed preflight and opened #308 with
-`nix flake check + module tree` running on it.
+Minted 2026-09-13, expires 2027-09-12. Verified end to end same day:
+manual `workflow_dispatch` passed preflight and opened #308.
 
-GitHub Actions repo secret, **not** `secrets.yaml` — a runner has no
-persistent host key to enrol, and `secrets.yaml` is committed to a public
-repo. A PAT rather than `GITHUB_TOKEN` because a `GITHUB_TOKEN`-opened PR
-does not trigger `pull_request` workflows, and the `experimental` ruleset
-requires that check.
+GitHub Actions repo secret, **not** `secrets.yaml` (runner has no host key to
+enrol; `secrets.yaml` is in a public repo). A PAT, not `GITHUB_TOKEN`:
+`GITHUB_TOKEN`-opened PRs don't trigger `pull_request` workflows, which the
+`experimental` ruleset requires.
 
-The workflow checks its own credential: missing/revoked/expired → hard fail
-with a `::error::` at the first step, plus an issue opened in this repo
-(reusing one titled `update-flake-lock: weekly lock PR needs attention`).
-Within 30 days of expiry → `::warning::`, keeps going. **Gap**: GitHub
-returns the expiry header only for tokens that have one, so an absent header
-means "cannot tell" — that emits a `::notice::` and does not fail.
+Self-check: missing/revoked/expired -> hard fail (`::error::`) at first step
+plus an issue in this repo (reuses one titled `update-flake-lock: weekly lock
+PR needs attention`). Within 30 days of expiry -> `::warning::`, continues.
+**Gap**: GitHub sends the expiry header only for tokens that have one; absent
+header = `::notice::`, no fail.
 
 Lapse symptom to recognise: the `update_flake_lock_action` branch sitting
 ahead of `experimental` with no PR attached.
 
 ## Adding an item
 
-Same change that introduces the credential. A secret with no expiry,
-cadence, or silent-breakage property doesn't belong here — it just lives in
-`secrets.yaml`.
+In the same change that introduces the credential. No expiry, cadence, or
+silent-breakage property -> it just lives in `secrets.yaml`.
 
-## See also
-
-[maintenance-schedule.md](maintenance-schedule.md) · skill
-[`secrets-hygiene`](../.agents/skills/secrets-hygiene/SKILL.md) ·
-[homelab/pending-setup.md](homelab/pending-setup.md) (one-time setup, as
-opposed to recurring)
+See also: [homelab/pending-setup.md](homelab/pending-setup.md) (one-time
+setup).
