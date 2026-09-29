@@ -19,8 +19,10 @@ hashed session ids only, never a command -- to <host>.<harness>.json in a
 clone of the private forge repo elly/agent-command-log, merging into what
 is already there (so history outlives the harness's own retention), then
 commits and pushes. The report merges every exported file with local
-data, and flags a file not updated in STALE_DAYS: that host isn't
-exporting (skill ship runs `export` before each PR). Git runs with
+data -- this host's own export included, since it keeps sessions the
+harness has since pruned -- and marks a source not exported in STALE_DAYS
+(skill ship runs `export` before each PR, so STALE means that host and
+harness haven't shipped lately). Files of an older FORMAT are skipped. Git runs with
 BatchMode ssh, so a missing key fails fast instead of prompting.
 
 Agents rarely repeat a whole command line; they reassemble the same
@@ -65,6 +67,8 @@ sensitive:
   - flags: a standalone 1-3 letter cluster (`-rn`) or find's long options
     survive; longer or value-glued short flags keep one letter (`-uadmin`
     -> `-u`); `--x=y` -> `--x=<arg>`; `-20` -> `-N`; after `--`, all <arg>.
+    Unquoted `--long-flag` names survive verbatim: a real, exported
+    literal class, acceptable because flag names are what a script needs.
   - subcommand words survive only from a closed list per tool
     (SUBCOMMANDS), so `git checkout experimental` is `git checkout <arg>`.
 
@@ -110,6 +114,11 @@ STATE      = Path(os.environ.get('XDG_STATE_HOME', Path.home() / '.local' / 'sta
 LOG_DIR    = STATE / 'nixos-configs' / 'agent-command-log'
 STALE_DAYS = 21
 MAX_LEN    = 4                         # longest sequence recorded
+# Bumped whenever shaping gets stricter: a file written under older rules
+# may hold keys the current ones would have dropped, and merging would keep
+# them forever. Files of another format are skipped when reading and
+# rebuilt, not merged, on the host's next export.
+FORMAT     = 2
 GIT_ENV    = {**os.environ,
               'GIT_SSH_COMMAND': 'ssh -o BatchMode=yes -o ConnectTimeout=8'}
 
@@ -157,7 +166,7 @@ PUNCT      = set(';&|()<>\n')
 REDIRECT   = re.compile(r'^(?:[<>]+&?|&>+|>&|<&)$')
 ENV_ASSIGN = re.compile(r'^[A-Za-z_][A-Za-z0-9_]*=')
 NAME       = re.compile(r'^[A-Za-z_][\w.+-]*$')
-HEREDOC    = re.compile(r"(?<!<)<<-?\s*(['\"]?)([\w-]+)\1")
+HEREDOC    = re.compile(r"(?<!<)<<-?\s*\\?(['\"]?)([\w-]+)\1")  # <<EOF <<'EOF' <<\EOF
 # Short flags survive only as a 1-3 letter cluster standing alone (`-rn`,
 # `-sb`); anything longer or with a value glued on (`-uadmin`, `-A4`) is
 # cut to its first letter. find's single-dash long options are listed.
@@ -221,6 +230,9 @@ def sqlite_rows(path):
         rows = db.execute(
             "select p.session_id, p.data from part p join session s"
             " on s.id = p.session_id where s.directory like '%nixos-configs%'"
+            # json_valid first: one malformed row must not fail the query
+            " and case when json_valid(p.data)"
+            "     then json_extract(p.data, '$.type') end = 'tool'"
             " order by p.rowid"        # insertion order: sequences need it
         ).fetchall()
     except sqlite3.Error as e:
@@ -332,6 +344,11 @@ def tokenize(cmd):
     except ValueError:
         return None
     if 'case' in tokens or any(unbalanced(t) for t in tokens):
+        return None
+    # A `<<` left after strip_heredocs is a heredoc form HEREDOC doesn't
+    # know (`<<$T`, `<<'A B'`), whose body would parse as commands -- or a
+    # shift in `$(( ))`. Either way, dropping the command is the safe side.
+    if any(is_punct(t) and '<<' in t.replace('<<<', '') for t in tokens):
         return None
     return tokens
 
@@ -558,17 +575,32 @@ def to_json(obs):
 
 
 def from_json(d):
-    obs = empty_obs()
-    obs['sessions'] = {h: dict(m) for h, m in d.get('sessions', {}).items()}
-    for kind in ('chains', 'pipes'):
-        for k, hs in d.get(kind, {}).items():
-            obs[kind][k] = set(hs)
-    return obs
+    """Observations from an export file; ValueError on anything that isn't
+    the shape to_json writes, so one bad file is skipped, not fatal."""
+    try:
+        obs = empty_obs()
+        for h, m in d['sessions'].items():
+            obs['sessions'][str(h)] = {'commands': int(m['commands']),
+                                       'batch': bool(m['batch']),
+                                       'headers': bool(m['headers'])}
+        for kind in ('chains', 'pipes'):
+            for k, hs in d[kind].items():
+                if not isinstance(k, str) or not isinstance(hs, list):
+                    raise TypeError(kind)
+                obs[kind][k] = set(map(str, hs))
+        return obs
+    except (KeyError, TypeError, AttributeError, ValueError) as e:
+        raise ValueError(f'not an export file ({e!r})') from None
 
 
-def git(*args, check=False):
-    return subprocess.run(['git', '-C', str(LOG_DIR), *args], env=GIT_ENV,
-                          capture_output=True, text=True, timeout=60, check=check)
+def git(*args):
+    """git in the log clone; never raises -- a timeout or missing git is a
+    failed result, so the ship step reports it instead of tracebacking."""
+    try:
+        return subprocess.run(['git', '-C', str(LOG_DIR), *args], env=GIT_ENV,
+                              capture_output=True, text=True, timeout=60)
+    except (OSError, subprocess.SubprocessError) as e:
+        return subprocess.CompletedProcess(args, 1, '', str(e))
 
 
 def pull():
@@ -578,17 +610,31 @@ def pull():
              'using the local copy')
 
 
-def exported(skip_host=None):
-    """(label, obs, updated) for each file in the log clone."""
+def load(path):
+    """(document, obs) for a current-format export file; ValueError if it
+    is malformed or another format."""
+    try:
+        d = json.loads(path.read_text())
+    except (OSError, ValueError) as e:
+        raise ValueError(f'unreadable ({e})') from None
+    if not isinstance(d, dict):
+        raise ValueError('not an export file')
+    if d.get('format') != FORMAT:
+        raise ValueError(f'format {d.get("format")!r}, not {FORMAT}: rebuilt '
+                         f'at that host\'s next export')
+    return d, from_json(d)
+
+
+def exported():
+    """(label, obs, updated) for each usable file in the log clone -- this
+    host's own included: it holds history the harness may have pruned."""
     for path in sorted(LOG_DIR.glob('*.json')) if LOG_DIR.exists() else []:
         try:
-            d = json.loads(path.read_text())
-        except ValueError:
-            warn(f'{path.name}: not JSON, skipped')
+            d, obs = load(path)
+        except ValueError as e:
+            warn(f'{path.name}: {e}; skipped')
             continue
-        if d.get('host') == skip_host:
-            continue                   # this host is read live instead
-        yield f'{d.get("harness")}@{d.get("host")}', from_json(d), d.get('updated')
+        yield f'{d.get("harness")}@{d.get("host")}', obs, d.get('updated')
 
 
 def rank(obs, min_sessions, top, max_len):
@@ -631,7 +677,7 @@ def rank(obs, min_sessions, top, max_len):
 
 
 def analyze(min_sessions, top, max_len, sync=True):
-    """Local harnesses read live, plus every other host's export."""
+    """Local harnesses read live, plus every export (this host's too)."""
     obs, sources = empty_obs(), []
     for harness, rows in HARNESSES.items():
         o = collect(rows(), harness)
@@ -642,7 +688,7 @@ def analyze(min_sessions, top, max_len, sync=True):
         if sync:
             pull()
         today = datetime.date.today()
-        for label, o, updated in exported(skip_host=host()):
+        for label, o, updated in exported():
             try:
                 age = (today - datetime.date.fromisoformat(updated)).days
             except (TypeError, ValueError):
@@ -709,34 +755,45 @@ def setup():
 
 def export():
     """Merge this host's observations into its files in the log repo,
-    commit, push. One line of output: skill ship runs it every PR."""
+    commit, push. One line of output: skill ship runs it every PR. Exit 1
+    on a failure, which the ship step reports but doesn't stop for."""
     if not (LOG_DIR / '.git').exists():
         print('export skipped: command log not set up on this host '
               '(`just agent recurring setup`)')
         return 0
     pull()
-    written = []
+    written, files = [], []
     for harness, rows in HARNESSES.items():
         obs = collect(rows(), harness)
-        if not obs['sessions']:
-            continue
         path = LOG_DIR / f'{host()}.{harness}.json'
         if path.exists():
             try:
-                obs = merge(from_json(json.loads(path.read_text())), obs)
-            except ValueError:
-                warn(f'{path.name} was not JSON; rewriting it')
-        path.write_text(json.dumps({'host': host(), 'harness': harness,
+                obs = merge(load(path)[1], obs)
+            except ValueError as e:
+                warn(f'{path.name}: {e}; rebuilding from live data')
+        elif not obs['sessions']:
+            continue                   # nothing here, nothing before
+        # Rewritten even with no new sessions, so `updated` means "this
+        # source was exported", and STALE means it wasn't.
+        path.write_text(json.dumps({'format': FORMAT, 'host': host(),
+                                    'harness': harness,
                                     'updated': datetime.date.today().isoformat(),
                                     **to_json(obs)}, indent=1) + '\n')
         written.append(f'{harness} {len(obs["sessions"])}')
-    git('add', '--', *(f'{host()}.{h}.json' for h in HARNESSES
-                       if (LOG_DIR / f'{host()}.{h}.json').exists()))
-    if git('diff', '--cached', '--quiet').returncode:
-        git('commit', '-qm', f'{host()}: export {datetime.date.today()}')
-    pushed = git('push', '-q').returncode == 0
-    print(f'exported {", ".join(written) or "nothing"} sessions from {host()}'
-          + ('' if pushed else ' (committed locally; push failed, next export retries)'))
+        files.append(path.name)
+    if not files:
+        print(f'export: no sessions on {host()}')
+        return 0
+    git('add', '--', *files)
+    if git('diff', '--cached', '--quiet', '--', *files).returncode:
+        r = git('commit', '-qm', f'{host()}: export {datetime.date.today()}', '--', *files)
+        if r.returncode:
+            print(f'export failed: commit: {r.stderr.strip()[:200]}')
+            return 1
+    r = git('push', '-q')
+    status = '' if r.returncode == 0 else \
+        f' (committed locally; push failed, next export retries: {r.stderr.strip()[:120]})'
+    print(f'exported {", ".join(written)} sessions from {host()}{status}')
     return 0
 
 

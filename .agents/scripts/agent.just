@@ -18,7 +18,7 @@ scripts := source_directory()
 _default:
     @just --list agent
 
-# Command fragments agents re-typed across sessions, from local transcripts
+# Command patterns agents re-type across sessions and hosts: `export`, `setup`
 recurring *args:
     @{{scripts}}/recurring.py {{args}}
 
