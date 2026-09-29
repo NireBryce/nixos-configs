@@ -19,6 +19,7 @@ internal edits); grep first rather than opening every page.
 - changing a fact a page states as current: category member count, import list, command, path, stateVersion, host count (host switch/boot status is deliberately *not* a wiki fact — live check per `AGENTS.md` State)
 - fixing a bug `open-threads.md` describes as open, or finding a new one worth recording there
 - reorganizing categories, splitting a module, anything changing which directory something lives under
+- adding a `just agent` script (skill `agent-scripts`): one line naming it on the `-for-agents` page for its topic, where an agent doing that task will look; none fits → skip
 
 Narrower cases with their own instructions (read first):
 

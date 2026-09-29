@@ -26,6 +26,7 @@ one-liner.
 | Writing a new skill | `.agents/skills/new-skill/SKILL.md` |
 | Commenting a module/lib function users or contributors can't follow from the code | `.agents/skills/explain-tricky-code/SKILL.md` |
 | Starting a task that will branch, commit, or check out | `.agents/skills/use-a-worktree/SKILL.md` |
+| Turning a re-typed command pattern into a `just agent` script | `.agents/skills/agent-scripts/SKILL.md` |
 
 See [architecture.md](architecture.md) and
 [impermanence-and-secrets.md](impermanence-and-secrets.md) for where each of

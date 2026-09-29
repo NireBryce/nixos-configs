@@ -46,7 +46,7 @@ Then, before opening a PR (CI, `.github/workflows/check.yml`: `just check` +
 `just modules` + `just lint`, is a minutes-later backstop only):
 
 ```sh
-just preflight    # every step CI runs, wiki-lint included; from repo root, not flake/
+just agent preflight-brief   # every step CI runs, one line each; `just preflight` for full output
 nix eval --raw '.#nixosConfigurations.<host>.config.system.build.toplevel.drvPath'   # forced toplevel per config the change could touch
 ```
 
@@ -89,15 +89,18 @@ Commit discipline:
   sweeping up unrelated staged files. Undo: `git reset --soft HEAD~1`, check
   `git status --short`, recommit with the right pathspec.
 - **Backticks / `$(...)` in an inline message are executed by the shell**
-  (2026-08-30: a backtick span became empty). Write the message to a file,
-  `git commit -F <file>`; fix a mangled one with `--amend -F <file>`.
+  (2026-08-30: a backtick span became empty). Feed the message on stdin
+  through a quoted heredoc, which the shell doesn't expand, rather than via
+  a temp file: `git commit -F - -- <paths...> <<'EOF'` … `EOF`. Fix a
+  mangled one the same way with `--amend -F -`.
 - **Trailer**: `Co-Authored-By: <the agent you are>` — name only, no model,
   no email (Claude: `Co-Authored-By: Claude`).
 - Branch name and first commit line get a `feat/`/`fix/`/`docs:` prefix
   (first line only; body stays what/why/verified narrative). Each commit
   green (§15); one coherent commit beats two artificial ones.
 
-Then `git push -u origin <branch>` and `gh pr create --base experimental`.
+Then `git push -u origin <branch>` and `gh pr create --base experimental
+--body-file - <<'EOF'` (body on stdin, same reason as the commit message).
 PR body: what changed, why, what was verified, what was left alone, under
 `.github/PULL_REQUEST_TEMPLATE.md`'s headings. **LLM-disclosure line at both
 top (before "What changed") and bottom** — a harness footer lands at the

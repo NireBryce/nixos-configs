@@ -19,6 +19,7 @@ is the cold-start read; this page says which file holds the answer. Pages with a
 | add a package to a user's environment | skill `new-package` |
 | land a change on `experimental` | [conventions.md](conventions.md), skill `ship` |
 | work without clobbering another session | skill `use-a-worktree` |
+| script a command pattern agents keep re-typing | skill `agent-scripts` |
 | check whether a bug is already tracked | [open-threads-for-agents.md](open-threads-for-agents.md), skill `investigate-bug` |
 | add a self-hosted service | [homelab/00-INDEX.md](homelab/00-INDEX.md), skill `new-homelab-service` |
 | give a service its own `svc:` hostname | [categories/reverse-proxy-for-agents.md](categories/reverse-proxy-for-agents.md), skill `new-tailscale-service` |
