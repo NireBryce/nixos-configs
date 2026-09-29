@@ -153,6 +153,7 @@ preflight:
     @just keybindings-test
     @just cod-desc-test
     @just modules-test
+    @just pinned-packages-test
     @just check
     @just modules
     @just lint
@@ -274,6 +275,20 @@ available *pkgs:
     # homebrew cask ALSO installs, and says what to do about each. Answers by
     # reading meta.platforms a question that used to be settled by eye, wrongly.
     @{{scripts}}/pkg-availability.py {{pkgs}}
+
+# Hand-pinned packages: `check` (default) or `bump <name>|--all`
+pinned-packages *args:
+    # check: is each pin behind upstream, and has nixpkgs or llm-agents started
+    # packaging it (locked rev and branch head both)? Exits 1 if either wants
+    # action. bump: rewrites the module's version and hashes to upstream,
+    # regenerates the npm pin's trimmed lockfile, builds, runs --version.
+    # Network and nix; skill pinned-packages is the procedure around it.
+    @{{scripts}}/pinned-packages.py {{args}}
+
+# Pure stdlib, no network -- the rewrites are regex-coupled to the modules
+# Fixture tests for pinned-packages.py's module rewrites; in preflight and CI
+pinned-packages-test:
+    python3 {{scripts}}/test_pinned_packages.py
 
 # Normalized keybinding cheat sheet per tool (kitty/zsh/bash), repo overrides on top
 keybindings *args:
