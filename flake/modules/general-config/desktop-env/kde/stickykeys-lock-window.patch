@@ -1,0 +1,81 @@
+diff -ruN a/src/plugins/stickykeys/stickykeys.cpp b/src/plugins/stickykeys/stickykeys.cpp
+--- a/src/plugins/stickykeys/stickykeys.cpp
++++ b/src/plugins/stickykeys/stickykeys.cpp
+@@ -72,6 +72,7 @@
+     m_showNotificationForLockedKeys = group.readEntry<bool>("kNotifyModifiers", false);
+     m_disableOnTwoKeys = group.readEntry<bool>("StickyKeysAutoOff", false);
+     m_ringBell = group.readEntry<bool>("StickyKeysBeep", false);
++    m_lockWindowMs = group.readEntry<int>("StickyKeysLockWindow", 0);
+ 
+     bool changed = false;
+     if (!m_lockKeys) {
+@@ -128,30 +129,41 @@
+                 // An unlatched modifier was pressed, latch it
+                 if (keyState.value() == None) {
+                     keyState.value() = Latched;
++                    m_latchTimestamps[event->key] = event->timestamp;
+                     KWin::input()->keyboard()->xkb()->setModifierLatched(keyToModifier(static_cast<Qt::Key>(event->key)), true);
+                     changed = true;
+                 }
+-                // A latched modifier was pressed, lock it
++                // A latched modifier was pressed, lock it -- but only while the
++                // lock window (StickyKeysLockWindow) is still open; a later second
++                // press unlatches instead of locking
+                 else if (keyState.value() == Latched && m_lockKeys) {
+-                    keyState.value() = Locked;
+-                    KWin::input()->keyboard()->xkb()->setModifierLatched(keyToModifier(static_cast<Qt::Key>(event->key)), false);
+-                    KWin::input()->keyboard()->xkb()->setModifierLocked(keyToModifier(static_cast<Qt::Key>(event->key)), true);
+-                    changed = true;
++                    const bool withinLockWindow = m_lockWindowMs == 0
++                        || event->timestamp - m_latchTimestamps.value(event->key) <= std::chrono::milliseconds(m_lockWindowMs);
++                    if (withinLockWindow) {
++                        keyState.value() = Locked;
++                        KWin::input()->keyboard()->xkb()->setModifierLatched(keyToModifier(static_cast<Qt::Key>(event->key)), false);
++                        KWin::input()->keyboard()->xkb()->setModifierLocked(keyToModifier(static_cast<Qt::Key>(event->key)), true);
++                        changed = true;
+ 
+-                    if (m_showNotificationForLockedKeys) {
++                        if (m_showNotificationForLockedKeys) {
+ #if KWIN_BUILD_NOTIFICATIONS
+-                        KNotification *noti = new KNotification("modifierkey-locked");
+-                        noti->setComponentName("kaccess");
++                            KNotification *noti = new KNotification("modifierkey-locked");
++                            noti->setComponentName("kaccess");
+ 
+-                        for (const auto mod : modifiers) {
+-                            if (mod.key == event->key) {
+-                                noti->setText(mod.lockedText.toString());
+-                                break;
++                            for (const auto mod : modifiers) {
++                                if (mod.key == event->key) {
++                                    noti->setText(mod.lockedText.toString());
++                                    break;
++                                }
+                             }
+-                        }
+ 
+-                        noti->sendEvent();
++                            noti->sendEvent();
+ #endif
++                        }
++                    } else {
++                        keyState.value() = None;
++                        KWin::input()->keyboard()->xkb()->setModifierLatched(keyToModifier(static_cast<Qt::Key>(event->key)), false);
++                        changed = true;
+                     }
+                 }
+                 // A locked modifier was pressed, unlock it
+diff -ruN a/src/plugins/stickykeys/stickykeys.h b/src/plugins/stickykeys/stickykeys.h
+--- a/src/plugins/stickykeys/stickykeys.h
++++ b/src/plugins/stickykeys/stickykeys.h
+@@ -39,4 +39,10 @@
+     bool m_disableOnTwoKeys = false;
+     QSet<int> m_pressedModifiers;
+     bool m_ringBell = false;
++    // Milliseconds a second press of a latched modifier may follow the press
++    // that latched it and still lock it; after the window it unlatches instead.
++    // 0 disables the window (any second press locks). See StickyKeysLockWindow.
++    int m_lockWindowMs = 0;
++    // Timestamp of the press event that latched each modifier, for the window check.
++    QMap<int, std::chrono::microseconds> m_latchTimestamps;
+ };
