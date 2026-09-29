@@ -1,9 +1,15 @@
 ---
-name: talk-style-explainer
-description: How to write the explanatory comments for a complicated module or lib function as if giving a conference talk to an audience of mixed skill levels.
+name: explain-tricky-code
+description: How to write comments that teach a user or contributor a module or lib function whose design isn't obvious from its code, so they learn what it does, why it's shaped that way, and what breaks if they change it.
 ---
 
-# Explaining a complicated module like a conference talk
+# Explaining tricky code so a user or contributor can follow it
+
+The technique: write the comments the way you'd give a conference talk on
+the code to an audience of mixed skill levels — start from the problem,
+build up, show diagrams, answer the questions a smart listener would ask.
+(Was `talk-style-explainer` until 2026-09-28, named for that technique
+rather than for when to reach for it.)
 
 ## Applies to
 
@@ -54,7 +60,7 @@ don't reorder.
    `flake.modules`, how import-tree filters paths), explain that piece with
    one real example from the tree (`zsh.nix` declaring both a `nixos` and a
    `homeManager` half). Not a tutorial on the whole tool.
-4. **The rule, stated once, then a diagram.** One sentence a newcomer could
+4. **The rule, stated once, then a diagram.** One sentence a first-time reader could
    repeat back ("a category imports every `.nix` module under its folder,
    however deep"), followed by a tree of *real* paths annotated with what
    happens to each. Then the consequences, as a short list.

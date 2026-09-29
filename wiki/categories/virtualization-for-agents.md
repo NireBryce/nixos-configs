@@ -103,8 +103,7 @@ DHCP-reserves the guest IP, then `virsh define` + start. Shares carry
 
 ## Imported by
 
-`nire-cube` only (as part of `homelab`). `tenacity` imports `containers`,
-never this.
+`nire-cube` only (as part of `homelab`). Never `tenacity`.
 
 ## See also
 

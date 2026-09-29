@@ -24,7 +24,7 @@ one-liner.
 | Tightening wiki/skill/AGENTS prose for conciseness | `.agents/skills/trim-docs/SKILL.md` |
 | Compressing a module's history section | `.agents/skills/trim-history/SKILL.md` |
 | Writing a new skill | `.agents/skills/new-skill/SKILL.md` |
-| Explaining a complicated module/lib function for a mixed audience | `.agents/skills/talk-style-explainer/SKILL.md` |
+| Commenting a module/lib function users or contributors can't follow from the code | `.agents/skills/explain-tricky-code/SKILL.md` |
 | Starting a task that will branch, commit, or check out | `.agents/skills/use-a-worktree/SKILL.md` |
 
 See [architecture.md](architecture.md) and
