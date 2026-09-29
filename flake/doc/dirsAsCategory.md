@@ -385,7 +385,8 @@ Checked before removing it:
   (lessons-learned §34, §35).
 
 The change: the collector lost the exception and `bareModulesOf`;
-`virtualization-cube.nix` moved to `host-config/cube/vms/`, cube-only
+`virtualization-cube.nix` moved to `host-config/cube/vms/` (renamed
+`cube-vm/` 2026-09-29), cube-only
 because only cube's configuration imports the `cube` category; `modules.py`
 `orphans` and `add` dropped their copies of the rule. Verified with
 `scripts/host-fingerprint.nix` on every configuration (`nire-durandal`,

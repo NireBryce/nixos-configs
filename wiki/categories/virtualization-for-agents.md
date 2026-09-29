@@ -1,6 +1,6 @@
 # `virtualization`, for agents
 
-_Last modified: 2026-09-28_
+_Last modified: 2026-09-29_
 _Sibling reviewed: 2026-09-27 -- condensed-version pointer moved below the intro on the source; no facts moved_
 
 Condensed from [virtualization.md](virtualization.md), which keeps the
@@ -42,7 +42,7 @@ Libvirt/QEMU VMs on `nire-cube` only — podman/distrobox are the separate
 
 A curried function, not a module (`_lib/` because import-tree ignores
 `/_`; auto-import would fail on its closed argument pattern). Current
-caller: `host-config/cube/vms/virtualization-cube.nix` — cube-only (moved
+caller: `host-config/cube/cube-vm/virtualization-cube.nix` — cube-only (moved
 out of `virtualization` 2026-09-28). Guests get a `nixosConfigurations` entry; a guest
 without the `nire-` prefix (e.g. `forge-runner`) is a component, not a
 fleet machine — that prefix is what host-count claims count.

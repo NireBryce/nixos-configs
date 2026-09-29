@@ -1,6 +1,6 @@
 # `virtualization` — history
 
-_Last modified: 2026-09-28_
+_Last modified: 2026-09-29_
 
 Resolved incidents and a removed VM's own verification record, split out of
 [virtualization](virtualization.md) 2026-09-03 so that page stays about the
@@ -60,7 +60,8 @@ imports, still collected it (through `bareModulesOf`).
 
 The collector rule was removed 2026-09-28, which would have put the VM
 wiring into `virtualization`, so the file moved to
-`host-config/cube/vms/virtualization-cube.nix`, cube-only because only
+`host-config/cube/vms/virtualization-cube.nix` (directory renamed
+`cube-vm/` 2026-09-29), cube-only because only
 cube's configuration imports the `cube` category. Full account:
 `flake/doc/dirsAsCategory.md`'s History.
 

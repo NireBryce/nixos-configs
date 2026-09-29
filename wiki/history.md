@@ -1,6 +1,6 @@
 # History & lessons learned
 
-_Last modified: 2026-09-28_
+_Last modified: 2026-09-29_
 
 ## Contents
 
@@ -74,7 +74,8 @@ _Last modified: 2026-09-28_
   silently reach no host, and forced `bareModulesOf` onto the collector
   once nested categories delegated by name. Both are gone; cube's VM wiring,
   which relied on the rule to stay out of `virtualization`, moved to
-  `host-config/cube/vms/virtualization-cube.nix`. Why it existed, what was
+  `host-config/cube/vms/virtualization-cube.nix` (directory renamed
+  `cube-vm/` 2026-09-29). Why it existed, what was
   checked before removing it, and how it was verified:
   `flake/doc/dirsAsCategory.md`'s History;
   [categories/virtualization-history.md](categories/virtualization-history.md#where-the-vm-wiring-used-to-live)

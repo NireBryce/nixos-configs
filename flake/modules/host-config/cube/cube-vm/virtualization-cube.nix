@@ -9,7 +9,8 @@
 # a VM definition there would start cube's runner on that host too.
 # (Was general-config/homelab/virtualization/virtualization-cube.nix until
 # 2026-09-28, kept out of `virtualization` by a collector rule since
-# removed -- flake/doc/dirsAsCategory.md's History.)
+# removed -- flake/doc/dirsAsCategory.md's History; then
+# host-config/cube/vms/ until 2026-09-29.)
 #
 # The guest itself: forge-runner (deliberately NOT nire-prefixed -- that
 # prefix names the fleet machines, and this is a component of cube;

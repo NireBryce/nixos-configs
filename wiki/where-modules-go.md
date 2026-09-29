@@ -1,6 +1,6 @@
 # Where a module goes
 
-_Last modified: 2026-09-28_
+_Last modified: 2026-09-29_
 
 Every module under `flake/modules/` sits in one of three places, and which
 one decides who gets it: **shared** modules sit in the general tree and
@@ -34,7 +34,7 @@ flake/modules/
 │   ├── cube/                category `cube`   -- only cube imports it
 │   │   ├── configuration/
 │   │   ├── hardware/
-│   │   └── vms/
+│   │   └── cube-vm/
 │   ├── cube-configuration.nix                 -- cube's entry point
 │   └── ...
 └── users-config/          one directory per user
@@ -59,7 +59,7 @@ on one machine: its `hardware-configuration`, its bootloader, its
 `host-config/<host>/` is a category named after the host, and only that
 host's entry point imports it — so a module here is that host's by
 construction, with nothing to remember. The subfolders in use
-(`configuration/`, `hardware/`, `fixes/`, cube's `vms/`) are grouping only.
+(`configuration/`, `hardware/`, `fixes/`, cube's `cube-vm/`) are grouping only.
 
 **User-specific — `users-config/<user>/`.** Anything about one person's
 account rather than a machine: the user account and its groups
@@ -119,7 +119,8 @@ Put modules one level down, in the host's or user's directory.
 `virtualization-cube.nix` defines the `forge-runner` libvirt VM that only
 cube runs. It used to sit in the shared `virtualization` category, kept out
 of that category's own import list by a collector rule. When that rule was
-removed (2026-09-28), the file moved to `host-config/cube/vms/` — where
+removed (2026-09-28), the file moved to `host-config/cube/cube-vm/` (then
+named `vms/`) — where
 "cube only" is a property of the location instead of a quirk someone has
 to know. That move is the pattern: anything whose placement needs an
 explanation for why other hosts don't get it probably belongs under a host.
