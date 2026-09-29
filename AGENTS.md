@@ -155,7 +155,7 @@ back; skill `home-manager-dotfiles` has the traps and integration specifics
 `nire-lysithea`, so everything in it has to survive darwin. Two questions
 when adding a package: can nixpkgs build it on darwin (answered
 automatically off `meta.platforms`), and does Homebrew already install it
-(never answered automatically). Skill `nirepackages-platform-support` has
+(never answered automatically). Skill `package-platform-support` has
 the full detail.
 
 ## Traps, all of which have actually happened here
@@ -190,7 +190,7 @@ its mount namespace and can look wrong while being correct — use
 `/proc/1/mountinfo`, `/dev/disk/by-uuid/`, `/run/current-system` instead,
 all unprivileged.
 
-### Adding or platform-gating a package — skill `nirepackages-platform-support`
+### Adding or platform-gating a package — skill `package-platform-support`
 
 Can nixpkgs build it on darwin (automatic, via
 `drop-unsupported-packages.nix` — don't hand-restate with

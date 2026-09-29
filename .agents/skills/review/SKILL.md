@@ -70,7 +70,7 @@ Per changed file, the question that catches each:
 - **Platform gating done right?** Platform support is *derived* (off
   `meta.platforms`); a hand-written `lib.mkIf (!pkgs.stdenv.isDarwin)`
   restating it is a finding. The other half — Homebrew overlap — is never
-  automatic; `just available --duplicates`. (`nirepackages-platform-support`.)
+  automatic; `just available --duplicates`. (`package-platform-support`.)
 - **Was an existing `programs.*` integration missed?** Check before a
   hand-rolled dotfile/bundle survives review.
 - **Does the diff add or run anything that can print a secret?** A bare
@@ -107,7 +107,7 @@ an eval is the exact overclaim this repo keeps teaching not to make.
 ## See also
 
 - The five trap skills (`new-flake-module`, `home-manager-dotfiles`,
-  `impermanence-initrd`, `nirepackages-platform-support`,
+  `impermanence-initrd`, `package-platform-support`,
   `secrets-hygiene`) — the worked examples this checklist compresses.
 - `ship` skill — the pre-PR gate this review complements; its step 0 is
   the "Run first" list above, from the author's side.

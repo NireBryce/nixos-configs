@@ -1,6 +1,6 @@
 # `macos` — `general-config/macos/`
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-29_
 
 `darwin`-class only, throughout — the one category in this repo that is
 entirely platform-specific rather than shared-with-a-guard. See
@@ -95,7 +95,7 @@ just never asked for in the first place.
   the other place platform-specific nix settings live.
 - [shell-config](shell-config/00-INDEX.md) — where zsh/bash themselves are actually
   configured.
-- The `nirepackages-platform-support` skill
-  (`.agents/skills/nirepackages-platform-support/SKILL.md`) — the
+- The `package-platform-support` skill
+  (`.agents/skills/package-platform-support/SKILL.md`) — the
   build-support-vs-Homebrew-overlap distinction that governs everything in
   `ellyHomeManager`, separate from this category.

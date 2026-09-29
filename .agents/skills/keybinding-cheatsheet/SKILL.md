@@ -13,7 +13,7 @@ description: How to generate a normalized keybinding cheat sheet for a tool and 
 | merging upstream defaults against this repo's overrides | same — that is the generator's whole job |
 | a new upstream/docs format the parser rejects or mangles | "Adding a new input format" |
 | changing the bindings themselves | skill `home-manager-dotfiles` — this only *reads* them |
-| Homebrew overlap for a package | skill `nirepackages-platform-support` — unrelated to chords |
+| Homebrew overlap for a package | skill `package-platform-support` — unrelated to chords |
 
 ## Quick start
 

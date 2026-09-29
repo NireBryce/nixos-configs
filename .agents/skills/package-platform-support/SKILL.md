@@ -1,5 +1,5 @@
 ---
-name: nirepackages-platform-support
+name: package-platform-support
 description: How to tell whether nixpkgs can build a package on darwin and whether Homebrew already installs it, when adding or platform-gating a package in this repo.
 ---
 
@@ -37,7 +37,7 @@ darwin only**, and warns naming everything it dropped. So:
 ## Does Homebrew already install it? Never answered automatically.
 
 `meta.platforms` has no opinion about Homebrew and never will.
-`homebrew.nix` (`flake/modules/general-config/macos/homebrew/`) installs 59 casks, and
+`homebrew.nix` (`flake/modules/general-config/macos/homebrew/`) installs its casks, and
 some of them are also nixpkgs packages in `ellyHomeManager` — lysithea gets
 two copies of each when that happens. Run:
 
@@ -80,3 +80,6 @@ fact instead of trusting the automatic filter — because for a darwin-only
 package the automatic filter provably does nothing on the hosts that need
 protecting. See skill `new-package` for the full add-a-package workflow this
 slots into.
+
+This skill was `nirepackages-platform-support` until 2026-09-29, named for
+the `nirePackages/` area directory that is now `packages-config/`.

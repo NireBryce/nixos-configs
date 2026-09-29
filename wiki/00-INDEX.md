@@ -1,6 +1,6 @@
 # Wiki
 
-_Last modified: 2026-09-28_
+_Last modified: 2026-09-29_
 
 The `flake/` folder is meant to be browsed by its file tree rather than
 traced through by following code paths. The heavy modularization
@@ -73,7 +73,7 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
 | add, rename, or wire a flake-parts module | [architecture.md](architecture.md), skill [`new-flake-module`](../.agents/skills/new-flake-module/SKILL.md) |
 | decide where a new module goes (shared, host, or user) | [where-modules-go.md](where-modules-go.md) |
 | touch impermanence or initrd | [impermanence-and-secrets.md](impermanence-and-secrets.md), skill [`impermanence-initrd`](../.agents/skills/impermanence-initrd/SKILL.md) |
-| add or platform-gate a package | [categories/00-INDEX.md](categories/00-INDEX.md), skill [`nirepackages-platform-support`](../.agents/skills/nirepackages-platform-support/SKILL.md) |
+| add or platform-gate a package | [categories/00-INDEX.md](categories/00-INDEX.md), skill [`package-platform-support`](../.agents/skills/package-platform-support/SKILL.md) |
 | land a change on `experimental` | [conventions.md](conventions.md), skill [`ship`](../.agents/skills/ship/SKILL.md) |
 | check whether a bug is already a known thread | [open-threads.md](open-threads.md), skill [`investigate-bug`](../.agents/skills/investigate-bug/SKILL.md) |
 | add a self-hosted service to a host | [homelab/00-INDEX.md](homelab/00-INDEX.md), skill [`new-homelab-service`](../.agents/skills/new-homelab-service/SKILL.md) |

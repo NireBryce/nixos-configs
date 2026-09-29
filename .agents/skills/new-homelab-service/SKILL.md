@@ -15,7 +15,7 @@ undo once a service is live and has state.
 
 A service *is* a flake module, so `new-flake-module`'s rules still apply;
 this skill is the layer above — which category, which port, how it's
-reached, what "working" means. Also: `nirepackages-platform-support` for
+reached, what "working" means. Also: `package-platform-support` for
 packages, `new-host-config` for hosts (VMs have no skill; see
 `wiki/categories/virtualization.md`).
 
