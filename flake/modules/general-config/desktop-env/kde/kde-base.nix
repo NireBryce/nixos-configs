@@ -17,27 +17,6 @@
             # Enable the KDE Desktop Environment and set wayland.
             services.desktopManager.plasma6.enable = true;
 
-            # kwin patched so sticky keys can tell a deliberate double-tap from a
-            # second press. Upstream locks a latched modifier on any second press,
-            # however long after the first (6.7.5
-            # src/plugins/stickykeys/stickykeys.cpp, "A latched modifier was
-            # pressed, lock it"). The patch adds StickyKeysLockWindow to kaccessrc
-            # [Keyboard]: milliseconds within which a second press still locks;
-            # after the window it unlatches instead. Default 0 is upstream
-            # behavior, so the patch is inert until a host sets the key (tenacity
-            # does, in its plasma-manager configFile). Written against kwin
-            # 6.7.5 -- a kwin bump that moves that hunk fails the build loudly
-            # rather than silently dropping the feature.
-            nixpkgs.overlays = [
-                (_final: prev: {
-                    kdePackages = prev.kdePackages.overrideScope (_kfinal: kprev: {
-                        kwin = kprev.kwin.overrideAttrs (old: {
-                            patches = (old.patches or [ ]) ++ [ ./stickykeys-lock-window.patch ];
-                        });
-                    });
-                })
-            ];
-
             networking = {
                 networkmanager.enable = lib.mkDefault true; # Needs to be 'true' for KDE networking
             };
@@ -89,3 +68,12 @@
 # Not a gap: networkmanager.enable is mkDefault here, but both hosts get it
 # as `true` from general-config/system/networking/wifi.nix -- tenacity was never
 # without networking.
+#
+# 2026-09-29 — the sticky-keys kwin patch left
+#
+# The StickyKeysLockWindow patch landed here first (70ccf1d2) as an
+# overrideScope overlay patching kdePackages.kwin. That rebuilt every
+# kdePackages member built against kwin -- most of Plasma, uncached -- on
+# every host importing this, although only tenacity sets the key. Now the
+# patched plugin alone is built out-of-tree and installed on tenacity:
+# host-config/tenacity/configuration/stickykeys-lock-window-tenacity.nix.
