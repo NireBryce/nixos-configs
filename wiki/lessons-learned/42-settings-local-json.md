@@ -1,8 +1,8 @@
 # 42. Not every file git tracks deserves the same scrutiny — `.claude/settings.local.json` is the user's, not a config artifact to protect
 
-_Last modified: 2026-09-14_
+_Last modified: 2026-09-29_
 
-§42 of [lessons-learned.md](../lessons-learned.md#42-not-every-file-git-tracks-deserves-the-same-scrutiny--claudesettingslocaljson-is-the-users-not-a-config-artifact-to-protect) — that page keeps the one-line version of every lesson; this is §42's full account.
+§42 of [lessons-learned.md](../lessons-learned.md) — that page keeps the one-line version of every lesson; this is §42's full account.
 
 2026-08-26, landing PRs #94 and #95. Several stash/cherry-pick/rebase steps
 in that session touched `.claude/settings.local.json` alongside real code

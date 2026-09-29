@@ -1,8 +1,8 @@
 # 44. A hook that runs `git` from a non-toplevel cwd needs `-C`, not a cleared GIT_DIR — the docs' own suggested fix broke the index lock instead
 
-_Last modified: 2026-09-09_
+_Last modified: 2026-09-29_
 
-§44 of [lessons-learned.md](../lessons-learned.md#44-a-hook-that-runs-git-from-a-non-toplevel-cwd-needs--c-not-a-cleared-git_dir--the-docs-own-suggested-fix-broke-the-index-lock-instead) — that page keeps the one-line version of every lesson; this is §44's full account.
+§44 of [lessons-learned.md](../lessons-learned.md) — that page keeps the one-line version of every lesson; this is §44's full account.
 
 2026-09-02, landing an unrelated docs commit from a worktree
 (`docs/claude-cave-to-wiki`, PR #149). `.githooks/pre-commit` re-stages

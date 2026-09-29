@@ -1,8 +1,8 @@
 # 40. A failed systemd unit doesn't mean the thing it manages is down — check the resource, not just the unit
 
-_Last modified: 2026-09-09_
+_Last modified: 2026-09-29_
 
-§40 of [lessons-learned.md](../lessons-learned.md#40-a-failed-systemd-unit-doesnt-mean-the-thing-it-manages-is-down--check-the-resource-not-just-the-unit) — that page keeps the one-line version of every lesson; this is §40's full account.
+§40 of [lessons-learned.md](../lessons-learned.md) — that page keeps the one-line version of every lesson; this is §40's full account.
 
 `nire-llm-sandbox` finally got a real end-to-end test 2026-08-23/24: `just
 switch` on `nire-cube`, watching `libvirt-vm-llm-sandbox.service`. It failed.

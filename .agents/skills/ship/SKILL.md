@@ -97,7 +97,9 @@ Commit discipline:
   no email (Claude: `Co-Authored-By: Claude`).
 - Branch name and first commit line get a `feat/`/`fix/`/`docs:` prefix
   (first line only; body stays what/why/verified narrative). Each commit
-  green (§15); one coherent commit beats two artificial ones.
+  green (§15); one coherent commit beats two artificial ones. The message
+  describes only what this commit contains, never a note or fix still to
+  come.
 
 Then `just agent recurring export` (one line: this host's command shapes
 to the private command log, skill `agent-scripts`; "not set up" or a
@@ -193,3 +195,7 @@ with a comment saying it was a hand close (#177).
 
 Promotion to `main`, branch rulesets, one-tree-two-PRs traps, named-branch
 exception: [side-flows.md](side-flows.md).
+
+A merge conflict in `.claude/settings.local.json` is the user's local
+allowlist, not shipped config: take the simplest resolution and move on
+(§42).

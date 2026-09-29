@@ -1,8 +1,8 @@
 # 41. A proxy config can be valid, buildable, *and* wrong per-app — two apps behind one prefix wanted opposite prefix handling
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-29_
 
-§41 of [lessons-learned.md](../lessons-learned.md#41-a-proxy-config-can-be-valid-buildable-and-wrong-per-app--two-apps-behind-one-prefix-wanted-opposite-prefix-handling) — that page keeps the one-line version of every lesson; this is §41's full account.
+§41 of [lessons-learned.md](../lessons-learned.md) — that page keeps the one-line version of every lesson; this is §41's full account.
 
 `nire/reverse-proxy/caddy/caddy.nix`, 2026-08-24. Grafana and Forgejo were both
 mounted under a path prefix on the same hostname

@@ -196,7 +196,19 @@ structured, extractable facts only:
             was bumping the sibling's date, which styleguide.md forbids for
             good reason and which this check could never have caught.
 
-  check     Runs all fourteen of the above.
+  lessons   wiki/lessons-learned.md is an index, one `- **§N** [title](...)
+            — rule. Home: ... Enforced: ...` entry per lesson, grouped by
+            when it applies (reorganised 2026-09-29 from an era-ordered page
+            whose header had drifted eleven lessons behind its entries).
+            Checks: every § from 1 to the highest has exactly one entry and
+            exactly one `wiki/lessons-learned/<N>-*.md` article whose title
+            reads `# N.`; each entry links its own article and carries both
+            `Home:` and `Enforced:`. The fields' contents are validated by
+            the checks that already read backticked recipe and skill names
+            and relative links; this one only guarantees they exist, so an
+            entry can't land without saying where its rule lives.
+
+  check     Runs all fifteen of the above.
 
     check_wiki.py imports       [repo-root]
     check_wiki.py table         [repo-root]
@@ -212,6 +224,7 @@ structured, extractable facts only:
     check_wiki.py dates         [repo-root]
     check_wiki.py counts        [repo-root]
     check_wiki.py siblings      [repo-root]
+    check_wiki.py lessons       [repo-root]
     check_wiki.py check         [repo-root]
     check_wiki.py gen-contents  <file.md> [file.md ...]
 
@@ -1647,6 +1660,55 @@ def check_dates(root):
     return findings
 
 
+LESSON_ENTRY = re.compile(
+    r'^- \*\*§(\d+)\*\* \[[^\]]+\]\((lessons-learned/[^)]+)\) — .+$')
+LESSON_ARTICLE = re.compile(r'^(\d+)-[a-z0-9-]+\.md$')
+
+
+def check_lessons(root):
+    """See the module docstring's `lessons` entry."""
+    findings = []
+    page = root / 'wiki' / 'lessons-learned.md'
+    art_dir = root / 'wiki' / 'lessons-learned'
+    entries = {}
+    for line in page.read_text().splitlines():
+        if not line.startswith('- **§'):
+            continue
+        m = LESSON_ENTRY.match(line)
+        if not m:
+            findings.append(f"MALFORMED LESSON  {page}: {line[:70]}")
+            continue
+        n, link = int(m.group(1)), m.group(2)
+        if n in entries:
+            findings.append(f"DUPLICATE LESSON  {page}: §{n} has two entries")
+        entries[n] = link
+        if not link.startswith(f'lessons-learned/{n}-'):
+            findings.append(
+                f"LESSON LINK  {page}: §{n} links {link}, not its own article")
+        for field in ('Home: ', 'Enforced: '):
+            if f'. {field}' not in line:
+                findings.append(f"LESSON FIELD  {page}: §{n} has no `{field.strip()}`")
+    articles = {}
+    for p in sorted(art_dir.glob('*.md')):
+        m = LESSON_ARTICLE.match(p.name)
+        if not m:
+            findings.append(f"LESSON ARTICLE NAME  {p}: not `<N>-<slug>.md`")
+            continue
+        n = int(m.group(1))
+        if n in articles:
+            findings.append(f"DUPLICATE ARTICLE  {p}: §{n} already has {articles[n].name}")
+        articles[n] = p
+        if not p.read_text().startswith(f'# {n}. '):
+            findings.append(f"LESSON ARTICLE TITLE  {p}: title isn't `# {n}. ...`")
+    top = max([*entries, *articles], default=0)
+    for n in range(1, top + 1):
+        if n not in entries:
+            findings.append(f"MISSING LESSON  {page}: no entry for §{n}")
+        if n not in articles:
+            findings.append(f"MISSING ARTICLE  {art_dir}: no {n}-*.md for §{n}")
+    return findings
+
+
 CONTENTS_ITEM_LINE = re.compile(r'^-\s+\[.+\]\(#[^)]+\)\s*$')
 
 
@@ -1746,7 +1808,7 @@ def main():
 
     cmds = ('imports', 'table', 'hosts', 'recipes', 'skills', 'skill-files',
             'secrets', 'routes', 'links', 'anchors', 'contents', 'dates',
-            'counts', 'siblings', 'check')
+            'counts', 'siblings', 'lessons', 'check')
     if cmd not in cmds:
         print(__doc__)
         sys.exit(2)
@@ -1780,6 +1842,8 @@ def main():
         findings += check_counts(root)
     if cmd in ('siblings', 'check'):
         findings += check_siblings(root)
+    if cmd in ('lessons', 'check'):
+        findings += check_lessons(root)
 
     for f in findings:
         print(f)

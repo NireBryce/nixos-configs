@@ -43,6 +43,7 @@ Three resources, two outside this repo's Nix:
    just tailscale-acl apply <file>
    ```
    `apply` refuses an empty diff and confirms before POSTing. Needs `tailscale_api_token` in `secrets.yaml` (script header says how to add it).
+   A committed HuJSON records intent, not what the control plane holds: `acl-diff-applied.hujson` once recorded an autoApprover never POSTed (§48). Done means `just tailscale-acl diff` reports no difference.
 
 5. **Create the Service object**: JSON (name/tags/ports/comment) beside the ACL file, then `just tailscale-acl vip-put <name> <file>`. Endpoint is `/api/v2/tailnet/{tailnet}/vip-services/{name}`, **not** `/vip-services/by-name/{name}` (404s with a bare routing miss, not a "not found" JSON body). Don't put a top-level `"services"` key in the *ACL* file — it belongs to the per-node serve config; the policy endpoint rejects it (`unknown field "services"`).
 

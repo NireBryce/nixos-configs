@@ -41,6 +41,11 @@ Four of five set options on an upstream module. `golink` has none
 hand-written unit is high risk: expect the first switch to fail, plan the
 runtime check.
 
+A `systemd.user.services` unit declared from NixOS lands in
+`/etc/systemd/user` and starts in **every** user's manager, sddm's
+included; they race for the port. Gate it with
+`unitConfig.ConditionUser` (§45, `opencode-server.nix`).
+
 ## 2. Name the category after the function, never the tool
 
 Category and module sharing a name both declare `flake.modules.nixos.<name>`
@@ -145,9 +150,11 @@ Skipping rungs is fine; claiming one you didn't run is not.
    ssh -n nire-cube.local 'cd ~/nixos-test && just build'
    ```
    `nire-cube.local`, not `ts-cube` (not in `known_hosts`); `-n` so nothing eats ssh's stdin.
+
+   Eval, build and reading the artifact all miss state a daemon holds: a secret file's owner set outside Nix, libvirt's defined-vs-started network. Only the switch shows it, via `systemctl status` and `journalctl -u` right after (§37).
 6. **Read the built artifact.** Drop-ins: `$toplevel/etc/systemd/system/<unit>.service.d/overrides.conf` — nixpkgs ships some units via `systemd.packages`, so grepping the `.service` alone finds nothing and looks like the setting didn't land.
 7. **The switch is the human's** (sudo on cube needs a password). Pre-build, hand over `just switch`.
-8. **Check from another tailnet host.** `curl` the real URL (`%{ssl_verify_result}` = 0 behind TLS); `systemctl show <unit> -p ActiveState,NRestarts` (`NRestarts=0`; a crash-looper reports `active` between restarts); `systemctl list-units --state=failed`; `ss -ltn` for the binding.
+8. **Check from another tailnet host.** `curl` the real URL (`%{ssl_verify_result}` = 0 behind TLS); `systemctl show <unit> -p ActiveState,NRestarts` (`NRestarts=0`; a crash-looper reports `active` between restarts); `systemctl list-units --state=failed`; `ss -ltn` for the binding. When two components can claim one port, `ss -ltnp` names who holds it; "enabled" doesn't (§46).
 9. **Check what the service renders, not the status code.** glance served widgets from `/api/pages/<page>/content/`, so 200 on `/` proved nothing (homepage is client-side — check the rendered page and widgets in a browser); Forgejo can proxy fine and still emit 404 links. §40: a failed unit ≠ the managed thing is down, and vice versa.
 
 Strongest end state, worth stating in the commit: the shipped tree evaluates

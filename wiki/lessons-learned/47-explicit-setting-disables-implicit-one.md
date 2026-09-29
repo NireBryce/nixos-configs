@@ -1,8 +1,8 @@
 # 47. An explicit setting can switch off an implicit one — auto-detection only fires where nothing is declared
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-29_
 
-§47 of [lessons-learned.md](../lessons-learned.md#47-an-explicit-setting-can-switch-off-an-implicit-one--auto-detection-only-fires-where-nothing-is-declared) — that page keeps the one-line version of every lesson; this is §47's full account.
+§47 of [lessons-learned.md](../lessons-learned.md) — that page keeps the one-line version of every lesson; this is §47's full account.
 
 ## What happened
 

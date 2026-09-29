@@ -1,8 +1,8 @@
 # 36. Evaluating the Nix expression and building the artifact it describes are different tests, and only one of them was run
 
-_Last modified: 2026-09-09_
+_Last modified: 2026-09-29_
 
-§36 of [lessons-learned.md](../lessons-learned.md#36-evaluating-the-nix-expression-and-building-the-artifact-it-describes-are-different-tests-and-only-one-of-them-was-run) — that page keeps the one-line version of every lesson; this is §36's full account.
+§36 of [lessons-learned.md](../lessons-learned.md) — that page keeps the one-line version of every lesson; this is §36's full account.
 
 Two real bugs surfaced building `nire-llm-sandbox` (a libvirt VM guest on
 cube), and both share a shape worth naming on its own,

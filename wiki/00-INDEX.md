@@ -113,9 +113,10 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   happened here, and the skills that hold the long version of each.
 - [History & lessons learned](history.md) — the den → flake-parts port, the
   first hardware boots, and what became of the sibling branch. The full log
-  itself, [lessons-learned.md](lessons-learned.md) — numbered §1–48 with a
-  one-line summary each, long entries broken out into `lessons-learned/`
-  articles (2026-09-09), "written by Claude Code, for Claude Code" — moved
+  itself, [lessons-learned.md](lessons-learned.md) — every numbered lesson
+  as one line, grouped by the moment it applies (since 2026-09-29), each
+  linking its full account under `lessons-learned/`, "written by Claude
+  Code, for Claude Code" — moved
   in from `claude cave/` 2026-09-02; this page stays the index, that page
   stays the log, the same split as `categories/shell-config/00-INDEX.md` and
   its deep-dives.
