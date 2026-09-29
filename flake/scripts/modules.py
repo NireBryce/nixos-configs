@@ -13,12 +13,23 @@ and neither produces an error -- the tree evaluates perfectly happily with eithe
   orphans     A module in a category that no host or home aggregate imports is
               valid, evaluates, and installs nothing.
 
+  names       A module in a category whose declared name isn't its filename.
+              The collector looks modules up by filename, so a hardcoded name
+              that differs is silently left out of every category.
+
+  shims       Category shims (dirsAsCategory.nix) that no longer agree: the
+              collector recognises a nested category by the *calling* shim's
+              own filename, so shims with different names, or drifted
+              contents, stop nesting correctly without any error.
+
 Both are platform independent, so unlike the host checks they also run on darwin.
 
     modules.py collisions <modules-dir>
     modules.py orphans    <modules-dir>
+    modules.py names      <modules-dir>
+    modules.py shims      <modules-dir>
     modules.py untracked  <modules-dir>     # untracked .nix files -- invisible to flakes
-    modules.py check      <modules-dir>     # all three; non-zero exit on any finding
+    modules.py check      <modules-dir>     # all of the above; non-zero exit on any finding
 
     modules.py add <modules-dir> <class> <category>/<subdir>/<name>.nix [description words...]
                            # scaffold a new module where the collector will
@@ -31,7 +42,15 @@ Both are platform independent, so unlike the host checks they also run on darwin
 """
 import re, sys, pathlib, subprocess
 
-CATEGORY_FILE = 'dirsAsCategory.nix'
+# A category shim is recognised by what it does -- import the shared
+# collector -- not by its filename, so renaming every shim needs no change
+# here (the collector itself reads the shim's name from the shim, for the
+# same reason). The `shims` check below catches shims that disagree.
+SHIM = re.compile(r'import\s*\(.*"/_lib/category-collector\.nix"\)')
+# Declaring a module under a literal name rather than `${moduleName}`. The
+# lookbehind keeps `config.flake.modules.<class>.<name>` -- a *reference*
+# to another module -- from reading as a declaration.
+LITERAL_DECL = re.compile(r'(?<!config\.)flake\.modules\.(\w+)\.([\w-]+)\s*=')
 DECL = re.compile(r'flake\.modules\.(\w+)\.(?:\$\{moduleName\}|(\w+))')
 # Declared inside a `flake.modules = { ... }` attrset, where each class
 # heads its own line without the prefix. Line-anchored so the leading
@@ -53,8 +72,20 @@ REF = re.compile(r'config\.flake\.modules\.(\w+)\.([\w-]+)')
 COMMENT = re.compile(r'#[^\n]*')
 
 
+def hidden(path, root):
+    """True for anything under a `_`-prefixed path component, which
+    import-tree never loads and the collector never collects (`_lib/`,
+    `_templates/`) -- helpers and templates, not modules."""
+    return any(part.startswith('_')
+               for part in pathlib.Path(path).relative_to(root).parts)
+
+
+def is_shim(path):
+    return bool(SHIM.search(COMMENT.sub('', path.read_text())))
+
+
 def scan(root):
-    """categories: name -> dirsAsCategory path.  modules: name -> [(path, classes)].
+    """categories: name -> shim path.  modules: name -> [(path, classes)].
 
     modules maps to a *list*, not a single entry. Keying it by stem and assigning
     would silently drop one of two same-named files, which is the exact case
@@ -64,7 +95,9 @@ def scan(root):
     root = pathlib.Path(root)
     categories, modules = {}, {}
     for p in sorted(root.rglob('*.nix')):
-        if p.name == CATEGORY_FILE:
+        if hidden(p, root):
+            continue
+        if is_shim(p):
             categories[p.parent.name] = p
             continue
         classes = {m.group(1) for m in DECL.finditer(p.read_text())}
@@ -88,7 +121,7 @@ def imported_names(root):
     """
     out = {}
     for p in pathlib.Path(root).rglob('*.nix'):
-        if p.name == CATEGORY_FILE:
+        if hidden(p, root) or is_shim(p):
             continue
         text = p.read_text()
         for m in AGG.finditer(text):
@@ -176,6 +209,75 @@ def orphans(root):
         print(f"ORPHAN     {name!r} ({path}) is imported by nothing; "
               f"reachable via: {' / '.join(reaching)}")
     return findings
+
+
+def names(root):
+    """A category module declared under a hardcoded name that isn't its
+    filename.
+
+    The collector turns each file into the name `<filename minus .nix>` and
+    looks that up, so `foo.nix` declaring `flake.modules.nixos.bar` is in
+    no category at all -- evaluates cleanly, installs nothing, and `orphans`
+    can't see it either, because orphans also goes by filename. Every
+    module avoids this by computing its name from its own path (the
+    `moduleName = ... __curPos.file` line); this catches one that doesn't.
+    Entry points outside every category (hosts.nix, *-configuration.nix)
+    name their aggregates by hand on purpose and are skipped.
+    """
+    categories, _ = scan(root)
+    catdirs = {p.parent for p in categories.values()}
+    hits = []
+    for p in sorted(pathlib.Path(root).rglob('*.nix')):
+        if hidden(p, root) or is_shim(p):
+            continue
+        if not any(d in catdirs for d in p.parents):
+            continue
+        for cls, name in LITERAL_DECL.findall(COMMENT.sub('', p.read_text())):
+            if name != p.stem:
+                print(f"NAME       {p} declares {cls}.{name}, but the collector "
+                      f"looks it up as {p.stem!r} -- it is in no category. "
+                      f"Derive the name from the filename (`moduleName`)")
+                hits.append((p, cls, name))
+    return hits
+
+
+def shims(root):
+    """Category shims that no longer agree with each other.
+
+    The collector skips the shim, and recognises a subfolder as a nested
+    category, by the filename the *calling* shim reports about itself. So
+    every shim must share one filename, or a renamed one stops being seen
+    as a category by its parent. They are also meant to be identical copies;
+    one that drifted is running different logic from the rest.
+    """
+    categories, _ = scan(root)
+    paths = sorted(categories.values())
+    hits = []
+    by_name = {}
+    for p in paths:
+        by_name.setdefault(p.name, []).append(p)
+    if len(by_name) > 1:
+        majority = max(by_name, key=lambda n: len(by_name[n]))
+        for n, ps in sorted(by_name.items()):
+            if n == majority:
+                continue
+            for p in ps:
+                print(f"SHIM       {p} is named {n!r} but the other shims are "
+                      f"{majority!r}; its parent won't see it as a category")
+                hits.append(p)
+    by_text = {}
+    for p in paths:
+        by_text.setdefault(p.read_text(), []).append(p)
+    if len(by_text) > 1:
+        majority = max(by_text, key=lambda t: len(by_text[t]))
+        for t, ps in by_text.items():
+            if t == majority:
+                continue
+            for p in ps:
+                print(f"SHIM       {p} differs from the other "
+                      f"{len(by_text[majority])} shims; copy one of them over it")
+                hits.append(p)
+    return hits
 
 
 def untracked(root):
@@ -355,8 +457,13 @@ def main():
         sys.exit(1 if orphans(root) else 0)
     if cmd == 'untracked':
         sys.exit(1 if untracked(root) else 0)
+    if cmd == 'names':
+        sys.exit(1 if names(root) else 0)
+    if cmd == 'shims':
+        sys.exit(1 if shims(root) else 0)
     if cmd == 'check':
-        bad = bool(collisions(root)) | bool(orphans(root)) | bool(untracked(root))
+        bad = (bool(collisions(root)) | bool(orphans(root)) | bool(names(root))
+               | bool(shims(root)) | bool(untracked(root)))
         print("no findings" if not bad else "", end="")
         sys.exit(1 if bad else 0)
     print(__doc__); sys.exit(2)
