@@ -192,6 +192,7 @@ preflight:
     @just modules-test
     @just pinned-packages-test
     @python3 .agents/scripts/test_recurring.py
+    @python3 .agents/scripts/test_ship.py
     @just guards-test
     @just preflight-mirror-test
     @just check

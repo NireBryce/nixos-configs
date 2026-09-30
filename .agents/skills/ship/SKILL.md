@@ -42,15 +42,15 @@ two asks 2026-09-05.
 `git fetch origin` first — other sessions land PRs concurrently; a branch cut
 from stale `experimental` makes step-2 comparisons meaningless.
 
-Then, before opening a PR (CI, `.github/workflows/check.yml`: `just check` +
-`just modules` + `just lint`, is a minutes-later backstop only):
+Then, before opening a PR (CI, `.github/workflows/check.yml`, runs the same
+`just preflight` minutes later — a backstop only):
 
 ```sh
-just agent preflight-brief   # every step CI runs, one line each; `just preflight` for full output
-nix eval --raw '.#nixosConfigurations.<host>.config.system.build.toplevel.drvPath'   # forced toplevel per config the change could touch
+just agent preflight-brief   # all of preflight, one line per step; `just preflight` for full output
 ```
 
-A cheap-attribute eval proves nothing (`AGENTS.md`, "Bugs here serialize").
+Its `just check` forces every host's toplevel and home, darwin included
+(`flake/modules/checks.nix`, since 2026-09-29), so there is no host to pick.
 If a drvPath moved, say *what* changed with `just diff HEAD` — a permuted
 `systemPackages` order is not a value change.
 
@@ -75,12 +75,13 @@ Never commit onto `experimental`. `git status -sb` first:
   git reset --hard origin/experimental
   git checkout <branch>
   ```
-  **Run and read that `git status --short` right before the reset** — the
-  git-guard hook's `ask` is a no-op under `--permission-mode auto`
-  (2026-09-06, issue #182) and its `systemMessage` warning doesn't stop an
-  auto-mode agent. `git branch` preserves only the commit; other dirty state
-  (someone else's uncommitted edit) is destroyed by `reset --hard` with no
-  recovery. Anything beyond your commits: stop and ask.
+  **Read that `git status --short` before the reset.** `git branch`
+  preserves only the commit; other dirty state (someone else's uncommitted
+  edit) is destroyed by `reset --hard` with no recovery. Anything beyond
+  your commits: stop and ask. The git-guard hook now denies `reset --hard`
+  on a dirty tree (since 2026-09-29; its old `ask` was a no-op under
+  `--permission-mode auto`, issue #182), but only in Claude Code, and it
+  falls back to `ask` when it can't tell which directory the reset runs in.
 
 Commit with `just agent commit` (`.agents/scripts/ship.py`, whose header
 has the incidents behind each rule):
