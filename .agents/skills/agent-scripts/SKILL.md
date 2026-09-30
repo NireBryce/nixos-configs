@@ -48,10 +48,13 @@ different verdicts:
 - `show`: the BATCH READS habit, as one reader over N specs.
 - `preflight-brief`: `just preflight | grep | tail` to skim it; reads its
   steps from the preflight recipe so it can't drift.
-- Not scripted: `cat <heredoc> -> git commit -F <path>` and `-> gh pr
-  create --body-file <path>` (33 sessions between them). `git commit -F -`
-  and `gh pr create --body-file -` already read stdin, so the fix was a
-  line in skill `ship`, not a wrapper.
+- `commit`, `ship-ready`, `ship-land` (`ship.py`): skill `ship`'s
+  commit conventions (pathspec, stdin message, trailer, no trunk
+  commits), its step-2 preview and gate, and the post-merge cleanup
+  (31 sessions) including the linked-worktree case.
+- Not scripted: `cat <heredoc> -> gh pr create --body-file <path>`.
+  `--body-file -` already reads stdin, so the fix was a line in skill
+  `ship`, not a wrapper.
 
 ## Is it worth a script?
 
@@ -59,11 +62,9 @@ Yes when the pattern carries a **convention**: a header format, a set of
 `nix eval`/`gh --json` flags, a fixed step order (fetch, then status).
 No when it's plain Unix: a script hides what the user learns from reading
 the command. Check `just agent` and the root `just` list first, and
-**extend** an overlapping recipe rather than start a second one: the
-post-merge cleanup overlaps `just branches prune` (local branches only);
-`gh pr view -> git log -> git diff --stat` is ship step 2's preview;
-`cat -> git commit -F` and `cat -> gh pr create --body-file` (a message
-written to a file, then used) are ship step 1.
+**extend** an overlapping recipe rather than start a second one:
+committing, ship's preview/gate and the post-merge cleanup are
+`ship.py`'s; merged-elsewhere branches are `just branches prune`'s.
 
 ## Extract it
 

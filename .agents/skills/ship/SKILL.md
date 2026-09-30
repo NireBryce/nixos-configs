@@ -82,19 +82,23 @@ Never commit onto `experimental`. `git status -sb` first:
   (someone else's uncommitted edit) is destroyed by `reset --hard` with no
   recovery. Anything beyond your commits: stop and ask.
 
-Commit discipline:
+Commit with `just agent commit` (`.agents/scripts/ship.py`, whose header
+has the incidents behind each rule):
 
-- **Explicit pathspec, always** — `git commit -F <file> -- <paths...>`;
-  `--amend` re-commits whatever is staged *right now*. Hit twice 2026-08-30,
-  sweeping up unrelated staged files. Undo: `git reset --soft HEAD~1`, check
-  `git status --short`, recommit with the right pathspec.
-- **Backticks / `$(...)` in an inline message are executed by the shell**
-  (2026-08-30: a backtick span became empty). Feed the message on stdin
-  through a quoted heredoc, which the shell doesn't expand, rather than via
-  a temp file: `git commit -F - -- <paths...> <<'EOF'` … `EOF`. Fix a
-  mangled one the same way with `--amend -F -`.
-- **Trailer**: `Co-Authored-By: <the agent you are>` — name only, no model,
-  no email (Claude: `Co-Authored-By: Claude`).
+```sh
+just agent commit [--agent <you>] -- <paths...> <<'EOF'
+feat: ...
+EOF
+```
+
+It requires a pathspec (a bare commit or `--amend` takes whatever is staged
+now), reads the message on stdin (a quoted heredoc, so backticks and
+`$(...)` aren't executed), refuses `experimental` and `main`, and appends
+`Co-Authored-By: <agent>` (default `Claude`; name only, no model, no email)
+unless the message already has one. Committed the wrong paths: `git reset
+--soft HEAD~1`, check `git status --short`, recommit. `--amend` isn't
+wrapped: `git commit --amend -F - -- <paths...> <<'EOF'`.
+
 - Branch name and first commit line get a `feat/`/`fix/`/`docs:` prefix
   (first line only; body stays what/why/verified narrative). Each commit
   green (§15); one coherent commit beats two artificial ones. The message
@@ -105,7 +109,8 @@ Then `just agent recurring export` (one line: this host's command shapes
 to the private command log, skill `agent-scripts`; "not set up" or a
 failure is reported, not a reason to stop),
 `git push -u origin <branch>`, and `gh pr create --base experimental
---body-file - <<'EOF'` (body on stdin, same reason as the commit message).
+--body-file - <<'EOF'` (body on stdin: backticks in an inline `--body`
+are executed, as in a commit message).
 PR body: what changed, why, what was verified, what was left alone, under
 `.github/PULL_REQUEST_TEMPLATE.md`'s headings. **LLM-disclosure line at both
 top (before "What changed") and bottom** — a harness footer lands at the
@@ -119,50 +124,36 @@ top.
 Read back what landed, never recall it:
 
 ```sh
-gh pr checks <n> --watch --interval 20   # wait for CI; minutes, not optional
-gh pr view --json url,title,additions,deletions,changedFiles,mergeable,mergeStateStatus,baseRefName
-git log --oneline origin/experimental..HEAD
-git diff --stat origin/experimental...HEAD
+just agent ship-ready <n>
 ```
 
-`mergeStateStatus` must be `CLEAN` and `baseRefName` `experimental`
-**before** asking. **`mergeable` is not the CI answer** (only "no
-conflicts"): #413 (2026-09-28) read `MERGEABLE` with red CI and
-`mergeStateStatus` `BLOCKED`, and the ask went out calling it mergeable.
-Red check: `gh run view <run> --log-failed`, fix, push, re-watch; if `just
-preflight` passed locally, the step it missed belongs in `preflight` too.
-Print the summary with the merge method and ask the one combined question:
+It waits for CI (`gh pr checks --watch`, minutes, not optional), then gates:
+PR open, `mergeStateStatus` `CLEAN` (not `mergeable`, which only means no
+conflicts: #413), base `experimental`. It prints title, URL, stats, the
+commit list, and the merge method: one commit `--rebase`, more `--merge`
+(their messages carry real reasoning; squashing flattens it). **NOT READY**
+means don't ask: fix what it names. Red check: `gh run view <run>
+--log-failed`, fix, push, re-run; if `just preflight` passed locally, the
+step it missed belongs in `preflight` too.
 
-- **Single commit** (common): default `--rebase`.
-- **Multiple commits**: default `--merge` — individual commit messages carry
-  real reasoning; squashing flattens it.
+**READY**: show that summary and ask the one combined question.
 
 **No**: leave the PR open, say so, stop. Don't merge, close, delete, or clean up.
 
 ## 3. Merge, then delete — on yes only
 
 ```sh
-gh pr merge <n> --rebase   # single-commit PR
-gh pr merge <n> --merge    # multi-commit PR
+just agent ship-land <n>
 ```
 
-Merge fails (unmergeable, required check pending, ruleset block): stop and
-say so. Don't delete a branch whose PR didn't merge; raise it, don't retry
-silently. On success delete immediately, no further ask:
-
-```sh
-git checkout experimental && git pull
-git branch -d <branch>
-git ls-remote --exit-code --heads origin <branch> >/dev/null \
-  && git push origin --delete <branch>
-```
-
-`delete_branch_on_merge` is on, so the remote branch is normally already
-gone and a bare `git push origin --delete` fails with `failed to push some
-refs` (every ship since at least #416, 2026-09-28); the `ls-remote` guard
-deletes only if it's still there.
-
-**Never `gh pr merge --delete-branch`** — use the explicit steps above.
+It re-runs the gate and refuses if it fails, merges with the computed
+method (never `--delete-branch`, pinned to the head commit the gate read),
+confirms `MERGED`, then: `experimental` checked out and pulled (from a
+linked worktree whose shared checkout holds `experimental`, it leaves that
+checkout alone and detaches this worktree instead), local branch deleted,
+remote branch deleted if still there, `just close-fixed <n>` (#177: closing
+keywords silently not closing). Any failure stops it and prints what's left;
+a failed merge deletes nothing. Raise that, don't retry silently.
 
 **Merged outside this flow** (web UI, another session): the branch stays.
 `just branches` classifies local branches by patch-id, which catches rebased
@@ -173,23 +164,11 @@ for the prompt, so pass `--yes`**; without it prune prints the verdict and
 exits 2 deleting nothing. Glance at it at session start, like `git worktree
 list`.
 
-Report the merge commit and the branch's fate; never report a commit range
-as if pushed to `experimental`.
-
-**Closing keywords ("Fixes #N", "Closes #N", "Resolves #N") — verify.**
-Broken 2026-09-06 (issue #177): three PRs with correct syntax merged into
-`experimental`, GitHub didn't auto-close, `gh pr view <n> --json
-closingIssuesReferences` empty, no error. After merging, for every issue the
-body claims to fix:
-
-```sh
-gh issue view <N> --json state -q .state
-gh issue close <N> --comment "..."   # if OPEN: what fixed it, which commit/PR
-```
-
-`just close-fixed <pr-number>` loops this: refuses unmerged PRs, unions
-linked issues with the body's keyword mentions, closes only still-OPEN ones
-with a comment saying it was a hand close (#177).
+Report the merge commit and the branch's fate (including anything
+`ship-land` left for you); never report a commit range as if pushed to
+`experimental`. After a land that ran outside `ship-land`, still run `just
+close-fixed <n>`: it re-checks every issue the PR claims to fix and closes
+the ones still OPEN, with a comment saying it was a hand close.
 
 ## Other flows
 
