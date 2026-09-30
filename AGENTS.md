@@ -284,7 +284,7 @@ commit — every tool written in the port reported success while wrong (§1).
 When an existing check fires on new work, fix its model before reaching for
 its escape flag (§23).
 
-**Then:** `just preflight` runs every step CI does; skill `wiki-sync` for
+**Then:** `just preflight` is what CI runs; skill `wiki-sync` for
 any wiki page the change made stale.
 
 ## Conventions
@@ -342,8 +342,8 @@ invites.
 bare `just` for the full list with a one-line summary per recipe; that
 list, not a copy of it here, is the source of truth, since `.justfile`'s
 own comments are what `just` actually reads. `just preflight` (wiki-lint +
-branches-test + check + modules + lint + the script tests -- every step CI
-runs) is the ship skill's step 0. `just
+branches-test + check + modules + lint + the script tests; CI runs this
+recipe itself) is the ship skill's step 0. `just
 hm-collisions`, `just root-drift`, and `just home-drift` are read-only,
 and only meaningful on the hardware itself.
 

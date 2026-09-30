@@ -1,35 +1,33 @@
 #!/usr/bin/env python3
-"""Fail when .justfile's `preflight` recipe and .github/workflows/check.yml
-stop running the same set of checks.
+"""Fail when .github/workflows/check.yml stops running `just preflight`
+itself, or starts running checks of its own beside it.
 
-Both are hand-maintained copies of one checklist -- the steps an agent runs
-before opening a PR, and the steps CI runs so a PR that skipped them still
-fails. The preflight recipe's own comment names the failure mode of keeping
-that copy by hand: a step added to one side and not the other is a failure
-an agent only learns about from a red PR, minutes or days after they
-reported their work green. Same motivation as check_wiki.py -- nothing
-about the prose (here, the two check-lists) is read by anything that would
-notice drift -- applied to CI instead of the wiki.
+History, since the name no longer says it: until 2026-09-29 check.yml
+listed preflight's steps a second time, by hand, and this script diffed
+the two lists (a step on one side only was a failure an agent learned
+about from a red PR). CI now runs `just preflight`, so there is one list
+and nothing to diff. What can still go wrong is the copy growing back --
+someone adds a check as a CI step instead of a preflight step, and the
+agent's preflight is again testing a different checklist than the one
+gating the PR. So this holds three things:
 
-How the two sides are compared: preflight is expanded (a `just <recipe>`
-line pulls in that recipe's command lines, with {{scripts}}/{{flake}}/
-{{user}} substituted), then each side is reduced to the set of *checks* it
-runs -- every referenced .py script, normalized to a repo-relative path so
-`cd flake && python3 scripts/lint.py check` and `just lint` land on the
-same key, plus `nix flake check` itself. CI-only steps that are setup, not
-checks (checkout, the nix installer, the sops store-race warmup) extract no
-key and are invisible to the comparison, as is anything the linter's
-ratchet or a future check might wrap a script in. Set equality, not order:
-preflight orders wiki-lint first because it fails in ~2s where `check`
-spends minutes; CI orders it first so a broken wiki claim fails before the
-toolchain installs. Both orderings are deliberate and neither is this
-check's business. Also fails if preflight names a recipe .justfile doesn't
-define -- a typo'd recipe name in the one recipe agents run most would
-otherwise surface only as a just error at the worst moment.
+1. check.yml has a `run:` that invokes `just preflight`.
+2. Every check a check.yml `run:` names (a .py/.sh script, or `nix flake
+   check`) is either run by preflight too or listed in CI_ONLY below with
+   its reason -- a new CI-only check has to be a deliberate edit here.
+3. preflight names no undefined recipe, and still runs the anchor checks
+   (a floor: the same check vanishing from preflight passes (1) and (2)).
+
+How checks are identified: preflight is expanded (a `just <recipe>` line
+pulls in that recipe's command lines, with {{scripts}}/{{flake}}/
+{{user}} substituted), then each command line is reduced to the scripts
+it runs, normalized to repo-relative paths so `cd flake && python3
+scripts/lint.py check` and `flake/scripts/lint.py` land on the same key.
+Setup steps (checkout, the nix installer, the sops warmup's `nix eval`)
+extract no key. Step `name:` lines and comments are ignored.
 
 Pure stdlib; runs via `just preflight-mirror-test`, part of `just
-preflight` and CI. Note the test is itself on both check-lists -- adding
-it to one side without the other fails here, which is the point.
+preflight` (and so of CI).
 """
 import pathlib
 import re
@@ -82,12 +80,21 @@ def expand(name, lines, depth=0):
     return out
 
 
+# Checks check.yml may run that preflight does not, each with its reason.
+CI_ONLY = {
+    # Needs the PR's commit range, which only the pull_request event has;
+    # its fixture test (test_check_trailers.py) is in preflight.
+    "flake/scripts/check_trailers.py",
+}
+
+
 def keys_of(line):
-    """The check-identity of one command line: every .py script it runs
-    (as a repo-relative path -- `cd flake` makes `scripts/lint.py` and
-    `flake/scripts/lint.py` the same file) plus `nix flake check` itself."""
+    """The check-identity of one command line: every .py/.sh script it
+    runs (as a repo-relative path -- `cd flake` makes `scripts/lint.py`
+    and `flake/scripts/lint.py` the same file) plus a bare `nix flake
+    check`."""
     keys = set()
-    for m in re.finditer(r"[A-Za-z0-9_./-]+\.py\b", line):
+    for m in re.finditer(r"[A-Za-z0-9_./-]+\.(?:py|sh)\b", line):
         p = m.group(0)
         keys.add("flake/" + p if p.startswith("scripts/") else p)
     if re.search(r"\bnix flake check\b", line):
@@ -148,47 +155,48 @@ def main():
     # recipes and scripts in prose); only what actually runs counts.
     ci_lines = [l for l in WORKFLOW.read_text().splitlines()
                 if not l.lstrip().startswith("#")]
-    ci_keys = set().union(*(keys_of(l) for l in ci_run_lines(ci_lines)))
-    if not ci_keys:
-        sys.exit("preflight-mirror: check.yml yielded no recognizable "
-                 "checks -- the workflow parser in this script has rotted")
+    ci_runs = ci_run_lines(ci_lines)
+    if not ci_runs:
+        sys.exit("preflight-mirror: check.yml yielded no run: lines -- "
+                 "the workflow parser in this script has rotted")
+    if not any(re.search(r"\bjust\s+preflight\b", l) for l in ci_runs):
+        sys.exit("preflight-mirror: check.yml no longer runs `just "
+                 "preflight` -- CI would stop gating on the checklist "
+                 "agents run locally")
 
-    only_preflight = sorted(preflight_keys - ci_keys)
-    only_ci = sorted(ci_keys - preflight_keys)
-    if only_preflight or only_ci:
-        print("preflight and CI check-lists have drifted:", file=sys.stderr)
-        for k in only_preflight:
-            print(f"  preflight only: {k}", file=sys.stderr)
-        for k in only_ci:
-            print(f"  CI only:        {k}", file=sys.stderr)
-        print("Add the step to the other side in the same change -- an "
-              "agent who runs only one of the two is testing a different "
-              "checklist than the one that gates the PR.", file=sys.stderr)
+    ci_keys = set().union(set(), *(keys_of(l) for l in ci_runs))
+    strays = sorted(ci_keys - preflight_keys - CI_ONLY)
+    if strays:
+        print("check.yml runs checks that preflight does not:",
+              file=sys.stderr)
+        for k in strays:
+            print(f"  {k}", file=sys.stderr)
+        print("Add them to the preflight recipe instead (CI runs it), or, "
+              "if one genuinely cannot run locally, to CI_ONLY in "
+              "flake/scripts/test_preflight_mirror.py with the reason.",
+              file=sys.stderr)
         sys.exit(1)
 
-    # Floor anchors. A two-sided mirror cannot see equal rot: the same
-    # check disappearing from BOTH lists at once passes the set comparison
-    # (demonstrated in review, 2026-09-29, by deleting lint.py from both
-    # sides). These must be present on both sides no matter what else
-    # changes; retiring one of them is a deliberate edit to this set, not
-    # drift the script should stay quiet about.
+    # Floor anchors. `just preflight` being called proves nothing if
+    # preflight itself quietly lost a check; these must stay in it.
+    # Retiring one is a deliberate edit to this set.
     anchors = {
-        "wiki/scripts/check_wiki.py",    # just wiki-lint
-        "flake/scripts/modules.py",      # just modules
-        "flake/scripts/lint.py",         # just lint
-        "flake/scripts/test_guards.py",  # just guards-test
-        "nix flake check",               # just check
+        "wiki/scripts/check_wiki.py",           # just wiki-lint
+        "flake/scripts/modules.py",             # just modules
+        "flake/scripts/lint.py",                # just lint
+        "flake/scripts/test_guards.py",         # just guards-test
+        "flake/scripts/flake-check.sh",         # just check
+        "flake/scripts/test_check_trailers.py", # just trailers-test
     }
     missing = sorted(anchors - preflight_keys)
     if missing:
         sys.exit(
             "preflight-mirror: anchor check(s) no longer run by preflight "
-            f"(and therefore, by the equality check above, by CI): "
-            f"{missing}. If one was deliberately retired, update "
-            "`anchors` here in the same change -- this set is what keeps "
-            "the mirror from passing vacuously.")
-    print(f"preflight/CI mirror ok: {len(preflight_keys)} checks on both "
-          f"sides")
+            f"(and therefore by CI): {missing}. If one was deliberately "
+            "retired, update `anchors` here in the same change -- this set "
+            "is what keeps the check from passing vacuously.")
+    print(f"preflight-mirror ok: CI runs `just preflight` ({len(preflight_keys)} "
+          f"checks), plus {len(ci_keys & CI_ONLY)} CI-only")
 
 
 if __name__ == "__main__":

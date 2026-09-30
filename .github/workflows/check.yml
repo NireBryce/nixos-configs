@@ -1,50 +1,55 @@
 name: flake-check
 
-# Mirrors `just check` + `just modules` + `just lint` + `just wiki-lint` +
-# `just branches-test` exactly (see .justfile) rather than inventing
-# separate CI-only logic --
-# what runs here is what any session already runs by hand before opening a
-# PR (the ship skill's own step 0), just automated instead of relying on
-# that being remembered every time. wiki-lint is not in `preflight` yet
-# (its recipe comment says so) -- CI runs it first so the class of breakage
-# it catches fails before the nix install even starts.
+# Runs `just preflight` -- the recipe itself, not a copy of its steps --
+# so what gates a PR is exactly what any session runs by hand before
+# opening one (the ship skill's step 0), automated instead of relying on
+# that being remembered. Until 2026-09-29 this file listed preflight's
+# steps a second time by hand; `just preflight-mirror-test` diffed the
+# two lists. It now holds the opposite in place: this workflow must call
+# `just preflight`, and may run no check of its own beyond the CI-only
+# ones that test names (today only the trailer check below, which needs
+# the PR's commit range). Add a check to the preflight recipe and CI
+# picks it up with no edit here.
+#
+# Beyond preflight, this file only adds what a local run cannot or need
+# not do: install the tools, warm the sops store race below, and check
+# the PR's own commit trailers.
+#
+# The job's `name:` is the required status check in the ruleset, and is
+# quoted by name in update-flake-lock.yml and wiki/maintenance.md -- do not
+# rename it; a renamed job leaves the required check pending forever.
+#
+# One job, deliberately: an early no-nix job for the stdlib tests would
+# report a broken wiki claim sooner by the length of the nix install
+# (tens of seconds), but it would need its own list of those tests -- the
+# copy this change removed -- and would not be a required check without a
+# ruleset edit. preflight already orders the ~2s checks first.
 #
 # `just lint` (statix + deadnix + an oversized-file check, ratcheted
-# against flake/scripts/lint-baseline.json) is the backstop for the local
-# pre-commit hook (.githooks/pre-commit, wired in via `just
-# install-hooks`) rather than a redundant re-check: the hook is opt-in
-# per clone and skips itself silently if statix/deadnix aren't on PATH,
-# so this is what actually blocks a regression on a contributor who never
-# ran `just install-hooks`. See flake/scripts/lint.py's own header for
-# why it's a ratchet rather than a plain pass/fail.
+# against flake/scripts/lint-baseline.json) here is the backstop for the
+# local pre-commit hook (.githooks/pre-commit, wired in via `just
+# install-hooks`): the hook is opt-in per clone and skips itself silently
+# if statix/deadnix aren't on PATH, so this is what actually blocks a
+# regression on a contributor who never ran `just install-hooks`.
+# statix/deadnix/just come from the flake's LOCKED nixpkgs
+# (`--inputs-from ./flake`), the same versions packages-config/nix-utils
+# puts on the hosts, so the ratchet counts match a local run.
 #
-# Deliberately `--no-build`, matching `just check` locally: this flake
-# defines full NixOS/darwin system toplevels (`checks.nix`) for real
-# hosts running KDE + a full dev toolchain, and building those from
-# scratch on every PR would be slow, disk-heavy, and roughly the same
-# scale of cost repeatedly rejected elsewhere in this repo for being
-# disproportionate to a homelab config (CLAUDE.md, "Calibrate severity").
-# `--no-build` still catches the actual class of bug this repo's own
-# history is full of -- a bad `perSystem` wrapper, bare strings in
-# `imports`, a module name colliding with its own category -- all of
-# which are evaluation errors, not build failures. A real `switch` on
-# the real host remains the only thing that proves more than this; see
-# CLAUDE.md's "Treat an undated 'verified' as *evaluates*" for why this
-# workflow doesn't try to close that gap too.
+# Deliberately `--no-build` (`just check`): this flake defines full
+# NixOS/darwin system toplevels (`checks.nix`) for real hosts running KDE
+# + a full dev toolchain, and building those from scratch on every PR
+# would be slow, disk-heavy, and disproportionate to a homelab config
+# (AGENTS.md, "Calibrate severity"). `--no-build` still catches the class
+# of bug this repo's history is full of -- a bad `perSystem` wrapper, bare
+# strings in `imports`, a module name colliding with its own category --
+# all evaluation errors, not build failures. A real `switch` on the real
+# host remains the only thing that proves more than this.
 #
-# One job, ubuntu-latest, checking every system: `--all-systems` forces
-# evaluation of the darwin config's checks too, and evaluation (unlike
-# building) doesn't need a matching builder -- confirmed by hand from an
-# x86_64-linux dev machine before writing this, the same way this repo's
-# own sessions already evaluate `nire-lysithea` from Linux hosts with no
-# darwin builder anywhere in reach.
-#
-# `modules.py check modules` runs as a separate step, not folded into the
-# `nix flake check` above, for the same reason the .justfile keeps `check`
-# and `modules` as two separate recipes: `checks.nix`'s own `module-tree`
-# check is a derivation that has to actually RUN to mean anything, and
-# `--no-build` skips exactly that -- `just modules` bypasses Nix's build
-# system entirely instead of trying to force one check through --no-build.
+# `--all-systems` evaluates the aarch64-darwin checks too, and evaluation
+# (unlike building) needs no matching builder -- this repo's sessions
+# evaluate `nire-lysithea` from Linux hosts routinely. Since 2026-09-29
+# checks.nix makes lysithea's toplevel and home a check; before that,
+# `nix flake check` walked past darwinConfigurations without evaluating it.
 #
 # RUNTIME-VERIFIED TRAP, 2026-08-25, found on this workflow's first real
 # runs and taking real investigation to pin down: `nix flake check
@@ -67,12 +72,16 @@ name: flake-check
 # the failure stop appearing entirely across several runs -- consistent
 # with a store-registration race across near-simultaneous adds of
 # identical content, not something wrong with this repo's own config.
-# Mitigated two ways below rather than just one: an explicit warmup
-# (matches what empirically fixed it) plus a retry on the real check
+# Mitigated two ways rather than just one: an explicit warmup step below
+# (matches what empirically fixed it) plus a retry of `nix flake check`
 # (in case the warmup doesn't fully close the window on a differently-
-# timed run). Neither is a full root-cause fix for whatever's actually
-# racing inside Nix/sops-nix -- if this stops being enough, that's the
-# next place to look, not something already ruled out here.
+# timed run). The retry moved into flake/scripts/flake-check.sh (what
+# `just check` runs) on 2026-09-29, since this file no longer runs that
+# step itself, and now fires only on the `secrets.yaml' is not valid`
+# text -- that script's header says why. Neither is a full root-cause fix
+# for whatever's actually racing inside Nix/sops-nix -- if this stops
+# being enough, that's the next place to look, not something already
+# ruled out here.
 
 on:
   pull_request:
@@ -94,63 +103,32 @@ permissions:
 
 jobs:
   eval-and-modules:
+    # Required status check, by this exact name -- see the header.
     name: nix flake check + module tree
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      # Full history: the trailer step walks the PR's commits back to
+      # their merge base with the target. The repo is small (~11 MiB
+      # packed, 2026-09-29), and a full clone is also what every local
+      # preflight runs against.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      # First, before the nix install: stdlib Python against the checkout,
-      # needs no nix at all, so a broken wiki claim fails in seconds instead
-      # of after the toolchain setup. `just preflight` runs it too (since
-      # 2026-09-28, issue #217); this is the backstop for a PR that skipped
-      # preflight, keeping a refactor that breaks a wiki claim from landing green.
-      - name: wiki lint (just wiki-lint)
-        run: python3 wiki/scripts/check_wiki.py check
-
-      # Same stdlib-Python, no-nix-needed shape as wiki-lint above:
-      # branches.py's classifier decides what `just branches prune`
-      # force-deletes, and the two #300 misclassifications it covers would
-      # each have deleted a real branch (issue #303). The test builds its
-      # own throwaway git repo, so unlike the `branches` command itself it
-      # means exactly as much in CI as on a host.
-      - name: branches classifier tests (just branches-test)
-        run: python3 flake/scripts/test_branches.py
-
-      # Same stdlib shape again (issue #371): keybinding-cheatsheet.py's
-      # parsers and chord normalizer decide what the cheat sheet claims a key
-      # does, and its repo readers are regex-coupled to the declaring
-      # modules' exact shapes. Pure text-in/objects-out, so it means exactly
-      # as much in CI as on a host.
-      - name: keybinding cheatsheet parser tests (just keybindings-test)
-        run: python3 flake/scripts/test_keybinding_cheatsheet.py
-      - name: cod completion descriptions tests (just cod-desc-test)
-        run: python3 flake/scripts/test_cod_desc.py
-      - name: modules.py check tests (just modules-test)
-        run: python3 flake/scripts/test_modules.py
-      - name: pinned-packages rewrite tests (just pinned-packages-test)
-        run: python3 flake/scripts/test_pinned_packages.py
-      # recurring.py's shape step is a privacy boundary: these assert no
-      # literal from a hostile command survives into a shape.
-      - name: agent recurring shape leak tests
-        run: python3 .agents/scripts/test_recurring.py
-      # The guard hooks (.agents/hooks/, .githooks/commit-msg) are
-      # pattern-matchers gating safety prompts -- the same class
-      # branches.py's classifier was fixture-tested for (#303) -- and each
-      # has already gone subtly wrong once in production (the 2>/dev/null
-      # sops miss, the posttooluse jq tostring bug). A guard that stops
-      # matching fails silently: with settings.json's `|| true`, a broken
-      # hook is indistinguishable from no hook. Skips itself without jq,
-      # like the pre-commit hook does without statix.
-      - name: guard hook fixture tests (just guards-test)
-        run: python3 flake/scripts/test_guards.py
-      # preflight's step list and this workflow's are one checklist kept
-      # twice by hand; this is the mechanical form of the preflight
-      # recipe's "mirrors check.yml's steps" comment, and it covers these
-      # two steps too -- adding a check to one side without the other
-      # fails here, in the no-nix prefix, in seconds.
-      - name: preflight/CI mirror check (just preflight-mirror-test)
-        run: python3 flake/scripts/test_preflight_mirror.py
+      # First, before the nix install: stdlib Python, seconds. On a PR the
+      # checkout is GitHub's refs/pull/N/merge commit, whose first parent
+      # is the target branch and second the PR head, so HEAD^1..HEAD^2 is
+      # exactly the PR's own commits -- steadier than the event's
+      # base.sha, which can lag the target and pull already-landed commits
+      # (and their old, deliberately kept, wrong trailers) into the range.
+      # Skipped on push: pushes to main/experimental only land through a
+      # PR (ruleset), whose commits this step already checked, and a
+      # finding there could not be fixed anyway -- rewriting a protected
+      # branch is what the ruleset forbids.
+      - name: Co-Authored-By trailers on this PR's commits
+        if: github.event_name == 'pull_request'
+        run: python3 flake/scripts/check_trailers.py HEAD^1..HEAD^2
 
       # Pinned by full SHA, same as update-flake-lock.yml pins its actions:
       # `@main` means running whatever upstream's default branch says on
@@ -160,8 +138,9 @@ jobs:
 
       # All four hosts .sops.yaml enrolls, including the darwinConfigurations
       # entry -- nire-lysithea's config touches secrets.yaml too
-      # (general-config/system/secrets/sops-darwin.nix), so --all-systems evaluating the
-      # darwin config below hits the same store race this warmup exists for.
+      # (general-config/system/secrets/sops-darwin.nix), and checks.nix
+      # forces its toplevel, so it hits the same store race this warmup
+      # exists for.
       - name: warm up sops-enrolled hosts' secrets.yaml store registration
         run: |
           cd flake
@@ -173,16 +152,8 @@ jobs:
             nix eval --raw ".#$ref.config.system.build.toplevel.drvPath" > /dev/null
           done
 
-      - name: nix flake check --all-systems --no-build
-        run: |
-          cd flake
-          nix flake check --all-systems --no-build \
-            || { echo "::warning::nix flake check failed, retrying once (see this workflow's own header comment on the known intermittent secrets.yaml store race)"; sleep 5; nix flake check --all-systems --no-build; }
-
-      - name: module tree check (just modules)
-        run: cd flake && python3 scripts/modules.py check modules
-
-      - name: lint ratchet (just lint)
-        run: |
-          cd flake
-          nix shell nixpkgs#statix nixpkgs#deadnix --command python3 scripts/lint.py check
+      - name: just preflight
+        run: >-
+          nix shell --inputs-from ./flake
+          nixpkgs#just nixpkgs#statix nixpkgs#deadnix
+          --command just preflight

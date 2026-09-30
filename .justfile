@@ -41,9 +41,11 @@ _default:
 # Agent-written helpers for recurring lookups: `just agent` lists them
 mod agent '.agents/scripts/agent.just'
 
+# `nix flake check --all-systems --no-build`; the script retries once on
+# CI's known secrets.yaml store race and on nothing else (its header).
 # Evaluate every output without building anything -- the real check
 check:
-    cd {{flake}} && nix flake check --all-systems --no-build
+    @{{scripts}}/flake-check.sh {{flake}}
 
 # Static check: module/category name collisions and unreachable modules
 modules:
@@ -155,20 +157,26 @@ install-hooks:
 guards-test:
     python3 {{scripts}}/test_guards.py
 
-# preflight's step list and check.yml's are one checklist kept twice by
-# hand; this is the mechanical form of the preflight comment "mirrors
-# check.yml's steps" and fails when the two sides drift. The test is
-# itself on both lists, so adding a check to one side without the other
-# fails here.
-# preflight and CI run the same check-set, or this fails; pure stdlib; in preflight and CI
+# check_trailers.py is the CI gate on Claude Co-Authored-By trailers (a
+# PR's own commits only; check.yml); this is its fixture test.
+# Fixture tests for the CI trailer check; pure stdlib + git; in preflight
+trailers-test:
+    python3 {{scripts}}/test_check_trailers.py
+
+# Named for what it replaced: until 2026-09-29 check.yml listed
+# preflight's steps a second time, and this diffed the two lists. CI now
+# runs `just preflight` itself, so this holds that in place instead:
+# check.yml must call preflight and may run no check of its own beyond
+# the CI-only ones, and preflight must keep its floor of anchor checks.
+# CI runs `just preflight`, not a copy of it, or this fails; pure stdlib; in preflight
 preflight-mirror-test:
     python3 {{scripts}}/test_preflight_mirror.py
 
-# Short of the per-host forced toplevel eval, which still needs picking a host
 # wiki-lint and branches-test first: each fails in ~2s, where check spends
-# minutes. Mirrors check.yml's steps -- held mechanically by
-# preflight-mirror-test now, but the cost of a miss is unchanged: a CI step
-# missing here is a failure an agent only learns about from a red PR
+# minutes. This recipe IS the CI check-set: check.yml runs `just preflight`
+# (since 2026-09-29), so a step added here gates PRs with no second edit.
+# `check` forces every host's toplevel and home, darwin included
+# (flake/modules/checks.nix).
 # wiki-lint + tests + check + modules + lint in one shot -- the ship skill's step 0
 preflight:
     # Warn-only, never fails (CI has no hooksPath); why it exists and why
@@ -180,6 +188,7 @@ preflight:
     @just branches-test
     @just keybindings-test
     @just cod-desc-test
+    @just trailers-test
     @just modules-test
     @just pinned-packages-test
     @python3 .agents/scripts/test_recurring.py

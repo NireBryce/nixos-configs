@@ -59,9 +59,6 @@ housekeeping pass over this list.
   admin-console territory, outside this repo.
 - **Forgejo has no local CI/CD yet** — mirroring `.github/workflows/` onto
   Forgejo Actions hasn't been started.
-- CI's lint step re-fetches `nixpkgs#statix nixpkgs#deadnix` on every run
-  rather than reusing the flake's own nixpkgs input. Cheap today; worth
-  pinning if CI minutes start mattering.
 - Idea placeholders with no content:
   [`../flake/scripts/script-wishlist.md`](<../flake/scripts/script-wishlist.md>),
   and the "things to look into" list at the end of
