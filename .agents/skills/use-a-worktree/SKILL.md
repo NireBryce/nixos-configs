@@ -70,9 +70,10 @@ git worktree remove --force <path>
 removed: worktree first, then branch. `-d` also refuses branches whose PR
 was merged by REBASE (new SHAs upstream); `just branches` settles that by
 patch-id, `just branches prune` deletes only provably landed ones. `git
-worktree list` shows what's outstanding; glance at session start for
-orphans, and don't remove an unrecognized one without checking (`git -C
-<path> status`, mtime) — it may belong to a live session.
+worktree list` shows what's outstanding (Claude Code's SessionStart hook
+prints it); glance at it at session start for orphans, and don't remove an
+unrecognized one without checking (`git -C <path> status`, mtime) — it may
+belong to a live session.
 
 ## See also
 

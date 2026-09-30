@@ -17,13 +17,29 @@
 #      hook was written for).
 #   3. `cat`/`bat`/`less`/`more`/`head`/`tail` reading a path under
 #      /run/secrets/ -- prints a live decrypted secret's contents.
-# Both ask for confirmation rather than hard-denying: there's a real
-# alternative for each (see the reason text), but a rare legitimate case
-# (e.g. actually needing the whole file) shouldn't be flatly impossible.
+# Each is DENIED, not asked (since 2026-09-29): there is always a narrower
+# form that answers the same question (the reason text names them), and a
+# deny reaches the model in every permission mode -- the model reads the
+# reason and retries with the safe form. The earlier "ask" was a silent
+# no-op under --permission-mode auto (issue #182's mechanism, found on
+# git-guard), so in auto mode this guard used to do nothing at all. A rare
+# genuine need for the whole file is the user's to run by hand.
+# systemMessage travels with the deny so the human sees it in the transcript.
 # Which keys exist -- the question that tempts the `sops -d | grep` shape --
 # never needs decryption at all: `just read-sops-names` reads the committed
 # ciphertext, where names are plaintext and values are ENC[...].
+#
+# No jq, no guard: without it the command can't be read, so the hook says so
+# in a systemMessage (built by hand, no jq) on every call rather than
+# allowing silently. The settings entry has no `|| true` for the same
+# reason: a crash surfaces as a hook error instead of vanishing.
 set -euo pipefail
+
+if ! command -v jq >/dev/null 2>&1; then
+    cat >/dev/null
+    printf '%s\n' '{"systemMessage":"secrets-guard-pretooluse: jq not on PATH, so this Bash command was NOT checked for sops -d / /run/secrets leaks. Install jq (packages-config/nix-utils/) to re-arm the guard."}'
+    exit 0
+fi
 
 input=$(cat)
 command=$(jq -r '.tool_input.command // empty' <<<"$input")
@@ -49,9 +65,10 @@ fi
 
 if [ -n "$reason" ]; then
     jq -n --arg reason "$reason" '{
+        systemMessage: ("🔒 SECRETS GUARD (denied): " + $reason),
         hookSpecificOutput: {
             hookEventName: "PreToolUse",
-            permissionDecision: "ask",
+            permissionDecision: "deny",
             permissionDecisionReason: $reason
         }
     }'

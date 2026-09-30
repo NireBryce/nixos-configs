@@ -25,6 +25,14 @@
 # check and would double-warn.
 set -euo pipefail
 
+# No jq: say so (JSON built by hand) instead of allowing silently -- the
+# same fail-visible rule as secrets-guard-pretooluse.sh's header.
+if ! command -v jq >/dev/null 2>&1; then
+    cat >/dev/null
+    printf '%s\n' '{"systemMessage":"nix-untracked-guard: jq not on PATH, so this command was NOT checked for untracked .nix files. Install jq (packages-config/nix-utils/) to re-arm the guard."}'
+    exit 0
+fi
+
 input=$(cat)
 command=$(jq -r '.tool_input.command // empty' <<<"$input")
 

@@ -42,7 +42,9 @@ Hooks wired in `.agents/settings.json` (project-scoped, committed):
 - **`.agents/hooks/secrets-guard-pretooluse.sh`** (`PreToolUse`, `Bash`):
   bare `sops -d`/`--decrypt` with no `--extract` and no `>/dev/null`, or
   `cat`/`bat`/`less`/`more`/`head`/`tail` on a `/run/secrets/` path →
-  `permissionDecision: "ask"` naming the narrower alternative.
+  `permissionDecision: "deny"` naming the narrower alternative (was `ask`
+  until 2026-09-29, a silent no-op under auto permission mode). Retry with
+  the named form; a genuine whole-file need is the user's to run by hand.
 - **`.agents/hooks/secrets-guard-posttooluse.sh`** (`PostToolUse`, `Bash`):
   scans command output for a Tailscale auth key (`tskey-...`), age secret key
   (`AGE-SECRET-KEY-...`), private key block (`-----BEGIN ... PRIVATE KEY-----`),

@@ -91,6 +91,9 @@ before stating any count) and `wiki/hosts.md`'s table. First-boot history
 `wiki/history.md`'s "Confirmed-on-hardware facts".
 
 - **Check `hostname` before assuming which machine the session is on.**
+  Under Claude Code, `.agents/hooks/session-start.sh` puts hostname,
+  branch, worktree, dirty count and `core.hooksPath` into context at
+  session start (other harnesses: check by hand).
 - **ssh to another host over the tailnet as `ts-<x>`, never `nire-<x>`** —
   `nire-<x>` is the hostname (`nire-<x>.local` on the LAN only), and
   tenacity's sshd is tailnet-only. `just reach <x>` tries every name. Rule
@@ -297,8 +300,11 @@ deliberate, not a cleanup target.
 `Co-Authored-By: <agent>` — the agent that wrote it, no model name, no
 email.** An agent cannot verify which model is executing it (the log holds
 dozens of wrong labels proving it), so the trailer records what it knows.
-Claude's canonical form is `Co-Authored-By: Claude`. `.githooks/commit-msg`
-(active after `just install-hooks`) auto-corrects only the
+Claude's canonical form is `Co-Authored-By: Claude`, and
+`.agents/settings.json`'s `attribution.commit` makes Claude Code itself ask
+for exactly that (since 2026-09-29). `.githooks/commit-msg` (wired by
+`just install-hooks`, or by the SessionStart hook) is the backstop for other
+harnesses and a stale settings file: it auto-corrects only the
 `Claude <model> <email>` shape; any other agent's trailer passes through,
 so form it correctly at write time.
 

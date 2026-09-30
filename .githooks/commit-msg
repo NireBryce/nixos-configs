@@ -18,6 +18,16 @@
 #
 # Existing commits keep their (wrong) labels per AGENTS.md -- this only
 # touches the message being written right now.
+#
+# Since 2026-09-29 this is the backstop, not the first line: .agents/
+# settings.json sets Claude Code's `attribution.commit` to the canonical
+# trailer, so the harness no longer tells the model to write a model name
+# and email. This hook still covers other harnesses (ZCode, opencode), a
+# session started from a stale settings file, and a model that writes the
+# old shape anyway. The match takes any capitalization of the trailer key,
+# since Claude Code's own default is `Co-authored-by: Claude
+# <claude@anthropic.com>` (bracket classes, not a case-insensitive flag:
+# BSD sed has none, and this runs on darwin too).
 set -euo pipefail
 msg_file="$1"
 
@@ -26,7 +36,7 @@ canonical="Co-Authored-By: Claude"
 # appended: "Claude", "Claude Opus 5 <noreply@anthropic.com>",
 # "Claude Sonnet 5", "Claude <claude@anthropic.com>", etc. -- all correct
 # down to the bare canonical form.
-pattern='^Co-Authored-By:[[:space:]]+Claude([[:space:]]+[^<]*)?([[:space:]]*<[^>]*>)?[[:space:]]*$'
+pattern='^[Cc]o-[Aa]uthored-[Bb]y:[[:space:]]+Claude([[:space:]]+[^<]*)?([[:space:]]*<[^>]*>)?[[:space:]]*$'
 
 if grep -qE "$pattern" "$msg_file" && ! grep -qxF "$canonical" "$msg_file"; then
     # Temp file + mv instead of sed -i: BSD sed's "-i -E" eats "-E" as the
