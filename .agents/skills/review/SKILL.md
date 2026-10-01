@@ -65,6 +65,12 @@ A diff read is never enough (bugs serialize). In order:
   model/email. Conventional-Commits prefix on the first line only.
 - **A bug recorded in a comment stays in the file** — deleting a "why"
   comment needs a reason; a stranded one moves to a `history` heading.
+  Exception: a security weakness. Its shapes and impact go to
+  `elly/infra-notes`; the file says only what is enforced.
+- **Public text about a security change** (commit message, PR body, code
+  comment, test name/comment, wiki): flag any line saying which inputs got
+  past the old version, what they could reach, or which host is exposed
+  (AGENTS.md, Working in this repo). Test inputs themselves are fine.
 - **Renamed-away name**: the declaration should say what it was.
 - **Dated "as of" claims**: a date is when someone last checked, not proof
   (`fact-hygiene`). Present-tense claims about other files are live pointers

@@ -87,6 +87,9 @@ the sections above, plus any "why not the obvious thing" for that line.
 - Plain words where exact ("folder"); keep the greppable term too
   (`forClass`, `imports`).
 - No history in the body ("We used to…" goes in bottom `history`).
+- Security code (guards, hooks, permission rules): explain the rule and
+  what it enforces, not the inputs that got past an earlier version or what
+  they reached — that analysis lives in `elly/infra-notes` (AGENTS.md).
 
 ## Diagrams
 
