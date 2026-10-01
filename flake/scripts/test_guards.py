@@ -491,6 +491,114 @@ class GitGuardPreToolUse(GuardCase):
         self.assertEqual(json.loads(out)["hookSpecificOutput"]
                          ["permissionDecision"], "deny")
 
+    def test_inherited_git_dir_on_clean_tree_asks(self):
+        # The command inherits GIT_DIR and acts on the repo it names, so a
+        # clean status elsewhere doesn't verify it.
+        r = self.repo()
+        for var in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE"):
+            env = {**os.environ, var: str(r / ".git")}
+            rc, out = run_hook_raw(self.script,
+                                   bash_payload("git reset --hard", r), env)
+            self.assertEqual(rc, 0)
+            self.assertEqual(json.loads(out)["hookSpecificOutput"]
+                             ["permissionDecision"], "ask", var)
+            # Commands with nothing to discard stay silent.
+            rc, out = run_hook_raw(self.script,
+                                   bash_payload("git status", r), env)
+            self.assertEqual((rc, out.strip()), (0, ""), var)
+
+    # Path-scoped tier 1: checkout [<tree-ish>] [--] <paths>, rm -f.
+
+    def dirty_repo(self):
+        """Repo with tracked.txt modified and a clean second file, other.txt."""
+        r = self.repo()
+        (r / "other.txt").write_text("o\n")
+        git(r, "add", "other.txt")
+        git(r, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
+            "-q", "-m", "other")
+        (r / "tracked.txt").write_text("changed\n")
+        return r
+
+    def test_checkout_paths_on_dirty_path_denies(self):
+        r = self.dirty_repo()
+        for cmd in ("git checkout -- tracked.txt",
+                    "git checkout HEAD -- tracked.txt",
+                    "git checkout HEAD tracked.txt",
+                    "git checkout tracked.txt other.txt",
+                    "git checkout --theirs tracked.txt",
+                    "git checkout -- ./", "git checkout -- :/",
+                    "git checkout main .", "git checkout main -- .",
+                    "git rm -f tracked.txt", "git rm -rf .",
+                    "git rm --force -- tracked.txt"):
+            self.assertDeny(self.script, cmd, "tracked.txt", cwd=r)
+
+    def test_checkout_paths_on_clean_path_passes(self):
+        # Another file being dirty doesn't block discarding a clean one.
+        r = self.dirty_repo()
+        for cmd in ("git checkout -- other.txt",
+                    "git checkout HEAD -- other.txt",
+                    "git checkout main other.txt",
+                    "git rm -f other.txt"):
+            self.assertIsNone(run_guard(self.script, bash_payload(cmd, r)),
+                              cmd)
+
+    def test_checkout_paths_unplain_pathspec_checks_whole_tree(self):
+        r = self.dirty_repo()
+        self.assertDeny(self.script, "git checkout -- *", "tracked.txt",
+                        cwd=r)
+        # Clean tree: still not a silent allow, since `*` is outside the
+        # plain grammar.
+        self.assertAsk(self.script, "git checkout -- *", cwd=self.repo())
+
+    def test_checkout_from_treeish_counts_overwritten_untracked(self):
+        # An untracked file that exists in the tree-ish is overwritten; one
+        # that doesn't is left alone.
+        r = self.repo()
+        git(r, "checkout", "-q", "-b", "side")
+        (r / "new.txt").write_text("side\n")
+        git(r, "add", "new.txt")
+        git(r, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
+            "-q", "-m", "side")
+        git(r, "checkout", "-q", "main")
+        (r / "new.txt").write_text("mine\n")
+        self.assertDeny(self.script, "git checkout side -- new.txt",
+                        "new.txt", cwd=r)
+        self.assertDeny(self.script, "git checkout side .", "new.txt", cwd=r)
+        self.assertIsNone(run_guard(self.script, bash_payload(
+            "git checkout side -- tracked.txt", r)))
+
+    def test_branch_reset_existing_asks(self):
+        r = self.repo()
+        git(r, "branch", "other")
+        for cmd in ("git checkout -B other", "git checkout -B other main",
+                    "git switch -C other", "git switch --force-create other",
+                    f"git -C {r} switch -C other"):
+            self.assertAsk(self.script, cmd, "already exists", cwd=r)
+        for cmd in ("git checkout -B fresh", "git switch -C fresh main"):
+            self.assertIsNone(run_guard(self.script, bash_payload(cmd, r)),
+                              cmd)
+        # Repo unknown: can't tell, so ask.
+        self.assertAsk(self.script, 'cd "$W" && git checkout -B fresh', cwd=r)
+
+    def test_everyday_commands_untouched(self):
+        # Even with a dirty tree, these lose nothing and must stay silent.
+        r = self.dirty_repo()
+        for cmd in ("git checkout main", "git checkout -b x",
+                    "git checkout -b y origin/experimental",
+                    "git switch -c z", "git stash", "git stash -u",
+                    "git stash push -m wip", "git stash pop",
+                    "git rm --cached tracked.txt", "git rm -r --cached .",
+                    "git rm other.txt", "git status",
+                    "git commit -m 'checkout a b'",
+                    "git log --grep checkout main other"):
+            self.assertIsNone(run_guard(self.script, bash_payload(cmd, r)),
+                              cmd)
+
+    def test_stash_then_drop_asks(self):
+        # stash -u alone only moves work into a stash; dropping it is what
+        # loses it, and that already asks.
+        self.assertAsk(self.script, "git stash -u && git stash drop")
+
     def test_branch_capital_d_trips(self):
         self.assertAsk(self.script, "git branch -D stale-branch")
 
