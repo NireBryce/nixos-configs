@@ -731,6 +731,9 @@ FRONTMATTER_KEY = re.compile(r'^([^\s:#][^:]*):', re.M)
 # `whenToUse`) is silently ignored by every harness -- so an unknown key is
 # a finding, and adopting a new one means extending this set on purpose.
 FRONTMATTER_KEYS = {'name', 'description', 'when_to_use'}
+# `!` then a backtick, at line start or after whitespace: Claude Code's
+# inline injection syntax.
+INJECTION = re.compile(r'(?:^|\s)!`')
 # Claude Code truncates description + when_to_use, combined, at this many
 # characters in the skill listing (code.claude.com/docs/en/skills,
 # checked 2026-10-01; configurable per-user via skillListingMaxDescChars).
@@ -870,6 +873,30 @@ def check_skill_files(root):
                 f"(over {DESC_MAX_WORDS}) -- scope detail that belongs in "
                 f"## Applies to")
         findings += _check_skill_frontmatter_extras(rel, head, desc)
+        findings += _check_skill_injection(rel, text)
+    return findings
+
+
+def _check_skill_injection(rel, text):
+    """Dynamic context injection (an exclamation mark then a backticked
+    command, or a fence opened with three backticks and an exclamation mark)
+    runs a shell command when the skill loads, with no prompt. This repo
+    doesn't use it; skill `new-skill` says why."""
+    findings, in_fence = [], False
+    for n, line in enumerate(text.splitlines(), 1):
+        stripped = line.lstrip()
+        if stripped.startswith("```"):
+            if not in_fence and stripped.startswith("```!"):
+                findings.append(
+                    f"INJECTION  {rel}:{n}: a ```! block runs at skill load "
+                    f"-- not used in this repo (skill `new-skill`)")
+            in_fence = not in_fence
+            continue
+        if not in_fence and INJECTION.search(line):
+            findings.append(
+                f"INJECTION  {rel}:{n}: an inline !`command` runs at skill "
+                f"load -- not used in this repo (skill `new-skill`); in "
+                f"prose, don't put ! directly before a backtick")
     return findings
 
 

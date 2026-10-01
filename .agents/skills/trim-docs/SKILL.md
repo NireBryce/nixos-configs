@@ -29,8 +29,8 @@ Checked mechanically (`wiki/scripts/check_wiki.py`); preserve:
   hosts", "all four hosts"). Naming a host to say it *doesn't* import is
   fine (REVIEW, not failure).
 - **The `.sops.yaml ... enrolls ... —` sentence** in
-  impermanence-and-secrets.md and AGENTS.md: keep the em-dash terminator and
-  all four hosts.
+  impermanence-and-secrets.md and `.agents/rules/secrets.md`: keep the
+  em-dash terminator and all four hosts.
 - **`## Contents` blocks** must match the page's headings. After any heading
   rename/add/remove: `python3 wiki/scripts/check_wiki.py gen-contents <page>`.
 - **The `_Last modified: YYYY-MM-DD_` line** right after the title. Don't

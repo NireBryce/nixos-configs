@@ -69,7 +69,7 @@ Three resources, two outside this repo's Nix:
 
 ## Docs
 
-Run `wiki-sync` incl. step 5 (three pages below have `-for-agents.md` siblings with the same URL map and traps; `just wiki-lint` fails if a date moves without its sibling). Likely stale: `wiki/categories/reverse-proxy.md`, `tailscale-services/README.md`, `wiki/homelab/reaching-services.md` URL map, `wiki/open-threads.md` Tailscale Services entry if this closes an open item.
+Run `wiki-sync` incl. step 5 (three pages below have `-for-agents.md` siblings with the same URL map and traps; `just wiki-lint` fails if a date moves without its sibling). Likely stale: `wiki/categories/reverse-proxy.md`, `tailscale-services/README.md`, `wiki/homelab/reaching-services.md` URL map, and any open issue this closes (`gh issue list --search "Tailscale Services"`).
 
 ## See also
 
