@@ -1,6 +1,7 @@
 ---
 name: keybinding-cheatsheet
 description: How to generate a normalized keybinding cheat sheet for a tool and teach the generator a new input format.
+when_to_use: Asked "what does this chord do" in kitty, zsh, or bash with ble.sh, merging upstream keybinding defaults with this repo's overrides.
 ---
 
 # Keybinding cheat sheets

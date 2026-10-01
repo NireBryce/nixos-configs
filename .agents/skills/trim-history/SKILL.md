@@ -1,6 +1,7 @@
 ---
 name: trim-history
 description: How to compress a .nix module's bottom-of-file history section down to the facts the module body doesn't already restate, and show the result side by side before landing.
+when_to_use: Compress, trim, or shrink the history section at the bottom of a .nix module.
 ---
 
 # Compressing a module's history section

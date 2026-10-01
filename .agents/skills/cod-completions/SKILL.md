@@ -1,6 +1,7 @@
 ---
 name: cod-completions
 description: How to give cod's completions their ble.sh menu descriptions and keep the curated table behind them current.
+when_to_use: Candidates for a command show no descriptions in the ble.sh menu, adding a command to cod's coverage, changing the cod-desc table.
 ---
 
 # cod completion descriptions

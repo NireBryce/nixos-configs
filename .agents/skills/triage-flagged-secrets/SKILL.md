@@ -1,6 +1,7 @@
 ---
 name: triage-flagged-secrets
 description: How to tell whether a secret the guard hooks flagged is a fresh leak or an already-confirmed-dead one from old git history.
+when_to_use: The secrets guard hook flags a Tailscale auth key, age key, or private key block in tool output -- before calling it a fresh leak.
 ---
 
 # Triaging a flagged secret

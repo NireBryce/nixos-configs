@@ -1,6 +1,7 @@
 ---
 name: new-flake-module
 description: How to create, rename, or wire a flake-parts module in this repo.
+when_to_use: Adding, renaming, or moving a .nix file under the flake modules tree, editing a dirsAsCategory.nix, a module that does not seem to apply.
 ---
 
 # Writing a flake-parts module in this repo

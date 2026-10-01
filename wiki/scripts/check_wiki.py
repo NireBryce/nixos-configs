@@ -101,7 +101,15 @@ structured, extractable facts only:
             a `description` keeping the shape skill `new-skill` specifies
             (one sentence, no repo paths, no parentheticals -- hard
             findings; wordiness is REVIEW only, density is a human call
-            the way it is for siblings).
+            the way it is for siblings). The optional `when_to_use` (Claude
+            Code appends it to the description in the skill listing) must
+            be one line, carry no repo path, and keep description +
+            when_to_use under the listing's 1,536-char cap; over 40 words
+            is REVIEW. Frontmatter keys outside name/description/
+            when_to_use are findings (a misspelt key is silently ignored),
+            and both values must be plain YAML scalars -- a leading quote
+            or an embedded ': ' reads fine to these regexes but breaks the
+            harness's YAML parse.
 
   secrets   The "`.sops.yaml` ... enrolls `host`, `host`, ... —" claim
             (wiki/impermanence-and-secrets.md and AGENTS.md's Safety section
@@ -809,6 +817,25 @@ DESC_PATH = re.compile(
 DESC_SENTENCE_END = re.compile(r'[.!?](?:\s|$)')
 DESC_MAX_WORDS = 30  # REVIEW only: the rule is one sentence of purpose;
                      # the ceiling just names the outliers worth re-reading.
+FRONTMATTER_WHEN = re.compile(r'^when_to_use:(.*)$', re.M)
+FRONTMATTER_KEY = re.compile(r'^([^\s:#][^:]*):', re.M)
+# Keys a SKILL.md here may carry. Claude Code reads more (allowed-tools,
+# model, ...), but none is used here, and a misspelt key (`when-to-use`,
+# `whenToUse`) is silently ignored by every harness -- so an unknown key is
+# a finding, and adopting a new one means extending this set on purpose.
+FRONTMATTER_KEYS = {'name', 'description', 'when_to_use'}
+# Claude Code truncates description + when_to_use, combined, at this many
+# characters in the skill listing (code.claude.com/docs/en/skills,
+# checked 2026-10-01; configurable per-user via skillListingMaxDescChars).
+LISTING_CAP = 1536
+WHEN_MAX_WORDS = 40  # REVIEW only: "short trigger phrases" -- the full
+                     # trigger detail lives in ## Applies to.
+# A plain (unquoted) YAML scalar can't open with an indicator character or
+# contain ': ' / ' #' -- a value like `"push", "ship it"` parses as a quoted
+# string followed by junk. The hand-rolled regexes above would read such a
+# line fine while the harness's YAML parser rejects the whole frontmatter.
+YAML_PLAIN_BAD_START = tuple('"\'[]{}>|*&!%@`,?#-')
+YAML_PLAIN_BAD_INNER = (': ', ' #')
 # Repo-rooted backtick paths worth existing-checking inside skill prose.
 # Prefix-scoped on purpose: bare names (`hosts.nix`, `serve.nix`) are
 # shorthand for paths this repo writes several ways, and checking them
@@ -935,6 +962,62 @@ def check_skill_files(root):
                 f"REVIEW   {rel}: description is {len(desc.split())} words "
                 f"(over {DESC_MAX_WORDS}) -- scope detail that belongs in "
                 f"## Applies to")
+        findings += _check_skill_frontmatter_extras(rel, head, desc)
+    return findings
+
+
+def _check_skill_frontmatter_extras(rel, head, desc):
+    """Unknown keys, YAML plain-scalar safety, and the optional
+    `when_to_use` -- short trigger phrases Claude Code appends to the
+    description in its skill listing (other harnesses ignore it, so
+    ## Applies to stays the full trigger detail). Skill `new-skill` has the
+    description / when_to_use / Applies-to split."""
+    why = (" -- skill `new-skill`'s when_to_use rule, enforced here so it "
+           "stays true")
+    findings = []
+    for m in FRONTMATTER_KEY.finditer(head):
+        key = m.group(1).strip()
+        if key not in FRONTMATTER_KEYS:
+            findings.append(
+                f"UNKNOWN KEY  {rel}: frontmatter key '{key}' -- not one of "
+                f"{sorted(FRONTMATTER_KEYS)}; a misspelt key is silently "
+                f"ignored, so extend FRONTMATTER_KEYS deliberately")
+    for line in head.splitlines():
+        if line[:1].isspace() and line.strip():
+            findings.append(
+                f"FRONTMATTER SHAPE  {rel}: indented/continuation line "
+                f"'{line.strip()[:40]}' -- every value stays on one line")
+    values = [('description', desc)]
+    when_m = FRONTMATTER_WHEN.search(head)
+    when = when_m.group(1).strip() if when_m else None
+    if when is not None:
+        values.append(('when_to_use', when))
+        if not when:
+            findings.append(
+                f"WHEN_TO_USE SHAPE  {rel}: when_to_use is empty or a "
+                f"block scalar{why}")
+        if DESC_PATH.search(when):
+            findings.append(
+                f"WHEN_TO_USE SHAPE  {rel}: when_to_use contains a repo "
+                f"path{why}")
+        total = len(desc) + len(when)
+        if total > LISTING_CAP:
+            findings.append(
+                f"WHEN_TO_USE SHAPE  {rel}: description + when_to_use is "
+                f"{total} chars, over Claude Code's {LISTING_CAP}-char "
+                f"listing cap -- the tail is truncated")
+        if len(when.split()) > WHEN_MAX_WORDS:
+            findings.append(
+                f"REVIEW   {rel}: when_to_use is {len(when.split())} words "
+                f"(over {WHEN_MAX_WORDS}) -- trigger detail that belongs in "
+                f"## Applies to")
+    for key, value in values:
+        if value and (value.startswith(YAML_PLAIN_BAD_START)
+                      or any(s in value for s in YAML_PLAIN_BAD_INNER)):
+            findings.append(
+                f"FRONTMATTER SHAPE  {rel}: {key} is not a plain YAML "
+                f"scalar (leading indicator character, ': ', or ' #') -- "
+                f"the harness's YAML parse fails or truncates it; reword")
     return findings
 
 
