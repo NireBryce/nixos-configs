@@ -269,7 +269,11 @@ def cmd_land(a):
     # Re-read: the checkout/detach above may have freed the branch.
     held = worktrees().get(head)
     tip = out(["git", "rev-parse", "--verify", "-q", f"refs/heads/{head}"])
-    if held:
+    if held and is_main and held == here:
+        say(f"note: {head} is checked out here, in the main checkout; left."
+            f" To finish: move this checkout off {head} ({BASE} is checked"
+            f" out at {exp_at}), then git branch -D {head}")
+    elif held:
         say(f"note: {head} is checked out at {held}; left. To finish:"
             f" git worktree remove {held} && git branch -D {head}")
     elif tip:

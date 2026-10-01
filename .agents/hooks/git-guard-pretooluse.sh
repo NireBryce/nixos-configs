@@ -39,10 +39,11 @@
 # A deny outranks an ask when one command line trips both.
 #
 # Known limits: pattern-matching on the command string, not a git parser.
-# Segments split on ; && || | without regard to quoting; shell variables and
-# aliases aren't followed; a short-option cluster this doesn't anticipate can
-# slip through. Extend the patterns rather than assuming every destructive
-# shape is covered. Fixture tests: flake/scripts/test_guards.py.
+# The tier-1 (state-checked) ops fail safe -- anything outside a plain
+# cd/git grammar asks rather than trusting the cwd (see the whitelist
+# comment below). The tier-2 asks are plain patterns: shell variables and
+# aliases aren't followed and an unanticipated option cluster can slip
+# through. Extend the patterns rather than assuming every shape is covered. Fixture tests: flake/scripts/test_guards.py.
 set -euo pipefail
 
 # No jq: say so (JSON built by hand) instead of allowing silently -- the
@@ -57,11 +58,6 @@ input=$(cat)
 command=$(jq -r '.tool_input.command // empty' <<<"$input")
 cwd=$(jq -r '.cwd // empty' <<<"$input")
 [ -n "$cwd" ] || cwd="${CLAUDE_PROJECT_DIR:-$PWD}"
-
-# Only look at commands that actually invoke git.
-if ! grep -qE '(^|[;&|('"'"'"]|[[:space:]])git([[:space:]]|$)' <<<"$command"; then
-    exit 0
-fi
 
 # A short-option cluster or long flag carrying -f/--force (e.g. -f, -uf,
 # -fd, --force), but not the safe long forms that refuse to overwrite work
@@ -94,7 +90,7 @@ resolve_dir() {
 #   untracked -- loses untracked files (clean -f); untracked+ignored with -x
 classify() {
     local seg=$1
-    if grep -qE '\breset\b' <<<"$seg" && grep -qE -- '--hard\b' <<<"$seg"; then
+    if grep -qE '\breset\b' <<<"$seg" && grep -qE -- '--ha(rd?)?\b' <<<"$seg"; then
         echo tracked
     elif grep -qE '\bcheckout\b[[:space:]]+(--[[:space:]]+)?\.([[:space:]]|$)' <<<"$seg"; then
         echo tracked
@@ -110,26 +106,54 @@ classify() {
     fi
 }
 
+# Only look at commands that invoke git -- however it's spelled (`\git`,
+# `/usr/bin/git`, `'git`, `g=git`) -- or carry a tier-1 verb even with no
+# git word in sight (`$g reset --hard`).
+git_word_re='(^|[^[:alnum:]_-])git([[:space:]]|$)'
+if ! [[ $command =~ $git_word_re ]] && [ -z "$(classify "$command")" ]; then
+    exit 0
+fi
+
 dirty_lines=""    # "in <repo>:" then "  <porcelain line>" per dirty path
 count=0
 unverified=""     # human-readable why, when a tier-1 op's repo can't be read
 dir=$cwd
 
 # A clean-tree verdict is only as good as the guard's idea of which repo the
-# command acts on, and the segment walk below models exactly two ways to move
-# it: a bare `cd <path>` segment and a `git -C <path>` right after `git`.
-# Anything else that can change the target repo -- a subshell or brace group
-# (`(cd d && git reset --hard)`), `pushd`, a nested shell (`bash -c '...'`),
-# `--git-dir`/`--work-tree` or GIT_DIR=, any other git global option before
-# the subcommand (`git -c k=v -C d`), a `cd` it can't parse (`cd 'my dir'`) --
-# would otherwise fall through to the payload cwd's status and be allowed
-# silently when that cwd happens to be clean: worse than the old always-ask
-# (PR #435 review, 2026-09-30, every shape above confirmed). So those shapes
-# make a tier-1 op unverified -> ask, as before this check existed.
+# command acts on. The segment walk below models exactly two ways to move it:
+# a bare `cd <path>` and a `git -C <path>` right after `git`. A blacklist of
+# shapes it can't follow didn't converge -- PR #435's review found subshells,
+# `bash -c`, `pushd`, `--git-dir`, `-c k=v -C d`, quoted cd paths, then (after
+# those were fixed) a lone `&`, `if/then`, loops, `\git`, `/usr/bin/git`,
+# `$g`, aliases, and `--har`, every one confirmed to allow `reset --hard`
+# silently against a dirty repo while the payload cwd was clean.
+#
+# So it's a whitelist: when a tier-1 verb appears anywhere, a silent allow
+# needs EVERY segment (split on && ; newline only) to be one of
+#     cd <word>
+#     git [-C <word>] <subcommand> <word>...
+# with <word> free of quotes, $, backticks, globs, redirects and | & ( ) { }.
+# Anything else makes the op unverified -> ask, as before the dirty-tree
+# check existed. A dirty repo the walk CAN resolve still denies.
+plain_word='[A-Za-z0-9_./:@=+,~^%-]+'
+plain_cd="^cd[[:space:]]+${plain_word}\$"
+plain_git="^git([[:space:]]+-C[[:space:]]+${plain_word})?[[:space:]]+[a-z][a-z-]*([[:space:]]+${plain_word})*\$"
 unmodeled=""
-if grep -qE '[(){}`]|(^|[^[:alnum:]_])(pushd|popd|eval|exec|xargs|env)([[:space:]]|$)|(^|[^[:alnum:]_])(ba|z|da)?sh[[:space:]]+-[a-z]*c|--git-dir|--work-tree|GIT_DIR=|GIT_WORK_TREE=' <<<"$command"; then
-    unmodeled="the command uses a subshell, nested shell, pushd, or a git-dir override the guard can't follow"
+if [ -n "$(classify "$command")" ]; then
+    while IFS= read -r s; do
+        s=$(sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' <<<"$s")
+        [ -n "$s" ] || continue
+        if ! [[ $s =~ $plain_cd || $s =~ $plain_git ]]; then
+            unmodeled="'$s' is outside the plain 'cd <path>' / 'git [-C <path>] <subcommand> <args>' shapes the guard can follow"
+            break
+        fi
+    done < <(awk '{ gsub(/&&|;/, "\n"); print }' <<<"$command")
 fi
+# Set up front, not when the walk reaches the op: a shape outside the
+# grammar can hide the op from the walk entirely (`cd d & git reset --hard`
+# is one `cd` segment to it). The walk still runs, so a dirty repo it can
+# resolve still denies.
+unverified=$unmodeled
 while IFS= read -r seg; do
     seg=$(sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' <<<"$seg")
     [ -n "$seg" ] || continue
@@ -147,16 +171,10 @@ while IFS= read -r seg; do
         dir=""
         continue
     fi
-    # A quote may precede git: `bash -c 'git reset --hard'`.
-    git_word_re="(^|[[:space:]'\"])git([[:space:]]|\$)"
     [[ $seg =~ $git_word_re ]] || continue
     op=$(classify "$seg")
     [ -n "$op" ] || continue
 
-    if [ -n "$unmodeled" ]; then
-        unverified=$unmodeled
-        continue
-    fi
     # Global options before the subcommand: only a lone `-C <path>` is modelled.
     if [[ $seg =~ (^|[[:space:]])git[[:space:]]+- ]] \
         && ! [[ $seg =~ (^|[[:space:]])git[[:space:]]+-C[[:space:]]+[^-[:space:]][^[:space:]]*[[:space:]]+[a-z] ]]; then

@@ -342,12 +342,37 @@ class GitGuardPreToolUse(GuardCase):
             "bash -c 'git reset --hard'",
             f"sh -c \"cd '{spaced}' && git reset --hard\"",
             f"GIT_DIR='{spaced}/.git' git reset --hard",
+            # Second round, after the blacklist fix: a lone `&`, control
+            # flow, git spelled another way, variables, aliases, --har.
+            f"cd '{spaced}' & git reset --hard",
+            f"if true; then cd '{spaced}' && git reset --hard; fi",
+            f"if cd '{spaced}'; then git reset --hard; fi",
+            f"for x in 1; do cd '{spaced}'; git reset --hard; done",
+            f"cd '{spaced}'; \\git reset --hard",
+            f"cd '{spaced}'; /usr/bin/git reset --hard",
+            f"g=git; cd '{spaced}'; $g reset --hard",
+            f"cd '{spaced}'; $(which git) reset --hard",
+            f"alias g=git; cd '{spaced}'; g reset --hard",
         ):
             out = run_guard(self.script, bash_payload(cmd, clean))
             decision = (out or {}).get("hookSpecificOutput", {}).get(
                 "permissionDecision")
             self.assertIn(decision, ("ask", "deny"),
                           f"allowed silently: {cmd!r}\nstdout was: {out}")
+        # git takes a unique prefix of --hard; the dirty tree must still deny.
+        self.assertDeny(self.script, "git reset --har", "tracked.txt",
+                        cwd=spaced)
+
+    def test_plain_shapes_on_clean_tree_still_pass(self):
+        # The whitelist must not tax the flows it exists to allow.
+        r = self.repo()
+        for cmd in ("git reset --hard origin/experimental",
+                    f"cd {r} && git reset --hard",
+                    "git fetch origin && git reset --hard origin/experimental",
+                    f"git -C {r} checkout -- .",
+                    "git status --short\ngit reset --hard HEAD~0"):
+            self.assertIsNone(run_guard(self.script, bash_payload(cmd, r)),
+                              cmd)
 
     def test_unresolvable_dir_asks(self):
         # `cd "$W"` can't be resolved without running the shell: unknown is

@@ -82,8 +82,9 @@ Never commit onto `experimental`. `git status -sb` first:
   on a dirty tree (since 2026-09-29; its old `ask` was a no-op under
   `--permission-mode auto`, issue #182), but only in Claude Code, and it
   falls back to `ask` — still a no-op under auto mode — when it can't tell
-  which repo the reset acts on (a variable path, a subshell, `bash -c`,
-  `pushd`, `--git-dir`, git options before the subcommand). So the
+  which repo the reset acts on: anything beyond plain `cd <path>` and
+  `git [-C <path>] <subcommand> <args>` joined by `&&`/`;` (a variable
+  path, a subshell, `bash -c`, `&`, `if`, `\git`, ...). So the
   `git status --short` read stays yours.
 
 Commit with `just agent commit` (`.agents/scripts/ship.py`, whose header
