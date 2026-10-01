@@ -1,12 +1,13 @@
 # Wiki index, for agents
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-01_
 
 Condensed from [00-INDEX.md](00-INDEX.md). Routing only.
 
 `flake/` is browsed by file tree ([architecture.md](architecture.md)). `CLAUDE.md`
 is the cold-start read; this page says which file holds the answer. Pages with a
 `-for-agents` sibling are listed by the sibling; load the human page only for the *why*.
+A page without one opens with `## Quick facts` — linked there.
 
 ## By task
 
@@ -25,9 +26,9 @@ is the cold-start read; this page says which file holds the answer. Pages with a
 | give a service its own `svc:` hostname | [categories/reverse-proxy-for-agents.md](categories/reverse-proxy-for-agents.md), skill `new-tailscale-service` |
 | add a host, or format its disk | [disk-formatting-for-agents.md](disk-formatting-for-agents.md), skill `new-host-config` |
 | check credential expiry | [maintenance-schedule-for-agents.md](maintenance-schedule-for-agents.md), skill `maintenance-schedule` |
-| run the fleet's periodic upkeep | [maintenance-for-agents.md](maintenance-for-agents.md) |
+| run the fleet's periodic upkeep | [maintenance.md § Quick facts](maintenance.md#quick-facts) |
 | bump or retire a hand-pinned upstream package | skill `pinned-packages` |
-| work out which name/IP answers for what | [name-resolution-for-agents.md](name-resolution-for-agents.md) |
+| work out which name/IP answers for what | [name-resolution.md § Quick facts](name-resolution.md#quick-facts) |
 | reach or debug a cube service | [homelab/reaching-services-for-agents.md](homelab/reaching-services-for-agents.md) |
 | write or tighten a wiki page | [styleguide-for-agents.md](styleguide-for-agents.md), skills `wiki-sync`, `trim-docs`, `fact-hygiene` |
 | write a module | [module-style-guide-for-agents.md](module-style-guide-for-agents.md) |

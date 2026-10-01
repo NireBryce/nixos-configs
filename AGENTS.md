@@ -275,20 +275,25 @@ home switch; `just switch` applies both (`.agents/rules/home-manager.md`).
 
 ## Docs
 
-**Every long wiki page is a pair. Read the `-for-agents.md` half.**
-`<page>.md` is explanation written for a human reading cold;
-`<page>-for-agents.md` is the same ground at maximum information density —
-paths, option names, commands, host lists, every trap as one line, no
-narrative. Both exist for the same subject, so loading the human page to
-answer a question the sibling already answers is paying for prose you don't
-need. Start at `wiki/00-INDEX-for-agents.md`, which routes by task.
+**A long wiki page is either a pair — read the `-for-agents.md` half — or
+one page opening with `## Quick facts` — read that first.** A pair is for a
+page that is long narrative: `<page>.md` is explanation written for a human
+reading cold; `<page>-for-agents.md` is the same ground at maximum
+information density — paths, option names, commands, host lists, every trap
+as one line, no narrative. Loading the human page to answer a question the
+sibling already answers is paying for prose you don't need. A page already
+compact or procedural (runbook, how-to) gets `## Quick facts` instead, since
+a sibling there only restated it and doubled every edit. Start at
+`wiki/00-INDEX-for-agents.md`, which routes by task.
 
 The tradeoff, stated so nobody has to rediscover it: this is deliberate
 duplication, against the "index over restatement" rule the rest of the wiki
 runs on, and `wiki/00-INDEX.md` says outright that this repo has been bitten
 repeatedly by one fact living in two places. It is allowed here because it
 is the one duplication with a mechanical guard — **`check_wiki.py siblings`
-fails when a sibling's `_Last modified:_` predates its source's**, so
+fails when a sibling's `_Last modified:_` predates its source's** (and when
+a page over 1,000 words has neither a sibling nor a first-section
+`## Quick facts`), so
 editing a page without following in its sibling, in the same change, breaks
 `just wiki-lint` and names the pair. Don't satisfy that by bumping the
 sibling's date; that converts a caught omission into a silent one. When the

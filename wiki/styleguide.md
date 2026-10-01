@@ -277,11 +277,26 @@ separate tier for the *usage* side:
 
 ## Two audiences per page
 
-A page over **1,000 words** gets a `<page>-for-agents.md` sibling. The
-original stays what it is — explanation, for a human reading it cold. The
-sibling is the same ground at maximum information density, for an agent that
-loaded it to get one thing done and pays for every token of narrative around
-that thing.
+A page over **1,000 words** serves an agent one of two ways: a
+`<page>-for-agents.md` sibling, or a `## Quick facts` section as its first
+section after Contents.
+
+**A sibling** is for a page whose human half is genuinely long narrative —
+explanation for a human reading cold, history, reasoning — where the dense
+version is a fraction of it. The sibling is the same ground at maximum
+information density, for an agent that loaded it to get one thing done and
+pays for every token of narrative around that thing.
+
+**Quick facts** is for a page that is already compact or procedural: a
+runbook, a how-to, a reference page. There a sibling turns out to be a
+near-verbatim restatement, and every edit is paid twice for no reading
+saved. Fold it: the dense facts (a table where one fits) go in
+`## Quick facts` at the top, linked from `00-INDEX-for-agents.md` by its
+anchor, and the body stays as written. The tests for folding an existing
+pair: the sibling is over ~45% of its source's words, or the two halves
+change in the same commits most of the time. `name-resolution.md` and
+`maintenance.md` were folded on those grounds 2026-10-01; the old sibling's
+name goes in the Quick facts lead-in so a grep for it still lands.
 
 **What goes in the sibling**: the file paths, option and flag names, exact
 commands, the shape of a config block, host lists, and every trap as a single
@@ -320,7 +335,7 @@ guard under it rather than a convention someone has to remember:
 `check_wiki.py siblings` (part of `just wiki-lint`) checks that
 
 - every sibling has a source page, and every page over the line has a
-  sibling;
+  sibling or opens with `## Quick facts`;
 - **the sibling's `_Last modified:_` does not predate its source's** — so
   editing a page's content without following in its sibling, in the same
   change, fails the run and names the pair. This is the whole point of the

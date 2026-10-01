@@ -46,10 +46,18 @@ finding.
 
 ## Two audiences per page
 
-A page over **1,000 words** gets a `<page>-for-agents.md` sibling. The
-original stays explanation for a human reading cold; the sibling is the same
-ground at maximum information density, for something that loaded it to get
-one thing done.
+A page over **1,000 words** gets a `<page>-for-agents.md` sibling **or**
+opens with `## Quick facts` (first section after Contents).
+
+- **Sibling** when the human page is long narrative and the dense version is
+  a fraction of it. The original stays explanation for a human reading cold;
+  the sibling is the same ground at maximum information density.
+- **Quick facts** when the page is already compact/procedural (runbook,
+  how-to, reference). Fold an existing pair when the sibling is over ~45% of
+  its source's words or the halves mostly change in the same commits. Dense
+  facts at the top, body unchanged, sibling deleted, links repointed to
+  `#quick-facts`, old sibling's name in the lead-in. Folded 2026-10-01:
+  `name-resolution.md`, `maintenance.md`.
 
 **In**: paths, option and flag names, exact commands, config-block shapes,
 host lists, each trap as one declarative line. Tables wherever one fits.
@@ -69,7 +77,8 @@ deliberate duplication rather than a future stale claim:
   `_Sibling reviewed: YYYY-MM-DD -- <reason>_` line on the sibling, dated at
   or after the source's. Reason mandatory; future date is a finding. Never
   bump the sibling's `_Last modified:_` to clear a stale finding.
-- every sibling has a source; every page over the line has a sibling
+- every sibling has a source; every page over the line has a sibling or a
+  first-section `## Quick facts`
 - each links to the other
 - sibling within **50%** of the source's `wc -w` — **REVIEW only, never a
   failure.** Cut narration, not facts; if what's left is load-bearing, over

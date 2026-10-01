@@ -167,7 +167,8 @@ structured, extractable facts only:
 
   siblings  The `<page>.md` / `<page>-for-agents.md` pairs (styleguide.md,
             "Two audiences per page"): every sibling has a source page, every
-            page over 1,000 words has a sibling unless exempt, each sibling
+            page over 1,000 words has a sibling or opens with `## Quick
+            facts` (the folded shape, since 2026-10-01) unless exempt, each sibling
             is inside a 50% word budget (REVIEW only -- density is the goal,
             and a fact always beats the number), and the two link to each
             other. The real
@@ -1394,6 +1395,24 @@ SIBLING_EXEMPT = (
 )
 
 
+# The other shape a long page may take (since 2026-10-01): one page whose
+# first section after `## Contents` is `## Quick facts` -- the dense,
+# agent-facing summary folded in at the top instead of kept as a sibling.
+# For pages where the sibling was mostly a restatement of a page that was
+# already compact, so every edit paid twice for no reading saved. The check
+# only asks that the section exist and come first; it is what an agent
+# lands on, so anywhere further down defeats it.
+QUICK_FACTS_HEADING = 'Quick facts'
+
+
+def _first_section(text):
+    """The page's first `## ` heading other than `## Contents`, or None."""
+    for line in text.splitlines():
+        if line.startswith('## ') and line[3:].strip() != 'Contents':
+            return line[3:].strip()
+    return None
+
+
 def _words(text):
     """Word count matching `wc -w`, so a human can check a budget finding
     with one shell command rather than rerunning this script."""
@@ -1440,8 +1459,9 @@ def check_siblings(root):
 
     - **orphan** -- a sibling whose source page doesn't exist (a rename that
       moved one half of the pair).
-    - **missing** -- a page over SIBLING_REQUIRED_WORDS with no sibling, and
-      not on the exempt list.
+    - **missing** -- a page over SIBLING_REQUIRED_WORDS with no sibling,
+      not on the exempt list, and not opening with `## Quick facts` (the
+      folded single-page shape, QUICK_FACTS_HEADING).
     - **stale** -- the guard the whole split rests on. Both pages carry
       `_Last modified:_` (checked for shape by `dates`); editing a page's
       content bumps it, per styleguide.md. So a sibling dated EARLIER than
@@ -1529,12 +1549,16 @@ def check_siblings(root):
             continue
         if any(rx.search(rel) for rx in SIBLING_EXEMPT):
             continue
-        words = _words(path.read_text())
+        text = path.read_text()
+        words = _words(text)
         if words >= SIBLING_REQUIRED_WORDS:
+            if _first_section(text) == QUICK_FACTS_HEADING:
+                continue  # single page, dense summary folded in at the top
             findings.append(
                 f"MISSING SIBLING  {rel}: {words} words, over the "
-                f"{SIBLING_REQUIRED_WORDS}-word line, but has no "
-                f"{path.stem}{SIBLING_SUFFIX}.md")
+                f"{SIBLING_REQUIRED_WORDS}-word line, but has neither a "
+                f"{path.stem}{SIBLING_SUFFIX}.md nor `## "
+                f"{QUICK_FACTS_HEADING}` as its first section")
     return findings
 
 

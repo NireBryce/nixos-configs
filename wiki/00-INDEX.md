@@ -1,6 +1,6 @@
 # Wiki
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-01_
 
 The `flake/` folder is meant to be browsed by its file tree rather than
 traced through by following code paths. The heavy modularization
@@ -38,10 +38,13 @@ know roughly what you're after — a human skimming for the right doc, or an
 agent trying to find the one file that actually answers a question instead
 of re-deriving it.
 
-**Every long page here has two versions.** `<page>.md` is the explanation;
-`<page>-for-agents.md` is the same ground condensed to facts, for an agent
-(or anyone) loading it to get one thing done rather than to read it. The
-rule, and the lint check that keeps the pair in step, is
+**Long pages come in one of two shapes.** Where the explanation is long
+narrative, there are two versions: `<page>.md` is the explanation,
+`<page>-for-agents.md` the same ground condensed to facts, for an agent (or
+anyone) loading it to get one thing done rather than to read it. Where a
+condensed copy would only restate the page, there is one page that opens
+with a `## Quick facts` section instead. The rule, and the lint check that
+keeps a pair in step, is
 [styleguide.md](styleguide.md)'s
 [Two audiences per page](styleguide.md#two-audiences-per-page).
 
