@@ -221,7 +221,7 @@ on the unit that deletes `/root` (§11).
 months between commits. "This is broken and here is the fix" beats incident
 framing.
 
-**Security/threat-model analysis for public-facing infra goes in the private `elly/infra-notes` repo on the forge (tailnet-only), not in public PR prose or wiki pages -- keep public descriptions mechanical (what changed, verified how) so they don't read as reconnaissance. Context for review stays intact in the private notes.** (Since 2026-09-25; the merged public history through #380 predates it.)
+**Security/threat-model analysis goes in the private `elly/infra-notes` repo on the forge (tailnet-only), never in anything public: PR bodies, commit messages, wiki pages, code comments, test names or test comments.** Public text says what a guard or fix enforces and how it was verified -- not which inputs got past it, what they could reach, or which host is exposed. Tests keep the inputs they check (a guard test needs them) without narrating what they would do. (Since 2026-09-25, widened 2026-10-01; the merged public history through #380, and #435's commit messages, predate it.)
 
 **Default to a dedicated `git worktree` for any task that will branch,
 commit, or check out — skill `use-a-worktree` (not for read-only work; there
@@ -352,6 +352,22 @@ branches-test + check + modules + lint + the script tests; CI runs this
 recipe itself) is the ship skill's step 0. `just
 hm-collisions`, `just root-drift`, and `just home-drift` are read-only,
 and only meaningful on the hardware itself.
+
+`.agents/settings.json`'s `permissions.allow` pre-approves a short list of
+read-only recipes for every clone and agent (since 2026-10-01). **Only
+read-only commands with a closed argument surface go on it**: exact
+recipes, or `just <recipe> *` only when the recipe is
+`[positional-arguments]`, so arguments reach the script unparsed. Never
+`nix` itself: its flags and `--expr` reach far beyond evaluating this
+flake, so it stays a prompt; `just fingerprint` is the pre-approved
+drvPath.
+`test_guards.py` enforces both rules. `just` runs the nearest justfile
+up from its cwd, so `.agents/hooks/just-guard-pretooluse.sh` asks
+whenever that isn't this repo's `.justfile`, so an exact rule like
+`Bash(just preflight)` only ever pre-approves this repo's recipe. Read-only `git` forms are already
+allowed by Claude Code itself. The guard hooks still run first, and a
+hook's deny wins over an allow rule — but they are string matchers, not a
+boundary.
 
 `host` derives from `hostname`, falling back to `nire-durandal` off-host.
 The override goes **before** the recipe name — `just host=nire-durandal

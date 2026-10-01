@@ -106,9 +106,8 @@ classify() {
     fi
 }
 
-# Only look at commands that invoke git -- however it's spelled (`\git`,
-# `/usr/bin/git`, `'git`, `g=git`) -- or carry a tier-1 verb even with no
-# git word in sight (`$g reset --hard`).
+# Only look at commands that invoke git -- however it's spelled -- or carry
+# a tier-1 verb even with no git word in sight.
 git_word_re='(^|[^[:alnum:]_-])git([[:space:]]|$)'
 if ! [[ $command =~ $git_word_re ]] && [ -z "$(classify "$command")" ]; then
     exit 0
@@ -121,14 +120,8 @@ dir=$cwd
 
 # A clean-tree verdict is only as good as the guard's idea of which repo the
 # command acts on. The segment walk below models exactly two ways to move it:
-# a bare `cd <path>` and a `git -C <path>` right after `git`. A blacklist of
-# shapes it can't follow didn't converge -- PR #435's review found subshells,
-# `bash -c`, `pushd`, `--git-dir`, `-c k=v -C d`, quoted cd paths, then (after
-# those were fixed) a lone `&`, `if/then`, loops, `\git`, `/usr/bin/git`,
-# `$g`, aliases, and `--har`, every one confirmed to allow `reset --hard`
-# silently against a dirty repo while the payload cwd was clean.
-#
-# So it's a whitelist: when a tier-1 verb appears anywhere, a silent allow
+# a bare `cd <path>` and a `git -C <path>` right after `git`. Listing the
+# shapes it can't follow never converged (#435), so it's a whitelist: when a tier-1 verb appears anywhere, a silent allow
 # needs EVERY segment (split on && ; newline only) to be one of
 #     cd <word>
 #     git [-C <word>] <subcommand> <word>...
@@ -150,9 +143,8 @@ if [ -n "$(classify "$command")" ]; then
     done < <(awk '{ gsub(/&&|;/, "\n"); print }' <<<"$command")
 fi
 # Set up front, not when the walk reaches the op: a shape outside the
-# grammar can hide the op from the walk entirely (`cd d & git reset --hard`
-# is one `cd` segment to it). The walk still runs, so a dirty repo it can
-# resolve still denies.
+# grammar can hide the op from the walk entirely. The walk still runs, so a
+# dirty repo it can resolve still denies.
 unverified=$unmodeled
 while IFS= read -r seg; do
     seg=$(sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' <<<"$seg")

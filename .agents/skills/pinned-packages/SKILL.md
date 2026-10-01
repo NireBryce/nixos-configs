@@ -1,6 +1,7 @@
 ---
 name: pinned-packages
 description: How to keep the hand-pinned upstream packages current, and retire each pin once nixpkgs or llm-agents packages it.
+when_to_use: Asked "are the pins current", "bump the pins", "update polytoken" or zai-coding-helper, adding a package fetched with a hand-written version and hash.
 ---
 
 # Tending the hand-pinned packages

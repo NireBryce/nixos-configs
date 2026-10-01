@@ -1,6 +1,6 @@
 # Module style guide, for agents
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-01_
 
 Condensed from [module-style-guide.md](module-style-guide.md). Rules only.
 
@@ -8,8 +8,11 @@ Applies to every module under `flake/modules/`, not just packages.
 
 ## Counts
 
-Watched by `check_wiki.py`'s `counts` subcheck. Recompute with
+Generated: `just wiki-gen` rewrites it, `just wiki-lint` fails when stale.
+Never hand-edit. By hand it is
 `grep -rl --include='*.nix' -- <pattern> flake/modules | wc -l`.
+
+<!-- generated:module-counts -- from a count of the .nix files under flake/modules/, by `just wiki-gen`; change the source, not this table -->
 
 | What | Files |
 |---|---|
@@ -17,6 +20,8 @@ Watched by `check_wiki.py`'s `counts` subcheck. Recompute with
 | module header (`moduleName = lib.removeSuffix ...`) | 229 |
 | `# # description` as first body line | 33 |
 | `with pkgs;` package lists | 123 |
+
+<!-- /generated -->
 
 ## The header
 

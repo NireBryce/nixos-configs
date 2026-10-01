@@ -1,6 +1,7 @@
 ---
 name: use-a-worktree
 description: How to work in an isolated git worktree instead of the shared checkout in this repo.
+when_to_use: Before any task that will branch, commit, merge, or check out in this repo -- the first git command that moves a branch or changes what is checked out.
 ---
 
 # Working in your own worktree

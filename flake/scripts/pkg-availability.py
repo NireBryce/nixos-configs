@@ -319,7 +319,11 @@ def main():
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('names', nargs='*', help='package attribute paths')
-    ap.add_argument('--system', default='aarch64-darwin')
+    # Interpolated into the Nix probe expression, so only a system double
+    # (e.g. x86_64-linux) is accepted.
+    ap.add_argument('--system', default='aarch64-darwin',
+                    type=lambda v: v if re.fullmatch(r'[a-z0-9_]+-[a-z0-9_]+', v)
+                    else ap.error(f'--system {v!r}: expected e.g. x86_64-linux'))
     ap.add_argument('--all', action='store_true',
                     help='derive the list from home.packages across packages-config/')
     ap.add_argument('--duplicates', action='store_true',

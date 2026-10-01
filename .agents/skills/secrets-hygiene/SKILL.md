@@ -1,6 +1,7 @@
 ---
 name: secrets-hygiene
 description: How to avoid printing sops-managed secret values into the conversation in this repo, and what to do when one leaks anyway.
+when_to_use: Any sops command, reading /run/secrets, "which secrets exist", env/printenv or journalctl near a unit that takes a secret, a secret value leaking into output.
 ---
 
 # Handling sops secrets without leaking them
@@ -40,20 +41,25 @@ through `sops -d`, or a live `/run/secrets/` path.
 Hooks wired in `.agents/settings.json` (project-scoped, committed):
 
 - **`.agents/hooks/secrets-guard-pretooluse.sh`** (`PreToolUse`, `Bash`):
-  bare `sops -d`/`--decrypt`/`sops decrypt` with no `--extract` and no
-  `>/dev/null`, or anything touching `/run/secrets` / `/run/secrets.d`
-  (or run with the cwd in there) other than a metadata command — `ls`,
-  `stat`, `test`/`[`, `find` without an action → `permissionDecision:
-  "deny"` naming the narrower alternative (was `ask` until 2026-09-29, a
-  silent no-op under auto permission mode; `/run/secrets` was a reader
-  blacklist until 2026-10-01, which `cd /run/secrets && cat foo` walked
-  past). No task needs a deployed secret's contents, only that it exists
-  with the right owner and mode. Retry with the named form; a genuine
-  whole-file need is the user's to run by hand.
+  a `sops` decrypt (`-d`/`--decrypt`/`sops decrypt`) whose own pipeline
+  stage has no `--extract` and doesn't send stdout to `/dev/null`;
+  `sops exec-env`/`exec-file`; or anything touching `/run/secrets` /
+  `/run/secrets.d` (or run with the cwd in there) other than a metadata
+  command — `ls`, `stat`, `test`/`[`, `find` without an action →
+  `permissionDecision: "deny"` naming the narrower alternative (was `ask`
+  until 2026-09-29, a silent no-op under auto permission mode). Checks are
+  per pipeline stage, so another command's `-d` (`cut -d=`, `grep -d`) on
+  the same line doesn't count, and a text tool (`grep`, `rg`, `echo`, ...)
+  merely naming sops passes. No task needs a deployed secret's contents,
+  only that it exists with the right owner and mode. Retry with the named
+  form; a genuine whole-file need is the user's to run by hand.
+  **Prose trips it too**: a commit message or PR body that names the
+  secrets path inline in the command is denied. Write the text to a file
+  and pass it (`git commit -F <file>`, `gh pr create --body-file <file>`).
 - **`permissions.deny`**: `Read(//run/secrets/**)` and
   `Read(//run/secrets.d/**)` — the Read tool (and, best-effort, Grep/Glob)
-  never passes through a Bash hook, and on cube at least one secret is owned
-  by the login user, so it is readable without root.
+  never passes through a Bash hook, and some secrets are owned by the login
+  user rather than root.
 - **`.agents/hooks/secrets-guard-posttooluse.sh`** (`PostToolUse`, `Bash`):
   scans command output for a Tailscale auth key (`tskey-...`), age secret key
   (`AGE-SECRET-KEY-...`), private key block (`-----BEGIN ... PRIVATE KEY-----`),
@@ -62,9 +68,9 @@ Hooks wired in `.agents/settings.json` (project-scoped, committed):
   this file, 2026-09-29) — a false positive; check no real value
   printed.
 
-Limits: `Bash` only (a `Read` of a decrypted file isn't caught); only
-specific shapes plus those two key names, so unrecognized credential shapes
-pass. Found 2026-09-09 with a fake `tskey-…` probe: **the ZCode harness
+Limits: the hooks see only `Bash` (the Read tool is covered by the deny
+rules above, nothing else is); they match text, so they are guard rails,
+not a boundary. Found 2026-09-09 with a fake `tskey-…` probe: **the ZCode harness
 didn't fire these hooks at all**, so there the prose below is the ONLY
 enforcement. Never assume a guard caught something; check output yourself.
 

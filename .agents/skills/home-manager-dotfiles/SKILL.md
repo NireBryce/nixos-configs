@@ -1,6 +1,7 @@
 ---
 name: home-manager-dotfiles
 description: How to edit Home Manager shell/dotfile modules in this repo, and read a generated dotfile back correctly.
+when_to_use: Editing zsh, bash, or starship rc content, home.file, or home.sessionPath, or a generated dotfile looks wrong or empty.
 ---
 
 # Editing Home Manager shell/dotfile modules

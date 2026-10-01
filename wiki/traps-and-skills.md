@@ -1,6 +1,6 @@
 # Traps & skills
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-01_
 
 [`../CLAUDE.md`](../CLAUDE.md)'s own "Traps" section carries a one-line
 summary of each; the full mechanism, code, and worked examples live in the
@@ -90,8 +90,8 @@ these fits into the bigger picture; this page is just the index.
 - **[module-style-guide.md](module-style-guide.md)**
   — conventions for `flake/modules/`: aligned-`=` columns are intentional,
   `nix fmt` is deliberately not wired up because it would flatten them.
-  Counts in it are dated 2026-08-08 and checkable against the tree rather
-  than asserted as current.
+  Its file counts live on the `-for-agents` sibling, generated from the
+  tree by `just wiki-gen`.
 - **Conventions section of [`../CLAUDE.md`](../CLAUDE.md)** — commit
   trailer wording (and why it deliberately omits a model name — see the
   section for the reasoning), the "say what it was" rule for renames, the

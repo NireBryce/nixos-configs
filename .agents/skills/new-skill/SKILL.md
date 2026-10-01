@@ -1,6 +1,7 @@
 ---
 name: new-skill
 description: How to write a new SKILL.md in this repo, or fix an existing skill's frontmatter description that undersells or overclaims it.
+when_to_use: Creating a SKILL.md, or editing any skill's description or when_to_use.
 ---
 
 # Writing a new skill
@@ -8,25 +9,47 @@ description: How to write a new SKILL.md in this repo, or fix an existing skill'
 ## Applies to
 
 Creating a new `.agents/skills/<name>/SKILL.md` in this repo, or editing an
-existing one's frontmatter `description`. Not for editing a skill's body
-content alone — only touch this when the description needs to change too.
+existing one's frontmatter `description` or `when_to_use`. Not for editing
+a skill's body content alone — only touch this when the frontmatter needs
+to change too.
 
 ## The rule
 
-Frontmatter `description` is **one sentence: what the skill does or is
-for.** No file paths, no parenthetical scope lists, no trigger conditions —
-all of that goes in `## Applies to`, the section right after the H1.
+Three places, three jobs:
 
-This isn't just tone: the live skill listing a session sees shows only
-`name: description`, and that's the only information available when
-deciding whether to load a skill. Scope caveats there read as noise. The
-body, by contrast, loads in full once the skill fires — trigger detail in
-`## Applies to` costs nothing there.
+| Where | Holds | Who sees it |
+|---|---|---|
+| `description` | **One sentence: what the skill does or is for.** No file paths, no parenthetical scope lists, no trigger conditions. | Every harness's skill listing |
+| `when_to_use` (optional) | Short trigger phrases a user or task would actually say — one line, comma-separated, or a short sentence. | Claude Code only: appended to `description` in its listing |
+| `## Applies to` (right after the H1) | The full trigger detail: triggers, non-triggers, exceptions, examples. | Anyone who loaded the skill |
+
+Why: the live skill listing a session sees shows only frontmatter, and
+that's the only information available when deciding whether to load a
+skill. A description stuffed with scope caveats reads as noise there;
+`when_to_use` is where the phrases that should fire it go, kept apart so
+the description stays a statement of purpose. Other harnesses (ZCode,
+opencode) ignore `when_to_use`, so nothing may live *only* there —
+`## Applies to` stays the complete trigger list. The body loads in full
+once the skill fires, so detail there costs nothing.
+
+Add `when_to_use` where a missed trigger has actually cost something
+(`ship`'s bare "push", `secrets-hygiene`'s `sops` commands) or `## Applies
+to` names concrete phrases the description doesn't. Skip it when the
+description already says it all. Derive the phrases from `## Applies to`
+and AGENTS.md, don't widen scope. Claude Code truncates description +
+`when_to_use` at 1,536 chars combined (code.claude.com/docs/en/skills,
+checked 2026-10-01). Both values must be plain YAML scalars: never open
+with a quote (`"push", "ship it"` parses as a quoted string plus junk —
+lead with a word, e.g. `A bare "push", ...`), and no `: ` or ` #` inside.
 
 `just wiki-lint`'s `skill-files` check enforces the mechanical half of
-this — one sentence, no repo paths, no parentheticals (wordiness is a
-REVIEW finding only) — so a description that drifts from the rule fails
-the run instead of waiting for a reader to notice.
+this — description: one sentence, no repo paths, no parentheticals
+(wordiness is a REVIEW finding only); `when_to_use`: one line, no repo
+paths, under the combined cap (over 40 words is REVIEW); both plain YAML
+scalars; no frontmatter keys beyond `name`/`description`/`when_to_use`
+(a misspelt `when-to-use` is silently ignored by every harness) — so
+frontmatter that drifts from the rule fails the run instead of waiting for
+a reader to notice.
 
 Prefer active "How to `<verb>`…" phrasing for a procedural skill over a
 "Known traps in…" noun phrase — "traps" reads as scope, not purpose (the user
@@ -46,6 +69,8 @@ literal "How to" wording is fine (`ship`'s) as long as it states purpose.
    belongs in `## Applies to`.
 3. **Write `## Applies to` right after the title**: triggers, explicit
    non-triggers (`ship`'s table is the pattern), example files, exceptions.
+   Then decide on `when_to_use` (above): if the triggers include phrases
+   the description doesn't carry, lift the short ones into it.
 4. **Write the rest of the body** in whatever shape the task needs — `Why
    this exists` (dated, where there is one), `Steps`/`Procedure`, task-
    specific gotchas, `See also`. Cite real files and commands, not invented

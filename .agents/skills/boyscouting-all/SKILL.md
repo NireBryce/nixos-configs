@@ -1,6 +1,7 @@
 ---
 name: boyscouting-all
 description: How to deliberately sweep the whole repo for the same small, local cleanups boyscouting fixes incidentally, and land them as one scoped change.
+when_to_use: Asked to "boyscout the repo", "clean up the small stuff everywhere" -- a standalone cleanup pass, not a fix noticed mid-task.
 ---
 
 # Boyscouting, repo-wide

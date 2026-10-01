@@ -1,6 +1,6 @@
 # Wiki style guide, for agents
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-01_
 
 Condensed from [styleguide.md](styleguide.md). Rules only here. The *repo's* style guide is
 [conventions.md](conventions.md); module formatting is
@@ -120,6 +120,25 @@ belongs in the linked file's own header.
 
 Whichever change makes a page stale corrects it in the same change (skill
 `wiki-sync`); only `just wiki-lint` checks links.
+
+**Generated tables** (since 2026-10-01): `<!-- generated:<name> ... -->` …
+`<!-- /generated -->` regions, rewritten by `just wiki-gen`
+(`wiki/scripts/wiki_gen.py`). Today: [hosts.md](hosts.md)'s host table,
+both Index tables on [categories/00-INDEX.md](categories/00-INDEX.md),
+[module-style-guide-for-agents.md](module-style-guide-for-agents.md#counts)'s
+counts.
+
+- Never edit inside a region: change the source the marker names, then
+  `just wiki-gen`. A hand edit is reverted on the next run.
+- `wiki-lint`'s `generated` check (= `just wiki-gen --check`) fails on a
+  stale, missing, unknown or unterminated region, or an empty hand cell.
+- Hand-written columns (named in the marker: hosts' Role, categories'
+  Imported by) are kept per row. A new row's hand cell starts empty and
+  fails lint until written.
+- Regeneration is mechanical: no `_Last modified:_` bump, no sibling edit.
+  A sibling needing the table carries the same region, not a copy.
+- New generated table: a `Region` in `wiki_gen.py` + a case in
+  `test_wiki_gen.py`. Prose counts/lists stay prose, under the old checks.
 
 ## See also
 

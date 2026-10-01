@@ -1,6 +1,6 @@
 # Open threads
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-01_
 
 Todos, half-formed ideas, and things-to-look-into notes left in various
 corners of the tree, plus upstream bugs found here but not yet filed. None
@@ -118,7 +118,7 @@ specific report — not as a housekeeping pass over this list:
 
   A fourth finding, the `## Counts` table sitting on the human style
   guide, was fixed the same day rather than listed (it moved to the
-  sibling; the `counts` subcheck follows `STYLEGUIDE_COUNTS`). Two
+  sibling; generated there by `just wiki-gen` since 2026-10-01). Two
   judgment calls stand as they were: the `homelab/` pages carry an
   explicit "What's verified here" section and the `categories/` pages
   carry the same facts inline instead, which is arguably better writing

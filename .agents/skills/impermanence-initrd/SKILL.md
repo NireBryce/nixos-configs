@@ -1,6 +1,7 @@
 ---
 name: impermanence-initrd
 description: How to edit impermanence/initrd config in this repo, and read real disk/mount state on a host that wipes /root on boot.
+when_to_use: Touching boot.initrd options or impermanence config, or before trusting lsblk, findmnt, or /etc output on a host that wipes /root.
 ---
 
 # Editing impermanence or initrd, and reading real disk state

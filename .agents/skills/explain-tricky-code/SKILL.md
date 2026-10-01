@@ -1,6 +1,7 @@
 ---
 name: explain-tricky-code
 description: How to write comments that teach a reader a module or lib function whose design isn't obvious, covering what it does, why it's shaped so, and what breaks on change.
+when_to_use: Asked to "explain this like a talk", "make these comments clearer for someone new", a comment rewrite that keeps coming back still confusing.
 ---
 
 # Explaining tricky code so a user or contributor can follow it
@@ -86,6 +87,9 @@ the sections above, plus any "why not the obvious thing" for that line.
 - Plain words where exact ("folder"); keep the greppable term too
   (`forClass`, `imports`).
 - No history in the body ("We used to…" goes in bottom `history`).
+- Security code (guards, hooks, permission rules): explain the rule and
+  what it enforces, not the inputs that got past an earlier version or what
+  they reached — that analysis lives in `elly/infra-notes` (AGENTS.md).
 
 ## Diagrams
 

@@ -6,17 +6,15 @@
 # needed. This is a pattern match, not a judgment call, so it runs every time
 # rather than depending on the model remembering to be careful.
 #
-# Three things trip it:
-#   1. `sops -d`/`sops --decrypt` with no `--extract` and no stdout-to-
-#      /dev/null redirect and no pipe -- prints the entire decrypted file.
-#   2. the same command carrying `2>/dev/null` -- redirects only STDERR and
-#      leaves stdout (the whole decrypted file) flowing into whatever comes
-#      next; the original `/dev/null` exemption matched it anyway, which is
-#      how 2026-09-09 happened (three values out via `sops -d ... |
-#      grep ... 2>/dev/null`, two years--sorry, months--after the leak this
-#      hook was written for).
-#   3. `cat`/`bat`/`less`/`more`/`head`/`tail` reading a path under
-#      /run/secrets/ -- prints a live decrypted secret's contents.
+# What trips it:
+#   1. a `sops` decrypt (`-d`, `--decrypt`, `sops decrypt`) whose own
+#      pipeline stage has no `--extract` and doesn't send stdout to
+#      /dev/null with nothing piped after it -- it prints the entire
+#      decrypted file. `2>/dev/null` is stderr and doesn't count (how
+#      2026-09-09 happened: three values out through `| grep ... 2>/dev/null`).
+#   2. `sops exec-env` / `exec-file`.
+#   3. anything touching the secrets directory other than a metadata
+#      command (see the whitelist comment below).
 # Each is DENIED, not asked (since 2026-09-29): there is always a narrower
 # form that answers the same question (the reason text names them), and a
 # deny reaches the model in every permission mode -- the model reads the
@@ -46,19 +44,42 @@ command=$(jq -r '.tool_input.command // empty' <<<"$input")
 
 reason=""
 
-# `sops decrypt <file>` is the subcommand spelling of `-d` (PR #435 review).
-if grep -qE '\bsops\b' <<<"$command" && grep -qE '(\s|^)-d\b|--decrypt\b|\bsops[[:space:]]+decrypt\b' <<<"$command"; then
-    if ! grep -qE -- '--extract\b' <<<"$command"; then
-        # Exemption needs BOTH: stdout (fd1 or bare) to /dev/null -- a
-        # `2>`-prefixed redirect is stderr and does not count -- AND no
-        # pipe anywhere in the command, since piped plaintext is the
-        # leak shape itself.
-        if ! { grep -qE '(^|[[:space:];&])1?>/dev/null' <<<"$command" \
-                && ! grep -qF '|' <<<"$command"; }; then
-            reason="Bare 'sops -d' prints the WHOLE decrypted secrets.yaml into the transcript -- the 2026-08-26 tailscale_key/atuin_key leak, and again 2026-09-09 (three values) through a '2>/dev/null | grep' this exemption used to miss. Use \`sops -d --extract '[\"key\"]' <file>\` for one value, \`sops -d <file> >/dev/null 2>&1; echo \$?\` to just test decrypt access, or \`just read-sops-names\` for key names without decrypting. See .agents/skills/secrets-hygiene/SKILL.md."
+# sops decrypt check, per pipeline stage: the decrypt flag, `--extract`, and
+# the stdout-to-/dev/null exemption only count inside the stage that runs
+# `sops`, so another command's `-d` (`grep -d`, `cut -d=`) on the same line
+# neither trips nor exempts it. Quotes are stripped first, so `"-d"` counts.
+# `N>&M` duplications are dropped and `&>` read as `>` before splitting, so
+# the `&` in them isn't taken for a separator.
+sops_scan=$(tr -d "'\"\\\\" <<<"$command" | sed -E 's/[0-9]*>&[0-9-]*/ /g; s/&>/>/g')
+while IFS= read -r cmd; do
+    grep -qE '(^|[^[:alnum:]_-])sops([[:space:]]|$)' <<<"$cmd" || continue
+    IFS='|' read -r -a stages <<<"$cmd"
+    last=$(( ${#stages[@]} - 1 ))
+    for i in "${!stages[@]}"; do
+        stage=${stages[$i]}
+        grep -qE '(^|[^[:alnum:]_-])sops([[:space:]]|$)' <<<"$stage" || continue
+        # A text tool's stage only mentions sops as an argument (`grep -d skip
+        # -r sops .`) -- unless it carries a substitution, which can run it.
+        # Tools that can run other commands (find -exec, awk, sed, xargs) are
+        # deliberately not on this list.
+        if [[ $stage =~ ^[[:space:]]*(grep|egrep|fgrep|rg|cut|sort|uniq|wc|tr|head|tail|ls|echo|printf)([[:space:]]|$) ]] \
+            && ! grep -qE '\$\(|`' <<<"$stage"; then
+            continue
         fi
-    fi
-fi
+        if grep -qE '(^|[^[:alnum:]_-])sops[[:space:]]+(.*[[:space:]])?exec-(env|file)([[:space:]]|$)' <<<"$stage"; then
+            reason="'sops exec-env'/'exec-file' hand the decrypted values to a command. Use \`sops -d --extract '[\"key\"]' <file>\` for one value, or \`just read-sops-names\` for key names. A genuine need is the user's to run by hand. See .agents/skills/secrets-hygiene/SKILL.md."
+            break 2
+        fi
+        grep -qE '(^|[[:space:]])(-d|--decrypt)([[:space:]=]|$)|(^|[^[:alnum:]_-])sops[[:space:]]+(.*[[:space:]])?decrypt([[:space:]]|$)' <<<"$stage" || continue
+        grep -qE -- '(^|[[:space:]])--extract([[:space:]=]|$)' <<<"$stage" && continue
+        # Stdout (fd1 or bare) to /dev/null, with nothing piped after it.
+        if [ "$i" -eq "$last" ] && grep -qE '(^|[[:space:]])1?>[[:space:]]*/dev/null' <<<"$stage"; then
+            continue
+        fi
+        reason="Bare 'sops -d' prints the WHOLE decrypted secrets.yaml into the transcript -- the 2026-08-26 tailscale_key/atuin_key leak, and again 2026-09-09 (three values) through a '2>/dev/null | grep'. Use \`sops -d --extract '[\"key\"]' <file>\` for one value, \`sops -d <file> >/dev/null 2>&1; echo \$?\` to just test decrypt access, or \`just read-sops-names\` for key names without decrypting. See .agents/skills/secrets-hygiene/SKILL.md."
+        break 2
+    done
+done < <(awk '{ gsub(/&&|\|\||;|&/, "\n"); print }' <<<"$sops_scan")
 
 # /run/secrets (and /run/secrets.d, where sops-nix keeps the real files):
 # a whitelist, not a reader list. No task here needs a secret's contents --
@@ -71,11 +92,23 @@ fi
 # permissions.deny covers it.
 # Any non-name character ends the path: `/run/secrets;` and `/run/secrets.d`
 # both match, `/run/secretsfoo` doesn't.
-secrets_path_re='/run/secrets([^[:alnum:]_-]|$)'
+# Match against a normalized copy of the command (quotes and backslashes
+# removed, repeated slashes and `.` segments collapsed), so equivalent
+# spellings of the path are treated alike.
+command_norm=$(tr -d "'\"\\\\" <<<"$command" | sed -E 's#/+#/#g; s#/(\./)+#/#g')
+# A /run/ path containing a glob or `..` is also in scope: the guard
+# doesn't resolve them, so it can't rule the secrets dir out.
+secrets_path_re='/run/secrets([^[:alnum:]_-]|$)|/run/[^[:space:];&|]*([*?[]|\.\.)'
 cwd=$(jq -r '.cwd // empty' <<<"$input")
 in_secrets=false
 [[ $cwd == /run/secrets || $cwd == /run/secrets/* || $cwd == /run/secrets.d* ]] && in_secrets=true
-if [ -z "$reason" ] && { $in_secrets || grep -qE "$secrets_path_re" <<<"$command"; }; then
+# A cd to /run itself plus any mention of secrets puts every segment in
+# scope, since later relative paths are then under /run.
+if grep -qE '(^|[;&|[:space:]])cd[[:space:]]+/run/?([;&|[:space:]]|$)' <<<"$command_norm" \
+    && grep -qF secret <<<"$command_norm"; then
+    in_secrets=true
+fi
+if [ -z "$reason" ] && { $in_secrets || grep -qE "$secrets_path_re" <<<"$command_norm"; }; then
     meta_re='^(ls|stat|test|\[|find)([[:space:]]|$)'
     while IFS= read -r seg; do
         seg=$(sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' <<<"$seg")
@@ -89,7 +122,7 @@ if [ -z "$reason" ] && { $in_secrets || grep -qE "$secrets_path_re" <<<"$command
         fi
         reason="'$seg' touches /run/secrets with something other than a metadata command. Nothing here needs a secret's contents: to confirm one was deployed, use \`test -s <path>\`, \`stat <path>\`, or \`ls -la /run/secrets/\`. See .agents/skills/secrets-hygiene/SKILL.md."
         break
-    done < <(awk '{ gsub(/&&|\|\||;|\||&/, "\n"); print }' <<<"$command")
+    done < <(awk '{ gsub(/&&|\|\||;|\||&/, "\n"); print }' <<<"$command_norm")
 fi
 
 if [ -n "$reason" ]; then

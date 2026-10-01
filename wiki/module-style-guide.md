@@ -1,6 +1,6 @@
 # Module style guide
 
-_Last modified: 2026-09-28_
+_Last modified: 2026-10-01_
 
 Conventions for `flake/modules/`. "How many files do this" used to be
 stated as inline counts per section, dated 2026-08-08 -- and by 2026-09-09
@@ -8,9 +8,9 @@ every one of them had gone quietly false as the tree grew from 151 to 263
 files. Counts now live in one table, on
 [module-style-guide-for-agents.md](module-style-guide-for-agents.md#counts)
 — they are bookkeeping rather than a rule, and the sibling is where
-facts-to-look-up belong. `check_wiki.py`'s `counts` subcheck recomputes
-each row against the tree and fails on drift, so they stay true instead of
-merely having been.
+facts-to-look-up belong. Since 2026-10-01 `just wiki-gen` writes the table
+from the tree and `just wiki-lint` fails when it is out of date, so the
+numbers stay true instead of merely having been.
 
 This file used to live at `modules/nirePackages/style-guide.md`, where its
 location implied it governed only package modules, and later at `claude

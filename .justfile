@@ -108,6 +108,21 @@ branches-test:
 wiki-lint:
     python3 wiki/scripts/check_wiki.py check
 
+# The wiki tables derivable from the repo (hosts.md's, categories/00-INDEX.md's,
+# the module counts) live in `<!-- generated:... -->` regions; this rewrites
+# them from source. `--check` only reports (wiki-lint's `generated` does the
+# same). Details: wiki/scripts/wiki_gen.py's docstring.
+# Regenerate the wiki's derived tables from source; `--check` to only report
+# positional-arguments + "$@": arguments reach the script as-is, never
+# re-parsed by the recipe's shell line.
+[positional-arguments]
+wiki-gen *args:
+    python3 wiki/scripts/wiki_gen.py "$@"
+
+# Fixture tests for wiki_gen.py; pure stdlib; runs in preflight and CI
+wiki-gen-test:
+    python3 wiki/scripts/test_wiki_gen.py
+
 # Spots a page turning into hand-maintained toil (a stale-prone claim nearby
 # things keep forcing edits to) before it becomes another categories/
 # 00-INDEX.md-Members-column situation (removed 2026-08-29). Pass args through,
@@ -185,6 +200,7 @@ preflight:
     # verbatim from `just --show`, which does not apply substitutions.
     @flake/scripts/hooks-path-note.sh
     @just wiki-lint
+    @just wiki-gen-test
     @just branches-test
     @just keybindings-test
     @just cod-desc-test
@@ -309,13 +325,16 @@ dotfile name:
     @{{scripts}}/dotfiles.sh {{host}} {{user}} '{{name}}'
 
 # Can these packages build on a system, and does Homebrew already install them
+# positional-arguments + "$@": arguments reach the script as-is, never
+# re-parsed by the recipe's shell line.
+[positional-arguments]
 available *pkgs:
     # Platform independent, like `just modules`, and defaults to aarch64-darwin
     # because that is the system the answer is usually wanted for. `--all`
     # sweeps every home.packages entry; `--duplicates` reports only the ones a
     # homebrew cask ALSO installs, and says what to do about each. Answers by
     # reading meta.platforms a question that used to be settled by eye, wrongly.
-    @{{scripts}}/pkg-availability.py {{pkgs}}
+    @{{scripts}}/pkg-availability.py "$@"
 
 # Hand-pinned packages: `check` (default) or `bump <name>|--all`
 pinned-packages *args:
@@ -393,14 +412,20 @@ sops-user-identity *args:
     @{{scripts}}/sops-user-identity.sh {{args}}
 
 # Has this already been seen? GitHub issues + wiki/ + lessons-learned.md
+# positional-arguments + "$@": arguments reach the script as-is, never
+# re-parsed by the recipe's shell line.
+[positional-arguments]
 threads *term:
-    @{{scripts}}/threads.sh {{term}}
+    @{{scripts}}/threads.sh "$@"
 
 # Line number of a .nix module's history section -- read only above it when
 # browsing for something; editing the module is when the history gets read.
 # No history section: silent exit 1. See skill `trim-history`.
+# positional-arguments + "$@": arguments reach the script as-is, never
+# re-parsed by the recipe's shell line.
+[positional-arguments]
 history-line file:
-    @{{scripts}}/history-line.sh {{file}}
+    @{{scripts}}/history-line.sh "$@"
 
 # A `# ── title ───…` comment heading at the house width (78):
 # just ruled-heading history   /   just ruled-heading --indent 8 "Home Manager"

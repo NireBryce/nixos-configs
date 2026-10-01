@@ -36,40 +36,25 @@ structured, extractable facts only:
             host-config/* bundles -- see categories/00-INDEX.md's own exclusion
             list) are silently skipped: nothing to check them against.
 
-  table     Checks categories/00-INDEX.md's "## Index" table -- the one place
-            that summarizes every category in one row each -- against the
-            tree. Directory and Class(es) are fully mechanical (a path, and
-            the union of `flake.modules.<class>` declarations found anywhere
-            under that path) so a mismatch is always a real finding, not a
-            heuristic; Imported by reuses the same substring/blanket-phrase
-            heuristic as `imports` above, just applied to the table cell
-            instead of a page's own section. This is the second mechanical
-            check `check`'s docstring used to say would show up here
-            eventually -- unlike the per-category file COUNT that used to
-            live in this same table (a "Members" column, removed 2026-08-29
-            once hand-incrementing it on every module add/remove outweighed
-            what it told a reader that "read the directory" didn't already,
-            see wiki-sync and CLAUDE.md's Safety section), Directory and
-            Class(es) aren't a running tally that grows every time something
-            nearby changes -- they only drift on an actual category move or
-            reclassification, which is exactly the kind of stale-claim-after-
-            a-refactor case this whole script exists for.
+  table     The Imported by column of categories/00-INDEX.md's "## Index"
+            tables, with the same substring/blanket-phrase heuristic as
+            `imports` above, applied to the table cell instead of a page's
+            own section. Narrowed 2026-10-01: the Category, Directory and
+            Class(es) columns (and which categories get a row at all) are
+            generated now -- wiki_gen.py, checked by `generated` below --
+            so only the hand-written column is left to check here. (A
+            per-category file COUNT "Members" column used to live in this
+            table too; removed 2026-08-29 once hand-incrementing it on every
+            module add/remove outweighed what it told a reader.)
 
-  hosts     Checks wiki/hosts.md's "The hosts" table -- Host, Class, and
-            Wipes `/root`? -- against `host-config/hosts.nix` (the actual
-            `nixosConfigurations`/`darwinConfigurations` entries, read
-            independently of this script's own HOSTS constant below, which
-            exists for a narrower reason and is a second hand-maintained
-            list this incidentally cross-checks) and, for Wipes `/root`?,
-            against whether the host's own import list actually contains
-            `impermanence`. Tailnet name must be `ts-<x>` for `nire-<x>` --
-            the rule tailnet-hosts.nix derives ssh entries from; checked
-            against the rule, since the tailnet itself is outside the repo.
-            Role is free prose and not checked. This is the
-            table CLAUDE.md's Safety section calls out by name as something
-            to read rather than trust a stale copy of -- exactly the kind of
-            claim worth making a script watch instead of a human remembering
-            to.
+  generated The tables wiki_gen.py generates (wiki/hosts.md's host table,
+            categories/00-INDEX.md's two Index tables, module-style-guide-
+            for-agents.md's counts) against a fresh render: a stale region,
+            a missing or unknown one, or an empty hand-written cell is a
+            hard finding. Same check as `just wiki-gen --check`; the fix is
+            `just wiki-gen`, never a hand edit inside the region. Replaced
+            the `hosts` check (Class / Wipes `/root`? / Tailnet name vs
+            hosts.nix, retired 2026-10-01) and the table half of `counts`.
 
   recipes   Every backtick `just <recipe...>` mention across wiki/ and
             AGENTS.md against .justfile's own recipe names -- a rename or
@@ -101,7 +86,15 @@ structured, extractable facts only:
             a `description` keeping the shape skill `new-skill` specifies
             (one sentence, no repo paths, no parentheticals -- hard
             findings; wordiness is REVIEW only, density is a human call
-            the way it is for siblings).
+            the way it is for siblings). The optional `when_to_use` (Claude
+            Code appends it to the description in the skill listing) must
+            be one line, carry no repo path, and keep description +
+            when_to_use under the listing's 1,536-char cap; over 40 words
+            is REVIEW. Frontmatter keys outside name/description/
+            when_to_use are findings (a misspelt key is silently ignored),
+            and both values must be plain YAML scalars -- a leading quote
+            or an embedded ': ' reads fine to these regexes but breaks the
+            harness's YAML parse.
 
   secrets   The "`.sops.yaml` ... enrolls `host`, `host`, ... —" claim
             (wiki/impermanence-and-secrets.md and AGENTS.md's Safety section
@@ -164,18 +157,13 @@ structured, extractable facts only:
             mechanically while deciding *what belongs* on the page stays
             manual.
 
-  counts    The counts table in wiki/module-style-guide-for-agents.md
-            (## Counts) and
-            the host-count claims phrased as "all N hosts" / "all N NixOS
+  counts    The host-count claims phrased as "all N hosts" / "all N NixOS
             hosts" / "M of the N NixOS hosts" in wiki/ + AGENTS.md, against
-            recomputation: the table rows against grep over flake/modules/,
-            the prose claims against hosts.nix's actual entry count (split
-            by class, via the same actual_hosts the `hosts` check uses).
-            Added 2026-09-09 after the style-guide's 2026-08-08 counts
-            (151/70/106) and AGENTS.md's "all five hosts" both went quietly
-            false -- same failure mode as `table`'s removed Members column,
-            but these live in prose rather than a table the tree can't see,
-            which is why they need their own subcheck.
+            hosts.nix's actual entry count (split by class, via
+            actual_hosts). Added 2026-09-09 after AGENTS.md's "all five
+            hosts" went quietly false. Its other half, the counts table on
+            module-style-guide-for-agents.md, is generated since 2026-10-01
+            (`generated` above) -- prose counts can't be, so they stay here.
 
   siblings  The `<page>.md` / `<page>-for-agents.md` pairs (styleguide.md,
             "Two audiences per page"): every sibling has a source page, every
@@ -212,7 +200,6 @@ structured, extractable facts only:
 
     check_wiki.py imports       [repo-root]
     check_wiki.py table         [repo-root]
-    check_wiki.py hosts         [repo-root]
     check_wiki.py recipes       [repo-root]
     check_wiki.py skills        [repo-root]
     check_wiki.py skill-files   [repo-root]
@@ -223,6 +210,7 @@ structured, extractable facts only:
     check_wiki.py contents      [repo-root]
     check_wiki.py dates         [repo-root]
     check_wiki.py counts        [repo-root]
+    check_wiki.py generated     [repo-root]
     check_wiki.py siblings      [repo-root]
     check_wiki.py lessons       [repo-root]
     check_wiki.py check         [repo-root]
@@ -339,12 +327,14 @@ def nested_category_names(categories, name):
     return result
 
 
-def host_imports(root, categories):
+def host_imports(root, categories, hosts=None):
     """host short-name -> set of category names it effectively imports --
     literal bare names from its own import list, expanded through any
-    umbrella category among them (see nested_category_names)."""
+    umbrella category among them (see nested_category_names). `hosts`
+    defaults to HOSTS; wiki_gen.py passes hosts.nix's own roster instead,
+    so a host missing from HOSTS still gets its row computed."""
     out = {}
-    for host in HOSTS:
+    for host in (HOSTS if hosts is None else hosts):
         p = root / 'flake' / 'modules' / 'host-config' / f'{host}-configuration.nix'
         if not p.exists():
             print(f"WARN  expected host file missing: {p}")
@@ -391,8 +381,8 @@ def actual_hosts(root):
     independent of this script's own HOSTS constant (below) -- HOSTS exists
     for host_imports' narrower purpose (which per-host aggregate file to
     read) and is itself a second hand-maintained list that could in
-    principle drift from hosts.nix; going back to the source here means
-    check_hosts also catches that, not just wiki/hosts.md's own table.
+    principle drift from hosts.nix; wiki_gen.py renders hosts.md's table
+    from this, not from HOSTS, so a host missing there still gets a row.
     """
     p = root / 'flake' / 'modules' / 'host-config' / 'hosts.nix'
     text = COMMENT.sub('', p.read_text())
@@ -565,9 +555,9 @@ BACKTICK = re.compile(r'`([^`]+)`')
 
 
 def check_table(root):
-    """Checks categories/00-INDEX.md's "## Index" table against the tree --
-    see this module's docstring for what each column can and can't be
-    checked mechanically."""
+    """The Imported by cells of categories/00-INDEX.md's "## Index" tables --
+    the one hand-written column there; the rest is wiki_gen.py's (see this
+    module's docstring)."""
     categories = find_categories(root)
     by_category = _by_category(root, categories)
 
@@ -581,112 +571,13 @@ def check_table(root):
     section = rest[:end.start()] if end else rest
 
     findings = []
-    seen = set()
     for row in INDEX_ROW.finditer(section):
         name = row.group('name')
         if name not in categories:
-            continue  # the header row, the separator row, or a stale link
-        seen.add(name)
-        cat_dir = categories[name]
-
-        # Directory column: the first backtick span is the path itself; a
-        # second one (hardware's "(+ nested `amd`)") is prose, not checked.
-        expected_dir = str(cat_dir.relative_to(root / 'flake' / 'modules')) + '/'
-        spans = BACKTICK.findall(row.group('dir'))
-        if not spans or spans[0] != expected_dir:
-            got = spans[0] if spans else '(none)'
-            findings.append(
-                f"DIRECTORY  {index_page}: '{name}' row says {got!r}, tree has "
-                f"{expected_dir!r}")
-
-        # Class(es) column -- fully mechanical, so any mismatch is real.
-        expected_classes = category_classes(cat_dir)
-        claimed_classes = {c.strip() for c in row.group('cls').split(',') if c.strip()}
-        if claimed_classes != expected_classes:
-            findings.append(
-                f"CLASSES    {index_page}: '{name}' row says "
-                f"{sorted(claimed_classes)}, tree declares "
-                f"{sorted(expected_classes)}")
-
+            continue  # the header row or the separator row
         findings += _imported_by_findings(
             f"{index_page} row for '{name}'", name, by_category.get(name, set()),
             row.group('imp'))
-
-    # A category with its own page that never made it into the table row set
-    # at all -- find_categories() sees it, nothing above does without this.
-    for name in sorted(categories):
-        if name in seen:
-            continue
-        page = root / 'wiki' / 'categories' / f'{name}.md'
-        if page.exists():
-            findings.append(
-                f"MISSING ROW  {index_page}: '{name}' has {page} but no Index "
-                f"table row")
-    return findings
-
-
-HOSTS_TABLE_ROW = re.compile(
-    r'^\|\s*`(?P<host>nire-[\w-]+)`\s*\|\s*(?P<class>\w+)\s*\|'
-    r'(?P<role>[^|]*)\|(?P<wipes>[^|]*)\|'
-    r'(?P<tailnet>[^|]*)\|\s*$', re.M)
-
-
-def check_hosts(root):
-    """Checks wiki/hosts.md's "The hosts" table against hosts.nix and the
-    `impermanence` category's actual importers -- see this module's
-    docstring for what each column can and can't be checked mechanically."""
-    hosts = actual_hosts(root)
-    categories = find_categories(root)
-    imports = host_imports(root, categories)  # short name -> category set
-
-    page = root / 'wiki' / 'hosts.md'
-    rows = {m.group('host'): m for m in HOSTS_TABLE_ROW.finditer(page.read_text())}
-
-    findings = []
-    for name in sorted(set(hosts) | set(rows)):
-        if name not in rows:
-            findings.append(
-                f"MISSING ROW  {page}: hosts.nix declares '{name}' but The "
-                f"hosts table has no row for it")
-            continue
-        if name not in hosts:
-            findings.append(
-                f"STALE ROW  {page}: '{name}' has a table row but hosts.nix "
-                f"no longer declares it")
-            continue
-        row = rows[name]
-
-        claimed_class = row.group('class').strip()
-        if claimed_class != hosts[name]:
-            findings.append(
-                f"CLASS      {page}: '{name}' row says {claimed_class!r}, "
-                f"hosts.nix declares it {hosts[name]!r}")
-
-        expected_tailnet = 'ts-' + name.removeprefix('nire-')
-        claimed_tailnet = row.group('tailnet').strip().strip('`')
-        if claimed_tailnet != expected_tailnet:
-            findings.append(
-                f"TAILNET    {page}: '{name}' row says {claimed_tailnet!r}, "
-                f"the nire-<x> -> ts-<x> rule (tailnet-hosts.nix) gives "
-                f"{expected_tailnet!r}")
-
-        # Wipes /root? is only meaningful for nixos-class hosts -- darwin has
-        # no initrd stage this repo touches, hence hosts.md's own "n/a".
-        wipes_cell = row.group('wipes').lower()
-        if hosts[name] == 'darwin':
-            if 'n/a' not in wipes_cell:
-                findings.append(
-                    f"WIPES ROOT {page}: '{name}' is darwin-class (no /root "
-                    f"wipe concept) but its row doesn't say 'n/a'")
-            continue
-        wipes_claimed = 'yes' in wipes_cell
-        wipes_actual = 'impermanence' in imports.get(name.removeprefix('nire-'), set())
-        if wipes_claimed != wipes_actual:
-            findings.append(
-                f"WIPES ROOT {page}: '{name}' row says "
-                f"{'yes' if wipes_claimed else 'no'!r}, but it "
-                f"{'does' if wipes_actual else 'does not'} import "
-                f"'impermanence'")
     return findings
 
 
@@ -809,6 +700,25 @@ DESC_PATH = re.compile(
 DESC_SENTENCE_END = re.compile(r'[.!?](?:\s|$)')
 DESC_MAX_WORDS = 30  # REVIEW only: the rule is one sentence of purpose;
                      # the ceiling just names the outliers worth re-reading.
+FRONTMATTER_WHEN = re.compile(r'^when_to_use:(.*)$', re.M)
+FRONTMATTER_KEY = re.compile(r'^([^\s:#][^:]*):', re.M)
+# Keys a SKILL.md here may carry. Claude Code reads more (allowed-tools,
+# model, ...), but none is used here, and a misspelt key (`when-to-use`,
+# `whenToUse`) is silently ignored by every harness -- so an unknown key is
+# a finding, and adopting a new one means extending this set on purpose.
+FRONTMATTER_KEYS = {'name', 'description', 'when_to_use'}
+# Claude Code truncates description + when_to_use, combined, at this many
+# characters in the skill listing (code.claude.com/docs/en/skills,
+# checked 2026-10-01; configurable per-user via skillListingMaxDescChars).
+LISTING_CAP = 1536
+WHEN_MAX_WORDS = 40  # REVIEW only: "short trigger phrases" -- the full
+                     # trigger detail lives in ## Applies to.
+# A plain (unquoted) YAML scalar can't open with an indicator character or
+# contain ': ' / ' #' -- a value like `"push", "ship it"` parses as a quoted
+# string followed by junk. The hand-rolled regexes above would read such a
+# line fine while the harness's YAML parser rejects the whole frontmatter.
+YAML_PLAIN_BAD_START = tuple('"\'[]{}>|*&!%@`,?#-')
+YAML_PLAIN_BAD_INNER = (': ', ' #')
 # Repo-rooted backtick paths worth existing-checking inside skill prose.
 # Prefix-scoped on purpose: bare names (`hosts.nix`, `serve.nix`) are
 # shorthand for paths this repo writes several ways, and checking them
@@ -935,6 +845,62 @@ def check_skill_files(root):
                 f"REVIEW   {rel}: description is {len(desc.split())} words "
                 f"(over {DESC_MAX_WORDS}) -- scope detail that belongs in "
                 f"## Applies to")
+        findings += _check_skill_frontmatter_extras(rel, head, desc)
+    return findings
+
+
+def _check_skill_frontmatter_extras(rel, head, desc):
+    """Unknown keys, YAML plain-scalar safety, and the optional
+    `when_to_use` -- short trigger phrases Claude Code appends to the
+    description in its skill listing (other harnesses ignore it, so
+    ## Applies to stays the full trigger detail). Skill `new-skill` has the
+    description / when_to_use / Applies-to split."""
+    why = (" -- skill `new-skill`'s when_to_use rule, enforced here so it "
+           "stays true")
+    findings = []
+    for m in FRONTMATTER_KEY.finditer(head):
+        key = m.group(1).strip()
+        if key not in FRONTMATTER_KEYS:
+            findings.append(
+                f"UNKNOWN KEY  {rel}: frontmatter key '{key}' -- not one of "
+                f"{sorted(FRONTMATTER_KEYS)}; a misspelt key is silently "
+                f"ignored, so extend FRONTMATTER_KEYS deliberately")
+    for line in head.splitlines():
+        if line[:1].isspace() and line.strip():
+            findings.append(
+                f"FRONTMATTER SHAPE  {rel}: indented/continuation line "
+                f"'{line.strip()[:40]}' -- every value stays on one line")
+    values = [('description', desc)]
+    when_m = FRONTMATTER_WHEN.search(head)
+    when = when_m.group(1).strip() if when_m else None
+    if when is not None:
+        values.append(('when_to_use', when))
+        if not when:
+            findings.append(
+                f"WHEN_TO_USE SHAPE  {rel}: when_to_use is empty or a "
+                f"block scalar{why}")
+        if DESC_PATH.search(when):
+            findings.append(
+                f"WHEN_TO_USE SHAPE  {rel}: when_to_use contains a repo "
+                f"path{why}")
+        total = len(desc) + len(when)
+        if total > LISTING_CAP:
+            findings.append(
+                f"WHEN_TO_USE SHAPE  {rel}: description + when_to_use is "
+                f"{total} chars, over Claude Code's {LISTING_CAP}-char "
+                f"listing cap -- the tail is truncated")
+        if len(when.split()) > WHEN_MAX_WORDS:
+            findings.append(
+                f"REVIEW   {rel}: when_to_use is {len(when.split())} words "
+                f"(over {WHEN_MAX_WORDS}) -- trigger detail that belongs in "
+                f"## Applies to")
+    for key, value in values:
+        if value and (value.startswith(YAML_PLAIN_BAD_START)
+                      or any(s in value for s in YAML_PLAIN_BAD_INNER)):
+            findings.append(
+                f"FRONTMATTER SHAPE  {rel}: {key} is not a plain YAML "
+                f"scalar (leading indicator character, ': ', or ' #') -- "
+                f"the harness's YAML parse fails or truncates it; reword")
     return findings
 
 
@@ -1273,34 +1239,6 @@ def check_contents(root):
     return findings
 
 
-# The `## Counts` table -- one row per convention module-style-guide.md once
-# stated as an inline count. Each row is recomputed by scanning every .nix
-# file under flake/modules/ with the same pattern the table's own "recompute
-# by hand" line gives a reader; a row whose number doesn't match its
-# recomputation is a hard finding.
-#
-# The table lives on the *-for-agents sibling, not on module-style-guide.md
-# where it sat until 2026-09-11. Grep `STYLEGUIDE_COUNTS` finds it either
-# way. It moved because it is bookkeeping, not a rule: four numbers nobody
-# reads to learn the style, sitting between the human page's intro and its
-# first actual convention. The sibling is where facts-to-look-up belong, and
-# the check doesn't care which page it parses -- only that exactly one page
-# carries the rows.
-STYLEGUIDE_COUNTS = pathlib.Path('wiki/module-style-guide-for-agents.md')
-MODULES_DIR = pathlib.Path('flake/modules')
-COUNT_ROW = re.compile(r'^\|\s*(.+?)\s*\|\s*(\d+)\s*\|\s*$', re.M)
-# The three recomputable rows, keyed by an unambiguous prefix of their label.
-# `total` has no pattern -- it is the count of .nix files itself.
-COUNT_DEFS = [
-    ('total `.nix` files',
-     None),
-    ('module header',
-     'moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);'),
-    ('`# # description`',
-     re.compile(r'(?m)^\s*# # description')),
-    ('`with pkgs;`',
-     'with pkgs;'),
-]
 # Number words a prose host-count claim can use, and the class-scoped
 # variants: "all five hosts", "all 4 hosts", "all three NixOS hosts",
 # "Two of the three NixOS hosts". Deliberately requires "all"/"of the" --
@@ -1327,68 +1265,19 @@ def _host_num(word):
 
 
 def check_counts(root):
-    """Two shapes of count claim, both of which actually went stale here:
-
-    - the `## Counts` table (on module-style-guide-for-agents.md, see
-      STYLEGUIDE_COUNTS), one row per convention module-style-guide.md used
-      to state as an inline count. Recomputed against flake/modules/ on
-      every run -- the rows are a view of the tree, not a snapshot of it.
-    - "all N hosts"-shaped prose across wiki/ + AGENTS.md, the exact claim
-      AGENTS.md's Platform-support section got wrong ("all five hosts"
-      when hosts.nix defines four). Class-scoped variants
-      ("all three NixOS hosts", "Two of the three NixOS hosts") are checked
-      against that class's own count.
-    """
-    findings = []
-
-    text = (root / STYLEGUIDE_COUNTS).read_text()
-    rows = {}
-    for label, n in COUNT_ROW.findall(text):
-        for key, _ in COUNT_DEFS:
-            if label.startswith(key):
-                rows[key] = int(n)
-                break
-    if not rows:
-        # Zero rows parsed means the table is gone, moved to another page, or
-        # its labels drifted out of COUNT_DEFS' reach -- and until 2026-09-12
-        # every one of those read as "no findings", because the per-key loop
-        # below skips a key it cannot find. A check that silently stops
-        # checking is worse than no check: the page keeps four numbers that
-        # nothing recomputes while `wiki-lint` stays green. Same shape as the
-        # MISSING CONTENTS gap fixed the same day.
-        #
-        # Deliberately only fires when ALL rows are missing. Removing ONE row
-        # stays a page edit rather than drift, which is what the `continue`
-        # below is for.
-        findings.append(
-            f"MISSING COUNTS TABLE  {root / STYLEGUIDE_COUNTS}: no rows "
-            f"matched any of {[k for k, _ in COUNT_DEFS]} -- the counts "
-            f"table is gone or its labels drifted, so `counts` is silently "
-            f"checking nothing. Point STYLEGUIDE_COUNTS at its new home, or "
-            f"update COUNT_DEFS' labels.")
-        return findings + _host_count_findings(root)
-    files = sorted((root / MODULES_DIR).rglob('*.nix'))
-    for key, pattern in COUNT_DEFS:
-        if key not in rows:
-            continue  # a removed row is a page edit, not drift
-        if pattern is None:
-            actual = len(files)
-        elif isinstance(pattern, re.Pattern):
-            actual = sum(1 for f in files if pattern.search(f.read_text()))
-        else:
-            actual = sum(1 for f in files if pattern in f.read_text())
-        if rows[key] != actual:
-            findings.append(
-                f"STALE    {root / STYLEGUIDE_COUNTS}: counts table says "
-                f"{rows[key]} for '{key}' but recomputed {actual}")
-
-    return findings + _host_count_findings(root)
+    """"all N hosts"-shaped prose across wiki/ + AGENTS.md, the exact claim
+    AGENTS.md's Platform-support section got wrong ("all five hosts" when
+    hosts.nix defines four). Class-scoped variants ("all three NixOS
+    hosts", "Two of the three NixOS hosts") are checked against that
+    class's own count. The counts *table* this used to check too is
+    generated since 2026-10-01 (wiki_gen.py's `module-counts` region)."""
+    return _host_count_findings(root)
 
 
 def _host_count_findings(root):
-    """The "all N hosts"-shaped prose half of `counts`, split out 2026-09-12
-    so the counts-table half can return early on a missing table without
-    silently skipping this too."""
+    """The whole of `counts` since the table half became generated
+    (2026-10-01); split out 2026-09-12, when the table half could return
+    early on a missing table."""
     findings = []
     hosts = actual_hosts(root)
     class_count = {'nixos': sum(1 for c in hosts.values() if c == 'nixos'),
@@ -1806,9 +1695,9 @@ def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else 'check'
     root = repo_root([sys.argv[0]] + sys.argv[2:])
 
-    cmds = ('imports', 'table', 'hosts', 'recipes', 'skills', 'skill-files',
+    cmds = ('imports', 'table', 'recipes', 'skills', 'skill-files',
             'secrets', 'routes', 'links', 'anchors', 'contents', 'dates',
-            'counts', 'siblings', 'lessons', 'check')
+            'counts', 'generated', 'siblings', 'lessons', 'check')
     if cmd not in cmds:
         print(__doc__)
         sys.exit(2)
@@ -1818,8 +1707,6 @@ def main():
         findings += check_imports(root)
     if cmd in ('table', 'check'):
         findings += check_table(root)
-    if cmd in ('hosts', 'check'):
-        findings += check_hosts(root)
     if cmd in ('recipes', 'check'):
         findings += check_recipes(root)
     if cmd in ('skills', 'check'):
@@ -1840,6 +1727,11 @@ def main():
         findings += check_dates(root)
     if cmd in ('counts', 'check'):
         findings += check_counts(root)
+    if cmd in ('generated', 'check'):
+        # Imported here, not at the top: wiki_gen imports this module for
+        # its parsers, and a top-level import each way would be a cycle.
+        import wiki_gen
+        findings += wiki_gen.check(root)
     if cmd in ('siblings', 'check'):
         findings += check_siblings(root)
     if cmd in ('lessons', 'check'):

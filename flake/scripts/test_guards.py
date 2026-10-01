@@ -175,7 +175,7 @@ class SecretsGuardPreToolUse(GuardCase):
         self.assertDeny(self.script, "cat /run/secrets/atuin_key")
 
     def test_decrypt_subcommand_and_other_readers_trip(self):
-        # PR #435 review: both shapes passed the guard.
+        # The subcommand spelling of -d, and a reader beyond cat/head/tail.
         self.assertDeny(self.script, "sops decrypt secrets.yaml")
         self.assertDeny(self.script, "grep . /run/secrets/tailscale_key")
 
@@ -197,6 +197,33 @@ class SecretsGuardPreToolUse(GuardCase):
                     "stat -c '%U %a' /run/secrets/atuin_key"):
             self.assertPass(self.script, cmd)
 
+    def test_run_secrets_spelled_with_extra_slashes(self):
+        for cmd in ("cat /run//secrets/x", "cat /run/./secrets/x",
+                    "cat //run/secrets.d//1/x"):
+            self.assertDeny(self.script, cmd)
+
+    def test_run_secrets_respellings(self):
+        # Equivalent spellings of the path are all in scope.
+        for cmd in ('cat "/run/"secrets/x', "cat /run/sec''rets/x",
+                    "cat /run/secret?/x", "cat /run/secre*/x",
+                    "cat /run/foo/../secrets/x", "cd /run && cat secrets/x"):
+            self.assertDeny(self.script, cmd)
+        self.assertPass(self.script, "ls /run/user")
+
+    def test_wildcard_allow_rules_quote_their_arguments(self):
+        # AGENTS.md's allowlist rules: a wildcard just rule only for a
+        # [positional-arguments] recipe, and never a rule for nix itself.
+        allow = json.loads(SETTINGS.read_text())["permissions"]["allow"]
+        for rule in allow:
+            self.assertNotRegex(rule, r"^Bash\(nix\b", rule)
+            m = re.fullmatch(r"Bash\(just ([\w-]+) \*\)", rule)
+            if not m:
+                self.assertNotIn("*", rule, f"unexpected wildcard: {rule}")
+                continue
+            shown = subprocess.run(["just", "--show", m.group(1)], cwd=REPO,
+                                   capture_output=True, text=True).stdout
+            self.assertIn("[positional-arguments]", shown, rule)
+
     def test_read_tool_denied_on_run_secrets(self):
         # The Bash hook never sees the Read tool; settings.json's deny rules
         # are the only thing between it and a user-owned secret (cube's
@@ -212,6 +239,29 @@ class SecretsGuardPreToolUse(GuardCase):
                          "deny")
         self.assertIsNone(run_guard(self.script, bash_payload(
             "ls -la", "/run/secrets")))
+
+    def test_other_commands_dash_d_is_not_sops(self):
+        # The decrypt flag has to belong to the sops invocation itself.
+        for cmd in ("just read-sops-names | grep -d skip x",
+                    "grep -ril sops wiki | cut -d: -f1",
+                    "sops --version; grep -d skip -r foo .",
+                    "grep -d skip -r sops .",
+                    "rg -n 'sops -d' wiki"):
+            self.assertPass(self.script, cmd)
+        # A substitution inside a text tool's stage can still run sops.
+        self.assertDeny(self.script, "echo $(sops -d f)")
+
+    def test_decrypt_checked_per_stage(self):
+        for cmd in ('sops "-d" secrets.yaml',
+                    "sops -d --extract x f; sops -d f",
+                    "sops -d f >/dev/null | cat",
+                    "sops -d f 2>&1 | grep k",
+                    "sops exec-env f env"):
+            self.assertDeny(self.script, cmd)
+        for cmd in ("sops -d f >/dev/null 2>&1; echo $?",
+                    "sops -d f &>/dev/null && echo ok",
+                    "sops -d --extract '[\"k\"]' f | wc -c"):
+            self.assertPass(self.script, cmd)
 
     def test_stat_run_secrets_passes(self):
         self.assertPass(self.script, "stat /run/secrets/atuin_key")
@@ -355,9 +405,8 @@ class GitGuardPreToolUse(GuardCase):
             f"git -C {clean} reset --hard", dirty)))
 
     def test_unmodeled_shapes_never_allow_silently(self):
-        # PR #435 review: each of these reached a dirty repo while the
-        # payload cwd was clean, and was allowed with no prompt. Unknown
-        # target is not clean: each must at least ask.
+        # Shapes outside the plain cd/git grammar: the target repo is
+        # unknown, and unknown is not clean, so each must at least ask.
         # The dirty repo's path holds a space, so `cd '<path>'` is one of
         # the shapes the bare-cd regex can't read.
         clean, dirty = self.repo(), self.repo()
@@ -376,8 +425,7 @@ class GitGuardPreToolUse(GuardCase):
             "bash -c 'git reset --hard'",
             f"sh -c \"cd '{spaced}' && git reset --hard\"",
             f"GIT_DIR='{spaced}/.git' git reset --hard",
-            # Second round, after the blacklist fix: a lone `&`, control
-            # flow, git spelled another way, variables, aliases, --har.
+            # More shapes outside the grammar.
             f"cd '{spaced}' & git reset --hard",
             f"if true; then cd '{spaced}' && git reset --hard; fi",
             f"if cd '{spaced}'; then git reset --hard; fi",
@@ -636,6 +684,49 @@ class NixUntrackedGuard(GuardCase):
                              {"CLAUDE_PROJECT_DIR": str(self.repo)}):
             out = run_guard(self.script, payload)
         self.assertIn("UNTRACKED", (out or {}).get("systemMessage", ""))
+
+
+class JustGuardPreToolUse(GuardCase):
+    """`Bash(just <recipe>)` allow rules must mean this repo's recipes;
+    `just` uses the nearest justfile up from its cwd. Foreign or unknowable
+    justfile -> ask."""
+    script = HOOKS / "just-guard-pretooluse.sh"
+
+    def foreign(self):
+        d = pathlib.Path(tempfile.mkdtemp(prefix="just-guard-"))
+        self.addCleanup(shutil.rmtree, d, ignore_errors=True)
+        (d / "justfile").write_text("preflight:\n    true\n")
+        return d
+
+    def test_repo_recipes_pass(self):
+        for cmd in ("just preflight", "just threads foo bar",
+                    "just agent preflight-brief", "cd flake && just check"):
+            self.assertPass(self.script, cmd, cwd=REPO)
+
+    def test_unrelated_commands_pass(self):
+        self.assertPass(self.script, "ls -la", cwd=self.foreign())
+        self.assertPass(self.script, "echo adjust", cwd=REPO)
+
+    def test_foreign_justfile_asks(self):
+        f = self.foreign()
+        self.assertAsk(self.script, "just preflight", "justfile", cwd=f)
+        self.assertAsk(self.script, f"cd {f} && just preflight", cwd=REPO)
+        self.assertAsk(self.script, "just preflight",
+                       cwd=REPO / "dev-shells" / "python")
+
+    def test_explicit_justfile_asks(self):
+        f = self.foreign()
+        for cmd in (f"just --justfile {f}/justfile preflight",
+                    f"just -f {f}/justfile preflight",
+                    f"just -d {f} preflight"):
+            self.assertAsk(self.script, cmd, cwd=REPO)
+
+    def test_unfollowable_shapes_ask(self):
+        f = self.foreign()
+        for cmd in (f"(cd {f} && just preflight)",
+                    f'cd "{f}" && just preflight',
+                    "timeout 5 just preflight"):
+            self.assertAsk(self.script, cmd, cwd=REPO)
 
 
 class CommitMsgHook(unittest.TestCase):
