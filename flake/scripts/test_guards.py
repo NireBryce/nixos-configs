@@ -179,6 +179,40 @@ class SecretsGuardPreToolUse(GuardCase):
         self.assertDeny(self.script, "sops decrypt secrets.yaml")
         self.assertDeny(self.script, "grep . /run/secrets/tailscale_key")
 
+    def test_run_secrets_whitelist(self):
+        # Anything touching /run/secrets that isn't metadata denies,
+        # whatever the reader; metadata passes.
+        for cmd in ("cd /run/secrets && cat foo",
+                    "cd /run/secrets; cut -c1- atuin_key",
+                    "cp /run/secrets/atuin_key /tmp/x",
+                    "cat /run/secrets.d/1/atuin_key",
+                    "ls $(cat /run/secrets/atuin_key)",
+                    "find /run/secrets -type f -exec cat {} +",
+                    "python3 -c 'print(open(\"/run/secrets/x\").read())'"):
+            self.assertDeny(self.script, cmd)
+        for cmd in ("ls -la /run/secrets/",
+                    "test -s /run/secrets/atuin_key && echo ok",
+                    "[ -s /run/secrets/atuin_key ]; echo $?",
+                    "find /run/secrets -maxdepth 1 -type f",
+                    "stat -c '%U %a' /run/secrets/atuin_key"):
+            self.assertPass(self.script, cmd)
+
+    def test_read_tool_denied_on_run_secrets(self):
+        # The Bash hook never sees the Read tool; settings.json's deny rules
+        # are the only thing between it and a user-owned secret (cube's
+        # opencode password is owned by the login user).
+        deny = json.loads(SETTINGS.read_text())["permissions"]["deny"]
+        for rule in ("Read(//run/secrets/**)", "Read(//run/secrets.d/**)"):
+            self.assertIn(rule, deny)
+
+    def test_cwd_inside_run_secrets(self):
+        out = run_guard(self.script, bash_payload("cat atuin_key",
+                                                  "/run/secrets"))
+        self.assertEqual(out["hookSpecificOutput"]["permissionDecision"],
+                         "deny")
+        self.assertIsNone(run_guard(self.script, bash_payload(
+            "ls -la", "/run/secrets")))
+
     def test_stat_run_secrets_passes(self):
         self.assertPass(self.script, "stat /run/secrets/atuin_key")
 

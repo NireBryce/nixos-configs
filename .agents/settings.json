@@ -3,7 +3,11 @@
     "commit": "Co-Authored-By: Claude"
   },
   "permissions": {
-    "allow": []
+    "allow": [],
+    "deny": [
+      "Read(//run/secrets/**)",
+      "Read(//run/secrets.d/**)"
+    ]
   },
   "hooks": {
     "SessionStart": [
