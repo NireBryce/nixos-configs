@@ -3,7 +3,20 @@
     "commit": "Co-Authored-By: Claude"
   },
   "permissions": {
-    "allow": [],
+    "allow": [
+      "Bash(just wiki-lint)",
+      "Bash(just modules)",
+      "Bash(just lint)",
+      "Bash(just check)",
+      "Bash(just preflight)",
+      "Bash(just guards-test)",
+      "Bash(just agent preflight-brief)",
+      "Bash(just read-sops-names)",
+      "Bash(just fingerprint)",
+      "Bash(just fingerprint-home)",
+      "Bash(just threads *)",
+      "Bash(just history-line *)"
+    ],
     "deny": [
       "Read(//run/secrets/**)",
       "Read(//run/secrets.d/**)"
@@ -35,6 +48,10 @@
           {
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/nix-untracked-guard-pretooluse.sh\""
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/just-guard-pretooluse.sh\""
           }
         ]
       },

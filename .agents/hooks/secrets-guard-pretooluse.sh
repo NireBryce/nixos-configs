@@ -71,11 +71,23 @@ fi
 # permissions.deny covers it.
 # Any non-name character ends the path: `/run/secrets;` and `/run/secrets.d`
 # both match, `/run/secretsfoo` doesn't.
-secrets_path_re='/run/secrets([^[:alnum:]_-]|$)'
+# Match against a normalized copy of the command (quotes and backslashes
+# removed, repeated slashes and `.` segments collapsed), so equivalent
+# spellings of the path are treated alike.
+command_norm=$(tr -d "'\"\\\\" <<<"$command" | sed -E 's#/+#/#g; s#/(\./)+#/#g')
+# A /run/ path containing a glob or `..` is also in scope: the guard
+# doesn't resolve them, so it can't rule the secrets dir out.
+secrets_path_re='/run/secrets([^[:alnum:]_-]|$)|/run/[^[:space:];&|]*([*?[]|\.\.)'
 cwd=$(jq -r '.cwd // empty' <<<"$input")
 in_secrets=false
 [[ $cwd == /run/secrets || $cwd == /run/secrets/* || $cwd == /run/secrets.d* ]] && in_secrets=true
-if [ -z "$reason" ] && { $in_secrets || grep -qE "$secrets_path_re" <<<"$command"; }; then
+# A cd to /run itself plus any mention of secrets puts every segment in
+# scope, since later relative paths are then under /run.
+if grep -qE '(^|[;&|[:space:]])cd[[:space:]]+/run/?([;&|[:space:]]|$)' <<<"$command_norm" \
+    && grep -qF secret <<<"$command_norm"; then
+    in_secrets=true
+fi
+if [ -z "$reason" ] && { $in_secrets || grep -qE "$secrets_path_re" <<<"$command_norm"; }; then
     meta_re='^(ls|stat|test|\[|find)([[:space:]]|$)'
     while IFS= read -r seg; do
         seg=$(sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' <<<"$seg")
@@ -89,7 +101,7 @@ if [ -z "$reason" ] && { $in_secrets || grep -qE "$secrets_path_re" <<<"$command
         fi
         reason="'$seg' touches /run/secrets with something other than a metadata command. Nothing here needs a secret's contents: to confirm one was deployed, use \`test -s <path>\`, \`stat <path>\`, or \`ls -la /run/secrets/\`. See .agents/skills/secrets-hygiene/SKILL.md."
         break
-    done < <(awk '{ gsub(/&&|\|\||;|\||&/, "\n"); print }' <<<"$command")
+    done < <(awk '{ gsub(/&&|\|\||;|\||&/, "\n"); print }' <<<"$command_norm")
 fi
 
 if [ -n "$reason" ]; then
