@@ -81,7 +81,10 @@ Never commit onto `experimental`. `git status -sb` first:
   your commits: stop and ask. The git-guard hook now denies `reset --hard`
   on a dirty tree (since 2026-09-29; its old `ask` was a no-op under
   `--permission-mode auto`, issue #182), but only in Claude Code, and it
-  falls back to `ask` when it can't tell which directory the reset runs in.
+  falls back to `ask` — still a no-op under auto mode — when it can't tell
+  which repo the reset acts on (a variable path, a subshell, `bash -c`,
+  `pushd`, `--git-dir`, git options before the subcommand). So the
+  `git status --short` read stays yours.
 
 Commit with `just agent commit` (`.agents/scripts/ship.py`, whose header
 has the incidents behind each rule):

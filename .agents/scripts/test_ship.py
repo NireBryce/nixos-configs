@@ -389,6 +389,14 @@ class Commit(Base):
             self.assertEqual(r.returncode, 1, b)
             self.assertIn(f"refusing to commit on {b}", r.stderr)
 
+    def test_detached_head_refused(self):
+        # ship-land leaves a linked worktree detached; a commit there would
+        # belong to no branch.
+        git(self.repo, "switch", "-q", "--detach")
+        r = self.ship("commit", "a", stdin=self.MSG)
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("detached HEAD", r.stderr)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=1)

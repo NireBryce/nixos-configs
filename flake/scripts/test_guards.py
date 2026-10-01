@@ -174,6 +174,11 @@ class SecretsGuardPreToolUse(GuardCase):
     def test_reading_run_secrets_trips(self):
         self.assertDeny(self.script, "cat /run/secrets/atuin_key")
 
+    def test_decrypt_subcommand_and_other_readers_trip(self):
+        # PR #435 review: both shapes passed the guard.
+        self.assertDeny(self.script, "sops decrypt secrets.yaml")
+        self.assertDeny(self.script, "grep . /run/secrets/tailscale_key")
+
     def test_stat_run_secrets_passes(self):
         self.assertPass(self.script, "stat /run/secrets/atuin_key")
 
@@ -314,6 +319,35 @@ class GitGuardPreToolUse(GuardCase):
                         cwd=clean)
         self.assertIsNone(run_guard(self.script, bash_payload(
             f"git -C {clean} reset --hard", dirty)))
+
+    def test_unmodeled_shapes_never_allow_silently(self):
+        # PR #435 review: each of these reached a dirty repo while the
+        # payload cwd was clean, and was allowed with no prompt. Unknown
+        # target is not clean: each must at least ask.
+        # The dirty repo's path holds a space, so `cd '<path>'` is one of
+        # the shapes the bare-cd regex can't read.
+        clean, dirty = self.repo(), self.repo()
+        (dirty / "tracked.txt").write_text("changed\n")
+        spaced = dirty.parent / f"{dirty.name} sp"
+        dirty.rename(spaced)
+        self.addCleanup(shutil.rmtree, spaced, ignore_errors=True)
+        for cmd in (
+            f"(cd '{spaced}' && git reset --hard)",
+            f"{{ cd '{spaced}'; git reset --hard; }}",
+            f"cd '{spaced}' && git reset --hard",
+            f"git --git-dir='{spaced}/.git' --work-tree='{spaced}' reset --hard",
+            f"git -c core.x=y -C '{spaced}' reset --hard",
+            f"git -C='{spaced}' reset --hard",
+            f"pushd '{spaced}'; git reset --hard",
+            "bash -c 'git reset --hard'",
+            f"sh -c \"cd '{spaced}' && git reset --hard\"",
+            f"GIT_DIR='{spaced}/.git' git reset --hard",
+        ):
+            out = run_guard(self.script, bash_payload(cmd, clean))
+            decision = (out or {}).get("hookSpecificOutput", {}).get(
+                "permissionDecision")
+            self.assertIn(decision, ("ask", "deny"),
+                          f"allowed silently: {cmd!r}\nstdout was: {out}")
 
     def test_unresolvable_dir_asks(self):
         # `cd "$W"` can't be resolved without running the shell: unknown is

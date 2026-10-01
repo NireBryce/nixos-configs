@@ -57,6 +57,10 @@ if root=$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null); then
     hooks_path=$(git -C "$root" config core.hooksPath 2>/dev/null || true)
     if [ "$hooks_path" = ".githooks" ]; then
         lines+=("core.hooksPath: .githooks (commit-msg trailer fixup and pre-commit lint ratchet active)")
+    elif [ -n "$hooks_path" ]; then
+        # Set to something else on purpose (a global hooks dir, say):
+        # report, never override.
+        lines+=("core.hooksPath: '$hooks_path', not .githooks -- left alone; the trailer fixup and lint ratchet are not active ('just install-hooks' to switch)")
     elif [ -d "$root/.githooks" ] && git -C "$root" config core.hooksPath .githooks 2>/dev/null; then
         lines+=("core.hooksPath: was '${hooks_path:-unset}', set it to .githooks just now (what 'just install-hooks' does)")
     else

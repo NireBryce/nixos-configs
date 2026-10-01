@@ -59,7 +59,7 @@ cwd=$(jq -r '.cwd // empty' <<<"$input")
 [ -n "$cwd" ] || cwd="${CLAUDE_PROJECT_DIR:-$PWD}"
 
 # Only look at commands that actually invoke git.
-if ! grep -qE '(^|[;&|]|[[:space:]])git([[:space:]]|$)' <<<"$command"; then
+if ! grep -qE '(^|[;&|('"'"'"]|[[:space:]])git([[:space:]]|$)' <<<"$command"; then
     exit 0
 fi
 
@@ -114,6 +114,22 @@ dirty_lines=""    # "in <repo>:" then "  <porcelain line>" per dirty path
 count=0
 unverified=""     # human-readable why, when a tier-1 op's repo can't be read
 dir=$cwd
+
+# A clean-tree verdict is only as good as the guard's idea of which repo the
+# command acts on, and the segment walk below models exactly two ways to move
+# it: a bare `cd <path>` segment and a `git -C <path>` right after `git`.
+# Anything else that can change the target repo -- a subshell or brace group
+# (`(cd d && git reset --hard)`), `pushd`, a nested shell (`bash -c '...'`),
+# `--git-dir`/`--work-tree` or GIT_DIR=, any other git global option before
+# the subcommand (`git -c k=v -C d`), a `cd` it can't parse (`cd 'my dir'`) --
+# would otherwise fall through to the payload cwd's status and be allowed
+# silently when that cwd happens to be clean: worse than the old always-ask
+# (PR #435 review, 2026-09-30, every shape above confirmed). So those shapes
+# make a tier-1 op unverified -> ask, as before this check existed.
+unmodeled=""
+if grep -qE '[(){}`]|(^|[^[:alnum:]_])(pushd|popd|eval|exec|xargs|env)([[:space:]]|$)|(^|[^[:alnum:]_])(ba|z|da)?sh[[:space:]]+-[a-z]*c|--git-dir|--work-tree|GIT_DIR=|GIT_WORK_TREE=' <<<"$command"; then
+    unmodeled="the command uses a subshell, nested shell, pushd, or a git-dir override the guard can't follow"
+fi
 while IFS= read -r seg; do
     seg=$(sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' <<<"$seg")
     [ -n "$seg" ] || continue
@@ -125,9 +141,28 @@ while IFS= read -r seg; do
         fi
         continue
     fi
-    [[ $seg =~ (^|[[:space:]])git([[:space:]]|$) ]] || continue
+    if [[ $seg =~ ^cd([[:space:]]|$) ]]; then
+        # A cd the regex above can't read (quoted path with a space, extra
+        # args): every later segment's repo is unknown.
+        dir=""
+        continue
+    fi
+    # A quote may precede git: `bash -c 'git reset --hard'`.
+    git_word_re="(^|[[:space:]'\"])git([[:space:]]|\$)"
+    [[ $seg =~ $git_word_re ]] || continue
     op=$(classify "$seg")
     [ -n "$op" ] || continue
+
+    if [ -n "$unmodeled" ]; then
+        unverified=$unmodeled
+        continue
+    fi
+    # Global options before the subcommand: only a lone `-C <path>` is modelled.
+    if [[ $seg =~ (^|[[:space:]])git[[:space:]]+- ]] \
+        && ! [[ $seg =~ (^|[[:space:]])git[[:space:]]+-C[[:space:]]+[^-[:space:]][^[:space:]]*[[:space:]]+[a-z] ]]; then
+        unverified="'$seg' passes git options before the subcommand that the guard doesn't model"
+        continue
+    fi
 
     gdir=$dir
     if [[ $seg =~ (^|[[:space:]])git[[:space:]]+-C[[:space:]]+([^[:space:]]+) ]]; then

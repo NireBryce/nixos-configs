@@ -180,7 +180,9 @@ def worktrees():
     wt, path = {}, None
     for line in (out(["git", "worktree", "list", "--porcelain"]) or "").splitlines():
         if line.startswith("worktree "):
-            path = line[len("worktree "):]
+            # realpath: show-toplevel and the porcelain list can disagree
+            # on a symlinked prefix, and a mismatch reads as "elsewhere".
+            path = os.path.realpath(line[len("worktree "):])
         elif line.startswith("branch refs/heads/"):
             wt[line[len("branch refs/heads/"):]] = path
     return wt
@@ -237,7 +239,12 @@ def cmd_land(a):
         return 1
     say(f"merged #{a.pr} ({m})")
 
-    here = out(["git", "rev-parse", "--show-toplevel"])
+    here = os.path.realpath(out(["git", "rev-parse", "--show-toplevel"]))
+    # The main checkout is shared by other sessions and can't be removed
+    # like a linked worktree, so it is never detached (PR #435 review).
+    is_main = (out(["git", "rev-parse", "--path-format=absolute", "--git-dir"])
+               == out(["git", "rev-parse", "--path-format=absolute",
+                       "--git-common-dir"]))
     wt = worktrees()
     exp_at = wt.get(BASE)
     s = Steps()
@@ -249,7 +256,10 @@ def cmd_land(a):
     else:
         say(f"note: {BASE} is checked out at {exp_at}, another checkout;"
             " not pulled there.")
-        if wt.get(head) == here:
+        if wt.get(head) == here and is_main:
+            say(f"note: {head} is checked out here, in the main checkout;"
+                " left as is rather than detaching a shared checkout.")
+        elif wt.get(head) == here:
             s.add(["git", "checkout", "--detach", f"origin/{BASE}"],
                   note=f"note: this worktree is now detached at origin/{BASE};"
                        f" remove it when done: git worktree remove {here}")
@@ -296,6 +306,11 @@ def cmd_commit(a):
     branch = out(["git", "branch", "--show-current"])
     if branch is None:
         sys.exit("not in a git repository")
+    if branch == "":
+        # A detached HEAD's commit belongs to no branch -- e.g. a worktree
+        # ship-land left detached at origin/experimental (PR #435 review).
+        sys.exit("refusing to commit on a detached HEAD: branch first"
+                 " (git switch -c <feat/...>)")
     if branch in PROTECTED:
         sys.exit(f"refusing to commit on {branch}: branch first"
                  " (git switch -c <feat/...>); it lands through a PR")

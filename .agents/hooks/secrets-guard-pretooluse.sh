@@ -46,7 +46,8 @@ command=$(jq -r '.tool_input.command // empty' <<<"$input")
 
 reason=""
 
-if grep -qE '\bsops\b' <<<"$command" && grep -qE '(\s|^)-d\b|--decrypt\b' <<<"$command"; then
+# `sops decrypt <file>` is the subcommand spelling of `-d` (PR #435 review).
+if grep -qE '\bsops\b' <<<"$command" && grep -qE '(\s|^)-d\b|--decrypt\b|\bsops[[:space:]]+decrypt\b' <<<"$command"; then
     if ! grep -qE -- '--extract\b' <<<"$command"; then
         # Exemption needs BOTH: stdout (fd1 or bare) to /dev/null -- a
         # `2>`-prefixed redirect is stderr and does not count -- AND no
@@ -59,7 +60,7 @@ if grep -qE '\bsops\b' <<<"$command" && grep -qE '(\s|^)-d\b|--decrypt\b' <<<"$c
     fi
 fi
 
-if [ -z "$reason" ] && grep -qE '\b(cat|bat|less|more|head|tail)\b[^|;&]*/run/secrets/' <<<"$command"; then
+if [ -z "$reason" ] && grep -qE '\b(cat|bat|less|more|head|tail|grep|rg|awk|sed|od|xxd|hexdump|strings|base64)\b[^|;&]*/run/secrets/' <<<"$command"; then
     reason="Reading a decrypted secret file directly prints its plaintext into the transcript. If you just need to confirm it exists/was written, use \`test -s <path>\`, \`stat <path>\`, or \`ls -la\` on its directory instead. See .agents/skills/secrets-hygiene/SKILL.md."
 fi
 
