@@ -240,6 +240,29 @@ class SecretsGuardPreToolUse(GuardCase):
         self.assertIsNone(run_guard(self.script, bash_payload(
             "ls -la", "/run/secrets")))
 
+    def test_other_commands_dash_d_is_not_sops(self):
+        # The decrypt flag has to belong to the sops invocation itself.
+        for cmd in ("just read-sops-names | grep -d skip x",
+                    "grep -ril sops wiki | cut -d: -f1",
+                    "sops --version; grep -d skip -r foo .",
+                    "grep -d skip -r sops .",
+                    "rg -n 'sops -d' wiki"):
+            self.assertPass(self.script, cmd)
+        # A substitution inside a text tool's stage can still run sops.
+        self.assertDeny(self.script, "echo $(sops -d f)")
+
+    def test_decrypt_checked_per_stage(self):
+        for cmd in ('sops "-d" secrets.yaml',
+                    "sops -d --extract x f; sops -d f",
+                    "sops -d f >/dev/null | cat",
+                    "sops -d f 2>&1 | grep k",
+                    "sops exec-env f env"):
+            self.assertDeny(self.script, cmd)
+        for cmd in ("sops -d f >/dev/null 2>&1; echo $?",
+                    "sops -d f &>/dev/null && echo ok",
+                    "sops -d --extract '[\"k\"]' f | wc -c"):
+            self.assertPass(self.script, cmd)
+
     def test_stat_run_secrets_passes(self):
         self.assertPass(self.script, "stat /run/secrets/atuin_key")
 
