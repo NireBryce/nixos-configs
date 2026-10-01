@@ -1,6 +1,6 @@
 # Lessons learned
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-01_
 
 > **Written by Claude Code, for Claude Code**, and largely a record of its own
 > mistakes, so the "I" in the articles is a machine with no memory of having
@@ -66,8 +66,8 @@ Home for most of this group: [AGENTS.md "Before you start"](../AGENTS.md#before-
 
 - **§10** [Read upstream source](lessons-learned/10-reading-upstream-source.md) — option types, module existence and unit names come from the source, not from guessing. Home: AGENTS.md "Read upstream source". Enforced: none.
 - **§27** [Check whether upstream already fixed it](lessons-learned/27-check-upstream-fixed-it.md) — read the project's current source and packaging before writing compatibility code; a backport deletes cleanly, an invention doesn't. Home: AGENTS.md "Read upstream source". Enforced: none.
-- **§33** [Removed options, and defaults are worth reading](lessons-learned/33-removed-option-and-defaults.md) — read the nixpkgs module's `mkRenamedOptionModule`/`mkRemovedOptionModule` block, not a wiki; config that restates a default reads as a decision. Home: AGENTS.md "An option that renders into a generated file". Enforced: none.
-- **§49** [Freeform `settings.*` renders unknown keys](lessons-learned/49-freeform-settings-render-unknown-keys.md) — eval passing says nothing about whether the consumer reads a key; read the rendered file. Home: AGENTS.md "An option that renders into a generated file". Enforced: [invariants.nix](../flake/modules/invariants.nix) (the pam_u2f key only).
+- **§33** [Removed options, and defaults are worth reading](lessons-learned/33-removed-option-and-defaults.md) — read the nixpkgs module's `mkRenamedOptionModule`/`mkRemovedOptionModule` block, not a wiki; config that restates a default reads as a decision. Home: [`.agents/rules/nix.md`](../.agents/rules/nix.md) (pointer in AGENTS.md "Traps"). Enforced: none.
+- **§49** [Freeform `settings.*` renders unknown keys](lessons-learned/49-freeform-settings-render-unknown-keys.md) — eval passing says nothing about whether the consumer reads a key; read the rendered file. Home: [`.agents/rules/nix.md`](../.agents/rules/nix.md) (pointer in AGENTS.md "Traps"). Enforced: [invariants.nix](../flake/modules/invariants.nix) (the pam_u2f key only).
 - **§8** [An option existing is not it fitting](lessons-learned/8-option-existing-vs-fitting.md) — read what an option generates, not what it's called. Home: [manconfig.nix](../flake/modules/general-config/nix/manconfig/manconfig.nix). Enforced: none.
 - **§9** [Cache placements](lessons-learned/9-cache-placements.md) — build time, activation, or timer; the built-in default is the expensive one. Home: this page; [manconfig.nix](../flake/modules/general-config/nix/manconfig/manconfig.nix) is the worked case. Enforced: none.
 - **§45** [`systemd.user.services` is global](lessons-learned/45-systemd-user-services-are-global.md) — a NixOS user unit starts in every user's manager (sddm's included); gate it with `ConditionUser`. Home: skill `new-homelab-service` §1. Enforced: none.

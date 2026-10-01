@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Static checks of wiki/ (and AGENTS.md, the one file outside wiki/ that
-duplicates wiki-shaped claims verbatim -- see `doc_files`) against the actual
+"""Static checks of wiki/ (and AGENTS.md plus `.agents/rules/*.md`, the files
+outside wiki/ that duplicate wiki-shaped claims verbatim -- see `doc_files`)
+against the actual
 module tree, for authoritative claims that silently go stale after a
 refactor -- a category moved, a host stopped importing something, a recipe
 got renamed. Same motivation as `flake/scripts/modules.py`: nothing about
@@ -97,9 +98,8 @@ structured, extractable facts only:
             harness's YAML parse.
 
   secrets   The "`.sops.yaml` ... enrolls `host`, `host`, ... —" claim
-            (wiki/impermanence-and-secrets.md and AGENTS.md's Safety section
-            both make it, in the same shape, and AGENTS.md's own text admits
-            "this paragraph has been stale before") against .sops.yaml's
+            (wiki/impermanence-and-secrets.md and .agents/rules/secrets.md
+            both make it, in the same shape) against .sops.yaml's
             actual key anchors. Fully mechanical in both directions -- unlike
             Imported by, there's no legitimate "named to say it's absent"
             case for an enrollment list.
@@ -196,7 +196,20 @@ structured, extractable facts only:
             and relative links; this one only guarantees they exist, so an
             entry can't land without saying where its rule lives.
 
-  check     Runs all fifteen of the above.
+  rules     The path-scoped rule files, `.agents/rules/*.md` (Claude Code
+            reads them as `.claude/rules/` and loads each only when a file
+            matching its `paths:` frontmatter is read). Each must open with
+            frontmatter whose only key is `paths:` (the only field Claude
+            Code reads; anything else is silently ignored), as a non-empty
+            YAML list of quoted globs; every glob must match at least one
+            git-tracked file, since a glob that matches nothing means the
+            rule never loads and nothing says so; and AGENTS.md must name
+            the file (`.agents/rules/<name>.md`), the pointer harnesses
+            without rule support depend on. The rules' prose is already in
+            `doc_files`, so recipes, skills, links, secrets and counts cover
+            it.
+
+  check     Runs all sixteen of the above.
 
     check_wiki.py imports       [repo-root]
     check_wiki.py table         [repo-root]
@@ -213,6 +226,7 @@ structured, extractable facts only:
     check_wiki.py generated     [repo-root]
     check_wiki.py siblings      [repo-root]
     check_wiki.py lessons       [repo-root]
+    check_wiki.py rules         [repo-root]
     check_wiki.py check         [repo-root]
     check_wiki.py gen-contents  <file.md> [file.md ...]
 
@@ -596,18 +610,27 @@ def wiki_md(root, pattern='*.md'):
     )
 
 
+def rule_files(root):
+    """`.agents/rules/*.md`, recursive -- Claude Code discovers rules in
+    subdirectories too. `.claude` is a symlink to `.agents`, so this is the
+    one real copy."""
+    rules = root / '.agents' / 'rules'
+    return sorted(rules.rglob('*.md')) if rules.is_dir() else []
+
+
 def doc_files(root):
-    """Every markdown file the three checks below scan: all of wiki/
-    (recursive) plus AGENTS.md itself -- the one file outside wiki/ that
-    duplicates wiki-shaped claims verbatim (CLAUDE.md is a symlink to it, so
-    checking the symlink's target once covers both names).
+    """Every markdown file the claim checks scan: all of wiki/ (recursive),
+    AGENTS.md itself, and the path-scoped rules AGENTS.md points at -- the
+    files outside wiki/ that duplicate wiki-shaped claims verbatim
+    (CLAUDE.md is a symlink to AGENTS.md, so checking the target once
+    covers both names).
 
     Symlinks under wiki/ are skipped for that same reason: each directory's
     README.md is a symlink to its 00-INDEX.md, kept so GitHub still has a
     filename it recognizes. Scanned as documents they would double every
     page's word count and invent a README.md/README-for-agents.md sibling
     pair that no one wrote."""
-    return wiki_md(root) + [root / 'AGENTS.md']
+    return wiki_md(root) + [root / 'AGENTS.md'] + rule_files(root)
 
 
 # A recipe header, e.g. `wiki-churn *args:`, `host=nire-durandal build`'s
@@ -920,9 +943,8 @@ def enrolled_hosts(root):
 
 def check_secrets(root):
     """Every "`.sops.yaml` ... enrolls `host`, `host`, ... —" claim
-    (wiki/impermanence-and-secrets.md and AGENTS.md's Safety section both
-    make this exact claim by hand, in the same shape -- AGENTS.md's own text
-    even admits "this paragraph has been stale before") against
+    (wiki/impermanence-and-secrets.md and .agents/rules/secrets.md both
+    make this exact claim by hand, in the same shape) against
     .sops.yaml's actual key anchors. Unlike Imported by, there's no
     legitimate named-as-an-exclusion case for enrollment, so a mismatch
     either way is a hard finding, not a REVIEW.
@@ -1554,6 +1576,98 @@ LESSON_ENTRY = re.compile(
 LESSON_ARTICLE = re.compile(r'^(\d+)-[a-z0-9-]+\.md$')
 
 
+# A rule's frontmatter: `paths:` then `  - "glob"` items, nothing else.
+RULE_FRONTMATTER = re.compile(r'\A---\n(.*?)\n---\n', re.S)
+RULE_PATH_ITEM = re.compile(r'^\s+-\s+"([^"]+)"\s*$')
+
+
+def glob_regex(pattern):
+    """A Claude Code `paths:` glob as a regex over repo-relative paths:
+    `**/` is zero or more directories, `**` anything, `*` and `?` stay
+    within one path segment, `{a,b}` is alternation. Enough for the shapes
+    rules here use; brackets are taken literally."""
+    out, i = [], 0
+    while i < len(pattern):
+        c = pattern[i]
+        if pattern.startswith('**/', i):
+            out.append('(?:.*/)?'); i += 3; continue
+        if pattern.startswith('**', i):
+            out.append('.*'); i += 2; continue
+        if c == '*':
+            out.append('[^/]*')
+        elif c == '?':
+            out.append('[^/]')
+        elif c == '{':
+            end = pattern.find('}', i)
+            if end < 0:
+                out.append(re.escape(c))
+            else:
+                alts = pattern[i + 1:end].split(',')
+                out.append('(?:' + '|'.join(re.escape(a) for a in alts) + ')')
+                i = end + 1
+                continue
+        else:
+            out.append(re.escape(c))
+        i += 1
+    return re.compile(''.join(out) + r'\Z')
+
+
+def tracked_files(root):
+    import subprocess
+    r = subprocess.run(['git', '-C', str(root), 'ls-files', '-z'],
+                       capture_output=True, text=True, check=True)
+    return [f for f in r.stdout.split('\0') if f]
+
+
+def check_rules(root):
+    """`.agents/rules/*.md`: frontmatter is exactly a non-empty `paths:`
+    list, every glob matches a tracked file, and AGENTS.md names the file.
+    See the module docstring's `rules` entry for why each matters."""
+    findings = []
+    rules = rule_files(root)
+    if not rules:
+        return findings
+    tracked = tracked_files(root)
+    agents = (root / 'AGENTS.md').read_text()
+    for path in rules:
+        rel = path.relative_to(root).as_posix()
+        if rel not in agents:
+            findings.append(
+                f"UNLISTED RULE  {rel}: AGENTS.md does not name it -- "
+                f"harnesses without rule support would never see it")
+        m = RULE_FRONTMATTER.match(path.read_text())
+        if not m:
+            findings.append(
+                f"RULE FRONTMATTER  {rel}: no leading --- frontmatter block "
+                f"-- without `paths:` it loads in every session")
+            continue
+        lines = [l for l in m.group(1).splitlines() if l.strip()]
+        if not lines or lines[0].rstrip() != 'paths:':
+            findings.append(
+                f"RULE FRONTMATTER  {rel}: frontmatter must be `paths:` "
+                f"followed by a list of quoted globs")
+            continue
+        globs = []
+        for line in lines[1:]:
+            item = RULE_PATH_ITEM.match(line)
+            if not item:
+                findings.append(
+                    f"RULE FRONTMATTER  {rel}: unexpected line {line!r} -- "
+                    f"`paths` is the only field Claude Code reads, as "
+                    f'`  - "glob"` items')
+                continue
+            globs.append(item.group(1))
+        if not globs:
+            findings.append(f"RULE FRONTMATTER  {rel}: `paths:` is empty")
+        for g in globs:
+            rx = glob_regex(g)
+            if not any(rx.match(f) for f in tracked):
+                findings.append(
+                    f"DEAD RULE GLOB  {rel}: {g!r} matches no tracked file "
+                    f"-- the rule would never load")
+    return findings
+
+
 def check_lessons(root):
     """See the module docstring's `lessons` entry."""
     findings = []
@@ -1697,7 +1811,7 @@ def main():
 
     cmds = ('imports', 'table', 'recipes', 'skills', 'skill-files',
             'secrets', 'routes', 'links', 'anchors', 'contents', 'dates',
-            'counts', 'generated', 'siblings', 'lessons', 'check')
+            'counts', 'generated', 'siblings', 'lessons', 'rules', 'check')
     if cmd not in cmds:
         print(__doc__)
         sys.exit(2)
@@ -1736,6 +1850,8 @@ def main():
         findings += check_siblings(root)
     if cmd in ('lessons', 'check'):
         findings += check_lessons(root)
+    if cmd in ('rules', 'check'):
+        findings += check_rules(root)
 
     for f in findings:
         print(f)
