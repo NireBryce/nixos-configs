@@ -22,7 +22,9 @@ findings zero, REVIEW findings not grown.
 
 Checked mechanically (`wiki/scripts/check_wiki.py`); preserve:
 
-- **"Imported by" sections and the categories/00-INDEX.md Index table**:
+- **"Imported by" sections and the categories/00-INDEX.md Index table's
+  Imported by column** (the table's other columns are generated -- never trim
+  inside a `<!-- generated:... -->` region):
   every importing host named, or the exact blanket phrase ("all 3 NixOS
   hosts", "all four hosts"). Naming a host to say it *doesn't* import is
   fine (REVIEW, not failure).

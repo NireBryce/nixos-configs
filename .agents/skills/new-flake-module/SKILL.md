@@ -121,7 +121,8 @@ config.flake.modules.nixos.nix` in an outer `let`.
 
 Adding/removing/renaming a module in a category with an article under
 `wiki/categories/`, or editing a `dirsAsCategory.nix`: update that article
-and `wiki/categories/00-INDEX.md`'s table in the same change.
+and run `just wiki-gen` (regenerates `wiki/categories/00-INDEX.md`'s tables
+and the module counts) in the same change.
 
 Further reading: `flake/doc/dirsAsCategory.md`, `wiki/module-style-guide.md`
 (aligned `=` columns deliberate; `nix fmt` deliberately not wired up).

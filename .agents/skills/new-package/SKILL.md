@@ -81,8 +81,8 @@ Each step catches what earlier ones can't:
 1. `git add -A` — flakes ignore untracked files.
 2. `just modules` — name collisions, orphans.
 3. `just check` (or `just preflight`: also modules, lint, script tests,
-   `just wiki-lint` -- a new `.nix` file moves the counts table in
-   `wiki/module-style-guide-for-agents.md`; bump it in the same change) —
+   `just wiki-lint` -- a new `.nix` file moves the generated counts table in
+   `wiki/module-style-guide-for-agents.md`; `just wiki-gen` in the same change) —
    evaluates every host across `--all-systems`; the only step that catches
    the darwin-only-package-on-Linux mistake.
 4. `just lint`.

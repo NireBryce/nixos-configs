@@ -104,7 +104,8 @@ generic pieces only; record the decision in the host header
    SSH host key (via `ssh-to-age`) to `.sops.yaml` and `sops updatekeys
    secrets.yaml`. Not preemptively.
 5. `AGENTS.md` Architecture/State sections need a line (always have).
-6. `wiki/hosts.md` table, plus the `Imported by` line of every
+6. `just wiki-gen` (adds the host's row to `wiki/hosts.md`; write its Role
+   cell, the one hand-written column), plus the `Imported by` line of every
    `wiki/categories/*.md` for categories the host now imports.
 
 ## Verifying

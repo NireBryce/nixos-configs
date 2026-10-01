@@ -23,8 +23,10 @@ internal edits); grep first rather than opening every page.
 
 Narrower cases with their own instructions (read first):
 
-- **Module added/removed/renamed, or category membership changed** — `new-flake-module` "Keep the wiki in sync": the category's `wiki/categories/<name>.md`, its `-for-agents.md` sibling, and `wiki/categories/00-INDEX.md`'s table.
-- **Host added, or its category imports changed** — `new-host-config` wiring step: `wiki/hosts.md` table plus the "Imported by" line on every affected `wiki/categories/*.md`.
+- **Module added/removed/renamed, or category membership changed** — `new-flake-module` "Keep the wiki in sync": the category's `wiki/categories/<name>.md`, its `-for-agents.md` sibling, and `just wiki-gen` for `wiki/categories/00-INDEX.md`'s tables.
+- **Host added, or its category imports changed** — `new-host-config` wiring step: `just wiki-gen` for `wiki/hosts.md`'s table (then write the new row's Role) plus the "Imported by" line on every affected `wiki/categories/*.md`.
+
+**Generated tables are not hand-edited.** A table between `<!-- generated:<name> ... -->` and `<!-- /generated -->` is rewritten from source by `just wiki-gen`; change the source the marker names, then run it. Only the columns the marker calls hand-written are yours to edit. `wiki-lint`'s `generated` check names a stale region; the fix is always `just wiki-gen`. No date bump for a regeneration (`wiki/styleguide.md`, "Generated tables").
 
 ## Procedure
 

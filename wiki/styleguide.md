@@ -1,6 +1,6 @@
 # Wiki style guide
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-01_
 
 How this wiki itself is organized and written — as opposed to
 [conventions.md](conventions.md), which is the *repo's* style guide (Nix
@@ -386,6 +386,46 @@ corrects that page in the same change, not as a follow-up. Treat an
 undated or vaguely-dated claim on a wiki page the same way `CLAUDE.md`
 says to treat one in itself: a claim about when someone last looked, not a
 guarantee about the tree today.
+
+### Generated tables
+
+A table whose every fact the repo already knows is not written by hand at
+all. Since 2026-10-01 those tables sit between two comment lines,
+
+```
+<!-- generated:<name> -- from <source>, by `just wiki-gen`; ... -->
+| ...the table... |
+<!-- /generated -->
+```
+
+and `just wiki-gen` rewrites everything between them from source. Before
+that, a lint check noticed the drift and an agent fixed the row by hand;
+the module counts table alone had its rows hand-edited in 24 commits in
+September.
+Today's regions: [hosts.md](hosts.md)'s host table, the two Index tables
+on [categories/00-INDEX.md](categories/00-INDEX.md), and the counts on
+[module-style-guide-for-agents.md](module-style-guide-for-agents.md#counts).
+
+**To change a generated fact, change its source** (the start marker names
+it) **and run `just wiki-gen`.** An edit inside a region is undone on the
+next run. `just wiki-lint` (its `generated` check, also `just wiki-gen
+--check`) fails when a region no longer matches its source, so a forgotten
+regeneration shows up the same way any other stale claim does.
+
+Some tables mix derived columns with prose no script can derive — a host's
+Role, a category's Imported by. Those columns are hand-written and kept
+per row across regenerations, and the marker says which they are. A new
+row starts with that cell empty and `wiki-lint` fails until someone writes
+it; the derived cells around it are never typed by hand.
+
+A regeneration is a mechanical touch: it doesn't bump the page's
+`_Last modified:_`, and so doesn't ask for a sibling edit either. If a
+`-for-agents` sibling ever needs the same table, it carries the same
+region rather than a copy. Adding a new generated table means a `Region`
+entry in `wiki/scripts/wiki_gen.py` (its docstring covers the rest) plus a
+fixture case in `test_wiki_gen.py`. Claims made inside a sentence — a host
+count, the `.sops.yaml` enrollment list — stay in prose and stay under the
+existing checks.
 
 ## See also
 
