@@ -108,6 +108,18 @@ branches-test:
 wiki-lint:
     python3 wiki/scripts/check_wiki.py check
 
+# The wiki tables derivable from the repo (hosts.md's, categories/00-INDEX.md's,
+# the module counts) live in `<!-- generated:... -->` regions; this rewrites
+# them from source. `--check` only reports (wiki-lint's `generated` does the
+# same). Details: wiki/scripts/wiki_gen.py's docstring.
+# Regenerate the wiki's derived tables from source; `--check` to only report
+wiki-gen *args:
+    python3 wiki/scripts/wiki_gen.py {{args}}
+
+# Fixture tests for wiki_gen.py; pure stdlib; runs in preflight and CI
+wiki-gen-test:
+    python3 wiki/scripts/test_wiki_gen.py
+
 # Spots a page turning into hand-maintained toil (a stale-prone claim nearby
 # things keep forcing edits to) before it becomes another categories/
 # 00-INDEX.md-Members-column situation (removed 2026-08-29). Pass args through,
@@ -185,6 +197,7 @@ preflight:
     # verbatim from `just --show`, which does not apply substitutions.
     @flake/scripts/hooks-path-note.sh
     @just wiki-lint
+    @just wiki-gen-test
     @just branches-test
     @just keybindings-test
     @just cod-desc-test

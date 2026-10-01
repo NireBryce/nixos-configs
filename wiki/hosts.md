@@ -1,6 +1,6 @@
 # Hosts & current state
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-01_
 
 This page is a map of where to look for each host. **Switch state is not
 recorded anywhere in the repo** — it rots faster than any session can
@@ -16,12 +16,19 @@ on the host (`just baseline`, `just diff-deployed`, or comparing `nix eval
 
 ## The hosts
 
+Generated from `hosts.nix` and each host's import list by `just wiki-gen`
+(Role is the one hand-written column); change those, not the table.
+
+<!-- generated:hosts-table -- from flake/modules/host-config/hosts.nix and each host's import list, by `just wiki-gen`; change the source, not this table. Hand-written, kept per row: Role -->
+
 | Host | Class | Role | Wipes `/root`? | Tailnet name |
 |---|---|---|---|---|
 | `nire-durandal` | nixos | workstation | yes | `ts-durandal` |
 | `nire-tenacity` | nixos | handheld (Jovian/SteamOS) — testbed for rapid prototyping | yes | `ts-tenacity` |
-| `nire-cube` | nixos | mini PC (GMKtec) | **no** — deliberately, see below | `ts-cube` |
+| `nire-cube` | nixos | mini PC (GMKtec); persistent root, deliberately — see below | **no** | `ts-cube` |
 | `nire-lysithea` | darwin | laptop | n/a | `ts-lysithea` |
+
+<!-- /generated -->
 
 **Two names per machine.** `nire-<x>` is the host's `networking.hostName`
 and its name in `hosts.nix`; on the LAN it answers as `nire-<x>.local`
@@ -33,8 +40,8 @@ tailnet (`tailscale.nix`'s trap #1). **To ssh over the tailnet, use
 `general-config/system/networking/tailnet-hosts.nix` derives a `Host ts-<x>`
 entry (and a described Tab-completion candidate) for every `nire-*` host,
 so ssh completes them on every machine. The `ts-` names themselves are set
-in the Tailscale admin console; `just wiki-lint` checks the column above
-against the rule, not against the tailnet.
+in the Tailscale admin console; the table's Tailnet name column is
+generated from the rule, not read from the tailnet.
 
 **One guest, not in the table on purpose:** `forge-runner` (2026-09-25) —
 the libvirt VM on `nire-cube` that runs the Forgejo Actions runner. It has

@@ -2,6 +2,8 @@
 
 _Last modified: 2026-09-29_
 
+_Sibling reviewed: 2026-10-01 -- source reworded a resolved-finding aside (the counts table is generated now); this page never carried it_
+
 Condensed from [open-threads.md](open-threads.md). Live threads only.
 
 **Before investigating any symptom: `just threads "<keywords>"`** — it
