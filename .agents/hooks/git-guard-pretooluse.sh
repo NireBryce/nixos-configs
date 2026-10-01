@@ -9,14 +9,19 @@
 #
 # 1. STATE-CHECKED -- `reset --hard`, `checkout .`/`checkout -- .`,
 #    `clean -f`, a forced `checkout`/`switch` (-f, --discard-changes),
-#    `checkout [<tree-ish>] [--] <paths>` (two or more words, a `--`, or a
-#    path-only flag like --ours), and `rm -f` without --cached. What these
+#    `checkout [<tree-ish>] [--] <paths>` (two or more words, a `--`, a
+#    path-only flag like --ours, or a lone word that doesn't resolve as a
+#    commit in the target repo), and `rm -f` without --cached. Each op is
+#    recognised in git's subcommand position, not as a word anywhere in the
+#    segment. What these
 #    destroy is what `git status --porcelain` lists, so the hook runs it in
 #    the repo the command targets and decides on the answer, not the string.
 #    The path forms check only their named pathspecs when those are plain
 #    words (the whole tree otherwise), so discarding one file isn't blocked
-#    by an unrelated dirty one; checking out of a tree-ish also counts
-#    untracked files that tree-ish would overwrite:
+#    by an unrelated dirty one. --pathspec-from-file (either spelling)
+#    makes the target the whole tree, and its value is never read as a
+#    pathspec or tree-ish. Checking out of a tree-ish also counts untracked
+#    and ignored files that tree-ish would overwrite:
 #    clean tree -> allow silently (nothing to lose; this is the ship skill's
 #    `reset --hard origin/experimental` recovery after `git branch <b>`);
 #    dirty tree -> DENY, listing the dirty paths and telling the model to ask
@@ -29,16 +34,20 @@
 #    literal `cd <dir>` segment before the git one, then by `git -C <dir>`.
 #    A dir that can't be resolved statically (`cd "$W"`, `cd -`), or a
 #    status that fails, falls back to tier 2's ask -- unknown is not clean.
-#    The status runs with GIT_DIR/GIT_WORK_TREE/GIT_INDEX_FILE cleared and
+#    The status runs with GIT_DIR/GIT_WORK_TREE/GIT_INDEX_FILE cleared,
+#    -c core.fsmonitor=false (every git call the hook makes does: the check
+#    runs no program the repo's config names) and
 #    --no-optional-locks: an inherited GIT_DIR silently retargets git
 #    (lessons-learned §44), and a read-only check must not take the index
 #    lock. The command itself still inherits them, so when any is set in the
 #    hook's environment a clean verdict is unverified -> ask.
 #
 # 2. ASK + systemMessage -- force push, push --delete/:ref, push --mirror,
-#    branch -D, filter-branch/filter-repo, stash drop/clear, restore onto the
-#    worktree, worktree remove --force, and `checkout -B`/`switch -C` when
-#    the branch already exists (or its repo can't be read). Each has a routine legitimate use
+#    branch -D (or -d with -f), filter-branch/filter-repo, stash drop/clear,
+#    restore onto the worktree (or from --pathspec-from-file), read-tree -u,
+#    worktree remove --force, and `checkout -B`/`switch -C`/`branch -f`/a
+#    forced `branch -M|-C` when the target branch already exists (or its
+#    repo can't be read). Each has a routine legitimate use
 #    (ship's post-merge `push --delete`, use-a-worktree's `worktree remove
 #    --force`) and no status that settles it, so they stay "ask". The
 #    systemMessage is what reaches the human transcript regardless of
@@ -48,9 +57,8 @@
 #
 # Not gated: `stash` push/save (-u/-a included) -- it moves work into a stash
 # rather than dropping it, and the drop/clear that would lose it asks.
-# `checkout <one word>` -- git reads it as a branch when a ref matches, and a
-# file restore otherwise; telling them apart would put every branch switch
-# through the state check.
+# `checkout <one word>` when the word resolves as a commit in the target
+# repo -- a branch switch carries local changes or refuses.
 #
 # Known limits: pattern-matching on the command string, not a git parser.
 # The tier-1 (state-checked) ops fail safe -- anything outside a plain
@@ -116,30 +124,40 @@ sub_args() {
     done < <(grep -oE "(^|[^[:alnum:]_-])git(([[:space:]]+-[Cc][[:space:]]+[^[:space:]]+)|([[:space:]]+-[^[:space:]]+))*[[:space:]]+$2([[:space:]][^;&|()<>]*)?" <<<"$1" || true)
 }
 
-co_first=""; co_paths=(); rm_paths=()
+co_first=""; co_paths=(); co_whole=0; co_single=0; rm_paths=()
 
-# parse_checkout <args>: succeed when `git checkout <args>` writes named
-# paths into the worktree (`checkout [<tree-ish>] [--] <paths>`), setting
-#   co_first -- a word that is the tree-ish if it resolves as one (else a path)
-#   co_paths -- the remaining pathspecs (empty: unknown, check the whole tree)
-# A lone non-dot word is a branch switch to git when it names a ref, so it
-# isn't treated as a path; -b/-B/--orphan take a start point, never paths.
+# parse_checkout <args>: succeed when `git checkout <args>` may write paths
+# into the worktree (`checkout [<tree-ish>] [--] <paths>`), setting
+#   co_first  -- a word that is the tree-ish if it resolves as one (else a path)
+#   co_paths  -- the remaining pathspecs (empty: unknown, check the whole tree)
+#   co_whole  -- 1 when --pathspec-from-file names the paths: the whole tree
+#                is the target, and the option's value is neither a pathspec
+#                nor a tree-ish
+#   co_single -- 1 for a lone word with no `--`: a branch switch when it
+#                resolves as a commit, a path discard otherwise (the caller
+#                decides, in the target repo)
+# -b/-B/--orphan take a start point, never paths.
 parse_checkout() {
-    local t dd=0 pathopt=0
+    local t dd=0 pathopt=0 skip=0
     local -a w pos=() after=()
     read -ra w <<<"$1"
+    co_first=""; co_paths=(); co_whole=0; co_single=0
     for t in "${w[@]}"; do
+        if [ "$skip" = 1 ]; then skip=0; continue; fi
         if [ "$dd" = 1 ]; then after+=("$t"); continue; fi
         case "$t" in
             --) dd=1 ;;
             -b|-B|--orphan|--orphan=*|-[a-zA-Z]*[bB]) return 1 ;;
-            --ours|--theirs|--conflict=*|-p|--patch|--pathspec-from-file=*) pathopt=1 ;;
+            --pathspec-from-file) co_whole=1; skip=1 ;;
+            --pathspec-from-file=*) co_whole=1 ;;
+            --ours|--theirs|--conflict=*|-p|--patch) pathopt=1 ;;
             -*) ;;
             *) pos+=("$t") ;;
         esac
     done
-    co_first=""; co_paths=()
-    if [ "$dd" = 1 ] && [ "${#after[@]}" -gt 0 ]; then
+    if [ "$co_whole" = 1 ]; then
+        co_first=${pos[0]:-}
+    elif [ "$dd" = 1 ] && [ "${#after[@]}" -gt 0 ]; then
         co_first=${pos[0]:-}
         co_paths=("${pos[@]:1}" "${after[@]}")
     elif [ "${#pos[@]}" -ge 2 ]; then
@@ -147,6 +165,9 @@ parse_checkout() {
         co_paths=("${pos[@]:1}")
     elif [ "$pathopt" = 1 ]; then
         co_paths=("${pos[@]}")
+    elif [ "$dd" = 0 ] && [ "${#pos[@]}" = 1 ]; then
+        co_single=1
+        co_paths=("${pos[0]}")
     else
         return 1
     fi
@@ -155,32 +176,39 @@ parse_checkout() {
 
 # parse_rm <args>: succeed when `git rm <args>` deletes worktree files it
 # would otherwise refuse to (-f, without --cached or a dry run), setting
-# rm_paths to the named pathspecs (empty: unknown, check the whole tree).
+# rm_paths to the named pathspecs (empty: unknown, check the whole tree --
+# always so under --pathspec-from-file, whose value is not a pathspec).
 parse_rm() {
-    local t dd=0 force=0
+    local t dd=0 force=0 whole=0 skip=0
     local -a w
     read -ra w <<<"$1"
     rm_paths=()
     for t in "${w[@]}"; do
+        if [ "$skip" = 1 ]; then skip=0; continue; fi
         if [ "$dd" = 1 ]; then rm_paths+=("$t"); continue; fi
         case "$t" in
             --) dd=1 ;;
             --cached|-n|--dry-run) return 1 ;;
             --force) force=1 ;;
+            --pathspec-from-file) whole=1; skip=1 ;;
+            --pathspec-from-file=*) whole=1 ;;
             --*) ;;
             -*f*) force=1 ;;
             -*) ;;
             *) rm_paths+=("$t") ;;
         esac
     done
+    [ "$whole" = 0 ] || rm_paths=()
     [ "$force" = 1 ]
 }
 
-# branch_reset <text>: print the branch a `checkout -B <b>` / `switch -C <b>`
-# (--force-create) would reset, if any.
+# branch_reset <text>: print the branch a command would force onto a new
+# commit, if any: `checkout -B <b>`, `switch -C <b>` (--force-create),
+# `branch -f <b> [<start>]` (--force), and the target of a forced rename or
+# copy, `branch -M|-C [<old>] <new>` (or -m/-c with -f).
 branch_reset() {
-    local args t prev sub
-    local -a w
+    local args t prev sub force move skip
+    local -a w pos
     for sub in checkout switch; do
         while IFS= read -r args; do
             read -ra w <<<"$args"
@@ -194,43 +222,89 @@ branch_reset() {
             done
         done < <(sub_args "$1" "$sub")
     done
+    while IFS= read -r args; do
+        read -ra w <<<"$args"
+        force=0; move=0; skip=0; pos=()
+        for t in "${w[@]}"; do
+            if [ "$skip" = 1 ]; then skip=0; continue; fi
+            case "$t" in
+                --force) force=1 ;;
+                --move|--copy) move=1 ;;
+                -d|--delete) move=2 ;;
+                -u|--set-upstream-to|--contains|--no-contains|--merged|--no-merged|--points-at|--sort|--format) skip=1 ;;
+                --*) ;;
+                -*)
+                    case "$t" in *f*) force=1 ;; esac
+                    case "$t" in *[MC]*) force=1; move=1 ;; *[mc]*) move=1 ;; esac
+                    case "$t" in *[dD]*) move=2 ;; esac
+                    ;;
+                *) pos+=("$t") ;;
+            esac
+        done
+        if [ "$force" = 1 ] && [ "$move" != 2 ] && [ "${#pos[@]}" -gt 0 ]; then
+            if [ "$move" = 1 ]; then
+                printf '%s\n' "${pos[${#pos[@]}-1]}"
+            else
+                printf '%s\n' "${pos[0]}"
+            fi
+            return 0
+        fi
+    done < <(sub_args "$1" branch)
 }
 
-# classify <segment>: which tier-1 operation this git segment is, if any.
+# classify <segment> [loose]: which tier-1 operation this git segment is, if
+# any, keyed on git's subcommand position (sub_args).
 #   tracked   -- loses tracked changes (reset --hard, checkout ., forced
 #                checkout/switch)
 #   untracked -- loses untracked files (clean -f); untracked+ignored with -x
-#   paths     -- overwrites named paths (checkout [<tree-ish>] [--] <paths>)
+#   paths     -- overwrites named paths (checkout [<tree-ish>] [--] <paths>,
+#                or a lone checkout word that may not be a commit)
 #   rmpaths   -- deletes named paths even when modified (rm -f)
+# With `loose`, a tier-1 verb and its flag anywhere in the text also count
+# (as `loose`): that is the whole-command test that decides whether the
+# whitelist walk runs, so a git spelled through a variable or alias still
+# can't be allowed silently. The per-segment state check uses the strict
+# form only.
 classify() {
     local seg=$1 a
-    if grep -qE '\breset\b' <<<"$seg" && grep -qE -- '--ha(rd?)?\b' <<<"$seg"; then
-        echo tracked; return
-    elif grep -qE '\bcheckout\b[[:space:]]+(--[[:space:]]+)?\.([[:space:]]|$)' <<<"$seg"; then
-        echo tracked; return
-    elif grep -qE '\b(checkout|switch)\b' <<<"$seg" \
-            && grep -qE -- "$force_flag_re|--discard-changes\b" <<<"$seg"; then
-        echo tracked; return
-    elif grep -qE '\bclean\b' <<<"$seg" && grep -qE -- "$force_flag_re" <<<"$seg"; then
-        if grep -qE -- '(^|[[:space:]])-[a-zA-Z]*[xX][a-zA-Z]*([[:space:]]|$)' <<<"$seg"; then
-            echo ignored
-        else
-            echo untracked
+    while IFS= read -r a; do
+        if [[ " $a " =~ [[:space:]]--ha(r|rd)?[[:space:]] ]]; then echo tracked; return; fi
+    done < <(sub_args "$seg" reset)
+    while IFS= read -r a; do
+        if [[ $a =~ ^(--[[:space:]]+)?\.([[:space:]]|$) ]]; then echo tracked; return; fi
+    done < <(sub_args "$seg" checkout)
+    while IFS= read -r a; do
+        if grep -qE -- "$force_flag_re|--discard-changes\b" <<<"$a"; then echo tracked; return; fi
+    done < <(sub_args "$seg" checkout; sub_args "$seg" switch)
+    while IFS= read -r a; do
+        if grep -qE -- "$force_flag_re" <<<"$a"; then
+            if grep -qE -- '(^|[[:space:]])-[a-zA-Z]*[xX][a-zA-Z]*([[:space:]]|$)' <<<"$a"; then
+                echo ignored
+            else
+                echo untracked
+            fi
+            return
         fi
-        return
-    fi
+    done < <(sub_args "$seg" clean)
     while IFS= read -r a; do
         if parse_checkout "$a"; then echo paths; return; fi
     done < <(sub_args "$seg" checkout)
     while IFS= read -r a; do
         if parse_rm "$a"; then echo rmpaths; return; fi
     done < <(sub_args "$seg" rm)
+    [ "${2:-}" = loose ] || return 0
+    if { grep -qE '\breset\b' <<<"$seg" && grep -qE -- '--ha(rd?)?\b' <<<"$seg"; } \
+        || grep -qE '\bcheckout\b[[:space:]]+(--[[:space:]]+)?\.([[:space:]]|$)' <<<"$seg" \
+        || { grep -qE '\b(checkout|switch|clean|rm)\b' <<<"$seg" \
+             && grep -qE -- "$force_flag_re|--discard-changes\b" <<<"$seg"; }; then
+        echo loose
+    fi
 }
 
 # Only look at commands that invoke git -- however it's spelled -- or carry
 # a tier-1 verb even with no git word in sight.
 git_word_re='(^|[^[:alnum:]_-])git([[:space:]]|$)'
-if ! [[ $command =~ $git_word_re ]] && [ -z "$(classify "$command")" ]; then
+if ! [[ $command =~ $git_word_re ]] && [ -z "$(classify "$command" loose)" ]; then
     exit 0
 fi
 
@@ -253,7 +327,7 @@ plain_word='[A-Za-z0-9_./:@=+,~^%-]+'
 plain_cd="^cd[[:space:]]+${plain_word}\$"
 plain_git="^git([[:space:]]+-C[[:space:]]+${plain_word})?[[:space:]]+[a-z][a-z-]*([[:space:]]+${plain_word})*\$"
 unmodeled=""
-tier1=$(classify "$command")
+tier1=$(classify "$command" loose)
 resets=$(branch_reset "$command")
 if [ -n "$tier1" ] || [ -n "$resets" ]; then
     while IFS= read -r s; do
@@ -278,7 +352,11 @@ inherited_why=""
 # dirty repo it can resolve still denies.
 unverified=""
 [ -z "$tier1" ] || unverified=${unmodeled:-$inherited_why}
-branch_why=""     # tier-2 reason for checkout -B / switch -C
+# Every git call below runs with the inherited repo-selecting variables
+# cleared and core.fsmonitor off, so the check never runs a program the
+# repo's config names. status/rev-parse/ls-tree/show-ref run no hooks.
+gitq=(env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE git -c core.fsmonitor=false)
+branch_why=""     # tier-2 reason for checkout -B / switch -C / branch -f
 plain_word_re="^${plain_word}\$"
 
 # all_plain <word>...: every word is a plain literal, usable as a pathspec.
@@ -311,7 +389,7 @@ while IFS= read -r seg; do
         gdir=$(resolve_dir "${BASH_REMATCH[2]}" "$gdir")
     fi
 
-    # checkout -B / switch -C: asks when the branch already exists, or when
+    # checkout -B / switch -C / branch -f: asks when the branch already exists, or when
     # the repo it would be looked up in isn't known.
     b=$(branch_reset "$seg")
     if [ -n "$b" ] && [ -z "$branch_why" ]; then
@@ -319,8 +397,7 @@ while IFS= read -r seg; do
             branch_why="the guard can't tell whether branch '$b' already exists"
         else
             rc=0
-            env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE \
-                git -C "$gdir" show-ref --verify -q "refs/heads/$b" 2>/dev/null || rc=$?
+            "${gitq[@]}" -C "$gdir" show-ref --verify -q "refs/heads/$b" 2>/dev/null || rc=$?
             if [ "$rc" = 0 ]; then
                 branch_why="branch '$b' already exists"
             elif [ "$rc" != 1 ]; then
@@ -342,7 +419,7 @@ while IFS= read -r seg; do
         unverified="couldn't tell which repo '$seg' runs in (a variable, substitution or 'cd -' in the path)"
         continue
     fi
-    g=(env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE git -C "$gdir" --no-optional-locks)
+    g=("${gitq[@]}" -C "$gdir" --no-optional-locks)
 
     # Which changes the op destroys, scoped to its pathspecs when they are
     # plain words (otherwise the whole tree).
@@ -355,6 +432,13 @@ while IFS= read -r seg; do
         paths)
             uflags=(-uno)
             parse_checkout "$(sub_args "$seg" checkout | head -n 1)" || true
+            # A lone word that resolves as a commit is a branch switch, which
+            # carries local changes or refuses; otherwise git reads it as a
+            # pathspec and discards its changes.
+            if [ "$co_single" = 1 ] \
+                && "${g[@]}" rev-parse -q --verify "${co_paths[0]}^{commit}" >/dev/null 2>&1; then
+                continue
+            fi
             p=("${co_paths[@]}")
             if [ -n "$co_first" ]; then
                 if "${g[@]}" rev-parse -q --verify "$co_first^{tree}" >/dev/null 2>&1; then
@@ -363,7 +447,9 @@ while IFS= read -r seg; do
                     p=("$co_first" "${p[@]}")
                 fi
             fi
-            if [ "${#p[@]}" -gt 0 ] && all_plain "${p[@]}"; then pathspec=(-- "${p[@]}"); fi
+            if [ "$co_whole" = 0 ] && [ "${#p[@]}" -gt 0 ] && all_plain "${p[@]}"; then
+                pathspec=(-- "${p[@]}")
+            fi
             ;;
         rmpaths)
             uflags=(-uno)
@@ -381,17 +467,18 @@ while IFS= read -r seg; do
     if [ "$op" = untracked ] || [ "$op" = ignored ]; then
         status=$(grep -E '^(\?\?|!!) ' <<<"$status" || true)
     fi
-    # Checking paths out of a tree-ish also overwrites untracked files that
-    # exist in that tree-ish.
+    # Checking paths out of a tree-ish also overwrites untracked and ignored
+    # files that exist in that tree-ish.
     if [ -n "$treeish" ]; then
-        if ! untracked=$("${g[@]}" status --porcelain -uall "${pathspec[@]}" 2>/dev/null) \
+        if ! untracked=$("${g[@]}" status --porcelain -uall --ignored=traditional "${pathspec[@]}" 2>/dev/null) \
             || ! intree=$("${g[@]}" ls-tree -r --name-only --full-tree "$treeish" 2>/dev/null); then
             unverified="'git status' failed in $gdir, so the tree's state is unknown"
             continue
         fi
-        hit=$(sed -n 's/^?? //p' <<<"$untracked" | grep -Fx -f <(printf '%s\n' "$intree") || true)
+        hit=$(sed -nE 's/^(\?\?|!!) //p' <<<"$untracked" | grep -Fx -f <(printf '%s\n' "$intree") || true)
         if [ -n "$hit" ]; then
-            status+="${status:+$'\n'}$(sed 's/^/?? /' <<<"$hit")"
+            hit=$(grep -Fx -f <(sed 's/^/?? /' <<<"$hit"; sed 's/^/!! /' <<<"$hit") <<<"$untracked" || true)
+            status+="${status:+$'\n'}$hit"
         fi
     fi
     if [ -n "$status" ]; then
@@ -424,11 +511,22 @@ if [ -n "$unverified" ]; then
     reason="This git command discards uncommitted work if the tree is dirty, and the guard $unverified. Run 'git status --short' in that repo first; if anything is listed that isn't yours to drop, stop and ask the user."
 fi
 
-# git checkout -B / switch -C onto an existing branch: moves its pointer to
-# the new start point, leaving commits only on the old tip reachable from the
-# reflog alone.
+# git checkout -B / switch -C / branch -f (or a forced branch rename/copy)
+# onto an existing branch: moves its pointer, leaving commits only on the old
+# tip reachable from the reflog alone.
 if [ -z "$reason" ] && [ -n "$branch_why" ]; then
-    reason="This resets a branch pointer ('checkout -B' / 'switch -C') and $branch_why. Commits only on its current tip stop being reachable from any branch. Confirm they are safe to drop, or use -b/-c to create a new branch instead."
+    reason="This resets a branch pointer ('checkout -B' / 'switch -C' / 'branch -f' / 'branch -M|-C') and $branch_why. Commits only on its current tip stop being reachable from any branch. Confirm they are safe to drop, or create a new branch instead."
+fi
+
+# git read-tree -u (with -m or --reset): writes the read tree into the
+# working tree, overwriting local changes to the paths it updates.
+if [ -z "$reason" ]; then
+    while IFS= read -r a; do
+        if [[ " $a " =~ [[:space:]](-[a-zA-Z]*u[a-zA-Z]*|--update)[[:space:]] ]]; then
+            reason="'git read-tree -u' writes the tree it reads into the working tree, overwriting uncommitted changes to the paths it updates. Confirm nothing uncommitted is about to be lost."
+            break
+        fi
+    done < <(sub_args "$command" read-tree)
 fi
 
 # git push --force / -f
@@ -446,8 +544,21 @@ fi
 
 # git branch -D (force delete, unlike the plain -d the ship skill uses for
 # its own already-merged post-PR cleanup)
-if [ -z "$reason" ] && grep -qE '\bbranch\b' <<<"$command" \
-    && grep -qE -- '(^|[[:space:]])-[a-zA-Z]*D[a-zA-Z]*([[:space:]]|$)' <<<"$command"; then
+# -d/--delete together with -f/--force is the same force delete.
+branch_force_delete() {
+    local a
+    while IFS= read -r a; do
+        a=" $a "
+        if [[ $a =~ [[:space:]](-[a-zA-Z]*d[a-zA-Z]*|--delete)[[:space:]] ]] \
+            && [[ $a =~ [[:space:]](-[a-zA-Z]*f[a-zA-Z]*|--force)[[:space:]] ]]; then
+            return 0
+        fi
+    done < <(sub_args "$1" branch)
+    return 1
+}
+if [ -z "$reason" ] && { { grep -qE '\bbranch\b' <<<"$command" \
+    && grep -qE -- '(^|[[:space:]])-[a-zA-Z]*D[a-zA-Z]*([[:space:]]|$)' <<<"$command"; } \
+    || branch_force_delete "$command"; }; then
     reason="'-D' force-deletes a branch even if it has commits not merged anywhere else -- unlike the plain '-d' the ship skill uses for its already-merged post-PR cleanup. Confirm the branch's commits are actually safe to lose."
 fi
 
@@ -472,8 +583,10 @@ fi
 # a single file, for symmetry with the checkout force gate.
 # `restore` is anchored to a following space/EOL, not `\brestore\b`, so a
 # path like .../restore-root/ doesn't read as the verb.
+# --pathspec-from-file makes the target every path the file lists, so it is
+# treated as the whole tree, like a dot.
 if [ -z "$reason" ] && grep -qE '\brestore([[:space:]]|$)' <<<"$command" \
-    && { grep -qE -- '(^|[[:space:]])--worktree([[:space:]]|$)|(^|[[:space:]])-[wW]([[:space:]]|$)' <<<"$command" \
+    && { grep -qE -- '(^|[[:space:]])--worktree([[:space:]]|$)|(^|[[:space:]])-[wW]([[:space:]]|$)|(^|[[:space:]])--pathspec-from-file([[:space:]=]|$)' <<<"$command" \
          || grep -qE '\brestore([[:space:]]([^;|&]*[[:space:]])?)\.([[:space:]]|$)' <<<"$command"; }; then
     reason="'git restore' onto the working tree discards uncommitted changes with no undo -- the modern spelling of 'git checkout -- .', which this hook also catches. Confirm nothing uncommitted is about to be lost ('--staged .' only unstages but trips too; '--staged <file>' without a dot does not trip)."
 fi
