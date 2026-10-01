@@ -1,87 +1,27 @@
 # Open threads, for agents
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-01_
 
-_Sibling reviewed: 2026-10-01 -- source reworded a resolved-finding aside (the counts table is generated now); this page never carried it_
+Condensed from [open-threads.md](open-threads.md).
 
-Condensed from [open-threads.md](open-threads.md). Live threads only.
+Not a tracker since 2026-10-01; this repo's GitHub issues are.
 
-**Before investigating any symptom: `just threads "<keywords>"`** — it
-covers GitHub issues plus `wiki/`, `lessons-learned.md` and
-`_loose-ends/bugs-pending-submission/` at once. Skill `investigate-bug`.
-This page is not a tracker; this repo's GitHub issues are.
-
-## Open issues worth knowing before you start work
-
-- **#205** — CI can only *evaluate*. `nix flake check + module tree` forces
-  each host's toplevel as an evaluation, never builds it; a bump that
-  evaluates but breaks a host stays invisible until `just switch` (§§36–37).
-  Proposal: build on cube. **If it lands, rewrite
-  [maintenance-schedule.md](maintenance-schedule.md) item 10's "Why not
-  sops"** — it relocates the PAT rather than removing it.
-- **#130** — extend backups past cube to durandal/tenacity/lysithea.
-- **#75** — remove `carapace-completer-read-fix.bash` once ble.sh or carapace
-  fix the bug upstream. Check its own "how to check" steps before assuming
-  it's still needed.
-- ~~**#298**~~ — **fixed 2026-09-14, closed.** Cube's tailscaled served no
-  `svc:` MagicDNS records, so server-side fetches ON cube of per-service
-  hostnames failed (hard-IP curl worked). Cause: no tailnet grant from
-  `tag:homelab-cube` to its own `svc:` destinations (existing grants all
-  named `autogroup:members`).
-- **#299** — homepage's gcal secret iCal addresses (the one human input
-  the calendar widgets still wait on; sops key `homepage-env`).
-
-## Written up, deliberately not filed
-
-`_loose-ends/bugs-pending-submission/` holds three reports against
-third-party projects. **Filing outside `NireBryce/nixos-configs` happens only when the user
-says so explicitly, in those words, for that specific report** — never as a
-housekeeping pass over this list.
-
-- nixpkgs: vscode ≥ 1.129 patches the wrong ripgrep on Linux (2026-08-11;
-  re-checked 2026-09-16 — fleet's 1.136.1 unaffected, `master` still carries
-  the Darwin-only conditional).
-- amd-s2idle: sleep residency reported 100× too high (2026-08-12).
-- Jovian-NixOS: `amd_iommu=off` blocks s0i3 on non-Deck handhelds with an
-  NPU (2026-08-12).
-
-## Undecided questions
-
-- Are the `peripherals` modules (`logitech-g600`/`zsa-moonlander`) still
-  wanted on a handheld? Is full desktop package parity still wanted on
-  tenacity?
-- **User split, not started**: `elly` (experimental) → `nire`
-  (user-package material) → dedicated non-interactive accounts, as a
-  confused-deputy mitigation, once the config stabilizes. See
-  [categories/elly.md](categories/elly.md#elly-as-the-experimental-user).
-- **QNAP (QuTS hero) SSH password auth: cannot be disabled — confirmed
-  impossible 2026-09-16.** Decided, not pending: no such setting exists in
-  QuTS hero. Password auth is a permanent condition of restic-over-SFTP to
-  the NAS; further mitigation (firewalling, idle SSH) is QNAP
-  admin-console territory, outside this repo.
-- **Forgejo has no local CI/CD yet** — mirroring `.github/workflows/` onto
-  Forgejo Actions hasn't been started.
-- Idea placeholders with no content:
+- **Before investigating any symptom: `just threads "<keywords>"`** —
+  issues + `wiki/` + `_loose-ends/bugs-pending-submission/` at once. Skill
+  `investigate-bug`.
+- `gh issue list --repo NireBryce/nixos-configs [--label <l>]`. Labels:
+  `upstream` (bug in a third-party project), `question` (undecided, the
+  user's call), `pending-setup` (one-time step on a live service —
+  [homelab/pending-setup-for-agents.md](homelab/pending-setup-for-agents.md)),
+  plus `bug`/`enhancement`/`documentation`.
+- **`upstream` issues and `_loose-ends/bugs-pending-submission/` write-ups
+  are never filed upstream** without the user saying so explicitly, in
+  those words, for that specific report. Tracking ≠ working.
+- New loose end → skill `propose-issue`, not a line here.
+- Not tracked on purpose (no done-condition):
   [`../flake/scripts/script-wishlist.md`](<../flake/scripts/script-wishlist.md>),
-  and the "things to look into" list at the end of
-  [`../flake/doc/notes-and-fixes.md`](<../flake/doc/notes-and-fixes.md>).
-
-## Tailscale Services traps (the `svc:` work, done 2026-09-11)
-
-- **Two API endpoint names are counter-intuitive** — ACL is `/acl`, not
-  `/policy`; vip-services is `/vip-services/{name}`, not `/by-name/{name}`.
-  Read `flake/scripts/tailscale-acl.py`'s own comments. **`vip-get` needs
-  the `svc:`-prefixed name**, or every service 404s including real ones.
-- **A recorded change is not an applied change.** An autoApprover sat in
-  this repo's policy copy for a day un-POSTed, with the Service object never
-  created. `just tailscale-acl diff` is the check.
-- **Creating and updating a Service want different bodies** — an update 400s
-  without the `addrs` the control plane assigned. Not committed (they'd rot
-  on a recreate); `vip-put` merges them.
-- **A new Service is not activated by re-running `serve set-config`** against
-  a standing advertisement. Restart `tailscaled`, then `tailscale-serve`.
-
-## Not indexed here on purpose
-
-Anything under an `ignore`/`IGNORE`-prefixed path (`ignore/`,
-`flake/!IGNORE-maybe-useful-chunks/`) is a retired experiment.
+  [`../flake/doc/notes-and-fixes.md`](<../flake/doc/notes-and-fixes.md>)'s
+  look-into list; self-hosted booking dropped 2026-08-24 (not in nixpkgs,
+  no module, PHP); user split (`elly` -> `nire`, then per-purpose
+  accounts) planned, not started. `ignore`/`IGNORE`-prefixed paths are
+  retired experiments.

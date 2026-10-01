@@ -1,6 +1,6 @@
 # Architecture & module system
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-01_
 
 For *why* this repo runs flake-parts at all, see [flake-parts.md](flake-parts.md)
 first — this page is the mechanism built on top of that, not the reason for
@@ -73,6 +73,6 @@ vm-networking — optional, cube only). Podman/distrobox live in
 since 2026-08-22, nested under the `homelab` umbrella since 2026-08-27 —
 imported by cube only (durandal dropped it 2026-08-27, same day as
 `virtualization`; tenacity 2026-09-26). See
-[`categories/homelab.md`](categories/homelab.md) and `AGENTS.md`'s
-Architecture section. A stale memory of "virtualization is the podman one"
+[`categories/homelab.md`](categories/homelab.md) and
+`.agents/rules/homelab.md`. A stale memory of "virtualization is the podman one"
 is exactly backwards.

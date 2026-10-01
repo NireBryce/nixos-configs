@@ -73,7 +73,8 @@ MARKERS = [
 # it is, and a "confirmed live" inside it is describing the finished work,
 # not a live setting. Without this the two cancelled out and a Done item
 # scored BELOW a still-pending one (hit while writing this, on
-# homelab/pending-setup.md items 3 and 4).
+# homelab/pending-setup.md items 3 and 4, before that page became a
+# pointer to issues on 2026-10-01).
 CONCLUSIVE = [
     (6, 'heading: historical', re.compile(r'\(historical\)', re.I)),
     (6, 'heading: retired', re.compile(r'^\s*retired\b', re.I)),

@@ -1,6 +1,6 @@
 # `backup` — `general-config/homelab/backup/`
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-01_
 
 [restic](https://restic.net/), backing up `nire-cube`'s own service state to
 the QNAP NAS already on the network. Added 2026-08-28, cube-only, against
@@ -52,10 +52,9 @@ deliberate departure from #87's original SFTP sketch (restic encrypts
 client-side regardless of backend, so local-path gets the same
 encryption-at-rest without SSH on the QNAP). The stated trade-off — NFS
 export trust is IP-based, not keyed — is what broke it: a real switch hit
-`mount.nfs: access denied by server`, the share's host-access list never
-got cube added, and the QNAP admin console has no way to force key-only
-SSH anyway. So: issue #87's original plan, SFTP — real per-connection key
-auth rather than a host-IP allowlist.
+`mount.nfs: access denied by server`, and the share's host-access list
+never got cube added. So: issue #87's original plan, SFTP — real
+per-connection key auth rather than a host-IP allowlist.
 
 The module now points at `sftp:nire@ts-hive:/share/restic-backup/cube`,
 authenticating with a dedicated ed25519 key (generated for this, not the
@@ -174,12 +173,9 @@ Live-checked 2026-09-05/06, over ssh to `nire-cube.local`:
 - ~~The sqlite consistency bug — root cause unknown~~ — **root-caused,
   fixed, and confirmed live** (above): a real restore of the new path
   opened a genuine, complete Forgejo database.
-- **SSH's own exposure is mitigated, as of 2026-08-31** — QuTS hero has no
-  toggle to force key-only auth, so this was done at the network level
-  instead: port 22 is LAN-blocked and tailnet-only (confirmed live from
-  both lysithea and cube — the LAN address times out, `ts-hive`'s tailnet
-  address still connects), and QNAP's own brute-force protection is on
-  (taken on confirmation, not independently checked). See
+- **SSH on the NAS is tailnet-only, as of 2026-08-31** — port 22 is
+  LAN-blocked (confirmed live from both lysithea and cube — the LAN
+  address times out, `ts-hive`'s tailnet address still connects). See
   [backup-history.md](backup-history.md) for the full account.
 - **Tailnet-only means the tailnet policy has to let cube in.** cube has
   been tagged `tag:homelab-cube` since 2026-09-07, and a tagged device is
@@ -208,10 +204,11 @@ after this category was added.
 - [git-forge](git-forge.md), [monitoring](monitoring.md),
   [shortlinks](shortlinks.md) — the three services this category actually
   backs up.
-- [../open-threads.md](../open-threads.md) — "Left open by the cube service
-  stack", where issue #87 was first tracked.
-- [../homelab/pending-setup.md](../homelab/pending-setup.md) — the two
-  remaining human steps, alongside the fleet's other one-time setup.
+- [#87](https://github.com/NireBryce/nixos-configs/issues/87) — the
+  issue this category closed; extending it past cube is
+  [#130](https://github.com/NireBryce/nixos-configs/issues/130).
+- [../homelab/pending-setup.md](../homelab/pending-setup.md) — the
+  fleet's one-time setup steps (backups' are all done).
 - [../homelab/backup-runbook.md](../homelab/backup-runbook.md) — the actual
   commands (finishing setup, status, manual backup, restore).
 - [../homelab/rustic.md](../homelab/rustic.md) — an interactive TUI that can

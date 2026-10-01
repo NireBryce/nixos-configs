@@ -1,6 +1,6 @@
 # Name resolution & reverse DNS
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-01_
 
 Which name answers for what in this fleet — forward and reverse — and
 where those names actually show up when you're reading logs, status
@@ -10,18 +10,41 @@ stub, 2026-09-14, per issue #294's ask; the *config* behind each
 behavior is owned by the module named in the last section, and this
 page links rather than restates it.
 
-> **Condensed version:**
-> [name-resolution-for-agents.md](name-resolution-for-agents.md) — the
-> same ground with the narrative stripped out, for an agent (or a human
-> in a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
 ## Contents
 
+- [Quick facts](#quick-facts)
 - [Which name source answers for what](#which-name-source-answers-for-what)
 - [Reverse DNS (PTR)](#reverse-dns-ptr)
 - [Where names show up in practice](#where-names-show-up-in-practice)
 - [Traps, and where the config lives](#traps-and-where-the-config-lives)
+
+## Quick facts
+
+Folded in from the retired `name-resolution-for-agents.md` sibling,
+2026-10-01. Detail and evidence in the sections below.
+
+| name / query | answered by | note |
+|---|---|---|
+| `*.moose-micro.ts.net`, forward and PTR | MagicDNS (`100.100.100.100`) via resolved's stub | tailscale0 routes `~moose-micro.ts.net`, `~100.100`–`~107.100.in-addr.arpa`, tailnet `ip6.arpa` |
+| `*.local` | avahi, LAN side only | the fallback when Tailscale is down on the client |
+| everything else | LAN router (DHCP resolvers) | |
+| `-x` device 100.x / v6 | `ts-<name>.moose-micro.ts.net.` | the DEVICE name, never `nire-<name>` |
+| `-x` `svc:` VIP | its own name (`git.moose-micro.ts.net.`) | |
+| `go` | its own tailnet device (100.98.81.59) | device rules, not a service VIP |
+
+- `svc:` records are netmap `ExtraRecords`, visibility-granted: a tagged
+  host gets none without a grant whose `src` is its tag (#298). First
+  check when forward or reverse fails:
+  `tailscale status --json | jq .ExtraRecords`.
+- `.DNSName` in `tailscale status --json` is authoritative; `.HostName`
+  can differ.
+- `getent hosts <ip>` → the PTR name; won't grep against
+  `networking.hostName`.
+- Caddy on cube sees `remote_ip: 127.0.0.1` for every request — identify
+  traffic by vhost, or read the app's / tailscaled's logs.
+- Config and the four name traps: `tailscale.nix`, `resolved.nix`,
+  `avahi.nix` (`flake/modules/general-config/system/networking/`), and the
+  `tailscale-services/README.md` — [last section](#traps-and-where-the-config-lives).
 
 ## Which name source answers for what
 

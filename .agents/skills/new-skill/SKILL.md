@@ -57,6 +57,17 @@ rejected the latter for `new-flake-module` on 2026-08-22; the accepted form
 is that skill's current description). A short flow description without
 literal "How to" wording is fine (`ship`'s) as long as it states purpose.
 
+## Frontmatter this repo doesn't use
+
+Only `name`, `description`, and `when_to_use` (the skill-files check
+rejects any other key). In particular, no `allowed-tools` and no dynamic
+context injection (an exclamation mark followed by a backticked command, or
+a fence opened with three backticks and an exclamation mark): both let a
+skill run commands without a prompt, and the hooks can't see an injected
+command. The skill-files check flags injection syntax anywhere in a
+SKILL.md, so in prose never put an exclamation mark directly before a
+backtick.
+
 ## Steps
 
 1. **Pick a name**: kebab-case, matching the directory exactly

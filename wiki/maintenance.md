@@ -1,6 +1,6 @@
 # Fleet maintenance
 
-_Last modified: 2026-09-28_
+_Last modified: 2026-10-01_
 
 The fleet's recurring upkeep in one place: the weekly flake.lock PR,
 deploying to a host and the verification habit around it, and store
@@ -11,19 +11,31 @@ certificates are not here** — they are
 [maintenance-schedule.md](maintenance-schedule.md)'s subject and stay
 there.
 
-> **Condensed version:**
-> [maintenance-for-agents.md](maintenance-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
 ## Contents
 
+- [Quick facts](#quick-facts)
 - [What lives here and what doesn't](#what-lives-here-and-what-doesnt)
 - [Lockfile updates](#lockfile-updates)
 - [Deploying, and the verification habit](#deploying-and-the-verification-habit)
 - [Store hygiene](#store-hygiene)
 - [The runner VM](#the-runner-vm)
+
+## Quick facts
+
+Folded in from the retired `maintenance-for-agents.md` sibling,
+2026-10-01. Reasons and detail in the sections below.
+
+| task | command / where |
+|---|---|
+| weekly lock PR | `.github/workflows/update-flake-lock.yml`, cron `0 9 * * 1` + `workflow_dispatch` → branch `update_flake_lock_action` → PR `chore: update flake.lock` into `experimental`; review the lock diff, merge via skill `ship` |
+| lock PR broken | watch issue `update-flake-lock: weekly lock PR needs attention`; branch ahead with no PR = token (`FLAKE_LOCK_TOKEN`) failure |
+| lock by hand | `just update`; hand-pinned packages: skill `pinned-packages` |
+| deploy | `just build` / `boot` / `switch` **on the host itself**; `just boot` for initrd/bootloader/impermanence |
+| around every deploy | `just baseline` (before, sudo) → `just fingerprint` / `just diff <ref>` → `just diff-deployed` → `just hm-collisions` (first switch) → `just root-drift` (durandal, tenacity) → `just home-drift` |
+| user-profile GC | automatic: `nh-clean.timer` (user unit), Mondays 00:00 |
+| system-profile GC | manual: `sudo nh clean all --keep-since 7d --keep 5` or `sudo nix-collect-garbage -d` |
+| recreate the runner VM now | on cube: `sudo systemctl restart forge-runner-cycle` |
+| credentials, keys, certs | not here — [maintenance-schedule.md](maintenance-schedule.md) |
 
 ## What lives here and what doesn't
 
@@ -43,7 +55,7 @@ this page links to the others rather than restating them:
 
 The dedicated page for this topic is [flake-lock.md](flake-lock.md).
 The weekly PR: `.github/workflows/update-flake-lock.yml` runs Mondays
-09:00 UTC (also on demand via `workflow_dispatch`), pushes the
+09:00 UTC (cron `0 9 * * 1`; also on demand via `workflow_dispatch`), pushes the
 `update_flake_lock_action` branch, and opens a PR titled
 `chore: update flake.lock` against `experimental`.
 
@@ -137,9 +149,9 @@ Half automatic, half not:
 Actions runner ([git-forge](categories/git-forge.md)), is recreated from
 its base image for every job: `forge-runner-cycle` registers a
 single-use runner, starts a fresh guest, and waits for it to power itself
-off after one job. There is no periodic reset to remember. A lock bump
+off after one job (`actions-runner.nix`). There is no periodic reset to remember. A lock bump
 reaches the guest on the next cycle after `just switch` on cube; a switch
-never restarts the guest, so it never kills a running job (a change to
+never restarts the guest (`autostart = false`), so it never kills a running job (a change to
 the cycle script itself does).
 
 To throw away an idle guest now (the loop's first step recreates it):

@@ -2,6 +2,8 @@
 
 _Last modified: 2026-09-29_
 
+_Sibling reviewed: 2026-10-01 -- source's restic rotation-log link repointed from pending-setup.md (item gone) to backup-history.md; this page carries no such link_
+
 Condensed from [maintenance-schedule.md](maintenance-schedule.md). Tended by
 skill [`maintenance-schedule`](../.agents/skills/maintenance-schedule/SKILL.md).
 

@@ -2,20 +2,12 @@
 
 _Last modified: 2026-10-01_
 
-Todos, half-formed ideas, and things-to-look-into notes left in various
-corners of the tree, plus upstream bugs found here but not yet filed. None
-of this is acted on just by being listed here — this page exists so these
-don't have to be rediscovered by grepping the whole tree.
-
-**Before starting work on any of these, or investigating a symptom that
-might already be one of them: `gh issue list --search "<keywords>"` in
-addition to grepping this page.** As of 2026-08-24 this repo actually files
-GitHub issues (see below) rather than leaving everything here as prose —
-started specifically because the ble.sh/carapace bug below had already been
-independently rediscovered once, at real cost, before it was tracked this
-way. `_loose-ends/bugs-pending-submission/` (next section) is still the
-write-up stage for a bug against a *third-party* project, before it's filed there; this
-repo's own tracker is the issue queue, not another markdown list.
+The repo's loose ends (todos left in code, upstream bugs found here,
+undecided design questions) are GitHub issues on this repo, not entries on
+this page. Until 2026-10-01 this page listed them as prose, and most of its
+edits were status flips; the open ones moved to issues that day. What stays
+here is what isn't a tracked item: where to look, and the rule about
+third-party write-ups.
 
 > **Condensed version:**
 > [open-threads-for-agents.md](open-threads-for-agents.md) — the same
@@ -25,260 +17,61 @@ repo's own tracker is the issue queue, not another markdown list.
 
 ## Contents
 
-- [Tracked as GitHub issues](#tracked-as-github-issues)
-- [Pending upstream bug reports](#pending-upstream-bug-reports)
-- [Todos and ideas left next to the code](#todos-and-ideas-left-next-to-the-code)
-- [Left open by the cube service stack, 2026-08-24](#left-open-by-the-cube-service-stack-2026-08-24)
-- [Not covered here](#not-covered-here)
+- [Where the threads are](#where-the-threads-are)
+- [Upstream write-ups are not filed upstream](#upstream-write-ups-are-not-filed-upstream)
+- [Not tracked, on purpose](#not-tracked-on-purpose)
 
-## Tracked as GitHub issues
+## Where the threads are
 
-- **[#205 — build the `flake.lock` bump on cube before proposing it,
-  instead of only evaluating it in
-  CI](https://github.com/NireBryce/nixos-configs/issues/205)** — open,
-  filed 2026-09-08. The weekly lock workflow (#204) can only *evaluate*:
-  `nix flake check + module tree` forces each host's toplevel as an
-  evaluation, and CI never builds it, so an input bump that evaluates fine
-  and breaks a host stays invisible until someone runs `just switch` on
-  real hardware — §§36–37 exactly. cube is `x86_64-linux` and already runs
-  scheduled work against a sops credential
-  ([restic.nix](../flake/modules/general-config/homelab/backup/restic/restic.nix) is
-  the precedent for the whole shape), so it can do what a runner
-  structurally cannot. Note this **relocates** the PAT rather than removing
-  it — same scopes, same expiry, `/run/secrets/` instead of a GitHub
-  Actions secret — so it is a wash on credential hygiene, and
-  [maintenance-schedule.md](maintenance-schedule.md) item 10's "Why not
-  sops" reasoning would need rewriting if it lands.
-- **[#87 — no backups anywhere in the fleet; decide a scheme for cube's
-  service state](https://github.com/NireBryce/nixos-configs/issues/87)** —
-  **closed 2026-09-06.** restic-over-SFTP to the QNAP, with a real restore
-  drill performed twice (once found and fixed a real `backupPrepareCommand`
-  sqlite-staging bug, once more confirmed a clean restore) — the bar the
-  issue itself set for "done". Full account:
-  [backup.md](categories/backup.md) /
-  [backup-history.md](categories/backup-history.md). Extending the same
-  coverage to durandal/tenacity/lysithea is now
-  **[#130](https://github.com/NireBryce/nixos-configs/issues/130)**.
-- **[#75 — remove `carapace-completer-read-fix.bash` once ble.sh/carapace
-  fix it upstream](https://github.com/NireBryce/nixos-configs/issues/75)**
-  — open. The follow-on to #72 below: a local workaround stays in the tree
-  until the real bug is fixed in one of the two projects it's actually in,
-  and this is the reminder to check rather than let it sit unnoticed.
-  Doesn't need revisiting on any particular schedule — but before assuming
-  it's still needed just because nobody's looked, see its own "how to
-  check" steps.
-- **[#72 — ble.sh + carapace: spurious `read: `': not a valid identifier` on
-  Tab / auto-complete](https://github.com/NireBryce/nixos-configs/issues/72)**
-  — closed 2026-08-24, confirmed via a real `just switch` on `nire-cube`.
-  Kept listed here as a worked example of the "check first" pattern this
-  section's own header describes. Full diagnosis:
-  [blesh.md](categories/shell-config/blesh.md).
+```sh
+gh issue list --repo NireBryce/nixos-configs                     # everything open
+gh issue list --repo NireBryce/nixos-configs --label upstream    # bug lives in a third-party project
+gh issue list --repo NireBryce/nixos-configs --label question    # undecided, waiting on the user
+gh issue list --repo NireBryce/nixos-configs --label pending-setup  # one-time step on a live service
+```
 
-## Pending upstream bug reports
+**Before starting work on a thread, or investigating a symptom that might
+already be one:** `just threads "<keywords>"` searches the issues and
+greps `wiki/` and `_loose-ends/bugs-pending-submission/` in one pass
+(skill `investigate-bug`). This exists because a ble.sh/carapace bug was
+rediscovered from scratch once, at real cost, before it was tracked
+([#72](https://github.com/NireBryce/nixos-configs/issues/72)).
 
-`_loose-ends/bugs-pending-submission/` — written up, not yet filed against
-the third-party project itself, and **not filed by anyone here on their own
-initiative**: per `CLAUDE.md`, filing outside `NireBryce/nixos-configs`
-happens only when the user says so explicitly, in those words, for that
-specific report — not as a housekeeping pass over this list:
+The `pending-setup` label is the fleet-side counterpart, explained on
+[homelab/pending-setup.md](homelab/pending-setup.md).
 
-- **[nixpkgs: vscode ≥ 1.129 patches the wrong ripgrep on Linux](../_loose-ends/bugs-pending-submission/2026-08-11-bugreport-nixpkgs-vscode-ripgrep.md)**
-  (2026-08-11, still present on nixpkgs `master` as of that date).
-- **[amd-s2idle: hardware sleep residency reported 100× too high](../_loose-ends/bugs-pending-submission/2026-08-12-bugreport-amd-s2idle-residency-percent.md)**
-  (2026-08-12, against `amd-debug-tools` 0.2.20).
-- **[Jovian-NixOS: `amd_iommu=off` blocks s0i3 on non-Deck handhelds with an NPU](../_loose-ends/bugs-pending-submission/2026-08-12-bugreport-jovian-amd-iommu-s0i3.md)**
-  (2026-08-12, found on a GPD G1617-02-L).
+## Upstream write-ups are not filed upstream
 
-## Todos and ideas left next to the code
+`_loose-ends/bugs-pending-submission/` holds bug reports written up against
+third-party projects (nixpkgs, `amd-debug-tools`, Jovian-NixOS), each with
+an `upstream`-labelled issue here that tracks it ([#444](https://github.com/NireBryce/nixos-configs/issues/444),
+[#442](https://github.com/NireBryce/nixos-configs/issues/442), [#443](https://github.com/NireBryce/nixos-configs/issues/443)). **Neither the file
+nor the issue is a reason to file it upstream**: per `AGENTS.md`, filing
+outside `NireBryce/nixos-configs` happens only when the user says so
+explicitly, in those words, for that specific report — not as a
+housekeeping pass over this list or the label. Tracking one here is not
+working it.
 
-- **Three findings from a 2026-09-11 read of every human-facing half of a
-  `-for-agents` pair — all fixed.** The read itself stood: no decay into
-  duplicate siblings (verbatim line overlap 0–5% across all 19 pairs,
-  nearly every section heading a *why* rather than a *what*). What each
-  finding got:
-  - **Header machinery before orientation** — the reorder landed
-    wiki-wide 2026-09-13/14 (PR #292's 18 paired pages, then the
-    remaining 20 from issue #302). The 2026-09-27 completion pass found
-    two stragglers:
-    `categories/virtualization.md`'s pointer had been re-inserted above
-    its intro by a later edit, and `maintenance-schedule.md` had never
-    had an intro — its "What this is" section became the intro prose,
-    heading dropped.
-  - **[categories/system.md](categories/system.md)'s "Subdirectories at a
-    glance" table** — replaced 2026-09-27 by prose on the four
-    subdirectories with something to say (`home-manager/`, `secrets/`,
-    `networking/`, `impermanence/`), pointing at the sibling for the
-    full inventory. The ls-able per-file rows died with the table; the
-    two rows carrying a why (`storage/smartd.nix`,
-    `security/sudo-wheel-only.nix`) moved to the sibling's
-    off-category files table.
-  - **[disk-formatting.md](disk-formatting.md)'s step 3** — now carries
-    the disko invocation itself, on both halves (2026-09-27), labelled
-    as quoted from disko's docs and not run end to end on any host here.
+## Not tracked, on purpose
 
-  A fourth finding, the `## Counts` table sitting on the human style
-  guide, was fixed the same day rather than listed (it moved to the
-  sibling; generated there by `just wiki-gen` since 2026-10-01). Two
-  judgment calls stand as they were: the `homelab/` pages carry an
-  explicit "What's verified here" section and the `categories/` pages
-  carry the same facts inline instead, which is arguably better writing
-  at the cost of a full read to answer "is this known to work?"; and the
-  "Condensed version" blockquote ends with an instruction to whoever
-  *edits* the page, sitting in the header of the page a human *reads*.
-- **[`../flake/scripts/script-wishlist.md`](<../flake/scripts/script-wishlist.md>)**
-  — bare headings only (`vicinae`, `just`, `espanso`, `other`), no content
-  yet. A placeholder for future script ideas, not current work.
-- **Are the `peripherals` modules (`logitech-g600`/`zsa-moonlander`) still
-  wanted on a handheld? Is full desktop package parity still wanted on
-  tenacity?** Two open questions, neither decided, rescued from a deleted
-  handoff doc into `claude cave/2026-08-09 things to look into
-  eventually.md` — itself removed 2026-09-01 (still in git history; also
-  carried a security-hardening reference link, now only recoverable there).
+Notes that have no "done when", so an issue would only sit open:
+
+- Idea placeholders:
+  [`../flake/scripts/script-wishlist.md`](<../flake/scripts/script-wishlist.md>)
+  (bare headings) and the "things to look into" list ending
+  [`../flake/doc/notes-and-fixes.md`](<../flake/doc/notes-and-fixes.md>).
+- Self-hosted booking (Easy!Appointments vs LibreBooking) was compared
+  2026-08-24 and not pursued: neither is in nixpkgs or has a NixOS module,
+  and both are PHP apps wanting a writable install dir. The write-up is
+  in git history (`claude cave/`, removed 2026-09-01).
 - **User split, not yet started.** `elly` is deliberately the experimental
-  user — everything lands there first. Plan: offload what's really
+  user — everything lands there first. Plan: move what's really
   user-package material onto `nire`, then, once the config has stabilized,
-  split anything that doesn't need direct human invocation into its own
-  dedicated user account, as a confused-deputy mitigation (a compromised or
-  misbehaving program running as one of those users shouldn't inherit the
-  whole of `elly`'s authority). Recorded now, rather than left purely
-  aspirational, because an LLM driving `just switch` on real hardware makes
-  the actual migration cheap enough to eventually just do — see
-  [categories/elly.md](categories/elly.md#elly-as-the-experimental-user)
-  and top-level [../README.md](../README.md)'s Users section.
-- `claude cave/2026-08-24-evaluation-self-hosted-booking.md` (removed
-  2026-09-01, still in git history if wanted) — Easy!Appointments vs
-  LibreBooking, compared 2026-08-24 and explicitly not pursued. What's
-  recorded: they aren't competitors (one books a person's time, the other
-  books a *thing*), **neither is in nixpkgs and neither has a NixOS
-  module**, and the unanswered first question if it restarts: both are PHP
-  apps wanting a writable install dir, so podman-vs-hand-written-module.
-  Also corrected a from-memory claim about Cal.com's license.
-- **[`../flake/doc/notes-and-fixes.md`](<../flake/doc/notes-and-fixes.md>)**
-  ends with a "things to look into" list — MyNixOS, nixpkgs-wayland,
-  nix-direnv, haumea, flakelight, flake-utils(-plus), devshell, devbox,
-  devenv, nixos-shell, nix-index, nix-prefetch — and an unanswered "learn
-  what `outputs @ inputs:` means and figure out specialArgs" note. Also
-  covered from the fix-snippet angle on [conventions.md](conventions.md).
-- **Forgejo: no local CI/CD yet.** `pending-setup.md` and `forgejo.md` cover
-  getting the forge itself usable; running Forgejo Actions against it (to
-  mirror what GitHub Actions does in `.github/workflows/`, on
-  locally-hosted infrastructure instead) hasn't been started. Rescued
-  2026-09-08 from a removed notebook TODO, itself already superseded on its
-  other point (the "manual migration steps" question — answered by
-  `pending-setup.md`'s mirror decision).
-- **QNAP NAS: SSH password authentication cannot be disabled in the QNAP's
-  own OS (QuTS hero) — confirmed impossible, 2026-09-16** — separate
-  from the restic-over-SFTP credentials in
-  [maintenance-schedule.md](maintenance-schedule.md) item 5, which cover
-  `nire-cube`'s side of that connection, not the NAS's own sshd config.
-  Decided, not pending: there is no mitigation to choose, because QuTS hero
-  offers no such setting at all. Password auth on the NAS's sshd is a
-  permanent condition of running restic-over-SFTP to it; anything further
-  (firewalling, disabling SSH when idle) is QNAP admin-console territory,
-  outside this repo. Rescued 2026-09-08 from a removed notebook; closed
-  2026-09-16.
-
-`nire-llm-sandbox`'s three runtime-verified `VMs/_lib/libvirt-vm.nix` fixes
-(default network never started, a nonexistent `virsh` flag, a missing fixed
-domain UUID) used to be recorded here; the VM itself was removed 2026-08-28
-— see [history.md](history.md) and [lessons-learned.md](lessons-learned.md)
-§40 for that detail now.
-
-## Left open by the cube service stack, 2026-08-24
-
-Four things the reverse-proxy/glance work knowingly did not do. None is a
-bug; each is a decision someone might otherwise re-litigate from scratch.
-
-- **Done.** `nire-cube` was running a config activated from
-  `~/nixos-caddy-test/`, a plain rsync of a working tree, while its real
-  checkout at `~/nixos-configs` sat several commits behind `main`. Both
-  since resolved: the checkout is caught up with `main` and `~/nixos-caddy-test`
-  has been deleted. Sync-and-build-over-ssh exists because a darwin session
-  cannot build an `x86_64-linux` toplevel; see the `new-homelab-service`
-  skill.
-- **Nothing backs up `/var/lib/forgejo`** — or anything else on cube.
-  **Now tracked as
-  [#87](https://github.com/NireBryce/nixos-configs/issues/87)** (whole
-  fleet, not just the forge); documented at
-  [homelab/forgejo.md](homelab/forgejo.md) so nobody mistakes the forge for
-  durable storage. A [backup](categories/backup.md) category landed
-  2026-08-28 implementing #87's scheme, switched and running on cube as of
-  2026-08-30 — but as local-path restic over NFS, which failed for real (an
-  export ACL the QNAP never granted cube), so SFTP since 2026-08-31. **Done
-  as of 2026-09-06**: sops secrets set, anti-deletion snapshot schedule
-  confirmed live, and the restore drill (#87's own bar for "done") actually
-  run twice — once finding the `backupPrepareCommand` sqlite-staging bug
-  (never worked, staged inside restic's own cache dir), once more
-  confirming a real restore after the fix. See
-  [backup.md](categories/backup.md) and
-  [backup-history.md](categories/backup-history.md). What's still open is
-  extending backups past cube to the other three hosts
-  (**[#130](https://github.com/NireBryce/nixos-configs/issues/130)**).
-- **Tailscale Services (`svc:`) — done, 2026-09-11.** Both costs
-  originally cited here had real mitigations: the per-service
-  admin-console approval is skippable via an `autoApprovers.services`
-  policy entry, and the policy file is API-scriptable
-  (`flake/scripts/tailscale-acl.py`, `just tailscale-acl`) rather than
-  console-only — reviewed as a diff and applied from this repo, same as
-  everything else. `svc:grafana` and `svc:git` are live; `svc:glance` was
-  retired with glance 2026-09-12 (issue #291, replaced by `svc:homepage`)
-  and re-made 2026-09-13 when glance rejoined homepage for the landing
-  evaluation — same mechanism throughout, applied at switch time per the
-  rollout order in `landing/homepage/homepage.nix`'s history section.
-  `nire-cube` is tagged
-  `tag:homelab-cube`; `services.tailscale.serve` backs each on
-  `tcp:443` and `tcp:80`; and Caddy's old `/grafana/`/`/git/` path routes
-  are retired. URLs are in
-  [homelab/reaching-services.md](homelab/reaching-services.md), the build
-  in [reverse-proxy](categories/reverse-proxy.md).
-
-  Four traps this turned up, all now written up where they'd be hit rather
-  than only here:
-
-  - **Two API endpoint names were wrong in both directions** on the first
-    attempt (ACL: `/policy` vs the real `/acl`; vip-services:
-    `/by-name/{name}` vs the real `/vip-services/{name}`). Read the
-    script's own comments before assuming either path again — and note
-    `vip-get` needs the **`svc:`-prefixed** name, or every service 404s
-    including ones that exist.
-  - **A recorded change is not an applied change.** `svc:glance`'s
-    autoApprover sat in this repo's copy of the policy file for a day
-    without ever being POSTed, and the Service object was never created at
-    all, so the name didn't resolve. `just tailscale-acl diff` is the
-    check that catches it.
-  - **Creating and updating a Service want different bodies** — an update
-    400s without the `addrs` the control plane assigned. Those are
-    deliberately not committed (they'd rot on any recreate); `vip-put`
-    merges them.
-  - **A new Service is not activated by re-running `serve set-config`**
-    against an already-standing advertisement. It needs a fresh
-    registration: restart `tailscaled`, then `tailscale-serve` after it.
-
-- **Grafana dashboards edited in the UI are not in this repo.** Anything
-  under `monitoring`'s `_dashboards/` is provisioned read-only from the
-  store; anything created through the web UI lives only in cube's sqlite db.
-  That db is now backed up (`/var/lib/grafana` is one of #87's covered
-  paths, via the sqlite-staging fix), so a UI-created dashboard survives a
-  restore — but it isn't declared as code, so it can't survive a rebuild
-  that reprovisions `_dashboards/` until the export procedure is run on it.
-  That procedure —
-  [monitoring.md](categories/monitoring.md#adding-a-dashboard-that-survives-a-rebuild)
-  — is verified end to end as of 2026-09-11: a UI-shaped dashboard
-  (random uid, numeric `id`, `${DS_PROMETHEUS}` variable) was carried
-  through the export into `_dashboards/` and then survived a real
-  `just switch` with no duplicate provisioned —
-  **[#190](https://github.com/NireBryce/nixos-configs/issues/190)**,
-  closed 2026-09-11.
-
-## Not covered here
-
-`ignore/` at the repo root and `flake/!IGNORE-maybe-useful-chunks/` hold
-retired experiments — old library helpers that didn't pan out
-(`extendLib.nix`, `findAspectUp.nix`, `findNamespaceUp.nix`,
-`recursively-collect-dirnames.nix`, each with its own README noting why it
-didn't work). The 2026-08-22 boy-scout cleanup dropped most of `ignore/`'s
-cruft and salvaged the one useful thing in it — `root-drift.sh` — out to
-`flake/scripts/root-drift.sh`, wired to `just root-drift` (see
-[conventions.md](conventions.md)); see recent git history for that commit.
-Treat anything still under an `ignore`/`IGNORE`-prefixed path as exactly
-that; it's not indexed here on purpose.
+  give anything that doesn't need direct human invocation its own account,
+  so a misbehaving program running as one of those users doesn't inherit
+  all of `elly`'s authority. See
+  [categories/elly.md](categories/elly.md#elly-as-the-experimental-user).
+- `ignore/` and `flake/!IGNORE-maybe-useful-chunks/` hold retired
+  experiments, each with a README saying why it didn't work. Anything
+  under an `ignore`/`IGNORE`-prefixed path is not indexed anywhere on
+  purpose.

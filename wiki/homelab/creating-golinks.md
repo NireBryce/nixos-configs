@@ -1,20 +1,15 @@
 # Creating go/ links
 
-_Last modified: 2026-09-11_
+_Last modified: 2026-10-01_
 
 `go/foo` shortlinks, served by [golink](https://github.com/tailscale/golink)
 on `nire-cube`. This page is about **using** it. For how it's configured,
 why it needed an `AF_NETLINK` fix, and why it's a tailnet device rather than
 a port on cube — see [shortlinks](../categories/shortlinks.md).
 
-> **Condensed version:**
-> [creating-golinks-for-agents.md](creating-golinks-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
 ## Contents
 
+- [Quick facts](#quick-facts)
 - [Where it is](#where-it-is)
 - [Creating a link](#creating-a-link)
 - [Paths after the short name get appended](#paths-after-the-short-name-get-appended)
@@ -24,6 +19,27 @@ a port on cube — see [shortlinks](../categories/shortlinks.md).
 - [Backups](#backups)
 - [What's verified here](#whats-verified-here)
 - [See also](#see-also)
+
+## Quick facts
+
+Folded in from the retired `creating-golinks-for-agents.md` sibling,
+2026-10-01. Detail in the sections below.
+
+| | |
+|---|---|
+| open / create (web UI) | `http://go/` — 302s to the HTTPS cert domain |
+| create from a shell | `curl -L --post302 -H Sec-Golink:1 -d short=<name> -d long=<url> http://go/` — all three flags load-bearing |
+| one link / all links | `curl -L http://go/<name>+` / `curl -L http://go/.export` (JSON Lines) |
+| upstream help (canonical) | `http://go/.help` |
+| delete | **web UI only** — `Sec-Golink` doesn't satisfy `serveDelete` |
+
+- Short names: case-insensitive, hyphens ignored when resolving.
+- Destinations append the trailing path by default; Go templates
+  (`.Path`, `.Now`, `.User`) wrapped in `{{if .Path}}…{{end}}` otherwise.
+- `curl` without `-L` returns the redirect stub, not data.
+- golink is its own tailnet device `go` — don't rename it.
+- Firefox: boolean `browser.fixup.domainwhitelist.go` = `true`.
+- No automated backup of the link database.
 
 ## Where it is
 

@@ -67,7 +67,7 @@ reading current config does.
    Ranked, reporting-only. **Most hits are wrong** — a reading list. Marker meanings: docstring of `wiki/scripts/history_candidates.py`.
 2. **Apply the test by reading each.** Name the current setting the section justifies; if you can, it stays.
 3. **Destination: one companion per category, not per page** (`5cdd8b2b` moved backup-runbook's background into `categories/backup-history.md`, not `backup-runbook-history.md`). Confirm it exists or its absence is intended.
-4. **A page spanning several categories has no single destination** (script says so). `homelab/pending-setup.md`: four of six items done, belonging to git-forge, backup, monitoring, shortlinks. Distributing destroys the checklist; `pending-setup-history.md` breaks the rule. **Don't settle silently** — it sets precedent. Ask; #288 records it open.
+4. **A page spanning several categories has no single destination** (script says so). The worked example was the old `homelab/pending-setup.md` checklist (items for git-forge, backup, monitoring, shortlinks), settled 2026-10-01 by moving open items to issues. Any new case: **don't settle silently** — it sets precedent. Ask; #288 records the question.
 5. **Leave a 1-2 sentence summary plus link**, never a bare pointer (`68b99813`'s shape).
 6. **Both pages get today's `_Last modified:_`**; follow in the `-for-agents` sibling in the same change or `siblings` fails (`wiki-sync` step 5). A sweep usually changes the sibling: it carries the conclusion a summary-plus-link replaces.
 7. `just wiki-lint`, then re-run `just wiki-history-candidates` on the swept page to confirm the section stopped scoring.

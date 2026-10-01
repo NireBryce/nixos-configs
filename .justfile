@@ -201,6 +201,7 @@ preflight:
     @flake/scripts/hooks-path-note.sh
     @just wiki-lint
     @just wiki-gen-test
+    @python3 wiki/scripts/test_check_wiki.py
     @just branches-test
     @just keybindings-test
     @just cod-desc-test

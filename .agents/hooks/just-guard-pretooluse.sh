@@ -12,6 +12,12 @@
 #
 # Same parse limits as git-guard's whitelist: only `cd <plain-path>` moves the
 # directory it tracks, and any other segment shape that mentions `just` asks.
+# Any JUST_* variable in the hook's environment (JUST_JUSTFILE,
+# JUST_WORKING_DIRECTORY, JUST_DOTENV_*, JUST_SHELL, ...) can change which
+# justfile runs or how, and the command inherits it, so every `just` asks
+# then -- the same rule as git-guard's for an inherited GIT_DIR. The one git
+# call runs with -c core.fsmonitor=false, so the check runs no program the
+# repo's config names.
 # Fixture tests: flake/scripts/test_guards.py.
 set -euo pipefail
 
@@ -48,13 +54,18 @@ nearest_justfile() {
 # Is <file> the root .justfile of a checkout of this repo (main or worktree)?
 is_repo_justfile() {
     local f=$1 top
-    top=$(env -u GIT_DIR -u GIT_WORK_TREE git -C "$(dirname "$f")" \
+    top=$(env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE \
+              git -c core.fsmonitor=false -C "$(dirname "$f")" \
               rev-parse --show-toplevel 2>/dev/null) || return 1
     [ "$f" = "$(realpath "$top/.justfile")" ] \
         && [ -f "$top/.agents/hooks/just-guard-pretooluse.sh" ]
 }
 
 reason=""
+just_env=$(compgen -e | grep '^JUST_' | paste -sd, - || true)
+if [ -n "$just_env" ]; then
+    reason="the hook's environment sets $just_env, which the command inherits and which can change the justfile just uses or how it runs it, so the guard can't tell it is this repo's .justfile."
+fi
 dir=$cwd
 while IFS= read -r seg; do
     seg=$(sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' <<<"$seg")
@@ -76,6 +87,7 @@ while IFS= read -r seg; do
         continue
     fi
     [[ $seg =~ $just_word_re ]] || continue
+    [ -z "$reason" ] || break
     if ! [[ $seg =~ ^just([[:space:]]+${plain_word})*$ ]]; then
         reason="'$seg' runs just in a shape this guard can't follow, so it can't tell which justfile it would use."
         break

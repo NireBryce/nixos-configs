@@ -53,9 +53,12 @@ def run_guard(script, payload):
     None. Fails the calling test if the script exits non-zero -- under the
     settings' `2>/dev/null || true` that failure would be silent in real
     use, so here it is always a finding."""
+    # just-guard asks whenever a JUST_* variable is inherited; keep the
+    # fixtures independent of whatever ran this test.
+    env = {k: v for k, v in os.environ.items() if not k.startswith("JUST_")}
     proc = subprocess.run(
         ["bash", str(script)], input=json.dumps(payload).encode(),
-        capture_output=True, timeout=60)
+        capture_output=True, timeout=60, env=env)
     if proc.returncode != 0:
         raise AssertionError(
             f"{script.name} exited {proc.returncode} -- a guard that errors "
@@ -491,6 +494,248 @@ class GitGuardPreToolUse(GuardCase):
         self.assertEqual(json.loads(out)["hookSpecificOutput"]
                          ["permissionDecision"], "deny")
 
+    def test_inherited_git_dir_on_clean_tree_asks(self):
+        # The command inherits GIT_DIR and acts on the repo it names, so a
+        # clean status elsewhere doesn't verify it.
+        r = self.repo()
+        for var in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE"):
+            env = {**os.environ, var: str(r / ".git")}
+            rc, out = run_hook_raw(self.script,
+                                   bash_payload("git reset --hard", r), env)
+            self.assertEqual(rc, 0)
+            self.assertEqual(json.loads(out)["hookSpecificOutput"]
+                             ["permissionDecision"], "ask", var)
+            # Commands with nothing to discard stay silent.
+            rc, out = run_hook_raw(self.script,
+                                   bash_payload("git status", r), env)
+            self.assertEqual((rc, out.strip()), (0, ""), var)
+
+    # Path-scoped tier 1: checkout [<tree-ish>] [--] <paths>, rm -f.
+
+    def dirty_repo(self):
+        """Repo with tracked.txt modified and a clean second file, other.txt."""
+        r = self.repo()
+        (r / "other.txt").write_text("o\n")
+        git(r, "add", "other.txt")
+        git(r, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
+            "-q", "-m", "other")
+        (r / "tracked.txt").write_text("changed\n")
+        return r
+
+    def test_checkout_paths_on_dirty_path_denies(self):
+        r = self.dirty_repo()
+        for cmd in ("git checkout -- tracked.txt",
+                    "git checkout HEAD -- tracked.txt",
+                    "git checkout HEAD tracked.txt",
+                    "git checkout tracked.txt other.txt",
+                    "git checkout --theirs tracked.txt",
+                    "git checkout -- ./", "git checkout -- :/",
+                    "git checkout main .", "git checkout main -- .",
+                    "git rm -f tracked.txt", "git rm -rf .",
+                    "git rm --force -- tracked.txt"):
+            self.assertDeny(self.script, cmd, "tracked.txt", cwd=r)
+
+    def test_checkout_paths_on_clean_path_passes(self):
+        # Another file being dirty doesn't block discarding a clean one.
+        r = self.dirty_repo()
+        for cmd in ("git checkout -- other.txt",
+                    "git checkout HEAD -- other.txt",
+                    "git checkout main other.txt",
+                    "git rm -f other.txt"):
+            self.assertIsNone(run_guard(self.script, bash_payload(cmd, r)),
+                              cmd)
+
+    def test_checkout_paths_unplain_pathspec_checks_whole_tree(self):
+        r = self.dirty_repo()
+        self.assertDeny(self.script, "git checkout -- *", "tracked.txt",
+                        cwd=r)
+        # Clean tree: still not a silent allow, since `*` is outside the
+        # plain grammar.
+        self.assertAsk(self.script, "git checkout -- *", cwd=self.repo())
+
+    def test_checkout_from_treeish_counts_overwritten_untracked(self):
+        # An untracked file that exists in the tree-ish is overwritten; one
+        # that doesn't is left alone.
+        r = self.repo()
+        git(r, "checkout", "-q", "-b", "side")
+        (r / "new.txt").write_text("side\n")
+        git(r, "add", "new.txt")
+        git(r, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
+            "-q", "-m", "side")
+        git(r, "checkout", "-q", "main")
+        (r / "new.txt").write_text("mine\n")
+        self.assertDeny(self.script, "git checkout side -- new.txt",
+                        "new.txt", cwd=r)
+        self.assertDeny(self.script, "git checkout side .", "new.txt", cwd=r)
+        self.assertIsNone(run_guard(self.script, bash_payload(
+            "git checkout side -- tracked.txt", r)))
+
+    def test_branch_reset_existing_asks(self):
+        r = self.repo()
+        git(r, "branch", "other")
+        for cmd in ("git checkout -B other", "git checkout -B other main",
+                    "git switch -C other", "git switch --force-create other",
+                    f"git -C {r} switch -C other"):
+            self.assertAsk(self.script, cmd, "already exists", cwd=r)
+        for cmd in ("git checkout -B fresh", "git switch -C fresh main"):
+            self.assertIsNone(run_guard(self.script, bash_payload(cmd, r)),
+                              cmd)
+        # Repo unknown: can't tell, so ask.
+        self.assertAsk(self.script, 'cd "$W" && git checkout -B fresh', cwd=r)
+
+    def test_everyday_commands_untouched(self):
+        # Even with a dirty tree, these lose nothing and must stay silent.
+        r = self.dirty_repo()
+        for cmd in ("git checkout main", "git checkout -b x",
+                    "git checkout -b y origin/experimental",
+                    "git switch -c z", "git stash", "git stash -u",
+                    "git stash push -m wip", "git stash pop",
+                    "git rm --cached tracked.txt", "git rm -r --cached .",
+                    "git rm other.txt", "git status", "git checkout -",
+                    "git branch -d x", "git read-tree HEAD",
+                    "git commit -m 'checkout a b'",
+                    "git log --grep checkout main other"):
+            self.assertIsNone(run_guard(self.script, bash_payload(cmd, r)),
+                              cmd)
+
+    def test_pathspec_from_file_targets_whole_tree(self):
+        # Either spelling: the whole tree is checked, and the option's value
+        # (here naming the clean other.txt, or a branch) is neither a
+        # pathspec nor a tree-ish.
+        r = self.dirty_repo()
+        (r / "list.txt").write_text("other.txt\n")
+        for cmd in ("git checkout --pathspec-from-file=list.txt",
+                    "git checkout --pathspec-from-file list.txt",
+                    "git checkout --pathspec-from-file other.txt",
+                    "git checkout --pathspec-from-file main",
+                    "git checkout HEAD --pathspec-from-file=list.txt",
+                    "git rm -f --pathspec-from-file=list.txt",
+                    "git rm -f --pathspec-from-file other.txt"):
+            self.assertDeny(self.script, cmd, "tracked.txt", cwd=r)
+        for cmd in ("git restore --pathspec-from-file=list.txt",
+                    "git restore --pathspec-from-file list.txt",
+                    "git restore --staged --pathspec-from-file=list.txt"):
+            self.assertAsk(self.script, cmd, cwd=r)
+        c = self.repo()
+        (c / "list.txt").write_text("tracked.txt\n")
+        for cmd in ("git checkout --pathspec-from-file=list.txt",
+                    "git checkout --pathspec-from-file list.txt",
+                    "git rm -f --pathspec-from-file list.txt"):
+            self.assertIsNone(run_guard(self.script, bash_payload(cmd, c)),
+                              cmd)
+
+    def test_checkout_from_treeish_counts_overwritten_ignored(self):
+        # An ignored file that exists in the tree-ish is overwritten too;
+        # one that doesn't is left alone.
+        r = self.repo()
+        (r / ".gitignore").write_text("gen.txt\n*.log\n")
+        git(r, "add", ".gitignore")
+        git(r, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
+            "-q", "-m", "ignore")
+        git(r, "checkout", "-q", "-b", "side")
+        (r / "gen.txt").write_text("side\n")
+        git(r, "add", "-f", "gen.txt")
+        git(r, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
+            "-q", "-m", "side")
+        git(r, "checkout", "-q", "main")
+        (r / "junk.log").write_text("x\n")
+        self.assertIsNone(run_guard(self.script, bash_payload(
+            "git checkout side .", r)))
+        (r / "gen.txt").write_text("mine\n")
+        self.assertDeny(self.script, "git checkout side -- gen.txt",
+                        "gen.txt", cwd=r)
+        self.assertDeny(self.script, "git checkout side .", "gen.txt", cwd=r)
+        self.assertIsNone(run_guard(self.script, bash_payload(
+            "git checkout side -- tracked.txt", r)))
+
+    def test_checkout_single_word_not_a_commit_is_a_path(self):
+        r = self.dirty_repo()
+        (r / "sub").mkdir()
+        (r / "sub" / "a.txt").write_text("a\n")
+        git(r, "add", "sub")
+        git(r, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
+            "-q", "-m", "sub")
+        (r / "sub" / "a.txt").write_text("changed\n")
+        for cmd, needle in (("git checkout tracked.txt", "tracked.txt"),
+                            ("git checkout sub", "sub/a.txt"),
+                            ("git checkout ./", "tracked.txt"),
+                            ("git checkout :/", "tracked.txt"),
+                            ("git checkout *.txt", "tracked.txt")):
+            self.assertDeny(self.script, cmd, needle, cwd=r)
+        # A clean path, or a word that resolves as a commit, passes.
+        for cmd in ("git checkout other.txt", "git checkout main",
+                    "git checkout HEAD~0", "git checkout -"):
+            self.assertIsNone(run_guard(self.script, bash_payload(cmd, r)),
+                              cmd)
+        # A glob is outside the plain grammar: never a silent allow.
+        self.assertAsk(self.script, "git checkout *.txt", cwd=self.repo())
+        # Repo unknown: can't tell a branch from a path.
+        self.assertAsk(self.script, 'cd "$W" && git checkout main', cwd=r)
+
+    def test_status_runs_without_fsmonitor(self):
+        # A repo-configured fsmonitor program never runs from the guard.
+        r = self.repo()
+        marker = r.parent / f"{r.name}-fsmonitor-ran"
+        hook = r.parent / f"{r.name}-fsmonitor.sh"
+        hook.write_text(f"#!/bin/sh\ntouch {marker}\nexit 1\n")
+        hook.chmod(0o755)
+        self.addCleanup(lambda: hook.unlink(missing_ok=True))
+        self.addCleanup(lambda: marker.unlink(missing_ok=True))
+        git(r, "config", "core.fsmonitor", str(hook))
+        git(r, "status", "--porcelain")
+        self.assertTrue(marker.exists(), "fixture: fsmonitor not invoked")
+        marker.unlink()
+        for cmd in ("git reset --hard", "git checkout tracked.txt",
+                    "git checkout main -- tracked.txt", "git rm -f tracked.txt",
+                    "git checkout -B other"):
+            run_guard(self.script, bash_payload(cmd, r))
+            self.assertFalse(marker.exists(), cmd)
+
+    def test_rm_f_is_not_clean_f(self):
+        # The op is read from git's subcommand position, not from a word.
+        r = self.repo()
+        (r / "clean.txt").write_text("c\n")
+        git(r, "add", "clean.txt")
+        git(r, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
+            "-q", "-m", "clean")
+        self.assertIsNone(run_guard(self.script, bash_payload(
+            "git rm -f clean.txt", r)))
+        (r / "scratch.txt").write_text("x\n")
+        self.assertIsNone(run_guard(self.script, bash_payload(
+            "git rm -f clean.txt", r)))
+        self.assertDeny(self.script, "git clean -f", "scratch.txt", cwd=r)
+        (r / "clean.txt").write_text("changed\n")
+        self.assertDeny(self.script, "git rm -f clean.txt", "clean.txt",
+                        cwd=r)
+
+    def test_branch_force_existing_asks(self):
+        r = self.repo()
+        git(r, "branch", "other")
+        for cmd in ("git branch -f other", "git branch -f other main",
+                    "git branch --force other HEAD", "git branch -M main other",
+                    "git branch -C other", "git branch -m -f main other"):
+            self.assertAsk(self.script, cmd, "already exists", cwd=r)
+        self.assertAsk(self.script, "git branch -d -f other", cwd=r)
+        for cmd in ("git branch -f fresh", "git branch -M fresh",
+                    "git branch -m other2", "git branch fresh2",
+                    "git branch -d other"):
+            self.assertIsNone(run_guard(self.script, bash_payload(cmd, r)),
+                              cmd)
+
+    def test_read_tree_update_asks(self):
+        r = self.repo()
+        for cmd in ("git read-tree -u --reset HEAD", "git read-tree -m -u HEAD",
+                    "git read-tree -mu HEAD"):
+            self.assertAsk(self.script, cmd, "read-tree -u", cwd=r)
+        for cmd in ("git read-tree HEAD", "git read-tree -m HEAD"):
+            self.assertIsNone(run_guard(self.script, bash_payload(cmd, r)),
+                              cmd)
+
+    def test_stash_then_drop_asks(self):
+        # stash -u alone only moves work into a stash; dropping it is what
+        # loses it, and that already asks.
+        self.assertAsk(self.script, "git stash -u && git stash drop")
+
     def test_branch_capital_d_trips(self):
         self.assertAsk(self.script, "git branch -D stale-branch")
 
@@ -720,6 +965,29 @@ class JustGuardPreToolUse(GuardCase):
                     f"just -f {f}/justfile preflight",
                     f"just -d {f} preflight"):
             self.assertAsk(self.script, cmd, cwd=REPO)
+
+    def test_inherited_just_env_asks(self):
+        # A JUST_* variable the command inherits can change which justfile
+        # runs, or how: every `just` asks; other commands stay silent.
+        base = {k: v for k, v in os.environ.items()
+                if not k.startswith("JUST_")}
+        for var, val in (("JUST_JUSTFILE", "/tmp/x/justfile"),
+                         ("JUST_WORKING_DIRECTORY", "/tmp"),
+                         ("JUST_DOTENV_PATH", "/tmp/.env"),
+                         ("JUST_SHELL", "sh"), ("JUST_UNSTABLE", "1")):
+            env = {**base, var: val}
+            rc, out = run_hook_raw(self.script,
+                                   bash_payload("just preflight", REPO), env)
+            self.assertEqual(rc, 0)
+            self.assertEqual(json.loads(out)["hookSpecificOutput"]
+                             ["permissionDecision"], "ask", var)
+            self.assertIn(var, json.loads(out)["systemMessage"])
+            rc, out = run_hook_raw(self.script,
+                                   bash_payload("ls -la", REPO), env)
+            self.assertEqual((rc, out.strip()), (0, ""), var)
+        rc, out = run_hook_raw(self.script,
+                               bash_payload("just preflight", REPO), base)
+        self.assertEqual((rc, out.strip()), (0, ""))
 
     def test_unfollowable_shapes_ask(self):
         f = self.foreign()

@@ -1,6 +1,6 @@
 # Backup runbook — restic on `nire-cube`
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-01_
 
 Commands for operating [backup](../categories/backup.md) — the restic
 category backing up Forgejo/Grafana/golink's state and `/persist` to the
@@ -16,14 +16,9 @@ is a wrapper the module generates with `RESTIC_REPOSITORY`,
 resolve to root-owned `0400` files, so plain `restic` won't work
 unprivileged.
 
-> **Condensed version:**
-> [backup-runbook-for-agents.md](backup-runbook-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
 ## Contents
 
+- [Quick facts](#quick-facts)
 - [Checking status](#checking-status)
 - [Creating a snapshot](#creating-a-snapshot)
 - [Listing and inspecting snapshots](#listing-and-inspecting-snapshots)
@@ -32,6 +27,30 @@ unprivileged.
 - [Rotating the secrets](#rotating-the-secrets)
 - [Troubleshooting](#troubleshooting)
 - [See also](#see-also)
+
+## Quick facts
+
+Folded in from the retired `backup-runbook-for-agents.md` sibling,
+2026-10-01. Detail in the sections below.
+
+All on `nire-cube`, with `sudo`; `restic-cube` is the module-generated
+wrapper (plain `restic` fails — root-owned `0400` env files).
+
+| task | command |
+|---|---|
+| status | `systemctl status restic-backups-cube.service`; `journalctl -u restic-backups-cube -e` |
+| run now | `sudo systemctl start restic-backups-cube.service` (timer: daily 03:30 + ≤30 min) |
+| staging log | `sudo cat /var/cache/restic-backups-cube/prepare.log` |
+| list / inspect | `sudo restic-cube snapshots`; `ls --recursive <id\|latest> <path>`; `stats`; `check` |
+| restore | `restore latest --target /root/restore-test --include /var/lib/restic-backups-cube-sqlite-staging …` |
+| prove it | `sqlite3 …/sqlite-staging/forgejo.db ".tables"` lists real tables |
+| delete / unlock | `forget <id> --prune`; `unlock` |
+
+- `Loaded: ... linked` (not `enabled`) is expected.
+- Live `.db` files are excluded on purpose; the staged copy is the backup.
+- **Losing `restic-cube-password` loses the backups**; the SSH key is
+  recoverable. Generate values inline (skill `secrets-hygiene`).
+- `key ... cannot be found` at switch: cube has two checkouts; check both.
 
 ## Checking status
 
@@ -202,6 +221,5 @@ section), then `just switch` on cube to pick it up.
   plan and every one-time setup snag, in full.
 - [rustic](rustic.md) — an interactive TUI alternative to the commands
   above.
-- [Pending setup](pending-setup.md) — item 4, now closed; this page is
-  the procedure it points to.
-- [open-threads.md](../open-threads.md) — issue #87.
+- [#87](https://github.com/NireBryce/nixos-configs/issues/87) — the
+  issue this procedure closed.

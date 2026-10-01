@@ -1,6 +1,6 @@
 # Using the forge
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-10-01_
 
 [Forgejo](https://forgejo.org/) on `nire-cube`, at
 `https://git.moose-micro.ts.net/` — its own Tailscale Services name as of
@@ -170,8 +170,9 @@ was enough. **Push over SSH is still untested.**
 
 Added 2026-09-24; since 2026-09-25 the runner lives in a libvirt VM on
 cube ([git-forge](../categories/git-forge.md) has the architecture —
-containment is the point). Bootstrap values landed the same day
-([pending-setup](pending-setup.md) item 8) and are live on cube.
+containment is the point). Bootstrap values landed the same day and are live on cube; since
+2026-09-26 cube mints a single-use registration per job, so there is no
+standing secret to fill in.
 
 Workflows live at `.forgejo/workflows/*.yaml` in each repo and use
 GitHub-Actions syntax: `on: [push, pull_request]`, `jobs.<id>.runs-on`,
@@ -284,7 +285,7 @@ GitHub's own branch list, default branch `experimental`. This is the first
 repo actually pushed/mirrored here — see
 [git-forge-history.md](../categories/git-forge-history.md#mirror-not-origin--and-the-first-real-mirror)
 for the record. Mirror-or-origin is settled (mirror, reaffirmed
-2026-09-12) — [pending-setup.md](pending-setup.md) item 2.
+2026-09-12).
 
 ## What's verified here
 

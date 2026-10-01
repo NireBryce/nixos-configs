@@ -1,6 +1,6 @@
 # Homelab services
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-01_
 
 How to **use** the services this fleet runs, as opposed to how they're
 configured. Everything here is reachable over the tailnet and nowhere else.
@@ -74,9 +74,9 @@ URL looks nothing like the other two. See
 ## Half-finished is the normal state here
 
 Several of these services are running, reachable, and still missing the
-human step that makes them useful — Forgejo has no users, golink has no
-links, and nothing is backed up. [Pending setup](pending-setup.md) is the
-list, kept separate from [open-threads.md](../open-threads.md) because
+human step that makes them useful. Those steps are GitHub issues with
+the `pending-setup` label; [Pending setup](pending-setup.md) explains the
+label, kept separate from [open-threads.md](../open-threads.md) because
 those are the *repo's* loose ends and these are the *fleet's*: one-time
 operational work that no commit will ever complete, because it lives in a
 service's own database rather than in Nix.

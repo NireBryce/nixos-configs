@@ -1,6 +1,6 @@
 # Practicing a workplace coding environment
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-10-01_
 
 What cube's forge ([forgejo.md](forgejo.md)) plus its Actions runner
 ([git-forge](../categories/git-forge.md)'s runner module) is *for*, beyond
@@ -82,7 +82,5 @@ reviewer. Two free ways to get a real one:
 
 - [forgejo.md](forgejo.md) — the forge itself: signing in, cloning, CI
   workflows.
-- [pending-setup.md](pending-setup.md) — item 8, the (now done) one-time runner
-  bootstrap.
 - [git-forge](../categories/git-forge.md) — the runner's configuration and
   registration scheme.

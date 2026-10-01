@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Static checks of wiki/ (and AGENTS.md, the one file outside wiki/ that
-duplicates wiki-shaped claims verbatim -- see `doc_files`) against the actual
+"""Static checks of wiki/ (and AGENTS.md plus `.agents/rules/*.md`, the files
+outside wiki/ that duplicate wiki-shaped claims verbatim -- see `doc_files`)
+against the actual
 module tree, for authoritative claims that silently go stale after a
 refactor -- a category moved, a host stopped importing something, a recipe
 got renamed. Same motivation as `flake/scripts/modules.py`: nothing about
@@ -97,9 +98,8 @@ structured, extractable facts only:
             harness's YAML parse.
 
   secrets   The "`.sops.yaml` ... enrolls `host`, `host`, ... —" claim
-            (wiki/impermanence-and-secrets.md and AGENTS.md's Safety section
-            both make it, in the same shape, and AGENTS.md's own text admits
-            "this paragraph has been stale before") against .sops.yaml's
+            (wiki/impermanence-and-secrets.md and .agents/rules/secrets.md
+            both make it, in the same shape) against .sops.yaml's
             actual key anchors. Fully mechanical in both directions -- unlike
             Imported by, there's no legitimate "named to say it's absent"
             case for an enrollment list.
@@ -167,7 +167,8 @@ structured, extractable facts only:
 
   siblings  The `<page>.md` / `<page>-for-agents.md` pairs (styleguide.md,
             "Two audiences per page"): every sibling has a source page, every
-            page over 1,000 words has a sibling unless exempt, each sibling
+            page over 1,000 words has a sibling or opens with `## Quick
+            facts` (the folded shape, since 2026-10-01) unless exempt, each sibling
             is inside a 50% word budget (REVIEW only -- density is the goal,
             and a fact always beats the number), and the two link to each
             other. The real
@@ -196,7 +197,20 @@ structured, extractable facts only:
             and relative links; this one only guarantees they exist, so an
             entry can't land without saying where its rule lives.
 
-  check     Runs all fifteen of the above.
+  rules     The path-scoped rule files, `.agents/rules/*.md` (Claude Code
+            reads them as `.claude/rules/` and loads each only when a file
+            matching its `paths:` frontmatter is read). Each must open with
+            frontmatter whose only key is `paths:` (the only field Claude
+            Code reads; anything else is silently ignored), as a non-empty
+            YAML list of quoted globs; every glob must match at least one
+            git-tracked file, since a glob that matches nothing means the
+            rule never loads and nothing says so; and AGENTS.md must name
+            the file (`.agents/rules/<name>.md`), the pointer harnesses
+            without rule support depend on. The rules' prose is already in
+            `doc_files`, so recipes, skills, links, secrets and counts cover
+            it.
+
+  check     Runs all sixteen of the above.
 
     check_wiki.py imports       [repo-root]
     check_wiki.py table         [repo-root]
@@ -213,6 +227,7 @@ structured, extractable facts only:
     check_wiki.py generated     [repo-root]
     check_wiki.py siblings      [repo-root]
     check_wiki.py lessons       [repo-root]
+    check_wiki.py rules         [repo-root]
     check_wiki.py check         [repo-root]
     check_wiki.py gen-contents  <file.md> [file.md ...]
 
@@ -596,18 +611,27 @@ def wiki_md(root, pattern='*.md'):
     )
 
 
+def rule_files(root):
+    """`.agents/rules/*.md`, recursive -- Claude Code discovers rules in
+    subdirectories too. `.claude` is a symlink to `.agents`, so this is the
+    one real copy."""
+    rules = root / '.agents' / 'rules'
+    return sorted(rules.rglob('*.md')) if rules.is_dir() else []
+
+
 def doc_files(root):
-    """Every markdown file the three checks below scan: all of wiki/
-    (recursive) plus AGENTS.md itself -- the one file outside wiki/ that
-    duplicates wiki-shaped claims verbatim (CLAUDE.md is a symlink to it, so
-    checking the symlink's target once covers both names).
+    """Every markdown file the claim checks scan: all of wiki/ (recursive),
+    AGENTS.md itself, and the path-scoped rules AGENTS.md points at -- the
+    files outside wiki/ that duplicate wiki-shaped claims verbatim
+    (CLAUDE.md is a symlink to AGENTS.md, so checking the target once
+    covers both names).
 
     Symlinks under wiki/ are skipped for that same reason: each directory's
     README.md is a symlink to its 00-INDEX.md, kept so GitHub still has a
     filename it recognizes. Scanned as documents they would double every
     page's word count and invent a README.md/README-for-agents.md sibling
     pair that no one wrote."""
-    return wiki_md(root) + [root / 'AGENTS.md']
+    return wiki_md(root) + [root / 'AGENTS.md'] + rule_files(root)
 
 
 # A recipe header, e.g. `wiki-churn *args:`, `host=nire-durandal build`'s
@@ -707,6 +731,9 @@ FRONTMATTER_KEY = re.compile(r'^([^\s:#][^:]*):', re.M)
 # `whenToUse`) is silently ignored by every harness -- so an unknown key is
 # a finding, and adopting a new one means extending this set on purpose.
 FRONTMATTER_KEYS = {'name', 'description', 'when_to_use'}
+# `!` then a backtick, at line start or after whitespace: Claude Code's
+# inline injection syntax.
+INJECTION = re.compile(r'(?:^|\s)!`')
 # Claude Code truncates description + when_to_use, combined, at this many
 # characters in the skill listing (code.claude.com/docs/en/skills,
 # checked 2026-10-01; configurable per-user via skillListingMaxDescChars).
@@ -846,6 +873,30 @@ def check_skill_files(root):
                 f"(over {DESC_MAX_WORDS}) -- scope detail that belongs in "
                 f"## Applies to")
         findings += _check_skill_frontmatter_extras(rel, head, desc)
+        findings += _check_skill_injection(rel, text)
+    return findings
+
+
+def _check_skill_injection(rel, text):
+    """Dynamic context injection (an exclamation mark then a backticked
+    command, or a fence opened with three backticks and an exclamation mark)
+    runs a shell command when the skill loads, with no prompt. This repo
+    doesn't use it; skill `new-skill` says why."""
+    findings, in_fence = [], False
+    for n, line in enumerate(text.splitlines(), 1):
+        stripped = line.lstrip()
+        if stripped.startswith("```"):
+            if not in_fence and stripped.startswith("```!"):
+                findings.append(
+                    f"INJECTION  {rel}:{n}: a ```! block runs at skill load "
+                    f"-- not used in this repo (skill `new-skill`)")
+            in_fence = not in_fence
+            continue
+        if not in_fence and INJECTION.search(line):
+            findings.append(
+                f"INJECTION  {rel}:{n}: an inline !`command` runs at skill "
+                f"load -- not used in this repo (skill `new-skill`); in "
+                f"prose, don't put ! directly before a backtick")
     return findings
 
 
@@ -920,9 +971,8 @@ def enrolled_hosts(root):
 
 def check_secrets(root):
     """Every "`.sops.yaml` ... enrolls `host`, `host`, ... —" claim
-    (wiki/impermanence-and-secrets.md and AGENTS.md's Safety section both
-    make this exact claim by hand, in the same shape -- AGENTS.md's own text
-    even admits "this paragraph has been stale before") against
+    (wiki/impermanence-and-secrets.md and .agents/rules/secrets.md both
+    make this exact claim by hand, in the same shape) against
     .sops.yaml's actual key anchors. Unlike Imported by, there's no
     legitimate named-as-an-exclusion case for enrollment, so a mismatch
     either way is a hard finding, not a REVIEW.
@@ -1372,6 +1422,24 @@ SIBLING_EXEMPT = (
 )
 
 
+# The other shape a long page may take (since 2026-10-01): one page whose
+# first section after `## Contents` is `## Quick facts` -- the dense,
+# agent-facing summary folded in at the top instead of kept as a sibling.
+# For pages where the sibling was mostly a restatement of a page that was
+# already compact, so every edit paid twice for no reading saved. The check
+# only asks that the section exist and come first; it is what an agent
+# lands on, so anywhere further down defeats it.
+QUICK_FACTS_HEADING = 'Quick facts'
+
+
+def _first_section(text):
+    """The page's first `## ` heading other than `## Contents`, or None."""
+    for line in text.splitlines():
+        if line.startswith('## ') and line[3:].strip() != 'Contents':
+            return line[3:].strip()
+    return None
+
+
 def _words(text):
     """Word count matching `wc -w`, so a human can check a budget finding
     with one shell command rather than rerunning this script."""
@@ -1418,8 +1486,9 @@ def check_siblings(root):
 
     - **orphan** -- a sibling whose source page doesn't exist (a rename that
       moved one half of the pair).
-    - **missing** -- a page over SIBLING_REQUIRED_WORDS with no sibling, and
-      not on the exempt list.
+    - **missing** -- a page over SIBLING_REQUIRED_WORDS with no sibling,
+      not on the exempt list, and not opening with `## Quick facts` (the
+      folded single-page shape, QUICK_FACTS_HEADING).
     - **stale** -- the guard the whole split rests on. Both pages carry
       `_Last modified:_` (checked for shape by `dates`); editing a page's
       content bumps it, per styleguide.md. So a sibling dated EARLIER than
@@ -1507,12 +1576,16 @@ def check_siblings(root):
             continue
         if any(rx.search(rel) for rx in SIBLING_EXEMPT):
             continue
-        words = _words(path.read_text())
+        text = path.read_text()
+        words = _words(text)
         if words >= SIBLING_REQUIRED_WORDS:
+            if _first_section(text) == QUICK_FACTS_HEADING:
+                continue  # single page, dense summary folded in at the top
             findings.append(
                 f"MISSING SIBLING  {rel}: {words} words, over the "
-                f"{SIBLING_REQUIRED_WORDS}-word line, but has no "
-                f"{path.stem}{SIBLING_SUFFIX}.md")
+                f"{SIBLING_REQUIRED_WORDS}-word line, but has neither a "
+                f"{path.stem}{SIBLING_SUFFIX}.md nor `## "
+                f"{QUICK_FACTS_HEADING}` as its first section")
     return findings
 
 
@@ -1552,6 +1625,98 @@ def check_dates(root):
 LESSON_ENTRY = re.compile(
     r'^- \*\*§(\d+)\*\* \[[^\]]+\]\((lessons-learned/[^)]+)\) — .+$')
 LESSON_ARTICLE = re.compile(r'^(\d+)-[a-z0-9-]+\.md$')
+
+
+# A rule's frontmatter: `paths:` then `  - "glob"` items, nothing else.
+RULE_FRONTMATTER = re.compile(r'\A---\n(.*?)\n---\n', re.S)
+RULE_PATH_ITEM = re.compile(r'^\s+-\s+"([^"]+)"\s*$')
+
+
+def glob_regex(pattern):
+    """A Claude Code `paths:` glob as a regex over repo-relative paths:
+    `**/` is zero or more directories, `**` anything, `*` and `?` stay
+    within one path segment, `{a,b}` is alternation. Enough for the shapes
+    rules here use; brackets are taken literally."""
+    out, i = [], 0
+    while i < len(pattern):
+        c = pattern[i]
+        if pattern.startswith('**/', i):
+            out.append('(?:.*/)?'); i += 3; continue
+        if pattern.startswith('**', i):
+            out.append('.*'); i += 2; continue
+        if c == '*':
+            out.append('[^/]*')
+        elif c == '?':
+            out.append('[^/]')
+        elif c == '{':
+            end = pattern.find('}', i)
+            if end < 0:
+                out.append(re.escape(c))
+            else:
+                alts = pattern[i + 1:end].split(',')
+                out.append('(?:' + '|'.join(re.escape(a) for a in alts) + ')')
+                i = end + 1
+                continue
+        else:
+            out.append(re.escape(c))
+        i += 1
+    return re.compile(''.join(out) + r'\Z')
+
+
+def tracked_files(root):
+    import subprocess
+    r = subprocess.run(['git', '-C', str(root), 'ls-files', '-z'],
+                       capture_output=True, text=True, check=True)
+    return [f for f in r.stdout.split('\0') if f]
+
+
+def check_rules(root):
+    """`.agents/rules/*.md`: frontmatter is exactly a non-empty `paths:`
+    list, every glob matches a tracked file, and AGENTS.md names the file.
+    See the module docstring's `rules` entry for why each matters."""
+    findings = []
+    rules = rule_files(root)
+    if not rules:
+        return findings
+    tracked = tracked_files(root)
+    agents = (root / 'AGENTS.md').read_text()
+    for path in rules:
+        rel = path.relative_to(root).as_posix()
+        if rel not in agents:
+            findings.append(
+                f"UNLISTED RULE  {rel}: AGENTS.md does not name it -- "
+                f"harnesses without rule support would never see it")
+        m = RULE_FRONTMATTER.match(path.read_text())
+        if not m:
+            findings.append(
+                f"RULE FRONTMATTER  {rel}: no leading --- frontmatter block "
+                f"-- without `paths:` it loads in every session")
+            continue
+        lines = [l for l in m.group(1).splitlines() if l.strip()]
+        if not lines or lines[0].rstrip() != 'paths:':
+            findings.append(
+                f"RULE FRONTMATTER  {rel}: frontmatter must be `paths:` "
+                f"followed by a list of quoted globs")
+            continue
+        globs = []
+        for line in lines[1:]:
+            item = RULE_PATH_ITEM.match(line)
+            if not item:
+                findings.append(
+                    f"RULE FRONTMATTER  {rel}: unexpected line {line!r} -- "
+                    f"`paths` is the only field Claude Code reads, as "
+                    f'`  - "glob"` items')
+                continue
+            globs.append(item.group(1))
+        if not globs:
+            findings.append(f"RULE FRONTMATTER  {rel}: `paths:` is empty")
+        for g in globs:
+            rx = glob_regex(g)
+            if not any(rx.match(f) for f in tracked):
+                findings.append(
+                    f"DEAD RULE GLOB  {rel}: {g!r} matches no tracked file "
+                    f"-- the rule would never load")
+    return findings
 
 
 def check_lessons(root):
@@ -1697,7 +1862,7 @@ def main():
 
     cmds = ('imports', 'table', 'recipes', 'skills', 'skill-files',
             'secrets', 'routes', 'links', 'anchors', 'contents', 'dates',
-            'counts', 'generated', 'siblings', 'lessons', 'check')
+            'counts', 'generated', 'siblings', 'lessons', 'rules', 'check')
     if cmd not in cmds:
         print(__doc__)
         sys.exit(2)
@@ -1736,6 +1901,8 @@ def main():
         findings += check_siblings(root)
     if cmd in ('lessons', 'check'):
         findings += check_lessons(root)
+    if cmd in ('rules', 'check'):
+        findings += check_rules(root)
 
     for f in findings:
         print(f)
