@@ -57,7 +57,8 @@ opens with `## Quick facts` (first section after Contents).
   its source's words or the halves mostly change in the same commits. Dense
   facts at the top, body unchanged, sibling deleted, links repointed to
   `#quick-facts`, old sibling's name in the lead-in. Folded 2026-10-01:
-  `name-resolution.md`, `maintenance.md`.
+  `name-resolution.md`, `maintenance.md`, `homelab/creating-golinks.md`,
+  `homelab/reaching-services.md`, `homelab/backup-runbook.md`.
 
 **In**: paths, option and flag names, exact commands, config-block shapes,
 host lists, each trap as one declarative line. Tables wherever one fits.

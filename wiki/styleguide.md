@@ -294,8 +294,10 @@ saved. Fold it: the dense facts (a table where one fits) go in
 `## Quick facts` at the top, linked from `00-INDEX-for-agents.md` by its
 anchor, and the body stays as written. The tests for folding an existing
 pair: the sibling is over ~45% of its source's words, or the two halves
-change in the same commits most of the time. `name-resolution.md` and
-`maintenance.md` were folded on those grounds 2026-10-01; the old sibling's
+change in the same commits most of the time. `name-resolution.md`,
+`maintenance.md`, and `homelab/`'s `creating-golinks.md`,
+`reaching-services.md`, `backup-runbook.md` were folded on those grounds
+2026-10-01; the old sibling's
 name goes in the Quick facts lead-in so a grep for it still lands.
 
 **What goes in the sibling**: the file paths, option and flag names, exact

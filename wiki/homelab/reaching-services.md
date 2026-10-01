@@ -1,6 +1,6 @@
 # Reaching cube's services
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-01_
 
 Each web service on `nire-cube` has **its own tailnet hostname and its own
 certificate**. That is a change from the original design — one hostname with
@@ -8,14 +8,9 @@ path prefixes — which this page described until 2026-09-11 and which is now
 retired. For how it's built, see
 [reverse-proxy](../categories/reverse-proxy.md).
 
-> **Condensed version:**
-> [reaching-services-for-agents.md](reaching-services-for-agents.md) — the same
-> ground with the narrative stripped out, for an agent (or a human in
-> a hurry) loading it mid-task. Both siblings get edited in the same
-> change.
-
 ## Contents
 
+- [Quick facts](#quick-facts)
 - [The map](#the-map)
 - [Muscle memory: what stopped answering, and when](#muscle-memory-what-stopped-answering-and-when)
 - [Why it's HTTPS, and the one warning you will still see](#why-its-https-and-the-one-warning-you-will-still-see)
@@ -23,6 +18,33 @@ retired. For how it's built, see
 - [Adding another service to this](#adding-another-service-to-this)
 - [What's verified here](#whats-verified-here)
 - [See also](#see-also)
+
+## Quick facts
+
+Folded in from the retired `reaching-services-for-agents.md` sibling,
+2026-10-01. Detail in the sections below.
+
+| What | Full name | Short |
+|---|---|---|
+| homepage (landing page) | `https://homepage.moose-micro.ts.net/` | `http://homepage/` |
+| glance (port 3004; homepage holds 3002) | `https://glance.moose-micro.ts.net/` | `http://glance/` |
+| Grafana | `https://grafana.moose-micro.ts.net/` | `http://grafana/` |
+| Forgejo | `https://git.moose-micro.ts.net/` | `http://git/` |
+| cube itself | `https://ts-cube.moose-micro.ts.net/` | `http://ts-cube/` |
+| golink (not on cube) | `http://go/` | — |
+
+- Short names with `http://` (redirects to the trusted cert);
+  `https://<short>` warns by design. Tailnet-only; not Funnel.
+- `ts-cube`, never `nire-cube`. Port URLs and `/grafana/`, `/git/`
+  prefixes are dead.
+- `svc:homepage` needs its Service object applied at switch time
+  (commands in `homepage.nix`'s history section).
+- Not answering: [the checklist](#when-something-doesnt-answer) —
+  unresolvable name = missing `svc:` object, `NRestarts` not `active`,
+  `tailscale-serve` down darkens every `svc:` name, a first-request `000`
+  is cert fetch, a TLS error is a config bug.
+- Adding one: Service object + `serve.nix` (`tcp:443` **and** `tcp:80`) +
+  Caddy vhost; skill `new-tailscale-service`.
 
 ## The map
 

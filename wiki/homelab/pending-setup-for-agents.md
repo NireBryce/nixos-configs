@@ -23,6 +23,6 @@ that label, don't add it here. Repo-side counterpart:
   never read it as "nobody signed in".
   [../categories/git-forge-for-agents.md](../categories/git-forge-for-agents.md).
 
-See also: [reaching-services-for-agents.md](reaching-services-for-agents.md) ·
-[creating-golinks-for-agents.md](creating-golinks-for-agents.md) ·
+See also: [reaching-services.md](reaching-services.md#quick-facts) ·
+[creating-golinks.md](creating-golinks.md#quick-facts) ·
 [forgejo-for-agents.md](forgejo-for-agents.md)
