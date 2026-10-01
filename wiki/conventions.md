@@ -29,8 +29,10 @@ as a second recipe, not a flag, and errors).
 
 ## Landing changes on `experimental`
 
-Skill `ship` (`.agents/skills/ship/SKILL.md`) — branch → PR → confirm →
-merge → confirm → delete-branch. Two confirmations, not one. Only for work
+Skill `ship` (`.agents/skills/ship/SKILL.md`) — branch → PR → one
+confirmation covering both → merge → delete-branch (two asks until
+2026-09-05). The mechanical steps are `just agent commit`, `just agent
+ship-ready <pr>` and `just agent ship-land <pr>`. Only for work
 headed to `experimental`; pushing a topic branch is just a push. "Push" in
 conversation means this flow, not a direct trunk push. Redirected from
 `main` to `experimental` 2026-08-25; on 2026-09-03 `experimental` became
@@ -85,9 +87,9 @@ Nothing breaks by leaving it — courtesy, not a bug with consequences.
   merged across hosts through the private forge repo
   `elly/agent-command-log` (shapes and hashed session ids only; each host
   runs `just agent recurring export` at ship time, `setup` once). Skill
-  `agent-scripts`. First
-  two extracted: `just agent show` (several files/ranges, a header each)
-  and `just agent preflight-brief` (preflight, one line per step).
+  `agent-scripts`. Extracted so far: `just agent show` (several
+  files/ranges, a header each), `just agent preflight-brief` (preflight,
+  one line per step), and ship's `commit`/`ship-ready`/`ship-land`.
 
 ## Fix snippets & one-offs
 

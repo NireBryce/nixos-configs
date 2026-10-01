@@ -17,20 +17,37 @@
 #      hook was written for).
 #   3. `cat`/`bat`/`less`/`more`/`head`/`tail` reading a path under
 #      /run/secrets/ -- prints a live decrypted secret's contents.
-# Both ask for confirmation rather than hard-denying: there's a real
-# alternative for each (see the reason text), but a rare legitimate case
-# (e.g. actually needing the whole file) shouldn't be flatly impossible.
+# Each is DENIED, not asked (since 2026-09-29): there is always a narrower
+# form that answers the same question (the reason text names them), and a
+# deny reaches the model in every permission mode -- the model reads the
+# reason and retries with the safe form. The earlier "ask" was a silent
+# no-op under --permission-mode auto (issue #182's mechanism, found on
+# git-guard), so in auto mode this guard used to do nothing at all. A rare
+# genuine need for the whole file is the user's to run by hand.
+# systemMessage travels with the deny so the human sees it in the transcript.
 # Which keys exist -- the question that tempts the `sops -d | grep` shape --
 # never needs decryption at all: `just read-sops-names` reads the committed
 # ciphertext, where names are plaintext and values are ENC[...].
+#
+# No jq, no guard: without it the command can't be read, so the hook says so
+# in a systemMessage (built by hand, no jq) on every call rather than
+# allowing silently. The settings entry has no `|| true` for the same
+# reason: a crash surfaces as a hook error instead of vanishing.
 set -euo pipefail
+
+if ! command -v jq >/dev/null 2>&1; then
+    cat >/dev/null
+    printf '%s\n' '{"systemMessage":"secrets-guard-pretooluse: jq not on PATH, so this Bash command was NOT checked for sops -d / /run/secrets leaks. Install jq (packages-config/nix-utils/) to re-arm the guard."}'
+    exit 0
+fi
 
 input=$(cat)
 command=$(jq -r '.tool_input.command // empty' <<<"$input")
 
 reason=""
 
-if grep -qE '\bsops\b' <<<"$command" && grep -qE '(\s|^)-d\b|--decrypt\b' <<<"$command"; then
+# `sops decrypt <file>` is the subcommand spelling of `-d` (PR #435 review).
+if grep -qE '\bsops\b' <<<"$command" && grep -qE '(\s|^)-d\b|--decrypt\b|\bsops[[:space:]]+decrypt\b' <<<"$command"; then
     if ! grep -qE -- '--extract\b' <<<"$command"; then
         # Exemption needs BOTH: stdout (fd1 or bare) to /dev/null -- a
         # `2>`-prefixed redirect is stderr and does not count -- AND no
@@ -43,15 +60,44 @@ if grep -qE '\bsops\b' <<<"$command" && grep -qE '(\s|^)-d\b|--decrypt\b' <<<"$c
     fi
 fi
 
-if [ -z "$reason" ] && grep -qE '\b(cat|bat|less|more|head|tail)\b[^|;&]*/run/secrets/' <<<"$command"; then
-    reason="Reading a decrypted secret file directly prints its plaintext into the transcript. If you just need to confirm it exists/was written, use \`test -s <path>\`, \`stat <path>\`, or \`ls -la\` on its directory instead. See .agents/skills/secrets-hygiene/SKILL.md."
+# /run/secrets (and /run/secrets.d, where sops-nix keeps the real files):
+# a whitelist, not a reader list. No task here needs a secret's contents --
+# only whether it was deployed (exists, non-empty, owner, mode) -- so every
+# segment that touches the path, or every segment at all when the payload cwd
+# is already in there, must be a metadata command: ls, stat, test/[, or find
+# without an action. Anything else denies, whatever the reader: `cd
+# /run/secrets && cat foo` (PR #435 review), cut, cp, a tool not invented
+# yet. The Read tool can't be seen from here at all; settings.json's
+# permissions.deny covers it.
+# Any non-name character ends the path: `/run/secrets;` and `/run/secrets.d`
+# both match, `/run/secretsfoo` doesn't.
+secrets_path_re='/run/secrets([^[:alnum:]_-]|$)'
+cwd=$(jq -r '.cwd // empty' <<<"$input")
+in_secrets=false
+[[ $cwd == /run/secrets || $cwd == /run/secrets/* || $cwd == /run/secrets.d* ]] && in_secrets=true
+if [ -z "$reason" ] && { $in_secrets || grep -qE "$secrets_path_re" <<<"$command"; }; then
+    meta_re='^(ls|stat|test|\[|find)([[:space:]]|$)'
+    while IFS= read -r seg; do
+        seg=$(sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' <<<"$seg")
+        [ -n "$seg" ] || continue
+        $in_secrets || grep -qE "$secrets_path_re" <<<"$seg" || continue
+        # Metadata only: no substitution or input redirect smuggling a read
+        # in (`ls $(cat x)`), no find action that runs or prints contents.
+        if [[ $seg =~ $meta_re ]] \
+            && ! grep -qE '[$`<]|-(exec|execdir|ok|okdir|fprint|fprintf|fls|delete)\b' <<<"$seg"; then
+            continue
+        fi
+        reason="'$seg' touches /run/secrets with something other than a metadata command. Nothing here needs a secret's contents: to confirm one was deployed, use \`test -s <path>\`, \`stat <path>\`, or \`ls -la /run/secrets/\`. See .agents/skills/secrets-hygiene/SKILL.md."
+        break
+    done < <(awk '{ gsub(/&&|\|\||;|\||&/, "\n"); print }' <<<"$command")
 fi
 
 if [ -n "$reason" ]; then
     jq -n --arg reason "$reason" '{
+        systemMessage: ("🔒 SECRETS GUARD (denied): " + $reason),
         hookSpecificOutput: {
             hookEventName: "PreToolUse",
-            permissionDecision: "ask",
+            permissionDecision: "deny",
             permissionDecisionReason: $reason
         }
     }'

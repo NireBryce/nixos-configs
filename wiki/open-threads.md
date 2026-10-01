@@ -1,6 +1,6 @@
 # Open threads
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-09-29_
 
 Todos, half-formed ideas, and things-to-look-into notes left in various
 corners of the tree, plus upstream bugs found here but not yet filed. None
@@ -166,12 +166,6 @@ specific report — not as a housekeeping pass over this list:
   2026-09-08 from a removed notebook TODO, itself already superseded on its
   other point (the "manual migration steps" question — answered by
   `pending-setup.md`'s mirror decision).
-- **CI's lint step re-fetches `nixpkgs#statix nixpkgs#deadnix` from the
-  binary cache on every run** (`.github/workflows/check.yml`), rather than
-  reusing the flake's own nixpkgs input (already in the tree as
-  home-manager packages, per `packages-config/nix-utils/`). Cheap today; worth
-  pinning if CI minutes ever start mattering. Rescued 2026-09-08 from a
-  removed notebook.
 - **QNAP NAS: SSH password authentication cannot be disabled in the QNAP's
   own OS (QuTS hero) — confirmed impossible, 2026-09-16** — separate
   from the restic-over-SFTP credentials in

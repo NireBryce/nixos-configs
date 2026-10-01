@@ -29,3 +29,15 @@ show *specs:
 # `just preflight`, one line per step; on failure, that step's tail
 preflight-brief:
     @"{{scripts}}/preflight-brief.sh"
+
+# Wait for CI, then gate a PR (CLEAN, base experimental) and print the ask
+ship-ready pr:
+    @cd "{{invocation_directory()}}" && "{{scripts}}/ship.py" ready "$@"
+
+# On a yes only: re-gate, merge (rebase/merge by commit count), clean up
+ship-land pr:
+    @cd "{{invocation_directory()}}" && "{{scripts}}/ship.py" land "$@"
+
+# Commit exactly these paths, message on stdin, trailer: commit [--agent X] -- paths
+commit *args:
+    @cd "{{invocation_directory()}}" && "{{scripts}}/ship.py" commit "$@"

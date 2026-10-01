@@ -15,6 +15,14 @@
 # or device-ID-shaped entries (ssh-*, syncthing-*), which aren't secrets.
 set -euo pipefail
 
+# No jq: say so (JSON built by hand) instead of allowing silently -- the
+# same fail-visible rule as secrets-guard-pretooluse.sh's header.
+if ! command -v jq >/dev/null 2>&1; then
+    cat >/dev/null
+    printf '%s\n' '{"systemMessage":"secrets-guard-posttooluse: jq not on PATH, so this Bash output was NOT scanned for plaintext secrets -- check it yourself before quoting it. Install jq (packages-config/nix-utils/) to re-arm the guard."}'
+    exit 0
+fi
+
 input=$(cat)
 # Extract stdout/stderr as RAW text, not `tostring` on the whole object --
 # tostring re-serializes an object to compact JSON, which turns real

@@ -40,9 +40,20 @@ through `sops -d`, or a live `/run/secrets/` path.
 Hooks wired in `.agents/settings.json` (project-scoped, committed):
 
 - **`.agents/hooks/secrets-guard-pretooluse.sh`** (`PreToolUse`, `Bash`):
-  bare `sops -d`/`--decrypt` with no `--extract` and no `>/dev/null`, or
-  `cat`/`bat`/`less`/`more`/`head`/`tail` on a `/run/secrets/` path →
-  `permissionDecision: "ask"` naming the narrower alternative.
+  bare `sops -d`/`--decrypt`/`sops decrypt` with no `--extract` and no
+  `>/dev/null`, or anything touching `/run/secrets` / `/run/secrets.d`
+  (or run with the cwd in there) other than a metadata command — `ls`,
+  `stat`, `test`/`[`, `find` without an action → `permissionDecision:
+  "deny"` naming the narrower alternative (was `ask` until 2026-09-29, a
+  silent no-op under auto permission mode; `/run/secrets` was a reader
+  blacklist until 2026-10-01, which `cd /run/secrets && cat foo` walked
+  past). No task needs a deployed secret's contents, only that it exists
+  with the right owner and mode. Retry with the named form; a genuine
+  whole-file need is the user's to run by hand.
+- **`permissions.deny`**: `Read(//run/secrets/**)` and
+  `Read(//run/secrets.d/**)` — the Read tool (and, best-effort, Grep/Glob)
+  never passes through a Bash hook, and on cube at least one secret is owned
+  by the login user, so it is readable without root.
 - **`.agents/hooks/secrets-guard-posttooluse.sh`** (`PostToolUse`, `Bash`):
   scans command output for a Tailscale auth key (`tskey-...`), age secret key
   (`AGE-SECRET-KEY-...`), private key block (`-----BEGIN ... PRIVATE KEY-----`),

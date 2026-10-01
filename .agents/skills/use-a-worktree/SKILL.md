@@ -67,12 +67,16 @@ git worktree remove --force <path>
 ```
 
 `git branch -d` fails ("used by worktree at ...") until the worktree is
-removed: worktree first, then branch. `-d` also refuses branches whose PR
+removed: worktree first, then branch. `just agent ship-land` handles this
+from inside the worktree: it detaches it at `origin/experimental`
+(leaving the shared checkout's `experimental` alone) and deletes the
+branch; the detached worktree is then yours to remove. `-d` also refuses branches whose PR
 was merged by REBASE (new SHAs upstream); `just branches` settles that by
 patch-id, `just branches prune` deletes only provably landed ones. `git
-worktree list` shows what's outstanding; glance at session start for
-orphans, and don't remove an unrecognized one without checking (`git -C
-<path> status`, mtime) — it may belong to a live session.
+worktree list` shows what's outstanding (Claude Code's SessionStart hook
+prints it); glance at it at session start for orphans, and don't remove an
+unrecognized one without checking (`git -C <path> status`, mtime) — it may
+belong to a live session.
 
 ## See also
 
