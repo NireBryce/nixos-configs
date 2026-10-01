@@ -26,8 +26,8 @@ _Last modified: 2026-10-01_
   open questions rescued from a deleted `HANDOFF-tenacity.md`, partially
   answered since (handheld stack — Jovian Steam autostart, decky-loader,
   handheld-daemon/adjustor — does work; recorded in `jovian.nix`). The
-  still-open ones are issues #TBD-peripherals-still-wanted and
-  #TBD-tenacity-desktop-parity.
+  still-open ones are issues [#440](https://github.com/NireBryce/nixos-configs/issues/440) and
+  [#441](https://github.com/NireBryce/nixos-configs/issues/441).
 - The `old-`/`old-historical-`-prefixed planning and handoff artifacts (the
   den→flake-parts port plan, the durandal/lysithea handoff, and tenacity's
   plan/prompt files) were removed 2026-08-26, their useful content already

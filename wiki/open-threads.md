@@ -44,8 +44,8 @@ The `pending-setup` label is the fleet-side counterpart, explained on
 
 `_loose-ends/bugs-pending-submission/` holds bug reports written up against
 third-party projects (nixpkgs, `amd-debug-tools`, Jovian-NixOS), each with
-an `upstream`-labelled issue here that tracks it (#TBD-upstream-vscode-ripgrep,
-#TBD-upstream-amd-s2idle, #TBD-upstream-jovian-iommu). **Neither the file
+an `upstream`-labelled issue here that tracks it ([#444](https://github.com/NireBryce/nixos-configs/issues/444),
+[#442](https://github.com/NireBryce/nixos-configs/issues/442), [#443](https://github.com/NireBryce/nixos-configs/issues/443)). **Neither the file
 nor the issue is a reason to file it upstream**: per `AGENTS.md`, filing
 outside `NireBryce/nixos-configs` happens only when the user says so
 explicitly, in those words, for that specific report — not as a
@@ -64,6 +64,13 @@ Notes that have no "done when", so an issue would only sit open:
   2026-08-24 and not pursued: neither is in nixpkgs or has a NixOS module,
   and both are PHP apps wanting a writable install dir. The write-up is
   in git history (`claude cave/`, removed 2026-09-01).
+- **User split, not yet started.** `elly` is deliberately the experimental
+  user — everything lands there first. Plan: move what's really
+  user-package material onto `nire`, then, once the config has stabilized,
+  give anything that doesn't need direct human invocation its own account,
+  so a misbehaving program running as one of those users doesn't inherit
+  all of `elly`'s authority. See
+  [categories/elly.md](categories/elly.md#elly-as-the-experimental-user).
 - `ignore/` and `flake/!IGNORE-maybe-useful-chunks/` hold retired
   experiments, each with a README saying why it didn't work. Anything
   under an `ignore`/`IGNORE`-prefixed path is not indexed anywhere on

@@ -96,4 +96,4 @@ matched; default branch `experimental`. GitHub stays canonical; mirror-not-origi
 ## See also
 
 [forgejo.md](forgejo.md) · [../categories/git-forge.md](../categories/git-forge.md) ·
-[pending-setup-for-agents.md](pending-setup-for-agents.md) (open one-time steps; push over SSH is #TBD-forge-ssh-push)
+[pending-setup-for-agents.md](pending-setup-for-agents.md) (open one-time steps; push over SSH is [#438](https://github.com/NireBryce/nixos-configs/issues/438))

@@ -22,5 +22,6 @@ Not a tracker since 2026-10-01; this repo's GitHub issues are.
   [`../flake/scripts/script-wishlist.md`](<../flake/scripts/script-wishlist.md>),
   [`../flake/doc/notes-and-fixes.md`](<../flake/doc/notes-and-fixes.md>)'s
   look-into list; self-hosted booking dropped 2026-08-24 (not in nixpkgs,
-  no module, PHP). `ignore`/`IGNORE`-prefixed paths are retired
-  experiments.
+  no module, PHP); user split (`elly` -> `nire`, then per-purpose
+  accounts) planned, not started. `ignore`/`IGNORE`-prefixed paths are
+  retired experiments.

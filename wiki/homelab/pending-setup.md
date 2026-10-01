@@ -34,8 +34,8 @@ when" that is checked on the live service, not by `nix eval`. When a step
 like this turns up, file it with that label rather than adding it here.
 
 At the move (2026-10-01) the label covered the first go/ links
-(#TBD-golink-first-links), a push over SSH to the forge
-(#TBD-forge-ssh-push), and homepage's calendar feeds
+([#439](https://github.com/NireBryce/nixos-configs/issues/439)), a push over SSH to the forge
+([#438](https://github.com/NireBryce/nixos-configs/issues/438)), and homepage's calendar feeds
 ([#299](https://github.com/NireBryce/nixos-configs/issues/299)).
 
 ## How this differs from open-threads.md
