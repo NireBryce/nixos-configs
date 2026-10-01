@@ -3,7 +3,8 @@
 autoApprovers) through Tailscale's REST API, instead of the admin console's
 HuJSON editor.
 
-Why this exists: wiki/open-threads.md's Tailscale Services entry deferred
+Why this exists: wiki/open-threads.md's Tailscale Services entry (since
+removed, 2026-10-01; in git history) deferred
 `svc:` partly because the policy file's state lives outside this repo, in
 Tailscale's control plane, editable only by hand in the console. The API
 (`GET`/`POST /api/v2/tailnet/{tailnet}/policy`) makes it scriptable instead

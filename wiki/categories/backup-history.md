@@ -1,6 +1,6 @@
 # `backup` — history
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-01_
 
 Resolved incidents and superseded design behind [backup](backup.md) and
 [../homelab/backup-runbook.md](../homelab/backup-runbook.md) — split out
@@ -139,8 +139,7 @@ The three sub-items that had to close first, all of which did:
 - **QuTS hero has no toggle to force key-only SSH auth** — mitigated
   2026-08-31: port 22 is LAN-blocked and tailnet-only (confirmed live), and
   QNAP's brute-force protection is on. Still a standing limitation rather
-  than a fix, and it is listed as such on
-  [open-threads.md](../open-threads.md).
+  than a fix; [backup.md](backup.md) carries it.
 
 The restore drill is what made this worth doing: it found a real bug, since
 fixed and confirmed live. Full account in "Getting the SFTP repository from
@@ -153,4 +152,5 @@ fixed and confirmed live. Full account in "Getting the SFTP repository from
 - [backup](backup.md) — the category as it actually works today.
 - [../homelab/backup-runbook.md](../homelab/backup-runbook.md) — the
   commands.
-- [../open-threads.md](../open-threads.md) — issue #87.
+- [#87](https://github.com/NireBryce/nixos-configs/issues/87) — the
+  issue this page closes out.

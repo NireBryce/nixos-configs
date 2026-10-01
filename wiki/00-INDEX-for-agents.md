@@ -47,8 +47,8 @@ A page without one opens with `## Quick facts` — linked there.
 - [history.md](history.md) — the index into the above.
 - [flake-parts-port-notes-for-agents.md](flake-parts-port-notes-for-agents.md)
   — salvaged from the deleted `flake-parts` branch.
-- [open-threads-for-agents.md](open-threads-for-agents.md) — pending reports,
-  todos, things to look into.
+- [open-threads-for-agents.md](open-threads-for-agents.md) — loose ends are
+  GitHub issues; labels, and the upstream-filing rule.
 
 ## Category reference
 

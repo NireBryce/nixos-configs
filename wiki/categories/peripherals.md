@@ -1,6 +1,6 @@
 # `peripherals` — `general-config/peripherals/`
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-01_
 
 ## Contents
 
@@ -19,8 +19,8 @@ Two small files, both `nixos`-class, both single-option one-liners:
 
 ## Open question this category carries
 
-Whether these are still wanted at all is explicitly unresolved — see
-[../open-threads.md](../open-threads.md): both modules "came across from the
+Whether these are still wanted at all is explicitly unresolved — tracked
+as #TBD-peripherals-still-wanted: both modules "came across from the
 pre-restructure config unexamined" per a note rescued from a deleted handoff
 doc, and nobody's revisited whether either peripheral is still in use on the
 hosts that import this category.
@@ -34,5 +34,5 @@ declares a `darwin` class (same reasoning as [hardware](hardware.md) and
 
 ## See also
 
-- [../open-threads.md](../open-threads.md) — the unresolved "still wanted?"
+- #TBD-peripherals-still-wanted — the unresolved "still wanted?"
   question.

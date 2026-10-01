@@ -2,6 +2,8 @@
 
 _Last modified: 2026-09-29_
 
+_Sibling reviewed: 2026-10-01 -- source's See-also links repointed from open-threads.md to issues #87/#130 (open-threads became a pointer page); this page links neither_
+
 Condensed from [backup.md](backup.md). Facts only here.
 
 restic, backing up `nire-cube`'s service state to the QNAP NAS, nested under

@@ -11,7 +11,8 @@ the script (`vip-put`/`apply`) to push an edit.
   `tag:homelab-cube`, `autoApprovers.services` for `svc:grafana`/`svc:git`
   (pre-approving that tag to advertise both, removing the manual
   per-service console click wiki/open-threads.md's Tailscale Services
-  entry cited as a cost), and explicit grants for the two service
+  entry cited as a cost -- that entry since removed, 2026-10-01; in git
+  history), and explicit grants for the two service
   destinations.
 - `svc-homepage.json`, `svc-glance.json` -- the third and fourth Service
   objects. `svc-glance.json` was the third once: PUT 2026-09-10, long

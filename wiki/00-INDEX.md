@@ -128,8 +128,8 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   its dead ends with the symptom that identified each, and a flake-parts
   machinery reference backed by the pinned upstream source. Content, not an
   index, because the branch it linked to is gone.
-- [Open threads](open-threads.md) — pending upstream bug reports, todos,
-  half-formed ideas, and things-to-look-into notes left in various corners.
+- [Open threads](open-threads.md) — where the repo's loose ends are
+  tracked (GitHub issues, by label), and the rule for upstream write-ups.
 - [Maintenance schedule](maintenance-schedule.md) — the fleet's keys,
   credentials, and certificates that have an actual expiry, rotation
   cadence, or silent-breakage property; tended by skill
@@ -172,8 +172,7 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   [using Grafana](homelab/grafana.md), and
   [creating go/ links](homelab/creating-golinks.md), plus
   [pending setup](homelab/pending-setup.md) — what's running but not
-  finished, now down to go/ links, homepage's calendar feeds, and the
-  Actions runner's one-time secret + UUID bootstrap. A different tier from the category pages, and the one place a
+  finished, tracked as `pending-setup`-labelled issues. A different tier from the category pages, and the one place a
   page may hold real content rather than links — because its source is
   often the running service's own help page, not a file in this repo.
 

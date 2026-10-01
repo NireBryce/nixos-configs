@@ -1,6 +1,6 @@
 # Backup runbook — restic on `nire-cube`
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-01_
 
 Commands for operating [backup](../categories/backup.md) — the restic
 category backing up Forgejo/Grafana/golink's state and `/persist` to the
@@ -202,6 +202,5 @@ section), then `just switch` on cube to pick it up.
   plan and every one-time setup snag, in full.
 - [rustic](rustic.md) — an interactive TUI alternative to the commands
   above.
-- [Pending setup](pending-setup.md) — item 4, now closed; this page is
-  the procedure it points to.
-- [open-threads.md](../open-threads.md) — issue #87.
+- [#87](https://github.com/NireBryce/nixos-configs/issues/87) — the
+  issue this procedure closed.

@@ -1,6 +1,6 @@
 # Maintenance schedule
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-01_
 
 A checklist of this fleet's credentials, keys, and certificates that have
 **an actual expiry, a recommended rotation cadence, or a "will silently
@@ -136,7 +136,7 @@ here, don't wrap this file in ciphertext to protect one row.
   and encrypt the restic repo.
 - **Rotation history**: 2026-08-27 (`restic-cube-password`) and 2026-08-31
   (`restic-cube-ssh-key`) — see
-  [homelab/pending-setup.md](homelab/pending-setup.md)'s backups section
+  [categories/backup-history.md](categories/backup-history.md#the-setup-checklist-closed-out-2026-08-28-through-2026-09-06)
   for the dated log.
 - **Procedure**: [homelab/backup-runbook.md](homelab/backup-runbook.md)'s
   ["Rotating the secrets"](homelab/backup-runbook.md#rotating-the-secrets)

@@ -1,6 +1,6 @@
 # `backup` — `general-config/homelab/backup/`
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-01_
 
 [restic](https://restic.net/), backing up `nire-cube`'s own service state to
 the QNAP NAS already on the network. Added 2026-08-28, cube-only, against
@@ -208,10 +208,11 @@ after this category was added.
 - [git-forge](git-forge.md), [monitoring](monitoring.md),
   [shortlinks](shortlinks.md) — the three services this category actually
   backs up.
-- [../open-threads.md](../open-threads.md) — "Left open by the cube service
-  stack", where issue #87 was first tracked.
-- [../homelab/pending-setup.md](../homelab/pending-setup.md) — the two
-  remaining human steps, alongside the fleet's other one-time setup.
+- [#87](https://github.com/NireBryce/nixos-configs/issues/87) — the
+  issue this category closed; extending it past cube is
+  [#130](https://github.com/NireBryce/nixos-configs/issues/130).
+- [../homelab/pending-setup.md](../homelab/pending-setup.md) — the
+  fleet's one-time setup steps (backups' are all done).
 - [../homelab/backup-runbook.md](../homelab/backup-runbook.md) — the actual
   commands (finishing setup, status, manual backup, restore).
 - [../homelab/rustic.md](../homelab/rustic.md) — an interactive TUI that can
