@@ -92,10 +92,8 @@ Five separate one-time steps, each hit a real snag:
    2026-09-03, to `restic-backup` (Storage Pool 2), its own genuinely
    dedicated share. Schedule confirmed live 2026-09-05 via a Snapshot
    Manager screenshot: daily 04:30, keep 5 days.
-3. **SSH's own exposure on the QNAP** — QuTS hero has no toggle to force
-   key-only auth, so port 22 was LAN-blocked and made tailnet-only instead
-   (confirmed live both directions, 2026-08-31); QNAP's own brute-force
-   protection left on.
+3. **SSH on the QNAP made tailnet-only** — port 22 LAN-blocked
+   (confirmed live both directions, 2026-08-31).
 4. **Migrating the pre-move repo** — the `restic-backup`-share path move
    above meant a real, already-populated repo sat at the old `homes` path
    (five real snapshots, 2026-08-31 through 2026-09-04) that would've been
@@ -136,10 +134,8 @@ The three sub-items that had to close first, all of which did:
 - **No QNAP-side snapshot schedule on the backup share** — done 2026-09-05,
   confirmed via a Snapshot Manager screenshot: daily at 04:30 on the
   `restic-backup` share, keeping 5 days, status Success.
-- **QuTS hero has no toggle to force key-only SSH auth** — mitigated
-  2026-08-31: port 22 is LAN-blocked and tailnet-only (confirmed live), and
-  QNAP's brute-force protection is on. Still a standing limitation rather
-  than a fix; [backup.md](backup.md) carries it.
+- **QNAP SSH made tailnet-only** 2026-08-31: port 22 is LAN-blocked
+  (confirmed live); [backup.md](backup.md) carries it.
 
 The restore drill is what made this worth doing: it found a real bug, since
 fixed and confirmed live. Full account in "Getting the SFTP repository from

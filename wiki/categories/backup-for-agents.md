@@ -1,6 +1,6 @@
 # `backup`, for agents
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-01_
 
 _Sibling reviewed: 2026-10-01 -- source's See-also links repointed from open-threads.md to issues #87/#130 (open-threads became a pointer page); this page links neither_
 
@@ -47,8 +47,7 @@ backups, and SFTP doesn't close that. The mitigation is a **QNAP-side
 snapshot schedule on the `restic-backup` share** — admin console, nothing
 here can enforce it. Confirmed live 2026-09-05: daily 04:30, keep 5 days.
 
-QNAP SSH has no key-only-auth toggle; mitigated at the network level
-instead — port 22 LAN-blocked, tailnet-only.
+QNAP SSH is tailnet-only: port 22 LAN-blocked.
 
 **cube reaches ts-hive only through the tailnet grant `tag:homelab-cube →
 ts-hive, tcp:22`** (`acl-diff-applied.hujson`, alias `ts-hive` in `hosts`).
