@@ -1,6 +1,6 @@
 # Conventions & workflow
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-02_
 
 ## Contents
 
@@ -32,7 +32,8 @@ as a second recipe, not a flag, and errors).
 Skill `ship` (`.agents/skills/ship/SKILL.md`) — branch → PR → one
 confirmation covering both → merge → delete-branch (two asks until
 2026-09-05). The mechanical steps are `just agent commit`, `just agent
-ship-ready <pr>` and `just agent ship-land <pr>`. Only for work
+preflight-each`, `just agent pr <body-file>`, `just agent ship-ready <pr>`
+and `just agent ship-land <pr>`. Only for work
 headed to `experimental`; pushing a topic branch is just a push. "Push" in
 conversation means this flow, not a direct trunk push. Redirected from
 `main` to `experimental` 2026-08-25; on 2026-09-03 `experimental` became
@@ -89,7 +90,9 @@ Nothing breaks by leaving it — courtesy, not a bug with consequences.
   runs `just agent recurring export` at ship time, `setup` once). Skill
   `agent-scripts`. Extracted so far: `just agent show` (several
   files/ranges, a header each), `just agent preflight-brief` (preflight,
-  one line per step), and ship's `commit`/`ship-ready`/`ship-land`.
+  one line per step), `preflight-each` (that, per commit), ship's
+  `commit`/`pr`/`ship-ready`/`ship-land`, and `worktree new`/`prune`
+  (skill `use-a-worktree`).
 
 ## Fix snippets & one-offs
 

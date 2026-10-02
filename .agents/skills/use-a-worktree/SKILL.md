@@ -47,6 +47,10 @@ git -C <repo> fetch origin
 git -C <repo> worktree add <scratchpad>/wt-<branch> -b <branch> origin/experimental
 ```
 
+Or `just agent worktree new <branch> [<base>] --root <scratchpad>` (same
+fetch and add, refuses an existing branch or path, prints only the path;
+`$AGENT_SCRATCH` stands in for `--root`). The directory is `wt-<branch
+minus its feat/-style prefix>`.
 `<scratchpad>` is the directory named in your system prompt (none: `/tmp`);
 `<branch>` is the real shipping branch, not a throwaway label. Then `just`,
 `nix eval`, `gh pr create` all work as usual. **Verify you're in it** (`git
@@ -84,7 +88,12 @@ patch-id, `just branches prune` deletes only provably landed ones. `git
 worktree list` shows what's outstanding (Claude Code's SessionStart hook
 prints it); glance at it at session start for orphans, and don't remove an
 unrecognized one without checking (`git -C <path> status`, mtime) — it may
-belong to a live session.
+belong to a live session. `just agent worktree prune --root <dir>`
+reports each linked worktree under `<dir>` (clean/dirty, branch, landed
+on `origin/experimental` by patch-id, on origin or not) and with `--yes`
+removes only clean ones that landed, or never pushed with nothing ahead
+and untouched for an hour (`--min-age`); never dirty ones, the main
+checkout, or the one it runs in.
 
 ## See also
 

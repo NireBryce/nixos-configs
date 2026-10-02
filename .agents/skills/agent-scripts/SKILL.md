@@ -52,9 +52,12 @@ different verdicts:
   commit conventions (pathspec, stdin message, trailer, no trunk
   commits), its step-2 preview and gate, and the post-merge cleanup
   (31 sessions) including the linked-worktree case.
-- Not scripted: `cat <heredoc> -> gh pr create --body-file <path>`.
-  `--body-file -` already reads stdin, so the fix was a line in skill
-  `ship`, not a wrapper.
+- `pr` (`ship.py`, 2026-10-02): first left unscripted (`--body-file -`
+  reads stdin), then wrapped once it carried conventions of its own: the
+  disclosure line at both ends, `--base experimental`, push `-u` first.
+- `worktree new/prune` (`worktree.py`), `preflight-each`: skill
+  `use-a-worktree`'s create and its never-done cleanup, and ship's
+  each-commit-green loop, which left worktrees behind when a check failed.
 
 ## Is it worth a script?
 

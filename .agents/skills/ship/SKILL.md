@@ -56,13 +56,15 @@ If a drvPath moved, say *what* changed with `just diff HEAD` — a permuted
 `systemPackages` order is not a value change.
 
 Multi-commit change: check **each** commit is green (`lessons-learned.md`
-§15) in a throwaway worktree:
+§15):
 
 ```sh
-git worktree add -q --detach /tmp/wt <sha> && cd /tmp/wt/flake
-# ... check ...
-git worktree remove --force /tmp/wt
+just agent preflight-each [<range>]   # default origin/experimental..HEAD
 ```
+
+`preflight-brief` on every commit, oldest first, in one throwaway detached
+worktree removed on any exit (Ctrl-C too); one `ok`/`FAIL` line per commit
+as it finishes, so it suits a background runner. Non-zero if any failed.
 
 ## 1. Branch, push, open the PR
 
@@ -112,10 +114,19 @@ wrapped: `git commit --amend -F - -- <paths...> <<'EOF'`.
 
 Then `just agent recurring export` (one line: this host's command shapes
 to the private command log, skill `agent-scripts`; "not set up" or a
-failure is reported, not a reason to stop),
-`git push -u origin <branch>`, and `gh pr create --base experimental
---body-file - <<'EOF'` (body on stdin: backticks in an inline `--body`
-are executed, as in a commit message).
+failure is reported, not a reason to stop), write the body to a file, and
+
+```sh
+just agent pr <body-file> [--title T]   # --edit <n> replaces an open PR's body
+```
+
+It pushes with `-u` when the branch has no `origin/<branch>` upstream (a
+branch cut from `origin/experimental` tracks the trunk, so a bare push
+fails), then `gh pr create --base experimental --body-file`. Title
+defaults to the only commit's subject; several commits need `--title`.
+It refuses on `experimental`/`main` and refuses a body missing the
+disclosure line at top or bottom (below). The body is a file because
+backticks in an inline `--body` are executed, as in a commit message.
 PR body: what changed, why, what was verified, what was left alone, under
 `.github/PULL_REQUEST_TEMPLATE.md`'s headings. Security-relevant change:
 the PR body and commit messages state what is now enforced, never what got
