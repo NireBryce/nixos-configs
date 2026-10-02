@@ -210,6 +210,7 @@ preflight:
     @just pinned-packages-test
     @python3 .agents/scripts/test_recurring.py
     @python3 .agents/scripts/test_ship.py
+    @python3 .agents/scripts/test_worktree.py
     @just guards-test
     @just preflight-mirror-test
     @just check
