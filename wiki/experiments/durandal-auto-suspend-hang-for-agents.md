@@ -1,6 +1,6 @@
 # Auto-suspend hang on nire-durandal, for agents
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-02_
 
 Source: [durandal-auto-suspend-hang.md](durandal-auto-suspend-hang.md).
 **Status: mechanism partly identified, cause
@@ -63,8 +63,14 @@ too long, RAM and the session are lost.
   delta.
 - **"Power-cycle count moved = hang" is WRONG** (corrected 2026-09-15): `+1`
   is baseline; only `> 1` is a hang.
-- Detector-labelled totals 2026-09-14→15: **1 hang, 6 clean.** Cycles predating
-  smartmontools are memory-labelled and unverifiable.
+- Detector-labelled totals 2026-09-14→2026-10-02: **2 hangs (cycle 7;
+  `20261002T233332Z-post`), 35 clean between them** — ~1 in 18. Cycles
+  predating smartmontools are memory-labelled, unverifiable.
+- **2026-10-02 hang:** auto, `deep`, 6.18.53, `nvme0` 2891→2894 (2 cuts; user
+  recalled "2 or 3" — trust the counter), 94 s suspend→resume wall clock incl.
+  both cuts (failed on first wake). `suspend_stats` success; GPU
+  `suspend_noirq` 517 ms (baseline); `pre` vs prior clean `pre` differs only in
+  per-cycle counters.
 
 ## Ruled out
 
@@ -152,9 +158,9 @@ non-zero returns** either direction.
 | `0000:07:00.0` GPU | `pci_pm_resume` | 471 ms |
 
 GPU is the **slowest device on the descent**; `suspend_noirq` is the last
-device phase before firmware handoff. ~1% spread = baseline; seconds there or
-no return = signal. USB `usb_dev_resume` times (1-2 1.7s, 1-1 1.6s, 1-10
-1.27s) are re-enumeration, **not suspects**.
+device phase before firmware handoff. ~1% spread = baseline. **2026-10-02 hang
+read 517 ms, returned 0** — the hang is past this phase, not in it.
+USB `usb_dev_resume` times (1-2 1.7s, 1-1 1.6s, 1-10 1.27s) are re-enumeration, **not suspects**.
 
 ## Reading the dumps
 

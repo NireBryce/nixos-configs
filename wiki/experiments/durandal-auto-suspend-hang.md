@@ -1,6 +1,6 @@
 # Auto-suspend hang on nire-durandal
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-02_
 
 `nire-durandal` suspends into S3 and then cannot be woken — keyboard, power
 button, nothing — until power is physically removed at the PSU. **Status:
@@ -173,6 +173,26 @@ only — they can never be verified. Hangs are therefore much rarer than the
 early "every auto-suspend" reading suggested, and short sleeps are not
 inherently suspicious: 14 s, 51 s and 450 s cycles all read clean.
 
+**Second detector-labelled hang, 2026-10-02** (dump pair
+`20261002T233158Z-pre` / `20261002T233332Z-post`, boot 0 from 2026-09-29).
+Auto-suspend (`org_kde_powerdevil`), `deep`, kernel 6.18.53. `nvme0` 2891 → 2894
+— `+3`, two PSU cuts (the user recalled "2 or 3"; the counter settles it), RAM
+kept. Suspend at 19:31:58 EDT, back at 19:33:32 — 94 s wall clock *including*
+both cuts, so it failed on the first wake attempt, not after a long sleep. What
+it did **not** show:
+
+- `suspend_stats` `success`, no failed step — the no-wake shape again.
+- GPU `pci_pm_suspend_noirq` **517 ms**, inside the 515–522 ms baseline; the
+  usual `MODE1 reset` and `Refused … D0 to D3hot`, same as every clean cycle.
+- Its `pre` dump against the clean cycle before it (19:03, `+1`) differs only
+  in counters that tick once per cycle (`gpe08`, `sci`, `01:00.0` / `device:3c`
+  / `PNP0C0C:00` wakeup events) — same wakeup enables, same GPU state.
+
+**Detector-labelled totals, 2026-09-14 → 2026-10-02: two hangs (cycle 7 and
+this one), 35 clean between them.** Every `post` delta in that span other than
+those two is exactly `+1`. Roughly one hang in 18 cycles, against the
+early-cycle impression of most of them.
+
 ## Instrumentation
 
 **Recorded per cycle** by
@@ -279,6 +299,11 @@ coming back. The ~1% spread across clean cycles is what makes it useful: it is
 a **baseline, not an anomaly**, so the same callback at seconds, or never
 returning, would be unmistakable. The earlier descent comparison came back
 "identical" only because it compared summaries.
+
+**The 2026-10-02 hang read 517 ms there** — inside the baseline, returning 0.
+So the one hang measured at this resolution does *not* stall in the last
+kernel device phase: whatever fails, fails after the handoff to firmware or on
+the way back in, where nothing is logged.
 
 USB numbers look worse (`1-2` 1.7 s, `1-1` 1.6 s, `1-10` 1.27 s) but are all
 `usb_dev_resume` — re-enumeration *after* the system is already back, past
