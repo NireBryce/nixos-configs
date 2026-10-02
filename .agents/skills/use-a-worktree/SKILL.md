@@ -33,6 +33,13 @@ same `.git` (branches, objects, `git worktree list` shared).
 
 ## How
 
+**Subagents (Claude Code)**: pass `isolation: "worktree"` to the Agent
+tool. Claude Code creates the worktree under `.claude/worktrees/`
+(gitignored) on its own `worktree-agent-*` branch and removes it again if
+the agent changed nothing. Branch it from the right base inside the agent
+if it will ship. This needs `.claude/` to be a real directory, not a
+symlink (it is, since 2026-10-02).
+
 **Create**, based on the target branch (usually `experimental`, skill `ship`):
 
 ```sh

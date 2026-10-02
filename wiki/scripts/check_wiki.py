@@ -613,8 +613,8 @@ def wiki_md(root, pattern='*.md'):
 
 def rule_files(root):
     """`.agents/rules/*.md`, recursive -- Claude Code discovers rules in
-    subdirectories too. `.claude` is a symlink to `.agents`, so this is the
-    one real copy."""
+    subdirectories too. `.claude/rules` is a symlink to `.agents/rules`, so
+    this is the one real copy."""
     rules = root / '.agents' / 'rules'
     return sorted(rules.rglob('*.md')) if rules.is_dir() else []
 

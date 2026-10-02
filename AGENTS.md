@@ -11,6 +11,10 @@
 > below are plain markdown at `.agents/skills/<name>/SKILL.md` — any agent
 > can read them as files, with or without a harness that loads skills.
 >
+> `.claude/` is a real directory whose `settings.json`, `skills` and
+> `rules` are symlinks into `.agents/` (a symlinked `.claude` itself makes
+> Claude Code refuse to create subagent worktrees).
+>
 > This file holds what applies to every session. Detail that matters only
 > under specific paths lives in `.agents/rules/*.md` (Claude Code reads them
 > as `.claude/rules/` and loads each only when a file matching its `paths:`
