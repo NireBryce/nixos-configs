@@ -1,6 +1,6 @@
 # Durandal suspend instrumentation: what is running
 
-_Last modified: 2026-09-16_
+_Last modified: 2026-10-02_
 
 Every step run against `nire-durandal` for the auto-suspend investigation, what
 survives a reboot, and **how to check rather than trust this page**. Each row
@@ -26,6 +26,7 @@ echo "runpm:          $(grep -o 'amdgpu.runpm=[0-9]' /proc/cmdline || echo absen
 echo "pm_print_times: $(cat /sys/power/pm_print_times)"
 echo "smartctl:       $(command -v smartctl || echo absent)"
 echo "it87:           $(grep -c '^it87 ' /proc/modules)"
+echo "gpu-mem:        $(grep -c drm_client_processes "$(grep -oE '/nix/store/[a-z0-9]+-unit-script-sleep-actions-start' /run/current-system/etc/systemd/system/sleep-actions.service | head -1)/bin/sleep-actions-start")"
 echo "dumps:          $(ls -1 /var/log/suspend-probe/*.txt 2>/dev/null | wc -l)"
 grep -c "GPU state" "$(grep -oE '/nix/store/[a-z0-9]+-unit-script-sleep-actions-start' \
   /run/current-system/etc/systemd/system/sleep-actions.service | head -1)/bin/sleep-actions-start"
@@ -41,6 +42,7 @@ grep -c "GPU state" "$(grep -oE '/nix/store/[a-z0-9]+-unit-script-sleep-actions-
 | 4 | `sudo modprobe hwmon-vid` then `sudo insmod <store>/it87.ko ignore_resource_conflict=1 update_vbat=1` | **no — gone at reboot** | `grep -c '^it87 ' /proc/modules` |
 | 5 | `just switch` 2026-09-16 — GPU state per cycle (DPM levels, link speed, busy%, hwmon) | yes, config | `grep -c "GPU state" <probe script>` |
 | 6 | same switch — `pm_print_times=1` via tmpfiles, per-device suspend/resume timings. Took effect immediately, no reboot | yes, config | `cat /sys/power/pm_print_times` |
+| 7 | in the tree 2026-10-02 — GPU memory totals and DRM client count in the GPU state section. Live only after a `just switch`; no reboot needed | yes, config | `grep -c drm_client_processes <probe script>` |
 
 Steps 5-6 confirmed producing data 2026-09-18: GPU state present in dumps from
 `20260916T082142Z` onward, and 1140 device callbacks recorded. Note the kernel
