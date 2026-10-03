@@ -55,8 +55,19 @@ if root=$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null); then
     done < <(git -C "$root" worktree list 2>/dev/null || true)
 
     hooks_path=$(git -C "$root" config core.hooksPath 2>/dev/null || true)
-    if [ "$hooks_path" = ".githooks" ]; then
-        lines+=("core.hooksPath: .githooks (commit-msg trailer fixup and pre-commit lint ratchet active)")
+    # Same test as flake/scripts/hooks-path-note.sh: the value (relative to
+    # the worktree top, or absolute) resolves to this checkout's .githooks
+    # or the main checkout's.
+    case "$hooks_path" in
+        '') hp_real= ;;
+        /*) hp_real=$(realpath -q "$hooks_path" || true) ;;
+        *) hp_real=$(realpath -q "$root/$hooks_path" || true) ;;
+    esac
+    hp_main=$(git -C "$root" worktree list --porcelain 2>/dev/null | sed -n '1s/^worktree //p')
+    if [ -n "$hp_real" ] && [ -d "$hp_real" ] \
+        && { [ "$hp_real" = "$(realpath -q "$root/.githooks" || true)" ] \
+            || [ "$hp_real" = "$(realpath -q "${hp_main:-$root}/.githooks" || true)" ]; }; then
+        lines+=("core.hooksPath: $hooks_path (this repo's .githooks; commit-msg trailer fixup and pre-commit lint ratchet active)")
     elif [ -n "$hooks_path" ]; then
         # Set to something else on purpose (a global hooks dir, say):
         # report, never override.
