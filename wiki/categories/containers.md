@@ -1,6 +1,6 @@
 # `containers` — `general-config/homelab/containers/`
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-03_
 
 Podman and distrobox — OCI containers — and *only* that. See
 [virtualization](virtualization.md) for why libvirt/QEMU is a different
@@ -63,18 +63,19 @@ own header has the two earlier names it carried
 
 ## Imported by
 
-`cube` only. Every NixOS host then on the tree (durandal,
-tenacity, lego, cube) imported it 2026-08-22→08-27, when durandal dropped
-it: nothing in this repo's history records durandal actually running a
-container or distrobox, unlike cube's confirmed homelab usage — parity, not
-need (see `durandal-configuration.nix`'s comment at the removal point).
-`lego` was removed the same day ([../history.md](../history.md)).
-tenacity dropped it 2026-09-26: podman's rootful socket makes the
-`podman` group root-equivalent with no password, and the user was in it on
-every host. Same day, on cube: the user left the `podman` group and the
-rootful socket was turned off (nothing used it; admin is `sudo podman`).
-See `podman.nix` and `tenacity-configuration.nix`. Not
-`lysithea` — the module is `nixos`-class only.
+`cube` only.
+
+History: every NixOS host then on the tree imported it 2026-08-22→08-27.
+Not imported by durandal since 2026-08-27: nothing in this repo's history
+records it actually running a container or distrobox, unlike cube's
+confirmed homelab usage — parity, not need (see
+`durandal-configuration.nix`'s comment at the removal point). `lego` was
+removed the same day ([../history.md](../history.md)). Not imported by
+tenacity since 2026-09-26 (`tenacity-configuration.nix` says why it does
+not). The same day, on cube, the rootful podman socket was turned off and
+the user left the `podman` group (nothing used either; admin is `sudo
+podman`) — see `podman.nix`. Not `lysithea` — the module is
+`nixos`-class only.
 
 ## See also
 

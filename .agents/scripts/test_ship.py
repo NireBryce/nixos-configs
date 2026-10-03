@@ -496,6 +496,46 @@ class Commit(Base):
             self.assertEqual(r.returncode, 1, b)
             self.assertIn(f"refusing to commit on {b}", r.stderr)
 
+    def _commit_only(self, *paths):
+        git(self.repo, "-c", "user.email=t@t", "-c", "user.name=t",
+            "commit", "-qm", "setup", "--", *paths)
+
+    def test_symlink_replaced_by_directory_refused(self):
+        os.symlink("a", self.repo / "l")
+        git(self.repo, "add", "l")
+        self._commit_only("l")
+        head = git(self.repo, "rev-parse", "HEAD")
+        (self.repo / "l").unlink()
+        (self.repo / "l").mkdir()
+        (self.repo / "l" / "f").write_text("x\n")
+        r = self.ship("commit", "--", "l", stdin=self.MSG)
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("changed type", r.stderr)
+        self.assertEqual(git(self.repo, "rev-parse", "HEAD"), head)
+        self.assertIn("b", git(self.repo, "diff", "--cached", "--name-only"))
+
+    def test_trailing_slash_on_ordinary_directory_commits(self):
+        (self.repo / "d").mkdir()
+        (self.repo / "d" / "f").write_text("x\n")
+        git(self.repo, "add", "d")
+        self._commit_only("d")
+        (self.repo / "d" / "f").write_text("y\n")
+        r = self.ship("commit", "--", "d/", stdin=self.MSG)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(self.committed(), ["d/f"])
+
+    def test_directory_replaced_by_symlink_refused(self):
+        (self.repo / "d").mkdir()
+        (self.repo / "d" / "f").write_text("x\n")
+        git(self.repo, "add", "d")
+        self._commit_only("d")
+        (self.repo / "d" / "f").unlink()
+        (self.repo / "d").rmdir()
+        os.symlink("a", self.repo / "d")
+        r = self.ship("commit", "--", "d", stdin=self.MSG)
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("changed type", r.stderr)
+
     def test_detached_head_refused(self):
         # ship-land leaves a linked worktree detached; a commit there would
         # belong to no branch.

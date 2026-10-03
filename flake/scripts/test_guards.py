@@ -1086,6 +1086,59 @@ class MissingJq(unittest.TestCase):
                                   json.loads(out)["systemMessage"])
 
 
+class HooksPathNote(unittest.TestCase):
+    """flake/scripts/hooks-path-note.sh (preflight's first step): silent when
+    core.hooksPath resolves to this checkout's or the main checkout's
+    .githooks, a NOTE otherwise."""
+    script = REPO / "flake" / "scripts" / "hooks-path-note.sh"
+
+    def note(self, cwd):
+        return subprocess.run([str(self.script)], cwd=cwd, capture_output=True,
+                              text=True, check=True).stdout
+
+    def setUp(self):
+        self.repo = make_repo("hooks-path-note-")
+        self.addCleanup(shutil.rmtree, self.repo, ignore_errors=True)
+        (self.repo / ".githooks").mkdir()
+
+    def test_unset_notes(self):
+        self.assertIn("NOTE", self.note(self.repo))
+
+    def test_relative_and_absolute_are_silent(self):
+        for value in (".githooks", str((self.repo / ".githooks").resolve())):
+            git(self.repo, "config", "core.hooksPath", value)
+            self.assertEqual(self.note(self.repo), "", value)
+
+    def test_linked_worktree_using_main_checkouts_hooks(self):
+        git(self.repo, "config", "core.hooksPath",
+            str((self.repo / ".githooks").resolve()))
+        wt = pathlib.Path(tempfile.mkdtemp(prefix="hooks-path-wt-")) / "wt"
+        self.addCleanup(shutil.rmtree, wt.parent, ignore_errors=True)
+        git(self.repo, "worktree", "add", "-q", str(wt), "-b", "side")
+        self.assertEqual(self.note(wt), "")
+
+    def test_missing_directory_notes(self):
+        (self.repo / ".githooks").rmdir()
+        git(self.repo, "config", "core.hooksPath", ".githooks")
+        self.assertIn("NOTE", self.note(self.repo))
+
+    def test_separate_git_dir_gitdir_hooks_not_accepted(self):
+        sep = pathlib.Path(tempfile.mkdtemp(prefix="hooks-path-sep-"))
+        self.addCleanup(shutil.rmtree, sep, ignore_errors=True)
+        wt, gd = sep / "wt", sep / "gd"
+        subprocess.run(["git", "init", "-q", f"--separate-git-dir={gd}", str(wt)],
+                       check=True)
+        (gd.parent / ".githooks").mkdir()
+        git(wt, "config", "core.hooksPath", str(gd.parent / ".githooks"))
+        self.assertIn("NOTE", self.note(wt))
+
+    def test_elsewhere_notes(self):
+        other = pathlib.Path(tempfile.mkdtemp(prefix="other-hooks-"))
+        self.addCleanup(shutil.rmtree, other, ignore_errors=True)
+        git(self.repo, "config", "core.hooksPath", str(other))
+        self.assertIn("NOTE", self.note(self.repo))
+
+
 class SessionStart(unittest.TestCase):
     script = HOOKS / "session-start.sh"
 
@@ -1112,6 +1165,21 @@ class SessionStart(unittest.TestCase):
                          ".githooks")
         # Idempotent: the second run reports, doesn't re-set.
         self.assertIn("core.hooksPath: .githooks (", self.context(self.repo))
+
+    def test_absolute_hooks_path_counts_as_wired(self):
+        git(self.repo, "config", "core.hooksPath",
+            str((self.repo / ".githooks").resolve()))
+        ctx = self.context(self.repo)
+        self.assertIn("this repo's .githooks", ctx)
+        self.assertNotIn("left alone", ctx)
+
+    def test_other_hooks_path_left_alone(self):
+        other = pathlib.Path(tempfile.mkdtemp(prefix="other-hooks-"))
+        self.addCleanup(shutil.rmtree, other, ignore_errors=True)
+        git(self.repo, "config", "core.hooksPath", str(other))
+        self.assertIn("left alone", self.context(self.repo))
+        self.assertEqual(git(self.repo, "config", "core.hooksPath").strip(),
+                         str(other))
 
     def test_linked_worktree_detected(self):
         wt = pathlib.Path(tempfile.mkdtemp(prefix="session-start-wt-")) / "wt"

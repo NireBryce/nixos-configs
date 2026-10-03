@@ -16,6 +16,22 @@
 set -euo pipefail
 
 root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
-if [ "$(git -C "$root" config core.hooksPath || true)" != ".githooks" ]; then
+# Wired means core.hooksPath resolves to an existing directory that is
+# this checkout's .githooks or the main checkout's (a relative value resolves
+# against the worktree top), so `.githooks` and an absolute path to the same
+# directory both count.
+hp=$(git -C "$root" config core.hooksPath || true)
+case "$hp" in
+    '') got= ;;
+    /*) got=$(realpath -q "$hp" || true) ;;
+    *) got=$(realpath -q "$root/$hp" || true) ;;
+esac
+# The main checkout is `git worktree list`'s first entry, whatever the
+# git-dir layout (separate git dir, submodule).
+main_wt=$(git -C "$root" worktree list --porcelain 2>/dev/null | sed -n '1s/^worktree //p')
+here=$(realpath -q "$root/.githooks" || true)
+main=$(realpath -q "${main_wt:-$root}/.githooks" || true)
+if [ -z "$got" ] || [ ! -d "$got" ] \
+    || { [ "$got" != "$here" ] && [ "$got" != "$main" ]; }; then
     echo "NOTE: git hooks not wired (core.hooksPath) -- 'just install-hooks' enables the pre-commit lint ratchet and the commit-msg trailer fixup; CI runs the same lint check either way"
 fi
