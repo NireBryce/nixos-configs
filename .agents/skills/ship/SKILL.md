@@ -41,7 +41,9 @@ two asks 2026-09-05.
 ## 0. Fetch, then is it green?
 
 `git fetch origin` first — other sessions land PRs concurrently; a branch cut
-from stale `experimental` makes step-2 comparisons meaningless.
+from stale `experimental` makes step-2 comparisons meaningless. `just agent
+where` does the fetch and then prints the branch line, dirty paths, commits
+and diff stat against `origin/experimental`, and this branch's PR, read-only.
 
 Then, before opening a PR (CI, `.github/workflows/check.yml`, runs the same
 `just preflight` minutes later — a backstop only):
@@ -140,7 +142,9 @@ top.
 
 ## 2. Preview, then ask
 
-Read back what landed, never recall it:
+Read back what landed, never recall it (`just agent where <n>` is the
+quick look: state and `mergeStateStatus` without waiting for CI; the gate
+is `ship-ready`):
 
 ```sh
 just agent ship-ready <n>
