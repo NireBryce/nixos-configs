@@ -41,6 +41,8 @@ and the report has three sections, each answering a different question:
   PIPELINES    per producer, the filters agents attach (`| head`,
                `| grep -i`): mostly plain Unix, a script there would hide
                what the reader learns from the command.
+  JUST         sessions per `just` recipe called (`just agent show`,
+               `just preflight`): whether a helper is being used.
 
 --json emits the same structure for other tools.
 
@@ -71,6 +73,12 @@ sensitive:
     literal class, acceptable because flag names are what a script needs.
   - subcommand words survive only from a closed list per tool
     (SUBCOMMANDS), so `git checkout experimental` is `git checkout <arg>`.
+  - `just`'s words survive only in recipe position and only when they
+    name a recipe this repo's justfiles define (`just_recipes()`, read
+    from `just --summary` at the repo root, `agent::show` as `agent
+    show`), so `just agent show <path>` counts as itself but `just
+    deploy-foo` is `just <word>`. Recipe names are repo-defined text,
+    already public; anything else after `just` stays a placeholder.
 
 Removed text renders as its category, never its content, so a reader can
 tell a flag from a value: <path>, <n> (numbers, `40,80p`), <str> (quoted),
@@ -85,7 +93,9 @@ cases from the regex version and from a review of this one. Residual: an
 unquoted word that happens to be a 1-3 letter flag cluster (`-foo`) or a
 real command name in command position still reads as one.
 
-`just` invocations (already scripts) and <cmd> segments are skipped.
+`just` invocations (already scripts) and <cmd> segments are skipped in
+SEQUENCES and PIPELINES; JUST counts each recipe's sessions instead, which
+is how adoption of a `just agent` helper is measured.
 
     recurring.py [--min-sessions N] [--top N] [--max-len N] [--json] [--no-sync]
     recurring.py --session <id-prefix>     # audit: one session's shapes
@@ -118,7 +128,7 @@ MAX_LEN    = 4                         # longest sequence recorded
 # may hold keys the current ones would have dropped, and merging would keep
 # them forever. Files of another format are skipped when reading and
 # rebuilt, not merged, on the host's next export.
-FORMAT     = 2
+FORMAT     = 3                          # 3: recipe names kept, `just` kind
 GIT_ENV    = {**os.environ,
               'GIT_SSH_COMMAND': 'ssh -o BatchMode=yes -o ConnectTimeout=8'}
 
@@ -175,6 +185,7 @@ LONG_FLAG  = re.compile(r'^(--[A-Za-z][A-Za-z0-9-]*)(=.*)?$')
 FIND_OPTS  = {'-maxdepth', '-mindepth', '-type', '-name', '-iname', '-path',
               '-newer', '-mtime', '-size', '-exec', '-print', '-print0',
               '-delete', '-empty', '-prune'}
+REPO = Path(__file__).resolve().parents[2]
 # A longer fragment seen in at least this share of a shorter one's
 # sessions absorbs it.
 ABSORB = 0.8
@@ -185,6 +196,32 @@ def is_command(name):
     """Shell builtin or an executable on this machine's PATH. Tests
     replace this, so the allowlist doesn't depend on the host."""
     return name in BUILTINS or shutil.which(name) is not None
+
+
+@lru_cache(maxsize=None)
+def just_recipes():
+    """The recipe vocabulary for `just`, shaped like a SUBCOMMANDS entry:
+    {recipe: set(), module: {recipe, ...}} from `just --summary` at the
+    repo root (module recipes print as `agent::show`). {} when just is
+    missing or fails: every word after `just` is then a placeholder, the
+    old behaviour. Tests replace this, like is_command."""
+    try:
+        p = subprocess.run(['just', '--summary'], cwd=REPO, capture_output=True,
+                           text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return {}
+    if p.returncode:
+        return {}
+    vocab = {}
+    for name in p.stdout.split():
+        mod, _, recipe = name.rpartition('::')
+        if not NAME.match(recipe) or (mod and not NAME.match(mod)):
+            continue
+        if mod:
+            vocab.setdefault(mod, set()).add(recipe)
+        else:
+            vocab.setdefault(recipe, set())
+    return vocab
 
 
 BUILTINS = {'cd', 'echo', 'printf', 'test', '[', 'read', 'export', 'set',
@@ -408,7 +445,8 @@ def segment_shape(tokens):
     name = toks[0]
     if quoted(name) or '/' in name or not NAME.match(name) or not is_command(name):
         return '<cmd>'
-    out, subs, args = [name], SUBCOMMANDS.get(name), toks[1:]
+    subs = just_recipes() if name == 'just' else SUBCOMMANDS.get(name)
+    out, args = [name], toks[1:]
     i, opts_done = 0, False
     while i < len(args):
         tok = args[i]
@@ -418,6 +456,8 @@ def segment_shape(tokens):
         if not opts_done and tok == '--':
             opts_done = True           # everything after `--` is an argument
             out.append('--')
+        elif name == 'just' and len(out) == 1 and ENV_ASSIGN.match(tok):
+            pass                       # `just host=x build`: an override, dropped like `X=1 cmd`
         elif not opts_done and isinstance(subs, (set, dict)) and tok in subs:
             out.append(tok)
             subs = subs[tok] if isinstance(subs, dict) else None
@@ -518,8 +558,11 @@ def session_key(harness, session):
     return hashlib.sha256(f'{harness}:{session}'.encode()).hexdigest()[:12]
 
 
+KINDS = ('chains', 'pipes', 'just')
+
+
 def empty_obs():
-    return {'sessions': {}, 'chains': defaultdict(set), 'pipes': defaultdict(set)}
+    return {'sessions': {}, **{k: defaultdict(set) for k in KINDS}}
 
 
 def collect(rows, harness):
@@ -541,6 +584,8 @@ def collect(rows, harness):
         if sum(cmd_name(x) in READERS for x in producers) >= 2:
             meta['batch'] = True
         for p in ps:
+            if cmd_name(p[0]) == 'just':
+                obs['just'][p[0]].add(h)
             if len(p) > 1 and cmd_name(p[0]) not in ('just', '<cmd>'):
                 obs['pipes']['\t'.join([p[0], *map(filter_name, p[1:])])].add(h)
         for n in range(2, MAX_LEN + 1):
@@ -562,7 +607,7 @@ def merge(a, b):
             cur['commands'] = max(cur['commands'], m['commands'])
             cur['batch'] |= m['batch']
             cur['headers'] |= m['headers']
-        for kind in ('chains', 'pipes'):
+        for kind in KINDS:
             for k, hs in src[kind].items():
                 out[kind][k] |= set(hs)
     return out
@@ -570,8 +615,8 @@ def merge(a, b):
 
 def to_json(obs):
     return {'sessions': dict(sorted(obs['sessions'].items())),
-            'chains': {k: sorted(v) for k, v in sorted(obs['chains'].items())},
-            'pipes':  {k: sorted(v) for k, v in sorted(obs['pipes'].items())}}
+            **{kind: {k: sorted(v) for k, v in sorted(obs[kind].items())}
+               for kind in KINDS}}
 
 
 def from_json(d):
@@ -583,7 +628,7 @@ def from_json(d):
             obs['sessions'][str(h)] = {'commands': int(m['commands']),
                                        'batch': bool(m['batch']),
                                        'headers': bool(m['headers'])}
-        for kind in ('chains', 'pipes'):
+        for kind in KINDS:
             for k, hs in d[kind].items():
                 if not isinstance(k, str) or not isinstance(hs, list):
                     raise TypeError(kind)
@@ -653,6 +698,16 @@ def rank(obs, min_sessions, top, max_len):
         pipes[key] |= hs
         variants[key][typed] += len(hs)
 
+    recipes = defaultdict(set)         # `just agent show` -> sessions
+    for k, hs in obs['just'].items():
+        head = []
+        for tok in k.split()[1:]:
+            if tok.startswith(('<', '-')):
+                break
+            head.append(tok)
+        toks = k.split()               # no recipe: `<word>`, `--summary`, bare
+        recipes[' '.join(head) or (toks[1] if len(toks) > 1 else '(bare)')] |= hs
+
     seq, seq_n = absorb({f: len(s) for f, s in chains.items()}, min_sessions, top)
     by_producer = defaultdict(list)
     for key, s in pipes.items():
@@ -669,6 +724,8 @@ def rank(obs, min_sessions, top, max_len):
         'sequences': [{'sessions': seq_n[f],
                        'chain': list(variants[f].most_common(1)[0][0])}
                       for f in seq],
+        'just': [{'sessions': len(hs), 'recipe': k} for k, hs in
+                 sorted(recipes.items(), key=lambda kv: (-len(kv[1]), kv[0]))],
         'pipelines': [{'producer': max(by_producer[p])[1], 'filters': [
             {'sessions': n, 'filters': f}
             for n, _, f in sorted(by_producer[p], reverse=True)[:4]]}
@@ -678,6 +735,9 @@ def rank(obs, min_sessions, top, max_len):
 
 def analyze(min_sessions, top, max_len, sync=True):
     """Local harnesses read live, plus every export (this host's too)."""
+    if not just_recipes():
+        warn('no recipe names from `just --summary`; every `just` call shapes'
+             ' as `just <word>`')
     obs, sources = empty_obs(), []
     for harness, rows in HARNESSES.items():
         o = collect(rows(), harness)
@@ -726,6 +786,13 @@ def report(a):
     for p in a['pipelines']:
         fs = ', '.join(f'| {f["filters"]} ({f["sessions"]})' for f in p['filters'])
         print(f'  {p["producer"][:40]:40s} {fs}'[:160])
+    print('\nJUST  sessions calling each recipe -- helper adoption'
+          ' (<word>: not a recipe here)')
+    rows = [f'{j["sessions"]:4d} {j["recipe"]}' for j in a['just']]
+    for i in range(0, len(rows), 4):
+        print('  ' + ''.join(f'{x:30s}' for x in rows[i:i + 4]).rstrip())
+    if not rows:
+        print('  (none)')
 
 
 def show_session(prefix):

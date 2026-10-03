@@ -5,7 +5,7 @@ command may survive into a shape. Two checks, the first the real one:
   - closed vocabulary: every token of every shape is a typed placeholder
     (<path>, <n>, <str>, <var>, <url>, <word>, <heredoc>, <loop>, <func>,
     <cmd>), -N, `--`, `-`, a command name the pinned allowlist knows, a
-    SUBCOMMANDS word, or a flag of the permitted forms. A literal can only get out by looking
+    SUBCOMMANDS word, a pinned `just` recipe name, or a flag of the permitted forms. A literal can only get out by looking
     like one of those, which is what the second check probes.
   - named literals: specific strings from hostile commands must not appear.
 
@@ -34,8 +34,12 @@ import recurring as r  # noqa: E402
 KNOWN = {'git', 'gh', 'nix', 'grep', 'sed', 'cat', 'head', 'tail', 'echo',
          'ls', 'find', 'ssh', 'curl', 'jq', 'sops', 'cut', 'wc', 'python3',
          'host', 'id', 'dir', 'printf', 'sort', 'uniq', 'stat', 'test',
-         'mkdir', 'rm', 'du', 'xargs', 'sh', 'bash', 'eval'}
+         'mkdir', 'rm', 'du', 'xargs', 'sh', 'bash', 'eval', 'just'}
 r.is_command = lambda name: name in KNOWN
+# Pinned too: the real vocabulary comes from `just --summary` in the repo.
+RECIPES = {'preflight': set(), 'build': set(),
+           'agent': {'show', 'recurring', 'where'}}
+r.just_recipes = lambda: RECIPES
 
 
 def vocabulary():
@@ -50,6 +54,7 @@ def vocabulary():
                 walk(v)
     for tool, subs in r.SUBCOMMANDS.items():
         walk(subs)
+    walk(RECIPES)
     return words
 
 
@@ -114,6 +119,13 @@ LEAKS = [
     ('gh pr create --body "run `grep x` then (shape only)"', ['shape', 'grep x']),
     ('for f in a; do n=$(awk -F\'"\' \'{print}\' $f | wc -w); echo "$(wc -w < $f) w $f"; done',
      [' w ', 'awk -F']),
+    # `just`: only words that are recipe names survive, and only in
+    # recipe position; overrides, arguments and unknown recipes don't
+    ('just deploy-to-ts-cube', ['deploy', 'ts-cube']),
+    ('just agent private-helper --host ts-cube', ['private-helper', 'ts-cube']),
+    ('just host=nire-secret build', ['nire-secret', 'host=']),
+    ('just agent show build preflight', ['show build', 'preflight']),
+    ('just agent recurring export', ['export']),
 ]
 
 SHAPES = [
@@ -140,6 +152,11 @@ SHAPES = [
     ("python3 - <<'EOF'\nx\nEOF", ['python3 - <heredoc>']),
     ('for h in a b; do ls; done', ['<loop>', 'ls']),
     ('host() { echo; }', ['<func>', 'echo']),
+    ('just agent show a.nix b.md', ['just agent show <path>']),
+    ('just preflight 2>&1 | tail -5', ['just preflight', 'tail -N']),
+    ('just host=x build', ['just build']),
+    ('just agent where 12', ['just agent where <n>']),
+    ('just nonrecipe', ['just <word>']),
 ]
 
 PIPELINES = [
@@ -191,7 +208,7 @@ class Export(unittest.TestCase):
         doc = r.to_json(r.collect(self.rows(), 'claude'))
         for h in doc['sessions']:
             self.assertRegex(h, r'^[0-9a-f]{12}$')
-        for kind in ('chains', 'pipes'):
+        for kind in r.KINDS:
             for key, hashes in doc[kind].items():
                 for tok in key.replace('\t', ' ').split():
                     with self.subTest(kind=kind, token=tok):
@@ -219,6 +236,16 @@ class Export(unittest.TestCase):
         seq = r.rank(r.collect(rows, 'claude'), 1, 5, 4)['sequences']
         self.assertEqual(seq, [{'sessions': 2,
                                 'chain': ['git fetch <word>', 'git status -sb']}])
+
+    def test_just_recipes_counted_per_session(self):
+        rows = [('s1', 'just agent show a b && just agent show c'),
+                ('s2', 'just agent show x.nix:1-9'),
+                ('s2', 'just host=y build'),
+                ('s3', 'just mystery thing')]
+        got = r.rank(r.collect(rows, 'claude'), 1, 5, 4)['just']
+        self.assertEqual(got, [{'sessions': 2, 'recipe': 'agent show'},
+                               {'sessions': 1, 'recipe': '<word>'},
+                               {'sessions': 1, 'recipe': 'build'}])
 
 
 class SqliteReader(unittest.TestCase):
@@ -299,7 +326,7 @@ class ExportFlow(unittest.TestCase):
         self.assertNotIn('failed', out)
         doc = json.loads((r.LOG_DIR / f'{r.host()}.claude.json').read_text())
         self.assertEqual(set(doc), {'format', 'host', 'harness', 'updated',
-                                    'sessions', 'chains', 'pipes'})
+                                    'sessions', 'chains', 'pipes', 'just'})
         self.assertEqual(doc['format'], r.FORMAT)
         log = subprocess.run(['git', '--git-dir', str(self.forge), 'log', '--oneline'],
                              capture_output=True, text=True).stdout
