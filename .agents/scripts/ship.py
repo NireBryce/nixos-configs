@@ -356,7 +356,29 @@ def cmd_commit(a):
         if "<" in m.group(1) or "@" in m.group(1) or len(m.group(1).split()) > 1:
             print(f"warning: trailer `{m.group(0).strip()}` -- AGENTS.md wants"
                   " the agent name only, no model or email", file=sys.stderr)
+    changed = [p for p in paths if type_changed(p)]
+    if changed:
+        sys.exit(
+            f"refusing: {', '.join(changed)} changed type (file/symlink <-> "
+            "directory) since HEAD, which `git commit -- <path>` either rejects "
+            "or commits only partly. Stage it yourself (`git add -A -- <path>`), "
+            "check `git diff --cached --name-only` lists only what you mean, "
+            "then `git commit -F <msgfile>` with the trailer in the message.")
     return run(["git", "commit", "-F", "-", "--", *paths], input=msg).returncode
+
+
+def type_changed(path):
+    """True when `path` is a directory in the work tree but a file or symlink
+    in HEAD, or a file or symlink in the work tree but a directory in HEAD.
+    Relative to the cwd, like the pathspec itself. A trailing slash is
+    dropped first: `ls-tree HEAD -- d/` lists d's contents, not d."""
+    path = path.rstrip("/") or path
+    entry = out(["git", "ls-tree", "HEAD", "--", path]) or ""
+    kind = entry.split(" ", 2)[1:2]
+    if not kind or not os.path.lexists(path):
+        return False
+    is_dir = os.path.isdir(path) and not os.path.islink(path)
+    return (kind == ["blob"] and is_dir) or (kind == ["tree"] and not is_dir)
 
 
 # ---- pr --------------------------------------------------------------------
