@@ -4,6 +4,9 @@
 # --show-current`", "glance at `git worktree list` at session start"
 # (skill use-a-worktree) -- as additionalContext, so it is in context before
 # the first tool call instead of depending on the model reading that far.
+# Plus one line naming the `just agent` helpers (from `just --summary`), so
+# `just agent show`/`where` are known before a read or orientation pipeline
+# gets hand-assembled again.
 #
 # Also wires .githooks/ when it isn't: `git config core.hooksPath .githooks`
 # is exactly what `just install-hooks` runs, repo-local, idempotent, and
@@ -76,6 +79,21 @@ if root=$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null); then
         lines+=("core.hooksPath: was '${hooks_path:-unset}', set it to .githooks just now (what 'just install-hooks' does)")
     else
         lines+=("core.hooksPath: '${hooks_path:-unset}', not .githooks, and setting it failed -- run 'just install-hooks'")
+    fi
+
+    # The `just agent` helper names, read from `just --summary` (a parse,
+    # no recipe runs; ~10ms here), so they are in context before the first
+    # hand-built pipeline. Skipped silently without just, a justfile, or
+    # an agent module, and capped at 1s where timeout exists.
+    if command -v just >/dev/null 2>&1; then
+        tmo=()
+        command -v timeout >/dev/null 2>&1 && tmo=(timeout 1)
+        summary=$(cd "$root" 2>/dev/null && "${tmo[@]}" just --summary 2>/dev/null || true)
+        helpers=""
+        for w in $summary; do
+            case "$w" in agent::*) helpers+=" ${w#agent::}" ;; esac
+        done
+        [ -n "$helpers" ] && lines+=("just agent helpers:$helpers -- batch reads: just agent show; state: just agent where")
     fi
 else
     lines+=("git: $cwd is not inside a git repo")

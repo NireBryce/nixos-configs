@@ -1189,6 +1189,20 @@ class SessionStart(unittest.TestCase):
         self.assertIn("branch: side", ctx)
         self.assertIn("LINKED worktree", ctx)
 
+    @unittest.skipUnless(shutil.which("just"), "just not on PATH")
+    def test_lists_agent_helpers_from_just_summary(self):
+        (self.repo / ".justfile").write_text(
+            "mod agent 'agent.just'\n\nroot-recipe:\n    false\n")
+        (self.repo / "agent.just").write_text(
+            "show:\n    false\n\nwhere:\n    false\n")
+        ctx = self.context(self.repo)
+        self.assertIn("just agent helpers: show where -- batch reads: "
+                      "just agent show; state: just agent where", ctx)
+        self.assertNotIn("root-recipe", ctx)
+
+    def test_no_helper_line_without_an_agent_module(self):
+        self.assertNotIn("just agent helpers", self.context(self.repo))
+
     def test_outside_a_repo_still_succeeds(self):
         d = pathlib.Path(tempfile.mkdtemp(prefix="session-start-norepo-"))
         self.addCleanup(shutil.rmtree, d, ignore_errors=True)

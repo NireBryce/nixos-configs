@@ -1,6 +1,6 @@
 # Conventions & workflow
 
-_Last modified: 2026-10-02_
+_Last modified: 2026-10-03_
 
 ## Contents
 
@@ -91,8 +91,12 @@ Nothing breaks by leaving it — courtesy, not a bug with consequences.
   `agent-scripts`. Extracted so far: `just agent show` (several
   files/ranges, a header each), `just agent preflight-brief` (preflight,
   one line per step), `preflight-each` (that, per commit), ship's
-  `commit`/`pr`/`ship-ready`/`ship-land`, and `worktree new`/`prune`
-  (skill `use-a-worktree`).
+  `commit`/`pr`/`ship-ready`/`ship-land`, `worktree new`/`prune`
+  (skill `use-a-worktree`), and `where [<pr>]` (fetch, then branch,
+  dirty paths, commits and diff stat against `origin/experimental`, and
+  the PR). The report's JUST section counts sessions per recipe, so a
+  helper's adoption is measurable; Claude Code's SessionStart hook lists
+  the helper names.
 
 ## Fix snippets & one-offs
 

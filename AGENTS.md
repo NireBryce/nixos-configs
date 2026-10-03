@@ -78,7 +78,8 @@ history: `wiki/history.md`'s "Confirmed-on-hardware facts".
 
 - **Check `hostname` before assuming which machine the session is on.**
   Under Claude Code, `.agents/hooks/session-start.sh` injects hostname,
-  branch, worktree, dirty count and `core.hooksPath`; elsewhere, check.
+  branch, worktree, dirty count, `core.hooksPath` and the `just agent`
+  helper names; elsewhere, check (`just agent where` for repo state).
 - **ssh to another host over the tailnet as `ts-<x>`, never `nire-<x>`** —
   `nire-<x>` is the hostname (`nire-<x>.local` on the LAN only), and
   tenacity's sshd is tailnet-only. `just reach <x>` tries every name. Rule
