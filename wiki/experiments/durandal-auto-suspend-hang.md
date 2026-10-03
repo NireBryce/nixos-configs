@@ -205,6 +205,17 @@ width, and hwmon power/temp/voltage. That last one exists because nothing else
 in the dump differs between a hang and a clean cycle; if the card goes into
 suspend in a different state, this is where it would show.
 
+Added 2026-10-02, in the same section — **GPU memory and client count**:
+`mem_info_vram_used`, `mem_info_vis_vram_used`, `mem_info_gtt_used` (bytes),
+and `drm_client_processes`, the number of processes holding this card's
+`/dev/dri` nodes open. The 2026-10-02 hang went down with the GPU idle (0%
+busy, 4 W), which rules out load but not a paused game holding gigabytes that
+S3 has to preserve. **Totals and a count only, on purpose**: the dumps are
+world-readable and get quoted into this public repo, and process names or argv
+would put what was running — or a token in an argument — into both. If a hang
+ever lines up with high memory or a high count, identify the processes by hand,
+on the host.
+
 `pm_print_times` is enabled via tmpfiles, so the kernel logs every device's
 suspend and resume duration.
 
