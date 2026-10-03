@@ -20,7 +20,8 @@ Replaces the orientation runs `just agent recurring` ranked highest at
      offline, no PR, on experimental/main or detached: one line saying
      which.
 
-Read-only: fetch updates remote-tracking refs and nothing else; no
+Read-only: fetch (--no-tags) updates remote-tracking refs and FETCH_HEAD
+and nothing else, status runs with --no-optional-locks; no
 checkout, no branch or worktree change. Exit 0 whenever it could report;
 2 outside a git repo. Ship's gate stays `just agent ship-ready` -- a
 mergeStateStatus here is a glance, not the gate.
@@ -56,7 +57,8 @@ def run(cmd, timeout=30):
 
 
 def git(*args):
-    rc, out, _ = run(["git", *args])
+    # --no-optional-locks: `status` must not refresh (write) the index.
+    rc, out, _ = run(["git", "--no-optional-locks", *args])
     return out if rc == 0 else None
 
 
@@ -65,7 +67,7 @@ def first_line(text):
 
 
 def fetch():
-    rc, _, err = run(["git", "fetch", "-q", "origin"], timeout=30)
+    rc, _, err = run(["git", "fetch", "-q", "--no-tags", "origin"], timeout=30)
     if rc == 0:
         return "fetch: origin ok"
     return (f"fetch: FAILED ({first_line(err) or f'exit {rc}'}); "

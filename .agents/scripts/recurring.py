@@ -202,9 +202,12 @@ def is_command(name):
 def just_recipes():
     """The recipe vocabulary for `just`, shaped like a SUBCOMMANDS entry:
     {recipe: set(), module: {recipe, ...}} from `just --summary` at the
-    repo root (module recipes print as `agent::show`). {} when just is
-    missing or fails: every word after `just` is then a placeholder, the
-    old behaviour. Tests replace this, like is_command."""
+    repo root (module recipes print as `agent::show`), kept only where the
+    recipe is also defined in origin/experimental's justfiles -- so a name
+    added on an unmerged branch or in an edited worktree never reaches an
+    export. {} when just or git is missing or fails: every word after `just`
+    is then a placeholder, the old behaviour. Tests replace this, like
+    is_command."""
     try:
         p = subprocess.run(['just', '--summary'], cwd=REPO, capture_output=True,
                            text=True, timeout=10)
@@ -212,16 +215,51 @@ def just_recipes():
         return {}
     if p.returncode:
         return {}
+    published = published_recipes()
+    if published is None:
+        return {}
     vocab = {}
     for name in p.stdout.split():
         mod, _, recipe = name.rpartition('::')
         if not NAME.match(recipe) or (mod and not NAME.match(mod)):
+            continue
+        if recipe not in published.get(mod, set()):
             continue
         if mod:
             vocab.setdefault(mod, set()).add(recipe)
         else:
             vocab.setdefault(recipe, set())
     return vocab
+
+
+# A recipe header: name, optional parameters (defaults may contain `=`),
+# then a `:` that isn't `:=`; `name := value` is an assignment, not a recipe.
+RECIPE_HEADER = re.compile(r'^@?([A-Za-z_][\w-]*)(?!\s*:=)\b[^\n:]*:(?!=)', re.M)
+MOD_LINE = re.compile(r"^mod\s+([A-Za-z_][\w-]*)\s+['\"]([^'\"]+)['\"]", re.M)
+
+
+def published_recipes():
+    """{module: {recipe, ...}} ('' for the root justfile) as defined on
+    origin/experimental, read with `git show` (text only, nothing run).
+    None when git can't read it."""
+    def show(path):
+        p = subprocess.run(['git', '-C', str(REPO), 'show',
+                            f'origin/experimental:{path}'],
+                           capture_output=True, text=True, timeout=10)
+        return p.stdout if p.returncode == 0 else None
+    try:
+        top = show('.justfile')
+        if top is None:
+            return None
+        out = {'': set(RECIPE_HEADER.findall(top))}
+        for mod, path in MOD_LINE.findall(top):
+            rel = path[2:] if path.startswith('./') else path
+            text = None if rel.startswith('/') else show(rel)
+            if text is not None:
+                out[mod] = set(RECIPE_HEADER.findall(text))
+        return out
+    except (OSError, subprocess.SubprocessError):
+        return None
 
 
 BUILTINS = {'cd', 'echo', 'printf', 'test', '[', 'read', 'export', 'set',

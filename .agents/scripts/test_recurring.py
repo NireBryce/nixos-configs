@@ -366,5 +366,32 @@ class ExportFlow(unittest.TestCase):
         self.assertNotIn('leaky', path.read_text())
 
 
+class PublishedRecipeParsing(unittest.TestCase):
+    """published_recipes() reads justfile text from origin/experimental; the
+    patterns must find recipe headers and `mod` lines, and nothing else."""
+
+    TEXT = (
+        "flake := justfile_directory() / \"flake\"\n"
+        "host := `hostname`\n"
+        "mod agent '.agents/scripts/agent.just'\n"
+        "# check: a comment, not a recipe\n"
+        "[positional-arguments]\n"
+        "threads *term:\n"
+        "    @echo hi\n"
+        "check:\n"
+        "@quiet arg='x':\n"
+        "_default:\n"
+        "issue title desc=title:\n"
+    )
+
+    def test_headers(self):
+        self.assertEqual(set(r.RECIPE_HEADER.findall(self.TEXT)),
+                         {"threads", "check", "quiet", "_default", "issue"})
+
+    def test_mod_lines(self):
+        self.assertEqual(r.MOD_LINE.findall(self.TEXT),
+                         [("agent", ".agents/scripts/agent.just")])
+
+
 if __name__ == '__main__':
     unittest.main()
