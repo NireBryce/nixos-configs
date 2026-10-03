@@ -53,3 +53,7 @@ worktree *args:
 # preflight-brief on each commit in a throwaway worktree: preflight-each [<range>]
 preflight-each *args:
     @cd "{{invocation_directory()}}" && "{{scripts}}/preflight-each.sh" "$@"
+
+# Fetch, then branch/dirty/commits/diff-stat vs origin/experimental and the PR: where [<pr>]
+where *args:
+    @cd "{{invocation_directory()}}" && "{{scripts}}/where.py" "$@"

@@ -54,7 +54,8 @@ minus its feat/-style prefix>`.
 `<scratchpad>` is the directory named in your system prompt (none: `/tmp`);
 `<branch>` is the real shipping branch, not a throwaway label. Then `just`,
 `nix eval`, `gh pr create` all work as usual. **Verify you're in it** (`git
-status -sb` or `pwd`) before anything state-changing; the bash tool can
+status -sb`, `pwd`, or `just agent where`, which also shows commits ahead
+of `origin/experimental`) before anything state-changing; the bash tool can
 reset cwd between calls, so re-`cd` or use absolute paths.
 
 **Check a commit without touching a branch pointer** (ship step 0, each

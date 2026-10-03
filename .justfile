@@ -211,6 +211,7 @@ preflight:
     @python3 .agents/scripts/test_recurring.py
     @python3 .agents/scripts/test_ship.py
     @python3 .agents/scripts/test_worktree.py
+    @python3 .agents/scripts/test_where.py
     @just guards-test
     @just preflight-mirror-test
     @just check

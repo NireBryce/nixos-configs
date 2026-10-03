@@ -26,9 +26,11 @@ recurring setup` once (needs a forge key, `wiki/homelab/forgejo-for-agents.md`).
 Removed text prints as its
 category: `<path>`, `<n>`, `<str>` (quoted), `<var>`, `<url>`, `<word>`;
 `-u<val>` means a value was glued to the flag; `<heredoc>`/`<loop>`/`<func>`
-mark dropped structure. Every token is checked against a closed vocabulary
-(see "Changing the miner"); `--json` for tooling. Three sections, three
-different verdicts:
+mark dropped structure. After `just`, a word survives only in recipe
+position and only if the repo's recipe list (just's `--summary`) has it
+(`just agent show`, `just preflight`); anything else is `<word>`. Every
+token is checked against a closed vocabulary (see "Changing the miner");
+`--json` for tooling. Four sections, four different verdicts:
 
 - **SEQUENCES**: producers run one after another (`&&`/`;`), in >= 3
   sessions. The script candidates. Each row is already the longest run
@@ -42,6 +44,11 @@ different verdicts:
 - **PIPELINES**: filters per producer (`nix eval --raw | tail`,
   `grep -n | head`). Plain Unix; leave these alone unless the filter
   itself is a convention (a `jq` filter, a fixed `--json` field set).
+- **JUST**: sessions per recipe called. `just` calls are kept out of
+  SEQUENCES and PIPELINES (already scripts); this is where a helper's
+  adoption shows. A helper still at 1-2 sessions weeks after it landed
+  while its SEQUENCES row keeps growing is not being found: name it
+  where agents look (the SessionStart hook lists the helper names).
 
 ## Worked examples (2026-09-29)
 
@@ -58,6 +65,20 @@ different verdicts:
 - `worktree new/prune` (`worktree.py`), `preflight-each`: skill
   `use-a-worktree`'s create and its never-done cleanup, and ship's
   each-commit-green loop, which left worktrees behind when a check failed.
+- `where [<pr>]` (`where.py`, 2026-10-03): orientation, the largest
+  unscripted habit left -- `git fetch -> git status -sb` (53 sessions),
+  `git log --oneline <range> -> git diff --stat <range>` (50),
+  `git log --oneline -N <-> git status -sb` (47), `gh pr view <n> --json
+  -> log -> diff --stat` (30). Fetch (offline tolerated), status line,
+  dirty paths, commits and diff stat against `origin/experimental`, the
+  PR. Read-only.
+
+Adoption, first JUST run (2026-10-03, nire-tenacity only: 68 Claude
+Code + 49 zcode sessions; the other hosts' exports predate format 3 and
+were skipped): `preflight` 69, `wiki-lint` 49, `agent preflight-brief`
+5, `agent show`/`commit`/`pr`/`worktree`/`preflight-each`/`ship-ready`/
+`ship-land` 1 each -- the helpers were days old, against 101 sessions
+(86%) batch-reading by hand. Re-check once exports rebuild.
 
 ## Is it worth a script?
 
@@ -103,7 +124,13 @@ quoted `--body "..."` text, `<<\EOF` heredoc bodies. Residual
 (docstring): an unquoted 1-3 letter word after `-`, and unquoted
 `--long-flag` names.
 
-**Bump `FORMAT` whenever shaping gets stricter.** Exports merge, so keys
+The `just` recipe vocabulary is read at run time (`just_recipes()`;
+tests pin it): recipe names are repo-defined and public. A non-recipe
+word after `just` stays `<word>`, and `test_recurring.py` holds cases
+for that.
+
+**Bump `FORMAT` whenever shaping gets stricter**, or the export's
+shape changes (3: recipe names and the `just` kind). Exports merge, so keys
 written under looser rules would otherwise persist; files of another
 format are skipped on read and rebuilt on that host's next export.
 
