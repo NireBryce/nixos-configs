@@ -110,6 +110,11 @@ counters, PCI + USB wakeup, `/sys/class/wakeup`, drive power cycles, and (from
 2026-09-15) **GPU state** — `power_dpm_state`, forced perf level, all
 `pp_dpm_*` with active marker, busy%, link speed/width, hwmon power/temp/volts.
 Added because nothing else in the dump differs between hang and clean.
+From 2026-10-02 also `mem_info_{vram,vis_vram,gtt}_used` and
+`drm_client_processes` (count of PIDs holding the card's `/dev/dri` nodes) —
+tests "paused game holding VRAM", which idle busy% can't. **Totals only; never
+add process names/argv** — dumps are world-readable and quoted into the public
+repo; argv can carry tokens. Identify processes by hand on the host if needed.
 `pm_print_times=1` via tmpfiles logs per-device suspend/resume durations.
 
 Not done: **`/sys/power/pm_test`** (`core`/`platform`/`devices`/`freezer` —

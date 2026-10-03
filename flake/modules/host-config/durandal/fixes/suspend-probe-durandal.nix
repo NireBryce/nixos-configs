@@ -5,7 +5,7 @@
         flake.modules.nixos.${moduleName} = { pkgs, ... }:
             let
                 probe = phase: ''
-                    export PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.systemd pkgs.smartmontools ]}:$PATH
+                    export PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.findutils pkgs.systemd pkgs.smartmontools ]}:$PATH
 
                     dir=/var/log/suspend-probe
                     mkdir -p "$dir" || exit 0
@@ -102,6 +102,24 @@
                                     [ -n "$v" ] && printf '    %-36s %s\n' "$f" "$v"
                                 done
                             done
+
+                            # Added 2026-10-02. An idle GPU can still be holding a
+                            # game's worth of memory that has to survive S3. Totals
+                            # and a client count only -- deliberately no process names
+                            # or argv: these dumps are world-readable and get quoted
+                            # into a public repo, and argv can carry tokens.
+                            for f in mem_info_vram_used mem_info_vis_vram_used mem_info_gtt_used; do
+                                printf '    %-36s %s\n' "$f" "$(cat "$g/$f" 2>/dev/null)"
+                            done
+                            nodes=""
+                            for n in "$g"/drm/card* "$g"/drm/renderD*; do
+                                [ -e "$n" ] && nodes="$nodes -o -lname /dev/dri/$(basename "$n")"
+                            done
+                            clients=""
+                            [ -n "$nodes" ] && clients=$(timeout 10 find /proc/[0-9]*/fd \
+                                    -maxdepth 1 \( ''${nodes# -o } \) 2>/dev/null \
+                                | cut -d/ -f3 | sort -u | wc -l)
+                            printf '    %-36s %s\n' "drm_client_processes" "''${clients:-unreadable}"
                         done
                         echo
 
