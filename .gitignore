@@ -5,6 +5,10 @@
 result
 .DS_Store
 .agents/settings.local.json
+# Claude Code writes the user's local allowlist and its subagent
+# worktrees under the real .claude/ directory.
+/.claude/settings.local.json
+/.claude/worktrees/
 # python bytecode cache -- any py_compile/import run leaves one behind
 __pycache__/
 # per-session agent state -- harness output, never repo content. The tracked

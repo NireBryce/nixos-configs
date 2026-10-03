@@ -41,3 +41,15 @@ ship-land pr:
 # Commit exactly these paths, message on stdin, trailer: commit [--agent X] -- paths
 commit *args:
     @cd "{{invocation_directory()}}" && "{{scripts}}/ship.py" commit "$@"
+
+# Open the PR for this branch (push -u if needed): pr <body-file> [--title T] [--edit N]
+pr *args:
+    @cd "{{invocation_directory()}}" && "{{scripts}}/ship.py" pr "$@"
+
+# Per-task worktrees: new <branch> [<base>] [--root D] | prune [--yes] [--root D]
+worktree *args:
+    @cd "{{invocation_directory()}}" && "{{scripts}}/worktree.py" "$@"
+
+# preflight-brief on each commit in a throwaway worktree: preflight-each [<range>]
+preflight-each *args:
+    @cd "{{invocation_directory()}}" && "{{scripts}}/preflight-each.sh" "$@"
