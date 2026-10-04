@@ -74,11 +74,13 @@ not a boundary. ZCode doesn't read `.agents/settings.json`: its hooks come from
 `.zcode/config.json` (`hooks.events`, run only with `hooks.enabled:
 true`), which since 2026-10-04 mirrors the same hooks (a test keeps the
 two in step). Before that ZCode ran none of them (fake `tskey-…` probe,
-2026-09-09). Whether each one fires there, and whether ZCode's edit
-tool exposes a `file_path` to the edit hooks, is #448's live check;
-ZCode's docs describe no equivalent of the `permissions.deny` Read
-rules. Never
-assume a guard caught something; check output yourself.
+2026-09-09). Live-checked 2026-10-04 on ZCode 3.14.3 (#448): the
+SessionStart context, the git and secrets denies, the secrets output scan
+and the edit hooks all fire (ZCode's `Edit` passes `file_path`); an `ask`
+is treated as allow, so only a deny is enforced there, and only
+`additionalContext` reaches its model. ZCode's docs describe no
+equivalent of the `permissions.deny` Read rules. Never assume a guard
+caught something; check output yourself.
 
 ## Preventing it
 

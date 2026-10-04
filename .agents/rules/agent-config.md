@@ -35,7 +35,11 @@ paths:
 - ZCode reads hooks from `.zcode/config.json` (`hooks.events`, with
   `hooks.enabled: true`), not `.agents/settings.json`. A hook added,
   removed or re-matched in one goes in the other too;
-  `test_guards.py` fails when they differ.
+  `test_guards.py` fails when they differ. Live-checked on ZCode 3.14.3
+  (2026-10-04, #448): every hook fires; an `ask` is treated as allow (so
+  a guard that must hold in ZCode denies); `systemMessage` is dropped for
+  PreToolUse. Re-check after a ZCode upgrade changes its hook docs
+  (bundled skills `zcode-configuration-guide`, `diagnosing-hooks`).
 
 - A hook's `systemMessage` reaches only the human (Claude Code's UI;
   ZCode drops it for PreToolUse). Anything the agent must read -- a
