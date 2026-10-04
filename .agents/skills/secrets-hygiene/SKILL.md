@@ -70,9 +70,15 @@ Hooks wired in `.agents/settings.json` (project-scoped, committed):
 
 Limits: the hooks see only `Bash` (the Read tool is covered by the deny
 rules above, nothing else is); they match text, so they are guard rails,
-not a boundary. Found 2026-09-09 with a fake `tskey-…` probe: **the ZCode harness
-didn't fire these hooks at all**, so there the prose below is the ONLY
-enforcement. Never assume a guard caught something; check output yourself.
+not a boundary. ZCode doesn't read `.agents/settings.json`: its hooks come from
+`.zcode/config.json` (`hooks.events`, run only with `hooks.enabled:
+true`), which since 2026-10-04 mirrors the same hooks (a test keeps the
+two in step). Before that ZCode ran none of them (fake `tskey-…` probe,
+2026-09-09). Whether each one fires there, and whether ZCode's edit
+tool exposes a `file_path` to the edit hooks, is #448's live check;
+ZCode's docs describe no equivalent of the `permissions.deny` Read
+rules. Never
+assume a guard caught something; check output yourself.
 
 ## Preventing it
 

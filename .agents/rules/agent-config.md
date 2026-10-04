@@ -1,6 +1,7 @@
 ---
 paths:
   - ".agents/settings.json"
+  - ".zcode/config.json"
   - ".agents/hooks/**"
   - ".githooks/**"
   - "flake/scripts/test_guards.py"
@@ -30,3 +31,8 @@ paths:
   trailer passes through.
 - Guard fixtures live in `flake/scripts/test_guards.py` (`just guards-test`);
   a guard's path patterns and its fixtures change together.
+
+- ZCode reads hooks from `.zcode/config.json` (`hooks.events`, with
+  `hooks.enabled: true`), not `.agents/settings.json`. A hook added,
+  removed or re-matched in one goes in the other too;
+  `test_guards.py` fails when they differ.
