@@ -97,6 +97,16 @@ def bash_payload(command, cwd=None):
             "cwd": str(cwd or REPO)}
 
 
+def model_context(out):
+    """What reaches the model: hookSpecificOutput.additionalContext.
+    systemMessage is shown only to the human (and dropped by ZCode for
+    PreToolUse), so a warning or ask that lives only there never reaches
+    the agent."""
+    hso = (out or {}).get("hookSpecificOutput", {})
+    return hso.get("additionalContext", "") if hso.get(
+        "hookEventName") == "PreToolUse" else ""
+
+
 class GuardCase(unittest.TestCase):
     def assertAsk(self, script, command, needle=None, cwd=None):
         out = run_guard(script, bash_payload(command, cwd))
@@ -322,6 +332,10 @@ class SecretsGuardPostToolUse(GuardCase):
 
 class GitGuardPreToolUse(GuardCase):
     script = HOOKS / "git-guard-pretooluse.sh"
+
+    def test_ask_reaches_the_model(self):
+        out = self.assertAsk(self.script, "git push --force origin x")
+        self.assertIn("force push", model_context(out))
 
     def test_force_push_trips(self):
         self.assertAsk(self.script, "git push -f origin main")
@@ -838,6 +852,7 @@ class ImpermanenceEditGuard(unittest.TestCase):
     def test_impermanence_tree_warns(self):
         out = self.run_edit(str(REPO / self.GUARDED[0]))
         self.assertIn("PROTECTED-CONFIG EDIT", (out or {}).get("systemMessage", ""))
+        self.assertIn("PROTECTED-CONFIG EDIT", model_context(out))
 
     def test_host_hardware_module_warns(self):
         out = self.run_edit(str(REPO / self.GUARDED[1]))
@@ -888,6 +903,7 @@ class NixUntrackedGuard(GuardCase):
         out = self.guard("nix eval --raw .#x")
         self.assertIn("UNTRACKED", (out or {}).get("systemMessage", ""))
         self.assertIn("new-module.nix", (out or {}).get("systemMessage", ""))
+        self.assertIn("new-module.nix", model_context(out))
 
     def test_git_command_does_not_warn(self):
         (self.repo / "new-module.nix").write_text("{ }\n")
@@ -954,6 +970,8 @@ class JustGuardPreToolUse(GuardCase):
 
     def test_foreign_justfile_asks(self):
         f = self.foreign()
+        out = self.assertAsk(self.script, "just preflight", cwd=f)
+        self.assertIn("justfile", model_context(out))
         self.assertAsk(self.script, "just preflight", "justfile", cwd=f)
         self.assertAsk(self.script, f"cd {f} && just preflight", cwd=REPO)
         self.assertAsk(self.script, "just preflight",

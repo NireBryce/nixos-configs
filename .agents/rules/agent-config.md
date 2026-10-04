@@ -36,3 +36,9 @@ paths:
   `hooks.enabled: true`), not `.agents/settings.json`. A hook added,
   removed or re-matched in one goes in the other too;
   `test_guards.py` fails when they differ.
+
+- A hook's `systemMessage` reaches only the human (Claude Code's UI;
+  ZCode drops it for PreToolUse). Anything the agent must read -- a
+  warning, or why an `ask` fired, since an ask is ignored in auto modes
+  and by ZCode -- also goes in `hookSpecificOutput.additionalContext`;
+  `test_guards.py` checks it for each warn and ask.

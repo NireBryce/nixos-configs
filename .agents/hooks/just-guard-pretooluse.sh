@@ -113,7 +113,8 @@ if [ -n "$reason" ]; then
         hookSpecificOutput: {
             hookEventName: "PreToolUse",
             permissionDecision: "ask",
-            permissionDecisionReason: $reason
+            permissionDecisionReason: $reason,
+            additionalContext: $reason
         }
     }'
 fi

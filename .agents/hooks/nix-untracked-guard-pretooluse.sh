@@ -50,7 +50,12 @@ root=$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null) || exit 0
 untracked=$(git -C "$root" ls-files --others --exclude-standard -- '*.nix')
 if [ -n "$untracked" ]; then
     count=$(wc -l <<<"$untracked")
+    # systemMessage reaches only the human (Claude Code's UI; ZCode drops it for
+    # PreToolUse); hookSpecificOutput.additionalContext is what reaches the
+    # model, in both harnesses. Hence both.
     jq -n --arg count "$count" --arg first "$(head -n 1 <<<"$untracked")" \
-        '{ systemMessage: ("⚠️  UNTRACKED .nix FILES (" + $count + ", e.g. " + $first + "): flakes ignore untracked files, so anything not git-added is invisible to this evaluation -- git add before trusting its result (AGENTS.md, \"git add before nix eval\").") }'
+        '("UNTRACKED .nix FILES (" + $count + ", e.g. " + $first + "): flakes ignore untracked files, so anything not git-added is invisible to this evaluation -- git add before trusting its result (AGENTS.md, \"git add before nix eval\").") as $m
+         | { systemMessage: ("⚠️  " + $m),
+             hookSpecificOutput: { hookEventName: "PreToolUse", additionalContext: $m } }'
 fi
 exit 0
