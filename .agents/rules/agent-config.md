@@ -41,8 +41,41 @@ paths:
   PreToolUse. Re-check after a ZCode upgrade changes its hook docs
   (bundled skills `zcode-configuration-guide`, `diagnosing-hooks`).
 
+- ZCode has no permission rules, so what carries over from
+  `.agents/settings.json` is hook-shaped (#458):
+  - An `ask` never pauses a ZCode session (treated as allow; since #456
+    the reason still reaches the model as context). git-guard and
+    just-guard therefore return `deny` under ZCode (`ZCODE_PROJECT_DIR`
+    set in the hook's environment) -- a deny is the only decision it
+    enforces -- except git-guard's two asks with a routine documented
+    flow (ship's post-merge `push --delete`, use-a-worktree's
+    `worktree remove --force`), which stay advisory there. In Claude
+    Code every ask stays an ask. If the bundled docs' `PermissionRequest`
+    event or an interactive mode turns out to honor an ask (untested),
+    this split is worth revisiting.
+  - `permissions.deny`'s Read rules (`//run/secrets/**`,
+    `//run/secrets.d/**`) have no ZCode equivalent;
+    `secrets-read-guard-pretooluse.sh` (matcher `Read|Grep|Glob`) is the
+    hook-side translation, wired into both configs. In Claude Code the
+    rules and the hook both apply; the fixture pins the rule list.
+  - session-start.sh prints `behind origin/experimental: N` when the
+    checkout is behind the last-fetched ref, so a separate clone
+    (ZCode's workspace was one) announces its staleness (#458 item 3)
+    instead of acting on it unnoticed.
+  - Still unverified: whether a ZCode model sees a deny's
+    `permissionDecisionReason`, or only `additionalContext` (which is
+    why the deny emitters this fix touched also carry the reason in
+    `additionalContext`); the pre-existing deny emitters (git-guard's
+    dirty-tree deny, secrets-guard) do not, and get it added only if a
+    live check shows it is needed.
+- `.zcode/skills/` was a per-machine symlink farm into `.claude/skills`,
+  removed 2026-10-04 (#458 item 4): ZCode scans `.agents/skills/` itself,
+  so the farm only duplicated every skill in its list. The path is
+  gitignored; per-machine ZCode state belongs under ignored paths, and
+  only `.zcode/config.json` is tracked.
+
 - A hook's `systemMessage` reaches only the human (Claude Code's UI;
   ZCode drops it for PreToolUse). Anything the agent must read -- a
-  warning, or why an `ask` fired, since an ask is ignored in auto modes
-  and by ZCode -- also goes in `hookSpecificOutput.additionalContext`;
-  `test_guards.py` checks it for each warn and ask.
+  warning, or a decision's reason -- also goes in
+  `hookSpecificOutput.additionalContext`; `test_guards.py` checks it for
+  each warn, ask, and the #458 deny emitters.

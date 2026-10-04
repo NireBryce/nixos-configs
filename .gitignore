@@ -17,3 +17,9 @@ __pycache__/
 /.agents/plans/
 /.zcode/plans/
 /.zcode/completed_todos/
+# per-machine ZCode scaffolding, not repo content: .zcode/skills/ held a
+# symlink farm into .claude/skills for the #448 parity check, removed with
+# #458 -- ZCode scans .agents/skills/ itself, so the farm only duplicated
+# every skill in its list. Ignored so a recreated farm can't show as
+# untracked noise; .zcode/config.json stays tracked (the mirror test).
+/.zcode/skills/

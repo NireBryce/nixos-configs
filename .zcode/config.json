@@ -42,6 +42,15 @@
               "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/impermanence-edit-guard-pretooluse.sh\""
             }
           ]
+        },
+        {
+          "matcher": "Read|Grep|Glob",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/secrets-read-guard-pretooluse.sh\""
+            }
+          ]
         }
       ],
       "PostToolUse": [

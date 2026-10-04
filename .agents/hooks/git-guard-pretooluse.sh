@@ -53,6 +53,15 @@
 #    systemMessage is what reaches the human transcript regardless of
 #    permission mode, so under auto the warning is at least never silent.
 #
+#    Under ZCode the ask hardens to a deny for everything here but those
+#    two routine steps: ZCode treats permissionDecision "ask" as allow
+#    (live-checked on 3.14.3, #448/#458), so an ask would be a silent
+#    allow where Claude Code prompts, and a deny is the only decision it
+#    enforces. The reason then says to stop and let the user run the
+#    command by hand. The two routine ones keep the advisory ask there --
+#    their skills invoke them as documented cleanup, and the context
+#    (#456) tells the model when they are expected.
+#
 # A deny outranks an ask when one command line trips both.
 #
 # Not gated: `stash` push/save (-u/-a included) -- it moves work into a stash
@@ -504,9 +513,10 @@ Denied rather than asked: an ask is a silent no-op under auto permission mode (i
     exit 0
 fi
 
-# --- Tier 2: ask ----------------------------------------------------------
+# --- Tier 2: ask (deny under ZCode for all but the routine two) -----------
 
 reason=""
+routine_ask=""
 if [ -n "$unverified" ]; then
     reason="This git command discards uncommitted work if the tree is dirty, and the guard $unverified. Run 'git status --short' in that repo first; if anything is listed that isn't yours to drop, stop and ask the user."
 fi
@@ -540,6 +550,7 @@ fi
 if [ -z "$reason" ] && grep -qE '\bpush\b' <<<"$command" \
     && grep -qE -- '--delete\b|(^|[[:space:]])-d([[:space:]]|$)|[[:space:]]:[A-Za-z]' <<<"$command"; then
     reason="This looks like it deletes a remote branch or tag. Confirm the ref is actually meant to go -- this is the routine post-merge cleanup step in the ship skill, but is otherwise hard to undo once someone else has fetched it."
+    routine_ask=1
 fi
 
 # git branch -D (force delete, unlike the plain -d the ship skill uses for
@@ -600,6 +611,7 @@ if [ -z "$reason" ] && grep -qE '\bworktree([[:space:]]|$)' <<<"$command" \
     && grep -qE '\bremove([[:space:]]|$)' <<<"$command" \
     && grep -qE -- "$force_flag_re" <<<"$command"; then
     reason="'git worktree remove --force' deletes a worktree even when it holds uncommitted or unpushed changes -- plain 'remove' refuses those. Confirm the worktree has nothing unsaved (this is also the use-a-worktree skill's documented cleanup step, so it's expected then)."
+    routine_ask=1
 fi
 
 # git push --mirror: makes the remote exactly match local, deleting every
@@ -611,11 +623,22 @@ if [ -z "$reason" ] && grep -qE '\bpush\b' <<<"$command" \
 fi
 
 if [ -n "$reason" ]; then
-    jq -n --arg reason "$reason" '{
+    decision="ask"
+    # ZCode has no ask: the harness treats permissionDecision "ask" as
+    # allow (#448/#458), so for everything but the two routine steps the
+    # decision there is deny -- a deny reaches the model in every mode and
+    # stops it, which is what a pause has to be in an unattended session.
+    if [ -n "${ZCODE_PROJECT_DIR:-}" ] && [ -z "$routine_ask" ]; then
+        decision="deny"
+        reason="$reason
+
+Denied rather than asked: ZCode treats an ask as allow (#458), so a deny is the only enforced pause. Do not retry around this. Stop and report; if the command is really intended, the user can run it by hand."
+    fi
+    jq -n --arg reason "$reason" --arg decision "$decision" '{
         systemMessage: ("⚠️  DESTRUCTIVE GIT COMMAND: " + $reason),
         hookSpecificOutput: {
             hookEventName: "PreToolUse",
-            permissionDecision: "ask",
+            permissionDecision: $decision,
             permissionDecisionReason: $reason,
             additionalContext: $reason
         }
