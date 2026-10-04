@@ -1315,6 +1315,21 @@ class Wiring(unittest.TestCase):
     settings.json entry with no script behind it breaks silently via the
     `|| true`. Keep the two lists equal, and every hook executable."""
 
+    def test_zcode_config_mirrors_claude_hooks(self):
+        # ZCode reads hooks from .zcode/config.json (hooks.events, off unless
+        # hooks.enabled), not from .agents/settings.json. Same events,
+        # matchers and commands in the same order, so a guard added to one
+        # can't be missing from the other.
+        def shape(groups):
+            return [(g.get("matcher"), [h["command"] for h in g["hooks"]])
+                    for g in groups]
+        claude = json.loads(SETTINGS.read_text())["hooks"]
+        zcode = json.loads((REPO / ".zcode" / "config.json").read_text())["hooks"]
+        self.assertIs(zcode.get("enabled"), True)
+        self.assertEqual(
+            {e: shape(g) for e, g in zcode["events"].items()},
+            {e: shape(g) for e, g in claude.items()})
+
     def test_settings_reference_existing_executable_hooks(self):
         config = json.loads(SETTINGS.read_text())
         referenced = []
