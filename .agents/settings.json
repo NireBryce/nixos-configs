@@ -11,6 +11,7 @@
       "Bash(just preflight)",
       "Bash(just guards-test)",
       "Bash(just agent preflight-brief)",
+      "Bash(just agent where)",
       "Bash(just read-sops-names)",
       "Bash(just fingerprint)",
       "Bash(just fingerprint-home)",

@@ -161,6 +161,14 @@ there — except `main`, the promoted known-good, which moves only by PR from
 `experimental` after hardware verification. Don't assume a branch — check
 `git branch --show-current`.
 
+**Shape a Bash call to be read in a permission prompt.** The harness
+shows the command string verbatim, wrapped, so: one step per line rather
+than an `&&` chain (`set -e` first if a failure should stop the rest);
+`git -C <path>` and absolute paths rather than a `cd <path> &&` prefix (a
+`cd "$VAR"` also makes git-guard and just-guard ask); unrelated steps as
+separate calls. A recurring multi-step command is a `just agent`
+candidate (`show`, `where`, `commit` exist) — skill `agent-scripts`.
+
 **Never file anything outside `NireBryce/nixos-configs` — an issue or PR on
 nixpkgs, ble.sh, carapace, any other project — without the user saying so
 explicitly, in those words, unprompted.** A yes to a bundled list does not
