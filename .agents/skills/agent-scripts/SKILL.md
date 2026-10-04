@@ -8,7 +8,8 @@ description: How to find the command patterns agents keep re-typing and extract 
 ## Applies to
 
 An occasional sweep (the user asks, or a scheduled run), or mid-task when
-you catch yourself hand-assembling the same pieces again. Not every ship:
+you catch yourself hand-assembling the same pieces again, or writing a
+command too long to read in a permission prompt. Not every ship:
 the patterns move over months. Not for scripts humans run: those go in
 `flake/scripts/` under its conventions.
 
