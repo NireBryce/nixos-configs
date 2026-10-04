@@ -258,4 +258,5 @@ class ClassifierTests(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    import parallel_unittest  # beside this file
+    parallel_unittest.main()

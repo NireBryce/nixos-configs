@@ -11,7 +11,7 @@
 # .justfile's header reserves conditionals and pipelines for scripts --
 # the inline version it replaced was exactly that shape. Deliberately
 # echo-only and never fails: CI has no hooksPath and preflight must stay
-# green there. preflight-brief.sh prints NOTE lines from a step's output,
+# green there. preflight-brief.py prints NOTE lines from a step's output,
 # so this reaches the ship skill's step-0 tool too.
 set -euo pipefail
 

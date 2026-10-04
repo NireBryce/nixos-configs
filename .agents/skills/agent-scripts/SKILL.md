@@ -65,6 +65,11 @@ token is checked against a closed vocabulary (see "Changing the miner");
 - `worktree new/prune` (`worktree.py`), `preflight-each`: skill
   `use-a-worktree`'s create and its never-done cleanup, and ship's
   each-commit-green loop, which left worktrees behind when a check failed.
+  2026-10-03: `preflight-brief` runs steps concurrently and
+  `preflight-each` caches `just check` per `flake/` tree; for a larger
+  range (several commits), at your judgement and memory permitting,
+  `preflight-each --jobs N` runs N commits at once (clamped by
+  `MemAvailable`; budget in its header).
 - `where [<pr>]` (`where.py`, 2026-10-03): orientation, the largest
   unscripted habit left -- `git fetch -> git status -sb` (53 sessions),
   `git log --oneline <range> -> git diff --stat <range>` (50),
