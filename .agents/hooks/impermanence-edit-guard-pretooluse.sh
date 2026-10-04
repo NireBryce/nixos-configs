@@ -59,6 +59,14 @@ case "$file_path" in
 esac
 
 [ -n "$reason" ] || exit 0
-jq -n --arg reason "$reason" \
-    '{ systemMessage: ("⚠️  PROTECTED-CONFIG EDIT: " + $reason) }'
+# systemMessage reaches only the human (Claude Code's UI; ZCode drops it for
+# PreToolUse); hookSpecificOutput.additionalContext is what reaches the
+# model, in both harnesses. Hence both.
+jq -n --arg reason "$reason" '{
+    systemMessage: ("⚠️  PROTECTED-CONFIG EDIT: " + $reason),
+    hookSpecificOutput: {
+        hookEventName: "PreToolUse",
+        additionalContext: ("PROTECTED-CONFIG EDIT: " + $reason)
+    }
+}'
 exit 0
