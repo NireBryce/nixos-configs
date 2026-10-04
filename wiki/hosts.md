@@ -1,6 +1,6 @@
 # Hosts & current state
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-04_
 
 This page is a map of where to look for each host. **Switch state is not
 recorded anywhere in the repo** — it rots faster than any session can
@@ -78,6 +78,13 @@ resume from suspend. Not a USB/kernel issue — `handheld-daemon`'s `adjustor`
 plugin deliberately delays reapplying TDP/GPU/governor settings after wake;
 see [desktop-env.md](categories/desktop-env.md#known-quirk-mouseinput-lag-for-45s-after-resume-on-tenacity)
 for the mechanism. Diagnosed 2026-09-06, not worth chasing.
+
+`nire-tenacity` memory/swap (2026-10-04): 12.4 GiB usable. Swap policy:
+`customOption.swap.policy = "zswap"` (`hardware-tenacity.nix`; implemented in
+`general-config/system/memory/swap-policy.nix`) — zswap fronts the 20G
+encrypted `nvme0n1p6` swap partition, replacing the SteamOS zram Jovian
+defaults to. Flip only by booting: a live switch `swapoff`s a loaded zram
+into free RAM.
 
 What cube runs, each with its own page — including per-service verification
 status and what broke on the way:

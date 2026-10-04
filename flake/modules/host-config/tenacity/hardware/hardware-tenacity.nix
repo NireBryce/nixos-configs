@@ -71,6 +71,13 @@
           };
       };
 
+      # Swap policy lives in general-config/system/memory/swap-policy.nix.
+      # zswap fronts the encrypted partition declared below: a compressed pool
+      # in RAM whose cold pages drain to the partition under LRU pressure.
+      # This replaces the SteamOS zram Jovian was defaulting
+      # (2026-10-04) -- see the policy module for the reasoning.
+      customOption.swap.policy = "zswap";
+
       # nvme0n1p6 carries a GPT swap type UUID, so systemd-gpt-auto-generator
       # finds and activates it with no configuration at all -- found live
       # 2026-09-25: /proc/swaps listed it while swapDevices was []. Declaring
