@@ -196,7 +196,7 @@ preflight-mirror-test:
 preflight:
     # Warn-only, never fails (CI has no hooksPath); why it exists and why
     # it is a script: flake/scripts/hooks-path-note.sh's own header.
-    # Literal path, not {{scripts}}: preflight-brief.sh evals these steps
+    # Literal path, not {{scripts}}: preflight-brief.py runs these steps
     # verbatim from `just --show`, which does not apply substitutions.
     @flake/scripts/hooks-path-note.sh
     @just wiki-lint
@@ -212,6 +212,7 @@ preflight:
     @python3 .agents/scripts/test_ship.py
     @python3 .agents/scripts/test_worktree.py
     @python3 .agents/scripts/test_where.py
+    @python3 flake/scripts/test_parallel_unittest.py
     @just guards-test
     @just preflight-mirror-test
     @just check

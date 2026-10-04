@@ -90,7 +90,8 @@ Nothing breaks by leaving it — courtesy, not a bug with consequences.
   runs `just agent recurring export` at ship time, `setup` once). Skill
   `agent-scripts`. Extracted so far: `just agent show` (several
   files/ranges, a header each), `just agent preflight-brief` (preflight,
-  one line per step), `preflight-each` (that, per commit), ship's
+  steps concurrent, one line each), `preflight-each` (that, per commit;
+  `--jobs N` for larger ranges, `just check` cached per `flake/` tree), ship's
   `commit`/`pr`/`ship-ready`/`ship-land`, `worktree new`/`prune`
   (skill `use-a-worktree`), and `where [<pr>]` (fetch, then branch,
   dirty paths, commits and diff stat against `origin/experimental`, and

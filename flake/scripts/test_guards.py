@@ -1374,4 +1374,5 @@ if __name__ == "__main__":
               "too; `nix shell nixpkgs#jq`, or run on a host with "
               "packages-config/nix-utils/ installed)")
         sys.exit(0)
-    unittest.main()
+    import parallel_unittest  # beside this file; ~60s serial, see its header
+    parallel_unittest.main()

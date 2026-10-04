@@ -20,5 +20,9 @@ paths:
 - A new checker is tested against a case it should catch, in the same
   commit (§1 in `wiki/lessons-learned.md`).
 - A `preflight` recipe step must use literal paths, not `{{scripts}}`:
-  `.agents/scripts/preflight-brief.sh` evals each step verbatim as just's
+  `.agents/scripts/preflight-brief.py` runs each step verbatim as just's
   `--show` prints it, without substitutions.
+- `preflight-brief.py` runs preflight's steps concurrently. A step that
+  writes into the repo tree (as `just lint` rewrites its baseline while
+  `just check` hashes `flake/`) goes in its `SERIAL_LAST`, run after the
+  rest; its header says how the other steps were shown not to write.

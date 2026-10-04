@@ -546,4 +546,7 @@ class Commit(Base):
 
 
 if __name__ == "__main__":
-    unittest.main(verbosity=1)
+    # flake/scripts/parallel_unittest.py: same tests, across processes
+    sys.path.insert(0, str(HERE.parents[1] / "flake" / "scripts"))
+    import parallel_unittest
+    parallel_unittest.main()

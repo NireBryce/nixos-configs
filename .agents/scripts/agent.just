@@ -26,9 +26,9 @@ recurring *args:
 show *specs:
     @cd "{{invocation_directory()}}" && "{{scripts}}/show.sh" "$@"
 
-# `just preflight`, one line per step; on failure, that step's tail
+# `just preflight`, steps run concurrently, one line each; a failing step's tail
 preflight-brief:
-    @"{{scripts}}/preflight-brief.sh"
+    @"{{scripts}}/preflight-brief.py"
 
 # Wait for CI, then gate a PR (CLEAN, base experimental) and print the ask
 ship-ready pr:
@@ -50,9 +50,9 @@ pr *args:
 worktree *args:
     @cd "{{invocation_directory()}}" && "{{scripts}}/worktree.py" "$@"
 
-# preflight-brief on each commit in a throwaway worktree: preflight-each [<range>]
+# preflight-brief on each commit, throwaway worktrees: preflight-each [--jobs N] [<range>]
 preflight-each *args:
-    @cd "{{invocation_directory()}}" && "{{scripts}}/preflight-each.sh" "$@"
+    @cd "{{invocation_directory()}}" && "{{scripts}}/preflight-each.py" "$@"
 
 # Fetch, then branch/dirty/commits/diff-stat vs origin/experimental and the PR: where [<pr>]
 where *args:

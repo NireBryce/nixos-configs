@@ -49,7 +49,7 @@ Then, before opening a PR (CI, `.github/workflows/check.yml`, runs the same
 `just preflight` minutes later — a backstop only):
 
 ```sh
-just agent preflight-brief   # all of preflight, one line per step; `just preflight` for full output
+just agent preflight-brief   # all of preflight, steps concurrent, one line each; `just preflight` for full output
 ```
 
 Its `just check` forces every host's toplevel and home, darwin included
@@ -61,12 +61,20 @@ Multi-commit change: check **each** commit is green (`lessons-learned.md`
 §15):
 
 ```sh
-just agent preflight-each [<range>]   # default origin/experimental..HEAD
+just agent preflight-each [--jobs N] [<range>]   # default origin/experimental..HEAD
 ```
 
-`preflight-brief` on every commit, oldest first, in one throwaway detached
-worktree removed on any exit (Ctrl-C too); one `ok`/`FAIL` line per commit
-as it finishes, so it suits a background runner. Non-zero if any failed.
+`preflight-brief` on every commit, oldest first, in a throwaway detached
+worktree removed on any exit (Ctrl-C too; one a SIGKILLed run left is
+swept by the next run, which touches only worktrees it marked itself);
+one `ok`/`FAIL` line per commit, in commit order, so it suits a
+background runner. Non-zero if any failed. A passing `just check` is
+reused for later commits with the same `flake/` tree (printed as
+`cached`); a failed one reruns. For a larger range (several commits), at
+your judgement and memory permitting, add `--jobs N`: up to N commits at
+once, each in its own worktree; N is cut to what available memory covers
+(`MemAvailable`, or a tighter cgroup limit; ~5 GiB per concurrent check,
+~1.5 per job; 1 if it can't tell) and the script prints when it cuts.
 
 ## 1. Branch, push, open the PR
 
