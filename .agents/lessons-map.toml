@@ -131,7 +131,7 @@ command = '(^|[\s;&|(`/])(lsblk|findmnt)(\s|$|`)'
 unless  = '\b(man|echo|grep|rg|which|type)\s[^|;&]*\b(lsblk|findmnt)\b'
 skill   = "impermanence-initrd"
 lessons = [19]
-remind  = "lsblk and findmnt (and /etc) report this shell's mount namespace, which can look wrong while being correct; /proc/1/mountinfo and /dev/disk/by-uuid/ are the host's view (§19)."
+remind  = "lsblk and findmnt (and /etc) report this shell's mount namespace, which can look wrong while being correct (an agent sandbox even has its own `/`); /proc/1/mountinfo and /dev/disk/by-uuid/ are the host's view (§19)."
 
 [[topic]]
 id      = "piped-status"
