@@ -16,8 +16,21 @@
 # there would block ordinary piped or redirected recipes this guard can't
 # parse, with nothing to protect.
 #
-# Same parse limits as git-guard's whitelist: only `cd <plain-path>` moves the
-# directory it tracks, and any other segment shape that mentions `just` asks.
+# Parsing: redirections are dropped first (they can't change which justfile
+# runs, and the `&` in `2>&1` isn't a separator), then the command is split
+# on `&& || ; | &`, `$(`, backticks and parentheses. In each segment, leading
+# `VAR=value` assignments, shell keywords (then, do, {, !, ...) and exec
+# wrappers (timeout, nice, nohup, stdbuf, xargs, env, command, builtin,
+# exec, time, sudo) are skipped, options included; the segment runs `just`
+# only if `just` is then its first word -- so prose that mentions just (a
+# commit message, `grep just`) is not a `just` call. Fail closed: a segment
+# still starting with a wrapper or keyword the parser couldn't strip, with
+# `just` outside quotes in it, asks; with `cd`/`pushd`/`popd` in it, the
+# directory becomes unknown. In a `just` call, every option before the
+# recipe is checked (attached clusters like `-fx` and `--opt=value` too):
+# those that pick a justfile, directory, shell or dotenv ask, and so does a
+# recipe given as a path. Only `cd <plain-path>` moves the directory it
+# tracks; any other cd/pushd/popd makes it unknown.
 # Any JUST_* variable in the hook's environment (JUST_JUSTFILE,
 # JUST_WORKING_DIRECTORY, JUST_DOTENV_*, JUST_SHELL, ...) can change which
 # justfile runs or how, and the command inherits it, so every `just` asks
@@ -45,7 +58,7 @@ command=$(jq -r '.tool_input.command // empty' <<<"$input")
 cwd=$(jq -r '.cwd // empty' <<<"$input")
 [ -n "$cwd" ] || cwd="${CLAUDE_PROJECT_DIR:-$PWD}"
 
-just_word_re='(^|[^[:alnum:]_.-])just([[:space:]]|$)'
+just_word_re='(^|[^[:alnum:]_.-])just([[:space:]"'"'"']|$)'
 [[ $command =~ $just_word_re ]] || exit 0
 
 plain_word='[A-Za-z0-9_./:@=+,~^%-]+'
@@ -79,10 +92,63 @@ just_env=$(compgen -e | grep '^JUST_' | paste -sd, - || true)
 if [ -n "$just_env" ]; then
     reason="the hook's environment sets $just_env, which the command inherits and which can change the justfile just uses or how it runs it, so the guard can't tell it is this repo's .justfile."
 fi
+# The segment's command, after leading assignments, shell keywords and
+# exec wrappers (with their options and, for timeout/nice, their argument).
+command_word() {
+    local s=$1
+    while :; do
+        if [[ $s =~ ^[A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*([[:space:]]+(.*))?$ ]]; then
+            s=${BASH_REMATCH[2]:-}
+        elif [[ $s =~ ^(then|do|else|elif|if|while|until|\{|!)([[:space:]]+(.*))?$ ]]; then
+            s=${BASH_REMATCH[3]:-}
+        elif [[ $s =~ ^timeout(([[:space:]]+-[^[:space:]]+)*([[:space:]]+-[sk][[:space:]]+[^[:space:]]+)*)*[[:space:]]+[0-9.]+[smhd]?[[:space:]]+(.*)$ ]]; then
+            s=${BASH_REMATCH[4]}
+        elif [[ $s =~ ^nice(([[:space:]]+-n[[:space:]]*-?[0-9]+)|([[:space:]]+-[^[:space:]]+))*[[:space:]]+(.*)$ ]]; then
+            s=${BASH_REMATCH[4]}
+        elif [[ $s =~ ^(xargs|stdbuf|sudo|env|command|builtin|nohup|exec|time)(([[:space:]]+-[^[:space:]]+)*)[[:space:]]+(.*)$ ]]; then
+            s=${BASH_REMATCH[4]}
+        else
+            break
+        fi
+    done
+    printf '%s\n' "$s"
+}
+
+wrapper_re='^(then|do|else|elif|if|while|until|\{|!|timeout|nice|xargs|stdbuf|sudo|env|command|builtin|nohup|exec|time)([[:space:]]|$)'
+unquoted_just_re='(^|[[:space:]])just([[:space:]]|$)'
+cd_word_re='(^|[[:space:]])(cd|pushd|popd)([[:space:]]|$)'
+
+# Quoted text removed, so a `just` inside a message isn't counted.
+unquoted() {
+    sed -E "s/'[^']*'//g; s/\"[^\"]*\"//g" <<<"$1"
+}
+
+# Redirections can't change which justfile runs: drop them before splitting.
+cleaned=$(sed -E 's/[0-9]*>&[0-9-]+//g; s/&>>?[[:space:]]*[^[:space:];&|()]+//g; s/[0-9]*>>?[[:space:]]*[^[:space:];&|()]+//g' <<<"$command")
+
 dir=$cwd
 while IFS= read -r seg; do
     seg=$(sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' <<<"$seg")
     [ -n "$seg" ] || continue
+    orig=$seg
+    seg=$(command_word "$seg")
+    [ -n "$seg" ] || continue
+    # A quoted command word is still the command: "just" / 'just'.
+    seg=$(sed -E "s/^([\"'])just\\1([[:space:]]|\$)/just\\2/" <<<"$seg")
+    if [[ $orig =~ $wrapper_re ]] && ! [[ $seg =~ ^(just|cd)([[:space:]]|$) ]]; then
+        # Began with a wrapper or keyword the parser couldn't strip all the
+        # way (an option taking a separate value, an unknown flag): judge the
+        # whole original segment.
+        bare=$(unquoted "$orig")
+        if [[ $bare =~ $cd_word_re ]]; then
+            dir=""
+        fi
+        if [[ $bare =~ $unquoted_just_re ]] && [ -z "$reason" ]; then
+            reason="'$orig' runs just behind a wrapper or shell keyword this guard can't parse, so it can't tell which justfile it would use."
+            break
+        fi
+        continue
+    fi
     if [[ $seg =~ $plain_cd ]]; then
         p=${BASH_REMATCH[1]}
         case "$p" in
@@ -99,14 +165,38 @@ while IFS= read -r seg; do
         dir=""
         continue
     fi
-    [[ $seg =~ $just_word_re ]] || continue
+    [[ $seg =~ ^just([[:space:]]|$) ]] || continue
     [ -z "$reason" ] || break
-    if ! [[ $seg =~ ^just([[:space:]]+${plain_word})*$ ]]; then
-        reason="'$seg' runs just in a shape this guard can't follow, so it can't tell which justfile it would use."
-        break
+    picks=""
+    # The long options that pick a justfile, directory, shell or dotenv are
+    # checked anywhere in the call (no recipe takes them as arguments).
+    if [[ $seg =~ [[:space:]](--justfile|--working-directory|--global-justfile|--shell|--shell-arg|--dotenv-[a-z-]+|--set)([[:space:]=]|$) ]]; then
+        picks=1
     fi
-    if [[ $seg =~ (^|[[:space:]])(-f|--justfile|-d|--working-directory|-g|--global-justfile)([[:space:]=]|$) ]]; then
-        reason="'$seg' picks its justfile explicitly, so it may not be this repo's .justfile."
+    read -r -a words <<<"$seg"
+    skip=""
+    for w in "${words[@]:1}"; do
+        [ -n "$picks" ] && break
+        # The value of an option that takes a separate one.
+        if [ -n "$skip" ]; then skip=""; continue; fi
+        case $w in
+            --color|--command-color|--chooser|--command|-c|--show|-s|--completions|--dump-format|--list-heading|--list-prefix|--tempdir|--timestamp-format|--alias-style|--list-submodules-prefix)
+                skip=1; continue ;;
+        esac
+        case $w in
+            --justfile|--justfile=*|--working-directory|--working-directory=*|--global-justfile|--shell|--shell=*|--shell-arg|--shell-arg=*|--dotenv-*|--set|--set=*)
+                picks=1; break ;;
+            --*) ;;
+            -[A-Za-z]*)
+                # a short-option cluster: -f, -d, -g anywhere in it picks one
+                [[ ${w:1} == *[fdg]* ]] && { picks=1; break; } ;;
+            *=*) ;;                      # a variable override (host=x)
+            */*) picks=1; break ;;       # a recipe given as a path
+            *) break ;;                  # the recipe: options end here
+        esac
+    done
+    if [ -n "$picks" ]; then
+        reason="'$seg' picks its justfile, directory, shell or dotenv explicitly, or names a recipe by path, so it may not run this repo's .justfile as-is."
         break
     fi
     if [ ! -d "$dir" ]; then
@@ -118,7 +208,7 @@ while IFS= read -r seg; do
         reason="'$seg' would run ${jf:-no justfile} (found walking up from $dir), not this repo's .justfile -- its recipes are not the ones .agents/settings.json pre-approves."
         break
     fi
-done < <(awk '{ gsub(/&&|\|\||;|\||&/, "\n"); print }' <<<"$command")
+done < <(awk '{ gsub(/&&|\|\||;|\||&|\$\(|`|\(|\)/, "\n"); print }' <<<"$cleaned")
 
 if [ -n "$reason" ]; then
     decision="ask"
