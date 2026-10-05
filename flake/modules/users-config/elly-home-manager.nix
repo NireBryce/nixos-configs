@@ -76,11 +76,11 @@
         development
         editors
         gui-other
-        linux-utils     # 17 modules; despite the name 12 of them build on
+        linux-utils     # 16 modules; despite the name 12 of them build on
                         # darwin and install on lysithea too, as of
                         # 2026-08-12. pciutils and usbutils are inert on
-                        # macOS; the other ten work. The remaining five --
-                        # ethtool, iotop, ltrace, strace, sysstat -- do not
+                        # macOS; the other ten work. The remaining four --
+                        # ethtool, iotop, strace, sysstat -- do not
                         # build there and are dropped by
                         # drop-unsupported-packages.nix, which names them in
                         # its warning on every darwin build.

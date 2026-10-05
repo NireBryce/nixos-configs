@@ -2,6 +2,8 @@
 
 _Last modified: 2026-09-29_
 
+_Sibling reviewed: 2026-10-05 -- ltrace marked removed in the source's darwin-dropped list; this page names no packages_
+
 Condensed from [system.md](system.md).
 
 `general-config/system/`, 19 subdirectories. Imported whole by every Linux host, **no opt-out for any piece**: anything
