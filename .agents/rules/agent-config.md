@@ -54,9 +54,7 @@ paths:
     single command and never for `experimental`/`main`. just-guard
     does nothing under ZCode: it only protects Claude Code's `Bash(just
     ...)` allow rules, and ZCode reads none. In Claude
-    Code every ask stays an ask. If the bundled docs' `PermissionRequest`
-    event or an interactive mode turns out to honor an ask (untested),
-    this split is worth revisiting.
+    Code every ask stays an ask.
   - `permissions.deny`'s Read rules (`//run/secrets/**`,
     `//run/secrets.d/**`) have no ZCode equivalent;
     `secrets-read-guard-pretooluse.sh` (matcher `Read|Grep|Glob`) is the
@@ -68,12 +66,25 @@ paths:
     checkout is behind the last-fetched ref, so a separate clone
     (ZCode's workspace was one) announces its staleness (#458 item 3)
     instead of acting on it unnoticed.
-  - Still unverified: whether a ZCode model sees a deny's
-    `permissionDecisionReason`, or only `additionalContext` (which is
-    why the deny emitters this fix touched also carry the reason in
-    `additionalContext`); the pre-existing deny emitters (git-guard's
-    dirty-tree deny, secrets-guard) do not, and get it added only if a
-    live check shows it is needed.
+  - Live-checked 2026-10-05 (ZCode 3.14.3 client, nire-tenacity): a deny
+    is enforced -- the tool call is blocked -- and the model sees the
+    reason. `permissionDecisionReason` arrives on its own (verified on
+    secrets-guard's deny, which carries no `additionalContext`), and
+    `additionalContext` rides along wherever the emitter has it. The
+    denial text renders with newlines collapsed, so `additionalContext`
+    is what keeps a multi-line reason readable: keep carrying both. A
+    live ask was observed too: the routine `worktree remove --force`
+    ask stayed advisory and the command ran.
+  - One-off, not reproduced: on 2026-10-04, pre-restart, a
+    `just agent commit ... <<'EOF'` call produced no output and no
+    commit. After the client restart the same shape worked end to end
+    (heredoc stdin reaches cat, just recipes, and ship.py), so it was
+    a client glitch, not a just or hook behaviour. If a heredoc call
+    goes silent again, note the client build and retry with the message
+    on `< file`.
+  - Still unverified: whether an interactive permission mode or the
+    bundled docs' `PermissionRequest` event honors an `ask` (needs a
+    human at the client); if so, the deny split is worth revisiting.
 - `.zcode/skills/` was a per-machine symlink farm into `.claude/skills`,
   removed 2026-10-04 (#458 item 4): ZCode scans `.agents/skills/` itself,
   so the farm only duplicated every skill in its list. The path is
