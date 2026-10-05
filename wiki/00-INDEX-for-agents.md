@@ -1,6 +1,6 @@
 # Wiki index, for agents
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-05_
 
 Condensed from [00-INDEX.md](00-INDEX.md). Routing only.
 
@@ -43,7 +43,8 @@ A page without one opens with `## Quick facts` — linked there.
 - [traps-and-skills.md](traps-and-skills.md) — real past mistakes, and which skill holds each.
 - [lessons-learned.md](lessons-learned.md) — every § as one line (rule,
   Home, Enforced), grouped by when it applies: read your task's group. By
-  number: `ls wiki/lessons-learned/43-*`. No sibling.
+  number: `ls wiki/lessons-learned/43-*`. By file or area: `just agent
+  lessons <path>`, from `.agents/lessons-map.toml`. No sibling.
 - [history.md](history.md) — the index into the above.
 - [flake-parts-port-notes-for-agents.md](flake-parts-port-notes-for-agents.md)
   — salvaged from the deleted `flake-parts` branch.

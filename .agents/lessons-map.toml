@@ -1,0 +1,147 @@
+# The topic map (#460): which paths and commands each skill, rules file and
+# lesson applies to, and the one line an agent should see at that moment.
+#
+# Read by .agents/hooks/lessons_map.py for three consumers:
+#   - lesson-reminder-pretooluse.py: before an Edit/Write (path topics) or a
+#     Bash command (command topics), adds `remind` to the model's context --
+#     once per topic per session, model-only (no systemMessage)
+#   - `just agent lessons [<path>...]`: every topic a path matches, with the
+#     index lines of its lessons; no argument = this branch's changed files
+#   - `check_wiki.py lessons`: validates this file against the repo
+#
+# One [[topic]] per area. Keys:
+#   id            kebab-case, unique
+#   paths         Claude Code `paths:` globs (same semantics as
+#                 .agents/rules/*.md); exactly one of paths / command
+#   command       regex searched in a Bash command
+#   unless        regex; a command that also matches it is not reminded
+#   skill         .agents/skills/<skill>/SKILL.md
+#   rules         .agents/rules/<file>; its frontmatter `paths:` must equal
+#                 this topic's `paths` (every rules file has one topic)
+#   lessons       § numbers in wiki/lessons-learned.md
+#   see           a repo file (optionally #anchor) holding the rule
+#   remind        the one line shown; required unless remind_on = "never"
+#   remind_on     paths topics: "edit" (any write, default), "create" (a
+#                 Write to a file that doesn't exist yet), "never" (lookup
+#                 and rules-sync only: too broad to remind on)
+#   delivered_by  a hook in .agents/hooks/ that already warns for these
+#                 paths on every edit; the reminder hook skips the topic
+#
+# A new lesson that applies to a path or a command gets listed here, so it
+# reaches the next agent at that moment instead of only in the index.
+
+# -- areas with a rules file (paths mirror its frontmatter) -----------------
+
+[[topic]]
+id           = "impermanence"
+paths        = ["flake/modules/general-config/impermanence/**", "flake/modules/host-config/*/hardware/**"]
+rules        = "impermanence.md"
+skill        = "impermanence-initrd"
+lessons      = [19, 28, 30]
+delivered_by = "impermanence-edit-guard-pretooluse.sh"
+
+[[topic]]
+id      = "secrets"
+paths   = ["flake/modules/general-config/system/secrets/**"]
+rules   = "secrets.md"
+skill   = "secrets-hygiene"
+remind  = "Secrets: `sops -d` prints every value in the file, and `2>/dev/null` doesn't stop stdout; key names are `just read-sops-names`, one value is `sops -d --extract`."
+
+[[topic]]
+id      = "home-manager"
+paths   = ["flake/modules/general-config/shell-config/**", "flake/modules/general-config/system/home-manager/**", "flake/modules/general-config/macos/shells/**", "flake/modules/users-config/**", "flake/doc/trailhead-home-manager-standalone.md"]
+rules   = "home-manager.md"
+skill   = "home-manager-dotfiles"
+lessons = [5, 22, 29]
+remind  = "Home Manager: `home.file.<n>.text` and `home.sessionPath` concatenate across modules rather than override; reading a generated dotfile back by a wrong attribute name returns empty, not an error -- `just dotfiles` lists the real names."
+
+[[topic]]
+id        = "flake-modules"
+paths     = ["flake/modules/**", "flake/flake.nix"]
+rules     = "flake-modules.md"
+skill     = "new-flake-module"
+lessons   = [23, 34, 35]
+remind_on = "create"
+remind    = "New module: its name is its filename, and a same-named module or category merges with it silently -- a category directory reserves its own basename. `just add-module` checks that up front; `git add` it before any eval, then `just modules`."
+
+[[topic]]
+id      = "homelab"
+paths   = ["flake/modules/general-config/homelab/**", "flake/modules/host-config/cube/**"]
+rules   = "homelab.md"
+skill   = "new-homelab-service"
+lessons = [37, 40, 45, 46]
+remind  = "Homelab: eval and build miss most of what breaks here (an owner set outside Nix, a NixOS user unit starting in every user's manager, a unit failing while its service runs); the skill's §8 verification order is what that cost."
+
+[[topic]]
+id        = "nix"
+paths     = ["**/*.nix"]
+rules     = "nix.md"
+lessons   = [33, 49]
+remind_on = "never"
+
+[[topic]]
+id      = "packages"
+paths   = ["flake/modules/packages-config/**", "flake/modules/general-config/macos/homebrew/**", "flake/modules/general-config/system/home-manager/drop-unsupported-packages.nix"]
+rules   = "packages.md"
+skill   = "package-platform-support"
+remind  = "Packages: darwin buildability is automatic (drop-unsupported-packages.nix) -- don't hand-gate with `mkIf isDarwin`; Homebrew overlap never is (`just available --duplicates`)."
+
+[[topic]]
+id        = "scripts"
+paths     = ["**/*.sh", "**/*.py", "**/*.just", ".justfile"]
+rules     = "scripts.md"
+lessons   = [1]
+remind_on = "create"
+remind    = "New script: no Python buried in bash (a real .py instead); a checker is tested against a case it should catch, in the same commit (§1)."
+
+[[topic]]
+id      = "agent-config"
+paths   = [".agents/settings.json", ".zcode/config.json", ".agents/hooks/**", ".githooks/**", "flake/scripts/test_guards.py"]
+rules   = "agent-config.md"
+lessons = [44]
+remind  = "Agent config: a hook added or re-matched in .agents/settings.json goes in .zcode/config.json too; a guard's patterns and its test_guards.py fixtures change together; what the model must read goes in additionalContext, not only systemMessage."
+
+# -- narrower areas ---------------------------------------------------------
+
+[[topic]]
+id      = "caddy"
+paths   = ["flake/modules/general-config/homelab/reverse-proxy/caddy/**"]
+skill   = "new-homelab-service"
+lessons = [41, 47]
+remind  = "Caddy: an explicit `tls` on one vhost changes the issuer for every vhost (§47); two apps behind one prefix can want opposite prefix handling, so `curl` the app itself (§41)."
+
+[[topic]]
+id      = "tailscale-services"
+paths   = ["flake/modules/general-config/homelab/reverse-proxy/tailscale-services/**"]
+skill   = "new-tailscale-service"
+lessons = [48]
+remind  = "Tailscale services: a committed ACL or service file records intent, not what the control plane holds; done means `just tailscale-acl diff` reports no difference (§48)."
+
+[[topic]]
+id      = "lessons-index"
+paths   = ["wiki/lessons-learned.md", "wiki/lessons-learned/**", ".agents/lessons-map.toml"]
+see     = "wiki/lessons-learned.md"
+remind  = "Lessons: a new lesson goes in its Home too, and here in .agents/lessons-map.toml when it applies to a path or a command; an entry whose lesson gained a mechanism names it under Enforced. `check_wiki.py lessons` checks the shape."
+
+# -- commands ---------------------------------------------------------------
+
+[[topic]]
+id      = "mount-namespace"
+command = '(^|[\s;&|(`/])(lsblk|findmnt)(\s|$|`)'
+unless  = '\b(man|echo|grep|rg|which|type)\s[^|;&]*\b(lsblk|findmnt)\b'
+skill   = "impermanence-initrd"
+lessons = [19]
+remind  = "lsblk and findmnt (and /etc) report this shell's mount namespace, which can look wrong while being correct; /proc/1/mountinfo and /dev/disk/by-uuid/ are the host's view (§19)."
+
+[[topic]]
+id      = "piped-status"
+command = '(^|[\s;&(])(just|nix|nh|nixos-rebuild|python3?)\s(?:[^|;&]|[0-9]?>&[0-9]?|&>)*\|&?\s*(?:tee\s[^|;&]*\|&?\s*)?(tail|head|grep)\b'
+unless  = 'pipefail'
+lessons = [20, 21]
+remind  = "This pipe's exit status is the last command's, so a failure upstream reads as success -- `set -o pipefail`, or believe the text over the status (§20); a nix trace's cause is at its bottom, which `head` cuts (§21)."
+
+[[topic]]
+id      = "ssh-hostname"
+command = '''(^|[\s;&(])ssh\s[^|;&"']*(?<![-\w.@])(?:\w+@)?nire-[a-z]+\b(?![.\w-])'''
+see     = "AGENTS.md#state"
+remind  = "ssh over the tailnet as `ts-<x>`, not `nire-<x>` (the hostname; `nire-<x>.local` is LAN-only, and tenacity's sshd is tailnet-only); `just reach <x>` tries every name."

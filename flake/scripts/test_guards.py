@@ -46,6 +46,15 @@ REPO = pathlib.Path(__file__).resolve().parents[2]
 HOOKS = REPO / ".agents" / "hooks"
 GIT_HOOKS = REPO / ".githooks"
 SETTINGS = REPO / ".agents" / "settings.json"
+# What settings.json wires: shell guards, and Python hooks named for their
+# event. lessons_map.py and nix_shell_interp.py beside them are modules the
+# hooks import, not hooks.
+HOOK_REF = r"\.agents/hooks/[\w-]+(?:\.sh|tooluse\.py)"
+
+
+def hook_scripts():
+    return [*HOOKS.glob("*.sh"), *HOOKS.glob("*-pretooluse.py"),
+            *HOOKS.glob("*-posttooluse.py")]
 
 
 def run_guard(script, payload):
@@ -1556,6 +1565,11 @@ class EditCheck(unittest.TestCase):
         (self.repo / "wiki/scripts").mkdir(parents=True)
         shutil.copy(REPO / "wiki/scripts/check_wiki.py",
                     self.repo / "wiki/scripts/check_wiki.py")
+        # check_wiki.py imports glob_regex from here (shared with the
+        # lesson-reminder hook), so the two travel together.
+        (self.repo / ".agents/hooks").mkdir(parents=True)
+        shutil.copy(HOOKS / "lessons_map.py",
+                    self.repo / ".agents/hooks/lessons_map.py")
         self.write("wiki/page.md", "# P\n\n_Last modified: 2026-09-29_\n\n"
                    "See [page-for-agents.md](page-for-agents.md).\n")
         self.write("wiki/page-for-agents.md",
@@ -1645,8 +1659,7 @@ class Wiring(unittest.TestCase):
         for group in config["hooks"].values():
             for entry in group:
                 for hook in entry["hooks"]:
-                    referenced += re.findall(r"\.agents/hooks/[\w-]+\.sh",
-                                             hook["command"])
+                    referenced += re.findall(HOOK_REF, hook["command"])
         self.assertTrue(referenced, "settings.json wires no hooks at all")
         for rel in referenced:
             path = REPO / rel
@@ -1659,10 +1672,8 @@ class Wiring(unittest.TestCase):
         for group in config["hooks"].values():
             for entry in group:
                 for hook in entry["hooks"]:
-                    referenced |= set(re.findall(r"\.agents/hooks/[\w-]+\.sh",
-                                                 hook["command"]))
-        on_disk = {f".agents/hooks/{p.name}"
-                   for p in HOOKS.glob("*.sh")}
+                    referenced |= set(re.findall(HOOK_REF, hook["command"]))
+        on_disk = {f".agents/hooks/{p.name}" for p in hook_scripts()}
         self.assertEqual(on_disk, referenced,
                          "a guard exists on disk but is not wired into "
                          "settings.json (or vice versa)")
@@ -1690,6 +1701,196 @@ class Wiring(unittest.TestCase):
             with self.subTest(script=script.name):
                 subprocess.run(["bash", "-n", str(script)], check=True,
                                capture_output=True)
+        for script in HOOKS.glob("*.py"):
+            with self.subTest(script=script.name):
+                compile(script.read_text(), str(script), "exec")
+
+
+class LessonReminder(unittest.TestCase):
+    """lesson-reminder-pretooluse.py (#460): .agents/lessons-map.toml topics
+    reach the model before the edit or command they apply to, once per
+    topic per session. Paths below are real tracked files, so a rename
+    fails here as well as in `check_wiki.py lessons`."""
+    script = HOOKS / "lesson-reminder-pretooluse.py"
+    HM = "flake/modules/general-config/shell-config/bash/bash.nix"
+    SECRETS = "flake/modules/general-config/system/secrets/sops.nix"
+    WARN = ("flake/modules/general-config/impermanence/root-rollback/"
+            "restore-root/WARN-impermanence.nix")
+
+    def setUp(self):
+        self.state = tempfile.mkdtemp(prefix="lesson-state-")
+        self.addCleanup(shutil.rmtree, self.state, ignore_errors=True)
+        self.session = 0
+
+    def run_hook(self, payload, session=True):
+        env = {k: v for k, v in os.environ.items()
+               if not k.startswith("JUST_") and k != "ZCODE_PROJECT_DIR"}
+        env["LESSON_REMINDER_STATE_DIR"] = self.state
+        if session is True:
+            self.session += 1
+            payload = {**payload, "session_id": f"s{self.session}"}
+        elif session:
+            payload = {**payload, "session_id": session}
+        proc = subprocess.run([str(self.script)], capture_output=True,
+                              input=json.dumps(payload).encode(),
+                              timeout=60, env=env)
+        self.assertEqual(proc.returncode, 0, proc.stderr.decode())
+        out = proc.stdout.decode()
+        return json.loads(out) if out.strip() else None
+
+    def edit(self, path, tool="Edit", **kw):
+        return self.run_hook({"tool_name": tool,
+                              "tool_input": {"file_path": str(path)}}, **kw)
+
+    def bash(self, command, **kw):
+        return self.run_hook(bash_payload(command), **kw)
+
+    def assertReminds(self, out, topic):
+        ctx = model_context(out)
+        self.assertIn(f"LESSON REMINDER ({topic})", ctx)
+        self.assertNotIn("systemMessage", out)  # model-only, by design
+
+    def test_fixture_paths_exist(self):
+        for rel in (self.HM, self.SECRETS, self.WARN):
+            self.assertTrue((REPO / rel).exists(), rel)
+
+    def test_area_edits_remind(self):
+        self.assertReminds(self.edit(REPO / self.HM), "home-manager")
+        self.assertReminds(self.edit(REPO / self.SECRETS), "secrets")
+        self.assertIn("read-sops-names",
+                      model_context(self.edit(REPO / self.SECRETS)))
+
+    def test_reminder_names_where_the_rule_lives(self):
+        ctx = model_context(self.edit(REPO / self.HM))
+        self.assertIn(".agents/skills/home-manager-dotfiles/SKILL.md", ctx)
+        self.assertIn("§22", ctx)
+
+    def test_delivered_by_topic_is_left_to_its_guard(self):
+        # impermanence: the edit guard warns on every edit, so no
+        # reminder here; the only other topics on WARN-impermanence.nix
+        # are lookup-only (nix) or create-only (flake-modules).
+        self.assertIsNone(self.edit(REPO / self.WARN))
+
+    def test_delivered_by_guard_covers_every_topic_glob(self):
+        # The map is the source of truth for the paths; a guard that
+        # delivers a topic must warn on a real file under each glob.
+        sys.path.insert(0, str(HOOKS))
+        import lessons_map
+        tracked = git(REPO, "ls-files").split()
+        for t in lessons_map.load(REPO):
+            if not t.get("delivered_by"):
+                continue
+            for rx in t["_globs"]:
+                sample = next(f for f in tracked if rx.match(f))
+                with self.subTest(topic=t["id"], file=sample):
+                    out = run_guard(HOOKS / t["delivered_by"],
+                                    {"tool_name": "Edit", "tool_input":
+                                     {"file_path": str(REPO / sample)}})
+                    self.assertTrue(model_context(out))
+
+    def test_create_only_topic(self):
+        new = REPO / "flake/modules/general-config/system/zz-new-module.nix"
+        self.assertFalse(new.exists())
+        self.assertReminds(self.edit(new, tool="Write"), "flake-modules")
+        # editing an existing module is not creating one
+        existing = REPO / "flake/modules/general-config/system/storage/smartd.nix"
+        self.assertIsNone(self.edit(existing))
+
+    def test_relative_path_resolves_against_cwd(self):
+        out = self.run_hook({"tool_name": "Edit", "cwd": str(REPO),
+                             "tool_input": {"file_path": self.HM}})
+        self.assertReminds(out, "home-manager")
+
+    def test_unmapped_paths_pass(self):
+        self.assertIsNone(self.edit(REPO / "README.md"))
+        self.assertIsNone(self.edit("/tmp/elsewhere/foo.nix"))
+        self.assertIsNone(self.run_hook({"tool_name": "Edit",
+                                         "tool_input": {}}))
+
+    def test_mount_namespace_commands(self):
+        for cmd in ("lsblk -f", "sudo findmnt /", "x; lsblk",
+                    "/usr/bin/lsblk"):
+            with self.subTest(cmd=cmd):
+                self.assertReminds(self.bash(cmd), "mount-namespace")
+        for cmd in ("cat /proc/1/mountinfo", "echo lsblk", "man lsblk",
+                    "grep findmnt notes.md", "lsblkx"):
+            with self.subTest(cmd=cmd):
+                self.assertIsNone(self.bash(cmd))
+
+    def test_piped_status(self):
+        for cmd in ("just check 2>&1 | tail -5", "nix eval .#x | head -3",
+                    "python3 t.py | grep FAIL", "nix eval x |& head",
+                    "nix build 2>&1 | tee log | tail"):
+            with self.subTest(cmd=cmd):
+                self.assertReminds(self.bash(cmd), "piped-status")
+        for cmd in ("set -o pipefail; just check | tail -5",
+                    "git log | head", "just check"):
+            with self.subTest(cmd=cmd):
+                self.assertIsNone(self.bash(cmd))
+
+    def test_ssh_hostname(self):
+        for cmd in ("ssh nire-cube uptime", "ssh elly@nire-cube x"):
+            with self.subTest(cmd=cmd):
+                self.assertReminds(self.bash(cmd), "ssh-hostname")
+        for cmd in ("ssh nire-cube.local uptime", "ssh ts-cube uptime",
+                    "ssh elly@nire-cube.local x", "ssh ts-nire-x y",
+                    'ssh ts-cube "hostname nire-cube"'):
+            with self.subTest(cmd=cmd):
+                self.assertIsNone(self.bash(cmd))
+
+    def test_once_per_topic_per_session(self):
+        self.assertReminds(self.bash("lsblk", session="a"), "mount-namespace")
+        self.assertIsNone(self.bash("findmnt", session="a"))
+        self.assertReminds(self.bash("lsblk", session="b"), "mount-namespace")
+
+    def test_unwritable_state_still_reminds(self):
+        # State is best-effort: losing it costs the dedup, not the reminder.
+        # A path under a regular file can never become a directory, unlike
+        # a "/nonexistent" that may be writable (and get created) on a
+        # tmpfs root.
+        blocker = pathlib.Path(self.state) / "file"
+        blocker.write_text("")
+        self.state = str(blocker / "state")
+        out = self.bash("lsblk", session="x")
+        self.assertReminds(out, "mount-namespace")
+
+    def test_non_string_inputs_pass(self):
+        self.assertIsNone(self.run_hook({"tool_name": "Edit",
+                                         "tool_input": {"file_path": 5}}))
+        self.assertIsNone(self.run_hook({"tool_name": "Bash",
+                                         "tool_input": {"command": ["ls"]}}))
+
+    def test_no_session_id_means_no_dedup(self):
+        for _ in range(2):
+            self.assertReminds(self.bash("lsblk", session=None),
+                               "mount-namespace")
+
+    def test_zcode_payload(self):
+        payload = zcode_payload(bash_payload("lsblk"))
+        payload["sessionId"] = "z"
+        self.assertReminds(self.run_hook(payload, session=None),
+                           "mount-namespace")
+        self.assertIsNone(self.run_hook(payload, session=None))
+
+    def test_map_is_read_from_the_edited_tree(self):
+        # A worktree carries its own map: copy it into a scratch tree and
+        # edit there; the scratch tree's map is the one consulted.
+        root = pathlib.Path(tempfile.mkdtemp(prefix="lesson-root-"))
+        self.addCleanup(shutil.rmtree, root, ignore_errors=True)
+        (root / ".agents").mkdir()
+        (root / ".agents" / "lessons-map.toml").write_text(
+            '[[topic]]\nid = "only"\npaths = ["x/**"]\n'
+            'see = "x"\nremind = "scratch map"\n')
+        self.assertIn("scratch map", model_context(self.edit(root / "x/y.nix")))
+        self.assertIsNone(self.edit(root / self.HM))
+
+    def test_broken_map_fails_open_visibly(self):
+        root = pathlib.Path(tempfile.mkdtemp(prefix="lesson-root-"))
+        self.addCleanup(shutil.rmtree, root, ignore_errors=True)
+        (root / ".agents").mkdir()
+        (root / ".agents" / "lessons-map.toml").write_text("[[topic\n")
+        out = self.edit(root / "x.nix")
+        self.assertIn("lesson-reminder", out["systemMessage"])
 
 
 if __name__ == "__main__":

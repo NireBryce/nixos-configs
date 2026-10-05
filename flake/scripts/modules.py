@@ -136,6 +136,26 @@ def imported_names(root):
     return out
 
 
+# Where each finding kind's rule and history live, printed once under that
+# kind's findings (#460): the moment a check fires is the moment its lesson
+# is worth reading.
+SEE = {
+    'collisions': "skill new-flake-module, 'Names share one namespace per "
+                  "class'; wiki/lessons-learned.md §34, §35",
+    'orphans':    "skill new-flake-module; an orphan in new work can be a "
+                  "gap in this checker's model, not the module "
+                  "(wiki/lessons-learned.md §23)",
+    'names':      "skill new-flake-module (derive the name with "
+                  "`moduleName`); wiki/lessons-learned.md §34",
+    'shims':      "flake/doc/dirsAsCategory.md",
+    'untracked':  "AGENTS.md, 'git add before nix eval'",
+}
+
+
+def see(kind):
+    print(f"           -> see {SEE[kind]}")
+
+
 def collisions(root):
     """Two ways one attribute ends up with two owners, both silent."""
     categories, modules = scan(root)
@@ -161,6 +181,8 @@ def collisions(root):
                     print(f"COLLISION  {n!r}: {p1} and {p2} both declare "
                           f"{'/'.join(sorted(shared))}.{n}; they merge")
                     hits.append(n)
+    if hits:
+        see('collisions')
     return hits
 
 
@@ -208,6 +230,8 @@ def orphans(root):
     for name, path, reaching in findings:
         print(f"ORPHAN     {name!r} ({path}) is imported by nothing; "
               f"reachable via: {' / '.join(reaching)}")
+    if findings:
+        see('orphans')
     return findings
 
 
@@ -238,6 +262,8 @@ def names(root):
                       f"looks it up as {p.stem!r} -- it is in no category. "
                       f"Derive the name from the filename (`moduleName`)")
                 hits.append((p, cls, name))
+    if hits:
+        see('names')
     return hits
 
 
@@ -277,6 +303,8 @@ def shims(root):
                 print(f"SHIM       {p} differs from the other "
                       f"{len(by_text[majority])} shims; copy one of them over it")
                 hits.append(p)
+    if hits:
+        see('shims')
     return hits
 
 
@@ -302,6 +330,8 @@ def untracked(root):
     for path in hits:
         print(f"UNTRACKED  {path} -- `git add` it, or nix will silently act as "
               f"though it does not exist")
+    if hits:
+        see('untracked')
     return hits
 
 

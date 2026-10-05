@@ -221,7 +221,7 @@
                 ok  = sleepOn == [ ];
                 msg = "${name}: systemd.sleep.settings.Sleep.{${lib.concatStringsSep "," sleepOn}} "
                     + "not false -- logind still offers a sleep state that writes a "
-                    + "hibernation image the kernel will refuse";
+                    + "hibernation image the kernel will refuse (§30)";
             }
 
             # -- persistence -------------------------------------------------
@@ -326,7 +326,7 @@
                           && lib.all (l: lib.hasInfix " authfile=" l && !lib.hasInfix "authFile=" l) u2fLines);
                 msg = "${name}: a rendered pam_u2f line lacks authfile= (or carries the camelCase "
                     + "authFile=, which pam_u2f ignores) -- u2f silently falls back to its "
-                    + "built-in key path";
+                    + "built-in key path (§49)";
             }
             {
                 # nixpkgs' auto allocator never looks at pinned ranges, so a
@@ -335,7 +335,7 @@
                 ok  = !(anyAutoSub && anyPinSub);
                 msg = "${name}: a user has autoSubUidGidRange while another has pinned "
                     + "subUidRanges/subGidRanges -- the allocator cannot see the pins, and a "
-                    + "fresh install gives two users one subordinate range";
+                    + "fresh install gives two users one subordinate range (§32)";
             }
             {
                 # nixpkgs mounts vfat /boot 0022 when no options are given;
@@ -395,6 +395,10 @@
                   } host(s)' > $out"
             else throw ("invariants failed:\n"
                  + lib.concatMapStringsSep "\n" (i: "  - ${i.msg}") failures
-                 + "\n");
+                 # Where to go from here (#460): the reason for each is the
+                 # comment above it, and §N is wiki/lessons-learned.md.
+                 + "\n  -> why each holds: the comment above it in flake/modules/invariants.nix;"
+                 + " impermanence ones: skill impermanence-initrd and WARN-impermanence.nix;"
+                 + " §N: wiki/lessons-learned.md (§25: a clean eval says nothing about these)\n");
     };
 }
