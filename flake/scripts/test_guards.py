@@ -1284,6 +1284,46 @@ class JustGuardPreToolUse(GuardCase):
             self.assertEqual((rc, raw.strip()), (0, ""), cmd)
 
 
+class ZcodeCanary(GuardCase):
+    """The guards' ZCode detection keys on camelCase payload fields an
+    upgrade can rename -- failing open: ZCode sessions would silently
+    lose the deny-under-ZCode behaviour. The canary cross-checks the
+    payload against the inherited ZCODE_PROJECT_DIR and alarms while
+    they disagree; these pins cover which disagreements alarm."""
+
+    script = HOOKS / "zcode-canary-pretooluse.sh"
+
+    def canary(self, payload, env):
+        rc, raw = run_hook_raw(self.script, payload, env)
+        self.assertEqual(rc, 0)
+        return json.loads(raw) if raw.strip() else None
+
+    def test_mismatch_alarms(self):
+        # The environment says ZCode, the payload looks like Claude
+        # Code's (snake_case only): either Claude Code inherited the
+        # variable or a ZCode upgrade changed the shape -- the alarm
+        # says so either way, to the human and the model.
+        out = self.canary(bash_payload("git status -sb"), zcode_env())
+        self.assertIn("ZCODE DETECTION MISMATCH",
+                      (out or {}).get("systemMessage", ""))
+        self.assertIn("live hook check", model_context(out))
+
+    def test_real_zcode_shape_is_silent(self):
+        # Payload fields present and the variable set: ZCode as it is
+        # today, nothing disarmed, nothing to say.
+        self.assertIsNone(self.canary(
+            zcode_payload(bash_payload("git status -sb")), zcode_env()))
+
+    def test_claude_code_without_the_variable_is_silent(self):
+        # Plain snake_case payload and no ZCODE_PROJECT_DIR: plain
+        # Claude Code, however the ambient environment looks (run_guard's
+        # stripping is repeated here -- the canary's whole job is reading
+        # this variable, so the fixture sets it explicitly either way).
+        env = {k: v for k, v in os.environ.items()
+               if not k.startswith("JUST_") and k != "ZCODE_PROJECT_DIR"}
+        self.assertIsNone(self.canary(bash_payload("git status -sb"), env))
+
+
 class CommitMsgHook(unittest.TestCase):
     script = GIT_HOOKS / "commit-msg"
 
