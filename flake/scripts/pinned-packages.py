@@ -9,7 +9,6 @@ Skill `pinned-packages` is the procedure around this script.
 
     pinned-packages.py                  # same as `check`
     pinned-packages.py check
-    pinned-packages.py bump polytoken
     pinned-packages.py bump zai-coding-helper
     pinned-packages.py bump --all
 
@@ -22,8 +21,7 @@ Skill `pinned-packages` is the procedure around this script.
                         candidate, not proof: read the package before switching.
 
   current?              the pinned version against upstream's own channel
-                        (polytoken: channels.json "stable"; the npm package:
-                        its "latest" dist-tag).
+                        (the npm package's "latest" dist-tag).
 
 `bump` rewrites the module (and, for the npm package, regenerates its trimmed
 package.json and lockfile), then builds the result and runs its --version.
@@ -47,16 +45,9 @@ HERE  = pathlib.Path(__file__).resolve().parent
 FLAKE = HERE.parent
 AI    = FLAKE / 'modules/packages-config/development/tools/ai-tools'
 
-POLYTOKEN_CHANNEL = 'stable'
-POLYTOKEN_BASE    = 'https://dl.polytoken.dev'
 ZAI_NPM           = '@z_ai/coding-helper'
 
 PINS = {
-    'polytoken': {
-        'module':  AI / 'polytoken.nix',
-        'pattern': r'polytoken',
-        'binary':  'polytoken',
-    },
     'zai-coding-helper': {
         'module':  AI / 'zai-coding-helper.nix',
         'pattern': r'(z[-_]?ai.*(coding|helper))|chelper|coding-helper',
@@ -86,15 +77,11 @@ def fetch_json(url):
     return json.loads(fetch(url))
 
 
-def polytoken_upstream():
-    return fetch_json(f'{POLYTOKEN_BASE}/channels.json')['channels'][POLYTOKEN_CHANNEL]
-
-
 def zai_upstream():
     return fetch_json(f'https://registry.npmjs.org/{ZAI_NPM}')['dist-tags']['latest']
 
 
-UPSTREAM = {'polytoken': polytoken_upstream, 'zai-coding-helper': zai_upstream}
+UPSTREAM = {'zai-coding-helper': zai_upstream}
 
 
 # ── reading and rewriting the modules ───────────────────────────────────────
@@ -118,19 +105,6 @@ def _sub_once(pattern, repl, text, what):
 
 def set_version(text, version):
     return _sub_once(VERSION_RE.pattern, lambda m: m.group(1) + version + m.group(3), text, 'version line')
-
-
-def rewrite_polytoken(text, version, hashes):
-    """hashes: {'linux-amd64': 'sha256-...', ...}, one per urlPlatform in the table."""
-    text = set_version(text, version)
-    for plat, h in hashes.items():
-        text = _sub_once(r'(urlPlatform\s*=\s*"' + re.escape(plat) + r'";\s*hash\s*=\s*")[^"]*(")',
-                         lambda m: m.group(1) + h + m.group(2), text, f'{plat} hash entry')
-    return text
-
-
-def polytoken_platforms(text):
-    return re.findall(r'urlPlatform\s*=\s*"([^"]+)"', text)
 
 
 def rewrite_zai(text, version, src_hash, deps_hash):
@@ -179,23 +153,6 @@ def packaged_elsewhere(system):
     return found
 
 
-def prefetch_zip(url):
-    """fetchzip's own NAR hash for url, read off a fake-hash build's `got:` line.
-
-    Not `nix store prefetch-file --unpack`: for polytoken's single-file zip it
-    disagrees with fetchzip { stripRoot = false; } (tried 2026-09-28 -- the
-    first bump shipped a hash the build then rejected). Asking fetchzip itself
-    means the hash is the one the module's fetch will check against.
-    """
-    expr = (f'(import (builtins.getFlake "{FLAKE}").inputs.nixpkgs {{ }}).fetchzip '
-            f'{{ url = "{url}"; stripRoot = false; hash = ""; }}')
-    r = subprocess.run(['nix', 'build', '--impure', '--no-link', '--expr', expr], capture_output=True, text=True)
-    m = re.search(r'got:\s+(sha256-\S+)', r.stderr)
-    if not m:
-        sys.exit(f'pinned-packages: could not read a hash for {url}:\n{r.stderr.strip()[-2000:]}')
-    return m.group(1)
-
-
 def nix_shell(pkgs, cmd, **kw):
     installables = [f'nixpkgs#{p}' for p in pkgs]
     return run(['nix', 'shell', '--inputs-from', str(FLAKE), *installables, '-c', *cmd], **kw)
@@ -233,19 +190,6 @@ def cmd_check(_args):
     return 1 if action else 0
 
 
-def bump_polytoken():
-    module = PINS['polytoken']['module']
-    text = module.read_text()
-    version = polytoken_upstream()
-    hashes = {}
-    for plat in polytoken_platforms(text):
-        url = f'{POLYTOKEN_BASE}/{version}/{plat}/polytoken.zip'
-        print(f'  prefetching {url}')
-        hashes[plat] = prefetch_zip(url)
-    module.write_text(rewrite_polytoken(text, version, hashes))
-    return version
-
-
 def bump_zai():
     module = PINS['zai-coding-helper']['module']
     version = zai_upstream()
@@ -272,7 +216,7 @@ def bump_zai():
     return version
 
 
-BUMP = {'polytoken': bump_polytoken, 'zai-coding-helper': bump_zai}
+BUMP = {'zai-coding-helper': bump_zai}
 
 
 def cmd_bump(args):
