@@ -36,15 +36,16 @@ paths:
   `hooks.enabled: true`), not `.agents/settings.json`. A hook added,
   removed or re-matched in one goes in the other too;
   `test_guards.py` fails when they differ. Live-checked on ZCode 3.14.3
-  (2026-10-04, #448): every hook fires; an `ask` is treated as allow (so
-  a guard that must hold in ZCode denies); `systemMessage` is dropped for
-  PreToolUse. Re-check after a ZCode upgrade changes its hook docs
-  (bundled skills `zcode-configuration-guide`, `diagnosing-hooks`).
+  (2026-10-04, #448): every hook fires; an unattended `ask` resolves to
+  allow (so a guard that must hold in ZCode denies); `systemMessage` is
+  dropped for PreToolUse. Re-check after a ZCode upgrade changes its hook
+  docs (bundled skills `zcode-configuration-guide`, `diagnosing-hooks`).
 
 - ZCode has no permission rules, so what carries over from
   `.agents/settings.json` is hook-shaped (#458):
-  - An `ask` never pauses a ZCode session (treated as allow; since #456
-    the reason still reaches the model as context). git-guard therefore
+  - An `ask` never pauses an unattended ZCode session (it resolves to
+    allow; since #456 the reason still reaches the model as context).
+    git-guard therefore
     returns `deny` under ZCode -- a deny is the only decision it enforces
     -- detected from the hook payload (ZCode's carries camelCase
     `hookEventName`/`transcriptPath`; an inherited `ZCODE_PROJECT_DIR`
@@ -82,9 +83,18 @@ paths:
     a client glitch, not a just or hook behaviour. If a heredoc call
     goes silent again, note the client build and retry with the message
     on `< file`.
-  - Still unverified: whether an interactive permission mode or the
-    bundled docs' `PermissionRequest` event honors an `ask` (needs a
-    human at the client); if so, the deny split is worth revisiting.
+  - Verified 2026-10-05 (interactive session, screenshot): with a human
+    at the client, an `ask` surfaces as ZCode's "Permission required"
+    panel -- the guard's `permissionDecisionReason` is the panel body,
+    with Allow / Always-allow-this-command / Full access / Deny / and a
+    tell-the-model option; Deny leaves the call unrun. So an ask is
+    advisory to the model and a prompt to a human who is there. Still
+    unverified: what an ask resolves to when nobody answers (#448's
+    measured case) -- that is the case the deny split protects against,
+    so the split stays. The panel's "Always allow this command" is an
+    interactive, per-machine allow rule the UI itself offers: ZCode has
+    allow rules even though its docs describe none, and still no deny
+    rules (#458 item 2's read-guard therefore stays).
 - `.zcode/skills/` was a per-machine symlink farm into `.claude/skills`,
   removed 2026-10-04 (#458 item 4): ZCode scans `.agents/skills/` itself,
   so the farm only duplicated every skill in its list. The path is
