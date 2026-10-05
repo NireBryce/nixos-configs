@@ -1323,6 +1323,34 @@ class ZcodeCanary(GuardCase):
                if not k.startswith("JUST_") and k != "ZCODE_PROJECT_DIR"}
         self.assertIsNone(self.canary(bash_payload("git status -sb"), env))
 
+    # The jq filter each hook uses to tell a ZCode payload apart.
+    DETECTION = re.compile(r"""jq -r '([^']*has\("hookEventName"\)[^']*)'""")
+
+    def detection(self, text):
+        return self.DETECTION.findall(text)
+
+    def test_detection_matches_the_guards(self):
+        # The canary is only as good as its copy of the guards' detection:
+        # update git-guard and just-guard after a ZCode change but not the
+        # canary, and it false-alarms or misses the real shape change.
+        # Exactly one copy per file, all three identical.
+        found = {name: self.detection((HOOKS / name).read_text())
+                 for name in ("zcode-canary-pretooluse.sh",
+                              "git-guard-pretooluse.sh",
+                              "just-guard-pretooluse.sh")}
+        for name, exprs in found.items():
+            self.assertEqual(len(exprs), 1, f"{name}: {exprs}")
+        self.assertEqual(len({e[0] for e in found.values()}), 1, found)
+
+    def test_detection_extractor_sees_a_drifted_copy(self):
+        # The pin above is only meaningful if the extractor tells two
+        # different filters apart.
+        text = self.script.read_text()
+        drifted = text.replace('has("transcriptPath")',
+                               'has("transcript_path_v2")')
+        self.assertNotEqual(self.detection(text), self.detection(drifted))
+        self.assertEqual(len(self.detection(drifted)), 1)
+
 
 class CommitMsgHook(unittest.TestCase):
     script = GIT_HOOKS / "commit-msg"

@@ -15,8 +15,9 @@
 #     variable -- harmless, this is Claude Code behaving as normal; or
 #   - a ZCode upgrade changed the payload shape -- then every ZCode-specific
 #     behaviour above is disarmed until the detection is updated.
-# Either way it says so on every guarded call (systemMessage for the human,
-# additionalContext for the model) instead of staying silent, and the
+# Either way it says so on every guarded call (additionalContext for the
+# model; systemMessage for the human, which only Claude Code shows -- ZCode
+# drops it for PreToolUse) instead of staying silent, and the
 # agent-config rule's live hook check is what settles it. Advisory only:
 # nothing is denied or blocked here. Bash matcher because the disarmed
 # behaviour is git-guard's and just-guard's, both Bash guards.
