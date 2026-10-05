@@ -1157,7 +1157,18 @@ class JustGuardPreToolUse(GuardCase):
         f = self.foreign()
         for cmd in (f"just --justfile {f}/justfile preflight",
                     f"just -f {f}/justfile preflight",
-                    f"just -d {f} preflight"):
+                    f"just -d {f} preflight",
+                    f"just -f{f}/justfile preflight",
+                    f"just -qf {f}/justfile preflight",
+                    f"just --justfile={f}/justfile preflight",
+                    f"just --working-directory={f} preflight",
+                    "just --shell sh preflight",
+                    "just --dotenv-path /tmp/x preflight",
+                    "just sub/preflight",
+                    f"just --color never -f {f}/justfile preflight",
+                    f"just --color never --justfile {f}/justfile preflight",
+                    f"just --command-color red -f {f}/justfile preflight",
+                    f"just -s x -f {f}/justfile preflight"):
             self.assertAsk(self.script, cmd, cwd=REPO)
 
     def test_inherited_just_env_asks(self):
@@ -1187,8 +1198,54 @@ class JustGuardPreToolUse(GuardCase):
         f = self.foreign()
         for cmd in (f"(cd {f} && just preflight)",
                     f'cd "{f}" && just preflight',
-                    "timeout 5 just preflight"):
+                    f"timeout 5 sh -c true; cd {f} && timeout 5 just preflight",
+                    f"W=$(cd {f} && just preflight)",
+                    f"cd {f} && just preflight 2>&1 | tail -1",
+                    # cd behind a keyword, wrapper or group
+                    f"builtin cd {f} && just preflight",
+                    f"{{ cd {f}; just preflight; }}",
+                    f"if true; then cd {f}; just preflight; fi"):
             self.assertAsk(self.script, cmd, cwd=REPO)
+        # just behind a wrapper or keyword, run from the foreign dir
+        for cmd in ("stdbuf -oL just preflight",
+                    "timeout -s KILL 5 just preflight",
+                    "timeout --signal=KILL 5 just preflight",
+                    "nice --adjustment=5 just preflight",
+                    "sudo just preflight",
+                    "if true; then just preflight; fi",
+                    "{ just preflight; }",
+                    "! just preflight",
+                    "for x in 1; do just preflight; done",
+                    # options taking a separate value, quoted command word
+                    "stdbuf -o L just preflight",
+                    "timeout -k 1 5 just preflight",
+                    "sudo -u root just preflight",
+                    'exec "just" preflight',
+                    "'just' preflight"):
+            self.assertAsk(self.script, cmd, cwd=f)
+
+    def test_ordinary_shapes_in_the_repo_pass(self):
+        # Redirections, pipes, command substitution, wrappers, assignments,
+        # quoted arguments, and prose that merely mentions just: none of
+        # them changes which justfile runs.
+        for cmd in ("just agent recurring export 2>&1 | tail -1",
+                    "just agent preflight-each 2>&1 | grep -vE x | tail -4",
+                    "just wiki-lint >/tmp/out.txt 2>/dev/null",
+                    "W=$(just agent worktree new feat/x --root /tmp/s 2>&1 | tail -1)",
+                    "timeout 600 just agent ship-land 450 2>&1 | tail -8",
+                    "FOO=1 just check",
+                    "echo x | xargs just threads",
+                    'just threads "two words"',
+                    "git commit -m 'just a note'",
+                    "git log --oneline | grep just",
+                    "timeout 60 just check",
+                    "just threads -f foo",
+                    "just host=nire-cube fingerprint",
+                    "just --color never check",
+                    "just --list",
+                    "just -n check",
+                    "printf '%s\\n' \"it's just text\" > /tmp/m.txt"):
+            self.assertPass(self.script, cmd, cwd=REPO)
 
     def test_zcode_stays_silent(self):
         # This guard protects Claude Code's allow rules; ZCode reads none,
