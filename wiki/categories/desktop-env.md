@@ -1,6 +1,12 @@
 # `desktop-env` — `general-config/desktop-env/`
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-05_
+
+> **Condensed version:**
+> [desktop-env-for-agents.md](desktop-env-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
 
 ## Contents
 
@@ -10,6 +16,8 @@ _Last modified: 2026-09-27_
 - [Why `jovian-persist.nix` isn't filed under `impermanence`](#why-jovian-persistnix-isnt-filed-under-impermanence)
 - [Imported by](#imported-by)
 - [Known quirk: mouse/input lag for ~4.5s after resume on tenacity](#known-quirk-mouseinput-lag-for-45s-after-resume-on-tenacity)
+- [Known limitation: three-finger pinch zoom can't be turned off alone (kwin upstream)](#known-limitation-three-finger-pinch-zoom-cant-be-turned-off-alone-kwin-upstream)
+- [Known issue: Kickoff opens with a 1-3s+ lag on tenacity (unresolved)](#known-issue-kickoff-opens-with-a-1-3s-lag-on-tenacity-unresolved)
 - [See also](#see-also)
 
 ## What's in it
@@ -92,6 +100,46 @@ instability the delay guards against) or an upstream ask to `hhd-dev`
 (not filed — skill `propose-issue` only ever files in this repo, not
 upstream). Decided not worth chasing; documented so a future session
 doesn't re-diagnose it as a USB or kernel resume bug.
+
+## Known limitation: three-finger pinch zoom can't be turned off alone (kwin upstream)
+
+On tenacity a three-finger touchpad pinch zooms the whole desktop, fires
+by accident, and has no dedicated off switch: kwin's zoom effect
+registers the pinch in its constructor with no config guard (kwin 6.7.4,
+`src/plugins/zoom/zoom.cpp:70,75`), and the only lever config offers —
+disabling the whole effect — also takes the wanted Meta+Ctrl+scroll
+zoom, which is the same effect, built from `PointerAxisGestureModifiers`
+(`zoom.cpp:167`). There is no per-device pinch toggle in `kcminputrc` or
+kwin's own config vocabulary, and plasma-manager exposes no gesture
+options at all. Decided 2026-09-09 ([#228](https://github.com/NireBryce/nixos-configs/issues/228),
+closed with this section as the record): leave it — both gestures stay.
+Escape hatches if that trade-off ever tips from nuisance to problem: an
+nixpkgs overlay dropping the two registration calls (a local kwin build,
+carried across every bump), or swapping desktop zoom for the separate
+magnifier effect (a lens, not the whole screen, its own plugin, no pinch
+gesture). Deliberately not filed upstream.
+
+## Known issue: Kickoff opens with a 1-3s+ lag on tenacity (unresolved)
+
+Reported 2026-09-09 ([#254](https://github.com/NireBryce/nixos-configs/issues/254),
+closed 2026-10-05 with this section as the record — unresolved, parked
+here so it isn't re-derived). Confirmed by live repro with logs and
+counters watched: it is the Kickoff applet specifically, not kwin —
+`vicinae`, a separate popup composited by the same kwin, opens instantly
+back to back; opened by mouse, not touch; not a ksycoca rebuild (no
+`kbuildsycoca` process and no new `~/.cache/ksycoca6_*` file across a
+repro); GPU/CPU headroom unremarkable; consistent at 1-3s+ and a
+regression ("started recently"). The first theory — amd-pstate EPP
+parked at `power`, slow to ramp — was falsified: the lag happens well
+after resume with headroom to spare, and PR #257 (the EPP nudge written
+for it) was closed unmerged. kwin_wayland logs libinput "your system is
+too slow" timer warnings during ordinary interactive use, consistent
+with the compositor occasionally failing to service input in time. Not
+yet done, and where the trail restarts: a syscall trace of `plasmashell`
+during a stall (`strace -p` needs `sudo sysctl
+kernel.yama.ptrace_scope=0` for the attach, revert after), or
+`journalctl --user -u plasma_plasmashell` with `QT_LOGGING_RULES` debug
+categories enabled around a repro.
 
 ## See also
 
