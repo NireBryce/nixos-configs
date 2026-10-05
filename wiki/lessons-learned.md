@@ -1,6 +1,6 @@
 # Lessons learned
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-04_
 
 > **Written by Claude Code, for Claude Code**, and largely a record of its own
 > mistakes, so the "I" in the articles is a machine with no memory of having
@@ -46,7 +46,7 @@ Home for most of this group: [AGENTS.md "Before calling it done"](../AGENTS.md#b
 - **§20** [A pipeline reports its last command's status](lessons-learned/20-pipeline-exit-status.md) — `cmd | tail` exits 0 when `cmd` failed; use `set -o pipefail` or don't pipe, and believe the text over the status. Home: AGENTS.md "Before calling it done". Enforced: none.
 - **§21** [An environment failure can look like a config failure](lessons-learned/21-environment-failure-as-config-failure.md) — nix puts the innermost cause last; read to the bottom of a trace. Home: AGENTS.md "Before calling it done". Enforced: none.
 - **§22** [Name matching fails silently](lessons-learned/22-name-matching-fails-silently.md) — before believing a zero, show the query can return non-zero (spelling differs, already present, `\w` misses `-`). Home: AGENTS.md "Before calling it done"; skill `home-manager-dotfiles`. Enforced: `just dotfiles` (for dotfile names).
-- **§31** [Count the thing you mean](lessons-learned/31-count-the-thing-you-mean.md) — know what a count counts, look for the existing cleaner before writing one, and don't set a limit below the observed worst case. Home: AGENTS.md "Before calling it done" (the counting half; the rest is the article). Enforced: none.
+- **§31** [Count the thing you mean](lessons-learned/31-count-the-thing-you-mean.md) — know what a count counts, look for the existing cleaner before writing one, and don't set a limit below the observed worst case. Home: AGENTS.md "Before calling it done"; [coredump-limit.nix](../flake/modules/general-config/system/storage/coredump-limit.nix). Enforced: none.
 - **§23** [When a check fires on new work, fix its model](lessons-learned/23-fix-the-checks-model.md) — "this check is wrong" and "this check is incomplete" look the same; widen the checker before reaching for the escape flag. Home: AGENTS.md "Before calling it done". Enforced: none.
 
 ## Investigating on the machine
