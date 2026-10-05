@@ -44,19 +44,23 @@ paths:
 - ZCode has no permission rules, so what carries over from
   `.agents/settings.json` is hook-shaped (#458):
   - An `ask` never pauses a ZCode session (treated as allow; since #456
-    the reason still reaches the model as context). git-guard and
-    just-guard therefore return `deny` under ZCode (`ZCODE_PROJECT_DIR`
-    set in the hook's environment) -- a deny is the only decision it
-    enforces -- except git-guard's two asks with a routine documented
+    the reason still reaches the model as context). git-guard therefore
+    returns `deny` under ZCode (`ZCODE_PROJECT_DIR` set in the hook's
+    environment) -- a deny is the only decision it enforces -- except its
+    two asks with a routine documented
     flow (ship's post-merge `push --delete`, use-a-worktree's
-    `worktree remove --force`), which stay advisory there. In Claude
+    `worktree remove --force`), which stay advisory there. just-guard
+    does nothing under ZCode: it only protects Claude Code's `Bash(just
+    ...)` allow rules, and ZCode reads none. In Claude
     Code every ask stays an ask. If the bundled docs' `PermissionRequest`
     event or an interactive mode turns out to honor an ask (untested),
     this split is worth revisiting.
   - `permissions.deny`'s Read rules (`//run/secrets/**`,
     `//run/secrets.d/**`) have no ZCode equivalent;
     `secrets-read-guard-pretooluse.sh` (matcher `Read|Grep|Glob`) is the
-    hook-side translation, wired into both configs. In Claude Code the
+    hook-side translation, wired into both configs. It normalizes each
+    path first, denies a Grep rooted at `/` or `/run`, and checks Glob
+    and Grep patterns as paths. In Claude Code the
     rules and the hook both apply; the fixture pins the rule list.
   - session-start.sh prints `behind origin/experimental: N` when the
     checkout is behind the last-fetched ref, so a separate clone

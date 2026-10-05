@@ -340,7 +340,19 @@ class SecretsReadGuardPreToolUse(GuardCase):
                          ("Read", {"file_path": "/run/secrets/"}),
                          ("Read", {"file_path": "/run/secrets.d/1/x"}),
                          ("Grep", {"path": "/run/secrets"}),
-                         ("Glob", {"path": "/run/secrets.d"})):
+                         ("Glob", {"path": "/run/secrets.d"}),
+                         # Equivalent spellings of the tree.
+                         ("Read", {"file_path": "/run//secrets/x"}),
+                         ("Read", {"file_path": "/run/./secrets/x"}),
+                         ("Read", {"file_path": "/run/foo/../secrets/x"}),
+                         # A Grep rooted above the tree recurses into it.
+                         ("Grep", {"pattern": "a", "path": "/run"}),
+                         ("Grep", {"pattern": "a", "path": "/"}),
+                         # Patterns name the tree too.
+                         ("Glob", {"pattern": "/run/secrets/*"}),
+                         ("Glob", {"path": "/run", "pattern": "secrets*/**"}),
+                         ("Grep", {"pattern": "a", "path": "/run/user",
+                                   "glob": "../secrets/*"})):
             out = self.run_tool(tool, **kw)
             hso = (out or {}).get("hookSpecificOutput", {})
             self.assertEqual(hso.get("permissionDecision"), "deny",
@@ -357,7 +369,11 @@ class SecretsReadGuardPreToolUse(GuardCase):
                          # merely starts like the secrets tree is not it.
                          ("Read", {"file_path": "/run/secretsdev/x"}),
                          ("Read", {"file_path": "/run/secrets.d2/x"}),
-                         ("Read", {"file_path": ""})):
+                         ("Read", {"file_path": ""}),
+                         ("Grep", {"pattern": "a"}),
+                         ("Grep", {"pattern": "a", "path": "/run/user"}),
+                         ("Glob", {"pattern": "**/*.nix"}),
+                         ("Glob", {"path": "/run", "pattern": "user/*"})):
             self.assertIsNone(self.run_tool(tool, **kw), f"{tool} {kw}")
 
 
@@ -1137,16 +1153,18 @@ class JustGuardPreToolUse(GuardCase):
                     "timeout 5 just preflight"):
             self.assertAsk(self.script, cmd, cwd=REPO)
 
-    def test_zcode_denies_foreign_justfile(self):
-        # #458: ZCode treats an ask as allow, so every verdict here is a
-        # deny under it, with the reason reaching the model either way.
+    def test_zcode_stays_silent(self):
+        # This guard protects Claude Code's allow rules; ZCode reads none,
+        # so under it the guard must not deny (or ask) anything -- least of
+        # all ordinary piped recipes and prose it can't parse.
         f = self.foreign()
-        out = self.assertZcodeDeny(self.script, "just preflight", cwd=f)
-        self.assertIn(
-            "run it by hand",
-            out["hookSpecificOutput"]["permissionDecisionReason"])
-        self.assertZcodeDeny(self.script, f"cd {f} && just preflight",
-                             cwd=REPO)
+        for cmd, cwd in (("just preflight", f),
+                         (f"cd {f} && just preflight", REPO),
+                         ("just agent recurring export 2>&1 | tail -1", REPO),
+                         ("git commit -m 'just a note'", REPO)):
+            rc, raw = run_hook_raw(self.script, bash_payload(cmd, cwd),
+                                   zcode_env())
+            self.assertEqual((rc, raw.strip()), (0, ""), cmd)
 
     def test_zcode_repo_recipes_still_pass(self):
         # The deny must not reach this repo's own recipes.

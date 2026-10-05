@@ -10,11 +10,11 @@
 # pre-approval, so the dev-shells justfiles and the like still run after a
 # prompt.
 #
-# ZCode has no prompt to fall back on: it treats permissionDecision "ask"
-# as allow (#448/#458), and it reads no allow rules at all, so under it
-# (ZCODE_PROJECT_DIR set in the hook's environment) the verdict here is a
-# deny -- the model stops and reports, and the user runs the recipe by hand
-# if it is really intended.
+# Under ZCode (ZCODE_PROJECT_DIR set in the hook's environment) this guard
+# does nothing: its only job is to keep Claude Code's `Bash(just ...)` allow
+# rules meaning this repo's recipes, and ZCode reads no allow rules. A deny
+# there would block ordinary piped or redirected recipes this guard can't
+# parse, with nothing to protect.
 #
 # Same parse limits as git-guard's whitelist: only `cd <plain-path>` moves the
 # directory it tracks, and any other segment shape that mentions `just` asks.
@@ -34,6 +34,7 @@ if ! command -v jq >/dev/null 2>&1; then
 fi
 
 input=$(cat)
+[ -n "${ZCODE_PROJECT_DIR:-}" ] && exit 0
 command=$(jq -r '.tool_input.command // empty' <<<"$input")
 cwd=$(jq -r '.cwd // empty' <<<"$input")
 [ -n "$cwd" ] || cwd="${CLAUDE_PROJECT_DIR:-$PWD}"
@@ -115,14 +116,6 @@ done < <(awk '{ gsub(/&&|\|\||;|\||&/, "\n"); print }' <<<"$command")
 
 if [ -n "$reason" ]; then
     decision="ask"
-    # ZCode treats an ask as allow (#448/#458), so there the pause this
-    # guard exists for has to be a deny.
-    if [ -n "${ZCODE_PROJECT_DIR:-}" ]; then
-        decision="deny"
-        reason="$reason
-
-Denied rather than asked: ZCode treats an ask as allow (#458), so a deny is the only enforced pause. Do not retry around this. Stop and report; if the recipe is really intended, the user can run it by hand."
-    fi
     jq -n --arg reason "$reason" --arg decision "$decision" '{
         systemMessage: ("⚠️  JUST GUARD: " + $reason),
         hookSpecificOutput: {
