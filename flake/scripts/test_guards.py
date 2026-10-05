@@ -53,9 +53,11 @@ def run_guard(script, payload):
     None. Fails the calling test if the script exits non-zero -- under the
     settings' `2>/dev/null || true` that failure would be silent in real
     use, so here it is always a finding."""
-    # just-guard asks whenever a JUST_* variable is inherited; keep the
-    # fixtures independent of whatever ran this test.
-    env = {k: v for k, v in os.environ.items() if not k.startswith("JUST_")}
+    # just-guard asks whenever a JUST_* variable is inherited, and the
+    # #458 deny-under-ZCode emitters key on ZCODE_PROJECT_DIR; keep the
+    # fixtures independent of whatever harness ran this test.
+    env = {k: v for k, v in os.environ.items()
+           if not k.startswith("JUST_") and k != "ZCODE_PROJECT_DIR"}
     proc = subprocess.run(
         ["bash", str(script)], input=json.dumps(payload).encode(),
         capture_output=True, timeout=60, env=env)
@@ -66,6 +68,24 @@ def run_guard(script, payload):
             f"{proc.stderr.decode(errors='replace')}")
     out = proc.stdout.decode()
     return json.loads(out) if out.strip() else None
+
+
+def zcode_payload(payload):
+    """A hook payload as ZCode builds it: its camelCase event fields ride
+    along beside the snake_case ones (the guards' under-ZCode test)."""
+    return {**payload, "hookEventName": payload.get("hook_event_name",
+                                                    "PreToolUse"),
+            "transcriptPath": "/tmp/zcode-transcript.jsonl"}
+
+
+def zcode_env():
+    """The environment as ZCode presents it to a hook: ZCODE_PROJECT_DIR
+    set (#458's under-ZCode discriminator), JUST_* stripped the way
+    run_guard strips it."""
+    env = {k: v for k, v in os.environ.items()
+           if not k.startswith("JUST_") and k != "ZCODE_PROJECT_DIR"}
+    env["ZCODE_PROJECT_DIR"] = str(REPO)
+    return env
 
 
 def run_hook_raw(script, payload, env=None, cwd=None):
@@ -134,6 +154,27 @@ class GuardCase(unittest.TestCase):
         self.assertTrue((out or {}).get("systemMessage"))
         if needle:
             self.assertIn(needle, hso.get("permissionDecisionReason", ""))
+        return out
+
+    def assertZcodeDeny(self, script, command, needle=None, cwd=None):
+        """#458: the same guard as ZCode would run it (ZCODE_PROJECT_DIR
+        set), where the must-hold asks return deny. Also pins that the
+        reason rides additionalContext -- the one channel known to reach
+        a ZCode model (systemMessage is dropped there for PreToolUse)."""
+        rc, raw = run_hook_raw(script, zcode_payload(bash_payload(command, cwd)),
+                               zcode_env())
+        self.assertEqual(rc, 0)
+        out = json.loads(raw) if raw.strip() else None
+        hso = (out or {}).get("hookSpecificOutput", {})
+        self.assertEqual(
+            hso.get("permissionDecision"), "deny",
+            f"{script.name} did not deny under ZCode: {command!r}\n"
+            f"stdout was: {out}")
+        self.assertTrue((out or {}).get("systemMessage"))
+        if needle:
+            self.assertIn(needle, hso.get("permissionDecisionReason", ""))
+        self.assertTrue(model_context(out),
+                        f"{script.name} deny carries no additionalContext")
         return out
 
     def assertPass(self, script, command, cwd=None):
@@ -238,9 +279,11 @@ class SecretsGuardPreToolUse(GuardCase):
             self.assertIn("[positional-arguments]", shown, rule)
 
     def test_read_tool_denied_on_run_secrets(self):
-        # The Bash hook never sees the Read tool; settings.json's deny rules
-        # are the only thing between it and a user-owned secret (cube's
-        # opencode password is owned by the login user).
+        # The Bash hook never sees the Read tool. settings.json's deny
+        # rules plus secrets-read-guard-pretooluse.sh (wired into both
+        # configs, #458) stand between it and a user-owned secret (cube's
+        # opencode password is owned by the login user); this pins the
+        # rule list, SecretsReadGuardPreToolUse pins the hook.
         deny = json.loads(SETTINGS.read_text())["permissions"]["deny"]
         for rule in ("Read(//run/secrets/**)", "Read(//run/secrets.d/**)"):
             self.assertIn(rule, deny)
@@ -285,6 +328,71 @@ class SecretsGuardPreToolUse(GuardCase):
 
     def test_unrelated_command_passes(self):
         self.assertPass(self.script, "nix eval --raw .#x --apply 'toString'")
+
+
+class SecretsReadGuardPreToolUse(GuardCase):
+    """#458: ZCode has no permissions.deny, so the Read rules on
+    /run/secrets get a hook of their own, wired into both configs. A read
+    tool returns contents into the conversation, so unlike the Bash-side
+    secrets guard there is no metadata exemption."""
+    script = HOOKS / "secrets-read-guard-pretooluse.sh"
+
+    def run_tool(self, tool, **kwargs):
+        return run_guard(self.script, {"tool_name": tool,
+                                       "tool_input": kwargs,
+                                       "cwd": str(REPO)})
+
+    def test_secret_paths_deny(self):
+        for tool, kw in (("Read", {"file_path": "/run/secrets/atuin_key"}),
+                         ("Read", {"file_path": "/run/secrets"}),
+                         ("Read", {"file_path": "/run/secrets/"}),
+                         ("Read", {"file_path": "/run/secrets.d/1/x"}),
+                         ("Grep", {"path": "/run/secrets"}),
+                         ("Glob", {"path": "/run/secrets.d"}),
+                         # Equivalent spellings of the tree.
+                         ("Read", {"file_path": "/run//secrets/x"}),
+                         ("Read", {"file_path": "/run/./secrets/x"}),
+                         ("Read", {"file_path": "/run/foo/../secrets/x"}),
+                         # A Grep rooted above the tree recurses into it.
+                         ("Grep", {"pattern": "a", "path": "/run"}),
+                         ("Grep", {"pattern": "a", "path": "/"}),
+                         # Patterns name the tree too.
+                         ("Glob", {"pattern": "/run/secrets/*"}),
+                         ("Glob", {"path": "/run", "pattern": "secrets*/**"}),
+                         ("Grep", {"pattern": "a", "path": "/run/user",
+                                   "glob": "../secrets/*"}),
+                         # `~` is the home directory, not a cwd-relative name.
+                         ("Read", {"file_path": "~/" + "../" * 8 + "run/secrets/x"})):
+            out = self.run_tool(tool, **kw)
+            hso = (out or {}).get("hookSpecificOutput", {})
+            self.assertEqual(hso.get("permissionDecision"), "deny",
+                             f"{tool} {kw}\nstdout was: {out}")
+            self.assertTrue((out or {}).get("systemMessage"))
+            # The reason must reach the model and name the safe forms.
+            self.assertIn("just read-sops-names", model_context(out))
+
+    def test_symlink_into_the_tree_denies(self):
+        d = pathlib.Path(tempfile.mkdtemp(prefix="read-guard-"))
+        self.addCleanup(shutil.rmtree, d, ignore_errors=True)
+        (d / "link").symlink_to("/run/secrets")
+        out = self.run_tool("Read", file_path=str(d / "link" / "x"))
+        self.assertEqual((out or {}).get("hookSpecificOutput", {})
+                         .get("permissionDecision"), "deny")
+
+    def test_other_paths_pass(self):
+        for tool, kw in (("Read", {"file_path": str(REPO / "README.md")}),
+                         ("Grep", {"path": "/tmp"}),
+                         ("Glob", {"path": str(REPO / "wiki")}),
+                         # The match is on path components: a name that
+                         # merely starts like the secrets tree is not it.
+                         ("Read", {"file_path": "/run/secretsdev/x"}),
+                         ("Read", {"file_path": "/run/secrets.d2/x"}),
+                         ("Read", {"file_path": ""}),
+                         ("Grep", {"pattern": "a"}),
+                         ("Grep", {"pattern": "a", "path": "/run/user"}),
+                         ("Glob", {"pattern": "**/*.nix"}),
+                         ("Glob", {"path": "/run", "pattern": "user/*"})):
+            self.assertIsNone(self.run_tool(tool, **kw), f"{tool} {kw}")
 
 
 class SecretsGuardPostToolUse(GuardCase):
@@ -821,6 +929,74 @@ class GitGuardPreToolUse(GuardCase):
         self.assertIn("DESTRUCTIVE GIT COMMAND",
                       (out or {}).get("systemMessage", ""))
 
+    # --- #458: the same asks under ZCode ----------------------------------
+    # ZCode treats permissionDecision "ask" as allow, so every tier-2 ask
+    # except the two routine steps returns deny when ZCODE_PROJECT_DIR is
+    # set. The ask tests above run without it (run_guard strips it),
+    # pinning Claude Code's ask-everywhere side of the split.
+
+    def test_zcode_hardens_must_hold_asks_to_deny(self):
+        r = self.repo()
+        git(r, "branch", "other")
+        for cmd in ("git push -f origin main",
+                    "git push --mirror origin",
+                    "git branch -D stale-branch",
+                    "git stash drop stash@{0}",
+                    "git restore .",
+                    "git read-tree -u --reset HEAD",
+                    "git checkout -B other",
+                    'cd "$W" && git reset --hard'):
+            out = self.assertZcodeDeny(self.script, cmd, cwd=r)
+            self.assertIn(
+                "run it by hand",
+                out["hookSpecificOutput"]["permissionDecisionReason"], cmd)
+
+    def test_zcode_keeps_the_routine_two_as_ask(self):
+        # ship's post-merge cleanup and use-a-worktree's teardown have a
+        # routine documented flow: under ZCode they stay advisory, the
+        # reason still reaching the model as context (#456).
+        for cmd in ("git push origin --delete some-branch",
+                    "git worktree remove --force /tmp/wt-x"):
+            rc, raw = run_hook_raw(self.script, zcode_payload(bash_payload(cmd)),
+                                   zcode_env())
+            self.assertEqual(rc, 0)
+            out = json.loads(raw)
+            hso = out["hookSpecificOutput"]
+            self.assertEqual(hso["permissionDecision"], "ask", cmd)
+            self.assertIn("DESTRUCTIVE GIT COMMAND", out["systemMessage"])
+            self.assertTrue(model_context(out), cmd)
+
+    def test_zcode_routine_exception_needs_a_single_command(self):
+        for cmd in ("git push origin --delete foo && git branch -D bar",
+                    "git push origin --delete foo; git reset --hard origin/x",
+                    "git push origin --delete experimental",
+                    "git push origin :main",
+                    "git push origin --delete 'main'",
+                    'git push origin --delete "experimental"',
+                    "git worktree remove --force /tmp/wt-x && git stash clear"):
+            self.assertZcodeDeny(self.script, cmd)
+
+    def test_inherited_zcode_env_does_not_flip_claude_code(self):
+        # A Claude Code session started from a ZCode terminal inherits
+        # ZCODE_PROJECT_DIR; its snake_case payload keeps asks as asks.
+        rc, raw = run_hook_raw(self.script,
+                               bash_payload("git branch -D stale-branch"),
+                               zcode_env())
+        self.assertEqual(json.loads(raw)["hookSpecificOutput"]
+                         ["permissionDecision"], "ask")
+
+    def test_zcode_tier1_deny_unchanged(self):
+        # Tier 1 denied before #458 and must not be downgraded to an ask
+        # by the new decision logic.
+        r = self.repo()
+        (r / "tracked.txt").write_text("changed\n")
+        rc, raw = run_hook_raw(self.script,
+                               zcode_payload(bash_payload("git reset --hard", r)),
+                               zcode_env())
+        self.assertEqual(rc, 0)
+        self.assertEqual(json.loads(raw)["hookSpecificOutput"]
+                         ["permissionDecision"], "deny")
+
     def test_benign_commands_pass(self):
         for cmd in ("git status -sb", "git add -A", "git log --oneline -5",
                     "just build"):
@@ -1014,6 +1190,33 @@ class JustGuardPreToolUse(GuardCase):
                     "timeout 5 just preflight"):
             self.assertAsk(self.script, cmd, cwd=REPO)
 
+    def test_zcode_stays_silent(self):
+        # This guard protects Claude Code's allow rules; ZCode reads none,
+        # so under it the guard must not deny (or ask) anything -- least of
+        # all ordinary piped recipes and prose it can't parse.
+        f = self.foreign()
+        for cmd, cwd in (("just preflight", f),
+                         (f"cd {f} && just preflight", REPO),
+                         ("just agent recurring export 2>&1 | tail -1", REPO),
+                         ("git commit -m 'just a note'", REPO)):
+            rc, raw = run_hook_raw(self.script, zcode_payload(bash_payload(cmd, cwd)),
+                                   zcode_env())
+            self.assertEqual((rc, raw.strip()), (0, ""), cmd)
+
+    def test_inherited_zcode_env_keeps_guarding_claude_code(self):
+        f = self.foreign()
+        rc, raw = run_hook_raw(self.script, bash_payload("just preflight", f),
+                               zcode_env())
+        self.assertEqual(json.loads(raw)["hookSpecificOutput"]
+                         ["permissionDecision"], "ask")
+
+    def test_zcode_repo_recipes_still_pass(self):
+        # The deny must not reach this repo's own recipes.
+        for cmd in ("just preflight", "just agent where"):
+            rc, raw = run_hook_raw(self.script, zcode_payload(bash_payload(cmd, REPO)),
+                                   zcode_env())
+            self.assertEqual((rc, raw.strip()), (0, ""), cmd)
+
 
 class CommitMsgHook(unittest.TestCase):
     script = GIT_HOOKS / "commit-msg"
@@ -1206,6 +1409,37 @@ class SessionStart(unittest.TestCase):
         ctx = self.context(wt)
         self.assertIn("branch: side", ctx)
         self.assertIn("LINKED worktree", ctx)
+
+    def test_reports_behind_origin_experimental(self):
+        # #458: a separate clone announces its staleness against the
+        # last-fetched ref (ZCode's workspace acted on state this checkout
+        # did not have during #448). Only on experimental itself.
+        git(self.repo, "switch", "-qc", "experimental")
+        git(self.repo, "-c", "user.email=t@t", "-c", "user.name=t",
+            "commit", "--allow-empty", "-m", "second")
+        git(self.repo, "update-ref", "refs/remotes/origin/experimental",
+            "HEAD")
+        git(self.repo, "reset", "--hard", "HEAD~1")
+        self.assertIn("behind origin/experimental: 1 commit",
+                      self.context(self.repo))
+
+    def test_no_behind_line_on_a_feature_branch(self):
+        git(self.repo, "-c", "user.email=t@t", "-c", "user.name=t",
+            "commit", "--allow-empty", "-m", "second")
+        git(self.repo, "update-ref", "refs/remotes/origin/experimental",
+            "HEAD")
+        git(self.repo, "reset", "--hard", "HEAD~1")
+        self.assertNotIn("behind origin/experimental",
+                         self.context(self.repo))
+
+    def test_no_behind_line_when_current_or_unfetched(self):
+        # Zero behind, and no origin/experimental ref at all: no line.
+        self.assertNotIn("behind origin/experimental",
+                         self.context(self.repo))
+        git(self.repo, "update-ref", "refs/remotes/origin/experimental",
+            "HEAD")
+        self.assertNotIn("behind origin/experimental",
+                         self.context(self.repo))
 
     @unittest.skipUnless(shutil.which("just"), "just not on PATH")
     def test_lists_agent_helpers_from_just_summary(self):

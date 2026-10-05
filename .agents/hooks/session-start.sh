@@ -52,6 +52,19 @@ if root=$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null); then
     dirty=$(git -C "$root" --no-optional-locks status --porcelain 2>/dev/null | grep -c . || true)
     lines+=("dirty paths (git status --porcelain): ${dirty:-?}")
 
+    # Issue #458: this workspace was a separate clone that only got merged
+    # changes after a pull and acted on stale state during #448. Counted
+    # against the last-fetched ref -- no network at session start, so "no
+    # line" means "not behind what was last fetched", nothing more.
+    # Only on experimental itself: a feature branch is behind the trunk by
+    # design and would always read as stale.
+    if [ "$(git -C "$root" branch --show-current 2>/dev/null)" = experimental ] \
+        && behind=$(git -C "$root" --no-optional-locks rev-list --count \
+                HEAD..origin/experimental 2>/dev/null) \
+        && [ "${behind:-0}" -gt 0 ] 2>/dev/null; then
+        lines+=("behind origin/experimental: $behind commit(s) -- this checkout is stale; fetch before trusting it")
+    fi
+
     lines+=("git worktree list:")
     while IFS= read -r wt; do
         lines+=("  $wt")

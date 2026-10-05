@@ -10,6 +10,12 @@
 # pre-approval, so the dev-shells justfiles and the like still run after a
 # prompt.
 #
+# Under ZCode (detected from the hook payload, below) this guard
+# does nothing: its only job is to keep Claude Code's `Bash(just ...)` allow
+# rules meaning this repo's recipes, and ZCode reads no allow rules. A deny
+# there would block ordinary piped or redirected recipes this guard can't
+# parse, with nothing to protect.
+#
 # Same parse limits as git-guard's whitelist: only `cd <plain-path>` moves the
 # directory it tracks, and any other segment shape that mentions `just` asks.
 # Any JUST_* variable in the hook's environment (JUST_JUSTFILE,
@@ -28,6 +34,13 @@ if ! command -v jq >/dev/null 2>&1; then
 fi
 
 input=$(cat)
+# Running under ZCode? Read from the payload, not the environment: ZCode
+# builds the hook input as {...its own event, snake_case copies}, so its
+# camelCase fields (hookEventName, transcriptPath) ride along; Claude Code's
+# input is snake_case only. An inherited ZCODE_PROJECT_DIR (Claude Code
+# started from a ZCode terminal) can't flip this.
+zcode=$(jq -r 'if has("hookEventName") or has("transcriptPath") then "1" else empty end' <<<"$input")
+[ -n "$zcode" ] && exit 0
 command=$(jq -r '.tool_input.command // empty' <<<"$input")
 cwd=$(jq -r '.cwd // empty' <<<"$input")
 [ -n "$cwd" ] || cwd="${CLAUDE_PROJECT_DIR:-$PWD}"
@@ -108,11 +121,12 @@ while IFS= read -r seg; do
 done < <(awk '{ gsub(/&&|\|\||;|\||&/, "\n"); print }' <<<"$command")
 
 if [ -n "$reason" ]; then
-    jq -n --arg reason "$reason" '{
+    decision="ask"
+    jq -n --arg reason "$reason" --arg decision "$decision" '{
         systemMessage: ("⚠️  JUST GUARD: " + $reason),
         hookSpecificOutput: {
             hookEventName: "PreToolUse",
-            permissionDecision: "ask",
+            permissionDecision: $decision,
             permissionDecisionReason: $reason,
             additionalContext: $reason
         }
