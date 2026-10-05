@@ -88,6 +88,12 @@ fi
 input=$(cat)
 command=$(jq -r '.tool_input.command // empty' <<<"$input")
 cwd=$(jq -r '.cwd // empty' <<<"$input")
+# Running under ZCode? Read from the payload, not the environment: ZCode
+# builds the hook input as {...its own event, snake_case copies}, so its
+# camelCase fields (hookEventName, transcriptPath) ride along; Claude Code's
+# input is snake_case only. An inherited ZCODE_PROJECT_DIR (Claude Code
+# started from a ZCode terminal) can't flip this.
+zcode=$(jq -r 'if has("hookEventName") or has("transcriptPath") then "1" else empty end' <<<"$input")
 [ -n "$cwd" ] || cwd="${CLAUDE_PROJECT_DIR:-$PWD}"
 
 # A short-option cluster or long flag carrying -f/--force (e.g. -f, -uf,
@@ -507,7 +513,8 @@ Denied rather than asked: an ask is a silent no-op under auto permission mode (i
         hookSpecificOutput: {
             hookEventName: "PreToolUse",
             permissionDecision: "deny",
-            permissionDecisionReason: $reason
+            permissionDecisionReason: $reason,
+            additionalContext: $reason
         }
     }'
     exit 0
@@ -517,6 +524,10 @@ fi
 
 reason=""
 routine_ask=""
+# A routine step is a single git command: chained onto anything else it
+# could cover the rest of the line, and the trunk branches are never routine.
+single_segment=""
+[[ $command == *[\;\&\|]* || $command == *$'\n'* ]] || single_segment=1
 if [ -n "$unverified" ]; then
     reason="This git command discards uncommitted work if the tree is dirty, and the guard $unverified. Run 'git status --short' in that repo first; if anything is listed that isn't yours to drop, stop and ask the user."
 fi
@@ -550,7 +561,10 @@ fi
 if [ -z "$reason" ] && grep -qE '\bpush\b' <<<"$command" \
     && grep -qE -- '--delete\b|(^|[[:space:]])-d([[:space:]]|$)|[[:space:]]:[A-Za-z]' <<<"$command"; then
     reason="This looks like it deletes a remote branch or tag. Confirm the ref is actually meant to go -- this is the routine post-merge cleanup step in the ship skill, but is otherwise hard to undo once someone else has fetched it."
-    routine_ask=1
+    if [ -n "$single_segment" ] \
+        && ! grep -qE "(^|[[:space:]:/'\"])(experimental|main)(['\"[:space:]]|\$)" <<<"$command"; then
+        routine_ask=1
+    fi
 fi
 
 # git branch -D (force delete, unlike the plain -d the ship skill uses for
@@ -611,7 +625,7 @@ if [ -z "$reason" ] && grep -qE '\bworktree([[:space:]]|$)' <<<"$command" \
     && grep -qE '\bremove([[:space:]]|$)' <<<"$command" \
     && grep -qE -- "$force_flag_re" <<<"$command"; then
     reason="'git worktree remove --force' deletes a worktree even when it holds uncommitted or unpushed changes -- plain 'remove' refuses those. Confirm the worktree has nothing unsaved (this is also the use-a-worktree skill's documented cleanup step, so it's expected then)."
-    routine_ask=1
+    [ -n "$single_segment" ] && routine_ask=1
 fi
 
 # git push --mirror: makes the remote exactly match local, deleting every
@@ -628,7 +642,7 @@ if [ -n "$reason" ]; then
     # allow (#448/#458), so for everything but the two routine steps the
     # decision there is deny -- a deny reaches the model in every mode and
     # stops it, which is what a pause has to be in an unattended session.
-    if [ -n "${ZCODE_PROJECT_DIR:-}" ] && [ -z "$routine_ask" ]; then
+    if [ -n "$zcode" ] && [ -z "$routine_ask" ]; then
         decision="deny"
         reason="$reason
 

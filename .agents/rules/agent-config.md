@@ -45,11 +45,13 @@ paths:
   `.agents/settings.json` is hook-shaped (#458):
   - An `ask` never pauses a ZCode session (treated as allow; since #456
     the reason still reaches the model as context). git-guard therefore
-    returns `deny` under ZCode (`ZCODE_PROJECT_DIR` set in the hook's
-    environment) -- a deny is the only decision it enforces -- except its
-    two asks with a routine documented
+    returns `deny` under ZCode -- a deny is the only decision it enforces
+    -- detected from the hook payload (ZCode's carries camelCase
+    `hookEventName`/`transcriptPath`; an inherited `ZCODE_PROJECT_DIR`
+    doesn't count), except its two asks with a routine documented
     flow (ship's post-merge `push --delete`, use-a-worktree's
-    `worktree remove --force`), which stay advisory there. just-guard
+    `worktree remove --force`), which stay advisory there only as a
+    single command and never for `experimental`/`main`. just-guard
     does nothing under ZCode: it only protects Claude Code's `Bash(just
     ...)` allow rules, and ZCode reads none. In Claude
     Code every ask stays an ask. If the bundled docs' `PermissionRequest`

@@ -43,6 +43,8 @@ pattern=$(jq -r 'if .tool_name == "Glob" then (.tool_input.pattern // "")
 # absolute <path>: against the cwd when relative.
 absolute() {
     case $1 in
+        '~') printf '%s\n' "$HOME" ;;
+        '~/'*) printf '%s\n' "$HOME/${1#\~/}" ;;
         /*) printf '%s\n' "$1" ;;
         *) printf '%s\n' "$cwd/$1" ;;
     esac
@@ -56,6 +58,7 @@ normalize() {
         p=$r
     fi
     local IFS=/
+    set -f    # split on `/` only; never glob a segment like `*`
     for seg in $p; do
         case $seg in
             ''|.) ;;
@@ -63,7 +66,8 @@ normalize() {
             *) out+=("$seg") ;;
         esac
     done
-    printf '/%s\n' "${out[*]}"
+    set +f
+    printf '/%s\n' "${out[*]+"${out[*]}"}"
 }
 
 in_tree() {

@@ -70,6 +70,14 @@ def run_guard(script, payload):
     return json.loads(out) if out.strip() else None
 
 
+def zcode_payload(payload):
+    """A hook payload as ZCode builds it: its camelCase event fields ride
+    along beside the snake_case ones (the guards' under-ZCode test)."""
+    return {**payload, "hookEventName": payload.get("hook_event_name",
+                                                    "PreToolUse"),
+            "transcriptPath": "/tmp/zcode-transcript.jsonl"}
+
+
 def zcode_env():
     """The environment as ZCode presents it to a hook: ZCODE_PROJECT_DIR
     set (#458's under-ZCode discriminator), JUST_* stripped the way
@@ -153,7 +161,7 @@ class GuardCase(unittest.TestCase):
         set), where the must-hold asks return deny. Also pins that the
         reason rides additionalContext -- the one channel known to reach
         a ZCode model (systemMessage is dropped there for PreToolUse)."""
-        rc, raw = run_hook_raw(script, bash_payload(command, cwd),
+        rc, raw = run_hook_raw(script, zcode_payload(bash_payload(command, cwd)),
                                zcode_env())
         self.assertEqual(rc, 0)
         out = json.loads(raw) if raw.strip() else None
@@ -352,7 +360,9 @@ class SecretsReadGuardPreToolUse(GuardCase):
                          ("Glob", {"pattern": "/run/secrets/*"}),
                          ("Glob", {"path": "/run", "pattern": "secrets*/**"}),
                          ("Grep", {"pattern": "a", "path": "/run/user",
-                                   "glob": "../secrets/*"})):
+                                   "glob": "../secrets/*"}),
+                         # `~` is the home directory, not a cwd-relative name.
+                         ("Read", {"file_path": "~/" + "../" * 8 + "run/secrets/x"})):
             out = self.run_tool(tool, **kw)
             hso = (out or {}).get("hookSpecificOutput", {})
             self.assertEqual(hso.get("permissionDecision"), "deny",
@@ -360,6 +370,14 @@ class SecretsReadGuardPreToolUse(GuardCase):
             self.assertTrue((out or {}).get("systemMessage"))
             # The reason must reach the model and name the safe forms.
             self.assertIn("just read-sops-names", model_context(out))
+
+    def test_symlink_into_the_tree_denies(self):
+        d = pathlib.Path(tempfile.mkdtemp(prefix="read-guard-"))
+        self.addCleanup(shutil.rmtree, d, ignore_errors=True)
+        (d / "link").symlink_to("/run/secrets")
+        out = self.run_tool("Read", file_path=str(d / "link" / "x"))
+        self.assertEqual((out or {}).get("hookSpecificOutput", {})
+                         .get("permissionDecision"), "deny")
 
     def test_other_paths_pass(self):
         for tool, kw in (("Read", {"file_path": str(REPO / "README.md")}),
@@ -939,7 +957,7 @@ class GitGuardPreToolUse(GuardCase):
         # reason still reaching the model as context (#456).
         for cmd in ("git push origin --delete some-branch",
                     "git worktree remove --force /tmp/wt-x"):
-            rc, raw = run_hook_raw(self.script, bash_payload(cmd),
+            rc, raw = run_hook_raw(self.script, zcode_payload(bash_payload(cmd)),
                                    zcode_env())
             self.assertEqual(rc, 0)
             out = json.loads(raw)
@@ -948,13 +966,32 @@ class GitGuardPreToolUse(GuardCase):
             self.assertIn("DESTRUCTIVE GIT COMMAND", out["systemMessage"])
             self.assertTrue(model_context(out), cmd)
 
+    def test_zcode_routine_exception_needs_a_single_command(self):
+        for cmd in ("git push origin --delete foo && git branch -D bar",
+                    "git push origin --delete foo; git reset --hard origin/x",
+                    "git push origin --delete experimental",
+                    "git push origin :main",
+                    "git push origin --delete 'main'",
+                    'git push origin --delete "experimental"',
+                    "git worktree remove --force /tmp/wt-x && git stash clear"):
+            self.assertZcodeDeny(self.script, cmd)
+
+    def test_inherited_zcode_env_does_not_flip_claude_code(self):
+        # A Claude Code session started from a ZCode terminal inherits
+        # ZCODE_PROJECT_DIR; its snake_case payload keeps asks as asks.
+        rc, raw = run_hook_raw(self.script,
+                               bash_payload("git branch -D stale-branch"),
+                               zcode_env())
+        self.assertEqual(json.loads(raw)["hookSpecificOutput"]
+                         ["permissionDecision"], "ask")
+
     def test_zcode_tier1_deny_unchanged(self):
         # Tier 1 denied before #458 and must not be downgraded to an ask
         # by the new decision logic.
         r = self.repo()
         (r / "tracked.txt").write_text("changed\n")
         rc, raw = run_hook_raw(self.script,
-                               bash_payload("git reset --hard", r),
+                               zcode_payload(bash_payload("git reset --hard", r)),
                                zcode_env())
         self.assertEqual(rc, 0)
         self.assertEqual(json.loads(raw)["hookSpecificOutput"]
@@ -1162,14 +1199,21 @@ class JustGuardPreToolUse(GuardCase):
                          (f"cd {f} && just preflight", REPO),
                          ("just agent recurring export 2>&1 | tail -1", REPO),
                          ("git commit -m 'just a note'", REPO)):
-            rc, raw = run_hook_raw(self.script, bash_payload(cmd, cwd),
+            rc, raw = run_hook_raw(self.script, zcode_payload(bash_payload(cmd, cwd)),
                                    zcode_env())
             self.assertEqual((rc, raw.strip()), (0, ""), cmd)
+
+    def test_inherited_zcode_env_keeps_guarding_claude_code(self):
+        f = self.foreign()
+        rc, raw = run_hook_raw(self.script, bash_payload("just preflight", f),
+                               zcode_env())
+        self.assertEqual(json.loads(raw)["hookSpecificOutput"]
+                         ["permissionDecision"], "ask")
 
     def test_zcode_repo_recipes_still_pass(self):
         # The deny must not reach this repo's own recipes.
         for cmd in ("just preflight", "just agent where"):
-            rc, raw = run_hook_raw(self.script, bash_payload(cmd, REPO),
+            rc, raw = run_hook_raw(self.script, zcode_payload(bash_payload(cmd, REPO)),
                                    zcode_env())
             self.assertEqual((rc, raw.strip()), (0, ""), cmd)
 
@@ -1369,7 +1413,8 @@ class SessionStart(unittest.TestCase):
     def test_reports_behind_origin_experimental(self):
         # #458: a separate clone announces its staleness against the
         # last-fetched ref (ZCode's workspace acted on state this checkout
-        # did not have during #448).
+        # did not have during #448). Only on experimental itself.
+        git(self.repo, "switch", "-qc", "experimental")
         git(self.repo, "-c", "user.email=t@t", "-c", "user.name=t",
             "commit", "--allow-empty", "-m", "second")
         git(self.repo, "update-ref", "refs/remotes/origin/experimental",
@@ -1377,6 +1422,15 @@ class SessionStart(unittest.TestCase):
         git(self.repo, "reset", "--hard", "HEAD~1")
         self.assertIn("behind origin/experimental: 1 commit",
                       self.context(self.repo))
+
+    def test_no_behind_line_on_a_feature_branch(self):
+        git(self.repo, "-c", "user.email=t@t", "-c", "user.name=t",
+            "commit", "--allow-empty", "-m", "second")
+        git(self.repo, "update-ref", "refs/remotes/origin/experimental",
+            "HEAD")
+        git(self.repo, "reset", "--hard", "HEAD~1")
+        self.assertNotIn("behind origin/experimental",
+                         self.context(self.repo))
 
     def test_no_behind_line_when_current_or_unfetched(self):
         # Zero behind, and no origin/experimental ref at all: no line.
