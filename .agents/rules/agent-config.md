@@ -56,6 +56,21 @@ paths:
     does nothing under ZCode: it only protects Claude Code's `Bash(just
     ...)` allow rules, and ZCode reads none. In Claude
     Code every ask stays an ask.
+  - That payload detection fails open: a ZCode upgrade that renames
+    the camelCase fields would leave unattended ZCode sessions at
+    ask-as-allow with nothing saying so. `zcode-canary-pretooluse.sh` (Bash matcher)
+    cross-checks the payload against the inherited `ZCODE_PROJECT_DIR`
+    -- independent signals, since ZCode injects the variable and Claude
+    Code does not -- and while they disagree says so on every guarded
+    call, in `additionalContext` and `systemMessage`. Under ZCode only
+    the model sees it (`systemMessage` is dropped for PreToolUse, see
+    above); the human sees it only in Claude Code. The disagreement is
+    one of two things and the hook cannot tell which: Claude Code
+    inheriting the variable from a ZCode-spawned shell (harmless), or
+    the shape having changed (then run the live hook check and update
+    the detection in git-guard and just-guard; `test_guards.py` keeps
+    the three copies of the detection expression identical). Advisory
+    only; it never decides.
   - `permissions.deny`'s Read rules (`//run/secrets/**`,
     `//run/secrets.d/**`) have no ZCode equivalent;
     `secrets-read-guard-pretooluse.sh` (matcher `Read|Grep|Glob`) is the
@@ -100,18 +115,6 @@ paths:
   so the farm only duplicated every skill in its list. The path is
   gitignored; per-machine ZCode state belongs under ignored paths, and
   only `.zcode/config.json` is tracked.
-
-- The payload detection above fails open: a ZCode upgrade that renames
-  the camelCase fields would leave ZCode sessions at ask-as-allow with
-  nothing saying so. `zcode-canary-pretooluse.sh` (Bash matcher)
-  cross-checks the payload against the inherited `ZCODE_PROJECT_DIR` --
-  independent signals, since ZCode injects the variable and Claude Code
-  does not -- and while they disagree says so on every guarded call, to
-  the human and the model. The disagreement is one of two things and
-  the hook cannot tell which: Claude Code inheriting the variable from
-  a ZCode-spawned shell (harmless), or the shape having changed (then
-  run the live hook check and update the detection in git-guard and
-  just-guard). Advisory only; it never decides.
 
 - `lesson-reminder-pretooluse.py` (matchers `Bash` and
   `Edit|Write|MultiEdit`, #460) is a Python hook, named `*-pretooluse.py`
