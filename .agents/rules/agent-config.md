@@ -91,6 +91,18 @@ paths:
   gitignored; per-machine ZCode state belongs under ignored paths, and
   only `.zcode/config.json` is tracked.
 
+- The payload detection above fails open: a ZCode upgrade that renames
+  the camelCase fields would leave ZCode sessions at ask-as-allow with
+  nothing saying so. `zcode-canary-pretooluse.sh` (Bash matcher)
+  cross-checks the payload against the inherited `ZCODE_PROJECT_DIR` --
+  independent signals, since ZCode injects the variable and Claude Code
+  does not -- and while they disagree says so on every guarded call, to
+  the human and the model. The disagreement is one of two things and
+  the hook cannot tell which: Claude Code inheriting the variable from
+  a ZCode-spawned shell (harmless), or the shape having changed (then
+  run the live hook check and update the detection in git-guard and
+  just-guard). Advisory only; it never decides.
+
 - `lesson-reminder-pretooluse.py` (matchers `Bash` and
   `Edit|Write|MultiEdit`, #460) is a Python hook, named `*-pretooluse.py`
   so the wiring tests count it as one; its imported module
