@@ -57,3 +57,7 @@ preflight-each *args:
 # Fetch, then branch/dirty/commits/diff-stat vs origin/experimental and the PR: where [<pr>]
 where *args:
     @cd "{{invocation_directory()}}" && "{{scripts}}/where.py" "$@"
+
+# What applies to these paths (default: this branch's diff): lessons [<path>...] [--command C]
+lessons *args:
+    @cd "{{invocation_directory()}}" && "{{scripts}}/lessons.py" "$@"

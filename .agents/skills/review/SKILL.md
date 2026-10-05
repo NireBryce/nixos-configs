@@ -28,7 +28,10 @@ A diff read is never enough (bugs serialize). In order:
    forces every host's toplevel and home, darwin included (since
    2026-09-29) — a cheap attribute proves nothing (`networking.hostName`
    resolved while four things were broken), which is why no host is skipped.
-4. drvPath moved: `just diff <ref>` — permuted `environment.systemPackages`
+4. `just agent lessons` — every `.agents/lessons-map.toml` topic the
+   diff's files fall under, with the lessons behind each: the traps to read
+   this diff for, beyond the list below.
+5. drvPath moved: `just diff <ref>` — permuted `environment.systemPackages`
    is not a value change; a same-looking hash can hide dead code. (Known gap
    #242: `diff` fails on cube — fingerprint assumes impermanence's
    `/persist`; fall back to `nix eval --json` of the specific options on both

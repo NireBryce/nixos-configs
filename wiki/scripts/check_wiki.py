@@ -196,6 +196,14 @@ structured, extractable facts only:
             the checks that already read backticked recipe and skill names
             and relative links; this one only guarantees they exist, so an
             entry can't land without saying where its rule lives.
+            Also validates .agents/lessons-map.toml, the topic map the
+            lesson-reminder hook and `just agent lessons` read (#460):
+            known keys, one of `paths`/`command`, every glob matching a
+            tracked file (a rename otherwise silences a reminder), skills,
+            rules files and `see` targets existing, every § having an
+            entry, and each `.agents/rules/*.md` having exactly one topic
+            whose `paths` equal its frontmatter. The rules lookup is in
+            lessons_map.validate(), beside the hook that uses the map.
 
   rules     The path-scoped rule files, `.agents/rules/*.md` (Claude Code
             reads them as `.claude/rules/` and loads each only when a file
@@ -1632,35 +1640,25 @@ RULE_FRONTMATTER = re.compile(r'\A---\n(.*?)\n---\n', re.S)
 RULE_PATH_ITEM = re.compile(r'^\s+-\s+"([^"]+)"\s*$')
 
 
-def glob_regex(pattern):
-    """A Claude Code `paths:` glob as a regex over repo-relative paths:
-    `**/` is zero or more directories, `**` anything, `*` and `?` stay
-    within one path segment, `{a,b}` is alternation. Enough for the shapes
-    rules here use; brackets are taken literally."""
-    out, i = [], 0
-    while i < len(pattern):
-        c = pattern[i]
-        if pattern.startswith('**/', i):
-            out.append('(?:.*/)?'); i += 3; continue
-        if pattern.startswith('**', i):
-            out.append('.*'); i += 2; continue
-        if c == '*':
-            out.append('[^/]*')
-        elif c == '?':
-            out.append('[^/]')
-        elif c == '{':
-            end = pattern.find('}', i)
-            if end < 0:
-                out.append(re.escape(c))
-            else:
-                alts = pattern[i + 1:end].split(',')
-                out.append('(?:' + '|'.join(re.escape(a) for a in alts) + ')')
-                i = end + 1
-                continue
-        else:
-            out.append(re.escape(c))
-        i += 1
-    return re.compile(''.join(out) + r'\Z')
+# One definition of the `paths:` glob semantics, shared with the
+# lesson-reminder hook and `just agent lessons` -- three copies could
+# disagree about what a rule or a topic selects.
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]
+                       / '.agents' / 'hooks'))
+from lessons_map import glob_regex  # noqa: E402
+import lessons_map  # noqa: E402
+
+
+def rule_globs(root):
+    """{rules filename: [globs]} from each `.agents/rules/*.md`
+    frontmatter, leniently -- check_rules reports a malformed one."""
+    out = {}
+    for path in rule_files(root):
+        m = RULE_FRONTMATTER.match(path.read_text())
+        lines = m.group(1).splitlines() if m else []
+        out[path.relative_to(root / '.agents' / 'rules').as_posix()] = [
+            i.group(1) for i in map(RULE_PATH_ITEM.match, lines) if i]
+    return out
 
 
 def tracked_files(root):
@@ -1760,6 +1758,8 @@ def check_lessons(root):
             findings.append(f"MISSING LESSON  {page}: no entry for §{n}")
         if n not in articles:
             findings.append(f"MISSING ARTICLE  {art_dir}: no {n}-*.md for §{n}")
+    findings += lessons_map.validate(root, tracked_files(root), set(entries),
+                                     rule_globs(root))
     return findings
 
 
@@ -1848,6 +1848,41 @@ def regenerate_contents(path):
         print(f"unchanged {path}")
 
 
+# Where to go when a finding fires, printed once per kind after the
+# findings (#460). Matched on the finding's leading tag; first match wins.
+SEE = (
+    (('STALE SIBLING', 'MISSING SIBLING', 'ORPHAN SIBLING', 'NO SIBLING LINK',
+      'NO SOURCE LINK', 'FUTURE REVIEW'),
+     "skill wiki-sync step 5; don't bump the sibling's date to clear it"),
+    (('STALE CONTENTS', 'MISSING CONTENTS'),
+     "`python3 wiki/scripts/check_wiki.py gen-contents <page>`"),
+    (('BROKEN LINK', 'BROKEN ANCHOR', 'MISSING PATH', 'UNKNOWN RECIPE',
+      'UNKNOWN SKILL', 'UNKNOWN ROUTE'),
+     "a rename left a reference behind: skill wiki-sync; skill "
+     "git-archaeology for where the thing went"),
+    (('MISSING LESSON', 'MISSING ARTICLE', 'DUPLICATE LESSON',
+      'DUPLICATE ARTICLE', 'MALFORMED LESSON', 'LESSON ', 'LESSONS MAP'),
+     "wiki/lessons-learned.md's header (adding a lesson) and "
+     ".agents/lessons-map.toml's (its keys)"),
+    (('RULE FRONTMATTER', 'DEAD RULE GLOB', 'UNLISTED RULE'),
+     ".agents/rules/agent-config.md; a rules file's paths also live in "
+     ".agents/lessons-map.toml"),
+    (('NO FRONTMATTER', 'NO NAME', 'NO DESCRIPTION', 'NAME MISMATCH',
+      'DESCRIPTION SHAPE', 'FRONTMATTER SHAPE', 'UNKNOWN KEY', 'INJECTION'),
+     "skill new-skill"),
+)
+
+
+def see_lines(findings):
+    out = []
+    for prefixes, where in SEE:
+        hit = sorted({pre for pre in prefixes for f in findings
+                      if f.startswith(pre)})
+        if hit:
+            out.append(f"  -> {' / '.join(h.strip() for h in hit)}: see {where}")
+    return out
+
+
 def main():
     if len(sys.argv) > 1 and sys.argv[1] == 'gen-contents':
         if len(sys.argv) < 3:
@@ -1906,6 +1941,8 @@ def main():
 
     for f in findings:
         print(f)
+    for line in see_lines(findings):
+        print(line)
     hard = [f for f in findings if not f.startswith('REVIEW')]
     if not findings:
         print(f"{cmd}: no findings")

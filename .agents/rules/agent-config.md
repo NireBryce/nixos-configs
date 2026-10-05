@@ -80,6 +80,17 @@ paths:
   gitignored; per-machine ZCode state belongs under ignored paths, and
   only `.zcode/config.json` is tracked.
 
+- `lesson-reminder-pretooluse.py` (matchers `Bash` and
+  `Edit|Write|MultiEdit`, #460) is a Python hook, named `*-pretooluse.py`
+  so the wiring tests count it as one; its imported module
+  `lessons_map.py` is not a hook. It reads `.agents/lessons-map.toml` from
+  the edited file's own tree (a worktree's map, not the main checkout's)
+  and puts each matching topic's reminder in `additionalContext` only --
+  context for the agent, not a banner for the human -- once per topic per
+  session (state keyed by the payload's session id). It never decides; a
+  broken map is one `systemMessage` and the call goes ahead. A guard that
+  already warns on a topic's paths names itself in that topic's
+  `delivered_by`, and a fixture checks it covers every glob.
 - A hook's `systemMessage` reaches only the human (Claude Code's UI;
   ZCode drops it for PreToolUse). Anything the agent must read -- a
   warning, or a decision's reason -- also goes in

@@ -1,6 +1,6 @@
 # Wiki style guide
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-05_
 
 How this wiki itself is organized and written — as opposed to
 [conventions.md](conventions.md), which is the *repo's* style guide (Nix
@@ -51,7 +51,10 @@ separate tier for the *usage* side:
   is a per-§ article in `wiki/lessons-learned/` (`<n>-<slug>.md`; long ones
   from 2026-09-09, all of them from 2026-09-29), and `lessons-learned.md`
   is the index: one entry per §, grouped by the moment it applies, naming
-  the rule's Home and what Enforced it (`check_wiki.py lessons`).
+  the rule's Home and what Enforced it (`check_wiki.py lessons`). A
+  lesson tied to particular paths or commands also gets a topic in
+  `.agents/lessons-map.toml`, which a hook uses to remind the next agent
+  at that moment.
 - **`wiki/categories/<name>.md`** — one page per real category, i.e. a
   directory under `flake/modules/` holding its own `dirsAsCategory.nix`
   (see [architecture.md](architecture.md)). Indexed in

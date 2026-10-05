@@ -89,7 +89,8 @@ history: `wiki/history.md`'s "Confirmed-on-hardware facts".
 
 - **Find the page for the task.** `wiki/00-INDEX-for-agents.md` routes by
   task; `wiki/lessons-learned.md` files every past mistake by the moment it
-  applies. Bare `just` lists every recipe.
+  applies, and `just agent lessons <path>` prints the ones that apply to a
+  file or area. Bare `just` lists every recipe.
 - **Someone reports a bug?** Skill `investigate-bug` first — `just threads
   "<keywords>"` — before reproducing anything.
 - **Ask "did it work before?" first.** `journalctl --list-boots` plus a
@@ -102,7 +103,9 @@ history: `wiki/history.md`'s "Confirmed-on-hardware facts".
 ## Traps, all of which have actually happened here
 
 One line per task; read the rule (short version) or skill (full mechanism)
-before the matching task.
+before the matching task. Under Claude Code and ZCode, the lesson-reminder
+hook adds each area's one-line reminder to your context on the first edit
+or command that touches it, from `.agents/lessons-map.toml`.
 
 - Writing, renaming or browsing a flake-parts module: names come from
   filenames, same-named modules merge — skill `new-flake-module`,

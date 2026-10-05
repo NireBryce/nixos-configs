@@ -20,6 +20,11 @@
 # is a silent no-op under an auto permission mode, while systemMessage
 # always reaches the transcript.
 #
+# It also delivers the `impermanence` topic of .agents/lessons-map.toml,
+# whose `delivered_by` names this file: the lesson-reminder hook skips that
+# topic, and test_guards.py checks this guard warns on a real file under
+# each of the topic's globs, so the map stays the source for the paths.
+#
 # Known limits: path-matching only -- a Bash-tool edit (sed -i, tee) of
 # these same files is the git/secrets guards' territory and does not trip
 # this. Renames of the guarded trees need the patterns below updated; the

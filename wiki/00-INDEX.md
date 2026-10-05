@@ -1,6 +1,6 @@
 # Wiki
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-05_
 
 The `flake/` folder is meant to be browsed by its file tree rather than
 traced through by following code paths. The heavy modularization
@@ -118,8 +118,9 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   first hardware boots, and what became of the sibling branch. The full log
   itself, [lessons-learned.md](lessons-learned.md) — every numbered lesson
   as one line, grouped by the moment it applies (since 2026-09-29), each
-  linking its full account under `lessons-learned/`, "written by Claude
-  Code, for Claude Code" — moved
+  linking its full account under `lessons-learned/` (and, by file or
+  area, `just agent lessons <path>`), "written by Claude Code, for Claude
+  Code" — moved
   in from `claude cave/` 2026-09-02; this page stays the index, that page
   stays the log, the same split as `categories/shell-config/00-INDEX.md` and
   its deep-dives.
