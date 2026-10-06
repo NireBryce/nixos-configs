@@ -74,4 +74,22 @@ if [ "$class" = darwin ]; then
     exec nh darwin "$action" "$flake" --hostname "$host" -o "$flake/result"
 fi
 
-exec nh os "$action" "$flake" --hostname "$host" -o "$flake/result"
+if [ "$action" != switch ]; then
+    exec nh os "$action" "$flake" --hostname "$host" -o "$flake/result"
+fi
+
+# A switch that moves glibc's version breaks login and unlock for every
+# process started before it -- glibc-guard.sh's header has the mechanism.
+# Warn-only. Shown before the build, while Ctrl-C can still pick `boot`
+# instead, and summarised after, since nh's output scrolls it away.
+warning=$("$(dirname -- "$0")/glibc-guard.sh" "$flake" "$host" 2>&1)
+[ -n "$warning" ] && echo "$warning" >&2
+status=0
+nh os switch "$flake" --hostname "$host" -o "$flake/result" || status=$?
+if [ "$status" -eq 0 ] && [[ "$warning" == *WARNING* ]]; then
+    echo >&2
+    echo "REMINDER: glibc changed under running processes. Reboot, or log out and" >&2
+    echo "  back in and \`sudo systemctl restart display-manager\` before anything" >&2
+    echo "  locks. Stuck lock screen: \`loginctl unlock-sessions\`." >&2
+fi
+exit "$status"
