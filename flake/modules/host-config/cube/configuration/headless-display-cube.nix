@@ -15,8 +15,8 @@
 #   so every physical port goes dark.
 # - A session. Sunshine is a user service wanted by graphical-session.target,
 #   so it only runs once someone is logged into Plasma. Autologin starts that
-#   session at boot. Cost: anyone at cube's physical console gets elly's
-#   desktop.
+#   session at boot. stream-lock-cube.nix locks it straight away, so the
+#   console and Moonlight both land on the lock screen.
 #
 # The modeline is CEA-861 VIC 16, 1920x1080@60 (148.5 MHz). Names are
 # capped at 12 characters by the module.

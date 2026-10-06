@@ -16,10 +16,10 @@ Never hand-edit. By hand it is
 
 | What | Files |
 |---|---|
-| total `.nix` files under `flake/modules/` | 281 |
-| module header (`moduleName = lib.removeSuffix ...`) | 229 |
-| `# # description` as first body line | 34 |
-| `with pkgs;` package lists | 122 |
+| total `.nix` files under `flake/modules/` | 282 |
+| module header (`moduleName = lib.removeSuffix ...`) | 230 |
+| `# # description` as first body line | 35 |
+| `with pkgs;` package lists | 123 |
 
 <!-- /generated -->
 
