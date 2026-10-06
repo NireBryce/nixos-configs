@@ -1,6 +1,6 @@
 # Fleet maintenance
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-06_
 
 The fleet's recurring upkeep in one place: the weekly flake.lock PR,
 deploying to a host and the verification habit around it, and store
@@ -29,8 +29,8 @@ Folded in from the retired `maintenance-for-agents.md` sibling,
 |---|---|
 | weekly lock PR | `.github/workflows/update-flake-lock.yml`, cron `0 9 * * 1` + `workflow_dispatch` → branch `update_flake_lock_action` → PR `chore: update flake.lock` into `experimental`; review the lock diff, merge via skill `ship` |
 | lock PR broken | watch issue `update-flake-lock: weekly lock PR needs attention`; branch ahead with no PR = token (`FLAKE_LOCK_TOKEN`) failure |
-| lock by hand | `just update`; hand-pinned packages: skill `pinned-packages` |
-| deploy | `just build` / `boot` / `switch` **on the host itself**; `just boot` for initrd/bootloader/impermanence |
+| lock by hand | `just update` (then check), or `just update-boot` (then stage for reboot); hand-pinned packages: skill `pinned-packages` |
+| deploy | `just build` / `boot` / `switch` **on the host itself**; `just boot` for initrd/bootloader/impermanence, and for any glibc version change (`just switch` warns) |
 | around every deploy | `just baseline` (before, sudo) → `just fingerprint` / `just diff <ref>` → `just diff-deployed` → `just hm-collisions` (first switch) → `just root-drift` (durandal, tenacity) → `just home-drift` |
 | user-profile GC | automatic: `nh-clean.timer` (user unit), Mondays 00:00 |
 | system-profile GC | manual: `sudo nh clean all --keep-since 7d --keep 5` or `sudo nix-collect-garbage -d` |
@@ -82,7 +82,8 @@ branch), or open the PR by hand from `update_flake_lock_action` to
 `experimental`.
 
 By hand instead: `just update` — `nix flake update` for every input,
-then `just check`.
+then `just check` — or `just update-boot`, which runs `just boot` instead
+so nothing activates until a reboot.
 
 A lock update never touches the few packages fetched straight from
 upstream with a version and hash written into their module. Those go
@@ -100,6 +101,15 @@ built from another machine. Prefer `just boot` over `just switch` for
 anything touching initrd, the bootloader, or impermanence: nothing
 activates until the next deliberate reboot, and the running generation
 stays in the boot menu as the fallback.
+
+**Also prefer `just boot` when glibc's version changes**, which only a lock
+update does. A live switch repoints `/etc/pam.d` at modules the
+already-running display manager and session lock screens cannot load, so
+login and unlock fail until a reboot, or a re-login plus
+`sudo systemctl restart display-manager` (2026-10-05/06 on durandal).
+`just switch` checks for this before building and warns
+([`glibc-guard.sh`](../flake/scripts/glibc-guard.sh)); a stuck lock screen
+is escaped with `loginctl unlock-sessions`.
 
 There is no fixed per-host cadence: hosts move when work targets them,
 plus the weekly lock PR when it merges. The habit that wraps every

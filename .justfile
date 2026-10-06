@@ -212,6 +212,7 @@ preflight:
     @python3 .agents/scripts/test_ship.py
     @python3 .agents/scripts/test_worktree.py
     @python3 .agents/scripts/test_where.py
+    @python3 flake/scripts/test_glibc_guard.py
     @python3 flake/scripts/test_parallel_unittest.py
     @just guards-test
     @just preflight-mirror-test
@@ -484,3 +485,10 @@ tailscale-acl cmd *args:
 update:
     cd {{flake}} && nix flake update
     @just check
+
+# Update inputs, then stage them for next boot -- never a live switch
+update-boot:
+    # An input update is what moves glibc, and switching across a glibc
+    # change breaks login/unlock for running sessions (glibc-guard.sh).
+    cd {{flake}} && nix flake update
+    @just host={{host}} boot

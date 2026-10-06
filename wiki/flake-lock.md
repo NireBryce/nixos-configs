@@ -1,6 +1,6 @@
 # `flake.lock` updates
 
-_Last modified: 2026-09-16_
+_Last modified: 2026-10-06_
 
 How this repo's nixpkgs pin moves: a weekly automated bump opens a PR, and
 only a reviewed merge lands it — the lock diff is the review, because an
@@ -36,7 +36,15 @@ the stronger check before merging. See §§36–37 of
 [lessons-learned.md](lessons-learned.md) for why that distinction keeps
 earning its keep.
 
-By hand: `just update` (`nix flake update`, then `just check`).
+By hand: `just update` (`nix flake update`, then `just check`), or
+`just update-boot` (`nix flake update`, then `just boot`) to stage it for the
+next reboot without activating anything. A lock update is what moves glibc,
+and **switching across a glibc version change breaks login and unlock for
+everything started before the switch** — the lock screen loops on every
+resume and SDDM's greeter crash-loops (nire-durandal, 2026-10-05/06, 2.42 →
+2.44). `just switch` warns when that would happen
+([`glibc-guard.sh`](../flake/scripts/glibc-guard.sh) has the mechanism);
+after merging a lock PR, `just boot` and a reboot avoid it entirely.
 
 ## Where the GitHub credential lives
 
