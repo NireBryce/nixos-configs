@@ -1,10 +1,12 @@
 # `landing` — `general-config/homelab/landing/`
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-06_
 
 [Homepage (gethomepage)](https://gethomepage.dev), the landing page for
 `nire-cube`: what's running, whether it's up, how the machine itself is
-doing, and the household calendar. The category has existed since
+doing. (The household calendar views came off 2026-10-06, #299 — see
+[The gcal feeds, removed](#the-gcal-feeds-removed-2026-10-06).) The
+category has existed since
 2026-08-24, cube-only, nested under the `homelab` umbrella since
 2026-08-27 (name unaffected) — but the app underneath it changed
 2026-09-12: **homepage replaced glance** (issue #291), because homepage's
@@ -34,9 +36,10 @@ grant giving `tag:homelab-cube` access to its own `svc:` destinations, since
 a tagged device is owned by the tag and every `svc:` grant named
 `autogroup:members` as source. Verified the same hour: cube's netmap
 `ExtraRecords` repopulated and MagicDNS answers NOERROR from cube. The other
-caveat stands — each calendar card shows a small
-API-error band until real feeds land in the sops value (the placeholder
-URL 403s — by design, gone the moment it's filled).
+caveat of the time — each calendar card's small API-error band from the
+placeholder URL 403ing — ended 2026-10-06, when the calendar views came
+off the page rather than take the feeds
+([#299](https://github.com/NireBryce/nixos-configs/issues/299)).
 
 > **Condensed version:**
 > [landing-for-agents.md](landing-for-agents.md) — the same
@@ -50,7 +53,7 @@ URL 403s — by design, gone the moment it's filled).
 - [What it is not](#what-it-is-not)
 - [Why the module isn't `dashboard` (or `landing`)](#why-the-module-isnt-dashboard-or-landing)
 - [The widgets](#the-widgets)
-- [How the gcal calendar feeds work](#how-the-gcal-calendar-feeds-work)
+- [The gcal feeds, removed 2026-10-06](#the-gcal-feeds-removed-2026-10-06)
 - [Loopback bind is not free here](#loopback-bind-is-not-free-here)
 - [Route and names](#route-and-names)
 - [No icons, deliberately — twice over](#no-icons-deliberately--twice-over)
@@ -96,7 +99,6 @@ is where you go to read graphs.
 | service cards + `siteMonitor` | Grafana, Forgejo, golink — status and latency, checked **through the proxy** at the URLs a person uses | `monitor` rows (same derivation from `services.caddy.virtualHosts`, throw-on-orphan, issue #221) |
 | `resources` | cube's CPU / memory / disk / uptime | `server-stats` |
 | `openmeteo` | New York weather, imperial, keyless (same api.open-meteo.com source) | `weather` (#226) |
-| `calendar` service widgets — *not* info widgets | **Month grid** (full-width, sunday-first) and **Upcoming** (agenda), one service entry per view in a one-column `Calendar` group | `calendar` (#207 — bare grid, no events possible); agenda is #290's ask, met natively |
 
 The service-card list is **derived** from caddy's vhost table — a vhost
 renamed there flows into these URLs, and a vhost removed forces an edit here
@@ -104,34 +106,42 @@ renamed there flows into these URLs, and a vhost removed forces an edit here
 not this host's vhost at all (own tailnet device,
 [shortlinks](shortlinks.md)).
 
-## How the gcal calendar feeds work
+## The gcal feeds, removed 2026-10-06
 
-The calendar sources are the household's Google Calendars via each
-calendar's **secret iCal address** — no API key, no public-calendar
-compromise (the source decision recorded in #208/#289/#290). The plumbing:
+The two calendar views (**Month grid**, **Upcoming**) came off the page
+2026-10-06 ([#299](https://github.com/NireBryce/nixos-configs/issues/299),
+closed removed-not-filled): the real secret iCal addresses never landed —
+the 2026-09-29 sops fill still 403'd — and the placeholder URL kept
+hitting Google's server on every widget refresh. Removed rather than left
+erroring; [#230](https://github.com/NireBryce/nixos-configs/issues/230)
+holds the calendar direction. The `calendars` attrset, both service-widget
+entries, the `layout.Calendar` group and the `homepage-env` sops
+*declaration* all went; the `homepage-env` key itself stays in
+`secrets.yaml`, unreferenced (the syncthing-keys precedent: an
+unreferenced key in the encrypted file costs nothing).
 
+What follows is the mechanism, kept as the **re-add recipe** — accurate
+for homepage v1.13.2, none of it live on the page right now:
+
+- The calendar sources are the household's Google Calendars via each
+  calendar's **secret iCal address** — no API key, no public-calendar
+  compromise (the source decision recorded in #208/#289/#290).
 - The addresses live in exactly one place: the sops key **`homepage-env`**,
   whose value is a systemd `EnvironmentFile` — one
-  `HOMEPAGE_VAR_ICAL_<NAME>=<secret-url>` line per calendar. Never in a Nix
-  file, never in the store, never in the repo.
-- `homepage.nix` declares the calendar *names* (the `calendars` attrset) and
-  emits services.yaml entries whose `url` is the literal placeholder
-  `{{HOMEPAGE_VAR_ICAL_FAMILY}}`; homepage substitutes from its environment
-  at load (verified against v1.13.2's `utils/config/config.js`).
+  `HOMEPAGE_VAR_ICAL_<NAME>=<secret-url>` line per calendar. Never in a
+  Nix file, never in the store, never in the repo. Re-adding means
+  re-declaring the secret in `homepage.nix` too (cube-only, on
+  forgejo.nix's reasoning) so it decrypts where imported.
+- `homepage.nix` declares the calendar *names* (the `calendars` attrset)
+  and emits services.yaml entries whose `url` is the literal placeholder
+  `{{HOMEPAGE_VAR_ICAL_FAMILY}}`; homepage substitutes from its
+  environment at load (verified against v1.13.2's `utils/config/config.js`).
 - **Everything fetches server-side**: the calendar proxy runs on cube, and
   it strips the URL from anything sent to the browser — the page can be
   viewed by anything on the tailnet without the secret addresses leaving
   the host.
-- Until real URLs are filled in, an integration fetch fails quietly in
-  the data path (the agenda shows its "No events" empty state, the grid
-  draws bare) — but each calendar card does show a small **API-error
-  band** where the events would attach. That band is the placeholder
-  URL 403ing; it disappears the moment the sops value holds real URLs
-  (the secret's `restartUnits` bounces homepage at the next switch).
 - **Adding a calendar is one line in each place**: an entry in
-  `homepage.nix`'s `calendars`, a line in the sops value. Calendar IDs were
-  deliberately not assigned at implementation — that's the one human step
-  left, tracked in [homelab/pending-setup.md](../homelab/pending-setup.md).
+  `homepage.nix`'s `calendars`, a line in the sops value.
 
 The schema trap this section sits on: `calendar` is a **service widget**
 (`widget:` under a service entry, one entry per view), *not* an info widget

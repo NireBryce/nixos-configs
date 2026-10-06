@@ -1,6 +1,6 @@
 # Reaching cube's services
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-06_
 
 Each web service on `nire-cube` has **its own tailnet hostname and its own
 certificate**. That is a change from the original design — one hostname with
@@ -62,7 +62,7 @@ behave differently and only one is pleasant — see
 [the warning section](#why-its-https-and-the-one-warning-you-will-still-see).
 
 **Start at the landing page.** It lists the services, live-checks each one,
-shows cube's CPU/memory/disk and the household calendar — so "what's running
+shows cube's CPU/memory/disk — so "what's running
 and is it up" is answered by looking, not by reading this page. It answers on
 both its own name and cube's. (Homepage since 2026-09-12, issue #291; the
 `homepage...` short name needs the `svc:homepage` Service object applied at
