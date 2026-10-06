@@ -1,8 +1,9 @@
 # homepage (gethomepage): the landing page for this host -- what's running,
-# whether it's up, how the machine is doing, and the household calendar.
-# Replaced glance here 2026-09-12 (issue #291), cube-only; glance rejoined
-# 2026-09-13 at its own name for the evaluation, so the category has two
-# modules until that closes.
+# whether it's up, how the machine is doing. The household calendar views
+# came off 2026-10-06 (#299 closed removed-not-filled); see the comment at
+# the former `calendars` attrset below. Replaced glance here 2026-09-12
+# (issue #291), cube-only; glance rejoined 2026-09-13 at its own name for
+# the evaluation, so the category has two modules until that closes.
 #
 # Named `homepage`, NOT `landing` (a category and its module sharing a name
 # declare the same `flake.modules.nixos.<name>` and silently MERGE) and NOT
@@ -61,45 +62,20 @@
                     };
                 };
 
-        # The household's gcal calendars feeding the calendar widgets, as
-        # integration name -> suffix of the HOMEPAGE_VAR_ env var holding
-        # that calendar's SECRET iCal address. The addresses themselves
-        # live only in the sops key `homepage-env` (declared below) --
-        # never here. Adding a calendar: one entry here, one line
-        # `HOMEPAGE_VAR_ICAL_<SUFFIX>=<secret-ics-url>` in the sops value.
-        # Names show up as event prefixes only when an integration sets
-        # `params.showName`, and distinguish the calendars' colors.
-        calendars = {
-            family = "ICAL_FAMILY";
-        };
-
-        calendarIntegrations = map
-            (name: {
-                type = "ical";
-                inherit name;
-                # Doubled braces are homepage's substitution syntax, not
-                # Nix: the emitted YAML carries the literal
-                # `{{HOMEPAGE_VAR_...}}` for homepage to replace at load.
-                url  = "{{HOMEPAGE_VAR_${calendars.${name}}}}";
-            })
-            (builtins.attrNames calendars);
+        # The household's gcal calendars fed two calendar views here until
+        # 2026-10-06: the real secret iCal addresses never landed (#299 --
+        # the 2026-09-29 sops fill still 403'd), and the placeholder fetch
+        # kept hitting Google's server on every widget refresh. Removed
+        # rather than left erroring; #230 holds the calendar direction.
+        # Re-adding is the shape wiki/categories/landing.md's gcal section
+        # documents -- names attrset, `{{HOMEPAGE_VAR_ICAL_*}}` service
+        # widgets, one line in the sops value -- and its schema trap
+        # (`calendar` is a service widget, not an info widget) still
+        # applies. The `homepage-env` sops key stays in secrets.yaml,
+        # unreferenced, on the syncthing-keys precedent.
     in {
         flake.modules.nixos.${moduleName} = { config, ... }: {
-            # # description = "homepage -- the landing page: what's running, whether it's up, the household calendar";
-
-            # One sops key whose VALUE is a whole EnvironmentFile (see this
-            # file's header: secret URLs stay out of the repo and the
-            # store). sopsFile unset -- defaults to
-            # `config.sops.defaultSopsFile` (secrets.yaml, set in
-            # general-config/system/secrets/sops.nix). Declared HERE and not in
-            # sops.nix, on forgejo.nix's reasoning: `landing` is cube-only,
-            # so the secret decrypts only where imported. restartUnits so
-            # an edited calendar list reaches the running page without a
-            # manual restart -- the same reassert-on-change shape
-            # forgejo.nix's password reset takes.
-            sops.secrets."homepage-env" = {
-                restartUnits = [ "homepage-dashboard.service" ];
-            };
+            # # description = "homepage -- the landing page: what's running, whether it's up";
 
             services.homepage-dashboard = {
                 enable = true;
@@ -140,31 +116,15 @@
                 # forgets this line.
                 allowedHosts = "${tailnetFqdn},${homepageFqdn}";
 
-                # See the sops block above: systemd parses this file as
-                # root pre-drop, so DynamicUser never needs to read it.
-                environmentFiles = [
-                    config.sops.secrets."homepage-env".path
-                ];
-
                 settings = {
                     # The one place the host's own name shows on the page,
                     # as glance's server-stats widget did.
                     title = "nire-cube";
-
-                    # The `Calendar` service GROUP renders one column, so
-                    # the two calendar cards get the group's full width
-                    # instead of splitting a row -- the monthly grid is
-                    # the widest thing on the page. Keys here are group
-                    # names exactly as spelled in `services` below.
-                    layout.Calendar = {
-                        columns = 1;
-                    };
                 };
 
                 # Info widgets, upstream's auto-grid across the top. The
-                # two calendar views are NOT here -- see the closing
-                # comment of this list for the calendar-widget trap and
-                # the `Calendar` service group below for where they live.
+                # two calendar views are NOT here -- removed 2026-10-06
+                # (#299); see the closing comment of this list.
                 widgets = [
                     {
                         # Replaces glance's server-stats. The nixpkgs
@@ -200,16 +160,12 @@
                         };
                     }
 
-                    # NOT here. THE CALENDAR WIDGET TRAP, found on the
-                    # first live render (#291): `calendar` is NOT an info
-                    # widget -- the info-widget registry
-                    # (components/widgets/widget.jsx, v1.13.2) has no
-                    # calendar entry, and a `calendar` line in widgets.yaml
-                    # renders the literal fallback "Missing calendar", no
-                    # error anywhere. Calendar views are SERVICE widgets
-                    # (docs/widgets/services/calendar.md): declared under a
-                    # service entry's `widget.` attrset, one entry per view
-                    # -- see the `Calendar` group below.
+                    # No calendar entries since 2026-10-06 (#299). The
+                    # schema trap they were found on (#291) -- `calendar`
+                    # is a service widget, not an info widget; a `calendar`
+                    # line in widgets.yaml renders "Missing calendar" with
+                    # no error anywhere -- is landing.md's to carry if
+                    # they return.
                 ];
 
                 services = let
@@ -231,58 +187,6 @@
                                 golink = {
                                     href        = "http://go/";
                                     siteMonitor = "http://go/";
-                                };
-                            }
-                            {
-                                # The calendars as SERVICE widgets -- see
-                                # the widgets block above for why they are
-                                # not in widgets.yaml. One entry per view
-                                # (monthly grid, agenda list); there is no
-                                # combined view. Each carries the same
-                                # integrations -- two feed fetches, 5 min
-                                # apart at most, for clean separation of
-                                # the two views. The YAML key must be
-                                # `integrations` (service-helpers.js reads
-                                # exactly that off the widget);
-                                # calendarIntegrations is only the Nix-
-                                # side name. `timezone` pins "today" to
-                                # the fleet's zone (tz.nix's
-                                # `time.timeZone` default) rather than
-                                # each viewer's browser. sunday first: en_US
-                                # locale (locale.nix) -- glance defaulted
-                                # monday "matching nothing in particular";
-                                # here it is chosen, and change it here if
-                                # that flips.
-                                "Month grid" = {
-                                    description = "the household calendars";
-                                    widget = {
-                                        type           = "calendar";
-                                        view           = "monthly";
-                                        firstDayInWeek = "sunday";
-                                        showTime       = true;
-                                        timezone       = "America/New_York";
-                                        # The YAML key must be `integrations`
-                                        # (service-helpers.js reads exactly
-                                        # that off the widget);
-                                        # calendarIntegrations is only the
-                                        # Nix-side name.
-                                        integrations = calendarIntegrations;
-                                    };
-                                };
-                            }
-
-                            {
-                                # Second view = second entry; see the
-                                # sibling above for the shared comments.
-                                "Upcoming" = {
-                                    description = "the same feeds, time-sorted";
-                                    widget = {
-                                        type     = "calendar";
-                                        view     = "agenda";
-                                        showTime = true;
-                                        timezone = "America/New_York";
-                                        integrations = calendarIntegrations;
-                                    };
                                 };
                             }
                         ];
@@ -334,3 +238,12 @@
 # advertisement activation gap; tailscale-serve's Restart=on-failure from
 # issue #267 absorbed the first racing attempt) -> verified. The one
 # failure mode found was #298, not homepage's -- fixed 2026-09-14.
+#
+# 2026-10-06 -- the two calendar views came off the page (#299, closed
+# removed-not-filled): the real secret iCal addresses never landed (the
+# 2026-09-29 sops fill still 403'd) and the placeholder fetch kept hitting
+# Google on every widget refresh. `calendars`/`calendarIntegrations`, the
+# `layout.Calendar` group, both service-widget entries and the
+# `homepage-env` sops declaration went with them; the sops key itself
+# stays in secrets.yaml, unreferenced (the syncthing-keys precedent).
+# Re-adding is landing.md's gcal section; #230 holds the direction.

@@ -1,6 +1,6 @@
 # `landing`, for agents
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-06_
 
 Condensed from [landing.md](landing.md). Homepage (gethomepage) is nire-cube's
 landing page (replaced glance 2026-09-12, #291). Category dates 2026-08-24, nested under `homelab` 2026-08-27.
@@ -14,7 +14,10 @@ landing page (replaced glance 2026-09-12, #291). Category dates 2026-08-24, nest
   evaluation: only at `glance.moose-micro.ts.net` (`http://glance/`). End of evaluation = delete
   the loser's module + caddy vhosts + serve.nix endpoints + `svc-*.json` + ACL entries.
 - Runtime-verified 2026-09-12 from tenacity: 200/validated TLS on all doors, unit clean, 3002
-  loopback-only; real browser: widgets, cards, both calendar views draw (month grid sunday-first).
+  loopback-only; real browser: widgets, cards draw. **Calendars removed 2026-10-06** (#299, removed-not-filled:
+  the 09-29 sops fill still 403'd and the placeholder kept hitting Google) — no `calendars` attrset, no
+  calendar service widgets, no `homepage-env` sops declaration (key remains in secrets.yaml, unreferenced).
+  Re-add per [landing.md](landing.md)'s gcal section.
 
 ## Facts
 
@@ -27,14 +30,14 @@ landing page (replaced glance 2026-09-12, #291). Category dates 2026-08-24, nest
   Run `ss -ltn | grep 3002` after every homepage-dashboard bump.
 - `allowedHosts = "ts-cube.moose-micro.ts.net,homepage.moose-micro.ts.net"`: Host header checked
   **exactly** (localhost forms auto-allowed). Missing name = middleware 403, not a Caddy error.
-- Secrets: sops key **`homepage-env`** = systemd EnvironmentFile, one
-  `HOMEPAGE_VAR_ICAL_<NAME>=<secret-gcal-ics-url>` per calendar. systemd reads it as root pre-DynamicUser
-  (default 0400 root correct); `sops-install-secrets` runs in `sysinit.target`, no ordering needed;
-  `restartUnits` bounces homepage on change.
-- Calendars: names in `homepage.nix`'s `calendars` attrset; services.yaml holds literal
-  `{{HOMEPAGE_VAR_ICAL_FAMILY}}` placeholders. Fetched server-side; proxy strips URL from client responses.
-- **`calendar` is a SERVICE widget, not info widget**: `widget = { type = "calendar"; view = ...; }` under a
-  service entry, one per view in a `layout.Calendar.columns = 1` group. A `calendar` line in
+- Calendars until 2026-10-06 (#299): sops key `homepage-env` = EnvironmentFile, one
+  `HOMEPAGE_VAR_ICAL_<NAME>=<secret-gcal-ics-url>` per calendar (systemd read it as root pre-DynamicUser;
+  `restartUnits` bounced homepage on change); names in the `calendars` attrset, `{{HOMEPAGE_VAR_ICAL_FAMILY}}`
+  placeholders in services.yaml, fetched server-side with the URL stripped from client responses.
+  All of that is GONE from the live config; the recipe and the systemd/sops mechanics live in
+  [landing.md](landing.md)'s gcal section for a future re-add.
+- **`calendar` is a SERVICE widget, not info widget** (still true, matters on re-add):
+  `widget = { type = "calendar"; view = ...; }` under a service entry, one per view. A `calendar` line in
   widgets.yaml renders "Missing calendar", no error.
 - Service cards derive from `services.caddy.virtualHosts` (throw-on-orphan, #221); golink hand-written
   (own tailnet device). Checks go via the proxy at person-URLs with `follow-redirects` (Grafana 302→/login reads up).
@@ -43,8 +46,8 @@ landing page (replaced glance 2026-09-12, #291). Category dates 2026-08-24, nest
 
 ## Traps
 
-- **Calendars show no events** (agenda "No events", bare grid, small **API-error band** per card)
-  until the sops value holds real URLs: expected.
+- **Calendar views are gone** (since 2026-10-06, #299): no calendar cards on the page. Don't
+  chase a "regression" — they were removed; see Modules.
 - **git/grafana status badges reading failure** ([#298](https://github.com/NireBryce/nixos-configs/issues/298)),
   fixed 2026-09-14: cube's tailscaled served no `svc:` MagicDNS records (hard-IP curl worked; name layer only).
   Tagged device is owned by its tag; every `svc:` grant sourced `autogroup:members`, so cube (only tagged
