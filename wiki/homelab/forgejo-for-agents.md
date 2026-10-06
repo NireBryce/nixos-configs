@@ -46,11 +46,11 @@ Host ts-cube
 - Verify `ssh -T forgejo@ts-cube`: a greeting that closes = success (no shell). Password
   prompt = key didn't take (`PasswordAuthentication` off fleet-wide).
 - Exercised 2026-09-13 from tenacity: auth and `git clone` over SSH with plain
-  `~/.ssh/id_ed25519`, no `ssh_config` block. 2026-10-06: clone re-verified and
-  `git push` shown to reach Forgejo's own policy answers — `Mirror ... is read-only`
-  on the mirror, `Push to create is not enabled for users` on a nonexistent repo
-  (`ENABLE_PUSH_CREATE` unset, default off). **A push that succeeds is still open**:
-  needs a non-mirror repo ([#438](https://github.com/NireBryce/nixos-configs/issues/438)).
+  `~/.ssh/id_ed25519`, no `ssh_config` block. 2026-10-06: `git push` exercised end
+  to end — mirror answers `read-only` (policy), nonexistent repo answers `Push to
+  create is not enabled` (`ENABLE_PUSH_CREATE` unset), and a real push to
+  `elly/scratch` created `main` plus a second branch, shas confirmed server-side via
+  `ls-remote` ([#438](https://github.com/NireBryce/nixos-configs/issues/438) closed).
 
 ## CI (Forgejo Actions)
 
@@ -100,4 +100,4 @@ matched; default branch `experimental`. GitHub stays canonical; mirror-not-origi
 ## See also
 
 [forgejo.md](forgejo.md) · [../categories/git-forge.md](../categories/git-forge.md) ·
-[pending-setup-for-agents.md](pending-setup-for-agents.md) (open one-time steps; push over SSH is [#438](https://github.com/NireBryce/nixos-configs/issues/438))
+[pending-setup-for-agents.md](pending-setup-for-agents.md) (open one-time steps; the SSH-push item was [#438](https://github.com/NireBryce/nixos-configs/issues/438), closed 2026-10-06)
