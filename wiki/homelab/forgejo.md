@@ -1,6 +1,6 @@
 # Using the forge
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-06_
 
 [Forgejo](https://forgejo.org/) on `nire-cube`, at
 `https://git.moose-micro.ts.net/` — its own Tailscale Services name as of
@@ -164,7 +164,8 @@ repo page rather than typing it.
 returned the greeting naming the key (`elly@nire-tenacity`), and
 `git clone --depth 1 forgejo@ts-cube:elly/nixos-configs.git` succeeded
 against the mirror. A plain `~/.ssh/id_ed25519` with no `ssh_config` block
-was enough. **Push over SSH is still untested.**
+was enough. Re-verified 2026-10-06 with a real push to `elly/scratch` —
+see [What's verified here](#whats-verified-here).
 
 ## CI: Forgejo Actions
 
@@ -303,9 +304,27 @@ identifies the person from the key rather than the username), and a real
 `git clone` over SSH of `elly/nixos-configs`, which came down at the
 mirror's then-current commit.
 
-**Still not exercised:** a **push** over SSH. The mirror above was created
-and synced entirely over HTTPS via the API, and a pull mirror is read-only
-on the Forgejo side, so a push would need a non-mirror repo to aim at.
+**Exercised 2026-10-06**, same direction: clone re-verified, and the SSH
+push path verified as far as a one-repo forge allows. A `git push` at the
+mirror returns Forgejo's own `Mirror Repository elly/nixos-configs is
+read-only` — that answer comes from Forgejo's push handling, not from
+sshd, so auth, key-to-user identification, repo resolution and push policy
+all executed server-side. A push at a repo that doesn't exist returns
+`Push to create is not enabled for users` (`ENABLE_PUSH_CREATE` unset, its
+default off — the probe created nothing).
+
+**Exercised 2026-10-06, later the same day:** the scratch repo landed in
+the web UI, and a real write went through it: `git push origin main` to
+`elly/scratch` created `refs/heads/main` at the pushed commit, and a
+second push created `refs/heads/scratch-branch` — `git ls-remote` shows
+both shas server-side exactly as pushed, and Forgejo's post-receive hook
+answered (the PR-suggestion banner for the new branch). The web UI itself
+was not driven by the agent (auth-only); the server refs are the same
+data its views render. Every git-over-SSH operation this forge supports —
+auth, clone, branch create, push — is now exercised;
+[#438](https://github.com/NireBryce/nixos-configs/issues/438) closed on
+it. The scratch repo is disposable: delete it in the web UI whenever
+(Settings → Delete), or keep it as the standing push-test target.
 
 ## See also
 
