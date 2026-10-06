@@ -1,6 +1,6 @@
 # Using the forge, for agents
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-06_
 
 Condensed from [forgejo.md](forgejo.md). Forgejo on `nire-cube`, single-user,
 sqlite3, tailnet-only. Module: [../categories/git-forge.md](../categories/git-forge.md).
@@ -46,7 +46,11 @@ Host ts-cube
 - Verify `ssh -T forgejo@ts-cube`: a greeting that closes = success (no shell). Password
   prompt = key didn't take (`PasswordAuthentication` off fleet-wide).
 - Exercised 2026-09-13 from tenacity: auth and `git clone` over SSH with plain
-  `~/.ssh/id_ed25519`, no `ssh_config` block. **Push over SSH untested** (mirror read-only).
+  `~/.ssh/id_ed25519`, no `ssh_config` block. 2026-10-06: clone re-verified and
+  `git push` shown to reach Forgejo's own policy answers — `Mirror ... is read-only`
+  on the mirror, `Push to create is not enabled for users` on a nonexistent repo
+  (`ENABLE_PUSH_CREATE` unset, default off). **A push that succeeds is still open**:
+  needs a non-mirror repo ([#438](https://github.com/NireBryce/nixos-configs/issues/438)).
 
 ## CI (Forgejo Actions)
 

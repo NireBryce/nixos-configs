@@ -1,6 +1,6 @@
 # Using the forge
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-06_
 
 [Forgejo](https://forgejo.org/) on `nire-cube`, at
 `https://git.moose-micro.ts.net/` — its own Tailscale Services name as of
@@ -164,7 +164,9 @@ repo page rather than typing it.
 returned the greeting naming the key (`elly@nire-tenacity`), and
 `git clone --depth 1 forgejo@ts-cube:elly/nixos-configs.git` succeeded
 against the mirror. A plain `~/.ssh/id_ed25519` with no `ssh_config` block
-was enough. **Push over SSH is still untested.**
+was enough. Re-verified 2026-10-06 (see [What's verified
+here](#whats-verified-here)); **a push that succeeds is still open** —
+[#438](https://github.com/NireBryce/nixos-configs/issues/438).
 
 ## CI: Forgejo Actions
 
@@ -303,9 +305,19 @@ identifies the person from the key rather than the username), and a real
 `git clone` over SSH of `elly/nixos-configs`, which came down at the
 mirror's then-current commit.
 
-**Still not exercised:** a **push** over SSH. The mirror above was created
-and synced entirely over HTTPS via the API, and a pull mirror is read-only
-on the Forgejo side, so a push would need a non-mirror repo to aim at.
+**Exercised 2026-10-06**, same direction: clone re-verified, and the SSH
+push path verified as far as a one-repo forge allows. A `git push` at the
+mirror returns Forgejo's own `Mirror Repository elly/nixos-configs is
+read-only` — that answer comes from Forgejo's push handling, not from
+sshd, so auth, key-to-user identification, repo resolution and push policy
+all executed server-side. A push at a repo that doesn't exist returns
+`Push to create is not enabled for users` (`ENABLE_PUSH_CREATE` unset, its
+default off — the probe created nothing). **Still not exercised:** a push
+that succeeds. Both rejections are the expected walls; between here and a
+real write sits exactly one scratch repo — web UI, or the API with the
+`forgejo_api_key` sops value, which only a host's root can decrypt.
+[#438](https://github.com/NireBryce/nixos-configs/issues/438) holds the
+done-when.
 
 ## See also
 
