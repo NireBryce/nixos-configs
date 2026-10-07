@@ -1,6 +1,6 @@
 # Homelab services
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-07_
 
 How to **use** the services this fleet runs, as opposed to how they're
 configured. Everything here is reachable over the tailnet and nowhere else.
@@ -27,6 +27,7 @@ under it, which can happen with no commit to this repo at all.
 | Service | Host | Reach it at | Page |
 |---|---|---|---|
 | *(all of cube's web services)* | `nire-cube` | `https://ts-cube.moose-micro.ts.net/` | [Reaching cube's services](reaching-services.md) |
+| *(commands: lockout reset, Sunshine web UI, deploy)* | `nire-cube` | — | [Common commands](common-commands.md) |
 | *(what's still unfinished)* | `nire-cube` | — | [Pending setup](pending-setup.md) |
 | golink — `go/` shortlinks | `nire-cube` | `http://go/` | [Creating go/ links](creating-golinks.md) |
 | Forgejo — self-hosted git forge | `nire-cube` | `https://git.moose-micro.ts.net/` (short: `http://git/`) | [Using the forge](forgejo.md) |
