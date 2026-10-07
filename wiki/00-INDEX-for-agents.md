@@ -1,6 +1,6 @@
 # Wiki index, for agents
 
-_Last modified: 2026-10-05_
+_Last modified: 2026-10-07_
 
 Condensed from [00-INDEX.md](00-INDEX.md). Routing only.
 
@@ -30,6 +30,7 @@ A page without one opens with `## Quick facts` — linked there.
 | bump or retire a hand-pinned upstream package | skill `pinned-packages` |
 | work out which name/IP answers for what | [name-resolution.md § Quick facts](name-resolution.md#quick-facts) |
 | reach or debug a cube service | [homelab/reaching-services.md § Quick facts](homelab/reaching-services.md#quick-facts) |
+| cube lockout reset, Sunshine web UI, stream | [homelab/common-commands.md § Quick facts](homelab/common-commands.md#quick-facts) |
 | write or tighten a wiki page | [styleguide-for-agents.md](styleguide-for-agents.md), skills `wiki-sync`, `trim-docs`, `fact-hygiene` |
 | write a module | [module-style-guide-for-agents.md](module-style-guide-for-agents.md) |
 | pick up an open, undiagnosed problem | [experiments/](experiments/), e.g. [durandal-auto-suspend-hang-for-agents.md](experiments/durandal-auto-suspend-hang-for-agents.md) |

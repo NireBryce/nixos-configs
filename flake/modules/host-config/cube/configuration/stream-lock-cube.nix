@@ -28,6 +28,11 @@
 # 100.64.0.0/10 as LAN (src/network.cpp, lan_ips), so tailnet clients fall
 # under the LAN setting, whose default is 0 (no encryption).
 #
+# `origin_web_ui_allowed = "pc"` limits the web UI (47990) to localhost; the
+# default `lan` admits every tailnet address for the same reason. Reach it
+# with `ssh -L 47990:localhost:47990 ts-cube`, then https://localhost:47990
+# (wiki/homelab/common-commands.md).
+#
 # Setting any `services.sunshine.settings` key makes the module pass a store
 # config file, which makes Sunshine's web-UI settings read-only. cube's
 # ~/.config/sunshine/sunshine.conf was empty when this was added. apps.json,
@@ -72,10 +77,11 @@
                 '';
 
                 services.sunshine.settings = {
-                    global_prep_cmd     = builtins.toJSON [
+                    global_prep_cmd       = builtins.toJSON [
                         { do = ""; undo = lib.getExe lockSession; }
                     ];
-                    lan_encryption_mode = 2;
+                    lan_encryption_mode   = 2;
+                    origin_web_ui_allowed = "pc";
                 };
             };
 }
