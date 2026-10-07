@@ -73,8 +73,15 @@ for user in d["users"]:
         src = f"file {user['hashedPasswordFile']}"
     elif user.get("hashedPassword"):
         src = "hashedPassword set in the config"
+    elif not d.get("mutableUsers"):
+        # update-users-groups.pl writes "!" to /etc/shadow for a user with no
+        # password source when mutableUsers is false: login by password is
+        # locked, not passwordless.
+        src = "none configured -> locked ('!'), mutableUsers=false"
     else:
-        src = "NONE — no password at all"
+        # mutableUsers=true keeps whatever /etc/shadow already holds, which
+        # this config can't see -- check `sudo passwd -S <user>`.
+        src = "WARNING: none configured, mutableUsers=true keeps the existing /etc/shadow entry -- check `sudo passwd -S`"
     print(f"  {user['name']:<10} uid={user.get('uid')}  password: {src}")
 PY
 else
