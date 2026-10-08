@@ -14,258 +14,258 @@
 # `-for-agents.md` and `git-forge-history.md`; cloning and day-to-day use,
 # wiki/homelab/forgejo.md. Traps sit next to the options.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = { config, ... }: {
-            services.forgejo = {
-                enable  = true;
-                # sqlite3 (the module default), not postgres/mysql: a
-                # single-user forge, no concurrent-write load needing a real
-                # RDBMS, and no second service/category to stand up.
-                # database.type left at default on purpose.
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = { config, ... }: {
+        services.forgejo = {
+            enable  = true;
+            # sqlite3 (the module default), not postgres/mysql: a
+            # single-user forge, no concurrent-write load needing a real
+            # RDBMS, and no second service/category to stand up.
+            # database.type left at default on purpose.
 
-                settings = {
-                    server = {
-                        # Loopback since 2026-08-24: nothing off-host
-                        # connects here.
-                        # general-config/homelab/reverse-proxy/caddy/caddy.nix
-                        # accepts on the tailnet, terminates TLS from tailscaled's
-                        # cert, proxies to this port over 127.0.0.1. Used to
-                        # be 0.0.0.0 -- history note at the bottom.
-                        #
-                        # Quieter second effect: Forgejo's LOCAL_ROOT_URL
-                        # defaults to `http://%(HTTP_ADDR)s:%(HTTP_PORT)s/`
-                        # (nixpkgs doesn't override), so 0.0.0.0 built
-                        # self-referential URLs from an any-address; now it
-                        # resolves to http://127.0.0.1:3001/, as it always
-                        # should have.
-                        HTTP_ADDR = "127.0.0.1";
-                        HTTP_PORT = 3001; # monitoring's grafana.nix already
-                                          # took 3000 on this host.
+            settings = {
+                server = {
+                    # Loopback since 2026-08-24: nothing off-host
+                    # connects here.
+                    # general-config/homelab/reverse-proxy/caddy/caddy.nix
+                    # accepts on the tailnet, terminates TLS from tailscaled's
+                    # cert, proxies to this port over 127.0.0.1. Used to
+                    # be 0.0.0.0 -- history note at the bottom.
+                    #
+                    # Quieter second effect: Forgejo's LOCAL_ROOT_URL
+                    # defaults to `http://%(HTTP_ADDR)s:%(HTTP_PORT)s/`
+                    # (nixpkgs doesn't override), so 0.0.0.0 built
+                    # self-referential URLs from an any-address; now it
+                    # resolves to http://127.0.0.1:3001/, as it always
+                    # should have.
+                    HTTP_ADDR = "127.0.0.1";
+                    HTTP_PORT = 3001; # monitoring's grafana.nix already
+                                      # took 3000 on this host.
 
-                        # DOMAIN and ROOT_URL deliberately DISAGREE, still
-                        # -- not a typo, and not both moving to
-                        # `tailscale-services/serve.nix`'s new service
-                        # name the way grafana.nix's domain/root_url did:
-                        #
-                        #   - ROOT_URL is what the browser sees, so it
-                        #     followed the move -- HTTP(S) now goes through
-                        #     Tailscale Serve as `svc:git`, not caddy.nix's
-                        #     `/git/` prefix (that route is retired, see
-                        #     serve.nix's header; not yet runtime-verified).
-                        #   - DOMAIN stays the device name `ts-cube`,
-                        #     unchanged, because it builds the SSH clone
-                        #     URLs (SSH_DOMAIN defaults to it) and git+ssh
-                        #     bypasses BOTH caddy and Tailscale Serve --
-                        #     it's the host's own sshd on port 22 (below),
-                        #     which serve.nix's `tcp:443`-only config
-                        #     doesn't touch. Clone URLs stay
-                        #     `forgejo@ts-cube:...`.
-                        #
-                        # `ts-cube`/`nire-cube` mismatch itself is
-                        # networking/tailscale.nix's "FOUR REAL TRAPS" #1;
-                        # the ROOT_URL FQDN is duplicated in serve.nix and
-                        # grafana.nix, not shared (no options in this
-                        # tree, CLAUDE.md Architecture) -- both move
-                        # together if the service name ever changes.
-                        DOMAIN    = "ts-cube";
-                        ROOT_URL  = "https://git.moose-micro.ts.net/";
+                    # DOMAIN and ROOT_URL deliberately DISAGREE, still
+                    # -- not a typo, and not both moving to
+                    # `tailscale-services/serve.nix`'s new service
+                    # name the way grafana.nix's domain/root_url did:
+                    #
+                    #   - ROOT_URL is what the browser sees, so it
+                    #     followed the move -- HTTP(S) now goes through
+                    #     Tailscale Serve as `svc:git`, not caddy.nix's
+                    #     `/git/` prefix (that route is retired, see
+                    #     serve.nix's header; not yet runtime-verified).
+                    #   - DOMAIN stays the device name `ts-cube`,
+                    #     unchanged, because it builds the SSH clone
+                    #     URLs (SSH_DOMAIN defaults to it) and git+ssh
+                    #     bypasses BOTH caddy and Tailscale Serve --
+                    #     it's the host's own sshd on port 22 (below),
+                    #     which serve.nix's `tcp:443`-only config
+                    #     doesn't touch. Clone URLs stay
+                    #     `forgejo@ts-cube:...`.
+                    #
+                    # `ts-cube`/`nire-cube` mismatch itself is
+                    # networking/tailscale.nix's "FOUR REAL TRAPS" #1;
+                    # the ROOT_URL FQDN is duplicated in serve.nix and
+                    # grafana.nix, not shared (no options in this
+                    # tree, CLAUDE.md Architecture) -- both move
+                    # together if the service name ever changes.
+                    DOMAIN    = "ts-cube";
+                    ROOT_URL  = "https://git.moose-micro.ts.net/";
 
-                        # DISABLE_SSH at default (false); START_SSH_SERVER
-                        # unset, so false too -- git+ssh goes through the
-                        # HOST's OpenSSH (system/ssh/ssh.nix, on every NixOS
-                        # host), not a second sshd. Forgejo manages
-                        # ~forgejo/.ssh/authorized_keys itself as keys are
-                        # added via the web UI; ordinary per-user
-                        # authorized_keys lookup does the rest, no
-                        # AuthorizedKeysCommand. Clone URLs
-                        # `forgejo@ts-cube:...`, port 22 -- the port normal
-                        # ssh already uses, so no second port, just a second
-                        # user with Forgejo-managed keys against sshd.
-                    };
-
-                    service = {
-                        # Single-user instance behind a tailnet only the user's
-                        # devices reach -- self-registration stays closed. A
-                        # new user is a `forgejo admin user create` away.
-                        DISABLE_REGISTRATION = true;
-                        # Nothing readable without signing in: repos, users,
-                        # the explore pages, the anonymous API. Everyone who
-                        # can reach the forge (the tailnet, and CI jobs on the
-                        # runner VM) otherwise reads every public repo and the
-                        # user list. Jobs still check out their own repo --
-                        # that uses the job's token.
-                        REQUIRE_SIGNIN_VIEW  = true;
-                    };
-
-                    # Every browser reaches the forge over HTTPS (Caddy); the
-                    # plain-HTTP vhosts only redirect. nixpkgs leaves this
-                    # false.
-                    session.COOKIE_SECURE = true;
-
-                    # A per-user cap on stored data -- repos, LFS, packages,
-                    # attachments and Actions artifacts together (the
-                    # built-in default group's one "size:all" rule,
-                    # models/quota/default.go). What a runner job uploads is
-                    # counted against the repo owner, so a job can't fill
-                    # cube's disk. Raise it here if a real repo outgrows it.
-                    # TRAP: an unparseable TOTAL is silently "unlimited"
-                    # (config_provider.go mustBytes returns -1); go-humanize
-                    # reads `10GiB`.
-                    quota.ENABLED           = true;
-                    "quota.default".TOTAL   = "10GiB";
-
-                    actions = {
-                        # Instance-wide switch for Forgejo Actions (CI) --
-                        # the jobs server, executed by actions-runner.nix's
-                        # runner. Repos can still toggle Actions off
-                        # individually; a repo created BEFORE this landed
-                        # may need its Settings toggle flipped once.
-                        ENABLED = true;
-                        # Defaults are 90 and 365 days. Artifacts are
-                        # throwaway build output here; logs are small but
-                        # add up.
-                        ARTIFACT_RETENTION_DAYS = 14;
-                        LOG_RETENTION_DAYS      = 90;
-                    };
-
-                    # Sweep runners that were registered but never came
-                    # online, or went offline, a day ago: the per-job
-                    # registrations of actions-runner.nix's cycle whose
-                    # guest never took a job. Used ephemeral runners are
-                    # deleted by Forgejo itself when their job completes.
-                    # GLOBAL_SCOPE_ONLY defaults true, which would skip
-                    # them (they are scoped to `elly`).
-                    "cron.cleanup_offline_runners" = {
-                        ENABLED           = true;
-                        GLOBAL_SCOPE_ONLY = false;
-                        OLDER_THAN        = "24h";
-                    };
-
-                    repository = {
-                        # Forgejo 15's built-in default (models/unit/unit.go
-                        # DefaultRepoUnits) minus `repo.actions`: a NEW repo
-                        # starts with Actions off, so nothing reaches the
-                        # runner VM until a repo's Settings turn it on.
-                        # Repos that existed before this keep their toggle.
-                        DEFAULT_REPO_UNITS = lib.concatStringsSep "," [
-                            "repo.code"
-                            "repo.issues"
-                            "repo.pulls"
-                            "repo.releases"
-                            "repo.wiki"
-                            "repo.projects"
-                            "repo.packages"
-                        ];
-                    };
+                    # DISABLE_SSH at default (false); START_SSH_SERVER
+                    # unset, so false too -- git+ssh goes through the
+                    # HOST's OpenSSH (system/ssh/ssh.nix, on every NixOS
+                    # host), not a second sshd. Forgejo manages
+                    # ~forgejo/.ssh/authorized_keys itself as keys are
+                    # added via the web UI; ordinary per-user
+                    # authorized_keys lookup does the rest, no
+                    # AuthorizedKeysCommand. Clone URLs
+                    # `forgejo@ts-cube:...`, port 22 -- the port normal
+                    # ssh already uses, so no second port, just a second
+                    # user with Forgejo-managed keys against sshd.
                 };
-            };
 
-            # No 3001 in networking.firewall.allowedTCPPorts: the
-            # loopback bind above is what keeps this off the LAN, with the
-            # firewall as the second line. The tailnet-facing port is
-            # caddy's 443, and `trustedInterfaces = [ "tailscale0" ]`
-            # trusts that WHOLE interface rather than a port -- the host's
-            # existing model, not something this module adds. Port 22 is
-            # already open on every NixOS host, so git+ssh rides existing
-            # exposure rather than new.
+                service = {
+                    # Single-user instance behind a tailnet only the user's
+                    # devices reach -- self-registration stays closed. A
+                    # new user is a `forgejo admin user create` away.
+                    DISABLE_REGISTRATION = true;
+                    # Nothing readable without signing in: repos, users,
+                    # the explore pages, the anonymous API. Everyone who
+                    # can reach the forge (the tailnet, and CI jobs on the
+                    # runner VM) otherwise reads every public repo and the
+                    # user list. Jobs still check out their own repo --
+                    # that uses the job's token.
+                    REQUIRE_SIGNIN_VIEW  = true;
+                };
 
-            # ssh.nix sets authorizedKeysInHomedir = false (2026-09-26), so
-            # sshd reads only /etc/ssh/authorized_keys.d/%u -- which would
-            # silently drop the Forgejo-written ~forgejo/.ssh/authorized_keys
-            # above and break git+ssh. This re-allows the home-dir file for
-            # the `forgejo` account only. mkAfter because a `Match` block
-            # swallows every directive after it: ssh.nix's global
-            # extraConfig lines must render first.
-            services.openssh.extraConfig = lib.mkAfter ''
-                Match User ${config.services.forgejo.user}
-                    AuthorizedKeysFile %h/.ssh/authorized_keys
-            '';
+                # Every browser reaches the forge over HTTPS (Caddy); the
+                # plain-HTTP vhosts only redirect. nixpkgs leaves this
+                # false.
+                session.COOKIE_SECURE = true;
 
-            # No forgejo-persist.nix, same reasoning grafana.nix gives for
-            # skipping one: cube has a plain persistent root
-            # (cube-configuration.nix's header), not the
-            # durandal/tenacity `/root` wipe, so /var/lib/forgejo
-            # (repos, sqlite db, self-generated secrets under
-            # `custom/conf/`) survives reboots. If a host that DOES wipe
-            # root ever imports this, add one first, modeled on
-            # tailscale-persist.nix.
+                # A per-user cap on stored data -- repos, LFS, packages,
+                # attachments and Actions artifacts together (the
+                # built-in default group's one "size:all" rule,
+                # models/quota/default.go). What a runner job uploads is
+                # counted against the repo owner, so a job can't fill
+                # cube's disk. Raise it here if a real repo outgrows it.
+                # TRAP: an unparseable TOTAL is silently "unlimited"
+                # (config_provider.go mustBytes returns -1); go-humanize
+                # reads `10GiB`.
+                quota.ENABLED           = true;
+                "quota.default".TOTAL   = "10GiB";
 
-            # Admin account bootstrap. Added 2026-08-26 --
-            # DISABLE_REGISTRATION closes self-signup and there is no setup
-            # wizard (useWizard default false, INSTALL_LOCK forced true
-            # above), so nothing creates the FIRST account either. Declared
-            # here rather than run by hand: reproducible from this repo +
-            # sops, not one-off machine state.
-            #
-            # sopsFile unset -- defaults to `config.sops.defaultSopsFile`
-            # (secrets.yaml, set in general-config/system/secrets/sops.nix, imported
-            # by every Linux host via `system`). Declared HERE and not in
-            # sops.nix on purpose: `git-forge` is cube-only, and a secret
-            # declared in sops.nix decrypts on every `system` host
-            # (durandal/tenacity included, neither running Forgejo);
-            # declaring it here means it decrypts only where imported.
-            # sops.nix holds no `sops.secrets.*` at all for this reason --
-            # its own history note says so.
-            sops.secrets.forgejo-admin-password = {
-                owner = config.services.forgejo.user;
-                group = config.services.forgejo.group;
-                mode  = "0400";
-            };
+                actions = {
+                    # Instance-wide switch for Forgejo Actions (CI) --
+                    # the jobs server, executed by actions-runner.nix's
+                    # runner. Repos can still toggle Actions off
+                    # individually; a repo created BEFORE this landed
+                    # may need its Settings toggle flipped once.
+                    ENABLED = true;
+                    # Defaults are 90 and 365 days. Artifacts are
+                    # throwaway build output here; logs are small but
+                    # add up.
+                    ARTIFACT_RETENTION_DAYS = 14;
+                    LOG_RETENTION_DAYS      = 90;
+                };
 
-            # Deliberately RESETS the password to the sops value on every
-            # activation, not the create-if-missing/never-touch shape
-            # forgejo-secrets.service and grafana-secret-key-setup.service
-            # use for SECRET_KEY-style values -- considered: a password,
-            # unlike a signing key, has no other state that breaks when it
-            # changes, and nix+sops is meant to be its sole source of truth.
-            # Tradeoff: a hand change in the web UI is silently reverted on
-            # the next `just switch`.
-            #
-            # `admin user create` first (covers the first activation); if it
-            # fails -- the only realistic failure once forgejo.service is
-            # healthy is "user already exists" -- `admin user
-            # change-password` runs instead. Ordered after/wants
-            # forgejo.service rather than duplicating its `forgejo migrate`
-            # preStart: a Type=notify unit reports active only after
-            # preStart (the migration) completed.
-            systemd.services.forgejo-admin-bootstrap = {
-                description = "Ensure the Forgejo admin account exists with the sops-managed password";
-                after       = [ "forgejo.service" ];
-                wants       = [ "forgejo.service" ];
-                wantedBy    = [ "multi-user.target" ];
-                path        = [ config.services.forgejo.package ];
+                # Sweep runners that were registered but never came
+                # online, or went offline, a day ago: the per-job
+                # registrations of actions-runner.nix's cycle whose
+                # guest never took a job. Used ephemeral runners are
+                # deleted by Forgejo itself when their job completes.
+                # GLOBAL_SCOPE_ONLY defaults true, which would skip
+                # them (they are scoped to `elly`).
+                "cron.cleanup_offline_runners" = {
+                    ENABLED           = true;
+                    GLOBAL_SCOPE_ONLY = false;
+                    OLDER_THAN        = "24h";
+                };
 
-                script = ''
-                    set -euo pipefail
-                    USERNAME=elly
-                    EMAIL=nire@computernope.net
-                    CONFIG=${config.services.forgejo.customDir}/conf/app.ini
-                    PASSWORD_FILE=${config.sops.secrets.forgejo-admin-password.path}
-
-                    if ! forgejo --config "$CONFIG" admin user create \
-                        --username "$USERNAME" \
-                        --email "$EMAIL" \
-                        --password "$(cat "$PASSWORD_FILE")" \
-                        --admin \
-                        --must-change-password=false
-                    then
-                        forgejo --config "$CONFIG" admin user change-password \
-                            --username "$USERNAME" \
-                            --password "$(cat "$PASSWORD_FILE")" \
-                            --must-change-password=false
-                    fi
-                '';
-
-                serviceConfig = {
-                    Type             = "oneshot";
-                    RemainAfterExit  = true;
-                    User             = config.services.forgejo.user;
-                    Group            = config.services.forgejo.group;
+                repository = {
+                    # Forgejo 15's built-in default (models/unit/unit.go
+                    # DefaultRepoUnits) minus `repo.actions`: a NEW repo
+                    # starts with Actions off, so nothing reaches the
+                    # runner VM until a repo's Settings turn it on.
+                    # Repos that existed before this keep their toggle.
+                    DEFAULT_REPO_UNITS = lib.concatStringsSep "," [
+                        "repo.code"
+                        "repo.issues"
+                        "repo.pulls"
+                        "repo.releases"
+                        "repo.wiki"
+                        "repo.projects"
+                        "repo.packages"
+                    ];
                 };
             };
         };
+
+        # No 3001 in networking.firewall.allowedTCPPorts: the
+        # loopback bind above is what keeps this off the LAN, with the
+        # firewall as the second line. The tailnet-facing port is
+        # caddy's 443, and `trustedInterfaces = [ "tailscale0" ]`
+        # trusts that WHOLE interface rather than a port -- the host's
+        # existing model, not something this module adds. Port 22 is
+        # already open on every NixOS host, so git+ssh rides existing
+        # exposure rather than new.
+
+        # ssh.nix sets authorizedKeysInHomedir = false (2026-09-26), so
+        # sshd reads only /etc/ssh/authorized_keys.d/%u -- which would
+        # silently drop the Forgejo-written ~forgejo/.ssh/authorized_keys
+        # above and break git+ssh. This re-allows the home-dir file for
+        # the `forgejo` account only. mkAfter because a `Match` block
+        # swallows every directive after it: ssh.nix's global
+        # extraConfig lines must render first.
+        services.openssh.extraConfig = lib.mkAfter ''
+            Match User ${config.services.forgejo.user}
+                AuthorizedKeysFile %h/.ssh/authorized_keys
+        '';
+
+        # No forgejo-persist.nix, same reasoning grafana.nix gives for
+        # skipping one: cube has a plain persistent root
+        # (cube-configuration.nix's header), not the
+        # durandal/tenacity `/root` wipe, so /var/lib/forgejo
+        # (repos, sqlite db, self-generated secrets under
+        # `custom/conf/`) survives reboots. If a host that DOES wipe
+        # root ever imports this, add one first, modeled on
+        # tailscale-persist.nix.
+
+        # Admin account bootstrap. Added 2026-08-26 --
+        # DISABLE_REGISTRATION closes self-signup and there is no setup
+        # wizard (useWizard default false, INSTALL_LOCK forced true
+        # above), so nothing creates the FIRST account either. Declared
+        # here rather than run by hand: reproducible from this repo +
+        # sops, not one-off machine state.
+        #
+        # sopsFile unset -- defaults to `config.sops.defaultSopsFile`
+        # (secrets.yaml, set in general-config/system/secrets/sops.nix, imported
+        # by every Linux host via `system`). Declared HERE and not in
+        # sops.nix on purpose: `git-forge` is cube-only, and a secret
+        # declared in sops.nix decrypts on every `system` host
+        # (durandal/tenacity included, neither running Forgejo);
+        # declaring it here means it decrypts only where imported.
+        # sops.nix holds no `sops.secrets.*` at all for this reason --
+        # its own history note says so.
+        sops.secrets.forgejo-admin-password = {
+            owner = config.services.forgejo.user;
+            group = config.services.forgejo.group;
+            mode  = "0400";
+        };
+
+        # Deliberately RESETS the password to the sops value on every
+        # activation, not the create-if-missing/never-touch shape
+        # forgejo-secrets.service and grafana-secret-key-setup.service
+        # use for SECRET_KEY-style values -- considered: a password,
+        # unlike a signing key, has no other state that breaks when it
+        # changes, and nix+sops is meant to be its sole source of truth.
+        # Tradeoff: a hand change in the web UI is silently reverted on
+        # the next `just switch`.
+        #
+        # `admin user create` first (covers the first activation); if it
+        # fails -- the only realistic failure once forgejo.service is
+        # healthy is "user already exists" -- `admin user
+        # change-password` runs instead. Ordered after/wants
+        # forgejo.service rather than duplicating its `forgejo migrate`
+        # preStart: a Type=notify unit reports active only after
+        # preStart (the migration) completed.
+        systemd.services.forgejo-admin-bootstrap = {
+            description = "Ensure the Forgejo admin account exists with the sops-managed password";
+            after       = [ "forgejo.service" ];
+            wants       = [ "forgejo.service" ];
+            wantedBy    = [ "multi-user.target" ];
+            path        = [ config.services.forgejo.package ];
+
+            script = ''
+                set -euo pipefail
+                USERNAME=elly
+                EMAIL=nire@computernope.net
+                CONFIG=${config.services.forgejo.customDir}/conf/app.ini
+                PASSWORD_FILE=${config.sops.secrets.forgejo-admin-password.path}
+
+                if ! forgejo --config "$CONFIG" admin user create \
+                    --username "$USERNAME" \
+                    --email "$EMAIL" \
+                    --password "$(cat "$PASSWORD_FILE")" \
+                    --admin \
+                    --must-change-password=false
+                then
+                    forgejo --config "$CONFIG" admin user change-password \
+                        --username "$USERNAME" \
+                        --password "$(cat "$PASSWORD_FILE")" \
+                        --must-change-password=false
+                fi
+            '';
+
+            serviceConfig = {
+                Type             = "oneshot";
+                RemainAfterExit  = true;
+                User             = config.services.forgejo.user;
+                Group            = config.services.forgejo.group;
+            };
+        };
+    };
 }
 
 # ── history ─────────────────────────────────────────────────────────────────

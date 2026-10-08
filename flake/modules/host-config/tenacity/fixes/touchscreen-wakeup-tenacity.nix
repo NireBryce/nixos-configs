@@ -36,12 +36,12 @@
 # this rule silently stops applying rather than erroring -- check
 # `cat /sys/class/wakeup/*/name` before assuming it is still in effect.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = {
-            services.udev.extraRules = ''
-            ACTION=="add|change", SUBSYSTEM=="i2c", KERNEL=="i2c-HTIX5288:00", ATTR{power/wakeup}="disabled"
-            '';
-        };
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = {
+        services.udev.extraRules = ''
+        ACTION=="add|change", SUBSYSTEM=="i2c", KERNEL=="i2c-HTIX5288:00", ATTR{power/wakeup}="disabled"
+        '';
+    };
 }

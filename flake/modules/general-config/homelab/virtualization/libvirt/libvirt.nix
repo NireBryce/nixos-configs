@@ -1,105 +1,105 @@
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = { pkgs, ... }: {
-            # # description = "libvirt/QEMU virtual machines, and virt-manager to drive them";
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+        # # description = "libvirt/QEMU virtual machines, and virt-manager to drive them";
 
-            # Was `virtualization.nix`, declaring `flake.modules.nixos.virtualization`,
-            # for about an hour on 2026-08-21. It could not keep that name once these
-            # modules moved into a category directory called `virtualization/`: the
-            # category aggregate takes the directory's name, so file and category
-            # would both have declared `flake.modules.nixos.virtualization` and
-            # *merged* rather than collided -- the `boot` trap from CLAUDE.md, in a
-            # shape where the merge would have been invisible because importing
-            # either name would still have produced working VMs.
-            #
-            # `virtualization` is now the category you import in a host config, and
-            # `libvirt` is this file. That is also the more honest filename: what is
-            # below is libvirtd options and nothing else.
-            #
-            # Scope: NOT every host. Cube is the only importer -- durandal dropped
-            # this category 2026-08-27 (carried for unused parity; nothing in this
-            # repo's history records durandal ever running a VM) -- and it is
-            # deliberately declined by tenacity, the handheld (the one that imports
-            # `jovian`). libvirtd is a boot-time daemon and a gamescope
-            # handheld will never open virt-manager. Before 2026-08-21 these modules
-            # lived under `nire/system/`, which every Linux host imports whole, so
-            # they did land on the handhelds; moving them to their own category is
-            # what fixed that. A new host opts in by adding `virtualization` to its
-            # list, which is also where the polkit note at the bottom of this file
-            # becomes relevant.
-            virtualisation.libvirtd = {
-                enable = true;
+        # Was `virtualization.nix`, declaring `flake.modules.nixos.virtualization`,
+        # for about an hour on 2026-08-21. It could not keep that name once these
+        # modules moved into a category directory called `virtualization/`: the
+        # category aggregate takes the directory's name, so file and category
+        # would both have declared `flake.modules.nixos.virtualization` and
+        # *merged* rather than collided -- the `boot` trap from CLAUDE.md, in a
+        # shape where the merge would have been invisible because importing
+        # either name would still have produced working VMs.
+        #
+        # `virtualization` is now the category you import in a host config, and
+        # `libvirt` is this file. That is also the more honest filename: what is
+        # below is libvirtd options and nothing else.
+        #
+        # Scope: NOT every host. Cube is the only importer -- durandal dropped
+        # this category 2026-08-27 (carried for unused parity; nothing in this
+        # repo's history records durandal ever running a VM) -- and it is
+        # deliberately declined by tenacity, the handheld (the one that imports
+        # `jovian`). libvirtd is a boot-time daemon and a gamescope
+        # handheld will never open virt-manager. Before 2026-08-21 these modules
+        # lived under `nire/system/`, which every Linux host imports whole, so
+        # they did land on the handhelds; moving them to their own category is
+        # what fixed that. A new host opts in by adding `virtualization` to its
+        # list, which is also where the polkit note at the bottom of this file
+        # becomes relevant.
+        virtualisation.libvirtd = {
+            enable = true;
 
-                qemu = {
-                    # Emulated TPM, which Windows 11 guests refuse to install without.
-                    swtpm.enable = true;
+            qemu = {
+                # Emulated TPM, which Windows 11 guests refuse to install without.
+                swtpm.enable = true;
 
-                    # Do NOT add `ovmf` here. Every guide still says to, and the
-                    # option is gone: nixpkgs removed the whole
-                    # `virtualisation.libvirtd.qemu.ovmf` submodule and now ships
-                    # every OVMF image QEMU distributes by default. Setting it is
-                    # not ignored -- libvirtd.nix asserts on it and evaluation
-                    # fails with "the submodule has been removed". Same for the
-                    # older `qemuOvmf`/`qemuOvmfPackage`, which are
-                    # mkRemovedOptionModule.
+                # Do NOT add `ovmf` here. Every guide still says to, and the
+                # option is gone: nixpkgs removed the whole
+                # `virtualisation.libvirtd.qemu.ovmf` submodule and now ships
+                # every OVMF image QEMU distributes by default. Setting it is
+                # not ignored -- libvirtd.nix asserts on it and evaluation
+                # fails with "the submodule has been removed". Same for the
+                # older `qemuOvmf`/`qemuOvmfPackage`, which are
+                # mkRemovedOptionModule.
 
-                    # virtiofs shares between host and guest. libvirt looks for the
-                    # helper binary in this list; without it a <filesystem
-                    # type='mount' driver='virtiofs'> device fails to start.
-                    vhostUserPackages = with pkgs; [ virtiofsd ];
+                # virtiofs shares between host and guest. libvirt looks for the
+                # helper binary in this list; without it a <filesystem
+                # type='mount' driver='virtiofs'> device fails to start.
+                vhostUserPackages = with pkgs; [ virtiofsd ];
 
-                    # QEMU as `qemu-libvirtd`, not root (nixpkgs' default is
-                    # root). cube runs CI job code in a guest, so a QEMU
-                    # escape should land unprivileged. libvirt's DAC driver
-                    # chowns each domain's writable images to that user at
-                    # start and skips read-only store paths (EROFS is
-                    # logged and ignored, security_dac.c); store images are
-                    # world-readable anyway. virtiofsd is spawned by
-                    # libvirtd itself and still runs as root.
-                    #
-                    # TRAP: a switch does NOT apply this, or any qemu.conf
-                    # change. nixpkgs marks libvirtd X-RestartIfChanged=false
-                    # (restarting it mid-switch would be disruptive), and
-                    # libvirtd-config -- which copies qemu.conf into
-                    # /var/lib/libvirt -- runs only as its dependency. Hit
-                    # 2026-09-25: the switch landed, the guest reset, and
-                    # QEMU still started as root. Apply by hand, then
-                    # restart any running domain (running ones keep their
-                    # user): `sudo systemctl restart libvirtd-config
-                    # libvirtd`. A reboot also does it.
-                    runAsRoot = false;
-                };
+                # QEMU as `qemu-libvirtd`, not root (nixpkgs' default is
+                # root). cube runs CI job code in a guest, so a QEMU
+                # escape should land unprivileged. libvirt's DAC driver
+                # chowns each domain's writable images to that user at
+                # start and skips read-only store paths (EROFS is
+                # logged and ignored, security_dac.c); store images are
+                # world-readable anyway. virtiofsd is spawned by
+                # libvirtd itself and still runs as root.
+                #
+                # TRAP: a switch does NOT apply this, or any qemu.conf
+                # change. nixpkgs marks libvirtd X-RestartIfChanged=false
+                # (restarting it mid-switch would be disruptive), and
+                # libvirtd-config -- which copies qemu.conf into
+                # /var/lib/libvirt -- runs only as its dependency. Hit
+                # 2026-09-25: the switch landed, the guest reset, and
+                # QEMU still started as root. Apply by hand, then
+                # restart any running domain (running ones keep their
+                # user): `sudo systemctl restart libvirtd-config
+                # libvirtd`. A reboot also does it.
+                runAsRoot = false;
             };
-
-            # Sets up the dconf entry that points virt-manager at qemu:///system on
-            # first launch, which is otherwise a manual step every fresh /home.
-            # It also installs the package, so don't list virt-manager in
-            # virt-tools.nix as well. programs.dconf is already enabled by the
-            # desktop, so it is not restated here.
-            programs.virt-manager.enable = true;
-
-            # USB passthrough from the host into a running guest, via the
-            # spice-client-glib udev rules and the usbredir helper. virt-manager's
-            # "Redirect USB device" menu does nothing without it.
-            virtualisation.spiceUSBRedirection.enable = true;
-
-            # elly is deliberately NOT in `libvirtd` (removed 2026-09-26).
-            # Membership reaches qemu:///system without authenticating, and a
-            # member can define a guest with any host block device attached
-            # -- root-equivalent with no password. Nothing needed it: every
-            # automated virsh call runs as root in a system service, and
-            # libvirt-exporter joins the group itself. Interactive use is
-            # `sudo virsh ...`, or polkit's auth_admin prompt. Was
-            # `users.users.elly.extraGroups = [ "libvirtd" ];` here, kept out
-            # of elly-user.nix because extraGroups concatenates across modules
-            # (naming "podman" in two files once listed it twice).
-
-            # libvirtd's assertion requires polkit; it is already on via the
-            # desktop on every host here, so this is a note rather than a setting.
-            # If a headless host ever imports this, it needs
-            # security.polkit.enable = true or evaluation fails with
-            # "The libvirtd module currently requires Polkit to be enabled".
         };
+
+        # Sets up the dconf entry that points virt-manager at qemu:///system on
+        # first launch, which is otherwise a manual step every fresh /home.
+        # It also installs the package, so don't list virt-manager in
+        # virt-tools.nix as well. programs.dconf is already enabled by the
+        # desktop, so it is not restated here.
+        programs.virt-manager.enable = true;
+
+        # USB passthrough from the host into a running guest, via the
+        # spice-client-glib udev rules and the usbredir helper. virt-manager's
+        # "Redirect USB device" menu does nothing without it.
+        virtualisation.spiceUSBRedirection.enable = true;
+
+        # elly is deliberately NOT in `libvirtd` (removed 2026-09-26).
+        # Membership reaches qemu:///system without authenticating, and a
+        # member can define a guest with any host block device attached
+        # -- root-equivalent with no password. Nothing needed it: every
+        # automated virsh call runs as root in a system service, and
+        # libvirt-exporter joins the group itself. Interactive use is
+        # `sudo virsh ...`, or polkit's auth_admin prompt. Was
+        # `users.users.elly.extraGroups = [ "libvirtd" ];` here, kept out
+        # of elly-user.nix because extraGroups concatenates across modules
+        # (naming "podman" in two files once listed it twice).
+
+        # libvirtd's assertion requires polkit; it is already on via the
+        # desktop on every host here, so this is a note rather than a setting.
+        # If a headless host ever imports this, it needs
+        # security.polkit.enable = true or evaluation fails with
+        # "The libvirtd module currently requires Polkit to be enabled".
+    };
 }

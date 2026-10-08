@@ -10,99 +10,99 @@
 # already, and the two would have become one module holding both machines'
 # filesystems and LUKS devices.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = { config, lib, modulesPath, ... }:
-    {
-      imports =
-        [
-          (modulesPath + "/installer/scan/not-detected.nix")
-        ];
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = { config, lib, modulesPath, ... }:
+{
+  imports =
+    [
+      (modulesPath + "/installer/scan/not-detected.nix")
+    ];
 
-      boot = {
-        initrd = {
-          availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usbhid" "usb_storage" "sd_mod" ];
-          kernelModules = [ ];
-          luks.devices."enc".device = "/dev/disk/by-uuid/03b8f5c0-d846-4fde-b533-2a22e8e9975b";
-        };
-        kernelModules = [ "kvm-amd" ];
-        extraModulePackages = [ ];
+  boot = {
+    initrd = {
+      availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usbhid" "usb_storage" "sd_mod" ];
+      kernelModules = [ ];
+      luks.devices."enc".device = "/dev/disk/by-uuid/03b8f5c0-d846-4fde-b533-2a22e8e9975b";
+    };
+    kernelModules = [ "kvm-amd" ];
+    extraModulePackages = [ ];
+  };
+
+  fileSystems = {
+    "/boot" =
+      { device = "/dev/disk/by-uuid/380C-3C39";
+        fsType = "vfat";
+        options = [ "fmask=0077" "dmask=0077" ]; # root-only: /boot/loader/random-seed lives here
       };
 
-      fileSystems = {
-        "/boot" =
-          { device = "/dev/disk/by-uuid/380C-3C39";
-            fsType = "vfat";
-            options = [ "fmask=0077" "dmask=0077" ]; # root-only: /boot/loader/random-seed lives here
-          };
-
-        "/" =
-          { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
-            fsType = "btrfs";
-            options = [ "subvol=root" "compress=zstd" "noatime" ];
-          };
-
-        "/home" =
-          { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
-            fsType = "btrfs";
-            options = [ "compress=zstd" "subvol=home" ];
-
-          };
-
-        "/nix" =
-          { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
-            fsType = "btrfs";
-            options = [ "subvol=nix" "noatime" "compress=zstd" ];
-          };
-
-        "/persist" =
-          { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
-            fsType = "btrfs";
-            options = [ "subvol=persist" "noatime" "compress=zstd" ];
-            neededForBoot = true;
-          };
-
-        "/var/log" =
-          { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
-            fsType = "btrfs";
-            options = [ "subvol=log" "noatime" "compress=zstd" ];
-            neededForBoot = true;
-          };
+    "/" =
+      { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
+        fsType = "btrfs";
+        options = [ "subvol=root" "compress=zstd" "noatime" ];
       };
 
-      # Swap policy lives in general-config/system/memory/swap-policy.nix.
-      # zswap fronts the encrypted partition declared below: a compressed pool
-      # in RAM whose cold pages drain to the partition under LRU pressure.
-      # This replaces the SteamOS zram Jovian was defaulting
-      # (2026-10-04) -- see the policy module for the reasoning.
-      customOption.swap.policy = "zswap";
+    "/home" =
+      { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
+        fsType = "btrfs";
+        options = [ "compress=zstd" "subvol=home" ];
 
-      # nvme0n1p6 carries a GPT swap type UUID, so systemd-gpt-auto-generator
-      # finds and activates it with no configuration at all -- found live
-      # 2026-09-25: /proc/swaps listed it while swapDevices was []. Declaring
-      # it takes it away from that discovery; randomEncryption wraps it in
-      # dmcrypt with a per-boot key, because this partition sits outside the
-      # LUKS container and page-out was landing there in plaintext.
-      # PARTUUID, not UUID: mkswap through the mapper overwrites the on-disk
-      # signature with ciphertext, so a filesystem UUID dies on the first
-      # encrypted boot -- nixpkgs asserts against by-uuid here. The GPT entry
-      # survives. An ephemeral key rules out hibernation, which nohibernate
-      # (WARN-impermanence.nix) already forbids.
-      swapDevices =
-        [ { device = "/dev/disk/by-partuuid/5e2b1c4c-3c14-49b4-b311-b176c1a1118c";
-            randomEncryption = true;
-          }
-        ];
+      };
 
-      # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
-      # (the default) this is the recommended approach. When using systemd-networkd it's
-      # still possible to use this option, but it's recommended to use it in conjunction
-      # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
-      networking.useDHCP = lib.mkDefault true;
-      # networking.interfaces.wlp1s0.useDHCP = lib.mkDefault true;
+    "/nix" =
+      { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
+        fsType = "btrfs";
+        options = [ "subvol=nix" "noatime" "compress=zstd" ];
+      };
 
-      nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-      hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-    }
+    "/persist" =
+      { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
+        fsType = "btrfs";
+        options = [ "subvol=persist" "noatime" "compress=zstd" ];
+        neededForBoot = true;
+      };
+
+    "/var/log" =
+      { device = "/dev/disk/by-uuid/a99ae3fe-3254-4d6b-9da7-c448a89d166d";
+        fsType = "btrfs";
+        options = [ "subvol=log" "noatime" "compress=zstd" ];
+        neededForBoot = true;
+      };
+  };
+
+  # Swap policy lives in general-config/system/memory/swap-policy.nix.
+  # zswap fronts the encrypted partition declared below: a compressed pool
+  # in RAM whose cold pages drain to the partition under LRU pressure.
+  # This replaces the SteamOS zram Jovian was defaulting
+  # (2026-10-04) -- see the policy module for the reasoning.
+  customOption.swap.policy = "zswap";
+
+  # nvme0n1p6 carries a GPT swap type UUID, so systemd-gpt-auto-generator
+  # finds and activates it with no configuration at all -- found live
+  # 2026-09-25: /proc/swaps listed it while swapDevices was []. Declaring
+  # it takes it away from that discovery; randomEncryption wraps it in
+  # dmcrypt with a per-boot key, because this partition sits outside the
+  # LUKS container and page-out was landing there in plaintext.
+  # PARTUUID, not UUID: mkswap through the mapper overwrites the on-disk
+  # signature with ciphertext, so a filesystem UUID dies on the first
+  # encrypted boot -- nixpkgs asserts against by-uuid here. The GPT entry
+  # survives. An ephemeral key rules out hibernation, which nohibernate
+  # (WARN-impermanence.nix) already forbids.
+  swapDevices =
+    [ { device = "/dev/disk/by-partuuid/5e2b1c4c-3c14-49b4-b311-b176c1a1118c";
+        randomEncryption = true;
+      }
+    ];
+
+  # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
+  # (the default) this is the recommended approach. When using systemd-networkd it's
+  # still possible to use this option, but it's recommended to use it in conjunction
+  # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
+  networking.useDHCP = lib.mkDefault true;
+  # networking.interfaces.wlp1s0.useDHCP = lib.mkDefault true;
+
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+}
 ;}

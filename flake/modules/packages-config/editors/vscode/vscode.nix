@@ -1,21 +1,21 @@
 { lib, inputs, ... }:
-    # TODO: remove need for `inputs`, try `'self?`
+# TODO: remove need for `inputs`, try `'self?`
 let
-  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
-  flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+    flake.modules.nixos.${moduleName} = { pkgs, ... }: {
         # systemPackages, NOT programs.vscode -- see history at the bottom.
         # The NixOS module forces a store path as --extensions-dir, which hides
         # every extension installed through the GUI.
         environment.systemPackages = with pkgs; [
-          vscode-fhs
+            vscode-fhs
         ];
 
 
         programs.nix-ld.enable = true; # Needed for VSCode remote connection, etc
         environment.sessionVariables.NIXOS_OZONE_WL = "1";
         nix.nixPath = [ "nixpkgs=${inputs.nixpkgs}" ]; # https://discourse.nixos.org/t/vs-code-and-nix-ide-newbie-problems/51385/5
-      };
+    };
 }
 
 # ── history ─────────────────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 # Module style guide, for agents
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-08_
 
 Condensed from [module-style-guide.md](module-style-guide.md). Rules only.
 
@@ -16,10 +16,10 @@ Never hand-edit. By hand it is
 
 | What | Files |
 |---|---|
-| total `.nix` files under `flake/modules/` | 283 |
-| module header (`moduleName = lib.removeSuffix ...`) | 231 |
+| total `.nix` files under `flake/modules/` | 284 |
+| module header (`moduleName = lib.removeSuffix ...`) | 232 |
 | `# # description` as first body line | 36 |
-| `with pkgs;` package lists | 123 |
+| `with pkgs;` package lists | 124 |
 
 <!-- /generated -->
 
@@ -27,12 +27,12 @@ Never hand-edit. By hand it is
 
 ```nix
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
-            ...
-        };
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
+        ...
+    };
 }
 ```
 
@@ -47,8 +47,12 @@ Never hand-edit. By hand it is
 ## Formatting
 
 - Opening brackets on the same line as whatever causes them.
-- Four-space indent. Module bodies sit one level deeper than necessary;
-  reindenting risks the `''` strings in the shell modules, so leave it.
+- Four-space indent. Top-level `let` / `in {` at column 0, level with the
+  closing `}`; the body one level in.
+- A nested `let` / `in` sits level with the line that opens it (lambda, `=`,
+  `else`) and with the bracket closing the `in` expression, never a level
+  deeper: an extra level with no closing bracket of its own reads as a
+  missing bracket.
 - `with pkgs; [ ... ]`, one package per line, no `pkgs.` prefix inside.
 - **Aligned `=` columns** for runs of related assignments — match the
   surrounding block, don't apply it everywhere. **This is why `nix fmt` is

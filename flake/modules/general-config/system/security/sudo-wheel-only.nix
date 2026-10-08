@@ -5,11 +5,11 @@
 # 2026-09-26. Nothing non-wheel here calls sudo; the user is in wheel
 # (elly-user.nix).
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = {
-            # # description = "sudo executable by wheel only";
-            security.sudo.execWheelOnly = true;
-        };
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = {
+        # # description = "sudo executable by wheel only";
+        security.sudo.execWheelOnly = true;
+    };
 }

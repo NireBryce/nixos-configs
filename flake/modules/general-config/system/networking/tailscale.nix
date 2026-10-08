@@ -58,32 +58,32 @@
 # world-readable. Settles "is trustedInterfaces really first" without
 # querying the live table.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = {
-            services.tailscale = {
-                enable = true;
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = {
+        services.tailscale = {
+            enable = true;
 
-                # Opens the daemon's own UDP port. networking.nix's
-                # `tailscale0` in trustedInterfaces is the other half: that
-                # covers traffic arriving over the tunnel, this the tunnel
-                # being established.
-                openFirewall = true;
+            # Opens the daemon's own UDP port. networking.nix's
+            # `tailscale0` in trustedInterfaces is the other half: that
+            # covers traffic arriving over the tunnel, this the tunnel
+            # being established.
+            openFirewall = true;
 
-                # authKeyFile deliberately NOT set, though secrets.yaml does
-                # carry an (undeclared, unused) `tailscale_key`. Auth keys
-                # expire -- 90 days maximum, and that one predates the
-                # flake-parts port -- so wiring it in would most likely mean a
-                # tailscaled-autoconnect.service failing on every boot rather
-                # than a machine that authenticates itself. With the state
-                # directory persisted by tailscale-persist.nix, `sudo
-                # tailscale up` once is enough and survives reboots. To
-                # revisit: mint a fresh key, add `sops.secrets.tailscale_key`
-                # in system/secrets/sops.nix (nothing declares it today), and
-                # point authKeyFile at config.sops.secrets.tailscale_key.path.
-            };
+            # authKeyFile deliberately NOT set, though secrets.yaml does
+            # carry an (undeclared, unused) `tailscale_key`. Auth keys
+            # expire -- 90 days maximum, and that one predates the
+            # flake-parts port -- so wiring it in would most likely mean a
+            # tailscaled-autoconnect.service failing on every boot rather
+            # than a machine that authenticates itself. With the state
+            # directory persisted by tailscale-persist.nix, `sudo
+            # tailscale up` once is enough and survives reboots. To
+            # revisit: mint a fresh key, add `sops.secrets.tailscale_key`
+            # in system/secrets/sops.nix (nothing declares it today), and
+            # point authKeyFile at config.sops.secrets.tailscale_key.path.
         };
+    };
 }
 
 # ── history ─────────────────────────────────────────────────────────────────

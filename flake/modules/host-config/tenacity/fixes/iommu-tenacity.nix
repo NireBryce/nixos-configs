@@ -56,22 +56,22 @@
 # implicated in this one: it cut wake events during sleep from 71 to 1, which
 # is its own win.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = {
-            jovian.steamos.enableDefaultCmdlineConfig = false;
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = {
+        jovian.steamos.enableDefaultCmdlineConfig = false;
 
-            # Valve's list from jupiter-hw-support's grub-steamos, minus
-            # amd_iommu=off. See Jovian's modules/steamos/boot.nix for the
-            # per-parameter reasoning.
-            boot.kernelParams = [
-                "log_buf_len=4M"
-                "amdgpu.lockup_timeout=5000,10000,10000,5000"
-                "ttm.pages_min=2097152"
-                "amdgpu.sched_hw_submission=4"
-                "amdgpu.dcdebugmask=0x20000"
-                "audit=0"
-            ];
-        };
+        # Valve's list from jupiter-hw-support's grub-steamos, minus
+        # amd_iommu=off. See Jovian's modules/steamos/boot.nix for the
+        # per-parameter reasoning.
+        boot.kernelParams = [
+            "log_buf_len=4M"
+            "amdgpu.lockup_timeout=5000,10000,10000,5000"
+            "ttm.pages_min=2097152"
+            "amdgpu.sched_hw_submission=4"
+            "amdgpu.dcdebugmask=0x20000"
+            "audit=0"
+        ];
+    };
 }

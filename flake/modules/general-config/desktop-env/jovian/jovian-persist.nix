@@ -34,10 +34,10 @@
 # /persist/etc/hhd, so whatever was set before this landed needs setting once
 # more after it does.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = {
-            environment.persistence."/persist".directories = [ "/etc/hhd" ];
-        };
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = {
+        environment.persistence."/persist".directories = [ "/etc/hhd" ];
+    };
 }

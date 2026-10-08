@@ -40,29 +40,29 @@
 # everything reading config.home.packages (home.path's buildEnv included)
 # sees the filtered list.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }: {
-            options.home.packages = lib.mkOption {
-                apply = packages:
-                    # hostPlatform, not the pkgs.stdenv.isDarwin alias used
-                    # elsewhere in this tree: availableOn takes a platform, and
-                    # taking both from the same place keeps the test and the
-                    # filter talking about one system.
-                    if !pkgs.stdenv.hostPlatform.isDarwin then packages
-                    else
-                        let
-                            split = lib.partition
-                                (lib.meta.availableOn pkgs.stdenv.hostPlatform)
-                                packages;
-                            names = map (p: p.pname or p.name or "<unnamed>") split.wrong;
-                        in
-                            lib.warnIf (split.wrong != [ ])
-                                ("home.packages: dropped ${toString (lib.length split.wrong)}"
-                                 + " package(s) unsupported on ${pkgs.stdenv.hostPlatform.system}: "
-                                 + lib.concatStringsSep " " (lib.sort (a: b: a < b) names))
-                                split.right;
-            };
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }: {
+        options.home.packages = lib.mkOption {
+            apply = packages:
+                # hostPlatform, not the pkgs.stdenv.isDarwin alias used
+                # elsewhere in this tree: availableOn takes a platform, and
+                # taking both from the same place keeps the test and the
+                # filter talking about one system.
+                if !pkgs.stdenv.hostPlatform.isDarwin then packages
+                else
+                let
+                    split = lib.partition
+                        (lib.meta.availableOn pkgs.stdenv.hostPlatform)
+                        packages;
+                    names = map (p: p.pname or p.name or "<unnamed>") split.wrong;
+                in
+                    lib.warnIf (split.wrong != [ ])
+                        ("home.packages: dropped ${toString (lib.length split.wrong)}"
+                         + " package(s) unsupported on ${pkgs.stdenv.hostPlatform.system}: "
+                         + lib.concatStringsSep " " (lib.sort (a: b: a < b) names))
+                        split.right;
         };
+    };
 }

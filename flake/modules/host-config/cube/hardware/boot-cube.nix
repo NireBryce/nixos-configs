@@ -8,16 +8,16 @@
 # this file is meant to be full parity with boot-durandal.nix, just renamed
 # so the two don't merge.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = { pkgs, ... }: {
-            environment.systemPackages = with pkgs; [
-            sbctl # secure boot ctl
-            ];
-            boot.loader = {
-                systemd-boot.enable = lib.mkDefault true;
-                efi.canTouchEfiVariables = lib.mkDefault true;
-            };
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+        environment.systemPackages = with pkgs; [
+        sbctl # secure boot ctl
+        ];
+        boot.loader = {
+            systemd-boot.enable = lib.mkDefault true;
+            efi.canTouchEfiVariables = lib.mkDefault true;
         };
+    };
 }

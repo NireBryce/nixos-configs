@@ -6,43 +6,43 @@
 # plasma6 from jovian.nix alone. See the history block at the bottom for what
 # that cost.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = { pkgs, ... }: {
-            # Plasma 6 and the KDE bits shared by every desktop host
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+        # Plasma 6 and the KDE bits shared by every desktop host
 
-            services.xserver.enable = true; # TODO: I think this is still needed for xwayland
+        services.xserver.enable = true; # TODO: I think this is still needed for xwayland
 
-            # Enable the KDE Desktop Environment and set wayland.
-            services.desktopManager.plasma6.enable = true;
+        # Enable the KDE Desktop Environment and set wayland.
+        services.desktopManager.plasma6.enable = true;
 
-            networking = {
-                networkmanager.enable = lib.mkDefault true; # Needs to be 'true' for KDE networking
-            };
-
-            # make GTK apps obey theme settings
-            programs.dconf.enable = true;
-
-            # fix electron fonts? https://github.com/electron/electron/issues/31797
-            environment.systemPackages = with pkgs; [
-                # kdePackages.xdg-desktop-portal-kde  # lives in xdg-portals
-                kdePackages.spectacle # screenshot tool                          https://invent.kde.org/graphics/spectacle
-                kdePackages.konqueror # one of the best `info` file pagers        https://invent.kde.org/network/konqueror
-                kdePackages.qttools
-                kdePackages.partitionmanager
-                kdePackages.plasma-disks # SMART wear/failure monitor, systray notifications -- https://invent.kde.org/plasma/plasma-disks
-                                         # needs `smartctl` on the *system* PATH; smartd.nix (system/storage) provides it.
-                kdePackages.kcharselect # symbol picker, may need to be kdePackages.kcharselect
-                polonium # tiling wm
-                kdePackages.krohnkite # other tiling wm
-                libinput # kde middle mouse scroll fix requires this
-            ];
-
-            environment.sessionVariables = {
-                GTK_USE_PORTAL = 1;
-            };
+        networking = {
+            networkmanager.enable = lib.mkDefault true; # Needs to be 'true' for KDE networking
         };
+
+        # make GTK apps obey theme settings
+        programs.dconf.enable = true;
+
+        # fix electron fonts? https://github.com/electron/electron/issues/31797
+        environment.systemPackages = with pkgs; [
+            # kdePackages.xdg-desktop-portal-kde  # lives in xdg-portals
+            kdePackages.spectacle # screenshot tool                          https://invent.kde.org/graphics/spectacle
+            kdePackages.konqueror # one of the best `info` file pagers        https://invent.kde.org/network/konqueror
+            kdePackages.qttools
+            kdePackages.partitionmanager
+            kdePackages.plasma-disks # SMART wear/failure monitor, systray notifications -- https://invent.kde.org/plasma/plasma-disks
+                                     # needs `smartctl` on the *system* PATH; smartd.nix (system/storage) provides it.
+            kdePackages.kcharselect # symbol picker, may need to be kdePackages.kcharselect
+            polonium # tiling wm
+            kdePackages.krohnkite # other tiling wm
+            libinput # kde middle mouse scroll fix requires this
+        ];
+
+        environment.sessionVariables = {
+            GTK_USE_PORTAL = 1;
+        };
+    };
 }
 
 # ── history ─────────────────────────────────────────────────────────────────

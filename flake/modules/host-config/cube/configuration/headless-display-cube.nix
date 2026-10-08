@@ -21,19 +21,19 @@
 # The modeline is CEA-861 VIC 16, 1920x1080@60 (148.5 MHz). Names are
 # capped at 12 characters by the module.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = {
-            # # description = "cube: forced HDMI-A-1 with a 1080p60 EDID, plus Plasma autologin, so Sunshine streams headless";
-            hardware.display = {
-                edid.modelines."cube1080p60" = "148.50  1920 2008 2052 2200  1080 1084 1089 1125  +hsync +vsync";
-                outputs."HDMI-A-1"           = { edid = "cube1080p60.bin"; mode = "e"; };
-            };
-
-            services.displayManager.autoLogin = {
-                enable = true;
-                user   = "elly";
-            };
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = {
+        # # description = "cube: forced HDMI-A-1 with a 1080p60 EDID, plus Plasma autologin, so Sunshine streams headless";
+        hardware.display = {
+            edid.modelines."cube1080p60" = "148.50  1920 2008 2052 2200  1080 1084 1089 1125  +hsync +vsync";
+            outputs."HDMI-A-1"           = { edid = "cube1080p60.bin"; mode = "e"; };
         };
+
+        services.displayManager.autoLogin = {
+            enable = true;
+            user   = "elly";
+        };
+    };
 }

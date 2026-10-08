@@ -11,14 +11,14 @@
 # Platform check 2026-09-07: nixpkgs builds it on aarch64-darwin and no
 # Homebrew cask collides (`just available mosh`), so no guard needed.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
-            # mosh: remote shell that keeps the session across roaming and
-            # intermittent connectivity
-            home.packages = with pkgs; [
-                mosh
-            ];
-        };
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
+        # mosh: remote shell that keeps the session across roaming and
+        # intermittent connectivity
+        home.packages = with pkgs; [
+            mosh
+        ];
+    };
 }

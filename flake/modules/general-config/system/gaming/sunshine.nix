@@ -53,19 +53,19 @@
 # always-ready-to-stream was judged worth a few seconds of login lag. Revisit
 # if that tradeoff stops feeling worth it.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        # `{ ... }:` kept over statix's suggested `_:` -- deliberate, see
-        # wiki/module-style-guide.md's "`{ ... }:` on an inner module lambda".
-        flake.modules.nixos.${moduleName} = { ... }: {
-            # # description = "Sunshine: host a Moonlight game-stream session, reachable only over Tailscale";
-            services.sunshine = {
-                enable      = true;
-                autoStart   = true; # runs as a systemd user service, not launched by hand --
-                                    # see the login-lag tradeoff in the header above
-                capSysAdmin = true; # KMS screen capture without running the service as root
-                # openFirewall deliberately omitted -- see header.
-            };
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    # `{ ... }:` kept over statix's suggested `_:` -- deliberate, see
+    # wiki/module-style-guide.md's "`{ ... }:` on an inner module lambda".
+    flake.modules.nixos.${moduleName} = { ... }: {
+        # # description = "Sunshine: host a Moonlight game-stream session, reachable only over Tailscale";
+        services.sunshine = {
+            enable      = true;
+            autoStart   = true; # runs as a systemd user service, not launched by hand --
+                                # see the login-lag tradeoff in the header above
+            capSysAdmin = true; # KMS screen capture without running the service as root
+            # openFirewall deliberately omitted -- see header.
         };
+    };
 }

@@ -13,14 +13,14 @@
 # deprecated in 26.11 and errors by name, the same way systemd.sleep.extraConfig
 # did.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = {
-            # ceiling, not retention -- see header
-            systemd.coredump.settings.Coredump = {
-                MaxUse   = "2G";
-                KeepFree = "1G";
-            };
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = {
+        # ceiling, not retention -- see header
+        systemd.coredump.settings.Coredump = {
+            MaxUse   = "2G";
+            KeepFree = "1G";
         };
+    };
 }

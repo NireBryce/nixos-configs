@@ -11,11 +11,11 @@
 # is the whole switch. If Tailscale is down on tenacity, nothing can ssh in
 # -- use the machine's own console.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = {
-            # # description = "tenacity: sshd reachable over tailscale0 only";
-            services.openssh.openFirewall = false;
-        };
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = {
+        # # description = "tenacity: sshd reachable over tailscale0 only";
+        services.openssh.openFirewall = false;
+    };
 }

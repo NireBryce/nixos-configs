@@ -10,11 +10,11 @@
 # the first activation has no live file to collide with -- unlike
 # networkmanager-persist.nix's secret_key.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = { config, lib, ... }:
-            lib.mkIf (config.boot.initrd.systemd.services ? restore-root) {
-                environment.persistence."/persist".directories = [ "/etc/mullvad-vpn" ];
-            };
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = { config, lib, ... }:
+        lib.mkIf (config.boot.initrd.systemd.services ? restore-root) {
+            environment.persistence."/persist".directories = [ "/etc/mullvad-vpn" ];
+        };
 }

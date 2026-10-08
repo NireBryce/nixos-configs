@@ -14,12 +14,12 @@
 # cache in devenv.yaml or a flake's nixConfig: getting one back means
 # trusting its key daemon-wide here again.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = { pkgs, ... }: {
-            environment.systemPackages = with pkgs; [
-                devenv
-            ];
-        };
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+        environment.systemPackages = with pkgs; [
+            devenv
+        ];
+    };
 }

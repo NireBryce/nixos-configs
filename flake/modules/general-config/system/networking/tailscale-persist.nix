@@ -40,11 +40,11 @@
 # see that file's "OPT-IN: HOSTS WITHOUT IMPERMANENCE ARE EXEMPT" header note
 # for why that specific signal and not something else.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = { config, lib, ... }:
-            lib.mkIf (config.boot.initrd.systemd.services ? restore-root) {
-                environment.persistence."/persist".directories = [ "/var/lib/tailscale" ];
-            };
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = { config, lib, ... }:
+        lib.mkIf (config.boot.initrd.systemd.services ? restore-root) {
+            environment.persistence."/persist".directories = [ "/var/lib/tailscale" ];
+        };
 }
