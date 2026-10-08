@@ -52,17 +52,17 @@ in {
                 # filter talking about one system.
                 if !pkgs.stdenv.hostPlatform.isDarwin then packages
                 else
-                    let
-                        split = lib.partition
-                            (lib.meta.availableOn pkgs.stdenv.hostPlatform)
-                            packages;
-                        names = map (p: p.pname or p.name or "<unnamed>") split.wrong;
-                    in
-                        lib.warnIf (split.wrong != [ ])
-                            ("home.packages: dropped ${toString (lib.length split.wrong)}"
-                             + " package(s) unsupported on ${pkgs.stdenv.hostPlatform.system}: "
-                             + lib.concatStringsSep " " (lib.sort (a: b: a < b) names))
-                            split.right;
+                let
+                    split = lib.partition
+                        (lib.meta.availableOn pkgs.stdenv.hostPlatform)
+                        packages;
+                    names = map (p: p.pname or p.name or "<unnamed>") split.wrong;
+                in
+                    lib.warnIf (split.wrong != [ ])
+                        ("home.packages: dropped ${toString (lib.length split.wrong)}"
+                         + " package(s) unsupported on ${pkgs.stdenv.hostPlatform.system}: "
+                         + lib.concatStringsSep " " (lib.sort (a: b: a < b) names))
+                        split.right;
         };
     };
 }

@@ -33,63 +33,63 @@ let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 in {
     flake.modules.homeManager.${moduleName} = { pkgs, ... }:
-        let
-            kp = pkgs.kdePackages;
+    let
+        kp = pkgs.kdePackages;
 
-            stickykeysLockWindow = pkgs.stdenv.mkDerivation {
-                pname = "kwin-stickykeys-lock-window";
-                inherit (kp.kwin) version src;
-                patches = [ ./stickykeys-lock-window.patch ];
+        stickykeysLockWindow = pkgs.stdenv.mkDerivation {
+            pname = "kwin-stickykeys-lock-window";
+            inherit (kp.kwin) version src;
+            patches = [ ./stickykeys-lock-window.patch ];
 
-                # Replaces the plugin's in-tree CMakeLists (which assumes
-                # kwin's own build: the `kwin` target, kwin's compiler
-                # settings) with a standalone one against the installed
-                # KWin package. CXX_STANDARD matches kwin's top-level
-                # CMakeLists; its headers need C++20 or later.
-                postPatch = ''
-                    cd src/plugins/stickykeys
-                    cat > CMakeLists.txt <<'EOF'
-                    cmake_minimum_required(VERSION 3.16)
-                    project(StickyKeysLockWindow CXX)
-                    set(CMAKE_CXX_STANDARD 23)
-                    set(CMAKE_CXX_STANDARD_REQUIRED ON)
-                    find_package(ECM REQUIRED NO_MODULE)
-                    set(CMAKE_MODULE_PATH ''${ECM_MODULE_PATH})
-                    include(KDEInstallDirs)
-                    include(KDECMakeSettings)
-                    include(KDECompilerSettings NO_POLICY_SCOPE)
-                    include(ECMQtDeclareLoggingCategory)
-                    find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
-                    find_package(KWin REQUIRED)
-                    find_package(KF6 REQUIRED COMPONENTS CoreAddons WindowSystem I18n Notifications)
-                    find_package(XKB REQUIRED)
-                    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ''${CMAKE_BINARY_DIR}/bin)
-                    kcoreaddons_add_plugin(StickyKeysLockWindowPlugin INSTALL_NAMESPACE "kwin/plugins")
-                    ecm_qt_declare_logging_category(StickyKeysLockWindowPlugin
-                        HEADER stickykeys_debug.h
-                        IDENTIFIER KWIN_STICKYKEYS
-                        CATEGORY_NAME kwin_stickykeys
-                        DEFAULT_SEVERITY Warning
-                    )
-                    target_sources(StickyKeysLockWindowPlugin PRIVATE main.cpp stickykeys.cpp)
-                    target_link_libraries(StickyKeysLockWindowPlugin PRIVATE KWin::kwin KF6::WindowSystem KF6::I18n KF6::Notifications XKB::XKB)
-                    EOF
-                '';
+            # Replaces the plugin's in-tree CMakeLists (which assumes
+            # kwin's own build: the `kwin` target, kwin's compiler
+            # settings) with a standalone one against the installed
+            # KWin package. CXX_STANDARD matches kwin's top-level
+            # CMakeLists; its headers need C++20 or later.
+            postPatch = ''
+                cd src/plugins/stickykeys
+                cat > CMakeLists.txt <<'EOF'
+                cmake_minimum_required(VERSION 3.16)
+                project(StickyKeysLockWindow CXX)
+                set(CMAKE_CXX_STANDARD 23)
+                set(CMAKE_CXX_STANDARD_REQUIRED ON)
+                find_package(ECM REQUIRED NO_MODULE)
+                set(CMAKE_MODULE_PATH ''${ECM_MODULE_PATH})
+                include(KDEInstallDirs)
+                include(KDECMakeSettings)
+                include(KDECompilerSettings NO_POLICY_SCOPE)
+                include(ECMQtDeclareLoggingCategory)
+                find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+                find_package(KWin REQUIRED)
+                find_package(KF6 REQUIRED COMPONENTS CoreAddons WindowSystem I18n Notifications)
+                find_package(XKB REQUIRED)
+                set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ''${CMAKE_BINARY_DIR}/bin)
+                kcoreaddons_add_plugin(StickyKeysLockWindowPlugin INSTALL_NAMESPACE "kwin/plugins")
+                ecm_qt_declare_logging_category(StickyKeysLockWindowPlugin
+                    HEADER stickykeys_debug.h
+                    IDENTIFIER KWIN_STICKYKEYS
+                    CATEGORY_NAME kwin_stickykeys
+                    DEFAULT_SEVERITY Warning
+                )
+                target_sources(StickyKeysLockWindowPlugin PRIVATE main.cpp stickykeys.cpp)
+                target_link_libraries(StickyKeysLockWindowPlugin PRIVATE KWin::kwin KF6::WindowSystem KF6::I18n KF6::Notifications XKB::XKB)
+                EOF
+            '';
 
-                nativeBuildInputs = with pkgs; [ cmake ninja pkg-config kp.extra-cmake-modules kp.qtbase.dev ];
-                buildInputs       = with pkgs; [ kp.kwin kp.kcoreaddons kp.kwindowsystem kp.ki18n kp.knotifications libxkbcommon ];
-                dontWrapQtApps    = true; # a plugin, nothing to wrap
-            };
-        in {
-            # # description = "sticky keys lock only on a quick double-tap: patched kwin plugin, built alone"
-
-            # lib/qt-6/plugins of the per-user profile is on the session's
-            # QT_PLUGIN_PATH, where kwin's plugin search finds it.
-            home.packages = [ stickykeysLockWindow ];
-
-            programs.plasma.configFile.kwinrc.Plugins = {
-                StickyKeysPluginEnabled           = false;
-                StickyKeysLockWindowPluginEnabled = true;
-            };
+            nativeBuildInputs = with pkgs; [ cmake ninja pkg-config kp.extra-cmake-modules kp.qtbase.dev ];
+            buildInputs       = with pkgs; [ kp.kwin kp.kcoreaddons kp.kwindowsystem kp.ki18n kp.knotifications libxkbcommon ];
+            dontWrapQtApps    = true; # a plugin, nothing to wrap
         };
+    in {
+        # # description = "sticky keys lock only on a quick double-tap: patched kwin plugin, built alone"
+
+        # lib/qt-6/plugins of the per-user profile is on the session's
+        # QT_PLUGIN_PATH, where kwin's plugin search finds it.
+        home.packages = [ stickykeysLockWindow ];
+
+        programs.plasma.configFile.kwinrc.Plugins = {
+            StickyKeysPluginEnabled           = false;
+            StickyKeysLockWindowPluginEnabled = true;
+        };
+    };
 }

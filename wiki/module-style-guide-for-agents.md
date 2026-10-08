@@ -49,6 +49,10 @@ in {
 - Opening brackets on the same line as whatever causes them.
 - Four-space indent. Top-level `let` / `in {` at column 0, level with the
   closing `}`; the body one level in.
+- A nested `let` / `in` sits level with the line that opens it (lambda, `=`,
+  `else`) and with the bracket closing the `in` expression, never a level
+  deeper: an extra level with no closing bracket of its own reads as a
+  missing bracket.
 - `with pkgs; [ ... ]`, one package per line, no `pkgs.` prefix inside.
 - **Aligned `=` columns** for runs of related assignments — match the
   surrounding block, don't apply it everywhere. **This is why `nix fmt` is

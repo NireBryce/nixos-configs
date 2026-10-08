@@ -44,21 +44,21 @@ in {
     # race *again* later in the same session, when you next run
     # `<carapace-covered-command> --help`.
     flake.modules.homeManager.${moduleName} = { pkgs, ... }:
-        let
-            # carapace --list needs no $HOME/network -- checked with
-            # both stripped, in a shell matching what a Nix build
-            # sandbox gives it -- so this is a legitimate, reproducible
-            # build-time step, not something reaching outside the
-            # sandbox.
-            ignoreConfig = pkgs.runCommand "cod-carapace-ignore.toml" {
-                nativeBuildInputs = [ pkgs.carapace pkgs.jq ];
-            } ''
-                carapace --list | jq -r '
-                    keys[]
-                    | "[[rule]]\nexecutable = \"" + . + "\"\npolicy = \"ignore\"\n"
-                ' > $out
-            '';
-        in {
-            home.file.".config/cod/config.toml".source = ignoreConfig;
-        };
+    let
+        # carapace --list needs no $HOME/network -- checked with
+        # both stripped, in a shell matching what a Nix build
+        # sandbox gives it -- so this is a legitimate, reproducible
+        # build-time step, not something reaching outside the
+        # sandbox.
+        ignoreConfig = pkgs.runCommand "cod-carapace-ignore.toml" {
+            nativeBuildInputs = [ pkgs.carapace pkgs.jq ];
+        } ''
+            carapace --list | jq -r '
+                keys[]
+                | "[[rule]]\nexecutable = \"" + . + "\"\npolicy = \"ignore\"\n"
+            ' > $out
+        '';
+    in {
+        home.file.".config/cod/config.toml".source = ignoreConfig;
+    };
 }

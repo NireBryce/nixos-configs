@@ -12,15 +12,15 @@ in {
     };
     
     flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }:
-        let
-            # A real file rather than inlined, same reasoning as
-            # blesh.nix's carapaceDescBash: it does textual surgery on
-            # carapace's own generated function via ${...} parameter
-            # expansions, and every one would need ''${...} escaping
-            # inside a Nix '' string.
-            carapaceCompleterReadFix = pkgs.writeText "carapace-completer-read-fix.bash"
-                (builtins.readFile ./carapace-completer-read-fix.bash);
-        in {
+    let
+        # A real file rather than inlined, same reasoning as
+        # blesh.nix's carapaceDescBash: it does textual surgery on
+        # carapace's own generated function via ${...} parameter
+        # expansions, and every one would need ''${...} escaping
+        # inside a Nix '' string.
+        carapaceCompleterReadFix = pkgs.writeText "carapace-completer-read-fix.bash"
+            (builtins.readFile ./carapace-completer-read-fix.bash);
+    in {
         # bash line editor, allows zsh-like line editor tricks and bindings
         home.packages = with pkgs; [
             blesh

@@ -6,30 +6,30 @@ in {
     # until they were merged here -- home.file.<n>.text is types.lines, so
     # both definitions concatenated and every ble-import below ran twice.
     flake.modules.homeManager.${moduleName} = { pkgs, ... }:
-        let
-            # A real file rather than inlined into the .blerc string
-            # below on purpose: this script is full of bash `${...}`
-            # parameter expansions, and every one of those would need
-            # escaping as ''${...} inside a Nix '' string. Reading it
-            # from disk means its content is never touched by Nix's
-            # string interpolation at all.
-            carapaceDescBash = pkgs.writeText "carapace-desc.bash"
-                (builtins.readFile ./carapace-desc.bash);
+    let
+        # A real file rather than inlined into the .blerc string
+        # below on purpose: this script is full of bash `${...}`
+        # parameter expansions, and every one of those would need
+        # escaping as ''${...} inside a Nix '' string. Reading it
+        # from disk means its content is never touched by Nix's
+        # string interpolation at all.
+        carapaceDescBash = pkgs.writeText "carapace-desc.bash"
+            (builtins.readFile ./carapace-desc.bash);
 
-            # Same reasoning, same shape, for cod's completions (the
-            # package comes from
-            # packages-config/shell-apps/completions/cod-completions.nix). cod
-            # stores no descriptions anywhere, so the data is ours:
-            # cod-desc.tsv is a curated command<TAB>candidate<TAB>
-            # description table (extend via `just cod-desc draft` --
-            # skill cod-completions has the workflow), the advice reads
-            # it at completion time through NIRE_COD_DESC_TSV, set in
-            # the .blerc string below before the deferred import fires.
-            codDescTsv = pkgs.writeText "cod-desc.tsv"
-                (builtins.readFile ./cod-desc.tsv);
-            codDescBash = pkgs.writeText "cod-desc.bash"
-                (builtins.readFile ./cod-desc.bash);
-        in {
+        # Same reasoning, same shape, for cod's completions (the
+        # package comes from
+        # packages-config/shell-apps/completions/cod-completions.nix). cod
+        # stores no descriptions anywhere, so the data is ours:
+        # cod-desc.tsv is a curated command<TAB>candidate<TAB>
+        # description table (extend via `just cod-desc draft` --
+        # skill cod-completions has the workflow), the advice reads
+        # it at completion time through NIRE_COD_DESC_TSV, set in
+        # the .blerc string below before the deferred import fires.
+        codDescTsv = pkgs.writeText "cod-desc.tsv"
+            (builtins.readFile ./cod-desc.tsv);
+        codDescBash = pkgs.writeText "cod-desc.bash"
+            (builtins.readFile ./cod-desc.bash);
+    in {
         # bash line editor, allows zsh-like line editor tricks and bindings.
         #
         # There is no `programs.bash.blesh` option -- Home Manager has no

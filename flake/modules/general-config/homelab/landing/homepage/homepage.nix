@@ -46,21 +46,21 @@ let
     };
 
     proxiedSite = vhosts: label: title:
-        let
-            matches = builtins.filter
-                (v: lib.hasInfix label v && lib.hasInfix "." v)
-                vhosts;
-        in
-            if matches == []
-            then builtins.throw "homepage services: no caddy vhost matches '${label}' -- the service moved or was renamed; update homepage.nix's `proxied` in the same change (issue #221)"
-            else {
-                ${title} = {
-                    href = "https://${builtins.head matches}/";
-                    # Same URL as href: the card then shows live
-                    # status + latency, checked through the proxy.
-                    siteMonitor = "https://${builtins.head matches}/";
-                };
+    let
+        matches = builtins.filter
+            (v: lib.hasInfix label v && lib.hasInfix "." v)
+            vhosts;
+    in
+        if matches == []
+        then builtins.throw "homepage services: no caddy vhost matches '${label}' -- the service moved or was renamed; update homepage.nix's `proxied` in the same change (issue #221)"
+        else {
+            ${title} = {
+                href = "https://${builtins.head matches}/";
+                # Same URL as href: the card then shows live
+                # status + latency, checked through the proxy.
+                siteMonitor = "https://${builtins.head matches}/";
             };
+        };
 
     # The household's gcal calendars fed two calendar views here until
     # 2026-10-06: the real secret iCal addresses never landed (#299 --

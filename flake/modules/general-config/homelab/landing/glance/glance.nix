@@ -39,17 +39,17 @@ let
     };
 
     monitoredSite = vhosts: label: title:
-        let
-            matches = builtins.filter
-                (v: lib.hasInfix label v && lib.hasInfix "." v)
-                vhosts;
-        in
-            if matches == []
-            then builtins.throw "glance monitor: no caddy vhost matches '${label}' -- the service moved or was renamed; update glance.nix's `monitored` in the same change (issue #221)"
-            else {
-                inherit title;
-                url = "https://${builtins.head matches}/";
-            };
+    let
+        matches = builtins.filter
+            (v: lib.hasInfix label v && lib.hasInfix "." v)
+            vhosts;
+    in
+        if matches == []
+        then builtins.throw "glance monitor: no caddy vhost matches '${label}' -- the service moved or was renamed; update glance.nix's `monitored` in the same change (issue #221)"
+        else {
+            inherit title;
+            url = "https://${builtins.head matches}/";
+        };
 in {
     flake.modules.nixos.${moduleName} = { config, ... }: {
         # # description = "glance -- the service index for this host: what's running, whether it's up";

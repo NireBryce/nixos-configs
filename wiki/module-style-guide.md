@@ -64,6 +64,23 @@ left over from moving `flake.modules` out of `perSystem` without reflowing;
 the reflow dedented every line uniformly, which leaves `''` strings' content
 unchanged (every host's toplevel drvPath was identical before and after).
 
+The same goes for a nested `let`: `let` and `in` sit level with the line
+that opens them (a module lambda, an `=`, an `else`), and so does the bracket
+that closes the `in` expression:
+
+```nix
+    flake.modules.nixos.${moduleName} = { pkgs, ... }:
+    let
+        x = y;
+    in {
+        ...
+    };
+```
+
+Indenting the `let` a level deeper makes `in {` open an indentation level
+whose closing bracket sits a level further out, and a reader skimming the
+file sees a level with no bracket closing it and suspects one is missing.
+
 ## The module header
 
 Every module derives its own name from its filename rather than repeating it:
