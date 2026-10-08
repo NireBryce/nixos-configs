@@ -9,11 +9,11 @@
 # renders `disable-publishing=yes`, which also covers the workstation and
 # user-service records.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = {
-            # # description = "tenacity: mDNS resolve-only, publishes nothing";
-            services.avahi.publish.enable = lib.mkForce false;
-        };
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = {
+        # # description = "tenacity: mDNS resolve-only, publishes nothing";
+        services.avahi.publish.enable = lib.mkForce false;
+    };
 }

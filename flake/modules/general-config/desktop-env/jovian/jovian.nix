@@ -14,129 +14,129 @@
 # to "gamescope-wayland" -- the half of kde-desktop.nix this host must not
 # have.
 { config, lib, inputs, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 
-        # Bound out here, before the module body: inside it `config` is the
-        # NixOS config and `config.flake.modules...` would not resolve, while
-        # the body genuinely needs the inner one, for
-        # `config.jovian.decky-loader.extraPackages` -- the two must not be
-        # confused. See CLAUDE.md, "There are two different `config`s".
-        kdeBase = config.flake.modules.nixos.kde-base;
+    # Bound out here, before the module body: inside it `config` is the
+    # NixOS config and `config.flake.modules...` would not resolve, while
+    # the body genuinely needs the inner one, for
+    # `config.jovian.decky-loader.extraPackages` -- the two must not be
+    # confused. See CLAUDE.md, "There are two different `config`s".
+    kdeBase = config.flake.modules.nixos.kde-base;
 
-        # Imported by name, not left to the category: `desktop-env` is never
-        # imported whole (see tenacity-configuration.nix), so a sibling file is
-        # reachable through nothing and `just modules` reports it as an orphan.
-        # Naming it here is also what scopes it -- /etc/hhd persists exactly
-        # where handheld-daemon runs, because the two arrive together.
-        jovianPersist = config.flake.modules.nixos.jovian-persist;
-    in {
-        flake.modules.nixos.${moduleName} = { config, pkgs, ... }: {
-            # Jovian/SteamOS handheld: Steam session, decky, TDP control
-            imports = [
-                inputs.jovian.nixosModules.default # I think this is instead of needing them as module args?
-                kdeBase
-                jovianPersist
-            ];
+    # Imported by name, not left to the category: `desktop-env` is never
+    # imported whole (see tenacity-configuration.nix), so a sibling file is
+    # reachable through nothing and `just modules` reports it as an orphan.
+    # Naming it here is also what scopes it -- /etc/hhd persists exactly
+    # where handheld-daemon runs, because the two arrive together.
+    jovianPersist = config.flake.modules.nixos.jovian-persist;
+in {
+    flake.modules.nixos.${moduleName} = { config, pkgs, ... }: {
+        # Jovian/SteamOS handheld: Steam session, decky, TDP control
+        imports = [
+            inputs.jovian.nixosModules.default # I think this is instead of needing them as module args?
+            kdeBase
+            jovianPersist
+        ];
 
-            # `config.jovian.…`, not `inputs.jovian.…`: the Jovian flake exposes
-            # only nixosModules/legacyPackages/overlays/checks/devShells, no
-            # `decky-loader`. The intended referent is the module option this
-            # same file sets below.
-            systemd.services.decky-loader.environment.LD_LIBRARY_PATH =
-              lib.makeLibraryPath
-              config.jovian.decky-loader.extraPackages;
+        # `config.jovian.…`, not `inputs.jovian.…`: the Jovian flake exposes
+        # only nixosModules/legacyPackages/overlays/checks/devShells, no
+        # `decky-loader`. The intended referent is the module option this
+        # same file sets below.
+        systemd.services.decky-loader.environment.LD_LIBRARY_PATH =
+          lib.makeLibraryPath
+          config.jovian.decky-loader.extraPackages;
 
-            jovian = {
-                steam = {
-                    enable = true;
-                    autoStart = true;
-                    desktopSession = "plasma";
-                    user = "elly";
-                };
-                hardware.has.amd.gpu = true;
-
-                decky-loader = {
-                    enable = true;
-                    extraPackages = with pkgs; [
-                        # power-profiles-daemon
-                        inotify-tools
-                        libpulseaudio
-                        coreutils
-                        gamescope
-                        gamemode
-                        mangohud
-                        pciutils
-                        systemd
-                        gnugrep
-                        python3
-                        gnused
-                        procps
-                        steam
-                        gawk
-                        file
-                    ];
-                    extraPythonPackages = pythonPkgs: with pythonPkgs; [
-                        click
-                    ];
-                };
-            };
-
-            # Jovian brings its own gamescope, and the security wrapper that
-            # puts it first on PATH. gaming.nix's gamescopeSession.enable has
-            # nixpkgs' steam module mkDefault programs.gamescope on, which
-            # added nixpkgs' gamescope to systemPackages as a second, unused
-            # build (until 2026-09-27). Durandal and cube keep theirs.
-            programs.gamescope.enable = false;
-
-            # needed for tdp adjustor
-            boot.extraModulePackages = [ config.boot.kernelPackages.acpi_call ];
-
-            # hhd's own /etc/hhd state is persisted by jovian-persist.nix, a
-            # sibling of this file -- without it, fan curves and TDP profiles
-            # reset on every boot. Split out 2026-08-14; it was declared here
-            # until then.
-
-            services.handheld-daemon = {
+        jovian = {
+            steam = {
                 enable = true;
-                user = "elly"; # TODO: use flake-parts to make this declared centrally
-                # Leave this on, despite benign crashes it causes in a Plasma
-                # session: the journal fills with OVRL D-Bus and GL errors
-                # ending in "Overlay thread died", and hhd-ui dumps core about
-                # three times per boot. Expected, not a fault to chase -- the
-                # overlay is a *gamescope* overlay and only renders inside the
-                # Steam session; in desktop mode it has nothing to attach to.
-                # Upstream treats this as by design, there is no fix to wait
-                # for -- the advice is to use the desktop app instead, the
-                # same binary run directly.
-                #
-                # Turning it off is worse than the noise. This one flag gates
-                # both uses (nixos/modules/services/hardware/handheld-daemon.nix):
-                #
-                #     environment.systemPackages = [ cfg.package ]
-                #       ++ lib.optional cfg.ui.enable cfg.ui.package;
-                #
-                # so `false` removes the overlay from Game Mode *and* takes
-                # hhd-ui off PATH in Plasma, losing the tool upstream points
-                # you at. The daemon, TDP, controller, RGB and power button are
-                # unaffected by the overlay dying, and it is a thread inside
-                # hhd rather than a unit, so `systemctl --failed` stays clean.
-                # Two control surfaces already work on the desktop: `hhd-ui`,
-                # and a web UI on 127.0.0.1:5335.
-                #
-                # The coredumps are bounded by
-                # general-config/system/storage/coredump-limit.nix.
-                ui.enable = true;
-                adjustor = {
-                    enable = true;
-                    loadAcpiCallModule = true;
-                };
+                autoStart = true;
+                desktopSession = "plasma";
+                user = "elly";
             };
-            
-            systemd.services."power-profiles-daemon" = {
-                enable = false; # conflicts with adjustor in hhd
+            hardware.has.amd.gpu = true;
+
+            decky-loader = {
+                enable = true;
+                extraPackages = with pkgs; [
+                    # power-profiles-daemon
+                    inotify-tools
+                    libpulseaudio
+                    coreutils
+                    gamescope
+                    gamemode
+                    mangohud
+                    pciutils
+                    systemd
+                    gnugrep
+                    python3
+                    gnused
+                    procps
+                    steam
+                    gawk
+                    file
+                ];
+                extraPythonPackages = pythonPkgs: with pythonPkgs; [
+                    click
+                ];
             };
         };
+
+        # Jovian brings its own gamescope, and the security wrapper that
+        # puts it first on PATH. gaming.nix's gamescopeSession.enable has
+        # nixpkgs' steam module mkDefault programs.gamescope on, which
+        # added nixpkgs' gamescope to systemPackages as a second, unused
+        # build (until 2026-09-27). Durandal and cube keep theirs.
+        programs.gamescope.enable = false;
+
+        # needed for tdp adjustor
+        boot.extraModulePackages = [ config.boot.kernelPackages.acpi_call ];
+
+        # hhd's own /etc/hhd state is persisted by jovian-persist.nix, a
+        # sibling of this file -- without it, fan curves and TDP profiles
+        # reset on every boot. Split out 2026-08-14; it was declared here
+        # until then.
+
+        services.handheld-daemon = {
+            enable = true;
+            user = "elly"; # TODO: use flake-parts to make this declared centrally
+            # Leave this on, despite benign crashes it causes in a Plasma
+            # session: the journal fills with OVRL D-Bus and GL errors
+            # ending in "Overlay thread died", and hhd-ui dumps core about
+            # three times per boot. Expected, not a fault to chase -- the
+            # overlay is a *gamescope* overlay and only renders inside the
+            # Steam session; in desktop mode it has nothing to attach to.
+            # Upstream treats this as by design, there is no fix to wait
+            # for -- the advice is to use the desktop app instead, the
+            # same binary run directly.
+            #
+            # Turning it off is worse than the noise. This one flag gates
+            # both uses (nixos/modules/services/hardware/handheld-daemon.nix):
+            #
+            #     environment.systemPackages = [ cfg.package ]
+            #       ++ lib.optional cfg.ui.enable cfg.ui.package;
+            #
+            # so `false` removes the overlay from Game Mode *and* takes
+            # hhd-ui off PATH in Plasma, losing the tool upstream points
+            # you at. The daemon, TDP, controller, RGB and power button are
+            # unaffected by the overlay dying, and it is a thread inside
+            # hhd rather than a unit, so `systemctl --failed` stays clean.
+            # Two control surfaces already work on the desktop: `hhd-ui`,
+            # and a web UI on 127.0.0.1:5335.
+            #
+            # The coredumps are bounded by
+            # general-config/system/storage/coredump-limit.nix.
+            ui.enable = true;
+            adjustor = {
+                enable = true;
+                loadAcpiCallModule = true;
+            };
+        };
+        
+        systemd.services."power-profiles-daemon" = {
+            enable = false; # conflicts with adjustor in hhd
+        };
+    };
 }
 
 # more examples:

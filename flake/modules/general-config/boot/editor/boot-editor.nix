@@ -14,10 +14,10 @@
 # Named boot-editor, not editor.nix or boot.nix -- see boot-generations.nix's
 # header for the same-name merge this avoids.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = {
-            boot.loader.systemd-boot.editor = false;
-        };
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = {
+        boot.loader.systemd-boot.editor = false;
+    };
 }

@@ -36,73 +36,73 @@
 # erroring, the same collision tenacity's suffixed filename exists to avoid.
 # See CLAUDE.md's new-flake-module trap notes.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = { config, lib, modulesPath, ... }:
-    {
-      imports =
-        [ (modulesPath + "/installer/scan/not-detected.nix")
-        ];
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = { config, lib, modulesPath, ... }:
+{
+  imports =
+    [ (modulesPath + "/installer/scan/not-detected.nix")
+    ];
 
-      boot = {
-        initrd = {
-          availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
-          kernelModules = [ ];
-        };
-        kernelModules = [ "kvm-amd" ];
-        extraModulePackages = [ ];
+  boot = {
+    initrd = {
+      availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
+      kernelModules = [ ];
+    };
+    kernelModules = [ "kvm-amd" ];
+    extraModulePackages = [ ];
+  };
+
+  fileSystems = {
+    "/" =
+      { device = "/dev/disk/by-uuid/63dae095-fe6b-425e-90ec-5978a475d45e";
+        fsType = "btrfs";
+        options = [ "subvol=root" "compress=zstd" ];
       };
 
-      fileSystems = {
-        "/" =
-          { device = "/dev/disk/by-uuid/63dae095-fe6b-425e-90ec-5978a475d45e";
-            fsType = "btrfs";
-            options = [ "subvol=root" "compress=zstd" ];
-          };
-
-        "/nix" =
-          { device = "/dev/disk/by-uuid/63dae095-fe6b-425e-90ec-5978a475d45e";
-            fsType = "btrfs";
-            options = [ "subvol=nix" "compress=zstd" ];
-          };
-
-        "/persist" =
-          { device = "/dev/disk/by-uuid/63dae095-fe6b-425e-90ec-5978a475d45e";
-            fsType = "btrfs";
-            options = [ "subvol=persist" "compress=zstd" ];
-            neededForBoot = true;
-          };
-
-        "/var/log" =
-          { device = "/dev/disk/by-uuid/63dae095-fe6b-425e-90ec-5978a475d45e";
-            fsType = "btrfs";
-            options = [ "subvol=log" "compress=zstd" ];
-            neededForBoot = true;
-          };
-
-        "/home" =
-          { device = "/dev/disk/by-uuid/63dae095-fe6b-425e-90ec-5978a475d45e";
-            fsType = "btrfs";
-            options = [ "subvol=home" "compress=zstd" ];
-          };
-
-        "/boot" =
-          { device = "/dev/disk/by-uuid/8857-B380";
-            fsType = "vfat";
-            options = [ "fmask=0077" "dmask=0077" ]; # root-only: /boot/loader/random-seed lives here
-          };
+    "/nix" =
+      { device = "/dev/disk/by-uuid/63dae095-fe6b-425e-90ec-5978a475d45e";
+        fsType = "btrfs";
+        options = [ "subvol=nix" "compress=zstd" ];
       };
 
-      swapDevices =
-        [ { device = "/dev/disk/by-uuid/0eb40248-55cf-444a-b8ed-ede4c35da60b"; }
-        ];
+    "/persist" =
+      { device = "/dev/disk/by-uuid/63dae095-fe6b-425e-90ec-5978a475d45e";
+        fsType = "btrfs";
+        options = [ "subvol=persist" "compress=zstd" ];
+        neededForBoot = true;
+      };
 
-      networking.useDHCP = lib.mkDefault true;
+    "/var/log" =
+      { device = "/dev/disk/by-uuid/63dae095-fe6b-425e-90ec-5978a475d45e";
+        fsType = "btrfs";
+        options = [ "subvol=log" "compress=zstd" ];
+        neededForBoot = true;
+      };
 
-      nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-      hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-    }
+    "/home" =
+      { device = "/dev/disk/by-uuid/63dae095-fe6b-425e-90ec-5978a475d45e";
+        fsType = "btrfs";
+        options = [ "subvol=home" "compress=zstd" ];
+      };
+
+    "/boot" =
+      { device = "/dev/disk/by-uuid/8857-B380";
+        fsType = "vfat";
+        options = [ "fmask=0077" "dmask=0077" ]; # root-only: /boot/loader/random-seed lives here
+      };
+  };
+
+  swapDevices =
+    [ { device = "/dev/disk/by-uuid/0eb40248-55cf-444a-b8ed-ede4c35da60b"; }
+    ];
+
+  networking.useDHCP = lib.mkDefault true;
+
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+}
 ;}
 
 # ── history ─────────────────────────────────────────────────────────────────

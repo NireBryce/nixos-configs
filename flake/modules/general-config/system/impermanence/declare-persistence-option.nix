@@ -43,10 +43,10 @@
 # directory onto a sibling directory on the same filesystem, which is a
 # little redundant and entirely functional.
 { lib, inputs, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = {
-            imports = [ inputs.impermanence.nixosModule ];
-        };
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = {
+        imports = [ inputs.impermanence.nixosModule ];
+    };
 }

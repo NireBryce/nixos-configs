@@ -51,95 +51,95 @@
                             # outside it (hence randomEncryption there).
 }:
 { lib, ... }:
-    let
-        secureVol = lib.optionalAttrs includeSecureboot {
-            "/secureboot" = {
-                mountpoint = "/var/lib/sbctl";
-                mountOptions = [ "compress=zstd" "noatime" ];
-            };
+let
+    secureVol = lib.optionalAttrs includeSecureboot {
+        "/secureboot" = {
+            mountpoint = "/var/lib/sbctl";
+            mountOptions = [ "compress=zstd" "noatime" ];
         };
-        swapVol = lib.optionalAttrs (swapSize != null) {
-            "/swap" = {
-                mountpoint = "/.swapvol";
-                swap.swapfile.size = swapSize;
-            };
+    };
+    swapVol = lib.optionalAttrs (swapSize != null) {
+        "/swap" = {
+            mountpoint = "/.swapvol";
+            swap.swapfile.size = swapSize;
         };
-    in {
-        disko.devices.disk.main = {
-            type = "disk";
-            inherit device;
-            content = {
-                type = "gpt";
-                partitions = {
-                    ESP = {
-                        size = espSize;
-                        type = "EF00";
-                        content = {
-                            type = "filesystem";
-                            format = "vfat";
-                            mountpoint = "/boot";
-                            mountOptions = [ "umask=0077" ];
-                        };
+    };
+in {
+    disko.devices.disk.main = {
+        type = "disk";
+        inherit device;
+        content = {
+            type = "gpt";
+            partitions = {
+                ESP = {
+                    size = espSize;
+                    type = "EF00";
+                    content = {
+                        type = "filesystem";
+                        format = "vfat";
+                        mountpoint = "/boot";
+                        mountOptions = [ "umask=0077" ];
                     };
-                    luks = {
-                        size = "100%";
+                };
+                luks = {
+                    size = "100%";
+                    content = {
+                        type = "luks";
+                        name = luksName;
+                        settings.allowDiscards = true;
                         content = {
-                            type = "luks";
-                            name = luksName;
-                            settings.allowDiscards = true;
-                            content = {
-                                type = "btrfs";
-                                extraArgs = [ "-f" ];
-                                subvolumes = {
-                                    "/root" = {
-                                        mountpoint = "/";
-                                        mountOptions = [ "compress=zstd" "noatime" ];
-                                    };
-                                    "/home" = {
-                                        mountpoint = "/home";
-                                        mountOptions = [ "compress=zstd" "noatime" ];
-                                    };
-                                    "/nix" = {
-                                        mountpoint = "/nix";
-                                        mountOptions = [ "compress=zstd" "noatime" ];
-                                    };
-                                    "/persist" = {
-                                        mountpoint = "/persist";
-                                        mountOptions = [ "compress=zstd" "noatime" ];
-                                    };
-                                    "/log" = {
-                                        mountpoint = "/var/log";
-                                        mountOptions = [ "compress=zstd" "noatime" ];
-                                    };
-                                    # No mountpoint: created, never mounted. The
-                                    # snapshot source WARN-impermanence.nix's
-                                    # initrd rollback unit reads from on every
-                                    # boot, not a filesystem entry.
-                                    "/root-blank" = { };
-                                } // secureVol // swapVol;
-                            };
+                            type = "btrfs";
+                            extraArgs = [ "-f" ];
+                            subvolumes = {
+                                "/root" = {
+                                    mountpoint = "/";
+                                    mountOptions = [ "compress=zstd" "noatime" ];
+                                };
+                                "/home" = {
+                                    mountpoint = "/home";
+                                    mountOptions = [ "compress=zstd" "noatime" ];
+                                };
+                                "/nix" = {
+                                    mountpoint = "/nix";
+                                    mountOptions = [ "compress=zstd" "noatime" ];
+                                };
+                                "/persist" = {
+                                    mountpoint = "/persist";
+                                    mountOptions = [ "compress=zstd" "noatime" ];
+                                };
+                                "/log" = {
+                                    mountpoint = "/var/log";
+                                    mountOptions = [ "compress=zstd" "noatime" ];
+                                };
+                                # No mountpoint: created, never mounted. The
+                                # snapshot source WARN-impermanence.nix's
+                                # initrd rollback unit reads from on every
+                                # boot, not a filesystem entry.
+                                "/root-blank" = { };
+                            } // secureVol // swapVol;
                         };
                     };
                 };
             };
         };
+    };
 
-        # disko does not set neededForBoot -- both real hosts add it by hand
-        # alongside their own generated fileSystems; /root-blank has no
-        # mountpoint, so it never gets a fileSystems entry to add this to.
-        #
-        # `//` merges attrsets shallowly (replaces a key present on both
-        # sides, does not combine), so `//` must apply to the value AT
-        # fileSystems, not the two top-level module attrsets:
-        # `{ fileSystems = {...}; } // lib.optionalAttrs cond { fileSystems = {...}; }`
-        # would let the second fileSystems silently replace the first
-        # whenever cond is true, dropping persist/log entirely (checked with
-        # includeSecureboot = true: sbctl's neededForBoot came back true,
-        # persist/log's false).
-        fileSystems = {
-            "/persist".neededForBoot = true;
-            "/var/log".neededForBoot = true;
-        } // lib.optionalAttrs includeSecureboot {
-            "/var/lib/sbctl".neededForBoot = true;
-        };
-    }
+    # disko does not set neededForBoot -- both real hosts add it by hand
+    # alongside their own generated fileSystems; /root-blank has no
+    # mountpoint, so it never gets a fileSystems entry to add this to.
+    #
+    # `//` merges attrsets shallowly (replaces a key present on both
+    # sides, does not combine), so `//` must apply to the value AT
+    # fileSystems, not the two top-level module attrsets:
+    # `{ fileSystems = {...}; } // lib.optionalAttrs cond { fileSystems = {...}; }`
+    # would let the second fileSystems silently replace the first
+    # whenever cond is true, dropping persist/log entirely (checked with
+    # includeSecureboot = true: sbctl's neededForBoot came back true,
+    # persist/log's false).
+    fileSystems = {
+        "/persist".neededForBoot = true;
+        "/var/log".neededForBoot = true;
+    } // lib.optionalAttrs includeSecureboot {
+        "/var/lib/sbctl".neededForBoot = true;
+    };
+}

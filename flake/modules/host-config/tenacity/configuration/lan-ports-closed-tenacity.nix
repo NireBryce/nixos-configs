@@ -14,16 +14,16 @@
 # does while running the daemon -- so turning the NixOS half off here loses
 # only the ports.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = {
-            # # description = "tenacity: KDE Connect and Steam LAN ports closed; tailnet only";
-            programs.kdeconnect.enable = lib.mkForce false;
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = {
+        # # description = "tenacity: KDE Connect and Steam LAN ports closed; tailnet only";
+        programs.kdeconnect.enable = lib.mkForce false;
 
-            programs.steam = {
-                remotePlay.openFirewall                = lib.mkForce false;
-                localNetworkGameTransfers.openFirewall = lib.mkForce false;
-            };
+        programs.steam = {
+            remotePlay.openFirewall                = lib.mkForce false;
+            localNetworkGameTransfers.openFirewall = lib.mkForce false;
         };
+    };
 }

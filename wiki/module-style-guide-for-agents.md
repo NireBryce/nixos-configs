@@ -1,6 +1,6 @@
 # Module style guide, for agents
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-08_
 
 Condensed from [module-style-guide.md](module-style-guide.md). Rules only.
 
@@ -27,12 +27,12 @@ Never hand-edit. By hand it is
 
 ```nix
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
-            ...
-        };
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
+        ...
+    };
 }
 ```
 
@@ -47,8 +47,8 @@ Never hand-edit. By hand it is
 ## Formatting
 
 - Opening brackets on the same line as whatever causes them.
-- Four-space indent. Module bodies sit one level deeper than necessary;
-  reindenting risks the `''` strings in the shell modules, so leave it.
+- Four-space indent. Top-level `let` / `in {` at column 0, level with the
+  closing `}`; the body one level in.
 - `with pkgs; [ ... ]`, one package per line, no `pkgs.` prefix inside.
 - **Aligned `=` columns** for runs of related assignments — match the
   surrounding block, don't apply it everywhere. **This is why `nix fmt` is

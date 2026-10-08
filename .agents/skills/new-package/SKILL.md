@@ -25,15 +25,15 @@ Hand-written, not generated. Follow a sibling file:
 
 ```nix
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
-                # <tool>: <one-line description, e.g. from nixpkgs meta.description>
-                home.packages = with pkgs; [
-                    <tool>
-                ];
-        };
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
+        # <tool>: <one-line description, e.g. from nixpkgs meta.description>
+        home.packages = with pkgs; [
+            <tool>
+        ];
+    };
 }
 ```
 

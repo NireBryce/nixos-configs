@@ -36,51 +36,51 @@
 # sessions died with "Bad owner or permissions on ~/.ssh/config" (hit
 # 2026-09-28). Hand edits to the file last only until the next switch.
 { config, lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 
-        # Outer `config` on purpose: the flake-parts config is what holds
-        # the host roster. Only the attribute names are read, which never
-        # forces a host's evaluation.
-        fleet = builtins.filter (lib.hasPrefix "nire-")
-            (builtins.attrNames config.flake.nixosConfigurations
-             ++ builtins.attrNames config.flake.darwinConfigurations);
+    # Outer `config` on purpose: the flake-parts config is what holds
+    # the host roster. Only the attribute names are read, which never
+    # forces a host's evaluation.
+    fleet = builtins.filter (lib.hasPrefix "nire-")
+        (builtins.attrNames config.flake.nixosConfigurations
+         ++ builtins.attrNames config.flake.darwinConfigurations);
 
-        tailnetName = host: "ts-${lib.removePrefix "nire-" host}";
+    tailnetName = host: "ts-${lib.removePrefix "nire-" host}";
 
-        sshOverlay = {
-            name       = "ssh";
-            completion.positional = [
-                (map (host: "${tailnetName host}\t${host} over the tailnet") fleet)
-            ];
+    sshOverlay = {
+        name       = "ssh";
+        completion.positional = [
+            (map (host: "${tailnetName host}\t${host} over the tailnet") fleet)
+        ];
+    };
+in {
+    # Inner `config`/`lib` are Home Manager's (`fleet` above already read
+    # the outer config; only HM's lib has `lib.hm.dag`).
+    flake.modules.homeManager.${moduleName} = { config, lib, pkgs, ... }: {
+        # # description = "ts-<x> tailnet names for every nire-<x> host, in ~/.ssh/config and ssh completion";
+        programs.ssh = {
+            enable              = true;
+            # No `Host *` defaults block: nothing here wants one, and HM
+            # warns until this is set either way.
+            enableDefaultConfig = false;
+            # Freeform: keys render verbatim, so a misspelled keyword
+            # evals clean and ssh ignores it -- read the rendered file
+            # back after changing this. (Not `matchBlocks`: deprecated
+            # in this HM, with an evaluation warning.)
+            settings            = lib.genAttrs (map tailnetName fleet)
+                (name: { HostName = name; });
         };
-    in {
-        # Inner `config`/`lib` are Home Manager's (`fleet` above already read
-        # the outer config; only HM's lib has `lib.hm.dag`).
-        flake.modules.homeManager.${moduleName} = { config, lib, pkgs, ... }: {
-            # # description = "ts-<x> tailnet names for every nire-<x> host, in ~/.ssh/config and ssh completion";
-            programs.ssh = {
-                enable              = true;
-                # No `Host *` defaults block: nothing here wants one, and HM
-                # warns until this is set either way.
-                enableDefaultConfig = false;
-                # Freeform: keys render verbatim, so a misspelled keyword
-                # evals clean and ssh ignores it -- read the rendered file
-                # back after changing this. (Not `matchBlocks`: deprecated
-                # in this HM, with an evaluation warning.)
-                settings            = lib.genAttrs (map tailnetName fleet)
-                    (name: { HostName = name; });
-            };
 
-            # Real file, not a symlink -- see the header.
-            home.file.".ssh/config".enable = false;
-            home.activation.sshConfigRealFile =
-                lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-                    run ${pkgs.coreutils}/bin/install -m 0600 \
-                        ${config.home.file.".ssh/config".source} "$HOME/.ssh/config"
-                '';
+        # Real file, not a symlink -- see the header.
+        home.file.".ssh/config".enable = false;
+        home.activation.sshConfigRealFile =
+            lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+                run ${pkgs.coreutils}/bin/install -m 0600 \
+                    ${config.home.file.".ssh/config".source} "$HOME/.ssh/config"
+            '';
 
-            # JSON is valid YAML, and toJSON gets the "\t" escape right.
-            xdg.configFile."carapace/overlays/ssh.yaml".text = builtins.toJSON sshOverlay;
-        };
+        # JSON is valid YAML, and toJSON gets the "\t" escape right.
+        xdg.configFile."carapace/overlays/ssh.yaml".text = builtins.toJSON sshOverlay;
+    };
 }

@@ -26,149 +26,149 @@
 # Kept in the wiki, not restated here: the run loop, labels, recovery --
 # wiki/categories/git-forge.md and sibling, wiki/homelab/forgejo.md.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = { pkgs, config, ... }: {
-            # # description = "cube-side support for the Forgejo Actions runner VM";
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = { pkgs, config, ... }: {
+        # # description = "cube-side support for the Forgejo Actions runner VM";
 
-            # Runs as root: virsh needs the system libvirtd, which the
-            # forgejo user cannot reach (polkit refuses it -- hit
-            # 2026-09-25, "authentication unavailable: no polkit agent
-            # available"). The register call alone drops to the forgejo
-            # user, through a secret file only that user can read.
-            #
-            # A switch that changes THIS script restarts the loop, and the
-            # new loop's first step recreates the guest -- killing any job
-            # in flight. A switch that changes only the guest does not: the
-            # guest's unit is never restarted by a switch (`autostart =
-            # false`), so the change lands on the next cycle.
-            systemd.services.forge-runner-cycle = {
-                description = "Run the Forgejo runner VM, one fresh VM and registration per job";
-                # After the admin bootstrap: `--scope elly` names a user that
-                # must already exist (forgejo.nix creates it).
-                after    = [ "forgejo.service" "forgejo-admin-bootstrap.service" "libvirtd.service" ];
-                wants    = [ "forgejo.service" "forgejo-admin-bootstrap.service" ];
-                requires = [ "libvirtd.service" ];
-                wantedBy = [ "multi-user.target" ];
-                path     = with pkgs; [ coreutils util-linux libvirt systemd ipset config.services.forgejo.package ];
+        # Runs as root: virsh needs the system libvirtd, which the
+        # forgejo user cannot reach (polkit refuses it -- hit
+        # 2026-09-25, "authentication unavailable: no polkit agent
+        # available"). The register call alone drops to the forgejo
+        # user, through a secret file only that user can read.
+        #
+        # A switch that changes THIS script restarts the loop, and the
+        # new loop's first step recreates the guest -- killing any job
+        # in flight. A switch that changes only the guest does not: the
+        # guest's unit is never restarted by a switch (`autostart =
+        # false`), so the change lands on the next cycle.
+        systemd.services.forge-runner-cycle = {
+            description = "Run the Forgejo runner VM, one fresh VM and registration per job";
+            # After the admin bootstrap: `--scope elly` names a user that
+            # must already exist (forgejo.nix creates it).
+            after    = [ "forgejo.service" "forgejo-admin-bootstrap.service" "libvirtd.service" ];
+            wants    = [ "forgejo.service" "forgejo-admin-bootstrap.service" ];
+            requires = [ "libvirtd.service" ];
+            wantedBy = [ "multi-user.target" ];
+            path     = with pkgs; [ coreutils util-linux libvirt systemd ipset config.services.forgejo.package ];
 
-                script = ''
-                    set -euo pipefail
-                    CONFIG=${config.services.forgejo.customDir}/conf/app.ini
-                    SHARE=/var/lib/forgejo-runner-share
-                    RUNDIR=/run/forge-runner-cycle
-                    # The guest's own ceiling is nix's 4h build timeout; this
-                    # is the backstop for a guest that never powers off.
-                    MAX_SECONDS=16200
+            script = ''
+                set -euo pipefail
+                CONFIG=${config.services.forgejo.customDir}/conf/app.ini
+                SHARE=/var/lib/forgejo-runner-share
+                RUNDIR=/run/forge-runner-cycle
+                # The guest's own ceiling is nix's 4h build timeout; this
+                # is the backstop for a guest that never powers off.
+                MAX_SECONDS=16200
 
-                    install -d -m 0700 "$SHARE"
-                    short=0
+                install -d -m 0700 "$SHARE"
+                short=0
 
-                    # Gauges for runner-alerts.nix, via node-exporter's
-                    # textfile collector. Best effort: never stops the loop.
-                    write_metrics() {
-                        local dir=/var/lib/node-exporter-textfile
-                        {
-                            echo "# TYPE forge_runner_last_cycle_seconds gauge"
-                            echo "forge_runner_last_cycle_seconds $1"
-                            echo "# TYPE forge_runner_short_cycle_streak gauge"
-                            echo "forge_runner_short_cycle_streak $short"
-                            echo "# TYPE forge_runner_last_cycle_end_timestamp_seconds gauge"
-                            echo "forge_runner_last_cycle_end_timestamp_seconds $(date +%s)"
-                        } > "$dir/.forge_runner_cycle.prom.tmp" 2>/dev/null \
-                            && chmod 0644 "$dir/.forge_runner_cycle.prom.tmp" \
-                            && mv -f "$dir/.forge_runner_cycle.prom.tmp" "$dir/forge_runner_cycle.prom" \
-                            || true
-                    }
-                    write_metrics 0
-                    install -d -m 0700 -o ${config.services.forgejo.user} -g ${config.services.forgejo.group} "$RUNDIR"
+                # Gauges for runner-alerts.nix, via node-exporter's
+                # textfile collector. Best effort: never stops the loop.
+                write_metrics() {
+                    local dir=/var/lib/node-exporter-textfile
+                    {
+                        echo "# TYPE forge_runner_last_cycle_seconds gauge"
+                        echo "forge_runner_last_cycle_seconds $1"
+                        echo "# TYPE forge_runner_short_cycle_streak gauge"
+                        echo "forge_runner_short_cycle_streak $short"
+                        echo "# TYPE forge_runner_last_cycle_end_timestamp_seconds gauge"
+                        echo "forge_runner_last_cycle_end_timestamp_seconds $(date +%s)"
+                    } > "$dir/.forge_runner_cycle.prom.tmp" 2>/dev/null \
+                        && chmod 0644 "$dir/.forge_runner_cycle.prom.tmp" \
+                        && mv -f "$dir/.forge_runner_cycle.prom.tmp" "$dir/forge_runner_cycle.prom" \
+                        || true
+                }
+                write_metrics 0
+                install -d -m 0700 -o ${config.services.forgejo.user} -g ${config.services.forgejo.group} "$RUNDIR"
 
-                    while true; do
-                        started=$(date +%s)
+                while true; do
+                    started=$(date +%s)
 
-                        secret=$(od -An -N20 -tx1 /dev/urandom | tr -d ' \n')
-                        ( umask 077
-                          printf '%s' "$secret" > "$RUNDIR/secret"
-                          printf '%s' "$secret" > "$SHARE/forgejo-runner-secret.new" )
-                        unset secret
-                        chown ${config.services.forgejo.user}:${config.services.forgejo.group} "$RUNDIR/secret"
+                    secret=$(od -An -N20 -tx1 /dev/urandom | tr -d ' \n')
+                    ( umask 077
+                      printf '%s' "$secret" > "$RUNDIR/secret"
+                      printf '%s' "$secret" > "$SHARE/forgejo-runner-secret.new" )
+                    unset secret
+                    chown ${config.services.forgejo.user}:${config.services.forgejo.group} "$RUNDIR/secret"
 
-                        # Prints the new runner's UUID to the journal -- not
-                        # secret (the admin UI shows it).
-                        runuser -u ${config.services.forgejo.user} -- \
-                            forgejo --config "$CONFIG" forgejo-cli actions register \
-                                --name forge-runner \
-                                --scope elly \
-                                --ephemeral \
-                                --secret-file "$RUNDIR/secret"
-                        # The CLI prints the UUID with no trailing newline;
-                        # without this, journald holds it until the next line.
-                        echo
-                        rm -f "$RUNDIR/secret"
-                        mv -f "$SHARE/forgejo-runner-secret.new" "$SHARE/forgejo-runner-secret"
+                    # Prints the new runner's UUID to the journal -- not
+                    # secret (the admin UI shows it).
+                    runuser -u ${config.services.forgejo.user} -- \
+                        forgejo --config "$CONFIG" forgejo-cli actions register \
+                            --name forge-runner \
+                            --scope elly \
+                            --ephemeral \
+                            --secret-file "$RUNDIR/secret"
+                    # The CLI prints the UUID with no trailing newline;
+                    # without this, journald holds it until the next line.
+                    echo
+                    rm -f "$RUNDIR/secret"
+                    mv -f "$SHARE/forgejo-runner-secret.new" "$SHARE/forgejo-runner-secret"
 
-                        # Empty the egress allowlist's address set
-                        # (vm-networking.nix, vm-egress-dns.nix): each job
-                        # starts able to reach only what it resolves itself.
-                        ipset flush vm-egress-allow 2>/dev/null || true
+                    # Empty the egress allowlist's address set
+                    # (vm-networking.nix, vm-egress-dns.nix): each job
+                    # starts able to reach only what it resolves itself.
+                    ipset flush vm-egress-allow 2>/dev/null || true
 
-                        # Fresh guest: dropping the stamp makes the
-                        # `ephemeral` activation destroy any running domain,
-                        # recreate the overlay, and start it.
-                        rm -f /run/libvirt-vm/forge-runner.stamp
-                        systemctl restart libvirt-vm-forge-runner.service
+                    # Fresh guest: dropping the stamp makes the
+                    # `ephemeral` activation destroy any running domain,
+                    # recreate the overlay, and start it.
+                    rm -f /run/libvirt-vm/forge-runner.stamp
+                    systemctl restart libvirt-vm-forge-runner.service
 
-                        while [ "$(virsh -c qemu:///system domstate forge-runner 2>/dev/null || true)" = "running" ]; do
-                            if [ $(( $(date +%s) - started )) -ge "$MAX_SECONDS" ]; then
-                                echo "forge-runner still running after ''${MAX_SECONDS}s; destroying"
-                                virsh -c qemu:///system destroy forge-runner || true
-                                break
-                            fi
-                            sleep 5
-                        done
-
-                        rm -f "$SHARE/forgejo-runner-secret"
-                        elapsed=$(( $(date +%s) - started ))
-                        echo "forge-runner cycle ended after ''${elapsed}s"
-                        # A guest that dies at boot would otherwise spin a
-                        # registration every half-minute. One short cycle is
-                        # usually a quick real job (31 s, 2026-09-26), so only
-                        # the second short cycle in a row backs off.
-                        if [ "$elapsed" -lt 120 ]; then short=$(( short + 1 )); else short=0; fi
-                        write_metrics "$elapsed"
-                        if [ "$short" -ge 2 ]; then sleep 60; fi
+                    while [ "$(virsh -c qemu:///system domstate forge-runner 2>/dev/null || true)" = "running" ]; do
+                        if [ $(( $(date +%s) - started )) -ge "$MAX_SECONDS" ]; then
+                            echo "forge-runner still running after ''${MAX_SECONDS}s; destroying"
+                            virsh -c qemu:///system destroy forge-runner || true
+                            break
+                        fi
+                        sleep 5
                     done
-                '';
 
-                serviceConfig = {
-                    Restart    = "always";
-                    RestartSec = 30;
-                };
-            };
-
-            # `ssh forge-runner` on cube -- the only place the guest takes
-            # SSH from (its authorized key is cube's). The guest is
-            # ephemeral, so its host key regenerates on every reset and a
-            # remembered one would refuse every time; host-key checking is
-            # off for this one bridge address instead. Intercepting
-            # virbr0 already takes root on cube.
-            programs.ssh.extraConfig = ''
-                Host forge-runner 192.168.122.11
-                    HostName 192.168.122.11
-                    User root
-                    StrictHostKeyChecking no
-                    UserKnownHostsFile /dev/null
-                    LogLevel ERROR
+                    rm -f "$SHARE/forgejo-runner-secret"
+                    elapsed=$(( $(date +%s) - started ))
+                    echo "forge-runner cycle ended after ''${elapsed}s"
+                    # A guest that dies at boot would otherwise spin a
+                    # registration every half-minute. One short cycle is
+                    # usually a quick real job (31 s, 2026-09-26), so only
+                    # the second short cycle in a row backs off.
+                    if [ "$elapsed" -lt 120 ]; then short=$(( short + 1 )); else short=0; fi
+                    write_metrics "$elapsed"
+                    if [ "$short" -ge 2 ]; then sleep 60; fi
+                done
             '';
 
-            # No persistence entry, same reasoning as forgejo.nix: cube has
-            # a plain persistent root (cube-configuration.nix's header), so
-            # /var/lib/forgejo-runner-share and the VM's overlay disk under
-            # /var/lib/libvirt/images survive reboots on their own. If a
-            # /root-wiping host ever imports this, add one first, modeled
-            # on tailscale-persist.nix.
+            serviceConfig = {
+                Restart    = "always";
+                RestartSec = 30;
+            };
         };
+
+        # `ssh forge-runner` on cube -- the only place the guest takes
+        # SSH from (its authorized key is cube's). The guest is
+        # ephemeral, so its host key regenerates on every reset and a
+        # remembered one would refuse every time; host-key checking is
+        # off for this one bridge address instead. Intercepting
+        # virbr0 already takes root on cube.
+        programs.ssh.extraConfig = ''
+            Host forge-runner 192.168.122.11
+                HostName 192.168.122.11
+                User root
+                StrictHostKeyChecking no
+                UserKnownHostsFile /dev/null
+                LogLevel ERROR
+        '';
+
+        # No persistence entry, same reasoning as forgejo.nix: cube has
+        # a plain persistent root (cube-configuration.nix's header), so
+        # /var/lib/forgejo-runner-share and the VM's overlay disk under
+        # /var/lib/libvirt/images survive reboots on their own. If a
+        # /root-wiping host ever imports this, add one first, modeled
+        # on tailscale-persist.nix.
+    };
 }
 # ── history ─────────────────────────────────────────────────────────────────
 #

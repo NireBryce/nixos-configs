@@ -10,27 +10,27 @@
 # unit. So this is the NixOS module's reasoning, unchanged, wired to the
 # darwin-side integration module instead.
 { config, lib, inputs, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 
-        # Bound out here for the same reason enable-home-manager.nix binds it
-        # out here: inside the module body `config` is the darwin config, not
-        # the flake-parts one, and `config.flake.modules...` would silently
-        # stop resolving. See CLAUDE.md, "There are two different `config`s".
-        #
-        # The SAME aggregate the NixOS hosts use, deliberately -- not a
-        # lysithea-specific bundle. Whatever in it does not evaluate on
-        # aarch64-darwin needs excluding at the source (the category, or the
-        # one module), not forked here into a second copy of the tree.
-        ellyHome = config.flake.modules.homeManager.ellyHomeManager;
-    in {
-        flake.modules.darwin.${moduleName} = {
-            imports = [ inputs.home-manager.darwinModules.home-manager ];
+    # Bound out here for the same reason enable-home-manager.nix binds it
+    # out here: inside the module body `config` is the darwin config, not
+    # the flake-parts one, and `config.flake.modules...` would silently
+    # stop resolving. See CLAUDE.md, "There are two different `config`s".
+    #
+    # The SAME aggregate the NixOS hosts use, deliberately -- not a
+    # lysithea-specific bundle. Whatever in it does not evaluate on
+    # aarch64-darwin needs excluding at the source (the category, or the
+    # one module), not forked here into a second copy of the tree.
+    ellyHome = config.flake.modules.homeManager.ellyHomeManager;
+in {
+    flake.modules.darwin.${moduleName} = {
+        imports = [ inputs.home-manager.darwinModules.home-manager ];
 
-            home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                users.elly = ellyHome;
-            };
+        home-manager = {
+            useGlobalPkgs = true;
+            useUserPackages = true;
+            users.elly = ellyHome;
         };
-    }
+    };
+}

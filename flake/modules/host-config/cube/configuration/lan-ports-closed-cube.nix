@@ -6,16 +6,16 @@
 # and the two Steam switches are gaming.nix's. Both still reach cube over
 # the tailnet (`tailscale0` is trusted, networking.nix).
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = {
-            # # description = "cube: KDE Connect and Steam LAN ports closed; tailnet only";
-            programs.kdeconnect.enable = lib.mkForce false;
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = {
+        # # description = "cube: KDE Connect and Steam LAN ports closed; tailnet only";
+        programs.kdeconnect.enable = lib.mkForce false;
 
-            programs.steam = {
-                remotePlay.openFirewall                = lib.mkForce false;
-                localNetworkGameTransfers.openFirewall = lib.mkForce false;
-            };
+        programs.steam = {
+            remotePlay.openFirewall                = lib.mkForce false;
+            localNetworkGameTransfers.openFirewall = lib.mkForce false;
         };
+    };
 }

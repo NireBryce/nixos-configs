@@ -40,48 +40,48 @@
 # Sunshine resolves from its appdata dir, not the config file's (src/config.cpp,
 # path_f).
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = { pkgs, ... }:
-            let
-                lockSession = pkgs.writeShellApplication {
-                    name          = "cube-lock-session";
-                    runtimeInputs = with pkgs; [
-                        coreutils
-                        dbus
-                    ];
-                    text = ''
-                        for _ in $(seq 30); do
-                            if dbus-send --session --print-reply --dest=org.freedesktop.ScreenSaver \
-                                /ScreenSaver org.freedesktop.ScreenSaver.Lock >/dev/null 2>&1; then
-                                exit 0
-                            fi
-                            sleep 1
-                        done
-                        echo "cube-lock-session: org.freedesktop.ScreenSaver.Lock failed for 30s" >&2
-                        exit 1
-                    '';
-                };
-            in {
-                # # description = "cube: lock Plasma at login, on idle and when a Sunshine app quits; encrypted streams only";
-                environment.etc."xdg/kscreenlockerrc".text = ''
-                    [Daemon][$i]
-                    Autolock=true
-                    Timeout=2
-                    Lock=true
-                    LockGrace=0
-                    RequirePassword=true
-                    LockOnResume=true
-                    LockOnStart=true
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = { pkgs, ... }:
+        let
+            lockSession = pkgs.writeShellApplication {
+                name          = "cube-lock-session";
+                runtimeInputs = with pkgs; [
+                    coreutils
+                    dbus
+                ];
+                text = ''
+                    for _ in $(seq 30); do
+                        if dbus-send --session --print-reply --dest=org.freedesktop.ScreenSaver \
+                            /ScreenSaver org.freedesktop.ScreenSaver.Lock >/dev/null 2>&1; then
+                            exit 0
+                        fi
+                        sleep 1
+                    done
+                    echo "cube-lock-session: org.freedesktop.ScreenSaver.Lock failed for 30s" >&2
+                    exit 1
                 '';
-
-                services.sunshine.settings = {
-                    global_prep_cmd       = builtins.toJSON [
-                        { do = ""; undo = lib.getExe lockSession; }
-                    ];
-                    lan_encryption_mode   = 2;
-                    origin_web_ui_allowed = "pc";
-                };
             };
+        in {
+            # # description = "cube: lock Plasma at login, on idle and when a Sunshine app quits; encrypted streams only";
+            environment.etc."xdg/kscreenlockerrc".text = ''
+                [Daemon][$i]
+                Autolock=true
+                Timeout=2
+                Lock=true
+                LockGrace=0
+                RequirePassword=true
+                LockOnResume=true
+                LockOnStart=true
+            '';
+
+            services.sunshine.settings = {
+                global_prep_cmd       = builtins.toJSON [
+                    { do = ""; undo = lib.getExe lockSession; }
+                ];
+                lan_encryption_mode   = 2;
+                origin_web_ui_allowed = "pc";
+            };
+        };
 }

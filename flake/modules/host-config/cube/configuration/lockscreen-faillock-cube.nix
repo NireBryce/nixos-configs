@@ -31,39 +31,39 @@
 # `security.pam.services.<name>.rules` is marked experimental in nixpkgs'
 # pam.nix ("subject to breaking changes without notice").
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = { pkgs, ... }:
-            let
-                faillock         = "${pkgs.pam}/lib/security/pam_faillock.so";
-                faillockSettings = {
-                    deny          = 5;
-                    fail_interval = 900;
-                    unlock_time   = 600;
-                };
-            in {
-                # # description = "cube: lock-screen password lockout after 5 failures (pam_faillock on the kde service)";
-                security.pam.services.kde.rules.auth = {
-                    faillock-preauth = {
-                        order      = 10950;
-                        control    = "requisite";
-                        modulePath = faillock;
-                        args       = [ "preauth" ];
-                        settings   = faillockSettings;
-                    };
-                    faillock-authfail = {
-                        order      = 13800;
-                        control    = "[default=die]";
-                        modulePath = faillock;
-                        args       = [ "authfail" ];
-                        settings   = faillockSettings;
-                    };
-                };
-
-                systemd.tmpfiles.rules = [
-                    "d /run/faillock      0755 root root -"
-                    "f /run/faillock/elly 0600 elly root -"
-                ];
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = { pkgs, ... }:
+        let
+            faillock         = "${pkgs.pam}/lib/security/pam_faillock.so";
+            faillockSettings = {
+                deny          = 5;
+                fail_interval = 900;
+                unlock_time   = 600;
             };
+        in {
+            # # description = "cube: lock-screen password lockout after 5 failures (pam_faillock on the kde service)";
+            security.pam.services.kde.rules.auth = {
+                faillock-preauth = {
+                    order      = 10950;
+                    control    = "requisite";
+                    modulePath = faillock;
+                    args       = [ "preauth" ];
+                    settings   = faillockSettings;
+                };
+                faillock-authfail = {
+                    order      = 13800;
+                    control    = "[default=die]";
+                    modulePath = faillock;
+                    args       = [ "authfail" ];
+                    settings   = faillockSettings;
+                };
+            };
+
+            systemd.tmpfiles.rules = [
+                "d /run/faillock      0755 root root -"
+                "f /run/faillock/elly 0600 elly root -"
+            ];
+        };
 }

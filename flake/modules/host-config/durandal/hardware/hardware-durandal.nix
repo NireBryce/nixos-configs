@@ -5,93 +5,93 @@
 # also exactly the name a future host's raw capture would collide with under
 # the "module name is its filename" merge rule.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = { config, ... }: {
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = { config, ... }: {
 
-            boot = {
-                initrd = {
-                    availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
-                    kernelModules = [ ];
-                    luks.devices."enc".device = "/dev/disk/by-uuid/23ae3533-e4ed-46d0-97a8-2fcd0c596526";
-                };
-                kernelModules = [ "kvm-amd" ];
-                extraModulePackages = [ ];
+        boot = {
+            initrd = {
+                availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
+                kernelModules = [ ];
+                luks.devices."enc".device = "/dev/disk/by-uuid/23ae3533-e4ed-46d0-97a8-2fcd0c596526";
             };
-
-            fileSystems = {
-                "/" = {
-                    device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
-                    fsType  = "btrfs";
-                    options = [ "subvol=root" "compress=zstd" "noatime" ];
-                };
-
-                "/home" = {
-                    device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
-                    fsType  = "btrfs";
-                    options = [ "subvol=home" "compress=zstd"];
-                };
-
-                "/nix" = {
-                    device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
-                    fsType  = "btrfs";
-                    options = [ "subvol=nix" "compress=zstd" "noatime" ];
-                };
-
-                "/persist" = {
-                    device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
-                    fsType  = "btrfs";
-                    options = [ "subvol=persist" "compress=zstd" "noatime" ];
-                    neededForBoot = true;
-                };
-
-                "/var/log" = {
-                    device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
-                    fsType  = "btrfs";
-                    options = [ "subvol=log" "compress=zstd" "noatime" ];
-                    neededForBoot = true;
-                };
-
-                "/var/lib/sbctl" = {
-                    device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
-                    fsType  = "btrfs";
-                    options = [ "subvol=secureboot" "compress=zstd" "noatime" ];
-                    neededForBoot = true;
-                };
-
-                "/boot" = {
-                    device  = "/dev/disk/by-uuid/B35C-D0E8";
-                    fsType  = "vfat";
-                    # root-only: /boot/loader/random-seed lives here. With no
-                    # options the mount came up fmask=0022 and bootctl logged
-                    # the seed as world accessible every boot.
-                    options = [ "fmask=0077" "dmask=0077" ];
-                };
-            };
-
-            # nvme0n1p2 (27G) sits outside the LUKS container, so page-out
-            # landed there in plaintext; randomEncryption wraps it in dmcrypt
-            # with a per-boot key. Was `/dev/disk/by-uuid/2aa9fe35-...`:
-            # mkswap through the mapper overwrites the on-disk signature with
-            # ciphertext, so that filesystem UUID dies on the first encrypted
-            # boot -- nixpkgs asserts against by-uuid here. The GPT entry
-            # survives. An ephemeral key rules out hibernation, which
-            # nohibernate (WARN-impermanence.nix) already forbids.
-            swapDevices =
-            [ { device = "/dev/disk/by-partuuid/956635cb-8253-4f62-956d-e1dc3065880a";
-                randomEncryption = true;
-              }
-            ];
-
-            # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
-            # (the default) this is the recommended approach. When using systemd-networkd it's
-            # still possible to use this option, but it's recommended to use it in conjunction
-            # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
-            networking.useDHCP = lib.mkDefault true;
-            # networking.interfaces.wlp4s0.useDHCP = lib.mkDefault true;
-
-            nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-            hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+            kernelModules = [ "kvm-amd" ];
+            extraModulePackages = [ ];
         };
+
+        fileSystems = {
+            "/" = {
+                device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
+                fsType  = "btrfs";
+                options = [ "subvol=root" "compress=zstd" "noatime" ];
+            };
+
+            "/home" = {
+                device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
+                fsType  = "btrfs";
+                options = [ "subvol=home" "compress=zstd"];
+            };
+
+            "/nix" = {
+                device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
+                fsType  = "btrfs";
+                options = [ "subvol=nix" "compress=zstd" "noatime" ];
+            };
+
+            "/persist" = {
+                device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
+                fsType  = "btrfs";
+                options = [ "subvol=persist" "compress=zstd" "noatime" ];
+                neededForBoot = true;
+            };
+
+            "/var/log" = {
+                device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
+                fsType  = "btrfs";
+                options = [ "subvol=log" "compress=zstd" "noatime" ];
+                neededForBoot = true;
+            };
+
+            "/var/lib/sbctl" = {
+                device  = "/dev/disk/by-uuid/a3bc8e9d-b58b-4161-b568-541af264c45c";
+                fsType  = "btrfs";
+                options = [ "subvol=secureboot" "compress=zstd" "noatime" ];
+                neededForBoot = true;
+            };
+
+            "/boot" = {
+                device  = "/dev/disk/by-uuid/B35C-D0E8";
+                fsType  = "vfat";
+                # root-only: /boot/loader/random-seed lives here. With no
+                # options the mount came up fmask=0022 and bootctl logged
+                # the seed as world accessible every boot.
+                options = [ "fmask=0077" "dmask=0077" ];
+            };
+        };
+
+        # nvme0n1p2 (27G) sits outside the LUKS container, so page-out
+        # landed there in plaintext; randomEncryption wraps it in dmcrypt
+        # with a per-boot key. Was `/dev/disk/by-uuid/2aa9fe35-...`:
+        # mkswap through the mapper overwrites the on-disk signature with
+        # ciphertext, so that filesystem UUID dies on the first encrypted
+        # boot -- nixpkgs asserts against by-uuid here. The GPT entry
+        # survives. An ephemeral key rules out hibernation, which
+        # nohibernate (WARN-impermanence.nix) already forbids.
+        swapDevices =
+        [ { device = "/dev/disk/by-partuuid/956635cb-8253-4f62-956d-e1dc3065880a";
+            randomEncryption = true;
+          }
+        ];
+
+        # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
+        # (the default) this is the recommended approach. When using systemd-networkd it's
+        # still possible to use this option, but it's recommended to use it in conjunction
+        # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
+        networking.useDHCP = lib.mkDefault true;
+        # networking.interfaces.wlp4s0.useDHCP = lib.mkDefault true;
+
+        nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+        hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+    };
 }

@@ -1,6 +1,6 @@
 # Module style guide
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-08_
 
 Conventions for `flake/modules/`. "How many files do this" used to be
 stated as inline counts per section, dated 2026-08-08 -- and by 2026-09-09
@@ -45,23 +45,24 @@ The original rule, and the only one that is purely about looks. It reduces
 clutter and makes brackets easier to match by eye when debugging.
 
 ```nix
-{
-    let
-        x = y;
-    in {
-        flake.modules.homeManager.myModule = {
-            x;
-        };
+{ lib, ... }:
+let
+    x = y;
+in {
+    flake.modules.homeManager.myModule = {
+        inherit x;
     };
 }
 ```
 
 ## Four-space indent
 
-Consistent across the tree. Module bodies currently sit one level deeper than
-they strictly need to, left over from moving `flake.modules` out of `perSystem`
-without reflowing — reindenting would risk the `''` strings in the shell
-modules, so it was left alone.
+Consistent across the tree. The top-level `let` and `in {` sit at column 0,
+level with the closing `}`, and the module body one level in. Until
+2026-10-08 the `let ... in` block sat one level deeper than its closing `}`,
+left over from moving `flake.modules` out of `perSystem` without reflowing;
+the reflow dedented every line uniformly, which leaves `''` strings' content
+unchanged (every host's toplevel drvPath was identical before and after).
 
 ## The module header
 
@@ -69,12 +70,12 @@ Every module derives its own name from its filename rather than repeating it:
 
 ```nix
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
-            ...
-        };
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
+        ...
+    };
 }
 ```
 

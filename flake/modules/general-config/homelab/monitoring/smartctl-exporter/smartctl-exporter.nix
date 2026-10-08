@@ -14,21 +14,21 @@
 # grafana/_dashboards/nire-cube-overview.json the same way
 # libvirt-exporter.nix's metrics became the "libvirt / QEMU VMs" row.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = {
-            # # description = "smartctl_exporter -- per-disk SMART/wear metrics for prometheus.nix to scrape";
-            services.prometheus.exporters.smartctl = {
-                enable = true;
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = {
+        # # description = "smartctl_exporter -- per-disk SMART/wear metrics for prometheus.nix to scrape";
+        services.prometheus.exporters.smartctl = {
+            enable = true;
 
-                # 127.0.0.1, not the default 0.0.0.0 -- same "only grafana.nix
-                # is meant to be reachable off-host" reasoning as
-                # node-exporter.nix/cadvisor.nix/libvirt-exporter.nix.
-                listenAddress = "127.0.0.1";
+            # 127.0.0.1, not the default 0.0.0.0 -- same "only grafana.nix
+            # is meant to be reachable off-host" reasoning as
+            # node-exporter.nix/cadvisor.nix/libvirt-exporter.nix.
+            listenAddress = "127.0.0.1";
 
-                # devices left at [] (default): autodiscovers every SMART/NVMe
-                # capable block device rather than naming cube's disks by path.
-            };
+            # devices left at [] (default): autodiscovers every SMART/NVMe
+            # capable block device rather than naming cube's disks by path.
         };
+    };
 }

@@ -31,26 +31,26 @@
 # rather than deleting the module, so a *future* non-impermanence host still
 # gets the reminder.
 { lib, ... }:
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = { config, ... }:
     let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+        usesImpermanence = config.boot.initrd.systemd.services ? restore-root;
+        solvedByHand = config.networking.hostName == "nire-cube";
     in {
-        flake.modules.nixos.${moduleName} = { config, ... }:
-        let
-            usesImpermanence = config.boot.initrd.systemd.services ? restore-root;
-            solvedByHand = config.networking.hostName == "nire-cube";
-        in {
-            # # description = "reminds a non-impermanence host that the user has no password until one is set by hand";
-            warnings = lib.optional (!usesImpermanence && !solvedByHand) ''
-                The user has no password on this host until you set one by hand. users.mutableUsers
-                is false, so `passwd` will not stick -- any change made that way is reverted on
-                the next switch -- and users.users.elly.hashedPasswordFile (elly-user.nix)
-                expects a real hash already sitting at /persist/passwords/elly, which nothing
-                in this repo creates for you.
+        # # description = "reminds a non-impermanence host that the user has no password until one is set by hand";
+        warnings = lib.optional (!usesImpermanence && !solvedByHand) ''
+            The user has no password on this host until you set one by hand. users.mutableUsers
+            is false, so `passwd` will not stick -- any change made that way is reverted on
+            the next switch -- and users.users.elly.hashedPasswordFile (elly-user.nix)
+            expects a real hash already sitting at /persist/passwords/elly, which nothing
+            in this repo creates for you.
 
-                Generate one and put it there before switching, or the user cannot log in:
+            Generate one and put it there before switching, or the user cannot log in:
 
-                    nix run nixpkgs#mkpasswd -- -m sha-512   # prompts for a password, prints its hash
-                    sudo install -D -m600 /dev/stdin /persist/passwords/elly   # paste the hash, then Ctrl-D
-            '';
-        };
+                nix run nixpkgs#mkpasswd -- -m sha-512   # prompts for a password, prints its hash
+                sudo install -D -m600 /dev/stdin /persist/passwords/elly   # paste the hash, then Ctrl-D
+        '';
+    };
 }

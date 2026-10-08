@@ -1,18 +1,18 @@
 # renamed from `boot.nix`, which declared `flake.modules.nixos.boot` and so
 # merged with the `general-config/boot/` category of the same name
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.nixos.${moduleName} = { pkgs, ... }: {
-            environment.systemPackages = with pkgs; [
-            sbctl # secure boot ctl
-            ];
-            boot.loader = {
-                systemd-boot.enable = lib.mkDefault true;
-                efi.canTouchEfiVariables = lib.mkDefault true;
-            };
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+        environment.systemPackages = with pkgs; [
+        sbctl # secure boot ctl
+        ];
+        boot.loader = {
+            systemd-boot.enable = lib.mkDefault true;
+            efi.canTouchEfiVariables = lib.mkDefault true;
         };
+    };
 }
 
 # ── history ─────────────────────────────────────────────────────────────────

@@ -8,104 +8,104 @@
 # -- they are the old config's own notes-to-self about which casks it no
 # longer remembers the purpose of, and that is honest information to keep.
 { lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.darwin.${moduleName} = {
-            # homebrew casks and formulae not covered by nix
-            homebrew = {
-                enable = true;
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.darwin.${moduleName} = {
+        # homebrew casks and formulae not covered by nix
+        homebrew = {
+            enable = true;
 
-                # Uninstall anything not declared here on activation, since a
-                # homebrew install that silently drifts from what is declared
-                # defeats the point of declaring it at all.
-                #
-                # nix-darwin turns this into `brew bundle --force-cleanup`
-                # (modules/homebrew.nix:196), a switch Homebrew added in 6.0.0.
-                # This option spent 2026-08-12..24 worked around as
-                # `cleanup = "none"` + `extraFlags = [ "--cleanup" ]` on
-                # Homebrew 5.x; that workaround is 5.x-only and breaks on 6.x.
-                # Read the history block at the bottom before reaching for it
-                # again -- neither spelling works on both generations.
-                onActivation.cleanup = "uninstall";
+            # Uninstall anything not declared here on activation, since a
+            # homebrew install that silently drifts from what is declared
+            # defeats the point of declaring it at all.
+            #
+            # nix-darwin turns this into `brew bundle --force-cleanup`
+            # (modules/homebrew.nix:196), a switch Homebrew added in 6.0.0.
+            # This option spent 2026-08-12..24 worked around as
+            # `cleanup = "none"` + `extraFlags = [ "--cleanup" ]` on
+            # Homebrew 5.x; that workaround is 5.x-only and breaks on 6.x.
+            # Read the history block at the bottom before reaching for it
+            # again -- neither spelling works on both generations.
+            onActivation.cleanup = "uninstall";
 
-                taps = [ ];
+            taps = [ ];
 
-                brews = [
-                    "gifski" # gif creator/converter
-                    "magic-wormhole" # easy secure point-to-point file transfer
-                    "opencode" # LLM coding agent CLI
-                    "python@3.13" # kept explicitly: `cleanup = "uninstall"`
-                                  # removes anything undeclared; this was
-                                  # installed by hand, not as a dep
-                ];
+            brews = [
+                "gifski" # gif creator/converter
+                "magic-wormhole" # easy secure point-to-point file transfer
+                "opencode" # LLM coding agent CLI
+                "python@3.13" # kept explicitly: `cleanup = "uninstall"`
+                              # removes anything undeclared; this was
+                              # installed by hand, not as a dep
+            ];
 
-                casks = [
-                    "audacity" # audio editor
-                    "angry-ip-scanner" # does what it says on the tin
-                    "app-cleaner" # also does what it says on the tin
-                    "balenaetcher" # disk image writer
-                    "betterdisplay" # better display settings
-                    "bettertouchtool" # touchbar configurator, but also more
-                    "bitwarden" # password manager
-                    "cd-to" # TODO: dont remember
-                    "cleanshot" # screenshot
-                    "daisydisk" # disk usage viewer
-                    "dash@6" # TODO: dont remember
-                    "discord" # why do i have to use discord for everyone
-                    "dropshare" # TODO: dont remember
-                    "file-juicer" # TODO: dont remember
-                    "gimp" # image editor
-                    "github" # github desktop
-                    "hammerspoon" # automations
-                    "iina" # TODO: dont remember
-                    "istat-menus" # menu bar stat indicators
-                    "jordanbaird-ice" # TODO: dont remember
-                    "karabiner-elements" # keyboard rebinder, look into kanata instead
-                    "keka" # TODO: dont remember
-                    "keyboard-maestro" # TODO: dont remember
-                    "kitty" # terminal emulator
-                    "latest" # TODO: dont remember
-                    "losslesscut" # TODO: dont remember
-                    "lulu" # TODO: dont remember
-                    "mist" # TODO: dont remember
-                    "name-mangler" # bulk rename tool
-                    "netnewswire" # rss reader
-                    "obsidian" # notes / PKM / wiki-like
-                    "openinterminal" # context menu option for opening `finder` location in terminal
-                    "orbstack" # VM/OCI manager
-                    "pacifist" # TODO: dont remember
-                    "raspberry-pi-imager" # lets you set some settings as you flash the pi
-                    "raycast" # much better spotlight, clipboard manager
-                    "rectangle" # window tiling but not a tiler
-                    "rocket" # emoji menu
-                    "sloth" # TODO: dont remember
-                    "steam" # steam games library
-                    "tailscale-app" # network tunnel -- renamed from `tailscale` by homebrew
-                    "the-unarchiver" # TODO: dont remember
-                    "transmit" # TODO: dont remember
-                    "unicodechecker" # TODO: dont remember
-                    "utm" # another VM thing
-                    "visual-studio-code" # VSCode
-                    "whisky" # `wine` for mac
-                    "xcodes-app" # renamed from `xcodes` by homebrew; version manager for various languages (python?)
-                    "xscope" # TODO: dont remember
-                    "zoom" # video conferencing
-                    "google-chrome" # need for webserial and webBLE apps for devices
-                    "autodesk-fusion" # Fusion 180 (personal featureless edition)
-                    "fantastical" # Calendar Software
-                    "moonlight" # moonlight game streaming (sunshine on durandal)
-                    "mullvad-vpn" # mullvad vpn -- renamed from `mullvadvpn` by homebrew
-                    "insta360-studio" # 360 video editor
-                    "espanso" # global text expansions -- see the homeManager
-                              # espanso module too; check for a real conflict
-                              # before running both at once
-                    "firefox" # TODO: this might break FF it used to be system managed
-                    "obs"
-                    "zcode" # AI-assisted development environment
-                ];
-            };
+            casks = [
+                "audacity" # audio editor
+                "angry-ip-scanner" # does what it says on the tin
+                "app-cleaner" # also does what it says on the tin
+                "balenaetcher" # disk image writer
+                "betterdisplay" # better display settings
+                "bettertouchtool" # touchbar configurator, but also more
+                "bitwarden" # password manager
+                "cd-to" # TODO: dont remember
+                "cleanshot" # screenshot
+                "daisydisk" # disk usage viewer
+                "dash@6" # TODO: dont remember
+                "discord" # why do i have to use discord for everyone
+                "dropshare" # TODO: dont remember
+                "file-juicer" # TODO: dont remember
+                "gimp" # image editor
+                "github" # github desktop
+                "hammerspoon" # automations
+                "iina" # TODO: dont remember
+                "istat-menus" # menu bar stat indicators
+                "jordanbaird-ice" # TODO: dont remember
+                "karabiner-elements" # keyboard rebinder, look into kanata instead
+                "keka" # TODO: dont remember
+                "keyboard-maestro" # TODO: dont remember
+                "kitty" # terminal emulator
+                "latest" # TODO: dont remember
+                "losslesscut" # TODO: dont remember
+                "lulu" # TODO: dont remember
+                "mist" # TODO: dont remember
+                "name-mangler" # bulk rename tool
+                "netnewswire" # rss reader
+                "obsidian" # notes / PKM / wiki-like
+                "openinterminal" # context menu option for opening `finder` location in terminal
+                "orbstack" # VM/OCI manager
+                "pacifist" # TODO: dont remember
+                "raspberry-pi-imager" # lets you set some settings as you flash the pi
+                "raycast" # much better spotlight, clipboard manager
+                "rectangle" # window tiling but not a tiler
+                "rocket" # emoji menu
+                "sloth" # TODO: dont remember
+                "steam" # steam games library
+                "tailscale-app" # network tunnel -- renamed from `tailscale` by homebrew
+                "the-unarchiver" # TODO: dont remember
+                "transmit" # TODO: dont remember
+                "unicodechecker" # TODO: dont remember
+                "utm" # another VM thing
+                "visual-studio-code" # VSCode
+                "whisky" # `wine` for mac
+                "xcodes-app" # renamed from `xcodes` by homebrew; version manager for various languages (python?)
+                "xscope" # TODO: dont remember
+                "zoom" # video conferencing
+                "google-chrome" # need for webserial and webBLE apps for devices
+                "autodesk-fusion" # Fusion 180 (personal featureless edition)
+                "fantastical" # Calendar Software
+                "moonlight" # moonlight game streaming (sunshine on durandal)
+                "mullvad-vpn" # mullvad vpn -- renamed from `mullvadvpn` by homebrew
+                "insta360-studio" # 360 video editor
+                "espanso" # global text expansions -- see the homeManager
+                          # espanso module too; check for a real conflict
+                          # before running both at once
+                "firefox" # TODO: this might break FF it used to be system managed
+                "obs"
+                "zcode" # AI-assisted development environment
+            ];
         };
+    };
 }
 
 # ── history ─────────────────────────────────────────────────────────────────

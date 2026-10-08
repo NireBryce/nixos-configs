@@ -9,25 +9,25 @@
 # Steam session: tenacity's display manager and default session both come from
 # Jovian instead. See kde-base.nix's history block.
 { config, lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 
-        # Bound out here, before the module body, on purpose. Inside the body
-        # `config` is the *NixOS* config, and `config.flake.modules...` silently
-        # stops resolving. Same reasoning as
-        # general-config/system/home-manager/enable-home-manager.nix.
-        kdeBase = config.flake.modules.nixos.kde-base;
-    in {
-        flake.modules.nixos.${moduleName} = {
-            # Plasma 6 as a workstation desktop session, via sddm
-            imports = [ kdeBase ];
+    # Bound out here, before the module body, on purpose. Inside the body
+    # `config` is the *NixOS* config, and `config.flake.modules...` silently
+    # stops resolving. Same reasoning as
+    # general-config/system/home-manager/enable-home-manager.nix.
+    kdeBase = config.flake.modules.nixos.kde-base;
+in {
+    flake.modules.nixos.${moduleName} = {
+        # Plasma 6 as a workstation desktop session, via sddm
+        imports = [ kdeBase ];
 
-            services.displayManager = {
-                defaultSession = "plasma";
-                sddm = {
-                    enable = true;
-                    wayland.enable = true;
-                };
+        services.displayManager = {
+            defaultSession = "plasma";
+            sddm = {
+                enable = true;
+                wayland.enable = true;
             };
         };
+    };
 }

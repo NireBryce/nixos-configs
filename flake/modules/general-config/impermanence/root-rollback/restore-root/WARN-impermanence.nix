@@ -178,189 +178,189 @@
 # 3. If a boot stops at emergency, pick the previous generation in the
 #    systemd-boot menu.
 { lib, ... }:
+let
+    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+in {
+    flake.modules.nixos.${moduleName} = { config, ... }:
     let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+        # Every name here comes from the host's own config, so this file
+        # names no host, volume, or device -- "how the unit finds the
+        # LUKS units" above.
+        rootDevice      = config.fileSystems."/".device;
+        luksVolumes     = builtins.attrNames config.boot.initrd.luks.devices;
+        luksDeviceUnits = map (v: "dev-mapper-${v}.device") luksVolumes;
+        luksCryptUnits  = map (v: "systemd-cryptsetup@${v}.service") luksVolumes;
     in {
-        flake.modules.nixos.${moduleName} = { config, ... }:
-        let
-            # Every name here comes from the host's own config, so this file
-            # names no host, volume, or device -- "how the unit finds the
-            # LUKS units" above.
-            rootDevice      = config.fileSystems."/".device;
-            luksVolumes     = builtins.attrNames config.boot.initrd.luks.devices;
-            luksDeviceUnits = map (v: "dev-mapper-${v}.device") luksVolumes;
-            luksCryptUnits  = map (v: "systemd-cryptsetup@${v}.service") luksVolumes;
-        in {
-            # ── persistence ─────────────────────────────────────────────────
+        # ── persistence ─────────────────────────────────────────────────
 
-            # A new machine-id every boot would make each boot a stranger to
-            # the journal (its directory is per machine-id).
-            environment.etc.machine-id.source = "/persist/etc/machine-id";
+        # A new machine-id every boot would make each boot a stranger to
+        # the journal (its directory is per machine-id).
+        environment.etc.machine-id.source = "/persist/etc/machine-id";
 
-            # The state every impermanence host needs. State that belongs to
-            # one service lives in a `<name>-persist.nix` beside that
-            # service's module instead -- desktop-env/jovian/
-            # jovian-persist.nix holds /etc/hhd, system/networking/
-            # tailscale-persist.nix holds /var/lib/tailscale, and there are a
-            # few more (`find -name '*-persist.nix'`). Filed as a sibling,
-            # each is collected by the same category as its service, so
-            # /etc/hhd persists only on hosts that run handheld-daemon.
-            # `directories` and `files` are lists, so their entries join
-            # these.
-            environment.persistence."/persist" = {
-                directories = [
-                    "/var/lib/bluetooth"
-                    "/var/lib/nixos"
-                    "/var/lib/systemd/coredump"
-                    "/etc/NetworkManager/system-connections"
-                    "/var/lib/flatpak"
-                ];
-                files = [
-                    "/etc/ssh/ssh_host_ed25519_key"
-                    "/etc/ssh/ssh_host_ed25519_key.pub"
-                    "/etc/ssh/ssh_host_rsa_key"
-                    "/etc/ssh/ssh_host_rsa_key.pub"
-                ];
-            };
+        # The state every impermanence host needs. State that belongs to
+        # one service lives in a `<name>-persist.nix` beside that
+        # service's module instead -- desktop-env/jovian/
+        # jovian-persist.nix holds /etc/hhd, system/networking/
+        # tailscale-persist.nix holds /var/lib/tailscale, and there are a
+        # few more (`find -name '*-persist.nix'`). Filed as a sibling,
+        # each is collected by the same category as its service, so
+        # /etc/hhd persists only on hosts that run handheld-daemon.
+        # `directories` and `files` are lists, so their entries join
+        # these.
+        environment.persistence."/persist" = {
+            directories = [
+                "/var/lib/bluetooth"
+                "/var/lib/nixos"
+                "/var/lib/systemd/coredump"
+                "/etc/NetworkManager/system-connections"
+                "/var/lib/flatpak"
+            ];
+            files = [
+                "/etc/ssh/ssh_host_ed25519_key"
+                "/etc/ssh/ssh_host_ed25519_key.pub"
+                "/etc/ssh/ssh_host_rsa_key"
+                "/etc/ssh/ssh_host_rsa_key.pub"
+            ];
+        };
 
-            # sudo's first-use lecture is remembered under /var/db/sudo,
-            # which the wipe forgets -- so it would lecture after every boot.
-            security.sudo.extraConfig = ''
-                Defaults lecture = never
-            '';
+        # sudo's first-use lecture is remembered under /var/db/sudo,
+        # which the wipe forgets -- so it would lecture after every boot.
+        security.sudo.extraConfig = ''
+            Defaults lecture = never
+        '';
 
-            # ── hibernation stays off ───────────────────────────────────────
-            #
-            # A hibernation image is a snapshot of a system whose / is about
-            # to be deleted and re-copied; resuming it restores a kernel
-            # holding open files that are gone.
-            #
-            # Nothing in this config asks for hibernation, and there's no
-            # swap configured, so this looks like it should already be off.
-            # It wasn't: on tenacity, systemd-gpt-auto-generator found a
-            # swap partition by its GPT type, turned it on, and pointed the
-            # resume device at it -- with `swapDevices = []` and no `resume=`
-            # anywhere (seen in /proc/swaps and /sys/power/resume). So the
-            # off switch has to hold whatever systemd discovers, and
-            # `nohibernate` is the kernel's own. The sleep.conf entries make
-            # logind stop *offering* these states rather than failing them;
-            # the KDE half is under "what fails silently" above.
-            #
-            # settings.Sleep because `systemd.sleep.extraConfig` was removed
-            # in 26.11.
-            boot.kernelParams = [ "nohibernate" ];
-            systemd.sleep.settings.Sleep = {
-                AllowHibernation          = false;
-                AllowHybridSleep          = false;
-                AllowSuspendThenHibernate = false;
-            };
+        # ── hibernation stays off ───────────────────────────────────────
+        #
+        # A hibernation image is a snapshot of a system whose / is about
+        # to be deleted and re-copied; resuming it restores a kernel
+        # holding open files that are gone.
+        #
+        # Nothing in this config asks for hibernation, and there's no
+        # swap configured, so this looks like it should already be off.
+        # It wasn't: on tenacity, systemd-gpt-auto-generator found a
+        # swap partition by its GPT type, turned it on, and pointed the
+        # resume device at it -- with `swapDevices = []` and no `resume=`
+        # anywhere (seen in /proc/swaps and /sys/power/resume). So the
+        # off switch has to hold whatever systemd discovers, and
+        # `nohibernate` is the kernel's own. The sleep.conf entries make
+        # logind stop *offering* these states rather than failing them;
+        # the KDE half is under "what fails silently" above.
+        #
+        # settings.Sleep because `systemd.sleep.extraConfig` was removed
+        # in 26.11.
+        boot.kernelParams = [ "nohibernate" ];
+        systemd.sleep.settings.Sleep = {
+            AllowHibernation          = false;
+            AllowHybridSleep          = false;
+            AllowSuspendThenHibernate = false;
+        };
 
-            # ── the rollback unit ───────────────────────────────────────────
-            boot.initrd = {
+        # ── the rollback unit ───────────────────────────────────────────
+        boot.initrd = {
+            enable = true;
+            # Puts the btrfs tools in the initrd, for the script.
+            supportedFilesystems = [ "btrfs" ];
+
+            systemd = {
                 enable = true;
-                # Puts the btrfs tools in the initrd, for the script.
-                supportedFilesystems = [ "btrfs" ];
 
-                systemd = {
-                    enable = true;
+                # emergencyAccess is left at its default, false. `true`
+                # would give an *unauthenticated* root shell, reachable
+                # before the LUKS volume is open -- a root shell for
+                # anyone holding the handheld. OnFailure below halts the
+                # boot either way, which is what matters, and root has no
+                # password to type anyway (users.mutableUsers = false;
+                # no root hash is set). Recovery is the previous
+                # generation in the systemd-boot menu. If an initrd shell
+                # is ever really needed, the option also takes a password
+                # hash: `oneOf [ bool (nullOr (passwdEntry str)) ]`.
 
-                    # emergencyAccess is left at its default, false. `true`
-                    # would give an *unauthenticated* root shell, reachable
-                    # before the LUKS volume is open -- a root shell for
-                    # anyone holding the handheld. OnFailure below halts the
-                    # boot either way, which is what matters, and root has no
-                    # password to type anyway (users.mutableUsers = false;
-                    # no root hash is set). Recovery is the previous
-                    # generation in the systemd-boot menu. If an initrd shell
-                    # is ever really needed, the option also takes a password
-                    # hash: `oneOf [ bool (nullOr (passwdEntry str)) ]`.
+                services.restore-root = {
+                    description = "Roll /root back to the blank btrfs snapshot";
 
-                    services.restore-root = {
-                        description = "Roll /root back to the blank btrfs snapshot";
+                    # The diagram in "where restore-root sits in the
+                    # boot", as unit ordering.
+                    #
+                    # initrd-root-device.target is the host-generic
+                    # point: reached once the root device exists,
+                    # whatever the volume is called. Being After= a
+                    # .device unit also means udev has finished with it,
+                    # so the /dev/disk/by-uuid symlink in rootDevice
+                    # exists -- a real barrier, not a poll.
+                    #
+                    # Both requires and after on the device, because in
+                    # systemd they're independent: Requires= pulls a unit
+                    # in, After= orders against it, and systemd.unit(5)
+                    # says to pair them. Requires= alone can start before
+                    # the device is there; After= alone runs anyway and
+                    # fails.
+                    wantedBy = [ "initrd.target" ];
+                    requires = luksDeviceUnits;
+                    after    = [ "initrd-root-device.target" ] ++ luksDeviceUnits ++ luksCryptUnits;
+                    before   = [ "sysroot.mount" ];
 
-                        # The diagram in "where restore-root sits in the
-                        # boot", as unit ordering.
-                        #
-                        # initrd-root-device.target is the host-generic
-                        # point: reached once the root device exists,
-                        # whatever the volume is called. Being After= a
-                        # .device unit also means udev has finished with it,
-                        # so the /dev/disk/by-uuid symlink in rootDevice
-                        # exists -- a real barrier, not a poll.
-                        #
-                        # Both requires and after on the device, because in
-                        # systemd they're independent: Requires= pulls a unit
-                        # in, After= orders against it, and systemd.unit(5)
-                        # says to pair them. Requires= alone can start before
-                        # the device is there; After= alone runs anyway and
-                        # fails.
-                        wantedBy = [ "initrd.target" ];
-                        requires = luksDeviceUnits;
-                        after    = [ "initrd-root-device.target" ] ++ luksDeviceUnits ++ luksCryptUnits;
-                        before   = [ "sysroot.mount" ];
+                    unitConfig = {
+                        # Opt out of systemd's implicit ordering (after
+                        # sysinit.target and basic.target) so the only
+                        # ordering is the explicit one above.
+                        DefaultDependencies = "no";
 
-                        unitConfig = {
-                            # Opt out of systemd's implicit ordering (after
-                            # sysinit.target and basic.target) so the only
-                            # ordering is the explicit one above.
-                            DefaultDependencies = "no";
+                        # Skips the wipe when the kernel command line
+                        # has `resume=`. A second line only: as the
+                        # hibernation block above describes, systemd
+                        # can set up resume without that parameter, and
+                        # on tenacity this condition would have passed
+                        # and let the wipe go ahead. nohibernate is what
+                        # closes it.
+                        ConditionKernelCommandLine = [ "!resume" ];
 
-                            # Skips the wipe when the kernel command line
-                            # has `resume=`. A second line only: as the
-                            # hibernation block above describes, systemd
-                            # can set up resume without that parameter, and
-                            # on tenacity this condition would have passed
-                            # and let the wipe go ahead. nohibernate is what
-                            # closes it.
-                            ConditionKernelCommandLine = [ "!resume" ];
-
-                            # A failed rollback halts the boot instead of
-                            # quietly leaving / un-wiped.
-                            OnFailure = "emergency.target";
-                        };
-
-                        serviceConfig.Type = "oneshot";
-
-                        # Runs under `set -e` (nixpkgs wraps every unit
-                        # script that way: makeJobScript in
-                        # nixos/lib/systemd-lib.nix), so the first failing
-                        # command fails the unit and OnFailure fires. The
-                        # tools are there: btrfs via supportedFilesystems,
-                        # mount/umount from systemd's extraBin, cut from
-                        # coreutils in initrdBin. PATH is /bin:/sbin.
-                        #
-                        # The loop comes first because by this point root/
-                        # holds nested subvolumes (observed: srv,
-                        # var/lib/portables, var/lib/machines, var/tmp), and
-                        # `btrfs subvolume delete` refuses a subvolume that
-                        # has others inside it. Deleting them has caused
-                        # nothing worse than harmless-looking
-                        # systemd-tmpfiles errors.
-                        script = ''
-                            mkdir -p /mnt
-
-                            # The top level, where the subvolumes are visible.
-                            mount -o subvol=/ ${rootDevice} /mnt
-
-                            btrfs subvolume list -o /mnt/root |
-                            cut -f9 -d' ' |
-                            while read subvolume; do
-                                echo "deleting /$subvolume subvolume..."
-                                btrfs subvolume delete "/mnt/$subvolume"
-                            done
-
-                            echo "deleting /root subvolume..."
-                            btrfs subvolume delete /mnt/root
-
-                            echo "restoring blank /root subvolume..."
-                            btrfs subvolume snapshot /mnt/root-blank /mnt/root
-
-                            umount /mnt
-                        '';
+                        # A failed rollback halts the boot instead of
+                        # quietly leaving / un-wiped.
+                        OnFailure = "emergency.target";
                     };
+
+                    serviceConfig.Type = "oneshot";
+
+                    # Runs under `set -e` (nixpkgs wraps every unit
+                    # script that way: makeJobScript in
+                    # nixos/lib/systemd-lib.nix), so the first failing
+                    # command fails the unit and OnFailure fires. The
+                    # tools are there: btrfs via supportedFilesystems,
+                    # mount/umount from systemd's extraBin, cut from
+                    # coreutils in initrdBin. PATH is /bin:/sbin.
+                    #
+                    # The loop comes first because by this point root/
+                    # holds nested subvolumes (observed: srv,
+                    # var/lib/portables, var/lib/machines, var/tmp), and
+                    # `btrfs subvolume delete` refuses a subvolume that
+                    # has others inside it. Deleting them has caused
+                    # nothing worse than harmless-looking
+                    # systemd-tmpfiles errors.
+                    script = ''
+                        mkdir -p /mnt
+
+                        # The top level, where the subvolumes are visible.
+                        mount -o subvol=/ ${rootDevice} /mnt
+
+                        btrfs subvolume list -o /mnt/root |
+                        cut -f9 -d' ' |
+                        while read subvolume; do
+                            echo "deleting /$subvolume subvolume..."
+                            btrfs subvolume delete "/mnt/$subvolume"
+                        done
+
+                        echo "deleting /root subvolume..."
+                        btrfs subvolume delete /mnt/root
+
+                        echo "restoring blank /root subvolume..."
+                        btrfs subvolume snapshot /mnt/root-blank /mnt/root
+
+                        umount /mnt
+                    '';
                 };
             };
         };
+    };
 }
 
 # ── history ─────────────────────────────────────────────────────────────────
