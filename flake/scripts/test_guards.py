@@ -1964,8 +1964,7 @@ class LessonReminder(unittest.TestCase):
 if __name__ == "__main__":
     if shutil.which("jq") is None:
         print("test_guards: jq not on PATH -- skipping (the guards need it "
-              "too; `nix shell nixpkgs#jq`, or run on a host with "
-              "packages-config/nix-utils/ installed)")
+              "too; `nix shell nixpkgs#jq` first)")
         sys.exit(0)
     import parallel_unittest  # beside this file; ~60s serial, see its header
     parallel_unittest.main()

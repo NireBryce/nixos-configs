@@ -31,9 +31,10 @@ name: flake-check
 # install-hooks`): the hook is opt-in per clone and skips itself silently
 # if statix/deadnix aren't on PATH, so this is what actually blocks a
 # regression on a contributor who never ran `just install-hooks`.
-# statix/deadnix/just come from the flake's LOCKED nixpkgs
-# (`--inputs-from ./flake`), the same versions packages-config/nix-utils
-# puts on the hosts, so the ratchet counts match a local run.
+# statix/deadnix/just come from the flake's own dev shell
+# (flake/modules/dev-shell.nix, LOCKED nixpkgs) -- the same shell `just
+# lint` enters locally when they aren't on PATH, so the ratchet counts
+# match a local run.
 #
 # Deliberately `--no-build` (`just check`): this flake defines full
 # NixOS/darwin system toplevels (`checks.nix`) for real hosts running KDE
@@ -153,7 +154,4 @@ jobs:
           done
 
       - name: just preflight
-        run: >-
-          nix shell --inputs-from ./flake
-          nixpkgs#just nixpkgs#statix nixpkgs#deadnix
-          --command just preflight
+        run: nix develop ./flake --command just preflight
