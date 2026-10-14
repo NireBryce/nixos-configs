@@ -9,6 +9,10 @@
 # statix/deadnix aren't on PATH, and CI runs `just preflight` inside it, so the
 # lint ratchet always counts with the flake's locked statix/deadnix.
 #
+# .vscode/settings.json starts nixd as `nix develop ./flake --command nixd`, with
+# stdout as the LSP stream -- a shellHook that echoes anything would corrupt it.
+# Print from a hook only to stderr (>&2), if one is ever added.
+#
 # dev-shells/nix/flake.nix is the copy-into-another-project template with the
 # same tool list; it is a standalone flake and cannot import this one, so a
 # tool added here belongs there too.

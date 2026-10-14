@@ -18,6 +18,9 @@ _default:
 create path:
     mkdir -p {{path}}
     cp {{here}}/flake.nix {{path}}/flake.nix
+    # Inside a git repo a flake only sees tracked files, so the `nix develop`
+    # below can't find an un-added flake.nix.
+    if git -C {{path}} rev-parse --is-inside-work-tree >/dev/null 2>&1; then git -C {{path}} add flake.nix; fi
     cd {{path}} && nix develop --command uv init
 
 # Drop into the python dev shell, blocking until you exit it

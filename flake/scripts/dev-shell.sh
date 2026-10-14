@@ -6,15 +6,11 @@
 #   dev-shell.sh <dev-shells-dir> new <shell> <path> [--force]
 #
 # `new` delegates to the template's own `create` recipe, so per-language
-# scaffolding (cargo init, uv init) stays in one place: dev-shells/<name>/
+# scaffolding (cargo init, uv init) and the `git add` of the copied files
+# (flakes ignore untracked files; it has to sit between the copy and the
+# template's own `nix develop`) stay in one place: dev-shells/<name>/
 # justfile. Around it, this adds:
 #   - refuses to overwrite an existing flake.nix unless --force;
-#   - when the target is in a git work tree, copies the template's files in
-#     and `git add`s them BEFORE `create` runs. Flakes ignore untracked
-#     files, and the python/rust `create` recipes run `nix develop` straight
-#     after their own `cp` -- inside a repo that eval can't see an un-added
-#     flake.nix (AGENTS.md, "git add before nix eval"). `create`'s `cp` then
-#     rewrites the same content;
 #   - writes `.envrc` with `use flake` for direnv when none exists.
 set -euo pipefail
 
@@ -50,20 +46,6 @@ case "$cmd" in
         if [ -e "$target/flake.nix" ] && [ "$force" != "--force" ]; then
             echo "dev-new: $target/flake.nix already exists; pass --force to overwrite" >&2
             exit 1
-        fi
-
-        mkdir -p "$target"
-        if git -C "$target" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-            files=()
-            for f in "$dir/$shell"/*; do
-                name=$(basename "$f")
-                if [ "$name" != justfile ] && [ -f "$f" ]; then
-                    cp "$f" "$target/$name"
-                    files+=("$name")
-                fi
-            done
-            git -C "$target" add -- "${files[@]}"
-            echo "dev-new: git-added ${files[*]} in $target (flakes ignore untracked files)"
         fi
 
         just --justfile "$dir/$shell/justfile" create "$target"

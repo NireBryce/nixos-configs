@@ -19,6 +19,8 @@ _default:
 create path:
     mkdir -p {{path}}
     cp {{here}}/flake.nix {{path}}/flake.nix
+    # Inside a git repo a flake only sees tracked files.
+    if git -C {{path}} rev-parse --is-inside-work-tree >/dev/null 2>&1; then git -C {{path}} add flake.nix; fi
 
 # Drop into the nix dev shell, blocking until you exit it
 activate:

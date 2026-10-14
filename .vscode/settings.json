@@ -11,7 +11,13 @@
         // no "editor.defaultFormatter" -- leaving it unset means Format Document has
         // nothing to invoke for .nix, rather than silently reaching for nixfmt.
     },
-    "nix.serverPath": "nixd",
+    // nixd isn't on the hosts' PATH (#486 moved it into the dev shell,
+    // flake/modules/dev-shell.nix), so start it from there. serverPath takes an
+    // argv array, and nix-ide expands ${workspaceFolder} in it (the same resolver
+    // as serverSettings below); its on-PATH check only looks at argv[0], `nix`.
+    // nix develop writes nothing to stdout for this shell (no shellHook), so the
+    // LSP stream stays clean -- checked by piping an `initialize` through it.
+    "nix.serverPath": ["nix", "develop", "${workspaceFolder}/flake", "--command", "nixd"],
     "nix.serverSettings": {
         "nixd": {
             // An EMPTY command is the off switch. Deleting this block does NOT disable
