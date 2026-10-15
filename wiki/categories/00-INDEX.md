@@ -67,10 +67,9 @@ matching "how do I use this, not configure it" page where one exists.
 | Category | Directory | Class(es) | Imported by |
 |---|---|---|---|
 | [backup](backup.md) | `general-config/homelab/backup/` | nixos | cube only |
-| [coding-agent](coding-agent.md) | `general-config/homelab/coding-agent/` | nixos | cube only |
 | [containers](containers.md) | `general-config/homelab/containers/` | nixos | cube only |
 | [git-forge](git-forge.md) | `general-config/homelab/git-forge/` | nixos | cube only |
-| [homelab](homelab.md) | `general-config/homelab/` (+ 9 nested) | nixos | cube only |
+| [homelab](homelab.md) | `general-config/homelab/` (+ 8 nested) | nixos | cube only |
 | [landing](landing.md) | `general-config/homelab/landing/` | nixos | cube only |
 | [monitoring](monitoring.md) | `general-config/homelab/monitoring/` | nixos | cube only |
 | [reverse-proxy](reverse-proxy.md) | `general-config/homelab/reverse-proxy/` | nixos | cube only |

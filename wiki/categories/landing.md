@@ -229,7 +229,7 @@ proxies to `127.0.0.1:3002`, so dropping `landing` while keeping
 ## glance, again 2026-09-13
 
 `glance/glance.nix` rejoined the category (port 3004 — 3002 stayed
-homepage's; 3003 is opencode) so both contestants can be tried live
+homepage's; 3003 was another service's then) so both contestants can be tried live
 before picking one. It answers at its own name only — the ts-cube root
 stays homepage's for the duration. Its widgets are exactly the #291-era
 set (monitor, server-stats, weather, bare calendar, the four to-do

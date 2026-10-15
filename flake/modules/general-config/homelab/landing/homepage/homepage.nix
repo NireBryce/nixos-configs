@@ -84,8 +84,7 @@ in {
             # slot, kept so nothing else about the port registry moves.
             # NOT the module's own default 8082: cadvisor already holds
             # 8080-adjacent ground and the 300x block is this host's
-            # user-facing range (opencode-server.nix took 3003 the
-            # same way). One-switch overlap: the glance unit this
+            # user-facing range. One-switch overlap: the glance unit this
             # replaces bound the same port; activation stops removed
             # units before starting new ones, and homepage's
             # Restart=on-failure would self-heal the race regardless.

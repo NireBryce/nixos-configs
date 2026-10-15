@@ -16,7 +16,7 @@ the patterns move over months. Not for scripts humans run: those go in
 ## Find candidates
 
 `just agent recurring` reads this host's agent history for the repo --
-Claude Code, OpenCode, and zcode, command field only, never output -- plus
+Claude Code and other agent harnesses, command field only, never output -- plus
 every other host's export from the private forge repo
 `elly/agent-command-log`. Its header lists each source's session count (a
 reader at 0 after a harness upgrade is a format change, not quiet) and

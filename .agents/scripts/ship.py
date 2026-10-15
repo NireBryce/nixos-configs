@@ -59,7 +59,7 @@ now -- hit twice 2026-08-30, sweeping up unrelated staged files. The
 message comes on stdin because backticks and `$(...)` in an inline -m are
 executed by the shell (2026-08-30: a backtick span became empty); feed it
 through a quoted heredoc (`<<'EOF'`). Appends `Co-Authored-By: <agent>`
-(default Claude; ZCode and opencode commit here too) unless a
+(default Claude; other harnesses commit here too) unless a
 Co-Authored-By trailer is already there -- and warns when that one carries
 an email or model, which AGENTS.md's trailer rule forbids. Refuses to
 commit on experimental or main: work lands there only through a PR.

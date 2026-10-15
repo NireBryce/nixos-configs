@@ -66,7 +66,7 @@ in {
                 host = "127.0.0.1";
 
                 # 3000 grafana, 3001 forgejo, 3002 homepage (this
-                # module's old slot, kept by #291), 3003 opencode,
+                # module's old slot, kept by #291), 3003 (unused),
                 # 3004 here. NOT glance's own default 8080 --
                 # monitoring/cadvisor.nix already holds 8080 on this
                 # host, and two services on one port is a bind failure

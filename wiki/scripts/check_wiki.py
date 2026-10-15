@@ -643,7 +643,7 @@ def doc_files(root):
 
 
 # A recipe header, e.g. `wiki-churn *args:`, `host=nire-durandal build`'s
-# own definition `build:`, or `opencode-attach dir='.' *args:` -- name,
+# own definition `build:`, or a recipe like `foo dir='.' *args:` -- name,
 # then zero or more space-separated parameter/default tokens (which may
 # quote defaults), then a bare `:`. `(?!=)` excludes a `name := value`
 # variable assignment, just's *other* use of a leading identifier.
