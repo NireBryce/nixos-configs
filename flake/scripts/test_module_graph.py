@@ -8,7 +8,7 @@ so. The real tree is clean of both, which would prove nothing about whether
 the picture could show them. Pure stdlib; runs via `just module-graph-test`,
 part of `just preflight` and CI.
 """
-import contextlib, importlib.util, io, pathlib, sys, tempfile, unittest
+import contextlib, importlib.util, io, pathlib, re, sys, tempfile, unittest
 
 _spec = importlib.util.spec_from_file_location(
     'module_graph', pathlib.Path(__file__).with_name('module-graph.py'))
@@ -163,7 +163,7 @@ class Selecting(Tree):
         self.write('area/lonely/l.nix', module('nixos'))
         g = mg.select(self.g(), 'hosts')
         self.assertIn('cat:area/lonely', g.nodes)        # drawn, with no host edge
-        self.assertFalse(any(e.dst == 'cat:area/lonely' for e in g.edges))
+        self.assertFalse(any(e.dst == 'cat:area/lonely' for e in g.edges if e.kind == 'imports'))
         self.assertFalse(any(n.kind == 'module' for n in g.nodes.values()))
         self.assertIn('agg:hosts/alpha-configuration.nix:nixos', g.nodes)
 
@@ -188,21 +188,45 @@ class Rendering(Tree):
         self.write('area/lonely/dirsAsCategory.nix', SHIM)
         self.write('area/lonely/lonely.nix', module('nixos'))
         out = mg.mermaid(mg.select(self.g(), 'tree'))
-        self.assertTrue(out.startswith('flowchart LR\n'))
+        self.assertTrue(out.startswith('%%{init:'))
+        self.assertIn('\nflowchart LR\n', out)
+        self.assertIn('subgraph g0["area"]', out)     # an area is a container
+        g = mg.select(self.g(), 'tree')
+        area = f'n{list(g.nodes).index("area:area")}'
+        self.assertNotRegex(out, rf'(?m)^\s+{area} ')   # containment, not arrows
         self.assertIn('-. merges .-', out)
         self.assertRegex(out, r'class [\w,]+ orphan')
         self.assertRegex(out, r'class [\w,]+ merges')
-        self.assertIn('a<br/>n h', out)
+        self.assertIn('<b>a</b><br/><i>n h</i>', out)
 
-    def test_mermaid_hosts_labels_edges_with_the_class_letter(self):
+    def test_mermaid_hosts_colours_each_hosts_edges(self):
+        self.write('hosts/beta-configuration.nix', host('nixos', 'used', 'sub'))
         out = mg.mermaid(mg.select(self.g(), 'hosts'))
-        self.assertRegex(out, r'n\d+ -->\|n\| n\d+')
+        styles = re.findall(r'(?m)^\s+linkStyle ([\d,]+) stroke:(#\w+)', out)
+        self.assertEqual(len(styles), 2)                  # one per host
+        self.assertNotEqual(styles[0][1], styles[1][1])   # in different hues
+        self.assertEqual(sorted(len(s.split(',')) for s, _ in styles), [1, 2])
+        self.assertIn('<i>nixos</i>', out)                # class on the host card
+        self.assertNotIn('-->|', out)                     # not on every edge
+
+    def test_hosts_view_boxes_nested_categories_in_their_area(self):
+        g = mg.select(self.g(), 'hosts')
+        (members,) = [m for i, _, m in mg.groups(g) if i == 'area:area']
+        self.assertEqual(set(members), {'cat:area/used', 'cat:area/used/sub'})
+
+    def test_dot_without_arrows_lays_areas_out_as_a_grid(self):
+        for k in range(6):
+            self.write(f'area/c{k}/dirsAsCategory.nix', SHIM)
+        out = mg.dot(mg.select(self.g(), 'tree', depth=1, categories_only=True))
+        self.assertIn('rankdir=TB', out)
+        self.assertEqual(out.count('[style=invis]'), 7 - mg.GRID)
 
     def test_dot_is_well_formed_and_escaped(self):
         out = mg.dot(mg.select(self.g(), 'hosts'))
         self.assertTrue(out.startswith('digraph modules {') and out.endswith('}'))
         self.assertEqual(out.count('{'), out.count('}'))
-        self.assertNotIn('<br/>', out)
+        self.assertIn('label=<<b>used/</b><br/><font', out)   # HTML label
+        self.assertIn('subgraph cluster_', out)
         self.assertIn('[style=dotted]', out)          # used -> sub nesting
 
     def test_cli_prints_mermaid(self):

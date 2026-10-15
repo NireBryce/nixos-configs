@@ -263,7 +263,9 @@ class Layout(Fixture):
     def test_draws_areas_and_top_categories_only(self):
         self.gen()
         text = self.read('wiki/architecture.md')
-        self.assertIn('```mermaid\nflowchart LR', text)
+        self.assertIn('```mermaid\n%%{init:', text)
+        self.assertIn('\nflowchart LR\n', text)
+        self.assertIn('subgraph g0["general-config"]', text)
         self.assertIn('general-config', text)
         self.assertIn('boot/', text)
         self.assertIn('homelab/', text)

@@ -38,7 +38,7 @@ Reachability reads the same imports modules.py does, including
 `config.flake.modules.<class>.<name>` references; only the `with ...; [ ]`
 aggregate lists are drawn as host edges.
 """
-import argparse, json, pathlib, subprocess, sys
+import argparse, html, json, pathlib, subprocess, sys
 from dataclasses import dataclass
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
@@ -196,8 +196,9 @@ def select(g, view='tree', category=None, depth=None, categories_only=False):
                  and e.src in shown and e.dst in shown]
         return Graph({i: g.nodes[i] for i in keep}, edges, [s for s in starts if s in shown])
 
-    # hosts: every category in range, plus the aggregates that import into it
-    shown = {i for i in keep if g.nodes[i].kind == 'category'}
+    # hosts: every category in range (in its area's container), plus the
+    # aggregates that import into it
+    shown = {i for i in keep if g.nodes[i].kind in ('category', 'area')}
     edges = [e for e in g.edges if e.kind == 'contains'
              and e.src in shown and e.dst in shown]
     for e in g.edges:
@@ -226,16 +227,153 @@ def select(g, view='tree', category=None, depth=None, categories_only=False):
 
 
 # --- renderers ------------------------------------------------------------
+#
+# The look follows nix-topology's: rounded cards with a muted fill and a
+# darker outline of the same hue, a bold name over a quiet subtitle, and
+# containers with a small title to group what belongs together. Fills are
+# light and the text dark on purpose, so a diagram reads the same on a white
+# page and on GitHub's dark theme.
 
-def tag(n):
-    """Node text: name, then classes (and module count for a category)."""
+INK, QUIET, LINE = '#1e293b', '#64748b', '#94a3b8'
+# kind -> (fill, outline)
+PALETTE = {
+    'area':      ('#f8fafc', '#cbd5e1'),
+    'category':  ('#dbeafe', '#60a5fa'),
+    'module':    ('#ffffff', '#94a3b8'),
+    'aggregate': ('#ffffff', '#f59e0b'),
+    'missing':   ('#fee2e2', '#ef4444'),
+}
+ALERT = ('#fff1f2', '#e11d48')      # an orphan category, or a name that merges
+# One hue per host or home entry point, for its card outline and every import
+# edge it draws -- nix-topology's colour-per-network, so one host's imports can
+# be followed through the crossing lines. Cycled past six.
+HUES = ['#2563eb', '#16a34a', '#d97706', '#9333ea', '#db2777', '#0891b2']
+
+
+def hues(g):
+    aggs = [i for i, n in g.nodes.items() if n.kind == 'aggregate']
+    return {a: HUES[k % len(HUES)] for k, a in enumerate(aggs)}
+
+
+def colours(n):
+    if n.kind != 'missing' and (n.merges or n.status == 'orphan'):
+        return ALERT
+    return PALETTE[n.kind]
+
+
+def parts(n):
+    """(title, subtitle) of a node's card."""
     if n.kind == 'category':
-        return f'{n.label}/<br/>{" · ".join(x for x in (letters(n.classes), str(n.count)) if x)}'
-    if n.kind == 'module' and n.classes:
-        return f'{n.label}<br/>{letters(n.classes)}'
+        return n.label + '/', ' · '.join(x for x in (letters(n.classes), str(n.count)) if x)
+    if n.kind == 'module':
+        return n.label, letters(n.classes)
     if n.kind == 'missing':
-        return f'{n.label}<br/>(no such module)'
-    return n.label
+        return n.label, 'no such module'
+    if n.kind == 'aggregate':
+        return n.label, ', '.join(c for c in CLASS_ORDER if c in n.classes)
+    return n.label, ''
+
+
+def groups(g):
+    """[(id, title, members)]: the containers a diagram draws. Areas in the
+    tree view (their `contains` edges are the containment, not arrows); the
+    host and home entry points together in the hosts view. An area holds
+    everything beneath it, so a nested category sits in its area's box."""
+    kids = {}
+    for e in g.edges:
+        if e.kind == 'contains':
+            kids.setdefault(e.src, []).append(e.dst)
+    out = []
+    for i, n in g.nodes.items():
+        if n.kind != 'area':
+            continue
+        members, queue = [], list(kids.get(i, []))
+        while queue:
+            m = queue.pop(0)
+            if m in g.nodes and m not in members:
+                members.append(m)
+                queue += kids.get(m, [])
+        out.append((i, n.label, members))
+    entry = [i for i, n in g.nodes.items() if n.kind == 'aggregate']
+    if entry:
+        out.append(('grp:entry', 'hosts and home', entry))
+    return out
+
+
+def arrows(g):
+    """The edges drawn as arrows: everything but an area's containment."""
+    return [e for e in g.edges
+            if not (e.kind == 'contains' and g.nodes[e.src].kind == 'area')]
+
+
+def esc(text):
+    return text.replace('"', '#quot;')
+
+
+MERMAID_INIT = ('%%{init: {"theme": "base", "themeVariables": {"fontFamily": '
+                '"ui-sans-serif, system-ui, sans-serif", "fontSize": "14px", '
+                f'"lineColor": "{LINE}"}}, "flowchart": {{"curve": "basis", '
+                '"nodeSpacing": 24, "rankSpacing": 80, "padding": 14}}}%%')
+
+
+def mermaid(g):
+    ids = {i: f'n{k}' for k, i in enumerate(g.nodes)}
+    shape = {'category': '({})', 'module': '([{}])', 'aggregate': '[[{}]]',
+             'missing': '{{{{{}}}}}', 'area': '[{}]'}
+
+    def card(i):
+        n = g.nodes[i]
+        title, sub = parts(n)
+        text = f'<b>{title}</b>' + (f'<br/><i>{sub}</i>' if sub else '')
+        return f'{ids[i]}{shape[n.kind].format(chr(34) + esc(text) + chr(34))}'
+
+    lines = [MERMAID_INIT, 'flowchart LR']
+    boxed, hue = set(), hues(g)
+    drawn = arrows(g)
+    # Mermaid stacks unconnected containers bottom-up; reversed, the areas
+    # read top-down in the order the tree lists them.
+    for k, (gid, title, members) in (list(enumerate(groups(g)))[::-1] if not drawn
+                                     else enumerate(groups(g))):
+        members = [m for m in members if m in g.nodes]
+        if not members:
+            continue
+        lines.append(f'    subgraph g{k}["{esc(title)}"]')
+        lines += [f'        {card(m)}' for m in members]
+        lines.append('    end')
+        boxed.update(members)
+        if gid in g.nodes:
+            boxed.add(gid)
+        fill, line = PALETTE['area'] if gid in g.nodes else ('#fefce8', '#fde68a')
+        lines.append(f'    style g{k} fill:{fill},stroke:{line},color:{QUIET}')
+    lines += [f'    {card(i)}' for i in g.nodes if i not in boxed and g.nodes[i].kind != 'area']
+    by_hue = {}
+    for k, e in enumerate(drawn):
+        a, b = ids[e.src], ids[e.dst]
+        if e.kind == 'contains':
+            nested = g.nodes[e.src].kind == g.nodes[e.dst].kind == 'category'
+            lines.append(f'    {a} {"-.->" if nested else "-->"} {b}')
+        elif e.kind == 'merges':
+            lines.append(f'    {a} -. merges .- {b}')
+        else:
+            lines.append(f'    {a} --> {b}')
+            by_hue.setdefault(hue[e.src], []).append(str(k))
+    lines += [f'    linkStyle {",".join(v)} stroke:{h},stroke-width:1.5px'
+              for h, v in by_hue.items()]
+    lines += [f'    style {ids[a]} stroke:{h},stroke-width:2px' for a, h in hue.items()]
+    for kind in PALETTE:
+        fill, line = PALETTE[kind]
+        lines.append(f'    classDef {kind} fill:{fill},stroke:{line},color:{INK},stroke-width:1.5px')
+    lines += [f'    classDef orphan fill:{ALERT[0]},stroke:{ALERT[1]},color:{INK},stroke-width:2.5px',
+              f'    classDef bymodule stroke-dasharray:5 3',
+              f'    classDef merges stroke:{ALERT[1]},stroke-width:2.5px']
+    members = {}
+    for i, n in g.nodes.items():
+        if n.kind == 'area':
+            continue
+        for s in style(n):
+            members.setdefault(s, []).append(ids[i])
+    lines += [f'    class {",".join(v)} {k}' for k, v in members.items()]
+    return '\n'.join(lines)
 
 
 def style(n):
@@ -247,65 +385,68 @@ def style(n):
     return out
 
 
-def esc(text):
-    return text.replace('"', '#quot;')
-
-
-def mermaid(g):
-    ids = {i: f'n{k}' for k, i in enumerate(g.nodes)}
-    lines = ['flowchart LR']
-    for i, n in g.nodes.items():
-        lines.append(f'    {ids[i]}["{esc(tag(n))}"]')
-    for e in g.edges:
-        a, b = ids[e.src], ids[e.dst]
-        if e.kind == 'contains':
-            nested = g.nodes[e.src].kind == g.nodes[e.dst].kind == 'category'
-            lines.append(f'    {a} {"-.->" if nested else "-->"} {b}')
-        elif e.kind == 'merges':
-            lines.append(f'    {a} -. merges .- {b}')
-        else:
-            lines.append(f'    {a} -->|{CLASS_LETTER.get(e.cls, e.cls)}| {b}')
-    members = {}
-    for i, n in g.nodes.items():
-        for s in style(n):
-            members.setdefault(s, []).append(ids[i])
-    lines += [
-        '    classDef area fill:#eee,stroke:#888',
-        '    classDef category fill:#dbeafe,stroke:#2563eb',
-        '    classDef module fill:#fff,stroke:#555',
-        '    classDef aggregate fill:#fef3c7,stroke:#b45309',
-        '    classDef missing fill:#fee2e2,stroke:#b91c1c',
-        '    classDef orphan fill:#fff,stroke:#dc2626,stroke-width:3px,color:#b91c1c',
-        '    classDef bymodule stroke-dasharray:5 3',
-        '    classDef merges stroke:#dc2626,stroke-width:3px',
-    ]
-    lines += [f'    class {",".join(v)} {k}' for k, v in members.items()]
-    return '\n'.join(lines)
+GRID = 4      # cards per row in an arrowless Graphviz diagram
 
 
 def dot(g):
-    shape = {'area': 'folder', 'category': 'box', 'module': 'ellipse',
-             'aggregate': 'component', 'missing': 'octagon'}
     ids = {i: f'n{k}' for k, i in enumerate(g.nodes)}
-    lines = ['digraph modules {', '    rankdir=LR;', '    node [fontname="sans-serif"];']
-    for i, n in g.nodes.items():
-        attrs = [f'label="{esc(tag(n).replace("<br/>", chr(92) + "n"))}"', f'shape={shape[n.kind]}']
-        if 'orphan' in style(n):
-            attrs.append('color=red penwidth=3 fontcolor=red')
-        if 'bymodule' in style(n):
-            attrs.append('style=dashed')
-        if n.merges:
-            attrs.append('color=red penwidth=3')
-        lines.append(f'    {ids[i]} [{" ".join(attrs)}];')
-    for e in g.edges:
+
+    def card(i):
+        n = g.nodes[i]
+        title, sub = parts(n)
+        fill, line = colours(n)
+        label = f'<b>{html.escape(title)}</b>'
+        if sub:
+            label += f'<br/><font point-size="9" color="{QUIET}">{html.escape(sub)}</font>'
+        attrs = [f'label=<{label}>', f'fillcolor="{fill}"',
+                 f'color="{hue.get(i, line)}"']
+        if n.kind == 'module':
+            attrs.append('shape=box style="rounded,filled"')
+        if n.kind == 'aggregate':
+            attrs.append('shape=box style="rounded,filled" penwidth=1.6')
+        if n.kind == 'category' and n.status == 'orphan' or n.merges:
+            attrs.append('penwidth=2.5')
+        if n.kind == 'category' and n.status == 'by-module':
+            attrs.append('style="rounded,filled,dashed"')
+        return f'{ids[i]} [{" ".join(attrs)}];'
+
+    hue, drawn = hues(g), arrows(g)
+    # With no arrows (areas and their categories only) a left-to-right layout
+    # stacks every card in one column; top-down plus invisible edges every
+    # GRID cards lays each area out as a grid instead.
+    lines = ['digraph modules {',
+             f'    rankdir={"LR" if drawn else "TB"}; bgcolor="white"; nodesep=0.22; '
+             f'ranksep={0.9 if drawn else 0.3}; splines=true; newrank=true;',
+             f'    node [shape=box style="rounded,filled" fontname="Helvetica" fontsize=11 '
+             f'fontcolor="{INK}" penwidth=1.3 margin="0.16,0.08"];',
+             f'    edge [color="{LINE}" fontname="Helvetica" fontsize=9 fontcolor="{QUIET}" '
+             f'arrowsize=0.7];']
+    boxed = set()
+    for k, (gid, title, members) in enumerate(groups(g)):
+        members = [m for m in members if m in g.nodes]
+        if not members:
+            continue
+        fill, line = PALETTE['area'] if gid in g.nodes else ('#fefce8', '#fde68a')
+        lines += [f'    subgraph cluster_{k} {{',
+                  f'        label=<<font color="{QUIET}" point-size="10">{html.escape(title)}</font>>;',
+                  f'        style="rounded,filled"; fillcolor="{fill}"; color="{line}"; margin=14;']
+        lines += [f'        {card(m)}' for m in members]
+        if not drawn:
+            lines += [f'        {ids[a]} -> {ids[b]} [style=invis];'
+                      for a, b in zip(members, members[GRID:])]
+        lines.append('    }')
+        boxed.update(members)
+    lines += [f'    {card(i)}' for i in g.nodes if i not in boxed and g.nodes[i].kind != 'area']
+    for e in drawn:
         a, b = ids[e.src], ids[e.dst]
         if e.kind == 'contains':
             nested = g.nodes[e.src].kind == g.nodes[e.dst].kind == 'category'
             lines.append(f'    {a} -> {b}' + (' [style=dotted];' if nested else ';'))
         elif e.kind == 'merges':
-            lines.append(f'    {a} -> {b} [label="merges" color=red style=dashed dir=none];')
+            lines.append(f'    {a} -> {b} [label="merges" color="{ALERT[1]}" fontcolor="{ALERT[1]}" '
+                         f'style=dashed dir=none];')
         else:
-            lines.append(f'    {a} -> {b} [label="{CLASS_LETTER.get(e.cls, e.cls)}"];')
+            lines.append(f'    {a} -> {b} [color="{hue[e.src]}" penwidth=1.2];')
     lines.append('}')
     return '\n'.join(lines)
 
