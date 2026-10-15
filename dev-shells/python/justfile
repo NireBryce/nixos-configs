@@ -21,7 +21,8 @@ create path:
     # Inside a git repo a flake only sees tracked files, so the `nix develop`
     # below can't find an un-added flake.nix.
     if git -C {{quote(path)}} rev-parse --is-inside-work-tree >/dev/null 2>&1; then git -C {{quote(path)}} add flake.nix; fi
-    cd {{quote(path)}} && nix develop --command uv init
+    # `uv init` refuses an existing project (dev-new --force over one): keep it.
+    if [ -e {{quote(path)}}/pyproject.toml ]; then echo "create: pyproject.toml exists, skipping uv init"; else cd {{quote(path)}} && nix develop --command uv init; fi
 
 # Drop into the python dev shell, blocking until you exit it
 activate:

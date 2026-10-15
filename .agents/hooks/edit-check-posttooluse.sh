@@ -29,7 +29,7 @@ unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE
 
 if ! command -v jq >/dev/null 2>&1; then
     cat >/dev/null
-    printf '%s\n' '{"systemMessage":"edit-check-posttooluse: jq not on PATH, so this edit was NOT checked (wiki siblings, Nix string interpolation, untracked module). Install jq (packages-config/nix-utils/) to re-arm the hook."}'
+    printf '%s\n' '{"systemMessage":"edit-check-posttooluse: jq not on PATH, so this edit was NOT checked (wiki siblings, Nix string interpolation, untracked module). Install jq (packages-config/shell-apps/json-yaml-tools/jq.nix) to re-arm the hook."}'
     exit 0
 fi
 

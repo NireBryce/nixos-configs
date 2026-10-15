@@ -23,7 +23,8 @@ create path:
     # Inside a git repo a flake only sees tracked files, so the `nix develop`
     # below can't find an un-added flake.nix or rust-toolchain.toml.
     if git -C {{quote(path)}} rev-parse --is-inside-work-tree >/dev/null 2>&1; then git -C {{quote(path)}} add flake.nix rust-toolchain.toml; fi
-    cd {{quote(path)}} && nix develop --command cargo init
+    # `cargo init` refuses an existing package (dev-new --force over one): keep it.
+    if [ -e {{quote(path)}}/Cargo.toml ]; then echo "create: Cargo.toml exists, skipping cargo init"; else cd {{quote(path)}} && nix develop --command cargo init; fi
 
 # Drop into the rust dev shell, blocking until you exit it
 activate:
