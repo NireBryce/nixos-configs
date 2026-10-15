@@ -109,8 +109,12 @@
      after them in their column left to right. */
   #hosts > .area { order: -1; }
   #stage.lr #hosts > .area { order: 1; }
-  /* The shared areas stack one per line, in their order, in both layouts. */
-  #shared { flex-direction: column; align-items: center; }
+  /* The shared areas sit side by side across the flow, in their order, so
+     each faces the hosts directly instead of the later ones sitting behind
+     the earlier: one row top-down (wrapping only on a narrow screen), one
+     column left to right. */
+  #shared { flex-wrap: nowrap; }
+  @media (max-width: 900px) { #shared { flex-wrap: wrap; } }
   /* Left to right: five columns, each stacking its boxes vertically. The
      hosts' own directories, the hosts and the user directory stack so each
      sits across from what it links to instead of in a row that every edge
