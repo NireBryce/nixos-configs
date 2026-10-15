@@ -83,8 +83,8 @@ Nothing breaks by leaving it — courtesy, not a bug with consequences.
   just module `.agents/scripts/agent.just` so `just agent` lists them apart
   from the main recipes (added 2026-09-29). Any language; the rule above
   doesn't bind there. Evidence that a pattern recurs comes from
-  `just agent recurring`, which mines agent history (Claude Code,
-  OpenCode, zcode) for command fragments agents re-type across sessions,
+  `just agent recurring`, which mines agent history (Claude Code
+  and other agent harnesses) for command fragments agents re-type across sessions,
   merged across hosts through the private forge repo
   `elly/agent-command-log` (shapes and hashed session ids only; each host
   runs `just agent recurring export` at ship time, `setup` once). Skill

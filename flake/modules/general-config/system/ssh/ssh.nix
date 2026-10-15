@@ -13,7 +13,7 @@ in {
             };
 
             # Only the declared keys below, never ~/.ssh/authorized_keys:
-            # anything running as the user (an agent, opencode on cube)
+            # anything running as the user (an agent running as the user)
             # could otherwise add a key that survives every switch. No
             # host had that file when this was set (2026-09-26).
             authorizedKeysInHomedir = false;

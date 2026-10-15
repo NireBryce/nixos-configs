@@ -34,7 +34,6 @@ in {
             brews = [
                 "gifski" # gif creator/converter
                 "magic-wormhole" # easy secure point-to-point file transfer
-                "opencode" # LLM coding agent CLI
                 "python@3.13" # kept explicitly: `cleanup = "uninstall"`
                               # removes anything undeclared; this was
                               # installed by hand, not as a dep
@@ -140,8 +139,8 @@ in {
 # failure byte for byte; the answer was on stdout.
 #
 # The revert made cleanup actually uninstall. `brew leaves` and the dry run's
-# own `Would uninstall` list were checked first: cask `zcode` and formulae
-# `opencode` and `python@3.13` were installed by hand and wanted, so they were
+# own `Would uninstall` list were checked first: cask `zcode` and formula
+# `python@3.13` were installed by hand and wanted, so they were
 # added to the lists above in the same change.
 # Everything else the dry run named (`node`, `ripgrep`, `pcre2`, `icu4c@78`,
 # `libuv`, ...) was a dependency of those and comes back on demand.

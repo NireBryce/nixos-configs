@@ -88,8 +88,8 @@ The semi-automation, all through `just cod-desc`:
    command line it's given, parses the help text, and starts serving
    completions for it. Verify with `cod list` and
    `cod api complete-words -- $$ 2 <cmd> ''`. cod's help-execution timeout
-   is **1 second**: slow-starting commands (`steamtinkerlaunch`,
-   `opencode`) never learn, and there is nothing to configure about it.
+   is **1 second**: slow-starting commands (`steamtinkerlaunch`)
+   never learn, and there is nothing to configure about it.
 2. **Draft rows**: `just cod-desc draft <cmd>...` runs `<cmd> --help`
    itself, parses flag and subcommand descriptions (kingpin and clap shapes
    are recognised; see `test_cod_desc.py` for what each looks like), and

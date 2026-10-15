@@ -290,8 +290,8 @@ class SecretsGuardPreToolUse(GuardCase):
     def test_read_tool_denied_on_run_secrets(self):
         # The Bash hook never sees the Read tool. settings.json's deny
         # rules plus secrets-read-guard-pretooluse.sh (wired into both
-        # configs, #458) stand between it and a user-owned secret (cube's
-        # opencode password is owned by the login user); this pins the
+        # configs, #458) stand between it and a user-owned secret (a
+        # secret can be owned by the login user); this pins the
         # rule list, SecretsReadGuardPreToolUse pins the hook.
         deny = json.loads(SETTINGS.read_text())["permissions"]["deny"]
         for rule in ("Read(//run/secrets/**)", "Read(//run/secrets.d/**)"):
