@@ -7,7 +7,7 @@ landing page (replaced glance 2026-09-12, #291). Category dates 2026-08-24, nest
 
 ## Modules
 
-- `general-config/homelab/landing/homepage/homepage.nix` (`nixos`): `services.homepage-dashboard`
+- `homelab-config/homelab/landing/homepage/homepage.nix` (`nixos`): `services.homepage-dashboard`
   (attrsets → `/etc/homepage-dashboard/*.yaml`). Port **3002**, loopback. Served at
   `https://ts-cube.moose-micro.ts.net/` (root route) and `https://homepage.moose-micro.ts.net/` (short `http://homepage/`).
 - `glance/glance.nix` (glance 0.8.5, port **3004**, loopback), rejoined 2026-09-13 for the landing

@@ -375,13 +375,15 @@ def host_imports(root, categories, hosts=None):
 
 def find_categories(root):
     """category name -> its directory, for every dirsAsCategory.nix under
-    flake/modules/general-config/ and flake/modules/users-config/ -- the two areas
-    categories/00-INDEX.md actually indexes (packages-config/* and host-config/*
+    flake/modules/general-config/, flake/modules/hardware-config/,
+    flake/modules/homelab-config/ and flake/modules/users-config/ -- the
+    areas categories/00-INDEX.md actually
+    indexes (packages-config/* and host-config/*
     are deliberately excluded there, see that file's own header, so this
     check has nothing to compare them against and doesn't look).
     """
     cats = {}
-    for area in ('general-config', 'users-config'):
+    for area in ('general-config', 'hardware-config', 'homelab-config', 'users-config'):
         base = root / 'flake' / 'modules' / area
         if not base.exists():
             continue
@@ -1003,7 +1005,7 @@ def check_secrets(root):
     return findings
 
 
-CADDY_NIX = pathlib.Path('flake/modules/general-config/homelab/reverse-proxy/caddy/caddy.nix')
+CADDY_NIX = pathlib.Path('flake/modules/homelab-config/homelab/reverse-proxy/caddy/caddy.nix')
 # Where the retired path-prefix routes live since 2026-09-13 -- moved out of
 # caddy.nix's history section, still the record of what `/grafana/` and
 # `/git/` were.

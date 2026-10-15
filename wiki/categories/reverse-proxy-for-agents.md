@@ -9,7 +9,7 @@ nested under `homelab` 2026-08-27.
 
 ## Files
 
-`general-config/homelab/reverse-proxy/`, both `nixos`-class:
+`homelab-config/homelab/reverse-proxy/`, both `nixos`-class:
 
 - `caddy/caddy.nix` — the Caddyfile, `permitCertUid`, systemd ordering.
 - `tailscale-services/serve.nix` — `svc:` endpoints. Raw TCP forwarding

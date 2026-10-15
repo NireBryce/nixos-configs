@@ -2,7 +2,7 @@
 
 _Last modified: 2026-10-15_
 
-The largest category by far — across 19 subdirectories, no per-file count
+The largest category by far — across 15 subdirectories, no per-file count
 kept here on purpose (see categories/00-INDEX.md's Index section for why) —
 and the one every Linux host in this repo imports whole, with no way to opt
 out of any piece of it. That property is exactly why
@@ -226,7 +226,7 @@ repository only).
 All three NixOS hosts import `system` whole. `lysithea` imports it too — for
 `enable-home-manager-darwin.nix`, per that file's own comment "this is what
 brings packages and dotfiles in" — but only the `nixos`/`darwin`-class
-subset that actually declares a `darwin` class reaches it; `bluetooth`,
+subset that actually declares a `darwin` class reaches it;
 `networking`, `kdeconnect`, and most of the rest of this category simply
 don't declare `darwin`-class modules, so importing `system` on lysithea
 doesn't drag any of that in. The `homeManager`-class slice

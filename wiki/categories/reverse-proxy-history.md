@@ -173,6 +173,6 @@ loopback listener, with Caddy terminating TLS and picking the vhost by SNI.
 ## See also
 
 - [reverse-proxy](reverse-proxy.md) — the mechanism as it works today.
-- [`caddy.nix`](../../flake/modules/general-config/homelab/reverse-proxy/caddy/caddy.nix)
+- [`caddy.nix`](../../flake/modules/homelab-config/homelab/reverse-proxy/caddy/caddy.nix)
   — its header carries the live mechanism; this page carries what it
   stopped doing.

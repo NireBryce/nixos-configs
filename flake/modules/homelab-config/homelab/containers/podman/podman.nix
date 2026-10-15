@@ -6,7 +6,7 @@ in {
     # `flake.modules.nixos.virtualization`. Everything here is OCI
     # containers -- podman and distrobox -- and never was anything else;
     # `virtualization` now names the VM category (libvirt/QEMU) at
-    # general-config/homelab/virtualization/. Directory was `nire/system/virtualization/`
+    # homelab-config/homelab/virtualization/. Directory was `nire/system/virtualization/`
     # until 2026-08-21 for the same reason.
     #
     # MOVED AGAIN, 2026-08-22: out of `nire/system/containers/` (under

@@ -76,7 +76,7 @@ differently under the hood — as netmap `ExtraRecords`, which are
 **visibility-granted**: a host whose only identity is a tag never
 receives them without a grant whose `src` is that tag (found live,
 issue #298; full story in
-[../flake/modules/general-config/homelab/reverse-proxy/tailscale-services/README.md](../flake/modules/general-config/homelab/reverse-proxy/tailscale-services/README.md)).
+[../flake/modules/homelab-config/homelab/reverse-proxy/tailscale-services/README.md](../flake/modules/homelab-config/homelab/reverse-proxy/tailscale-services/README.md)).
 
 ## Reverse DNS (PTR)
 
@@ -147,6 +147,6 @@ read these before changing anything:
   in D-Bus/link-DNS mode instead of rewriting `/etc/resolv.conf`.
 - `flake/modules/general-config/system/networking/avahi.nix` — the `.local` half
   and the publish settings that make hosts answer for their own names.
-- `flake/modules/general-config/homelab/reverse-proxy/tailscale-services/README.md`
+- `flake/modules/homelab-config/homelab/reverse-proxy/tailscale-services/README.md`
   — the `svc:` layer: Service objects, the tag/grant visibility rule
   (#298), and the activation dance.

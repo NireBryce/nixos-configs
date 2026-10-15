@@ -81,7 +81,7 @@ for the mechanism. Diagnosed 2026-09-06, not worth chasing.
 
 `nire-tenacity` memory/swap (2026-10-04): 12.4 GiB usable. Swap policy:
 `customOption.swap.policy = "zswap"` (`hardware-tenacity.nix`; implemented in
-`general-config/system/memory/swap-policy.nix`) — zswap fronts the 20G
+`hardware-config/hardware/memory/swap-policy.nix`) — zswap fronts the 20G
 encrypted `nvme0n1p6` swap partition, replacing the SteamOS zram Jovian
 defaults to. Flip only by booting: a live switch `swapoff`s a loaded zram
 into free RAM.

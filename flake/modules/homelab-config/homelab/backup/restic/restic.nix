@@ -2,7 +2,7 @@
 # already on the network. Added 2026-08-28 against issue #87 ("no backups
 # anywhere in the fleet"), which is closed: a real restore drill on
 # 2026-09-06 opened a genuine, complete Forgejo database out of the repo.
-# Own category (`general-config/homelab/backup/`), not `restic`: a category and its
+# Own category (`homelab-config/homelab/backup/`), not `restic`: a category and its
 # one module both named `restic` would declare `flake.modules.nixos.restic`
 # twice and silently MERGE, the `containers`/`podman.nix` collision
 # AGENTS.md documents -- same reason `git-forge` isn't `forgejo`.

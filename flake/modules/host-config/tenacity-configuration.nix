@@ -37,7 +37,8 @@
 
             hardware        # amdcpu, amdgpu
             nix
-            peripherals     # logitech-g600, zsa-moonlander -- both were on the old config
+            # no `peripherals` (logitech-g600, zsa-moonlander): neither device is
+            # used on the handheld -- dropped 2026-10-15, the per-host question of #440.
             shell-config
             system
 

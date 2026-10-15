@@ -9,7 +9,7 @@ Forgejo on `nire-cube`, nested under `homelab`. URL
 
 ## What's in it
 
-Two `nixos`-class files under `general-config/homelab/git-forge/forgejo/`:
+Two `nixos`-class files under `homelab-config/homelab/git-forge/forgejo/`:
 `forgejo.nix` (the forge), `actions-runner.nix` (CI runner, added 2026-09-24).
 
 Category isn't named `forgejo`: category and module sharing a name both

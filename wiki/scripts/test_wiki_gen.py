@@ -9,7 +9,7 @@ regions), changes a source fact on purpose, and asserts what `--check`
 reports and what a write run produces. Pure stdlib; runs via
 `just wiki-gen-test`, part of `just preflight` and so of CI.
 """
-import contextlib, io, pathlib, sys, tempfile, unittest
+import contextlib, io, pathlib, re, sys, tempfile, unittest
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 import wiki_gen  # noqa: E402
@@ -85,11 +85,13 @@ class Fixture(unittest.TestCase):
         self.write(m + 'host-config/gamma-configuration.nix',
                    'with config.flake.modules.darwin; [ boot ]\n')
         g = m + 'general-config/'
-        for cat, cls in [('boot', 'darwin'), ('impermanence', 'nixos'),
-                         ('homelab', 'nixos'), ('homelab/backup', 'nixos'),
-                         ('impermanence/rollback', 'homeManager')]:
-            self.write(g + cat + '/dirsAsCategory.nix', SHIM)
-            self.write(g + cat + '/thing.nix', MOD.replace('CLASS', cls))
+        for cat, cls in [('general-config/boot', 'darwin'),
+                         ('general-config/impermanence', 'nixos'),
+                         ('homelab-config/homelab', 'nixos'),
+                         ('homelab-config/homelab/backup', 'nixos'),
+                         ('general-config/impermanence/rollback', 'homeManager')]:
+            self.write(m + cat + '/dirsAsCategory.nix', SHIM)
+            self.write(m + cat + '/thing.nix', MOD.replace('CLASS', cls))
         self.write(g + 'boot/other.nix', MOD.replace('CLASS', 'nixos'))
         for page in ('boot', 'impermanence', 'homelab', 'backup'):
             self.write(f'wiki/categories/{page}.md', f'# {page}\n')
@@ -203,8 +205,8 @@ class Categories(Fixture):
                       '(+ nested `rollback`) | nixos, homeManager |  |', system)
         self.assertNotIn('rollback](', system)  # no page, no row
         self.assertNotIn('homelab', system)
-        self.assertIn('| [backup](backup.md) | `general-config/homelab/backup/` | nixos |', homelab)
-        self.assertIn('| [homelab](homelab.md) | `general-config/homelab/` (+ nested `backup`) |', homelab)
+        self.assertIn('| [backup](backup.md) | `homelab-config/homelab/backup/` | nixos |', homelab)
+        self.assertIn('| [homelab](homelab.md) | `homelab-config/homelab/` (+ nested `backup`) |', homelab)
         self.assertLess(homelab.index('[backup]'), homelab.index('[homelab]'))
 
     def test_imported_by_survives_and_dir_page_links(self):
@@ -214,7 +216,7 @@ class Categories(Fixture):
         (self.root / 'wiki/categories/homelab.md').unlink()
         self.assertTrue(any('categories-index-homelab' in f for f in self.check()))
         self.gen()
-        self.assertIn('| [homelab](homelab/00-INDEX.md) | `general-config/homelab/` '
+        self.assertIn('| [homelab](homelab/00-INDEX.md) | `homelab-config/homelab/` '
                       '(+ nested `backup`) | nixos | some hosts |',
                       self.read('wiki/categories/00-INDEX.md'))
 
@@ -265,7 +267,8 @@ class Layout(Fixture):
         text = self.read('wiki/architecture.md')
         self.assertIn('```mermaid\n%%{init:', text)
         self.assertIn('\nflowchart LR\n', text)
-        self.assertIn('subgraph g0["general-config"]', text)
+        self.assertRegex(text, r'subgraph g\d+\["general-config"\]')
+        self.assertRegex(text, r'subgraph g\d+\["homelab-config"\]')   # its own area
         self.assertIn('general-config', text)
         self.assertIn('boot/', text)
         self.assertIn('homelab/', text)

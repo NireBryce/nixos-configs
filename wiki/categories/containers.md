@@ -1,4 +1,4 @@
-# `containers` — `general-config/homelab/containers/`
+# `containers` — `homelab-config/homelab/containers/`
 
 _Last modified: 2026-10-03_
 

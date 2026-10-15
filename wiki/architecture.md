@@ -102,39 +102,45 @@ Mermaid an edge up into the top row is a plain line, not an arrow.
 %%{init: {"theme": "base", "themeVariables": {"fontFamily": "ui-sans-serif, system-ui, sans-serif", "fontSize": "14px", "lineColor": "#94a3b8"}, "flowchart": {"curve": "basis", "nodeSpacing": 24, "rankSpacing": 80, "padding": 14}}}%%
 flowchart LR
     subgraph g0["users-config"]
-        n25("<b>elly/</b><br/><i>n h d · 4</i>")
+        n27("<b>elly/</b><br/><i>n h d · 4</i>")
     end
     subgraph g1["packages-config"]
-        n18("<b>development/</b><br/><i>n h · 17</i>")
-        n19("<b>editors/</b><br/><i>n h · 3</i>")
-        n20("<b>gui-other/</b><br/><i>h · 20</i>")
-        n21("<b>linux-utils/</b><br/><i>h · 17</i>")
-        n22("<b>nix-utils/</b><br/><i>n h · 4</i>")
-        n23("<b>shell-apps/</b><br/><i>n h · 40</i>")
-        n24("<b>terminals/</b><br/><i>h · 3</i>")
+        n20("<b>development/</b><br/><i>n h · 17</i>")
+        n21("<b>editors/</b><br/><i>n h · 3</i>")
+        n22("<b>gui-other/</b><br/><i>h · 20</i>")
+        n23("<b>linux-utils/</b><br/><i>h · 17</i>")
+        n24("<b>nix-utils/</b><br/><i>n h · 4</i>")
+        n25("<b>shell-apps/</b><br/><i>n h · 40</i>")
+        n26("<b>terminals/</b><br/><i>h · 3</i>")
     end
     subgraph g2["host-config"]
-        n14("<b>cube/</b><br/><i>n · 9</i>")
-        n15("<b>durandal/</b><br/><i>n · 6</i>")
-        n16("<b>lysithea/</b><br/><i>d · 2</i>")
-        n17("<b>tenacity/</b><br/><i>n h · 11</i>")
+        n16("<b>cube/</b><br/><i>n · 9</i>")
+        n17("<b>durandal/</b><br/><i>n · 6</i>")
+        n18("<b>lysithea/</b><br/><i>d · 2</i>")
+        n19("<b>tenacity/</b><br/><i>n h · 11</i>")
     end
-    subgraph g3["general-config"]
-        n4("<b>boot/</b><br/><i>n · 2</i>")
-        n5("<b>desktop-env/</b><br/><i>n · 4</i>")
-        n6("<b>hardware/</b><br/><i>n · 2</i>")
-        n7("<b>homelab/</b><br/><i>n · 21</i>")
+    subgraph g3["homelab-config"]
+        n15("<b>homelab/</b><br/><i>n · 21</i>")
+    end
+    subgraph g4["hardware-config"]
+        n13("<b>hardware/</b><br/><i>n · 8</i>")
+        n14("<b>peripherals/</b><br/><i>n · 2</i>")
+    end
+    subgraph g5["general-config"]
+        n6("<b>boot/</b><br/><i>n · 2</i>")
+        n7("<b>desktop-env/</b><br/><i>n · 4</i>")
         n8("<b>impermanence/</b><br/><i>n h · 2</i>")
         n9("<b>macos/</b><br/><i>d · 3</i>")
         n10("<b>nix/</b><br/><i>n h d · 2</i>")
-        n11("<b>peripherals/</b><br/><i>n · 2</i>")
-        n12("<b>shell-config/</b><br/><i>n h · 4</i>")
-        n13("<b>system/</b><br/><i>n h d · 44</i>")
+        n11("<b>shell-config/</b><br/><i>n h · 4</i>")
+        n12("<b>system/</b><br/><i>n h d · 38</i>")
     end
     style g0 fill:#f8fafc,stroke:#cbd5e1,color:#64748b
     style g1 fill:#f8fafc,stroke:#cbd5e1,color:#64748b
     style g2 fill:#f8fafc,stroke:#cbd5e1,color:#64748b
     style g3 fill:#f8fafc,stroke:#cbd5e1,color:#64748b
+    style g4 fill:#f8fafc,stroke:#cbd5e1,color:#64748b
+    style g5 fill:#f8fafc,stroke:#cbd5e1,color:#64748b
     classDef area fill:#f8fafc,stroke:#cbd5e1,color:#1e293b,stroke-width:1.5px
     classDef category fill:#dbeafe,stroke:#2563eb,color:#1e293b,stroke-width:1.5px
     classDef folder fill:#f1f5f9,stroke:#94a3b8,color:#1e293b,stroke-width:1.5px
@@ -144,8 +150,8 @@ flowchart LR
     classDef orphan fill:#fff1f2,stroke:#e11d48,color:#1e293b,stroke-width:2.5px
     classDef bymodule stroke-dasharray:5 3
     classDef merges stroke:#e11d48,stroke-width:2.5px
-    class n4,n5,n6,n7,n8,n9,n10,n11,n12,n13,n14,n15,n16,n17,n18,n19,n20,n21,n22,n23,n24,n25 category
-    class n5 bymodule
+    class n6,n7,n8,n9,n10,n11,n12,n13,n14,n15,n16,n17,n18,n19,n20,n21,n22,n23,n24,n25,n26,n27 category
+    class n7 bymodule
 ```
 
 <!-- /generated -->
@@ -176,9 +182,9 @@ flowchart LR
 ## Related, easy to get backwards
 
 Containers and VMs are separate categories here, and "virtualization" means
-only the VM one (`general-config/homelab/virtualization/`: libvirt, virt-tools,
+only the VM one (`homelab-config/homelab/virtualization/`: libvirt, virt-tools,
 vm-networking — optional, cube only). Podman/distrobox live in
-[`general-config/homelab/containers/`](categories/containers.md), its own category
+[`homelab-config/homelab/containers/`](categories/containers.md), its own category
 since 2026-08-22, nested under the `homelab` umbrella since 2026-08-27 —
 imported by cube only (durandal dropped it 2026-08-27, same day as
 `virtualization`; tenacity 2026-09-26). See

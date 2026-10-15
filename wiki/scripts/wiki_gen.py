@@ -185,7 +185,7 @@ def host_rows(root):
 
 
 CLASS_ORDER = ['nixos', 'homeManager', 'darwin']
-HOMELAB = 'general-config/homelab'
+HOMELAB = 'homelab-config/homelab'
 NESTED_NAMED_MAX = 3  # up to this many nested categories are named, past it counted
 
 
@@ -286,7 +286,7 @@ REGIONS = {r.name: r for r in [
            ['Category', 'Directory', 'Class(es)', 'Imported by'],
            'Category', ['Imported by'], category_rows(homelab=False)),
     Region('categories-index-homelab', 'wiki/categories/00-INDEX.md',
-           'the dirsAsCategory.nix tree under flake/modules/general-config/homelab/ and the pages in wiki/categories/',
+           'the dirsAsCategory.nix tree under flake/modules/homelab-config/homelab/ and the pages in wiki/categories/',
            ['Category', 'Directory', 'Class(es)', 'Imported by'],
            'Category', ['Imported by'], category_rows(homelab=True)),
     Region('module-counts', 'wiki/module-style-guide-for-agents.md',

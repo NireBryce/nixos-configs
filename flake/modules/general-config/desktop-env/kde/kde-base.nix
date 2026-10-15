@@ -32,7 +32,7 @@ in {
             kdePackages.qttools
             kdePackages.partitionmanager
             kdePackages.plasma-disks # SMART wear/failure monitor, systray notifications -- https://invent.kde.org/plasma/plasma-disks
-                                     # needs `smartctl` on the *system* PATH; smartd.nix (system/storage) provides it.
+                                     # needs `smartctl` on the *system* PATH; smartd.nix (hardware-config/hardware/storage) provides it.
             kdePackages.kcharselect # symbol picker, may need to be kdePackages.kcharselect
             polonium # tiling wm
             kdePackages.krohnkite # other tiling wm

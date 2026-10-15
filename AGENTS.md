@@ -279,8 +279,10 @@ similar, never a bare NixOS or Home Manager module.
 **Membership comes from the directory**: each category's
 `dirsAsCategory.nix` collects every `.nix` file beneath it; categories are
 how shared things stay optional (no `mkEnableOption`). Areas:
-`general-config/` (incl. `macos/` for darwin), `host-config/`,
-`packages-config/`, `users-config/`. Detail: `.agents/rules/flake-modules.md`.
+`general-config/` (incl. `macos/` for darwin), `hardware-config/`,
+`homelab-config/` (self-hosted services), `host-config/`, `packages-config/`,
+`users-config/`.
+Detail: `.agents/rules/flake-modules.md`.
 Host roster: `host-config/hosts.nix` (its comments cover naming, the
 forge-runner guest, removed hosts) — don't restate it.
 

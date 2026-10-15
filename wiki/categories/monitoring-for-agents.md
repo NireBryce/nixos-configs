@@ -10,7 +10,7 @@ since 2026-09-07; the old `.../grafana/` path 404s.
 
 ## What's in it
 
-`general-config/homelab/monitoring/`, seven files, all `nixos`-class, **every listener
+`homelab-config/homelab/monitoring/`, seven files, all `nixos`-class, **every listener
 on loopback**:
 
 | File | Scrapes | Note |

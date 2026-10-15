@@ -37,7 +37,7 @@ in
         # A GUEST, not a machine -- hence no `nire-` prefix: that prefix
         # names the fleet (the machines the host-count claims in wiki/ and
         # AGENTS.md are about), and this is a component instantiated on
-        # nire-cube by general-config/homelab/virtualization/
+        # nire-cube by homelab-config/homelab/virtualization/
         # virtualization-cube.nix through the VM generator. Its config:
         # host-config/forge-runner-configuration.nix. Not in .sops.yaml, and not
         # switched from this repo -- it comes up with cube's libvirtd.

@@ -149,7 +149,7 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
 ### Category reference (configuration)
 
 - [Category reference](categories/00-INDEX.md) — one article per real
-  category (`general-config/system`, `general-config/impermanence`, `general-config/homelab/virtualization`, …):
+  category (`general-config/system`, `general-config/impermanence`, `homelab-config/homelab/virtualization`, …):
   what's in it, which hosts import it, and the traps specific to that one.
   [shell-config](categories/shell-config/00-INDEX.md) is the one category
   that's grown its own subdirectory, with deep-dives on

@@ -52,7 +52,7 @@ def index_lines(root):
 
 def expand(root, cwd, arg):
     """A path argument as repo-relative files; a directory is every tracked
-    file beneath it, so `lessons flake/modules/general-config/homelab`
+    file beneath it, so `lessons flake/modules/homelab-config/homelab`
     reports the area, not nothing."""
     p = (cwd / arg).resolve()
     if p != root and root not in p.parents:

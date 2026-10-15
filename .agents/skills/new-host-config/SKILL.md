@@ -27,7 +27,7 @@ cube, not a fleet host (no `nire-` prefix; see its `hosts.nix` comment).
   host header like `cube-configuration.nix`, including the `invariants.nix`
   interaction.
 - **CPU/GPU?** AMD hosts import the shared `hardware` category (`amdcpu`,
-  `amdgpu`). **Never add an `intel` sibling under `general-config/hardware/`**
+  `amdgpu`). **Never add an `intel` sibling under `hardware-config/hardware/`**
   — `dirsAsCategory` recurses, so it would apply to AMD hosts too. Intel
   hosts skip `hardware` and pull the exact `nixos-hardware` module (e.g.
   `lenovo-thinkpad-x270`) from `<name>/hardware/hardware-<name>.nix`

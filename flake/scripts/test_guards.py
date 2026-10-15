@@ -1861,7 +1861,7 @@ class LessonReminder(unittest.TestCase):
         self.assertFalse(new.exists())
         self.assertReminds(self.edit(new, tool="Write"), "flake-modules")
         # editing an existing module is not creating one
-        existing = REPO / "flake/modules/general-config/system/storage/smartd.nix"
+        existing = REPO / "flake/modules/hardware-config/hardware/storage/smartd.nix"
         self.assertIsNone(self.edit(existing))
 
     def test_relative_path_resolves_against_cwd(self):

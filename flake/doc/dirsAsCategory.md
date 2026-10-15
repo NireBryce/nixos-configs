@@ -90,7 +90,7 @@ are grouping only. (Until 2026-09-28 files directly in a category's own
 directory were skipped; see History.) `category-collector.nix`'s header has a
 worked tree diagram.
 
-**A nested category (`general-config/hardware/amd/`, `homelab`'s seven children,
+**A nested category (`hardware-config/hardware/amd/`, `homelab`'s seven children,
 `packages-config/development/langs`, ...) is referenced by name instead of
 walked from scratch by every ancestor.** If a subdirectory owns its own
 `dirsAsCategory.nix`, the collector adds that subdirectory's own name to the
@@ -132,8 +132,8 @@ The same held for the readability rewrite that followed (new names,
   declares. `micro.nix` declares only `homeManager`; without the filter,
   `flake.modules.nixos.editors` asks for `config.flake.modules.nixos.micro`,
   which does not exist.
-- **Nested categories overlap their parents on purpose.** `general-config/hardware` and
-  `general-config/hardware/amd` both collect `amdcpu` and `amdgpu`, because a category's
+- **Nested categories overlap their parents on purpose.** `hardware-config/hardware` and
+  `hardware-config/hardware/amd` both collect `amdcpu` and `amdgpu`, because a category's
   collection reaches through its nested ones. That gives coarse and fine handles on the same modules. It looks
   like a bug and is not.
 - **Every shim must share one filename.** The collector recognises a nested
@@ -336,7 +336,7 @@ The two wrong versions:
   silently dropped `libvirt-vm-llm-sandbox` from `nire-cube`'s
   `systemd.services` entirely. Cause: `virtualization-cube.nix` (the
   `nire-llm-sandbox` VM's cube wiring — both since removed, 2026-08-28; see
-  `wiki/history.md`) sat bare in `general-config/homelab/virtualization/`'s own root,
+  `wiki/history.md`) sat bare in `homelab-config/homelab/virtualization/`'s own root,
   deliberately excluded from the
   `virtualization` category's own aggregate (a `.nix` file bare in a
   category's own root was then collected by nothing — the rule removed
@@ -381,7 +381,7 @@ workarounds:
   to add them back into the parent.
 
 It was also used on purpose once: `virtualization-cube.nix`, cube's VM
-wiring, sat directly in `general-config/homelab/virtualization/` so it
+wiring, sat directly in `homelab-config/homelab/virtualization/` so it
 reached cube through `homelab` without joining `virtualization`, which
 durandal imported at the time (lessons-learned §38 on why a VM definition
 shouldn't ride along with shared libvirt setup).

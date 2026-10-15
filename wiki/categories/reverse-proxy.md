@@ -1,4 +1,4 @@
-# `reverse-proxy` — `general-config/homelab/reverse-proxy/`
+# `reverse-proxy` — `homelab-config/homelab/reverse-proxy/`
 
 _Last modified: 2026-09-27_
 

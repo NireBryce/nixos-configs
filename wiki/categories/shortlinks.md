@@ -1,4 +1,4 @@
-# `shortlinks` — `general-config/homelab/shortlinks/`
+# `shortlinks` — `homelab-config/homelab/shortlinks/`
 
 _Last modified: 2026-09-27_
 
