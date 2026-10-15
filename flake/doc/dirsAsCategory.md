@@ -63,19 +63,22 @@ as import-tree does), and declares one aggregate per module class:
 ```nix
 categoryName = baseNameOf categoryDir;   # categoryDir = dirOf shimFile
 # …
-flake.modules.nixos.${categoryName}.imports       = forClass "nixos";
-flake.modules.homeManager.${categoryName}.imports = forClass "homeManager";
-flake.modules.darwin.${categoryName}.imports      = forClass "darwin";
+flake.modules.nixos.${categoryName}.imports       = importsFor "nixos";
+flake.modules.homeManager.${categoryName}.imports = importsFor "homeManager";
+flake.modules.darwin.${categoryName}.imports      = importsFor "darwin";
 ```
 
-`forClass` resolves the collected names to real module references and drops any
-name that class does not declare:
+`importsFor` resolves the collected names to real module references and drops
+any name that class does not declare:
 
 ```nix
-forClass = class:
-    map (n: config.flake.modules.${class}.${n})
-        (lib.filter (n: config.flake.modules.${class} ? ${n}) (collectModules categoryDir));
+declaredIn = class: name: config.flake.modules.${class} ? ${name};
+moduleFor  = class: name: config.flake.modules.${class}.${name};
+importsFor = class: map (moduleFor class) (lib.filter (declaredIn class) collectedNames);
 ```
+
+(`forClass` and `collectModules` until 2026-10-15; renamed, behaviour
+unchanged.)
 
 **Membership is therefore implicit: a module belongs to the category of the
 directory it is filed in.** Adding a module is a one-file change — create the
@@ -91,7 +94,7 @@ worked tree diagram.
 `packages-config/development/langs`, ...) is referenced by name instead of
 walked from scratch by every ancestor.** If a subdirectory owns its own
 `dirsAsCategory.nix`, the collector adds that subdirectory's own name to the
-list — `forClass` then resolves it exactly like a plain module name, because
+list — `importsFor` then resolves it exactly like a plain module name, because
 a nested category's aggregate lives in the same `flake.modules.<class>`
 namespace a leaf module's does, and the "always define all three classes,
 even empty" rule below guarantees it exists for every class regardless of
@@ -100,10 +103,28 @@ what that subtree actually collected.
 Getting delegation right took two wrong attempts, both caught by
 evaluating rather than by reading the diff — History has both.
 
+### Reading membership as data
+
+Since 2026-10-15 the collector also publishes what it collected, as
+`flake.categoryGraph.<category> = { dir; files; nested; }` (option declared
+in `modules/category-graph.nix`): the category's directory, the module files
+it collects itself, and the names of the categories nested directly in it,
+paths relative to `modules/`. It comes from the same directory walk
+(`entriesUnder`) that `collectedNames` reads names from, so it cannot drift
+from the import lists, and it reads only `readDir` -- never `flake.modules` -- so
+it adds no self-reference. Read it with `nix eval --json ./flake#categoryGraph`
+rather than parsing files.
+
+Adding it changed no host: every NixOS and darwin toplevel and every Home
+Manager activation drvPath was identical before and after, and breaking
+the walk on purpose did move cube's, so the refactored walk is the live one.
+The same held for the readability rewrite that followed (new names,
+`host-fingerprint.nix` fingerprints identical too).
+
 ### Things that are load-bearing
 
 - **Always define all three classes, even when the filtered list is empty.**
-  Making the attribute itself conditional — `lib.optionalAttrs (forClass … != [])` —
+  Making the attribute itself conditional — `lib.optionalAttrs (importsFor … != [])` —
   looks tidier and recurses: computing the attribute names of
   `flake.modules.nixos` would require reading `flake.modules.nixos`. Empty
   aggregates are harmless. Conditional ones are not.
@@ -112,8 +133,8 @@ evaluating rather than by reading the diff — History has both.
   `flake.modules.nixos.editors` asks for `config.flake.modules.nixos.micro`,
   which does not exist.
 - **Nested categories overlap their parents on purpose.** `general-config/hardware` and
-  `general-config/hardware/amd` both collect `amdcpu` and `amdgpu`, because `collectModules`
-  recurses. That gives coarse and fine handles on the same modules. It looks
+  `general-config/hardware/amd` both collect `amdcpu` and `amdgpu`, because a category's
+  collection reaches through its nested ones. That gives coarse and fine handles on the same modules. It looks
   like a bug and is not.
 - **Every shim must share one filename.** The collector recognises a nested
   category by the *calling* shim's own filename, so a lone renamed shim stops

@@ -189,10 +189,11 @@ def collisions(root):
 def orphans(root):
     """Reachability is per module, not per category.
 
-    collectModules recurses, so a module in a nested category is also collected
-    by every category above it -- `rust` sits in `langs`, but `development`
-    picks it up too. Checking categories directly would report every nested one
-    as dead. So: walk each module's ancestors, and treat it as reachable if the
+    A category's collection reaches through its nested categories, so a
+    module in a nested category is also collected by every category above
+    it -- `rust` sits in `langs`, but `development` picks it up too.
+    Checking categories directly would report every nested one as dead.
+    So: walk each module's ancestors, and treat it as reachable if the
     module itself is imported by name (durandal takes `kde-desktop` that way,
     and kde-desktop in turn takes `kde-base`) or any ancestor category is.
     """

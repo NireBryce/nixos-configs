@@ -1,6 +1,6 @@
 # Architecture & module system
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-15_
 
 For *why* this repo runs flake-parts at all, see [flake-parts.md](flake-parts.md)
 first — this page is the mechanism built on top of that, not the reason for
@@ -23,6 +23,9 @@ is the mechanism, not the inventory.
   flake-parts module (`flake.modules.<class>.<name> = ...`), and which
   category it belongs to is derived from the directory it's filed in, not
   declared explicitly. Read this before touching any `dirsAsCategory.nix`.
+  What each category collects is also published as data:
+  `nix eval --json ./flake#categoryGraph` (its directory, the module files
+  it collects itself, and the categories nested in it).
 - **[`../CLAUDE.md`](../CLAUDE.md), Architecture section** — the prose
   overview: `import-tree`, entry points that sit outside every category tree
   (`modules/checks.nix`, `host-config/hosts.nix`, the per-host configs,
