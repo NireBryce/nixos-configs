@@ -39,8 +39,8 @@ in {
         #          its `unset python` marked "MAGIC: idk why this is here" is possibly
         #          related to the equally unexplained PYTHON = "PYTHON" in shell-env.nix.
 
-        # fast syntax highlighting theems
-        home.file."./.config/F-Sy-H".source = ./config/zsh-f-s-highlight-themes;
+        # # fast syntax highlighting theems
+        # home.file."./.config/F-Sy-H".source = ./config/zsh-f-s-highlight-themes;
 
         # plugin dependencies
         home.packages = with pkgs; [
