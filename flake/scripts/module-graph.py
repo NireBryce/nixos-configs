@@ -12,8 +12,9 @@ The model is one function, `graph(root)`, returning plain nodes and edges.
 
     module-graph.py tree  <modules-dir> [filters]   # category -> module tree, Mermaid
     module-graph.py hosts <modules-dir> [filters]   # host -> categories it imports, Mermaid;
-                                                    # top-down, each host's own host-config/
-                                                    # category above it, shared ones below
+                                                    # top-down, each host's host-config/ and
+                                                    # users-config/ categories above it,
+                                                    # shared ones below, --wrap N per row
     module-graph.py dot   <modules-dir> [filters] [--view tree|hosts]   # Graphviz
 
 Filters (a few hundred modules in one diagram is unreadable):
@@ -346,21 +347,78 @@ def arrows(g):
 
 
 # The hosts view runs top-down, imports flowing down from the hosts --
-# except into a host's own directory under host-config/ (hosts.nix's
-# convention: host-config/<host>/ is a category only that host imports),
-# which is drawn ABOVE the hosts: it is the host's own definition, not
-# something it pulls in from the shared tree.
-HOST_AREA = 'host-config'
+# except into the per-host and per-user directories (host-config/<host>/,
+# users-config/<user>/: where-modules-go.md's "host-specific" and
+# "user-specific" places), which are drawn ABOVE the hosts: they are what a
+# host and its user are, not something pulled in from the shared tree.
+TOP_AREAS = ('host-config', 'users-config')
+# The shared areas below the hosts wrap their categories at this many per
+# row (`--wrap`; 0 for one row), nested categories under their parent too --
+# otherwise general-config alone is a row of ten, packages-config seven.
+WRAP = 5
 
 
 def hosts_view(g):
     return any(n.kind == 'aggregate' for n in g.nodes.values())
 
 
+def area_of(i):
+    return i.split(':', 1)[1].split('/')[0]
+
+
 def upward(g, e):
-    """An import into a category under HOST_AREA: drawn pointing up."""
+    """An import into a category under TOP_AREAS: drawn pointing up."""
     return (e.kind == 'imports' and g.nodes[e.dst].kind == 'category'
-            and e.dst.split(':', 1)[1].split('/')[0] == HOST_AREA)
+            and area_of(e.dst) in TOP_AREAS)
+
+
+def layout_links(g, wrap=WRAP):
+    """[(src, dst, minlen)]: invisible links that shape the hosts view,
+    shared by both renderers so they cannot disagree.
+
+    Pins: a shared category nothing imports whole (desktop-env, an orphan)
+    has no edge to rank it, lands on the hosts' row and drags its whole
+    area up beside them; a link from the first host holds it below.
+
+    Wrapping: in each shared area, the categories directly in it are cut
+    into rows of `wrap`, each card linked to the one under it. The gap is
+    the row's tallest card -- 1, plus a rank per row of nested categories
+    under it (themselves wrapped the same way) -- so a nested row never
+    shares a rank with the next row of categories."""
+    if not hosts_view(g):
+        return []
+    first = next(i for i, n in g.nodes.items() if n.kind == 'aggregate')
+    drawn = arrows(g)
+    incoming = {e.dst for e in drawn}
+    links = [(first, i, 1) for i, n in g.nodes.items()
+             if n.kind == 'category' and i not in incoming and area_of(i) not in TOP_AREAS]
+    if wrap <= 0:
+        return links
+    kids = {}
+    for e in drawn:
+        if e.kind == 'contains':
+            kids.setdefault(e.src, []).append(e.dst)
+
+    def rows(items):
+        return [items[k:k + wrap] for k in range(0, len(items), wrap)]
+
+    def height(i):
+        under = rows(kids.get(i, []))
+        return 1 + sum(max(height(c) for c in r) for r in under)
+
+    def stack(rs):
+        for upper, lower in zip(rs, rs[1:]):
+            gap = max(height(i) for i in upper)
+            links.extend((a, b, gap) for a, b in zip(upper, lower))
+
+    for gid, _, members in groups(g):
+        if gid not in g.nodes or g.nodes[gid].label in TOP_AREAS:
+            continue
+        top = [e.dst for e in g.edges if e.kind == 'contains' and e.src == gid]
+        stack(rows(top))
+        for i in members:
+            stack(rows(kids.get(i, [])))
+    return links
 
 
 def esc(text):
@@ -373,7 +431,7 @@ MERMAID_INIT = ('%%{init: {"theme": "base", "themeVariables": {"fontFamily": '
                 '"nodeSpacing": 24, "rankSpacing": 80, "padding": 14}}}%%')
 
 
-def mermaid(g):
+def mermaid(g, wrap=WRAP):
     ids = {i: f'n{k}' for k, i in enumerate(g.nodes)}
     shape = {'category': '({})', 'folder': '[{}]', 'module': '([{}])', 'aggregate': '[[{}]]',
              'missing': '{{{{{}}}}}', 'area': '[{}]'}
@@ -403,18 +461,19 @@ def mermaid(g):
         fill, line = PALETTE['area'] if gid in g.nodes else ('#fefce8', '#fde68a')
         lines.append(f'    style g{k} fill:{fill},stroke:{line},color:{QUIET}')
     lines += [f'    {card(i)}' for i in g.nodes if i not in boxed and g.nodes[i].kind != 'area']
-    # Mermaid has no reversed arrow, and ranks by edge direction; an upward
-    # import is an invisible `category ~~~ host` link (which ranks the
-    # category above) plus the real arrow. linkStyle indexes count the
-    # invisible links too, hence the explicit counter.
-    by_hue, k = {}, -1
-    for e in drawn:
-        k += 1
+    # Mermaid has no reversed arrow and ranks by edge direction, so an
+    # upward import is a plain `category --- host` line in the host's
+    # colour: written category-first, it ranks the category above. (An
+    # invisible `category ~~~ host` plus the real arrow was tried: each pair
+    # is a cycle, and with elly/ imported by every host, dagre broke the
+    # cycles inconsistently and lifted a host out of its row.)
+    by_hue = {}
+    for k, e in enumerate(drawn):
         a, b = ids[e.src], ids[e.dst]
         if upward(g, e):
-            lines.append(f'    {b} ~~~ {a}')
-            k += 1
-        if e.kind == 'contains':
+            lines.append(f'    {b} --- {a}')
+            by_hue.setdefault(hue[e.src], []).append(str(k))
+        elif e.kind == 'contains':
             # into a category: dotted, since it is importable on its own too
             nested = g.nodes[e.dst].kind == 'category'
             lines.append(f'    {a} {"-.->" if nested else "-->"} {b}')
@@ -423,6 +482,9 @@ def mermaid(g):
         else:
             lines.append(f'    {a} --> {b}')
             by_hue.setdefault(hue[e.src], []).append(str(k))
+    # Layout links last: every linkStyle index above is already fixed. In
+    # Mermaid each `~` past three is one more rank between the two ends.
+    lines += [f'    {ids[a]} {"~" * (minlen + 2)} {ids[b]}' for a, b, minlen in layout_links(g, wrap)]
     lines += [f'    linkStyle {",".join(v)} stroke:{h},stroke-width:1.5px'
               for h, v in by_hue.items()]
     lines += [f'    style {ids[a]} stroke:{h},stroke-width:2px' for a, h in hue.items()]
@@ -454,7 +516,7 @@ def style(n):
 GRID = 4      # cards per row in an arrowless Graphviz diagram
 
 
-def dot(g):
+def dot(g, wrap=WRAP):
     ids = {i: f'n{k}' for k, i in enumerate(g.nodes)}
 
     def card(i):
@@ -482,7 +544,7 @@ def dot(g):
     # With no arrows (areas and their categories only) a left-to-right layout
     # stacks every card in one column; top-down plus invisible edges every
     # GRID cards lays each area out as a grid instead.
-    # The hosts view runs top-down (HOST_AREA above the hosts, see upward()).
+    # The hosts view runs top-down (TOP_AREAS above the hosts, see upward()).
     lines = ['digraph modules {',
              f'    rankdir={"LR" if drawn and not hosts_view(g) else "TB"}; bgcolor="white"; nodesep=0.22; '
              f'ranksep={0.9 if drawn else 0.3}; splines=true; newrank=true;',
@@ -506,15 +568,14 @@ def dot(g):
         lines.append('    }')
         boxed.update(members)
     lines += [f'    {card(i)}' for i in g.nodes if i not in boxed and g.nodes[i].kind != 'area']
+    lines += [f'    {ids[a]} -> {ids[b]} [style=invis minlen={minlen}];'
+              for a, b, minlen in layout_links(g, wrap)]
     if hosts_view(g):
-        # A shared category nothing imports whole (desktop-env, an orphan)
-        # has no edge to rank it, lands on the hosts' row, and drags its
-        # whole area up beside them. Pinned below the hosts, invisibly.
-        first = next(i for i, n in g.nodes.items() if n.kind == 'aggregate')
-        incoming = {e.dst for e in drawn}
-        lines += [f'    {ids[first]} -> {ids[i]} [style=invis];' for i, n in g.nodes.items()
-                  if n.kind == 'category' and i not in incoming
-                  and i.split(':', 1)[1].split('/')[0] != HOST_AREA]
+        # One row of hosts. Without it a host whose imports all sit in a
+        # lower wrapped row (lysithea: nix, system, macos) is pulled down
+        # to them -- Graphviz shortens edges, it does not keep rows.
+        lines.append('    { rank=same; ' + ' '.join(
+            ids[i] for i, n in g.nodes.items() if n.kind == 'aggregate') + ' }')
     for e in drawn:
         a, b = ids[e.src], ids[e.dst]
         if e.kind == 'contains':
@@ -572,11 +633,13 @@ def main(argv=None):
     ap.add_argument('--categories-only', action='store_true')
     ap.add_argument('--view', choices=['tree', 'hosts'], default='tree',
                     help='for dot: which graph')
+    ap.add_argument('--wrap', type=int, default=WRAP,
+                    help=f'hosts view: categories per row in a shared area (default {WRAP}; 0: one row)')
     ap.add_argument('--verify', action='store_true')
     a = ap.parse_args(argv)
     view = a.view if a.cmd == 'dot' else a.cmd
     sub = select(graph(a.root), view, a.category, a.depth, a.categories_only)
-    print(dot(sub) if a.cmd == 'dot' else mermaid(sub))
+    print(dot(sub, a.wrap) if a.cmd == 'dot' else mermaid(sub, a.wrap))
     if a.verify:
         hits = verify(a.root)
         print('\n'.join(hits), file=sys.stderr)

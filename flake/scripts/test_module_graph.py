@@ -260,22 +260,22 @@ class HostsLayout(Tree):
     def test_mermaid_runs_top_down_with_the_hosts_own_category_above(self):
         out = mg.mermaid(self.g_)
         self.assertIn('\nflowchart TB\n', out)
-        self.assertIn(f'{self.own} ~~~ {self.agg}', out)   # ranks it above
-        self.assertIn(f'{self.agg} --> {self.own}', out)   # arrow still host -> category
+        self.assertIn(f'{self.own} --- {self.agg}', out)   # category-first: ranks it above
+        self.assertNotIn(f'{self.agg} --> {self.own}', out)   # no arrow back: no cycle
         self.assertIn(f'{self.agg} --> {self.used}', out)  # shared ones flow down
 
-    def test_mermaid_link_styles_count_the_invisible_links(self):
+    def test_mermaid_link_styles_land_on_the_hosts_own_edges(self):
         out = mg.mermaid(self.g_)
         links = [l.strip() for l in out.splitlines()
-                 if ' --> ' in l or ' -.-> ' in l or ' ~~~ ' in l or ' -. merges .- ' in l]
+                 if re.search(r' (-->|-\.->|---|~{3,}|-\. merges \.-) ', l)]
         for idx, colour in re.findall(r'linkStyle ([\d,]+) stroke:(#\w+)', out):
             for k in map(int, idx.split(',')):
-                self.assertIn(' --> ', links[k], (k, links[k]))   # a coloured edge is a real arrow
+                self.assertNotIn('~', links[k], (k, links[k]))   # never an invisible link
         hue = mg.hues(self.g_)['agg:hosts/alpha-configuration.nix:nixos']
         mine = [k for idx, c in re.findall(r'linkStyle ([\d,]+) stroke:(#\w+)', out)
                 if c == hue for k in map(int, idx.split(','))]
         self.assertEqual(sorted(links[k] for k in mine),
-                         sorted([f'{self.agg} --> {self.own}', f'{self.agg} --> {self.used}']))
+                         sorted([f'{self.own} --- {self.agg}', f'{self.agg} --> {self.used}']))
 
     def test_dot_reverses_the_upward_edge_but_keeps_the_arrowhead(self):
         out = mg.dot(self.g_)
@@ -289,13 +289,86 @@ class HostsLayout(Tree):
         g = mg.select(self.g(), 'hosts')
         ids = {i: f'n{k}' for k, i in enumerate(g.nodes)}
         out = mg.dot(g)
-        self.assertRegex(out, rf'n\d+ -> {ids["cat:area/lonely"]} \[style=invis\]')
-        self.assertNotIn(f'-> {ids["cat:area/used"]} [style=invis]', out)   # has an import
-        self.assertNotIn(f'-> {ids["cat:host-config/alpha"]} [style=invis]', out)
+        self.assertRegex(out, rf'n\d+ -> {ids["cat:area/lonely"]} \[style=invis minlen=1\]')
+        self.assertNotRegex(out, rf'-> {ids["cat:area/used"]} \[style=invis')    # has an import
+        self.assertNotRegex(out, rf'-> {ids["cat:host-config/alpha"]} \[style=invis')
+
+    def test_users_config_sits_above_the_hosts_too(self):
+        self.write('users-config/u/dirsAsCategory.nix', SHIM)
+        self.write('users-config/u/acct.nix', module('nixos'))
+        self.write('hosts/alpha-configuration.nix', host('nixos', 'alpha', 'u', 'used'))
+        g = mg.select(self.g(), 'hosts')
+        ids = {i: f'n{k}' for k, i in enumerate(g.nodes)}
+        agg = ids['agg:hosts/alpha-configuration.nix:nixos']
+        out = mg.dot(g)
+        self.assertIn(f'{ids["cat:users-config/u"]} -> {agg} [dir=back', out)
+        self.assertIn(f'{ids["cat:host-config/alpha"]} -> {agg} [dir=back', out)
+        self.assertIn(f'{agg} -> {ids["cat:area/used"]} [color=', out)
 
     def test_tree_view_stays_left_to_right(self):
         out = mg.dot(mg.select(self.g(), 'tree'))
         self.assertIn('rankdir=LR', out)
+
+
+class Wrapping(Tree):
+    """Shared areas wrap at `wrap` categories per row; each row sits far
+    enough below the last to clear its nested categories."""
+
+    def setUp(self):
+        super().setUp()
+        tops = [f'c{k}' for k in range(7)]
+        for c in tops:
+            self.write(f'area/{c}/dirsAsCategory.nix', SHIM)
+            self.write(f'area/{c}/m.nix', module('nixos'))
+        for k in range(6):                       # c0 has six nested: two rows at wrap 5
+            self.write(f'area/c0/k{k}/dirsAsCategory.nix', SHIM)
+        self.write('hosts/alpha-configuration.nix', host('nixos', *tops, 'used'))
+        self.g_ = mg.select(self.g(), 'hosts')
+
+    def links(self, wrap=5):
+        return {(a.split(':')[-1], b.split(':')[-1], n)
+                for a, b, n in mg.layout_links(self.g_, wrap)}
+
+    def test_top_categories_wrap_into_rows(self):
+        # top row (in area order): c0 c1 c2 c3 c4; next: c5 c6 used
+        links = self.links()
+        # c0 takes a rank, its two nested rows two more: the next row is 3 down
+        self.assertIn(('area/c0', 'area/c5', 3), links)
+        self.assertIn(('area/c1', 'area/c6', 3), links)   # gap is the row's tallest
+        self.assertIn(('area/c2', 'area/used', 3), links)
+        self.assertFalse(any(b == 'area/c1' for _, b, _ in links))   # c1 is in the top row
+
+    def test_nested_categories_wrap_under_their_parent(self):
+        links = self.links()
+        self.assertIn(('area/c0/k0', 'area/c0/k5', 1), links)
+        self.assertEqual(len([l for l in links if l[0].startswith('area/c0/')]), 1)
+
+    def test_wrap_zero_is_one_row(self):
+        self.assertEqual({l for l in self.links(0) if l[1] != 'area/c0/k5'}, set())
+
+    def test_dot_keeps_every_host_on_one_row(self):
+        self.write('hosts/beta-configuration.nix', host('nixos', 'c6'))
+        g = mg.select(self.g(), 'hosts')
+        ids = {i: f'n{k}' for k, i in enumerate(g.nodes)}
+        aggs = [ids[i] for i, n in g.nodes.items() if n.kind == 'aggregate']
+        self.assertEqual(len(aggs), 2)
+        self.assertIn('{ rank=same; ' + ' '.join(aggs) + ' }', mg.dot(g))
+
+    def test_tree_view_is_never_wrapped(self):
+        self.assertEqual(mg.layout_links(mg.select(self.g(), 'tree')), [])
+
+    def test_renderers_draw_the_same_links(self):
+        g = self.g_
+        ids = {i: f'n{k}' for k, i in enumerate(g.nodes)}
+        a, b = ids['cat:area/c0'], ids['cat:area/c5']
+        self.assertIn(f'{a} -> {b} [style=invis minlen=3];', mg.dot(g))
+        self.assertIn(f'{a} ~~~~~ {b}', mg.mermaid(g))       # 3 tildes is 1 rank, +1 per rank
+
+    def test_cli_wrap_flag_reaches_the_renderer(self):
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            mg.main(['dot', str(self.root), '--view', 'hosts', '--wrap', '0'])
+        self.assertNotIn('minlen=3', buf.getvalue())
 
 
 class Rendering(Tree):
