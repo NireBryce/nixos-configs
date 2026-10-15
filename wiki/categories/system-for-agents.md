@@ -1,6 +1,6 @@
 # `system`, for agents
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-14_
 
 _Sibling reviewed: 2026-10-05 -- ltrace marked removed in the source's darwin-dropped list; this page names no packages_
 
@@ -64,6 +64,15 @@ that must be optional cannot be filed here (why `virtualization`/`containers` ar
 `systemctl show firewall.service -p ExecStart` reads as a plain shell
 script (world-readable, no root) and is the literal in-order `iptables`
 ruleset NixOS applied at boot.
+
+## System diagram
+
+`networking/nix-topology.nix`: `nix build .#topology.x86_64-linux.config.output`
+-> `main.svg` (services) + `network.svg` (tailnet links). Global topology in
+`perSystem.topology.modules` is limited to repo-stated facts (roster,
+`ts-<x>`, `ts-hive`); no subnets/addresses/upstream devices on purpose.
+Drawn hosts = those importing `system` (not `forge-runner`); lysithea is a
+hand-declared node.
 
 ## Imported by
 
