@@ -1,6 +1,6 @@
 # Auto-suspend hang on nire-durandal
 
-_Last modified: 2026-10-02_
+_Last modified: 2026-10-14_
 
 `nire-durandal` suspends into S3 and then cannot be woken — keyboard, power
 button, nothing — until power is physically removed at the PSU. **Status:
@@ -192,6 +192,29 @@ it did **not** show:
 this one), 35 clean between them.** Every `post` delta in that span other than
 those two is exactly `+1`. Roughly one hang in 18 cycles, against the
 early-cycle impression of most of them.
+
+**Third and fourth hangs, 2026-10-05 and 2026-10-14**, both found in the probe
+dumps after the fact (the 10-05 one was never written up). Both auto-suspend
+(`org_kde_powerdevil`), `deep`, no-wake shape, RAM kept:
+
+| | pair | `nvme0` | kernel | suspend → back | after previous resume |
+|---|---|---|---|---|---|
+| 3rd | `20261006T013559Z-pre` / `T013712Z-post` | 2897 → 2900 (`+3`) | 6.18.53 | 21:35:58 → 21:37 EDT | ~21 min |
+| 4th | `20261014T235228Z-pre` / `20261015T000352Z-post` | 2918 → 2921 (`+3`) | 6.18.55 | 19:52:28 → 20:03:52 EDT | ~15 min |
+
+Both are `+3`, two PSU cuts. The 4th: GPU `pci_pm_suspend_noirq` **519 ms**
+returning 0 (baseline), `suspend_stats` `success`, GPU idle (0% busy, 5 W),
+**1.09 GB VRAM and 15 DRM clients — inside the range the clean cycles show**
+(clean `drm_client_processes` read 13, 15 and 17), so "a paused game holding
+VRAM" is not supported. The 3rd predates the memory fields. Its `pre` differs
+from the previous clean one only in per-cycle counters, as before. The 10-14
+hang was on 6.18.55, so the newer kernel did not fix it; wall clock was 11 min
+including the PSU cuts.
+
+**Detector-labelled totals, 2026-10-02 → 2026-10-14: two hangs, 21 clean**
+(every other `post` delta is `+1`). Since 2026-09-14: **4 hangs**, roughly one
+in 15 cycles. The short gap since the previous resume (15–22 min) is
+noted, not a discriminator: clean cycles follow a resume by 13 s to 6 min.
 
 ## Instrumentation
 

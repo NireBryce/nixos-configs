@@ -1,6 +1,6 @@
 # Auto-suspend hang on nire-durandal, for agents
 
-_Last modified: 2026-10-02_
+_Last modified: 2026-10-14_
 
 Source: [durandal-auto-suspend-hang.md](durandal-auto-suspend-hang.md).
 **Status: mechanism partly identified, cause
@@ -63,14 +63,23 @@ too long, RAM and the session are lost.
   delta.
 - **"Power-cycle count moved = hang" is WRONG** (corrected 2026-09-15): `+1`
   is baseline; only `> 1` is a hang.
-- Detector-labelled totals 2026-09-14→2026-10-02: **2 hangs (cycle 7;
-  `20261002T233332Z-post`), 35 clean between them** — ~1 in 18. Cycles
-  predating smartmontools are memory-labelled, unverifiable.
+- Detector-labelled totals 2026-09-14→2026-10-14: **4 hangs (cycle 7;
+  `20261002T233332Z-post`; `20261006T013712Z-post`; `20261015T000352Z-post`),
+  ~56 clean** — ~1 in 15. Cycles predating smartmontools are memory-labelled,
+  unverifiable.
 - **2026-10-02 hang:** auto, `deep`, 6.18.53, `nvme0` 2891→2894 (2 cuts; user
   recalled "2 or 3" — trust the counter), 94 s suspend→resume wall clock incl.
   both cuts (failed on first wake). `suspend_stats` success; GPU
   `suspend_noirq` 517 ms (baseline); `pre` vs prior clean `pre` differs only in
   per-cycle counters.
+
+- **2026-10-05 and 2026-10-14 hangs:** both auto (`org_kde_powerdevil`),
+  `deep`, `+3` (`nvme0` 2897→2900; 2918→2921), `suspend_stats` success.
+  10-14 on **6.18.55** (10-05 on 6.18.53), so the kernel bump did not help; GPU
+  `suspend_noirq` 519 ms, idle 0%/5 W, 1.09 GB VRAM, 15 DRM clients — all
+  inside the clean-cycle range, so the paused-game-VRAM idea is unsupported.
+  Both came 15–22 min after the previous resume; clean cycles also follow
+  resumes by 13 s–6 min, so not a discriminator.
 
 ## Ruled out
 
