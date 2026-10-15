@@ -259,7 +259,10 @@ def module_layout(root):
     categories, no modules -- from flake/scripts/module-graph.py, which owns
     the parsing and the drawing (per-category and per-host diagrams are
     on-demand output of `just module-graph`, not committed). Loaded from this
-    file's own checkout, not `root`, so a fixture tree needs no scripts."""
+    file's own checkout, not `root`, so a fixture tree needs no scripts.
+    Drawn from the static parse, never `nix eval`: wiki-lint stays fast and
+    runs on fixture trees, and `module-graph.py --verify` is what checks the
+    parse against the collector's categoryGraph."""
     script = pathlib.Path(__file__).resolve().parents[2] / 'flake/scripts/module-graph.py'
     spec = importlib.util.spec_from_file_location('module_graph', script)
     mg = importlib.util.module_from_spec(spec)

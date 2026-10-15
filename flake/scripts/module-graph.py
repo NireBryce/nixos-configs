@@ -2,10 +2,15 @@
 """Draws the module tree: which categories exist, what sits in them, and which
 host imports what -- the picture behind `modules.py`'s checks.
 
-Everything is read statically from the files (modules.py's parsing, not a
-second parser), so it runs on darwin too and needs no `nix eval`. A module
-belongs to the category of the directory it sits in, a host imports categories
-by name, and neither fact is written down anywhere as a list; this is that list.
+Which categories exist, and which folder each one is, come from the
+collector itself: `nix eval --json ./flake#categoryGraph`, published by
+_lib/category-collector.nix from the same walk that builds the import lists.
+When that evaluation is unavailable (no nix, or the flake does not evaluate)
+the tool says so on stderr and falls back to modules.py's static parse, which
+finds categories by their shims; `--static` asks for that path outright, and
+the wiki's generated diagram always uses it (wiki-lint runs no evaluation).
+What a module declares (its classes) and what a host imports are parsed from
+the files either way: evaluation keeps neither as names.
 
 The model is one function, `graph(root)`, returning plain nodes and edges.
 `select()` narrows it, and the three subcommands are thin renderers:
@@ -25,8 +30,10 @@ Filters (a few hundred modules in one diagram is unreadable):
                         --category) are level 0, what sits directly in them level 1
     --categories-only   leave out modules and the plain folders holding them
 
-    --verify            also compare the parsed names with `nix eval .#modules.<class>`
-                        attribute names; slow, and off by default
+    --static            read categories from the files only; no `nix eval`
+    --verify            also check the static parse against evaluation: categories,
+                        folders, files and nesting against categoryGraph, and module
+                        names against `nix eval .#modules.<class>`; slow, off by default
 
 Colour standard (PALETTE below holds it). Importable categories -- a
 directory holding a dirsAsCategory.nix, which a host can name -- are blue
@@ -91,14 +98,21 @@ def letters(classes):
     return ' '.join(known + sorted(c for c in classes if c not in CLASS_LETTER))
 
 
-def graph(root):
+def graph(root, evaluated=None):
+    """The whole model. `evaluated` is flake.categoryGraph (see
+    evaluated_categories()); without it, categories come from the static
+    scan. Module classes and host imports are parsed from files either way."""
     root = pathlib.Path(root)
-    categories, by_name = mod.scan(root)
-    catdirs = {p.parent: name for name, p in categories.items()}
+    scanned, by_name = mod.scan(root)
+    if evaluated is None:
+        catdir_of = {name: p.parent for name, p in scanned.items()}
+    else:
+        catdir_of = {name: root / v['dir'] for name, v in evaluated.items()}
+    catdirs = {d: name for name, d in catdir_of.items()}
     # A plain directory inside a category: no shim, so no host can name it --
-    # its modules arrive only through the category above it (the collector's
-    # walkSubdir). Drawn as its own node so the two kinds of directory can be
-    # told apart; `_` paths are already out of `entries`.
+    # its modules arrive only through the category above it (the collector
+    # walks into it). Drawn as its own node so the two kinds of directory can
+    # be told apart; `_` paths are already out of `entries`.
     entries = sorted((p, n, c) for n, es in by_name.items() for p, c in es)
     folderdirs = sorted({d for p, _, _ in entries for d in p.parents
                          if d not in catdirs and catdirs.keys() & set(d.parents)})
@@ -132,7 +146,7 @@ def graph(root):
 
     def merges(path, name, classes):
         same = [p for p, c in by_name[name] if p != path and c & classes]
-        return name in categories or bool(same)
+        return name in catdir_of or bool(same)
 
     for d, name in sorted(catdirs.items()):
         subtree = beneath(d)
@@ -164,8 +178,8 @@ def graph(root):
             path = root / nid.split(':', 1)[1]
             edges.append(Edge(parent_of(path), nid, 'contains'))
     for path, name, classes in entries:
-        if name in categories:
-            edges.append(Edge(f'mod:{rel(path)}', f'cat:{rel(categories[name].parent)}', 'merges'))
+        if name in catdir_of:
+            edges.append(Edge(f'mod:{rel(path)}', f'cat:{rel(catdir_of[name])}', 'merges'))
         for p2, c2 in by_name[name]:
             if p2 > path and c2 & classes:
                 edges.append(Edge(f'mod:{rel(path)}', f'mod:{rel(p2)}', 'merges'))
@@ -174,8 +188,8 @@ def graph(root):
         aid = f'agg:{rel(path)}:{cls}'
         nodes.setdefault(aid, Node(aid, 'aggregate', path.stem, frozenset([cls])))
         for name in dict.fromkeys(listed):
-            if name in categories:
-                targets = [f'cat:{rel(categories[name].parent)}']
+            if name in catdir_of:
+                targets = [f'cat:{rel(catdir_of[name])}']
             elif name in by_name:
                 targets = [f'mod:{rel(p)}' for p, c in by_name[name]]
             else:
@@ -693,29 +707,108 @@ def dot(g, wrap=WRAP):
     return '\n'.join(lines)
 
 
+# --- evaluation -----------------------------------------------------------
+
+def evaluate(root, attr, run=subprocess.run):
+    """(value, None) for `nix eval --json path:<flake>#<attr>`, or (None, why).
+    `path:` rather than the git flake, so untracked files count -- the same
+    files this tool parses -- instead of silently vanishing."""
+    flake = pathlib.Path(root).resolve().parent
+    try:
+        r = run(['nix', 'eval', '--json', f'path:{flake}#{attr}'],
+                capture_output=True, text=True)
+    except FileNotFoundError:
+        return None, 'nix is not installed'
+    if r.returncode:
+        lines = r.stderr.strip().splitlines()
+        return None, lines[-1] if lines else f'nix eval exited {r.returncode}'
+    return json.loads(r.stdout), None
+
+
+def evaluated_categories(root, run=subprocess.run):
+    """flake.categoryGraph -- {category: {dir, files, nested}} -- or (None, why)."""
+    return evaluate(root, 'categoryGraph', run)
+
+
+def static_categories(root):
+    """The static parse in categoryGraph's shape, for comparing the two: each
+    category's folder, the module files it collects itself (not those inside
+    a nested category), and the categories nested in it. Files are every
+    `.nix` the collector would take -- declaring a module or not."""
+    root = pathlib.Path(root)
+    scanned, _ = mod.scan(root)
+    catdirs = {p.parent: name for name, p in scanned.items()}
+    out = {}
+    for name, shim in scanned.items():
+        d = shim.parent
+        files, nested = [], []
+        for p in sorted(d.rglob('*')):
+            if mod.hidden(p, root) or p == shim:
+                continue
+            inside = [a for a in p.parents if a in catdirs and d in a.parents]
+            if p.is_dir() and p in catdirs and not inside:
+                nested.append(p.name)
+            elif p.is_file() and p.suffix == '.nix' and not inside and not mod.is_shim(p):
+                files.append(p.relative_to(root).as_posix())
+        out[name] = {'dir': d.relative_to(root).as_posix(), 'files': files,
+                     'nested': sorted(nested)}
+    return out
+
+
+def compare_categories(static, evaluated):
+    """Findings where the static parse and the collector disagree."""
+    hits = []
+    for name in sorted(set(static) | set(evaluated)):
+        s, e = static.get(name), evaluated.get(name)
+        if s is None:
+            hits.append(f'VERIFY  category {name!r} ({e["dir"]}) is evaluated but the static '
+                        f'parse finds no shim for it')
+            continue
+        if e is None:
+            hits.append(f'VERIFY  category {name!r} ({s["dir"]}) is parsed but not in '
+                        f'categoryGraph')
+            continue
+        if s['dir'] != e['dir']:
+            hits.append(f'VERIFY  category {name!r}: parsed at {s["dir"]}, evaluated at {e["dir"]}')
+        for f in sorted(set(s['files']) ^ set(e['files'])):
+            side = 'parse' if f in s['files'] else 'collector'
+            hits.append(f'VERIFY  category {name!r}: {f} is collected only per the {side}')
+        for n in sorted(set(s['nested']) ^ set(e['nested'])):
+            side = 'parse' if n in s['nested'] else 'collector'
+            hits.append(f'VERIFY  category {name!r}: nested {n!r} only per the {side}')
+    return hits
+
+
 # --- --verify -------------------------------------------------------------
 
-def verify(root):
+def verify(root, run=subprocess.run):
     """Parsed names against `nix eval .#modules.<class>`. Returns the findings.
 
     Every (class, filename) the parser found inside a category must be an
     evaluated attribute. Entry points outside every category name their
     aggregates by hand (`cubeConfiguration`), so they are not checked by
-    filename and show up only as the informational other direction."""
+    filename and show up only as the informational other direction.
+
+    First, membership: the static parse against flake.categoryGraph
+    (compare_categories())."""
     root = pathlib.Path(root).resolve()
-    flake = root.parent
+    hits = []
+    evaluated, why = evaluated_categories(root, run)
+    if evaluated is None:
+        hits.append(f'VERIFY  nix eval of categoryGraph failed: {why}')
+    else:
+        hits += compare_categories(static_categories(root), evaluated)
     categories, by_name = mod.scan(root)
     catdirs = {p.parent for p in categories.values()}
     by_name = {n: [(p, c) for p, c in es if catdirs & set(p.parents)]
                for n, es in by_name.items()}
-    hits = []
     for cls in CLASS_ORDER:
-        r = subprocess.run(['nix', 'eval', '--json', f'path:{flake}#modules.{cls}',
-                            '--apply', 'builtins.attrNames'], capture_output=True, text=True)
-        if r.returncode:
-            hits.append(f'VERIFY  nix eval of modules.{cls} failed: {r.stderr.strip().splitlines()[-1]}')
+        names, why = evaluate(root, f'modules.{cls}', lambda cmd, **kw: run(
+            cmd + ['--apply', 'builtins.attrNames'], **kw))
+        if names is None:
+            hits.append(f'VERIFY  nix eval of modules.{cls} failed: {why}')
             continue
-        evaluated = set(json.loads(r.stdout))
+        evaluated = set(names)
         parsed = {n for n, es in by_name.items() if any(cls in c for _, c in es)} | set(categories)
         hits += [f'VERIFY  {cls}.{n} is parsed from the tree but not an evaluated attribute'
                  for n in sorted(parsed - evaluated)]
@@ -724,7 +817,7 @@ def verify(root):
     return hits
 
 
-def main(argv=None):
+def main(argv=None, run=subprocess.run):
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     ap.add_argument('cmd', choices=['tree', 'hosts', 'dot'])
     ap.add_argument('root', help='the flake/modules directory')
@@ -735,13 +828,21 @@ def main(argv=None):
                     help='for dot: which graph')
     ap.add_argument('--wrap', type=int, default=WRAP,
                     help=f'hosts view: categories per row in a shared area (default {WRAP}; 0: one row)')
+    ap.add_argument('--static', action='store_true',
+                    help='read categories from the files only; no nix eval')
     ap.add_argument('--verify', action='store_true')
     a = ap.parse_args(argv)
     view = a.view if a.cmd == 'dot' else a.cmd
-    sub = select(graph(a.root), view, a.category, a.depth, a.categories_only)
+    evaluated = None
+    if not a.static:
+        evaluated, why = evaluated_categories(a.root, run)
+        if evaluated is None:
+            print(f'note: categories from the static parse; nix eval of categoryGraph '
+                  f'failed ({why})', file=sys.stderr)
+    sub = select(graph(a.root, evaluated), view, a.category, a.depth, a.categories_only)
     print(dot(sub, a.wrap) if a.cmd == 'dot' else mermaid(sub, a.wrap))
     if a.verify:
-        hits = verify(a.root)
+        hits = verify(a.root, run)
         print('\n'.join(hits), file=sys.stderr)
         return 1 if any(h.startswith('VERIFY') for h in hits) else 0
     return 0

@@ -368,7 +368,7 @@ class Wrapping(Tree):
     def test_cli_wrap_flag_reaches_the_renderer(self):
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
-            mg.main(['dot', str(self.root), '--view', 'hosts', '--wrap', '0'])
+            mg.main(['dot', str(self.root), '--view', 'hosts', '--wrap', '0', '--static'])
         self.assertNotIn('minlen=3', buf.getvalue())
 
 
@@ -414,6 +414,130 @@ class Boxes(Tree):
         self.assertIn('dashed', picked)                          # reached by module only
         m = mg.mermaid(mg.select(self.g(), 'hosts'))
         self.assertRegex(m, rf'style g\d+ fill:{mg.BOX_FILL},stroke:{mg.ALERT[1]}.*stroke-width:2.5px')
+
+
+class FakeNix:
+    """Stands in for subprocess.run: answers `nix eval --json <ref>#<attr>`
+    from a dict, so evaluation is tested without nix. A value of None makes
+    that attribute fail to evaluate; `missing=True` acts as if nix is absent."""
+
+    def __init__(self, answers, missing=False):
+        self.answers, self.missing, self.calls = answers, missing, []
+
+    def __call__(self, cmd, **kw):
+        import json, types
+        self.calls.append(cmd)
+        if self.missing:
+            raise FileNotFoundError('nix')
+        attr = cmd[3].split('#', 1)[1]
+        value = self.answers.get(attr)
+        if value is None:
+            return types.SimpleNamespace(returncode=1, stdout='',
+                                         stderr=f"error: flake has no attribute '{attr}'\n")
+        if '--apply' in cmd:
+            value = sorted(value)
+        return types.SimpleNamespace(returncode=0, stdout=json.dumps(value), stderr='')
+
+
+class Evaluated(Tree):
+    """Categories from flake.categoryGraph instead of the static scan."""
+
+    def truth(self):
+        return mg.static_categories(self.root)
+
+    def test_static_categories_in_categorygraph_shape(self):
+        self.write('area/used/grp/c.nix', module('nixos'))
+        self.assertEqual(self.truth(), {
+            'used': {'dir': 'area/used', 'files': ['area/used/a.nix', 'area/used/grp/c.nix'],
+                     'nested': ['sub']},
+            'sub': {'dir': 'area/used/sub', 'files': ['area/used/sub/b.nix'], 'nested': []}})
+
+    def test_matching_evaluation_draws_the_same_graph(self):
+        static, evald = mg.graph(self.root), mg.graph(self.root, self.truth())
+        self.assertEqual(static.nodes, evald.nodes)
+        self.assertEqual(static.edges, evald.edges)
+
+    def test_the_collector_decides_what_is_a_category(self):
+        # evaluation knows no `sub`: its folder is drawn as a plain folder
+        evaluated = self.truth()
+        del evaluated['sub']
+        g = mg.graph(self.root, evaluated)
+        self.assertEqual(g.nodes['dir:area/used/sub'].kind, 'folder')
+        self.assertNotIn('cat:area/used/sub', g.nodes)
+
+    def test_compare_finds_every_kind_of_disagreement(self):
+        s = self.truth()
+        self.assertEqual(mg.compare_categories(s, self.truth()), [])
+        e = self.truth()
+        e['used']['files'].remove('area/used/a.nix')
+        e['used']['nested'] = []
+        e['sub']['dir'] = 'area/elsewhere'
+        e['ghost'] = {'dir': 'area/ghost', 'files': [], 'nested': []}
+        hits = mg.compare_categories(s, e)
+        self.assertEqual(len(hits), 4, hits)
+        joined = '\n'.join(hits)
+        for needle in ("'ghost'", 'area/used/a.nix is collected only per the parse',
+                       "nested 'sub' only per the parse", 'evaluated at area/elsewhere'):
+            self.assertIn(needle, joined)
+
+    def test_evaluate_reports_why_it_failed(self):
+        self.assertEqual(mg.evaluated_categories(self.root, FakeNix({'categoryGraph': {'x': 1}})),
+                         ({'x': 1}, None))
+        value, why = mg.evaluated_categories(self.root, FakeNix({}))
+        self.assertIsNone(value)
+        self.assertIn("no attribute 'categoryGraph'", why)
+        self.assertEqual(mg.evaluated_categories(self.root, FakeNix({}, missing=True)),
+                         (None, 'nix is not installed'))
+
+    def test_evaluate_uses_a_path_ref(self):
+        fake = FakeNix({'categoryGraph': {}})
+        mg.evaluated_categories(self.root, fake)
+        self.assertTrue(fake.calls[0][3].startswith('path:'), fake.calls[0])
+
+    def test_cli_falls_back_to_the_static_parse_and_says_so(self):
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            rc = mg.main(['tree', str(self.root)], run=FakeNix({}))
+        self.assertEqual(rc, 0)
+        self.assertIn('used/', out.getvalue())
+        self.assertIn('static parse', err.getvalue())
+
+    def test_cli_static_never_evaluates(self):
+        fake = FakeNix({})
+        with contextlib.redirect_stdout(io.StringIO()):
+            mg.main(['tree', str(self.root), '--static'], run=fake)
+        self.assertEqual(fake.calls, [])
+
+    def test_cli_draws_from_the_evaluation(self):
+        evaluated = self.truth()
+        del evaluated['sub']
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            mg.main(['tree', str(self.root)], run=FakeNix({'categoryGraph': evaluated}))
+        self.assertIn('["<b>sub/</b>', out.getvalue())       # square: a folder now
+
+    def test_verify_reports_membership_disagreement(self):
+        evaluated = self.truth()
+        evaluated['used']['nested'] = []
+        names = {'nixos': ['used', 'sub', 'a'], 'homeManager': ['used', 'sub', 'a', 'b'],
+                 'darwin': ['used', 'sub']}
+        fake = FakeNix({'categoryGraph': evaluated,
+                        **{f'modules.{c}': v for c, v in names.items()}})
+        err = io.StringIO()
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(err):
+            rc = mg.main(['tree', str(self.root), '--static', '--verify'], run=fake)
+        self.assertEqual(rc, 1)
+        self.assertIn("nested 'sub' only per the parse", err.getvalue())
+
+    def test_verify_clean_when_everything_agrees(self):
+        names = {'nixos': ['used', 'sub', 'a'], 'homeManager': ['used', 'sub', 'a', 'b'],
+                 'darwin': ['used', 'sub']}
+        fake = FakeNix({'categoryGraph': self.truth(),
+                        **{f'modules.{c}': v for c, v in names.items()}})
+        err = io.StringIO()
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(err):
+            rc = mg.main(['tree', str(self.root), '--static', '--verify'], run=fake)
+        self.assertEqual((rc, err.getvalue().strip()), (0, ''))
 
 
 class Rendering(Tree):
@@ -466,7 +590,7 @@ class Rendering(Tree):
     def test_cli_prints_mermaid(self):
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
-            rc = mg.main(['tree', str(self.root), '--categories-only'])
+            rc = mg.main(['tree', str(self.root), '--categories-only', '--static'])
         self.assertEqual(rc, 0)
         self.assertIn('used/', buf.getvalue())
 

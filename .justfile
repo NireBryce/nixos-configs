@@ -61,7 +61,8 @@ modules-test:
 # Draw the module tree: just module-graph tree|hosts|dot [--category X] [--depth N]
 # [--categories-only] [--verify]. tree/hosts print Mermaid, dot prints Graphviz
 # (`just module-graph dot --view hosts | nix shell nixpkgs#graphviz -c dot -Tsvg`).
-# Static, no nix eval unless --verify. See flake/scripts/module-graph.py.
+# Categories come from `nix eval ./flake#categoryGraph` (falls back to parsing
+# files, with a note; --static skips the eval). See flake/scripts/module-graph.py.
 module-graph cmd *args:
     cd {{flake}} && python3 scripts/module-graph.py {{cmd}} modules {{args}}
 
