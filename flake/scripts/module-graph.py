@@ -21,6 +21,8 @@ The model is one function, `graph(root)`, returning plain nodes and edges.
                                                     # users-config/ categories above it,
                                                     # shared ones below, --wrap N per row
     module-graph.py dot   <modules-dir> [filters] [--view tree|hosts]   # Graphviz
+    module-graph.py html  <modules-dir> [filters]   # the hosts view as an interactive page:
+                                                    # click hosts to show only what they reach
 
 Filters (a few hundred modules in one diagram is unreadable):
 
@@ -707,6 +709,66 @@ def dot(g, wrap=WRAP):
     return '\n'.join(lines)
 
 
+# --- the interactive page --------------------------------------------------
+#
+# `html` renders the hosts view as one self-contained page (template:
+# module-graph.html, beside this file). Python decides what is in the model
+# and how each kind looks -- the same PALETTE, hues and parts() the other
+# renderers use -- and the page only lays it out and filters it, so the
+# page cannot disagree with them.
+
+TEMPLATE = pathlib.Path(__file__).with_name('module-graph.html')
+PLACEHOLDER = '/*@DATA@*/null'
+
+
+def page_data(g):
+    """The page's model, from a hosts-view graph: areas holding everything
+    beneath them as a tree, the hosts with their hues, and what each host
+    imports. A name a host imports that no module declares goes in its own
+    'not found' area, as in the other views."""
+    kids, hue = children_of(g), hues(g)
+
+    def node(i):
+        n = g.nodes[i]
+        title, sub = parts(n)
+        out = {'id': i, 'kind': n.kind, 'title': title, 'sub': sub}
+        if n.kind == 'category':
+            out['status'] = n.status
+        if n.merges:
+            out['merges'] = True
+        children = [node(c) for c in kids.get(i, []) if c in g.nodes]
+        if children:
+            out['children'] = children
+        return out
+
+    areas = []
+    for i, n in g.nodes.items():
+        if n.kind == 'area' and kids.get(i):
+            area = node(i)
+            area['top'] = n.label in TOP_AREAS
+            areas.append(area)
+    missing = [i for i, n in g.nodes.items() if n.kind == 'missing']
+    if missing:
+        areas.append({'id': 'area:(not found)', 'kind': 'area', 'title': 'not found',
+                      'sub': '', 'top': False, 'children': [node(i) for i in missing]})
+    hosts = [{'id': a, 'title': parts(g.nodes[a])[0], 'sub': parts(g.nodes[a])[1],
+              'hue': h} for a, h in hue.items()]
+    imports = {a: [e.dst for e in g.edges if e.kind == 'imports' and e.src == a] for a in hue}
+    style = {'palette': {k: list(v) for k, v in PALETTE.items()}, 'alert': list(ALERT),
+             'boxFill': BOX_FILL}
+    return {'areas': areas, 'hosts': hosts, 'imports': imports, 'style': style}
+
+
+def page(g):
+    """The template with the model filled in. `</` is escaped so no name in
+    the data can end the <script> element it sits in."""
+    data = json.dumps(page_data(g), separators=(',', ':')).replace('</', '<\\/')
+    text = TEMPLATE.read_text()
+    if text.count(PLACEHOLDER) != 1:
+        raise SystemExit(f'error: {TEMPLATE} must hold {PLACEHOLDER} exactly once')
+    return text.replace(PLACEHOLDER, data)
+
+
 # --- evaluation -----------------------------------------------------------
 
 def evaluate(root, attr, run=subprocess.run):
@@ -819,7 +881,7 @@ def verify(root, run=subprocess.run):
 
 def main(argv=None, run=subprocess.run):
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
-    ap.add_argument('cmd', choices=['tree', 'hosts', 'dot'])
+    ap.add_argument('cmd', choices=['tree', 'hosts', 'dot', 'html'])
     ap.add_argument('root', help='the flake/modules directory')
     ap.add_argument('--category')
     ap.add_argument('--depth', type=int)
@@ -832,7 +894,7 @@ def main(argv=None, run=subprocess.run):
                     help='read categories from the files only; no nix eval')
     ap.add_argument('--verify', action='store_true')
     a = ap.parse_args(argv)
-    view = a.view if a.cmd == 'dot' else a.cmd
+    view = a.view if a.cmd == 'dot' else 'hosts' if a.cmd == 'html' else a.cmd
     evaluated = None
     if not a.static:
         evaluated, why = evaluated_categories(a.root, run)
@@ -840,7 +902,10 @@ def main(argv=None, run=subprocess.run):
             print(f'note: categories from the static parse; nix eval of categoryGraph '
                   f'failed ({why})', file=sys.stderr)
     sub = select(graph(a.root, evaluated), view, a.category, a.depth, a.categories_only)
-    print(dot(sub, a.wrap) if a.cmd == 'dot' else mermaid(sub, a.wrap))
+    if a.cmd == 'html':
+        print(page(sub))
+    else:
+        print(dot(sub, a.wrap) if a.cmd == 'dot' else mermaid(sub, a.wrap))
     if a.verify:
         hits = verify(a.root, run)
         print('\n'.join(hits), file=sys.stderr)

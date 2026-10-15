@@ -1,6 +1,6 @@
 # Wiki index, for agents
 
-_Last modified: 2026-10-07_
+_Last modified: 2026-10-15_
 
 Condensed from [00-INDEX.md](00-INDEX.md). Routing only.
 
@@ -13,7 +13,7 @@ A page without one opens with `## Quick facts` — linked there.
 
 | Task | Read |
 |---|---|
-| add, rename, or wire a flake-parts module | [architecture.md](architecture.md), skill `new-flake-module` |
+| add, rename, or wire a flake-parts module | [architecture.md](architecture.md#quick-facts), skill `new-flake-module` |
 | place a new module: shared / host / user | [where-modules-go.md](where-modules-go.md) |
 | touch impermanence or initrd | [impermanence-and-secrets.md](impermanence-and-secrets.md), skill `impermanence-initrd` |
 | add or platform-gate a package | [categories/00-INDEX.md](categories/00-INDEX.md), skill `package-platform-support` |

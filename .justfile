@@ -58,9 +58,10 @@ modules:
 modules-test:
     python3 {{scripts}}/test_modules.py
 
-# Draw the module tree: just module-graph tree|hosts|dot [--category X] [--depth N]
+# Draw the module tree: just module-graph tree|hosts|dot|html [--category X] [--depth N]
 # [--categories-only] [--verify]. tree/hosts print Mermaid, dot prints Graphviz
 # (`just module-graph dot --view hosts | nix shell nixpkgs#graphviz -c dot -Tsvg`).
+# html prints the hosts view as an interactive page (`> modules.html`, open it).
 # Categories come from `nix eval ./flake#categoryGraph` (falls back to parsing
 # files, with a note; --static skips the eval). See flake/scripts/module-graph.py.
 module-graph cmd *args:

@@ -540,6 +540,84 @@ class Evaluated(Tree):
         self.assertEqual((rc, err.getvalue().strip()), (0, ''))
 
 
+class Page(Tree):
+    """`html`: the hosts view as an interactive page. The page's behaviour is
+    JS and is checked in a browser; these pin what Python hands it."""
+
+    def setUp(self):
+        super().setUp()
+        self.write('host-config/alpha/dirsAsCategory.nix', SHIM)
+        self.write('host-config/alpha/hw.nix', module('nixos'))
+        self.write('hosts/alpha-configuration.nix', host('nixos', 'alpha', 'used', 'ghost'))
+        self.write('hosts/home.nix', host('homeManager', 'sub'))
+
+    def data(self):
+        return mg.page_data(mg.select(self.g(), 'hosts'))
+
+    def test_areas_hold_their_tree_and_know_which_sit_on_top(self):
+        d = self.data()
+        areas = {a['title']: a for a in d['areas']}
+        self.assertEqual(areas['host-config']['top'], True)
+        self.assertEqual(areas['area']['top'], False)
+        (used,) = areas['area']['children']
+        self.assertEqual((used['id'], used['kind'], used['status']),
+                         ('cat:area/used', 'category', 'imported'))
+        self.assertEqual([c['id'] for c in used['children']], ['cat:area/used/sub'])
+
+    def test_hosts_carry_their_hue_and_imports(self):
+        d = self.data()
+        hosts = {h['title']: h for h in d['hosts']}
+        self.assertEqual(set(hosts), {'alpha-configuration', 'home'})
+        self.assertEqual(hosts['alpha-configuration']['sub'], 'nixos')
+        self.assertNotEqual(hosts['alpha-configuration']['hue'], hosts['home']['hue'])
+        self.assertEqual(d['imports'][hosts['home']['id']], ['cat:area/used/sub'])
+
+    def test_a_name_no_module_declares_gets_a_not_found_area(self):
+        areas = {a['title']: a for a in self.data()['areas']}
+        self.assertEqual([c['title'] for c in areas['not found']['children']], ['ghost'])
+
+    def test_style_comes_from_the_python_palette(self):
+        style = self.data()['style']
+        self.assertEqual(style['palette']['category'], list(mg.PALETTE['category']))
+        self.assertEqual((style['alert'], style['boxFill']), (list(mg.ALERT), mg.BOX_FILL))
+
+    def test_page_fills_the_template_once(self):
+        out = mg.page(mg.select(self.g(), 'hosts'))
+        self.assertTrue(out.startswith('<!doctype html>'))
+        self.assertNotIn(mg.PLACEHOLDER, out)
+        self.assertIn('"title":"alpha-configuration"', out)
+
+    def test_data_cannot_close_the_script_element(self):
+        g = mg.Graph({'area:x': mg.Node('area:x', 'area', 'x'),
+                      'cat:x/evil': mg.Node('cat:x/evil', 'category', '</script><b>'),
+                      'agg:h:nixos': mg.Node('agg:h:nixos', 'aggregate', 'h', frozenset(['nixos']))},
+                     [mg.Edge('area:x', 'cat:x/evil', 'contains'),
+                      mg.Edge('agg:h:nixos', 'cat:x/evil', 'imports', 'nixos')], [])
+        out = mg.page(g)
+        script = out[out.index('const DATA'):]
+        self.assertNotIn('</script><b>', script.split('\n')[0])
+        self.assertIn('<\\/script><b>', out)
+        self.assertEqual(out.count('</script>'), 1)          # only the template's own
+
+    def test_a_template_without_one_placeholder_is_refused(self):
+        bad = pathlib.Path(self._tmp.name) / 'template.html'
+        bad.write_text('<!doctype html><script>const DATA = null;</script>')
+        old, mg.TEMPLATE = mg.TEMPLATE, bad
+        try:
+            with self.assertRaises(SystemExit):
+                mg.page(mg.select(self.g(), 'hosts'))
+        finally:
+            mg.TEMPLATE = old
+
+    def test_cli_html(self):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            rc = mg.main(['html', str(self.root), '--static'])
+        self.assertEqual(rc, 0)
+        self.assertIn('<title>Module graph</title>', out.getvalue())
+        self.assertIn('"id":"cat:host-config/alpha"', out.getvalue())
+
+
 class Rendering(Tree):
     def test_mermaid_marks_orphans_and_merges(self):
         self.write('area/lonely/dirsAsCategory.nix', SHIM)
