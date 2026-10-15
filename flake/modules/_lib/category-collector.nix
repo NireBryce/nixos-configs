@@ -92,7 +92,7 @@
 # - A module only shows up in the kinds of config it actually provides. The
 #   micro editor only has user config, so it appears in `editors` for
 #   homeManager and simply isn't there for nixos. A folder can't know what
-#   its files provide, so we check each one (that's forClass, below).
+#   its files provide, so we check each one (that's importsFor, below).
 # - Don't name a module after its own category. Folder names are free --
 #   editors/micro/micro.nix is fine -- but a file `shell-apps.nix` inside
 #   shell-apps/ would declare the same name as the category, and the two
@@ -152,7 +152,7 @@
 # That's not hypothetical: when the shim was renamed from
 # `dirsAsProvides.nix`, a hardcoded name here was missed, and every category
 # quietly collected a module called `dirsAsCategory`. Nothing complained --
-# forClass drops names no module declares, which hides a mistake like that
+# importsFor drops names no module declares, which hides a mistake like that
 # rather than catching it. `just modules` also reports shims whose names or
 # contents have drifted apart.
 #
@@ -162,68 +162,96 @@
 # history section at the bottom is why.
 { config, lib, shimFile }:
 let
-    categoryDir = dirOf shimFile;
+    # ── where this category is ──────────────────────────────────────────────
+    categoryDir  = dirOf shimFile;
     categoryName = baseNameOf categoryDir;
-    shimName = baseNameOf shimFile;
-    stripNix = name: lib.removeSuffix ".nix" name;
+    shimFileName = baseNameOf shimFile;
 
-    # Walk a folder and list what it contributes, one entry per thing:
-    # each `.nix` file is a module, `{ name = <filename minus .nix>; ... }`;
-    # a subfolder that is itself a category contributes one entry, its
-    # name, marked `nested` (see "categories inside categories"); any other
-    # subfolder is walked into. Anything starting with `_` is skipped, same
-    # as import-tree does. Each entry also keeps its `path`, which only
-    # flake.categoryGraph below reads -- the import lists use names alone.
-    walk = dir:
-        lib.concatMap
-            ({ name, value }:
-                if lib.hasPrefix "_" name then [ ]
-                else if value == "directory" then
-                    (if builtins.pathExists (dir + "/${name}/${shimName}")
-                     then [ { inherit name; path = dir + "/${name}"; nested = true; } ]
-                     else walk (dir + "/${name}"))
-                else lib.optional (lib.hasSuffix ".nix" name && name != shimName)
-                    { name = stripNix name; path = dir + "/${name}"; nested = false; })
-            (lib.mapAttrsToList lib.nameValuePair (builtins.readDir dir));
+    # ── what a folder entry is ──────────────────────────────────────────────
+    # Hidden: import-tree never loads a `_` path, so the collector skips it
+    # too (`_lib/`, `_templates/`).
+    isHidden         = name: lib.hasPrefix "_" name;
+    # A module file: any `.nix` except the shim itself.
+    isModuleFile     = name: lib.hasSuffix ".nix" name && name != shimFileName;
+    # A nested category: a subfolder with its own shim.
+    isNestedCategory = dir: builtins.pathExists (dir + "/${shimFileName}");
+    # A module's name is its filename minus `.nix`.
+    moduleNameOf     = fileName: lib.removeSuffix ".nix" fileName;
+    # A folder's items -- what is on disk, before deciding what each one
+    # contributes -- as a list of { itemName, itemType }; itemType is
+    # readDir's "regular", "directory", "symlink" or "unknown".
+    folderContents   = dir:
+        lib.mapAttrsToList (itemName: itemType: { inherit itemName itemType; }) (builtins.readDir dir);
 
-    # Every module name in a folder, nested categories by their own name.
-    # Called on the category's own folder to start things off.
-    collectModules = dir: map (e: e.name) (walk dir);
+    # ── walking the category ────────────────────────────────────────────────
+    # Everything the category collects becomes one entry. `name` is what the
+    # import lists look up; `path` and `nested` are only for
+    # flake.categoryGraph at the bottom.
+    moduleEntry   = dir: fileName: { name = moduleNameOf fileName; path = dir + "/${fileName}"; nested = false; };
+    categoryEntry = dir: dirName:  { name = dirName;               path = dir + "/${dirName}";  nested = true;  };
 
-    # The same walk, as data: where this category is, which module files it
-    # collects itself, and which categories nest directly inside it. Paths
-    # are relative to modules/, found the way the shim finds it. Reads only
-    # the directory tree -- never flake.modules -- so it cannot recurse
-    # into the attribute set it sits beside.
-    modulesRoot = let up = d: if baseNameOf d == "modules" then d else up (dirOf d); in up categoryDir;
-    relative = p: lib.removePrefix "${toString modulesRoot}/" (toString p);
-    entries = walk categoryDir;
+    # What one folder item contributes: a module file is one entry; a
+    # nested category is one entry, its name, and is NOT walked into (its
+    # own shim already collected it -- see "categories inside categories");
+    # any other subfolder is grouping only, so walk into it.
+    entriesFor = dir: { itemName, itemType }:
+        if isHidden itemName then [ ]
+        else if itemType == "directory" then
+            (if isNestedCategory (dir + "/${itemName}")
+             then [ (categoryEntry dir itemName) ]
+             else entriesUnder (dir + "/${itemName}"))
+        else if isModuleFile itemName then [ (moduleEntry dir itemName) ]
+        else [ ];
 
-    # Turn the list of names into actual modules, for one kind of config.
+    entriesUnder = dir: lib.concatMap (entriesFor dir) (folderContents dir);
+
+    collected      = entriesUnder categoryDir;
+    namesOf        = entries: map (entry: entry.name) entries;
+    collectedNames = namesOf collected;
+
+    # ── turning names into imports, for one class ───────────────────────────
+    # A *class* is which module system a piece of config is for (flake-parts'
+    # term, from `flake.modules.<class>.<name>`, kept so this reads the same
+    # as flake-parts and the rest of the tree):
+    #
+    #   nixos        a NixOS machine's system config
+    #   darwin       a Mac's nix-darwin system config
+    #   homeManager  a user's Home Manager config -- not a platform: the same
+    #                user config runs on NixOS and darwin hosts alike
     #
     # Why not just hand over the names? Because `imports` treats a string
     # as a file path -- you get `string 'bluetooth' doesn't represent an
     # absolute path`. So we look each name up.
     #
-    # The filter (`?` means "does this exist?") skips names this kind of
-    # config doesn't have. Without it, asking nixos for `micro`, which only
-    # has user config, is an error.
+    # declaredIn skips names this class doesn't have. Without it, asking
+    # nixos for `micro`, which only has user config, is an error.
     #
-    # One more subtlety: all three kinds get a module below even when the
+    # One more subtlety: all three classes get a module below even when the
     # list is empty. It's tempting to skip the empty ones, but deciding
-    # "is it empty?" means reading `flake.modules.<kind>`, which is the very
+    # "is it empty?" means reading `flake.modules.<class>`, which is the very
     # thing we're in the middle of defining -- infinite recursion again. An
     # empty module does nothing, so leaving it in is free.
-    forClass = class:
-        map (n: config.flake.modules.${class}.${n})
-            (lib.filter (n: config.flake.modules.${class} ? ${n}) (collectModules categoryDir));
+    declaredIn = class: name: config.flake.modules.${class} ? ${name};
+    moduleFor  = class: name: config.flake.modules.${class}.${name};
+    importsFor = class: map (moduleFor class) (lib.filter (declaredIn class) collectedNames);
+
+    # ── the same walk, as data ──────────────────────────────────────────────
+    # Paths relative to modules/, found the way the shim finds it. Reads only
+    # the directory tree -- never flake.modules -- so it cannot recurse into
+    # the attribute set it sits beside.
+    findModulesRoot   = dir: if baseNameOf dir == "modules" then dir else findModulesRoot (dirOf dir);
+    modulesRoot       = findModulesRoot categoryDir;
+    relativeToModules = path: lib.removePrefix "${toString modulesRoot}/" (toString path);
+    pathsOf           = entries: map (entry: entry.path) entries;
+    moduleFiles       = lib.filter (entry: !entry.nested) collected;
+    nestedCategories  = lib.filter (entry: entry.nested) collected;
 
 in
 {
     flake.modules = {
-        nixos.${categoryName}.imports        = forClass "nixos";
-        homeManager.${categoryName}.imports  = forClass "homeManager";
-        darwin.${categoryName}.imports       = forClass "darwin";
+        nixos.${categoryName}.imports        = importsFor "nixos";
+        homeManager.${categoryName}.imports  = importsFor "homeManager";
+        darwin.${categoryName}.imports       = importsFor "darwin";
     };
 
     # What this category collects, for tools to read with
@@ -231,9 +259,9 @@ in
     # parsing files. Declared in modules/category-graph.nix; one key per
     # category, so the shims merge.
     flake.categoryGraph.${categoryName} = {
-        dir    = relative categoryDir;
-        files  = map (e: relative e.path) (lib.filter (e: !e.nested) entries);
-        nested = map (e: e.name) (lib.filter (e: e.nested) entries);
+        dir    = relativeToModules categoryDir;
+        files  = map relativeToModules (pathsOf moduleFiles);
+        nested = namesOf nestedCategories;
     };
 }
 
@@ -246,3 +274,7 @@ in
 # delegating to nested categories by name first shipped without
 # bareModulesOf and silently dropped a VM from nire-cube (2026-08-27) --
 # drvPath fingerprints didn't catch it, evaluating `systemd.services` did.
+#
+# 2026-10-15: renamed for readability, behaviour unchanged (host fingerprints
+# identical): forClass -> importsFor, collectModules -> collectedNames (plus
+# entriesUnder/entriesFor, which replaced walkSubdir and the inline walk).

@@ -85,7 +85,7 @@ the sections above, plus any "why not the obvious thing" for that line.
 - Start from what the reader would expect ("You'd think it could just hand
   over the names — it can't, and here's why").
 - Plain words where exact ("folder"); keep the greppable term too
-  (`forClass`, `imports`).
+  (`importsFor`, `imports`).
 - No history in the body ("We used to…" goes in bottom `history`).
 - Security code (guards, hooks, permission rules): explain the rule and
   what it enforces, not the inputs that got past an earlier version or what

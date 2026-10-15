@@ -421,7 +421,7 @@ def category_classes(category_dir):
     physically under the umbrella's tree too, so this walks straight through
     a nested `dirsAsCategory.nix` boundary rather than stopping at it: what
     the Class(es) column claims is "what importing this name actually wires
-    in", and an umbrella's forClass resolves every nested name regardless of
+    in", and an umbrella's importsFor resolves every nested name regardless of
     whether that name's own aggregate is empty for a given class (dirsAsCategory
     always defines all three, even empty -- see category-collector.nix), so
     presence of the *attribute* proves nothing; presence of an actual
