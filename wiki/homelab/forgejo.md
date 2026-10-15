@@ -142,7 +142,7 @@ Host ts-cube
 
 **`IdentitiesOnly yes` is the part worth not skipping.** Without it ssh
 offers every identity it has and a different key can match first — the same
-failure that made the QNAP restic key look broken when it wasn't (see the
+failure that made the `ts-hive` restic key look broken when it wasn't (see the
 [backup runbook](backup-runbook.md)'s troubleshooting).
 
 Then check it:
@@ -262,7 +262,7 @@ this survives reboots with nothing special configured.
 
 **This is backed up, as of 2026-09-06.** It was not until then, and this
 paragraph said so — [#87](https://github.com/NireBryce/nixos-configs/issues/87)
-closed with restic backing `/var/lib/forgejo` and `/persist` to the QNAP,
+closed with restic backing `/var/lib/forgejo` and `/persist` to `ts-hive`,
 and a real restore that opened a complete Forgejo database rather than
 merely producing files. See [backup](../categories/backup.md) and the
 [backup runbook](backup-runbook.md).

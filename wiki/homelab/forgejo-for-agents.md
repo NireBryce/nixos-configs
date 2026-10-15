@@ -87,7 +87,7 @@ Per repo: Settings → Branches → Add new rule; pattern `main`.
 ## Storage and backups
 
 - sqlite3 at `/var/lib/forgejo/` with repos and generated secrets. Cube has persistent root.
-- Backed up since 2026-09-06 (#87): restic to the QNAP; restore verified (opened a complete DB).
+- Backed up since 2026-09-06 (#87): restic to `ts-hive`; restore verified (opened a complete DB).
 - **Live `.db` files under `/var/lib/forgejo` are excluded from every snapshot on purpose**;
   restorable copy is `/var/lib/restic-backups-cube-sqlite-staging`. Wrong path restores a file that opens as nothing.
 

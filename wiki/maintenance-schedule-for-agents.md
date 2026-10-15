@@ -19,8 +19,8 @@ and dates are not values.
 | 2 | `tailscale_api_token` | **unverified** (classic PAT 90d; OAuth secret never) | `tailscale-acl.py get`/`apply`/`vip-*` silently start 401ing | 2026-09-07 |
 | 3 | Tailscale node keys | 180d default, per machine | host drops off the tailnet until interactive `tailscale up` | 2026-09-07 |
 | 4 | sops age recipients | none on a timer | a regenerated SSH host key silently orphans that host | 2026-09-07 |
-| 5 | `restic-cube-ssh-key` / `restic-cube-password` | on suspicion / QNAP re-image | backup runs fail | 2026-08-31 |
-| 6 | QNAP SSH host key pin | none; breaks on re-image | backup runs fail | untracked |
+| 5 | `restic-cube-ssh-key` / `restic-cube-password` | on suspicion / `ts-hive` re-image | backup runs fail | 2026-08-31 |
+| 6 | `ts-hive` SSH host key pin | none; breaks on re-image | backup runs fail | untracked |
 | 7 | `forgejo-admin-password` | none enforced; never rotated | — | — |
 | 8 | Grafana admin credentials | real password, set by hand 2026-09-13; **not** reproducible | lives only in cube's sqlite db | 2026-09-13 |
 | 9 | Syncthing device certs | decades; **declared by no module since 2026-09-08** | nothing | 2026-09-07 |
