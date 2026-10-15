@@ -59,13 +59,17 @@ Reachability reads the same imports modules.py does, including
 `config.flake.modules.<class>.<name>` references; only the `with ...; [ ]`
 aggregate lists are drawn as host edges.
 """
-import argparse, html, json, pathlib, subprocess, sys
+import argparse, html, json, pathlib, re, subprocess, sys
 from dataclasses import dataclass
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import modules as mod  # noqa: E402
 
 CLASS_LETTER = {'nixos': 'n', 'homeManager': 'h', 'darwin': 'd'}
+# An aggregate's own declaration, with or without `.imports`:
+# `flake.modules.nixos.cubeConfiguration.imports =` and
+# `flake.modules.nixos.tenacityConfiguration = {` both name one.
+AGG_DECL = re.compile(r'(?<!config\.)flake\.modules\.(\w+)\.([\w-]+)(?:\.imports)?\s*=')
 CLASS_ORDER = list(CLASS_LETTER)
 
 
@@ -84,7 +88,7 @@ class Node:
 class Edge:
     src: str
     dst: str
-    kind: str                # contains | imports | merges
+    kind: str                # contains | imports | merges | enables
     cls: str = ''            # imports: the class of the aggregate that lists it
 
 
@@ -186,7 +190,8 @@ def graph(root, evaluated=None):
             if p2 > path and c2 & classes:
                 edges.append(Edge(f'mod:{rel(path)}', f'mod:{rel(p2)}', 'merges'))
 
-    for path, cls, listed in mod.aggregates(root):
+    aggregate_list = mod.aggregates(root)
+    for path, cls, listed in aggregate_list:
         aid = f'agg:{rel(path)}:{cls}'
         nodes.setdefault(aid, Node(aid, 'aggregate', path.stem, frozenset([cls])))
         for name in dict.fromkeys(listed):
@@ -198,7 +203,45 @@ def graph(root, evaluated=None):
                 targets = [f'missing:{name}']
                 nodes.setdefault(targets[0], Node(targets[0], 'missing', name))
             edges += [Edge(aid, t, 'imports', cls) for t in targets]
+    edges += enables(root, aggregate_list, catdir_of, entries, by_name, beneath, rel)
     return Graph(nodes, edges, roots)
+
+
+def enables(root, aggregate_list, catdir_of, entries, by_name, beneath, rel):
+    """`enables` edges: aggregate A -> aggregate B when a module A reaches
+    refers to B by name. That is how a host gets its Home Manager config:
+    it imports no `ellyHomeManager`; it imports `system`, which holds
+    enable-home-manager.nix, which refers to
+    `config.flake.modules.homeManager.ellyHomeManager`.
+
+    A reaches a file of its own class that sits under a category it imports,
+    or is a module it imports by name, or its own file -- so a NixOS host
+    importing `system` gets enable-home-manager.nix, not the darwin twin."""
+    declared = {}                    # (class, declared name) -> aggregate id
+    for path, cls, _ in aggregate_list:
+        for c, name in AGG_DECL.findall(mod.COMMENT.sub('', path.read_text())):
+            if c == cls:
+                declared[(cls, name)] = f'agg:{rel(path)}:{cls}'
+                break
+    refs = {}
+
+    def refs_of(p):
+        if p not in refs:
+            refs[p] = set(mod.REF.findall(mod.COMMENT.sub('', p.read_text())))
+        return refs[p]
+
+    out = []
+    for path, cls, listed in aggregate_list:
+        aid = f'agg:{rel(path)}:{cls}'
+        files = {path}
+        for name in listed:
+            if name in catdir_of:
+                files |= {p for p, _, c in beneath(catdir_of[name]) if cls in c}
+            files |= {p for p, c in by_name.get(name, []) if cls in c}
+        targets = sorted({declared[r] for f in files for r in refs_of(f)
+                          if r in declared and declared[r] != aid})
+        out += [Edge(aid, target, 'enables', cls) for target in targets]
+    return out
 
 
 def children(g):
@@ -271,7 +314,9 @@ def select(g, view='tree', category=None, depth=None, categories_only=False):
     nodes = {i: n for i, n in g.nodes.items()
              if i in shown or (n.kind == 'aggregate' and i in used)
              or (n.kind == 'missing' and any(e.dst == i for e in imports))}
-    return Graph(nodes, containment(list(nodes), shown) + imports, [])
+    enabled = [e for e in g.edges if e.kind == 'enables'
+               and e.src in nodes and e.dst in nodes]
+    return Graph(nodes, containment(list(nodes), shown) + imports + enabled, [])
 
 
 # --- renderers ------------------------------------------------------------
@@ -569,6 +614,10 @@ def mermaid(g, wrap=WRAP):
             lines.append(f'    {a} {"-.->" if nested else "-->"} {b}')
         elif e.kind == 'merges':
             lines.append(f'    {a} -. merges .- {b}')
+        elif e.kind == 'enables':
+            # dashed: not an import -- a module the host imports turns it on
+            lines.append(f'    {a} -. enables .-> {b}')
+            by_hue.setdefault(hue[e.src], []).append(str(k))
         else:
             lines.append(f'    {a} --> {b}')
             by_hue.setdefault(hue[e.src], []).append(str(k))
@@ -700,6 +749,9 @@ def dot(g, wrap=WRAP):
         elif e.kind == 'merges':
             lines.append(edge(e.src, e.dst, [f'label="merges" color="{ALERT[1]}"',
                                              f'fontcolor="{ALERT[1]}" style=dashed dir=none']))
+        elif e.kind == 'enables':
+            lines.append(edge(e.src, e.dst, [f'color="{hue[e.src]}" style=dashed penwidth=1.2',
+                                             'label="enables"', f'fontcolor="{hue[e.src]}"']))
         elif upward(g, e):
             # reversed for ranking, arrowhead kept on the category
             lines.append(edge(e.dst, e.src, [f'dir=back color="{hue[e.src]}" penwidth=1.2']))
@@ -718,14 +770,22 @@ def dot(g, wrap=WRAP):
 # page cannot disagree with them.
 
 TEMPLATE = pathlib.Path(__file__).with_name('module-graph.html')
+# Where the page puts each area relative to the hosts: a host's own
+# directory behind them (above, or to the left), the user's own directory
+# and the Home Manager config the hosts enable ahead of them, then the
+# shared areas. (The Mermaid and Graphviz hosts views keep TOP_AREAS.)
+BEHIND_AREAS = ('host-config',)
+USER_AREAS = ('users-config',)
 PLACEHOLDER = '/*@DATA@*/null'
 
 
 def page_data(g):
     """The page's model, from a hosts-view graph: areas holding everything
-    beneath them as a tree, the hosts with their hues, and what each host
-    imports. A name a host imports that no module declares goes in its own
-    'not found' area, as in the other views."""
+    beneath them as a tree (each with its `place`: behind, user or shared),
+    the hosts and the Home Manager configs they enable ("homes": aggregates
+    another aggregate enables), each with its hue, what each imports, and
+    which homes each host enables. A name a host imports that no module
+    declares goes in its own 'not found' area, as in the other views."""
     kids, hue = children_of(g), hues(g)
 
     def node(i):
@@ -745,18 +805,24 @@ def page_data(g):
     for i, n in g.nodes.items():
         if n.kind == 'area' and kids.get(i):
             area = node(i)
-            area['top'] = n.label in TOP_AREAS
+            area['place'] = ('behind' if n.label in BEHIND_AREAS
+                             else 'user' if n.label in USER_AREAS else 'shared')
             areas.append(area)
     missing = [i for i, n in g.nodes.items() if n.kind == 'missing']
     if missing:
         areas.append({'id': 'area:(not found)', 'kind': 'area', 'title': 'not found',
-                      'sub': '', 'top': False, 'children': [node(i) for i in missing]})
-    hosts = [{'id': a, 'title': parts(g.nodes[a])[0], 'sub': parts(g.nodes[a])[1],
-              'hue': h} for a, h in hue.items()]
+                      'sub': '', 'place': 'shared', 'children': [node(i) for i in missing]})
+    enabled = {e.dst for e in g.edges if e.kind == 'enables'}
+    card = lambda a: {'id': a, 'title': parts(g.nodes[a])[0], 'sub': parts(g.nodes[a])[1],
+                      'hue': hue[a]}
+    hosts = [card(a) for a in hue if a not in enabled]
+    homes = [card(a) for a in hue if a in enabled]
     imports = {a: [e.dst for e in g.edges if e.kind == 'imports' and e.src == a] for a in hue}
+    enables = {a: [e.dst for e in g.edges if e.kind == 'enables' and e.src == a] for a in hue}
     style = {'palette': {k: list(v) for k, v in PALETTE.items()}, 'alert': list(ALERT),
              'boxFill': BOX_FILL}
-    return {'areas': areas, 'hosts': hosts, 'imports': imports, 'style': style}
+    return {'areas': areas, 'hosts': hosts, 'homes': homes, 'imports': imports,
+            'enables': enables, 'style': style}
 
 
 def page(g):

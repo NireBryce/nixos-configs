@@ -5,14 +5,28 @@
   model as JSON (page_data()); everything else here is static. No external
   scripts or stylesheets, so the generated file works offline.
 
-  Layout is CSS (flex rows that wrap); an SVG layer underneath draws the
-  import edges between the cards' live positions. Clicking a host toggles
-  it; with hosts selected, only what they reach is shown -- what they import,
-  and everything inside a category they import. The selection lives in the
-  URL hash (#hosts=cube-configuration,elly-home-manager).
+  The flow, in either direction (top-down, or left to right):
+
+    host-config/  ->  hosts  ->  users-config/ + Home Manager  ->  shared areas
+    (behind)                     (the user group)
+
+  A host's own directory sits behind it; the user's own directory and the
+  Home Manager config the hosts enable sit ahead of them; the shared areas
+  come last. A host does not import its Home Manager config: a module it
+  imports turns it on, drawn as a dashed "enables" edge.
+
+  Layout is CSS (flex rows or columns); an SVG layer draws the edges between
+  the cards' live positions. An edge runs forward or backward by where its
+  ends actually are, so one that points against the flow (a host into its
+  own directory, Home Manager into the user directory it imports) bends the
+  other way. Clicking a host or Home Manager card toggles it; with any
+  selected, only what they reach is shown -- what they import, everything
+  inside a category they import, and for a host, the Home Manager config it
+  enables and what that reaches. The selection and layout live in the URL
+  hash (#hosts=cube-configuration&layout=lr).
 
   After every change the page writes what it shows into <body data-...>
-  (selected hosts, visible nodes, drawn edges), which the tests read from a
+  (selected cards, visible nodes, drawn edges), which the tests read from a
   headless browser's DOM.
 -->
 <html lang="en">
@@ -52,20 +66,16 @@
   }
   h1 { font-size: 17px; margin: 0; font-weight: 650; }
   .hint { color: var(--quiet); font-size: 13px; }
-  #all {
+  header button {
     font: inherit; font-size: 13px; padding: 4px 12px; border-radius: 999px;
     background: var(--button-bg); color: var(--text);
     border: 1px solid var(--button-line); cursor: pointer;
   }
   #all[aria-pressed="true"] { border-color: var(--quiet); font-weight: 600; }
-  #layout {
-    font: inherit; font-size: 13px; padding: 4px 12px; border-radius: 999px;
-    background: var(--button-bg); color: var(--text);
-    border: 1px solid var(--button-line); cursor: pointer;
-  }
   .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--quiet); }
   .legend span { display: inline-flex; align-items: center; gap: 6px; }
   .swatch { width: 18px; height: 12px; border-radius: 4px; border: 1.5px solid; display: inline-block; }
+  .dash { width: 22px; border-top: 2px dashed var(--quiet); display: inline-block; }
 
   #stage { position: relative; padding: 4px 16px 48px; }
   /* Stacking: the edge layer sits above the area and box backgrounds but
@@ -75,25 +85,32 @@
      stacking contexts and put their cards back under the edges. */
   #edges { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; z-index: 1; }
   #edges path { fill: none; stroke-width: 1.6; opacity: .62; transition: opacity .15s; }
+  #edges path.enables { stroke-dasharray: 6 4; }
   #edges.focus path { opacity: .08; }
   #edges.focus path.hot { opacity: .95; stroke-width: 2.2; }
 
+  /* Top-down: four rows. The user group stacks its user directory above
+     the Home Manager config, in flow order. */
   .row {
     position: relative; display: flex; flex-wrap: wrap; gap: 16px;
     justify-content: center; align-items: flex-start; margin: 0 0 64px;
   }
   .row:last-child { margin-bottom: 0; }
-  /* Left to right: three columns -- the hosts' own directories, the hosts,
-     the shared areas -- each stacking its boxes vertically. */
+  #user { flex-direction: column; align-items: center; gap: 40px; }
+  /* Left to right: four columns, each stacking its boxes vertically; the
+     user group runs left to right inside its column, again in flow order.
+     The hosts' own directories, the hosts, the user directory and Home
+     Manager stack so each sits across from what it links to instead of in
+     a row that every edge has to pass under. */
   #stage.lr {
-    display: grid; grid-template-columns: auto auto auto; column-gap: 96px;
+    display: grid; grid-template-columns: auto auto auto auto; column-gap: 88px;
     justify-content: center; align-items: center;
   }
   #stage.lr .row { flex-direction: column; flex-wrap: nowrap; margin: 0; }
-  #stage.lr #hosts .entry .body { flex-direction: column; align-items: stretch; }
-  /* The hosts' own directories stack too, so each sits across from its
-     host instead of in a row that every edge has to pass under. */
-  #stage.lr #top .area .body { flex-direction: column; align-items: stretch; }
+  #stage.lr #user { flex-direction: row; align-items: center; gap: 56px; }
+  #stage.lr #behind .area > .body,
+  #stage.lr #user .area > .body,
+  #stage.lr .entry > .body { flex-direction: column; align-items: stretch; }
   .area {
     position: relative; background: var(--area-bg); border: 1px solid var(--area-line);
     border-radius: 12px; padding: 24px 12px 12px;
@@ -110,6 +127,7 @@
     display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
     align-items: flex-start; max-width: calc(5 * 138px + 4 * 10px);
   }
+  .entry > .body { max-width: none; }
   .box { border-radius: 12px; border: 1.5px solid; padding: 6px 10px 10px; color: #1e293b; }
   .box > .head { position: relative; z-index: 2; display: flex; gap: 8px; align-items: baseline; justify-content: center; margin-bottom: 6px; }
   .box > .head .t { font-weight: 650; }
@@ -149,8 +167,9 @@
 </header>
 <div id="stage">
   <svg id="edges" aria-hidden="true"><defs id="markers"></defs><g id="paths"></g></svg>
-  <div class="row" id="top"></div>
+  <div class="row" id="behind"></div>
   <div class="row" id="hosts"></div>
+  <div class="row" id="user"></div>
   <div class="row" id="shared"></div>
 </div>
 <script>
@@ -159,33 +178,46 @@ const DATA = /*@DATA@*/null;
 const S = DATA.style;
 
 // ── the model, indexed ──────────────────────────────────────────────────────
-const byId = new Map(), parentOf = new Map(), topIds = new Set();
-function index(node, parent, top) {
+// "Sources" are the clickable cards: the hosts, and the Home Manager configs
+// ("homes") they enable. Everything else is a node in an area's tree.
+const sources = [...DATA.hosts, ...DATA.homes];
+const sourceById = new Map(sources.map(s => [s.id, s]));
+const byId = new Map(), parentOf = new Map();
+function index(node, parent) {
   byId.set(node.id, node);
   if (parent) parentOf.set(node.id, parent.id);
-  if (top) topIds.add(node.id);
-  for (const child of node.children || []) index(child, node, top);
+  for (const child of node.children || []) index(child, node);
 }
-for (const area of DATA.areas) index(area, null, area.top);
+for (const area of DATA.areas) index(area, null);
 
 function withDescendants(id, into) {
   into.add(id);
   for (const child of byId.get(id).children || []) withDescendants(child.id, into);
   return into;
 }
-// What each host reaches: what it imports, and everything inside it.
-const reachOf = new Map();
-for (const host of DATA.hosts) {
+function directReach(id) {
   const reached = new Set();
-  for (const target of DATA.imports[host.id] || []) {
+  for (const target of DATA.imports[id] || []) {
     if (byId.has(target)) withDescendants(target, reached);
+  }
+  return reached;
+}
+// What each source reaches: what it imports, everything inside it, and for
+// a host, each home it enables and everything that home reaches.
+const reachOf = new Map();
+for (const home of DATA.homes) reachOf.set(home.id, directReach(home.id));
+for (const host of DATA.hosts) {
+  const reached = directReach(host.id);
+  for (const home of DATA.enables[host.id] || []) {
+    reached.add(home);
+    for (const id of reachOf.get(home) || directReach(home)) reached.add(id);
   }
   reachOf.set(host.id, reached);
 }
-const hostByTitle = new Map(DATA.hosts.map(h => [h.title, h.id]));
+const sourceByTitle = new Map(sources.map(s => [s.title, s.id]));
 
 // ── building the page once ──────────────────────────────────────────────────
-const els = new Map(), hostEls = new Map(), dotEls = new Map();
+const els = new Map(), sourceEls = new Map(), dotEls = new Map();
 
 function div(cls, parent, text) {
   const el = document.createElement("div");
@@ -231,29 +263,36 @@ function build(node, parent) {
   els.set(node.id, el);
   for (const child of node.children || []) build(child, inner);
 }
-const rows = { top: document.getElementById("top"), shared: document.getElementById("shared") };
-for (const area of DATA.areas) build(area, area.top ? rows.top : rows.shared);
-
-const hostRow = document.getElementById("hosts");
-const entry = div("entry", hostRow);
-div("label", entry, "hosts and home");
-const entryBody = div("body", entry);
-entryBody.style.maxWidth = "none";
-for (const host of DATA.hosts) {
-  const b = document.createElement("button");
-  b.type = "button"; b.className = "host"; b.dataset.id = host.id;
-  b.style.borderColor = host.hue;
-  div("t", b, host.title); div("s", b, host.sub);
-  b.addEventListener("click", () => toggle(host.id));
-  b.addEventListener("mouseenter", () => focusHost(host.id));
-  b.addEventListener("mouseleave", () => focusHost(null));
-  b.addEventListener("focus", () => focusHost(host.id));
-  b.addEventListener("blur", () => focusHost(null));
-  entryBody.appendChild(b);
-  hostEls.set(host.id, b);
-  els.set(host.id, b);
+function sourceGroup(parent, label, list, id) {
+  if (!list.length) return;
+  const box = div("entry", parent);
+  div("label", box, label);
+  const body = div("body", box);
+  for (const source of list) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "host"; b.dataset.id = source.id;
+    b.style.borderColor = source.hue;
+    div("t", b, source.title); div("s", b, source.sub);
+    b.addEventListener("click", () => toggle(source.id));
+    b.addEventListener("mouseenter", () => focusSource(source.id));
+    b.addEventListener("mouseleave", () => focusSource(null));
+    b.addEventListener("focus", () => focusSource(source.id));
+    b.addEventListener("blur", () => focusSource(null));
+    body.appendChild(b);
+    sourceEls.set(source.id, b);
+    els.set(source.id, b);
+  }
+  els.set(id, box);
 }
-els.set("grp:entry", entry);
+const rows = {
+  behind: document.getElementById("behind"), hosts: document.getElementById("hosts"),
+  user: document.getElementById("user"), shared: document.getElementById("shared"),
+};
+for (const area of DATA.areas.filter(a => a.place === "behind")) build(area, rows.behind);
+sourceGroup(rows.hosts, "hosts", DATA.hosts, "grp:hosts");
+for (const area of DATA.areas.filter(a => a.place === "user")) build(area, rows.user);
+sourceGroup(rows.user, "home", DATA.homes, "grp:homes");
+for (const area of DATA.areas.filter(a => a.place === "shared")) build(area, rows.shared);
 
 const legend = document.getElementById("legend");
 for (const [label, fill, line, cls] of [
@@ -267,29 +306,32 @@ for (const [label, fill, line, cls] of [
   sw.className = "swatch " + cls; sw.style.background = fill; sw.style.borderColor = line;
   item.append(sw, label); legend.appendChild(item);
 }
+const enablesNote = document.createElement("span");
+const dash = document.createElement("i"); dash.className = "dash";
+enablesNote.append(dash, "enables (a module it imports turns it on)");
+legend.appendChild(enablesNote);
 const dotsNote = document.createElement("span");
-dotsNote.textContent = "dots: hosts that reach it";
+dotsNote.textContent = "dots: what reaches it";
 legend.appendChild(dotsNote);
 
-// ── markers: one arrowhead per host colour ──────────────────────────────────
+// ── markers: one arrowhead per source colour ────────────────────────────────
 const SVG = "http://www.w3.org/2000/svg";
 const svg = document.getElementById("edges"), pathsG = document.getElementById("paths");
 const markers = document.getElementById("markers");
-for (const host of DATA.hosts) {
+sources.forEach((source, k) => {
   const m = document.createElementNS(SVG, "marker");
-  m.id = "arrow-" + DATA.hosts.indexOf(host);
+  m.id = "arrow-" + k;
   m.setAttribute("viewBox", "0 0 10 10"); m.setAttribute("refX", "9"); m.setAttribute("refY", "5");
   m.setAttribute("markerWidth", "7"); m.setAttribute("markerHeight", "7");
   m.setAttribute("orient", "auto-start-reverse");
   const p = document.createElementNS(SVG, "path");
-  p.setAttribute("d", "M0,0 L10,5 L0,10 z"); p.setAttribute("fill", host.hue);
+  p.setAttribute("d", "M0,0 L10,5 L0,10 z"); p.setAttribute("fill", source.hue);
   m.appendChild(p); markers.appendChild(m);
-}
+});
 
 // ── state ───────────────────────────────────────────────────────────────────
 const selected = new Set();
 let visible = new Set();
-
 let leftToRight = false;
 const stageEl = document.getElementById("stage"), layoutButton = document.getElementById("layout");
 function setLayout(lr) {
@@ -303,21 +345,17 @@ function readHash() {
   const m = location.hash.match(/hosts=([^&]*)/);
   if (!m) return;
   for (const title of decodeURIComponent(m[1]).split(",")) {
-    const id = hostByTitle.get(title);
+    const id = sourceByTitle.get(title);
     if (id) selected.add(id);
   }
 }
 function writeHash() {
-  const titles = DATA.hosts.filter(h => selected.has(h.id)).map(h => h.title);
+  const titles = sources.filter(s => selected.has(s.id)).map(s => s.title);
   const parts = [];
   if (titles.length) parts.push("hosts=" + titles.join(","));
   if (leftToRight) parts.push("layout=lr");
   history.replaceState(null, "", parts.length ? "#" + parts.join("&") : location.pathname);
 }
-layoutButton.addEventListener("click", () => {
-  const before = rects();
-  setLayout(!leftToRight); writeHash(); play(before);
-});
 function toggle(id) {
   selected.has(id) ? selected.delete(id) : selected.add(id);
   writeHash(); apply(true);
@@ -325,15 +363,28 @@ function toggle(id) {
 document.getElementById("all").addEventListener("click", () => {
   selected.clear(); writeHash(); apply(true);
 });
+layoutButton.addEventListener("click", () => {
+  const before = rects();
+  setLayout(!leftToRight); writeHash(); play(before);
+});
 window.addEventListener("hashchange", () => { readHash(); apply(true); });
 
-function activeHosts() {
-  return selected.size ? DATA.hosts.filter(h => selected.has(h.id)) : DATA.hosts;
+// Sources whose edges are drawn: everything with nothing selected; else the
+// selected ones and the homes the selected hosts enable.
+function activeSources() {
+  if (!selected.size) return sources;
+  const ids = new Set(selected);
+  for (const id of selected) for (const home of DATA.enables[id] || []) ids.add(home);
+  return sources.filter(s => ids.has(s.id));
+}
+// Sources a card's dots stand for: the selected ones, else all of them.
+function dotSources() {
+  return selected.size ? sources.filter(s => selected.has(s.id)) : sources;
 }
 function computeVisible() {
   const out = new Set();
   if (!selected.size) { for (const id of byId.keys()) out.add(id); return out; }
-  for (const id of selected) for (const reached of reachOf.get(id)) out.add(reached);
+  for (const id of selected) for (const reached of reachOf.get(id)) if (byId.has(reached)) out.add(reached);
   for (const id of [...out]) {
     for (let p = parentOf.get(id); p; p = parentOf.get(p)) out.add(p);
   }
@@ -350,9 +401,9 @@ function animatedParent(el) {
   const p = el.parentElement && el.parentElement.closest("[data-id]");
   return p ? p.dataset.id : null;
 }
-// A host's hue mixed with white: an opaque light tint, so a selected host
-// card stays light with dark text on a dark page too (a translucent hue over
-// the dark background turned dark and hid the text).
+// A source's hue mixed with white: an opaque light tint, so a selected card
+// stays light with dark text on a dark page too (a translucent hue over the
+// dark background turned dark and hid the text).
 function tint(hex, amount) {
   const n = parseInt(hex.slice(1), 16);
   const mix = c => Math.round(255 - (255 - c) * amount);
@@ -365,23 +416,23 @@ function apply(animate) {
   for (const [id, el] of els) {
     if (byId.has(id)) el.classList.toggle("hidden", !visible.has(id));
   }
-  const active = activeHosts();
-  for (const [id, b] of hostEls) {
+  const active = new Set(activeSources().map(s => s.id));
+  for (const [id, b] of sourceEls) {
     b.setAttribute("aria-pressed", String(selected.has(id)));
-    b.classList.toggle("off", selected.size > 0 && !selected.has(id));
-    const hue = DATA.hosts.find(h => h.id === id).hue;
-    b.style.background = selected.has(id) ? tint(hue, 0.2) : "#ffffff";
+    b.classList.toggle("off", selected.size > 0 && !active.has(id));
+    b.style.background = selected.has(id) ? tint(sourceById.get(id).hue, 0.2) : "#ffffff";
   }
   document.getElementById("all").setAttribute("aria-pressed", String(selected.size === 0));
+  const dotted = dotSources();
   for (const [id, dots] of dotEls) {
     dots.replaceChildren();
-    for (const host of active) {
-      if (!reachOf.get(host.id).has(id)) continue;
-      const d = div("dot", dots); d.style.background = host.hue; d.title = host.title;
+    for (const source of dotted) {
+      if (!reachOf.get(source.id).has(id)) continue;
+      const d = div("dot", dots); d.style.background = source.hue; d.title = source.title;
     }
   }
   if (before) play(before); else drawEdges();
-  document.body.dataset.selected = DATA.hosts.filter(h => selected.has(h.id)).map(h => h.title).join(",");
+  document.body.dataset.selected = sources.filter(s => selected.has(s.id)).map(s => s.title).join(",");
   document.body.dataset.visible = String([...visible].filter(id => byId.get(id).kind !== "area").length);
 }
 function play(before) {
@@ -410,46 +461,57 @@ function play(before) {
 }
 
 // ── edges ───────────────────────────────────────────────────────────────────
+// Forward or backward by where the two ends actually are along the flow:
+// forward leaves the source's far side for the target's near side; backward
+// (a host into its own directory, Home Manager into the user directory it
+// imports) leaves the near side for the target's far side.
+function edgePath(a, b, stage) {
+  if (leftToRight) {
+    const back = b.left + b.width / 2 < a.left + a.width / 2;
+    const x1 = (back ? a.left : a.right) - stage.left, x2 = (back ? b.right : b.left) - stage.left;
+    const y1 = a.top + a.height / 2 - stage.top, y2 = b.top + b.height / 2 - stage.top;
+    const bend = (x2 - x1) / 2;
+    return `M${x1},${y1} C${x1 + bend},${y1} ${x2 - bend},${y2} ${x2},${y2}`;
+  }
+  const back = b.top + b.height / 2 < a.top + a.height / 2;
+  const x1 = a.left + a.width / 2 - stage.left, x2 = b.left + b.width / 2 - stage.left;
+  const y1 = (back ? a.top : a.bottom) - stage.top, y2 = (back ? b.bottom : b.top) - stage.top;
+  const bend = (y2 - y1) / 2;
+  return `M${x1},${y1} C${x1},${y1 + bend} ${x2},${y2 - bend} ${x2},${y2}`;
+}
 function drawEdges() {
-  const stage = document.getElementById("stage").getBoundingClientRect();
+  const stage = stageEl.getBoundingClientRect();
   svg.setAttribute("width", stage.width); svg.setAttribute("height", stage.height);
   const out = [];
-  for (const host of activeHosts()) {
-    const hr = hostEls.get(host.id).getBoundingClientRect();
-    const marker = "url(#arrow-" + DATA.hosts.indexOf(host) + ")";
-    for (const target of DATA.imports[host.id] || []) {
-      if (!visible.has(target) || !els.has(target)) continue;
-      const tr = els.get(target).getBoundingClientRect();
-      // An edge into a host's own directory (host-config/, users-config/)
-      // runs backwards: up in the top-down layout, left in the other.
-      const back = topIds.has(target);
-      const p = document.createElementNS(SVG, "path");
-      if (leftToRight) {
-        const x1 = (back ? hr.left : hr.right) - stage.left, x2 = (back ? tr.right : tr.left) - stage.left;
-        const y1 = hr.top + hr.height / 2 - stage.top, y2 = tr.top + tr.height / 2 - stage.top;
-        const bend = (x2 - x1) / 2;
-        p.setAttribute("d", `M${x1},${y1} C${x1 + bend},${y1} ${x2 - bend},${y2} ${x2},${y2}`);
-      } else {
-        const x1 = hr.left + hr.width / 2 - stage.left, x2 = tr.left + tr.width / 2 - stage.left;
-        const y1 = (back ? hr.top : hr.bottom) - stage.top, y2 = (back ? tr.bottom : tr.top) - stage.top;
-        const bend = (y2 - y1) / 2;
-        p.setAttribute("d", `M${x1},${y1} C${x1},${y1 + bend} ${x2},${y2 - bend} ${x2},${y2}`);
-      }
-      p.setAttribute("stroke", host.hue);
-      p.setAttribute("marker-end", marker);
-      p.dataset.host = host.id;
-      out.push(p);
+  const active = activeSources();
+  const activeIds = new Set(active.map(s => s.id));
+  const line = (source, targetEl, cls) => {
+    const p = document.createElementNS(SVG, "path");
+    p.setAttribute("d", edgePath(sourceEls.get(source.id).getBoundingClientRect(),
+                                 targetEl.getBoundingClientRect(), stage));
+    p.setAttribute("stroke", source.hue);
+    p.setAttribute("marker-end", "url(#arrow-" + sources.indexOf(source) + ")");
+    if (cls) p.classList.add(cls);
+    p.dataset.source = source.id;
+    out.push(p);
+  };
+  for (const source of active) {
+    for (const target of DATA.imports[source.id] || []) {
+      if (visible.has(target) && els.has(target)) line(source, els.get(target));
+    }
+    for (const home of DATA.enables[source.id] || []) {
+      if (activeIds.has(home)) line(source, sourceEls.get(home), "enables");
     }
   }
   pathsG.replaceChildren(...out);
   document.body.dataset.edges = String(out.length);
-  focusHost(focused);
+  focusSource(focused);
 }
 let focused = null;
-function focusHost(id) {
+function focusSource(id) {
   focused = id;
   svg.classList.toggle("focus", id !== null);
-  for (const p of pathsG.children) p.classList.toggle("hot", p.dataset.host === id);
+  for (const p of pathsG.children) p.classList.toggle("hot", p.dataset.source === id);
 }
 let pending = false;
 window.addEventListener("resize", () => {
