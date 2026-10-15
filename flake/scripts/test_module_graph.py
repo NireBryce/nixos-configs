@@ -139,6 +139,64 @@ class Model(Tree):
         self.assertEqual(g.nodes['missing:ghost'].kind, 'missing')
 
 
+class Standard(Tree):
+    """The colour standard: a directory with a shim is an importable category;
+    a plain directory inside one is an implicit folder; a module is never
+    importable, even when a host names it."""
+
+    def setUp(self):
+        super().setUp()
+        self.write('area/used/grp/c.nix', module('nixos'))
+        self.write('area/used/grp/inner/dirsAsCategory.nix', SHIM)
+        self.write('area/used/grp/inner/d.nix', module('nixos'))
+
+    def test_plain_directory_is_an_implicit_folder(self):
+        g = self.g()
+        self.assertEqual(g.nodes['dir:area/used/grp'].kind, 'folder')
+        self.assertEqual(g.nodes['dir:area/used/grp'].count, 2)   # c, and inner's d
+        contains = self.kinds(g, 'contains')
+        self.assertIn(('cat:area/used', 'dir:area/used/grp'), contains)
+        self.assertIn(('dir:area/used/grp', 'mod:area/used/grp/c.nix'), contains)
+        self.assertIn(('dir:area/used/grp', 'cat:area/used/grp/inner'), contains)
+        self.assertNotIn('dir:area/used/grp/inner', g.nodes)      # a category, not a folder
+
+    def test_directories_outside_categories_are_not_folders(self):
+        self.write('hosts/sub/e.nix', module('nixos'))
+        self.assertNotIn('dir:hosts/sub', self.g().nodes)
+
+    def test_overviews_drop_folders_and_relink_nested_categories(self):
+        for view in ('tree', 'hosts'):
+            g = mg.select(self.g(), view, categories_only=True)
+            self.assertFalse(any(n.kind == 'folder' for n in g.nodes.values()), view)
+            self.assertIn(('cat:area/used', 'cat:area/used/grp/inner'), self.kinds(g, 'contains'))
+
+    def test_host_hues_never_reuse_the_category_or_alert_colour(self):
+        self.assertNotIn(mg.PALETTE['category'][1], mg.HUES)
+        self.assertNotIn(mg.ALERT[1], mg.HUES)
+
+    def test_a_named_module_is_not_drawn_as_importable(self):
+        self.write('hosts/beta-configuration.nix', host('nixos', 'c'))
+        g = mg.select(self.g(), 'hosts')
+        node = g.nodes['mod:area/used/grp/c.nix']
+        self.assertEqual(mg.style(node), ['module'])
+        self.assertEqual(mg.colours(node), mg.PALETTE['module'])
+        out = mg.mermaid(g)
+        cid = f'n{list(g.nodes).index("mod:area/used/grp/c.nix")}'
+        self.assertNotRegex(out, rf'class [\w,]*\b{cid}\b[\w,]* category')
+
+    def test_renderers_draw_the_two_directory_kinds_apart(self):
+        g = mg.select(self.g(), 'tree')
+        out = mg.dot(g)
+        self.assertRegex(out, r'<b>grp/</b>.*shape=folder')
+        self.assertRegex(out, rf'<b>used/</b>.*color="{mg.PALETTE["category"][1]}"')
+        m = mg.mermaid(g)
+        self.assertIn('["<b>grp/</b>', m)        # square: implicit
+        self.assertIn('("<b>inner/</b>', m)      # rounded: importable
+        ids = {i: f'n{k}' for k, i in enumerate(g.nodes)}
+        self.assertIn(f'{ids["dir:area/used/grp"]} -.-> {ids["cat:area/used/grp/inner"]}', m)
+        self.assertIn(f'{ids["dir:area/used/grp"]} --> {ids["mod:area/used/grp/c.nix"]}', m)
+
+
 class Selecting(Tree):
     def test_depth_and_categories_only(self):
         g = mg.select(self.g(), 'tree', depth=1, categories_only=True)

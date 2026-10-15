@@ -18,12 +18,20 @@ Filters (a few hundred modules in one diagram is unreadable):
 
     --category NAME     only that category and what is nested in it; for `hosts`,
                         also only the hosts that import something in it
-    --depth N           levels below the diagram's roots: areas (or the --category)
-                        are level 0, their direct categories level 1
-    --categories-only   leave the modules out
+    --depth N           directory levels below the diagram's roots: areas (or the
+                        --category) are level 0, what sits directly in them level 1
+    --categories-only   leave out modules and the plain folders holding them
 
     --verify            also compare the parsed names with `nix eval .#modules.<class>`
                         attribute names; slow, and off by default
+
+Colour standard (PALETTE below holds it). Importable categories -- a
+directory holding a dirsAsCategory.nix, which a host can name -- are blue
+rounded cards, reached by dotted edges. Implicit folders -- plain
+directories inside a category, collected only through it -- are slate and
+square-cornered. Modules are white, including one a host names directly:
+importable means a category, never a single module. Host and home entry
+points are white with one hue each, shared by their import edges.
 
 Annotations. `n` `h` `d` are the classes a module declares (nixos, homeManager,
 darwin); a category shows the union over everything beneath it and a module
@@ -51,10 +59,10 @@ CLASS_ORDER = list(CLASS_LETTER)
 @dataclass(frozen=True)
 class Node:
     id: str
-    kind: str                # area | category | module | aggregate | missing
+    kind: str                # area | category | folder | module | aggregate | missing
     label: str
     classes: frozenset = frozenset()
-    count: int = 0           # category: modules beneath it, nested categories included
+    count: int = 0           # category, folder: modules beneath, nested categories included
     status: str = ''         # category: imported | inherited | by-module | orphan
     merges: bool = False     # shares its name with a category or a same-class module
 
@@ -83,9 +91,15 @@ def graph(root):
     root = pathlib.Path(root)
     categories, by_name = mod.scan(root)
     catdirs = {p.parent: name for name, p in categories.items()}
+    # A plain directory inside a category: no shim, so no host can name it --
+    # its modules arrive only through the category above it (the collector's
+    # walkSubdir). Drawn as its own node so the two kinds of directory can be
+    # told apart; `_` paths are already out of `entries`.
+    entries = sorted((p, n, c) for n, es in by_name.items() for p, c in es)
+    folderdirs = sorted({d for p, _, _ in entries for d in p.parents
+                         if d not in catdirs and catdirs.keys() & set(d.parents)})
     imported = mod.imported_names(root)
     all_imported = set().union(*imported.values()) if imported else set()
-    entries = sorted((p, n, c) for n, es in by_name.items() for p, c in es)
 
     nodes, edges, roots = {}, [], []
 
@@ -101,10 +115,12 @@ def graph(root):
         return node.id
 
     def parent_of(path):
-        """Nearest enclosing category, else the area directory."""
+        """Nearest enclosing category or folder, else the area directory."""
         for anc in path.parents:
             if anc in catdirs:
                 return f'cat:{rel(anc)}'
+            if anc in folderdirs:
+                return f'dir:{rel(anc)}'
         return area(path)
 
     def beneath(d):
@@ -128,13 +144,19 @@ def graph(root):
         nodes[f'cat:{rel(d)}'] = Node(f'cat:{rel(d)}', 'category', name, classes,
                                       len(subtree), status, name in by_name)
 
+    for d in folderdirs:
+        subtree = beneath(d)
+        nodes[f'dir:{rel(d)}'] = Node(f'dir:{rel(d)}', 'folder', d.name,
+                                      frozenset().union(*(c for _, _, c in subtree)),
+                                      len(subtree))
+
     for path, name, classes in entries:
         nodes[f'mod:{rel(path)}'] = Node(f'mod:{rel(path)}', 'module', name,
                                          frozenset(classes), merges=merges(path, name, classes))
 
     # containment last, so area nodes are created in a stable order
     for nid, n in list(nodes.items()):
-        if n.kind in ('category', 'module'):
+        if n.kind in ('category', 'folder', 'module'):
             path = root / nid.split(':', 1)[1]
             edges.append(Edge(parent_of(path), nid, 'contains'))
     for path, name, classes in entries:
@@ -188,42 +210,48 @@ def select(g, view='tree', category=None, depth=None, categories_only=False):
         level[i] = d
         keep.append(i)
         queue += [(k, d + 1) for k in kids.get(i, [])]
-    hide = {i for i in keep if g.nodes[i].kind == 'module' and (categories_only or view == 'hosts')}
-    keep = [i for i in keep if i not in hide]
+    # Overviews leave out what a host cannot name: modules and the plain
+    # folders holding them. A category nested in a hidden folder hangs off
+    # the nearest directory still drawn.
+    overview = categories_only or view == 'hosts'
+    keep = [i for i in keep if not (overview and g.nodes[i].kind in ('module', 'folder'))]
+    parent = {e.dst: e.src for e in g.edges if e.kind == 'contains'}
+
+    def up(i, shown):
+        p = parent.get(i)
+        while p is not None and p not in shown:
+            p = parent.get(p)
+        return p
+
+    def containment(order, shown):
+        return [Edge(up(i, shown), i, 'contains') for i in order if up(i, shown) is not None]
+
     if view == 'tree':
         shown = set(keep)
-        edges = [e for e in g.edges if e.kind in ('contains', 'merges')
-                 and e.src in shown and e.dst in shown]
+        edges = containment(keep, shown) + [e for e in g.edges if e.kind == 'merges'
+                                            and e.src in shown and e.dst in shown]
         return Graph({i: g.nodes[i] for i in keep}, edges, [s for s in starts if s in shown])
 
     # hosts: every category in range (in its area's container), plus the
     # aggregates that import into it
     shown = {i for i in keep if g.nodes[i].kind in ('category', 'area')}
-    edges = [e for e in g.edges if e.kind == 'contains'
-             and e.src in shown and e.dst in shown]
+    imports = []
     for e in g.edges:
         if e.kind != 'imports' or e.dst not in g.nodes:
             continue
         if g.nodes[e.dst].kind == 'module':
             # a module imported by name (kde-desktop): drawn when its category is
-            owner = next((c.src for c in g.edges if c.kind == 'contains' and c.dst == e.dst), None)
-            if owner not in shown and category is not None:
+            if category is not None and up(e.dst, shown) is None:
                 continue
             shown.add(e.dst)
-            edges += [c for c in g.edges if c.kind == 'contains' and c.dst == e.dst
-                      and c.src in shown and c not in edges]
-            edges.append(e)
+            imports.append(e)
         elif e.dst in shown or (category is None and g.nodes[e.dst].kind == 'missing'):
-            edges.append(e)
-    used = {e.src for e in edges if e.kind == 'imports'}
+            imports.append(e)
+    used = {e.src for e in imports}
     nodes = {i: n for i, n in g.nodes.items()
              if i in shown or (n.kind == 'aggregate' and i in used)
-             or (n.kind == 'missing' and any(e.dst == i for e in edges))}
-    # a module drawn only because a host names it hangs off its category
-    for e in list(edges):
-        if e.kind == 'contains' and e.src not in nodes:
-            edges.remove(e)
-    return Graph(nodes, edges, [])
+             or (n.kind == 'missing' and any(e.dst == i for e in imports))}
+    return Graph(nodes, containment(list(nodes), shown) + imports, [])
 
 
 # --- renderers ------------------------------------------------------------
@@ -235,10 +263,17 @@ def select(g, view='tree', category=None, depth=None, categories_only=False):
 # page and on GitHub's dark theme.
 
 INK, QUIET, LINE = '#1e293b', '#64748b', '#94a3b8'
-# kind -> (fill, outline)
+# The colour standard, kind -> (fill, outline). One rule carries it: a
+# directory holding a dirsAsCategory.nix is an IMPORTABLE category -- a host
+# can name it -- and is the only thing drawn in blue, as a rounded card. A
+# plain directory inside one is IMPLICIT, collected only through the
+# category above it: slate, square-cornered (Graphviz: a folder). Modules
+# are neutral white whether or not some host names one directly
+# (kde-desktop); importable here means a category, never a single module.
 PALETTE = {
     'area':      ('#f8fafc', '#cbd5e1'),
-    'category':  ('#dbeafe', '#60a5fa'),
+    'category':  ('#dbeafe', '#2563eb'),
+    'folder':    ('#f1f5f9', '#94a3b8'),
     'module':    ('#ffffff', '#94a3b8'),
     'aggregate': ('#ffffff', '#f59e0b'),
     'missing':   ('#fee2e2', '#ef4444'),
@@ -246,8 +281,10 @@ PALETTE = {
 ALERT = ('#fff1f2', '#e11d48')      # an orphan category, or a name that merges
 # One hue per host or home entry point, for its card outline and every import
 # edge it draws -- nix-topology's colour-per-network, so one host's imports can
-# be followed through the crossing lines. Cycled past six.
-HUES = ['#2563eb', '#16a34a', '#d97706', '#9333ea', '#db2777', '#0891b2']
+# be followed through the crossing lines. Cycled past six. No blue and no
+# red: blue is the importable-category colour and red the alert, and a host
+# drawn in either reads as one of those.
+HUES = ['#16a34a', '#d97706', '#9333ea', '#db2777', '#0d9488', '#92400e']
 
 
 def hues(g):
@@ -263,7 +300,7 @@ def colours(n):
 
 def parts(n):
     """(title, subtitle) of a node's card."""
-    if n.kind == 'category':
+    if n.kind in ('category', 'folder'):
         return n.label + '/', ' · '.join(x for x in (letters(n.classes), str(n.count)) if x)
     if n.kind == 'module':
         return n.label, letters(n.classes)
@@ -318,7 +355,7 @@ MERMAID_INIT = ('%%{init: {"theme": "base", "themeVariables": {"fontFamily": '
 
 def mermaid(g):
     ids = {i: f'n{k}' for k, i in enumerate(g.nodes)}
-    shape = {'category': '({})', 'module': '([{}])', 'aggregate': '[[{}]]',
+    shape = {'category': '({})', 'folder': '[{}]', 'module': '([{}])', 'aggregate': '[[{}]]',
              'missing': '{{{{{}}}}}', 'area': '[{}]'}
 
     def card(i):
@@ -350,7 +387,8 @@ def mermaid(g):
     for k, e in enumerate(drawn):
         a, b = ids[e.src], ids[e.dst]
         if e.kind == 'contains':
-            nested = g.nodes[e.src].kind == g.nodes[e.dst].kind == 'category'
+            # into a category: dotted, since it is importable on its own too
+            nested = g.nodes[e.dst].kind == 'category'
             lines.append(f'    {a} {"-.->" if nested else "-->"} {b}')
         elif e.kind == 'merges':
             lines.append(f'    {a} -. merges .- {b}')
@@ -402,6 +440,8 @@ def dot(g):
                  f'color="{hue.get(i, line)}"']
         if n.kind == 'module':
             attrs.append('shape=box style="rounded,filled"')
+        if n.kind == 'folder':
+            attrs.append('shape=folder style=filled')
         if n.kind == 'aggregate':
             attrs.append('shape=box style="rounded,filled" penwidth=1.6')
         if n.kind == 'category' and n.status == 'orphan' or n.merges:
@@ -440,7 +480,7 @@ def dot(g):
     for e in drawn:
         a, b = ids[e.src], ids[e.dst]
         if e.kind == 'contains':
-            nested = g.nodes[e.src].kind == g.nodes[e.dst].kind == 'category'
+            nested = g.nodes[e.dst].kind == 'category'
             lines.append(f'    {a} -> {b}' + (' [style=dotted];' if nested else ';'))
         elif e.kind == 'merges':
             lines.append(f'    {a} -> {b} [label="merges" color="{ALERT[1]}" fontcolor="{ALERT[1]}" '

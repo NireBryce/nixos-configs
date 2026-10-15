@@ -50,11 +50,24 @@ is the mechanism, not the inventory.
 The top of the tree, drawn from the files: each area directory, then the
 categories directly in it. `n h d` are the classes a category carries
 (nixos, homeManager, darwin) and the number is how many modules it holds,
-nested categories included. A dashed outline is a category reached only
-through modules a host names one by one; a red outline is one no host
-imports. Per-category and per-host diagrams are on-demand, not committed:
-`just module-graph tree --category homelab`, `just module-graph hosts`, and
-`dot` for Graphviz (`just module-graph dot --view hosts`).
+nested categories included. Per-category and per-host diagrams are
+on-demand, not committed: `just module-graph tree --category homelab`,
+`just module-graph hosts`, and `dot` for Graphviz
+(`just module-graph dot --view hosts`).
+
+Every diagram uses one colour standard, keyed on the `dirsAsCategory.nix`
+criterion:
+
+- **Blue, rounded: an importable category.** The directory holds a
+  `dirsAsCategory.nix`, so a host can name it. An edge into one is dotted:
+  it is importable alone and also collected by the category above it.
+- **Slate, square-cornered (a folder in Graphviz): an implicit folder.** A
+  plain directory inside a category; its modules arrive only through that
+  category.
+- **White: a module.** Also when a host names one directly (`kde-desktop`):
+  importable means a category, never a single module.
+- **Outline overlays on a category:** dashed when it is reached only
+  through modules a host names one by one; red when no host imports it.
 
 <!-- generated:module-layout -- from the dirsAsCategory.nix tree under flake/modules/, drawn by flake/scripts/module-graph.py, by `just wiki-gen`; change the source, not this table -->
 
@@ -96,7 +109,8 @@ flowchart LR
     end
     style g0 fill:#f8fafc,stroke:#cbd5e1,color:#64748b
     classDef area fill:#f8fafc,stroke:#cbd5e1,color:#1e293b,stroke-width:1.5px
-    classDef category fill:#dbeafe,stroke:#60a5fa,color:#1e293b,stroke-width:1.5px
+    classDef category fill:#dbeafe,stroke:#2563eb,color:#1e293b,stroke-width:1.5px
+    classDef folder fill:#f1f5f9,stroke:#94a3b8,color:#1e293b,stroke-width:1.5px
     classDef module fill:#ffffff,stroke:#94a3b8,color:#1e293b,stroke-width:1.5px
     classDef aggregate fill:#ffffff,stroke:#f59e0b,color:#1e293b,stroke-width:1.5px
     classDef missing fill:#fee2e2,stroke:#ef4444,color:#1e293b,stroke-width:1.5px
