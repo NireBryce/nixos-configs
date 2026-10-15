@@ -121,8 +121,6 @@ License
 -------
 
 Copyright 2026 Nire Bryce. Licensed under the Apache License, Version 2.0;
-see `LICENSE`. Files carrying their own copyright header keep their own
+see `LICENSE`. One file carries its own copyright header and keeps its own
 terms: `flake/modules/users-config/elly/!dotfiles/.dir_colors` (Free
-Software Foundation) and the fast-syntax-highlighting theme in
-`flake/modules/general-config/shell-config/zsh/config/zsh-f-s-highlight-themes/`
-(Sebastian Gniazdowski).
+Software Foundation).
