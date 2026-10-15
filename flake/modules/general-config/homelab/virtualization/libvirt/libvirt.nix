@@ -86,13 +86,11 @@ in {
         virtualisation.spiceUSBRedirection.enable = true;
 
         # elly is deliberately NOT in `libvirtd` (removed 2026-09-26).
-        # Membership reaches qemu:///system without authenticating, and a
-        # member can define a guest with any host block device attached
-        # -- root-equivalent with no password. Nothing needed it: every
-        # automated virsh call runs as root in a system service, and
-        # libvirt-exporter joins the group itself. Interactive use is
-        # `sudo virsh ...`, or polkit's auth_admin prompt. Was
-        # `users.users.elly.extraGroups = [ "libvirtd" ];` here, kept out
+        # Nothing needed it: every automated virsh call runs as root in a
+        # system service, and libvirt-exporter joins the group itself.
+        # Interactive use is `sudo virsh ...`, or polkit's auth_admin
+        # prompt. Was `users.users.elly.extraGroups = [ "libvirtd" ];`
+        # here, kept out
         # of elly-user.nix because extraGroups concatenates across modules
         # (naming "podman" in two files once listed it twice).
 

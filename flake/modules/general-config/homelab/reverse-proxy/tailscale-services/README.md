@@ -158,8 +158,7 @@ own reachability grant applied in the same change, not after -- adding the
 tag and the compensating grant are one atomic step, or the device drops off
 the tailnet for everyone else the moment the tag takes effect.
 
-(2026-09-26: that `ip: ["*"]` grant is now two port-limited grants, with
-opencode's 3003 restricted to linux/macOS devices by `srcPosture` -- see
+(2026-09-26: that `ip: ["*"]` grant is now port-limited -- see
 `acl-diff-applied.hujson`. The rule above is unchanged.)
 
 ## Tagging also drops the device out of `autogroup:members` as a grant SOURCE -- svc: DNS records never reach the tagged host, live incident, 2026-09-14

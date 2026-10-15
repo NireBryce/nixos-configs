@@ -15,7 +15,7 @@ The match mirrors commit-msg's pattern -- `Claude`, then optionally a
 model name and/or an `<email>` -- with the key matched case-insensitively
 (git treats trailer keys that way; the hook's grep does not, so this is
 strictly broader). Only trailers naming Claude are judged. Any other
-agent's name-only trailer (`Co-Authored-By: ZCode`, `opencode`) passes:
+agent's name-only trailer (e.g. `Co-Authored-By: ZCode`) passes:
 no check can know which agent wrote a commit, so their form stays a
 write-time rule, as AGENTS.md says.
 

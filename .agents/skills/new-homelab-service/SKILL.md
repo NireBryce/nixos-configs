@@ -44,7 +44,7 @@ runtime check.
 A `systemd.user.services` unit declared from NixOS lands in
 `/etc/systemd/user` and starts in **every** user's manager, sddm's
 included; they race for the port. Gate it with
-`unitConfig.ConditionUser` (§45, `opencode-server.nix`).
+`unitConfig.ConditionUser` (§45).
 
 ## 2. Name the category after the function, never the tool
 

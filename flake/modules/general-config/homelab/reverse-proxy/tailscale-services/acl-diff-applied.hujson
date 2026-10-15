@@ -6,7 +6,7 @@
 	// Declare convenient hostname aliases to use in place of IP addresses.
 	"hosts": {
 		"example-host-1": "100.100.100.100",
-		// The QNAP (ts-hive), backup target for cube's restic. A grant dst
+		// ts-hive, the backup target for cube's restic. A grant dst
 		// cannot name a device, so it gets an alias. Re-check if the NAS is
 		// ever re-registered and its 100.x address changes.
 		"ts-hive": "100.78.140.91",
@@ -19,13 +19,6 @@
 	// `nodeAttrs` -- both were the policy's stock defaults, removed
 	// 2026-09-26: the ssh block allowed root, and Funnel let any member
 	// device publish a local port to the public internet.
-
-	// Device posture from the default `node:os` attribute (all plans).
-	// Laptops and desktops: durandal, tenacity, cube, lysithea. Phones and
-	// the iPad report ios/android and fall outside it.
-	"postures": {
-		"posture:workstation": ["node:os IN ['linux', 'macos']"],
-	},
 
 	"tagOwners": {
 		"tag:golink-host": ["nirebryce@github"],
@@ -114,9 +107,8 @@
 		// tailnet member's peer list (not just offline -- absent),
 		// SSH included, within a minute of the tag taking effect.
 		//
-		// Narrowed 2026-09-26 from `ip: ["*"]` to the ports actually used,
-		// split in two: everything a phone needs, and opencode (3003) for
-		// laptops/desktops only. `tailscale0` is a trusted interface on
+		// Narrowed 2026-09-26 from `ip: ["*"]` to the ports actually used.
+		// `tailscale0` is a trusted interface on
 		// cube (networking.nix), so this grant is the only thing deciding
 		// which cube ports a tailnet device reaches. A new tailnet-facing
 		// service on cube needs its port added here.
@@ -131,13 +123,6 @@
 				"tcp:47984", "tcp:47989", "tcp:47990", "tcp:48010",
 				"udp:47998-48000", "udp:48002", "udp:48010",
 			],
-		},
-		{
-			// opencode serve (coding-agent/opencode/opencode-server.nix).
-			"src":        ["autogroup:members"],
-			"srcPosture": ["posture:workstation"],
-			"dst":        ["tag:homelab-cube"],
-			"ip":         ["tcp:3003"],
 		},
 		// The tagged advertiser needs to reach its own services by name:
 		// tagging dropped cube out of autogroup:members as a SOURCE too,

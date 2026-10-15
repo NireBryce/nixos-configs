@@ -27,8 +27,8 @@ Why: the live skill listing a session sees shows only frontmatter, and
 that's the only information available when deciding whether to load a
 skill. A description stuffed with scope caveats reads as noise there;
 `when_to_use` is where the phrases that should fire it go, kept apart so
-the description stays a statement of purpose. Other harnesses (ZCode,
-opencode) ignore `when_to_use`, so nothing may live *only* there —
+the description stays a statement of purpose. Other harnesses
+ignore `when_to_use`, so nothing may live *only* there —
 `## Applies to` stays the complete trigger list. The body loads in full
 once the skill fires, so detail there costs nothing.
 

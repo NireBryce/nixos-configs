@@ -116,3 +116,13 @@ a machine you are not prepared to lose `/root` on.
 
 `AGENTS.md` and `wiki/lessons-learned.md` are an AI agent's working notes,
 not documentation for a human reader — skip them unless you're the agent.
+
+License
+-------
+
+Copyright 2026 Nire Bryce. Licensed under the Apache License, Version 2.0;
+see `LICENSE`. Files carrying their own copyright header keep their own
+terms: `flake/modules/users-config/elly/!dotfiles/.dir_colors` (Free
+Software Foundation) and the fast-syntax-highlighting theme in
+`flake/modules/general-config/shell-config/zsh/config/zsh-f-s-highlight-themes/`
+(Sebastian Gniazdowski).

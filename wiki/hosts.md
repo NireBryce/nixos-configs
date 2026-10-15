@@ -106,20 +106,13 @@ status and what broke on the way:
 - [shortlinks](categories/shortlinks.md) — golink (2026-08-24). Not behind
   Caddy and not a host service: it embeds tsnet and joins the tailnet as its
   own device `go`, needing a one-time interactive login on first start.
-- [backup](categories/backup.md) — restic to the QNAP (2026-08-28, issue
+- [backup](categories/backup.md) — restic to `ts-hive` (2026-08-28, issue
   [#87](https://github.com/NireBryce/nixos-configs/issues/87)); local-path
   over NFS failed for real, SFTP since 2026-08-31. **Done as of
   2026-09-06**, restore drill included (run twice — found and fixed a real
   sqlite-staging bug, then confirmed). Still no backups on durandal/
   tenacity/lysithea ([#130](https://github.com/NireBryce/nixos-configs/issues/130)).
   Runbook: [homelab/backup-runbook.md](homelab/backup-runbook.md).
-- [coding-agent](categories/coding-agent.md) — opencode (2026-09-07; its
-  own category since 2026-09-26, and cube is now the only NixOS host with
-  the CLI at all). Runs `opencode serve` as a systemd user service bound
-  to the tailnet IP only, with HTTP basic auth since 2026-09-26 (sops
-  `OPENCODE_SERVER_PASSWORD`; username `opencode`) — `just opencode-attach`
-  prompts for it unless `OPENCODE_SERVER_PASSWORD` is set (`-c` resumes the
-  last session after a TUI exit).
 
 ## Where each fact lives
 

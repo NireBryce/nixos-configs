@@ -23,15 +23,11 @@ doesn't repeat their content, see each one's own article for what it
 actually contains and why it's shaped the way it is.
 
 An eighth, [backup](backup.md), joined 2026-08-28 the same way — restic,
-backing up the state the other seven produce to the QNAP NAS already on the
+backing up the state the other seven produce to the `ts-hive` NAS already on the
 network. It's the odd one out functionally (nothing to reach over the
 tailnet, no port, no Caddy route — a timer, not a listener) but structurally
 identical: its own `dirsAsCategory.nix` under `general-config/homelab/backup/`,
 cube-only, folded in by the same delegation this page describes below.
-
-A ninth, [coding-agent](coding-agent.md), joined 2026-09-26: opencode's CLI
-and server, moved out of `hosts/cube/configuration/` (and out of every
-other host's Home Manager) so cube is the only host with it.
 
 ## Nested categories overlap their parents on purpose
 
