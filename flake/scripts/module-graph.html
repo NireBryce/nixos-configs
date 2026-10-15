@@ -58,6 +58,11 @@
     border: 1px solid var(--button-line); cursor: pointer;
   }
   #all[aria-pressed="true"] { border-color: var(--quiet); font-weight: 600; }
+  #layout {
+    font: inherit; font-size: 13px; padding: 4px 12px; border-radius: 999px;
+    background: var(--button-bg); color: var(--text);
+    border: 1px solid var(--button-line); cursor: pointer;
+  }
   .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--quiet); }
   .legend span { display: inline-flex; align-items: center; gap: 6px; }
   .swatch { width: 18px; height: 12px; border-radius: 4px; border: 1.5px solid; display: inline-block; }
@@ -78,6 +83,17 @@
     justify-content: center; align-items: flex-start; margin: 0 0 64px;
   }
   .row:last-child { margin-bottom: 0; }
+  /* Left to right: three columns -- the hosts' own directories, the hosts,
+     the shared areas -- each stacking its boxes vertically. */
+  #stage.lr {
+    display: grid; grid-template-columns: auto auto auto; column-gap: 96px;
+    justify-content: center; align-items: center;
+  }
+  #stage.lr .row { flex-direction: column; flex-wrap: nowrap; margin: 0; }
+  #stage.lr #hosts .entry .body { flex-direction: column; align-items: stretch; }
+  /* The hosts' own directories stack too, so each sits across from its
+     host instead of in a row that every edge has to pass under. */
+  #stage.lr #top .area .body { flex-direction: column; align-items: stretch; }
   .area {
     position: relative; background: var(--area-bg); border: 1px solid var(--area-line);
     border-radius: 12px; padding: 24px 12px 12px;
@@ -127,6 +143,7 @@
 <header>
   <h1>Module graph</h1>
   <button id="all" type="button" aria-pressed="true">All hosts</button>
+  <button id="layout" type="button">Left to right</button>
   <span class="hint">Click hosts to show only what they import.</span>
   <div class="legend" id="legend"></div>
 </header>
@@ -273,8 +290,16 @@ for (const host of DATA.hosts) {
 const selected = new Set();
 let visible = new Set();
 
+let leftToRight = false;
+const stageEl = document.getElementById("stage"), layoutButton = document.getElementById("layout");
+function setLayout(lr) {
+  leftToRight = lr;
+  stageEl.classList.toggle("lr", lr);
+  layoutButton.textContent = lr ? "Top to bottom" : "Left to right";
+}
 function readHash() {
   selected.clear();
+  setLayout(/(^#|&)layout=lr(&|$)/.test(location.hash));
   const m = location.hash.match(/hosts=([^&]*)/);
   if (!m) return;
   for (const title of decodeURIComponent(m[1]).split(",")) {
@@ -284,8 +309,15 @@ function readHash() {
 }
 function writeHash() {
   const titles = DATA.hosts.filter(h => selected.has(h.id)).map(h => h.title);
-  history.replaceState(null, "", titles.length ? "#hosts=" + titles.join(",") : location.pathname);
+  const parts = [];
+  if (titles.length) parts.push("hosts=" + titles.join(","));
+  if (leftToRight) parts.push("layout=lr");
+  history.replaceState(null, "", parts.length ? "#" + parts.join("&") : location.pathname);
 }
+layoutButton.addEventListener("click", () => {
+  const before = rects();
+  setLayout(!leftToRight); writeHash(); play(before);
+});
 function toggle(id) {
   selected.has(id) ? selected.delete(id) : selected.add(id);
   writeHash(); apply(true);
@@ -388,12 +420,21 @@ function drawEdges() {
     for (const target of DATA.imports[host.id] || []) {
       if (!visible.has(target) || !els.has(target)) continue;
       const tr = els.get(target).getBoundingClientRect();
-      const up = topIds.has(target);
-      const x1 = hr.left + hr.width / 2 - stage.left, x2 = tr.left + tr.width / 2 - stage.left;
-      const y1 = (up ? hr.top : hr.bottom) - stage.top, y2 = (up ? tr.bottom : tr.top) - stage.top;
-      const bend = (y2 - y1) / 2;
+      // An edge into a host's own directory (host-config/, users-config/)
+      // runs backwards: up in the top-down layout, left in the other.
+      const back = topIds.has(target);
       const p = document.createElementNS(SVG, "path");
-      p.setAttribute("d", `M${x1},${y1} C${x1},${y1 + bend} ${x2},${y2 - bend} ${x2},${y2}`);
+      if (leftToRight) {
+        const x1 = (back ? hr.left : hr.right) - stage.left, x2 = (back ? tr.right : tr.left) - stage.left;
+        const y1 = hr.top + hr.height / 2 - stage.top, y2 = tr.top + tr.height / 2 - stage.top;
+        const bend = (x2 - x1) / 2;
+        p.setAttribute("d", `M${x1},${y1} C${x1 + bend},${y1} ${x2 - bend},${y2} ${x2},${y2}`);
+      } else {
+        const x1 = hr.left + hr.width / 2 - stage.left, x2 = tr.left + tr.width / 2 - stage.left;
+        const y1 = (back ? hr.top : hr.bottom) - stage.top, y2 = (back ? tr.bottom : tr.top) - stage.top;
+        const bend = (y2 - y1) / 2;
+        p.setAttribute("d", `M${x1},${y1} C${x1},${y1 + bend} ${x2},${y2 - bend} ${x2},${y2}`);
+      }
       p.setAttribute("stroke", host.hue);
       p.setAttribute("marker-end", marker);
       p.dataset.host = host.id;
