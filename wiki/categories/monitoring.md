@@ -1,4 +1,4 @@
-# `monitoring` — `general-config/homelab/monitoring/`
+# `monitoring` — `homelab-config/homelab/monitoring/`
 
 _Last modified: 2026-09-27_
 

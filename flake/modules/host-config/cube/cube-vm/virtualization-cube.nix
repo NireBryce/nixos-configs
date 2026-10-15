@@ -1,5 +1,5 @@
 # nire-cube's VM wiring -- every libvirt VM on cube is instantiated here,
-# one import of the generator (general-config/homelab/virtualization/
+# one import of the generator (homelab-config/homelab/virtualization/
 # VMs/_lib/libvirt-vm.nix) per VM. Revives the name of the llm-sandbox-era
 # wiring file (removed 2026-08-28 with that VM).
 #
@@ -23,7 +23,7 @@ let
     runnerCfg = config.flake.nixosConfigurations.forge-runner.config;
 in {
     flake.modules.nixos.${moduleName} =
-        import ../../../general-config/homelab/virtualization/VMs/_lib/libvirt-vm.nix {
+        import ../../../homelab-config/homelab/virtualization/VMs/_lib/libvirt-vm.nix {
             name  = "forge-runner";
             # `uuidgen` once, pinned forever -- libvirt's redefinition
             # trap is the generator's `uuid` parameter comment. No

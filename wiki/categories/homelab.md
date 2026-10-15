@@ -1,4 +1,4 @@
-# `homelab` — `general-config/homelab/`
+# `homelab` — `homelab-config/homelab/`
 
 _Last modified: 2026-09-28_
 
@@ -26,7 +26,7 @@ An eighth, [backup](backup.md), joined 2026-08-28 the same way — restic,
 backing up the state the other seven produce to the `ts-hive` NAS already on the
 network. It's the odd one out functionally (nothing to reach over the
 tailnet, no port, no Caddy route — a timer, not a listener) but structurally
-identical: its own `dirsAsCategory.nix` under `general-config/homelab/backup/`,
+identical: its own `dirsAsCategory.nix` under `homelab-config/homelab/backup/`,
 cube-only, folded in by the same delegation this page describes below.
 
 ## Nested categories overlap their parents on purpose

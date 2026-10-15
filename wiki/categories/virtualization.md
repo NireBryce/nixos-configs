@@ -1,4 +1,4 @@
-# `virtualization` — `general-config/homelab/virtualization/`
+# `virtualization` — `homelab-config/homelab/virtualization/`
 
 _Last modified: 2026-09-29_
 

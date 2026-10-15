@@ -76,9 +76,9 @@
         # Every self-hosted/homelab service this host runs, as one aggregate
         # -- added 2026-08-27, folding what used to be seven separate
         # imports here (virtualization, containers, monitoring, git-forge,
-        # shortlinks, reverse-proxy, landing) into `general-config/homelab/`.
+        # shortlinks, reverse-proxy, landing) into `homelab-config/homelab/`.
         # Each of those is still its own category nested under it
-        # (`general-config/homelab/<name>/`, each keeping its own
+        # (`homelab-config/homelab/<name>/`, each keeping its own
         # `dirsAsCategory.nix`)
         # and still individually importable by name -- tenacity still pulls
         # `containers` directly, unaffected by this move (durandal dropped

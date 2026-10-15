@@ -336,7 +336,7 @@ The two wrong versions:
   silently dropped `libvirt-vm-llm-sandbox` from `nire-cube`'s
   `systemd.services` entirely. Cause: `virtualization-cube.nix` (the
   `nire-llm-sandbox` VM's cube wiring — both since removed, 2026-08-28; see
-  `wiki/history.md`) sat bare in `general-config/homelab/virtualization/`'s own root,
+  `wiki/history.md`) sat bare in `homelab-config/homelab/virtualization/`'s own root,
   deliberately excluded from the
   `virtualization` category's own aggregate (a `.nix` file bare in a
   category's own root was then collected by nothing — the rule removed
@@ -381,7 +381,7 @@ workarounds:
   to add them back into the parent.
 
 It was also used on purpose once: `virtualization-cube.nix`, cube's VM
-wiring, sat directly in `general-config/homelab/virtualization/` so it
+wiring, sat directly in `homelab-config/homelab/virtualization/` so it
 reached cube through `homelab` without joining `virtualization`, which
 durandal imported at the time (lessons-learned §38 on why a VM definition
 shouldn't ride along with shared libvirt setup).

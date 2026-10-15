@@ -29,7 +29,7 @@ in {
                 server = {
                     # Loopback since 2026-08-24: nothing off-host
                     # connects here.
-                    # general-config/homelab/reverse-proxy/caddy/caddy.nix
+                    # homelab-config/homelab/reverse-proxy/caddy/caddy.nix
                     # accepts on the tailnet, terminates TLS from tailscaled's
                     # cert, proxies to this port over 127.0.0.1. Used to
                     # be 0.0.0.0 -- history note at the bottom.
@@ -273,7 +273,7 @@ in {
 # 2026-08-24 — this used to listen on 0.0.0.0 with a plain-HTTP ROOT_URL
 #
 # For the few hours between this file being written and
-# general-config/homelab/reverse-proxy/caddy/caddy.nix being added, `settings.server` read
+# homelab-config/homelab/reverse-proxy/caddy/caddy.nix being added, `settings.server` read
 # HTTP_ADDR = "0.0.0.0" -- commented as the one service in the category
 # meant to be reached off-host at all (over Tailscale), "tailnet only"
 # enforced at the firewall, grafana.nix's reasoning at the time -- and

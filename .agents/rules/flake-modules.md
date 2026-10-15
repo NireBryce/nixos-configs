@@ -37,9 +37,10 @@ Read `flake/doc/dirsAsCategory.md` before changing any `dirsAsCategory.nix`.
   `modules/invariants.nix`, `host-config/hosts.nix` and the
   `<host>-configuration.nix` files beside it, and
   `users-config/elly-home-manager.nix`. `just modules` relies on this.
-- Areas: `general-config/`, `host-config/`, `packages-config/`,
-  `users-config/` (formerly `hosts/`, `packages/`, `users/`), named so no
-  area can collide with a module or category name.
+- Areas: `general-config/`, `homelab-config/`, `host-config/`,
+  `packages-config/`, `users-config/` (formerly `hosts/`, `packages/`,
+  `users/`; `homelab-config/homelab/` was `general-config/homelab/` until
+  2026-10-15), named so no area can collide with a module or category name.
 - The category is how something shared stays optional: nothing here
   declares `mkEnableOption`. `kde-desktop` is the by-name variant, imported
   directly while its category (`desktop-env`, which also holds `jovian`) is

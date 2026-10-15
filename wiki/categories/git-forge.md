@@ -1,4 +1,4 @@
-# `git-forge` — `general-config/homelab/git-forge/`
+# `git-forge` — `homelab-config/homelab/git-forge/`
 
 _Last modified: 2026-09-29_
 

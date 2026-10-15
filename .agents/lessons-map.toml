@@ -66,7 +66,7 @@ remind    = "New module: its name is its filename, and a same-named module or ca
 
 [[topic]]
 id      = "homelab"
-paths   = ["flake/modules/general-config/homelab/**", "flake/modules/host-config/cube/**"]
+paths   = ["flake/modules/homelab-config/homelab/**", "flake/modules/host-config/cube/**"]
 rules   = "homelab.md"
 skill   = "new-homelab-service"
 lessons = [37, 40, 45, 46]
@@ -105,14 +105,14 @@ remind  = "Agent config: a hook added or re-matched in .agents/settings.json goe
 
 [[topic]]
 id      = "caddy"
-paths   = ["flake/modules/general-config/homelab/reverse-proxy/caddy/**"]
+paths   = ["flake/modules/homelab-config/homelab/reverse-proxy/caddy/**"]
 skill   = "new-homelab-service"
 lessons = [41, 47]
 remind  = "Caddy: an explicit `tls` on one vhost changes the issuer for every vhost (§47); two apps behind one prefix can want opposite prefix handling, so `curl` the app itself (§41)."
 
 [[topic]]
 id      = "tailscale-services"
-paths   = ["flake/modules/general-config/homelab/reverse-proxy/tailscale-services/**"]
+paths   = ["flake/modules/homelab-config/homelab/reverse-proxy/tailscale-services/**"]
 skill   = "new-tailscale-service"
 lessons = [48]
 remind  = "Tailscale services: a committed ACL or service file records intent, not what the control plane holds; done means `just tailscale-acl diff` reports no difference (§48)."

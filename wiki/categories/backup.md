@@ -1,4 +1,4 @@
-# `backup` — `general-config/homelab/backup/`
+# `backup` — `homelab-config/homelab/backup/`
 
 _Last modified: 2026-10-01_
 

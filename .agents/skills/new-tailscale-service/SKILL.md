@@ -13,7 +13,7 @@ Not Funnel (Tailscale Services stay tailnet-only). Not a Caddy replacement: as o
 
 ## Background (2026-09-07)
 
-Grafana and Forgejo moved from `ts-cube.../grafana/` and `.../git/` to `grafana.<tailnet-domain>`/`git.<tailnet-domain>` the day `svc:` opened on this tailnet. Worked example; account in `wiki/categories/reverse-proxy.md` and `flake/modules/general-config/homelab/reverse-proxy/tailscale-services/`. Read `serve.nix`'s history section for the failed first design (most likely to be re-invented).
+Grafana and Forgejo moved from `ts-cube.../grafana/` and `.../git/` to `grafana.<tailnet-domain>`/`git.<tailnet-domain>` the day `svc:` opened on this tailnet. Worked example; account in `wiki/categories/reverse-proxy.md` and `flake/modules/homelab-config/homelab/reverse-proxy/tailscale-services/`. Read `serve.nix`'s history section for the failed first design (most likely to be re-invented).
 
 ## The shape
 
@@ -74,7 +74,7 @@ Run `wiki-sync` incl. step 5 (three pages below have `-for-agents.md` siblings w
 ## See also
 
 - `new-homelab-service` — do first if the service isn't already behind Caddy.
-- `flake/modules/general-config/homelab/reverse-proxy/tailscale-services/serve.nix` — worked example + failed first design.
+- `flake/modules/homelab-config/homelab/reverse-proxy/tailscale-services/serve.nix` — worked example + failed first design.
 - `.../tailscale-services/README.md` — ACL/tag/service-object side, tagging incident in full.
 - `wiki/categories/reverse-proxy.md` — Caddy's half, cert mechanism, why `permitCertUid` is scoped where it is.
 - `flake/scripts/tailscale-acl.py` — header has endpoint-naming traps (`/acl` not `/policy`, `/vip-services/{name}` not `/by-name/{name}`).
