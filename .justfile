@@ -79,9 +79,11 @@ lint:
 dev-list:
     @{{scripts}}/dev-shell.sh {{justfile_directory()}}/dev-shells list
 
+# [no-cd]: a relative <path> means relative to where you ran just, not the repo root.
 # Deploy a dev-shells/<shell> flake into <path>: just dev-new rust ~/src/foo [--force]
+[no-cd]
 dev-new shell path *force:
-    {{scripts}}/dev-shell.sh {{justfile_directory()}}/dev-shells new {{shell}} {{path}} {{force}}
+    {{quote(scripts / "dev-shell.sh")}} {{quote(justfile_directory() / "dev-shells")}} new {{quote(shell)}} {{quote(path)}} {{force}}
 
 # Checks import lists, categories/00-INDEX.md's Index table, hosts.md's host
 # table, every `just <recipe>`/skill-name/markdown-link reference, and the

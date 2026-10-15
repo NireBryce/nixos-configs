@@ -17,14 +17,14 @@ _default:
 
 # Scaffold a new rust project at <path>: copies flake.nix in, then `cargo init`s it
 create path:
-    mkdir -p {{path}}
-    cp {{here}}/flake.nix {{path}}/flake.nix
-    cp {{here}}/rust-toolchain.toml {{path}}/rust-toolchain.toml
+    mkdir -p {{quote(path)}}
+    cp {{quote(here)}}/flake.nix {{quote(path)}}/flake.nix
+    cp {{quote(here)}}/rust-toolchain.toml {{quote(path)}}/rust-toolchain.toml
     # Inside a git repo a flake only sees tracked files, so the `nix develop`
     # below can't find an un-added flake.nix or rust-toolchain.toml.
-    if git -C {{path}} rev-parse --is-inside-work-tree >/dev/null 2>&1; then git -C {{path}} add flake.nix rust-toolchain.toml; fi
-    cd {{path}} && nix develop --command cargo init
+    if git -C {{quote(path)}} rev-parse --is-inside-work-tree >/dev/null 2>&1; then git -C {{quote(path)}} add flake.nix rust-toolchain.toml; fi
+    cd {{quote(path)}} && nix develop --command cargo init
 
 # Drop into the rust dev shell, blocking until you exit it
 activate:
-    nix develop {{here}}
+    nix develop {{quote(here)}}

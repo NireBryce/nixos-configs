@@ -10,6 +10,8 @@
 # (flakes ignore untracked files; it has to sit between the copy and the
 # template's own `nix develop`) stay in one place: dev-shells/<name>/
 # justfile. Around it, this adds:
+#   - resolves <path> to an absolute path and refuses one inside the
+#     templates folder;
 #   - refuses to overwrite an existing flake.nix unless --force;
 #   - writes `.envrc` with `use flake` for direnv when none exists.
 set -euo pipefail
@@ -33,10 +35,26 @@ case "$cmd" in
         shell=${3:?$usage}
         target=${4:?$usage}
         force=${5:-}
+        if [ $# -gt 5 ]; then
+            echo "dev-new: too many arguments; $usage" >&2
+            exit 2
+        fi
         if [ -n "$force" ] && [ "$force" != "--force" ]; then
             echo "dev-new: unknown flag '$force' (only --force)" >&2
             exit 2
         fi
+
+        # The template's `create` runs with its own folder as cwd, so a
+        # relative target would land inside dev-shells/<shell>/. Resolve it
+        # here, against the cwd `just dev-new` was run from ([no-cd]).
+        target=$(realpath -m -- "$target")
+        dir=$(realpath -- "$dir")
+        case "$target/" in
+            "$dir"/*)
+                echo "dev-new: $target is inside $dir; pick a path outside the templates" >&2
+                exit 1
+                ;;
+        esac
 
         if [ ! -f "$dir/$shell/flake.nix" ]; then
             echo "dev-new: no dev shell '$shell'. Available:" >&2
