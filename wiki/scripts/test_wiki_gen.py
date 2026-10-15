@@ -59,6 +59,11 @@ COUNTS_MD = '''# Counts
 <!-- generated:module-counts -->
 <!-- /generated -->
 '''
+LAYOUT_MD = '''# Architecture
+
+<!-- generated:module-layout -->
+<!-- /generated -->
+'''
 
 
 def quiet(fn, *a, **kw):
@@ -91,6 +96,7 @@ class Fixture(unittest.TestCase):
         self.write('wiki/hosts.md', HOSTS_MD)
         self.write('wiki/categories/00-INDEX.md', INDEX_MD)
         self.write('wiki/module-style-guide-for-agents.md', COUNTS_MD)
+        self.write('wiki/architecture.md', LAYOUT_MD)
 
     def tearDown(self):
         self._tmp.cleanup()
@@ -251,6 +257,35 @@ class Markers(Fixture):
         # The copy starts without hand cells, so each row asks for its Role.
         self.assertEqual(len(findings), 3)
         self.assertTrue(all(f.startswith('EMPTY HAND CELL  wiki/hosts-for-agents.md') for f in findings))
+
+
+class Layout(Fixture):
+    def test_draws_areas_and_top_categories_only(self):
+        self.gen()
+        text = self.read('wiki/architecture.md')
+        self.assertIn('```mermaid\n%%{init:', text)
+        self.assertIn('\nflowchart LR\n', text)
+        self.assertIn('subgraph g0["general-config"]', text)
+        self.assertIn('general-config', text)
+        self.assertIn('boot/', text)
+        self.assertIn('homelab/', text)
+        self.assertNotIn('backup/', text)      # nested: one level deep only
+        self.assertNotIn('thing', text)        # modules are left out
+
+    def test_new_category_makes_the_region_stale(self):
+        self.gen()
+        self.fill_hand_cells()
+        self.assertEqual(self.check(), [])
+        g = 'flake/modules/general-config/fresh/'
+        self.write(g + 'dirsAsCategory.nix', SHIM)
+        self.write(g + 'f.nix', MOD.replace('CLASS', 'nixos'))
+        findings = [f for f in self.check() if 'module-layout' in f]
+        self.assertEqual(len(findings), 1)
+        self.assertTrue(findings[0].startswith(
+            "STALE GENERATED  wiki/architecture.md: region 'module-layout'"))
+        self.gen()
+        self.assertIn('fresh/', self.read('wiki/architecture.md'))
+        self.assertEqual(self.check(), [])
 
 
 if __name__ == '__main__':

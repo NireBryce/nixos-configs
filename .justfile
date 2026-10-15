@@ -58,6 +58,20 @@ modules:
 modules-test:
     python3 {{scripts}}/test_modules.py
 
+# Draw the module tree: just module-graph tree|hosts|dot [--category X] [--depth N]
+# [--categories-only] [--verify]. tree/hosts print Mermaid, dot prints Graphviz
+# (`just module-graph dot --view hosts | nix shell nixpkgs#graphviz -c dot -Tsvg`).
+# Categories come from `nix eval ./flake#categoryGraph` (falls back to parsing
+# files, with a note; --static skips the eval). See flake/scripts/module-graph.py.
+module-graph cmd *args:
+    cd {{flake}} && python3 scripts/module-graph.py {{cmd}} modules {{args}}
+
+# Fixture tests for module-graph.py: builds throwaway trees with a name merge
+# and an orphan category and asserts the diagram shows them. Pure stdlib;
+# runs in preflight and CI
+module-graph-test:
+    python3 {{scripts}}/test_module_graph.py
+
 # Scaffold a new module: just add-module <class> <category>/<subdir>/<name> ["one-line description"]
 # Class is nixos/homeManager/flake/generic/darwin; the path is relative to
 # flake/modules/ and must sit in a subdirectory of a category dir (see
@@ -218,6 +232,7 @@ preflight:
     @just cod-desc-test
     @just trailers-test
     @just modules-test
+    @just module-graph-test
     @just pinned-packages-test
     @python3 .agents/scripts/test_recurring.py
     @python3 .agents/scripts/test_ship.py
