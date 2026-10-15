@@ -8,7 +8,13 @@
   The flow, in either direction (top-down, or left to right):
 
     host-config/  ->  hosts  ->  shared areas  <-  Home Manager  ->  users-config/
-    (behind)                                       (the far end, flowing back)
+    (behind)          homelab-config/              (the far end, flowing back)
+                      (beside the hosts)
+
+  The shared areas run general-config, hardware-config, packages-config.
+  homelab-config sits beside the hosts -- to their left top-down, below them
+  left to right -- since only one host runs it; an edge into something
+  beside its host runs sideways.
 
   A host's own directory sits behind it and the shared areas ahead of it.
   The user's own directory and the Home Manager config the hosts enable sit
@@ -99,6 +105,12 @@
     justify-content: center; align-items: flex-start; margin: 0 0 64px;
   }
   .row:last-child { margin-bottom: 0; }
+  /* homelab-config beside the hosts: before them in their row top-down,
+     after them in their column left to right. */
+  #hosts > .area { order: -1; }
+  #stage.lr #hosts > .area { order: 1; }
+  /* The shared areas stack one per line, in their order, in both layouts. */
+  #shared { flex-direction: column; align-items: center; }
   /* Left to right: five columns, each stacking its boxes vertically. The
      hosts' own directories, the hosts and the user directory stack so each
      sits across from what it links to instead of in a row that every edge
@@ -290,6 +302,7 @@ const rows = Object.fromEntries(["behind", "hosts", "shared", "home", "user"]
   .map(id => [id, document.getElementById(id)]));
 for (const area of DATA.areas.filter(a => a.place === "behind")) build(area, rows.behind);
 sourceGroup(rows.hosts, "hosts", DATA.hosts, "grp:hosts");
+for (const area of DATA.areas.filter(a => a.place === "beside")) build(area, rows.hosts);
 for (const area of DATA.areas.filter(a => a.place === "shared")) build(area, rows.shared);
 sourceGroup(rows.home, "home", DATA.homes, "grp:homes");
 for (const area of DATA.areas.filter(a => a.place === "user")) build(area, rows.user);
@@ -471,6 +484,24 @@ function play(before) {
 // (a host into its own directory, Home Manager into the user directory it
 // imports) leaves the near side for the target's far side.
 function edgePath(a, b, stage) {
+  // Beside: the two ends share a band across the flow (homelab-config next
+  // to the hosts), so the edge runs sideways between them.
+  const besideTB = !leftToRight && b.bottom > a.top && b.top < a.bottom;
+  const besideLR = leftToRight && b.right > a.left && b.left < a.right;
+  if (besideTB) {
+    const left = b.left + b.width / 2 < a.left + a.width / 2;
+    const x1 = (left ? a.left : a.right) - stage.left, x2 = (left ? b.right : b.left) - stage.left;
+    const y1 = a.top + a.height / 2 - stage.top, y2 = b.top + b.height / 2 - stage.top;
+    const bend = (x2 - x1) / 2;
+    return `M${x1},${y1} C${x1 + bend},${y1} ${x2 - bend},${y2} ${x2},${y2}`;
+  }
+  if (besideLR) {
+    const up = b.top + b.height / 2 < a.top + a.height / 2;
+    const x1 = a.left + a.width / 2 - stage.left, x2 = b.left + b.width / 2 - stage.left;
+    const y1 = (up ? a.top : a.bottom) - stage.top, y2 = (up ? b.bottom : b.top) - stage.top;
+    const bend = (y2 - y1) / 2;
+    return `M${x1},${y1} C${x1},${y1 + bend} ${x2},${y2 - bend} ${x2},${y2}`;
+  }
   if (leftToRight) {
     const back = b.left + b.width / 2 < a.left + a.width / 2;
     const x1 = (back ? a.left : a.right) - stage.left, x2 = (back ? b.right : b.left) - stage.left;
@@ -484,28 +515,31 @@ function edgePath(a, b, stage) {
   const bend = (y2 - y1) / 2;
   return `M${x1},${y1} C${x1},${y1 + bend} ${x2},${y2 - bend} ${x2},${y2}`;
 }
-// A route around the outside of the graph: out of the host sideways, along a
-// lane past everything, then into the target from outside. `side` < 0 is
-// over the top (left to right) or down the left (top-down); > 0 the other
-// edge. `lane` spaces the routes on one side apart.
-function aroundPath(a, b, stage, bounds, side, lane) {
-  const off = 20 + lane * 9, d = 28;
+// A route around the outside of the graph. It first clears the whole hosts
+// group -- homelab-config beside the hosts included -- then runs along a lane
+// outside everything drawn, then turns into the target from outside.
+// `side` < 0 is over the top (left to right) or down the left (top-down),
+// > 0 the other edge; `lane` spaces the routes on one side apart, both the
+// lane and the point where each route leaves the hosts group.
+function aroundPath(a, b, stage, bounds, group, side, lane) {
+  const r = 14, s = side < 0 ? -1 : 1, off = 20 + lane * 9;
+  const X = v => v - stage.left, Y = v => v - stage.top;
   if (leftToRight) {
-    const laneY = side < 0 ? bounds.top - off : bounds.bottom + off;
-    const x1 = a.right - stage.left, y1 = a.top + a.height / 2 - stage.top;
-    const xt = b.left + b.width / 2 - stage.left;
-    const yt = (side < 0 ? b.top : b.bottom) - stage.top, ly = laneY - stage.top;
-    const toward = side < 0 ? d : -d;
-    return `M${x1},${y1} C${x1 + d},${y1} ${x1 + d},${ly} ${x1 + 2 * d},${ly} ` +
-           `L${xt - d},${ly} C${xt},${ly} ${xt},${ly} ${xt},${ly + toward} L${xt},${yt}`;
+    const x1 = X(a.right), y1 = Y(a.top + a.height / 2);
+    const dx = X(group.right) + 16 + lane * 7;                 // clear of the group
+    const ly = Y(side < 0 ? bounds.top - off : bounds.bottom + off);
+    const xt = X(b.left + b.width / 2), yt = Y(side < 0 ? b.top : b.bottom);
+    return `M${x1},${y1} L${dx - r},${y1} Q${dx},${y1} ${dx},${y1 + s * r} ` +
+           `L${dx},${ly - s * r} Q${dx},${ly} ${dx + r},${ly} ` +
+           `L${xt - r},${ly} Q${xt},${ly} ${xt},${ly - s * r} L${xt},${yt}`;
   }
-  const laneX = side < 0 ? bounds.left - off : bounds.right + off;
-  const x1 = a.left + a.width / 2 - stage.left, y1 = a.bottom - stage.top;
-  const yt = b.top + b.height / 2 - stage.top;
-  const xt = (side < 0 ? b.left : b.right) - stage.left, lx = laneX - stage.left;
-  const toward = side < 0 ? d : -d;
-  return `M${x1},${y1} C${x1},${y1 + d} ${lx},${y1 + d} ${lx},${y1 + 2 * d} ` +
-         `L${lx},${yt - d} C${lx},${yt} ${lx},${yt} ${lx + toward},${yt} L${xt},${yt}`;
+  const x1 = X(a.left + a.width / 2), y1 = Y(a.bottom);
+  const ey = Y(group.bottom) + 16 + lane * 7;                  // clear of the group
+  const lx = X(side < 0 ? bounds.left - off : bounds.right + off);
+  const xt = X(side < 0 ? b.left : b.right), yt = Y(b.top + b.height / 2);
+  return `M${x1},${y1} L${x1},${ey - r} Q${x1},${ey} ${x1 + s * r},${ey} ` +
+         `L${lx - s * r},${ey} Q${lx},${ey} ${lx},${ey + r} ` +
+         `L${lx},${yt - r} Q${lx},${yt} ${lx - s * r},${yt} L${xt},${yt}`;
 }
 // The box around everything drawn, which the lanes run outside of.
 function contentBounds() {
@@ -538,7 +572,8 @@ function drawEdges() {
     const a = sourceEls.get(source.id).getBoundingClientRect(), b = targetEl.getBoundingClientRect();
     if (hostIds.has(source.id) && farIds.has(targetId)) {
       const side = sideOf(source.id);
-      p.setAttribute("d", aroundPath(a, b, stage, bounds, side, lanes[side]++));
+      p.setAttribute("d", aroundPath(a, b, stage, bounds, rows.hosts.getBoundingClientRect(),
+                                     side, lanes[side]++));
       p.classList.add("around");
     } else {
       p.setAttribute("d", edgePath(a, b, stage));

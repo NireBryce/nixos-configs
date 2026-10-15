@@ -775,13 +775,19 @@ TEMPLATE = pathlib.Path(__file__).with_name('module-graph.html')
 # and the Home Manager config the hosts enable ahead of them, then the
 # shared areas. (The Mermaid and Graphviz hosts views keep TOP_AREAS.)
 BEHIND_AREAS = ('host-config',)
+# Beside the hosts, in their row (top-down) or column (left to right): the
+# self-hosted services, which only one host runs.
+BESIDE_AREAS = ('homelab-config',)
 USER_AREAS = ('users-config',)
+# The shared areas, in this order; any other area follows, alphabetically.
+SHARED_ORDER = ('general-config', 'hardware-config', 'packages-config')
 PLACEHOLDER = '/*@DATA@*/null'
 
 
 def page_data(g):
     """The page's model, from a hosts-view graph: areas holding everything
-    beneath them as a tree (each with its `place`: behind, user or shared),
+    beneath them as a tree (each with its `place`: behind, beside, user or
+    shared; shared ones in SHARED_ORDER),
     the hosts and the Home Manager configs they enable ("homes": aggregates
     another aggregate enables), each with its hue, what each imports, and
     which homes each host enables. A name a host imports that no module
@@ -806,8 +812,11 @@ def page_data(g):
         if n.kind == 'area' and kids.get(i):
             area = node(i)
             area['place'] = ('behind' if n.label in BEHIND_AREAS
+                             else 'beside' if n.label in BESIDE_AREAS
                              else 'user' if n.label in USER_AREAS else 'shared')
             areas.append(area)
+    rank = {name: k for k, name in enumerate(SHARED_ORDER)}
+    areas.sort(key=lambda a: (rank.get(a['title'], len(rank)), a['title']))
     missing = [i for i, n in g.nodes.items() if n.kind == 'missing']
     if missing:
         areas.append({'id': 'area:(not found)', 'kind': 'area', 'title': 'not found',

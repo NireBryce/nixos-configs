@@ -638,6 +638,26 @@ def turns_on(cls, *refs):
             f'        flake.modules.{cls}.${{moduleName}} = {{ }};\n{lines}    }}\n')
 
 
+class Places(Tree):
+    """Where the page puts each area."""
+
+    def test_areas_get_their_place_and_shared_ones_their_order(self):
+        for area in ('packages-config/p', 'general-config/g', 'hardware-config/w',
+                     'homelab-config/h', 'zz-config/z', 'host-config/x'):
+            self.write(f'{area}/dirsAsCategory.nix', SHIM)
+            self.write(f'{area}/{area.split("/")[1]}m.nix', module('nixos'))
+        names = ' '.join(a.split('/')[1] for a in ('packages-config/p', 'general-config/g',
+                         'hardware-config/w', 'homelab-config/h', 'zz-config/z', 'host-config/x'))
+        self.write('hosts/alpha-configuration.nix', host('nixos', *names.split()))
+        d = mg.page_data(mg.select(self.g(), 'hosts'))
+        places = [(a['title'], a['place']) for a in d['areas']]
+        shared = [t for t, p in places if p == 'shared']
+        self.assertEqual(shared[:3], ['general-config', 'hardware-config', 'packages-config'])
+        self.assertEqual(sorted(shared[3:]), shared[3:])            # the rest, alphabetically
+        self.assertIn(('homelab-config', 'beside'), places)
+        self.assertIn(('host-config', 'behind'), places)
+
+
 class Enables(Tree):
     """A host does not import its Home Manager config: a module it imports
     refers to it. That reference is the `enables` edge."""
