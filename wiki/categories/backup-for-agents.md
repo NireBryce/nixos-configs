@@ -6,7 +6,7 @@ _Sibling reviewed: 2026-10-01 -- source's See-also links repointed from open-thr
 
 Condensed from [backup.md](backup.md). Facts only here.
 
-restic, backing up `nire-cube`'s service state to the QNAP NAS, nested under
+restic, backing up `nire-cube`'s service state to the `ts-hive` NAS, nested under
 [homelab](homelab.md) (issue #87). **Module is done** — restore drill performed twice; a
 real restore opened a complete Forgejo database (2026-09-06).
 
@@ -43,11 +43,11 @@ declare `flake.modules.nixos.restic` and silently **merge**.
 ## Not enforceable from this repo
 
 Anti-deletion: cube's own credentials can `restic forget --prune` its
-backups, and SFTP doesn't close that. The mitigation is a **QNAP-side
+backups, and SFTP doesn't close that. The mitigation is a **NAS-side
 snapshot schedule on the `restic-backup` share** — admin console, nothing
 here can enforce it. Confirmed live 2026-09-05: daily 04:30, keep 5 days.
 
-QNAP SSH is tailnet-only: port 22 LAN-blocked.
+`ts-hive` SSH is tailnet-only: port 22 LAN-blocked.
 
 **cube reaches ts-hive only through the tailnet grant `tag:homelab-cube →
 ts-hive, tcp:22`** (`acl-diff-applied.hujson`, alias `ts-hive` in `hosts`).

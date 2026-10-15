@@ -4,7 +4,7 @@ _Last modified: 2026-10-01_
 
 Commands for operating [backup](../categories/backup.md) — the restic
 category backing up Forgejo/Grafana/golink's state and `/persist` to the
-QNAP NAS over SFTP. That page covers the design and its history (including
+`ts-hive` NAS over SFTP. That page covers the design and its history (including
 the sqlite consistency bug found and fixed 2026-09-06); this page is only
 what to actually type. Confirmed fully working end to end 2026-09-06: a
 real restore recovered a real, openable Forgejo database — see that
@@ -158,7 +158,7 @@ in `restic.nix`. **Losing `restic-cube-password` loses the backups** —
 restic has no recovery path for a forgotten repository password; keep a
 copy somewhere that isn't cube and isn't this repo. Losing
 `restic-cube-ssh-key` is recoverable (generate a new one, re-authorize it
-on the QNAP) but breaks backups until that's done.
+on `ts-hive`) but breaks backups until that's done.
 
 ```sh
 # Repository password
@@ -197,11 +197,11 @@ section), then `just switch` on cube to pick it up.
   before restic opens the repo. Test in isolation:
   `sudo -u root ssh -i /run/secrets/restic-cube-ssh-key nire@ts-hive echo ok`.
 - **`Permission denied (publickey,password,keyboard-interactive)`** — the
-  key isn't authorized on the QNAP side, or `IdentitiesOnly=yes` is
+  key isn't authorized on the `ts-hive` side, or `IdentitiesOnly=yes` is
   masking a working key with a broken default one. Confirm the public
   half is in `nire@ts-hive`'s `~/.ssh/authorized_keys` and that
   `/run/secrets/restic-cube-ssh-key` actually decrypted.
-- **Host key verification failed** — the QNAP's SSH host key changed
+- **Host key verification failed** — `ts-hive`'s SSH host key changed
   (reinstall, firmware reset) and no longer matches
   `programs.ssh.knownHosts."ts-hive"` in `restic.nix`. Re-run
   `ssh-keyscan -t ed25519 ts-hive`, confirm the change is expected, and

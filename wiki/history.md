@@ -59,7 +59,7 @@ _Last modified: 2026-10-07_
   "index over restatement, except here" shape `wiki/homelab/` pages and
   `categories/shell-config/`'s deep-dives already used, per
   [styleguide.md](styleguide.md). The one file that didn't get its own
-  page, the cube/QNAP backup plan, was folded into
+  page, the cube/`ts-hive` backup plan, was folded into
   [homelab/backup-runbook.md](homelab/backup-runbook.md)'s own "Background"
   section instead, since its content was already superseded by
   [categories/backup.md](categories/backup.md) — see that runbook section

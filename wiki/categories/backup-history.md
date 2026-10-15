@@ -10,14 +10,14 @@ Nothing here changes what to type or how the module is shaped now.
 ## Contents
 
 - [The original plan (2026-08-27)](#the-original-plan-2026-08-27)
-- [The QNAP mount predates this category by months, and was never dangling](#the-qnap-mount-predates-this-category-by-months-and-was-never-dangling)
+- [The hive mount predates this category by months, and was never dangling](#the-hive-mount-predates-this-category-by-months-and-was-never-dangling)
 - [Getting the SFTP repository from "declared" to "actually working" (2026-08-30 through 2026-09-06)](#getting-the-sftp-repository-from-declared-to-actually-working-2026-08-30-through-2026-09-06)
 - [The setup checklist, closed out (2026-08-28 through 2026-09-06)](#the-setup-checklist-closed-out-2026-08-28-through-2026-09-06)
 - [See also](#see-also)
 
 ## The original plan (2026-08-27)
 
-Written before anything had touched cube or the QNAP for real, against
+Written before anything had touched cube or `ts-hive` for real, against
 issue #87 and [homelab/pending-setup.md](../homelab/pending-setup.md) item
 4. What it got wrong and what changed since:
 
@@ -32,7 +32,7 @@ issue #87 and [homelab/pending-setup.md](../homelab/pending-setup.md) item
   path, least valuable, fully regenerable by scraping again.
 - **The six-step shape it proposed**: size the paths first (`du -sh`)
   before committing to a retention policy — still not done, see [backup](backup.md)'s
-  "What isn't done yet"; import the storage mount; confirm the QNAP side (a
+  "What isn't done yet"; import the storage mount; confirm the `ts-hive` side (a
   share plus a native snapshot schedule, the anti-deletion mitigation); a
   new cube-only category wrapping `services.restic.backups.cube` with a
   sops-secret password and a `backupPrepareCommand` staging sqlite copies;
@@ -42,34 +42,34 @@ issue #87 and [homelab/pending-setup.md](../homelab/pending-setup.md) item
   how #87 and the runbook define "done."
 - **The one judgment call it flagged explicitly**, rather than presenting
   as settled: NFS-local-path trades keyed auth for not standing up SSH on
-  the QNAP at all. That's the trade-off that broke in practice — see
+  `ts-hive` at all. That's the trade-off that broke in practice — see
   [backup](backup.md)'s SFTP section.
 
 Lived at `claude cave/plans/2026-08-27-1816-cube-qnap-backup-plan.md`
 until 2026-09-02, then folded into `backup-runbook.md`'s own "Background"
 section when `claude cave/` was retired; moved here 2026-09-03.
 
-## The QNAP mount predates this category by months, and was never dangling
+## The hive mount predates this category by months, and was never dangling
 
 The plan doc above described `nire/system/storage/storage-NFS.nix` (the
-NFS mount to the QNAP) as an unused module. It isn't:
+NFS mount to `ts-hive`) as an unused module. It isn't:
 `general-config/system/storage/` has no `dirsAsCategory.nix` of its own, so the
 module is collected straight into the shared `system` aggregate, which
 every Linux host imports — confirmed via `nix eval
 .#nixosConfigurations.<host>.config.fileSystems` on all three NixOS hosts,
 2026-08-28. So no new import was needed to reach it. Still true from the
-plan: nothing had ever exercised that mount against the real QNAP, so
+plan: nothing had ever exercised that mount against the real `ts-hive`, so
 "already imported" ≠ "known to work."
 
-The mount point itself moved 2026-08-28: `/mnt/qnap-erin` (a share shared
-with unrelated QNAP uses) → `/mnt/restic-backup` (dedicated). As of
+The mount point itself moved 2026-08-28: `/mnt/<old-share>` (a share shared
+with unrelated `ts-hive` uses) → `/mnt/restic-backup` (dedicated). As of
 2026-08-31 the module didn't use that mount at all — see [backup](backup.md)'s
 SFTP section — and `storage-NFS.nix` sat there unused on all three Linux
 hosts until it was **deleted 2026-09-14**. Nothing referenced
 `/mnt/restic-backup` after the SFTP move, and leaving it meant three hosts
 held IP-trusted NFS write access to the backup repository — the exact
 property (NFS export trust is host-IP based, not keyed) that moving to SFTP
-was meant to end. If general QNAP access is ever wanted again, it wants a
+was meant to end. If general `ts-hive` access is ever wanted again, it wants a
 mount at a general share, not at the backup repo.
 
 ## Getting the SFTP repository from "declared" to "actually working" (2026-08-30 through 2026-09-06)
@@ -83,16 +83,16 @@ Five separate one-time steps, each hit a real snag:
    from a session with decrypt access (`ssh nire-cube.local 'cat ...' |
    jq -Rs . | xargs ... sops set ...`) since generating and decrypting
    happened in different sessions.
-2. **QNAP-side snapshot schedule**, the anti-deletion mitigation — took
+2. **NAS-side snapshot schedule**, the anti-deletion mitigation — took
    three tries to name the right share. Believed `restic-backup` (the
    abandoned NFS-era mount name); then `/share/homes/nire/restic-cube`
-   (the `homes` share, live 2026-08-31 through 2026-09-02) — but QNAP
+   (the `homes` share, live 2026-08-31 through 2026-09-02) — but `ts-hive`
    snapshots are per-share, so scheduling one there would've covered every
    user's home directory just to protect this one repo. Moved for real,
-   2026-09-03, to `restic-backup` (Storage Pool 2), its own genuinely
+   2026-09-03, to `restic-backup` (its own pool), genuinely
    dedicated share. Schedule confirmed live 2026-09-05 via a Snapshot
    Manager screenshot: daily 04:30, keep 5 days.
-3. **SSH on the QNAP made tailnet-only** — port 22 LAN-blocked
+3. **SSH on `ts-hive` made tailnet-only** — port 22 LAN-blocked
    (confirmed live both directions, 2026-08-31).
 4. **Migrating the pre-move repo** — the `restic-backup`-share path move
    above meant a real, already-populated repo sat at the old `homes` path
@@ -131,10 +131,10 @@ The three sub-items that had to close first, all of which did:
   and the pre-move repository's history (five snapshots, 2026-08-31 through
   2026-09-04) was migrated in with `restic copy` — six snapshots total,
   confirmed by a live listing.
-- **No QNAP-side snapshot schedule on the backup share** — done 2026-09-05,
-  confirmed via a Snapshot Manager screenshot: daily at 04:30 on the
+- **No NAS-side snapshot schedule on the backup share** — done 2026-09-05,
+  confirmed via a snapshot-schedule screenshot: daily at 04:30 on the
   `restic-backup` share, keeping 5 days, status Success.
-- **QNAP SSH made tailnet-only** 2026-08-31: port 22 is LAN-blocked
+- **`ts-hive` SSH made tailnet-only** 2026-08-31: port 22 is LAN-blocked
   (confirmed live); [backup.md](backup.md) carries it.
 
 The restore drill is what made this worth doing: it found a real bug, since

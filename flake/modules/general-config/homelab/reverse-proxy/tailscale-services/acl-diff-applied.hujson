@@ -6,7 +6,7 @@
 	// Declare convenient hostname aliases to use in place of IP addresses.
 	"hosts": {
 		"example-host-1": "100.100.100.100",
-		// The QNAP (ts-hive), backup target for cube's restic. A grant dst
+		// ts-hive, the backup target for cube's restic. A grant dst
 		// cannot name a device, so it gets an alias. Re-check if the NAS is
 		// ever re-registered and its 100.x address changes.
 		"ts-hive": "100.78.140.91",

@@ -35,12 +35,12 @@ under it, which can happen with no commit to this repo at all.
 | homepage — the landing page: services, status, weather, calendar | `nire-cube` | `https://homepage.moose-micro.ts.net/` (short: `http://homepage/`; also `.../` on cube's own name) | [Reaching cube's services](reaching-services.md); [landing](../categories/landing.md) covers config |
 | glance — the old index, back for the landing evaluation | `nire-cube` | `https://glance.moose-micro.ts.net/` (short: `http://glance/`) | [landing](../categories/landing.md) |
 | Grafana — dashboards over cube's own metrics | `nire-cube` | `https://grafana.moose-micro.ts.net/` (short: `http://grafana/`) | [Using Grafana](grafana.md) |
-| restic — backups to the QNAP | `nire-cube` | — (no URL; a timer, not a listener) | [Backup runbook](backup-runbook.md) |
+| restic — backups to `ts-hive` | `nire-cube` | — (no URL; a timer, not a listener) | [Backup runbook](backup-runbook.md) |
 
 **Not a service of its own, but related**: [rustic](rustic.md) — a TUI that
 can browse and restore from the same repository the row above writes.
 Installed 2026-08-28 (`ellyHomeManager`-wide) and switched on cube as of
-2026-08-30, but not yet run against a real repository — the QNAP mount
+2026-08-30, but not yet run against a real repository — the `ts-hive` mount
 itself isn't working yet either (see the runbook).
 
 **Start at that second one if you don't know what's running.** It lists the

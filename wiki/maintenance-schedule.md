@@ -99,7 +99,7 @@ here, don't wrap this file in ciphertext to protect one row.
     services (see below) — worth disabling in the admin console rather
     than relying on someone noticing before it lapses.
   - `nire-tenacity` (self) — expires 2027-02-18.
-  - `homeassistant`, `go`, `ts-hive`, `samsung SM-S911U` — all expire
+  - `homeassistant`, `go`, `ts-hive`, an Android phone — all expire
     2027-02-18 to 2027-02-27.
   - `nire-lysithea` — appears **twice** in the peer list, both offline,
     with two different expiry dates (2026-12-13 and 2027-02-27) — looks
@@ -132,7 +132,7 @@ here, don't wrap this file in ciphertext to protect one row.
 
 ### 5. `restic-cube-ssh-key` / `restic-cube-password`
 
-- **What**: backup credentials `nire-cube` uses to reach the QNAP over SSH
+- **What**: backup credentials `nire-cube` uses to reach `ts-hive` over SSH
   and encrypt the restic repo.
 - **Rotation history**: 2026-08-27 (`restic-cube-password`) and 2026-08-31
   (`restic-cube-ssh-key`) — see
@@ -141,16 +141,16 @@ here, don't wrap this file in ciphertext to protect one row.
 - **Procedure**: [homelab/backup-runbook.md](homelab/backup-runbook.md)'s
   ["Rotating the secrets"](homelab/backup-runbook.md#rotating-the-secrets)
   section — the actual `sops set` commands live there, not duplicated here.
-- **Cadence**: no fixed schedule; rotate on suspicion of compromise or QNAP
+- **Cadence**: no fixed schedule; rotate on suspicion of compromise or `ts-hive`
   re-image. Not time-boxed like the Tailscale items above.
 - **Last checked**: 2026-08-31 (per the dated rotation log linked above).
 
-### 6. QNAP SSH host key pin
+### 6. `ts-hive` SSH host key pin
 
-- **What**: `nire-cube`'s pinned host key for the QNAP backup target.
+- **What**: `nire-cube`'s pinned host key for the `ts-hive` backup target.
 - **Expiry**: none — this isn't a credential that expires, but it *breaks*
   the same way an expired one would (backup runs start failing) whenever
-  the QNAP is re-imaged or its host key otherwise changes. Grouped here
+  `ts-hive` is re-imaged or its host key otherwise changes. Grouped here
   because the failure mode and the fix are maintenance-shaped even though
   nothing is actually expiring.
 - **Procedure**: `backup-runbook.md`'s "Host key verification failed" entry
@@ -356,7 +356,7 @@ admin account with a publicly-known password, not an absence. Skill
 - [Impermanence, initrd & secrets](impermanence-and-secrets.md) — the sops
   mechanism these age-key and rotation procedures build on.
 - [homelab/backup-runbook.md](homelab/backup-runbook.md) — the actual
-  rotation commands for the restic/QNAP items.
+  rotation commands for the restic/`ts-hive` items.
 - [homelab/pending-setup.md](homelab/pending-setup.md) — one-time setup
   steps, as opposed to this page's recurring/expiring ones. An item can
   move from there to here once it's set up and now needs tending.

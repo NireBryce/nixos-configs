@@ -3,7 +3,7 @@
 _Last modified: 2026-10-01_
 
 [restic](https://restic.net/), backing up `nire-cube`'s own service state to
-the QNAP NAS already on the network. Added 2026-08-28, cube-only, against
+the `ts-hive` NAS already on the network. Added 2026-08-28, cube-only, against
 issue [#87](https://github.com/NireBryce/nixos-configs/issues/87) ("no
 backups anywhere in the fleet"). The original plan, an early NFS-mount
 correction, and the mount's own pre-history are on
@@ -50,7 +50,7 @@ silently **merge** — the `containers`/`podman.nix` collision
 Shipped 2026-08-28 with a local-path repository on the NFS mount, a
 deliberate departure from #87's original SFTP sketch (restic encrypts
 client-side regardless of backend, so local-path gets the same
-encryption-at-rest without SSH on the QNAP). The stated trade-off — NFS
+encryption-at-rest without SSH on `ts-hive`). The stated trade-off — NFS
 export trust is IP-based, not keyed — is what broke it: a real switch hit
 `mount.nfs: access denied by server`, and the share's host-access list
 never got cube added. So: issue #87's original plan, SFTP — real
@@ -59,15 +59,15 @@ per-connection key auth rather than a host-IP allowlist.
 The module now points at `sftp:nire@ts-hive:/share/restic-backup/cube`,
 authenticating with a dedicated ed25519 key (generated for this, not the
 personal key; confirmed by hand: `ssh -i ~/.ssh/restic-cube-backup
-nire@ts-hive` authenticates with no password). The QNAP host key is pinned
+nire@ts-hive` authenticates with no password). The `ts-hive` host key is pinned
 in Nix (`programs.ssh.knownHosts` via `ssh-keyscan`), not trusted on first
 connection.
 
 **Moved off `nire`'s home 2026-09-03** — it originally pointed at
-`/share/homes/nire/restic-cube`, but QNAP snapshots the anti-deletion
+`/share/homes/nire/restic-cube`, but `ts-hive` snapshots the anti-deletion
 mitigation below needs are per-shared-folder, so that path would have
 required snapshotting every user's home directory just to cover this repo.
-`restic-backup` (Storage Pool 2) already exists as its own unused share, so
+`restic-backup` (its own pool) already exists as its own unused share, so
 the repo moved there. **Done, live-confirmed 2026-09-05**: cube switched
 onto this path, its own timer already ran successfully against it, and the
 five snapshots from the old `homes` path (2026-08-31 through 2026-09-04)
@@ -145,15 +145,15 @@ fully regenerable by scraping again. Nothing else cube runs is excluded.
 ## Anti-deletion is not a Nix change
 
 Issue #87's open question 3: anything compromising cube can run
-`restic forget --prune` against its own backups, since `nire` (the QNAP
+`restic forget --prune` against its own backups, since `nire` (`ts-hive`
 account) has full read-write access to the repository. SFTP didn't close
 this. The mitigation this module assumes — cheapest rung of #87's
-ascending-effort list — is a **QNAP-side native snapshot schedule on the
+ascending-effort list — is a **NAS-side native snapshot schedule on the
 `restic-backup` share itself** (the repo's own dedicated share as of
 2026-09-03, not a share shared with anything else), so cube can write and
-prune within the repository but can't touch the NAS's own snapshots. QNAP
+prune within the repository but can't touch the NAS's own snapshots. `ts-hive`
 admin-console configuration, so nothing in this repo can enforce it — but
-**confirmed live, 2026-09-05**, via a Snapshot Manager screenshot: daily
+**confirmed live, 2026-09-05**, via a snapshot-schedule screenshot: daily
 at 04:30, keeping 5 days, status Success, 2 snapshots taken.
 
 ## What isn't done yet
@@ -168,7 +168,7 @@ Live-checked 2026-09-05/06, over ssh to `nire-cube.local`:
   above.
 - ~~The repository path moved but cube hasn't switched onto it~~ —
   **switched, and the pre-move repo's history migrated in** (see above).
-- ~~The QNAP-side snapshot schedule described above still hasn't been
+- ~~The NAS-side snapshot schedule described above still hasn't been
   configured~~ — **done** (see above).
 - ~~The sqlite consistency bug — root cause unknown~~ — **root-caused,
   fixed, and confirmed live** (above): a real restore of the new path
@@ -215,4 +215,4 @@ after this category was added.
   browse and restore from this same repository, installed but not yet
   switched or run against it.
 - [backup-history.md](backup-history.md) — the original plan and what it
-  got wrong about the QNAP mount.
+  got wrong about the `ts-hive` mount.

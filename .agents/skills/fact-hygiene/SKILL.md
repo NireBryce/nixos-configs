@@ -7,7 +7,7 @@ description: How to write a specific fact, a dated status snapshot, or a cross-r
 
 ## Applies to
 
-1. **Specific checkable fact about an external system** (host, QNAP, vendor UI, hardware not in front of you): path, share/volume name, permission, version, "confirmed working" — stated with more confidence than observed this session.
+1. **Specific checkable fact about an external system** (host, `ts-hive`, vendor UI, hardware not in front of you): path, share/volume name, permission, version, "confirmed working" — stated with more confidence than observed this session.
 2. **"Status as of `<date>`" snapshot** asserting current mutable state (secret set? host switched? service reachable). The date reads as freshly checked; nothing re-verifies it.
 3. **Cross-reference to something else in this repo** (host, module, option, secret) in a comment as a currently-true fact ("X and Y both do Z"). A later unrelated rename/removal can't know the comment exists; `just modules` (module renames) and `wiki-sync` (wiki claims) don't check plain-English `.nix` comment mentions.
 
@@ -21,7 +21,7 @@ description: How to write a specific fact, a dated status snapshot, or a cross-r
 ## Why (all three traps: once phrased as settled, it stops looking checkable and gets copied)
 
 - **Cat 2, 2026-09-03 (`216a5ae7`):** `wiki/homelab/pending-setup.md` item 4, `wiki/homelab/backup-runbook.md` intro, and `wiki/categories/backup.md` "What isn't done yet" each said the two restic sops secrets had no value, days after both were set. Found by accident grepping `secrets.yaml`. AGENTS.md's State section is the narrower version of this rule.
-- **Cat 1, same day:** QNAP `restic-backup` share called "dedicated to this module" — inherited from an NFS-era comment about a different mount — spread into `restic.nix` header, `wiki/categories/backup.md`, `wiki/homelab/backup-runbook.md` until a Snapshot Manager screenshot showed the repo under share `homes`. Also `real path /share/ZFS19_DATA/homes/nire` fused a volume label from one old comment with a path seen over ssh (`/share/homes/nire`); no observation said both.
+- **Cat 1, same day:** the NAS's `restic-backup` share called "dedicated to this module" — inherited from an NFS-era comment about a different mount — spread into `restic.nix` header, `wiki/categories/backup.md`, `wiki/homelab/backup-runbook.md` until a snapshot-schedule screenshot showed the repo under share `homes`. Also a volume-labelled "real path" fused a volume label from one old comment with a path seen over ssh (`/share/homes/nire`); no observation said both.
 - **Cat 3, same sweep:** four passing comments still named a host removed a week earlier (other removed-host references had explicit removal notes). Hosts/files/comments are in `216a5ae7`'s diff; deleted, not rewritten.
 
 ## The rule

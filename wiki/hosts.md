@@ -106,7 +106,7 @@ status and what broke on the way:
 - [shortlinks](categories/shortlinks.md) — golink (2026-08-24). Not behind
   Caddy and not a host service: it embeds tsnet and joins the tailnet as its
   own device `go`, needing a one-time interactive login on first start.
-- [backup](categories/backup.md) — restic to the QNAP (2026-08-28, issue
+- [backup](categories/backup.md) — restic to `ts-hive` (2026-08-28, issue
   [#87](https://github.com/NireBryce/nixos-configs/issues/87)); local-path
   over NFS failed for real, SFTP since 2026-08-31. **Done as of
   2026-09-06**, restore drill included (run twice — found and fixed a real

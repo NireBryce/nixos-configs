@@ -110,7 +110,7 @@ not grep against `networking.hostName` — that gap is trap 1 in
 
 - **`tailscale status --json`**: each peer's `.DNSName` is the
   authoritative MagicDNS FQDN (trailing dot included), and it can differ
-  from `.HostName` — the phone registered as `samsung SM-S911U` answers
+  from `.HostName` — an Android phone registered under its model name answers
   on the tailnet as `ts-iona.moose-micro.ts.net`. Trust `.DNSName` when
   scripting against peers.
 - **`getent hosts <ip>`** on any fleet host: resolves the IP to the

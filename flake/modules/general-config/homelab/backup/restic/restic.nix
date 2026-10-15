@@ -1,4 +1,4 @@
-# restic: cube's only backup of its own service state, to the QNAP NAS
+# restic: cube's only backup of its own service state, to the `ts-hive` NAS
 # already on the network. Added 2026-08-28 against issue #87 ("no backups
 # anywhere in the fleet"), which is closed: a real restore drill on
 # 2026-09-06 opened a genuine, complete Forgejo database out of the repo.
@@ -15,8 +15,8 @@
 let
     moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
 
-    # `restic-backup`, the QNAP's own dedicated share (Storage Pool 2),
-    # not `nire`'s home: QNAP snapshots are per-shared-folder, and the
+    # `restic-backup`, `ts-hive`'s own dedicated share (its own pool),
+    # not `nire`'s home: `ts-hive` snapshots are per-shared-folder, and the
     # anti-deletion mitigation below would otherwise have to snapshot
     # every user's home directory to cover this one repo. `cube`
     # underneath it is a host-scoped subdirectory -- nothing stops
@@ -220,7 +220,7 @@ in {
         # Anti-deletion is NOT a Nix change and SFTP didn't close it:
         # `nire` can delete anything it has permission to on
         # `restic-backup`, same as it could over NFS. What guards the
-        # repo is a QNAP-side native snapshot schedule on that share --
+        # repo is a NAS-side native snapshot schedule on that share --
         # daily 04:30, keeping 5 days, confirmed live 2026-09-05 -- so
         # cube can write and prune inside the repository but cannot
         # touch the NAS's own snapshots. Nothing here enforces that,
@@ -233,11 +233,11 @@ in {
 # ── history ─────────────────────────────────────────────────────────────────
 #
 # 2026-08-28 to 2026-08-31, THE NFS ERA — the repository was a local path on
-# the QNAP's NFS mount, not SFTP. Deliberate at the time: restic encrypts
+# `ts-hive`'s NFS mount, not SFTP. Deliberate at the time: restic encrypts
 # client-side regardless of backend, so a local-path repo gets encryption at
-# rest without standing up SSH on the QNAP. The stated trade-off -- NFS
+# rest without standing up SSH on `ts-hive`. The stated trade-off -- NFS
 # export trust is IP-based, not keyed -- is what ended up mattering: a real
-# switch on cube hit `mount.nfs: access denied by server`, and the QNAP admin
+# switch on cube hit `mount.nfs: access denied by server`, and the `ts-hive` admin
 # console has no menu for forcing key-only SSH, so the weaker option was also
 # the broken one. SFTP with a dedicated key replaced it 2026-08-31, which is
 # what issue #87 had originally suggested. `storage-NFS.nix`, the mount it
