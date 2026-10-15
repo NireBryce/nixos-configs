@@ -67,12 +67,23 @@ add-module class target *desc:
 
 # statix + deadnix + an oversized-file check, ratcheted against a committed baseline
 lint:
-    # Needs statix/deadnix on PATH -- already there via packages-config/nix-utils/
-    # on a real host; `nix shell nixpkgs#statix nixpkgs#deadnix` first otherwise.
+    # Needs statix/deadnix, which live only in the dev shell (`nix develop
+    # ./flake`, flake/modules/dev-shell.nix): with-nix-tools.sh re-runs this
+    # inside it when they aren't on PATH.
     # A commit can lower the finding count but never raise it -- see
     # flake/scripts/lint.py's own header for why this is a ratchet and not a
     # plain pass/fail, and `just install-hooks` for enforcing it pre-commit.
-    cd {{flake}} && python3 scripts/lint.py check
+    cd {{flake}} && scripts/with-nix-tools.sh . python3 scripts/lint.py check
+
+# List the dev-shells/* flake templates `just dev-new` can deploy
+dev-list:
+    @{{scripts}}/dev-shell.sh {{justfile_directory()}}/dev-shells list
+
+# [no-cd]: a relative <path> means relative to where you ran just, not the repo root.
+# Deploy a dev-shells/<shell> flake into <path>: just dev-new rust ~/src/foo [--force]
+[no-cd]
+dev-new shell path *force:
+    {{quote(scripts / "dev-shell.sh")}} {{quote(justfile_directory() / "dev-shells")}} new {{quote(shell)}} {{quote(path)}} {{force}}
 
 # Checks import lists, categories/00-INDEX.md's Index table, hosts.md's host
 # table, every `just <recipe>`/skill-name/markdown-link reference, and the

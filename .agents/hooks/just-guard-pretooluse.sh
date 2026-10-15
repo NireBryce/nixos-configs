@@ -88,7 +88,11 @@ is_repo_justfile() {
 }
 
 reason=""
-just_env=$(compgen -e | grep '^JUST_' | paste -sd, - || true)
+# ${!JUST_*}, not `compgen -e`: compgen exists only in a bash built with
+# programmable completion, and stdenv's bash (first on PATH in `nix develop`,
+# where CI runs this) lacks it -- `compgen ... || true` read that as "none
+# set". The hook sets no JUST_* variable itself, so every name is inherited.
+just_env=$(IFS=,; printf '%s' "${!JUST_*}")
 if [ -n "$just_env" ]; then
     reason="the hook's environment sets $just_env, which the command inherits and which can change the justfile just uses or how it runs it, so the guard can't tell it is this repo's .justfile."
 fi

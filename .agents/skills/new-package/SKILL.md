@@ -38,7 +38,7 @@ in {
 ```
 
 File at `packages-config/<category>/<tool>/<tool>.nix` (some flatter:
-`nix-utils/nixfmt/nixfmt.nix`, `terminals/kitty/kitty.nix`,
+`nix-utils/nvd/nvd.nix`, `terminals/kitty/kitty.nix`,
 `development/tools/ai-tools/herdr.nix`; skim the target category first).
 
 Wiring is automatic **once the category is already imported**: `dirsAsCategory`

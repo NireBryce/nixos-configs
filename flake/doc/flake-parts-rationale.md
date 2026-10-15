@@ -18,7 +18,9 @@ attributes of the same attrset. That's the payoff: a single `.nix` file
 can hold both a NixOS module and a Home Manager module for the same
 feature, instead of a NixOS-side file and a Home-Manager-side file tied
 together by nothing but a shared filename.
-`flake/modules/packages-config/nix-utils/nixd/nixd.nix` in full:
+`flake/modules/packages-config/nix-utils/nixd/nixd.nix` in full, as it stood
+until #486 moved the nix dev tools out of the host profiles and into the
+dev shell -- still the shortest example of the shape:
 
 ```nix
 { lib, ... }:
@@ -83,8 +85,10 @@ Checked by grep — none of these appear anywhere in `flake/`:
 - **`debug`** — the `mkFlake` debug option is never set.
 - **Any other bundled `flakeModules`** — `easyOverlay`, `partitions`, etc.
   are never imported.
-- **`perSystem.packages` / `.devShells` / `.apps` / `.overlays`** — no dev
-  shell, custom package, or app output goes through flake-parts here.
+- **`perSystem.packages` / `.apps` / `.overlays`** — no custom package or
+  app output goes through flake-parts here. `.devShells` has one user:
+  `flake/modules/dev-shell.nix`, the nix tooling `nix develop ./flake` gives
+  (#486).
   `.formatter` is the one flake-parts would otherwise require something
   for — that's what `touchup` is for, above.
 - **Overlay/`legacyPackages` composition** — the two `legacyPackages` hits

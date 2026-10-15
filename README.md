@@ -46,9 +46,10 @@ flake-parts, but doesn't enumerate modules by hand. `(inputs.import-tree
 instead. Each file declares
 one `flake.modules.<class>.<name>` module — `<class>` is `nixos`,
 `homeManager`, or `darwin`, so a single file can declare a NixOS module and
-a Home Manager module for the same feature side by side (`nixd.nix`
-installs the nixd LSP for both) instead of splitting one feature across two
-files that agree only by sharing a filename. Which category a module
+a Home Manager module for the same feature side by side
+(`cod-completions.nix` declares both halves of cod's shell completions)
+instead of splitting one feature across two files that agree only by
+sharing a filename. Which category a module
 belongs to is decided by the directory it sits in, not by an explicit list,
 so moving a file between directories moves it between categories and
 nothing else has to change.
@@ -83,6 +84,23 @@ need to be invoked directly by a human into their own dedicated user
 accounts, so a compromised or misbehaving program running as one of
 those users doesn't inherit the whole of `elly`'s authority (a
 confused-deputy mitigation via user separation, not yet built out).
+
+Dev shells
+----------
+
+The nix tooling for working on this repo (nixd, nil, nixfmt, statix,
+deadnix, nix-tree, nix-diff, nix-du, nurl) isn't installed on the hosts;
+`nix develop ./flake` from the repo root provides it
+(`flake/modules/dev-shell.nix`). `just lint` enters that shell on its own
+when statix/deadnix aren't on PATH.
+
+`dev-shells/<name>/` holds standalone flake templates (`nix`, `python`,
+`rust`) for other projects. `just dev-list` lists them; `just dev-new
+<name> <path>` deploys one into a folder -- copies the flake, `git add`s
+it when the folder is in a repo (flakes ignore untracked files), runs the
+template's own scaffolding (`cargo init`, `uv init`), and writes an
+`.envrc` with `use flake` for direnv. It refuses to overwrite an existing
+`flake.nix` without `--force`.
 
 Secrets
 -------

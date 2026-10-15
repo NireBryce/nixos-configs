@@ -1,0 +1,27 @@
+# Recipes for the nix dev-shell template in this directory.
+#
+# This flake.nix is a template, not a project of its own -- `create` copies it
+# into a project directory so `nix develop` there has the nix LSPs, linters
+# and inspection tools that no longer sit in the host profiles (#486). For
+# this repo itself, `nix develop ./flake` from the repo root is the same set.
+#
+# `activate` can't export the tools into your CURRENT shell -- a just recipe
+# runs in a subprocess, so nothing it sets survives the recipe returning.
+# Instead it drops you into `nix develop` interactively, blocking until you
+# exit it.
+
+here := justfile_directory()
+
+_default:
+    @just --list
+
+# Copy the nix dev flake into <path>; no init step, a nix project needs none
+create path:
+    mkdir -p {{quote(path)}}
+    cp {{quote(here)}}/flake.nix {{quote(path)}}/flake.nix
+    # Inside a git repo a flake only sees tracked files.
+    if git -C {{quote(path)}} rev-parse --is-inside-work-tree >/dev/null 2>&1; then git -C {{quote(path)}} add flake.nix; fi
+
+# Drop into the nix dev shell, blocking until you exit it
+activate:
+    nix develop {{quote(here)}}
