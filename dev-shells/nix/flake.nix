@@ -1,5 +1,5 @@
 {
-  # description = "Nix dev environment";
+    description = "Nix dev environment";
 
     # Same tool list as flake/modules/dev-shell.nix (this repo's own
     # `nix develop`); that one can't be imported from here because this file
@@ -21,7 +21,7 @@
             };
         in
         {
-            devShell = pkgs.mkShell {
+            devShells.default = pkgs.mkShell {
                 packages = with pkgs; [
                     # LSPs
                     nixd

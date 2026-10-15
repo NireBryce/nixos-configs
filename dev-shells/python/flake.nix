@@ -1,5 +1,5 @@
 {
-  # description = "Python dev environment";
+    description = "Python dev environment";
 
     inputs = {
         nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -20,7 +20,7 @@
             python = pkgs.python3;
         in
         {
-            devShell = pkgs.mkShell {
+            devShells.default = pkgs.mkShell {
                 nativeBuildInputs = with pkgs; [
                     python
                     uv

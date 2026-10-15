@@ -1,5 +1,5 @@
 {
-  # description = "Rust Rover environment";
+    description = "Rust Rover environment";
 
     inputs = {
         nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -25,9 +25,9 @@
             rustToolchain = pkgs.rust-bin.stable.latest.default.override {
                 extensions = [ "rust-src" "clippy" "rustfmt" ];
             };
-        in 
+        in
         {
-            devShell = pkgs.mkShell {
+            devShells.default = pkgs.mkShell {
                 nativeBuildInputs = [
                     rustToolchain
                 ];
@@ -38,7 +38,7 @@
                     rust-analyzer
                     jetbrains.rust-rover
                 ];
-            
+
                 env = {
                     RUST_SRC_PATH = "${rustToolchain}/lib/rustlib/src/rust/library";
                     PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
