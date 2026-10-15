@@ -100,6 +100,22 @@ what that subtree actually collected.
 Getting delegation right took two wrong attempts, both caught by
 evaluating rather than by reading the diff — History has both.
 
+### Reading membership as data
+
+Since 2026-10-15 the collector also publishes what it collected, as
+`flake.categoryGraph.<category> = { dir; files; nested; }` (option declared
+in `modules/category-graph.nix`): the category's directory, the module files
+it collects itself, and the names of the categories nested directly in it,
+paths relative to `modules/`. It comes from the same directory walk
+(`walk`) that `collectModules` reads names from, so it cannot drift from
+the import lists, and it reads only `readDir` -- never `flake.modules` -- so
+it adds no self-reference. Read it with `nix eval --json ./flake#categoryGraph`
+rather than parsing files.
+
+Adding it changed no host: every NixOS and darwin toplevel and every Home
+Manager activation drvPath was identical before and after, and breaking
+`walk` on purpose did move cube's, so the refactored walk is the live one.
+
 ### Things that are load-bearing
 
 - **Always define all three classes, even when the filtered list is empty.**

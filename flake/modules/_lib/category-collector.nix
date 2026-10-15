@@ -167,25 +167,37 @@ let
     shimName = baseNameOf shimFile;
     stripNix = name: lib.removeSuffix ".nix" name;
 
-    # For one folder, at any depth: if it's a category, contribute its name
-    # (see "categories inside categories"); otherwise walk into it.
-    walkSubdir = subdir: name:
-        if builtins.pathExists (subdir + "/${shimName}")
-        then [ name ]
-        else collectModules subdir;
-
-    # List every module name in a folder: each `.nix` file becomes its
-    # filename minus `.nix`, and each subfolder adds whatever walkSubdir
-    # says. Called on the category's own folder to start things off.
-    # Anything starting with `_` is skipped, same as import-tree does.
-    collectModules = dir:
+    # Walk a folder and list what it contributes, one entry per thing:
+    # each `.nix` file is a module, `{ name = <filename minus .nix>; ... }`;
+    # a subfolder that is itself a category contributes one entry, its
+    # name, marked `nested` (see "categories inside categories"); any other
+    # subfolder is walked into. Anything starting with `_` is skipped, same
+    # as import-tree does. Each entry also keeps its `path`, which only
+    # flake.categoryGraph below reads -- the import lists use names alone.
+    walk = dir:
         lib.concatMap
             ({ name, value }:
                 if lib.hasPrefix "_" name then [ ]
-                else if value == "directory"
-                then walkSubdir (dir + "/${name}") name
-                else lib.optional (lib.hasSuffix ".nix" name && name != shimName) (stripNix name))
+                else if value == "directory" then
+                    (if builtins.pathExists (dir + "/${name}/${shimName}")
+                     then [ { inherit name; path = dir + "/${name}"; nested = true; } ]
+                     else walk (dir + "/${name}"))
+                else lib.optional (lib.hasSuffix ".nix" name && name != shimName)
+                    { name = stripNix name; path = dir + "/${name}"; nested = false; })
             (lib.mapAttrsToList lib.nameValuePair (builtins.readDir dir));
+
+    # Every module name in a folder, nested categories by their own name.
+    # Called on the category's own folder to start things off.
+    collectModules = dir: map (e: e.name) (walk dir);
+
+    # The same walk, as data: where this category is, which module files it
+    # collects itself, and which categories nest directly inside it. Paths
+    # are relative to modules/, found the way the shim finds it. Reads only
+    # the directory tree -- never flake.modules -- so it cannot recurse
+    # into the attribute set it sits beside.
+    modulesRoot = let up = d: if baseNameOf d == "modules" then d else up (dirOf d); in up categoryDir;
+    relative = p: lib.removePrefix "${toString modulesRoot}/" (toString p);
+    entries = walk categoryDir;
 
     # Turn the list of names into actual modules, for one kind of config.
     #
@@ -212,6 +224,16 @@ in
         nixos.${categoryName}.imports        = forClass "nixos";
         homeManager.${categoryName}.imports  = forClass "homeManager";
         darwin.${categoryName}.imports       = forClass "darwin";
+    };
+
+    # What this category collects, for tools to read with
+    # `nix eval --json ./flake#categoryGraph` rather than re-derive by
+    # parsing files. Declared in modules/category-graph.nix; one key per
+    # category, so the shims merge.
+    flake.categoryGraph.${categoryName} = {
+        dir    = relative categoryDir;
+        files  = map (e: relative e.path) (lib.filter (e: !e.nested) entries);
+        nested = map (e: e.name) (lib.filter (e: e.nested) entries);
     };
 }
 

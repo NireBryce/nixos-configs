@@ -16,7 +16,7 @@ Never hand-edit. By hand it is
 
 | What | Files |
 |---|---|
-| total `.nix` files under `flake/modules/` | 274 |
+| total `.nix` files under `flake/modules/` | 275 |
 | module header (`moduleName = lib.removeSuffix ...`) | 222 |
 | `# # description` as first body line | 35 |
 | `with pkgs;` package lists | 115 |
