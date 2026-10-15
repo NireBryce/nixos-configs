@@ -1,6 +1,6 @@
 # `system` — `general-config/system/`
 
-_Last modified: 2026-10-14_
+_Last modified: 2026-10-15_
 
 The largest category by far — across 19 subdirectories, no per-file count
 kept here on purpose (see categories/00-INDEX.md's Index section for why) —
@@ -215,6 +215,11 @@ the `ts-<x>` naming rule and the backup target `ts-hive`, all on one
 devices. `forge-runner` is a guest, not a machine, and does not import the
 module, so it is not drawn; `nire-lysithea` is a darwin host and is declared
 by hand.
+
+The rendered SVGs are build output and are not committed. The restic
+extractor's list of backed-up paths is deliberately left off the diagram (the
+module hides the extracted service and declares one with the name and
+repository only).
 
 ## Imported by
 
