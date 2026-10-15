@@ -61,6 +61,9 @@ criterion:
 - **Blue, rounded: an importable category.** The directory holds a
   `dirsAsCategory.nix`, so a host can name it. An edge into one is dotted:
   it is importable alone and also collected by the category above it.
+  A category that holds nested categories (`development`, `homelab`) is a
+  pale blue box around them instead of a card, titled with its name,
+  classes and module count; edges into it end at the box.
 - **Slate, square-cornered (a folder in Graphviz): an implicit folder.** A
   plain directory inside a category; its modules arrive only through that
   category.
@@ -80,11 +83,10 @@ Mermaid an edge up into the top row is a plain line, not an arrow.
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"fontFamily": "ui-sans-serif, system-ui, sans-serif", "fontSize": "14px", "lineColor": "#94a3b8"}, "flowchart": {"curve": "basis", "nodeSpacing": 24, "rankSpacing": 80, "padding": 14}}}%%
 flowchart LR
-    subgraph g3["users-config"]
+    subgraph g0["users-config"]
         n25("<b>elly/</b><br/><i>n h d · 4</i>")
     end
-    style g3 fill:#f8fafc,stroke:#cbd5e1,color:#64748b
-    subgraph g2["packages-config"]
+    subgraph g1["packages-config"]
         n18("<b>development/</b><br/><i>n h · 17</i>")
         n19("<b>editors/</b><br/><i>n h · 3</i>")
         n20("<b>gui-other/</b><br/><i>h · 20</i>")
@@ -93,15 +95,13 @@ flowchart LR
         n23("<b>shell-apps/</b><br/><i>n h · 40</i>")
         n24("<b>terminals/</b><br/><i>h · 3</i>")
     end
-    style g2 fill:#f8fafc,stroke:#cbd5e1,color:#64748b
-    subgraph g1["host-config"]
+    subgraph g2["host-config"]
         n14("<b>cube/</b><br/><i>n · 9</i>")
         n15("<b>durandal/</b><br/><i>n · 6</i>")
         n16("<b>lysithea/</b><br/><i>d · 2</i>")
         n17("<b>tenacity/</b><br/><i>n h · 11</i>")
     end
-    style g1 fill:#f8fafc,stroke:#cbd5e1,color:#64748b
-    subgraph g0["general-config"]
+    subgraph g3["general-config"]
         n4("<b>boot/</b><br/><i>n · 2</i>")
         n5("<b>desktop-env/</b><br/><i>n · 4</i>")
         n6("<b>hardware/</b><br/><i>n · 2</i>")
@@ -114,6 +114,9 @@ flowchart LR
         n13("<b>system/</b><br/><i>n h d · 44</i>")
     end
     style g0 fill:#f8fafc,stroke:#cbd5e1,color:#64748b
+    style g1 fill:#f8fafc,stroke:#cbd5e1,color:#64748b
+    style g2 fill:#f8fafc,stroke:#cbd5e1,color:#64748b
+    style g3 fill:#f8fafc,stroke:#cbd5e1,color:#64748b
     classDef area fill:#f8fafc,stroke:#cbd5e1,color:#1e293b,stroke-width:1.5px
     classDef category fill:#dbeafe,stroke:#2563eb,color:#1e293b,stroke-width:1.5px
     classDef folder fill:#f1f5f9,stroke:#94a3b8,color:#1e293b,stroke-width:1.5px

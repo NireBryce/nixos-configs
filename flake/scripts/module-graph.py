@@ -30,7 +30,8 @@ Filters (a few hundred modules in one diagram is unreadable):
 
 Colour standard (PALETTE below holds it). Importable categories -- a
 directory holding a dirsAsCategory.nix, which a host can name -- are blue
-rounded cards, reached by dotted edges. Implicit folders -- plain
+rounded cards, reached by dotted edges; one that holds nested categories is
+a pale blue box around them instead (boxed()), titled like its card. Implicit folders -- plain
 directories inside a category, collected only through it -- are slate and
 square-cornered. Modules are white, including one a host names directly:
 importable means a category, never a single module. Host and home entry
@@ -314,36 +315,80 @@ def parts(n):
     return n.label, ''
 
 
-def groups(g):
-    """[(id, title, members)]: the containers a diagram draws. Areas in the
-    tree view (their `contains` edges are the containment, not arrows); the
-    host and home entry points together in the hosts view. An area holds
-    everything beneath it, so a nested category sits in its area's box."""
+@dataclass
+class Box:
+    """A container a diagram draws: an area, the host and home entry points,
+    or a category that holds a nested category."""
+    id: str                  # the area or category node id; 'grp:entry' for the hosts
+    kind: str                # area | category | entry
+    items: list              # node ids drawn directly inside
+    subs: list               # Boxes nested inside
+    top: list                # direct children, in order: what wrapping lays out in rows
+
+
+def children_of(g):
     kids = {}
     for e in g.edges:
         if e.kind == 'contains':
             kids.setdefault(e.src, []).append(e.dst)
-    out = []
-    for i, n in g.nodes.items():
-        if n.kind != 'area':
-            continue
-        members, queue = [], list(kids.get(i, []))
+    return kids
+
+
+def boxed(g):
+    """Categories drawn as a container rather than a card: those with a
+    nested category drawn directly under them (development holds langs and
+    tools). Their own `contains` edges become the containment, as an
+    area's do."""
+    kids = children_of(g)
+    return {i for i, n in g.nodes.items() if n.kind == 'category'
+            and any(g.nodes[k].kind == 'category' for k in kids.get(i, []))}
+
+
+def boxes(g):
+    """The container tree: one Box per area, holding everything beneath it
+    -- a boxed category as a nested Box, anything else as an item -- then
+    the host and home entry points together, in the hosts view."""
+    kids, cats = children_of(g), boxed(g)
+
+    def build(i):
+        b = Box(i, g.nodes[i].kind, [], [], list(kids.get(i, [])))
+        queue = list(kids.get(i, []))
         while queue:
             m = queue.pop(0)
-            if m in g.nodes and m not in members:
-                members.append(m)
+            if m in cats:
+                b.subs.append(build(m))
+            else:
+                b.items.append(m)
                 queue += kids.get(m, [])
-        out.append((i, n.label, members))
+        return b
+
+    out = [build(i) for i, n in g.nodes.items() if n.kind == 'area']
     entry = [i for i, n in g.nodes.items() if n.kind == 'aggregate']
     if entry:
-        out.append(('grp:entry', 'hosts and home', entry))
+        out.append(Box('grp:entry', 'entry', entry, [], entry))
     return out
 
 
+def walk(tree):
+    for b in tree:
+        yield b
+        yield from walk(b.subs)
+
+
+def rep(i, index):
+    """The node an edge or a layout link uses for `i`: a boxed category is
+    reached through the first thing in its box."""
+    while i in index:
+        i = index[i].top[0]
+    return i
+
+
 def arrows(g):
-    """The edges drawn as arrows: everything but an area's containment."""
+    """The edges drawn as arrows: everything but the containment an area or
+    a boxed category draws as a box."""
+    inside = boxed(g)
     return [e for e in g.edges
-            if not (e.kind == 'contains' and g.nodes[e.src].kind == 'area')]
+            if not (e.kind == 'contains' and (g.nodes[e.src].kind == 'area' or e.src in inside))]
 
 
 # The hosts view runs top-down, imports flowing down from the hosts --
@@ -353,7 +398,7 @@ def arrows(g):
 # host and its user are, not something pulled in from the shared tree.
 TOP_AREAS = ('host-config', 'users-config')
 # The shared areas below the hosts wrap their categories at this many per
-# row (`--wrap`; 0 for one row), nested categories under their parent too --
+# row (`--wrap`; 0 for one row), a boxed category's nested ones too --
 # otherwise general-config alone is a row of ten, packages-config seven.
 WRAP = 5
 
@@ -373,51 +418,49 @@ def upward(g, e):
 
 
 def layout_links(g, wrap=WRAP):
-    """[(src, dst, minlen)]: invisible links that shape the hosts view,
-    shared by both renderers so they cannot disagree.
+    """[(first host, card, rank)]: invisible links that place every card in
+    a shared area exactly `rank` ranks below the hosts -- shared by both
+    renderers so they cannot disagree.
 
-    Pins: a shared category nothing imports whole (desktop-env, an orphan)
-    has no edge to rank it, lands on the hosts' row and drags its whole
-    area up beside them; a link from the first host holds it below.
-
-    Wrapping: in each shared area, the categories directly in it are cut
-    into rows of `wrap`, each card linked to the one under it. The gap is
-    the row's tallest card -- 1, plus a rank per row of nested categories
-    under it (themselves wrapped the same way) -- so a nested row never
-    shares a rank with the next row of categories."""
+    Each shared area's categories are cut into rows of `wrap`; row r sits
+    below row r-1 by that row's tallest entry, where a card is one rank and
+    a boxed category the sum of its own rows (a box takes no rank of its
+    own; its rows start where it does). Every card gets a link, not only
+    the first of a row: a card in a box beside the one its host edges land
+    on (text-tools, next to terminal-multiplexer in shell-apps) has no
+    other edge at all, and Graphviz floats an unconstrained node to the top
+    rank. The same link holds a category nothing imports whole
+    (desktop-env) below the hosts instead of beside them."""
     if not hosts_view(g):
         return []
+    tree = boxes(g)
+    index = {b.id: b for b in walk(tree) if b.kind == 'category'}
     first = next(i for i, n in g.nodes.items() if n.kind == 'aggregate')
-    drawn = arrows(g)
-    incoming = {e.dst for e in drawn}
-    links = [(first, i, 1) for i, n in g.nodes.items()
-             if n.kind == 'category' and i not in incoming and area_of(i) not in TOP_AREAS]
-    if wrap <= 0:
-        return links
-    kids = {}
-    for e in drawn:
-        if e.kind == 'contains':
-            kids.setdefault(e.src, []).append(e.dst)
 
     def rows(items):
+        if wrap <= 0:
+            return [items] if items else []
         return [items[k:k + wrap] for k in range(0, len(items), wrap)]
 
     def height(i):
-        under = rows(kids.get(i, []))
-        return 1 + sum(max(height(c) for c in r) for r in under)
+        if i not in index:
+            return 1
+        return sum(max(height(c) for c in r) for r in rows(index[i].top))
 
-    def stack(rs):
-        for upper, lower in zip(rs, rs[1:]):
-            gap = max(height(i) for i in upper)
-            links.extend((a, b, gap) for a, b in zip(upper, lower))
+    links = []
 
-    for gid, _, members in groups(g):
-        if gid not in g.nodes or g.nodes[gid].label in TOP_AREAS:
-            continue
-        top = [e.dst for e in g.edges if e.kind == 'contains' and e.src == gid]
-        stack(rows(top))
-        for i in members:
-            stack(rows(kids.get(i, [])))
+    def place(top, rank):
+        for row in rows(top):
+            for i in row:
+                if i in index:
+                    place(index[i].top, rank)
+                else:
+                    links.append((first, i, rank))
+            rank += max(height(i) for i in row)
+
+    for b in tree:
+        if b.kind == 'area' and g.nodes[b.id].label not in TOP_AREAS:
+            place(b.top, 1)
     return links
 
 
@@ -429,6 +472,21 @@ MERMAID_INIT = ('%%{init: {"theme": "base", "themeVariables": {"fontFamily": '
                 '"ui-sans-serif, system-ui, sans-serif", "fontSize": "14px", '
                 f'"lineColor": "{LINE}"}}, "flowchart": {{"curve": "basis", '
                 '"nodeSpacing": 24, "rankSpacing": 80, "padding": 14}}}%%')
+# A boxed category's container: the category colours, paler, so the cards
+# inside it still stand out.
+BOX_FILL = '#eff6ff'
+ENTRY = ('#fefce8', '#fde68a')
+
+
+def box_look(g, b):
+    """(fill, outline, dashed, alert) for a container."""
+    if b.kind == 'area':
+        return (*PALETTE['area'], False, False)
+    if b.kind == 'entry':
+        return (*ENTRY, False, False)
+    n = g.nodes[b.id]
+    alert = colours(n) == ALERT
+    return BOX_FILL, colours(n)[1], n.status == 'by-module', alert
 
 
 def mermaid(g, wrap=WRAP):
@@ -442,25 +500,41 @@ def mermaid(g, wrap=WRAP):
         text = f'<b>{title}</b>' + (f'<br/><i>{sub}</i>' if sub else '')
         return f'{ids[i]}{shape[n.kind].format(chr(34) + esc(text) + chr(34))}'
 
+    hue, drawn, tree = hues(g), arrows(g), boxes(g)
+    index = {b.id: b for b in walk(tree) if b.kind == 'category'}
+    sid, styles = {}, []
+
+    def emit(b, pad):
+        if not (b.items or b.subs):
+            return []
+        name = sid[b.id] = f'g{len(sid)}'
+        if b.kind == 'category':
+            title, sub = parts(g.nodes[b.id])
+            text = f'<b>{title}</b>' + (f' · <i>{sub}</i>' if sub else '')
+        else:
+            text = g.nodes[b.id].label if b.kind == 'area' else 'hosts and home'
+        fill, line, dashed, alert = box_look(g, b)
+        styles.append(f'    style {name} fill:{fill},stroke:{line},'
+                      f'color:{INK if b.kind == "category" else QUIET}'
+                      + (',stroke-width:2.5px' if alert else '')
+                      + (',stroke-dasharray:5 3' if dashed else ''))
+        out = [f'{pad}subgraph {name}["{esc(text)}"]']
+        out += [f'{pad}    {card(m)}' for m in b.items]
+        for s in b.subs:
+            out += emit(s, pad + '    ')
+        return out + [f'{pad}end']
+
+    def end(i):
+        return sid[i] if i in index else ids[i]
+
     lines = [MERMAID_INIT, f'flowchart {"TB" if hosts_view(g) else "LR"}']
-    boxed, hue = set(), hues(g)
-    drawn = arrows(g)
     # Mermaid stacks unconnected containers bottom-up; reversed, the areas
     # read top-down in the order the tree lists them.
-    for k, (gid, title, members) in (list(enumerate(groups(g)))[::-1] if not drawn
-                                     else enumerate(groups(g))):
-        members = [m for m in members if m in g.nodes]
-        if not members:
-            continue
-        lines.append(f'    subgraph g{k}["{esc(title)}"]')
-        lines += [f'        {card(m)}' for m in members]
-        lines.append('    end')
-        boxed.update(members)
-        if gid in g.nodes:
-            boxed.add(gid)
-        fill, line = PALETTE['area'] if gid in g.nodes else ('#fefce8', '#fde68a')
-        lines.append(f'    style g{k} fill:{fill},stroke:{line},color:{QUIET}')
-    lines += [f'    {card(i)}' for i in g.nodes if i not in boxed and g.nodes[i].kind != 'area']
+    for b in (tree[::-1] if not drawn else tree):
+        lines += emit(b, '    ')
+    inside = {m for b in walk(tree) for m in b.items}
+    lines += [f'    {card(i)}' for i, n in g.nodes.items()
+              if i not in inside and i not in index and n.kind != 'area']
     # Mermaid has no reversed arrow and ranks by edge direction, so an
     # upward import is a plain `category --- host` line in the host's
     # colour: written category-first, it ranks the category above. (An
@@ -469,7 +543,7 @@ def mermaid(g, wrap=WRAP):
     # cycles inconsistently and lifted a host out of its row.)
     by_hue = {}
     for k, e in enumerate(drawn):
-        a, b = ids[e.src], ids[e.dst]
+        a, b = end(e.src), end(e.dst)
         if upward(g, e):
             lines.append(f'    {b} --- {a}')
             by_hue.setdefault(hue[e.src], []).append(str(k))
@@ -487,6 +561,7 @@ def mermaid(g, wrap=WRAP):
     lines += [f'    {ids[a]} {"~" * (minlen + 2)} {ids[b]}' for a, b, minlen in layout_links(g, wrap)]
     lines += [f'    linkStyle {",".join(v)} stroke:{h},stroke-width:1.5px'
               for h, v in by_hue.items()]
+    lines += styles
     lines += [f'    style {ids[a]} stroke:{h},stroke-width:2px' for a, h in hue.items()]
     for kind in PALETTE:
         fill, line = PALETTE[kind]
@@ -496,7 +571,7 @@ def mermaid(g, wrap=WRAP):
               f'    classDef merges stroke:{ALERT[1]},stroke-width:2.5px']
     members = {}
     for i, n in g.nodes.items():
-        if n.kind == 'area':
+        if n.kind == 'area' or i in index:
             continue
         for s in style(n):
             members.setdefault(s, []).append(ids[i])
@@ -518,6 +593,9 @@ GRID = 4      # cards per row in an arrowless Graphviz diagram
 
 def dot(g, wrap=WRAP):
     ids = {i: f'n{k}' for k, i in enumerate(g.nodes)}
+    hue, drawn, tree = hues(g), arrows(g), boxes(g)
+    index = {b.id: b for b in walk(tree) if b.kind == 'category'}
+    cluster = {}
 
     def card(i):
         n = g.nodes[i]
@@ -540,34 +618,57 @@ def dot(g, wrap=WRAP):
             attrs.append('style="rounded,filled,dashed"')
         return f'{ids[i]} [{" ".join(attrs)}];'
 
-    hue, drawn = hues(g), arrows(g)
+    def emit(b, pad):
+        if not (b.items or b.subs):
+            return []
+        name = cluster[b.id] = f'cluster_{len(cluster)}'
+        fill, line, dashed, alert = box_look(g, b)
+        if b.kind == 'category':
+            title, sub = parts(g.nodes[b.id])
+            label = (f'<b>{html.escape(title)}</b>'
+                     + (f'  <font point-size="9" color="{QUIET}">{html.escape(sub)}</font>' if sub else ''))
+        else:
+            text = g.nodes[b.id].label if b.kind == 'area' else 'hosts and home'
+            label = f'<font color="{QUIET}" point-size="10">{html.escape(text)}</font>'
+        out = [f'{pad}subgraph {name} {{',
+               f'{pad}    label=<{label}>;',
+               f'{pad}    style="rounded,filled{",dashed" if dashed else ""}"; fillcolor="{fill}"; '
+               f'color="{line}"; penwidth={2.5 if alert else 1.2}; margin=14;']
+        out += [f'{pad}    {card(m)}' for m in b.items]
+        if not drawn:
+            out += [f'{pad}    {ids[x]} -> {ids[y]} [style=invis];'
+                    for x, y in zip(b.items, b.items[GRID:])]
+        for s in b.subs:
+            out += emit(s, pad + '    ')
+        return out + [f'{pad}}}']
+
+    def edge(src, dst, attrs):
+        """An edge whose ends may be boxes: drawn to the box's first node
+        and clipped at the box (compound=true)."""
+        attrs = list(attrs)
+        if src in index:
+            attrs.append(f'ltail={cluster[src]}')
+        if dst in index:
+            attrs.append(f'lhead={cluster[dst]}')
+        a, b = ids[rep(src, index)], ids[rep(dst, index)]
+        return f'    {a} -> {b}' + (f' [{" ".join(attrs)}];' if attrs else ';')
+
     # With no arrows (areas and their categories only) a left-to-right layout
     # stacks every card in one column; top-down plus invisible edges every
     # GRID cards lays each area out as a grid instead.
     # The hosts view runs top-down (TOP_AREAS above the hosts, see upward()).
     lines = ['digraph modules {',
              f'    rankdir={"LR" if drawn and not hosts_view(g) else "TB"}; bgcolor="white"; nodesep=0.22; '
-             f'ranksep={0.9 if drawn else 0.3}; splines=true; newrank=true;',
+             f'ranksep={0.9 if drawn else 0.3}; splines=true; newrank=true; compound=true;',
              f'    node [shape=box style="rounded,filled" fontname="Helvetica" fontsize=11 '
              f'fontcolor="{INK}" penwidth=1.3 margin="0.16,0.08"];',
              f'    edge [color="{LINE}" fontname="Helvetica" fontsize=9 fontcolor="{QUIET}" '
              f'arrowsize=0.7];']
-    boxed = set()
-    for k, (gid, title, members) in enumerate(groups(g)):
-        members = [m for m in members if m in g.nodes]
-        if not members:
-            continue
-        fill, line = PALETTE['area'] if gid in g.nodes else ('#fefce8', '#fde68a')
-        lines += [f'    subgraph cluster_{k} {{',
-                  f'        label=<<font color="{QUIET}" point-size="10">{html.escape(title)}</font>>;',
-                  f'        style="rounded,filled"; fillcolor="{fill}"; color="{line}"; margin=14;']
-        lines += [f'        {card(m)}' for m in members]
-        if not drawn:
-            lines += [f'        {ids[a]} -> {ids[b]} [style=invis];'
-                      for a, b in zip(members, members[GRID:])]
-        lines.append('    }')
-        boxed.update(members)
-    lines += [f'    {card(i)}' for i in g.nodes if i not in boxed and g.nodes[i].kind != 'area']
+    for b in tree:
+        lines += emit(b, '    ')
+    inside = {m for b in walk(tree) for m in b.items}
+    lines += [f'    {card(i)}' for i, n in g.nodes.items()
+              if i not in inside and i not in index and n.kind != 'area']
     lines += [f'    {ids[a]} -> {ids[b]} [style=invis minlen={minlen}];'
               for a, b, minlen in layout_links(g, wrap)]
     if hosts_view(g):
@@ -577,18 +678,17 @@ def dot(g, wrap=WRAP):
         lines.append('    { rank=same; ' + ' '.join(
             ids[i] for i, n in g.nodes.items() if n.kind == 'aggregate') + ' }')
     for e in drawn:
-        a, b = ids[e.src], ids[e.dst]
         if e.kind == 'contains':
             nested = g.nodes[e.dst].kind == 'category'
-            lines.append(f'    {a} -> {b}' + (' [style=dotted];' if nested else ';'))
+            lines.append(edge(e.src, e.dst, ['style=dotted'] if nested else []))
         elif e.kind == 'merges':
-            lines.append(f'    {a} -> {b} [label="merges" color="{ALERT[1]}" fontcolor="{ALERT[1]}" '
-                         f'style=dashed dir=none];')
+            lines.append(edge(e.src, e.dst, [f'label="merges" color="{ALERT[1]}"',
+                                             f'fontcolor="{ALERT[1]}" style=dashed dir=none']))
         elif upward(g, e):
             # reversed for ranking, arrowhead kept on the category
-            lines.append(f'    {b} -> {a} [dir=back color="{hue[e.src]}" penwidth=1.2];')
+            lines.append(edge(e.dst, e.src, [f'dir=back color="{hue[e.src]}" penwidth=1.2']))
         else:
-            lines.append(f'    {a} -> {b} [color="{hue[e.src]}" penwidth=1.2];')
+            lines.append(edge(e.src, e.dst, [f'color="{hue[e.src]}" penwidth=1.2']))
     lines.append('}')
     return '\n'.join(lines)
 

@@ -188,7 +188,7 @@ class Standard(Tree):
         g = mg.select(self.g(), 'tree')
         out = mg.dot(g)
         self.assertRegex(out, r'<b>grp/</b>.*shape=folder')
-        self.assertRegex(out, rf'<b>used/</b>.*color="{mg.PALETTE["category"][1]}"')
+        self.assertRegex(out, rf'label=<<b>used/</b>.*\n.*color="{mg.PALETTE["category"][1]}"')
         m = mg.mermaid(g)
         self.assertIn('["<b>grp/</b>', m)        # square: implicit
         self.assertIn('("<b>inner/</b>', m)      # rounded: importable
@@ -256,13 +256,15 @@ class HostsLayout(Tree):
         self.agg = self.ids['agg:hosts/alpha-configuration.nix:nixos']
         self.own = self.ids['cat:host-config/alpha']
         self.used = self.ids['cat:area/used']
+        self.sub = self.ids['cat:area/used/sub']   # first in used's box: where its edges land
 
     def test_mermaid_runs_top_down_with_the_hosts_own_category_above(self):
         out = mg.mermaid(self.g_)
         self.assertIn('\nflowchart TB\n', out)
         self.assertIn(f'{self.own} --- {self.agg}', out)   # category-first: ranks it above
         self.assertNotIn(f'{self.agg} --> {self.own}', out)   # no arrow back: no cycle
-        self.assertIn(f'{self.agg} --> {self.used}', out)  # shared ones flow down
+        box = re.search(r'subgraph (g\d+)\["<b>used/</b>', out).group(1)
+        self.assertIn(f'{self.agg} --> {box}', out)        # shared ones flow down, into the box
 
     def test_mermaid_link_styles_land_on_the_hosts_own_edges(self):
         out = mg.mermaid(self.g_)
@@ -274,14 +276,15 @@ class HostsLayout(Tree):
         hue = mg.hues(self.g_)['agg:hosts/alpha-configuration.nix:nixos']
         mine = [k for idx, c in re.findall(r'linkStyle ([\d,]+) stroke:(#\w+)', out)
                 if c == hue for k in map(int, idx.split(','))]
+        box = re.search(r'subgraph (g\d+)\["<b>used/</b>', out).group(1)
         self.assertEqual(sorted(links[k] for k in mine),
-                         sorted([f'{self.own} --- {self.agg}', f'{self.agg} --> {self.used}']))
+                         sorted([f'{self.own} --- {self.agg}', f'{self.agg} --> {box}']))
 
     def test_dot_reverses_the_upward_edge_but_keeps_the_arrowhead(self):
         out = mg.dot(self.g_)
         self.assertIn('rankdir=TB', out)
         self.assertRegex(out, rf'{self.own} -> {self.agg} \[dir=back ')
-        self.assertRegex(out, rf'{self.agg} -> {self.used} \[color=')
+        self.assertRegex(out, rf'{self.agg} -> {self.sub} \[color=[^\]]* lhead=cluster_\d+\]')
 
     def test_dot_pins_unimported_shared_categories_below_the_hosts(self):
         self.write('area/lonely/dirsAsCategory.nix', SHIM)
@@ -290,8 +293,7 @@ class HostsLayout(Tree):
         ids = {i: f'n{k}' for k, i in enumerate(g.nodes)}
         out = mg.dot(g)
         self.assertRegex(out, rf'n\d+ -> {ids["cat:area/lonely"]} \[style=invis minlen=1\]')
-        self.assertNotRegex(out, rf'-> {ids["cat:area/used"]} \[style=invis')    # has an import
-        self.assertNotRegex(out, rf'-> {ids["cat:host-config/alpha"]} \[style=invis')
+        self.assertNotRegex(out, rf'-> {ids["cat:host-config/alpha"]} \[style=invis')   # above, not below
 
     def test_users_config_sits_above_the_hosts_too(self):
         self.write('users-config/u/dirsAsCategory.nix', SHIM)
@@ -303,7 +305,7 @@ class HostsLayout(Tree):
         out = mg.dot(g)
         self.assertIn(f'{ids["cat:users-config/u"]} -> {agg} [dir=back', out)
         self.assertIn(f'{ids["cat:host-config/alpha"]} -> {agg} [dir=back', out)
-        self.assertIn(f'{agg} -> {ids["cat:area/used"]} [color=', out)
+        self.assertRegex(out, rf'{agg} -> {ids["cat:area/used/sub"]} \[color=[^\]]* lhead=')
 
     def test_tree_view_stays_left_to_right(self):
         out = mg.dot(mg.select(self.g(), 'tree'))
@@ -326,25 +328,24 @@ class Wrapping(Tree):
         self.g_ = mg.select(self.g(), 'hosts')
 
     def links(self, wrap=5):
-        return {(a.split(':')[-1], b.split(':')[-1], n)
-                for a, b, n in mg.layout_links(self.g_, wrap)}
+        return {b.split(':')[-1]: n for _, b, n in mg.layout_links(self.g_, wrap)}
 
-    def test_top_categories_wrap_into_rows(self):
-        # top row (in area order): c0 c1 c2 c3 c4; next: c5 c6 used
-        links = self.links()
-        # c0 takes a rank, its two nested rows two more: the next row is 3 down
-        self.assertIn(('area/c0', 'area/c5', 3), links)
-        self.assertIn(('area/c1', 'area/c6', 3), links)   # gap is the row's tallest
-        self.assertIn(('area/c2', 'area/used', 3), links)
-        self.assertFalse(any(b == 'area/c1' for _, b, _ in links))   # c1 is in the top row
+    def test_every_card_gets_its_rank_below_the_hosts(self):
+        # top row c0..c4, then c5 c6 used. c0 is a box holding k0..k4 then
+        # k5, and takes no rank of its own: its rows start at 1, so the
+        # area's next row starts at 1 + 2.
+        self.assertEqual(self.links(), {
+            'area/c0/k0': 1, 'area/c0/k1': 1, 'area/c0/k2': 1, 'area/c0/k3': 1,
+            'area/c0/k4': 1, 'area/c0/k5': 2,
+            'area/c1': 1, 'area/c2': 1, 'area/c3': 1, 'area/c4': 1,
+            'area/c5': 3, 'area/c6': 3, 'area/used/sub': 3})
 
-    def test_nested_categories_wrap_under_their_parent(self):
-        links = self.links()
-        self.assertIn(('area/c0/k0', 'area/c0/k5', 1), links)
-        self.assertEqual(len([l for l in links if l[0].startswith('area/c0/')]), 1)
+    def test_links_all_start_at_the_first_host(self):
+        self.assertEqual({a for a, _, _ in mg.layout_links(self.g_)},
+                         {'agg:hosts/alpha-configuration.nix:nixos'})
 
     def test_wrap_zero_is_one_row(self):
-        self.assertEqual({l for l in self.links(0) if l[1] != 'area/c0/k5'}, set())
+        self.assertEqual(set(self.links(0).values()), {1})
 
     def test_dot_keeps_every_host_on_one_row(self):
         self.write('hosts/beta-configuration.nix', host('nixos', 'c6'))
@@ -360,7 +361,7 @@ class Wrapping(Tree):
     def test_renderers_draw_the_same_links(self):
         g = self.g_
         ids = {i: f'n{k}' for k, i in enumerate(g.nodes)}
-        a, b = ids['cat:area/c0'], ids['cat:area/c5']
+        a, b = ids['agg:hosts/alpha-configuration.nix:nixos'], ids['cat:area/c5']
         self.assertIn(f'{a} -> {b} [style=invis minlen=3];', mg.dot(g))
         self.assertIn(f'{a} ~~~~~ {b}', mg.mermaid(g))       # 3 tildes is 1 rank, +1 per rank
 
@@ -369,6 +370,50 @@ class Wrapping(Tree):
         with contextlib.redirect_stdout(buf):
             mg.main(['dot', str(self.root), '--view', 'hosts', '--wrap', '0'])
         self.assertNotIn('minlen=3', buf.getvalue())
+
+
+class Boxes(Tree):
+    """A category holding a nested category is drawn as a box around it."""
+
+    def test_only_a_category_with_a_nested_category_is_boxed(self):
+        g = mg.select(self.g(), 'tree')
+        self.assertEqual(mg.boxed(g), {'cat:area/used'})        # sub holds only b
+
+    def test_the_box_holds_its_whole_subtree(self):
+        g = mg.select(self.g(), 'tree')
+        (used,) = [b for b in mg.walk(mg.boxes(g)) if b.id == 'cat:area/used']
+        self.assertEqual(set(used.items), {'mod:area/used/a.nix', 'cat:area/used/sub',
+                                           'mod:area/used/sub/b.nix'})
+        self.assertEqual(set(used.top), {'mod:area/used/a.nix', 'cat:area/used/sub'})  # direct only
+
+    def test_containment_is_the_box_not_an_arrow(self):
+        g = mg.select(self.g(), 'tree')
+        self.assertFalse(any(e.src == 'cat:area/used' for e in mg.arrows(g)))
+        self.assertIn(('cat:area/used/sub', 'mod:area/used/sub/b.nix'),
+                      {(e.src, e.dst) for e in mg.arrows(g)})   # sub is a card: arrows stay
+
+    def test_a_box_is_not_also_drawn_as_a_card(self):
+        g = mg.select(self.g(), 'hosts')
+        ids = {i: f'n{k}' for k, i in enumerate(g.nodes)}
+        self.assertNotRegex(mg.dot(g), rf'(?m)^\s+{ids["cat:area/used"]} \[')
+        self.assertNotRegex(mg.mermaid(g), rf'(?m)^\s+{ids["cat:area/used"]}\(')
+
+    def test_box_status_styling(self):
+        self.write('area/lonely/dirsAsCategory.nix', SHIM)
+        self.write('area/lonely/inner/dirsAsCategory.nix', SHIM)
+        self.write('area/lonely/inner/l.nix', module('nixos'))
+        self.write('area/picked/dirsAsCategory.nix', SHIM)
+        self.write('area/picked/inner2/dirsAsCategory.nix', SHIM)
+        self.write('area/picked/inner2/p.nix', module('nixos'))
+        self.write('hosts/beta-configuration.nix', host('nixos', 'p'))
+        out = mg.dot(mg.select(self.g(), 'hosts'))
+        lonely = re.search(r'label=<<b>lonely/</b>.*\n(.*)', out).group(1)
+        self.assertIn(f'color="{mg.ALERT[1]}"', lonely)
+        self.assertIn('penwidth=2.5', lonely)
+        picked = re.search(r'label=<<b>picked/</b>.*\n(.*)', out).group(1)
+        self.assertIn('dashed', picked)                          # reached by module only
+        m = mg.mermaid(mg.select(self.g(), 'hosts'))
+        self.assertRegex(m, rf'style g\d+ fill:{mg.BOX_FILL},stroke:{mg.ALERT[1]}.*stroke-width:2.5px')
 
 
 class Rendering(Tree):
@@ -399,8 +444,9 @@ class Rendering(Tree):
 
     def test_hosts_view_boxes_nested_categories_in_their_area(self):
         g = mg.select(self.g(), 'hosts')
-        (members,) = [m for i, _, m in mg.groups(g) if i == 'area:area']
-        self.assertEqual(set(members), {'cat:area/used', 'cat:area/used/sub'})
+        (area,) = [b for b in mg.boxes(g) if b.id == 'area:area']
+        (used,) = area.subs
+        self.assertEqual((used.id, used.items), ('cat:area/used', ['cat:area/used/sub']))
 
     def test_dot_without_arrows_lays_areas_out_as_a_grid(self):
         for k in range(6):
@@ -413,9 +459,9 @@ class Rendering(Tree):
         out = mg.dot(mg.select(self.g(), 'hosts'))
         self.assertTrue(out.startswith('digraph modules {') and out.endswith('}'))
         self.assertEqual(out.count('{'), out.count('}'))
-        self.assertIn('label=<<b>used/</b><br/><font', out)   # HTML label
-        self.assertIn('subgraph cluster_', out)
-        self.assertIn('[style=dotted]', out)          # used -> sub nesting
+        self.assertIn('label=<<b>sub/</b><br/><font', out)    # HTML label
+        self.assertIn('label=<<b>used/</b>  <font', out)     # a box's title
+        self.assertNotIn('[style=dotted]', out)       # used -> sub is the box, not an arrow
 
     def test_cli_prints_mermaid(self):
         buf = io.StringIO()
