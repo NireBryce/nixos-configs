@@ -213,6 +213,7 @@ preflight:
     @python3 .agents/scripts/test_worktree.py
     @python3 .agents/scripts/test_where.py
     @python3 flake/scripts/test_glibc_guard.py
+    @python3 flake/scripts/test_pm_test_core.py
     @python3 flake/scripts/test_parallel_unittest.py
     @just guards-test
     @just preflight-mirror-test
@@ -285,6 +286,10 @@ root-drift:
     # boot. Only meaningful on a host that imports `impermanence` -- see
     # CLAUDE.md, Safety.
     @{{scripts}}/root-drift.sh
+
+# Durandal suspend hunt: N cycles of the kernel's pm_test=core descent -- needs sudo, see the hang page
+pm-test-core cycles="50":
+    @sudo {{scripts}}/pm-test-core.sh {{cycles}}
 
 # What's in /home that neither /persist nor home-manager covers -- needs sudo
 home-drift:

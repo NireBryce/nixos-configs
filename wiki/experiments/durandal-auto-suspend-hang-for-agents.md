@@ -126,9 +126,13 @@ add process names/argv** — dumps are world-readable and quoted into the public
 repo; argv can carry tokens. Identify processes by hand on the host if needed.
 `pm_print_times=1` via tmpfiles logs per-device suspend/resume durations.
 
-Not done: **`/sys/power/pm_test`** (`core`/`platform`/`devices`/`freezer` —
-bisects where suspend fails without entering S3; if `devices`+`platform` pass
-while real S3 hangs, the fault is beyond the kernel) · **serial console +
+Written, not yet run: **`just pm-test-core`**
+([script](../../flake/scripts/pm-test-core.sh), needs sudo) — 50 cycles of
+`pm_test=core`. Only `core` is informative (real hangs already pass the
+earlier levels). Clean = consistent with fault beyond the kernel (~97% at 1/15);
+freeze = real finding, last line of `/var/log/suspend-probe/pm-test-core.log`
+is the hung cycle, recover by hard reset. No probe dumps, no power-cycle delta
+(bypasses systemd) · **serial console +
 `no_console_suspend=1`** (`/dev/ttyS0`, 16550A at 0x3f8 — the only way to
 observe the failure, since the CPU is not executing during it; needs a cable
 and a second machine) · **`umr`** (packaged, but near-useless here: needs the

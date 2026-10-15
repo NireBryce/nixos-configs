@@ -265,7 +265,7 @@ resolution than is currently enabled.
 
 | option | buys | cost |
 |---|---|---|
-| `/sys/power/pm_test` (`core`/`platform`/`devices`/`freezer`) | bisects *where* suspend fails without entering S3. If `devices` and `platform` pass while real S3 hangs, the failure is beyond the kernel — closing off a lot of speculation | minutes, run by hand |
+| `/sys/power/pm_test` (`core`/`platform`/`devices`/`freezer`) | bisects *where* suspend fails without entering S3. If `devices` and `platform` pass while real S3 hangs, the failure is beyond the kernel — closing off a lot of speculation. Only `core` adds information, since every real hang already passed the earlier levels: `just pm-test-core` runs 50 cycles ([script](../../flake/scripts/pm-test-core.sh)). A clean run is what "beyond the kernel" predicts (~97% at the observed rate); a freeze is a real finding, read from the last line of `/var/log/suspend-probe/pm-test-core.log`, and recovery is a hard reset, not a PSU cut. Bypasses systemd, so no probe dumps and no power-cycle delta | minutes, `just pm-test-core` (needs sudo) |
 | serial console + `no_console_suspend=1` | the **only** way to observe the failure, since the CPU is not executing during it. `/dev/ttyS0` is real hardware here (16550A at 0x3f8) | a cable and a second machine |
 | `umr` (packaged in nixpkgs) | AMD register-level debugging | **near-zero here** — it needs the GPU to respond, which is exactly what fails |
 
