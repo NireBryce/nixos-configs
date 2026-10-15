@@ -11,11 +11,27 @@ is the mechanism, not the inventory.
 
 ## Contents
 
+- [Quick facts](#quick-facts)
 - [The core mechanism](#the-core-mechanism)
 - [The layout at a glance](#the-layout-at-a-glance)
 - [Home Manager integration](#home-manager-integration)
 - [Package modules](#package-modules)
 - [Related, easy to get backwards](#related-easy-to-get-backwards)
+
+## Quick facts
+
+The mechanism in one table; the sections below link the reasoning.
+
+| what | where / how |
+|---|---|
+| a module | every `.nix` under `flake/modules/` is a flake-parts module, declaring `flake.modules.<class>.<name>`; its name is its filename |
+| a class | the module system the config is for: `nixos`, `darwin`, `homeManager` |
+| a category | a folder holding a `dirsAsCategory.nix`; imports every module beneath it, nested categories included; hosts import categories by name |
+| the collector | `flake/modules/_lib/category-collector.nix`; read `flake/doc/dirsAsCategory.md` before changing it |
+| membership as data | `nix eval --json ./flake#categoryGraph` |
+| checks | `just modules`: collisions, orphans, names, shims, untracked |
+| diagrams | `just module-graph tree`, `hosts`, `dot`, `html` (`--category`, `--depth`, `--static`, `--verify`) |
+| Home Manager | integrated through NixOS, no `homeConfigurations`; `just switch` applies both |
 
 ## The core mechanism
 
@@ -52,8 +68,10 @@ categories directly in it. `n h d` are the classes a category carries
 (nixos, homeManager, darwin) and the number is how many modules it holds,
 nested categories included. Per-category and per-host diagrams are
 on-demand, not committed: `just module-graph tree --category homelab`,
-`just module-graph hosts`, and `dot` for Graphviz
-(`just module-graph dot --view hosts`).
+`just module-graph hosts`, `dot` for Graphviz
+(`just module-graph dot --view hosts`), and `html` for an interactive page
+of the hosts view (`just module-graph html > modules.html`): click hosts to
+show only what they import.
 
 Every diagram uses one colour standard, keyed on the `dirsAsCategory.nix`
 criterion:
