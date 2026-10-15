@@ -35,7 +35,7 @@ set -euo pipefail
 # same fail-visible rule as secrets-guard-pretooluse.sh's header.
 if ! command -v jq >/dev/null 2>&1; then
     cat >/dev/null
-    printf '%s\n' '{"systemMessage":"impermanence-edit-guard: jq not on PATH, so the path of this edit was NOT checked against the impermanence tree / host hardware modules. Install jq (packages-config/nix-utils/) to re-arm the guard."}'
+    printf '%s\n' '{"systemMessage":"impermanence-edit-guard: jq not on PATH, so the path of this edit was NOT checked against the impermanence tree / host hardware modules. Install jq (packages-config/shell-apps/json-yaml-tools/jq.nix) to re-arm the guard."}'
     exit 0
 fi
 
