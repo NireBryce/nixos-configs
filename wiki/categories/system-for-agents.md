@@ -1,6 +1,6 @@
 # `system`, for agents
 
-_Last modified: 2026-10-14_
+_Last modified: 2026-10-15_
 
 _Sibling reviewed: 2026-10-05 -- ltrace marked removed in the source's darwin-dropped list; this page names no packages_
 
@@ -72,7 +72,8 @@ ruleset NixOS applied at boot.
 `perSystem.topology.modules` is limited to repo-stated facts (roster,
 `ts-<x>`, `ts-hive`); no subnets/addresses/upstream devices on purpose.
 Drawn hosts = those importing `system` (not `forge-runner`); lysithea is a
-hand-declared node.
+hand-declared node. Renders are not committed; restic's backed-up `paths` are
+hidden from the diagram (service replaced by a name+repository one).
 
 ## Imported by
 
