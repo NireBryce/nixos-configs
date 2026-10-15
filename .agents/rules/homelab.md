@@ -12,5 +12,5 @@ paths:
   they cost. A Tailscale `svc:` name is skill `new-tailscale-service`.
 - `homelab-config/homelab/` is an umbrella category nesting several
   cube-only categories, the same coarse-and-fine overlap as
-  `general-config/hardware` / `general-config/hardware/amd`. Nested
+  `hardware-config/hardware` / `hardware-config/hardware/amd`. Nested
   category names and a real collector quirk: `wiki/categories/homelab.md`.

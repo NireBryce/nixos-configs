@@ -84,8 +84,8 @@
         # `containers` directly, unaffected by this move (durandal dropped
         # both `virtualization` and `containers` 2026-08-27, the same day
         # this move landed; cube's own copies come through `homelab` now),
-        # per the same coarse-and-fine nesting `general-config/hardware`/
-        # `general-config/hardware/amd` already established (see
+        # per the same coarse-and-fine nesting `hardware-config/hardware`/
+        # `hardware-config/hardware/amd` already established (see
         # flake/doc/dirsAsCategory.md). All of it was cube-only before this
         # move and stays cube-only now -- nothing here belongs on the
         # handhelds, which is the reason each got its own category in the

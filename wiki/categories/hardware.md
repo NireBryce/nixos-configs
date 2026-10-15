@@ -1,6 +1,6 @@
-# `hardware` — `general-config/hardware/` (+ nested `amd`)
+# `hardware` — `hardware-config/hardware/` (+ nested `amd`)
 
-_Last modified: 2026-09-28_
+_Last modified: 2026-10-15_
 
 ## Contents
 
@@ -11,16 +11,29 @@ _Last modified: 2026-09-28_
 
 ## What's in it
 
-Two files, both under a nested `amd/` directory: `amdcpu/amdcpu.nix`
-(`inputs.nixos-hardware.nixosModules.common-cpu-amd`) and
-`amdgpu/amdgpu.nix` (`inputs.nixos-hardware.nixosModules.common-gpu-amd`,
-plus a package list — mesa, vulkan-tools, `amdgpu_top`, etc.). Every host in
-this repo is AMD, so that's the entire category so far.
+Eight files, all `nixos`-class:
+
+- **`amd/`**, a nested category: `amdcpu/amdcpu.nix`
+  (`inputs.nixos-hardware.nixosModules.common-cpu-amd`) and
+  `amdgpu/amdgpu.nix` (`inputs.nixos-hardware.nixosModules.common-gpu-amd`,
+  plus a package list — mesa, vulkan-tools, `amdgpu_top`, etc.). Every host
+  in this repo is AMD.
+- **`bluetooth/bluetooth.nix`** — `hardware.bluetooth`.
+- **`firmware/`** — `firmware-all.nix` (`hardware.enableAllFirmware`,
+  `enableRedistributableFirmware`) and `fwupd.nix` (`services.fwupd`).
+- **`storage/`** — `smartd.nix` (S.M.A.R.T. monitoring and scheduled
+  self-tests) and `coredump-limit.nix` (`systemd.coredump` limits).
+- **`memory/swap-policy.nix`** — the zram/zswap swap-policy toggle.
+
+`bluetooth/`, `firmware/`, `storage/` and `memory/` were plain folders in
+the [system](system.md) category until 2026-10-15; the hosts that import
+`hardware` are the same three that took them through `system`, so no host
+gained or lost anything in the move.
 
 ## Nested categories overlap their parents on purpose
 
-`general-config/hardware/amd/` has its **own** `dirsAsCategory.nix`, nested inside
-`general-config/hardware/`'s. `hardware`'s own aggregate ends up referencing `amd`'s
+`hardware-config/hardware/amd/` has its **own** `dirsAsCategory.nix`, nested inside
+`hardware-config/hardware/`'s. `hardware`'s own aggregate ends up referencing `amd`'s
 aggregate by name rather than re-deriving `amdcpu`/`amdgpu` independently
 (as of the 2026-08-27 refactor into `modules/_lib/category-collector.nix` —
 see that doc's History section) — a coarse handle (`hardware`, what every

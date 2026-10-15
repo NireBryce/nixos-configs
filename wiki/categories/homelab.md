@@ -31,7 +31,7 @@ cube-only, folded in by the same delegation this page describes below.
 
 ## Nested categories overlap their parents on purpose
 
-Same mechanism [hardware](hardware.md) documents for `general-config/hardware/amd/`:
+Same mechanism [hardware](hardware.md) documents for `hardware-config/hardware/amd/`:
 `homelab`'s `dirsAsCategory.nix` references each nested category by name
 (via `modules/_lib/category-collector.nix` — see that doc's History
 section) rather than re-deriving their modules, giving one coarse handle

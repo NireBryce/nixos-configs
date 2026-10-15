@@ -375,14 +375,15 @@ def host_imports(root, categories, hosts=None):
 
 def find_categories(root):
     """category name -> its directory, for every dirsAsCategory.nix under
-    flake/modules/general-config/, flake/modules/homelab-config/ and
-    flake/modules/users-config/ -- the areas categories/00-INDEX.md actually
+    flake/modules/general-config/, flake/modules/hardware-config/,
+    flake/modules/homelab-config/ and flake/modules/users-config/ -- the
+    areas categories/00-INDEX.md actually
     indexes (packages-config/* and host-config/*
     are deliberately excluded there, see that file's own header, so this
     check has nothing to compare them against and doesn't look).
     """
     cats = {}
-    for area in ('general-config', 'homelab-config', 'users-config'):
+    for area in ('general-config', 'hardware-config', 'homelab-config', 'users-config'):
         base = root / 'flake' / 'modules' / area
         if not base.exists():
             continue

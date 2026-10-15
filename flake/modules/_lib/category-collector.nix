@@ -103,7 +103,7 @@
 #
 # Notice `text-tools` above: a category inside a category. That's useful --
 # a host can import all of `shell-apps`, or just `text-tools` if that's all
-# it needs. The same goes for general-config/hardware/amd/ inside
+# it needs. The same goes for hardware-config/hardware/amd/ inside
 # `hardware`, and the service categories inside `homelab`.
 #
 # When shell-apps is collecting and reaches text-tools/, it could walk in and

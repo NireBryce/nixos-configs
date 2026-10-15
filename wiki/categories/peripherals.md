@@ -1,6 +1,6 @@
-# `peripherals` — `general-config/peripherals/`
+# `peripherals` — `hardware-config/peripherals/`
 
-_Last modified: 2026-10-07_
+_Last modified: 2026-10-15_
 
 ## Contents
 
@@ -23,12 +23,13 @@ Was tracked as [#440](https://github.com/NireBryce/nixos-configs/issues/440):
 both modules "came across from the pre-restructure config unexamined" per a
 note rescued from a deleted handoff doc, and nobody had revisited whether
 either peripheral is still in use on the hosts that import this category.
-Closed as dropped 2026-10-07 without a per-host decision — the category is
-imported unchanged until someone revisits.
+Closed as dropped 2026-10-07 without a per-host decision. Revisited for
+tenacity on 2026-10-15: neither device is used on the handheld, so it no
+longer imports the category; durandal and cube still do.
 
 ## Imported by
 
-All three NixOS hosts (`durandal`, `tenacity`, `cube`) — not
+`durandal` and `cube`. Not `tenacity` (dropped 2026-10-15, above), and not
 `lysithea`, left out rather than imported-for-nothing since neither module
 declares a `darwin` class (same reasoning as [hardware](hardware.md) and
 [desktop-env](desktop-env.md) being absent from lysithea's imports).

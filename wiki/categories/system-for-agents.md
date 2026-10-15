@@ -6,15 +6,18 @@ _Sibling reviewed: 2026-10-05 -- ltrace marked removed in the source's darwin-dr
 
 Condensed from [system.md](system.md).
 
-`general-config/system/`, 19 subdirectories. Imported whole by every Linux host, **no opt-out for any piece**: anything
+`general-config/system/`, 15 subdirectories. Imported whole by every Linux host, **no opt-out for any piece**: anything
 that must be optional cannot be filed here (why `virtualization`/`containers` are separate).
 
 ## Subdirectories
 
-`base-system-packages/` · `bluetooth/` · `firmware/` · `flatpak/` ·
-`font/` · `gaming/` · `home-manager/` · `impermanence/` · `kdeconnect/` ·
-`locale-tz-etc/` · `networking/` · `nix-ld/` · `secrets/` · `security/` ·
-`sound/` · `ssh/` · `storage/` · `wayland/` · `xdg/`
+`base-system-packages/` · `flatpak/` · `font/` · `gaming/` ·
+`home-manager/` · `impermanence/` · `kdeconnect/` · `locale-tz-etc/` ·
+`networking/` · `nix-ld/` · `secrets/` · `security/` · `sound/` · `ssh/` ·
+`wayland/` · `xdg/`
+
+`bluetooth/`, `firmware/`, `storage/`, `memory/` moved to
+[hardware](hardware.md) (`hardware-config/hardware/`) 2026-10-15.
 
 ## The files that matter off-category
 
@@ -29,7 +32,6 @@ that must be optional cannot be filed here (why `virtualization`/`containers` ar
 | `secrets/low-side/secrets.yaml` | not a module — `.sops.yaml`-only, keyed to a personal SSH key instead of a host key, no `sops.secrets.*`, no NixOS activation. Skill `low-side-secrets`. |
 | `impermanence/declare-persistence-option.nix` | **not** the [impermanence](impermanence.md) category. Declares the option unconditionally, even where nothing populates it. |
 | `security/sudo-wheel-only.nix` | sets `security.sudo.execWheelOnly` — `sudo` executable by wheel-group members only. |
-| `storage/smartd.nix` | smartmontools + scheduled S.M.A.R.T. self-tests — disk wear/failure monitoring on every host. |
 
 ## Traps
 

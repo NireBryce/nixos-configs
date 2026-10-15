@@ -125,7 +125,7 @@ in {
             # and a web UI on 127.0.0.1:5335.
             #
             # The coredumps are bounded by
-            # general-config/system/storage/coredump-limit.nix.
+            # hardware-config/hardware/storage/coredump-limit.nix.
             ui.enable = true;
             adjustor = {
                 enable = true;

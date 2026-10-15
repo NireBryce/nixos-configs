@@ -27,6 +27,7 @@ flake/modules/
 ├── general-config/        shared system behavior, one category per subject
 │   ├── boot/                (boot, impermanence, shell-config, ...)
 │   └── ...
+├── hardware-config/       hardware support: `hardware`, `peripherals`
 ├── homelab-config/        self-hosted services
 │   └── homelab/             category `homelab`, one nested category per service
 ├── packages-config/       shared packages, one category per kind
@@ -47,13 +48,14 @@ flake/modules/
     └── elly-home-manager.nix                  -- the HM entry point
 ```
 
-**Shared — `general-config/`, `homelab-config/` and `packages-config/`.** Anything more than
+**Shared — `general-config/`, `hardware-config/`, `homelab-config/` and `packages-config/`.** Anything more than
 one host could want, even if only one takes it today. Each subdirectory is
 a category (`boot`, `homelab`, `shell-apps`, …) and a host opts in by
 listing the category in its entry point, so a shared module can still be
 optional: a category nobody lists is a category nobody gets (`homelab`,
 and `virtualization` inside it, are cube-only that way). `general-config/` is behavior —
-services, boot, shell setup; `homelab-config/` is the self-hosted services
+services, boot, shell setup; `hardware-config/` is hardware support
+(drivers, firmware, storage, peripherals); `homelab-config/` is the self-hosted services
 (the `homelab` category and one nested category per service);
 `packages-config/` is packages.
 

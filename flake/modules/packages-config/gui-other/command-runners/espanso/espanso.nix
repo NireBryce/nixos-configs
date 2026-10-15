@@ -83,7 +83,7 @@ in {
         #
         # Not worth doing until something actually misbehaves: one crash,
         # self-healing, and the coredumps are bounded by
-        # general-config/system/storage/coredump-limit.nix.
+        # hardware-config/hardware/storage/coredump-limit.nix.
         services.espanso = {
             enable = true;
             waylandSupport = true;

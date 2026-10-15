@@ -1,6 +1,6 @@
 # Category reference
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-15_
 
 One article per real category — a directory holding its own
 `dirsAsCategory.nix` under `flake/modules/`. See
@@ -45,13 +45,13 @@ one hand-written column, kept across regenerations.
 |---|---|---|---|
 | [boot](boot.md) | `general-config/boot/` | nixos | all 3 NixOS hosts |
 | [desktop-env](desktop-env.md) | `general-config/desktop-env/` | nixos | never imported whole — hosts take `jovian` or `kde-desktop` by name |
-| [hardware](hardware.md) | `general-config/hardware/` (+ nested `amd`) | nixos | all 3 NixOS hosts |
 | [impermanence](impermanence.md) | `general-config/impermanence/` (+ nested `root-rollback`) | nixos, homeManager | durandal, tenacity (not cube) |
 | [macos](macos.md) | `general-config/macos/` | darwin | lysithea |
 | [nix](nix.md) | `general-config/nix/` | nixos, homeManager, darwin | all 4 hosts |
-| [peripherals](peripherals.md) | `general-config/peripherals/` | nixos | all 3 NixOS hosts |
 | [shell-config](shell-config/00-INDEX.md) | `general-config/shell-config/` | nixos, homeManager | all 3 NixOS hosts directly; reaches lysithea via `ellyHomeManager` |
 | [system](system.md) | `general-config/system/` | nixos, homeManager, darwin | all 3 NixOS hosts + lysithea (partially) |
+| [hardware](hardware.md) | `hardware-config/hardware/` (+ nested `amd`) | nixos | all 3 NixOS hosts |
+| [peripherals](peripherals.md) | `hardware-config/peripherals/` | nixos | durandal, cube |
 | [elly](elly.md) | `users-config/elly/` | nixos, homeManager, darwin | all 4 hosts |
 
 <!-- /generated -->

@@ -71,7 +71,7 @@ in {
       };
   };
 
-  # Swap policy lives in general-config/system/memory/swap-policy.nix.
+  # Swap policy lives in hardware-config/hardware/memory/swap-policy.nix.
   # zswap fronts the encrypted partition declared below: a compressed pool
   # in RAM whose cold pages drain to the partition under LRU pressure.
   # This replaces the SteamOS zram Jovian was defaulting
