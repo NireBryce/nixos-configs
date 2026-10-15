@@ -62,6 +62,17 @@ class Tree(unittest.TestCase):
         self.assertEqual(quiet(modules.names, self.root), [])
         self.assertEqual(quiet(modules.shims, self.root), [])
 
+    def test_classes_ignore_comments_and_references(self):
+        # a commented-out declaration and a reference to another module's
+        # class are not this file declaring that class
+        self.write('area/cat/group/mixed.nix',
+                   '{ config, lib, ... }:\nlet moduleName = "mixed"; in {\n'
+                   '  flake.modules.nixos.${moduleName} = { };\n'
+                   '  # flake.modules.homeManager.${moduleName} = { };\n'
+                   '  x = config.flake.modules.darwin.good;\n}\n')
+        _, mods = modules.scan(self.root)
+        self.assertEqual(mods['mixed'][0][1], {'nixos'})
+
     def test_shims_found_by_content_not_name(self):
         self.write('area/other/anything.nix', SHIM)
         cats, _ = modules.scan(self.root)

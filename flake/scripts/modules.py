@@ -51,7 +51,9 @@ SHIM = re.compile(r'import\s*\(.*"/_lib/category-collector\.nix"\)')
 # lookbehind keeps `config.flake.modules.<class>.<name>` -- a *reference*
 # to another module -- from reading as a declaration.
 LITERAL_DECL = re.compile(r'(?<!config\.)flake\.modules\.(\w+)\.([\w-]+)\s*=')
-DECL = re.compile(r'flake\.modules\.(\w+)\.(?:\$\{moduleName\}|(\w+))')
+# Same lookbehind as LITERAL_DECL: `config.flake.modules.<class>.<name>` is a
+# reference to a module, not a declaration of one.
+DECL = re.compile(r'(?<!config\.)flake\.modules\.(\w+)\.(?:\$\{moduleName\}|(\w+))')
 # Declared inside a `flake.modules = { ... }` attrset, where each class
 # heads its own line without the prefix. Line-anchored so the leading
 # `flake` of a flat `flake.modules.<class>...` line cannot match as a
@@ -100,11 +102,30 @@ def scan(root):
         if is_shim(p):
             categories[p.parent.name] = p
             continue
-        classes = {m.group(1) for m in DECL.finditer(p.read_text())}
-        classes.update(DECL_ATTRSET.findall(p.read_text()))
+        # Comments stripped, like every other scan here: a commented-out or
+        # prose `flake.modules.homeManager.` line is not a declaration, and
+        # counting it gave podman a homeManager half it never had.
+        text = COMMENT.sub('', p.read_text())
+        classes = {m.group(1) for m in DECL.finditer(text)}
+        classes.update(DECL_ATTRSET.findall(text))
         if classes:
             modules.setdefault(p.stem, []).append((p, classes))
     return categories, modules
+
+
+def aggregates(root):
+    """[(path, class, [names])] for every `with config.flake.modules.<class>;
+    [ ... ]` list in the tree -- how hosts and the Home Manager entry point
+    name what they import. Names keep source order and repeats; comments are
+    stripped first so a commented-out import is not read as a live one."""
+    out = []
+    for p in sorted(pathlib.Path(root).rglob('*.nix')):
+        if hidden(p, root) or is_shim(p):
+            continue
+        for m in AGG.finditer(p.read_text()):
+            body = COMMENT.sub('', m.group(2))           # strip trailing comments
+            out.append((p, m.group(1), re.findall(r'[\w-]+', body)))
+    return out
 
 
 def imported_names(root):
@@ -120,18 +141,15 @@ def imported_names(root):
     can appear anywhere, including inside a category.
     """
     out = {}
+    for _, cls, names in aggregates(root):
+        out.setdefault(cls, set()).update(names)
     for p in pathlib.Path(root).rglob('*.nix'):
         if hidden(p, root) or is_shim(p):
             continue
-        text = p.read_text()
-        for m in AGG.finditer(text):
-            cls, body = m.group(1), m.group(2)
-            body = COMMENT.sub('', body)                 # strip trailing comments
-            out.setdefault(cls, set()).update(re.findall(r'[\w-]+', body))
         # Comments are stripped first here: several modules discuss
         # `config.flake.modules` in prose, and a reference named only in a
         # comment would mark a genuinely dead module as reachable.
-        for m in REF.finditer(COMMENT.sub('', text)):
+        for m in REF.finditer(COMMENT.sub('', p.read_text())):
             out.setdefault(m.group(1), set()).add(m.group(2))
     return out
 

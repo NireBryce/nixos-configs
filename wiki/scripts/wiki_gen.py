@@ -48,6 +48,7 @@ lists, class declarations), never restated here.
 Pure stdlib; fixture tests in test_wiki_gen.py (`just wiki-gen-test`, part
 of `just preflight` and so of CI).
 """
+import importlib.util
 import pathlib
 import re
 import sys
@@ -140,6 +141,18 @@ class Region:
         text = (self.marker() + '\n\n' + render_table(self.headers, out)
                 + '\n\n' + END)
         return text, empty, dropped
+
+
+class Block(Region):
+    """A generated region that is not a table: `body(root)` is the whole
+    text, rewritten as a unit. No hand-written cells, so no dropped rows."""
+
+    def __init__(self, name, page, source, body):
+        super().__init__(name, page, source, [], None, [], None)
+        self.body = body
+
+    def render(self, root, old_body):
+        return self.marker() + '\n\n' + self.body(root) + '\n\n' + END, [], []
 
 
 def host_rows(root):
@@ -241,6 +254,25 @@ def count_rows(root):
         yield label, {'What': label, 'Files': str(n)}
 
 
+def module_layout(root):
+    """Mermaid of the top of the module tree -- areas and their direct
+    categories, no modules -- from flake/scripts/module-graph.py, which owns
+    the parsing and the drawing (per-category and per-host diagrams are
+    on-demand output of `just module-graph`, not committed). Loaded from this
+    file's own checkout, not `root`, so a fixture tree needs no scripts."""
+    script = pathlib.Path(__file__).resolve().parents[2] / 'flake/scripts/module-graph.py'
+    spec = importlib.util.spec_from_file_location('module_graph', script)
+    mg = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mg)
+    modules = root / 'flake' / 'modules'
+    if not modules.is_dir():
+        raise GenError('no flake/modules/ directory')
+    g = mg.select(mg.graph(modules), 'tree', depth=1, categories_only=True)
+    if not any(n.kind == 'category' for n in g.nodes.values()):
+        raise GenError('no categories under flake/modules/')
+    return '```mermaid\n' + mg.mermaid(g) + '\n```'
+
+
 REGIONS = {r.name: r for r in [
     Region('hosts-table', 'wiki/hosts.md',
            "flake/modules/host-config/hosts.nix and each host's import list",
@@ -257,6 +289,9 @@ REGIONS = {r.name: r for r in [
     Region('module-counts', 'wiki/module-style-guide-for-agents.md',
            'a count of the .nix files under flake/modules/',
            ['What', 'Files'], 'What', [], count_rows),
+    Block('module-layout', 'wiki/architecture.md',
+          'the dirsAsCategory.nix tree under flake/modules/, drawn by flake/scripts/module-graph.py',
+          module_layout),
 ]}
 
 
