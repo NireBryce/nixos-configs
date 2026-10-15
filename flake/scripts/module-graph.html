@@ -7,13 +7,17 @@
 
   The flow, in either direction (top-down, or left to right):
 
-    host-config/  ->  hosts  ->  users-config/ + Home Manager  ->  shared areas
-    (behind)                     (the user group)
+    host-config/  ->  hosts  ->  shared areas  <-  Home Manager  ->  users-config/
+    (behind)                                       (the far end, flowing back)
 
-  A host's own directory sits behind it; the user's own directory and the
-  Home Manager config the hosts enable sit ahead of them; the shared areas
-  come last. A host does not import its Home Manager config: a module it
-  imports turns it on, drawn as a dashed "enables" edge.
+  A host's own directory sits behind it and the shared areas ahead of it.
+  The user's own directory and the Home Manager config the hosts enable sit
+  at the far end, past the shared areas: Home Manager's imports run back
+  into them (bottom-up, or right to left). A host's links out to the far
+  end route around the outside of the graph -- the first half of the hosts
+  over the top (or down the left), the rest under the bottom (or the right)
+  -- instead of through the middle. A host does not import its Home Manager
+  config: a module it imports turns it on, drawn as a dashed "enables" edge.
 
   Layout is CSS (flex rows or columns); an SVG layer draws the edges between
   the cards' live positions. An edge runs forward or backward by where its
@@ -77,7 +81,7 @@
   .swatch { width: 18px; height: 12px; border-radius: 4px; border: 1.5px solid; display: inline-block; }
   .dash { width: 22px; border-top: 2px dashed var(--quiet); display: inline-block; }
 
-  #stage { position: relative; padding: 4px 16px 48px; }
+  #stage { position: relative; padding: 4px 80px 48px; }
   /* Stacking: the edge layer sits above the area and box backgrounds but
      below the cards (z-index 1 vs 2), so a line visibly runs across a box
      to the card it ends on instead of disappearing behind the box. Areas
@@ -89,25 +93,22 @@
   #edges.focus path { opacity: .08; }
   #edges.focus path.hot { opacity: .95; stroke-width: 2.2; }
 
-  /* Top-down: four rows. The user group stacks its user directory above
-     the Home Manager config, in flow order. */
+  /* Top-down: five rows, in flow order. */
   .row {
     position: relative; display: flex; flex-wrap: wrap; gap: 16px;
     justify-content: center; align-items: flex-start; margin: 0 0 64px;
   }
   .row:last-child { margin-bottom: 0; }
-  #user { flex-direction: column; align-items: center; gap: 40px; }
-  /* Left to right: four columns, each stacking its boxes vertically; the
-     user group runs left to right inside its column, again in flow order.
-     The hosts' own directories, the hosts, the user directory and Home
-     Manager stack so each sits across from what it links to instead of in
-     a row that every edge has to pass under. */
+  /* Left to right: five columns, each stacking its boxes vertically. The
+     hosts' own directories, the hosts and the user directory stack so each
+     sits across from what it links to instead of in a row that every edge
+     has to pass under. The padding is room for the lanes that route around
+     the outside. */
   #stage.lr {
-    display: grid; grid-template-columns: auto auto auto auto; column-gap: 88px;
-    justify-content: center; align-items: center;
+    display: grid; grid-template-columns: repeat(5, auto); column-gap: 88px;
+    justify-content: center; align-items: center; padding: 72px 16px;
   }
   #stage.lr .row { flex-direction: column; flex-wrap: nowrap; margin: 0; }
-  #stage.lr #user { flex-direction: row; align-items: center; gap: 56px; }
   #stage.lr #behind .area > .body,
   #stage.lr #user .area > .body,
   #stage.lr .entry > .body { flex-direction: column; align-items: stretch; }
@@ -169,8 +170,9 @@
   <svg id="edges" aria-hidden="true"><defs id="markers"></defs><g id="paths"></g></svg>
   <div class="row" id="behind"></div>
   <div class="row" id="hosts"></div>
-  <div class="row" id="user"></div>
   <div class="row" id="shared"></div>
+  <div class="row" id="home"></div>
+  <div class="row" id="user"></div>
 </div>
 <script>
 "use strict";
@@ -284,15 +286,18 @@ function sourceGroup(parent, label, list, id) {
   }
   els.set(id, box);
 }
-const rows = {
-  behind: document.getElementById("behind"), hosts: document.getElementById("hosts"),
-  user: document.getElementById("user"), shared: document.getElementById("shared"),
-};
+const rows = Object.fromEntries(["behind", "hosts", "shared", "home", "user"]
+  .map(id => [id, document.getElementById(id)]));
 for (const area of DATA.areas.filter(a => a.place === "behind")) build(area, rows.behind);
 sourceGroup(rows.hosts, "hosts", DATA.hosts, "grp:hosts");
-for (const area of DATA.areas.filter(a => a.place === "user")) build(area, rows.user);
-sourceGroup(rows.user, "home", DATA.homes, "grp:homes");
 for (const area of DATA.areas.filter(a => a.place === "shared")) build(area, rows.shared);
+sourceGroup(rows.home, "home", DATA.homes, "grp:homes");
+for (const area of DATA.areas.filter(a => a.place === "user")) build(area, rows.user);
+// The far end: the user's own directory and the homes. A host's link out
+// to any of it routes around the graph rather than through it.
+const farIds = new Set(DATA.homes.map(h => h.id));
+for (const area of DATA.areas.filter(a => a.place === "user")) withDescendants(area.id, farIds);
+const hostIds = new Set(DATA.hosts.map(h => h.id));
 
 const legend = document.getElementById("legend");
 for (const [label, fill, line, cls] of [
@@ -479,16 +484,65 @@ function edgePath(a, b, stage) {
   const bend = (y2 - y1) / 2;
   return `M${x1},${y1} C${x1},${y1 + bend} ${x2},${y2 - bend} ${x2},${y2}`;
 }
+// A route around the outside of the graph: out of the host sideways, along a
+// lane past everything, then into the target from outside. `side` < 0 is
+// over the top (left to right) or down the left (top-down); > 0 the other
+// edge. `lane` spaces the routes on one side apart.
+function aroundPath(a, b, stage, bounds, side, lane) {
+  const off = 20 + lane * 9, d = 28;
+  if (leftToRight) {
+    const laneY = side < 0 ? bounds.top - off : bounds.bottom + off;
+    const x1 = a.right - stage.left, y1 = a.top + a.height / 2 - stage.top;
+    const xt = b.left + b.width / 2 - stage.left;
+    const yt = (side < 0 ? b.top : b.bottom) - stage.top, ly = laneY - stage.top;
+    const toward = side < 0 ? d : -d;
+    return `M${x1},${y1} C${x1 + d},${y1} ${x1 + d},${ly} ${x1 + 2 * d},${ly} ` +
+           `L${xt - d},${ly} C${xt},${ly} ${xt},${ly} ${xt},${ly + toward} L${xt},${yt}`;
+  }
+  const laneX = side < 0 ? bounds.left - off : bounds.right + off;
+  const x1 = a.left + a.width / 2 - stage.left, y1 = a.bottom - stage.top;
+  const yt = b.top + b.height / 2 - stage.top;
+  const xt = (side < 0 ? b.left : b.right) - stage.left, lx = laneX - stage.left;
+  const toward = side < 0 ? d : -d;
+  return `M${x1},${y1} C${x1},${y1 + d} ${lx},${y1 + d} ${lx},${y1 + 2 * d} ` +
+         `L${lx},${yt - d} C${lx},${yt} ${lx},${yt} ${lx + toward},${yt} L${xt},${yt}`;
+}
+// The box around everything drawn, which the lanes run outside of.
+function contentBounds() {
+  let top = Infinity, left = Infinity, bottom = -Infinity, right = -Infinity;
+  for (const row of Object.values(rows)) {
+    for (const child of row.children) {
+      if (child.classList.contains("hidden")) continue;
+      const r = child.getBoundingClientRect();
+      if (!r.width && !r.height) continue;
+      top = Math.min(top, r.top); left = Math.min(left, r.left);
+      bottom = Math.max(bottom, r.bottom); right = Math.max(right, r.right);
+    }
+  }
+  return { top, left, bottom, right };
+}
 function drawEdges() {
   const stage = stageEl.getBoundingClientRect();
   svg.setAttribute("width", stage.width); svg.setAttribute("height", stage.height);
   const out = [];
   const active = activeSources();
   const activeIds = new Set(active.map(s => s.id));
-  const line = (source, targetEl, cls) => {
+  const bounds = contentBounds();
+  // Each host routes around one side: the first half of the hosts one way,
+  // the rest the other. Each route on a side gets its own lane.
+  const hostOrder = DATA.hosts.map(h => h.id);
+  const sideOf = id => hostOrder.indexOf(id) < hostOrder.length / 2 ? -1 : 1;
+  const lanes = { "-1": 0, "1": 0 };
+  const line = (source, targetId, targetEl, cls) => {
     const p = document.createElementNS(SVG, "path");
-    p.setAttribute("d", edgePath(sourceEls.get(source.id).getBoundingClientRect(),
-                                 targetEl.getBoundingClientRect(), stage));
+    const a = sourceEls.get(source.id).getBoundingClientRect(), b = targetEl.getBoundingClientRect();
+    if (hostIds.has(source.id) && farIds.has(targetId)) {
+      const side = sideOf(source.id);
+      p.setAttribute("d", aroundPath(a, b, stage, bounds, side, lanes[side]++));
+      p.classList.add("around");
+    } else {
+      p.setAttribute("d", edgePath(a, b, stage));
+    }
     p.setAttribute("stroke", source.hue);
     p.setAttribute("marker-end", "url(#arrow-" + sources.indexOf(source) + ")");
     if (cls) p.classList.add(cls);
@@ -497,10 +551,10 @@ function drawEdges() {
   };
   for (const source of active) {
     for (const target of DATA.imports[source.id] || []) {
-      if (visible.has(target) && els.has(target)) line(source, els.get(target));
+      if (visible.has(target) && els.has(target)) line(source, target, els.get(target));
     }
     for (const home of DATA.enables[source.id] || []) {
-      if (activeIds.has(home)) line(source, sourceEls.get(home), "enables");
+      if (activeIds.has(home)) line(source, home, sourceEls.get(home), "enables");
     }
   }
   pathsG.replaceChildren(...out);
