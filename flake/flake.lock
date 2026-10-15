@@ -279,6 +279,29 @@
         "type": "github"
       }
     },
+    "nix-topology": {
+      "inputs": {
+        "flake-parts": [
+          "flake-parts"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1782153600,
+        "narHash": "sha256-Vbkgl7/x8+Gg0gMe94EStfIfNC4bHQIbaZrIAxpuQ/w=",
+        "owner": "oddlama",
+        "repo": "nix-topology",
+        "rev": "e61876f548e4f301d63640d30ecc1305c05c3986",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oddlama",
+        "repo": "nix-topology",
+        "type": "github"
+      }
+    },
     "nixos-hardware": {
       "inputs": {
         "nixpkgs": "nixpkgs_2"
@@ -377,6 +400,7 @@
         "jovian": "jovian",
         "llm-agents": "llm-agents",
         "nix-index-database": "nix-index-database",
+        "nix-topology": "nix-topology",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_3",
         "nixpkgs-lib": [

@@ -1,6 +1,6 @@
 # `system` — `general-config/system/`
 
-_Last modified: 2026-10-05_
+_Last modified: 2026-10-14_
 
 The largest category by far — across 19 subdirectories, no per-file count
 kept here on purpose (see categories/00-INDEX.md's Index section for why) —
@@ -25,6 +25,7 @@ under `system`.
 - [Containers vs. virtualization — the live trap, and no longer filed here](#containers-vs-virtualization--the-live-trap-and-no-longer-filed-here)
 - [The `*-persist.nix` sibling-file convention](#the--persistnix-sibling-file-convention)
 - [Tailscale: MagicDNS names, and the ACL lives outside this repo](#tailscale-magicdns-names-and-the-acl-lives-outside-this-repo)
+- [System diagram (nix-topology)](#system-diagram-nix-topology)
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
@@ -193,6 +194,27 @@ a plain shell script (world-readable, no root needed), is the literal
 in-order `iptables` ruleset NixOS applied at boot — faster than querying the
 live table when the question is "is `trustedInterfaces` really the first
 rule in the chain."
+
+## System diagram (nix-topology)
+
+`networking/nix-topology.nix` wires [nix-topology](https://github.com/oddlama/nix-topology)
+in, so the fleet can be rendered as SVG straight from the NixOS configs:
+
+```sh
+nix build .#topology.x86_64-linux.config.output
+```
+
+The result holds `main.svg` (services per host) and `network.svg` (networks
+and links). The NixOS half of the module is imported by every host that takes
+the `system` category; the flake-parts half adds the `topology` output.
+
+What the hand-written global topology (`perSystem.topology.modules` in that
+file) declares is limited to what this repo already states: the host roster,
+the `ts-<x>` naming rule and the backup target `ts-hive`, all on one
+`tailnet` network. It deliberately carries no subnets, addresses or upstream
+devices. `forge-runner` is a guest, not a machine, and does not import the
+module, so it is not drawn; `nire-lysithea` is a darwin host and is declared
+by hand.
 
 ## Imported by
 

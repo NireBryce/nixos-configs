@@ -102,6 +102,16 @@
         sops-nix.url                               = "github:mic92/sops-nix";
         sops-nix.inputs.nixpkgs.follows            = "nixpkgs";
 
+        # System/network diagrams rendered from the NixOS configs; module:
+        # general-config/system/networking/nix-topology.nix
+        nix-topology = {
+            url = "github:oddlama/nix-topology";
+            inputs = {
+                nixpkgs.follows    = "nixpkgs";
+                flake-parts.follows = "flake-parts";
+            };
+        };
+
         # ── Nix utilities ─────────────────────────────────────────────────────────
         nixos-hardware.url                         = "github:NixOS/nixos-hardware/master";
         nix-index-database.url                     = "github:nix-community/nix-index-database";
