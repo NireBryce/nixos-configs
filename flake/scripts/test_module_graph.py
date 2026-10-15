@@ -241,6 +241,63 @@ class Selecting(Tree):
         self.assertIn('mod:area/never-whole/picked.nix', g.nodes)
 
 
+class HostsLayout(Tree):
+    """The hosts view flows down from the hosts, with each host's own
+    host-config/ category drawn above it."""
+
+    def setUp(self):
+        super().setUp()
+        self.write('host-config/alpha/dirsAsCategory.nix', SHIM)
+        self.write('host-config/alpha/hw.nix', module('nixos'))
+        self.write('hosts/alpha-configuration.nix', host('nixos', 'alpha', 'used'))
+        self.write('hosts/home.nix', host('homeManager', 'used'))
+        self.g_ = mg.select(self.g(), 'hosts')
+        self.ids = {i: f'n{k}' for k, i in enumerate(self.g_.nodes)}
+        self.agg = self.ids['agg:hosts/alpha-configuration.nix:nixos']
+        self.own = self.ids['cat:host-config/alpha']
+        self.used = self.ids['cat:area/used']
+
+    def test_mermaid_runs_top_down_with_the_hosts_own_category_above(self):
+        out = mg.mermaid(self.g_)
+        self.assertIn('\nflowchart TB\n', out)
+        self.assertIn(f'{self.own} ~~~ {self.agg}', out)   # ranks it above
+        self.assertIn(f'{self.agg} --> {self.own}', out)   # arrow still host -> category
+        self.assertIn(f'{self.agg} --> {self.used}', out)  # shared ones flow down
+
+    def test_mermaid_link_styles_count_the_invisible_links(self):
+        out = mg.mermaid(self.g_)
+        links = [l.strip() for l in out.splitlines()
+                 if ' --> ' in l or ' -.-> ' in l or ' ~~~ ' in l or ' -. merges .- ' in l]
+        for idx, colour in re.findall(r'linkStyle ([\d,]+) stroke:(#\w+)', out):
+            for k in map(int, idx.split(',')):
+                self.assertIn(' --> ', links[k], (k, links[k]))   # a coloured edge is a real arrow
+        hue = mg.hues(self.g_)['agg:hosts/alpha-configuration.nix:nixos']
+        mine = [k for idx, c in re.findall(r'linkStyle ([\d,]+) stroke:(#\w+)', out)
+                if c == hue for k in map(int, idx.split(','))]
+        self.assertEqual(sorted(links[k] for k in mine),
+                         sorted([f'{self.agg} --> {self.own}', f'{self.agg} --> {self.used}']))
+
+    def test_dot_reverses_the_upward_edge_but_keeps_the_arrowhead(self):
+        out = mg.dot(self.g_)
+        self.assertIn('rankdir=TB', out)
+        self.assertRegex(out, rf'{self.own} -> {self.agg} \[dir=back ')
+        self.assertRegex(out, rf'{self.agg} -> {self.used} \[color=')
+
+    def test_dot_pins_unimported_shared_categories_below_the_hosts(self):
+        self.write('area/lonely/dirsAsCategory.nix', SHIM)
+        self.write('area/lonely/l.nix', module('nixos'))
+        g = mg.select(self.g(), 'hosts')
+        ids = {i: f'n{k}' for k, i in enumerate(g.nodes)}
+        out = mg.dot(g)
+        self.assertRegex(out, rf'n\d+ -> {ids["cat:area/lonely"]} \[style=invis\]')
+        self.assertNotIn(f'-> {ids["cat:area/used"]} [style=invis]', out)   # has an import
+        self.assertNotIn(f'-> {ids["cat:host-config/alpha"]} [style=invis]', out)
+
+    def test_tree_view_stays_left_to_right(self):
+        out = mg.dot(mg.select(self.g(), 'tree'))
+        self.assertIn('rankdir=LR', out)
+
+
 class Rendering(Tree):
     def test_mermaid_marks_orphans_and_merges(self):
         self.write('area/lonely/dirsAsCategory.nix', SHIM)

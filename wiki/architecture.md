@@ -69,6 +69,10 @@ criterion:
 - **Outline overlays on a category:** dashed when it is reached only
   through modules a host names one by one; red when no host imports it.
 
+The hosts view runs top-down: each host's own `host-config/<host>/`
+category sits above it, and the shared categories it imports below, each
+host's edges in its own colour (never blue or red).
+
 <!-- generated:module-layout -- from the dirsAsCategory.nix tree under flake/modules/, drawn by flake/scripts/module-graph.py, by `just wiki-gen`; change the source, not this table -->
 
 ```mermaid
