@@ -18,10 +18,11 @@ own that; this file is their review-side compression.
 
 A diff read is never enough (bugs serialize). In order:
 
-1. `just modules` — a module no host reaches (orphan), untracked files, and
-   drift between wiki-lint's file-only reading and the evaluated graph. A
-   repeated module/category name or an unknown `includes` name fails
-   evaluation itself (dirs-as-categories, `wiki/module-files.md`).
+1. `just modules` — untracked files, and drift between wiki-lint's
+   file-only reading and the evaluated graph. A module no host reaches
+   (orphan) fails `just check`'s `module-orphans`; a repeated module/category
+   name or an unknown `includes` name fails evaluation itself
+   (dirs-as-categories, `wiki/module-files.md`).
 2. `git status --short` — **`git add` before `nix eval`**: an untracked new
    file doesn't exist to the flake; a passing eval may never have seen it.
 3. `just preflight` — wiki-lint + check + modules + lint (statix/deadnix

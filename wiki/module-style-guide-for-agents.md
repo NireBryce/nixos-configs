@@ -102,4 +102,4 @@ option without a reason beyond tidiness.
 - Filename = name. A repeated name, or one shared with a category, stops
   evaluation (was a silent merge, §34).
 
-`just modules` reports orphans and untracked files.
+`just check` fails on an orphan (`module-orphans`); `just modules` reports untracked files.

@@ -1,6 +1,6 @@
 # Where a module goes
 
-_Last modified: 2026-10-15_
+_Last modified: 2026-10-16_
 
 Every module under `flake/modules/` sits in one of three places, and which
 one decides who gets it: **shared** modules sit in the general tree and
@@ -117,7 +117,7 @@ host's or user's directory — are **entry points**: `hosts.nix`, each
 categories a host or the Home Manager config imports. Neither directory is
 a category itself, so nothing collects a file placed there: a module
 dropped at `host-config/foo.nix` reaches no host, and because it sits
-outside every category tree, `just modules`' orphan check skips it too.
+outside every category tree, the orphan check (`module-orphans`) skips it too.
 Put modules one level down, in the host's or user's directory.
 
 ## Worked example: cube's VM wiring

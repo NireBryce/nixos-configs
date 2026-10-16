@@ -24,7 +24,7 @@
     #
     # jovian-persist is imported by name, not left to the category: `desktop-env` is never
     # imported whole (see tenacity-configuration.nix), so a sibling file is
-    # reachable through nothing and `just modules` reports it as an orphan.
+    # reachable through nothing and the orphan check reports it.
     # Naming it here is also what scopes it -- /etc/hhd persists exactly
     # where handheld-daemon runs, because the two arrive together.
     includes.nixos = [ "kde-base" "jovian-persist" ];
