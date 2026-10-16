@@ -20,7 +20,7 @@
 
     homeManager = { pkgs, ... }:
         # services.kdeconnect asserts meta.platforms (Linux-only), a hard
-        # eval failure, and ellyHomeManager is shared with nire-lysithea
+        # eval failure, and elly-home-manager is shared with nire-lysithea
         # (aarch64-darwin). The guard has to be here by hand:
         # drop-unsupported-packages.nix only filters home.packages, and
         # services.* assertions fire before any package list exists --
