@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for modules.py's `orphans` check and its `add` scaffold.
+"""Tests for modules.py's `drift` check and its `add` scaffold.
 
 Both read flake.moduleGraph; here a stand-in for `nix eval` answers with a
 document built per test, so a check is shown firing on a tree broken on
@@ -70,52 +70,6 @@ class Tree(unittest.TestCase):
         return document(self.cats, self.mods, self.includes, self.enables)
 
 
-class Orphans(Tree):
-    def found(self):
-        return {name for name, _, _ in quiet(modules.orphans, self.root, self.doc())}
-
-    def test_clean_tree_has_no_findings(self):
-        self.assertEqual(self.found(), set())
-
-    def test_a_category_nothing_reaches_is_reported(self):
-        self.cats['lonely'] = 'area/lonely'
-        self.mods['l'] = 'area/lonely/l/l.nix'
-        self.assertEqual(self.found(), {'l'})
-
-    def test_a_nested_category_is_reached_through_its_parent(self):
-        self.assertNotIn('b', self.found())
-
-    def test_a_module_named_in_includes_or_enables_is_reached(self):
-        self.cats['lonely'] = 'area/lonely'
-        self.mods['picked'] = 'area/lonely/picked.nix'
-        self.mods['other'] = 'area/lonely/other.nix'
-        self.mods['turned-on'] = 'area/lonely/turned-on.nix'
-        self.includes['alpha']['nixos'].append('picked')
-        self.enables['a'] = {'homeManager': ['turned-on']}
-        self.assertEqual(self.found(), {'other'})
-
-    def test_a_module_including_another_reaches_it(self):
-        # kde-desktop includes kde-base: kde-base is reached that way
-        self.cats['desk'] = 'area/desk'
-        self.mods['full'] = 'area/desk/full.nix'
-        self.mods['base'] = 'area/desk/base.nix'
-        self.includes['alpha']['nixos'].append('full')
-        self.includes['full'] = {'nixos': ['base']}
-        self.assertEqual(self.found(), set())
-
-    def test_entry_points_outside_categories_are_not_orphans(self):
-        self.mods['beta'] = 'hosts/beta.nix'
-        self.assertEqual(self.found(), set())
-
-    def test_orphan_ok_in_the_file_is_respected(self):
-        self.cats['lonely'] = 'area/lonely'
-        self.mods['kept'] = 'area/lonely/kept.nix'
-        f = self.root / 'area/lonely/kept.nix'
-        f.parent.mkdir(parents=True, exist_ok=True)
-        f.write_text('# ORPHAN-OK: for a host not configured now\n{ nixos = { }; }\n')
-        self.assertEqual(self.found(), set())
-
-
 class Graph(Tree):
     def test_reads_a_path_ref_beside_the_modules_dir(self):
         fake = FakeNix(self.doc())
@@ -165,6 +119,20 @@ class Add(Tree):
             self.assertEqual(self.add(cls, target), 1, target)
             self.assertFalse((self.root / target).exists(), target)
 
+    def test_reports_the_new_module_as_an_expected_orphan(self):
+        doc = self.doc()
+        doc['orphans'] = ['new-thing']          # what the graph says once the file exists
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            rc = modules.add(self.root, 'homeManager', 'area/used/new-thing/new-thing.nix', [], run=FakeNix(doc))
+        self.assertEqual(rc, 0)
+        self.assertIn('ORPHAN (expected -- brand new)', out.getvalue())
+
+    def test_an_older_orphan_fails_the_scaffold(self):
+        doc = self.doc()
+        doc['orphans'] = ['new-thing', 'stale']
+        self.assertEqual(self.add('homeManager', 'area/used/new-thing/new-thing.nix', doc=doc), 1)
+
     def test_refuses_a_description_that_breaks_the_string(self):
         self.assertEqual(self.add('nixos', 'area/used/q/q.nix', 'a', '"quote'), 1)
 
@@ -186,29 +154,20 @@ class Drift(Tree):
             self.assertTrue(any(needle in h for h in hits), needle)
 
 
-class GraphFile(Tree):
-    def test_graph_from_a_file_needs_no_nix(self):
-        self.cats['lonely'] = 'area/lonely'
-        self.mods['l'] = 'area/lonely/l/l.nix'
-        f = pathlib.Path(self._tmp.name) / 'graph.json'
-        f.write_text(json.dumps(self.doc()))
-        no_nix = lambda *a, **kw: (_ for _ in ()).throw(AssertionError('nix was called'))
-        self.assertEqual(quiet(modules.main, ['orphans', str(self.root), '--graph', str(f)], run=no_nix), 1)
-
-
 class Main(Tree):
-    def test_check_fails_on_a_finding(self):
-        self.cats['lonely'] = 'area/lonely'
-        self.mods['l'] = 'area/lonely/l/l.nix'
+    def test_check_fails_on_drift_and_passes_when_the_readings_agree(self):
+        self.assertEqual(quiet(modules.main, ['check', str(self.root)], run=FakeNix(self.doc())), 0)
         doc = self.doc()
+        doc['categories']['ghost'] = {'dir': 'area/ghost'}       # evaluated, not in the files
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
             rc = modules.main(['check', str(self.root)], run=FakeNix(doc))
         self.assertEqual(rc, 1)
-        self.assertIn("ORPHAN     'l'", out.getvalue())
-        self.assertNotIn('DRIFT', out.getvalue())          # the tree reads the same both ways
-        self.cats.pop('lonely'); self.mods.pop('l')
-        self.assertEqual(quiet(modules.main, ['orphans', str(self.root)], run=FakeNix(self.doc())), 0)
+        self.assertIn("DRIFT      category 'ghost'", out.getvalue())
+
+    def test_orphans_is_no_longer_a_subcommand(self):
+        # dirs-as-categories reports them (`nix flake check`'s module-orphans)
+        self.assertEqual(quiet(modules.main, ['orphans', str(self.root)], run=FakeNix(self.doc())), 2)
 
 
 if __name__ == '__main__':

@@ -9,7 +9,7 @@
 #
 # Being a sibling is NOT enough to make it reachable, though. `desktop-env` is
 # never imported whole -- hosts name `jovian` directly -- so nothing collects
-# this file, and `just modules` reported it as an orphan the moment it was
+# this file, and the orphan check reported it the moment it was
 # created. jovian.nix imports it explicitly instead, which is also the tighter
 # guarantee: the persistence rule cannot arrive without the daemon that needs
 # it, or be forgotten by a host that adds one.

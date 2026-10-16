@@ -55,8 +55,10 @@ the full rules.
   declares `mkEnableOption`. `kde-desktop` is the by-name variant, included
   directly while its category (`desktop-env`, which also holds `jovian`) is
   never included whole.
-- `just modules` reports orphans, untracked files, and drift between
-  wiki-lint's file-only reading and the evaluated graph.
+- Orphans (a module nothing reaches) fail `nix flake check`
+  (`module-orphans`, dirs-as-categories' check); `just modules` reports
+  untracked files and drift between wiki-lint's file-only reading and the
+  evaluated graph.
 
 ## Conventions
 

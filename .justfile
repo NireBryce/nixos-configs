@@ -54,8 +54,8 @@ modules:
     # Platform independent, so this is the one check that means anything on darwin.
     cd {{flake}} && python3 scripts/modules.py check modules
 
-# Tests for modules.py: builds throwaway trees and documents with an orphan,
-# an untracked file and each kind of drift, and asserts each check fires.
+# Tests for modules.py: builds throwaway trees and documents with each kind
+# of drift and an orphaned scaffold, and asserts each check fires.
 # Pure stdlib; runs in preflight and CI
 modules-test:
     python3 {{scripts}}/tests/test_modules.py

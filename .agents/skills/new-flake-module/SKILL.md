@@ -112,8 +112,9 @@ Adding/removing/renaming a module in a category with an article under
 `wiki/categories/`, or changing which folders are categories: update that
 article and run `just wiki-gen` (regenerates `wiki/categories/00-INDEX.md`'s
 tables, the module counts and `wiki/architecture.md`'s diagram) in the same
-change. `just modules` checks orphans, untracked files, and that wiki-lint's
-file-only reading still matches the evaluated graph.
+change. `just check` fails on an orphan (a module nothing reaches; the
+`module-orphans` check); `just modules` checks untracked files, and that
+wiki-lint's file-only reading still matches the evaluated graph.
 
 Further reading: `wiki/module-files.md`, `wiki/module-style-guide.md`
 (aligned `=` columns deliberate; `nix fmt` deliberately not wired up).

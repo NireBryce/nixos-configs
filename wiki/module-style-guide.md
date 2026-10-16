@@ -256,4 +256,4 @@ Not formatting, but it belongs here because getting it wrong produces no error:
 - A module's filename is its name. A file named like another module or a
   category stops evaluation (it used to merge silently, §34).
 
-`just modules` reports orphans and untracked files.
+`just check` fails on an orphan (`module-orphans`); `just modules` reports untracked files.

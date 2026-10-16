@@ -11,7 +11,11 @@
 # flake-parts module rather than a module file (wiki/module-files.md).
 { config, lib, ... }:
 {
-    perSystem = { system, pkgs, ... }:
+    # checks.<system>.module-orphans: fails naming any module inside a
+    # category that no `includes`/`enables` reaches (wiki/module-files.md).
+    dirsAsCategories.checkOrphans = true;
+
+    perSystem = { system, ... }:
     let
         # Both host classes, each filtered to the system it evaluates under.
         # nix-darwin sets nixpkgs.hostPlatform the same way NixOS does, so one
@@ -51,26 +55,10 @@
             (lib.filterAttrs (_: host: host.config ? home-manager) (nixosHosts // darwinHosts));
     in
     {
-        checks = hostChecks // homeChecks // {
-            # Static, so it means the same under every system -- unlike the
-            # host checks above, each filtered to the one system its host is.
-            #
-            # Catches what evaluating cannot report: a module no host or home
-            # aggregate reaches (valid, evaluates, installs nothing). A repeated
-            # name no longer needs catching here -- dirs-as-categories refuses it
-            # at evaluation. There is no nix inside a build, so the graph is
-            # handed over already evaluated; `just modules` runs the rest
-            # (untracked files, drift against wiki-lint's reading).
-            module-tree = pkgs.runCommand "module-tree-check"
-                { nativeBuildInputs = [ pkgs.python3 ]; }
-                ''
-                    if ! python3 ${../scripts/modules.py} orphans ${./.} \
-                        --graph ${pkgs.writeText "module-graph.json" (builtins.toJSON config.flake.moduleGraph)} > "$out"; then
-                        cat "$out" >&2
-                        exit 1
-                    fi
-                    cat "$out"
-                '';
-        };
+        # Orphans -- modules nothing reaches, which evaluate and install
+        # nothing -- are dirs-as-categories' own check, `module-orphans`,
+        # turned on at the top of this file; `just modules` runs the rest (untracked files,
+        # drift against wiki-lint's reading).
+        checks = hostChecks // homeChecks;
     };
 }

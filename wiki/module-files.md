@@ -33,7 +33,7 @@ error); this page is what they mean for this repo, and why it changed.
 | Not a module | a function asking for `config`/`withSystem`, or a file with no class key: loaded as a plain flake-parts module |
 | `_` paths | skipped, as by import-tree |
 | Mistakes | duplicate names, unknown keys, unknown names in `includes`/`enables` stop evaluation, naming the file |
-| Checks | `just modules`: orphans, untracked files, and drift between wiki-lint's file-only reading and the evaluated graph |
+| Checks | `nix flake check`'s `module-orphans` (dirs-as-categories' `checkOrphans`, on in `checks.nix`): modules nothing reaches; `just modules`: untracked files, and drift between wiki-lint's file-only reading and the evaluated graph |
 
 ## What a module file is
 
