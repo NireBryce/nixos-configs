@@ -554,11 +554,15 @@ class Page(Tree):
     def data(self):
         return mg.page_data(mg.select(self.g(), 'hosts'))
 
-    def test_areas_hold_their_tree_and_know_which_sit_on_top(self):
+    def test_areas_hold_their_tree_and_know_their_place(self):
+        self.write('users-config/u/dirsAsCategory.nix', SHIM)
+        self.write('users-config/u/acct.nix', module('nixos'))
+        self.write('hosts/alpha-configuration.nix', host('nixos', 'alpha', 'u', 'used', 'ghost'))
         d = self.data()
         areas = {a['title']: a for a in d['areas']}
-        self.assertEqual(areas['host-config']['top'], True)
-        self.assertEqual(areas['area']['top'], False)
+        self.assertEqual({k: a['place'] for k, a in areas.items()},
+                         {'host-config': 'behind', 'users-config': 'user',
+                          'area': 'shared', 'not found': 'shared'})
         (used,) = areas['area']['children']
         self.assertEqual((used['id'], used['kind'], used['status']),
                          ('cat:area/used', 'category', 'imported'))
@@ -616,6 +620,94 @@ class Page(Tree):
         self.assertEqual(rc, 0)
         self.assertIn('<title>Module graph</title>', out.getvalue())
         self.assertIn('"id":"cat:host-config/alpha"', out.getvalue())
+
+
+HOME = '''{ config, ... }: {
+    flake.modules.homeManager.homeAgg.imports =
+        with config.flake.modules.homeManager; [ sub ];
+}
+'''
+
+
+def turns_on(cls, *refs):
+    """A module of class `cls` that refers to the given aggregates, the way
+    enable-home-manager.nix refers to ellyHomeManager."""
+    lines = ''.join(f'        x{k} = config.flake.modules.{r};\n' for k, r in enumerate(refs))
+    return ('{ config, lib, ... }:\n    let moduleName = lib.removeSuffix ".nix" '
+            '(baseNameOf __curPos.file);\n    in {\n'
+            f'        flake.modules.{cls}.${{moduleName}} = {{ }};\n{lines}    }}\n')
+
+
+class Places(Tree):
+    """Where the page puts each area."""
+
+    def test_areas_get_their_place_and_shared_ones_their_order(self):
+        for area in ('packages-config/p', 'general-config/g', 'hardware-config/w',
+                     'homelab-config/h', 'zz-config/z', 'host-config/x'):
+            self.write(f'{area}/dirsAsCategory.nix', SHIM)
+            self.write(f'{area}/{area.split("/")[1]}m.nix', module('nixos'))
+        names = ' '.join(a.split('/')[1] for a in ('packages-config/p', 'general-config/g',
+                         'hardware-config/w', 'homelab-config/h', 'zz-config/z', 'host-config/x'))
+        self.write('hosts/alpha-configuration.nix', host('nixos', *names.split()))
+        d = mg.page_data(mg.select(self.g(), 'hosts'))
+        places = [(a['title'], a['place']) for a in d['areas']]
+        shared = [t for t, p in places if p == 'shared']
+        self.assertEqual(shared[:3], ['general-config', 'hardware-config', 'packages-config'])
+        self.assertEqual(sorted(shared[3:]), shared[3:])            # the rest, alphabetically
+        self.assertIn(('homelab-config', 'beside'), places)
+        self.assertIn(('host-config', 'behind'), places)
+
+
+class Enables(Tree):
+    """A host does not import its Home Manager config: a module it imports
+    refers to it. That reference is the `enables` edge."""
+
+    def setUp(self):
+        super().setUp()
+        self.write('hosts/home.nix', HOME)
+        self.write('hosts/alpha-configuration.nix', host('nixos', 'used'))
+
+    def enabled(self):
+        return {(e.src, e.dst, e.cls) for e in self.g().edges if e.kind == 'enables'}
+
+    HOST, HOMEID = 'agg:hosts/alpha-configuration.nix:nixos', 'agg:hosts/home.nix:homeManager'
+
+    def test_a_module_the_host_imports_refers_to_it(self):
+        self.write('area/used/turn-on.nix', turns_on('nixos', 'homeManager.homeAgg'))
+        self.assertEqual(self.enabled(), {(self.HOST, self.HOMEID, 'nixos')})
+
+    def test_no_reference_no_edge(self):
+        self.assertEqual(self.enabled(), set())
+
+    def test_only_modules_of_the_hosts_class_count(self):
+        # the darwin twin sits in the same category; a nixos host never gets it
+        self.write('area/used/turn-on-darwin.nix', turns_on('darwin', 'homeManager.homeAgg'))
+        self.assertEqual(self.enabled(), set())
+
+    def test_a_module_imported_by_name_counts(self):
+        self.write('area/never-whole/dirsAsCategory.nix', SHIM)
+        self.write('area/never-whole/picked.nix', turns_on('nixos', 'homeManager.homeAgg'))
+        self.write('hosts/alpha-configuration.nix', host('nixos', 'picked'))
+        self.assertEqual(self.enabled(), {(self.HOST, self.HOMEID, 'nixos')})
+
+    def test_a_reference_in_a_comment_does_not_count(self):
+        self.write('area/used/turn-on.nix', turns_on('nixos') +
+                   '# config.flake.modules.homeManager.homeAgg\n')
+        self.assertEqual(self.enabled(), set())
+
+    def test_page_splits_hosts_from_the_homes_they_enable(self):
+        self.write('area/used/turn-on.nix', turns_on('nixos', 'homeManager.homeAgg'))
+        d = mg.page_data(mg.select(self.g(), 'hosts'))
+        self.assertEqual([h['title'] for h in d['hosts']], ['alpha-configuration'])
+        self.assertEqual([h['title'] for h in d['homes']], ['home'])
+        self.assertEqual(d['enables'][self.HOST], [self.HOMEID])
+        self.assertEqual(d['enables'][self.HOMEID], [])
+
+    def test_renderers_draw_it_dashed(self):
+        self.write('area/used/turn-on.nix', turns_on('nixos', 'homeManager.homeAgg'))
+        g = mg.select(self.g(), 'hosts')
+        self.assertIn('-. enables .->', mg.mermaid(g))
+        self.assertRegex(mg.dot(g), r'style=dashed penwidth=1.2 label="enables"')
 
 
 class Rendering(Tree):
