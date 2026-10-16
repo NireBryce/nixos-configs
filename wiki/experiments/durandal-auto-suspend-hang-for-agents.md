@@ -1,6 +1,6 @@
 # Auto-suspend hang on nire-durandal, for agents
 
-_Last modified: 2026-10-14_
+_Last modified: 2026-10-16_
 
 Source: [durandal-auto-suspend-hang.md](durandal-auto-suspend-hang.md).
 **Status: mechanism partly identified, cause
@@ -63,9 +63,9 @@ too long, RAM and the session are lost.
   delta.
 - **"Power-cycle count moved = hang" is WRONG** (corrected 2026-09-15): `+1`
   is baseline; only `> 1` is a hang.
-- Detector-labelled totals 2026-09-14→2026-10-14: **4 hangs (cycle 7;
-  `20261002T233332Z-post`; `20261006T013712Z-post`; `20261015T000352Z-post`),
-  ~56 clean** — ~1 in 15. Cycles predating smartmontools are memory-labelled,
+- Detector-labelled totals 2026-09-14→2026-10-16: **5 hangs (cycle 7;
+  `20261002T233332Z-post`; `20261006T013712Z-post`; `20261015T000352Z-post`;
+  `20261016T052124Z-post`), ~64 clean** — ~1 in 14. Cycles predating smartmontools are memory-labelled,
   unverifiable.
 - **2026-10-02 hang:** auto, `deep`, 6.18.53, `nvme0` 2891→2894 (2 cuts; user
   recalled "2 or 3" — trust the counter), 94 s suspend→resume wall clock incl.
@@ -78,8 +78,17 @@ too long, RAM and the session are lost.
   10-14 on **6.18.55** (10-05 on 6.18.53), so the kernel bump did not help; GPU
   `suspend_noirq` 519 ms, idle 0%/5 W, 1.09 GB VRAM, 15 DRM clients — all
   inside the clean-cycle range, so the paused-game-VRAM idea is unsupported.
-  Both came 15–22 min after the previous resume; clean cycles also follow
-  resumes by 13 s–6 min, so not a discriminator.
+  Both came 15–22 min after the previous resume.
+
+- **2026-10-16 hang:** auto, `deep`, 6.18.55, `+4` (`nvme0` 2929→2933, 3
+  cuts in ~3 min), RAM kept, `suspend_stats` success. GPU `suspend_noirq`
+  515 ms returning 0, idle 0%/5 W, 1.50 GB VRAM, 19 DRM clients — inside the
+  clean range (VRAM 0.05–3.04 GB, clients 0–23, every `pre` with the fields).
+  `ata6: failed to resume link` fires every cycle, not a suspect.
+
+- **Resume→suspend gap is not a discriminator.** Hangs at 15, 15, 21, 22 min;
+  clean cycles span <1 min to ~15 h, several at 15–24 min (recomputed
+  2026-10-16; an earlier "clean = 13 s–6 min" here was wrong).
 
 ## Ruled out
 

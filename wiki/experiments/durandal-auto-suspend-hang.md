@@ -1,6 +1,6 @@
 # Auto-suspend hang on nire-durandal
 
-_Last modified: 2026-10-14_
+_Last modified: 2026-10-16_
 
 `nire-durandal` suspends into S3 and then cannot be woken — keyboard, power
 button, nothing — until power is physically removed at the PSU. **Status:
@@ -212,9 +212,32 @@ hang was on 6.18.55, so the newer kernel did not fix it; wall clock was 11 min
 including the PSU cuts.
 
 **Detector-labelled totals, 2026-10-02 → 2026-10-14: two hangs, 21 clean**
-(every other `post` delta is `+1`). Since 2026-09-14: **4 hangs**, roughly one
-in 15 cycles. The short gap since the previous resume (15–22 min) is
-noted, not a discriminator: clean cycles follow a resume by 13 s to 6 min.
+(every other `post` delta is `+1`).
+
+**Fifth hang, 2026-10-16**, reported by the user hours later and found in the
+dumps the same way. Auto-suspend (`org_kde_powerdevil`), `deep`, no-wake shape,
+RAM kept (same boot since 2026-10-06):
+
+| | pair | `nvme0` | kernel | suspend → back | after previous resume |
+|---|---|---|---|---|---|
+| 5th | `20261016T051815Z-pre` / `T052124Z-post` | 2929 → 2933 (`+4`) | 6.18.55 | 01:18:16 → 01:21:24 EDT | ~15 min |
+
+`+4`, three PSU cuts in about three minutes. GPU `pci_pm_suspend_noirq`
+**515 ms** returning 0 (baseline), `suspend_stats` `success` (no failed step),
+GPU idle (0% busy, 5 W), **1.50 GB VRAM and 19 DRM clients**. Both are inside
+the clean-cycle range across every `pre` dump that has the fields (VRAM
+0.05–3.04 GB, `drm_client_processes` 0–23). `ata6: failed to resume link` is
+in its resume log but fires on every cycle (26 times in 25 suspends this boot),
+so it is not a discriminator.
+
+**Detector-labelled totals, 2026-10-15 → 2026-10-16: one hang, 8 clean.**
+Since 2026-09-14: **5 hangs, ~64 clean**, roughly one in 14 cycles.
+
+**The gap since the previous resume is not a discriminator.** Hangs came 15,
+15, 21 and 22 min after a resume. Clean cycles range from under a minute to
+~15 h, including several at 15–24 min (recomputed 2026-10-16 from every
+`post`→`pre` pair; this page earlier gave the clean range as 13 s–6 min, which
+was wrong).
 
 ## Instrumentation
 
