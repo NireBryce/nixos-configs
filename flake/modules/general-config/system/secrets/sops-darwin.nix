@@ -1,7 +1,5 @@
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{
     # Darwin counterpart to sops.nix (that module is nixos-only -- see
     # its own header -- because nothing on darwin currently consumes
     # `sops.secrets.*` at activation; lysithea has no service depending
@@ -31,7 +29,7 @@ in {
     # shell to expand $HOME at sourcing time) -- same reasoning
     # `config.users.users.elly.home` gets used for elsewhere, e.g.
     # security/yubikey.nix.
-    flake.modules.darwin.${moduleName} = { config, ... }: {
+    darwin = { config, ... }: {
         environment.variables.SOPS_AGE_KEY_FILE =
             "${config.users.users.elly.home}/.config/sops/age/keys.txt";
     };

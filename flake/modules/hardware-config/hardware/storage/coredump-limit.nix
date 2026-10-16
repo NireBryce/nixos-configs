@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # A size backstop for the coredump store.
 #
 # What is already true without this file: systemd ships
@@ -12,11 +13,8 @@
 # settings.Coredump, not extraConfig: `systemd.coredump.extraConfig` is
 # deprecated in 26.11 and errors by name, the same way systemd.sleep.extraConfig
 # did.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = {
+{
+    nixos = {
         # ceiling, not retention -- see header
         systemd.coredump.settings.Coredump = {
             MaxUse   = "2G";

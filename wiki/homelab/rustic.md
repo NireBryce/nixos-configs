@@ -8,7 +8,7 @@ search results) — a client tool for the repository
 [backup](../categories/backup.md) writes, not a service this fleet runs.
 Installed 2026-08-28 in
 `packages-config/shell-apps/backup-tools/rustic.nix`, so it's on every host
-`ellyHomeManager` reaches.
+`elly-home-manager` reaches.
 
 ## Contents
 
@@ -46,7 +46,7 @@ one caveat: don't run `prune` from both at the same time.
 `mainProgram = "rustic"`) via
 `packages-config/shell-apps/backup-tools/rustic.nix` — a plain `home.packages`
 entry, no `programs.*`/`services.*` module exists for it. It's in
-`ellyHomeManager`, which every host shares, rather than gated to cube: it's
+`elly-home-manager`, which every host shares, rather than gated to cube: it's
 a generally useful restic-repository browser, not tied to this one
 repository, and `just available rustic` found no Homebrew cask duplicating
 it (so no `isDarwin` judgment call the way `obsidian.nix` needed one).

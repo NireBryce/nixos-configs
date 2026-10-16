@@ -1,11 +1,9 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Prometheus itself: scrapes the four loopback-only exporters
 # (node-exporter.nix, cadvisor.nix, libvirt-exporter.nix, smartctl-exporter.nix)
 # and stores the time series grafana.nix's dashboard reads from.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = {
+{
+    nixos = {
         # # description = "prometheus -- scrapes the exporters, stores metrics for grafana.nix";
         services.prometheus = {
             enable = true;

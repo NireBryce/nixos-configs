@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Device-permission groups elly needs for sunshine.nix (next door) to actually
 # work at runtime -- split out from that file because it edits the user
 # account rather than the service, and from elly-user.nix because these groups
@@ -9,13 +10,10 @@
 # capSysAdmin (in sunshine.nix) only grants CAP_SYS_ADMIN -- it does not bypass
 # the normal DAC permission checks on the device nodes below, so elly still
 # needs to be a member of the groups that own them:
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
+{
     # `{ ... }:` kept over statix's suggested `_:` -- deliberate, see
     # wiki/module-style-guide.md's "`{ ... }:` on an inner module lambda".
-    flake.modules.nixos.${moduleName} = { ... }: {
+    nixos = { ... }: {
         users.users.elly.extraGroups = [
             "render" # /dev/dri/renderD* (root:render, 0660) -- VAAPI hardware encode.
                      # logind's dynamic per-seat ACLs (the "uaccess" udev tag) cover

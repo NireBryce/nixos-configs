@@ -31,9 +31,9 @@
 # below are NixOS-only, and a darwin host would fail on the option
 # paths, not on the invariants.
 #
-# Sits at the top of modules/, outside every category directory, so no
-# dirsAsCategory collects it; it declares no flake.modules.<class>
-# attribute, so modules.py does not consider it for orphans either.
+# A function asking for `config`, so dirs-as-categories loads it as a plain
+# flake-parts module, not a module file (wiki/module-files.md); being no
+# module, it is not considered for orphans either.
 #
 # OPT-IN: HOSTS WITHOUT IMPERMANENCE ARE EXEMPT
 #

@@ -1,7 +1,6 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 { lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
+{
     # Renamed from `virtualization.nix`, which declared
     # `flake.modules.nixos.virtualization`. Everything here is OCI
     # containers -- podman and distrobox -- and never was anything else;
@@ -21,14 +20,14 @@ in {
     #
     # RENAMED IN THE SAME MOVE, `containers.nix` -> `podman.nix`: the
     # exact near-miss `virtualization`'s header records, hit for real.
-    # The category's `dirsAsCategory.nix` derives its aggregate name from
-    # its directory `nire/containers/`, declaring
-    # `flake.modules.nixos.containers` -- the same attribute a file still
-    # named `containers.nix` would declare from ITS filename; the two
-    # would merge invisibly, not conflict, and `just modules` caught it.
+    # The category took its name from its directory `nire/containers/`,
+    # declaring `flake.modules.nixos.containers` -- the same attribute a
+    # file still named `containers.nix` would declare from ITS filename; the
+    # two would have merged invisibly, and `just modules` caught it (today
+    # evaluation refuses it).
     # Named after the technology, like `libvirt.nix` isn't named
     # `virtualization.nix`.
-    flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+    nixos = { pkgs, ... }: {
         # # description = "podman, distrobox, and the subuid pinning they need";
         environment.systemPackages = with pkgs; [
             distrobox
@@ -141,7 +140,7 @@ in {
         # '';
     };
 
-# flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
+# homeManager = { pkgs, ... }: {
 #         User-scoped `~/.config/containers/registries`
 #         https://wiki.nixos.org/wiki/Podman#DevContainers
 #         xdg.configFile."containers/registries.conf".text = ''

@@ -1,7 +1,5 @@
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{
     # `sops.age.sshKeyPaths` (sops.nix) is enough for NixOS's OWN
     # activation-time secret decryption -- that already works, proven by
     # /run/secrets existing on every host that imports this category.
@@ -101,7 +99,7 @@ in {
     # liable to be copied out by a substituter push, `nix copy`, or any
     # binary cache -- a categorically worse exposure than "root-only on
     # this one machine," which is all this module is meant to stay.
-    flake.modules.nixos.${moduleName} = { config, lib, pkgs, ... }: {
+    nixos = { config, lib, pkgs, ... }: {
         # Root has no Home Manager profile, so the user's `EDITOR = "micro"`
         # (shell-env.nix) never reaches it -- see the header comment.
         # Same value, exported system-wide instead of per-user.

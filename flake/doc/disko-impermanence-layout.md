@@ -9,7 +9,7 @@ LUKS-encrypted partition, btrfs inside it, subvolumes for `root` / `home` /
 `WARN-impermanence.nix`'s initrd unit snapshots from on every boot.
 
 **Nothing imports it.** Same spirit as `dirsAsCategory.md`'s trailhead for
-per-module opt-in: written to have the mechanism ready and checked, not to
+per-module opt-in (that note is history now, the spirit isn't): written to have the mechanism ready and checked, not to
 commit any host to using it. `nire-cube` was added with a plain persistent
 btrfs root instead, deliberately, and this file exists alongside that
 decision rather than because of it.
@@ -35,7 +35,7 @@ imports = [
 
 It sits under `_disko/` rather than a normal category directory because
 `import-tree` ignores any path containing `/_` by default -- the same rule
-`_templates/dirsAsCategory.nix` already relies on.
+`grafana/_dashboards/` and `VMs/_lib/` already rely on.
 That matters here specifically: this file is not a `flake.modules.<class>.<name>`
 module, so if import-tree tried to auto-import it the normal way, it would call
 it with the standard flake-parts args (`{ config, lib, inputs, ... }`) instead

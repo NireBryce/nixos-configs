@@ -39,7 +39,7 @@ under it, which can happen with no commit to this repo at all.
 
 **Not a service of its own, but related**: [rustic](rustic.md) — a TUI that
 can browse and restore from the same repository the row above writes.
-Installed 2026-08-28 (`ellyHomeManager`-wide) and switched on cube as of
+Installed 2026-08-28 (`elly-home-manager`-wide) and switched on cube as of
 2026-08-30, but not yet run against a real repository — the `ts-hive` mount
 itself isn't working yet either (see the runbook).
 

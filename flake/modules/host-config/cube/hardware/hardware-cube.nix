@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # nire-cube (GMKtec Nucbox G11). fileSystems/boot.initrd.*/swapDevices below
 # are real, captured from `nixos-generate-config` after installing NixOS onto
 # the real disk with the stock NixOS live ISO -- not this flake's own
@@ -35,11 +36,8 @@
 # host's fileSystems into durandal's under the same attribute instead of
 # erroring, the same collision tenacity's suffixed filename exists to avoid.
 # See CLAUDE.md's new-flake-module trap notes.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { config, lib, modulesPath, ... }:
+{
+    nixos = { config, lib, modulesPath, ... }:
 {
   imports =
     [ (modulesPath + "/installer/scan/not-detected.nix")

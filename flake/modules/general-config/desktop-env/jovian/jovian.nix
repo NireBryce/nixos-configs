@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # The handheld half of the desktop story: Jovian, Steam, and the TDP stack.
 #
 # Generic to handhelds -- machines with built-in controllers that occasionally
@@ -13,30 +14,25 @@
 # from Jovian's own modules/steam/autostart.nix, which sets defaultSession
 # to "gamescope-wayland" -- the half of kde-desktop.nix this host must not
 # have.
-{ config, lib, inputs, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-
-    # Bound out here, before the module body: inside it `config` is the
-    # NixOS config and `config.flake.modules...` would not resolve, while
-    # the body genuinely needs the inner one, for
-    # `config.jovian.decky-loader.extraPackages` -- the two must not be
-    # confused. See CLAUDE.md, "There are two different `config`s".
-    kdeBase = config.flake.modules.nixos.kde-base;
-
-    # Imported by name, not left to the category: `desktop-env` is never
+{ lib, inputs, ... }:
+{
+    # kde-base and jovian-persist by name: dirs-as-categories imports both into
+    # this module. They were `config.flake.modules.nixos.<name>` bound in a
+    # `let`, outside the module body, because the body genuinely needs the
+    # inner (NixOS) `config` for `config.jovian.decky-loader.extraPackages`
+    # and the two must not be confused; `includes` leaves no outer `config`.
+    #
+    # jovian-persist is imported by name, not left to the category: `desktop-env` is never
     # imported whole (see tenacity-configuration.nix), so a sibling file is
     # reachable through nothing and `just modules` reports it as an orphan.
     # Naming it here is also what scopes it -- /etc/hhd persists exactly
     # where handheld-daemon runs, because the two arrive together.
-    jovianPersist = config.flake.modules.nixos.jovian-persist;
-in {
-    flake.modules.nixos.${moduleName} = { config, pkgs, ... }: {
+    includes.nixos = [ "kde-base" "jovian-persist" ];
+
+    nixos = { config, pkgs, ... }: {
         # Jovian/SteamOS handheld: Steam session, decky, TDP control
         imports = [
             inputs.jovian.nixosModules.default # I think this is instead of needing them as module args?
-            kdeBase
-            jovianPersist
         ];
 
         # `config.jovian.…`, not `inputs.jovian.…`: the Jovian flake exposes

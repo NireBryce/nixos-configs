@@ -1,6 +1,6 @@
 # flake-parts port notes
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-16_
 
 Salvaged 2026-09-08 from the `flake-parts` branch, which was deleted the
 same day. That branch was the sibling of this one — the 2026-08 den →
@@ -92,7 +92,8 @@ from.
 The ones whose mechanism still applies to this tree. Each is a trap that
 produced no error, or an error naming the wrong thing.
 
-- **The two `config`s.** Every file has an outer flake-parts scope and an
+- **The two `config`s** (retired 2026-10-16: a module file can no longer take
+  the flake-parts `config` at all, [module-files.md](module-files.md)). Every file had an outer flake-parts scope and an
   inner NixOS/HM module, both named `config`. A module written as a bare
   attrset has no inner scope, so `config` in it means the flake-parts one;
   adding an argument list to reach the NixOS `config` silently repoints
@@ -293,8 +294,8 @@ is `flake.modules.nixos.*` for the reusable half and
 - [flake-parts.md](flake-parts.md) — why this repo runs flake-parts at all,
   and the wiki's index into
   [`../flake/doc/flake-parts-rationale.md`](<../flake/doc/flake-parts-rationale.md>).
-- [architecture.md](architecture.md) — `dirsAsCategory`, the mechanism
-  built on `flake.modules.<class>.<name>`.
+- [architecture.md](architecture.md) — the category mechanism built on
+  `flake.modules.<class>.<name>` ([module-files.md](module-files.md)).
 - [lessons-learned.md](lessons-learned.md) — §§1–18 are this same port,
   written as it happened.
 - [history.md](history.md) — where this page is indexed from, and the rest

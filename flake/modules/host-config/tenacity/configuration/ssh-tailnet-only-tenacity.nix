@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # sshd on tenacity answers over the tailnet only, never on whatever LAN or
 # café wifi the handheld is on that day. Added 2026-09-26.
 #
@@ -10,11 +11,8 @@
 # networking.nix deliberately does not list 22 itself, so this one option
 # is the whole switch. If Tailscale is down on tenacity, nothing can ssh in
 # -- use the machine's own console.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = {
+{
+    nixos = {
         # # description = "tenacity: sshd reachable over tailscale0 only";
         services.openssh.openFirewall = false;
     };

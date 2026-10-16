@@ -49,6 +49,8 @@ Pure stdlib; fixture tests in test_wiki_gen.py (`just wiki-gen-test`, part
 of `just preflight` and so of CI).
 """
 import importlib.util
+import json
+import subprocess
 import pathlib
 import re
 import sys
@@ -210,7 +212,7 @@ def category_rows(homelab):
                 link = f'{name}/00-INDEX.md'
             else:
                 continue  # no page, no row (amd, root-rollback)
-            nested = sorted(p.parent.name for p in cw.shims_under(d) if p.parent != d)
+            nested = sorted(c.name for c in cw.categories_under(root, d))
             dir_cell = f'`{rel}/`'
             if 0 < len(nested) <= NESTED_NAMED_MAX:
                 dir_cell += ' (+ nested ' + ', '.join(f'`{n}`' for n in nested) + ')'
@@ -232,8 +234,8 @@ def category_rows(homelab):
 # "recompute by hand" grep uses; None counts the files themselves.
 COUNT_ROWS = [
     ('total `.nix` files under `flake/modules/`', None),
-    ('module header (`moduleName = lib.removeSuffix ...`)',
-     'moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);'),
+    ('pointer line (`# Module file: … wiki/module-files.md`)',
+     '# Module file: named after this file; why it looks this way: wiki/module-files.md'),
     ('`# # description` as first body line', re.compile(r'(?m)^\s*# # description')),
     ('`with pkgs;` package lists', 'with pkgs;'),
 ]
@@ -256,24 +258,29 @@ def count_rows(root):
 
 def module_layout(root):
     """Mermaid of the top of the module tree -- areas and their direct
-    categories, no modules -- from flake/scripts/module-graph.py, which owns
-    the parsing and the drawing (per-category and per-host diagrams are
-    on-demand output of `just module-graph`, not committed). Loaded from this
-    file's own checkout, not `root`, so a fixture tree needs no scripts.
-    Drawn from the static parse, never `nix eval`: wiki-lint stays fast and
-    runs on fixture trees, and `module-graph.py --verify` is what checks the
-    parse against the collector's categoryGraph."""
-    script = pathlib.Path(__file__).resolve().parents[2] / 'flake/scripts/module-graph.py'
-    spec = importlib.util.spec_from_file_location('module_graph', script)
-    mg = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mg)
+    categories, no modules (per-category and per-host diagrams are on-demand
+    output of `just module-graph`, not committed). The tree is check_wiki's
+    file-only reading of `root` (static_document; `just modules` keeps it in
+    step with the evaluated graph), drawn by the flake-module-graph input
+    through this checkout's own flake -- not `root`'s, so a fixture tree
+    needs no flake. Never evaluates `root`: wiki-lint runs on fixture trees."""
     modules = root / 'flake' / 'modules'
     if not modules.is_dir():
         raise GenError('no flake/modules/ directory')
-    g = mg.select(mg.graph(modules), 'tree', depth=1, categories_only=True)
-    if not any(n.kind == 'category' for n in g.nodes.values()):
+    doc = cw.static_document(root)
+    if not doc['categories']:
         raise GenError('no categories under flake/modules/')
-    return '```mermaid\n' + mg.mermaid(g) + '\n```'
+    flake = pathlib.Path(__file__).resolve().parents[2] / 'flake'
+    try:
+        r = subprocess.run(['nix', 'run', f'{flake}#module-graph', '--',
+                            'tree', '-', '--depth', '1', '--categories-only'],
+                           input=json.dumps(doc), capture_output=True, text=True)
+    except FileNotFoundError:
+        raise GenError('nix is not installed; the diagram is drawn by the flake-module-graph input')
+    if r.returncode:
+        lines = r.stderr.strip().splitlines()
+        raise GenError(f'module-graph failed: {lines[-1] if lines else r.returncode}')
+    return '```mermaid\n' + r.stdout.rstrip('\n') + '\n```'
 
 
 REGIONS = {r.name: r for r in [
@@ -282,18 +289,18 @@ REGIONS = {r.name: r for r in [
            ['Host', 'Class', 'Role', 'Wipes `/root`?', 'Tailnet name'],
            'Host', ['Role'], host_rows),
     Region('categories-index-system', 'wiki/categories/00-INDEX.md',
-           'the dirsAsCategory.nix tree under flake/modules/ and the pages in wiki/categories/',
+           'the categories under flake/modules/ and the pages in wiki/categories/',
            ['Category', 'Directory', 'Class(es)', 'Imported by'],
            'Category', ['Imported by'], category_rows(homelab=False)),
     Region('categories-index-homelab', 'wiki/categories/00-INDEX.md',
-           'the dirsAsCategory.nix tree under flake/modules/homelab-config/homelab/ and the pages in wiki/categories/',
+           'the categories under flake/modules/homelab-config/homelab/ and the pages in wiki/categories/',
            ['Category', 'Directory', 'Class(es)', 'Imported by'],
            'Category', ['Imported by'], category_rows(homelab=True)),
     Region('module-counts', 'wiki/module-style-guide-for-agents.md',
            'a count of the .nix files under flake/modules/',
            ['What', 'Files'], 'What', [], count_rows),
     Block('module-layout', 'wiki/architecture.md',
-          'the dirsAsCategory.nix tree under flake/modules/, drawn by flake/scripts/module-graph.py',
+          'the categories under flake/modules/, drawn by the flake-module-graph input',
           module_layout),
 ]}
 

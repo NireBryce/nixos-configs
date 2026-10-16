@@ -1,6 +1,6 @@
 # `shortlinks` — `homelab-config/homelab/shortlinks/`
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-16_
 
 [golink](https://github.com/tailscale/golink), Tailscale's `go/foo`
 shortlink service. Added 2026-08-24, cube-only; nested under the `homelab`
@@ -62,11 +62,11 @@ declares its own `systemd.services.golink`. If nixpkgs ever grows
 
 Two knock-on details of writing it by hand:
 
-- The unit name is written out literally, not derived from `moduleName` the
-  way the flake-parts attribute is. The attribute *has* to track the
-  filename (that's how `dirsAsCategory` finds it); the systemd unit name is
-  what `systemctl status golink` keys off and should not quietly change if
-  the file is ever renamed.
+- The unit name is written out literally, not derived from the filename the
+  way the module's name is. The module's name *is* the filename
+  ([module-files.md](../module-files.md)); the systemd unit name is what
+  `systemctl status golink` keys off and should not quietly change if the
+  file is ever renamed.
 - `-sqlitedb` is a **required** flag, not an optional one — `golink.go`
   exits with `--sqlitedb is required` unless `-dev-listen` is also set. Both
   it and `-config-dir` (where tsnet keeps the node key) are pinned to paths

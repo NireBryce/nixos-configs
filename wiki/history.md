@@ -1,6 +1,6 @@
 # History & lessons learned
 
-_Last modified: 2026-10-07_
+_Last modified: 2026-10-16_
 
 ## Contents
 
@@ -84,6 +84,12 @@ _Last modified: 2026-10-07_
   `flake/doc/dirsAsCategory.md`'s History;
   [categories/virtualization-history.md](categories/virtualization-history.md#where-the-vm-wiring-used-to-live)
   for the VM file's side.
+
+- **The shims, the collector and `moduleName` were retired 2026-10-16**
+  for the `dirs-as-categories` input: names from filenames, categories from
+  the tree's shape, hosts' `includes` by name. Every host's drvPath stayed
+  the same. Why: [module-files.md](module-files.md); the shim design:
+  `flake/doc/dirsAsCategory.md`.
 
 ## Confirmed-on-hardware facts, and how they were confirmed
 

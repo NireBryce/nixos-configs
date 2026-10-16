@@ -5,7 +5,7 @@ _Last modified: 2026-09-27_
 The one category under `users-config/` — the "for the user" area, as opposed to
 `general-config/` (shared system) or `packages-config/` (packages). Don't confuse this
 category with `users-config/elly-home-manager.nix`, the entry point one level up
-that assembles the *whole* `ellyHomeManager` bundle out of this category
+that assembles the *whole* `elly-home-manager` bundle out of this category
 plus several others — see [../architecture.md](../architecture.md).
 
 ## Contents
@@ -62,7 +62,7 @@ All four hosts. Every NixOS and
 darwin host lists `elly` in its own per-host imports for the `nixos`/`darwin`-class
 content (the account, darwin fonts); the `homeManager`-class content
 (`elly-git`, `hm-config`) reaches every host via the shared
-`ellyHomeManager` bundle regardless.
+`elly-home-manager` bundle regardless.
 
 ## `elly` as the experimental user
 

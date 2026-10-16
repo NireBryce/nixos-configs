@@ -36,7 +36,7 @@ Condensed from [desktop-env.md](desktop-env.md). Facts only here.
 durandal, cube via `kde-desktop`; tenacity via `jovian`. One session
 per host, never both. Tenacity's Plasma *preferences* are a separate
 mechanism: `host-config/tenacity/configuration/plasma-tenacity.nix`
-(plasma-manager, wired only through `tenacityConfiguration`'s own
+(plasma-manager, wired only through `tenacity-configuration`'s own
 `home-manager.users.elly.imports`) — a curated subset, not a 1:1 dump;
 the shortcut diff trick is column 1 vs column 2 of `kglobalshortcutsrc`
 (`active,default,…` — KDE dumps all ~350 defaults to disk on first

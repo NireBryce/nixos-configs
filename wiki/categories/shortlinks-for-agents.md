@@ -1,6 +1,6 @@
 # `shortlinks`, for agents
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-16_
 
 Source: [shortlinks.md](shortlinks.md).
 
@@ -22,9 +22,9 @@ typo when grepped.
 rev; `pkgs/by-name/go/golink/` exists as a package, `nixos/modules/` has
 nothing. If nixpkgs ever grows one, delete the unit and use it.
 
-- The systemd unit name is written **literally**, not derived from
-  `moduleName` — the flake-parts attribute has to track the filename, the
-  unit name must not change if the file is renamed.
+- The systemd unit name is written **literally**, not derived from the
+  filename — the module's name is the filename, the unit name must not
+  change if the file is renamed.
 - `-sqlitedb` is **required** (golink exits `--sqlitedb is required` unless
   `-dev-listen` is set). It and `-config-dir` are pinned under
   `StateDirectory` rather than left to `os.UserConfigDir`, which under

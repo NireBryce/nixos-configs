@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # homepage (gethomepage): the landing page for this host -- what's running,
 # whether it's up, how the machine is doing. The household calendar views
 # came off 2026-10-06 (#299 closed removed-not-filled); see the comment at
@@ -17,8 +18,6 @@
 # Traps sit next to the options.
 { lib, ... }:
 let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-
     # The two names the page answers on. Duplicated (by necessity --
     # nothing declares options, CLAUDE.md Architecture) from caddy.nix,
     # which holds the same strings for the same reason: the ts-cube
@@ -74,7 +73,7 @@ let
     # applies. The `homepage-env` sops key stays in secrets.yaml,
     # unreferenced, on the syncthing-keys precedent.
 in {
-    flake.modules.nixos.${moduleName} = { config, ... }: {
+    nixos = { config, ... }: {
         # # description = "homepage -- the landing page: what's running, whether it's up";
 
         services.homepage-dashboard = {

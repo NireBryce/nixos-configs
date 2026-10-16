@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Homebrew casks and formulae, for the GUI applications and CLI tools nix
 # does not package well on Aarch64 (or that need App Store / notarisation /
 # menu-bar integration that a nix-built .app bundle does not get for free).
@@ -7,11 +8,8 @@
 # was never the broken part, so it is kept close to verbatim, TODOs and all
 # -- they are the old config's own notes-to-self about which casks it no
 # longer remembers the purpose of, and that is honest information to keep.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.darwin.${moduleName} = {
+{
+    darwin = {
         # homebrew casks and formulae not covered by nix
         homebrew = {
             enable = true;

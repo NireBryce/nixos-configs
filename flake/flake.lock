@@ -55,6 +55,29 @@
         "type": "github"
       }
     },
+    "dirs-as-categories": {
+      "inputs": {
+        "flake-parts": [
+          "flake-parts"
+        ],
+        "import-tree": [
+          "import-tree"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792129493,
+        "narHash": "sha256-is3rX28MwcZlTFecmFj1Hw7PZIfdFXTR0uGMG7DGjqQ=",
+        "owner": "NireBryce",
+        "repo": "dirs-as-categories",
+        "rev": "e7c402503c75d8a4b8e52cf56b3dcebcc1c62009",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NireBryce",
+        "repo": "dirs-as-categories",
+        "type": "github"
+      }
+    },
     "disko": {
       "inputs": {
         "nixpkgs": [
@@ -72,6 +95,26 @@
       "original": {
         "owner": "nix-community",
         "repo": "disko",
+        "type": "github"
+      }
+    },
+    "flake-module-graph": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792128550,
+        "narHash": "sha256-eVIprIVIN8yP9oAjhFFIPMDir1h2r5IP55grWs5nKV0=",
+        "owner": "NireBryce",
+        "repo": "flake-module-graph",
+        "rev": "5618a12521cb7b8544f8a8025fb4d27e3e05d593",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NireBryce",
+        "repo": "flake-module-graph",
         "type": "github"
       }
     },
@@ -392,7 +435,9 @@
     "root": {
       "inputs": {
         "darwin": "darwin",
+        "dirs-as-categories": "dirs-as-categories",
         "disko": "disko",
+        "flake-module-graph": "flake-module-graph",
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
         "impermanence": "impermanence",

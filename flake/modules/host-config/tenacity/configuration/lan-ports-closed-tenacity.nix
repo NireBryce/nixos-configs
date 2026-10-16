@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # KDE Connect and Steam's LAN ports stay closed on tenacity, which joins
 # whatever Wi-Fi it's near. Same idea as ssh-tailnet-only-tenacity.nix next
 # door; added 2026-09-26.
@@ -14,10 +15,8 @@
 # does while running the daemon -- so turning the NixOS half off here loses
 # only the ports.
 { lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = {
+{
+    nixos = {
         # # description = "tenacity: KDE Connect and Steam LAN ports closed; tailnet only";
         programs.kdeconnect.enable = lib.mkForce false;
 

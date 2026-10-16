@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # The persistence half of jovian.nix. Split out 2026-08-14; until then this was
 # a single `environment.persistence` block partway down that file.
 #
@@ -33,11 +34,8 @@
 # This protects state going forward, not retroactively -- nothing is already in
 # /persist/etc/hhd, so whatever was set before this landed needs setting once
 # more after it does.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = {
+{
+    nixos = {
         environment.persistence."/persist".directories = [ "/etc/hhd" ];
     };
 }

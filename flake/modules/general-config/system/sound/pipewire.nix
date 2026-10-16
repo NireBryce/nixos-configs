@@ -1,8 +1,6 @@
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{
+    nixos = { pkgs, ... }: {
         security.rtkit.enable = true; # https://nixos.wiki/wiki/PipeWire
         hardware.bluetooth.package = pkgs.bluez5-experimental;
         services.pipewire = {

@@ -7,7 +7,7 @@ description: How to add a package to a user's environment in this repo and verif
 
 ## Applies to
 
-Adding `pkgs.<name>` (or a small handful) to `ellyHomeManager` via
+Adding `pkgs.<name>` (or a small handful) to `elly-home-manager` via
 `flake/modules/packages-config/`. Use before writing the module — `just
 modules`/`just check` catch outright collisions, not a wrong category
 choice.
@@ -24,11 +24,9 @@ host a real build runs on differ (sections below).
 Hand-written, not generated. Follow a sibling file:
 
 ```nix
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{
+    homeManager = { pkgs, ... }: {
         # <tool>: <one-line description, e.g. from nixpkgs meta.description>
         home.packages = with pkgs; [
             <tool>
@@ -37,12 +35,14 @@ in {
 }
 ```
 
+(`just add-module homeManager <path> "<description>"` writes this.)
+
 File at `packages-config/<category>/<tool>/<tool>.nix` (some flatter:
 `nix-utils/nvd/nvd.nix`, `terminals/kitty/kitty.nix`,
 `development/tools/ai-tools/herdr.nix`; skim the target category first).
 
-Wiring is automatic **once the category is already imported**: `dirsAsCategory`
-makes the file a member of its directory's category, and
+Wiring is automatic **once the category is already included**: the file is a
+member of the category above its folder (`wiki/module-files.md`), and
 `users-config/elly-home-manager.nix` imports the coarse categories
 (`development`, `editors`, `gui-other`, `linux-utils`, `nix-utils`,
 `shell-apps`, `terminals`, plus non-package ones). A new category not listed
@@ -103,5 +103,5 @@ branch.
 ## See also
 
 - `package-platform-support` — platform/Homebrew decision, darwin-only case.
-- `new-flake-module` — filenames, classes, two `config`s, collisions.
+- `new-flake-module` — the module shape, filenames, classes, collisions.
 - `wiki/module-style-guide.md` — formatting (aligned `=`, no `nix fmt`).

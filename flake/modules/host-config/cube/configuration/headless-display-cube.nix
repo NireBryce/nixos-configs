@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Gives cube a desktop for Sunshine (general-config/system/gaming/sunshine.nix)
 # to stream with no monitor attached; added 2026-10-06. Two parts, both
 # needed:
@@ -20,11 +21,8 @@
 #
 # The modeline is CEA-861 VIC 16, 1920x1080@60 (148.5 MHz). Names are
 # capped at 12 characters by the module.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = {
+{
+    nixos = {
         # # description = "cube: forced HDMI-A-1 with a 1080p60 EDID, plus Plasma autologin, so Sunshine streams headless";
         hardware.display = {
             edid.modelines."cube1080p60" = "148.50  1920 2008 2052 2200  1080 1084 1089 1125  +hsync +vsync";

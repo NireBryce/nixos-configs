@@ -55,7 +55,7 @@ so moving a file between directories moves it between categories and
 nothing else has to change.
 
 This keeps the config easy to reshape and confusing to browse from a directory
-listing alone. `flake/doc/dirsAsCategory.md` explains that mechanism;
+listing alone. `wiki/module-files.md` explains that mechanism;
 `flake/doc/flake-parts-rationale.md` explains why flake-parts specifically,
 and what else of it this repo actually uses.
 

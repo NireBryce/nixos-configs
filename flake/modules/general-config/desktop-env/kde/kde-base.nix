@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Plasma 6, and the parts of it that every host running a desktop wants.
 #
 # Split out of kde.nix -- now kde-desktop.nix -- so the handheld can have the
@@ -6,10 +7,8 @@
 # plasma6 from jovian.nix alone. See the history block at the bottom for what
 # that cost.
 { lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+{
+    nixos = { pkgs, ... }: {
         # Plasma 6 and the KDE bits shared by every desktop host
 
         services.xserver.enable = true; # TODO: I think this is still needed for xwayland

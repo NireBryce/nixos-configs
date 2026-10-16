@@ -1,13 +1,11 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Shell registration at the system level. zsh itself is configured through
 # Home Manager (general-config/shell-config/zsh/), same as the Linux hosts; this is only
 # the macOS-specific plumbing around that: which shells exist in
 # /etc/shells, and stopping the system's own zsh completion setup from
 # fighting with Home Manager's.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.darwin.${moduleName} = { pkgs, lib, ... }: {
+{
+    darwin = { pkgs, lib, ... }: {
         # shell registration and completion plumbing, macOS side
         environment.shells = with pkgs; [
             bash

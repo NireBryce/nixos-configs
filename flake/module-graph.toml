@@ -1,0 +1,8 @@
+# Where `just module-graph` and wiki/architecture.md's diagram put each area
+# (the flake-module-graph input reads this; its README has the keys).
+[layout]
+top    = ["host-config", "users-config"]   # Mermaid/Graphviz hosts view: above the hosts
+behind = ["host-config"]                   # page: before the hosts
+beside = ["homelab-config"]                # page: next to the hosts (only cube runs it)
+far    = ["users-config"]                  # page: the far end, past the shared areas
+shared = ["general-config", "hardware-config", "packages-config"]   # page: in this order

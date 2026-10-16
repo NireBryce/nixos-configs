@@ -1,7 +1,7 @@
 # Why flake-parts, and what of it is actually used
 
 > **Written by Claude Code.** A working note, not documentation — same
-> footing as `dirsAsCategory.md`: checked by reading the actual imports and
+> footing as `dirsAsCategory.md` (now history): checked by reading the actual imports and
 > grepping for actual usage, not by reasoning about what flake-parts
 > generally offers.
 
@@ -23,24 +23,24 @@ until #486 moved the nix dev tools out of the host profiles and into the
 dev shell -- still the shortest example of the shape:
 
 ```nix
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
+{
+    homeManager = { pkgs, ... }: {
         home.packages = with pkgs; [ nixd ];
     };
 
-    flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+    nixos = { pkgs, ... }: {
         environment.systemPackages = with pkgs; [ nixd ];
     };
 }
 ```
 
-Everything else — `dirsAsCategory` deriving category membership from
-directory placement, hosts assembling config from
-`config.flake.modules.<class>.<name>` (`hosts.nix`) — is built on top of
-that one option. Without it, NixOS and Home Manager halves of a feature
+(as written since 2026-10-16: the `dirs-as-categories` input names the
+module after its file and writes both halves into `flake.modules`; until
+then each file wrote `flake.modules.<class>.${moduleName} = …` itself.)
+
+Everything else — category membership derived from directory placement,
+hosts assembling config from `config.flake.modules.<class>.<name>`
+(`hosts.nix`) — is built on top of that one option. Without it, NixOS and Home Manager halves of a feature
 would need separate files with no mechanism tying them together.
 
 ## What's actually used
@@ -97,8 +97,9 @@ Checked by grep — none of these appear anywhere in `flake/`:
 
 ## See also
 
-- `../doc/dirsAsCategory.md` — the mechanism built on
-  `flake.modules.<class>.<name>`, in full.
+- `../../wiki/module-files.md` — the mechanism built on
+  `flake.modules.<class>.<name>`, as it is now; `../doc/dirsAsCategory.md`
+  — the shim-based version it replaced.
 - `../doc/trailhead-home-manager-standalone.md` — the other half of "NixOS
   and Home Manager in the same file": how Home Manager is wired in from
   the NixOS side rather than as a standalone flake output.

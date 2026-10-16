@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # The persistence half of wifi.nix. wifi.nix only sets
 # networking.networkmanager.enable; this is filed as its own sibling rather
 # than folded in, matching tailscale-persist.nix's split from tailscale.nix.
@@ -23,11 +24,8 @@
 # rescuing state from a wipe that never happens, plus a spurious "Neither
 # /var/lib/nixos nor any of its parents are persisted" warning the moment ANY
 # environment.persistence entry exists without it alongside.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { config, lib, ... }:
+{
+    nixos = { config, lib, ... }:
         lib.mkIf (config.boot.initrd.systemd.services ? restore-root) {
             environment.persistence."/persist".files = [ "/var/lib/NetworkManager/secret_key" ];
         };

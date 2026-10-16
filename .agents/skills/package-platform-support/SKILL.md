@@ -7,7 +7,7 @@ description: How to tell whether nixpkgs can build a package on darwin and wheth
 
 ## Applies to
 
-Packages in `ellyHomeManager` (`packages-config/`, `users-config/`), shared
+Packages in `elly-home-manager` (`packages-config/`, `users-config/`), shared
 verbatim by all four hosts including `nire-lysithea` (aarch64-darwin), so
 everything in it must survive darwin. Use before adding a package module, an
 `isDarwin`/platform guard, or deciding whether a cask duplicates a nixpkgs
@@ -33,7 +33,7 @@ re-declares `home.packages` with an `apply` filtering by
 
 `meta.platforms` knows nothing of Homebrew. `homebrew.nix`
 (`flake/modules/general-config/macos/homebrew/`) installs casks, some also
-nixpkgs packages in `ellyHomeManager`: lysithea gets two copies.
+nixpkgs packages in `elly-home-manager`: lysithea gets two copies.
 
 ```sh
 just available --duplicates   # only the ones homebrew ALSO installs, and what to do

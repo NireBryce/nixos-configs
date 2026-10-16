@@ -52,5 +52,5 @@ description: How to write a specific fact, a dated status snapshot, or a cross-r
 - `wiki/styleguide.md` "Two audiences per page": its cut-list item ("who confirmed it and when") and #6 differ — *who/how verified* is narration and goes; *whether verified at all* is a qualifier and stays.
 - `AGENTS.md` "State" — narrower cat-2 rule for switch/boot status.
 - `restic.nix` header, `wiki/categories/backup.md`, `wiki/homelab/backup-runbook.md`, `wiki/homelab/pending-setup.md` — cat 1/2 worked examples with `UNVERIFIED` markers and corrected dates.
-- `podman.nix`, `hosts.nix`, `invariants.nix` — correct style: explicit removal notes ("lego removed the same day", "were both removed 2026-08-27", "since removed"). `category-collector.nix`, once named as a fourth example, holds no such comment today.
+- `podman.nix`, `hosts.nix`, `invariants.nix` — correct style: explicit removal notes ("lego removed the same day", "were both removed 2026-08-27", "since removed"). `category-collector.nix`, once named as a fourth example, was retired 2026-10-16.
 - skill `git-archaeology` — find the commit behind a date/hash when the file moved; an empty path-scoped log usually means a rename (hit 2026-09-15 verifying this file's examples).

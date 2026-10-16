@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # nire-cube's VM wiring -- every libvirt VM on cube is instantiated here,
 # one import of the generator (homelab-config/homelab/virtualization/
 # VMs/_lib/libvirt-vm.nix) per VM. Revives the name of the llm-sandbox-era
@@ -17,12 +18,13 @@
 # hosts.nix's entry says so) -- declared in
 # host-config/forge-runner-configuration.nix and instantiated as a
 # nixosConfiguration in host-config/hosts.nix -- same shape llm-sandbox used.
-{ config, lib, ... }:
+{ inputs, ... }:
 let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    runnerCfg = config.flake.nixosConfigurations.forge-runner.config;
+    # the guest's own built config, from the flake's outputs (was the
+    # flake-parts `config.flake.nixosConfigurations`, the same attribute set)
+    runnerCfg = inputs.self.nixosConfigurations.forge-runner.config;
 in {
-    flake.modules.nixos.${moduleName} =
+    nixos =
         import ../../../homelab-config/homelab/virtualization/VMs/_lib/libvirt-vm.nix {
             name  = "forge-runner";
             # `uuidgen` once, pinned forever -- libvirt's redefinition

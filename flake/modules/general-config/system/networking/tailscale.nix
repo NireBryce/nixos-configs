@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Tailscale, as an actual service rather than just the CLI on PATH.
 # Imported by every Linux host via the `system` category.
 #
@@ -57,11 +58,8 @@
 # path) holding the literal, in-order `iptables` commands applied at boot,
 # world-readable. Settles "is trustedInterfaces really first" without
 # querying the live table.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = {
+{
+    nixos = {
         services.tailscale = {
             enable = true;
 

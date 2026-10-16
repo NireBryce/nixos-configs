@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # tenacity announces nothing over mDNS; added 2026-09-27. It joins whatever
 # Wi-Fi it's near, and avahi.nix's publish block would announce its hostname
 # and addresses there. Nothing on its LAN side takes connections anyway
@@ -9,10 +10,8 @@
 # renders `disable-publishing=yes`, which also covers the workstation and
 # user-service records.
 { lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = {
+{
+    nixos = {
         # # description = "tenacity: mDNS resolve-only, publishes nothing";
         services.avahi.publish.enable = lib.mkForce false;
     };

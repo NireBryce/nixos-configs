@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # renamed from `hardware-configuration.nix` 2026-08-21 -- every other host
 # with a captured hardware file already used `hardware-<hostname>.nix`
 # (hardware-cube.nix, hardware-tenacity.nix); this one
@@ -5,10 +6,8 @@
 # also exactly the name a future host's raw capture would collide with under
 # the "module name is its filename" merge rule.
 { lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { config, ... }: {
+{
+    nixos = { config, ... }: {
 
         boot = {
             initrd = {

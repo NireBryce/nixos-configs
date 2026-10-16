@@ -1,6 +1,6 @@
 # `homelab` — `homelab-config/homelab/`
 
-_Last modified: 2026-09-28_
+_Last modified: 2026-10-16_
 
 ## Contents
 
@@ -17,8 +17,8 @@ existing, previously-standalone categories under one directory:
 [containers](containers.md), [git-forge](git-forge.md),
 [landing](landing.md), [monitoring](monitoring.md),
 [reverse-proxy](reverse-proxy.md), [shortlinks](shortlinks.md), and
-[virtualization](virtualization.md). Each kept its own `dirsAsCategory.nix`,
-so each is still its own aggregate, addressable by its own name — this page
+[virtualization](virtualization.md). Each is still a category of its own,
+addressable by its own name (each holds a subfolder of modules) — this page
 doesn't repeat their content, see each one's own article for what it
 actually contains and why it's shaped the way it is.
 
@@ -26,19 +26,18 @@ An eighth, [backup](backup.md), joined 2026-08-28 the same way — restic,
 backing up the state the other seven produce to the `ts-hive` NAS already on the
 network. It's the odd one out functionally (nothing to reach over the
 tailnet, no port, no Caddy route — a timer, not a listener) but structurally
-identical: its own `dirsAsCategory.nix` under `homelab-config/homelab/backup/`,
-cube-only, folded in by the same delegation this page describes below.
+identical: its own category, `homelab-config/homelab/backup/`, cube-only,
+folded in by the same nesting this page describes below.
 
 ## Nested categories overlap their parents on purpose
 
 Same mechanism [hardware](hardware.md) documents for `hardware-config/hardware/amd/`:
-`homelab`'s `dirsAsCategory.nix` references each nested category by name
-(via `modules/_lib/category-collector.nix` — see that doc's History
-section) rather than re-deriving their modules, giving one coarse handle
-(`homelab`, what cube imports) and fine ones that stay individually
-importable — a host can take one child, e.g. `containers`, without the
-rest (tenacity did exactly that until it dropped podman 2026-09-26).
-`flake/doc/dirsAsCategory.md` documents this as load-bearing, not a bug.
+`homelab` includes each nested category by name rather than re-deriving
+their modules ([module-files.md](../module-files.md)), giving one coarse
+handle (`homelab`, what cube includes) and fine ones that stay individually
+includable — a host can take one child, e.g. `containers`, without the rest
+(tenacity did exactly that until it dropped podman 2026-09-26). This is
+load-bearing, not a bug.
 
 **A behavioral consequence, since removed:** until 2026-09-28 a category
 skipped the files sitting directly in its own directory, so `homelab`'s
@@ -68,7 +67,7 @@ the move and stays so.
 
 ## See also
 
-- [../architecture.md](../architecture.md) — the `dirsAsCategory` mechanism
+- [../architecture.md](../architecture.md) — the category mechanism
   generally, and the "Related, and a live trap" note on `virtualization`/
   `containers` history.
 - [00-INDEX.md](00-INDEX.md) — the full category index and table.

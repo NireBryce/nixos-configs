@@ -1,8 +1,6 @@
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = {
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{
+    nixos = {
         # The daemon, not just the app: until 2026-09-26 this installed
         # `mullvad-vpn` into systemPackages with no service, so the GUI
         # had no daemon to talk to. The module now splits them --

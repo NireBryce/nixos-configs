@@ -19,9 +19,10 @@ is it shaped like this" and "what breaks if I touch it". Asked directly
 new"), or offered when a comment rewrite keeps coming back "still
 confusing".
 
-Worked example: `flake/modules/_lib/category-collector.nix`, rewritten
-2026-09-28 after three denser rounds that read as clear only to someone who
-already knew the answer.
+Worked example: the category collector, rewritten 2026-09-28 after three
+denser rounds that read as clear only to someone who already knew the
+answer. The file was retired 2026-10-16 (wiki/module-files.md); read it with
+`git show 5808bfe2:flake/modules/_lib/category-collector.nix`.
 
 Not this skill:
 
@@ -48,7 +49,7 @@ LLM agents included, weighs the code beneath.
 
 1. **Self-introduction, own line, full path.** "This file,
    `modules/_lib/category-collector.nix`, is the logic every
-   `dirsAsCategory.nix` runs."
+   `dirsAsCategory.nix` runs." (the worked example's own opening)
 2. **The problem: what first, why second.** One plain statement of what it
    does, then the obvious alternative and its concrete failure modes
    ("rename a module and every list naming it is wrong").
@@ -78,8 +79,8 @@ the sections above, plus any "why not the obvious thing" for that line.
 
 ## Voice
 
-- Define every term at first use, in words ("a folder with a
-  `dirsAsCategory.nix` is a *category*").
+- Define every term at first use, in words ("a folder whose subfolders
+  hold modules is a *category*").
 - Real examples from this tree, never placeholders (`fzf.nix` in `find/`,
   not `foo.nix` in `bar/`) — a real path can be checked.
 - Start from what the reader would expect ("You'd think it could just hand
@@ -136,6 +137,6 @@ checks.
 
 ## See also
 
-- `flake/modules/_lib/category-collector.nix` — worked example.
+- `git show 5808bfe2:flake/modules/_lib/category-collector.nix` — worked example.
 - `wiki/module-style-guide.md` — the dense default this departs from.
 - Skill `fact-hygiene`; `just ruled-heading`.

@@ -50,7 +50,7 @@ into them, and each has its own section below:
 ## Home Manager integration lives here
 
 `home-manager/enable-home-manager.nix` is *the* module that wires
-`home-manager.users.elly` to the shared `ellyHomeManager` bundle with
+`home-manager.users.elly` to the shared `elly-home-manager` bundle with
 `useGlobalPkgs`/`useUserPackages` — see
 [../architecture.md](../architecture.md). It's filed under `general-config/system/`
 specifically so the `system` category picks it up and every host that
@@ -60,7 +60,7 @@ for `lysithea` — it's what actually brings packages and dotfiles to a darwin
 host, not anything under [macos](macos.md).
 
 `home-manager/drop-unsupported-packages.nix` is the platform-support
-counterpart: `ellyHomeManager` is shared verbatim across all four hosts, so
+counterpart: `elly-home-manager` is shared verbatim across all four hosts, so
 every package in it has to survive `aarch64-darwin`. Eleven didn't (`vlc`,
 `gimp`, `libreoffice-qt`, `github-desktop`, `piper`, `qpwgraph`, `strace`,
 `ltrace` (since removed), `iotop`, `sysstat`, `ethtool`), each previously
@@ -231,7 +231,7 @@ subset that actually declares a `darwin` class reaches it;
 don't declare `darwin`-class modules, so importing `system` on lysithea
 doesn't drag any of that in. The `homeManager`-class slice
 (`font`, `drop-unsupported-packages`) reaches every host, lysithea included,
-via `ellyHomeManager` rather than through this category import at all.
+via `elly-home-manager` rather than through this category import at all.
 
 ## See also
 

@@ -1,8 +1,7 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 { lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = {
+{
+    nixos = {
         # nix-ld, needed for VSCode remote connection, etc
         programs.nix-ld.enable = lib.mkDefault true;
     };

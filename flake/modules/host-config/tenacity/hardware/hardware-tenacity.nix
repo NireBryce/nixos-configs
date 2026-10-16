@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # nire-tenacity hardware, from `nixos-generate-config` on the machine.
 #
 # Wrapped as a flake-parts module. A raw generator file under modules/ makes
@@ -9,11 +10,8 @@
 # its attribute name, and same-named modules merge -- durandal has one of those
 # already, and the two would have become one module holding both machines'
 # filesystems and LUKS devices.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { config, lib, modulesPath, ... }:
+{
+    nixos = { config, lib, modulesPath, ... }:
 {
   imports =
     [

@@ -1,172 +1,54 @@
 #!/usr/bin/env python3
-"""Static checks over the module tree, for the things evaluation cannot report.
+"""Checks over the module tree, for the things evaluation cannot report.
 
-Membership here is implicit: a module belongs to the category of the directory it
-sits in, and a host imports categories by name. Two failures follow from that,
-and neither produces an error -- the tree evaluates perfectly happily with either.
+dirs-as-categories (the flake input that builds flake.modules from
+flake/modules/) already refuses what used to fail silently here: two
+modules or a module and a category sharing a name, a mistyped class key, a
+name in `includes` that doesn't exist (wiki/module-files.md). What it
+cannot refuse, because the tree is valid either way:
 
-  collisions  A module whose filename equals a category name declares into the
-              same attribute as that category, and same-named modules MERGE
-              rather than conflicting. This is how `boot` came to mean both
-              general-config/boot/ (which wipes /root on boot) and durandal's bootloader.
+  orphans     A module in a category that no host or home aggregate reaches
+              is valid, evaluates, and installs nothing.
 
-  orphans     A module in a category that no host or home aggregate imports is
-              valid, evaluates, and installs nothing.
+  untracked   A .nix file git doesn't know about: flakes in a git repo
+              ignore it, so it silently does not exist.
 
-  names       A module in a category whose declared name isn't its filename.
-              The collector looks modules up by filename, so a hardcoded name
-              that differs is silently left out of every category.
+  drift       wiki-lint reads categories, modules, includes and enables
+              from the files without evaluating (check_wiki.py's
+              static_document); this compares that reading with the
+              evaluated graph, so the two rules cannot drift apart.
 
-  shims       Category shims (dirsAsCategory.nix) that no longer agree: the
-              collector recognises a nested category by the *calling* shim's
-              own filename, so shims with different names, or drifted
-              contents, stop nesting correctly without any error.
+Both read what dirs-as-categories built -- `nix eval .#moduleGraph`, through
+a `path:` flake so untracked files count -- rather than parsing files.
 
-Both are platform independent, so unlike the host checks they also run on darwin.
-
-    modules.py collisions <modules-dir>
     modules.py orphans    <modules-dir>
-    modules.py names      <modules-dir>
-    modules.py shims      <modules-dir>
-    modules.py untracked  <modules-dir>     # untracked .nix files -- invisible to flakes
-    modules.py check      <modules-dir>     # all of the above; non-zero exit on any finding
+    modules.py untracked  <modules-dir>
+    modules.py drift      <modules-dir>
+    modules.py check      <modules-dir>     # all three; non-zero exit on any finding
+
+    --graph FILE   read the graph from FILE instead of `nix eval` (checks.nix
+                   hands it the evaluated one: no nix inside a build)
 
     modules.py add <modules-dir> <class> <category>/<subdir>/<name>.nix [description words...]
-                           # scaffold a new module where the collector will
-                           # actually find it, with boilerplate per
-                           # wiki/module-style-guide.md; `git add`s the file
-                           # (flakes ignore untracked ones) and runs the
-                           # checks above immediately. The new module is
+                           # scaffold a new module inside a category, in the
+                           # shape wiki/module-files.md describes; `git add`s
+                           # the file (flakes ignore untracked ones) and runs
+                           # the checks above immediately. The new module is
                            # reported as an ORPHAN on purpose -- nothing
-                           # imports it yet.
+                           # includes it yet.
 """
-import re, sys, pathlib, subprocess
-
-# A category shim is recognised by what it does -- import the shared
-# collector -- not by its filename, so renaming every shim needs no change
-# here (the collector itself reads the shim's name from the shim, for the
-# same reason). The `shims` check below catches shims that disagree.
-SHIM = re.compile(r'import\s*\(.*"/_lib/category-collector\.nix"\)')
-# Declaring a module under a literal name rather than `${moduleName}`. The
-# lookbehind keeps `config.flake.modules.<class>.<name>` -- a *reference*
-# to another module -- from reading as a declaration.
-LITERAL_DECL = re.compile(r'(?<!config\.)flake\.modules\.(\w+)\.([\w-]+)\s*=')
-# Same lookbehind as LITERAL_DECL: `config.flake.modules.<class>.<name>` is a
-# reference to a module, not a declaration of one.
-DECL = re.compile(r'(?<!config\.)flake\.modules\.(\w+)\.(?:\$\{moduleName\}|(\w+))')
-# Declared inside a `flake.modules = { ... }` attrset, where each class
-# heads its own line without the prefix. Line-anchored so the leading
-# `flake` of a flat `flake.modules.<class>...` line cannot match as a
-# class name. basic-nix-settings.nix is the one module shaped this way;
-# missed by this and check_wiki.py's CLASSES scan until 2026-09-08.
-DECL_ATTRSET = re.compile(r'(?m)^\s*(\w+)\.\$\{moduleName\}\s*=')
-# `with config.flake.modules.<class>; [ a b c ]` -- how the aggregates list members
-AGG = re.compile(r'with\s+config\.flake\.modules\.(\w+);\s*\[(.*?)\]', re.S)
-# `config.flake.modules.<class>.<name>` -- one module importing another directly,
-# rather than a host aggregate listing it. Bound in a `let` above the body, since
-# inside it `config` is the NixOS/HM one; enable-home-manager.nix reaches
-# ellyHomeManager this way and kde-desktop.nix/jovian.nix both reach kde-base.
-#
-# The name is [\w-]+, not \w+: hyphens are legal in Nix identifiers, so `kde-base`
-# is one attribute and not a subtraction. Matching \w+ here would silently record
-# a reference to `kde` and leave kde-base looking like an orphan.
-REF = re.compile(r'config\.flake\.modules\.(\w+)\.([\w-]+)')
-COMMENT = re.compile(r'#[^\n]*')
-
-
-def hidden(path, root):
-    """True for anything under a `_`-prefixed path component, which
-    import-tree never loads and the collector never collects (`_lib/`,
-    `_templates/`) -- helpers and templates, not modules."""
-    return any(part.startswith('_')
-               for part in pathlib.Path(path).relative_to(root).parts)
-
-
-def is_shim(path):
-    return bool(SHIM.search(COMMENT.sub('', path.read_text())))
-
-
-def scan(root):
-    """categories: name -> shim path.  modules: name -> [(path, classes)].
-
-    modules maps to a *list*, not a single entry. Keying it by stem and assigning
-    would silently drop one of two same-named files, which is the exact case
-    `collisions` exists to report -- the checker would have overwritten the
-    evidence and then found nothing.
-    """
-    root = pathlib.Path(root)
-    categories, modules = {}, {}
-    for p in sorted(root.rglob('*.nix')):
-        if hidden(p, root):
-            continue
-        if is_shim(p):
-            categories[p.parent.name] = p
-            continue
-        # Comments stripped, like every other scan here: a commented-out or
-        # prose `flake.modules.homeManager.` line is not a declaration, and
-        # counting it gave podman a homeManager half it never had.
-        text = COMMENT.sub('', p.read_text())
-        classes = {m.group(1) for m in DECL.finditer(text)}
-        classes.update(DECL_ATTRSET.findall(text))
-        if classes:
-            modules.setdefault(p.stem, []).append((p, classes))
-    return categories, modules
-
-
-def aggregates(root):
-    """[(path, class, [names])] for every `with config.flake.modules.<class>;
-    [ ... ]` list in the tree -- how hosts and the Home Manager entry point
-    name what they import. Names keep source order and repeats; comments are
-    stripped first so a commented-out import is not read as a live one."""
-    out = []
-    for p in sorted(pathlib.Path(root).rglob('*.nix')):
-        if hidden(p, root) or is_shim(p):
-            continue
-        for m in AGG.finditer(p.read_text()):
-            body = COMMENT.sub('', m.group(2))           # strip trailing comments
-            out.append((p, m.group(1), re.findall(r'[\w-]+', body)))
-    return out
-
-
-def imported_names(root):
-    """Names anything imports, by class.
-
-    Two forms count. Aggregates list members with `with config.flake.modules.
-    <class>; [ ... ]`; they live directly under a namespace dir (host-config/,
-    users-config/), where dirsAsCategory cannot collect them -- which is also what
-    makes them findable as 'not in a category dir'.
-
-    A module can also import another module directly, by naming it as
-    `config.flake.modules.<class>.<name>`. That form is not a host's choice and
-    can appear anywhere, including inside a category.
-    """
-    out = {}
-    for _, cls, names in aggregates(root):
-        out.setdefault(cls, set()).update(names)
-    for p in pathlib.Path(root).rglob('*.nix'):
-        if hidden(p, root) or is_shim(p):
-            continue
-        # Comments are stripped first here: several modules discuss
-        # `config.flake.modules` in prose, and a reference named only in a
-        # comment would mark a genuinely dead module as reachable.
-        for m in REF.finditer(COMMENT.sub('', p.read_text())):
-            out.setdefault(m.group(1), set()).add(m.group(2))
-    return out
-
+import json, pathlib, subprocess, sys
 
 # Where each finding kind's rule and history live, printed once under that
 # kind's findings (#460): the moment a check fires is the moment its lesson
 # is worth reading.
 SEE = {
-    'collisions': "skill new-flake-module, 'Names share one namespace per "
-                  "class'; wiki/lessons-learned.md §34, §35",
-    'orphans':    "skill new-flake-module; an orphan in new work can be a "
-                  "gap in this checker's model, not the module "
-                  "(wiki/lessons-learned.md §23)",
-    'names':      "skill new-flake-module (derive the name with "
-                  "`moduleName`); wiki/lessons-learned.md §34",
-    'shims':      "flake/doc/dirsAsCategory.md",
-    'untracked':  "AGENTS.md, 'git add before nix eval'",
+    'orphans':   "skill new-flake-module; an orphan in new work can be a gap "
+                 "in this checker's model, not the module "
+                 "(wiki/lessons-learned.md §23)",
+    'untracked': "AGENTS.md, 'git add before nix eval'",
+    'drift':     "wiki/module-files.md; fix whichever reading is wrong, "
+                 "check_wiki.py's module_classes/all_categories or the file",
 }
 
 
@@ -174,168 +56,76 @@ def see(kind):
     print(f"           -> see {SEE[kind]}")
 
 
-def collisions(root):
-    """Two ways one attribute ends up with two owners, both silent."""
-    categories, modules = scan(root)
-    hits = []
-
-    # a module named the same as a category
-    for n in sorted(set(categories) & set(modules)):
-        for path, _ in modules[n]:
-            print(f"COLLISION  {n!r}: category {categories[n].parent}/ and module "
-                  f"{path} declare the same attribute; they merge")
-        hits.append(n)
-
-    # two modules with the same filename, anywhere in the tree. Only collides
-    # per class, so `foo.nix` declaring nixos and another declaring homeManager
-    # is legal -- reported only when the classes actually overlap.
-    for n, entries in sorted(modules.items()):
-        if len(entries) < 2:
-            continue
-        for i, (p1, c1) in enumerate(entries):
-            for p2, c2 in entries[i + 1:]:
-                shared = c1 & c2
-                if shared:
-                    print(f"COLLISION  {n!r}: {p1} and {p2} both declare "
-                          f"{'/'.join(sorted(shared))}.{n}; they merge")
-                    hits.append(n)
-    if hits:
-        see('collisions')
-    return hits
+def graph(root, run=subprocess.run, path=None):
+    """flake.moduleGraph for the flake around <modules-dir> (or from `path`),
+    or exit with why."""
+    if path is not None:
+        return json.loads(pathlib.Path(path).read_text())
+    flake = pathlib.Path(root).resolve().parent
+    try:
+        r = run(['nix', 'eval', '--json', f'path:{flake}#moduleGraph'],
+                capture_output=True, text=True)
+    except FileNotFoundError:
+        sys.exit('error: nix is not installed; these checks read what the flake evaluates to')
+    if r.returncode:
+        lines = r.stderr.strip().splitlines()
+        sys.exit(f'error: nix eval of moduleGraph failed: {lines[-1] if lines else r.returncode}')
+    return json.loads(r.stdout)
 
 
-def orphans(root):
+def ancestors(path):
+    p = pathlib.PurePosixPath(path)
+    return [str(a) for a in p.parents if str(a) != '.']
+
+
+def orphans(root, doc):
     """Reachability is per module, not per category.
 
-    A category's collection reaches through its nested categories, so a
-    module in a nested category is also collected by every category above
-    it -- `rust` sits in `langs`, but `development` picks it up too.
-    Checking categories directly would report every nested one as dead.
-    So: walk each module's ancestors, and treat it as reachable if the
-    module itself is imported by name (durandal takes `kde-desktop` that way,
-    and kde-desktop in turn takes `kde-base`) or any ancestor category is.
+    A category reaches through its nested categories, so a module in a
+    nested category is also collected by every category above it -- `rust`
+    sits in `langs`, but `development` picks it up too. So: walk each
+    module's ancestor folders, and treat it as reachable if the module is
+    named in some `includes`/`enables` (durandal takes `kde-desktop` that
+    way, and kde-desktop in turn includes `kde-base`), or any category above
+    it is.
     """
-    categories, modules = scan(root)
-    imported = imported_names(root)
-    all_imported = set().union(*imported.values()) if imported else set()
-    catdirs = {p.parent: name for name, p in categories.items()}
+    named = {n for kind in ('includes', 'enables')
+             for per in (doc.get(kind) or {}).values()
+             for names in per.values() for n in names}
+    category_at = {c['dir']: name for name, c in doc['categories'].items()}
 
     findings = []
-    for name, (path, classes) in sorted(
-        (n, e) for n, entries in modules.items() for e in entries
-    ):
-        if name in all_imported:
+    for name, m in sorted(doc['modules'].items()):
+        if name in named:
             continue
-
-        if 'ORPHAN-OK' in path.read_text():
-            # Deliberately unreachable, and says so in the file. Used for modules
-            # kept for a host that is not currently configured.
+        reaching = [category_at[a] for a in ancestors(m['path']) if a in category_at]
+        if not reaching:
+            # Outside every category: an entry point (a host, the home
+            # aggregate). Nothing is meant to include them.
             continue
-
-        ancestors = [d for d in path.parents if d in catdirs]
-        if not ancestors:
-            # Outside every category tree. That is how entry points are defined
-            # here -- hosts.nix, durandal-configuration.nix, elly-home-manager.nix
-            # and checks.nix all sit where dirsAsCategory cannot reach them, on
-            # purpose. Nothing is meant to import them.
+        if 'ORPHAN-OK' in (pathlib.Path(root) / m['path']).read_text():
+            # Deliberately unreachable, and says so in the file -- kept for a
+            # host that is not currently configured.
             continue
-
-        # Every category above the file collects it, including the one whose
-        # directory it sits directly in (category-collector.nix).
-        reaching = [catdirs[d] for d in ancestors]
-        if not any(c in all_imported for c in reaching):
-            findings.append((name, path, reaching))
+        if not any(c in named for c in reaching):
+            findings.append((name, m['path'], reaching))
 
     for name, path, reaching in findings:
-        print(f"ORPHAN     {name!r} ({path}) is imported by nothing; "
+        print(f"ORPHAN     {name!r} ({path}) is reached by nothing; "
               f"reachable via: {' / '.join(reaching)}")
     if findings:
         see('orphans')
     return findings
 
 
-def names(root):
-    """A category module declared under a hardcoded name that isn't its
-    filename.
-
-    The collector turns each file into the name `<filename minus .nix>` and
-    looks that up, so `foo.nix` declaring `flake.modules.nixos.bar` is in
-    no category at all -- evaluates cleanly, installs nothing, and `orphans`
-    can't see it either, because orphans also goes by filename. Every
-    module avoids this by computing its name from its own path (the
-    `moduleName = ... __curPos.file` line); this catches one that doesn't.
-    Entry points outside every category (hosts.nix, *-configuration.nix)
-    name their aggregates by hand on purpose and are skipped.
-    """
-    categories, _ = scan(root)
-    catdirs = {p.parent for p in categories.values()}
-    hits = []
-    for p in sorted(pathlib.Path(root).rglob('*.nix')):
-        if hidden(p, root) or is_shim(p):
-            continue
-        if not any(d in catdirs for d in p.parents):
-            continue
-        for cls, name in LITERAL_DECL.findall(COMMENT.sub('', p.read_text())):
-            if name != p.stem:
-                print(f"NAME       {p} declares {cls}.{name}, but the collector "
-                      f"looks it up as {p.stem!r} -- it is in no category. "
-                      f"Derive the name from the filename (`moduleName`)")
-                hits.append((p, cls, name))
-    if hits:
-        see('names')
-    return hits
-
-
-def shims(root):
-    """Category shims that no longer agree with each other.
-
-    The collector skips the shim, and recognises a subfolder as a nested
-    category, by the filename the *calling* shim reports about itself. So
-    every shim must share one filename, or a renamed one stops being seen
-    as a category by its parent. They are also meant to be identical copies;
-    one that drifted is running different logic from the rest.
-    """
-    categories, _ = scan(root)
-    paths = sorted(categories.values())
-    hits = []
-    by_name = {}
-    for p in paths:
-        by_name.setdefault(p.name, []).append(p)
-    if len(by_name) > 1:
-        majority = max(by_name, key=lambda n: len(by_name[n]))
-        for n, ps in sorted(by_name.items()):
-            if n == majority:
-                continue
-            for p in ps:
-                print(f"SHIM       {p} is named {n!r} but the other shims are "
-                      f"{majority!r}; its parent won't see it as a category")
-                hits.append(p)
-    by_text = {}
-    for p in paths:
-        by_text.setdefault(p.read_text(), []).append(p)
-    if len(by_text) > 1:
-        majority = max(by_text, key=lambda t: len(by_text[t]))
-        for t, ps in by_text.items():
-            if t == majority:
-                continue
-            for p in ps:
-                print(f"SHIM       {p} differs from the other "
-                      f"{len(by_text[majority])} shims; copy one of them over it")
-                hits.append(p)
-    if hits:
-        see('shims')
-    return hits
-
-
 def untracked(root):
     """A new .nix file that git doesn't know about yet.
 
-    CLAUDE.md, 'Working in this repo': flakes in a git repo ignore untracked
-    files, so a brand-new module silently does not exist as far as `nix eval`
-    or a build is concerned -- no error, just a module that was never there.
-    `git status` already reports this, but nothing surfaces it at the moment
-    it actually matters (right before a check/build), so it stays easy to
-    forget in exactly the way that trap already bit once.
+    AGENTS.md, 'git add before nix eval': flakes in a git repo ignore
+    untracked files, so a brand-new module silently does not exist as far as
+    `nix eval` or a build is concerned -- no error, just a module that was
+    never there. `git status` already reports this, but nothing surfaces it
+    at the moment it actually matters (right before a check/build).
     """
     try:
         out = subprocess.run(
@@ -354,113 +144,118 @@ def untracked(root):
     return hits
 
 
-# The classes that mean anything (new-flake-module skill): flake-parts stamps
-# whatever class is declared straight into `_class` and validates nothing, so
-# a typo here declares fine and fails much later, at the import site. `darwin`
-# works only because nix-darwin sets that `_class` itself.
-CLASSES = ('nixos', 'homeManager', 'flake', 'generic', 'darwin')
+def static_document(root):
+    """check_wiki.py's file-only reading of the tree. The script is loaded
+    from this checkout (wiki/scripts/), the tree read from <modules-dir>,
+    which sits at <repo>/flake/modules."""
+    import importlib.util
+    script = pathlib.Path(__file__).resolve().parents[2] / 'wiki' / 'scripts' / 'check_wiki.py'
+    spec = importlib.util.spec_from_file_location('check_wiki', script)
+    cw = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cw)
+    return cw.static_document(pathlib.Path(root).resolve().parents[1])
 
-# wiki/module-style-guide.md's module header: name derived from the filename
-# (never hardcoded), opening brackets on the same line, four-space indent, and
-# the `# # description` comment as the first line of the body. The inner
-# lambda is `_:` rather than `{ ... }:` -- statix flags the empty pattern and
+
+def drift(doc, static):
+    """Where the file-only reading disagrees with the evaluated graph."""
+    views = {
+        'category': lambda d: {n: c['dir'] for n, c in d['categories'].items()},
+        'module':   lambda d: {n: (m['path'], sorted(m['classes'])) for n, m in d['modules'].items()},
+        'includes': lambda d: d.get('includes') or {},
+        'enables':  lambda d: d.get('enables') or {},
+    }
+    hits = []
+    for kind, view in views.items():
+        a, b = view(doc), view(static)
+        for name in sorted(set(a) | set(b)):
+            if a.get(name) != b.get(name):
+                hits.append(f"DRIFT      {kind} {name!r}: evaluated {a.get(name)!r}, "
+                            f"read from the files {b.get(name)!r}")
+    for h in hits:
+        print(h)
+    if hits:
+        see('drift')
+    return hits
+
+
+# The classes dirs-as-categories is configured with (flake/flake.nix): a key
+# outside these is refused at evaluation, so refuse it here first.
+CLASSES = ('nixos', 'homeManager', 'darwin')
+
+# wiki/module-files.md's shape and wiki/module-style-guide.md's formatting:
+# the pointer line, opening brackets on the same line, four-space indent, and
+# the `# # description` comment as the first line of the body. The class
+# module is `_:` rather than `{ ... }:` -- statix flags the empty pattern and
 # a fresh file would raise the lint ratchet; whoever fleshes the module out
-# will destructure `config`/`pkgs` anyway. No history heading: that is added
-# when there is something historical to record, not at birth.
+# will destructure `config`/`pkgs` anyway. No `{ lib, ... }:` header until
+# the body uses `lib`: deadnix would flag it unused.
 #
-# Tokens, not str.format: the text is full of literal Nix braces, and every
-# one of them is a format field waiting to KeyError.
-BOILERPLATE = '''{ lib, ... }:
-    let
-        moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-    in {
-        flake.modules.@CLASS@.${moduleName} = _: {
-            # # description = "@DESC@";
-        };
+# Tokens, not str.format: the text is full of literal Nix braces.
+BOILERPLATE = '''# Module file: named after this file; why it looks this way: wiki/module-files.md
+{
+    @CLASS@ = _: {
+        # # description = "@DESC@";
+    };
 }
 '''
 
 
-def add(root, cls, target, description):
-    """Scaffold a module file where the collector will actually find it.
+def add(root, cls, target, description, run=subprocess.run):
+    """Scaffold a module file inside a category.
 
-    Every rule enforced here is one that has silently bitten (the
-    new-flake-module skill collects them): the declared name comes from the
-    filename, never hardcoded; the target must sit inside a category's tree,
-    since entry points outside every category are collected by nothing; the
-    class must
-    be one that means something; and a name that already exists is refused or
-    warned about, because same-named declarations merge instead of
-    conflicting. The file is `git add`-ed -- flakes in a git repo ignore
-    untracked files -- and the checks run immediately, so a mistake is caught
-    this second rather than at the next build.
+    The target must sit under a category, since a module outside every
+    category is collected by nothing; the class must be one dirs-as-categories
+    knows; a name already taken by a module or a category is refused, since
+    dirs-as-categories would refuse the whole tree. The file is `git add`-ed --
+    flakes in a git repo ignore untracked files -- and the checks run
+    immediately, so a mistake is caught this second rather than at the next
+    build.
     """
     if cls not in CLASSES:
-        print(f"error: class {cls!r} is not one that means anything here "
-              f"({', '.join(CLASSES)}); a wrong class declares fine and "
-              f"fails only at the import site", file=sys.stderr)
+        print(f"error: class {cls!r} is not one dirs-as-categories knows "
+              f"({', '.join(CLASSES)})", file=sys.stderr)
         return 1
-    target = pathlib.Path(target)
+    target = pathlib.PurePosixPath(target)
     if target.is_absolute() or '..' in target.parts:
-        print(f"error: target must be a relative path under {root}",
-              file=sys.stderr)
+        print(f"error: target must be a relative path under {root}", file=sys.stderr)
         return 1
     if target.suffix != '.nix' or len(target.parts) < 2:
         print("error: target must name a .nix file inside a category, e.g. "
               "general-config/system/my-thing/my-thing.nix", file=sys.stderr)
         return 1
+    if target.name in ('default.nix', 'defaults.nix'):
+        print("error: name the file after the module; default.nix and defaults.nix "
+              "mean something else here (wiki/module-files.md)", file=sys.stderr)
+        return 1
     description = ' '.join(description) if description else "TODO: one line"
     if '"' in description or '${' in description:
         # Either would break the "..." string in the generated Nix: a quote
         # terminates it, `${` interpolates.
-        print('error: description must not contain `"` or `${`',
-              file=sys.stderr)
+        print('error: description must not contain `"` or `${`', file=sys.stderr)
         return 1
 
-    root = pathlib.Path(root)
-    path = root / target
+    path = pathlib.Path(root) / target
     if path.exists():
         print(f"error: {path} already exists", file=sys.stderr)
         return 1
 
-    categories, modules = scan(root)
-    catdirs = {p.parent: name for name, p in categories.items()}
-
-    category = next((catdirs[anc] for anc in path.parents if anc in catdirs),
-                    None)
+    doc = graph(root, run)
+    category_at = {c['dir']: name for name, c in doc['categories'].items()}
+    category = next((category_at[a] for a in ancestors(target) if a in category_at), None)
     if category is None:
-        print(f"error: {target} sits outside every category tree; a module "
-              f"must be under a directory holding a dirsAsCategory.nix (only "
-              f"entry points live outside, and they are not collected)",
-              file=sys.stderr)
+        print(f"error: {target} sits outside every category; a module must be "
+              f"under a category's folder (only entry points live outside, and "
+              f"they are collected by nothing)", file=sys.stderr)
         return 1
-
     name = target.stem
-    for existing_path, existing_classes in modules.get(name, []):
-        if cls in existing_classes:
-            print(f"error: {cls}.{name} is already declared by "
-                  f"{existing_path}; two same-named modules of one class "
-                  f"MERGE silently rather than conflicting -- pick another "
-                  f"name", file=sys.stderr)
-            return 1
-    if name in modules:
-        others = ', '.join(sorted(
-            f"{'/'.join(sorted(c))}.{name} ({p})"
-            for p, c in modules[name]))
-        print(f"warning: the name {name!r} already exists as {others}; a "
-              f"different class declares cleanly, but grep for the name "
-              f"before keeping it")
-    if name in categories:
-        print(f"error: {name!r} is also a category "
-              f"({categories[name].parent}/); declaring a module of the same "
-              f"name merges the two attributes -- this is exactly how `boot` "
-              f"came to mean two different things. Pick another name",
-              file=sys.stderr)
+    if name in doc['modules'] or name in doc['categories']:
+        where = doc['modules'][name]['path'] if name in doc['modules'] else doc['categories'][name]['dir']
+        print(f"error: the name {name!r} is taken ({where}); modules and "
+              f"categories share one namespace -- pick another name", file=sys.stderr)
         return 1
 
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        BOILERPLATE.replace('@CLASS@', cls).replace('@DESC@', description))
+    path.write_text(BOILERPLATE.replace('@CLASS@', cls).replace('@DESC@', description))
     repo = pathlib.Path(subprocess.run(
         ['git', 'rev-parse', '--show-toplevel'],
         cwd=root, capture_output=True, text=True, check=True).stdout.strip())
@@ -468,56 +263,56 @@ def add(root, cls, target, description):
     # the repo-relative form -- not the modules-dir-relative one.
     subprocess.run(['git', '-C', str(repo), 'add', '--',
                     str(path.resolve().relative_to(repo))], check=True)
-    print(f"created {path} -- declares {cls}.{name}, collected via category "
-          f"{category!r}; `git add`-ed")
+    print(f"created {path} -- the {cls} module {name!r}, in category {category!r}; "
+          f"`git add`-ed")
 
-    # The new module is imported by nothing yet, so `orphans` listing it is
+    # The new module is reached by nothing yet, so `orphans` listing it is
     # the expected outcome, not a finding. Anything ELSE it reports was
     # already wrong before this command ran -- say so and fail rather than
     # let the new file hide in noise.
-    new = {str(path)}
-    findings = bool(collisions(root)) | bool(untracked(root))
-    orphaned = orphans(root)
-    stale = [f for f in orphaned if str(f[1]) not in new]
-    if {str(f[1]) for f in orphaned} & new:
-        print("ORPHAN (expected -- brand new): import it from a host or "
+    stale_untracked = bool(untracked(root))
+    orphaned = orphans(root, graph(root, run))
+    stale = [f for f in orphaned if f[1] != str(target)]
+    if any(f[1] == str(target) for f in orphaned):
+        print("ORPHAN (expected -- brand new): include it from a host or "
               "another module, or it installs nothing")
-    if findings or stale:
+    if stale_untracked or stale:
         print("error: the checks above did not come back clean -- fix what "
               "they report before scaffolding here", file=sys.stderr)
         return 1
     return 0
 
 
-def main():
-    if len(sys.argv) < 2:
-        print(__doc__); sys.exit(2)
-    cmd = sys.argv[1]
+def main(argv=None, run=subprocess.run):
+    argv = list(sys.argv[1:] if argv is None else argv)
+    graph_file = None
+    if '--graph' in argv:
+        i = argv.index('--graph')
+        graph_file = argv[i + 1]
+        del argv[i:i + 2]
+    if not argv:
+        print(__doc__); return 2
+    cmd = argv[0]
     if cmd == 'add':
-        if len(sys.argv) < 5:
-            print(__doc__); sys.exit(2)
-        sys.exit(add(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5:]))
-    if len(sys.argv) != 3:
-        print(__doc__); sys.exit(2)
-    root = sys.argv[2]
-    if cmd == 'collisions':
-        sys.exit(1 if collisions(root) else 0)
-    if cmd == 'orphans':
-        sys.exit(1 if orphans(root) else 0)
+        if len(argv) < 4:
+            print(__doc__); return 2
+        return add(argv[1], argv[2], argv[3], argv[4:], run)
+    if len(argv) != 2:
+        print(__doc__); return 2
+    root = argv[1]
     if cmd == 'untracked':
-        sys.exit(1 if untracked(root) else 0)
-    if cmd == 'names':
-        sys.exit(1 if names(root) else 0)
-    if cmd == 'shims':
-        sys.exit(1 if shims(root) else 0)
+        return 1 if untracked(root) else 0
+    if cmd == 'orphans':
+        return 1 if orphans(root, graph(root, run, graph_file)) else 0
+    if cmd == 'drift':
+        return 1 if drift(graph(root, run, graph_file), static_document(root)) else 0
     if cmd == 'check':
-        bad = (bool(collisions(root)) | bool(orphans(root)) | bool(names(root))
-               | bool(shims(root)) | bool(untracked(root)))
+        doc = graph(root, run, graph_file)
+        bad = bool(untracked(root)) | bool(orphans(root, doc)) | bool(drift(doc, static_document(root)))
         print("no findings" if not bad else "", end="")
-        sys.exit(1 if bad else 0)
-    print(__doc__); sys.exit(2)
+        return 1 if bad else 0
+    print(__doc__); return 2
 
-# Guarded so `add` (and the checks) stay importable for testing; nothing in
-# the tree imports this module today, but unguarded main() made that impossible.
+
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

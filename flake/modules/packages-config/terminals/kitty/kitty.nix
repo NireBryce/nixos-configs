@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # kitty, installation only. The configuration is kitty-config.nix, alongside
 # this file.
 #
@@ -12,11 +13,8 @@
 # They must NOT both declare a home.file.<n>.text: that option is types.lines
 # and concatenates silently rather than conflicting. bash.nix and blesh.nix,
 # the other split pair in this tree, did exactly that to .blerc.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }: {
+{
+    homeManager = { pkgs, lib, ... }: {
         # kitty terminal emulator
         home.packages = with pkgs; [
             kitty-img

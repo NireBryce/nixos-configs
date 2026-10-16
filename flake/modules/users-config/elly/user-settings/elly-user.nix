@@ -1,9 +1,7 @@
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{
     # TODO: these modules should be stored outside of the users folder, so it's clearer when it's imported
-    flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+    nixos = { pkgs, ... }: {
         users.mutableUsers = false;
         users.users = { 
             # groups = {
@@ -46,7 +44,7 @@ in {
         ];
     };
 
-    flake.modules.darwin.${moduleName} = { pkgs, ... }: {
+    darwin = { pkgs, ... }: {
         fonts.packages = with pkgs; [
             nerd-fonts.fira-code
             nerd-fonts.iosevka

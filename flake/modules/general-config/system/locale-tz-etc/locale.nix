@@ -1,8 +1,7 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 { lib, ... }:
-let
-      moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-flake.modules.nixos.${moduleName} = {
+{
+    nixos = {
         i18n.defaultLocale = lib.mkDefault "en_US.UTF-8";
     };
 }

@@ -1,8 +1,7 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 { lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { pkgs, ... }:
+{
+    nixos = { pkgs, ... }:
     let
         probe = phase: ''
             export PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.findutils pkgs.systemd pkgs.smartmontools ]}:$PATH

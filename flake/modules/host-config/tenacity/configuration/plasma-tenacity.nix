@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Tenacity's live Plasma/KDE state (theme, kwin behavior, input devices,
 # global shortcuts), captured from this machine's own ~/.config on
 # 2026-09-01 and turned into plasma-manager declarations.
@@ -18,11 +19,9 @@
 # The one fact worth carrying here: nearly every default Meta-based
 # kwin/plasmashell shortcut on this machine is deliberately UNBOUND, and
 # that is captured as configuration. Nothing in this repo says why.
-{ lib, inputs, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.homeManager.${moduleName} = {
+{ inputs, ... }:
+{
+    homeManager = {
         imports = [ inputs.plasma-manager.homeModules.plasma-manager ];
 
         programs.plasma = {

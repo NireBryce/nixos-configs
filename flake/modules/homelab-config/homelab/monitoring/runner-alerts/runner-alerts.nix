@@ -1,9 +1,9 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 { lib, ... }:
 let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
     textfileDir = "/var/lib/node-exporter-textfile";
 in {
-    flake.modules.nixos.${moduleName} = { pkgs, config, ... }: let
+    nixos = { pkgs, config, ... }: let
         promUid = (lib.findFirst (d: d.type == "prometheus") null
             config.services.grafana.provision.datasources.settings.datasources).uid;
 

@@ -101,7 +101,7 @@ inside it, keep only what a person reading the generated dotfile needs.**
 `lysithea` doesn't list `shell-config` in its
 own imports, but reaches the `homeManager`-class content anyway (`bash`,
 `blesh`, `shell-env`, `zsh`) via `users-config/elly-home-manager.nix`'s shared
-`ellyHomeManager` bundle, which every host's Home Manager config points at
+`elly-home-manager` bundle, which every host's Home Manager config points at
 regardless of what that host's own `nixos`/`darwin` import list says. System
 shell *registration* on darwin (which shells exist in `/etc/shells`) is a
 separate, platform-specific concern handled by [macos](../macos.md)'s
@@ -117,6 +117,6 @@ separate, platform-specific concern handled by [macos](../macos.md)'s
   (`.agents/skills/home-manager-dotfiles/SKILL.md`) — the general form of
   the concatenation trap above.
 - [macos](../macos.md) — darwin-side shell registration.
-- [../../architecture.md](../../architecture.md) — the `ellyHomeManager`
+- [../../architecture.md](../../architecture.md) — the `elly-home-manager`
   bundle and why it, not per-host imports, is what actually reaches every
   host's home config.

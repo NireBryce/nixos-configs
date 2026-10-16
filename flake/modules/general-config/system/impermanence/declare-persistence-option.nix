@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Declares the `environment.persistence` option for every NixOS host, whether
 # or not that host actually wipes anything. Nothing else. No bind mounts
 # happen unless something populates environment.persistence."/persist" with
@@ -42,11 +43,9 @@
 # filesystem or mountpoint at all -- the bind mount ends up being one
 # directory onto a sibling directory on the same filesystem, which is a
 # little redundant and entirely functional.
-{ lib, inputs, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = {
+{ inputs, ... }:
+{
+    nixos = {
         imports = [ inputs.impermanence.nixosModule ];
     };
 }

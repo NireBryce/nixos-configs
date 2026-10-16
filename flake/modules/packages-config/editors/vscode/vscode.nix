@@ -1,9 +1,8 @@
-{ lib, inputs, ... }:
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{ inputs, ... }:
 # TODO: remove need for `inputs`, try `'self?`
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+{
+    nixos = { pkgs, ... }: {
         # systemPackages, NOT programs.vscode -- see history at the bottom.
         # The NixOS module forces a store path as --extensions-dir, which hides
         # every extension installed through the GUI.

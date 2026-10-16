@@ -1,8 +1,6 @@
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{
+    nixos = { pkgs, ... }: {
         # Cod - Completion daemon
         # I think it needs to be system installed to access system shells
         #
@@ -43,7 +41,7 @@ in {
     # existed. The ignore rule only has to stop cod from winning that
     # race *again* later in the same session, when you next run
     # `<carapace-covered-command> --help`.
-    flake.modules.homeManager.${moduleName} = { pkgs, ... }:
+    homeManager = { pkgs, ... }:
     let
         # carapace --list needs no $HOME/network -- checked with
         # both stripped, in a shell matching what a Nix build

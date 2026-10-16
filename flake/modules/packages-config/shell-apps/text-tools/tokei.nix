@@ -1,8 +1,6 @@
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.homeManager.${moduleName} = { pkgs, ... }: { 
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{
+    homeManager = { pkgs, ... }: { 
         # count lines of code
         home.packages = with pkgs; [
             tokei

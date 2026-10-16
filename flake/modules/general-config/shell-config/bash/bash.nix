@@ -1,8 +1,6 @@
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{
+    nixos = { pkgs, ... }: {
         environment.pathsToLink = [
         "/share/bash-completion"
         ];
@@ -11,7 +9,7 @@ in {
         ];
     };
     
-    flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }:
+    homeManager = { pkgs, lib, ... }:
     let
         # A real file rather than inlined, same reasoning as
         # blesh.nix's carapaceDescBash: it does textual surgery on

@@ -1,7 +1,6 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 { lib, ... }:
 let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-
     # What libvirt guests (the Forgejo runner VM) may reach, by domain;
     # each entry covers its subdomains. Anything else gets NXDOMAIN
     # here, and a connection to an address this resolver didn't hand
@@ -19,7 +18,7 @@ let
     ];
     upstreams = [ "9.9.9.9" "1.1.1.1" ];
 in {
-    flake.modules.nixos.${moduleName} = { pkgs, ... }: let
+    nixos = { pkgs, ... }: let
         conf = pkgs.writeText "vm-egress-dns.conf" ''
             # 5354 on the bridge address; vm-networking.nix DNATs every
             # guest DNS query here. libvirt's own dnsmasq keeps :53.

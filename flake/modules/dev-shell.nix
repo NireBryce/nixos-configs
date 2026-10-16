@@ -20,7 +20,11 @@
 # This file sits at the top of modules/ rather than in a category directory,
 # like checks.nix: it is a flake output, not something a host imports.
 {
-    perSystem = { pkgs, ... }: {
+    perSystem = { pkgs, inputs', ... }: {
+        # `just module-graph` and wiki/architecture.md's diagram draw with this
+        # (flake/module-graph.toml says where each area goes).
+        packages.module-graph = inputs'.flake-module-graph.packages.default;
+
         devShells.default = pkgs.mkShell {
             packages = with pkgs; [
                 just

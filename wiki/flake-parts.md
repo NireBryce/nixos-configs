@@ -1,6 +1,6 @@
 # flake-parts
 
-_Last modified: 2026-10-13_
+_Last modified: 2026-10-16_
 
 The one fact worth knowing before reading `flake.nix` or any module for the
 first time: this repo depends on exactly one flake-parts option, and almost
@@ -28,8 +28,10 @@ architecture is the mechanism built on top of this, not this itself.
 
 ## See also
 
-- [architecture.md](architecture.md) — `dirsAsCategory`, the mechanism
-  built on the option above: category membership derived from directory
-  placement rather than declared per module.
-- [`../flake/doc/dirsAsCategory.md`](<../flake/doc/dirsAsCategory.md>) —
-  that mechanism in full.
+- [architecture.md](architecture.md) — the category mechanism built on the
+  option above: category membership derived from directory placement rather
+  than declared per module.
+- [module-files.md](module-files.md) — that mechanism as this repo uses it,
+  through the `dirs-as-categories` input;
+  [`../flake/doc/dirsAsCategory.md`](<../flake/doc/dirsAsCategory.md>) is
+  the shim-based design it replaced.

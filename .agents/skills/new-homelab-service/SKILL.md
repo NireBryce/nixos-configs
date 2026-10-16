@@ -24,8 +24,9 @@ the checklist below is their accrued cost.
 
 ## The shape
 
-One commit: category dir `flake/modules/general-config/<category>/` with a
-copy of `dirsAsCategory.nix`; module `<category>/<tool>/<tool>.nix`; one
+One commit: category dir `flake/modules/homelab-config/homelab/<category>/`
+(a category because `<tool>/` holds the module); module
+`<category>/<tool>/<tool>.nix`; one
 commented line in the host's config; Caddy route if HTTP; docs
 (`wiki/categories/<category>.md` + indexes).
 

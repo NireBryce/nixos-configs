@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Puts Plasma's lock screen in front of cube's autologin session
 # (headless-display-cube.nix), so both the console and a Moonlight client
 # need elly's password, and requires encryption on Sunshine streams; added
@@ -40,10 +41,8 @@
 # Sunshine resolves from its appdata dir, not the config file's (src/config.cpp,
 # path_f).
 { lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { pkgs, ... }:
+{
+    nixos = { pkgs, ... }:
     let
         lockSession = pkgs.writeShellApplication {
             name          = "cube-lock-session";

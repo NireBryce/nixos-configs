@@ -107,9 +107,9 @@ before the matching task. Under Claude Code and ZCode, the lesson-reminder
 hook adds each area's one-line reminder to your context on the first edit
 or command that touches it, from `.agents/lessons-map.toml`.
 
-- Writing, renaming or browsing a flake-parts module: names come from
-  filenames, same-named modules merge — skill `new-flake-module`,
-  `.agents/rules/flake-modules.md`.
+- Writing, renaming or browsing a module: its name is its filename and a
+  rename renames it; categories come from folders — skill
+  `new-flake-module`, `.agents/rules/flake-modules.md`, `wiki/module-files.md`.
 - Home Manager shell/dotfiles: `home.file` text concatenates — skill
   `home-manager-dotfiles`, `.agents/rules/home-manager.md`.
 - Impermanence, initrd, host hardware: trust `/proc/1/mountinfo` over
@@ -269,16 +269,18 @@ other machine (no remote builder, no binfmt); `rebuild.sh` says so.
 
 ## Architecture
 
-`flake.nix` is a manifest. `(inputs.import-tree ./modules)` recursively
-imports every `.nix` file under `flake/modules/`, and
-`flake-parts.flakeModules.modules` declares the `flake.modules.<class>.<name>`
-option they all write into. **Every `.nix` file under `modules/` is a
-flake-parts module** — top level `{ flake.modules.<class>.<name> = …; }` or
-similar, never a bare NixOS or Home Manager module.
+`flake.nix` is a manifest. `(inputs.dirs-as-categories.lib.tree ./modules)`
+(an import-tree preset, a flake input) reads every `.nix` file under
+`flake/modules/` and fills `flake.modules.<class>.<name>` from them. **A
+module file names no module**: it is `{ nixos = …; homeManager = …; }`
+(optionally a function of `lib`/`inputs`), its name is its filename, and its
+first line points to `wiki/module-files.md`, which says why. Anything else
+(`hosts.nix`, `checks.nix`) is a plain flake-parts module.
 
-**Membership comes from the directory**: each category's
-`dirsAsCategory.nix` collects every `.nix` file beneath it; categories are
-how shared things stay optional (no `mkEnableOption`). Areas:
+**Membership comes from the directory**: a folder with a subfolder holding
+modules is a category, which includes every module beneath it; hosts list
+categories by name in `includes.<class>`. Categories are how shared things
+stay optional (no `mkEnableOption`). Areas:
 `general-config/` (incl. `macos/` for darwin), `hardware-config/`,
 `homelab-config/` (self-hosted services), `host-config/`, `packages-config/`,
 `users-config/`.
@@ -288,7 +290,7 @@ forge-runner guest, removed hosts) — don't restate it.
 
 **Home Manager is NixOS-integrated** — no `homeConfigurations`, no separate
 home switch; `just switch` applies both (`.agents/rules/home-manager.md`).
-`ellyHomeManager` is shared verbatim by all four hosts including
+`elly-home-manager` is shared verbatim by all four hosts including
 `nire-lysithea`, so everything in it has to survive darwin.
 
 ## Docs

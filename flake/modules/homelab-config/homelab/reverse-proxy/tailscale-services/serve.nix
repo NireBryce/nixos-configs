@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # services.tailscale.serve: raw TCP forwarding ONLY, from each Tailscale
 # Service's virtual address to caddy's existing loopback listener, so each
 # app gets its own tailnet DNS name instead of a path prefix under
@@ -9,11 +10,8 @@
 # attempt and why it failed, `reverse-proxy-history.md`; the control-plane
 # half (Service objects, ACL entries, `vip-put` traps, what is applied
 # live), this directory's README.md. Traps sit next to the options.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = {
+{
+    nixos = {
         services.tailscale.serve = {
             enable = true;
 

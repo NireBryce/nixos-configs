@@ -1,6 +1,6 @@
 # Lessons learned
 
-_Last modified: 2026-10-05_
+_Last modified: 2026-10-16_
 
 > **Written by Claude Code, for Claude Code**, and largely a record of its own
 > mistakes, so the "I" in the articles is a machine with no memory of having
@@ -91,8 +91,8 @@ Home for most of this group: [AGENTS.md "Before you start"](../AGENTS.md#before-
 
 ## Names and resources that can collide
 
-- **§34** [The dangerous collision is where both halves work](lessons-learned/34-collision-where-both-halves-work.md) — a category and a same-named module merge silently; name the file after the specific thing. Home: skill `new-flake-module`. Enforced: `just modules`, which cites it (reminded by the lesson-reminder hook on creating a module).
-- **§35** [The same collision, a third time](lessons-learned/35-collision-a-third-time.md) — a new category directory's name is reserved for every module under it; check by construction when splitting one out. Home: skill `new-flake-module`. Enforced: `just modules`, which cites it (reminded by the lesson-reminder hook on creating a module).
+- **§34** [The dangerous collision is where both halves work](lessons-learned/34-collision-where-both-halves-work.md) — a category and a same-named module merge silently; name the file after the specific thing. Home: skill `new-flake-module`. Enforced: evaluation -- dirs-as-categories refuses a repeated name, naming both files (wiki/module-files.md); reminded by the lesson-reminder hook on creating a module.
+- **§35** [The same collision, a third time](lessons-learned/35-collision-a-third-time.md) — a new category directory's name is reserved for every module under it; check by construction when splitting one out. Home: skill `new-flake-module`. Enforced: evaluation -- dirs-as-categories refuses a repeated name, naming both files (wiki/module-files.md); reminded by the lesson-reminder hook on creating a module.
 - **§32** [An auto-allocator can't see manual entries](lessons-learned/32-auto-allocator-vs-manual.md) — before mixing auto and manual modes for one resource, check auto can see manual; a working host may be relying on state a fresh one lacks. Home: [podman.nix](../flake/modules/homelab-config/homelab/containers/podman/podman.nix). Enforced: [invariants.nix](../flake/modules/invariants.nix) (subuid ranges).
 
 ## Git, commits, and working with the user

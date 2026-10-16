@@ -1,7 +1,6 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 { lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
+{
     # 26.05 -- NOT this flake's own 26.11 pin (checked against
     # nixosConfigurations.nire-tenacity.config.system.nixos.release), and
     # not the "starts on the current release, no data yet" 26.11 this file
@@ -14,7 +13,7 @@ in {
     # under and is never bumped after the fact -- see durandal's/tenacity's
     # own 23.11/25.05 for the same reasoning -- so this has to match what
     # /etc/nixos already committed to, not this flake's nixpkgs pin.
-    flake.modules.nixos.${moduleName} = {
+    nixos = {
         system.stateVersion = lib.mkDefault "26.05"; # Don't change. https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion
     };
 }

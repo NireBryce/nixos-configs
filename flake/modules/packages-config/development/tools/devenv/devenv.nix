@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # devenv from nixpkgs (built by Hydra, served from cache.nixos.org).
 #
 # No devenv.cachix.org substituter. It used to sit here with its key in
@@ -13,11 +14,8 @@
 # detect_missing_caches has no callers). The same goes for any per-project
 # cache in devenv.yaml or a flake's nixConfig: getting one back means
 # trusting its key daemon-wide here again.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+{
+    nixos = { pkgs, ... }: {
         environment.systemPackages = with pkgs; [
             devenv
         ];

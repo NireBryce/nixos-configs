@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # kitty's configuration. Installation, and the darwin/homebrew decision, are
 # kitty.nix alongside this file.
 #
@@ -9,11 +10,8 @@
 # Generates nothing on its own -- Home Manager wraps the whole programs.kitty
 # config block in `mkIf cfg.enable`, and `enable` is set in kitty.nix. If this
 # file's settings ever appear to do nothing, check that first.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.homeManager.${moduleName} = {
+{
+    homeManager = {
         programs.kitty = {
             extraConfig = ''
                 clipboard_control write-clipboard write-primary read-clipboard-ask read-primary-ask

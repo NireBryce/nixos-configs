@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # What nire-cube is made of. GMKtec Nucbox G11, a mini PC -- workstation
 # shape, same as durandal, not a handheld (see tenacity-configuration.nix
 # for that shape instead).
@@ -9,7 +10,7 @@
 # it does.
 #
 # This file sits directly under host-config/ rather than in a category directory,
-# because dirsAsCategory only collects from *sub*directories -- a host
+# because a file directly in an area belongs to no category -- a host
 # definition should not become a member of anything.
 #
 # Meant as a copy of durandal-configuration.nix's shape -- same category
@@ -41,52 +42,50 @@
 # every host and cube's root never wipes the hand-made hash back out. Read
 # WARN-impermanence.nix and README.md's safety section before assuming any of
 # that has changed for cube.
-{ config, ... }:
 {
-    flake.modules.nixos.cubeConfiguration.imports =
-    with config.flake.modules.nixos; [
+    includes.nixos = [
         # ── this machine ──────────────────────────────────────────────────────
         # host-config/cube/: hardware-cube, boot-cube, nixpkgs-hostPlatform-cube,
         # nixpkgs-stateVersion-cube -- suffixed for the same reason
         # tenacity's are: a module's name is its filename, and
         # same name in the same class merges rather than erroring.
-        cube
+        "cube"
 
         # ── shared ────────────────────────────────────────────────────────────
-        boot            # common boot options: boot-generations, boot-editor
+        "boot"          # common boot options: boot-generations, boot-editor
 
         # Deliberately NOT `impermanence` -- see the header above. This host
         # keeps a plain persistent root, not the `/root` wipe
         # durandal/tenacity have.
 
-        hardware        # amdcpu, amdgpu -- R2514 + integrated Radeon is AMD
+        "hardware"      # amdcpu, amdgpu -- R2514 + integrated Radeon is AMD
                         # throughout, same shared category durandal
                         # already imports.
-        nix
-        peripherals
-        shell-config
-        system
+        "nix"
+        "peripherals"
+        "shell-config"
+        "system"
 
         # Same choice durandal made: a workstation, its own session module
         # rather than the whole `desktop-env` category (which also holds
         # jovian, a handheld-only module this host has no use for).
         # kde-desktop pulls in kde-base itself.
-        kde-desktop
+        "kde-desktop"
 
         # Every self-hosted/homelab service this host runs, as one aggregate
         # -- added 2026-08-27, folding what used to be seven separate
         # imports here (virtualization, containers, monitoring, git-forge,
         # shortlinks, reverse-proxy, landing) into `homelab-config/homelab/`.
         # Each of those is still its own category nested under it
-        # (`homelab-config/homelab/<name>/`, each keeping its own
-        # `dirsAsCategory.nix`)
+        # (`homelab-config/homelab/<name>/`, each a category because its
+        # subfolders hold modules)
         # and still individually importable by name -- tenacity still pulls
         # `containers` directly, unaffected by this move (durandal dropped
         # both `virtualization` and `containers` 2026-08-27, the same day
         # this move landed; cube's own copies come through `homelab` now),
         # per the same coarse-and-fine nesting `hardware-config/hardware`/
         # `hardware-config/hardware/amd` already established (see
-        # flake/doc/dirsAsCategory.md). All of it was cube-only before this
+        # wiki/module-files.md). All of it was cube-only before this
         # move and stays cube-only now -- nothing here belongs on the
         # handhelds, which is the reason each got its own category in the
         # first place rather than living in `system`.
@@ -98,21 +97,21 @@
         # `reverse-proxy` pairing) live on each service's own module header
         # and in `wiki/categories/`, not repeated here now that they share
         # one import line.
-        homelab
+        "homelab"
 
         # ── packages ──────────────────────────────────────────────────────────
         # Full parity with durandal.
-        development
-        editors
-        gui-other
-        linux-utils
-        nix-utils
-        shell-apps
-        terminals
+        "development"
+        "editors"
+        "gui-other"
+        "linux-utils"
+        "nix-utils"
+        "shell-apps"
+        "terminals"
 
         # ── user ──────────────────────────────────────────────────────────────
-        elly            # elly-user: the account, groups, emergency packages
+        "elly"          # elly-user: the account, groups, emergency packages
     ];
 
-    flake.modules.nixos.cubeConfiguration.networking.hostName = "nire-cube";
+    nixos.networking.hostName = "nire-cube";
 }

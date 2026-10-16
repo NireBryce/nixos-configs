@@ -14,7 +14,7 @@
             # is nix-darwin's own module for exactly this, so there is no
             # reason to skip it.
             inputs.darwin.flakeModules.default
-            (inputs.import-tree ./modules)
+            (inputs.dirs-as-categories.lib.tree ./modules)
             # RUNTIME-VERIFIED, 2026-08-25, in CI (.github/workflows/check.yml)
             # on its first real run: without this, `nix flake check` errors
             # outright -- "flake-parts could not determine statically that no
@@ -54,6 +54,21 @@
         # ── Dendritic toolchain ───────────────────────────────────────────────────
         # systems.url                                = "github:nix-systems/default";
         import-tree.url                            = "github:vic/import-tree";
+
+        # builds flake.modules from modules/ (wiki/module-files.md)
+        dirs-as-categories = {
+            url = "github:NireBryce/dirs-as-categories";
+            inputs = {
+                import-tree.follows = "import-tree";
+                flake-parts.follows = "flake-parts";
+            };
+        };
+
+        # draws the module tree (`just module-graph`, wiki/architecture.md's diagram)
+        flake-module-graph = {
+            url = "github:NireBryce/flake-module-graph";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
         # den.url                                    = "github:vic/den";
         # flake-aspects.url                          = "github:vic/flake-aspects";
 

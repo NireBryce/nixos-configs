@@ -139,7 +139,7 @@ First boot also needs the KDE half of the hibernation guard —
 `root-rollback/restore-root/kde-sleepmode.nix` sets `SleepMode=1` in `powerdevil.rc`,
 matching `WARN-impermanence.nix`'s `nohibernate` kernel parameter, or
 suspend breaks outright. It's `homeManager`-class and reaches every desktop
-host through `ellyHomeManager` automatically.
+host through `elly-home-manager` automatically.
 
 ## Confirming the rollback actually works
 

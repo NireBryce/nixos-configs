@@ -1,9 +1,9 @@
 # Category reference
 
-_Last modified: 2026-10-15_
+_Last modified: 2026-10-16_
 
-One article per real category — a directory holding its own
-`dirsAsCategory.nix` under `flake/modules/`. See
+One article per real category — a folder under `flake/modules/` whose
+subfolders hold modules ([../module-files.md](../module-files.md)). See
 [../architecture.md](../architecture.md) for the mechanism itself; these
 pages are the "what's actually in it, and why is it shaped this way" detail
 for each one, at the same what/why/traps depth as the rest of this wiki.
@@ -39,7 +39,7 @@ one hand-written column, kept across regenerations.
 
 ### System categories
 
-<!-- generated:categories-index-system -- from the dirsAsCategory.nix tree under flake/modules/ and the pages in wiki/categories/, by `just wiki-gen`; change the source, not this table. Hand-written, kept per row: Imported by -->
+<!-- generated:categories-index-system -- from the categories under flake/modules/ and the pages in wiki/categories/, by `just wiki-gen`; change the source, not this table. Hand-written, kept per row: Imported by -->
 
 | Category | Directory | Class(es) | Imported by |
 |---|---|---|---|
@@ -48,7 +48,7 @@ one hand-written column, kept across regenerations.
 | [impermanence](impermanence.md) | `general-config/impermanence/` (+ nested `root-rollback`) | nixos, homeManager | durandal, tenacity (not cube) |
 | [macos](macos.md) | `general-config/macos/` | darwin | lysithea |
 | [nix](nix.md) | `general-config/nix/` | nixos, homeManager, darwin | all 4 hosts |
-| [shell-config](shell-config/00-INDEX.md) | `general-config/shell-config/` | nixos, homeManager | all 3 NixOS hosts directly; reaches lysithea via `ellyHomeManager` |
+| [shell-config](shell-config/00-INDEX.md) | `general-config/shell-config/` | nixos, homeManager | all 3 NixOS hosts directly; reaches lysithea via `elly-home-manager` |
 | [system](system.md) | `general-config/system/` | nixos, homeManager, darwin | all 3 NixOS hosts + lysithea (partially) |
 | [hardware](hardware.md) | `hardware-config/hardware/` (+ nested `amd`) | nixos | all 3 NixOS hosts |
 | [peripherals](peripherals.md) | `hardware-config/peripherals/` | nixos | durandal, cube |
@@ -62,7 +62,7 @@ Nested under `homelab-config/homelab/`, cube-only — see [homelab](homelab.md) 
 umbrella mechanism, and the [Usage pages](#usage-pages) table below for the
 matching "how do I use this, not configure it" page where one exists.
 
-<!-- generated:categories-index-homelab -- from the dirsAsCategory.nix tree under flake/modules/homelab-config/homelab/ and the pages in wiki/categories/, by `just wiki-gen`; change the source, not this table. Hand-written, kept per row: Imported by -->
+<!-- generated:categories-index-homelab -- from the categories under flake/modules/homelab-config/homelab/ and the pages in wiki/categories/, by `just wiki-gen`; change the source, not this table. Hand-written, kept per row: Imported by -->
 
 | Category | Directory | Class(es) | Imported by |
 |---|---|---|---|

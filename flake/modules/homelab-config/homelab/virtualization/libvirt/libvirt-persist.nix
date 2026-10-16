@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # The persistence half of libvirt.nix.
 #
 # /var/lib/libvirt/secrets/secrets-encryption-key encrypts libvirt's own
@@ -22,11 +23,8 @@
 # plus a spurious "Neither /var/lib/nixos nor any of its parents are
 # persisted" warning the moment ANY environment.persistence entry exists
 # without it alongside.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { config, lib, ... }:
+{
+    nixos = { config, lib, ... }:
         lib.mkIf (config.boot.initrd.systemd.services ? restore-root) {
             environment.persistence."/persist".files = [ "/var/lib/libvirt/secrets/secrets-encryption-key" ];
         };

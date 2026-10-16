@@ -1,8 +1,6 @@
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }:
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{
+    homeManager = { pkgs, lib, ... }:
         # cmux (meta.platforms = [ "aarch64-darwin" ]) is the mirror image of
         # the usual case: drop-unsupported-packages.nix's meta.platforms
         # filter only runs on darwin -- on Linux it's a no-op by design (see
