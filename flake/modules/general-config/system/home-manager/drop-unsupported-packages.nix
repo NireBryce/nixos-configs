@@ -1,6 +1,6 @@
 # Module file: named after this file; why it looks this way: wiki/module-files.md
 # Drop packages nixpkgs cannot build on this system, once, instead of guarding
-# them one module at a time. ellyHomeManager is shared verbatim by all four
+# them one module at a time. elly-home-manager is shared verbatim by all four
 # hosts, so everything in it has to survive aarch64-darwin as well as
 # x86_64-linux; eleven packages each carried a hand-written
 # `lib.mkIf (!pkgs.stdenv.isDarwin)` before this existed. All eleven were

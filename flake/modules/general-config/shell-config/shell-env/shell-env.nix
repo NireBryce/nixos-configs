@@ -18,7 +18,7 @@
             # Launchers for the two GUI apps that homebrew owns on lysithea
             # and nix owns everywhere else.
             #
-            # This module is part of ellyHomeManager, which every host shares
+            # This module is part of elly-home-manager, which every host shares
             # verbatim, so these have to be guarded -- on the four Linux hosts
             # `discord` and `google-chrome` already ARE the binaries, and an
             # unguarded alias would shadow them with an `open` that does not

@@ -3,8 +3,8 @@
 # global shortcuts), captured from this machine's own ~/.config on
 # 2026-09-01 and turned into plasma-manager declarations.
 #
-# Home-manager class, but deliberately NOT part of `ellyHomeManager` --
-# imported only via tenacityConfiguration's `home-manager.users.elly.imports`
+# Home-manager class, but deliberately NOT part of `elly-home-manager` --
+# imported only via tenacity-configuration's `home-manager.users.elly.imports`
 # (the bottom of tenacity-configuration.nix), so plasma-manager's own HM
 # module never loads on durandal, lysithea or cube. Filed under
 # tenacity/configuration/ rather than a shared category: one host's live

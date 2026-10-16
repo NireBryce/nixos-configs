@@ -14,7 +14,7 @@
 #
 # What actually brings packages and dotfiles across is
 # enable-home-manager-darwin.nix (in `system`), which wires
-# home-manager.users.elly to the SAME `ellyHomeManager` aggregate the NixOS
+# home-manager.users.elly to the SAME `elly-home-manager` aggregate the NixOS
 # hosts use -- not a lysithea-specific copy. Whatever in that aggregate does
 # not evaluate on aarch64-darwin needs excluding at the source, not forked
 # here.
@@ -30,7 +30,7 @@
         # ── shared ───────────────────────────────────────────────────────────────
         "nix"           # basic-nix-settings: allowUnfree, experimental-features
         "system"        # enable-home-manager-darwin -- this is what brings
-                        # packages and dotfiles in, via ellyHomeManager
+                        # packages and dotfiles in, via elly-home-manager
 
         # ── macOS ────────────────────────────────────────────────────────────────
         # homebrew, shell registration, system.primaryUser/nix.enable. Not
@@ -41,7 +41,7 @@
 
         # ── user ─────────────────────────────────────────────────────────────────
         "elly"          # elly-user (darwin fonts), elly-git (homeManager,
-                        # reused via ellyHomeManager already -- listed here too
+                        # reused via elly-home-manager already -- listed here too
                         # only because durandal/tenacity list it the same way)
     ];
 
