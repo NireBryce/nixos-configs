@@ -4,7 +4,7 @@ paths:
   - ".zcode/config.json"
   - ".agents/hooks/**"
   - ".githooks/**"
-  - "flake/scripts/test_guards.py"
+  - "flake/scripts/tests/test_guards.py"
 ---
 
 # Agent settings, permissions, and guard hooks
@@ -29,7 +29,7 @@ paths:
   `just install-hooks`, or by the SessionStart hook) is the backstop: it
   auto-corrects only the `Claude <model> <email>` shape; any other agent's
   trailer passes through.
-- Guard fixtures live in `flake/scripts/test_guards.py` (`just guards-test`);
+- Guard fixtures live in `flake/scripts/tests/test_guards.py` (`just guards-test`);
   a guard's path patterns and its fixtures change together.
 
 - ZCode reads hooks from `.zcode/config.json` (`hooks.events`, with

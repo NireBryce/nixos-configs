@@ -28,7 +28,7 @@
 # Known limits: path-matching only -- a Bash-tool edit (sed -i, tee) of
 # these same files is the git/secrets guards' territory and does not trip
 # this. Renames of the guarded trees need the patterns below updated; the
-# fixture tests in flake/scripts/test_guards.py pin them.
+# fixture tests in flake/scripts/tests/test_guards.py pin them.
 set -euo pipefail
 
 # No jq: say so (JSON built by hand) instead of allowing silently -- the
@@ -50,7 +50,7 @@ reason=""
 # anyway (a future harness or hand-run test): they over-warn on an
 # identically-shaped tree copied elsewhere, e.g. under /tmp, which is the
 # right direction for a warn. A rename of the guarded trees must update
-# these patterns and the fixtures in flake/scripts/test_guards.py -- the
+# these patterns and the fixtures in flake/scripts/tests/test_guards.py -- the
 # fixtures pin that the guarded paths exist on disk, not just the strings.
 case "$file_path" in
     */flake/modules/general-config/impermanence/*|\

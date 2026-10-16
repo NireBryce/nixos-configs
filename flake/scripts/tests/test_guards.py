@@ -42,7 +42,7 @@ import tempfile
 import unittest
 from unittest import mock
 
-REPO = pathlib.Path(__file__).resolve().parents[2]
+REPO = pathlib.Path(__file__).resolve().parents[3]
 HOOKS = REPO / ".agents" / "hooks"
 GIT_HOOKS = REPO / ".githooks"
 SETTINGS = REPO / ".agents" / "settings.json"
@@ -1966,5 +1966,6 @@ if __name__ == "__main__":
         print("test_guards: jq not on PATH -- skipping (the guards need it "
               "too; `nix shell nixpkgs#jq` first)")
         sys.exit(0)
-    import parallel_unittest  # beside this file; ~60s serial, see its header
+    sys.path.insert(0, str(REPO / "flake" / "scripts"))
+    import parallel_unittest  # ~60s serial, see its header
     parallel_unittest.main()

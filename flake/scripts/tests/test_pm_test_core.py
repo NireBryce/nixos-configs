@@ -13,8 +13,8 @@ import subprocess
 import tempfile
 import unittest
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-SCRIPT = os.path.join(HERE, 'pm-test-core.sh')
+SCRIPTS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SCRIPT = os.path.join(SCRIPTS, 'pm-test-core.sh')
 
 
 class PmTestCoreTests(unittest.TestCase):

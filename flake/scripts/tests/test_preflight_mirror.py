@@ -33,7 +33,7 @@ import pathlib
 import re
 import sys
 
-REPO = pathlib.Path(__file__).resolve().parents[2]
+REPO = pathlib.Path(__file__).resolve().parents[3]
 JUSTFILE = REPO / ".justfile"
 WORKFLOW = REPO / ".github" / "workflows" / "check.yml"
 
@@ -173,7 +173,7 @@ def main():
             print(f"  {k}", file=sys.stderr)
         print("Add them to the preflight recipe instead (CI runs it), or, "
               "if one genuinely cannot run locally, to CI_ONLY in "
-              "flake/scripts/test_preflight_mirror.py with the reason.",
+              "flake/scripts/tests/test_preflight_mirror.py with the reason.",
               file=sys.stderr)
         sys.exit(1)
 
@@ -181,12 +181,12 @@ def main():
     # preflight itself quietly lost a check; these must stay in it.
     # Retiring one is a deliberate edit to this set.
     anchors = {
-        "wiki/scripts/check_wiki.py",           # just wiki-lint
-        "flake/scripts/modules.py",             # just modules
-        "flake/scripts/lint.py",                # just lint
-        "flake/scripts/test_guards.py",         # just guards-test
-        "flake/scripts/flake-check.sh",         # just check
-        "flake/scripts/test_check_trailers.py", # just trailers-test
+        "wiki/scripts/check_wiki.py",                 # just wiki-lint
+        "flake/scripts/modules.py",                   # just modules
+        "flake/scripts/lint.py",                      # just lint
+        "flake/scripts/tests/test_guards.py",         # just guards-test
+        "flake/scripts/flake-check.sh",               # just check
+        "flake/scripts/tests/test_check_trailers.py", # just trailers-test
     }
     missing = sorted(anchors - preflight_keys)
     if missing:

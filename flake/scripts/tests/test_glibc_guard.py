@@ -20,8 +20,8 @@ import subprocess
 import tempfile
 import unittest
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-GUARD = os.path.join(HERE, 'glibc-guard.sh')
+SCRIPTS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+GUARD = os.path.join(SCRIPTS, 'glibc-guard.sh')
 HASH = 'a' * 32
 
 

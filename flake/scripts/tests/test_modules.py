@@ -9,7 +9,7 @@ whether it could. Pure stdlib; runs via `just modules-test`, part of
 """
 import contextlib, io, json, pathlib, subprocess, sys, tempfile, types, unittest
 
-sys.path.insert(0, str(pathlib.Path(__file__).parent))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 import modules  # noqa: E402
 
 

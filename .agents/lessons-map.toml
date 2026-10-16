@@ -96,7 +96,7 @@ remind    = "New script: no Python buried in bash (a real .py instead); a checke
 
 [[topic]]
 id      = "agent-config"
-paths   = [".agents/settings.json", ".zcode/config.json", ".agents/hooks/**", ".githooks/**", "flake/scripts/test_guards.py"]
+paths   = [".agents/settings.json", ".zcode/config.json", ".agents/hooks/**", ".githooks/**", "flake/scripts/tests/test_guards.py"]
 rules   = "agent-config.md"
 lessons = [44]
 remind  = "Agent config: a hook added or re-matched in .agents/settings.json goes in .zcode/config.json too; a guard's patterns and its test_guards.py fixtures change together; what the model must read goes in additionalContext, not only systemMessage."

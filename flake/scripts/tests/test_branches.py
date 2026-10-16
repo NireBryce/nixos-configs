@@ -40,7 +40,7 @@ import unittest
 from argparse import Namespace
 from unittest import mock
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import branches
 
 
@@ -258,5 +258,5 @@ class ClassifierTests(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    import parallel_unittest  # beside this file
+    import parallel_unittest  # in flake/scripts, on sys.path above
     parallel_unittest.main()

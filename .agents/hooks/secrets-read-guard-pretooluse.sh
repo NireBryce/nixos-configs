@@ -19,7 +19,7 @@
 # boundary (.agents/rules/agent-config.md). Edit/Write are not this hook's
 # tools; secrets-guard-posttooluse watches their output.
 #
-# Fixture tests: flake/scripts/test_guards.py.
+# Fixture tests: flake/scripts/tests/test_guards.py.
 set -euo pipefail
 
 # No jq: say so (JSON built by hand) instead of allowing silently -- the

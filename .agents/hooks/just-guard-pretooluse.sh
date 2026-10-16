@@ -37,7 +37,7 @@
 # then -- the same rule as git-guard's for an inherited GIT_DIR. The one git
 # call runs with -c core.fsmonitor=false, so the check runs no program the
 # repo's config names.
-# Fixture tests: flake/scripts/test_guards.py.
+# Fixture tests: flake/scripts/tests/test_guards.py.
 set -euo pipefail
 
 if ! command -v jq >/dev/null 2>&1; then

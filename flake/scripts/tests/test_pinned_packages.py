@@ -11,9 +11,9 @@ import json
 import pathlib
 import unittest
 
-HERE = pathlib.Path(__file__).resolve().parent
+SCRIPTS = pathlib.Path(__file__).resolve().parents[1]
 
-_spec = importlib.util.spec_from_file_location('pinned_packages', HERE / 'pinned-packages.py')
+_spec = importlib.util.spec_from_file_location('pinned_packages', SCRIPTS / 'pinned-packages.py')
 pp = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(pp)
 
