@@ -1,8 +1,7 @@
-{ lib, inputs, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.homeManager.${moduleName} = {
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{ inputs, ... }:
+{
+    homeManager = {
         imports = [
             inputs.nix-index-database.homeModules.default
         ];

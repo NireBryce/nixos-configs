@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # The persistence half of vpn.nix, same shape and same gate as
 # tailscale-persist.nix (read its header for why restore-root is the gate).
 #
@@ -9,11 +10,8 @@
 # Neither directory existed on durandal when this was added (2026-09-26), so
 # the first activation has no live file to collide with -- unlike
 # networkmanager-persist.nix's secret_key.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { config, lib, ... }:
+{
+    nixos = { config, lib, ... }:
         lib.mkIf (config.boot.initrd.systemd.services ? restore-root) {
             environment.persistence."/persist".directories = [ "/etc/mullvad-vpn" ];
         };

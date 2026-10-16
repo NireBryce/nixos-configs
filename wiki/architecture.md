@@ -1,6 +1,6 @@
 # Architecture & module system
 
-_Last modified: 2026-10-15_
+_Last modified: 2026-10-16_
 
 For *why* this repo runs flake-parts at all, see [flake-parts.md](flake-parts.md)
 first — this page is the mechanism built on top of that, not the reason for
@@ -24,28 +24,28 @@ The mechanism in one table; the sections below link the reasoning.
 
 | what | where / how |
 |---|---|
-| a module | every `.nix` under `flake/modules/` is a flake-parts module, declaring `flake.modules.<class>.<name>`; its name is its filename |
+| a module | a `.nix` under `flake/modules/` keyed by class (`{ nixos = …; }`); its name is its filename; dirs-as-categories (a flake input) turns it into `flake.modules.<class>.<name>` -- [module-files.md](module-files.md) |
 | a class | the module system the config is for: `nixos`, `darwin`, `homeManager` |
-| a category | a folder holding a `dirsAsCategory.nix`; imports every module beneath it, nested categories included; hosts import categories by name |
-| the collector | `flake/modules/_lib/category-collector.nix`; read `flake/doc/dirsAsCategory.md` before changing it |
-| membership as data | `nix eval --json ./flake#categoryGraph` |
-| checks | `just modules`: collisions, orphans, names, shims, untracked |
-| diagrams | `just module-graph tree`, `hosts`, `dot`, `html` (`--category`, `--depth`, `--static`, `--verify`) |
+| a category | a folder with a subfolder holding modules (or `folderIsCategory`); includes every module beneath it, nested categories included; hosts `includes` categories by name |
+| the rules | the `dirs-as-categories` input (`flake/flake.nix`); its `doc/convention.md`, and [module-files.md](module-files.md) for this repo |
+| membership as data | `nix eval --json ./flake#moduleGraph` |
+| checks | evaluation refuses repeated names, unknown keys and unknown `includes`; `just modules`: orphans, untracked, drift |
+| diagrams | `just module-graph tree`, `hosts`, `dot`, `html` (`--category`, `--depth`, `--wrap`); the flake-module-graph input |
 | Home Manager | integrated through NixOS, no `homeConfigurations`; `just switch` applies both |
 
 ## The core mechanism
 
-- **[`../flake/doc/dirsAsCategory.md`](<../flake/doc/dirsAsCategory.md>)** —
-  the load-bearing one. Every `.nix` file under `flake/modules/` is a
-  flake-parts module (`flake.modules.<class>.<name> = ...`), and which
-  category it belongs to is derived from the directory it's filed in, not
-  declared explicitly. Read this before touching any `dirsAsCategory.nix`.
-  What each category collects is also published as data:
-  `nix eval --json ./flake#categoryGraph` (its directory, the module files
-  it collects itself, and the categories nested in it).
+- **[module-files.md](module-files.md)** — the load-bearing one. A module
+  file is keyed by class and named after its file, and which category it
+  belongs to is derived from the folder it's filed in, not declared. The
+  `dirs-as-categories` flake input applies those rules and publishes what it
+  built as data: `nix eval --json ./flake#moduleGraph` (categories, modules
+  and their classes, `includes`, `enables`).
+  [`../flake/doc/dirsAsCategory.md`](<../flake/doc/dirsAsCategory.md>) is
+  the shim-based design it replaced on 2026-10-16, kept as history.
 - **[`../CLAUDE.md`](../CLAUDE.md), Architecture section** — the prose
-  overview: `import-tree`, entry points that sit outside every category tree
-  (`modules/checks.nix`, `host-config/hosts.nix`, the per-host configs,
+  overview: `dirs-as-categories`, entry points that sit outside every category
+  (`host-config/hosts.nix`, the per-host configs,
   `users-config/elly-home-manager.nix`), and which categories aren't imported by
   every host (`virtualization` is the running example — cube only as of
   2026-08-27, deliberately absent on the handhelds and, since that date, on
@@ -55,11 +55,9 @@ The mechanism in one table; the sections below link the reasoning.
   `packages-config/`), a host's directory under `host-config/`, or a
   user's under `users-config/` — and the naming rule that goes with each.
 - **Skill `new-flake-module`** (`.agents/skills/new-flake-module/SKILL.md`)
-  — the traps in *writing* one: `flake.modules` can't live inside
-  `perSystem`, a module's name comes from its filename so a rename can
-  silently drop it from its category, two modules with the same name merge
-  rather than conflict, and module classes aren't validated until the import
-  site fails.
+  — the traps in *writing* one: a module's name is its filename so a
+  rename renames it, a repeated name stops evaluation (it used to merge
+  silently), and a new subfolder can make a folder a category.
 
 ## The layout at a glance
 
@@ -73,11 +71,10 @@ on-demand, not committed: `just module-graph tree --category homelab`,
 of the hosts view (`just module-graph html > modules.html`): click hosts to
 show only what they import.
 
-Every diagram uses one colour standard, keyed on the `dirsAsCategory.nix`
-criterion:
+Every diagram uses one colour standard, keyed on what a host can include:
 
-- **Blue, rounded: an importable category.** The directory holds a
-  `dirsAsCategory.nix`, so a host can name it. An edge into one is dotted:
+- **Blue, rounded: an importable category.** A host can include it by
+  name. An edge into one is dotted:
   it is importable alone and also collected by the category above it.
   A category that holds nested categories (`development`, `homelab`) is a
   pale blue box around them instead of a card, titled with its name,
@@ -96,7 +93,7 @@ the shared categories they import below, wrapped at five per row
 (`--wrap N`), each host's edges in its own colour (never blue or red). In
 Mermaid an edge up into the top row is a plain line, not an arrow.
 
-<!-- generated:module-layout -- from the dirsAsCategory.nix tree under flake/modules/, drawn by flake/scripts/module-graph.py, by `just wiki-gen`; change the source, not this table -->
+<!-- generated:module-layout -- from the categories under flake/modules/, drawn by the flake-module-graph input, by `just wiki-gen`; change the source, not this table -->
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"fontFamily": "ui-sans-serif, system-ui, sans-serif", "fontSize": "14px", "lineColor": "#94a3b8"}, "flowchart": {"curve": "basis", "nodeSpacing": 24, "rankSpacing": 80, "padding": 14}}}%%
@@ -149,7 +146,6 @@ flowchart LR
     classDef missing fill:#fee2e2,stroke:#ef4444,color:#1e293b,stroke-width:1.5px
     classDef orphan fill:#fff1f2,stroke:#e11d48,color:#1e293b,stroke-width:2.5px
     classDef bymodule stroke-dasharray:5 3
-    classDef merges stroke:#e11d48,stroke-width:2.5px
     class n6,n7,n8,n9,n10,n11,n12,n13,n14,n15,n16,n17,n18,n19,n20,n21,n22,n23,n24,n25,n26,n27 category
     class n7 bymodule
 ```

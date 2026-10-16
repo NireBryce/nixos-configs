@@ -1,8 +1,6 @@
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in { 
-    flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }:
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{ 
+    homeManager = { pkgs, lib, ... }:
         # Same reason as obsidian.nix, and read the isDarwin test the same
         # way: "on darwin, homebrew.nix owns this app", NOT "Linux-only".
         # discord builds on aarch64-darwin perfectly well, and

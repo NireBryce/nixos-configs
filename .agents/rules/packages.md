@@ -10,7 +10,7 @@ paths:
 Full detail: skill `package-platform-support`; the add-and-verify flow is
 skill `new-package`.
 
-`ellyHomeManager` is shared verbatim by all four hosts including
+`elly-home-manager` is shared verbatim by all four hosts including
 `nire-lysithea`, so everything in it has to survive darwin. Two separate
 questions:
 

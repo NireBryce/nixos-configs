@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Home Manager, managed from the NixOS side.
 #
 # Lives under general-config/system/ so the `system` category picks it up and durandal gets
@@ -5,18 +6,18 @@
 # home switch: `nh os switch` applies both.
 #
 # To go back to standalone, see flake/doc/trailhead-home-manager-standalone.md.
-{ config, lib, inputs, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
+{ inputs, ... }:
+{
+    # The Home Manager aggregate arrives as `enabled.homeManager.elly-home-manager`:
+    # dirs-as-categories resolves the names listed in `enables` and hands this
+    # module exactly those. It used to be bound in a `let` from the flake-parts
+    # `config` (`config.flake.modules.homeManager.ellyHomeManager`), out of the
+    # module body on purpose, because inside the body `config` is the NixOS
+    # one and the reference would silently stop resolving. With `enabled`
+    # there is no outer `config` here to confuse it with.
+    enables.homeManager = [ "elly-home-manager" ];
 
-    # Bound out here, before the module body, on purpose. Inside the body
-    # `config` would mean the *NixOS* config, not the flake-parts one, the
-    # moment anyone adds an argument list to reach it -- and then
-    # `config.flake.modules...` silently stops resolving. Binding it in the
-    # let keeps that edit from breaking this.
-    ellyHome = config.flake.modules.homeManager.ellyHomeManager;
-in {
-    flake.modules.nixos.${moduleName} = {
+    nixos = { enabled, ... }: {
         imports = [ inputs.home-manager.nixosModules.home-manager ];
 
         home-manager = {
@@ -55,7 +56,7 @@ in {
             # the full path here is `home-manager.users.elly`; the account
             # name is hardcoded, as it is in users.users.elly and
             # home.username
-            users.elly = ellyHome;
+            users.elly = enabled.homeManager.elly-home-manager;
         };
     };
 }

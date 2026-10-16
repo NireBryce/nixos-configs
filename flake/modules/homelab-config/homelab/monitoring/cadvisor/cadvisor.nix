@@ -1,12 +1,10 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # cadvisor: per-container CPU/memory/network metrics, for the podman
 # containers containers.nix's `podman` category enables. One of three things
 # prometheus.nix scrapes -- see that file and grafana.nix for the rest of the
 # stack this belongs to.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = {
+{
+    nixos = {
         # # description = "cadvisor -- per-container metrics for prometheus.nix to scrape";
         services.cadvisor = {
             enable        = true;

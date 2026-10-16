@@ -1,7 +1,5 @@
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{
     # Was cod-completions.nix until 2026-08-22, when this file (carapace)
     # was split out alongside it. carapace is just a binary invoked
     # synchronously per completion request -- no daemon, no system-wide
@@ -30,7 +28,7 @@ in {
     # See blesh.nix for why carapace's own bash completer alone doesn't
     # populate descriptions in the blesh menu, and the ble.sh advice hook
     # there that does.
-    flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
+    homeManager = { pkgs, ... }: {
         home.packages = with pkgs; [
             carapace
         ];

@@ -1,8 +1,6 @@
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in { 
-    flake.modules.homeManager.${moduleName} = {
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{ 
+    homeManager = {
         programs.direnv = {
             enable = true;
             enableBashIntegration = true;

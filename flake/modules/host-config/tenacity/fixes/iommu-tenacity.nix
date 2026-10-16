@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Re-enable the IOMMU that Jovian turns off, because this is not a Steam Deck.
 #
 # CONFIRMED FIX, 2026-08-12. Suspend went from 0% to 92.5% hardware sleep
@@ -55,11 +56,8 @@
 # The touchscreen fix in this directory is a separate bug and was never
 # implicated in this one: it cut wake events during sleep from 71 to 1, which
 # is its own win.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = {
+{
+    nixos = {
         jovian.steamos.enableDefaultCmdlineConfig = false;
 
         # Valve's list from jupiter-hw-support's grub-steamos, minus

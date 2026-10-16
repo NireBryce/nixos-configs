@@ -1,10 +1,9 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # renamed from `boot.nix`, which declared `flake.modules.nixos.boot` and so
 # merged with the `general-config/boot/` category of the same name
 { lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+{
+    nixos = { pkgs, ... }: {
         environment.systemPackages = with pkgs; [
         sbctl # secure boot ctl
         ];
@@ -20,8 +19,8 @@ in {
 # 2026-08-08 — why this file is not called `boot.nix`
 #
 # It was, and its filename made it declare `flake.modules.nixos.boot` — the
-# same name dirsAsCategory gives the `general-config/boot/` category. Same-named
-# modules MERGE rather than conflict, so the two silently became one, and
+# same name the `general-config/boot/` category had. Same-named modules then
+# MERGED rather than conflicting (today it stops evaluation), so the two silently became one, and
 # both directions were wrong:
 #
 #   - importing the `boot` category also applied durandal's systemd-boot and

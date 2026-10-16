@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Sticky keys that tell a deliberate double-tap from a later second press.
 #
 # Upstream kwin locks a latched modifier on any second press, however long
@@ -28,11 +29,8 @@
 # fails this build loudly rather than silently dropping the feature. The
 # plugin links the stock kwin's libkwin by store path, so a kwin bump
 # rebuilds it (seconds) against the matching headers.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.homeManager.${moduleName} = { pkgs, ... }:
+{
+    homeManager = { pkgs, ... }:
     let
         kp = pkgs.kdePackages;
 

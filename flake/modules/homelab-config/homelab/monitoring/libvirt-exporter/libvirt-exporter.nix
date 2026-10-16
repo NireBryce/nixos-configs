@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # prometheus-libvirt-exporter: per-VM state/CPU/memory/disk/network metrics
 # for whatever libvirt/QEMU guests are defined on this host via
 # `virtualization`. No guest is currently defined here -- `virtualization-cube`
@@ -6,11 +7,8 @@
 # is generic to the `virtualization` category, not to that one VM. One of
 # three things prometheus.nix scrapes -- see that file and grafana.nix for
 # the rest of the stack this belongs to.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = {
+{
+    nixos = {
         # # description = "prometheus-libvirt-exporter -- per-VM metrics for prometheus.nix to scrape";
         services.prometheus.exporters.libvirt = {
             enable = true;

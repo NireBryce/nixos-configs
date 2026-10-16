@@ -42,14 +42,14 @@ and the NixOS side knew nothing about it.
 
 This is the whole of the integration: it imports
 `inputs.home-manager.nixosModules.home-manager` and sets `home-manager.users.elly`
-to `ellyHomeManager`. Nothing else references it.
+to `elly-home-manager`. Nothing else references it.
 
 It lives under `general-config/system/` (the `general-config/` directory's own `system/` subdirectory) so the `system` category carries it to durandal.
 Deleting the file removes it from that category automatically — no host edit.
 
 ### 2. `modules/users-config/elly-home-manager.nix` — keep, and build a configuration from it
 
-`ellyHomeManager` is the module aggregate and is **independent of how it gets
+`elly-home-manager` is the module aggregate and is **independent of how it gets
 applied**. It is the same value either way; only the consumer changes. Add a
 `homeConfigurations` output alongside it:
 
@@ -60,7 +60,7 @@ applied**. It is the same value either way; only the consumer changes. Add a
         inputs.home-manager.lib.homeManagerConfiguration {
             inherit pkgs;
             extraSpecialArgs = { inherit inputs; };
-            modules = [ config.flake.modules.homeManager.ellyHomeManager ];
+            modules = [ config.flake.modules.homeManager.elly-home-manager ];
         });
 }
 ```
@@ -139,10 +139,10 @@ dotfile HM wants to own and finds already present.
 
 ## What does *not* change
 
-- `ellyHomeManager` itself, and every module it imports. The whole
+- `elly-home-manager` itself, and every module it imports. The whole
   `modules/packages-config/` tree, `general-config/shell-config/`, `users-config/elly/` — all of it
   is untouched by this decision. That is the point of the aggregate being a plain
   `deferredModule`: it does not know or care who evaluates it.
-- Anything about categories, `dirsAsCategory`, or the host wiring.
+- Anything about categories, which folders are categories, or the host wiring.
 - The NixOS side of `basic-nix-settings.nix`, which sets `allowUnfree` for the
   system regardless.

@@ -47,36 +47,32 @@ mod agent '.agents/scripts/agent.just'
 check:
     @{{scripts}}/flake-check.sh {{flake}}
 
-# Static check: module/category name collisions and unreachable modules
+# Checks the evaluation cannot report: unreachable modules, untracked .nix
+# files, and drift between the file-only reading wiki-lint uses and the
+# evaluated graph (flake/scripts/modules.py says why each exists).
 modules:
     # Platform independent, so this is the one check that means anything on darwin.
     cd {{flake}} && python3 scripts/modules.py check modules
 
-# Fixture tests for modules.py's shim detection and names/shims checks:
-# breaks throwaway module trees on purpose and asserts each check fires.
+# Tests for modules.py: builds throwaway trees and documents with an orphan,
+# an untracked file and each kind of drift, and asserts each check fires.
 # Pure stdlib; runs in preflight and CI
 modules-test:
     python3 {{scripts}}/test_modules.py
 
 # Draw the module tree: just module-graph tree|hosts|dot|html [--category X] [--depth N]
-# [--categories-only] [--verify]. tree/hosts print Mermaid, dot prints Graphviz
+# [--categories-only] [--wrap N]. tree/hosts print Mermaid, dot prints Graphviz
 # (`just module-graph dot --view hosts | nix shell nixpkgs#graphviz -c dot -Tsvg`).
 # html prints the hosts view as an interactive page (`> modules.html`, open it).
-# Categories come from `nix eval ./flake#categoryGraph` (falls back to parsing
-# files, with a note; --static skips the eval). See flake/scripts/module-graph.py.
+# Draws flake.moduleGraph with the flake-module-graph input; where each area
+# goes is flake/module-graph.toml.
 module-graph cmd *args:
-    cd {{flake}} && python3 scripts/module-graph.py {{cmd}} modules {{args}}
-
-# Fixture tests for module-graph.py: builds throwaway trees with a name merge
-# and an orphan category and asserts the diagram shows them. Pure stdlib;
-# runs in preflight and CI
-module-graph-test:
-    python3 {{scripts}}/test_module_graph.py
+    cd {{flake}} && nix run .#module-graph -- {{cmd}} --flake 'path:.' --config module-graph.toml {{args}}
 
 # Scaffold a new module: just add-module <class> <category>/<subdir>/<name> ["one-line description"]
-# Class is nixos/homeManager/flake/generic/darwin; the path is relative to
-# flake/modules/ and must sit in a subdirectory of a category dir (see
-# skill new-flake-module for why). git-adds the file and runs the checks.
+# Class is nixos/homeManager/darwin; the path is relative to flake/modules/
+# and must sit inside a category (see skill new-flake-module for why).
+# git-adds the file and runs the checks.
 add-module class target *desc:
     cd {{flake}} && python3 scripts/modules.py add modules {{class}} {{target}} {{desc}}
 
@@ -233,7 +229,6 @@ preflight:
     @just cod-desc-test
     @just trailers-test
     @just modules-test
-    @just module-graph-test
     @just pinned-packages-test
     @python3 .agents/scripts/test_recurring.py
     @python3 .agents/scripts/test_ship.py

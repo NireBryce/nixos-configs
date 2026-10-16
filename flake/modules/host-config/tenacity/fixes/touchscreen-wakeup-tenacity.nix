@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Stop the built-in touchscreen from waking the handheld.
 #
 # Same shape and reason as durandal/fixes/b550-suspend-fix.nix -- a device
@@ -35,11 +36,8 @@
 # The match is the exact enumerated name. If the instance suffix ever changes,
 # this rule silently stops applying rather than erroring -- check
 # `cat /sys/class/wakeup/*/name` before assuming it is still in effect.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = {
+{
+    nixos = {
         services.udev.extraRules = ''
         ACTION=="add|change", SUBSYSTEM=="i2c", KERNEL=="i2c-HTIX5288:00", ATTR{power/wakeup}="disabled"
         '';

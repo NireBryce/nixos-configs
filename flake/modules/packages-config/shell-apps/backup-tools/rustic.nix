@@ -1,8 +1,6 @@
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{
+    homeManager = { pkgs, ... }: {
         # restic-compatible client with an interactive TUI (`rustic
         # snapshots -i`) for browsing/restoring a repository --
         # reads/writes the same repo format services.restic writes on

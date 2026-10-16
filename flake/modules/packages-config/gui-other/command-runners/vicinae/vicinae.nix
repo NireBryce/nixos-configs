@@ -1,9 +1,7 @@
-{ lib, ... }:
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }:
+{
+    homeManager = { pkgs, lib, ... }:
         # Genuinely Linux-only, not just untested there: the module itself
         # asserts `meta.platforms`, a hard eval failure rather than
         # something that would merely install nothing. Hit evaluating this

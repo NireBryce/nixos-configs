@@ -249,34 +249,127 @@ Contents list rather than someone else's, an `anchors` finding too).
 """
 import re, sys, pathlib, urllib.parse, datetime
 
-# Category shims are found by what they import, not by filename -- same as
-# flake/scripts/modules.py and the collector itself, so renaming every shim
-# needs no change here.
-SHIM = re.compile(r'import\s*\(.*"/_lib/category-collector\.nix"\)')
-
-
-def is_shim(path):
-    return bool(SHIM.search(re.sub(r'#[^\n]*', '', path.read_text())))
-
-
-def shims_under(base):
-    """Every category shim under `base`, skipping `_` paths the way
-    import-tree does."""
-    return [p for p in base.rglob('*.nix')
-            if not any(part.startswith('_') for part in p.relative_to(base).parts)
-            and is_shim(p)]
-# Same shape as modules.py's AGG -- `with config.flake.modules.<class>; [ ... ]`,
-# the form every host aggregate and every dirsAsCategory.nix output uses.
-AGG = re.compile(r'with\s+config\.flake\.modules\.(\w+);\s*\[(.*?)\]', re.S)
-# Same shape as modules.py's DECL -- `flake.modules.<class>.<name>` (or the
-# `${moduleName}` template form ellyHomeManager's per-module files use), how a
-# module declares which class it belongs to.
-DECL = re.compile(r'flake\.modules\.(\w+)\.(?:\$\{moduleName\}|\w+)')
-# Declared inside a `flake.modules = { ... }` attrset, where each class
-# heads its own line without the prefix -- see the call site for why this
-# form exists and can't just be flattened away.
-DECL_ATTRSET = re.compile(r'(?m)^\s*(\w+)\.\$\{moduleName\}\s*=')
+# The tree's modules and categories by dirs-as-categories' rules
+# (wiki/module-files.md), read from the files rather than evaluated: wiki-lint
+# runs without nix and on fixture trees. `just modules` checks this reading
+# against what dirs-as-categories actually evaluates to (flake.moduleGraph),
+# so the two cannot drift apart silently.
+CLASS_KEYS = ('nixos', 'homeManager', 'darwin')
 COMMENT = re.compile(r'#[^\n]*')
+# A key of a module file's top-level attribute set: the house style puts
+# those at exactly four spaces (wiki/module-style-guide.md), with `nixos =`,
+# `homeManager.foo =` or `includes.nixos =`.
+TOP_KEY = re.compile(r'(?m)^ {4}(\w+)(?:\.(\w+))?[\w.]*\s*=')
+FLAG = re.compile(r'\bfolderIsCategory\s*=\s*(true|false)\s*;')
+# `includes.<class> = [ "a" "b" ];` -- how a host or the home aggregate names
+# what it includes.
+INCLUDES = re.compile(r'includes\.(\w+)\s*=\s*\[(.*?)\]', re.S)
+
+
+def _visible(path, base):
+    """Not under a `_`-prefixed path component -- import-tree skips those."""
+    return '/_' not in '/' + str(path)[len(str(base)) + 1:]
+
+
+def module_classes(path, text=None):
+    """The classes a module file declares -- its top-level class keys, and
+    any class it has `includes` for -- or an empty set for a file that is
+    not a module file (defaults.nix, a flake-parts module). `text`: the
+    file's contents with comments stripped, when the caller has them."""
+    if path.name == 'defaults.nix':
+        return set()
+    classes = set()
+    for key, sub in TOP_KEY.findall(COMMENT.sub('', path.read_text()) if text is None else text):
+        if key in CLASS_KEYS:
+            classes.add(key)
+        elif key == 'includes' and sub in CLASS_KEYS:
+            classes.add(sub)
+    return classes
+
+
+_CATEGORIES = {}
+
+
+def all_categories(root):
+    """category name -> directory, for every category under flake/modules/:
+    a folder below the top level with a subfolder holding a module file, or
+    one whose files set folderIsCategory (`false` opts out).
+
+    Called once per category and host by the checks above, so the reading
+    is cached -- keyed on every file's path, mtime and size, so a fixture
+    tree a test edits between calls is read afresh."""
+    modules = root / 'flake' / 'modules'
+    files = [p for p in modules.rglob('*.nix') if _visible(p, modules)]
+    key = (str(pathlib.Path(root).resolve()),
+           tuple((str(p), s.st_mtime_ns, s.st_size) for p in files for s in [p.stat()]))
+    if key not in _CATEGORIES:
+        _CATEGORIES.clear()
+        _CATEGORIES[key] = _read_categories(modules, files)
+    return dict(_CATEGORIES[key])
+
+
+def _read_categories(modules, files):
+    # Paths as strings relative to modules/: pathlib's ancestor checks were
+    # most of wiki-lint's time.
+    base = len(str(modules)) + 1
+    texts = {p: COMMENT.sub('', p.read_text()) for p in files}      # each file read once
+    rel = {p: str(p)[base:] for p in files}
+    module_dirs = {rel[p].rpartition('/')[0] for p in files if module_classes(p, texts[p])}
+    flags_in, folders = {}, set()
+    for p in files:
+        d = rel[p].rpartition('/')[0]
+        flags_in.setdefault(d, set()).update(FLAG.findall(texts[p]))
+        while d:
+            folders.add(d)
+            d = d.rpartition('/')[0]
+    cats = {}
+    for d in sorted(folders):
+        if '/' not in d:
+            continue                                   # an area
+        flags = flags_in.get(d, set())
+        if flags == {'true'} or (flags != {'false'}
+                                 and any(m.startswith(d + '/') for m in module_dirs)):
+            cats[d.rpartition('/')[2]] = modules / d
+    return cats
+
+
+ENABLES = re.compile(r'enables\.(\w+)\s*=\s*\[(.*?)\]', re.S)
+
+
+def module_name(path):
+    """A module's name: its filename, or its folder's for default.nix."""
+    return path.parent.name if path.name == 'default.nix' else path.stem
+
+
+def static_document(root):
+    """flake.moduleGraph (format 1), as far as the files say it -- categories,
+    modules with their classes, includes and enables -- for drawing without
+    nix and for `just modules` to compare against the evaluated one."""
+    modules = root / 'flake' / 'modules'
+    rel = lambda p: p.relative_to(modules).as_posix()
+    doc = {'version': 1, 'classes': list(CLASS_KEYS), 'folders': [], 'defaults': [], 'admin': [],
+           'categories': {n: {'dir': rel(d), 'members': [], 'nested': [], 'flag': None}
+                          for n, d in all_categories(root).items()},
+           'modules': {}, 'includes': {}, 'enables': {}}
+    for p in sorted(modules.rglob('*.nix')):
+        if not _visible(p, modules):
+            continue
+        classes = module_classes(p)
+        if not classes:
+            continue
+        name = module_name(p)
+        doc['modules'][name] = {'path': rel(p), 'classes': [c for c in CLASS_KEYS if c in classes]}
+        text = COMMENT.sub('', p.read_text())
+        for kind, pattern in (('includes', INCLUDES), ('enables', ENABLES)):
+            for cls, names in pattern.findall(text):
+                doc[kind].setdefault(name, {})[cls] = re.findall(r'"([\w-]+)"', names)
+    return doc
+
+
+def categories_under(root, d):
+    """The categories nested anywhere under category directory `d`."""
+    prefix = str(d) + '/'
+    return [c for c in all_categories(root).values() if str(c).startswith(prefix)]
 
 # host short-name -> its host-config/*-configuration.nix. lysithea is darwin-class;
 # every other host is nixos-class. nire-installer and nire-llm-sandbox
@@ -334,28 +427,24 @@ def repo_root(argv):
 def nested_category_names(categories, name):
     """`name` plus every category nested (at any depth) under its own
     directory -- e.g. `homelab` expands to itself plus `containers`,
-    `git-forge`, ..., `virtualization`. Mirrors "nested categories overlap
-    their parents on purpose" (flake/doc/dirsAsCategory.md): a host that
-    imports the umbrella name effectively gets every module the nested ones
-    do, so for the purposes of "does this host import category X" it counts
-    as importing X too, even though X never appears literally in the host's
-    own import list.
+    `git-forge`, ..., `virtualization`. Including a category includes
+    everything beneath it, nested categories too (wiki/module-files.md), so
+    for the purposes of "does this host import category X" a host that
+    includes the umbrella counts as importing X, even though X never appears
+    literally in the host's own `includes`.
     """
     if name not in categories:
         return {name}
-    result = {name}
-    for child in shims_under(categories[name]):
-        if child.parent != categories[name]:
-            result.add(child.parent.name)
-    return result
-
+    d = categories[name]
+    modules = next(a for a in d.parents if a.name == 'modules')
+    return {name} | {c.name for c in categories_under(modules.parent.parent, d)}
 
 def host_imports(root, categories, hosts=None):
     """host short-name -> set of category names it effectively imports --
-    literal bare names from its own import list, expanded through any
-    umbrella category among them (see nested_category_names). `hosts`
-    defaults to HOSTS; wiki_gen.py passes hosts.nix's own roster instead,
-    so a host missing from HOSTS still gets its row computed."""
+    the names in its own `includes`, expanded through any umbrella category
+    among them (see nested_category_names). `hosts` defaults to HOSTS;
+    wiki_gen.py passes hosts.nix's own roster instead, so a host missing from
+    HOSTS still gets its row computed."""
     out = {}
     for host in (HOSTS if hosts is None else hosts):
         p = root / 'flake' / 'modules' / 'host-config' / f'{host}-configuration.nix'
@@ -364,17 +453,16 @@ def host_imports(root, categories, hosts=None):
             continue
         text = COMMENT.sub('', p.read_text())
         literal = set()
-        for m in AGG.finditer(text):
-            literal.update(re.findall(r'[\w-]+', m.group(2)))
+        for _, names in INCLUDES.findall(text):
+            literal.update(re.findall(r'"([\w-]+)"', names))
         effective = set()
         for n in literal:
             effective |= nested_category_names(categories, n)
         out[host] = effective
     return out
 
-
 def find_categories(root):
-    """category name -> its directory, for every dirsAsCategory.nix under
+    """category name -> its directory, for every category under
     flake/modules/general-config/, flake/modules/hardware-config/,
     flake/modules/homelab-config/ and flake/modules/users-config/ -- the
     areas categories/00-INDEX.md actually
@@ -382,14 +470,10 @@ def find_categories(root):
     are deliberately excluded there, see that file's own header, so this
     check has nothing to compare them against and doesn't look).
     """
-    cats = {}
-    for area in ('general-config', 'hardware-config', 'homelab-config', 'users-config'):
-        base = root / 'flake' / 'modules' / area
-        if not base.exists():
-            continue
-        for p in shims_under(base):
-            cats[p.parent.name] = p.parent
-    return cats
+    modules = root / 'flake' / 'modules'
+    areas = ('general-config', 'hardware-config', 'homelab-config', 'users-config')
+    return {n: d for n, d in all_categories(root).items()
+            if d.relative_to(modules).parts[0] in areas}
 
 
 # `nire-durandal = mkHost "x86_64-linux" ...;` / `nire-lysithea = mkDarwinHost
@@ -416,41 +500,19 @@ def actual_hosts(root):
 
 
 def category_classes(category_dir):
-    """The set of flake.modules.<class> declared by anything under this
-    category's own directory tree, DECL-scanned rather than evaluated --
-    same reasoning as scanning imports statically elsewhere in this repo's
-    tooling (modules.py's own `scan`). A nested category's files live
-    physically under the umbrella's tree too, so this walks straight through
-    a nested `dirsAsCategory.nix` boundary rather than stopping at it: what
-    the Class(es) column claims is "what importing this name actually wires
-    in", and an umbrella's importsFor resolves every nested name regardless of
-    whether that name's own aggregate is empty for a given class (dirsAsCategory
-    always defines all three, even empty -- see category-collector.nix), so
-    presence of the *attribute* proves nothing; presence of an actual
-    declaration under the tree does.
+    """The classes declared by any module file under this category's own
+    directory tree, read statically (module_classes). A nested category's
+    files live physically under the umbrella's tree too, so this walks
+    straight through a nested category rather than stopping at it: what the
+    Class(es) column claims is "what including this name actually wires in".
+    Every category exists in every class (dirs-as-categories defines all of
+    them, even empty), so presence of the *attribute* proves nothing;
+    presence of a declaration under the tree does.
     """
     classes = set()
     for p in category_dir.rglob('*.nix'):
-        if is_shim(p):
-            continue
-        # Comments stripped first: podman.nix has a commented-out
-        # `flake.modules.homeManager.${moduleName}` stanza (never activated),
-        # which is prose describing a possible module, not a declaration of
-         # one -- left uncounted, same as scanning wiki prose that merely
-        # discusses `config.flake.modules` (see modules.py's `imported_names`).
-        text = COMMENT.sub('', p.read_text())
-        classes.update(DECL.findall(text))
-        # The attrset form -- `flake.modules = { homeManager.${moduleName} = ...;
-        # nixos.${moduleName} = ...; }` -- declares classes without repeating the
-        # `flake.modules.` prefix. One real module is shaped this way
-        # (basic-nix-settings.nix, three classes); the flat form three times in
-        # one file trips statix's repeated-`flake`-key rule, so the attrset is
-        # not simply expandable. Line-anchored so the leading `flake` of a flat
-        # `flake.modules.<class>...` line cannot match as a class name. Missed
-        # entirely by both checkers until 2026-09-08 -- the CLASSES check read
-        # the nix category as homeManager-only and failed against the
-        # 00-INDEX's correct row.
-        classes.update(DECL_ATTRSET.findall(text))
+        if _visible(p, category_dir):
+            classes |= module_classes(p)
     return classes
 
 

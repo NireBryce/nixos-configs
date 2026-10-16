@@ -1,9 +1,7 @@
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{
 
-    flake.modules.homeManager.${moduleName} = { config, pkgs, ... }: {
+    homeManager = { config, pkgs, ... }: {
         # An index for `apropos` / `man -k`. Plain `man foo` needs none of this.
         #
         # Neither built-in option is usable here. `programs.man.generateCaches`

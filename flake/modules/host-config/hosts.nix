@@ -30,9 +30,9 @@ in
     # the ssh entries from the `nire-*` names below -- a new host gets one
     # with no edit there.
     flake.nixosConfigurations = {
-        nire-durandal = mkHost "x86_64-linux" config.flake.modules.nixos.durandalConfiguration;
-        nire-tenacity = mkHost "x86_64-linux" config.flake.modules.nixos.tenacityConfiguration;
-        nire-cube     = mkHost "x86_64-linux" config.flake.modules.nixos.cubeConfiguration;
+        nire-durandal = mkHost "x86_64-linux" config.flake.modules.nixos.durandal-configuration;
+        nire-tenacity = mkHost "x86_64-linux" config.flake.modules.nixos.tenacity-configuration;
+        nire-cube     = mkHost "x86_64-linux" config.flake.modules.nixos.cube-configuration;
 
         # A GUEST, not a machine -- hence no `nire-` prefix: that prefix
         # names the fleet (the machines the host-count claims in wiki/ and
@@ -41,7 +41,7 @@ in
         # virtualization-cube.nix through the VM generator. Its config:
         # host-config/forge-runner-configuration.nix. Not in .sops.yaml, and not
         # switched from this repo -- it comes up with cube's libvirtd.
-        forge-runner = mkHost "x86_64-linux" config.flake.modules.nixos.forgeRunnerConfiguration;
+        forge-runner = mkHost "x86_64-linux" config.flake.modules.nixos.forge-runner-configuration;
 
         # nire-lego (never built or switched) and nire-installer (the generic
         # live-USB installer image) were both removed 2026-08-27 -- see
@@ -58,6 +58,6 @@ in
     };
 
     flake.darwinConfigurations = {
-        nire-lysithea = mkDarwinHost "aarch64-darwin" config.flake.modules.darwin.lysitheaConfiguration;
+        nire-lysithea = mkDarwinHost "aarch64-darwin" config.flake.modules.darwin.lysithea-configuration;
     };
 }

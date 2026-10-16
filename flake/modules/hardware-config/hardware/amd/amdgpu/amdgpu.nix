@@ -1,8 +1,7 @@
-{ lib, inputs, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{ inputs, ... }:
+{
+    nixos = { pkgs, ... }: {
         imports = [ inputs.nixos-hardware.nixosModules.common-gpu-amd ];
 
         environment.systemPackages = with pkgs; [

@@ -1,10 +1,8 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Core system-level settings every darwin host in this config wants.
 # Ported from macos-old/nire-lysithea-configuration.nix.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.darwin.${moduleName} = {
+{
+    darwin = {
         # core darwin system settings: primary user, nix management
 
         # `elly` hardcoded, same as users.users.elly and home.username

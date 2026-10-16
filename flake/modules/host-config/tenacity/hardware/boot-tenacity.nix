@@ -1,8 +1,7 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 { lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = {
+{
+    nixos = {
         # The old config force-disabled limine here, with the note "hack,
         # replace after switching tinylaptop to limine". Nothing on this
         # branch enables limine and NixOS defaults it off, so the mkForce is

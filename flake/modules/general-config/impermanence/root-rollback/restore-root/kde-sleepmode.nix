@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # The desktop half of `nohibernate`. Filed beside WARN-impermanence.nix because
 # that is what creates the requirement, not because it is about KDE.
 #
@@ -15,11 +16,8 @@
 # desktop-env or with the handheld modules: durandal imports the `boot` category
 # too, so it also has `nohibernate`, and its PowerDevil would fail identically.
 # Anything that gives one host `nohibernate` gives it this.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }:
+{
+    homeManager = { pkgs, lib, ... }:
         # KDE-specific, and `impermanence` is imported by every host
         # (elly-home-manager.nix) since nohibernate applies to every host
         # too. Guarded here rather than at the import, which cannot depend

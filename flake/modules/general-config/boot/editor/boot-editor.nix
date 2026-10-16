@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # No kernel command-line editing at the systemd-boot menu.
 #
 # nixpkgs defaults `editor` to true "for backwards compatibility", and its own
@@ -13,11 +14,8 @@
 #
 # Named boot-editor, not editor.nix or boot.nix -- see boot-generations.nix's
 # header for the same-name merge this avoids.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = {
+{
+    nixos = {
         boot.loader.systemd-boot.editor = false;
     };
 }

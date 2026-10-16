@@ -4,7 +4,7 @@
 Against the real tree a clean `--check` proves only that today's tables
 match today's sources, not that a changed source would be noticed or that a
 hand-written cell survives a rewrite. So this builds a small repo in a temp
-directory (hosts.nix, host configs, category shims, wiki pages carrying the
+directory (hosts.nix, host configs, categories, wiki pages carrying the
 regions), changes a source fact on purpose, and asserts what `--check`
 reports and what a write run produces. Pure stdlib; runs via
 `just wiki-gen-test`, part of `just preflight` and so of CI.
@@ -14,7 +14,9 @@ import contextlib, io, pathlib, re, sys, tempfile, unittest
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 import wiki_gen  # noqa: E402
 
-SHIM = 'import (findModulesRoot (dirOf shimFile) + "/_lib/category-collector.nix") { }\n'
+# Marks a folder as a category outright (wiki/module-files.md): the fixture's
+# categories hold their modules directly, with no subfolder to make them one.
+CATEGORY = '{ folderIsCategory = true; }\n'
 HOSTS_NIX = '''{
     flake.nixosConfigurations = {
         nire-alpha = mkHost "x86_64-linux" config.flake.modules.nixos.alphaConfiguration;
@@ -26,9 +28,10 @@ HOSTS_NIX = '''{
     };
 }
 '''
-MOD = '''{ lib, ... }:
-let moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in { flake.modules.CLASS.${moduleName} = with pkgs; [ ]; }
+MOD = '''# Module file: named after this file; why it looks this way: wiki/module-files.md
+{
+    CLASS = with pkgs; [ ];
+}
 '''
 HOSTS_MD = '''# Hosts
 
@@ -76,21 +79,20 @@ class Fixture(unittest.TestCase):
         self._tmp = tempfile.TemporaryDirectory()
         self.root = pathlib.Path(self._tmp.name)
         m = 'flake/modules/'
-        self.write(m + '_lib/category-collector.nix', '# collector\n')
         self.write(m + 'host-config/hosts.nix', HOSTS_NIX)
         self.write(m + 'host-config/alpha-configuration.nix',
-                   'with config.flake.modules.nixos; [ impermanence homelab ]\n')
+                   '{\n    includes.nixos = [ "impermanence" "homelab" ];\n}\n')
         self.write(m + 'host-config/beta-configuration.nix',
-                   'with config.flake.modules.nixos; [ boot ]\n')
+                   '{\n    includes.nixos = [ "boot" ];\n}\n')
         self.write(m + 'host-config/gamma-configuration.nix',
-                   'with config.flake.modules.darwin; [ boot ]\n')
+                   '{\n    includes.darwin = [ "boot" ];\n}\n')
         g = m + 'general-config/'
         for cat, cls in [('general-config/boot', 'darwin'),
                          ('general-config/impermanence', 'nixos'),
                          ('homelab-config/homelab', 'nixos'),
                          ('homelab-config/homelab/backup', 'nixos'),
                          ('general-config/impermanence/rollback', 'homeManager')]:
-            self.write(m + cat + '/dirsAsCategory.nix', SHIM)
+            self.write(m + cat + '/defaults.nix', CATEGORY)
             self.write(m + cat + '/thing.nix', MOD.replace('CLASS', cls))
         self.write(g + 'boot/other.nix', MOD.replace('CLASS', 'nixos'))
         for page in ('boot', 'impermanence', 'homelab', 'backup'):
@@ -167,7 +169,7 @@ class Hosts(Fixture):
         self.gen()
         self.fill_hand_cells()
         self.write('flake/modules/host-config/delta-configuration.nix',
-                   'with config.flake.modules.nixos; [ ]\n')
+                   '{\n    includes.nixos = [ ];\n}\n')
         p = self.root / 'flake/modules/host-config/hosts.nix'
         p.write_text(p.read_text().replace(
             '        guest', '        nire-delta = mkHost "x86_64-linux" x;\n        guest'))
@@ -227,7 +229,7 @@ class Counts(Fixture):
         text = self.read('wiki/module-style-guide-for-agents.md')
         n_nix = len(list((self.root / 'flake/modules').rglob('*.nix')))
         self.assertIn(f'| total `.nix` files under `flake/modules/` | {n_nix} |', text)
-        self.assertIn('| module header (`moduleName = lib.removeSuffix ...`) | 6 |', text)
+        self.assertIn('| pointer line (`# Module file: … wiki/module-files.md`) | 6 |', text)
         self.assertIn('| `# # description` as first body line | 0 |', text)
         self.assertIn('| `with pkgs;` package lists | 6 |', text)
 
@@ -280,7 +282,7 @@ class Layout(Fixture):
         self.fill_hand_cells()
         self.assertEqual(self.check(), [])
         g = 'flake/modules/general-config/fresh/'
-        self.write(g + 'dirsAsCategory.nix', SHIM)
+        self.write(g + 'defaults.nix', CATEGORY)
         self.write(g + 'f.nix', MOD.replace('CLASS', 'nixos'))
         findings = [f for f in self.check() if 'module-layout' in f]
         self.assertEqual(len(findings), 1)

@@ -1,9 +1,6 @@
-{ lib, ... }:
-let
-  moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 {
-    flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+    nixos = { pkgs, ... }: {
         environment.systemPackages = with pkgs; [
             cargo
             rustc

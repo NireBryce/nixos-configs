@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # smartmontools (smartctl/smartd): general-purpose SMART/NVMe health and
 # wear monitoring, for every NixOS host regardless of desktop environment.
 # The KDE-specific half of this -- a systray applet on top of the same
@@ -11,11 +12,8 @@
 # package, so it needs smartctl on the *system* PATH
 # (/run/current-system/sw/bin) to find it at all -- a home-manager-only
 # install would leave that service silently unable to query anything.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+{
+    nixos = { pkgs, ... }: {
         environment.systemPackages = with pkgs; [
             smartmontools # smartctl/smartd -- https://www.smartmontools.org/
         ];

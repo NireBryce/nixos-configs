@@ -10,8 +10,8 @@ description: How to add a new host to this repo.
 Adding a machine: a `host-config/<name>-configuration.nix` entry point, a
 `host-config/<name>/` directory of host modules, and a line in `hosts.nix`.
 The entry point sits directly under `host-config/`, outside every category
-tree on purpose (`new-flake-module` has why); the directory is collected by
-its own `dirsAsCategory.nix` copy. Read the closest worked example first:
+tree on purpose (`new-flake-module` has why); the directory is a category
+because its subfolders hold modules. Read the closest worked example first:
 durandal, tenacity, cube, lysithea (darwin). `forge-runner` is a VM guest on
 cube, not a fleet host (no `nire-` prefix; see its `hosts.nix` comment).
 (`nire-lego`, `nire-installer` removed 2026-08-27: git history.)
@@ -28,7 +28,8 @@ cube, not a fleet host (no `nire-` prefix; see its `hosts.nix` comment).
   interaction.
 - **CPU/GPU?** AMD hosts import the shared `hardware` category (`amdcpu`,
   `amdgpu`). **Never add an `intel` sibling under `hardware-config/hardware/`**
-  — `dirsAsCategory` recurses, so it would apply to AMD hosts too. Intel
+  — a category includes everything beneath it, so it would apply to AMD
+  hosts too. Intel
   hosts skip `hardware` and pull the exact `nixos-hardware` module (e.g.
   `lenovo-thinkpad-x270`) from `<name>/hardware/hardware-<name>.nix`
   (`nire-testbed`, removed 2026-08-22, did; no live Intel host).
@@ -94,12 +95,13 @@ generic pieces only; record the decision in the host header
 
 ## Wiring
 
-1. `host-config/<name>-configuration.nix` — imports + `networking.hostName`.
-2. `host-config/<name>/` with a verbatim `dirsAsCategory.nix` and the
-   `configuration/`, `hardware/`, `fixes/` subdirs needed.
+1. `host-config/<name>-configuration.nix` — `includes.nixos = [ "<name>" … ];`
+   and `nixos.networking.hostName` (copy `durandal-configuration.nix`).
+2. `host-config/<name>/` with the `configuration/`, `hardware/`, `fixes/`
+   subdirs needed; holding them is what makes `<name>` a category.
 3. `hosts.nix`: `mkHost` in `flake.nixosConfigurations` (or `mkDarwinHost`
    in `darwinConfigurations`) pointing at
-   `config.flake.modules.nixos.<name>Configuration`.
+   `config.flake.modules.nixos.<name>-configuration`.
 4. Secrets are not auto-enrolled: when the host needs `secrets.yaml`, add its
    SSH host key (via `ssh-to-age`) to `.sops.yaml` and `sops updatekeys
    secrets.yaml`. Not preemptively.

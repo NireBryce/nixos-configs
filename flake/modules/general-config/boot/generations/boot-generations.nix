@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # How many generations the bootloader keeps.
 #
 # In a subdirectory, not directly in general-config/boot/: required until
@@ -7,11 +8,8 @@
 # flake.modules.nixos.boot, which is this category's own name, and the two would
 # silently MERGE rather than conflict. That exact collision is why
 # boot-durandal.nix carries the name it does; `just modules` fails on it now.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = {
+{
+    nixos = {
         # systemd-boot's default is `null`, which means keep every
         # generation forever.
         #

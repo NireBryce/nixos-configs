@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # glance: the second landing page for this host, running beside homepage
 # (which replaced it 2026-09-12, issue #291) since 2026-09-13 so both can
 # be tried live before picking one. Cube-only. homepage keeps the ts-cube
@@ -18,8 +19,6 @@
 # options.
 { lib, ... }:
 let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-
     # The monitor's rows for services THIS host proxies, derived from
     # caddy's own vhost table (issue #221): the attribute names of
     # `services.caddy.virtualHosts` ARE the public site addresses
@@ -51,7 +50,7 @@ let
             url = "https://${builtins.head matches}/";
         };
 in {
-    flake.modules.nixos.${moduleName} = { config, ... }: {
+    nixos = { config, ... }: {
         # # description = "glance -- the service index for this host: what's running, whether it's up";
 
         services.glance = {

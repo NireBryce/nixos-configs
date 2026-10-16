@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Grafana: the one piece of this stack (prometheus.nix, node-exporter.nix,
 # cadvisor.nix, libvirt-exporter.nix) meant to be reached off-host, and then
 # only over the tailnet. Every listener in the stack, this one included, is
@@ -10,10 +11,7 @@
 # and both of Grafana's passwords, wiki/categories/monitoring.md,
 # `-for-agents.md` and `monitoring-history.md`; how to actually sign in,
 # wiki/homelab/grafana.md. Traps sit next to the options.
-{ lib, ... }:
 let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-
     secretKeyPath = "/persist/secrets/grafana-secret-key";
 
     # Fixed, not auto-generated, so the dashboard JSON below can
@@ -28,7 +26,7 @@ in {
     # into `_module.args` at this scope (evaluating it errors:
     # "attribute 'pkgs' missing"). Same pattern
     # zsh.nix/bash.nix/pipewire.nix/etc. use throughout this tree.
-    flake.modules.nixos.${moduleName} = { pkgs, config, ... }: {
+    nixos = { pkgs, config, ... }: {
         # # description = "grafana -- dashboards over the tailnet only, for the metrics prometheus.nix collects";
 
         # `owner`, not the root:root default -- grafana.service runs as

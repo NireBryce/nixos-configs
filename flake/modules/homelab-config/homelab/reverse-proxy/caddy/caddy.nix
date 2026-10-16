@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Caddy: one tailnet-only HTTPS front door for every web service on
 # nire-cube. Added 2026-08-24, cube-only. The category is `reverse-proxy`,
 # not `caddy`: a category and its one module sharing a name silently MERGE
@@ -10,10 +11,7 @@
 # wiki/homelab/reaching-services.md for the URL map and what to do when
 # something doesn't answer; `reverse-proxy-history.md` for the retired
 # path-prefix routes. Traps sit next to the options they concern, below.
-{ lib, ... }:
 let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-
     # `ts-cube`, NOT `nire-cube` -- this tailnet renames devices
     # fleet-wide (tailscale.nix's trap #1), verified live 2026-08-24.
     # Duplicated by necessity in grafana.nix's `root_url` and
@@ -93,7 +91,7 @@ let
         }
     '';
 in {
-    flake.modules.nixos.${moduleName} = {
+    nixos = {
         # # description = "caddy -- tailnet-only HTTPS front door, with certs from tailscaled";
 
         services.caddy = {

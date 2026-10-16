@@ -98,4 +98,4 @@ just never asked for in the first place.
 - The `package-platform-support` skill
   (`.agents/skills/package-platform-support/SKILL.md`) — the
   build-support-vs-Homebrew-overlap distinction that governs everything in
-  `ellyHomeManager`, separate from this category.
+  `elly-home-manager`, separate from this category.

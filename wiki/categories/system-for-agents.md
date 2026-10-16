@@ -83,7 +83,7 @@ All three NixOS hosts, whole. `lysithea` imports it too, but only for
 `enable-home-manager-darwin.nix` — the rest of the category declares no
 `darwin`-class modules, so nothing else comes with it. The
 `homeManager`-class slice (`font`, `drop-unsupported-packages`) reaches
-every host via `ellyHomeManager`, not via this import.
+every host via `elly-home-manager`, not via this import.
 
 ## See also
 

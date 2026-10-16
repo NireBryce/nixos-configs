@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # The Forgejo Actions runner VM -- a NixOS guest on nire-cube, instantiated
 # by virtualization-cube.nix through VMs/_lib/libvirt-vm.nix. This file is
 # the guest's whole config; cube-side support (the per-job registration,
@@ -27,7 +28,8 @@
 # listener stays unreachable from here, by design -- Caddy is the door.
 { lib, ... }:
 {
-    flake.modules.nixos.forgeRunnerConfiguration = { pkgs, modulesPath, ... }: {
+    # was `flake.modules.nixos.forgeRunnerConfiguration`; the name is now the filename
+    nixos = { pkgs, modulesPath, ... }: {
         imports = [
             # DIRECT import, not image.modules -- the image.modules variant
             # builds an extendModules config that never feeds fileSystems/

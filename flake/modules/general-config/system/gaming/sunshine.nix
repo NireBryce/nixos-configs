@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Sunshine game-stream host (Moonlight's server side).
 #
 # Filed alongside gaming.nix rather than as its own category: this directory
@@ -52,13 +53,10 @@
 # (`systemctl --user start sunshine`) before every streaming session, and
 # always-ready-to-stream was judged worth a few seconds of login lag. Revisit
 # if that tradeoff stops feeling worth it.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
+{
     # `{ ... }:` kept over statix's suggested `_:` -- deliberate, see
     # wiki/module-style-guide.md's "`{ ... }:` on an inner module lambda".
-    flake.modules.nixos.${moduleName} = { ... }: {
+    nixos = { ... }: {
         # # description = "Sunshine: host a Moonlight game-stream session, reachable only over Tailscale";
         services.sunshine = {
             enable      = true;

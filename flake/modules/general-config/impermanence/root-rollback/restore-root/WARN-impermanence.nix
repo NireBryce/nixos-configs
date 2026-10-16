@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # WARNING: IMPORTING THIS DELETES / ON EVERY BOOT. If your disk looks like
 # the one described below, it will delete yours. Know what you're doing.
 #
@@ -177,11 +178,8 @@
 #    lines from the script below.
 # 3. If a boot stops at emergency, pick the previous generation in the
 #    systemd-boot menu.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { config, ... }:
+{
+    nixos = { config, ... }:
     let
         # Every name here comes from the host's own config, so this file
         # names no host, volume, or device -- "how the unit finds the

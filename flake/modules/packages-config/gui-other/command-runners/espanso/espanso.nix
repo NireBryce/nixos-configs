@@ -1,13 +1,11 @@
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{
     # An argument list was added here on 2026-08-12, where there was
     # previously a bare attrset. That is normally the trap CLAUDE.md warns
     # about -- adding `{ ... }:` repoints every `config` in the body from
     # the flake-parts scope to the Home Manager one -- but this body never
     # referenced `config`, only `services.espanso`, so nothing moved.
-    flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }:
+    homeManager = { pkgs, lib, ... }:
         # Excluded on darwin, and NOT for the reason kitty.nix is. kitty
         # keeps its config there and only drops the binary; espanso cannot,
         # for three separate reasons, any one of which would be enough:

@@ -1,8 +1,6 @@
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }:
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{
+    homeManager = { pkgs, lib, ... }:
         # Excluded on darwin because general-config/macos/homebrew/homebrew.nix already
         # installs the `obsidian` cask, so lysithea was getting two copies.
         #

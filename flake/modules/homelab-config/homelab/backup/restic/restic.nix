@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # restic: cube's only backup of its own service state, to the `ts-hive` NAS
 # already on the network. Added 2026-08-28 against issue #87 ("no backups
 # anywhere in the fleet"), which is closed: a real restore drill on
@@ -13,8 +14,6 @@
 # a secret, wiki/homelab/backup-runbook.md. Traps sit next to the options.
 { lib, ... }:
 let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-
     # `restic-backup`, `ts-hive`'s own dedicated share (its own pool),
     # not `nire`'s home: `ts-hive` snapshots are per-shared-folder, and the
     # anti-deletion mitigation below would otherwise have to snapshot
@@ -63,12 +62,11 @@ let
     };
 in {
     # `config` and `pkgs` bound HERE, on the inner NixOS-module
-    # function, not the outer flake-parts one -- flake-parts doesn't
-    # inject a `pkgs` into `_module.args` at that scope (evaluating it
-    # errors: "attribute 'pkgs' missing"), and the outer `config` is
-    # the flake-parts config, not this option tree. Same pattern
+    # function -- the only place they exist: the file's own header can
+    # take only `lib`/`inputs` (wiki/module-files.md), and the NixOS
+    # option tree is this module's `config`. Same pattern
     # grafana.nix/golink.nix/forgejo.nix use.
-    flake.modules.nixos.${moduleName} = { config, pkgs, ... }: {
+    nixos = { config, pkgs, ... }: {
         # Pinned host key, not TOFU -- see the module header. Captured
         # 2026-08-31 via `ssh-keyscan -t ed25519 ts-hive` against the
         # real host. `programs.ssh.knownHosts` writes this into
@@ -246,8 +244,8 @@ in {
 # SFTP.
 #
 # Two corrections from that era worth not re-making: the plan doc claimed
-# `storage-NFS.nix` was dangling, and it was not -- `system/storage/` has no
-# `dirsAsCategory.nix`, so its files collect straight into the shared
+# `storage-NFS.nix` was dangling, and it was not -- `system/storage/` was a
+# plain folder, not a category, so its files collected straight into the shared
 # `system` aggregate that every Linux host imports (checked by evaluating
 # `config.fileSystems` on all three). And a build failed on
 # `sops.secrets.restic-cube-password` having no value, at BUILD time rather

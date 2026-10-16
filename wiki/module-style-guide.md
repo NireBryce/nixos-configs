@@ -1,6 +1,6 @@
 # Module style guide
 
-_Last modified: 2026-10-08_
+_Last modified: 2026-10-16_
 
 Conventions for `flake/modules/`. "How many files do this" used to be
 stated as inline counts per section, dated 2026-08-08 -- and by 2026-09-09
@@ -49,7 +49,7 @@ clutter and makes brackets easier to match by eye when debugging.
 let
     x = y;
 in {
-    flake.modules.homeManager.myModule = {
+    homeManager = {
         inherit x;
     };
 }
@@ -69,7 +69,7 @@ that opens them (a module lambda, an `=`, an `else`), and so does the bracket
 that closes the `in` expression:
 
 ```nix
-    flake.modules.nixos.${moduleName} = { pkgs, ... }:
+    nixos = { pkgs, ... }:
     let
         x = y;
     in {
@@ -83,14 +83,16 @@ file sees a level with no bracket closing it and suspects one is missing.
 
 ## The module header
 
-Every module derives its own name from its filename rather than repeating it:
+A module names nothing: its name is its filename, and its first line points
+to [module-files.md](module-files.md), which says why (until 2026-10-16 every
+module derived its name itself, with `moduleName = lib.removeSuffix ".nix"
+(baseNameOf __curPos.file)` and `flake.modules.<class>.${moduleName} =`):
 
 ```nix
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 { lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
+{
+    homeManager = { pkgs, ... }: {
         ...
     };
 }
@@ -98,13 +100,12 @@ in {
 
 Which argument goes where is not cosmetic:
 
-- `lib` and `inputs` belong in the **outer** (flake-parts) list.
-- `pkgs` and `config` belong in the **inner** module's list. `pkgs` taken from
-  the outer scope is perSystem's, which has no `nixpkgs.config` applied and
-  would silently lose `allowUnfree`; `config` from the outer scope is the
-  flake-parts config, not the NixOS/HM one.
-
-`CLAUDE.md` has the two-`config` shadowing trap in full.
+- `lib` and `inputs` belong in the **outer** list, and only the ones the file
+  uses (deadnix fails an unused one); a file using neither has no header.
+- `pkgs` and `config` belong in the **inner** module's list. There is no outer
+  `config` any more (a module file can't ask for one), and `pkgs` from
+  anywhere else would be perSystem's, which has no `nixpkgs.config` applied
+  and would silently lose `allowUnfree`.
 
 ## `{ ... }:` on an inner module lambda is sometimes deliberate
 
@@ -116,7 +117,7 @@ that will in turn receive `config`/`lib`/`pkgs`/etc., even though this
 particular one doesn't use any of them), not just an ignored argument:
 
 ```nix
-flake.modules.nixos.${moduleName} = { ... }: {
+nixos = { ... }: {
     # ...
 };
 ```
@@ -135,7 +136,7 @@ A one-line description of what the module is for, commented out, immediately
 inside the module body:
 
 ```nix
-flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
+homeManager = { pkgs, ... }: {
     # # description = "`rg` is a much faster and more powerful grep alternative";
     home.packages = with pkgs; [
         ripgrep
@@ -160,7 +161,7 @@ informally.
 
 ### The alternative that was considered and declined
 
-A typed registry (`flake.moduleDescriptions.${moduleName}`, `attrsOf str`)
+A typed registry (`flake.moduleDescriptions.<name>`, `attrsOf str`)
 would be queryable and would **error** on two modules setting the same key
 differently, catching the module-name collision class for free. Declined:
 a tree-wide edit for something already working; `just modules` already detects
@@ -244,15 +245,15 @@ next to. `boot-durandal.nix` has one. See `CLAUDE.md` for the rule in full.
 
 Not formatting, but it belongs here because getting it wrong produces no error:
 
-- A category collects **every `.nix` file under its directory**, at any
-  depth — including one placed directly beside its `dirsAsCategory.nix`
-  (skipped until 2026-09-28). Subdirectories are grouping only. To keep a
-  module out of a category, file it outside that category's tree;
-  `category-collector.nix`'s header has a worked tree diagram.
-- Entry points — `checks.nix`, `hosts.nix`, `durandal-configuration.nix`,
-  `elly-home-manager.nix` — sit outside every category tree deliberately.
-- A module's filename becomes its attribute name, and names **merge** rather
-  than conflicting, so a file named the same as a category silently combines
-  with it.
+- A category includes **every module under its folder**, at any depth. A
+  folder becomes a category by holding a subfolder of modules, so adding the
+  first subfolder to a flat folder can make it one (and reorder hosts'
+  package lists); [module-files.md](module-files.md) has the rule and
+  `folderIsCategory`. To keep a module out of a category, file it outside
+  that category's tree.
+- Entry points — `hosts.nix`, `durandal-configuration.nix`,
+  `elly-home-manager.nix` — sit outside every category deliberately.
+- A module's filename is its name. A file named like another module or a
+  category stops evaluation (it used to merge silently, §34).
 
-`just modules` checks the last two.
+`just modules` reports orphans and untracked files.

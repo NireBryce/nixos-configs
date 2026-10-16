@@ -1,8 +1,6 @@
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{
+    nixos = { pkgs, ... }: {
         # # description = "client and disk-image tooling for the VMs libvirt.nix hosts";
 
         # Split from libvirt.nix so that file stays about the daemon and its

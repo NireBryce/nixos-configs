@@ -7,8 +7,8 @@
 # `networking.hostName` resolved happily through most of that. Forcing each
 # host's toplevel derivation is what catches the class, and it builds nothing.
 #
-# This file sits at the top of modules/ rather than in a category directory, so
-# dirsAsCategory does not collect it; that only walks subdirectories.
+# A function asking for `config`, so dirs-as-categories loads it as a plain
+# flake-parts module rather than a module file (wiki/module-files.md).
 { config, lib, ... }:
 {
     perSystem = { system, pkgs, ... }:
@@ -55,14 +55,17 @@
             # Static, so it means the same under every system -- unlike the
             # host checks above, each filtered to the one system its host is.
             #
-            # Catches the two failures this layout cannot report by evaluating: a
-            # module whose filename collides with a category name (they merge
-            # silently), and a module no aggregate can reach (valid, evaluates,
-            # installs nothing).
+            # Catches what evaluating cannot report: a module no host or home
+            # aggregate reaches (valid, evaluates, installs nothing). A repeated
+            # name no longer needs catching here -- dirs-as-categories refuses it
+            # at evaluation. There is no nix inside a build, so the graph is
+            # handed over already evaluated; `just modules` runs the rest
+            # (untracked files, drift against wiki-lint's reading).
             module-tree = pkgs.runCommand "module-tree-check"
                 { nativeBuildInputs = [ pkgs.python3 ]; }
                 ''
-                    if ! python3 ${../scripts/modules.py} check ${./.} > "$out"; then
+                    if ! python3 ${../scripts/modules.py} orphans ${./.} \
+                        --graph ${pkgs.writeText "module-graph.json" (builtins.toJSON config.flake.moduleGraph)} > "$out"; then
                         cat "$out" >&2
                         exit 1
                     fi

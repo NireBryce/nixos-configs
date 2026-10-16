@@ -1,11 +1,9 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # node_exporter: CPU/memory/disk/network metrics for the host itself.
 # One of three things prometheus.nix scrapes -- see that file and grafana.nix
 # for the rest of the stack this belongs to.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = {
+{
+    nixos = {
         # # description = "node_exporter -- host CPU/mem/disk/net metrics for prometheus.nix to scrape";
         services.prometheus.exporters.node = {
             enable = true;

@@ -1,6 +1,6 @@
 # `containers` — `homelab-config/homelab/containers/`
 
-_Last modified: 2026-10-03_
+_Last modified: 2026-10-16_
 
 Podman and distrobox — OCI containers — and *only* that. See
 [virtualization](virtualization.md) for why libvirt/QEMU is a different
@@ -53,8 +53,8 @@ it; that changed 2026-08-27 when `durandal` became the first (see
 
 The only category/module collision that actually shipped far enough for
 `just modules` to catch: the freshly moved module was still named
-`containers.nix`, declaring `flake.modules.nixos.containers` — exactly what
-the new category's `dirsAsCategory.nix` declares for its aggregate.
+`containers.nix`, declaring `flake.modules.nixos.containers` — exactly the
+name the new category had (today the same file would stop evaluation).
 Renamed to `podman.nix`: name the file after the technology, not the
 category it sits in (same reason `libvirt.nix` isn't `virtualization.nix`;
 see [virtualization](virtualization.md)'s near-miss section). The file's

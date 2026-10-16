@@ -10,44 +10,53 @@ Full mechanism and worked examples: skill `new-flake-module`.
 
 ## Module shape
 
-- Every `.nix` file under `flake/modules/` is a flake-parts module, top
-  level `{ flake.modules.<class>.<name> = …; }` or similar, never a bare
-  NixOS or Home Manager module. `flake.modules` cannot live inside
-  `perSystem` (no `<system>` axis, no `freeformType` there).
-- A module's declared name comes from its filename, so a rename silently
-  drops it from its category if the two disagree. Two modules sharing a
-  name **merge** rather than conflict, since module names share one
-  namespace per class. `just modules` catches both.
-- Module classes aren't validated at declaration; a wrong one fails at the
-  import site.
+`wiki/module-files.md` is the why; dirs-as-categories' `doc/convention.md`
+the full rules.
+
+- A module file is `{ nixos = …; homeManager = …; darwin = …; }`, or a
+  function of only `lib`/`inputs` returning that. Its name is its filename
+  (`default.nix`: its folder's); nothing in the file names it. Its first
+  line is the pointer to `wiki/module-files.md`.
+- `pkgs` and `config` belong in the inner (class) module's arguments; a
+  module file cannot take the flake-parts `config` at all. The flake's own
+  outputs are `inputs.self` (`tailnet-hosts.nix`).
+- A rename renames the module. Two modules with one name, or a module named
+  like a category, stop evaluation naming both files (§34, §35).
+- A mistyped class key beside a real one is refused naming the file; a
+  file whose only class key is mistyped is loaded as a flake-parts module
+  and flake-parts rejects the unknown option.
 - Raw `nixos-generate-config` output needs wrapping, or evaluation dies
   with a misleading `infinite recursion` naming `modulesPath`.
 - `git add` a new file before `nix eval`: flakes ignore untracked files.
 
 ## Membership comes from the directory
 
-Read `flake/doc/dirsAsCategory.md` before changing any `dirsAsCategory.nix`.
-
-- Each category directory's `dirsAsCategory.nix` (a shim over
-  `flake/modules/_lib/category-collector.nix`) collects every `.nix` file
-  under its directory at any depth, including files directly beside it. A
-  module belongs to the category of the directory it is filed in; to keep
-  one out, file it outside the category's tree.
-- Entry points sit outside every category tree: `modules/checks.nix`,
-  `modules/invariants.nix`, `host-config/hosts.nix` and the
-  `<host>-configuration.nix` files beside it, and
-  `users-config/elly-home-manager.nix`. `just modules` relies on this.
+- A folder below an area is a category when a subfolder of it holds a
+  module, or a file directly in it sets `folderIsCategory = true`
+  (`false` opts out: `python-dev/` and `pkm/history/` keep plain-folder
+  status that way). Including a category includes every module beneath it,
+  nested categories too.
+- A module belongs to the nearest category above it; to keep one out of a
+  category, file it outside that category's tree.
+- Hosts and the home aggregate are modules with `includes.<class> = [ … ];`
+  outside every category: `host-config/<host>-configuration.nix`,
+  `users-config/elly-home-manager.nix`. A module may include another by
+  name too (`kde-desktop` includes `kde-base`).
+- Another class's module is reached with `enables.<class>` and arrives as
+  `enabled.<class>.<name>` (`enable-home-manager.nix`).
+- `defaults.nix` is never a module: its class parts apply whenever anything
+  in its folder is reached. None carries settings today.
+- Not modules: `hosts.nix`, `checks.nix`, `invariants.nix`, `dev-shell.nix`,
+  `nix-topology-flake.nix` -- plain flake-parts modules.
 - Areas: `general-config/`, `hardware-config/`, `homelab-config/`,
-  `host-config/`, `packages-config/`, `users-config/` (formerly `hosts/`,
-  `packages/`, `users/`; `homelab-config/homelab/` was
-  `general-config/homelab/`, and `hardware-config/` was
-  `general-config/hardware/`, `general-config/peripherals/` and four folders
-  of `system/`, until 2026-10-15), named so no area can collide with a
-  module or category name.
+  `host-config/`, `packages-config/`, `users-config/`, named so no area can
+  collide with a module or category name.
 - The category is how something shared stays optional: nothing here
-  declares `mkEnableOption`. `kde-desktop` is the by-name variant, imported
+  declares `mkEnableOption`. `kde-desktop` is the by-name variant, included
   directly while its category (`desktop-env`, which also holds `jovian`) is
-  never imported whole.
+  never included whole.
+- `just modules` reports orphans, untracked files, and drift between
+  wiki-lint's file-only reading and the evaluated graph.
 
 ## Conventions
 

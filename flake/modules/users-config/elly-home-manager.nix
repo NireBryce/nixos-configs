@@ -1,8 +1,9 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # elly's whole Home Manager config, as one module.
 #
 # The home-side counterpart to host-config/durandal-configuration.nix, and it sits
-# directly under users-config/ for the same reason: dirsAsCategory only collects from
-# *sub*directories, so a file here does not become a member of anything.
+# directly under users-config/ for the same reason: a file directly in an area belongs
+# to no category, so a file here does not become a member of anything.
 #
 # Only the categories that actually contain homeManager modules are listed. Every
 # category is declared for all three classes, so `hardware`, `peripherals`,
@@ -42,12 +43,10 @@
 #                       vicinae.nix and kde-connect.nix are the three, all
 #                       option-shaped: the HM module asserts before any
 #                       package list exists, so the filter cannot reach them.
-{ config, ... }:
 {
-    flake.modules.homeManager.ellyHomeManager.imports =
-    with config.flake.modules.homeManager; [
+    includes.homeManager = [
         # elly-git, elly-session, hm-config (username, homeDirectory, stateVersion)
-        elly
+        "elly"
 
         # kde-sleepmode only. The rest of `impermanence` is nixos-class --
         # notably WARN-impermanence, which is what makes this necessary: it
@@ -55,11 +54,11 @@
         # hibernation or suspend silently stops working. Both Linux hosts
         # import `impermanence` on the system side, so both need this;
         # kde-sleepmode.nix itself is what excludes darwin.
-        impermanence
+        "impermanence"
 
-        nix             # basic-nix-settings
-        shell-config    # bash, blesh, shell-env, zsh
-        system          # font, drop-unsupported-packages. The rest of the
+        "nix"           # basic-nix-settings
+        "shell-config"  # bash, blesh, shell-env, zsh
+        "system"        # font, drop-unsupported-packages. The rest of the
                         # `system` category is nixos/darwin-class and does not
                         # reach here. This line used to read "font,
                         # virtualization" -- virtualization.nix's homeManager
@@ -73,10 +72,10 @@
                         # three hosts, so it never reaches this list either.
 
         # packages
-        development
-        editors
-        gui-other
-        linux-utils     # 16 modules; despite the name 12 of them build on
+        "development"
+        "editors"
+        "gui-other"
+        "linux-utils"   # 16 modules; despite the name 12 of them build on
                         # darwin and install on lysithea too, as of
                         # 2026-08-12. pciutils and usbutils are inert on
                         # macOS; the other ten work. The remaining four --
@@ -84,8 +83,8 @@
                         # build there and are dropped by
                         # drop-unsupported-packages.nix, which names them in
                         # its warning on every darwin build.
-        nix-utils
-        shell-apps
-        terminals
+        "nix-utils"
+        "shell-apps"
+        "terminals"
     ];
 }

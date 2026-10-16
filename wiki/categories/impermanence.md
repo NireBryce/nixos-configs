@@ -1,6 +1,6 @@
 # `impermanence` — `general-config/impermanence/`
 
-_Last modified: 2026-09-28_
+_Last modified: 2026-10-16_
 
 **Read `WARN-impermanence.nix` itself before changing anything here — this
 page is an index, not a substitute.** See
@@ -19,13 +19,15 @@ directory.
 
 ## What's in it
 
-`root-rollback/` is itself a nested category (its own `dirsAsCategory.nix`,
-added for issue #103) rather than two bare files — a host can import
+`root-rollback/` is itself a nested category (added for issue #103) rather
+than two bare files — a host can import
 `root-rollback` directly instead of the whole `impermanence` umbrella, the
 same handle homelab's children give theirs. Its actual modules sit one level
 further in, under `restore-root/` (named for the systemd service
 `WARN-impermanence.nix` declares) — a subdirectory the collector required
-until 2026-09-28, grouping only since (`flake/doc/dirsAsCategory.md`).
+until 2026-09-28, and since 2026-10-16 what makes `root-rollback` a category
+at all: a folder with a subfolder holding modules is one
+([module-files.md](../module-files.md)).
 
 - **`root-rollback/restore-root/WARN-impermanence.nix`** — the module.
   Deletes the `/root` btrfs subvolume in initrd on every boot and snapshots a
@@ -54,13 +56,12 @@ until 2026-09-28, grouping only since (`flake/doc/dirsAsCategory.md`).
   module but a curried function returning a normal `nixosModule`. **Nothing
   imports this today** — see
   [../flake/doc/disko-impermanence-layout.md](<../../flake/doc/disko-impermanence-layout.md>)
-  for what it's for and how to actually wire it in. Deliberately does **not**
-  get a `dirsAsCategory.nix` of its own the way `root-rollback/` did: that
-  file would itself sit on a path containing `/_`, so `import-tree` would
-  skip importing it too, leaving `flake.modules.nixos._disko` never defined
-  — dead weight, not a working category. It doesn't need one anyway: nothing
-  has ever auto-imported it, by design, so there was no bundling to undo on
-  this side (see the file's own header).
+  for what it's for and how to actually wire it in. It can't be a category
+  the way `root-rollback/` is: everything on a path containing `/_` is
+  skipped, so nothing there is ever read as a module or a category. It
+  doesn't need to be one anyway: nothing has ever auto-imported it, by
+  design, so there was no bundling to undo on this side (see the file's own
+  header).
 
 ## Imported by
 
@@ -97,7 +98,7 @@ though the *value* doesn't.
 
 Only `kde-sleepmode.nix` is `homeManager`-class; the rest of this category
 is `nixos`-class and doesn't reach Home Manager. It rides into every host
-via `users-config/elly-home-manager.nix` (the shared `ellyHomeManager` bundle,
+via `users-config/elly-home-manager.nix` (the shared `elly-home-manager` bundle,
 outside every category tree — see [../architecture.md](../architecture.md)),
 not through each host's own per-host imports list.
 

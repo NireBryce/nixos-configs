@@ -1,5 +1,15 @@
 # `dirsAsCategory`, and the trailhead out of it
 
+> **History since 2026-10-16.** The shims and `_lib/category-collector.nix`
+> this note describes were replaced by the `dirs-as-categories` flake input:
+> no shims, categories found from the tree's shape, module names from
+> filenames. [`../../wiki/module-files.md`](../../wiki/module-files.md) is
+> the current design and why. Kept for the reasoning and the history below,
+> which still explain categories; the collector's last version is
+> `git show 5808bfe2:flake/modules/_lib/category-collector.nix`. The
+> trailhead out of categories still applies in spirit: dirs-as-categories'
+> `includes` lists are what a per-module opt-in would edit.
+
 > **Written by Claude Code.** A working note, not documentation: it records how one mechanism here works and what it cost to find out. Accurate as far as it was checked, and more thorough about its own reasoning than a human would bother being.
 
 

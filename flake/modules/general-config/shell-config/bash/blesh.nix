@@ -1,11 +1,9 @@
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{
     # This module owns .blerc. bash.nix carried a byte-identical copy of it
     # until they were merged here -- home.file.<n>.text is types.lines, so
     # both definitions concatenated and every ble-import below ran twice.
-    flake.modules.homeManager.${moduleName} = { pkgs, ... }:
+    homeManager = { pkgs, ... }:
     let
         # A real file rather than inlined into the .blerc string
         # below on purpose: this script is full of bash `${...}`

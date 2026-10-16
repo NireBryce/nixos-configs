@@ -1,8 +1,7 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 { lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
+{
+    homeManager = { pkgs, ... }: {
         home = {
             shellAliases = {
                 # for in-place functions in aliases refer to:  https://stackoverflow.com/questions/34340575/zsh-alias-with-parameter

@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Non-impermanence hosts (nire-cube today) have no help anywhere in this
 # repo setting a login password. WARN-impermanence.nix documents the whole
 # /persist dance for hosts that wipe /root on boot; a host that keeps a plain
@@ -31,10 +32,8 @@
 # rather than deleting the module, so a *future* non-impermanence host still
 # gets the reminder.
 { lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { config, ... }:
+{
+    nixos = { config, ... }:
     let
         usesImpermanence = config.boot.initrd.systemd.services ? restore-root;
         solvedByHand = config.networking.hostName == "nire-cube";

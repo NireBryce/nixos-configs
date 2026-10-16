@@ -150,8 +150,8 @@ categories enabled around a repro.
   Plasma *preferences* (theme, kwin behavior, input devices, global
   shortcuts) via plasma-manager, captured from tenacity's live `~/.config`
   on 2026-09-01. A separate mechanism from everything above: home-manager
-  class, wired in only through `tenacityConfiguration`'s own
-  `home-manager.users.elly.imports`, not this category or `ellyHomeManager` —
+  class, wired in only through `tenacity-configuration`'s own
+  `home-manager.users.elly.imports`, not this category or `elly-home-manager` —
   durandal, lysithea and cube never load plasma-manager's HM module.
 
   **It is a curated subset, not a 1:1 dump**, and what was left out was

@@ -1,10 +1,8 @@
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{
     # `{ ... }:` kept over statix's suggested `_:` -- deliberate, see
     # wiki/module-style-guide.md's "`{ ... }:` on an inner module lambda".
-    flake.modules.nixos.${moduleName} = { ... }: {
+    nixos = { ... }: {
         # # description = "let libvirt's NAT bridge past the host firewall";
 
         # libvirt's default network is NAT behind `virbr0`, with libvirt's own

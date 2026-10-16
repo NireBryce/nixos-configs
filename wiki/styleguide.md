@@ -1,6 +1,6 @@
 # Wiki style guide
 
-_Last modified: 2026-10-05_
+_Last modified: 2026-10-16_
 
 How this wiki itself is organized and written — as opposed to
 [conventions.md](conventions.md), which is the *repo's* style guide (Nix
@@ -56,8 +56,8 @@ separate tier for the *usage* side:
   `.agents/lessons-map.toml`, which a hook uses to remind the next agent
   at that moment.
 - **`wiki/categories/<name>.md`** — one page per real category, i.e. a
-  directory under `flake/modules/` holding its own `dirsAsCategory.nix`
-  (see [architecture.md](architecture.md)). Indexed in
+  folder under `flake/modules/` that is a category (see
+  [module-files.md](module-files.md)). Indexed in
   [categories/00-INDEX.md](categories/00-INDEX.md)'s table (`Category |
   Directory | Class(es) | Imported by` — deliberately no per-category file
   count column; see that page's own note on why). Deliberately *not*

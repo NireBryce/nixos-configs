@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Cube-side host support for the Forgejo Actions runner, which runs in a
 # VM (forge-runner, instantiated by virtualization-cube.nix; its
 # config is host-config/forge-runner-configuration.nix). This module is what
@@ -25,11 +26,8 @@
 #
 # Kept in the wiki, not restated here: the run loop, labels, recovery --
 # wiki/categories/git-forge.md and sibling, wiki/homelab/forgejo.md.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { pkgs, config, ... }: {
+{
+    nixos = { pkgs, config, ... }: {
         # # description = "cube-side support for the Forgejo Actions runner VM";
 
         # Runs as root: virsh needs the system libvirtd, which the

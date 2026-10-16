@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # The naming rule, as code: host `nire-<x>` (networking.hostName, and
 # `nire-<x>.local` on the LAN via avahi.nix) is the Tailscale device
 # `ts-<x>` (MagicDNS; FQDN `ts-<x>.moose-micro.ts.net`). tailscale.nix's
@@ -35,16 +36,14 @@
 # ssh/git-over-ssh from VS Code's terminal, git integration, and agent
 # sessions died with "Bad owner or permissions on ~/.ssh/config" (hit
 # 2026-09-28). Hand edits to the file last only until the next switch.
-{ config, lib, ... }:
+{ lib, inputs, ... }:
 let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-
-    # Outer `config` on purpose: the flake-parts config is what holds
-    # the host roster. Only the attribute names are read, which never
-    # forces a host's evaluation.
+    # `inputs.self` is the flake's own outputs, which hold the host roster
+    # (it was the flake-parts `config.flake`, the same attribute set). Only
+    # the attribute names are read, which never forces a host's evaluation.
     fleet = builtins.filter (lib.hasPrefix "nire-")
-        (builtins.attrNames config.flake.nixosConfigurations
-         ++ builtins.attrNames config.flake.darwinConfigurations);
+        (builtins.attrNames inputs.self.nixosConfigurations
+         ++ builtins.attrNames inputs.self.darwinConfigurations);
 
     tailnetName = host: "ts-${lib.removePrefix "nire-" host}";
 
@@ -56,8 +55,8 @@ let
     };
 in {
     # Inner `config`/`lib` are Home Manager's (`fleet` above already read
-    # the outer config; only HM's lib has `lib.hm.dag`).
-    flake.modules.homeManager.${moduleName} = { config, lib, pkgs, ... }: {
+    # the flake's outputs; only HM's lib has `lib.hm.dag`).
+    homeManager = { config, lib, pkgs, ... }: {
         # # description = "ts-<x> tailnet names for every nire-<x> host, in ~/.ssh/config and ssh completion";
         programs.ssh = {
             enable              = true;

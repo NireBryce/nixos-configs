@@ -1,8 +1,7 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 { lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.darwin.${moduleName} = {
+{
+    darwin = {
         nixpkgs.hostPlatform = lib.mkDefault "aarch64-darwin";
     };
 }

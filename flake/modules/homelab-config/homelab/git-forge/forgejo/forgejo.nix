@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Forgejo: a self-hosted git forge, tailnet-only, at
 # https://git.moose-micro.ts.net/. Added 2026-08-24, cube-only. Named
 # `git-forge`, not `forgejo`: a category and a module sharing a name declare
@@ -14,10 +15,8 @@
 # `-for-agents.md` and `git-forge-history.md`; cloning and day-to-day use,
 # wiki/homelab/forgejo.md. Traps sit next to the options.
 { lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = { config, ... }: {
+{
+    nixos = { config, ... }: {
         services.forgejo = {
             enable  = true;
             # sqlite3 (the module default), not postgres/mysql: a

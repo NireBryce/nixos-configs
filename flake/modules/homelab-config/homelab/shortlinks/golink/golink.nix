@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # golink: tailscale's `go/foo` shortlink service, run as its OWN node on the
 # tailnet. Added 2026-08-24, cube-only, own category (`homelab-config/homelab/shortlinks/`) --
 # the category-as-optionality mechanism CLAUDE.md's Architecture section
@@ -72,25 +73,23 @@
 # actually happen.
 { lib, ... }:
 let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-
     # StateDirectory = "golink" under DynamicUser: real directory
     # /var/lib/private/golink, symlinked from /var/lib/golink; both work
     # from outside, the service sees /var/lib/golink. Written out rather
     # than `%S` so the flags below read as ordinary paths.
     stateDir = "/var/lib/golink";
 in {
-    flake.modules.nixos.${moduleName} = { pkgs, ... }: {
+    nixos = { pkgs, ... }: {
         # `pkgs` bound on the INNER NixOS module, not the outer
         # flake-parts function -- flake-parts injects no `pkgs` there;
         # evaluating it errors "attribute 'pkgs' missing". Same pattern
         # grafana.nix and zsh.nix use.
 
-        # Unit name written out literally, NOT derived from `moduleName`:
-        # the flake-parts attribute must track the filename (how
-        # dirsAsCategory finds it), but the unit name keys `systemctl
-        # status golink` and the journal, and should not quietly change
-        # if this file is renamed.
+        # Unit name written out literally, NOT derived from the filename:
+        # the module's name tracks the filename (dirs-as-categories names
+        # it from the file), but the unit name keys `systemctl status
+        # golink` and the journal, and should not quietly change if this
+        # file is renamed. (The filename used to arrive as `moduleName`.)
         systemd.services.golink = {
             description = "golink -- go/ shortlinks, as its own tailnet node";
             wantedBy    = [ "multi-user.target" ];

@@ -1,9 +1,7 @@
-{ lib, ... }:
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in { 
-    flake.modules.homeManager.${moduleName} = {
+{ 
+    homeManager = {
         # micro, what if nano was msword for dos
         programs.micro = {
             enable = true;

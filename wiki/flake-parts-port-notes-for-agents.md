@@ -1,6 +1,6 @@
 # flake-parts port notes, for agents
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-16_
 
 Condensed from [flake-parts-port-notes.md](flake-parts-port-notes.md).
 Salvaged 2026-09-08 from the deleted `flake-parts` branch (tip `cf9aea42`).
@@ -29,7 +29,8 @@ against them.
 
 ## Traps that produced no error, or named the wrong thing
 
-- **The two `config`s.** A bare-attrset module's `config` is the flake-parts
+- **The two `config`s** (retired 2026-10-16: no outer `config` in a module
+  file now). A bare-attrset module's `config` was the flake-parts
   one; adding an argument list to reach the NixOS `config` silently repoints
   every `config` in the file and `config.flake.modules.*` stops resolving.
   Bind what you need in a `let` above the declaration.

@@ -1,6 +1,6 @@
 # Module style guide, for agents
 
-_Last modified: 2026-10-08_
+_Last modified: 2026-10-16_
 
 Condensed from [module-style-guide.md](module-style-guide.md). Rules only.
 
@@ -16,8 +16,8 @@ Never hand-edit. By hand it is
 
 | What | Files |
 |---|---|
-| total `.nix` files under `flake/modules/` | 275 |
-| module header (`moduleName = lib.removeSuffix ...`) | 222 |
+| total `.nix` files under `flake/modules/` | 237 |
+| pointer line (`# Module file: … wiki/module-files.md`) | 228 |
 | `# # description` as first body line | 35 |
 | `with pkgs;` package lists | 115 |
 
@@ -26,23 +26,25 @@ Never hand-edit. By hand it is
 ## The header
 
 ```nix
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 { lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.homeManager.${moduleName} = { pkgs, ... }: {
+{
+    homeManager = { pkgs, ... }: {
         ...
     };
 }
 ```
 
+Name = filename; nothing in the file names it ([module-files.md](module-files.md)).
+Was `moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file)` +
+`flake.modules.<class>.${moduleName} =` until 2026-10-16.
+
 **Which argument goes where is not cosmetic:**
 
-- `lib`, `inputs` → the **outer** (flake-parts) list.
-- `pkgs`, `config` → the **inner** module's list. `pkgs` from the outer scope
-  is perSystem's, with no `nixpkgs.config` applied — it silently loses
-  `allowUnfree`. `config` from the outer scope is the flake-parts config, not
-  the NixOS/HM one.
+- `lib`, `inputs` → the **outer** list, only if used (deadnix); neither → no header.
+- `pkgs`, `config` → the **inner** module's list. No outer `config` exists;
+  `pkgs` from anywhere else is perSystem's, with no `nixpkgs.config` applied
+  — it silently loses `allowUnfree`.
 
 ## Formatting
 
@@ -91,12 +93,13 @@ option without a reason beyond tidiness.
 
 ## File placement produces no error when wrong
 
-- A category collects **every `.nix` file under its directory**, any
-  depth, beside the shim included (since 2026-09-28). Keep a module out ->
-  file it outside the tree. Diagram: `category-collector.nix` header.
-- Entry points sit outside every category tree: `checks.nix`, `hosts.nix`,
+- A category includes **every module under its folder**, any depth. A
+  folder is a category when a subfolder holds modules (or
+  `folderIsCategory = true`); adding a first subfolder can promote a folder.
+  Keep a module out -> file it outside the tree.
+- Entry points sit outside every category: `hosts.nix`,
   `durandal-configuration.nix`, `elly-home-manager.nix`.
-- A filename becomes the attribute name, and names **merge** rather than
-  conflict — a file named the same as a category silently combines with it.
+- Filename = name. A repeated name, or one shared with a category, stops
+  evaluation (was a silent merge, §34).
 
-`just modules` checks the last two.
+`just modules` reports orphans and untracked files.

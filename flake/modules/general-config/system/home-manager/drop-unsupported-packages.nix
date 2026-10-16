@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # Drop packages nixpkgs cannot build on this system, once, instead of guarding
 # them one module at a time. ellyHomeManager is shared verbatim by all four
 # hosts, so everything in it has to survive aarch64-darwin as well as
@@ -39,11 +40,8 @@
 # own, and the module system merges a second declaration that adds one, so
 # everything reading config.home.packages (home.path's buildEnv included)
 # sees the filtered list.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.homeManager.${moduleName} = { pkgs, lib, ... }: {
+{
+    homeManager = { pkgs, lib, ... }: {
         options.home.packages = lib.mkOption {
             apply = packages:
                 # hostPlatform, not the pkgs.stdenv.isDarwin alias used

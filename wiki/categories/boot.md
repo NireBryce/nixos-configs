@@ -1,6 +1,6 @@
 # `boot` — `general-config/boot/`
 
-_Last modified: 2026-09-28_
+_Last modified: 2026-10-16_
 
 ## Contents
 
@@ -24,20 +24,22 @@ Two files:
 
 ## Why each file sits in a subdirectory
 
-Until 2026-09-28 `dirsAsCategory` skipped `.nix` files sitting straight in a
-category's own directory, so a module directly in `general-config/boot/`
-reached nothing — hence `generations/` and `editor/`. That rule is gone
-(`flake/doc/dirsAsCategory.md`'s History); the subdirectories stay as
-grouping.
+Until 2026-09-28 the category collector skipped `.nix` files sitting
+straight in a category's own directory, so a module directly in
+`general-config/boot/` reached nothing — hence `generations/` and `editor/`
+(`flake/doc/dirsAsCategory.md`'s History). Since 2026-10-16 they are what
+makes `boot` a category at all: a folder with a subfolder holding modules is
+one ([module-files.md](../module-files.md)). **Flatten both and `boot`
+stops being a category**, and every host's `includes` of it fails to
+evaluate.
 
 ## The name trap this category is the origin of
 
-The module can't be named `boot.nix`. A module's declared name is its
-filename, so `boot.nix` here would declare `flake.modules.nixos.boot` — the
-exact attribute name this category's own `dirsAsCategory.nix` already
-declares for its aggregate — and same-named modules **merge** rather than
-conflict. That merge is invisible: both halves would probably look like they
-work. This is literally the trap `CLAUDE.md`'s Traps section cites by name
+The module can't be named `boot.nix`. A module's name is its filename, so
+`boot.nix` here would be a module named `boot` — the name of this category.
+Today that stops evaluation, naming both; until 2026-10-16 the two **merged**
+rather than conflicting, and that merge was invisible: both halves would
+probably look like they work. This is literally the trap `CLAUDE.md`'s Traps section cites by name
 ("This is how `boot` came to mean both `general-config/boot/` ... and durandal's
 bootloader"), and it's also why
 `host-config/durandal/hardware/boot-durandal.nix` and the other hosts'

@@ -1,7 +1,6 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 { lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
+{
     # NixOS's programs.kdeconnect only installs the package and opens the
     # firewall ports (1714-1764 TCP+UDP) -- it starts no daemon. Without a
     # unit, kdeconnectd is D-Bus-activated (org.kde.kdeconnect) when
@@ -13,13 +12,13 @@ in {
     # on its own (ordering below). indicator stays off: Plasma's own tray applet
     # (org.kde.kdeconnect) already covers that; kdeconnect-indicator is
     # the non-Plasma (e.g. GNOME/gsconnect-adjacent) equivalent.
-    flake.modules.nixos.${moduleName} = {
+    nixos = {
         programs.kdeconnect = {
             enable = true; # package + firewall ports only
         };
     };
 
-    flake.modules.homeManager.${moduleName} = { pkgs, ... }:
+    homeManager = { pkgs, ... }:
         # services.kdeconnect asserts meta.platforms (Linux-only), a hard
         # eval failure, and ellyHomeManager is shared with nire-lysithea
         # (aarch64-darwin). The guard has to be here by hand:

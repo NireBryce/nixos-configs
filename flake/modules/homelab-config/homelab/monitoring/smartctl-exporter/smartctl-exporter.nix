@@ -1,3 +1,4 @@
+# Module file: named after this file; why it looks this way: wiki/module-files.md
 # smartctl_exporter: per-disk SMART/NVMe wear metrics (health status,
 # percentage used, media errors, temperature) for prometheus.nix to scrape
 # and grafana.nix to trend over time -- the one piece of this stack that
@@ -13,11 +14,8 @@
 # this is deployed, then add a "Storage" row to
 # grafana/_dashboards/nire-cube-overview.json the same way
 # libvirt-exporter.nix's metrics became the "libvirt / QEMU VMs" row.
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in {
-    flake.modules.nixos.${moduleName} = {
+{
+    nixos = {
         # # description = "smartctl_exporter -- per-disk SMART/wear metrics for prometheus.nix to scrape";
         services.prometheus.exporters.smartctl = {
             enable = true;

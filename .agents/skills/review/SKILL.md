@@ -18,9 +18,10 @@ own that; this file is their review-side compression.
 
 A diff read is never enough (bugs serialize). In order:
 
-1. `just modules` — catches a module renamed out of agreement with its
-   category (collected by *nothing*), and two modules declaring the same
-   `flake.modules.<class>.<name>` (they **merge**). Nags untracked files.
+1. `just modules` — a module no host reaches (orphan), untracked files, and
+   drift between wiki-lint's file-only reading and the evaluated graph. A
+   repeated module/category name or an unknown `includes` name fails
+   evaluation itself (dirs-as-categories, `wiki/module-files.md`).
 2. `git status --short` — **`git add` before `nix eval`**: an untracked new
    file doesn't exist to the flake; a passing eval may never have seen it.
 3. `just preflight` — wiki-lint + check + modules + lint (statix/deadnix
@@ -41,6 +42,10 @@ A diff read is never enough (bugs serialize). In order:
 
 - **Filed in the right directory?** Category = directory; a module outside
   every category tree is collected by nothing, no error (`new-flake-module`).
+  A first subfolder of modules can turn a plain folder into a category.
+- **Module file shape?** First line the pointer to `wiki/module-files.md`;
+  keys only classes/`includes`/`enables`/`folderIsCategory`; header only the
+  `lib`/`inputs` it uses.
 - **Two files writing the "same" file?** `home.file.<n>.text` and
   `home.sessionPath` **concatenate** across modules — silent doubling.
   Reading a generated dotfile back gives false negatives; eval the

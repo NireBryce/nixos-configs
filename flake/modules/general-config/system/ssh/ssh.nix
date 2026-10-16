@@ -1,8 +1,6 @@
-{ lib, ... }:
-let
-    moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file);
-in { 
-    flake.modules.nixos.${moduleName} = {
+# Module file: named after this file; why it looks this way: wiki/module-files.md
+{ 
+    nixos = {
         services.openssh = {
             enable = true;
             allowSFTP = false; # Don't set this if you need sftp

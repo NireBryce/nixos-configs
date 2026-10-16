@@ -75,7 +75,7 @@ No install runbook here (`nire-installer` removed 2026-08-27). Standard disko in
 - **First boot needs the KDE hibernation half** —
   `root-rollback/restore-root/kde-sleepmode.nix` sets `SleepMode=1` in `powerdevil.rc`,
   matching the `nohibernate` kernel parameter, or suspend breaks outright.
-  `homeManager`-class, arrives via `ellyHomeManager`.
+  `homeManager`-class, arrives via `elly-home-manager`.
 
 ## Confirming the rollback runs
 
