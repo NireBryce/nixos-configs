@@ -5,7 +5,7 @@
 # descriptions come from this table: cod-desc.bash advises cod's completer
 # and looks candidates up here, keyed command<TAB>candidate<TAB>description.
 # The wiring lives in blesh.nix; the format is pinned by
-# flake/scripts/test_cod_desc.py, which runs in `just preflight`.
+# flake/scripts/tests/test_cod_desc.py, which runs in `just preflight`.
 #
 # To extend: teach cod the command (`cod learn -- <cmd> --help` -- its
 # help-execution timeout is 1s, so slow-starting commands never learn),

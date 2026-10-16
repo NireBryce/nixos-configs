@@ -15,7 +15,7 @@ import tempfile
 import textwrap
 import unittest
 
-HERE = pathlib.Path(__file__).resolve().parent
+SCRIPTS = pathlib.Path(__file__).resolve().parents[1]
 
 
 class Runner(unittest.TestCase):
@@ -24,7 +24,7 @@ class Runner(unittest.TestCase):
             mod = pathlib.Path(d) / "test_fixture.py"
             mod.write_text(textwrap.dedent(f"""\
                 import os, sys, time, unittest
-                sys.path.insert(0, {str(HERE)!r})
+                sys.path.insert(0, {str(SCRIPTS)!r})
                 import parallel_unittest
             """) + textwrap.dedent(body) + textwrap.dedent("""
                 if __name__ == "__main__":

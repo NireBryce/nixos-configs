@@ -20,10 +20,10 @@ import importlib.util
 import os
 import unittest
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+SCRIPTS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # the hyphen in the module's filename rules out a plain `import`
 _spec = importlib.util.spec_from_file_location(
-    'keybinding_cheatsheet', os.path.join(HERE, 'keybinding-cheatsheet.py'))
+    'keybinding_cheatsheet', os.path.join(SCRIPTS, 'keybinding-cheatsheet.py'))
 kbc = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(kbc)
 

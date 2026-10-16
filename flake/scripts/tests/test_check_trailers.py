@@ -19,11 +19,11 @@ import sys
 import tempfile
 import unittest
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HERE)
+SCRIPTS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, SCRIPTS)
 import check_trailers  # noqa: E402
 
-SCRIPT = os.path.join(HERE, "check_trailers.py")
+SCRIPT = os.path.join(SCRIPTS, "check_trailers.py")
 
 
 class ClassifierTests(unittest.TestCase):

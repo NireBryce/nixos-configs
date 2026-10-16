@@ -22,7 +22,7 @@
 # nothing is denied or blocked here. Bash matcher because the disarmed
 # behaviour is git-guard's and just-guard's, both Bash guards.
 #
-# Fixture tests: flake/scripts/test_guards.py.
+# Fixture tests: flake/scripts/tests/test_guards.py.
 set -euo pipefail
 
 # No jq: say so (JSON built by hand) instead of allowing silently -- the

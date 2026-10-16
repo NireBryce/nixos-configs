@@ -100,7 +100,7 @@ Traps that have bitten here:
    formats share `parse_chord`; a notation fixed in one parser is fixed
    everywhere. A sequence that will not decode must return a raw `Chord` —
    verbatim on the sheet — never a guess.
-4. **Add a fixture class** in `flake/scripts/test_keybinding_cheatsheet.py`,
+4. **Add a fixture class** in `flake/scripts/tests/test_keybinding_cheatsheet.py`,
    following the existing ones: real-shaped sample, the happy path, plus
    the ugly row (header cell, dynamic key, unbind). Run `just
    keybindings-test`; `just preflight` runs it from now on.

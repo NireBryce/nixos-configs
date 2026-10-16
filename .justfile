@@ -58,7 +58,7 @@ modules:
 # an untracked file and each kind of drift, and asserts each check fires.
 # Pure stdlib; runs in preflight and CI
 modules-test:
-    python3 {{scripts}}/test_modules.py
+    python3 {{scripts}}/tests/test_modules.py
 
 # Draw the module tree: just module-graph tree|hosts|dot|html [--category X] [--depth N]
 # [--categories-only] [--wrap N]. tree/hosts print Mermaid, dot prints Graphviz
@@ -121,7 +121,7 @@ branches cmd="check" *args:
 # and asserts the verdicts plus exactly what prune deletes.
 # Pure git in a temp repo -- no fleet state; runs in preflight and CI
 branches-test:
-    python3 {{scripts}}/test_branches.py
+    python3 {{scripts}}/tests/test_branches.py
 
 # In CI (.github/workflows/check.yml) since 2026-09-09, in `preflight` since
 # 2026-09-28 (issue #217's "once green a while"): until then a stale wiki
@@ -192,13 +192,13 @@ install-hooks:
 # tostring newline bug) and a guard that stops matching protects nothing.
 # Fixture tests for the guard hooks; jq required, skips without it; in preflight and CI
 guards-test:
-    python3 {{scripts}}/test_guards.py
+    python3 {{scripts}}/tests/test_guards.py
 
 # check_trailers.py is the CI gate on Claude Co-Authored-By trailers (a
 # PR's own commits only; check.yml); this is its fixture test.
 # Fixture tests for the CI trailer check; pure stdlib + git; in preflight
 trailers-test:
-    python3 {{scripts}}/test_check_trailers.py
+    python3 {{scripts}}/tests/test_check_trailers.py
 
 # Named for what it replaced: until 2026-09-29 check.yml listed
 # preflight's steps a second time, and this diffed the two lists. CI now
@@ -207,7 +207,7 @@ trailers-test:
 # the CI-only ones, and preflight must keep its floor of anchor checks.
 # CI runs `just preflight`, not a copy of it, or this fails; pure stdlib; in preflight
 preflight-mirror-test:
-    python3 {{scripts}}/test_preflight_mirror.py
+    python3 {{scripts}}/tests/test_preflight_mirror.py
 
 # wiki-lint and branches-test first: each fails in ~2s, where check spends
 # minutes. This recipe IS the CI check-set: check.yml runs `just preflight`
@@ -234,9 +234,9 @@ preflight:
     @python3 .agents/scripts/test_ship.py
     @python3 .agents/scripts/test_worktree.py
     @python3 .agents/scripts/test_where.py
-    @python3 flake/scripts/test_glibc_guard.py
-    @python3 flake/scripts/test_pm_test_core.py
-    @python3 flake/scripts/test_parallel_unittest.py
+    @python3 flake/scripts/tests/test_glibc_guard.py
+    @python3 flake/scripts/tests/test_pm_test_core.py
+    @python3 flake/scripts/tests/test_parallel_unittest.py
     @just guards-test
     @just preflight-mirror-test
     @just check
@@ -360,7 +360,7 @@ pinned-packages *args:
 # Pure stdlib, no network -- the rewrites are regex-coupled to the modules
 # Fixture tests for pinned-packages.py's module rewrites; in preflight and CI
 pinned-packages-test:
-    python3 {{scripts}}/test_pinned_packages.py
+    python3 {{scripts}}/tests/test_pinned_packages.py
 
 # Normalized keybinding cheat sheet per tool (kitty/zsh/bash), repo overrides on top
 keybindings *args:
@@ -378,7 +378,7 @@ keybindings-test:
     # about what a key does on these hosts -- and the read_repo_* readers are
     # regex-coupled to the declaring modules' exact shapes. Pure stdlib; runs
     # in preflight and CI.
-    python3 {{scripts}}/test_keybinding_cheatsheet.py
+    python3 {{scripts}}/tests/test_keybinding_cheatsheet.py
 
 # Draft / audit / check the cod completion descriptions table (cod-desc.tsv)
 cod-desc *args:
@@ -396,7 +396,7 @@ cod-desc-test:
     # cod-desc.tsv looking authoritative -- and the wiring checks are
     # regex-coupled to blesh.nix's and cod-desc.bash's exact shapes. Pure
     # stdlib; runs in preflight and CI.
-    python3 {{scripts}}/test_cod_desc.py
+    python3 {{scripts}}/tests/test_cod_desc.py
 
 # The safe answer to "which secrets exist?" -- reads the committed
 # ciphertext (names are plaintext, values are ENC[...]) and never decrypts,

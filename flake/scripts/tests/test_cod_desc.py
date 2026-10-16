@@ -28,13 +28,13 @@ import pathlib
 import re
 import unittest
 
-HERE = pathlib.Path(__file__).resolve().parent
-FLAKE = HERE.parent
+SCRIPTS = pathlib.Path(__file__).resolve().parents[1]
+FLAKE = SCRIPTS.parent
 DATA = FLAKE / 'modules/general-config/shell-config/bash/cod-desc.tsv'
 BLESH = FLAKE / 'modules/general-config/shell-config/bash/blesh.nix'
 ADVICE = FLAKE / 'modules/general-config/shell-config/bash/cod-desc.bash'
 
-_spec = importlib.util.spec_from_file_location('cod_desc', HERE / 'cod-desc.py')
+_spec = importlib.util.spec_from_file_location('cod_desc', SCRIPTS / 'cod-desc.py')
 cod_desc = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(cod_desc)
 

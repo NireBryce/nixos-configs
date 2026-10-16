@@ -65,8 +65,8 @@ Only an exact MERGED verdict is deletable, which is why every other state
 carries a suffix rather than its own arm: `MERGED (worktree)` is not
 `MERGED`.
 
-The classifier has a fixture test, `flake/scripts/test_branches.py` (`just
-branches-test`, part of `just preflight` and CI): every verdict state built
+The classifier has a fixture test, `flake/scripts/tests/test_branches.py`
+(`just branches-test`, part of `just preflight` and CI): every verdict state built
 in a throwaway repo, asserting the verdicts and exactly what prune deletes.
 It exists because #300 shipped two misclassifications -- a no-commits branch
 reading MERGED, an all-merges branch reading MERGED -- either of which would

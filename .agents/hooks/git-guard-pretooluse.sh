@@ -74,7 +74,7 @@
 # cd/git grammar asks rather than trusting the cwd (see the whitelist
 # comment below). The tier-2 asks are plain patterns: shell variables and
 # aliases aren't followed and an unanticipated option cluster can slip
-# through. Extend the patterns rather than assuming every shape is covered. Fixture tests: flake/scripts/test_guards.py.
+# through. Extend the patterns rather than assuming every shape is covered. Fixture tests: flake/scripts/tests/test_guards.py.
 set -euo pipefail
 
 # No jq: say so (JSON built by hand) instead of allowing silently -- the
