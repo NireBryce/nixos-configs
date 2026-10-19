@@ -13,8 +13,12 @@
 #   host-age-key.sh --updatekeys            # re-encrypt secrets.yaml for
 #                                            # .sops.yaml's CURRENT keys list
 #
-# This script only ever reads a PUBLIC key and only ever prints. It does not
-# edit .sops.yaml for you -- CLAUDE.md and the new-host-config skill are both
+# In its default modes this script only ever reads a PUBLIC key and only
+# ever prints. The one exception is --updatekeys: it rewrites the committed
+# secrets.yaml in place, re-encrypted for .sops.yaml's CURRENT keys list
+# (`sops updatekeys` decrypts only in memory; nothing plaintext is printed
+# or left on disk, but the tracked ciphertext file does change). It still
+# does not edit .sops.yaml for you -- CLAUDE.md and the new-host-config skill are both
 # explicit that enrollment happens "when that need actually arises, not
 # preemptively", and a `keys:` entry plus which `creation_rules` group it
 # belongs to is a judgement call this script has no way to make safely by

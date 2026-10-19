@@ -24,8 +24,10 @@
 #     a scratch XDG_CONFIG_HOME), but only for the bare host position --
 #     after `user@` the names come from the ~/.ssh/config half alone.
 #
-# Taking over ~/.ssh/config: Home Manager moves any hand-written file to
-# ~/.ssh/config.hm-bak on first activation (backupFileExtension). Entries
+# Taking over ~/.ssh/config: NO backup. home.backupFileExtension (hm-bak,
+# enable-home-manager.nix) applies only to entries home.file still manages,
+# and this one is disabled -- the activation install below replaces whatever
+# is there outright, on first adoption and on every switch after. Entries
 # worth keeping go in `settings` below, not back in the file.
 #
 # ~/.ssh/config is a real file, not HM's usual store symlink: programs.ssh

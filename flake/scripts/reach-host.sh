@@ -25,6 +25,12 @@
 #   reach-host.sh <host> [remote command...]   # connect (or run a command)
 #   reach-host.sh --resolve <host>              # print the working name, don't connect
 #
+# SIDE EFFECT: the probe runs with StrictHostKeyChecking=accept-new, so the
+# first candidate name that answers records its host key into
+# ~/.ssh/known_hosts -- including on a --resolve run, which probes before it
+# prints. Up to one new known_hosts entry per run, and nothing else is
+# written: the connect at the end is the ordinary ssh you asked for.
+#
 # <host> is whatever comes after "nire-"/"ts-" -- durandal, tenacity, cube,
 # lysithea. Not validated against hosts.nix: this only ever tries three
 # derived DNS names and lets ssh's own connection attempt be the judge, so a
@@ -53,6 +59,7 @@ probe() {
     # A real (cheap) SSH handshake + auth, not just a DNS/ping check --
     # what this script promises is "ssh will actually work here", and a
     # name can resolve while nothing is listening or auth fails.
+    # accept-new is what records the answered key -- SIDE EFFECT above.
     ssh -o ConnectTimeout=3 -o BatchMode=yes -o StrictHostKeyChecking=accept-new \
         "$1" true >/dev/null 2>&1
 }

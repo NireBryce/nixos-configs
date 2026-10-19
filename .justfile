@@ -266,7 +266,9 @@ switch:
     @{{scripts}}/rebuild.sh switch {{flake}} {{host}}
 
 # SSH to another host by short name (durandal/tenacity/cube/lysithea),
-# trying LAN mDNS then Tailscale then plain DNS -- see reach-host.sh
+# trying LAN mDNS then Tailscale then plain DNS. Each try is a real ssh
+# auth probe and records the answered name's host key into ~/.ssh/known_hosts
+# (--resolve included) -- see reach-host.sh's SIDE EFFECT note
 reach *args:
     @{{scripts}}/reach-host.sh {{args}}
 
