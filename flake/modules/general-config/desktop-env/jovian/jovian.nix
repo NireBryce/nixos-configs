@@ -43,6 +43,20 @@
           lib.makeLibraryPath
           config.jovian.decky-loader.extraPackages;
 
+        # The display manager used to arrive as a side effect of
+        # jovian.steam.autoStart, which enabled SDDM with autoLogin into
+        # gamescope-wayland. Enabled here instead, same settings minus the
+        # autologin: a password at boot, Gaming Mode by default, Plasma one
+        # click away (kde-desktop.nix is durandal's session module --
+        # tenacity never had its own before this).
+        services.displayManager = {
+            defaultSession = "gamescope-wayland";
+            sddm = {
+                enable = true;
+                wayland.enable = true;
+            };
+        };
+
         jovian = {
             steam = {
                 enable = true;

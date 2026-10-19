@@ -1,6 +1,6 @@
 # `git-forge`, for agents
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-19_
 
 Condensed from [git-forge.md](git-forge.md). Facts only here.
 
@@ -62,10 +62,12 @@ access roots the VM, not cube.
   %h/.ssh/authorized_keys` (`lib.mkAfter`); `ssh.nix` sets
   `authorizedKeysInHomedir = false` for everyone else. Drop that block and
   git+ssh fails silently. Clone URLs: `forgejo@ts-cube:...`, port 22.
-- **`forgejo-admin-bootstrap` resets elly's password to the sops value on
-  every activation.** A change made through the web UI is silently reverted
-  by the next `just switch`. Deliberate, unlike the create-once shape the
-  signing-key units use.
+- **`forgejo-admin-bootstrap` re-asserts elly's password from sops on
+  every activation.** Since 2026-10-19 the re-assert goes through the
+  loopback admin API (the CLI's only password channel is argv, world-readable
+  in /proc). A hand change in the web UI now FAILS the unit loudly (401)
+  instead of being silently reverted -- fix the secret, or run the CLI
+  `change-password` by hand once.
 - The `forgejo-admin-password` sops secret is declared **in this module**,
   not in `general-config/system/secrets/sops.nix`, so it only decrypts on cube.
 - **`one-job` refuses a config defining a connection** when given
@@ -84,8 +86,9 @@ access roots the VM, not cube.
 - **Hardening (forgejo.nix):** `REQUIRE_SIGNIN_VIEW = true` (HTTPS clones
   need credentials); `quota.ENABLED`, `[quota.default] TOTAL = 10GiB`
   (unparseable ⇒ silently unlimited); artifacts 14 d, logs 90 d;
-  `COOKIE_SECURE = true`. 2FA is UI-side; the admin bootstrap's
-  `change-password` doesn't touch it.
+  `COOKIE_SECURE = true`. 2FA is UI-side; the admin bootstrap's password
+  re-assert touches only the password and must-change flag, so enrolled
+  2FA survives every switch.
 
 ## Imported by
 

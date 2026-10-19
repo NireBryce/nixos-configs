@@ -66,6 +66,9 @@
             sessionVariables = {
                 EDITOR                  = "micro";
                 MICRO_TRUECOLOR         = 1;
+                # Unfree allowed in every session, deliberately: ad-hoc
+                # nix-shell/nix build runs should not trip on it. Flakes
+                # that care set their own policy.
                 NIXPKGS_ALLOW_UNFREE    = 1;
                 PYTHONBREAKPOINT        = "ipdb.set_trace";
                 COLORTERM               = "truecolor";

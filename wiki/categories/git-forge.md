@@ -1,6 +1,6 @@
 # `git-forge` — `homelab-config/homelab/git-forge/`
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-19_
 
 Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only; nested under
 the `homelab` umbrella since 2026-08-27 (name unaffected). As of 2026-09-07
@@ -182,9 +182,9 @@ Set in `forgejo.nix`, 2026-09-26:
   HTTPS.
 
 Two-factor authentication for `elly` is set in the UI (Settings →
-Security), not here; the admin bootstrap only ever resets the password
-(`admin user change-password` updates the password and the
-must-change flag, nothing else), so enrolled 2FA survives every switch.
+Security), not here; the admin bootstrap only ever touches the password
+(the API PUT sets the password and the must-change flag, nothing else),
+so enrolled 2FA survives every switch.
 
 ## Tailnet-only access, same mechanism as Grafana
 
@@ -249,17 +249,21 @@ creates the *first* account either — before this, that was a manual
 `forgejo admin user create` on cube.
 
 `forgejo-admin-bootstrap`, a oneshot ordered after `forgejo.service`, tries
-`admin user create --admin` for `elly`, falling back to `admin user
-change-password` if the user already exists. The password comes from a sops
-secret, `forgejo-admin-password`, declared **in this module** rather than
-centralized in `general-config/system/secrets/sops.nix` — so it only decrypts on cube,
-where `git-forge` is imported.
+`admin user create --admin` for `elly`, falling back to a loopback
+admin-API password re-assert if the user already exists — not the CLI's
+`admin user change-password`, whose only password channel is an argv flag
+world-readable in /proc (forgejo 15.0.9, checked 2026-10-19). The password
+comes from a sops secret, `forgejo-admin-password`, declared **in this
+module** rather than centralized in `general-config/system/secrets/sops.nix`
+— so it only decrypts on cube, where `git-forge` is imported.
 
-**This resets the password to the sops value on every activation** — a
-considered choice, unlike the create-once shape the signing-key units use:
-a password has nothing that breaks if it changes, and this repo's nix+sops
-config is the sole source of truth for it. The tradeoff: a hand change
-through the web UI is silently reverted on the next `just switch`.
+**This re-asserts the sops value on every activation** — a considered
+choice, unlike the create-once shape the signing-key units use: a password
+has nothing that breaks if it changes, and this repo's nix+sops config is
+the sole source of truth for it. Drift is therefore a bug, not a state to
+revert: since 2026-10-19 a hand change in the web UI makes the unit FAIL
+(401) instead of silently reverting — fix the secret, or run the CLI
+`change-password` by hand once to re-sync.
 
 **Status: switched and logged in, confirmed 2026-09-05.** The user has signed
 in as `elly` and used the account directly (screenshot-confirmed) — the

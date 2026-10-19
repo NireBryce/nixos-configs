@@ -1,7 +1,10 @@
 # Module file: named after this file; why it looks this way: wiki/module-files.md
 {
     homeManager = {
-    # Atuin remote encrypted history manager
+    # Atuin remote encrypted history manager. History syncs to the remote
+    # sync server by default (auto_sync, on every prompt) -- nothing here
+    # disables it, deliberately; the account and its rotation runbook are
+    # atuin-key-rotation.md, next to this file.
     programs.atuin = {
       enable = true;
       enableZshIntegration = true;

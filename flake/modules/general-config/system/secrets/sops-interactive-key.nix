@@ -117,12 +117,18 @@
         # login shell, never a `sudo`-constructed one) survives that
         # reset, so `sudo sops secrets.yaml` fell through to sops's
         # built-in default, vi/vim -- confirmed 2026-09-16, `sudo sops`
-        # opened vim despite both EDITOR settings existing. Explicitly
-        # keeping EDITOR/VISUAL in sudo's env_keep list makes it pass the
-        # invoking user's own EDITOR (micro) through instead of
-        # resetting it away.
+        # opened vim despite both EDITOR settings existing. Keeping
+        # EDITOR/VISUAL in sudo's env_keep list makes it pass the invoking
+        # user's own EDITOR (micro) through instead of resetting it away.
+        # Scoped to the sops binary (2026-10-19): it was a global
+        # `Defaults env_keep`, handing the invoking user's editor choice
+        # to EVERY sudo command; only `sudo sops` needs it, and that path
+        # is stable -- sops.nix puts sops in systemPackages. An absolute
+        # store-path invocation of sops would not match the alias and
+        # falls back to vi -- acceptable for a path nobody types.
         security.sudo.extraConfig = ''
-            Defaults env_keep += "EDITOR VISUAL"
+            Cmnd_Alias SOPS_CMDS = /run/current-system/sw/bin/sops *
+            Defaults!SOPS_CMDS env_keep += "EDITOR VISUAL"
         '';
 
         # mkIf on the VALUE, not a config-conditioned module shape --
