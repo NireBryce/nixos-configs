@@ -16,9 +16,9 @@ Never hand-edit. By hand it is
 
 | What | Files |
 |---|---|
-| total `.nix` files under `flake/modules/` | 237 |
-| pointer line (`# Module file: … wiki/module-files.md`) | 228 |
-| `# # description` as first body line | 35 |
+| total `.nix` files under `flake/modules/` | 236 |
+| pointer line (`# Module file: … wiki/module-files.md`) | 227 |
+| `# # description` as first body line | 34 |
 | `with pkgs;` package lists | 115 |
 
 <!-- /generated -->

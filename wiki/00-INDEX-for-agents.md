@@ -27,7 +27,6 @@ A page without one opens with `## Quick facts` — linked there.
 | add a host, or format its disk | [disk-formatting-for-agents.md](disk-formatting-for-agents.md), skill `new-host-config` |
 | check credential expiry | [maintenance-schedule-for-agents.md](maintenance-schedule-for-agents.md), skill `maintenance-schedule` |
 | run the fleet's periodic upkeep | [maintenance.md § Quick facts](maintenance.md#quick-facts) |
-| bump or retire a hand-pinned upstream package | skill `pinned-packages` |
 | work out which name/IP answers for what | [name-resolution.md § Quick facts](name-resolution.md#quick-facts) |
 | reach or debug a cube service | [homelab/reaching-services.md § Quick facts](homelab/reaching-services.md#quick-facts) |
 | cube lockout reset, Sunshine web UI, stream | [homelab/common-commands.md § Quick facts](homelab/common-commands.md#quick-facts) |

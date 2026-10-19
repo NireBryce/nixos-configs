@@ -102,7 +102,7 @@ flowchart LR
         n27("<b>elly/</b><br/><i>n h d · 4</i>")
     end
     subgraph g1["packages-config"]
-        n20("<b>development/</b><br/><i>n h · 17</i>")
+        n20("<b>development/</b><br/><i>n h · 16</i>")
         n21("<b>editors/</b><br/><i>n h · 3</i>")
         n22("<b>gui-other/</b><br/><i>h · 20</i>")
         n23("<b>linux-utils/</b><br/><i>h · 17</i>")
