@@ -19,18 +19,12 @@
             # UDP
             allowedUDPPorts = [
                 5353 # mdns
-                24470 # planetside2
-                25410 # planetside2
                 # tailscale's own port is opened by services.tailscale.openFirewall
                 # in tailscale.nix, not listed here.
             ];
-            allowedUDPPortRanges = [
-                {
-                    # planetside2
-                    from = 20040;
-                    to = 20199;
-                } 
-            ];
+            # Planetside 2's ports (24470, 25410, 20040-20199) moved to
+            # planetside2-ports-durandal.nix on 2026-10-19: this category
+            # reaches every host, and only durandal plays.
 
             trustedInterfaces = [
                 "tailscale0" # always allow traffic from your Tailscale network

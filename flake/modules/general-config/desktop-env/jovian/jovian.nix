@@ -46,8 +46,15 @@
         jovian = {
             steam = {
                 enable = true;
-                autoStart = true;
-                desktopSession = "plasma";
+                # Not autoStart: that SDDM-autoLogins straight into the
+                # gamescope session, which on a handheld is a pocketable
+                # logged-in session whenever it sleeps in a bag. With it off
+                # (the Jovian default), kde-desktop.nix's SDDM shows a real
+                # greeter offering Gaming Mode (gamescope-wayland) and
+                # Plasma; desktopSession has no effect in this mode and is
+                # omitted. Wake-from-sleep protection is the screen lock's
+                # job either way, not this option's.
+                autoStart = false;
                 user = "elly";
             };
             hardware.has.amd.gpu = true;

@@ -104,7 +104,7 @@ flowchart LR
     subgraph g1["packages-config"]
         n20("<b>development/</b><br/><i>n h · 16</i>")
         n21("<b>editors/</b><br/><i>n h · 3</i>")
-        n22("<b>gui-other/</b><br/><i>h · 20</i>")
+        n22("<b>gui-other/</b><br/><i>h · 19</i>")
         n23("<b>linux-utils/</b><br/><i>h · 17</i>")
         n24("<b>nix-utils/</b><br/><i>n h · 4</i>")
         n25("<b>shell-apps/</b><br/><i>n h · 40</i>")
@@ -112,7 +112,7 @@ flowchart LR
     end
     subgraph g2["host-config"]
         n16("<b>cube/</b><br/><i>n · 9</i>")
-        n17("<b>durandal/</b><br/><i>n · 6</i>")
+        n17("<b>durandal/</b><br/><i>n · 7</i>")
         n18("<b>lysithea/</b><br/><i>d · 2</i>")
         n19("<b>tenacity/</b><br/><i>n h · 11</i>")
     end
