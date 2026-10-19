@@ -1,6 +1,6 @@
 # Fleet maintenance
 
-_Last modified: 2026-10-06_
+_Last modified: 2026-10-18_
 
 The fleet's recurring upkeep in one place: the weekly flake.lock PR,
 deploying to a host and the verification habit around it, and store
@@ -29,7 +29,7 @@ Folded in from the retired `maintenance-for-agents.md` sibling,
 |---|---|
 | weekly lock PR | `.github/workflows/update-flake-lock.yml`, cron `0 9 * * 1` + `workflow_dispatch` → branch `update_flake_lock_action` → PR `chore: update flake.lock` into `experimental`; review the lock diff, merge via skill `ship` |
 | lock PR broken | watch issue `update-flake-lock: weekly lock PR needs attention`; branch ahead with no PR = token (`FLAKE_LOCK_TOKEN`) failure |
-| lock by hand | `just update` (then check), or `just update-boot` (then stage for reboot); hand-pinned packages: skill `pinned-packages` |
+| lock by hand | `just update` (then check), or `just update-boot` (then stage for reboot) |
 | deploy | `just build` / `boot` / `switch` **on the host itself**; `just boot` for initrd/bootloader/impermanence, and for any glibc version change (`just switch` warns) |
 | around every deploy | `just baseline` (before, sudo) → `just fingerprint` / `just diff <ref>` → `just diff-deployed` → `just hm-collisions` (first switch) → `just root-drift` (durandal, tenacity) → `just home-drift` |
 | user-profile GC | automatic: `nh-clean.timer` (user unit), Mondays 00:00 |
@@ -84,13 +84,6 @@ branch), or open the PR by hand from `update_flake_lock_action` to
 By hand instead: `just update` — `nix flake update` for every input,
 then `just check` — or `just update-boot`, which runs `just boot` instead
 so nothing activates until a reboot.
-
-A lock update never touches the few packages fetched straight from
-upstream with a version and hash written into their module. Those go
-stale silently, so `just pinned-packages` checks them against upstream and
-asks whether nixpkgs or llm-agents has started packaging them; skill
-[`pinned-packages`](../.agents/skills/pinned-packages/SKILL.md) is the
-procedure.
 
 ## Deploying, and the verification habit
 
