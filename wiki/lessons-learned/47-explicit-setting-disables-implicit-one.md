@@ -1,6 +1,6 @@
 # 47. An explicit setting can switch off an implicit one — auto-detection only fires where nothing is declared
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-20_
 
 §47 of [lessons-learned.md](../lessons-learned.md) — that page keeps the one-line version of every lesson; this is §47's full account.
 
@@ -43,7 +43,7 @@ Three steps, none visible from the diff:
 ## Why nothing caught it
 
 `nix eval`, the build, `just modules` and even `caddy adapt` all passed. They
-had to: **the generated Caddyfile was valid.** It simply meant something
+had to: **the generated Caddyfile was valid.** It meant something
 other than what was intended. This is §37's shape ("some bugs need real
 system state to exist at all") arriving through a new door — not a missing
 check, but a check that cannot distinguish *valid* from *correct*.

@@ -1,6 +1,6 @@
 # blesh (bash line editor)
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-20_
 _Sibling reviewed: 2026-09-14 -- blesh-for-agents.md only renamed `system/` path shorthand to `config-system/`; no facts moved_
 
 `ble.sh` is wired up by hand for bash — there's no Home Manager option for
@@ -145,7 +145,7 @@ case. When it succeeds mid-completer, the hook redirects whatever `read`
 call was in flight through a fallback path
 (`ble/bash/read "$@" < /dev/null; return 148`) — and when the read call
 caught by that fallback is carapace's own read line (see
-[carapace.md](carapace.md) for what it actually is — its visible `IFS=''`
+[carapace.md](carapace.md) for what it is — its visible `IFS=''`
 is an invisible SOH byte, not a literally empty string, confirmed with
 `od -c` after that misreading briefly derailed this diagnosis too), the
 forwarded `"$@"` comes back split character-by-character instead of into

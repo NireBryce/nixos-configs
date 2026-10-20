@@ -2,6 +2,8 @@
 
 _Last modified: 2026-10-06_
 
+_Sibling reviewed: 2026-10-20 -- source change was filler-word removal only; no facts changed_
+
 Condensed from [forgejo.md](forgejo.md). Forgejo on `nire-cube`, single-user,
 sqlite3, tailnet-only. Module: [../categories/git-forge.md](../categories/git-forge.md).
 

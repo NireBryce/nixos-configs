@@ -1,6 +1,6 @@
 # cod completion descriptions
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-20_
 
 How [cod](carapace.md)'s completions get their descriptions in the ble.sh
 menu — the one part cod cannot do for itself, bridged with a curated table
@@ -93,7 +93,7 @@ The semi-automation, all through `just cod-desc`:
 2. **Draft rows**: `just cod-desc draft <cmd>...` runs `<cmd> --help`
    itself, parses flag and subcommand descriptions (kingpin and clap shapes
    are recognised; see `test_cod_desc.py` for what each looks like), and
-   prints TSV lines for candidates cod actually serves, minus rows already
+   prints TSV lines for candidates cod serves, minus rows already
    in the table. Gaps print as `TODO` placeholders. **Drafts are a starting
    point** — review every line before adding it.
 3. **Curate and commit** the rows into `cod-desc.tsv`.

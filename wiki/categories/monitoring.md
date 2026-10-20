@@ -1,6 +1,6 @@
 # `monitoring` — `homelab-config/homelab/monitoring/`
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-20_
 
 Prometheus + Grafana, scraping this host's own resource metrics. Added
 2026-08-23, cube-only so far; nested under the `homelab` umbrella since
@@ -218,7 +218,7 @@ design reason rules them out, it just hasn't been asked for there yet.
 
 - [homelab/grafana.md](../homelab/grafana.md) — the usage-tier page, written
   2026-09-13: signing in (and the two passwords that don't reconcile), what
-  happens to a dashboard edited in the UI, and what a restore actually gets
+  happens to a dashboard edited in the UI, and what a restore gets
   you. This page is the configuration half.
 - [reverse-proxy](reverse-proxy.md) — Caddy, how Grafana is reached as of
   2026-08-24, and where its TLS certificate comes from.

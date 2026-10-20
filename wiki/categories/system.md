@@ -1,6 +1,6 @@
 # `system` — `general-config/system/`
 
-_Last modified: 2026-10-15_
+_Last modified: 2026-10-20_
 
 The largest category by far — across 15 subdirectories, no per-file count
 kept here on purpose (see categories/00-INDEX.md's Index section for why) —
@@ -56,7 +56,7 @@ into them, and each has its own section below:
 specifically so the `system` category picks it up and every host that
 imports `system` gets it automatically, rather than each host wiring HM in
 by hand. `enable-home-manager-darwin.nix` is the nix-darwin-side equivalent
-for `lysithea` — it's what actually brings packages and dotfiles to a darwin
+for `lysithea` — it's what brings packages and dotfiles to a darwin
 host, not anything under [macos](macos.md).
 
 `home-manager/drop-unsupported-packages.nix` is the platform-support
@@ -112,7 +112,7 @@ env_keep += "EDITOR VISUAL"'';`, which makes sudo pass the invoking user's
 own EDITOR through instead of resetting it away.
 
 See [../impermanence-and-secrets.md](../impermanence-and-secrets.md) for
-which hosts are actually enrolled in `.sops.yaml` — that's tracked separately
+which hosts are enrolled in `.sops.yaml` — that's tracked separately
 from which hosts import these modules.
 
 `secrets/low-side/` (2026-09-17) is not a fourth module and declares no
@@ -226,8 +226,8 @@ repository only).
 All three NixOS hosts import `system` whole. `lysithea` imports it too — for
 `enable-home-manager-darwin.nix`, per that file's own comment "this is what
 brings packages and dotfiles in" — but only the `nixos`/`darwin`-class
-subset that actually declares a `darwin` class reaches it;
-`networking`, `kdeconnect`, and most of the rest of this category simply
+subset that declares a `darwin` class reaches it;
+`networking`, `kdeconnect`, and most of the rest of this category
 don't declare `darwin`-class modules, so importing `system` on lysithea
 doesn't drag any of that in. The `homeManager`-class slice
 (`font`, `drop-unsupported-packages`) reaches every host, lysithea included,

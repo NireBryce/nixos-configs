@@ -1,6 +1,6 @@
 # `reverse-proxy` — history
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-20_
 
 The verification record for [reverse-proxy](reverse-proxy.md)'s second
 switch, split out 2026-09-03, plus the path-prefix routing design (retired
@@ -74,11 +74,11 @@ vs `handle_path` to disagree about. Kept for the mechanism, and in case
 either move ever needs reverting — [the routes themselves](#the-retired-routes-as-they-were)
 are below, moved out of `caddy.nix`'s header 2026-09-13.
 
-This is the one thing that was actually gotten wrong, and it cost a switch.
+This is the one thing that was wrong, and it cost a switch.
 Both routes were given `handle`, which passes the matched path through
 untouched. `/grafana/` returned 200; `/git/` returned **404**.
 
-- **Grafana**, with `serve_from_sub_path`, genuinely serves *under*
+- **Grafana**, with `serve_from_sub_path`, serves *under*
   `/grafana`, so the prefix must be **left on** → `handle`.
 - **Forgejo** has no equivalent option. It always serves at `/` — confirmed
   on the host rather than inferred: `curl 127.0.0.1:3001/` is 200,

@@ -1,6 +1,6 @@
 # flake-parts
 
-_Last modified: 2026-10-16_
+_Last modified: 2026-10-20_
 
 The one fact worth knowing before reading `flake.nix` or any module for the
 first time: this repo depends on exactly one flake-parts option, and almost
@@ -20,7 +20,7 @@ architecture is the mechanism built on top of this, not this itself.
   single file declare a NixOS module and a Home Manager module as sibling
   attributes instead of two files tied together only by a shared filename
   (`nixd.nix`, since moved to the dev shell, is the worked example). Also inventories, by grep rather than
-  assumption, which other flake-parts machinery this repo actually calls
+  assumption, which other flake-parts machinery this repo calls
   (`perSystem` for `nix flake check` and the one dev shell, `withSystem` once, `touchup` for
   one line) and which it never touches (`moduleWithSystem`, `debug`,
   overlay/`legacyPackages` composition, any bundled

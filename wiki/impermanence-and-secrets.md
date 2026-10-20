@@ -1,6 +1,6 @@
 # Impermanence, initrd & secrets
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-20_
 
 ## Contents
 
@@ -33,7 +33,7 @@ that import it.
   [`../flake/doc/disko-impermanence-layout.md`](<../flake/doc/disko-impermanence-layout.md>),
   covered in more depth on [hosts.md](hosts.md).
 - **New-host runbook** — [disk-formatting.md](disk-formatting.md): the
-  ordered steps and safety warnings for actually getting a new host onto
+  ordered steps and safety warnings for getting a new host onto
   this layout, pulled together from the doc above, `WARN-impermanence.nix`,
   and the `new-host-config` skill.
 

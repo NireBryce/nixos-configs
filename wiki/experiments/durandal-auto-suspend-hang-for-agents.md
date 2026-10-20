@@ -2,6 +2,8 @@
 
 _Last modified: 2026-10-16_
 
+_Sibling reviewed: 2026-10-20 -- source change was filler-word removal only; no facts changed_
+
 Source: [durandal-auto-suspend-hang.md](durandal-auto-suspend-hang.md).
 **Status: mechanism partly identified, cause
 not. Nothing under test.** `amdgpu.runpm=0` tried 2026-09-14, failed.

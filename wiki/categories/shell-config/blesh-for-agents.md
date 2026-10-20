@@ -2,6 +2,8 @@
 
 _Last modified: 2026-09-29_
 
+_Sibling reviewed: 2026-10-20 -- source change was filler-word removal only; no facts changed_
+
 Source: [blesh.md](blesh.md).
 
 `ble.sh` is wired by hand — **there is no `programs.bash.blesh.enable` in

@@ -8,7 +8,7 @@ break later" property** — as opposed to `secrets.yaml`'s full inventory,
 which is every secret regardless of whether it ever needs attention. Tended
 by skill [`maintenance-schedule`](../.agents/skills/maintenance-schedule/SKILL.md).
 
-Each item states what it actually is, what's known about its expiry (not
+Each item states what it is, what's known about its expiry (not
 guessed — "unverified" is written down as such rather than invented), and
 where the real rotation procedure lives if there is one. This page is the
 index that says *something is due*; `backup-runbook.md` and similar own the
@@ -68,7 +68,7 @@ here, don't wrap this file in ciphertext to protect one row.
 - **What**: added 2026-09-07 (commit `63dcfe1b`) — a Tailscale API token,
   scoped to the tailnet's policy file, read narrowly by
   [`flake/scripts/tailscale-acl.py`](../flake/scripts/tailscale-acl.py) via
-  `sops -d --extract`. Unlike `tailscale_key` above, this one is actually
+  `sops -d --extract`. Unlike `tailscale_key` above, this one is
   wired up and in active use (confirmed end-to-end against the real
   tailnet per that commit's message).
 - **Expiry**: **unverified** — depends on how the token was minted (a
@@ -152,7 +152,7 @@ here, don't wrap this file in ciphertext to protect one row.
   the same way an expired one would (backup runs start failing) whenever
   `ts-hive` is re-imaged or its host key otherwise changes. Grouped here
   because the failure mode and the fix are maintenance-shaped even though
-  nothing is actually expiring.
+  nothing is expiring.
 - **Procedure**: `backup-runbook.md`'s "Host key verification failed" entry
   — update the pin, don't delete it blind.
 - **Last checked**: not tracked independently; only noticed when a backup

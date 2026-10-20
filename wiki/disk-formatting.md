@@ -1,6 +1,6 @@
 # New host disk formatting (LUKS + btrfs + impermanence)
 
-_Last modified: 2026-09-28_
+_Last modified: 2026-10-20_
 
 The runbook-shaped piece of adding a new host: **the actual disk step**, not
 the Nix config around it. Skill `new-host-config` covers the whole
@@ -48,7 +48,7 @@ partition, btrfs inside it, subvolumes for `root`/`home`/`nix`/`persist`/`log`,
 and an unmounted `root-blank` subvolume. **Nothing in this repo currently
 calls it** — every live host either has hand-written `hardware-*.nix` from a
 real install, or (cube) never adopted this layout at all. The disko doc's own
-inline example is the only reference until a new host actually uses it.
+inline example is the only reference until a new host uses it.
 
 ## Decide before touching a disk
 
@@ -65,7 +65,7 @@ Per the disko doc and the `new-host-config` skill, in order:
 4. **LUKS unlock method** — the generator sets none of `keyFile` /
    `passwordFile` / `enrollFido2`, so disko's own default applies:
    interactive passphrase, at partition time and at every later boot. That's
-   what durandal and tenacity actually do. Automating it (key file on
+   what durandal and tenacity do. Automating it (key file on
    removable media, TPM/FIDO2 enrollment) is a real per-host decision the
    template deliberately doesn't make for you.
 
@@ -160,7 +160,7 @@ The subvolid must change on every boot — on tenacity it moved 607 → 622 →
 demonstrably running, not just present). `CLAUDE.md`'s State table records
 each host's confirmation this same way — "confirmed by subvolid in the
 journal, not by the machine coming up" — update it for the new host once
-this has actually been checked, not once the machine merely boots.
+this has been checked, not once the machine merely boots.
 
 ## Traps
 

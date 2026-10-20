@@ -1,6 +1,6 @@
 # `containers` — `homelab-config/homelab/containers/`
 
-_Last modified: 2026-10-16_
+_Last modified: 2026-10-20_
 
 Podman and distrobox — OCI containers — and *only* that. See
 [virtualization](virtualization.md) for why libvirt/QEMU is a different
@@ -30,7 +30,7 @@ One file, `podman/podman.nix`, `nixos`-class:
   into distrobox containers. Both paths are needed, not one:
   `/etc/profiles/per-user/elly` is itself a symlink to
   `/etc/static/profiles/per-user/elly` (nixpkgs'
-  `config/users-groups.nix`), which is the one that actually points into
+  `config/users-groups.nix`), which is the one that points into
   `/nix/store` — mounting only the first gives a container a dangling link.
 - A dedicated `container` system user (`isNormalUser`, `linger = true`,
   pinned `subUidRanges`/`subGidRanges` at `165536:65536`) alongside elly's
@@ -51,7 +51,7 @@ it; that changed 2026-08-27 when `durandal` became the first (see
 
 ## The collision this move hit for real
 
-The only category/module collision that actually shipped far enough for
+The only category/module collision that shipped far enough for
 `just modules` to catch: the freshly moved module was still named
 `containers.nix`, declaring `flake.modules.nixos.containers` — exactly the
 name the new category had (today the same file would stop evaluation).
@@ -67,7 +67,7 @@ own header has the two earlier names it carried
 
 History: every NixOS host then on the tree imported it 2026-08-22→08-27.
 Not imported by durandal since 2026-08-27: nothing in this repo's history
-records it actually running a container or distrobox, unlike cube's
+records it running a container or distrobox, unlike cube's
 confirmed homelab usage — parity, not need (see
 `durandal-configuration.nix`'s comment at the removal point). `lego` was
 removed the same day ([../history.md](../history.md)). Not imported by

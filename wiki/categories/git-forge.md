@@ -1,6 +1,6 @@
 # `git-forge` — `homelab-config/homelab/git-forge/`
 
-_Last modified: 2026-10-19_
+_Last modified: 2026-10-20_
 
 Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only; nested under
 the `homelab` umbrella since 2026-08-27 (name unaffected). As of 2026-09-07
@@ -271,7 +271,7 @@ errors still fail it. Fresh installs set the password via `create`, unaffected.
 
 **Status: switched and logged in, confirmed 2026-09-05.** The user has signed
 in as `elly` and used the account directly (screenshot-confirmed) — the
-account and password both work as declared. Whether it's genuinely
+account and password both work as declared. Whether it's
 *admin* (the `--admin` flag) is **confirmed: it took** — checked from
 inside the UI and reported by the user 2026-09-12. That was the only way to
 check it: Forgejo's unauthenticated `/api/v1/users/search` always reports
@@ -300,7 +300,7 @@ gives for itself.
 ## See also
 
 - [homelab/forgejo.md](../homelab/forgejo.md) — the usage-tier page: how to
-  actually use the forge once it's up, as opposed to how it's configured
+  use the forge once it's up, as opposed to how it's configured
   here.
 - [reverse-proxy](reverse-proxy.md) — Caddy, which is how this is reached
   as of 2026-08-24, and where the TLS certificate comes from.

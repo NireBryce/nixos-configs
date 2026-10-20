@@ -2,7 +2,7 @@
 
 _Last modified: 2026-10-01_
 
-_Sibling reviewed: 2026-10-01 -- source's See-also links repointed from open-threads.md to issues #87/#130 (open-threads became a pointer page); this page links neither_
+_Sibling reviewed: 2026-10-20 -- source's 2026-10-20 edit was filler-word removal only; no facts changed. Earlier: See-also links repointed from open-threads.md to issues #87/#130; this page links neither_
 
 Condensed from [backup.md](backup.md). Facts only here.
 

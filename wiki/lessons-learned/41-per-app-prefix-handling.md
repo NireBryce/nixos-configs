@@ -1,6 +1,6 @@
 # 41. A proxy config can be valid, buildable, *and* wrong per-app — two apps behind one prefix wanted opposite prefix handling
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-20_
 
 §41 of [lessons-learned.md](../lessons-learned.md) — that page keeps the one-line version of every lesson; this is §41's full account.
 
@@ -30,7 +30,7 @@ wrong choice for the app behind it.
 The two apps want opposite things, and nothing in the config can tell you
 which:
 
-- **Grafana** has `serve_from_sub_path`, so it genuinely serves *under*
+- **Grafana** has `serve_from_sub_path`, so it serves *under*
   `/grafana` and needs the prefix left on — `handle`.
 - **Forgejo** has no equivalent. It always serves at `/`, and expects the
   proxy to strip — `handle_path`. Its `ROOT_URL` carrying `/git/` only

@@ -35,7 +35,7 @@ of it.
 entry point and the one thing worth reading cold before touching this repo.
 This wiki exists for the "where do I even look" problem once you already
 know roughly what you're after — a human skimming for the right doc, or an
-agent trying to find the one file that actually answers a question instead
+agent trying to find the one file that answers a question instead
 of re-deriving it.
 
 **Long pages come in one of two shapes.** Where the explanation is long
@@ -97,11 +97,11 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   here if you're new; everything else on this page assumes you've read it
   or don't need to.
 - [Hosts & current state](hosts.md) — the four hosts (three NixOS + one
-  darwin), what's actually been switched/booted vs. only evaluated, and
+  darwin), what's been switched/booted vs. only evaluated, and
   where that status is tracked.
 - [New host disk formatting](disk-formatting.md) — the LUKS + btrfs +
   impermanence disk layout runbook: what to decide before touching a real
-  disk, what depends on disko actually having run, and how to confirm the
+  disk, what depends on disko having run, and how to confirm the
   `/root` rollback is really working rather than just booting.
 - [flake-parts](flake-parts.md) — why this repo runs flake-parts at all:
   its `flake.modules.<class>.<name>` option lets a single file declare a
@@ -114,7 +114,7 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   module looks the way it does -- names from filenames, categories from folders.
 - [Impermanence, initrd & secrets](impermanence-and-secrets.md) — the
   `/root`-wipe-on-boot mechanism, which hosts opt in, sops-nix.
-- [Traps & skills](traps-and-skills.md) — the mistakes that have actually
+- [Traps & skills](traps-and-skills.md) — the mistakes that have
   happened here, and the skills that hold the long version of each.
 - [History & lessons learned](history.md) — the den → flake-parts port, the
   first hardware boots, and what became of the sibling branch. The full log
@@ -166,7 +166,7 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
 ### Homelab (usage)
 
 - [Homelab services](homelab/00-INDEX.md) — how to *use* what the fleet
-  actually runs, as opposed to how it's configured:
+  runs, as opposed to how it's configured:
   [reaching cube's services](homelab/reaching-services.md) (the URL map
   since everything moved behind one HTTPS hostname on 2026-08-24, and what
   to check when something doesn't answer),

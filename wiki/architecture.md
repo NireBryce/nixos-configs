@@ -1,10 +1,10 @@
 # Architecture & module system
 
-_Last modified: 2026-10-16_
+_Last modified: 2026-10-20_
 
 For *why* this repo runs flake-parts at all, see [flake-parts.md](flake-parts.md)
 first — this page is the mechanism built on top of that, not the reason for
-it. For what's actually inside each individual category — members, which
+it. For what's inside each individual category — members, which
 hosts import it, category-specific traps — see the
 [category reference](categories/00-INDEX.md) instead of this page; this page
 is the mechanism, not the inventory.

@@ -1,6 +1,6 @@
 # Overview
 
-_Last modified: 2026-09-02_
+_Last modified: 2026-10-20_
 
 The orientation page — read this first if you don't yet know what you're
 looking for. [00-INDEX.md](00-INDEX.md) is the index once you do; this page is
@@ -27,7 +27,7 @@ NixOS (and one nix-darwin) config for a small personal fleet.
 Not a generalist template, and not meant to be installed as-is: two hosts
 wipe `/root` on every boot — see [../README.md](../README.md)'s own
 warning. One repo, one flake, every host's config comes out of it.
-[hosts.md](hosts.md) has the current roster and what's actually been
+[hosts.md](hosts.md) has the current roster and what's been
 switched versus only evaluated.
 
 ## The shape of it
@@ -48,7 +48,7 @@ switched versus only evaluated.
   forge, monitoring, a shortlink service, a landing page, backups — behind
   one reverse proxy, reachable only over Tailscale.
   [categories/homelab.md](categories/homelab.md) is the umbrella category;
-  [homelab/00-INDEX.md](homelab/00-INDEX.md) is how to actually use what's
+  [homelab/00-INDEX.md](homelab/00-INDEX.md) is how to use what's
   running, as opposed to how it's built.
 
 ## What's distinctive here
@@ -63,7 +63,7 @@ switched versus only evaluated.
   in the repo is ciphertext, not a leak to fix. Same page as above.
 - **Two tiers, not one, for anything self-hosted.** A `categories/` page is
   *configuration* — what's in it, how it's wired, what broke building it. A
-  `homelab/` page is *usage* — what to actually do with the running
+  `homelab/` page is *usage* — what to do with the running
   service. They go stale on different triggers (a config change vs. the
   service itself changing), which is why they're kept apart rather than
   combined. [homelab/00-INDEX.md](homelab/00-INDEX.md) has the full reasoning.

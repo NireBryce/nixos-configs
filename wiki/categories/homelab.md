@@ -1,6 +1,6 @@
 # `homelab` — `homelab-config/homelab/`
 
-_Last modified: 2026-10-16_
+_Last modified: 2026-10-20_
 
 ## Contents
 
@@ -20,7 +20,7 @@ existing, previously-standalone categories under one directory:
 [virtualization](virtualization.md). Each is still a category of its own,
 addressable by its own name (each holds a subfolder of modules) — this page
 doesn't repeat their content, see each one's own article for what it
-actually contains and why it's shaped the way it is.
+contains and why it's shaped the way it is.
 
 An eighth, [backup](backup.md), joined 2026-08-28 the same way — restic,
 backing up the state the other seven produce to the `ts-hive` NAS already on the

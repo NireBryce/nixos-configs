@@ -1,6 +1,6 @@
 # `macos` — `general-config/macos/`
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-20_
 
 `darwin`-class only, throughout — the one category in this repo that is
 entirely platform-specific rather than shared-with-a-guard. See
@@ -77,7 +77,7 @@ the tailnet admin console; not a Nix-config issue either.
 
 Nothing in `macos/` guards against being imported on Linux, because nothing
 Linux-specific ever tries to import it — `lysithea-configuration.nix`
-simply doesn't list `hardware`, `desktop-env`, or `peripherals` at all,
+doesn't list `hardware`, `desktop-env`, or `peripherals` at all,
 since none of those categories declare a `darwin` class and importing them
 would resolve to empty aggregates. Left out rather than imported-for-nothing.
 This is the mirror image of `drop-unsupported-packages.nix`'s job on the
@@ -93,7 +93,7 @@ just never asked for in the first place.
 
 - [nix](nix.md) — `basic-nix-settings.nix` also has a `darwin`-class block,
   the other place platform-specific nix settings live.
-- [shell-config](shell-config/00-INDEX.md) — where zsh/bash themselves are actually
+- [shell-config](shell-config/00-INDEX.md) — where zsh/bash themselves are
   configured.
 - The `package-platform-support` skill
   (`.agents/skills/package-platform-support/SKILL.md`) — the

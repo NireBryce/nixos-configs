@@ -1,6 +1,6 @@
 # Wiki style guide
 
-_Last modified: 2026-10-16_
+_Last modified: 2026-10-20_
 
 How this wiki itself is organized and written — as opposed to
 [conventions.md](conventions.md), which is the *repo's* style guide (Nix
@@ -137,7 +137,7 @@ separate tier for the *usage* side:
   [homelab/backup-runbook.md](homelab/backup-runbook.md), so a usage-tier
   page's history can live on its category's history page too rather than
   needing its own. **Don't reach for this by default** — most of what
-  reads as "history" in a category page is actually mechanism explained
+  reads as "history" in a category page is mechanism explained
   through its discovery, and that stays put; see "index over restatement"
   below for why narrating *how* something was verified is not the same as
   narrating *that* it used to be broken. The test: does understanding the
@@ -252,7 +252,7 @@ separate tier for the *usage* side:
   header comment, `CLAUDE.md`, a skill, a
   `_loose-ends/bugs-pending-submission/` writeup — rather than copying its
   content into the wiki page. When in doubt, the wiki page should be short and the linked file should be where
-  the reader actually ends up.
+  the reader ends up.
 - **`wiki/homelab/` pages are the other exception**, on the terms in the
   hierarchy section above: synthesized content is allowed because the
   source is the live service, but the page owes the reader an explicit
@@ -284,7 +284,7 @@ A page over **1,000 words** serves an agent one of two ways: a
 `<page>-for-agents.md` sibling, or a `## Quick facts` section as its first
 section after Contents.
 
-**A sibling** is for a page whose human half is genuinely long narrative —
+**A sibling** is for a page whose human half is long narrative —
 explanation for a human reading cold, history, reasoning — where the dense
 version is a fraction of it. The sibling is the same ground at maximum
 information density, for an agent that loaded it to get one thing done and
@@ -333,7 +333,7 @@ that reason.
 [00-INDEX.md](00-INDEX.md)'s "why a link layer and not a rewrite" section says
 in as many words that this repo has been bitten repeatedly by one fact
 living in two places and drifting. That objection is correct. The split is
-worth it anyway — the two readers genuinely want different documents — but
+worth it anyway — the two readers want different documents — but
 only because it is the one duplication in this wiki with a **mechanical**
 guard under it rather than a convention someone has to remember:
 

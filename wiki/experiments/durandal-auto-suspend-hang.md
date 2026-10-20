@@ -1,6 +1,6 @@
 # Auto-suspend hang on nire-durandal
 
-_Last modified: 2026-10-16_
+_Last modified: 2026-10-20_
 
 `nire-durandal` suspends into S3 and then cannot be woken — keyboard, power
 button, nothing — until power is physically removed at the PSU. **Status:
@@ -47,7 +47,7 @@ Measured 2026-09-14. Across one boot's cycles, `CLOCK_BOOTTIME` minus
 a 17 s remainder across three cycles, which is ordinary device suspend/resume
 overhead.
 
-So during a hang **the CPU is not running.** The machine is genuinely in S3 and
+So during a hang **the CPU is not running.** The machine is in S3 and
 will not come out. It is not a kernel wedge partway through resume, which is
 what the identical resume logs had suggested.
 
@@ -271,7 +271,7 @@ buffer and only reach disk *if the machine resumes*. When it doesn't, they are
 lost — not unprinted, unflushed. The kernel may well be saying what is wrong,
 into a buffer nobody gets to read.
 
-**But the gap may genuinely be empty.** `CLOCK_BOOTTIME` minus
+**But the gap may be empty.** `CLOCK_BOOTTIME` minus
 `CLOCK_MONOTONIC` showed the CPU is not executing during a hang, and nothing
 can record what nothing is printing. A serial console only helps in the case
 where the kernel *is* running and printing into a torn-down console; on the
@@ -324,7 +324,7 @@ test work even on a generation with no probe.
 
 **Not being chased further (decided 2026-09-16).** Booting gen 221 would test
 this directly, but the hardware and config hypotheses have each failed in turn
-and the instrumentation is what has actually produced results. Effort stays on
+and the instrumentation is what has produced results. Effort stays on
 logging. If the boundary ever needs revisiting, the pre-upgrade tree is
 recoverable from git rather than from the boot menu — gen 221 was built
 2026-05-30, putting it at or just before `887cdc6f` ("changed a lot of

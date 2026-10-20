@@ -1,11 +1,11 @@
 # Category reference
 
-_Last modified: 2026-10-16_
+_Last modified: 2026-10-20_
 
 One article per real category — a folder under `flake/modules/` whose
 subfolders hold modules ([../module-files.md](../module-files.md)). See
 [../architecture.md](../architecture.md) for the mechanism itself; these
-pages are the "what's actually in it, and why is it shaped this way" detail
+pages are the "what's in it, and why is it shaped this way" detail
 for each one, at the same what/why/traps depth as the rest of this wiki.
 
 Scoped to the `general-config/*` system-ish categories plus `users-config/elly`,

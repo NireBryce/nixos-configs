@@ -2,6 +2,8 @@
 
 _Last modified: 2026-10-16_
 
+_Sibling reviewed: 2026-10-20 -- source change was filler-word removal only; no facts changed_
+
 Condensed from [styleguide.md](styleguide.md). Rules only here. The *repo's* style guide is
 [conventions.md](conventions.md); module formatting is
 [module-style-guide.md](module-style-guide.md).

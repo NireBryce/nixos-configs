@@ -1,9 +1,9 @@
 # Name resolution & reverse DNS
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-20_
 
 Which name answers for what in this fleet — forward and reverse — and
-where those names actually show up when you're reading logs, status
+where those names show up when you're reading logs, status
 output, or a stalled ssh. Every behavioral claim below was probed live
 on `nire-tenacity` against `100.100.100.100` and through the resolved
 stub, 2026-09-14, per issue #294's ask; the *config* behind each
