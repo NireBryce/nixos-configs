@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Plasma 6, and the parts of it that every host running a desktop wants.
 #
 # Split out of kde.nix -- now kde-desktop.nix -- so the handheld can have the

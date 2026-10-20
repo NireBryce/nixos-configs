@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Non-impermanence hosts (nire-cube today) have no help anywhere in this
 # repo setting a login password. WARN-impermanence.nix documents the whole
 # /persist dance for hosts that wipe /root on boot; a host that keeps a plain

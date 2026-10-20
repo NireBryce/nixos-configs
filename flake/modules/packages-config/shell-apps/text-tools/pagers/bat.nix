@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 {
     homeManager = { pkgs, ... }: { 
         # `bat` - syntax highlighted `cat` and `less` replacement https://github.com/sharkdp/bat

@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # The handheld half of the desktop story: Jovian, Steam, and the TDP stack.
 #
 # Generic to handhelds -- machines with built-in controllers that occasionally

@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # The setuid sudo binary is executable by `wheel` only (mode 4510,
 # root:wheel), so a service account or any other non-wheel user -- cube's
 # `container`, the DynamicUser services -- can't reach sudo's own parser at

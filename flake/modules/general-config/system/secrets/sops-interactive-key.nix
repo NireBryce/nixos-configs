@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 {
     # `sops.age.sshKeyPaths` (sops.nix) is enough for NixOS's OWN
     # activation-time secret decryption -- that already works, proven by

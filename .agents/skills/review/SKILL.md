@@ -44,7 +44,7 @@ A diff read is never enough (bugs serialize). In order:
 - **Filed in the right directory?** Category = directory; a module outside
   every category tree is collected by nothing, no error (`new-flake-module`).
   A first subfolder of modules can turn a plain folder into a category.
-- **Module file shape?** First line the pointer to `wiki/module-files.md`;
+- **Module file shape?** First line the dirs-as-categories comment;
   keys only classes/`includes`/`enables`/`folderIsCategory`; header only the
   `lib`/`inputs` it uses.
 - **Two files writing the "same" file?** `home.file.<n>.text` and

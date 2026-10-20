@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # KDE Connect and Steam's LAN ports stay closed on tenacity, which joins
 # whatever Wi-Fi it's near. Same idea as ssh-tailnet-only-tenacity.nix next
 # door; added 2026-09-26.

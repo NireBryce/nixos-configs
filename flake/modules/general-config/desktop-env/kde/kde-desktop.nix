@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Durandal's session: the workstation half of what used to be kde.nix.
 #
 # Was `kde.nix`, so the module this declares was `flake.modules.nixos.kde` until

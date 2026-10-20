@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # What nire-tenacity is made of. Handheld, Jovian/SteamOS.
 #
 # Sits directly under host-config/ rather than in a category directory, because

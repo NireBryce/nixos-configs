@@ -1,6 +1,6 @@
 # Wiki
 
-_Last modified: 2026-10-16_
+_Last modified: 2026-10-20_
 
 The `flake/` folder is meant to be browsed by its file tree rather than
 traced through by following code paths. The heavy modularization
@@ -111,7 +111,7 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   [Architecture & module system](architecture.md), which is the
   category mechanism, Home Manager integration, and package
   modules built on top of it. [Module files](module-files.md) is why every
-  module looks the way it does -- the page each module's first line points to.
+  module looks the way it does -- names from filenames, categories from folders.
 - [Impermanence, initrd & secrets](impermanence-and-secrets.md) — the
   `/root`-wipe-on-boot mechanism, which hosts opt in, sops-nix.
 - [Traps & skills](traps-and-skills.md) — the mistakes that have actually

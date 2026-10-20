@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Grafana: the one piece of this stack (prometheus.nix, node-exporter.nix,
 # cadvisor.nix, libvirt-exporter.nix) meant to be reached off-host, and then
 # only over the tailnet. Every listener in the stack, this one included, is

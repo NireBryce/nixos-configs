@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # The persistence half of wifi.nix. wifi.nix only sets
 # networking.networkmanager.enable; this is filed as its own sibling rather
 # than folded in, matching tailscale-persist.nix's split from tailscale.nix.

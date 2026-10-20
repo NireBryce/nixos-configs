@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Core system-level settings every darwin host in this config wants.
 # Ported from macos-old/nire-lysithea-configuration.nix.
 {

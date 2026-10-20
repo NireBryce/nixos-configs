@@ -1,6 +1,6 @@
 # Module style guide, for agents
 
-_Last modified: 2026-10-16_
+_Last modified: 2026-10-20_
 
 Condensed from [module-style-guide.md](module-style-guide.md). Rules only.
 
@@ -17,7 +17,7 @@ Never hand-edit. By hand it is
 | What | Files |
 |---|---|
 | total `.nix` files under `flake/modules/` | 235 |
-| pointer line (`# Module file: … wiki/module-files.md`) | 226 |
+| header comment (`# dirs-as-categories: …`) | 226 |
 | `# # description` as first body line | 33 |
 | `with pkgs;` package lists | 115 |
 
@@ -26,7 +26,7 @@ Never hand-edit. By hand it is
 ## The header
 
 ```nix
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 { lib, ... }:
 {
     homeManager = { pkgs, ... }: {

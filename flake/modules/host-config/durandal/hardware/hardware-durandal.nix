@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # renamed from `hardware-configuration.nix` 2026-08-21 -- every other host
 # with a captured hardware file already used `hardware-<hostname>.nix`
 # (hardware-cube.nix, hardware-tenacity.nix); this one

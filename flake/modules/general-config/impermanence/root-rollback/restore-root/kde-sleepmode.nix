@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # The desktop half of `nohibernate`. Filed beside WARN-impermanence.nix because
 # that is what creates the requirement, not because it is about KDE.
 #

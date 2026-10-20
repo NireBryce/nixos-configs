@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Caddy: one tailnet-only HTTPS front door for every web service on
 # nire-cube. Added 2026-08-24, cube-only. The category is `reverse-proxy`,
 # not `caddy`: a category and its one module sharing a name silently MERGE

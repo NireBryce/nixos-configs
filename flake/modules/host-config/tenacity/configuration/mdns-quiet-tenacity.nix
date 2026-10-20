@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # tenacity announces nothing over mDNS; added 2026-09-27. It joins whatever
 # Wi-Fi it's near, and avahi.nix's publish block would announce its hostname
 # and addresses there. Nothing on its LAN side takes connections anyway

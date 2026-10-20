@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 {
     # This module owns .blerc. bash.nix carried a byte-identical copy of it
     # until they were merged here -- home.file.<n>.text is types.lines, so

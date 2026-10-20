@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 {
     # Was cod-completions.nix until 2026-08-22, when this file (carapace)
     # was split out alongside it. carapace is just a binary invoked

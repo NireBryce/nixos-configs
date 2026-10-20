@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Prometheus itself: scrapes the four loopback-only exporters
 # (node-exporter.nix, cadvisor.nix, libvirt-exporter.nix, smartctl-exporter.nix)
 # and stores the time series grafana.nix's dashboard reads from.

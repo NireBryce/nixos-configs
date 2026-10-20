@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # WARNING: IMPORTING THIS DELETES / ON EVERY BOOT. If your disk looks like
 # the one described below, it will delete yours. Know what you're doing.
 #

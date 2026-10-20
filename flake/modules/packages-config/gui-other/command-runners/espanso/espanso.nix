@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 {
     # An argument list was added here on 2026-08-12, where there was
     # previously a bare attrset. That is normally the trap CLAUDE.md warns

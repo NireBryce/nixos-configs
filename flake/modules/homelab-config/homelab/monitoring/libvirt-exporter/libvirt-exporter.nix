@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # prometheus-libvirt-exporter: per-VM state/CPU/memory/disk/network metrics
 # for whatever libvirt/QEMU guests are defined on this host via
 # `virtualization`. No guest is currently defined here -- `virtualization-cube`

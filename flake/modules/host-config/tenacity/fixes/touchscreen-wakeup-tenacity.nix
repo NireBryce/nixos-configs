@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Stop the built-in touchscreen from waking the handheld.
 #
 # Same shape and reason as durandal/fixes/b550-suspend-fix.nix -- a device

@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # nire-tenacity hardware, from `nixos-generate-config` on the machine.
 #
 # Wrapped as a flake-parts module. A raw generator file under modules/ makes

@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Puts Plasma's lock screen in front of cube's autologin session
 # (headless-display-cube.nix), so both the console and a Moonlight client
 # need elly's password, and requires encryption on Sunshine streams; added

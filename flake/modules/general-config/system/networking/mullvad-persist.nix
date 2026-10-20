@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # The persistence half of vpn.nix, same shape and same gate as
 # tailscale-persist.nix (read its header for why restore-root is the gate).
 #

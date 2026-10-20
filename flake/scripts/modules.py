@@ -131,7 +131,7 @@ def drift(doc, static):
 CLASSES = ('nixos', 'homeManager', 'darwin')
 
 # wiki/module-files.md's shape and wiki/module-style-guide.md's formatting:
-# the pointer line, opening brackets on the same line, four-space indent, and
+# the header comment, opening brackets on the same line, four-space indent, and
 # the `# # description` comment as the first line of the body. The class
 # module is `_:` rather than `{ ... }:` -- statix flags the empty pattern and
 # a fresh file would raise the lint ratchet; whoever fleshes the module out
@@ -139,7 +139,7 @@ CLASSES = ('nixos', 'homeManager', 'darwin')
 # the body uses `lib`: deadnix would flag it unused.
 #
 # Tokens, not str.format: the text is full of literal Nix braces.
-BOILERPLATE = '''# Module file: named after this file; why it looks this way: wiki/module-files.md
+BOILERPLATE = '''# dirs-as-categories: the module is named after this file; its categories are the folders above it
 {
     @CLASS@ = _: {
         # # description = "@DESC@";

@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Re-enable the IOMMU that Jovian turns off, because this is not a Steam Deck.
 #
 # CONFIRMED FIX, 2026-08-12. Suspend went from 0% to 92.5% hardware sleep

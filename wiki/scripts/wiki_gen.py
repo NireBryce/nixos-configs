@@ -234,8 +234,8 @@ def category_rows(homelab):
 # "recompute by hand" grep uses; None counts the files themselves.
 COUNT_ROWS = [
     ('total `.nix` files under `flake/modules/`', None),
-    ('pointer line (`# Module file: … wiki/module-files.md`)',
-     '# Module file: named after this file; why it looks this way: wiki/module-files.md'),
+    ('header comment (`# dirs-as-categories: …`)',
+     '# dirs-as-categories: the module is named after this file; its categories are the folders above it'),
     ('`# # description` as first body line', re.compile(r'(?m)^\s*# # description')),
     ('`with pkgs;` package lists', 'with pkgs;'),
 ]

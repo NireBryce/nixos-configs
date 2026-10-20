@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Named boot-cube.nix, not boot.nix, for the same reason boot-durandal.nix
 # is not called boot.nix: a module's filename is its attribute name, and
 # `general-config/boot/` is a category of that same name. See boot-durandal.nix's own

@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # renamed from `boot.nix`, which declared `flake.modules.nixos.boot` and so
 # merged with the `general-config/boot/` category of the same name
 { lib, ... }:

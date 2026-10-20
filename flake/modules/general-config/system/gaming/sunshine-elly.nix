@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Device-permission groups elly needs for sunshine.nix (next door) to actually
 # work at runtime -- split out from that file because it edits the user
 # account rather than the service, and from elly-user.nix because these groups

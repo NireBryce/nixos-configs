@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 {
     # TODO: these modules should be stored outside of the users folder, so it's clearer when it's imported
     nixos = { pkgs, ... }: {

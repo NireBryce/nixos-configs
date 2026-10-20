@@ -19,7 +19,7 @@ Every trap below has happened here.
 ## Scaffolder
 
 `just add-module <class> <category>/<subdir>/<name> ["one-line description"]`
-writes the file in the module shape (pointer line, `# # description`,
+writes the file in the module shape (header comment, `# # description`,
 `wiki/module-style-guide.md` formatting), `git add`s it (flakes ignore
 untracked files), and runs the checks (`flake/scripts/modules.py add`;
 #293). It refuses a class dirs-as-categories doesn't know, a target outside
@@ -29,7 +29,7 @@ module or a category. It cannot decide what the module *says*.
 ## The shape
 
 ```nix
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 { lib, ... }:
 {
     homeManager = { pkgs, ... }: {

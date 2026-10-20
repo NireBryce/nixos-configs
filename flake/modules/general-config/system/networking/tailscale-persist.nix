@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # The persistence half of tailscale.nix. Split out 2026-08-14; until then this
 # was the last block of that file.
 #

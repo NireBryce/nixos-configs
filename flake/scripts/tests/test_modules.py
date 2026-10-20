@@ -99,7 +99,7 @@ class Add(Tree):
     def test_scaffolds_the_new_shape_and_stages_it(self):
         self.assertEqual(self.add('homeManager', 'area/used/new-thing/new-thing.nix', 'does', 'a', 'thing'), 0)
         text = (self.root / 'area/used/new-thing/new-thing.nix').read_text()
-        self.assertTrue(text.startswith('# Module file:'))
+        self.assertTrue(text.startswith('# dirs-as-categories:'))
         self.assertIn('homeManager = _: {', text)
         self.assertIn('# # description = "does a thing";', text)
         self.assertNotIn('moduleName', text)

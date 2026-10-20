@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Failed-attempt lockout on cube's Plasma lock screen (stream-lock-cube.nix):
 # 5 wrong passwords within 15 minutes refuse password unlock for 10 minutes;
 # added 2026-10-07. Only the `kde` PAM service (kscreenlocker's, set in
