@@ -104,7 +104,7 @@ flowchart LR
     subgraph g1["packages-config"]
         n20("<b>development/</b><br/><i>n h · 16</i>")
         n21("<b>editors/</b><br/><i>n h · 3</i>")
-        n22("<b>gui-other/</b><br/><i>h · 19</i>")
+        n22("<b>gui-other/</b><br/><i>h · 18</i>")
         n23("<b>linux-utils/</b><br/><i>h · 17</i>")
         n24("<b>nix-utils/</b><br/><i>n h · 4</i>")
         n25("<b>shell-apps/</b><br/><i>n h · 40</i>")

@@ -16,10 +16,10 @@ Never hand-edit. By hand it is
 
 | What | Files |
 |---|---|
-| total `.nix` files under `flake/modules/` | 235 |
-| header comment (`# dirs-as-categories: …`) | 226 |
+| total `.nix` files under `flake/modules/` | 234 |
+| header comment (`# dirs-as-categories: …`) | 225 |
 | `# # description` as first body line | 33 |
-| `with pkgs;` package lists | 115 |
+| `with pkgs;` package lists | 114 |
 
 <!-- /generated -->
 
