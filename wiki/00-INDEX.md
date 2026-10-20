@@ -118,6 +118,9 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   index, because the branch it linked to is gone.
 - [Open threads](open-threads.md) — where the repo's loose ends are
   tracked (GitHub issues, by label), and the rule for upstream write-ups.
+- [Temporary patches and hacks](temporary-patches-and-hacks.md) — every
+  workaround in the config that exists because of a third-party bug, and
+  the condition for removing each.
 - [Maintenance schedule](maintenance-schedule.md) — the fleet's keys,
   credentials, and certificates that have an actual expiry, rotation
   cadence, or silent-breakage property; tended by skill

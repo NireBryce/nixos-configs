@@ -1,5 +1,8 @@
 # carapace-completer-read-fix.bash -- this repo, 2026-08-24.
 #
+# TEMPORARY -- works around a ble.sh/carapace bug (issue #75); when to
+# remove it: wiki/temporary-patches-and-hacks.md and carapace-read-fix.md.
+#
 # Works around a real bug, found live on nire-cube and written up in
 # `claude cave/lessons-learned.md` #39: carapace's own generated
 # _carapace_completer (source <(carapace _carapace bash), in bash.nix --

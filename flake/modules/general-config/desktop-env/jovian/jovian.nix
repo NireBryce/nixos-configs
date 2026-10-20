@@ -111,6 +111,48 @@
         # needed for tdp adjustor
         boot.extraModulePackages = [ config.boot.kernelPackages.acpi_call ];
 
+        # TEMPORARY -- works around a nixpkgs packaging bug; listed in
+        # wiki/temporary-patches-and-hacks.md.
+        #
+        # Why: since the 2026-10-20 lock bump, nixpkgs signs kernel
+        # modules with kmodigest at Kbuild's modules_install, leaving a
+        # `<module>.ko.cer` beside each one, and the module aggregator
+        # (pkgs/os-specific/linux/kmod/aggregator.nix) `cat`s that file
+        # for every external module. acpi_call's installPhase copies the
+        # .ko by hand and never runs modules_install, so no .cer exists
+        # and the tenacity build dies in linux-<ver>-modules with
+        #
+        #     cat: misc/acpi_call.ko.cer: No such file or directory
+        #
+        # This runs kmodigest on the installed .ko, as modules_install
+        # would. It is overridden in kernelPackages, not at the use
+        # above, because nixpkgs' handheld-daemon module adds its own
+        # `config.boot.kernelPackages.acpi_call` (adjustor.
+        # loadAcpiCallModule) and both copies need the certificate.
+        #
+        # Remove when ALL of these hold:
+        #   1. nixpkgs' acpi_call itself installs acpi_call.ko.cer -- the
+        #      check below fails the build with a pointer here when it
+        #      does, so an input bump announces it;
+        #   2. with this block deleted, the tenacity toplevel builds
+        #      (`just host=nire-tenacity build`; evaluation alone does not
+        #      reach the modules aggregator);
+        #   3. after switching, `modinfo acpi_call` resolves and hhd's TDP
+        #      control still works (the adjustor is the only user).
+        # Also remove it if tenacity stops carrying acpi_call at all.
+        boot.kernelPackages = pkgs.linuxPackages.extend (kself: ksuper: {
+            acpi_call = ksuper.acpi_call.overrideAttrs (old: {
+                installPhase = old.installPhase + ''
+                    ko=$out/lib/modules/${kself.kernel.modDirVersion}/misc/acpi_call.ko
+                    if [ -e "$ko.cer" ]; then
+                        echo "acpi_call now ships $ko.cer; delete the override in jovian.nix" >&2
+                        exit 1
+                    fi
+                    ${lib.getExe pkgs.buildPackages.kmodigest} "$ko"
+                '';
+            });
+        });
+
         # hhd's own /etc/hhd state is persisted by jovian-persist.nix, a
         # sibling of this file -- without it, fan curves and TDP profiles
         # reset on every boot. Split out 2026-08-14; it was declared here

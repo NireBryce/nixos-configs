@@ -22,6 +22,7 @@ A page without one opens with `## Quick facts` — linked there.
 | work without clobbering another session | skill `use-a-worktree` |
 | script a command pattern agents keep re-typing | skill `agent-scripts` |
 | check whether a bug is already tracked | [open-threads-for-agents.md](open-threads-for-agents.md), skill `investigate-bug` |
+| after a lock bump: can a workaround go? | [temporary-patches-and-hacks.md § Quick facts](temporary-patches-and-hacks.md#quick-facts) |
 | add a self-hosted service | [homelab/00-INDEX.md](homelab/00-INDEX.md), skill `new-homelab-service` |
 | give a service its own `svc:` hostname | [categories/reverse-proxy-for-agents.md](categories/reverse-proxy-for-agents.md), skill `new-tailscale-service` |
 | add a host, or format its disk | [disk-formatting-for-agents.md](disk-formatting-for-agents.md), skill `new-host-config` |
@@ -53,6 +54,8 @@ A page without one opens with `## Quick facts` — linked there.
   — salvaged from the deleted `flake-parts` branch.
 - [open-threads-for-agents.md](open-threads-for-agents.md) — loose ends are
   GitHub issues; labels, and the upstream-filing rule.
+- [temporary-patches-and-hacks.md § Quick facts](temporary-patches-and-hacks.md#quick-facts)
+  — workarounds for third-party bugs, each with its removal condition.
 
 ## Category reference
 
