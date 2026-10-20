@@ -1,6 +1,6 @@
 # `desktop-env` — `general-config/desktop-env/`
 
-_Last modified: 2026-10-05_
+_Last modified: 2026-10-20_
 
 > **Condensed version:**
 > [desktop-env-for-agents.md](desktop-env-for-agents.md) — the same
@@ -37,7 +37,7 @@ Two sub-areas, split along the same line as the hosts that use them:
 ## Why this category is never imported whole
 
 No host lists `desktop-env` in its imports — each names the one session
-module it actually wants: `kde-desktop` (durandal, cube — pulls in
+module it wants: `kde-desktop` (durandal, cube — pulls in
 `kde-base` itself) or `jovian` (tenacity — also pulls in `kde-base`
 itself, for the Plasma 6 desktop Jovian's SteamOS session drops back to).
 That's why `kde-base.nix` is imported by *two different files*, not by the
@@ -172,7 +172,7 @@ categories enabled around a repro.
   `kglobalshortcutsrc` runs ~350 lines because KDE dumps its entire default
   set to disk the first time anything touches it — not because 350 actions
   were rebound. Each line is `active,default,description`, so **diffing
-  column 1 against column 2** recovers what actually changed, instead of
+  column 1 against column 2** recovers what changed, instead of
   guessing at stock KDE from memory. Doing that turned up the real story:
   nearly every default Meta-based kwin/plasmashell shortcut on tenacity has
   been deliberately *unbound*. Nothing in the repo records why (checked for a

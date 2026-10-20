@@ -1,6 +1,6 @@
 # `shell-config` — `general-config/shell-config/`
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-20_
 
 ## Contents
 
@@ -118,5 +118,5 @@ separate, platform-specific concern handled by [macos](../macos.md)'s
   the concatenation trap above.
 - [macos](../macos.md) — darwin-side shell registration.
 - [../../architecture.md](../../architecture.md) — the `elly-home-manager`
-  bundle and why it, not per-host imports, is what actually reaches every
+  bundle and why it, not per-host imports, is what reaches every
   host's home config.

@@ -1,6 +1,8 @@
 # `reverse-proxy`, for agents
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-20_
+
+_Sibling reviewed: 2026-10-20 -- source lede moved its incident narrative to reverse-proxy-history.md; facts here unchanged_
 
 Condensed from [reverse-proxy.md](reverse-proxy.md).
 

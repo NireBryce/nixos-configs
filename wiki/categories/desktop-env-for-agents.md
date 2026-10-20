@@ -2,6 +2,8 @@
 
 _Last modified: 2026-10-05_
 
+_Sibling reviewed: 2026-10-20 -- source change was filler-word removal only; no facts changed_
+
 Condensed from [desktop-env.md](desktop-env.md). Facts only here.
 
 ## Category shape

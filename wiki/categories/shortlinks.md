@@ -1,20 +1,17 @@
 # `shortlinks` — `homelab-config/homelab/shortlinks/`
 
-_Last modified: 2026-10-16_
+_Last modified: 2026-10-20_
 
-[golink](https://github.com/tailscale/golink), Tailscale's `go/foo`
-shortlink service. Added 2026-08-24, cube-only; nested under the `homelab`
-umbrella since 2026-08-27 (name unaffected).
+[golink](https://github.com/tailscale/golink), Tailscale's `go/foo` shortlink
+service, on cube only (added 2026-08-24; under the `homelab` umbrella since
+2026-08-27). This page covers configuration; creating and managing links is
+[homelab/creating-golinks.md](../homelab/creating-golinks.md).
 
-**It failed its first real switch, then was fixed and confirmed working
-end to end the same day (2026-08-24)** — a missing `AF_NETLINK` in this
-module's own `RestrictAddressFamilies`; see [the hardening
-section](#dynamicuser-deliberately) for the setting, and
-[shortlinks-history.md](shortlinks-history.md) for the crash-loop and the
-fix in full.
-
-Usage — creating and managing links — is [homelab/creating-golinks.md](../homelab/creating-golinks.md).
-This page stays the configuration side.
+Its first real switch failed on a missing `AF_NETLINK` in the module's
+`RestrictAddressFamilies`. It was fixed and confirmed working end to end the
+same day (2026-08-24). [The hardening section](#dynamicuser-deliberately)
+covers the setting; [shortlinks-history.md](shortlinks-history.md) has the
+crash-loop and the fix in full.
 
 > **Condensed version:**
 > [shortlinks-for-agents.md](shortlinks-for-agents.md) — the same

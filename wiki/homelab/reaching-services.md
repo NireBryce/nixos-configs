@@ -1,6 +1,6 @@
 # Reaching cube's services
 
-_Last modified: 2026-10-06_
+_Last modified: 2026-10-20_
 
 Each web service on `nire-cube` has **its own tailnet hostname and its own
 certificate**. That is a change from the original design — one hostname with
@@ -104,13 +104,13 @@ Two things follow that are worth knowing as a user:
 
 ## When something doesn't answer
 
-Work down this list; it's ordered by what's most often actually wrong.
+Work down this list; it's ordered by what's most often wrong.
 
 1. **Is your device on the tailnet?** `tailscale status` on the machine
    you're browsing from. Everything here is tailnet-only.
 2. **Does another service answer?** These are now independent names on
    independent virtual addresses, so "Grafana is down" and "cube is down"
-   are genuinely different questions. If `https://ts-cube.moose-micro.ts.net/`
+   are different questions. If `https://ts-cube.moose-micro.ts.net/`
    answers but `https://git.moose-micro.ts.net/` doesn't, cube and Caddy are
    fine — suspect that one Service or that one app.
 3. **Does the name resolve at all?** `getent hosts git.moose-micro.ts.net`.
@@ -170,7 +170,7 @@ over the tailnet:
   following the redirect lands on `200` with `ssl_verify_result 0`.
 
 **Not exercised:** the failure-mode steps above — they're derived from
-failures that actually happened, not from breaking things deliberately
+failures that happened, not from breaking things deliberately
 afterwards.
 
 ## See also

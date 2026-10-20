@@ -1,13 +1,11 @@
 # `impermanence` — `general-config/impermanence/`
 
-_Last modified: 2026-10-16_
+_Last modified: 2026-10-20_
 
-**Read `WARN-impermanence.nix` itself before changing anything here — this
-page is an index, not a substitute.** See
-[../impermanence-and-secrets.md](../impermanence-and-secrets.md) for the
-cross-cutting version of this topic (which hosts wipe `/root`, the initrd
-sharp edges); this page is specifically about what lives in the category
-directory.
+**Read `WARN-impermanence.nix` itself before changing anything here; this
+page is an index, not a substitute.** It covers what lives in the category
+directory. For which hosts wipe `/root` and the initrd sharp edges, see
+[../impermanence-and-secrets.md](../impermanence-and-secrets.md).
 
 ## Contents
 
@@ -56,7 +54,7 @@ at all: a folder with a subfolder holding modules is one
   module but a curried function returning a normal `nixosModule`. **Nothing
   imports this today** — see
   [../flake/doc/disko-impermanence-layout.md](<../../flake/doc/disko-impermanence-layout.md>)
-  for what it's for and how to actually wire it in. It can't be a category
+  for what it's for and how to wire it in. It can't be a category
   the way `root-rollback/` is: everything on a path containing `/_` is
   skipped, so nothing there is ever read as a module or a category. It
   doesn't need to be one anyway: nothing has ever auto-imported it, by
@@ -105,7 +103,7 @@ not through each host's own per-host imports list.
 ## See also
 
 - [../disk-formatting.md](../disk-formatting.md) — the runbook: what to
-  decide and do to actually get a new host onto this layout, as opposed to
+  decide and do to get a new host onto this layout, as opposed to
   what's in the category once it does.
 - [../impermanence-and-secrets.md](../impermanence-and-secrets.md) — the
   cross-cutting topic page.

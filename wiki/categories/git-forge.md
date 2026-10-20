@@ -1,17 +1,16 @@
 # `git-forge` — `homelab-config/homelab/git-forge/`
 
-_Last modified: 2026-10-19_
+_Last modified: 2026-10-20_
 
-Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only; nested under
-the `homelab` umbrella since 2026-08-27 (name unaffected). As of 2026-09-07
-reached at `https://git.moose-micro.ts.net/` — its own Tailscale Services
-name, still fronted by Caddy ([reverse-proxy](reverse-proxy.md)) since
-Tailscale Services can't terminate HTTPS declaratively yet (confirmed
-upstream bug, see `tailscale-services/serve.nix`'s history section). The
-`.../git/`-path-under-`ts-cube` form no longer answers (404).
-[git-forge-history.md](git-forge-history.md) has the original first-switch
-record and the move behind Caddy; the move to its own service name is
-this category's newest change, not yet its own history entry.
+Forgejo, a self-hosted git forge, on cube only (added 2026-08-24; under the
+`homelab` umbrella since 2026-08-27). Since 2026-09-07 it is at
+`https://git.moose-micro.ts.net/`, its own Tailscale Services name, fronted by
+Caddy ([reverse-proxy](reverse-proxy.md)) because Tailscale Services can't
+terminate HTTPS declaratively yet (confirmed upstream bug; see
+`tailscale-services/serve.nix`'s history section). The old
+`.../git/` path under `ts-cube` now returns 404.
+[git-forge-history.md](git-forge-history.md) has the first-switch record and
+the move behind Caddy; the move to its own service name isn't in it yet.
 
 > **Condensed version:**
 > [git-forge-for-agents.md](git-forge-for-agents.md) — the same
@@ -271,7 +270,7 @@ errors still fail it. Fresh installs set the password via `create`, unaffected.
 
 **Status: switched and logged in, confirmed 2026-09-05.** The user has signed
 in as `elly` and used the account directly (screenshot-confirmed) — the
-account and password both work as declared. Whether it's genuinely
+account and password both work as declared. Whether it's
 *admin* (the `--admin` flag) is **confirmed: it took** — checked from
 inside the UI and reported by the user 2026-09-12. That was the only way to
 check it: Forgejo's unauthenticated `/api/v1/users/search` always reports
@@ -300,7 +299,7 @@ gives for itself.
 ## See also
 
 - [homelab/forgejo.md](../homelab/forgejo.md) — the usage-tier page: how to
-  actually use the forge once it's up, as opposed to how it's configured
+  use the forge once it's up, as opposed to how it's configured
   here.
 - [reverse-proxy](reverse-proxy.md) — Caddy, which is how this is reached
   as of 2026-08-24, and where the TLS certificate comes from.

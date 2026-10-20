@@ -1,6 +1,6 @@
 # `git-forge` — history
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-10-20_
 
 Verification record for [git-forge](git-forge.md) as it was first switched
 and then re-routed, split out 2026-09-03 so that page stays about the
@@ -87,7 +87,7 @@ reaffirmed one look identical while resting on different evidence: the
 first was made because an origin was too risky, the second with that risk
 actually retired.
 
-**2026-09-11: this repo itself became the first thing actually mirrored.**
+**2026-09-11: this repo itself became the first thing mirrored.**
 `elly/nixos-configs` was created as a genuine Forgejo pull mirror (migrate
 API, `mirror: true`, `mirror_interval: 8h0m0s`, authenticated with the
 `forgejo_api_key` sops secret) of

@@ -1,15 +1,12 @@
 # Fleet maintenance
 
-_Last modified: 2026-10-18_
+_Last modified: 2026-10-20_
 
-The fleet's recurring upkeep in one place: the weekly flake.lock PR,
-deploying to a host and the verification habit around it, and store
-hygiene — including which parts already run themselves, so a human does
-only the parts that need a human. Opened as issue #295, whose candidate
-list this page verified and filled in. **Credentials, keys, and
-certificates are not here** — they are
-[maintenance-schedule.md](maintenance-schedule.md)'s subject and stay
-there.
+The fleet's recurring upkeep (issue #295): the weekly flake.lock PR,
+deploying to a host and the verification habit around it, and store hygiene.
+It says which parts already run themselves, so a human does only the parts
+that need one. **Credentials, keys, and certificates are not here**; see
+[maintenance-schedule.md](maintenance-schedule.md).
 
 ## Contents
 

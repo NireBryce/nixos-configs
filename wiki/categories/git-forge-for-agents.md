@@ -2,6 +2,8 @@
 
 _Last modified: 2026-10-19_
 
+_Sibling reviewed: 2026-10-20 -- source change was filler-word removal only; no facts changed_
+
 Condensed from [git-forge.md](git-forge.md). Facts only here.
 
 Forgejo on `nire-cube`, nested under `homelab`. URL

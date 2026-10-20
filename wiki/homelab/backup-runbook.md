@@ -1,12 +1,12 @@
 # Backup runbook — restic on `nire-cube`
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-20_
 
 Commands for operating [backup](../categories/backup.md) — the restic
 category backing up Forgejo/Grafana/golink's state and `/persist` to the
 `ts-hive` NAS over SFTP. That page covers the design and its history (including
 the sqlite consistency bug found and fixed 2026-09-06); this page is only
-what to actually type. Confirmed fully working end to end 2026-09-06: a
+what to type. Confirmed fully working end to end 2026-09-06: a
 real restore recovered a real, openable Forgejo database — see that
 page's "The sqlite consistency bug" for the account.
 
@@ -100,7 +100,7 @@ sudo restic-cube check
 
 `ls` without `--recursive` only shows a directory's own tree entry, not
 what's inside it — pass `--recursive` (with a path argument) whenever you
-actually want to know if a directory's contents made it into the
+want to know if a directory's contents made it into the
 snapshot, not just that the directory exists.
 
 An interactive alternative exists — [rustic](rustic.md), on `elly`'s
@@ -188,7 +188,7 @@ section), then `just switch` on cube to pick it up.
 
 - **`sops-install-secrets: ... the key 'restic-cube-ssh-key' cannot be
   found` (or `restic-cube-password`)** at build/switch time — the key
-  genuinely doesn't exist in the `secrets.yaml` being built. Cube keeps
+  doesn't exist in the `secrets.yaml` being built. Cube keeps
   two checkouts (`~/nixos-configs`, `~/projects/nix/nixos-configs`); check
   `git log -1` in both before assuming the secret needs regenerating —
   one may just be stale.

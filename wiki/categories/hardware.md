@@ -1,6 +1,6 @@
 # `hardware` — `hardware-config/hardware/` (+ nested `amd`)
 
-_Last modified: 2026-10-16_
+_Last modified: 2026-10-20_
 
 ## Contents
 
@@ -36,7 +36,7 @@ gained or lost anything in the move.
 `hardware`: its subfolders `amdcpu/` and `amdgpu/` hold modules, which is what
 makes it one ([module-files.md](../module-files.md)). `hardware` includes `amd`
 by name rather than listing `amdcpu`/`amdgpu` again -- a coarse handle
-(`hardware`, what every host actually includes today) reaching the same content
+(`hardware`, what every host includes today) reaching the same content
 as the fine one (`amd`, for if this repo ever needs to distinguish AMD from
 Intel hardware), by reference instead of by duplicate derivation. That has
 been the shape since the 2026-08-27 collector refactor; before it the parent

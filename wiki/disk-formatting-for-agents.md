@@ -2,6 +2,8 @@
 
 _Last modified: 2026-09-29_
 
+_Sibling reviewed: 2026-10-20 -- source change was filler-word removal only; no facts changed_
+
 Condensed from [disk-formatting.md](disk-formatting.md).
 
 **Destructive.** `disko` partitions a real disk. Read `CLAUDE.md`'s Safety

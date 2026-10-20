@@ -4,7 +4,7 @@ _Last modified: 2026-10-20_
 
 Condensed from [module-style-guide.md](module-style-guide.md). Rules only.
 
-Applies to every module under `flake/modules/`, not just packages.
+Applies to every module under `flake/modules/`, packages included.
 
 ## Counts
 

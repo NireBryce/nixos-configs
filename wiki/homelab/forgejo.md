@@ -1,6 +1,6 @@
 # Using the forge
 
-_Last modified: 2026-10-06_
+_Last modified: 2026-10-20_
 
 [Forgejo](https://forgejo.org/) on `nire-cube`, at
 `https://git.moose-micro.ts.net/` — its own Tailscale Services name as of
@@ -76,7 +76,7 @@ password from this repo's sops secrets rather than typed by hand. It
 resets that password to the sops value on every `switch`, so changing it
 through the web UI won't stick — change it in `secrets.yaml` instead if it
 ever needs to change. **Switched and logged in, confirmed 2026-09-05**;
-genuinely *admin*, confirmed by the user 2026-09-12 from the
+*admin*, confirmed by the user 2026-09-12 from the
 Site Administration panel (see
 [git-forge](../categories/git-forge.md)'s account of the masked-field trap
 for why no API call could have told you).
@@ -236,7 +236,7 @@ that's just `main`.
   covers that tradeoff), otherwise 0.
 - **Dismiss stale approvals** and **Block merge if pull request is
   outdated:** on, when approvals are required. They make an approval
-  cover what actually gets merged.
+  cover what gets merged.
 - **Enforce this rule for repository admins:** on. `elly` is an admin,
   and without this the rule doesn't apply to the one account that
   pushes.
@@ -283,7 +283,7 @@ the migrate API (`mirror: true`, `mirror_interval: 8h0m0s`) using the
 `forgejo_api_key` sops secret. GitHub stays canonical; Forgejo re-pulls on
 its own schedule. Confirmed live: all 7 branches present and matching
 GitHub's own branch list, default branch `experimental`. This is the first
-repo actually pushed/mirrored here — see
+repo pushed/mirrored here — see
 [git-forge-history.md](../categories/git-forge-history.md#mirror-not-origin--and-the-first-real-mirror)
 for the record. Mirror-or-origin is settled (mirror, reaffirmed
 2026-09-12).

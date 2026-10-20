@@ -1,6 +1,6 @@
 # `nix` — `general-config/nix/`
 
-_Last modified: 2026-09-28_
+_Last modified: 2026-10-20_
 
 ## Contents
 
@@ -36,7 +36,7 @@ _Last modified: 2026-09-28_
   a `buildEnv` over every `home.packages` entry and reruns `mandb` at
   *build* time, so touching any one of ~126 packages rebuilds the whole
   index; `documentation.man.generateCaches` is system-scoped and would miss
-  `/etc/profiles/per-user/<user>/share/man`, where the packages actually
+  `/etc/profiles/per-user/<user>/share/man`, where the packages
   worth searching live. Was on only as a side effect of fish's
   `generateCompletions` setting it, and stayed on when fish did.
 

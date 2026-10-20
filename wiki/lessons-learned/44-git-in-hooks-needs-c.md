@@ -1,6 +1,6 @@
 # 44. A hook that runs `git` from a non-toplevel cwd needs `-C`, not a cleared GIT_DIR — the docs' own suggested fix broke the index lock instead
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-20_
 
 §44 of [lessons-learned.md](../lessons-learned.md) — that page keeps the one-line version of every lesson; this is §44's full account.
 
@@ -64,7 +64,7 @@ Applying a real fix without testing it against a real `git commit` — not
 just re-reasoning that the docs' own example must be safe — would have
 shipped a second, worse bug in the same commit as fixing the first one.
 
-The fix that actually holds up under a real `git commit`, retried several
+The fix that holds up under a real `git commit`, retried several
 times: don't touch the environment at all. `git -C "$repo_root" add
 flake/scripts/lint-baseline.json` — an explicit `-C` plus a path relative
 to it, instead of a `cd` plus an absolute one — sidesteps the whole

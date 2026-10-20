@@ -2,6 +2,8 @@
 
 _Last modified: 2026-10-19_
 
+_Sibling reviewed: 2026-10-20 -- source change was filler-word removal only; no facts changed_
+
 Condensed from [virtualization.md](virtualization.md).
 
 Libvirt/QEMU VMs on `nire-cube` only (podman/distrobox = [containers](containers.md)). Nested under `homelab`.

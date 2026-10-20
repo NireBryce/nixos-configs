@@ -1,6 +1,6 @@
 # `boot` — `general-config/boot/`
 
-_Last modified: 2026-10-16_
+_Last modified: 2026-10-20_
 
 ## Contents
 
@@ -48,7 +48,7 @@ carry a host-suffixed name instead of the generic one they'd naturally want.
 
 ## Don't confuse this with the impermanence category
 
-`general-config/boot/` is genuinely about the bootloader (generation count,
+`general-config/boot/` is about the bootloader (generation count,
 menu editor). It is
 **not** the category that wipes `/root` — that's [impermanence](impermanence.md),
 named `boot` itself until 2026-08-11, which is exactly the confusion the

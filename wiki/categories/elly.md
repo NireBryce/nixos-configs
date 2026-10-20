@@ -1,6 +1,6 @@
 # `elly` — `users-config/elly/`
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-20_
 
 The one category under `users-config/` — the "for the user" area, as opposed to
 `general-config/` (shared system) or `packages-config/` (packages). Don't confuse this
@@ -39,7 +39,7 @@ plus several others — see [../architecture.md](../architecture.md).
   *because* a non-impermanence host doesn't import
   [impermanence](impermanence.md). `elly-user.nix`'s `hashedPasswordFile` is
   unconditional, and nothing else in this repo tells such a host how to
-  actually populate that file — `WARN-impermanence.nix` documents the whole
+  populate that file — `WARN-impermanence.nix` documents the whole
   `/persist` dance for hosts that wipe `/root`, but a host with a plain
   persistent root has no equivalent pointer. Gated on
   `boot.initrd.systemd.services ? restore-root` existing (the unit only
@@ -93,4 +93,4 @@ Users section for the same plan stated for a human reader.
 - [system](system.md) — `declare-persistence-option.nix`, referenced above.
 - [../architecture.md](../architecture.md) — `users-config/elly-home-manager.nix`,
   the entry point that assembles this category into the full bundle every
-  host's Home Manager actually uses.
+  host's Home Manager uses.

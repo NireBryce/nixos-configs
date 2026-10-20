@@ -1,10 +1,10 @@
 # `backup` — history
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-20_
 
 Resolved incidents and superseded design behind [backup](backup.md) and
 [../homelab/backup-runbook.md](../homelab/backup-runbook.md) — split out
-2026-09-03 so those pages stay about the backend as it actually works today.
+2026-09-03 so those pages stay about the backend as it works today.
 Nothing here changes what to type or how the module is shaped now.
 
 ## Contents
@@ -145,7 +145,7 @@ fixed and confirmed live. Full account in "Getting the SFTP repository from
 
 ## See also
 
-- [backup](backup.md) — the category as it actually works today.
+- [backup](backup.md) — the category as it works today.
 - [../homelab/backup-runbook.md](../homelab/backup-runbook.md) — the
   commands.
 - [#87](https://github.com/NireBryce/nixos-configs/issues/87) — the

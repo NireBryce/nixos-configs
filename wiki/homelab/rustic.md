@@ -1,14 +1,13 @@
 # rustic — an interactive alternative to the plain `restic` CLI
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-20_
 
 [rustic](https://github.com/rustic-rs/rustic) (the `rustic-rs` project, not
 the unrelated `bnavetta/rustic` "restic wrapper" that shares its name in
-search results) — a client tool for the repository
-[backup](../categories/backup.md) writes, not a service this fleet runs.
-Installed 2026-08-28 in
-`packages-config/shell-apps/backup-tools/rustic.nix`, so it's on every host
-`elly-home-manager` reaches.
+search results) is a client for the repository
+[backup](../categories/backup.md) writes. It is not a service this fleet runs.
+Installed 2026-08-28 in `packages-config/shell-apps/backup-tools/rustic.nix`,
+so it's on every host `elly-home-manager` reaches.
 
 ## Contents
 
@@ -110,7 +109,7 @@ are root-owned, mode `0400`, by sops-nix's own default — see the runbook.
 **On darwin**: `nix eval` only — present in `home.packages`, survives the
 platform filter, never built, run, or switched there.
 
-**Still entirely unverified everywhere**: whether the TUI actually behaves
+**Still entirely unverified everywhere**: whether the TUI behaves
 as its own docs describe, and whether the command shape in "Pointing it at
 this repo's repository" above is right — pointing it at the real
 repository specifically can't be tested yet regardless, since neither sops
@@ -118,7 +117,7 @@ secret the backup itself needs has a value in this tree yet (see
 [the runbook](backup-runbook.md)). All of "What it is" and that section are
 transcribed from rustic's
 own GitHub repo, docs site, and FAQ, not from a run here; `--version` is
-the only subcommand actually invoked. Treat the rest the way
+the only subcommand invoked. Treat the rest the way
 [forgejo.md](forgejo.md) treats its own untested commands: plausible from
 the source, not proven.
 
@@ -127,7 +126,7 @@ the source, not proven.
 - [Backup runbook](backup-runbook.md) — the plain-`restic` commands this
   page is an alternative front end for, and the wrapper-script env vars
   that don't carry over automatically.
-- [backup](../categories/backup.md) — the module that actually writes this
+- [backup](../categories/backup.md) — the module that writes this
   repository.
 - [rustic-rs/rustic](https://github.com/rustic-rs/rustic) and
   [rustic.cli.rs](https://rustic.cli.rs/) — the live, canonical source;

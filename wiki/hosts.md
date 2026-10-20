@@ -1,11 +1,10 @@
 # Hosts & current state
 
-_Last modified: 2026-10-04_
+_Last modified: 2026-10-20_
 
-This page is a map of where to look for each host. **Switch state is not
-recorded anywhere in the repo** — it rots faster than any session can
-correct it, so "is this host running the current build?" is answered live
-on the host (`just baseline`, `just diff-deployed`, or comparing `nix eval
+A map of where to look for each host. **Switch state is not recorded
+anywhere in the repo**; it rots faster than any session can correct it. Whether
+a host runs the current build is answered live on the host (`just baseline`, `just diff-deployed`, or comparing `nix eval
 ...toplevel.outPath` against `readlink /run/current-system`); see
 [`AGENTS.md`'s State section](../AGENTS.md#state).
 

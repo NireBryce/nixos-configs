@@ -1,6 +1,6 @@
 # `virtualization` — `homelab-config/homelab/virtualization/`
 
-_Last modified: 2026-10-19_
+_Last modified: 2026-10-20_
 
 Libvirt/QEMU VMs, and *only* that — see [containers](containers.md) for why
 podman and distrobox (OCI containers) are a different category. Nested under
@@ -186,7 +186,7 @@ records durandal ever running a VM, so it was parity, not need (see
 
 ## See also
 
-- [containers](containers.md) — where OCI containers actually live, and why
+- [containers](containers.md) — where OCI containers live, and why
   "virtualization" meaning only this is a live trap for a stale memory.
 - [impermanence](impermanence.md), [desktop-env](desktop-env.md) — the other
   categories with `*-persist.nix` siblings following the same

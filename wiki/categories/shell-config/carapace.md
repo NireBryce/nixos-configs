@@ -1,6 +1,6 @@
 # carapace
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-20_
 
 A completion engine used as the primary source of shell completions across
 this repo: `pkgs.carapace` in `home.packages`
@@ -32,7 +32,7 @@ As of 2026-08-22 it does, in order:
 1. Defines `get-env`/`set-env`/`unset-env` shims (`${!1}` indirect
    expansion, `export "$1=$2"`, `unset "$1"`) — carapace's generic
    shell-integration surface, not bash-specific.
-2. Defines `_carapace_completer`, the function actually registered for
+2. Defines `_carapace_completer`, the function registered for
    completion. On each call it exports `COMP_LINE`/`COMP_POINT`/
    `COMP_TYPE`/`COMP_WORDBREAKS` and a handful of `CARAPACE_SHELL_*`
    variables carapace uses to see into the calling shell's state —
@@ -45,7 +45,7 @@ As of 2026-08-22 it does, in order:
    `carapace "$command" bash` on it with a quote character appended —
    trying `''` (empty, i.e. unquoted) first, then `'`, then `"` if the
    previous attempt exits `1` — to let carapace figure out what quoting
-   context the cursor is actually in.
+   context the cursor is in.
 4. Parses the result over a `\x01`-delimited protocol:
    `IFS=$'\001' read -r -d '' nospace data <<<"${data}"` splits a leading
    nospace flag off the front of the payload; `mapfile -t COMPREPLY < <(echo
@@ -76,7 +76,7 @@ As of 2026-08-22 it does, in order:
 is a *different* completion mechanism — a daemon that learns completions at
 runtime by watching for a command's `--help` invocation, needs a system
 install (hence `environment.systemPackages`, not `home.packages`), and was
-carried over from before carapace existed here. Both ultimately register
+carried over from before carapace existed here. Both register
 through the same bash mechanism, `complete -F <function> <command>`, which
 is **last-registration-wins per command name** — whichever of the two
 registers last for `git` is the one that runs.

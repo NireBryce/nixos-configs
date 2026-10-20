@@ -1,6 +1,6 @@
 # 43. A fingerprint check can pass for the wrong reason — dead code looks exactly like safe code until you make it live
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-20_
 
 §43 of [lessons-learned.md](../lessons-learned.md) — that page keeps the one-line version of every lesson; this is §43's full account.
 
@@ -31,10 +31,10 @@ repo has is exactly one level deep. The delegation code was real, compiled,
 and syntactically what I'd described to the user in conversation — and entirely
 dead, for a reason that took tracing the actual call graph to see, not
 reasoning from the diff. The fingerprint check "passed" because nothing had
-actually changed, not because the change was safe.
+changed, not because the change was safe.
 
 Went back and made it live — applying the same check one level higher, so it
-would actually fire at the depth this repo has — specifically to find out
+would fire at the depth this repo has — specifically to find out
 whether it *was* safe, rather than leaving the question open. It wasn't:
 `homelab` delegating to `virtualization`'s aggregate instead of walking it
 independently silently dropped `libvirt-vm-llm-sandbox` from `nire-cube`'s
@@ -49,7 +49,7 @@ earlier the same session and still nearly re-broke the thing it describes).
 Delegating collapses that independence: `homelab` would then get only what
 `virtualization`'s own aggregate decided to include, which is deliberately
 short one file. `drvPath` alone would not have shown this either, cheaply —
-what actually surfaced it was evaluating `config.systemd.services` directly
+what surfaced it was evaluating `config.systemd.services` directly
 and checking for the one service name that mattered, before and after.
 
 Reverted the delegation entirely at first, on the reasoning that no

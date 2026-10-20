@@ -1,12 +1,12 @@
 # `reverse-proxy` — history
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-20_
 
 The verification record for [reverse-proxy](reverse-proxy.md)'s second
 switch, split out 2026-09-03, plus the path-prefix routing design (retired
 2026-09-07, moved here 2026-09-12 once each app got its own Tailscale
 Services vhost and there was no longer a shared prefix for the design to
-justify).
+justify), and the 2026-09-07 to 09-11 moves and TLS outage (moved here from the main page's opening 2026-10-20).
 
 ## Contents
 
@@ -15,6 +15,7 @@ justify).
 - [The two apps want opposite things from the proxy (historical)](#the-two-apps-want-opposite-things-from-the-proxy-historical)
 - [The retired routes, as they were](#the-retired-routes-as-they-were)
 - [The first Tailscale Services attempt, 2026-09-07](#the-first-tailscale-services-attempt-2026-09-07)
+- [The 2026-09-07 to 09-11 moves and outage](#the-2026-09-07-to-09-11-moves-and-outage)
 - [See also](#see-also)
 
 ## Confirmed working end to end, 2026-08-24
@@ -74,11 +75,11 @@ vs `handle_path` to disagree about. Kept for the mechanism, and in case
 either move ever needs reverting — [the routes themselves](#the-retired-routes-as-they-were)
 are below, moved out of `caddy.nix`'s header 2026-09-13.
 
-This is the one thing that was actually gotten wrong, and it cost a switch.
+This is the one thing that was wrong, and it cost a switch.
 Both routes were given `handle`, which passes the matched path through
 untouched. `/grafana/` returned 200; `/git/` returned **404**.
 
-- **Grafana**, with `serve_from_sub_path`, genuinely serves *under*
+- **Grafana**, with `serve_from_sub_path`, serves *under*
   `/grafana`, so the prefix must be **left on** → `handle`.
 - **Forgejo** has no equivalent option. It always serves at `/` — confirmed
   on the host rather than inferred: `curl 127.0.0.1:3001/` is 200,
@@ -169,6 +170,83 @@ guessed:
 
 Hence the shape `serve.nix` has now: `tcp://` raw forwarding to Caddy's
 loopback listener, with Caddy terminating TLS and picking the vhost by SNI.
+
+## The 2026-09-07 to 09-11 moves and outage
+
+Moved here from the top of [reverse-proxy](reverse-proxy.md) so that page opens with what the category is. Statuses below are as of the dated entries; `svc:glance` was removed 2026-10-19.
+
+**Confirmed working end to end, 2026-08-24**, on the second switch — the
+first served `/git/` a 404 through the wrong Caddy directive, because
+Grafana and Forgejo wanted opposite `handle`/`handle_path` treatment for
+the path prefix they then shared; see
+[reverse-proxy-history.md](reverse-proxy-history.md#the-two-apps-want-opposite-things-from-the-proxy-historical)
+for that mechanism and the full verification checklist (TLS validation,
+generated-link checks, the exact requests tested).
+
+**Grafana and Forgejo moved again, 2026-09-07**, off the shared
+`ts-cube.../grafana/`, `.../git/` paths onto their own Tailscale Services
+names — `https://grafana.moose-micro.ts.net/`,
+`https://git.moose-micro.ts.net/`. Caddy is still what terminates TLS for
+both: Tailscale Services turned out not to support declarative HTTPS
+termination on this tailscale version (a confirmed upstream bug, not a
+config mistake — see `tailscale-services/serve.nix`'s history section for
+the full investigation, including the two tailscale/tailscale issue
+numbers). Confirmed working end to end the same day: valid TLS on both new
+names, old paths correctly 404, Forgejo's own generated links using the new
+`ROOT_URL`.
+
+**Then all tailnet HTTPS on cube broke, 2026-09-08 to 2026-09-10**, and the
+two "confirmed working" snapshots above are both older than the break. The
+bare-name convenience vhosts added 2026-09-08 (`https://git` and friends,
+each with `tls internal`) made Caddy's Caddyfile adapter emit an explicit
+`automation.policies` entry covering the `.ts.net` names too — and an
+explicit policy suppresses Caddy's automatic "this is a Tailscale domain,
+ask tailscaled for the cert" detection, leaving those names pointed at
+public Let's Encrypt, which can never issue for a tailnet name. Every
+`.ts.net` handshake died with `SSL_ERROR_INTERNAL_ERROR_ALERT`, including
+`ts-cube.moose-micro.ts.net`, which no commit had touched. `caddy.nix`'s
+`tailscaleCert` binding carries the mechanism with `file:line` references
+into caddy 2.11.4's source; [§47](../lessons-learned/47-explicit-setting-disables-implicit-one.md)
+is the full account. The fix
+is naming `get_certificate tailscale` on each `.ts.net` vhost explicitly
+rather than relying on the detection. **Runtime-verified on hardware
+2026-09-11**: from tenacity, every name returns validated TLS
+(`tls_verify_result` 0) — `ts-cube` 200, `git` 200, `grafana` 302, `glance`
+200.
+
+Two things the same investigation turned up:
+
+- **`svc:glance` never existed — created 2026-09-10, one step still
+  pending.** PR #211 landed the `serve.nix` forward and the Caddy vhost, and
+  `acl-diff-applied.hujson` recorded the autoApprover, but the policy file
+  was never POSTed and the `svc:` object was never PUT, so
+  `glance.moose-micro.ts.net` did not resolve at all while git and grafana
+  did. Now created, along with the `grants` entry the other two services
+  each had; `just tailscale-acl diff` reports "no difference" for the first
+  time since 2026-09-09, and the name resolves tailnet-wide. Fixed 2026-09-11,
+  but restarting `tailscale-serve` was not what fixed it (tried twice, both
+  clean, no change). Re-running `serve set-config` against an
+  already-standing advertisement does not activate a newly-created
+  Service — cube had carried `svc:glance` in its serve config since
+  2026-09-09, long before the object existed to approve it against. A fresh
+  registration is what the control plane acts on: `systemctl restart
+  tailscaled`, then `tailscale-serve` after it (per #267). All four names
+  now return validated TLS. Beware `vip-get glance` as an existence check:
+  the API path wants the `svc:` prefix, and without it every service 404s,
+  `svc:grafana` included.
+
+- **`tailscale-serve.service` lost the race on boot** — issue #267, fixed
+  2026-09-11 and closed. It failed `unexpected state: NoState` 34ms into the
+  2026-09-09 boot and, being a `oneshot` with no retry, stayed failed for
+  9.5 hours until a switch happened to re-run it: no `svc:` forwards at all
+  in the meantime, while cube's own name kept working. `serve.nix` now sets
+  `Restart=on-failure` with a `StartLimit` pair — legal on `Type=oneshot`
+  (only `always`/`on-success` are rejected), so it retries the race and
+  still gives up on a persistent failure. The upstream unit gates on
+  tailscaled the *process*, not its backend state, which is what makes the
+  race possible at all. **Not yet observed self-healing on a real boot** —
+  the fix is reasoned from `systemd.service(5)` and the failure it
+  reproduces, not from watching a reboot recover.
 
 ## See also
 
