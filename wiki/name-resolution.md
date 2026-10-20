@@ -53,7 +53,7 @@ Three answering systems, cleanly divided:
 - **MagicDNS (tailscaled, at `100.100.100.100`)** owns `*.moose-micro.ts.net`
   in both directions: every peer device (`ts-cube`, `ts-tenacity`, `go`,
   `ts-iona`, `homeassistant`, …) and every `svc:` Service VIP
-  (`git`, `grafana`, `homepage`, `glance`). On a host it is reached not
+  (`git`, `grafana`). On a host it is reached not
   directly but through systemd-resolved, which tailscale0's per-link
   routing domains hand the tailnet domain *and* the reverse ranges to —
   so plain `dig -x`, `getent hosts`, and ssh all traverse the stub and

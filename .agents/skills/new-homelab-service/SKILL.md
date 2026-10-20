@@ -8,8 +8,7 @@ description: How to add a self-hosted network service to a host in this repo and
 ## Applies to
 
 Adding a service that listens on a port and is reached from another machine
-— Grafana, Forgejo, golink, the landing page (homepage since 2026-09-12,
-glance before, #291), Caddy; all on `nire-cube`. Use before creating the
+— Grafana, Forgejo, golink, Caddy; all on `nire-cube`. Use before creating the
 category: some decisions are hard to undo once a service has state.
 
 A service is a flake module, so `new-flake-module` still applies; this is the
@@ -57,7 +56,6 @@ and **silently merge** (happened with `containers`/`podman.nix`).
 | `git-forge` | `forgejo` | `forgejo`/`forgejo` merges |
 | `shortlinks` | `golink` | not `golinks` — one letter off reads as a typo |
 | `reverse-proxy` | `caddy` | `caddy`/`caddy` merges |
-| `landing` | `homepage` | not `dashboard` — `monitoring` is full of Grafana dashboards (`glance` held the slot until #291) |
 | `monitoring` | 5 modules | — |
 
 Run `just modules` right after creating the directory; only it catches this.
@@ -70,7 +68,6 @@ A collision is a bind failure at start, not an eval error.
 |---|---|---|
 | 3000 | Grafana | loopback |
 | 3001 | Forgejo | loopback |
-| 3002 | homepage (glance's old slot) | loopback |
 | 8080 | cadvisor | loopback |
 | 9090 | Prometheus | loopback |
 | 9100 | node-exporter | loopback |
@@ -83,7 +80,7 @@ Next free `300x` for user-facing. Grep before trusting the table:
 grep -rnE '\b(30[0-9]{2}|80[0-9]{2}|9[0-9]{3})\b' flake/modules/general-config/ | grep -iE 'port'
 ```
 
-Never accept a tool's default unchecked: glance defaulted to 8080 (cadvisor's); homepage-dashboard defaults to 8082.
+Never accept a tool's default unchecked: glance defaulted to 8080 (cadvisor's); homepage-dashboard to 8082 (both since removed).
 
 ## 4. Bind loopback, add nothing to the firewall
 
@@ -114,7 +111,7 @@ curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:<port>/<prefix>/
 Root 200 + prefix 404 → `handle_path`. Caddyfile traps: `handle` takes
 **one** matcher token (`handle /a /a/*` is a parse error; use named matcher
 `@a path /a /a/*`); `handle_path` takes an inline path matcher only, so a
-bare `/a` needs its own `redir` to `/a/`. A service at `/` (landing page)
+bare `/a` needs its own `redir` to `/a/`. A service at `/`
 avoids all this. Own `svc:` hostname instead of a prefix: `new-tailscale-service`.
 
 ## 6. Does the upstream module handle its own secrets?

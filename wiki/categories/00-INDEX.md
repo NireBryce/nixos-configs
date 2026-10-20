@@ -69,8 +69,7 @@ matching "how do I use this, not configure it" page where one exists.
 | [backup](backup.md) | `homelab-config/homelab/backup/` | nixos | cube only |
 | [containers](containers.md) | `homelab-config/homelab/containers/` | nixos | cube only |
 | [git-forge](git-forge.md) | `homelab-config/homelab/git-forge/` | nixos | cube only |
-| [homelab](homelab.md) | `homelab-config/homelab/` (+ 8 nested) | nixos | cube only |
-| [landing](landing.md) | `homelab-config/homelab/landing/` | nixos | cube only |
+| [homelab](homelab.md) | `homelab-config/homelab/` (+ 7 nested) | nixos | cube only |
 | [monitoring](monitoring.md) | `homelab-config/homelab/monitoring/` | nixos | cube only |
 | [reverse-proxy](reverse-proxy.md) | `homelab-config/homelab/reverse-proxy/` | nixos | cube only |
 | [shortlinks](shortlinks.md) | `homelab-config/homelab/shortlinks/` | nixos | cube only |
@@ -89,7 +88,6 @@ config-vs-usage split. "—" means no service exists to write one about yet.
 | backup | [homelab/backup-runbook.md](../homelab/backup-runbook.md) (+ [rustic.md](../homelab/rustic.md) for browsing/restoring) |
 | containers | — (podman/distrobox, no fleet-facing service) |
 | git-forge | [homelab/forgejo.md](../homelab/forgejo.md) |
-| landing | [homelab/reaching-services.md](../homelab/reaching-services.md) (homepage is the front page; glance beside it since 2026-09-13 for the evaluation) |
 | monitoring | not yet written up — see [homelab/00-INDEX.md](../homelab/00-INDEX.md)'s "Also running, not yet written up" |
 | reverse-proxy | [homelab/reaching-services.md](../homelab/reaching-services.md) (the arrangement all the others sit behind) |
 | shortlinks | [homelab/creating-golinks.md](../homelab/creating-golinks.md) |

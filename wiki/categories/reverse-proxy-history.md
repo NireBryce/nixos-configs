@@ -27,7 +27,7 @@ tailnet host (not `localhost` on cube):
 |---|---|
 | `https://ts-cube.moose-micro.ts.net/grafana/` | 200, TLS validated |
 | `https://ts-cube.moose-micro.ts.net/git/` | 200, TLS validated |
-| `https://ts-cube.moose-micro.ts.net/` | 200 — [glance](landing.md), the service index |
+| `https://ts-cube.moose-micro.ts.net/` | 200 — glance, the service index (since removed) |
 | `https://ts-cube.moose-micro.ts.net/git` | 301 → `/git/` |
 | `http://ts-cube/` | 301 → the FQDN |
 
