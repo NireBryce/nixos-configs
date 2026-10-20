@@ -28,8 +28,6 @@ let
     # does NOT rename the control-plane `svc:` object.
     grafanaFqdn  = "grafana.moose-micro.ts.net";
     gitFqdn      = "git.moose-micro.ts.net";
-    homepageFqdn = "homepage.moose-micro.ts.net";
-    glanceFqdn   = "glance.moose-micro.ts.net";
 
     # EVERY `.ts.net` vhost below MUST carry this. An explicit `tls`
     # directive ANYWHERE in this file makes the Caddyfile adapter emit an
@@ -105,16 +103,12 @@ in {
             # `.ts.net` address is what makes the tailscale cert
             # manager eligible at all.
             virtualHosts = {
-                # Everything unclaimed goes to the landing page --
-                # homepage since 2026-09-12 (issue #291), which is why
-                # this is still port 3002: it kept glance's slot. No
-                # prefix question here, the page serves at `/` with its
-                # assets under it.
+                # No landing page: the bare host answers 404.
                 ${tailnetFqdn}.extraConfig = ''
                     ${tailscaleCert}
                     ${vmDeny}
                     handle {
-                        reverse_proxy 127.0.0.1:3002
+                        respond "not found" 404
                     }
                 '';
 
@@ -132,18 +126,6 @@ in {
                     ${tailscaleCert}
                     ${vmRunnerPathsOnly}
                     reverse_proxy 127.0.0.1:3001
-                '';
-
-                ${homepageFqdn}.extraConfig = ''
-                    ${tailscaleCert}
-                    ${vmDeny}
-                    reverse_proxy 127.0.0.1:3002
-                '';
-
-                ${glanceFqdn}.extraConfig = ''
-                    ${tailscaleCert}
-                    ${vmDeny}
-                    reverse_proxy 127.0.0.1:3004
                 '';
 
                 # `http://` is load-bearing on every bare-name vhost: it
@@ -177,14 +159,6 @@ in {
                     redir https://${grafanaFqdn}{uri} permanent
                 '';
 
-                "http://homepage".extraConfig = ''
-                    redir https://${homepageFqdn}{uri} permanent
-                '';
-
-                "http://glance".extraConfig = ''
-                    redir https://${glanceFqdn}{uri} permanent
-                '';
-
                 # HTTPS twins, for browsers that force HTTPS before the
                 # redirect above gets a chance: they send TLS SNI = the
                 # literal bare name, which no other vhost here matches.
@@ -208,15 +182,6 @@ in {
                     redir https://${grafanaFqdn}{uri} permanent
                 '';
 
-                "https://homepage".extraConfig = ''
-                    tls internal
-                    redir https://${homepageFqdn}{uri} permanent
-                '';
-
-                "https://glance".extraConfig = ''
-                    tls internal
-                    redir https://${glanceFqdn}{uri} permanent
-                '';
             };
         };
 
@@ -276,9 +241,7 @@ in {
 # breaking tailnet HTTPS host-wide until 2026-09-10. Fixed by the
 # `tailscaleCert` binding above; full account, wiki/lessons-learned.md §47.
 #
-# 2026-09-12 (issue #291) — homepage replaced glance as the landing page and
-# kept its port 3002; svc:homepage had to be vip-put and svc:glance
-# vip-deleted, a vhost rename here having no effect on the control plane.
-#
-# 2026-09-13 — glance re-added alongside homepage for the landing
-# evaluation, on port 3004, with svc:glance re-made.
+# 2026-09-12 to 2026-10-19 — homepage (then glance beside it) served as the
+# landing page on ports 3002/3004; both removed as unused attack surface.
+# The bare ts-cube host now answers 404. svc:homepage / svc:glance control-
+# plane objects need vip-delete by hand.

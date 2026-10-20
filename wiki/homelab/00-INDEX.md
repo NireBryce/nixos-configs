@@ -32,8 +32,6 @@ under it, which can happen with no commit to this repo at all.
 | golink — `go/` shortlinks | `nire-cube` | `http://go/` | [Creating go/ links](creating-golinks.md) |
 | Forgejo — self-hosted git forge | `nire-cube` | `https://git.moose-micro.ts.net/` (short: `http://git/`) | [Using the forge](forgejo.md) |
 | practice loop — using the forge + CI like a workplace | `nire-cube` | — | [Practicing a workplace coding environment](practice-environment.md) |
-| homepage — the landing page: services, status, weather, calendar | `nire-cube` | `https://homepage.moose-micro.ts.net/` (short: `http://homepage/`; also `.../` on cube's own name) | [Reaching cube's services](reaching-services.md); [landing](../categories/landing.md) covers config |
-| glance — the old index, back for the landing evaluation | `nire-cube` | `https://glance.moose-micro.ts.net/` (short: `http://glance/`) | [landing](../categories/landing.md) |
 | Grafana — dashboards over cube's own metrics | `nire-cube` | `https://grafana.moose-micro.ts.net/` (short: `http://grafana/`) | [Using Grafana](grafana.md) |
 | restic — backups to `ts-hive` | `nire-cube` | — (no URL; a timer, not a listener) | [Backup runbook](backup-runbook.md) |
 
@@ -56,7 +54,7 @@ and certificate. Caddy still terminates TLS for all of them, with certs
 issued by `tailscaled` — see
 [reverse-proxy](../categories/reverse-proxy.md).
 
-The short names (`http://grafana/`, `http://git/`, `http://homepage/`) redirect
+The short names (`http://grafana/`, `http://git/`) redirect
 to the full ones. Use `http://`, not `https://`: the bare names cannot have a
 publicly-trusted certificate, so the `https://` form shows a browser warning
 by design. Full map and the reasoning:

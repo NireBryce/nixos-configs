@@ -15,7 +15,7 @@ _Last modified: 2026-10-16_
 Nothing of its own — it's an umbrella. Added 2026-08-27, folding seven
 existing, previously-standalone categories under one directory:
 [containers](containers.md), [git-forge](git-forge.md),
-[landing](landing.md), [monitoring](monitoring.md),
+[monitoring](monitoring.md),
 [reverse-proxy](reverse-proxy.md), [shortlinks](shortlinks.md), and
 [virtualization](virtualization.md). Each is still a category of its own,
 addressable by its own name (each holds a subfolder of modules) — this page
@@ -50,9 +50,9 @@ History has the account.
 
 ## Why one category for all seven
 
-Five ([monitoring](monitoring.md), [git-forge](git-forge.md),
-[shortlinks](shortlinks.md), [reverse-proxy](reverse-proxy.md),
-[landing](landing.md)) were cube-only from birth; `virtualization` and
+Four ([monitoring](monitoring.md), [git-forge](git-forge.md),
+[shortlinks](shortlinks.md), [reverse-proxy](reverse-proxy.md))
+were cube-only from birth; `virtualization` and
 [containers](containers.md) became effectively cube-only when durandal
 dropped both 2026-08-27. By then `cube-configuration.nix` carried eight
 import lines for self-hosted services alone; folding them into one

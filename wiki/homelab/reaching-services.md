@@ -26,8 +26,6 @@ Folded in from the retired `reaching-services-for-agents.md` sibling,
 
 | What | Full name | Short |
 |---|---|---|
-| homepage (landing page) | `https://homepage.moose-micro.ts.net/` | `http://homepage/` |
-| glance (port 3004; homepage holds 3002) | `https://glance.moose-micro.ts.net/` | `http://glance/` |
 | Grafana | `https://grafana.moose-micro.ts.net/` | `http://grafana/` |
 | Forgejo | `https://git.moose-micro.ts.net/` | `http://git/` |
 | cube itself | `https://ts-cube.moose-micro.ts.net/` | `http://ts-cube/` |
@@ -37,8 +35,6 @@ Folded in from the retired `reaching-services-for-agents.md` sibling,
   `https://<short>` warns by design. Tailnet-only; not Funnel.
 - `ts-cube`, never `nire-cube`. Port URLs and `/grafana/`, `/git/`
   prefixes are dead.
-- `svc:homepage` needs its Service object applied at switch time
-  (commands in `homepage.nix`'s history section).
 - Not answering: [the checklist](#when-something-doesnt-answer) —
   unresolvable name = missing `svc:` object, `NRestarts` not `active`,
   `tailscale-serve` down darkens every `svc:` name, a first-request `000`
@@ -50,23 +46,14 @@ Folded in from the retired `reaching-services-for-agents.md` sibling,
 
 | What | URL | Short form |
 |---|---|---|
-| Landing page (homepage) | `https://homepage.moose-micro.ts.net/` | `http://homepage/` |
-| glance — back for the landing evaluation | `https://glance.moose-micro.ts.net/` | `http://glance/` |
 | Grafana | `https://grafana.moose-micro.ts.net/` | `http://grafana/` |
 | Forgejo | `https://git.moose-micro.ts.net/` | `http://git/` |
-| cube itself (also the landing page) | `https://ts-cube.moose-micro.ts.net/` | `http://ts-cube/` |
+| cube itself (root answers 404) | `https://ts-cube.moose-micro.ts.net/` | `http://ts-cube/` |
 | golink (**not** on cube) | `http://go/` — see [creating go/ links](creating-golinks.md) | |
 
 **Type the short form with `http://`, not `https://`.** Both work, but they
 behave differently and only one is pleasant — see
 [the warning section](#why-its-https-and-the-one-warning-you-will-still-see).
-
-**Start at the landing page.** It lists the services, live-checks each one,
-shows cube's CPU/memory/disk — so "what's running
-and is it up" is answered by looking, not by reading this page. It answers on
-both its own name and cube's. (Homepage since 2026-09-12, issue #291; the
-`homepage...` short name needs the `svc:homepage` Service object applied at
-switch time — until then use cube's own name, which needs nothing new.)
 
 `ts-cube`, **not** `nire-cube`: this tailnet renames its devices. That trap
 has its own writeup in `general-config/system/networking/tailscale.nix`, indexed from
@@ -80,7 +67,7 @@ has its own writeup in `general-config/system/networking/tailscale.nix`, indexed
 | `http://ts-cube:3001/` | `https://git.moose-micro.ts.net/` | 2026-08-24 |
 | `https://ts-cube.moose-micro.ts.net/grafana/` | `https://grafana.moose-micro.ts.net/` | 2026-09-07 |
 | `https://ts-cube.moose-micro.ts.net/git/` | `https://git.moose-micro.ts.net/` | 2026-09-07 |
-| `https://glance.moose-micro.ts.net/`, `http://glance/` | retired 2026-09-12 → **reinstated 2026-09-13** for the evaluation (glance on its own name again; port 3004) | — |
+| `https://homepage.moose-micro.ts.net/`, `https://glance.moose-micro.ts.net/` (and `http://` short forms) | landing page removed; `ts-cube` root answers 404 | 2026-10-19 |
 
 The port URLs went away because both apps moved to loopback — reachable only
 through Caddy, so a firewall mistake no longer exposes them. The path
@@ -96,7 +83,7 @@ certificate is issued by **Tailscale**, fetched by Caddy from the local
 `tailscaled`. No ACME account, no self-signed warning, nothing to install on
 your devices: `*.ts.net` names get real, publicly-trusted certs.
 
-For the **short names** — bare `git`, `grafana`, `glance` — it depends
+For the **short names** — bare `git`, `grafana` — it depends
 entirely on the scheme, and this catches people:
 
 - **`http://git`** redirects to the full name. No certificate is involved in
@@ -139,7 +126,7 @@ Work down this list; it's ordered by what's most often actually wrong.
    policy file (`just tailscale-acl`), not in the app.
 6. **Ask the host**, over ssh:
    ```sh
-   systemctl status caddy grafana forgejo homepage-dashboard glance tailscale-serve
+   systemctl status caddy grafana forgejo tailscale-serve
    systemctl list-units --state=failed
    ```
    `NRestarts` is the number to look at, not just `active` — a service that
@@ -181,16 +168,6 @@ over the tailnet:
   presented.
 - All four short `http://` names return `301` to their full name, and
   following the redirect lands on `200` with `ssl_verify_result 0`.
-- glance answered on both `ts-cube.moose-micro.ts.net` and its own name,
-  assets included. **Superseded 2026-09-12** by homepage (issue #291),
-  re-verified the same day from `nire-tenacity`: all homepage doors —
-  `ts-cube.../`, `homepage.moose-micro.ts.net/`, and
-  `http://homepage/` redirect-and-follow — return 200 over validated TLS
-  (`ssl_verify_result 0`), and the rendered page draws its widgets in a
-  real browser. The `homepage` Service needed its control-plane object
-  plus one tailscaled/tailscale-serve restart to activate (the
-  `svc:glance` story in [reverse-proxy](../categories/reverse-proxy.md),
-  replayed identically).
 
 **Not exercised:** the failure-mode steps above — they're derived from
 failures that actually happened, not from breaking things deliberately
@@ -202,8 +179,6 @@ afterwards.
   mechanism, and the Tailscale Services split.
 - [reverse-proxy-history](../categories/reverse-proxy-history.md) — the
   retired path-prefix design and why it went.
-- [landing](../categories/landing.md) — homepage and, for the evaluation,
-  glance.
 - [Using the forge](forgejo.md) — cloning, and the hostnames Forgejo hands out.
 - [homelab index](00-INDEX.md) — the other services on this tailnet.
 - [hosts.md](../hosts.md) — `nire-cube` itself.

@@ -21,8 +21,7 @@ nested under `homelab` 2026-08-27.
 |---|---|---|
 | `https://grafana.moose-micro.ts.net/` | `127.0.0.1:3000` | own `svc:`, no path prefix |
 | `https://git.moose-micro.ts.net/` | `127.0.0.1:3001` | own `svc:`, no path prefix |
-| `https://homepage.moose-micro.ts.net/` | homepage | own `svc:`; glance's `svc:glance` renamed by #291, 2026-09-12 (object re-made at switch time) |
-| `https://ts-cube.moose-micro.ts.net/` | homepage at `/` | device name, not a `svc:` |
+| `https://ts-cube.moose-micro.ts.net/` | 404 (no landing page) | device name, not a `svc:` |
 
 Path-prefix routes are retired (2026-09-07) and 404. `http://<bare name>`
 redirects; `https://<bare name>` serves Caddy's local CA and shows
@@ -69,9 +68,8 @@ redirects; `https://<bare name>` serves Caddy's local CA and shows
   (Forgejo 15 `routers/init.go`). No web UI/login for jobs.
 - No `environment.persistence` entry — cube has a persistent root. A host
   that wipes `/root` would need one for `/var/lib/caddy` first.
-- `landing` is a hard dependency: the root route proxies to the landing
-  page (homepage since #291, port 3002 unchanged), so dropping `landing`
-  leaves `/` at 502.
+- The root route answers 404; the landing page (homepage/glance) was
+  removed 2026-10-19. `svc:homepage`/`svc:glance` need `vip-delete`.
 
 ## Out-of-repo prerequisites
 

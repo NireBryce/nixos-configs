@@ -75,7 +75,7 @@
         # Every self-hosted/homelab service this host runs, as one aggregate
         # -- added 2026-08-27, folding what used to be seven separate
         # imports here (virtualization, containers, monitoring, git-forge,
-        # shortlinks, reverse-proxy, landing) into `homelab-config/homelab/`.
+        # shortlinks, reverse-proxy, landing -- landing since removed) into `homelab-config/homelab/`.
         # Each of those is still its own category nested under it
         # (`homelab-config/homelab/<name>/`, each a category because its
         # subfolders hold modules)
@@ -93,8 +93,7 @@
         # Individual per-service mechanism notes (Tailscale-only reachability,
         # the category/module name-collision reasons `git-forge` isn't
         # `forgejo`, `shortlinks` isn't `golink`, `reverse-proxy` isn't
-        # `caddy`, `landing` isn't `glance`/`dashboard`, and the `landing` /
-        # `reverse-proxy` pairing) live on each service's own module header
+        # `caddy`) live on each service's own module header
         # and in `wiki/categories/`, not repeated here now that they share
         # one import line.
         "homelab"

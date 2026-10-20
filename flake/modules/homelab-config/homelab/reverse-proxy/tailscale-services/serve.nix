@@ -45,22 +45,6 @@
                 # made the gap easy to miss.
                 grafana.endpoints."tcp:80"  = "tcp://127.0.0.1:80";
                 git.endpoints."tcp:80"      = "tcp://127.0.0.1:80";
-
-                # A RENAME HERE IS A NEW SERVICE to tailscaled -- the
-                # serve config drops one advertisement and adds another,
-                # and the control-plane object has to be re-made to
-                # match (`vip-put`/`vip-delete`, README.md). Renamed
-                # from `glance` 2026-09-12 with the landing page (issue
-                # #291); homepage.nix's history has the rollout order.
-                homepage.endpoints."tcp:443" = "tcp://127.0.0.1:443";
-                homepage.endpoints."tcp:80"  = "tcp://127.0.0.1:80";
-
-                # Back with glance itself 2026-09-13 for the landing
-                # evaluation. Which port sits behind caddy for a given
-                # name is caddy.nix's business, not this file's -- every
-                # endpoint here forwards to the same two caddy ports.
-                glance.endpoints."tcp:443" = "tcp://127.0.0.1:443";
-                glance.endpoints."tcp:80"  = "tcp://127.0.0.1:80";
             };
         };
 
