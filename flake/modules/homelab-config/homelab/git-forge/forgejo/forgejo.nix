@@ -239,9 +239,13 @@
         # host, ever. Ordered after/wants forgejo.service rather than
         # duplicating its `forgejo migrate` preStart: a Type=notify unit
         # reports active only after preStart (the migration) completed.
-        # Assumes no 2FA on the admin account: basic auth with the
-        # password is rejected when 2FA is on (then the CLI, or an API
-        # token provisioned via sops, is the fallback).
+        # With 2FA on the admin account, basic auth with the password is
+        # rejected (401 "invalid provided OTP"), so a 401 is logged and
+        # the unit still succeeds: a failed unit blocked every switch
+        # (2026-10-19). The re-assert is then skipped; any other status
+        # still fails. Fresh installs never reach this path (`create`
+        # sets the password). An API token provisioned via sops would
+        # restore the re-assert under 2FA.
         systemd.services.forgejo-admin-bootstrap = {
             description = "Ensure the Forgejo admin account exists with the sops-managed password";
             after       = [ "forgejo.service" ];
@@ -264,7 +268,10 @@
                     --admin \
                     --must-change-password=false
                 then
-                    curl --silent --show-error --fail-with-body \
+                    RESPONSE=$(mktemp)
+                    trap 'rm -f "$RESPONSE"' EXIT
+                    STATUS=$(curl --silent --show-error \
+                        --output "$RESPONSE" --write-out '%{http_code}' \
                         --netrc-file <(printf 'machine %s login %s password %s\n' \
                             "${config.services.forgejo.settings.server.HTTP_ADDR}" \
                             "$USERNAME" "$(cat "$PASSWORD_FILE")") \
@@ -272,7 +279,18 @@
                         --request PUT \
                         --data "$(jq -n --arg password "$(cat "$PASSWORD_FILE")" \
                             '{password: $password, must_change_password: false}')" \
-                        "$API/api/v1/admin/users/$USERNAME"
+                        "$API/api/v1/admin/users/$USERNAME")
+                    case "$STATUS" in
+                        2??) ;;
+                        401)
+                            echo "forgejo-admin-bootstrap: API refused the password (2FA on $USERNAME, or the password drifted); not re-asserted" >&2
+                            cat "$RESPONSE" >&2
+                            ;;
+                        *)
+                            cat "$RESPONSE" >&2
+                            exit 1
+                            ;;
+                    esac
                 fi
             '';
 

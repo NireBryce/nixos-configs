@@ -65,9 +65,9 @@ access roots the VM, not cube.
 - **`forgejo-admin-bootstrap` re-asserts elly's password from sops on
   every activation.** Since 2026-10-19 the re-assert goes through the
   loopback admin API (the CLI's only password channel is argv, world-readable
-  in /proc). A hand change in the web UI now FAILS the unit loudly (401)
-  instead of being silently reverted -- fix the secret, or run the CLI
-  `change-password` by hand once.
+  in /proc). With 2FA on elly (the case today) the API answers 401 and the
+  unit logs a warning and succeeds without re-asserting; other API errors
+  still fail it. Fresh installs set the password via `create`, unaffected.
 - The `forgejo-admin-password` sops secret is declared **in this module**,
   not in `general-config/system/secrets/sops.nix`, so it only decrypts on cube.
 - **`one-job` refuses a config defining a connection** when given

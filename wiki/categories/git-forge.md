@@ -261,9 +261,10 @@ module** rather than centralized in `general-config/system/secrets/sops.nix`
 choice, unlike the create-once shape the signing-key units use: a password
 has nothing that breaks if it changes, and this repo's nix+sops config is
 the sole source of truth for it. Drift is therefore a bug, not a state to
-revert: since 2026-10-19 a hand change in the web UI makes the unit FAIL
-(401) instead of silently reverting — fix the secret, or run the CLI
-`change-password` by hand once to re-sync.
+revert: since 2026-10-19 the re-assert goes through the admin API, which
+refuses it (401) while elly has 2FA; the unit then logs a warning and
+succeeds without re-asserting (it failed every switch until then). Other API
+errors still fail it. Fresh installs set the password via `create`, unaffected.
 
 **Status: switched and logged in, confirmed 2026-09-05.** The user has signed
 in as `elly` and used the account directly (screenshot-confirmed) — the
