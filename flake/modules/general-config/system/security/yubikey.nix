@@ -61,7 +61,8 @@
             pcscd.enable = true; # smartcard service
         };
 
-        # Login with a YubiKey touch instead of a password. One enable turns
+        # Login with a YubiKey touch instead of a password (but see `login`
+        # below, where the password goes first). One enable turns
         # u2f on for EVERY PAM service -- each service's u2fAuth defaults to
         # security.pam.u2f.enable (nixpkgs pam.nix) -- so login, sudo, the
         # KDE lock screen, polkit and sshd all get the `sufficient` rule,
@@ -83,6 +84,19 @@
                 authfile = "${config.users.users.elly.home}/.config/Yubico/u2f_keys";
             };
         };
+
+        # The one exception to u2f-first: `login`, which SDDM's stack pulls
+        # in as a substack, checks the password before waiting on a touch.
+        # A greeter collects the password before PAM runs, so u2f-first
+        # blocked a correct password on a touch the greeter never showed --
+        # and a wayland session's VT sits unclaimed for that whole wait:
+        # switching VTs meanwhile spawns an autovt getty on it, and the
+        # session dies on "Failed to take control of /dev/ttyN" (tenacity,
+        # 2026-10-20). Offset from unix's order, as nixpkgs' `order` docs
+        # require, so a correct password returns `sufficient` straight away;
+        # an empty or wrong one falls through to the touch, ahead of deny.
+        security.pam.services.login.rules.auth.u2f.order =
+            config.security.pam.services.login.rules.auth.unix.order + 10;
     };
 }
 
