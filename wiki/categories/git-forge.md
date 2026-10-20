@@ -129,10 +129,13 @@ loops forever: it generates a random 40-hex secret on tmpfs, registers it
 with `forgejo forgejo-cli actions register --ephemeral --scope elly
 --secret-file …` (as the forgejo user; after `forgejo-admin-bootstrap`,
 which creates `elly`), stages it into `/var/lib/forgejo-runner-share/`
-(root 0600, shared into the guest read-only at `/mnt/runner-secret`),
+(owned by the QEMU user, 0400; QEMU hands it to the guest as an fw_cfg
+entry, read from `/sys/firmware/qemu_fw_cfg` — no shared filesystem),
 drops the VM generator's reset stamp and restarts
 `libvirt-vm-forge-runner` — a guest recreated from its base image — then
-waits until the guest powers off, or destroys it after 4.5 h. Two cycles in a row
+waits until the guest powers off, destroying it if it sits unclaimed for
+1 h (Forgejo's task table says whether the runner has taken a job) or runs a
+job past 3.5 h. Two cycles in a row
 shorter than two minutes (a guest dying at boot) back off for one; a
 single short cycle is usually just a quick job.
 

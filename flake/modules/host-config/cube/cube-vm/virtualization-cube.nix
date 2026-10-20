@@ -74,16 +74,21 @@ in {
             ephemeral = true;
             autostart = false;
 
-            # The runner's token, staged by
-            # git-forge/forgejo/actions-runner.nix's registration
-            # unit (a root ExecStartPost) from
-            # the sops-decrypted /run/secrets copy. This is the whole
-            # delivery mechanism -- the guest runs no sops and has no
-            # key; see the guest configuration's header for why the
-            # share's contents must stay single-purpose.
-            shares = [ {
-                source = "/var/lib/forgejo-runner-share";
-                tag    = "runner-secret";
+            # The runner's token, staged per job by
+            # git-forge/forgejo/actions-runner.nix's forge-runner-cycle
+            # and handed to QEMU as an fw_cfg file: the guest reads it
+            # from /sys/firmware/qemu_fw_cfg, as root. No virtiofsd (a
+            # root daemon over a passthrough directory), no mount, no
+            # shared memory. The guest runs no sops and has no key; the
+            # file holds this one job's single-use token and nothing else.
+            fwCfg = [ {
+                name = "opt/forge-runner/secret";
+                file = "/var/lib/forgejo-runner-share/forgejo-runner-secret";
             } ];
+
+            # CI is the one tenant here that runs unreviewed code on a
+            # host that also serves Forgejo and Grafana: yield CPU under
+            # contention, and cap disk throughput at 100 MB/s.
+            limits = { cpuShares = 256; diskBytesPerSec = 100 * 1000 * 1000; };
         };
 }
