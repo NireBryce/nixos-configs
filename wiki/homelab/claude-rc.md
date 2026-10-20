@@ -30,7 +30,7 @@ its header comment has the reasoning behind each option.
   or the unit exits "Workspace not trusted" and retries every 30 seconds.
 - **Push**: sessions push with sops secret `cube_claude_rc_github_token`, a
   fine-grained PAT (four repos, Contents read/write), not the account `gh`
-  token. Expires after 90 days:
+  token. Expires 2027-01-18 (90 days):
   [maintenance-schedule](../maintenance-schedule.md) item 13 has the
   rotation steps.
 - **Hand-started `claude rc` in the same directory** makes the unit fail with

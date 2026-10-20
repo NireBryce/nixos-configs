@@ -27,7 +27,7 @@ and dates are not values.
 | 10 | `FLAKE_LOCK_TOKEN` | expires 2027-09-12; custom date ≤366d | fails loudly by construction, see below | 2026-09-13 |
 | 11 | Atuin account key | none; on suspicion only | — | 2026-09-09 |
 | 12 | `nire-galatea/tskey` (git history only) | dead — rotated 2024; auth keys ≤90d anyway | nothing — history fossil, not a credential | 2026-09-14 |
-| 13 | `cube_claude_rc_github_token` | fine-grained PAT, 90d from ~2026-10-20 (confirm on GitHub) | pushes from cube's `claude-rc` sessions get an auth error; nothing else | 2026-10-20 |
+| 13 | `cube_claude_rc_github_token` | fine-grained PAT, expires **2027-01-18** (90d from 2026-10-20) | pushes from cube's `claude-rc` sessions get an auth error; nothing else | 2026-10-20 |
 
 **Row 12, decided not pended.** Auth key committed 2024-01-29 (`449d158`)
 for the removed `nire-galatea`; left in git history deliberately (rewrite
