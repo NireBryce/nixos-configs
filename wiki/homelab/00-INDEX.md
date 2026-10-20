@@ -1,6 +1,6 @@
 # Homelab services
 
-_Last modified: 2026-10-07_
+_Last modified: 2026-10-20_
 
 How to **use** the services this fleet runs, as opposed to how they're
 configured. Everything here is reachable over the tailnet and nowhere else.
@@ -34,6 +34,7 @@ under it, which can happen with no commit to this repo at all.
 | practice loop — using the forge + CI like a workplace | `nire-cube` | — | [Practicing a workplace coding environment](practice-environment.md) |
 | Grafana — dashboards over cube's own metrics | `nire-cube` | `https://grafana.moose-micro.ts.net/` (short: `http://grafana/`) | [Using Grafana](grafana.md) |
 | restic — backups to `ts-hive` | `nire-cube` | — (no URL; a timer, not a listener) | [Backup runbook](backup-runbook.md) |
+| Claude Remote Control — claude.ai/code sessions in cube's project directories | `nire-cube` | claude.ai/code | [Claude Remote Control on cube](claude-rc.md) |
 
 **Not a service of its own, but related**: [rustic](rustic.md) — a TUI that
 can browse and restore from the same repository the row above writes.

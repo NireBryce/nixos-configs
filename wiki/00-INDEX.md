@@ -74,6 +74,7 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
 |---|---|
 | reach or debug a service running on cube | [homelab/reaching-services.md](homelab/reaching-services.md) |
 | stream cube's desktop, clear a lock-screen lockout, open Sunshine's web UI | [homelab/common-commands.md](homelab/common-commands.md) |
+| restart, add to, or debug cube's Claude Remote Control sessions | [homelab/claude-rc.md](homelab/claude-rc.md) |
 | add, rename, or wire a flake-parts module | [architecture.md](architecture.md), skill [`new-flake-module`](../.agents/skills/new-flake-module/SKILL.md) |
 | decide where a new module goes (shared, host, or user) | [where-modules-go.md](where-modules-go.md) |
 | touch impermanence or initrd | [impermanence-and-secrets.md](impermanence-and-secrets.md), skill [`impermanence-initrd`](../.agents/skills/impermanence-initrd/SKILL.md) |
