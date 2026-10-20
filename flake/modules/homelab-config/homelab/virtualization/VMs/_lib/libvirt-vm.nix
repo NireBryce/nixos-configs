@@ -244,7 +244,14 @@ let
     # nixos/lib/make-disk-image.nix). q35 can run BIOS-only too but its
     # firmware defaults are less uniform across libvirt versions, and
     # nothing here needs it (no PCIe passthrough, one disk/nic).
-    domainXml = pkgs.writeText "${name}-domain.xml" ''
+    #
+    # checkPhase: the build fails on malformed XML (2026-10-20: a `--` in an
+    # XML comment evaluated and built fine, then libvirt refused to define
+    # the domain at boot and the unit failed on nire-cube).
+    domainXml = pkgs.writeTextFile {
+      name = "${name}-domain.xml";
+      checkPhase = "${pkgs.libxml2}/bin/xmllint --noout $target";
+      text = ''
       <domain type='kvm'>
         <name>${name}</name>
         <uuid>${uuid}</uuid>
@@ -284,14 +291,15 @@ let
             <target port='0'/>
           </serial>
           <!-- Headless: no VNC/video (an unauthenticated console for any
-               local user), no balloon, no USB bus -- devices QEMU would
+               local user), no balloon, no USB bus; devices QEMU would
                otherwise emulate for nothing. The serial console is the
                way in. -->
           <controller type='usb' model='none'/>
           <memballoon model='none'/>
         </devices>
       </domain>
-    '';
+      '';
+    };
 
     # Idempotent by design, safe to re-run on every activation -- but only
     # because `domainXml` now carries a fixed `uuid` (see that parameter's
