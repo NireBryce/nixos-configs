@@ -34,8 +34,13 @@ case "$action" in
     *) echo "rebuild.sh: unknown action '$action' (want build, boot or switch)" >&2; exit 2 ;;
 esac
 
-if nix eval --raw --apply "cfgs: if cfgs ? \"$host\" then \"yes\" else \"no\"" \
-        "${flake}#darwinConfigurations" 2>/dev/null | grep -q yes; then
+# Compare the captured reply, not `| grep -q yes`: grep -q exits on its
+# first match, and if nix is still writing when it does, nix dies of SIGPIPE
+# and pipefail reads the pipeline as failed -- a darwin host classified
+# nixos. The reply is one word, so capturing it whole is free.
+reply=$(nix eval --raw --apply "cfgs: if cfgs ? \"$host\" then \"yes\" else \"no\"" \
+        "${flake}#darwinConfigurations" 2>/dev/null) || reply=
+if [ "$reply" = yes ]; then
     class=darwin
 else
     class=nixos

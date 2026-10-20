@@ -16,7 +16,7 @@
 # wiki/homelab/forgejo.md. Traps sit next to the options.
 { lib, ... }:
 {
-    nixos = { config, ... }: {
+    nixos = { config, pkgs, ... }: {
         services.forgejo = {
             enable  = true;
             # sqlite3 (the module default), not postgres/mysql: a
@@ -219,22 +219,35 @@
         # use for SECRET_KEY-style values -- considered: a password,
         # unlike a signing key, has no other state that breaks when it
         # changes, and nix+sops is meant to be its sole source of truth.
-        # Tradeoff: a hand change in the web UI is silently reverted on
-        # the next `just switch`.
+        # That makes drift a bug, not a state to revert: since 2026-10-19
+        # a hand change in the web UI makes this unit FAIL loudly (the
+        # API call below 401s) instead of silently reverting the hand
+        # change on the next `just switch`. Re-sync by fixing the secret
+        # or running the CLI change-password by hand, once.
         #
         # `admin user create` first (covers the first activation); if it
         # fails -- the only realistic failure once forgejo.service is
-        # healthy is "user already exists" -- `admin user
-        # change-password` runs instead. Ordered after/wants
-        # forgejo.service rather than duplicating its `forgejo migrate`
-        # preStart: a Type=notify unit reports active only after
-        # preStart (the migration) completed.
+        # healthy is "user already exists" -- the password is re-asserted
+        # over the loopback admin API. That is not `admin user
+        # change-password` for a reason: forgejo 15.0.9's CLI (checked
+        # --help 2026-10-19) takes the password only as an argv flag,
+        # world-readable in /proc for the command's lifetime. The API
+        # path keeps it off every command line: the JSON body is jq-built
+        # so any charset survives, and auth rides a netrc file on a
+        # /dev/fd rather than a `-u user:pass` argv. Residual: `create`
+        # still passes --password on argv -- it runs exactly once per
+        # host, ever. Ordered after/wants forgejo.service rather than
+        # duplicating its `forgejo migrate` preStart: a Type=notify unit
+        # reports active only after preStart (the migration) completed.
+        # Assumes no 2FA on the admin account: basic auth with the
+        # password is rejected when 2FA is on (then the CLI, or an API
+        # token provisioned via sops, is the fallback).
         systemd.services.forgejo-admin-bootstrap = {
             description = "Ensure the Forgejo admin account exists with the sops-managed password";
             after       = [ "forgejo.service" ];
             wants       = [ "forgejo.service" ];
             wantedBy    = [ "multi-user.target" ];
-            path        = [ config.services.forgejo.package ];
+            path        = [ config.services.forgejo.package pkgs.jq pkgs.curl ];
 
             script = ''
                 set -euo pipefail
@@ -242,6 +255,7 @@
                 EMAIL=nire@computernope.net
                 CONFIG=${config.services.forgejo.customDir}/conf/app.ini
                 PASSWORD_FILE=${config.sops.secrets.forgejo-admin-password.path}
+                API="http://${config.services.forgejo.settings.server.HTTP_ADDR}:${toString config.services.forgejo.settings.server.HTTP_PORT}"
 
                 if ! forgejo --config "$CONFIG" admin user create \
                     --username "$USERNAME" \
@@ -250,10 +264,15 @@
                     --admin \
                     --must-change-password=false
                 then
-                    forgejo --config "$CONFIG" admin user change-password \
-                        --username "$USERNAME" \
-                        --password "$(cat "$PASSWORD_FILE")" \
-                        --must-change-password=false
+                    curl --silent --show-error --fail-with-body \
+                        --netrc-file <(printf 'machine %s login %s password %s\n' \
+                            "${config.services.forgejo.settings.server.HTTP_ADDR}" \
+                            "$USERNAME" "$(cat "$PASSWORD_FILE")") \
+                        --header 'Content-Type: application/json' \
+                        --request PUT \
+                        --data "$(jq -n --arg password "$(cat "$PASSWORD_FILE")" \
+                            '{password: $password, must_change_password: false}')" \
+                        "$API/api/v1/admin/users/$USERNAME"
                 fi
             '';
 

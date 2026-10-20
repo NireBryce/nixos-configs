@@ -46,9 +46,22 @@ echo
 echo '### Kernel command line'
 echo
 echo '```'
-nix derivation show "$drv" 2>/dev/null \
-  | python3 -c 'import json,sys; print(list(json.load(sys.stdin).values())[0]["env"].get("kernelParams",""))' \
-  | tr ' ' '\n' | grep -v '^$' || true
+# A failed read is marked IN the record and fails the script at the end,
+# never silently empty: this output is the record once the generation is
+# collected (lessons-learned.md §24), and an empty section reads as the
+# fact "no kernel parameters". A successful but empty read still prints an
+# empty block -- that one IS a fact about the machine, which is why the
+# `|| true` stays on the grep below rather than the whole read.
+# bootspec, not `nix derivation show`: the toplevel drv's env no longer
+# carries kernelParams (and nix 2.34 nests derivation attrs under
+# "derivations") -- boot.json is what the bootloader actually consumed,
+# which is this script's whole subject.
+kparams=$(python3 -c 'import json,sys; b=json.load(open(sys.argv[1]))["org.nixos.bootspec.v1"]; print(" ".join(b.get("kernelParams", [])))' \
+    /run/current-system/boot.json 2>/dev/null) || {
+    echo '!!! CAPTURE FAILED: no readable /run/current-system/boot.json'
+    baseline_incomplete=1
+}
+printf '%s' "$kparams" | tr ' ' '\n' | grep -v '^$' || true
 echo '```'
 echo
 
@@ -127,4 +140,14 @@ else
     echo '```sh'
     echo "sudo $0"
     echo '```'
+fi
+
+# After everything that could still be captured: an incomplete snapshot must
+# not read as a successful one (§24 -- once the new generation boots and the
+# store is collected, this output is all there is).
+if [ -n "${baseline_incomplete:-}" ]; then
+    echo
+    echo "!!! baseline INCOMPLETE (kernel command line not captured) -- fix the"
+    echo "!!! cause and re-run BEFORE switching; lessons-learned.md §24."
+    exit 1
 fi

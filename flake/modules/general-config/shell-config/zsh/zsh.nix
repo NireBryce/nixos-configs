@@ -127,7 +127,11 @@
             localVariables = {
                 # _ZO_CMD_PREFIX="x";
                 SHELL = "${pkgs.zsh}/bin/zsh";
-                PATH = "$HOME/.nix-profile/bin:$PATH";
+                # No ~/.nix-profile/bin prepend: this config owns the Nix
+                # install, the live profile is /etc/profiles/per-user/elly
+                # (already on PATH), and ~/.nix-profile/bin is empty on
+                # every host (checked 2026-10-19). Was a Manjaro-era left
+                # over that would shadow the real profile if it ever grew.
             };
 
             setOptions = [
@@ -215,6 +219,12 @@
                 autoload -Uz compinit
                 compinit -C
             '')
+                # The `-C` above skips compinit's security audit -- fine,
+                # because programs.zsh.enableCompletion (HM default) emits
+                # a FULL, audited `compinit` at the very end of the
+                # rendered ~/.zshrc (checked there, 2026-10-19). This
+                # mid-file -C only re-initializes completion after the
+                # fpath/plugin setup above, cheaply reusing the dump.
                 # Deliberately no aliases in this block: `#` inside a ''
                 # string is shell text, not a Nix comment, so the reasoning
                 # lives above the string rather than being emitted into

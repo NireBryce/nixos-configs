@@ -30,7 +30,12 @@
             };
             signing = {
                 key = "~/.ssh/id_ed25519";
-                signByDefault = builtins.stringLength "~/.ssh/id_ed25519" > 0;
+                # Every commit signs with the SSH auth key, deliberately --
+                # including agent-made ones. git fails a signing commit
+                # loudly if the key is ever absent; the old
+                # `stringLength "~/.ssh/id_ed25519" > 0` "check" could only
+                # ever be true (it measured the literal, not the disk).
+                signByDefault = true;
             };
 
             lfs.enable = true;

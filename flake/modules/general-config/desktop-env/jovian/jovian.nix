@@ -43,11 +43,34 @@
           lib.makeLibraryPath
           config.jovian.decky-loader.extraPackages;
 
+        # The display manager used to arrive as a side effect of
+        # jovian.steam.autoStart, which enabled SDDM with autoLogin into
+        # gamescope-wayland. Enabled here instead, same settings minus the
+        # autologin: a password at boot, Plasma as the default session,
+        # Gaming Mode (gamescope-wayland) one click away -- Jovian's own
+        # docs bless the display-manager path ("launch the Steam Deck UI
+        # from your Display Manager"). kde-desktop.nix is durandal's
+        # session module -- tenacity never had its own before this.
+        services.displayManager = {
+            defaultSession = "plasma";
+            sddm = {
+                enable = true;
+                wayland.enable = true;
+            };
+        };
+
         jovian = {
             steam = {
                 enable = true;
-                autoStart = true;
-                desktopSession = "plasma";
+                # Not autoStart: that SDDM-autoLogins straight into the
+                # gamescope session, which on a handheld is a pocketable
+                # logged-in session whenever it sleeps in a bag. With it off
+                # (the Jovian default), kde-desktop.nix's SDDM shows a real
+                # greeter offering Gaming Mode (gamescope-wayland) and
+                # Plasma; desktopSession has no effect in this mode and is
+                # omitted. Wake-from-sleep protection is the screen lock's
+                # job either way, not this option's.
+                autoStart = false;
                 user = "elly";
             };
             hardware.has.amd.gpu = true;

@@ -7,7 +7,9 @@
           "hooks": [
             {
               "type": "command",
-              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/session-start.sh\""
+              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/session-start.sh\"",
+              "enabled": true,
+              "timeout": 60
             }
           ]
         }
@@ -18,27 +20,34 @@
           "hooks": [
             {
               "type": "command",
-              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/secrets-guard-pretooluse.sh\""
+              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/secrets-guard-pretooluse.sh\"",
+              "enabled": true,
+              "timeout": 60
             },
             {
               "type": "command",
-              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/git-guard-pretooluse.sh\""
+              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/git-guard-pretooluse.sh\"",
+              "enabled": true
             },
             {
               "type": "command",
-              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/nix-untracked-guard-pretooluse.sh\""
+              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/nix-untracked-guard-pretooluse.sh\"",
+              "enabled": true
             },
             {
               "type": "command",
-              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/just-guard-pretooluse.sh\""
+              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/just-guard-pretooluse.sh\"",
+              "enabled": true
             },
             {
               "type": "command",
-              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/lesson-reminder-pretooluse.py\""
+              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/lesson-reminder-pretooluse.py\"",
+              "enabled": true
             },
             {
               "type": "command",
-              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/zcode-canary-pretooluse.sh\""
+              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/zcode-canary-pretooluse.sh\"",
+              "enabled": true
             }
           ]
         },
@@ -47,11 +56,13 @@
           "hooks": [
             {
               "type": "command",
-              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/impermanence-edit-guard-pretooluse.sh\""
+              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/impermanence-edit-guard-pretooluse.sh\"",
+              "enabled": true
             },
             {
               "type": "command",
-              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/lesson-reminder-pretooluse.py\""
+              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/lesson-reminder-pretooluse.py\"",
+              "enabled": true
             }
           ]
         },
@@ -60,7 +71,8 @@
           "hooks": [
             {
               "type": "command",
-              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/secrets-read-guard-pretooluse.sh\""
+              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/secrets-read-guard-pretooluse.sh\"",
+              "enabled": true
             }
           ]
         }
@@ -71,7 +83,8 @@
           "hooks": [
             {
               "type": "command",
-              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/secrets-guard-posttooluse.sh\""
+              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/secrets-guard-posttooluse.sh\"",
+              "enabled": true
             }
           ]
         },
@@ -80,7 +93,8 @@
           "hooks": [
             {
               "type": "command",
-              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/edit-check-posttooluse.sh\""
+              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/edit-check-posttooluse.sh\"",
+              "enabled": true
             }
           ]
         }
