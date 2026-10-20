@@ -256,12 +256,11 @@ re-fetches certificates from tailscaled.
 
 ## Why the category isn't named `caddy`
 
-Same reason [git-forge](git-forge.md) isn't `forgejo` and
-[shortlinks](shortlinks.md) isn't `golink`: a category and its one module
-both declaring `caddy` would both write `flake.modules.nixos.caddy` and
-silently **merge** rather than error — the `containers`/`podman.nix`
-collision [architecture.md](../architecture.md) documents, hit for real
-twice in this tree already.
+A category and its one module both declaring `caddy` would both write
+`flake.modules.nixos.caddy` and silently **merge** rather than error (the
+`containers`/`podman.nix` collision [architecture.md](../architecture.md)
+documents, hit for real twice in this tree already). [git-forge](git-forge.md)
+and [shortlinks](shortlinks.md) are named for the same reason.
 
 ## Imported by
 

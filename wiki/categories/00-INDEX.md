@@ -7,10 +7,9 @@ subfolders hold modules, see [../module-files.md](../module-files.md)),
 covering what's in it, why it's shaped that way, and its traps.
 [../architecture.md](../architecture.md) has the mechanism.
 
-Scoped to the `general-config/*` system-ish categories plus `users-config/elly`,
-one article each. (`general-config/` was `config-system/` until 2026-09-27 — same
-categories, directory renamed; `git log --follow` across the rename when
-dating anything older.) Not covered here, deliberately:
+It covers the `general-config/*` categories plus `users-config/elly`.
+(`general-config/` was `config-system/` until 2026-09-27; `git log --follow`
+across the rename when dating anything older.) Deliberately not covered:
 
 - **`packages-config/*` subcategories** (`editors`, `terminals`, `gui-other`,
   `linux-utils`, `nix-utils`, `shell-apps`, `development`, …) — mostly

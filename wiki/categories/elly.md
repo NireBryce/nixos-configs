@@ -2,11 +2,11 @@
 
 _Last modified: 2026-10-20_
 
-The one category under `users-config/` — the "for the user" area, as opposed to
-`general-config/` (shared system) or `packages-config/` (packages). Don't confuse this
-category with `users-config/elly-home-manager.nix`, the entry point one level up
-that assembles the *whole* `elly-home-manager` bundle out of this category
-plus several others — see [../architecture.md](../architecture.md).
+The one category under `users-config/`, the per-user area (as opposed to
+`general-config/` for shared system or `packages-config/` for packages). Not to
+be confused with `users-config/elly-home-manager.nix`, one level up, which
+assembles the whole `elly-home-manager` bundle from this category plus several
+others; see [../architecture.md](../architecture.md).
 
 ## Contents
 

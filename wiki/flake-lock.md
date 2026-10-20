@@ -3,8 +3,9 @@
 _Last modified: 2026-10-20_
 
 A weekly automated bump opens a PR for the nixpkgs pin, and only a reviewed
-merge lands it. The lock diff is the review, because an input bump can change what hosts build and boot, including the two that
-wipe `/root` at every boot. The bump is the
+merge lands it. The lock diff is the review, because an input bump can
+change what hosts build and boot, including the two that wipe `/root` at
+every boot. The bump is the
 [DeterminateSystems/update-flake-lock](https://github.com/DeterminateSystems/update-flake-lock)
 GitHub Action, SHA-pinned like every third-party action here, running
 Mondays 09:00 UTC plus on-demand `workflow_dispatch`.

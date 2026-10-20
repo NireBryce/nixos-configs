@@ -37,11 +37,10 @@ One file, `nixos`-class: `restic/restic.nix`, declaring
 
 ## Why the category isn't named `restic`
 
-Same reason [git-forge](git-forge.md) isn't `forgejo` and
-[shortlinks](shortlinks.md) isn't `golink`: a category and its one module
-both named `restic` would both declare `flake.modules.nixos.restic` and
-silently **merge** — the `containers`/`podman.nix` collision
-[architecture.md](../architecture.md) documents.
+A category and its one module both named `restic` would both declare
+`flake.modules.nixos.restic` and silently **merge** (the `containers`/`podman.nix`
+collision [architecture.md](../architecture.md) documents). [git-forge](git-forge.md)
+and [shortlinks](shortlinks.md) are named for the same reason.
 
 ## SFTP repository now, not local-path on NFS
 

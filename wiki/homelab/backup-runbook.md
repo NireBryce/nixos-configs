@@ -6,12 +6,11 @@ Run these on `nire-cube` to operate [backup](../categories/backup.md), the
 restic backups of Forgejo/Grafana/golink's state and `/persist` to the
 `ts-hive` NAS over SFTP. That page covers the design and its history
 (including the sqlite consistency bug fixed 2026-09-06); this page is only
-what to type. Confirmed fully working end to end 2026-09-06: a
-real restore recovered a real, openable Forgejo database — see that
-page's "The sqlite consistency bug" for the account.
+what to type. Confirmed working end to end 2026-09-06: a real restore
+recovered a real, openable Forgejo database (see that page's "The sqlite
+consistency bug").
 
-All commands below run on `nire-cube` itself, with `sudo` — `restic-cube`
-is a wrapper the module generates with `RESTIC_REPOSITORY`,
+Use `sudo`: `restic-cube` is a wrapper the module generates with `RESTIC_REPOSITORY`,
 `RESTIC_PASSWORD_FILE`, and the SFTP identity already baked in, and those
 resolve to root-owned `0400` files, so plain `restic` won't work
 unprivileged.

@@ -4,7 +4,8 @@ _Last modified: 2026-10-20_
 
 The fleet's recurring upkeep is the weekly flake.lock PR, deploying to a host
 and verifying it, and store hygiene (issue #295). This page says which parts
-already run themselves, so a human does only the parts that need one. **Credentials, keys, and certificates are not here**; see
+already run themselves, so a human does only the parts that need one.
+**Credentials, keys, and certificates are not here**; see
 [maintenance-schedule.md](maintenance-schedule.md).
 
 ## Contents

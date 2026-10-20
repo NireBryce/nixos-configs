@@ -2,11 +2,11 @@
 
 _Last modified: 2026-10-20_
 
-[Forgejo](https://forgejo.org/) on `nire-cube`, at
-`https://git.moose-micro.ts.net/` — its own Tailscale Services name as of
-2026-09-07 (was `https://ts-cube.moose-micro.ts.net/git/`; that path 404s
-now). This page is about **using** it — signing in, cloning, pushing. For
-how it's configured and why its two hostnames disagree, see
+[Forgejo](https://forgejo.org/) on `nire-cube` is at
+`https://git.moose-micro.ts.net/`, its own Tailscale Services name since
+2026-09-07 (the old `https://ts-cube.moose-micro.ts.net/git/` now 404s).
+This page covers signing in, cloning and pushing. How it's configured, and
+why its two hostnames disagree, is in
 [git-forge](../categories/git-forge.md).
 
 > **Condensed version:**

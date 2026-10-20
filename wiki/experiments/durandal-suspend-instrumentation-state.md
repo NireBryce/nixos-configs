@@ -7,8 +7,8 @@ investigation and what survives a reboot. **Check it, don't trust it**: each
 row carries its own verification command, because a "currently active" list
 rots silently.
 
-Findings live on [durandal-auto-suspend-hang.md](durandal-auto-suspend-hang.md).
-This page is only about machine state.
+Findings live on [durandal-auto-suspend-hang.md](durandal-auto-suspend-hang.md);
+this page tracks only machine state.
 
 ## Contents
 

@@ -38,13 +38,13 @@ One file, `nixos`-class: `golink/golink.nix`.
 
 ## Why the category isn't named `golink`
 
-Same reason [git-forge](git-forge.md) isn't named `forgejo`: a category and
-its one module both declaring `golink` would both write
-`flake.modules.nixos.golink` and silently **merge** rather than error — the
+A category and its one module both declaring `golink` would both write
+`flake.modules.nixos.golink` and silently **merge** rather than error (the
 `containers`/`podman.nix` collision [architecture.md](../architecture.md)
-documents, hit for real twice already in this tree. It's `shortlinks` rather
-than `golinks`, too: a category name one letter off its own module reads as
-a typo the next time someone greps for it.
+documents, hit for real twice already in this tree; [git-forge](git-forge.md)
+is named for the same reason). It's `shortlinks` rather than `golinks`, too:
+a category name one letter off its own module reads as a typo the next time
+someone greps for it.
 
 ## It hand-writes a systemd unit, which is unusual here
 

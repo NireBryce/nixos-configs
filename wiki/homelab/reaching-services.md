@@ -3,9 +3,8 @@
 _Last modified: 2026-10-20_
 
 Each web service on `nire-cube` has **its own tailnet hostname and its own
-certificate**. That is a change from the original design — one hostname with
-path prefixes — which this page described until 2026-09-11 and which is now
-retired. For how it's built, see
+certificate**. (The earlier one-hostname-with-path-prefixes design was
+retired 2026-09-11.) How it's built:
 [reverse-proxy](../categories/reverse-proxy.md).
 
 ## Contents

@@ -186,12 +186,12 @@ deployed generation matches the tree.
 
 ## Why cube only, and why that's a category rather than a host-specific file
 
-The reasoning is [virtualization](virtualization.md)'s and
-[containers](containers.md)': `general-config/system/` is imported whole by
-every Linux host with no way to opt a piece out, so anything optional needs
-its own category (see [../architecture.md](../architecture.md), "if something
-shared needs to be optional, a category is the mechanism"). If a second host
-ever wants this stack, importing `monitoring` there costs one line.
+`general-config/system/` is imported whole by every Linux host with no way to
+opt a piece out, so anything optional needs its own category, as with
+[virtualization](virtualization.md) and [containers](containers.md) (see
+[../architecture.md](../architecture.md), "if something shared needs to be
+optional, a category is the mechanism"). If a second host ever wants this
+stack, importing `monitoring` there costs one line.
 
 ## Imported by
 

@@ -2,41 +2,27 @@
 
 _Last modified: 2026-10-20_
 
-The `flake/` folder is meant to be browsed by its file tree rather than
-traced through by following code paths. The heavy modularization
-([architecture.md](architecture.md)) exists to make documenting
-functionality in-situ possible, and to keep the context any single
-reader -- agent or human -- has to load down to just the chunk they're
-looking at, instead of the whole tree.
+This is the wiki's topic index. The `flake/` folder is meant to be browsed by
+its file tree, with documentation next to the code; the heavy modularization
+([architecture.md](architecture.md)) keeps the context a reader loads down to
+the chunk they're looking at. Almost nothing is restated here: each link
+points at the file that is already the source for that fact (`CLAUDE.md`,
+`flake/doc/`, `.agents/skills/`, `.md` files next to the code they cover,
+`_loose-ends/bugs-pending-submission/`). When in doubt, follow the link
+rather than trusting this page's paraphrase.
 
-This page is a topic index over documentation that already exists scattered around this
-repo — `CLAUDE.md`, `flake/doc/`, `.agents/skills/`, stray `.md` files
-sitting next to the code they're about, and
-`_loose-ends/bugs-pending-submission/`. Almost nothing has been moved
-here: every link below points at the file that's already the source for
-that fact. The exception is `claude cave/`'s
-four working-notes files, moved in as real pages 2026-09-02 when that
-directory was retired — the same "index over restatement, except here"
-shape `wiki/homelab/` pages and `categories/shell-config/`'s deep-dives
-already used; see [styleguide.md](styleguide.md)'s Directory hierarchy
-section for which tiers are allowed to hold synthesized content instead of
-links, and why.
+**Why links and not a rewrite.** The same fact living in two places has
+repeatedly drifted here; `CLAUDE.md`'s host-count and Safety sections still
+carry the scar tissue ("this paragraph said N until..."). Copying content into
+wiki pages would add a third and fourth place. The exceptions are pages with
+no other source to link to: the four working-notes files moved in from
+`claude cave/` (retired 2026-09-02), the `wiki/homelab/` pages, and
+`categories/shell-config/`'s deep-dives. [styleguide.md](styleguide.md)'s
+Directory hierarchy section says which tiers may hold synthesized content.
 
-**Why a link layer and not a rewrite:** this repo has already been bitten,
-repeatedly, by the same fact living in two places and drifting — `CLAUDE.md`'s
-own host-count and Safety sections carry visible scar tissue from exactly
-that ("this paragraph said N until..."). Copying content into wiki pages
-would just add a third and fourth place for the same drift. So these pages
-are indexes and short orientation notes, not restatements — when in doubt,
-follow the link and read the file it points to, not this page's paraphrase
-of it.
-
-**Not a replacement for `CLAUDE.md`.** `CLAUDE.md` is still the agent-facing
-entry point and the one thing worth reading cold before touching this repo.
-This wiki exists for the "where do I even look" problem once you already
-know roughly what you're after — a human skimming for the right doc, or an
-agent trying to find the one file that answers a question instead
-of re-deriving it.
+**This wiki doesn't replace `CLAUDE.md`**, the agent-facing entry point and
+the one thing worth reading cold before touching this repo. The wiki answers
+"where do I even look" once you know roughly what you're after.
 
 **Long pages come in one of two shapes.** Where the explanation is long
 narrative, there are two versions: `<page>.md` is the explanation,
@@ -48,9 +34,8 @@ keeps a pair in step, is
 [styleguide.md](styleguide.md)'s
 [Two audiences per page](styleguide.md#two-audiences-per-page).
 
-**Don't know what you're after yet?** Start with [Overview](overview.md) —
-the 2-minute mental model this index assumes. Already know what you're
-trying to do? Skip straight to Common tasks below.
+**Don't know what you're after yet?** Start with [Overview](overview.md).
+If you do, skip to Common tasks below.
 
 > **Condensed version:**
 > [00-INDEX-for-agents.md](00-INDEX-for-agents.md) — the same
