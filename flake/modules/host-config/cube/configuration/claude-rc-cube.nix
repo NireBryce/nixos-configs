@@ -18,15 +18,27 @@
 # /home writable on cube (tested with systemd-run --user), so ProtectHome=tmpfs
 # empties it and BindPaths puts back only the project directory, ~/.claude,
 # ~/.claude.json, ~/.cache, and ~/.gitconfig read-only. ~/.ssh and
-# ~/.config/gh are therefore absent: every remote here is https through
-# `gh auth git-credential`, so sessions can't push -- bind ~/.config/gh to
-# change that. Tested by hand with systemd-run on cube: git, the project dir
-# and `claude -p` work; whether ~/.claude.json survives claude's rewrites of
-# it through a file bind mount is unchecked. The Bash sandbox in
-# ~/.claude/settings.json (not managed here) layers on top; bwrap works inside.
+# ~/.config/gh are absent: the latter holds the account-wide `gh` token
+# (scopes repo, workflow, read:org, gist).
+#
+# Push access is a separate fine-grained token, sops secret
+# `cube_claude_rc_github_token`: Contents read/write on the four repos in
+# `dirs`, nothing else, 90-day expiry (wiki/maintenance-schedule.md). Each unit
+# gets it through LoadCredential, and `credential.https://github.com.helper` is
+# replaced, through GIT_CONFIG_* so ~/.gitconfig's `gh auth git-credential` is
+# reset and not merely preceded, by a helper that prints it. If the token
+# expires, pushes fail with an auth error; nothing else breaks. Tested on cube
+# with a dummy token under systemd-run (LoadCredential in a user unit, helper
+# chosen by `git credential fill`); the real token only exists there after a
+# switch. A sandboxed Bash command may be able to read the credentials
+# directory: the sandbox denyRead in ~/.claude/settings.json (not managed here)
+# names ~/.ssh and ~/.config/gh only.
+#
+# Whether ~/.claude.json survives claude's rewrites of it through a file bind
+# mount is unchecked. bwrap works inside these options.
 # ConditionUser keeps it out of other users' managers (NixOS user units start
-# in every one). PATH is the per-user profile plus the system one, so spawned sessions find
-# git and the rest as an ssh shell would.
+# in every one). PATH is the per-user profile plus the system one, so spawned
+# sessions find git and the rest as an ssh shell would.
 let
     dirs = {
         nixos-configs     = "nixos-configs";
@@ -36,13 +48,31 @@ let
     };
 in
 {
-    nixos = { lib, pkgs, ... }: {
+    nixos = { config, lib, pkgs, ... }:
+    let
+        # Answers `get` with the unit's credential and ignores store/erase.
+        tokenHelper = pkgs.writeShellScript "git-credential-claude-rc" ''
+            [ "$1" = get ] || exit 0
+            printf 'username=x-access-token\npassword=%s\n' \
+                "$(cat "$CREDENTIALS_DIRECTORY/github-token")"
+        '';
+    in {
+    # Owned by elly: the user units read it, root's sops activation writes it.
+    sops.secrets.cube_claude_rc_github_token.owner = "elly";
+
     systemd.user.services = lib.mapAttrs' (name: dir:
         lib.nameValuePair "claude-rc-${name}" {
             description = "claude remote-control in ~/${dir}";
             wantedBy    = [ "default.target" ];
             path        = [ "/etc/profiles/per-user/elly" "/run/current-system/sw" ];
             unitConfig.ConditionUser = "elly";
+            environment = {
+                GIT_CONFIG_COUNT   = "2";
+                GIT_CONFIG_KEY_0   = "credential.https://github.com.helper";
+                GIT_CONFIG_VALUE_0 = "";
+                GIT_CONFIG_KEY_1   = "credential.https://github.com.helper";
+                GIT_CONFIG_VALUE_1 = "${tokenHelper}";
+            };
             serviceConfig = {
                 WorkingDirectory = "%h/${dir}";
                 ExecStart        = "${lib.getExe pkgs.claude-code} remote-control";
@@ -56,6 +86,7 @@ in
                     "%h/${dir}" "%h/.claude" "%h/.claude.json" "%h/.cache"
                 ];
                 BindReadOnlyPaths = [ "%h/.gitconfig" ];
+                LoadCredential    = "github-token:${config.sops.secrets.cube_claude_rc_github_token.path}";
             };
         }
     ) dirs;

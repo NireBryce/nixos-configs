@@ -30,6 +30,7 @@ A page without one opens with `## Quick facts` — linked there.
 | work out which name/IP answers for what | [name-resolution.md § Quick facts](name-resolution.md#quick-facts) |
 | reach or debug a cube service | [homelab/reaching-services.md § Quick facts](homelab/reaching-services.md#quick-facts) |
 | cube lockout reset, Sunshine web UI, stream | [homelab/common-commands.md § Quick facts](homelab/common-commands.md#quick-facts) |
+| cube's Claude Remote Control units | [homelab/claude-rc.md § Quick facts](homelab/claude-rc.md#quick-facts) |
 | write or tighten a wiki page | [styleguide-for-agents.md](styleguide-for-agents.md), skills `wiki-sync`, `trim-docs`, `fact-hygiene` |
 | write a module | [module-style-guide-for-agents.md](module-style-guide-for-agents.md) |
 | pick up an open, undiagnosed problem | [experiments/](experiments/), e.g. [durandal-auto-suspend-hang-for-agents.md](experiments/durandal-auto-suspend-hang-for-agents.md) |
