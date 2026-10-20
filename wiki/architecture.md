@@ -111,7 +111,7 @@ flowchart LR
         n26("<b>terminals/</b><br/><i>h · 3</i>")
     end
     subgraph g2["host-config"]
-        n16("<b>cube/</b><br/><i>n · 9</i>")
+        n16("<b>cube/</b><br/><i>n · 10</i>")
         n17("<b>durandal/</b><br/><i>n · 7</i>")
         n18("<b>lysithea/</b><br/><i>d · 2</i>")
         n19("<b>tenacity/</b><br/><i>n h · 11</i>")
