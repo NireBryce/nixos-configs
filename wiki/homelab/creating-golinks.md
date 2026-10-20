@@ -148,6 +148,13 @@ oversight. **Delete through the web UI.** This is also why nothing was
 created as a probe while writing this page: a curl-created test link couldn't
 have been cleaned up the same way.
 
+**Who may create links: any tailnet member that can reach `go`.** golink
+authenticates via the tailnet identity and has no create-permission option
+of its own — creation is open to everyone the ACL lets through, which makes
+the `go/` namespace a shared surface (any member can point `go/anything`
+anywhere). Narrowing creation means narrowing the ACL grants to the `go`
+node, in the admin console.
+
 **Ownership is per-user.** You own what you create and only you can edit or
 delete it; ownership can be handed over from the link's edit page. Links
 owned by someone no longer on the tailnet become editable by anyone, who then

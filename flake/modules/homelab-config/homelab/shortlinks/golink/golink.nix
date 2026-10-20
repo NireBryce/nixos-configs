@@ -34,6 +34,15 @@
 #     traffic silently drops connections here too, nothing in this repo to
 #     fix.
 #
+# WHO MAY CREATE LINKS: anyone the tailnet ACL lets reach the `go` node.
+# golink authenticates via tailnet identity and has no create-permission
+# knob of its own, so authorization IS the ACL (tcp 80/443 to the node, the
+# autogroup:members grant in acl-diff-applied.hujson) plus admin-console
+# group membership for the `tailscale.com/cap/golink` admin cap -- which
+# governs edit/delete, while per-user ownership governs the rest. Nothing
+# in Nix gates creation; the `go/` namespace is therefore shared across
+# the tailnet by design. Usage docs: wiki/homelab/creating-golinks.md.
+#
 # FIRST RUN NEEDS A ONE-TIME LOGIN, BY DESIGN. No `TS_AUTHKEY` -- same call
 # as tailscale.nix's not wiring `authKeyFile`: keys expire (90 days max),
 # so a baked-in key just buys later boot failures. Without a key tsnet
