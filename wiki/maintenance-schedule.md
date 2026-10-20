@@ -341,9 +341,9 @@ here, don't wrap this file in ciphertext to protect one row.
   `LoadCredential` and served to git by a credential helper. It exists so
   those sessions can push without the account-wide `gh` token
   (`~/.config/gh`, deliberately not visible to them).
-- **Expiry**: 90 days from creation, around 2026-10-20 (the user set
-  the expiry; the exact date is on the token's GitHub settings page).
-  Confirm it there and replace the date below.
+- **Expiry**: 90 days from creation on 2026-10-20, so **2027-01-18**
+  (the user's count from the day the token was added, not read off GitHub;
+  the token's settings page is authoritative if they differ).
 - **Fails how**: pushes from those sessions get an authentication error.
   Nothing else breaks and the units keep running.
 - **Rotation**: create a new fine-grained PAT with the same repos and
