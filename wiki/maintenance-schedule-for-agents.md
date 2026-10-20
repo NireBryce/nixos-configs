@@ -1,6 +1,6 @@
 # Maintenance schedule, for agents
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-20_
 
 _Sibling reviewed: 2026-10-01 -- source's restic rotation-log link repointed from pending-setup.md (item gone) to backup-history.md; this page carries no such link_
 
@@ -27,11 +27,18 @@ and dates are not values.
 | 10 | `FLAKE_LOCK_TOKEN` | expires 2027-09-12; custom date ≤366d | fails loudly by construction, see below | 2026-09-13 |
 | 11 | Atuin account key | none; on suspicion only | — | 2026-09-09 |
 | 12 | `nire-galatea/tskey` (git history only) | dead — rotated 2024; auth keys ≤90d anyway | nothing — history fossil, not a credential | 2026-09-14 |
+| 13 | `cube_claude_rc_github_token` | fine-grained PAT, 90d from ~2026-10-20 (confirm on GitHub) | pushes from cube's `claude-rc` sessions get an auth error; nothing else | 2026-10-20 |
 
 **Row 12, decided not pended.** Auth key committed 2024-01-29 (`449d158`)
 for the removed `nire-galatea`; left in git history deliberately (rewrite
 rejected 2026-09-14: public repo, window closed, force-push of both protected
 branches too costly). Scanner flags it: mark rotated/false-positive, move on.
+
+**Row 13.** Fine-grained PAT, four repos, Contents r/w only; sops-declared on
+cube, `LoadCredential` into each `claude-rc-*` unit, git helper in the unit's
+`GIT_CONFIG_*`. Rotate: new PAT, `sops` edit of the value, switch cube,
+`systemctl --user restart 'claude-rc-*'`. Account-wide `gh` token stays
+unbound from the units on purpose.
 
 **Row 8.** Live password set by hand 2026-09-13, only in cube's sqlite db.
 Separately `grafana-admin-password` (sops) feeds

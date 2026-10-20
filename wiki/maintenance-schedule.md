@@ -1,6 +1,6 @@
 # Maintenance schedule
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-20_
 
 A checklist of this fleet's credentials, keys, and certificates that have
 **an actual expiry, a recommended rotation cadence, or a "will silently
@@ -331,6 +331,28 @@ here, don't wrap this file in ciphertext to protect one row.
   and move on. The flag is expected noise, not a finding.
 - **Last checked**: 2026-09-14 — decision made; no key material read, per
   `secrets-hygiene`.
+
+### 13. `cube_claude_rc_github_token` — push token for cube's `claude-rc` sessions
+
+- **What**: a fine-grained GitHub PAT in `secrets.yaml`, scoped to the four
+  repos in [`claude-rc-cube.nix`](../flake/modules/host-config/cube/configuration/claude-rc-cube.nix)'s
+  `dirs` with `Contents: read/write` and nothing else. Declared only on
+  `nire-cube`, handed to each `claude-rc-*` user unit through
+  `LoadCredential` and served to git by a credential helper. It exists so
+  those sessions can push without the account-wide `gh` token
+  (`~/.config/gh`, deliberately not visible to them).
+- **Expiry**: 90 days from creation, around 2026-10-20 (the user set
+  the expiry; the exact date is on the token's GitHub settings page).
+  Confirm it there and replace the date below.
+- **Fails how**: pushes from those sessions get an authentication error.
+  Nothing else breaks and the units keep running.
+- **Rotation**: create a new fine-grained PAT with the same repos and
+  permission, replace the `cube_claude_rc_github_token` value in
+  `secrets.yaml` with `sops` (skill `secrets-hygiene`), switch cube, then
+  `systemctl --user restart 'claude-rc-*'`. Add a repo by adding it to the
+  token's repository list and to `dirs`.
+- **Last checked**: 2026-10-20 -- created and wired; the real token had not
+  yet reached cube, only a dummy under `systemd-run`.
 
 ## Adding a new item
 
