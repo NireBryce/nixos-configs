@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # What nire-durandal is made of.
 #
 # This file sits directly under host-config/ rather than in a category directory,

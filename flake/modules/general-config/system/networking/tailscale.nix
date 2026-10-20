@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Tailscale, as an actual service rather than just the CLI on PATH.
 # Imported by every Linux host via the `system` category.
 #

@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # One `claude remote-control` per working directory, as a user service on cube,
 # so the sessions listed in claude.ai/code come back after a reboot instead of
 # needing someone to ssh in and start each by hand; added 2026-10-19.

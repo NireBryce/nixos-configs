@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 {
     # 25.05, not durandal's 23.11 -- this host was installed later. The
     # sibling branch's tenacity stub said 23.11, which looks like it was

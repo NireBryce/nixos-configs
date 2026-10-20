@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Shell registration at the system level. zsh itself is configured through
 # Home Manager (general-config/shell-config/zsh/), same as the Linux hosts; this is only
 # the macOS-specific plumbing around that: which shells exist in

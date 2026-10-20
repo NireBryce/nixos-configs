@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Declares the `environment.persistence` option for every NixOS host, whether
 # or not that host actually wipes anything. Nothing else. No bind mounts
 # happen unless something populates environment.persistence."/persist" with

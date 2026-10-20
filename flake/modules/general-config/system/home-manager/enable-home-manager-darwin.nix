@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Home Manager, managed from the darwin side. The darwin counterpart to
 # enable-home-manager.nix, in the same file for the same reason -- see that
 # file's own header. Lives here rather than under lysithea's own host

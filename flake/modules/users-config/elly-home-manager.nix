@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # elly's whole Home Manager config, as one module.
 #
 # The home-side counterpart to host-config/durandal-configuration.nix, and it sits

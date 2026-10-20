@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Home Manager, managed from the NixOS side.
 #
 # Lives under general-config/system/ so the `system` category picks it up and durandal gets

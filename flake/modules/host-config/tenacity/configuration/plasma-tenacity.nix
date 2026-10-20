@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Tenacity's live Plasma/KDE state (theme, kwin behavior, input devices,
 # global shortcuts), captured from this machine's own ~/.config on
 # 2026-09-01 and turned into plasma-manager declarations.

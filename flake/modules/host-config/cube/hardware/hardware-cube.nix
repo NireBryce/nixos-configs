@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # nire-cube (GMKtec Nucbox G11). fileSystems/boot.initrd.*/swapDevices below
 # are real, captured from `nixos-generate-config` after installing NixOS onto
 # the real disk with the stock NixOS live ISO -- not this flake's own

@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Cube-side host support for the Forgejo Actions runner, which runs in a
 # VM (forge-runner, instantiated by virtualization-cube.nix; its
 # config is host-config/forge-runner-configuration.nix). This module is what

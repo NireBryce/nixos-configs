@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # cadvisor: per-container CPU/memory/network metrics, for the podman
 # containers containers.nix's `podman` category enables. One of three things
 # prometheus.nix scrapes -- see that file and grafana.nix for the rest of the

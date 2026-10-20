@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Gives cube a desktop for Sunshine (general-config/system/gaming/sunshine.nix)
 # to stream with no monitor attached; added 2026-10-06. Two parts, both
 # needed:

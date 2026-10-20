@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Planetside 2's UDP ports, on the one host that plays it. They sat in
 # networking.nix's shared allowedUDPPorts until 2026-10-19, opening the same
 # LAN holes on cube (the always-on homelab server) and tenacity (the

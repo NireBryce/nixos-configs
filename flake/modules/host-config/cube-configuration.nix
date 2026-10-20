@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # What nire-cube is made of. GMKtec Nucbox G11, a mini PC -- workstation
 # shape, same as durandal, not a handheld (see tenacity-configuration.nix
 # for that shape instead).

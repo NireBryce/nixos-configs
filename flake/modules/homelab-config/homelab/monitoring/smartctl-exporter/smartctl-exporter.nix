@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # smartctl_exporter: per-disk SMART/NVMe wear metrics (health status,
 # percentage used, media errors, temperature) for prometheus.nix to scrape
 # and grafana.nix to trend over time -- the one piece of this stack that

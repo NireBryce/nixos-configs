@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # The naming rule, as code: host `nire-<x>` (networking.hostName, and
 # `nire-<x>.local` on the LAN via avahi.nix) is the Tailscale device
 # `ts-<x>` (MagicDNS; FQDN `ts-<x>.moose-micro.ts.net`). tailscale.nix's

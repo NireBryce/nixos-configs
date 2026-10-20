@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # Drop packages nixpkgs cannot build on this system, once, instead of guarding
 # them one module at a time. elly-home-manager is shared verbatim by all four
 # hosts, so everything in it has to survive aarch64-darwin as well as

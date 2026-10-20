@@ -1,6 +1,6 @@
 # Wiki index, for agents
 
-_Last modified: 2026-10-16_
+_Last modified: 2026-10-20_
 
 Condensed from [00-INDEX.md](00-INDEX.md). Routing only.
 
@@ -42,7 +42,7 @@ A page without one opens with `## Quick facts` — linked there.
 - [flake-parts.md](flake-parts.md) → [architecture.md](architecture.md) —
   why flake-parts, then the category mechanism on top of it.
 - [module-files.md](module-files.md) — a module file's shape and rules, and why
-  (each module's first line points here).
+  (names from filenames, categories from folders).
 - [traps-and-skills.md](traps-and-skills.md) — real past mistakes, and which skill holds each.
 - [lessons-learned.md](lessons-learned.md) — every § as one line (rule,
   Home, Enforced), grouped by when it applies: read your task's group. By

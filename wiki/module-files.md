@@ -1,12 +1,17 @@
 # Module files
 
-_Last modified: 2026-10-16_
+_Last modified: 2026-10-20_
 
-Why every module under `flake/modules/` looks the way it does. Each one's
-first line points here. The rules themselves live in the
-[dirs-as-categories](https://github.com/NireBryce/dirs-as-categories)
-flake input that applies them (its `doc/convention.md` states every rule and
-error); this page is what they mean for this repo, and why it changed.
+How the files under `flake/modules/` become NixOS, Home Manager and darwin
+modules, and why they are written the way they are. A module file never
+names its module: the
+[dirs-as-categories](https://github.com/NireBryce/dirs-as-categories) flake
+input names it after the file (`gaming.nix` is `gaming`) and makes every
+folder that holds modules a category, so a host includes a whole folder by
+name. Writing the name by hand in 228 files let the two disagree, and a
+module whose name disagreed with its filename silently dropped out of its
+categories. Each module's first line says this in a comment. The rules are
+in the input's `doc/convention.md`; this page is what they mean here.
 
 ## Contents
 
@@ -38,7 +43,7 @@ error); this page is what they mean for this repo, and why it changed.
 ## What a module file is
 
 ```nix
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 { lib, ... }:
 {
     nixos = { pkgs, ... }: {
@@ -130,7 +135,7 @@ Names are the filenames: the aggregates are `cube-configuration`,
 `hosts.nix`, `checks.nix`, `invariants.nix`, `dev-shell.nix` and
 `nix-topology-flake.nix` are plain flake-parts modules -- functions asking
 for `config`, or sets with no class key -- loaded as written. They carry no
-pointer line. `nix-topology.nix` was split in two for this: a module file
+dirs-as-categories header comment. `nix-topology.nix` was split in two for this: a module file
 holds only its classes, so its `perSystem` half moved to
 `nix-topology-flake.nix`.
 

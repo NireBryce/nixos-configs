@@ -1,6 +1,6 @@
 # Module style guide
 
-_Last modified: 2026-10-16_
+_Last modified: 2026-10-20_
 
 Conventions for `flake/modules/`. "How many files do this" used to be
 stated as inline counts per section, dated 2026-08-08 -- and by 2026-09-09
@@ -83,13 +83,14 @@ file sees a level with no bracket closing it and suspects one is missing.
 
 ## The module header
 
-A module names nothing: its name is its filename, and its first line points
-to [module-files.md](module-files.md), which says why (until 2026-10-16 every
+A module names nothing: dirs-as-categories names it after its filename, and
+the first-line comment says so ([module-files.md](module-files.md) has the
+why; until 2026-10-16 every
 module derived its name itself, with `moduleName = lib.removeSuffix ".nix"
 (baseNameOf __curPos.file)` and `flake.modules.<class>.${moduleName} =`):
 
 ```nix
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 { lib, ... }:
 {
     homeManager = { pkgs, ... }: {

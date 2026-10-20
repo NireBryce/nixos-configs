@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # nire-cube's VM wiring -- every libvirt VM on cube is instantiated here,
 # one import of the generator (homelab-config/homelab/virtualization/
 # VMs/_lib/libvirt-vm.nix) per VM. Revives the name of the llm-sandbox-era

@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # sshd on tenacity answers over the tailnet only, never on whatever LAN or
 # café wifi the handheld is on that day. Added 2026-09-26.
 #

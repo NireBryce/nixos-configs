@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # smartmontools (smartctl/smartd): general-purpose SMART/NVMe health and
 # wear monitoring, for every NixOS host regardless of desktop environment.
 # The KDE-specific half of this -- a systray applet on top of the same

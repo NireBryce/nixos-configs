@@ -1,4 +1,4 @@
-# Module file: named after this file; why it looks this way: wiki/module-files.md
+# dirs-as-categories: the module is named after this file; its categories are the folders above it
 # mosh (mobile shell): remote terminal over UDP that survives roaming,
 # sleep, and IP changes -- the client half of "get me a shell on another
 # machine". Filed under terminals/ by function, next to kitty (the local
