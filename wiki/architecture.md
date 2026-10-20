@@ -2,8 +2,9 @@
 
 _Last modified: 2026-10-20_
 
-How `flake/modules/` becomes NixOS, Home Manager and darwin configuration:
-module files, categories, and host includes. For why the repo uses
+`flake.nix` is a manifest: it reads every `.nix` file under `flake/modules/`
+and fills `flake.modules.<class>.<name>` from them. A folder holding modules
+is a category, and a host includes categories by name. For why the repo uses
 flake-parts, see [flake-parts.md](flake-parts.md). For one category's
 members, importing hosts and traps, see the
 [category reference](categories/00-INDEX.md).

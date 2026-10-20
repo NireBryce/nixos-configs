@@ -1,11 +1,11 @@
 # Using Grafana
 
-_Last modified: 2026-09-26_
+_Last modified: 2026-10-20_
 
-Grafana on `nire-cube`, showing the metrics
-[monitoring](../categories/monitoring.md) collects. This page is about
-**using** it — signing in, and what happens to a dashboard you make. That
-page is how it's configured and why.
+Grafana on `nire-cube` shows the metrics
+[monitoring](../categories/monitoring.md) collects. This page covers signing
+in and what happens to a dashboard you make; that page covers how it's
+configured and why.
 
 ## Contents
 

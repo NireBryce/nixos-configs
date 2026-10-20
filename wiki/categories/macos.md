@@ -2,10 +2,10 @@
 
 _Last modified: 2026-10-20_
 
-`darwin`-class only, throughout — the one category in this repo that is
+`darwin`-class only, throughout: the one category in this repo that is
 entirely platform-specific rather than shared-with-a-guard. See
 [../architecture.md](../architecture.md)'s "Platform support is derived"
-section for the general pattern this fits into.
+section for the general pattern.
 
 ## Contents
 

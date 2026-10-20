@@ -2,17 +2,16 @@
 
 _Last modified: 2026-10-20_
 
-A checklist of this fleet's credentials, keys, and certificates that have
-**an actual expiry, a recommended rotation cadence, or a "will silently
-break later" property** — as opposed to `secrets.yaml`'s full inventory,
-which is every secret regardless of whether it ever needs attention. Tended
-by skill [`maintenance-schedule`](../.agents/skills/maintenance-schedule/SKILL.md).
+Each item below is a credential, key, or certificate with **an expiry, a
+recommended rotation cadence, or a "will silently break later" property**.
+`secrets.yaml` holds every secret; this page lists only the ones that need
+attention. Tended by skill
+[`maintenance-schedule`](../.agents/skills/maintenance-schedule/SKILL.md).
 
-Each item states what it is, what's known about its expiry (not
-guessed — "unverified" is written down as such rather than invented), and
-where the real rotation procedure lives if there is one. This page is the
-index that says *something is due*; `backup-runbook.md` and similar own the
-*how*.
+Each item states what it is, what's known about its expiry ("unverified" is
+written down as such, never guessed), and where the rotation procedure lives
+if there is one. This page says *something is due*; `backup-runbook.md` and
+similar own the *how*.
 
 > **Condensed version:**
 > [maintenance-schedule-for-agents.md](maintenance-schedule-for-agents.md) — the same
@@ -29,20 +28,16 @@ index that says *something is due*; `backup-runbook.md` and similar own the
 
 ## Why this file is plaintext, not sops-encrypted
 
-Considered and rejected: sops-encrypting this file the way `secrets.yaml`
-is. Nothing on this page is a secret *value* — key **names**, rotation
-**dates**, and expiry **durations** aren't the credentials themselves, the
-same reasoning `secrets-hygiene`'s skill applies to `secrets.yaml`'s own key
-names (safe to `cat`/`git show`; only the `ENC[...]` payload is sensitive).
-Encrypting a schedule that exists specifically to be checked on a cadence
-would work against its own purpose — nobody re-derives a due date through
-`sops -d` on a regular basis, and a wiki page has no age-key access control
-to begin with.
+Nothing on this page is a secret *value*. Key **names**, rotation **dates**,
+and expiry **durations** aren't the credentials, the same reasoning
+`secrets-hygiene` applies to `secrets.yaml`'s own key names (safe to
+`cat`/`git show`; only the `ENC[...]` payload is sensitive). A schedule meant
+to be checked on a cadence is also useless behind `sops -d`, and a wiki page
+has no age-key access control anyway.
 
-**This judgment flips per-row, not for the whole file**, if a row ever needs
-to hold an actual secret value (a real key material dump, not a name or a
-date) — encrypt that value with sops the normal way and reference it from
-here, don't wrap this file in ciphertext to protect one row.
+If a row ever needs to hold an actual secret value, encrypt that value with
+sops and reference it from here. Don't wrap this file in ciphertext to
+protect one row.
 
 ## Items
 
@@ -222,36 +217,31 @@ here, don't wrap this file in ciphertext to protect one row.
   `Contents: read/write` and `Pull requests: read/write`. Read by
   [`../.github/workflows/update-flake-lock.yml`](<../.github/workflows/update-flake-lock.yml>)
   as the `token` input to `DeterminateSystems/update-flake-lock`.
-- **Why a PAT rather than `GITHUB_TOKEN`**: chiefly so these PRs trigger
-  CI. A `GITHUB_TOKEN`-opened PR does not trigger this repo's own
-  `pull_request` workflows, so `nix flake check + module tree` never
-  reports — and the `experimental` ruleset *requires* it, making such a PR
-  unmergeable without an admin bypass. Secondarily, it keeps the repo-wide
-  "Allow GitHub Actions to create and approve pull requests" setting off,
-  and it structurally cannot approve its own PRs (GitHub refuses
-  self-approval). That setting is a single switch granting create **and**
-  approve, with no way to have one without the other.
-- **Why not sops**, asked 2026-09-08 and worth not re-deriving: a runner
-  would need the age key to decrypt, and that key would itself have to be
-  a GitHub Actions secret — one GitHub-stored credential swapped for
-  another, plus a layer. Nor could a runner be enrolled: every key in
+- **Why a PAT rather than `GITHUB_TOKEN`**: so these PRs trigger CI. A
+  `GITHUB_TOKEN`-opened PR does not trigger this repo's `pull_request`
+  workflows, so `nix flake check + module tree` never reports, and the
+  `experimental` ruleset *requires* it, leaving the PR unmergeable without an
+  admin bypass. A PAT also keeps the repo-wide "Allow GitHub Actions to
+  create and approve pull requests" setting off (one switch grants create
+  **and** approve) and cannot approve its own PRs.
+- **Why not sops** (asked 2026-09-08): a runner would need the age key to
+  decrypt, and that key would itself have to be a GitHub Actions secret, so
+  one GitHub-stored credential is swapped for another plus a layer. A runner
+  can't be enrolled either: every key in
   [`.sops.yaml`](<../flake/modules/general-config/system/secrets/.sops.yaml>) is
-  derived from a *host's* `/etc/ssh/ssh_host_ed25519_key.pub`, and a
-  runner is an ephemeral VM with no persistent host key. And nothing in
-  the nix tree ever reads this token, so a `sops.secrets.*` entry for it
-  would decrypt on three hosts with no use for it — the shape #203
-  deleted. Minor point in the same direction: `secrets.yaml` is committed
-  to a *public* repo, so its ciphertext is permanently public; an Actions
-  secret is never published. The general rule this follows is the one in
-  "Why this file is plaintext" above — the consumer picks the store.
+  derived from a *host's* `/etc/ssh/ssh_host_ed25519_key.pub`, and a runner
+  is an ephemeral VM with no persistent host key. Nothing in the nix tree
+  reads this token, so a `sops.secrets.*` entry would decrypt on three hosts
+  with no use for it (the shape #203 deleted). Also, `secrets.yaml` is
+  committed to a *public* repo, so its ciphertext is permanently public; an
+  Actions secret is never published. The consumer picks the store.
 - **Expiry**: **2027-09-12** (minted 2026-09-13 as a custom date; GitHub's
-  maximum is 366 days and the creation UI defaults to 30). The creation UI
-  also offers "No expiration" for fine-grained tokens — chosen against:
-  a no-expiry token gets no expiry header, so the weekly check would
-  degrade to the "cannot tell" notice below forever.
-- **This one fails loudly, by construction.** Unlike everything else on
-  this page, the workflow checks its own credential rather than relying on
-  someone reading this file:
+  maximum is 366 days and the creation UI defaults to 30). "No expiration" is
+  also offered for fine-grained tokens, but a no-expiry token gets no expiry
+  header, so the weekly check would degrade to the "cannot tell" notice
+  below forever.
+- **This one fails loudly, by construction.** The workflow checks its own
+  credential rather than relying on someone reading this file:
   - A **missing, revoked, or expired** token fails the run at its first
     step with a `::error::` annotation naming the secret and what to do —
     before the nix install and flake update, rather than as a bare 401
@@ -264,11 +254,10 @@ here, don't wrap this file in ciphertext to protect one row.
     issue titled `update-flake-lock: weekly lock PR needs attention`
     rather than filing weekly), because a red scheduled run only emails
     the repo owner and that is easy to miss months later.
-  - One gap, stated rather than papered over: GitHub returns the
-    `github-authentication-token-expiration` header only for tokens that
-    *have* an expiry, so an absent header means "cannot tell", not
-    "healthy". That case emits a `::notice::` and does **not** fail — so
-    the early warning is best-effort, while the hard failure on an
+  - One gap: GitHub returns the `github-authentication-token-expiration`
+    header only for tokens that *have* an expiry, so an absent header means
+    "cannot tell", not "healthy". That case emits a `::notice::` and does
+    **not** fail. The early warning is best-effort; the hard failure on an
     already-dead token is not.
 - **Failure mode if it lapses anyway**: the run pushes the updated
   `update_flake_lock_action` branch as normal and then fails at PR
@@ -318,15 +307,14 @@ here, don't wrap this file in ciphertext to protect one row.
   and Tailscale auth keys can't outlive 90 days regardless. The repo is
   public, so the blob has been public since the day it was pushed — the
   exposure window closed years before anyone flagged it again.
-- **Decision, 2026-09-14: left in place; history rewrite considered and
-  rejected.** Purging it means force-pushing `main` and `experimental`
-  (both ruleset-protected), invalidating every commit-SHA reference made
-  since January 2024, and dropping the rewrite under whatever sessions are
-  in flight — for a credential that cannot authenticate, in a repo where
-  the old objects survive in existing clones and GitHub's caches no matter
-  what (a true purge is a GitHub Support ticket even after a rewrite). The
-  same public-repo permanence item 10 records for `secrets.yaml`'s
-  ciphertext applies here.
+- **Decision, 2026-09-14: left in place; a history rewrite was rejected.**
+  Purging it means force-pushing `main` and `experimental` (both
+  ruleset-protected), invalidating every commit-SHA reference since January
+  2024, and rewriting under whatever sessions are in flight, all for a
+  credential that cannot authenticate. The old objects survive in existing
+  clones and GitHub's caches regardless (a true purge is a GitHub Support
+  ticket). The public-repo permanence item 10 records for `secrets.yaml`'s
+  ciphertext applies here too.
 - **What to do when a scanner flags it**: mark it rotated/false-positive
   and move on. The flag is expected noise, not a finding.
 - **Last checked**: 2026-09-14 — decision made; no key material read, per

@@ -49,20 +49,15 @@ named (and reads as) `forgejo`.
 
 ## Zero-touch secrets, built in rather than hand-rolled
 
-Checked against the pinned nixpkgs' forgejo module before assuming a
-Grafana-style manual secret was needed: it isn't. `services.forgejo` ships
-`forgejo-secrets.service`, a oneshot that generates
+Unlike Grafana, Forgejo needs no manual secret. The pinned nixpkgs'
+`services.forgejo` ships `forgejo-secrets.service`, a oneshot that generates
 `SECRET_KEY`/`INTERNAL_TOKEN`/`JWT_SECRET` under `${customDir}/conf/`
 (`/var/lib/forgejo/custom/conf/` by default) on first run and no-ops after.
-Nothing to create by hand.
 
-[monitoring](monitoring.md)'s `grafana.nix` needed a hand-rolled
-`grafana-secret-key-setup.service` to match this exact shape — its
-`secret_key` file was hand-created, found regressed unreadable on a live
-re-check, and only then fixed, modeled on `forgejo-secrets.service`:
-generate-if-missing, reassert ownership unconditionally, never regenerate an
-existing key. Upstream `services.forgejo` ships that pattern;
-`services.grafana`'s deliberately doesn't (nixpkgs removed its
+[monitoring](monitoring.md)'s `grafana.nix` has a hand-rolled
+`grafana-secret-key-setup.service` modeled on it: generate-if-missing,
+reassert ownership unconditionally, never regenerate an existing key.
+`services.grafana` doesn't ship that pattern (nixpkgs removed its
 `secretKeyFile` option).
 
 ## Actions and the runner
@@ -72,8 +67,9 @@ Added 2026-09-24 on the host; moved into a VM 2026-09-25. Forgejo Actions
 (`settings.actions.ENABLED`), but a new repo starts with its Actions unit
 off (`repository.DEFAULT_REPO_UNITS` omits `repo.actions`) and is opted in
 from its Settings. The runner is registered scoped to the user `elly`
-(`--scope elly`): it takes jobs from that user's repos only. The runner itself is the libvirt guest
-`forge-runner` on cube — instantiated by
+(`--scope elly`): it takes jobs from that user's repos only, one at a time,
+and runs no actions cache server. It is the libvirt guest
+`forge-runner` on cube, instantiated by
 `host-config/cube/cube-vm/virtualization-cube.nix` through the VM generator, guest
 config in `host-config/forge-runner-configuration.nix` (no `nire-` prefix:
 that names the fleet machines, and this is a component of cube). What
@@ -81,11 +77,10 @@ stays on the host (`forgejo/actions-runner.nix`) is only what must be
 here: the sops secret, the registration oneshot, and the staged token
 copy the guest mounts.
 
-The containment is the point: workflow code with podman/docker access is
-one escape from whatever holds it, and cube holds everything sops
-decrypts. In the VM it holds one secret — its own runner token. The VM
-adds no listening port either way; it is dial-out, like the runner was
-on the host. Its egress is scoped by the GUEST's own firewall
+The point is containment: workflow code with podman/docker access is one
+escape from whatever holds it, and cube holds everything sops decrypts. In
+the VM it holds one secret, its own runner token. The VM adds no listening
+port; it dials out, as the runner did on the host. Its egress is scoped by the GUEST's own firewall
 (`networking.firewall.extraCommands` in the guest config: gateway DHCP
 and the forge's 443 only, all private ranges and the tailnet dropped).
 Beyond that it reaches an **allowlist** only, enforced on cube: every
@@ -146,9 +141,7 @@ secret (the first 16 characters as raw ASCII bytes are the UUID,
 gone. Forgejo deletes an ephemeral runner when its job completes, so a
 token a job reads is dead afterwards; registrations that never took a job
 are swept by `cron.cleanup_offline_runners` (`forgejo.nix`,
-`GLOBAL_SCOPE_ONLY = false`, 24 h). The runner is scoped to the user
-`elly`, takes one job at a time, and runs no actions cache server; new
-repos start with Actions off (`repository.DEFAULT_REPO_UNITS`).
+`GLOBAL_SCOPE_ONLY = false`, 24 h).
 
 Why not nixpkgs' `services.forgejo-runner`: it runs daemon mode, which
 refuses ephemeral runners (`internal/app/cmd/daemon.go`), and it writes a
@@ -200,8 +193,6 @@ path prefix to strip — the `handle`/`handle_path` asymmetry with Grafana
 that this used to require is retired, kept as history in
 [reverse-proxy-history.md](reverse-proxy-history.md#the-retired-routes-as-they-were).
 
-It bound `0.0.0.0` briefly at first — [git-forge-history.md](git-forge-history.md)
-has that window and what it fixed quietly along the way.
 `trustedInterfaces = [ "tailscale0" ]` ([system](system.md)) still applies,
 to Caddy's 443 now, as the second line.
 
@@ -235,23 +226,21 @@ Tailscale Serve, so it stays the short `ts-cube` regardless of what
 
 ## Single-user, sqlite3, registration closed
 
-`database.type` is left at the nixpkgs default, `sqlite3` — a single-user
-homelab forge has no concurrent-write load a real RDBMS is needed for, and
-it avoids standing up a second service/category just for this one. Since
-only the tailnet (in practice, elly's own devices) can reach it at all,
-`DISABLE_REGISTRATION = true` closes public self-registration too — a
-*second* user, if this ever wants more than one, is a `forgejo admin user
-create` (or the web UI's Site Administration panel) away. The first
-account no longer needs that by-hand step — see below.
+`database.type` is left at the nixpkgs default, `sqlite3`: a single-user
+homelab forge has no concurrent-write load that needs a real RDBMS, and this
+avoids a second service. Only the tailnet (in practice, elly's own devices)
+can reach it at all, and `DISABLE_REGISTRATION = true` closes self-registration
+too. A second user is a `forgejo admin user create` (or the web UI's Site
+Administration panel) away. The first account is bootstrapped, see below.
 
 ## Admin account: bootstrapped from nix+sops, not created by hand
 
 Added 2026-08-26. `DISABLE_REGISTRATION` plus no setup wizard means nothing
-creates the *first* account either — before this, that was a manual
+else creates the *first* account, which used to be a manual
 `forgejo admin user create` on cube.
 
-`forgejo-admin-bootstrap`, a oneshot ordered after `forgejo.service`, tries
-`admin user create --admin` for `elly`, falling back to a loopback
+`forgejo-admin-bootstrap` is a oneshot ordered after `forgejo.service`. It
+tries `admin user create --admin` for `elly`, falling back to a loopback
 admin-API password re-assert if the user already exists — not the CLI's
 `admin user change-password`, whose only password channel is an argv flag
 world-readable in /proc (forgejo 15.0.9, checked 2026-10-19). The password
@@ -268,14 +257,12 @@ refuses it (401) while elly has 2FA; the unit then logs a warning and
 succeeds without re-asserting (it failed every switch until then). Other API
 errors still fail it. Fresh installs set the password via `create`, unaffected.
 
-**Status: switched and logged in, confirmed 2026-09-05.** The user has signed
-in as `elly` and used the account directly (screenshot-confirmed) — the
-account and password both work as declared. Whether it's
-*admin* (the `--admin` flag) is **confirmed: it took** — checked from
-inside the UI and reported by the user 2026-09-12. That was the only way to
-check it: Forgejo's unauthenticated `/api/v1/users/search` always reports
-`is_admin: false` regardless of the real value, so that field never could
-settle it, and reading it as an answer produced a wrong one twice. (Since 2026-09-26 it doesn't answer at all without signing in: `REQUIRE_SIGNIN_VIEW`.) See
+**Confirmed 2026-09-05:** the user signed in as `elly`; the account and
+password work as declared. That `elly` is admin (the `--admin` flag took) was
+confirmed from inside the UI 2026-09-12. That was the only way to check:
+Forgejo's unauthenticated `/api/v1/users/search` always reports
+`is_admin: false` whatever the real value (and since 2026-09-26 it doesn't
+answer at all without signing in: `REQUIRE_SIGNIN_VIEW`). See
 [git-forge-history.md](git-forge-history.md#the-admin-account-and-an-anonymous-api-that-reports-zeroes)
 for the fuller account of that trap.
 

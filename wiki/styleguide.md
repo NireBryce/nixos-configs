@@ -2,11 +2,13 @@
 
 _Last modified: 2026-10-20_
 
-How this wiki is organized and written. ([conventions.md](conventions.md) is
-the repo's style guide: Nix formatting, `just` commands, the `ship` flow.)
-Read this before adding a page, splitting one into a subdirectory, or
-reorganizing links. It turns the reasoning behind
-[00-INDEX.md](00-INDEX.md)'s "why a link layer, not a rewrite" into rules.
+A page lives in the directory that matches its reader: `wiki/` for
+cross-cutting topics, `categories/` for one page per category, `homelab/` for
+using a running service, `experiments/` for open investigations. Read this
+before adding a page, splitting one into a subdirectory, or reorganizing
+links. The rules come from [00-INDEX.md](00-INDEX.md)'s "why a link layer,
+not a rewrite". ([conventions.md](conventions.md) is the repo's own style
+guide: Nix formatting, `just` commands, the `ship` flow.)
 
 > **Condensed version:**
 > [styleguide-for-agents.md](styleguide-for-agents.md) — the same
@@ -26,8 +28,7 @@ reorganizing links. It turns the reasoning behind
 
 ## Directory hierarchy
 
-Two tiers for the *configuration* side, plus one escape hatch — and one
-separate tier for the *usage* side:
+Pages go in one of these places:
 
 - **`wiki/*.md`** — cross-cutting topics that don't belong to one category:
   `overview.md` (the newcomer's on-ramp, deliberately written to be read
@@ -37,23 +38,19 @@ separate tier for the *usage* side:
   tier), `history.md`, `impermanence-and-secrets.md`, `open-threads.md`,
   `traps-and-skills.md`, `conventions.md`, this file.
 
-  Two pages in this tier are the exception to "index over restatement"
-  below: `lessons-learned.md` and `module-style-guide.md` moved in verbatim
-  from `claude cave/` when that directory was retired 2026-09-02 (two
-  others moved with them — `impermanence-stage1-migration.md` and
-  `kde-to-wayland-migration.md` — and were removed 2026-09-05 —
-  `history.md`) — real, synthesized content because there's nothing else
-  for it to link to.
-  `history.md` stays the index into `lessons-learned.md`;
-  `conventions.md` stays the index into `module-style-guide.md` — the same
-  split as a category page and its deep-dive. Every lesson's full account
-  is a per-§ article in `wiki/lessons-learned/` (`<n>-<slug>.md`; long ones
-  from 2026-09-09, all of them from 2026-09-29), and `lessons-learned.md`
-  is the index: one entry per §, grouped by the moment it applies, naming
-  the rule's Home and what Enforced it (`check_wiki.py lessons`). A
-  lesson tied to particular paths or commands also gets a topic in
-  `.agents/lessons-map.toml`, which a hook uses to remind the next agent
-  at that moment.
+  Two pages in this tier are exceptions to "index over restatement"
+  below: `lessons-learned.md` and `module-style-guide.md` hold synthesized
+  content because there's nothing else for it to link to (they moved in
+  verbatim from `claude cave/`, retired 2026-09-02).
+  `history.md` is the index into `lessons-learned.md`, and `conventions.md`
+  the index into `module-style-guide.md`: the same split as a category page
+  and its deep-dive. Every lesson's full account is a per-§ article in
+  `wiki/lessons-learned/` (`<n>-<slug>.md`), and `lessons-learned.md` is the
+  index: one entry per §, grouped by the moment it applies, naming the
+  rule's Home and what Enforced it (`check_wiki.py lessons`). A lesson tied
+  to particular paths or commands also gets a topic in
+  `.agents/lessons-map.toml`, which a hook uses to remind the next agent at
+  that moment.
 - **`wiki/categories/<name>.md`** — one page per real category, i.e. a
   folder under `flake/modules/` that is a category (see
   [module-files.md](module-files.md)). Indexed in
@@ -71,19 +68,18 @@ separate tier for the *usage* side:
 
   **Name a page for what the reader wants to do, not for the module.**
   `forgejo.md` works as a bare noun because the tool's name is what you'd
-  search for and the page is about the whole service. A plural noun does
-  not: `golinks.md` read as *a list of the fleet's go/ links* — which is a
-  thing that could plausibly exist and isn't what the page is — so it was
-  renamed `creating-golinks.md` on 2026-09-11, taking the verb-phrase shape
+  search for and the page covers the whole service. A plural noun doesn't:
+  `golinks.md` read as a list of the fleet's go/ links, so it became
+  `creating-golinks.md` (2026-09-11), the verb-phrase shape
   [reaching-services.md](homelab/reaching-services.md) already used. When a
-  noun name would name a collection the reader might expect to be listed
-  there, use the verb.
+  noun would name a collection the reader might expect to find listed, use
+  the verb.
 
   [reaching-services.md](homelab/reaching-services.md) is the one page not
-  about a single service: a cross-service page earns its place here when
-  the *thing being explained is the arrangement* — the URL map, why the
-  certificate is trusted, which layer to suspect. Prefer a service page;
-  reach for this shape only when the alternative is repeating yourself.
+  about a single service. A cross-service page earns its place when the
+  *thing being explained is the arrangement* (the URL map, why the
+  certificate is trusted, which layer to suspect). Prefer a service page;
+  use this shape only when the alternative is repeating yourself.
 
   It's a separate tier from `categories/` because the two rot differently:
   a category page goes stale when the config changes, a usage page when the
@@ -130,28 +126,21 @@ separate tier for the *usage* side:
   incidents (a first-switch failure since fixed, a superseded plan, a
   regression that's been fixed twice) whose *outcome* still matters but
   whose blow-by-blow doesn't need loading every time the category page is
-  read. Added 2026-09-03 across `backup`, `virtualization`, `shortlinks`,
-  `git-forge`, `monitoring`, `reverse-proxy` — `backup-history.md` also
-  absorbed what had been a "Background" section on
-  [homelab/backup-runbook.md](homelab/backup-runbook.md), so a usage-tier
-  page's history can live on its category's history page too rather than
-  needing its own. **Don't reach for this by default** — most of what
-  reads as "history" in a category page is mechanism explained
-  through its discovery, and that stays put; see "index over restatement"
-  below for why narrating *how* something was verified is not the same as
-  narrating *that* it used to be broken. The test: does understanding the
-  *current* setting/behavior require this paragraph, or only understanding
-  how it came to be that way? Only the second kind moves. The main page
-  keeps a one-to-two-sentence summary and a link — never a bare pointer
-  with nothing — so a reader loses no context skimming the main page, only
-  the full narrative.
+  read. A usage-tier page's history can live on its category's history page
+  too (`backup-history.md` holds what was a "Background" section of
+  [homelab/backup-runbook.md](homelab/backup-runbook.md)). **Don't reach for
+  this by default.** Most of what reads as "history" in a category page is
+  mechanism explained through its discovery, and that stays put. The test:
+  does understanding the *current* setting or behavior require this
+  paragraph, or only understanding how it came to be that way? Only the
+  second kind moves. The main page keeps a one-to-two-sentence summary and a
+  link, never a bare pointer, so skimming it loses the narrative but no
+  context.
 
   **The procedure is skill `wiki-history-sweep`**, and
   `just wiki-history-candidates` ranks sections that might qualify
-  (reporting only, never fails, and most hits are wrong by design). Both
-  added 2026-09-11, because this pattern was created in one pass on
-  2026-09-02 and extracted into exactly once since — a destination nothing
-  routed to, with no procedure written down. Issue #288.
+  (reporting only, never fails, and most hits are wrong by design). Issue
+  #288.
 
 ## Naming
 
@@ -194,55 +183,40 @@ separate tier for the *usage* side:
   wiki-lint`), but — like every other date claim in this repo — can't check
   that it's still *true*; that's on the editor, the same discipline skill
   `wiki-sync` already asks for everywhere else on a page.
-- **Every page carries a `## Contents`** — a bullet list of section links,
-  one per `##` heading on the page, placed **after** the intro prose and the
-  condensed-version pointer, immediately before the first real section.
-  Added wiki-wide 2026-09-01 directly after the title, for browsability — a
-  reader lands knowing the page's shape before reading a word of it — and
-  moved below the intro 2026-09-11, across all 18 pages that had one. The
-  original reasoning has the order backwards for the reader this half of a
-  pair exists for: a section list is useful once you know you're on the
-  right page, and the sentence saying what the page *is* is what settles
-  that. Before the move, that sentence landed at line 17–23 on every paired
-  page, under a bullet list and a pointer telling a human to go read the
-  agent's copy instead. Each link's
-  target is GitHub's own heading-slug algorithm applied to that heading's
-  text: lowercase, strip everything that isn't a letter/digit/space/hyphen/
-  underscore (backticks, colons, periods, em-dashes, quotes all disappear; a
-  removed character between two spaces leaves a double hyphen once spaces
-  become hyphens), then replace each space with a hyphen.
+- **Every page carries a `## Contents`**: a bullet list of section links,
+  one per `##` heading, placed **after** the intro prose and the
+  condensed-version pointer, immediately before the first real section. It
+  goes below the intro because a section list is useful once you know you're
+  on the right page, and the intro is what settles that. Each link's target
+  is GitHub's heading slug of that heading's text: lowercase, strip
+  everything that isn't a letter, digit, space, hyphen or underscore
+  (backticks, colons, periods, em-dashes and quotes all disappear; a removed
+  character between two spaces leaves a double hyphen), then replace each
+  space with a hyphen.
 
   **Don't hand-derive this.** `wiki/scripts/check_wiki.py` implements the
   exact algorithm (`github_slug`, reverse-engineered against real rendered
-  GitHub output, not assumed) and two checks that use it: `anchors` (every
-  link with a `#fragment` resolves to a real heading on its target page) and
-  `contents` (every page's `## Contents` list still matches its own current
-  headings) — both part of `check`/`just wiki-lint`. After adding, renaming,
-  or removing a heading, run `python3 wiki/scripts/check_wiki.py gen-contents
-  <the page>` to regenerate its Contents block correctly rather than editing
-  it by hand; it's idempotent, so running it on an already-correct page is a
-  no-op. This exists because a hand-derived anchor already got it wrong once
-  — `categories/homelab.md`'s link into `virtualization.md`'s `` `VMs/_lib/
-  libvirt-vm.nix` `` heading — and sat wrong until `anchors` caught it.
+  GitHub output) and two checks that use it: `anchors` (every link with a
+  `#fragment` resolves to a real heading on its target page) and `contents`
+  (every page's `## Contents` list matches its current headings). Both are
+  part of `check` and `just wiki-lint`. After adding, renaming, or removing
+  a heading, run `python3 wiki/scripts/check_wiki.py gen-contents <the page>`
+  rather than editing the block by hand; it's idempotent. A hand-derived
+  anchor already got it wrong once, in `categories/homelab.md`'s link into
+  `virtualization.md`'s `` `VMs/_lib/libvirt-vm.nix` `` heading.
 
-  Enforced since 2026-09-12: `check_contents` reports **MISSING CONTENTS**
-  for a non-exempt page with headings and no block. Before that it only
-  checked a block it found, so a page that *lost* one was indistinguishable
-  from a page correctly exempt — which is how `reverse-proxy-history.md`
-  lost its own that day. **Note the exempt list below is not the same set as
-  the `-for-agents` sibling exemption**; `-history.md` pages are exempt from
-  needing a sibling and still carry a Contents block, and conflating the two
-  is what caused that.
+  `check_contents` reports **MISSING CONTENTS** for a non-exempt page with
+  headings and no block. **The exempt list below is not the same set as the
+  `-for-agents` sibling exemption**: `-history.md` pages need no sibling but
+  still carry a Contents block. Conflating the two is how
+  `reverse-proxy-history.md` lost its block unnoticed.
 
   **Exception: `lessons-learned.md`, `lessons-learned/` articles, and
-  `-for-agents.md` siblings carry no Contents block** (the first two relaxed
-  2026-09-09, siblings 2026-09-11 — on a page whose whole purpose is
-  information density, an anchor list is the first thing that has to go). Entries there are located by
-  group or by § number — `ls wiki/lessons-learned/43-*` — so a 46-line
-  anchor list was paid on every full read of the wiki's largest page for no
-  navigational gain. The `contents`
-  check only validates pages that have a Contents block, so this needed no
-  linter change, only this sentence.
+  `-for-agents.md` siblings carry no Contents block.** On pages built for
+  information density an anchor list is the first thing to go, and entries
+  there are located by group or § number (`ls wiki/lessons-learned/43-*`).
+  The `contents` check only validates pages that have a block, so this
+  needed no linter change.
 - Category pages follow **what's in it → mechanism notes specific to that
   category, if any → imported by → see also**. This is the same
   what/why/traps depth the rest of the wiki holds itself to, per
@@ -252,26 +226,21 @@ separate tier for the *usage* side:
   `_loose-ends/bugs-pending-submission/` writeup — rather than copying its
   content into the wiki page. When in doubt, the wiki page should be short and the linked file should be where
   the reader ends up.
-- **`wiki/homelab/` pages are the other exception**, on the terms in the
-  hierarchy section above: synthesized content is allowed because the
-  source is the live service, but the page owes the reader an explicit
-  verified-vs-transcribed split.
-- **The one exception is a deep-dive page** (`blesh.md`, `carapace.md`):
-  those *are* allowed to hold real, synthesized findings, because they
-  document a cross-file or cross-tool interaction that has no single
-  natural home to live in as a code comment. That's the whole reason the
-  finding earned a wiki page instead of one file's header — don't apply
-  "index over restatement" so strictly there that the finding has nowhere
-  to live.
-- If an ordinary category or topic page starts accumulating actual facts
-  instead of links — a paragraph explaining *why*, not just *where* —
-  that's a sign the fact belongs in the linked file's own header instead,
-  per this repo's standing convention of keeping explanations next to the
-  code they explain (see [conventions.md](conventions.md)).
-- **Dates are absolute**, not relative ("2026-08-22", never "today" or
-  "last week") — the same rule this repo applies everywhere, and the only
-  thing that lets a stale wiki page be recognized as stale by its own text
-  rather than by someone noticing the drift.
+- **`wiki/homelab/` pages are another exception**, on the terms in the
+  hierarchy section above: synthesized content is allowed because the source
+  is the live service, but the page owes the reader a verified-vs-transcribed
+  split.
+- **Deep-dive pages** (`blesh.md`, `carapace.md`) are the third exception.
+  They may hold synthesized findings, because they document a cross-file or
+  cross-tool interaction with no single natural home as a code comment.
+- If an ordinary category or topic page starts accumulating facts instead of
+  links (a paragraph explaining *why*, not just *where*), the fact belongs in
+  the linked file's own header, per the repo's convention of keeping
+  explanations next to the code they explain (see
+  [conventions.md](conventions.md)).
+- **Dates are absolute** ("2026-08-22", never "today" or "last week"). It's
+  the only thing that lets a stale page be recognized as stale by its own
+  text.
 - **See-also sections point two ways**: sideways to sibling pages, and
   outward to the general form of a trap where one exists — a skill, most
   often (e.g. `shell-config` → the `home-manager-dotfiles` skill). The wiki
@@ -329,12 +298,11 @@ that reason.
 
 ### This is deliberate duplication, and it is the only kind here
 
-[00-INDEX.md](00-INDEX.md)'s "why a link layer and not a rewrite" section says
-in as many words that this repo has been bitten repeatedly by one fact
-living in two places and drifting. That objection is correct. The split is
-worth it anyway — the two readers want different documents — but
-only because it is the one duplication in this wiki with a **mechanical**
-guard under it rather than a convention someone has to remember:
+[00-INDEX.md](00-INDEX.md)'s "why a link layer and not a rewrite" section
+says this repo has been bitten repeatedly by one fact living in two places
+and drifting. That objection is correct. The split is worth it anyway
+because the two readers want different documents, and because it is the one
+duplication in this wiki with a **mechanical** guard under it:
 
 `check_wiki.py siblings` (part of `just wiki-lint`) checks that
 
@@ -351,15 +319,14 @@ guard under it rather than a convention someone has to remember:
   _Sibling reviewed: 2026-09-11 -- header reorder, no facts moved_
   ```
 
-  That is the one legitimate way to land a source edit with genuinely
-  nothing to sync — a reorder, a typo, a rewording of something the sibling
-  already states its own way. It means someone read the source as of that
-  date and confirmed this page needs no change. **Don't reach for it to
-  avoid the work**; a real fact in a source edit belongs in both halves, and
-  the reason you write is what a reviewer checks that against. Added
-  2026-09-11: before it, the only way to land a no-op source edit was to bump
-  the sibling's date, which the paragraph below tells you not to do and which
-  no check could ever catch. A future-dated review is itself a finding.
+  This is the one legitimate way to land a source edit with nothing to
+  sync: a reorder, a typo, a rewording of something the sibling already
+  states its own way. It means someone read the source as of that date and
+  confirmed this page needs no change. **Don't reach for it to avoid the
+  work**; a real fact in a source edit belongs in both halves, and a
+  reviewer checks your reason against that. Bumping the sibling's date
+  instead is never acceptable, and no check could catch it. A future-dated
+  review is itself a finding.
 - the two link to each other;
 - the sibling fits a 50% word budget — a **REVIEW** finding only, never a
   failure. Density is the goal, and a page that is mostly irreducible
@@ -381,29 +348,25 @@ import list doesn't have to be written twice to stay watched.
 - Link in both directions: an index links down into a page, and that page
   links back up (`categories/00-INDEX.md` ↔ a category page ↔ its
   deep-dive pages).
-- **No path in this repo contains a space**, so no markdown link target
-  needs the `<...>` wrapper a space forces. Both paths that once did are
-  gone: `claude cave/` was retired 2026-09-02 into `wiki/` proper, and
-  `bugs pending submission/` became `_loose-ends/bugs-pending-submission/`
-  2026-09-14. Keep it that way; if a spaced path ever comes back, every
-  link target pointing at it has to be wrapped in angle brackets or the
-  markdown won't parse — and this checker's own link regex reads such a
-  wrapper as a live link, so it can't be shown inline here as an example.
-- Verify a link resolves before leaving it. There's no automated check for
-  this (see below); a quick `[ -e "$(dirname "$file")/$link" ]` per link
-  after any move or rename catches what proofreading misses.
+- **No path in this repo contains a space**, so no link target needs the
+  `<...>` wrapper a space forces. Keep it that way; if a spaced path comes
+  back, every link target pointing at it must be wrapped in angle brackets
+  or the markdown won't parse. (The checker's own link regex reads such a
+  wrapper as a live link, so it can't be shown inline here.)
+- Verify a link resolves before leaving it. `check_wiki.py anchors` covers
+  `#fragment` links; for the path itself, a quick
+  `[ -e "$(dirname "$file")/$link" ]` after any move or rename catches what
+  proofreading misses.
 
 ## Keeping this from rotting
 
-No CI ties these links together — a moved or renamed file breaks them
-silently, and a stale fact (a category's member count, a host's
-import list) just sits there until someone happens to read it against the
-source. The rule is the same one `CLAUDE.md` holds itself to: whichever
-session's change makes a wiki page stale — moving a file it links to,
-changing a fact it states, adding a member to a category it describes —
-corrects that page in the same change, not as a follow-up. Treat an
-undated or vaguely-dated claim on a wiki page the same way `CLAUDE.md`
-says to treat one in itself: a claim about when someone last looked, not a
+Nothing catches every stale claim: a moved file breaks links silently, and a
+stale fact (a category's member count, a host's import list) sits there until
+someone reads it against the source. The rule is the one `CLAUDE.md` holds
+itself to: whichever change makes a wiki page stale (moving a file it links
+to, changing a fact it states, adding a member to a category it describes)
+corrects that page in the same change, not as a follow-up. Treat an undated
+or vaguely dated claim as a claim about when someone last looked, not a
 guarantee about the tree today.
 
 ### Generated tables

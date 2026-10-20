@@ -1,12 +1,11 @@
 # `shortlinks` — history
 
-_Last modified: 2026-09-02_
+_Last modified: 2026-10-20_
 
-The first-switch incident behind [shortlinks](shortlinks.md)'s
-`AF_NETLINK` requirement, split out 2026-09-03 so that page stays about the
-module as it works today. The setting itself, and why it stays, is still
-on the main page's "`DynamicUser`, deliberately" section — this is only
-the story of how it was found.
+The incident behind [shortlinks](shortlinks.md)'s `AF_NETLINK` setting is
+recorded here (split out 2026-09-03). That page's "`DynamicUser`,
+deliberately" section explains why the setting stays.
+
 
 ## Contents
 

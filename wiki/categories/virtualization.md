@@ -2,14 +2,15 @@
 
 _Last modified: 2026-10-20_
 
-Libvirt/QEMU VMs, and *only* that — see [containers](containers.md) for why
-podman and distrobox (OCI containers) are a different category. Nested under
-the `homelab` umbrella since 2026-08-27 (moved from `nire/virtualization/`;
-name and by-name importability unaffected). `nire-llm-sandbox`, the one VM
-this category ran until 2026-08-28, has a successor: `forge-runner`
-(2026-09-25, the Forgejo Actions runner VM — [git-forge](git-forge.md)
-tells the runner half; no `nire-` prefix, deliberately — that prefix names
-the fleet machines, and this is a component of cube) — the category's first second life.
+Libvirt/QEMU VMs, and *only* those; podman and distrobox (OCI containers) are
+the separate [containers](containers.md) category. Under the `homelab`
+umbrella since 2026-08-27 (moved from `nire/virtualization/`; name and
+by-name importability unaffected).
+
+The category's VM is `forge-runner` (2026-09-25), the Forgejo Actions runner;
+[git-forge](git-forge.md) covers the runner half. It has no `nire-` prefix
+because that prefix names fleet machines and this is a component of cube. It
+succeeded `nire-llm-sandbox`, the category's only VM until 2026-08-28.
 
 > **Condensed version:**
 > [virtualization-for-agents.md](virtualization-for-agents.md) — the same

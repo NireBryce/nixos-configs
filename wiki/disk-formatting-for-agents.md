@@ -2,7 +2,7 @@
 
 _Last modified: 2026-09-29_
 
-_Sibling reviewed: 2026-10-20 -- source change was filler-word removal only; no facts changed_
+_Sibling reviewed: 2026-10-20 -- source body condensed; dropped a stale pointer to a CLAUDE.md State table that no longer exists; no other facts changed_
 
 Condensed from [disk-formatting.md](disk-formatting.md).
 

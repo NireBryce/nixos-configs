@@ -2,8 +2,8 @@
 
 _Last modified: 2026-10-20_
 
-A completion engine used as the primary source of shell completions across
-this repo: `pkgs.carapace` in `home.packages`
+carapace is the primary source of shell completions in this repo:
+`pkgs.carapace` in `home.packages`
 ([`carapace-completions.nix`](../../../flake/modules/packages-config/shell-apps/completions/carapace-completions.nix)),
 sourced into bash via `source <(carapace _carapace bash)` in `bash.nix`, and
 layered under ble.sh's own menu in

@@ -2,6 +2,8 @@
 
 _Last modified: 2026-10-16_
 
+_Sibling reviewed: 2026-10-20 -- source lede and intro sentences condensed; no technical facts changed_
+
 Condensed from [flake-parts-port-notes.md](flake-parts-port-notes.md).
 Salvaged 2026-09-08 from the deleted `flake-parts` branch (tip `cf9aea42`).
 

@@ -2,10 +2,11 @@
 
 _Last modified: 2026-10-20_
 
-Resolved incidents and superseded design behind [backup](backup.md) and
-[../homelab/backup-runbook.md](../homelab/backup-runbook.md) — split out
-2026-09-03 so those pages stay about the backend as it works today.
-Nothing here changes what to type or how the module is shaped now.
+The original backup plan and the incidents it ran into are recorded here,
+split out 2026-09-03 so [backup](backup.md) and
+[../homelab/backup-runbook.md](../homelab/backup-runbook.md) stay about the
+backend as it works today. Nothing here changes what to type or how the
+module is shaped now.
 
 ## Contents
 

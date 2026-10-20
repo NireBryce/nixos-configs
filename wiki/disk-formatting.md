@@ -2,9 +2,10 @@
 
 _Last modified: 2026-10-20_
 
-Runbook for the disk step of adding a new host: the order of operations and
-the safety warnings for running `disko` on a real disk. Skill
-`new-host-config` covers the whole host-adding decision tree, and
+Formatting a new host's disk takes four decisions (device path, secure boot,
+swap, LUKS unlock), wiring the generator into the host config, then running
+`disko` from install media. `disko` partitions a real disk, so the order and
+warnings below matter. Skill `new-host-config` covers the whole host-adding decision tree, and
 [flake/doc/disko-impermanence-layout.md](<../flake/doc/disko-impermanence-layout.md>)
 covers the generator's mechanism. Read this page once before formatting; it
 doesn't replace either.
@@ -33,22 +34,22 @@ touching a device path at all.
 
 ## What this is for
 
-For a **new** host that will wipe `/root` on every boot — durandal and
-tenacity's shape, not `nire-cube`'s. Impermanence is a per-host decision, not
-a default: see [categories/impermanence.md](categories/impermanence.md) for
-which hosts currently import it, and the `new-host-config` skill's "Impermanence
-or not?" section for how that decision gets made for a host that doesn't
-exist yet. If the new host is opting *out* the way `nire-cube` and the
-handhelds do, none of this page applies — say so in the host's own header
-instead, the way `cube-configuration.nix` does.
+A **new** host that will wipe `/root` on every boot, like durandal and
+tenacity and unlike `nire-cube`. Impermanence is a per-host decision, not a
+default: [categories/impermanence.md](categories/impermanence.md) lists which
+hosts import it, and the `new-host-config` skill's "Impermanence or not?"
+section covers deciding for a new host. A host that opts out, like `nire-cube`
+and the handhelds, can ignore this page; say so in the host's own header the
+way `cube-configuration.nix` does.
 
-`general-config/impermanence/_disko/impermanence-luks-btrfs.nix` reproduces durandal
-and tenacity's hand-run layout as a reusable generator: one LUKS-encrypted
-partition, btrfs inside it, subvolumes for `root`/`home`/`nix`/`persist`/`log`,
-and an unmounted `root-blank` subvolume. **Nothing in this repo currently
-calls it** — every live host either has hand-written `hardware-*.nix` from a
-real install, or (cube) never adopted this layout at all. The disko doc's own
-inline example is the only reference until a new host uses it.
+`general-config/impermanence/_disko/impermanence-luks-btrfs.nix` reproduces
+durandal and tenacity's hand-run layout as a reusable generator: one
+LUKS-encrypted partition, btrfs inside it, subvolumes for
+`root`/`home`/`nix`/`persist`/`log`, and an unmounted `root-blank` subvolume.
+**Nothing in this repo currently calls it.** Every live host has a
+hand-written `hardware-*.nix` from a real install, or (cube) never adopted
+this layout. The disko doc's inline example is the only reference until a
+new host uses it.
 
 ## Decide before touching a disk
 
@@ -96,12 +97,10 @@ Two things easy to get backwards here:
 
 ## Actually formatting the disk
 
-This repo does not currently carry a live install/bootstrap runbook of its
-own — the earlier live-USB installer mechanism (`nire-installer`, embedded
-flake, unattended `nixos-install`) was removed 2026-08-27; see
-[history.md](history.md). What follows is disko's own standard interface,
-not something this repo has run end to end and confirmed — the generator
-itself is evaluation-verified only (see the doc's own "What was actually
+This repo has no live install/bootstrap runbook (the live-USB installer
+`nire-installer` was removed 2026-08-27; see [history.md](history.md)). What
+follows is disko's standard interface, not run end to end in this repo. The
+generator itself is evaluation-verified only (see the doc's "What was actually
 verified" section), never against real hardware.
 
 1. Boot install media on the target machine.
@@ -143,39 +142,35 @@ host through `elly-home-manager` automatically.
 
 ## Confirming the rollback actually works
 
-The machine coming up proves nothing — a failed rollback that silently
-doesn't wipe anything looks exactly like a working system until the disk
-fills. The confirmation method used on tenacity:
-compare the `/root` subvolid across a reboot, not just check that boot
-succeeded.
+The machine coming up proves nothing: a failed rollback that wipes nothing
+looks like a working system until the disk fills. The method used on
+tenacity is to compare the `/root` subvolid across a reboot.
 
 ```sh
 findmnt -no SOURCE /        # or: awk '$5=="/"{print $NF}' /proc/1/mountinfo
 journalctl -b 0 -u restore-root
 ```
 
-The subvolid must change on every boot — on tenacity it moved 607 → 622 →
-627 across successive boots, against neighbouring subvolumes sitting at
-257–265 (a `/root` subvolid far above its siblings is the rollback
-demonstrably running, not just present). `CLAUDE.md`'s State table records
-each host's confirmation this same way — "confirmed by subvolid in the
-journal, not by the machine coming up" — update it for the new host once
-this has been checked, not once the machine merely boots.
+The subvolid must change on every boot. On tenacity it moved 607 → 622 → 627
+across successive boots, against neighbouring subvolumes at 257–265 (a
+`/root` subvolid far above its siblings shows the rollback running, not just
+present). Run this check on the new host before calling the rollback
+confirmed; AGENTS.md's State section explains why the result isn't recorded in
+the repo.
 
 ## Traps
 
-- **The shell's own view of the machine can be scoped wrong.** `lsblk`,
-  `findmnt`, `/etc` are scoped to the running shell's mount namespace and
-  can describe a completely different, wrong-looking-but-correct disk
-  layout. Use `/proc/1/mountinfo`, `/dev/disk/by-uuid/`, and
-  `/run/current-system` instead — same skill.
-- **Hibernation must actually be disabled, not just assumed absent.**
+- **The shell's view of the machine can be scoped wrong.** `lsblk`,
+  `findmnt` and `/etc` are scoped to the shell's mount namespace and can
+  describe a different disk layout. Use `/proc/1/mountinfo`,
+  `/dev/disk/by-uuid/`, and `/run/current-system` instead (skill
+  `impermanence-initrd`).
+- **Check that hibernation is disabled; don't assume it's absent.**
   `systemd-gpt-auto-generator` can activate a swap partition and wire up
-  `/sys/power/resume` on its own, with no `resume=` on the kernel command
-  line and no `swapDevices` entry in the config — checking the config for a
-  resume device proves nothing about whether the running machine has one.
-  `WARN-impermanence.nix`'s own history section has the full account of how
-  this was gotten wrong here once already.
+  `/sys/power/resume` with no `resume=` on the kernel command line and no
+  `swapDevices` entry, so the config proves nothing about the running
+  machine. `WARN-impermanence.nix`'s history section has the account of how
+  this went wrong here once.
 - **A `just check`/toplevel build proves the config evaluates, not that the
   disk is formatted or the rollback runs.** Both are runtime facts; see the
   two sections above.

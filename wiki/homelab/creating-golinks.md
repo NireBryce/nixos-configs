@@ -1,11 +1,11 @@
 # Creating go/ links
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-20_
 
-`go/foo` shortlinks, served by [golink](https://github.com/tailscale/golink)
-on `nire-cube`. This page is about **using** it. For how it's configured,
-why it needed an `AF_NETLINK` fix, and why it's a tailnet device rather than
-a port on cube — see [shortlinks](../categories/shortlinks.md).
+`go/foo` shortlinks are served by [golink](https://github.com/tailscale/golink)
+on `nire-cube`. Its configuration, the `AF_NETLINK` fix, and why it's a
+tailnet device rather than a port on cube are in
+[shortlinks](../categories/shortlinks.md).
 
 ## Contents
 

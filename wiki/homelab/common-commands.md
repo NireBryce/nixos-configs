@@ -1,12 +1,11 @@
 # Common commands
 
-_Last modified: 2026-10-07_
+_Last modified: 2026-10-20_
 
-Commands you need when something is in the way: streaming cube's desktop,
-getting back in after the lock screen locks you out, reaching Sunshine's web
-UI, deploying to cube. Run them from any tailnet device with ssh access to
-`ts-cube`. How it's configured lives in the module headers linked from each
-section.
+Run these from any tailnet device with ssh access to `ts-cube` when
+something is in the way: streaming cube's desktop, getting back in after the
+lock screen locks you out, reaching Sunshine's web UI, deploying to cube. How it's configured lives in the module headers linked
+from each section.
 
 ## Contents
 

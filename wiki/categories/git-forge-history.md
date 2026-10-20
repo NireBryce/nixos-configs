@@ -2,8 +2,8 @@
 
 _Last modified: 2026-10-20_
 
-Verification record for [git-forge](git-forge.md) as it was first switched
-and then re-routed, split out 2026-09-03 so that page stays about the
+The first switch of [git-forge](git-forge.md) and its re-routing behind
+Caddy are recorded here, split out 2026-09-03 so that page stays about the
 category as it works today.
 
 ## Contents

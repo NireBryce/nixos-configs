@@ -2,13 +2,10 @@
 
 _Last modified: 2026-10-20_
 
-How to **use** the services this fleet runs. Everything here is reachable
-over the tailnet and nowhere else.
-
-The [category pages](../categories/00-INDEX.md) answer *"how is this built,
-and what breaks"* for whoever is editing `flake/modules/`. These pages answer
-*"I want to do a thing with the running service"*: no Nix involved, and
-useful on a phone.
+Everything here is reachable over the tailnet and nowhere else. These pages
+are for doing a thing with a running service: no Nix involved, and useful on
+a phone. The [category pages](../categories/00-INDEX.md) answer *"how is this
+built, and what breaks"* for whoever is editing `flake/modules/`.
 
 The two go stale differently. A category page goes stale when the config
 changes; a page here goes stale when the *service* changes under it, which
