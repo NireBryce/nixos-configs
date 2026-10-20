@@ -1,33 +1,27 @@
 # flake-parts port notes
 
-_Last modified: 2026-10-16_
+_Last modified: 2026-10-20_
 
-Salvaged 2026-09-08 from the `flake-parts` branch, which was deleted the
-same day. That branch was the sibling of this one — the 2026-08 den →
-flake-parts port, done on a darwin laptop against a tree that could only be
-evaluated — and it carried two files nothing here reproduced:
-`SESSION-HANDOFF.md` and `linux-flake/flake-parts-reference.md`.
-[history.md](history.md) and `AGENTS.md` both pointed at it with `git show
-origin/flake-parts:…`, which stopped resolving when the branch went.
+Decisions, dead ends, and flake-parts machinery from the 2026-08 den →
+flake-parts port, salvaged 2026-09-08 from two files on the `flake-parts`
+branch (`SESSION-HANDOFF.md` and `linux-flake/flake-parts-reference.md`)
+before the branch was deleted. The port was done on a darwin laptop against
+a tree that could only be evaluated.
 
 **This page is an exception to the wiki's "index over restatement" rule**,
 on the same terms as [lessons-learned.md](lessons-learned.md) and
 [module-style-guide.md](module-style-guide.md): the source it would
-otherwise link to no longer exists, so the content lives here or nowhere.
-See [styleguide.md](styleguide.md)'s Directory hierarchy section.
+otherwise link to no longer exists. See [styleguide.md](styleguide.md)'s
+Directory hierarchy section.
 
-**What was left behind.** Most of both files was port mechanics that the
-port itself settled — sequencing advice for a migration that has happened,
-bug reports against a branch that is gone, "does tenacity build?"
-(it does; three hosts have booted since — [hosts.md](hosts.md)). What
-survives here is the part that was never reconstructible from the tree:
-decisions with reasons, dead ends with symptoms, and machinery claims
-backed by upstream source. Everything cut is recoverable while the objects survive:
-the branch tip was `cf9aea42`, so `git show
-cf9aea42:SESSION-HANDOFF.md` and `git show
-cf9aea42:linux-flake/flake-parts-reference.md` still work in a clone that
-has fetched it — but a deleted branch's commits are unreferenced and
-eventually garbage-collected, which is the reason for this page.
+Only what can't be reconstructed from the tree survives here: decisions with
+reasons, dead ends with symptoms, and machinery claims backed by upstream
+source. The port mechanics the port itself settled (migration sequencing, bug
+reports against the deleted branch, "does tenacity build?", which it does;
+see [hosts.md](hosts.md)) were cut. The branch tip was `cf9aea42`, so
+`git show cf9aea42:SESSION-HANDOFF.md` and `git show
+cf9aea42:linux-flake/flake-parts-reference.md` work in a clone that fetched
+it, but unreferenced commits are eventually garbage-collected.
 
 > **Condensed version:**
 > [flake-parts-port-notes-for-agents.md](flake-parts-port-notes-for-agents.md) — the same
@@ -44,10 +38,9 @@ eventually garbage-collected, which is the reason for this page.
 
 ## Decisions, not defaults
 
-From `SESSION-HANDOFF.md` §7, which opened "each of these was an explicit
-choice between options I put up, not a default I picked. Re-deciding them
-silently would be worse than either answer." Still true, and several are
-load-bearing in the tree today:
+From `SESSION-HANDOFF.md` §7: each was an explicit choice between options,
+not a default, and re-deciding one silently is worse than either answer.
+Several are still live in the tree:
 
 - **Home Manager NixOS-integrated**, chosen over standalone and over
   keeping both. Live: `general-config/system/home-manager/enable-home-manager.nix`,
@@ -143,18 +136,16 @@ produced no error, or an error naming the wrong thing.
 
 ## flake-parts machinery, with the upstream source behind each claim
 
-From `linux-flake/flake-parts-reference.md`, which was read out of the
-pinned `inputs.flake-parts` rather than the website. **Re-verified
-2026-09-08** against the currently pinned `flake-parts`
-(`427bf4bd9435fdf21321c8cc628c24efc14c0f7a`); every path and line number
-below was checked, not carried over. One correction from the original: the
-`_file` string now passes both components through
+From `linux-flake/flake-parts-reference.md`, read out of the pinned
+`inputs.flake-parts` rather than the website. **Re-verified 2026-09-08**
+against the pinned `flake-parts` (`427bf4bd9435fdf21321c8cc628c24efc14c0f7a`):
+every path and line number below was checked. One correction from the
+original: the `_file` string now passes both components through
 `lib.strings.escapeNixIdentifier`.
 
 [`../flake/doc/flake-parts-rationale.md`](<../flake/doc/flake-parts-rationale.md>)
-covers *which* machinery this repo uses and which it doesn't, by grep. This
-section is the complementary half — how the pieces behave, from their
-source.
+covers *which* machinery this repo uses, by grep. This section covers how
+the pieces behave, from their source.
 
 ### `flake.modules` — the option everything here is built on
 
