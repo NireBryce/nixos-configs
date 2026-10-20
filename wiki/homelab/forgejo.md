@@ -53,9 +53,8 @@ both correctly.
 
 ## Signing in, and why there's no sign-up
 
-**Registration is closed.** `DISABLE_REGISTRATION = true` — a single-user
-homelab forge on a tailnet only the user's devices reach has nothing to gain from
-open self-registration.
+**Registration is closed** (`DISABLE_REGISTRATION = true`). Only the user's
+devices reach the tailnet, so open self-registration would gain nothing.
 
 **Nothing is visible without signing in** (since 2026-09-26): not repos,
 not users, not the API. An HTTPS clone asks for your username and a
@@ -63,23 +62,20 @@ password or access token (a token is the better choice for anything
 scripted); SSH clones work as before. Turn on two-factor authentication
 under Settings → Security; a switch never removes it.
 
-A detail that will mislead a status check: `/git/user/sign_up` returns **HTTP
-200**, not a 403 or a redirect. The page renders "Registration is disabled.
-Please contact your site administrator." with no form fields on it. Verified
-live, 2026-08-24. So "the signup page loads" is not evidence registration is
-open — read the page, not the status code.
+The sign-up page returns **HTTP 200**, not a 403 or a redirect (verified
+live 2026-08-24; the path was `/git/user/sign_up` then). It renders
+"Registration is disabled. Please contact your site administrator." with no
+form fields. A loading sign-up page is not evidence registration is open;
+read the page, not the status code.
 
-**The first account (`elly`, admin) is bootstrapped automatically as of
-2026-08-26** — `forgejo-admin-bootstrap` (see
-[git-forge](../categories/git-forge.md)) creates it on activation, with a
-password from this repo's sops secrets rather than typed by hand. It
-resets that password to the sops value on every `switch`, so changing it
-through the web UI won't stick — change it in `secrets.yaml` instead if it
-ever needs to change. **Switched and logged in, confirmed 2026-09-05**;
-*admin*, confirmed by the user 2026-09-12 from the
-Site Administration panel (see
-[git-forge](../categories/git-forge.md)'s account of the masked-field trap
-for why no API call could have told you).
+**The first account (`elly`, admin) is bootstrapped automatically** (since
+2026-08-26). `forgejo-admin-bootstrap` (see
+[git-forge](../categories/git-forge.md)) creates it on activation with a
+password from this repo's sops secrets. It resets that password to the sops
+value on every `switch`, so changing it in the web UI won't stick; change it
+in `secrets.yaml` instead. Login was confirmed 2026-09-05, and admin status
+2026-09-12 from the Site Administration panel (git-forge's account of the
+masked-field trap explains why no API call could have told you).
 
 To add a *second* user, on cube:
 

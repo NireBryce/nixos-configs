@@ -93,33 +93,26 @@ Seven files, all `nixos`-class:
 
 ## Tailnet-only access, not a new firewall mechanism
 
-Grafana binds `127.0.0.1:3000` as of 2026-08-24, so the whole category is
-loopback-only and nothing outside cube can open a connection to any of it.
-Its port is deliberately **not** in `networking.firewall.allowedTCPPorts`,
-but that is no longer what restricts access — the binding is.
+Grafana binds `127.0.0.1:3000`, so the whole category is loopback-only and
+nothing outside cube can open a connection to any of it. Its port is
+deliberately **not** in `networking.firewall.allowedTCPPorts`, but the
+binding, not the firewall, is what restricts access. (It bound `0.0.0.0` only
+from 2026-08-23 to 2026-08-24.)
 
-Grafana bound `0.0.0.0` from 2026-08-23 until then, because nothing else on
-the host could accept the connection on its behalf, and the
-`trustedInterfaces = [ "tailscale0" ]` rule [system](system.md)'s
-`tailscale.nix` sets on every host was the only thing between port 3000 and
-the LAN: traffic arriving on `tailscale0` bypasses the allow-list entirely,
-traffic arriving on any other interface hits the default-deny.
-
-That rule still applies, to Caddy's 443 now
-([reverse-proxy](reverse-proxy.md)), and the same caveat with it:
-`trustedInterfaces` trusts the *whole* interface, not one port — the blanket
-trust ssh/kde-connect already get on every host, not something this category
-introduces. What changed is that it is the second line rather than the only
-one. `http_addr` stays loopback in `grafana.nix` for this reason; `root_url`
-now points at `grafana.moose-micro.ts.net` (its own Tailscale Services name)
-instead of a path under `ts-cube` — `serve_from_sub_path` is gone, since
-Grafana has its own vhost rather than sharing one under a prefix. The
-file's own history note has the full before/after.
+The `trustedInterfaces = [ "tailscale0" ]` rule that [system](system.md)'s
+`tailscale.nix` sets on every host is the second line, now covering Caddy's
+443 ([reverse-proxy](reverse-proxy.md)): traffic arriving on `tailscale0`
+bypasses the allow-list, traffic on any other interface hits the
+default-deny. It trusts the *whole* interface, not one port, the same blanket
+trust ssh/kde-connect already get on every host. `http_addr` stays loopback
+in `grafana.nix` for this reason. `root_url` points at
+`grafana.moose-micro.ts.net` (its own Tailscale Services name), and
+`serve_from_sub_path` is gone because Grafana has its own vhost rather than a
+path prefix. The file's own history note has the full before/after.
 
 ## The secret_key trap, and why it's now a unit instead of a warning
 
-Found on `nire-cube`'s first real `just switch` with this category —
-[hosts.md](../hosts.md) has the current switch status.
+Found on `nire-cube`'s first real `just switch` with this category.
 
 - **`services.grafana.settings.security.secret_key` has no default as of
   nixpkgs 26.05** — a hard eval-time assertion, not a warning. Pointed at
@@ -148,11 +141,9 @@ confirmation this unit actually fixed it.
 
 ## Adding a dashboard that survives a rebuild
 
-The missing piece [open-threads.md](../open-threads.md) used to flag: a
-dashboard built in the Grafana UI lives only in cube's sqlite db (now
-[backed up](backup.md), but still not *declared* — a rebuild that
-reprovisions `_dashboards/` doesn't touch the db, but the db is still the
-only copy of anything not checked in here).
+A dashboard built in the Grafana UI lives only in cube's sqlite db. The db is
+[backed up](backup.md) but not *declared*: reprovisioning `_dashboards/`
+doesn't touch it, and it is the only copy of anything not checked in here.
 
 `grafana.nix`'s `dashboards.settings.providers` points a `file` provider at
 `./_dashboards`, so getting a UI dashboard into the repo is exporting its
@@ -178,33 +169,29 @@ JSON there — no extra plumbing needed:
 5. Save the file under `grafana/_dashboards/`, `just switch`, confirm the
    dashboard reappears with its panels intact.
 
-**Verified end to end 2026-09-11.** A dashboard shaped like a UI build —
-Grafana-assigned random uid, top-level numeric `id`, panels pointing at the
-`${DS_PROMETHEUS}` template variable — was created on cube over the API
+**Verified end to end 2026-09-11.** A dashboard shaped like a UI build
+(random Grafana uid, top-level numeric `id`, panels pointing at the
+`${DS_PROMETHEUS}` template variable) was created on cube over the API
 (`127.0.0.1:3000` over SSH), exported, and carried through steps 2–4 into
-`roundtrip-check.json`; the db copy was deleted afterwards, so the only copy
-of that dashboard is the file in this repo. Exactly the transformations the
-steps predict were needed: wrapper `dashboard`/`meta` unwrapped, `id`
-dropped, `adsllh` → `roundtrip-check`, `${DS_PROMETHEUS}` → the fixed
-`prometheus-cube` uid, template variable removed. The switch leg then ran
-for real, a few hours later: after `just switch` on cube, Grafana's API
-lists exactly two dashboards — no duplicate — `roundtrip-check`'s meta
-reports `provisioned: True` with `provisionedExternalId:
-roundtrip-check.json` (file-sourced, not a db leftover), the panel's uptime
-query returns live data through the datasource proxy, and `nix store
-diff-closures` shows the deployed generation matches the tree exactly.
+`roundtrip-check.json`. The db copy was then deleted, so the file in this
+repo is the only copy. The transformations the steps predict were exactly
+the ones needed: wrapper `dashboard`/`meta` unwrapped, `id` dropped, `adsllh`
+→ `roundtrip-check`, `${DS_PROMETHEUS}` → the fixed `prometheus-cube` uid,
+template variable removed. After `just switch` on cube, Grafana's API lists
+exactly two dashboards (no duplicate), `roundtrip-check`'s meta reports
+`provisioned: True` with `provisionedExternalId: roundtrip-check.json`
+(file-sourced, not a db leftover), the panel's uptime query returns live data
+through the datasource proxy, and `nix store diff-closures` shows the
+deployed generation matches the tree.
 
 ## Why cube only, and why that's a category rather than a host-specific file
 
-Same reasoning [virtualization](virtualization.md) and
-[containers](containers.md) already give: `general-config/system/` is imported whole
-by every Linux host with no way to opt a piece of it out, so anything that
-should be optional needs its own category (see
-[../architecture.md](../architecture.md), "if something shared needs to be
-optional, a category is the mechanism"). Nothing here is `system`-scoped
-today — it's a fresh category from the start — but the same logic applies
-looking forward: if a second host ever wants this stack, importing
-`monitoring` there costs one line, no reshuffle.
+The reasoning is [virtualization](virtualization.md)'s and
+[containers](containers.md)': `general-config/system/` is imported whole by
+every Linux host with no way to opt a piece out, so anything optional needs
+its own category (see [../architecture.md](../architecture.md), "if something
+shared needs to be optional, a category is the mechanism"). If a second host
+ever wants this stack, importing `monitoring` there costs one line.
 
 ## Imported by
 

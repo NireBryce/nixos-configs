@@ -2,7 +2,7 @@
 
 _Last modified: 2026-09-29_
 
-_Sibling reviewed: 2026-10-20 -- source change was filler-word removal only; no facts changed_
+_Sibling reviewed: 2026-10-20 -- source body condensed (access-history sentences, verification narration); no facts changed_
 
 Condensed from [monitoring.md](monitoring.md).
 
