@@ -2,9 +2,8 @@
 
 _Last modified: 2026-10-20_
 
-How [cod](carapace.md)'s completions get their descriptions in the ble.sh
-menu — the one part cod cannot do for itself, bridged with a curated table
-in this repo and a ble.sh advice hook. cod (the completion daemon,
+[cod](carapace.md)'s menu descriptions in ble.sh come from a curated table in
+this repo plus a ble.sh advice hook, because cod cannot supply them itself. cod (the completion daemon,
 [`cod-completions.nix`](../../../flake/modules/packages-config/shell-apps/completions/cod-completions.nix))
 covers exactly the commands [carapace](carapace.md) doesn't: its config
 ignores everything in carapace's spec list, and learns the rest at runtime

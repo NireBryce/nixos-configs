@@ -2,8 +2,10 @@
 
 _Last modified: 2026-10-20_
 
-Runbook for the disk step of adding a new host: the order of operations and
-the safety warnings for running `disko` on a real disk. Skill
+Formatting a new host's disk takes four decisions (device path, secure boot,
+swap, LUKS unlock), wiring the generator into the host config, then running
+`disko` from install media. `disko` partitions a real disk, so the order and
+warnings below matter. Skill
 `new-host-config` covers the whole host-adding decision tree, and
 [flake/doc/disko-impermanence-layout.md](<../flake/doc/disko-impermanence-layout.md>)
 covers the generator's mechanism. Read this page once before formatting; it

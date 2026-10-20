@@ -1,12 +1,12 @@
 # Practicing a workplace coding environment
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-20_
 
-What cube's forge ([forgejo.md](forgejo.md)) plus its Actions runner
-([git-forge](../categories/git-forge.md)'s runner module) is *for*, beyond
-hosting mirrors: the experience of **submitting code in a workplace**, as
-the developer, not the ops side. The infrastructure already existed; the
-part that makes it a workplace is the policy and habit layer on top.
+Cube's forge ([forgejo.md](forgejo.md)) plus its Actions runner
+([git-forge](../categories/git-forge.md)'s runner module) lets you practice
+**submitting code in a workplace**, as the developer, not the ops side. The
+infrastructure already existed; the policy and habit layer on top is what
+makes it a workplace.
 
 ## Contents
 

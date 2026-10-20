@@ -2,10 +2,10 @@
 
 _Last modified: 2026-10-20_
 
-Commands for operating [backup](../categories/backup.md) — the restic
-category backing up Forgejo/Grafana/golink's state and `/persist` to the
-`ts-hive` NAS over SFTP. That page covers the design and its history (including
-the sqlite consistency bug found and fixed 2026-09-06); this page is only
+Run these on `nire-cube` to operate [backup](../categories/backup.md), the
+restic backups of Forgejo/Grafana/golink's state and `/persist` to the
+`ts-hive` NAS over SFTP. That page covers the design and its history
+(including the sqlite consistency bug fixed 2026-09-06); this page is only
 what to type. Confirmed fully working end to end 2026-09-06: a
 real restore recovered a real, openable Forgejo database — see that
 page's "The sqlite consistency bug" for the account.

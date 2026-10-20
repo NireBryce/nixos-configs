@@ -2,8 +2,10 @@
 
 _Last modified: 2026-10-20_
 
-Which name answers for what in this fleet, forward and reverse, and where
-those names show up in logs, status output, or a stalled ssh. Every
+Tailscale MagicDNS (`100.100.100.100`, through resolved's stub) answers
+`*.moose-micro.ts.net` forward and reverse, and avahi answers `*.local` on the
+LAN only. This page lists which name answers for what and where those names
+show up in logs, status output, or a stalled ssh. Every
 behavioral claim below was probed live on `nire-tenacity` against
 `100.100.100.100` and through the resolved stub on 2026-09-14 (issue #294).
 The config behind each behavior is owned by the module named in the last

@@ -1,12 +1,12 @@
 # `shortlinks` — history
 
-_Last modified: 2026-09-02_
+_Last modified: 2026-10-20_
 
-The first-switch incident behind [shortlinks](shortlinks.md)'s
-`AF_NETLINK` requirement, split out 2026-09-03 so that page stays about the
-module as it works today. The setting itself, and why it stays, is still
-on the main page's "`DynamicUser`, deliberately" section — this is only
-the story of how it was found.
+golink crash-looped on its first real switch for lack of `AF_NETLINK`, and
+that incident is recorded here (split out 2026-09-03 so
+[shortlinks](shortlinks.md) stays about the module as it works today). The
+setting itself, and why it stays, is on that page's "`DynamicUser`,
+deliberately" section; this is only the story of how it was found.
 
 ## Contents
 

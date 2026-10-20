@@ -2,9 +2,8 @@
 
 _Last modified: 2026-10-20_
 
-A two-minute mental model of the repo. Read it first; once you know what
-you're looking for, [00-INDEX.md](00-INDEX.md) is the index. This page is
-short on facts and long on pointers: a checkable claim (a host count, a
+Read this first. Once you know what you're looking for,
+[00-INDEX.md](00-INDEX.md) is the index. This page is short on facts and long on pointers: a checkable claim (a host count, a
 category list) belongs on the page that owns it, not copied here to drift.
 
 ## Contents

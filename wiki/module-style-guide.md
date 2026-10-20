@@ -2,7 +2,8 @@
 
 _Last modified: 2026-10-20_
 
-Conventions for every module under `flake/modules/`, not just packages. See
+Every module under `flake/modules/` follows these conventions, not just
+packages. See
 [history.md](history.md) and [styleguide.md](styleguide.md) for why this file
 is an exception to the wiki's "index over restatement" rule.
 

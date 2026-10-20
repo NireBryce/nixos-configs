@@ -1,11 +1,11 @@
 # Durandal suspend instrumentation: what is running
 
-_Last modified: 2026-10-02_
+_Last modified: 2026-10-20_
 
-Every step run against `nire-durandal` for the auto-suspend investigation, what
-survives a reboot, and **how to check rather than trust this page**. Each row
-carries its own verification command precisely because a "currently active"
-list is the kind of claim that rots silently — re-derive, don't believe.
+This page lists every step run against `nire-durandal` for the auto-suspend
+investigation and what survives a reboot. **Check it, don't trust it**: each
+row carries its own verification command, because a "currently active" list
+rots silently.
 
 Findings live on [durandal-auto-suspend-hang.md](durandal-auto-suspend-hang.md).
 This page is only about machine state.

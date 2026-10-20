@@ -2,11 +2,11 @@
 
 _Last modified: 2026-10-20_
 
-The verification record for [reverse-proxy](reverse-proxy.md)'s second
-switch, split out 2026-09-03, plus the path-prefix routing design (retired
-2026-09-07, moved here 2026-09-12 once each app got its own Tailscale
-Services vhost and there was no longer a shared prefix for the design to
-justify), and the 2026-09-07 to 09-11 moves and TLS outage (moved here from the main page's opening 2026-10-20).
+This page records [reverse-proxy](reverse-proxy.md)'s second-switch
+verification (split out 2026-09-03), the retired path-prefix routing design
+(retired 2026-09-07, moved here 2026-09-12 once each app had its own
+Tailscale Services vhost), and the 2026-09-07 to 09-11 moves and TLS outage
+(moved here from the main page 2026-10-20).
 
 ## Contents
 

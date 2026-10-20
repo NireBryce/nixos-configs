@@ -2,10 +2,10 @@
 
 _Last modified: 2026-10-20_
 
-The credentials, keys, and certificates in this fleet that have **an expiry,
-a recommended rotation cadence, or a "will silently break later" property**.
-`secrets.yaml` is the full inventory of every secret; this page lists only
-the ones that need attention. Tended by skill
+Each item below is a credential, key, or certificate with **an expiry, a
+recommended rotation cadence, or a "will silently break later" property**.
+`secrets.yaml` holds every secret; this page lists only the ones that need
+attention. Tended by skill
 [`maintenance-schedule`](../.agents/skills/maintenance-schedule/SKILL.md).
 
 Each item states what it is, what's known about its expiry ("unverified" is

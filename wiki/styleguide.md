@@ -2,11 +2,13 @@
 
 _Last modified: 2026-10-20_
 
-How this wiki is organized and written. ([conventions.md](conventions.md) is
-the repo's style guide: Nix formatting, `just` commands, the `ship` flow.)
-Read this before adding a page, splitting one into a subdirectory, or
-reorganizing links. It turns the reasoning behind
-[00-INDEX.md](00-INDEX.md)'s "why a link layer, not a rewrite" into rules.
+A page lives in the directory that matches its reader: `wiki/` for
+cross-cutting topics, `categories/` for one page per category, `homelab/` for
+using a running service, `experiments/` for open investigations. Read this
+before adding a page, splitting one into a subdirectory, or reorganizing
+links. The rules come from [00-INDEX.md](00-INDEX.md)'s "why a link layer,
+not a rewrite". ([conventions.md](conventions.md) is the repo's own style
+guide: Nix formatting, `just` commands, the `ship` flow.)
 
 > **Condensed version:**
 > [styleguide-for-agents.md](styleguide-for-agents.md) — the same

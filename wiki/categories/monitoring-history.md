@@ -1,11 +1,11 @@
 # `monitoring` — history
 
-_Last modified: 2026-09-02_
+_Last modified: 2026-10-20_
 
-How [monitoring](monitoring.md)'s `grafana-secret-key-setup.service` came
-to exist, split out 2026-09-03 so that page's "The `secret_key` trap"
-section can stay about the mechanism as it works today rather than the
-road to it.
+`grafana-secret-key-setup.service` exists because a hand-fixed `secret_key`
+file regressed. That history is here, split out 2026-09-03 so
+[monitoring](monitoring.md)'s "The `secret_key` trap" section can stay about
+the mechanism as it works today.
 
 ## Contents
 
