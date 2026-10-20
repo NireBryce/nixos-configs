@@ -82,7 +82,11 @@
                 iptables -w -A cube-vm-in -m conntrack --ctstate ESTABLISHED,RELATED -j RETURN
                 iptables -w -A cube-vm-in -p udp --dport 67 -j RETURN
                 iptables -w -A cube-vm-in -p tcp --dport 443 -d 192.168.122.1 -j RETURN
+                # DNS is capped per source (a job can't flood the
+                # resolver's query log); real lookups come in bursts.
+                iptables -w -A cube-vm-in -p udp --dport 5354 -d 192.168.122.1 -m hashlimit --hashlimit-name vmdns-udp --hashlimit-mode srcip --hashlimit-above 200/second --hashlimit-burst 400 -j DROP
                 iptables -w -A cube-vm-in -p udp --dport 5354 -d 192.168.122.1 -j RETURN
+                iptables -w -A cube-vm-in -p tcp --dport 5354 -d 192.168.122.1 -m conntrack --ctstate NEW -m hashlimit --hashlimit-name vmdns-tcp --hashlimit-mode srcip --hashlimit-above 50/second --hashlimit-burst 100 -j DROP
                 iptables -w -A cube-vm-in -p tcp --dport 5354 -d 192.168.122.1 -j RETURN
                 iptables -w -A cube-vm-in -p icmp -j RETURN
                 iptables -w -A cube-vm-in -j DROP
@@ -91,18 +95,26 @@
                 ip6tables -w -D nixos-fw -i virbr0 -m conntrack --ctstate NEW -j DROP 2>/dev/null || true
                 ip6tables -w -I nixos-fw 1 -i virbr0 -m conntrack --ctstate NEW -j DROP
 
-                iptables -w -t mangle -D FORWARD -i virbr0 -j cube-vm-egress 2>/dev/null || true
+                # Built under a temporary name and swapped in, never
+                # flushed in place: a reload would otherwise leave the
+                # guest unfiltered here between the flush and the last
+                # rule. The new chain is jumped to BEFORE the old one is
+                # unhooked, and `-E` renames it (jumps follow).
+                iptables -w -t mangle -F cube-vm-egress-new 2>/dev/null || true
+                iptables -w -t mangle -X cube-vm-egress-new 2>/dev/null || true
+                iptables -w -t mangle -N cube-vm-egress-new
+                iptables -w -t mangle -A cube-vm-egress-new -m conntrack --ctstate ESTABLISHED,RELATED -j RETURN
+                iptables -w -t mangle -A cube-vm-egress-new -d 10.0.0.0/8     -j DROP
+                iptables -w -t mangle -A cube-vm-egress-new -d 172.16.0.0/12  -j DROP
+                iptables -w -t mangle -A cube-vm-egress-new -d 192.168.0.0/16 -j DROP
+                iptables -w -t mangle -A cube-vm-egress-new -d 100.64.0.0/10  -j DROP
+                ipset -exist create vm-egress-allow hash:ip family inet
+                iptables -w -t mangle -A cube-vm-egress-new -m set ! --match-set vm-egress-allow dst -j DROP
+                iptables -w -t mangle -I FORWARD 1 -i virbr0 -j cube-vm-egress-new
+                while iptables -w -t mangle -D FORWARD -i virbr0 -j cube-vm-egress 2>/dev/null; do :; done
                 iptables -w -t mangle -F cube-vm-egress 2>/dev/null || true
                 iptables -w -t mangle -X cube-vm-egress 2>/dev/null || true
-                iptables -w -t mangle -N cube-vm-egress
-                iptables -w -t mangle -A cube-vm-egress -m conntrack --ctstate ESTABLISHED,RELATED -j RETURN
-                iptables -w -t mangle -A cube-vm-egress -d 10.0.0.0/8     -j DROP
-                iptables -w -t mangle -A cube-vm-egress -d 172.16.0.0/12  -j DROP
-                iptables -w -t mangle -A cube-vm-egress -d 192.168.0.0/16 -j DROP
-                iptables -w -t mangle -A cube-vm-egress -d 100.64.0.0/10  -j DROP
-                ipset -exist create vm-egress-allow hash:ip family inet
-                iptables -w -t mangle -A cube-vm-egress -m set ! --match-set vm-egress-allow dst -j DROP
-                iptables -w -t mangle -I FORWARD 1 -i virbr0 -j cube-vm-egress
+                iptables -w -t mangle -E cube-vm-egress-new cube-vm-egress
 
                 iptables -w -t nat -D PREROUTING -i virbr0 -j vm-egress-dns 2>/dev/null || true
                 iptables -w -t nat -F vm-egress-dns 2>/dev/null || true
@@ -129,6 +141,9 @@
                 iptables -w -t mangle -D FORWARD -i virbr0 -j cube-vm-egress 2>/dev/null || true
                 iptables -w -t mangle -F cube-vm-egress 2>/dev/null || true
                 iptables -w -t mangle -X cube-vm-egress 2>/dev/null || true
+                iptables -w -t mangle -D FORWARD -i virbr0 -j cube-vm-egress-new 2>/dev/null || true
+                iptables -w -t mangle -F cube-vm-egress-new 2>/dev/null || true
+                iptables -w -t mangle -X cube-vm-egress-new 2>/dev/null || true
                 ip6tables -w -t mangle -D FORWARD -i virbr0 -j DROP 2>/dev/null || true
                 iptables -w -t mangle -D INPUT -i virbr0 -p udp --dport 53 -j DROP 2>/dev/null || true
                 iptables -w -t mangle -D INPUT -i virbr0 -p tcp --dport 53 -j DROP 2>/dev/null || true

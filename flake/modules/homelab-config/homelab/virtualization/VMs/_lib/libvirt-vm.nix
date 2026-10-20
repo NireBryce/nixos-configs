@@ -101,6 +101,24 @@
     # directory. Pass `readonly = false;` on a share that genuinely needs
     # writes back.
 
+, fwCfg ? []
+    # Optional fw_cfg entries, each `{ name = "opt/org.example/x"; file =
+    # "/absolute/host/file"; }`: QEMU reads the host file at domain start
+    # and the guest sees the bytes at
+    # /sys/firmware/qemu_fw_cfg/by_name/<name>/raw (root-only, needs the
+    # `qemu_fw_cfg` module). The delivery channel for a single small
+    # secret: no host daemon, no shared memory, no mount in the guest --
+    # unlike `shares`, whose virtiofsd runs as root over a passthrough
+    # directory. The file must be readable by the QEMU user, and is read
+    # once, at start.
+
+, limits ? null
+    # null (no limits), or `{ cpuShares ? 1024; diskBytesPerSec ? null; }`:
+    # a CPU weight under libvirt's cgroup (default 1024; lower yields to
+    # the host's own services under contention) and a total-throughput
+    # cap on the disk. A guest running someone else's code should not be
+    # able to starve the services it shares a host with.
+
 , bandwidth ? null
     # null (no limit), or `{ outboundKBps = <int>; }` -- caps what the
     # guest SENDS, in kilobytes/s, via libvirt's <bandwidth><outbound>
@@ -194,6 +212,20 @@ let
           </filesystem>
     '') shares;
 
+    sysinfoXml = lib.optionalString (fwCfg != [ ]) ''
+        <sysinfo type='fwcfg'>
+          ${lib.concatMapStringsSep "\n      " (e: "<entry name='${e.name}' file='${e.file}'/>") fwCfg}
+        </sysinfo>
+    '';
+
+    cputuneXml = lib.optionalString (limits != null) ''
+        <cputune>
+          <shares>${toString (limits.cpuShares or 1024)}</shares>
+        </cputune>
+    '';
+    iotuneXml = lib.optionalString (limits != null && (limits.diskBytesPerSec or null) != null)
+        "<iotune><total_bytes_sec>${toString limits.diskBytesPerSec}</total_bytes_sec></iotune>";
+
     # libvirt requires shared memory for virtiofs; memfd is the backend
     # its own docs use. Only emitted when there is something to share --
     # a plain NAT VM keeps the default (non-shared) memory so the element
@@ -219,6 +251,8 @@ let
         <memory unit='MiB'>${toString memoryMB}</memory>
         <currentMemory unit='MiB'>${toString memoryMB}</currentMemory>
         <vcpu placement='static'>${toString vcpus}</vcpu>
+        ${cputuneXml}
+        ${sysinfoXml}
         <os>
           <type arch='x86_64' machine='pc'>hvm</type>
           <boot dev='hd'/>
@@ -230,7 +264,7 @@ let
         <cpu mode='host-passthrough'/>
         <clock offset='utc'/>
         <on_poweroff>destroy</on_poweroff>
-        <on_reboot>restart</on_reboot>
+        <on_reboot>destroy</on_reboot>
         <on_crash>destroy</on_crash>
         ${memoryBackingXml}
         <devices>
@@ -239,6 +273,7 @@ let
             <driver name='qemu' type='qcow2'/>
             <source file='${overlay}'/>
             <target dev='vda' bus='virtio'/>
+            ${iotuneXml}
           </disk>
           ${interfaceXml}
           ${sharesXml}
@@ -248,8 +283,12 @@ let
           <serial type='pty'>
             <target port='0'/>
           </serial>
-          <graphics type='vnc' port='-1' autoport='yes' listen='127.0.0.1'/>
-          <video><model type='qxl'/></video>
+          <!-- Headless: no VNC/video (an unauthenticated console for any
+               local user), no balloon, no USB bus -- devices QEMU would
+               otherwise emulate for nothing. The serial console is the
+               way in. -->
+          <controller type='usb' model='none'/>
+          <memballoon model='none'/>
         </devices>
       </domain>
     '';

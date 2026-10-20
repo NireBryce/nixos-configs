@@ -13,10 +13,11 @@
 # holds is that one job's single-use runner token.
 #
 # The guest deliberately runs NO sops-nix, no Home Manager, and no user
-# account -- same shape llm-sandbox used. Its secret arrives over virtiofs
-# (tag `runner-secret`, read-only on the host side and mounted read-only
-# at /mnt/runner-secret), staged there by cube for this boot only; the
-# mount is the guest's entire trust surface from the host side.
+# account -- same shape llm-sandbox used. Its secret arrives as a QEMU
+# fw_cfg entry (/sys/firmware/qemu_fw_cfg/by_name/opt/forge-runner/secret,
+# root-only), staged by cube for this boot only. There is no shared
+# filesystem: the fw_cfg bytes are the guest's entire trust surface from
+# the host side.
 #
 # Networking, without tailscaled: the guest is NOT on the tailnet. It
 # reaches the forge through Caddy on the virbr0 gateway (192.168.122.1),
@@ -104,11 +105,12 @@
         services.timesyncd.enable = false;
 
         boot = {
-            # virtiofs share of the runner token, read-only. systemd loads
-            # the module and the mount unit comes from the fileSystems
-            # entry; the runner unit below is ordered after it via
-            # RequiresMountsFor.
-            kernelModules = [ "virtiofs" ];
+            # The runner token's channel (qemu_fw_cfg exposes the entry
+            # under /sys/firmware/qemu_fw_cfg). In the INITRD so the
+            # file exists before the runner unit's LoadCredential reads
+            # it: a module loaded later races it, and a failed start
+            # powers the guest off (FailureAction).
+            initrd.kernelModules = [ "qemu_fw_cfg" ];
 
             # The initrd NEEDS these: importing disk-image.nix alone pulls
             # in only the generic hardware-detection module set (ahci,
@@ -144,12 +146,6 @@
                 "kernel.kptr_restrict"             = 2;
                 "kernel.dmesg_restrict"            = 1;
             };
-        };
-
-        fileSystems."/mnt/runner-secret" = {
-            device  = "runner-secret";
-            fsType  = "virtiofs";
-            options = [ "ro" "nodev" "nosuid" ];
         };
 
         # Nix hardening for a CI guest. Jobs are supposed to build what
@@ -209,7 +205,7 @@
         # 2026-09-26, as instance `forge-runner` -- unit
         # "forgejo-runner-forge\x2drunner" (utils.escapeSystemdPath).
         #
-        # The share holds this boot's 40-hex secret. Its UUID is derived
+        # The fw_cfg entry holds this boot's 40-hex secret. Its UUID is derived
         # the way Forgejo derives it (models/actions/forgejo.go: the first
         # 16 characters as raw ASCII bytes, google/uuid.FromBytes), so
         # nothing about the runner's identity is baked into this config.
@@ -219,6 +215,7 @@
         # it, so the job's own sandbox needs no power to. cube sees the
         # domain shut off and starts the next cycle.
         systemd.services.forgejo-runner = let
+            secretPath = "/sys/firmware/qemu_fw_cfg/by_name/opt/forge-runner/secret/raw";
             # Only `runner` and `cache` -- the connection comes from the
             # command line (see above).
             runnerConfig = (pkgs.formats.yaml { }).generate "forgejo-runner.yaml" {
@@ -255,11 +252,12 @@
             # runtime in this guest, so `ubuntu-latest`-style container
             # jobs find no runner here by design.
 
-            # The credential source must be mounted first: LoadCredential
-            # on a not-yet-mounted path is a hard start failure, and the
-            # mount is NOT implicitly ordered before an unrelated service.
+            # No secret, no start (a skipped condition is not a failure,
+            # so the guest idles for cube's deadline instead of
+            # powering off in a loop): LoadCredential on a missing path
+            # is a hard start failure.
             unitConfig = {
-                RequiresMountsFor = "/mnt/runner-secret";
+                ConditionPathExists = secretPath;
                 SuccessAction     = "poweroff";
                 FailureAction     = "poweroff";
             };
@@ -299,7 +297,7 @@
                 # DynamicUser's state dir is mounted noexec otherwise, and
                 # host jobs run scripts from it.
                 ExecPaths        = [ "/var/lib/forgejo-runner" ];
-                LoadCredential   = "runner-secret:/mnt/runner-secret/forgejo-runner-secret";
+                LoadCredential   = "runner-secret:${secretPath}";
 
                 NoNewPrivileges       = true;
                 ProtectSystem         = "strict";
@@ -337,7 +335,10 @@
         # system/ssh/ssh.nix), reached through a tailnet DNAT on port 2223.
         services.openssh = {
             enable = true;
-            settings.PasswordAuthentication = false;
+            settings = {
+                PasswordAuthentication       = false;
+                KbdInteractiveAuthentication = false;
+            };
         };
         users.users.root.openssh.authorizedKeys.keys = [
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILqzV9o32OsJdkCfDJhR5X4uSu1nzRzrL/2gBWLp9QyX elly@nire-cube"

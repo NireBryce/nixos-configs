@@ -1,6 +1,6 @@
 # `virtualization`, for agents
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-19_
 
 Condensed from [virtualization.md](virtualization.md).
 
@@ -45,7 +45,10 @@ fresh one per define and then refuses redefinition; runtime-verified),
 relative), `memoryMB ? 4096`, `vcpus ? 2`, `networked ? true`,
 `sshForward ? { guestId, hostPort, sourceCidrs ? … }`, `shares ? []`
 (virtiofs mounts `{ source, tag }`; switches the domain to memfd/shared
-memory).
+memory), `fwCfg ? []` (`{ name, file }` fw_cfg entries; the guest reads
+`/sys/firmware/qemu_fw_cfg/by_name/<name>/raw`; forge-runner's token
+channel), `limits ? null` (`{ cpuShares, diskBytesPerSec }`). Domain XML is
+headless: no VNC/video/balloon/USB; `on_reboot = destroy`.
 
 Produces: domain XML at `/etc/libvirt/qemu/<name>.xml` + a oneshot
 `libvirt-vm-<name>` unit (after/requires `libvirtd`, wantedBy

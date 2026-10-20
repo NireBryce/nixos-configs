@@ -1,6 +1,6 @@
 # `virtualization` — `homelab-config/homelab/virtualization/`
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-19_
 
 Libvirt/QEMU VMs, and *only* that — see [containers](containers.md) for why
 podman and distrobox (OCI containers) are a different category. Nested under
@@ -144,7 +144,9 @@ never reaches an existing guest. The generator's `ephemeral` parameter
 answers that for guests whose state is disposable: the overlay is
 recreated on every host boot and whenever the base image or domain XML
 changes (a stamp under `/run/libvirt-vm/`). `forge-runner` sets it; see
-[maintenance.md](../maintenance.md#the-runner-vm). Shares are read-only
+[maintenance.md](../maintenance.md#the-runner-vm). The runner's token no longer uses a share (2026-10-19): the generator's
+`fwCfg` parameter hands QEMU a host file as an fw_cfg entry, and `limits`
+sets a CPU weight and disk throughput cap. Shares are read-only
 on the host side by default (`<readonly/>`, virtiofsd `--readonly`).
 Overlays are created 0600 in a 0711 `/var/lib/libvirt/images` (libvirt's
 own default; qemu-libvirtd still reaches the file, and libvirt chowns it

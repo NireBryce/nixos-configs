@@ -12,12 +12,13 @@
 #      talks to the local DB). The runner's UUID is derived from the
 #      secret's first 16 characters (models/actions/forgejo.go), so every
 #      cycle is a new runner;
-#   3. the secret staged into the virtiofs share (read-only to the guest);
+#   3. the secret staged as a file QEMU hands the guest over fw_cfg
+#      (owned by the QEMU user, 0400);
 #   4. the guest recreated from its base image and started
 #      (libvirt-vm-forge-runner, `ephemeral`, restarted by this loop);
 #   5. wait for the guest to power itself off -- it runs `forgejo-runner
-#      one-job` and powers off when that exits -- or kill it at a
-#      deadline.
+#      one-job` and powers off when that exits -- or kill it: an
+#      unclaimed guest after MAX_IDLE, a running job after MAX_JOB.
 # Forgejo deletes an ephemeral runner as soon as its job completes
 # (routers/api/actions/runner/runner.go), so a token stolen by a job is
 # dead once that job ends. Registrations that never got a job (a guest
@@ -49,18 +50,30 @@
             wants    = [ "forgejo.service" "forgejo-admin-bootstrap.service" ];
             requires = [ "libvirtd.service" ];
             wantedBy = [ "multi-user.target" ];
-            path     = with pkgs; [ coreutils util-linux libvirt systemd ipset config.services.forgejo.package ];
+            path     = with pkgs; [ coreutils util-linux libvirt systemd ipset sqlite config.services.forgejo.package ];
 
             script = ''
                 set -euo pipefail
                 CONFIG=${config.services.forgejo.customDir}/conf/app.ini
                 SHARE=/var/lib/forgejo-runner-share
                 RUNDIR=/run/forge-runner-cycle
-                # The guest's own ceiling is nix's 4h build timeout; this
-                # is the backstop for a guest that never powers off.
-                MAX_SECONDS=16200
+                DB=${config.services.forgejo.database.path}
+                # Two ceilings, because a guest waits for its job:
+                # MAX_IDLE is how long one may sit unclaimed; MAX_JOB
+                # runs from the moment a task row names this runner,
+                # and sits past Forgejo's own 3h ENDLESS_TASK_TIMEOUT.
+                # (One total deadline from boot killed a job that
+                # arrived late in the wait.)
+                MAX_IDLE=3600
+                MAX_JOB=12600
+                # Only when the db can't be asked (see below): the old
+                # single deadline, as the backstop.
+                MAX_TOTAL=21600
 
-                install -d -m 0700 "$SHARE"
+                # 0711: QEMU's user traverses to its one file; the
+                # secret itself is 0400 and owned by that user.
+                install -d -m 0711 "$SHARE"
+                rm -f "$SHARE"/forgejo-runner-secret*
                 short=0
 
                 # Gauges for runner-alerts.nix, via node-exporter's
@@ -86,10 +99,17 @@
                     started=$(date +%s)
 
                     secret=$(od -An -N20 -tx1 /dev/urandom | tr -d ' \n')
+                    # The runner's UUID is the secret's first 16 characters
+                    # as ASCII bytes (the guest derives the same), kept to
+                    # ask Forgejo whether that runner has taken a task.
+                    uuid_hex=$(printf '%s' "''${secret:0:16}" | od -An -tx1 | tr -d ' \n')
+                    uuid="''${uuid_hex:0:8}-''${uuid_hex:8:4}-''${uuid_hex:12:4}-''${uuid_hex:16:4}-''${uuid_hex:20:12}"
                     ( umask 077
                       printf '%s' "$secret" > "$RUNDIR/secret"
                       printf '%s' "$secret" > "$SHARE/forgejo-runner-secret.new" )
                     unset secret
+                    chown qemu-libvirtd "$SHARE/forgejo-runner-secret.new"
+                    chmod 0400 "$SHARE/forgejo-runner-secret.new"
                     chown ${config.services.forgejo.user}:${config.services.forgejo.group} "$RUNDIR/secret"
 
                     # Prints the new runner's UUID to the journal -- not
@@ -117,16 +137,42 @@
                     rm -f /run/libvirt-vm/forge-runner.stamp
                     systemctl restart libvirt-vm-forge-runner.service
 
+                    job_started=0
+                    db_ok=0
                     while [ "$(virsh -c qemu:///system domstate forge-runner 2>/dev/null || true)" = "running" ]; do
-                        if [ $(( $(date +%s) - started )) -ge "$MAX_SECONDS" ]; then
-                            echo "forge-runner still running after ''${MAX_SECONDS}s; destroying"
+                        now=$(date +%s)
+                        if [ "$job_started" -eq 0 ]; then
+                            # Ephemeral runners are deleted when their job
+                            # ends, but the task row stays. A query that
+                            # FAILS (schema change, locked db) means
+                            # "can't tell": no idle recycling then, since
+                            # a claimed job would look unclaimed.
+                            if n=$(sqlite3 -readonly "$DB" "select count(*) from action_task where runner_id in (select id from action_runner where uuid = '$uuid')" 2>/dev/null); then
+                                db_ok=1
+                                if [ "$n" != "0" ]; then job_started=$now; fi
+                            else
+                                db_ok=0
+                            fi
+                        fi
+                        if [ "$job_started" -eq 0 ] && [ "$db_ok" -eq 1 ] && [ $(( now - started )) -ge "$MAX_IDLE" ]; then
+                            echo "forge-runner unclaimed after ''${MAX_IDLE}s; recycling"
+                            virsh -c qemu:///system destroy forge-runner || true
+                            break
+                        fi
+                        if [ "$job_started" -ne 0 ] && [ $(( now - job_started )) -ge "$MAX_JOB" ]; then
+                            echo "forge-runner job still running after ''${MAX_JOB}s; destroying"
+                            virsh -c qemu:///system destroy forge-runner || true
+                            break
+                        fi
+                        if [ "$db_ok" -eq 0 ] && [ $(( now - started )) -ge "$MAX_TOTAL" ]; then
+                            echo "forge-runner running ''${MAX_TOTAL}s with no db answer; destroying"
                             virsh -c qemu:///system destroy forge-runner || true
                             break
                         fi
                         sleep 5
                     done
 
-                    rm -f "$SHARE/forgejo-runner-secret"
+                    rm -f "$SHARE"/forgejo-runner-secret*
                     elapsed=$(( $(date +%s) - started ))
                     echo "forge-runner cycle ended after ''${elapsed}s"
                     # A guest that dies at boot would otherwise spin a
@@ -142,6 +188,8 @@
             serviceConfig = {
                 Restart    = "always";
                 RestartSec = 30;
+                # A stopped loop (switch, failure) leaves no token behind.
+                ExecStopPost = "${pkgs.bash}/bin/bash -c 'rm -f /var/lib/forgejo-runner-share/forgejo-runner-secret*'";
             };
         };
 
@@ -155,6 +203,8 @@
             Host forge-runner 192.168.122.11
                 HostName 192.168.122.11
                 User root
+                ForwardAgent no
+                ForwardX11 no
                 StrictHostKeyChecking no
                 UserKnownHostsFile /dev/null
                 LogLevel ERROR
