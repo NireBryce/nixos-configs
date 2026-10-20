@@ -2,12 +2,10 @@
 
 _Last modified: 2026-10-20_
 
-The orientation page — read this first if you don't yet know what you're
-looking for. [00-INDEX.md](00-INDEX.md) is the index once you do; this page is
-the 2-minute mental model that makes the index make sense. Like the rest of
-this wiki, it's short on its own facts and long on pointers — a checkable
-claim (a host count, a category list) belongs on the page that owns it, not
-copied here to drift.
+A two-minute mental model of the repo. Read it first; once you know what
+you're looking for, [00-INDEX.md](00-INDEX.md) is the index. This page is
+short on facts and long on pointers: a checkable claim (a host count, a
+category list) belongs on the page that owns it, not copied here to drift.
 
 ## Contents
 

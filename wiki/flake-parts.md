@@ -2,11 +2,10 @@
 
 _Last modified: 2026-10-20_
 
-The one fact worth knowing before reading `flake.nix` or any module for the
-first time: this repo depends on exactly one flake-parts option, and almost
-everything else about how the tree is organized follows from it. Moved out
-of [architecture.md](architecture.md) 2026-09-03 to sit ahead of it —
-architecture is the mechanism built on top of this, not this itself.
+This repo depends on exactly one flake-parts option, `flake.modules.<class>.<name>`,
+and almost everything about how the tree is organized follows from it. Read
+this before `flake.nix` or any module; [architecture.md](architecture.md)
+covers the mechanism built on top.
 
 ## Contents
 

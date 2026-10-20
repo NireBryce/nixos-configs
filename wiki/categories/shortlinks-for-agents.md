@@ -2,6 +2,8 @@
 
 _Last modified: 2026-10-16_
 
+_Sibling reviewed: 2026-10-20 -- source lede reworded; no facts changed_
+
 Source: [shortlinks.md](shortlinks.md).
 
 golink (Tailscale's `go/foo` service) on `nire-cube`. Added 2026-08-24,

@@ -2,18 +2,17 @@
 
 _Last modified: 2026-10-20_
 
-How to **use** the services this fleet runs, as opposed to how they're
-configured. Everything here is reachable over the tailnet and nowhere else.
+How to **use** the services this fleet runs. Everything here is reachable
+over the tailnet and nowhere else.
 
-This is a different tier from the rest of the wiki, and deliberately so. The
-[category pages](../categories/00-INDEX.md) answer *"how is this built, and
-what breaks"* — they're for whoever is editing `flake/modules/`. These pages
-answer *"I want to do a thing with the running service"* — no Nix involved,
-and useful on a phone.
+The [category pages](../categories/00-INDEX.md) answer *"how is this built,
+and what breaks"* for whoever is editing `flake/modules/`. These pages answer
+*"I want to do a thing with the running service"*: no Nix involved, and
+useful on a phone.
 
-The split matters because the two rot differently. A category page goes stale
-when the config changes; a page here goes stale when the *service* changes
-under it, which can happen with no commit to this repo at all.
+The two go stale differently. A category page goes stale when the config
+changes; a page here goes stale when the *service* changes under it, which
+can happen with no commit to this repo at all.
 
 ## Contents
 

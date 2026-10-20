@@ -2,17 +2,15 @@
 
 _Last modified: 2026-10-20_
 
-[restic](https://restic.net/), backing up `nire-cube`'s own service state to
-the `ts-hive` NAS already on the network. Added 2026-08-28, cube-only, against
-issue [#87](https://github.com/NireBryce/nixos-configs/issues/87) ("no
-backups anywhere in the fleet"). The original plan, an early NFS-mount
-correction, and the mount's own pre-history are on
-[backup-history.md](backup-history.md).
+[restic](https://restic.net/) backs up `nire-cube`'s service state to the
+`ts-hive` NAS already on the network. Cube-only; added 2026-08-28 against issue
+[#87](https://github.com/NireBryce/nixos-configs/issues/87) ("no backups
+anywhere in the fleet"). [backup-history.md](backup-history.md) has the
+original plan, an early NFS-mount correction, and the mount's pre-history.
 
-Nested under [homelab](homelab.md) the same way the other seven are — see
-that page's own note on this one being the odd member out functionally
-(nothing to reach over the tailnet; a timer, not a listener) but structurally
-identical.
+It is nested under [homelab](homelab.md) like the other six, but functionally
+the odd one out: nothing to reach over the tailnet, a timer rather than a
+listener.
 
 > **Condensed version:**
 > [backup-for-agents.md](backup-for-agents.md) — the same

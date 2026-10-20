@@ -1,12 +1,11 @@
 # Traps & skills
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-20_
 
-[`../CLAUDE.md`](../CLAUDE.md)'s own "Traps" section carries a one-line
-summary of each; the full mechanism, code, and worked examples live in the
-matching skill, loaded only when the matching task comes up so it doesn't
-cost context every session regardless of what's being worked on. Read the
-skill before doing the matching task rather than re-deriving from the
+[`../CLAUDE.md`](../CLAUDE.md)'s "Traps" section has a one-line summary of
+each trap. The full mechanism, code, and worked examples live in the matching
+skill, which loads only when that task comes up, so it costs no context
+otherwise. Read the skill before the task rather than re-deriving from the
 one-liner.
 
 | Task | Skill |

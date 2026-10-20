@@ -2,12 +2,12 @@
 
 _Last modified: 2026-10-20_
 
-The runbook-shaped piece of adding a new host: **the actual disk step**, not
-the Nix config around it. Skill `new-host-config` covers the whole
-host-adding decision tree; [flake/doc/disko-impermanence-layout.md](<../flake/doc/disko-impermanence-layout.md>)
-covers the generator's own mechanism in full. This page is the order of
-operations and the safety warnings that are otherwise scattered across both
-— read this once before doing it, not instead of either.
+Runbook for the disk step of adding a new host: the order of operations and
+the safety warnings for running `disko` on a real disk. Skill
+`new-host-config` covers the whole host-adding decision tree, and
+[flake/doc/disko-impermanence-layout.md](<../flake/doc/disko-impermanence-layout.md>)
+covers the generator's mechanism. Read this page once before formatting; it
+doesn't replace either.
 
 **This is the destructive step.** `disko` partitions a real disk. Read
 [`../CLAUDE.md`](../CLAUDE.md)'s Safety section before running any of this

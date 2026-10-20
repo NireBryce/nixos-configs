@@ -2,16 +2,15 @@
 
 _Last modified: 2026-10-20_
 
-Forgejo, a self-hosted git forge. Added 2026-08-24, cube-only; nested under
-the `homelab` umbrella since 2026-08-27 (name unaffected). As of 2026-09-07
-reached at `https://git.moose-micro.ts.net/` — its own Tailscale Services
-name, still fronted by Caddy ([reverse-proxy](reverse-proxy.md)) since
-Tailscale Services can't terminate HTTPS declaratively yet (confirmed
-upstream bug, see `tailscale-services/serve.nix`'s history section). The
-`.../git/`-path-under-`ts-cube` form no longer answers (404).
-[git-forge-history.md](git-forge-history.md) has the original first-switch
-record and the move behind Caddy; the move to its own service name is
-this category's newest change, not yet its own history entry.
+Forgejo, a self-hosted git forge, on cube only (added 2026-08-24; under the
+`homelab` umbrella since 2026-08-27). Since 2026-09-07 it is at
+`https://git.moose-micro.ts.net/`, its own Tailscale Services name, fronted by
+Caddy ([reverse-proxy](reverse-proxy.md)) because Tailscale Services can't
+terminate HTTPS declaratively yet (confirmed upstream bug; see
+`tailscale-services/serve.nix`'s history section). The old
+`.../git/` path under `ts-cube` now returns 404.
+[git-forge-history.md](git-forge-history.md) has the first-switch record and
+the move behind Caddy; the move to its own service name isn't in it yet.
 
 > **Condensed version:**
 > [git-forge-for-agents.md](git-forge-for-agents.md) — the same

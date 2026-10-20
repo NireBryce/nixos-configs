@@ -12,7 +12,7 @@ _Last modified: 2026-10-20_
 
 ## What's in it
 
-Nothing of its own — it's an umbrella. Added 2026-08-27, folding seven
+Nothing of its own — it's an umbrella. Added 2026-08-27, folding six
 existing, previously-standalone categories under one directory:
 [containers](containers.md), [git-forge](git-forge.md),
 [monitoring](monitoring.md),
@@ -22,8 +22,8 @@ addressable by its own name (each holds a subfolder of modules) — this page
 doesn't repeat their content, see each one's own article for what it
 contains and why it's shaped the way it is.
 
-An eighth, [backup](backup.md), joined 2026-08-28 the same way — restic,
-backing up the state the other seven produce to the `ts-hive` NAS already on the
+A seventh, [backup](backup.md), joined 2026-08-28 the same way — restic,
+backing up the state the other six produce to the `ts-hive` NAS already on the
 network. It's the odd one out functionally (nothing to reach over the
 tailnet, no port, no Caddy route — a timer, not a listener) but structurally
 identical: its own category, `homelab-config/homelab/backup/`, cube-only,

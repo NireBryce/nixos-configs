@@ -2,13 +2,12 @@
 
 _Last modified: 2026-10-20_
 
-Which name answers for what in this fleet — forward and reverse — and
-where those names show up when you're reading logs, status
-output, or a stalled ssh. Every behavioral claim below was probed live
-on `nire-tenacity` against `100.100.100.100` and through the resolved
-stub, 2026-09-14, per issue #294's ask; the *config* behind each
-behavior is owned by the module named in the last section, and this
-page links rather than restates it.
+Which name answers for what in this fleet, forward and reverse, and where
+those names show up in logs, status output, or a stalled ssh. Every
+behavioral claim below was probed live on `nire-tenacity` against
+`100.100.100.100` and through the resolved stub on 2026-09-14 (issue #294).
+The config behind each behavior is owned by the module named in the last
+section; this page links to it.
 
 ## Contents
 

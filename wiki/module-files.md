@@ -3,15 +3,15 @@
 _Last modified: 2026-10-20_
 
 How the files under `flake/modules/` become NixOS, Home Manager and darwin
-modules, and why they are written the way they are. A module file never
+modules. A module file never
 names its module: the
 [dirs-as-categories](https://github.com/NireBryce/dirs-as-categories) flake
 input names it after the file (`gaming.nix` is `gaming`) and makes every
 folder that holds modules a category, so a host includes a whole folder by
 name. Before, each of 228 files derived its own name with boilerplate, and a
 name that disagreed with the filename silently dropped the module out of its
-categories. Each module now opens with a dirs-as-categories comment saying so. The rules are
-in the input's `doc/convention.md`; this page is what they mean here.
+categories. Each module now opens with a comment saying so. The input's
+`doc/convention.md` has the rules; this page covers what they mean here.
 
 ## Contents
 

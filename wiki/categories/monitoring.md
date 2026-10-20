@@ -2,20 +2,17 @@
 
 _Last modified: 2026-10-20_
 
-Prometheus + Grafana, scraping this host's own resource metrics. Added
-2026-08-23, cube-only so far; nested under the `homelab` umbrella since
-2026-08-27 (name unaffected).
+Prometheus + Grafana, scraping this host's own resource metrics. Cube-only so
+far (added 2026-08-23; under the `homelab` umbrella since 2026-08-27).
 
-As of 2026-09-07 Grafana is reached at `https://grafana.moose-micro.ts.net/`
-— its own Tailscale Services name, still fronted by Caddy
-([reverse-proxy](reverse-proxy.md)) since Tailscale Services can't
-terminate HTTPS declaratively yet (a confirmed upstream bug, see
-`tailscale-services/serve.nix`'s history section). The
-`.../grafana/`-path-under-`ts-cube` form this page described from
-2026-08-24 no longer answers (404). Every listener in this category is on
-loopback either way. Confirmed working 2026-09-07: 200 over validated TLS
-from another tailnet host, Grafana's own login redirect (`302 -> /login`)
-observed correctly.
+Since 2026-09-07 Grafana is at `https://grafana.moose-micro.ts.net/`, its own
+Tailscale Services name, fronted by Caddy ([reverse-proxy](reverse-proxy.md))
+because Tailscale Services can't terminate HTTPS declaratively yet (confirmed
+upstream bug; see `tailscale-services/serve.nix`'s history section). The old
+`.../grafana/` path under `ts-cube` now returns 404. Every listener in this
+category is on loopback either way. Confirmed 2026-09-07: 200 over validated
+TLS from another tailnet host, and Grafana's own login redirect
+(`302 -> /login`).
 
 > **Condensed version:**
 > [monitoring-for-agents.md](monitoring-for-agents.md) — the same

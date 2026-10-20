@@ -2,12 +2,10 @@
 
 _Last modified: 2026-10-20_
 
-**Read `WARN-impermanence.nix` itself before changing anything here — this
-page is an index, not a substitute.** See
-[../impermanence-and-secrets.md](../impermanence-and-secrets.md) for the
-cross-cutting version of this topic (which hosts wipe `/root`, the initrd
-sharp edges); this page is specifically about what lives in the category
-directory.
+**Read `WARN-impermanence.nix` itself before changing anything here; this
+page is an index, not a substitute.** It covers what lives in the category
+directory. For which hosts wipe `/root` and the initrd sharp edges, see
+[../impermanence-and-secrets.md](../impermanence-and-secrets.md).
 
 ## Contents
 

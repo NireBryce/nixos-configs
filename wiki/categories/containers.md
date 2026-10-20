@@ -2,12 +2,10 @@
 
 _Last modified: 2026-10-20_
 
-Podman and distrobox — OCI containers — and *only* that. See
-[virtualization](virtualization.md) for why libvirt/QEMU is a different
-category despite "virtualization" sounding like it should cover this too.
-Nested under the `homelab` umbrella since 2026-08-27 (name unaffected);
-durandal stopped importing it the same day, tenacity 2026-09-26 — see
-[Imported by](#imported-by).
+Podman and distrobox (OCI containers), and only those. libvirt/QEMU is the
+separate [virtualization](virtualization.md) category. Under the `homelab`
+umbrella since 2026-08-27; durandal stopped importing it the same day,
+tenacity 2026-09-26. See [Imported by](#imported-by).
 
 ## Contents
 

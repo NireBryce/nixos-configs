@@ -2,12 +2,11 @@
 
 _Last modified: 2026-10-20_
 
-How this wiki itself is organized and written — as opposed to
-[conventions.md](conventions.md), which is the *repo's* style guide (Nix
-formatting, `just` commands, the `ship` flow). Read this before adding a
-page, splitting one into a subdirectory, or reorganizing links; it's the
-place the reasoning behind [00-INDEX.md](00-INDEX.md)'s "why a link layer, not
-a rewrite" gets turned into concrete rules.
+How this wiki is organized and written. ([conventions.md](conventions.md) is
+the repo's style guide: Nix formatting, `just` commands, the `ship` flow.)
+Read this before adding a page, splitting one into a subdirectory, or
+reorganizing links. It turns the reasoning behind
+[00-INDEX.md](00-INDEX.md)'s "why a link layer, not a rewrite" into rules.
 
 > **Condensed version:**
 > [styleguide-for-agents.md](styleguide-for-agents.md) — the same

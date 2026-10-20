@@ -2,14 +2,12 @@
 
 _Last modified: 2026-10-20_
 
-The largest category by far — across 15 subdirectories, no per-file count
-kept here on purpose (see categories/00-INDEX.md's Index section for why) —
-and the one every Linux host in this repo imports whole, with no way to opt
-out of any piece of it. That property is exactly why
-[virtualization](virtualization.md) and [containers](containers.md) got
-split into their own categories instead of living here: anything that needs
-to be optional for some hosts (or just optional in principle) can't be filed
-under `system`.
+The largest category: 15 subdirectories (no per-file count here; see
+categories/00-INDEX.md's Index section for why). Every Linux host imports it
+whole, with no way to opt out of any piece. That is why
+[virtualization](virtualization.md) and [containers](containers.md) are their
+own categories: anything that needs to be optional for some hosts, even in
+principle, can't be filed under `system`.
 
 > **Condensed version:**
 > [system-for-agents.md](system-for-agents.md) — the same

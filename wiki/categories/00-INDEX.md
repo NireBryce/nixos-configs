@@ -2,11 +2,10 @@
 
 _Last modified: 2026-10-20_
 
-One article per real category — a folder under `flake/modules/` whose
-subfolders hold modules ([../module-files.md](../module-files.md)). See
-[../architecture.md](../architecture.md) for the mechanism itself; these
-pages are the "what's in it, and why is it shaped this way" detail
-for each one, at the same what/why/traps depth as the rest of this wiki.
+One article per real category (a folder under `flake/modules/` whose
+subfolders hold modules, see [../module-files.md](../module-files.md)),
+covering what's in it, why it's shaped that way, and its traps.
+[../architecture.md](../architecture.md) has the mechanism.
 
 Scoped to the `general-config/*` system-ish categories plus `users-config/elly`,
 one article each. (`general-config/` was `config-system/` until 2026-09-27 — same

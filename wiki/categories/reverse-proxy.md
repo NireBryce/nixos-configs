@@ -1,106 +1,21 @@
 # `reverse-proxy` — `homelab-config/homelab/reverse-proxy/`
 
-_Last modified: 2026-09-27_
+_Last modified: 2026-10-20_
 
 [Caddy](https://caddyserver.com/), one tailnet-only HTTPS front door for
-every web service on `nire-cube`. Added 2026-08-24, cube-only; nested under
-the `homelab` umbrella since 2026-08-27 (name unaffected).
+every web service on `nire-cube`. Cube-only; added 2026-08-24, under the
+`homelab` umbrella since 2026-08-27.
 
-**Confirmed working end to end, 2026-08-24**, on the second switch — the
-first served `/git/` a 404 through the wrong Caddy directive, because
-Grafana and Forgejo wanted opposite `handle`/`handle_path` treatment for
-the path prefix they then shared; see
-[reverse-proxy-history.md](reverse-proxy-history.md#the-two-apps-want-opposite-things-from-the-proxy-historical)
-for that mechanism and the full verification checklist (TLS validation,
-generated-link checks, the exact requests tested).
-
-**Grafana and Forgejo moved again, 2026-09-07**, off the shared
-`ts-cube.../grafana/`, `.../git/` paths onto their own Tailscale Services
-names — `https://grafana.moose-micro.ts.net/`,
-`https://git.moose-micro.ts.net/`. Caddy is still what terminates TLS for
-both: Tailscale Services turned out not to support declarative HTTPS
-termination on this tailscale version (a confirmed upstream bug, not a
-config mistake — see `tailscale-services/serve.nix`'s history section for
-the full investigation, including the two tailscale/tailscale issue
-numbers). Confirmed working end to end the same day: valid TLS on both new
-names, old paths correctly 404, Forgejo's own generated links using the new
-`ROOT_URL`.
-
-**Then all tailnet HTTPS on cube broke, 2026-09-08 to 2026-09-10**, and the
-two "confirmed working" snapshots above are both older than the break. The
-bare-name convenience vhosts added 2026-09-08 (`https://git` and friends,
-each with `tls internal`) made Caddy's Caddyfile adapter emit an explicit
-`automation.policies` entry covering the `.ts.net` names too — and an
-explicit policy suppresses Caddy's automatic "this is a Tailscale domain,
-ask tailscaled for the cert" detection, leaving those names pointed at
-public Let's Encrypt, which can never issue for a tailnet name. Every
-`.ts.net` handshake died with `SSL_ERROR_INTERNAL_ERROR_ALERT`, including
-`ts-cube.moose-micro.ts.net`, which no commit had touched. `caddy.nix`'s
-`tailscaleCert` binding carries the mechanism with `file:line` references
-into caddy 2.11.4's source; [§47](../lessons-learned/47-explicit-setting-disables-implicit-one.md)
-is the full account. The fix
-is naming `get_certificate tailscale` on each `.ts.net` vhost explicitly
-rather than relying on the detection. **Runtime-verified on hardware
-2026-09-11**: from tenacity, every name returns validated TLS
-(`tls_verify_result` 0) — `ts-cube` 200, `git` 200, `grafana` 302, `glance`
-200.
-
-The bare-name vhosts come in two flavours, and the difference matters:
-
-- **`http://git`** and friends redirect with no certificate involved at
-  all, landing on the real publicly-valid tailnet cert — no warning
-  anywhere. These were *unreachable* from the day they were written until
-  2026-09-11 (issue #272): a `svc:` name is a Service VIP that answers only
-  on the ports its Service object and `serve.nix` both declare, and all
-  three declared `tcp:443` only. `http://ts-cube` worked throughout, being
-  a real device address where Caddy binds 80 directly — which is what made
-  the gap easy to miss. Fixed by adding `tcp:80` to both halves.
-- **`https://git`** and friends show `SEC_ERROR_UNKNOWN_ISSUER`, and that
-  is `tls internal` working as designed, not a leftover bug — they serve
-  Caddy's own local CA. They exist to catch browsers that force HTTPS
-  before the `http://` redirect gets a chance: such a browser sends TLS SNI
-  = the literal string `git`, **not** the FQDN, even though the OS resolver
-  completes the bare name for DNS purposes via `tailscale0`'s search domain
-  — SNI is fixed before that completion is visible downstream. With no vhost
-  matching that SNI, Caddy falls back to trying for a publicly-issued cert
-  for `git`, which can never succeed (confirmed live: `curl -v https://git/`
-  returned a raw `TLSv1.3 (IN), TLS alert, internal error (592)`). Short of trusting that CA on
-  every client there is no improving them, and they were deliberately kept
-  rather than dropped once `http://` worked.
-
-Two things the same investigation turned up:
-
-- **`svc:glance` never existed — created 2026-09-10, one step still
-  pending.** PR #211 landed the `serve.nix` forward and the Caddy vhost, and
-  `acl-diff-applied.hujson` recorded the autoApprover, but the policy file
-  was never POSTed and the `svc:` object was never PUT, so
-  `glance.moose-micro.ts.net` did not resolve at all while git and grafana
-  did. Now created, along with the `grants` entry the other two services
-  each had; `just tailscale-acl diff` reports "no difference" for the first
-  time since 2026-09-09, and the name resolves tailnet-wide. Fixed 2026-09-11,
-  but restarting `tailscale-serve` was not what fixed it (tried twice, both
-  clean, no change). Re-running `serve set-config` against an
-  already-standing advertisement does not activate a newly-created
-  Service — cube had carried `svc:glance` in its serve config since
-  2026-09-09, long before the object existed to approve it against. A fresh
-  registration is what the control plane acts on: `systemctl restart
-  tailscaled`, then `tailscale-serve` after it (per #267). All four names
-  now return validated TLS. Beware `vip-get glance` as an existence check:
-  the API path wants the `svc:` prefix, and without it every service 404s,
-  `svc:grafana` included.
-
-- **`tailscale-serve.service` lost the race on boot** — issue #267, fixed
-  2026-09-11 and closed. It failed `unexpected state: NoState` 34ms into the
-  2026-09-09 boot and, being a `oneshot` with no retry, stayed failed for
-  9.5 hours until a switch happened to re-run it: no `svc:` forwards at all
-  in the meantime, while cube's own name kept working. `serve.nix` now sets
-  `Restart=on-failure` with a `StartLimit` pair — legal on `Type=oneshot`
-  (only `always`/`on-success` are rejected), so it retries the race and
-  still gives up on a persistent failure. The upstream unit gates on
-  tailscaled the *process*, not its backend state, which is what makes the
-  race possible at all. **Not yet observed self-healing on a real boot** —
-  the fix is reasoned from `systemd.service(5)` and the failure it
-  reproduces, not from watching a reboot recover.
+Each app has its own Tailscale Services name (`https://grafana.moose-micro.ts.net/`,
+`https://git.moose-micro.ts.net/`) and Caddy terminates TLS for it, because
+Tailscale Services can't terminate HTTPS declaratively on this tailscale
+version (a confirmed upstream bug; `tailscale-services/serve.nix`'s history
+section has the investigation and the two tailscale/tailscale issue numbers).
+Certificates come from tailscaled, and every `.ts.net` vhost names
+`get_certificate tailscale` explicitly (see below). Runtime-verified on
+hardware 2026-09-11: from tenacity, every name returns validated TLS.
+The incidents behind this setup, including the 2026-09-08 to 09-10 outage,
+are in [reverse-proxy-history.md](reverse-proxy-history.md#the-2026-09-07-to-09-11-moves-and-outage).
 
 > **Condensed version:**
 > [reverse-proxy-for-agents.md](reverse-proxy-for-agents.md) — the same
@@ -112,6 +27,7 @@ Two things the same investigation turned up:
 
 - [What's in it](#whats-in-it)
 - [What it changed elsewhere](#what-it-changed-elsewhere)
+- [Bare-name vhosts](#bare-name-vhosts)
 - [Certificates come from tailscaled, with no plugin](#certificates-come-from-tailscaled-with-no-plugin)
 - [Fronting Tailscale Services with Caddy](#fronting-tailscale-services-with-caddy)
 - [Named matchers, not inline ones](#named-matchers-not-inline-ones)
@@ -150,6 +66,31 @@ The root route answers 404: the landing page (homepage, and glance beside
 it) was removed 2026-10-19 as unused attack surface. Their Service objects
 (`svc:homepage`, `svc:glance`) and ACL entries are the control-plane half
 this repo only records and still need `vip-delete` / removal by hand.
+
+## Bare-name vhosts
+
+The bare-name vhosts come in two flavours, and the difference matters:
+
+- **`http://git`** and friends redirect with no certificate involved at
+  all, landing on the real publicly-valid tailnet cert — no warning
+  anywhere. These were *unreachable* from the day they were written until
+  2026-09-11 (issue #272): a `svc:` name is a Service VIP that answers only
+  on the ports its Service object and `serve.nix` both declare, and all
+  three declared `tcp:443` only. `http://ts-cube` worked throughout, being
+  a real device address where Caddy binds 80 directly — which is what made
+  the gap easy to miss. Fixed by adding `tcp:80` to both halves.
+- **`https://git`** and friends show `SEC_ERROR_UNKNOWN_ISSUER`, and that
+  is `tls internal` working as designed, not a leftover bug — they serve
+  Caddy's own local CA. They exist to catch browsers that force HTTPS
+  before the `http://` redirect gets a chance: such a browser sends TLS SNI
+  = the literal string `git`, **not** the FQDN, even though the OS resolver
+  completes the bare name for DNS purposes via `tailscale0`'s search domain
+  — SNI is fixed before that completion is visible downstream. With no vhost
+  matching that SNI, Caddy falls back to trying for a publicly-issued cert
+  for `git`, which can never succeed (confirmed live: `curl -v https://git/`
+  returned a raw `TLSv1.3 (IN), TLS alert, internal error (592)`). Short of trusting that CA on
+  every client there is no improving them, and they were deliberately kept
+  rather than dropped once `http://` worked.
 
 ## Certificates come from tailscaled, with no plugin
 

@@ -4,11 +4,10 @@ _Last modified: 2026-10-20_
 
 [rustic](https://github.com/rustic-rs/rustic) (the `rustic-rs` project, not
 the unrelated `bnavetta/rustic` "restic wrapper" that shares its name in
-search results) — a client tool for the repository
-[backup](../categories/backup.md) writes, not a service this fleet runs.
-Installed 2026-08-28 in
-`packages-config/shell-apps/backup-tools/rustic.nix`, so it's on every host
-`elly-home-manager` reaches.
+search results) is a client for the repository
+[backup](../categories/backup.md) writes. It is not a service this fleet runs.
+Installed 2026-08-28 in `packages-config/shell-apps/backup-tools/rustic.nix`,
+so it's on every host `elly-home-manager` reaches.
 
 ## Contents
 
