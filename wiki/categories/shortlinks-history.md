@@ -2,11 +2,10 @@
 
 _Last modified: 2026-10-20_
 
-golink crash-looped on its first real switch for lack of `AF_NETLINK`, and
-that incident is recorded here (split out 2026-09-03 so
-[shortlinks](shortlinks.md) stays about the module as it works today). The
-setting itself, and why it stays, is on that page's "`DynamicUser`,
-deliberately" section; this is only the story of how it was found.
+The incident behind [shortlinks](shortlinks.md)'s `AF_NETLINK` setting is
+recorded here (split out 2026-09-03). That page's "`DynamicUser`,
+deliberately" section explains why the setting stays.
+
 
 ## Contents
 

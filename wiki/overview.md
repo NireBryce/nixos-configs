@@ -3,8 +3,9 @@
 _Last modified: 2026-10-20_
 
 Read this first. Once you know what you're looking for,
-[00-INDEX.md](00-INDEX.md) is the index. This page is short on facts and long on pointers: a checkable claim (a host count, a
-category list) belongs on the page that owns it, not copied here to drift.
+[00-INDEX.md](00-INDEX.md) is the index. This page is short on facts and long
+on pointers: a checkable claim (a host count, a category list) belongs on the
+page that owns it, not copied here to drift.
 
 ## Contents
 
@@ -15,17 +16,16 @@ category list) belongs on the page that owns it, not copied here to drift.
 
 ## What this is
 
-A single [flake-parts](flake-parts.md) flake — chosen specifically because
-its `flake.modules.<class>.<name>` option lets one file declare a NixOS
-module and a Home Manager module for the same feature side by side,
-instead of two files tied together only by a shared filename — that builds
-NixOS (and one nix-darwin) config for a small personal fleet.
+A single [flake-parts](flake-parts.md) flake that builds NixOS (and one
+nix-darwin) config for a small personal fleet. Its
+`flake.modules.<class>.<name>` option lets one file declare a NixOS module
+and a Home Manager module for the same feature side by side, instead of two
+files tied together only by a shared filename.
 
 Not a generalist template, and not meant to be installed as-is: two hosts
 wipe `/root` on every boot — see [../README.md](../README.md)'s own
 warning. One repo, one flake, every host's config comes out of it.
-[hosts.md](hosts.md) has the current roster and what's been
-switched versus only evaluated.
+[hosts.md](hosts.md) has the current roster.
 
 ## The shape of it
 

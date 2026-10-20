@@ -2,8 +2,7 @@
 
 _Last modified: 2026-10-20_
 
-A module file under `flake/modules/` never
-names its module: the
+A module file under `flake/modules/` never names its module. The
 [dirs-as-categories](https://github.com/NireBryce/dirs-as-categories) flake
 input names it after the file (`gaming.nix` is `gaming`) and makes every
 folder that holds modules a category, so a host includes a whole folder by

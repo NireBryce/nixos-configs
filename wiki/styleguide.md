@@ -28,8 +28,7 @@ guide: Nix formatting, `just` commands, the `ship` flow.)
 
 ## Directory hierarchy
 
-Two tiers for the *configuration* side, plus one escape hatch — and one
-separate tier for the *usage* side:
+Pages go in one of these places:
 
 - **`wiki/*.md`** — cross-cutting topics that don't belong to one category:
   `overview.md` (the newcomer's on-ramp, deliberately written to be read
