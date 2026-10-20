@@ -9,7 +9,7 @@ functionality in-situ possible, and to keep the context any single
 reader -- agent or human -- has to load down to just the chunk they're
 looking at, instead of the whole tree.
 
-A topic index over documentation that already exists scattered around this
+This page is a topic index over documentation that already exists scattered around this
 repo — `CLAUDE.md`, `flake/doc/`, `.agents/skills/`, stray `.md` files
 sitting next to the code they're about, and
 `_loose-ends/bugs-pending-submission/`. Almost nothing has been moved
