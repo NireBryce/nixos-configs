@@ -6,13 +6,13 @@
 # `nire-tenacity.local` had nothing to lead to -- use `ts-tenacity`.
 #
 # Resolving other hosts' `.local` names still works: nssmdns4 and the daemon
-# stay on, and UDP 5353 stays open for the replies. publish.enable = false
+# stay on, and UDP 5353 stays open for the replies. disable-publishing = true
 # renders `disable-publishing=yes`, which also covers the workstation and
 # user-service records.
 { lib, ... }:
 {
     nixos = {
         # # description = "tenacity: mDNS resolve-only, publishes nothing";
-        services.avahi.publish.enable = lib.mkForce false;
+        services.avahi.settings.publish.disable-publishing = lib.mkForce true;
     };
 }
