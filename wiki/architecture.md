@@ -124,7 +124,7 @@ flowchart LR
         n14("<b>peripherals/</b><br/><i>n · 2</i>")
     end
     subgraph g5["general-config"]
-        n6("<b>boot/</b><br/><i>n · 2</i>")
+        n6("<b>boot/</b><br/><i>n · 3</i>")
         n7("<b>desktop-env/</b><br/><i>n · 4</i>")
         n8("<b>impermanence/</b><br/><i>n h · 2</i>")
         n9("<b>macos/</b><br/><i>d · 3</i>")

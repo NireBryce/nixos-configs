@@ -28,6 +28,7 @@ that still needs the user to ask, report by report.
 |---|---|---|---|---|
 | sign `acpi_call` with kmodigest | `flake/modules/general-config/desktop-env/jovian/jovian.nix` (`boot.kernelPackages` override) | nire-tenacity | nixpkgs `acpi_call` installs no `.ko.cer`; no issue yet | nixpkgs' package ships the `.cer` itself (the build fails on purpose when it does) |
 | re-declare Valve's cmdline minus `amd_iommu=off` | `flake/modules/host-config/tenacity/fixes/iommu-tenacity.nix` | nire-tenacity | [#443](https://github.com/NireBryce/nixos-configs/issues/443) (Jovian) | Jovian stops setting `amd_iommu=off` for non-Deck hardware, or its param list changes (re-diff) |
+| blacklist `tiny_power_button` | `flake/modules/general-config/boot/power-button/no-tiny-power-button.nix` | every host in the `boot` category (durandal, tenacity, cube) | Linux 6.18.57's partial backport of 6.19's ACPI button rework; no issue yet | any kernel bump: eval warns when the kernel is no longer 6.18.57; re-check, then drop |
 | replace a `read` in `_carapace_completer` | `flake/modules/general-config/shell-config/bash/carapace-completer-read-fix.bash`, sourced from `bash.nix` | all with bash + ble.sh | [#75](https://github.com/NireBryce/nixos-configs/issues/75) (ble.sh/carapace) | the repro no longer reproduces with the fix removed |
 
 None of these is removed on the strength of a version bump alone: each
@@ -94,6 +95,34 @@ bump: a parameter Valve adds upstream does not reach tenacity while this
 override exists. To confirm after removal, suspend and read
 `/sys/power/suspend_stats/last_hw_sleep` (not `amd-s2idle`'s percentage;
 see [#442](https://github.com/NireBryce/nixos-configs/issues/442)).
+
+### tiny\_power\_button powers off on a power-button press
+
+Added 2026-10-20, after the kernel bump to 6.18.57.
+
+**What breaks without it.** `tiny_power_button` is the kernel's power
+button driver for VMs: a press makes the kernel send `SIGRTMIN+4` to init
+(`kill_cad_pid`), and systemd powers off immediately, before logind or the
+desktop sees the key. It is meant to replace the normal `button` driver
+(Kconfig `depends on !ACPI_BUTTON`), but nixpkgs builds both as modules with
+the same ACPI aliases, so udev loads both. On 6.18.57, which carries part of
+6.19's conversion of `button` to a platform driver, tiny binds the ACPI
+power-button device (`PNP0C0C:00`) and the button powers the machine off
+whatever `HandlePowerKey` and PowerDevil say. Seen on tenacity: a
+`signal_generate` trace showed `acpi_ev_notify_dispatch → kill_cad_pid`. The
+same partial backport left the button dead on another machine:
+<https://bbs.archlinux.org/viewtopic.php?pid=2312287>.
+
+**What it does.** `no-tiny-power-button.nix` adds `tiny_power_button` to
+`boot.blacklistedKernelModules`, which stops the alias autoload. It also
+records the kernel it was confirmed on (6.18.57) and adds an eval warning
+when the host's kernel is any other version.
+
+**Undo when** the kernel changes at all: any kernel bump, point release
+included, is the cue (the eval warning says so). On the new kernel, remove
+the blacklist, boot, and check that `/sys/bus/acpi/drivers/tiny-power-button/`
+binds nothing and a power-button press suspends. If it still binds
+`PNP0C0C:00`, keep the blacklist and move `confirmedOn` to the new version.
 
 ### carapace's completer loses a race with ble.sh
 
