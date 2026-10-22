@@ -186,6 +186,11 @@ around them, so there is nothing to undo:
   The workaround, a direct `hooks trust grant`, was run once by hand and
   left state on disk under `~/.zcode`, not in this config. Nothing to undo
   here; the write-up says what to keep.
+- Tenacity's internal SD card reader intermittently failing to enumerate
+  since 6.18.57, which also delays the lock screen's YubiKey prompt
+  ([experiments/tenacity-sd-reader-enumeration.md](experiments/tenacity-sd-reader-enumeration.md)).
+  Suspected cause is a 6.18.56 USB hub change; tabled until a kernel bump.
+  Recheck on the same bump that retires the `tiny_power_button` blacklist.
 
 ## Not on this page, on purpose
 
