@@ -1,6 +1,6 @@
 # Wiki index, for agents
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-21_
 
 Condensed from [00-INDEX.md](00-INDEX.md). Routing only.
 
@@ -78,7 +78,11 @@ diagnosed**; "still measuring" is not settled config. Current:
 [durandal-auto-suspend-hang-for-agents.md](experiments/durandal-auto-suspend-hang-for-agents.md) —
 sleeps into S3 and will not wake without a PSU power cut. `suspend_stats`
 reports those as `success`; s2idle and the BIOS are ruled out; `amdgpu.runpm=0`
-tried 2026-09-14, failed; nothing under test, cause not found. On resolution the outcome moves to
+tried 2026-09-14, failed; nothing under test, cause not found.
+[tenacity-sd-reader-enumeration.md](experiments/tenacity-sd-reader-enumeration.md) —
+reader `05e3:0764` on `usb2` port 1 fails to enumerate (error -62) on ~half of
+6.18.57 boots and delays `pam_u2f` on the lock screen; suspect 6.18.56's 120ms
+SS root hub hold; tabled, recheck on the next kernel bump. On resolution the outcome moves to
 [lessons-learned.md](lessons-learned.md) or the category page and the page goes.
 
 ## Rotting

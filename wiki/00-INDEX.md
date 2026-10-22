@@ -1,6 +1,6 @@
 # Wiki
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-21_
 
 This is the wiki's topic index. The `flake/` folder is meant to be browsed by
 its file tree, with documentation next to the code; the heavy modularization
@@ -174,7 +174,10 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   "we're still measuring this" never gets read as settled config:
   [durandal's auto-suspend hang](experiments/durandal-auto-suspend-hang.md)
   (sleeps into S3 and won't wake without a PSU power cut; the kernel reports
-  those as `success`, so an on-disk probe and `amdgpu.runpm=0` are under test). When a question closes, the
+  those as `success`, so an on-disk probe and `amdgpu.runpm=0` are under test), and
+  [tenacity's SD card reader](experiments/tenacity-sd-reader-enumeration.md)
+  (fails to enumerate on about half of boots since 6.18.57 and slows the
+  lock-screen YubiKey prompt; tabled until a kernel bump). When a question closes, the
   outcome moves to [lessons-learned.md](lessons-learned.md) or the relevant
   category page and the experiment page goes.
 
