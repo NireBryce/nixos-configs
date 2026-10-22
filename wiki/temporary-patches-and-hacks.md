@@ -1,6 +1,6 @@
 # Temporary patches and hacks
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-21_
 
 This page lists every workaround in this config that exists only because a
 third-party project has a bug, with what each one works around and when it
@@ -29,6 +29,7 @@ that still needs the user to ask, report by report.
 | sign `acpi_call` with kmodigest | `flake/modules/general-config/desktop-env/jovian/jovian.nix` (`boot.kernelPackages` override) | nire-tenacity | nixpkgs `acpi_call` installs no `.ko.cer`; no issue yet | nixpkgs' package ships the `.cer` itself (the build fails on purpose when it does) |
 | re-declare Valve's cmdline minus `amd_iommu=off` | `flake/modules/host-config/tenacity/fixes/iommu-tenacity.nix` | nire-tenacity | [#443](https://github.com/NireBryce/nixos-configs/issues/443) (Jovian) | Jovian stops setting `amd_iommu=off` for non-Deck hardware, or its param list changes (re-diff) |
 | blacklist `tiny_power_button` | `flake/modules/general-config/boot/power-button/no-tiny-power-button.nix` | every host in the `boot` category (durandal, tenacity, cube) | Linux 6.18.57's partial backport of 6.19's ACPI button rework; no issue yet | any kernel bump: eval warns when the kernel is no longer 6.18.57; re-check, then drop |
+| null out avahi's deprecated `publish.{enable,userServices}` | `flake/modules/general-config/system/gaming/sunshine.nix` | every NixOS host | nixpkgs `sunshine.nix` still sets them; no issue yet | nixpkgs' `sunshine.nix` sets `services.avahi.settings.publish` itself |
 | replace a `read` in `_carapace_completer` | `flake/modules/general-config/shell-config/bash/carapace-completer-read-fix.bash`, sourced from `bash.nix` | all with bash + ble.sh | [#75](https://github.com/NireBryce/nixos-configs/issues/75) (ble.sh/carapace) | the repro no longer reproduces with the fix removed |
 
 None of these is removed on the strength of a version bump alone: each
@@ -123,6 +124,26 @@ included, is the cue (the eval warning says so). On the new kernel, remove
 the blacklist, boot, and check that `/sys/bus/acpi/drivers/tiny-power-button/`
 binds nothing and a power-button press suspends. If it still binds
 `PNP0C0C:00`, keep the blacklist and move `confirmedOn` to the new version.
+
+### sunshine sets avahi options nixpkgs deprecated
+
+Added 2026-10-21.
+
+**What breaks without it.** nixpkgs' `sunshine` module turns avahi on with
+`services.avahi.publish.enable` and `publish.userServices` (both
+`mkDefault`). The avahi module deprecated both in favour of
+`services.avahi.settings.publish`, so every evaluation of every NixOS host
+prints two "option is obsolete" warnings. Nothing misbehaves.
+
+**What it does.** `sunshine.nix` sets both options to `null` at normal
+priority, which drops the module's values and the warnings, and sets
+`settings.publish.disable-user-service-publishing = false` (what
+`userServices = true` used to derive). `avahi.nix` sets the other two keys.
+The rendered `services.avahi.settings.publish` is unchanged on every host.
+
+**Undo when** nixpkgs' `sunshine.nix` sets `services.avahi.settings.publish`
+itself. Delete the block, evaluate, and check the warnings stay gone and
+`services.avahi.settings.publish` is the same as before.
 
 ### carapace's completer loses a race with ble.sh
 

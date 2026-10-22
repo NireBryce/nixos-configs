@@ -26,14 +26,17 @@
             # mDNS, not before.
             nssmdns4 = true;
 
-            # Both of these default to FALSE, and without them this host
-            # resolves other machines' .local names while never answering for
-            # its own -- which is the half that actually matters for reaching
-            # a box by name. `publish-addresses` in avahi-daemon.conf is what
-            # registers the A records for this host's addresses.
-            publish = {
-                enable    = true;
-                addresses = true;
+            # publishing is disabled by default and publish-addresses defaults
+            # to false, and without both changed this host resolves other
+            # machines' .local names while never answering for its own --
+            # which is the half that actually matters for reaching a box by
+            # name. `publish-addresses` in avahi-daemon.conf is what
+            # registers the A records for this host's addresses. These are
+            # the raw avahi-daemon.conf keys: the old publish.enable and
+            # publish.addresses options are deprecated renames of them.
+            settings.publish = {
+                disable-publishing = false;
+                publish-addresses  = true;
             };
         };
 

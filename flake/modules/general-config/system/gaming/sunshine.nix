@@ -65,5 +65,26 @@
             capSysAdmin = true; # KMS screen capture without running the service as root
             # openFirewall deliberately omitted -- see header.
         };
+
+        # TEMPORARY: nixpkgs' sunshine module still switches avahi on through
+        # the deprecated services.avahi.publish.{enable,userServices} (with
+        # mkDefault), and that alone prints two "option is obsolete" evaluation
+        # warnings on every host. Setting both back to null at normal priority
+        # drops the module's values and the warnings; the settings below are
+        # the avahi-daemon.conf keys those two options used to derive, so the
+        # rendered avahi-daemon.conf does not change. disable-publishing and
+        # publish-addresses are set in avahi.nix.
+        # Remove this block when nixpkgs' sunshine.nix sets
+        # services.avahi.settings.publish itself (see the mkDefault block near
+        # the end of nixos/modules/services/networking/sunshine.nix); the
+        # warnings are the cue to look, and they stop on their own when it is
+        # fixed. wiki/temporary-patches-and-hacks.md lists it.
+        services.avahi = {
+            publish = {
+                enable       = null;
+                userServices = null;
+            };
+            settings.publish.disable-user-service-publishing = false;
+        };
     };
 }
