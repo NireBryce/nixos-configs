@@ -12,7 +12,8 @@
         # ── this machine ──────────────────────────────────────────────────────
         # host-config/durandal/: hardware-durandal, boot-durandal,
         # b550-suspend-fix, suspend-probe-durandal,
-        # nixpkgs-hostPlatform-durandal, nixpkgs-stateVersion-durandal
+        # nixpkgs-hostPlatform-durandal, nixpkgs-stateVersion-durandal,
+        # planetside2-ports-durandal, gaming-durandal
         # -- suffixed 2026-08-12 so a second nixos host's copies (tenacity's)
         # don't merge into these under the "module name is its filename" rule.
         "durandal"
