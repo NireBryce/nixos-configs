@@ -158,8 +158,8 @@ Each job starts with a cold guest nix store.
 Each cycle also writes `forge_runner_last_cycle_seconds`,
 `forge_runner_short_cycle_streak` and
 `forge_runner_last_cycle_end_timestamp_seconds` to the node-exporter textfile
-directory (`/var/lib/node-exporter-textfile/forge_runner_cycle.prom`), of which
-[monitoring](monitoring.md)'s runner alerts alert on the short-cycle streak.
+directory (`/var/lib/node-exporter-textfile/forge_runner_cycle.prom`);
+the runner alerts in [monitoring](monitoring.md) fire on the short-cycle streak.
 
 The single long-lived runner this replaced, its pinned UUID and its
 day-one traps: [git-forge-history.md](git-forge-history.md#the-long-lived-runner-2026-09-24-to-2026-09-26).

@@ -29,7 +29,7 @@ at all: a folder with a subfolder holding modules is one
 
 - **`root-rollback/restore-root/WARN-impermanence.nix`** — the module.
   Deletes the `/root` btrfs subvolume in initrd on every boot and snapshots a
-  fresh one from `root-blank`. about 440 lines; the file itself is the
+  fresh one from `root-blank`. 440 lines; the file itself is the
   documentation for the mechanics (systemd-cryptsetup unit naming, ordering,
   the persisted directories list). Its own name is deliberately alarming, and
   per its own header comment, even the module's *name* is load-bearing:

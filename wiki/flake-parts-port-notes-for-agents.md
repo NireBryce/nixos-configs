@@ -48,7 +48,7 @@ against them.
   would have failed silently.
 - **Segment-scoped edges reported 119 of 160 modules as orphans** (a name
   bound in a `let` above the first declaration belongs to no segment).
-  `modules.py`'s `tree`/`orphans` that this concerned are gone; orphans is
+  `modules.py`'s `tree` and `orphans` no longer exist; the orphan check is
   now dirs-as-categories' `module-orphans` flake check.
 - **Omit an opt-in line and *nothing happens*** (clean eval, no error);
   hence the orphan check as a flake check.

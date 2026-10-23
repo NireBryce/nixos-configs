@@ -38,9 +38,9 @@ _Last modified: 2026-10-22_
   *build* time, so touching any one of ~126 packages rebuilds the whole
   index; `documentation.man.generateCaches` is system-scoped and would miss
   `/etc/profiles/per-user/<user>/share/man`, where the packages
-  worth searching live. Was on only as a side effect of fish's
-  `generateCompletions` setting it, and stayed on when fish did. Instead
-  it writes `~/.manpath` (one `MANDB_MAP` line pointing the profile's
+  worth searching live. `programs.man.generateCaches` had been on only as a
+  side effect of fish's `generateCompletions` setting it, and left with fish.
+  Instead this module writes `~/.manpath` (one `MANDB_MAP` line pointing the profile's
   `share/man` at `$XDG_CACHE_HOME/man`; the module owns that file, so
   enabling `programs.man.generateCaches` as well would concatenate a
   second map) and a user `mandb` service + weekly timer

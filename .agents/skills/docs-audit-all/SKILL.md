@@ -24,8 +24,8 @@ The pass that introduced this skill (commit `0abcb9de`, branch
 1. **Use a worktree** (`use-a-worktree`). The audit edits many files.
 2. **Leads.** `just wiki-lint` and `just wiki-stale-refs`. Leads only.
 3. **Rank and partition.** `just agent doc-drift [--top N]` ranks docs by
-   cited-code changes since their `_Last modified:_` (audit these first,
-   hardest). `just agent doc-partition [--agents N]` assigns every doc to
+   cited-code changes since their `_Last modified:_` (audit the top of the
+   list first). `just agent doc-partition [--agents N]` assigns every doc to
    exactly one owner, balanced by words, and fails on an unowned doc. Run
    bare `just agent` for exact flags. A `-for-agents` pair goes to one owner.
 4. **One agent per partition**, background, disjoint files. Prompt template:
@@ -56,7 +56,7 @@ The pass that introduced this skill (commit `0abcb9de`, branch
 
 ## Calibrate
 
-Agents invent errors as readily as they find them. A fix with no cited
+Agents report errors that are not there. A fix with no cited
 source line is a guess; revert it. An audit that touches code files has
 left its scope: file those findings (`propose-issue`) instead.
 

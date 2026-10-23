@@ -169,7 +169,7 @@ restore-root)`, so they only take effect on hosts that import
   matching inode and unchanged mtime. Full detail in the module's history
   note.
 
-All rely on `environment.persistence."/persist".directories`/`.files` being
+All three rely on `environment.persistence."/persist".directories`/`.files` being
 `listOf` and therefore concatenating across every file that appends to it —
 same merge behavior as `environment.systemPackages` and the same one that
 makes `home.file.<n>.text` a trap on the Home Manager side (see
