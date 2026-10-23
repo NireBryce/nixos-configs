@@ -1,6 +1,6 @@
 # Module style guide, for agents
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 Condensed from [module-style-guide.md](module-style-guide.md). Rules only.
 
@@ -75,7 +75,7 @@ option without a reason beyond tidiness.
 - **`{ ... }:` on an inner module lambda** is deliberate in
   `vm-networking.nix`, `sunshine-elly.nix`, `sunshine.nix` — it signals "this
   value is itself a NixOS module", which `_:` doesn't. statix's W10 findings
-  for them are accepted into `lint-baseline.json`.
+  for them are counted in `flake/scripts/lint-baseline.json`'s statix total.
 
 ## Comments
 

@@ -1,8 +1,8 @@
 # Traps & skills
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
-[`../CLAUDE.md`](../CLAUDE.md)'s "Traps" section has a one-line summary of
+[`../CLAUDE.md`](../CLAUDE.md)'s "Traps, all of which have actually happened here" section has a one-line summary of
 each trap. The full mechanism, code, and worked examples live in the matching
 skill, which loads only when that task comes up, so it costs no context
 otherwise. Read the skill before the task rather than re-deriving from the
@@ -25,7 +25,16 @@ one-liner.
 | Writing a new skill | `.agents/skills/new-skill/SKILL.md` |
 | Commenting a module/lib function users or contributors can't follow from the code | `.agents/skills/explain-tricky-code/SKILL.md` |
 | Starting a task that will branch, commit, or check out | `.agents/skills/use-a-worktree/SKILL.md` |
+| Adding a package to a user's environment | `.agents/skills/new-package/SKILL.md` |
+| Creating a wiki page (date line, Contents, sibling, index entry) | `.agents/skills/new-wiki-page/SKILL.md` |
+| Writing a fact, status snapshot, or cross-reference that must not rot | `.agents/skills/fact-hygiene/SKILL.md` |
+| Running a sops command, or a secret value showed up in output | `.agents/skills/secrets-hygiene/SKILL.md` |
+| A guard hook flagged a secret in tool output | `.agents/skills/triage-flagged-secrets/SKILL.md` |
+| Checking whether a reported bug is already a tracked thread | `.agents/skills/investigate-bug/SKILL.md` |
+| Reviewing a PR, branch, or commit | `.agents/skills/review/SKILL.md` |
+| Moving a resolved incident out of a wiki page into `-history.md` | `.agents/skills/wiki-history-sweep/SKILL.md` |
 | Turning a re-typed command pattern into a `just agent` script | `.agents/skills/agent-scripts/SKILL.md` |
+| Auditing every doc claim against the code with parallel agents | `.agents/skills/docs-audit-all/SKILL.md` |
 
 See [architecture.md](architecture.md) and
 [impermanence-and-secrets.md](impermanence-and-secrets.md) for where each of

@@ -1,6 +1,6 @@
 # Open threads
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-22_
 
 The repo's loose ends (todos left in code, upstream bugs found here,
 undecided design questions) are GitHub issues on this repo, not entries on
@@ -71,7 +71,3 @@ Notes that have no "done when", so an issue would only sit open:
   so a misbehaving program running as one of those users doesn't inherit
   all of `elly`'s authority. See
   [categories/elly.md](categories/elly.md#elly-as-the-experimental-user).
-- `ignore/` and `flake/!IGNORE-maybe-useful-chunks/` hold retired
-  experiments, each with a README saying why it didn't work. Anything
-  under an `ignore`/`IGNORE`-prefixed path is not indexed anywhere on
-  purpose.

@@ -164,5 +164,70 @@ class LessonsMapCheck(unittest.TestCase):
         self.assertFinds('[[topic\n', "LESSONS MAP SYNTAX")
 
 
+class DocRefsCheck(unittest.TestCase):
+    """Each rule of `docrefs` against a case it must catch and one it must
+    leave alone."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = pathlib.Path(self.tmp.name)
+        self.write('.agents/scripts/agent.just', 'where *args:\n    @true\n')
+        self.write('.agents/skills/real-skill/SKILL.md', '# s\n')
+        self.write('wiki/target.md', '# Target\n\n## Ad hoc restic commands\n')
+        self.write('AGENTS.md', 'clean\n')
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def write(self, rel, text):
+        p = self.root / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(text)
+
+    def findings(self, doc):
+        self.write('wiki/doc.md', doc)
+        return check_wiki.check_docrefs(self.root)
+
+    def test_unknown_helper_caught(self):
+        f = self.findings('Run `just agent nope`.\n')
+        self.assertTrue(any(x.startswith('UNKNOWN HELPER') for x in f), f)
+
+    def test_known_helper_and_placeholder_pass(self):
+        self.assertEqual(self.findings(
+            'Run `just agent where` or `just agent where <n>` or `just agent`.\n'), [])
+
+    def test_skill_path_caught(self):
+        f = self.findings('See `.agents/skills/gone/SKILL.md`.\n')
+        self.assertTrue(any(x.startswith('UNKNOWN SKILL') for x in f), f)
+
+    def test_plain_hyphenated_skill_caught(self):
+        f = self.findings('Follow skill no-such-skill here.\n')
+        self.assertTrue(any(x.startswith('UNKNOWN SKILL') for x in f), f)
+
+    def test_real_skill_and_git_log_pass(self):
+        self.assertEqual(self.findings(
+            'See `.agents/skills/real-skill/SKILL.md` and skill real-skill.\n'
+            '`git log -- .agents/skills/removed-one` has it.\n'), [])
+
+    def test_missing_section_caught(self):
+        f = self.findings('See [target.md](target.md)\'s "Nonexistent part" section.\n')
+        self.assertTrue(any(x.startswith('UNKNOWN SECTION') for x in f), f)
+
+    def test_existing_section_passes(self):
+        self.assertEqual(self.findings(
+            'See `target.md`\'s "Ad hoc restic commands" section.\n'), [])
+
+    def test_quote_belonging_to_other_page_not_flagged(self):
+        self.assertEqual(self.findings(
+            'The "Elsewhere" section of the `real-skill` skill, see `target.md`.\n'), [])
+
+    def test_moved_path_caught(self):
+        f = self.findings('Guards live in `.claude/hooks/x.sh`.\n')
+        self.assertTrue(any(x.startswith('MOVED PATH') for x in f), f)
+
+    def test_new_path_passes(self):
+        self.assertEqual(self.findings('Guards live in `.agents/hooks/x.sh`.\n'), [])
+
+
 if __name__ == '__main__':
     unittest.main()

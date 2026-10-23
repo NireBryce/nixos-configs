@@ -1,8 +1,8 @@
 # `system` — `general-config/system/`
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
-The largest category: 15 subdirectories (no per-file count here; see
+The largest category: 16 subdirectories (no per-file count here; see
 categories/00-INDEX.md's Index section for why). Every Linux host imports it
 whole, with no way to opt out of any piece. That is why
 [virtualization](virtualization.md) and [containers](containers.md) are their
@@ -53,8 +53,9 @@ into them, and each has its own section below:
 [../architecture.md](../architecture.md). It's filed under `general-config/system/`
 specifically so the `system` category picks it up and every host that
 imports `system` gets it automatically, rather than each host wiring HM in
-by hand. `enable-home-manager-darwin.nix` is the nix-darwin-side equivalent
-for `lysithea` — it's what brings packages and dotfiles to a darwin
+by hand (it also sets `backupFileExtension = "hm-bak"`).
+`enable-home-manager-darwin.nix` is the nix-darwin-side equivalent
+for `lysithea` (same `useGlobalPkgs`/`useUserPackages`, no backup extension) — it's what brings packages and dotfiles to a darwin
 host, not anything under [macos](macos.md).
 
 `home-manager/drop-unsupported-packages.nix` is the platform-support
@@ -64,7 +65,9 @@ every package in it has to survive `aarch64-darwin`. Eleven didn't (`vlc`,
 `ltrace` (since removed), `iotop`, `sysstat`, `ethtool`), each previously
 guarded by a hand-written `lib.mkIf (!pkgs.stdenv.isDarwin)` — a restated fact that can
 drift. This file reads `meta.platforms`/`meta.badPlatforms` and drops what
-can't build, once, with a warning naming what it dropped. See skill
+can't build, once, with a warning naming what it dropped. It is a no-op on
+Linux by design (an unbuildable package there stays a loud error), and it
+does not catch `meta.broken` (hence `cod`'s hand-written guards). See skill
 `package-platform-support` for the full
 build-support-vs-Homebrew-overlap distinction this is one half of.
 
@@ -99,15 +102,18 @@ pure derivation of an existing key, self-healing because durandal/tenacity
 wipe `/root` every boot. See the module header for the nix-store-safety
 reasoning.
 
-The same module also fixes which editor `sudo sops secrets.yaml` opens.
+The same module also fixes which editor `sudo sops secrets.yaml` opens
+(`environment.variables.EDITOR`/`VISUAL = "micro"`, system-wide, since root has no Home Manager profile).
 Setting `environment.variables.EDITOR = "micro"` system-wide was not
 sufficient on its own — confirmed 2026-09-16, `sudo sops` still opened
 vi/vim despite it — because `sudo`'s default `env_reset` discards the
 invoking environment (including EDITOR/VISUAL) before exec, and that reset
 happens independently of a target-user shell ever sourcing
-`environment.variables`. The fix is `security.sudo.extraConfig = ''Defaults
-env_keep += "EDITOR VISUAL"'';`, which makes sudo pass the invoking user's
-own EDITOR through instead of resetting it away.
+`environment.variables`. The fix is `security.sudo.extraConfig`, scoped (2026-10-19; it was a global
+`Defaults env_keep`) to a `Cmnd_Alias` for `/run/current-system/sw/bin/sops *`
+with `Defaults!SOPS_CMDS env_keep += "EDITOR VISUAL"`, which makes sudo pass the
+invoking user's own EDITOR through for `sudo sops` only. A store-path
+invocation of sops doesn't match the alias and falls back to vi.
 
 See [../impermanence-and-secrets.md](../impermanence-and-secrets.md) for
 which hosts are enrolled in `.sops.yaml` — that's tracked separately
@@ -137,10 +143,14 @@ several categories: persistence for state that matters to one specific
 thing is filed as a sibling of the module that generates it, not
 centralized under [impermanence](impermanence.md).
 
-- **`tailscale-persist.nix`** persists `/var/lib/tailscale/tailscaled.state`
-  — without it, Tailscale needs re-authenticating on every boot, since node
-  identity lives under `/var/lib` and both hosts that import this roll `/`
-  back on every boot.
+All three are wrapped in `lib.mkIf (config.boot.initrd.systemd.services ?
+restore-root)`, so they only take effect on hosts that import
+`WARN-impermanence.nix` (durandal, tenacity); on cube they contribute nothing.
+
+- **`tailscale-persist.nix`** persists the directory `/var/lib/tailscale`
+  (including `tailscaled.state`) — without it, Tailscale needs
+  re-authenticating on every boot, since node identity lives under
+  `/var/lib` and those hosts roll `/` back on every boot.
 - **`mullvad-persist.nix`** persists `/etc/mullvad-vpn` (account, device,
   settings) — without it the Mullvad daemon (`vpn.nix`, enabled 2026-09-26)
   logs out and registers a new device on every boot.
@@ -159,7 +169,7 @@ centralized under [impermanence](impermanence.md).
   matching inode and unchanged mtime. Full detail in the module's history
   note.
 
-Both rely on `environment.persistence."/persist".directories` being
+All three rely on `environment.persistence."/persist".directories`/`.files` being
 `listOf` and therefore concatenating across every file that appends to it —
 same merge behavior as `environment.systemPackages` and the same one that
 makes `home.file.<n>.text` a trap on the Home Manager side (see

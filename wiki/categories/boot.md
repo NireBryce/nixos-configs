@@ -1,6 +1,6 @@
 # `boot` — `general-config/boot/`
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 ## Contents
 
@@ -13,7 +13,7 @@ _Last modified: 2026-10-20_
 
 ## What's in it
 
-Two files:
+Three files:
 
 - `generations/boot-generations.nix` caps how many bootloader generations
   systemd-boot keeps.
@@ -21,12 +21,17 @@ Two files:
   systemd-boot menu (nixpkgs defaults it on; `init=/bin/sh` there is a root
   shell). Recovery parameters now go through `boot.kernelParams` and a
   rebuild, an older generation, or a live USB.
+- `power-button/no-tiny-power-button.nix` blacklists the kernel module
+  `tiny_power_button` (a VM-only driver that, on 6.18.57, binds the real
+  power button and powers off at once instead of suspending). TEMPORARY: it
+  warns at eval time when the kernel version differs from the one it was
+  confirmed on; removal condition in `wiki/temporary-patches-and-hacks.md`.
 
 ## Why each file sits in a subdirectory
 
 Until 2026-09-28 the category collector skipped `.nix` files sitting
 straight in a category's own directory, so a module directly in
-`general-config/boot/` reached nothing — hence `generations/` and `editor/`
+`general-config/boot/` reached nothing — hence `generations/`, `editor/` and `power-button/`
 (`flake/doc/dirsAsCategory.md`'s History). Since 2026-10-16 they are what
 makes `boot` a category at all: a folder with a subfolder holding modules is
 one ([module-files.md](../module-files.md)). **Flatten both and `boot`
@@ -49,7 +54,7 @@ carry a host-suffixed name instead of the generic one they'd naturally want.
 ## Don't confuse this with the impermanence category
 
 `general-config/boot/` is about the bootloader (generation count,
-menu editor). It is
+menu editor, a power-button workaround). It is
 **not** the category that wipes `/root` — that's [impermanence](impermanence.md),
 named `boot` itself until 2026-08-11, which is exactly the confusion the
 rename was meant to end. If you're looking for the `/root` rollback, you

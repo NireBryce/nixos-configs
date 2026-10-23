@@ -1,6 +1,6 @@
 # flake-parts port notes
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 Decisions, dead ends, and flake-parts machinery from the 2026-08 den →
 flake-parts port, salvaged 2026-09-08 from two files on the `flake-parts`
@@ -92,8 +92,7 @@ produced no error, or an error naming the wrong thing.
   adding an argument list to reach the NixOS `config` silently repoints
   every existing `config` in that module, and `config.flake.modules.*`
   stops resolving. Bind what you need from the outer scope in a `let` above
-  the declaration — `enable-home-manager.nix` does exactly this and says
-  so.
+  the declaration (what the module files did before the move).
 - **`useGlobalPkgs` makes Home Manager reject `nixpkgs.*` outright**, which
   silently dropped an `allowUnfreePredicate` workaround for HM issue #2942.
   `home.profileDirectory` moves to `/etc/profiles/per-user/<user>`, and
@@ -118,12 +117,14 @@ produced no error, or an error naming the wrong thing.
   silently with no build-time error. Caught by reading source, not by any
   tool.
 - **Segment-scoped reference edges reported 119 of 160 modules as
-  orphans.** `modules.py tree` attributes a reference to whichever
+  orphans.** (`modules.py`'s `tree` and `orphans` are gone since the move
+  to dirs-as-categories, [module-files.md](module-files.md); the orphan
+  check is now its `module-orphans` flake check. Kept for the mechanism.)
+  `modules.py tree` attributed a reference to whichever
   declaration's text region it sits in; a name bound in a `let` *above* the
   first declaration belongs to no segment, the edge vanishes, and a whole
-  tree detaches. `orphans` uses file-level edges instead, where no edge can
-  be lost. The two are deliberately not shared — don't "simplify" them into
-  one edge model.
+  tree detaches. `orphans` used file-level edges instead, where no edge can
+  be lost; the two were deliberately not shared.
 - **Verifying the opt-in mechanism before betting a refactor on it.** A
   throwaway `mkFlake` with two separate modules each setting
   `flake.modules.nixos.workstation.imports` produced a config carrying both
@@ -188,10 +189,10 @@ deliberately, so it is still accepted as a full module under
 
 **`deferredModule` merges, which is why membership lives with the module.**
 Several files may define the same attribute and the module system merges
-all of them into one. This is the mechanism behind every category in this
-repo, and behind the collision trap in `AGENTS.md` — two modules sharing a
-name merge rather than conflict, so a copy-paste that forgets to rename
-gives you a module that silently also carries someone else's config.
+all of them into one. Raw flake-parts merges two modules sharing a name, so a
+copy-paste that forgot to rename gave a module that silently also carried
+someone else's config. Here dirs-as-categories refuses a repeated name
+before it reaches the merge ([module-files.md](module-files.md), §34).
 
 **Prefer `config.flake.modules.…` over `self.modules.…`.** Both resolve to
 the same data, but `self.modules` goes out through the flake's `outputs`
@@ -248,7 +249,9 @@ of a second nixpkgs instantiation. `hosts.nix` says so at its head.
 ### `import-tree`
 
 Not flake-parts, but inseparable from how this config reads.
-`(inputs.import-tree ./modules)` imports **every** `.nix` file under
+`dirs-as-categories` builds on it (`(inputs.dirs-as-categories.lib.tree
+./modules)` in `flake/flake.nix`; `import-tree` is its input), and
+import-tree imports **every** `.nix` file under
 `modules/` recursively as a flake-parts module, so file paths carry no
 meaning to Nix and files can be moved freely. Non-`.nix` files are ignored,
 which is why a module's config files can sit beside it. Paths containing
@@ -267,7 +270,8 @@ error: infinite recursion encountered
 
 — pointing at `modulesPath`, `_module.args`, and a `config` reference in
 `imports`, none of which is the cause. Always wrap:
-`{ ... }: { flake.modules.nixos.<name> = <the original module>; }`. Skill
+`{ nixos = <the original module>; }` (the class key; the name is the
+filename). Skill
 [`new-flake-module`](../.agents/skills/new-flake-module/SKILL.md) carries
 this.
 

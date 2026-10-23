@@ -71,8 +71,9 @@ The host can be fully wired and still unable to boot — say so in the header.
 ## Naming: suffix anything host-specific
 
 Names in one class **merge**. Every file under `<name>/` gets a host suffix
-(`hardware-cube.nix`, `boot-cube.nix`). Durandal's unsuffixed
-`hardware-configuration.nix` predates the rule; don't repeat it.
+(`hardware-cube.nix`, `boot-cube.nix`). Every live host follows it, down to
+`nixpkgs-hostPlatform-<name>.nix` and `nixpkgs-stateVersion-<name>.nix` in
+`<name>/configuration/`.
 
 ## `system.stateVersion`: copy the reasoning, not the value
 
@@ -83,7 +84,8 @@ bumped. A host with no data starts on the **current** release:
 nix eval --raw .#nixosConfigurations.nire-tenacity.config.system.nixos.release
 ```
 
-Not durandal's `23.11` or tenacity's `25.05`. Comment the fresh-host case,
+Not durandal's `23.11`, tenacity's `25.05` or cube's `26.05` (each lives
+in its `nixpkgs-stateVersion-<name>.nix`). Comment the fresh-host case,
 not just the string.
 
 ## Don't copy hardware-keyed fixes blind
@@ -105,7 +107,9 @@ generic pieces only; record the decision in the host header
 4. Secrets are not auto-enrolled: when the host needs `secrets.yaml`, add its
    SSH host key (via `ssh-to-age`) to `.sops.yaml` and `sops updatekeys
    secrets.yaml`. Not preemptively.
-5. `AGENTS.md` Architecture/State sections need a line (always have).
+5. `AGENTS.md` keeps no host roster (it points at `hosts.nix` and
+   `wiki/hosts.md`); edit it only if its Safety section's list of hosts that
+   wipe `/root` changes.
 6. `just wiki-gen` (adds the host's row to `wiki/hosts.md`; write its Role
    cell, the one hand-written column), plus the `Imported by` line of every
    `wiki/categories/*.md` for categories the host now imports.

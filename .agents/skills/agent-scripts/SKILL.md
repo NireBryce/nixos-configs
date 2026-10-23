@@ -101,8 +101,9 @@ committing, ship's preview/gate and the post-merge cleanup are
 1. Script in `.agents/scripts/`, executable, any language. Generalize
    past the cases seen (N files, not two). The header says what question
    it answers and which SEQUENCES row or habit it replaces. A toolchain
-   not already on the hosts (python3 and bash are; the flake has no
-   devShells) → ask the user before adding a devShell.
+   not already on the hosts (python3 and bash are; the flake's only
+   devShell is `flake/modules/dev-shell.nix`) → ask the user before adding
+   a package to it.
 2. One-line recipe in `.agents/scripts/agent.just`: summary comment, then
    `@"{{scripts}}/<script>" "$@"` (positional arguments are on, so quoted
    arguments stay whole). Module recipes run from `.agents/scripts/`, not

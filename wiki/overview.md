@@ -1,6 +1,6 @@
 # Overview
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 Read this first. Once you know what you're looking for,
 [00-INDEX.md](00-INDEX.md) is the index. This page is short on facts and long
@@ -29,10 +29,11 @@ warning. One repo, one flake, every host's config comes out of it.
 
 ## The shape of it
 
-- **A module is just a file.** `flake.nix` imports every `.nix` file under
-  `flake/modules/` automatically (`import-tree`); each declares one
-  `flake.modules.<class>.<name>`. No central list of modules to keep in
-  sync — [architecture.md](architecture.md) has the mechanism.
+- **A module is just a file.** `flake.nix` hands every `.nix` file under
+  `flake/modules/` to the `dirs-as-categories` input, which names each
+  module after its filename and fills `flake.modules.<class>.<name>`. No
+  central list of modules to keep in sync, and no name written in the file;
+  [architecture.md](architecture.md) has the mechanism.
 - **Which category a module belongs to is decided by its directory, not a
   declaration.** A category is a directory that opts something shared
   (system config, a package, a piece of Home Manager) into being optional

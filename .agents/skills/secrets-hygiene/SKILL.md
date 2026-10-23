@@ -114,7 +114,7 @@ caught something; check output yourself.
    secret-shaped content: Tailscale auth key (`tskey-...`), age key (`age1...`
    as a *secret*, or `AGE-SECRET-KEY-...`), SSH private key block, recovery
    phrase (plain words next to a key name like `atuin_key`), or any
-   `secrets.yaml` key name (`tailscale_key`, `atuin_key`, `syncthing-*`,
+   `secrets.yaml` key name (`tailscale_key`, `atuin_key`, `restic-*`,
    `ssh-*`) beside a value rather than `ENC[...]`.
 2. Don't requote a leaked value; refer to it by name ("the `tailscale_key`
    value"). Repeating it only adds copies.
@@ -134,7 +134,7 @@ caught something; check output yourself.
   `hooks.PreToolUse`/`hooks.PostToolUse`): read before assuming a new
   risky-command shape is covered; if not, extend the pattern match, not just
   this prose.
-- `CLAUDE.md` Safety — why `secrets.yaml` is encrypted-but-committed, which
-  hosts are enrolled.
+- `CLAUDE.md` Safety — why `secrets.yaml` is encrypted-but-committed;
+  `.agents/rules/secrets.md` — which hosts are enrolled.
 - `flake/modules/general-config/system/secrets/sops.nix` — how secrets are
   declared and wired to services.

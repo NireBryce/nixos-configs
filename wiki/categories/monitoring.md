@@ -1,6 +1,6 @@
 # `monitoring` — `homelab-config/homelab/monitoring/`
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 Prometheus + Grafana, scraping this host's own resource metrics. Cube-only so
 far (added 2026-08-23; under the `homelab` umbrella since 2026-08-27).
@@ -100,7 +100,7 @@ binding, not the firewall, is what restricts access. (It bound `0.0.0.0` only
 from 2026-08-23 to 2026-08-24.)
 
 The `trustedInterfaces = [ "tailscale0" ]` rule that [system](system.md)'s
-`tailscale.nix` sets on every host is the second line, now covering Caddy's
+`networking.nix` sets on every host is the second line, now covering Caddy's
 443 ([reverse-proxy](reverse-proxy.md)): traffic arriving on `tailscale0`
 bypasses the allow-list, traffic on any other interface hits the
 default-deny. It trusts the *whole* interface, not one port, the same blanket
@@ -206,7 +206,7 @@ design reason rules them out, it just hasn't been asked for there yet.
   you. This page is the configuration half.
 - [reverse-proxy](reverse-proxy.md) — Caddy, how Grafana is reached as of
   2026-08-24, and where its TLS certificate comes from.
-- [system](system.md) — `tailscale.nix`, the firewall rule this category's
+- [system](system.md) — `networking.nix`, the firewall rule this category's
   access model still rests on, one layer out.
 - [virtualization](virtualization.md) — what `libvirt-exporter.nix` scrapes,
   and the unrelated network-start bug found in the same activation.

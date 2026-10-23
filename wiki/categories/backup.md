@@ -1,6 +1,6 @@
 # `backup` — `homelab-config/homelab/backup/`
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 [restic](https://restic.net/) backs up `nire-cube`'s service state to the
 `ts-hive` NAS already on the network. Cube-only; added 2026-08-28 against issue
@@ -33,7 +33,19 @@ listener.
 ## What's in it
 
 One file, `nixos`-class: `restic/restic.nix`, declaring
-`services.restic.backups.cube`.
+`services.restic.backups.cube`:
+
+- **Paths**: `/var/lib/forgejo`, `/var/lib/grafana`, `/var/lib/golink`,
+  `/persist/secrets`, `/persist/passwords`, and the sqlite staging directory.
+- **Schedule**: timer `OnCalendar = 03:30`, `RandomizedDelaySec = 30m`,
+  `Persistent = true`.
+- **Retention** (`pruneOpts`, an unsized starting point): `--keep-daily 7`,
+  `--keep-weekly 4`, `--keep-monthly 6`.
+- **Secrets**: `restic-cube-ssh-key` and `restic-cube-password`, declared in
+  the module itself (not `sops.nix`) so they decrypt only where it is imported.
+- `initialize = true`, and plain `restic` in `environment.systemPackages`
+  next to nixpkgs' `restic-cube` wrapper (the wrapper can't do a
+  two-repository `restic copy`).
 
 ## Why the category isn't named `restic`
 

@@ -243,8 +243,8 @@
                 #
                 # `rustdevshell` did survive, nothing else defining it, but
                 # was stale twice over: the checkout is nixos-configs, and
-                # that dev-shell is parked in ignore/dev-shells/rust/,
-                # wired into nothing.
+                # that dev-shell was parked in the old ignore/ directory
+                # (since removed), wired into nothing.
                 #
                 # Add aliases to home.shellAliases in shell-env.nix.
                 #

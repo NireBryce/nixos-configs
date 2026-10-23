@@ -1,6 +1,6 @@
 # cod completion descriptions
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 [cod](carapace.md)'s menu descriptions in ble.sh come from a curated table in
 this repo plus a ble.sh advice hook, because cod cannot supply them itself.
@@ -49,8 +49,9 @@ Three pieces, all under
    `__cod_complete_bash` (same pattern as `carapace-desc.bash`): let the
    real completer fill `COMPREPLY`, then re-yield each candidate through
    `ble/complete/cand/yield` with the table's description where one exists.
-   Candidates with no row yield plain; a command with no rows at all leaves
-   `COMPREPLY` untouched, so ble.sh's mandb enrichment and default handling
+   Once at least one candidate in a completion has a row, the rest yield
+   plain; if none does (including a command with no rows at all), the advice
+   leaves `COMPREPLY` untouched, so ble.sh's mandb enrichment and default handling
    still apply — an untabled command costs one hash lookup, nothing more.
    This is also why the table only covers cod's own domain and doesn't try
    to duplicate man pages.

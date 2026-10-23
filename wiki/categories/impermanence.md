@@ -1,6 +1,6 @@
 # `impermanence` — `general-config/impermanence/`
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 **Read `WARN-impermanence.nix` itself before changing anything here; this
 page is an index, not a substitute.** It covers what lives in the category
@@ -29,7 +29,7 @@ at all: a folder with a subfolder holding modules is one
 
 - **`root-rollback/restore-root/WARN-impermanence.nix`** — the module.
   Deletes the `/root` btrfs subvolume in initrd on every boot and snapshots a
-  fresh one from `root-blank`. 532 lines; the file itself is the
+  fresh one from `root-blank`. 440 lines; the file itself is the
   documentation for the mechanics (systemd-cryptsetup unit naming, ordering,
   the persisted directories list). Its own name is deliberately alarming, and
   per its own header comment, even the module's *name* is load-bearing:
@@ -44,7 +44,10 @@ at all: a folder with a subfolder holding modules is one
   `CanHybridSleep=no` — it drops the suspend request entirely rather than
   falling back to plain suspend, which broke suspend outright on 2026-08-10
   (`lessons-learned.md` §30). This module is the other half of that same
-  decision; the two have to agree or the machine can't sleep at all. It's
+  decision; the two have to agree or the machine can't sleep at all. It
+  writes `SleepMode = 1` (plain suspend) into `powerdevilrc` for the `AC`,
+  `Battery` and `LowBattery` profiles via a Home Manager activation step
+  (`kwriteconfig6`), and is a no-op on darwin. It's
   `homeManager`-class and applies to **both** Linux desktop hosts durandal
   and tenacity, since durandal also imports `boot`/`impermanence` and would
   hit the identical PowerDevil failure otherwise.

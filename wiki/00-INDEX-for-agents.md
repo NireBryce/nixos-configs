@@ -84,7 +84,10 @@ tried 2026-09-14, failed; nothing under test, cause not found.
 [tenacity-sd-reader-enumeration.md](experiments/tenacity-sd-reader-enumeration.md) —
 reader `05e3:0764` on `usb2` port 1 fails to enumerate (error -62) on ~half of
 6.18.57 boots and delays `pam_u2f` on the lock screen; suspect 6.18.56's 120ms
-SS root hub hold; tabled, recheck on the next kernel bump. On resolution the outcome moves to
+SS root hub hold; tabled, recheck on the next kernel bump. Also in `experiments/`: [durandal-suspend-instrumentation-state.md](experiments/durandal-suspend-instrumentation-state.md)
+(what is running on durandal for the hang, each row with its check command) and
+[a 2026-09-16 probe transcript](experiments/durandal-superio-probe-runbook-2026-09-16.md)
+(historical, do not follow). On resolution the outcome moves to
 [lessons-learned.md](lessons-learned.md) or the category page and the page goes.
 
 ## Rotting

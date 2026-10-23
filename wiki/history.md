@@ -1,6 +1,6 @@
 # History & lessons learned
 
-_Last modified: 2026-10-16_
+_Last modified: 2026-10-22_
 
 ## Contents
 
@@ -48,7 +48,7 @@ _Last modified: 2026-10-16_
   agent) was removed 2026-08-28 with its `nireHost/llm-sandbox/` files,
   `hosts.nix` entry, and `virtualization-cube.nix`. Confirmed booted and
   staying up 2026-08-24 (see "Confirmed-on-hardware facts" below);
-  §  §40 has the three runtime-only bugs its first switch hit. The generator
+  [§36](lessons-learned/36-evaluating-vs-building.md) and [§40](lessons-learned/40-check-the-resource-not-the-unit.md) cover the bugs its first builds and switch hit. The generator
   it ran on, `VMs/_lib/libvirt-vm.nix`, is kept as unexercised reusable
   infrastructure — see [virtualization](categories/virtualization.md).
 - **`claude cave/` itself was retired 2026-09-02.** Its four remaining
@@ -78,8 +78,8 @@ _Last modified: 2026-10-16_
   silently reach no host, and forced `bareModulesOf` onto the collector
   once nested categories delegated by name. Both are gone; cube's VM wiring,
   which relied on the rule to stay out of `virtualization`, moved to
-  `host-config/cube/vms/virtualization-cube.nix` (directory renamed
-  `cube-vm/` 2026-09-29). Why it existed, what was
+  `host-config/cube/cube-vm/virtualization-cube.nix` (the directory was
+  `vms/` until 2026-09-29). Why it existed, what was
   checked before removing it, and how it was verified:
   `flake/doc/dirsAsCategory.md`'s History;
   [categories/virtualization-history.md](categories/virtualization-history.md#where-the-vm-wiring-used-to-live)

@@ -1,6 +1,6 @@
 # Architecture & module system
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 `flake.nix` is a manifest: it reads every `.nix` file under `flake/modules/`
 and fills `flake.modules.<class>.<name>` from them. A folder holding modules
@@ -178,8 +178,8 @@ flowchart LR
 ## Related, easy to get backwards
 
 Containers and VMs are separate categories here, and "virtualization" means
-only the VM one (`homelab-config/homelab/virtualization/`: libvirt, virt-tools,
-vm-networking — optional, cube only). Podman/distrobox live in
+only the VM one (`homelab-config/homelab/virtualization/`: libvirt,
+libvirt-persist, virt-tools, vm-egress-dns, vm-networking — cube only). Podman/distrobox live in
 [`homelab-config/homelab/containers/`](categories/containers.md), its own category
 since 2026-08-22, nested under the `homelab` umbrella since 2026-08-27 —
 imported by cube only (durandal dropped it 2026-08-27, same day as

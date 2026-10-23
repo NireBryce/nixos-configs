@@ -1,13 +1,13 @@
 # Wiki style guide
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 A page lives in the directory that matches its reader: `wiki/` for
 cross-cutting topics, `categories/` for one page per category, `homelab/` for
 using a running service, `experiments/` for open investigations. Read this
 before adding a page, splitting one into a subdirectory, or reorganizing
-links. The rules come from [00-INDEX.md](00-INDEX.md)'s "why a link layer,
-not a rewrite". ([conventions.md](conventions.md) is the repo's own style
+links. The rules come from [00-INDEX.md](00-INDEX.md)'s "Why links and not a
+rewrite" paragraph. ([conventions.md](conventions.md) is the repo's own style
 guide: Nix formatting, `just` commands, the `ship` flow.)
 
 > **Condensed version:**
@@ -30,7 +30,8 @@ guide: Nix formatting, `just` commands, the `ship` flow.)
 
 Pages go in one of these places:
 
-- **`wiki/*.md`** — cross-cutting topics that don't belong to one category:
+- **`wiki/*.md`** — cross-cutting topics that don't belong to one category
+  (`ls wiki/*.md` is the full list; the main ones):
   `overview.md` (the newcomer's on-ramp, deliberately written to be read
   first), `architecture.md`, `hosts.md`, `disk-formatting.md` (the one
   runbook-shaped page here — ordered steps, closer to a `homelab/` usage
@@ -41,7 +42,8 @@ Pages go in one of these places:
   Two pages in this tier are exceptions to "index over restatement"
   below: `lessons-learned.md` and `module-style-guide.md` hold synthesized
   content because there's nothing else for it to link to (they moved in
-  verbatim from `claude cave/`, retired 2026-09-02).
+  verbatim from `claude cave/`, retired 2026-09-02). `flake-parts-port-notes.md`
+  is a third, for the same reason: the branch it was salvaged from is gone.
   `history.md` is the index into `lessons-learned.md`, and `conventions.md`
   the index into `module-style-guide.md`: the same split as a category page
   and its deep-dive. Every lesson's full account is a per-§ article in
@@ -298,7 +300,7 @@ that reason.
 
 ### This is deliberate duplication, and it is the only kind here
 
-[00-INDEX.md](00-INDEX.md)'s "why a link layer and not a rewrite" section
+[00-INDEX.md](00-INDEX.md)'s "Why links and not a rewrite" paragraph
 says this repo has been bitten repeatedly by one fact living in two places
 and drifting. That objection is correct. The split is worth it anyway
 because the two readers want different documents, and because it is the one
@@ -385,8 +387,10 @@ that, a lint check noticed the drift and an agent fixed the row by hand;
 the module counts table alone had its rows hand-edited in 24 commits in
 September.
 Today's regions: [hosts.md](hosts.md)'s host table, the two Index tables
-on [categories/00-INDEX.md](categories/00-INDEX.md), and the counts on
-[module-style-guide-for-agents.md](module-style-guide-for-agents.md#counts).
+on [categories/00-INDEX.md](categories/00-INDEX.md), the counts on
+[module-style-guide-for-agents.md](module-style-guide-for-agents.md#counts),
+and the module-layout diagram on [architecture.md](architecture.md) (a
+`Block` in `wiki_gen.py`: no hand-written columns).
 
 **To change a generated fact, change its source** (the start marker names
 it) **and run `just wiki-gen`.** An edit inside a region is undone on the
@@ -411,8 +415,8 @@ existing checks.
 
 ## See also
 
-- [00-INDEX.md](00-INDEX.md) — the wiki's own top-level index and the "why a
-  link layer, not a rewrite" reasoning this style guide turns into rules.
+- [00-INDEX.md](00-INDEX.md) — the wiki's own top-level index and the "Why links
+  and not a rewrite" reasoning this style guide turns into rules.
 - [categories/00-INDEX.md](categories/00-INDEX.md) — the category-index page,
   and the concrete precedent note for the `shell-config/` split.
 - [conventions.md](conventions.md) — the repo's own style guide (Nix

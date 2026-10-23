@@ -87,8 +87,8 @@ wrong**: `modules.py` once read `config.flake.modules.nixos.kde-base` as
 
 ## Classes
 
-dirs-as-categories knows `nixos`, `homeManager`, `darwin` (`flake/flake.nix`
-sets the list). A *valid* class can still be wrong: `jq` and `bitwarden`
+dirs-as-categories knows `nixos`, `homeManager`, `darwin` (the `classes` in
+`nix eval --json ./flake#moduleGraph`; `modules.py`'s `CLASSES` mirrors it). A *valid* class can still be wrong: `jq` and `bitwarden`
 once declared `nixos` bodies full of `home.packages`.
 
 ## Raw NixOS modules

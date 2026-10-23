@@ -1,6 +1,6 @@
 # `containers` — `homelab-config/homelab/containers/`
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 Podman and distrobox (OCI containers), and only those. libvirt/QEMU is the
 separate [virtualization](virtualization.md) category. Under the `homelab`
@@ -23,7 +23,10 @@ One file, `podman/podman.nix`, `nixos`-class:
   (needed so containers under `podman-compose` can talk to each other).
 - `environment.systemPackages`: `distrobox`, `distrobox-tui`, `distroshelf`,
   `boxbuddy`, `host-spawn`, `podman-compose`.
-- `environment.etc."distrobox/distrobox.conf"` — mounts both
+- `systemd.sockets.podman.wantedBy = mkForce []` (rootful podman socket off;
+  admin is `sudo podman`) and `virtualisation.oci-containers.backend =
+  "podman"`.
+- `environment.etc."distrobox/distrobox.conf"` — mounts `/nix/store` plus both
   `/etc/profiles/per-user` *and* `/etc/static/profiles/per-user` read-only
   into distrobox containers. Both paths are needed, not one:
   `/etc/profiles/per-user/elly` is itself a symlink to

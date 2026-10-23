@@ -1,13 +1,14 @@
 # Category reference
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 One article per real category (a folder under `flake/modules/` whose
 subfolders hold modules, see [../module-files.md](../module-files.md)),
 covering what's in it, why it's shaped that way, and its traps.
 [../architecture.md](../architecture.md) has the mechanism.
 
-It covers the `general-config/*` categories plus `users-config/elly`.
+It covers the `general-config/*`, `hardware-config/*` and
+`homelab-config/homelab/*` categories plus `users-config/elly`.
 (`general-config/` was `config-system/` until 2026-09-27; `git log --follow`
 across the rename when dating anything older.) Deliberately not covered:
 

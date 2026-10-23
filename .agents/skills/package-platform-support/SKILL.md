@@ -58,7 +58,7 @@ package; wrong for one that never will build there.
 Guard by hand, opposite direction from `obsidian.nix`:
 
 ```nix
-lib.mkIf pkgs.stdenv.isDarwin {
+lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
     home.packages = with pkgs; [ cmux ];
 }
 ```

@@ -1,6 +1,6 @@
 # Module style guide
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 Every module under `flake/modules/` follows these conventions, not just
 packages. See
@@ -122,7 +122,7 @@ deliberately unused" with no hint of what kind of function this is — the
 distinction that matters when skimming a file to tell "is this a module" from
 "is this a plain function". Left alone in `vm-networking.nix`,
 `sunshine-elly.nix`, and `sunshine.nix`; the corresponding statix findings are
-accepted into `lint-baseline.json` rather than fixed. Don't "fix" these on a
+counted in `flake/scripts/lint-baseline.json`'s statix total rather than fixed. Don't "fix" these on a
 lint pass without checking here first.
 
 ## `# # description = "..."` as the first line of the body
@@ -159,8 +159,8 @@ informally.
 A typed registry (`flake.moduleDescriptions.<name>`, `attrsOf str`)
 would be queryable and would **error** on two modules setting the same key
 differently, catching the module-name collision class for free. Declined:
-a tree-wide edit for something already working; `just modules` already detects
-collisions for all names; identical descriptions would still merge silently;
+a tree-wide edit for something already working; evaluation already refuses
+repeated names; identical descriptions would still merge silently;
 one more `unknown flake output` warning; and a registry can go stale
 silently. **Do not "upgrade" this to an option without a reason beyond
 tidiness.**

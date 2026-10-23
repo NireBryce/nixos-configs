@@ -1,11 +1,11 @@
 # `macos` — `general-config/macos/`
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 `darwin`-class only, throughout: the one category in this repo that is
 entirely platform-specific rather than shared-with-a-guard. See
-[../architecture.md](../architecture.md)'s "Platform support is derived"
-section for the general pattern.
+the `package-platform-support` skill (`.agents/skills/package-platform-support/SKILL.md`)
+for the general pattern.
 
 ## Contents
 
@@ -19,19 +19,24 @@ section for the general pattern.
 
 - **`homebrew/homebrew.nix`** — casks and formulae for what nix doesn't
   package well on Aarch64, or what needs App Store / notarisation / menu-bar
-  integration a nix-built `.app` doesn't get for free. Ported near-verbatim
+  integration a nix-built `.app` doesn't get for free. Sets
+  `homebrew.onActivation.cleanup = "uninstall"`, so a formula or cask not
+  listed in the file is **removed** on the next switch (hence `python@3.13`
+  is listed explicitly as a brew). Ported near-verbatim
   from a since-abandoned standalone flake (`macos-old/nire-lysithea-configuration.nix`)
   that predates this repo's current structure — TODOs and all, kept
   deliberately rather than cleaned up, because they're honest information
   about which casks nobody remembers the purpose of anymore, not noise.
-- **`shells/shells.nix`** — system-level shell registration only (`/etc/shells`,
-  stopping the system's own zsh completion setup from fighting Home
-  Manager's). zsh itself is configured through Home Manager, same as the
+- **`shells/shells.nix`** — system-level shell registration only (bash, zsh
+  and fish into `/etc/shells`, their `/share` dirs linked, `programs.zsh.enable`
+  with `enableCompletion` forced off so the system's own zsh completion setup
+  doesn't fight Home Manager's). zsh itself is configured through Home Manager, same as the
   Linux hosts — see [shell-config](shell-config/00-INDEX.md).
 - **`system-settings/darwin-system.nix`** — `system.primaryUser = "elly"`
   (hardcoded, same as `users.users.elly` and `home.username` everywhere else
   in this tree — nix-darwin needs it for homebrew and launchd
-  user-context activation) and `nix.enable = true` (nix-darwin manages the
+  user-context activation), `users.users.elly.home = "/Users/elly"`, and
+  `nix.enable = true` (nix-darwin manages the
   nix installation itself rather than assuming an external installer like
   Determinate owns it).
 

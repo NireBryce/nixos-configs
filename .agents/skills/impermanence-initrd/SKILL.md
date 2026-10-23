@@ -51,6 +51,7 @@ removal scheduled 26.11). For old `boot.initrd.postResumeCommands`-shaped
 code: hook strings were pasted into `stage-1-init.sh` by a fixed sequence of
 `substituteInPlace --replace-fail` passes, so naming a *later* placeholder
 (e.g. `@preLVMCommands@`) inside an *earlier* one's string — even in a
-comment — pasted a whole other script in and executed most of it. Full
-account: `wiki/lessons-learned.md` §28, `WARN-impermanence.nix` history
-comments.
+comment — pasted a whole other script in and executed most of it. This
+paragraph is the only full account; `WARN-impermanence.nix`'s history
+comments list what else the old mechanism did (and `wiki/lessons-learned.md`
+§28 is the hibernation-resume side of the same migration, not this trap).

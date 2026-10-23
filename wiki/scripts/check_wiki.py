@@ -97,6 +97,23 @@ structured, extractable facts only:
             or an embedded ': ' reads fine to these regexes but breaks the
             harness's YAML parse.
 
+  docrefs   Four cross-reference shapes the checks above miss, scanned
+            over wiki/, AGENTS.md, `.agents/rules/` AND `.agents/skills/`
+            (found by a manual audit, 0abcb9de, that lint had passed):
+            `just agent <helper>` where <helper> is not a recipe in the
+            agent module (`recipes` only looks up the first word, which is
+            always `agent`); a `.agents/skills/<name>` path, or an unquoted
+            hyphenated "skill some-name", naming no skill directory; a
+            sentence that names exactly one markdown page AND a quoted
+            heading ("the "Ad hoc restic commands" section") where that page
+            has no such heading (substring, case-insensitive; the page must
+            resolve unambiguously, otherwise the sentence is skipped); and a
+            backticked path under a directory root in MOVED_DIRS (data, not
+            logic: `.claude/hooks` -> `.agents/hooks`). A "count word next
+            to a linked directory" check ("all four files") was considered
+            and skipped: the phrasing is too varied to match without
+            guessing which directory and which files a count refers to.
+
   secrets   The "`.sops.yaml` ... enrolls `host`, `host`, ... —" claim
             (wiki/impermanence-and-secrets.md and .agents/rules/secrets.md
             both make it, in the same shape) against .sops.yaml's
@@ -780,6 +797,125 @@ def check_skills(root):
                 findings.append(
                     f"UNKNOWN SKILL  {path}: '{name}' has no "
                     f".agents/skills/{name}/ directory")
+    return findings
+
+
+# -- docrefs ----------------------------------------------------------------
+
+# Directory roots that moved, mapped to where they went. Data on purpose:
+# adding a future move is one line, and the check never has to guess.
+MOVED_DIRS = {
+    '.claude/hooks': '.agents/hooks',
+}
+SKILL_PATH = re.compile(r'\.agents/skills/([A-Za-z][\w-]*)')
+# "skill wiki-sync" with no backticks. Hyphenated names only: a plain
+# "skill set" is prose, and every skill here but one-word `ship` is hyphenated.
+SKILL_PLAIN = re.compile(r'\b[Ss]kills? ([a-z]+(?:-[a-z]+)+)\b')
+QUOTED_SECTION = re.compile(
+    r'["\u201c]([^"\u201c\u201d\n]{3,80})["\u201d]\s+(?:section|heading)\b'
+    r'|\b(?:section|heading)\s+["\u201c]([^"\u201c\u201d\n]{3,80})["\u201d]')
+MD_REF = re.compile(r'`([\w./-]+\.md)`|\]\(([\w./-]+\.md)(?:#[^)]*)?\)')
+SENTENCE_SPLIT = re.compile(r'(?<=[.!?])\s+(?=[A-Z])|\n\s*\n')
+
+
+def agent_module_recipes(root):
+    """Recipe names in the `agent` just module (`.agents/scripts/agent.just`)."""
+    path = root / '.agents' / 'scripts' / 'agent.just'
+    if not path.exists():
+        return None
+    return set(JUST_RECIPE.findall(COMMENT.sub('', path.read_text())))
+
+
+def docref_files(root):
+    """doc_files plus every `.agents/skills/**/*.md`."""
+    skills = root / '.agents' / 'skills'
+    extra = sorted(skills.rglob('*.md')) if skills.is_dir() else []
+    return doc_files(root) + extra
+
+
+def _norm_heading(text):
+    return re.sub(r'[^a-z0-9 ]+', '', text.lower().replace('`', '')).split()
+
+
+def _resolve_md(root, doc, ref):
+    """The one real file a markdown reference means, or None if it is
+    missing or ambiguous (then the sentence is skipped, never flagged)."""
+    cands = {(doc.parent / ref).resolve(), (root / ref).resolve()}
+    cands = {c for c in cands if c.is_file()}
+    if not cands and '/' not in ref:
+        cands = {p.resolve() for p in wiki_md(root, ref)}
+    return cands.pop() if len(cands) == 1 else None
+
+
+def check_docrefs(root):
+    agent = agent_module_recipes(root)
+    skills_dir = root / '.agents' / 'skills'
+    real = ({p.name for p in skills_dir.iterdir() if p.is_dir()}
+            if skills_dir.exists() else set())
+    findings = []
+    for path in docref_files(root):
+        text = path.read_text()
+        rel = path.relative_to(root) if path.is_relative_to(root) else path
+
+        if agent is not None:
+            for m in JUST_MENTION.finditer(text):
+                tokens = m.group(1).split()
+                if len(tokens) < 2 or tokens[0] != 'agent':
+                    continue
+                helper = tokens[1]
+                if not re.fullmatch(r'[a-z][\w-]*', helper):
+                    continue  # a placeholder or flag, not a helper name
+                if helper not in agent:
+                    findings.append(
+                        f"UNKNOWN HELPER  {rel}: `just {m.group(1)}` -- "
+                        f"'{helper}' is not a recipe in "
+                        f".agents/scripts/agent.just")
+
+        for rx in (SKILL_PATH, SKILL_PLAIN):
+            for m in rx.finditer(text):
+                name = m.group(1)
+                line = text[text.rfind('\n', 0, m.start()) + 1:
+                            text.find('\n', m.end())]
+                if 'git log' in line:
+                    continue  # `git log -- <path>` is how a REMOVED skill is found
+                if name not in real:
+                    findings.append(
+                        f"UNKNOWN SKILL  {rel}: '{name}' has no "
+                        f".agents/skills/{name}/ directory")
+
+        for old, new in MOVED_DIRS.items():
+            for m in re.finditer(r'`[^`\n]*' + re.escape(old) + r'[^`\n]*`', text):
+                findings.append(
+                    f"MOVED PATH  {rel}: {m.group(0)} -- {old} is now {new}")
+
+        for sentence in SENTENCE_SPLIT.split(text):
+            sentence = ' '.join(sentence.split())
+            refs = list(MD_REF.finditer(sentence))
+            if len({m.group(1) or m.group(2) for m in refs}) != 1:
+                continue
+            ref = refs[0]
+            for qm in QUOTED_SECTION.finditer(sentence):
+                # The quote must sit right next to the page reference, with
+                # no other backticked name or "skill" between: otherwise
+                # the heading belongs to some other page in the sentence.
+                a, b = sorted((ref.span(), qm.span()))
+                gap = sentence[a[1]:b[0]]
+                if len(gap) > 45 or '`' in gap or 'skill' in gap.lower():
+                    continue
+                target = _resolve_md(root, path, ref.group(1) or ref.group(2))
+                if target is None:
+                    continue
+                q = qm.group(1) or qm.group(2)
+                want = _norm_heading(q)
+                heads = [_norm_heading(h) for _, h in
+                         _iter_headings(target.read_text())]
+                if want and not any(
+                        any(h[i:i + len(want)] == want
+                            for i in range(len(h) - len(want) + 1))
+                        for h in heads):
+                    findings.append(
+                        f"UNKNOWN SECTION  {rel}: heading \"{q}\" is not "
+                        f"in {target.relative_to(root)}")
     return findings
 
 
@@ -1921,7 +2057,8 @@ SEE = (
     (('STALE CONTENTS', 'MISSING CONTENTS'),
      "`python3 wiki/scripts/check_wiki.py gen-contents <page>`"),
     (('BROKEN LINK', 'BROKEN ANCHOR', 'MISSING PATH', 'UNKNOWN RECIPE',
-      'UNKNOWN SKILL', 'UNKNOWN ROUTE'),
+      'UNKNOWN SKILL', 'UNKNOWN ROUTE', 'UNKNOWN HELPER', 'MOVED PATH',
+      'UNKNOWN SECTION'),
      "a rename left a reference behind: skill wiki-sync; skill "
      "git-archaeology for where the thing went"),
     (('MISSING LESSON', 'MISSING ARTICLE', 'DUPLICATE LESSON',
@@ -1961,7 +2098,8 @@ def main():
 
     cmds = ('imports', 'table', 'recipes', 'skills', 'skill-files',
             'secrets', 'routes', 'links', 'anchors', 'contents', 'dates',
-            'counts', 'generated', 'siblings', 'lessons', 'rules', 'check')
+            'counts', 'generated', 'siblings', 'lessons', 'rules', 'docrefs',
+            'check')
     if cmd not in cmds:
         print(__doc__)
         sys.exit(2)
@@ -2002,6 +2140,8 @@ def main():
         findings += check_lessons(root)
     if cmd in ('rules', 'check'):
         findings += check_rules(root)
+    if cmd in ('docrefs', 'check'):
+        findings += check_docrefs(root)
 
     for f in findings:
         print(f)

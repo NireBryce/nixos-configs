@@ -1,6 +1,6 @@
 # `git-forge` — `homelab-config/homelab/git-forge/`
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 Forgejo, a self-hosted git forge, on cube only (added 2026-08-24; under the
 `homelab` umbrella since 2026-08-27). Since 2026-09-07 it is at
@@ -154,6 +154,12 @@ not wanted at boot, `restartIfChanged = false`); a guest change lands on
 the next cycle, and a running job is never killed by it. A change to the
 cycle script restarts the loop, whose first step recreates the guest.
 Each job starts with a cold guest nix store.
+
+Each cycle also writes `forge_runner_last_cycle_seconds`,
+`forge_runner_short_cycle_streak` and
+`forge_runner_last_cycle_end_timestamp_seconds` to the node-exporter textfile
+directory (`/var/lib/node-exporter-textfile/forge_runner_cycle.prom`);
+the runner alerts in [monitoring](monitoring.md) fire on the short-cycle streak.
 
 The single long-lived runner this replaced, its pinned UUID and its
 day-one traps: [git-forge-history.md](git-forge-history.md#the-long-lived-runner-2026-09-24-to-2026-09-26).

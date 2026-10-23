@@ -49,8 +49,8 @@
         # not specific to this host; a second handheld would import it too.
         #
         # kde-desktop is the half this host must NOT have: sddm, and
-        # defaultSession = "plasma". Jovian sets both itself, to
-        # "gamescope-wayland" with autologin.
+        # defaultSession = "plasma". jovian sets both itself (SDDM on Wayland,
+        # plasma default, no autologin; jovian.steam.autoStart is off).
         "jovian"
 
         # Deliberately NOT `containers` (podman + distrobox) as of

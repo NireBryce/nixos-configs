@@ -61,3 +61,11 @@ where *args:
 # What applies to these paths (default: this branch's diff): lessons [<path>...] [--command C]
 lessons *args:
     @cd "{{invocation_directory()}}" && "{{scripts}}/lessons.py" "$@"
+
+# Docs ranked by commits to the paths they cite since their date: doc-drift [--top N]
+doc-drift *args:
+    @"{{scripts}}/doc_drift.py" "$@"
+
+# Split every doc into N balanced groups, siblings together; exit 1 if any lost: doc-partition [--agents N]
+doc-partition *args:
+    @"{{scripts}}/doc_partition.py" "$@"

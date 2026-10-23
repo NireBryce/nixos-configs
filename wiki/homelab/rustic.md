@@ -1,6 +1,6 @@
 # rustic — an interactive alternative to the plain `restic` CLI
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 [rustic](https://github.com/rustic-rs/rustic) (the `rustic-rs` project, not
 the unrelated `bnavetta/rustic` "restic wrapper" that shares its name in
@@ -88,7 +88,7 @@ nothing has tried.
 variables are `RUSTIC_REPOSITORY` / `RUSTIC_PASSWORD_FILE`, not restic's
 `RESTIC_REPOSITORY` / `RESTIC_PASSWORD_FILE` — so it will **not**
 automatically pick up the environment the module's generated `restic-cube`
-wrapper script sets (see the runbook's "Ad hoc restic commands" section).
+wrapper script sets (see the runbook's intro).
 Either export the `RUSTIC_*` names yourself or pass the equivalent flags
 directly:
 
@@ -111,9 +111,8 @@ platform filter, never built, run, or switched there.
 
 **Still entirely unverified everywhere**: whether the TUI behaves
 as its own docs describe, and whether the command shape in "Pointing it at
-this repo's repository" above is right — pointing it at the real
-repository specifically can't be tested yet regardless, since neither sops
-secret the backup itself needs has a value in this tree yet (see
+this repo's repository" above is right — nothing has pointed it at the
+real repository (the plain-`restic` path is confirmed in
 [the runbook](backup-runbook.md)). All of "What it is" and that section are
 transcribed from rustic's
 own GitHub repo, docs site, and FAQ, not from a run here; `--version` is

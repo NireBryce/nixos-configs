@@ -1,6 +1,6 @@
 # Homelab services
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 Everything here is reachable over the tailnet and nowhere else. These pages
 are for doing a thing with a running service: no Nix involved, and useful on
@@ -35,12 +35,7 @@ can happen with no commit to this repo at all.
 **Not a service of its own, but related**: [rustic](rustic.md) — a TUI that
 can browse and restore from the same repository the row above writes.
 Installed 2026-08-28 (`elly-home-manager`-wide) and switched on cube as of
-2026-08-30, but not yet run against a real repository — the `ts-hive` mount
-itself isn't working yet either (see the runbook).
-
-**Start at that second one if you don't know what's running.** It lists the
-services below, live-checks each one, and shows how cube itself is doing —
-so it answers "what's on here and is it up" without reading this page.
+2026-08-30, but not yet run against the real repository.
 
 **Those URLs have changed twice.** The port forms
 (`http://ts-cube:3000/`, `http://ts-cube:3001/`) stopped answering
@@ -89,5 +84,5 @@ transcribed. [creating-golinks.md](creating-golinks.md) ends with exactly that s
 
 ## See also
 
-- [hosts.md](../hosts.md) — which host runs what, and current switch status.
+- [hosts.md](../hosts.md) — which host runs what.
 - [categories/00-INDEX.md](../categories/00-INDEX.md) — the configuration side.

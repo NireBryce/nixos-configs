@@ -1,6 +1,6 @@
 # `git-forge`, for agents
 
-_Last modified: 2026-10-19_
+_Last modified: 2026-10-22_
 
 _Sibling reviewed: 2026-10-20 -- source body condensed (grafana comparison, admin status paragraph, duplicated runner-scope sentence); no facts changed_
 
@@ -45,6 +45,7 @@ access roots the VM, not cube.
 | Job→forge | guest `/etc/hosts` pins the FQDN to `192.168.122.1` (virbr0 gw; `vm-networking.nix` opens only 443 + DHCP there); Caddy TLS → loopback Forgejo; on the git vhost guests reach only `/api/actions/`, `/api/actions_pipeline/`, the v4 artifact twirp service, `/api/v1/` and git-over-HTTPS paths (`vmRunnerPathsOnly`, no web UI/login); every other `.ts.net` vhost aborts guest-subnet requests (`vmDeny`). 3001 unreachable from the guest, by design |
 | Labels | `nix:host` only = label `nix`, `host` executor — workflows say `runs-on: nix` (`nix:host` matches nothing, job waits forever); jobs run in the VM with guest nix; no container runtime in the guest |
 | Secret | per job: 40 hex from `/dev/urandom` on cube (tmpfs `/run/forge-runner-cycle`), staged as `/var/lib/forgejo-runner-share/forgejo-runner-secret` (qemu-libvirtd 0400), removed when the guest stops. Nothing in sops (`forgejo-runner-secret` key removed 2026-09-26) |
+| Metrics | each cycle writes `forge_runner_last_cycle_seconds`, `forge_runner_short_cycle_streak`, `forge_runner_last_cycle_end_timestamp_seconds` to `/var/lib/node-exporter-textfile/forge_runner_cycle.prom` (runner alerts fire on the streak) |
 | Into the guest | QEMU fw_cfg entry (generator `fwCfg` param), read by the guest from `/sys/firmware/qemu_fw_cfg/by_name/opt/forge-runner/secret/raw` (module `qemu_fw_cfg` in the initrd); no virtiofs, no mount; guest runs no sops, no key |
 | UUID | derived in the guest from the staged secret: first 16 chars as ASCII bytes (`google/uuid.FromBytes`), formatted 8-4-4-4-12. New every job |
 | Status | live since 2026-09-25, per-job cycle since 2026-09-26. Earlier long-lived runner: [git-forge-history.md](git-forge-history.md#the-long-lived-runner-2026-09-24-to-2026-09-26) |

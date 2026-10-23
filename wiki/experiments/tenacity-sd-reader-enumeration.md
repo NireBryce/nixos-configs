@@ -1,6 +1,6 @@
 # Tenacity: SD card reader intermittently fails to enumerate
 
-_Last modified: 2026-10-21_
+_Last modified: 2026-10-22_
 
 On `nire-tenacity`, the internal SD card reader stopped coming up on some
 boots and resumes after the jump from Linux 6.18.55 to 6.18.57. While it is
@@ -106,10 +106,11 @@ journalctl -k -g 'usb 2-1'
 ```
 
 - **`New USB device found, idVendor=05e3` appears at once:** root-hub
-  runtime PM is implicated. The fix is a udev rule setting
-  `power/control=on` for `usb2` under `0000:c3:00.3`, listed in
-  [temporary-patches-and-hacks.md](../temporary-patches-and-hacks.md). It
-  also removes the lock-screen delay, since no retry loop would run on
+  runtime PM is implicated. The fix would be a udev rule setting
+  `power/control=on` for `usb2` under `0000:c3:00.3`. No such rule exists
+  in the config yet; add it to
+  [temporary-patches-and-hacks.md](../temporary-patches-and-hacks.md) when
+  it lands. It would also remove the lock-screen delay, since no retry loop would run on
   resume.
 - **It doesn't:** boot a 6.18.55 generation (95–98 on tenacity) several
   times. At about 50 % failure on 6.18.57, one good boot proves nothing.

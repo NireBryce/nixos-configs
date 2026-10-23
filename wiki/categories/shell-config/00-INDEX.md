@@ -1,6 +1,6 @@
 # `shell-config` — `general-config/shell-config/`
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 ## Contents
 
@@ -14,8 +14,13 @@ _Last modified: 2026-10-20_
 ## What's in it
 
 - **`bash/bash.nix`** — `nixos`-class: `environment.pathsToLink` for bash
-  completion, `environment.shells`. `homeManager`-class: bash itself as a
-  line editor for zsh-like bindings.
+  completion, `environment.shells`. `homeManager`-class: `programs.bash`
+  (completion + VTE integration), the `blesh` package, and the ordered
+  `initExtra`: `mkBefore` piece (unset `SSH_ASKPASS` with no display,
+  `source ble.sh --attach=none`), `cod init` (not on darwin), carapace plus
+  the read-fix, and last, at `mkOrder 2500` (above zoxide's 2000), the
+  konsole focus/blur no-op binds and `ble-attach`. ble.sh must load first
+  and attach last or it strands other integrations' prompt hooks.
 - **`bash/blesh.nix`** — the `.blerc` config, `homeManager`-only. Owns the
   file outright: it used to be duplicated byte-for-byte inside `bash.nix`
   until they were merged here, because `home.file.<n>.text` is
@@ -40,14 +45,16 @@ _Last modified: 2026-10-20_
   so both stopped being commands there when `b0845be6` excluded the nix
   packages as unfree cask duplicates — a side effect that commit's
   evaluation-only verification could not see. The guard matters because this
-  file is shared with the four Linux hosts, where `discord` and
+  file is shared with the Linux hosts, where `discord` and
   `google-chrome` already are the real binaries and an unguarded alias would
   shadow them with an `open` that doesn't exist. The file's own header has
   the full timeline.
 - **`zsh/zsh.nix`** — `nixos`-class enables the shell and disables HM's
   `enableCompletion` with `mkForce false` ("unless disabled, home-manager
   causes an extra compaudit"); `homeManager`-class carries the actual
-  283-line zsh config, plugins, and a troubleshooting note (`~/.zcompdump`/
+  zsh config (plugins, `zsh-abbr` abbreviations, `setOptions`, history,
+  `compinit -C` at `mkOrder 550`, cod/carapace/`just` completions, and the
+  `config/*.zsh` fragments), and a troubleshooting note (`~/.zcompdump`/
   `~/.config/zsh/.zcompdump` deletion) right in the file for when "zsh side"
   errors show up.
 

@@ -1,6 +1,6 @@
 # Where a module goes
 
-_Last modified: 2026-10-16_
+_Last modified: 2026-10-22_
 
 Every module under `flake/modules/` sits in one of three places, and which
 one decides who gets it: **shared** modules sit in the general tree and
@@ -49,8 +49,8 @@ flake/modules/
 ```
 
 **Shared — `general-config/`, `hardware-config/`, `homelab-config/` and `packages-config/`.** Anything more than
-one host could want, even if only one takes it today. Each subdirectory is
-a category (`boot`, `homelab`, `shell-apps`, …) and a host opts in by
+one host could want, even if only one takes it today. Most subdirectories are
+categories (`boot`, `homelab`, `shell-apps`, …) and a host opts in by
 listing the category in its entry point, so a shared module can still be
 optional: a category nobody lists is a category nobody gets (`homelab`,
 and `virtualization` inside it, are cube-only that way). `general-config/` is behavior —
@@ -97,8 +97,9 @@ too-general fix before it shipped.
 
 A module's name is its filename, and names share **one namespace per
 class** across the whole tree. Two hosts each with a `boot.nix` would both
-declare `flake.modules.nixos.boot` and silently **merge** — with each other
-and with the shared `boot` category. So:
+claim `flake.modules.nixos.boot`, and a module named like a category
+(`boot`) collides with that too; evaluation stops naming both files
+([module-files.md](module-files.md), §34, §35). So:
 
 - host-specific files end in `-<host>`: `boot-cube.nix`,
   `hardware-tenacity.nix`, `nixpkgs-stateVersion-durandal.nix`.
@@ -106,8 +107,8 @@ and with the shared `boot` category. So:
   be generic: `elly-git.nix`, `elly-user.nix`.
 
 A file that's inherently unique (`b550-suspend-fix.nix`) doesn't need one.
-`just modules` reports a collision if you miss one; `just add-module`
-refuses or warns about a taken name up front.
+Evaluation refuses a repeated name; `just add-module` refuses a taken
+name up front.
 
 ## Not a module: entry points
 
