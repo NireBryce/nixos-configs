@@ -1,6 +1,6 @@
 # Wiki index, for agents
 
-_Last modified: 2026-10-21_
+_Last modified: 2026-10-22_
 
 Condensed from [00-INDEX.md](00-INDEX.md). Routing only.
 
@@ -40,6 +40,8 @@ A page without one opens with `## Quick facts` — linked there.
 
 - [overview.md](overview.md) — 2-minute mental model.
 - [hosts.md](hosts.md) — the roster.
+- [durandal-gaming.md](durandal-gaming.md) — Steam (shared), Heroic +
+  GameMode (durandal only), gamemode polkit group, worth-considering list.
 - [flake-parts.md](flake-parts.md) → [architecture.md](architecture.md) —
   why flake-parts, then the category mechanism on top of it.
 - [module-files.md](module-files.md) — a module file's shape and rules, and why

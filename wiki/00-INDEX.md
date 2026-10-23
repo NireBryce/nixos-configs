@@ -1,6 +1,6 @@
 # Wiki
 
-_Last modified: 2026-10-21_
+_Last modified: 2026-10-22_
 
 This is the wiki's topic index. The `flake/` folder is meant to be browsed by
 its file tree, with documentation next to the code; the heavy modularization
@@ -84,6 +84,9 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
 - [Hosts & current state](hosts.md) — the four hosts (three NixOS + one
   darwin), what's been switched/booted vs. only evaluated, and
   where that status is tracked.
+- [Durandal gaming](durandal-gaming.md) — what durandal runs games with:
+  shared Steam, its own Heroic and GameMode (added for Alan Wake 2), the
+  GameMode polkit group, and what's worth adding next.
 - [New host disk formatting](disk-formatting.md) — the LUKS + btrfs +
   impermanence disk layout runbook: what to decide before touching a real
   disk, what depends on disko having run, and how to confirm the
