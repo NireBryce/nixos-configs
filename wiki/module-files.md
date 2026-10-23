@@ -73,7 +73,7 @@ collector looked modules up by filename, so a hand-written name that
 differed silently left the module out of every category. Repeating that
 derivation in every file was boilerplate that could only be gotten wrong. Now
 the name is never written in the file at all, so it cannot disagree with the
-filename, and two modules with one name -- or a module named like a
+filename, and modules sharing a name -- or a module named like a
 category -- are an evaluation error instead of a silent merge (§34, §35).
 
 ## Why categories need no shim

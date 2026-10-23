@@ -20,8 +20,8 @@ host-key-only on purpose (the comment on `&elly` in `.sops.yaml`).
 
 Built 2026-09-17 for a Forgejo API token an agent session fetches without a
 human typing it (access already bounded by the tailnet; the token is a
-convenience credential). Mechanical traps surfaced (steps 2 and 3); both
-silently recur.
+convenience credential). Two mechanical traps surfaced (steps 2 and 3) and
+both silently recur.
 
 ## Steps
 

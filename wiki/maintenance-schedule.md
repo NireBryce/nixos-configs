@@ -236,7 +236,7 @@ protect one row.
   [`.sops.yaml`](<../flake/modules/general-config/system/secrets/.sops.yaml>) is
   derived from a *host's* `/etc/ssh/ssh_host_ed25519_key.pub`, and a runner
   is an ephemeral VM with no persistent host key. Nothing in the nix tree
-  reads this token, so a `sops.secrets.*` entry would decrypt on three hosts
+  reads this token, so a `sops.secrets.*` entry would decrypt on every enrolled host
   with no use for it (the shape #203 deleted). Also, `secrets.yaml` is
   committed to a *public* repo, so its ciphertext is permanently public; an
   Actions secret is never published. The consumer picks the store.

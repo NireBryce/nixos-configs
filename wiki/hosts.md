@@ -104,8 +104,8 @@ status and what broke on the way:
   [#87](https://github.com/NireBryce/nixos-configs/issues/87)); local-path
   over NFS failed for real, SFTP since 2026-08-31. **Done
   2026-09-06**, restore drill included (run twice — found and fixed a real
-  sqlite-staging bug, then confirmed). Backups for durandal/
-  tenacity/lysithea: [#130](https://github.com/NireBryce/nixos-configs/issues/130).
+  sqlite-staging bug, then confirmed). No backups yet for durandal/
+  tenacity/lysithea (as of 2026-10-22): [#130](https://github.com/NireBryce/nixos-configs/issues/130).
   Runbook: [homelab/backup-runbook.md](homelab/backup-runbook.md).
 
 ## Where each fact lives

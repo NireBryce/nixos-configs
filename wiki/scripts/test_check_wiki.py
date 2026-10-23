@@ -221,6 +221,37 @@ class DocRefsCheck(unittest.TestCase):
         self.assertEqual(self.findings(
             'The "Elsewhere" section of the `real-skill` skill, see `target.md`.\n'), [])
 
+    def bare(self, doc, rel='wiki/doc.md'):
+        self.write(rel, doc)
+        return [x for x in check_wiki.check_docrefs(self.root)
+                if x.startswith('BARE COUNT')]
+
+    def test_bare_count_caught(self):
+        self.assertTrue(self.bare('All four files under x/ do y.\n'))
+        self.assertTrue(self.bare('There are 12 nix modules here.\n'))
+
+    def test_bare_count_accompanied_or_exempt_passes(self):
+        for doc in (
+            'The four hosts are `a`, `b`, `c`, `d`.\n',
+            'There are four files:\n\n- a\n',
+            'As of 2026-10-01 there are four files.\n',
+            'Four hosts at the time, as of the merge.\n',
+            'Four files here. <!-- count-ok: measurement -->\n',
+            'It said "all four files" once.\n',
+            'Run `all four files` today.\n',
+            '```\nfour files\n```\n',
+            'Reported 119 of 160 modules as orphans.\n',
+            'Two modules with one name collide.\n',
+            'Four colours and three people.\n',
+            '<!-- generated:t -- x -->\nfour files\n<!-- /generated -->\n',
+        ):
+            self.assertEqual(self.bare(doc), [], doc)
+
+    def test_bare_count_skips_narrative_paths(self):
+        self.assertEqual(self.bare('All four files.\n',
+                                   'wiki/lessons-learned/1-x.md'), [])
+        self.assertEqual(self.bare('All four files.\n', 'wiki/x-history.md'), [])
+
     def test_moved_path_caught(self):
         f = self.findings('Guards live in `.claude/hooks/x.sh`.\n')
         self.assertTrue(any(x.startswith('MOVED PATH') for x in f), f)

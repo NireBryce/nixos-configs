@@ -340,7 +340,7 @@ a reason, on the sibling, is the way to say so. Full rule and the cut list:
   investigating on the machine, writing config, changing behaviour,
   collisions, git and process), each naming the skill or section that
   carries its rule and what enforces it. Full accounts are
-  `wiki/lessons-learned/<N>-*.md`; § numbers are stable, cited from ~50
+  `wiki/lessons-learned/<N>-*.md`; § numbers are stable, cited from many
   files, never renumbered. No `-for-agents` sibling, deliberately:
   it is already written agent-facing. **A new lesson goes in its Home as
   well as the index** — a rule only that page states reaches nobody.

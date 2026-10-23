@@ -115,7 +115,7 @@ exists — had silently protected nothing, the whole time.
 `CacheDirectory=` exactly). **restic refuses to back up its own cache
 directory.** Confirmed with a clean before/after test, not from docs: the
 identical `restic backup --dry-run` with the identical
-`--exclude-file`/`--files-from` processed 603 files (all three staged
+`--exclude-file`/`--files-from` processed 603 files <!-- count-ok: dry-run measurement, not a repo count --> (all three staged
 sqlite copies included) with `RESTIC_CACHE_DIR` unset, and exactly 600
 (all three silently dropped, no error) with it set to the real value —
 the one variable that changed. Everything else chased along the way and

@@ -38,7 +38,7 @@ declare `flake.modules.nixos.restic` and silently **merge**.
   `RESTIC_CACHE_DIR`** — nixpkgs sets that to
   `/var/cache/restic-backups-<name>`. The sqlite staging directory lived
   there and protected nothing, with no error and green timers. `--dry-run`
-  pair: 603 files with the variable unset, 600 set. **Never stage
+  pair: 603 files <!-- count-ok: dry-run measurement, not a repo count --> with the variable unset, 600 set. **Never stage
   anything under `/var/cache/restic-backups-*`.**
 - **A green timer proves nothing about content.** The bar is a restore
   drill against the repository's own metadata: `restic ls --recursive

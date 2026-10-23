@@ -22,7 +22,7 @@ addressable by its own name (each holds a subfolder of modules) — this page
 doesn't repeat their content, see each one's own article for what it
 contains and why it's shaped the way it is.
 
-A seventh, [backup](backup.md), joined 2026-08-28 the same way — restic,
+A later one, [backup](backup.md), joined 2026-08-28 the same way — restic,
 backing up the state the other services produce to the `ts-hive` NAS already on the
 network. It's the odd one out functionally (nothing to reach over the
 tailnet, no port, no Caddy route — a timer, not a listener) but structurally

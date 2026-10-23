@@ -11,7 +11,7 @@ _Last modified: 2026-10-22_
 
 ## What's in it
 
-All `nixos`-class:
+Every file is `nixos`-class:
 
 - **`amd/`**, a nested category: `amdcpu/amdcpu.nix`
   (`inputs.nixos-hardware.nixosModules.common-cpu-amd`) and
