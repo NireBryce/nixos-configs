@@ -72,6 +72,15 @@ before claiming a change affects a host, find out what that host runs, and
 for a hardware fact, ask (§2). Capture `just baseline` before switching;
 once the old generation is collected it can't be re-derived (§24).
 
+**Don't record what a command or the cited file answers.** Counts of
+files, modules, hosts or recipes, line counts, live-state versions
+(kernel, Mesa), and config values copied from a file the doc already
+links all drift silently. Write the pointer (`the modules under X`, the
+file, the command) or name the items; keep a number only when it is the
+rule itself, a dated incident or experiment record, a PR/issue/commit
+reference, or an interface a user types (a port). Skill `fact-hygiene`
+(cat 4); `check_wiki.py docrefs` catches the bare count-of-files shape.
+
 Roster, class, and which hosts wipe `/root`: `host-config/hosts.nix` (check
 it before stating any count) and `wiki/hosts.md`'s table. First-boot
 history: `wiki/history.md`'s "Confirmed-on-hardware facts".
@@ -290,7 +299,7 @@ forge-runner guest, removed hosts) — don't restate it.
 
 **Home Manager is NixOS-integrated** — no `homeConfigurations`, no separate
 home switch; `just switch` applies both (`.agents/rules/home-manager.md`).
-`elly-home-manager` is shared verbatim by all four hosts including
+`elly-home-manager` is shared verbatim by every host, including
 `nire-lysithea`, so everything in it has to survive darwin.
 
 ## Docs

@@ -27,10 +27,10 @@ declare `flake.modules.nixos.restic` and silently **merge**.
 | Host key | pinned in Nix via `programs.ssh.knownHosts`, not TOFU |
 | sqlite staging | `/var/lib/restic-backups-cube-sqlite-staging`, dir 0700 / copies 0600 (umask 077 in `backupPrepareCommand`; was 0755/0644 until 2026-09-27) |
 | Paths | `/var/lib/{forgejo,grafana,golink}`, `/persist/secrets`, `/persist/passwords`, sqlite staging dir |
-| Timer | `OnCalendar=03:30`, `RandomizedDelaySec=30m`, `Persistent=true` |
-| Retention | `--keep-daily 7 --keep-weekly 4 --keep-monthly 6` (unsized starting point) |
+| Timer | `OnCalendar`, `RandomizedDelaySec`, `Persistent=true` (values in `restic/restic.nix`) |
+| Retention | `pruneOpts` `--keep-daily/-weekly/-monthly` (unsized starting point; values in `restic/restic.nix`) |
 | Secrets | `restic-cube-ssh-key`, `restic-cube-password`, declared in the module (decrypt only on cube) |
-| Excluded | Prometheus TSDB (biggest, least valuable, regenerable); the three live sqlite db files |
+| Excluded | Prometheus TSDB (biggest, least valuable, regenerable); the live sqlite db files |
 
 ## The two traps this module was built out of
 

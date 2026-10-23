@@ -1,6 +1,6 @@
 # `peripherals` — `hardware-config/peripherals/`
 
-_Last modified: 2026-10-15_
+_Last modified: 2026-10-22_
 
 ## Contents
 
@@ -11,7 +11,7 @@ _Last modified: 2026-10-15_
 
 ## What's in it
 
-Two small files, both `nixos`-class, both single-option one-liners:
+Small files, all `nixos`-class, each a single-option one-liner:
 
 - **`logitech-g600/logitech-g600.nix`** — `services.ratbagd.enable = true;`,
   for Piper to control the mouse.

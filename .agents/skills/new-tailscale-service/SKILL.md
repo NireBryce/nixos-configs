@@ -9,7 +9,7 @@ description: How to give a homelab service its own Tailscale Services hostname f
 
 A service already running on `nire-cube` (or another homelab host), reachable only via a Caddy path prefix under the host's shared `ts-<host>` name (`new-homelab-service`'s default); this gives it `https://<name>.<tailnet-domain>/`. Assumes the app is built, switched, on a loopback port; writing the service module is `new-homelab-service`.
 
-Not Funnel (Tailscale Services stay tailnet-only). Not a Caddy replacement: as of tailscale 1.102.2 `services.tailscale.serve` cannot terminate HTTPS declaratively (step 6), so Caddy does TLS per service name instead of per path.
+Not Funnel (Tailscale Services stay tailnet-only). Not a Caddy replacement: as of the 2026-09-07 check (Background below; re-check on a newer nixpkgs) `services.tailscale.serve` cannot terminate HTTPS declaratively (step 6), so Caddy does TLS per service name instead of per path.
 
 ## Background (2026-09-07)
 

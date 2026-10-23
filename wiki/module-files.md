@@ -1,12 +1,12 @@
 # Module files
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 A module file under `flake/modules/` never names its module. The
 [dirs-as-categories](https://github.com/NireBryce/dirs-as-categories) flake
 input names it after the file (`gaming.nix` is `gaming`) and makes every
 folder that holds modules a category, so a host includes a whole folder by
-name. Before, each of 228 files derived its own name with boilerplate, and a
+name. Before, each file derived its own name with boilerplate, and a
 name that disagreed with the filename silently dropped the module out of its
 categories. Each module now opens with a comment saying so. The input's
 `doc/convention.md` has the rules; this page covers what they mean here.
@@ -71,7 +71,7 @@ in {
 Every module already had to be named after its file -- the category
 collector looked modules up by filename, so a hand-written name that
 differed silently left the module out of every category. Repeating that
-derivation in 228 files was boilerplate that could only be gotten wrong. Now
+derivation in every file was boilerplate that could only be gotten wrong. Now
 the name is never written in the file at all, so it cannot disagree with the
 filename, and two modules with one name -- or a module named like a
 category -- are an evaluation error instead of a silent merge (§34, §35).
@@ -81,12 +81,12 @@ category -- are an evaluation error instead of a silent merge (§34, §35).
 A category used to be a folder holding a copy of `dirsAsCategory.nix`, a
 shim that found its own path through `__curPos.file` and called the
 collector in `_lib/` ([dirsAsCategory.md](../flake/doc/dirsAsCategory.md)
-has that design, now history). 39 identical files, each of which had to stay
+has that design, now history). Identical files, each of which had to stay
 identical.
 
 dirs-as-categories decides from the tree's shape instead: a folder is a
 category when one of its subfolders holds modules. Against this tree that
-rule finds the same 38 categories the shims declared, plus two folders it
+rule finds the same categories the shims declared, plus two folders it
 would also call categories, `development/langs/python-dev` and
 `gui-other/pkm/history`. Promoting them changes the order of every host's
 Home Manager package list (same packages, different order, so a different
@@ -105,7 +105,7 @@ the file uses (deadnix fails an unused one); a file using neither is a plain
 attribute set.
 
 A function asking for anything else (`config`) is never called, which is
-why a module can no longer read the flake-parts `config`. The two files that
+why a module can no longer read the flake-parts `config`. The files that
 read the flake's own outputs -- `tailnet-hosts.nix` (the host roster) and
 `virtualization-cube.nix` (forge-runner's image) -- read `inputs.self`
 instead, the same attribute set. That also retires the trap of two

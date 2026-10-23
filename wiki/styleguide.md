@@ -386,7 +386,7 @@ and `just wiki-gen` rewrites everything between them from source. Before
 that, a lint check noticed the drift and an agent fixed the row by hand;
 the module counts table alone had its rows hand-edited in 24 commits in
 September.
-Today's regions: [hosts.md](hosts.md)'s host table, the two Index tables
+Regions (`grep -rn 'generated:' wiki/` lists them): [hosts.md](hosts.md)'s host table, the Index tables
 on [categories/00-INDEX.md](categories/00-INDEX.md), the counts on
 [module-style-guide-for-agents.md](module-style-guide-for-agents.md#counts),
 and the module-layout diagram on [architecture.md](architecture.md) (a

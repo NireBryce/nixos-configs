@@ -11,7 +11,7 @@ _Last modified: 2026-10-22_
 
 ## What's in it
 
-Eight files, all `nixos`-class:
+All `nixos`-class:
 
 - **`amd/`**, a nested category: `amdcpu/amdcpu.nix`
   (`inputs.nixos-hardware.nixosModules.common-cpu-amd`) and
@@ -20,13 +20,13 @@ Eight files, all `nixos`-class:
   `hardware.graphics` with 32-bit support, libva-utils and the ROCm OpenCL ICD). Every host
   in this repo is AMD.
 - **`bluetooth/bluetooth.nix`** — `hardware.bluetooth` enabled, power on at
-  boot, `FastConnectable`, 60 s discoverable/pairable timeouts.
+  boot, `FastConnectable`, discoverable/pairable timeouts set.
 - **`firmware/`** — `firmware-all.nix` (`hardware.enableAllFirmware`,
   `enableRedistributableFirmware`) and `fwupd.nix` (`services.fwupd`, `mkDefault true`). `firmware-all.nix` also
   sets `nixpkgs.config.allowUnfree = true`, which `enableAllFirmware` needs.
 - **`storage/`** — `smartd.nix` (S.M.A.R.T. monitoring: smartd with autodetect, a short
-  self-test daily at 02:00 and a long one weekly on day 7 at 04:00) and
-  `coredump-limit.nix` (`systemd.coredump` `MaxUse = 2G`, `KeepFree = 1G`).
+  self-test daily and a long one weekly) and
+  `coredump-limit.nix` (`systemd.coredump` `MaxUse`/`KeepFree` caps).
 - **`memory/swap-policy.nix`** — declares the option
   `customOption.swap.policy` (`unmanaged` default, `zram`, `zswap`);
   `zswap` turns zram off and enables `boot.zswap`. Only tenacity sets it
@@ -34,7 +34,7 @@ Eight files, all `nixos`-class:
 
 `bluetooth/`, `firmware/`, `storage/` and `memory/` were plain folders in
 the [system](system.md) category until 2026-10-15; the hosts that import
-`hardware` are the same three that took them through `system`, so no host
+`hardware` are the same ones that took them through `system`, so no host
 gained or lost anything in the move.
 
 ## Nested categories overlap their parents on purpose
@@ -43,7 +43,7 @@ gained or lost anything in the move.
 `hardware`: its subfolders `amdcpu/` and `amdgpu/` hold modules, which is what
 makes it one ([module-files.md](../module-files.md)). `hardware` includes `amd`
 by name rather than listing `amdcpu`/`amdgpu` again -- a coarse handle
-(`hardware`, what every host includes today) reaching the same content
+(`hardware`, what every host includes) reaching the same content
 as the fine one (`amd`, for if this repo ever needs to distinguish AMD from
 Intel hardware), by reference instead of by duplicate derivation. That has
 been the shape since the 2026-08-27 collector refactor; before it the parent
@@ -71,7 +71,7 @@ History).
 
 ## Imported by
 
-All three NixOS hosts import `hardware` directly (not the narrower `amd`) —
+Every NixOS host imports `hardware` directly (not the narrower `amd`) —
 durandal, tenacity, cube are all AMD (Ryzen desktop/APU, Ryzen Z1
 handheld). `nire-lysithea` (darwin, Apple Silicon) does not import this
 category at all — importing it would resolve to an empty darwin aggregate

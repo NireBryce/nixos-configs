@@ -2,7 +2,7 @@
 
 _Last modified: 2026-10-22_
 
-Formatting a new host's disk takes four decisions (device path, secure boot,
+Formatting a new host's disk takes decisions (device path, secure boot,
 swap, LUKS unlock), wiring the generator into the host config, then running
 `disko` from install media. `disko` partitions a real disk, so the order and
 warnings below matter. Skill `new-host-config` covers the whole host-adding decision tree, and
@@ -46,7 +46,8 @@ way `cube-configuration.nix` does.
 durandal and tenacity's hand-run layout as a reusable generator: one
 LUKS-encrypted partition, btrfs inside it, subvolumes for
 `root`/`home`/`nix`/`persist`/`log`, and an unmounted `root-blank` subvolume.
-**Nothing in this repo currently calls it.** Every live host has a
+**Nothing in this repo called it at last check** (`grep -rn
+impermanence-luks-btrfs flake/` re-checks). Every live host has a
 hand-written `hardware-*.nix` from a real install, or (cube) never adopted
 this layout. The disko doc's inline example is the only reference until a
 new host uses it.
@@ -190,7 +191,7 @@ the repo.
   (`.agents/skills/impermanence-initrd/SKILL.md`) — the initrd-specific sharp
   edges referenced above.
 - [categories/impermanence.md](categories/impermanence.md) — what's in the
-  category, which hosts import it today.
+  category, which hosts import it.
 - [impermanence-and-secrets.md](impermanence-and-secrets.md) — the
   cross-cutting topic page (impermanence and secrets together).
 - [hosts.md](hosts.md) — current roster and per-host boot/switch status.

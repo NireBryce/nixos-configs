@@ -1,6 +1,6 @@
 # Using the forge
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 [Forgejo](https://forgejo.org/) on `nire-cube` is at
 `https://git.moose-micro.ts.net/`, its own Tailscale Services name since
@@ -277,7 +277,7 @@ runbook's "Restoring a snapshot" covers it.
 `https://github.com/NireBryce/nixos-configs.git`, created 2026-09-11 via
 the migrate API (`mirror: true`, `mirror_interval: 8h0m0s`) using the
 `forgejo_api_key` sops secret. GitHub stays canonical; Forgejo re-pulls on
-its own schedule. Confirmed live: all 7 branches present and matching
+its own schedule. Confirmed live: all branches present and matching
 GitHub's own branch list, default branch `experimental`. This is the first
 repo pushed/mirrored here — see
 [git-forge-history.md](../categories/git-forge-history.md#mirror-not-origin--and-the-first-real-mirror)

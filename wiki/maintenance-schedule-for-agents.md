@@ -18,7 +18,7 @@ and dates are not values.
 | 1 | `tailscale_key` | 90d max; already stale | **nothing** — undeclared and unused | 2026-09-07 |
 | 2 | `tailscale_api_token` | **unverified** (classic PAT 90d; OAuth secret never) | `tailscale-acl.py get`/`apply`/`vip-*` silently start 401ing | 2026-09-07 |
 | 3 | Tailscale node keys | 180d default, per machine | host drops off the tailnet until interactive `tailscale up` | 2026-09-07 |
-| 4 | sops age recipients (4 host keys on `secrets.yaml`; 2 user keys on `low-side/` only) | none on a timer | a regenerated SSH host key silently orphans that host | 2026-10-22 (structure only) |
+| 4 | sops age recipients (host keys on `secrets.yaml`; user keys on `low-side/` only) | none on a timer | a regenerated SSH host key silently orphans that host | 2026-10-22 (structure only) |
 | 5 | `restic-cube-ssh-key` / `restic-cube-password` | on suspicion / `ts-hive` re-image | backup runs fail | 2026-08-31 |
 | 6 | `ts-hive` SSH host key pin | none; breaks on re-image | backup runs fail | untracked |
 | 7 | `forgejo-admin-password` | none enforced; never rotated | — | — |
@@ -34,7 +34,7 @@ for the removed `nire-galatea`; left in git history deliberately (rewrite
 rejected 2026-09-14: public repo, window closed, force-push of both protected
 branches too costly). Scanner flags it: mark rotated/false-positive, move on.
 
-**Row 13.** Fine-grained PAT, four repos, Contents r/w only; sops-declared on
+**Row 13.** Fine-grained PAT, repos in `claude-rc-cube.nix`'s `dirs`, Contents r/w only; sops-declared on
 cube, `LoadCredential` into each `claude-rc-*` unit, git helper in the unit's
 `GIT_CONFIG_*`. Rotate: new PAT, `sops` edit of the value, switch cube,
 `systemctl --user restart 'claude-rc-*'`. Account-wide `gh` token stays

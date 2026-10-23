@@ -8,7 +8,7 @@ description: How to tell whether nixpkgs can build a package on darwin and wheth
 ## Applies to
 
 Packages in `elly-home-manager` (`packages-config/`, `users-config/`), shared
-verbatim by all four hosts including `nire-lysithea` (aarch64-darwin), so
+verbatim by every host (`host-config/hosts.nix`) including `nire-lysithea` (aarch64-darwin), so
 everything in it must survive darwin. Use before adding a package module, an
 `isDarwin`/platform guard, or deciding whether a cask duplicates a nixpkgs
 package. Two different questions look identical in config; only one is
@@ -22,7 +22,7 @@ re-declares `home.packages` with an `apply` filtering by
 
 - **Don't add `lib.mkIf (!pkgs.stdenv.isDarwin)` to a single-package module
   for platform reasons**; `meta.platforms` already says it and a hand copy
-  can drift (eleven modules did, all correct, none needed).
+  can drift (several modules did, all correct, none needed).
 - On Linux the filter is a no-op on purpose: an unsupported package on
   durandal stays a loud error.
 - It only reaches `home.packages`. A body of `programs.foo.enable` /

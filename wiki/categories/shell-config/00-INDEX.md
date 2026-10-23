@@ -104,7 +104,7 @@ inside it, keep only what a person reading the generated dotfile needs.**
 
 ## Imported by
 
-`durandal`, `tenacity`, and `cube` -- all three NixOS hosts -- directly.
+`durandal`, `tenacity`, and `cube` -- every NixOS host -- directly.
 `lysithea` doesn't list `shell-config` in its
 own imports, but reaches the `homeManager`-class content anyway (`bash`,
 `blesh`, `shell-env`, `zsh`) via `users-config/elly-home-manager.nix`'s shared

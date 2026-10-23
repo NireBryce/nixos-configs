@@ -1,6 +1,6 @@
 # Using the forge, for agents
 
-_Last modified: 2026-10-06_
+_Last modified: 2026-10-22_
 
 _Sibling reviewed: 2026-10-20 -- source sign-in paragraphs condensed; no facts changed_
 
@@ -96,7 +96,7 @@ Per repo: Settings → Branches → Add new rule; pattern `main`.
 ## Mirroring
 
 `elly/nixos-configs` is a pull mirror of the GitHub repo (created 2026-09-11; migrate API,
-`mirror: true`, `mirror_interval: 8h0m0s`, `forgejo_api_key` sops secret). All 7 branches
+`mirror: true`, `mirror_interval: 8h0m0s`, `forgejo_api_key` sops secret). All branches
 matched; default branch `experimental`. GitHub stays canonical; mirror-not-origin settled 2026-09-12.
 
 ## See also

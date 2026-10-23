@@ -1,6 +1,6 @@
 # Auto-suspend hang on nire-durandal, for agents
 
-_Last modified: 2026-10-16_
+_Last modified: 2026-10-22_
 
 _Sibling reviewed: 2026-10-20 -- source change was filler-word removal only; no facts changed_
 
@@ -115,7 +115,7 @@ the keyboard wake path; disabling it costs wake-on-keyboard).
 
 ## Under test
 
-Nothing. Instrumentation only:
+As of 2026-10-20, nothing. Instrumentation only:
 [suspend-probe-durandal.nix](../../flake/modules/host-config/durandal/fixes/suspend-probe-durandal.nix)
 — writes `/var/log/suspend-probe/`, `sync`'d; `/var/log` is its own btrfs
 subvolume, outside the wiped root.

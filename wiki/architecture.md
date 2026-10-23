@@ -47,9 +47,9 @@ The mechanism in one table; the sections below link the reasoning.
   overview: `dirs-as-categories`, entry points that sit outside every category
   (`host-config/hosts.nix`, the per-host configs,
   `users-config/elly-home-manager.nix`), and which categories aren't imported by
-  every host (`virtualization` is the running example — cube only as of
-  2026-08-27, deliberately absent on the handhelds and, since that date, on
-  durandal too — see [`categories/virtualization.md`](categories/virtualization.md)).
+  every host (`virtualization` is the running example, deliberately absent on the
+  handhelds — see [`categories/virtualization.md`](categories/virtualization.md)
+  for which hosts import it).
 - **[where-modules-go.md](where-modules-go.md)** — which of the three
   places a module belongs in: the shared tree (`general-config/`,
   `packages-config/`), a host's directory under `host-config/`, or a
@@ -89,8 +89,8 @@ Every diagram uses one colour standard, keyed on what a host can include:
 
 The hosts view runs top-down: the host's and user's own directories
 (`host-config/<host>/`, `users-config/<user>/`) sit above the hosts, and
-the shared categories they import below, wrapped at five per row
-(`--wrap N`), each host's edges in its own colour (never blue or red). In
+the shared categories they import below, wrapped into rows
+(`--wrap N` sets the width), each host's edges in its own colour (never blue or red). In
 Mermaid an edge up into the top row is a plain line, not an arrow.
 
 <!-- generated:module-layout -- from the categories under flake/modules/, drawn by the flake-module-graph input, by `just wiki-gen`; change the source, not this table -->

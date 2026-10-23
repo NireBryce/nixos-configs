@@ -29,7 +29,7 @@ succeeded `nire-llm-sandbox`, the category's only VM until 2026-08-28.
 
 ## What's in it
 
-All five files live under `libvirt/` and are all `nixos`-class:
+All the files live under `libvirt/` and are all `nixos`-class:
 
 - **`libvirt.nix`** — `virtualisation.libvirtd`, the daemon itself, with
   swtpm, virtiofsd (`vhostUserPackages`, needed for virtiofs shares) and
@@ -125,7 +125,7 @@ fail auto-importing it. Filed under `_lib/` because `import-tree` ignores
 any path containing `/_` (same as
 `general-config/impermanence/_disko/impermanence-luks-btrfs.nix`).
 
-Called today by `host-config/cube/cube-vm/virtualization-cube.nix` (for
+Called by `host-config/cube/cube-vm/virtualization-cube.nix` (for
 `forge-runner` — see below); earlier by a same-named file for
 `nire-llm-sandbox`, removed with that VM 2026-08-28. The caller lives under
 cube's host directory, not in this category, so it is cube-only by

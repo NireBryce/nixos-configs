@@ -1,6 +1,6 @@
 # Using Grafana
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 Grafana on `nire-cube` shows the metrics
 [monitoring](../categories/monitoring.md) collects. This page covers signing
@@ -80,8 +80,8 @@ real UI export**, so expect to correct it the first time someone tries.
 
 ## Alerts
 
-**Alerting → Alert rules** has six provisioned rules. Folder `cube` has one:
-cube's root filesystem under 10% free. Folder `forge-runner` has five
+**Alerting → Alert rules** has provisioned rules. Folder `cube` holds
+cube's root filesystem under 10% free. Folder `forge-runner` holds the rules
 about the Forgejo runner VM. All are defined in
 `monitoring/runner-alerts/runner-alerts.nix`:
 

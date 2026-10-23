@@ -106,7 +106,7 @@ Which argument goes where is not cosmetic:
 
 `statix` flags a bare `{ ... }:` as its W10 "empty pattern" lint and suggests
 `_:` instead, since nothing is destructured out of the argument. Usually
-correct — but three modules keep `{ ... }:` on purpose, as a readability
+correct — but some modules keep `{ ... }:` on purpose, as a readability
 signal that the value being assigned is itself a NixOS module (something
 that will in turn receive `config`/`lib`/`pkgs`/etc., even though this
 particular one doesn't use any of them), not just an ignored argument:

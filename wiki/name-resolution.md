@@ -1,6 +1,6 @@
 # Name resolution & reverse DNS
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 Tailscale MagicDNS (`100.100.100.100`, through resolved's stub) answers
 `*.moose-micro.ts.net` forward and reverse, and avahi answers `*.local` on the
@@ -42,7 +42,7 @@ Folded in from the retired `name-resolution-for-agents.md` sibling,
   `networking.hostName`.
 - Caddy on cube sees `remote_ip: 127.0.0.1` for every request — identify
   traffic by vhost, or read the app's / tailscaled's logs.
-- Config and the four name traps: `tailscale.nix`, `resolved.nix`,
+- Config and the name traps: `tailscale.nix`, `resolved.nix`,
   `avahi.nix` (`flake/modules/general-config/system/networking/`), and the
   `tailscale-services/README.md` — [last section](#traps-and-where-the-config-lives).
 
@@ -133,7 +133,7 @@ not grep against `networking.hostName` — that gap is trap 1 in
 
 ## Traps, and where the config lives
 
-The config rationale and the four hard-won traps live in the modules —
+The config rationale and the hard-won traps live in the modules —
 read these before changing anything:
 
 - `flake/modules/general-config/system/networking/tailscale.nix` — the

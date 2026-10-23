@@ -18,7 +18,7 @@ Full traps and integration specifics (rejected `nixpkgs.*`,
   `homeConfigurations` output, no separate home switch; `just switch`
   applies both. `flake/doc/trailhead-home-manager-standalone.md` is the way
   back.
-- `elly-home-manager` is shared verbatim by all four hosts including
+- `elly-home-manager` is shared verbatim by every host, including
   `nire-lysithea`, so everything in it has to survive darwin.
 - `home.file.<n>.text` and `home.sessionPath` concatenate across modules
   rather than override: two modules writing the "same" file double it,

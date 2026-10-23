@@ -1,6 +1,6 @@
 # Common commands
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 Run these from any tailnet device with ssh access to `ts-cube` when
 something is in the way: streaming cube's desktop, getting back in after the
@@ -37,7 +37,7 @@ cube boots straight into Plasma with no monitor attached and locks the
 session at once, so a stream opens on the lock screen. Unlock with elly's
 password; the YubiKey isn't registered on cube. Quitting the app in Moonlight
 locks the session again; closing Moonlight without quitting leaves it to the
-2-minute idle lock.
+idle lock.
 
 Config: `host-config/cube/configuration/headless-display-cube.nix` (forced
 HDMI-A-1 output, autologin) and `stream-lock-cube.nix` (lock policy, Sunshine

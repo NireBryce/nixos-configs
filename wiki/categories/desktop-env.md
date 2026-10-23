@@ -174,8 +174,8 @@ categories enabled around a repro.
   left out rather than guessed at.
 
   **How the shortcuts were read**, which is the part worth not re-deriving:
-  `kglobalshortcutsrc` runs ~350 lines because KDE dumps its entire default
-  set to disk the first time anything touches it — not because 350 actions
+  `kglobalshortcutsrc` runs to hundreds of lines because KDE dumps its entire default
+  set to disk the first time anything touches it — not because that many actions
   were rebound. Each line is `active,default,description`, so **diffing
   column 1 against column 2** recovers what changed, instead of
   guessing at stock KDE from memory. Doing that turned up the real story:

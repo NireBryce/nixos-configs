@@ -11,7 +11,7 @@ Forgejo on `nire-cube`, nested under `homelab`. URL
 
 ## What's in it
 
-Two `nixos`-class files under `homelab-config/homelab/git-forge/forgejo/`:
+The `nixos`-class files under `homelab-config/homelab/git-forge/forgejo/`:
 `forgejo.nix` (the forge), `actions-runner.nix` (CI runner, added 2026-09-24).
 
 Category isn't named `forgejo`: category and module sharing a name both
@@ -24,7 +24,7 @@ declare `flake.modules.nixos.forgejo` and silently **merge**.
 | Binding | `127.0.0.1:3001` (3000 is Grafana) |
 | Firewall | no port opened; the binding is what keeps it off the LAN |
 | Database | `sqlite3` (nixpkgs default) |
-| Registration | `forge-runner-cycle.service` on cube (root; register runs as the forgejo user): `forgejo-cli actions register --name forge-runner --scope elly --ephemeral --secret-file`, then drop `/run/libvirt-vm/forge-runner.stamp`, restart `libvirt-vm-forge-runner`, wait for `shut off` (destroy after 3600 s unclaimed, or 12600 s after a `action_task` row names the runner; 21600 s total if the db can't be queried), back off 60 s after two consecutive cycles under 120 s; register's UUID output gets an explicit newline (the CLI prints none, so journald held it). Forgejo deletes the runner when its job completes; never-used ones go via `cron.cleanup_offline_runners` (GLOBAL_SCOPE_ONLY=false, 24h). Runner settings `capacity = 1`, `cache.enabled = false`; new repos' Actions unit off (`DEFAULT_REPO_UNITS`) |
+| Registration | `forge-runner-cycle.service` on cube (root; register runs as the forgejo user): `forgejo-cli actions register --name forge-runner --scope elly --ephemeral --secret-file`, then drop `/run/libvirt-vm/forge-runner.stamp`, restart `libvirt-vm-forge-runner`, wait for `shut off` (destroy after an unclaimed timeout, a longer one once an `action_task` row names the runner, an overall cap if the db can't be queried; back off after two consecutive very short cycles; values in `actions-runner.nix`); register's UUID output gets an explicit newline (the CLI prints none, so journald held it). Forgejo deletes the runner when its job completes; never-used ones go via `cron.cleanup_offline_runners` (GLOBAL_SCOPE_ONLY=false, 24h). Runner settings `capacity = 1`, `cache.enabled = false`; new repos' Actions unit off (`DEFAULT_REPO_UNITS`) |
 | Secrets | upstream `forgejo-secrets.service` generates `SECRET_KEY`/`INTERNAL_TOKEN`/`JWT_SECRET` on first run. **Nothing to create by hand.** |
 | Persistence | none needed — cube has a persistent root |
 | Actions | `settings.actions.ENABLED = true`; runner in `actions-runner.nix` |
@@ -68,7 +68,7 @@ access roots the VM, not cube.
 - **`forgejo-admin-bootstrap` re-asserts elly's password from sops on
   every activation.** Since 2026-10-19 the re-assert goes through the
   loopback admin API (the CLI's only password channel is argv, world-readable
-  in /proc). With 2FA on elly (the case today) the API answers 401 and the
+  in /proc). With 2FA enrolled on elly (UI-side, so check the account, not the repo) the API answers 401 and the
   unit logs a warning and succeeds without re-asserting; other API errors
   still fail it. Fresh installs set the password via `create`, unaffected.
 - The `forgejo-admin-password` sops secret is declared **in this module**,
@@ -87,8 +87,8 @@ access roots the VM, not cube.
   **is** admin (confirmed there 2026-09-12). The endpoint needs a login
   anyway (`REQUIRE_SIGNIN_VIEW`).
 - **Hardening (forgejo.nix):** `REQUIRE_SIGNIN_VIEW = true` (HTTPS clones
-  need credentials); `quota.ENABLED`, `[quota.default] TOTAL = 10GiB`
-  (unparseable ⇒ silently unlimited); artifacts 14 d, logs 90 d;
+  need credentials); `quota.ENABLED`, `[quota.default] TOTAL` in `GiB` form
+  (unparseable ⇒ silently unlimited); shortened artifact/log retention (values in forgejo.nix);
   `COOKIE_SECURE = true`. 2FA is UI-side; the admin bootstrap's password
   re-assert touches only the password and must-change flag, so enrolled
   2FA survives every switch.

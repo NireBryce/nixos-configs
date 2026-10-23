@@ -42,16 +42,16 @@ one hand-written column, kept across regenerations.
 
 | Category | Directory | Class(es) | Imported by |
 |---|---|---|---|
-| [boot](boot.md) | `general-config/boot/` | nixos | all 3 NixOS hosts |
+| [boot](boot.md) | `general-config/boot/` | nixos | durandal, tenacity, cube |
 | [desktop-env](desktop-env.md) | `general-config/desktop-env/` | nixos | never imported whole — hosts take `jovian` or `kde-desktop` by name |
 | [impermanence](impermanence.md) | `general-config/impermanence/` (+ nested `root-rollback`) | nixos, homeManager | durandal, tenacity (not cube) |
 | [macos](macos.md) | `general-config/macos/` | darwin | lysithea |
-| [nix](nix.md) | `general-config/nix/` | nixos, homeManager, darwin | all 4 hosts |
-| [shell-config](shell-config/00-INDEX.md) | `general-config/shell-config/` | nixos, homeManager | all 3 NixOS hosts directly; reaches lysithea via `elly-home-manager` |
-| [system](system.md) | `general-config/system/` | nixos, homeManager, darwin | all 3 NixOS hosts + lysithea (partially) |
-| [hardware](hardware.md) | `hardware-config/hardware/` (+ nested `amd`) | nixos | all 3 NixOS hosts |
+| [nix](nix.md) | `general-config/nix/` | nixos, homeManager, darwin | durandal, tenacity, cube, lysithea |
+| [shell-config](shell-config/00-INDEX.md) | `general-config/shell-config/` | nixos, homeManager | durandal, tenacity, cube directly; reaches lysithea via `elly-home-manager` |
+| [system](system.md) | `general-config/system/` | nixos, homeManager, darwin | durandal, tenacity, cube + lysithea (partially) |
+| [hardware](hardware.md) | `hardware-config/hardware/` (+ nested `amd`) | nixos | durandal, tenacity, cube |
 | [peripherals](peripherals.md) | `hardware-config/peripherals/` | nixos | durandal, cube |
-| [elly](elly.md) | `users-config/elly/` | nixos, homeManager, darwin | all 4 hosts |
+| [elly](elly.md) | `users-config/elly/` | nixos, homeManager, darwin | durandal, tenacity, cube, lysithea |
 
 <!-- /generated -->
 

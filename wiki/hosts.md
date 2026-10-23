@@ -1,6 +1,6 @@
 # Hosts & current state
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 **Switch state is not recorded anywhere in the repo**; it rots faster than
 any session can correct it. Whether a host runs the current build is answered
@@ -61,7 +61,7 @@ a human reader.
 `nire-tenacity`'s sshd is tailnet-only (2026-09-26,
 `host-config/tenacity/configuration/ssh-tailnet-only-tenacity.nix`): port 22 is
 closed on every other interface, so `ssh ts-tenacity` works and
-`nire-tenacity.local` from the LAN does not. durandal and cube still open 22.
+`nire-tenacity.local` from the LAN does not. The other hosts have no equivalent module.
 KDE Connect and Steam Remote Play/transfer ports are closed on its LAN side
 too (`lan-ports-closed-tenacity.nix`); both work over the tailnet, with the
 peer added by name rather than found by broadcast. cube has the same ports
@@ -102,10 +102,10 @@ status and what broke on the way:
   own device `go`, needing a one-time interactive login on first start.
 - [backup](categories/backup.md) — restic to `ts-hive` (2026-08-28, issue
   [#87](https://github.com/NireBryce/nixos-configs/issues/87)); local-path
-  over NFS failed for real, SFTP since 2026-08-31. **Done as of
+  over NFS failed for real, SFTP since 2026-08-31. **Done
   2026-09-06**, restore drill included (run twice — found and fixed a real
-  sqlite-staging bug, then confirmed). Still no backups on durandal/
-  tenacity/lysithea ([#130](https://github.com/NireBryce/nixos-configs/issues/130)).
+  sqlite-staging bug, then confirmed). Backups for durandal/
+  tenacity/lysithea: [#130](https://github.com/NireBryce/nixos-configs/issues/130).
   Runbook: [homelab/backup-runbook.md](homelab/backup-runbook.md).
 
 ## Where each fact lives

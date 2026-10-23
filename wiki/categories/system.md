@@ -2,7 +2,7 @@
 
 _Last modified: 2026-10-22_
 
-The largest category: 16 subdirectories (no per-file count here; see
+The largest category (no per-file count here; see
 categories/00-INDEX.md's Index section for why). Every Linux host imports it
 whole, with no way to opt out of any piece. That is why
 [virtualization](virtualization.md) and [containers](containers.md) are their
@@ -59,8 +59,8 @@ for `lysithea` (same `useGlobalPkgs`/`useUserPackages`, no backup extension) —
 host, not anything under [macos](macos.md).
 
 `home-manager/drop-unsupported-packages.nix` is the platform-support
-counterpart: `elly-home-manager` is shared verbatim across all four hosts, so
-every package in it has to survive `aarch64-darwin`. Eleven didn't (`vlc`,
+counterpart: `elly-home-manager` is shared verbatim across every host, so
+every package in it has to survive `aarch64-darwin`. These didn't (`vlc`,
 `gimp`, `libreoffice-qt`, `github-desktop`, `piper`, `qpwgraph`, `strace`,
 `ltrace` (since removed), `iotop`, `sysstat`, `ethtool`), each previously
 guarded by a hand-written `lib.mkIf (!pkgs.stdenv.isDarwin)` — a restated fact that can
@@ -231,7 +231,7 @@ repository only).
 
 ## Imported by
 
-All three NixOS hosts import `system` whole. `lysithea` imports it too — for
+`durandal`, `tenacity` and `cube` import `system` whole. `lysithea` imports it too — for
 `enable-home-manager-darwin.nix`, per that file's own comment "this is what
 brings packages and dotfiles in" — but only the `nixos`/`darwin`-class
 subset that declares a `darwin` class reaches it;

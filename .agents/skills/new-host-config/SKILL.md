@@ -54,8 +54,8 @@ impermanence host `neededForBoot = true` on `/persist`.
 `general-config/impermanence/_disko/impermanence-luks-btrfs.nix` (curried
 over `device`, `includeSecureboot`, `swapSize`; call-site example in
 `flake/doc/disko-impermanence-layout.md`) rather than inventing a
-`hardware-configuration.nix`. No module calls it currently; the doc example
-is the reference.
+`hardware-configuration.nix`. Grep for callers; the doc example is the
+reference.
 
 - **Placeholder device path must be unmistakably fake**
   (`/dev/disk/by-id/REPLACE-ME-before-running-disko`), never plausible like
@@ -84,8 +84,8 @@ bumped. A host with no data starts on the **current** release:
 nix eval --raw .#nixosConfigurations.nire-tenacity.config.system.nixos.release
 ```
 
-Not durandal's `23.11`, tenacity's `25.05` or cube's `26.05` (each lives
-in its `nixpkgs-stateVersion-<name>.nix`). Comment the fresh-host case,
+Not another host's value (each lives in its
+`nixpkgs-stateVersion-<name>.nix`). Comment the fresh-host case,
 not just the string.
 
 ## Don't copy hardware-keyed fixes blind

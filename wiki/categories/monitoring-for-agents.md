@@ -1,6 +1,6 @@
 # `monitoring`, for agents
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-22_
 
 _Sibling reviewed: 2026-10-22 -- source fix was a file-name correction (the `trustedInterfaces` rule is in `networking.nix`); this page names no file for it_
 
@@ -12,7 +12,7 @@ since 2026-09-07; the old `.../grafana/` path 404s.
 
 ## What's in it
 
-`homelab-config/homelab/monitoring/`, seven files, all `nixos`-class, **every listener
+`homelab-config/homelab/monitoring/`, all `nixos`-class, **every listener
 on loopback**:
 
 | File | Scrapes | Note |
@@ -21,9 +21,9 @@ on loopback**:
 | `cadvisor/cadvisor.nix` | podman containers | not runtime-verified against podman; falls back to walking cgroups, so containers show by cgroup path not name unless `virtualisation.podman.dockerSocket` is wired |
 | `libvirt-exporter/libvirt-exporter.nix` | libvirt/QEMU guests via `qemu:///system` | **overrides `group` to `libvirtd`** — its default group can't read `/run/libvirt/libvirt-sock` and it then serves an empty metrics page instead of failing |
 | `smartctl-exporter/smartctl-exporter.nix` | per-disk SMART/NVMe wear (health, percentage used, media errors, temperature) | added 2026-09-21; `devices` left `[]` (autodiscover). **No dashboard panel yet** — `smartctl_device_*` metric names weren't confirmed against live `/metrics` before landing this; check that on cube first |
-| `prometheus/prometheus.nix` | the four above, over loopback | |
-| `runner-alerts/runner-alerts.nix` | textfile metrics (`/var/lib/node-exporter-textfile`: `forge_runner_egress_dropped_packets_total{reason}`, `forge_runner_dns_refused_5m`, cycle gauges from actions-runner.nix) + systemd collector (unit-include: forge-runner-cycle, vm-egress-dns, libvirt-vm-forge-runner) | 6 provisioned Grafana alert rules: 5 in folder `forge-runner`, plus `cube-root-disk-low` (folder `cube`, / under 10% free for 15m); datasource UID looked up from grafana.nix's provisioned datasources; checked by loading the built provisioning into Grafana 13.1.6 locally |
-| `grafana/grafana.nix` | — | the only off-host-facing piece. Ships two provisioned dashboards: `nire-cube-overview.json` (three rows) and `roundtrip-check.json` (one panel, the export-verification artifact) |
+| `prometheus/prometheus.nix` | the exporters above, over loopback | |
+| `runner-alerts/runner-alerts.nix` | textfile metrics (`/var/lib/node-exporter-textfile`: `forge_runner_egress_dropped_packets_total{reason}`, `forge_runner_dns_refused_5m`, cycle gauges from actions-runner.nix) + systemd collector (unit-include: forge-runner-cycle, vm-egress-dns, libvirt-vm-forge-runner) | provisioned Grafana alert rules: those in folder `forge-runner`, plus `cube-root-disk-low` (folder `cube`, low free space on /); datasource UID looked up from grafana.nix's provisioned datasources; checked by loading the built provisioning into Grafana 13.1.6 locally |
+| `grafana/grafana.nix` | — | the only off-host-facing piece. Ships provisioned dashboards: `nire-cube-overview.json` and `roundtrip-check.json` (the export-verification artifact) |
 
 `grafana/_dashboards/` is underscore-prefixed because `import-tree` ignores
 any path containing `/_` — otherwise the JSON would be taken for a module.

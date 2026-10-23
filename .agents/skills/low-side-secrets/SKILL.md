@@ -20,7 +20,7 @@ host-key-only on purpose (the comment on `&elly` in `.sops.yaml`).
 
 Built 2026-09-17 for a Forgejo API token an agent session fetches without a
 human typing it (access already bounded by the tailnet; the token is a
-convenience credential). Two mechanical traps surfaced (steps 2 and 3); both
+convenience credential). Mechanical traps surfaced (steps 2 and 3); both
 silently recur.
 
 ## Steps
@@ -34,8 +34,8 @@ silently recur.
    so `./secrets.yaml$` also matches the tail of any `/secrets.yaml` path,
    including nested `low-side/secrets.yaml`. sops takes the *first* match:
    general rule first → the nested file is silently encrypted for every host
-   key (happened: `sops --encrypt` produced a file readable by all four
-   hosts). Verify: `grep 'recipient:' <new file>` shows exactly the intended
+   key (happened: `sops --encrypt` produced a file readable by every
+   host). Verify: `grep 'recipient:' <new file>` shows exactly the intended
    key(s).
 3. **Materialize your decrypt identity**: `just sops-user-identity` (wraps
    `flake/scripts/sops-user-identity.sh`) converts your SSH *private* key to
