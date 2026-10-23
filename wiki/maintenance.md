@@ -50,7 +50,7 @@ this page links to the others rather than restating them:
 
 ## Lockfile updates
 
-The dedicated page for this topic is [flake-lock.md](flake-lock.md).
+The dedicated page for this topic is [flake-lock-weekly-bump.md](flake-lock-weekly-bump.md).
 The weekly PR: `.github/workflows/update-flake-lock.yml` runs Mondays
 09:00 UTC (cron `0 9 * * 1`; also on demand via `workflow_dispatch`), pushes the
 `update_flake_lock_action` branch, and opens a PR titled
