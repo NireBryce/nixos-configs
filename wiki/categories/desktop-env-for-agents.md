@@ -43,7 +43,7 @@ mechanism: `host-config/tenacity/configuration/plasma-tenacity.nix`
 (plasma-manager, wired only through `tenacity-configuration`'s own
 `home-manager.users.elly.imports`) — a curated subset, not a 1:1 dump;
 the shortcut diff trick is column 1 vs column 2 of `kglobalshortcutsrc`
-(`active,default,…` — KDE dumps all ~350 defaults to disk on first
+(`active,default,…` — KDE dumps all its defaults to disk on first
 touch; on tenacity nearly every default Meta shortcut is deliberately
 unbound).
 

@@ -49,7 +49,7 @@ protect one row.
 - **Expiry**: Tailscale auth keys expire at **90 days maximum** from
   creation. This one predates the flake-parts port (so it's already stale)
   and isn't wired to anything — no `sops.secrets.tailscale_key`, no
-  `authKeyFile` — so its expiry currently has zero operational effect.
+  `authKeyFile` — so its expiry has no operational effect unless it is wired in.
 - **If this ever gets wired in**: mint a fresh key first (an expired one
   fails `tailscaled-autoconnect.service` on every boot rather than
   degrading gracefully), and either plan on re-minting every ≤90 days or
@@ -109,12 +109,12 @@ protect one row.
 
 ### 4. sops age recipients — derived from host SSH host keys
 
-- **What**: the four host `age1...` recipients in
+- **What**: the host `age1...` recipients in
   `flake/modules/general-config/system/secrets/.sops.yaml` (`nire-durandal`,
   `nire-lysithea`, `nire-tenacity`, `nire-cube`; the rule for `secrets.yaml`)
   are each derived from that host's own `/etc/ssh/ssh_host_ed25519_key.pub`
   via `just age-key` (`flake/scripts/host-age-key.sh`) — not standalone
-  `age-keygen` keypairs. The file also holds two user-key recipients
+  `age-keygen` keypairs. The file also holds user-key recipients
   (`elly`, `elly-lysithea`) for `low-side/secrets.yaml` only; those are SSH
   user keys, not host keys (skill `low-side-secrets`).
 - **Expiry**: none in the usual sense — SSH host keys don't expire on a
@@ -125,7 +125,7 @@ protect one row.
   update `.sops.yaml`, then `sops updatekeys secrets.yaml` — see
   [impermanence-and-secrets.md](impermanence-and-secrets.md)'s Secrets
   section.
-- **Last checked**: 2026-10-22 (structure only: four host recipients in the
+- **Last checked**: 2026-10-22 (structure only: the host recipients in the
   `secrets.yaml` rule, matching `.agents/rules/secrets.md`'s enrolled hosts —
   names, not values, read; no host key regeneration checked).
 
@@ -236,7 +236,7 @@ protect one row.
   [`.sops.yaml`](<../flake/modules/general-config/system/secrets/.sops.yaml>) is
   derived from a *host's* `/etc/ssh/ssh_host_ed25519_key.pub`, and a runner
   is an ephemeral VM with no persistent host key. Nothing in the nix tree
-  reads this token, so a `sops.secrets.*` entry would decrypt on three hosts
+  reads this token, so a `sops.secrets.*` entry would decrypt on every enrolled host
   with no use for it (the shape #203 deleted). Also, `secrets.yaml` is
   committed to a *public* repo, so its ciphertext is permanently public; an
   Actions secret is never published. The consumer picks the store.
@@ -329,7 +329,7 @@ protect one row.
 
 ### 13. `cube_claude_rc_github_token` — push token for cube's `claude-rc` sessions
 
-- **What**: a fine-grained GitHub PAT in `secrets.yaml`, scoped to the four
+- **What**: a fine-grained GitHub PAT in `secrets.yaml`, scoped to the
   repos in [`claude-rc-cube.nix`](../flake/modules/host-config/cube/configuration/claude-rc-cube.nix)'s
   `dirs` with `Contents: read/write` and nothing else. Declared only on
   `nire-cube`, handed to each `claude-rc-*` user unit through

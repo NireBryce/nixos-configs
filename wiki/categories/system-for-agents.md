@@ -6,7 +6,7 @@ _Sibling reviewed: 2026-10-05 -- ltrace marked removed in the source's darwin-dr
 
 Condensed from [system.md](system.md).
 
-`general-config/system/`, 16 subdirectories. Imported whole by every Linux host, **no opt-out for any piece**: anything
+`general-config/system/`. Imported whole by every Linux host, **no opt-out for any piece**: anything
 that must be optional cannot be filed here (why `virtualization`/`containers` are separate).
 
 ## Subdirectories
@@ -81,7 +81,7 @@ hidden from the diagram (service replaced by a name+repository one).
 
 ## Imported by
 
-All three NixOS hosts, whole. `lysithea` imports it too, but only for
+`durandal`, `tenacity`, `cube`: whole. `lysithea` imports it too, but only for
 `enable-home-manager-darwin.nix` — the rest of the category declares no
 `darwin`-class modules, so nothing else comes with it. The
 `homeManager`-class slice (`font`, `drop-unsupported-packages`) reaches

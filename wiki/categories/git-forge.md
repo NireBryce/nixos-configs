@@ -35,7 +35,7 @@ the move behind Caddy; the move to its own service name isn't in it yet.
 
 ## What's in it
 
-Two files, `nixos`-class: `forgejo/forgejo.nix` (the forge) and
+The `nixos`-class files: `forgejo/forgejo.nix` (the forge) and
 `forgejo/actions-runner.nix` (the CI worker, added 2026-09-24).
 
 ## Why the category isn't named `forgejo`
@@ -127,11 +127,11 @@ which creates `elly`), stages it into `/var/lib/forgejo-runner-share/`
 entry, read from `/sys/firmware/qemu_fw_cfg` — no shared filesystem),
 drops the VM generator's reset stamp and restarts
 `libvirt-vm-forge-runner` — a guest recreated from its base image — then
-waits until the guest powers off, destroying it if it sits unclaimed for
-1 h (Forgejo's task table says whether the runner has taken a job) or runs a
-job past 3.5 h. Two cycles in a row
-shorter than two minutes (a guest dying at boot) back off for one; a
-single short cycle is usually just a quick job.
+waits until the guest powers off, destroying it if it sits unclaimed past a
+timeout (Forgejo's task table says whether the runner has taken a job) or
+runs a job past an overall cap. Two cycles in a row that end very quickly
+(a guest dying at boot) trigger a backoff; a single short cycle is usually
+just a quick job. The values are in `actions-runner.nix`.
 
 In the guest, a hand-written `forgejo-runner.service` runs
 `forgejo-runner one-job --wait` with the UUID derived from the staged
@@ -174,11 +174,12 @@ Set in `forgejo.nix`, 2026-09-26:
   repos, users, the explore pages and the anonymous API all need a login
   or a token, from the tailnet and from CI jobs alike. HTTPS clones need
   credentials (a password or an access token); SSH clones are unaffected.
-- **Storage quota:** `quota.ENABLED` with `[quota.default] TOTAL = 10GiB`
-  per user, counting repos, LFS, packages, attachments and Actions
+- **Storage quota:** `quota.ENABLED` with a `[quota.default] TOTAL` per
+  user, counting repos, LFS, packages, attachments and Actions
   artifacts. Forgejo reads an unparseable size as "unlimited" without a
-  word, so keep the `10GiB` form.
-- **Actions retention:** artifacts 14 days, logs 90 (defaults 90 and 365).
+  word, so keep the `GiB` suffix form (value in `forgejo.nix`).
+- **Actions retention:** artifacts and logs are kept for less than
+  Forgejo's defaults (values in `forgejo.nix`).
 - **`session.COOKIE_SECURE = true`**: every browser reaches the forge over
   HTTPS.
 

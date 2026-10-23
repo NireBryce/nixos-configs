@@ -109,10 +109,22 @@ structured, extractable facts only:
             has no such heading (substring, case-insensitive; the page must
             resolve unambiguously, otherwise the sentence is skipped); and a
             backticked path under a directory root in MOVED_DIRS (data, not
-            logic: `.claude/hooks` -> `.agents/hooks`). A "count word next
-            to a linked directory" check ("all four files") was considered
-            and skipped: the phrasing is too varied to match without
-            guessing which directory and which files a count refers to.
+            logic: `.claude/hooks` -> `.agents/hooks`). Plus ONE narrow
+            count rule, BARE COUNT (skill fact-hygiene cat 4): a numeral
+            or number word (three..twenty, 3+; "two" is the pair idiom) directly before `files`,
+            `modules`, `subdirectories`, `hosts`, `recipes` or `skills`
+            (one optional adjective between: "four nix files"). That is a
+            number that rots when the thing it counts changes, so it is
+            flagged unless the sentence (or its list item) names that many
+            items itself -- at least N backticked names / links -- or ends
+            in a colon (a list follows). Opt-outs: a date (YYYY-MM-DD) or
+            "as of" / "at the time" in the sentence (a dated record), or
+            `<!-- count-ok: reason -->` in the same paragraph. Not scanned:
+            fenced code, `<!-- generated:... -->` regions, wiki/lessons-
+            learned/ and *-history.md (narrative); quoted "examples",
+            `code` spans and "N of M modules" (a measurement) never match. The broader "all four
+            files under a directory" shape stays unchecked: only these six
+            nouns are matched, so ordinary prose counts do not fire.
 
   secrets   The "`.sops.yaml` ... enrolls `host`, `host`, ... —" claim
             (wiki/impermanence-and-secrets.md and .agents/rules/secrets.md
@@ -818,6 +830,51 @@ MD_REF = re.compile(r'`([\w./-]+\.md)`|\]\(([\w./-]+\.md)(?:#[^)]*)?\)')
 SENTENCE_SPLIT = re.compile(r'(?<=[.!?])\s+(?=[A-Z])|\n\s*\n')
 
 
+COUNT_WORDS = ('two three four five six seven eight nine ten eleven twelve '
+               'thirteen fourteen fifteen sixteen seventeen eighteen '
+               'nineteen twenty').split()
+# "two"/"2" is deliberately absent: it is the pair idiom ("two modules with
+# one name", "link the two files"), not a tally that rots. From three up.
+BARE_COUNT = re.compile(
+    r'(?<!\bof )\b(?P<n>[3-9]|[1-9]\d+|' + '|'.join(COUNT_WORDS[1:]) + r')'
+    r'(?:\s+[A-Za-z][\w-]*)?\s+'
+    r'(?:files|modules|subdirectories|hosts|recipes|skills)\b', re.I)
+COUNT_OK = re.compile(r'<!--\s*count-ok:[^>]*-->')
+DATED = re.compile(r'\d{4}-\d{2}-\d{2}|\bas of\b|\bat the time\b', re.I)
+NAMED = re.compile(r'`[^`\n]+`|\]\([^)]+\)')
+GEN_REGION = re.compile(
+    r'(?ms)^<!-- generated:[\w-]+\b[^\n]*?-->[ \t]*\n.*?'
+    r'^<!-- /generated -->[ \t]*$')
+COUNT_FENCE = re.compile(r'(?ms)^(```|~~~).*?^\1[^\n]*$')
+
+
+QUOTED = re.compile(r'"[^"\n]*"|\u201c[^\u201d\n]*\u201d|`[^`\n]*`')
+
+
+def _count_value(tok):
+    tok = tok.lower()
+    return int(tok) if tok.isdigit() else COUNT_WORDS.index(tok) + 2
+
+
+def bare_counts(text):
+    """Yield (count_token, sentence) for each unaccompanied BARE COUNT."""
+    text = COUNT_FENCE.sub('', GEN_REGION.sub('', text))
+    for para in re.split(r'\n\s*\n', text):
+        if COUNT_OK.search(para):
+            continue
+        for item in re.split(r'\n(?=\s*(?:[-*]|\d+\.)\s)', para):
+            for sent in re.split(r'(?<=[.!?])\s+(?=[A-Z])', item):
+                sent = ' '.join(sent.split())
+                # Quoted examples ("all four files") and `code` spans are
+                # mentions, not claims; "N of M modules" is a measurement.
+                m = BARE_COUNT.search(QUOTED.sub(' ', sent))
+                if not m or DATED.search(sent) or sent.endswith(':'):
+                    continue
+                if len(NAMED.findall(sent)) >= _count_value(m.group('n')):
+                    continue
+                yield m.group('n'), sent
+
+
 def agent_module_recipes(root):
     """Recipe names in the `agent` just module (`.agents/scripts/agent.just`)."""
     path = root / '.agents' / 'scripts' / 'agent.just'
@@ -887,6 +944,12 @@ def check_docrefs(root):
             for m in re.finditer(r'`[^`\n]*' + re.escape(old) + r'[^`\n]*`', text):
                 findings.append(
                     f"MOVED PATH  {rel}: {m.group(0)} -- {old} is now {new}")
+
+        if not (rel.parts[:2] == ('wiki', 'lessons-learned')
+                or rel.name.endswith('-history.md')):
+            for n, sent in bare_counts(text):
+                findings.append(
+                    f"BARE COUNT  {rel}: '{n} ...' -- {sent[:100]}")
 
         for sentence in SENTENCE_SPLIT.split(text):
             sentence = ' '.join(sentence.split())
@@ -2065,6 +2128,10 @@ SEE = (
       'DUPLICATE ARTICLE', 'MALFORMED LESSON', 'LESSON ', 'LESSONS MAP'),
      "wiki/lessons-learned.md's header (adding a lesson) and "
      ".agents/lessons-map.toml's (its keys)"),
+    (('BARE COUNT',),
+     "a count of repo things rots: replace it with a pointer to where the "
+     "list lives or with the named items (skill fact-hygiene cat 4); a "
+     "dated record takes a date or 'as of', else <!-- count-ok: reason -->"),
     (('RULE FRONTMATTER', 'DEAD RULE GLOB', 'UNLISTED RULE'),
      ".agents/rules/agent-config.md; a rules file's paths also live in "
      ".agents/lessons-map.toml"),

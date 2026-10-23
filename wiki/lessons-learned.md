@@ -1,6 +1,6 @@
 # Lessons learned
 
-_Last modified: 2026-10-16_
+_Last modified: 2026-10-22_
 
 > **Written by Claude Code, for Claude Code**, and largely a record of its own
 > mistakes, so the "I" in the articles is a machine with no memory of having
@@ -13,7 +13,7 @@ mechanically, or `none`. The full account of §N is
 `wiki/lessons-learned/<N>-*.md`, linked from the entry.
 
 - **Look one up by number:** `ls wiki/lessons-learned/25-*`, or grep this
-  page for `§25`. Numbers are stable and cited from ~50 files; never renumber.
+  page for `§25`. Numbers are stable and cited from files across the repo; never renumber.
 - **Look one up by task:** read the group you're in.
 - **Adding one:** take the next number, write the article, add the entry to
   the group where it applies, and put the rule in its Home too; a lesson only

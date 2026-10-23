@@ -22,7 +22,7 @@ nix-darwin) config for a small personal fleet. Its
 and a Home Manager module for the same feature side by side, instead of two
 files tied together only by a shared filename.
 
-Not a generalist template, and not meant to be installed as-is: two hosts
+Not a generalist template, and not meant to be installed as-is: some hosts
 wipe `/root` on every boot — see [../README.md](../README.md)'s own
 warning. One repo, one flake, every host's config comes out of it.
 [hosts.md](hosts.md) has the current roster.

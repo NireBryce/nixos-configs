@@ -130,16 +130,15 @@ Half automatic, half not:
 
 - **Automatic, user profiles.** The home-manager nh module
   (`flake/modules/packages-config/nix-utils/nh/nh.nix`) sets
-  `programs.nh.clean` for elly on all four hosts (verified by eval on
+  `programs.nh.clean` for elly on every host (verified by eval on
   each host's config, 2026-09-14), which wires a systemd **user** timer:
-  `nh-clean.timer` runs weekly, Mondays 00:00, `Persistent=true`, and
-  executes `nh clean user --keep-since 7d --keep 5` — user-profile
-  generations from the last 7 days (and at least 5) survive, older ones
-  are collected. Timer and unit read live on tenacity, 2026-09-14.
+  `nh-clean.timer` runs on the schedule `nh.nix` sets, and executes
+  `nh clean user` with the keep flags set there — user-profile
+  generations inside the keep window survive, older ones are collected. Timer and unit read live on tenacity, 2026-09-14.
 - **Manual, system profiles.** The user timer never touches root's
   profile, so old **system** generations accumulate until collected by
-  hand: `sudo nh clean all --keep-since 7d --keep 5` (same keep flags
-  the user unit runs — not exercised as root), or
+  hand: `sudo nh clean all` with the keep flags from `nh.nix` (the same
+  ones the user unit runs — not exercised as root), or
   `sudo nix-collect-garbage -d` for the blunter form. Most relevant on
   `nire-cube`, which runs the homelab services.
 - No disk-space watch is configured anywhere in the tree. `df -h /`

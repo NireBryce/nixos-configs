@@ -31,7 +31,7 @@ mark dropped structure. After `just`, a word survives only in recipe
 position and only if the repo's recipe list (just's `--summary`) has it
 (`just agent show`, `just preflight`); anything else is `<word>`. Every
 token is checked against a closed vocabulary (see "Changing the miner");
-`--json` for tooling. Four sections, four different verdicts:
+`--json` for tooling. Each section gets its own verdict:
 
 - **SEQUENCES**: producers run one after another (`&&`/`;`), in >= 3
   sessions. The script candidates. Each row is already the longest run

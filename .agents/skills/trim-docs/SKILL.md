@@ -30,7 +30,7 @@ Checked mechanically (`wiki/scripts/check_wiki.py`); preserve:
   fine (REVIEW, not failure).
 - **The `.sops.yaml ... enrolls ... —` sentence** in
   impermanence-and-secrets.md and `.agents/rules/secrets.md`: keep the
-  em-dash terminator and all four hosts.
+  em-dash terminator and the full host list.
 - **`## Contents` blocks** must match the page's headings. After any heading
   rename/add/remove: `python3 wiki/scripts/check_wiki.py gen-contents <page>`.
 - **The `_Last modified: YYYY-MM-DD_` line** right after the title. Don't

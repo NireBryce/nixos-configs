@@ -51,7 +51,7 @@ _Last modified: 2026-10-22_
   [§36](lessons-learned/36-evaluating-vs-building.md) and [§40](lessons-learned/40-check-the-resource-not-the-unit.md) cover the bugs its first builds and switch hit. The generator
   it ran on, `VMs/_lib/libvirt-vm.nix`, is kept as unexercised reusable
   infrastructure — see [virtualization](categories/virtualization.md).
-- **`claude cave/` itself was retired 2026-09-02.** Its four remaining
+- **`claude cave/` itself was retired 2026-09-02.** Its remaining
   files became real wiki pages — [lessons-learned.md](lessons-learned.md),
   `impermanence-stage1-migration.md` (since removed — above),
   [module-style-guide.md](module-style-guide.md), and

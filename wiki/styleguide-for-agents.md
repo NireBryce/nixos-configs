@@ -14,7 +14,7 @@ Condensed from [styleguide.md](styleguide.md). Rules only here. The *repo's* sty
 |---|---|
 | `wiki/*.md` | cross-cutting topics belonging to no one category |
 | `wiki/categories/<name>.md` | one page per real category — a folder under `flake/modules/` that is a category ([module-files.md](module-files.md)). Indexed in [categories/00-INDEX.md](categories/00-INDEX.md)'s table. |
-| `wiki/categories/<name>/` | escape hatch, used once (`shell-config`). Triggered by one *member* accumulating an investigation, not by length. `00-INDEX.md` becomes the category article; each deep-dive is named after its subject. **No third tier under it.** |
+| `wiki/categories/<name>/` | escape hatch (`shell-config`). Triggered by one *member* accumulating an investigation, not by length. `00-INDEX.md` becomes the category article; each deep-dive is named after its subject. **No third tier under it.** |
 | `wiki/categories/<name>-history.md` | resolved incidents whose *outcome* matters but whose blow-by-blow shouldn't load every read. **Not the default** — the test is whether understanding the *current* behavior needs the paragraph. One companion per **category**, not per page. Procedure: skill `wiki-history-sweep`; candidates: `just wiki-history-candidates`. |
 | `wiki/homelab/` | usage tier: operating a service, for a reader who wants to *do something with it*. |
 | `wiki/experiments/` | open questions: one page per problem **instrumented but not yet diagnosed** — symptom, established, ruled out, under test. Must mark settled vs under-test claims (`fact-hygiene`). On resolution the outcome moves to `lessons-learned.md` or the category page and the page goes. |
@@ -135,8 +135,8 @@ Whichever change makes a page stale corrects it in the same change (skill
 
 **Generated tables** (since 2026-10-01): `<!-- generated:<name> ... -->` …
 `<!-- /generated -->` regions, rewritten by `just wiki-gen`
-(`wiki/scripts/wiki_gen.py`). Today: [hosts.md](hosts.md)'s host table,
-both Index tables on [categories/00-INDEX.md](categories/00-INDEX.md),
+(`wiki/scripts/wiki_gen.py`). Regions (`grep -rn 'generated:' wiki/` lists them): [hosts.md](hosts.md)'s host table,
+the Index tables on [categories/00-INDEX.md](categories/00-INDEX.md),
 [module-style-guide-for-agents.md](module-style-guide-for-agents.md#counts)'s
 counts, and [architecture.md](architecture.md)'s module-layout diagram (a
 `Block`, no hand-written columns).

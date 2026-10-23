@@ -1,6 +1,6 @@
 # Auto-suspend hang on nire-durandal
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 `nire-durandal` suspends into S3 and then cannot be woken — keyboard, power
 button, nothing — until power is physically removed at the PSU. **Status:
@@ -126,7 +126,7 @@ Two consequences, both load-bearing:
 
 ## Under test
 
-Nothing is being tested right now. Instrumentation only:
+As of 2026-10-20 nothing was under test; instrumentation only:
 
 - **[suspend-probe-durandal.nix](../../flake/modules/host-config/durandal/fixes/suspend-probe-durandal.nix)**
   — dumps wakeup, GPE and drive state to `/var/log/suspend-probe/` around every

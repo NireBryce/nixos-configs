@@ -13,7 +13,7 @@ _Last modified: 2026-10-22_
 
 ## What's in it
 
-Three files:
+The files:
 
 - `generations/boot-generations.nix` caps how many bootloader generations
   systemd-boot keeps.
@@ -62,7 +62,7 @@ want `impermanence`, not this page.
 
 ## Imported by
 
-All three NixOS hosts (`durandal`, `tenacity`, `cube`) — not
+Every NixOS host (`durandal`, `tenacity`, `cube`) — not
 `lysithea` (darwin has no bootloader-generation concept here).
 
 ## See also

@@ -32,7 +32,7 @@ TLS from another tailnet host, and Grafana's own login redirect
 
 ## What's in it
 
-Seven files, all `nixos`-class:
+All `nixos`-class:
 
 - **`node-exporter/node-exporter.nix`** — host CPU/memory/disk/network
   metrics. Loopback-only (`127.0.0.1`); nothing outside the host queries it
@@ -62,15 +62,15 @@ Seven files, all `nixos`-class:
   names weren't confirmed against this host's own `/metrics` output before
   landing; check that first, then add a "Storage" row the same way
   `libvirt-exporter.nix`'s metrics became the "libvirt / QEMU VMs" row.
-- **`prometheus/prometheus.nix`** — scrapes the four exporters above over
+- **`prometheus/prometheus.nix`** — scrapes the exporters above over
   loopback. Also loopback-only itself; nothing outside the host queries
   Prometheus directly either.
 - **`grafana/grafana.nix`** — the one service in this stack meant to be
   reached off-host, and the only piece with anything non-obvious in it (see
-  below). Ships two provisioned dashboards,
-  `grafana/_dashboards/nire-cube-overview.json` — three rows (system basics,
-  libvirt/QEMU VMs, podman containers) — and
-  `grafana/_dashboards/roundtrip-check.json`, one panel, the artifact of the
+  below). Ships provisioned dashboards,
+  `grafana/_dashboards/nire-cube-overview.json` — rows for system basics,
+  libvirt/QEMU VMs, and podman containers — and
+  `grafana/_dashboards/roundtrip-check.json`, the artifact of the
   live-export verification described under "Adding a dashboard that survives
   a rebuild". The dashboards directory is
   underscore-prefixed for the same reason `VMs/_lib/` is in
@@ -82,11 +82,11 @@ Seven files, all `nixos`-class:
   textfile collector (`/var/lib/node-exporter-textfile`) and its systemd
   collector, limited to the runner's units. A one-minute timer writes the
   guest egress drop counters and the resolver's refused-lookup count; the
-  runner's cycle loop writes its own gauges. Six Grafana alert rules are
+  runner's cycle loop writes its own gauges. Grafana alert rules are
   provisioned: blocked connections outside the
   allowlist or into private ranges, refused DNS, a guest failing to boot,
   and the cycle or resolver not running (folder `forge-runner`), plus cube's
-  root filesystem under 10% free (folder `cube`) — there because Actions
+  root filesystem running low on free space (folder `cube`) — there because Actions
   artifacts and logs are the likeliest thing to fill it. They are
   Grafana-evaluated (no Alertmanager); where notifications go is Grafana's
   contact points.

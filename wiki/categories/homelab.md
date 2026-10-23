@@ -1,12 +1,12 @@
 # `homelab` — `homelab-config/homelab/`
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 ## Contents
 
 - [What's in it](#whats-in-it)
 - [Nested categories overlap their parents on purpose](#nested-categories-overlap-their-parents-on-purpose)
-- [Why one category for all seven](#why-one-category-for-all-seven)
+- [Why one category for all the services](#why-one-category-for-all-the-services)
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
@@ -22,8 +22,8 @@ addressable by its own name (each holds a subfolder of modules) — this page
 doesn't repeat their content, see each one's own article for what it
 contains and why it's shaped the way it is.
 
-A seventh, [backup](backup.md), joined 2026-08-28 the same way — restic,
-backing up the state the other six produce to the `ts-hive` NAS already on the
+A later one, [backup](backup.md), joined 2026-08-28 the same way — restic,
+backing up the state the other services produce to the `ts-hive` NAS already on the
 network. It's the odd one out functionally (nothing to reach over the
 tailnet, no port, no Caddy route — a timer, not a listener) but structurally
 identical: its own category, `homelab-config/homelab/backup/`, cube-only,
@@ -48,7 +48,7 @@ wiring), caught by evaluating `config.systemd.services` before and after.
 The rule and `bareModulesOf` are both gone — `flake/doc/dirsAsCategory.md`'s
 History has the account.
 
-## Why one category for all seven
+## Why one category for all the services
 
 Four ([monitoring](monitoring.md), [git-forge](git-forge.md),
 [shortlinks](shortlinks.md), [reverse-proxy](reverse-proxy.md))
@@ -61,7 +61,7 @@ notes still live on each service's own module header and wiki page.
 
 ## Imported by
 
-`nire-cube` only, as `homelab` (replacing eight separate import lines). No
+`nire-cube` only, as `homelab` (replacing separate per-service import lines). No
 other host imports it, or should — everything under it was cube-only before
 the move and stays so.
 

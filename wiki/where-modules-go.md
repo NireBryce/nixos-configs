@@ -49,11 +49,11 @@ flake/modules/
 ```
 
 **Shared — `general-config/`, `hardware-config/`, `homelab-config/` and `packages-config/`.** Anything more than
-one host could want, even if only one takes it today. Most subdirectories are
+one host could want, even if only one takes it. Most subdirectories are
 categories (`boot`, `homelab`, `shell-apps`, …) and a host opts in by
 listing the category in its entry point, so a shared module can still be
-optional: a category nobody lists is a category nobody gets (`homelab`,
-and `virtualization` inside it, are cube-only that way). `general-config/` is behavior —
+optional: a category nobody lists is a category nobody gets (`homelab`
+is one; [hosts.md](hosts.md)'s table shows what each host imports). `general-config/` is behavior —
 services, boot, shell setup; `hardware-config/` is hardware support
 (drivers, firmware, storage, peripherals); `homelab-config/` is the self-hosted services
 (the `homelab` category and one nested category per service);

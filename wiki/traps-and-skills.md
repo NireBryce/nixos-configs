@@ -85,7 +85,7 @@ these fits into the bigger picture; this page is just the index.
 ## A trap that points at the wiki instead of a skill
 
 - **Debugging "can't reach a host by tailscale name"** — no skill for this
-  one; the full mechanism (three traps: names don't match `networking.
+  one; the full mechanism (the traps: names don't match `networking.
   hostName`, a tailnet ACL can silently block peer traffic, and a name
   that won't resolve at all means check Tailscale on the client, not the
   name) lives in `networking/tailscale.nix`'s own header, indexed at

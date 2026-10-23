@@ -49,7 +49,7 @@ _Last modified: 2026-10-22_
 
 ## Imported by
 
-All four hosts. The three NixOS hosts import `nix` directly in their own
+Every host. `durandal`, `tenacity` and `cube` import `nix` directly in their own
 category list; `lysithea` imports it too, under its `darwin`-class list —
 which works precisely because `basic-nix-settings.nix` declares a real
 `darwin` block, unlike most modules in this tree. `manconfig.nix` (homeManager-only)

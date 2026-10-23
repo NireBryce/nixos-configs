@@ -27,10 +27,10 @@ declare `flake.modules.nixos.restic` and silently **merge**.
 | Host key | pinned in Nix via `programs.ssh.knownHosts`, not TOFU |
 | sqlite staging | `/var/lib/restic-backups-cube-sqlite-staging`, dir 0700 / copies 0600 (umask 077 in `backupPrepareCommand`; was 0755/0644 until 2026-09-27) |
 | Paths | `/var/lib/{forgejo,grafana,golink}`, `/persist/secrets`, `/persist/passwords`, sqlite staging dir |
-| Timer | `OnCalendar=03:30`, `RandomizedDelaySec=30m`, `Persistent=true` |
-| Retention | `--keep-daily 7 --keep-weekly 4 --keep-monthly 6` (unsized starting point) |
+| Timer | `OnCalendar`, `RandomizedDelaySec`, `Persistent=true` (values in `restic/restic.nix`) |
+| Retention | `pruneOpts` `--keep-daily/-weekly/-monthly` (unsized starting point; values in `restic/restic.nix`) |
 | Secrets | `restic-cube-ssh-key`, `restic-cube-password`, declared in the module (decrypt only on cube) |
-| Excluded | Prometheus TSDB (biggest, least valuable, regenerable); the three live sqlite db files |
+| Excluded | Prometheus TSDB (biggest, least valuable, regenerable); the live sqlite db files |
 
 ## The two traps this module was built out of
 
@@ -38,7 +38,7 @@ declare `flake.modules.nixos.restic` and silently **merge**.
   `RESTIC_CACHE_DIR`** — nixpkgs sets that to
   `/var/cache/restic-backups-<name>`. The sqlite staging directory lived
   there and protected nothing, with no error and green timers. `--dry-run`
-  pair: 603 files with the variable unset, 600 set. **Never stage
+  pair: 603 files <!-- count-ok: dry-run measurement, not a repo count --> with the variable unset, 600 set. **Never stage
   anything under `/var/cache/restic-backups-*`.**
 - **A green timer proves nothing about content.** The bar is a restore
   drill against the repository's own metadata: `restic ls --recursive

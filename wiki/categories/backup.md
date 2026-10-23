@@ -37,10 +37,10 @@ One file, `nixos`-class: `restic/restic.nix`, declaring
 
 - **Paths**: `/var/lib/forgejo`, `/var/lib/grafana`, `/var/lib/golink`,
   `/persist/secrets`, `/persist/passwords`, and the sqlite staging directory.
-- **Schedule**: timer `OnCalendar = 03:30`, `RandomizedDelaySec = 30m`,
-  `Persistent = true`.
-- **Retention** (`pruneOpts`, an unsized starting point): `--keep-daily 7`,
-  `--keep-weekly 4`, `--keep-monthly 6`.
+- **Schedule**: a daily timer with a randomized delay and `Persistent = true`
+  (times in `restic/restic.nix`).
+- **Retention** (`pruneOpts`, an unsized starting point): daily, weekly and
+  monthly keeps, values in `restic/restic.nix`.
 - **Secrets**: `restic-cube-ssh-key` and `restic-cube-password`, declared in
   the module itself (not `sops.nix`) so they decrypt only where it is imported.
 - `initialize = true`, and plain `restic` in `environment.systemPackages`
@@ -115,7 +115,7 @@ exists — had silently protected nothing, the whole time.
 `CacheDirectory=` exactly). **restic refuses to back up its own cache
 directory.** Confirmed with a clean before/after test, not from docs: the
 identical `restic backup --dry-run` with the identical
-`--exclude-file`/`--files-from` processed 603 files (all three staged
+`--exclude-file`/`--files-from` processed 603 files <!-- count-ok: dry-run measurement, not a repo count --> (all three staged
 sqlite copies included) with `RESTIC_CACHE_DIR` unset, and exactly 600
 (all three silently dropped, no error) with it set to the real value —
 the one variable that changed. Everything else chased along the way and

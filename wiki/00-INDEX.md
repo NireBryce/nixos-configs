@@ -15,7 +15,7 @@ rather than trusting this page's paraphrase.
 repeatedly drifted here; `CLAUDE.md`'s host-count and Safety sections still
 carry the scar tissue ("this paragraph said N until..."). Copying content into
 wiki pages would add a third and fourth place. The exceptions are pages with
-no other source to link to: the four working-notes files moved in from
+no other source to link to: the working-notes files moved in from
 `claude cave/` (retired 2026-09-02), the `wiki/homelab/` pages, and
 `categories/shell-config/`'s deep-dives. [styleguide.md](styleguide.md)'s
 Directory hierarchy section says which tiers may hold synthesized content.
@@ -81,7 +81,7 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   the shape of it, what's distinctive here, and where to go next. Start
   here if you're new; everything else on this page assumes you've read it
   or don't need to.
-- [Hosts & current state](hosts.md) — the four hosts (three NixOS + one
+- [Hosts & current state](hosts.md) — the hosts (NixOS and
   darwin), what's been switched/booted vs. only evaluated, and
   where that status is tracked.
 - [Durandal gaming](durandal-gaming.md) — what durandal runs games with:

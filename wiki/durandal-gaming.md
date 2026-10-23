@@ -90,7 +90,7 @@ set the launch options to `gamemoderun %command%`. Check it is active with
 What the tree provided as of 2026-10-22:
 
 - **Mesh shaders**, which AW2 requires: RADV exposes them on RDNA2, and the
-  tree carried Mesa 26.2.5 with kernel 6.18.57.
+  tree's Mesa and kernel on that date were recent enough.
 - **`vm.max_map_count`** is 1048576, the nixpkgs default, so it is not set
   here.
 - **`programs.gamescope.enable`** is already true, via steam's
@@ -100,7 +100,7 @@ There is no ProtonDB page, since the game is not on Steam. Community
 reports install it through Heroic with GE-Proton. Reports from 2023–24
 mention missing textures on Mesa
 ([GamingOnLinux](https://gamingonlinux.com/2023/10/ge-proton-8-22-released-with-fixes-for-alan-wake-2-metal-gear-solid-3)),
-which predate the Mesa above by years. Not yet run on this host.
+which predate the tree's Mesa by years. Not yet run on this host.
 
 ## Worth considering
 

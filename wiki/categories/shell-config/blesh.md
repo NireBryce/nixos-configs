@@ -181,8 +181,8 @@ above and driven through four different Tab-completions with zero errors,
 where each
 reliably errored before; and `just modules` clean with the change
 evaluating correctly into `programs.bash.initExtra`. **Since confirmed
-through a real `just switch`** on `nire-cube` (generation 10, current,
-toplevel matches evaluating `nire-cube` fresh off `main`) — re-run against
+through a real `just switch`** on `nire-cube` (the running
+toplevel matched evaluating `nire-cube` fresh off `main`) — re-run against
 the switched host: several passes of the same repro, zero errors, plus a
 check that the fix's own tripwire warning doesn't fire, confirming the
 patch is actually applying rather than silently skipping while the bug

@@ -29,7 +29,7 @@ at all: a folder with a subfolder holding modules is one
 
 - **`root-rollback/restore-root/WARN-impermanence.nix`** — the module.
   Deletes the `/root` btrfs subvolume in initrd on every boot and snapshots a
-  fresh one from `root-blank`. 440 lines; the file itself is the
+  fresh one from `root-blank`. The file itself is the
   documentation for the mechanics (systemd-cryptsetup unit naming, ordering,
   the persisted directories list). Its own name is deliberately alarming, and
   per its own header comment, even the module's *name* is load-bearing:
@@ -54,8 +54,8 @@ at all: a folder with a subfolder holding modules is one
 - **`_disko/impermanence-luks-btrfs.nix`** — a reusable disko generator
   reproducing durandal/tenacity's hand-run LUKS + btrfs layout. Under a
   `_`-prefixed directory so `import-tree` ignores it; not a flake-parts
-  module but a curried function returning a normal `nixosModule`. **Nothing
-  imports this today** — see
+  module but a curried function returning a normal `nixosModule`. **No host
+  imported this as of 2026-10-22** (comments cite it; re-check the hosts' `imports`) — see
   [../flake/doc/disko-impermanence-layout.md](<../../flake/doc/disko-impermanence-layout.md>)
   for what it's for and how to wire it in. It can't be a category
   the way `root-rollback/` is: everything on a path containing `/_` is

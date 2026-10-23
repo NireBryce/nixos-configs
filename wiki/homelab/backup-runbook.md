@@ -1,6 +1,6 @@
 # Backup runbook — restic on `nire-cube`
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 Run these on `nire-cube` to operate [backup](../categories/backup.md), the
 restic backups of Forgejo/Grafana/golink's state and `/persist` to the
@@ -38,7 +38,7 @@ wrapper (plain `restic` fails — root-owned `0400` env files).
 | task | command |
 |---|---|
 | status | `systemctl status restic-backups-cube.service`; `journalctl -u restic-backups-cube -e` |
-| run now | `sudo systemctl start restic-backups-cube.service` (timer: daily 03:30 + ≤30 min) |
+| run now | `sudo systemctl start restic-backups-cube.service` (timer: `timerConfig` in `restic.nix`) |
 | staging log | `sudo cat /var/cache/restic-backups-cube/prepare.log` |
 | list / inspect | `sudo restic-cube snapshots`; `ls --recursive <id\|latest> <path>`; `stats`; `check` |
 | restore | `restore latest --target /root/restore-test --include /var/lib/restic-backups-cube-sqlite-staging …` |
@@ -65,12 +65,11 @@ journalctl -u restic-backups-cube -e
 
 ## Creating a snapshot
 
-The timer fires daily at 03:30 plus up to a 30-minute random delay
-(`timerConfig` in `restic.nix`) and runs the full cycle:
+The timer (`timerConfig` in `restic.nix`) fires daily with a random delay
+and runs the full cycle:
 `backupPrepareCommand` (stages consistent sqlite copies of
 Forgejo/Grafana/golink's databases), `restic backup`, `restic unlock`,
-then `restic forget --prune` per `pruneOpts` (7 daily / 4 weekly / 6
-monthly).
+then `restic forget --prune` per `pruneOpts` in `restic.nix`.
 
 To run it on demand instead of waiting:
 

@@ -16,9 +16,9 @@ tenacity's shape. A host opting out (cube) uses none of this.
 
 `general-config/impermanence/_disko/impermanence-luks-btrfs.nix`: one LUKS partition,
 btrfs inside, subvolumes `root`/`home`/`nix`/`persist`/`log`, plus an
-unmounted `root-blank`. **Nothing in this repo calls it today** (live hosts have hand-written `hardware-*.nix`; cube never adopted it). Evaluation-verified only, never run on hardware.
+unmounted `root-blank`. **Nothing in this repo called it at last check; re-check: `grep -rn impermanence-luks-btrfs flake/`** (live hosts have hand-written `hardware-*.nix`; cube never adopted it). Evaluation-verified only, never run on hardware.
 
-## Decide explicitly, four things
+## Decide explicitly
 
 1. **Real device path**, read on the target machine (`lsblk`,
    `ls /dev/disk/by-id/`). Never inferred from another host.

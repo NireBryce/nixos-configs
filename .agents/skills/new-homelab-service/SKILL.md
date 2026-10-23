@@ -56,7 +56,7 @@ and **silently merge** (happened with `containers`/`podman.nix`).
 | `git-forge` | `forgejo` | `forgejo`/`forgejo` merges |
 | `shortlinks` | `golink` | not `golinks` — one letter off reads as a typo |
 | `reverse-proxy` | `caddy` | `caddy`/`caddy` merges |
-| `monitoring` | 7 modules | — |
+| `monitoring` | the modules under `monitoring/` | — |
 
 Run `just modules` right after creating the directory; only it catches this.
 

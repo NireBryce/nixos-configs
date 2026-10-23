@@ -41,7 +41,7 @@ are in [reverse-proxy-history.md](reverse-proxy-history.md#the-2026-09-07-to-09-
 
 ## What's in it
 
-Two files, `nixos`-class: `caddy/caddy.nix` and
+The `nixos`-class files: `caddy/caddy.nix` and
 `tailscale-services/serve.nix` (the latter added 2026-09-07 — raw TCP
 forwarding only, not HTTPS termination; see below).
 
@@ -138,7 +138,7 @@ pointed at Caddy's own loopback address, `127.0.0.1:443`. tailscaled
 forwards the untouched TLS bytes (SNI ClientHello included) from each
 service's virtual address; Caddy picks the right vhost by SNI, same
 mechanism it already used to be the one thing on this host bound to 443,
-now serving three names instead of one
+now serving several names instead of one
 (`ts-cube`/`grafana`/`git.moose-micro.ts.net`). Each new vhost is a plain
 `reverse_proxy` with no path matcher — the app has the whole vhost to
 itself, so `handle`/`handle_path` don't come up at all for these two.
