@@ -69,7 +69,7 @@ examples: `package-platform-support`).
   the overlap; which wins is a judgement call.
 
 **Mirror case needing a hand guard**: a package whose `meta.platforms` names
-only darwin (`cmux.nix`) needs `lib.mkIf pkgs.stdenv.isDarwin` around
+only darwin (`cmux.nix`) needs `lib.mkIf pkgs.stdenv.hostPlatform.isDarwin` around
 `home.packages`, or every Linux host's `nix flake check`/toplevel build
 breaks when `buildEnv` forces the unbuildable derivation. The one legitimate
 hand-restated `meta.platforms` fact; read that skill's section first.

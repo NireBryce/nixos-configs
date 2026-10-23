@@ -1,6 +1,6 @@
 # Temporary patches and hacks
 
-_Last modified: 2026-10-21_
+_Last modified: 2026-10-22_
 
 This page lists every workaround in this config that exists only because a
 third-party project has a bug, with what each one works around and when it
@@ -186,6 +186,12 @@ around them, so there is nothing to undo:
   The workaround, a direct `hooks trust grant`, was run once by hand and
   left state on disk under `~/.zcode`, not in this config. Nothing to undo
   here; the write-up says what to keep.
+- KDE bug 513595: every KDE login logs "Could not register app ID" from the
+  portal clients, which can leave the portal daemon's KIO connection
+  uninitialised for the session. No fix in the config; the manual workaround
+  is `systemctl --user restart xdg-desktop-portal.service
+  plasma-xdg-desktop-portal-kde.service` after login
+  (`flake/modules/general-config/system/xdg/xdg-portals.nix` history block).
 - Tenacity's internal SD card reader intermittently failing to enumerate
   since 6.18.57, which also delays the lock screen's YubiKey prompt
   ([experiments/tenacity-sd-reader-enumeration.md](experiments/tenacity-sd-reader-enumeration.md)).

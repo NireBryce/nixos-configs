@@ -1,6 +1,6 @@
 # Fleet maintenance
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 The fleet's recurring upkeep is the weekly flake.lock PR, deploying to a host
 and verifying it, and store hygiene (issue #295). This page says which parts
@@ -61,8 +61,10 @@ deliberately — a lock bump can change what hosts build and boot,
 including the hosts that wipe `/root` at every boot — so the lock diff
 is the review: read it, confirm `nix flake check + module tree` went
 green, and merge through the normal ship flow when the change is
-wanted. CI does not force a host toplevel for these PRs, so `just
-preflight` locally is the stronger check.
+wanted. CI runs `just preflight`, whose `just check` forces every host's
+toplevel (evaluation only, nothing is built), so a green PR proves the
+lock evaluates, not that it builds: `just build` on the host is the
+stronger check.
 
 The workflow needs the `FLAKE_LOCK_TOKEN` repo secret — a fine-grained
 PAT whose expiry and rotation belong to

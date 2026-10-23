@@ -1,12 +1,12 @@
 # blesh (bash line editor)
 
-_Last modified: 2026-10-20_
-_Sibling reviewed: 2026-09-14 -- blesh-for-agents.md only renamed `system/` path shorthand to `config-system/`; no facts moved_
+_Last modified: 2026-10-22_
 
 `ble.sh` is wired up by hand for bash — there's no Home Manager option for
 it (`programs.bash.blesh.enable` doesn't exist; see
 [shell-config](00-INDEX.md)). The package, `source ble.sh
---attach=none` early in `initContent`, and `ble-attach` at the end all live
+--attach=none` early in `programs.bash.initExtra` (`mkBefore`), and `ble-attach`
+at the end (`mkOrder 2500`) all live
 in `bash.nix`; the `.blerc` config itself is owned by
 [`bash/blesh.nix`](../../../flake/modules/general-config/shell-config/bash/blesh.nix).
 
@@ -72,12 +72,13 @@ together external completion/history tools underneath ble.sh's UI:
   to `1` means "open the fzf menu one tick after every keystroke," which on
   real hardware looked exactly like Tab being held down. Full mechanism in
   the file's own comment.
-- **`fzf-key-bindings.bash`**, loaded via a `-C` callback rather than a
-  plain `ble-import`, specifically so it loads *after* `ble-attach` has
-  already imported atuin's Ctrl-R binding — `-d` imports are deferred to
-  idle time, which lands after everything in `.bashrc`. fzf's Ctrl-T/Alt-C
-  survive; fzf's Ctrl-R is deliberately rebound back to atuin via two
-  `ble-bind -x` calls in the same `-C` callback (rebinding rather than
+- **`fzf-key-bindings.bash`**, imported with `ble-import -d` plus two `-C`
+  callbacks. `-d` defers the load to idle time, which lands after everything
+  in `.bashrc` and after `ble-attach` has imported atuin's Ctrl-R binding, so
+  fzf wins Ctrl-R by arriving last. fzf's Ctrl-T/Alt-C
+  survive; fzf's Ctrl-R is deliberately rebound back to atuin via the `-C`
+  callbacks (one `ble-bind -x` each for `emacs` and `vi_imap`), the only hook
+  that runs after that deferred load (rebinding rather than
   unbinding, because a ble.sh keymap with no entry for a key does nothing,
   not "fall through to atuin").
 - **C-v (quoted-insert) is unbound**, in both the `emacs` and `vi_imap`

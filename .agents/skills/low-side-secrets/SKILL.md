@@ -14,7 +14,7 @@ real access boundary is enforced elsewhere (network ACLs, an already-scoped
 API token), so it's decrypted ad hoc by whatever runs as that user, not via
 `sops.secrets.*`/NixOS activation. Worked example:
 `secrets/low-side/secrets.yaml`. Not for the main `secrets.yaml` — stays
-host-key-only on purpose (`secrets/sops.nix` comment).
+host-key-only on purpose (the comment on `&elly` in `.sops.yaml`).
 
 ## Why this exists
 
@@ -54,8 +54,8 @@ silently recur.
 
 ## See also
 
-- `secrets/sops.nix` history note — why the main `secrets.yaml` never gains a
-  user-keyed recipient.
+- `.sops.yaml`'s comment on the `&elly` anchor — why the main `secrets.yaml`
+  never gains a user-keyed recipient.
 - `secrets/sops-interactive-key.nix` — root/host-key version of step 3's mismatch.
 - Skill `secrets-hygiene`.
 - `wiki/impermanence-and-secrets.md` Secrets section — human overview.

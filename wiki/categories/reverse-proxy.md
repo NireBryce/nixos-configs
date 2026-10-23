@@ -1,6 +1,6 @@
 # `reverse-proxy` — `homelab-config/homelab/reverse-proxy/`
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 [Caddy](https://caddyserver.com/), one tailnet-only HTTPS front door for
 every web service on `nire-cube`. Cube-only; added 2026-08-24, under the
@@ -208,8 +208,8 @@ for the Actions runner VM ([virtualization](virtualization.md)). Every
 `.ts.net` vhost except `git.` carries `vmDeny` — a
 `remote_ip 192.168.122.0/24` matcher in a `handle` that aborts — so a
 guest sending another Host/SNI gets nothing. It is a `handle`, not a bare
-`abort`, because `handle` sorts ahead of `abort` and the landing vhost's
-catch-all `handle` would win otherwise (checked with `caddy adapt`,
+`abort`, because `handle` sorts ahead of `abort` and the `ts-cube` vhost's
+catch-all `handle` (the 404) would win otherwise (checked with `caddy adapt`,
 2.11.4). The bare-name `https://` twins don't carry it: `redir` sorts
 ahead of `handle` as well, so there it would never run, and all they give
 a guest is a 301 to a name that does.
@@ -277,8 +277,8 @@ before and after this change.
 - [shortlinks](shortlinks.md) — golink, the service that is deliberately
   *not* behind this: it embeds tsnet and joins the tailnet as its own
   device.
-- [system](system.md) — `tailscale.nix`, for the firewall rule this rests
-  on and the two out-of-repo tailnet traps.
+- [system](system.md) — `networking.nix` for the firewall rule this rests
+  on, and `tailscale.nix` for the out-of-repo tailnet traps.
 - [homelab/00-INDEX.md](../homelab/00-INDEX.md) — the usage side: the current
   URLs for everything on cube.
 - [hosts.md](../hosts.md) — current switch/verification status for

@@ -56,7 +56,7 @@ and **silently merge** (happened with `containers`/`podman.nix`).
 | `git-forge` | `forgejo` | `forgejo`/`forgejo` merges |
 | `shortlinks` | `golink` | not `golinks` — one letter off reads as a typo |
 | `reverse-proxy` | `caddy` | `caddy`/`caddy` merges |
-| `monitoring` | 5 modules | — |
+| `monitoring` | 7 modules | — |
 
 Run `just modules` right after creating the directory; only it catches this.
 
@@ -72,6 +72,7 @@ A collision is a bind failure at start, not an eval error.
 | 9090 | Prometheus | loopback |
 | 9100 | node-exporter | loopback |
 | 9177 | libvirt-exporter | loopback |
+| 9633 | smartctl-exporter | loopback |
 | 80, 443 | Caddy | all interfaces |
 
 Next free `300x` for user-facing. Grep before trusting the table:

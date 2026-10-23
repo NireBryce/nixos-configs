@@ -1,6 +1,6 @@
 # `desktop-env`, for agents
 
-_Last modified: 2026-10-05_
+_Last modified: 2026-10-22_
 
 _Sibling reviewed: 2026-10-20 -- source change was filler-word removal only; no facts changed_
 
@@ -12,10 +12,12 @@ Condensed from [desktop-env.md](desktop-env.md). Facts only here.
   line:
   - `kde/`: `kde-base.nix` (Plasma 6 + the bits every desktop host
     wants: `services.xserver.enable`, `services.desktopManager.plasma6.enable`,
-    networking) and `kde-desktop.nix` (workstation session on top:
+    `networkmanager` mkDefault, dconf, KDE tools) and `kde-desktop.nix` (workstation session on top:
     display manager, default session).
-  - `jovian/`: `jovian.nix` (handheld half: Jovian, Steam, the TDP
-    stack) and `jovian-persist.nix` (its `/etc/hhd` persistence rule,
+  - `jovian/`: `jovian.nix` (handheld half: Jovian, Steam with
+    `autoStart = false`, Decky Loader, handheld-daemon + adjustor,
+    `power-profiles-daemon` disabled; also SDDM (Wayland), default session
+    `plasma`, no autologin, Gaming Mode is a greeter choice) and `jovian-persist.nix` (its `/etc/hhd` persistence rule,
     split out 2026-08-14).
 - **Never imported whole.** No host imports `desktop-env`; each names
   one session module: `kde-desktop` (durandal, cube — pulls in

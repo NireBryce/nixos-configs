@@ -51,6 +51,7 @@ Three resources, two outside this repo's Nix:
    ```nix
    services.tailscale.serve.services.<name>.endpoints."tcp:443" = "tcp://127.0.0.1:443";
    ```
+   Add `endpoints."tcp:80" = "tcp://127.0.0.1:80";` too, and list both ports in the Service object's `ports` (re-`vip-put` after editing); `serve.nix` has both for grafana and git, and 443 alone left the bare-name `http://` redirects unreachable (#272).
    `tcp://`, **not** `http://`; target is **Caddy's loopback listener**, not the app port. The upstream option-doc form `"http://127.0.0.1:<app-port>"` gives no real HTTPS: `serve set-config`/`get-config` rounds an endpoint's scheme down to `http://` on this version (tailscale/tailscale#18381; the raw-CLI workaround in #18219 doesn't survive `set-config` or reboot). tailscaled forwards untouched TLS bytes (SNI included) to 443; Caddy terminates. `services.<name>` becomes `svc:<name>` (module adds the prefix; don't).
 
 7. **Add a Caddy vhost for `<name>.<tailnet-domain>`** in `caddy.nix`: plain `reverse_proxy 127.0.0.1:<app-port>`, no path matcher (`handle`/`handle_path` not needed). Same `isTailscaleDomain` cert mechanism as the host vhost: Caddy asks tailscaled for a cert by **site address**, not the connecting socket, so loopback arrival is fine.

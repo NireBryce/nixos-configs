@@ -1,6 +1,6 @@
 # New host disk formatting (LUKS + btrfs + impermanence)
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 Formatting a new host's disk takes four decisions (device path, secure boot,
 swap, LUKS unlock), wiring the generator into the host config, then running
@@ -38,8 +38,8 @@ A **new** host that will wipe `/root` on every boot, like durandal and
 tenacity and unlike `nire-cube`. Impermanence is a per-host decision, not a
 default: [categories/impermanence.md](categories/impermanence.md) lists which
 hosts import it, and the `new-host-config` skill's "Impermanence or not?"
-section covers deciding for a new host. A host that opts out, like `nire-cube`
-and the handhelds, can ignore this page; say so in the host's own header the
+section covers deciding for a new host. A host that opts out, like `nire-cube`,
+can ignore this page; say so in the host's own header the
 way `cube-configuration.nix` does.
 
 `general-config/impermanence/_disko/impermanence-luks-btrfs.nix` reproduces

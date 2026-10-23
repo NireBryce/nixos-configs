@@ -1,6 +1,6 @@
 # `backup`, for agents
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-22_
 
 _Sibling reviewed: 2026-10-20 -- source's 2026-10-20 edit was filler-word removal only; no facts changed. Earlier: See-also links repointed from open-threads.md to issues #87/#130; this page links neither_
 
@@ -26,6 +26,10 @@ declare `flake.modules.nixos.restic` and silently **merge**.
 | Auth | dedicated ed25519 key `~/.ssh/restic-cube-backup`, not the personal key |
 | Host key | pinned in Nix via `programs.ssh.knownHosts`, not TOFU |
 | sqlite staging | `/var/lib/restic-backups-cube-sqlite-staging`, dir 0700 / copies 0600 (umask 077 in `backupPrepareCommand`; was 0755/0644 until 2026-09-27) |
+| Paths | `/var/lib/{forgejo,grafana,golink}`, `/persist/secrets`, `/persist/passwords`, sqlite staging dir |
+| Timer | `OnCalendar=03:30`, `RandomizedDelaySec=30m`, `Persistent=true` |
+| Retention | `--keep-daily 7 --keep-weekly 4 --keep-monthly 6` (unsized starting point) |
+| Secrets | `restic-cube-ssh-key`, `restic-cube-password`, declared in the module (decrypt only on cube) |
 | Excluded | Prometheus TSDB (biggest, least valuable, regenerable); the three live sqlite db files |
 
 ## The two traps this module was built out of

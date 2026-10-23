@@ -1,8 +1,6 @@
 # flake-parts port notes, for agents
 
-_Last modified: 2026-10-16_
-
-_Sibling reviewed: 2026-10-20 -- source lede and intro sentences condensed; no technical facts changed_
+_Last modified: 2026-10-22_
 
 Condensed from [flake-parts-port-notes.md](flake-parts-port-notes.md).
 Salvaged 2026-09-08 from the deleted `flake-parts` branch (tip `cf9aea42`).
@@ -48,10 +46,10 @@ against them.
 - **`ble-import` with an absolute path needs the `.bash` extension** — the
   extension fallback applies only to relative module names. All five imports
   would have failed silently.
-- **`modules.py`'s `tree` and `orphans` use different edge models on
-  purpose.** Segment-scoped edges reported 119 of 160 modules as orphans (a
-  name bound in a `let` above the first declaration belongs to no segment).
-  Don't unify them.
+- **Segment-scoped edges reported 119 of 160 modules as orphans** (a name
+  bound in a `let` above the first declaration belongs to no segment).
+  `modules.py`'s `tree`/`orphans` that this concerned are gone; orphans is
+  now dirs-as-categories' `module-orphans` flake check.
 - **Omit an opt-in line and *nothing happens*** (clean eval, no error);
   hence the orphan check as a flake check.
 
@@ -68,8 +66,8 @@ From the pinned `flake-parts`, re-verified 2026-09-08.
   (special-cased to set no class, so it loads anywhere). `darwin` works
   because nix-darwin sets the matching `_class`.
 - **`deferredModule` merges.** Same-named attributes across files merge, not
-  conflict — the mechanism behind every category and the copy-paste
-  collision trap.
+  conflict in raw flake-parts; dirs-as-categories refuses a repeated name
+  before that (§34).
 - **Prefer `config.flake.modules.…` over `self.modules.…`** — same data, but
   `self.modules` routes out through `outputs` and back, a common source of
   confusing recursion.
@@ -88,12 +86,12 @@ From the pinned `flake-parts`, re-verified 2026-09-08.
   **Fails on a system not in `systems`.**
 - **Deliberately not done: `nixpkgs.pkgs = pkgs` from perSystem** (drops
   `allowUnfree`); accepted cost: a second nixpkgs instantiation.
-- **`import-tree`** imports every `.nix` file under `modules/` recursively, so
+- **`import-tree`** (under `dirs-as-categories.lib.tree`) imports every `.nix` file under `modules/` recursively, so
   paths carry no meaning to Nix. Non-`.nix` files ignored; paths containing
   `/_` excluded (which is what makes `_lib/` work).
 - **A plain NixOS module left unwrapped under `modules/` dies with `infinite
   recursion` blaming `modulesPath`** — nothing in the error is the cause.
-  Always wrap: `{ ... }: { flake.modules.nixos.<name> = <module>; }`. Skill
+  Always wrap: `{ nixos = <module>; }`. Skill
   `new-flake-module`.
 - `flake.nixosConfigurations` is for **specific machines**; reusable
   configurations go in `flake.modules.nixos.*` as modules, per its own

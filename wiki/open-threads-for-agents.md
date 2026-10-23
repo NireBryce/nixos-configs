@@ -1,6 +1,6 @@
 # Open threads, for agents
 
-_Last modified: 2026-10-01_
+_Last modified: 2026-10-22_
 
 Condensed from [open-threads.md](open-threads.md).
 
@@ -23,5 +23,4 @@ Not a tracker since 2026-10-01; this repo's GitHub issues are.
   [`../flake/doc/notes-and-fixes.md`](<../flake/doc/notes-and-fixes.md>)'s
   look-into list; self-hosted booking dropped 2026-08-24 (not in nixpkgs,
   no module, PHP); user split (`elly` -> `nire`, then per-purpose
-  accounts) planned, not started. `ignore`/`IGNORE`-prefixed paths are
-  retired experiments.
+  accounts) planned, not started.

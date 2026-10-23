@@ -41,9 +41,9 @@ Layout
 
 The flake entry point is `flake/flake.nix` -- the repo root has none.
 `flake.nix` itself is a manifest: it declares inputs and wires up
-flake-parts, but doesn't enumerate modules by hand. `(inputs.import-tree
-./modules)` recursively imports every `.nix` file under `flake/modules/`
-instead. Each file declares
+flake-parts, but doesn't enumerate modules by hand.
+`(inputs.dirs-as-categories.lib.tree ./modules)` (an import-tree preset)
+recursively imports every `.nix` file under `flake/modules/` instead. Each file declares
 one `flake.modules.<class>.<name>` module — `<class>` is `nixos`,
 `homeManager`, or `darwin`, so a single file can declare a NixOS module and
 a Home Manager module for the same feature side by side

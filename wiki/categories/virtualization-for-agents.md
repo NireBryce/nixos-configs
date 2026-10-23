@@ -1,8 +1,6 @@
 # `virtualization`, for agents
 
-_Last modified: 2026-10-19_
-
-_Sibling reviewed: 2026-10-20 -- source change was filler-word removal only; no facts changed_
+_Last modified: 2026-10-22_
 
 Condensed from [virtualization.md](virtualization.md).
 
@@ -10,8 +8,8 @@ Libvirt/QEMU VMs on `nire-cube` only (podman/distrobox = [containers](containers
 
 ## Members (`libvirt/`, all `nixos`-class)
 
-- `libvirt.nix` — `virtualisation.libvirtd`; virtiofsd (`vhostUserPackages`,
-  required for virtiofs shares); virt-manager; `elly` deliberately *not* in
+- `libvirt.nix` — `virtualisation.libvirtd` (swtpm on); virtiofsd (`vhostUserPackages`,
+  required for virtiofs shares); virt-manager (dconf default `qemu:///system`); `spiceUSBRedirection`; `elly` deliberately *not* in
   `libvirtd` (use `sudo virsh`). No `ovmf`
   (removed option, eval fails). `qemu.runAsRoot = false` (QEMU as
   `qemu-libvirtd`; DAC chowns writable images, skips read-only store paths).
@@ -49,7 +47,7 @@ relative), `memoryMB ? 4096`, `vcpus ? 2`, `networked ? true`,
 (virtiofs mounts `{ source, tag }`; switches the domain to memfd/shared
 memory), `fwCfg ? []` (`{ name, file }` fw_cfg entries; the guest reads
 `/sys/firmware/qemu_fw_cfg/by_name/<name>/raw`; forge-runner's token
-channel), `limits ? null` (`{ cpuShares, diskBytesPerSec }`). Domain XML is
+channel), `limits ? null` (`{ cpuShares, diskBytesPerSec }`), `bandwidth ? null` (`{ outboundKBps }`, guest-outbound cap), `autostart ? true`, `ephemeral ? false`. Domain XML is
 headless: no VNC/video/balloon/USB; `on_reboot = destroy`.
 
 Produces: domain XML at `/etc/libvirt/qemu/<name>.xml` + a oneshot

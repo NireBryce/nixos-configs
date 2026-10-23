@@ -10,9 +10,9 @@
 # here, which gave the handheld a desktop session with no XWayland and none
 # of the KDE applications; kde-base.nix's history block has the detail.
 #
-# Not moved to kde-base: sddm, the default session and autologin all come
-# from Jovian's own modules/steam/autostart.nix, which sets defaultSession
-# to "gamescope-wayland" -- the half of kde-desktop.nix this host must not
+# Not moved to kde-base: sddm and the default session are set below, not by
+# Jovian's autostart.nix (jovian.steam.autoStart is off: it would SDDM-autologin
+# into gamescope-wayland) -- the half of kde-desktop.nix this host must not
 # have.
 { lib, inputs, ... }:
 {

@@ -1,12 +1,12 @@
 # `system`, for agents
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 _Sibling reviewed: 2026-10-05 -- ltrace marked removed in the source's darwin-dropped list; this page names no packages_
 
 Condensed from [system.md](system.md).
 
-`general-config/system/`, 15 subdirectories. Imported whole by every Linux host, **no opt-out for any piece**: anything
+`general-config/system/`, 16 subdirectories. Imported whole by every Linux host, **no opt-out for any piece**: anything
 that must be optional cannot be filed here (why `virtualization`/`containers` are separate).
 
 ## Subdirectories
@@ -23,14 +23,15 @@ that must be optional cannot be filed here (why `virtualization`/`containers` ar
 
 | File | Why you'd care |
 |---|---|
-| `home-manager/enable-home-manager.nix` | *the* NixOS↔HM wiring (`useGlobalPkgs`, `useUserPackages`). Filed here so importing `system` is enough. |
+| `home-manager/enable-home-manager.nix` | *the* NixOS↔HM wiring (`useGlobalPkgs`, `useUserPackages`, `backupFileExtension = "hm-bak"`). Filed here so importing `system` is enough. |
 | `home-manager/enable-home-manager-darwin.nix` | the darwin equivalent — what brings packages/dotfiles to `lysithea`. Not anything under `macos`. |
 | `home-manager/drop-unsupported-packages.nix` | reads `meta.platforms`/`meta.badPlatforms` and drops what darwin can't build, with a warning. **Don't hand-write `lib.mkIf (!pkgs.stdenv.isDarwin)`.** |
 | `secrets/sops.nix` | sops-nix, key path derived from the host's own ed25519 SSH host key. `nixos` class only. |
 | `secrets/sops-darwin.nix` | points `SOPS_AGE_KEY_FILE` at the Linux-XDG path; darwin's default lookup is `~/Library/Application Support/...`. |
-| `secrets/sops-interactive-key.nix` | oneshot, every boot, converts the host ed25519 key to a native age identity. Unconditional (self-heals on hosts that wipe `/root`). Also sets `security.sudo.extraConfig` `env_keep += "EDITOR VISUAL"` (sudo's `env_reset` strips `environment.variables.EDITOR` before `sudo sops`). |
+| `secrets/sops-interactive-key.nix` | oneshot, every boot, converts the host ed25519 key to a native age identity. Unconditional (self-heals on hosts that wipe `/root`). Also sets `EDITOR`/`VISUAL=micro` system-wide and a `security.sudo.extraConfig` `Cmnd_Alias` for `/run/current-system/sw/bin/sops *` with `env_keep += "EDITOR VISUAL"` scoped to it (2026-10-19; was global) — sudo's `env_reset` strips the editor before `sudo sops`; a store-path sops call misses the alias. |
 | `secrets/low-side/secrets.yaml` | not a module — `.sops.yaml`-only, keyed to a personal SSH key instead of a host key, no `sops.secrets.*`, no NixOS activation. Skill `low-side-secrets`. |
 | `impermanence/declare-persistence-option.nix` | **not** the [impermanence](impermanence.md) category. Declares the option unconditionally, even where nothing populates it. |
+| `security/yubikey.nix` | pam_u2f (login/sudo, `authfile` under the user's `~/.config/Yubico/u2f_keys`), pcscd, udev rules: YubiKey removed -> `loginctl lock-sessions`, inserted -> `loginctl activate` the user's session. |
 | `security/sudo-wheel-only.nix` | sets `security.sudo.execWheelOnly` — `sudo` executable by wheel-group members only. |
 
 ## Traps
@@ -40,12 +41,13 @@ that must be optional cannot be filed here (why `virtualization`/`containers` ar
   2026-08-22.
 - **`*-persist.nix` is a sibling-file convention**, not centralized under
   `impermanence`: `networking/tailscale-persist.nix`
-  (`/var/lib/tailscale/tailscaled.state`),
+  (dir `/var/lib/tailscale`),
   `networking/networkmanager-persist.nix`
-  (`/var/lib/NetworkManager/secret_key`),
-  `networking/mullvad-persist.nix` (`/etc/mullvad-vpn`). All rely on
-  `environment.persistence."/persist".directories` being `listOf` and
-  concatenating across files.
+  (file `/var/lib/NetworkManager/secret_key`),
+  `networking/mullvad-persist.nix` (dir `/etc/mullvad-vpn`). All are
+  `mkIf (boot.initrd.systemd.services ? restore-root)` (no-op on cube) and
+  rely on `environment.persistence."/persist".directories`/`.files` being
+  `listOf` and concatenating across files.
 - **`environment.persistence` refuses to bind-mount over a live file.**
   Move the existing file into `/persist` first, then re-switch.
 - **Tailscale device names don't match `networking.hostName`**, a tailnet

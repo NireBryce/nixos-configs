@@ -1,6 +1,6 @@
 # Conventions & workflow
 
-_Last modified: 2026-10-03_
+_Last modified: 2026-10-22_
 
 ## Contents
 
@@ -16,7 +16,7 @@ _Last modified: 2026-10-03_
 [`../CLAUDE.md`](../CLAUDE.md)'s Commands section. The ones worth knowing
 exist: `just check`, `just modules` (the only static check that means
 anything on darwin), `just wiki-lint` (checks this wiki's own "Imported by"
-claims and category member counts against the real module tree — added
+claims and generated category tables and counts against the real module tree — added
 2026-08-27, `wiki/scripts/check_wiki.py`; part of `preflight` since 2026-09-28),
 `just available <pkg>` / `--duplicates`, `just build`/`boot`/`switch`
 (dispatch per host class via `scripts/rebuild.sh`), and the
@@ -73,7 +73,7 @@ Nothing breaks by leaving it — courtesy, not a bug with consequences.
   mechanism, what was tried, outcome), but compressed like every other
   comment: facts kept, narration cut.
 - **Don't bury Python inside bash** — a little Python in an otherwise-shell
-  script goes in `flake/scripts/util/` as a real `.py` file; mostly-Python
+  script goes in `flake/scripts/` as a real `.py` file; mostly-Python
   work is written as Python outright (`modules.py` is the precedent). Grew
   out of a package-availability checker that shipped both bugs this
   shape invites (env vars read where argv was expected, a mangled line

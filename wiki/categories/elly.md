@@ -1,6 +1,6 @@
 # `elly` — `users-config/elly/`
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 The one category under `users-config/`, the per-user area (as opposed to
 `general-config/` for shared system or `packages-config/` for packages). Not to
@@ -19,7 +19,10 @@ others; see [../architecture.md](../architecture.md).
 
 - **`elly-git/elly-git.nix`** — `homeManager`-only: `programs.git`, a
   `.gitconfig` written from `home.file`, and aliases (`pushall`, `graph`,
-  `add-nowhitespace`).
+  `add-nowhitespace`). Also identity, SSH commit signing on by default
+  (`gpg.format = "ssh"`, key `~/.ssh/id_ed25519`), `init.defaultBranch =
+  "main"`, git-lfs, global ignores (`.direnv`, `result`), and `git
+  maintenance` for one hardcoded repository path.
 - **`hm-config/hm-config.nix`** — `homeManager`-only, and tiny:
   `home.stateVersion`, `home.username`, `home.homeDirectory` — all
   `lib.mkDefault`, with a comment flagging that darwin's home directory
@@ -27,7 +30,9 @@ others; see [../architecture.md](../architecture.md).
   meant to be overridden per-platform if one ever needs to).
 - **`user-settings/elly-user.nix`** — both `nixos`- and `darwin`-class: the
   account itself on the NixOS side (`users.mutableUsers = false`,
-  `isNormalUser = true`, `extraGroups = [ "wheel" "audio" "kvm" ]`; no `podman` or
+  `isNormalUser = true`, `extraGroups = [ "wheel" "audio" "kvm" ]`,
+  `hashedPasswordFile = /persist/passwords/elly`, and a few emergency packages
+  (firefox, git, gh, micro, tree, partitionmanager); no `podman` or
   `libvirtd` since 2026-09-26: both were passwordless root), tmpfiles rules
   holding `/persist/passwords` at 0700 and the hash file at 0600, root-owned
   (2026-09-27; the hand-made files had been 0644 on every host) and,

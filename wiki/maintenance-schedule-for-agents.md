@@ -1,6 +1,6 @@
 # Maintenance schedule, for agents
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 _Sibling reviewed: 2026-10-20 -- source trimmed of rationale narration (items 10, 12, intro); no item facts changed. Earlier (2026-10-01): source's restic rotation-log link repointed from pending-setup.md to backup-history.md; this page carries no such link_
 
@@ -18,14 +18,14 @@ and dates are not values.
 | 1 | `tailscale_key` | 90d max; already stale | **nothing** — undeclared and unused | 2026-09-07 |
 | 2 | `tailscale_api_token` | **unverified** (classic PAT 90d; OAuth secret never) | `tailscale-acl.py get`/`apply`/`vip-*` silently start 401ing | 2026-09-07 |
 | 3 | Tailscale node keys | 180d default, per machine | host drops off the tailnet until interactive `tailscale up` | 2026-09-07 |
-| 4 | sops age recipients | none on a timer | a regenerated SSH host key silently orphans that host | 2026-09-07 |
+| 4 | sops age recipients (4 host keys on `secrets.yaml`; 2 user keys on `low-side/` only) | none on a timer | a regenerated SSH host key silently orphans that host | 2026-10-22 (structure only) |
 | 5 | `restic-cube-ssh-key` / `restic-cube-password` | on suspicion / `ts-hive` re-image | backup runs fail | 2026-08-31 |
 | 6 | `ts-hive` SSH host key pin | none; breaks on re-image | backup runs fail | untracked |
 | 7 | `forgejo-admin-password` | none enforced; never rotated | — | — |
 | 8 | Grafana admin credentials | real password, set by hand 2026-09-13; **not** reproducible | lives only in cube's sqlite db | 2026-09-13 |
-| 9 | Syncthing device certs | decades; **declared by no module since 2026-09-08** | nothing | 2026-09-07 |
+| 9 | Syncthing device certs | decades; declared by no module since 2026-09-08, **`syncthing-*` keys removed from `secrets.yaml` 2026-10-19** (`842b216a`) | nothing; stub | 2026-10-22 |
 | 10 | `FLAKE_LOCK_TOKEN` | expires 2027-09-12; custom date ≤366d | fails loudly by construction, see below | 2026-09-13 |
-| 11 | Atuin account key | none; on suspicion only | — | 2026-09-09 |
+| 11 | Atuin account key (undeclared `atuin_key` entry in `secrets.yaml`: same key unconfirmed) | none; on suspicion only | — | 2026-09-09 |
 | 12 | `nire-galatea/tskey` (git history only) | dead — rotated 2024; auth keys ≤90d anyway | nothing — history fossil, not a credential | 2026-09-14 |
 | 13 | `cube_claude_rc_github_token` | fine-grained PAT, expires **2027-01-18** (90d from 2026-10-20) | pushes from cube's `claude-rc` sessions get an auth error; nothing else | 2026-10-20 |
 

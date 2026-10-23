@@ -1,6 +1,6 @@
 # `desktop-env` — `general-config/desktop-env/`
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 > **Condensed version:**
 > [desktop-env-for-agents.md](desktop-env-for-agents.md) — the same
@@ -26,12 +26,17 @@ Two sub-areas, split along the same line as the hosts that use them:
 
 - **`kde/`** — `kde-base.nix` (Plasma 6 and the bits every desktop host
   wants: `services.xserver.enable`, `services.desktopManager.plasma6.enable`,
-  networking bits) and `kde-desktop.nix` (the workstation session on top of
+  `networkmanager.enable` as a `mkDefault`, `programs.dconf`, and a set of KDE
+  tools and tiling-WM scripts) and `kde-desktop.nix` (the workstation session on top of
   it: display manager, default session — everything specific to a machine
   that boots *to* a desktop rather than to a Steam session).
-- **`jovian/`** — `jovian.nix` (the handheld half: Jovian, Steam, the TDP
-  stack — generic to any machine with built-in controllers and an
-  occasional SteamOS session, not specific to one host) and
+- **`jovian/`** — `jovian.nix` (the handheld half: Jovian, Steam with
+  `autoStart = false`, Decky Loader, `handheld-daemon` with the adjustor TDP
+  stack, `power-profiles-daemon` disabled as conflicting with it — generic to
+  any machine with built-in controllers and an occasional SteamOS session,
+  not specific to one host; it also enables SDDM (Wayland) with `plasma` as
+  the default session and no autologin, so Gaming Mode (gamescope-wayland) is
+  a greeter choice, and it does not import `kde-desktop`) and
   `jovian-persist.nix` (its persistence rule, split out 2026-08-14).
 
 ## Why this category is never imported whole

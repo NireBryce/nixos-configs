@@ -1,14 +1,12 @@
 # blesh, for agents
 
-_Last modified: 2026-09-29_
-
-_Sibling reviewed: 2026-10-20 -- source change was filler-word removal only; no facts changed_
+_Last modified: 2026-10-22_
 
 Source: [blesh.md](blesh.md).
 
 `ble.sh` is wired by hand — **there is no `programs.bash.blesh.enable` in
 Home Manager.** Package, `source ble.sh --attach=none` early in
-`initContent`, and `ble-attach` at the end live in `bash.nix`; the `.blerc`
+`programs.bash.initExtra` (`mkBefore`), and `ble-attach` at the end (`mkOrder 2500`) live in `bash.nix`; the `.blerc`
 is `general-config/shell-config/bash/blesh.nix`.
 
 ## What it wires together
@@ -25,9 +23,11 @@ is `general-config/shell-config/bash/blesh.nix`.
 
 - **bash-completion loads before the fzf integrations** (ble.sh's own
   requirement).
-- **`fzf-key-bindings.bash` loads via a `-C` callback, not `ble-import`**,
-  so it lands after `ble-attach` imported atuin's Ctrl-R. fzf's Ctrl-R is
-  then **rebound** back to atuin with two `ble-bind -x` calls — rebound, not
+- **`fzf-key-bindings.bash` is `ble-import -d` plus two `-C` callbacks**:
+  `-d` defers it past `ble-attach` and atuin's Ctrl-R, so fzf wins by
+  arriving last. The `-C` callbacks (the only hook that runs after that
+  load) **rebind** Ctrl-R back to atuin with one `ble-bind -x` each for
+  `emacs` and `vi_imap` — rebound, not
   unbound: a keymap with no entry for a key does nothing, it does not fall
   through.
 - **`complete_auto_menu` must stay unset.** It is an idle-delay knob, not a

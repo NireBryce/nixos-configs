@@ -1,6 +1,6 @@
 # `reverse-proxy`, for agents
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 _Sibling reviewed: 2026-10-20 -- source lede moved its incident narrative to reverse-proxy-history.md; facts here unchanged_
 
@@ -61,8 +61,8 @@ redirects; `https://<bare name>` serves Caddy's local CA and shows
   `caddy.service`'s `AmbientCapabilities`.
 - `virbr0` reaches 443 too (runner VM). Every `.ts.net` vhost but `git.` carries
   `vmDeny` (`@vm remote_ip 192.168.122.0/24` + `handle @vm { abort }`);
-  `handle`, not bare `abort`, since `handle` sorts first and the landing
-  vhost's catch-all `handle` would otherwise win. Not on the bare
+  `handle`, not bare `abort`, since `handle` sorts first and the
+  `ts-cube` vhost's catch-all `handle` (404) would otherwise win. Not on the bare
   `https://` twins — `redir` sorts ahead of `handle`; they only 301 to a
   `.ts.net` name that carries it.
 - `git.` carries `vmRunnerPathsOnly` instead: guest requests abort unless

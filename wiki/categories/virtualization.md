@@ -1,6 +1,6 @@
 # `virtualization` — `homelab-config/homelab/virtualization/`
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 Libvirt/QEMU VMs, and *only* those; podman and distrobox (OCI containers) are
 the separate [containers](containers.md) category. Under the `homelab`
@@ -29,9 +29,12 @@ succeeded `nire-llm-sandbox`, the category's only VM until 2026-08-28.
 
 ## What's in it
 
-All four files live under `libvirt/` and are all `nixos`-class:
+All five files live under `libvirt/` and are all `nixos`-class:
 
-- **`libvirt.nix`** — `virtualisation.libvirtd`, the daemon itself. The
+- **`libvirt.nix`** — `virtualisation.libvirtd`, the daemon itself, with
+  swtpm, virtiofsd (`vhostUserPackages`, needed for virtiofs shares) and
+  `runAsRoot = false`; plus `programs.virt-manager` (which also sets its
+  dconf default to `qemu:///system`) and `spiceUSBRedirection`. The
   user is deliberately not in the `libvirtd` group (since 2026-09-26).
   Every automated `virsh` runs as root anyway; interactively, `sudo virsh`.
 - **`virt-tools.nix`** — client/disk-image tooling that runs *against*
@@ -56,7 +59,8 @@ All four files live under `libvirt/` and are all `nixos`-class:
 - **`libvirt-persist.nix`** — persists
   `/var/lib/libvirt/secrets/secrets-encryption-key` only (libvirtd's other
   first-run state is just stock defaults recreating themselves). Losing the
-  key orphans whatever it was encrypting. Found 2026-08-22 via
+  key orphans whatever it was encrypting. Conditional on the host having
+  the impermanence root rollback, so a no-op on cube. Found 2026-08-22 via
   `root-drift.sh`, alongside NetworkManager's key (see
   [system](system.md)).
 

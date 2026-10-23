@@ -103,7 +103,7 @@ Inline `#` comments, 78 columns:
 
   ```
   #     find/          plain folder    -> walk in          -> fzf, fd
-  #     text-tools/    a category      -> add its name     -> ripgrep, bat, ...
+  #     text-tools/    a category      -> add its name     -> ripgrep, tokei, ...
   ```
 
 - **Code shapes**: attribute paths one per line

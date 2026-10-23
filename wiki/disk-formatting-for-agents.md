@@ -1,6 +1,6 @@
 # New host disk formatting, for agents
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-22_
 
 _Sibling reviewed: 2026-10-20 -- source body condensed; dropped a stale pointer to a CLAUDE.md State table that no longer exists; no other facts changed_
 
@@ -12,7 +12,7 @@ section first. Skill `new-host-config` is the decision tree.
 ## Scope
 
 Only for a new host that will wipe `/root` on every boot — durandal and
-tenacity's shape. A host opting out (cube, the handhelds) uses none of this.
+tenacity's shape. A host opting out (cube) uses none of this.
 
 `general-config/impermanence/_disko/impermanence-luks-btrfs.nix`: one LUKS partition,
 btrfs inside, subvolumes `root`/`home`/`nix`/`persist`/`log`, plus an

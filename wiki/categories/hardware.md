@@ -1,6 +1,6 @@
 # `hardware` — `hardware-config/hardware/` (+ nested `amd`)
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-22_
 
 ## Contents
 
@@ -16,14 +16,21 @@ Eight files, all `nixos`-class:
 - **`amd/`**, a nested category: `amdcpu/amdcpu.nix`
   (`inputs.nixos-hardware.nixosModules.common-cpu-amd`) and
   `amdgpu/amdgpu.nix` (`inputs.nixos-hardware.nixosModules.common-gpu-amd`,
-  plus a package list — mesa, vulkan-tools, `amdgpu_top`, etc.). Every host
+  plus a package list — mesa, vulkan-tools, `amdgpu_top`, etc. — and
+  `hardware.graphics` with 32-bit support, libva-utils and the ROCm OpenCL ICD). Every host
   in this repo is AMD.
-- **`bluetooth/bluetooth.nix`** — `hardware.bluetooth`.
+- **`bluetooth/bluetooth.nix`** — `hardware.bluetooth` enabled, power on at
+  boot, `FastConnectable`, 60 s discoverable/pairable timeouts.
 - **`firmware/`** — `firmware-all.nix` (`hardware.enableAllFirmware`,
-  `enableRedistributableFirmware`) and `fwupd.nix` (`services.fwupd`).
-- **`storage/`** — `smartd.nix` (S.M.A.R.T. monitoring and scheduled
-  self-tests) and `coredump-limit.nix` (`systemd.coredump` limits).
-- **`memory/swap-policy.nix`** — the zram/zswap swap-policy toggle.
+  `enableRedistributableFirmware`) and `fwupd.nix` (`services.fwupd`, `mkDefault true`). `firmware-all.nix` also
+  sets `nixpkgs.config.allowUnfree = true`, which `enableAllFirmware` needs.
+- **`storage/`** — `smartd.nix` (S.M.A.R.T. monitoring: smartd with autodetect, a short
+  self-test daily at 02:00 and a long one weekly on day 7 at 04:00) and
+  `coredump-limit.nix` (`systemd.coredump` `MaxUse = 2G`, `KeepFree = 1G`).
+- **`memory/swap-policy.nix`** — declares the option
+  `customOption.swap.policy` (`unmanaged` default, `zram`, `zswap`);
+  `zswap` turns zram off and enables `boot.zswap`. Only tenacity sets it
+  (`zswap`, in `hardware-tenacity.nix`).
 
 `bluetooth/`, `firmware/`, `storage/` and `memory/` were plain folders in
 the [system](system.md) category until 2026-10-15; the hosts that import

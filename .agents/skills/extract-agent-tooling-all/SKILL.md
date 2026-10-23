@@ -37,9 +37,9 @@ look, not what you'll find.
 | `wiki/styleguide.md`, `wiki/00-INDEX.md` | Two-audience page pairs, routing index, `-history.md` companions, date lines |
 | `wiki/lessons-learned.md` + `wiki/lessons-learned/` | § numbering with per-§ articles; individual lessons whose rule outlives the incident |
 | `wiki/scripts/` | Doc linters (`check_wiki.py`'s generic checks, `check_restatement.py`, `history_candidates.py`) |
-| `flake/scripts/` | Non-Nix scripts (`branches.py`, `threads.sh`-style tooling) |
-| `.claude/hooks/`, `.githooks/` | Git/secret guard hooks, the commit-trailer normalizer |
-| `.claude/settings.json` | Permission and hook wiring patterns |
+| `flake/scripts/`, `.agents/scripts/` | Non-Nix scripts (`branches.py`, `threads.sh`-style tooling; the `just agent` helpers) |
+| `.agents/hooks/`, `.githooks/` | Git/secret guard hooks, the commit-trailer normalizer |
+| `.agents/settings.json` (symlinked as `.claude/settings.json`) | Permission and hook wiring patterns |
 
 Anything turned up here that needs Nix to make sense goes to the Nix folder
 (`extract-nix-tooling-all`) — note it and move on rather than doing both
