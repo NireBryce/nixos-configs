@@ -47,8 +47,8 @@ issue #87 and [homelab/pending-setup.md](../homelab/pending-setup.md) item
   [backup](backup.md)'s SFTP section.
 
 Lived at `claude cave/plans/2026-08-27-1816-cube-qnap-backup-plan.md`
-until 2026-09-02, then folded into `backup-runbook.md`'s own "Background"
-section when `claude cave/` was retired; moved here 2026-09-03.
+until 2026-09-02, then folded into `backup-runbook.md`
+(whose "Background" part has since been trimmed away) when `claude cave/` was retired; moved here 2026-09-03.
 
 ## The hive mount predates this category by months, and was never dangling
 

@@ -6,8 +6,8 @@ A page lives in the directory that matches its reader: `wiki/` for
 cross-cutting topics, `categories/` for one page per category, `homelab/` for
 using a running service, `experiments/` for open investigations. Read this
 before adding a page, splitting one into a subdirectory, or reorganizing
-links. The rules come from [00-INDEX.md](00-INDEX.md)'s "why a link layer,
-not a rewrite". ([conventions.md](conventions.md) is the repo's own style
+links. The rules come from [00-INDEX.md](00-INDEX.md)'s "Why links and not a
+rewrite" paragraph. ([conventions.md](conventions.md) is the repo's own style
 guide: Nix formatting, `just` commands, the `ship` flow.)
 
 > **Condensed version:**
@@ -300,7 +300,7 @@ that reason.
 
 ### This is deliberate duplication, and it is the only kind here
 
-[00-INDEX.md](00-INDEX.md)'s "why a link layer and not a rewrite" section
+[00-INDEX.md](00-INDEX.md)'s "Why links and not a rewrite" paragraph
 says this repo has been bitten repeatedly by one fact living in two places
 and drifting. That objection is correct. The split is worth it anyway
 because the two readers want different documents, and because it is the one
@@ -415,8 +415,8 @@ existing checks.
 
 ## See also
 
-- [00-INDEX.md](00-INDEX.md) — the wiki's own top-level index and the "why a
-  link layer, not a rewrite" reasoning this style guide turns into rules.
+- [00-INDEX.md](00-INDEX.md) — the wiki's own top-level index and the "Why links
+  and not a rewrite" reasoning this style guide turns into rules.
 - [categories/00-INDEX.md](categories/00-INDEX.md) — the category-index page,
   and the concrete precedent note for the `shell-config/` split.
 - [conventions.md](conventions.md) — the repo's own style guide (Nix

@@ -233,6 +233,7 @@ preflight:
     @python3 .agents/scripts/test_ship.py
     @python3 .agents/scripts/test_worktree.py
     @python3 .agents/scripts/test_where.py
+    @python3 .agents/scripts/test_docs.py
     @python3 flake/scripts/tests/test_glibc_guard.py
     @python3 flake/scripts/tests/test_pm_test_core.py
     @python3 flake/scripts/tests/test_parallel_unittest.py

@@ -4,8 +4,8 @@ _Last modified: 2026-10-22_
 
 `darwin`-class only, throughout: the one category in this repo that is
 entirely platform-specific rather than shared-with-a-guard. See
-[../architecture.md](../architecture.md)'s "Platform support is derived"
-section for the general pattern.
+the `package-platform-support` skill (`.agents/skills/package-platform-support/SKILL.md`)
+for the general pattern.
 
 ## Contents
 

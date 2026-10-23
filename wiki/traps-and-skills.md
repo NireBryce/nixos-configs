@@ -34,6 +34,7 @@ one-liner.
 | Reviewing a PR, branch, or commit | `.agents/skills/review/SKILL.md` |
 | Moving a resolved incident out of a wiki page into `-history.md` | `.agents/skills/wiki-history-sweep/SKILL.md` |
 | Turning a re-typed command pattern into a `just agent` script | `.agents/skills/agent-scripts/SKILL.md` |
+| Auditing every doc claim against the code with parallel agents | `.agents/skills/docs-audit-all/SKILL.md` |
 
 See [architecture.md](architecture.md) and
 [impermanence-and-secrets.md](impermanence-and-secrets.md) for where each of
