@@ -173,12 +173,9 @@ HOST_LINE = re.compile(r'^\s*(nire-[\w-]+)\s*=\s*(mkHost|mkDarwinHost)\b', re.M)
 
 def actual_hosts(root):
     """host name (with `nire-` prefix, matching how wiki/hosts.md writes it)
-    -> class ('nixos' or 'darwin'), read straight from hosts.nix. Deliberately
-    independent of this script's own HOSTS constant (below) -- HOSTS exists
-    for host_imports' narrower purpose (which per-host aggregate file to
-    read) and is itself a second hand-maintained list that could in
-    principle drift from hosts.nix; wiki_gen.py renders hosts.md's table
-    from this, not from HOSTS, so a host missing there still gets a row.
+    -> class ('nixos' or 'darwin'), read straight from hosts.nix. The one
+    roster: check_wiki.roster() and wiki_gen.py's hosts.md table both derive
+    from it, so a host added to hosts.nix appears in both with no edit here.
     """
     p = root / 'flake' / 'modules' / 'host-config' / 'hosts.nix'
     text = COMMENT.sub('', p.read_text())

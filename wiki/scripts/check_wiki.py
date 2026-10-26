@@ -302,15 +302,19 @@ from nixtree import (  # noqa: E402,F401
     static_document)
 import wiki_gen  # noqa: E402,F401  (registers the `generated` check)
 
-# host short-name -> its host-config/*-configuration.nix. lysithea is darwin-class;
-# every other host is nixos-class. nire-installer and nire-llm-sandbox
-# (removed 2026-08-27 and 2026-08-28 respectively -- see wiki/history.md; both
-# were deliberately excluded even while they existed) are not listed here --
-# CLAUDE.md's Architecture section is explicit that neither counted as "a
-# host" the way these four do, and categories/00-INDEX.md's "Imported by"
-# columns never name either one. (nire-lego was a fifth real host here until
-# its removal 2026-08-27 -- see wiki/history.md.)
-HOSTS = ['durandal', 'tenacity', 'cube', 'lysithea']
+def roster(root):
+    """(host short names in hosts.nix order, the NixOS-class ones as a set).
+    A short name is the `nire-` name without its prefix, which is how a host's
+    `<short>-configuration.nix` and the wiki's Imported by columns write it.
+    Read from hosts.nix, so adding or removing a host needs no edit here --
+    this used to be two hand-kept lists, renumbered with each roster change.
+    nire-installer and nire-llm-sandbox were never counted as hosts here (see
+    wiki/history.md)."""
+    hosts = actual_hosts(root)
+    short = lambda name: name.removeprefix('nire-')
+    return ([short(n) for n in hosts],
+            {short(n) for n, cls in hosts.items() if cls == 'nixos'})
+
 
 # Cues that a host named in an "Imported by" section is being named to say
 # it does NOT import the category, or that it gets the category by some
@@ -350,8 +354,8 @@ NEXT_HEADING = re.compile(r'^##\s+', re.M)
 
 
 def host_imports(root, categories, hosts=None):
-    """nixtree.host_imports over HOSTS unless the caller names the roster."""
-    return nixtree.host_imports(root, categories, HOSTS if hosts is None else hosts)
+    """nixtree.host_imports over hosts.nix's roster unless the caller names one."""
+    return nixtree.host_imports(root, categories, roster(root)[0] if hosts is None else hosts)
 
 
 def repo_root(argv):
@@ -362,31 +366,31 @@ def repo_root(argv):
 
 # "all four hosts" / "All three NixOS hosts" -- a page is allowed to claim
 # blanket coverage in prose instead of naming every host individually. Two
-# separate phrases because they cover different sets: "three NixOS hosts"
-# means specifically {durandal, tenacity, cube} (lysithea is darwin,
-# not NixOS), while "four hosts" means all of HOSTS including lysithea. A
-# category can use the three-host phrase and still separately name lysithea
-# by hand for a narrower reason (system.md, nix.md) -- so blanket coverage
-# only removes hosts it actually covers from the per-host check below,
-# rather than skipping that check entirely. (Before nire-lego's removal
-# 2026-08-27 these were "four NixOS hosts" / "five hosts" -- renumbered,
-# not renamed, since the phrases themselves are what pages actually say.)
-ALL_NIXOS_HOSTS_PHRASE = re.compile(r'\ball\s+(?:three|3)\s+NixOS\s+hosts\b', re.I)
-ALL_HOSTS_PHRASE = re.compile(r'\ball\s+(?:four|4)\s+hosts\b', re.I)
-NIXOS_HOSTS = {'durandal', 'tenacity', 'cube'}
+# separate phrases because they cover different sets: "all N NixOS hosts"
+# covers the NixOS-class hosts only (a darwin host isn't one of them), while
+# "all N hosts" covers the whole roster. A category can use the NixOS phrase
+# and still separately name the darwin host by hand for a narrower reason
+# (system.md, nix.md) -- so blanket coverage only removes hosts it actually
+# covers from the per-host check below, rather than skipping that check
+# entirely. N is the roster's own count, so a phrase that went stale when a
+# host was added or removed covers nothing and the unnamed hosts are
+# reported -- which is the finding that sends the page to be renumbered.
+def _blanket_phrase(count, tail):
+    spelled = [w for w, n in NUMWORD.items() if n == count] + [str(count)]
+    return re.compile(rf'\ball\s+(?:{"|".join(spelled)})\s+{tail}\b', re.I)
 
 
-def _imported_by_findings(where, category, hosts, section):
+def _imported_by_findings(where, category, hosts, section, shorts, nixos):
     """Shared by check_imports (a page's own "## Imported by" section) and
     check_table (one cell of the Index table) -- same heuristic, same two
     finding shapes, just a different chunk of prose and a different label
     for where it came from."""
     findings = []
     covered = set()
-    if ALL_NIXOS_HOSTS_PHRASE.search(section):
-        covered |= NIXOS_HOSTS
-    if ALL_HOSTS_PHRASE.search(section):
-        covered |= set(HOSTS)
+    if _blanket_phrase(len(nixos), r'NixOS\s+hosts').search(section):
+        covered |= nixos
+    if _blanket_phrase(len(shorts), r'hosts').search(section):
+        covered |= set(shorts)
 
     # Hosts a blanket phrase already accounts for are satisfied; anything
     # left over (a host the blanket doesn't cover, or every host when
@@ -409,7 +413,7 @@ def _imported_by_findings(where, category, hosts, section):
     # every such page reported one finding per excluded host -- 25 of them,
     # all correct prose, which is exactly the volume that trains a reader to
     # skim past the one real stale inclusion.
-    for host in HOSTS:
+    for host in shorts:
         if host not in hosts:
             for clause in _clauses_mentioning(section, host):
                 if EXCLUSION_CUE.search(clause) or INDIRECT_CUE.search(clause):
@@ -440,6 +444,7 @@ def _by_category(root, categories):
 def check_imports(root):
     categories = find_categories(root)
     by_category = _by_category(root, categories)
+    shorts, nixos = roster(root)
     cat_pages_dir = root / 'wiki' / 'categories'
     findings = []
 
@@ -467,7 +472,7 @@ def check_imports(root):
             end = NEXT_HEADING.search(rest)
             section = rest[:end.start()] if end else rest
             findings += _imported_by_findings(
-                candidate, category, hosts, section)
+                candidate, category, hosts, section, shorts, nixos)
         if not checked:
             findings.append(
                 f"NO 'Imported by' SECTION  {page}"
@@ -493,6 +498,7 @@ def check_table(root):
     module's docstring)."""
     categories = find_categories(root)
     by_category = _by_category(root, categories)
+    shorts, nixos = roster(root)
 
     index_page = root / 'wiki' / 'categories' / '00-INDEX.md'
     text = index_page.read_text()
@@ -510,7 +516,7 @@ def check_table(root):
             continue  # the header row or the separator row
         findings += _imported_by_findings(
             f"{index_page} row for '{name}'", name, by_category.get(name, set()),
-            row.group('imp'))
+            row.group('imp'), shorts, nixos)
     return findings
 
 
