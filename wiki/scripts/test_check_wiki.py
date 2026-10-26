@@ -344,5 +344,54 @@ class CheckRegistry(unittest.TestCase):
         self.assertEqual(r.returncode, 2)
 
 
+class ImportedByRoster(unittest.TestCase):
+    """check_imports reads the host roster from hosts.nix, so a host that
+    isn't one of the original four is held to the same "named in Imported
+    by" rule, and the blanket phrases ("all two NixOS hosts") cover what
+    their count says they cover."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = pathlib.Path(self.tmp.name)
+        self.write('flake/modules/host-config/hosts.nix',
+                   '    nire-aaa = mkHost "x86_64-linux" a;\n'
+                   '    nire-bbb = mkHost "x86_64-linux" b;\n'
+                   '    nire-ccc = mkDarwinHost "aarch64-darwin" c;\n')
+        for h in ('aaa', 'bbb'):
+            self.write(f'flake/modules/host-config/{h}-configuration.nix',
+                       '{\n    includes.nixos = [ "sys" ];\n}\n')
+        self.write('flake/modules/host-config/ccc-configuration.nix', '{ }\n')
+        self.write('flake/modules/general-config/sys/m.nix',
+                   '{\n    folderIsCategory = true;\n    nixos = { };\n}\n')
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def write(self, rel, text):
+        p = self.root / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(text)
+
+    def findings(self, imported_by):
+        self.write('wiki/categories/sys.md',
+                   f'# sys\n\n## Imported by\n\n{imported_by}\n')
+        return check_wiki.check_imports(self.root)
+
+    def test_hosts_named_pass(self):
+        self.assertEqual(self.findings('aaa and bbb.'), [])
+
+    def test_unnamed_roster_host_is_missing(self):
+        f = self.findings('aaa only.')
+        self.assertEqual(len(f), 1, f)
+        self.assertIn("'bbb'", f[0])
+
+    def test_blanket_phrase_covers_the_nixos_hosts(self):
+        self.assertEqual(self.findings('All two NixOS hosts.'), [])
+
+    def test_blanket_phrase_with_the_wrong_count_covers_nothing(self):
+        f = self.findings('All three NixOS hosts.')
+        self.assertEqual(len(f), 2, f)
+
+
 if __name__ == '__main__':
     unittest.main()
