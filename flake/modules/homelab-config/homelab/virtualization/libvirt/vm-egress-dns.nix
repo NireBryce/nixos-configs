@@ -1,6 +1,9 @@
 # dirs-as-categories: the module is named after this file; its categories are the folders above it
 { lib, ... }:
 let
+    # libvirt's default network (_lib/libvirt-net.nix)
+    net = import ../../_lib/libvirt-net.nix;
+
     # What libvirt guests (the Forgejo runner VM) may reach, by domain;
     # each entry covers its subdomains. Anything else gets NXDOMAIN
     # here, and a connection to an address this resolver didn't hand
@@ -23,7 +26,7 @@ in {
             # 5354 on the bridge address; vm-networking.nix DNATs every
             # guest DNS query here. libvirt's own dnsmasq keeps :53.
             port=5354
-            listen-address=192.168.122.1
+            listen-address=${net.gateway}
             # virbr0 only exists once a VM has started the network.
             bind-dynamic
             no-resolv

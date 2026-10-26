@@ -1,6 +1,6 @@
 # `reverse-proxy` — `homelab-config/homelab/reverse-proxy/`
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-10-25_
 
 [Caddy](https://caddyserver.com/), one tailnet-only HTTPS front door for
 every web service on `nire-cube`. Cube-only; added 2026-08-24, under the
@@ -44,6 +44,14 @@ are in [reverse-proxy-history.md](reverse-proxy-history.md#the-2026-09-07-to-09-
 The `nixos`-class files: `caddy/caddy.nix` and
 `tailscale-services/serve.nix` (the latter added 2026-09-07 — raw TCP
 forwarding only, not HTTPS termination; see below).
+
+The services they front are one table, `homelab/_lib/cube-services.nix`
+(loopback port, `svc:` name, derived FQDN and URL). `caddy.nix`'s
+`mkTsService` builds each entry's TLS vhost and both bare-name redirects
+from it, `serve.nix` forwards a `tcp:443`/`tcp:80` pair per entry, and
+grafana.nix and forgejo.nix read their port and `root_url`/`ROOT_URL` from
+it, so none of them can disagree with a vhost. A new entry also needs a line
+in caddy.nix's `guards` (evaluation fails without one).
 
 ## What it changed elsewhere
 

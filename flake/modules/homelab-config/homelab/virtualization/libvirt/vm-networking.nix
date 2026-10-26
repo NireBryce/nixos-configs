@@ -1,5 +1,8 @@
 # dirs-as-categories: the module is named after this file; its categories are the folders above it
-{
+let
+    # libvirt's default network (_lib/libvirt-net.nix)
+    net = import ../../_lib/libvirt-net.nix;
+in {
     # `{ ... }:` kept over statix's suggested `_:` -- deliberate, see
     # wiki/module-style-guide.md's "`{ ... }:` on an inner module lambda".
     nixos = { ... }: {
@@ -81,13 +84,13 @@
                 iptables -w -N cube-vm-in
                 iptables -w -A cube-vm-in -m conntrack --ctstate ESTABLISHED,RELATED -j RETURN
                 iptables -w -A cube-vm-in -p udp --dport 67 -j RETURN
-                iptables -w -A cube-vm-in -p tcp --dport 443 -d 192.168.122.1 -j RETURN
+                iptables -w -A cube-vm-in -p tcp --dport 443 -d ${net.gateway} -j RETURN
                 # DNS is capped per source (a job can't flood the
                 # resolver's query log); real lookups come in bursts.
-                iptables -w -A cube-vm-in -p udp --dport 5354 -d 192.168.122.1 -m hashlimit --hashlimit-name vmdns-udp --hashlimit-mode srcip --hashlimit-above 200/second --hashlimit-burst 400 -j DROP
-                iptables -w -A cube-vm-in -p udp --dport 5354 -d 192.168.122.1 -j RETURN
-                iptables -w -A cube-vm-in -p tcp --dport 5354 -d 192.168.122.1 -m conntrack --ctstate NEW -m hashlimit --hashlimit-name vmdns-tcp --hashlimit-mode srcip --hashlimit-above 50/second --hashlimit-burst 100 -j DROP
-                iptables -w -A cube-vm-in -p tcp --dport 5354 -d 192.168.122.1 -j RETURN
+                iptables -w -A cube-vm-in -p udp --dport 5354 -d ${net.gateway} -m hashlimit --hashlimit-name vmdns-udp --hashlimit-mode srcip --hashlimit-above 200/second --hashlimit-burst 400 -j DROP
+                iptables -w -A cube-vm-in -p udp --dport 5354 -d ${net.gateway} -j RETURN
+                iptables -w -A cube-vm-in -p tcp --dport 5354 -d ${net.gateway} -m conntrack --ctstate NEW -m hashlimit --hashlimit-name vmdns-tcp --hashlimit-mode srcip --hashlimit-above 50/second --hashlimit-burst 100 -j DROP
+                iptables -w -A cube-vm-in -p tcp --dport 5354 -d ${net.gateway} -j RETURN
                 iptables -w -A cube-vm-in -p icmp -j RETURN
                 iptables -w -A cube-vm-in -j DROP
                 iptables -w -I nixos-fw 1 -i virbr0 -j cube-vm-in
@@ -120,8 +123,8 @@
                 iptables -w -t nat -F vm-egress-dns 2>/dev/null || true
                 iptables -w -t nat -X vm-egress-dns 2>/dev/null || true
                 iptables -w -t nat -N vm-egress-dns
-                iptables -w -t nat -A vm-egress-dns -p udp --dport 53 -j DNAT --to-destination 192.168.122.1:5354
-                iptables -w -t nat -A vm-egress-dns -p tcp --dport 53 -j DNAT --to-destination 192.168.122.1:5354
+                iptables -w -t nat -A vm-egress-dns -p udp --dport 53 -j DNAT --to-destination ${net.gateway}:5354
+                iptables -w -t nat -A vm-egress-dns -p tcp --dport 53 -j DNAT --to-destination ${net.gateway}:5354
                 iptables -w -t nat -I PREROUTING 1 -i virbr0 -j vm-egress-dns
 
                 iptables -w -t mangle -D INPUT -i virbr0 -p udp --dport 53 -j DROP 2>/dev/null || true

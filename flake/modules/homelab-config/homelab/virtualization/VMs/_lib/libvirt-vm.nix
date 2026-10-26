@@ -151,6 +151,7 @@
 }:
 { pkgs, lib, ... }:
 let
+    net      = import ../../../_lib/libvirt-net.nix;
     diskDir  = "/var/lib/libvirt/images";
     overlay  = "${diskDir}/${name}.qcow2";
     baseImg  = imagePath;
@@ -164,7 +165,7 @@ let
     # reference with sshForward == null fails loudly instead of pointing
     # at 192.168.122.0.
     guestMac = "52:54:00:00:00:${hex2 sshForward.guestId}";
-    guestIp  = "192.168.122.${toString sshForward.guestId}";
+    guestIp  = "${net.prefix}.${toString sshForward.guestId}";
 
     interfaceXml = lib.optionalString networked ''
       <interface type='network'>

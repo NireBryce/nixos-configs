@@ -3,7 +3,15 @@
 # (node-exporter.nix, cadvisor.nix, libvirt-exporter.nix, smartctl-exporter.nix)
 # and stores the time series grafana.nix's dashboard reads from.
 {
-    nixos = {
+    nixos = { config, ... }:
+    let
+        # Targets are read from the exporters' own port options, so a port
+        # changed in an exporter module moves the scrape with it. The
+        # exporters are loopback-only (their modules say why), hence the
+        # fixed host.
+        loopback = "127.0.0.1";
+        exporters = config.services.prometheus.exporters;
+    in {
         # # description = "prometheus -- scrapes the exporters, stores metrics for grafana.nix";
         services.prometheus = {
             enable = true;
@@ -21,19 +29,19 @@
             scrapeConfigs = [
                 {
                     job_name        = "node";
-                    static_configs  = [ { targets = [ "127.0.0.1:9100" ]; } ]; # node-exporter.nix's default port
+                    static_configs  = [ { targets = [ "${loopback}:${toString exporters.node.port}" ]; } ]; # node-exporter.nix
                 }
                 {
                     job_name        = "cadvisor";
-                    static_configs  = [ { targets = [ "127.0.0.1:8080" ]; } ]; # cadvisor.nix
+                    static_configs  = [ { targets = [ "${loopback}:${toString config.services.cadvisor.port}" ]; } ]; # cadvisor.nix
                 }
                 {
                     job_name        = "libvirt";
-                    static_configs  = [ { targets = [ "127.0.0.1:9177" ]; } ]; # libvirt-exporter.nix's default port
+                    static_configs  = [ { targets = [ "${loopback}:${toString exporters.libvirt.port}" ]; } ]; # libvirt-exporter.nix
                 }
                 {
                     job_name        = "smartctl";
-                    static_configs  = [ { targets = [ "127.0.0.1:9633" ]; } ]; # smartctl-exporter.nix's default port
+                    static_configs  = [ { targets = [ "${loopback}:${toString exporters.smartctl.port}" ]; } ]; # smartctl-exporter.nix
                 }
             ];
         };

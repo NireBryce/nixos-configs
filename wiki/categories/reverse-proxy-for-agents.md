@@ -1,6 +1,6 @@
 # `reverse-proxy`, for agents
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-10-25_
 
 _Sibling reviewed: 2026-10-20 -- source lede moved its incident narrative to reverse-proxy-history.md; facts here unchanged_
 
@@ -15,7 +15,16 @@ nested under `homelab` 2026-08-27.
 
 - `caddy/caddy.nix` — the Caddyfile, `permitCertUid`, systemd ordering.
 - `tailscale-services/serve.nix` — `svc:` endpoints. Raw TCP forwarding
-  only, never HTTPS termination. Added 2026-09-07.
+  only, never HTTPS termination. Added 2026-09-07. One `tcp:443` + `tcp:80`
+  pair per table entry.
+- `homelab/_lib/cube-services.nix` — the table: per service `port`, `name`,
+  derived `fqdn`/`url`; plus `device`/`deviceFqdn`. Read by `caddy.nix`
+  (`mkTsService` builds the TLS vhost + both bare-name redirects per entry;
+  `guards.<name>` is required, a missing one fails eval), `serve.nix`,
+  grafana.nix and forgejo.nix.
+- `homelab/_lib/libvirt-net.nix` — libvirt's default network (`prefix`,
+  `gateway`, `cidr`) for `vmDeny`/`vmRunnerPathsOnly`, the guest firewall,
+  the egress resolver and guest addresses.
 
 ## Current names
 

@@ -12,22 +12,16 @@
 # something doesn't answer; `reverse-proxy-history.md` for the retired
 # path-prefix routes. Traps sit next to the options they concern, below.
 let
-    # `ts-cube`, NOT `nire-cube` -- this tailnet renames devices
-    # fleet-wide (tailscale.nix's trap #1), verified live 2026-08-24.
-    # Duplicated by necessity in grafana.nix's `root_url` and
-    # forgejo.nix's `ROOT_URL`: nothing here declares options, so a
-    # change means editing those two.
-    tailnetFqdn = "ts-cube.moose-micro.ts.net";
+    # libvirt's default network (_lib/libvirt-net.nix)
+    net = import ../../_lib/libvirt-net.nix;
 
-    # Each app's own Tailscale Service name, also duplicated in
-    # grafana.nix/forgejo.nix and in serve.nix's forward targets.
-    # Reached over the tailnet via that Service's virtual address and
-    # forwarded here as raw TCP, so caddy only ever sees loopback
-    # connections -- it asks tailscaled for the cert by SITE address,
-    # not by peer address, which is why that works. Renaming one here
-    # does NOT rename the control-plane `svc:` object.
-    grafanaFqdn  = "grafana.moose-micro.ts.net";
-    gitFqdn      = "git.moose-micro.ts.net";
+    # Ports, names and FQDNs (`ts-cube`, NOT `nire-cube`, among them)
+    # live in _lib/cube-services.nix, shared with grafana.nix,
+    # forgejo.nix and serve.nix so none of them can disagree with a
+    # vhost here.
+    cube = import ../../_lib/cube-services.nix;
+
+    tailnetFqdn = cube.deviceFqdn;
 
     # EVERY `.ts.net` vhost below MUST carry this. An explicit `tls`
     # directive ANYWHERE in this file makes the Caddyfile adapter emit an
@@ -75,7 +69,7 @@ let
     # routers/init.go; `[^/]+/[^/]+` also matches `repo.git`.
     vmRunnerPathsOnly = ''
         @vmNotRunnerPath {
-            remote_ip 192.168.122.0/24
+            remote_ip ${net.cidr}
             not path_regexp ^/(api/actions/|api/actions_pipeline/|twirp/github\.actions\.results\.api\.v1\.ArtifactService/|api/v1/|[^/]+/[^/]+/(info/refs|git-upload-pack|git-receive-pack|info/lfs/))
         }
         handle @vmNotRunnerPath {
@@ -83,13 +77,78 @@ let
         }
     '';
     vmDeny = ''
-        @vm remote_ip 192.168.122.0/24
+        @vm remote_ip ${net.cidr}
         handle @vm {
             abort
         }
     '';
+
+    # Which guard each service in the table gets. A service with no entry
+    # here fails evaluation (attribute missing) rather than being proxied
+    # unguarded.
+    guards = {
+        grafana = vmDeny;
+        git     = vmRunnerPathsOnly;
+    };
+
+    # THE REFERENCE FOR ADDING A SERVICE (skill new-tailscale-service):
+    # everything Caddy needs for one entry of _lib/cube-services.nix --
+    # its TLS vhost and both bare-name redirects -- so a new service is
+    # a table entry plus a `guards` line above, not a hand-copied trio.
+    #
+    # Each app has its own Tailscale Service name. It is reached over the
+    # tailnet via that Service's virtual address and forwarded here as
+    # raw TCP, so caddy only ever sees loopback connections -- it asks
+    # tailscaled for the cert by SITE address, not by peer address, which
+    # is why that works. Renaming an entry does NOT rename the
+    # control-plane `svc:` object.
+    mkTsService = svc: {
+        # One vhost per app, so each serves at plain `/` and needs no
+        # path matcher -- matching what serve_from_sub_path=false
+        # (grafana.nix) and the unprefixed ROOT_URL (forgejo.nix) expect.
+        ${svc.fqdn}.extraConfig = ''
+            ${tailscaleCert}
+            ${guards.${svc.name}}
+            reverse_proxy 127.0.0.1:${toString svc.port}
+        '';
+
+        # `http://` is load-bearing on every bare-name vhost: it marks the
+        # site HTTP-only and suppresses automatic HTTPS. Without the
+        # scheme caddy would seek a cert for a non-`.ts.net` name, the
+        # tailscale manager would decline, and it would fall through to
+        # caddy's internal CA -- an untrusted cert on a name that only
+        # redirects.
+        #
+        # UNLIKE `http://ts-cube`, the `svc:` bare names work only because
+        # serve.nix forwards `tcp:80` here: `ts-cube` is a device address
+        # where caddy binds 80 itself, a `svc:` name is a VIP answering
+        # only on ports its Service object AND serve.nix both declare.
+        # These sat unreachable from f478494a to 2026-09-11 (issue #272)
+        # for that reason -- dead config that looked fine. Deleting a
+        # `tcp:80` endpoint, in either half, silently returns them to it.
+        #
+        # These are the nice door: no certificate is involved, so they
+        # land on the real tailnet cert rather than the local-CA warning
+        # their `https://` twins below give.
+        "http://${svc.name}".extraConfig = ''
+            redir https://${svc.fqdn}{uri} permanent
+        '';
+
+        # HTTPS twin, for browsers that force HTTPS before the redirect
+        # above gets a chance: they send TLS SNI = the literal bare name,
+        # which no other vhost here matches. `tls internal` answers with
+        # caddy's local CA, trading an unrecoverable handshake failure for
+        # a click-through warning (SEC_ERROR_UNKNOWN_ISSUER) -- by design,
+        # not a bug to fix. This is also a `tls` directive, which is what
+        # makes `tailscaleCert` mandatory above; adding another one
+        # anywhere carries the same obligation.
+        "https://${svc.name}".extraConfig = ''
+            tls internal
+            redir https://${svc.fqdn}{uri} permanent
+        '';
+    };
 in {
-    nixos = {
+    nixos = { lib, ... }: {
         # # description = "caddy -- tailnet-only HTTPS front door, with certs from tailscaled";
 
         services.caddy = {
@@ -112,77 +171,19 @@ in {
                     }
                 '';
 
-                # One vhost per app, so each serves at plain `/` and
-                # needs no path matcher -- matching what
-                # serve_from_sub_path=false (grafana.nix) and the
-                # unprefixed ROOT_URL (forgejo.nix) expect.
-                ${grafanaFqdn}.extraConfig = ''
-                    ${tailscaleCert}
-                    ${vmDeny}
-                    reverse_proxy 127.0.0.1:3000
-                '';
-
-                ${gitFqdn}.extraConfig = ''
-                    ${tailscaleCert}
-                    ${vmRunnerPathsOnly}
-                    reverse_proxy 127.0.0.1:3001
-                '';
-
-                # `http://` is load-bearing on every bare-name vhost: it
-                # marks the site HTTP-only and suppresses automatic
-                # HTTPS. Without the scheme caddy would seek a cert for
-                # a non-`.ts.net` name, the tailscale manager would
-                # decline, and it would fall through to caddy's internal
-                # CA -- an untrusted cert on a name that only redirects.
-                "http://ts-cube".extraConfig = ''
+                # The device's own short name; see mkTsService for why the
+                # scheme matters.
+                "http://${cube.device}".extraConfig = ''
                     redir https://${tailnetFqdn}{uri} permanent
                 '';
 
-                # UNLIKE `http://ts-cube` above, the `svc:` bare names
-                # work only because serve.nix forwards `tcp:80` here:
-                # `ts-cube` is a device address where caddy binds 80
-                # itself, a `svc:` name is a VIP answering only on ports
-                # its Service object AND serve.nix both declare. These
-                # sat here unreachable from f478494a to 2026-09-11
-                # (issue #272) for that reason -- dead config that
-                # looked fine. Deleting a `tcp:80` endpoint, in either
-                # half, silently returns them to it.
-                #
-                # These are the nice door: no certificate is involved,
-                # so they land on the real tailnet cert rather than the
-                # local-CA warning their `https://` twins below give.
-                "http://git".extraConfig = ''
-                    redir https://${gitFqdn}{uri} permanent
-                '';
-
-                "http://grafana".extraConfig = ''
-                    redir https://${grafanaFqdn}{uri} permanent
-                '';
-
-                # HTTPS twins, for browsers that force HTTPS before the
-                # redirect above gets a chance: they send TLS SNI = the
-                # literal bare name, which no other vhost here matches.
-                # `tls internal` answers with caddy's local CA, trading
-                # an unrecoverable handshake failure for a click-through
-                # warning (SEC_ERROR_UNKNOWN_ISSUER) -- by design, not a
-                # bug to fix. These are also the `tls` directives that
-                # make `tailscaleCert` mandatory above; adding another
-                # one anywhere carries the same obligation.
-                #
-                # `ts-cube` has the same gap (no `https://ts-cube`
-                # vhost) and is deliberately left alone -- nobody has
-                # hit it; same fix if they do.
-                "https://git".extraConfig = ''
-                    tls internal
-                    redir https://${gitFqdn}{uri} permanent
-                '';
-
-                "https://grafana".extraConfig = ''
-                    tls internal
-                    redir https://${grafanaFqdn}{uri} permanent
-                '';
-
-            };
+                # `ts-cube` has no `https://ts-cube` vhost (the gap
+                # mkTsService's HTTPS twins close for the `svc:` names)
+                # and is deliberately left alone -- nobody has hit it;
+                # same fix if they do.
+            }
+            # Grafana and Forgejo (and any later entry in the table).
+            // lib.mergeAttrsList (map mkTsService (lib.attrValues cube.services));
         };
 
         # NOT optional: tailscaled refuses cert requests from non-root

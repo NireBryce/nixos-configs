@@ -15,7 +15,11 @@
 # `-for-agents.md` and `git-forge-history.md`; cloning and day-to-day use,
 # wiki/homelab/forgejo.md. Traps sit next to the options.
 { lib, ... }:
-{
+let
+    # port, URL and name shared with caddy.nix and serve.nix (_lib/cube-services.nix)
+    cube = import ../../_lib/cube-services.nix;
+    git  = cube.services.git;
+in {
     nixos = { config, pkgs, ... }: {
         services.forgejo = {
             enable  = true;
@@ -40,8 +44,8 @@
                     # resolves to http://127.0.0.1:3001/, as it always
                     # should have.
                     HTTP_ADDR = "127.0.0.1";
-                    HTTP_PORT = 3001; # monitoring's grafana.nix already
-                                      # took 3000 on this host.
+                    HTTP_PORT = git.port; # _lib/cube-services.nix; also what
+                                          # caddy.nix proxies to.
 
                     # DOMAIN and ROOT_URL deliberately DISAGREE, still
                     # -- not a typo, and not both moving to
@@ -63,13 +67,12 @@
                     #     `forgejo@ts-cube:...`.
                     #
                     # `ts-cube`/`nire-cube` mismatch itself is
-                    # networking/tailscale.nix's "FOUR REAL TRAPS" #1;
-                    # the ROOT_URL FQDN is duplicated in serve.nix and
-                    # grafana.nix, not shared (no options in this
-                    # tree, CLAUDE.md Architecture) -- both move
-                    # together if the service name ever changes.
-                    DOMAIN    = "ts-cube";
-                    ROOT_URL  = "https://git.moose-micro.ts.net/";
+                    # networking/tailscale.nix's "FOUR REAL TRAPS" #1.
+                    # ROOT_URL comes from _lib/cube-services.nix, the
+                    # same entry caddy.nix's vhost and serve.nix's
+                    # forward are built from.
+                    DOMAIN    = cube.device;
+                    ROOT_URL  = git.url;
 
                     # DISABLE_SSH at default (false); START_SSH_SERVER
                     # unset, so false too -- git+ssh goes through the
