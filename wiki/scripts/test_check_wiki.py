@@ -7,7 +7,7 @@ caught -- so this builds a small git repo in a temp directory, breaks one
 thing at a time, and asserts the finding. Pure stdlib + git; runs in
 `just preflight` and so in CI.
 """
-import pathlib, subprocess, sys, tempfile, unittest
+import importlib.util, pathlib, subprocess, sys, tempfile, unittest
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 import check_wiki  # noqa: E402
@@ -292,6 +292,56 @@ class FenceHandling(unittest.TestCase):
     def test_prose_after_closing_fence_is_not_read(self):
         self.assertNotIn('after-recipe', self.mentions(
             '```\nx\n```\njust after-recipe\n'))
+
+
+class CheckRegistry(unittest.TestCase):
+    """A check is a subcommand and part of `check` by being registered, and
+    for no other reason -- main() keeps no list of names."""
+
+    def test_every_check_function_is_registered(self):
+        registered = {fn.__name__ for _, fn in check_wiki.wikicore.registered()}
+        defined = {name for name, fn in vars(check_wiki).items()
+                   if name.startswith('check_') and callable(fn)}
+        self.assertTrue(defined)
+        self.assertEqual(defined - registered, set())
+
+    def test_generated_check_comes_from_wiki_gen(self):
+        names = [n for n, _ in check_wiki.wikicore.registered()]
+        self.assertIn('generated', names)
+        self.assertEqual(names.index('generated'), names.index('counts') + 1)
+
+    def test_unordered_checks_run_last_in_registration_order(self):
+        wc = check_wiki.wikicore
+        saved = dict(wc.CHECKS)
+        try:
+            def late(root): return []
+            def later(root): return []
+            def first(root): return []
+            def other(root): return []
+            wc.check('zz-late')(late)
+            wc.check('zz-later')(later)
+            wc.check('aa-first', order=-1)(first)
+            names = [n for n, _ in wc.registered()]
+            self.assertEqual(names[0], 'aa-first')
+            self.assertEqual(names[-2:], ['zz-late', 'zz-later'])
+            with self.assertRaises(AssertionError):
+                wc.check('zz-late')(other)
+        finally:
+            wc.CHECKS.clear()
+            wc.CHECKS.update(saved)
+
+    def test_reloading_the_module_replaces_its_checks(self):
+        spec = importlib.util.spec_from_file_location(
+            'check_wiki', pathlib.Path(check_wiki.__file__))
+        again = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(again)   # what flake/scripts/modules.py does
+        self.assertEqual([n for n, _ in check_wiki.wikicore.registered()].count('imports'), 1)
+
+    def test_unknown_subcommand_exits_2(self):
+        r = subprocess.run(
+            [sys.executable, str(pathlib.Path(check_wiki.__file__)), 'nope'],
+            capture_output=True, text=True)
+        self.assertEqual(r.returncode, 2)
 
 
 if __name__ == '__main__':

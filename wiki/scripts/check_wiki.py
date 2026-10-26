@@ -275,134 +275,32 @@ part of `check`'s aggregate: it rewrites each given page's `## Contents`
 block in place to match that page's real headings, which is the actual fix
 for a `contents` finding (and, if the broken link was into the page's own
 Contents list rather than someone else's, an `anchors` finding too).
+
+Adding a check: write `def check_x(root) -> [finding]`, decorate it with
+`@check('x', order=N)` (wikicore.py), and give it a fixture test that fails
+without it. That is the whole registration -- main() keeps no list of names,
+so the subcommand and its place in `check` follow. Where a failing finding
+points the reader is `SEE`, keyed by the finding's leading tag.
 """
 import re, sys, pathlib, urllib.parse, datetime
 
 # One definition of "inside a fenced code block" (see mdfence.py).
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import mdfence  # noqa: E402
-
-# The tree's modules and categories by dirs-as-categories' rules
-# (wiki/module-files.md), read from the files rather than evaluated: wiki-lint
-# runs without nix and on fixture trees. `just modules` checks this reading
-# against what dirs-as-categories actually evaluates to (flake.moduleGraph),
-# so the two cannot drift apart silently.
-CLASS_KEYS = ('nixos', 'homeManager', 'darwin')
-COMMENT = re.compile(r'#[^\n]*')
-# A key of a module file's top-level attribute set: the house style puts
-# those at exactly four spaces (wiki/module-style-guide.md), with `nixos =`,
-# `homeManager.foo =` or `includes.nixos =`.
-TOP_KEY = re.compile(r'(?m)^ {4}(\w+)(?:\.(\w+))?[\w.]*\s*=')
-FLAG = re.compile(r'\bfolderIsCategory\s*=\s*(true|false)\s*;')
-# `includes.<class> = [ "a" "b" ];` -- how a host or the home aggregate names
-# what it includes.
-INCLUDES = re.compile(r'includes\.(\w+)\s*=\s*\[(.*?)\]', re.S)
-
-
-def _visible(path, base):
-    """Not under a `_`-prefixed path component -- import-tree skips those."""
-    return '/_' not in '/' + str(path)[len(str(base)) + 1:]
-
-
-def module_classes(path, text=None):
-    """The classes a module file declares -- its top-level class keys, and
-    any class it has `includes` for -- or an empty set for a file that is
-    not a module file (defaults.nix, a flake-parts module). `text`: the
-    file's contents with comments stripped, when the caller has them."""
-    if path.name == 'defaults.nix':
-        return set()
-    classes = set()
-    for key, sub in TOP_KEY.findall(COMMENT.sub('', path.read_text()) if text is None else text):
-        if key in CLASS_KEYS:
-            classes.add(key)
-        elif key == 'includes' and sub in CLASS_KEYS:
-            classes.add(sub)
-    return classes
-
-
-_CATEGORIES = {}
-
-
-def all_categories(root):
-    """category name -> directory, for every category under flake/modules/:
-    a folder below the top level with a subfolder holding a module file, or
-    one whose files set folderIsCategory (`false` opts out).
-
-    Called once per category and host by the checks above, so the reading
-    is cached -- keyed on every file's path, mtime and size, so a fixture
-    tree a test edits between calls is read afresh."""
-    modules = root / 'flake' / 'modules'
-    files = [p for p in modules.rglob('*.nix') if _visible(p, modules)]
-    key = (str(pathlib.Path(root).resolve()),
-           tuple((str(p), s.st_mtime_ns, s.st_size) for p in files for s in [p.stat()]))
-    if key not in _CATEGORIES:
-        _CATEGORIES.clear()
-        _CATEGORIES[key] = _read_categories(modules, files)
-    return dict(_CATEGORIES[key])
-
-
-def _read_categories(modules, files):
-    # Paths as strings relative to modules/: pathlib's ancestor checks were
-    # most of wiki-lint's time.
-    base = len(str(modules)) + 1
-    texts = {p: COMMENT.sub('', p.read_text()) for p in files}      # each file read once
-    rel = {p: str(p)[base:] for p in files}
-    module_dirs = {rel[p].rpartition('/')[0] for p in files if module_classes(p, texts[p])}
-    flags_in, folders = {}, set()
-    for p in files:
-        d = rel[p].rpartition('/')[0]
-        flags_in.setdefault(d, set()).update(FLAG.findall(texts[p]))
-        while d:
-            folders.add(d)
-            d = d.rpartition('/')[0]
-    cats = {}
-    for d in sorted(folders):
-        if '/' not in d:
-            continue                                   # an area
-        flags = flags_in.get(d, set())
-        if flags == {'true'} or (flags != {'false'}
-                                 and any(m.startswith(d + '/') for m in module_dirs)):
-            cats[d.rpartition('/')[2]] = modules / d
-    return cats
-
-
-ENABLES = re.compile(r'enables\.(\w+)\s*=\s*\[(.*?)\]', re.S)
-
-
-def module_name(path):
-    """A module's name: its filename, or its folder's for default.nix."""
-    return path.parent.name if path.name == 'default.nix' else path.stem
-
-
-def static_document(root):
-    """flake.moduleGraph (format 1), as far as the files say it -- categories,
-    modules with their classes, includes and enables -- for drawing without
-    nix and for `just modules` to compare against the evaluated one."""
-    modules = root / 'flake' / 'modules'
-    rel = lambda p: p.relative_to(modules).as_posix()
-    doc = {'version': 1, 'classes': list(CLASS_KEYS), 'folders': [], 'defaults': [], 'admin': [],
-           'categories': {n: {'dir': rel(d), 'members': [], 'nested': [], 'flag': None}
-                          for n, d in all_categories(root).items()},
-           'modules': {}, 'includes': {}, 'enables': {}}
-    for p in sorted(modules.rglob('*.nix')):
-        if not _visible(p, modules):
-            continue
-        classes = module_classes(p)
-        if not classes:
-            continue
-        name = module_name(p)
-        doc['modules'][name] = {'path': rel(p), 'classes': [c for c in CLASS_KEYS if c in classes]}
-        text = COMMENT.sub('', p.read_text())
-        for kind, pattern in (('includes', INCLUDES), ('enables', ENABLES)):
-            for cls, names in pattern.findall(text):
-                doc[kind].setdefault(name, {})[cls] = re.findall(r'"([\w-]+)"', names)
-    return doc
-
-
-def categories_under(root, d):
-    """The categories nested anywhere under category directory `d`."""
-    prefix = str(d) + '/'
-    return [c for c in all_categories(root).values() if str(c).startswith(prefix)]
+import wikicore  # noqa: E402
+from wikicore import (  # noqa: E402
+    LAST_MODIFIED_LINE, RULE_FRONTMATTER, check, doc_files, rule_files, wiki_md)
+from wikicore import last_modified as _last_modified  # noqa: E402,F401
+# The tree reading lives in nixtree.py so wiki_gen.py can share it without
+# importing this module; re-exported because the tests and `just modules`
+# reach it as check_wiki.<name>.
+import nixtree  # noqa: E402
+from nixtree import (  # noqa: E402,F401
+    CLASS_KEYS, COMMENT, ENABLES, FLAG, HOST_LINE, INCLUDES, TOP_KEY,
+    actual_hosts, all_categories, categories_under, category_classes,
+    find_categories, module_classes, module_name, nested_category_names,
+    static_document)
+import wiki_gen  # noqa: E402,F401  (registers the `generated` check)
 
 # host short-name -> its host-config/*-configuration.nix. lysithea is darwin-class;
 # every other host is nixos-class. nire-installer and nire-llm-sandbox
@@ -451,102 +349,15 @@ IMPORTED_BY_HEADING = re.compile(r'^##\s+Imported by\s*$', re.M)
 NEXT_HEADING = re.compile(r'^##\s+', re.M)
 
 
+def host_imports(root, categories, hosts=None):
+    """nixtree.host_imports over HOSTS unless the caller names the roster."""
+    return nixtree.host_imports(root, categories, HOSTS if hosts is None else hosts)
+
+
 def repo_root(argv):
     if len(argv) > 1:
         return pathlib.Path(argv[1]).resolve()
     return pathlib.Path(__file__).resolve().parents[2]
-
-
-def nested_category_names(categories, name):
-    """`name` plus every category nested (at any depth) under its own
-    directory -- e.g. `homelab` expands to itself plus `containers`,
-    `git-forge`, ..., `virtualization`. Including a category includes
-    everything beneath it, nested categories too (wiki/module-files.md), so
-    for the purposes of "does this host import category X" a host that
-    includes the umbrella counts as importing X, even though X never appears
-    literally in the host's own `includes`.
-    """
-    if name not in categories:
-        return {name}
-    d = categories[name]
-    modules = next(a for a in d.parents if a.name == 'modules')
-    return {name} | {c.name for c in categories_under(modules.parent.parent, d)}
-
-def host_imports(root, categories, hosts=None):
-    """host short-name -> set of category names it effectively imports --
-    the names in its own `includes`, expanded through any umbrella category
-    among them (see nested_category_names). `hosts` defaults to HOSTS;
-    wiki_gen.py passes hosts.nix's own roster instead, so a host missing from
-    HOSTS still gets its row computed."""
-    out = {}
-    for host in (HOSTS if hosts is None else hosts):
-        p = root / 'flake' / 'modules' / 'host-config' / f'{host}-configuration.nix'
-        if not p.exists():
-            print(f"WARN  expected host file missing: {p}")
-            continue
-        text = COMMENT.sub('', p.read_text())
-        literal = set()
-        for _, names in INCLUDES.findall(text):
-            literal.update(re.findall(r'"([\w-]+)"', names))
-        effective = set()
-        for n in literal:
-            effective |= nested_category_names(categories, n)
-        out[host] = effective
-    return out
-
-def find_categories(root):
-    """category name -> its directory, for every category under
-    flake/modules/general-config/, flake/modules/hardware-config/,
-    flake/modules/homelab-config/ and flake/modules/users-config/ -- the
-    areas categories/00-INDEX.md actually
-    indexes (packages-config/* and host-config/*
-    are deliberately excluded there, see that file's own header, so this
-    check has nothing to compare them against and doesn't look).
-    """
-    modules = root / 'flake' / 'modules'
-    areas = ('general-config', 'hardware-config', 'homelab-config', 'users-config')
-    return {n: d for n, d in all_categories(root).items()
-            if d.relative_to(modules).parts[0] in areas}
-
-
-# `nire-durandal = mkHost "x86_64-linux" ...;` / `nire-lysithea = mkDarwinHost
-# "aarch64-darwin" ...;` -- hosts.nix's own two attrsets, `flake.
-# nixosConfigurations` and `flake.darwinConfigurations`. The constructor name
-# is what tells the two apart; no need to isolate which attrset a line sits
-# in first.
-HOST_LINE = re.compile(r'^\s*(nire-[\w-]+)\s*=\s*(mkHost|mkDarwinHost)\b', re.M)
-
-
-def actual_hosts(root):
-    """host name (with `nire-` prefix, matching how wiki/hosts.md writes it)
-    -> class ('nixos' or 'darwin'), read straight from hosts.nix. Deliberately
-    independent of this script's own HOSTS constant (below) -- HOSTS exists
-    for host_imports' narrower purpose (which per-host aggregate file to
-    read) and is itself a second hand-maintained list that could in
-    principle drift from hosts.nix; wiki_gen.py renders hosts.md's table
-    from this, not from HOSTS, so a host missing there still gets a row.
-    """
-    p = root / 'flake' / 'modules' / 'host-config' / 'hosts.nix'
-    text = COMMENT.sub('', p.read_text())
-    return {name: ('darwin' if ctor == 'mkDarwinHost' else 'nixos')
-            for name, ctor in HOST_LINE.findall(text)}
-
-
-def category_classes(category_dir):
-    """The classes declared by any module file under this category's own
-    directory tree, read statically (module_classes). A nested category's
-    files live physically under the umbrella's tree too, so this walks
-    straight through a nested category rather than stopping at it: what the
-    Class(es) column claims is "what including this name actually wires in".
-    Every category exists in every class (dirs-as-categories defines all of
-    them, even empty), so presence of the *attribute* proves nothing;
-    presence of a declaration under the tree does.
-    """
-    classes = set()
-    for p in category_dir.rglob('*.nix'):
-        if _visible(p, category_dir):
-            classes |= module_classes(p)
-    return classes
 
 
 # "all four hosts" / "All three NixOS hosts" -- a page is allowed to claim
@@ -625,6 +436,7 @@ def _by_category(root, categories):
     return by_category
 
 
+@check('imports', order=10)
 def check_imports(root):
     categories = find_categories(root)
     by_category = _by_category(root, categories)
@@ -674,6 +486,7 @@ INDEX_ROW = re.compile(
 BACKTICK = re.compile(r'`([^`]+)`')
 
 
+@check('table', order=20)
 def check_table(root):
     """The Imported by cells of categories/00-INDEX.md's "## Index" tables --
     the one hand-written column there; the rest is wiki_gen.py's (see this
@@ -701,44 +514,6 @@ def check_table(root):
     return findings
 
 
-def wiki_md(root, pattern='*.md'):
-    """Every real markdown file under wiki/, symlinks excluded.
-
-    Each wiki directory carries a README.md symlink to its 00-INDEX.md so
-    GitHub still sees a filename it recognizes. Those are the same bytes
-    under a second name: scanned as documents they double every word
-    count and invent a README.md/README-for-agents.md sibling pair nobody
-    wrote. Every check that walks wiki/ goes through here so a new one
-    can't reintroduce that by globbing directly.
-    """
-    return sorted(
-        p for p in root.joinpath('wiki').rglob(pattern) if not p.is_symlink()
-    )
-
-
-def rule_files(root):
-    """`.agents/rules/*.md`, recursive -- Claude Code discovers rules in
-    subdirectories too. `.claude/rules` is a symlink to `.agents/rules`, so
-    this is the one real copy."""
-    rules = root / '.agents' / 'rules'
-    return sorted(rules.rglob('*.md')) if rules.is_dir() else []
-
-
-def doc_files(root):
-    """Every markdown file the claim checks scan: all of wiki/ (recursive),
-    AGENTS.md itself, and the path-scoped rules AGENTS.md points at -- the
-    files outside wiki/ that duplicate wiki-shaped claims verbatim
-    (CLAUDE.md is a symlink to AGENTS.md, so checking the target once
-    covers both names).
-
-    Symlinks under wiki/ are skipped for that same reason: each directory's
-    README.md is a symlink to its 00-INDEX.md, kept so GitHub still has a
-    filename it recognizes. Scanned as documents they would double every
-    page's word count and invent a README.md/README-for-agents.md sibling
-    pair that no one wrote."""
-    return wiki_md(root) + [root / 'AGENTS.md'] + rule_files(root)
-
-
 # A recipe header, e.g. `wiki-churn *args:`, `host=nire-durandal build`'s
 # own definition `build:`, or a recipe like `foo dir='.' *args:` -- name,
 # then zero or more space-separated parameter/default tokens (which may
@@ -763,6 +538,7 @@ def justfile_recipes(root):
 JUST_MENTION = re.compile(r'`just ([^`]+)`')
 
 
+@check('recipes', order=30)
 def check_recipes(root):
     """Every backtick `just <recipe...>` mention across wiki/ and AGENTS.md
     against .justfile's own recipe names -- catches a recipe rename or
@@ -796,6 +572,7 @@ def check_recipes(root):
 SKILL_MENTION = re.compile(r'[Ss]kill `([a-zA-Z][\w-]*)`|`([a-zA-Z][\w-]*)` skill\b')
 
 
+@check('skills', order=40)
 def check_skills(root):
     """Every "skill `name`" / "`name` skill" mention across wiki/ and
     AGENTS.md against real `.agents/skills/<name>/` directories -- same
@@ -907,6 +684,7 @@ def _resolve_md(root, doc, ref):
     return cands.pop() if len(cands) == 1 else None
 
 
+@check('docrefs', order=170)
 def check_docrefs(root):
     agent = agent_module_recipes(root)
     skills_dir = root / '.agents' / 'skills'
@@ -1042,6 +820,7 @@ def _just_mentions_in_skill(text):
     return found
 
 
+@check('skill-files', order=50)
 def check_skill_files(root):
     """The `.agents/skills/**/*.md` files themselves -- see `skill-files` in
     the module docstring for why. Four lookups shared with the wiki-side
@@ -1237,6 +1016,7 @@ def enrolled_hosts(root):
     return set(re.findall(r'&(nire-[\w-]+)', COMMENT.sub('', p.read_text())))
 
 
+@check('secrets', order=60)
 def check_secrets(root):
     """Every "`.sops.yaml` ... enrolls `host`, `host`, ... —" claim
     (wiki/impermanence-and-secrets.md and .agents/rules/secrets.md both
@@ -1311,6 +1091,7 @@ def caddy_routes(root):
     return routes
 
 
+@check('routes', order=70)
 def check_routes(root):
     """Every routed URL mentioned in wiki/ or AGENTS.md (the two shapes this
     wiki actually uses -- see ROUTE_MENTION) against caddy.nix's real path
@@ -1336,6 +1117,7 @@ def check_routes(root):
 MD_LINK = re.compile(r'\[[^\]]*\]\(([^)]+)\)')
 
 
+@check('links', order=80)
 def check_links(root):
     """Every relative markdown link across wiki/ and AGENTS.md resolves to a
     real file. Skips `http(s)://`/`mailto:` targets (nothing on disk to
@@ -1372,12 +1154,6 @@ def check_links(root):
 HEADING = re.compile(r'^(#{1,6})\s+(.+?)\s*$')
 CONTENTS_HEADING = re.compile(r'^##\s+Contents\s*$', re.M)
 CONTENTS_ITEM = re.compile(r'^-\s+\[(?P<text>.+)\]\(#(?P<slug>[^)]+)\)\s*$', re.M)
-# The exact line styleguide.md requires right after a page's title:
-# `_Last modified: 2026-09-06_`. Anchored to the whole line -- a stray
-# trailing word or missing underscore is exactly the kind of drift this
-# check exists to catch, same reasoning as CONTENTS_ITEM being just as
-# strict about its own line shape.
-LAST_MODIFIED_LINE = re.compile(r'^_Last modified: (\d{4}-\d{2}-\d{2})_\s*$')
 
 
 def _iter_headings(text):
@@ -1436,6 +1212,7 @@ def _page_anchors(path):
     return {github_slug(text, seen) for _, text in _iter_headings(path.read_text())}
 
 
+@check('anchors', order=90)
 def check_anchors(root):
     """Every `#fragment` on a markdown link -- same-file (`(#see-also)`) or
     into another page (`reverse-proxy.md#the-two-apps-...`) -- resolves to a
@@ -1516,6 +1293,7 @@ CONTENTS_EXEMPT = (
 )
 
 
+@check('contents', order=100)
 def check_contents(root):
     """Two halves, both about a page's `## Contents` block.
 
@@ -1577,6 +1355,7 @@ def _host_num(word):
     return NUMWORD.get(word.lower()) or int(word)
 
 
+@check('counts', order=120)
 def check_counts(root):
     """"all N hosts"-shaped prose across wiki/ + AGENTS.md, the exact claim
     AGENTS.md's Platform-support section got wrong ("all five hosts" when
@@ -1709,18 +1488,6 @@ def _words(text):
     return len(text.split())
 
 
-def _last_modified(text):
-    """The page's `_Last modified:_` date, or None. check_dates is what
-    reports a page missing the line at all; this just can't compare without
-    it."""
-    lines = text.splitlines()
-    for line in lines[:6]:
-        m = LAST_MODIFIED_LINE.match(line)
-        if m:
-            return datetime.date.fromisoformat(m.group(1))
-    return None
-
-
 def _sibling_reviewed(text):
     """The sibling's `_Sibling reviewed:_` date and reason, or (None, None).
     Read from the same head-of-file window as `_last_modified` so the two
@@ -1744,6 +1511,7 @@ def sibling_pairs(root):
     return pairs
 
 
+@check('siblings', order=140)
 def check_siblings(root):
     """The `<page>.md` / `<page>-for-agents.md` pairing, four ways:
 
@@ -1852,6 +1620,7 @@ def check_siblings(root):
     return findings
 
 
+@check('dates', order=110)
 def check_dates(root):
     """Every page under wiki/ has a `_Last modified: YYYY-MM-DD_` line right
     after its title, in exactly the format styleguide.md's Content-shape
@@ -1891,7 +1660,6 @@ LESSON_ARTICLE = re.compile(r'^(\d+)-[a-z0-9-]+\.md$')
 
 
 # A rule's frontmatter: `paths:` then `  - "glob"` items, nothing else.
-RULE_FRONTMATTER = re.compile(r'\A---\n(.*?)\n---\n', re.S)
 RULE_PATH_ITEM = re.compile(r'^\s+-\s+"([^"]+)"\s*$')
 
 
@@ -1923,6 +1691,7 @@ def tracked_files(root):
     return [f for f in r.stdout.split('\0') if f]
 
 
+@check('rules', order=160)
 def check_rules(root):
     """`.agents/rules/*.md`: frontmatter is exactly a non-empty `paths:`
     list, every glob matches a tracked file, and AGENTS.md names the file.
@@ -1972,6 +1741,7 @@ def check_rules(root):
     return findings
 
 
+@check('lessons', order=150)
 def check_lessons(root):
     """See the module docstring's `lessons` entry."""
     findings = []
@@ -2155,52 +1925,14 @@ def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else 'check'
     root = repo_root([sys.argv[0]] + sys.argv[2:])
 
-    cmds = ('imports', 'table', 'recipes', 'skills', 'skill-files',
-            'secrets', 'routes', 'links', 'anchors', 'contents', 'dates',
-            'counts', 'generated', 'siblings', 'lessons', 'rules', 'docrefs',
-            'check')
-    if cmd not in cmds:
+    if cmd != 'check' and cmd not in wikicore.CHECKS:
         print(__doc__)
         sys.exit(2)
 
     findings = []
-    if cmd in ('imports', 'check'):
-        findings += check_imports(root)
-    if cmd in ('table', 'check'):
-        findings += check_table(root)
-    if cmd in ('recipes', 'check'):
-        findings += check_recipes(root)
-    if cmd in ('skills', 'check'):
-        findings += check_skills(root)
-    if cmd in ('skill-files', 'check'):
-        findings += check_skill_files(root)
-    if cmd in ('secrets', 'check'):
-        findings += check_secrets(root)
-    if cmd in ('routes', 'check'):
-        findings += check_routes(root)
-    if cmd in ('links', 'check'):
-        findings += check_links(root)
-    if cmd in ('anchors', 'check'):
-        findings += check_anchors(root)
-    if cmd in ('contents', 'check'):
-        findings += check_contents(root)
-    if cmd in ('dates', 'check'):
-        findings += check_dates(root)
-    if cmd in ('counts', 'check'):
-        findings += check_counts(root)
-    if cmd in ('generated', 'check'):
-        # Imported here, not at the top: wiki_gen imports this module for
-        # its parsers, and a top-level import each way would be a cycle.
-        import wiki_gen
-        findings += wiki_gen.check(root)
-    if cmd in ('siblings', 'check'):
-        findings += check_siblings(root)
-    if cmd in ('lessons', 'check'):
-        findings += check_lessons(root)
-    if cmd in ('rules', 'check'):
-        findings += check_rules(root)
-    if cmd in ('docrefs', 'check'):
-        findings += check_docrefs(root)
+    for name, fn in wikicore.registered():
+        if cmd in (name, 'check'):
+            findings += fn(root)
 
     for f in findings:
         print(f)
