@@ -19,6 +19,8 @@
 # from, never the hash.
 set -euo pipefail
 
+script_dir=$(cd -- "$(dirname -- "$0")" && pwd)
+
 cur=$(readlink -f /run/current-system)
 drv=$(nix-store --query --deriver /run/current-system)
 
@@ -56,7 +58,7 @@ echo '```'
 # carries kernelParams (and nix 2.34 nests derivation attrs under
 # "derivations") -- boot.json is what the bootloader actually consumed,
 # which is this script's whole subject.
-kparams=$(python3 -c 'import json,sys; b=json.load(open(sys.argv[1]))["org.nixos.bootspec.v1"]; print(" ".join(b.get("kernelParams", [])))' \
+kparams=$(python3 "$script_dir/deployed_baseline.py" kernel-params \
     /run/current-system/boot.json 2>/dev/null) || {
     echo '!!! CAPTURE FAILED: no readable /run/current-system/boot.json'
     baseline_incomplete=1
@@ -69,34 +71,7 @@ echo '### Declarative users'
 echo
 u=$(grep -oE '/nix/store/[a-z0-9]+-users-groups\.json' /run/current-system/activate | head -1 || true)
 if [[ -n $u && -e $u ]]; then
-    python3 - "$u" <<'PY'
-import json, sys
-d = json.load(open(sys.argv[1]))
-print(f"mutableUsers: {d.get('mutableUsers')}")
-print()
-# Select on having a password source, plus root -- not on isNormalUser, which
-# users-groups.json does not carry. Filtering on it silently omitted the only
-# account you can actually log into.
-for user in d["users"]:
-    has_pw = user.get("hashedPasswordFile") or user.get("hashedPassword")
-    if not (has_pw or user["name"] == "root"):
-        continue
-    # where the password comes from, never what it is
-    if user.get("hashedPasswordFile"):
-        src = f"file {user['hashedPasswordFile']}"
-    elif user.get("hashedPassword"):
-        src = "hashedPassword set in the config"
-    elif not d.get("mutableUsers"):
-        # update-users-groups.pl writes "!" to /etc/shadow for a user with no
-        # password source when mutableUsers is false: login by password is
-        # locked, not passwordless.
-        src = "none configured -> locked ('!'), mutableUsers=false"
-    else:
-        # mutableUsers=true keeps whatever /etc/shadow already holds, which
-        # this config can't see -- check `sudo passwd -S <user>`.
-        src = "WARNING: none configured, mutableUsers=true keeps the existing /etc/shadow entry -- check `sudo passwd -S`"
-    print(f"  {user['name']:<10} uid={user.get('uid')}  password: {src}")
-PY
+    python3 "$script_dir/deployed_baseline.py" users "$u"
 else
     echo "  (no users-groups.json found in the activation script)"
 fi

@@ -45,45 +45,4 @@ trap 'cleanup; rm -f "$before" "$after"' EXIT
 FLAKE_PATH=$worktree/$flake_rel HOST=$host nix eval --impure --json --file "$fingerprint" >"$before"
 FLAKE_PATH=$flake_dir            HOST=$host nix eval --impure --json --file "$fingerprint" >"$after"
 
-python3 - "$before" "$after" <<'PY'
-import json, sys
-b = json.load(open(sys.argv[1])); a = json.load(open(sys.argv[2]))
-
-if b["toplevel"] == a["toplevel"]:
-    print(f"  toplevel drvPath IDENTICAL -- byte-for-byte, no behaviour change")
-    print(f"    {a['toplevel']}")
-    raise SystemExit(0)
-
-print("  toplevel drvPath DIFFERS")
-print(f"    before {b['toplevel']}")
-print(f"    after  {a['toplevel']}")
-print()
-
-changed = False
-for k in b:
-    if k == "toplevel" or b[k] == a[k]:
-        continue
-    changed = True
-    bv, av = b[k], a[k]
-    if isinstance(bv, list) and sorted(map(str, bv)) == sorted(map(str, av)):
-        print(f"  {k}: SAME SET, ORDER ONLY ({len(bv)} items)")
-        continue
-    if isinstance(bv, list):
-        bs, as_ = set(map(str, bv)), set(map(str, av))
-        if bs - as_: print(f"  {k}: removed {sorted(bs - as_)}")
-        if as_ - bs: print(f"  {k}: added   {sorted(as_ - bs)}")
-    elif isinstance(bv, dict):
-        # only the keys that moved -- printing both dicts whole is unreadable,
-        # and homeFileHashes has 53 entries
-        for kk in sorted(set(bv) | set(av)):
-            if kk not in av:   print(f"  {k}: removed {kk!r}")
-            elif kk not in bv: print(f"  {k}: added   {kk!r}")
-            elif bv[kk] != av[kk]: print(f"  {k}: changed {kk!r}")
-    else:
-        print(f"  {k}: {bv!r} -> {av!r}")
-
-if not changed:
-    print("  no attribute in the fingerprint differs.")
-    print("  the change is real but outside what host-fingerprint.nix samples;")
-    print("  add the relevant attribute there to see it.")
-PY
+python3 "$script_dir/diff_fingerprint.py" "$before" "$after"
