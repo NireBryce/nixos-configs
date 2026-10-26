@@ -43,6 +43,10 @@
     [ (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
+  # The /persist subvolume below exists although nothing wipes root here; see
+  # lib.persist.persistRegardless.
+  nire.hasPersistVolume = true;
+
   boot = {
     initrd = {
       availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];

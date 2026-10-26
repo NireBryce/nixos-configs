@@ -9,7 +9,7 @@
 #
 # A function asking for `config`, so dirs-as-categories loads it as a plain
 # flake-parts module rather than a module file (wiki/module-files.md).
-{ config, lib, ... }:
+{ config, lib, inputs, ... }:
 {
     # checks.<system>.module-orphans: fails naming any module inside a
     # category that no `includes`/`enables` reaches (wiki/module-files.md).
@@ -53,12 +53,50 @@
             (name: host: lib.nameValuePair "home-${name}"
                 host.config.home-manager.users.elly.home.activationPackage)
             (lib.filterAttrs (_: host: host.config ? home-manager) (nixosHosts // darwinHosts));
+
+        # The helpers in flake.lib are pure, so they can be checked against
+        # hand-made configs. The mkIf conditions are what a host would see.
+        L     = config.flake.lib;
+        host  = { restore ? false, volume ? false }: {
+            boot.initrd.systemd.services = if restore then { restore-root = { }; } else { };
+            nire.hasPersistVolume        = volume;
+        };
+        cond  = x: x.condition;
+        libTestFailures = lib.runTests {
+            testImpermanentYes = {
+                expr = cond (L.persist.persistIfImpermanent (host { restore = true; }) { }); expected = true;
+            };
+            testImpermanentNo = {
+                expr = cond (L.persist.persistIfImpermanent (host { }) { }); expected = false;
+            };
+            # cube: a /persist volume and no wipe
+            testRegardlessWithVolume = {
+                expr = cond (L.persist.persistRegardless (host { volume = true; }) { }); expected = true;
+            };
+            testRegardlessWithoutVolume = {
+                expr = cond (L.persist.persistRegardless (host { }) { }); expected = false;
+            };
+            testPersistTarget = {
+                expr = (L.persist.persistIfImpermanent (host { restore = true; }) { files = [ "/f" ]; }).content;
+                expected = { environment.persistence."/persist".files = [ "/f" ]; };
+            };
+            testTailnetName = { expr = L.fleet.tailnetName "nire-cube"; expected = "ts-cube"; };
+            testBaseHostnames = {
+                expr = L.fleet.baseHostnames [ "nire-a" "forge-runner" "nire-b" ]; expected = [ "nire-a" "nire-b" ];
+            };
+        };
+        pkgs = inputs.nixpkgs.legacyPackages.${system};
     in
     {
         # Orphans -- modules nothing reaches, which evaluate and install
         # nothing -- are dirs-as-categories' own check, `module-orphans`,
         # turned on at the top of this file; `just modules` runs the rest (untracked files,
         # drift against wiki-lint's reading).
-        checks = hostChecks // homeChecks;
+        checks = hostChecks // homeChecks // {
+            lib-helpers = pkgs.runCommand "lib-helpers" { } (
+                if libTestFailures == [ ] then "touch $out"
+                else "echo ${lib.escapeShellArg (builtins.toJSON libTestFailures)}; exit 1"
+            );
+        };
     };
 }

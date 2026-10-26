@@ -122,7 +122,7 @@
             # restore-root existing is what marks a host as having opted
             # into impermanence -- see the header, "OPT-IN: HOSTS WITHOUT
             # IMPERMANENCE ARE EXEMPT", for why this is the gate.
-            usesImpermanence = rollback != null;
+            usesImpermanence = config.flake.lib.persist.usesImpermanence c;
 
             # Whether this host imported enable-home-manager.nix at all --
             # see the header's opt-in addendum. forge-runner has no `elly`

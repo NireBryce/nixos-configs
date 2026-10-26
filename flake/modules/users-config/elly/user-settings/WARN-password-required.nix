@@ -31,11 +31,11 @@
 # cube-configuration.nix) never wipes it back out. Excluded by hostname
 # rather than deleting the module, so a *future* non-impermanence host still
 # gets the reminder.
-{ lib, ... }:
+{ lib, inputs, ... }:
 {
     nixos = { config, ... }:
     let
-        usesImpermanence = config.boot.initrd.systemd.services ? restore-root;
+        usesImpermanence = inputs.self.lib.persist.usesImpermanence config;
         solvedByHand = config.networking.hostName == "nire-cube";
     in {
         # # description = "reminds a non-impermanence host that the user has no password until one is set by hand";

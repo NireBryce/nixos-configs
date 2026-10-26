@@ -36,13 +36,15 @@
 # guards now is a non-impermanence host getting an entry, and the warning, for
 # no reason.
 #
-# Gated on boot.initrd.systemd.services ? restore-root, the same signal
+# Gated by lib.persist.persistIfImpermanent (_lib/persist.nix), on
+# boot.initrd.systemd.services ? restore-root, the same signal
 # invariants.nix uses to mean "this host actually opted into impermanence" --
 # see that file's "OPT-IN: HOSTS WITHOUT IMPERMANENCE ARE EXEMPT" header note
 # for why that specific signal and not something else.
+{ inputs, ... }:
 {
-    nixos = { config, lib, ... }:
-        lib.mkIf (config.boot.initrd.systemd.services ? restore-root) {
-            environment.persistence."/persist".directories = [ "/var/lib/tailscale" ];
+    nixos = { config, ... }:
+        inputs.self.lib.persist.persistIfImpermanent config {
+            directories = [ "/var/lib/tailscale" ];
         };
 }

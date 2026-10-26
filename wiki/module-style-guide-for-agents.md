@@ -16,7 +16,7 @@ Never hand-edit. By hand it is
 
 | What | Files |
 |---|---|
-| total `.nix` files under `flake/modules/` | 236 |
+| total `.nix` files under `flake/modules/` | 239 |
 | header comment (`# dirs-as-categories: …`) | 227 |
 | `# # description` as first body line | 35 |
 | `with pkgs;` package lists | 115 |

@@ -38,16 +38,16 @@
 # ssh/git-over-ssh from VS Code's terminal, git integration, and agent
 # sessions died with "Bad owner or permissions on ~/.ssh/config" (hit
 # 2026-09-28). Hand edits to the file last only until the next switch.
-{ lib, inputs, ... }:
+{ inputs, ... }:
 let
     # `inputs.self` is the flake's own outputs, which hold the host roster
     # (it was the flake-parts `config.flake`, the same attribute set). Only
     # the attribute names are read, which never forces a host's evaluation.
-    fleet = builtins.filter (lib.hasPrefix "nire-")
+    inherit (inputs.self.lib.fleet) baseHostnames tailnetName;
+
+    fleet = baseHostnames
         (builtins.attrNames inputs.self.nixosConfigurations
          ++ builtins.attrNames inputs.self.darwinConfigurations);
-
-    tailnetName = host: "ts-${lib.removePrefix "nire-" host}";
 
     sshOverlay = {
         name       = "ssh";

@@ -45,7 +45,19 @@
 # little redundant and entirely functional.
 { inputs, ... }:
 {
-    nixos = {
+    nixos = { config, lib, ... }: {
         imports = [ inputs.impermanence.nixosModule ];
+
+        # Whether this host has a /persist volume. True wherever it wipes root,
+        # and set by hand on a host that has the volume without the wipe
+        # (hardware-cube.nix). Read by lib.persist.persistRegardless
+        # (_lib/persist.nix), which cannot ask fileSystems: environment.
+        # persistence adds fileSystems entries, so that is infinite recursion.
+        options.nire.hasPersistVolume = lib.mkOption {
+            type    = lib.types.bool;
+            default = config.boot.initrd.systemd.services ? restore-root;
+            defaultText = lib.literalExpression "config.boot.initrd.systemd.services ? restore-root";
+            description = "Whether this host has a /persist volume to keep state on.";
+        };
     };
 }
