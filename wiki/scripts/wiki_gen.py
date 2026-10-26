@@ -40,7 +40,7 @@ Generated regions are a mechanical touch: rewriting one does not bump the
 page's `_Last modified:_` (styleguide.md, "Required on every page"), which
 also keeps a region update from tripping the `siblings` check.
 
-Parsing is reused from check_wiki.py (hosts.nix, category shims, host import
+Parsing is reused from nixtree.py (hosts.nix, category shims, host import
 lists, class declarations), never restated here.
 
     wiki_gen.py [--check] [repo-root]
@@ -56,8 +56,9 @@ import re
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-import check_wiki as cw  # noqa: E402
 import mdfence  # noqa: E402
+import nixtree  # noqa: E402
+import wikicore  # noqa: E402
 
 START = re.compile(r'(?m)^<!-- generated:([\w-]+)\b[^\n]*-->[ \t]*$')
 END = '<!-- /generated -->'
@@ -164,7 +165,7 @@ def host_rows(root):
     `impermanence`; darwin has no initrd stage this repo touches, hence
     n/a. A NixOS host that does not wipe is bold: it is the exception
     AGENTS.md's Safety section warns about."""
-    hosts = cw.actual_hosts(root)
+    hosts = nixtree.actual_hosts(root)
     if not hosts:
         raise GenError('hosts.nix declares no nire-* hosts (or moved)')
     shorts = [h.removeprefix('nire-') for h in hosts]
@@ -172,7 +173,7 @@ def host_rows(root):
         p = root / 'flake' / 'modules' / 'host-config' / f'{s}-configuration.nix'
         if not p.exists():
             raise GenError(f'no {p.relative_to(root)} for nire-{s}')
-    imports = cw.host_imports(root, cw.find_categories(root), shorts)
+    imports = nixtree.host_imports(root, nixtree.find_categories(root), shorts)
     for name, cls in hosts.items():
         short = name.removeprefix('nire-')
         if cls == 'darwin':
@@ -202,7 +203,7 @@ def category_rows(homelab):
         modules = root / 'flake' / 'modules'
         pages = root / 'wiki' / 'categories'
         found = []
-        for name, d in cw.find_categories(root).items():
+        for name, d in nixtree.find_categories(root).items():
             rel = d.relative_to(modules).as_posix()
             if (rel == HOMELAB or rel.startswith(HOMELAB + '/')) != homelab:
                 continue
@@ -212,13 +213,13 @@ def category_rows(homelab):
                 link = f'{name}/00-INDEX.md'
             else:
                 continue  # no page, no row (amd, root-rollback)
-            nested = sorted(c.name for c in cw.categories_under(root, d))
+            nested = sorted(c.name for c in nixtree.categories_under(root, d))
             dir_cell = f'`{rel}/`'
             if 0 < len(nested) <= NESTED_NAMED_MAX:
                 dir_cell += ' (+ nested ' + ', '.join(f'`{n}`' for n in nested) + ')'
             elif nested:
                 dir_cell += f' (+ {len(nested)} nested)'
-            classes = cw.category_classes(d)
+            classes = nixtree.category_classes(d)
             ordered = [c for c in CLASS_ORDER if c in classes] + sorted(classes - set(CLASS_ORDER))
             found.append(((rel.split('/')[0], name), name, {
                 'Category': f'[{name}]({link})', 'Directory': dir_cell,
@@ -267,7 +268,7 @@ def module_layout(root):
     modules = root / 'flake' / 'modules'
     if not modules.is_dir():
         raise GenError('no flake/modules/ directory')
-    doc = cw.static_document(root)
+    doc = nixtree.static_document(root)
     if not doc['categories']:
         raise GenError('no categories under flake/modules/')
     flake = pathlib.Path(__file__).resolve().parents[2] / 'flake'
@@ -312,7 +313,7 @@ def run(root, write):
     are what --check fails on; notes are what a write run reports (dropped
     rows' hand text). With `write`, stale regions are rewritten in place."""
     findings, notes, seen = [], [], {}
-    for page in cw.wiki_md(root):
+    for page in wikicore.wiki_md(root):
         text = page.read_text()
         rel = page.relative_to(root)
         scan = _unfenced(text)
@@ -380,6 +381,7 @@ def run(root, write):
     return findings, notes
 
 
+@wikicore.check('generated', order=130)
 def check(root):
     """For check_wiki.py's `generated` subcommand."""
     return run(root, write=False)[0]
