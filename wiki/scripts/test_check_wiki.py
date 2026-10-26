@@ -260,5 +260,39 @@ class DocRefsCheck(unittest.TestCase):
         self.assertEqual(self.findings('Guards live in `.agents/hooks/x.sh`.\n'), [])
 
 
+class FenceHandling(unittest.TestCase):
+    """`_just_mentions_in_skill` reads bare `just <recipe>` only inside a
+    fenced code block, so what counts as a fence decides which mentions get
+    checked. check_wiki.py once defined FENCE twice with different patterns;
+    the later one silently won for every function above it."""
+
+    def mentions(self, text):
+        return check_wiki._just_mentions_in_skill(text)
+
+    def test_indented_fence_in_list_item(self):
+        self.assertIn('indented-recipe', self.mentions(
+            '1. step\n\n   ```sh\n   just indented-recipe\n   ```\n'))
+
+    def test_tilde_fence(self):
+        self.assertIn('tilde-recipe', self.mentions(
+            '~~~\njust tilde-recipe\n~~~\n'))
+
+    def test_longer_fence_is_not_closed_by_a_shorter_one(self):
+        self.assertIn('inner-recipe', self.mentions(
+            '````md\n```\njust inner-recipe\n```\n````\n'))
+
+    def test_other_fence_character_does_not_close(self):
+        self.assertIn('mixed-recipe', self.mentions(
+            '```\n~~~\njust mixed-recipe\n```\n'))
+
+    def test_four_space_indent_is_not_a_fence(self):
+        self.assertNotIn('prose-recipe', self.mentions(
+            '    ```\njust prose-recipe\n'))
+
+    def test_prose_after_closing_fence_is_not_read(self):
+        self.assertNotIn('after-recipe', self.mentions(
+            '```\nx\n```\njust after-recipe\n'))
+
+
 if __name__ == '__main__':
     unittest.main()

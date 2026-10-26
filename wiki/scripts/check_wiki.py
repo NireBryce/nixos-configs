@@ -278,6 +278,10 @@ Contents list rather than someone else's, an `anchors` finding too).
 """
 import re, sys, pathlib, urllib.parse, datetime
 
+# One definition of "inside a fenced code block" (see mdfence.py).
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import mdfence  # noqa: E402
+
 # The tree's modules and categories by dirs-as-categories' rules
 # (wiki/module-files.md), read from the files rather than evaluated: wiki-lint
 # runs without nix and on fixture trees. `just modules` checks this reading
@@ -845,7 +849,6 @@ NAMED = re.compile(r'`[^`\n]+`|\]\([^)]+\)')
 GEN_REGION = re.compile(
     r'(?ms)^<!-- generated:[\w-]+\b[^\n]*?-->[ \t]*\n.*?'
     r'^<!-- /generated -->[ \t]*$')
-COUNT_FENCE = re.compile(r'(?ms)^(```|~~~).*?^\1[^\n]*$')
 
 
 QUOTED = re.compile(r'"[^"\n]*"|\u201c[^\u201d\n]*\u201d|`[^`\n]*`')
@@ -858,7 +861,7 @@ def _count_value(tok):
 
 def bare_counts(text):
     """Yield (count_token, sentence) for each unaccompanied BARE COUNT."""
-    text = COUNT_FENCE.sub('', GEN_REGION.sub('', text))
+    text = mdfence.blank_fences(GEN_REGION.sub('', text))
     for para in re.split(r'\n\s*\n', text):
         if COUNT_OK.search(para):
             continue
@@ -1024,7 +1027,6 @@ YAML_PLAIN_BAD_INNER = (': ', ' #')
 ROOTED_PATH = re.compile(
     r'`((?:wiki|flake|\.agents|\.github|scripts)/[\w./-]+)`')
 MD_LINK = re.compile(r'\]\(([^)\s]+)\)')
-FENCE = re.compile(r'\s*```')
 BARE_JUST = re.compile(r'\bjust ([a-z][\w-]*)')
 
 
@@ -1034,11 +1036,8 @@ def _just_mentions_in_skill(text):
     outside both, which is what keeps this free of the false positives a
     raw-text scan drowns in."""
     found = [m.group(1) for m in JUST_MENTION.finditer(text)]
-    in_fence = False
-    for line in text.splitlines():
-        if FENCE.match(line):
-            in_fence = not in_fence
-        elif in_fence:
+    for _, line, kind in mdfence.scan_lines(text):
+        if kind == mdfence.BODY:
             found.extend(m.group(1) for m in BARE_JUST.finditer(line))
     return found
 
@@ -1153,17 +1152,15 @@ def _check_skill_injection(rel, text):
     command, or a fence opened with three backticks and an exclamation mark)
     runs a shell command when the skill loads, with no prompt. This repo
     doesn't use it; skill `new-skill` says why."""
-    findings, in_fence = [], False
-    for n, line in enumerate(text.splitlines(), 1):
-        stripped = line.lstrip()
-        if stripped.startswith("```"):
-            if not in_fence and stripped.startswith("```!"):
+    findings = []
+    for n, line, kind in mdfence.scan_lines(text):
+        if kind == mdfence.OPENER:
+            if line.lstrip().startswith("```!"):
                 findings.append(
                     f"INJECTION  {rel}:{n}: a ```! block runs at skill load "
                     f"-- not used in this repo (skill `new-skill`)")
-            in_fence = not in_fence
             continue
-        if not in_fence and INJECTION.search(line):
+        if kind == mdfence.TEXT and INJECTION.search(line):
             findings.append(
                 f"INJECTION  {rel}:{n}: an inline !`command` runs at skill "
                 f"load -- not used in this repo (skill `new-skill`); in "
@@ -1372,7 +1369,6 @@ def check_links(root):
     return findings
 
 
-FENCE = re.compile(r'^(```|~~~)')
 HEADING = re.compile(r'^(#{1,6})\s+(.+?)\s*$')
 CONTENTS_HEADING = re.compile(r'^##\s+Contents\s*$', re.M)
 CONTENTS_ITEM = re.compile(r'^-\s+\[(?P<text>.+)\]\(#(?P<slug>[^)]+)\)\s*$', re.M)
@@ -1390,11 +1386,7 @@ def _iter_headings(text):
     code block (```` ``` ```` or `~~~`). Without the fence tracking, a shell
     comment like `# or, one-off:` inside a ```sh block (`homelab/rustic.md`
     has exactly this) would be misread as a level-1 heading."""
-    in_fence = False
-    for line in text.splitlines():
-        if FENCE.match(line):
-            in_fence = not in_fence
-            continue
+    for _, line, in_fence in mdfence.iter_lines(text):
         if in_fence:
             continue
         m = HEADING.match(line)

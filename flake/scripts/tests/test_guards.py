@@ -1633,6 +1633,8 @@ class EditCheck(unittest.TestCase):
         (self.repo / "wiki/scripts").mkdir(parents=True)
         shutil.copy(REPO / "wiki/scripts/check_wiki.py",
                     self.repo / "wiki/scripts/check_wiki.py")
+        shutil.copy(REPO / "wiki/scripts/mdfence.py",
+                    self.repo / "wiki/scripts/mdfence.py")
         # check_wiki.py imports glob_regex from here (shared with the
         # lesson-reminder hook), so the two travel together.
         (self.repo / ".agents/hooks").mkdir(parents=True)
