@@ -57,6 +57,7 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import check_wiki as cw  # noqa: E402
+import mdfence  # noqa: E402
 
 START = re.compile(r'(?m)^<!-- generated:([\w-]+)\b[^\n]*-->[ \t]*$')
 END = '<!-- /generated -->'
@@ -65,14 +66,13 @@ REGION = re.compile(
     r'(?P<body>.*?)^<!-- /generated -->[ \t]*$')
 END_LINE = re.compile(r'(?m)^<!-- /generated -->[ \t]*$')
 CELL_SPLIT = re.compile(r'(?<!\\)\|')
-FENCED = re.compile(r'(?ms)^(```|~~~).*?^\1[^\n]*$')
 
 
 def _unfenced(text):
     """`text` with every fenced code block blanked to spaces, newlines and
     length kept -- so a marker shown as an example in a fence (styleguide.md
     has one) is not a region, and match offsets still index the original."""
-    return FENCED.sub(lambda m: re.sub(r'[^\n]', ' ', m.group(0)), text)
+    return mdfence.blank_fences(text)
 
 
 class GenError(Exception):

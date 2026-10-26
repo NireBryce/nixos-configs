@@ -43,10 +43,13 @@ import collections
 import os
 import pathlib
 import re
+import sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import mdfence  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 NGRAM = 8
-FENCE = re.compile(r"^(```|~~~)")
 HEADING = re.compile(r"^#+\s")
 CONTENTS = re.compile(r"^##\s+Contents\s*$")
 WORD = re.compile(r"[a-z0-9_]['a-z0-9_.-]*")
@@ -89,12 +92,8 @@ def normalize(path):
     design), and ## Contents blocks (navigation, not prose) dropped so
     by-design repeats don't register as restatement."""
     tagged = []
-    fence = False
     in_contents = False
-    for lineno, line in enumerate(path.read_text().splitlines(), 1):
-        if FENCE.match(line):
-            fence = not fence
-            continue
+    for lineno, line, fence in mdfence.iter_lines(path.read_text()):
         if fence:
             continue
         if CONTENTS.match(line):

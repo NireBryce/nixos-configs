@@ -224,6 +224,7 @@ preflight:
     @just wiki-lint
     @just wiki-gen-test
     @python3 wiki/scripts/test_check_wiki.py
+    @python3 wiki/scripts/test_mdfence.py
     @just branches-test
     @just keybindings-test
     @just cod-desc-test
