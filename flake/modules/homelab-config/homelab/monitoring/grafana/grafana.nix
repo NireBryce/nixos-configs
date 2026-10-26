@@ -124,7 +124,7 @@ in {
                         uid       = prometheusDatasourceUid;
                         type      = "prometheus";
                         access    = "proxy";
-                        url       = "http://127.0.0.1:9090"; # prometheus.nix, over loopback
+                        url       = "http://${config.services.prometheus.listenAddress}:${toString config.services.prometheus.port}"; # prometheus.nix, over loopback
                         isDefault = true;
                     }
                 ];
