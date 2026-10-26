@@ -1,6 +1,6 @@
 # Reaching cube's services
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-25_
 
 Each web service on `nire-cube` has **its own tailnet hostname and its own
 certificate**. (The earlier one-hostname-with-path-prefixes design was
@@ -38,8 +38,9 @@ Folded in from the retired `reaching-services-for-agents.md` sibling,
   unresolvable name = missing `svc:` object, `NRestarts` not `active`,
   `tailscale-serve` down darkens every `svc:` name, a first-request `000`
   is cert fetch, a TLS error is a config bug.
-- Adding one: Service object + `serve.nix` (`tcp:443` **and** `tcp:80`) +
-  Caddy vhost; skill `new-tailscale-service`.
+- Adding one: Service object + an entry in `_lib/cube-services.nix` (which
+  feeds `serve.nix`'s `tcp:443` **and** `tcp:80` and `caddy.nix`'s
+  `mkTsService`) + a `guards` line; skill `new-tailscale-service`.
 
 ## The map
 
@@ -153,7 +154,9 @@ two days in September 2026. See
 
 Short version: it binds loopback, gets its own `svc:` name, and needs three
 things to agree — the Service object, `serve.nix`'s endpoints (**both**
-`tcp:443` and `tcp:80`), and a Caddy vhost. The long version is the
+`tcp:443` and `tcp:80`), and a Caddy vhost. The last two come from one entry
+in `homelab/_lib/cube-services.nix` (`mkTsService` builds the vhosts; the
+entry also needs a line in caddy.nix's `guards`). The long version is the
 `new-tailscale-service` skill; `new-homelab-service` covers writing the
 service module itself first.
 

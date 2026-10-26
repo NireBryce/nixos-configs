@@ -37,6 +37,5 @@ in {
     # Forgejo is 3001 because grafana already holds 3000.
     services = builtins.mapAttrs mk {
         grafana.port = 3000;
-        git.port     = 3001;
-    };
+        git.port     = 3001;    };
 }
