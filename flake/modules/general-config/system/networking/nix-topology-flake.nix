@@ -8,12 +8,9 @@
 let
     # Only the attribute names are read, which never forces a host's
     # evaluation -- same derivation as tailnet-hosts.nix.
-    nixosHosts  = builtins.filter (lib.hasPrefix "nire-")
-        (builtins.attrNames config.flake.nixosConfigurations);
-    darwinHosts = builtins.filter (lib.hasPrefix "nire-")
-        (builtins.attrNames config.flake.darwinConfigurations);
-
-    tailnetName = host: "ts-${lib.removePrefix "nire-" host}";
+    inherit (config.flake.lib.fleet) baseHostnames tailnetName;
+    nixosHosts  = baseHostnames (builtins.attrNames config.flake.nixosConfigurations);
+    darwinHosts = baseHostnames (builtins.attrNames config.flake.darwinConfigurations);
 
     tailnetInterface = name: {
         network   = "tailnet";

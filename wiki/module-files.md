@@ -1,6 +1,6 @@
 # Module files
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-10-25_
 
 A module file under `flake/modules/` never names its module. The
 [dirs-as-categories](https://github.com/NireBryce/dirs-as-categories) flake
@@ -20,6 +20,7 @@ categories. Each module now opens with a comment saying so. The input's
 - [Why some files keep `{ lib, inputs, ... }:`](#why-some-files-keep--lib-inputs--)
 - [Reaching other modules: `includes` and `enables`](#reaching-other-modules-includes-and-enables)
 - [Files that are not modules](#files-that-are-not-modules)
+- [Shared helpers: `flake.lib`](#shared-helpers-flakelib)
 - [How the move was checked](#how-the-move-was-checked)
 
 ## Quick facts
@@ -130,12 +131,34 @@ Names are the filenames: the aggregates are `cube-configuration`,
 
 ## Files that are not modules
 
-`hosts.nix`, `checks.nix`, `invariants.nix`, `dev-shell.nix` and
+`hosts.nix`, `checks.nix`, `invariants.nix`, `dev-shell.nix`, `lib.nix` and
 `nix-topology-flake.nix` are plain flake-parts modules -- functions asking
 for `config`, or sets with no class key -- loaded as written. They carry no
 dirs-as-categories header comment. `nix-topology.nix` was split in two for this: a module file
 holds only its classes, so its `perSystem` half moved to
 `nix-topology-flake.nix`.
+
+## Shared helpers: `flake.lib`
+
+`lib.nix` sets `flake.lib`, pure helpers modules share, one file per topic in
+`modules/_lib/` (skipped by the tree, so they are not modules). A module file
+reaches it as `inputs.self.lib`, a plain flake-parts module as
+`config.flake.lib`. `flake.lib` is typed `raw`, so only `lib.nix` may define it.
+
+| Helper | For |
+|---|---|
+| `persist.persistIfImpermanent config { directories; files; }` | state a root wipe destroys: entries only on a host with `restore-root` |
+| `persist.persistRegardless config { … }` | a folder that belongs on `/persist` whether or not root is wiped (nire-cube has the volume); gated on `nire.hasPersistVolume` |
+| `persist.usesImpermanence config` | the predicate itself |
+| `fleet.baseHostnames names`, `fleet.tailnetName host` | `nire-<x>` base hostnames and their `ts-<x>` tailnet names |
+
+`persistRegardless` reads an option, not `config.fileSystems`: persistence adds
+`fileSystems` entries, so testing them from inside the entry is infinite
+recursion. The option defaults to `usesImpermanence`; `hardware-cube.nix` sets
+it. A persistence entry on a host that does not wipe root still makes
+impermanence warn that `/var/lib/nixos` is not persisted.
+
+`checks.nix`'s `lib-helpers` check runs the helpers against hand-made configs.
 
 ## How the move was checked
 

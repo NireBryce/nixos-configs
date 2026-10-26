@@ -24,10 +24,11 @@
 # rescuing state from a wipe that never happens, plus a spurious "Neither
 # /var/lib/nixos nor any of its parents are persisted" warning the moment ANY
 # environment.persistence entry exists without it alongside.
+{ inputs, ... }:
 {
-    nixos = { config, lib, ... }:
-        lib.mkIf (config.boot.initrd.systemd.services ? restore-root) {
-            environment.persistence."/persist".files = [ "/var/lib/NetworkManager/secret_key" ];
+    nixos = { config, ... }:
+        inputs.self.lib.persist.persistIfImpermanent config {
+            files = [ "/var/lib/NetworkManager/secret_key" ];
         };
 }
 
