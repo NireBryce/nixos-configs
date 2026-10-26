@@ -237,6 +237,7 @@ preflight:
     @python3 flake/scripts/tests/test_glibc_guard.py
     @python3 flake/scripts/tests/test_pm_test_core.py
     @python3 flake/scripts/tests/test_parallel_unittest.py
+    @python3 flake/scripts/tests/test_extracted_scripts.py
     @just guards-test
     @just preflight-mirror-test
     @just check
