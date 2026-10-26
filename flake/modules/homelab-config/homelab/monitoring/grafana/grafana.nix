@@ -12,6 +12,8 @@
 # `-for-agents.md` and `monitoring-history.md`; how to actually sign in,
 # wiki/homelab/grafana.md. Traps sit next to the options.
 let
+    grafana = (import ../../_lib/cube-services.nix).services.grafana;
+
     secretKeyPath = "/persist/secrets/grafana-secret-key";
 
     # Fixed, not auto-generated, so the dashboard JSON below can
@@ -80,7 +82,7 @@ in {
                     "$__file{${config.sops.secrets.grafana-admin-password.path}}";
 
                 server = {
-                    http_port = 3000;
+                    http_port = grafana.port; # _lib/cube-services.nix; also what caddy.nix proxies to
 
                     # Loopback, like the rest of this stack. As of
                     # 2026-08-24 nothing off-host talks to this port
@@ -103,7 +105,7 @@ in {
                     # suffix>`, NOT the device name `ts-cube` the old
                     # prefix used -- confirmed against a real TLS
                     # handshake from another tailnet host, 2026-09-07.
-                    root_url = "https://grafana.moose-micro.ts.net/";
+                    root_url = grafana.url; # _lib/cube-services.nix, shared with caddy.nix and serve.nix
 
                     # Not load-bearing while `enforce_domain` is false
                     # and `root_url` is a literal (nixpkgs leaves this
@@ -111,7 +113,7 @@ in {
                     # default root_url). Set anyway so the two agree --
                     # flipping enforce_domain on later would otherwise
                     # reject every real request.
-                    domain   = "grafana.moose-micro.ts.net";
+                    domain   = grafana.fqdn;
                 };
             };
 

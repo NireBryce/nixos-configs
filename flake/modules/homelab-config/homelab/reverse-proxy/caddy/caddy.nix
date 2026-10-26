@@ -15,22 +15,22 @@ let
     # libvirt's default network (_lib/libvirt-net.nix)
     net = import ../../_lib/libvirt-net.nix;
 
-    # `ts-cube`, NOT `nire-cube` -- this tailnet renames devices
-    # fleet-wide (tailscale.nix's trap #1), verified live 2026-08-24.
-    # Duplicated by necessity in grafana.nix's `root_url` and
-    # forgejo.nix's `ROOT_URL`: nothing here declares options, so a
-    # change means editing those two.
-    tailnetFqdn = "ts-cube.moose-micro.ts.net";
+    # Ports, names and FQDNs (`ts-cube`, NOT `nire-cube`, among them)
+    # live in _lib/cube-services.nix, shared with grafana.nix,
+    # forgejo.nix and serve.nix so none of them can disagree with a
+    # vhost here.
+    cube = import ../../_lib/cube-services.nix;
 
-    # Each app's own Tailscale Service name, also duplicated in
-    # grafana.nix/forgejo.nix and in serve.nix's forward targets.
+    tailnetFqdn = cube.deviceFqdn;
+
+    # Each app's own Tailscale Service name, from that table.
     # Reached over the tailnet via that Service's virtual address and
     # forwarded here as raw TCP, so caddy only ever sees loopback
     # connections -- it asks tailscaled for the cert by SITE address,
     # not by peer address, which is why that works. Renaming one here
     # does NOT rename the control-plane `svc:` object.
-    grafanaFqdn  = "grafana.moose-micro.ts.net";
-    gitFqdn      = "git.moose-micro.ts.net";
+    grafanaFqdn  = cube.services.grafana.fqdn;
+    gitFqdn      = cube.services.git.fqdn;
 
     # EVERY `.ts.net` vhost below MUST carry this. An explicit `tls`
     # directive ANYWHERE in this file makes the Caddyfile adapter emit an
@@ -122,13 +122,13 @@ in {
                 ${grafanaFqdn}.extraConfig = ''
                     ${tailscaleCert}
                     ${vmDeny}
-                    reverse_proxy 127.0.0.1:3000
+                    reverse_proxy 127.0.0.1:${toString cube.services.grafana.port}
                 '';
 
                 ${gitFqdn}.extraConfig = ''
                     ${tailscaleCert}
                     ${vmRunnerPathsOnly}
-                    reverse_proxy 127.0.0.1:3001
+                    reverse_proxy 127.0.0.1:${toString cube.services.git.port}
                 '';
 
                 # `http://` is load-bearing on every bare-name vhost: it
@@ -137,7 +137,7 @@ in {
                 # a non-`.ts.net` name, the tailscale manager would
                 # decline, and it would fall through to caddy's internal
                 # CA -- an untrusted cert on a name that only redirects.
-                "http://ts-cube".extraConfig = ''
+                "http://${cube.device}".extraConfig = ''
                     redir https://${tailnetFqdn}{uri} permanent
                 '';
 

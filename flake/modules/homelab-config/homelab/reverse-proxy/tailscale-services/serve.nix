@@ -10,8 +10,10 @@
 # attempt and why it failed, `reverse-proxy-history.md`; the control-plane
 # half (Service objects, ACL entries, `vip-put` traps, what is applied
 # live), this directory's README.md. Traps sit next to the options.
-{
-    nixos = {
+let
+    cube = import ../../_lib/cube-services.nix;
+in {
+    nixos = { lib, ... }: {
         services.tailscale.serve = {
             enable = true;
 
@@ -20,7 +22,11 @@
             # renders this to JSON and runs `tailscale serve set-config
             # --all` as a oneshot after tailscaled. Each key becomes
             # `svc:<key>` -- the module adds the prefix, don't.
-            services = {
+            #
+            # One forward pair per entry of _lib/cube-services.nix, the
+            # table caddy.nix's vhosts and the apps' own URLs come from,
+            # so a Service cannot be proxied without being forwarded to.
+            services = lib.mapAttrs (_: _: {
                 # `tcp://`, NOT `http://`: raw byte forwarding with no
                 # HTTP interpretation, aimed at caddy's own 443, not at
                 # the app's port. tailscaled hands the untouched TLS
@@ -28,24 +34,24 @@
                 # the vhost by SNI. The obvious `http://127.0.0.1:PORT`
                 # form -- what the upstream option doc's example uses --
                 # cannot give these names HTTPS at all; see history.
-                grafana.endpoints."tcp:443" = "tcp://127.0.0.1:443";
-                git.endpoints."tcp:443"     = "tcp://127.0.0.1:443";
+                endpoints = {
+                    "tcp:443" = "tcp://127.0.0.1:443";
 
-                # PORT 80 IS NOT DECORATION. A `svc:` name resolves to a
-                # Service VIP, which answers only on ports declared in
-                # BOTH this endpoint set and the Service object's own
-                # `ports` list (svc-*.json, re-`vip-put` after editing).
-                # Declaring 443 alone left caddy.nix's `http://git` etc.
-                # bare-name redirects unreachable from the day they were
-                # written until 2026-09-11 (issue #272) -- and those are
-                # the doors worth keeping, being the ones with no
-                # certificate in the path and so no local-CA warning.
-                # `http://ts-cube` worked throughout, being a device
-                # address where caddy binds 80 directly, which is what
-                # made the gap easy to miss.
-                grafana.endpoints."tcp:80"  = "tcp://127.0.0.1:80";
-                git.endpoints."tcp:80"      = "tcp://127.0.0.1:80";
-            };
+                    # PORT 80 IS NOT DECORATION. A `svc:` name resolves to a
+                    # Service VIP, which answers only on ports declared in
+                    # BOTH this endpoint set and the Service object's own
+                    # `ports` list (svc-*.json, re-`vip-put` after editing).
+                    # Declaring 443 alone left caddy.nix's `http://git` etc.
+                    # bare-name redirects unreachable from the day they were
+                    # written until 2026-09-11 (issue #272) -- and those are
+                    # the doors worth keeping, being the ones with no
+                    # certificate in the path and so no local-CA warning.
+                    # `http://ts-cube` worked throughout, being a device
+                    # address where caddy binds 80 directly, which is what
+                    # made the gap easy to miss.
+                    "tcp:80"  = "tcp://127.0.0.1:80";
+                };
+            }) cube.services;
         };
 
         # Added 2026-09-11 (issue #267). The upstream unit gates on
