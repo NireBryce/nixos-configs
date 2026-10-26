@@ -27,7 +27,12 @@
 #
 # Kept in the wiki, not restated here: the run loop, labels, recovery --
 # wiki/categories/git-forge.md and sibling, wiki/homelab/forgejo.md.
-{
+let
+    # libvirt's default network (_lib/libvirt-net.nix); the .11 is the
+    # runner VM's guestId (virtualization-cube.nix).
+    net      = import ../../_lib/libvirt-net.nix;
+    runnerIp = "${net.prefix}.11";
+in {
     nixos = { pkgs, config, ... }: {
         # # description = "cube-side support for the Forgejo Actions runner VM";
 
@@ -200,8 +205,8 @@
         # off for this one bridge address instead. Intercepting
         # virbr0 already takes root on cube.
         programs.ssh.extraConfig = ''
-            Host forge-runner 192.168.122.11
-                HostName 192.168.122.11
+            Host forge-runner ${runnerIp}
+                HostName ${runnerIp}
                 User root
                 ForwardAgent no
                 ForwardX11 no

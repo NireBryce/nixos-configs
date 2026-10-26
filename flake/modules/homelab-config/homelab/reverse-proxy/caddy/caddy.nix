@@ -12,6 +12,9 @@
 # something doesn't answer; `reverse-proxy-history.md` for the retired
 # path-prefix routes. Traps sit next to the options they concern, below.
 let
+    # libvirt's default network (_lib/libvirt-net.nix)
+    net = import ../../_lib/libvirt-net.nix;
+
     # `ts-cube`, NOT `nire-cube` -- this tailnet renames devices
     # fleet-wide (tailscale.nix's trap #1), verified live 2026-08-24.
     # Duplicated by necessity in grafana.nix's `root_url` and
@@ -75,7 +78,7 @@ let
     # routers/init.go; `[^/]+/[^/]+` also matches `repo.git`.
     vmRunnerPathsOnly = ''
         @vmNotRunnerPath {
-            remote_ip 192.168.122.0/24
+            remote_ip ${net.cidr}
             not path_regexp ^/(api/actions/|api/actions_pipeline/|twirp/github\.actions\.results\.api\.v1\.ArtifactService/|api/v1/|[^/]+/[^/]+/(info/refs|git-upload-pack|git-receive-pack|info/lfs/))
         }
         handle @vmNotRunnerPath {
@@ -83,7 +86,7 @@ let
         }
     '';
     vmDeny = ''
-        @vm remote_ip 192.168.122.0/24
+        @vm remote_ip ${net.cidr}
         handle @vm {
             abort
         }
