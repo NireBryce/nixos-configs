@@ -1,0 +1,8 @@
+[book]
+title = "nixos-configs: a guide"
+description = "How this NixOS / nix-darwin flake is put together, and how to extend it."
+language = "en"
+src = "src"
+
+[output.html]
+git-repository-url = "https://github.com/NireBryce/nixos-configs"
