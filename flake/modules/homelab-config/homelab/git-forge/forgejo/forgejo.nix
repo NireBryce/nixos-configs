@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# Forgejo: a self-hosted git forge, tailnet-only, at
+# summary: Forgejo: a self-hosted git forge, tailnet-only, at
 # https://git.moose-micro.ts.net/. Added 2026-08-24, cube-only. Named
 # `git-forge`, not `forgejo`: a category and a module sharing a name declare
 # the same `flake.modules.nixos.<name>` and silently MERGE (`just modules`

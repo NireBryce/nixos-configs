@@ -67,7 +67,7 @@ in {
             ];
         };
     in {
-        # # description = "metrics and Grafana alert rules for the Forgejo runner VM";
+        # summary: metrics and Grafana alert rules for the Forgejo runner VM
 
 
         services.prometheus.exporters.node = {

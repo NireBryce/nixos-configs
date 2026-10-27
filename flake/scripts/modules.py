@@ -132,7 +132,7 @@ CLASSES = ('nixos', 'homeManager', 'darwin')
 
 # wiki/module-files.md's shape and wiki/module-style-guide.md's formatting:
 # the header comment, opening brackets on the same line, four-space indent, and
-# the `# # description` comment as the first line of the body. The class
+# the `# summary:` comment as the first line of the body. The class
 # module is `_:` rather than `{ ... }:` -- statix flags the empty pattern and
 # a fresh file would raise the lint ratchet; whoever fleshes the module out
 # will destructure `config`/`pkgs` anyway. No `{ lib, ... }:` header until
@@ -142,7 +142,7 @@ CLASSES = ('nixos', 'homeManager', 'darwin')
 BOILERPLATE = '''# dirs-as-categories: the module is named after this file; its categories are the folders above it
 {
     @CLASS@ = _: {
-        # # description = "@DESC@";
+        # summary: @DESC@
     };
 }
 '''

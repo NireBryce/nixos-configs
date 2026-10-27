@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# Home Manager, managed from the NixOS side.
+# summary: Home Manager, managed from the NixOS side.
 #
 # Lives under general-config/system/ so the `system` category picks it up and durandal gets
 # it with everything else. There is no homeConfigurations output and no separate

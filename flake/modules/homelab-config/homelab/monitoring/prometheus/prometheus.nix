@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# Prometheus itself: scrapes the four loopback-only exporters
+# summary: Prometheus itself: scrapes the four loopback-only exporters
 # (node-exporter.nix, cadvisor.nix, libvirt-exporter.nix, smartctl-exporter.nix)
 # and stores the time series grafana.nix's dashboard reads from.
 {
@@ -16,7 +16,6 @@
         loopback = "127.0.0.1";
         exporters = config.services.prometheus.exporters;
     in {
-        # # description = "prometheus -- scrapes the exporters, stores metrics for grafana.nix";
         services.prometheus = {
             enable = true;
 

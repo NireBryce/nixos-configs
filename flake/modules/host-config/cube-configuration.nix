@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# What nire-cube is made of. GMKtec Nucbox G11, a mini PC -- workstation
+# summary: What nire-cube is made of. GMKtec Nucbox G11, a mini PC -- workstation
 # shape, same as durandal, not a handheld (see tenacity-configuration.nix
 # for that shape instead).
 #

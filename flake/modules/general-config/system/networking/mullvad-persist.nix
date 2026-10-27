@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# The persistence half of vpn.nix, same shape and same gate as
+# summary: The persistence half of vpn.nix, same shape and same gate as
 # tailscale-persist.nix (read its header for why restore-root is the gate).
 #
 # /etc/mullvad-vpn holds the daemon's account login, device registration and

@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# What nire-lysithea is made of. M3 MacBook Air, aarch64-darwin.
+# summary: What nire-lysithea is made of. M3 MacBook Air, aarch64-darwin.
 #
 # Sits directly under host-config/ rather than in a category directory, same
 # reason as durandal-configuration.nix and tenacity-configuration.nix:

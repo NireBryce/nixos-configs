@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# The naming rule, as code: host `nire-<x>` (networking.hostName, and
+# summary: The naming rule, as code: host `nire-<x>` (networking.hostName, and
 # `nire-<x>.local` on the LAN via avahi.nix) is the Tailscale device
 # `ts-<x>` (MagicDNS; FQDN `ts-<x>.moose-micro.ts.net`). tailscale.nix's
 # trap #1 is why this matters; this file makes it something `ssh` and Tab
@@ -63,7 +63,6 @@ in {
     # Inner `config`/`lib` are Home Manager's (`fleet` above already read
     # the flake's outputs; only HM's lib has `lib.hm.dag`).
     homeManager = { config, lib, pkgs, ... }: {
-        # # description = "ts-<x> tailnet names for every nire-<x> host, in ~/.ssh/config and ssh completion";
         programs.ssh = {
             enable              = true;
             # No `Host *` defaults block: nothing here wants one, and HM

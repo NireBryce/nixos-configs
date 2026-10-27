@@ -3,7 +3,8 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# Sunshine game-stream host (Moonlight's server side).
+# summary: Sunshine game-stream host (Moonlight's server side), reachable
+# only over Tailscale.
 #
 # Filed alongside gaming.nix rather than as its own category: this directory
 # is collected into the `system` category same as gaming.nix is, and `system`
@@ -61,7 +62,6 @@
     # `{ ... }:` kept over statix's suggested `_:` -- deliberate, see
     # wiki/module-style-guide.md's "`{ ... }:` on an inner module lambda".
     nixos = { ... }: {
-        # # description = "Sunshine: host a Moonlight game-stream session, reachable only over Tailscale";
         services.sunshine = {
             enable      = true;
             autoStart   = true; # runs as a systemd user service, not launched by hand --

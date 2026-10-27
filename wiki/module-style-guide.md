@@ -25,7 +25,7 @@ all false by 2026-09-09: the tree had grown from 151 to 263 files.)
 - [Four-space indent](#four-space-indent)
 - [The module header](#the-module-header)
 - [`{ ... }:` on an inner module lambda is sometimes deliberate](#---on-an-inner-module-lambda-is-sometimes-deliberate)
-- [`# # description = "..."` as the first line of the body](#--description---as-the-first-line-of-the-body)
+- [`# summary:` as the first line of the body](#-summary-as-the-first-line-of-the-body)
 - [Rationale goes inside the module body, not in a header block](#rationale-goes-inside-the-module-body-not-in-a-header-block)
 - [`with pkgs; [ ... ]` for package lists](#with-pkgs----for-package-lists)
 - [Aligned `=` columns](#aligned--columns)
@@ -128,14 +128,15 @@ distinction that matters when skimming a file to tell "is this a module" from
 counted in `flake/scripts/lint-baseline.json`'s statix total rather than fixed. Don't "fix" these on a
 lint pass without checking here first.
 
-## `# # description = "..."` as the first line of the body
+## `# summary:` as the first line of the body
 
-A one-line description of what the module is for, commented out, immediately
-inside the module body:
+A one-line description of what the module is for, as a comment, immediately
+inside the module body. In `packages-config/` the prefix is `# package summary:`
+and it says what the package is (not just its name or a URL):
 
 ```nix
 homeManager = { pkgs, ... }: {
-    # # description = "`rg` is a much faster and more powerful grep alternative";
+    # package summary: `rg` is a much faster and more powerful grep alternative
     home.packages = with pkgs; [
         ripgrep
     ];
@@ -146,7 +147,7 @@ Keep it first, keep it to one line.
 
 ### Why it is a comment and not an option
 
-The doubled `#` looks like a placeholder for a field that will arrive. It is
+The prefix looks like a placeholder for a field that will arrive. It is
 not. **There is no such field, in flakes, in flake-parts, or in the NixOS
 module system** (checked, not assumed: flake-parts declares no module-
 metadata option; `extras/modules.nix` attaches only `_class` and `_file`;

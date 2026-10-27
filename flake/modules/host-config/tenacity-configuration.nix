@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# What nire-tenacity is made of. Handheld, Jovian/SteamOS.
+# summary: What nire-tenacity is made of. Handheld, Jovian/SteamOS.
 #
 # Sits directly under host-config/ rather than in a category directory, because
 # a file directly in an area belongs to no category -- a host definition should

@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# The persistence half of wifi.nix. wifi.nix only sets
+# summary: The persistence half of wifi.nix. wifi.nix only sets
 # networking.networkmanager.enable; this is filed as its own sibling rather
 # than folded in, matching tailscale-persist.nix's split from tailscale.nix.
 #

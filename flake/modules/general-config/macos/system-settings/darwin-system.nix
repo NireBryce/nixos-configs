@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# Core system-level settings every darwin host in this config wants.
+# summary: Core system-level settings every darwin host in this config wants.
 # Ported from macos-old/nire-lysithea-configuration.nix.
 {
     darwin = {

@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# Home Manager, managed from the darwin side. The darwin counterpart to
+# summary: Home Manager, managed from the darwin side. The darwin counterpart to
 # enable-home-manager.nix, in the same file for the same reason -- see that
 # file's own header. Lives here rather than under lysithea's own host
 # directory because it is genuinely generic to any darwin host, not specific

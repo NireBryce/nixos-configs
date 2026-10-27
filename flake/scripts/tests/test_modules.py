@@ -101,7 +101,7 @@ class Add(Tree):
         text = (self.root / 'area/used/new-thing/new-thing.nix').read_text()
         self.assertTrue(text.startswith('# dirs-as-categories:'))
         self.assertIn('homeManager = _: {', text)
-        self.assertIn('# # description = "does a thing";', text)
+        self.assertIn('# summary: does a thing', text)
         self.assertNotIn('moduleName', text)
         staged = subprocess.run(['git', '-C', self._tmp.name, 'diff', '--cached', '--name-only'],
                                 capture_output=True, text=True).stdout

@@ -4,7 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     nixos = {
-        # # description = "systemd-resolved for unicast DNS, and the line that keeps it off mDNS";
+        # summary: systemd-resolved for unicast DNS, and the line that keeps it off mDNS
 
         services.resolved = {
             enable = true;

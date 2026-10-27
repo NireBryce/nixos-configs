@@ -31,7 +31,7 @@
         codDescBash = pkgs.writeText "cod-desc.bash"
             (builtins.readFile ./cod-desc.bash);
     in {
-        # bash line editor, allows zsh-like line editor tricks and bindings.
+        # summary: bash line editor, allows zsh-like line editor tricks and bindings.
         #
         # There is no `programs.bash.blesh` option -- Home Manager has no
         # blesh module of any kind, so the `programs.bash.blesh.enable =

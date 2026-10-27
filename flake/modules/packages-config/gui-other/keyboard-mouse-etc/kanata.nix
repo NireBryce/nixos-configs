@@ -4,7 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 { 
     homeManager = { pkgs, ... }: {
-        # description ="kanata - input-level keybinding, platform independent";
+        # package summary: kanata - input-level keybinding, platform independent
         home.packages = with pkgs; [
             kanata
         ];

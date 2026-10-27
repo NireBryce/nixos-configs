@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# services.tailscale.serve: raw TCP forwarding ONLY, from each Tailscale
+# summary: services.tailscale.serve: raw TCP forwarding ONLY, from each Tailscale
 # Service's virtual address to caddy's existing loopback listener, so each
 # app gets its own tailnet DNS name instead of a path prefix under
 # ts-cube.moose-micro.ts.net. Caddy still terminates TLS -- caddy.nix's

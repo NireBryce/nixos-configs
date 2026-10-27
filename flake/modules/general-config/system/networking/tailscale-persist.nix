@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# The persistence half of tailscale.nix. Split out 2026-08-14; until then this
+# summary: The persistence half of tailscale.nix. Split out 2026-08-14; until then this
 # was the last block of that file.
 #
 # WITHOUT THIS, TAILSCALE NEEDS RE-AUTHENTICATING ON EVERY BOOT. Node identity

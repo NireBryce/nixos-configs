@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# How many generations the bootloader keeps.
+# summary: How many generations the bootloader keeps.
 #
 # In a subdirectory, not directly in general-config/boot/: required until
 # 2026-09-28, when a category still skipped .nix files sitting straight in its

@@ -27,7 +27,7 @@ Hand-written, not generated. Follow a sibling file:
 # dirs-as-categories: the module is named after this file; its categories are the folders above it
 {
     homeManager = { pkgs, ... }: {
-        # <tool>: <one-line description, e.g. from nixpkgs meta.description>
+        # package summary: <tool> -- <what the package is, one line; nixpkgs meta.description is a start>
         home.packages = with pkgs; [
             <tool>
         ];
@@ -35,7 +35,10 @@ Hand-written, not generated. Follow a sibling file:
 }
 ```
 
-(`just add-module homeManager <path> "<description>"` writes this.)
+(`just add-module homeManager <path> "<description>"` writes the file with a
+`# summary:` line; in `packages-config/` rename it to `# package summary:`.)
+The `package summary:` line is required: say what the package *is*, not just
+its name or a URL, so a reader browsing the module knows without opening nixpkgs.
 
 File at `packages-config/<category>/<tool>/<tool>.nix` (some flatter:
 `nix-utils/nvd/nvd.nix`, `terminals/kitty/kitty.nix`,

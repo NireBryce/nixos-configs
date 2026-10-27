@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# Tailscale, as an actual service rather than just the CLI on PATH.
+# summary: Tailscale, as an actual service rather than just the CLI on PATH.
 # Imported by every Linux host via the `system` category.
 #
 # FOUR REAL TRAPS, none of them a bug in this file or in

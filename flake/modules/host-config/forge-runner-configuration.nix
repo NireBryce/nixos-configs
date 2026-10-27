@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# The Forgejo Actions runner VM -- a NixOS guest on nire-cube, instantiated
+# summary: The Forgejo Actions runner VM -- a NixOS guest on nire-cube, instantiated
 # by virtualization-cube.nix through VMs/_lib/libvirt-vm.nix. This file is
 # the guest's whole config; cube-side support (the per-job registration,
 # the share staging, the cycle that recreates this guest after every job)

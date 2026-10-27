@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# elly's whole Home Manager config, as one module.
+# summary: elly's whole Home Manager config, as one module.
 #
 # The home-side counterpart to host-config/durandal-configuration.nix, and it sits
 # directly under users-config/ for the same reason: a file directly in an area belongs

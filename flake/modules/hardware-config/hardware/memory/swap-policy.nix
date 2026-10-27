@@ -5,7 +5,7 @@
 { lib, ... }:
 {
     nixos = { config, ... }: {
-        # # description = "swap policy toggle - unmanaged zram zswap";
+        # summary: swap policy toggle - unmanaged zram zswap
 
         options.customOption.swap.policy = lib.mkOption {
             # `customOption.*` is this deployment's namespace for local

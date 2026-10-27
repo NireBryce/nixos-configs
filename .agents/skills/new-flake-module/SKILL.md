@@ -19,7 +19,7 @@ Every trap below has happened here.
 ## Scaffolder
 
 `just add-module <class> <category>/<subdir>/<name> ["one-line description"]`
-writes the file in the module shape (header comment, `# # description`,
+writes the file in the module shape (header comment, `# summary:`,
 `wiki/module-style-guide.md` formatting), `git add`s it (flakes ignore
 untracked files), and runs the checks (`flake/scripts/modules.py add`;
 #293). It refuses a class dirs-as-categories doesn't know, a target outside
@@ -33,7 +33,7 @@ module or a category. It cannot decide what the module *says*.
 { lib, ... }:
 {
     homeManager = { pkgs, ... }: {
-        # # description = "one line";
+        # summary: one line (in packages-config/, `# package summary:`)
         home.packages = with pkgs; [ ripgrep ];
     };
 }

@@ -55,7 +55,7 @@ in {
             ipset=/${lib.concatStringsSep "/" allowedDomains}/vm-egress-allow
         '';
     in {
-        # # description = "allowlisting DNS for libvirt guests; fills the egress ipset";
+        # summary: allowlisting DNS for libvirt guests; fills the egress ipset
 
         # The firewall script creates the set and matches on it
         # (vm-networking.nix); it needs the binary.

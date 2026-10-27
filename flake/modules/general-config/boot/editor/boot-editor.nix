@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# No kernel command-line editing at the systemd-boot menu.
+# summary: No kernel command-line editing at the systemd-boot menu.
 #
 # nixpkgs defaults `editor` to true "for backwards compatibility", and its own
 # option description recommends false: anyone at the console can append

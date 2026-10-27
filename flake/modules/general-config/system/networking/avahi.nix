@@ -4,7 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     nixos = {
-        # # description = "mDNS, so hosts resolve each other as <name>.local on the LAN";
+        # summary: mDNS, so hosts resolve each other as <name>.local on the LAN
 
         # Runs alongside services.resolved, which is enabled next door in
         # resolved.nix. They divide cleanly: avahi owns `.local`, resolved owns

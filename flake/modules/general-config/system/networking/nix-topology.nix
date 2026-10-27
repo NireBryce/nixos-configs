@@ -4,7 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 { lib, inputs, ... }:
 {
-    # The NixOS half of nix-topology: lets each host describe itself.
+    # summary: The NixOS half of nix-topology: lets each host describe itself.
     # Extractors fill in most of it from the existing config (interfaces,
     # services, tailscale, etc.). The flake-parts half -- the `topology`
     # output and the tailnet drawn over it -- is nix-topology-flake.nix

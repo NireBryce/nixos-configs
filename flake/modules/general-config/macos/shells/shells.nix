@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# Shell registration at the system level. zsh itself is configured through
+# summary: Shell registration at the system level. zsh itself is configured through
 # Home Manager (general-config/shell-config/zsh/), same as the Linux hosts; this is only
 # the macOS-specific plumbing around that: which shells exist in
 # /etc/shells, and stopping the system's own zsh completion setup from

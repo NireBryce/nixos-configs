@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
-    # Darwin counterpart to sops.nix (that module is nixos-only -- see
+    # summary: Darwin counterpart to sops.nix (that module is nixos-only -- see
     # its own header -- because nothing on darwin currently consumes
     # `sops.secrets.*` at activation; lysithea has no service depending
     # on an auto-decrypted secret, so there's nothing here to wire

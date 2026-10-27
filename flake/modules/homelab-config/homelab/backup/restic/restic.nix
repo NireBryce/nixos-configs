@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# restic: cube's only backup of its own service state, to the `ts-hive` NAS
+# summary: restic: cube's only backup of its own service state, to the `ts-hive` NAS
 # already on the network. Added 2026-08-28 against issue #87 ("no backups
 # anywhere in the fleet"), which is closed: a real restore drill on
 # 2026-09-06 opened a genuine, complete Forgejo database out of the repo.

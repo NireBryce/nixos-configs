@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# Re-enable the IOMMU that Jovian turns off, because this is not a Steam Deck.
+# summary: Re-enable the IOMMU that Jovian turns off, because this is not a Steam Deck.
 #
 # TEMPORARY -- works around a Jovian bug (issue #443); when to remove it:
 # wiki/temporary-patches-and-hacks.md.

@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# nire-cube (GMKtec Nucbox G11). fileSystems/boot.initrd.*/swapDevices below
+# summary: nire-cube (GMKtec Nucbox G11). fileSystems/boot.initrd.*/swapDevices below
 # are real, captured from `nixos-generate-config` after installing NixOS onto
 # the real disk with the stock NixOS live ISO -- not this flake's own
 # live-USB image (nire-installer, removed 2026-08-27), and not through this

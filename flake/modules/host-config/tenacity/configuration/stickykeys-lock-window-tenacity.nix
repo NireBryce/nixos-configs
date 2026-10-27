@@ -3,7 +3,8 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# Sticky keys that tell a deliberate double-tap from a later second press.
+# summary: Sticky keys that tell a deliberate double-tap from a later second
+# press, via a patched kwin plugin built on its own.
 #
 # Upstream kwin locks a latched modifier on any second press, however long
 # after the first (6.7.5 src/plugins/stickykeys/stickykeys.cpp, "A latched
@@ -83,8 +84,6 @@
             dontWrapQtApps    = true; # a plugin, nothing to wrap
         };
     in {
-        # # description = "sticky keys lock only on a quick double-tap: patched kwin plugin, built alone"
-
         # lib/qt-6/plugins of the per-user profile is on the session's
         # QT_PLUGIN_PATH, where kwin's plugin search finds it.
         home.packages = [ stickykeysLockWindow ];

@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# prometheus-libvirt-exporter: per-VM state/CPU/memory/disk/network metrics
+# summary: prometheus-libvirt-exporter: per-VM state/CPU/memory/disk/network metrics
 # for whatever libvirt/QEMU guests are defined on this host via
 # `virtualization`. No guest is currently defined here -- `virtualization-cube`
 # (nire-llm-sandbox) was removed 2026-08-28 -- so this scrapes an empty set
@@ -13,7 +13,6 @@
 # the rest of the stack this belongs to.
 {
     nixos = {
-        # # description = "prometheus-libvirt-exporter -- per-VM metrics for prometheus.nix to scrape";
         services.prometheus.exporters.libvirt = {
             enable = true;
 
