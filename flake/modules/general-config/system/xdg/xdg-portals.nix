@@ -33,7 +33,8 @@
 
 # ── history ─────────────────────────────────────────────────────────────────
 #
-# 2026-08-21 -- known upstream bug on every KDE host, since the wlr-to-kde switch above
+# 2026-08-21 -- known upstream bug on every KDE host, since the wlr-to-kde
+# switch above
 #
 # Every KDE login on durandal logs a burst of
 # `Failed to register with host portal QDBusError("org.freedesktop.portal.Error.Failed",

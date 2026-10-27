@@ -7,8 +7,8 @@
 #
 # Wrapped as a flake-parts module. A raw generator file under modules/ makes
 # flake-parts resolve `modulesPath` through its own _module.args and evaluation
-# dies with `infinite recursion encountered`, naming modulesPath rather than this
-# file. That broke the sibling branch twice.
+# dies with `infinite recursion encountered`, naming modulesPath rather than
+# this file. That broke the sibling branch twice.
 #
 # Named for the host, not `hardware-configuration`: a module's filename becomes
 # its attribute name, and same-named modules merge -- durandal has one of those
@@ -97,10 +97,11 @@
       }
     ];
 
-  # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
-  # (the default) this is the recommended approach. When using systemd-networkd it's
-  # still possible to use this option, but it's recommended to use it in conjunction
-  # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
+  # Enables DHCP on each ethernet and wireless interface. In case of scripted
+  # networking (the default) this is the recommended approach. When using
+  # systemd-networkd it's still possible to use this option, but it's recommended
+  # to use it in conjunction with explicit per-interface declarations with
+  # `networking.interfaces.<interface>.useDHCP`.
   networking.useDHCP = lib.mkDefault true;
   # networking.interfaces.wlp1s0.useDHCP = lib.mkDefault true;
 

@@ -25,10 +25,10 @@
 {
     includes.darwin = [
         # ── this machine ────────────────────────────────────────────────────────
-        # host-config/lysithea/: nixpkgs-hostPlatform-lysithea, nixpkgs-stateVersion-lysithea
-        # -- suffixed 2026-08-12 for consistency with durandal/tenacity, though
-        # darwin is its own module class here, so nothing would actually have
-        # collided yet.
+        # host-config/lysithea/: nixpkgs-hostPlatform-lysithea,
+        # nixpkgs-stateVersion-lysithea -- suffixed 2026-08-12 for consistency with
+        # durandal/tenacity, though darwin is its own module class here, so nothing
+        # would actually have collided yet.
         "lysithea"
 
         # ── shared ───────────────────────────────────────────────────────────────

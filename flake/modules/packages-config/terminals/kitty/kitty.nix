@@ -7,11 +7,11 @@
 # this file.
 #
 # Split 2026-08-12 so that the darwin question below never has to touch the
-# keybindings. general-config/macos/homebrew/homebrew.nix installs the `kitty` cask, so
-# lysithea had two copies -- and the obvious fix, wrapping the whole module in
-# lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin), would have thrown the config away with the
-# package. Keeping the two concerns in separate files makes that mistake
-# harder to make.
+# keybindings. general-config/macos/homebrew/homebrew.nix installs the `kitty`
+# cask, so lysithea had two copies -- and the obvious fix, wrapping the whole
+# module in lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin), would have thrown the
+# config away with the package. Keeping the two concerns in separate files makes
+# that mistake harder to make.
 #
 # Both files write into `programs.kitty`, which is an attrset merge and fine.
 # They must NOT both declare a home.file.<n>.text: that option is types.lines

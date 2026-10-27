@@ -5,7 +5,7 @@
 {
 
     homeManager = { config, pkgs, ... }: {
-        # summary: An index for `apropos` / `man -k`. Plain `man foo` needs none of this.
+        # summary: An index for `apropos` / `man -k`. `man foo` needs none of this.
         #
         # Neither built-in option is usable here. `programs.man.generateCaches`
         # builds a buildEnv over every entry in home.packages and runs mandb at

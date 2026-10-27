@@ -3,13 +3,14 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# summary: nire-cube (GMKtec Nucbox G11). fileSystems/boot.initrd.*/swapDevices below
-# are real, captured from `nixos-generate-config` after installing NixOS onto
-# the real disk with the stock NixOS live ISO -- not this flake's own
-# live-USB image (nire-installer, removed 2026-08-27), and not through this
-# flake at all -- see the history note at the bottom for what
-# stood here before this and why. Cross-checked against the live system's own
-# `lsblk -f` while writing this file, not just copied from /etc/nixos blind.
+# summary: nire-cube (GMKtec Nucbox G11).
+# fileSystems/boot.initrd.*/swapDevices below are real, captured from
+# `nixos-generate-config` after installing NixOS onto the real disk with the
+# stock NixOS live ISO -- not this flake's own live-USB image (nire-installer,
+# removed 2026-08-27), and not through this flake at all -- see the history note
+# at the bottom for what stood here before this and why. Cross-checked against
+# the live system's own `lsblk -f` while writing this file, not just copied from
+# /etc/nixos blind.
 #
 # No LUKS, no impermanence: this host was installed with a plain persistent
 # btrfs root, not the LUKS + impermanence layout disko-cube.nix (deleted by
@@ -115,15 +116,15 @@
 #
 # 2026-08-21 -- this file replaces disko-cube.nix
 #
-# From cube's addition (2026-08-15) until then, this host's hardware module
-# was disko-cube.nix: a disko template wiring in
-# general-config/impermanence/_disko/impermanence-luks-btrfs.nix, with an intentionally
-# fake device path ("/dev/disk/by-id/REPLACE-ME-before-running-disko") -- the
-# machine hadn't been installed yet. It was installed by hand off the stock
-# NixOS live ISO instead (plain persistent root, no LUKS, not through this
-# flake), so disko-cube.nix was deleted rather than pointed at a real
-# device, and cube-configuration.nix dropped its `impermanence` import to
-# match. A future LUKS + impermanence reinstall is a fresh decision, not a
-# git-history resurrection: re-derive the device path and layout against
-# the disk actually there, the way this file was derived from a real scan
-# rather than the old placeholder.
+# From cube's addition (2026-08-15) until then, this host's hardware module was
+# disko-cube.nix: a disko template wiring in
+# general-config/impermanence/_disko/impermanence-luks-btrfs.nix, with an
+# intentionally fake device path
+# ("/dev/disk/by-id/REPLACE-ME-before-running-disko") -- the machine hadn't been
+# installed yet. It was installed by hand off the stock NixOS live ISO instead
+# (plain persistent root, no LUKS, not through this flake), so disko-cube.nix
+# was deleted rather than pointed at a real device, and cube-configuration.nix
+# dropped its `impermanence` import to match. A future LUKS + impermanence
+# reinstall is a fresh decision, not a git-history resurrection: re-derive the
+# device path and layout against the disk actually there, the way this file was
+# derived from a real scan rather than the old placeholder.

@@ -5,9 +5,9 @@
 
 # summary: Home Manager, managed from the NixOS side.
 #
-# Lives under general-config/system/ so the `system` category picks it up and durandal gets
-# it with everything else. There is no homeConfigurations output and no separate
-# home switch: `nh os switch` applies both.
+# Lives under general-config/system/ so the `system` category picks it up and
+# durandal gets it with everything else. There is no homeConfigurations output
+# and no separate home switch: `nh os switch` applies both.
 #
 # To go back to standalone, see flake/doc/trailhead-home-manager-standalone.md.
 { inputs, ... }:

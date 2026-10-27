@@ -11,12 +11,12 @@ in {
     nixos = { ... }: {
         # summary: let libvirt's NAT bridge past the host firewall
 
-        # libvirt's default network is NAT behind `virbr0`, with libvirt's own
-        # dnsmasq handing out DHCP leases (and DNS, which guests here are
-        # refused -- below) on the bridge address. The host firewall is on here (networking.firewall.enable is
-        # true on every host in this repo), and it drops those guest-to-host
-        # packets, so the symptom is a guest that boots fine, gets no lease,
-        # and looks like a broken NIC rather than a firewall problem.
+        # libvirt's default network is NAT behind `virbr0`, with libvirt's own dnsmasq
+        # handing out DHCP leases (and DNS, which guests here are refused -- below) on
+        # the bridge address. The host firewall is on here (networking.firewall.enable
+        # is true on every host in this repo), and it drops those guest-to-host packets,
+        # so the symptom is a guest that boots fine, gets no lease, and looks like a
+        # broken NIC rather than a firewall problem.
         #
         # 2026-09-25: narrowed from `trustedInterfaces = [ "virbr0" ]`
         # (concatenating, additive to tailscale0/lo) when the runner VM

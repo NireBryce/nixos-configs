@@ -5,9 +5,9 @@
 
 # summary: What nire-durandal is made of.
 #
-# This file sits directly under host-config/ rather than in a category directory,
-# because a file directly in an area belongs to no category -- a host definition
-# should not become a member of anything.
+# This file sits directly under host-config/ rather than in a category
+# directory, because a file directly in an area belongs to no category -- a host
+# definition should not become a member of anything.
 #
 # The list mirrors the `moduleList` the den version carried, translated from den
 # aspects to categories (wiki/module-files.md).

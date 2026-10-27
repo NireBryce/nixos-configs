@@ -3,14 +3,14 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# summary: restic: cube's only backup of its own service state, to the `ts-hive` NAS
+# summary: restic: cube's only backup of its service state, to the `ts-hive` NAS
 # already on the network. Added 2026-08-28 against issue #87 ("no backups
-# anywhere in the fleet"), which is closed: a real restore drill on
-# 2026-09-06 opened a genuine, complete Forgejo database out of the repo.
-# Own category (`homelab-config/homelab/backup/`), not `restic`: a category and its
-# one module both named `restic` would declare `flake.modules.nixos.restic`
-# twice and silently MERGE, the `containers`/`podman.nix` collision
-# AGENTS.md documents -- same reason `git-forge` isn't `forgejo`.
+# anywhere in the fleet"), which is closed: a real restore drill on 2026-09-06
+# opened a genuine, complete Forgejo database out of the repo. Own category
+# (`homelab-config/homelab/backup/`), not `restic`: a category and its one
+# module both named `restic` would declare `flake.modules.nixos.restic` twice
+# and silently MERGE, the `containers`/`podman.nix` collision AGENTS.md
+# documents -- same reason `git-forge` isn't `forgejo`.
 #
 # Kept in the wiki, not restated here: what is verified and what isn't,
 # wiki/categories/backup.md; how each one-time setup step actually went,

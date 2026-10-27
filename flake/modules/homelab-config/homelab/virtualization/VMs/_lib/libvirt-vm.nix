@@ -66,16 +66,15 @@
     # DHCP reservation below -- a guest reachable only from this host.
     #
     # `guestId` is a plain human-assigned integer, not derived or
-    # auto-allocated -- same "pin explicitly, a human reasons about
-    # collisions" reasoning as `homelab-config/homelab/containers/podman/podman.nix`'s
-    # `subUidRanges` (see its incident comment). It
-    # fixes the guest's MAC (`52:54:00:00:00:<guestId, hex>`) and
-    # DHCP-reserved IP (`192.168.122.<guestId>`) on libvirt's default
-    # network, giving the port forward a stable destination -- no `virsh
-    # domifaddr` polling, no DHCP timing. Two VMs sharing a guestId is a
-    # real, unchecked collision -- no auto-allocator on purpose; avoiding
-    # it is on whoever wires up the second VM, like a `subUidRanges`
-    # collision.
+    # auto-allocated -- same "pin explicitly, a human reasons about collisions"
+    # reasoning as `homelab-config/homelab/containers/podman/podman.nix`'s
+    # `subUidRanges` (see its incident comment). It fixes the guest's MAC
+    # (`52:54:00:00:00:<guestId, hex>`) and DHCP-reserved IP
+    # (`192.168.122.<guestId>`) on libvirt's default network, giving the port
+    # forward a stable destination -- no `virsh domifaddr` polling, no DHCP
+    # timing. Two VMs sharing a guestId is a real, unchecked collision -- no
+    # auto-allocator on purpose; avoiding it is on whoever wires up the second
+    # VM, like a `subUidRanges` collision.
 
 , shares ? []
     # Optional virtiofs mounts, host directory -> guest, each

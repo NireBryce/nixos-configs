@@ -14,12 +14,13 @@
     };
     
     homeManager = { pkgs, ... }: {
-        # Notes:
-        # `zsh side` errors: delete ~/.zcompdump and ~/.config/zsh/.zcompdump
+        # Notes: `zsh side` errors: delete ~/.zcompdump and ~/.config/zsh/.zcompdump
         # Multiple highlighters cause "zsh_zle-highlight-buffer-p:4: permission denied";
-        # here it was trapd00r/zsh-syntax-highlighting-filetypes, which highlights more than filetypes
+        # here it was trapd00r/zsh-syntax-highlighting-filetypes, which highlights more
+        # than filetypes
 
-        # TO-DONE: evaluate oh-my-zsh, prezto -- o-m-z too all-encompassing but best support;
+        # TO-DONE: evaluate oh-my-zsh, prezto -- o-m-z too all-encompassing but best
+        # support;
         #          prezto not worth it, want something stable
 
         # TO-DONE: migrate off zi. `5659567` dropped the last references to
@@ -38,8 +39,9 @@
         #            RobSis/zsh-completion-generator
         #
         #          The file's z-a-* entries were zi annexes, meaningless without zi;
-        #          its `unset python` marked "MAGIC: idk why this is here" is possibly
-        #          related to the equally unexplained PYTHON = "PYTHON" in shell-env.nix.
+        #          its `unset python` marked "MAGIC: idk why this is here" is
+        #          possibly related to the equally unexplained PYTHON = "PYTHON"
+        #          in shell-env.nix.
 
         # plugin dependencies
         home.packages = with pkgs; [
@@ -172,7 +174,8 @@
             ];
 
             ## .zshrc
-            #! FOOTGUN: if you comment out a nix variable pointing to .filecontents, '#' only comments out the first line
+            #! FOOTGUN: if you comment out a nix variable pointing to
+            #! .filecontents, '#' only comments out the first line
             initContent = lib.mkMerge [
                 # Same SSH_ASKPASS unset as bash.nix's initExtra, for the
                 # same reason: nixpkgs' programs.ssh exports it globally

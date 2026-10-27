@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# summary: Plasma 6, and the parts of it that every host running a desktop wants.
+# summary: Plasma 6, and the parts every host running a desktop wants.
 #
 # Split out of kde.nix -- now kde-desktop.nix -- so the handheld can have the
 # desktop without the workstation's session handling. Before the split durandal
@@ -35,7 +35,8 @@
             kdePackages.qttools
             kdePackages.partitionmanager
             kdePackages.plasma-disks # SMART wear/failure monitor, systray notifications -- https://invent.kde.org/plasma/plasma-disks
-                                     # needs `smartctl` on the *system* PATH; smartd.nix (hardware-config/hardware/storage) provides it.
+                                     # needs `smartctl` on the *system* PATH; smartd.nix
+                                     # (hardware-config/hardware/storage) provides it.
             kdePackages.kcharselect # symbol picker, may need to be kdePackages.kcharselect
             polonium # tiling wm
             kdePackages.krohnkite # other tiling wm

@@ -3,9 +3,10 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# summary: One `claude remote-control` per working directory, as a user service on cube,
-# so the sessions listed in claude.ai/code come back after a reboot instead of
-# needing someone to ssh in and start each by hand; added 2026-10-19.
+# summary: One `claude remote-control` per working directory, as a
+# user service on cube, so the sessions listed in claude.ai/code come back after
+# a reboot instead of needing someone to ssh in and start each by hand; added
+# 2026-10-19.
 #
 # These are the four directories `claude rc` was running in on cube when this
 # was added. Add or drop a directory by editing `dirs`; the attribute name

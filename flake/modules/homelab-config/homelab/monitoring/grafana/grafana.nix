@@ -224,10 +224,10 @@ in {
 # Tailscale), unlike the loopback-only node-exporter/cadvisor/
 # libvirt-exporter/prometheus, with "tailnet only" enforced at the firewall.
 # True at the time: nothing else on the host could accept the connection, so
-# `trustedInterfaces = [ "tailscale0" ]` was the ONLY thing between port
-# 3000 and the LAN. Adding homelab-config/homelab/reverse-proxy/caddy/caddy.nix removed that
-# constraint -- caddy accepts on the tailnet, terminates TLS with a cert
-# from tailscaled, connects over loopback -- so the listener moved back in
+# `trustedInterfaces = [ "tailscale0" ]` was the ONLY thing between port 3000
+# and the LAN. Adding homelab-config/homelab/reverse-proxy/caddy/caddy.nix
+# removed that constraint -- caddy accepts on the tailnet, terminates TLS with a
+# cert from tailscaled, connects over loopback -- so the listener moved back in
 # line with the rest of the stack.
 #
 # The same comment predicted "invalid redirect" errors after login would

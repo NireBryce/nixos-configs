@@ -29,6 +29,7 @@
             bindsTo = [ "pipewire.service" ];
             after = [ "pipewire.service" ];
         };
-        # pipewire also set in graphics.extraPackages presumably for hdmi/displayport audio
+        # pipewire also set in graphics.extraPackages presumably for hdmi/displayport
+        # audio
     };
 }

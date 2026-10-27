@@ -5,11 +5,11 @@
 { lib, ... }:
 {
     # Renamed from `virtualization.nix`, which declared
-    # `flake.modules.nixos.virtualization`. Everything here is OCI
-    # containers -- podman and distrobox -- and never was anything else;
-    # `virtualization` now names the VM category (libvirt/QEMU) at
-    # homelab-config/homelab/virtualization/. Directory was `nire/system/virtualization/`
-    # until 2026-08-21 for the same reason.
+    # `flake.modules.nixos.virtualization`. Everything here is OCI containers --
+    # podman and distrobox -- and never was anything else; `virtualization` now
+    # names the VM category (libvirt/QEMU) at
+    # homelab-config/homelab/virtualization/. Directory was
+    # `nire/system/virtualization/` until 2026-08-21 for the same reason.
     #
     # MOVED AGAIN, 2026-08-22: out of `nire/system/containers/` (under
     # `system`, imported whole by every Linux host, no opt-out) into its

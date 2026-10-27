@@ -88,10 +88,10 @@
         pkgs = inputs.nixpkgs.legacyPackages.${system};
     in
     {
-        # Orphans -- modules nothing reaches, which evaluate and install
-        # nothing -- are dirs-as-categories' own check, `module-orphans`,
-        # turned on at the top of this file; `just modules` runs the rest (untracked files,
-        # drift against wiki-lint's reading).
+        # Orphans -- modules nothing reaches, which evaluate and install nothing -- are
+        # dirs-as-categories' own check, `module-orphans`, turned on at the top of this
+        # file; `just modules` runs the rest (untracked files, drift against wiki-lint's
+        # reading).
         checks = hostChecks // homeChecks // {
             lib-helpers = pkgs.runCommand "lib-helpers" { } (
                 if libTestFailures == [ ] then "touch $out"

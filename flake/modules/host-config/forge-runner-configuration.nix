@@ -3,11 +3,11 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# summary: The Forgejo Actions runner VM -- a NixOS guest on nire-cube, instantiated
-# by virtualization-cube.nix through VMs/_lib/libvirt-vm.nix. This file is
-# the guest's whole config; cube-side support (the per-job registration,
-# the share staging, the cycle that recreates this guest after every job)
-# lives in git-forge/forgejo/actions-runner.nix.
+# summary: The Forgejo Actions runner VM -- a NixOS guest on nire-cube,
+# instantiated by virtualization-cube.nix through VMs/_lib/libvirt-vm.nix. This
+# file is the guest's whole config; cube-side support (the per-job registration,
+# the share staging, the cycle that recreates this guest after every job) lives
+# in git-forge/forgejo/actions-runner.nix.
 #
 # Why a VM at all: a CI runner executes workflow code, and workflow code on
 # a runner with podman/docker access is one container escape away from the
@@ -33,7 +33,8 @@
 # listener stays unreachable from here, by design -- Caddy is the door.
 { lib, ... }:
 {
-    # was `flake.modules.nixos.forgeRunnerConfiguration`; the name is now the filename
+    # was `flake.modules.nixos.forgeRunnerConfiguration`; the name is now the
+    # filename
     nixos = { pkgs, modulesPath, ... }: {
         imports = [
             # DIRECT import, not image.modules -- the image.modules variant

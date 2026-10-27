@@ -13,7 +13,7 @@ let
 confirmedOn = "6.18.57";
 in {
     nixos = { config, ... }: {
-        # summary: keep the VM-only tiny_power_button driver from powering off on a power-button press
+        # summary: stops the VM-only tiny_power_button driver powering off on a press
 
         # tiny_power_button is the kernel's driver for VMs: a power-button
         # press calls kill_cad_pid(SIGRTMIN+4), which makes systemd power

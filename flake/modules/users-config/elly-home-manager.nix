@@ -5,14 +5,16 @@
 
 # summary: elly's whole Home Manager config, as one module.
 #
-# The home-side counterpart to host-config/durandal-configuration.nix, and it sits
-# directly under users-config/ for the same reason: a file directly in an area belongs
-# to no category, so a file here does not become a member of anything.
+# The home-side counterpart to host-config/durandal-configuration.nix, and it
+# sits directly under users-config/ for the same reason: a file directly in an
+# area belongs to no category, so a file here does not become a member of
+# anything.
 #
-# Only the categories that actually contain homeManager modules are listed. Every
-# category is declared for all three classes, so `hardware`, `peripherals`,
-# `desktop-env` and `durandal` also exist here -- as empty aggregates. Importing
-# them would be harmless but would suggest content that is not there.
+# Only the categories that actually contain homeManager modules are listed.
+# Every category is declared for all three classes, so `hardware`,
+# `peripherals`, `desktop-env` and `durandal` also exist here -- as empty
+# aggregates. Importing them would be harmless but would suggest content that is
+# not there.
 #
 # `impermanence` is listed and is nearly empty: one module, and only because a
 # system decision made in that category has a consequence on the home side.
@@ -20,17 +22,16 @@
 #
 # This whole bundle is reused as-is by every host, nire-lysithea (darwin)
 # included -- see enable-home-manager-darwin.nix. Some of what it carries only
-# makes sense on Linux. The fix for that is NOT here: `imports` cannot depend on `pkgs` under
-# useGlobalPkgs without a genuine infinite recursion -- `pkgs` for a
-# useGlobalPkgs home-manager module is itself threaded in through
+# makes sense on Linux. The fix for that is NOT here: `imports` cannot depend on
+# `pkgs` under useGlobalPkgs without a genuine infinite recursion -- `pkgs` for
+# a useGlobalPkgs home-manager module is itself threaded in through
 # `_module.args`, which is not resolved until after `imports` is, so
 # conditioning `imports` on `pkgs.stdenv.isLinux` is a real cycle, not just
 # something nix happens to disallow. Confirmed by trying it: durandal and
-# tenacity both failed to evaluate with "infinite recursion encountered",
-# naming this exact shape in nixpkgs' own error text -- "if you are trying to
-# achieve a conditional import behavior dependent on config, consider
-# importing unconditionally, and using mkEnableOption and mkIf to control its
-# effect."
+# tenacity both failed to evaluate with "infinite recursion encountered", naming
+# this exact shape in nixpkgs' own error text -- "if you are trying to achieve a
+# conditional import behavior dependent on config, consider importing
+# unconditionally, and using mkEnableOption and mkIf to control its effect."
 #
 # So: import everything unconditionally, same as always, and deal with darwin
 # per *module* rather than per import. Two mechanisms, and they answer

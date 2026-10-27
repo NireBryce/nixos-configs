@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# summary: Gives cube a desktop for Sunshine (general-config/system/gaming/sunshine.nix)
+# summary: Gives cube a desktop for Sunshine (system/gaming/sunshine.nix)
 # to stream with no monitor attached; added 2026-10-06. Two parts, both
 # needed:
 #

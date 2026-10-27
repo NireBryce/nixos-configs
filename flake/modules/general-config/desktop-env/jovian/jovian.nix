@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# summary: The handheld half of the desktop story: Jovian, Steam, and the TDP stack.
+# summary: The handheld half of the desktop: Jovian, Steam, and the TDP stack.
 #
 # Generic to handhelds -- machines with built-in controllers that occasionally
 # launch a SteamOS session -- not specific to tenacity; a second handheld
@@ -26,11 +26,11 @@
     # inner (NixOS) `config` for `config.jovian.decky-loader.extraPackages`
     # and the two must not be confused; `includes` leaves no outer `config`.
     #
-    # jovian-persist is imported by name, not left to the category: `desktop-env` is never
-    # imported whole (see tenacity-configuration.nix), so a sibling file is
-    # reachable through nothing and the orphan check reports it.
-    # Naming it here is also what scopes it -- /etc/hhd persists exactly
-    # where handheld-daemon runs, because the two arrive together.
+    # jovian-persist is imported by name, not left to the category: `desktop-env` is
+    # never imported whole (see tenacity-configuration.nix), so a sibling file is
+    # reachable through nothing and the orphan check reports it. Naming it here is
+    # also what scopes it -- /etc/hhd persists exactly where handheld-daemon runs,
+    # because the two arrive together.
     includes.nixos = [ "kde-base" "jovian-persist" ];
 
     nixos = { config, pkgs, ... }: {

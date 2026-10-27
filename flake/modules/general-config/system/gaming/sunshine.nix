@@ -29,20 +29,20 @@
 # it). Tailscale ACLs, configured in the tailnet admin console rather than
 # here, can narrow this further to specific devices if that's ever wanted.
 #
-# Hardware encode: nothing to set here. `capSysAdmin` (below) covers KMS
-# screen *capture*; the actual *encode* is VAAPI, which comes from
+# Hardware encode: nothing to set here. `capSysAdmin` (below) covers KMS screen
+# *capture*; the actual *encode* is VAAPI, which comes from
 # `hardware.graphics.enable` -- already `true` on all four AMD hosts via
-# hardware-config/hardware/amd/amdgpu/amdgpu.nix (mesa's radeonsi driver bundles VAAPI,
-# no separate package needed the way Intel's does). This module deliberately
-# does not force `services.sunshine.settings.encoder = "vaapi"`: sunshine
-# already prefers a hardware encoder when one is usable and falls back to
-# software (x264) otherwise, and forcing the setting would trade that graceful
-# fallback for a hard failure on any host where VAAPI turns out not to work --
-# not a trade worth making on config that has not been runtime-tested yet (see
-# CLAUDE.md, "undated verified means evaluates"). The device permissions VAAPI
-# and KMS capture both need at runtime (`render`, `video`, `uinput`) are in
-# sunshine-elly.nix, right next to this file -- they edit the user account,
-# not the service, so they're split out rather than living here.
+# hardware-config/hardware/amd/amdgpu/amdgpu.nix (mesa's radeonsi driver bundles
+# VAAPI, no separate package needed the way Intel's does). This module
+# deliberately does not force `services.sunshine.settings.encoder = "vaapi"`:
+# sunshine already prefers a hardware encoder when one is usable and falls back
+# to software (x264) otherwise, and forcing the setting would trade that
+# graceful fallback for a hard failure on any host where VAAPI turns out not to
+# work -- not a trade worth making on config that has not been runtime-tested
+# yet (see CLAUDE.md, "undated verified means evaluates"). The device
+# permissions VAAPI and KMS capture both need at runtime (`render`, `video`,
+# `uinput`) are in sunshine-elly.nix, right next to this file -- they edit the
+# user account, not the service, so they're split out rather than living here.
 #
 # autoStart = true has a real, confirmed cost: because sunshine is
 # `wantedBy = [ "graphical-session.target" ]`, it starts the instant you land
