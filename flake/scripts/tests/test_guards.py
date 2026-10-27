@@ -502,6 +502,27 @@ class GitGuardPreToolUse(GuardCase):
             self.assertIn("Ask the user",
                           out["hookSpecificOutput"]["permissionDecisionReason"])
 
+    def test_many_dirty_paths_still_denies(self):
+        # The path listing is cut to 21 lines by `head`. With enough output
+        # (long names, over ~4KB) head exits while grep is still writing,
+        # grep takes SIGPIPE, and under `set -eo pipefail` the hook exited 141
+        # instead of answering. A handful of short paths never reached it.
+        r = self.repo()
+        names = [f"dirty-{i:03d}-" + "x" * 90 + ".txt" for i in range(120)]
+        for n in names:
+            (r / n).write_text("a\n")
+        git(r, "add", ".")
+        git(r, "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-q",
+            "-m", "many files")
+        for n in names:
+            (r / n).write_text("b\n")
+        for _ in range(3):  # the race is timing-dependent; the data is not
+            out = self.assertDeny(self.script, "git reset --hard",
+                                  "(120 dirty paths in all)", cwd=r)
+            reason = out["hookSpecificOutput"]["permissionDecisionReason"]
+            self.assertIn("dirty-000-", reason)       # the listing's start
+            self.assertNotIn("dirty-119-", reason)    # cut at 21 lines
+
     def test_untracked_only(self):
         # reset --hard leaves untracked files alone (-uno); clean deletes
         # exactly them.
