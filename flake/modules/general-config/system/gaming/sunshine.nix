@@ -61,7 +61,7 @@
 {
     # `{ ... }:` kept over statix's suggested `_:` -- deliberate, see
     # wiki/module-style-guide.md's "`{ ... }:` on an inner module lambda".
-    nixos = { ... }: {
+    nixos = _: {
         services.sunshine = {
             enable      = true;
             autoStart   = true; # runs as a systemd user service, not launched by hand --
