@@ -39,7 +39,7 @@ Two sub-areas, split along the same line as the hosts that use them:
   a greeter choice, and it does not import `kde-desktop`) and
   `jovian-persist.nix` (its persistence rule, split out 2026-08-14).
 
-## Why this category is never imported whole
+## Why this category isn't imported whole
 
 No host lists `desktop-env` in its imports — each names the one session
 module it wants: `kde-desktop` (durandal, cube — pulls in
