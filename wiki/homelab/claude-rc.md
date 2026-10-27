@@ -31,7 +31,7 @@ its header comment has the reasoning behind each option.
 - **Push**: sessions push with sops secret `cube_claude_rc_github_token`, a
   fine-grained PAT (four repos, Contents read/write), not the account `gh`
   token. Expires 2027-01-18 (90 days):
-  [maintenance-schedule](../maintenance-schedule.md) item 13 has the
+  [maintenance-schedule](../upkeep-and-admin/maintenance-schedule.md) item 13 has the
   rotation steps.
 - **Hand-started `claude rc` in the same directory** makes the unit fail with
   "already served by a terminal `claude remote-control`" and retry; stop the
@@ -76,4 +76,4 @@ file tools run outside it.
 
 - [Reaching cube's services](reaching-services.md) for ssh to cube
   (`ts-cube`, never `nire-cube`).
-- [Maintenance schedule](../maintenance-schedule.md), item 13.
+- [Maintenance schedule](../upkeep-and-admin/maintenance-schedule.md), item 13.

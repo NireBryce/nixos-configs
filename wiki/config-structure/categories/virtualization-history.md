@@ -1,0 +1,73 @@
+# `virtualization` — history
+
+_Last modified: 2026-10-20_
+
+This page holds resolved VM incidents and the verification record of
+`nire-llm-sandbox`, which was removed 2026-08-28 ([../../meta/history.md](../../meta/history.md)).
+Split out of [virtualization](virtualization.md) 2026-09-03 so that page
+stays about the generator as it exists today.
+
+## Contents
+
+- [`nire-llm-sandbox`'s `sshForward` verification](#nire-llm-sandboxs-sshforward-verification)
+- [The near-miss this category's own header records](#the-near-miss-this-categorys-own-header-records)
+- [Where the VM wiring used to live](#where-the-vm-wiring-used-to-live)
+- [See also](#see-also)
+
+## `nire-llm-sandbox`'s `sshForward` verification
+
+`nire-llm-sandbox` was the one caller of `VMs/_lib/libvirt-vm.nix`'s
+`sshForward` parameter, before its removal 2026-08-28: `guestId = 10`,
+`hostPort = 2222`, `sourceCidrs` narrowed to Tailscale only (not the
+generator's own LAN-or-Tailscale default) — a per-VM choice in its cube
+wiring (`virtualization-cube.nix`, also removed), not a property of the
+generator itself.
+
+While it existed it was verified by reading back the actual generated
+domain XML, activation script, and firewall rule (not just evaluation) —
+the domain XML carried the exact MAC, the activation script's
+DHCP-reservation guard referenced it correctly, and
+`networking.firewall.extraCommands` contained exactly one DNAT rule,
+scoped to `100.64.0.0/10`, no LAN range. The domain itself was confirmed
+booted and staying up on `nire-cube` (2026-08-24 — see
+[../../agent-lessons-learned.md](../../agent-lessons-learned.md) §40), but an actual SSH
+connection through this forward was never made before the VM was removed.
+`forge-runner` (2026-09-25) is its second caller — `guestId = 11`,
+`hostPort = 2223`, tailnet-only — and the first connection through the
+forward was made on 2026-09-25: `ssh -p 2223 root@ts-cube` from a tailnet
+host reached the guest. The same day, forge-runner narrowed its SSH to
+cube's key and dropped the forward (`sourceCidrs = [ ]`), leaving
+`sshForward` only its fixed-address half.
+
+## The near-miss this category's own header records
+
+For about an hour on 2026-08-21, `libvirt.nix` was named
+`virtualization.nix` and declared `flake.modules.nixos.virtualization` —
+the exact attribute this category's `dirsAsCategory.nix` declares for its
+aggregate. Both would have written to the same name and **merged**
+invisibly. Caught and renamed before it shipped.
+
+## Where the VM wiring used to live
+
+Until 2026-09-28 the file that instantiates cube's VMs,
+`virtualization-cube.nix` (for `nire-llm-sandbox`, then `forge-runner`),
+sat directly in `general-config/homelab/virtualization/`, not in a
+subdirectory. That was deliberate: the collector then skipped `.nix` files
+sitting straight in a category's own directory, so the file stayed out of
+the `virtualization` aggregate — which durandal imported at the time, and
+should not have started cube's VM — while `homelab`, which only cube
+imports, still collected it (through `bareModulesOf`).
+
+The collector rule was removed 2026-09-28, which would have put the VM
+wiring into `virtualization`, so the file moved to
+`host-config/cube/vms/virtualization-cube.nix` (directory renamed
+`cube-vm/` 2026-09-29), cube-only because only
+cube's configuration imports the `cube` category. Full account:
+`flake/doc/dirsAsCategory.md`'s History.
+
+## See also
+
+- [virtualization](virtualization.md) — the category as it works today.
+- [../../meta/history.md](../../meta/history.md) — `nire-llm-sandbox`'s removal.
+- The `nixos-vm-images` writeup — removed 2026-09-03 with the VM gone;
+  `git log -- .agents/skills/nixos-vm-images` has it.

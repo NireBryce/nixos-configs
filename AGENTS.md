@@ -85,8 +85,8 @@ reference, or an interface a user types (a port). Skill `fact-hygiene`
 (cat 4); `check_wiki.py docrefs` catches the bare count-of-files shape.
 
 Roster, class, and which hosts wipe `/root`: `host-config/hosts.nix` (check
-it before stating any count) and `wiki/hosts.md`'s table. First-boot
-history: `wiki/history.md`'s "Confirmed-on-hardware facts".
+it before stating any count) and `wiki/fleet/hosts.md`'s table. First-boot
+history: `wiki/meta/history.md`'s "Confirmed-on-hardware facts".
 
 - **Check `hostname` before assuming which machine the session is on.**
   Under Claude Code, `.agents/hooks/session-start.sh` injects hostname,
@@ -95,7 +95,7 @@ history: `wiki/history.md`'s "Confirmed-on-hardware facts".
 - **ssh to another host over the tailnet as `ts-<x>`, never `nire-<x>`** —
   `nire-<x>` is the hostname (`nire-<x>.local` on the LAN only), and
   tenacity's sshd is tailnet-only. `just reach <x>` tries every name. Rule
-  and table: `wiki/hosts.md`; as code: `tailnet-hosts.nix`.
+  and table: `wiki/fleet/hosts.md`; as code: `tailnet-hosts.nix`.
 
 ## Before you start
 
@@ -121,7 +121,7 @@ or command that touches it, from `.agents/lessons-map.toml`.
 
 - Writing, renaming or browsing a module: its name is its filename and a
   rename renames it; categories come from folders — skill
-  `new-flake-module`, `.agents/rules/flake-modules.md`, `wiki/module-files.md`.
+  `new-flake-module`, `.agents/rules/flake-modules.md`, `wiki/config-structure/module-files.md`.
 - Home Manager shell/dotfiles: `home.file` text concatenates — skill
   `home-manager-dotfiles`, `.agents/rules/home-manager.md`.
 - Impermanence, initrd, host hardware: trust `/proc/1/mountinfo` over
@@ -190,7 +190,7 @@ other project (nixpkgs, ble.sh, carapace, anything else).** The one exception
 is the user asking, in their own message, for that specific filing on that
 specific project. Approval of a list of tasks doesn't count, even if one item
 is an upstream filing. `propose-issue` files here only. Drafts for other
-projects (`_loose-ends/bugs-pending-submission/`, `wiki/open-threads.md`) are
+projects (`_loose-ends/bugs-pending-submission/`, `wiki/meta/open-threads.md`) are
 for the user to file; don't work through them. Security notes are the other
 exception: they go in the private `elly/infra-notes` repo (see above).
 
@@ -238,7 +238,7 @@ page the change made stale.
 
 ## Conventions
 
-**Read `wiki/module-style-guide.md` before writing a new module** — its
+**Read `wiki/config-structure/module-style-guide.md` before writing a new module** — its
 formatting is deliberate, not a cleanup target. The other module
 conventions (old names on renames, bugs recorded in comments stay, `elly`
 hardcoded, `programs.*` first) are `.agents/rules/flake-modules.md`.
@@ -292,7 +292,7 @@ other machine (no remote builder, no binfmt); `rebuild.sh` says so.
 **A module file never declares its own name; the filename is the name**,
 which `dirs-as-categories` assigns. The file body is an attribute set like
 `{ nixos = …; homeManager = …; }`, or a function of `lib`/`inputs` returning
-one. Each file's header comment says this, and `wiki/module-files.md` gives
+one. Each file's header comment says this, and `wiki/config-structure/module-files.md` gives
 the reason. A file under `flake/modules/` that isn't in that shape (`hosts.nix`,
 `checks.nix`) is a plain flake-parts module.
 
@@ -338,7 +338,7 @@ editing a page without following in its sibling, in the same change, breaks
 sibling's date; that converts a caught omission into a silent one. When the
 edit genuinely has nothing to sync, a dated `_Sibling reviewed:_` line with
 a reason, on the sibling, is the way to say so. Full rule and the cut list:
-`wiki/styleguide.md`'s "Two audiences per page"; the procedure is skill
+`wiki/meta/styleguide.md`'s "Two audiences per page"; the procedure is skill
 `wiki-sync`, step 5.
 
 - `wiki/00-INDEX.md` — topic index (`00-INDEX-for-agents.md` condensed).

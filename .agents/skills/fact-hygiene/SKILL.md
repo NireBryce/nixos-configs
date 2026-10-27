@@ -22,8 +22,8 @@ when_to_use: Writing a claim about an external system or live state, a status as
 
 ## Why (all three traps: once phrased as settled, it stops looking checkable and gets copied)
 
-- **Cat 2, 2026-09-03 (`216a5ae7`):** `wiki/homelab/pending-setup.md` item 4, `wiki/homelab/backup-runbook.md` intro, and `wiki/categories/backup.md` "What isn't done yet" each said the two restic sops secrets had no value, days after both were set. Found by accident grepping `secrets.yaml`. AGENTS.md's State section is the narrower version of this rule.
-- **Cat 1, same day:** the NAS's `restic-backup` share called "dedicated to this module" — inherited from an NFS-era comment about a different mount — spread into `restic.nix` header, `wiki/categories/backup.md`, `wiki/homelab/backup-runbook.md` until a snapshot-schedule screenshot showed the repo under share `homes`. Also a volume-labelled "real path" fused a volume label from one old comment with a path seen over ssh (`/share/homes/nire`); no observation said both.
+- **Cat 2, 2026-09-03 (`216a5ae7`):** `wiki/homelab/pending-setup.md` item 4, `wiki/homelab/backup-runbook.md` intro, and `wiki/config-structure/categories/backup.md` "What isn't done yet" each said the two restic sops secrets had no value, days after both were set. Found by accident grepping `secrets.yaml`. AGENTS.md's State section is the narrower version of this rule.
+- **Cat 1, same day:** the NAS's `restic-backup` share called "dedicated to this module" — inherited from an NFS-era comment about a different mount — spread into `restic.nix` header, `wiki/config-structure/categories/backup.md`, `wiki/homelab/backup-runbook.md` until a snapshot-schedule screenshot showed the repo under share `homes`. Also a volume-labelled "real path" fused a volume label from one old comment with a path seen over ssh (`/share/homes/nire`); no observation said both.
 - **Cat 3, same sweep:** four passing comments still named a host removed a week earlier (other removed-host references had explicit removal notes). Hosts/files/comments are in `216a5ae7`'s diff; deleted, not rewritten.
 
 ## The rule
@@ -52,8 +52,8 @@ when_to_use: Writing a claim about an external system or live state, a status as
 ## See also
 
 - `wiki-sync` — finds/fixes every `wiki/` page (siblings included) a stale fact reached; `wiki/` only, cat 3 covers `flake/` comments.
-- `wiki/styleguide.md` "Two audiences per page": its cut-list item ("who confirmed it and when") and #6 differ — *who/how verified* is narration and goes; *whether verified at all* is a qualifier and stays.
+- `wiki/meta/styleguide.md` "Two audiences per page": its cut-list item ("who confirmed it and when") and #6 differ — *who/how verified* is narration and goes; *whether verified at all* is a qualifier and stays.
 - `AGENTS.md` "State" — narrower cat-2 rule for switch/boot status.
-- `restic.nix` header, `wiki/categories/backup.md`, `wiki/homelab/backup-runbook.md`, `wiki/homelab/pending-setup.md` — the cat 1/2 pages; the `UNVERIFIED` markers added in `216a5ae7` have mostly since been resolved and removed, so its diff holds the before/after.
+- `restic.nix` header, `wiki/config-structure/categories/backup.md`, `wiki/homelab/backup-runbook.md`, `wiki/homelab/pending-setup.md` — the cat 1/2 pages; the `UNVERIFIED` markers added in `216a5ae7` have mostly since been resolved and removed, so its diff holds the before/after.
 - `podman.nix`, `hosts.nix`, `invariants.nix` — correct style: explicit removal notes ("lego removed the same day", "were both removed 2026-08-27", "since removed"). `category-collector.nix`, once named as a fourth example, was retired 2026-10-16.
 - skill `git-archaeology` — find the commit behind a date/hash when the file moved; an empty path-scoped log usually means a rename (hit 2026-09-15 verifying this file's examples).

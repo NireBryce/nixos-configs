@@ -10,7 +10,7 @@ when_to_use: Writing or changing a skill, lesson, wiki convention, AGENTS.md sec
 
 You are writing or materially changing something agent-facing — a skill, a
 `wiki/agent-lessons-learned.md` §, a wiki layout or style rule, an AGENTS.md
-section, a `wiki/scripts/` or `flake/scripts/` checker, a `.agents/hooks/`
+section, a `wiki/meta/scripts/` or `flake/scripts/` checker, a `.agents/hooks/`
 or `.githooks/` hook — and notice its *mechanism* doesn't depend on this
 repo. Not: a deliberate pass over the whole tree (`extract-agent-tooling-all`);
 something that only makes sense with Nix in the picture

@@ -49,7 +49,7 @@ File at `packages-config/<category>/<tool>/<tool>.nix` (some flatter:
 `development/tools/ai-tools/herdr.nix`; skim the target category first).
 
 Wiring is automatic **once the category is already included**: the file is a
-member of the category above its folder (`wiki/module-files.md`), and
+member of the category above its folder (`wiki/config-structure/module-files.md`), and
 `users-config/elly-home-manager.nix` imports the coarse categories
 (`development`, `editors`, `gui-other`, `linux-utils`, `nix-utils`,
 `shell-apps`, `terminals`, plus non-package ones). A new category not listed
@@ -90,7 +90,7 @@ Each step catches what earlier ones can't:
    evaluation; an orphan fails `just check`'s `module-orphans`).
 3. `just check` (or `just preflight`: also modules, lint, script tests,
    `just wiki-lint` -- a new `.nix` file moves the generated counts table in
-   `wiki/module-style-guide-for-agents.md`; `just wiki-gen` in the same change) —
+   `wiki/config-structure/module-style-guide-for-agents.md`; `just wiki-gen` in the same change) —
    evaluates every host across `--all-systems`; the only step that catches
    the darwin-only-package-on-Linux mistake.
 4. `just lint`.
@@ -112,4 +112,4 @@ branch.
 
 - `package-platform-support` — platform/Homebrew decision, darwin-only case.
 - `new-flake-module` — the module shape, filenames, classes, collisions.
-- `wiki/module-style-guide.md` — formatting (aligned `=`, no `nix fmt`).
+- `wiki/config-structure/module-style-guide.md` — formatting (aligned `=`, no `nix fmt`).

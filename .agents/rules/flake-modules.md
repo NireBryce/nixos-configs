@@ -10,13 +10,13 @@ Full mechanism and worked examples: skill `new-flake-module`.
 
 ## Module shape
 
-`wiki/module-files.md` is the why; dirs-as-categories' `doc/convention.md`
+`wiki/config-structure/module-files.md` is the why; dirs-as-categories' `doc/convention.md`
 the full rules.
 
 - A module file is `{ nixos = …; homeManager = …; darwin = …; }`, or a
   function of only `lib`/`inputs` returning that. Its name is its filename
   (`default.nix`: its folder's); nothing in the file names it. Its header
-  is a dirs-as-categories comment saying so (`wiki/module-files.md`).
+  is a dirs-as-categories comment saying so (`wiki/config-structure/module-files.md`).
 - `pkgs` and `config` belong in the inner (class) module's arguments; a
   module file cannot take the flake-parts `config` at all. The flake's own
   outputs are `inputs.self` (`tailnet-hosts.nix`).
@@ -62,7 +62,7 @@ the full rules.
 
 ## Conventions
 
-- Read `wiki/module-style-guide.md` before writing a new module. Its
+- Read `wiki/config-structure/module-style-guide.md` before writing a new module. Its
   formatting (aligned `=` columns, why `nix fmt` isn't wired up) is
   deliberate, not a cleanup target.
 - Check for an existing `programs.*` integration before hand-writing one.
@@ -74,7 +74,7 @@ the full rules.
   (`boot-durandal.nix`, `WARN-impermanence.nix`, `vscode.nix`).
 - `elly` is hardcoded in `users.users.elly`, `home.username`, and
   `home-manager.users.elly`. Introducing a `nire.primaryUser`-style option
-  is a separate change, not a tidy-up; `wiki/flake-parts-port-notes.md`
+  is a separate change, not a tidy-up; `wiki/config-structure/flake-parts-port-notes.md`
   has the reasoning.
 - Browsing modules, not editing them: `just history-line <file>` prints
   where the history section starts; read up to it. Editing is different:

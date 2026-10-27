@@ -97,7 +97,7 @@ Checked by grep — none of these appear anywhere in `flake/`:
 
 ## See also
 
-- `../../wiki/module-files.md` — the mechanism built on
+- `../../wiki/config-structure/module-files.md` — the mechanism built on
   `flake.modules.<class>.<name>`, as it is now; `../doc/dirsAsCategory.md`
   — the shim-based version it replaced.
 - `../doc/trailhead-home-manager-standalone.md` — the other half of "NixOS
@@ -105,4 +105,4 @@ Checked by grep — none of these appear anywhere in `flake/`:
   the NixOS side rather than as a standalone flake output.
 - `../../CLAUDE.md`, Architecture section — the prose overview this note
   fills the "why" and "what's unused" gaps of.
-- `../../wiki/flake-parts.md` — the wiki's index into this page.
+- `../../wiki/config-structure/flake-parts.md` — the wiki's index into this page.

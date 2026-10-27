@@ -3,7 +3,7 @@
 _Last modified: 2026-10-20_
 
 Cube's forge ([forgejo.md](forgejo.md)) plus its Actions runner
-([git-forge](../categories/git-forge.md)'s runner module) lets you practice
+([git-forge](../config-structure/categories/git-forge.md)'s runner module) lets you practice
 **submitting code in a workplace**, as the developer, not the ops side. The
 infrastructure already existed; the policy and habit layer on top is what
 makes it a workplace.
@@ -82,5 +82,5 @@ reviewer. Two free ways to get a real one:
 
 - [forgejo.md](forgejo.md) — the forge itself: signing in, cloning, CI
   workflows.
-- [git-forge](../categories/git-forge.md) — the runner's configuration and
+- [git-forge](../config-structure/categories/git-forge.md) — the runner's configuration and
   registration scheme.

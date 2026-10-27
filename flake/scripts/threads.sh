@@ -12,7 +12,7 @@
 #
 # Exists because a ble.sh/carapace completion bug got independently
 # rediscovered from scratch on 2026-08-24, at real cost, two days after it
-# was first diagnosed and written up in wiki/categories/shell-config/blesh.md
+# was first diagnosed and written up in wiki/config-structure/categories/shell-config/blesh.md
 # -- findable in one grep, never run. See `wiki/agent-lessons-learned.md`
 # #39 and issue #72. Run this before reproducing or diagnosing anything a
 # user reports as a symptom, not just before filing something new -- see

@@ -10,7 +10,7 @@
 # definition should not become a member of anything.
 #
 # The list mirrors the `moduleList` the den version carried, translated from den
-# aspects to categories (wiki/module-files.md).
+# aspects to categories (wiki/config-structure/module-files.md).
 {
     includes.nixos = [
         # ── this machine ──────────────────────────────────────────────────────
@@ -53,7 +53,7 @@
         # `homelab` category still exists and is unaffected -- `containers`
         # is now cube only (tenacity dropped it 2026-09-26), and
         # `virtualization` is cube only. See
-        # wiki/categories/virtualization.md and wiki/categories/containers.md's
+        # wiki/config-structure/categories/virtualization.md and wiki/config-structure/categories/containers.md's
         # "Imported by" sections. If this host ever does need libvirt or
         # podman again, re-add the two lines this comment replaced -- see
         # git history for the exact wording.

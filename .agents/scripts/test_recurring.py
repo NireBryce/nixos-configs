@@ -72,7 +72,7 @@ USERPASS = ':'.join(['admin', 'hunter2'])
 
 # (command, literals that must not appear in any shape)
 LEAKS = [
-    ('grep -n "persist\\|home\\|git.moose" wiki/hosts.md | head -20',
+    ('grep -n "persist\\|home\\|git.moose" wiki/fleet/hosts.md | head -20',
      ['persist', 'home', 'moose', 'hosts.md']),
     ("grep -A4 -i 'Host ts-cube\\|git.moose' ~/.ssh/config | grep -i identityfile",
      ['ts-cube', 'moose', 'identityfile', '.ssh']),

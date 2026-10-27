@@ -14,7 +14,7 @@
 # every `.nix` in every SUBdirectory, so a module there joins the shared
 # `virtualization` aggregate and reaches every host importing it.
 #
-# wiki/categories/virtualization.md has the placement mechanism and the
+# wiki/config-structure/categories/virtualization.md has the placement mechanism and the
 # default-network trap in full; `virtualization-history.md` has the
 # sshForward verification record from the llm-sandbox era.
 { name

@@ -28,7 +28,7 @@ Not this skill:
 The pattern was created in one pass (`68b99813`, 2026-09-02, six category
 pages) and extracted into once since (`5cdd8b2b`, 2026-09-06,
 `homelab/backup-runbook.md` rewritten as a command reference). Nothing
-routes to it: no check asks, and `wiki/styleguide.md`'s "Directory
+routes to it: no check asks, and `wiki/meta/styleguide.md`'s "Directory
 hierarchy" documents it with no procedure. Issue #288.
 
 ## The test (conservative)
@@ -63,9 +63,9 @@ reading current config does.
    ```sh
    just wiki-history-candidates            # everything scoring > 0
    just wiki-history-candidates --min 6    # stronger hits only
-   just wiki-history-candidates --page wiki/categories/reverse-proxy.md
+   just wiki-history-candidates --page wiki/config-structure/categories/reverse-proxy.md
    ```
-   Ranked, reporting-only. **Most hits are wrong** — a reading list. Marker meanings: docstring of `wiki/scripts/history_candidates.py`.
+   Ranked, reporting-only. **Most hits are wrong** — a reading list. Marker meanings: docstring of `wiki/meta/scripts/history_candidates.py`.
 2. **Apply the test by reading each.** Name the current setting the section justifies; if you can, it stays.
 3. **Destination: one companion per category, not per page** (`5cdd8b2b` moved backup-runbook's background into `categories/backup-history.md`, not `backup-runbook-history.md`). Confirm it exists or its absence is intended.
 4. **A page spanning several categories has no single destination** (script says so). The worked example was the old `homelab/pending-setup.md` checklist (items for git-forge, backup, monitoring, shortlinks), settled 2026-10-01 by moving open items to issues. Any new case: **don't settle silently** — it sets precedent. Ask; #288 records the question.
@@ -75,10 +75,10 @@ reading current config does.
 
 ## Traps
 
-- **`gen-contents` after removing a heading:** `python3 wiki/scripts/check_wiki.py gen-contents <page>`, not hand-editing.
+- **`gen-contents` after removing a heading:** `python3 wiki/meta/scripts/check_wiki.py gen-contents <page>`, not hand-editing.
 - **Never run `gen-contents` across all pages.** `-for-agents.md` siblings, `agent-lessons-learned.md` and its articles are exempt from Contents blocks and the insert path adds one anyway (hit 2026-09-11, ~20 pages). Pass only pages you changed.
 - **A `-history.md` needs no `-for-agents` sibling but DOES keep `## Contents`.** `SIBLING_EXEMPT` in `check_wiki.py` covers `-history.md`; styleguide's Contents exception covers only `agent-lessons-learned*` and `-for-agents.md`. An earlier version of this skill had it backwards and `reverse-proxy-history.md` lost its block (2026-09-12); `check_contents` now reports **MISSING CONTENTS** for a non-exempt page with headings but no block.
 
 ## See also
 
-- `wiki/styleguide.md` "Directory hierarchy"; `wiki/scripts/history_candidates.py`; commit `68b99813` (best worked example); `wiki-sync`.
+- `wiki/meta/styleguide.md` "Directory hierarchy"; `wiki/meta/scripts/history_candidates.py`; commit `68b99813` (best worked example); `wiki-sync`.

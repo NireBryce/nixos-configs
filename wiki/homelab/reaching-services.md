@@ -5,7 +5,7 @@ _Last modified: 2026-10-25_
 Each web service on `nire-cube` has **its own tailnet hostname and its own
 certificate**. (The earlier one-hostname-with-path-prefixes design was
 retired 2026-09-11.) How it's built:
-[reverse-proxy](../categories/reverse-proxy.md).
+[reverse-proxy](../config-structure/categories/reverse-proxy.md).
 
 ## Contents
 
@@ -57,7 +57,7 @@ behave differently and only one is pleasant — see
 
 `ts-cube`, **not** `nire-cube`: this tailnet renames its devices. That trap
 has its own writeup in `general-config/system/networking/tailscale.nix`, indexed from
-[system](../categories/system.md).
+[system](../config-structure/categories/system.md).
 
 ## Muscle memory: what stopped answering, and when
 
@@ -74,7 +74,7 @@ through Caddy, so a firewall mistake no longer exposes them. The path
 prefixes went away because Tailscale Services gave each app a real hostname
 of its own, which is both nicer to type and removes a whole class of
 prefix-rewriting bugs (see
-[reverse-proxy-history](../categories/reverse-proxy-history.md)).
+[reverse-proxy-history](../config-structure/categories/reverse-proxy-history.md)).
 
 ## Why it's HTTPS, and the one warning you will still see
 
@@ -116,7 +116,7 @@ Work down this list; it's ordered by what's most often wrong.
 3. **Does the name resolve at all?** `getent hosts git.moose-micro.ts.net`.
    A Service name that doesn't resolve means the `svc:` object is missing or
    unapproved, not that the app is down — a distinct failure with its own
-   fix, see [reverse-proxy](../categories/reverse-proxy.md).
+   fix, see [reverse-proxy](../config-structure/categories/reverse-proxy.md).
 4. **Does the port answer?** A Service VIP only listens on the ports its
    Service object *and* `serve.nix` both declare. A connection that times out
    while another port on the same name works means a missing endpoint, not a
@@ -148,7 +148,7 @@ as broken.
 `.ts.net` name means Caddy has no certificate to offer and is usually a
 config bug, not an outage — that exact failure took down all four names for
 two days in September 2026. See
-[reverse-proxy](../categories/reverse-proxy.md).
+[reverse-proxy](../config-structure/categories/reverse-proxy.md).
 
 ## Adding another service to this
 
@@ -177,10 +177,10 @@ afterwards.
 
 ## See also
 
-- [reverse-proxy](../categories/reverse-proxy.md) — Caddy, the certificate
+- [reverse-proxy](../config-structure/categories/reverse-proxy.md) — Caddy, the certificate
   mechanism, and the Tailscale Services split.
-- [reverse-proxy-history](../categories/reverse-proxy-history.md) — the
+- [reverse-proxy-history](../config-structure/categories/reverse-proxy-history.md) — the
   retired path-prefix design and why it went.
 - [Using the forge](forgejo.md) — cloning, and the hostnames Forgejo hands out.
 - [homelab index](00-INDEX.md) — the other services on this tailnet.
-- [hosts.md](../hosts.md) — `nire-cube` itself.
+- [hosts.md](../fleet/hosts.md) — `nire-cube` itself.

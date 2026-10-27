@@ -34,9 +34,9 @@ look, not what you'll find.
 |---|---|
 | `AGENTS.md` | Structure and framing (written-by-agents header, canonical file + `CLAUDE.md` symlink, Traps-as-pointers-to-skills, prose conventions) |
 | `.agents/skills/` | Skills whose description survives losing "in this repo"; the `.claude/skills` symlink layout itself |
-| `wiki/styleguide.md`, `wiki/00-INDEX.md` | Two-audience page pairs, routing index, `-history.md` companions, date lines |
+| `wiki/meta/styleguide.md`, `wiki/00-INDEX.md` | Two-audience page pairs, routing index, `-history.md` companions, date lines |
 | `wiki/agent-lessons-learned.md` + `wiki/agent-lessons-learned/` | § numbering with per-§ articles; individual lessons whose rule outlives the incident |
-| `wiki/scripts/` | Doc linters (`check_wiki.py`'s generic checks, `check_restatement.py`, `history_candidates.py`) |
+| `wiki/meta/scripts/` | Doc linters (`check_wiki.py`'s generic checks, `check_restatement.py`, `history_candidates.py`) |
 | `flake/scripts/`, `.agents/scripts/` | Non-Nix scripts (`branches.py`, `threads.sh`-style tooling; the `just agent` helpers) |
 | `.agents/hooks/`, `.githooks/` | Git/secret guard hooks, the commit-trailer normalizer |
 | `.agents/settings.json` (symlinked as `.claude/settings.json`) | Permission and hook wiring patterns |

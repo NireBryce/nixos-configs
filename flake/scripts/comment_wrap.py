@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Re-flow pure `#` comment blocks in the Nix modules to the house column.
 
-The rule (wiki/module-style-guide.md, "Comment width"): a comment line may
+The rule (wiki/config-structure/module-style-guide.md, "Comment width"): a comment line may
 reach 80 columns plus the line's own indentation -- a comment indented four
 spaces wraps at 84 -- so the text after `# ` keeps one constant width
 wherever the module nests it. That is the shape the tree already used
@@ -12,7 +12,7 @@ the procedure around it.
 
 Only lines that are nothing but a comment are touched. A `#` inside a
 `''` or `"` string is shell or config text, not a Nix comment --
-wiki/module-style-guide.md's documented trap, fourteen lines of maintenance
+wiki/config-structure/module-style-guide.md's documented trap, fourteen lines of maintenance
 notes once shipped into `~/.zshrc` that way -- so the scanner lexes strings
 and the `${ ... }` interpolations inside them and neither reports nor
 rewrites inside one. Trailing comments after code are code-coupled and

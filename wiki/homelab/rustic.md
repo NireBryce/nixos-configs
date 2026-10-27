@@ -5,7 +5,7 @@ _Last modified: 2026-10-22_
 [rustic](https://github.com/rustic-rs/rustic) (the `rustic-rs` project, not
 the unrelated `bnavetta/rustic` "restic wrapper" that shares its name in
 search results) is a client for the repository
-[backup](../categories/backup.md) writes. It is not a service this fleet runs.
+[backup](../config-structure/categories/backup.md) writes. It is not a service this fleet runs.
 Installed 2026-08-28 in `packages-config/shell-apps/backup-tools/rustic.nix`,
 so it's on every host `elly-home-manager` reaches.
 
@@ -21,7 +21,7 @@ so it's on every host `elly-home-manager` reaches.
 
 A full reimplementation of restic in Rust, not a wrapper around the `restic`
 binary — it reads and writes the **same repository format** restic does, so
-it can operate on the same repository [backup](../categories/backup.md)
+it can operate on the same repository [backup](../config-structure/categories/backup.md)
 writes directly, no conversion, no separate copy. Since version 0.8.0 it
 ships an interactive TUI:
 
@@ -78,7 +78,7 @@ nix run nixpkgs#rustic -- snapshots -i
 ## Pointing it at this repo's repository
 
 **The repository moved, 2026-08-31**: SFTP now, not a local path on an NFS
-mount — see [backup](../categories/backup.md) for why. The command below is
+mount — see [backup](../config-structure/categories/backup.md) for why. The command below is
 updated to match but is **more speculative than the rest of this page**:
 it's unconfirmed whether rustic accepts the same `-o sftp.command=` shape
 restic's `extraOptions` does for pointing at a non-default SSH identity —
@@ -125,7 +125,7 @@ the source, not proven.
 - [Backup runbook](backup-runbook.md) — the plain-`restic` commands this
   page is an alternative front end for, and the wrapper-script env vars
   that don't carry over automatically.
-- [backup](../categories/backup.md) — the module that writes this
+- [backup](../config-structure/categories/backup.md) — the module that writes this
   repository.
 - [rustic-rs/rustic](https://github.com/rustic-rs/rustic) and
   [rustic.cli.rs](https://rustic.cli.rs/) — the live, canonical source;

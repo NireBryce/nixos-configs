@@ -1,0 +1,227 @@
+# `backup` — `homelab-config/homelab/backup/`
+
+_Last modified: 2026-10-22_
+
+[restic](https://restic.net/) backs up `nire-cube`'s service state to the
+`ts-hive` NAS already on the network. Cube-only; added 2026-08-28 against issue
+[#87](https://github.com/NireBryce/nixos-configs/issues/87) ("no backups
+anywhere in the fleet"). [backup-history.md](backup-history.md) has the
+original plan, an early NFS-mount correction, and the mount's pre-history.
+
+It is nested under [homelab](homelab.md) like the other six, but functionally
+the odd one out: nothing to reach over the tailnet, a timer rather than a
+listener.
+
+> **Condensed version:**
+> [backup-for-agents.md](backup-for-agents.md) — the same
+> ground with the narrative stripped out, for an agent (or a human in
+> a hurry) loading it mid-task. Both siblings get edited in the same
+> change.
+
+## Contents
+
+- [Category contents](#category-contents)
+- [Why the category isn't named `restic`](#why-the-category-isnt-named-restic)
+- [SFTP repository now, not local-path on NFS](#sftp-repository-now-not-local-path-on-nfs)
+- [The sqlite consistency bug — root-caused and fixed, 2026-09-06](#the-sqlite-consistency-bug--root-caused-and-fixed-2026-09-06)
+- [What's excluded, and why](#whats-excluded-and-why)
+- [Anti-deletion is not a Nix change](#anti-deletion-is-not-a-nix-change)
+- [What isn't done yet](#what-isnt-done-yet)
+- [Imported by](#imported-by)
+- [See also](#see-also)
+
+## Category contents
+
+One file, `nixos`-class: `restic/restic.nix`, declaring
+`services.restic.backups.cube`:
+
+- **Paths**: `/var/lib/forgejo`, `/var/lib/grafana`, `/var/lib/golink`,
+  `/persist/secrets`, `/persist/passwords`, and the sqlite staging directory.
+- **Schedule**: a daily timer with a randomized delay and `Persistent = true`
+  (times in `restic/restic.nix`).
+- **Retention** (`pruneOpts`, an unsized starting point): daily, weekly and
+  monthly keeps, values in `restic/restic.nix`.
+- **Secrets**: `restic-cube-ssh-key` and `restic-cube-password`, declared in
+  the module itself (not `sops.nix`) so they decrypt only where it is imported.
+- `initialize = true`, and plain `restic` in `environment.systemPackages`
+  next to nixpkgs' `restic-cube` wrapper (the wrapper can't do a
+  two-repository `restic copy`).
+
+## Why the category isn't named `restic`
+
+A category and its one module both named `restic` would both declare
+`flake.modules.nixos.restic` and silently **merge** (the `containers`/`podman.nix`
+collision [architecture.md](../architecture.md) documents). [git-forge](git-forge.md)
+and [shortlinks](shortlinks.md) are named for the same reason.
+
+## SFTP repository now, not local-path on NFS
+
+Shipped 2026-08-28 with a local-path repository on the NFS mount, a
+deliberate departure from #87's original SFTP sketch (restic encrypts
+client-side regardless of backend, so local-path gets the same
+encryption-at-rest without SSH on `ts-hive`). The stated trade-off — NFS
+export trust is IP-based, not keyed — is what broke it: a real switch hit
+`mount.nfs: access denied by server`, and the share's host-access list
+never got cube added. So: issue #87's original plan, SFTP — real
+per-connection key auth rather than a host-IP allowlist.
+
+The module now points at `sftp:nire@ts-hive:/share/restic-backup/cube`,
+authenticating with a dedicated ed25519 key (generated for this, not the
+personal key; confirmed by hand: `ssh -i ~/.ssh/restic-cube-backup
+nire@ts-hive` authenticates with no password). The `ts-hive` host key is pinned
+in Nix (`programs.ssh.knownHosts` via `ssh-keyscan`), not trusted on first
+connection.
+
+**Moved off `nire`'s home 2026-09-03** — it originally pointed at
+`/share/homes/nire/restic-cube`, but `ts-hive` snapshots the anti-deletion
+mitigation below needs are per-shared-folder, so that path would have
+required snapshotting every user's home directory just to cover this repo.
+`restic-backup` (its own pool) already exists as its own unused share, so
+the repo moved there. **Done, live-confirmed 2026-09-05**: cube switched
+onto this path, its own timer already ran successfully against it, and the
+five snapshots from the old `homes` path (2026-08-31 through 2026-09-04)
+were migrated in with `restic copy` — six snapshots total, verified via a
+live `snapshots` listing. See [backup-history.md](backup-history.md) for
+exactly what ran.
+
+## The sqlite consistency bug — root-caused and fixed, 2026-09-06
+
+Forgejo, Grafana and golink are all sqlite, and copying a live db file can
+capture a torn write mid-transaction that restic will store without
+complaint (issue #87's open question 1). `backupPrepareCommand` runs
+`sqlite3 <db> ".backup"` into a staging directory before each backup; the
+three live db files are `exclude`d, so it's the staged, consistent copy
+that gets backed up, not the live one. The prepare step runs under
+`umask 077` and creates the staging directory 0700: the copies are whole
+databases, account hashes included, and until 2026-09-27 they sat 0644 in
+a 0755 directory, readable by every account on cube while the live ones
+sit in 0700/0750 service directories.
+
+**It had never worked.** Found doing the restore drill this page's own
+"done means" always said was the real bar: `restic ls --recursive
+<snapshot> /var/cache/restic-backups-cube/sqlite-staging` against the
+repository's own metadata — not a restore, the repository directly —
+showed **zero file entries** in every real snapshot checked: 2026-09-01,
+2026-09-05, and two fresh on-demand runs on 2026-09-06, one immediately
+after a full reboot of cube. `/persist/secrets`, `/persist/passwords`,
+and the live Forgejo/Grafana/golink directories really were backed up;
+only this specific mechanism — the entire reason `backupPrepareCommand`
+exists — had silently protected nothing, the whole time.
+
+**Root cause**: the staging directory lived at
+`/var/cache/restic-backups-cube/sqlite-staging` — *inside*
+`RESTIC_CACHE_DIR` (nixpkgs' restic module sets that to
+`/var/cache/restic-backups-<name>`, matching the systemd unit's own
+`CacheDirectory=` exactly). **restic refuses to back up its own cache
+directory.** Confirmed with a clean before/after test, not from docs: the
+identical `restic backup --dry-run` with the identical
+`--exclude-file`/`--files-from` processed 603 files <!-- count-ok: dry-run measurement, not a repo count --> (all three staged
+sqlite copies included) with `RESTIC_CACHE_DIR` unset, and exactly 600
+(all three silently dropped, no error) with it set to the real value —
+the one variable that changed. Everything else chased along the way and
+ruled out, each by faithful reproduction rather than inference: sandboxing
+(`PrivateTmp`/`CacheDirectory`, via `systemd-run` with matching
+properties); exclude-pattern basename matching; switch-without-reboot
+cruft (survived a fresh reboot). A `backupPrepareCommand`-added diagnostic
+log (`prepare.log`) proved the sqlite3 step itself always wrote real,
+correctly-sized files — the failure was 100% on restic's side.
+
+**Fix**: `sqliteStagingDir` moved to `/var/lib/restic-backups-cube-sqlite-staging`
+— outside the cache directory entirely, a structural fix rather than an
+`--exclude-caches`-adjacent flag that would leave the directory choice
+still wrong.
+
+**What this means for existing backups**: every snapshot taken before
+this fix protects `/persist/secrets`, `/persist/passwords`, and the live
+service directories, but not the sqlite databases themselves — nothing
+past-tense is recoverable that wasn't already.
+
+**Confirmed live, 2026-09-06 — issue #87's actual "done means" bar,
+finally met for real.** Cube switched, a real run produced snapshot
+`095beb8e` with `/var/lib/restic-backups-cube-sqlite-staging` correctly
+listing all three real files, and a real restore of that path opened a
+genuine, complete Forgejo database — every expected table present
+(`repository`, `user`, `issue`, `pull_request`, `webhook`, `action_run`,
+and dozens more). Not just "backed up": recovered, and openable. This is
+the first time since the module's creation that's been true.
+
+## What's excluded, and why
+
+Prometheus's TSDB is deliberately not in `paths` — issue #87's open
+question 4: the biggest path on the host by far, the least valuable, and
+fully regenerable by scraping again. Nothing else cube runs is excluded.
+
+## Anti-deletion is not a Nix change
+
+Issue #87's open question 3: anything compromising cube can run
+`restic forget --prune` against its own backups, since `nire` (`ts-hive`
+account) has full read-write access to the repository. SFTP didn't close
+this. The mitigation this module assumes — cheapest rung of #87's
+ascending-effort list — is a **NAS-side native snapshot schedule on the
+`restic-backup` share itself** (the repo's own dedicated share as of
+2026-09-03, not a share shared with anything else), so cube can write and
+prune within the repository but can't touch the NAS's own snapshots. `ts-hive`
+admin-console configuration, so nothing in this repo can enforce it — but
+**confirmed live, 2026-09-05**, via a snapshot-schedule screenshot: daily
+at 04:30, keeping 5 days, status Success, 2 snapshots taken.
+
+## What isn't done yet
+
+Live-checked 2026-09-05/06, over ssh to `nire-cube.local`:
+
+- ~~Both sops secrets are declared but this tree can't set their
+  values~~ — **set, 2026-08-30/31**, and the shell-level mechanics work:
+  real timer runs exit `status=0/SUCCESS` end to end against both the old
+  and new repo paths. **Whether the content they produce is actually
+  correct is a separate question** — see "The sqlite consistency bug"
+  above.
+- ~~The repository path moved but cube hasn't switched onto it~~ —
+  **switched, and the pre-move repo's history migrated in** (see above).
+- ~~The NAS-side snapshot schedule described above still hasn't been
+  configured~~ — **done** (see above).
+- ~~The sqlite consistency bug — root cause unknown~~ — **root-caused,
+  fixed, and confirmed live** (above): a real restore of the new path
+  opened a genuine, complete Forgejo database.
+- **SSH on the NAS is tailnet-only, as of 2026-08-31** — port 22 is
+  LAN-blocked (confirmed live from both lysithea and cube — the LAN
+  address times out, `ts-hive`'s tailnet address still connects). See
+  [backup-history.md](backup-history.md) for the full account.
+- **Tailnet-only means the tailnet policy has to let cube in.** cube has
+  been tagged `tag:homelab-cube` since 2026-09-07, and a tagged device is
+  outside `autogroup:members` as a source, so the member-to-member grant
+  never covered cube → ts-hive. Backups failed nightly from then until a
+  dedicated `tag:homelab-cube → ts-hive, tcp:22` grant was added
+  2026-09-26 — found by accident while narrowing the policy, since nothing
+  alerts on a failed backup run.
+
+All of the above is done. The restore drill has been
+performed — issue #87's own "done means" was followed exactly as
+written, twice: once to find that the sqlite consistency mechanism
+(above) had never worked, something no green timer ever would have
+caught, and once more after the fix, to confirm a real restore recovers
+a real, openable Forgejo database. **This module is done.**
+
+## Imported by
+
+`nire-cube` only, via `homelab`. Confirmed not to move durandal, tenacity,
+or lysithea: each host's toplevel `drvPath` is byte-identical before and
+after this category was added.
+
+## See also
+
+- [homelab](homelab.md) — the umbrella category this nests under.
+- [git-forge](git-forge.md), [monitoring](monitoring.md),
+  [shortlinks](shortlinks.md) — the three services this category
+  backs up.
+- [#87](https://github.com/NireBryce/nixos-configs/issues/87) — the
+  issue this category closed; extending it past cube is
+  [#130](https://github.com/NireBryce/nixos-configs/issues/130).
+- [../../homelab/pending-setup.md](../../homelab/pending-setup.md) — the
+  fleet's one-time setup steps (backups' are all done).
+- [../../homelab/backup-runbook.md](../../homelab/backup-runbook.md) — the actual
+  commands (finishing setup, status, manual backup, restore).
+- [../../homelab/rustic.md](../../homelab/rustic.md) — an interactive TUI that can
+  browse and restore from this same repository, installed but not yet
+  switched or run against it.
+- [backup-history.md](backup-history.md) — the original plan and what it
+  got wrong about the `ts-hive` mount.

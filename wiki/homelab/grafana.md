@@ -3,7 +3,7 @@
 _Last modified: 2026-10-22_
 
 Grafana on `nire-cube` shows the metrics
-[monitoring](../categories/monitoring.md) collects. This page covers signing
+[monitoring](../config-structure/categories/monitoring.md) collects. This page covers signing
 in and what happens to a dashboard you make; that page covers how it's
 configured and why.
 
@@ -74,7 +74,7 @@ Two kinds of dashboard exist here and they behave differently:
 A UI dashboard **survives a restore** (the db is backed up) but **not a
 rebuild that reprovisions** `_dashboards/`. If you want to keep one, it has
 to end up in the repo:
-[monitoring.md's how-to](../categories/monitoring.md#adding-a-dashboard-that-survives-a-rebuild)
+[monitoring.md's how-to](../config-structure/categories/monitoring.md#adding-a-dashboard-that-survives-a-rebuild)
 covers exporting it to JSON and adding it — **not yet verified against a
 real UI export**, so expect to correct it the first time someone tries.
 
@@ -121,9 +121,9 @@ get a file that is present and opens as nothing.
 
 ## See also
 
-- [monitoring](../categories/monitoring.md) — configuration, the
+- [monitoring](../config-structure/categories/monitoring.md) — configuration, the
   `secret_key` trap, and the dashboard how-to.
-- [maintenance-schedule.md](../maintenance-schedule.md) — item 8, both
+- [maintenance-schedule.md](../upkeep-and-admin/maintenance-schedule.md) — item 8, both
   passwords and what would unify them.
 - [Reaching cube's services](reaching-services.md) — names, TLS, and what to
   check when something doesn't answer.

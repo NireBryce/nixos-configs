@@ -2,7 +2,7 @@
 """Fixture tests for comment_wrap.py, the comment-width checker/fixer.
 
 One half is the lexer: which lines are pure `#` comments, against the
-shapes the tree actually holds and the ones wiki/module-style-guide.md
+shapes the tree actually holds and the ones wiki/config-structure/module-style-guide.md
 warns about -- `#` shell comments inside `''` strings (fourteen lines of
 maintenance notes once shipped into `~/.zshrc` that way), `${ ... }`
 interpolations with strings and comments inside, and the `''` escape

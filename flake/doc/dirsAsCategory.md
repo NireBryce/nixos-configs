@@ -3,7 +3,7 @@
 > **History since 2026-10-16.** The shims and `_lib/category-collector.nix`
 > this note describes were replaced by the `dirs-as-categories` flake input:
 > no shims, categories found from the tree's shape, module names from
-> filenames. [`../../wiki/module-files.md`](../../wiki/module-files.md) is
+> filenames. [`../../wiki/config-structure/module-files.md`](../../wiki/config-structure/module-files.md) is
 > the current design and why. Kept for the reasoning and the history below,
 > which still explain categories; the collector's last version is
 > `git show 5808bfe2:flake/modules/_lib/category-collector.nix`. The
@@ -346,14 +346,14 @@ The two wrong versions:
   silently dropped `libvirt-vm-llm-sandbox` from `nire-cube`'s
   `systemd.services` entirely. Cause: `virtualization-cube.nix` (the
   `nire-llm-sandbox` VM's cube wiring — both since removed, 2026-08-28; see
-  `wiki/history.md`) sat bare in `homelab-config/homelab/virtualization/`'s own root,
+  `wiki/meta/history.md`) sat bare in `homelab-config/homelab/virtualization/`'s own root,
   deliberately excluded from the
   `virtualization` category's own aggregate (a `.nix` file bare in a
   category's own root was then collected by nothing — the rule removed
   2026-09-28, below) — but it reached `nire-cube` at all only because
   `homelab` used to walk into `virtualization/` independently, as *its*
   subdirectory, where a bare file one level in was never excluded (see
-  `wiki/categories/virtualization.md`'s "This exclusion is category-scoped,
+  `wiki/config-structure/categories/virtualization.md`'s "This exclusion is category-scoped,
   not tree-scoped" section). Delegating straight to `virtualization`'s
   aggregate collapsed that independence and lost exactly that file.
   Confirmed by evaluating `nire-cube`'s `config.systemd.services` before and

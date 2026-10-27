@@ -16,7 +16,7 @@ name: flake-check
 # the PR's own commit trailers.
 #
 # The job's `name:` is the required status check in the ruleset, and is
-# quoted by name in update-flake-lock.yml and wiki/maintenance.md -- do not
+# quoted by name in update-flake-lock.yml and wiki/upkeep-and-admin/maintenance.md -- do not
 # rename it; a renamed job leaves the required check pending forever.
 #
 # One job, deliberately: an early no-nix job for the stdlib tests would

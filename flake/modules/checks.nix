@@ -8,11 +8,11 @@
 # host's toplevel derivation is what catches the class, and it builds nothing.
 #
 # A function asking for `config`, so dirs-as-categories loads it as a plain
-# flake-parts module rather than a module file (wiki/module-files.md).
+# flake-parts module rather than a module file (wiki/config-structure/module-files.md).
 { config, lib, inputs, ... }:
 {
     # checks.<system>.module-orphans: fails naming any module inside a
-    # category that no `includes`/`enables` reaches (wiki/module-files.md).
+    # category that no `includes`/`enables` reaches (wiki/config-structure/module-files.md).
     dirsAsCategories.checkOrphans = true;
 
     perSystem = { system, ... }:
