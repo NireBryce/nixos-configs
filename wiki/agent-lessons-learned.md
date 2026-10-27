@@ -12,8 +12,9 @@ already be reading, and which states the rule), and what **Enforced** it
 mechanically, or `none`. The full account of §N is
 `wiki/agent-lessons-learned/<N>-*.md`, linked from the entry.
 
-- **New here, and a person:** read
-  [0-human-README.md](agent-lessons-learned/0-human-README.md) first.
+- **Reading this as a person:** start with
+  [0-human-README.md](agent-lessons-learned/0-human-README.md), which explains
+  what this section is for.
 - **Look one up by number:** `ls wiki/agent-lessons-learned/25-*`, or grep this
   page for `§25`. Numbers are stable and cited from files across the repo; never renumber.
 - **Look one up by task:** read the group you're in.
