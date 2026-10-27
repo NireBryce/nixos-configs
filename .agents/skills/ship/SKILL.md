@@ -93,7 +93,8 @@ Never commit onto `experimental`. `git status -sb` first:
   edit) is destroyed by `reset --hard` with no recovery. Anything beyond
   your commits: stop and ask. The git-guard hook now denies `reset --hard`
   on a dirty tree (since 2026-09-29; its old `ask` was a no-op under
-  `--permission-mode auto`, issue #182), but only in Claude Code, and it
+  `--permission-mode auto`, issue #182), in Claude Code and in ZCode (both
+  harnesses wire the same guard), and it
   falls back to `ask` — still a no-op under auto mode — when it can't tell
   which repo the reset acts on: anything beyond plain `cd <path>` and
   `git [-C <path>] <subcommand> <args>` joined by `&&`/`;`. So the
