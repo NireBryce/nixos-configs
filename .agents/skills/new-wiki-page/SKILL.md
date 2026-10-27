@@ -1,6 +1,7 @@
 ---
 name: new-wiki-page
-description: How to create a new wiki page with the date line, Contents block, sibling decision, and index registration wiki-lint requires.
+description: Creates a wiki page with the date line, Contents block, sibling decision and index entry that wiki-lint requires.
+when_to_use: Creating any new page under wiki, such as a category page, a homelab runbook or a topic page.
 ---
 
 # Creating a new wiki page

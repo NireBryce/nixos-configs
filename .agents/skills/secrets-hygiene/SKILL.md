@@ -1,7 +1,7 @@
 ---
 name: secrets-hygiene
-description: How to avoid printing sops-managed secret values into the conversation in this repo, and what to do when one leaks anyway.
-when_to_use: Any sops command, reading /run/secrets, "which secrets exist", env/printenv or journalctl near a unit that takes a secret, a secret value leaking into output.
+description: Keeps sops-managed secret values out of the conversation, and covers what to do when one leaks.
+when_to_use: Running any sops command, reading /run/secrets, asking which secrets exist, running env, printenv or journalctl near a unit that takes a secret, or a secret value showing up in output.
 ---
 
 # Handling sops secrets without leaking them

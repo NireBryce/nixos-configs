@@ -1,7 +1,7 @@
 ---
 name: new-flake-module
-description: How to create, rename, or wire a module in this repo.
-when_to_use: Adding, renaming, or moving a .nix file under the flake modules tree, making or unmaking a category, a module that does not seem to apply.
+description: Creates, renames and wires a module in the flake modules tree.
+when_to_use: Adding, renaming or moving a .nix file under the flake modules tree, making or removing a category, or a module that doesn't seem to apply.
 ---
 
 # Writing a module in this repo

@@ -1,7 +1,7 @@
 ---
 name: docs-audit-all
-description: How to audit every wiki page, rule file, skill, and AGENTS.md claim against the code, using parallel subagents that each own disjoint files.
-when_to_use: Asked to "audit the docs", "check the wiki against the code", "find stale or wrong docs everywhere" -- a standalone whole-repo accuracy pass.
+description: Audits every wiki page, rule file, skill and AGENTS.md claim against the code, with parallel subagents that each own separate files.
+when_to_use: Asked to audit the docs, check the wiki against the code, or find stale or wrong docs everywhere, as a standalone whole-repo accuracy pass.
 ---
 
 # Docs audit, repo-wide

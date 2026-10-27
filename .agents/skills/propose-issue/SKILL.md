@@ -1,6 +1,7 @@
 ---
 name: propose-issue
-description: How to propose filing a GitHub issue when you notice a genuine bug in this repo's own config/code/docs while working on something else.
+description: Proposes a GitHub issue for a real bug in this repo's config, code or docs that you found while doing something else.
+when_to_use: Noticing a defect while working on something unrelated, such as a command in a doc that fails, an option that no longer exists, or a claim the machine contradicts.
 ---
 
 # Proposing repo bugs for the issue tracker

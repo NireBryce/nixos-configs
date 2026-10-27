@@ -1,7 +1,7 @@
 ---
 name: review
-description: How to review a change in this repo — the repo-specific checks and known traps a generic reviewer doesn't know.
-when_to_use: Review a PR, branch, or commit, or before saying done on your own change.
+description: Reviews a change using this repo's own checks and known traps.
+when_to_use: Reviewing a PR, branch or commit, or before saying your own change is done.
 ---
 
 # Reviewing a change in nixos-configs

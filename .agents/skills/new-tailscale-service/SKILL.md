@@ -1,6 +1,7 @@
 ---
 name: new-tailscale-service
-description: How to give a homelab service its own Tailscale Services hostname fronted by Caddy for TLS.
+description: Gives a homelab service its own Tailscale Services hostname, with Caddy terminating TLS.
+when_to_use: A running homelab service should be reachable at its own tailnet hostname instead of a path under the host's shared name.
 ---
 
 # Giving a homelab service its own Tailscale Services hostname

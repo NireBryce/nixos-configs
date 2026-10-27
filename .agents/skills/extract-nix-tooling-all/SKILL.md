@@ -1,6 +1,6 @@
 ---
 name: extract-nix-tooling-all
-description: How to sweep the whole repo for Nix patterns, flake machinery, scripts, and traps worth extracting to a general Nix repo, and bring the candidates folder up to date.
+description: Sweeps the repo for Nix patterns, flake machinery, scripts and traps that would work in any flake, and updates the extraction candidates folder.
 when_to_use: Asked what Nix patterns here are reusable, or to refresh the Nix extraction candidates.
 ---
 

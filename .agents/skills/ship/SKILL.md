@@ -1,7 +1,7 @@
 ---
 name: ship
-description: Branch -> PR -> confirm merge-and-delete -> merge -> delete-branch flow for landing work on experimental in this repo.
-when_to_use: A bare "push", "ship it", "land this", or "merge this" -- any ask to get changes onto experimental, never a direct push to main.
+description: Lands work on experimental through a branch, a PR, a confirmed merge and delete, the merge, and deleting the branch.
+when_to_use: A bare push, ship it, land this or merge this, or any ask to get changes onto experimental. Never push directly to main.
 ---
 
 # Landing work on experimental in nixos-configs

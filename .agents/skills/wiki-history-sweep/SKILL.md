@@ -1,6 +1,7 @@
 ---
 name: wiki-history-sweep
-description: How to move a wiki page's resolved-incident narrative into a <name>-history.md companion, and how to find the pages that need it.
+description: Moves a wiki page's resolved-incident narrative into a history companion page, and finds the pages that need it.
+when_to_use: A wiki page carries narrative about fully resolved problems, or running the history candidates sweep.
 ---
 
 # Sweeping resolved narrative into a `-history.md` companion
@@ -49,7 +50,7 @@ False positives (confirmed 2026-09-11; the script still scores them; don't move)
 - `categories/shell-config/blesh.md` `read: not a valid identifier` — diagnosis is history-shaped; upstream bug still open.
 - `categories/system.md` "Containers vs. virtualization — no longer filed here" — trap is live; where someone remembering the old location looks.
 
-**A section's justification can expire** — worth sweeping for.
+**A section's justification can expire**. Check for it during a sweep.
 `reverse-proxy.md`'s `handle`-vs-`handle_path` section was kept 2026-09-02
 as explaining a live setting; path-prefix routes were retired 2026-09-07
 (each app got its own vhost), so no shared prefix remains. Same words, no

@@ -1,45 +1,40 @@
 ---
 name: boyscouting-all
-description: How to deliberately sweep the whole repo for the same small, local cleanups boyscouting fixes incidentally, and land them as one scoped change.
-when_to_use: Asked to "boyscout the repo", "clean up the small stuff everywhere" -- a standalone cleanup pass, not a fix noticed mid-task.
+description: Sweeps the whole repo for small, local cleanups and lands them as one scoped change.
+when_to_use: Asked to "boyscout the repo" or "clean up the small stuff everywhere" as a standalone task, not a fix noticed mid-task.
 ---
 
 # Boyscouting, repo-wide
 
 ## Applies to
 
-Asked to "boyscout the repo", "clean up the small stuff everywhere": a
-deliberate standalone pass over files you weren't editing for another task.
-Not: a fix noticed mid-task (`boyscouting`, in that task's commit); review of
-a diff; docs conciseness (`trim-docs`); stale facts (`wiki-sync`); anything
-with a real failure scenario (`propose-issue`).
+Asked to "boyscout the repo" or "clean up the small stuff everywhere": a standalone pass over files you weren't editing for another task. Not for:
+
+- a fix noticed mid-task: `boyscouting`, in that task's commit
+- reviewing a diff
+- docs conciseness: `trim-docs`
+- stale facts: `wiki-sync`
+- anything with a real failure scenario: `propose-issue`
 
 ## Relationship to `boyscouting`
 
-Same eligibility bar: read its "What qualifies" / "What doesn't" first.
-Only scope changes (this skill *is* the task, so opening files is
-deliberate). Behavior-neutral, no new failure scenario, no opinion-only
-renames, real bugs to `propose-issue` — all still apply.
+Same bar for what's eligible. Read its "What qualifies" and "What doesn't" first. Only the scope differs: this skill is the task, so opening files is expected. Changes must still be behavior-neutral, create no new failure scenario, and skip opinion-only renames. Real bugs go to `propose-issue`.
 
-The discipline: not "keep the diff small" (it won't be) but **every hunk
-independently justifiable and trivially reviewable**; smuggle in nothing
-that needed its own task.
+The diff won't be small, so the test is that every hunk is independently justifiable and trivially reviewable. Don't include anything that needed its own task.
 
 ## Steps
 
 1. **Use a worktree** (`use-a-worktree`).
-2. **Scope first.** Ask whether it's everything, one area (`flake/modules/general-config/`, `wiki/`, one host), or one class (dead imports, stale comments, unused variables). One clarifying question beats guessing diff size.
-3. **Search, don't skim.** Grep `boyscouting`'s qualifying shapes: unused bindings, TODO/FIXME older than surrounding code, duplicated small blocks, stale comments referencing moved code. `statix`/`deadnix` (run by `just preflight`) catch many Nix cases; use them first.
-4. **Apply the bar per candidate.** A real bug found here still goes to `propose-issue`, not this branch.
-5. **One commit per logical cleanup**, so a reviewer can revert one without another. Group only identical mechanical fixes (e.g. deadnix's suggested removals).
-6. **`just preflight`** before shipping.
-7. **`ship`**: one branch, one PR, describing scope and the categories of fix, not just "cleanup".
+2. **Pin down scope.** Ask whether it's everything, one area (`flake/modules/general-config/`, `wiki/`, one host), or one class of fix (dead imports, stale comments, unused variables). One question beats guessing diff size.
+3. **Search.** Grep for the shapes `boyscouting` lists: unused bindings, TODO/FIXME older than the surrounding code, duplicated small blocks, comments referencing moved code. Search, don't skim. Run `statix` and `deadnix` first (`just preflight` runs them); they catch many Nix cases.
+4. **Check each candidate against the bar.** A real bug goes to `propose-issue`, not this branch.
+5. **One commit per logical cleanup**, so a reviewer can revert one without the others. Group only identical mechanical fixes (e.g. deadnix's suggested removals).
+6. **Run `just preflight`** before shipping.
+7. **`ship`**: one branch, one PR. Describe the scope and the kinds of fix, not just "cleanup".
 
 ## Calibrate
 
-If step 5 would yield more than a handful of commits, the sweep found real
-work: split into a proposal (`propose-issue` per finding or one listing
-several), not a mega-branch. Not a full audit under a friendlier name.
+If step 5 gives more than a handful of commits, the sweep found real work. Split it into proposals (`propose-issue` per finding, or one issue listing several) instead of a mega-branch. A full audit isn't a boyscout pass.
 
 ## See also
 

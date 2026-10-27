@@ -1,6 +1,7 @@
 ---
 name: agent-scripts
-description: How to find the command patterns agents keep re-typing and extract them into general scripts behind `just agent`.
+description: Finds command patterns agents keep re-typing and turns them into scripts behind `just agent`.
+when_to_use: Periodic sweep for recurring commands, or mid-task when you're assembling the same pipeline again or writing a command too long to read in a permission prompt.
 ---
 
 # Agent scripts

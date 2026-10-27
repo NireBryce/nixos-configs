@@ -1,7 +1,7 @@
 ---
 name: home-manager-dotfiles
-description: How to edit Home Manager shell/dotfile modules in this repo, and read a generated dotfile back correctly.
-when_to_use: Editing zsh, bash, or starship rc content, home.file, or home.sessionPath, or a generated dotfile looks wrong or empty.
+description: Edits Home Manager shell and dotfile modules and reads a generated dotfile back correctly.
+when_to_use: Editing zsh, bash or starship rc content, home.file or home.sessionPath, or a generated dotfile looks wrong or empty.
 ---
 
 # Editing Home Manager shell/dotfile modules
@@ -25,7 +25,7 @@ Type is `types.lines`: two modules declaring one file both contribute. `.blerc` 
 - **Attribute names are inconsistent**: `".zshrc"`, `"./.zshrc"`, and full `/home/elly/...` all occur. A wrong name returns **empty, not an error**, indistinguishable from a real negative. Run `just dotfiles` first for actual names.
 - **Some entries have no `.text`**, only `.source` (`.bashrc`). Read the owning option instead (`programs.bash.initExtra`).
 
-Both hit minutes apart during the original port, by someone who had already written them down.
+Both happened within minutes of each other in the original port, by someone who had already written them down.
 
 ## rc ordering is load-bearing
 

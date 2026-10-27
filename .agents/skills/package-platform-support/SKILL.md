@@ -1,6 +1,7 @@
 ---
 name: package-platform-support
-description: How to tell whether nixpkgs can build a package on darwin and whether Homebrew already installs it, when adding or platform-gating a package in this repo.
+description: Checks whether nixpkgs builds a package on darwin and whether Homebrew already installs it, for adding or platform-gating a package.
+when_to_use: Before adding a package module, adding an isDarwin or platform guard, or deciding whether a cask duplicates a nixpkgs package.
 ---
 
 # Adding or platform-gating a package

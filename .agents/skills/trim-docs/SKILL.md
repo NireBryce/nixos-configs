@@ -1,7 +1,7 @@
 ---
 name: trim-docs
-description: How to tighten wiki pages, skills, and AGENTS.md prose for conciseness without breaking wiki-lint checks or losing load-bearing facts.
-when_to_use: Asked to "lint", "tighten", "trim", or "make more concise" the wiki, a skill, or AGENTS.md.
+description: Tightens wiki pages, skills and AGENTS.md prose without breaking wiki-lint or losing facts that matter.
+when_to_use: Asked to lint, tighten, trim or make more concise the wiki, a skill or AGENTS.md.
 ---
 
 # Trimming docs for conciseness

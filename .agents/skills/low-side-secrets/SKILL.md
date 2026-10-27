@@ -1,6 +1,7 @@
 ---
 name: low-side-secrets
-description: How to add and maintain a sops file keyed to a personal SSH key instead of host keys, for secrets that don't need NixOS activation-time decryption.
+description: Adds and maintains a sops file keyed to a personal SSH key instead of host keys, for secrets that don't need NixOS activation-time decryption.
+when_to_use: Adding a secrets file for an ad hoc secret whose recipient is a personal SSH key (via ssh-to-age) and whose access is already limited elsewhere. Not the main secrets.yaml.
 ---
 
 # A sops file keyed to a user, not a host
