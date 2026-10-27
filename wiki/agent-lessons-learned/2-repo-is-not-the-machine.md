@@ -4,7 +4,7 @@ _Last modified: 2026-10-20_
 
 ## Index entry
 
-§2 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+§2 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the longer write-up.
 
 ## The lesson
 
