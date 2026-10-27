@@ -1,5 +1,5 @@
 # The web services on nire-cube that get their own Tailscale Service name,
-# written once. A plain attrset `import`ed by path, filed under `_lib/`
+# written in one place. A plain attrset `import`ed by path, filed under `_lib/`
 # because import-tree ignores any path containing `/_`.
 #
 # Each of these facts used to be spelled out in the app's own module AND in

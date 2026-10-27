@@ -26,7 +26,7 @@ someone who wasn't there, not to argue against it.
 ## How it works
 
 Every category directory holds a copy of `dirsAsCategory.nix`. Since
-2026-08-27 that copy is a small shim — the actual logic lives once, in
+2026-08-27 that copy is a small shim — the actual logic lives in one place,
 `modules/_lib/category-collector.nix`, and every copy is now byte-identical
 (confirmed by hashing all of them; before this change three had drifted by a
 comment word, and `packages-config/_templates/dirsAsCategory.nix`, inert because

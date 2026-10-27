@@ -1,4 +1,4 @@
-# libvirt's default network, written once. A plain attrset `import`ed by path,
+# libvirt's default network, written in one place. A plain attrset `import`ed by path,
 # filed under `_lib/` because import-tree ignores any path containing `/_`
 # (same reason as virtualization/VMs/_lib/libvirt-vm.nix).
 #

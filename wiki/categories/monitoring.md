@@ -160,7 +160,7 @@ JSON there — no extra plumbing needed:
    `uid`, and a stale numeric `id` from the exported instance doesn't mean
    anything on a fresh provision.
 4. Point every panel's `datasource.uid` at the fixed
-   `prometheusDatasourceUid` (`"prometheus-cube"`, declared once in
+   `prometheusDatasourceUid` (`"prometheus-cube"`, declared in one place,
    `grafana.nix`) instead of leaving Grafana's own `${DS_PROMETHEUS}`
    template variable in the export — the existing dashboard does this
    throughout (`grep -c '"uid": "prometheus-cube"'` on it agrees), and it's
