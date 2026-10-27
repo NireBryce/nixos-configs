@@ -1,6 +1,6 @@
 # Module style guide
 
-_Last modified: 2026-10-26_
+_Last modified: 2026-10-27_
 
 Every module under `flake/modules/` follows these conventions, not just
 packages. See
@@ -25,7 +25,7 @@ all false by 2026-09-09: the tree had grown from 151 to 263 files.)
 - [Four-space indent](#four-space-indent)
 - [The module header](#the-module-header)
 - [`{ ... }:` on an inner module lambda is sometimes deliberate](#---on-an-inner-module-lambda-is-sometimes-deliberate)
-- [`# summary:` as the first line of the body](#-summary-as-the-first-line-of-the-body)
+- [`# summary:`, one per module](#-summary-one-per-module)
 - [Rationale goes inside the module body, not in a header block](#rationale-goes-inside-the-module-body-not-in-a-header-block)
 - [`with pkgs; [ ... ]` for package lists](#with-pkgs----for-package-lists)
 - [Aligned `=` columns](#aligned--columns)
@@ -128,11 +128,38 @@ distinction that matters when skimming a file to tell "is this a module" from
 counted in `flake/scripts/lint-baseline.json`'s statix total rather than fixed. Don't "fix" these on a
 lint pass without checking here first.
 
-## `# summary:` as the first line of the body
+## `# summary:`, one per module
 
-A one-line description of what the module is for, as a comment, immediately
-inside the module body. In `packages-config/` the prefix is `# package summary:`
-and it says what the package is (not just its name or a URL):
+Every module says what it is for in one `# summary:` comment, and has only
+one. Where it goes depends on whether the module has a leading comment (the
+block between the dirs-as-categories header and the opening `{`):
+
+- **With a leading comment**, that comment's first line is the summary, and
+  the paragraph it starts is the short version of everything below it:
+
+  ```nix
+  # summary: The setuid sudo binary is executable by `wheel` only (mode 4510,
+  # root:wheel), so a service account or any other non-wheel user ... can't
+  # reach sudo's own parser at all, ... (sudo-wheel-only.nix)
+  {
+      nixos = {
+          security.sudo.execWheelOnly = true;
+  ```
+
+- **Without one**, a one-line `# summary:` is the first line of the class
+  body, immediately inside it:
+
+  ```nix
+  nixos = {
+      # summary: nix-ld, needed for VSCode remote connection, etc
+      programs.nix-ld.enable = lib.mkDefault true;
+  };
+  ```
+  (nix-ld.nix)
+
+A module with several classes has one summary for the file, in the leading
+comment. In `packages-config/` the prefix is `# package summary:`, always in
+the body, and it says what the package is (not just its name or a URL):
 
 ```nix
 homeManager = { pkgs, ... }: {
@@ -143,7 +170,10 @@ homeManager = { pkgs, ... }: {
 };
 ```
 
-Keep it first, keep it to one line.
+Never write both a leading and a body summary: the two drift apart, and the
+shorter one usually repeats the longer. 21 modules had both until 2026-10-26.
+`just add-module` writes the body form; move it into the leading comment if
+the module grows one. Keep a body summary to one line.
 
 ### Why it is a comment and not an option
 

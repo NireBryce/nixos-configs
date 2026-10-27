@@ -1,6 +1,6 @@
 # Module style guide, for agents
 
-_Last modified: 2026-10-26_
+_Last modified: 2026-10-27_
 
 Condensed from [module-style-guide.md](module-style-guide.md). Rules only.
 
@@ -66,9 +66,12 @@ Was `moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file)` +
 
 ## `# summary:` / `# package summary:`
 
-One comment line, first thing in the module body, one line only. `package summary:`
-in `packages-config/` (what the package *is*); `summary:` elsewhere. Replaced
-`# # description = "..."`, 2026-10-26.
+One per module, never two. Module with a leading comment (between the header
+and `{`): that comment's first line is `# summary:`. Without one: a one-line
+`# summary:` first in the class body. Several classes: the leading comment.
+`package summary:` in `packages-config/` (what the package *is*), always in
+the body. `just add-module` writes the body form. Replaced
+`# # description = "..."`, 2026-10-26; 21 modules had both forms until then.
 
 **There is no such field** — not in flakes, flake-parts, or the NixOS module
 system (checked). The module system has no per-module namespace at all. A
