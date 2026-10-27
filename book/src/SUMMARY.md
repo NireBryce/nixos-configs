@@ -16,6 +16,12 @@
 - [Wiring a user and Home Manager](users-and-home-manager.md)
 - [Darwin edge cases](darwin.md)
 
+# Working with agents
+
+- [How agents work in this repo](agents-in-the-repo.md)
+- [Checks, guards and hooks](agent-checks-and-guards.md)
+- [Git and agent workflows](git-and-agent-workflows.md)
+
 # Reference
 
 - [Glossary](glossary.md)

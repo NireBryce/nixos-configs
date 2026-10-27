@@ -88,12 +88,28 @@ explicit root.
 Source: `flake/doc/trailhead-home-manager-standalone.md`, "Order, and the
 one-way part".
 
+## Guard hook
+
+A guard hook is a harness hook that denies, asks or warns when a tool call
+matches a pattern, such as a git command that would discard uncommitted work
+or a command that would print decrypted secrets. The guards are string and
+path matchers, not a security boundary.
+Source: `.agents/rules/agent-config.md`; the scripts under `.agents/hooks/`.
+
 ## Home Manager
 
 Home Manager manages a user's packages and dotfiles with the same module
 system NixOS uses. In this repo it runs inside each system configuration, so
 there is no `homeConfigurations` output and one switch applies both.
 Source: `flake/modules/general-config/system/home-manager/enable-home-manager.nix`.
+
+## Hook (Claude Code)
+
+A hook is a command the agent harness runs at a fixed event (session start,
+before a tool call, after one), whose JSON reply can deny, ask, warn or add
+context. Claude Code reads the list from `.agents/settings.json`; ZCode reads
+the same scripts from `.zcode/config.json`.
+Source: `.agents/settings.json`; `.agents/rules/agent-config.md`.
 
 ## Impermanence
 
@@ -113,6 +129,24 @@ what they take. An unknown name stops evaluation.
 Source: [module-files.md](../../wiki/config-structure/module-files.md), Quick
 facts.
 
+## Lesson
+
+A lesson is a numbered record of a past agent mistake: an article in
+`wiki/agent-lessons-learned/`, a one-line index entry naming the rule's Home
+and what enforces it, and, where it applies to paths or commands, a reminder
+topic in `.agents/lessons-map.toml`. Lesson numbers are stable and
+never renumbered.
+Source: [agent-lessons-learned.md](../../wiki/agent-lessons-learned.md),
+header.
+
+## Lint ratchet
+
+The lint ratchet compares statix, deadnix and oversized-file counts against a
+committed baseline, so a commit can lower a count but never raise it. A
+commit that lowers one rewrites the baseline, and the pre-commit hook stages
+it.
+Source: `flake/scripts/lint.py`, docstring; `.githooks/pre-commit`.
+
 ## Module class
 
 A module class is the kind of configuration a module targets: `nixos`,
@@ -120,6 +154,15 @@ A module class is the kind of configuration a module targets: `nixos`,
 whose value is the module for that class.
 Source: [module-files.md](../../wiki/config-structure/module-files.md), "What
 a module file is".
+
+## Offline checks
+
+The offline checks are the checks that need neither nix nor `just`, run by
+the git hooks when nix cannot supply the lint tools, as in a cloud container
+that cannot fetch the flake inputs. `staged` mode checks syntax and parsing
+of staged files plus the wiki lint; `preflight` mode runs preflight's
+`python3` steps.
+Source: `flake/scripts/offline_checks.py`, docstring.
 
 ## Orphan
 
@@ -137,6 +180,21 @@ from it silently loses `allowUnfree`.
 Source: `flake/modules/host-config/hosts.nix` (comments above `mkHost`);
 `flake/doc/flake-parts-rationale.md`.
 
+## Preflight
+
+Preflight is the `just preflight` recipe: the wiki lint, the test suites,
+`just check`, `just modules` and `just lint`. CI runs the recipe itself, so
+a step added to it gates every PR.
+Source: `.justfile`, `preflight`; `.github/workflows/check.yml`.
+
+## Skill
+
+A skill is a markdown procedure for one kind of task, at
+`.agents/skills/<name>/SKILL.md`. Its frontmatter `description` is what a
+harness lists, and an agent loads the skill when that description matches
+its task.
+Source: `.agents/skills/new-skill/SKILL.md`.
+
 ## `useGlobalPkgs` and `useUserPackages`
 
 These two Home Manager options are set by the NixOS-side bridge.
@@ -145,3 +203,11 @@ a second instantiation, which is why a home module may not set `nixpkgs.*`.
 `useUserPackages = true` installs packages into
 `/etc/profiles/per-user/<name>` instead of `~/.nix-profile`.
 Source: `flake/modules/general-config/system/home-manager/enable-home-manager.nix`.
+
+## Worktree
+
+A worktree is a second working directory attached to the same git
+repository, with its own checked-out branch and `HEAD` but shared branches
+and objects. Each task that will branch, commit or check out gets its own,
+so concurrent sessions do not disturb each other.
+Source: `.agents/skills/use-a-worktree/SKILL.md`.
