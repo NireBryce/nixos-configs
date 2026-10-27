@@ -8,7 +8,7 @@ let
 in {
     # `{ ... }:` kept over statix's suggested `_:` -- deliberate, see
     # wiki/module-style-guide.md's "`{ ... }:` on an inner module lambda".
-    nixos = { ... }: {
+    nixos = _: {
         # summary: let libvirt's NAT bridge past the host firewall
 
         # libvirt's default network is NAT behind `virbr0`, with libvirt's own dnsmasq

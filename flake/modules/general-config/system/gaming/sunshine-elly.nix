@@ -17,7 +17,7 @@
 {
     # `{ ... }:` kept over statix's suggested `_:` -- deliberate, see
     # wiki/module-style-guide.md's "`{ ... }:` on an inner module lambda".
-    nixos = { ... }: {
+    nixos = _: {
         users.users.elly.extraGroups = [
             "render" # /dev/dri/renderD* (root:render, 0660) -- VAAPI hardware encode.
                      # logind's dynamic per-seat ACLs (the "uaccess" udev tag) cover
