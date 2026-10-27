@@ -32,9 +32,19 @@ Full diagnosis: [`wiki/categories/shell-config/blesh.md`](../../../../../wiki/ca
 [`carapace-completer-read-fix.bash`](./carapace-completer-read-fix.bash)
 patches `_carapace_completer`'s body — via `declare -f` plus a textual
 substitution — replacing that one `read` call with pure parameter
-expansion (`nospace=${data##*$sep}; data=${data%$sep*}`, `$sep` the same
-real separator byte). No `read`, nothing for ble.sh's global override to
-catch, same result.
+expansion (`nospace=${data%%$sep*}; data=${data#*$sep}$'\n'`, `$sep` the
+same real separator byte). No `read`, nothing for ble.sh's global override
+to catch, same result. carapace's data is `<flag><SOH><completions>`; the
+trailing `$'\n'` stands in for the newline the original `<<<` here-string
+added, which the later `unset COMPREPLY[-1]` depends on.
+
+**Corrected 2026-10-26.** The first version of this fix (2026-08-24) split
+the other way round (`nospace=${data##*$sep}; data=${data%$sep*}`), putting
+the completions in `nospace` and the flag in `data`, so every completion
+came back empty; the live check counted `read` errors, which that version
+also removed. The current form was checked against the unpatched function in
+plain bash (not under an attached ble.sh) on seven real command lines:
+identical `COMPREPLY`.
 
 It has a built-in tripwire: if carapace ever changes its generated
 template so the exact line being matched no longer appears, the fix
@@ -52,7 +62,7 @@ advice wraps the same function. Order matters both ways: this fix needs
 source line), and it needs to run before the advice wrap so the advice
 ends up wrapping the *patched* version, not the original.
 
-## Status as of 2026-08-24
+## Status as of 2026-08-24 (fix form corrected 2026-10-26, see above)
 
 **Confirmed, through a real `just switch`.** In the tree, evaluates
 correctly (`just modules` clean, renders into `programs.bash.initExtra` as

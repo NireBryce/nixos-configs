@@ -1,6 +1,6 @@
 # Temporary patches and hacks
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-10-26_
 
 This page lists every workaround in this config that exists only because a
 third-party project has a bug, with what each one works around and when it
@@ -162,6 +162,10 @@ generated `_carapace_completer` mid-call and splits its arguments wrongly.
 split, so there is no `read` for ble.sh to catch. If carapace's template
 changes so the expected line is gone, the file prints a warning instead of
 patching.
+
+Upstream, ble.sh has an open issue for the `IFS=$'\001'` read failure
+(akinomyoga/ble.sh#735, checked 2026-10-26); carapace master still emits
+the `read` line.
 
 **Undo when** either ble.sh's cancellation path stops corrupting an
 in-flight `read`, or carapace's completer stops using `read` there. Check
