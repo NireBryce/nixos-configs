@@ -1,4 +1,8 @@
-# dirs-as-categories: the module is named after this file; its categories are the folders above it
+# This is a dirs-as-categories module, which means it creates a flake-parts
+# module that derives its name from its filename minus the .nix suffix, whose
+# category module is the name of the folder it belongs to.
+# https://github.com/NireBryce/dirs-as-categories/wiki
+
 # Device-permission groups elly needs for sunshine.nix (next door) to actually
 # work at runtime -- split out from that file because it edits the user
 # account rather than the service, and from elly-user.nix because these groups

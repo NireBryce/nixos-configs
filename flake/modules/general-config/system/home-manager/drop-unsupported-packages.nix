@@ -1,4 +1,8 @@
-# dirs-as-categories: the module is named after this file; its categories are the folders above it
+# This is a dirs-as-categories module, which means it creates a flake-parts
+# module that derives its name from its filename minus the .nix suffix, whose
+# category module is the name of the folder it belongs to.
+# https://github.com/NireBryce/dirs-as-categories/wiki
+
 # Drop packages nixpkgs cannot build on this system, once, instead of guarding
 # them one module at a time. elly-home-manager is shared verbatim by all four
 # hosts, so everything in it has to survive aarch64-darwin as well as

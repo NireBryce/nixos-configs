@@ -1,4 +1,8 @@
-# dirs-as-categories: the module is named after this file; its categories are the folders above it
+# This is a dirs-as-categories module, which means it creates a flake-parts
+# module that derives its name from its filename minus the .nix suffix, whose
+# category module is the name of the folder it belongs to.
+# https://github.com/NireBryce/dirs-as-categories/wiki
+
 # mosh (mobile shell): remote terminal over UDP that survives roaming,
 # sleep, and IP changes -- the client half of "get me a shell on another
 # machine". Filed under terminals/ by function, next to kitty (the local

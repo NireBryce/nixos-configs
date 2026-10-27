@@ -1,4 +1,8 @@
-# dirs-as-categories: the module is named after this file; its categories are the folders above it
+# This is a dirs-as-categories module, which means it creates a flake-parts
+# module that derives its name from its filename minus the .nix suffix, whose
+# category module is the name of the folder it belongs to.
+# https://github.com/NireBryce/dirs-as-categories/wiki
+
 # The Forgejo Actions runner VM -- a NixOS guest on nire-cube, instantiated
 # by virtualization-cube.nix through VMs/_lib/libvirt-vm.nix. This file is
 # the guest's whole config; cube-side support (the per-job registration,

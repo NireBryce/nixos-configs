@@ -1,4 +1,8 @@
-# dirs-as-categories: the module is named after this file; its categories are the folders above it
+# This is a dirs-as-categories module, which means it creates a flake-parts
+# module that derives its name from its filename minus the .nix suffix, whose
+# category module is the name of the folder it belongs to.
+# https://github.com/NireBryce/dirs-as-categories/wiki
+
 # Forgejo: a self-hosted git forge, tailnet-only, at
 # https://git.moose-micro.ts.net/. Added 2026-08-24, cube-only. Named
 # `git-forge`, not `forgejo`: a category and a module sharing a name declare

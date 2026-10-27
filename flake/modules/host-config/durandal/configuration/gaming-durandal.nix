@@ -1,4 +1,8 @@
-# dirs-as-categories: the module is named after this file; its categories are the folders above it
+# This is a dirs-as-categories module, which means it creates a flake-parts
+# module that derives its name from its filename minus the .nix suffix, whose
+# category module is the name of the folder it belongs to.
+# https://github.com/NireBryce/dirs-as-categories/wiki
+
 # Heroic and GameMode on durandal (Ryzen 7 5800X, RX 6700 XT / Navi 22,
 # 32 GB), added for Alan Wake 2, an Epic Games Store title. The shared
 # gaming.nix (Steam, MangoHud, protonup-qt) already reaches this host

@@ -28,7 +28,7 @@ HOSTS_NIX = '''{
     };
 }
 '''
-MOD = '''# dirs-as-categories: the module is named after this file; its categories are the folders above it
+MOD = '''# This is a dirs-as-categories module, which means it creates a flake-parts
 {
     CLASS = with pkgs; [ ];
 }
@@ -229,7 +229,7 @@ class Counts(Fixture):
         text = self.read('wiki/module-style-guide-for-agents.md')
         n_nix = len(list((self.root / 'flake/modules').rglob('*.nix')))
         self.assertIn(f'| total `.nix` files under `flake/modules/` | {n_nix} |', text)
-        self.assertIn('| header comment (`# dirs-as-categories: …`) | 6 |', text)
+        self.assertIn('| header comment (`# This is a dirs-as-categories module…`) | 6 |', text)
         self.assertIn('| `# # description` as first body line | 0 |', text)
         self.assertIn('| `with pkgs;` package lists | 6 |', text)
 

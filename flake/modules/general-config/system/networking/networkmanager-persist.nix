@@ -1,4 +1,8 @@
-# dirs-as-categories: the module is named after this file; its categories are the folders above it
+# This is a dirs-as-categories module, which means it creates a flake-parts
+# module that derives its name from its filename minus the .nix suffix, whose
+# category module is the name of the folder it belongs to.
+# https://github.com/NireBryce/dirs-as-categories/wiki
+
 # The persistence half of wifi.nix. wifi.nix only sets
 # networking.networkmanager.enable; this is filed as its own sibling rather
 # than folded in, matching tailscale-persist.nix's split from tailscale.nix.

@@ -1,4 +1,8 @@
-# dirs-as-categories: the module is named after this file; its categories are the folders above it
+# This is a dirs-as-categories module, which means it creates a flake-parts
+# module that derives its name from its filename minus the .nix suffix, whose
+# category module is the name of the folder it belongs to.
+# https://github.com/NireBryce/dirs-as-categories/wiki
+
 # Non-impermanence hosts (nire-cube today) have no help anywhere in this
 # repo setting a login password. WARN-impermanence.nix documents the whole
 # /persist dance for hosts that wipe /root on boot; a host that keeps a plain
