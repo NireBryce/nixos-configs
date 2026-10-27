@@ -93,20 +93,60 @@ rendered mdBook site they leave the book and will not resolve.
 Source: `flake/flake.nix`, `flake/modules/host-config/hosts.nix`,
 `README.md`, `wiki/overview.md`.
 
+## Three kinds of module
+
+The word "module" names three different things here, and the book keeps them
+apart. The repo follows the same convention, defined in
+[`wiki/config-structure/module-files.md`](../../wiki/config-structure/module-files.md).
+
+| Name | What it is | Example |
+|---|---|---|
+| [Module file](glossary.md#module-file) | A `.nix` file under `flake/modules/` that holds one or more class modules under class keys. It is named by its filename. | `ripgrep.nix` |
+| [NixOS module](glossary.md#nixos-module) (also Home Manager module, darwin module) | The value under a class key: an ordinary module of that system, evaluated for each host that includes the file. | the body of `homeManager = { pkgs, ... }: { ... }` |
+| [Flake-parts module](glossary.md#flake-parts-module) | A module that configures the flake itself (`flake.*`, `perSystem`, `withSystem`). In this tree it is a plain file outside the module-file shape. | `hosts.nix` |
+
+One module file and one flake-parts module, side by side:
+
+```nix
+# ripgrep.nix: a module file with one Home Manager module inside
+{
+    homeManager = { pkgs, ... }: {
+        home.packages = [ pkgs.ripgrep ];
+    };
+}
+```
+
+```nix
+# hosts.nix (shortened): a flake-parts module; it builds flake outputs
+{ config, inputs, withSystem, ... }:
+{
+    flake.nixosConfigurations = { /* one mkHost line per machine */ };
+}
+```
+
+The distinction explains an error you will meet. A plain NixOS module (for
+example `nixos-generate-config` output) placed under `flake/modules/` is not a
+module file, so dirs-as-categories loads it as a flake-parts module, and
+evaluation fails with an infinite recursion that names `modulesPath`. Wrapping
+it as `{ nixos = <the module>; }` makes it a module file
+(see [wrapping a raw NixOS module](adding-a-module.md#wrapping-a-raw-nixos-module)).
+Where a name already contains the word, such as `just modules` or
+`module-orphans`, "module" means module file.
+
 ## The idea in one paragraph
 
-Almost every `.nix` file under `flake/modules/` is a module, and its name is
-its filename. (The exceptions are plain flake-parts files such as `hosts.nix`,
+Almost every `.nix` file under `flake/modules/` is a module file, named by its
+filename. (The exceptions are plain flake-parts modules such as `hosts.nix`,
 `checks.nix`, `invariants.nix`, `dev-shell.nix` and `lib.nix`, `defaults.nix`
 files, and anything under a `_` path; see [how it works](how-it-works.md).)
-The folder a module sits in decides which [category](glossary.md#category)
-it belongs to; a category is a named group of modules that a host can take
-in one line. A host lists categories by name and receives every module in
-them. No central module list needs to be kept in sync, and no feature has
-its own `enable` option: membership is the directory tree. A single file can
-declare the NixOS side and the Home Manager side of one feature next to each
-other, one [module class](glossary.md#module-class) per key. The details, and
-the places where this design surprises people, are in
+The folder a module file sits in decides which [category](glossary.md#category)
+it belongs to; a category is a named group of module files that a host can
+take in one line. A host lists categories by name and receives every module
+file in them. No central list needs to be kept in sync, and no feature has its
+own `enable` option: membership is the directory tree. A single module file
+can declare the NixOS module and the Home Manager module of one feature next
+to each other, one [module class](glossary.md#module-class) per key. The
+details, and the places where this design surprises people, are in
 [how it works](how-it-works.md).
 
 ## Repository map

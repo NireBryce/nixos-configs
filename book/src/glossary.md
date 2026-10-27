@@ -79,6 +79,17 @@ modules. This repo uses it mainly for one option,
 Home Manager module side by side.
 Source: `flake/doc/flake-parts-rationale.md`.
 
+## Flake-parts module
+
+A flake-parts module configures the flake itself, through `flake.*`,
+`perSystem` or `withSystem`, and is evaluated by flake-parts' `mkFlake`. In
+this tree it is a plain file that is not in the module-file shape, such as
+`hosts.nix` or `checks.nix`. It is a different thing from a
+[module file](#module-file) and from the [NixOS module](#nixos-module) inside
+one.
+Source: [module-files.md](../../wiki/config-structure/module-files.md), "Three
+kinds of module, and what to call each".
+
 ## GC root
 
 A GC root is a reference that the Nix garbage collector treats as live, so
@@ -154,6 +165,25 @@ A module class is the kind of configuration a module targets: `nixos`,
 whose value is the module for that class.
 Source: [module-files.md](../../wiki/config-structure/module-files.md), "What
 a module file is".
+
+## Module file
+
+A module file is a `.nix` file under `flake/modules/` that holds one or more
+class modules under class keys (`nixos`, `homeManager`, `darwin`), or is a
+function of only `lib` and `inputs` returning such a set. dirs-as-categories
+names it after its filename and fills `flake.modules.<class>.<name>` from it.
+A bare "module" in a name such as `just modules` means module file.
+Source: [module-files.md](../../wiki/config-structure/module-files.md), "Three
+kinds of module, and what to call each".
+
+## NixOS module
+
+A NixOS module is the value under the `nixos` key of a [module file](#module-file):
+an ordinary NixOS module, evaluated by `nixosSystem` for each host that
+includes the file. A Home Manager module (the `homeManager` key) and a darwin
+module (the `darwin` key) are the same idea for those systems.
+Source: [module-files.md](../../wiki/config-structure/module-files.md), "Three
+kinds of module, and what to call each".
 
 ## Offline checks
 

@@ -203,14 +203,14 @@ graph (categories, modules, classes, `includes`, `enables`) as data, and
 Source: [module-files.md](../../wiki/config-structure/module-files.md),
 "Reaching other modules"; `flake/modules/general-config/system/home-manager/enable-home-manager.nix`.
 
-## Files that are not modules
+## Files that are not module files
 
-Not every `.nix` file under `modules/` is a module. If a function asks for
+Not every `.nix` file under `modules/` is a module file. If a function asks for
 `config` or `withSystem`, or a file has no class key, dirs-as-categories
 loads it as a **plain flake-parts module**. `hosts.nix`, `checks.nix`,
 `invariants.nix`, `dev-shell.nix` and `lib.nix` are written that way on
 purpose, and they carry no dirs-as-categories header comment. `defaults.nix`
-is never a module: its class parts apply whenever anything in its folder is
+is never a module file: its class parts apply whenever anything in its folder is
 reached, and `folderIsCategory` goes in it.
 
 A module file can no longer read the flake-parts `config`. Files that need
