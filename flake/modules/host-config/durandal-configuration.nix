@@ -39,24 +39,22 @@
         # the 2026-08-10 split.
         "kde-desktop"
 
-        # Deliberately NOT `virtualization` (libvirt/QEMU VMs) or `containers`
-        # (podman + distrobox) as of 2026-08-27 -- dropped from this host.
-        # Both were imported here since the flake-parts port purely for
-        # parity with what the den config carried, on the theory this
-        # workstation might use them the way cube's homelab VMs/containers
-        # actually did -- but nothing in this repo's history records this
-        # host ever actually running a VM or a distrobox container, unlike
-        # cube's confirmed usage. Removing them stops `libvirtd`/`podman` on
-        # the next `just switch` here. `virtualization` was already
-        # host-optional by design (tenacity, the handheld, already
-        # declines it) so this doesn't change any documented invariant; the
-        # `homelab` category still exists and is unaffected -- `containers`
-        # is now cube only (tenacity dropped it 2026-09-26), and
+        # Deliberately NOT `virtualization` (libvirt/QEMU VMs) or `containers` (podman +
+        # distrobox) as of 2026-08-27 -- dropped from this host. Both were imported here
+        # since the flake-parts port purely for parity with what the den config carried,
+        # on the theory this workstation might use them the way cube's homelab
+        # VMs/containers actually did -- but nothing in this repo's history records this
+        # host ever actually running a VM or a distrobox container, unlike cube's
+        # confirmed usage. Removing them stops `libvirtd`/`podman` on the next `just
+        # switch` here. `virtualization` was already host-optional by design (tenacity,
+        # the handheld, already declines it) so this doesn't change any documented
+        # invariant; the `homelab` category still exists and is unaffected --
+        # `containers` is now cube only (tenacity dropped it 2026-09-26), and
         # `virtualization` is cube only. See
-        # wiki/config-structure/categories/virtualization.md and wiki/config-structure/categories/containers.md's
-        # "Imported by" sections. If this host ever does need libvirt or
-        # podman again, re-add the two lines this comment replaced -- see
-        # git history for the exact wording.
+        # wiki/config-structure/categories/virtualization.md and
+        # wiki/config-structure/categories/containers.md's "Imported by" sections. If
+        # this host ever does need libvirt or podman again, re-add the two lines this
+        # comment replaced -- see git history for the exact wording.
 
         # ── packages ──────────────────────────────────────────────────────────
         "development"

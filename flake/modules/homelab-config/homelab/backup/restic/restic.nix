@@ -13,9 +13,10 @@
 # documents -- same reason `git-forge` isn't `forgejo`.
 #
 # Kept in the wiki, not restated here: what is verified and what isn't,
-# wiki/config-structure/categories/backup.md; how each one-time setup step actually went,
-# `backup-history.md`; the commands for restoring, migrating, or re-setting
-# a secret, wiki/homelab/backup-runbook.md. Traps sit next to the options.
+# wiki/config-structure/categories/backup.md; how each one-time setup step
+# actually went, `backup-history.md`; the commands for restoring, migrating, or
+# re-setting a secret, wiki/homelab/backup-runbook.md. Traps sit next to the
+# options.
 { lib, ... }:
 let
     # `restic-backup`, `ts-hive`'s own dedicated share (its own pool),

@@ -15,9 +15,10 @@
 # `${customDir}/conf/` on first run and a no-op once they exist.
 #
 # Kept in the wiki, not restated here: the access model, the admin-account
-# bootstrap and the verification record -- wiki/config-structure/categories/git-forge.md,
-# `-for-agents.md` and `git-forge-history.md`; cloning and day-to-day use,
-# wiki/homelab/forgejo.md. Traps sit next to the options.
+# bootstrap and the verification record --
+# wiki/config-structure/categories/git-forge.md, `-for-agents.md` and
+# `git-forge-history.md`; cloning and day-to-day use, wiki/homelab/forgejo.md.
+# Traps sit next to the options.
 { lib, ... }:
 let
     # port, URL and name shared with caddy.nix and serve.nix

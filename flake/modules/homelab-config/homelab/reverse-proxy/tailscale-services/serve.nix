@@ -10,10 +10,10 @@
 # `.ts.net` vhosts are the other half. Added 2026-09-07.
 #
 # Kept elsewhere, not restated here: the design and the current names,
-# wiki/config-structure/categories/reverse-proxy.md and its `-for-agents.md`; the first
-# attempt and why it failed, `reverse-proxy-history.md`; the control-plane
-# half (Service objects, ACL entries, `vip-put` traps, what is applied
-# live), this directory's README.md. Traps sit next to the options.
+# wiki/config-structure/categories/reverse-proxy.md and its `-for-agents.md`;
+# the first attempt and why it failed, `reverse-proxy-history.md`; the
+# control-plane half (Service objects, ACL entries, `vip-put` traps, what is
+# applied live), this directory's README.md. Traps sit next to the options.
 let
     cube = import ../../_lib/cube-services.nix;
 in {

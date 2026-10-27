@@ -3,8 +3,8 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# TEMPORARY -- wiki/upkeep-and-admin/temporary-patches-and-hacks.md lists it with its removal
-# condition.
+# TEMPORARY -- wiki/upkeep-and-admin/temporary-patches-and-hacks.md lists it
+# with its removal condition.
 { lib, ... }:
 let
 # The kernel this workaround was confirmed against. Any other version --

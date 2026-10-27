@@ -60,7 +60,8 @@
 # if that tradeoff stops feeling worth it.
 {
     # `{ ... }:` kept over statix's suggested `_:` -- deliberate, see
-    # wiki/config-structure/module-style-guide.md's "`{ ... }:` on an inner module lambda".
+    # wiki/config-structure/module-style-guide.md's "`{ ... }:` on an inner module
+    # lambda".
     nixos = _: {
         services.sunshine = {
             enable      = true;

@@ -32,8 +32,8 @@
 # paths, not on the invariants.
 #
 # A function asking for `config`, so dirs-as-categories loads it as a plain
-# flake-parts module, not a module file (wiki/config-structure/module-files.md); being no
-# module, it is not considered for orphans either.
+# flake-parts module, not a module file (wiki/config-structure/module-files.md);
+# being no module, it is not considered for orphans either.
 #
 # OPT-IN: HOSTS WITHOUT IMPERMANENCE ARE EXEMPT
 #

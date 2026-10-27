@@ -21,8 +21,8 @@
 # like checks.nix: it is a flake output, not something a host imports.
 {
     perSystem = { pkgs, inputs', ... }: {
-        # `just module-graph` and wiki/config-structure/architecture.md's diagram draw with this
-        # (flake/module-graph.toml says where each area goes).
+        # `just module-graph` and wiki/config-structure/architecture.md's diagram draw
+        # with this (flake/module-graph.toml says where each area goes).
         packages.module-graph = inputs'.flake-module-graph.packages.default;
 
         devShells.default = pkgs.mkShell {

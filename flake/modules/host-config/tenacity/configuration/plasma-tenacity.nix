@@ -15,10 +15,10 @@
 # preferences, not something a second KDE host would want verbatim.
 #
 # A CURATED SUBSET, not a 1:1 dump. What was excluded and why, and the
-# column-1-vs-column-2 diffing trick that recovers which shortcuts were
-# actually changed out of kglobalshortcutsrc's ~350 dumped lines, are in
-# wiki/config-structure/categories/desktop-env.md -- read that before re-capturing, or the
-# exclusions get silently swept back in.
+# column-1-vs-column-2 diffing trick that recovers which shortcuts were actually
+# changed out of kglobalshortcutsrc's ~350 dumped lines, are in
+# wiki/config-structure/categories/desktop-env.md -- read that before
+# re-capturing, or the exclusions get silently swept back in.
 #
 # The one fact worth carrying here: nearly every default Meta-based
 # kwin/plasmashell shortcut on this machine is deliberately UNBOUND, and
