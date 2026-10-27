@@ -6,7 +6,7 @@
 # summary: Caddy: one tailnet-only HTTPS front door for every web service on
 # nire-cube, with certs from tailscaled. Added 2026-08-24, cube-only. The
 # category is `reverse-proxy`, not `caddy`: a category and its one module
-# sharing a name silently MERGE rather than error (CLAUDE.md, Architecture).
+# sharing a name stops evaluation (dirs-as-categories refuses a repeated name).
 #
 # Kept in the wiki, not restated here: the design and what it moved, the
 # out-of-repo prerequisites (tailnet HTTPS in the admin console, each `svc:`

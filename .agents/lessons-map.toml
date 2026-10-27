@@ -62,7 +62,7 @@ rules     = "flake-modules.md"
 skill     = "new-flake-module"
 lessons   = [23, 34, 35]
 remind_on = "create"
-remind    = "New module: its name is its filename, and a same-named module or category merges with it silently -- a category directory reserves its own basename. `just add-module` checks that up front; `git add` it before any eval, then `just modules`."
+remind    = "New module: its name is its filename, and a same-named module or category is an evaluation error -- a category directory reserves its own basename. `just add-module` checks that up front; `git add` it before any eval, then `just modules`."
 
 [[topic]]
 id      = "homelab"

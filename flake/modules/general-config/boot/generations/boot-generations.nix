@@ -9,9 +9,9 @@
 # 2026-09-28, when a category still skipped .nix files sitting straight in its
 # own directory; grouping only since. And named boot-generations rather than
 # boot.nix: a module's name is its filename, so boot.nix would declare
-# flake.modules.nixos.boot, which is this category's own name, and the two would
-# silently MERGE rather than conflict. That exact collision is why
-# boot-durandal.nix carries the name it does; `just modules` fails on it now.
+# flake.modules.nixos.boot, which is this category's own name, and a repeated
+# name stops evaluation. (It once merged silently, which is why
+# boot-durandal.nix carries the name it does.)
 {
     nixos = {
         # systemd-boot's default is `null`, which means keep every

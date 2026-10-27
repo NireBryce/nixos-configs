@@ -5,9 +5,9 @@
 
 # summary: Forgejo: a self-hosted git forge, tailnet-only, at
 # https://git.moose-micro.ts.net/. Added 2026-08-24, cube-only. Named
-# `git-forge`, not `forgejo`: a category and a module sharing a name declare
-# the same `flake.modules.nixos.<name>` and silently MERGE (`just modules`
-# caught it pre-ship).
+# `git-forge`, not `forgejo`: a category and a module sharing a name share one
+# name, which stops evaluation (it once merged silently; `just modules` caught
+# it pre-ship).
 #
 # No hand-created secrets here, unlike grafana.nix -- checked against the
 # pinned nixpkgs module: `services.forgejo` ships `forgejo-secrets.service`,

@@ -17,7 +17,7 @@
 # `boot.kernelParams` and rebuild, or boot an older generation, or a live USB.
 #
 # Named boot-editor, not editor.nix or boot.nix -- see boot-generations.nix's
-# header for the same-name merge this avoids.
+# header for the same-name clash this avoids.
 {
     nixos = {
         boot.loader.systemd-boot.editor = false;

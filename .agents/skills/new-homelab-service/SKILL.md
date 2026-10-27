@@ -49,8 +49,9 @@ included; they race for the port. Gate it with
 
 ## 2. Name the category after the function, never the tool
 
-Category and module sharing a name both declare `flake.modules.nixos.<name>`
-and **silently merge** (happened with `containers`/`podman.nix`).
+Category and module sharing a name share one name, and a repeated name stops
+evaluation (dirs-as-categories refuses it). It once **merged silently**, which
+is how `containers`/`podman.nix` happened.
 
 | category | module | why not the obvious name |
 |---|---|---|

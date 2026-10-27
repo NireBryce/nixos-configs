@@ -1,10 +1,12 @@
 # 34. The dangerous name collision is the one where both halves work
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-27_
 
 ## Index entry
 
 §34 in [agent-lessons-learned.md](../agent-lessons-learned.md)
+
+_Status 2026-10-27: dirs-as-categories now refuses a repeated name, so the merge described below is an evaluation error today (wiki/config-structure/module-files.md); the account is kept as it happened._
 
 ## The lesson
 

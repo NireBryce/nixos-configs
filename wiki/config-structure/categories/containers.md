@@ -87,7 +87,8 @@ podman`) — see `podman.nix`. Not `lysithea` — the module is
   "Containers vs. virtualization" section kept there as a pointer for
   anyone remembering the old location.
 - [../architecture.md](../architecture.md) — "if something shared needs to
-  be optional, a category is the mechanism," and the merge-vs-conflict trap
-  a same-named category and module walk straight into.
+  be optional, a category is the mechanism," and the same-name trap (a
+  repeated name stops evaluation) a same-named category and module walk straight
+  into.
 - [monitoring](monitoring.md) — `cadvisor.nix` scrapes the containers this
   category enables, on `nire-cube`.

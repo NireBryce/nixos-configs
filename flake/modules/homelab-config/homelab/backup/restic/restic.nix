@@ -8,9 +8,9 @@
 # anywhere in the fleet"), which is closed: a real restore drill on 2026-09-06
 # opened a genuine, complete Forgejo database out of the repo. Own category
 # (`homelab-config/homelab/backup/`), not `restic`: a category and its one
-# module both named `restic` would declare `flake.modules.nixos.restic` twice
-# and silently MERGE, the `containers`/`podman.nix` collision AGENTS.md
-# documents -- same reason `git-forge` isn't `forgejo`.
+# module both named `restic` would share one name, and a repeated name stops
+# evaluation (it once merged silently: the `containers`/`podman.nix` collision
+# AGENTS.md documents) -- same reason `git-forge` isn't `forgejo`.
 #
 # Kept in the wiki, not restated here: what is verified and what isn't,
 # wiki/config-structure/categories/backup.md; how each one-time setup step
