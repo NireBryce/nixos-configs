@@ -35,7 +35,7 @@ Source: header of `WARN-impermanence.nix`; `AGENTS.md`, Safety;
 
 ## What a host is made of
 
-There are three pieces, plus optional enrolments:
+A host is made of these pieces, plus optional enrolments:
 
 ```text
 flake/modules/host-config/
@@ -61,7 +61,7 @@ Source: `.agents/skills/new-host-config/SKILL.md`, "Applies to";
 - **Workstation or handheld?** A workstation includes `"kde-desktop"` and a
   handheld includes `"jovian"`. Both live in `desktop-env`. Include the
   module, never the whole category.
-- **Impermanence?** The usual answer is yes, as on durandal and tenacity. If
+- **Impermanence?** The usual answer is yes (see the entry points for hosts that include `impermanence`). If
   the host opts out, say so in its header the way `cube-configuration.nix`
   does, including how `invariants.nix` and `WARN-password-required.nix`
   interact with that choice.
@@ -251,7 +251,7 @@ nix eval --raw .#nixosConfigurations.nire-<name>.config.system.build.toplevel.dr
   else is broken.
 - If `just check` fails, use `git stash` to confirm the failure isn't
   pre-existing before you blame the new host.
-- **Evaluating is not booting.** Tenacity's first real boot found four
+- **Evaluating is not booting.** A host's first real boot once found several
   defects that a clean eval and a clean build had both missed (§25 in
   [agent-lessons-learned.md](../../wiki/agent-lessons-learned.md)). Write
   "evaluates", not "verified".

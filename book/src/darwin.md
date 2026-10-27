@@ -1,6 +1,6 @@
 # Darwin edge cases
 
-This chapter lists what behaves differently on the one nix-darwin host, so that
+This chapter lists what behaves differently on the nix-darwin host, so that
 you do not rediscover each of them. The short version: the Home Manager
 bundle is shared verbatim with the Linux hosts, so every difference has to be
 absorbed per module or per package, never by forking the bundle.
@@ -133,7 +133,7 @@ Source: `flake/modules/general-config/macos/`,
   reached (evaluated, built, switched) and do not claim the Mac works on the
   strength of a Linux evaluation.
 - `nix flake check` did not force `darwinConfigurations` by itself until
-  `flake/modules/checks.nix` started doing it (2026-09-29): flake-check
+  `flake/modules/checks.nix` started doing it: flake-check
   warns about an unknown output and evaluates nothing inside it. The repo's
   check now evaluates the Mac's configuration too, but a cheap attribute is
   still not a build.
