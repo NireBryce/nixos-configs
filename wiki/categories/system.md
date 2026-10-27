@@ -1,6 +1,6 @@
 # `system` — `general-config/system/`
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-10-27_
 
 The largest category (no per-file count here; see
 categories/00-INDEX.md's Index section for why). Every Linux host imports it
@@ -41,9 +41,9 @@ into them, and each has its own section below:
 - **`networking/`** — tailscale, vpn, wifi, the resolved/avahi split, and
   three `*-persist.nix` sibling files
   ([below](#tailscale-magicdns-names-and-the-acl-lives-outside-this-repo)).
-- **`impermanence/`** — **not** the [impermanence](impermanence.md)
-  category: it only declares the persistence option. That page's "don't
-  confuse the two" section has the full note.
+- **`persistence/`** — only declares the persistence option; it is not the
+  [impermanence](impermanence.md) category. That page's "don't confuse the
+  two" section has the full note.
 
 ## Home Manager integration lives here
 
@@ -174,7 +174,7 @@ All three rely on `environment.persistence."/persist".directories`/`.files` bein
 same merge behavior as `environment.systemPackages` and the same one that
 makes `home.file.<n>.text` a trap on the Home Manager side (see
 [shell-config](shell-config/00-INDEX.md)). See
-`general-config/system/impermanence/declare-persistence-option.nix`'s own header (and
+`general-config/system/persistence/declare-persistence-option.nix`'s own header (and
 [impermanence](impermanence.md)) for why that option has to be declared
 unconditionally even on hosts where nothing populates it.
 
@@ -243,8 +243,8 @@ via `elly-home-manager` rather than through this category import at all.
 
 ## See also
 
-- [impermanence](impermanence.md) — `declare-persistence-option.nix`, and
-  the "don't confuse the two `impermanence`s" note.
+- [impermanence](impermanence.md) — the "don't confuse the two" note on
+  `persistence/declare-persistence-option.nix`.
 - [virtualization](virtualization.md) and [containers](containers.md) — both
   split out of `system` so hosts could opt out (or, for containers, could in
   principle); easy to confuse the two by history and by name.

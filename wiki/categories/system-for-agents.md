@@ -1,6 +1,6 @@
 # `system`, for agents
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-10-27_
 
 _Sibling reviewed: 2026-10-05 -- ltrace marked removed in the source's darwin-dropped list; this page names no packages_
 
@@ -12,8 +12,8 @@ that must be optional cannot be filed here (why `virtualization`/`containers` ar
 ## Subdirectories
 
 `base-system-packages/` · `flatpak/` · `font/` · `gaming/` ·
-`home-manager/` · `impermanence/` · `kdeconnect/` · `locale-tz-etc/` ·
-`networking/` · `nix-ld/` · `secrets/` · `security/` · `sound/` · `ssh/` ·
+`home-manager/` · `kdeconnect/` · `locale-tz-etc/` ·
+`networking/` · `nix-ld/` · `persistence/` · `secrets/` · `security/` · `sound/` · `ssh/` ·
 `wayland/` · `xdg/`
 
 `bluetooth/`, `firmware/`, `storage/`, `memory/` moved to
@@ -30,7 +30,7 @@ that must be optional cannot be filed here (why `virtualization`/`containers` ar
 | `secrets/sops-darwin.nix` | points `SOPS_AGE_KEY_FILE` at the Linux-XDG path; darwin's default lookup is `~/Library/Application Support/...`. |
 | `secrets/sops-interactive-key.nix` | oneshot, every boot, converts the host ed25519 key to a native age identity. Unconditional (self-heals on hosts that wipe `/root`). Also sets `EDITOR`/`VISUAL=micro` system-wide and a `security.sudo.extraConfig` `Cmnd_Alias` for `/run/current-system/sw/bin/sops *` with `env_keep += "EDITOR VISUAL"` scoped to it (2026-10-19; was global) — sudo's `env_reset` strips the editor before `sudo sops`; a store-path sops call misses the alias. |
 | `secrets/low-side/secrets.yaml` | not a module — `.sops.yaml`-only, keyed to a personal SSH key instead of a host key, no `sops.secrets.*`, no NixOS activation. Skill `low-side-secrets`. |
-| `impermanence/declare-persistence-option.nix` | **not** the [impermanence](impermanence.md) category. Declares the option unconditionally, even where nothing populates it. |
+| `persistence/declare-persistence-option.nix` | **not** the [impermanence](impermanence.md) category. Declares the option unconditionally, even where nothing populates it. |
 | `security/yubikey.nix` | pam_u2f (login/sudo, `authfile` under the user's `~/.config/Yubico/u2f_keys`), pcscd, udev rules: YubiKey removed -> `loginctl lock-sessions`, inserted -> `loginctl activate` the user's session. |
 | `security/sudo-wheel-only.nix` | sets `security.sudo.execWheelOnly` — `sudo` executable by wheel-group members only. |
 

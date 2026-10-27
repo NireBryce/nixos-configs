@@ -17,7 +17,7 @@
 # matters to one thing lives next to what generates it, the way
 # jovian-persist.nix does for /etc/hhd. Being a sibling also means the same
 # category collects it, so it reaches exactly the hosts tailscale.nix reaches --
-# filing it under system/impermanence/ instead would change which hosts get it.
+# filing it under system/persistence/ instead would change which hosts get it.
 #
 # `directories` is `listOf`, so the entries concatenate with
 # WARN-impermanence.nix's own list rather than overriding it.
@@ -35,7 +35,7 @@
 # impermanence flake). Wrong warning for a host with no wipe to worry about.
 #
 # `environment.persistence` itself is declared for every NixOS host regardless
-# -- see general-config/system/impermanence/declare-persistence-option.nix -- so
+# -- see general-config/system/persistence/declare-persistence-option.nix -- so
 # this module no longer risks an option-does-not-exist error either way. What it
 # guards now is a non-impermanence host getting an entry, and the warning, for
 # no reason.
