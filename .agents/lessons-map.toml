@@ -145,3 +145,10 @@ id      = "ssh-hostname"
 command = '''(^|[\s;&(])ssh\s[^|;&"']*(?<![-\w.@])(?:\w+@)?nire-[a-z]+\b(?![.\w-])'''
 see     = "AGENTS.md#state"
 remind  = "ssh over the tailnet as `ts-<x>`, not `nire-<x>` (the hostname; `nire-<x>.local` is LAN-only, and tenacity's sshd is tailnet-only); `just reach <x>` tries every name."
+
+[[topic]]
+id      = "ble-completion"
+paths   = ["flake/modules/general-config/shell-config/bash/**", "flake/scripts/tests/test_completion_live.py"]
+skill   = "cod-completions"
+lessons = [50]
+remind  = "ble.sh/carapace/cod completion code: a check with ble.sh's functions stubbed passed three bugs here that a real Tab press found -- run `just completion-live-test` (or terminal-puppeteer) before saying it works."

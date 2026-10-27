@@ -1,6 +1,6 @@
 # Lessons learned
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-10-27_
 
 > **Written by Claude Code, for Claude Code**, and largely a record of its own
 > mistakes, so the "I" in the articles is a machine with no memory of having
@@ -40,6 +40,7 @@ Home for most of this group: [AGENTS.md "Before calling it done"](../AGENTS.md#b
 - **§36** [Evaluating vs building](lessons-learned/36-evaluating-vs-building.md) — when a value's correctness depends on more than its type, build what consumes it and read the result. Home: AGENTS.md "Before calling it done". Enforced: none.
 - **§25** [Running it is a rung of its own](lessons-learned/25-running-is-its-own-rung.md) — a clean eval and a clean build still miss runtime defects (a missing import, hook order, suspend mode); switch and use it. Home: AGENTS.md "Before calling it done". Enforced: none.
 - **§37** [Bugs that need real system state](lessons-learned/37-bugs-that-need-real-system-state.md) — state a daemon holds (file owners set outside Nix, defined-vs-started) only shows at a switch; check `systemctl`/`journalctl` after it. Home: skill `new-homelab-service` §8; AGENTS.md "Bugs here serialize". Enforced: none (reminded by the lesson-reminder hook on homelab edits).
+- **§50** [A stub tests your model of the host](lessons-learned/50-stubs-test-your-model-of-the-host.md) — code that plugs into another program (ble.sh advice, a generated completer) passed every check with that program's functions stubbed, and three bugs only showed with a real Tab press; take stub inputs from the real caller, and count *runs* only against the real program. Home: skill `cod-completions` "Live check". Enforced: none (opt-in `just completion-live-test` covers those three behaviours; reminded by the lesson-reminder hook on shell-config/bash edits).
 - **§6** [Bugs serialise](lessons-learned/6-bugs-serialise.md) — each fix can uncover the next; a defect count from static analysis is a lower bound. Home: AGENTS.md "Bugs here serialize". Enforced: none.
 - **§4** [An unchanged fingerprint can mean inert code](lessons-learned/4-unchanged-fingerprint-inert-code.md) — an identical fingerprint after a change you expected to matter is a reason to investigate. Home: AGENTS.md "Before calling it done". Enforced: none.
 - **§43** [A fingerprint can pass for the wrong reason](lessons-learned/43-fingerprint-passed-for-the-wrong-reason.md) — dead code looks exactly like safe code; trace that the changed path runs, then diff the real values. Home: AGENTS.md "Before calling it done". Enforced: none.
