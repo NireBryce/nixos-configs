@@ -1663,6 +1663,8 @@ def check_dates(root):
 LESSON_ENTRY = re.compile(
     r'^- \*\*§(\d+)\*\* \[[^\]]+\]\((agent-lessons-learned/[^)]+)\) — .+$')
 LESSON_ARTICLE = re.compile(r'^(\d+)-[a-z0-9-]+\.md$')
+# Not a lesson: explains the folder to a person reading it.
+HUMAN_README = '0-human-README.md'
 
 
 # A rule's frontmatter: `paths:` then `  - "glob"` items, nothing else.
@@ -1773,6 +1775,8 @@ def check_lessons(root):
                 findings.append(f"LESSON FIELD  {page}: §{n} has no `{field.strip()}`")
     articles = {}
     for p in sorted(art_dir.glob('*.md')):
+        if p.name == HUMAN_README:
+            continue
         m = LESSON_ARTICLE.match(p.name)
         if not m:
             findings.append(f"LESSON ARTICLE NAME  {p}: not `<N>-<slug>.md`")
