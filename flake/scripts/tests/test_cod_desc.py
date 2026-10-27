@@ -26,6 +26,9 @@ Covers:
 import importlib.util
 import pathlib
 import re
+import shutil
+import subprocess
+import tempfile
 import unittest
 
 SCRIPTS = pathlib.Path(__file__).resolve().parents[1]
@@ -237,7 +240,41 @@ class WiringTest(unittest.TestCase):
         text = ADVICE.read_text()
         # regression: a plain array=() inside the function made every
         # lookup evaluate its subscript as arithmetic and silently miss
-        self.assertIn('declare -A __nire_cod_desc=()', text)
+        # -g: ble.sh sources this file from inside a function, where a plain
+        # declare would make the cache local to that function and lose it
+        self.assertIn('declare -gA __nire_cod_desc=()', text)
+
+    @unittest.skipUnless(shutil.which('bash'), 'needs bash')
+    def test_advice_attaches_descriptions_when_loaded_from_a_function(self):
+        # Load the file the way ble-import does (source inside a function),
+        # with ble.sh's own functions stubbed to log, then run the advice.
+        with tempfile.TemporaryDirectory() as d:
+            tsv = pathlib.Path(d) / 'table.tsv'
+            tsv.write_text('sops\t--decrypt\tDecrypt a file\n'
+                           'sops\t--value-stdin\tRead the value from stdin\n')
+            script = f"""
+ble/is-function() {{ declare -F "$1" >/dev/null; }}
+ble/function#advice() {{ :; }}
+ble/complete/source/test-limit() {{ return 0; }}
+ble/complete/check-cancel() {{ return 1; }}
+ble/complete/cand/yield() {{ echo "yield $*"; }}
+bleopt() {{ :; }}
+bleopt_complete_polling_cycle=50
+__cod_complete_bash() {{ :; }}
+import() {{ source '{ADVICE}'; }}
+import
+BLE_ATTACHED=1 ADVICE_EXIT=0 NIRE_COD_DESC_TSV='{tsv}'
+COMP_WORDS=(sops --de) COMP_CWORD=1
+COMPREPLY=(--decrypt --value-stdin= --other)
+ble/contrib/cod-desc/_cod_complete_bash.advice
+"""
+            out = subprocess.run(['bash', '--norc', '-c', script],
+                                 capture_output=True, text=True, check=False)
+        self.assertEqual(
+            out.stdout.splitlines(),
+            ['yield word --decrypt Decrypt a file',
+             'yield word --value-stdin= Read the value from stdin',
+             'yield word --other'], out.stderr)
 
     def test_blesh_nix_declares_cod_desc_variables(self):
         text = BLESH.read_text()

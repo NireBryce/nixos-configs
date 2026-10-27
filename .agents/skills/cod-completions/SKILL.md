@@ -56,9 +56,21 @@ Background (why cod can't carry descriptions, advice mechanism, table format):
    every host; on a new host the rows stay dormant until cod learns the
    command there.
 
+## Live check
+
+`just completion-live-test` presses real Tab in an attached ble.sh (via
+terminal-puppeteer) for the read-fix, carapace's descriptions and cod's
+descriptions, using this working tree's files. Opt-in, ~30s, not in
+preflight; each missing prerequisite skips with its fix (needs `sops`
+learned in cod for the cod case). Run it after editing `cod-desc.bash`,
+`cod-desc.tsv`, `carapace-desc.bash` or the read-fix. The stubbed checks in
+`test_cod_desc.py` did not catch the bugs this one does. How it differs
+from the real shell and how to point it at older files:
+`flake/scripts/tests/test_completion_live.py`'s header.
+
 ## Verification limits
 
-Verified 2026-09-25 by driving the real `__cod_complete_bash` (daemon and all) under a real ble.sh with only the candidate-yield layer stubbed to a log: descriptions attached, trailing-`=` resolved via the stripped key, unknown commands untouched. Not covered: the menu painting the desc column under a live attach. If descriptions don't show, check `complete -p <cmd>` really names
+Verified 2026-09-25 by driving the real `__cod_complete_bash` (daemon and all) under a real ble.sh with only the candidate-yield layer stubbed to a log: descriptions attached, trailing-`=` resolved via the stripped key, unknown commands untouched. Verified live 2026-10-26 with `terminal-puppeteer --cmd 'bash -i'` (Tab Tab after `sops --de`): the menu shows the descriptions. That run is the only check that caught `cod-desc.bash`'s cache being function-local when loaded by `ble-import`; a command must be a cod-owned one (`complete -p <cmd>` names `__cod_complete_bash`; `uv` is carapace's here). If descriptions don't show, check `complete -p <cmd>` really names
 `__cod_complete_bash` (cod registers per learned command only), that
 `NIRE_COD_DESC_TSV` is set in the shell (plain variable, set by `.blerc`),
 and that the command has rows in `cod-desc.tsv` — everything else falls

@@ -1,6 +1,6 @@
 # blesh, for agents
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-10-26_
 
 Source: [blesh.md](blesh.md).
 
@@ -62,7 +62,8 @@ character-by-character. **Not caused by `carapace-desc.bash`** — confirmed twi
 
 Fix (in tree, switch-confirmed): `carapace-completer-read-fix.bash` patches `_carapace_completer` via
 `declare -f` plus textual substitution, replacing the `read` with parameter
-expansion. Sourced from `bash.nix` after `source <(carapace _carapace bash)`
+expansion (`nospace=${data%%$sep*}; data=${data#*$sep}$'\n'`; the 2026-08-24
+form had the halves swapped, fixed 2026-10-26). Sourced from `bash.nix` after `source <(carapace _carapace bash)`
 and before `carapace-desc.bash`. Closed as issue #72; removing it once
 upstream fixes the bug is issue #75.
 

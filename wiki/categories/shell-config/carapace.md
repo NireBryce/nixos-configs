@@ -1,6 +1,6 @@
 # carapace
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-26_
 
 carapace is the primary source of shell completions in this repo:
 `pkgs.carapace` in `home.packages`
@@ -65,10 +65,13 @@ As of 2026-08-22 it does, in order:
    everything from `git`/`docker`/`kubectl` to `dd`/`chmod`/coreutils.
    **Bash's own completion protocol has no description slot** — `COMPREPLY`
    is plain candidate words only, confirmed by reading this generated
-   function directly rather than assuming — which is exactly the gap
+   function — which is exactly the gap
    `carapace-desc.bash` exists to paper over by pulling descriptions from a
    separate `carapace <cmd> export -- <words...>` JSON mode instead (see
    [blesh.md](blesh.md)).
+6. Ends with `[[ "${COMPREPLY[*]}" == "" ]] && COMPREPLY=()`: it **returns 1
+   exactly when it has candidates**, so advice must test `COMPREPLY`, not the
+   exit status.
 
 ## The `cod` registration race, and how it's resolved
 

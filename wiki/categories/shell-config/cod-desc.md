@@ -1,6 +1,6 @@
 # cod completion descriptions
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-10-26_
 
 [cod](carapace.md)'s menu descriptions in ble.sh come from a curated table in
 this repo plus a ble.sh advice hook, because cod cannot supply them itself.
@@ -120,6 +120,12 @@ texts and checks the committed table and the blesh.nix wiring.
 - **The ignore list is generated, not hand-kept.** carapace-covered
   commands are ignored via `~/.config/cod/config.toml`, regenerated at
   build time by `cod-completions.nix` — never add ignore rules by hand.
+- **State in a `ble-import`ed file needs `declare -g`.** ble.sh loads the
+  file with `source` inside its own function, so a plain `declare -A` makes
+  a function-local variable that is gone before the advice runs; with an
+  indexed array in its place every table lookup silently misses. The cache
+  is `declare -gA` (found 2026-10-26; `test_cod_desc.py` loads the file from
+  a function to pin it).
 - **One owning module per generated file.** `blesh.nix` owns `.blerc`;
   wiring for a second completion source goes through it (as
   `cod-desc.bash` does), not through a second module declaring `.blerc`

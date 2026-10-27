@@ -1,6 +1,6 @@
 # blesh (bash line editor)
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-10-26_
 
 `ble.sh` is wired up by hand for bash — there's no Home Manager option for
 it (`programs.bash.blesh.enable` doesn't exist; see
@@ -56,7 +56,11 @@ together external completion/history tools underneath ble.sh's UI:
   complete_menu_style=desc` reads. If the `export` call or the JSON parse
   ever fails, `COMPREPLY` is left untouched and candidates silently fall
   back to carapace's plain word list — same as before this file existed.
-  Full detail on what it's advising and why: [carapace](carapace.md).
+  Full detail on what it's advising and why: [carapace](carapace.md). Until
+  2026-10-26 it began with `((ADVICE_EXIT==0)) || return 0`, but
+  `_carapace_completer` returns 1 whenever it has candidates, so the advice
+  never reached the menu in a live shell; found by a live Tab test, not by
+  the stubbed check that had passed.
 - **[`cod-desc.bash`](../../../flake/modules/general-config/shell-config/bash/cod-desc.bash)**
   (this repo, 2026-09-25) — the same advice pattern for cod's
   `__cod_complete_bash`, with one difference that changes where the
@@ -171,7 +175,9 @@ catch —
 next to it for the operator-facing summary and how to undo it)
 patches `_carapace_completer`'s body via `declare -f` plus a textual
 substitution, replacing the `read` with parameter expansion split on the
-same real SOH byte (`nospace=${data##*$sep}; data=${data%$sep*}`), sourced
+same real SOH byte (`nospace=${data%%$sep*}; data=${data#*$sep}$'\n'`; the
+first form of this fix, 2026-08-24, had the two halves swapped and emptied
+`COMPREPLY`, corrected 2026-10-26), sourced
 from `bash.nix` right after `source <(carapace _carapace bash)` and before
 `carapace-desc.bash`'s advice wraps the same function. Validated three
 ways: the substitution reproduces the exact byte checked with `od -c`

@@ -388,6 +388,14 @@ cod-desc-test:
     # stdlib; runs in preflight and CI.
     python3 {{scripts}}/tests/test_cod_desc.py
 
+# Live Tab-completion checks (ble.sh + carapace + cod, via terminal-puppeteer)
+completion-live-test:
+    # Not in preflight: needs an installed ble.sh, cod's per-user daemon,
+    # carapace and terminal-puppeteer, and takes ~30s. Each missing
+    # prerequisite skips with the fix. Header of the test: why it exists,
+    # how it differs from the real shell, COMPLETION_LIVE_DIR.
+    python3 {{scripts}}/tests/test_completion_live.py -v
+
 # The safe answer to "which secrets exist?" -- reads the committed
 # ciphertext (names are plaintext, values are ENC[...]) and never decrypts,
 # so it cannot print a value. This question leaked twice when answered
