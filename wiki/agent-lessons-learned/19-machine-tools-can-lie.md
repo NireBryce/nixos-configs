@@ -2,7 +2,11 @@
 
 _Last modified: 2026-10-05_
 
-§19 of [agent-lessons-learned.md](../agent-lessons-learned.md), the index that files every lesson by when it applies; this is §19's full account.
+## Index entry
+
+§19 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 Confirming the disk matched `hardware-tenacity.nix` was a stop condition. The
 obvious commands returned nonsense: `findmnt` said `/` was a tmpfs, `lsblk`

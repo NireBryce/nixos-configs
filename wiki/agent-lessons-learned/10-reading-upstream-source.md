@@ -2,7 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-§10 of [agent-lessons-learned.md](../agent-lessons-learned.md), the index that files every lesson by when it applies; this is §10's full account.
+## Index entry
+
+§10 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 - `flake-parts/extras/modules.nix:33` — `flake.modules` is
   `lazyAttrsOf (lazyAttrsOf deferredModule)` at the **top level**; the only

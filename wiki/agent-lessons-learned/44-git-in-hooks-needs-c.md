@@ -2,7 +2,11 @@
 
 _Last modified: 2026-10-20_
 
-§44 of [agent-lessons-learned.md](../agent-lessons-learned.md) — that page keeps the one-line version of every lesson; this is §44's full account.
+## Index entry
+
+§44 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 2026-09-02, landing an unrelated docs commit from a worktree
 (`docs/claude-cave-to-wiki`, PR #149). `.githooks/pre-commit` re-stages

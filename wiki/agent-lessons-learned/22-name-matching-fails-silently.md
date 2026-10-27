@@ -2,7 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-§22 of [agent-lessons-learned.md](../agent-lessons-learned.md), the index that files every lesson by when it applies; this is §22's full account.
+## Index entry
+
+§22 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 §5 records this for `home.file` names. It recurred twice in output I had
 generated myself:

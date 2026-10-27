@@ -2,7 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-§39 of [agent-lessons-learned.md](../agent-lessons-learned.md) — that page keeps the one-line version of every lesson; this is §39's full account.
+## Index entry
+
+§39 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 Reported 2026-08-24: "weird completion errors" over SSH to `nire-cube`,
 `-bash: read: `': not a valid identifier`, appearing while typing (before

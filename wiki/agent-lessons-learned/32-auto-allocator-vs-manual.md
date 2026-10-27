@@ -2,7 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-§32 of [agent-lessons-learned.md](../agent-lessons-learned.md), the index that files every lesson by when it applies; this is §32's full account.
+## Index entry
+
+§32 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 `nire/system/containers/containers.nix` (then `virtualization.nix`) set
 `autoSubUidGidRange = true` on a `container` user while pinning

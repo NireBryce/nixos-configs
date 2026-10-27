@@ -2,7 +2,11 @@
 
 _Last modified: 2026-10-20_
 
-§27 of [agent-lessons-learned.md](../agent-lessons-learned.md), the index that files every lesson by when it applies; this is §27's full account.
+## Index entry
+
+§27 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 `handheld-daemon` imports `pkg_resources`, which setuptools 83 removed. That got
 a 45-line bespoke shim, and it worked, and it was the wrong artefact — upstream

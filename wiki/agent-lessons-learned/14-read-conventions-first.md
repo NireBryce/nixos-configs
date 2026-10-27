@@ -2,7 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-§14 of [agent-lessons-learned.md](../agent-lessons-learned.md), the index that files every lesson by when it applies; this is §14's full account.
+## Index entry
+
+§14 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 `manconfig.nix` was written with a 25-line header and rejected for not matching
 its neighbours. The repo had a style guide all along, four levels down beside

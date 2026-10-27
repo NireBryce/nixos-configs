@@ -2,7 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-§46 of [agent-lessons-learned.md](../agent-lessons-learned.md) — that page keeps the one-line version of every lesson; this is §46's full account.
+## Index entry
+
+§46 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 **Borrowed, not lived** — the one entry in this file that did not happen here.
 Adopted from a NixOS Discourse thread while enabling avahi and

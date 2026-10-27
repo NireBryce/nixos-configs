@@ -2,7 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-§40 of [agent-lessons-learned.md](../agent-lessons-learned.md) — that page keeps the one-line version of every lesson; this is §40's full account.
+## Index entry
+
+§40 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 `nire-llm-sandbox` finally got a real end-to-end test 2026-08-23/24: `just
 switch` on `nire-cube`, watching `libvirt-vm-llm-sandbox.service`. It failed.

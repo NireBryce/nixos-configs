@@ -2,7 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-§11 of [agent-lessons-learned.md](../agent-lessons-learned.md), the index that files every lesson by when it applies; this is §11's full account.
+## Index entry
+
+§11 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 I was about to replace a `requires`/`after` block whose lines carried a
 systemd.unit(5) URL. The user asked whether I had read it. I had not.

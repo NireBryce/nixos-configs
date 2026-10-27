@@ -2,7 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-§4 of [agent-lessons-learned.md](../agent-lessons-learned.md), the index that files every lesson by when it applies; this is §4's full account.
+## Index entry
+
+§4 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 Editing `boot.initrd.systemd.services.restore-root` left the initrd
 byte-identical every time — not because the edits were equivalent, but because

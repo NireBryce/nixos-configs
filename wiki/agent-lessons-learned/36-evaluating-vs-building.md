@@ -2,7 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-§36 of [agent-lessons-learned.md](../agent-lessons-learned.md) — that page keeps the one-line version of every lesson; this is §36's full account.
+## Index entry
+
+§36 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 Two real bugs surfaced building `nire-llm-sandbox` (a libvirt VM guest on
 cube), and both share a shape worth naming on its own,

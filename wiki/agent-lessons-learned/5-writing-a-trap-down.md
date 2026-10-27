@@ -2,7 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-§5 of [agent-lessons-learned.md](../agent-lessons-learned.md), the index that files every lesson by when it applies; this is §5's full account.
+## Index entry
+
+§5 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 `CLAUDE.md` gained a section on reading generated dotfiles. Within minutes I hit
 both halves: queried `home.file.".zshrc"` (the attribute is `"./.zshrc"`, and a

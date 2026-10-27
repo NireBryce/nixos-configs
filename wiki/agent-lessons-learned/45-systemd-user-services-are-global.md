@@ -2,7 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-§45 of [agent-lessons-learned.md](../agent-lessons-learned.md), the index that files every lesson by when it applies; this is §45's full account.
+## Index entry
+
+§45 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 2026-09-08, cube (PR #196's coding-agent server unit). A NixOS user unit lands
 in `/etc/systemd/user` and `wantedBy` enables it in *every* manager —

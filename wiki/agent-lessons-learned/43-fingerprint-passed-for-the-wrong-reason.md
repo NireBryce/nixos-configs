@@ -2,7 +2,11 @@
 
 _Last modified: 2026-10-20_
 
-§43 of [agent-lessons-learned.md](../agent-lessons-learned.md) — that page keeps the one-line version of every lesson; this is §43's full account.
+## Index entry
+
+§43 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 2026-08-27, the `dirsAsCategory.nix` deduplication (`flake/doc/dirsAsCategory.md`'s
 History section has the full account; this is the general shape). 37

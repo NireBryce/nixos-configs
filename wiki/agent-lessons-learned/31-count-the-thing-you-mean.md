@@ -2,7 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-§31 of [agent-lessons-learned.md](../agent-lessons-learned.md), the index that files every lesson by when it applies; this is §31's full account.
+## Index entry
+
+§31 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 Found `/var/lib/systemd/coredump` at 1.1G and wrote a module capping it, on the
 reasoning that "nothing ever clears it" and "the store only ever grows". Both

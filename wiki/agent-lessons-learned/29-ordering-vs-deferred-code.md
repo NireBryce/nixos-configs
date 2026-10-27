@@ -2,7 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-§29 of [agent-lessons-learned.md](../agent-lessons-learned.md), the index that files every lesson by when it applies; this is §29's full account.
+## Index entry
+
+§29 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 `ble-attach` ran before seven integrations, so the fix was `mkOrder`. That was
 correct and insufficient: one thing binding `Ctrl-R` was not in `.bashrc` at all.

@@ -2,7 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-§33 of [agent-lessons-learned.md](../agent-lessons-learned.md), the index that files every lesson by when it applies; this is §33's full account.
+## Index entry
+
+§33 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 Three separate restatements went into one afternoon's libvirt module, and the
 tree caught none of them:

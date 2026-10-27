@@ -2,7 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-§24 of [agent-lessons-learned.md](../agent-lessons-learned.md), the index that files every lesson by when it applies; this is §24's full account.
+## Index entry
+
+§24 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 §2 says the repo is not the machine; on the hardware there is finally a way to
 act on it. Diffing the branch against the **running system** answered "would

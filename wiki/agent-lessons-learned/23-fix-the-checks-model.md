@@ -2,7 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-§23 of [agent-lessons-learned.md](../agent-lessons-learned.md), the index that files every lesson by when it applies; this is §23's full account.
+## Index entry
+
+§23 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 Splitting out `kde-base.nix` made `just modules` report it as an orphan.
 `modules.py` has an `ORPHAN-OK` escape hatch for exactly that complaint.

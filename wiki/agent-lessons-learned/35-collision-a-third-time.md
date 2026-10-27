@@ -2,7 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-§35 of [agent-lessons-learned.md](../agent-lessons-learned.md), the index that files every lesson by when it applies; this is §35's full account.
+## Index entry
+
+§35 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 `containers.nix`, moved into its own category (`nire/containers/`) on
 2026-08-22 for the same reason `virtualization` split off `system` a day

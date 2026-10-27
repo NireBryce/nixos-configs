@@ -2,7 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-§25 of [agent-lessons-learned.md](../agent-lessons-learned.md), the index that files every lesson by when it applies; this is §25's full account.
+## Index entry
+
+§25 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 Switching put this branch on the hardware, and four things broke that neither
 evaluation nor a successful build could see:

@@ -2,7 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-§42 of [agent-lessons-learned.md](../agent-lessons-learned.md) — that page keeps the one-line version of every lesson; this is §42's full account.
+## Index entry
+
+§42 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 2026-08-26, landing PRs #94 and #95. Several stash/cherry-pick/rebase steps
 in that session touched `.claude/settings.local.json` alongside real code

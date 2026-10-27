@@ -2,7 +2,11 @@
 
 _Last modified: 2026-10-20_
 
-§41 of [agent-lessons-learned.md](../agent-lessons-learned.md) — that page keeps the one-line version of every lesson; this is §41's full account.
+## Index entry
+
+§41 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 `nire/reverse-proxy/caddy/caddy.nix`, 2026-08-24. Grafana and Forgejo were both
 mounted under a path prefix on the same hostname

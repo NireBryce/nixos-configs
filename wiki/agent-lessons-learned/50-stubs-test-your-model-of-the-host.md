@@ -2,7 +2,11 @@
 
 _Last modified: 2026-10-27_
 
-§50 of [agent-lessons-learned.md](../agent-lessons-learned.md) — that page keeps the one-line version of every lesson; this is §50's full account.
+## Index entry
+
+§50 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 Three files plug into programs this repo does not own: `carapace-desc.bash`
 and `cod-desc.bash` are ble.sh advice around two other tools' completers, and

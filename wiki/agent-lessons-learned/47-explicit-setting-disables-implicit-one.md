@@ -2,7 +2,11 @@
 
 _Last modified: 2026-10-20_
 
-§47 of [agent-lessons-learned.md](../agent-lessons-learned.md) — that page keeps the one-line version of every lesson; this is §47's full account.
+## Index entry
+
+§47 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 ## What happened
 

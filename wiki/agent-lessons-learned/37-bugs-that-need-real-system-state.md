@@ -2,7 +2,11 @@
 
 _Last modified: 2026-09-29_
 
-§37 of [agent-lessons-learned.md](../agent-lessons-learned.md) — that page keeps the one-line version of every lesson; this is §37's full account.
+## Index entry
+
+§37 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the full account.
+
+## The lesson
 
 `nire-cube`'s first real `just switch` with the `monitoring` category and
 `nire-llm-sandbox`'s network fix both wired in (2026-08-23) failed two
