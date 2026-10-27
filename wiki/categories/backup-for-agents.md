@@ -10,7 +10,7 @@ restic, backing up `nire-cube`'s service state to the `ts-hive` NAS, nested unde
 [homelab](homelab.md) (issue #87). **Module is done** — restore drill performed twice; a
 real restore opened a complete Forgejo database (2026-09-06).
 
-## What's in it
+## Category contents
 
 One file, `nixos`-class: `restic/restic.nix`, declaring
 `services.restic.backups.cube`.

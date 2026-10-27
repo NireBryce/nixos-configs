@@ -4,13 +4,13 @@ _Last modified: 2026-10-22_
 
 ## Contents
 
-- [What's in it](#whats-in-it)
+- [Category contents](#category-contents)
 - [Nested categories overlap their parents on purpose](#nested-categories-overlap-their-parents-on-purpose)
 - [Why one category for all the services](#why-one-category-for-all-the-services)
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
-## What's in it
+## Category contents
 
 Nothing of its own — it's an umbrella. Added 2026-08-27, folding six
 existing, previously-standalone categories under one directory:

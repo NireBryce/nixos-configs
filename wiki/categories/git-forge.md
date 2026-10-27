@@ -20,7 +20,7 @@ the move behind Caddy; the move to its own service name isn't in it yet.
 
 ## Contents
 
-- [What's in it](#whats-in-it)
+- [Category contents](#category-contents)
 - [Why the category isn't named `forgejo`](#why-the-category-isnt-named-forgejo)
 - [Zero-touch secrets, built in rather than hand-rolled](#zero-touch-secrets-built-in-rather-than-hand-rolled)
 - [Actions and the runner](#actions-and-the-runner)
@@ -33,7 +33,7 @@ the move behind Caddy; the move to its own service name isn't in it yet.
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
-## What's in it
+## Category contents
 
 The `nixos`-class files: `forgejo/forgejo.nix` (the forge) and
 `forgejo/actions-runner.nix` (the CI worker, added 2026-09-24).

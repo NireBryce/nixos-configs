@@ -10,7 +10,7 @@ Prometheus + Grafana on `nire-cube`. Added 2026-08-23, nested under
 `homelab` 2026-08-27. Reached at `https://grafana.moose-micro.ts.net/`
 since 2026-09-07; the old `.../grafana/` path 404s.
 
-## What's in it
+## Category contents
 
 `homelab-config/homelab/monitoring/`, all `nixos`-class, **every listener
 on loopback**:

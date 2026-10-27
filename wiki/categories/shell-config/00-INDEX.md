@@ -4,14 +4,14 @@ _Last modified: 2026-10-22_
 
 ## Contents
 
-- [What's in it](#whats-in-it)
+- [Category contents](#category-contents)
 - [The `home.file`/`home.sessionPath` concatenation trap, live in this category](#the-homefilehomesessionpath-concatenation-trap-live-in-this-category)
 - [`SSH_ASKPASS` is unset for sessions with no display](#ssh_askpass-is-unset-for-sessions-with-no-display)
 - [Comments inside a `''` string ship into the dotfile](#comments-inside-a--string-ship-into-the-dotfile)
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
-## What's in it
+## Category contents
 
 - **`bash/bash.nix`** — `nixos`-class: `environment.pathsToLink` for bash
   completion, `environment.shells`. `homeManager`-class: `programs.bash`

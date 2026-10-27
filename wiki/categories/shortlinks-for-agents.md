@@ -10,7 +10,7 @@ golink (Tailscale's `go/foo` service) on `nire-cube`. Added 2026-08-24,
 nested under `homelab` 2026-08-27. Usage is
 [../homelab/creating-golinks.md](../homelab/creating-golinks.md).
 
-## What's in it
+## Category contents
 
 One file, `nixos`-class: `homelab-config/homelab/shortlinks/golink/golink.nix`.
 

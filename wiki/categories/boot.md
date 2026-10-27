@@ -4,14 +4,14 @@ _Last modified: 2026-10-22_
 
 ## Contents
 
-- [What's in it](#whats-in-it)
+- [Category contents](#category-contents)
 - [Why each file sits in a subdirectory](#why-each-file-sits-in-a-subdirectory)
 - [The name trap this category is the origin of](#the-name-trap-this-category-is-the-origin-of)
 - [Don't confuse this with the impermanence category](#dont-confuse-this-with-the-impermanence-category)
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
-## What's in it
+## Category contents
 
 The files:
 

@@ -10,7 +10,7 @@ _Last modified: 2026-10-22_
 
 ## Contents
 
-- [What's in it](#whats-in-it)
+- [Category contents](#category-contents)
 - [Why this category is never imported whole](#why-this-category-is-never-imported-whole)
 - [Why the split happened](#why-the-split-happened)
 - [Why `jovian-persist.nix` isn't filed under `impermanence`](#why-jovian-persistnix-isnt-filed-under-impermanence)
@@ -20,7 +20,7 @@ _Last modified: 2026-10-22_
 - [Known issue: Kickoff opens with a 1-3s+ lag on tenacity (unresolved)](#known-issue-kickoff-opens-with-a-1-3s-lag-on-tenacity-unresolved)
 - [See also](#see-also)
 
-## What's in it
+## Category contents
 
 Two sub-areas, split along the same line as the hosts that use them:
 

@@ -9,13 +9,13 @@ tenacity 2026-09-26. See [Imported by](#imported-by).
 
 ## Contents
 
-- [What's in it](#whats-in-it)
+- [Category contents](#category-contents)
 - [Why it's its own category, and why that didn't change anything](#why-its-its-own-category-and-why-that-didnt-change-anything)
 - [The collision this move hit for real](#the-collision-this-move-hit-for-real)
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
-## What's in it
+## Category contents
 
 One file, `podman/podman.nix`, `nixos`-class:
 

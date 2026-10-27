@@ -9,13 +9,13 @@ directory. For which hosts wipe `/root` and the initrd sharp edges, see
 
 ## Contents
 
-- [What's in it](#whats-in-it)
+- [Category contents](#category-contents)
 - [Imported by](#imported-by)
 - [The other "impermanence" — don't confuse the two](#the-other-impermanence--dont-confuse-the-two)
 - [Reaching the home-manager side](#reaching-the-home-manager-side)
 - [See also](#see-also)
 
-## What's in it
+## Category contents
 
 `root-rollback/` is itself a nested category (added for issue #103) rather
 than two bare files — a host can import

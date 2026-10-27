@@ -9,7 +9,7 @@ Condensed from [git-forge.md](git-forge.md). Facts only here.
 Forgejo on `nire-cube`, nested under `homelab`. URL
 `https://git.moose-micro.ts.net/`; the old `.../git/` path 404s.
 
-## What's in it
+## Category contents
 
 The `nixos`-class files under `homelab-config/homelab/git-forge/forgejo/`:
 `forgejo.nix` (the forge), `actions-runner.nix` (CI runner, added 2026-09-24).
