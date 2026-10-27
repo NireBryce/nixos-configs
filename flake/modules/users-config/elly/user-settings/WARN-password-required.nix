@@ -42,7 +42,7 @@
         usesImpermanence = inputs.self.lib.persist.usesImpermanence config;
         solvedByHand = config.networking.hostName == "nire-cube";
     in {
-        # # description = "reminds a non-impermanence host that the user has no password until one is set by hand";
+        # summary: reminds a non-impermanence host that the user has no password until one is set by hand
         warnings = lib.optional (!usesImpermanence && !solvedByHand) ''
             The user has no password on this host until you set one by hand. users.mutableUsers
             is false, so `passwd` will not stick -- any change made that way is reverted on

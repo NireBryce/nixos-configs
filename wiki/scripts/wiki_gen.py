@@ -237,7 +237,7 @@ COUNT_ROWS = [
     ('total `.nix` files under `flake/modules/`', None),
     ('header comment (`# This is a dirs-as-categories module…`)',
      '# This is a dirs-as-categories module, which means'),
-    ('`# # description` as first body line', re.compile(r'(?m)^\s*# # description')),
+    ('`# summary:` / `# package summary:` comment', re.compile(r'(?m)^\s*# (?:package )?summary:')),
     ('`with pkgs;` package lists', 'with pkgs;'),
 ]
 

@@ -4,7 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
-        # description =  "mtr - traceroute + ping https://www.bitwizard.nl/mtr/";
+        # package summary: mtr - traceroute + ping https://www.bitwizard.nl/mtr/
         home.packages = with pkgs; [
             mtr
         ];

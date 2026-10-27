@@ -4,7 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
-        # description = "uv - python version-, venv-, and packaging-management tool";
+        # package summary: uv - python version-, venv-, and packaging-management tool
         home.packages = with pkgs; [
           uv
         ];

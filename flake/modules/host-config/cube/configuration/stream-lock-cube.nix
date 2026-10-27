@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# Puts Plasma's lock screen in front of cube's autologin session
+# summary: Puts Plasma's lock screen in front of cube's autologin session
 # (headless-display-cube.nix), so both the console and a Moonlight client
 # need elly's password, and requires encryption on Sunshine streams; added
 # 2026-10-06. Three points lock it:
@@ -67,7 +67,6 @@
             '';
         };
     in {
-        # # description = "cube: lock Plasma at login, on idle and when a Sunshine app quits; encrypted streams only";
         environment.etc."xdg/kscreenlockerrc".text = ''
             [Daemon][$i]
             Autolock=true

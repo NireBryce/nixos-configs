@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# nire-cube's VM wiring -- every libvirt VM on cube is instantiated here,
+# summary: nire-cube's VM wiring -- every libvirt VM on cube is instantiated here,
 # one import of the generator (homelab-config/homelab/virtualization/
 # VMs/_lib/libvirt-vm.nix) per VM. Revives the name of the llm-sandbox-era
 # wiring file (removed 2026-08-28 with that VM).

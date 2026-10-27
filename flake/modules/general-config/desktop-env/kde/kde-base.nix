@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# Plasma 6, and the parts of it that every host running a desktop wants.
+# summary: Plasma 6, and the parts of it that every host running a desktop wants.
 #
 # Split out of kde.nix -- now kde-desktop.nix -- so the handheld can have the
 # desktop without the workstation's session handling. Before the split durandal

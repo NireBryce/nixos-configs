@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# Cube-side host support for the Forgejo Actions runner, which runs in a
+# summary: Cube-side host support for the Forgejo Actions runner, which runs in a
 # VM (forge-runner, instantiated by virtualization-cube.nix; its
 # config is host-config/forge-runner-configuration.nix). This module is what
 # remains on the HOST: the loop that gives every job a fresh VM and a
@@ -38,8 +38,6 @@ let
     runnerIp = "${net.prefix}.11";
 in {
     nixos = { pkgs, config, ... }: {
-        # # description = "cube-side support for the Forgejo Actions runner VM";
-
         # Runs as root: virsh needs the system libvirtd, which the
         # forgejo user cannot reach (polkit refuses it -- hit
         # 2026-09-25, "authentication unavailable: no polkit agent

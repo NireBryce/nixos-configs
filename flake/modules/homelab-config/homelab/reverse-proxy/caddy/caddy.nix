@@ -3,10 +3,10 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# Caddy: one tailnet-only HTTPS front door for every web service on
-# nire-cube. Added 2026-08-24, cube-only. The category is `reverse-proxy`,
-# not `caddy`: a category and its one module sharing a name silently MERGE
-# rather than error (CLAUDE.md, Architecture).
+# summary: Caddy: one tailnet-only HTTPS front door for every web service on
+# nire-cube, with certs from tailscaled. Added 2026-08-24, cube-only. The
+# category is `reverse-proxy`, not `caddy`: a category and its one module
+# sharing a name silently MERGE rather than error (CLAUDE.md, Architecture).
 #
 # Kept in the wiki, not restated here: the design and what it moved, the
 # out-of-repo prerequisites (tailnet HTTPS in the admin console, each `svc:`
@@ -153,8 +153,6 @@ let
     };
 in {
     nixos = { lib, ... }: {
-        # # description = "caddy -- tailnet-only HTTPS front door, with certs from tailscaled";
-
         services.caddy = {
             enable = true;
 

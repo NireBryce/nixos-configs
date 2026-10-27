@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# The desktop half of `nohibernate`. Filed beside WARN-impermanence.nix because
+# summary: The desktop half of `nohibernate`. Filed beside WARN-impermanence.nix because
 # that is what creates the requirement, not because it is about KDE.
 #
 # WARN-impermanence.nix sets `nohibernate` and turns off AllowHibernation,

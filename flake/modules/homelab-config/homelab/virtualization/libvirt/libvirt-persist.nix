@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# The persistence half of libvirt.nix.
+# summary: The persistence half of libvirt.nix.
 #
 # /var/lib/libvirt/secrets/secrets-encryption-key encrypts libvirt's own
 # stored secrets (e.g. an encrypted storage pool's passphrase). Everything

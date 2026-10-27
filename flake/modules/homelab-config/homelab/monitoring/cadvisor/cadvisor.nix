@@ -3,13 +3,12 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# cadvisor: per-container CPU/memory/network metrics, for the podman
+# summary: cadvisor: per-container CPU/memory/network metrics, for the podman
 # containers containers.nix's `podman` category enables. One of three things
 # prometheus.nix scrapes -- see that file and grafana.nix for the rest of the
 # stack this belongs to.
 {
     nixos = {
-        # # description = "cadvisor -- per-container metrics for prometheus.nix to scrape";
         services.cadvisor = {
             enable        = true;
             listenAddress = "127.0.0.1"; # already the default; stated because

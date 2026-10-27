@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# What nire-durandal is made of.
+# summary: What nire-durandal is made of.
 #
 # This file sits directly under host-config/ rather than in a category directory,
 # because a file directly in an area belongs to no category -- a host definition

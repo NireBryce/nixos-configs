@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# The persistence half of jovian.nix. Split out 2026-08-14; until then this was
+# summary: The persistence half of jovian.nix. Split out 2026-08-14; until then this was
 # a single `environment.persistence` block partway down that file.
 #
 # Filed beside jovian.nix, NOT in the impermanence category. That is deliberate,

@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# One `claude remote-control` per working directory, as a user service on cube,
+# summary: One `claude remote-control` per working directory, as a user service on cube,
 # so the sessions listed in claude.ai/code come back after a reboot instead of
 # needing someone to ssh in and start each by hand; added 2026-10-19.
 #

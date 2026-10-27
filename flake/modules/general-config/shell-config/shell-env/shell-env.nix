@@ -18,7 +18,7 @@
                 img-cat                 = "${pkgs.kitty}/bin/kitty +kitten icat";
                 kssh                    = "${pkgs.kitty}/bin/kitty +kitten ssh";
             }
-            # Launchers for the two GUI apps that homebrew owns on lysithea
+            # summary: Launchers for the two GUI apps that homebrew owns on lysithea
             # and nix owns everywhere else.
             #
             # This module is part of elly-home-manager, which every host shares

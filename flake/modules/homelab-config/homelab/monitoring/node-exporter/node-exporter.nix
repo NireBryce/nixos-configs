@@ -3,12 +3,11 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# node_exporter: CPU/memory/disk/network metrics for the host itself.
+# summary: node_exporter: CPU/memory/disk/network metrics for the host itself.
 # One of three things prometheus.nix scrapes -- see that file and grafana.nix
 # for the rest of the stack this belongs to.
 {
     nixos = {
-        # # description = "node_exporter -- host CPU/mem/disk/net metrics for prometheus.nix to scrape";
         services.prometheus.exporters.node = {
             enable = true;
 

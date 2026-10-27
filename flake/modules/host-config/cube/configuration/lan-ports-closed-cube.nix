@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# KDE Connect and Steam's LAN ports stay closed on cube, a homelab box with
+# summary: KDE Connect and Steam's LAN ports stay closed on cube, a homelab box with
 # no use for either on the LAN; added 2026-09-27. durandal keeps them open.
 # Same mechanism as lan-ports-closed-tenacity.nix, which has the full account:
 # programs.kdeconnect's only effects are the package (the Home Manager
@@ -13,7 +13,6 @@
 { lib, ... }:
 {
     nixos = {
-        # # description = "cube: KDE Connect and Steam LAN ports closed; tailnet only";
         programs.kdeconnect.enable = lib.mkForce false;
 
         programs.steam = {

@@ -33,7 +33,7 @@
             [ -n "$session" ] && exec ${pkgs.systemd}/bin/loginctl activate "$session"
         '';
     in {
-        # # description = "YubiKey: u2f PAM, udev lock/wake rules, pcscd, OATH app, ykman";
+        # summary: YubiKey: u2f PAM, udev lock/wake rules, pcscd, OATH app, ykman
         environment.systemPackages = with pkgs; [
             pam_u2f
             yubioath-flutter

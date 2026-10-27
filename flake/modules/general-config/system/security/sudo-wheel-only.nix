@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# The setuid sudo binary is executable by `wheel` only (mode 4510,
+# summary: The setuid sudo binary is executable by `wheel` only (mode 4510,
 # root:wheel), so a service account or any other non-wheel user -- cube's
 # `container`, the DynamicUser services -- can't reach sudo's own parser at
 # all, rather than reaching it and being refused by sudoers. Added
@@ -11,7 +11,6 @@
 # (elly-user.nix).
 {
     nixos = {
-        # # description = "sudo executable by wheel only";
         security.sudo.execWheelOnly = true;
     };
 }

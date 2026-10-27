@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# sshd on tenacity answers over the tailnet only, never on whatever LAN or
+# summary: sshd on tenacity answers over the tailnet only, never on whatever LAN or
 # café wifi the handheld is on that day. Added 2026-09-26.
 #
 # Closes only the firewall port: sshd still listens on every address, and
@@ -17,7 +17,6 @@
 # -- use the machine's own console.
 {
     nixos = {
-        # # description = "tenacity: sshd reachable over tailscale0 only";
         services.openssh.openFirewall = false;
     };
 }

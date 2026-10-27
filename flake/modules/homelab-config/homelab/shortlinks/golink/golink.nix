@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# golink: tailscale's `go/foo` shortlink service, run as its OWN node on the
+# summary: golink: tailscale's `go/foo` shortlink service, run as its OWN node on the
 # tailnet. Added 2026-08-24, cube-only, own category (`homelab-config/homelab/shortlinks/`) --
 # the category-as-optionality mechanism CLAUDE.md's Architecture section
 # gives `monitoring` and `virtualization`; nothing here for the handhelds,

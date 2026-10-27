@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# A size backstop for the coredump store.
+# summary: A size backstop for the coredump store.
 #
 # What is already true without this file: systemd ships
 # `d /var/lib/systemd/coredump 0755 root root 2w` in tmpfiles, and

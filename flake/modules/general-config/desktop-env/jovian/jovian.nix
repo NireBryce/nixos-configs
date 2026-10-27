@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# The handheld half of the desktop story: Jovian, Steam, and the TDP stack.
+# summary: The handheld half of the desktop story: Jovian, Steam, and the TDP stack.
 #
 # Generic to handhelds -- machines with built-in controllers that occasionally
 # launch a SteamOS session -- not specific to tenacity; a second handheld

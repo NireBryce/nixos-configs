@@ -159,7 +159,7 @@
             true
         '';
     in {
-        # # description = "Dump wakeup/GPE state around every suspend on durandal, to survive a hang";
+        # summary: Dump wakeup/GPE state around every suspend on durandal, to survive a hang
 
         # nire-durandal suspends into S3 and then will not wake by any input
         # -- keyboard, power button, nothing. Only a PSU power cut recovers it,

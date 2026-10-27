@@ -4,7 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
-            # # description = "herdr: agent multiplexer that lives in your terminal"
+            # package summary: herdr: agent multiplexer that lives in your terminal
             home.packages = with pkgs; [
                 herdr
             ];

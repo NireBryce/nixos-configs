@@ -3,8 +3,9 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# Grafana: the one piece of this stack (prometheus.nix, node-exporter.nix,
-# cadvisor.nix, libvirt-exporter.nix) meant to be reached off-host, and then
+# summary: Grafana: dashboards for the metrics prometheus.nix collects, and the
+# one piece of this stack (prometheus.nix, node-exporter.nix, cadvisor.nix,
+# libvirt-exporter.nix) meant to be reached off-host, and then
 # only over the tailnet. Every listener in the stack, this one included, is
 # on LOOPBACK: Grafana is reached at https://grafana.moose-micro.ts.net/,
 # its own Tailscale Services name, and Caddy is what terminates TLS for it
@@ -33,8 +34,6 @@ in {
     # "attribute 'pkgs' missing"). Same pattern
     # zsh.nix/bash.nix/pipewire.nix/etc. use throughout this tree.
     nixos = { pkgs, config, ... }: {
-        # # description = "grafana -- dashboards over the tailnet only, for the metrics prometheus.nix collects";
-
         # `owner`, not the root:root default -- grafana.service runs as
         # the `grafana` user and reads this file itself at start, the
         # same way it reads secretKeyPath. Getting that wrong is the

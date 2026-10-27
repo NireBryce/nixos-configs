@@ -4,7 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     nixos = { pkgs, ... }: {
-        # # description = "libvirt/QEMU virtual machines, and virt-manager to drive them";
+        # summary: libvirt/QEMU virtual machines, and virt-manager to drive them
 
         # Was `virtualization.nix`, declaring `flake.modules.nixos.virtualization`,
         # for about an hour on 2026-08-21. It could not keep that name once these

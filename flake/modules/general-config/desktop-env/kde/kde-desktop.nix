@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# Durandal's session: the workstation half of what used to be kde.nix.
+# summary: Durandal's session: the workstation half of what used to be kde.nix.
 #
 # Was `kde.nix`, so the module this declares was `flake.modules.nixos.kde` until
 # 2026-08-10 -- filenames are attribute names here, and the old one is no longer

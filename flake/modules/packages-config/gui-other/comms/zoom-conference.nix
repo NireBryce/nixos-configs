@@ -4,7 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
-        # description = "zoom videoconferencing software";
+        # package summary: zoom videoconferencing software
         home.packages = with pkgs; [
             zoom-us
         ];

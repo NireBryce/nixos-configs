@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# Declares the `environment.persistence` option for every NixOS host, whether
+# summary: Declares the `environment.persistence` option for every NixOS host, whether
 # or not that host actually wipes anything. Nothing else. No bind mounts
 # happen unless something populates environment.persistence."/persist" with
 # actual entries -- this file alone is a complete no-op.

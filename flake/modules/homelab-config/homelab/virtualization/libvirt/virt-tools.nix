@@ -4,7 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     nixos = { pkgs, ... }: {
-        # # description = "client and disk-image tooling for the VMs libvirt.nix hosts";
+        # summary: client and disk-image tooling for the VMs libvirt.nix hosts
 
         # Split from libvirt.nix so that file stays about the daemon and its
         # options. Nothing here configures libvirtd; it is all things you run

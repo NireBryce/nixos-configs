@@ -18,7 +18,7 @@ Never hand-edit. By hand it is
 |---|---|
 | total `.nix` files under `flake/modules/` | 241 |
 | header comment (`# This is a dirs-as-categories module…`) | 227 |
-| `# # description` as first body line | 35 |
+| `# summary:` / `# package summary:` comment | 86 |
 | `with pkgs;` package lists | 115 |
 
 <!-- /generated -->
@@ -64,9 +64,11 @@ Was `moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file)` +
   not run**; `treefmt` is deliberately absent and would need
   `flakeCheck = false`.
 
-## `# # description = "..."`
+## `# summary:` / `# package summary:`
 
-One commented line, first thing in the module body, one line only.
+One comment line, first thing in the module body, one line only. `package summary:`
+in `packages-config/` (what the package *is*); `summary:` elsewhere. Replaced
+`# # description = "..."`, 2026-10-26.
 
 **There is no such field** — not in flakes, flake-parts, or the NixOS module
 system (checked). The module system has no per-module namespace at all. A

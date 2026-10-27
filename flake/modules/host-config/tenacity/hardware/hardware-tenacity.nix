@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# nire-tenacity hardware, from `nixos-generate-config` on the machine.
+# summary: nire-tenacity hardware, from `nixos-generate-config` on the machine.
 #
 # Wrapped as a flake-parts module. A raw generator file under modules/ makes
 # flake-parts resolve `modulesPath` through its own _module.args and evaluation

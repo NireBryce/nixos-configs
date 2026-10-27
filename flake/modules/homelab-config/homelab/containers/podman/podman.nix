@@ -31,7 +31,7 @@
     # Named after the technology, like `libvirt.nix` isn't named
     # `virtualization.nix`.
     nixos = { pkgs, ... }: {
-        # # description = "podman, distrobox, and the subuid pinning they need";
+        # summary: podman, distrobox, and the subuid pinning they need
         environment.systemPackages = with pkgs; [
             distrobox
             distrobox-tui

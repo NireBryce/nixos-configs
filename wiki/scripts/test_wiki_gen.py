@@ -230,7 +230,7 @@ class Counts(Fixture):
         n_nix = len(list((self.root / 'flake/modules').rglob('*.nix')))
         self.assertIn(f'| total `.nix` files under `flake/modules/` | {n_nix} |', text)
         self.assertIn('| header comment (`# This is a dirs-as-categories module…`) | 6 |', text)
-        self.assertIn('| `# # description` as first body line | 0 |', text)
+        self.assertIn('| `# summary:` / `# package summary:` comment | 0 |', text)
         self.assertIn('| `with pkgs;` package lists | 6 |', text)
 
 

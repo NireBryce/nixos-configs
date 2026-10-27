@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# Stop the built-in touchscreen from waking the handheld.
+# summary: Stop the built-in touchscreen from waking the handheld.
 #
 # Same shape and reason as durandal/fixes/b550-suspend-fix.nix -- a device
 # armed for wakeup that should not be -- but this one was picked out of the

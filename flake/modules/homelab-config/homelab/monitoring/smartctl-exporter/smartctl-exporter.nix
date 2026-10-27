@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# smartctl_exporter: per-disk SMART/NVMe wear metrics (health status,
+# summary: smartctl_exporter: per-disk SMART/NVMe wear metrics (health status,
 # percentage used, media errors, temperature) for prometheus.nix to scrape
 # and grafana.nix to trend over time -- the one piece of this stack that
 # tracks wear rather than a moment-in-time reading, unlike the CLI tools
@@ -20,7 +20,6 @@
 # libvirt-exporter.nix's metrics became the "libvirt / QEMU VMs" row.
 {
     nixos = {
-        # # description = "smartctl_exporter -- per-disk SMART/wear metrics for prometheus.nix to scrape";
         services.prometheus.exporters.smartctl = {
             enable = true;
 
