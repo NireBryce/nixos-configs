@@ -101,7 +101,7 @@ Nothing breaks by leaving it — courtesy, not a bug with consequences.
 
 ## Fix snippets & one-offs
 
-**[`../flake/doc/notes-and-fixes.md`](<../../flake/doc/notes-and-fixes.md>)** —
+**[`../../flake/doc/notes-and-fixes.md`](<../../flake/doc/notes-and-fixes.md>)** —
 a grab-bag, not organized by topic:
 
 - `SteamTinkerLaunch` workarounds (external gist link).

@@ -19,8 +19,8 @@ Not a tracker since 2026-10-01; this repo's GitHub issues are.
   those words, for that specific report. Tracking ≠ working.
 - New loose end → skill `propose-issue`, not a line here.
 - Not tracked on purpose (no done-condition):
-  [`../flake/scripts/script-wishlist.md`](<../../flake/scripts/script-wishlist.md>),
-  [`../flake/doc/notes-and-fixes.md`](<../../flake/doc/notes-and-fixes.md>)'s
+  [`../../flake/scripts/script-wishlist.md`](<../../flake/scripts/script-wishlist.md>),
+  [`../../flake/doc/notes-and-fixes.md`](<../../flake/doc/notes-and-fixes.md>)'s
   look-into list; self-hosted booking dropped 2026-08-24 (not in nixpkgs,
   no module, PHP); user split (`elly` -> `nire`, then per-purpose
   accounts) planned, not started.

@@ -41,7 +41,7 @@ The mechanism in one table; the sections below link the reasoning.
   `dirs-as-categories` flake input applies those rules and publishes what it
   built as data: `nix eval --json ./flake#moduleGraph` (categories, modules
   and their classes, `includes`, `enables`).
-  [`../flake/doc/dirsAsCategory.md`](<../../flake/doc/dirsAsCategory.md>) is
+  [`../../flake/doc/dirsAsCategory.md`](<../../flake/doc/dirsAsCategory.md>) is
   the shim-based design it replaced on 2026-10-16, kept as history.
 - **[`../../CLAUDE.md`](../../CLAUDE.md), Architecture section** — the prose
   overview: `dirs-as-categories`, entry points that sit outside every category
@@ -154,7 +154,7 @@ flowchart LR
 
 ## Home Manager integration
 
-- **[`../flake/doc/trailhead-home-manager-standalone.md`](<../../flake/doc/trailhead-home-manager-standalone.md>)**
+- **[`../../flake/doc/trailhead-home-manager-standalone.md`](<../../flake/doc/trailhead-home-manager-standalone.md>)**
   — HM is wired in from the NixOS side (`useGlobalPkgs`/`useUserPackages`),
   not as a standalone `homeConfigurations` output. This doc is the trailhead
   back to standalone if that's ever wanted.

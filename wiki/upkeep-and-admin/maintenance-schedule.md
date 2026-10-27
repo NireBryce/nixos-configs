@@ -220,7 +220,7 @@ protect one row.
   (**not** in `secrets.yaml` — see below), holding a fine-grained PAT
   scoped to this repo with
   `Contents: read/write` and `Pull requests: read/write`. Read by
-  [`../.github/workflows/update-flake-lock.yml`](<../../.github/workflows/update-flake-lock.yml>)
+  [`../../.github/workflows/update-flake-lock.yml`](<../../.github/workflows/update-flake-lock.yml>)
   as the `token` input to `DeterminateSystems/update-flake-lock`.
 - **Why a PAT rather than `GITHUB_TOKEN`**: so these PRs trigger CI. A
   `GITHUB_TOKEN`-opened PR does not trigger this repo's `pull_request`

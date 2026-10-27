@@ -57,9 +57,9 @@ working it.
 Notes that have no "done when", so an issue would only sit open:
 
 - Idea placeholders:
-  [`../flake/scripts/script-wishlist.md`](<../../flake/scripts/script-wishlist.md>)
+  [`../../flake/scripts/script-wishlist.md`](<../../flake/scripts/script-wishlist.md>)
   (bare headings) and the "things to look into" list ending
-  [`../flake/doc/notes-and-fixes.md`](<../../flake/doc/notes-and-fixes.md>).
+  [`../../flake/doc/notes-and-fixes.md`](<../../flake/doc/notes-and-fixes.md>).
 - Self-hosted booking (Easy!Appointments vs LibreBooking) was compared
   2026-08-24 and not pursued: neither is in nixpkgs or has a NixOS module,
   and both are PHP apps wanting a writable install dir. The write-up is

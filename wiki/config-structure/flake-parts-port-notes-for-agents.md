@@ -11,7 +11,7 @@ Explicit choices; don't re-decide silently.
 
 - **Home Manager NixOS-integrated**, not standalone.
   `general-config/system/home-manager/enable-home-manager.nix`;
-  [`../flake/doc/trailhead-home-manager-standalone.md`](<../../flake/doc/trailhead-home-manager-standalone.md>)
+  [`../../flake/doc/trailhead-home-manager-standalone.md`](<../../flake/doc/trailhead-home-manager-standalone.md>)
   is the way back.
 - **Package parity across hosts** — no role split. The handheld gets the full
   desktop GUI set on purpose.

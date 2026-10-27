@@ -30,7 +30,7 @@ that import it.
   section has a retired scripted-stage-1 templating trap, from before this
   repo's 2026-08-10 move to systemd stage 1.)
 - **Disk layout template** —
-  [`../flake/doc/disko-impermanence-layout.md`](<../../flake/doc/disko-impermanence-layout.md>),
+  [`../../flake/doc/disko-impermanence-layout.md`](<../../flake/doc/disko-impermanence-layout.md>),
   covered in more depth on [../fleet/hosts.md](../fleet/hosts.md).
 - **New-host runbook** — [../fleet/disk-formatting.md](../fleet/disk-formatting.md): the
   ordered steps and safety warnings for getting a new host onto
