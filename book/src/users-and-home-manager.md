@@ -42,6 +42,11 @@ Most changes are not wiring changes. To add a program or dotfile for the user:
   contains `homeManager` modules: every category exists for every class, and
   the file's header explains why empty ones are left out.
 
+A host-specific Home Manager addition is not a fork of the aggregate: it is
+appended to that host's `home-manager.users.elly.imports`. Tenacity does this
+for its Plasma configuration (`host-config/tenacity/configuration/plasma-tenacity.nix`
+says it is imported only that way).
+
 Because the aggregate is shared by every host, **everything in it has to
 survive darwin**. [Darwin edge cases](darwin.md) covers how.
 
