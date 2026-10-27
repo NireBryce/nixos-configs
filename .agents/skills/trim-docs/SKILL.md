@@ -43,7 +43,7 @@ Checked mechanically (`wiki/scripts/check_wiki.py`); preserve:
 - **Anchors are GitHub slugs of headings.** Renaming a heading breaks every
   inbound `page.md#anchor` link silently: grep `page.md#` across wiki/ and
   AGENTS.md first, or don't rename.
-- **lessons-learned § numbers are referenced repo-wide.** Never renumber,
+- **agent-lessons-learned § numbers are referenced repo-wide.** Never renumber,
   merge, or drop a §.
 
 ## Cut
@@ -82,7 +82,7 @@ explanation.
 ## Calibrate
 
 - The metric is facts per sentence, not word count. Don't gut
-  lessons-learned's numbered lessons or a skill made of real incidents for
+  agent-lessons-learned's numbered lessons or a skill made of real incidents for
   marginal savings; trim their narration and intros.
 - Wiki pages stay human-readable prose; skills may be terser; a
   `-for-agents.md` sibling is terser still, the one place in `wiki/` where

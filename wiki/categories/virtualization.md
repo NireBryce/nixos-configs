@@ -161,7 +161,7 @@ directory, so any account on cube could read a guest's disk.
 The two real bugs this feature hit the first time (nixpkgs'
 image-variant isolation not reaching a base config's toplevel;
 `image.filePath` being relative rather than absolute) are in
-lessons-learned §36; a new one joined them the same day the second VM
+agent-lessons-learned §36; a new one joined them the same day the second VM
 landed: a runner instance name containing a dash escapes into the unit
 name (`forge-runner` → `forge\x2drunner`), so wiring that targets the
 plain spelling silently creates an empty second unit — caught by reading

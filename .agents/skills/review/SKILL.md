@@ -100,4 +100,4 @@ eval is the overclaim this repo keeps teaching against.
 - Trap skills: `new-flake-module`, `home-manager-dotfiles`,
   `impermanence-initrd`, `package-platform-support`, `secrets-hygiene`.
 - `ship` — pre-PR gate; its step 0 is "Run first" from the author's side.
-- `wiki/lessons-learned.md` — every § earned the hard way.
+- `wiki/agent-lessons-learned.md` — every § earned the hard way.

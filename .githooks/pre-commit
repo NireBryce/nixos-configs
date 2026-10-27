@@ -41,7 +41,7 @@ fi
 # the given *absolute* path relative to that -- dropping the flake/ prefix
 # outright and creating a second, stray copy at scripts/lint-baseline.json.
 # No error at any layer; caught for real 2026-09-02, landing an unrelated
-# docs commit from a worktree (wiki/lessons-learned.md #44 has the full
+# docs commit from a worktree (wiki/agent-lessons-learned.md #44 has the full
 # repro). `-C "$repo_root"` sidesteps the whole GIT_DIR-vs-cwd question by
 # telling git directly what directory to treat as its starting point,
 # instead of leaving it to infer one -- githooks(5) itself suggests

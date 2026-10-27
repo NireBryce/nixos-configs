@@ -64,7 +64,7 @@ these fits into the bigger picture; this page is just the index.
   what its `ROOT_URL` says, and Caddy must strip it. Both spellings are valid
   Caddy, both build, and the wrong one is a 404 on every page of the affected
   app. It cost a switch on 2026-08-24 —
-  [lessons-learned.md](lessons-learned.md) #41, with the
+  [agent-lessons-learned.md](agent-lessons-learned.md) #41, with the
   routing detail in [reverse-proxy](categories/reverse-proxy.md). The
   `new-homelab-service` skill has the two-`curl` test that settles it in
   seconds.
@@ -80,7 +80,7 @@ these fits into the bigger picture; this page is just the index.
   `caddy adapt` all pass — the config is valid, it just means something
   else; only a real handshake finds it. The general shape, and the questions
   to ask before adding an explicit setting anywhere:
-  [lessons-learned.md](lessons-learned.md) §47.
+  [agent-lessons-learned.md](agent-lessons-learned.md) §47.
 
 ## A trap that points at the wiki instead of a skill
 

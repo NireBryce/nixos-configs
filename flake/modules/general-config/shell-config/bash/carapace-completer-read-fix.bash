@@ -21,7 +21,7 @@
 # character by character, hence the error. It happens with carapace's stock
 # completer alone (checked on nire-cube), so it is not this repo's completion
 # code. Full account: wiki/categories/shell-config/blesh.md, wiki/
-# lessons-learned.md #39, issue #72.
+# agent-lessons-learned.md #39, issue #72.
 #
 # The fix removes the `read` by replacing that line, in the function's source
 # text, with parameter expansions:

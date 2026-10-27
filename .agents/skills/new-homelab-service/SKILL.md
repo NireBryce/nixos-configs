@@ -180,6 +180,6 @@ page needs one only past 1,000 words.
 
 ## See also
 
-- `wiki/lessons-learned.md` §§36, 37, 40, 41.
+- `wiki/agent-lessons-learned.md` §§36, 37, 40, 41.
 - `wiki/categories/reverse-proxy.md` — routing layer, prefix asymmetry in full.
 - `flake/modules/general-config/system/networking/tailscale.nix` — tailnet device names ≠ `networking.hostName`; an ACL can block everything with perfect config.

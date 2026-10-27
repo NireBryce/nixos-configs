@@ -17,7 +17,7 @@ Freeform settings options (typed `attrsOf …` with a `freeformType`, like
 config: a misspelled or renamed key evals clean and the consumer discards
 it. `settings.authFile` (camelCase of nixpkgs' `authfile`) was ignored by
 pam_u2f for five months, masked by the value coinciding with the consumer's
-default (§49 in `wiki/lessons-learned.md`). Eval passing is a claim about
+default (§49 in `wiki/agent-lessons-learned.md`). Eval passing is a claim about
 the type, not the consumer: read the rendered artifact (`/etc/pam.d/<service>`
 on the host, or eval `config.security.pam.services.<name>.text`) when a
 change touches one.

@@ -393,7 +393,7 @@ workarounds:
 It was also used on purpose once: `virtualization-cube.nix`, cube's VM
 wiring, sat directly in `homelab-config/homelab/virtualization/` so it
 reached cube through `homelab` without joining `virtualization`, which
-durandal imported at the time (lessons-learned §38 on why a VM definition
+durandal imported at the time (agent-lessons-learned §38 on why a VM definition
 shouldn't ride along with shared libvirt setup).
 
 Checked before removing it:
@@ -413,7 +413,7 @@ Checked before removing it:
   evaluated twice.
 - **No new name collisions.** Names come from filenames whichever category
   collects a file; `just modules` checks them the same way either way
-  (lessons-learned §34, §35).
+  (agent-lessons-learned §34, §35).
 
 The change: the collector lost the exception and `bareModulesOf`;
 `virtualization-cube.nix` moved to `host-config/cube/vms/` (renamed

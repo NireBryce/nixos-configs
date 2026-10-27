@@ -40,7 +40,7 @@ in {
             image = runnerCfg.system.build.image;
             # NOT just runnerCfg.image.filePath -- that option is
             # relative to the image derivation's own $out (the trap
-            # that bit llm-sandbox, lessons-learned §36).
+            # that bit llm-sandbox, agent-lessons-learned §36).
             imagePath = "${runnerCfg.system.build.image}/${runnerCfg.image.filePath}";
             memoryMB  = 4096;
             vcpus     = 2;

@@ -98,4 +98,4 @@ From the pinned `flake-parts`, re-verified 2026-09-08.
   docstring.
 
 See also: [flake-parts.md](flake-parts.md) · [architecture.md](architecture.md) ·
-[lessons-learned.md](lessons-learned.md) §§1–18
+[agent-lessons-learned.md](agent-lessons-learned.md) §§1–18

@@ -10,7 +10,7 @@ _Last modified: 2026-10-22_
 
 ## This repo's own history
 
-- **[lessons-learned.md](lessons-learned.md)**
+- **[agent-lessons-learned.md](agent-lessons-learned.md)**
   — "Written by Claude Code, for Claude Code, and largely a record of its
   own mistakes." The main one. §§1–18 the den → flake-parts port, §§19–24
   the first session on real hardware, §§25–31 after it first booted, §32+
@@ -33,7 +33,7 @@ _Last modified: 2026-10-22_
 - The `old-`/`old-historical-`-prefixed planning and handoff artifacts (the
   den→flake-parts port plan, the durandal/lysithea handoff, and tenacity's
   plan/prompt files) were removed 2026-08-26, their useful content already
-  superseded by `lessons-learned.md`, `CLAUDE.md`'s State section, and this
+  superseded by `agent-lessons-learned.md`, `CLAUDE.md`'s State section, and this
   page. Still in git history if one of them is ever needed again.
 - `nire-lego` (a handheld, Legion Go, never built or switched) and
   `nire-installer` (the generic live-USB installer image, generalized
@@ -48,11 +48,11 @@ _Last modified: 2026-10-22_
   agent) was removed 2026-08-28 with its `nireHost/llm-sandbox/` files,
   `hosts.nix` entry, and `virtualization-cube.nix`. Confirmed booted and
   staying up 2026-08-24 (see "Confirmed-on-hardware facts" below);
-  [§36](lessons-learned/36-evaluating-vs-building.md) and [§40](lessons-learned/40-check-the-resource-not-the-unit.md) cover the bugs its first builds and switch hit. The generator
+  [§36](agent-lessons-learned/36-evaluating-vs-building.md) and [§40](agent-lessons-learned/40-check-the-resource-not-the-unit.md) cover the bugs its first builds and switch hit. The generator
   it ran on, `VMs/_lib/libvirt-vm.nix`, is kept as unexercised reusable
   infrastructure — see [virtualization](categories/virtualization.md).
 - **`claude cave/` itself was retired 2026-09-02.** Its remaining
-  files became real wiki pages — [lessons-learned.md](lessons-learned.md),
+  files became real wiki pages — [agent-lessons-learned.md](agent-lessons-learned.md),
   `impermanence-stage1-migration.md` (since removed — above),
   [module-style-guide.md](module-style-guide.md), and
   `kde-to-wayland-migration.md` (since removed — next entry) — the same
@@ -127,5 +127,5 @@ page, not a `git show origin/flake-parts:…`, which no longer resolves:
 The branch tip was `cf9aea42`; both files are still readable there from a
 clone that fetched it, until the objects are garbage-collected. The port
 mechanics that page left behind were superseded by the port having
-happened — see [lessons-learned.md](lessons-learned.md) §§1–18, written as
+happened — see [agent-lessons-learned.md](agent-lessons-learned.md) §§1–18, written as
 it went.

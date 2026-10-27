@@ -47,9 +47,9 @@ A page without one opens with `## Quick facts` — linked there.
 - [module-files.md](module-files.md) — a module file's shape and rules, and why
   (names from filenames, categories from folders).
 - [traps-and-skills.md](traps-and-skills.md) — real past mistakes, and which skill holds each.
-- [lessons-learned.md](lessons-learned.md) — every § as one line (rule,
+- [agent-lessons-learned.md](agent-lessons-learned.md) — every § as one line (rule,
   Home, Enforced), grouped by when it applies: read your task's group. By
-  number: `ls wiki/lessons-learned/43-*`. By file or area: `just agent
+  number: `ls wiki/agent-lessons-learned/43-*`. By file or area: `just agent
   lessons <path>`, from `.agents/lessons-map.toml`. No sibling.
 - [history.md](history.md) — the index into the above.
 - [flake-parts-port-notes-for-agents.md](flake-parts-port-notes-for-agents.md)
@@ -88,7 +88,7 @@ SS root hub hold; tabled, recheck on the next kernel bump. Also in `experiments/
 (what is running on durandal for the hang, each row with its check command) and
 [a 2026-09-16 probe transcript](experiments/durandal-superio-probe-runbook-2026-09-16.md)
 (historical, do not follow). On resolution the outcome moves to
-[lessons-learned.md](lessons-learned.md) or the category page and the page goes.
+[agent-lessons-learned.md](agent-lessons-learned.md) or the category page and the page goes.
 
 ## Rotting
 

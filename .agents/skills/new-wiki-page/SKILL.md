@@ -25,7 +25,7 @@ narrative out (`wiki-history-sweep`), writing a skill (`new-skill`).
 ## Traps
 
 - Dates absolute (`wiki-sync`'s edit rules apply).
-- `gen-contents` across exempt pages (`lessons-learned*`, `-for-agents.md`) adds blocks that shouldn't exist (2026-09-11, ~20 pages; see `wiki-history-sweep` traps).
+- `gen-contents` across exempt pages (`agent-lessons-learned*`, `-for-agents.md`) adds blocks that shouldn't exist (2026-09-11, ~20 pages; see `wiki-history-sweep` traps).
 - A category page usually earns its sibling by its second real incident, not at creation (`new-homelab-service` step 9). An empty "for later" sibling puts the `siblings` check on watch over nothing.
 
 ## See also

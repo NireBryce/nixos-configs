@@ -96,7 +96,7 @@ KEEPERS = [
     (2, 'currently', re.compile(r'\bcurrently\b', re.I)),
 ]
 
-SKIP = re.compile(r'-for-agents\.md$|-history\.md$|lessons-learned|^wiki/history\.md$')
+SKIP = re.compile(r'-for-agents\.md$|-history\.md$|agent-lessons-learned|^wiki/history\.md$')
 HEADING = re.compile(r'^(##+) (.+)$', re.M)
 
 

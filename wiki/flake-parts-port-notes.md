@@ -9,7 +9,7 @@ before the branch was deleted. The port was done on a darwin laptop against
 a tree that could only be evaluated.
 
 **This page is an exception to the wiki's "index over restatement" rule**,
-on the same terms as [lessons-learned.md](lessons-learned.md) and
+on the same terms as [agent-lessons-learned.md](agent-lessons-learned.md) and
 [module-style-guide.md](module-style-guide.md): the source it would
 otherwise link to no longer exists. See [styleguide.md](styleguide.md)'s
 Directory hierarchy section.
@@ -291,7 +291,7 @@ is `flake.modules.nixos.*` for the reusable half and
   [`../flake/doc/flake-parts-rationale.md`](<../flake/doc/flake-parts-rationale.md>).
 - [architecture.md](architecture.md) — the category mechanism built on
   `flake.modules.<class>.<name>` ([module-files.md](module-files.md)).
-- [lessons-learned.md](lessons-learned.md) — §§1–18 are this same port,
+- [agent-lessons-learned.md](agent-lessons-learned.md) — §§1–18 are this same port,
   written as it happened.
 - [history.md](history.md) — where this page is indexed from, and the rest
   of the repo's own history.

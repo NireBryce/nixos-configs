@@ -33,7 +33,7 @@ The PR is a decision, not an auto-merge. CI (`nix flake check + module
 tree`) *evaluates* every host toplevel on the PR, but nothing builds it —
 `just preflight` plus a real `just build`/`switch` on the affected hosts is
 the stronger check before merging. See §§36–37 of
-[lessons-learned.md](lessons-learned.md) for why that distinction keeps
+[agent-lessons-learned.md](agent-lessons-learned.md) for why that distinction keeps
 earning its keep.
 
 By hand: `just update` (`nix flake update`, then `just check`), or

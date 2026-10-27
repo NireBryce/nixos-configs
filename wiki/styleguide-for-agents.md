@@ -17,7 +17,7 @@ Condensed from [styleguide.md](styleguide.md). Rules only here. The *repo's* sty
 | `wiki/categories/<name>/` | escape hatch (`shell-config`). Triggered by one *member* accumulating an investigation, not by length. `00-INDEX.md` becomes the category article; each deep-dive is named after its subject. **No third tier under it.** |
 | `wiki/categories/<name>-history.md` | resolved incidents whose *outcome* matters but whose blow-by-blow shouldn't load every read. **Not the default** — the test is whether understanding the *current* behavior needs the paragraph. One companion per **category**, not per page. Procedure: skill `wiki-history-sweep`; candidates: `just wiki-history-candidates`. |
 | `wiki/homelab/` | usage tier: operating a service, for a reader who wants to *do something with it*. |
-| `wiki/experiments/` | open questions: one page per problem **instrumented but not yet diagnosed** — symptom, established, ruled out, under test. Must mark settled vs under-test claims (`fact-hygiene`). On resolution the outcome moves to `lessons-learned.md` or the category page and the page goes. |
+| `wiki/experiments/` | open questions: one page per problem **instrumented but not yet diagnosed** — symptom, established, ruled out, under test. Must mark settled vs under-test claims (`fact-hygiene`). On resolution the outcome moves to `agent-lessons-learned.md` or the category page and the page goes. |
 | `<page>-for-agents.md` | the condensed sibling; see below. |
 
 No per-category page for `packages-config/*` subcategories or `host-config/*`
@@ -40,7 +40,7 @@ A category page's order: **category contents → category-specific mechanism not
 gen-contents <page>` after adding, renaming, or removing any heading; it's
 idempotent. A hand-derived anchor already got it wrong once.
 
-Exempt from `## Contents`: `lessons-learned.md`, `lessons-learned/`
+Exempt from `## Contents`: `agent-lessons-learned.md`, `agent-lessons-learned/`
 articles, and `-for-agents.md` siblings. **Not the same list as the sibling
 exemption** — `-history.md` needs no sibling but does carry a Contents
 block. A non-exempt page with headings and no block is a MISSING CONTENTS
@@ -67,7 +67,7 @@ host lists, each trap as one declarative line. Tables wherever one fits.
 **Out**: how it came to be, what was tried first, who confirmed it and when,
 the reasoning behind a choice, meta-commentary, see-also sprawl.
 
-Exempt from needing one: `lessons-learned*`, `*-history.md`. Under 1,000
+Exempt from needing one: `agent-lessons-learned*`, `*-history.md`. Under 1,000
 words it's allowed but usually a loss.
 
 Checked by `check_wiki.py siblings`, which is what makes this the wiki's one
@@ -93,8 +93,8 @@ deliberate duplication rather than a future stale claim:
 Link to the real source — a module header, `CLAUDE.md`, a skill — rather
 than copying it in. Exceptions, each on stated terms:
 
-- `lessons-learned.md` and `module-style-guide.md` — nothing to link to.
-- `lessons-learned.md` is an index: one `- **§N**` line per lesson (title linking `lessons-learned/<N>-<slug>.md`, the rule, `Home:`, `Enforced:`), under the group where it applies; the article holds the account. The rule also goes in its Home, and a lesson tied to a path or command gets a topic in `.agents/lessons-map.toml` (the lesson-reminder hook's source). `check_wiki.py lessons` enforces the shape and the map.
+- `agent-lessons-learned.md` and `module-style-guide.md` — nothing to link to.
+- `agent-lessons-learned.md` is an index: one `- **§N**` line per lesson (title linking `agent-lessons-learned/<N>-<slug>.md`, the rule, `Home:`, `Enforced:`), under the group where it applies; the article holds the account. The rule also goes in its Home, and a lesson tied to a path or command gets a topic in `.agents/lessons-map.toml` (the lesson-reminder hook's source). `check_wiki.py lessons` enforces the shape and the map.
 - `flake-parts-port-notes.md` — the branch it indexed is gone.
 - `wiki/homelab/` — the source is often the live service, so synthesized
   content is allowed **if the page says what was verified against the live

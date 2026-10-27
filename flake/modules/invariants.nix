@@ -6,7 +6,7 @@
 # when a module moved, an initrd unit nothing wants, hibernation creeping
 # back onto a machine that cannot survive it -- what tenacity's first
 # boot found, about which a green `nix flake check` said nothing
-# (wiki/lessons-learned.md §25).
+# (wiki/agent-lessons-learned.md §25).
 #
 # WHY THIS THROWS RATHER THAN FAILING A BUILD
 #
@@ -396,9 +396,9 @@
             else throw ("invariants failed:\n"
                  + lib.concatMapStringsSep "\n" (i: "  - ${i.msg}") failures
                  # Where to go from here (#460): the reason for each is the
-                 # comment above it, and §N is wiki/lessons-learned.md.
+                 # comment above it, and §N is wiki/agent-lessons-learned.md.
                  + "\n  -> why each holds: the comment above it in flake/modules/invariants.nix;"
                  + " impermanence ones: skill impermanence-initrd and WARN-impermanence.nix;"
-                 + " §N: wiki/lessons-learned.md (§25: a clean eval says nothing about these)\n");
+                 + " §N: wiki/agent-lessons-learned.md (§25: a clean eval says nothing about these)\n");
     };
 }

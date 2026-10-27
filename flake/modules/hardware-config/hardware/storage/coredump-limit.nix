@@ -12,7 +12,7 @@
 # between two daily cleanups. MaxUse stays above the worst real fortnight
 # observed (1.1G); the first draft capped below it, which would have
 # discarded dumps during exactly the incident they were wanted for
-# (wiki/lessons-learned.md §31).
+# (wiki/agent-lessons-learned.md §31).
 # 
 # settings.Coredump, not extraConfig: `systemd.coredump.extraConfig` is
 # deprecated in 26.11 and errors by name, the same way systemd.sleep.extraConfig

@@ -28,6 +28,6 @@ before changing anything here.
 - Read the links in a comment before deleting the code it annotates: a
   dropped `requires` that a cited manual page explained nearly turned the
   `/root`-deleting unit from "does not run" into "runs and fails" (§11 in
-  `wiki/lessons-learned.md`).
+  `wiki/agent-lessons-learned.md`).
 - `.agents/hooks/impermanence-edit-guard-pretooluse.sh` warns (never
   blocks) when an Edit/Write lands in these trees.

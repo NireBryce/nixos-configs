@@ -57,7 +57,7 @@ Its `just check` forces every host's toplevel and home, darwin included
 If a drvPath moved, say *what* changed with `just diff HEAD` — a permuted
 `systemPackages` order is not a value change.
 
-Multi-commit change: check **each** commit is green (`lessons-learned.md`
+Multi-commit change: check **each** commit is green (`agent-lessons-learned.md`
 §15):
 
 ```sh

@@ -249,7 +249,7 @@ class DocRefsCheck(unittest.TestCase):
 
     def test_bare_count_skips_narrative_paths(self):
         self.assertEqual(self.bare('All four files.\n',
-                                   'wiki/lessons-learned/1-x.md'), [])
+                                   'wiki/agent-lessons-learned/1-x.md'), [])
         self.assertEqual(self.bare('All four files.\n', 'wiki/x-history.md'), [])
 
     def test_moved_path_caught(self):

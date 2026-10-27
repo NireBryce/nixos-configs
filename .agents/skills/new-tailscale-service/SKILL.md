@@ -65,7 +65,7 @@ Three resources, two outside this repo's Nix:
 - Old path-prefixed URL now 404s.
 - Backend port still loopback-only (`ss -ltn` on host).
 - `tailscale serve status` shows `http://<name>...:443`, not `https://` — the #18381 display bug, not evidence HTTPS is off. Trust `curl`.
-- App-generated links use the new hostname (Forgejo `ROOT_URL` mismatch cost a switch once, `wiki/lessons-learned.md` #41).
+- App-generated links use the new hostname (Forgejo `ROOT_URL` mismatch cost a switch once, `wiki/agent-lessons-learned.md` #41).
 
 ## Docs
 

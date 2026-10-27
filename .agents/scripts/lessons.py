@@ -3,7 +3,7 @@
 
 For each path (file or directory, relative to the cwd), every
 .agents/lessons-map.toml topic it falls under: the topic's reminder, where
-the full rule lives, and the wiki/lessons-learned.md index line of each of
+the full rule lives, and the wiki/agent-lessons-learned.md index line of each of
 its lessons. `--command` does the same for a shell command.
 
 With no arguments: the files this branch changes against the merge base
@@ -41,7 +41,7 @@ def branch_files(root):
 
 
 def index_lines(root):
-    page = root / 'wiki' / 'lessons-learned.md'
+    page = root / 'wiki' / 'agent-lessons-learned.md'
     out = {}
     for line in page.read_text().splitlines():
         m = ENTRY.match(line)

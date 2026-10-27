@@ -43,7 +43,7 @@ at all: a folder with a subfolder holding modules is one
   PowerDevil (KDE's power daemon) doesn't degrade gracefully when told
   `CanHybridSleep=no` — it drops the suspend request entirely rather than
   falling back to plain suspend, which broke suspend outright on 2026-08-10
-  (`lessons-learned.md` §30). This module is the other half of that same
+  (`agent-lessons-learned.md` §30). This module is the other half of that same
   decision; the two have to agree or the machine can't sleep at all. It
   writes `SleepMode = 1` (plain suspend) into `powerdevilrc` for the `AC`,
   `Battery` and `LowBattery` profiles via a Home Manager activation step

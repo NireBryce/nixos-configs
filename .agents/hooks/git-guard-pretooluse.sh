@@ -38,7 +38,7 @@
 #    -c core.fsmonitor=false (every git call the hook makes does: the check
 #    runs no program the repo's config names) and
 #    --no-optional-locks: an inherited GIT_DIR silently retargets git
-#    (lessons-learned §44), and a read-only check must not take the index
+#    (agent-lessons-learned §44), and a read-only check must not take the index
 #    lock. The command itself still inherits them, so when any is set in the
 #    hook's environment a clean verdict is unverified -> ask.
 #

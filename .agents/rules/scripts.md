@@ -18,7 +18,7 @@ paths:
   scripts for recurring lookups, any language. Adding one: skill
   `agent-scripts`.
 - A new checker is tested against a case it should catch, in the same
-  commit (§1 in `wiki/lessons-learned.md`).
+  commit (§1 in `wiki/agent-lessons-learned.md`).
 - A `preflight` recipe step must use literal paths, not `{{scripts}}`:
   `.agents/scripts/preflight-brief.py` runs each step verbatim as just's
   `--show` prints it, without substitutions.
