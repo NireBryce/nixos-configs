@@ -273,6 +273,7 @@ class SecretsGuardPreToolUse(GuardCase):
             self.assertDeny(self.script, cmd)
         self.assertPass(self.script, "ls /run/user")
 
+    @unittest.skipUnless(shutil.which("just"), "just not on PATH")
     def test_wildcard_allow_rules_quote_their_arguments(self):
         # AGENTS.md's allowlist rules: a wildcard just rule only for a
         # [positional-arguments] recipe, and never a rule for nix itself.

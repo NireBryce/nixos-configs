@@ -266,6 +266,14 @@ is the ship skill's step 0. `just hm-collisions`, `just root-drift`, and
 `.agents/settings.json` pre-approves a few read-only recipes; what may join
 them: `.agents/rules/agent-config.md`.
 
+**With no usable nix (a Claude Code cloud container has nix but cannot fetch
+the flake inputs, and has no `just`), the git hooks degrade instead of
+failing:** `.githooks/pre-commit` runs `flake/scripts/offline_checks.py
+staged` (syntax, parse, wiki lint minus the nix-dependent `generated`
+check) and `.githooks/pre-push` runs `offline_checks.py preflight`, the
+python steps of preflight. Both say what they left to CI; `--no-verify`
+should not be needed. `just preflight-offline` is the same set by hand.
+
 `host` derives from `hostname`, falling back to `nire-durandal` off-host.
 The override goes **before** the recipe name — `just host=nire-durandal
 build`; after it, just reads it as a second recipe name and errors.

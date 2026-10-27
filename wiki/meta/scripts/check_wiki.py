@@ -265,7 +265,7 @@ structured, extractable facts only:
     check_wiki.py siblings      [repo-root]
     check_wiki.py lessons       [repo-root]
     check_wiki.py rules         [repo-root]
-    check_wiki.py check         [repo-root]
+    check_wiki.py check         [repo-root] [--skip=name,name]
     check_wiki.py gen-contents  <file.md> [file.md ...]
 
 repo-root defaults to three directories up from this script (wiki/meta/scripts/ ->
@@ -1932,6 +1932,22 @@ def main():
             regenerate_contents(pathlib.Path(p))
         sys.exit(0)
 
+    # --skip=a,b leaves the named checks out of `check`. For a machine where
+    # `generated` cannot run (it evaluates the flake through nix): the hooks
+    # in .githooks/ use it when nix cannot fetch the inputs. Said out loud in
+    # the output, never silent.
+    skip = set()
+    argv = [sys.argv[0]]
+    for a in sys.argv[1:]:
+        if a.startswith('--skip='):
+            skip |= {s for s in a[len('--skip='):].split(',') if s}
+        else:
+            argv.append(a)
+    sys.argv = argv
+    if skip - set(wikicore.CHECKS):
+        print(f"unknown check(s) in --skip: {sorted(skip - set(wikicore.CHECKS))}")
+        sys.exit(2)
+
     cmd = sys.argv[1] if len(sys.argv) > 1 else 'check'
     root = repo_root([sys.argv[0]] + sys.argv[2:])
 
@@ -1941,8 +1957,10 @@ def main():
 
     findings = []
     for name, fn in wikicore.registered():
-        if cmd in (name, 'check'):
+        if cmd in (name, 'check') and name not in skip:
             findings += fn(root)
+    if skip and cmd == 'check':
+        print(f"check: skipped {', '.join(sorted(skip))} (--skip)")
 
     for f in findings:
         print(f)

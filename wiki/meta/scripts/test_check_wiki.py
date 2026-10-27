@@ -343,6 +343,42 @@ class CheckRegistry(unittest.TestCase):
             capture_output=True, text=True)
         self.assertEqual(r.returncode, 2)
 
+    def test_skip_leaves_a_check_out_and_says_so(self):
+        # Two fake checks, one failing: `check` fails; skipping it passes and
+        # names what it skipped, so a skip is never silent.
+        import contextlib, io
+        wc = check_wiki.wikicore
+        saved, argv = dict(wc.CHECKS), sys.argv
+        try:
+            wc.CHECKS.clear()
+            wc.check('zz-ok', order=1)(lambda root: [])
+            wc.check('zz-bad', order=2)(lambda root: ['BAD  always'])
+
+            def run(*args):
+                sys.argv = ['check_wiki.py', *args]
+                out = io.StringIO()
+                with contextlib.redirect_stdout(out):
+                    with self.assertRaises(SystemExit) as e:
+                        check_wiki.main()
+                return e.exception.code, out.getvalue()
+            code, out = run('check')
+            self.assertEqual(code, 1)
+            self.assertIn('BAD  always', out)
+            code, out = run('check', '--skip=zz-bad')
+            self.assertEqual(code, 0)
+            self.assertNotIn('BAD', out)
+            self.assertIn('skipped zz-bad', out)
+        finally:
+            sys.argv = argv
+            wc.CHECKS.clear()
+            wc.CHECKS.update(saved)
+
+    def test_skip_rejects_an_unknown_check(self):
+        r = subprocess.run(
+            [sys.executable, str(pathlib.Path(check_wiki.__file__)),
+             'check', '--skip=nope'], capture_output=True, text=True)
+        self.assertEqual(r.returncode, 2)
+
 
 class ImportedByRoster(unittest.TestCase):
     """check_imports reads the host roster from hosts.nix, so a host that
