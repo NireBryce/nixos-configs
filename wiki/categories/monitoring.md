@@ -22,7 +22,7 @@ TLS from another tailnet host, and Grafana's own login redirect
 
 ## Contents
 
-- [What's in it](#whats-in-it)
+- [Category contents](#category-contents)
 - [Tailnet-only access, not a new firewall mechanism](#tailnet-only-access-not-a-new-firewall-mechanism)
 - [The secret_key trap, and why it's now a unit instead of a warning](#the-secret_key-trap-and-why-its-now-a-unit-instead-of-a-warning)
 - [Adding a dashboard that survives a rebuild](#adding-a-dashboard-that-survives-a-rebuild)
@@ -30,7 +30,7 @@ TLS from another tailnet host, and Grafana's own login redirect
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
-## What's in it
+## Category contents
 
 All `nixos`-class:
 

@@ -19,7 +19,7 @@ succeeded `nire-llm-sandbox`, the category's only VM until 2026-08-28.
 
 ## Contents
 
-- [What's in it](#whats-in-it)
+- [Category contents](#category-contents)
 - [The default network is defined but never started — and where that's fixed](#the-default-network-is-defined-but-never-started--and-where-thats-fixed)
 - [Optional inbound SSH, scoped by source IP rather than by interface](#optional-inbound-ssh-scoped-by-source-ip-rather-than-by-interface)
 - [`VMs/_lib/libvirt-vm.nix` — a generator, not a category member](#vms_liblibvirt-vmnix--a-generator-not-a-category-member)
@@ -27,7 +27,7 @@ succeeded `nire-llm-sandbox`, the category's only VM until 2026-08-28.
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
-## What's in it
+## Category contents
 
 All the files live under `libvirt/` and are all `nixos`-class:
 

@@ -219,7 +219,7 @@ Pages go in one of these places:
   there are located by group or § number (`ls wiki/lessons-learned/43-*`).
   The `contents` check only validates pages that have a block, so this
   needed no linter change.
-- Category pages follow **what's in it → mechanism notes specific to that
+- Category pages follow **category contents → mechanism notes specific to that
   category, if any → imported by → see also**. This is the same
   what/why/traps depth the rest of the wiki holds itself to, per
   [categories/00-INDEX.md](categories/00-INDEX.md).

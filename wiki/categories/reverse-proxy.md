@@ -25,7 +25,7 @@ are in [reverse-proxy-history.md](reverse-proxy-history.md#the-2026-09-07-to-09-
 
 ## Contents
 
-- [What's in it](#whats-in-it)
+- [Category contents](#category-contents)
 - [What it changed elsewhere](#what-it-changed-elsewhere)
 - [Bare-name vhosts](#bare-name-vhosts)
 - [Certificates come from tailscaled, with no plugin](#certificates-come-from-tailscaled-with-no-plugin)
@@ -39,7 +39,7 @@ are in [reverse-proxy-history.md](reverse-proxy-history.md#the-2026-09-07-to-09-
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
-## What's in it
+## Category contents
 
 The `nixos`-class files: `caddy/caddy.nix` and
 `tailscale-services/serve.nix` (the latter added 2026-09-07 — raw TCP

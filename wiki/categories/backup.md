@@ -20,7 +20,7 @@ listener.
 
 ## Contents
 
-- [What's in it](#whats-in-it)
+- [Category contents](#category-contents)
 - [Why the category isn't named `restic`](#why-the-category-isnt-named-restic)
 - [SFTP repository now, not local-path on NFS](#sftp-repository-now-not-local-path-on-nfs)
 - [The sqlite consistency bug — root-caused and fixed, 2026-09-06](#the-sqlite-consistency-bug--root-caused-and-fixed-2026-09-06)
@@ -30,7 +30,7 @@ listener.
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
-## What's in it
+## Category contents
 
 One file, `nixos`-class: `restic/restic.nix`, declaring
 `services.restic.backups.cube`:

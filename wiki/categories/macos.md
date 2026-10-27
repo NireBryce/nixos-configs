@@ -9,13 +9,13 @@ for the general pattern.
 
 ## Contents
 
-- [What's in it](#whats-in-it)
+- [Category contents](#category-contents)
 - [Sharp corner: a Homebrew-updated system extension can get stuck mid-upgrade](#sharp-corner-a-homebrew-updated-system-extension-can-get-stuck-mid-upgrade)
 - [Why `hardware`/`desktop-env`/`peripherals` are absent from lysithea instead of guarded here](#why-hardwaredesktop-envperipherals-are-absent-from-lysithea-instead-of-guarded-here)
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
-## What's in it
+## Category contents
 
 - **`homebrew/homebrew.nix`** — casks and formulae for what nix doesn't
   package well on Aarch64, or what needs App Store / notarisation / menu-bar

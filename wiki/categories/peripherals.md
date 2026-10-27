@@ -4,12 +4,12 @@ _Last modified: 2026-10-22_
 
 ## Contents
 
-- [What's in it](#whats-in-it)
+- [Category contents](#category-contents)
 - [The "still wanted?" question](#the-still-wanted-question)
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
-## What's in it
+## Category contents
 
 Small files, all `nixos`-class, each a single-option one-liner:
 

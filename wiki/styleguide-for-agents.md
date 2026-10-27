@@ -23,7 +23,7 @@ Condensed from [styleguide.md](styleguide.md). Rules only here. The *repo's* sty
 No per-category page for `packages-config/*` subcategories or `host-config/*`
 bundles.
 
-A category page's order: **what's in it → category-specific mechanism notes
+A category page's order: **category contents → category-specific mechanism notes
 → imported by → see also.**
 
 ## Required on every page

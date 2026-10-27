@@ -4,12 +4,12 @@ _Last modified: 2026-10-22_
 
 ## Contents
 
-- [What's in it](#whats-in-it)
+- [Category contents](#category-contents)
 - [Nested categories overlap their parents on purpose](#nested-categories-overlap-their-parents-on-purpose)
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
-## What's in it
+## Category contents
 
 Every file is `nixos`-class:
 

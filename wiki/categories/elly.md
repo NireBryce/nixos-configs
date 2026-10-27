@@ -10,12 +10,12 @@ others; see [../architecture.md](../architecture.md).
 
 ## Contents
 
-- [What's in it](#whats-in-it)
+- [Category contents](#category-contents)
 - [Imported by](#imported-by)
 - [`elly` as the experimental user](#elly-as-the-experimental-user)
 - [See also](#see-also)
 
-## What's in it
+## Category contents
 
 - **`elly-git/elly-git.nix`** — `homeManager`-only: `programs.git`, a
   `.gitconfig` written from `home.file`, and aliases (`pushall`, `graph`,

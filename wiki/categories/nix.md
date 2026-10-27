@@ -4,11 +4,11 @@ _Last modified: 2026-10-22_
 
 ## Contents
 
-- [What's in it](#whats-in-it)
+- [Category contents](#category-contents)
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
-## What's in it
+## Category contents
 
 - **`nix-settings/basic-nix-settings.nix`** — the one file in this whole
   repo that declares all three classes deliberately, each slightly

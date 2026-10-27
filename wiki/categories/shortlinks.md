@@ -21,7 +21,7 @@ crash-loop and the fix in full.
 
 ## Contents
 
-- [What's in it](#whats-in-it)
+- [Category contents](#category-contents)
 - [Why the category isn't named `golink`](#why-the-category-isnt-named-golink)
 - [It hand-writes a systemd unit, which is unusual here](#it-hand-writes-a-systemd-unit-which-is-unusual-here)
 - [It is not a service on this host's network](#it-is-not-a-service-on-this-hosts-network)
@@ -32,7 +32,7 @@ crash-loop and the fix in full.
 - [Imported by](#imported-by)
 - [See also](#see-also)
 
-## What's in it
+## Category contents
 
 One file, `nixos`-class: `golink/golink.nix`.
 
