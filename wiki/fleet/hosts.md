@@ -120,7 +120,7 @@ status and what broke on the way:
 - **Adding a new host** — skill `new-host-config`
   (`.agents/skills/new-host-config/SKILL.md`).
 - **Disk layout (LUKS + btrfs + impermanence)** —
-  [`../flake/doc/disko-impermanence-layout.md`](<../../flake/doc/disko-impermanence-layout.md>)
+  [`../../flake/doc/disko-impermanence-layout.md`](<../../flake/doc/disko-impermanence-layout.md>)
   — the generator durandal/tenacity run, the template if cube ever adopts
   impermanence. [disk-formatting.md](disk-formatting.md) is the runbook.
 - **Repo-wide layout and the impermanence warning** —

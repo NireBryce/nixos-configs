@@ -44,7 +44,7 @@ Several are still live in the tree:
 
 - **Home Manager NixOS-integrated**, chosen over standalone and over
   keeping both. Live: `general-config/system/home-manager/enable-home-manager.nix`,
-  and [`../flake/doc/trailhead-home-manager-standalone.md`](<../../flake/doc/trailhead-home-manager-standalone.md>)
+  and [`../../flake/doc/trailhead-home-manager-standalone.md`](<../../flake/doc/trailhead-home-manager-standalone.md>)
   is the documented way back.
 - **Package parity across hosts.** Offered a role split so the handheld
   would stop getting `vscode`, `gimp`, `libre-office`, `zoom`,
@@ -144,7 +144,7 @@ every path and line number below was checked. One correction from the
 original: the `_file` string now passes both components through
 `lib.strings.escapeNixIdentifier`.
 
-[`../flake/doc/flake-parts-rationale.md`](<../../flake/doc/flake-parts-rationale.md>)
+[`../../flake/doc/flake-parts-rationale.md`](<../../flake/doc/flake-parts-rationale.md>)
 covers *which* machinery this repo uses, by grep. This section covers how
 the pieces behave, from their source.
 
@@ -288,7 +288,7 @@ is `flake.modules.nixos.*` for the reusable half and
 
 - [flake-parts.md](flake-parts.md) — why this repo runs flake-parts at all,
   and the wiki's index into
-  [`../flake/doc/flake-parts-rationale.md`](<../../flake/doc/flake-parts-rationale.md>).
+  [`../../flake/doc/flake-parts-rationale.md`](<../../flake/doc/flake-parts-rationale.md>).
 - [architecture.md](architecture.md) — the category mechanism built on
   `flake.modules.<class>.<name>` ([module-files.md](module-files.md)).
 - [../agent-lessons-learned.md](../agent-lessons-learned.md) — §§1–18 are this same port,

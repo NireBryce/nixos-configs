@@ -38,6 +38,10 @@ ship-ready pr:
 ship-land pr:
     @cd "{{invocation_directory()}}" && "{{scripts}}/ship.py" land "$@"
 
+# After `git mv`: rewrite links and path mentions repo-wide; REVIEW lines = code to read
+move-refs *args:
+    @cd "{{invocation_directory()}}" && "{{scripts}}/move_refs.py" "$@"
+
 # Commit exactly these paths, message on stdin, trailer: commit [--agent X] -- paths
 commit *args:
     @cd "{{invocation_directory()}}" && "{{scripts}}/ship.py" commit "$@"

@@ -24,6 +24,7 @@ internal edits); grep first rather than opening every page.
 
 Narrower cases with their own instructions (read first):
 
+- **Files or directories moved** — `git mv` them, then `just agent move-refs` (`--dry-run` first): it rewrites markdown links and bare path mentions repo-wide, and prints `REVIEW` lines for code that builds a moved path from pieces or counts directories up (`parents[2]`), which no link check sees. Read every one; then `just wiki-lint`.
 - **Module added/removed/renamed, or category membership changed** — `new-flake-module` "Keep the wiki in sync": the category's `wiki/config-structure/categories/<name>.md`, its `-for-agents.md` sibling, and `just wiki-gen` for `wiki/config-structure/categories/00-INDEX.md`'s tables.
 - **Host added, or its category imports changed** — `new-host-config` wiring step: `just wiki-gen` for `wiki/fleet/hosts.md`'s table (then write the new row's Role) plus the "Imported by" line on every affected `wiki/config-structure/categories/*.md`.
 

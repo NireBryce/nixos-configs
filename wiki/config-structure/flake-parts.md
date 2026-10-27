@@ -14,7 +14,7 @@ covers the mechanism built on top.
 
 ## Why flake-parts
 
-- **[`../flake/doc/flake-parts-rationale.md`](<../../flake/doc/flake-parts-rationale.md>)**
+- **[`../../flake/doc/flake-parts-rationale.md`](<../../flake/doc/flake-parts-rationale.md>)**
   — the payoff is one option, `flake.modules.<class>.<name>`, which lets a
   single file declare a NixOS module and a Home Manager module as sibling
   attributes instead of two files tied together only by a shared filename
@@ -32,5 +32,5 @@ covers the mechanism built on top.
   than declared per module.
 - [module-files.md](module-files.md) — that mechanism as this repo uses it,
   through the `dirs-as-categories` input;
-  [`../flake/doc/dirsAsCategory.md`](<../../flake/doc/dirsAsCategory.md>) is
+  [`../../flake/doc/dirsAsCategory.md`](<../../flake/doc/dirsAsCategory.md>) is
   the shim-based design it replaced.
