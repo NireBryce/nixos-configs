@@ -23,3 +23,6 @@ __pycache__/
 # every skill in its list. Ignored so a recreated farm can't show as
 # untracked noise; .zcode/config.json stays tracked (the mirror test).
 /.zcode/skills/
+
+# mdBook output (book/book.toml builds into book/book)
+/book/book/

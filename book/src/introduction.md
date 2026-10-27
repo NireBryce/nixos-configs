@@ -9,7 +9,10 @@ this tree.
 
 It is a tour, not a second copy of the documentation. The repo's wiki is the
 source for facts, and this book links into it wherever a page already says
-something well. When the two disagree, the wiki and the code win.
+something well. When the two disagree, the wiki and the code win. Links of the form
+`../../wiki/...` point at files in the repository, so they work when you
+read the book's Markdown on GitHub or in a checkout; on a rendered mdBook
+site they leave the book and will not resolve.
 
 ## Do not install this wholesale
 
@@ -31,8 +34,8 @@ care about. Which hosts wipe `/root` is a fact to check in
 - **Home Manager for one user**, integrated into each system configuration
   rather than exposed as its own `homeConfigurations` output. One switch
   applies both. See [users and Home Manager](users-and-home-manager.md).
-- **A small self-hosted stack** on one host, reachable over Tailscale only.
-  That is out of scope for this book; start at
+- **A small self-hosted stack** on one host. That is out of scope for this
+  book; start at
   [`wiki/homelab/00-INDEX.md`](../../wiki/homelab/00-INDEX.md).
 
 Source: `flake/flake.nix`, `flake/modules/host-config/hosts.nix`,
@@ -40,8 +43,10 @@ Source: `flake/flake.nix`, `flake/modules/host-config/hosts.nix`,
 
 ## The idea in one paragraph
 
-Every `.nix` file under `flake/modules/` is a module, and its name is its
-filename. The folder it sits in decides which *category* it belongs to. A host
+Almost every `.nix` file under `flake/modules/` is a module, and its name is
+its filename. (The exceptions are plain flake-parts files such as `hosts.nix`,
+`checks.nix`, `invariants.nix`, `dev-shell.nix` and `lib.nix`, `defaults.nix`
+files, and anything under a `_` path; see [how it works](how-it-works.md).) The folder it sits in decides which *category* it belongs to. A host
 lists categories by name and receives every module in them. There is no central
 module list to keep in sync and no `enable` option per feature: membership is
 the directory tree. A single file can declare the NixOS side and the Home

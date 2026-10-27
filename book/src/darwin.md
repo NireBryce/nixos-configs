@@ -114,6 +114,16 @@ Source: `flake/modules/general-config/macos/`,
 `flake/modules/users-config/elly/user-settings/elly-user.nix`,
 `wiki/config-structure/categories/macos.md`.
 
+## Things that do not exist on darwin
+
+- **Impermanence.** The `/root` wipe is a NixOS-host mechanism; the darwin
+  host is an ordinary persistent system. `just boot` is NixOS-only for the
+  same reason (nix-darwin has no boot generation to stage).
+- **sops-nix paths.** On the Mac, `flake/modules/general-config/system/secrets/sops-darwin.nix`
+  points `SOPS_AGE_KEY_FILE` at the Linux-style XDG path directly, so `sops`
+  finds the key. Names of secrets only, never values, as everywhere in this
+  repo.
+
 ## Building and verifying
 
 - A NixOS host cannot be built from any other machine: there is no remote
@@ -122,6 +132,11 @@ Source: `flake/modules/general-config/macos/`,
   host can be evaluated from a Linux machine. Say which level you actually
   reached (evaluated, built, switched) and do not claim the Mac works on the
   strength of a Linux evaluation.
+- `nix flake check` did not force `darwinConfigurations` by itself until
+  `flake/modules/checks.nix` started doing it (2026-09-29): flake-check
+  warns about an unknown output and evaluates nothing inside it. The repo's
+  check now evaluates the Mac's configuration too, but a cheap attribute is
+  still not a build.
 - When you change something in the shared bundle, check the Mac's evaluation
   too, not only the Linux one. The two use different `pkgs`, and a package
   that is fine on Linux can be the one that fails there.
