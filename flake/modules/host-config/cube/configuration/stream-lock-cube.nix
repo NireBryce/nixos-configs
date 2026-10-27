@@ -1,4 +1,8 @@
-# dirs-as-categories: the module is named after this file; its categories are the folders above it
+# This is a dirs-as-categories module, which means it creates a flake-parts
+# module that derives its name from its filename minus the .nix suffix, whose
+# category module is the name of the folder it belongs to.
+# https://github.com/NireBryce/dirs-as-categories/wiki
+
 # Puts Plasma's lock screen in front of cube's autologin session
 # (headless-display-cube.nix), so both the console and a Moonlight client
 # need elly's password, and requires encryption on Sunshine streams; added

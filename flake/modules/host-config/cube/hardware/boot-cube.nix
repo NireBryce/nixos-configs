@@ -1,4 +1,8 @@
-# dirs-as-categories: the module is named after this file; its categories are the folders above it
+# This is a dirs-as-categories module, which means it creates a flake-parts
+# module that derives its name from its filename minus the .nix suffix, whose
+# category module is the name of the folder it belongs to.
+# https://github.com/NireBryce/dirs-as-categories/wiki
+
 # Named boot-cube.nix, not boot.nix, for the same reason boot-durandal.nix
 # is not called boot.nix: a module's filename is its attribute name, and
 # `general-config/boot/` is a category of that same name. See boot-durandal.nix's own

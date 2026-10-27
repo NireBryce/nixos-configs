@@ -1,4 +1,8 @@
-# dirs-as-categories: the module is named after this file; its categories are the folders above it
+# This is a dirs-as-categories module, which means it creates a flake-parts
+# module that derives its name from its filename minus the .nix suffix, whose
+# category module is the name of the folder it belongs to.
+# https://github.com/NireBryce/dirs-as-categories/wiki
+
 # smartmontools (smartctl/smartd): general-purpose SMART/NVMe health and
 # wear monitoring, for every NixOS host regardless of desktop environment.
 # The KDE-specific half of this -- a systray applet on top of the same

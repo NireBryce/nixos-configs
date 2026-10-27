@@ -1,4 +1,8 @@
-# dirs-as-categories: the module is named after this file; its categories are the folders above it
+# This is a dirs-as-categories module, which means it creates a flake-parts
+# module that derives its name from its filename minus the .nix suffix, whose
+# category module is the name of the folder it belongs to.
+# https://github.com/NireBryce/dirs-as-categories/wiki
+
 # Failed-attempt lockout on cube's Plasma lock screen (stream-lock-cube.nix):
 # 5 wrong passwords within 15 minutes refuse password unlock for 10 minutes;
 # added 2026-10-07. Only the `kde` PAM service (kscreenlocker's, set in

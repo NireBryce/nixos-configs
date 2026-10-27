@@ -1,6 +1,6 @@
 # Module files
 
-_Last modified: 2026-10-25_
+_Last modified: 2026-10-26_
 
 A module file under `flake/modules/` never names its module. The
 [dirs-as-categories](https://github.com/NireBryce/dirs-as-categories) flake
@@ -42,7 +42,10 @@ categories. Each module now opens with a comment saying so. The input's
 ## What a module file is
 
 ```nix
-# dirs-as-categories: the module is named after this file; its categories are the folders above it
+# This is a dirs-as-categories module, which means it creates a flake-parts
+# module that derives its name from its filename minus the .nix suffix, whose
+# category module is the name of the folder it belongs to.
+# https://github.com/NireBryce/dirs-as-categories/wiki
 { lib, ... }:
 {
     nixos = { pkgs, ... }: {

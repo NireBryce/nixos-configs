@@ -1,4 +1,8 @@
-# dirs-as-categories: the module is named after this file; its categories are the folders above it
+# This is a dirs-as-categories module, which means it creates a flake-parts
+# module that derives its name from its filename minus the .nix suffix, whose
+# category module is the name of the folder it belongs to.
+# https://github.com/NireBryce/dirs-as-categories/wiki
+
 # tenacity announces nothing over mDNS; added 2026-09-27. It joins whatever
 # Wi-Fi it's near, and avahi.nix's publish block would announce its hostname
 # and addresses there. Nothing on its LAN side takes connections anyway

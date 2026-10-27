@@ -1,4 +1,8 @@
-# dirs-as-categories: the module is named after this file; its categories are the folders above it
+# This is a dirs-as-categories module, which means it creates a flake-parts
+# module that derives its name from its filename minus the .nix suffix, whose
+# category module is the name of the folder it belongs to.
+# https://github.com/NireBryce/dirs-as-categories/wiki
+
 # KDE Connect and Steam's LAN ports stay closed on cube, a homelab box with
 # no use for either on the LAN; added 2026-09-27. durandal keeps them open.
 # Same mechanism as lan-ports-closed-tenacity.nix, which has the full account:
