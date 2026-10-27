@@ -14,7 +14,7 @@ Not Funnel (Tailscale Services stay tailnet-only). Not a Caddy replacement: as o
 
 ## Background (2026-09-07)
 
-Grafana and Forgejo moved from `ts-cube.../grafana/` and `.../git/` to `grafana.<tailnet-domain>`/`git.<tailnet-domain>` the day `svc:` opened on this tailnet. Worked example; account in `wiki/categories/reverse-proxy.md` and `flake/modules/homelab-config/homelab/reverse-proxy/tailscale-services/`. Read `serve.nix`'s history section for the failed first design (most likely to be re-invented).
+Grafana and Forgejo moved from `ts-cube.../grafana/` and `.../git/` to `grafana.<tailnet-domain>`/`git.<tailnet-domain>` the day `svc:` opened on this tailnet. Worked example; account in `wiki/config-structure/categories/reverse-proxy.md` and `flake/modules/homelab-config/homelab/reverse-proxy/tailscale-services/`. Read `serve.nix`'s history section for the failed first design (most likely to be re-invented).
 
 ## The shape
 
@@ -69,7 +69,7 @@ Three resources, two outside this repo's Nix:
 
 ## Docs
 
-Run `wiki-sync` incl. step 5 (three pages below have `-for-agents.md` siblings with the same URL map and traps; `just wiki-lint` fails if a date moves without its sibling). Likely stale: `wiki/categories/reverse-proxy.md`, `tailscale-services/README.md`, `wiki/homelab/reaching-services.md` URL map, and any open issue this closes (`gh issue list --search "Tailscale Services"`).
+Run `wiki-sync` incl. step 5 (three pages below have `-for-agents.md` siblings with the same URL map and traps; `just wiki-lint` fails if a date moves without its sibling). Likely stale: `wiki/config-structure/categories/reverse-proxy.md`, `tailscale-services/README.md`, `wiki/homelab/reaching-services.md` URL map, and any open issue this closes (`gh issue list --search "Tailscale Services"`).
 
 ## See also
 
@@ -77,5 +77,5 @@ Run `wiki-sync` incl. step 5 (three pages below have `-for-agents.md` siblings w
 - `flake/modules/homelab-config/homelab/_lib/cube-services.nix` — the table; `caddy.nix`'s `mkTsService` is the vhost reference.
 - `flake/modules/homelab-config/homelab/reverse-proxy/tailscale-services/serve.nix` — failed first design in its history section.
 - `.../tailscale-services/README.md` — ACL/tag/service-object side, tagging incident in full.
-- `wiki/categories/reverse-proxy.md` — Caddy's half, cert mechanism, why `permitCertUid` is scoped where it is.
+- `wiki/config-structure/categories/reverse-proxy.md` — Caddy's half, cert mechanism, why `permitCertUid` is scoped where it is.
 - `flake/scripts/tailscale-acl.py` — header has endpoint-naming traps (`/acl` not `/policy`, `/vip-services/{name}` not `/by-name/{name}`).

@@ -3,7 +3,7 @@
 # generated bash completion function. Written 2026-08-24.
 #
 # TEMPORARY. Works around a ble.sh/carapace interaction (issue #75); when to
-# remove it and how: wiki/temporary-patches-and-hacks.md, carapace-read-fix.md.
+# remove it and how: wiki/upkeep-and-admin/temporary-patches-and-hacks.md, carapace-read-fix.md.
 #
 # The bug: while typing at normal speed with carapace completing, the
 # terminal shows `-bash: read: `': not a valid identifier`. Cause: `source
@@ -20,7 +20,7 @@
 # this line, the read is abandoned and its arguments come out split
 # character by character, hence the error. It happens with carapace's stock
 # completer alone (checked on nire-cube), so it is not this repo's completion
-# code. Full account: wiki/categories/shell-config/blesh.md, wiki/
+# code. Full account: wiki/config-structure/categories/shell-config/blesh.md, wiki/
 # agent-lessons-learned.md #39, issue #72.
 #
 # The fix removes the `read` by replacing that line, in the function's source

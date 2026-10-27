@@ -1,0 +1,154 @@
+# `backup` — history
+
+_Last modified: 2026-10-22_
+
+The original backup plan and the incidents it ran into are recorded here,
+split out 2026-09-03 so [backup](backup.md) and
+[../../homelab/backup-runbook.md](../../homelab/backup-runbook.md) stay about the
+backend as it works today. Nothing here changes what to type or how the
+module is shaped now.
+
+## Contents
+
+- [The original plan (2026-08-27)](#the-original-plan-2026-08-27)
+- [The hive mount predates this category by months, and was never dangling](#the-hive-mount-predates-this-category-by-months-and-was-never-dangling)
+- [Getting the SFTP repository from "declared" to "actually working" (2026-08-30 through 2026-09-06)](#getting-the-sftp-repository-from-declared-to-actually-working-2026-08-30-through-2026-09-06)
+- [The setup checklist, closed out (2026-08-28 through 2026-09-06)](#the-setup-checklist-closed-out-2026-08-28-through-2026-09-06)
+- [See also](#see-also)
+
+## The original plan (2026-08-27)
+
+Written before anything had touched cube or `ts-hive` for real, against
+issue #87 and [homelab/pending-setup.md](../../homelab/pending-setup.md) item
+4. What it got wrong and what changed since:
+
+- **What was at risk**, per issue #87 re-confirmed by grep 2026-08-27: cube
+  has a plain persistent root, no impermanence, and nothing in `flake/`
+  configured a backup tool. Four paths named explicitly: `/var/lib/forgejo`
+  (repos, sqlite db, self-generated secrets), `/var/lib/grafana` (sqlite
+  db — UI-created dashboards live only here), `/var/lib/private/golink`
+  (links db + tsnet node key), `/persist/secrets/`/`/persist/passwords/`
+  (hand-created, nothing recreates them). None recoverable if lost.
+  Prometheus's TSDB was deliberately excluded from the start — biggest
+  path, least valuable, fully regenerable by scraping again.
+- **The six-step shape it proposed**: size the paths first (`du -sh`)
+  before committing to a retention policy — still not done, see [backup](backup.md)'s
+  "What isn't done yet"; import the storage mount; confirm the `ts-hive` side (a
+  share plus a native snapshot schedule, the anti-deletion mitigation); a
+  new cube-only category wrapping `services.restic.backups.cube` with a
+  sops-secret password and a `backupPrepareCommand` staging sqlite copies;
+  a repo password kept outside cube too, since the sops key needed to
+  decrypt it lives on cube's own disk; and a restore drill as the actual
+  bar for done — a definition that outlived the plan itself and is still
+  how #87 and the runbook define "done."
+- **The one judgment call it flagged explicitly**, rather than presenting
+  as settled: NFS-local-path trades keyed auth for not standing up SSH on
+  `ts-hive` at all. That's the trade-off that broke in practice — see
+  [backup](backup.md)'s SFTP section.
+
+Lived at `claude cave/plans/2026-08-27-1816-cube-qnap-backup-plan.md`
+until 2026-09-02, then folded into `backup-runbook.md` as an inline
+background section when `claude cave/` was retired. That section moved here
+in `68b99813` (2026-09-02).
+
+## The hive mount predates this category by months, and was never dangling
+
+The plan doc above described `nire/system/storage/storage-NFS.nix` (the
+NFS mount to `ts-hive`) as an unused module. It isn't:
+`general-config/system/storage/` has no `dirsAsCategory.nix` of its own, so the
+module is collected straight into the shared `system` aggregate, which
+every Linux host imports — confirmed via `nix eval
+.#nixosConfigurations.<host>.config.fileSystems` on all three NixOS hosts,
+2026-08-28. So no new import was needed to reach it. Still true from the
+plan: nothing had ever exercised that mount against the real `ts-hive`, so
+"already imported" ≠ "known to work."
+
+The mount point itself moved 2026-08-28: `/mnt/<old-share>` (a share shared
+with unrelated `ts-hive` uses) → `/mnt/restic-backup` (dedicated). As of
+2026-08-31 the module didn't use that mount at all — see [backup](backup.md)'s
+SFTP section — and `storage-NFS.nix` sat there unused on all three Linux
+hosts until it was **deleted 2026-09-14**. Nothing referenced
+`/mnt/restic-backup` after the SFTP move, and leaving it meant three hosts
+held IP-trusted NFS write access to the backup repository — the exact
+property (NFS export trust is host-IP based, not keyed) that moving to SFTP
+was meant to end. If general `ts-hive` access is ever wanted again, it wants a
+mount at a general share, not at the backup repo.
+
+## Getting the SFTP repository from "declared" to "actually working" (2026-08-30 through 2026-09-06)
+
+Five separate one-time steps, each hit a real snag:
+
+1. **The two sops secrets** (`restic-cube-password`, `restic-cube-ssh-key`)
+   — set 2026-08-30/31. The SSH key specifically: generated on cube
+   (`~/.ssh/restic-cube-backup`), public half hand-appended to
+   `nire@ts-hive`'s `authorized_keys`, private half piped into `sops set`
+   from a session with decrypt access (`ssh nire-cube.local 'cat ...' |
+   jq -Rs . | xargs ... sops set ...`) since generating and decrypting
+   happened in different sessions.
+2. **NAS-side snapshot schedule**, the anti-deletion mitigation — took
+   three tries to name the right share. Believed `restic-backup` (the
+   abandoned NFS-era mount name); then `/share/homes/nire/restic-cube`
+   (the `homes` share, live 2026-08-31 through 2026-09-02) — but `ts-hive`
+   snapshots are per-share, so scheduling one there would've covered every
+   user's home directory just to protect this one repo. Moved for real,
+   2026-09-03, to `restic-backup` (its own pool), genuinely
+   dedicated share. Schedule confirmed live 2026-09-05 via a Snapshot
+   Manager screenshot: daily 04:30, keep 5 days.
+3. **SSH on `ts-hive` made tailnet-only** — port 22 LAN-blocked
+   (confirmed live both directions, 2026-08-31).
+4. **Migrating the pre-move repo** — the `restic-backup`-share path move
+   above meant a real, already-populated repo sat at the old `homes` path
+   (five real snapshots, 2026-08-31 through 2026-09-04) that would've been
+   abandoned by the switch. Copied in with `restic copy --from-repo
+   sftp:nire@ts-hive:/share/homes/nire/restic-cube --from-password-file
+   ...` (note: `copy`'s *destination* is the ordinary `--repo`, the
+   *source* is `--from-repo` — an earlier draft had invented
+   `--to-repo`/`--to-password-file`, which don't exist, verified against
+   the real `--help` before running for real). Landed after cube had
+   already switched onto the new path and auto-`init`ed a fresh repo
+   there — `copy` doesn't care which side ran first. Old repo left in
+   place afterward as a backstop.
+5. **Switching cube itself** — done 2026-09-05, but tripped the
+   "checkout trap" along the way: cube keeps two clones
+   (`~/nixos-configs`, `~/projects/nix/nixos-configs`), and which one is
+   ahead flips depending on which was last used, not on either path name
+   being inherently current. Check both with `git log -1` every time
+   rather than trusting memory of which was ahead last.
+
+## The setup checklist, closed out (2026-08-28 through 2026-09-06)
+
+Moved here 2026-09-12 from `homelab/pending-setup.md` item 4, which is
+fully resolved. Tracked as
+[#87](https://github.com/NireBryce/nixos-configs/issues/87), closed
+2026-09-06 against the harder bar it always set — not "a backup exists" but
+a real restore of `/var/lib/forgejo`, `/persist/` and Forgejo's actual
+sqlite database, confirmed recoverable.
+
+The three sub-items that had to close first, all of which did:
+
+- **Neither sops secret had a value in this tree** — set 2026-08-30
+  (`restic-cube-password`) and 2026-08-31 (`restic-cube-ssh-key`), and
+  live-confirmed working 2026-09-05: cube switched onto the
+  `restic-backup`-share path move, its timer ran successfully against it,
+  and the pre-move repository's history (five snapshots, 2026-08-31 through
+  2026-09-04) was migrated in with `restic copy` — six snapshots total,
+  confirmed by a live listing.
+- **No NAS-side snapshot schedule on the backup share** — done 2026-09-05,
+  confirmed via a snapshot-schedule screenshot: daily at 04:30 on the
+  `restic-backup` share, keeping 5 days, status Success.
+- **`ts-hive` SSH made tailnet-only** 2026-08-31: port 22 is LAN-blocked
+  (confirmed live); [backup.md](backup.md) carries it.
+
+The restore drill is what made this worth doing: it found a real bug, since
+fixed and confirmed live. Full account in "Getting the SFTP repository from
+'declared' to 'actually working'" above and in
+[backup.md](backup.md)'s "The sqlite consistency bug"; the procedure is
+[backup-runbook.md](../../homelab/backup-runbook.md).
+
+## See also
+
+- [backup](backup.md) — the category as it works today.
+- [../../homelab/backup-runbook.md](../../homelab/backup-runbook.md) — the
+  commands.
+- [#87](https://github.com/NireBryce/nixos-configs/issues/87) — the
+  issue this page closes out.

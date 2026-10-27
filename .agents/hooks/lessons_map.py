@@ -7,7 +7,7 @@ matches:
   lesson-reminder-pretooluse.py   the hook: one reminder per topic per
                                   session, before an edit or a command
   .agents/scripts/lessons.py      `just agent lessons [<path>...]`
-  wiki/scripts/check_wiki.py      `lessons` check: validate() below
+  wiki/meta/scripts/check_wiki.py      `lessons` check: validate() below
 
 Globs use Claude Code's `paths:` semantics (`.agents/rules/*.md` frontmatter),
 because a topic that names a rules file must list that file's globs exactly

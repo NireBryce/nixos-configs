@@ -116,7 +116,7 @@
         boot.extraModulePackages = [ config.boot.kernelPackages.acpi_call ];
 
         # TEMPORARY -- works around a nixpkgs packaging bug; listed in
-        # wiki/temporary-patches-and-hacks.md.
+        # wiki/upkeep-and-admin/temporary-patches-and-hacks.md.
         #
         # Why: since the 2026-10-20 lock bump, nixpkgs signs kernel
         # modules with kmodigest at Kbuild's modules_install, leaving a

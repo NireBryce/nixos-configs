@@ -16,7 +16,7 @@ page that owns it, not copied here to drift.
 
 ## What this is
 
-A single [flake-parts](flake-parts.md) flake that builds NixOS (and one
+A single [flake-parts](config-structure/flake-parts.md) flake that builds NixOS (and one
 nix-darwin) config for a small personal fleet. Its
 `flake.modules.<class>.<name>` option lets one file declare a NixOS module
 and a Home Manager module for the same feature side by side, instead of two
@@ -25,7 +25,7 @@ files tied together only by a shared filename.
 Not a generalist template, and not meant to be installed as-is: some hosts
 wipe `/root` on every boot — see [../README.md](../README.md)'s own
 warning. One repo, one flake, every host's config comes out of it.
-[hosts.md](hosts.md) has the current roster.
+[fleet/hosts.md](fleet/hosts.md) has the current roster.
 
 ## The shape of it
 
@@ -33,19 +33,19 @@ warning. One repo, one flake, every host's config comes out of it.
   `flake/modules/` to the `dirs-as-categories` input, which names each
   module after its filename and fills `flake.modules.<class>.<name>`. No
   central list of modules to keep in sync, and no name written in the file;
-  [architecture.md](architecture.md) has the mechanism.
+  [config-structure/architecture.md](config-structure/architecture.md) has the mechanism.
 - **Which category a module belongs to is decided by its directory, not a
   declaration.** A category is a directory that opts something shared
   (system config, a package, a piece of Home Manager) into being optional
-  per-host. [categories/00-INDEX.md](categories/00-INDEX.md) is one article per
-  category; [architecture.md](architecture.md) explains the mechanism itself.
+  per-host. [config-structure/categories/00-INDEX.md](config-structure/categories/00-INDEX.md) is one article per
+  category; [config-structure/architecture.md](config-structure/architecture.md) explains the mechanism itself.
 - **Home Manager rides inside NixOS**, not as a separate tool with its own
   switch command — one `just switch` applies both. See
-  [architecture.md](architecture.md)'s Home Manager section.
+  [config-structure/architecture.md](config-structure/architecture.md)'s Home Manager section.
 - **One host, `nire-cube`, also runs a small self-hosted stack** — a git
   forge, monitoring, a shortlink service, a landing page, backups — behind
   one reverse proxy, reachable only over Tailscale.
-  [categories/homelab.md](categories/homelab.md) is the umbrella category;
+  [config-structure/categories/homelab.md](config-structure/categories/homelab.md) is the umbrella category;
   [homelab/00-INDEX.md](homelab/00-INDEX.md) is how to use what's
   running, as opposed to how it's built.
 
@@ -54,7 +54,7 @@ warning. One repo, one flake, every host's config comes out of it.
 - **Impermanence.** Some hosts in this repo wipe `/root` back to blank on
   every boot — anything not explicitly persisted is gone at the next
   reboot. Which ones is not something to assume either way — see
-  [impermanence-and-secrets.md](impermanence-and-secrets.md) for the
+  [config-structure/impermanence-and-secrets.md](config-structure/impermanence-and-secrets.md) for the
   cross-cutting version of this, and `../CLAUDE.md`'s Safety section
   before touching anything near it.
 - **Secrets are sops-nix, committed encrypted on purpose** — `secrets.yaml`
@@ -67,7 +67,7 @@ warning. One repo, one flake, every host's config comes out of it.
   combined. [homelab/00-INDEX.md](homelab/00-INDEX.md) has the full reasoning.
 - **This wiki, `AGENTS.md`, and the `.agents/skills/` are working notes as
   much as documentation** — written for an agent with no memory between
-  sessions as much as for a human. [traps-and-skills.md](traps-and-skills.md)
+  sessions as much as for a human. [meta/traps-and-skills.md](meta/traps-and-skills.md)
   is the short version of why that shapes how things are written here.
 
 ## Where to go next

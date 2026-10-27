@@ -59,7 +59,7 @@ for the first time — not introduced by anything added on top of it.
 
 Also worth naming plainly: **this exact bug was already found and written
 up two days earlier**, 2026-08-22, in
-[`wiki/categories/shell-config/blesh.md`](../categories/shell-config/blesh.md)
+[`wiki/config-structure/categories/shell-config/blesh.md`](../config-structure/categories/shell-config/blesh.md)
 — pinned to "somewhere inside ble.sh's global `read` override" and left
 open. This session re-derived the whole thing from a live pty before
 checking whether the wiki already had it, which cost real effort the

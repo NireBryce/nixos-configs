@@ -40,7 +40,7 @@ re-uploading everything under a new one.
 
 No fixed schedule; rotate on suspicion of key compromise (e.g. a device
 the key lived on is lost or stolen). Not time-boxed like the Tailscale
-items in [`maintenance-schedule.md`](../../../../../wiki/maintenance-schedule.md).
+items in [`maintenance-schedule.md`](../../../../../wiki/upkeep-and-admin/maintenance-schedule.md).
 
 ## Watch for
 

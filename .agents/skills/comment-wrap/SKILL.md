@@ -22,7 +22,7 @@ when_to_use: A comment block runs past the column, a comment insert broke an exi
 
 A pure `#` comment line wraps at 80 columns plus the line's own indent —
 a four-space-indented comment wraps at 84. The full statement, the
-exempt shapes and why: wiki/module-style-guide.md, "Comment width".
+exempt shapes and why: wiki/config-structure/module-style-guide.md, "Comment width".
 
 ## Procedure
 

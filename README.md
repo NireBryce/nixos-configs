@@ -54,7 +54,7 @@ in front of them. `flake/` is meant to be browsed by its file tree instead
 of traced through code paths. The cost is that a directory listing alone
 doesn't show how the pieces fit together.
 
-`wiki/module-files.md` explains how names come from filenames and categories
+`wiki/config-structure/module-files.md` explains how names come from filenames and categories
 from folders. `flake/doc/flake-parts-rationale.md` explains why flake-parts
 was chosen and which of its features this repo actually uses.
 
@@ -62,7 +62,7 @@ Hosts
 -----
 
 The main hosts are `nire-durandal`, `nire-tenacity` and `nire-cube` (NixOS)
-and `nire-lysithea` (darwin). [wiki/hosts.md](wiki/hosts.md) has the full
+and `nire-lysithea` (darwin). [wiki/fleet/hosts.md](wiki/fleet/hosts.md) has the full
 table: roster, class, role, and which hosts wipe `/root`. A check compares
 it against `hosts.nix`, so it can't drift the way a second list in this
 README did. What a given branch actually runs on a host can only be

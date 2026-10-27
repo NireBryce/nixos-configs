@@ -55,7 +55,7 @@
         # systems.url                                = "github:nix-systems/default";
         import-tree.url                            = "github:vic/import-tree";
 
-        # builds flake.modules from modules/ (wiki/module-files.md)
+        # builds flake.modules from modules/ (wiki/config-structure/module-files.md)
         dirs-as-categories = {
             url = "github:NireBryce/dirs-as-categories";
             inputs = {
@@ -64,7 +64,7 @@
             };
         };
 
-        # draws the module tree (`just module-graph`, wiki/architecture.md's diagram)
+        # draws the module tree (`just module-graph`, wiki/config-structure/architecture.md's diagram)
         flake-module-graph = {
             url = "github:NireBryce/flake-module-graph";
             inputs.nixpkgs.follows = "nixpkgs";

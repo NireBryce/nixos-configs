@@ -26,7 +26,7 @@ just cod-desc-test                # fixture tests + committed-table check
 ```
 
 Background (why cod can't carry descriptions, advice mechanism, table format):
-[wiki/categories/shell-config/cod-desc.md](../../../wiki/categories/shell-config/cod-desc.md). This skill is the procedure.
+[wiki/config-structure/categories/shell-config/cod-desc.md](../../../wiki/config-structure/categories/shell-config/cod-desc.md). This skill is the procedure.
 
 ## The pieces, and which to touch
 

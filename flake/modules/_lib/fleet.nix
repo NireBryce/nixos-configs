@@ -1,6 +1,6 @@
 # Host naming. A host's flake attribute and `networking.hostName` is the base
 # hostname, `nire-<x>`. Its tailnet DNS name is `ts-<x>`; the two are different
-# names for one machine (wiki/hosts.md). Both rules used to be written out in
+# names for one machine (wiki/fleet/hosts.md). Both rules used to be written out in
 # tailnet-hosts.nix and nix-topology-flake.nix, and a third time in
 # flake/scripts/reach-host.sh, which only points here.
 { lib }:

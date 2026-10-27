@@ -30,7 +30,7 @@
 # cron.cleanup_offline_runners.
 #
 # Kept in the wiki, not restated here: the run loop, labels, recovery --
-# wiki/categories/git-forge.md and sibling, wiki/homelab/forgejo.md.
+# wiki/config-structure/categories/git-forge.md and sibling, wiki/homelab/forgejo.md.
 let
     # libvirt's default network (_lib/libvirt-net.nix); the .11 is the
     # runner VM's guestId (virtualization-cube.nix).

@@ -16,7 +16,7 @@
 # `command<TAB>candidate<TAB>description` per line. blesh.nix puts it in the
 # Nix store and sets NIRE_COD_DESC_TSV (a plain, unexported shell variable in
 # ~/.blerc) to its path. Add rows with `just cod-desc draft <cmd>`; workflow
-# in skill cod-completions, background in wiki/categories/shell-config/
+# in skill cod-completions, background in wiki/config-structure/categories/shell-config/
 # cod-desc.md.
 #
 # The mechanism is ble.sh "advice": a function that runs after another one.

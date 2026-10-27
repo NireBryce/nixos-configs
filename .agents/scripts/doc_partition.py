@@ -23,7 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import docscope  # noqa: E402
 
 SUFFIXES = ("-for-agents", "-history")
-WIKI_AREAS = ("categories", "homelab", "experiments", "agent-lessons-learned")
+WIKI_AREAS = ("config-structure", "homelab", "experiments", "agent-lessons-learned")
 
 
 def words(root, rel):

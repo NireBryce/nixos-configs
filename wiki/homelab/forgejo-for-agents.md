@@ -5,7 +5,7 @@ _Last modified: 2026-10-22_
 _Sibling reviewed: 2026-10-20 -- source sign-in paragraphs condensed; no facts changed_
 
 Condensed from [forgejo.md](forgejo.md). Forgejo on `nire-cube`, single-user,
-sqlite3, tailnet-only. Module: [../categories/git-forge.md](../categories/git-forge.md).
+sqlite3, tailnet-only. Module: [../config-structure/categories/git-forge.md](../config-structure/categories/git-forge.md).
 
 ## Addresses
 
@@ -101,5 +101,5 @@ matched; default branch `experimental`. GitHub stays canonical; mirror-not-origi
 
 ## See also
 
-[forgejo.md](forgejo.md) · [../categories/git-forge.md](../categories/git-forge.md) ·
+[forgejo.md](forgejo.md) · [../config-structure/categories/git-forge.md](../config-structure/categories/git-forge.md) ·
 [pending-setup-for-agents.md](pending-setup-for-agents.md) (open one-time steps; the SSH-push item was [#438](https://github.com/NireBryce/nixos-configs/issues/438), closed 2026-10-06)

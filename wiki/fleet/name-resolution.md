@@ -1,0 +1,152 @@
+# Name resolution & reverse DNS
+
+_Last modified: 2026-10-22_
+
+Tailscale MagicDNS (`100.100.100.100`, through resolved's stub) answers
+`*.moose-micro.ts.net` forward and reverse, and avahi answers `*.local` on the
+LAN only. This page lists which name answers for what and where those names
+show up in logs, status output, or a stalled ssh. Every behavioral claim
+below was probed live on `nire-tenacity` against `100.100.100.100` and
+through the resolved stub on 2026-09-14 (issue #294). The module named in
+the last section owns the config behind each behavior.
+
+## Contents
+
+- [Quick facts](#quick-facts)
+- [Which name source answers for what](#which-name-source-answers-for-what)
+- [Reverse DNS (PTR)](#reverse-dns-ptr)
+- [Where names show up in practice](#where-names-show-up-in-practice)
+- [Traps, and where the config lives](#traps-and-where-the-config-lives)
+
+## Quick facts
+
+Folded in from the retired `name-resolution-for-agents.md` sibling,
+2026-10-01. Detail and evidence in the sections below.
+
+| name / query | answered by | note |
+|---|---|---|
+| `*.moose-micro.ts.net`, forward and PTR | MagicDNS (`100.100.100.100`) via resolved's stub | tailscale0 routes `~moose-micro.ts.net`, `~100.100`–`~107.100.in-addr.arpa`, tailnet `ip6.arpa` |
+| `*.local` | avahi, LAN side only | the fallback when Tailscale is down on the client |
+| everything else | LAN router (DHCP resolvers) | |
+| `-x` device 100.x / v6 | `ts-<name>.moose-micro.ts.net.` | the DEVICE name, never `nire-<name>` |
+| `-x` `svc:` VIP | its own name (`git.moose-micro.ts.net.`) | |
+| `go` | its own tailnet device (100.98.81.59) | device rules, not a service VIP |
+
+- `svc:` records are netmap `ExtraRecords`, visibility-granted: a tagged
+  host gets none without a grant whose `src` is its tag (#298). First
+  check when forward or reverse fails:
+  `tailscale status --json | jq .ExtraRecords`.
+- `.DNSName` in `tailscale status --json` is authoritative; `.HostName`
+  can differ.
+- `getent hosts <ip>` → the PTR name; won't grep against
+  `networking.hostName`.
+- Caddy on cube sees `remote_ip: 127.0.0.1` for every request — identify
+  traffic by vhost, or read the app's / tailscaled's logs.
+- Config and the name traps: `tailscale.nix`, `resolved.nix`,
+  `avahi.nix` (`flake/modules/general-config/system/networking/`), and the
+  `tailscale-services/README.md` — [last section](#traps-and-where-the-config-lives).
+
+## Which name source answers for what
+
+Three answering systems, cleanly divided:
+
+- **MagicDNS (tailscaled, at `100.100.100.100`)** owns `*.moose-micro.ts.net`
+  in both directions: every peer device (`ts-cube`, `ts-tenacity`, `go`,
+  `ts-iona`, `homeassistant`, …) and every `svc:` Service VIP
+  (`git`, `grafana`). On a host it is reached not
+  directly but through systemd-resolved, which tailscale0's per-link
+  routing domains hand the tailnet domain *and* the reverse ranges to —
+  so plain `dig -x`, `getent hosts`, and ssh all traverse the stub and
+  land in the same place.
+- **avahi/mDNS** owns `*.local` on the LAN side only —
+  `nire-cube.local` resolves to the LAN address from a machine on the
+  same LAN, and is the fallback name that still works when Tailscale is
+  down on the client (see
+  [Traps](#traps-and-where-the-config-lives)).
+- **The LAN router (DHCP-provided resolvers)** own ordinary internet and
+  LAN-unqualified names. Everything else falls through to them.
+
+One device worth naming: **golink registers as its own tailnet device**
+(`go`, IP 100.98.81.59) — so `go.moose-micro.ts.net` is a device name
+with device rules, not a service VIP, and it appears in `tailscale
+status` like any peer.
+
+`svc:` names ride the same MagicDNS path as devices but reach a client
+differently under the hood — as netmap `ExtraRecords`, which are
+**visibility-granted**: a host whose only identity is a tag never
+receives them without a grant whose `src` is that tag (found live,
+issue #298; full story in
+[../../flake/modules/homelab-config/homelab/reverse-proxy/tailscale-services/README.md](../../flake/modules/homelab-config/homelab/reverse-proxy/tailscale-services/README.md)).
+
+## Reverse DNS (PTR)
+
+tailscaled answers PTR for the whole CGNAT range, and it answers for
+Service VIPs the same way as for devices — probed both directly
+(`dig @100.100.100.100 -x`) and through the resolved stub, same
+answers:
+
+| query | answer |
+|---|---|
+| `-x` a device's 100.x IP | `ts-cube.moose-micro.ts.net.` — the **device** name, never `nire-cube` |
+| `-x` an `svc:` VIP (100.117.139.169) | `git.moose-micro.ts.net.` |
+| `-x` a device's tailnet IPv6 | works, same name as its v4 |
+
+The reverse routing that makes the stub path work is visible in
+`resolvectl status tailscale0`: tailscale0 claims
+`~100.100.in-addr.arpa` through `~107.100.in-addr.arpa` plus the
+tailnet's `ip6.arpa` range, alongside `~moose-micro.ts.net`. Nothing
+about reverse lookups needs a separate config — if forward MagicDNS
+works, reverse does too, and if it doesn't, the
+[#298 check](https://github.com/NireBryce/nixos-configs/issues/298)
+(`tailscale status --json | jq .ExtraRecords`) is where to look first.
+
+Note what the device PTR says: **reverse lookup answers with the
+`ts-` device name even though the machine's hostname is `nire-cube`.**
+Piping an IP from a log through `getent hosts` yields a name that will
+not grep against `networking.hostName` — that gap is trap 1 in
+`tailscale.nix`, seen from the reverse side.
+
+## Where names show up in practice
+
+- **`tailscale status --json`**: each peer's `.DNSName` is the
+  authoritative MagicDNS FQDN (trailing dot included), and it can differ
+  from `.HostName` — an Android phone registered under its model name answers
+  on the tailnet as `ts-iona.moose-micro.ts.net`. Trust `.DNSName` when
+  scripting against peers.
+- **`getent hosts <ip>`** on any fleet host: resolves the IP to the
+  PTR name (device or service, per the table above) via nsswitch →
+  resolved → tailscale0. This is the quick "which tailnet thing is
+  100.x.y.z" command.
+- **ssh**: you connect to `ts-cube`; the machine you land on reports its
+  hostname as `nire-cube` (`hostname` on the far side). Both are
+  correct; they are different namespaces.
+- **Caddy on cube — peers do not appear at all.** tailscaled terminates
+  the tailnet connection and forwards raw TCP over loopback to Caddy
+  (that is the whole `svc:` design), so every request Caddy sees has
+  `remote_ip: 127.0.0.1` — verified in cube's journal, 2026-09-14.
+  Reverse DNS cannot show up in these logs because there is no peer
+  address to resolve. Traffic is identified by vhost
+  (`server_name`/`host` — `git.moose-micro.ts.net` etc.), and per-request
+  lines appear only at error level since no site block configures an
+  access log. Debugging "who hit this vhost" means the *app's* logs
+  (Forgejo, Grafana) or tailscaled's, not Caddy's.
+
+## Traps, and where the config lives
+
+The config rationale and the hard-won traps live in the modules —
+read these before changing anything:
+
+- `flake/modules/general-config/system/networking/tailscale.nix` — the
+  `ts-`-vs-`nire-` device-name trap, the ACL-vs-firewall signature,
+  the "tailnet name won't resolve → is Tailscale up on *your* machine?"
+  rule and the `.local` fallback, and the tagging visibility incident.
+  `flake/scripts/reach-host.sh` (`just reach <host>`) automates trying
+  every real name a host answers to.
+- `flake/modules/general-config/system/networking/resolved.nix` — why resolved
+  has mDNS off globally (the 5353 coupling), and why tailscaled ends up
+  in D-Bus/link-DNS mode instead of rewriting `/etc/resolv.conf`.
+- `flake/modules/general-config/system/networking/avahi.nix` — the `.local` half
+  and the publish settings that make hosts answer for their own names.
+- `flake/modules/homelab-config/homelab/reverse-proxy/tailscale-services/README.md`
+  — the `svc:` layer: Service objects, the tag/grant visibility rule
+  (#298), and the activation dance.

@@ -7,7 +7,7 @@
 #
 # WHY THIS EXISTS: 2026-08-30, a session ssh'd to `ts-cube` (the tailnet
 # name, correctly recalled from this wiki's own trap writeup -- see
-# wiki/traps-and-skills.md and this file's own header for the two OTHER
+# wiki/meta/traps-and-skills.md and this file's own header for the two OTHER
 # traps this exact confusion has produced before) and got a plain resolution
 # failure, because Tailscale itself wasn't connected on the CLIENT machine.
 # Several turns went into diagnosing Tailscale's own health (`tailscale

@@ -87,7 +87,7 @@
         # `virtualization` and `containers` 2026-08-27, the same day this move landed;
         # cube's own copies come through `homelab` now), per the same coarse-and-fine
         # nesting `hardware-config/hardware`/ `hardware-config/hardware/amd` already
-        # established (see wiki/module-files.md). All of it was cube-only before this
+        # established (see wiki/config-structure/module-files.md). All of it was cube-only before this
         # move and stays cube-only now -- nothing here belongs on the handhelds, which
         # is the reason each got its own category in the first place rather than living
         # in `system`.
@@ -96,7 +96,7 @@
         # the category/module name-collision reasons `git-forge` isn't
         # `forgejo`, `shortlinks` isn't `golink`, `reverse-proxy` isn't
         # `caddy`) live on each service's own module header
-        # and in `wiki/categories/`, not repeated here now that they share
+        # and in `wiki/config-structure/categories/`, not repeated here now that they share
         # one import line.
         "homelab"
 

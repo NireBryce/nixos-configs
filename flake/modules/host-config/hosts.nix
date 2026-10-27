@@ -45,13 +45,13 @@ in
 
         # nire-lego (never built or switched) and nire-installer (the generic
         # live-USB installer image) were both removed 2026-08-27 -- see
-        # wiki/history.md. nire-installer's mechanism (embedded flake, patched
+        # wiki/meta/history.md. nire-installer's mechanism (embedded flake, patched
         # Calamares, unattended nixos-install) is not gone conceptually, just
         # not carried in this tree; nireHost/installer/liveusb-installer.md's
         # last version (git history) is the starting point if it returns.
 
         # nire-llm-sandbox (a libvirt VM on nire-cube sandboxing an LLM coding
-        # agent) was removed 2026-08-28 -- see wiki/history.md. The generic
+        # agent) was removed 2026-08-28 -- see wiki/meta/history.md. The generic
         # generator it was built on, VMs/_lib/libvirt-vm.nix, is kept as
         # unexercised reusable infrastructure; its last full config (git
         # history) is the starting point if a VM like it is wanted again.

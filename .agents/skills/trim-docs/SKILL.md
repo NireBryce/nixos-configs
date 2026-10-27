@@ -11,7 +11,7 @@ when_to_use: Asked to lint, tighten, trim or make more concise the wiki, a skill
 Asked to "lint", "tighten", "trim", or "make more concise" the wiki,
 `.agents/skills/*/SKILL.md`, or `AGENTS.md`. Not: fixing a stale fact
 (`wiki-sync`), writing a new page (`new-wiki-page`), or module code comments
-(`wiki/module-style-guide.md`).
+(`wiki/config-structure/module-style-guide.md`).
 
 ## Baseline first
 
@@ -20,7 +20,7 @@ findings zero, REVIEW findings not grown.
 
 ## What lint pins in place
 
-Checked mechanically (`wiki/scripts/check_wiki.py`); preserve:
+Checked mechanically (`wiki/meta/scripts/check_wiki.py`); preserve:
 
 - **"Imported by" sections and the categories/00-INDEX.md Index table's
   Imported by column** (the table's other columns are generated -- never trim
@@ -32,7 +32,7 @@ Checked mechanically (`wiki/scripts/check_wiki.py`); preserve:
   impermanence-and-secrets.md and `.agents/rules/secrets.md`: keep the
   em-dash terminator and the full host list.
 - **`## Contents` blocks** must match the page's headings. After any heading
-  rename/add/remove: `python3 wiki/scripts/check_wiki.py gen-contents <page>`.
+  rename/add/remove: `python3 wiki/meta/scripts/check_wiki.py gen-contents <page>`.
 - **The `_Last modified: YYYY-MM-DD_` line** right after the title. Don't
   delete it; bump it to today on every page whose text you change
   (wiki-sync's rule), and leave it alone on pages you only re-read.
@@ -72,7 +72,7 @@ don't conflate them:
   what a sibling exists to fix.
 - **The sibling** is trimmed toward density: only what a reader needs to
   act, no story. Its 50% word budget is a **REVIEW** finding, never a
-  failure (`wiki/styleguide.md` "Two audiences per page": a fact beats the
+  failure (`wiki/meta/styleguide.md` "Two audiences per page": a fact beats the
   number); don't cut a command or option name to meet it.
 
 **Never move a fact from the human page to the sibling to shorten the human

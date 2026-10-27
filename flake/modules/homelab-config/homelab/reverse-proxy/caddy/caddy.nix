@@ -11,7 +11,7 @@
 # Kept in the wiki, not restated here: the design and what it moved, the
 # out-of-repo prerequisites (tailnet HTTPS in the admin console, each `svc:`
 # object and its ACL entries) and the verification record --
-# wiki/categories/reverse-proxy.md and its `-for-agents.md`;
+# wiki/config-structure/categories/reverse-proxy.md and its `-for-agents.md`;
 # wiki/homelab/reaching-services.md for the URL map and what to do when
 # something doesn't answer; `reverse-proxy-history.md` for the retired
 # path-prefix routes. Traps sit next to the options they concern, below.
@@ -235,7 +235,7 @@ in {
 # prefix; `handle_path` for Forgejo, which always served at `/`) and giving
 # both the same one cost the first live switch: /grafana/ 200, /git/ 404
 # (wiki/agent-lessons-learned.md §41). Routes, mechanism and verification record:
-# wiki/categories/reverse-proxy-history.md -- kept because path-prefix
+# wiki/config-structure/categories/reverse-proxy-history.md -- kept because path-prefix
 # routing is the fallback if the per-Service move ever needs reverting, and
 # because anything added here WITHOUT its own `svc:` name needs it again.
 #

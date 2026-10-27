@@ -14,7 +14,7 @@
 # NixOS hosts import; safe to do broadly because a category's darwin module
 # only ever contains modules that have a `darwin` key -- including `system`,
 # for instance, does not drag in bluetooth/networking/kdeconnect/etc, because
-# none of those have one. See wiki/module-files.md.
+# none of those have one. See wiki/config-structure/module-files.md.
 #
 # What actually brings packages and dotfiles across is
 # enable-home-manager-darwin.nix (in `system`), which wires

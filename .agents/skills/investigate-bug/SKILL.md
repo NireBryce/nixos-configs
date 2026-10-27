@@ -18,7 +18,7 @@ file.
 
 2026-08-24: a ble.sh/carapace completion bug was re-derived from a live pty
 session (hours) though already written up 2026-08-22 in
-`wiki/categories/shell-config/blesh.md`, one link from `wiki/00-INDEX.md`.
+`wiki/config-structure/categories/shell-config/blesh.md`, one link from `wiki/00-INDEX.md`.
 §39, [issue #72](https://github.com/NireBryce/nixos-configs/issues/72).
 Prose saying "check first" didn't make the check happen; hence a triggered
 skill.

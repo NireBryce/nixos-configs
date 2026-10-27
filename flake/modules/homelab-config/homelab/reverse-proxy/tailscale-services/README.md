@@ -10,7 +10,7 @@ the script (`vip-put`/`apply`) to push an edit.
 - `acl-diff-applied.hujson` -- the tailnet policy file as POSTed. Adds
   `tag:homelab-cube`, `autoApprovers.services` for `svc:grafana`/`svc:git`
   (pre-approving that tag to advertise both, removing the manual
-  per-service console click wiki/open-threads.md's Tailscale Services
+  per-service console click wiki/meta/open-threads.md's Tailscale Services
   entry cited as a cost -- that entry since removed, 2026-10-01; in git
   history), and explicit grants for the two service
   destinations.
@@ -127,7 +127,7 @@ generated links correctly using the new `ROOT_URL`); the old
 `ts-cube.../grafana/`, `.../git/` paths correctly `404`; backend ports
 3000/3001 still loopback-only. See `serve.nix`'s own history section for
 how the design got here (the first attempt didn't work) and
-[reverse-proxy.md](../../../../../../wiki/categories/reverse-proxy.md)
+[reverse-proxy.md](../../../../../../wiki/config-structure/categories/reverse-proxy.md)
 for the full picture.
 
 ## Tagging a device drops it out of `autogroup:members` -- live incident, 2026-09-07

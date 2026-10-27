@@ -19,7 +19,7 @@ opinion (no failure scenario, no issue).
 
 `AGENTS.md`'s "a bug recorded in a comment stays in the file" (or a
 `history` heading: `boot-durandal.nix`, `WARN-impermanence.nix`,
-`vscode.nix`), `wiki/agent-lessons-learned.md`, and `wiki/open-threads.md` all
+`vscode.nix`), `wiki/agent-lessons-learned.md`, and `wiki/meta/open-threads.md` all
 record; none get the bug *worked*. The issue is added to whichever of those
 the bug warrants, not instead. The repo has labels (`bug`, `documentation`,
 `enhancement`, …) but no backlog yet, so an unfiled bug is easily lost.
@@ -32,7 +32,7 @@ Filing elsewhere is a separate action with its own `CLAUDE.md` rule: never
 without the user asking for that specific filing in their own message — not
 satisfied by step 3's confirmation or by folding it into another approval.
 For an upstream bug, still track it *here* (`bug` label, or
-`wiki/open-threads.md` / `_loose-ends/bugs-pending-submission/` if a draft
+`wiki/meta/open-threads.md` / `_loose-ends/bugs-pending-submission/` if a draft
 write-up is what's ready); the upstream filing is a separate ask by name.
 
 ## Why propose instead of just filing

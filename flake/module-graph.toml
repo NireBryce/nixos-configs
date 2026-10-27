@@ -1,4 +1,4 @@
-# Where `just module-graph` and wiki/architecture.md's diagram put each area
+# Where `just module-graph` and wiki/config-structure/architecture.md's diagram put each area
 # (the flake-module-graph input reads this; its README has the keys).
 [layout]
 top    = ["host-config", "users-config"]   # Mermaid/Graphviz hosts view: above the hosts

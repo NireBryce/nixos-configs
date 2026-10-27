@@ -7,7 +7,7 @@ let
     net = import ../../_lib/libvirt-net.nix;
 in {
     # `{ ... }:` kept over statix's suggested `_:` -- deliberate, see
-    # wiki/module-style-guide.md's "`{ ... }:` on an inner module lambda".
+    # wiki/config-structure/module-style-guide.md's "`{ ... }:` on an inner module lambda".
     nixos = _: {
         # summary: let libvirt's NAT bridge past the host firewall
 

@@ -21,16 +21,16 @@ confusing".
 
 Worked example: the category collector, rewritten 2026-09-28 after three
 denser rounds that read as clear only to someone who already knew the
-answer. The file was retired 2026-10-16 (wiki/module-files.md); read it with
+answer. The file was retired 2026-10-16 (wiki/config-structure/module-files.md); read it with
 `git show 5808bfe2:flake/modules/_lib/category-collector.nix`.
 
 Not this skill:
 
 | ask | what to do |
 |---|---|
-| ordinary module (package, service toggle) | `wiki/module-style-guide.md` — dense one-line comments |
+| ordinary module (package, service toggle) | `wiki/config-structure/module-style-guide.md` — dense one-line comments |
 | bottom-of-file history block | skill `trim-history`; stays compressed, never talk-style |
-| a wiki page | `wiki/styleguide.md` (human half + agent half) |
+| a wiki page | `wiki/meta/styleguide.md` (human half + agent half) |
 | tightening existing prose | skill `trim-docs` |
 
 **Opposite trade from the repo's house style** (max density); a talk header
@@ -138,5 +138,5 @@ checks.
 ## See also
 
 - `git show 5808bfe2:flake/modules/_lib/category-collector.nix` — worked example.
-- `wiki/module-style-guide.md` — the dense default this departs from.
+- `wiki/config-structure/module-style-guide.md` — the dense default this departs from.
 - Skill `fact-hygiene`; `just ruled-heading`.

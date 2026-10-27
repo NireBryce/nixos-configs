@@ -31,7 +31,7 @@ where to look, not what you'll find.
 | `flake/modules/general-config/` | Cross-cutting modules whose mechanism isn't this fleet's (`drop-unsupported-packages.nix`), not host config |
 | `flake/scripts/` | `modules.py` (name/class/untracked checks), `lint.py` (ratchet), `diff-config.sh`, `diff-deployed.sh`, `rebuild.sh`, `pkg-availability.py`, `history-line.sh` |
 | `flake/doc/` | Rationale docs and trailheads (`trailhead-home-manager-standalone.md`) — often the general explanation behind a pattern |
-| `wiki/module-style-guide.md` | Formatting rules, and the module-bottom history-section convention (`trim-history`) |
+| `wiki/config-structure/module-style-guide.md` | Formatting rules, and the module-bottom history-section convention (`trim-history`) |
 | Nix-shaped skills | `new-flake-module`, `home-manager-dotfiles`, `package-platform-support`, `impermanence-initrd`, `review`'s Nix checks |
 | `wiki/agent-lessons-learned.md` | §s about evaluation vs build vs runtime, freeform options, interpolation |
 | AGENTS.md "Traps" | Nix traps stated inline (`${…}` in `''` strings, freeform settings) |

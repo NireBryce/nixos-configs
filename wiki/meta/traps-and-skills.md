@@ -1,0 +1,106 @@
+# Traps & skills
+
+_Last modified: 2026-10-22_
+
+[`../../CLAUDE.md`](../../CLAUDE.md)'s "Traps, all of which have actually happened here" section has a one-line summary of
+each trap. The full mechanism, code, and worked examples live in the matching
+skill, which loads only when that task comes up, so it costs no context
+otherwise. Read the skill before the task rather than re-deriving from the
+one-liner.
+
+| Task | Skill |
+|---|---|
+| Writing/renaming a flake-parts module | `.agents/skills/new-flake-module/SKILL.md` |
+| Editing HM shell/dotfile modules | `.agents/skills/home-manager-dotfiles/SKILL.md` |
+| Editing impermanence or initrd | `.agents/skills/impermanence-initrd/SKILL.md` |
+| Adding/platform-gating a package | `.agents/skills/package-platform-support/SKILL.md` |
+| Adding a new host | `.agents/skills/new-host-config/SKILL.md` |
+| Adding a homelab service (port, proxy route, verification) | `.agents/skills/new-homelab-service/SKILL.md` |
+| Giving a service its own Tailscale Services (`svc:`) hostname | `.agents/skills/new-tailscale-service/SKILL.md` |
+| Landing work on `experimental` | `.agents/skills/ship/SKILL.md` |
+| Filing a bug noticed while doing something else | `.agents/skills/propose-issue/SKILL.md` |
+| Checking whether a change left a `wiki/` page stale | `.agents/skills/wiki-sync/SKILL.md` |
+| Tightening wiki/skill/AGENTS prose for conciseness | `.agents/skills/trim-docs/SKILL.md` |
+| Compressing a module's history section | `.agents/skills/trim-history/SKILL.md` |
+| Writing a new skill | `.agents/skills/new-skill/SKILL.md` |
+| Commenting a module/lib function users or contributors can't follow from the code | `.agents/skills/explain-tricky-code/SKILL.md` |
+| Starting a task that will branch, commit, or check out | `.agents/skills/use-a-worktree/SKILL.md` |
+| Adding a package to a user's environment | `.agents/skills/new-package/SKILL.md` |
+| Creating a wiki page (date line, Contents, sibling, index entry) | `.agents/skills/new-wiki-page/SKILL.md` |
+| Writing a fact, status snapshot, or cross-reference that must not rot | `.agents/skills/fact-hygiene/SKILL.md` |
+| Running a sops command, or a secret value showed up in output | `.agents/skills/secrets-hygiene/SKILL.md` |
+| A guard hook flagged a secret in tool output | `.agents/skills/triage-flagged-secrets/SKILL.md` |
+| Checking whether a reported bug is already a tracked thread | `.agents/skills/investigate-bug/SKILL.md` |
+| Reviewing a PR, branch, or commit | `.agents/skills/review/SKILL.md` |
+| Moving a resolved incident out of a wiki page into `-history.md` | `.agents/skills/wiki-history-sweep/SKILL.md` |
+| Turning a re-typed command pattern into a `just agent` script | `.agents/skills/agent-scripts/SKILL.md` |
+| Auditing every doc claim against the code with parallel agents | `.agents/skills/docs-audit-all/SKILL.md` |
+
+See [../config-structure/architecture.md](../config-structure/architecture.md) and
+[../config-structure/impermanence-and-secrets.md](../config-structure/impermanence-and-secrets.md) for where each of
+these fits into the bigger picture; this page is just the index.
+
+## Contents
+
+- [Two traps general enough to stay inline in `CLAUDE.md` rather than a skill](#two-traps-general-enough-to-stay-inline-in-claudemd-rather-than-a-skill)
+- [A trap worth knowing before it's needed](#a-trap-worth-knowing-before-its-needed)
+- [A trap that points at the wiki instead of a skill](#a-trap-that-points-at-the-wiki-instead-of-a-skill)
+- [Style](#style)
+
+## Two traps general enough to stay inline in `CLAUDE.md` rather than a skill
+
+- `${...}` inside a Nix `''` string is interpolation, even inside what reads
+  like a comment — escape as `''${...}` or reword. General enough (any `''`
+  string) that it isn't specific to one kind of module.
+- **`git add` before `nix eval`** — flakes in a git repo ignore untracked
+  files, so a new module can silently not exist yet as far as evaluation is
+  concerned.
+
+## A trap worth knowing before it's needed
+
+- **Two apps behind the same reverse proxy can need opposite prefix
+  handling.** Grafana serves *under* its path prefix (`serve_from_sub_path`)
+  and Caddy must leave the prefix on; Forgejo always serves at `/` no matter
+  what its `ROOT_URL` says, and Caddy must strip it. Both spellings are valid
+  Caddy, both build, and the wrong one is a 404 on every page of the affected
+  app. It cost a switch on 2026-08-24 —
+  [../agent-lessons-learned.md](../agent-lessons-learned.md) #41, with the
+  routing detail in [reverse-proxy](../config-structure/categories/reverse-proxy.md). The
+  `new-homelab-service` skill has the two-`curl` test that settles it in
+  seconds.
+
+- **Adding an explicit `tls` directive to one Caddy vhost changes the
+  issuer for every other vhost.** The Caddyfile adapter emits automation
+  policies for *all* sites as soon as *any* site declares `tls`, and Caddy's
+  Tailscale-certificate auto-detection only runs for names that have no
+  policy — so `tls internal` on three bare-name redirects silently pointed
+  four unrelated `.ts.net` vhosts at public Let's Encrypt, which can never
+  issue for a tailnet name. Two days of `SSL_ERROR_INTERNAL_ERROR_ALERT` on
+  names no commit had touched, 2026-09-08. Eval, build, `just modules` and
+  `caddy adapt` all pass — the config is valid, it just means something
+  else; only a real handshake finds it. The general shape, and the questions
+  to ask before adding an explicit setting anywhere:
+  [../agent-lessons-learned.md](../agent-lessons-learned.md) §47.
+
+## A trap that points at the wiki instead of a skill
+
+- **Debugging "can't reach a host by tailscale name"** — no skill for this
+  one; the full mechanism (the traps: names don't match `networking.
+  hostName`, a tailnet ACL can silently block peer traffic, and a name
+  that won't resolve at all means check Tailscale on the client, not the
+  name) lives in `networking/tailscale.nix`'s own header, indexed at
+  [../config-structure/categories/system.md](../config-structure/categories/system.md)'s "Tailscale" section. `just
+  reach <host>` (`flake/scripts/reach-host.sh`) is the automated fix for
+  the third one.
+
+## Style
+
+- **[../config-structure/module-style-guide.md](../config-structure/module-style-guide.md)**
+  — conventions for `flake/modules/`: aligned-`=` columns are intentional,
+  `nix fmt` is deliberately not wired up because it would flatten them.
+  Its file counts live on the `-for-agents` sibling, generated from the
+  tree by `just wiki-gen`.
+- **Conventions section of [`../../CLAUDE.md`](../../CLAUDE.md)** — commit
+  trailer wording (and why it deliberately omits a model name — see the
+  section for the reasoning), the "say what it was" rule for renames, the
+  "don't bury Python in bash" rule with its two ways out.

@@ -10,7 +10,7 @@
 # `.ts.net` vhosts are the other half. Added 2026-09-07.
 #
 # Kept elsewhere, not restated here: the design and the current names,
-# wiki/categories/reverse-proxy.md and its `-for-agents.md`; the first
+# wiki/config-structure/categories/reverse-proxy.md and its `-for-agents.md`; the first
 # attempt and why it failed, `reverse-proxy-history.md`; the control-plane
 # half (Service objects, ACL entries, `vip-put` traps, what is applied
 # live), this directory's README.md. Traps sit next to the options.
@@ -95,7 +95,7 @@ in {
 # HTTPS but that it doesn't survive set-config or a reboot; the fix, PR
 # #20116, was an unmerged draft against a tailscale newer than the pinned
 # 1.102.2). Symptoms, the CLI attempt, and the exact failing commands:
-# wiki/categories/reverse-proxy-history.md.
+# wiki/config-structure/categories/reverse-proxy-history.md.
 #
 # THE RULE THAT GIVES, still live: a `svc:` name needing real HTTPS needs
 # its own TLS terminator behind a `tcp://` raw forward, as here. An

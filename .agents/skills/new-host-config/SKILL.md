@@ -109,11 +109,11 @@ generic pieces only; record the decision in the host header
    SSH host key (via `ssh-to-age`) to `.sops.yaml` and `sops updatekeys
    secrets.yaml`. Not preemptively.
 5. `AGENTS.md` keeps no host roster (it points at `hosts.nix` and
-   `wiki/hosts.md`); edit it only if its Safety section's list of hosts that
+   `wiki/fleet/hosts.md`); edit it only if its Safety section's list of hosts that
    wipe `/root` changes.
-6. `just wiki-gen` (adds the host's row to `wiki/hosts.md`; write its Role
+6. `just wiki-gen` (adds the host's row to `wiki/fleet/hosts.md`; write its Role
    cell, the one hand-written column), plus the `Imported by` line of every
-   `wiki/categories/*.md` for categories the host now imports.
+   `wiki/config-structure/categories/*.md` for categories the host now imports.
 
 ## Verifying
 

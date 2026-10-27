@@ -27,7 +27,7 @@ the test and the folder differ.
 
 The category machinery left this repo as the `dirs-as-categories` flake
 input (2026-10-16; `flake/doc/dirsAsCategory.md`'s header has the before,
-`wiki/module-files.md` the after), and the module-tree diagram as
+`wiki/config-structure/module-files.md` the after), and the module-tree diagram as
 `flake-module-graph`. Both are inputs in `flake/flake.nix`. So before
 recording a candidate, ask whether it extends one of those rather than
 needing a home of its own; say which in the file's "General kernel" line.

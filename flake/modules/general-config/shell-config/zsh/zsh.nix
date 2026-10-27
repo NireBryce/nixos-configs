@@ -181,7 +181,7 @@
                 # same reason: nixpkgs' programs.ssh exports it globally
                 # wherever services.xserver.enable is true, and over plain
                 # SSH ksshaskpass crashes instead of falling back to a
-                # terminal prompt. wiki/categories/shell-config/00-INDEX.md
+                # terminal prompt. wiki/config-structure/categories/shell-config/00-INDEX.md
                 # has the incident. Kept out here rather than inside the
                 # string, per this file's own note below the aliases.
                 (lib.mkBefore ''
