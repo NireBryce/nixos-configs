@@ -79,3 +79,4 @@ the full rules.
 - Browsing modules, not editing them: `just history-line <file>` prints
   where the history section starts; read up to it. Editing is different:
   read the history before changing what it describes.
+- Name the kind of module: *module file* (the `.nix` file), *NixOS / Home Manager / darwin module* (the value under a class key), *flake-parts module* (a plain file like `hosts.nix`). A module file is never a "flake-parts module"; `wiki/config-structure/module-files.md`, "Three kinds of module".

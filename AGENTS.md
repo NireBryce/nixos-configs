@@ -250,6 +250,14 @@ records what it knows. Claude's form is `Co-Authored-By: Claude`.
 `.githooks/commit-msg` auto-corrects only the `Claude <model> <email>`
 shape, so form any other agent's trailer correctly at write time.
 
+**Say which kind of module.** A *module file* is a `.nix` file under
+`flake/modules/` in the dirs-as-categories shape; a *NixOS module* (or *Home
+Manager*, *darwin*) is the value under a class key inside it; a *flake-parts
+module* is a plain file such as `hosts.nix` that configures the flake itself.
+Never call a module file a "flake-parts module": wrapping a raw NixOS module as
+`{ nixos = ...; }` is how it becomes a module file
+(`wiki/config-structure/module-files.md`).
+
 **Prose that means the person says "the user," never the name.** `elly` in
 an identifier is the account this config builds; in prose it reads as a
 claim about who runs this repo, which doesn't hold for a fork or a fresh

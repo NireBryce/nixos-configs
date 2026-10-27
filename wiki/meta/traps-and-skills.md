@@ -10,7 +10,7 @@ one-liner.
 
 | Task | Skill |
 |---|---|
-| Writing/renaming a flake-parts module | `.agents/skills/new-flake-module/SKILL.md` |
+| Writing/renaming a module file | `.agents/skills/new-flake-module/SKILL.md` |
 | Editing HM shell/dotfile modules | `.agents/skills/home-manager-dotfiles/SKILL.md` |
 | Editing impermanence or initrd | `.agents/skills/impermanence-initrd/SKILL.md` |
 | Adding/platform-gating a package | `.agents/skills/package-platform-support/SKILL.md` |

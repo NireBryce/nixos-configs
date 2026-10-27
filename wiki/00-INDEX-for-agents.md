@@ -39,7 +39,7 @@ root holds only entry points.
 
 | Task | Read |
 |---|---|
-| add, rename, or wire a flake-parts module | [config-structure/architecture.md](config-structure/architecture.md#quick-facts), skill `new-flake-module` |
+| add, rename, or wire a module file | [config-structure/architecture.md](config-structure/architecture.md#quick-facts), skill `new-flake-module` |
 | place a new module: shared / host / user | [config-structure/where-modules-go.md](config-structure/where-modules-go.md) |
 | touch impermanence or initrd | [config-structure/impermanence-and-secrets.md](config-structure/impermanence-and-secrets.md), skill `impermanence-initrd` |
 | add or platform-gate a package | [config-structure/categories/00-INDEX.md](config-structure/categories/00-INDEX.md), skill `package-platform-support` |

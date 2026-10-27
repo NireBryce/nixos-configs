@@ -30,10 +30,11 @@
 # boot-cube.nix still installs sbctl as a package (parity with durandal), it
 # just has nowhere dedicated to keep its files.
 #
-# Wrapped as a flake-parts module for the same reason durandal's/tenacity's
-# hardware files are: a raw nixos-generate-config file under modules/ makes
-# flake-parts resolve `modulesPath` through its own _module.args and dies with
-# "infinite recursion encountered", naming modulesPath rather than this file.
+# Wrapped as a module file, `{ nixos = ...; }`, for the same reason
+# durandal's/tenacity's hardware files are: a raw nixos-generate-config file
+# under modules/ makes flake-parts resolve `modulesPath` through its own
+# _module.args and dies with "infinite recursion encountered", naming
+# modulesPath rather than this file.
 #
 # Named hardware-cube.nix, not hardware-configuration.nix: durandal's own
 # capture already claims the module name "hardware-configuration", and a

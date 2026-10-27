@@ -87,7 +87,7 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
 | reach or debug a service running on cube | [homelab/reaching-services.md](homelab/reaching-services.md) |
 | stream cube's desktop, clear a lock-screen lockout, open Sunshine's web UI | [homelab/common-commands.md](homelab/common-commands.md) |
 | restart, add to, or debug cube's Claude Remote Control sessions | [homelab/claude-rc.md](homelab/claude-rc.md) |
-| add, rename, or wire a flake-parts module | [config-structure/architecture.md](config-structure/architecture.md), skill [`new-flake-module`](../.agents/skills/new-flake-module/SKILL.md) |
+| add, rename, or wire a module file | [config-structure/architecture.md](config-structure/architecture.md), skill [`new-flake-module`](../.agents/skills/new-flake-module/SKILL.md) |
 | decide where a new module goes (shared, host, or user) | [config-structure/where-modules-go.md](config-structure/where-modules-go.md) |
 | touch impermanence or initrd | [config-structure/impermanence-and-secrets.md](config-structure/impermanence-and-secrets.md), skill [`impermanence-initrd`](../.agents/skills/impermanence-initrd/SKILL.md) |
 | add or platform-gate a package | [config-structure/categories/00-INDEX.md](config-structure/categories/00-INDEX.md), skill [`package-platform-support`](../.agents/skills/package-platform-support/SKILL.md) |
