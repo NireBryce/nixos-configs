@@ -7,7 +7,7 @@ purpose -- the real tree comes back clean, which proves nothing about
 whether it could. Pure stdlib; runs via `just modules-test`, part of
 `just preflight` and CI.
 """
-import contextlib, io, json, pathlib, subprocess, sys, tempfile, types, unittest
+import collections, contextlib, io, json, pathlib, subprocess, sys, tempfile, types, unittest
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 import modules  # noqa: E402
@@ -84,6 +84,20 @@ class Graph(Tree):
         self.assertIn('boom', str(cm.exception))
 
 
+def tree_header():
+    """The four-line header most modules in the real tree carry. The scaffold
+    has to write that one: a header the tree has moved on from was left in
+    the template once, and 227 of 241 modules disagreed with it."""
+    headers = collections.Counter(
+        tuple(p.read_text().splitlines()[:4])
+        for p in (pathlib.Path(modules.__file__).resolve().parents[1] / 'modules').rglob('*.nix'))
+    (header, _), = headers.most_common(1)
+    return '\n'.join(header) + '\n'
+
+
+TREE_HEADER = tree_header()
+
+
 class Add(Tree):
     """`add` writes into a real git repo: it `git add`s what it creates."""
 
@@ -99,7 +113,7 @@ class Add(Tree):
     def test_scaffolds_the_new_shape_and_stages_it(self):
         self.assertEqual(self.add('homeManager', 'area/used/new-thing/new-thing.nix', 'does', 'a', 'thing'), 0)
         text = (self.root / 'area/used/new-thing/new-thing.nix').read_text()
-        self.assertTrue(text.startswith('# dirs-as-categories:'))
+        self.assertTrue(text.startswith(TREE_HEADER), text)
         self.assertIn('homeManager = _: {', text)
         self.assertIn('# summary: does a thing', text)
         self.assertNotIn('moduleName', text)

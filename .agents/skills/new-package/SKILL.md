@@ -24,7 +24,10 @@ host a real build runs on differ (sections below).
 Hand-written, not generated. Follow a sibling file:
 
 ```nix
-# dirs-as-categories: the module is named after this file; its categories are the folders above it
+# This is a dirs-as-categories module, which means it creates a flake-parts
+# module that derives its name from its filename minus the .nix suffix, whose
+# category module is the name of the folder it belongs to.
+# https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
         # package summary: <tool> -- <what the package is, one line; nixpkgs meta.description is a start>

@@ -130,6 +130,15 @@ def drift(doc, static):
 # outside these is refused at evaluation, so refuse it here first.
 CLASSES = ('nixos', 'homeManager', 'darwin')
 
+# The header every module file opens with, as wiki/module-files.md shows it.
+# tests/test_modules.py checks it against what most modules in the tree carry,
+# so the scaffold cannot quietly fall behind a change to the header.
+HEADER = """# This is a dirs-as-categories module, which means it creates a flake-parts
+# module that derives its name from its filename minus the .nix suffix, whose
+# category module is the name of the folder it belongs to.
+# https://github.com/NireBryce/dirs-as-categories/wiki
+"""
+
 # wiki/module-files.md's shape and wiki/module-style-guide.md's formatting:
 # the header comment, opening brackets on the same line, four-space indent, and
 # the `# summary:` comment as the first line of the body. The class
@@ -139,8 +148,7 @@ CLASSES = ('nixos', 'homeManager', 'darwin')
 # the body uses `lib`: deadnix would flag it unused.
 #
 # Tokens, not str.format: the text is full of literal Nix braces.
-BOILERPLATE = '''# dirs-as-categories: the module is named after this file; its categories are the folders above it
-{
+BOILERPLATE = HEADER + '''{
     @CLASS@ = _: {
         # summary: @DESC@
     };
