@@ -6,6 +6,16 @@ Condensed from [module-style-guide.md](module-style-guide.md). Rules only.
 
 Applies to every module under `flake/modules/`, packages included.
 
+## Contents
+
+- [Counts](#counts)
+- [The header](#the-header)
+- [Formatting](#formatting)
+- [`# summary:` / `# package summary:`](#-summary---package-summary)
+- [`_:` for an inner module lambda that uses no argument](#_-for-an-inner-module-lambda-that-uses-no-argument)
+- [Comments](#comments)
+- [File placement produces no error when wrong](#file-placement-produces-no-error-when-wrong)
+
 ## Counts
 
 Generated: `just wiki-gen` rewrites it, `just wiki-lint` fails when stale.
@@ -86,12 +96,12 @@ system (checked). The module system has no per-module namespace at all. A
 typed registry was considered and **declined**. Don't "upgrade" this to an
 option without a reason beyond tidiness.
 
-## Don't "fix" these
+## `_:` for an inner module lambda that uses no argument
 
-- **`{ ... }:` on an inner module lambda** is deliberate in
-  `vm-networking.nix`, `sunshine-elly.nix`, `sunshine.nix` — it signals "this
-  value is itself a NixOS module", which `_:` doesn't. statix's W10 findings
-  for them are counted in `flake/scripts/lint-baseline.json`'s statix total.
+- Write `nixos = _: { ... };`, not `{ ... }:`. statix W10 flags the latter and
+  `lint-baseline.json` is at 0, so a new one fails `just lint`. The earlier
+  "`{ ... }:` signals a module" exception (`vm-networking.nix`,
+  `sunshine-elly.nix`, `sunshine.nix`) was removed in `23c7b89`.
 
 ## Comments
 

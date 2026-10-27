@@ -35,7 +35,7 @@ cube, not a fleet host (no `nire-` prefix; see its `hosts.nix` comment).
   `lenovo-thinkpad-x270`) from `<name>/hardware/hardware-<name>.nix`
   (`nire-testbed`, removed 2026-08-22, did; no live Intel host).
 - **NixOS or darwin?** `mkHost`/`mkDarwinHost` in `hosts.nix`; darwin has no
-  `elly-user`, no impermanence, lands in `flake.darwinConfigurations`.
+  impermanence, lands in `flake.darwinConfigurations`.
   `nire-lysithea` is the only example.
 
 ## Real hardware, or not installed yet?
@@ -71,7 +71,9 @@ The host can be fully wired and still unable to boot — say so in the header.
 
 ## Naming: suffix anything host-specific
 
-Names in one class **merge**. Every file under `<name>/` gets a host suffix
+A name is one namespace across the whole tree (every class, modules and
+categories alike), and a repeated name is an evaluation error naming both
+paths (dirs-as-categories: `names used more than once`). Every file under `<name>/` gets a host suffix
 (`hardware-cube.nix`, `boot-cube.nix`). Every live host follows it, down to
 `nixpkgs-hostPlatform-<name>.nix` and `nixpkgs-stateVersion-<name>.nix` in
 `<name>/configuration/`.

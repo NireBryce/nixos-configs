@@ -25,7 +25,7 @@ all false by 2026-09-09: the tree had grown from 151 to 263 files.)
 - [Four-space indent](#four-space-indent)
 - [Comment width](#comment-width)
 - [The module header](#the-module-header)
-- [`{ ... }:` on an inner module lambda is sometimes deliberate](#---on-an-inner-module-lambda-is-sometimes-deliberate)
+- [An inner module lambda that uses no argument is `_:`](#an-inner-module-lambda-that-uses-no-argument-is-_)
 - [`# summary:`, one per module](#-summary-one-per-module)
 - [Rationale goes inside the module body, not in a header block](#rationale-goes-inside-the-module-body-not-in-a-header-block)
 - [`with pkgs; [ ... ]` for package lists](#with-pkgs----for-package-lists)
@@ -129,28 +129,26 @@ Which argument goes where is not cosmetic:
   anywhere else would be perSystem's, which has no `nixpkgs.config` applied
   and would silently lose `allowUnfree`.
 
-## `{ ... }:` on an inner module lambda is sometimes deliberate
+## An inner module lambda that uses no argument is `_:`
 
 `statix` flags a bare `{ ... }:` as its W10 "empty pattern" lint and suggests
-`_:` instead, since nothing is destructured out of the argument. Usually
-correct — but some modules keep `{ ... }:` on purpose, as a readability
-signal that the value being assigned is itself a NixOS module (something
-that will in turn receive `config`/`lib`/`pkgs`/etc., even though this
-particular one doesn't use any of them), not just an ignored argument:
+`_:`, since nothing is destructured out of the argument. Write the inner
+lambda of a module that takes nothing as `_:`:
 
 ```nix
-nixos = { ... }: {
+nixos = _: {
     # ...
 };
 ```
 
-`_:` is technically equivalent and shorter, but reads as "argument
-deliberately unused" with no hint of what kind of function this is — the
-distinction that matters when skimming a file to tell "is this a module" from
-"is this a plain function". Left alone in `vm-networking.nix`,
-`sunshine-elly.nix`, and `sunshine.nix`; the corresponding statix findings are
-counted in `flake/scripts/lint-baseline.json`'s statix total rather than fixed. Don't "fix" these on a
-lint pass without checking here first.
+An older version of this page kept `{ ... }:` in `vm-networking.nix`,
+`sunshine-elly.nix` and `sunshine.nix`, on the argument that it reads as "this
+value is itself a module" where `_:` reads as "argument deliberately unused".
+That was weighed and set aside: `_:` is equivalent, the lint ratchet
+(`flake/scripts/lint-baseline.json`) counts statix findings and is now at 0
+after those three were changed, so a new `{ ... }:` fails `just lint`.
+Don't reintroduce it for readability; the key (`nixos`, `homeManager`,
+`darwin`) already says it is a module.
 
 ## `# summary:`, one per module
 

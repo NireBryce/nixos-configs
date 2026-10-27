@@ -52,7 +52,7 @@
         # host-config/cube/: hardware-cube, boot-cube, nixpkgs-hostPlatform-cube,
         # nixpkgs-stateVersion-cube -- suffixed for the same reason
         # tenacity's are: a module's name is its filename, and
-        # same name in the same class merges rather than erroring.
+        # a repeated name anywhere in the tree stops evaluation.
         "cube"
 
         # ── shared ────────────────────────────────────────────────────────────
