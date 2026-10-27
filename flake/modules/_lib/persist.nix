@@ -18,7 +18,7 @@ rec {
     # nire-cube has one and wipes nothing. It is an option rather than a read of
     # `config.fileSystems ? "/persist"` because environment.persistence adds
     # fileSystems entries: testing for one from inside the persistence value is
-    # infinite recursion. Set in general-config/system/impermanence/
+    # infinite recursion. Set in general-config/system/persistence/
     # declare-persistence-option.nix (default: usesImpermanence).
     hasPersistVolume = config: config.nire.hasPersistVolume;
 

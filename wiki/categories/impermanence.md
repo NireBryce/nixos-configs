@@ -1,6 +1,6 @@
 # `impermanence` — `general-config/impermanence/`
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-10-27_
 
 **Read `WARN-impermanence.nix` itself before changing anything here; this
 page is an index, not a substitute.** It covers what lives in the category
@@ -74,14 +74,14 @@ is why two other things exist:
 warns that a non-impermanence host has no login-password help here (cube
 itself is excluded by hostname as of 2026-09-01 — its password was set by
 hand before it was switched), and
-`general-config/system/impermanence/declare-persistence-option.nix` — a **different,
+`general-config/system/persistence/declare-persistence-option.nix` — a **different,
 easily confused file**, next section.
 
 ## The other "impermanence" — don't confuse the two
 
-`general-config/system/impermanence/declare-persistence-option.nix` is **not** part of
-this category. It's a subdirectory of `general-config/system/` that happens to share
-the word "impermanence" in its path, collected into the `system` category
+`general-config/system/persistence/declare-persistence-option.nix` is **not** part of
+this category. It's a subdirectory of `general-config/system/` (named `impermanence/`
+until 2026-10-27, hence the confusion), collected into the `system` category
 aggregate like everything else under `general-config/system/`, not into this one. It
 declares the `environment.persistence` *option* (not any actual persisted
 paths) for every NixOS host unconditionally — including `cube`, which

@@ -7,7 +7,7 @@
 # this was a single `environment.persistence` block partway down that file.
 #
 # Filed beside jovian.nix, NOT in the impermanence category. That is deliberate,
-# and it is what keeps the scoping: moving it under system/impermanence/ would
+# and it is what keeps the scoping: moving it under system/persistence/ would
 # hand /etc/hhd to durandal too, which runs no handheld-daemon and has no reason
 # to carry the rule.
 #

@@ -50,7 +50,7 @@ others; see [../architecture.md](../architecture.md).
   `boot.initrd.systemd.services ? restore-root` existing (the unit only
   `WARN-impermanence.nix` creates) rather than on
   `environment.persistence`, because that option is declared for *every*
-  host regardless, via `general-config/system/impermanence/declare-persistence-option.nix`
+  host regardless, via `general-config/system/persistence/declare-persistence-option.nix`
   (see [system](system.md)) — so it wouldn't distinguish anything. `nire-cube`
   is additionally excluded by hostname: the module used to fire on cube too,
   but its password hash was created by hand on the real machine before cube

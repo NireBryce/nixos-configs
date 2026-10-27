@@ -15,7 +15,7 @@
 # WARN-impermanence.nix creates. See that file's "OPT-IN: HOSTS WITHOUT
 # IMPERMANENCE ARE EXEMPT" header for why that signal and not
 # `environment.persistence` (declared for every host regardless --
-# general-config/system/impermanence/declare-persistence-option.nix).
+# general-config/system/persistence/declare-persistence-option.nix).
 #
 # Filed under users-config/elly/, so it rides the `elly` category into every
 # host automatically rather than being wired into a specific host's config by

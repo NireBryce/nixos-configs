@@ -77,7 +77,7 @@
 # flake input. It provides `environment.persistence`: for every path listed
 # there, it bind-mounts /persist/<path> over <path> during activation, so
 # the file looks like it never left. This file uses that option without
-# importing the module. general-config/system/impermanence/
+# importing the module. general-config/system/persistence/
 # declare-persistence-option.nix imports it once, for every NixOS host --
 # nire-cube included, since its *-persist.nix modules need the option to
 # exist even when they set nothing. A second import from here would be a
