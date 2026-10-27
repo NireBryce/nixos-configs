@@ -132,8 +132,8 @@ The one-way part of the move to integrated Home Manager is on the machine,
 not in the repo. Switching to integrated reduces Home Manager's own install
 step to removing the standalone profile entry. That profile lives in the
 user's home directory, not in the system generation, so **rolling the system
-back to an older generation does not restore it.** This happened on one host
-in August 2026: the rollback left the account with no user profile, and
+back to an older generation does not restore it.** This has happened on a real
+host: the rollback left the account with no user profile, and
 recovery meant re-activating an older Home Manager generation by hand.
 That worked only because the generation links under
 `~/.local/state/nix/profiles/` still existed. Garbage collection with

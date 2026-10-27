@@ -10,9 +10,9 @@ and you'll know when it needs a guard.
 
 Packages live under `flake/modules/packages-config/`, one file per package.
 They reach every host through one Home Manager module, `elly-home-manager`.
-Every host shares that module unchanged, **including the darwin host
-`nire-lysithea`**, so every package you add has to survive aarch64-darwin as
-well as Linux.
+Every host shares that module unchanged, **including any darwin host**
+(see `host-config/hosts.nix`), so every package you add has to survive
+aarch64-darwin as well as Linux.
 
 That module includes the coarse package categories by name: `development`,
 `editors`, `gui-other`, `linux-utils`, `nix-utils`, `shell-apps`,
@@ -98,7 +98,7 @@ like this:
 The guard **looks** like "Linux-only", but it means *"on darwin,
 `homebrew.nix` owns this app"*. Obsidian builds fine on aarch64-darwin. The
 nix copy was dropped because it is the expensive one: an unfree repackaged
-`.dmg` that is never in the binary cache. On 2026-08-12 the GitHub download
+`.dmg` that is never in the binary cache. Once, the GitHub download
 of that `.dmg` returned 503 on every retry and failed the whole darwin build,
 for an app Homebrew had already installed.
 

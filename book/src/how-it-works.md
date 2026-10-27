@@ -38,8 +38,8 @@ Source: `flake/flake.nix`;
 
 **What actually happens.** A module file never names itself.
 dirs-as-categories names it after its file, so `gaming.nix` becomes the
-module `gaming`, and a `default.nix` takes its folder's name. Until
-2026-10-16 every file worked out its own name with boilerplate
+module `gaming`, and a `default.nix` takes its folder's name. Earlier,
+every file worked out its own name with boilerplate
 (`lib.removeSuffix ".nix" (baseNameOf __curPos.file)`). That boilerplate is
 gone.
 
@@ -248,7 +248,7 @@ Source: `flake/modules/lib.nix`, `flake/modules/_lib/fleet.nix`;
 [module-files.md](../../wiki/config-structure/module-files.md), "Shared
 helpers"; commit `aca2a74`.
 
-## Impermanence: two hosts wipe `/root` on every boot
+## Impermanence: some hosts wipe `/root` on every boot
 
 **What you'd expect.** A NixOS root filesystem that keeps what was written
 to it.
@@ -259,9 +259,9 @@ runs a `restore-root` unit in the initrd. The unit deletes the btrfs
 subvolume that `/` lives on and replaces it with a snapshot of an empty
 subvolume, `root-blank`. What survives is `/nix`, `/home`, `/var/log`, and
 the paths listed for `/persist`. Hosts get this only through the
-`impermanence` category. **`nire-durandal` and `nire-tenacity` include it;
-`nire-cube` deliberately does not** (plain persistent root). Darwin has no
-impermanence. Check the specific host's entry point rather than assuming.
+`impermanence` category. A host that includes it wipes `/root`; a host that leaves it out keeps a
+plain persistent root (its entry point says so). Darwin has no impermanence.
+Check the specific host's entry point rather than assuming.
 
 **Why it matters.**
 

@@ -199,7 +199,7 @@ Source: `flake/modules/host-config/tenacity-configuration.nix`,
 There is one page per category that a host might include: what is in it,
 why it is shaped that way, and its traps. The index,
 [`categories/00-INDEX.md`](../../wiki/config-structure/categories/00-INDEX.md),
-has two generated tables, system categories and the cube-only homelab set.
+has generated tables, one for system categories and one for the homelab set.
 **Imported by** is the one column written by hand, and `just wiki-gen` keeps
 it when it regenerates the tables. The `packages-config/*` subcategories
 and the per-host bundles are deliberately left out. The first are

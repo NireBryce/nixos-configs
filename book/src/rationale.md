@@ -9,17 +9,15 @@ than either answer.
 
 ## A note on the sources
 
-The git history in this clone is shallow. The oldest commit, `8d4f570`
-(2026-10-19), is a graft that holds the whole earlier tree. Commits that the
-docs cite from before it (`0c0b5f0`, `5808bfe2`, the deleted `flake-parts`
-branch tip `cf9aea42`) are not objects in this clone. For anything earlier
-than 2026-10-19, this chapter therefore relies on the dated working notes in
-`flake/doc/` and `wiki/`, not on `git log`. To check one of those older
-claims against a full history, use the `git-archaeology` skill
-(`.agents/skills/git-archaeology/SKILL.md`) in a clone that has it.
-
-Source: `git rev-parse --is-shallow-repository` (true);
-`git cat-file -t 0c0b5f0` (not a valid object).
+A shallow clone (`git rev-parse --is-shallow-repository` prints `true`) has
+a graft commit at its oldest point that holds the whole earlier tree. Commits
+the docs cite from before the graft, including the tip of the deleted
+`flake-parts` branch, are then not objects you can read: `git cat-file -t
+<hash>` answers "not a valid object". For anything older than your clone's
+history, this chapter relies on the dated working notes in `flake/doc/` and
+`wiki/`, not on `git log`. To check one of those claims against a full
+history, use the `git-archaeology` skill
+(`.agents/skills/git-archaeology/SKILL.md`) in a full clone.
 
 ## Decision: flake-parts, for one option
 
@@ -93,7 +91,7 @@ Source: `flake/doc/dirsAsCategory.md`, "What the alternative is";
 
 ## Dead end: hand-written module names and category shims
 
-**What it was.** Until 2026-10-16, every module computed its own name from
+**What it was.** Until the change, every module computed its own name from
 `__curPos.file`. Every category folder held an identical copy of a shim,
 `dirsAsCategory.nix`, which called a shared collector in `_lib/`.
 
@@ -203,13 +201,14 @@ Source: comment on `touchup` in `flake/flake.nix`;
 [module-style-guide-for-agents.md](../../wiki/config-structure/module-style-guide-for-agents.md),
 "Formatting".
 
-## Decision: impermanence on two hosts, not all
+## Decision: impermanence on some hosts, not all
 
-**Choice.** `nire-durandal` and `nire-tenacity` wipe `/root` on every boot,
-so that any state that matters has to be declared in the repo. Forgetting
-something fails loudly the next day instead of silently years later.
-`nire-cube` was installed by hand with a plain root and opts out. Its entry
-point says so and explains how the checks opt out with it.
+**Choice.** Hosts that include the `impermanence` category wipe `/root` on
+every boot, so that any state that matters has to be declared in the repo.
+Forgetting something fails loudly the next day instead of silently years
+later. A host installed by hand with a plain root opts out; its entry point
+says so and explains how the checks opt out with it (the cube host's entry
+point, `cube-configuration.nix`, is the worked example).
 
 Source: `WARN-impermanence.nix`, "what this does, and why";
 `flake/modules/host-config/cube-configuration.nix` header.
@@ -220,10 +219,10 @@ All of these produced no error, or an error that named the wrong thing:
 
 - **Two `config`s in one file.** Adding an argument list to reach the NixOS
   `config` silently changed what every existing `config` in the file meant.
-  This was retired on 2026-10-16, since module files can no longer take the
+  This was retired, since module files can no longer take the
   flake-parts `config`.
 - **starship beat powerlevel10k for a whole session.** Its init ran last in
-  the generated `.zshrc`, so the 1,660-line p10k config never did anything.
+  the generated `.zshrc`, so the very long p10k config never did anything.
   Read the generated dotfile, not the module.
 - **`home.file.<n>.text` concatenates.** Two modules writing `.blerc`
   produced one file in which every import ran twice.
@@ -252,9 +251,9 @@ Source: `AGENTS.md`, State; commit `4a95690`;
 ## Decision: calibrated severity
 
 This is a homelab config, not production. The port notes quote the
-correction that set the tone: a four-day window in which the flake did not
-evaluate had been over-dramatised, and "the repo has gone six months
-between commits". `AGENTS.md`'s "Calibrate severity" rule comes from there.
+correction that set the tone: a short window in which the flake did not
+evaluate had been over-dramatised, and the repo can go months between
+commits. `AGENTS.md`'s "Calibrate severity" rule comes from there.
 
 Source: [flake-parts-port-notes.md](../../wiki/config-structure/flake-parts-port-notes.md),
 "Decisions, not defaults"; `AGENTS.md`, Working in this repo.

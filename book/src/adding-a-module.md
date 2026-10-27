@@ -42,7 +42,7 @@ host-specific (§38 in
 **Worked example.** `virtualization-cube.nix` defines the `forge-runner` VM
 that only cube runs. It used to sit in the shared `virtualization`
 category, and a collector rule kept it out of that category's own imports.
-When that rule went away on 2026-09-28, the file moved to
+When that rule went away, the file moved to
 `host-config/cube/cube-vm/`. Now "cube only" follows from where the file
 is, instead of being a quirk someone has to remember.
 
@@ -61,7 +61,7 @@ namespace across the whole tree and across classes.
   otherwise be generic: `elly-git.nix`, `elly-user.nix`.
 - **Name the file after the specific thing**, not after the category it
   sits in. A `containers/containers.nix` would collide with its own
-  category, so it is `podman.nix` (§35). This happened three times before
+  category, so it is `podman.nix` (§35). This happened more than once before
   evaluation began refusing it.
 - A name that is unique anyway (`b550-suspend-fix.nix`) needs no suffix.
 - **`default.nix` takes its folder's name**, and `defaults.nix` is never a

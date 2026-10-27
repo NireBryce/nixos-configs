@@ -16,7 +16,7 @@ site they leave the book and will not resolve.
 
 ## Do not install this wholesale
 
-This is not a template. Two of the NixOS hosts enable impermanence: on every
+This is not a template. Some NixOS hosts enable impermanence: on every
 boot the `/root` btrfs subvolume is deleted and recreated from a blank
 snapshot, and anything not explicitly persisted is gone at the next reboot.
 Read [how the non-obvious pieces work](how-it-works.md) and
@@ -29,7 +29,7 @@ care about. Which hosts wipe `/root` is a fact to check in
 
 - **NixOS hosts**, declared in `flake/modules/host-config/hosts.nix` as
   `flake.nixosConfigurations`.
-- **One nix-darwin host**, declared in the same file as
+- **nix-darwin hosts**, declared in the same file as
   `flake.darwinConfigurations`.
 - **Home Manager for one user**, integrated into each system configuration
   rather than exposed as its own `homeConfigurations` output. One switch
