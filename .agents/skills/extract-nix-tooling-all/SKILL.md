@@ -12,7 +12,7 @@ Asked "what Nix patterns here are reusable", or to refresh
 `_loose-ends/extraction-candidates/nix/` — a deliberate, standalone pass.
 Not: a candidate noticed mid-task (`extract-nix-tooling`); the non-Nix
 sweep (`extract-agent-tooling-all`); creating or pushing to the general
-repo (only when the user asks in those words).
+repo (only when the user asks for it).
 
 ## Relationship to the other three
 

@@ -29,7 +29,7 @@ the bug warrants, not instead. The repo has labels (`bug`, `documentation`,
 Every `gh issue create` here hardcodes `--repo NireBryce/nixos-configs`,
 even when the real fix belongs upstream (nixpkgs, ble.sh, carapace, …).
 Filing elsewhere is a separate action with its own `CLAUDE.md` rule: never
-without the user saying so explicitly, in those words, unprompted — not
+without the user asking for that specific filing in their own message — not
 satisfied by step 3's confirmation or by folding it into another approval.
 For an upstream bug, still track it *here* (`bug` label, or
 `wiki/open-threads.md` / `_loose-ends/bugs-pending-submission/` if a draft

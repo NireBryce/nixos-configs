@@ -29,13 +29,16 @@ Every one has been broken here at least once.
 - **Never suggest installing this config wholesale**; it deletes `/root`
   on boot. (Safety)
 - **Never decrypt sops output into the conversation.** (Safety)
-- **Never file anything outside `NireBryce/nixos-configs`** unasked.
-  (Working in this repo)
+- **File issues and PRs only in `NireBryce/nixos-configs`**, not on other
+  projects, unless the user asks for that specific filing. (Working in this
+  repo)
 - **"push" means skill `ship`, landing on `experimental`**; `main` is
   promotion-only. (Working)
-- **Branching work happens in its own worktree.** (Working)
+- **Do work that will branch, commit or check out in its own worktree**,
+  not the shared checkout. (Working)
 - **`git add` before `nix eval`.** (Working)
-- **Public text stays mechanical.** (Working)
+- **Public text says what a guard enforces, not what got past it.**
+  (Working)
 - **Say which rung you reached**, never more. (Before calling it done)
 - **A change that makes a wiki page stale fixes it in the same change** —
   skill `wiki-sync`.
@@ -161,8 +164,9 @@ exposed. Tests keep the inputs they check without narrating what they
 would do. Merged history through #380, and #435's commit messages, predate
 this rule and are not precedent.
 
-**Default to a dedicated `git worktree` for any task that will branch,
-commit, or check out — skill `use-a-worktree` (not for read-only work).**
+**Do any task that will branch, commit, or check out in a dedicated `git
+worktree` — skill `use-a-worktree`. Skip it for read-only work, or when the
+user says to work in the shared checkout.**
 If git state doesn't match your own last action, check `git reflog` before
 concluding anything is broken.
 
@@ -181,14 +185,17 @@ than an `&&` chain (`set -e` first if a failure should stop the rest);
 separate calls. A recurring multi-step command is a `just agent`
 candidate (`show`, `where`, `commit` exist) — skill `agent-scripts`.
 
-**Never file anything outside `NireBryce/nixos-configs` — an issue or PR on
-nixpkgs, ble.sh, carapace, any other project — without the user saying so
-explicitly, in those words, unprompted.** A yes to a bundled list does not
-cover an upstream filing folded into it. `propose-issue` only ever files
-here; `_loose-ends/bugs-pending-submission/` and `wiki/open-threads.md`'s
-drafts are deliberately not worked through automatically. Filing here can
-still reach another project via GitHub autolinking (`owner/repo#123` in a
-title or body pings that repo), so grep for that shape first.
+**File issues and PRs only in `NireBryce/nixos-configs`. Do not file on any
+other project (nixpkgs, ble.sh, carapace, anything else).** The one exception
+is the user asking, in their own message, for that specific filing on that
+specific project. Approval of a list of tasks doesn't count, even if one item
+is an upstream filing. `propose-issue` files here only. Drafts for other
+projects (`_loose-ends/bugs-pending-submission/`, `wiki/open-threads.md`) are
+for the user to file; don't work through them. Security notes are the other
+exception: they go in the private `elly/infra-notes` repo (see above).
+
+A filing here can still ping another project through GitHub autolinking
+(`owner/repo#123` in a title or body). Grep for that pattern before filing.
 
 ## Before calling it done
 
@@ -280,11 +287,14 @@ other machine (no remote builder, no binfmt); `rebuild.sh` says so.
 
 `flake.nix` is a manifest. `(inputs.dirs-as-categories.lib.tree ./modules)`
 (an import-tree preset, a flake input) reads every `.nix` file under
-`flake/modules/` and fills `flake.modules.<class>.<name>` from them. **A
-module file names no module**: it is `{ nixos = …; homeManager = …; }`
-(optionally a function of `lib`/`inputs`), its name is its filename (dirs-as-categories
-names it; the header comment says so), and `wiki/module-files.md` says why. Anything else
-(`hosts.nix`, `checks.nix`) is a plain flake-parts module.
+`flake/modules/` and fills `flake.modules.<class>.<name>` from them.
+
+**A module file never declares its own name; the filename is the name**,
+which `dirs-as-categories` assigns. The file body is an attribute set like
+`{ nixos = …; homeManager = …; }`, or a function of `lib`/`inputs` returning
+one. Each file's header comment says this, and `wiki/module-files.md` gives
+the reason. A file under `flake/modules/` that isn't in that shape (`hosts.nix`,
+`checks.nix`) is a plain flake-parts module.
 
 **Membership comes from the directory**: a folder with a subfolder holding
 modules is a category, which includes every module beneath it; hosts list

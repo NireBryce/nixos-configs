@@ -8,8 +8,8 @@ Paste-ready for <https://github.com/zai-org/feedback>. Everything below the
 drop before filing") is not part of the report.
 
 **Not filed. Not to be filed on the strength of this file existing** — per
-`AGENTS.md`, filing outside `NireBryce/nixos-configs` needs the user saying so
-explicitly, in those words, for this specific report.
+`AGENTS.md`, filing outside `NireBryce/nixos-configs` needs the user to ask
+in their own message, for this specific report.
 
 ---
 

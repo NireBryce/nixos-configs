@@ -5,7 +5,7 @@ Home Manager / nix-darwin config, not just this fleet — module patterns,
 flake-parts machinery, lint and diff scripts, Nix-specific traps and the
 skills that guard them — recorded for a future general Nix repo. No such
 repo exists yet; nothing here gets copied anywhere without the user asking
-(AGENTS.md, "Never file anything outside").
+(AGENTS.md, "File issues and PRs only in").
 
 Maintained by skills `extract-nix-tooling` (one candidate, as you go) and
 `extract-nix-tooling-all` (whole-repo sweep). Entry shape comes from
