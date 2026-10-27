@@ -1,6 +1,6 @@
 # Module style guide
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-10-26_
 
 Every module under `flake/modules/` follows these conventions, not just
 packages. See
@@ -78,13 +78,16 @@ file sees a level with no bracket closing it and suspects one is missing.
 ## The module header
 
 A module names nothing: dirs-as-categories names it after its filename, and
-the first-line comment says so ([module-files.md](module-files.md) has the
+the header comment says so ([module-files.md](module-files.md) has the
 why; until 2026-10-16 every
 module derived its name itself, with `moduleName = lib.removeSuffix ".nix"
 (baseNameOf __curPos.file)` and `flake.modules.<class>.${moduleName} =`):
 
 ```nix
-# dirs-as-categories: the module is named after this file; its categories are the folders above it
+# This is a dirs-as-categories module, which means it creates a flake-parts
+# module that derives its name from its filename minus the .nix suffix, whose
+# category module is the name of the folder it belongs to.
+# https://github.com/NireBryce/dirs-as-categories/wiki
 { lib, ... }:
 {
     homeManager = { pkgs, ... }: {

@@ -283,7 +283,7 @@ other machine (no remote builder, no binfmt); `rebuild.sh` says so.
 `flake/modules/` and fills `flake.modules.<class>.<name>` from them. **A
 module file names no module**: it is `{ nixos = …; homeManager = …; }`
 (optionally a function of `lib`/`inputs`), its name is its filename (dirs-as-categories
-names it; the first-line comment says so), and `wiki/module-files.md` says why. Anything else
+names it; the header comment says so), and `wiki/module-files.md` says why. Anything else
 (`hosts.nix`, `checks.nix`) is a plain flake-parts module.
 
 **Membership comes from the directory**: a folder with a subfolder holding

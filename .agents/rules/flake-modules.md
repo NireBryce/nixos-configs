@@ -15,8 +15,8 @@ the full rules.
 
 - A module file is `{ nixos = …; homeManager = …; darwin = …; }`, or a
   function of only `lib`/`inputs` returning that. Its name is its filename
-  (`default.nix`: its folder's); nothing in the file names it. Its first
-  line is a dirs-as-categories comment saying so (`wiki/module-files.md`).
+  (`default.nix`: its folder's); nothing in the file names it. Its header
+  is a dirs-as-categories comment saying so (`wiki/module-files.md`).
 - `pkgs` and `config` belong in the inner (class) module's arguments; a
   module file cannot take the flake-parts `config` at all. The flake's own
   outputs are `inputs.self` (`tailnet-hosts.nix`).
