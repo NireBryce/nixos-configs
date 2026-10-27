@@ -3,8 +3,8 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# summary: Homebrew casks and formulae, for the GUI applications and CLI tools nix
-# does not package well on Aarch64 (or that need App Store / notarisation /
+# summary: Homebrew casks and formulae, for the GUI applications and CLI tools
+# nix does not package well on Aarch64 (or that need App Store / notarisation /
 # menu-bar integration that a nix-built .app bundle does not get for free).
 #
 # Ported from macos-old/nire-lysithea-configuration.nix, which had this

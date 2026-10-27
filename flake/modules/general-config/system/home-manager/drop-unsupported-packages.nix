@@ -3,13 +3,13 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# summary: Drop packages nixpkgs cannot build on this system in one place, instead of guarding
-# them one module at a time. elly-home-manager is shared verbatim by all four
-# hosts, so everything in it has to survive aarch64-darwin as well as
-# x86_64-linux; eleven packages each carried a hand-written
-# `lib.mkIf (!pkgs.stdenv.isDarwin)` before this existed. All eleven were
-# correct, and all eleven were facts about a package restated by hand.
-# Skill `package-platform-support` has that story and `just available`.
+# summary: Drop packages nixpkgs cannot build on this system in one place,
+# instead of guarding them one module at a time. elly-home-manager is shared
+# verbatim by all four hosts, so everything in it has to survive aarch64-darwin
+# as well as x86_64-linux; eleven packages each carried a hand-written `lib.mkIf
+# (!pkgs.stdenv.isDarwin)` before this existed. All eleven were correct, and all
+# eleven were facts about a package restated by hand. Skill
+# `package-platform-support` has that story and `just available`.
 #
 # nixpkgs already knows: meta.platforms/meta.badPlatforms are the flag and
 # `lib.meta.availableOn` is the reader. It reads meta WITHOUT forcing the

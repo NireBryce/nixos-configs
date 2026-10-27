@@ -22,8 +22,8 @@
         };
     };
     homeManager = { pkgs, ... }: {
-        # font packages that are per-user through home-manager
-        # duplicated in system fonts, this primarily for non-nix hosts; consider moving to there
+        # font packages that are per-user through home-manager duplicated in system
+        # fonts, this primarily for non-nix hosts; consider moving to there
         home.packages = with pkgs; [
             nerd-fonts.fira-code
             nerd-fonts.iosevka

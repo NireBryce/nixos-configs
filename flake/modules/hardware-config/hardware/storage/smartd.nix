@@ -3,8 +3,8 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# summary: smartmontools (smartctl/smartd): general-purpose SMART/NVMe health and
-# wear monitoring, for every NixOS host regardless of desktop environment.
+# summary: smartmontools (smartctl/smartd): general-purpose SMART/NVMe health
+# and wear monitoring, for every NixOS host regardless of desktop environment.
 # The KDE-specific half of this -- a systray applet on top of the same
 # data -- is kde-base.nix's plasma-disks entry, not here.
 #

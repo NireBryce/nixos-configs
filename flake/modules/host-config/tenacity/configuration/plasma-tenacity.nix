@@ -3,8 +3,8 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# summary: Tenacity's live Plasma/KDE state (theme, kwin behavior, input devices,
-# global shortcuts), captured from this machine's own ~/.config on
+# summary: Tenacity's live Plasma/KDE state (theme, kwin behavior, input
+# devices, global shortcuts), captured from this machine's own ~/.config on
 # 2026-09-01 and turned into plasma-manager declarations.
 #
 # Home-manager class, but deliberately NOT part of `elly-home-manager` --

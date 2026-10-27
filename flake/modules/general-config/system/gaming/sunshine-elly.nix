@@ -3,8 +3,8 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# summary: Device-permission groups elly needs for sunshine.nix (next door) to actually
-# work at runtime -- split out from that file because it edits the user
+# summary: Device-permission groups elly needs for sunshine.nix (next door) to
+# actually work at runtime -- split out from that file because it edits the user
 # account rather than the service, and from elly-user.nix because these groups
 # exist only because sunshine does, not because of anything about the account
 # itself. `extraGroups` is `listOf str`, so this merges by concatenation with

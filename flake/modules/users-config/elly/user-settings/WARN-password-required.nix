@@ -14,13 +14,13 @@
 # `boot.initrd.systemd.services ? restore-root`, the unit only
 # WARN-impermanence.nix creates. See that file's "OPT-IN: HOSTS WITHOUT
 # IMPERMANENCE ARE EXEMPT" header for why that signal and not
-# `environment.persistence` (declared for
-# every host regardless -- general-config/system/impermanence/declare-persistence-option.nix).
+# `environment.persistence` (declared for every host regardless --
+# general-config/system/impermanence/declare-persistence-option.nix).
 #
-# Filed under users-config/elly/, so it rides the `elly` category into every host
-# automatically rather than being wired into a specific host's config by
-# hand. Stays silent for durandal/tenacity, and fires on its own for any
-# future host that also skips impermanence.
+# Filed under users-config/elly/, so it rides the `elly` category into every
+# host automatically rather than being wired into a specific host's config by
+# hand. Stays silent for durandal/tenacity, and fires on its own for any future
+# host that also skips impermanence.
 #
 # A `warnings` entry, not an `assertions` failure: this can't check whether
 # /persist/passwords/elly actually exists on the target machine -- that path
@@ -42,7 +42,7 @@
         usesImpermanence = inputs.self.lib.persist.usesImpermanence config;
         solvedByHand = config.networking.hostName == "nire-cube";
     in {
-        # summary: reminds a non-impermanence host that the user has no password until one is set by hand
+        # summary: reminds a non-impermanence host: no password until one is set by hand
         warnings = lib.optional (!usesImpermanence && !solvedByHand) ''
             The user has no password on this host until you set one by hand. users.mutableUsers
             is false, so `passwd` will not stick -- any change made that way is reverted on

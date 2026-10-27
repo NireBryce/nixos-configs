@@ -56,8 +56,8 @@
 # lysithea, sif, iona) until 2026-09-08, each setting only `sopsFile` to the
 # same `secretsPath` that `defaultSopsFile` already points at. Removed because
 # nothing consumed them: no `services.syncthing` anywhere in the tree, and
-# galatea/sif/iona are not hosts in `host-config/hosts.nix`. Declaring them meant
-# decrypting five unused secrets on every `system` host at activation. The
+# galatea/sif/iona are not hosts in `host-config/hosts.nix`. Declaring them
+# meant decrypting five unused secrets on every `system` host at activation. The
 # removal was written on the `exp-module-cleanup` branch 2026-08-28 and never
 # landed there; that branch was deleted once this landed.
 #

@@ -22,10 +22,10 @@
 #
 # 2026-08-08 — why this file is not called `boot.nix`
 #
-# It was, and its filename made it declare `flake.modules.nixos.boot` — the
-# same name the `general-config/boot/` category had. Same-named modules then
-# MERGED rather than conflicting (today it stops evaluation), so the two silently became one, and
-# both directions were wrong:
+# It was, and its filename made it declare `flake.modules.nixos.boot` — the same
+# name the `general-config/boot/` category had. Same-named modules then MERGED
+# rather than conflicting (today it stops evaluation), so the two silently
+# became one, and both directions were wrong:
 #
 #   - importing the `boot` category also applied durandal's systemd-boot and
 #     sbctl config

@@ -3,8 +3,8 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# summary: The persistence half of tailscale.nix. Split out 2026-08-14; until then this
-# was the last block of that file.
+# summary: The persistence half of tailscale.nix. Split out 2026-08-14; until
+# then this was the last block of that file.
 #
 # WITHOUT THIS, TAILSCALE NEEDS RE-AUTHENTICATING ON EVERY BOOT. Node identity
 # lives in /var/lib/tailscale/tailscaled.state, and both hosts importing this
@@ -35,8 +35,8 @@
 # impermanence flake). Wrong warning for a host with no wipe to worry about.
 #
 # `environment.persistence` itself is declared for every NixOS host regardless
-# -- see general-config/system/impermanence/declare-persistence-option.nix -- so this
-# module no longer risks an option-does-not-exist error either way. What it
+# -- see general-config/system/impermanence/declare-persistence-option.nix -- so
+# this module no longer risks an option-does-not-exist error either way. What it
 # guards now is a non-impermanence host getting an entry, and the warning, for
 # no reason.
 #

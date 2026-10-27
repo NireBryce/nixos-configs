@@ -3,9 +3,9 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# summary: KDE Connect and Steam's LAN ports stay closed on tenacity, which joins
-# whatever Wi-Fi it's near. Same idea as ssh-tailnet-only-tenacity.nix next
-# door; added 2026-09-26.
+# summary: KDE Connect and Steam's LAN ports stay closed on tenacity, which
+# joins whatever Wi-Fi it's near. Same idea as ssh-tailnet-only-tenacity.nix
+# next door; added 2026-09-26.
 #
 # Both still work over the tailnet: `tailscale0` is a trusted interface
 # (networking.nix), so peers reach any port with no rule. What goes is LAN

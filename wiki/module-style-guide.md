@@ -23,6 +23,7 @@ all false by 2026-09-09: the tree had grown from 151 to 263 files.)
 
 - [Opening brackets go on the same line as whatever causes them](#opening-brackets-go-on-the-same-line-as-whatever-causes-them)
 - [Four-space indent](#four-space-indent)
+- [Comment width](#comment-width)
 - [The module header](#the-module-header)
 - [`{ ... }:` on an inner module lambda is sometimes deliberate](#---on-an-inner-module-lambda-is-sometimes-deliberate)
 - [`# summary:`, one per module](#-summary-one-per-module)
@@ -74,6 +75,29 @@ that closes the `in` expression:
 Indenting the `let` a level deeper makes `in {` open an indentation level
 whose closing bracket sits a level further out, and a reader skimming the
 file sees a level with no bracket closing it and suspects one is missing.
+
+## Comment width
+
+A pure `#` comment line wraps at 80 columns plus the line's own indentation —
+a comment indented four spaces wraps at 84 — so the text after `# ` keeps one
+width wherever the module nests it. This is the shape the tree already used;
+the 2026-10-26 summary-comment insert landed past the wrap the surrounding
+blocks used, and the sweep that fixed those added the checker.
+
+`just comment-wrap` reports violations and exits nonzero on any;
+`just comment-wrap --fix` rewrites the unambiguous prose (preview with
+`--diff`). Skill `comment-wrap` is the procedure for what it declines.
+
+The fixer reflows only prose. Left alone, and exempt from the rule: anything
+inside a `''` or `"` string (`#` there is shell text — see "Rationale goes
+inside the module body, not in a header block"); trailing comments after
+code; URL lines; aligned `# ... # ...` tables; banner and `── section ──`
+decoration lines; commented-out code and shell snippets; single tokens wider
+than any wrapped line could hold (verbatim config spans sit like URLs).
+
+`# summary:` is the one hand-tightened shape: it stays one line, so an
+over-long one is shortened, never wrapped — the lead paragraph under it still
+refills mechanically.
 
 ## The module header
 
@@ -173,7 +197,8 @@ homeManager = { pkgs, ... }: {
 Never write both a leading and a body summary: the two drift apart, and the
 shorter one usually repeats the longer. 21 modules had both until 2026-10-26.
 `just add-module` writes the body form; move it into the leading comment if
-the module grows one. Keep a body summary to one line.
+the module grows one. Keep a body summary to one line, inside the comment
+width (above) — a too-long summary is tightened, not wrapped.
 
 ### Why it is a comment and not an option
 

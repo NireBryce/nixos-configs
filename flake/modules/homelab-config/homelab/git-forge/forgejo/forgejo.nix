@@ -20,7 +20,8 @@
 # wiki/homelab/forgejo.md. Traps sit next to the options.
 { lib, ... }:
 let
-    # port, URL and name shared with caddy.nix and serve.nix (_lib/cube-services.nix)
+    # port, URL and name shared with caddy.nix and serve.nix
+    # (_lib/cube-services.nix)
     cube = import ../../_lib/cube-services.nix;
     git  = cube.services.git;
 in {

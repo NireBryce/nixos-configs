@@ -60,6 +60,19 @@ modules:
 modules-test:
     python3 {{scripts}}/tests/test_modules.py
 
+# Comment width, the maintenance pass: pure `#` comment blocks wrap at 80
+# columns plus the line's indent (rule, and what the autofix will not touch:
+# wiki/module-style-guide.md "Comment width", skill comment-wrap). No args
+# reports over-limit blocks; --fix rewrites the safe subset; --diff previews
+comment-wrap *args:
+    python3 {{scripts}}/comment_wrap.py {{args}}
+
+# Tests for comment_wrap.py: the lexer vs `''`-string shell comments and
+# `${...}` interps, the moving limit, the exempt shapes, the hand classes.
+# Pure stdlib; runs in preflight and CI
+comment-wrap-test:
+    python3 {{scripts}}/tests/test_comment_wrap.py
+
 # Draw the module tree: just module-graph tree|hosts|dot|html [--category X] [--depth N]
 # [--categories-only] [--wrap N]. tree/hosts print Mermaid, dot prints Graphviz
 # (`just module-graph dot --view hosts | nix shell nixpkgs#graphviz -c dot -Tsvg`).
@@ -239,6 +252,7 @@ preflight:
     @python3 flake/scripts/tests/test_pm_test_core.py
     @python3 flake/scripts/tests/test_parallel_unittest.py
     @python3 flake/scripts/tests/test_extracted_scripts.py
+    @python3 flake/scripts/tests/test_comment_wrap.py
     @just guards-test
     @just preflight-mirror-test
     @just check

@@ -3,9 +3,9 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# summary: What nire-cube is made of. GMKtec Nucbox G11, a mini PC -- workstation
-# shape, same as durandal, not a handheld (see tenacity-configuration.nix
-# for that shape instead).
+# summary: What nire-cube is made of. GMKtec Nucbox G11, a mini PC --
+# workstation shape, same as durandal, not a handheld (see
+# tenacity-configuration.nix for that shape instead).
 #
 # CPU: AMD Ryzen Embedded R2514, 4c/8t, max boost 3.7GHz, 4MB L3.
 # GPU: AMD Radeon integrated graphics (on-die with the R2514).
@@ -13,8 +13,8 @@
 # this host takes the shared `hardware` category (amdcpu, amdgpu) same as
 # it does.
 #
-# This file sits directly under host-config/ rather than in a category directory,
-# because a file directly in an area belongs to no category -- a host
+# This file sits directly under host-config/ rather than in a category
+# directory, because a file directly in an area belongs to no category -- a host
 # definition should not become a member of anything.
 #
 # Meant as a copy of durandal-configuration.nix's shape -- same category
@@ -76,23 +76,21 @@
         # kde-desktop pulls in kde-base itself.
         "kde-desktop"
 
-        # Every self-hosted/homelab service this host runs, as one aggregate
-        # -- added 2026-08-27, folding what used to be seven separate
-        # imports here (virtualization, containers, monitoring, git-forge,
-        # shortlinks, reverse-proxy, landing -- landing since removed) into `homelab-config/homelab/`.
-        # Each of those is still its own category nested under it
-        # (`homelab-config/homelab/<name>/`, each a category because its
-        # subfolders hold modules)
-        # and still individually importable by name -- tenacity still pulls
-        # `containers` directly, unaffected by this move (durandal dropped
-        # both `virtualization` and `containers` 2026-08-27, the same day
-        # this move landed; cube's own copies come through `homelab` now),
-        # per the same coarse-and-fine nesting `hardware-config/hardware`/
-        # `hardware-config/hardware/amd` already established (see
-        # wiki/module-files.md). All of it was cube-only before this
-        # move and stays cube-only now -- nothing here belongs on the
-        # handhelds, which is the reason each got its own category in the
-        # first place rather than living in `system`.
+        # Every self-hosted/homelab service this host runs, as one aggregate -- added
+        # 2026-08-27, folding what used to be seven separate imports here
+        # (virtualization, containers, monitoring, git-forge, shortlinks, reverse-proxy,
+        # landing -- landing since removed) into `homelab-config/homelab/`. Each of
+        # those is still its own category nested under it
+        # (`homelab-config/homelab/<name>/`, each a category because its subfolders hold
+        # modules) and still individually importable by name -- tenacity still pulls
+        # `containers` directly, unaffected by this move (durandal dropped both
+        # `virtualization` and `containers` 2026-08-27, the same day this move landed;
+        # cube's own copies come through `homelab` now), per the same coarse-and-fine
+        # nesting `hardware-config/hardware`/ `hardware-config/hardware/amd` already
+        # established (see wiki/module-files.md). All of it was cube-only before this
+        # move and stays cube-only now -- nothing here belongs on the handhelds, which
+        # is the reason each got its own category in the first place rather than living
+        # in `system`.
         #
         # Individual per-service mechanism notes (Tailscale-only reachability,
         # the category/module name-collision reasons `git-forge` isn't

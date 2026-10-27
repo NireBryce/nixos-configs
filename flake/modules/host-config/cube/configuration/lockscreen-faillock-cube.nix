@@ -3,7 +3,7 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# summary: Failed-attempt lockout on cube's Plasma lock screen (stream-lock-cube.nix):
+# summary: Failed-attempt lockout on cube's lock screen (stream-lock-cube.nix):
 # 5 wrong passwords within 15 minutes refuse password unlock for 10 minutes;
 # added 2026-10-07. Only the `kde` PAM service (kscreenlocker's, set in
 # kscreenlocker's greeter/CMakeLists.txt) gets it -- sddm, sudo, login and

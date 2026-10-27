@@ -83,10 +83,10 @@
 
     nixos = { enabled, ... }: {
         # hostPlatform comes from hardware-tenacity.nix AND
-        # tenacity/configuration/nixpkgs-hostPlatform-tenacity.nix, both mkDefault
-        # with the same value -- same redundant-but-harmless shape durandal has
-        # between hardware-durandal.nix and nixpkgs-hostPlatform-durandal.nix.
-        # stateVersion moved to tenacity/configuration/nixpkgs-stateVersion-tenacity.nix.
+        # tenacity/configuration/nixpkgs-hostPlatform-tenacity.nix, both mkDefault with
+        # the same value -- same redundant-but-harmless shape durandal has between
+        # hardware-durandal.nix and nixpkgs-hostPlatform-durandal.nix. stateVersion
+        # moved to tenacity/configuration/nixpkgs-stateVersion-tenacity.nix.
         networking.hostName = "nire-tenacity";
 
         # enabled.homeManager.tenacity is the homeManager side of this host's own
