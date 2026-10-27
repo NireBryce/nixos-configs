@@ -503,7 +503,10 @@ while IFS= read -r seg; do
 done < <(awk '{ gsub(/&&|\|\||;|\|/, "\n"); print }' <<<"$command")
 
 if [ "$count" -gt 0 ]; then
-    listing=$(grep . <<<"$dirty_lines" | head -n 21)
+    # awk, not `grep . | head -n 21`: head exits after 21 lines, grep is still
+    # writing, takes SIGPIPE, and under pipefail the assignment's status (141)
+    # kills this hook before it answers. awk reads all of it and prints 21.
+    listing=$(awk 'length && n++ < 21' <<<"$dirty_lines")
     if [ "$count" -gt 20 ]; then listing+=$'\n'"  ... ($count dirty paths in all)"; fi
     reason="This git command would discard uncommitted work -- the working tree is dirty ($count path(s), from git status --porcelain):
 $listing

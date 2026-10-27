@@ -63,8 +63,10 @@ terminal-puppeteer) for the read-fix, carapace's descriptions and cod's
 descriptions, using this working tree's files. Opt-in, ~30s, not in
 preflight; each missing prerequisite skips with its fix (needs `sops`
 learned in cod for the cod case). Run it after editing `cod-desc.bash`,
-`cod-desc.tsv`, `carapace-desc.bash` or the read-fix. The stubbed checks in
-`test_cod_desc.py` did not catch the bugs this one does. How it differs
+`cod-desc.tsv`, `carapace-desc.bash` or the read-fix. A check with ble.sh's
+functions stubbed tests your model of ble.sh, not ble.sh: the stubbed checks
+(including `test_cod_desc.py`'s) passed three bugs this one catches, so for
+these files only a real Tab press counts as *runs* (lessons-learned §50). How it differs
 from the real shell and how to point it at older files:
 `flake/scripts/tests/test_completion_live.py`'s header.
 
