@@ -15,3 +15,7 @@
 - [Wiring a host](wiring-a-host.md)
 - [Wiring a user and Home Manager](users-and-home-manager.md)
 - [Darwin edge cases](darwin.md)
+
+# Reference
+
+- [Glossary](glossary.md)
