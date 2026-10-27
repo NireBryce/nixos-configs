@@ -1,6 +1,7 @@
 ---
 name: wiki-sync
-description: Check whether a change you just made leaves a wiki/ article stale, and fix it in the same change.
+description: Checks whether your change left a wiki article stale, and fixes it in the same change.
+when_to_use: At the end of any change that could make something the wiki states no longer true.
 ---
 
 # Keeping the local wiki in sync

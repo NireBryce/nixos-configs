@@ -1,6 +1,7 @@
 ---
 name: new-homelab-service
-description: How to add a self-hosted network service to a host in this repo and verify it actually works.
+description: Adds a self-hosted network service to a host and verifies it works after the first switch.
+when_to_use: Adding a service that listens on a port and is reached from another machine, before creating its category.
 ---
 
 # Adding a homelab service in this repo

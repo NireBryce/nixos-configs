@@ -1,6 +1,7 @@
 ---
 name: new-package
-description: How to add a package to a user's environment in this repo and verify it on the target host.
+description: Adds a package to the user environment and verifies it on the target host.
+when_to_use: Adding a package to the Home Manager package set, before writing the module.
 ---
 
 # Adding a package in this repo

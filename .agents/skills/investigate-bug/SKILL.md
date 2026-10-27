@@ -1,7 +1,7 @@
 ---
 name: investigate-bug
-description: How to check whether a reported bug or symptom is already a known, tracked thread before investigating it yourself.
-when_to_use: Someone reports an error, crash, or weird behavior in this repo or on a host -- before reproducing or diagnosing it.
+description: Checks whether a reported bug or symptom is already a tracked thread before you investigate it.
+when_to_use: Someone reports an error, crash or odd behavior in this repo or on a host, before reproducing or diagnosing it.
 ---
 
 # Checking before investigating

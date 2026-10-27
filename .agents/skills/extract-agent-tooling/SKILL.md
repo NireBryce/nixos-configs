@@ -1,7 +1,7 @@
 ---
 name: extract-agent-tooling
-description: How to notice, while creating or editing a skill, lesson, wiki convention, script, or hook, that its mechanism would serve any agent-worked repo, and record it as an extraction candidate.
-when_to_use: Writing or changing a skill, lesson, wiki convention, AGENTS.md section, checker script, or hook whose mechanism would work in any repo.
+description: Records a skill, lesson, wiki convention, script or hook as an extraction candidate when its mechanism would work in any agent-run repo.
+when_to_use: Writing or changing a skill, lesson, wiki convention, AGENTS.md section, checker script or hook whose mechanism isn't specific to this repo.
 ---
 
 # Recording general agent-tooling candidates, as you go

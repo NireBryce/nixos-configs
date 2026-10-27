@@ -1,7 +1,7 @@
 ---
 name: git-archaeology
-description: How to find the commit that added, changed, or removed something in git history when the file has since been renamed or moved.
-when_to_use: Asked "when was this removed?", git log on a file's current path came back empty, or about to conclude no commit ever touched something.
+description: Finds the commit that added, changed or removed something when the file has since been renamed or moved.
+when_to_use: Asked when something was removed, git log on a file's current path comes back empty, or about to conclude no commit ever touched something.
 ---
 
 # Finding a change in git history despite renames

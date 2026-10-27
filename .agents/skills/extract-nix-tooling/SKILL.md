@@ -1,7 +1,7 @@
 ---
 name: extract-nix-tooling
-description: How to notice, while editing a module, script, or skill, that a Nix pattern or trap would serve any flake config, and record it as an extraction candidate.
-when_to_use: Writing or changing a module, flake script, or Nix-shaped skill or lesson whose pattern would work in any flake.
+description: Records a Nix pattern or trap as an extraction candidate when it would work in any flake config.
+when_to_use: Writing or changing a module, flake script, or Nix-related skill or lesson whose pattern isn't specific to this repo.
 ---
 
 # Recording general Nix candidates, as you go

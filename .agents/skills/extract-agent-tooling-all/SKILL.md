@@ -1,6 +1,6 @@
 ---
 name: extract-agent-tooling-all
-description: How to sweep the whole repo for skills, lessons, wiki conventions, scripts, and hooks worth extracting to a general agent-orchestration repo, and bring the candidates folder up to date.
+description: Sweeps the repo for skills, lessons, wiki conventions, scripts and hooks that would work in any agent-run repo, and updates the extraction candidates folder.
 when_to_use: Asked what here is worth extracting, what would work in other repos, or to refresh the agent-orchestration extraction candidates.
 ---
 

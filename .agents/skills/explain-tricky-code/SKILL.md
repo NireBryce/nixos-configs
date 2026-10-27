@@ -1,7 +1,7 @@
 ---
 name: explain-tricky-code
-description: How to write comments that teach a reader a module or lib function whose design isn't obvious, covering what it does, why it's shaped so, and what breaks on change.
-when_to_use: Asked to "explain this like a talk", "make these comments clearer for someone new", a comment rewrite that keeps coming back still confusing.
+description: Writes comments for a module or lib function whose design isn't obvious, covering what it does, why it's shaped that way, and what breaks if it changes.
+when_to_use: Asked to explain code like a talk, make comments clearer for someone new, or redo a comment rewrite that is still confusing.
 ---
 
 # Explaining tricky code so a user or contributor can follow it

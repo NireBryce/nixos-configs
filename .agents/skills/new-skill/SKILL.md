@@ -1,6 +1,6 @@
 ---
 name: new-skill
-description: How to write a new SKILL.md in this repo, or fix an existing skill's frontmatter description that undersells or overclaims it.
+description: Writes a new SKILL.md, or fixes the frontmatter of an existing skill.
 when_to_use: Creating a SKILL.md, or editing any skill's description or when_to_use.
 ---
 
@@ -25,14 +25,14 @@ Three places, three jobs:
 
 Why: the live skill listing a session sees shows only frontmatter, and
 that's the only information available when deciding whether to load a
-skill. A description stuffed with scope caveats reads as noise there;
+skill. A description stuffed with scope caveats is hard to scan there;
 `when_to_use` is where the phrases that should fire it go, kept apart so
 the description stays a statement of purpose. Other harnesses
 ignore `when_to_use`, so nothing may live *only* there —
 `## Applies to` stays the complete trigger list. The body loads in full
 once the skill fires, so detail there costs nothing.
 
-Add `when_to_use` where a missed trigger has actually cost something
+Add `when_to_use` where a missed trigger has cost something
 (`ship`'s bare "push", `secrets-hygiene`'s `sops` commands) or `## Applies
 to` names concrete phrases the description doesn't. Skip it when the
 description already says it all. Derive the phrases from `## Applies to`
@@ -51,11 +51,12 @@ scalars; no frontmatter keys beyond `name`/`description`/`when_to_use`
 frontmatter that drifts from the rule fails the run instead of waiting for
 a reader to notice.
 
-Prefer active "How to `<verb>`…" phrasing for a procedural skill over a
-"Known traps in…" noun phrase — "traps" reads as scope, not purpose (the user
-rejected the latter for `new-flake-module` on 2026-08-22; the accepted form
-is that skill's current description). A short flow description without
-literal "How to" wording is fine (`ship`'s) as long as it states purpose.
+Write the description as a plain statement of what the skill does, starting
+with a verb ("Adds a package to...", "Checks whether..."). Skip "How to..."
+and "Known traps in..." openers: the first is filler, the second reads as
+scope, not purpose. Put when it fires in `when_to_use`, in direct words
+(the user asked for this on 2026-10-27, replacing the earlier "How to"
+preference; "Known traps in..." was rejected on 2026-08-22).
 
 ## Frontmatter this repo doesn't use
 
@@ -76,7 +77,7 @@ backtick.
    appeared in the live listing the turn after its directory was created).
 2. **Draft the description first, alone.** One sentence. Test: covering the
    body, would a session deciding whether to load this skill understand
-   what it's for? If the honest answer needs a second clause, that clause
+   what it's for? If it needs a second clause, that clause
    belongs in `## Applies to`.
 3. **Write `## Applies to` right after the title**: triggers, explicit
    non-triggers (`ship`'s table is the pattern), example files, exceptions.
@@ -102,7 +103,7 @@ Bad — scope and triggers crammed into the sentence:
 
 Good:
 
-> How to create, rename, or wire a flake-parts module in this repo.
+> Creates, renames and wires a module in the flake modules tree.
 
 ## See also
 

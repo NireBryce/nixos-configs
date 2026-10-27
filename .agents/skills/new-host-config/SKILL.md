@@ -1,6 +1,7 @@
 ---
 name: new-host-config
-description: How to add a new host to this repo.
+description: Adds a new host to the repo.
+when_to_use: Adding a machine, or a host entry point, host module directory or hosts.nix line.
 ---
 
 # Adding a new host

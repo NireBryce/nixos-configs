@@ -1,6 +1,7 @@
 ---
 name: fact-hygiene
-description: How to write a specific fact, a dated status snapshot, a cross-reference, or a count/version/config value copied from elsewhere in this repo without it quietly rotting into a false claim.
+description: Keeps facts, dated status snapshots, cross-references and copied counts, versions or config values from going stale when you write them.
+when_to_use: Writing a claim about an external system or live state, a status as of a date, a comment stating as current fact something about other modules or hosts, or a count, version or config value copied from another file.
 ---
 
 # Writing facts, dated status, and cross-references without them rotting silently

@@ -1,7 +1,7 @@
 ---
 name: maintenance-schedule
-description: How to review and keep current the fleet's key/credential expiry and rotation checklist.
-when_to_use: Asked to "check what's due", "review key expiry", or any change that adds or rotates a key, credential, or certificate with an expiry.
+description: Reviews and updates the checklist of key and credential expiry and rotation dates.
+when_to_use: Asked what's due, to review key expiry, or when a change adds or rotates a key, credential or certificate that expires.
 ---
 
 # Tending the maintenance schedule
