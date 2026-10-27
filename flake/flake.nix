@@ -68,9 +68,7 @@
         flake-module-graph = {
             url = "github:NireBryce/flake-module-graph";
             inputs.nixpkgs.follows = "nixpkgs";
-        };
-        # den.url                                    = "github:vic/den";
-        # flake-aspects.url                          = "github:vic/flake-aspects";
+        }; 
 
         # ── Home Manager ──────────────────────────────────────────────────────────
         home-manager.url                           = "github:nix-community/home-manager/master";
