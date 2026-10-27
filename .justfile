@@ -255,9 +255,15 @@ preflight:
     @python3 flake/scripts/tests/test_comment_wrap.py
     @just guards-test
     @just preflight-mirror-test
+    @python3 flake/scripts/tests/test_offline_checks.py
     @just check
     @just modules
     @just lint
+
+# The steps of preflight that need neither nix nor `just`, for a machine where
+# they cannot run (a cloud container); .githooks/pre-push runs this there
+preflight-offline:
+    python3 flake/scripts/offline_checks.py preflight
 
 # Build this host, without activating it
 build:
