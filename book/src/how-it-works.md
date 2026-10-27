@@ -13,10 +13,10 @@ no hosts and lists no modules. flake-parts is a library that builds a flake's
 outputs from module-system modules (*flake-parts modules*), much as NixOS
 builds a system from NixOS modules.
 
-`flake/flake.nix` imports three flake-parts modules:
+Among the flake-parts modules `flake/flake.nix` imports are
 `flake-parts.flakeModules.modules`, nix-darwin's flake module, and
-`(inputs.dirs-as-categories.lib.tree ./modules)`. It also imports `touchup`,
-which only turns off the `formatter` output. The *dirs-as-categories* input
+`(inputs.dirs-as-categories.lib.tree ./modules)`; `touchup` only turns off the
+`formatter` output. The *dirs-as-categories* input
 uses `import-tree` to read every `.nix` file under `flake/modules/`. From
 those files it fills in `flake.modules.<class>.<name>`. The hosts themselves
 are declared in `flake/modules/host-config/hosts.nix`.
