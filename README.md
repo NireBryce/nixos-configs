@@ -2,121 +2,113 @@ nixos-configs
 ==============
 
 Personal NixOS + Home Manager configuration, built with flake-parts. Not a
-generalist template.
+template.
 
-Most of the prose in this repo -- commit messages, docs, comments -- is
-written by coding agents, with human review before it lands.
+Most of the prose in this repo (commit messages, docs, comments) is written
+by coding agents, with human review before it lands.
 
-The `flake/` folder is meant to be browsed by its file tree rather than
-traced through by following code paths. The heavy modularization (see
-Layout below) exists to make documenting functionality in-situ possible,
-and to keep the context any single reader -- agent or human -- has to
-load down to just the chunk they're looking at, instead of the whole
-tree.
+[wiki/00-INDEX.md](wiki/00-INDEX.md) is the topic index for the docs spread
+around the repo. Start there to find something specific. The wiki is
+machine-generated, human-vetted descriptions of how each component behaves
+and how it got that way.
 
-[wiki/00-INDEX.md](wiki/00-INDEX.md) is the topic index over the docs
-scattered around this repo -- start there if you're looking for a
-specific thing. The wiki itself is machine-generated, human-vetted
-descriptions of component behavior and how it evolved.
+Do not install this as-is
+-------------------------
 
-Do not install this blindly
-----------------------------
+Impermanence is on for `nire-durandal` and `nire-tenacity`. On every boot,
+`/root` is deleted and recreated from a blank btrfs snapshot, so anything not
+explicitly persisted is gone at the next reboot. That is deliberate: the
+config, not whatever has piled up on disk, is the source of truth. Read the
+code before running any of it on a machine you care about, and don't run
+`nixos-rebuild switch` against it on a machine where losing `/root` would
+hurt.
 
-This config enables impermanence: `/root` is deleted and recreated from a
-blank snapshot on every boot. The philosophy behind it is that state
-should never accumulate by accident -- anything worth keeping has to be
-named explicitly (persisted), so the config itself stays the source of
-truth instead of drifting away from whatever's actually on disk.
-Anything not explicitly persisted is gone at the next reboot. Read the
-code before running any of it on a machine you care about.
-
-That philosophy doesn't apply to home directory state yet -- `$HOME` is
-still ordinary accumulated state, not wiped and rebuilt. Home Manager is
-the interim tool for closing that gap: each thing it takes over (a
-dotfile, a config, a package) is one less piece of `$HOME` that's just
-sitting there undeclared.
+`$HOME` is not wiped; it is ordinary accumulated state. Home Manager
+manages the user environment from Nix: dotfiles, program configs and user
+packages are declared in this repo, and Home Manager installs or symlinks them into the
+home directory. It is
+integrated into the NixOS configuration, so one switch applies both. In the
+meantime it also narrows the `$HOME` gap: each dotfile, config or package it
+manages is one less undeclared thing in `$HOME`.
 
 Layout
 ------
 
-The flake entry point is `flake/flake.nix` -- the repo root has none.
-`flake.nix` itself is a manifest: it declares inputs and wires up
-flake-parts, but doesn't enumerate modules by hand.
-`(inputs.dirs-as-categories.lib.tree ./modules)` (an import-tree preset)
-recursively imports every `.nix` file under `flake/modules/` instead. Each file declares
-one `flake.modules.<class>.<name>` module — `<class>` is `nixos`,
-`homeManager`, or `darwin`, so a single file can declare a NixOS module and
-a Home Manager module for the same feature side by side
-(`cod-completions.nix` declares both halves of cod's shell completions)
-instead of splitting one feature across two files that agree only by
-sharing a filename. Which category a module
-belongs to is decided by the directory it sits in, not by an explicit list,
-so moving a file between directories moves it between categories and
-nothing else has to change.
+The flake entry point is `flake/flake.nix`. The repo root has none.
+`flake.nix` declares inputs and sets up flake-parts, but doesn't list
+modules. Instead, `(inputs.dirs-as-categories.lib.tree ./modules)` (an
+import-tree preset) imports every `.nix` file under `flake/modules/` and
+fills in `flake.modules.<class>.<name>` for each one. `<class>` is `nixos`,
+`homeManager` or `darwin`.
 
-This keeps the config easy to reshape and confusing to browse from a directory
-listing alone. `wiki/module-files.md` explains that mechanism (names from filenames,
-categories from folders);
-`flake/doc/flake-parts-rationale.md` explains why flake-parts specifically,
-and what else of it this repo actually uses.
+A module's name is its filename, and its category is the directory it sits
+in. Moving a file to another directory changes its category and nothing
+else. One file can define both a NixOS and a Home Manager module for the
+same feature (`cod-completions.nix` does this for cod's shell completions),
+so a feature doesn't get split across two files that have to agree on a
+name.
+
+The config is split into many small files so each one can carry its own
+documentation, and so a reader, human or agent, only has to load the file
+in front of them. `flake/` is meant to be browsed by its file tree instead
+of traced through code paths. The cost is that a directory listing alone
+doesn't show how the pieces fit together.
+
+`wiki/module-files.md` explains how names come from filenames and categories
+from folders. `flake/doc/flake-parts-rationale.md` explains why flake-parts
+was chosen and which of its features this repo actually uses.
 
 Hosts
 -----
 
-Four hosts: `nire-durandal`, `nire-tenacity`, `nire-cube` (NixOS) and
-`nire-lysithea` (darwin). [wiki/hosts.md](wiki/hosts.md) is the table --
-roster, class, role, and which wipe `/root` -- and is checked against
-`hosts.nix` mechanically, so it can't drift the way a second list here
-did. Which one this branch actually runs on is a live question for the
-host itself; see `AGENTS.md`'s State section.
+The main hosts are `nire-durandal`, `nire-tenacity` and `nire-cube` (NixOS)
+and `nire-lysithea` (darwin). [wiki/hosts.md](wiki/hosts.md) has the full
+table: roster, class, role, and which hosts wipe `/root`. A check compares
+it against `hosts.nix`, so it can't drift the way a second list in this
+README did. What a given branch actually runs on a host can only be
+answered on that host; see the State section of `AGENTS.md`.
 
-`nire-(t)enacity` is a handheld, so it's usually the (t)estbed for
-rapid prototyping -- it gets picked up and put down constantly, which
-surfaces breakage fast. The other hosts usually lag behind it, not
-ahead.
+`nire-tenacity` is a handheld, so it is the test bed. It gets picked up and
+put down constantly, which surfaces breakage quickly. The other hosts
+usually lag behind it.
 
 Users
 -----
 
-`(e)lly` is the (e)xperimental user -- everything lands there first. The
-long-term idea is to offload what's really user-package material onto
-`nire`, and beyond that, split off things that don't
-need to be invoked directly by a human into their own dedicated user
-accounts, so a compromised or misbehaving program running as one of
-those users doesn't inherit the whole of `elly`'s authority (a
-confused-deputy mitigation via user separation, not yet built out).
+`elly` is the experimental user, and everything lands there first. The
+long-term plan is to move user-package material onto `nire`, and to split
+things that don't need to be invoked by a human into their own accounts, so
+a compromised or misbehaving program running as one of them doesn't inherit
+all of `elly`'s authority. This separation isn't built yet.
 
 Dev shells
 ----------
 
-The nix tooling for working on this repo (nixd, nil, nixfmt, statix,
-deadnix, nix-tree, nix-diff, nix-du, nurl) isn't installed on the hosts;
-`nix develop ./flake` from the repo root provides it
-(`flake/modules/dev-shell.nix`). `just lint` enters that shell on its own
-when statix/deadnix aren't on PATH.
+The Nix tooling for working on this repo (nixd, nil, nixfmt, statix,
+deadnix, nix-tree, nix-diff, nix-du, nurl) isn't installed on the hosts.
+Run `nix develop ./flake` from the repo root to get it
+(`flake/modules/dev-shell.nix`). `just lint` enters that shell by itself
+when statix and deadnix aren't on PATH.
 
 `dev-shells/<name>/` holds standalone flake templates (`nix`, `python`,
-`rust`) for other projects. `just dev-list` lists them; `just dev-new
-<name> <path>` deploys one into a folder -- copies the flake, `git add`s
-it when the folder is in a repo (flakes ignore untracked files), runs the
-template's own scaffolding (`cargo init`, `uv init`), and writes an
-`.envrc` with `use flake` for direnv. It refuses to overwrite an existing
-`flake.nix` without `--force`.
+`rust`) for other projects. `just dev-list` lists them. `just dev-new <name>
+<path>` sets one up in a folder: it copies the flake, runs `git add` on it
+if the folder is in a repo (flakes ignore untracked files), runs the
+template's own scaffolding (`cargo init`, `uv init`), and writes an `.envrc`
+with `use flake` for direnv. It won't overwrite an existing `flake.nix`
+unless you pass `--force`.
 
 Secrets
 -------
 
-sops-nix. `secrets.yaml` is encrypted and committed on purpose, not a
-mistake to fix.
+Secrets use sops-nix. `secrets.yaml` is encrypted and committed on purpose.
 
 Using this
 ----------
 
-Steal what's useful. Don't run `nixos-rebuild switch` against this as-is on
-a machine you are not prepared to lose `/root` on.
-
-`AGENTS.md` and `wiki/agent-lessons-learned.md` are an AI agent's working notes,
-not documentation for a human reader — skip them unless you're the agent.
+Take whatever is useful. `AGENTS.md` and `wiki/agent-lessons-learned.md` are
+an AI agent's working notes, not documentation for people, so skip them
+unless you're the agent.
 
 License
 -------
