@@ -41,7 +41,7 @@
             # builds an extendModules config that never feeds fileSystems/
             # bootloader back into the base config, and checks.nix's forced
             # toplevel dies with "the 'fileSystems' option does not specify
-            # your root file system" (lessons-learned §36).
+            # your root file system" (agent-lessons-learned §36).
             (modulesPath + "/virtualisation/disk-image.nix")
         ];
 

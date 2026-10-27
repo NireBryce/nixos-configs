@@ -76,7 +76,7 @@
 #
 # STATUS: FAILED its first real switch (nire-cube, 2026-08-24, gen 13) --
 # missing AF_NETLINK, see the RestrictAddressFamilies comment below
-# (lessons-learned.md §37 class: invisible to eval and to the rendered
+# (agent-lessons-learned.md §37 class: invisible to eval and to the rendered
 # unit). Written from darwin (no x86_64-linux build possible, no remote
 # builder -- CLAUDE.md's State section), shipped evaluates-only, and broke
 # for the one thing its hardening comment meant to avoid. Lesson: not

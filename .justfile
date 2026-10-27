@@ -186,7 +186,7 @@ wiki-history-candidates *args:
 
 # Where the same prose shows up in two of AGENTS.md / skills / wiki -- the
 # mechanical half of "one pointer per fact". Deliberately not in wiki-lint:
-# overlap between lessons-learned.md and its lessons-learned/ articles is by
+# overlap between agent-lessons-learned.md and its agent-lessons-learned/ articles is by
 # design, and a shared table may be a fact's one true home -- read the spans.
 # Reporting only, never fails -- word-8-gram overlap across the doc layers
 wiki-restatement *args:
@@ -296,7 +296,7 @@ diff-deployed:
 # What this machine is really running -- capture BEFORE switching
 baseline:
     # Everything it prints stops being recoverable once the new generation boots
-    # and the store is collected. lessons-learned.md §24 covers why that matters; run it
+    # and the store is collected. agent-lessons-learned.md §24 covers why that matters; run it
     # with sudo to include the btrfs subvolumes.
     @{{scripts}}/deployed-baseline.sh
 
@@ -435,7 +435,7 @@ age-key *args:
 sops-user-identity *args:
     @{{scripts}}/sops-user-identity.sh {{args}}
 
-# Has this already been seen? GitHub issues + wiki/ + lessons-learned.md
+# Has this already been seen? GitHub issues + wiki/ + agent-lessons-learned.md
 # positional-arguments + "$@": arguments reach the script as-is, never
 # re-parsed by the recipe's shell line.
 [positional-arguments]

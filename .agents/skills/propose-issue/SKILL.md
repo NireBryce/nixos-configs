@@ -19,7 +19,7 @@ opinion (no failure scenario, no issue).
 
 `AGENTS.md`'s "a bug recorded in a comment stays in the file" (or a
 `history` heading: `boot-durandal.nix`, `WARN-impermanence.nix`,
-`vscode.nix`), `wiki/lessons-learned.md`, and `wiki/open-threads.md` all
+`vscode.nix`), `wiki/agent-lessons-learned.md`, and `wiki/open-threads.md` all
 record; none get the bug *worked*. The issue is added to whichever of those
 the bug warrants, not instead. The repo has labels (`bug`, `documentation`,
 `enhancement`, …) but no backlog yet, so an unfiled bug is easily lost.
@@ -46,7 +46,7 @@ nothing.
 1. **Verify, don't recall.** Re-open the file or re-run the command ("bugs
    here serialize" applies to reporting too).
 2. **Check it isn't already tracked.** `just threads "<keywords>"` covers
-   GitHub issues plus `wiki/`, `lessons-learned.md` and `bugs pending
+   GitHub issues plus `wiki/`, `agent-lessons-learned.md` and `bugs pending
    submission/` in one shot; also grep `AGENTS.md` itself, which that
    script doesn't touch. Stop if already covered.
 3. **Ask with real content**: title, short drafted body, and label (`bug`,
@@ -64,7 +64,7 @@ nothing.
    PR flow's Claude Code badge (an agent can't verify its model; same reason
    as the agent-name-only commit trailer). Report the issue URL.
 5. **On no:** don't file, say so, and still leave whatever comment or
-   `lessons-learned.md` entry the bug warrants.
+   `agent-lessons-learned.md` entry the bug warrants.
 
 ## Calibrate
 

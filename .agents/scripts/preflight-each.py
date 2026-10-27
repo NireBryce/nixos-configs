@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Is every commit of a multi-commit change green on its own (skill ship
-step 0, lessons-learned §15) -- `preflight-brief` on each, one line per
+step 0, agent-lessons-learned §15) -- `preflight-brief` on each, one line per
 commit. Replaces the throwaway-worktree loop ship spelled out by hand:
 `worktree add --detach /tmp/wt <sha> && cd ... && check; worktree
 remove`, re-typed per commit and left behind when a check failed.

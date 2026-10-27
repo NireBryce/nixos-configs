@@ -40,14 +40,14 @@ Pages go in one of these places:
   `traps-and-skills.md`, `conventions.md`, this file.
 
   Two pages in this tier are exceptions to "index over restatement"
-  below: `lessons-learned.md` and `module-style-guide.md` hold synthesized
+  below: `agent-lessons-learned.md` and `module-style-guide.md` hold synthesized
   content because there's nothing else for it to link to (they moved in
   verbatim from `claude cave/`, retired 2026-09-02). `flake-parts-port-notes.md`
   is a third, for the same reason: the branch it was salvaged from is gone.
-  `history.md` is the index into `lessons-learned.md`, and `conventions.md`
+  `history.md` is the index into `agent-lessons-learned.md`, and `conventions.md`
   the index into `module-style-guide.md`: the same split as a category page
   and its deep-dive. Every lesson's full account is a per-§ article in
-  `wiki/lessons-learned/` (`<n>-<slug>.md`), and `lessons-learned.md` is the
+  `wiki/agent-lessons-learned/` (`<n>-<slug>.md`), and `agent-lessons-learned.md` is the
   index: one entry per §, grouped by the moment it applies, naming the
   rule's Home and what Enforced it (`check_wiki.py lessons`). A lesson tied
   to particular paths or commands also gets a topic in
@@ -98,13 +98,13 @@ Pages go in one of these places:
   One page per problem that is *instrumented but not yet diagnosed*: the
   symptom, what has been established, what has been ruled out, and what is
   currently under test. Distinct from `categories/`, which documents config
-  that works, and from [lessons-learned.md](lessons-learned.md), which records
+  that works, and from [agent-lessons-learned.md](agent-lessons-learned.md), which records
   what was learned once it's over.
 
   **A page here must say which claims are settled and which are still being
   tested.** It exists precisely because the answer isn't known, so its most
   likely failure is reading as though it were — skill `fact-hygiene`. When the
-  question closes, the outcome moves to `lessons-learned.md` or the relevant
+  question closes, the outcome moves to `agent-lessons-learned.md` or the relevant
   category page and the experiment page goes; a page here that has quietly
   become true is a page in the wrong tier.
 - **`wiki/categories/<name>/`** — the escape hatch, used exactly once so
@@ -213,10 +213,10 @@ Pages go in one of these places:
   still carry a Contents block. Conflating the two is how
   `reverse-proxy-history.md` lost its block unnoticed.
 
-  **Exception: `lessons-learned.md`, `lessons-learned/` articles, and
+  **Exception: `agent-lessons-learned.md`, `agent-lessons-learned/` articles, and
   `-for-agents.md` siblings carry no Contents block.** On pages built for
   information density an anchor list is the first thing to go, and entries
-  there are located by group or § number (`ls wiki/lessons-learned/43-*`).
+  there are located by group or § number (`ls wiki/agent-lessons-learned/43-*`).
   The `contents` check only validates pages that have a block, so this
   needed no linter change.
 - Category pages follow **category contents → mechanism notes specific to that
@@ -289,8 +289,8 @@ pointing back at the human page and at two or three real siblings.
 that drops those states a guess as settled in the copy most likely to be
 acted on. Skill `fact-hygiene` #6.
 
-Exempt from *needing* one: [lessons-learned.md](lessons-learned.md) and its
-`lessons-learned/` articles (already written agent-facing; the index is
+Exempt from *needing* one: [agent-lessons-learned.md](agent-lessons-learned.md) and its
+`agent-lessons-learned/` articles (already written agent-facing; the index is
 one line per lesson, and an article is found by § number) and `<name>-history.md` pages
 (resolved incidents — already the moved-out-of-the-way tier). A page under
 1,000 words *may* have one, but usually shouldn't: at that size the

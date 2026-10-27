@@ -635,7 +635,7 @@ class GitGuardPreToolUse(GuardCase):
                        cwd=self.repo())
 
     def test_inherited_git_dir_ignored(self):
-        # lessons-learned §44: an inherited GIT_DIR retargets git. The hook
+        # agent-lessons-learned §44: an inherited GIT_DIR retargets git. The hook
         # clears it, so the status is the target repo's, not GIT_DIR's.
         clean, dirty = self.repo(), self.repo()
         (dirty / "tracked.txt").write_text("changed\n")

@@ -18,7 +18,7 @@
 #   skill         .agents/skills/<skill>/SKILL.md
 #   rules         .agents/rules/<file>; its frontmatter `paths:` must equal
 #                 this topic's `paths` (every rules file has one topic)
-#   lessons       § numbers in wiki/lessons-learned.md
+#   lessons       § numbers in wiki/agent-lessons-learned.md
 #   see           a repo file (optionally #anchor) holding the rule
 #   remind        the one line shown; required unless remind_on = "never"
 #   remind_on     paths topics: "edit" (any write, default), "create" (a
@@ -119,8 +119,8 @@ remind  = "Tailscale services: a committed ACL or service file records intent, n
 
 [[topic]]
 id      = "lessons-index"
-paths   = ["wiki/lessons-learned.md", "wiki/lessons-learned/**", ".agents/lessons-map.toml"]
-see     = "wiki/lessons-learned.md"
+paths   = ["wiki/agent-lessons-learned.md", "wiki/agent-lessons-learned/**", ".agents/lessons-map.toml"]
+see     = "wiki/agent-lessons-learned.md"
 remind  = "Lessons: a new lesson goes in its Home too, and here in .agents/lessons-map.toml when it applies to a path or a command; an entry whose lesson gained a mechanism names it under Enforced. `check_wiki.py lessons` checks the shape."
 
 # -- commands ---------------------------------------------------------------

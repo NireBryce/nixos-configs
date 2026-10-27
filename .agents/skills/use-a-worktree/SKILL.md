@@ -99,4 +99,4 @@ checkout, or the one it runs in.
 ## See also
 
 `AGENTS.md` "Working in this repo"; skill `ship` step 0 (throwaway worktree,
-narrower use); `wiki/lessons-learned.md` §44 (the `GIT_DIR` hook bug in full).
+narrower use); `wiki/agent-lessons-learned.md` §44 (the `GIT_DIR` hook bug in full).

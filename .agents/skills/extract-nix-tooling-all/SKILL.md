@@ -33,7 +33,7 @@ where to look, not what you'll find.
 | `flake/doc/` | Rationale docs and trailheads (`trailhead-home-manager-standalone.md`) — often the general explanation behind a pattern |
 | `wiki/module-style-guide.md` | Formatting rules, and the module-bottom history-section convention (`trim-history`) |
 | Nix-shaped skills | `new-flake-module`, `home-manager-dotfiles`, `package-platform-support`, `impermanence-initrd`, `review`'s Nix checks |
-| `wiki/lessons-learned.md` | §s about evaluation vs build vs runtime, freeform options, interpolation |
+| `wiki/agent-lessons-learned.md` | §s about evaluation vs build vs runtime, freeform options, interpolation |
 | AGENTS.md "Traps" | Nix traps stated inline (`${…}` in `''` strings, freeform settings) |
 
 Host-specific trees (`flake/modules/host-config/`, `flake/modules/homelab-config/`)

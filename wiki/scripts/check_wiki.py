@@ -214,12 +214,12 @@ structured, extractable facts only:
             was bumping the sibling's date, which styleguide.md forbids for
             good reason and which this check could never have caught.
 
-  lessons   wiki/lessons-learned.md is an index, one `- **§N** [title](...)
+  lessons   wiki/agent-lessons-learned.md is an index, one `- **§N** [title](...)
             — rule. Home: ... Enforced: ...` entry per lesson, grouped by
             when it applies (reorganised 2026-09-29 from an era-ordered page
             whose header had drifted eleven lessons behind its entries).
             Checks: every § from 1 to the highest has exactly one entry and
-            exactly one `wiki/lessons-learned/<N>-*.md` article whose title
+            exactly one `wiki/agent-lessons-learned/<N>-*.md` article whose title
             reads `# N.`; each entry links its own article and carries both
             `Home:` and `Enforced:`. The fields' contents are validated by
             the checks that already read backticked recipe and skill names
@@ -732,7 +732,7 @@ def check_docrefs(root):
                 findings.append(
                     f"MOVED PATH  {rel}: {m.group(0)} -- {old} is now {new}")
 
-        if not (rel.parts[:2] == ('wiki', 'lessons-learned')
+        if not (rel.parts[:2] == ('wiki', 'agent-lessons-learned')
                 or rel.name.endswith('-history.md')):
             for n, sent in bare_counts(text):
                 findings.append(
@@ -1074,7 +1074,7 @@ def caddy_routes(root):
     """path-prefix name -> True if Caddy strips it before reaching the app,
     False if it's kept -- read straight out of caddy.nix's own embedded
     Caddyfile string rather than assumed (the "read the built artifact,
-    don't guess" reasoning lessons-learned.md §41 is about, applied statically
+    don't guess" reasoning agent-lessons-learned.md §41 is about, applied statically
     here instead of via `caddy adapt`). Cube-only and there's exactly one
     caddy.nix, so no need for find_categories-style generality.
 
@@ -1294,7 +1294,7 @@ def actual_contents_items(text):
 # one on 2026-09-12 on the strength of that confusion. Keep the two lists
 # apart and named for what they exempt.
 CONTENTS_EXEMPT = (
-    re.compile(r'^wiki/lessons-learned(\.md|/)'),
+    re.compile(r'^wiki/agent-lessons-learned(\.md|/)'),
     re.compile(r'-for-agents\.md$'),
 )
 
@@ -1460,12 +1460,12 @@ SIBLING_BUDGET = 0.50
 SIBLING_REVIEWED_LINE = re.compile(
     r'^_Sibling reviewed: (\d{4}-\d{2}-\d{2})\s*(?:--|—)\s*(\S.*?)_\s*$')
 # Exempt from *requiring* a sibling (each may still have one):
-#   lessons-learned.md and lessons-learned/  -- already written agent-facing
+#   agent-lessons-learned.md and agent-lessons-learned/  -- already written agent-facing
 #     and located by section number, not read front-to-back
 #   *-history.md                             -- resolved incidents; already
 #     the moved-out-of-the-way tier, rarely loaded on task
 SIBLING_EXEMPT = (
-    re.compile(r'^wiki/lessons-learned(\.md|/)'),
+    re.compile(r'^wiki/agent-lessons-learned(\.md|/)'),
     re.compile(r'-history\.md$'),
 )
 
@@ -1661,8 +1661,10 @@ def check_dates(root):
 
 
 LESSON_ENTRY = re.compile(
-    r'^- \*\*§(\d+)\*\* \[[^\]]+\]\((lessons-learned/[^)]+)\) — .+$')
+    r'^- \*\*§(\d+)\*\* \[[^\]]+\]\((agent-lessons-learned/[^)]+)\) — .+$')
 LESSON_ARTICLE = re.compile(r'^(\d+)-[a-z0-9-]+\.md$')
+# Not a lesson: explains the folder to a person reading it.
+HUMAN_README = '0-human-README.md'
 
 
 # A rule's frontmatter: `paths:` then `  - "glob"` items, nothing else.
@@ -1751,8 +1753,8 @@ def check_rules(root):
 def check_lessons(root):
     """See the module docstring's `lessons` entry."""
     findings = []
-    page = root / 'wiki' / 'lessons-learned.md'
-    art_dir = root / 'wiki' / 'lessons-learned'
+    page = root / 'wiki' / 'agent-lessons-learned.md'
+    art_dir = root / 'wiki' / 'agent-lessons-learned'
     entries = {}
     for line in page.read_text().splitlines():
         if not line.startswith('- **§'):
@@ -1765,7 +1767,7 @@ def check_lessons(root):
         if n in entries:
             findings.append(f"DUPLICATE LESSON  {page}: §{n} has two entries")
         entries[n] = link
-        if not link.startswith(f'lessons-learned/{n}-'):
+        if not link.startswith(f'agent-lessons-learned/{n}-'):
             findings.append(
                 f"LESSON LINK  {page}: §{n} links {link}, not its own article")
         for field in ('Home: ', 'Enforced: '):
@@ -1773,6 +1775,8 @@ def check_lessons(root):
                 findings.append(f"LESSON FIELD  {page}: §{n} has no `{field.strip()}`")
     articles = {}
     for p in sorted(art_dir.glob('*.md')):
+        if p.name == HUMAN_README:
+            continue
         m = LESSON_ARTICLE.match(p.name)
         if not m:
             findings.append(f"LESSON ARTICLE NAME  {p}: not `<N>-<slug>.md`")
@@ -1894,7 +1898,7 @@ SEE = (
      "git-archaeology for where the thing went"),
     (('MISSING LESSON', 'MISSING ARTICLE', 'DUPLICATE LESSON',
       'DUPLICATE ARTICLE', 'MALFORMED LESSON', 'LESSON ', 'LESSONS MAP'),
-     "wiki/lessons-learned.md's header (adding a lesson) and "
+     "wiki/agent-lessons-learned.md's header (adding a lesson) and "
      ".agents/lessons-map.toml's (its keys)"),
     (('BARE COUNT',),
      "a count of repo things rots: replace it with a pointer to where the "

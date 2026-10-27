@@ -3,7 +3,7 @@
 one-line reminder for whatever .agents/lessons-map.toml topic the call
 touches into the model's context, before the call runs (#460).
 
-Most lessons in wiki/lessons-learned.md had `Enforced: none` -- they reached
+Most lessons in wiki/agent-lessons-learned.md had `Enforced: none` -- they reached
 an agent only if it chose to read the right skill first, and §5 records
 that writing a trap down does not stop anyone walking into it. This
 delivers the trap at the moment it applies: an edit under a topic's

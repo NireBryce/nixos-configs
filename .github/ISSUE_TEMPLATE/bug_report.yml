@@ -20,7 +20,7 @@ body:
     id: rung
     attributes:
       label: How far did it get?
-      description: The repo distinguishes evaluating from building from running -- say which rung you observed (see wiki/lessons-learned.md §18).
+      description: The repo distinguishes evaluating from building from running -- say which rung you observed (see wiki/agent-lessons-learned.md §18).
       options:
         - evaluation fails (nix eval / flake check errors)
         - build fails

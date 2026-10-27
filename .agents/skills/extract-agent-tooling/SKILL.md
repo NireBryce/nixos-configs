@@ -9,7 +9,7 @@ when_to_use: Writing or changing a skill, lesson, wiki convention, AGENTS.md sec
 ## Applies to
 
 You are writing or materially changing something agent-facing — a skill, a
-`wiki/lessons-learned.md` §, a wiki layout or style rule, an AGENTS.md
+`wiki/agent-lessons-learned.md` §, a wiki layout or style rule, an AGENTS.md
 section, a `wiki/scripts/` or `flake/scripts/` checker, a `.agents/hooks/`
 or `.githooks/` hook — and notice its *mechanism* doesn't depend on this
 repo. Not: a deliberate pass over the whole tree (`extract-agent-tooling-all`);
@@ -51,7 +51,7 @@ file, compressed, never trimmed away" is general; "in a `.nix` module" is
 the Nix half. Record each half in its own folder and link the two files.
 
 **Evidence beats elegance.** A convention that has a § in
-`wiki/lessons-learned.md`, a lint check enforcing it, or a dated incident
+`wiki/agent-lessons-learned.md`, a lint check enforcing it, or a dated incident
 behind it is a much stronger candidate than one that merely reads well —
 say which in the file.
 
@@ -68,7 +68,7 @@ named for the mechanism, not the source file (sources get renamed):
 - **General kernel:** one sentence, repo nouns stripped.
 - **Strip/replace:** the repo-specific parts the extracted form must drop
   or parameterize (paths, recipe names, host lists, dates).
-- **Evidence:** lessons-learned §, incident date, or enforcing check — or
+- **Evidence:** agent-lessons-learned §, incident date, or enforcing check — or
   "none yet".
 - **Depends on:** other candidate files it presupposes (e.g. `skill-files` lint
   needs `new-skill`'s description rule).

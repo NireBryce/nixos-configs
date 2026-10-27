@@ -30,7 +30,7 @@ DHCP-reservation guard referenced it correctly, and
 `networking.firewall.extraCommands` contained exactly one DNAT rule,
 scoped to `100.64.0.0/10`, no LAN range. The domain itself was confirmed
 booted and staying up on `nire-cube` (2026-08-24 — see
-[../lessons-learned.md](../lessons-learned.md) §40), but an actual SSH
+[../agent-lessons-learned.md](../agent-lessons-learned.md) §40), but an actual SSH
 connection through this forward was never made before the VM was removed.
 `forge-runner` (2026-09-25) is its second caller — `guestId = 11`,
 `hostPort = 2223`, tailnet-only — and the first connection through the

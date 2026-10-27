@@ -310,7 +310,7 @@ before/after pair rather than inference.
 
 The b550 udev rule is present in 221, 222 **and** 227 — it was not lost here.
 
-The `sleep.conf` change is the one [lessons-learned.md](../lessons-learned.md)
+The `sleep.conf` change is the one [agent-lessons-learned.md](../agent-lessons-learned.md)
 records as having broken suspend outright (logind answering
 `CanHybridSleep=no` and *dropping* the request), fixed with `SleepMode=1`,
 which `powerdevilrc` still carries. That is closed. **PowerDevil's own
@@ -419,5 +419,5 @@ manual.
   — every step run against the machine, what survives a reboot, and how to
   verify each rather than trust it.
 - [hosts.md](../hosts.md) — the host roster.
-- [lessons-learned.md](../lessons-learned.md) — the KDE hybrid-sleep trap, a
+- [agent-lessons-learned.md](../agent-lessons-learned.md) — the KDE hybrid-sleep trap, a
   different suspend failure on this fleet.

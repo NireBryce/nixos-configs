@@ -1,0 +1,17 @@
+# 11. Read the links in a comment before deleting the code they annotate
+
+_Last modified: 2026-09-29_
+
+## Index entry
+
+§11 in [agent-lessons-learned.md](../agent-lessons-learned.md), which keeps a one-line version of every lesson, filed by when it applies. This page is the longer write-up.
+
+## The lesson
+
+I was about to replace a `requires`/`after` block whose lines carried a
+systemd.unit(5) URL. The user asked whether I had read it. I had not.
+
+`Requires=` is an activation dependency, `After=` is ordering, neither implies
+the other, and the manual says to pair them. Dropping `requires` would have
+changed the failure mode from "does not run" to "runs and fails" — on the
+service that deletes `/root`.

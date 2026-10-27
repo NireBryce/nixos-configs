@@ -45,7 +45,7 @@ while `/git/` returned 404, because both routes had been given the same
 Caddy directive — every static check had passed first, including a real
 build and a read of the built artifact. See [the two apps want opposite
 things](#the-two-apps-want-opposite-things-from-the-proxy-historical)
-for the mechanism, and [`lessons-learned.md`](../lessons-learned.md) #41
+for the mechanism, and [`agent-lessons-learned.md`](../agent-lessons-learned.md) #41
 for the general shape of the mistake.
 
 ## Paths, not subdomains, was the original constraint — Tailscale Services lifted it, partially
@@ -94,7 +94,7 @@ rejected — so the bare `/git` can't ride along in one matcher the way
 `@grafana`'s two paths do, and gets its own `redir` to `/git/` instead.
 
 The general form of the mistake, and why every static check missed it, is
-[`lessons-learned.md`](../lessons-learned.md) #41.
+[`agent-lessons-learned.md`](../agent-lessons-learned.md) #41.
 
 ## The retired routes, as they were
 
@@ -206,7 +206,7 @@ public Let's Encrypt, which can never issue for a tailnet name. Every
 `.ts.net` handshake died with `SSL_ERROR_INTERNAL_ERROR_ALERT`, including
 `ts-cube.moose-micro.ts.net`, which no commit had touched. `caddy.nix`'s
 `tailscaleCert` binding carries the mechanism with `file:line` references
-into caddy 2.11.4's source; [§47](../lessons-learned/47-explicit-setting-disables-implicit-one.md)
+into caddy 2.11.4's source; [§47](../agent-lessons-learned/47-explicit-setting-disables-implicit-one.md)
 is the full account. The fix
 is naming `get_certificate tailscale` on each `.ts.net` vhost explicitly
 rather than relying on the detection. **Runtime-verified on hardware

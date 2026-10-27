@@ -35,7 +35,7 @@ look, not what you'll find.
 | `AGENTS.md` | Structure and framing (written-by-agents header, canonical file + `CLAUDE.md` symlink, Traps-as-pointers-to-skills, prose conventions) |
 | `.agents/skills/` | Skills whose description survives losing "in this repo"; the `.claude/skills` symlink layout itself |
 | `wiki/styleguide.md`, `wiki/00-INDEX.md` | Two-audience page pairs, routing index, `-history.md` companions, date lines |
-| `wiki/lessons-learned.md` + `wiki/lessons-learned/` | § numbering with per-§ articles; individual lessons whose rule outlives the incident |
+| `wiki/agent-lessons-learned.md` + `wiki/agent-lessons-learned/` | § numbering with per-§ articles; individual lessons whose rule outlives the incident |
 | `wiki/scripts/` | Doc linters (`check_wiki.py`'s generic checks, `check_restatement.py`, `history_candidates.py`) |
 | `flake/scripts/`, `.agents/scripts/` | Non-Nix scripts (`branches.py`, `threads.sh`-style tooling; the `just agent` helpers) |
 | `.agents/hooks/`, `.githooks/` | Git/secret guard hooks, the commit-trailer normalizer |
@@ -61,7 +61,7 @@ sweeps at once unless asked.
    only says how much stripping the extracted form needs.
 5. **Rank, don't just list.** Order the new candidates in your report by
    evidence
-   (enforced by a check > has a lessons-learned § > has an incident >
+   (enforced by a check > has a agent-lessons-learned § > has an incident >
    none) and by coupling (a skill and its lint travel as one candidate).
 6. **Report** a short table — candidate, kernel, evidence, coupling — and
    the files you deleted or rewrote, with why.

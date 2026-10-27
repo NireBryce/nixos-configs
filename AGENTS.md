@@ -97,7 +97,7 @@ history: `wiki/history.md`'s "Confirmed-on-hardware facts".
 ## Before you start
 
 - **Find the page for the task.** `wiki/00-INDEX-for-agents.md` routes by
-  task; `wiki/lessons-learned.md` files every past mistake by the moment it
+  task; `wiki/agent-lessons-learned.md` files every past mistake by the moment it
   applies, and `just agent lessons <path>` prints the ones that apply to a
   file or area. Bare `just` lists every recipe.
 - **Someone reports a bug?** Skill `investigate-bug` first — `just threads
@@ -192,8 +192,8 @@ title or body pings that repo), so grep for that shape first.
 
 ## Before calling it done
 
-Each § is an entry in `wiki/lessons-learned.md`, full account in
-`wiki/lessons-learned/<N>-*.md`.
+Each § is an entry in `wiki/agent-lessons-learned.md`, full account in
+`wiki/agent-lessons-learned/<N>-*.md`.
 
 **Say which rung you reached.** *Evaluates* (`nix eval`, `just check`),
 *builds* (`just build`; `nix build --dry-run` gives the plan without
@@ -335,12 +335,12 @@ a reason, on the sibling, is the way to say so. Full rule and the cut list:
   **Maintained the same way this file is**:
   a change that makes a wiki page stale corrects it in the same change
   (`just wiki-lint` checks the mechanical claims).
-- `wiki/lessons-learned.md` — every past mistake as one line, grouped by
+- `wiki/agent-lessons-learned.md` — every past mistake as one line, grouped by
   the moment it applies (proving a change works, reading tool output,
   investigating on the machine, writing config, changing behaviour,
   collisions, git and process), each naming the skill or section that
   carries its rule and what enforces it. Full accounts are
-  `wiki/lessons-learned/<N>-*.md`; § numbers are stable, cited from many
+  `wiki/agent-lessons-learned/<N>-*.md`; § numbers are stable, cited from many
   files, never renumbered. No `-for-agents` sibling, deliberately:
   it is already written agent-facing. **A new lesson goes in its Home as
   well as the index** — a rule only that page states reaches nobody.

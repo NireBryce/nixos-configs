@@ -39,7 +39,7 @@ let
     # 2026-09-10 -- `ts-cube` included, which no commit had touched --
     # while eval, build, `just modules` and `caddy adapt` all passed on a
     # Caddyfile that was VALID and meant something else
-    # (wiki/lessons-learned.md §47). Naming the manager also beats the
+    # (wiki/agent-lessons-learned.md §47). Naming the manager also beats the
     # detection it replaces: `implicitTailscaleManagersOnly()`
     # (automation.go:434) drops the public-CA fallback for an
     # all-`.ts.net` policy, so a name tailscaled won't issue for fails
@@ -234,7 +234,7 @@ in {
 # needed OPPOSITE directives (`handle` for Grafana, which served under the
 # prefix; `handle_path` for Forgejo, which always served at `/`) and giving
 # both the same one cost the first live switch: /grafana/ 200, /git/ 404
-# (wiki/lessons-learned.md §41). Routes, mechanism and verification record:
+# (wiki/agent-lessons-learned.md §41). Routes, mechanism and verification record:
 # wiki/categories/reverse-proxy-history.md -- kept because path-prefix
 # routing is the fallback if the per-Service move ever needs reverting, and
 # because anything added here WITHOUT its own `svc:` name needs it again.
@@ -242,7 +242,7 @@ in {
 # 2026-09-08 (d7af47c5) — `tls internal` on the bare-name vhosts suppressed
 # tailscale cert auto-detection for every `.ts.net` name in this file,
 # breaking tailnet HTTPS host-wide until 2026-09-10. Fixed by the
-# `tailscaleCert` binding above; full account, wiki/lessons-learned.md §47.
+# `tailscaleCert` binding above; full account, wiki/agent-lessons-learned.md §47.
 #
 # 2026-09-12 to 2026-10-19 — homepage (then glance beside it) served as the
 # landing page on ports 3002/3004; both removed as unused attack surface.

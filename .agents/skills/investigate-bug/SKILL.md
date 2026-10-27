@@ -28,7 +28,7 @@ skill.
 1. **Before reproducing**, `just threads "<keywords>"` with a couple of
    guesses from the report's wording (symptom, error text, command). It
    searches GitHub issues (`gh issue list --search`) and greps `wiki/`
-   (incl. `lessons-learned/`) and `_loose-ends/bugs-pending-submission/`;
+   (incl. `agent-lessons-learned/`) and `_loose-ends/bugs-pending-submission/`;
    see `flake/scripts/threads.sh`.
    A design question ("why is it shaped like this?") may be settled in
    an earlier session's transcript; `just agent` has scripts that read

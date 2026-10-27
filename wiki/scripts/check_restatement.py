@@ -11,7 +11,7 @@ AGENTS.md, every .agents/skills/**/*.md, and every wiki/**/*.md.
 
 Report-only, never fails -- like wiki_churn.py and wiki_stale_refs.py,
 most hits need a human judgement call: overlap between
-wiki/lessons-learned.md and its wiki/lessons-learned/ articles is by
+wiki/agent-lessons-learned.md and its wiki/agent-lessons-learned/ articles is by
 design (one-line summary + link, full account next door), and a shared
 table of ports or a quoted command may be the fact's one true home.
 Read the spans, decide which copy dies.
@@ -179,7 +179,7 @@ def main():
 
     print(
         f"{len(hits)} pair(s) share {args.min_words}+ words "
-        f"(shingle={NGRAM}; lessons-learned.md ↔ its articles is by design)"
+        f"(shingle={NGRAM}; agent-lessons-learned.md ↔ its articles is by design)"
     )
     if sibling_hits:
         worst = sibling_hits[0]

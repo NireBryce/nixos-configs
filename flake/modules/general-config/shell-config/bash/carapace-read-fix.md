@@ -24,7 +24,7 @@ twice (2026-08-22 and 2026-08-24) that this happens with carapace's stock
 completer alone, no advice or config from this repo involved.
 
 Full diagnosis: [`wiki/categories/shell-config/blesh.md`](../../../../../wiki/categories/shell-config/blesh.md#bug-spurious-read--not-a-valid-identifier-on-tab--auto-complete),
-[`wiki/lessons-learned.md`](<../../../../../wiki/lessons-learned.md>) #39,
+[`wiki/agent-lessons-learned.md`](<../../../../../wiki/agent-lessons-learned.md>) #39,
 [issue #72](https://github.com/NireBryce/nixos-configs/issues/72).
 
 ## What the fix does
@@ -72,7 +72,7 @@ against the switched host with
 [`terminal-puppeteer`](https://github.com/NireBryce/terminal-puppeteer) —
 several passes of the original repro, zero errors, plus a check that the
 fix's own tripwire warning doesn't fire (confirming the substitution is
-actually applying, not silently skipping). See `lessons-learned.md` #39
+actually applying, not silently skipping). See `agent-lessons-learned.md` #39
 and [issue #72](https://github.com/NireBryce/nixos-configs/issues/72) for
 the full account.
 

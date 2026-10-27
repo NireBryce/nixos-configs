@@ -28,7 +28,7 @@ precisely the reason its own hardening comment claimed to be guarding
 against — the risk was named correctly, attached to the wrong knob. Same
 family as [monitoring](monitoring.md)'s `grafana.service` first-switch
 failure: a green evaluation and a read-back of the rendered unit both said
-nothing ([`lessons-learned.md`](../lessons-learned.md) §37).
+nothing ([`agent-lessons-learned.md`](../agent-lessons-learned.md) §37).
 
 Fixed the same day and confirmed working end to end, after the fix and the
 one-time login: `golink.service` `active (running)` at `NRestarts=0`, 0

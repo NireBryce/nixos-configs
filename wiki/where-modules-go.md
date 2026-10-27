@@ -90,7 +90,7 @@ When in doubt between shared and host-specific, ask what happens if a
 second host imports the category it would land in. If the answer is "that
 host now runs something it shouldn't" — a VM, a firewall rule, a
 machine-specific fix — it's host-specific. That question is the one
-[lessons-learned §38](lessons-learned.md) records as having caught a
+[agent-lessons-learned §38](agent-lessons-learned.md) records as having caught a
 too-general fix before it shipped.
 
 ## Naming: suffix anything host- or user-specific

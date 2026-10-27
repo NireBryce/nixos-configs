@@ -105,7 +105,7 @@ def pointers(t):
     if t.get('rules'):
         out.append(f".agents/rules/{t['rules']}")
     if t.get('lessons'):
-        out.append('wiki/lessons-learned.md '
+        out.append('wiki/agent-lessons-learned.md '
                    + ', '.join(f'§{n}' for n in t['lessons']))
     if t.get('see'):
         out.append(t['see'])
@@ -171,7 +171,7 @@ def validate(root, tracked, lesson_numbers, rule_globs):
                     f"frontmatter -- they must select the same files")
         for n in t.get('lessons', []):
             if n not in lesson_numbers:
-                bad(f"§{n} has no entry in wiki/lessons-learned.md")
+                bad(f"§{n} has no entry in wiki/agent-lessons-learned.md")
         if t.get('see'):
             target = t['see'].split('#', 1)[0]
             if not (root / target).exists():

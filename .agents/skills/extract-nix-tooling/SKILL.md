@@ -8,7 +8,7 @@ when_to_use: Writing or changing a module, flake script, or Nix-related skill or
 
 ## Applies to
 
-You are writing or changing a flake-parts module, a `flake/scripts/` tool, a Nix-shaped skill, or a lessons-learned
+You are writing or changing a flake-parts module, a `flake/scripts/` tool, a Nix-shaped skill, or a agent-lessons-learned
 § about Nix behavior, and notice the pattern would work in someone else's
 flake. Not: non-Nix agent tooling (`extract-agent-tooling`); a deliberate
 whole-repo pass (`extract-nix-tooling-all`); copying anything into another
@@ -56,7 +56,7 @@ for patterns *this repo* invented that others could reuse, not fixes owed
 upstream.
 
 **Evidence** matters the same way: a pattern that `modules.py` or
-`lint.py` enforces, or that a lessons-learned § records breaking, is a
+`lint.py` enforces, or that a agent-lessons-learned § records breaking, is a
 stronger candidate than one that's just tidy. Nix traps (`${…}` inside
 `''` strings, freeform settings swallowing misspelled keys, `git add`
 before `nix eval`) carry most of their value in the evidence line.

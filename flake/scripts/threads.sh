@@ -6,14 +6,14 @@
 #
 # Checks, in order: open GitHub issues (this repo only -- see the `gh
 # issue list --repo` below), then `wiki/` (which includes
-# `wiki/lessons-learned.md` -- it moved in from `claude cave/` 2026-09-02,
+# `wiki/agent-lessons-learned.md` -- it moved in from `claude cave/` 2026-09-02,
 # so it no longer needs its own separate search path) and the repo-root
 # `_loose-ends/bugs-pending-submission/` for the same term.
 #
 # Exists because a ble.sh/carapace completion bug got independently
 # rediscovered from scratch on 2026-08-24, at real cost, two days after it
 # was first diagnosed and written up in wiki/categories/shell-config/blesh.md
-# -- findable in one grep, never run. See `wiki/lessons-learned.md`
+# -- findable in one grep, never run. See `wiki/agent-lessons-learned.md`
 # #39 and issue #72. Run this before reproducing or diagnosing anything a
 # user reports as a symptom, not just before filing something new -- see
 # the `investigate-bug` skill.

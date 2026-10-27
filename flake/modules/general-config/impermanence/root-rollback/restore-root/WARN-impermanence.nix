@@ -389,7 +389,7 @@
 #   ordering and could race a resuming boot -- hence
 #   ConditionKernelCommandLine, then nohibernate once tenacity showed resume
 #   set up with no `resume=` (found 2026-08-10). Never fired; one flat
-#   battery during suspend away. lessons-learned §28 (including the wrong
+#   battery during suspend away. agent-lessons-learned §28 (including the wrong
 #   "tenacity has no swap" assessment that started it).
 # - The template-injection trap (never write an @placeholder@ token in a
 #   scripted hook string, comments included -- a later substituteInPlace
@@ -406,7 +406,7 @@
 # and ~2.3G of writes. Not a regression from the migration (the journal
 # shows the same under scripted stage 1). Disabling hibernation then broke
 # suspend entirely until PowerDevil's SleepMode changed from 2 to 1
-# (lessons-learned §30). An earlier version of this comment claimed a
+# (agent-lessons-learned §30). An earlier version of this comment claimed a
 # refused hybrid-sleep request degrades to plain s2idle; it does not --
 # logind still reported CanSuspend=yes and /sys/power/state `freeze mem`,
 # only the request was dropped. /sys/power/mem_sleep on tenacity is

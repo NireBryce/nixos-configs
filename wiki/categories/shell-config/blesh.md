@@ -138,7 +138,7 @@ Reopened 2026-08-24 when reported over SSH, reproduced the same way, and
 pinned the rest of the way to a specific line and a working fix (the pty
 tool has since left this repo as
 [`terminal-puppeteer`](https://github.com/NireBryce/terminal-puppeteer)).
-Full session account: [lessons-learned.md](../../lessons-learned.md) §39.
+Full session account: [agent-lessons-learned.md](../../agent-lessons-learned.md) §39.
 
 **Root cause**: ble.sh's own auto-complete/progcomp machinery installs a
 cancellation safety net, `_ble_builtin_read_hook`, while any registered

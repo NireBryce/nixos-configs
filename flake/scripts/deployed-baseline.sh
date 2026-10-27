@@ -6,7 +6,7 @@
 # Run it before switching. Everything it prints becomes unrecoverable once the
 # new generation boots and nix-collect-garbage runs, and it is the only thing
 # that can answer "is what I am about to install different from what works" --
-# see lessons-learned.md §24.
+# see agent-lessons-learned.md §24.
 #
 # Read-only. The btrfs section needs root and is skipped without it.
 #
@@ -50,7 +50,7 @@ echo
 echo '```'
 # A failed read is marked IN the record and fails the script at the end,
 # never silently empty: this output is the record once the generation is
-# collected (lessons-learned.md §24), and an empty section reads as the
+# collected (agent-lessons-learned.md §24), and an empty section reads as the
 # fact "no kernel parameters". A successful but empty read still prints an
 # empty block -- that one IS a fact about the machine, which is why the
 # `|| true` stays on the grep below rather than the whole read.
@@ -94,7 +94,7 @@ echo '```'
 echo
 echo "Note: read /proc/1/mountinfo, not findmnt or lsblk. Inside a sandboxed"
 echo "shell those two report the namespace they are in, not the host — see"
-echo "CLAUDE.md and lessons-learned.md §19."
+echo "CLAUDE.md and agent-lessons-learned.md §19."
 echo
 
 uid=$(id -u)
@@ -123,6 +123,6 @@ fi
 if [ -n "${baseline_incomplete:-}" ]; then
     echo
     echo "!!! baseline INCOMPLETE (kernel command line not captured) -- fix the"
-    echo "!!! cause and re-run BEFORE switching; lessons-learned.md §24."
+    echo "!!! cause and re-run BEFORE switching; agent-lessons-learned.md §24."
     exit 1
 fi

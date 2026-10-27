@@ -1,7 +1,7 @@
 """Shared by doc_drift.py and doc_partition.py: which docs are in scope,
 and which repo paths a doc cites. Stdlib only; read-only.
 
-Scope: wiki/**/*.md (categories/, homelab/, experiments/, lessons-learned/
+Scope: wiki/**/*.md (categories/, homelab/, experiments/, agent-lessons-learned/
 included), .agents/rules/*.md, .agents/skills/*/SKILL.md, AGENTS.md.
 Symlinks (wiki/README.md, the rules and skills links) are in scope as
 paths; callers decide whether to follow them.

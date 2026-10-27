@@ -75,7 +75,7 @@ DHCP-reserves the guest IP, then `virsh define` + start. Shares carry
 - **`image.modules.qemu`-style guests break toplevel checks** — import
   `modulesPath + "/virtualisation/disk-image.nix"` DIRECTLY in the guest
   config, and read `image.filePath` relative to the image derivation
-  (lessons-learned §36).
+  (agent-lessons-learned §36).
 - **GC the base image = VM cannot start** — overlays reference the
   backing file by path; the generator's GC root is the fix, removing it
   is a deliberate step.

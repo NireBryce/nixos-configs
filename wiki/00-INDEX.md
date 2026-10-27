@@ -106,9 +106,9 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   happened here, and the skills that hold the long version of each.
 - [History & lessons learned](history.md) — the den → flake-parts port, the
   first hardware boots, and what became of the sibling branch. The full log
-  itself, [lessons-learned.md](lessons-learned.md) — every numbered lesson
+  itself, [agent-lessons-learned.md](agent-lessons-learned.md) — every numbered lesson
   as one line, grouped by the moment it applies (since 2026-09-29), each
-  linking its full account under `lessons-learned/` (and, by file or
+  linking its full account under `agent-lessons-learned/` (and, by file or
   area, `just agent lessons <path>`), "written by Claude Code, for Claude
   Code" — moved
   in from `claude cave/` 2026-09-02; this page stays the index, that page
@@ -185,7 +185,7 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   also holds [what is instrumented on durandal right now](experiments/durandal-suspend-instrumentation-state.md)
   and [a historical 2026-09-16 probe transcript](experiments/durandal-superio-probe-runbook-2026-09-16.md).
   When a question closes, the
-  outcome moves to [lessons-learned.md](lessons-learned.md) or the relevant
+  outcome moves to [agent-lessons-learned.md](agent-lessons-learned.md) or the relevant
   category page and the experiment page goes.
 
 ### Conventions & meta

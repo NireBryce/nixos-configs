@@ -11,7 +11,7 @@ _Last modified: 2026-10-22_
 ## Contents
 
 - [Category contents](#category-contents)
-- [Why this category is never imported whole](#why-this-category-is-never-imported-whole)
+- [Why this category isn't imported whole](#why-this-category-isnt-imported-whole)
 - [Why the split happened](#why-the-split-happened)
 - [Why `jovian-persist.nix` isn't filed under `impermanence`](#why-jovian-persistnix-isnt-filed-under-impermanence)
 - [Imported by](#imported-by)
