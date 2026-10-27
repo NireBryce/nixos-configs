@@ -12,7 +12,7 @@ You are writing or changing a flake-parts module, a `flake/scripts/` tool, a Nix
 § about Nix behavior, and notice the pattern would work in someone else's
 flake. Not: non-Nix agent tooling (`extract-agent-tooling`); a deliberate
 whole-repo pass (`extract-nix-tooling-all`); copying anything into another
-repo (never, unless the user asks in those words).
+repo (never, unless the user asks for it).
 
 Candidates go in `_loose-ends/extraction-candidates/nix/`, one file per
 candidate, named `<short-name>.md`.

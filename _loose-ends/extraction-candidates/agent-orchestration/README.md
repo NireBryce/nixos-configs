@@ -4,7 +4,7 @@ One file per thing in this repo whose mechanism would work in *any* repo an
 agent works in — skills, wiki conventions, lessons, hooks, lint scripts,
 AGENTS.md structure — recorded for a future general-purpose repo. No such
 repo exists yet; nothing here gets copied anywhere without the user asking
-(AGENTS.md, "Never file anything outside").
+(AGENTS.md, "File issues and PRs only in").
 
 Maintained by skills `extract-agent-tooling` (one candidate, as you go) and
 `extract-agent-tooling-all` (whole-repo sweep). Entry shape and the

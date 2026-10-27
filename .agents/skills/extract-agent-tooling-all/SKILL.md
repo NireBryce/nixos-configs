@@ -14,8 +14,8 @@ repos", or to refresh
 standalone pass. Not: a candidate noticed while doing something else
 (`extract-agent-tooling`, in that task's commit); the Nix-specific
 equivalent (`extract-nix-tooling-all`); actually creating, populating, or
-pushing to the general repo (only when the user asks in those words —
-AGENTS.md's "Never file anything outside").
+pushing to the general repo (only when the user asks for it —
+AGENTS.md's "File issues and PRs only in").
 
 ## Relationship to `extract-agent-tooling`
 

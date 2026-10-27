@@ -48,7 +48,7 @@ an `upstream`-labelled issue here that tracks it ([#444](https://github.com/Nire
 [#442](https://github.com/NireBryce/nixos-configs/issues/442), [#443](https://github.com/NireBryce/nixos-configs/issues/443)). **Neither the file
 nor the issue is a reason to file it upstream**: per `AGENTS.md`, filing
 outside `NireBryce/nixos-configs` happens only when the user says so
-explicitly, in those words, for that specific report — not as a
+in their own message, for that specific report — not as a
 housekeeping pass over this list or the label. Tracking one here is not
 working it.
 
