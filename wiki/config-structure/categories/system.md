@@ -1,6 +1,6 @@
 # `system` — `general-config/system/`
 
-_Last modified: 2026-10-27_
+_Last modified: 2026-10-28_
 
 The largest category (no per-file count here; see
 categories/00-INDEX.md's Index section for why). Every Linux host imports it
@@ -55,7 +55,7 @@ specifically so the `system` category picks it up and every host that
 imports `system` gets it automatically, rather than each host wiring HM in
 by hand (it also sets `backupFileExtension = "hm-bak"`).
 `enable-home-manager-darwin.nix` is the nix-darwin-side equivalent
-for `lysithea` (same `useGlobalPkgs`/`useUserPackages`, no backup extension) — it's what brings packages and dotfiles to a darwin
+for `lysithea` (same `useGlobalPkgs`, `useUserPackages` and `backupFileExtension`) — it's what brings packages and dotfiles to a darwin
 host, not anything under [macos](macos.md).
 
 `home-manager/drop-unsupported-packages.nix` is the platform-support

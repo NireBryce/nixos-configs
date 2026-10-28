@@ -33,6 +33,7 @@ Exit status: 0 all pass, 1 a check failed.
 import concurrent.futures
 import importlib.util
 import json
+import os
 import pathlib
 import re
 import shutil
@@ -155,8 +156,23 @@ def classify(lines):
     return out
 
 
+def clean_env():
+    """The environment minus git's repository-locating variables.
+
+    git exports GIT_DIR, GIT_INDEX_FILE and friends to hooks. A test that
+    runs `git init` or `git commit` in a temp dir while inheriting them acts
+    on the real repository: it rewrote its config and added commits to the
+    branch being committed. `git rev-parse --local-env-vars` is git's own
+    list of them.
+    """
+    out = subprocess.run(["git", "rev-parse", "--local-env-vars"],
+                         capture_output=True, text=True).stdout.split()
+    return {k: v for k, v in os.environ.items() if k not in out}
+
+
 def run_one(argv):
-    r = subprocess.run(argv, cwd=REPO, capture_output=True, text=True)
+    r = subprocess.run(argv, cwd=REPO, capture_output=True, text=True,
+                       env=clean_env())
     return r.returncode, (r.stdout + r.stderr)
 
 

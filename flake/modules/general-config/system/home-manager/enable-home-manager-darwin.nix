@@ -31,6 +31,11 @@
         home-manager = {
             useGlobalPkgs = true;
             useUserPackages = true;
+            # Same reason as enable-home-manager.nix: a file Home Manager
+            # cannot account for is renamed to <file>.hm-bak instead of
+            # aborting activation. The option comes from nixos/common.nix,
+            # which the darwin module imports, so it exists here too.
+            backupFileExtension = "hm-bak";
             users.elly = enabled.homeManager.elly-home-manager;
         };
     };
