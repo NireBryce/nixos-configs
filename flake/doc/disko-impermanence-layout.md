@@ -28,10 +28,16 @@ list actually wants:
 ```nix
 imports = [
     (import ../../general-config/impermanence/_disko/impermanence-luks-btrfs.nix {
-        device = "/dev/nvme0n1";
+        device = "/dev/disk/by-id/REPLACE-ME-before-running-disko";
     })
+    inputs.disko.nixosModules.disko
 ];
 ```
+
+The device is a deliberately fake placeholder: a real path such as
+`/dev/nvme0n1` exists on a live host here, and disko pointed at the wrong
+machine wipes real data. The path to the generator is written for a file
+directly in `host-config/<name>/`; from `<name>/hardware/` it is `../../../`.
 
 It sits under `_disko/` rather than a normal category directory because
 `import-tree` ignores any path containing `/_` by default -- the same rule

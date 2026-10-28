@@ -1,6 +1,6 @@
 # New host disk formatting, for agents
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-10-28_
 
 _Sibling reviewed: 2026-10-20 -- source body condensed; dropped a stale pointer to a CLAUDE.md State table that no longer exists; no other facts changed_
 
@@ -41,6 +41,10 @@ imports = [
 ];
 ```
 
+- **The generator does not import disko; the path depends on the file's
+  location.** Also import `inputs.disko.nixosModules.disko` in the same
+  `imports`. `../../` fits a file directly in `host-config/<name>/`; one in
+  `<name>/hardware/` needs `../../../`.
 - **The placeholder must be unmistakably fake.** Never a plausible path like
   `/dev/nvme0n1` — that exists on tenacity, and disko pointed at the wrong
   box silently wipes real data.

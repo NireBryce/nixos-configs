@@ -1,6 +1,6 @@
 # Module files
 
-_Last modified: 2026-10-26_
+_Last modified: 2026-10-28_
 
 A module file under `flake/modules/` never names its module. The
 [dirs-as-categories](https://github.com/NireBryce/dirs-as-categories) flake
@@ -86,10 +86,10 @@ Rules of use:
   that is not in the module-file shape as a flake-parts module, except that it
   refuses a function asking for an argument only a class module gets (`pkgs`,
   `modulesPath`, `osConfig`, `nixosConfig`, `darwinConfig`, `utils`), naming the
-  argument and the fix. A raw module that asks only for `config`, `lib` or
-  `options` is not caught and loads as a flake-parts module. Wrap it,
-  `{ nixos = <the raw module>; }`, to make it a module file, or rename it with a
-  leading `_` and import it from a class.
+  argument and suggesting a rename with a leading `_` plus an import from a
+  class. A raw module that asks only for `config`, `lib` or `options` is not
+  caught and loads as a flake-parts module. Wrapping it,
+  `{ nixos = <the raw module>; }`, also makes it a module file.
 - A file kept off the auto-imported tree (a `_`-prefixed path, or outside
   `flake/modules/`) is imported by path and is whatever its importer treats it
   as. `impermanence/_disko/impermanence-luks-btrfs.nix` is a curried function
