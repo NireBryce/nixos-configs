@@ -42,10 +42,6 @@ ship-land pr:
 book-lint *args:
     @"{{scripts}}/book_lint.py" "$@"
 
-# Book-contents block in each chapter, generated from SUMMARY.md: write | check
-book-nav *args:
-    @"{{scripts}}/book_nav.py" "$@"
-
 # A built mdBook as one self-contained HTML file: book-render <mdbook-output-dir> <dest.html>
 book-render *args:
     @"{{scripts}}/book_render.py" "$@"

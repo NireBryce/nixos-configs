@@ -1,40 +1,5 @@
 # How the non-obvious pieces work
 
-<!-- book-nav: generated from SUMMARY.md by `just agent book-nav write`; do not edit -->
-<details class="book-nav">
-<summary>Book contents (you are on: How the non-obvious pieces work)</summary>
-
-[Introduction](introduction.md)
-
-**Understanding the repo**
-
-1. **How the non-obvious pieces work** (this page)
-2. [Why it is built this way](rationale.md)
-
-**Extending it**
-
-3. [Categories and membership](categories.md)
-4. [Adding a module](adding-a-module.md)
-5. [Adding a package](adding-a-package.md)
-6. [Wiring a host](wiring-a-host.md)
-7. [Wiring a user and Home Manager](users-and-home-manager.md)
-8. [Darwin edge cases](darwin.md)
-
-**Working with agents**
-
-9. [How agents work in this repo](agents-in-the-repo.md)
-10. [Checks, guards and hooks](agent-checks-and-guards.md)
-11. [Git and agent workflows](git-and-agent-workflows.md)
-
-**Reference**
-
-12. [Glossary](glossary.md)
-
-← [Introduction](introduction.md) · [Why it is built this way](rationale.md) →
-
-</details>
-<!-- /book-nav -->
-
 Several parts of this flake behave differently from what a reader who knows
 NixOS would assume. Each section below states the rule, then the mechanism and
 its consequences. Read the chapter before you edit anything under

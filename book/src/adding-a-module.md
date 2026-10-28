@@ -1,40 +1,5 @@
 # Adding a module
 
-<!-- book-nav: generated from SUMMARY.md by `just agent book-nav write`; do not edit -->
-<details class="book-nav">
-<summary>Book contents (you are on: Adding a module)</summary>
-
-[Introduction](introduction.md)
-
-**Understanding the repo**
-
-1. [How the non-obvious pieces work](how-it-works.md)
-2. [Why it is built this way](rationale.md)
-
-**Extending it**
-
-3. [Categories and membership](categories.md)
-4. **Adding a module** (this page)
-5. [Adding a package](adding-a-package.md)
-6. [Wiring a host](wiring-a-host.md)
-7. [Wiring a user and Home Manager](users-and-home-manager.md)
-8. [Darwin edge cases](darwin.md)
-
-**Working with agents**
-
-9. [How agents work in this repo](agents-in-the-repo.md)
-10. [Checks, guards and hooks](agent-checks-and-guards.md)
-11. [Git and agent workflows](git-and-agent-workflows.md)
-
-**Reference**
-
-12. [Glossary](glossary.md)
-
-← [Categories and membership](categories.md) · [Adding a package](adding-a-package.md) →
-
-</details>
-<!-- /book-nav -->
-
 Creating a module under `flake/modules/` takes five steps: choose where it
 goes, name it, write it in the house style, stage it, and prove it is wired
 in. The same rules apply to renaming or moving a module. In this tree a

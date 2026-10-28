@@ -1,40 +1,5 @@
 # How agents work in this repo
 
-<!-- book-nav: generated from SUMMARY.md by `just agent book-nav write`; do not edit -->
-<details class="book-nav">
-<summary>Book contents (you are on: How agents work in this repo)</summary>
-
-[Introduction](introduction.md)
-
-**Understanding the repo**
-
-1. [How the non-obvious pieces work](how-it-works.md)
-2. [Why it is built this way](rationale.md)
-
-**Extending it**
-
-3. [Categories and membership](categories.md)
-4. [Adding a module](adding-a-module.md)
-5. [Adding a package](adding-a-package.md)
-6. [Wiring a host](wiring-a-host.md)
-7. [Wiring a user and Home Manager](users-and-home-manager.md)
-8. [Darwin edge cases](darwin.md)
-
-**Working with agents**
-
-9. **How agents work in this repo** (this page)
-10. [Checks, guards and hooks](agent-checks-and-guards.md)
-11. [Git and agent workflows](git-and-agent-workflows.md)
-
-**Reference**
-
-12. [Glossary](glossary.md)
-
-← [Darwin edge cases](darwin.md) · [Checks, guards and hooks](agent-checks-and-guards.md) →
-
-</details>
-<!-- /book-nav -->
-
 Coding agents write and maintain most of this repo's docs, scripts, skills
 and hooks, under nire's direction. An agent has no memory of earlier
 sessions. The mechanisms below route it to the right file for a task, and
@@ -225,12 +190,6 @@ Generators, automatic checks and skills back that rule:
 - `just agent book-lint` is the book's mechanical half. It catches dead
   links and anchors, chapters missing from the summary, and dates or counts
   that go stale. It runs in preflight.
-- `just agent book-nav` keeps a book-contents block under each chapter's
-  heading, generated from `SUMMARY.md`: the chapter tree in order, the
-  current page marked, and previous and next links. It is the sidebar for
-  readers of the plain Markdown; the rendered book hides it because mdBook
-  draws its own. `write` regenerates it after the chapter order changes, and
-  `check` runs in preflight.
 - Skill `trim-docs` tightens prose without breaking what lint pins in
   place (Contents blocks, date lines, siblings, anchors, § numbers).
 - Skill `fact-hygiene` governs how a fact is written so it does not rot:
