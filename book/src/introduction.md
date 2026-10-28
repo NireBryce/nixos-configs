@@ -85,9 +85,9 @@ undocumented and the documentation would fall out of date.
 
 Agent authorship changes how you should read the repo:
 
-- The prose has an agent's habits. Rules are written as hard-won lessons, and
+- The prose has an agent's habits. Rules are written as lessons from past mistakes, and
   the docs address agents as much as people.
-- Nire has corrected the load-bearing claims. The rest is agent output
+- Nire has corrected the claims the repo depends on. The rest is agent output
   with less scrutiny. Treat the documentation as reliable but unproven, and
   check any statement that matters to you against the code it cites.
 - The repo relies on mechanical checks to make up for that. Lints compare

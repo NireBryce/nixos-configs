@@ -168,7 +168,7 @@ name `boot` and merged. A second near-miss had no visible symptom at all. A
 two halves that were both libvirt config. Everything would still have worked
 until someone imported the category expecting only the category.
 
-The lesson: a merge is visible only when the two halves disagree. Give the
+A merge of the two halves shows only when they disagree. Give the
 file the specific name (`libvirt.nix`, `podman.nix`) and leave the general
 name to the category. Evaluation now enforces this naming rule.
 
