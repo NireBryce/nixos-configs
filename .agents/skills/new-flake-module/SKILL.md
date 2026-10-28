@@ -100,7 +100,9 @@ is caught only by the orphan check, not for its contents). The library's opt-in
 `module-class-contents`, that names a class part setting a namespace only
 another class has (`home` under `nixos`); it is a heuristic over a short list.
 This repo does not enable it yet: like `module-orphans` it fails only when
-built, and `just check` runs `--no-build` (issue 561).
+built, and `just check` runs `--no-build`; the misplaced list is not in
+`flake.moduleGraph`, so it cannot be gated at evaluation time the way orphans
+are (dirs-as-categories issue 37).
 
 ## Raw NixOS modules
 
@@ -126,8 +128,9 @@ Adding/removing/renaming a module in a category with an article under
 `wiki/config-structure/categories/`, or changing which folders are categories: update that
 article and run `just wiki-gen` (regenerates `wiki/config-structure/categories/00-INDEX.md`'s
 tables, the module counts and `wiki/config-structure/architecture.md`'s diagram) in the same
-change. `just check` fails on an orphan (a module nothing reaches; the
-`module-orphans` check); `just modules` checks untracked files, and that
+change. `just modules` fails on an orphan (a module nothing reaches, from
+`flake.moduleGraph.orphans`; the `module-orphans` flake check fails only when
+built, and `just check` is `--no-build`), and checks untracked files and that
 wiki-lint's file-only reading still matches the evaluated graph.
 
 Further reading: `wiki/config-structure/module-files.md`, `wiki/config-structure/module-style-guide.md`

@@ -1,6 +1,6 @@
 # Module style guide, for agents
 
-_Last modified: 2026-10-27_
+_Last modified: 2026-10-28_
 
 Condensed from [module-style-guide.md](module-style-guide.md). Rules only.
 
@@ -128,4 +128,4 @@ option without a reason beyond tidiness.
 - Filename = name. A repeated name, or one shared with a category, stops
   evaluation (was a silent merge, §34).
 
-`just check` fails on an orphan (`module-orphans`); `just modules` reports untracked files.
+`just modules` fails on an orphan (`module-orphans` does not: it fails only when built, and `just check` is `--no-build`), reports untracked files, and checks drift.

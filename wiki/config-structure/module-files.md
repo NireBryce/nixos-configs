@@ -38,7 +38,7 @@ categories. Each module now opens with a comment saying so. The input's
 | Not a module file | a function asking for `config`/`withSystem`, or a file with no class key: loaded as a plain flake-parts module (names for the three kinds of module: [Three kinds of module](#three-kinds-of-module-and-what-to-call-each)) |
 | `_` paths | skipped, as by import-tree |
 | Mistakes | duplicate names, unknown keys, unknown names in `includes`/`enables` stop evaluation, naming the file |
-| Checks | `nix flake check`'s `module-orphans` (dirs-as-categories' `checkOrphans`, on in `checks.nix`): modules nothing reaches; `just modules`: untracked files, and drift between wiki-lint's file-only reading and the evaluated graph |
+| Checks | `just modules`: orphans (modules nothing reaches, from `flake.moduleGraph.orphans`), untracked files, and drift between wiki-lint's file-only reading and the evaluated graph. `nix flake check`'s `module-orphans` (dirs-as-categories' `checkOrphans`, on in `checks.nix`) reports orphans too, but fails only when built and `just check` is `--no-build` |
 
 ## What a module file is
 

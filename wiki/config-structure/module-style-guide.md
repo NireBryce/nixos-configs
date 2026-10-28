@@ -1,6 +1,6 @@
 # Module style guide
 
-_Last modified: 2026-10-27_
+_Last modified: 2026-10-28_
 
 Every module under `flake/modules/` follows these conventions, not just
 packages. See
@@ -308,4 +308,4 @@ Not formatting, but it belongs here because getting it wrong produces no error:
 - A module's filename is its name. A file named like another module or a
   category stops evaluation (it used to merge silently, §34).
 
-`just check` fails on an orphan (`module-orphans`); `just modules` reports untracked files.
+`just modules` fails on an orphan (`module-orphans` does not: it fails only when built, and `just check` is `--no-build`), reports untracked files, and checks drift.

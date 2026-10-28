@@ -13,7 +13,9 @@
 { config, lib, inputs, ... }:
 {
     # checks.<system>.module-orphans: fails naming any module inside a
-    # category that no `includes`/`enables` reaches (wiki/config-structure/module-files.md).
+    # category that no `includes`/`enables` reaches (wiki/config-structure/module-files.md)
+    # -- when built. `just check` runs --no-build, so `just modules` is what
+    # gates orphans in preflight and CI.
     dirsAsCategories.checkOrphans = true;
 
     perSystem = { system, ... }:
@@ -89,15 +91,20 @@
         pkgs = inputs.nixpkgs.legacyPackages.${system};
     in
     {
-        # Orphans -- modules nothing reaches, which evaluate and install nothing -- are
-        # dirs-as-categories' own check, `module-orphans`, turned on at the top of this
-        # file; `just modules` runs the rest (untracked files, drift against wiki-lint's
-        # reading).
+        # `just check` is `nix flake check --no-build`, which evaluates a check
+        # and never runs its builder, so a check that fails by `exit 1` in a
+        # builder cannot fail there (invariants.nix explains the same trap).
+        # lib-helpers therefore throws during evaluation. Orphans -- modules
+        # nothing reaches, which evaluate and install nothing -- are
+        # dirs-as-categories' own check, `module-orphans`, turned on at the top
+        # of this file; it fails only when built, so `just modules` reads the
+        # same list from flake.moduleGraph at evaluation time and is the gate
+        # that fails, along with untracked files and drift against wiki-lint's
+        # reading.
         checks = hostChecks // homeChecks // {
-            lib-helpers = pkgs.runCommand "lib-helpers" { } (
-                if libTestFailures == [ ] then "touch $out"
-                else "echo ${lib.escapeShellArg (builtins.toJSON libTestFailures)}; exit 1"
-            );
+            lib-helpers =
+                if libTestFailures == [ ] then pkgs.runCommand "lib-helpers" { } "touch $out"
+                else throw "lib-helpers: ${builtins.toJSON libTestFailures}";
         };
     };
 }
