@@ -41,8 +41,9 @@ Hand-written, not generated. Follow a sibling file:
 
 (`just add-module homeManager <path> "<description>"` writes the file with a
 `# summary:` line; in `packages-config/` rename it to `# package summary:`.)
-The `package summary:` line is required: say what the package *is*, not just
-its name or a URL, so a reader browsing the module knows without opening nixpkgs.
+The `package summary:` line is required (`just wiki-lint`'s `summaries` check
+fails without it): say what the package *is*, not just its name or a URL, so a
+reader browsing the module knows without opening nixpkgs.
 
 File at `packages-config/<category>/<tool>/<tool>.nix` (some flatter:
 `nix-utils/nvd/nvd.nix`, `terminals/kitty/kitty.nix`,
