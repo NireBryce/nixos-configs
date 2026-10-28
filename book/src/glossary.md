@@ -191,7 +191,7 @@ The offline checks are the checks that need neither nix nor `just`, run by
 the git hooks when nix cannot supply the lint tools, as in a cloud container
 that cannot fetch the flake inputs. `staged` mode checks syntax and parsing
 of staged files plus the wiki lint; `preflight` mode runs preflight's
-`python3` steps.
+`python3` steps except those that need nix, and names what it left to CI.
 Source: `flake/scripts/offline_checks.py`, docstring.
 
 ## Orphan

@@ -154,8 +154,9 @@ fire on their own, and skills an agent runs.
   host table, the category index tables, the module counts) sits between
   `<!-- generated:<name> … -->` and `<!-- /generated -->` markers.
   `just wiki-gen` rewrites each region from its source; an edit inside a
-  region is lost on the next run. To change a generated fact, change its
-  source and run `just wiki-gen`.
+  region is lost on the next run, except in a column the marker calls
+  hand-written (such as a host's role). To change a generated fact, change
+  its source and run `just wiki-gen`.
 - **`just wiki-lint`** runs `wiki/meta/scripts/check_wiki.py check`, a set of
   static checks of the wiki, `AGENTS.md`, the rules files and the skills
   against the repo. The [checks chapter](agent-checks-and-guards.md) lists
@@ -185,8 +186,9 @@ fire on their own, and skills an agent runs.
   pointer to the file or command that answers it. `check_wiki.py docrefs`
   flags the bare count-of-files shape.
 
-Automatic: `just wiki-gen --check` and `just wiki-lint` inside preflight and
-CI, and the edit-check hook. Convention: running `just wiki-gen`, and the
+Automatic: `just wiki-lint`, which includes the `generated` check (the same
+test as `just wiki-gen --check`), inside preflight and CI, and the edit-check
+hook. Convention: running `just wiki-gen`, and the
 skills.
 
 Source: `AGENTS.md`, hard rules, "State" and "Docs";
@@ -280,7 +282,7 @@ Source: `.agents/skills/extract-agent-tooling/SKILL.md`;
 | Rules files | Loaded by path under Claude Code; `rules` lint | Opening them under other harnesses |
 | Skills | Discovery, listing, `skill-files` lint | Loading the skill when it applies |
 | Lessons | Lesson-reminder hook; `lessons` lint | Writing the article, entry, Home rule and map topic |
-| Docs | `wiki-lint` and `wiki-gen --check` in preflight; edit-check hook | `wiki-sync`, `docs-audit-all`, `trim-docs`, `fact-hygiene` |
+| Docs | `wiki-lint` (including its `generated` check) in preflight; edit-check hook | `wiki-sync`, `docs-audit-all`, `trim-docs`, `fact-hygiene` |
 | Scripts | Helper names at session start | `agent-scripts`; checking `just agent` first |
 | Proposals | None | `boyscouting`, `propose-issue` |
 | Extraction | None | The `extract-*` skills |

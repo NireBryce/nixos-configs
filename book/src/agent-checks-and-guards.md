@@ -18,7 +18,7 @@ the two lists differ. The events used here are `SessionStart`, `PreToolUse`
 (before a tool runs, matched by tool name: `Bash`, `Edit|Write|MultiEdit`,
 `Read|Grep|Glob`) and `PostToolUse` (after it runs).
 
-A hook's reply takes one of four forms:
+A hook's reply takes one of five forms:
 
 - **deny**: `permissionDecision: "deny"` stops the call, and the reason
   reaches the agent in every permission mode.
@@ -29,6 +29,9 @@ A hook's reply takes one of four forms:
   same text in `hookSpecificOutput.additionalContext` for the agent. The
   call goes ahead.
 - **remind**: `additionalContext` only, for the agent. The call goes ahead.
+- **block** (after the call): `decision: "block"` with a reason, from a
+  `PostToolUse` hook. The tool has already run; the reason is fed back to the
+  agent. Only the secrets output scan uses it.
 
 A *[guard hook](glossary.md#guard-hook)* is a hook that denies, asks or warns
 on a pattern in the tool call. Every guard checks for `jq` first; without it,
@@ -46,12 +49,12 @@ Source: `.agents/settings.json`; `.zcode/config.json`;
 | Layer | Triggered by | Enforces | On failure | Lives in |
 |---|---|---|---|---|
 | Session-start hook | Session start | Puts host, branch, worktree, dirty count, hooks path and helper names in context; sets `core.hooksPath` to `.githooks` when unset | Reminds | `.agents/hooks/session-start.sh` |
-| git guard | `Bash` call that runs git | No discarding uncommitted work; a pause before force pushes, branch force-deletes, history rewrites and similar | Blocks on a dirty tree; otherwise asks (denies under ZCode) | `.agents/hooks/git-guard-pretooluse.sh` |
+| git guard | `Bash` call that runs git | No discarding uncommitted work; a pause before force pushes, branch force-deletes, history rewrites and similar | Denies discarding operations on a dirty tree (a clean tree passes); asks for the pause-worthy operations (denies under ZCode, except two routine cleanups) | `.agents/hooks/git-guard-pretooluse.sh` |
 | just guard | `Bash` call that runs `just` | A `Bash(just …)` allow rule only ever approves this repo's `.justfile` | Asks | `.agents/hooks/just-guard-pretooluse.sh` |
 | Untracked-nix guard | `Bash` call that evaluates the flake | `git add` before `nix eval` | Warns | `.agents/hooks/nix-untracked-guard-pretooluse.sh` |
 | Secrets command guard | `Bash` call that runs `sops` or touches `/run/secrets` | No decrypted file in output; metadata-only access to deployed secrets | Blocks | `.agents/hooks/secrets-guard-pretooluse.sh` |
 | Secrets read guard | `Read`, `Grep` or `Glob` | No read-tool access under `/run/secrets` or `/run/secrets.d` | Blocks | `.agents/hooks/secrets-read-guard-pretooluse.sh` |
-| Secrets output scan | After a `Bash` call | Flags secret-shaped text in the output | Warns the agent to stop and name it only | `.agents/hooks/secrets-guard-posttooluse.sh` |
+| Secrets output scan | After a `Bash` call | Flags secret-shaped text in the output | Blocks after the call has run, with a reason telling the agent to name it only | `.agents/hooks/secrets-guard-posttooluse.sh` |
 | Impermanence edit guard | `Edit`/`Write` in the impermanence tree or a host hardware module | Safety context before the edit | Warns | `.agents/hooks/impermanence-edit-guard-pretooluse.sh` |
 | Lesson-reminder hook | `Bash` or `Edit`/`Write` matching a topic in `.agents/lessons-map.toml` | The lesson for that area, once per session | Reminds | `.agents/hooks/lesson-reminder-pretooluse.py` |
 | Edit-check hook | After an `Edit`/`Write` | Stale sibling pair, shell-shaped `${…}` in a Nix `''` string, untracked new module | Reminds | `.agents/hooks/edit-check-posttooluse.sh` |
@@ -102,7 +105,9 @@ tiers.
   `worktree remove --force`, and resetting an existing branch pointer all
   ask. Under ZCode, where an ask resolves to allow, these become denies,
   except the two routine cleanup steps the skills use (the post-merge remote
-  branch delete and `worktree remove --force`) when run as a single command.
+  branch delete and `worktree remove --force`) when run as a single command,
+  and the remote delete never for a command that names `experimental` or
+  `main`.
 
 The guard's status checks run with `GIT_DIR`, `GIT_WORK_TREE` and
 `GIT_INDEX_FILE` cleared and `core.fsmonitor` off, so the check never runs
@@ -133,8 +138,9 @@ untracked files, so a module written minutes ago does not exist for that
 evaluation. The guard matches `nix eval`, `build`, `run`, `develop`,
 `profile` and `flake`, `nh os|home|d`, and the `just` recipes that evaluate
 (`build`, `boot`, `switch`, `check`, `update`, `diff`, `fingerprint`,
-`fingerprint-home`). It runs `git ls-files --others` in the command's own
-repository, so it is correct inside a worktree. It only warns, because
+`fingerprint-home`). It runs `git ls-files --others` in the repository that contains the tool
+call's working directory, so it is correct when the session runs inside a
+worktree. It only warns, because
 untracked files are often deliberate.
 
 Source: `.agents/hooks/nix-untracked-guard-pretooluse.sh`, header.
@@ -171,7 +177,8 @@ The impermanence edit guard warns when an `Edit` or `Write` lands in
 `flake/modules/general-config/impermanence/` or in a host hardware module
 under `flake/modules/host-config/*/hardware/`. The warning says what the
 code there does on boot, points at `AGENTS.md`'s Safety section and the
-skill `impermanence-initrd`, and recommends `just boot` over `just switch`.
+skill `impermanence-initrd`; for a host hardware module it also recommends
+`just boot` over `just switch`.
 It warns rather than asks, because most edits there are legitimate
 maintenance. It matches paths only, so a Bash-tool edit of the same files
 does not trip it. It also delivers the `impermanence` topic of the lessons
@@ -190,7 +197,8 @@ edited file (or the Bash call's working directory), so a worktree uses its
 own map. A topic matches an edit by its `paths` globs or a Bash command by
 its `command` regex. `remind_on` narrows a path topic to file creation, or
 switches the reminder off for topics too broad to remind on. The hook never
-decides; any error becomes one `systemMessage` and the call goes ahead.
+decides; most errors become one `systemMessage` and the call goes ahead (a
+state-file error, or a python3 older than 3.11, stays silent).
 
 Source: `.agents/hooks/lesson-reminder-pretooluse.py`, docstring;
 `.agents/hooks/lessons_map.py`, docstring; `.agents/lessons-map.toml`,
@@ -220,8 +228,10 @@ Source: `.agents/hooks/edit-check-posttooluse.sh`, header;
 
 The ZCode canary warns when the git and just guards' ZCode detection may be
 disarmed. Both guards detect ZCode from camelCase fields in the hook payload.
-The canary cross-checks that against `ZCODE_PROJECT_DIR` in the environment,
-and when the two disagree it says so on every Bash call. It never blocks.
+The canary cross-checks that against `ZCODE_PROJECT_DIR` in the environment.
+When the environment says ZCode but the payload carries none of the camelCase
+fields, it says so on every Bash call. The reverse mismatch stays silent. It
+never blocks.
 
 Source: `.agents/hooks/zcode-canary-pretooluse.sh`, header;
 `.agents/rules/agent-config.md`.
@@ -251,8 +261,8 @@ every worktree.
 The [offline checks](glossary.md#offline-checks) in `staged` mode compile
 staged `.py` files, run `bash -n` on shell scripts and hooks, parse `.json`
 and `.toml`, run `nix-instantiate --parse` on `.nix`, and run the wiki lint
-without its nix-dependent `generated` check. In `preflight` mode they run
-every `python3` step of the preflight recipe and name the steps left to CI.
+without its nix-dependent `generated` check. In `preflight` mode they run the preflight recipe's `python3` steps, except
+those the script lists as needing nix, and name the steps left to CI.
 
 Source: `.githooks/pre-commit`, `.githooks/commit-msg`, `.githooks/pre-push`;
 `flake/scripts/with-nix-tools.sh`; `flake/scripts/offline_checks.py`,
@@ -275,7 +285,7 @@ of them run inside [preflight](glossary.md#preflight).
   <recipe>` mentions against the `.justfile`), `skills` (skill mentions
   against `.agents/skills/`), `docrefs` (`just agent <helper>` names, skill
   paths, quoted section headings, moved directories, and bare counts of
-  files, modules, hosts, recipes or skills).
+  files, subdirectories, modules, hosts, recipes or skills).
 - **Links**: `links` (every relative link resolves) and `anchors` (every
   `#fragment` matches a heading's slug).
 - **Page structure**: `contents` (the `## Contents` block matches the
@@ -348,7 +358,8 @@ rule for `nix` itself never qualifies, because its flags and `--expr` reach
 far beyond evaluating this flake; `just fingerprint` is the pre-approved way
 to get a `drvPath`.
 
-`test_guards.py` enforces both rules: it fails on any `Bash(nix …)` rule, on
+`test_guards.py` enforces both rules (that test is skipped where `just` is not
+on `PATH`): it fails on any `Bash(nix …)` rule, on
 a wildcard outside the `Bash(just <recipe> *)` form, and on a wildcard
 recipe that `just --show` does not mark `[positional-arguments]`. Read-only
 git forms are allowed by Claude Code itself, and a hook's deny outranks an
