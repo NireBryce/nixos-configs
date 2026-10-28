@@ -233,7 +233,7 @@ An agent that notices a problem outside its task proposes it rather than
 fixing it, unless the problem is small and in a file it is already
 changing. These skills draw the line:
 
-- **`boyscouting`** covers small, local, behaviour-neutral fixes (a stale
+- **`boyscouting`** covers small, local, behavior-neutral fixes (a stale
   comment, an unused variable) in a file the diff already touches. The fix
   goes in the same commit, with a trailing clause in the message saying it
   is incidental. A real bug, a file the agent was not going to open, or a

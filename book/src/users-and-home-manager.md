@@ -108,7 +108,7 @@ say, and marks what they do not.
 
 Home Manager's activation is a separate step from the system's. Activation
 looks at the files Home Manager already owns and links its files into the
-home directory. If a file Home Manager does not recognise sits where Home
+home directory. If a file Home Manager does not recognize sits where Home
 Manager wants to write, activation stops instead of overwriting the file.
 
 - **NixOS hosts set `backupFileExtension = "hm-bak"`.** Without that
@@ -171,7 +171,7 @@ while the home configuration is fixed.
 
 Unverified here, because no file in the repo records it: exactly how a
 failing `home-manager-<name>.service` is reported by the switch command on a
-NixOS host (that is general NixOS behaviour, not something this repo
+NixOS host (that is general NixOS behavior, not something this repo
 configures), and whether darwin's launchd-based activation reports a failure
 the same way. Test on the target host and note the result rather than
 assuming. Per the repo's own habit, say which level you reached: evaluated,

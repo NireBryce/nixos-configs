@@ -161,7 +161,7 @@ Source: `AGENTS.md` ("Commands"), `flake/scripts/rebuild.sh`.
 1. Check whether nixpkgs builds the package on `aarch64-darwin`
    (`just available <pkg>`). If it does not, there is nothing to do: the
    filter warns and drops it.
-2. Check whether the package is `meta.broken` there, or behavioural
+2. Check whether the package is `meta.broken` there, or behavioral
    (option-shaped, asserts early). If so, guard the module with
    `lib.mkIf (!pkgs.stdenv.isDarwin)`.
 3. Check whether Homebrew already installs it. Run
