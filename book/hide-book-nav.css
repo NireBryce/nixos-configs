@@ -1,0 +1,3 @@
+/* The sidebar already shows the chapter tree; the book-contents block in each
+   chapter is for readers of the plain Markdown (see .agents/scripts/book_nav.py). */
+details.book-nav { display: none; }

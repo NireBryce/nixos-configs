@@ -1,5 +1,40 @@
 # Introduction
 
+<!-- book-nav: generated from SUMMARY.md by `just agent book-nav write`; do not edit -->
+<details class="book-nav">
+<summary>Book contents (you are on: Introduction)</summary>
+
+**Introduction** (this page)
+
+**Understanding the repo**
+
+1. [How the non-obvious pieces work](how-it-works.md)
+2. [Why it is built this way](rationale.md)
+
+**Extending it**
+
+3. [Categories and membership](categories.md)
+4. [Adding a module](adding-a-module.md)
+5. [Adding a package](adding-a-package.md)
+6. [Wiring a host](wiring-a-host.md)
+7. [Wiring a user and Home Manager](users-and-home-manager.md)
+8. [Darwin edge cases](darwin.md)
+
+**Working with agents**
+
+9. [How agents work in this repo](agents-in-the-repo.md)
+10. [Checks, guards and hooks](agent-checks-and-guards.md)
+11. [Git and agent workflows](git-and-agent-workflows.md)
+
+**Reference**
+
+12. [Glossary](glossary.md)
+
+[How the non-obvious pieces work](how-it-works.md) →
+
+</details>
+<!-- /book-nav -->
+
 This book explains one repository: a personal configuration for NixOS,
 nix-darwin and [Home Manager](glossary.md#home-manager), built as a single
 flake with [flake-parts](https://flake.parts). Home Manager manages a user's
@@ -50,9 +85,9 @@ undocumented and the documentation would fall out of date.
 
 Agent authorship changes how you should read the repo:
 
-- The prose has an agent's habits. Rules are written as hard-won lessons, and
+- The prose has an agent's habits. Rules are written as lessons from past mistakes, and
   the docs address agents as much as people.
-- Nire has corrected the load-bearing claims. The rest is agent output
+- Nire has corrected the claims the repo depends on. The rest is agent output
   with less scrutiny. Treat the documentation as reliable but unproven, and
   check any statement that matters to you against the code it cites.
 - The repo relies on mechanical checks to make up for that. Lints compare
@@ -181,10 +216,11 @@ this design surprises people.
 
 1. Read [how the non-obvious pieces work](how-it-works.md), then
    [why it is built this way](rationale.md). The how-to chapters assume both.
-2. Read the how-to chapters in the order you need them:
-   [adding a package](adding-a-package.md),
-   [adding a module](adding-a-module.md),
+2. Read the how-to chapters in book order, or jump to the one you need.
+   Each builds on the one before it:
    [categories and membership](categories.md),
+   [adding a module](adding-a-module.md),
+   [adding a package](adding-a-package.md),
    [wiring a host](wiring-a-host.md),
    [wiring a user and Home Manager](users-and-home-manager.md), and
    [Darwin edge cases](darwin.md).
