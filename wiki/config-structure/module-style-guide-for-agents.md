@@ -28,7 +28,7 @@ Never hand-edit. By hand it is
 |---|---|
 | total `.nix` files under `flake/modules/` | 241 |
 | header comment (`# This is a dirs-as-categories module…`) | 227 |
-| `# summary:` / `# package summary:` comment | 86 |
+| `# summary:` / `# package summary:` comment | 181 |
 | `with pkgs;` package lists | 115 |
 
 <!-- /generated -->
