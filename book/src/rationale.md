@@ -89,7 +89,7 @@ depend on was modelled and evaluated first (§12 in
 [agent-lessons-learned.md](../../wiki/agent-lessons-learned.md)).
 
 `flake/doc/dirsAsCategory.md` keeps a "How to convert" section as a
-documented way back. The user has chosen this pattern three times: when a
+documented way back. Nire has chosen this pattern three times: when a
 choice is close, keep a documented escape hatch and stop re-arguing the
 choice (§13).
 

@@ -103,7 +103,7 @@ tiers.
   forced `checkout` or `switch`, `checkout` onto paths, and `rm -f`, the
   guard runs `git status --porcelain` in the repository the command targets.
   A clean tree passes with no message. A dirty tree is denied, with the dirty
-  paths listed and an instruction to ask the user. When the guard cannot tell
+  paths listed and an instruction to ask nire. When the guard cannot tell
   which repository the command acts on (anything beyond plain `cd <path>` and
   `git [-C <path>] <subcommand> <args>` segments), it asks.
 - Ask tier. These all ask: a force push without `--force-with-lease`, a

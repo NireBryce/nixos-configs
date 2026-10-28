@@ -19,6 +19,24 @@ and the git history, and every chapter says where each claim came from. That
 makes it checkable and makes it drift: when a script, hook, skill or doc it
 describes changes, the chapter is the part nobody edits.
 
+## Book prose conventions
+
+The book's own rules, which the clarity pass (step 5) enforces:
+
+- **"nire" is the repository author.** Where the text means the person who
+  directs the agents, owns the repo and decides (who asks for a filing, who
+  merges, who switches a host), write "nire", lower-case mid-sentence. The
+  introduction names them once. Keep "the user" where it means a user of the
+  system in an example or the account the config builds (the user
+  environment, the user's fonts, `elly-user.nix`). This differs from
+  `AGENTS.md`, which has agents write "the user" in repo text; the book is
+  the one place that names the author, at their request.
+- Point at the file or command that lists a thing instead of stating a count,
+  a date or a host roster (`book-lint check` enforces it).
+- Define a term in one clause at first use; link the glossary after that.
+- Terminology: module file, NixOS/Home Manager/darwin module, flake-parts
+  module (`wiki/config-structure/module-files.md`).
+
 ## Steps
 
 1. **Mechanical pass first.** `just agent book-lint check` fails on a dead
