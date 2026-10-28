@@ -59,9 +59,6 @@
 # always-ready-to-stream was judged worth a few seconds of login lag. Revisit
 # if that tradeoff stops feeling worth it.
 {
-    # `{ ... }:` kept over statix's suggested `_:` -- deliberate, see
-    # wiki/config-structure/module-style-guide.md's "`{ ... }:` on an inner module
-    # lambda".
     nixos = _: {
         services.sunshine = {
             enable      = true;

@@ -15,9 +15,6 @@
 # the normal DAC permission checks on the device nodes below, so elly still
 # needs to be a member of the groups that own them:
 {
-    # `{ ... }:` kept over statix's suggested `_:` -- deliberate, see
-    # wiki/config-structure/module-style-guide.md's "`{ ... }:` on an inner module
-    # lambda".
     nixos = _: {
         users.users.elly.extraGroups = [
             "render" # /dev/dri/renderD* (root:render, 0660) -- VAAPI hardware encode.

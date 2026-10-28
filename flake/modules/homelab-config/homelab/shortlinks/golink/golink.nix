@@ -11,8 +11,8 @@
 # for it.
 #
 # Named `shortlinks`, not `golink`: a category and its one module both named
-# `golink` would declare the same `flake.modules.nixos.golink` attribute and
-# silently MERGE (the `containers`/`podman.nix` collision CLAUDE.md
+# `golink` would share one name, and a repeated name stops evaluation (it once
+# merged silently: the `containers`/`podman.nix` collision AGENTS.md
 # documents). Not `golinks` either -- one letter from the module name reads
 # as a typo later.
 #

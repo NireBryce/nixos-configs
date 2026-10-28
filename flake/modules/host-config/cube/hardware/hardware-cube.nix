@@ -37,9 +37,9 @@
 #
 # Named hardware-cube.nix, not hardware-configuration.nix: durandal's own
 # capture already claims the module name "hardware-configuration", and a
-# module's name is its filename -- reusing that name here would merge this
-# host's fileSystems into durandal's under the same attribute instead of
-# erroring, the same collision tenacity's suffixed filename exists to avoid.
+# module's name is its filename -- reusing that name here would repeat it,
+# and a repeated name stops evaluation, the same clash tenacity's suffixed
+# filename exists to avoid.
 # See CLAUDE.md's new-flake-module trap notes.
 {
     nixos = { config, lib, modulesPath, ... }:

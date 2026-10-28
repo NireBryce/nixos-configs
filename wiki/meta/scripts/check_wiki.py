@@ -247,7 +247,7 @@ structured, extractable facts only:
             `doc_files`, so recipes, skills, links, secrets and counts cover
             it.
 
-  check     Runs all sixteen of the above.
+  check     Runs every check listed above.
 
     check_wiki.py imports       [repo-root]
     check_wiki.py table         [repo-root]
@@ -265,6 +265,7 @@ structured, extractable facts only:
     check_wiki.py siblings      [repo-root]
     check_wiki.py lessons       [repo-root]
     check_wiki.py rules         [repo-root]
+    check_wiki.py docrefs       [repo-root]
     check_wiki.py check         [repo-root] [--skip=name,name]
     check_wiki.py gen-contents  <file.md> [file.md ...]
 

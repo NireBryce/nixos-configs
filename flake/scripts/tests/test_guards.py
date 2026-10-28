@@ -27,7 +27,8 @@ settings.json names exists on disk, so a guard can't silently fall out of
 -- or never enter -- the harness config.
 
 jq is required (the guards need it too); without it the test skips with a
-note, the way .githooks/pre-commit skips without statix. Pure stdlib plus
+note, the way .githooks/pre-commit falls back to the offline checks when nix
+cannot supply statix. Pure stdlib plus
 bash, jq, git; no network, no fleet state. Runs via `just guards-test`,
 part of `just preflight` and CI.
 """

@@ -11,9 +11,9 @@
 # this file. That broke the sibling branch twice.
 #
 # Named for the host, not `hardware-configuration`: a module's filename becomes
-# its attribute name, and same-named modules merge -- durandal has one of those
-# already, and the two would have become one module holding both machines'
-# filesystems and LUKS devices.
+# its attribute name, and a repeated name stops evaluation -- durandal has one
+# of those already. (Before repeats were refused, the two would have become one
+# module holding both machines' filesystems and LUKS devices.)
 {
     nixos = { config, lib, modulesPath, ... }:
 {

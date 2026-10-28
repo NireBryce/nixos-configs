@@ -28,9 +28,10 @@ name: flake-check
 # `just lint` (statix + deadnix + an oversized-file check, ratcheted
 # against flake/scripts/lint-baseline.json) here is the backstop for the
 # local pre-commit hook (.githooks/pre-commit, wired in via `just
-# install-hooks`): the hook is opt-in per clone and skips itself silently
-# if statix/deadnix aren't on PATH, so this is what actually blocks a
-# regression on a contributor who never ran `just install-hooks`.
+# install-hooks`): the hook is opt-in per clone, and where nix cannot supply
+# statix/deadnix it runs the offline checks (flake/scripts/offline_checks.py)
+# instead of the ratchet, so this is what actually blocks a regression on a
+# contributor who never ran `just install-hooks`.
 # statix/deadnix/just come from the flake's own dev shell
 # (flake/modules/dev-shell.nix, LOCKED nixpkgs) -- the same shell `just
 # lint` enters locally when they aren't on PATH, so the ratchet counts
