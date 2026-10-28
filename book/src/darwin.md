@@ -12,8 +12,9 @@ the [glossary](glossary.md).
   `mkDarwinHost`, which mirrors the NixOS helper but calls nix-darwin's
   `darwinSystem`. Like the NixOS helper, `mkDarwinHost` does *not* take
   `pkgs` from flake-parts' per-system scope
-  ([perSystem](glossary.md#persystem)). The perSystem `pkgs` has no
-  `nixpkgs.config` applied and would drop `allowUnfree` without an error.
+  ([perSystem](glossary.md#persystem)). The perSystem `pkgs` is built from
+  the same shared `nixpkgs.config` but is a different instance from the
+  host's.
 - The host's definition is
   `flake/modules/host-config/lysithea-configuration.nix`, which lists
   categories under `includes.darwin`. A

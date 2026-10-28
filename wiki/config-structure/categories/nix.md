@@ -16,7 +16,7 @@ _Last modified: 2026-10-22_
   - `homeManager` — nearly empty. `nixpkgs.config` **cannot** be set from
     Home Manager here: HM is NixOS-managed with `useGlobalPkgs`, which makes
     it *reject* every `nixpkgs.*` option outright rather than silently
-    ignore it. `allowUnfree` therefore has to come from the `nixos` block
+    ignore it. The shared `nixpkgs.config` (`flake.lib.nixpkgs.config`, so `allowUnfree`) therefore has to come from the `nixos` block
     below instead, applying to the same shared `pkgs` instance. This also
     means the old `allowUnfreePredicate = (_: true)` workaround for
     upstream Home Manager issue #2942 is gone — if unfree packages start

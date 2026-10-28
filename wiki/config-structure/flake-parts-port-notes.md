@@ -206,8 +206,9 @@ omitted; arguments `pkgs`, `system`, `self'`, `inputs'`, `config`,
 `options`, `lib`.
 
 - `pkgs` defaults to `inputs.nixpkgs.legacyPackages.${system}`, **with no
-  config applied** — which is exactly why host `pkgs` is not taken from
-  here.
+  config applied**. `flake/modules/nixpkgs.nix` replaces it with an instance
+  built from `flake.lib.nixpkgs.config`, so checks and the dev shell carry
+  `allowUnfree`. Host `pkgs` is still not taken from here.
 - `inputs'.foo = config.perInput system inputs.foo`, so
   `inputs'.foo.packages.bar` rather than
   `inputs.foo.packages.${system}.bar` (`modules/perSystem.nix:82-119`).
@@ -239,10 +240,11 @@ for exactly one thing: getting `self'`/`inputs'` into `specialArgs`.
 `imports`, which is evaluated before `config`.
 
 **Deliberately not done: passing `nixpkgs.pkgs = pkgs` from perSystem.**
-Sharing that bare `legacyPackages` would drop `allowUnfree` and break the
-unfree packages these hosts install. Letting `nixosSystem` build its own
-`pkgs` from the host's own `nixpkgs.config` is the right trade, at the cost
-of a second nixpkgs instantiation. `hosts.nix` says so at its head.
+perSystem's `pkgs` now carries the shared `nixpkgs.config`, but reusing the
+instance means `nixpkgs.pkgs`, which makes NixOS ignore `nixpkgs.config`, and
+moves `hostPlatform` and overlays. Letting `nixosSystem` build its own `pkgs`
+from the same shared config is the trade, at the cost of a second nixpkgs
+instantiation. `hosts.nix` says so at its head.
 
 **`withSystem` on a system not in `systems` fails** — keep the two in sync.
 

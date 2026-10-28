@@ -10,7 +10,7 @@
 # A function asking for `config`, so dirs-as-categories loads it as a plain
 # flake-parts module rather than a module file
 # (wiki/config-structure/module-files.md).
-{ config, lib, inputs, ... }:
+{ config, lib, ... }:
 {
     # checks.<system>.module-orphans: fails naming any module inside a
     # category that no `includes`/`enables` reaches (wiki/config-structure/module-files.md)
@@ -25,7 +25,7 @@
     # which is published while this is "build" or "eval".
     dirsAsCategories.checkClassContents = "build";
 
-    perSystem = { system, ... }:
+    perSystem = { system, pkgs, ... }:
     let
         # Both host classes, each filtered to the system it evaluates under.
         # nix-darwin sets nixpkgs.hostPlatform the same way NixOS does, so one
@@ -95,7 +95,6 @@
                 expr = L.fleet.baseHostnames [ "nire-a" "forge-runner" "nire-b" ]; expected = [ "nire-a" "nire-b" ];
             };
         };
-        pkgs = inputs.nixpkgs.legacyPackages.${system};
     in
     {
         # `just check` is `nix flake check --no-build`, which evaluates a check

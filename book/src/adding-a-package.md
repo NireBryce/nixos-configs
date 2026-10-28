@@ -172,7 +172,7 @@ the kind of configuration the module targets. Get these points right:
   category name anywhere in the tree, or evaluation stops.
 - Put `pkgs` in the inner `homeManager` lambda, never in the outer header.
   A `pkgs` from anywhere else comes from
-  [perSystem](glossary.md#persystem) and loses `allowUnfree`.
+  [perSystem](glossary.md#persystem), a different instance from the host's.
 - Write one `# package summary:` line that says what the package *is*.
   The name alone is not enough.
 - Use `with pkgs; [ … ]`, one package per line, with no `pkgs.` prefix inside

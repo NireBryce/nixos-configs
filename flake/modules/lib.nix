@@ -17,5 +17,6 @@
     flake.lib = {
         persist = import ./_lib/persist.nix { inherit lib; };
         fleet   = import ./_lib/fleet.nix   { inherit lib; };
+        nixpkgs = import ./_lib/nixpkgs.nix { inherit lib; };
     };
 }

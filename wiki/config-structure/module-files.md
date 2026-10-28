@@ -197,6 +197,7 @@ reaches it as `inputs.self.lib`, a plain flake-parts module as
 | `persist.persistRegardless config { … }` | a folder that belongs on `/persist` whether or not root is wiped (nire-cube has the volume); gated on `nire.hasPersistVolume` |
 | `persist.usesImpermanence config` | the predicate itself |
 | `fleet.baseHostnames names`, `fleet.tailnetName host` | `nire-<x>` base hostnames and their `ts-<x>` tailnet names |
+| `nixpkgs.config` | the fleet's one `nixpkgs.config` (`allowUnfree`): hosts set it, and `nixpkgs.nix` builds perSystem's `pkgs` from it |
 
 `persistRegardless` reads an option, not `config.fileSystems`: persistence adds
 `fileSystems` entries, so testing them from inside the entry is infinite
