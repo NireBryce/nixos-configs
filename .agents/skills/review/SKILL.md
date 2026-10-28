@@ -69,8 +69,29 @@ A diff read is never enough (bugs serialize). In order:
   `secrets.yaml` (`secrets-hygiene`; flagged hit → `triage-flagged-secrets`
   before rotation talk).
 
+## Flake input bumps
+
+A lock move is the change most likely to pass CI and still be wrong. Check:
+
+- **The locked rev is the tag the title names**:
+  `gh api repos/<owner>/<repo>/git/ref/tags/<tag> --jq .object.sha` against
+  `flake.lock`'s `rev`; and only the intended input moved (`git diff
+  flake/flake.lock`).
+- **The upstream changelog's Breaks, read, not inferred** from the one
+  option that visibly broke. Every option the repo sets on that input is
+  re-checked.
+- **Every prose claim about upstream behaviour** (a field exists, a mode
+  fails under `--no-build`) names where it was read (changelog, source) or
+  says it is unverified. "Looked it up" is not a source.
+- **A link dropped from the docs** (an upstream issue) is dropped because the
+  issue is closed: `gh issue view`, not memory.
+
 ## Conventions worth flagging
 
+- **Line width of added prose.** Comments are held to 80 columns by
+  `just comment-wrap`; no checker covers skill or book prose, so scan the
+  diff for added lines far past their neighbours (`git diff -U0 | grep
+  '^+' | awk 'length>81'`) and re-flow them.
 - **Trailer** on agent commits: `Co-Authored-By: <agent>`, name only, no
   model/email. Conventional-Commits prefix on the first line only.
 - **A bug recorded in a comment stays in the file** — deleting a "why"
