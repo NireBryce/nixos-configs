@@ -1,6 +1,6 @@
 # Wiki index, for agents
 
-_Last modified: 2026-10-27_
+_Last modified: 2026-10-28_
 
 Condensed from [00-INDEX.md](00-INDEX.md). Routing only.
 
@@ -59,6 +59,7 @@ root holds only entry points.
 | cube lockout reset, Sunshine web UI, stream | [homelab/common-commands.md § Quick facts](homelab/common-commands.md#quick-facts) |
 | cube's Claude Remote Control units | [homelab/claude-rc.md § Quick facts](homelab/claude-rc.md#quick-facts) |
 | write or tighten a wiki page | [meta/styleguide-for-agents.md](meta/styleguide-for-agents.md), skills `wiki-sync`, `trim-docs`, `fact-hygiene` |
+| fact-check docs or the book against the code | skills `wiki-fact-check`, `book-fact-check`; `just agent book-lint` |
 | write a module | [config-structure/module-style-guide-for-agents.md](config-structure/module-style-guide-for-agents.md) |
 | pick up an open, undiagnosed problem | [experiments/](experiments/), e.g. [durandal-auto-suspend-hang-for-agents.md](experiments/durandal-auto-suspend-hang-for-agents.md) |
 

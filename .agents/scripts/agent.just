@@ -38,6 +38,14 @@ ship-ready pr:
 ship-land pr:
     @cd "{{invocation_directory()}}" && "{{scripts}}/ship.py" land "$@"
 
+# Mechanical checks of the mdBook (links, anchors, SUMMARY, stale dates and counts): check | prose
+book-lint *args:
+    @"{{scripts}}/book_lint.py" "$@"
+
+# A built mdBook as one self-contained HTML file: book-render <mdbook-output-dir> <dest.html>
+book-render *args:
+    @"{{scripts}}/book_render.py" "$@"
+
 # After `git mv`: rewrite links and path mentions repo-wide; REVIEW lines = code to read
 move-refs *args:
     @cd "{{invocation_directory()}}" && "{{scripts}}/move_refs.py" "$@"
