@@ -5,7 +5,7 @@ _Last modified: 2026-10-20_
 `go/foo` shortlinks are served by [golink](https://github.com/tailscale/golink)
 on `nire-cube`. Its configuration, the `AF_NETLINK` fix, and why it's a
 tailnet device rather than a port on cube are in
-[shortlinks](../categories/shortlinks.md).
+[shortlinks](../config-structure/categories/shortlinks.md).
 
 ## Contents
 
@@ -194,7 +194,7 @@ drifted.
 
 ## See also
 
-- [shortlinks](../categories/shortlinks.md) — the module, the `AF_NETLINK`
+- [shortlinks](../config-structure/categories/shortlinks.md) — the module, the `AF_NETLINK`
   first-switch failure, and why golink is its own tailnet device.
 - [homelab index](00-INDEX.md) — the other services on this tailnet.
-- [hosts.md](../hosts.md) — `nire-cube`, which runs it.
+- [hosts.md](../fleet/hosts.md) — `nire-cube`, which runs it.

@@ -4,7 +4,7 @@
 dirs-as-categories (the flake input that builds flake.modules from
 flake/modules/) already refuses what used to fail silently here: two
 modules or a module and a category sharing a name, a mistyped class key, a
-name in `includes` that doesn't exist (wiki/module-files.md). It also
+name in `includes` that doesn't exist (wiki/config-structure/module-files.md). It also
 reports orphans -- modules nothing reaches -- as `nix flake check`'s
 module-orphans (flake/modules/checks.nix turns it on). What is left:
 
@@ -25,7 +25,7 @@ untracked files count.
 
     modules.py add <modules-dir> <class> <category>/<subdir>/<name>.nix [description words...]
                            # scaffold a new module inside a category, in the
-                           # shape wiki/module-files.md describes; `git add`s
+                           # shape wiki/config-structure/module-files.md describes; `git add`s
                            # the file (flakes ignore untracked ones) and runs
                            # the checks above immediately. The new module is
                            # reported as an orphan on purpose -- nothing
@@ -38,7 +38,7 @@ import json, pathlib, subprocess, sys
 # is worth reading.
 SEE = {
     'untracked': "AGENTS.md, 'git add before nix eval'",
-    'drift':     "wiki/module-files.md; fix whichever reading is wrong, "
+    'drift':     "wiki/config-structure/module-files.md; fix whichever reading is wrong, "
                  "check_wiki.py's module_classes/all_categories or the file",
 }
 
@@ -94,10 +94,10 @@ def untracked(root):
 
 def static_document(root):
     """check_wiki.py's file-only reading of the tree. The script is loaded
-    from this checkout (wiki/scripts/), the tree read from <modules-dir>,
+    from this checkout (wiki/meta/scripts/), the tree read from <modules-dir>,
     which sits at <repo>/flake/modules."""
     import importlib.util
-    script = pathlib.Path(__file__).resolve().parents[2] / 'wiki' / 'scripts' / 'check_wiki.py'
+    script = pathlib.Path(__file__).resolve().parents[2] / 'wiki' / 'meta' / 'scripts' / 'check_wiki.py'
     spec = importlib.util.spec_from_file_location('check_wiki', script)
     cw = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(cw)
@@ -130,7 +130,7 @@ def drift(doc, static):
 # outside these is refused at evaluation, so refuse it here first.
 CLASSES = ('nixos', 'homeManager', 'darwin')
 
-# The header every module file opens with, as wiki/module-files.md shows it.
+# The header every module file opens with, as wiki/config-structure/module-files.md shows it.
 # tests/test_modules.py checks it against what most modules in the tree carry,
 # so the scaffold cannot quietly fall behind a change to the header.
 HEADER = """# This is a dirs-as-categories module, which means it creates a flake-parts
@@ -139,7 +139,7 @@ HEADER = """# This is a dirs-as-categories module, which means it creates a flak
 # https://github.com/NireBryce/dirs-as-categories/wiki
 """
 
-# wiki/module-files.md's shape and wiki/module-style-guide.md's formatting:
+# wiki/config-structure/module-files.md's shape and wiki/config-structure/module-style-guide.md's formatting:
 # the header comment, opening brackets on the same line, four-space indent, and
 # the `# summary:` comment as the first line of the body. The class
 # module is `_:` rather than `{ ... }:` -- statix flags the empty pattern and
@@ -181,7 +181,7 @@ def add(root, cls, target, description, run=subprocess.run):
         return 1
     if target.name in ('default.nix', 'defaults.nix'):
         print("error: name the file after the module; default.nix and defaults.nix "
-              "mean something else here (wiki/module-files.md)", file=sys.stderr)
+              "mean something else here (wiki/config-structure/module-files.md)", file=sys.stderr)
         return 1
     description = ' '.join(description) if description else "TODO: one line"
     if '"' in description or '${' in description:

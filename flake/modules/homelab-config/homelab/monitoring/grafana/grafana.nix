@@ -12,8 +12,8 @@
 # (serve.nix only raw-forwards TCP -- Tailscale Services cannot terminate
 # HTTPS declaratively on this version). Confirmed working 2026-09-07.
 #
-# Kept in the wiki, not restated here: the secret_key trap's full account
-# and both of Grafana's passwords, wiki/categories/monitoring.md,
+# Kept in the wiki, not restated here: the secret_key trap's full account and
+# both of Grafana's passwords, wiki/config-structure/categories/monitoring.md,
 # `-for-agents.md` and `monitoring-history.md`; how to actually sign in,
 # wiki/homelab/grafana.md. Traps sit next to the options.
 let
@@ -101,7 +101,7 @@ in {
                     # and `root_url` is that name, not
                     # `ts-cube.../grafana/`. Verified end to end
                     # 2026-09-07; the retired path-prefix route is in
-                    # wiki/categories/reverse-proxy-history.md if this
+                    # wiki/config-structure/categories/reverse-proxy-history.md if this
                     # ever needs reverting.
                     #
                     # The service hostname is `<name>.<tailnet MagicDNS

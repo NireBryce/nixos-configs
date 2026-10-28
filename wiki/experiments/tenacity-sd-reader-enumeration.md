@@ -8,7 +8,7 @@ missing, the lock screen's YubiKey prompt is slow. **Tabled 2026-10-21**, on
 the expectation that a nixpkgs kernel bump may fix it. Nothing in the config
 works around it yet. Recheck after the next kernel bump on tenacity: the
 same bump that makes `no-tiny-power-button.nix` warn
-([temporary-patches-and-hacks.md](../temporary-patches-and-hacks.md)).
+([temporary-patches-and-hacks.md](../upkeep-and-admin/temporary-patches-and-hacks.md)).
 
 ## Contents
 
@@ -109,7 +109,7 @@ journalctl -k -g 'usb 2-1'
   runtime PM is implicated. The fix would be a udev rule setting
   `power/control=on` for `usb2` under `0000:c3:00.3`. No such rule exists
   in the config yet; add it to
-  [temporary-patches-and-hacks.md](../temporary-patches-and-hacks.md) when
+  [temporary-patches-and-hacks.md](../upkeep-and-admin/temporary-patches-and-hacks.md) when
   it lands. It would also remove the lock-screen delay, since no retry loop would run on
   resume.
 - **It doesn't:** boot a 6.18.55 generation (95–98 on tenacity) several

@@ -47,7 +47,7 @@ independently silently dropped `libvirt-vm-llm-sandbox` from `nire-cube`'s
 *own* aggregate (a category collects from subdirectories only), but reaches
 `nire-cube` today only because `homelab` walks into `virtualization/`
 independently, as *its own* subdirectory, where that same file is not
-excluded (`wiki/categories/virtualization.md` already documented this exact
+excluded (`wiki/config-structure/categories/virtualization.md` already documented this exact
 quirk, from the 2026-08-24 `homelab` consolidation — I had read that page
 earlier the same session and still nearly re-broke the thing it describes).
 Delegating collapses that independence: `homelab` would then get only what
@@ -80,7 +80,7 @@ whether new logic is reachable before trusting a green check that could
 easily be green because the logic never ran. **"Looks like the obvious next
 optimization" is exactly the moment to check for a documented quirk the
 optimization would collapse**, not proceed because the refactor immediately
-upstream just verified clean — `wiki/categories/virtualization.md` had the
+upstream just verified clean — `wiki/config-structure/categories/virtualization.md` had the
 answer already written down, from three days earlier, and reading it after
 the fact (once the regression was already suspected) rather than before
 writing the code is what let it get built at all. And **finding a real bug

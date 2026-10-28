@@ -19,7 +19,7 @@
     # in place of `system`'s implicit coverage -- no package set changed.
     # Since: durandal dropped it 2026-08-27, lego removed the same day,
     # tenacity dropped it 2026-09-26 (the rootful socket's `podman` group
-    # is root-equivalent) -- see wiki/categories/containers.md.
+    # is root-equivalent) -- see wiki/config-structure/categories/containers.md.
     #
     # RENAMED IN THE SAME MOVE, `containers.nix` -> `podman.nix`: the
     # exact near-miss `virtualization`'s header records, hit for real.

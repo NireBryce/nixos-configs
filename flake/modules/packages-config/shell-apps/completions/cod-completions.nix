@@ -10,7 +10,7 @@
         # The menu descriptions for cod's completions live elsewhere: cod
         # stores none itself, so blesh.nix renders cod-desc.tsv +
         # cod-desc.bash (a ble.sh advice hook) from this repo's own data.
-        # See wiki/categories/shell-config/cod-desc.md and skill
+        # See wiki/config-structure/categories/shell-config/cod-desc.md and skill
         # cod-completions.
         environment.systemPackages = with pkgs; [
             cod

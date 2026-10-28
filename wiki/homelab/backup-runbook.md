@@ -2,7 +2,7 @@
 
 _Last modified: 2026-10-22_
 
-Run these on `nire-cube` to operate [backup](../categories/backup.md), the
+Run these on `nire-cube` to operate [backup](../config-structure/categories/backup.md), the
 restic backups of Forgejo/Grafana/golink's state and `/persist` to the
 `ts-hive` NAS over SFTP. That page covers the design and its history
 (including the sqlite consistency bug fixed 2026-09-06); this page is only
@@ -212,10 +212,10 @@ section), then `just switch` on cube to pick it up.
 
 ## See also
 
-- [backup](../categories/backup.md) — the module's design, and the full
+- [backup](../config-structure/categories/backup.md) — the module's design, and the full
   incident history (the SFTP/NFS switch, the repository-path migration,
   the sqlite consistency bug).
-- [backup-history.md](../categories/backup-history.md) — the original
+- [backup-history.md](../config-structure/categories/backup-history.md) — the original
   plan and every one-time setup snag, in full.
 - [rustic](rustic.md) — an interactive TUI alternative to the commands
   above.

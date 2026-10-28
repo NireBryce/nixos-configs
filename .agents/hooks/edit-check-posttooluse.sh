@@ -49,9 +49,9 @@ notes=()
 
 case "$rel" in
     wiki/*.md)
-        if [ -n "$have_py" ] && [ -f "$root/wiki/scripts/check_wiki.py" ]; then
+        if [ -n "$have_py" ] && [ -f "$root/wiki/meta/scripts/check_wiki.py" ]; then
             base=${rel%.md}; base=${base%-for-agents}
-            hits=$(python3 "$root/wiki/scripts/check_wiki.py" siblings "$root" 2>/dev/null \
+            hits=$(python3 "$root/wiki/meta/scripts/check_wiki.py" siblings "$root" 2>/dev/null \
                 | grep -F -e "$base.md" -e "$base-for-agents.md" \
                 | grep -v '^REVIEW' || true)
             if [ -n "$hits" ]; then

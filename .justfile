@@ -62,7 +62,7 @@ modules-test:
 
 # Comment width, the maintenance pass: pure `#` comment blocks wrap at 80
 # columns plus the line's indent (rule, and what the autofix will not touch:
-# wiki/module-style-guide.md "Comment width", skill comment-wrap). No args
+# wiki/config-structure/module-style-guide.md "Comment width", skill comment-wrap). No args
 # reports over-limit blocks; --fix rewrites the safe subset; --diff previews
 comment-wrap *args:
     python3 {{scripts}}/comment_wrap.py {{args}}
@@ -141,22 +141,22 @@ branches-test:
 # count surfaced only as a red PR, minutes after an agent reported it green
 # Static check: wiki/ and AGENTS.md claims vs the repo -- in preflight and CI
 wiki-lint:
-    python3 wiki/scripts/check_wiki.py check
+    python3 wiki/meta/scripts/check_wiki.py check
 
 # The wiki tables derivable from the repo (hosts.md's, categories/00-INDEX.md's,
 # the module counts) live in `<!-- generated:... -->` regions; this rewrites
 # them from source. `--check` only reports (wiki-lint's `generated` does the
-# same). Details: wiki/scripts/wiki_gen.py's docstring.
+# same). Details: wiki/meta/scripts/wiki_gen.py's docstring.
 # Regenerate the wiki's derived tables from source; `--check` to only report
 # positional-arguments + "$@": arguments reach the script as-is, never
 # re-parsed by the recipe's shell line.
 [positional-arguments]
 wiki-gen *args:
-    python3 wiki/scripts/wiki_gen.py "$@"
+    python3 wiki/meta/scripts/wiki_gen.py "$@"
 
 # Fixture tests for wiki_gen.py; pure stdlib; runs in preflight and CI
 wiki-gen-test:
-    python3 wiki/scripts/test_wiki_gen.py
+    python3 wiki/meta/scripts/test_wiki_gen.py
 
 # Spots a page turning into hand-maintained toil (a stale-prone claim nearby
 # things keep forcing edits to) before it becomes another categories/
@@ -164,7 +164,7 @@ wiki-gen-test:
 # e.g. `just wiki-churn --top 5` or `just wiki-churn --since "3 weeks ago"`.
 # Reporting only, never fails -- ranks wiki/ pages by git-log edit churn
 wiki-churn *args:
-    python3 wiki/scripts/wiki_churn.py {{args}}
+    python3 wiki/meta/scripts/wiki_churn.py {{args}}
 
 # Deliberately not a check_wiki.py subcommand and not in `wiki-lint`: most
 # candidates are a deliberately-kept historical name, an upstream reference,
@@ -172,7 +172,7 @@ wiki-churn *args:
 # docstring before treating any hit as one.
 # Reporting only, never fails -- backtick file/path mentions with no matching tracked file, heuristic
 wiki-stale-refs:
-    python3 wiki/scripts/wiki_stale_refs.py
+    python3 wiki/meta/scripts/wiki_stale_refs.py
 
 # Sections that read like resolved-incident narrative and may belong in a
 # <name>-history.md companion (styleguide.md, Directory hierarchy).
@@ -182,7 +182,7 @@ wiki-stale-refs:
 # script's docstring and skill `wiki-history-sweep` first. Issue #288.
 # Reporting only, never fails -- ranked candidate sections, heuristic
 wiki-history-candidates *args:
-    python3 wiki/scripts/history_candidates.py {{args}}
+    python3 wiki/meta/scripts/history_candidates.py {{args}}
 
 # Where the same prose shows up in two of AGENTS.md / skills / wiki -- the
 # mechanical half of "one pointer per fact". Deliberately not in wiki-lint:
@@ -190,7 +190,7 @@ wiki-history-candidates *args:
 # design, and a shared table may be a fact's one true home -- read the spans.
 # Reporting only, never fails -- word-8-gram overlap across the doc layers
 wiki-restatement *args:
-    python3 wiki/scripts/check_restatement.py {{args}}
+    python3 wiki/meta/scripts/check_restatement.py {{args}}
 
 # Point git at .githooks/: lint ratchet pre-commit, trailer fixup commit-msg
 install-hooks:
@@ -236,8 +236,8 @@ preflight:
     @flake/scripts/hooks-path-note.sh
     @just wiki-lint
     @just wiki-gen-test
-    @python3 wiki/scripts/test_check_wiki.py
-    @python3 wiki/scripts/test_mdfence.py
+    @python3 wiki/meta/scripts/test_check_wiki.py
+    @python3 wiki/meta/scripts/test_mdfence.py
     @just branches-test
     @just keybindings-test
     @just cod-desc-test
@@ -248,6 +248,7 @@ preflight:
     @python3 .agents/scripts/test_worktree.py
     @python3 .agents/scripts/test_where.py
     @python3 .agents/scripts/test_docs.py
+    @python3 .agents/scripts/test_move_refs.py
     @python3 flake/scripts/tests/test_glibc_guard.py
     @python3 flake/scripts/tests/test_pm_test_core.py
     @python3 flake/scripts/tests/test_parallel_unittest.py
@@ -255,9 +256,15 @@ preflight:
     @python3 flake/scripts/tests/test_comment_wrap.py
     @just guards-test
     @just preflight-mirror-test
+    @python3 flake/scripts/tests/test_offline_checks.py
     @just check
     @just modules
     @just lint
+
+# The steps of preflight that need neither nix nor `just`, for a machine where
+# they cannot run (a cloud container); .githooks/pre-push runs this there
+preflight-offline:
+    python3 flake/scripts/offline_checks.py preflight
 
 # Build this host, without activating it
 build:

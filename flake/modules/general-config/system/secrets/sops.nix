@@ -22,7 +22,7 @@
       # and passes sops-nix's own `builtins.isPath` branch of the same
       # validation. Seen 2026-09-01, root-caused and fixed 2026-09-26
       # with a fresh-file before/after repro; full writeup in
-      # wiki/impermanence-and-secrets.md's Secrets section.
+      # wiki/config-structure/impermanence-and-secrets.md's Secrets section.
       secretsPath = ./secrets.yaml;
     in {
         imports = [

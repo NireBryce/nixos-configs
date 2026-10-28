@@ -7,7 +7,7 @@ _Last modified: 2026-10-22_
 2026-09-07 (the old `https://ts-cube.moose-micro.ts.net/git/` now 404s).
 This page covers signing in, cloning and pushing. How it's configured, and
 why its two hostnames disagree, is in
-[git-forge](../categories/git-forge.md).
+[git-forge](../config-structure/categories/git-forge.md).
 
 > **Condensed version:**
 > [forgejo-for-agents.md](forgejo-for-agents.md) — the same
@@ -70,7 +70,7 @@ read the page, not the status code.
 
 **The first account (`elly`, admin) is bootstrapped automatically** (since
 2026-08-26). `forgejo-admin-bootstrap` (see
-[git-forge](../categories/git-forge.md)) creates it on activation with a
+[git-forge](../config-structure/categories/git-forge.md)) creates it on activation with a
 password from this repo's sops secrets. It resets that password to the sops
 value on every `switch`, so changing it in the web UI won't stick; change it
 in `secrets.yaml` instead. Login was confirmed 2026-09-05, and admin status
@@ -166,7 +166,7 @@ see [What's verified here](#whats-verified-here).
 ## CI: Forgejo Actions
 
 Added 2026-09-24; since 2026-09-25 the runner lives in a libvirt VM on
-cube ([git-forge](../categories/git-forge.md) has the architecture —
+cube ([git-forge](../config-structure/categories/git-forge.md) has the architecture —
 containment is the point). Bootstrap values landed the same day and are live on cube; since
 2026-09-26 cube mints a single-use registration per job, so there is no
 standing secret to fill in.
@@ -260,7 +260,7 @@ this survives reboots with nothing special configured.
 paragraph said so — [#87](https://github.com/NireBryce/nixos-configs/issues/87)
 closed with restic backing `/var/lib/forgejo` and `/persist` to `ts-hive`,
 and a real restore that opened a complete Forgejo database rather than
-merely producing files. See [backup](../categories/backup.md) and the
+merely producing files. See [backup](../config-structure/categories/backup.md) and the
 [backup runbook](backup-runbook.md).
 
 One caveat that survives: the live `.db` files under `/var/lib/forgejo` are
@@ -280,7 +280,7 @@ the migrate API (`mirror: true`, `mirror_interval: 8h0m0s`) using the
 its own schedule. Confirmed live: all branches present and matching
 GitHub's own branch list, default branch `experimental`. This is the first
 repo pushed/mirrored here — see
-[git-forge-history.md](../categories/git-forge-history.md#mirror-not-origin--and-the-first-real-mirror)
+[git-forge-history.md](../config-structure/categories/git-forge-history.md#mirror-not-origin--and-the-first-real-mirror)
 for the record. Mirror-or-origin is settled (mirror, reaffirmed
 2026-09-12).
 
@@ -324,11 +324,11 @@ it. The scratch repo is disposable: delete it in the web UI whenever
 
 ## See also
 
-- [git-forge](../categories/git-forge.md) — the module, the zero-touch secret
+- [git-forge](../config-structure/categories/git-forge.md) — the module, the zero-touch secret
   handling, and why `DOMAIN` and `ROOT_URL` disagree.
 - [Practicing a workplace coding environment](practice-environment.md) —
   what the forge plus the runner is *for*, beyond hosting mirrors.
 - [Reaching cube's services](reaching-services.md) — the URL map and what to
   check when something doesn't answer.
-- [system](../categories/system.md) — `ssh.nix`, the host sshd git+ssh rides
+- [system](../config-structure/categories/system.md) — `ssh.nix`, the host sshd git+ssh rides
   on.

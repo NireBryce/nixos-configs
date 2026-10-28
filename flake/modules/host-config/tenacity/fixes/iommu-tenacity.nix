@@ -6,7 +6,7 @@
 # summary: Re-enable the IOMMU that Jovian turns off; this is not a Steam Deck.
 #
 # TEMPORARY -- works around a Jovian bug (issue #443); when to remove it:
-# wiki/temporary-patches-and-hacks.md.
+# wiki/upkeep-and-admin/temporary-patches-and-hacks.md.
 #
 # CONFIRMED FIX, 2026-08-12. Suspend went from 0% to 92.5% hardware sleep
 # residency on the first boot with this applied -- evidence at the bottom.

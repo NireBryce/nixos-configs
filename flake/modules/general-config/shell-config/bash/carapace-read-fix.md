@@ -23,13 +23,13 @@ variable names, which is what produces the error. Confirmed independently
 twice (2026-08-22 and 2026-08-24) that this happens with carapace's stock
 completer alone, no advice or config from this repo involved.
 
-Full diagnosis: [`wiki/categories/shell-config/blesh.md`](../../../../../wiki/categories/shell-config/blesh.md#bug-spurious-read--not-a-valid-identifier-on-tab--auto-complete),
+Full diagnosis: [`wiki/config-structure/categories/shell-config/blesh.md`](../../../../../wiki/config-structure/categories/shell-config/blesh.md#bug-spurious-read--not-a-valid-identifier-on-tab--auto-complete),
 [`wiki/agent-lessons-learned.md`](<../../../../../wiki/agent-lessons-learned.md>) #39,
 [issue #72](https://github.com/NireBryce/nixos-configs/issues/72).
 
 ## What the fix does
 
-[`carapace-completer-read-fix.bash`](./carapace-completer-read-fix.bash)
+[`carapace-completer-read-fix.bash`](carapace-completer-read-fix.bash)
 patches `_carapace_completer`'s body — via `declare -f` plus a textual
 substitution — replacing that one `read` call with pure parameter
 expansion (`nospace=${data%%$sep*}; data=${data#*$sep}$'\n'`, `$sep` the

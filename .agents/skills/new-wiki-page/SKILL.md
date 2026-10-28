@@ -16,9 +16,9 @@ narrative out (`wiki-history-sweep`), writing a skill (`new-skill`).
 ## Steps
 
 1. **Name and place it.** kebab-case; `00-INDEX.md` is reserved for a directory's own index. Plan inbound links in the same change (`wiki/00-INDEX.md`, the parent directory's index, or the pages holding the prose this page extracts): an unlinked page is dead weight.
-2. **Skeleton**: `# Title`, `_Last modified: YYYY-MM-DD_` right after (absolute, today), intro prose, then `## Contents` via `python3 wiki/scripts/check_wiki.py gen-contents <page>`, never by hand. Pass only the page you created (the insert path also adds blocks to exempt pages).
-3. **Sibling decision, deliberately.** Under ~1,000 words and human-facing: no `-for-agents.md` yet. Past 1,000 words: a sibling if the page is long narrative, otherwise a `## Quick facts` first section (runbooks, how-tos, reference pages) -- `wiki/styleguide.md` "Two audiences per page". Whenever created, the pair needs back-links both directions and the sibling its own `_Last modified:`. Exemptions differ (classic mistake): a `-for-agents.md` sibling never carries Contents; a `-history.md` companion always does but never gets a sibling.
-4. **Category page extras**: `just wiki-gen` (adds the page's row to `wiki/categories/00-INDEX.md`'s generated Index table; write its Imported by cell), and `## Imported by` naming every importing host (`check_imports` reads whichever copy exists — human page, sibling, or both; grep first).
+2. **Skeleton**: `# Title`, `_Last modified: YYYY-MM-DD_` right after (absolute, today), intro prose, then `## Contents` via `python3 wiki/meta/scripts/check_wiki.py gen-contents <page>`, never by hand. Pass only the page you created (the insert path also adds blocks to exempt pages).
+3. **Sibling decision, deliberately.** Under ~1,000 words and human-facing: no `-for-agents.md` yet. Past 1,000 words: a sibling if the page is long narrative, otherwise a `## Quick facts` first section (runbooks, how-tos, reference pages) -- `wiki/meta/styleguide.md` "Two audiences per page". Whenever created, the pair needs back-links both directions and the sibling its own `_Last modified:`. Exemptions differ (classic mistake): a `-for-agents.md` sibling never carries Contents; a `-history.md` companion always does but never gets a sibling.
+4. **Category page extras**: `just wiki-gen` (adds the page's row to `wiki/config-structure/categories/00-INDEX.md`'s generated Index table; write its Imported by cell), and `## Imported by` naming every importing host (`check_imports` reads whichever copy exists — human page, sibling, or both; grep first).
 5. **Register before landing**: index rows; inbound links from the pages it extracts from (leave a pointer, not a duplicate); if it documents a credential, a `maintenance-schedule` row in the same change.
 6. **`just wiki-lint`** (checks imports, counts, links, anchors, recipes, dates, pair rules).
 
@@ -30,4 +30,4 @@ narrative out (`wiki-history-sweep`), writing a skill (`new-skill`).
 
 ## See also
 
-`wiki/styleguide.md` (Content shape, Directory hierarchy, Two audiences per page) and `wiki/styleguide-for-agents.md`; `wiki-sync`; `trim-docs`; `new-homelab-service` step 9.
+`wiki/meta/styleguide.md` (Content shape, Directory hierarchy, Two audiences per page) and `wiki/meta/styleguide-for-agents.md`; `wiki-sync`; `trim-docs`; `new-homelab-service` step 9.

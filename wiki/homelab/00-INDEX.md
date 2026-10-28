@@ -4,7 +4,7 @@ _Last modified: 2026-10-22_
 
 Everything here is reachable over the tailnet and nowhere else. These pages
 are for doing a thing with a running service: no Nix involved, and useful on
-a phone. The [category pages](../categories/00-INDEX.md) answer *"how is this
+a phone. The [category pages](../config-structure/categories/00-INDEX.md) answer *"how is this
 built, and what breaks"* for whoever is editing `flake/modules/`.
 
 The two go stale differently. A category page goes stale when the config
@@ -44,7 +44,7 @@ forms (`https://ts-cube.moose-micro.ts.net/grafana/`, `/git/`) stopped
 answering 2026-09-07, when each app got its own Tailscale Services hostname
 and certificate. Caddy still terminates TLS for all of them, with certs
 issued by `tailscaled` — see
-[reverse-proxy](../categories/reverse-proxy.md).
+[reverse-proxy](../config-structure/categories/reverse-proxy.md).
 
 The short names (`http://grafana/`, `http://git/`) redirect
 to the full ones. Use `http://`, not `https://`: the bare names cannot have a
@@ -55,26 +55,26 @@ by design. Full map and the reasoning:
 `ts-cube`, **not** `nire-cube`: this tailnet's device names don't match
 `networking.hostName`. That trip-up has its own writeup in
 `general-config/system/networking/tailscale.nix`'s header, indexed from
-[system](../categories/system.md).
+[system](../config-structure/categories/system.md).
 
 golink is the exception to that pattern rather than a naming inconsistency —
 it's its own tailnet device named `go`, not a port on cube, which is why its
 URL looks nothing like the other two. See
-[shortlinks](../categories/shortlinks.md).
+[shortlinks](../config-structure/categories/shortlinks.md).
 
 ## Half-finished is the normal state here
 
 Several of these services are running, reachable, and still missing the
 human step that makes them useful. Those steps are GitHub issues with
 the `pending-setup` label; [Pending setup](pending-setup.md) explains the
-label, kept separate from [open-threads.md](../open-threads.md) because
+label, kept separate from [open-threads.md](../meta/open-threads.md) because
 those are the *repo's* loose ends and these are the *fleet's*: one-time
 operational work that no commit will ever complete, because it lives in a
 service's own database rather than in Nix.
 
 ## Index over restatement still applies, with one carve-out
 
-[styleguide.md](../styleguide.md)'s rule holds here: link to the real source
+[styleguide.md](../meta/styleguide.md)'s rule holds here: link to the real source
 rather than copying it. The carve-out is that for these pages the "real
 source" is often **the running service's own help page**, not a file in this
 repo — `http://go/.help` for golink, for instance. So a page here may hold
@@ -84,5 +84,5 @@ transcribed. [creating-golinks.md](creating-golinks.md) ends with exactly that s
 
 ## See also
 
-- [hosts.md](../hosts.md) — which host runs what.
-- [categories/00-INDEX.md](../categories/00-INDEX.md) — the configuration side.
+- [hosts.md](../fleet/hosts.md) — which host runs what.
+- [categories/00-INDEX.md](../config-structure/categories/00-INDEX.md) — the configuration side.

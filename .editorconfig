@@ -1,10 +1,10 @@
 # Editor-wide conventions, read by editors and many formatters/linters.
 # Deliberately NOT a formatter and enforces nothing by itself -- `nix fmt`
 # stays unwired for the aligned-`=`-columns reason in
-# wiki/module-style-guide.md. Indent sizes mirror what the tree already
+# wiki/config-structure/module-style-guide.md. Indent sizes mirror what the tree already
 # does: Nix modules 4 (that page's own rule), .justfile 4, YAML 2 (the
 # workflows), JSON 2 (package-lock.json and friends), Python 4 (PEP 8;
-# flake/scripts and wiki/scripts).
+# flake/scripts and wiki/meta/scripts).
 root = true
 
 [*]

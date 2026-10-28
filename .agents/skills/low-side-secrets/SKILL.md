@@ -59,4 +59,4 @@ both silently recur.
   never gains a user-keyed recipient.
 - `secrets/sops-interactive-key.nix` — root/host-key version of step 3's mismatch.
 - Skill `secrets-hygiene`.
-- `wiki/impermanence-and-secrets.md` Secrets section — human overview.
+- `wiki/config-structure/impermanence-and-secrets.md` Secrets section — human overview.

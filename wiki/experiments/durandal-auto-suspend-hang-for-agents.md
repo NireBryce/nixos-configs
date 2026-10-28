@@ -210,4 +210,4 @@ USB `usb_dev_resume` times (1-2 1.7s, 1-1 1.6s, 1-10 1.27s) are re-enumeration, 
 
 ## See also
 
-[durandal-suspend-instrumentation-state.md](durandal-suspend-instrumentation-state.md) (what is running on the machine) · [hosts.md](../hosts.md)
+[durandal-suspend-instrumentation-state.md](durandal-suspend-instrumentation-state.md) (what is running on the machine) · [hosts.md](../fleet/hosts.md)

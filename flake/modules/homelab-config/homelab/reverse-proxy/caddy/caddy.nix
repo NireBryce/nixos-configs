@@ -11,7 +11,7 @@
 # Kept in the wiki, not restated here: the design and what it moved, the
 # out-of-repo prerequisites (tailnet HTTPS in the admin console, each `svc:`
 # object and its ACL entries) and the verification record --
-# wiki/categories/reverse-proxy.md and its `-for-agents.md`;
+# wiki/config-structure/categories/reverse-proxy.md and its `-for-agents.md`;
 # wiki/homelab/reaching-services.md for the URL map and what to do when
 # something doesn't answer; `reverse-proxy-history.md` for the retired
 # path-prefix routes. Traps sit next to the options they concern, below.
@@ -229,20 +229,21 @@ in {
 # ── history ─────────────────────────────────────────────────────────────────
 #
 # 2026-08-24 to 2026-09-07 — Grafana and Forgejo were routed through here as
-# `/grafana/` and `/git/` path prefixes on the one `ts-cube` hostname,
-# retired once serve.nix gave each its own Tailscale Service. The two apps
-# needed OPPOSITE directives (`handle` for Grafana, which served under the
-# prefix; `handle_path` for Forgejo, which always served at `/`) and giving
-# both the same one cost the first live switch: /grafana/ 200, /git/ 404
-# (wiki/agent-lessons-learned.md §41). Routes, mechanism and verification record:
-# wiki/categories/reverse-proxy-history.md -- kept because path-prefix
-# routing is the fallback if the per-Service move ever needs reverting, and
-# because anything added here WITHOUT its own `svc:` name needs it again.
+# `/grafana/` and `/git/` path prefixes on the one `ts-cube` hostname, retired
+# once serve.nix gave each its own Tailscale Service. The two apps needed
+# OPPOSITE directives (`handle` for Grafana, which served under the prefix;
+# `handle_path` for Forgejo, which always served at `/`) and giving both the
+# same one cost the first live switch: /grafana/ 200, /git/ 404
+# (wiki/agent-lessons-learned.md §41). Routes, mechanism and verification
+# record: wiki/config-structure/categories/reverse-proxy-history.md -- kept
+# because path-prefix routing is the fallback if the per-Service move ever needs
+# reverting, and because anything added here WITHOUT its own `svc:` name needs
+# it again.
 #
 # 2026-09-08 (d7af47c5) — `tls internal` on the bare-name vhosts suppressed
-# tailscale cert auto-detection for every `.ts.net` name in this file,
-# breaking tailnet HTTPS host-wide until 2026-09-10. Fixed by the
-# `tailscaleCert` binding above; full account, wiki/agent-lessons-learned.md §47.
+# tailscale cert auto-detection for every `.ts.net` name in this file, breaking
+# tailnet HTTPS host-wide until 2026-09-10. Fixed by the `tailscaleCert` binding
+# above; full account, wiki/agent-lessons-learned.md §47.
 #
 # 2026-09-12 to 2026-10-19 — homepage (then glance beside it) served as the
 # landing page on ports 3002/3004; both removed as unused attack surface.

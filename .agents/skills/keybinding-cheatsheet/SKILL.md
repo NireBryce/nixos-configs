@@ -130,5 +130,5 @@ Traps that have bitten here:
 ## See also
 
 - skill `home-manager-dotfiles` — editing what this sheet reads
-- `wiki/categories/shell-config/blesh.md` — why the ble-bind lines are
+- `wiki/config-structure/categories/shell-config/blesh.md` — why the ble-bind lines are
   shaped the way they are

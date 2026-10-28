@@ -60,7 +60,8 @@
 # if that tradeoff stops feeling worth it.
 {
     # `{ ... }:` kept over statix's suggested `_:` -- deliberate, see
-    # wiki/module-style-guide.md's "`{ ... }:` on an inner module lambda".
+    # wiki/config-structure/module-style-guide.md's "`{ ... }:` on an inner module
+    # lambda".
     nixos = _: {
         services.sunshine = {
             enable      = true;
@@ -82,7 +83,7 @@
         # services.avahi.settings.publish itself (see the mkDefault block near
         # the end of nixos/modules/services/networking/sunshine.nix); the
         # warnings are the cue to look, and they stop on their own when it is
-        # fixed. wiki/temporary-patches-and-hacks.md lists it.
+        # fixed. wiki/upkeep-and-admin/temporary-patches-and-hacks.md lists it.
         services.avahi = {
             publish = {
                 enable       = null;

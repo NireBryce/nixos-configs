@@ -15,7 +15,7 @@ category: some decisions are hard to undo once a service has state.
 A service is a flake module, so `new-flake-module` still applies; this is the
 layer above (category, port, reach, what "working" means). Also
 `package-platform-support` (packages), `new-host-config` (hosts; VMs have no
-skill, see `wiki/categories/virtualization.md`).
+skill, see `wiki/config-structure/categories/virtualization.md`).
 
 Three of the five services broke on first switch for reasons invisible to
 eval, build, and reading the artifact: secret file owner (Grafana), missing
@@ -28,7 +28,7 @@ One commit: category dir `flake/modules/homelab-config/homelab/<category>/`
 (a category because `<tool>/` holds the module); module
 `<category>/<tool>/<tool>.nix`; one
 commented line in the host's config; Caddy route if HTTP; docs
-(`wiki/categories/<category>.md` + indexes).
+(`wiki/config-structure/categories/<category>.md` + indexes).
 
 ## 1. Check nixpkgs for a module before writing a unit
 
@@ -164,13 +164,13 @@ to a **byte-identical `outPath`** to what's running.
 
 ## 9. Docs, in the same change
 
-Run `wiki-sync`. New service: new `wiki/categories/<category>.md` (skill
-`new-wiki-page`); alphabetical row in `wiki/categories/00-INDEX.md`;
-`wiki/hosts.md`; URL in `wiki/homelab/00-INDEX.md`; `AGENTS.md` has no per-category list (only the homelab umbrella note; touch it only if that changes).
+Run `wiki-sync`. New service: new `wiki/config-structure/categories/<category>.md` (skill
+`new-wiki-page`); alphabetical row in `wiki/config-structure/categories/00-INDEX.md`;
+`wiki/fleet/hosts.md`; URL in `wiki/homelab/00-INDEX.md`; `AGENTS.md` has no per-category list (only the homelab umbrella note; touch it only if that changes).
 A changed reach makes the service's page and module header stale too.
 
 Long pages touched here have a `-for-agents.md` sibling (the half an agent
-loads; `wiki/styleguide.md` "Two audiences per page"); `wiki-sync` step 5
+loads; `wiki/meta/styleguide.md` "Two audiences per page"); `wiki-sync` step 5
 covers it and `just wiki-lint` fails a date bump without it. A new category
 page needs one only past 1,000 words.
 
@@ -181,5 +181,5 @@ page needs one only past 1,000 words.
 ## See also
 
 - `wiki/agent-lessons-learned.md` §§36, 37, 40, 41.
-- `wiki/categories/reverse-proxy.md` — routing layer, prefix asymmetry in full.
+- `wiki/config-structure/categories/reverse-proxy.md` — routing layer, prefix asymmetry in full.
 - `flake/modules/general-config/system/networking/tailscale.nix` — tailnet device names ≠ `networking.hostName`; an ACL can block everything with perfect config.

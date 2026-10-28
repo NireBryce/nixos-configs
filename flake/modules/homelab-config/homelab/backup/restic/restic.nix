@@ -13,9 +13,10 @@
 # documents -- same reason `git-forge` isn't `forgejo`.
 #
 # Kept in the wiki, not restated here: what is verified and what isn't,
-# wiki/categories/backup.md; how each one-time setup step actually went,
-# `backup-history.md`; the commands for restoring, migrating, or re-setting
-# a secret, wiki/homelab/backup-runbook.md. Traps sit next to the options.
+# wiki/config-structure/categories/backup.md; how each one-time setup step
+# actually went, `backup-history.md`; the commands for restoring, migrating, or
+# re-setting a secret, wiki/homelab/backup-runbook.md. Traps sit next to the
+# options.
 { lib, ... }:
 let
     # `restic-backup`, `ts-hive`'s own dedicated share (its own pool),
@@ -67,7 +68,7 @@ let
 in {
     # `config` and `pkgs` bound HERE, on the inner NixOS-module
     # function -- the only place they exist: the file's own header can
-    # take only `lib`/`inputs` (wiki/module-files.md), and the NixOS
+    # take only `lib`/`inputs` (wiki/config-structure/module-files.md), and the NixOS
     # option tree is this module's `config`. Same pattern
     # grafana.nix/golink.nix/forgejo.nix use.
     nixos = { config, pkgs, ... }: {
@@ -261,4 +262,4 @@ in {
 # were migrated in with `restic copy`, and the sqlite staging bug above was
 # found and fixed. Issue #87 closed on the restore drill that followed. The
 # step-by-step account of all of it, including which parts took three tries,
-# is wiki/categories/backup-history.md.
+# is wiki/config-structure/categories/backup-history.md.

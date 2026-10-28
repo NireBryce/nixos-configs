@@ -98,5 +98,5 @@ As of 2026-10-07:
 
 ## See also
 
-- [hosts.md](../hosts.md) — `ts-<x>` vs `nire-<x>` names, which host runs what.
+- [hosts.md](../fleet/hosts.md) — `ts-<x>` vs `nire-<x>` names, which host runs what.
 - [Reaching cube's services](reaching-services.md) — cube's web services.

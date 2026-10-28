@@ -1,12 +1,12 @@
 """Shared by doc_drift.py and doc_partition.py: which docs are in scope,
 and which repo paths a doc cites. Stdlib only; read-only.
 
-Scope: wiki/**/*.md (categories/, homelab/, experiments/, agent-lessons-learned/
+Scope: wiki/**/*.md (config-structure/categories/, homelab/, experiments/, agent-lessons-learned/
 included), .agents/rules/*.md, .agents/skills/*/SKILL.md, AGENTS.md.
 Symlinks (wiki/README.md, the rules and skills links) are in scope as
 paths; callers decide whether to follow them.
 
-Citation extraction mirrors wiki/scripts/wiki_stale_refs.py (backtick
+Citation extraction mirrors wiki/meta/scripts/wiki_stale_refs.py (backtick
 tokens, shortened paths matched by suffix, `normalize` imported from it),
 widened to markdown link targets and to directories.
 """
@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "wiki" / "scripts"))
+sys.path.insert(0, str(ROOT / "wiki" / "meta" / "scripts"))
 
 BACKTICK = re.compile(r"`([^`\n]+)`")
 MDLINK = re.compile(r"\]\(([^)\s#]+)(?:#[^)]*)?\)")
@@ -30,7 +30,7 @@ def normalize(token):
     try:
         from wiki_stale_refs import normalize as n
         return n(token)
-    except ImportError:  # fixture repos have no wiki/scripts
+    except ImportError:  # fixture repos have no wiki/meta/scripts
         return "/".join(p for p in token.split("/") if p not in (".", ".."))
 
 

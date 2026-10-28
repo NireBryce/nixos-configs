@@ -12,7 +12,7 @@ A file under `flake/modules/`. Use before adding a new `.nix` file there,
 renaming or moving one, changing which folders are categories, or
 debugging a module that doesn't seem to apply.
 
-`wiki/module-files.md` is why modules look the way they do; the
+`wiki/config-structure/module-files.md` is why modules look the way they do; the
 dirs-as-categories input's `doc/convention.md` has every rule and error.
 Every trap below has happened here.
 
@@ -20,7 +20,7 @@ Every trap below has happened here.
 
 `just add-module <class> <category>/<subdir>/<name> ["one-line description"]`
 writes the file in the module shape (header comment, `# summary:`,
-`wiki/module-style-guide.md` formatting), `git add`s it (flakes ignore
+`wiki/config-structure/module-style-guide.md` formatting), `git add`s it (flakes ignore
 untracked files), and runs the checks (`flake/scripts/modules.py add`;
 #293). It refuses a class dirs-as-categories doesn't know, a target outside
 every category, `default.nix`/`defaults.nix`, and a name already taken by a
@@ -112,12 +112,12 @@ Wrap it in the same commit:
 ## Wiki sync
 
 Adding/removing/renaming a module in a category with an article under
-`wiki/categories/`, or changing which folders are categories: update that
-article and run `just wiki-gen` (regenerates `wiki/categories/00-INDEX.md`'s
-tables, the module counts and `wiki/architecture.md`'s diagram) in the same
+`wiki/config-structure/categories/`, or changing which folders are categories: update that
+article and run `just wiki-gen` (regenerates `wiki/config-structure/categories/00-INDEX.md`'s
+tables, the module counts and `wiki/config-structure/architecture.md`'s diagram) in the same
 change. `just check` fails on an orphan (a module nothing reaches; the
 `module-orphans` check); `just modules` checks untracked files, and that
 wiki-lint's file-only reading still matches the evaluated graph.
 
-Further reading: `wiki/module-files.md`, `wiki/module-style-guide.md`
+Further reading: `wiki/config-structure/module-files.md`, `wiki/config-structure/module-style-guide.md`
 (aligned `=` columns deliberate; `nix fmt` deliberately not wired up).

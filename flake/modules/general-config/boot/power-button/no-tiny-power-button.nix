@@ -3,8 +3,8 @@
 # category module is the name of the folder it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-# TEMPORARY -- wiki/temporary-patches-and-hacks.md lists it with its removal
-# condition.
+# TEMPORARY -- wiki/upkeep-and-admin/temporary-patches-and-hacks.md lists it
+# with its removal condition.
 { lib, ... }:
 let
 # The kernel this workaround was confirmed against. Any other version --
@@ -43,7 +43,7 @@ in {
         warnings = lib.optional (config.boot.kernelPackages.kernel.version != confirmedOn) ''
             no-tiny-power-button.nix: the kernel is now ${config.boot.kernelPackages.kernel.version}, not ${confirmedOn}.
             Re-check whether the tiny_power_button blacklist is still needed
-            (removal steps in the module and wiki/temporary-patches-and-hacks.md).
+            (removal steps in the module and wiki/upkeep-and-admin/temporary-patches-and-hacks.md).
         '';
     };
 }

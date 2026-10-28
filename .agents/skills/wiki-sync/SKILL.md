@@ -24,10 +24,11 @@ internal edits); grep first rather than opening every page.
 
 Narrower cases with their own instructions (read first):
 
-- **Module added/removed/renamed, or category membership changed** — `new-flake-module` "Keep the wiki in sync": the category's `wiki/categories/<name>.md`, its `-for-agents.md` sibling, and `just wiki-gen` for `wiki/categories/00-INDEX.md`'s tables.
-- **Host added, or its category imports changed** — `new-host-config` wiring step: `just wiki-gen` for `wiki/hosts.md`'s table (then write the new row's Role) plus the "Imported by" line on every affected `wiki/categories/*.md`.
+- **Files or directories moved** — `git mv` them, then `just agent move-refs` (`--dry-run` first): it rewrites markdown links and bare path mentions repo-wide, and prints `REVIEW` lines for code that builds a moved path from pieces or counts directories up (`parents[2]`), which no link check sees. Read every one; then `just wiki-lint`.
+- **Module added/removed/renamed, or category membership changed** — `new-flake-module` "Keep the wiki in sync": the category's `wiki/config-structure/categories/<name>.md`, its `-for-agents.md` sibling, and `just wiki-gen` for `wiki/config-structure/categories/00-INDEX.md`'s tables.
+- **Host added, or its category imports changed** — `new-host-config` wiring step: `just wiki-gen` for `wiki/fleet/hosts.md`'s table (then write the new row's Role) plus the "Imported by" line on every affected `wiki/config-structure/categories/*.md`.
 
-**Generated tables are not hand-edited.** A table between `<!-- generated:<name> ... -->` and `<!-- /generated -->` is rewritten from source by `just wiki-gen`; change the source the marker names, then run it. Only the columns the marker calls hand-written are yours to edit. `wiki-lint`'s `generated` check names a stale region; the fix is always `just wiki-gen`. No date bump for a regeneration (`wiki/styleguide.md`, "Generated tables").
+**Generated tables are not hand-edited.** A table between `<!-- generated:<name> ... -->` and `<!-- /generated -->` is rewritten from source by `just wiki-gen`; change the source the marker names, then run it. Only the columns the marker calls hand-written are yours to edit. `wiki-lint`'s `generated` check names a stale region; the fix is always `just wiki-gen`. No date bump for a regeneration (`wiki/meta/styleguide.md`, "Generated tables").
 
 ## Procedure
 
@@ -36,15 +37,15 @@ Narrower cases with their own instructions (read first):
    ```sh
    grep -rln "<old-name-or-path-or-fact>" wiki/
    ```
-   Usual hits for structural changes: `wiki/categories/00-INDEX.md`, `wiki/hosts.md`, `wiki/architecture.md`; `wiki/open-threads.md` for anything tracked as pending.
+   Usual hits for structural changes: `wiki/config-structure/categories/00-INDEX.md`, `wiki/fleet/hosts.md`, `wiki/config-structure/architecture.md`; `wiki/meta/open-threads.md` for anything tracked as pending.
 3. **Read each against the new state, not memory** — re-derive (`just modules`, `hostname`, the file itself).
-4. **Edit stale pages in the same change**, per `wiki/styleguide.md`:
+4. **Edit stale pages in the same change**, per `wiki/meta/styleguide.md`:
    - Dates absolute (`2026-08-23`).
    - Relative links recomputed for file depth; verify each resolves.
    - kebab-case names; `00-INDEX.md` reserved for a directory's own index.
    - A fix ballooning into prose that argues a fact means the fact belongs in the linked file's own header.
    - **Bump `_Last modified: YYYY-MM-DD_`** (right after the title) to today on every page you edited, not on pages only read. `check_wiki.py dates` (in `just wiki-lint`) catches only a missing/malformed line, never a stale date left behind.
-5. **Edit the `-for-agents` sibling of every page you touched, same change.** Long narrative pages are pairs (`wiki/styleguide.md` "Two audiences per page"); the sibling is the copy an agent reads, so stale there is the worse half. A page with no sibling that opens with `## Quick facts` is the folded shape: update that section in place if your edit changes a fact it states. A pair whose sibling you find restating the page near-verbatim, or that churns in lockstep, is a fold candidate (styleguide's tests) -- a separate change, not part of this one.
+5. **Edit the `-for-agents` sibling of every page you touched, same change.** Long narrative pages are pairs (`wiki/meta/styleguide.md` "Two audiences per page"); the sibling is the copy an agent reads, so stale there is the worse half. A page with no sibling that opens with `## Quick facts` is the folded shape: update that section in place if your edit changes a fact it states. A pair whose sibling you find restating the page near-verbatim, or that churns in lockstep, is a fold candidate (styleguide's tests) -- a separate change, not part of this one.
 
    `check_wiki.py siblings` (in `just wiki-lint`) fails when a sibling's `_Last modified:_` predates its source's. **Don't satisfy it by bumping the sibling's date** (turns a caught omission silent). Edit, then bump.
 
@@ -63,5 +64,5 @@ Narrower cases with their own instructions (read first):
 
 ## See also
 
-- `wiki/styleguide.md` (house rules; "Two audiences per page"), `wiki/styleguide-for-agents.md` (checklist), `wiki/00-INDEX.md` ("keeping this from rotting").
+- `wiki/meta/styleguide.md` (house rules; "Two audiences per page"), `wiki/meta/styleguide-for-agents.md` (checklist), `wiki/00-INDEX.md` ("keeping this from rotting").
 - Skills `new-flake-module`, `new-host-config`, `new-wiki-page` (creating a page; this skill starts from an existing one).

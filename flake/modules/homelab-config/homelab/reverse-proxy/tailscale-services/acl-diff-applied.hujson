@@ -24,7 +24,7 @@
 		"tag:golink-host": ["nirebryce@github"],
 		// nixos-configs' homelab (nire-cube): grafana/git-forge move off
 		// Caddy path prefixes onto their own Tailscale Services names.
-		// See wiki/open-threads.md and wiki/categories/reverse-proxy.md.
+		// See wiki/meta/open-threads.md and wiki/config-structure/categories/reverse-proxy.md.
 		"tag:homelab-cube": ["nirebryce@github"],
 	},
 

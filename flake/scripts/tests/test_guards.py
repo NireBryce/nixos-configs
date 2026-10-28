@@ -273,6 +273,7 @@ class SecretsGuardPreToolUse(GuardCase):
             self.assertDeny(self.script, cmd)
         self.assertPass(self.script, "ls /run/user")
 
+    @unittest.skipUnless(shutil.which("just"), "just not on PATH")
     def test_wildcard_allow_rules_quote_their_arguments(self):
         # AGENTS.md's allowlist rules: a wildcard just rule only for a
         # [positional-arguments] recipe, and never a rule for nix itself.
@@ -1651,13 +1652,13 @@ class EditCheck(unittest.TestCase):
         self.assertEqual(self.edit("flake/modules/ok.nix"), "")
 
     def test_wiki_stale_sibling(self):
-        (self.repo / "wiki/scripts").mkdir(parents=True)
-        shutil.copy(REPO / "wiki/scripts/check_wiki.py",
-                    self.repo / "wiki/scripts/check_wiki.py")
+        (self.repo / "wiki/meta/scripts").mkdir(parents=True)
+        shutil.copy(REPO / "wiki/meta/scripts/check_wiki.py",
+                    self.repo / "wiki/meta/scripts/check_wiki.py")
         # check_wiki.py imports these beside itself.
         for mod in ("mdfence", "wikicore", "nixtree", "wiki_gen"):
-            shutil.copy(REPO / f"wiki/scripts/{mod}.py",
-                        self.repo / f"wiki/scripts/{mod}.py")
+            shutil.copy(REPO / f"wiki/meta/scripts/{mod}.py",
+                        self.repo / f"wiki/meta/scripts/{mod}.py")
         # check_wiki.py imports glob_regex from here (shared with the
         # lesson-reminder hook), so the two travel together.
         (self.repo / ".agents/hooks").mkdir(parents=True)

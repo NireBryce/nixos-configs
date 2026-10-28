@@ -8,7 +8,7 @@ when_to_use: Asked what's due, to review key expiry, or when a change adds or ro
 
 ## Applies to
 
-Requests to "check what's due", "review key expiry", or similar against [wiki/maintenance-schedule.md](../../../wiki/maintenance-schedule.md); also any change that introduces or rotates a credential, key, or certificate with an expiry, rotation cadence, or silent-breakage property — the page needs a matching update in the same change (`wiki-sync` discipline). Not for secret *values* (`secrets-hygiene`).
+Requests to "check what's due", "review key expiry", or similar against [wiki/upkeep-and-admin/maintenance-schedule.md](../../../wiki/upkeep-and-admin/maintenance-schedule.md); also any change that introduces or rotates a credential, key, or certificate with an expiry, rotation cadence, or silent-breakage property — the page needs a matching update in the same change (`wiki-sync` discipline). Not for secret *values* (`secrets-hygiene`).
 
 ## Why
 
@@ -16,7 +16,7 @@ Requests to "check what's due", "review key expiry", or similar against [wiki/ma
 
 ## Reviewing the page
 
-1. **Read `wiki/maintenance-schedule.md` in full** (short by design); don't grep for one item.
+1. **Read `wiki/upkeep-and-admin/maintenance-schedule.md` in full** (short by design); don't grep for one item.
 2. **Check each item's actual current state** without decrypting more than needed:
    - Live check (Tailscale admin console, a service's settings page) beats inferring from repo state.
    - A `secrets.yaml` key's *existence* is checkable (`grep '^key-name:' secrets.yaml`); its value isn't needed to know if it's rotated (else `secrets-hygiene`).
@@ -51,7 +51,7 @@ The page's "Why this file is plaintext" section has the reasoning: key names, da
 
 ## See also
 
-- [wiki/maintenance-schedule.md](../../../wiki/maintenance-schedule.md) — the page.
+- [wiki/upkeep-and-admin/maintenance-schedule.md](../../../wiki/upkeep-and-admin/maintenance-schedule.md) — the page.
 - `secrets-hygiene` — touch secrets without printing plaintext.
 - `wiki-sync` — the general discipline this specializes.
 - `homelab/backup-runbook.md` "Rotating the secrets" — worked rotation procedure this page points to.

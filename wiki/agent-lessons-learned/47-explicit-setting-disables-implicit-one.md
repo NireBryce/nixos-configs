@@ -98,7 +98,7 @@ version never was.
 
 ## See also
 
-- [reverse-proxy](../categories/reverse-proxy.md) — the category, and the
+- [reverse-proxy](../config-structure/categories/reverse-proxy.md) — the category, and the
   two-flavour bare-name situation this left behind.
 - §37, §43 — the other two entries about checks that pass without proving
   what you wanted proved.

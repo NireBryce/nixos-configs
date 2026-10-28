@@ -41,7 +41,7 @@ Read subvolids too: a `/root` far above its neighbours is the rollback
 *demonstrably running*, stronger than `root-blank` merely existing
 (tenacity: 607 vs. 257–265 on first boot). Second method: boot journal for
 the delete-then-snapshot sequence (durandal's first boot into this config).
-Both: `wiki/history.md`'s "Confirmed-on-hardware facts".
+Both: `wiki/meta/history.md`'s "Confirmed-on-hardware facts".
 
 ## History
 

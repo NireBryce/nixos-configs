@@ -3,7 +3,7 @@
 autoApprovers) through Tailscale's REST API, instead of the admin console's
 HuJSON editor.
 
-Why this exists: wiki/open-threads.md's Tailscale Services entry (since
+Why this exists: wiki/meta/open-threads.md's Tailscale Services entry (since
 removed, 2026-10-01; in git history) deferred
 `svc:` partly because the policy file's state lives outside this repo, in
 Tailscale's control plane, editable only by hand in the console. The API
@@ -40,7 +40,7 @@ of this repo's sops secret:
 
 per skill secrets-hygiene: a bare `sops -d` prints the whole file, this
 extracts one key. TAILNET defaults to the tailnet this repo's hosts are
-already on (see wiki/categories/reverse-proxy.md) but can be overridden
+already on (see wiki/config-structure/categories/reverse-proxy.md) but can be overridden
 with $TAILSCALE_TAILNET for a different one.
 """
 import os, subprocess, sys, urllib.request, urllib.error, difflib, pathlib, json

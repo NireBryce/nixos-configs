@@ -45,7 +45,7 @@
         # that ships into ~/.blerc verbatim, so the string keeps only what
         # a reader of the dotfile needs. Full account of all of it, with
         # the upstream bug found along the way:
-        # wiki/categories/shell-config/blesh.md.
+        # wiki/config-structure/categories/shell-config/blesh.md.
         #
         #   - `complete_auto_menu` MUST NOT be set. It reads like a boolean
         #     and is an idle DELAY (`until=$((_ble_idle_clock_start +

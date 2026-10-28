@@ -81,7 +81,7 @@
                 # anything reaching for it dies instead of falling back
                 # to a terminal prompt -- ksshaskpass needs a Qt/X11
                 # platform that isn't there. zsh.nix carries the same
-                # three lines; wiki/categories/shell-config/00-INDEX.md
+                # three lines; wiki/config-structure/categories/shell-config/00-INDEX.md
                 # has the incident. Notes live HERE, not inside the
                 # string below: `#` in a `''` string is shell text and
                 # ships into ~/.bashrc verbatim.
@@ -154,7 +154,7 @@
                 # has already wrapped the bind builtin by the time it
                 # sources that. emacs keymap only -- bash is never in vi
                 # mode. Confirmed on hardware 2026-09-07; full account in
-                # wiki/categories/shell-config/blesh.md.
+                # wiki/config-structure/categories/shell-config/blesh.md.
                 (lib.mkOrder 2500 ''
                     # Swallow konsole's focus/blur keys (see blesh.md).
                     if [[ -n "''${BLE_VERSION-}" ]]; then

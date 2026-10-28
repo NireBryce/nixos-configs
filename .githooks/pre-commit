@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Runs `just lint`'s ratchet before every commit. Not active by default --
+# Runs `just lint`'s ratchet before every commit (or, where nix can't supply
+# the lint tools, the offline checks -- see below). Not active by default --
 # `git config core.hooksPath .githooks` (or `just install-hooks`) has to point
 # git at this directory first; a fresh clone still relies on CI to catch a
 # lint regression until that's run once, same as any other opt-in hook.
@@ -12,21 +13,29 @@ set -euo pipefail
 repo_root="$(git rev-parse --show-toplevel)"
 
 # statix/deadnix live only in the dev shell (flake/modules/dev-shell.nix);
-# with-nix-tools.sh enters it when they aren't on PATH. Without nix at all
-# there is no way to get them, so skip rather than block the commit.
-if { ! command -v statix >/dev/null || ! command -v deadnix >/dev/null; } \
-        && ! command -v nix >/dev/null; then
-    echo "pre-commit: neither statix/deadnix nor nix on PATH -- skipping the lint ratchet." >&2
-    exit 0
-fi
-
+# with-nix-tools.sh enters it when they aren't on PATH, and exits 75 when it
+# can't -- no nix, or nix can't fetch the flake inputs (a Claude Code cloud
+# container has nix and no route to GitHub, so the old "skip if there is no
+# nix" test never fired there and the hook failed every commit instead).
+# On 75 the ratchet cannot run, so the checks that need neither nix nor
+# `just` run in its place (flake/scripts/offline_checks.py): syntax, parse
+# and the wiki lint. Any other failure is a real lint regression.
 cd "${repo_root}/flake"
-if ! scripts/with-nix-tools.sh . python3 scripts/lint.py check; then
-    echo >&2
-    echo "pre-commit: lint regression above -- fix it, or 'just lint' to see it" >&2
-    echo "  again without committing. --no-verify bypasses this hook if you" >&2
-    echo "  really need to; CI still runs the same check on the PR either way." >&2
-    exit 1
+if scripts/with-nix-tools.sh . python3 scripts/lint.py check; then
+    :
+else
+    status=$?
+    if [ "$status" -ne 75 ]; then
+        echo >&2
+        echo "pre-commit: lint regression above -- fix it, or 'just lint' to see it" >&2
+        echo "  again without committing. --no-verify bypasses this hook if you" >&2
+        echo "  really need to; CI still runs the same check on the PR either way." >&2
+        exit 1
+    fi
+    echo "pre-commit: lint ratchet cannot run here (no usable nix); running the offline checks instead." >&2
+    python3 "${repo_root}/flake/scripts/offline_checks.py" staged
+    # Nothing to re-stage: the ratchet, which rewrites the baseline, did not run.
+    exit 0
 fi
 
 # `-C "$repo_root"` + a repo-root-relative path, not `cd` + an absolute one.
