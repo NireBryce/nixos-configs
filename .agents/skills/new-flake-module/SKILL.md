@@ -100,10 +100,9 @@ opt-in `dirsAsCategories.checkClassContents = "build"` or `"eval"` (v0.4.0)
 adds a flake check, `module-class-contents`, that names a class part setting a
 namespace only another class has (`home` under `nixos`); it is a heuristic
 over a short list.
-This repo does not enable it yet: `"build"` fails only when built, and
-`just check` runs `--no-build`; `"eval"` fails under `--no-build` too. While
-either is set, `flake.moduleGraph.misplaced` lists the messages, so
-`just modules` could gate it the way it gates orphans.
+This repo sets it to `"build"`, which fails only when built, and `just check`
+runs `--no-build`; so `just modules` reads `flake.moduleGraph.misplaced` and
+fails on any entry, the way it gates orphans.
 
 ## Raw NixOS modules
 
