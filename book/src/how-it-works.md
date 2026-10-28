@@ -117,10 +117,10 @@ Two mistakes here are easy to make:
   (`just modules`).
 
 Since v0.3.1 the library has an opt-in check for the second mistake. Setting
-`dirsAsCategories.checkClassContents = "build"` (v0.4.0; `true` before) adds a flake check named
-`module-class-contents`. The check names a class part that sets a namespace
-only another class has (`home` under `nixos`), over a short list of
-namespaces. This repo does not enable it. With `"build"` the check fails
+`dirsAsCategories.checkClassContents = "build"` (v0.4.0; `true` before) adds a
+flake check named `module-class-contents`. The check names a class part that
+sets a namespace only another class has (`home` under `nixos`), over a short
+list of namespaces. This repo does not enable it. With `"build"` the check fails
 only when built, and `just check` runs with `--no-build`; `"eval"` fails
 under `--no-build` too, and while either is set `flake.moduleGraph.misplaced`
 lists the messages, so `just modules` could read the list as it does
