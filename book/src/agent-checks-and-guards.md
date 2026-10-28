@@ -65,7 +65,7 @@ Source: `.agents/settings.json`; `.zcode/config.json`;
 | `just wiki-lint` | Preflight, CI, by hand | Docs agree with the repo | Fails | `wiki/meta/scripts/check_wiki.py` |
 | `just modules` | Preflight, CI, by hand | No untracked `.nix`; static and evaluated module graphs agree | Fails | `flake/scripts/modules.py` |
 | `just lint` | Preflight, CI, pre-commit | statix, deadnix and oversized-file counts never rise | Fails | `flake/scripts/lint.py` |
-| `just check` | Preflight, CI | Every host's toplevel and home evaluate; no orphan modules; `flake.lib` helpers | Fails | `flake/modules/checks.nix` |
+| `just check` | Preflight, CI | Every host's toplevel and home evaluate (the orphan and `flake.lib` checks fail only when built, so `--no-build` skips them) | Fails | `flake/modules/checks.nix` |
 | Trailer check | CI, on a PR's commits | No non-canonical Claude trailer | Fails the PR | `flake/scripts/check_trailers.py` |
 
 Source: each file named in the table; `.agents/settings.json`;
@@ -311,7 +311,9 @@ The other static checks:
 - **`checks.nix`** defines the flake checks `just check` evaluates with `nix
   flake check --all-systems --no-build`: every host's toplevel (NixOS and
   darwin), every Home Manager home, `module-orphans`, and unit checks of the
-  `flake.lib` helpers.
+  `flake.lib` helpers. The last two fail through a builder, which
+  `--no-build` never runs; the book's [adding a module](adding-a-module.md)
+  chapter links the issue.
 
 Source: `wiki/meta/scripts/check_wiki.py`, docstring and `@check`
 registrations; `wiki/meta/scripts/wiki_gen.py`; `flake/scripts/modules.py`,

@@ -34,7 +34,8 @@ Source: `flake/modules/host-config/hosts.nix`,
 
 ## One bundle, two platforms
 
-Every host imports `elly-home-manager`, the Mac included (see
+Every fleet machine imports `elly-home-manager`, the Mac included; the
+`forge-runner` guest does not (see
 [users and Home Manager](users-and-home-manager.md)). Adding a package to
 that shared bundle raises two separate questions with different answers.
 
@@ -46,7 +47,7 @@ re-declares `home.packages` with an `apply` function that filters by
 package it drops. On Linux the filter does nothing, deliberately: an
 unbuildable package on the main hosts should stay a loud error.
 
-So **do not** hand-write `lib.mkIf (!pkgs.stdenv.isDarwin)` around a package
+So **do not** hand-write `lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin)` around a package
 because it does not build on macOS; `meta.platforms` already records that.
 
 The filter has three limits, each of which has caught someone:
@@ -127,8 +128,10 @@ Source: `flake/modules/general-config/macos/`,
 
 - Impermanence: the `/root` wipe is a NixOS-host mechanism (see
   [impermanence](glossary.md#impermanence)); the darwin host is an ordinary
-  persistent system. `just boot` is NixOS-only for the same reason:
-  nix-darwin has no boot generation to stage.
+  persistent system.
+- `just boot`: NixOS-only. nix-darwin has no bootloader to stage a generation
+  into, and `nh darwin` offers only build and switch, so `rebuild.sh` refuses
+  it.
 - sops-nix paths: on the Mac,
   `flake/modules/general-config/system/secrets/sops-darwin.nix` points
   `SOPS_AGE_KEY_FILE` at the Linux-style XDG path directly, so `sops` finds
@@ -139,15 +142,17 @@ Source: `flake/modules/general-config/macos/`,
 
 - A NixOS host cannot be built from any other machine: there is no remote
   builder and no binfmt. `flake/scripts/rebuild.sh` says so, and picks
-  `nh darwin` or `nh os` from the flake. Unverified here: how far a darwin
-  host can be evaluated from a Linux machine. Say which level you actually
-  reached (evaluated, built, switched), and do not claim the Mac works on
-  the strength of a Linux evaluation.
+  `nh darwin` or `nh os` from the flake. A darwin host's toplevel and home
+  activation package evaluate from Linux: CI does this on a Linux runner with
+  `nix flake check --all-systems --no-build`, because evaluation, unlike
+  building, needs no matching builder. Building the Mac's configuration needs
+  the Mac. Say which level you actually reached (evaluated, built, switched),
+  and do not claim the Mac works on the strength of an evaluation.
 - `nix flake check` did not force `darwinConfigurations` by itself until
   `flake/modules/checks.nix` started doing it: flake-check warns about an
   unknown output and evaluates nothing inside it. The repo's check now
-  evaluates the Mac's configuration too, but a cheap attribute is still not
-  a build.
+  forces the Mac's toplevel and home activation package, so a real evaluation
+  runs, but it only evaluates them and does not build them.
 - When you change something in the shared bundle, check the Mac's
   evaluation as well as the Linux one. The two use different `pkgs`, and a
   package that is fine on Linux can be the one that fails on the Mac.
@@ -163,7 +168,7 @@ Source: `AGENTS.md` ("Commands"), `flake/scripts/rebuild.sh`.
    filter warns and drops it.
 2. Check whether the package is `meta.broken` there, or behavioral
    (option-shaped, asserts early). If so, guard the module with
-   `lib.mkIf (!pkgs.stdenv.isDarwin)`.
+   `lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin)`.
 3. Check whether Homebrew already installs it. Run
    `just available --duplicates` and decide which side owns it.
 4. Evaluate the darwin host as well as a Linux host.

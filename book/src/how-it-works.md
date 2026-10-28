@@ -103,9 +103,9 @@ Two mistakes here are easy to make:
   `nixos-generate-config` output) is not a module file. dirs-as-categories
   refuses a file that asks for an argument only a class module gets (`pkgs`,
   `modulesPath`, `osConfig`, `nixosConfig`, `darwinConfig`, `utils`), and the
-  error names the argument and the fix: wrap the module,
-  `{ nixos = <the original module>; }`, or rename the file with a leading `_`
-  and import it from a class. Older library versions died with `infinite
+  error names the argument and suggests renaming the file with a leading `_`
+  and importing it from a class. Wrapping the module,
+  `{ nixos = <the original module>; }`, also works. Older library versions died with `infinite
   recursion encountered`, blaming `modulesPath`. A raw module that asks only
   for `config`, `lib` or `options` is not caught: it loads as a flake-parts
   module.
@@ -186,7 +186,8 @@ module there, no host receives it.
 A name in `includes` that doesn't exist stops evaluation, which is the safe
 failure. The silent failure is a category that no host includes: it
 evaluates fine and installs nothing. The `module-orphans` flake check exists
-to catch that case.
+to catch that case, but it fails only when built, and `just check` runs with
+`--no-build` ([issue 561](https://github.com/NireBryce/nixos-configs/issues/561)).
 
 Source: `flake/modules/host-config/durandal-configuration.nix`,
 `flake/modules/host-config/hosts.nix`;

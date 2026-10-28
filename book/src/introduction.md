@@ -33,12 +33,11 @@ a machine you care about can destroy data. Do not assume which hosts wipe
 ### Coding agents wrote most of this, and the user directs them
 
 Large language model (LLM) coding agents co-wrote most of what is in the
-repository: this book, the wiki, the code comments, the scripts, the skills
-and hooks, and much of the Nix. The user aims the agents, reviews and adjusts
-what they produce, and rarely writes text directly. There are
-two reasons. The user does not have the time to write and maintain all of it
-by hand, and without the agents the code would go undocumented and the
-documentation would fall out of date.
+repository: this book, the wiki, the code comments, the scripts, and the
+skills and hooks. The user aims the agents, reviews and adjusts what they
+produce, and rarely writes text directly. The user gives two reasons: there is
+no time to write and maintain all of it by hand, and without the agents the
+code would go undocumented and the documentation would fall out of date.
 
 This has consequences for how you read the repo:
 
@@ -50,7 +49,9 @@ This has consequences for how you read the repo:
   cites.
 - The repo compensates with mechanical checks instead of trust. Lints compare
   documentation against the code, tests pin each checker to a case it should
-  catch, and text that could not be confirmed is marked `Unverified:`. Later
+  catch, and the docs mark claims they could not confirm with an inline
+  qualifier such as `UNVERIFIED` or "not confirmed live" (this book writes
+  `Unverified:`). Later
   chapters ([agents in the repo](agents-in-the-repo.md),
   [checks and guards](agent-checks-and-guards.md),
   [git and agent workflows](git-and-agent-workflows.md)) describe how this
@@ -60,7 +61,8 @@ This has consequences for how you read the repo:
   their sources so that you can check them.
 
 Source: `README.md` ("most of the prose in this repo ... is written by coding
-agents"), `AGENTS.md` (its opening note).
+agents"), `AGENTS.md` (its opening note). The user's working method and the
+two reasons are the user's own description; no file in the repo records them.
 
 ### How to use this book
 
@@ -108,10 +110,13 @@ apart. The repo follows the same convention, defined in
 One module file and one flake-parts module, side by side:
 
 ```nix
-# ripgrep.nix: a module file with one Home Manager module inside
+# ripgrep.nix (header comment omitted): a module file with one Home Manager module
 {
     homeManager = { pkgs, ... }: {
-        home.packages = [ pkgs.ripgrep ];
+        # `rg` is a much faster and more powerful grep alternative
+        home.packages = with pkgs; [
+            ripgrep
+        ];
     };
 }
 ```
@@ -136,18 +141,18 @@ Where a name already contains the word, such as `just modules` or
 ## The idea in one paragraph
 
 Almost every `.nix` file under `flake/modules/` is a module file, named by its
-filename. (The exceptions are plain flake-parts modules such as `hosts.nix`,
-`checks.nix`, `invariants.nix`, `dev-shell.nix` and `lib.nix`, `defaults.nix`
-files, and anything under a `_` path; see [how it works](how-it-works.md).)
-The folder a module file sits in decides which [category](glossary.md#category)
-it belongs to; a category is a named group of module files that a host can
-take in one line. A host lists categories by name and receives every module
+filename. The exceptions are plain flake-parts modules such as `hosts.nix` and
+`checks.nix`, `defaults.nix` files, and anything under a `_` path.
+
+The folder a module file sits in decides its
+[category](glossary.md#category), a named group of module files that a host
+takes in one line. A host lists categories by name and receives every module
 file in them. No central list needs to be kept in sync, and no feature has its
-own `enable` option: membership is the directory tree. A single module file
-can declare the NixOS module and the Home Manager module of one feature next
-to each other, one [module class](glossary.md#module-class) per key. The
-details, and the places where this design surprises people, are in
-[how it works](how-it-works.md).
+own `enable` option: membership is the directory tree. One module file can
+declare the NixOS module and the Home Manager module of one feature side by
+side, one [module class](glossary.md#module-class) per key. [How it
+works](how-it-works.md) has the details and the places where this design
+surprises people.
 
 ## Repository map
 

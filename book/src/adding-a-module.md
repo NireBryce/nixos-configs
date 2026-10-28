@@ -128,8 +128,10 @@ deliberate, not cleanup targets:
   string.
 - Look for an existing `programs.*` integration before writing one by hand.
 
-Check: `just add-module` exits with an error for each refusal listed above;
-on success the file is already staged.
+Check: `just add-module` exits with an error, before writing anything, for
+each refusal listed above. On success the file is staged. It also exits 1,
+after creating and staging the file, if other orphans or untracked `.nix`
+files already exist.
 
 Source: `.agents/skills/new-flake-module/SKILL.md`, "Scaffolder" and "The
 shape"; `flake/scripts/modules.py` (`add`, `BOILERPLATE`);
@@ -146,7 +148,7 @@ you created the file by hand, stage it yourself and run the checks:
 ```sh
 git add flake/modules/general-config/system/my-thing/my-thing.nix
 just modules     # reports untracked .nix files and graph drift
-just check       # evaluates every host; fails on an orphan (module-orphans)
+just check       # evaluates every host; does not fail on an orphan (see Step 5)
 ```
 
 When iterating, force a real toplevel. A cheap attribute can resolve while
@@ -170,14 +172,17 @@ Source: `AGENTS.md`, "Working in this repo" and "Commands";
 A module inside a category reaches every host that includes that category.
 If no host includes the category, the module is an
 [**orphan**](glossary.md#orphan): it evaluates and installs nothing. The
-`module-orphans` check in `nix flake check` reports it. If a host should take
-the module on its own, without the rest of the category, name the module in
+`module-orphans` check in `nix flake check` is meant to report it, but it fails
+only when built and `just check` runs with `--no-build`, so today an orphan
+passes `just check` and CI ([issue 561](https://github.com/NireBryce/nixos-configs/issues/561)). `nix eval --json ./flake#moduleGraph`
+lists orphans under `orphans`. If a host should take the module on its own, without the rest of the category, name the module in
 an `includes` list directly, as the hosts do with `kde-desktop`.
 
 Also check whether your new folder has turned its parent into a category.
 See [Categories and membership](categories.md).
 
-Check: `just check` passes, which means `module-orphans` found nothing.
+Check: the `orphans` list in `nix eval --json ./flake#moduleGraph` does not
+include the module. `just check` cannot tell you this today.
 
 Source: [module-files.md](../../wiki/config-structure/module-files.md),
 Quick facts; `.agents/skills/new-flake-module/SKILL.md`, "Categories come

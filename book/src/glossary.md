@@ -198,7 +198,8 @@ Source: `flake/scripts/offline_checks.py`, docstring.
 
 An orphan is a module that no host reaches, because nothing includes its
 category or names it. It evaluates cleanly and installs nothing. The
-`module-orphans` check in `nix flake check` reports it.
+`module-orphans` check in `nix flake check` is meant to report it, but it
+fails only when built, which `just check`'s `--no-build` skips.
 Source: [module-files.md](../../wiki/config-structure/module-files.md), Quick
 facts; `flake/modules/checks.nix`.
 
@@ -227,7 +228,8 @@ Source: `.agents/skills/new-skill/SKILL.md`.
 
 ## `useGlobalPkgs` and `useUserPackages`
 
-These two Home Manager options are set by the NixOS-side bridge.
+These two Home Manager options are set by both bridge modules
+(`enable-home-manager.nix` and `enable-home-manager-darwin.nix`).
 `useGlobalPkgs = true` makes Home Manager use the system's nixpkgs instead of
 a second instantiation, which is why a home module may not set `nixpkgs.*`.
 `useUserPackages = true` installs packages into

@@ -86,16 +86,18 @@ Source: `.agents/skills/new-host-config/SKILL.md`, "Shape decisions".
 
 ## Step 2: write the entry point
 
-Copy `durandal-configuration.nix` and adapt it. Shortened:
+Copy `durandal-configuration.nix` and adapt it. Abridged (the real file
+has more comments and one more category line than shown):
 
 ```nix
 {
     includes.nixos = [
         "<name>"        # host-config/<name>/
         "boot"
-        "impermanence"  # WARN-impermanence: wipes /root on boot. Delete this line to opt out.
+        "impermanence"  # WARN-impermanence -- wipes /root on boot, see the module.
         "hardware"
         "nix"
+        "peripherals"
         "shell-config"
         "system"
         "kde-desktop"
@@ -169,7 +171,8 @@ may lack:
 With no hardware yet, use the disko generator
 `general-config/impermanence/_disko/impermanence-luks-btrfs.nix` rather
 than inventing a hardware configuration. That generator has been evaluated,
-never run on hardware, and no host imports it today. Call it like this:
+never run on hardware, and no host imports it today. From a file directly in `host-config/<name>/`,
+call it like this:
 
 ```nix
 imports = [
@@ -178,6 +181,13 @@ imports = [
     })
 ];
 ```
+
+Two adjustments the excerpt does not show. The generator produces only
+`disko.devices` and `fileSystems` values, so also import
+`inputs.disko.nixosModules.disko` beside it, or evaluation fails on an
+unknown option (`flake/doc/disko-impermanence-layout.md` lists this as a step).
+And write the path relative to the file it sits in: a file in
+`<name>/hardware/` needs `../../../` where the excerpt shows `../../`.
 
 - **The placeholder device must be obviously fake.** Never use a plausible
   path like `/dev/nvme0n1`. That path exists on tenacity, and disko pointed

@@ -263,7 +263,9 @@ patterns. Each records one file under
 `_loose-ends/extraction-candidates/agent-orchestration/` or
 `_loose-ends/extraction-candidates/nix/`, in the same commit as the task
 that surfaced it. The test is to restate the thing's purpose with every repo
-noun removed and see whether it is still true and useful. The `-all` variants
+noun removed and see whether it is still true and useful.
+
+The `-all` variants
 (`extract-agent-tooling-all`, `extract-nix-tooling-all`) are deliberate
 whole-repo sweeps that also reconcile the existing candidate files. Copying
 anything into another repo happens only when the user asks.

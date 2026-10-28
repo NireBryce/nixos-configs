@@ -36,8 +36,8 @@ shared filename. The worked example is the old `nixd.nix`, which installed
 The rationale note lists, from grep, which flake-parts features are used and
 which are not. Unused: `moduleWithSystem`, `debug`, overlay or
 `legacyPackages` composition, and any bundled flake module other than
-`modules` and `touchup`. `perSystem` is used for checks and the one dev
-shell, and `withSystem` appears once.
+`modules` and `touchup`. `perSystem` is used for checks, the dev shell and the
+nix-topology output, and `withSystem` is used only in `hosts.nix`.
 
 Source: `flake/doc/flake-parts-rationale.md`;
 [flake-parts.md](../../wiki/config-structure/flake-parts.md).
@@ -76,14 +76,15 @@ the result is greppable. The note lists its costs:
 - **A new silent failure.** Leave out the opt-in line and the module is
   valid, evaluates cleanly, and installs nothing. No evaluation can ever
   report this mistake.
+- Same-named modules merge instead of erroring.
 
 Categories cannot fail that way, because membership is automatic.
 
-The pattern was tested before it was adopted. Someone built a throwaway
-`mkFlake` with two modules that each set the same aggregate's `imports`, and
-confirmed that both definitions survived. The port notes say that
-experiment is why the pattern was adopted at all, instead of being assumed
-to work (§12 in
+The opt-in pattern was tested before the sibling branch adopted it. Someone
+built a throwaway `mkFlake` with two modules that each set the same
+aggregate's `imports`, and confirmed that both definitions survived. Later,
+before categories were repaired rather than replaced, the self-reference they
+depend on was modelled and evaluated first (§12 in
 [agent-lessons-learned.md](../../wiki/agent-lessons-learned.md)).
 
 `flake/doc/dirsAsCategory.md` keeps a "How to convert" section as a
@@ -150,9 +151,10 @@ the system's per-user profile).
 The integration bought one switch instead of two, one nixpkgs instantiation,
 and a home config that cannot drift out of sync with its system.
 
-It cost three things. Home modules may not set `nixpkgs.*`; doing so is an
-error, not a no-op. Activation runs as a systemd unit with a minimal `PATH`.
-The home config can't be switched on its own.
+It cost four things. Home modules may not set `nixpkgs.*`; doing so is an
+error, not a no-op. The home profile directory moves to
+`/etc/profiles/per-user/<name>`. Activation runs as a systemd unit with a
+minimal `PATH`. The home config can't be switched on its own.
 
 `flake/doc/trailhead-home-manager-standalone.md` is the documented way back.
 For more detail, see [Wiring a user and Home Manager](users-and-home-manager.md).
@@ -238,7 +240,9 @@ Each of these produced no error, or an error that named the wrong thing:
   error that blamed `modulesPath`. The library now refuses it with advice.
 
 Source: [flake-parts-port-notes.md](../../wiki/config-structure/flake-parts-port-notes.md),
-"Dead ends, with the symptom that identified them".
+"Dead ends, with the symptom that identified them" and "import-tree";
+[module-files.md](../../wiki/config-structure/module-files.md), "Three kinds of
+module, and what to call each" (the current refusal).
 
 ## Decision: what the repo refuses to record
 

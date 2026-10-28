@@ -11,8 +11,7 @@ the [glossary](glossary.md).
 
 Packages live under `flake/modules/packages-config/`, one file per package.
 They reach every host through one [Home Manager](glossary.md#home-manager)
-module, `elly-home-manager`. (Home Manager manages a user's packages and
-dotfiles as modules; here it runs inside each system configuration.) Every
+module, `elly-home-manager`. Every
 host shares that module unchanged, **including any darwin host** (see
 `host-config/hosts.nix`), so every package you add has to survive
 aarch64-darwin as well as Linux.
@@ -35,7 +34,7 @@ to, so that the module can be found later. The recorded example: `cmux` is a
 terminal, but its description leans on support for AI coding agents, so it
 went in `development/tools/ai-tools/` beside `herdr.nix` instead of in
 `terminals/` beside `kitty.nix`. If the choice isn't obvious, explain it in
-the module comment, as `kitty.nix` and `obsidian.nix` do.
+the module's header comment.
 
 The usual path is `packages-config/<category>/<tool>/<tool>.nix`. Some
 folders are flatter, for example `development/tools/ai-tools/herdr.nix` and
@@ -182,9 +181,10 @@ the kind of configuration the module targets. Get these points right:
 
 `just add-module homeManager packages-config/<category>/<tool>/<tool>.nix "<description>"`
 can write the file for you. It also runs `git add` and the checks. The
-scaffolder leaves two edits to you: it writes `# summary:`, which you change
-to `# package summary:` in this area, and it writes `_:` as the inner lambda,
-which needs to become `{ pkgs, ... }:` before you can use `pkgs`.
+scaffolder leaves edits to you: it writes `# summary:`, which you change to
+`# package summary:` in this area; it writes `_:` as the inner lambda, which
+needs to become `{ pkgs, ... }:` before you can use `pkgs`; and it writes no
+`home.packages` list, so you add the body.
 
 Check: `just add-module` refuses a name that a module or category already
 uses. For a file written by hand, the same collision stops evaluation in

@@ -139,9 +139,11 @@ Source: `.agents/rules/flake-modules.md`.
 3. Make something include the category. For the system side, add the name
    to the relevant hosts' `includes.<class>`. For the Home Manager side, add
    it to `users-config/elly-home-manager.nix`. A category that nothing
-   includes evaluates cleanly and installs nothing. `nix flake check`'s
-   `module-orphans` check reports its modules as
-   [orphans](glossary.md#orphan).
+   includes evaluates cleanly and installs nothing. the
+   `module-orphans` check is meant to report its modules as
+   [orphans](glossary.md#orphan), but it cannot fail under `just check`'s
+   `--no-build` ([issue 561](https://github.com/NireBryce/nixos-configs/issues/561)); read `orphans` from
+   `nix eval --json ./flake#moduleGraph`.
 4. Compare the hosts before and after (`just diff <ref>`, or the
    fingerprints). Promoting an existing folder can reorder package lists.
 5. Run `just wiki-gen`. Give the category a page under
@@ -162,7 +164,7 @@ shape".
    that more hosts include. Unverified: no doc describes this case directly.
    It follows from the rules above. Check it with
    `nix eval --json ./flake#moduleGraph`.
-3. Run `just diff` across any removal. Removing a module can remove
+3. Run `just diff <ref>` across any removal. Removing a module can remove
    something another module had switched on (§7).
 4. Update the category's page and run `just wiki-gen`.
 
