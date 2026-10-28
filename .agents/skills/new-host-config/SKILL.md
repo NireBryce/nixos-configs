@@ -45,8 +45,8 @@ question (`just baseline` on the host); not recorded in the repo.
 
 **Real, scanned hardware**: capture `nixos-generate-config`'s
 `fileSystems`/`boot.initrd.*` into `<name>/hardware/hardware-<name>.nix`,
-wrapped as a flake-parts module (raw output dies with a misleading
-`infinite recursion`; `new-flake-module` has the shape). Generated output
+wrapped as a module file (raw output is refused for asking for
+`modulesPath`; `new-flake-module` has the shape). Generated output
 may lack two things `invariants.nix` fails `just check` over:
 `options = [ "fmask=0077" "dmask=0077" ]` on vfat `/boot`, and on an
 impermanence host `neededForBoot = true` on `/persist`.

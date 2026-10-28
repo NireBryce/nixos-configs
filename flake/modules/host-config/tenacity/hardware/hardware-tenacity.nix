@@ -5,10 +5,11 @@
 
 # summary: nire-tenacity hardware, from `nixos-generate-config` on the machine.
 #
-# Wrapped as a flake-parts module. A raw generator file under modules/ makes
-# flake-parts resolve `modulesPath` through its own _module.args and evaluation
-# dies with `infinite recursion encountered`, naming modulesPath rather than
-# this file. That broke the sibling branch twice.
+# Wrapped as a module file, `{ nixos = ...; }`. A raw generator file under
+# modules/ is refused by dirs-as-categories for asking for `modulesPath`, which
+# only a NixOS module gets. Older versions died with `infinite recursion
+# encountered`, naming modulesPath rather than this file, which broke the
+# sibling branch twice.
 #
 # Named for the host, not `hardware-configuration`: a module's filename becomes
 # its attribute name, and a repeated name stops evaluation -- durandal has one

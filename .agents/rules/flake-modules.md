@@ -25,8 +25,10 @@ the full rules.
 - A mistyped class key beside a real one is refused naming the file; a
   file whose only class key is mistyped is loaded as a flake-parts module
   and flake-parts rejects the unknown option.
-- Raw `nixos-generate-config` output needs wrapping, or evaluation dies
-  with a misleading `infinite recursion` naming `modulesPath`.
+- Raw `nixos-generate-config` output needs wrapping: dirs-as-categories
+  refuses a file asking for a class-only argument (`pkgs`, `modulesPath`,
+  ...), naming it and the fix. Older versions died with a misleading
+  `infinite recursion` naming `modulesPath`.
 - `git add` a new file before `nix eval`: flakes ignore untracked files.
 
 ## Membership comes from the directory
@@ -79,3 +81,4 @@ the full rules.
 - Browsing modules, not editing them: `just history-line <file>` prints
   where the history section starts; read up to it. Editing is different:
   read the history before changing what it describes.
+- Name the kind of module: *module file* (the `.nix` file), *NixOS / Home Manager / darwin module* (the value under a class key), *flake-parts module* (a plain file like `hosts.nix`). A module file is never a "flake-parts module"; `wiki/config-structure/module-files.md`, "Three kinds of module".

@@ -15,6 +15,7 @@ categories. Each module now opens with a comment saying so. The input's
 
 - [Quick facts](#quick-facts)
 - [What a module file is](#what-a-module-file-is)
+- [Three kinds of module, and what to call each](#three-kinds-of-module-and-what-to-call-each)
 - [Why the name comes from the filename](#why-the-name-comes-from-the-filename)
 - [Why categories need no shim](#why-categories-need-no-shim)
 - [Why some files keep `{ lib, inputs, ... }:`](#why-some-files-keep--lib-inputs--)
@@ -34,7 +35,7 @@ categories. Each module now opens with a comment saying so. The input's
 | Hosts and the home aggregate | `includes.<class> = [ "name" … ];`, resolved by name |
 | Another class's module | `enables.<class> = [ "name" ];`, received as `enabled.<class>.<name>` |
 | `defaults.nix` | never a module; its class parts apply whenever anything in its folder is reached |
-| Not a module | a function asking for `config`/`withSystem`, or a file with no class key: loaded as a plain flake-parts module |
+| Not a module file | a function asking for `config`/`withSystem`, or a file with no class key: loaded as a plain flake-parts module (names for the three kinds of module: [Three kinds of module](#three-kinds-of-module-and-what-to-call-each)) |
 | `_` paths | skipped, as by import-tree |
 | Mistakes | duplicate names, unknown keys, unknown names in `includes`/`enables` stop evaluation, naming the file |
 | Checks | `nix flake check`'s `module-orphans` (dirs-as-categories' `checkOrphans`, on in `checks.nix`): modules nothing reaches; `just modules`: untracked files, and drift between wiki-lint's file-only reading and the evaluated graph |
@@ -58,6 +59,48 @@ dirs-as-categories reads that file, names it `gaming` after its filename,
 and defines `flake.modules.nixos.gaming` itself. A file may carry several
 classes (`bash.nix` has `nixos` and `homeManager`); each key is that class's
 module, exactly what `flake.modules.<class>.${moduleName} = …` used to hold.
+
+## Three kinds of module, and what to call each
+
+A `.nix` file under `flake/modules/` and the value inside it are different
+things, and the bare word "module" can mean either. Use these names:
+
+| Name | What it is | Evaluated by | Examples |
+|---|---|---|---|
+| module file | a `.nix` file in the shape above: a set of class keys, or a function of only `lib`/`inputs` returning one. The unit dirs-as-categories names after its filename | dirs-as-categories reads it and fills `flake.modules.<class>.<name>` | `ripgrep.nix` |
+| NixOS module, Home Manager module, darwin module | the value under a class key: an ordinary module of that system | `nixosSystem`, Home Manager or `darwinSystem`, for each host that includes the module file | the body of `nixos = { pkgs, ... }: { ... }` |
+| flake-parts module | a module that configures the flake itself (`flake.*`, `perSystem`, `withSystem`). In this tree, only a plain file that is not in the module-file shape | flake-parts' `mkFlake` | `hosts.nix`, `checks.nix`, `lib.nix`, `invariants.nix`, `dev-shell.nix` |
+
+Rules of use:
+
+- Say "module file" for the file. Do not call it a "flake-parts module", even
+  though dirs-as-categories compiles each module file into one internally (the
+  header comment in each file says so); that is an implementation detail, not
+  something to name in prose.
+- Name the class when you mean the body: "the NixOS module in `x.nix`", "the
+  Home Manager module in `x.nix`". One module file can hold several.
+- A bare "module" is fine inside names that are already fixed (`just modules`,
+  `modules.py`, `module-orphans`, `flake.modules`). There it means module file.
+- A raw NixOS module, such as `nixos-generate-config` output, is none of the
+  three while it sits under `flake/modules/`. dirs-as-categories loads a file
+  that is not in the module-file shape as a flake-parts module, except that it
+  refuses a function asking for an argument only a class module gets (`pkgs`,
+  `modulesPath`, `osConfig`, `nixosConfig`, `darwinConfig`, `utils`), naming the
+  argument and the fix. A raw module that asks only for `config`, `lib` or
+  `options` is not caught and loads as a flake-parts module. Wrap it,
+  `{ nixos = <the raw module>; }`, to make it a module file, or rename it with a
+  leading `_` and import it from a class.
+- A file kept off the auto-imported tree (a `_`-prefixed path, or outside
+  `flake/modules/`) is imported by path and is whatever its importer treats it
+  as. `impermanence/_disko/impermanence-luks-btrfs.nix` is a curried function
+  that returns a NixOS module.
+
+Why it matters: mixing the terms hides the cause of the errors that come from
+putting the wrong kind of file in the tree, such as a raw NixOS module under
+`modules/` (refused with advice when it asks for a class-only argument; older
+library versions died with an infinite recursion naming `modulesPath`) or a
+plain flake-parts file asked to behave like a module file. Both are covered
+below.
 
 ## Why the name comes from the filename
 
