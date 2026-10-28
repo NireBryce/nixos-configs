@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 { 
     homeManager = { pkgs, ... }: {
+        # package summary: iftop -- per-connection network bandwidth monitor (top-like)
         # network monitor https://pdw.ex-parrot.com/iftop/
         home.packages = with pkgs; [
             iftop

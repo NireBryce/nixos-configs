@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: rustic -- restic-compatible backup client written in Rust
         # restic-compatible client with an interactive TUI (`rustic
         # snapshots -i`) for browsing/restoring a repository --
         # reads/writes the same repo format services.restic writes on

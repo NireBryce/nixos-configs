@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: shellcheck -- static analyzer (linter) for shell scripts
         home.packages = with pkgs; [
             shellcheck
         ];

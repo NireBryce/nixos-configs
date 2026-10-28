@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: tldr -- community-maintained simplified man pages
         # tldr - community provided man pages
         home.packages = with pkgs; [
             tldr

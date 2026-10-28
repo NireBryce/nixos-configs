@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: socat -- relays data between two sockets, files or pipes
         # openbsd netcat replacement https://www.dest-unreach.org/socat/
         home.packages = with pkgs; [
             socat

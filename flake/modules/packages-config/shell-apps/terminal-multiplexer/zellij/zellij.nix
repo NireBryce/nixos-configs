@@ -5,6 +5,7 @@
 { lib, ... }:
 {
     homeManager = { pkgs, ... }: { 
+        # package summary: zellij -- terminal multiplexer and workspace
         # zellij terminal multiplexer
         home.packages = with pkgs; [
             zellij

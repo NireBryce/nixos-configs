@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: shfmt -- shell script formatter (sh, bash, mksh)
         home.packages = with pkgs; [
             shfmt
         ];

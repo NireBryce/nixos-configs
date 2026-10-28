@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: neovim -- extensible Vim-based text editor
         # neovim - it's like vim but heavier
         home.packages = with pkgs; [ neovim ];
     };

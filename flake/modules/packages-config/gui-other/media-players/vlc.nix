@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: vlc -- cross-platform media player
         # meta.platforms excludes aarch64-darwin. The official VLC.app is
         # what people actually use on macOS; add it as a homebrew cask in
         # general-config/macos/homebrew/homebrew.nix if wanted on nire-lysithea.

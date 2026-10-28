@@ -20,6 +20,7 @@
 # trusting its key daemon-wide here again.
 {
     nixos = { pkgs, ... }: {
+        # package summary: devenv -- Nix-based declarative developer environments
         environment.systemPackages = with pkgs; [
             devenv
         ];

@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: magic-wormhole-rs -- one-off file transfer between machines
         # wh - magic-wormhole point to point file transfer
         home.packages = with pkgs; [
             magic-wormhole-rs

@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: fselect -- finds files with SQL-like queries
         home.packages = with pkgs; [
             fselect
         ];

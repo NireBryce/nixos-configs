@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+            # package summary: bubblewrap -- unprivileged sandboxing tool (`bwrap`)
             # bubblewrap: unprivileged sandboxing tool. Filed here, not
             # linux-utils/, because it's here for Claude Code's sandbox
             # (claude.nix), which needs `bwrap` and `socat` on PATH on Linux;

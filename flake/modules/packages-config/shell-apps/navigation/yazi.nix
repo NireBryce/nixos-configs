@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: { 
+        # package summary: yazi -- terminal file manager
         # yazi - file browser
         home.packages = with pkgs; [
             yazi

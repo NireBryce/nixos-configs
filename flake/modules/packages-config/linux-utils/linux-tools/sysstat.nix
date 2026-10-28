@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: sysstat -- perf monitors (`sar`, `iostat`, `mpstat`)
         # system stats http://sebastien.godard.pagesperso-orange.fr/
         home.packages = with pkgs; [
             sysstat

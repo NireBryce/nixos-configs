@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: iperf3 -- network throughput measurement tool
         # network tools https://software.es.net/iperf/
         home.packages = with pkgs; [
             iperf3

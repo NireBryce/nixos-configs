@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     nixos = { pkgs, ... }: {
+        # package summary: cod -- completion daemon that learns from `--help` output
         # Cod - Completion daemon
         # I think it needs to be system installed to access system shells
         #

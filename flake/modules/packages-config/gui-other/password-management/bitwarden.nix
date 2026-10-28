@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: bitwarden-desktop -- Bitwarden password manager desktop app
         # bitwarden - password manager https://bitwarden.com/
         home.packages = with pkgs; [
             bitwarden-desktop

@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = {
+        # package summary: nh -- Nix rebuild helper CLI, with scheduled store cleanup
         programs.nh = {
             enable = true;
             clean.enable = true;

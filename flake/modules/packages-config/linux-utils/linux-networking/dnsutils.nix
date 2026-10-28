@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: dnsutils -- BIND's DNS lookup tools (`dig`, `nslookup`)
         # provides `dig` + `nslookup`
         home.packages = with pkgs; [
             dnsutils

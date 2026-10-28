@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: aria2 -- CLI download manager (HTTP, FTP, BitTorrent)
         # aria2 -cli download manager
         home.packages = with pkgs; [
             aria2

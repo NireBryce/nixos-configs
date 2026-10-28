@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: sqlite -- SQLite embedded database and `sqlite3` CLI
         home.packages = with pkgs; [
             sqlite
         ];

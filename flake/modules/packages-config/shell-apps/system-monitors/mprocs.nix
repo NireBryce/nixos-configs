@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: { 
+        # package summary: mprocs -- runs several commands at once, a TUI pane each
         # run multiple commands in parallel
         home.packages = with pkgs; [
             mprocs

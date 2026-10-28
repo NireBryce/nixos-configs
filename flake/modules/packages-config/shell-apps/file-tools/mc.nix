@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 { 
     homeManager = { pkgs, ... }: {
+        # package summary: mc -- Midnight Commander, two-pane terminal file manager
         # midnight commander file browser
         home.packages = with pkgs; [
             mc

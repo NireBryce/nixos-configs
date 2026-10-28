@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 { 
     homeManager = { pkgs, ... }: {
+        # package summary: which -- prints the path a command name resolves to
         # which - find the location of a given command's binary
         home.packages = with pkgs; [
             which

@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: { 
+        # package summary: yq-go -- jq-like processor for YAML, JSON and XML
         # yaml jq https://github.com/mikefarah/yq
         home.packages = with pkgs; [
             yq-go

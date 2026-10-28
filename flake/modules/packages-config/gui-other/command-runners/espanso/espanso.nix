@@ -40,6 +40,7 @@
         # default.yml, so Home Manager would refuse to clobber it and fail
         # activation until that file is moved out of the way.
         lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin) {
+        # package summary: espanso -- text expander: typed trigger phrases become text
         # espanso is a text expansion tool that turns a trigger phrase into text
 
         # TODO 2026-08-11: espanso crashes once per boot and then works.

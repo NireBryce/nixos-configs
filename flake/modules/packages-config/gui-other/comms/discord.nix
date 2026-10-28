@@ -18,6 +18,7 @@
         # come from the cache, so they cost build time rather than
         # risking the build.
         lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin) {
+        # package summary: discord -- voice, video and text chat client
         # discord gamer chat app that broke containment
         home.packages = with pkgs; [
             discord

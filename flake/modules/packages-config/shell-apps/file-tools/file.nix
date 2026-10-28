@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: file -- identifies a file's type from its contents
         # an application to show file info
         home.packages = with pkgs; [
             file

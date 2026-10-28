@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: nvd -- diffs package versions between two Nix closures
         # nix package version diff
         home.packages = with pkgs; [
             nvd

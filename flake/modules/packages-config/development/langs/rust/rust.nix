@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     nixos = { pkgs, ... }: {
+        # package summary: rust -- Rust toolchain (rustc, cargo, rustup, clippy, LSP)
         environment.systemPackages = with pkgs; [
             cargo
             rustc

@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 { 
     homeManager = {
+        # package summary: direnv -- per-directory environment loader, with nix-direnv
         programs.direnv = {
             enable = true;
             enableBashIntegration = true;

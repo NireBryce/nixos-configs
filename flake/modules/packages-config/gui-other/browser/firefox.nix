@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: firefox -- Mozilla's web browser
         # note: this is also installed as a system package, does that matter?
         home.packages = with pkgs; [ 
             firefox 

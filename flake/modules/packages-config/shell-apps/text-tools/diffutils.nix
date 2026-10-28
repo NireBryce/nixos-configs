@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: { 
+        # package summary: diffutils -- GNU `diff`, `cmp`, `diff3` and `sdiff`
         home.packages = with pkgs; [
             diffutils
         ];

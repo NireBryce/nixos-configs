@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = {
+    # package summary: atuin -- shell history in SQLite, with encrypted sync
     # Atuin remote encrypted history manager. History syncs to the remote
     # sync server by default (auto_sync, on every prompt) -- nothing here
     # disables it, deliberately; the account and its rotation runbook are

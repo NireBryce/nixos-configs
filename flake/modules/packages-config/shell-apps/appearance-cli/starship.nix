@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = {
+        # package summary: starship -- cross-shell prompt
         programs.starship = {
             enable = true;
             enableBashIntegration = true;

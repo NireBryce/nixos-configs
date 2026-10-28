@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: { 
+        # package summary: hyfetch -- neofetch fork: system info with pride flags
         # neofetch replacement https://github.com/hykilpikonna/HyFetch
         home.packages = with pkgs; [
             hyfetch

@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: ipcalc -- IPv4/IPv6 address and subnet calculator
         # IP address calculator https://gitlab.com/ipcalc/ipcalc
         home.packages = with pkgs; [
             ipcalc

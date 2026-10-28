@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = {
+        # package summary: fzf -- command-line fuzzy finder
         programs.fzf = {
             enable = true;
             enableZshIntegration = true;

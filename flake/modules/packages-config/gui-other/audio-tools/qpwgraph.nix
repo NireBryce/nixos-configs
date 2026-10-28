@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: qpwgraph -- PipeWire patchbay for audio/MIDI routing
         # virtual mixer
         home.packages = with pkgs; [
             qpwgraph

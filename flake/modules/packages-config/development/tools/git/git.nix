@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {    
+        # package summary: git -- distributed version control system
         home.packages = with pkgs; [
             git
         ];

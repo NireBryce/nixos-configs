@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: python3 -- Python 3 interpreter, user-level install
         # home-manager instance of python3
         home.packages = with pkgs; [
             python3

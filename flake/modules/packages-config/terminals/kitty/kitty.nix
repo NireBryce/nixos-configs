@@ -19,6 +19,7 @@
 # the other split pair in this tree, did exactly that to .blerc.
 {
     homeManager = { pkgs, lib, ... }: {
+        # package summary: kitty -- GPU-based terminal emulator, installation only
         # kitty terminal emulator
         home.packages = with pkgs; [
             kitty-img

@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: usbutils -- USB device tools (`lsusb`)
         # `lsusb` https://www.linux-usb.org/
         home.packages = with pkgs; [
             usbutils

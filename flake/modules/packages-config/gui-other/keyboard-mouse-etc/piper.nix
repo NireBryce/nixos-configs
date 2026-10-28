@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: piper -- GTK frontend to libratbag for gaming mouse settings
         # A libratbag/udev frontend, so Linux-only with no macOS
         # equivalent; meta.platforms excludes aarch64-darwin.
         # piper - logitech/razer graphical mouse manager https://github.com/soxoj/piper

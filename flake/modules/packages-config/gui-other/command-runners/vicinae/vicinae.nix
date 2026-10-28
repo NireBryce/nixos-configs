@@ -13,6 +13,7 @@
         # equivalent on that machine, which is what the "Like raycast for
         # linux" description below was already saying.
         lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin) {
+        # package summary: vicinae -- Raycast-style launcher for Linux
         # Like raycast for linux
         programs.vicinae = {
             enable = true;

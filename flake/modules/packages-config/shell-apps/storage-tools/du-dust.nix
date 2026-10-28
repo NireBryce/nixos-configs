@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: { 
+        # package summary: dust -- `du` alternative showing disk usage as a tree
         # `du` alternative
         home.packages = with pkgs; [
             dust

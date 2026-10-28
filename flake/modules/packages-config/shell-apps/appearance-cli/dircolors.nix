@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = {
+        # package summary: dircolors -- sets LS_COLORS for colored `ls` output
         programs.dircolors = {
             enable = true;
             enableZshIntegration = true;

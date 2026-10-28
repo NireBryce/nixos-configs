@@ -16,6 +16,7 @@
 # file's settings ever appear to do nothing, check that first.
 {
     homeManager = {
+        # package summary: kitty -- GPU-based terminal emulator; config only here
         programs.kitty = {
             extraConfig = ''
                 clipboard_control write-clipboard write-primary read-clipboard-ask read-primary-ask

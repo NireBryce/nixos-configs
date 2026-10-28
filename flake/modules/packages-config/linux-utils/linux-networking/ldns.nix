@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: ldns -- DNS library; provides `drill`, a `dig` alternative
         # provides `drill`, a `dig` replacement https://www.nlnetlabs.nl/projects/ldns/about/
         home.packages = with pkgs; [
             ldns

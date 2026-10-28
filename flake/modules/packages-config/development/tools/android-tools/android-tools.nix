@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: android-tools -- Android SDK platform tools (adb, fastboot)
         # android-tools: Android SDK platform tools (adb, fastboot)
         home.packages = with pkgs; [
             android-tools

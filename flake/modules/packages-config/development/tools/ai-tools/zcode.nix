@@ -5,6 +5,7 @@
 { inputs, ... }:
 {
     homeManager = { pkgs, ... }: {
+        # package summary: zcode -- AI coding-agent harness, from the llm-agents input
         home.packages = with pkgs; [
             # pkgs.system is the deprecated alias of this (2026-09-09, issue #233)
             inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.zcode

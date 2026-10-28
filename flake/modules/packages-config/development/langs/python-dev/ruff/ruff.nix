@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: ruff -- Python linter and code formatter
         home.packages = with pkgs; [
             ruff
         ];

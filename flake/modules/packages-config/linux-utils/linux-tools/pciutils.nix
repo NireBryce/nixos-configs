@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: pciutils -- PCI bus tools (`lspci`, `setpci`)
         # `lspci`
         home.packages = with pkgs; [
             pciutils

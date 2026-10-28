@@ -6,6 +6,7 @@
 # TODO: remove need for `inputs`, try `'self?`
 {
     nixos = { pkgs, ... }: {
+        # package summary: vscode-fhs -- Visual Studio Code in an FHS environment
         # systemPackages, NOT programs.vscode -- see history at the bottom.
         # The NixOS module forces a store path as --extensions-dir, which hides
         # every extension installed through the GUI.

@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: whois -- domain and IP registration lookup client
         # whois lookup https://packages.qa.debian.org/w/whois.html
         home.packages = with pkgs; [
             whois

@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: { 
+        # package summary: duf -- `df` alternative with a table of mounted disks
         # `df` alternative
         home.packages = with pkgs; [
             duf

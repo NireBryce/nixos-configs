@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 { 
     homeManager = { pkgs, ... }: {
+        # package summary: fd -- simpler, faster `find` alternative
         # `find` alternative
         home.packages = with pkgs; [
             fd

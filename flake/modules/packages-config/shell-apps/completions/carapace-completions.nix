@@ -32,6 +32,7 @@
     # populate descriptions in the blesh menu, and the ble.sh advice hook
     # there that does.
     homeManager = { pkgs, ... }: {
+        # package summary: carapace -- multi-shell command-line completion generator
         home.packages = with pkgs; [
             carapace
         ];

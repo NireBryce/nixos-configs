@@ -15,6 +15,7 @@
         # it from upstream -- the shape that failed the whole build with a
         # GitHub 503 on obsidian, 2026-08-12.
         lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin) {
+        # package summary: google-chrome -- Google's Chrome web browser
         # note: this is also installed as a system package, does that matter?
         home.packages = with pkgs; [
             google-chrome

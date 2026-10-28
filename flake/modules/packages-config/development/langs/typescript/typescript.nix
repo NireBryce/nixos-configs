@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+            # package summary: typescript -- TypeScript compiler (`tsc`)
             home.packages = with pkgs; [
                 typescript
             ];

@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: strace -- system call tracer
         # system call tracer https://linux.die.net/man/1/strace
         home.packages = with pkgs; [
             strace

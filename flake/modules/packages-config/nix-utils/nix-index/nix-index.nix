@@ -5,6 +5,7 @@
 { inputs, ... }:
 {
     homeManager = {
+        # package summary: nix-index -- finds the package providing a file; plus `,`
         imports = [
             inputs.nix-index-database.homeModules.default
         ];

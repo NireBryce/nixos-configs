@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: iotop -- per-process disk I/O monitor
         # iotop - io monitoring http://guichaz.free.fr/iotop
         home.packages = with pkgs; [
             iotop

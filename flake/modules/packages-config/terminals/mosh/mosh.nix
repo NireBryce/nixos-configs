@@ -17,6 +17,7 @@
 # Homebrew cask collides (`just available mosh`), so no guard needed.
 {
     homeManager = { pkgs, ... }: {
+        # package summary: mosh -- roaming-tolerant remote terminal over UDP (client)
         # mosh: remote shell that keeps the session across roaming and
         # intermittent connectivity
         home.packages = with pkgs; [

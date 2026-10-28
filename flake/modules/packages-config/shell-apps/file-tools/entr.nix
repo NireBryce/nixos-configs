@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: entr -- runs a command when watched files change
         # run commands when file changes
         home.packages = with pkgs; [
             entr

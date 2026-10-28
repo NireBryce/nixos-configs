@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: lsof -- lists open files and the processes holding them
         # list open files https://linux.die.net/man/1/lsof
         home.packages = with pkgs; [
             lsof

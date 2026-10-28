@@ -17,6 +17,7 @@
         # that redundancy used to cause.
         home.file."./.justfile".source = ./config/.justfile;
 
+        # package summary: just -- command runner for justfile recipes, plus just-lsp
         home.packages = with pkgs; [
             just
             just-lsp # language server; nefrob.vscode-just-syntax runs `just-lsp` off PATH by default (vscode-just.lspPath)

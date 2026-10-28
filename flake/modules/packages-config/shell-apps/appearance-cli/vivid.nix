@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: vivid -- LS_COLORS generator with themes
         # vivid - LS_COLORS generator
         home.packages = with pkgs; [
             vivid

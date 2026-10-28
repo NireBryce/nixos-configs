@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+        # package summary: gh -- GitHub's official command-line client
         home.packages = with pkgs; [
             gh
         ];

@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
+            # package summary: claude-code -- Anthropic's agentic coding CLI
             home.packages = with pkgs; [
                 claude-code
             ];

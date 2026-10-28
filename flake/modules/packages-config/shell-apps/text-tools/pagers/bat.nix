@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: { 
+        # package summary: bat -- `cat` clone with syntax highlighting and git marks
         # `bat` - syntax highlighted `cat` and `less` replacement https://github.com/sharkdp/bat
         home.packages = with pkgs; [
             bat

@@ -4,6 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { 
+        # package summary: tmux -- terminal multiplexer
         # tmux - terminal multiplexer
         programs.tmux = {
             enable = true;
