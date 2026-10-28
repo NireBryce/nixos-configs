@@ -17,7 +17,7 @@
 # search rooted at `/` or `/run` (it would recurse into the tree), and a
 # Glob or Grep pattern is checked as a path too. Still a matcher, not a
 # boundary (.agents/rules/agent-config.md). Edit/Write are not this hook's
-# tools; secrets-guard-posttooluse watches their output.
+# tools; secrets-guard-posttooluse scans Bash output only.
 #
 # Fixture tests: flake/scripts/tests/test_guards.py.
 set -euo pipefail

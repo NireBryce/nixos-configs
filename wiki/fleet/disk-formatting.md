@@ -1,6 +1,6 @@
 # New host disk formatting (LUKS + btrfs + impermanence)
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-10-28_
 
 Formatting a new host's disk takes decisions (device path, secure boot,
 swap, LUKS unlock), wiring the generator into the host config, then running
@@ -84,13 +84,19 @@ imports = [
 ];
 ```
 
-Two things easy to get backwards here:
+Three things easy to get backwards here:
 
 - **The placeholder device path must be unmistakably fake.** Never a
   plausible-looking one like `/dev/nvme0n1` — that path exists on a real
   machine here already (tenacity), and disko running against the wrong box
   silently wipes real data. A nonexistent path just fails loudly. Replace it
   only once you're certain which disk on which machine you're pointed at.
+- **The generator does not import disko, and the path depends on where the
+  file sits.** It only sets `disko.devices` and `fileSystems` values, so also
+  import `inputs.disko.nixosModules.disko` in the same `imports`, or
+  evaluation fails on an unknown option. `../../` reaches `flake/modules/` from
+  a file directly in `host-config/<name>/`; a file in `<name>/hardware/` needs
+  `../../../`.
 - **This generator produces the disk layout only.** The `impermanence`
   category import — which brings in `WARN-impermanence.nix` (the rollback
   unit), the hibernation guards, and `environment.persistence` — is a
