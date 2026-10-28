@@ -117,15 +117,14 @@ Two mistakes here are easy to make:
   (`just modules`).
 
 Since v0.3.1 the library has an opt-in check for the second mistake. Setting
-`dirsAsCategories.checkClassContents = true` adds a flake check named
+`dirsAsCategories.checkClassContents = "build"` (v0.4.0; `true` before) adds a flake check named
 `module-class-contents`. The check names a class part that sets a namespace
 only another class has (`home` under `nixos`), over a short list of
-namespaces. This repo does not enable it, for two reasons:
-
-- The check fails only when built, and `just check` runs with `--no-build`.
-- The misplaced list it reads is not published in `flake.moduleGraph`, so
-  `just modules` cannot read it either
-  ([dirs-as-categories issue 37](https://github.com/NireBryce/dirs-as-categories/issues/37)).
+namespaces. This repo does not enable it. With `"build"` the check fails
+only when built, and `just check` runs with `--no-build`; `"eval"` fails
+under `--no-build` too, and while either is set `flake.moduleGraph.misplaced`
+lists the messages, so `just modules` could read the list as it does
+orphans. Nothing here has been wired up yet.
 
 Unverified: the raw-module refusal and the class-contents check were read from
 the library's `nix/` files and changelog, not run. Running them needs flake

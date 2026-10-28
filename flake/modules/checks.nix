@@ -14,9 +14,10 @@
 {
     # checks.<system>.module-orphans: fails naming any module inside a
     # category that no `includes`/`enables` reaches (wiki/config-structure/module-files.md)
-    # -- when built. `just check` runs --no-build, so `just modules` is what
-    # gates orphans in preflight and CI.
-    dirsAsCategories.checkOrphans = true;
+    # -- when built ("build"; "eval" would also fail under --no-build). `just
+    # check` runs --no-build, so `just modules` is what gates orphans in
+    # preflight and CI.
+    dirsAsCategories.checkOrphans = "build";
 
     perSystem = { system, ... }:
     let
