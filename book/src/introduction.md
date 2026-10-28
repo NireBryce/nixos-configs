@@ -5,60 +5,67 @@ nix-darwin and [Home Manager](glossary.md#home-manager), built as a single
 flake with [flake-parts](https://flake.parts). Home Manager manages a user's
 packages and dotfiles with the NixOS module system. flake-parts is a library
 for writing a flake as a set of modules (see the
-[glossary](glossary.md#flake-parts)). The book covers what the pieces are,
-why they have their current shape, how coding agents maintain the repo, and
-how to make the common extensions: a package, a module, a category, a host, a
-user. It assumes basic Nix and no prior knowledge of this tree.
+[glossary](glossary.md#flake-parts)).
+
+The book covers:
+
+- what the pieces are and why they have their current shape;
+- how coding agents maintain the repo;
+- how to make the common extensions: a package, a module, a category, a
+  host, a user.
+
+It assumes basic Nix and no prior knowledge of this tree.
 
 ## Read this first
 
 ### This is one person's fleet, not a product
 
 The repo configures a personal fleet of machines. It is not a template, a
-distribution or a framework, and it is not meant to be installed, run or
-deployed by anyone else. Read it to understand how it works, and borrow the
-pieces as examples of how to build similar shapes in your own NixOS
-configuration repository: a module tree where folders define groups, Home
-Manager run from the system configuration, hooks that keep working without
-network access, docs that check themselves.
+distribution or a framework, and nobody else should install, run or deploy
+it. Read it to understand how it works. Borrow the pieces as examples for
+your own NixOS configuration repository:
+
+- a module tree where folders define groups;
+- Home Manager run from the system configuration;
+- hooks that keep working without network access;
+- docs that check themselves.
 
 The concrete reason not to deploy it: some NixOS hosts here enable
 [impermanence](glossary.md#impermanence). On every boot, the `/root` btrfs
-subvolume is deleted and recreated from a blank snapshot, and anything not
-explicitly persisted is gone at the next reboot. Running the configuration on
-a machine you care about can destroy data. Do not assume which hosts wipe
+subvolume is deleted and recreated from a blank snapshot. Anything not
+explicitly persisted is gone at the next reboot, so running the configuration
+on a machine you care about can destroy data. Do not assume which hosts wipe
 `/root`, in either direction; check `flake/modules/host-config/hosts.nix` and
 [`wiki/fleet/hosts.md`](../../wiki/fleet/hosts.md).
 
 ### Coding agents wrote most of this, and the user directs them
 
-Large language model (LLM) coding agents co-wrote most of what is in the
-repository: this book, the wiki, the code comments, the scripts, and the
-skills and hooks. The user aims the agents, reviews and adjusts what they
-produce, and rarely writes text directly. The user gives two reasons: there is
-no time to write and maintain all of it by hand, and without the agents the
-code would go undocumented and the documentation would fall out of date.
+Large language model (LLM) coding agents co-wrote most of the repository:
+this book, the wiki, the code comments, the scripts, and the skills and
+hooks. The user aims the agents, reviews and adjusts what they produce, and
+rarely writes text directly. The user gives two reasons. There is no time to
+write and maintain all of it by hand. Without the agents, the code would go
+undocumented and the documentation would fall out of date.
 
-This has consequences for how you read the repo:
+Agent authorship changes how you should read the repo:
 
 - The prose has an agent's habits. Rules are written as hard-won lessons, and
-  the docs are written to be read by agents as much as by people.
-- The user has corrected the load-bearing claims; the rest is agent output
-  that has had less scrutiny. Treat the documentation as reliable, not as
-  proven. Where a statement matters to you, check it against the code it
-  cites.
-- The repo compensates with mechanical checks instead of trust. Lints compare
-  documentation against the code, tests pin each checker to a case it should
-  catch, and the docs mark claims they could not confirm with an inline
-  qualifier such as `UNVERIFIED` or "not confirmed live" (this book writes
-  `Unverified:`). Later
-  chapters ([agents in the repo](agents-in-the-repo.md),
-  [checks and guards](agent-checks-and-guards.md),
-  [git and agent workflows](git-and-agent-workflows.md)) describe how this
-  works and where it stops working.
-- This book was written the same way: agents drafted it from the wiki, the
-  code, comments and git history, and the user reviewed it. Its claims cite
-  their sources so that you can check them.
+  the docs address agents as much as people.
+- The user has corrected the load-bearing claims. The rest is agent output
+  with less scrutiny. Treat the documentation as reliable but unproven, and
+  check any statement that matters to you against the code it cites.
+- The repo relies on mechanical checks to make up for that. Lints compare
+  documentation against the code, and tests pin each checker to a case it
+  should catch. The docs mark claims they could not confirm with an inline
+  qualifier such as `UNVERIFIED` or "not confirmed live"; this book writes
+  `Unverified:`. The chapters on
+  [agents in the repo](agents-in-the-repo.md),
+  [checks and guards](agent-checks-and-guards.md) and
+  [git and agent workflows](git-and-agent-workflows.md) describe how these
+  checks work and where they stop working.
+- Agents drafted this book the same way, from the wiki, the code, comments
+  and git history, and the user reviewed it. Its claims cite their sources so
+  that you can check them.
 
 Source: `README.md` ("most of the prose in this repo ... is written by coding
 agents"), `AGENTS.md` (its opening note). The user's working method and the
@@ -72,11 +79,12 @@ similar, expect to change names, paths and rules to suit your fleet.
 
 ### How the book relates to the wiki
 
-The book does not duplicate the documentation. The repo's wiki is the source
-for facts, and the book links into it wherever a wiki page already covers a
-topic. When the book and the wiki or the code disagree, the wiki and the code
-win. Links of the form `../../wiki/...` point at files in the repository.
-They work when you read the book's Markdown on GitHub or in a checkout. On a
+The repo's wiki is the source for facts. The book links into it wherever a
+wiki page already covers a topic, and does not duplicate it. When the book
+disagrees with the wiki or the code, the wiki and the code win.
+
+Links of the form `../../wiki/...` point at files in the repository. They
+work when you read the book's Markdown on GitHub or in a checkout. On a
 rendered mdBook site they leave the book and will not resolve.
 
 ## What it builds
@@ -85,9 +93,9 @@ rendered mdBook site they leave the book and will not resolve.
   `flake.nixosConfigurations`.
 - nix-darwin hosts, declared in the same file as
   `flake.darwinConfigurations`.
-- Home Manager for one user, integrated into each system configuration
-  instead of exposed as its own `homeConfigurations` output. One switch
-  applies both. See [users and Home Manager](users-and-home-manager.md).
+- Home Manager for one user, integrated into each system configuration.
+  The flake has no `homeConfigurations` output, and one switch applies both.
+  See [users and Home Manager](users-and-home-manager.md).
 - A small self-hosted stack on one host. The stack is out of scope for this
   book; start at
   [`wiki/homelab/00-INDEX.md`](../../wiki/homelab/00-INDEX.md).
@@ -138,32 +146,33 @@ it as `{ nixos = <the module>; }` makes it a module file
 Where a name already contains the word, such as `just modules` or
 `module-orphans`, "module" means module file.
 
-## The idea in one paragraph
+## The core idea
 
 Almost every `.nix` file under `flake/modules/` is a module file, named by its
 filename. The exceptions are plain flake-parts modules such as `hosts.nix` and
 `checks.nix`, `defaults.nix` files, and anything under a `_` path.
 
 The folder a module file sits in decides its
-[category](glossary.md#category), a named group of module files that a host
+[category](glossary.md#category): a named group of module files that a host
 takes in one line. A host lists categories by name and receives every module
-file in them. No central list needs to be kept in sync, and no feature has its
-own `enable` option: membership is the directory tree. One module file can
-declare the NixOS module and the Home Manager module of one feature side by
-side, one [module class](glossary.md#module-class) per key. [How it
-works](how-it-works.md) has the details and the places where this design
-surprises people.
+file in them. Membership is the directory tree, so no central list needs to be
+kept in sync and no feature has its own `enable` option.
+
+One module file can declare the NixOS module and the Home Manager module of
+one feature side by side, one [module class](glossary.md#module-class) per
+key. [How it works](how-it-works.md) has the details and the places where
+this design surprises people.
 
 ## Repository map
 
 | Path | What is there |
 |---|---|
-| `flake/flake.nix` | Inputs and flake-parts setup. Deliberately holds no module list. |
+| `flake/flake.nix` | Inputs and flake-parts setup. Holds no module list. |
 | `flake/modules/` | Every module, grouped into areas such as `general-config/`, `hardware-config/`, `packages-config/`, `homelab-config/`, `host-config/`, `users-config/`. |
 | `flake/doc/` | Standalone notes on mechanisms and ways back (for example returning to standalone Home Manager). |
 | `flake/scripts/` | Scripts behind the `just` recipes. |
 | `wiki/` | The documentation, organized by what a reader is doing. Start at [`wiki/00-INDEX.md`](../../wiki/00-INDEX.md). |
-| `AGENTS.md` (also `CLAUDE.md`) | Working rules written for coding agents. Worth reading as a list of past mistakes. |
+| `AGENTS.md` (also `CLAUDE.md`) | Working rules written for coding agents. Reads as a list of past mistakes. |
 | `.agents/` | Agent skills, rules and hooks. The skills double as checklists for the tasks in this book. |
 | `book/` | This book. |
 
@@ -178,8 +187,8 @@ surprises people.
    [wiring a host](wiring-a-host.md),
    [wiring a user and Home Manager](users-and-home-manager.md), and
    [Darwin edge cases](darwin.md).
-3. Read the chapters on working with agents, if you want to know how the
-   repo stays documented and checked:
+3. Read the chapters on working with agents to learn how the repo stays
+   documented and checked:
    [agents in the repo](agents-in-the-repo.md),
    [checks, guards and hooks](agent-checks-and-guards.md), and
    [git and agent workflows](git-and-agent-workflows.md).
@@ -187,15 +196,13 @@ surprises people.
 
 ## Two habits that apply everywhere
 
-- **Run `git add` before you evaluate.** A flake inside a git repository
-  ignores untracked files, so a brand-new module silently does not exist
-  until it is tracked. Every how-to chapter repeats this rule, because
-  forgetting it is the most common way to conclude that a correct change
-  does nothing.
-- State how far you verified. Evaluating a configuration, building it, and
-  switching to it are three different levels of evidence, and each level
-  finds problems the previous one cannot. The repo's habit is to state which
-  level a claim reached. Apply the same habit to anything you write down in
-  the repo.
+- Run `git add` before you evaluate. A flake inside a git repository ignores
+  untracked files, so a brand-new module does not exist until it is tracked.
+  Forgetting this step is the most common way to conclude that a correct
+  change does nothing, and every how-to chapter repeats it.
+- State how far you verified. Evaluating a configuration, building it and
+  switching to it are different levels of evidence, and each level finds
+  problems the previous one cannot. The repo states which level a claim
+  reached; do the same in anything you write in the repo.
 
 Source: `AGENTS.md` ("Working in this repo", "Before calling it done").
