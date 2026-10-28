@@ -157,7 +157,7 @@ details, and the places where this design surprises people, are in
 | `flake/modules/` | Every module, grouped into areas such as `general-config/`, `hardware-config/`, `packages-config/`, `homelab-config/`, `host-config/`, `users-config/`. |
 | `flake/doc/` | Standalone notes on mechanisms and ways back (for example returning to standalone Home Manager). |
 | `flake/scripts/` | Scripts behind the `just` recipes. |
-| `wiki/` | The documentation, organised by what a reader is doing. Start at [`wiki/00-INDEX.md`](../../wiki/00-INDEX.md). |
+| `wiki/` | The documentation, organized by what a reader is doing. Start at [`wiki/00-INDEX.md`](../../wiki/00-INDEX.md). |
 | `AGENTS.md` (also `CLAUDE.md`) | Working rules written for coding agents. Worth reading as a list of past mistakes. |
 | `.agents/` | Agent skills, rules and hooks. The skills double as checklists for the tasks in this book. |
 | `book/` | This book. |

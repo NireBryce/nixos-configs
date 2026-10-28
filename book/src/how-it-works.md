@@ -253,7 +253,7 @@ On every boot,
 runs a `restore-root` unit in the initrd. The unit deletes the btrfs
 subvolume that `/` lives on and replaces it with a snapshot of an empty
 subvolume, `root-blank`. What survives is `/nix`, `/home`, `/var/log`, and
-the paths listed for `/persist`. Hosts get this behaviour only through the
+the paths listed for `/persist`. Hosts get this behavior only through the
 `impermanence` category. A host that includes the category wipes `/root`. A
 host that leaves it out keeps a plain persistent root, and its entry point
 says so. Darwin has no impermanence. Check the specific host's entry point

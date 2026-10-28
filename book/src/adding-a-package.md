@@ -80,7 +80,7 @@ the NixOS hosts should stay a loud error.
 `meta.platforms` knows nothing about Homebrew. The casks in
 `general-config/macos/homebrew/homebrew.nix` can overlap with nixpkgs
 packages, and then the darwin host gets two copies. Deciding which copy wins
-is a judgement per app.
+is a judgment per app.
 
 Check: `just available --duplicates` lists the packages that both sides
 install.

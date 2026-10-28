@@ -269,7 +269,7 @@ of them run inside [preflight](glossary.md#preflight).
 - **Claims about the module tree and hosts**: `imports` and `table` (a
   category page's "Imported by" text against the hosts that import it),
   `counts` (host-count phrases against `hosts.nix`), `secrets` (the
-  enrolment sentence against `.sops.yaml`), `routes` (routed URLs against
+  enrollment sentence against `.sops.yaml`), `routes` (routed URLs against
   the Caddy config).
 - **Names that can be renamed out from under a doc**: `recipes` (`just
   <recipe>` mentions against the `.justfile`), `skills` (skill mentions

@@ -2,7 +2,7 @@
 
 This chapter adds a machine to the flake from start to finish: the entry
 point, the host's own module directory, the `hosts.nix` line, hardware and
-disks, the impermanence decision, secrets enrolment, and the tailnet name.
+disks, the impermanence decision, secrets enrollment, and the tailnet name.
 It also says what "done" can honestly mean for a host that has not booted
 yet. Unfamiliar terms are in the [glossary](glossary.md).
 
@@ -37,7 +37,7 @@ Source: header of `WARN-impermanence.nix`; `AGENTS.md`, Safety;
 
 ## What a host is made of
 
-A host is made of these pieces, plus optional enrolments:
+A host is made of these pieces, plus optional enrollments:
 
 ```text
 flake/modules/host-config/
@@ -182,7 +182,7 @@ imports = [
 - **The placeholder device must be obviously fake.** Never use a plausible
   path like `/dev/nvme0n1`. That path exists on tenacity, and disko pointed
   at the wrong machine destroys real data. A fake path fails loudly.
-- `includeSecureboot` and `swapSize` are judgement calls for each host. Set
+- `includeSecureboot` and `swapSize` are judgment calls for each host. Set
   them explicitly, with a one-line reason.
 - The disk layout and the `impermanence` category are separate steps. You
   need both.
@@ -239,7 +239,7 @@ Check: `just reach <x>` tries every name.
 Source: header of `tailnet-hosts.nix`; `flake/modules/_lib/fleet.nix`;
 [hosts.md](../../wiki/fleet/hosts.md), "Two names per machine".
 
-## Step 7: enrol secrets, only when needed
+## Step 7: enroll secrets, only when needed
 
 Hosts are not enrolled automatically. When the host needs `secrets.yaml`:
 
@@ -248,9 +248,9 @@ Hosts are not enrolled automatically. When the host needs `secrets.yaml`:
 2. Add the recipient to `general-config/system/secrets/.sops.yaml`.
 3. Run `sops updatekeys secrets.yaml`.
 
-Don't enrol a host in advance. If a host is reinstalled or regenerates its
-host key, its existing enrolment stops matching. Re-run the key script and
-compare its output with `.sops.yaml` rather than assuming the old enrolment
+Don't enroll a host in advance. If a host is reinstalled or regenerates its
+host key, its existing enrollment stops matching. Re-run the key script and
+compare its output with `.sops.yaml` rather than assuming the old enrollment
 still holds.
 
 To see which secrets exist, use `just read-sops-names`. Never decrypt to
