@@ -113,18 +113,15 @@ looks at the files Home Manager already owns and links its files into the
 home directory. If a file Home Manager does not recognize sits where Home
 Manager wants to write, activation stops and leaves the file alone.
 
-- NixOS hosts set `backupFileExtension = "hm-bak"`. Without that setting, the first unowned file aborts activation. The comment in
+- NixOS and darwin hosts both set `backupFileExtension = "hm-bak"`. Without that setting, the first unowned file aborts activation. The comment in
   `enable-home-manager.nix` describes the outcome the setting prevents as
   "failing the switch half-applied, with the system activated and the home
   not". With the setting, the file is renamed to `<file>.hm-bak` and the
   switch continues. If `.hm-bak` files show up, treat them as a finding
   about untracked state and do not sweep them away.
-- The darwin integration does not set it. `enable-home-manager-darwin.nix`
-  sets `useGlobalPkgs` and `useUserPackages` only, so on darwin an unowned
-  file in the way aborts activation (inferred from Home Manager's default; no
-  file in the repo says it for darwin). `just hm-collisions`,
-  described below, evaluates only NixOS hosts, so a Mac's collisions need
-  another check before the first switch.
+- `just hm-collisions`, described below, evaluates only NixOS hosts, so
+  the rename on a Mac is the only protection; the script does not list a
+  Mac's collisions beforehand.
 - The first switch onto the integrated setup is the riskiest. A host
   arriving from standalone Home Manager has a user profile that the
   integrated setup does not share.
