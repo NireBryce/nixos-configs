@@ -1,8 +1,6 @@
 # `system`, for agents
 
-_Last modified: 2026-10-27_
-
-_Sibling reviewed: 2026-10-05 -- ltrace marked removed in the source's darwin-dropped list; this page names no packages_
+_Last modified: 2026-10-28_
 
 Condensed from [system.md](system.md).
 
@@ -24,7 +22,7 @@ that must be optional cannot be filed here (why `virtualization`/`containers` ar
 | File | Why you'd care |
 |---|---|
 | `home-manager/enable-home-manager.nix` | *the* NixOS↔HM wiring (`useGlobalPkgs`, `useUserPackages`, `backupFileExtension = "hm-bak"`). Filed here so importing `system` is enough. |
-| `home-manager/enable-home-manager-darwin.nix` | the darwin equivalent — what brings packages/dotfiles to `lysithea`. Not anything under `macos`. |
+| `home-manager/enable-home-manager-darwin.nix` | the darwin equivalent (same `useGlobalPkgs`, `useUserPackages`, `backupFileExtension`) — what brings packages/dotfiles to `lysithea`. Not anything under `macos`. |
 | `home-manager/drop-unsupported-packages.nix` | reads `meta.platforms`/`meta.badPlatforms` and drops what darwin can't build, with a warning. **Don't hand-write `lib.mkIf (!pkgs.stdenv.isDarwin)`.** |
 | `secrets/sops.nix` | sops-nix, key path derived from the host's own ed25519 SSH host key. `nixos` class only. |
 | `secrets/sops-darwin.nix` | points `SOPS_AGE_KEY_FILE` at the Linux-XDG path; darwin's default lookup is `~/Library/Application Support/...`. |

@@ -107,8 +107,8 @@ Source: `wiki/config-structure/categories/macos.md`.
   `/etc/shells` and links their share directories. zsh's own completion is
   forced off at the system level so that it does not fight Home Manager's.
 - Activation: Home Manager activates through launchd instead of a systemd
-  unit. The darwin integration module does not set `backupFileExtension`
-  (the NixOS one does), so an unowned file in the way aborts activation. See the split-brain section of
+  unit. The darwin integration sets `backupFileExtension` as the NixOS one
+  does, so an unowned file in the way is renamed to `<file>.hm-bak`. See the split-brain section of
   [users and Home Manager](users-and-home-manager.md).
 - Fonts: the user's fonts are installed from the `darwin` class of
   `elly-user.nix`.
