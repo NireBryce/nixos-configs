@@ -74,9 +74,11 @@ would need separate files with no mechanism tying them together.
 - **`withSystem`** — one call site, `modules/host-config/hosts.nix`, to get
   `self'`/`inputs'` for `specialArgs`. Deliberately **not** used for
   `pkgs`: `nixosSystem`/`darwinSystem` build their own `pkgs` from the
-  host's own `nixpkgs.config`, and `perSystem`'s default
-  `legacyPackages.<system>` has none of that — taking `pkgs` from there
-  would silently drop `allowUnfree`. See `hosts.nix:3-9`.
+  host's own `nixpkgs.config`. `perSystem`'s `pkgs` is built from the same
+  shared config (`modules/nixpkgs.nix`, `_lib/nixpkgs.nix`), so the policy is
+  one, but handing hosts that instance means `nixpkgs.pkgs`, under which
+  NixOS ignores `nixpkgs.config`, `hostPlatform` and overlays. See the comment
+  above `mkHost` in `modules/host-config/hosts.nix`.
 
 ## What's not used
 

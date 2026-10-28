@@ -67,11 +67,11 @@ applied**. It is the same value either way; only the consumer changes. Add a
 
 Two things to get right here:
 
-- **`pkgs` needs `allowUnfree`.** This is the trap. perSystem's default `pkgs` is
-  `inputs.nixpkgs.legacyPackages.<system>`, which has no `nixpkgs.config` applied
-  — and this config installs plenty of unfree packages. Either configure a pkgs
-  instance explicitly for it, or restore the `nixpkgs.config` block in
-  `basic-nix-settings.nix`, which standalone allows again.
+- **`pkgs` needs `allowUnfree`.** perSystem's `pkgs` is built from the fleet's
+  shared config (`modules/nixpkgs.nix`, `_lib/nixpkgs.nix`), so `inherit pkgs`
+  above already carries it. Restoring the `nixpkgs.config` block in
+  `basic-nix-settings.nix` is no longer needed for that; standalone allows it
+  again if wanted.
 - **`withSystem` requires the system to be listed in `systems`** in `flake.nix`.
   `x86_64-linux` is, today.
 
@@ -99,8 +99,9 @@ breadcrumb back here.
    overlap, and it is how this config was configured for a long time by accident
    — the NixOS side imported the HM module and never set `home-manager.users`,
    so it was inert while `homeConfigurations` did the real work.
-2. Restore the `nixpkgs.config` block, or configure `pkgs` for the standalone
-   configuration. Do this second, so a broken unfree evaluation is attributable.
+2. Check the unfree evaluation: `pkgs` from perSystem already carries the shared
+   config, so the `nixpkgs.config` block below is optional. Do this second, so a
+   broken unfree evaluation is attributable.
 3. Delete `enable-home-manager.nix` last.
 4. Update `.justfile` and CLAUDE.md — with standalone there is a separate
    `nh home switch --configuration elly-nire-durandal` step, which integrated
