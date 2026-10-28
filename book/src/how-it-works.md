@@ -120,11 +120,10 @@ Since v0.3.1 the library has an opt-in check for the second mistake. Setting
 `dirsAsCategories.checkClassContents = "build"` (v0.4.0; `true` before) adds a
 flake check named `module-class-contents`. The check names a class part that
 sets a namespace only another class has (`home` under `nixos`), over a short
-list of namespaces. This repo does not enable it. With `"build"` the check fails
-only when built, and `just check` runs with `--no-build`; `"eval"` fails
-under `--no-build` too, and while either is set `flake.moduleGraph.misplaced`
-lists the messages, so `just modules` could read the list as it does
-orphans. Nothing here has been wired up yet.
+list of namespaces. This repo sets it to `"build"`, which fails only when
+built, and `just check` runs with `--no-build`. So `just modules` reads
+`flake.moduleGraph.misplaced`, which is published while the check is on, and
+fails on any entry, as it does for orphans.
 
 Unverified: the raw-module refusal and the class-contents check were read from
 the library's `nix/` files and changelog, not run. Running them needs flake

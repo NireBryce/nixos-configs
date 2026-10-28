@@ -202,6 +202,17 @@ class Main(Tree):
         doc.pop('orphans')       # a graph from before the field existed
         self.assertEqual(quiet(modules.main, ['check', str(self.root)], run=FakeNix(doc)), 0)
 
+    def test_check_fails_on_a_misplaced_class_part(self):
+        doc = self.doc()
+        doc['misplaced'] = ["module 'jq': `home` is set under `nixos`"]
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            rc = modules.main(['check', str(self.root)], run=FakeNix(doc))
+        self.assertEqual(rc, 1)
+        self.assertIn("MISPLACED  module 'jq'", out.getvalue())
+        doc['misplaced'] = []
+        self.assertEqual(quiet(modules.main, ['check', str(self.root)], run=FakeNix(doc)), 0)
+
     def test_an_orphan_and_drift_are_both_reported(self):
         doc = self.doc()
         doc['orphans'] = ['lonely']

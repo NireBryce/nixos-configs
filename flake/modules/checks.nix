@@ -19,6 +19,12 @@
     # preflight and CI.
     dirsAsCategories.checkOrphans = "build";
 
+    # checks.<system>.module-class-contents: names a class part that sets a
+    # namespace only another class has (`home` under `nixos`). Same --no-build
+    # gap as orphans, so `just modules` reads flake.moduleGraph.misplaced,
+    # which is published while this is "build" or "eval".
+    dirsAsCategories.checkClassContents = "build";
+
     perSystem = { system, ... }:
     let
         # Both host classes, each filtered to the system it evaluates under.
