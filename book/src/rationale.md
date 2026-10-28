@@ -51,7 +51,8 @@ hosts.
 perSystem is flake-parts' per-system scope. Its default `pkgs` is
 `legacyPackages.<system>` with no `nixpkgs.config` applied. Using that `pkgs`
 would silently drop `allowUnfree`, and these hosts install unfree packages.
-The accepted cost is a second nixpkgs instantiation.
+The accepted cost is a second nixpkgs instantiation. The design is under
+review in [issue 559](https://github.com/NireBryce/nixos-configs/issues/559).
 
 Source: `flake/modules/host-config/hosts.nix` (comments above `mkHost`);
 [flake-parts-port-notes.md](../../wiki/config-structure/flake-parts-port-notes.md),
@@ -233,8 +234,8 @@ Each of these produced no error, or an error that named the wrong thing:
   anything. Read the generated dotfile, not the module.
 - `home.file.<n>.text` concatenates. Two modules writing `.blerc` produced
   one file in which every import ran twice.
-- A plain NixOS module left unwrapped dies with an `infinite recursion`
-  error that blames `modulesPath`.
+- A plain NixOS module left unwrapped died with an `infinite recursion`
+  error that blamed `modulesPath`. The library now refuses it with advice.
 
 Source: [flake-parts-port-notes.md](../../wiki/config-structure/flake-parts-port-notes.md),
 "Dead ends, with the symptom that identified them".

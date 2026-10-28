@@ -159,7 +159,7 @@ The path depends on whether the machine has been scanned.
 For real hardware you've already scanned, put the `fileSystems` and
 `boot.initrd.*` output of `nixos-generate-config` into
 `<name>/hardware/hardware-<name>.nix`, wrapped as `{ nixos = …; }`. Raw
-output fails to evaluate with a misleading `infinite recursion` error. Then
+output is refused for asking for `modulesPath`, so it must be wrapped. Then
 add the two settings that `invariants.nix` checks and that generated output
 may lack:
 
