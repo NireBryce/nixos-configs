@@ -160,7 +160,7 @@ just agent ship-ready <n>
 ```
 
 It waits for CI (`gh pr checks --watch`, minutes, not optional), then gates:
-PR open, `mergeStateStatus` `CLEAN` (not `mergeable`, which only means no
+PR open and not a draft, `mergeStateStatus` `CLEAN` (not `mergeable`, which only means no
 conflicts: #413), base `experimental`. It prints title, URL, stats, the
 commit list, and the merge method: one commit `--rebase`, more `--merge`
 (their messages carry real reasoning; squashing flattens it). **NOT READY**

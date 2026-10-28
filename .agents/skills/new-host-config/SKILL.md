@@ -127,7 +127,7 @@ generic pieces only; record the decision in the host header
 ```sh
 git add -A flake/modules/host-config/<name> flake/modules/host-config/<name>-configuration.nix flake/modules/host-config/hosts.nix
 just modules      # category-membership check; catches name collisions
-cd flake && nix eval --raw .#nixosConfigurations.<name>.config.system.build.toplevel.drvPath
+cd flake && nix eval --raw .#nixosConfigurations.nire-<name>.config.system.build.toplevel.drvPath
 ```
 
 Force the real toplevel; cheap attributes resolve while something else is
