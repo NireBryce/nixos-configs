@@ -1,6 +1,6 @@
-# This is a dirs-as-categories module, which means it creates a flake-parts
-# module that derives its name from its filename minus the .nix suffix, whose
-# category module is the name of the folder it belongs to.
+# This is a dirs-as-categories module file, which means its name is its
+# filename minus the .nix suffix, and its category is the name of the folder
+# it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     # An argument list was added here on 2026-08-12, where there was
@@ -40,6 +40,7 @@
         # default.yml, so Home Manager would refuse to clobber it and fail
         # activation until that file is moved out of the way.
         lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin) {
+        # package summary: espanso -- text expander: typed trigger phrases become text
         # espanso is a text expansion tool that turns a trigger phrase into text
 
         # TODO 2026-08-11: espanso crashes once per boot and then works.

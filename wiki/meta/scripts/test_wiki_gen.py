@@ -28,7 +28,7 @@ HOSTS_NIX = '''{
     };
 }
 '''
-MOD = '''# This is a dirs-as-categories module, which means it creates a flake-parts
+MOD = '''# This is a dirs-as-categories module file, which means its name is its
 {
     CLASS = with pkgs; [ ];
 }

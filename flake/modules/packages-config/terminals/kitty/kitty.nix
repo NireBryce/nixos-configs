@@ -1,6 +1,6 @@
-# This is a dirs-as-categories module, which means it creates a flake-parts
-# module that derives its name from its filename minus the .nix suffix, whose
-# category module is the name of the folder it belongs to.
+# This is a dirs-as-categories module file, which means its name is its
+# filename minus the .nix suffix, and its category is the name of the folder
+# it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
 # kitty, installation only. The configuration is kitty-config.nix, alongside
@@ -19,6 +19,7 @@
 # the other split pair in this tree, did exactly that to .blerc.
 {
     homeManager = { pkgs, lib, ... }: {
+        # package summary: kitty -- GPU-based terminal emulator, installation only
         # kitty terminal emulator
         home.packages = with pkgs; [
             kitty-img

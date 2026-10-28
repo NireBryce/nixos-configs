@@ -1,11 +1,12 @@
-# This is a dirs-as-categories module, which means it creates a flake-parts
-# module that derives its name from its filename minus the .nix suffix, whose
-# category module is the name of the folder it belongs to.
+# This is a dirs-as-categories module file, which means its name is its
+# filename minus the .nix suffix, and its category is the name of the folder
+# it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 { inputs, ... }:
 # TODO: remove need for `inputs`, try `'self?`
 {
     nixos = { pkgs, ... }: {
+        # package summary: vscode-fhs -- Visual Studio Code in an FHS environment
         # systemPackages, NOT programs.vscode -- see history at the bottom.
         # The NixOS module forces a store path as --extensions-dir, which hides
         # every extension installed through the GUI.

@@ -158,9 +158,9 @@ CLASSES = ('nixos', 'homeManager', 'darwin')
 # The header every module file opens with, as wiki/config-structure/module-files.md shows it.
 # tests/test_modules.py checks it against what most modules in the tree carry,
 # so the scaffold cannot quietly fall behind a change to the header.
-HEADER = """# This is a dirs-as-categories module, which means it creates a flake-parts
-# module that derives its name from its filename minus the .nix suffix, whose
-# category module is the name of the folder it belongs to.
+HEADER = """# This is a dirs-as-categories module file, which means its name is its
+# filename minus the .nix suffix, and its category is the name of the folder
+# it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 """
 

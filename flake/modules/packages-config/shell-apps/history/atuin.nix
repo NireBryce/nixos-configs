@@ -1,9 +1,10 @@
-# This is a dirs-as-categories module, which means it creates a flake-parts
-# module that derives its name from its filename minus the .nix suffix, whose
-# category module is the name of the folder it belongs to.
+# This is a dirs-as-categories module file, which means its name is its
+# filename minus the .nix suffix, and its category is the name of the folder
+# it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = {
+    # package summary: atuin -- shell history in SQLite, with encrypted sync
     # Atuin remote encrypted history manager. History syncs to the remote
     # sync server by default (auto_sync, on every prompt) -- nothing here
     # disables it, deliberately; the account and its rotation runbook are

@@ -1,6 +1,6 @@
-# This is a dirs-as-categories module, which means it creates a flake-parts
-# module that derives its name from its filename minus the .nix suffix, whose
-# category module is the name of the folder it belongs to.
+# This is a dirs-as-categories module file, which means its name is its
+# filename minus the .nix suffix, and its category is the name of the folder
+# it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
 # mosh (mobile shell): remote terminal over UDP that survives roaming,
@@ -17,6 +17,7 @@
 # Homebrew cask collides (`just available mosh`), so no guard needed.
 {
     homeManager = { pkgs, ... }: {
+        # package summary: mosh -- roaming-tolerant remote terminal over UDP (client)
         # mosh: remote shell that keeps the session across roaming and
         # intermittent connectivity
         home.packages = with pkgs; [

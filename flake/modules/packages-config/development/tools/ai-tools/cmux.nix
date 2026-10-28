@@ -1,6 +1,6 @@
-# This is a dirs-as-categories module, which means it creates a flake-parts
-# module that derives its name from its filename minus the .nix suffix, whose
-# category module is the name of the folder it belongs to.
+# This is a dirs-as-categories module file, which means its name is its
+# filename minus the .nix suffix, and its category is the name of the folder
+# it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, lib, ... }:
@@ -13,6 +13,7 @@
         # lysithea is the only darwin host, so this guard is exact, not just
         # convenient -- there's no case where cmux should install elsewhere.
         lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
+            # package summary: cmux -- macOS terminal built on Ghostty for AI coding agents
             # cmux: macOS-native terminal built on Ghostty for AI coding agents
             home.packages = with pkgs; [
                 cmux

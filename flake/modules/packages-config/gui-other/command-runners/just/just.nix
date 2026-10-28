@@ -1,6 +1,6 @@
-# This is a dirs-as-categories module, which means it creates a flake-parts
-# module that derives its name from its filename minus the .nix suffix, whose
-# category module is the name of the folder it belongs to.
+# This is a dirs-as-categories module file, which means its name is its
+# filename minus the .nix suffix, and its category is the name of the folder
+# it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
     homeManager = { pkgs, ... }: {
@@ -17,6 +17,7 @@
         # that redundancy used to cause.
         home.file."./.justfile".source = ./config/.justfile;
 
+        # package summary: just -- command runner for justfile recipes, plus just-lsp
         home.packages = with pkgs; [
             just
             just-lsp # language server; nefrob.vscode-just-syntax runs `just-lsp` off PATH by default (vscode-just.lspPath)

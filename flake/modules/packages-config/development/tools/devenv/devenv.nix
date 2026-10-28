@@ -1,6 +1,6 @@
-# This is a dirs-as-categories module, which means it creates a flake-parts
-# module that derives its name from its filename minus the .nix suffix, whose
-# category module is the name of the folder it belongs to.
+# This is a dirs-as-categories module file, which means its name is its
+# filename minus the .nix suffix, and its category is the name of the folder
+# it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
 # devenv from nixpkgs (built by Hydra, served from cache.nixos.org).
@@ -20,6 +20,7 @@
 # trusting its key daemon-wide here again.
 {
     nixos = { pkgs, ... }: {
+        # package summary: devenv -- Nix-based declarative developer environments
         environment.systemPackages = with pkgs; [
             devenv
         ];
