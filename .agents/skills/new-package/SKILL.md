@@ -86,8 +86,8 @@ hand-restated `meta.platforms` fact; read that skill's section first.
 Each step catches what earlier ones can't:
 
 1. `git add -A` — flakes ignore untracked files.
-2. `just modules` — untracked files, drift (a repeated name fails
-   evaluation; an orphan fails `just check`'s `module-orphans`).
+2. `just modules` — untracked files, drift, orphans (a repeated name fails
+   evaluation).
 3. `just check` (or `just preflight`: also modules, lint, script tests,
    `just wiki-lint` -- a new `.nix` file moves the generated counts table in
    `wiki/config-structure/module-style-guide-for-agents.md`; `just wiki-gen` in the same change) —

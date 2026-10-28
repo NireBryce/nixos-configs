@@ -114,14 +114,15 @@ Two mistakes here are easy to make:
   once declared `nixos` bodies full of `home.packages`. dirs-as-categories
   checks class keys, not what a class body sets, so the mistake shows up when
   a host that includes the module is evaluated, as an "option `home` does not
-  exist" error. A module that no host reaches is flagged only as an orphan.
+  exist" error. A module that no host reaches is flagged only as an orphan (`just modules`).
   Since v0.3.1 the library has an opt-in check for this,
   `dirsAsCategories.checkClassContents = true`, which adds a flake check named
   `module-class-contents`. It names a class part that sets a namespace only
   another class has (`home` under `nixos`), over a short list of namespaces. This
-  repo does not enable it yet: like `module-orphans`, it fails only when built,
-  and `just check` runs with `--no-build`
-  ([issue 561](https://github.com/NireBryce/nixos-configs/issues/561)).
+  repo does not enable it: it fails only when built, `just check` runs with
+  `--no-build`, and the misplaced list it reads is not published in
+  `flake.moduleGraph`, so `just modules` cannot read it either
+  ([dirs-as-categories issue 37](https://github.com/NireBryce/dirs-as-categories/issues/37)).
 
 Unverified: the raw-module refusal and the class-contents check were read from
 the library's `nix/` files and changelog, not run. Running it needs flake inputs that the environment this
@@ -191,9 +192,10 @@ module there, no host receives it.
 
 A name in `includes` that doesn't exist stops evaluation, which is the safe
 failure. The silent failure is a category that no host includes: it
-evaluates fine and installs nothing. The `module-orphans` flake check exists
-to catch that case, but it fails only when built, and `just check` runs with
-`--no-build` ([issue 561](https://github.com/NireBryce/nixos-configs/issues/561)).
+evaluates fine and installs nothing. `just modules` catches that case and
+fails, reading `orphans` from `flake.moduleGraph`. The `module-orphans` flake
+check fails only when built, and `just check` runs with `--no-build`, so it
+does not.
 
 Source: `flake/modules/host-config/durandal-configuration.nix`,
 `flake/modules/host-config/hosts.nix`;

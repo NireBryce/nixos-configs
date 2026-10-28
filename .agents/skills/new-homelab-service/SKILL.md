@@ -142,9 +142,8 @@ header states which case applies; keep that.
 Skipping rungs is fine; claiming one you didn't run is not.
 
 1. `git add` first (untracked modules don't exist to flakes).
-2. `just modules` (untracked files, drift) and `just check`, whose
-   `module-orphans` fails on a module nothing reaches; a repeated name fails
-   evaluation itself.
+2. `just modules` (orphans, a module nothing reaches; untracked files;
+   drift) and `just check`; a repeated name fails evaluation itself.
 3. `nix eval` toplevel drvPath of the target host *and the others* — a cube-only change must leave durandal, tenacity, lysithea byte-identical.
 4. Caddy: `caddy adapt` the generated Caddyfile (on darwin, build the file from the evaluated config; caught the `handle` parse error once).
 5. **Real build on the target host** (darwin can't build `x86_64-linux`, no remote builder):

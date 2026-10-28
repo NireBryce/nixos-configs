@@ -198,8 +198,9 @@ Source: `flake/scripts/offline_checks.py`, docstring.
 
 An orphan is a module that no host reaches, because nothing includes its
 category or names it. It evaluates cleanly and installs nothing. The
-`module-orphans` check in `nix flake check` is meant to report it, but it
-fails only when built, which `just check`'s `--no-build` skips.
+`just modules` fails on an orphan and names it. The `module-orphans` check
+in `nix flake check` fails only when built, which `just check`'s `--no-build`
+skips.
 Source: [module-files.md](../../wiki/config-structure/module-files.md), Quick
 facts; `flake/modules/checks.nix`.
 

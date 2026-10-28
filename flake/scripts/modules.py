@@ -4,9 +4,13 @@
 dirs-as-categories (the flake input that builds flake.modules from
 flake/modules/) already refuses what used to fail silently here: two
 modules or a module and a category sharing a name, a mistyped class key, a
-name in `includes` that doesn't exist (wiki/config-structure/module-files.md). It also
-reports orphans -- modules nothing reaches -- as `nix flake check`'s
-module-orphans (flake/modules/checks.nix turns it on). What is left:
+name in `includes` that doesn't exist (wiki/config-structure/module-files.md). What is left:
+
+  orphans     A module inside a category that nothing reaches: it evaluates
+              and installs nothing. dirs-as-categories has a `module-orphans`
+              flake check for this (flake/modules/checks.nix turns it on), but it
+              fails only when built and `just check` runs --no-build, so this
+              reads flake.moduleGraph.orphans at evaluation time instead.
 
   untracked   A .nix file git doesn't know about: flakes in a git repo
               ignore it, so it silently does not exist.
@@ -21,7 +25,7 @@ untracked files count.
 
     modules.py untracked  <modules-dir>
     modules.py drift      <modules-dir>
-    modules.py check      <modules-dir>     # both; non-zero exit on any finding
+    modules.py check      <modules-dir>     # all three; non-zero exit on any finding
 
     modules.py add <modules-dir> <class> <category>/<subdir>/<name>.nix [description words...]
                            # scaffold a new module inside a category, in the
@@ -40,6 +44,8 @@ SEE = {
     'untracked': "AGENTS.md, 'git add before nix eval'",
     'drift':     "wiki/config-structure/module-files.md; fix whichever reading is wrong, "
                  "check_wiki.py's module_classes/all_categories or the file",
+    'orphan':    "wiki/config-structure/module-files.md; name the module (or its category) in "
+                 "an `includes`/`enables`, or delete it",
 }
 
 
@@ -89,6 +95,25 @@ def untracked(root):
               f"though it does not exist")
     if hits:
         see('untracked')
+    return hits
+
+
+def orphans(doc, expected=()):
+    """Modules inside a category that no `includes` or `enables` reaches.
+
+    They evaluate cleanly and install nothing, so nothing else reports them.
+    dirs-as-categories publishes them as flake.moduleGraph.orphans and its
+    `module-orphans` flake check fails on them, but that check fails only when
+    it is BUILT and `just check` runs --no-build, so it never fails there. This
+    reads the same list at evaluation time, which is what makes it a gate
+    (issue 561). `expected` names modules that are orphans on purpose (the one
+    `add` just created).
+    """
+    hits = [n for n in (doc.get('orphans') or []) if n not in expected]
+    for n in hits:
+        print(f"ORPHAN     {n!r} is reached by no `includes`/`enables`, so no host gets it")
+    if hits:
+        see('orphan')
     return hits
 
 
@@ -227,13 +252,11 @@ def add(root, cls, target, description, run=subprocess.run):
     # already wrong before this command ran -- say so and fail rather than
     # let the new file hide in noise.
     stale_untracked = bool(untracked(root))
-    orphaned = graph(root, run).get('orphans', [])
-    stale = [n for n in orphaned if n != name]
-    if name in orphaned:
+    doc = graph(root, run)
+    if name in (doc.get('orphans') or []):
         print("ORPHAN (expected -- brand new): include it from a host or "
               "another module, or it installs nothing")
-    for n in stale:
-        print(f"ORPHAN     {n!r} is reached by nothing (`nix flake check` fails on it too)")
+    stale = orphans(doc, expected=(name,))
     if stale_untracked or stale:
         print("error: the checks above did not come back clean -- fix what "
               "they report before scaffolding here", file=sys.stderr)
@@ -258,7 +281,8 @@ def main(argv=None, run=subprocess.run):
     if cmd == 'drift':
         return 1 if drift(graph(root, run), static_document(root)) else 0
     if cmd == 'check':
-        bad = bool(untracked(root)) | bool(drift(graph(root, run), static_document(root)))
+        doc = graph(root, run)
+        bad = bool(untracked(root)) | bool(drift(doc, static_document(root))) | bool(orphans(doc))
         print("no findings" if not bad else "", end="")
         return 1 if bad else 0
     print(__doc__); return 2

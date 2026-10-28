@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for modules.py's `drift` check and its `add` scaffold.
+"""Tests for modules.py's `drift` and orphan checks and its `add` scaffold.
 
 Both read flake.moduleGraph; here a stand-in for `nix eval` answers with a
 document built per test, so a check is shown firing on a tree broken on
@@ -179,9 +179,39 @@ class Main(Tree):
         self.assertEqual(rc, 1)
         self.assertIn("DRIFT      category 'ghost'", out.getvalue())
 
-    def test_orphans_is_no_longer_a_subcommand(self):
-        # dirs-as-categories reports them (`nix flake check`'s module-orphans)
+    def test_orphans_is_not_a_subcommand_of_its_own(self):
+        # it is a finding of `check`, from the graph `check` already evaluates
         self.assertEqual(quiet(modules.main, ['orphans', str(self.root)], run=FakeNix(self.doc())), 2)
+
+    def test_check_fails_on_an_orphan_and_names_it(self):
+        # The flake check module-orphans fails only when built, and `just
+        # check` is --no-build, so this is the gate that has to fail (561).
+        doc = self.doc()
+        doc['orphans'] = ['lonely']
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            rc = modules.main(['check', str(self.root)], run=FakeNix(doc))
+        self.assertEqual(rc, 1)
+        self.assertIn("ORPHAN     'lonely'", out.getvalue())
+        self.assertIn('see wiki/config-structure/module-files.md', out.getvalue())
+
+    def test_check_passes_with_no_orphans_and_with_a_graph_that_has_no_field(self):
+        doc = self.doc()
+        doc['orphans'] = []
+        self.assertEqual(quiet(modules.main, ['check', str(self.root)], run=FakeNix(doc)), 0)
+        doc.pop('orphans')       # a graph from before the field existed
+        self.assertEqual(quiet(modules.main, ['check', str(self.root)], run=FakeNix(doc)), 0)
+
+    def test_an_orphan_and_drift_are_both_reported(self):
+        doc = self.doc()
+        doc['orphans'] = ['lonely']
+        doc['categories']['ghost'] = {'dir': 'area/ghost'}
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            rc = modules.main(['check', str(self.root)], run=FakeNix(doc))
+        self.assertEqual(rc, 1)
+        self.assertIn('ORPHAN', out.getvalue())
+        self.assertIn('DRIFT', out.getvalue())
 
 
 if __name__ == '__main__':
