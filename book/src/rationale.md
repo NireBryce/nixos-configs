@@ -1,37 +1,38 @@
 # Why it is built this way
 
-This chapter collects the design decisions that were deliberate choices,
-not defaults, together with the dead ends that led to them. Each dead end is
-described by the symptom that identified it. Read the chapter before you
-"tidy" something that looks odd. Most of the odd-looking parts of this tree
-were chosen on purpose, and the repo treats silently re-deciding a choice as
-worse than either answer. Terms such as *category*, *aggregate* and
-*deferred module* are defined in the [glossary](glossary.md).
+Most odd-looking parts of this tree were chosen on purpose. Below are those
+decisions and the dead ends that led to them, each dead end named by the
+symptom that identified it. Read them before you "tidy" something that looks
+odd: the repo treats re-deciding a choice without saying so as worse than
+either answer. Terms such as *category*, *aggregate* and *deferred module*
+are defined in the [glossary](glossary.md).
 
-## A note on the sources
+## Older commits may be missing from your clone
 
-Some commits this chapter relies on may be missing from your clone. A
-shallow clone (`git rev-parse --is-shallow-repository` prints `true`) has a
-graft commit at its oldest point that holds the whole earlier tree. Commits
-the docs cite from before the graft, including the tip of the deleted
-`flake-parts` branch, are then not objects you can read: `git cat-file -t
-<hash>` answers "not a valid object". For anything older than your clone's
-history, this chapter relies on the dated working notes in `flake/doc/` and
-`wiki/`, not on `git log`. To check one of those claims against a full
-history, use the `git-archaeology` skill
-(`.agents/skills/git-archaeology/SKILL.md`) in a full clone.
+A shallow clone (`git rev-parse --is-shallow-repository` prints `true`)
+has a graft commit at its oldest point that holds the whole earlier tree.
+Commits the docs cite from before the graft are not objects you can read,
+including the tip of the deleted `flake-parts` branch: `git cat-file -t
+<hash>` answers "not a valid object".
+
+For anything older than your clone's history, the sections below rely on the
+dated working notes in `flake/doc/` and `wiki/` rather than `git log`. To
+check one of those claims against a full history, use the `git-archaeology`
+skill (`.agents/skills/git-archaeology/SKILL.md`) in a full clone.
 
 ## Decision: flake-parts, for one option
 
 The flake is built with flake-parts, a library for writing a flake as
-module-system modules, and the stated reason is a single option. That option
-is `flake.modules.<class>.<name>`, which `flakeModules.modules` declares as a
-`deferredModule`: a module stored unevaluated, to be imported later by a
-NixOS, Home Manager or darwin configuration. With it, one file can hold a
-NixOS module and a Home Manager module for the same feature as sibling
-attributes. The alternative is two files tied together by nothing but a
-shared filename. The worked example is the old `nixd.nix`, which installed
-`nixd` both system-wide and in Home Manager from one file.
+module-system modules. The stated reason is a single option,
+`flake.modules.<class>.<name>`, which `flakeModules.modules` declares as a
+`deferredModule`. A deferred module is stored unevaluated, to be imported
+later by a NixOS, Home Manager or darwin configuration.
+
+With that option, one file can hold a NixOS module and a Home Manager module
+for the same feature as sibling attributes. Without it, the two would be
+separate files tied together only by a shared filename. The worked example
+is the old `nixd.nix`, which installed `nixd` both system-wide and in Home
+Manager from one file.
 
 The rationale note lists, from grep, which flake-parts features are used and
 which are not. Unused: `moduleWithSystem`, `debug`, overlay or
@@ -45,12 +46,12 @@ Source: `flake/doc/flake-parts-rationale.md`;
 ## Decision: hosts build their own `pkgs`
 
 `hosts.nix` uses `withSystem` only to get `self'` and `inputs'` into
-`specialArgs`. It deliberately does **not** pass perSystem's `pkgs` to the
-hosts.
+`specialArgs`. It does **not** pass perSystem's `pkgs` to the hosts.
 
 perSystem is flake-parts' per-system scope. Its default `pkgs` is
 `legacyPackages.<system>` with no `nixpkgs.config` applied. Using that `pkgs`
-would silently drop `allowUnfree`, and these hosts install unfree packages.
+would drop `allowUnfree` without an error, and these hosts install unfree
+packages.
 The accepted cost is a second nixpkgs instantiation. The design is under
 review in [issue 559](https://github.com/NireBryce/nixos-configs/issues/559).
 
@@ -58,7 +59,7 @@ Source: `flake/modules/host-config/hosts.nix` (comments above `mkHost`);
 [flake-parts-port-notes.md](../../wiki/config-structure/flake-parts-port-notes.md),
 "`withSystem`".
 
-## Decision: membership by directory, not per-module opt-in
+## Decision: membership by directory
 
 A module belongs to the category of the folder it sits in; a category is a
 folder whose modules a host can take by one name. The `dirsAsCategory.md`
@@ -67,16 +68,16 @@ than replaced during the flake-parts port.
 
 The sibling `flake-parts` branch used per-module opt-in, where each module
 declares which aggregates it joins. (An aggregate is a module that exists to
-import other modules by name.) Per-module opt-in has real advantages:
-directory and membership come apart, a module can join several roles, and
-the result is greppable. The note lists its costs:
+import other modules by name.) Per-module opt-in has advantages: directory
+and membership come apart, a module can join several roles, and the result
+is greppable. The note lists its costs:
 
 - An opt-in line per module.
 - No file that shows a roster.
-- **A new silent failure.** Leave out the opt-in line and the module is
-  valid, evaluates cleanly, and installs nothing. No evaluation can ever
-  report this mistake.
-- Same-named modules merge instead of erroring.
+- A new failure that reports nothing. Leave out the opt-in line and the
+  module is valid, evaluates cleanly, and installs nothing. No evaluation can
+  ever report this mistake.
+- Same-named modules merge, with no error.
 
 Categories cannot fail that way, because membership is automatic.
 
@@ -88,9 +89,9 @@ depend on was modelled and evaluated first (§12 in
 [agent-lessons-learned.md](../../wiki/agent-lessons-learned.md)).
 
 `flake/doc/dirsAsCategory.md` keeps a "How to convert" section as a
-documented way back. Keeping one follows a pattern the user has chosen three
-times: when a choice is close, keep a documented escape hatch instead of
-re-arguing the choice (§13).
+documented way back. The user has chosen this pattern three times: when a
+choice is close, keep a documented escape hatch and stop re-arguing the
+choice (§13).
 
 Source: `flake/doc/dirsAsCategory.md`, "What the alternative is";
 [flake-parts-port-notes.md](../../wiki/config-structure/flake-parts-port-notes.md),
@@ -111,20 +112,19 @@ That arrangement produced three symptoms:
 - A renamed shim once made nested categories collect a phantom module
   called `dirsAsCategory`. The class filter hid the phantom.
 
-The `dirs-as-categories` flake input replaced both the hand-written names and
-the shims. The input takes the name
-from the file and works out categories from the shape of the tree, so no
-file states either. Same-named modules now fail evaluation instead of
-merging. The move was checked by comparing every host's toplevel `drvPath`
-(the store path of the system derivation), and the fingerprints, before and
-after.
+The `dirs-as-categories` flake input replaced both the hand-written names
+and the shims. The input takes the name from the file and works out
+categories from the shape of the tree, so no file states either. Same-named
+modules now fail evaluation. The move was checked by comparing every host's
+toplevel `drvPath` (the store path of the system derivation), and the
+fingerprints, before and after.
 
 Source: [module-files.md](../../wiki/config-structure/module-files.md),
 "Why the name comes from the filename", "Why categories need no shim", "How
 the move was checked"; `flake/doc/dirsAsCategory.md`, "Things that are
 load-bearing" and its History banner.
 
-## Dead end: same-named modules merging silently
+## Dead end: same-named modules merging without an error
 
 Importing the `boot` category once applied durandal's bootloader, because
 durandal's `boot.nix` and the `general-config/boot/` category shared the
@@ -148,13 +148,18 @@ and over keeping both. The NixOS-side bridge sets `useGlobalPkgs` (Home
 Manager uses the system's nixpkgs) and `useUserPackages` (packages go into
 the system's per-user profile).
 
-The integration bought one switch instead of two, one nixpkgs instantiation,
-and a home config that cannot drift out of sync with its system.
+The integration bought:
 
-It cost four things. Home modules may not set `nixpkgs.*`; doing so is an
-error, not a no-op. The home profile directory moves to
-`/etc/profiles/per-user/<name>`. Activation runs as a systemd unit with a
-minimal `PATH`. The home config can't be switched on its own.
+- one switch for both system and home;
+- one nixpkgs instantiation;
+- a home config that cannot drift out of sync with its system.
+
+It cost:
+
+- Home modules may not set `nixpkgs.*`; doing so is an error.
+- The home profile directory moves to `/etc/profiles/per-user/<name>`.
+- Activation runs as a systemd unit with a minimal `PATH`.
+- The home config can't be switched on its own.
 
 `flake/doc/trailhead-home-manager-standalone.md` is the documented way back.
 For more detail, see [Wiring a user and Home Manager](users-and-home-manager.md).
@@ -167,8 +172,8 @@ actually bought and cost";
 ## Decision: package parity across hosts
 
 Hosts are not split by role. The handheld gets the full desktop GUI set
-(`vscode`, `gimp`, `libre-office`, `zoom`, …) on purpose. A split was
-offered and declined, and the structure was left able to split later.
+(`vscode`, `gimp`, `libre-office`, `zoom`, …). A split was offered and
+declined, and the structure was left able to split later.
 
 As a consequence, `packages-config/` has one file per package (the "full
 per-file dendritic conversion"). The boilerplate was accepted. Categories
@@ -183,11 +188,11 @@ Source: [flake-parts-port-notes.md](../../wiki/config-structure/flake-parts-port
 One module, `drop-unsupported-packages.nix`, filters `home.packages` by
 `meta.platforms`, on darwin only, and warns by name about each package it
 drops. It replaced hand-written `isDarwin` guards that were all correct but
-each restated a fact nixpkgs already knows. On Linux the filter does nothing
-on purpose: a package that can't build on Linux is a mistake, and it should
-stay a loud error.
+each restated a fact nixpkgs already knows. On Linux the filter does nothing:
+a package that can't build on Linux is a mistake, and it should stay a loud
+error.
 
-The filter deliberately does not catch `meta.broken`. It does not detect
+The filter does not catch `meta.broken`, by design. It does not detect
 Homebrew overlap either; `just available --duplicates` is the tool for that.
 [Adding a package](adding-a-package.md) walks through both.
 
@@ -197,25 +202,26 @@ Source: header of
 
 ## Decision: `nix fmt` is not wired up
 
-The aligned `=` columns in the modules are deliberate. A formatter would
+The modules align their `=` signs in columns on purpose. A formatter would
 flatten them, so `treefmt` is absent and the flake's `formatter` output is
 turned off with `touchup`.
 
 A CI failure forced the `touchup` line. CI's first real run failed
 `nix flake check` with "flake-parts could not determine statically that no
 formatter is defined". The error reproduced on a fresh clone too. It had
-been missed locally partly because the check was piped through `tail`, and
-a pipeline reports the exit status of `tail`, not of the check (§20).
+been missed locally partly because the check was piped through `tail`. A
+pipeline reports the exit status of its last command, here `tail` (§20).
 
 Source: comment on `touchup` in `flake/flake.nix`;
 [module-style-guide-for-agents.md](../../wiki/config-structure/module-style-guide-for-agents.md),
 "Formatting".
 
-## Decision: impermanence on some hosts, not all
+## Decision: impermanence on some hosts
 
 Hosts that include the `impermanence` category wipe `/root` on every boot,
-so that any state that matters has to be declared in the repo. Forgetting
-something then fails loudly the next day instead of silently years later. A
+so that any state that matters has to be declared in the repo. A forgotten
+path then fails loudly the next day. Without the wipe, it would surface
+years later with no warning. A
 host installed by hand with a plain root opts out. Its entry point says so
 and explains how the checks opt out with it. The cube host's entry point,
 `cube-configuration.nix`, is the worked example.
@@ -228,7 +234,8 @@ Source: `WARN-impermanence.nix`, "what this does, and why";
 Each of these produced no error, or an error that named the wrong thing:
 
 - Two `config`s in one file. Adding an argument list to reach the NixOS
-  `config` silently changed what every existing `config` in the file meant.
+  `config` changed what every existing `config` in the file meant, with no
+  error.
   The trap is retired, since module files can no longer take the
   flake-parts `config`.
 - starship beat powerlevel10k for a whole session. starship's init ran last
@@ -252,7 +259,7 @@ point at the file or the command instead. Commit `4a95690` removed such
 facts across the docs, and `check_wiki.py docrefs` catches the bare
 count-of-files shape.
 
-These facts go stale without anyone noticing, and a stale fact looks exactly
+Such facts go stale without anyone noticing, and a stale fact looks exactly
 like a current one. Whether a host runs what the tree evaluates to is a live
 question, answered on the host with `just baseline` or `just diff-deployed`.
 
@@ -261,10 +268,9 @@ Source: `AGENTS.md`, State; commit `4a95690`;
 
 ## Decision: calibrated severity
 
-This is a homelab config, not production. The port notes quote the
-correction that set the tone: a short window in which the flake did not
-evaluate had been over-dramatised, and the repo can go months between
-commits. `AGENTS.md`'s "Calibrate severity" rule comes from that correction.
+The repo is a homelab config. The port notes quote the correction that set
+the tone: a short window in which the flake did not evaluate had been
+over-dramatised, and the repo can go months between commits. `AGENTS.md`'s "Calibrate severity" rule comes from that correction.
 
 Source: [flake-parts-port-notes.md](../../wiki/config-structure/flake-parts-port-notes.md),
 "Decisions, not defaults"; `AGENTS.md`, Working in this repo.

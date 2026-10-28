@@ -1,12 +1,12 @@
 # How agents work in this repo
 
 Coding agents write and maintain most of this repo's docs, scripts, skills
-and hooks, under the user's direction. This chapter shows how an agent with
-no memory of earlier sessions finds the right file for a task, and how a
-mistake made once turns into a reminder the next agent sees. For each
-mechanism it says whether it is *automatic* (a hook or check fires without
-anyone asking) or a *convention* (an instruction the agent is told to follow
-and can skip).
+and hooks, under the user's direction. An agent has no memory of earlier
+sessions. The mechanisms below route it to the right file for a task, and
+turn a mistake made once into a reminder the next agent sees. Each mechanism
+is either *automatic* (a hook or check fires without anyone asking) or a
+*convention* (an instruction the agent is told to follow and can skip), and
+each section says which.
 
 ## Where an agent starts
 
@@ -29,9 +29,10 @@ pages come in one of two agent-facing shapes:
   already compact or procedural, so a sibling would only restate it.
 
 Under Claude Code, the session-start [hook](glossary.md#hook-claude-code)
-(a command the harness runs at a fixed event) adds the hostname, branch,
-[worktree](glossary.md#worktree), dirty-path count, `core.hooksPath` and the `just agent` helper
-names to the agent's context before its first tool call.
+runs before the agent's first tool call. (A hook is a command the harness
+runs at a fixed event.) It adds the hostname, branch,
+[worktree](glossary.md#worktree), dirty-path count, `core.hooksPath` and the
+`just agent` helper names to the agent's context.
 
 Automatic: the session-start hook. Convention: reading `AGENTS.md` and the
 index, and choosing the sibling over the human page.
@@ -44,8 +45,8 @@ Source: `AGENTS.md`, header and "Docs";
 ## Rules files load by path
 
 A rules file under `.agents/rules/` holds detail that matters only when
-working under particular paths, and Claude Code loads it only when a file
-matching those paths is read. Each rules file opens with frontmatter whose
+working under particular paths. Claude Code loads it only when the agent
+reads a file matching those paths. Each rules file opens with frontmatter whose
 only key is `paths:`, a list of globs. For example,
 `.agents/rules/flake-modules.md` lists `flake/modules/**` and
 `flake/flake.nix`. Claude Code sees the directory as `.claude/rules`, a
@@ -69,8 +70,7 @@ Source: `AGENTS.md`, header; `.agents/rules/flake-modules.md` frontmatter;
 
 A [skill](glossary.md#skill) is a markdown file at
 `.agents/skills/<name>/SKILL.md` that holds the full procedure for one kind
-of task, and an agent loads it when its description matches the task in
-hand. Any agent can read a skill as a plain file. Claude Code also lists the
+of task. An agent loads it when its description matches the task in hand. Any agent can read a skill as a plain file. Claude Code also lists the
 skills it finds through `.claude/skills`, a symlink into `.agents/`, with no
 registry to update.
 
@@ -86,14 +86,18 @@ A skill triggers when the agent reads the listing and decides the
 description fits its task. The listing shows only frontmatter, so the
 description has to be scannable. Nothing may live only in `when_to_use`,
 because other harnesses ignore it. For example, `ship`'s `when_to_use` reads
-"A bare push, ship it, land this or merge this", which is the phrase that
-caused the mistake the skill exists to prevent.
+"A bare push, ship it, land this or merge this". A bare "push" is the phrase
+that caused the mistake the skill exists to prevent.
 
 The skill `new-skill` is the procedure for writing one. `check_wiki.py
-skill-files` enforces the mechanical half of that procedure: one-sentence
-description with no repo paths or parentheticals, `when_to_use` on one line,
-no frontmatter keys beyond `name`, `description` and `when_to_use`. It also
-rejects syntax that would let a skill run a command without a prompt.
+skill-files` enforces its mechanical half:
+
+- a one-sentence description with no repo paths or parentheticals;
+- `when_to_use` on one line;
+- no frontmatter keys beyond `name`, `description` and `when_to_use`.
+
+The check also rejects syntax that would let a skill run a command without
+a prompt.
 
 Automatic: discovery and listing, and the frontmatter lint. Convention:
 loading the skill when it applies.
@@ -106,9 +110,10 @@ repo doesn't use" and "Steps"; `.agents/skills/ship/SKILL.md` frontmatter;
 ## The lesson loop
 
 A mistake an agent makes here becomes a numbered
-[lesson](glossary.md#lesson), a rule in the place an agent doing that task
-already reads, and, where it applies to particular paths or commands, a
-reminder that a hook delivers at that moment. The loop has four parts:
+[lesson](glossary.md#lesson). The lesson's rule goes where an agent doing
+that task already reads. If the lesson applies to particular paths or
+commands, a hook also delivers a reminder at that moment. The loop has four
+parts:
 
 1. An article, `wiki/agent-lessons-learned/<N>-*.md`, gives the full
    account. Numbers are stable and cited across the repo, so they are never
@@ -146,48 +151,48 @@ docstring for `lessons`.
 
 ## Keeping docs current
 
-A change that makes a wiki page stale fixes the page in the same change, and
-several mechanisms back that rule. They split into generators, checks that
-fire on their own, and skills an agent runs.
+A change that makes a wiki page stale fixes the page in the same change.
+Generators, automatic checks and skills back that rule:
 
-- **Generated regions.** A table whose facts the repo already knows (the
+- Generated regions. A table whose facts the repo already knows (the
   host table, the category index tables, the module counts) sits between
   `<!-- generated:<name> … -->` and `<!-- /generated -->` markers.
   `just wiki-gen` rewrites each region from its source; an edit inside a
   region is lost on the next run, except in a column the marker calls
   hand-written (such as a host's role). To change a generated fact, change
   its source and run `just wiki-gen`.
-- **`just wiki-lint`** runs `wiki/meta/scripts/check_wiki.py check`, a set of
+- `just wiki-lint` runs `wiki/meta/scripts/check_wiki.py check`, a set of
   static checks of the wiki, `AGENTS.md`, the rules files and the skills
   against the repo. The [checks chapter](agent-checks-and-guards.md) lists
   what class of drift each catches.
-- **The sibling-date rule.** `check_wiki.py siblings` fails when a
+- The sibling-date rule. `check_wiki.py siblings` fails when a
   `-for-agents.md` sibling's `_Last modified:_` date predates its source
   page's. The fix is to edit the sibling, then bump its date. When the source
   edit needs nothing in the sibling (a reorder, a typo), the agent adds a
   dated `_Sibling reviewed: <date> -- <reason>_` line to the sibling instead.
-  Bumping the sibling's date without reading it is forbidden, because that
-  turns a caught omission into a silent one.
-- **The edit-check hook** runs the sibling check on every wiki page an agent
+  Bumping the sibling's date without reading it is forbidden: it turns a
+  caught omission into one nobody sees.
+- The edit-check hook runs the sibling check on every wiki page an agent
   edits and reports a stale pair at once, before [preflight](glossary.md#preflight)
   would.
-- **Skill `wiki-sync`** is the procedure an agent runs at the end of a change:
+- Skill `wiki-sync` is the procedure an agent runs at the end of a change:
   name what changed as facts, grep the wiki for them, fix each page and its
   sibling.
-- **Skill `docs-audit-all`** is a standalone whole-repo accuracy pass. It
+- Skill `docs-audit-all` is a standalone whole-repo accuracy pass. It
   ranks docs with `just agent doc-drift`, splits them across parallel
   subagents with `just agent doc-partition`, and checks each claim against
   the code. Its own text says a lint-clean wiki is not an accurate one.
-- **Skills `wiki-fact-check` and `book-fact-check`** check a chosen set of
-  docs, or the book, with read-only agents that report each problem claim as
-  wrong, stale, unsupported, misleading or uncheckable. The orchestrator
-  verifies the consequential findings against the source and applies the
-  corrections. `just agent book-lint` is the book's mechanical half: dead links
-  and anchors, chapters missing from the summary, and dates or counts that go
-  stale. It runs in preflight.
-- **Skill `trim-docs`** tightens prose without breaking what lint pins in
+- Skills `wiki-fact-check` and `book-fact-check` check a chosen set of
+  docs, or the book, with read-only agents. The agents report each problem
+  claim as wrong, stale, unsupported, misleading or uncheckable. The
+  orchestrator verifies the consequential findings against the source and
+  applies the corrections.
+- `just agent book-lint` is the book's mechanical half. It catches dead
+  links and anchors, chapters missing from the summary, and dates or counts
+  that go stale. It runs in preflight.
+- Skill `trim-docs` tightens prose without breaking what lint pins in
   place (Contents blocks, date lines, siblings, anchors, § numbers).
-- **Skill `fact-hygiene`** governs how a fact is written so it does not rot:
+- Skill `fact-hygiene` governs how a fact is written so it does not rot:
   state only what was observed this session, qualify the rest in the same
   sentence, and replace a count, version or copied config value with a
   pointer to the file or command that answers it. `check_wiki.py docrefs`
@@ -212,16 +217,20 @@ Source: `AGENTS.md`, hard rules, "State" and "Docs";
 A command pattern that agents keep re-typing becomes a script under
 `.agents/scripts/`, run as `just agent <recipe>`. Bare `just agent` lists the
 helpers, and the session-start hook names them at the start of each Claude
-Code session. Examples of helpers: `show` reads several files or ranges in
-one call, `where` prints the branch, dirty paths and commits against
-`origin/experimental`, and `commit` and `pr` carry the ship skill's commit and
-PR conventions.
+Code session. Examples:
+
+- `show` reads several files or ranges in one call.
+- `where` prints the branch, dirty paths and commits against
+  `origin/experimental`.
+- `commit` and `pr` carry the ship skill's commit and PR conventions.
 
 The skill `agent-scripts` is the procedure. `just agent recurring` mines
-agent command history for repeated shapes (command fields only, never
-output, with literals replaced by placeholders such as `<path>` and
-`<str>`). The skill then asks whether a pattern carries a convention (a fixed
-step order, a set of `--json` fields); plain Unix pipelines stay unscripted.
+agent command history for repeated shapes. It reads command fields only,
+never output, and replaces literals with placeholders such as `<path>` and
+`<str>`. The skill then asks whether a pattern carries a convention, such as
+a fixed step order or a set of `--json` fields. Plain Unix pipelines stay
+unscripted.
+
 A new helper is a script in `.agents/scripts/`, in any language, plus a
 one-line recipe in `.agents/scripts/agent.just`. The skill requires running
 the helper on a case where it should find something, and committing it on its
@@ -238,18 +247,18 @@ Source: `.agents/skills/agent-scripts/SKILL.md`; `.agents/scripts/agent.just`;
 `.agents/rules/scripts.md`; `AGENTS.md`, "Before you start";
 `.agents/hooks/session-start.sh`.
 
-## Proposing a fix instead of making it
+## When to propose a fix and when to make it
 
-An agent that notices a problem outside its task proposes it rather than
-fixing it, unless the problem is small and in a file it is already
+An agent that notices a problem outside its task proposes a fix and leaves
+the problem alone. The exception is a small problem in a file it is already
 changing. These skills draw the line:
 
-- **`boyscouting`** covers small, local, behavior-neutral fixes (a stale
+- `boyscouting` covers small, local, behavior-neutral fixes (a stale
   comment, an unused variable) in a file the diff already touches. The fix
   goes in the same commit, with a trailing clause in the message saying it
-  is incidental. A real bug, a file the agent was not going to open, or a
-  rename on taste is out of scope.
-- **`propose-issue`** covers a real defect found while doing something else.
+  is incidental. A bug, a file the agent was not going to open, or a rename
+  on taste is out of scope.
+- `propose-issue` covers a defect found while doing something else.
   The agent re-checks it, runs `just threads "<keywords>"` to see whether it
   is already tracked, and asks the user with a drafted title, body and
   label. Only on a yes does it run `gh issue create --repo
@@ -265,18 +274,21 @@ Source: `.agents/skills/boyscouting/SKILL.md`;
 ## Extraction candidates
 
 When an agent writes or changes something whose mechanism would work outside
-this repo, it records an extraction candidate rather than extracting it. The
+this repo, it records an extraction candidate. It does not extract the thing
+itself. The
 skill `extract-agent-tooling` covers agent tooling (a skill, a lesson, a
 wiki convention, a checker, a hook); `extract-nix-tooling` covers Nix
 patterns. Each records one file under
 `_loose-ends/extraction-candidates/agent-orchestration/` or
 `_loose-ends/extraction-candidates/nix/`, in the same commit as the task
-that surfaced it. The test is to restate the thing's purpose with every repo
-noun removed and see whether it is still true and useful.
+that surfaced it.
 
-The `-all` variants
-(`extract-agent-tooling-all`, `extract-nix-tooling-all`) are deliberate
-whole-repo sweeps that also reconcile the existing candidate files. Copying
+The test for a candidate: restate the thing's purpose with every repo noun
+removed, and see whether it is still true and useful.
+
+The `-all` variants (`extract-agent-tooling-all`, `extract-nix-tooling-all`)
+are standalone whole-repo sweeps that also reconcile the existing
+candidate files. Copying
 anything into another repo happens only when the user asks.
 
 All four are conventions.

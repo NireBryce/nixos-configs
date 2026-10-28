@@ -1,9 +1,9 @@
 # Adding a module
 
-This chapter creates a module under `flake/modules/`: choosing where it
-goes, naming it, writing it in the house style, and proving it is wired in.
-The same rules apply to renaming or moving a module, because in this tree a
-rename changes the module's name and a move can change which hosts get it.
+Creating a module under `flake/modules/` takes five steps: choose where it
+goes, name it, write it in the house style, stage it, and prove it is wired
+in. The same rules apply to renaming or moving a module. In this tree a
+rename changes the module's name, and a move can change which hosts get it.
 Packages follow the same rules plus some of their own; see
 [Adding a package](adding-a-package.md). Unfamiliar terms are in the
 [glossary](glossary.md).
@@ -46,7 +46,7 @@ only the example host cube runs. The file used to sit in the shared
 `virtualization` category, and a collector rule kept it out of that
 category's own imports. When that rule went away, the file moved to
 `host-config/cube/cube-vm/`. "Cube only" now follows from where the file is,
-instead of being a quirk someone has to remember.
+and nobody has to remember it.
 
 Check: name the category that the chosen folder falls under, and confirm
 that the hosts you intend include it.
@@ -64,12 +64,12 @@ across the whole tree and across classes.
   `hardware-tenacity.nix`, `nixpkgs-stateVersion-durandal.nix`.
 - Prefix anything user-specific with the user where the name would otherwise
   be generic: `elly-git.nix`, `elly-user.nix`.
-- Name the file after the specific thing, not after the category it sits in.
-  A `containers/containers.nix` would collide with its own category, so the
-  file is `podman.nix` (§35). That collision happened more than once before
-  evaluation began refusing it.
+- Name the file after the specific thing it configures. A
+  `containers/containers.nix` would collide with its own category, so the
+  file is `podman.nix` (§35). Such collisions happened more than once before
+  evaluation began refusing them.
 - A name that is unique anyway (`b550-suspend-fix.nix`) needs no suffix.
-- **`default.nix` takes its folder's name**, and `defaults.nix` is never a
+- `default.nix` takes its folder's name, and `defaults.nix` is never a
   module. `just add-module` refuses both.
 
 Check: a duplicate name stops evaluation and names both files; `just
@@ -106,8 +106,8 @@ category already uses. It writes:
 }
 ```
 
-When you fill the file in, keep the house style. These rules are
-deliberate, not cleanup targets:
+When you fill the file in, keep the house style. Do not "clean up" these
+rules:
 
 - Put arguments in the right place. `lib` and `inputs` go in the outer list,
   and only if the file uses them, because deadnix fails on an unused one.
@@ -116,22 +116,23 @@ deliberate, not cleanup targets:
 - Indent four spaces, with opening brackets on the same line as whatever
   opens them.
 - Align `=` columns for runs of related assignments, matching the
-  surrounding block. This alignment is why `nix fmt` is not wired up.
+  surrounding block. `nix fmt` is not wired up because it would undo the
+  alignment.
 - Wrap comments at 80 columns plus the line's indent. `just comment-wrap`
   reports violations. Keep `# summary:` to one line; tighten it rather than
   wrap it.
 - Write one `# summary:` per module. In `packages-config/` it is
   `# package summary:`.
 - Put the reasoning next to the option it explains, inside the body.
-- **`#` inside a `''` string is shell text** and ends up verbatim in the
+- `#` inside a `''` string is shell text and ends up verbatim in the
   generated file. Put notes for the person editing the `.nix` above the
   string.
 - Look for an existing `programs.*` integration before writing one by hand.
 
 Check: `just add-module` exits with an error, before writing anything, for
-each refusal listed above. On success the file is staged. It also exits 1,
-after creating and staging the file, if other orphans or untracked `.nix`
-files already exist (`just modules` reports the same).
+each refusal listed above. On success the file is staged. The command also
+exits 1 after creating and staging the file if other orphans or untracked
+`.nix` files already exist (`just modules` reports the same).
 
 Source: `.agents/skills/new-flake-module/SKILL.md`, "Scaffolder" and "The
 shape"; `flake/scripts/modules.py` (`add`, `BOILERPLATE`);
@@ -140,9 +141,9 @@ shape"; `flake/scripts/modules.py` (`add`, `BOILERPLATE`);
 
 ## Step 4: `git add` before `nix eval`
 
-A flake inside a git repository ignores untracked files. A new module that
-hasn't been `git add`ed **does not exist** as far as Nix is concerned, and
-nothing reports its absence. `just add-module` stages the file for you. If
+A flake inside a git repository ignores untracked files. To Nix, a new
+module that hasn't been `git add`ed **does not exist**, and nothing reports
+its absence. `just add-module` stages the file for you. If
 you created the file by hand, stage it yourself and run the checks:
 
 ```sh
@@ -151,8 +152,8 @@ just modules     # reports untracked .nix files and graph drift
 just check       # evaluates every host; does not fail on an orphan; `just modules` does (see Step 5)
 ```
 
-When iterating, force a real toplevel. A cheap attribute can resolve while
-something else is broken. Evaluating the toplevel's
+When iterating, force the whole toplevel. A cheap attribute can resolve
+while something else is broken. Evaluating the toplevel's
 [`drvPath`](glossary.md#drvpath) forces the whole host configuration without
 building it:
 
@@ -171,13 +172,16 @@ Source: `AGENTS.md`, "Working in this repo" and "Commands";
 
 A module inside a category reaches every host that includes that category.
 If no host includes the category, the module is an
-[**orphan**](glossary.md#orphan): it evaluates and installs nothing. The
-`just modules` fails on an orphan and names it; it reads the `orphans` list
-from `nix eval --json ./flake#moduleGraph`. The `module-orphans` flake check
-fails only when built, and `just check` runs with `--no-build`, so `just
-check` does not catch an orphan. If a host should take the module on its own,
-without the rest of the category, name the module in an `includes` list
-directly, as the hosts do with `kde-desktop`.
+[**orphan**](glossary.md#orphan): it evaluates and installs nothing.
+
+- `just modules` fails on an orphan and names it. It reads the `orphans`
+  list from `nix eval --json ./flake#moduleGraph`.
+- `just check` does not catch an orphan. The `module-orphans` flake check
+  fails only when built, and `just check` runs with `--no-build`.
+
+If a host should take the module on its own, without the rest of the
+category, name the module in an `includes` list directly, as the hosts do
+with `kde-desktop`.
 
 Also check whether your new folder has turned its parent into a category.
 See [Categories and membership](categories.md).
@@ -191,9 +195,9 @@ from folders".
 
 ## Renaming or moving a module
 
-- A rename renames the module. Membership follows the folder, so membership
-  survives. References by name (`includes`, `enables`, `hosts.nix`) break,
-  but loudly. Fix them in the same change.
+- A rename renames the module. Membership follows the folder, so it
+  survives. References by name (`includes`, `enables`, `hosts.nix`) break
+  with an error; fix them in the same change.
 - Leave the old name somewhere greppable. When a rename makes the old name
   impossible to find, add a one-line comment containing the old string on
   the declaration. `boot-durandal.nix` and `enable-home-manager.nix` do this.
@@ -225,14 +229,16 @@ wrap it in the same commit:
 }
 ```
 
-dirs-as-categories refuses an unwrapped module that asks for an argument only
-a class module gets, such as `modulesPath` or `pkgs`, and the error names the
-argument. Besides the wrapper above, the fix it suggests is to rename the file
-with a leading `_` and import it from a class, `nixos.imports = [ ./_name.nix ];`.
-A raw module that asks only for `config`, `lib` or `options` is not refused and
-loads as a flake-parts module, so wrap those too. Older library versions died
-with `infinite recursion encountered`, naming `modulesPath`, an error that did
-not point at the real cause.
+dirs-as-categories refuses an unwrapped module that asks for an argument
+only a class module gets, such as `modulesPath` or `pkgs`, and the error
+names the argument. The error suggests a second fix besides the wrapper
+above: rename the file with a leading `_` and import it from a class, as in
+`nixos.imports = [ ./_name.nix ];`.
+
+A raw module that asks only for `config`, `lib` or `options` is not refused.
+It loads as a flake-parts module, so wrap those too. Older library versions
+died with `infinite recursion encountered`, naming `modulesPath`, an error
+that did not point at the real cause.
 
 Source: `.agents/skills/new-flake-module/SKILL.md`, "Raw NixOS modules".
 

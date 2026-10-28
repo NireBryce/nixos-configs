@@ -1,10 +1,10 @@
 # Wiring a host
 
-This chapter adds a machine to the flake from start to finish: the entry
-point, the host's own module directory, the `hosts.nix` line, hardware and
-disks, the impermanence decision, secrets enrollment, and the tailnet name.
-It also says what "done" can honestly mean for a host that has not booted
-yet. Unfamiliar terms are in the [glossary](glossary.md).
+Adding a machine to the flake touches the entry point, the host's own
+module directory, the `hosts.nix` line, hardware and disks, the impermanence
+decision, secrets enrollment, and the tailnet name. The last step says what
+"done" can mean for a host that has not booted yet. Unfamiliar terms are in
+the [glossary](glossary.md).
 
 ## Read this first: the `/root` wipe
 
@@ -18,12 +18,12 @@ This setup is called [impermanence](glossary.md#impermanence): anything on
 `/` that is not explicitly persisted is gone after the next boot. In
 practice:
 
-- **Never install this config wholesale** on a machine you care about.
+- Never install this config wholesale on a machine you care about.
 - Look at the specific host's entry point; don't assume "every host" or "no
   host". A host that leaves the `impermanence` category out says so in its
   entry-point header.
-- **The rollback needs `root-blank` to exist**, and no host's config
-  creates it. Without it, the unit deletes `/root` and then cannot replace
+- The rollback needs `root-blank` to exist, and no host's config creates
+  it. Without it, the unit deletes `/root` and then cannot replace
   it.
 - Read the whole of
   `flake/modules/general-config/impermanence/root-rollback/restore-root/WARN-impermanence.nix`
@@ -50,15 +50,16 @@ flake/modules/host-config/
 ```
 
 The [entry point](glossary.md#entry-point) is the module file that lists the
-host's categories; a [category](glossary.md#category) is a folder whose
-modules a host takes by one name. Before you start, find the closest worked
-example: `host-config/hosts.nix` and
-[`wiki/fleet/hosts.md`](../../wiki/fleet/hosts.md) list each host and its
-role, and each host's entry point sits beside `hosts.nix`. Look for one with
-the same shape as yours: a workstation or a handheld, impermanence or a
-persistent root, NixOS or darwin. A VM guest such as `forge-runner` is a
-component of a host, not a fleet machine, which is why it has no `nire-`
-prefix.
+host's categories. A [category](glossary.md#category) is a folder whose
+modules a host takes by one name.
+
+Before you start, find the closest worked example.
+`host-config/hosts.nix` and [`wiki/fleet/hosts.md`](../../wiki/fleet/hosts.md)
+list each host and its role, and each host's entry point sits beside
+`hosts.nix`. Pick one with the same shape as yours: a workstation or a
+handheld, impermanence or a persistent root, NixOS or darwin. A VM guest
+such as `forge-runner` is a component of a host and not a fleet machine, so
+it has no `nire-` prefix.
 
 Source: `.agents/skills/new-host-config/SKILL.md`, "Applies to";
 `flake/modules/host-config/hosts.nix`.
@@ -67,18 +68,18 @@ Source: `.agents/skills/new-host-config/SKILL.md`, "Applies to";
 
 Answer four questions before writing any file:
 
-- **Workstation or handheld?** A workstation includes `"kde-desktop"` and a
+- Workstation or handheld? A workstation includes `"kde-desktop"` and a
   handheld includes `"jovian"`. Both modules live in `desktop-env`. Include
   the module, never the whole category.
-- **Impermanence?** The usual answer is yes (see the entry points for hosts
+- Impermanence? The usual answer is yes (see the entry points for hosts
   that include `impermanence`). If the host opts out, say so in its header
   the way `cube-configuration.nix` does, including how `invariants.nix` and
   `WARN-password-required.nix` interact with that choice.
-- **CPU and GPU?** AMD hosts include the shared `hardware` category. An
+- CPU and GPU? AMD hosts include the shared `hardware` category. An
   Intel host skips it and imports the exact `nixos-hardware` module from its
   own hardware file. Never add an `intel` folder under
   `hardware-config/hardware/`, because the AMD hosts would get it too.
-- **NixOS or darwin?** Use `mkHost` into `flake.nixosConfigurations`, or
+- NixOS or darwin? Use `mkHost` into `flake.nixosConfigurations`, or
   `mkDarwinHost` into `flake.darwinConfigurations`. There is no
   impermanence on darwin. See [Darwin edge cases](darwin.md).
 
@@ -124,25 +125,26 @@ Source: `flake/modules/host-config/durandal-configuration.nix`;
 ## Step 3: create the host directory, with suffixed names
 
 Create `host-config/<name>/` with the subfolders you need. A subfolder that
-holds modules is what makes `<name>` a category. **Suffix every file with
-the host name**: `hardware-<name>.nix`, `boot-<name>.nix`,
-`nixpkgs-hostPlatform-<name>.nix`, `nixpkgs-stateVersion-<name>.nix`. Module
-names share one namespace across the tree, so a bare `boot.nix` would
-collide with the `boot` category and with every other host's copy.
-dirs-as-categories, the flake input that names modules after their files,
-refuses that collision and names both files.
+holds modules makes `<name>` a category.
 
-For `system.stateVersion`, copy the reasoning, not the value. The option
-pins defaults to the release under which the host's data was first created,
-and it is never bumped. A host with no data yet starts on the *current*
+**Suffix every file with the host name**: `hardware-<name>.nix`,
+`boot-<name>.nix`, `nixpkgs-hostPlatform-<name>.nix`,
+`nixpkgs-stateVersion-<name>.nix`. Module names share one namespace across
+the tree, so a bare `boot.nix` would collide with the `boot` category and
+with every other host's copy. dirs-as-categories, the flake input that names
+modules after their files, refuses that collision and names both files.
+
+For `system.stateVersion`, copy the reasoning and leave the value. The
+option pins defaults to the release under which the host's data was first
+created, and it is never bumped. A host with no data yet starts on the *current*
 release:
 
 ```sh
 nix eval --raw .#nixosConfigurations.nire-tenacity.config.system.nixos.release
 ```
 
-Don't copy another host's value. Write a comment explaining the fresh-host
-case, not only the string.
+Don't copy another host's value. Next to the string, write a comment that
+explains the fresh-host case.
 
 Don't copy hardware-keyed fixes without checking.
 `durandal/fixes/b550-suspend-fix.nix` targets specific PCI IDs on
@@ -161,7 +163,7 @@ The path depends on whether the machine has been scanned.
 For real hardware you've already scanned, put the `fileSystems` and
 `boot.initrd.*` output of `nixos-generate-config` into
 `<name>/hardware/hardware-<name>.nix`, wrapped as `{ nixos = …; }`. Raw
-output is refused for asking for `modulesPath`, so it must be wrapped. Then
+output asks for `modulesPath` and is refused, so it must be wrapped. Then
 add the two settings that `invariants.nix` checks and that generated output
 may lack:
 
@@ -170,9 +172,9 @@ may lack:
 
 With no hardware yet, use the disko generator
 `general-config/impermanence/_disko/impermanence-luks-btrfs.nix` rather
-than inventing a hardware configuration. That generator has been evaluated,
-never run on hardware, and no host imports it today. From a file directly in `host-config/<name>/`,
-call it like this:
+than inventing a hardware configuration. The generator has been evaluated
+but never run on hardware, and no host imports it today. From a file
+directly in `host-config/<name>/`, call it like this:
 
 ```nix
 imports = [
@@ -182,21 +184,25 @@ imports = [
 ];
 ```
 
-Two adjustments the excerpt does not show. The generator produces only
-`disko.devices` and `fileSystems` values, so also import
-`inputs.disko.nixosModules.disko` beside it, or evaluation fails on an
-unknown option (`flake/doc/disko-impermanence-layout.md` lists this as a step).
-And write the path relative to the file it sits in: a file in
-`<name>/hardware/` needs `../../../` where the excerpt shows `../../`.
+The excerpt leaves out two adjustments:
 
-- **The placeholder device must be obviously fake.** Never use a plausible
+- The generator produces only `disko.devices` and `fileSystems` values.
+  Import `inputs.disko.nixosModules.disko` beside it, or evaluation fails on
+  an unknown option (`flake/doc/disko-impermanence-layout.md` lists this as
+  a step).
+- Write the path relative to the file it sits in. A file in
+  `<name>/hardware/` needs `../../../` where the excerpt shows `../../`.
+
+Then:
+
+- The placeholder device must be obviously fake. Never use a plausible
   path like `/dev/nvme0n1`. That path exists on tenacity, and disko pointed
   at the wrong machine destroys real data. A fake path fails loudly.
 - `includeSecureboot` and `swapSize` are judgment calls for each host. Set
   them explicitly, with a one-line reason.
 - The disk layout and the `impermanence` category are separate steps. You
   need both.
-- **A host can be fully wired and still unable to boot.** `root-blank`
+- A host can be fully wired and still unable to boot. `root-blank`
   exists only after disko has run on the real disk. Say so in the host's
   header.
 
@@ -240,7 +246,7 @@ Every machine has two names:
 name in `hosts.nix` and generates a `Host ts-<x>` ssh entry and a completion
 candidate for each, so **a new host needs no edit there**. The naming rule
 lives in `flake.lib.fleet` (`tailnetName`). The `ts-` name itself is set in
-the Tailscale admin console, outside this repo, so the code can follow the
+the Tailscale admin console, outside this repo. The code follows the
 convention but cannot enforce it. To ssh over the tailnet, use `ts-<x>`,
 never `nire-<x>`.
 
@@ -281,12 +287,12 @@ cd flake
 nix eval --raw .#nixosConfigurations.nire-<name>.config.system.build.toplevel.drvPath
 ```
 
-- Force the real toplevel. Cheap attributes can resolve while something
+- Force the whole toplevel. Cheap attributes can resolve while something
   else is broken; evaluating the toplevel's [`drvPath`](glossary.md#drvpath)
   forces the whole configuration without building it.
 - If `just check` fails, use `git stash` to confirm the failure isn't
   pre-existing before you blame the new host.
-- **Evaluating is not booting.** A host's first real boot once found several
+- Evaluating is not booting. A host's first real boot once found several
   defects that a clean eval and a clean build had both missed (§25 in
   [agent-lessons-learned.md](../../wiki/agent-lessons-learned.md)). Write
   "evaluates", not "verified".

@@ -1,11 +1,10 @@
 # Categories and membership
 
-A **category** is a named group of modules that a host takes in one line,
-and in this tree categories are not declared anywhere: they come from the
-shape of the folders. This chapter states the rule, walks through real
-examples from `flake/modules/`, and covers how to add a module to a
-category, how to create or remove one, and the traps that produce no error.
-Unfamiliar terms are in the [glossary](glossary.md).
+A **category** is a named group of modules that a host takes in one line.
+No file declares categories; they come from the shape of the folders. Below
+are the rule, real examples from `flake/modules/`, the procedures for adding
+a module to a category and for creating or removing one, and the traps that
+produce no error. Unfamiliar terms are in the [glossary](glossary.md).
 
 ## The rule
 
@@ -27,7 +26,7 @@ Unfamiliar terms are in the [glossary](glossary.md).
   module targets. A class's version of the category holds only the modules
   that have that class's key, so it may be empty.
 - The areas themselves are not categories. A file placed directly in an
-  area belongs to nothing, which is why the host entry points sit there.
+  area belongs to nothing, so the host entry points sit there.
 
 Source: [module-files.md](../../wiki/config-structure/module-files.md), Quick
 facts; `.agents/rules/flake-modules.md`, "Membership comes from the
@@ -42,17 +41,16 @@ category, and the NixOS hosts include it with one line, `"boot"`.
 `hardware-config/hardware/amd/` is a nested category. Its subfolders
 `amdcpu/` and `amdgpu/` hold modules, so `amd` is a category. `amd` also
 sits inside `hardware`, which is a category too, and both collect `amdcpu`
-and `amdgpu`. The overlap is deliberate: it gives a coarse handle and a fine
-handle on the same modules.
+and `amdgpu`. The overlap gives a coarse handle and a fine handle on the
+same modules.
 
 `general-config/desktop-env/` is a category that no host includes whole. It
 is a category because its subfolders `kde/` and `jovian/` hold modules.
-`kde/` and `jovian/` hold only files, so they are plain folders, not
-categories. Including `desktop-env` would bring in both the workstation
-session and the handheld session. Instead, each host names a single module,
-`"kde-desktop"` for the workstation session or `"jovian"` for the handheld
-one (check the host's entry point for which). Both include `kde-base`
-themselves.
+`kde/` and `jovian/` hold only files, so they are plain folders. Including
+`desktop-env` would bring in both the workstation session and the handheld
+session. Each host names a single module instead: `"kde-desktop"` for the
+workstation session or `"jovian"` for the handheld one (check the host's
+entry point for which). Both modules include `kde-base` themselves.
 
 `general-config/impermanence/` shows a skipped subfolder. Its `_disko/`
 folder is ignored because the path contains `/_`. `root-rollback/` is a
@@ -67,10 +65,10 @@ subfolders `ruff/` and `uv/` would make it a category on its own, but its
 { folderIsCategory = false; }
 ```
 
-That line keeps `python-dev` a plain folder inside `development`. Promoting
-it would not change which packages any host gets, but it would reorder every
-host's Home Manager package list, which changes every hash. Deleting the
-file would promote the folder.
+The line keeps `python-dev` a plain folder inside `development`. Promoting
+it would not change which packages any host gets. It would reorder every
+host's Home Manager package list, though, and that changes every hash.
+Deleting the file would promote the folder.
 
 `homelab-config/homelab/` is an umbrella. It holds one nested category per
 service (`backup`, `containers`, `git-forge`, `monitoring`, …). Cube includes
@@ -139,7 +137,7 @@ Source: `.agents/rules/flake-modules.md`.
 3. Make something include the category. For the system side, add the name
    to the relevant hosts' `includes.<class>`. For the Home Manager side, add
    it to `users-config/elly-home-manager.nix`. A category that nothing
-   includes evaluates cleanly and installs nothing. Its modules are
+   includes evaluates without error and installs nothing. Its modules are
    [orphans](glossary.md#orphan); `just modules` fails and names them
    (`just check` does not, because it runs with `--no-build`).
 4. Compare the hosts before and after (`just diff <ref>`, or the
@@ -157,7 +155,8 @@ shape".
    miss makes evaluation stop with an unknown-name error, so the mistake is
    loud.
 2. Check what the folder becomes. If you are removing the folder's *last*
-   subfolder of modules, the folder quietly stops being a category. Its
+   subfolder of modules, the folder stops being a category without any
+   message. Its
    modules then belong to the nearest category above it, which may be one
    that more hosts include. Unverified: no doc describes this case directly.
    It follows from the rules above. Check it with
@@ -211,10 +210,12 @@ the category, why it is shaped that way, and its traps. The index,
 [`categories/00-INDEX.md`](../../wiki/config-structure/categories/00-INDEX.md),
 has generated tables, one for system categories and one for the homelab set.
 **Imported by** is the one column written by hand, and `just wiki-gen` keeps
-that column when it regenerates the tables. Two groups are deliberately left
-out: the `packages-config/*` subcategories, which are self-explanatory
-wrappers, and the per-host bundles, which
-[`wiki/fleet/hosts.md`](../../wiki/fleet/hosts.md) covers.
+that column when it regenerates the tables. The index leaves out two groups:
+
+- the `packages-config/*` subcategories, which are self-explanatory
+  wrappers;
+- the per-host bundles, which
+  [`wiki/fleet/hosts.md`](../../wiki/fleet/hosts.md) covers.
 
 Source: `wiki/config-structure/categories/00-INDEX.md`.
 
@@ -223,12 +224,12 @@ Source: `wiki/config-structure/categories/00-INDEX.md`.
 - A new subfolder can promote its parent. Adding the first subfolder of
   modules to a flat folder turns the folder into a category. The folder's
   name is then reserved, and package order can shift.
-- **Never add an `intel` sibling under `hardware-config/hardware/`.** A
+- Never add an `intel` sibling under `hardware-config/hardware/`. A
   category includes everything beneath it, so the AMD hosts that include
   `hardware` would get the Intel module too. An Intel host skips `hardware`
   and imports the exact `nixos-hardware` module from its own hardware file.
-- Categories are easy to confuse with containers and VMs. `virtualization`
-  means only the libvirt VM category. Podman and distrobox are `containers`.
+- The `virtualization` and `containers` categories are easy to confuse.
+  `virtualization` means only the libvirt VM category. Podman and distrobox are `containers`.
   Both categories are nested under `homelab`, and the category index lists
   which hosts include them.
 - Leaving a category out produces no error. Check

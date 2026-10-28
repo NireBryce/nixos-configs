@@ -15,8 +15,9 @@ Source: `flake/doc/dirsAsCategory.md`; header of
 ## Area
 
 An area is a top-level folder under `flake/modules/`, such as
-`general-config/` or `host-config/`. An area is not a category, so a file placed directly in one
-belongs to no category. Host entry points sit there for that reason.
+`general-config/` or `host-config/`. An area is not a category, so a file
+placed directly in one belongs to no category. Host entry points sit there
+for that reason.
 Source: `AGENTS.md`, "Architecture"; header of
 `flake/modules/users-config/elly-home-manager.nix`.
 
@@ -51,7 +52,8 @@ Source: `flake/flake.nix`;
 
 `drvPath` is the store path of a derivation. Evaluating
 `config.system.build.toplevel.drvPath` forces Nix to evaluate a host's whole
-configuration without building it, which a cheap attribute does not.
+configuration without building it. A cheap attribute does not force that
+much.
 Source: `AGENTS.md`, "Commands".
 
 ## `enables`
@@ -84,8 +86,8 @@ Source: `flake/doc/flake-parts-rationale.md`.
 A flake-parts module configures the flake itself, through `flake.*`,
 `perSystem` or `withSystem`, and is evaluated by flake-parts' `mkFlake`. In
 this tree it is a plain file that is not in the module-file shape, such as
-`hosts.nix` or `checks.nix`. It is a different thing from a
-[module file](#module-file) and from the [NixOS module](#nixos-module) inside
+`hosts.nix` or `checks.nix`. A flake-parts module is neither a
+[module file](#module-file) nor the [NixOS module](#nixos-module) inside
 one.
 Source: [module-files.md](../../wiki/config-structure/module-files.md), "Three
 kinds of module, and what to call each".
@@ -102,22 +104,22 @@ one-way part".
 ## Guard hook
 
 A guard hook is a harness hook that denies, asks or warns when a tool call
-matches a pattern, such as a git command that would discard uncommitted work
-or a command that would print decrypted secrets. The guards are string and
-path matchers, not a security boundary.
+matches a pattern. Examples are a git command that would discard uncommitted
+work and a command that would print decrypted secrets. The guards are string and
+path matchers. They are not a security boundary.
 Source: `.agents/rules/agent-config.md`; the scripts under `.agents/hooks/`.
 
 ## Home Manager
 
 Home Manager manages a user's packages and dotfiles with the same module
-system NixOS uses. In this repo it runs inside each system configuration, so
-there is no `homeConfigurations` output and one switch applies both.
+system NixOS uses. In this repo it runs inside each system configuration.
+The flake has no `homeConfigurations` output, and one switch applies both.
 Source: `flake/modules/general-config/system/home-manager/enable-home-manager.nix`.
 
 ## Hook (Claude Code)
 
-A hook is a command the agent harness runs at a fixed event (session start,
-before a tool call, after one), whose JSON reply can deny, ask, warn or add
+A hook is a command the agent harness runs at a fixed event: session start,
+before a tool call, or after one. Its JSON reply can deny, ask, warn or add
 context. Claude Code reads the list from `.agents/settings.json`; ZCode reads
 the same scripts from `.zcode/config.json`.
 Source: `.agents/settings.json`; `.agents/rules/agent-config.md`.
@@ -142,11 +144,11 @@ facts.
 
 ## Lesson
 
-A lesson is a numbered record of a past agent mistake: an article in
-`wiki/agent-lessons-learned/`, a one-line index entry naming the rule's Home
-and what enforces it, and, where it applies to paths or commands, a reminder
-topic in `.agents/lessons-map.toml`. Lesson numbers are stable and
-never renumbered.
+A lesson is a numbered record of a past agent mistake. It has an article in
+`wiki/agent-lessons-learned/` and a one-line index entry naming the rule's
+Home and what enforces it. Where it applies to paths or commands, it also
+has a reminder topic in `.agents/lessons-map.toml`. Lesson numbers are stable
+and never renumbered.
 Source: [agent-lessons-learned.md](../../wiki/agent-lessons-learned.md),
 header.
 
@@ -187,17 +189,17 @@ kinds of module, and what to call each".
 
 ## Offline checks
 
-The offline checks are the checks that need neither nix nor `just`, run by
-the git hooks when nix cannot supply the lint tools, as in a cloud container
+The offline checks are the checks that need neither nix nor `just`. The git
+hooks run them when nix cannot supply the lint tools, as in a cloud container
 that cannot fetch the flake inputs. `staged` mode checks syntax and parsing
-of staged files plus the wiki lint; `preflight` mode runs preflight's
+of staged files plus the wiki lint. `preflight` mode runs preflight's
 `python3` steps except those that need nix, and names what it left to CI.
 Source: `flake/scripts/offline_checks.py`, docstring.
 
 ## Orphan
 
 An orphan is a module that no host reaches, because nothing includes its
-category or names it. It evaluates cleanly and installs nothing. The
+category or names it. It evaluates cleanly and installs nothing.
 `just modules` fails on an orphan and names it. The `module-orphans` check
 in `nix flake check` fails only when built, which `just check`'s `--no-build`
 skips.
@@ -208,7 +210,7 @@ facts; `flake/modules/checks.nix`.
 
 perSystem is flake-parts' per-system scope, used here for checks and the dev
 shell. Its default `pkgs` has no `nixpkgs.config` applied, so a `pkgs` taken
-from it silently loses `allowUnfree`.
+from it loses `allowUnfree` without an error.
 Source: `flake/modules/host-config/hosts.nix` (comments above `mkHost`);
 `flake/doc/flake-parts-rationale.md`.
 
@@ -229,10 +231,10 @@ Source: `.agents/skills/new-skill/SKILL.md`.
 
 ## `useGlobalPkgs` and `useUserPackages`
 
-These two Home Manager options are set by both bridge modules
-(`enable-home-manager.nix` and `enable-home-manager-darwin.nix`).
-`useGlobalPkgs = true` makes Home Manager use the system's nixpkgs instead of
-a second instantiation, which is why a home module may not set `nixpkgs.*`.
+Both bridge modules (`enable-home-manager.nix` and
+`enable-home-manager-darwin.nix`) set these Home Manager options.
+`useGlobalPkgs = true` makes Home Manager use the system's nixpkgs and skip
+a second instantiation. A home module therefore may not set `nixpkgs.*`.
 `useUserPackages = true` installs packages into
 `/etc/profiles/per-user/<name>` instead of `~/.nix-profile`.
 Source: `flake/modules/general-config/system/home-manager/enable-home-manager.nix`.

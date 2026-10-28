@@ -1,25 +1,24 @@
 # How the non-obvious pieces work
 
-This chapter covers the parts of this flake that behave differently from
-what a reader who knows NixOS would assume. Each section opens with the rule,
-then shows the mechanism and its consequences. Read the chapter before you
-edit anything under `flake/modules/`; the later chapters assume it. Terms in
-*italics* on first use are defined in the [glossary](glossary.md).
+Several parts of this flake behave differently from what a reader who knows
+NixOS would assume. Each section below states the rule, then the mechanism and
+its consequences. Read the chapter before you edit anything under
+`flake/modules/`; the later chapters assume it. Terms in *italics* on first
+use are defined in the [glossary](glossary.md).
 
-## `flake.nix` is a manifest, not a host list
+## `flake.nix` is a manifest
 
 `flake/flake.nix` declares inputs and imports flake-parts modules; it names
 no hosts and lists no modules. flake-parts is a library that builds a flake's
 outputs from module-system modules (*flake-parts modules*), much as NixOS
 builds a system from NixOS modules.
 
-Among the flake-parts modules `flake/flake.nix` imports are
-`flake-parts.flakeModules.modules`, nix-darwin's flake module, and
-`(inputs.dirs-as-categories.lib.tree ./modules)`; `touchup` only turns off the
-`formatter` output. The *dirs-as-categories* input
-uses `import-tree` to read every `.nix` file under `flake/modules/`. From
-those files it fills in `flake.modules.<class>.<name>`. The hosts themselves
-are declared in `flake/modules/host-config/hosts.nix`.
+`flake/flake.nix` imports `flake-parts.flakeModules.modules`, nix-darwin's
+flake module, and `(inputs.dirs-as-categories.lib.tree ./modules)`, among
+others. Its `touchup` only turns off the `formatter` output. The
+*dirs-as-categories* input uses `import-tree` to read every `.nix` file under
+`flake/modules/`, and fills in `flake.modules.<class>.<name>` from those
+files. The hosts are declared in `flake/modules/host-config/hosts.nix`.
 
 Because no file lists modules, a file's role depends on its *filename* and
 on the *folder* it sits in, as the next sections explain. Two path rules
@@ -41,8 +40,8 @@ A module file never names itself: dirs-as-categories names it after its
 file. `gaming.nix` becomes the module `gaming`, and a `default.nix` takes its
 folder's name. A reader used to flake-parts would expect each file to declare
 `flake.modules.nixos.gaming = …`. Earlier, every file worked out its own name
-with boilerplate (`lib.removeSuffix ".nix" (baseNameOf __curPos.file)`). That
-boilerplate is gone.
+with boilerplate (`lib.removeSuffix ".nix" (baseNameOf __curPos.file)`); the
+library removed the need for it.
 
 Two consequences follow.
 
@@ -52,12 +51,12 @@ Two consequences follow.
 - Names share one namespace across the whole tree, modules and categories
   alike. If two files have the same name, or a module has the same name as a
   category, evaluation stops, names both files, and (from v0.3.1) says which
-  kind of clash it is. Before dirs-as-categories,
-  such a pair merged silently. Durandal's old `boot.nix` merging with the
-  `boot` category is the recorded example (§34 in
-  [agent-lessons-learned.md](../../wiki/agent-lessons-learned.md)). The shared
-  namespace is why host-specific files carry a host suffix
-  (`boot-durandal.nix`, `hardware-cube.nix`).
+  kind of clash it is. Before dirs-as-categories, such a pair merged without
+  any error. Durandal's old `boot.nix` merging with the `boot` category is the
+  recorded example (§34 in
+  [agent-lessons-learned.md](../../wiki/agent-lessons-learned.md)).
+  Host-specific files carry a host suffix (`boot-durandal.nix`,
+  `hardware-cube.nix`) to stay clear of the shared namespace.
 
 Source: [module-files.md](../../wiki/config-structure/module-files.md),
 "Why the name comes from the filename"; `.agents/skills/new-flake-module/SKILL.md`.
@@ -66,8 +65,8 @@ Source: [module-files.md](../../wiki/config-structure/module-files.md),
 
 A module file is an attribute set whose keys are *module classes*, and each
 value is the module for that class. A class is the kind of configuration the
-module targets: `nixos`, `homeManager` or `darwin`. A reader would expect a
-plain NixOS module (`{ config, pkgs, ... }: { … }`) instead.
+module targets: `nixos`, `homeManager` or `darwin`. A reader who knows NixOS
+would expect a plain NixOS module (`{ config, pkgs, ... }: { … }`).
 
 ```nix
 # This is a dirs-as-categories module, which means it creates a flake-parts
@@ -86,16 +85,16 @@ plain NixOS module (`{ config, pkgs, ... }: { … }`) instead.
 
 That is `packages-config/shell-apps/text-tools/ripgrep.nix` in full. The
 allowed keys are `nixos`, `homeManager` and `darwin`, plus `includes`,
-`enables` and `folderIsCategory`. A file may set several classes at once.
-Holding several classes in one file is the main thing flake-parts offers this
-repo: one feature's NixOS half and Home Manager half can live in one file.
+`enables` and `folderIsCategory`. A file may set several classes at once, so
+one feature's NixOS half and Home Manager half can live in one file. That is
+the main thing flake-parts offers this repo.
 
 The file may instead be a function of only `lib` and/or `inputs` that
 returns such a set (`{ lib, ... }: { nixos = …; }`). `pkgs` and `config`
 belong in the **inner**, per-class module's arguments. A `pkgs` taken from
-anywhere else comes from *perSystem*, flake-parts' per-system scope. That
-`pkgs` has no `nixpkgs.config`, so it silently loses `allowUnfree`. That
-design is under review in
+anywhere else comes from *perSystem*, flake-parts' per-system scope. The
+perSystem `pkgs` has no `nixpkgs.config`, so it loses `allowUnfree` without
+any warning. The design is under review in
 [issue 559](https://github.com/NireBryce/nixos-configs/issues/559).
 
 Two mistakes here are easy to make:
@@ -103,30 +102,34 @@ Two mistakes here are easy to make:
 - A raw NixOS module dropped under `modules/` (for example
   `nixos-generate-config` output) is not a module file. dirs-as-categories
   refuses a file that asks for an argument only a class module gets (`pkgs`,
-  `modulesPath`, `osConfig`, `nixosConfig`, `darwinConfig`, `utils`), and the
+  `modulesPath`, `osConfig`, `nixosConfig`, `darwinConfig`, `utils`). The
   error names the argument and suggests renaming the file with a leading `_`
-  and importing it from a class. Wrapping the module,
-  `{ nixos = <the original module>; }`, also works. Older library versions died with `infinite
-  recursion encountered`, blaming `modulesPath`. A raw module that asks only
-  for `config`, `lib` or `options` is not caught: it loads as a flake-parts
-  module.
+  and importing it from a class. Wrapping the module as
+  `{ nixos = <the original module>; }` also works. Older library versions
+  died with `infinite recursion encountered`, blaming `modulesPath`. A raw
+  module that asks only for `config`, `lib` or `options` is not caught: it
+  loads as a flake-parts module.
 - A class key can be valid and its body still wrong. `jq` and `bitwarden`
   once declared `nixos` bodies full of `home.packages`. dirs-as-categories
-  checks class keys, not what a class body sets, so the mistake shows up when
-  a host that includes the module is evaluated, as an "option `home` does not
-  exist" error. A module that no host reaches is flagged only as an orphan (`just modules`).
-  Since v0.3.1 the library has an opt-in check for this,
-  `dirsAsCategories.checkClassContents = true`, which adds a flake check named
-  `module-class-contents`. It names a class part that sets a namespace only
-  another class has (`home` under `nixos`), over a short list of namespaces. This
-  repo does not enable it: it fails only when built, `just check` runs with
-  `--no-build`, and the misplaced list it reads is not published in
-  `flake.moduleGraph`, so `just modules` cannot read it either
+  checks class keys but not what a class body sets. The mistake shows up as an
+  "option `home` does not exist" error when a host that includes the module
+  is evaluated. A module that no host reaches is flagged only as an orphan
+  (`just modules`).
+
+Since v0.3.1 the library has an opt-in check for the second mistake. Setting
+`dirsAsCategories.checkClassContents = true` adds a flake check named
+`module-class-contents`. The check names a class part that sets a namespace
+only another class has (`home` under `nixos`), over a short list of
+namespaces. This repo does not enable it, for two reasons:
+
+- The check fails only when built, and `just check` runs with `--no-build`.
+- The misplaced list it reads is not published in `flake.moduleGraph`, so
+  `just modules` cannot read it either
   ([dirs-as-categories issue 37](https://github.com/NireBryce/dirs-as-categories/issues/37)).
 
 Unverified: the raw-module refusal and the class-contents check were read from
-the library's `nix/` files and changelog, not run. Running it needs flake inputs that the environment this
-book was written in could not fetch.
+the library's `nix/` files and changelog, not run. Running them needs flake
+inputs that the environment this book was written in could not fetch.
 
 Source: [module-files.md](../../wiki/config-structure/module-files.md),
 "What a module file is";
@@ -145,9 +148,9 @@ folder can also decide the question with `folderIsCategory`. Including a
 category includes every module beneath it, at any depth, nested categories
 too. Nobody writes the membership list down; it comes from where files sit.
 
-Choosing a directory is therefore choosing which hosts get the module.
-Shared things stay optional because a host can leave a category out, so
-nothing in this repo declares an `mkEnableOption` for that purpose. The
+Choosing a directory for a module therefore chooses which hosts get it. A
+host can leave a category out, which keeps shared things optional, so nothing
+in this repo declares an `mkEnableOption` for that purpose. The
 [categories chapter](categories.md) covers the details and the traps.
 
 Source: [architecture.md](../../wiki/config-structure/architecture.md),
@@ -187,11 +190,11 @@ machine:
 
 Entry points sit **directly** in `host-config/` (and `users-config/`, for
 `elly-home-manager.nix`). A file there is outside every category, so the
-host definition doesn't become a member of anything. If you put an ordinary
-module there, no host receives it.
+host definition doesn't become a member of anything. An ordinary module put
+there reaches no host.
 
 A name in `includes` that doesn't exist stops evaluation, which is the safe
-failure. The silent failure is a category that no host includes: it
+failure. The unsafe failure is a category that no host includes: it
 evaluates fine and installs nothing. `just modules` catches that case and
 fails, reading `orphans` from `flake.moduleGraph`. The `module-orphans` flake
 check fails only when built, and `just check` runs with `--no-build`, so it
@@ -204,8 +207,8 @@ Source: `flake/modules/host-config/durandal-configuration.nix`,
 
 ## `includes` and `enables`
 
-Modules reach other modules by name, through two mechanisms, not by
-importing paths:
+Modules reach other modules by name, never by importing paths. Two
+mechanisms do this:
 
 - `includes.<class> = [ "name" … ];` pulls in other modules or categories of
   the **same** class. `kde-desktop.nix` has `includes.nixos = [ "kde-base" ];`
@@ -218,9 +221,9 @@ importing paths:
   `tenacity-configuration.nix` uses the same mechanism to append its own
   Home Manager module.
 
-The `enabled` argument holds only the names that were declared. The
-declaration and its use therefore can't drift apart, and the module graph
-can draw the link. `nix eval --json ./flake#moduleGraph` publishes the whole
+The `enabled` argument holds only the names that were declared, so the
+declaration and its use can't drift apart, and the module graph can draw the
+link. `nix eval --json ./flake#moduleGraph` publishes the whole
 graph (categories, modules, classes, `includes`, `enables`) as data, and
 `just module-graph` draws it.
 
@@ -229,9 +232,9 @@ Source: [module-files.md](../../wiki/config-structure/module-files.md),
 
 ## Files that are not module files
 
-Not every `.nix` file under `modules/` is a module file. If a function asks for
-`config` or `withSystem`, or a file has no class key, dirs-as-categories
-loads it as a **plain flake-parts module**. `hosts.nix`, `checks.nix`,
+Not every `.nix` file under `modules/` is a module file. dirs-as-categories
+loads a file as a **plain flake-parts module** when its function asks for
+`config` or `withSystem`, or when it has no class key. `hosts.nix`, `checks.nix`,
 `invariants.nix`, `dev-shell.nix` and `lib.nix` are written that way on
 purpose, and they carry no dirs-as-categories header comment. `defaults.nix`
 is never a module file: its class parts apply whenever anything in its folder is
@@ -239,7 +242,7 @@ reached, and `folderIsCategory` goes in it.
 
 A module file can no longer read the flake-parts `config`. Files that need
 the flake's own outputs read `inputs.self` instead; `tailnet-hosts.nix` does
-this to get the host roster. A side effect is that the old trap of having two
+this to get the host roster. As a side effect, the old trap of two
 different `config`s in one file is gone.
 
 Source: [module-files.md](../../wiki/config-structure/module-files.md),
@@ -247,8 +250,8 @@ Source: [module-files.md](../../wiki/config-structure/module-files.md),
 
 ## Shared helpers: `flake.lib`
 
-Shared helper functions live in `flake.lib`, not in a `lib/` folder that
-modules import by relative path. `flake/modules/lib.nix` sets `flake.lib`
+Shared helper functions live in `flake.lib`. Modules do not import a
+`lib/` folder by relative path. `flake/modules/lib.nix` sets `flake.lib`
 from one file per topic in `modules/_lib/`. The underscore keeps the tree
 from treating those files as modules. A module file reaches the helpers as
 `inputs.self.lib`, and a plain flake-parts module as `config.flake.lib`. The
@@ -269,25 +272,25 @@ helpers"; commit `aca2a74`.
 ## Impermanence: some hosts wipe `/root` on every boot
 
 A host that includes the `impermanence` category loses everything on `/`
-that is not explicitly persisted, at every boot. *Impermanence* is the name
-for this setup.
+that is not explicitly persisted, at every boot. This setup is called
+*impermanence*.
 
 On every boot,
 `general-config/impermanence/root-rollback/restore-root/WARN-impermanence.nix`
 runs a `restore-root` unit in the initrd. The unit deletes the btrfs
 subvolume that `/` lives on and replaces it with a snapshot of an empty
 subvolume, `root-blank`. What survives is `/nix`, `/home`, `/var/log`, and
-the paths listed for `/persist`. Hosts get this behavior only through the
+the paths listed for `/persist`. Hosts get the rollback only through the
 `impermanence` category. A host that includes the category wipes `/root`. A
 host that leaves it out keeps a plain persistent root, and its entry point
 says so. Darwin has no impermanence. Check the specific host's entry point
-rather than assuming.
+before assuming either way.
 
 Consequences:
 
 - **Never install this config wholesale.** On a disk shaped like the one the
   module describes, it deletes `/`.
-- **`root-blank` must already exist.** No host's config creates it, and
+- `root-blank` must already exist. No host's config creates it, and
   without it the rollback deletes `/root` and then cannot replace it.
 - Any state that matters has to be declared for persistence. Use
   `persist.persistIfImpermanent` from `flake.lib`.
@@ -302,8 +305,8 @@ header; `AGENTS.md`, Safety; `.agents/rules/impermanence.md`;
 
 ## Secrets: sops-nix, names only
 
-Secrets live in an encrypted file inside the repository; inspect them by
-name, never by value. They are managed with sops-nix
+Secrets live in an encrypted file inside the repository. Inspect them by
+name, never by value. sops-nix manages them
 (`general-config/system/secrets/`). `secrets.yaml` is encrypted and
 **committed on purpose**. Each host decrypts it with its own SSH host key,
 converted to an age key. The enrolled hosts are whichever ones `.sops.yaml`
@@ -324,8 +327,8 @@ Source: `AGENTS.md`, Safety; `.agents/rules/secrets.md`;
 ## Home Manager comes through NixOS
 
 *Home Manager*, which manages a user's packages and dotfiles as modules, runs
-inside each system configuration. There is no `homeConfigurations` output
-and no separate home switch. `just switch` applies the system and Home
+inside each system configuration. The flake has no `homeConfigurations`
+output and no separate home switch. `just switch` applies the system and Home
 Manager together. The whole home config is one module, `elly-home-manager`,
 and every host shares it, darwin included. The reasons and the failure modes
 are in [Wiring a user and Home Manager](users-and-home-manager.md); the
