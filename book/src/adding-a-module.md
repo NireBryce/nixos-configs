@@ -219,9 +219,14 @@ wrap it in the same commit:
 }
 ```
 
-An unwrapped module makes evaluation die with `infinite recursion
-encountered`, naming `modulesPath`. That error does not point at the real
-cause.
+dirs-as-categories refuses an unwrapped module that asks for an argument only
+a class module gets, such as `modulesPath` or `pkgs`, and the error names the
+argument. Besides the wrapper above, the fix it suggests is to rename the file
+with a leading `_` and import it from a class, `nixos.imports = [ ./_name.nix ];`.
+A raw module that asks only for `config`, `lib` or `options` is not refused and
+loads as a flake-parts module, so wrap those too. Older library versions died
+with `infinite recursion encountered`, naming `modulesPath`, an error that did
+not point at the real cause.
 
 Source: `.agents/skills/new-flake-module/SKILL.md`, "Raw NixOS modules".
 

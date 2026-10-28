@@ -126,8 +126,8 @@ One module file and one flake-parts module, side by side:
 
 The distinction explains an error you will meet. A plain NixOS module (for
 example `nixos-generate-config` output) placed under `flake/modules/` is not a
-module file, so dirs-as-categories loads it as a flake-parts module, and
-evaluation fails with an infinite recursion that names `modulesPath`. Wrapping
+module file. When it asks for an argument only a class module gets, such as
+`modulesPath`, dirs-as-categories refuses it and names the argument. Wrapping
 it as `{ nixos = <the module>; }` makes it a module file
 (see [wrapping a raw NixOS module](adding-a-module.md#wrapping-a-raw-nixos-module)).
 Where a name already contains the word, such as `just modules` or

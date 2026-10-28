@@ -93,18 +93,33 @@ The file may instead be a function of only `lib` and/or `inputs` that
 returns such a set (`{ lib, ... }: { nixos = …; }`). `pkgs` and `config`
 belong in the **inner**, per-class module's arguments. A `pkgs` taken from
 anywhere else comes from *perSystem*, flake-parts' per-system scope. That
-`pkgs` has no `nixpkgs.config`, so it silently loses `allowUnfree`.
+`pkgs` has no `nixpkgs.config`, so it silently loses `allowUnfree`. That
+design is under review in
+[issue 559](https://github.com/NireBryce/nixos-configs/issues/559).
 
-Two failures here give misleading errors:
+Two mistakes here are easy to make:
 
 - A raw NixOS module dropped under `modules/` (for example
-  `nixos-generate-config` output) asks for `config`, so dirs-as-categories
-  loads it as a flake-parts module. Evaluation then dies with `infinite
-  recursion encountered`, blaming `modulesPath`. Nothing in that error points
-  at the real cause. The fix is to wrap the module:
-  `{ nixos = <the original module>; }`.
-- A class key can be valid and still wrong. `jq` and `bitwarden` once
-  declared `nixos` bodies full of `home.packages`.
+  `nixos-generate-config` output) is not a module file. dirs-as-categories
+  refuses a file that asks for an argument only a class module gets (`pkgs`,
+  `modulesPath`, `osConfig`, `nixosConfig`, `darwinConfig`, `utils`), and the
+  error names the argument and the fix: wrap the module,
+  `{ nixos = <the original module>; }`, or rename the file with a leading `_`
+  and import it from a class. Older library versions died with `infinite
+  recursion encountered`, blaming `modulesPath`. A raw module that asks only
+  for `config`, `lib` or `options` is not caught: it loads as a flake-parts
+  module.
+- A class key can be valid and its body still wrong. `jq` and `bitwarden`
+  once declared `nixos` bodies full of `home.packages`. dirs-as-categories
+  checks class keys, not what a class body sets, so the mistake shows up when
+  a host that includes the module is evaluated, as an "option `home` does not
+  exist" error. A module that no host reaches is flagged only as an orphan. An
+  opt-in hint is proposed in
+  [dirs-as-categories issue 32](https://github.com/NireBryce/dirs-as-categories/issues/32).
+
+Unverified: the raw-module refusal was read from the library's `nix/scan.nix`
+and changelog, not run. Running it needs flake inputs that the environment this
+book was written in could not fetch.
 
 Source: [module-files.md](../../wiki/config-structure/module-files.md),
 "What a module file is";
