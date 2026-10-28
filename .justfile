@@ -250,6 +250,7 @@ preflight:
     @python3 .agents/scripts/test_docs.py
     @python3 .agents/scripts/test_move_refs.py
     @python3 .agents/scripts/test_book_lint.py
+    @python3 .agents/scripts/test_book_pages_links.py
     @python3 .agents/scripts/book_lint.py check
     @python3 flake/scripts/tests/test_glibc_guard.py
     @python3 flake/scripts/tests/test_pm_test_core.py

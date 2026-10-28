@@ -1,0 +1,55 @@
+name: book
+
+# Builds the mdBook in book/ and publishes it to GitHub Pages. The chapters
+# link into the repo with `../../wiki/...`, which 404s on a built site, so the
+# build runs on a throwaway copy whose repo-relative links
+# .agents/scripts/book_pages_links.py has turned into absolute GitHub URLs.
+# The source keeps the relative links (book_lint.py checks them).
+#
+# One-time setup in the repo: Settings > Pages > Source = "GitHub Actions".
+# The deploy job fails until that is set.
+#
+# mdbook comes from the flake's locked nixpkgs, as the other workflow's tools
+# do; the installer pin is the same one check.yml uses.
+
+on:
+  push:
+    branches: [experimental]
+    paths: ["book/**", ".agents/scripts/book_pages_links.py", ".github/workflows/book.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@b074b4ad5f255f9c8a6a2414a2f07e7f4f2925a3 # 2026-09-08
+      - name: build the book on a copy with absolute repo links
+        run: |
+          set -euo pipefail
+          cp -r book "$RUNNER_TEMP/book"
+          python3 .agents/scripts/book_pages_links.py "$RUNNER_TEMP/book"
+          nix run --inputs-from ./flake nixpkgs#mdbook -- build "$RUNNER_TEMP/book" -d "$RUNNER_TEMP/site"
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
