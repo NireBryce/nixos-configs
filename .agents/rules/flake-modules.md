@@ -25,8 +25,10 @@ the full rules.
 - A mistyped class key beside a real one is refused naming the file; a
   file whose only class key is mistyped is loaded as a flake-parts module
   and flake-parts rejects the unknown option.
-- Raw `nixos-generate-config` output needs wrapping, or evaluation dies
-  with a misleading `infinite recursion` naming `modulesPath`.
+- Raw `nixos-generate-config` output needs wrapping: dirs-as-categories
+  refuses a file asking for a class-only argument (`pkgs`, `modulesPath`,
+  ...), naming it and the fix. Older versions died with a misleading
+  `infinite recursion` naming `modulesPath`.
 - `git add` a new file before `nix eval`: flakes ignore untracked files.
 
 ## Membership comes from the directory

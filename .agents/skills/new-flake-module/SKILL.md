@@ -96,10 +96,13 @@ once declared `nixos` bodies full of `home.packages`.
 
 ## Raw NixOS modules
 
-Raw `nixos-generate-config` output dropped into `modules/` is a function
-asking for `config`, so it is loaded as a flake-parts module and dies with
-`infinite recursion encountered` naming `modulesPath` (not the cause).
-Wrap it in the same commit:
+Raw `nixos-generate-config` output dropped into `modules/` is not a module
+file. dirs-as-categories refuses a function that asks for an argument only a
+class module gets (`pkgs`, `modulesPath`, `osConfig`, `nixosConfig`,
+`darwinConfig`, `utils`), naming the argument and the fix; older versions
+died with `infinite recursion encountered` naming `modulesPath` (not the
+cause). A raw module that asks only for `config`, `lib` or `options` is not
+caught and loads as a flake-parts module. Wrap it in the same commit:
 
 ```nix
 {

@@ -82,19 +82,25 @@ Rules of use:
 - A bare "module" is fine inside names that are already fixed (`just modules`,
   `modules.py`, `module-orphans`, `flake.modules`). There it means module file.
 - A raw NixOS module, such as `nixos-generate-config` output, is none of the
-  three while it sits under `flake/modules/`: dirs-as-categories loads any
-  file that is not in the module-file shape as a flake-parts module, and a raw
-  NixOS module asks for arguments flake-parts does not provide. Wrap it,
-  `{ nixos = <the raw module>; }`, to make it a module file.
+  three while it sits under `flake/modules/`. dirs-as-categories loads a file
+  that is not in the module-file shape as a flake-parts module, except that it
+  refuses a function asking for an argument only a class module gets (`pkgs`,
+  `modulesPath`, `osConfig`, `nixosConfig`, `darwinConfig`, `utils`), naming the
+  argument and the fix. A raw module that asks only for `config`, `lib` or
+  `options` is not caught and loads as a flake-parts module. Wrap it,
+  `{ nixos = <the raw module>; }`, to make it a module file, or rename it with a
+  leading `_` and import it from a class.
 - A file kept off the auto-imported tree (a `_`-prefixed path, or outside
   `flake/modules/`) is imported by path and is whatever its importer treats it
   as. `impermanence/_disko/impermanence-luks-btrfs.nix` is a curried function
   that returns a NixOS module.
 
-Why it matters: mixing the terms hides the cause of the two errors this tree
-produces most often, a raw NixOS module under `modules/` (infinite recursion
-naming `modulesPath`) and a plain flake-parts file asked to behave like a
-module file. Both are covered below.
+Why it matters: mixing the terms hides the cause of the errors that come from
+putting the wrong kind of file in the tree, such as a raw NixOS module under
+`modules/` (refused with advice when it asks for a class-only argument; older
+library versions died with an infinite recursion naming `modulesPath`) or a
+plain flake-parts file asked to behave like a module file. Both are covered
+below.
 
 ## Why the name comes from the filename
 
