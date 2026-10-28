@@ -16,7 +16,7 @@ its own directory and `HEAD` and shares the repository's branches and
 objects. Two sessions in one repo then no longer see each other's checkouts
 and commits mid-task. Read-only work (reading files, `just check` on what is
 checked out) needs no worktree, and neither does work in the shared checkout
-when the user says to work there.
+when nire says to work there.
 
 Create one with the helper, which fetches `origin` first and refuses an
 existing branch or path:
@@ -176,7 +176,7 @@ landing on `experimental`, the default branch. `main` is the promoted
 known-good branch and moves only by a PR from `experimental` after hardware
 verification. Other asks map differently:
 
-| The user says | The agent does |
+| Nire says | The agent does |
 |---|---|
 | "push this branch" | `git push` it; no PR, no gates |
 | "open a PR" | Opens it and stops |
@@ -193,7 +193,7 @@ Source: `AGENTS.md`, hard rules and "Working in this repo";
 ## The ship flow
 
 The `ship` skill lands work on `experimental` through a branch, a PR, one
-combined question to the user, the merge and the branch deletion.
+combined question to nire, the merge and the branch deletion.
 
 1. Fetch and check. `just agent where` fetches and prints the branch,
    dirty paths, commits and diff stat against `origin/experimental`. Then
@@ -244,12 +244,12 @@ two PRs".
 
 Agents file issues and PRs only in `NireBryce/nixos-configs`. An upstream bug
 (in nixpkgs or another tool) is still tracked here. Filing on another project
-needs the user to ask for that specific filing in their own message.
+needs nire to ask for that specific filing in their own message.
 Approving a list of tasks that includes one does not count.
 
 Drafts written for other projects stay in
 `_loose-ends/bugs-pending-submission/` and `wiki/meta/open-threads.md` for
-the user to file. A filing here can still notify another project through
+nire to file. A filing here can still notify another project through
 GitHub autolinking of `owner/repo#123`, so the agent greps for that pattern
 before filing. The skill `propose-issue` hardcodes
 `--repo NireBryce/nixos-configs` in its `gh issue create`.
@@ -402,7 +402,7 @@ checkout and `<scratch>` the session's scratch directory.
    just agent ship-ready <n>
    ```
 
-   Check: the output says READY. Show the summary to the user and ask the
+   Check: the output says READY. Show the summary to nire and ask the
    single question: merge, and delete the branch afterward?
 
 10. On a yes, land it.

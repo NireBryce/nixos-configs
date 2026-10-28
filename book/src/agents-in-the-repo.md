@@ -1,7 +1,7 @@
 # How agents work in this repo
 
 Coding agents write and maintain most of this repo's docs, scripts, skills
-and hooks, under the user's direction. An agent has no memory of earlier
+and hooks, under nire's direction. An agent has no memory of earlier
 sessions. The mechanisms below route it to the right file for a task, and
 turn a mistake made once into a reminder the next agent sees. Each mechanism
 is either *automatic* (a hook or check fires without anyone asking) or a
@@ -260,10 +260,10 @@ changing. These skills draw the line:
   on taste is out of scope.
 - `propose-issue` covers a defect found while doing something else.
   The agent re-checks it, runs `just threads "<keywords>"` to see whether it
-  is already tracked, and asks the user with a drafted title, body and
+  is already tracked, and asks nire with a drafted title, body and
   label. Only on a yes does it run `gh issue create --repo
   NireBryce/nixos-configs`. The repo is hardcoded: an upstream bug is still
-  tracked here, and filing on another project needs the user to ask for that
+  tracked here, and filing on another project needs nire to ask for that
   specific filing.
 
 Both are conventions; no hook enforces them.
@@ -289,7 +289,7 @@ removed, and see whether it is still true and useful.
 The `-all` variants (`extract-agent-tooling-all`, `extract-nix-tooling-all`)
 are standalone whole-repo sweeps that also reconcile the existing
 candidate files. Copying
-anything into another repo happens only when the user asks.
+anything into another repo happens only when nire asks.
 
 All four are conventions.
 

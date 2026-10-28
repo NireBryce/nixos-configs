@@ -215,7 +215,7 @@ just build          # a real build, on the host itself
 - A NixOS host can't be built from another machine (there is no remote
   builder and no binfmt). Run `just build` on the target. Read `nh`'s diff
   and check that the new package is the **only** thing that changed.
-- `just switch` needs interactive `sudo`, so switching is the user's step.
+- `just switch` needs interactive `sudo`, so switching is nire's step.
 
 When you report the result, name the rung you reached: *evaluates*,
 *builds*, or *runs*.

@@ -38,12 +38,13 @@ on a machine you care about can destroy data. Do not assume which hosts wipe
 `/root`, in either direction; check `flake/modules/host-config/hosts.nix` and
 [`wiki/fleet/hosts.md`](../../wiki/fleet/hosts.md).
 
-### Coding agents wrote most of this, and the user directs them
+### Coding agents wrote most of this, and nire directs them
 
 Large language model (LLM) coding agents co-wrote most of the repository:
 this book, the wiki, the code comments, the scripts, and the skills and
-hooks. The user aims the agents, reviews and adjusts what they produce, and
-rarely writes text directly. The user gives two reasons. There is no time to
+hooks. Nire, the author of the repository (the GitHub account NireBryce),
+aims the agents, reviews and adjusts what they produce, and
+rarely writes text directly. Nire gives two reasons. There is no time to
 write and maintain all of it by hand. Without the agents, the code would go
 undocumented and the documentation would fall out of date.
 
@@ -51,7 +52,7 @@ Agent authorship changes how you should read the repo:
 
 - The prose has an agent's habits. Rules are written as hard-won lessons, and
   the docs address agents as much as people.
-- The user has corrected the load-bearing claims. The rest is agent output
+- Nire has corrected the load-bearing claims. The rest is agent output
   with less scrutiny. Treat the documentation as reliable but unproven, and
   check any statement that matters to you against the code it cites.
 - The repo relies on mechanical checks to make up for that. Lints compare
@@ -64,12 +65,12 @@ Agent authorship changes how you should read the repo:
   [git and agent workflows](git-and-agent-workflows.md) describe how these
   checks work and where they stop working.
 - Agents drafted this book the same way, from the wiki, the code, comments
-  and git history, and the user reviewed it. Its claims cite their sources so
+  and git history, and nire reviewed it. Its claims cite their sources so
   that you can check them.
 
 Source: `README.md` ("most of the prose in this repo ... is written by coding
-agents"), `AGENTS.md` (its opening note). The user's working method and the
-two reasons are the user's own description; no file in the repo records them.
+agents"), `AGENTS.md` (its opening note). Nire's working method and the
+two reasons are nire's own description; no file in the repo records them.
 
 ### How to use this book
 
