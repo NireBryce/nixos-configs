@@ -164,6 +164,42 @@ class LessonsMapCheck(unittest.TestCase):
         self.assertFinds('[[topic\n', "LESSONS MAP SYNTAX")
 
 
+class SummariesCheck(unittest.TestCase):
+    PKG = 'flake/modules/packages-config/dev/tools/jq.nix'
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = pathlib.Path(self.tmp.name)
+        subprocess.run(['git', 'init', '-q', str(self.root)], check=True)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def add(self, rel, text):
+        p = self.root / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(text)
+        subprocess.run(['git', '-C', str(self.root), 'add', rel], check=True)
+
+    def test_module_with_a_summary_passes(self):
+        self.add(self.PKG, '{\n    # package summary: jq -- JSON processor\n}\n')
+        self.assertEqual(check_wiki.check_summaries(self.root), [])
+
+    def test_module_without_one_is_named(self):
+        self.add(self.PKG, '{\n    # summary: jq -- JSON processor\n}\n')
+        f = check_wiki.check_summaries(self.root)
+        self.assertEqual(len(f), 1)
+        self.assertIn('NO PACKAGE SUMMARY', f[0])
+        self.assertIn(self.PKG, f[0])
+
+    def test_defaults_underscore_paths_and_other_areas_are_skipped(self):
+        for rel in ('flake/modules/packages-config/dev/defaults.nix',
+                    'flake/modules/packages-config/dev/_lib/x.nix',
+                    'flake/modules/general-config/x.nix'):
+            self.add(rel, '{ }\n')
+        self.assertEqual(check_wiki.check_summaries(self.root), [])
+
+
 class DocRefsCheck(unittest.TestCase):
     """Each rule of `docrefs` against a case it must catch and one it must
     leave alone."""

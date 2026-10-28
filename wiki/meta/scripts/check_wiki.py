@@ -247,6 +247,12 @@ structured, extractable facts only:
             `doc_files`, so recipes, skills, links, secrets and counts cover
             it.
 
+  summaries Every package module under flake/modules/packages-config/ carries
+            a `# package summary:` line (the new-package skill's required
+            one-line statement of what the package is). Skipped: files
+            named defaults.nix and anything under a `_` path, which are not
+            module files. Read from git-tracked files, so it needs no nix.
+
   check     Runs every check listed above.
 
     check_wiki.py imports       [repo-root]
@@ -265,6 +271,7 @@ structured, extractable facts only:
     check_wiki.py siblings      [repo-root]
     check_wiki.py lessons       [repo-root]
     check_wiki.py rules         [repo-root]
+    check_wiki.py summaries     [repo-root]
     check_wiki.py docrefs       [repo-root]
     check_wiki.py check         [repo-root] [--skip=name,name]
     check_wiki.py gen-contents  <file.md> [file.md ...]
@@ -1700,6 +1707,29 @@ def tracked_files(root):
     return [f for f in r.stdout.split('\0') if f]
 
 
+PACKAGES_DIR = 'flake/modules/packages-config/'
+PACKAGE_SUMMARY = re.compile(r'(?m)^\s*# package summary:')
+
+
+@check('summaries', order=165)
+def check_summaries(root):
+    """Every package module file carries a `# package summary:` line, so a
+    reader browsing the module knows what the package is without opening
+    nixpkgs. See the module docstring's `summaries` entry."""
+    findings = []
+    for rel in sorted(tracked_files(root)):
+        if not (rel.startswith(PACKAGES_DIR) and rel.endswith('.nix')):
+            continue
+        parts = rel.split('/')
+        if parts[-1] == 'defaults.nix' or any(p.startswith('_') for p in parts):
+            continue
+        if not PACKAGE_SUMMARY.search((root / rel).read_text()):
+            findings.append(
+                f"NO PACKAGE SUMMARY  {rel}: no `# package summary: <tool> "
+                f"-- <what it is>` line -- skill new-package requires one")
+    return findings
+
+
 @check('rules', order=160)
 def check_rules(root):
     """`.agents/rules/*.md`: frontmatter is exactly a non-empty `paths:`
@@ -1890,6 +1920,8 @@ SEE = (
     (('STALE SIBLING', 'MISSING SIBLING', 'ORPHAN SIBLING', 'NO SIBLING LINK',
       'NO SOURCE LINK', 'FUTURE REVIEW'),
      "skill wiki-sync step 5; don't bump the sibling's date to clear it"),
+    (('NO PACKAGE SUMMARY',),
+     "skill new-package: add the `# package summary:` line above the package list"),
     (('STALE CONTENTS', 'MISSING CONTENTS'),
      "`python3 wiki/meta/scripts/check_wiki.py gen-contents <page>`"),
     (('BROKEN LINK', 'BROKEN ANCHOR', 'MISSING PATH', 'UNKNOWN RECIPE',
