@@ -51,7 +51,8 @@ Two consequences follow.
   Membership survives a rename, because membership comes from the folder.
 - Names share one namespace across the whole tree, modules and categories
   alike. If two files have the same name, or a module has the same name as a
-  category, evaluation stops and names both files. Before dirs-as-categories,
+  category, evaluation stops, names both files, and (from v0.3.1) says which
+  kind of clash it is. Before dirs-as-categories,
   such a pair merged silently. Durandal's old `boot.nix` merging with the
   `boot` category is the recorded example (§34 in
   [agent-lessons-learned.md](../../wiki/agent-lessons-learned.md)). The shared
@@ -113,12 +114,17 @@ Two mistakes here are easy to make:
   once declared `nixos` bodies full of `home.packages`. dirs-as-categories
   checks class keys, not what a class body sets, so the mistake shows up when
   a host that includes the module is evaluated, as an "option `home` does not
-  exist" error. A module that no host reaches is flagged only as an orphan. An
-  opt-in hint is proposed in
-  [dirs-as-categories issue 32](https://github.com/NireBryce/dirs-as-categories/issues/32).
+  exist" error. A module that no host reaches is flagged only as an orphan.
+  Since v0.3.1 the library has an opt-in check for this,
+  `dirsAsCategories.checkClassContents = true`, which adds a flake check named
+  `module-class-contents`. It names a class part that sets a namespace only
+  another class has (`home` under `nixos`), over a short list of namespaces. This
+  repo does not enable it yet: like `module-orphans`, it fails only when built,
+  and `just check` runs with `--no-build`
+  ([issue 561](https://github.com/NireBryce/nixos-configs/issues/561)).
 
-Unverified: the raw-module refusal was read from the library's `nix/scan.nix`
-and changelog, not run. Running it needs flake inputs that the environment this
+Unverified: the raw-module refusal and the class-contents check were read from
+the library's `nix/` files and changelog, not run. Running it needs flake inputs that the environment this
 book was written in could not fetch.
 
 Source: [module-files.md](../../wiki/config-structure/module-files.md),

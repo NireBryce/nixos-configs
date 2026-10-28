@@ -73,7 +73,10 @@ The host can be fully wired and still unable to boot — say so in the header.
 
 A name is one namespace across the whole tree (every class, modules and
 categories alike), and a repeated name is an evaluation error naming both
-paths (dirs-as-categories: `names used more than once`). Every file under `<name>/` gets a host suffix
+paths, one line per clash, saying which kind it is (dirs-as-categories v0.3.1:
+`module and module share the name <name>`, `module and category share ...`,
+`category and category share ...`, or `<name>.nix and <name>/default.nix
+share ...`). Every file under `<name>/` gets a host suffix
 (`hardware-cube.nix`, `boot-cube.nix`). Every live host follows it, down to
 `nixpkgs-hostPlatform-<name>.nix` and `nixpkgs-stateVersion-<name>.nix` in
 `<name>/configuration/`.
