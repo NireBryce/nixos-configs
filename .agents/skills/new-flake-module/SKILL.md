@@ -96,13 +96,13 @@ once declared `nixos` bodies full of `home.packages`. dirs-as-categories checks
 class keys, not what a class body sets; evaluating a host that reaches the
 module catches it as "option `home` does not exist" (a module no host reaches
 is caught only by the orphan check, not for its contents). The library's opt-in
-`dirsAsCategories.checkClassContents = true` (v0.3.1) adds a flake check,
+`dirsAsCategories.checkClassContents = "build"` or `"eval"` (v0.4.0) adds a flake check,
 `module-class-contents`, that names a class part setting a namespace only
 another class has (`home` under `nixos`); it is a heuristic over a short list.
-This repo does not enable it yet: like `module-orphans` it fails only when
-built, and `just check` runs `--no-build`; the misplaced list is not in
-`flake.moduleGraph`, so it cannot be gated at evaluation time the way orphans
-are (dirs-as-categories issue 37).
+This repo does not enable it yet: `"build"` fails only when built, and
+`just check` runs `--no-build`; `"eval"` fails under `--no-build` too. While
+either is set, `flake.moduleGraph.misplaced` lists the messages, so
+`just modules` could gate it the way it gates orphans.
 
 ## Raw NixOS modules
 

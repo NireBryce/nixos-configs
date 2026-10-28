@@ -65,11 +65,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793162063,
-        "narHash": "sha256-GKGrtBAKgmCXysNM7SdZDnlpLnbFinx09A8h35BrxJE=",
+        "lastModified": 1793165099,
+        "narHash": "sha256-R/zFcGQBI/Qwk/Ynzj3NQd5xoQmHHlc7Cfzl83zOeTk=",
         "owner": "NireBryce",
         "repo": "dirs-as-categories",
-        "rev": "a0fcb35b8ced41edb52844067a4ffcbb0128bd68",
+        "rev": "c092aa699f19135e3f34c757305f4f06ef2ace7d",
         "type": "github"
       },
       "original": {
