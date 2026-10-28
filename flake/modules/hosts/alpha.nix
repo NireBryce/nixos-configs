@@ -1,0 +1,4 @@
+{
+    includes.nixos = [ "used" ];
+    nixos = { };
+}

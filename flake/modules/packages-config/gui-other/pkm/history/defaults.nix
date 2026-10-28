@@ -1,1 +1,0 @@
-{ folderIsCategory = false; }
