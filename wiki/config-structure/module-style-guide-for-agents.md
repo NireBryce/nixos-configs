@@ -26,7 +26,7 @@ Never hand-edit. By hand it is
 
 | What | Files |
 |---|---|
-| total `.nix` files under `flake/modules/` | 241 |
+| total `.nix` files under `flake/modules/` | 243 |
 | header comment (`# This is a dirs-as-categories module…`) | 227 |
 | `# summary:` / `# package summary:` comment | 181 |
 | `with pkgs;` package lists | 115 |
@@ -56,8 +56,8 @@ Was `moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file)` +
 
 - `lib`, `inputs` → the **outer** list, only if used (deadnix); neither → no header.
 - `pkgs`, `config` → the **inner** module's list. No outer `config` exists;
-  `pkgs` from anywhere else is perSystem's, with no `nixpkgs.config` applied
-  — it silently loses `allowUnfree`.
+  `pkgs` from anywhere else is perSystem's, a different instance from the
+  host's.
 
 ## Formatting
 

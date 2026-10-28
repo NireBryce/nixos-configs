@@ -71,9 +71,9 @@ From the pinned `flake-parts`, re-verified 2026-09-08.
 - **Prefer `config.flake.modules.…` over `self.modules.…`** — same data, but
   `self.modules` routes out through `outputs` and back, a common source of
   confusing recursion.
-- **`perSystem`'s `pkgs` has no config applied** (plain
-  `legacyPackages.${system}`), which is why host `pkgs` never comes from
-  there. Inside it, `self`/`inputs`/`getSystem`/`withSystem`/
+- **`perSystem`'s `pkgs`** is built from `flake.lib.nixpkgs.config`
+  (`modules/nixpkgs.nix`), not plain `legacyPackages.${system}`; host `pkgs`
+  still never comes from there. Inside it, `self`/`inputs`/`getSystem`/`withSystem`/
   `moduleWithSystem` are bound to *throwing* aliases.
 - `inputs'.foo.packages.bar`, not `inputs.foo.packages.${system}.bar`.
 - **`checks` entries must be derivations**, which is what lets
@@ -84,8 +84,9 @@ From the pinned `flake-parts`, re-verified 2026-09-08.
   config. `hosts.nix` uses it for one thing — getting `self'`/`inputs'` into
   `specialArgs`, which (unlike `_module.args`) is usable inside `imports`.
   **Fails on a system not in `systems`.**
-- **Deliberately not done: `nixpkgs.pkgs = pkgs` from perSystem** (drops
-  `allowUnfree`); accepted cost: a second nixpkgs instantiation.
+- **Deliberately not done: `nixpkgs.pkgs = pkgs` from perSystem** (NixOS
+  ignores `nixpkgs.config`; `hostPlatform`/overlays move); accepted cost: a
+  second nixpkgs instantiation.
 - **`import-tree`** (under `dirs-as-categories.lib.tree`) imports every `.nix` file under `modules/` recursively, so
   paths carry no meaning to Nix. Non-`.nix` files ignored; paths containing
   `/_` excluded (which is what makes `_lib/` work).

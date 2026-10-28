@@ -48,12 +48,13 @@ Source: `flake/doc/flake-parts-rationale.md`;
 `hosts.nix` uses `withSystem` only to get `self'` and `inputs'` into
 `specialArgs`. It does **not** pass perSystem's `pkgs` to the hosts.
 
-perSystem is flake-parts' per-system scope. Its default `pkgs` is
-`legacyPackages.<system>` with no `nixpkgs.config` applied. Using that `pkgs`
-would drop `allowUnfree` without an error, and these hosts install unfree
-packages.
-The accepted cost is a second nixpkgs instantiation. The design is under
-review in [issue 559](https://github.com/NireBryce/nixos-configs/issues/559).
+perSystem is flake-parts' per-system scope. Its `pkgs` is built from the
+fleet's shared `nixpkgs.config` (`flake/modules/_lib/nixpkgs.nix`), so checks
+and the dev shell see the same unfree policy as the hosts. The hosts still
+build their own instance from that config rather than reusing perSystem's, at
+the cost of a second nixpkgs instantiation: reusing it would mean
+`nixpkgs.pkgs`, under which NixOS ignores `nixpkgs.config`, and
+`hostPlatform` and overlays would move with it.
 
 Source: `flake/modules/host-config/hosts.nix` (comments above `mkHost`);
 [flake-parts-port-notes.md](../../wiki/config-structure/flake-parts-port-notes.md),

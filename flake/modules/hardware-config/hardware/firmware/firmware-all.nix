@@ -2,10 +2,12 @@
 # filename minus the .nix suffix, and its category is the name of the folder
 # it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
+{ inputs, ... }:
 {
     nixos = {
         hardware.enableAllFirmware = true;
         hardware.enableRedistributableFirmware = true;
-        nixpkgs.config.allowUnfree = true; # enableAllFirmware depends on this
+        # enableAllFirmware depends on allowUnfree, which the shared config sets
+        nixpkgs.config = inputs.self.lib.nixpkgs.config;
     };
 }

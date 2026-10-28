@@ -52,7 +52,7 @@
             channel.enable = false;
         };
 
-        nixpkgs.config.allowUnfree = true;
+        nixpkgs.config = inputs.self.lib.nixpkgs.config;
     };
 
     # Same reasoning as the nixos block, minus nix.channel.enable -- not
@@ -70,6 +70,6 @@
                 ];
             };
         };
-        nixpkgs.config.allowUnfree = true;
+        nixpkgs.config = inputs.self.lib.nixpkgs.config;
     };
 }

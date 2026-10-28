@@ -209,8 +209,9 @@ facts; `flake/modules/checks.nix`.
 ## perSystem
 
 perSystem is flake-parts' per-system scope, used here for checks and the dev
-shell. Its default `pkgs` has no `nixpkgs.config` applied, so a `pkgs` taken
-from it loses `allowUnfree` without an error.
+shell. Its `pkgs` is built from the fleet's shared `nixpkgs.config`
+(`flake/modules/_lib/nixpkgs.nix`, set in `flake/modules/nixpkgs.nix`), so it
+carries `allowUnfree`; it is not the instance a host builds.
 Source: `flake/modules/host-config/hosts.nix` (comments above `mkHost`);
 `flake/doc/flake-parts-rationale.md`.
 

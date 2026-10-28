@@ -23,7 +23,7 @@ Every file is `nixos`-class:
   boot, `FastConnectable`, discoverable/pairable timeouts set.
 - **`firmware/`** — `firmware-all.nix` (`hardware.enableAllFirmware`,
   `enableRedistributableFirmware`) and `fwupd.nix` (`services.fwupd`, `mkDefault true`). `firmware-all.nix` also
-  sets `nixpkgs.config.allowUnfree = true`, which `enableAllFirmware` needs.
+  sets `nixpkgs.config` to the shared `flake.lib.nixpkgs.config` (`allowUnfree`), which `enableAllFirmware` needs.
 - **`storage/`** — `smartd.nix` (S.M.A.R.T. monitoring: smartd with autodetect, a short
   self-test daily and a long one weekly) and
   `coredump-limit.nix` (`systemd.coredump` `MaxUse`/`KeepFree` caps).

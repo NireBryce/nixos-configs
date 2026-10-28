@@ -126,8 +126,7 @@ Which argument goes where is not cosmetic:
   uses (deadnix fails an unused one); a file using neither has no header.
 - `pkgs` and `config` belong in the **inner** module's list. There is no outer
   `config` any more (a module file can't ask for one), and `pkgs` from
-  anywhere else would be perSystem's, which has no `nixpkgs.config` applied
-  and would silently lose `allowUnfree`.
+  anywhere else would be perSystem's, a different instance from the host's.
 
 ## An inner module lambda that uses no argument is `_:`
 

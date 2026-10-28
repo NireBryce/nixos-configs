@@ -4,17 +4,19 @@ let
     # system-preselected `self'` / `inputs'` available to host modules.
     #
     # `pkgs` is deliberately NOT taken from perSystem: nixosSystem builds its own
-    # from the host's own nixpkgs.config, and perSystem's default
-    # legacyPackages.<system> instance has none of that applied -- taking it from
-    # there would silently drop allowUnfree, which this config depends on.
+    # from the host's nixpkgs.config. perSystem's `pkgs` is built from the same
+    # shared config (nixpkgs.nix, _lib/nixpkgs.nix), so the unfree policy is
+    # one, but handing the instance over would mean `nixpkgs.pkgs`, under which
+    # NixOS ignores nixpkgs.config and hostPlatform and overlays move. The cost
+    # is a second nixpkgs instantiation per host.
     mkHost = system: hostModule: withSystem system ({ self', inputs', ... }:
         inputs.nixpkgs.lib.nixosSystem {
             specialArgs = { inherit inputs self' inputs'; };
             modules     = [ hostModule ];
         });
 
-    # Same shape and same reasoning as mkHost -- pkgs not taken from perSystem,
-    # for the same allowUnfree reason -- just calling darwinSystem instead of
+    # Same shape and same reasoning as mkHost -- pkgs not taken from perSystem
+    # -- just calling darwinSystem instead of
     # nixosSystem. darwinSystem's own signature (nix-darwin's flake.nix) takes
     # `modules` and forwards anything else through, same as nixosSystem, so
     # `specialArgs` works identically.

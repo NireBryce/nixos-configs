@@ -92,10 +92,10 @@ the main thing flake-parts offers this repo.
 The file may instead be a function of only `lib` and/or `inputs` that
 returns such a set (`{ lib, ... }: { nixos = …; }`). `pkgs` and `config`
 belong in the **inner**, per-class module's arguments. A `pkgs` taken from
-anywhere else comes from *perSystem*, flake-parts' per-system scope. The
-perSystem `pkgs` has no `nixpkgs.config`, so it loses `allowUnfree` without
-any warning. The design is under review in
-[issue 559](https://github.com/NireBryce/nixos-configs/issues/559).
+anywhere else comes from *perSystem*, flake-parts' per-system scope. That
+`pkgs` is built from the fleet's shared `nixpkgs.config`
+(`flake/modules/_lib/nixpkgs.nix`), so it carries `allowUnfree` like a host's,
+but it is a separate nixpkgs instance, not the host's.
 
 Two mistakes here are easy to make:
 
