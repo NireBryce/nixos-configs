@@ -61,7 +61,7 @@ of them automatically.
 
 `general-config/system/home-manager/drop-unsupported-packages.nix` filters
 `home.packages` by `meta.platforms` on darwin and warns by name about each
-package it drops. So **do not** add `lib.mkIf (!pkgs.stdenv.isDarwin)` to a
+package it drops. So **do not** add `lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin)` to a
 package module for platform reasons. `meta.platforms` already records the
 platforms, and a hand-written copy can drift. The filter has two gaps:
 
