@@ -1,40 +1,5 @@
 # Categories and membership
 
-<!-- book-nav: generated from SUMMARY.md by `just agent book-nav write`; do not edit -->
-<details class="book-nav">
-<summary>Book contents (you are on: Categories and membership)</summary>
-
-[Introduction](introduction.md)
-
-**Understanding the repo**
-
-1. [How the non-obvious pieces work](how-it-works.md)
-2. [Why it is built this way](rationale.md)
-
-**Extending it**
-
-3. **Categories and membership** (this page)
-4. [Adding a module](adding-a-module.md)
-5. [Adding a package](adding-a-package.md)
-6. [Wiring a host](wiring-a-host.md)
-7. [Wiring a user and Home Manager](users-and-home-manager.md)
-8. [Darwin edge cases](darwin.md)
-
-**Working with agents**
-
-9. [How agents work in this repo](agents-in-the-repo.md)
-10. [Checks, guards and hooks](agent-checks-and-guards.md)
-11. [Git and agent workflows](git-and-agent-workflows.md)
-
-**Reference**
-
-12. [Glossary](glossary.md)
-
-← [Why it is built this way](rationale.md) · [Adding a module](adding-a-module.md) →
-
-</details>
-<!-- /book-nav -->
-
 A **category** is a named group of modules that a host takes in one line.
 No file declares categories; they come from the shape of the folders. Below
 are the rule, real examples from `flake/modules/`, the procedures for adding

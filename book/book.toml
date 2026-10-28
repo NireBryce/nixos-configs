@@ -6,4 +6,5 @@ src = "src"
 
 [output.html]
 git-repository-url = "https://github.com/NireBryce/nixos-configs"
-additional-css = ["hide-book-nav.css"]
+additional-js = ["show-sidebar.js"]
+sidebar-header-nav = false
