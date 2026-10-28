@@ -96,6 +96,25 @@ class PreflightClassification(unittest.TestCase):
         self.assertGreater(sum(1 for a, _, _ in self.steps if a), 5)
 
 
+class StepEnvironment(unittest.TestCase):
+    def test_steps_do_not_inherit_the_hooks_repository_variables(self):
+        # Hooks export these; a step that ran `git init` or `git commit`
+        # with them set would act on the real repository.
+        probe = "import os; print(os.environ.get('GIT_DIR'), os.environ.get('GIT_INDEX_FILE'))"
+        old = {k: os.environ.get(k) for k in ("GIT_DIR", "GIT_INDEX_FILE")}
+        os.environ["GIT_DIR"] = "/nonexistent/.git"
+        os.environ["GIT_INDEX_FILE"] = "/nonexistent/index"
+        try:
+            rc, out = oc.run_one([sys.executable, "-c", probe])
+        finally:
+            for k, v in old.items():
+                if v is None:
+                    os.environ.pop(k, None)
+                else:
+                    os.environ[k] = v
+        self.assertEqual((rc, out.strip()), (0, "None None"))
+
+
 class WithNixToolsContract(unittest.TestCase):
     def test_exits_75_when_there_is_neither_the_tools_nor_nix(self):
         script = REPO / "flake/scripts/with-nix-tools.sh"
