@@ -105,8 +105,8 @@ Each step catches what earlier ones can't:
 
 ## Ship
 
-`ship` skill: branch, PR, ask before merging, ask again before deleting the
-branch.
+`ship` skill: branch, PR, one combined ask covering the merge and deleting
+the branch.
 
 ## See also
 
