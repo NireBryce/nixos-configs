@@ -251,6 +251,8 @@ preflight:
     @python3 .agents/scripts/test_move_refs.py
     @python3 .agents/scripts/test_book_lint.py
     @python3 .agents/scripts/book_lint.py check
+    @python3 .agents/scripts/test_book_nav.py
+    @python3 .agents/scripts/book_nav.py check
     @python3 flake/scripts/tests/test_glibc_guard.py
     @python3 flake/scripts/tests/test_pm_test_core.py
     @python3 flake/scripts/tests/test_parallel_unittest.py

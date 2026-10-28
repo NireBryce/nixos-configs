@@ -9,9 +9,9 @@
 
 # Extending it
 
-- [Adding a package](adding-a-package.md)
-- [Adding a module](adding-a-module.md)
 - [Categories and membership](categories.md)
+- [Adding a module](adding-a-module.md)
+- [Adding a package](adding-a-package.md)
 - [Wiring a host](wiring-a-host.md)
 - [Wiring a user and Home Manager](users-and-home-manager.md)
 - [Darwin edge cases](darwin.md)

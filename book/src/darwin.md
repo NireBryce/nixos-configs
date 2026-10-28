@@ -1,5 +1,40 @@
 # Darwin edge cases
 
+<!-- book-nav: generated from SUMMARY.md by `just agent book-nav write`; do not edit -->
+<details class="book-nav">
+<summary>Book contents (you are on: Darwin edge cases)</summary>
+
+[Introduction](introduction.md)
+
+**Understanding the repo**
+
+1. [How the non-obvious pieces work](how-it-works.md)
+2. [Why it is built this way](rationale.md)
+
+**Extending it**
+
+3. [Categories and membership](categories.md)
+4. [Adding a module](adding-a-module.md)
+5. [Adding a package](adding-a-package.md)
+6. [Wiring a host](wiring-a-host.md)
+7. [Wiring a user and Home Manager](users-and-home-manager.md)
+8. **Darwin edge cases** (this page)
+
+**Working with agents**
+
+9. [How agents work in this repo](agents-in-the-repo.md)
+10. [Checks, guards and hooks](agent-checks-and-guards.md)
+11. [Git and agent workflows](git-and-agent-workflows.md)
+
+**Reference**
+
+12. [Glossary](glossary.md)
+
+← [Wiring a user and Home Manager](users-and-home-manager.md) · [How agents work in this repo](agents-in-the-repo.md) →
+
+</details>
+<!-- /book-nav -->
+
 The nix-darwin host differs from the NixOS hosts in the ways listed below.
 The Home Manager bundle is shared verbatim with the Linux hosts. Each
 difference therefore has to be absorbed per module or per package; never

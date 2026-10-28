@@ -84,6 +84,7 @@ The book's own rules, which the clarity pass (step 5) enforces:
    ```sh
    mdbook build book -d <scratch>/bookout     # cargo install mdbook --locked, if absent
    just agent book-lint check
+   just agent book-nav check     # `write` after any SUMMARY.md reorder
    just agent book-render <scratch>/bookout <scratch>/book.html
    ```
 
