@@ -81,7 +81,8 @@ The move cost:
   which makes Home Manager use the system's nixpkgs, also makes it *reject*
   any `nixpkgs.*` option inside a home module with an error.
   `allowUnfree` therefore has to come from the system side, in
-  `flake/modules/general-config/nix/nix-settings/basic-nix-settings.nix`.
+  `flake/modules/general-config/nix/nix-settings/basic-nix-settings.nix`,
+  which reads it from the shared `flake.lib.nixpkgs.config`.
 - `home.profileDirectory` becomes `/etc/profiles/per-user/<name>` instead of
   `~/.nix-profile`. `useUserPackages = true` causes that change.
 - Activation runs as a systemd unit (`home-manager-<name>.service`) outside

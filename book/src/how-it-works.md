@@ -253,11 +253,13 @@ Shared helper functions live in `flake.lib`. Modules do not import a
 from one file per topic in `modules/_lib/`. The underscore keeps the tree
 from treating those files as modules. A module file reaches the helpers as
 `inputs.self.lib`, and a plain flake-parts module as `config.flake.lib`. The
-current topics are `persist` and `fleet`:
+current topics are `persist`, `fleet` and `nixpkgs`:
 
 - `persist.persistIfImpermanent` keeps state only on a host that wipes
   `/root`.
 - `fleet.tailnetName` turns `nire-<x>` into `ts-<x>`.
+- `nixpkgs.config` is the fleet's one `nixpkgs.config` (`allowUnfree`). Hosts
+  set it, and perSystem's `pkgs` is built from it.
 
 `flake.lib` is typed `raw`, so only one definition is allowed. A new topic
 goes in `_lib/<topic>.nix` plus an entry in `lib.nix`. A second
