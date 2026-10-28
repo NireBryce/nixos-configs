@@ -1,6 +1,6 @@
 # Traps & skills
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-10-28_
 
 [`../../CLAUDE.md`](../../CLAUDE.md)'s "Traps, all of which have actually happened here" section has a one-line summary of
 each trap. The full mechanism, code, and worked examples live in the matching
@@ -35,6 +35,8 @@ one-liner.
 | Moving a resolved incident out of a wiki page into `-history.md` | `.agents/skills/wiki-history-sweep/SKILL.md` |
 | Turning a re-typed command pattern into a `just agent` script | `.agents/skills/agent-scripts/SKILL.md` |
 | Auditing every doc claim against the code with parallel agents | `.agents/skills/docs-audit-all/SKILL.md` |
+| Fact-checking a chosen set of docs with read-only agents | `.agents/skills/wiki-fact-check/SKILL.md` |
+| Fact-checking, linting and rebuilding the mdBook | `.agents/skills/book-fact-check/SKILL.md` |
 
 See [../config-structure/architecture.md](../config-structure/architecture.md) and
 [../config-structure/impermanence-and-secrets.md](../config-structure/impermanence-and-secrets.md) for where each of

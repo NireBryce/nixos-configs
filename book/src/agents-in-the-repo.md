@@ -178,6 +178,13 @@ fire on their own, and skills an agent runs.
   ranks docs with `just agent doc-drift`, splits them across parallel
   subagents with `just agent doc-partition`, and checks each claim against
   the code. Its own text says a lint-clean wiki is not an accurate one.
+- **Skills `wiki-fact-check` and `book-fact-check`** check a chosen set of
+  docs, or the book, with read-only agents that report each problem claim as
+  wrong, stale, unsupported, misleading or uncheckable. The orchestrator
+  verifies the consequential findings against the source and applies the
+  corrections. `just agent book-lint` is the book's mechanical half: dead links
+  and anchors, chapters missing from the summary, and dates or counts that go
+  stale. It runs in preflight.
 - **Skill `trim-docs`** tightens prose without breaking what lint pins in
   place (Contents blocks, date lines, siblings, anchors, § numbers).
 - **Skill `fact-hygiene`** governs how a fact is written so it does not rot:
@@ -195,7 +202,9 @@ Source: `AGENTS.md`, hard rules, "State" and "Docs";
 [styleguide.md](../../wiki/meta/styleguide.md), "Two audiences per page" and
 "Generated tables"; `wiki/meta/scripts/wiki_gen.py`, docstring;
 `.agents/hooks/edit-check-posttooluse.sh`; `.agents/skills/wiki-sync/SKILL.md`;
-`.agents/skills/docs-audit-all/SKILL.md`; `.agents/skills/trim-docs/SKILL.md`;
+`.agents/skills/docs-audit-all/SKILL.md`; `.agents/skills/wiki-fact-check/SKILL.md`;
+`.agents/skills/book-fact-check/SKILL.md`; `.agents/scripts/book_lint.py`;
+`.agents/skills/trim-docs/SKILL.md`;
 `.agents/skills/fact-hygiene/SKILL.md`.
 
 ## Recurring work becomes a script
@@ -284,7 +293,7 @@ Source: `.agents/skills/extract-agent-tooling/SKILL.md`;
 | Rules files | Loaded by path under Claude Code; `rules` lint | Opening them under other harnesses |
 | Skills | Discovery, listing, `skill-files` lint | Loading the skill when it applies |
 | Lessons | Lesson-reminder hook; `lessons` lint | Writing the article, entry, Home rule and map topic |
-| Docs | `wiki-lint` (including its `generated` check) in preflight; edit-check hook | `wiki-sync`, `docs-audit-all`, `trim-docs`, `fact-hygiene` |
+| Docs | `wiki-lint` (including its `generated` check) in preflight; edit-check hook | `wiki-sync`, `docs-audit-all`, `wiki-fact-check`, `book-fact-check`, `trim-docs`, `fact-hygiene` |
 | Scripts | Helper names at session start | `agent-scripts`; checking `just agent` first |
 | Proposals | None | `boyscouting`, `propose-issue` |
 | Extraction | None | The `extract-*` skills |
