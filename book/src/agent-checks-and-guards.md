@@ -12,7 +12,7 @@ contributor who only edits modules can skip it; the commit-time flow is in
 A [hook](glossary.md#hook-claude-code) is a command the agent harness runs at
 a fixed event. Its JSON reply decides whether the tool call goes ahead.
 Claude Code reads the hook list from `.agents/settings.json` (seen as
-`.claude/settings.json`). ZCode reads the same scripts from
+`.claude/settings.json`). ZCode (a second agent harness) reads the same scripts from
 `.zcode/config.json`, and `flake/scripts/tests/test_guards.py` fails when
 the two lists differ. The events used are `SessionStart`, `PreToolUse`
 (before a tool runs, matched by tool name: `Bash`, `Edit|Write|MultiEdit`,
@@ -25,7 +25,7 @@ A hook's reply takes one of five forms:
 - ask: `permissionDecision: "ask"` prompts the human. Under an auto
   permission mode an ask is a no-op and nobody is prompted, so the guards
   that must hold use deny.
-- warn: a `systemMessage` shown to the human in Claude Code, plus the
+- warn: a `systemMessage` shown to the human (in Claude Code), plus the
   same text in `hookSpecificOutput.additionalContext` for the agent. The
   call goes ahead.
 - remind: `additionalContext` only, for the agent. The call goes ahead.
@@ -51,13 +51,13 @@ a security boundary.
 | Secrets read guard | `Read`, `Grep` or `Glob` | No read-tool access under `/run/secrets` or `/run/secrets.d` | Blocks | `.agents/hooks/secrets-read-guard-pretooluse.sh` |
 | Secrets output scan | After a `Bash` call | Flags secret-shaped text in the output | Blocks after the call has run, with a reason telling the agent to name it only | `.agents/hooks/secrets-guard-posttooluse.sh` |
 | Impermanence edit guard | `Edit`/`Write` in the impermanence tree or a host hardware module | Safety context before the edit | Warns | `.agents/hooks/impermanence-edit-guard-pretooluse.sh` |
-| Lesson-reminder hook | `Bash` or `Edit`/`Write` matching a topic in `.agents/lessons-map.toml` | The lesson for that area, once per session | Reminds | `.agents/hooks/lesson-reminder-pretooluse.py` |
+| Lesson-reminder hook ([lessons](glossary.md#lesson)) | `Bash` or `Edit`/`Write` matching a topic in `.agents/lessons-map.toml` | The lesson for that area, once per session | Reminds | `.agents/hooks/lesson-reminder-pretooluse.py` |
 | Edit-check hook | After an `Edit`/`Write` | Stale sibling pair, shell-shaped `${…}` in a Nix `''` string, untracked new module | Reminds | `.agents/hooks/edit-check-posttooluse.sh` |
 | ZCode canary | `Bash` call | Detects that the ZCode payload detection may be disarmed | Warns | `.agents/hooks/zcode-canary-pretooluse.sh` |
-| pre-commit | `git commit` | Lint ratchet, or the offline checks where nix cannot run | Blocks the commit | `.githooks/pre-commit` |
+| pre-commit | `git commit` | [Lint ratchet](glossary.md#lint-ratchet), or the [offline checks](glossary.md#offline-checks) where nix cannot run | Blocks the commit | `.githooks/pre-commit` |
 | commit-msg | `git commit` | Canonical `Co-Authored-By: Claude` trailer | Rewrites the trailer | `.githooks/commit-msg` |
 | pre-push | `git push` | Preflight's offline steps where nix cannot run | Blocks the push | `.githooks/pre-push` |
-| `just wiki-lint` | Preflight, CI, by hand | Docs agree with the repo | Fails | `wiki/meta/scripts/check_wiki.py` |
+| `just wiki-lint` | [Preflight](glossary.md#preflight), CI, by hand | Docs agree with the repo | Fails | `wiki/meta/scripts/check_wiki.py` |
 | `just modules` | Preflight, CI, by hand | No untracked `.nix`; static and evaluated module graphs agree | Fails | `flake/scripts/modules.py` |
 | `just lint` | Preflight, CI, pre-commit | statix, deadnix and oversized-file counts never rise | Fails | `flake/scripts/lint.py` |
 | `just check` | Preflight, CI | Every host's toplevel and home evaluate (`module-orphans` fails only when built, so `--no-build` skips it; `just modules` is the orphan gate) | Fails | `flake/modules/checks.nix` |
@@ -65,7 +65,7 @@ a security boundary.
 
 ## The session-start hook
 
-The hook also reports the commits `experimental` is behind the last-fetched
+The session-start hook also reports the commits `experimental` is behind the last-fetched
 `origin/experimental`, and the output of `git worktree list`. When
 `core.hooksPath` is unset it runs `git config core.hooksPath .githooks`, the
 same command as `just install-hooks`; a different existing value is reported

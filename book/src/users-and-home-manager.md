@@ -3,7 +3,7 @@
 One user account and its [Home Manager](glossary.md#home-manager)
 environment are wired into every host. Home Manager runs inside the system
 configuration, so a switch can succeed for the system and fail for Home
-Manager; the split-brain section covers that case.
+Manager ([split-brain](glossary.md#split-brain); covered below).
 
 ## The account, the environment and the bridge
 
@@ -39,10 +39,10 @@ Most changes are not wiring changes. To add a program or dotfile:
 1. Put a module file with a `homeManager` key in the right category under
    `flake/modules/` (see [adding a module](adding-a-module.md) and
    [adding a package](adding-a-package.md)).
-2. Check that the aggregate includes the category. If it does not, the module
-   never loads for the user and nothing reports it. Add the category name to
-   `includes.homeManager` in `elly-home-manager.nix`, only if the category
-   contains `homeManager` modules. The header of `elly-home-manager.nix`
+2. Check that `includes.homeManager` in `elly-home-manager.nix` lists the
+   category. If it does not, the module never loads for the user and nothing
+   reports it. Add the name only if the category contains `homeManager`
+   modules. The header of `elly-home-manager.nix`
    explains why empty categories are left out.
 
 A host-specific Home Manager addition leaves the aggregate alone: the host
@@ -81,7 +81,7 @@ Costs:
 
 ## When the system switches but the home half does not
 
-**Split-brain** here means the system generation is activated but the user's
+[**Split-brain**](glossary.md#split-brain) here means the system generation is activated but the user's
 Home Manager generation is not.
 
 ### Why the halves can disagree
@@ -132,13 +132,6 @@ account (a browser, git, an editor, and similar), commented "Emergency
 packages if home-manager dies". The darwin class of that file carries only
 fonts.
 
-Not checked: how the switch command reports a failing
-`home-manager-<name>.service` on a NixOS host; whether darwin's launchd
-activation reports a failure the same way; how a Home Manager failure plays
-out beyond the fallback packages. No file in the repo records any of these.
-Test on the target host and say which level you reached: evaluated, built, or
-switched.
-
 ## Checklist: wiring the user into a new host
 
 1. Include `elly` and `system` in the host's `includes.nixos` (or
@@ -150,10 +143,17 @@ switched.
    `just hm-collisions` before the first switch.
 4. If the host was on standalone Home Manager, pin the current generation as
    a GC root first.
-5. After `git add`, evaluate
-   `home-manager.users.elly.home.activationPackage.drvPath` for the host (the
-   command is in `AGENTS.md`); `drvPath` forces the whole home configuration.
+5. After `git add`, run from `flake/`:
+   `nix eval --raw '.#nixosConfigurations.nire-<name>.config.home-manager.users.elly.home.activationPackage.drvPath'`.
+   Evaluating the [`drvPath`](glossary.md#drvpath) forces the whole home
+   configuration without building it.
 6. After switching, check that `home-manager-<name>.service` succeeded.
+
+Not checked: how the switch command reports a failing
+`home-manager-<name>.service` on a NixOS host; whether darwin's launchd
+activation reports a failure the same way; how a Home Manager failure plays
+out beyond the fallback packages. No file in the repo records any of these.
+Test on the target host and say whether you evaluated, built or switched.
 
 ## Sources
 

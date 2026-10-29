@@ -2,13 +2,13 @@
 
 Adding a machine to the flake touches the entry point, the host's own
 module directory, the `hosts.nix` line, hardware and disks, the impermanence
-decision, secrets enrollment, and the tailnet name. The last step says what
+decision, secrets enrollment, and the tailnet name. Step 8 says what
 "done" can mean for a host that has not booted yet.
 
 ## Read this first: the `/root` wipe
 
-> **`WARN-impermanence.nix` deletes `/` on every boot** on any host that
-> includes the `impermanence` category. On every boot, in the initrd, it
+> **`WARN-impermanence.nix` deletes the root filesystem on every boot** on
+> any host that includes the `impermanence` category. In the initrd, it
 > deletes the btrfs subvolume that `/` lives on and replaces it with a copy
 > of an empty `root-blank` subvolume. If your disk matches the layout the
 > module describes, it will delete yours.
@@ -55,7 +55,7 @@ not a fleet machine, so it has no `nire-` prefix.
   the module, never the whole category.
 - Impermanence? The usual answer is yes. A host that opts out says so in its
   header, as `cube-configuration.nix` does, including how `invariants.nix`
-  and `WARN-password-required.nix` interact with that choice.
+  (evaluation-time checks on every host) and `WARN-password-required.nix` interact with that choice.
 - CPU and GPU? AMD hosts include the shared `hardware` category. An Intel
   host skips it and imports the exact `nixos-hardware` module from its own
   hardware file. Never add an `intel` folder under
@@ -134,7 +134,8 @@ output asks for `modulesPath` and is refused). Then add the two settings that
 - `options = [ "fmask=0077" "dmask=0077" ]` on a vfat `/boot`
 - `neededForBoot = true` on `/persist`, on an impermanence host
 
-With no hardware yet, use the disko generator
+With no hardware yet, use the disko generator (disko partitions
+and formats disks from a Nix description)
 `general-config/impermanence/_disko/impermanence-luks-btrfs.nix` instead of
 inventing a hardware configuration. It has been evaluated but never run on
 hardware, and no host imports it today. From a file directly in
@@ -156,7 +157,7 @@ Two adjustments to the excerpt:
 - Write the path relative to the file it sits in. A file in
   `<name>/hardware/` needs `../../../` where the excerpt shows `../../`.
 
-Also:
+Rules for the generator:
 
 - The placeholder device must be obviously fake. A plausible path like
   `/dev/nvme0n1` exists on tenacity, and disko pointed at the wrong machine
@@ -225,6 +226,9 @@ just modules
 cd flake
 nix eval --raw .#nixosConfigurations.nire-<name>.config.system.build.toplevel.drvPath
 ```
+
+`just modules` reports untracked files and module-graph drift. The `nix eval`
+prints a `/nix/store/….drv` path on success.
 
 - Force the whole toplevel. Evaluating the toplevel's
   [`drvPath`](glossary.md#drvpath) forces the whole configuration without

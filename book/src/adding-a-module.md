@@ -1,8 +1,7 @@
 # Adding a module
 
 Creating a module under `flake/modules/` takes five steps: choose where it
-goes, name it, write it in the house style, stage it, and prove it is wired
-in. Renaming or moving a module follows the same rules: a rename changes the
+goes, name it, write it in the house style, stage it, and prove a host reaches it. Renaming or moving a module follows the same rules: a rename changes the
 module's name, and a move can change which hosts get it. Packages add rules
 of their own; see [Adding a package](adding-a-package.md).
 
@@ -59,7 +58,8 @@ and names both files.
 
 ## Step 3: write it
 
-Run the scaffolder, which writes the correct shape and stages the file:
+Run the scaffolder, which writes a [dirs-as-categories](glossary.md#dirs-as-categories)
+module file and stages it:
 
 ```sh
 just add-module nixos general-config/system/my-thing/my-thing.nix "one-line description"
@@ -112,9 +112,9 @@ rules.
 Before writing an integration by hand, look for an existing `programs.*`
 option.
 
-If other orphans or untracked `.nix` files already exist, `just add-module`
-still creates and stages the file, then exits 1 (`just modules` reports the
-same).
+If the tree already has [orphans](glossary.md#orphan) or untracked `.nix`
+files, `just add-module` still creates and stages the file, then exits 1
+(`just modules` reports the same).
 
 ## Step 4: `git add` before `nix eval`
 
@@ -162,8 +162,8 @@ see [Categories and membership](categories.md).
 ## Renaming or moving a module
 
 - A rename renames the module. Membership follows the folder, so it
-  survives. References by name (`includes`, `enables`, `hosts.nix`) break
-  with an error; fix them in the same change.
+  survives. References by name ([`includes`](glossary.md#includes),
+  [`enables`](glossary.md#enables), `hosts.nix`) break with an error; fix them in the same change.
 - When a rename makes the old name impossible to find, add a one-line
   comment containing the old string on the declaration. `boot-durandal.nix`
   and `enable-home-manager.nix` do this.
@@ -191,14 +191,15 @@ wrap it in the same commit:
 }
 ```
 
-dirs-as-categories refuses an unwrapped module that asks for an argument
-only a class module gets, such as `modulesPath` or `pkgs`, and the error
+[dirs-as-categories](glossary.md#dirs-as-categories) refuses an unwrapped module that asks for an argument
+only a class module (the value under `nixos`, for example) gets, such as `modulesPath` or `pkgs`, and the error
 names the argument. The error also suggests an alternative to the wrapper:
 rename the file with a leading `_` and import it from a class, as in
 `nixos.imports = [ ./_name.nix ];`.
 
 A raw module that asks only for `config`, `lib` or `options` is not refused.
-It loads as a flake-parts module, so wrap those too.
+It loads as a [flake-parts module](glossary.md#flake-parts-module), so wrap
+those too.
 
 ## Keeping the wiki in step
 
@@ -206,7 +207,7 @@ If the category you changed has a page under
 `wiki/config-structure/categories/`, update it in the same change, then run
 `just wiki-gen` to regenerate the category index tables, the module counts
 and the architecture diagram. `just wiki-lint` fails when they are stale.
-The procedure is the `wiki-sync` skill.
+The procedure is the `wiki-sync` [skill](glossary.md#skill).
 
 ## Sources
 

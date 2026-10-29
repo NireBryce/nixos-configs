@@ -4,7 +4,7 @@ Adding a package to the user environment is a one-file change that every
 host picks up through Home Manager. This page covers where the file goes,
 what it contains, when it needs a platform guard, and how to verify it. Two
 different platform questions produce guards that look identical in config;
-step 2 separates them.
+Step 2 separates them.
 
 ## Before you start: the shared package set
 
@@ -165,7 +165,7 @@ writes the file, runs `git add` and runs the checks. Afterwards:
 
 ## Step 4: verify, one rung at a time
 
-Run the checks in order. Each catches something the earlier ones can't:
+Run the checks in order. Each catches something the earlier ones cannot:
 
 ```sh
 git add -A          # flakes ignore untracked files: an unstaged module does not exist
@@ -185,7 +185,8 @@ just build          # a real build, on the host itself
   the new package is the **only** change.
 - `just switch` needs interactive `sudo`, so the user runs it.
 
-Report the highest rung you reached: *evaluates*, *builds*, or *runs*.
+Report the highest level you reached: *evaluates* (`just check`), *builds*
+(`just build`), or *runs* (switched and used).
 
 ## Where to go next
 

@@ -4,8 +4,9 @@ Most odd-looking parts of this tree were chosen on purpose. This chapter lists
 those decisions and the dead ends that led to them, each dead end named by the
 symptom that identified it. Read it before you "tidy" something that looks
 odd: the repo treats re-deciding a choice without saying so as worse than
-either answer. Terms such as *category*, *aggregate* and *deferred module*
-are in the [glossary](glossary.md).
+either answer. Terms such as [category](glossary.md#category),
+[aggregate](glossary.md#aggregate) and
+[deferred module](glossary.md#deferred-module) are in the glossary.
 
 ## Older commits may be missing from your clone
 
@@ -17,8 +18,9 @@ including the tip of the deleted `flake-parts` branch: `git cat-file -t
 
 For anything older than your clone's history, the sections below rely on the
 dated working notes in `flake/doc/` and `wiki/` rather than `git log`. To
-check a claim against a full history, use the `git-archaeology` skill
-(`.agents/skills/git-archaeology/SKILL.md`) in a full clone.
+check a claim against a full history, use the `git-archaeology`
+[skill](glossary.md#skill) (`.agents/skills/git-archaeology/SKILL.md`) in a
+full clone.
 
 ## Decision: flake-parts, for one option
 
@@ -34,18 +36,20 @@ separate files tied together only by a shared filename. The worked example
 is the old `nixd.nix`, which installed `nixd` both system-wide and in Home
 Manager from one file.
 
-The rationale note lists which flake-parts features are used and which are
-not. Unused: `moduleWithSystem`, `debug`, overlay or `legacyPackages`
+`flake/doc/flake-parts-rationale.md` lists which flake-parts features are
+used and which are not. Unused: `moduleWithSystem`, `debug`, overlay or `legacyPackages`
 composition, and any bundled flake module other than `modules` and
 `touchup`. `perSystem` is used for checks, the dev shell and the nix-topology
-output, and `withSystem` is used only in `hosts.nix`.
+output, and `withSystem` is used only in `hosts.nix`. `touchup` is a
+flake-parts module that sets attributes on flake outputs; the repo uses it to
+turn off the `formatter` output.
 
 ## Decision: hosts build their own `pkgs`
 
 `hosts.nix` uses `withSystem` only to get `self'` and `inputs'` into
 `specialArgs`. It does **not** pass perSystem's `pkgs` to the hosts.
 
-perSystem's `pkgs` is built from the fleet's shared `nixpkgs.config`
+The [perSystem](glossary.md#persystem) `pkgs` is built from the fleet's shared `nixpkgs.config`
 (`flake/modules/_lib/nixpkgs.nix`), so checks and the dev shell see the same
 unfree policy as the hosts. The hosts build their own instance from that
 config, at the cost of a second nixpkgs instantiation. Reusing perSystem's
@@ -54,15 +58,14 @@ would mean `nixpkgs.pkgs`, under which NixOS ignores `nixpkgs.config`, and
 
 ## Decision: membership by directory
 
-A module belongs to the category of the folder it sits in. The
-`dirsAsCategory.md` note says this was repaired rather than replaced during
-the flake-parts port.
+A module belongs to the category of the folder it sits in.
+`flake/doc/dirsAsCategory.md` says this was repaired rather than replaced
+during the port to flake-parts.
 
-The sibling `flake-parts` branch used per-module opt-in, where each module
-declares which aggregates it joins. (An aggregate is a module that exists to
-import other modules by name.) Per-module opt-in has advantages: directory
-and membership come apart, a module can join several roles, and the result
-is greppable. The note lists its costs:
+An earlier `flake-parts` branch used per-module opt-in, where each module
+declares which [aggregates](glossary.md#aggregate) it joins. Per-module opt-in
+has advantages: directory and membership come apart, a module can join
+several roles, and the result is greppable. The note lists its costs:
 
 - An opt-in line per module.
 - No file that shows a roster.
@@ -73,7 +76,7 @@ is greppable. The note lists its costs:
 
 Categories cannot fail that way, because membership is automatic.
 
-The opt-in pattern was tested before the sibling branch adopted it, with a
+The opt-in pattern was tested before that branch adopted it, with a
 throwaway `mkFlake` whose two modules each set the same aggregate's `imports`;
 both definitions survived. Before categories were repaired, the self-reference
 they depend on was modelled and evaluated first ([lesson
@@ -98,13 +101,14 @@ That arrangement produced three symptoms:
 - Shims that should have been byte-identical drifted. Hashing found copies
   that differed by a comment word.
 - A renamed shim once made nested categories collect a phantom module
-  called `dirsAsCategory`. The class filter hid the phantom.
+  called `dirsAsCategory`. The per-class filter dropped it from the results,
+  so no error appeared.
 
 The `dirs-as-categories` flake input replaced both the hand-written names
 and the shims. It takes the name from the file and works out categories from
 the shape of the tree, so no file states either. The move was checked by
-comparing every host's toplevel `drvPath` (the store path of the system
-derivation), and the fingerprints, before and after.
+comparing every host's toplevel [`drvPath`](glossary.md#drvpath) and the
+fingerprints, before and after.
 
 ## Dead end: same-named modules merging without an error
 
@@ -134,7 +138,7 @@ Manager](users-and-home-manager.md).
 
 ## Decision: package parity across hosts
 
-Hosts are not split by role. The handheld gets the full desktop GUI set
+Hosts are not split by role. The handheld, `nire-tenacity`, gets the full desktop GUI set
 (`vscode`, `gimp`, `libre-office`, `zoom`, …). A split was offered and
 declined, and the structure was left able to split later.
 
@@ -172,7 +176,7 @@ with no warning. A host installed by hand with a plain root opts out;
 `cube-configuration.nix` is the worked example. The mechanism is in [Wiring a
 host](wiring-a-host.md#read-this-first-the-root-wipe).
 
-## Dead ends from the port that still teach something
+## Dead ends from the flake-parts port that still teach something
 
 Each of these produced no error, or an error that named the wrong thing:
 
@@ -201,7 +205,7 @@ question, answered on the host with `just baseline` or `just diff-deployed`.
 
 ## Decision: calibrated severity
 
-The repo is a homelab config. The port notes quote the correction that set
+The repo is a homelab config. [The port notes](../../wiki/config-structure/flake-parts-port-notes.md) quote the correction that set
 the tone: a short window in which the flake did not evaluate had been
 over-dramatised, and the repo can go months between commits. `AGENTS.md`'s
 "Calibrate severity" rule comes from that correction.

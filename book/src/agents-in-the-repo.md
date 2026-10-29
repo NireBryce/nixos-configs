@@ -3,12 +3,13 @@
 This chapter is for anyone who wants to know how coding agents are routed to
 the right file, reminded of past mistakes and kept from letting docs go stale.
 It covers `AGENTS.md`, rules files, skills, the lesson loop, doc upkeep and
-helper scripts. A contributor who only edits modules can skip it.
+helper scripts. A contributor who only edits modules can skip it. A human
+using Claude Code in this checkout sees the hook messages described here.
 
 Coding agents write and maintain most of this repo's docs, scripts, skills
-and hooks, under nire's direction. An agent has no memory of earlier sessions,
+and hooks, under the repo owner's direction. An agent has no memory of earlier sessions,
 so these mechanisms route it to the right file and turn a mistake made once
-into a reminder the next agent sees. Each mechanism is *automatic* (a hook or
+into a reminder the next agent sees. Each mechanism is *automatic* (a [hook](glossary.md#hook-claude-code) or
 check fires without anyone asking) or a *convention* (an instruction the agent
 can skip). The [table at the end](#automatic-and-convention-side-by-side) says
 which part is which.
@@ -31,7 +32,7 @@ page and skill that answer it. Long wiki pages take one of two shapes:
 - A single page that opens with `## Quick facts`, used where the page is
   already compact or procedural.
 
-Under Claude Code, the session-start [hook](glossary.md#hook-claude-code)
+Under Claude Code, the session-start hook
 runs before the agent's first tool call. It adds the hostname, branch,
 [worktree](glossary.md#worktree), dirty-path count, `core.hooksPath` and the
 `just agent` helper names to the agent's context.
@@ -84,7 +85,7 @@ skill-files` enforces its mechanical half:
 ## The lesson loop
 
 A mistake an agent makes here becomes a numbered
-[lesson](glossary.md#lesson). The lesson's rule goes where an agent doing
+[lesson](glossary.md#lesson) (a recorded mistake and its rule). The lesson's rule goes where an agent doing
 that task already reads, and a hook delivers a reminder when the lesson
 applies to particular paths or commands. The loop has four parts:
 
@@ -108,7 +109,7 @@ applies to particular paths or commands. The loop has four parts:
 `just agent lessons <path>` prints every topic a path falls under, with the
 index lines of its lessons. With no argument it covers the files the current
 branch changes. `check_wiki.py lessons` fails on a lesson number with no entry
-or article, an entry missing `Home:` or `Enforced:`, and a map that has
+or article, an entry missing `Home:` or `Enforced:`, and a lessons map that has
 drifted from the repo (a glob matching no tracked file, a missing skill or
 rules file).
 
@@ -117,7 +118,7 @@ rules file).
 A change that makes a wiki page stale fixes the page in the same change.
 
 **Generated.** A table whose facts the repo already knows (the host table,
-the category index tables, module counts) sits between
+the category index tables) sits between
 `<!-- generated:<name> … -->` and `<!-- /generated -->` markers. `just
 wiki-gen` rewrites each region from its source, so an edit inside a region is
 lost on the next run, except in a column the marker calls hand-written (such
@@ -196,10 +197,10 @@ problem alone, unless it is a small problem in a file it is already changing.
   open, or a rename on taste is out of scope.
 - `propose-issue`: for a defect found while doing something else. The agent
   re-checks it, runs `just threads "<keywords>"` to see whether it is already
-  tracked, and asks nire with a drafted title, body and label. Only on a yes
+  tracked, and asks the repo owner with a drafted title, body and label. Only on a yes
   does it run `gh issue create --repo NireBryce/nixos-configs`. The repo is
   hardcoded: an upstream bug is still tracked here, and filing elsewhere needs
-  nire to ask for that specific filing.
+  the repo owner to ask for that specific filing.
 
 ## Extraction candidates
 
@@ -214,7 +215,7 @@ Each records one file under `_loose-ends/extraction-candidates/agent-orchestrati
 or `_loose-ends/extraction-candidates/nix/`, in the same commit as the task
 that surfaced it. The `-all` variants are standalone whole-repo sweeps that
 also reconcile the existing candidate files. Copying anything into another
-repo happens only when nire asks.
+repo happens only when the repo owner asks.
 
 ## Automatic and convention, side by side
 

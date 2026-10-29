@@ -1,8 +1,9 @@
 # Darwin edge cases
 
 The nix-darwin host differs from the NixOS hosts in the ways listed below.
-The Home Manager bundle is shared verbatim with the Linux hosts, so each
-difference is absorbed per module or per package; the bundle is never forked.
+It shares the `elly-home-manager` module, the bundle of Home Manager modules,
+verbatim with the Linux hosts. Each difference is absorbed per module or per
+package, and the bundle is never forked.
 
 ## How the darwin host is built
 
@@ -62,8 +63,8 @@ installed by hand with `brew` vanishes, that setting is why; add it to
   forced off at the system level so it does not fight Home Manager's.
 - Activation: Home Manager activates through launchd instead of a systemd
   unit. The darwin integration sets `backupFileExtension` as the NixOS one
-  does, so an unowned file in the way is renamed to `<file>.hm-bak`. See the
-  split-brain section of [users and Home Manager](users-and-home-manager.md).
+  does, so an unowned file in the way is renamed to `<file>.hm-bak`. See
+  [split-brain](glossary.md#split-brain) in the glossary.
 - Fonts: the user's fonts are installed from the `darwin` class of
   `elly-user.nix`.
 - Tailscale: the NixOS Tailscale module never reaches darwin; on the Mac,
