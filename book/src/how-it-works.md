@@ -239,8 +239,10 @@ dirs-as-categories loads a file as a **plain flake-parts module** when its
 function asks for `config` or `withSystem`, or when it has no class key.
 `hosts.nix`, `checks.nix`, `invariants.nix`, `dev-shell.nix` and `lib.nix`
 are written that way on purpose, and they carry no dirs-as-categories header
-comment. `defaults.nix` is never a module file: its class parts apply whenever
-anything in its folder is reached, and `folderIsCategory` goes in it.
+comment. `defaults.nix` is never a module file and has no module name. Any
+class keys in it (`nixos`, `homeManager`, `darwin`) are added to a host that
+includes any module in the same folder. By convention it is also where
+`folderIsCategory` is set.
 
 A module file cannot read the flake-parts `config`. Files that need the
 flake's own outputs read `inputs.self` instead; `tailnet-hosts.nix` does this
