@@ -1,22 +1,21 @@
 # Git and agent workflows
 
-A change moves through the repo's working loop in a fixed order. It gets its
-own worktree and commits with a provenance trailer. Checks run at commit and
-push, then preflight, and the `ship` skill routes it to a merged PR. The
-sections below follow that order. They also cover what "push" means here,
-where issues and PRs may be filed, how a session reports what it verified,
-and how a session without nix still gets checked. A worked example from
-first edit to merged PR closes the chapter.
+A change moves through a fixed loop. It gets its own worktree and commits with
+a provenance trailer. Checks run at commit and push, then preflight, and the
+`ship` skill routes it to a merged PR. The sections below follow that order,
+then cover what "push" means, where issues and PRs may be filed, how to report
+what was verified, and how a session without nix is checked. A worked example
+closes the chapter. The rules apply to human and agent contributors alike.
 
 ## One worktree per task
 
 Work that will branch, commit or check out happens in its own
 [worktree](glossary.md#worktree), outside the shared checkout. A worktree has
 its own directory and `HEAD` and shares the repository's branches and
-objects. Two sessions in one repo then no longer see each other's checkouts
-and commits mid-task. Read-only work (reading files, `just check` on what is
-checked out) needs no worktree, and neither does work in the shared checkout
-when nire says to work there.
+objects, so two sessions in one repo do not see each other's checkouts
+mid-task. Read-only work (reading files, `just check` on what is checked out)
+needs no worktree, and neither does work in the shared checkout when the repo
+owner says to work there.
 
 Create one with the helper, which fetches `origin` first and refuses an
 existing branch or path:
@@ -28,37 +27,24 @@ just agent worktree new <branch> [<base>] --root <scratch-dir>
 The base defaults to `origin/experimental`. The worktree lands at
 `<scratch-dir>/wt-<branch>`, with any leading `feat/`-style component
 dropped, and the command prints only that path. `$AGENT_SCRATCH` can stand in
-for `--root`. Under Claude Code, a subagent can get its own worktree by
-passing `isolation: "worktree"` to the Agent tool.
+for `--root`. Under Claude Code, a subagent gets its own worktree by passing
+`isolation: "worktree"` to the Agent tool.
 
 Clean up with `git worktree remove --force <path>` once the work has shipped
 or been abandoned. `just agent worktree prune --root <dir>` reports each
 linked worktree under `<dir>`. With `--yes`, it removes only clean worktrees
-of two kinds:
-
-- those whose commits have landed;
-- those that have no commits ahead, were never pushed, and have sat
-  untouched past `--min-age` (60 minutes by default).
-
-It never removes a dirty worktree or the main checkout.
+whose commits have landed, or that have no commits ahead, were never pushed,
+and have sat untouched past `--min-age` (60 minutes by default). It never
+removes a dirty worktree or the main checkout.
 
 Check: `just agent where` (or `git status -sb`) inside the new directory shows
-the new branch. The session-start hook also reports whether the current
-directory is a linked worktree or the shared checkout.
-
-Source: `.agents/skills/use-a-worktree/SKILL.md`; `.agents/scripts/worktree.py`,
-docstring; `AGENTS.md`, "Working in this repo";
-`.agents/hooks/session-start.sh`.
+the new branch.
 
 ## Branch names
 
 A branch name and the first line of each commit start with a type prefix:
 `feat/`, `fix/` or `docs:` style. The prefix applies to the first line only;
-the commit body stays a what, why and verified narrative. The worktree helper
-strips the branch's first prefix component to name the directory.
-
-Source: `.agents/skills/ship/SKILL.md`, step 1;
-`.agents/scripts/worktree.py`, docstring.
+the commit body states what changed, why, and what was verified.
 
 ## Commits and the provenance trailer
 
@@ -81,12 +67,12 @@ The helper:
 - refuses to commit on `experimental` or `main`, since work lands there only
   through a PR;
 - appends `Co-Authored-By: <agent>` (default `Claude`, or `--agent <name>`)
-  unless the message already has a `Co-Authored-By` trailer;
+  unless the message already has one;
 - warns when that trailer carries an email or a model name.
 
-The trailer names the agent only, with no model name and no email. An agent
-cannot verify which model is executing it, so the trailer records only what
-the agent knows. Three layers hold the convention:
+The trailer names the agent only. An agent cannot verify which model is
+executing it, so the trailer records what it knows. Three layers hold the
+convention:
 
 1. `attribution.commit` in `.agents/settings.json` makes Claude Code ask for
    `Co-Authored-By: Claude`.
@@ -95,79 +81,43 @@ the agent knows. Three layers hold the convention:
 3. `check_trailers.py` fails a PR in CI that still carries a non-canonical
    Claude trailer.
 
-Another agent's trailer passes through all three, so that agent must form it
-correctly when it writes the commit.
+Another agent's trailer passes through all three, so it must be formed
+correctly when the commit is written.
 
 Check: `git log -1` shows the trailer as the last line of the message.
 
-Source: `.agents/scripts/ship.py`, docstring (`commit`);
-`.agents/skills/ship/SKILL.md`, step 1; `AGENTS.md`, "Conventions";
-`.agents/settings.json`; `.githooks/commit-msg`;
-`flake/scripts/check_trailers.py`, docstring.
-
 ## `git add` before `nix eval`
 
-A new file must be staged before any evaluation. A flake in a git
-repository ignores untracked files, so an unstaged module does not exist for
-Nix, and nothing says so. `just add-module` stages the file it creates. Two
-hooks remind at the moment of the mistake:
-
-- the edit-check hook, when an untracked `.nix` file under `flake/modules/`
-  is written;
-- the untracked-nix guard, when an evaluating command runs while untracked
-  `.nix` files exist.
-
-`just modules` reports untracked files at preflight.
-
-Source: `AGENTS.md`, "Working in this repo";
-`.agents/hooks/edit-check-posttooluse.sh`;
-`.agents/hooks/nix-untracked-guard-pretooluse.sh`; `flake/scripts/modules.py`,
-docstring.
+A flake in a git repository ignores untracked files, so an unstaged new module
+does not exist for Nix. Stage new files before any evaluation; the reasoning
+and the guards that remind you are in
+[Step 4 of adding a module](adding-a-module.md#step-4-git-add-before-nix-eval).
 
 ## What runs at commit and push
 
-Once `core.hooksPath` points at `.githooks`, each commit runs the lint ratchet
-and each push without nix runs the offline preflight steps. The session-start
-hook sets `core.hooksPath` when it is unset; `just install-hooks` does the
-same by hand.
-
-| Moment | Hook | Where nix works | Where nix cannot run |
-|---|---|---|---|
-| `git commit` | `pre-commit` | [Lint ratchet](glossary.md#lint-ratchet); stages a lowered baseline | `offline_checks.py staged` |
-| `git commit` | `commit-msg` | Trailer rewrite | Trailer rewrite |
-| `git push` | `pre-push` | Nothing; preflight is the checklist | `offline_checks.py preflight` |
-
-A failing hook stops the commit or push. `--no-verify` bypasses the hooks;
+Once `core.hooksPath` points at `.githooks`, each commit runs the
+[lint ratchet](glossary.md#lint-ratchet) and the trailer rewrite, and each
+push without nix runs the offline preflight steps. The session-start hook sets
+`core.hooksPath` when it is unset; `just install-hooks` does it by hand. A
+failing hook stops the commit or push. `--no-verify` bypasses the hooks, but
 `AGENTS.md` says it should not be needed, and CI runs the same checks
-regardless.
-
-Source: `.githooks/pre-commit`, `.githooks/commit-msg`, `.githooks/pre-push`;
-`AGENTS.md`, "Commands".
+regardless. What each hook does is in
+[Checks, guards and hooks](agent-checks-and-guards.md#git-hooks).
 
 ## Preflight is the CI checklist
 
-[Preflight](glossary.md#preflight) is the `just preflight` recipe. CI runs
-the recipe itself, never a copy of its steps. The recipe runs the fast
-checks first (the wiki lint and the test suites), then `just check`,
-`just modules` and `just lint`; `just --show preflight` lists the current
-steps.
+[Preflight](glossary.md#preflight) is the `just preflight` recipe, and CI runs
+the recipe itself, never a copy of its steps. `just --show preflight` lists
+the current steps. A step added to the recipe gates PRs with no edit to
+`.github/workflows/check.yml`; `just preflight-mirror-test` fails if the
+workflow stops calling the recipe or adds checks of its own beyond the
+CI-only ones. On a pull request CI also runs `check_trailers.py` over the PR's
+own commits.
 
-`.github/workflows/check.yml` installs nix and runs `nix develop ./flake
---command just preflight`. On a pull request it also runs `check_trailers.py`
-over the PR's own commits. `just preflight-mirror-test`, itself a preflight
-step, fails if the workflow stops calling the recipe or adds checks of its
-own beyond the CI-only ones. A step added to the recipe therefore gates PRs
-with no edit to the workflow.
-
-`just agent preflight-brief` runs the same steps concurrently (`just lint`
-last, alone). It prints one line per step, with the tail of any failure. For
-a branch with several commits, `just agent preflight-each [<range>]` runs it
-on each commit in a throwaway detached worktree, because each commit must be
-green on its own.
-
-Source: `.justfile`, `preflight` and `preflight-mirror-test`;
-`.github/workflows/check.yml`, header and steps; `.agents/scripts/agent.just`;
-`.agents/skills/ship/SKILL.md`, step 0.
+`just agent preflight-brief` runs the same steps concurrently and prints one
+line per step, with the tail of any failure. For a branch with several
+commits, `just agent preflight-each [<range>]` runs it on each commit in a
+throwaway detached worktree, because each commit must be green on its own.
 
 ## What "push" means
 
@@ -176,7 +126,7 @@ landing on `experimental`, the default branch. `main` is the promoted
 known-good branch and moves only by a PR from `experimental` after hardware
 verification. Other asks map differently:
 
-| Nire says | The agent does |
+| The repo owner says | The contributor does |
 |---|---|
 | "push this branch" | `git push` it; no PR, no gates |
 | "open a PR" | Opens it and stops |
@@ -184,78 +134,54 @@ verification. Other asks map differently:
 | "promote to main" | The promotion flow: a PR from `experimental` to `main`, merged with a merge commit |
 | a branch named outright | Pushes directly there, except `main` |
 
-When unsure whether an ask means `experimental`, the agent asks.
-
-Source: `AGENTS.md`, hard rules and "Working in this repo";
-`.agents/skills/ship/SKILL.md`, "Applies to";
-`.agents/skills/ship/side-flows.md`.
+When unsure whether an ask means `experimental`, ask.
 
 ## The ship flow
 
 The `ship` skill lands work on `experimental` through a branch, a PR, one
-combined question to nire, the merge and the branch deletion.
+combined question to the repo owner (merge, and delete the branch afterward?),
+the merge and the branch deletion.
 
-1. Fetch and check. `just agent where` fetches and prints the branch,
-   dirty paths, commits and diff stat against `origin/experimental`. Then
-   `just agent preflight-brief`, and `just agent preflight-each` for a
-   multi-commit branch.
-2. Branch, commit, open the PR. Commit with `just agent commit`, write
-   the PR body to a file, and run `just agent pr <body-file>`. The helper
-   pushes with `-u` when the branch has no `origin/<branch>` upstream and
-   runs `gh pr create --base experimental --body-file`. It refuses on
-   `experimental` or `main` and refuses a body missing the disclosure line.
-3. Gate, then ask. `just agent ship-ready <n>` waits for CI. It then
-   requires the PR to be open, not a draft, `mergeStateStatus` `CLEAN` and
-   based on `experimental`. `mergeable` alone is not enough, because it means
-   only "no conflicts". On READY the agent shows the printed summary and asks
-   one question covering both actions: merge, and delete the branch
-   afterward? On NOT READY it fixes what the gate names and does not ask.
-4. Land, on yes only. `just agent ship-land <n>`:
-   - re-runs the gate;
-   - merges, pinned to the head commit the gate read (rebase for one commit,
-     a merge commit for several);
-   - confirms the PR is `MERGED`;
-   - checks out and pulls `experimental` (from a linked worktree it detaches
-     that worktree and leaves the shared checkout alone);
-   - deletes the local and remote branch;
-   - runs `just close-fixed <n>`.
-
-   A failed merge deletes nothing.
+1. Check. `just agent where` fetches and prints the branch, dirty paths,
+   commits and diff stat against `origin/experimental`. Then
+   `just agent preflight-brief`.
+2. Open the PR. Commit with `just agent commit`, write the PR body to a file,
+   and run `just agent pr <body-file>`. It pushes the branch and runs
+   `gh pr create --base experimental`. It refuses on `experimental` or `main`
+   and refuses a body missing the disclosure line.
+3. Gate, then ask. `just agent ship-ready <n>` waits for CI, then requires the
+   PR to be open, not a draft, `mergeStateStatus` `CLEAN` and based on
+   `experimental`. On READY, show the printed summary and ask the one
+   question. On NOT READY, fix what the gate names and do not ask.
+4. Land, on yes only. `just agent ship-land <n>` re-runs the gate, merges
+   (rebase for one commit, a merge commit for several), confirms the PR is
+   `MERGED`, updates `experimental`, deletes the local and remote branch and
+   runs `just close-fixed <n>`. A failed merge deletes nothing.
 
 On a no, the PR stays open and nothing is cleaned up.
 
-Source: `.agents/skills/ship/SKILL.md`, steps 0 to 3; `.agents/scripts/ship.py`,
-docstring.
-
 ## Stacked PRs
 
-A stacked PR is one whose base is another PR's branch. It must be
-retargeted to `experimental` before its base merges. GitHub retargets a
-stacked PR only when the base branch is deleted, and the repository deletes
-a branch as soon as its PR merges. No gap is left in which to retarget
-afterwards. Retarget with `gh pr edit <child> --base experimental`. Each PR
-still gets its own merge-and-delete question, and the agent says which PR is
-stacked on which.
-
-Source: `.agents/skills/ship/side-flows.md`, "When one working tree becomes
-two PRs".
+A stacked PR is one whose base is another PR's branch. It must be retargeted
+to `experimental` before its base merges. GitHub retargets a stacked PR only
+when the base branch is deleted, and the repository deletes a branch as soon
+as its PR merges, so no gap is left to retarget afterwards. Retarget with
+`gh pr edit <child> --base experimental`. Each PR still gets its own
+merge-and-delete question, and the PR body says which PR is stacked on which.
 
 ## File issues and PRs only in this repository
 
-Agents file issues and PRs only in `NireBryce/nixos-configs`. An upstream bug
-(in nixpkgs or another tool) is still tracked here. Filing on another project
-needs nire to ask for that specific filing in their own message.
+File issues and PRs only in `NireBryce/nixos-configs`. An upstream bug (in
+nixpkgs or another tool) is still tracked here. Filing on another project
+needs the repo owner to ask for that specific filing in their own message.
 Approving a list of tasks that includes one does not count.
 
 Drafts written for other projects stay in
 `_loose-ends/bugs-pending-submission/` and `wiki/meta/open-threads.md` for
-nire to file. A filing here can still notify another project through
-GitHub autolinking of `owner/repo#123`, so the agent greps for that pattern
-before filing. The skill `propose-issue` hardcodes
-`--repo NireBryce/nixos-configs` in its `gh issue create`.
-
-Source: `AGENTS.md`, hard rules and "Working in this repo";
-`.agents/skills/propose-issue/SKILL.md`, "Never a third-party repo".
+the repo owner to file. A filing here can still notify another project through
+GitHub autolinking of `owner/repo#123`, so grep for that pattern before
+filing. The skill `propose-issue` hardcodes `--repo NireBryce/nixos-configs`
+in its `gh issue create`.
 
 ## The PR body
 
@@ -267,14 +193,10 @@ comparison against unaffected hosts.
 
 When an agent wrote the PR, the disclosure line `🤖 Generated by an LLM agent`
 goes before "What changed" and again at the bottom. A harness-injected footer
-counts as the bottom one. The line names no model, for the same reason as
-the trailer. For a change to a guard or check, the body says what is now
-enforced and how it was verified. It says nothing about which inputs got
-past the old version.
-
-Source: `.github/PULL_REQUEST_TEMPLATE.md`; `.agents/skills/ship/SKILL.md`,
-step 1; `.agents/scripts/ship.py`, docstring (`pr`); `AGENTS.md`, "Working in
-this repo".
+counts as the bottom one. The line names no model, for the same reason as the
+trailer. For a change to a guard or check, the body says what is now enforced
+and how it was verified. It does not say which inputs got past the old
+version.
 
 ## Say which rung you reached
 
@@ -290,10 +212,7 @@ beyond it. The rungs, each catching defects the one before cannot:
 An undated "verified" counts as *evaluates*. Evaluating a cheap attribute
 proves nothing; force a toplevel. A clean build still stops short of runtime.
 A NixOS host can be built only on itself, because there is no remote builder
-and no binfmt.
-
-Source: `AGENTS.md`, "Before calling it done" and "Commands";
-[18-say-which-rung.md](../../wiki/agent-lessons-learned/18-say-which-rung.md).
+and no binfmt. See [lesson 18](../../wiki/agent-lessons-learned/18-say-which-rung.md).
 
 ## A session without nix or `just`
 
@@ -307,17 +226,12 @@ Some cloud sessions have nix but cannot fetch the flake inputs, and have no
   `nix-instantiate --parse`, and the wiki lint runs without its `generated`
   check.
 - `pre-push` runs `offline_checks.py preflight`: every `python3` step of the
-  preflight recipe, read from the recipe itself, with the nix-dependent
-  steps named and left to CI.
+  preflight recipe, with the nix-dependent steps named and left to CI.
 
 `just preflight-offline` runs the same set by hand where `just` exists. The
 [offline checks](glossary.md#offline-checks) stand in for statix and deadnix
 but do not match them, so CI still has to catch a lint regression. Such a
 session reaches no rung above the offline checks, and says so.
-
-Source: `flake/scripts/offline_checks.py`, docstring; `.githooks/pre-commit`;
-`.githooks/pre-push`; `flake/scripts/with-nix-tools.sh`; `AGENTS.md`,
-"Commands".
 
 ## Worked example: a one-page docs fix
 
@@ -325,25 +239,18 @@ The example fixes a wrong command on one wiki page and lands it. Run each
 command from inside the worktree once it exists; `<repo>` is the shared
 checkout and `<scratch>` the session's scratch directory.
 
-1. Check where the session is.
+1. Check where the session is. The output names the branch and dirty paths.
 
    ```sh
    hostname
    just agent where
    ```
 
-   Check: the output names the branch and the dirty paths of the current
-   checkout, and the session-start context says whether this is the shared
-   checkout.
-
-2. Create a worktree for the task.
+2. Create a worktree. It prints `<scratch>/wt-fix-wiki-command`.
 
    ```sh
    just agent worktree new docs/fix-wiki-command --root <scratch>
    ```
-
-   Check: the command prints `<scratch>/wt-fix-wiki-command`, and `git -C
-   <scratch>/wt-fix-wiki-command status -sb` shows `docs/fix-wiki-command`.
 
 3. Find whether the problem is already tracked.
 
@@ -351,13 +258,9 @@ checkout and `<scratch>` the session's scratch directory.
    just threads "<keywords>"
    ```
 
-   Check: no open issue or wiki thread already covers it.
-
 4. Edit the page and its `-for-agents.md` sibling, bump `_Last modified:_` on
    each page whose text changed, and grep for other copies of the wrong
    command (skill `wiki-sync`).
-
-   Check: the edit-check hook reports no stale sibling for the pair.
 
 5. Run the wiki lint.
 
@@ -365,17 +268,14 @@ checkout and `<scratch>` the session's scratch directory.
    just wiki-lint
    ```
 
-   Check: no hard findings.
-
 6. Run preflight.
 
    ```sh
    just agent preflight-brief
    ```
 
-   Check: every step prints as passing.
-
-7. Commit exactly the changed pages.
+7. Commit exactly the changed pages. `git log -1` ends with
+   `Co-Authored-By: Claude`.
 
    ```sh
    just agent commit -- wiki/<dir>/<page>.md wiki/<dir>/<page>-for-agents.md <<'EOF'
@@ -385,52 +285,50 @@ checkout and `<scratch>` the session's scratch directory.
    EOF
    ```
 
-   Check: `git log -1` ends with `Co-Authored-By: Claude`.
-
 8. Write the PR body to a file under the template's headings, with the
-   disclosure line at the top and bottom, then open the PR.
+   disclosure line at the top and bottom, then open the PR. The command prints
+   the PR URL.
 
    ```sh
    just agent pr <scratch>/pr-body.md
    ```
 
-   Check: the command prints the PR URL, and the PR's base is `experimental`.
-
-9. Gate the PR.
+9. Gate the PR. The output says READY; show the summary to the repo owner and
+   ask the single merge-and-delete question.
 
    ```sh
    just agent ship-ready <n>
    ```
 
-   Check: the output says READY. Show the summary to nire and ask the
-   single question: merge, and delete the branch afterward?
-
-10. On a yes, land it.
+10. On a yes, land it. The output prints `merged #<n> (<method>)`, the detach
+    of this worktree and the local `git branch -D`.
 
     ```sh
     just agent ship-land <n>
     ```
 
-    Check: the output prints `merged #<n> (<method>)`, the detach of this
-    worktree and the local `git branch -D`. The remote branch is usually
-    already gone.
-
-11. Remove the worktree.
+11. Remove the worktree. The git guard asks before `worktree remove --force`;
+    it is the `use-a-worktree` skill's documented cleanup step.
 
     ```sh
     git -C <repo> worktree remove --force <scratch>/wt-fix-wiki-command
     ```
 
-    The git guard asks before `worktree remove --force`; it is the
-    `use-a-worktree` skill's documented cleanup step.
+12. Report the landed commit, the branch's fate, and the rung reached. A docs
+    change *evaluates* (lint and preflight passed); it does not build or run.
 
-    Check: `git -C <repo> worktree list` no longer shows it.
+## Sources
 
-12. Report the result: the landed commit (rebased, for a single-commit PR),
-    the branch's fate, and the rung reached. A docs change *evaluates* (lint
-    and preflight passed); it does not build or run.
-
-Source: `.agents/skills/use-a-worktree/SKILL.md`; `.agents/skills/ship/SKILL.md`;
-`.agents/skills/wiki-sync/SKILL.md`; `.agents/skills/propose-issue/SKILL.md`,
-step 2; `.agents/scripts/agent.just`; `.agents/skills/docs-audit-all/SKILL.md`,
-step 8.
+- `AGENTS.md`: hard rules, "Working in this repo", "Conventions", "Commands",
+  "Before calling it done"
+- `.agents/skills/use-a-worktree/SKILL.md`, `.agents/skills/ship/SKILL.md`,
+  `.agents/skills/ship/side-flows.md`, `.agents/skills/wiki-sync/SKILL.md`,
+  `.agents/skills/propose-issue/SKILL.md`
+- `.agents/scripts/worktree.py`, `.agents/scripts/ship.py`,
+  `.agents/scripts/agent.just`
+- `.agents/settings.json`, `.agents/hooks/session-start.sh`
+- `.githooks/pre-commit`, `.githooks/commit-msg`, `.githooks/pre-push`
+- `flake/scripts/check_trailers.py`, `flake/scripts/offline_checks.py`,
+  `flake/scripts/with-nix-tools.sh`
+- `.justfile`, `.github/workflows/check.yml`, `.github/PULL_REQUEST_TEMPLATE.md`
+- [18-say-which-rung.md](../../wiki/agent-lessons-learned/18-say-which-rung.md)
