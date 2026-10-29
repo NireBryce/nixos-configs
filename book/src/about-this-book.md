@@ -9,8 +9,8 @@ depends on; the remainder is agent output with less scrutiny. Treat the
 book as reliable but unproven, and check statements that matter against the
 code each chapter lists under Sources.
 
-Mechanical checks compensate: lints compare documentation against code, and
-tests pin each checker to a case it should catch. The chapters on
+Mechanical checks back this up: lints compare documentation against code, and
+each checker has a test with a case it must catch. The chapters on
 [agents in the repo](agents-in-the-repo.md),
 [checks and guards](agent-checks-and-guards.md) and
 [git and agent workflows](git-and-agent-workflows.md) describe them.
@@ -23,15 +23,15 @@ and the code win.
 
 ## Links to `../../wiki/...`
 
-These links point at files in the repository. They work when you read the
+Links to `../../wiki/...` point at files in the repository. They work when you read the
 Markdown on GitHub or in a checkout. The published site rewrites them to
 GitHub URLs at build time ([`book.yml`](../../.github/workflows/book.yml),
 [`book_pages_links.py`](../../.agents/scripts/book_pages_links.py)).
 
 ## Unverified claims
 
-A claim the author could not confirm is marked `Unverified:`, or collected in
-a "Not checked" list at the end of the chapter. Read those as open questions.
+A claim the agents could not confirm from the repo is listed under "Not
+checked" at the end of its chapter. Read those as open questions.
 
 ## Sources
 

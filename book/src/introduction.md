@@ -19,8 +19,8 @@ Borrow the patterns instead.
 
 ## The core idea
 
-Almost every `.nix` file under `flake/modules/` is a module file, and its
-filename is its module name. The folder it sits in decides its
+Almost every `.nix` file under `flake/modules/` is a
+[module file](glossary.md#module-file), and its filename is its module name. The folder it sits in decides its
 [category](glossary.md#category). A host lists categories by name and
 receives every module file in them. No central list needs updating and no
 feature has its own `enable` option.
@@ -67,11 +67,11 @@ In names such as `just modules`, "module" means module file.
 |---|---|
 | `flake/flake.nix` | Inputs and flake-parts setup. Holds no module list. |
 | `flake/modules/` | Every module, grouped into areas such as `general-config/`, `hardware-config/`, `packages-config/`, `homelab-config/`, `host-config/`, `users-config/`. |
-| `flake/doc/` | Standalone notes on mechanisms and ways back. |
+| `flake/doc/` | Standalone notes on individual mechanisms. |
 | `flake/scripts/` | Scripts behind the `just` recipes. |
 | `wiki/` | The documentation, organized by task. Start at [`wiki/00-INDEX.md`](../../wiki/00-INDEX.md). |
 | `AGENTS.md` (also `CLAUDE.md`) | Working rules for coding agents, written as past mistakes. |
-| `.agents/` | Agent skills, rules and hooks. |
+| `.agents/` | Agent [skills](glossary.md#skill), rules and [hooks](glossary.md#hook-claude-code). |
 | `book/` | This book. See [about this book](about-this-book.md). |
 
 Hosts are declared in `flake/modules/host-config/hosts.nix`. Home Manager runs

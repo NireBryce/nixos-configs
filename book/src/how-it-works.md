@@ -2,14 +2,13 @@
 
 Several parts of this flake behave differently from what a reader who knows
 NixOS would assume. Each section states the rule, then the mechanism and its
-consequences. The later chapters assume this one. Terms in *italics* on first
-use are in the [glossary](glossary.md).
+consequences. The later chapters assume this one.
 
 ## The module file shape
 
-A module file is an attribute set whose keys are *module classes*, and each
-value is the module for that class. The class keys are `nixos`, `homeManager`
-and `darwin`. A plain NixOS module (`{ config, pkgs, ... }: { … }`) is not a
+A [module file](glossary.md#module-file) is an attribute set whose keys are
+[module classes](glossary.md#module-class), and each value is the module for
+that class. A plain NixOS module (`{ config, pkgs, ... }: { … }`) is not a
 module file.
 
 ```nix
@@ -27,16 +26,18 @@ module file.
 }
 ```
 
-That is `packages-config/shell-apps/text-tools/ripgrep.nix` in full. The
-allowed keys are `nixos`, `homeManager` and `darwin`, plus `includes`,
-`enables` and `folderIsCategory`. A file may set several classes at once, so
-one feature's NixOS half and Home Manager half can live in one file. That is
-the main thing flake-parts offers this repo.
+The example is `packages-config/shell-apps/text-tools/ripgrep.nix` in full. The
+allowed keys are the class keys `nixos`, `homeManager` and `darwin`, plus
+[`includes`](#hosts-list-categories-with-includes),
+[`enables`](#includes-and-enables) and `folderIsCategory`. A file may set
+several classes at once, so one feature's NixOS half and Home Manager half can
+live in one file. This is the main thing [flake-parts](glossary.md#flake-parts)
+offers this repo.
 
 The file may instead be a function of only `lib` and/or `inputs` that
 returns such a set (`{ lib, ... }: { nixos = …; }`). `pkgs` and `config`
-belong in the **inner**, per-class module's arguments. A `pkgs` taken from
-anywhere else comes from *perSystem*, flake-parts' per-system scope. That
+belong in the arguments of the **inner**, per-class module. A `pkgs` taken from
+the outer function comes from [perSystem](glossary.md#persystem). That
 `pkgs` is built from the fleet's shared `nixpkgs.config`
 (`flake/modules/_lib/nixpkgs.nix`), so it carries `allowUnfree` like a host's,
 but it is a separate nixpkgs instance.
@@ -44,8 +45,8 @@ but it is a separate nixpkgs instance.
 Two mistakes are easy to make:
 
 - A raw NixOS module dropped under `modules/` (for example
-  `nixos-generate-config` output) is not a module file. dirs-as-categories
-  refuses it when it asks for an argument only a class module gets, and the
+  `nixos-generate-config` output) is not a module file.
+  [dirs-as-categories](glossary.md#dirs-as-categories) refuses it when it asks for an argument only a class module gets, and the
   error names the argument. Wrap it as `{ nixos = <the original module>; }`;
   see [Wrapping a raw NixOS
   module](adding-a-module.md#wrapping-a-raw-nixos-module).
@@ -89,8 +90,8 @@ nix eval --json ./flake#moduleGraph     # categories, modules, classes, includes
 just module-graph tree --category shell-apps
 ```
 
-A folder below an *area* (`general-config/`, `packages-config/`, …) is a
-category when one of its subfolders holds modules. A file directly in the
+A folder below an [area](glossary.md#area) (`general-config/`,
+`packages-config/`, …) is a category when one of its subfolders holds modules. A file directly in the
 folder can decide the question with `folderIsCategory`. Including a category
 includes every module beneath it, at any depth.
 
@@ -117,8 +118,8 @@ The [categories chapter](categories.md) covers the details and the traps.
 
 ## Hosts list categories with `includes`
 
-A host's *entry point* lists categories **by name**. It is
-`host-config/<host>-configuration.nix`, and is itself a module file:
+A host's [entry point](glossary.md#entry-point) lists categories **by name**.
+The entry point is `host-config/<host>-configuration.nix`, itself a module file:
 
 ```nix
 {
@@ -144,8 +145,9 @@ Entry points sit **directly** in `host-config/` (and `users-config/`, for
 ordinary module put there reaches no host.
 
 A name in `includes` that doesn't exist stops evaluation. A category that no
-host includes evaluates fine and installs nothing. `just modules` catches that
-case and fails, reading `orphans` from `flake.moduleGraph`. The
+host includes evaluates fine and installs nothing; its modules are
+[orphans](glossary.md#orphan). `just modules` fails on them, reading `orphans`
+from `flake.moduleGraph`. The
 `module-orphans` flake check fails only when built, and `just check` runs with
 `--no-build`, so it does not.
 
@@ -174,28 +176,22 @@ A host that includes the `impermanence` category loses everything on `/`
 that is not explicitly persisted, at every boot. A host that leaves the
 category out keeps a plain persistent root, and its entry point says so.
 Darwin has no impermanence. Check the specific host's entry point before
-assuming either way. The mechanism is in [Wiring a
+assuming either way. The warning, the `root-blank` prerequisite and the
+precautions are in [Wiring a
 host](wiring-a-host.md#read-this-first-the-root-wipe).
 
-- **Never install this config wholesale.** On a disk shaped like the one the
-  module describes, it deletes `/`.
-- `root-blank` must already exist. No host's config creates it.
-- Any state that matters has to be declared for persistence. Use
-  `persist.persistIfImpermanent` from `flake.lib`.
-- For changes near boot, prefer `just boot` over `just switch`, so the
-  running generation stays in the boot menu as a fallback.
-- Read all of `WARN-impermanence.nix` before you touch anything near it.
+State that matters has to be declared for persistence with
+`persist.persistIfImpermanent` from `flake.lib` (see
+[Shared helpers](#shared-helpers-flakelib)).
 
 ## Secrets: sops-nix, names only
 
-Secrets live in an encrypted file inside the repository. Inspect them by
-name, never by value. sops-nix manages them
-(`general-config/system/secrets/`). `secrets.yaml` is encrypted and
-**committed on purpose**. Each host decrypts it with its own SSH host key,
+sops-nix manages secrets (`general-config/system/secrets/`). `secrets.yaml` is
+encrypted and **committed on purpose**. Each host decrypts it with its own SSH host key,
 converted to an age key. The enrolled hosts are whichever ones `.sops.yaml`
 in that folder lists; read that file rather than a count.
 
-The *names* of the keys are plaintext inside the ciphertext. To answer
+The names of the keys are plaintext inside the ciphertext. To answer
 "which secrets exist?", run `just read-sops-names`. The recipe prints names
 only. **Never use `sops -d` to answer that question:** it prints every value,
 and redirecting stderr doesn't stop stdout. The repo has leaked values that
@@ -204,8 +200,8 @@ handling of sops output.
 
 ## Home Manager comes through NixOS
 
-*Home Manager*, which manages a user's packages and dotfiles as modules, runs
-inside each system configuration. The flake has no `homeConfigurations`
+[Home Manager](glossary.md#home-manager) runs inside each system
+configuration. The flake has no `homeConfigurations`
 output and no separate home switch. `just switch` applies the system and Home
 Manager together. The whole home config is one module, `elly-home-manager`,
 and every host shares it, darwin included. The reasons and the failure modes
@@ -218,13 +214,14 @@ darwin side is in [Darwin edge cases](darwin.md).
 
 `flake/flake.nix` declares inputs and imports flake-parts modules; it names
 no hosts and lists no modules. flake-parts builds a flake's outputs from
-module-system modules (*flake-parts modules*), much as NixOS builds a system
-from NixOS modules.
+module-system modules ([flake-parts modules](glossary.md#flake-parts-module)),
+much as NixOS builds a system from NixOS modules.
 
-It imports `flake-parts.flakeModules.modules`, nix-darwin's flake module, and
-`(inputs.dirs-as-categories.lib.tree ./modules)`, among others. Its `touchup`
-only turns off the `formatter` output. The *dirs-as-categories* input uses
-`import-tree` to read every `.nix` file under `flake/modules/`, and fills in
+`flake.nix` imports `flake-parts.flakeModules.modules`, nix-darwin's flake module, and
+`(inputs.dirs-as-categories.lib.tree ./modules)`, among others. The flake-parts
+`touchup` module only turns off the `formatter` output. The
+[dirs-as-categories](glossary.md#dirs-as-categories) input uses `import-tree`
+to read every `.nix` file under `flake/modules/`, and fills in
 `flake.modules.<class>.<name>` from those files. The hosts are declared in
 `flake/modules/host-config/hosts.nix`.
 

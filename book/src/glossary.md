@@ -37,8 +37,8 @@ Source: `flake/doc/flake-parts-rationale.md`.
 ## dirs-as-categories
 
 The flake input that turns `flake/modules/` into modules. It names each module
-after its file and makes folders into categories. It uses import-tree to find
-the files and skips any path containing `/_`.
+after its file and makes folders into categories. It uses import-tree (a library that lists a
+directory's `.nix` files) to find the files and skips any path containing `/_`.
 Source: `flake/flake.nix`.
 
 ## `drvPath`
@@ -89,7 +89,7 @@ Source: `flake/doc/trailhead-home-manager-standalone.md`.
 
 ## Guard hook
 
-A harness hook that denies, asks or warns when a tool call matches a pattern,
+A [hook](#hook-claude-code) that denies, asks or warns when a tool call matches a pattern,
 such as a git command that would discard uncommitted work. Guards are string
 and path matchers, not a security boundary.
 Source: `.agents/rules/agent-config.md`.
@@ -167,8 +167,8 @@ Source: [module-files.md](../../wiki/config-structure/module-files.md).
 Checks that need neither nix nor `just`. The git hooks run them when nix cannot
 supply the lint tools, as in a cloud container that cannot fetch the flake
 inputs. `staged` mode checks syntax and parsing of staged files plus the wiki
-lint. `preflight` mode runs preflight's `python3` steps and names what it left
-to CI.
+lint. `preflight` mode runs the `python3` steps of [preflight](#preflight) and names
+what it left to CI.
 Source: `flake/scripts/offline_checks.py`.
 
 ## Orphan

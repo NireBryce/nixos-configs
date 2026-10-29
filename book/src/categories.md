@@ -1,9 +1,9 @@
 # Categories and membership
 
-A [category](glossary.md#category) comes from the shape of the folders; no
-file declares one. This chapter gives the rule, the procedures for adding a
-module to a category and for creating, removing and including one, real
-examples from `flake/modules/`, and the traps that produce no error.
+A [category](glossary.md#category) is determined by the shape of the folders
+under `flake/modules/`. This chapter gives the rule, the procedures for adding
+a module to a category and for creating, removing and including one, real
+examples, and the traps that produce no error.
 
 ## The rule
 
@@ -34,8 +34,8 @@ just module-graph tree --category homelab
 just module-graph hosts                 # which host takes which category
 ```
 
-`wiki/config-structure/architecture.md` carries a generated diagram of the
-top level.
+[`architecture.md`](../../wiki/config-structure/architecture.md) carries a
+generated diagram of the top level.
 
 ## Adding a module to a category
 
@@ -64,9 +64,10 @@ No per-module exclusion exists.
    includes evaluates without error and installs nothing. Its modules are
    [orphans](glossary.md#orphan); `just modules` fails and names them
    (`just check` does not, because it runs with `--no-build`).
-4. Compare the hosts before and after (`just diff <ref>`, or the
-   fingerprints). Promoting an existing folder can reorder package lists.
-5. Run `just wiki-gen`. Give the category a page under
+4. Compare the hosts before and after with `just diff <ref>`, where `<ref>` is
+   the git ref to compare against. Promoting an existing folder can reorder
+   package lists.
+5. Run `just wiki-gen`, which regenerates the wiki's derived tables. Give the category a page under
    `wiki/config-structure/categories/` if any host might include it.
 
 ## Removing a category
@@ -78,10 +79,11 @@ No per-module exclusion exists.
    message. Its modules then belong to the nearest category above it, which
    may be one that more hosts include. Check with
    `nix eval --json ./flake#moduleGraph`.
-3. Run `just diff <ref>` across any removal. Removing a module can remove
+3. Run `just diff <ref>` across any removal; `<ref>` is the git ref from before
+   the change. Removing a module can remove
    something another module had switched on ([lesson
    7](../../wiki/agent-lessons-learned/7-cross-module-side-effects.md)).
-4. Update the category's page and run `just wiki-gen`.
+4. Update the category's page and run `just wiki-gen` as above.
 
 ## Including categories from a host
 
@@ -129,8 +131,8 @@ host, includes `"system"` under `includes.darwin`. It gets no bluetooth,
 networking or KDE Connect, because none of those modules has a `darwin` key.
 
 Three smaller cases follow the same rule. A path containing `/_` is skipped
-(`general-config/impermanence/_disko/`). `homelab-config/homelab/` is an
-umbrella with one nested category per service, and cube includes all of them
+(`general-config/impermanence/_disko/`). `homelab-config/homelab/` is a
+category containing one nested category per service, and cube includes all of them
 with `"homelab"`. `host-config/cube/` and `users-config/elly/` are categories
 that only their own entry point includes, so a module placed there belongs to
 that host or user by construction.

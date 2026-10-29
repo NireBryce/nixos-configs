@@ -1,7 +1,7 @@
 # Your first change
 
-This page adds one small package as a Home Manager module. Run the commands
-from the repo root.
+This page adds one small package as a [Home Manager](glossary.md#home-manager)
+module. Run the commands from the repo root.
 
 ## 1. Scaffold the file
 
@@ -9,15 +9,17 @@ from the repo root.
 just add-module homeManager packages-config/shell-apps/text-tools/example-tool.nix "one-line description"
 ```
 
-The path is relative to `flake/modules/` and must sit inside an existing
-category. The file name becomes the module name. The command writes a stub and
-stages it with `git add`. It refuses an unknown class, a path outside every
-category and a name already in use.
+The first argument is the [module class](glossary.md#module-class). The path is
+relative to `flake/modules/` and must sit inside an existing
+[category](glossary.md#category) (here `text-tools`, inside `shell-apps`). The
+file name becomes the module name. The command writes a stub with a
+`# summary:` comment and stages it with `git add`. It refuses an unknown class,
+a path outside every category and a name already in use.
 
 ## 2. Fill in the body
 
-Replace the stub's class lambda, using `ripgrep.nix` in the same folder as the
-model:
+Replace the stub's `homeManager = _: { ... };` with the following, modeled on
+`ripgrep.nix` in the same folder:
 
 ```nix
 {
@@ -29,8 +31,8 @@ model:
 }
 ```
 
-If you edited or created the file by hand, run `git add` on it again. An
-untracked file does not exist to the flake.
+If you create a file by hand instead of with `just add-module`, run `git add`
+on it. A flake in a git repository ignores untracked files.
 
 ## 3. Check the wiring
 
@@ -38,8 +40,9 @@ untracked file does not exist to the flake.
 just modules
 ```
 
-It reports untracked `.nix` files, orphans (modules no host reaches) and drift
-between the docs and the evaluated module graph. No output of that kind means
+`just modules` evaluates the module graph and reports untracked `.nix` files,
+[orphans](glossary.md#orphan), class bodies that set another class's options,
+and drift between the wiki and the graph. Output without such a finding means
 the file is tracked and reachable.
 
 To see membership, draw the category:
@@ -48,8 +51,9 @@ To see membership, draw the category:
 just module-graph tree --category text-tools
 ```
 
-Your module should appear under `text-tools`. It reaches every host whose
-Home Manager aggregate includes that category.
+Your module should appear under `text-tools`. Every host receives it, because
+`elly-home-manager` includes `shell-apps` and a category includes every module
+beneath it.
 
 ## 4. Evaluate
 
@@ -58,9 +62,10 @@ cd flake
 nix eval --raw '.#nixosConfigurations.nire-durandal.config.home-manager.users.elly.home.activationPackage.drvPath'
 ```
 
-A `/nix/store/….drv` path means the whole configuration evaluated. It proves
-the module evaluates, not that it builds or runs; `just build` is the next
-level.
+The command evaluates the host's whole Home Manager configuration to its
+[`drvPath`](glossary.md#drvpath). A `/nix/store/….drv` path means it evaluated.
+This shows that the module evaluates, not that it builds or runs; `just build` on
+the host is the next step up.
 
 ## Details
 
