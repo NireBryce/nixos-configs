@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 # Runs factcheck, from wherever this environment can get it.
+# factcheck is EXPERIMENTAL (adopted 2026-10-30): read a finding before
+# acting on it, and revert or pin the factcheck flake input if it
+# misbehaves -- this script is the revert point for the wiring.
 #
 # The tool is the factcheck flake input, not a checkout copy, so where it
 # is depends on the session:

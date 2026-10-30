@@ -83,6 +83,9 @@ file, the command) or name the items; keep a number only when it is the
 rule itself, a dated incident or experiment record, a PR/issue/commit
 reference, or an interface a user types (a port). Skill `fact-hygiene`
 (cat 4); `factcheck docrefs` catches the bare count-of-files shape.
+factcheck is experimental (adopted 2026-10-30; parity-verified against
+the checker it replaced, but young) -- read a finding before acting on
+it, and revert or pin the `factcheck` flake input if it misbehaves.
 
 Roster, class, and which hosts wipe `/root`: `host-config/hosts.nix` (check
 it before stating any count) and `wiki/fleet/hosts.md`'s table. First-boot

@@ -245,6 +245,17 @@ All of these run inside [preflight](glossary.md#preflight). factcheck
 check` runs them all; the repo-specific sub-checks and the generated
 regions are this repo's plugins under `tools/docchecks/`.
 
+**factcheck is experimental** (it replaced
+`wiki/meta/scripts/check_docs.py`, and is young upstream). It was
+adopted only after parity verification -- identical findings to the
+checker it replaced, on an untouched tree and with defects injected --
+but it has not yet guarded this repo through real merges, and the
+tool's API will still move. Until
+it has a track record here: read a finding before acting on it, treat an
+unexpected one as a prompt to check the tool before the doc, and if it
+misbehaves, revert or pin the `factcheck` flake input -- the checker is
+upstream, and this PR is the revert for the adoption.
+
 | Sub-check | What it compares |
 |---|---|
 | `imports`, `table` | A category page's "Imported by" text against the hosts that import it |
