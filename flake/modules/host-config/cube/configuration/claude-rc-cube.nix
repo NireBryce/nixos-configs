@@ -27,8 +27,9 @@
 # (scopes repo, workflow, read:org, gist).
 #
 # Push access is a separate fine-grained token, sops secret
-# `cube_claude_rc_github_token`: Contents read/write on the four repos in
-# `dirs`, nothing else, 90-day expiry (wiki/upkeep-and-admin/maintenance-schedule.md). Each unit
+# `cube_claude_rc_github_token`: Contents, Pull requests and Issues
+# read/write on the four repos in `dirs`, nothing else, 90-day expiry
+# (wiki/upkeep-and-admin/maintenance-schedule.md). Each unit
 # gets it through LoadCredential, and `credential.https://github.com.helper` is
 # replaced, through GIT_CONFIG_* so ~/.gitconfig's `gh auth git-credential` is
 # reset and not merely preceded, by a helper that prints it. If the token

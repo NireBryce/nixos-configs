@@ -29,8 +29,8 @@ its header comment has the reasoning behind each option.
   directory must already have been trusted once by running `claude` in it,
   or the unit exits "Workspace not trusted" and retries every 30 seconds.
 - **Push**: sessions push with sops secret `cube_claude_rc_github_token`, a
-  fine-grained PAT (four repos, Contents read/write), not the account `gh`
-  token. Expires 2027-01-18 (90 days):
+  fine-grained PAT (four repos; Contents, Pull requests and Issues read/write), not the account `gh`
+  token. Expires about 2027-01-27 (90 days from 2026-10-29):
   [maintenance-schedule](../upkeep-and-admin/maintenance-schedule.md) item 13 has the
   rotation steps.
 - **Hand-started `claude rc` in the same directory** makes the unit fail with
