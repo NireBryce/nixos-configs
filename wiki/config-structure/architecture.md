@@ -99,7 +99,7 @@ Mermaid an edge up into the top row is a plain line, not an arrow.
 %%{init: {"theme": "base", "themeVariables": {"fontFamily": "ui-sans-serif, system-ui, sans-serif", "fontSize": "14px", "lineColor": "#94a3b8"}, "flowchart": {"curve": "basis", "nodeSpacing": 24, "rankSpacing": 80, "padding": 14}}}%%
 flowchart LR
     subgraph g0["users-config"]
-        n27("<b>elly/</b><br/><i>n h d · 4</i>")
+        n28("<b>elly/</b><br/><i>n h d · 4</i>")
     end
     subgraph g1["packages-config"]
         n20("<b>development/</b><br/><i>n h · 17</i>")
@@ -109,6 +109,7 @@ flowchart LR
         n24("<b>nix-utils/</b><br/><i>n h · 4</i>")
         n25("<b>shell-apps/</b><br/><i>n h · 40</i>")
         n26("<b>terminals/</b><br/><i>h · 3</i>")
+        n27("<b>test-harnesses-for-polymorph/</b><br/><i>n · 4</i>")
     end
     subgraph g2["host-config"]
         n16("<b>cube/</b><br/><i>n · 10</i>")
@@ -146,7 +147,7 @@ flowchart LR
     classDef missing fill:#fee2e2,stroke:#ef4444,color:#1e293b,stroke-width:1.5px
     classDef orphan fill:#fff1f2,stroke:#e11d48,color:#1e293b,stroke-width:2.5px
     classDef bymodule stroke-dasharray:5 3
-    class n6,n7,n8,n9,n10,n11,n12,n13,n14,n15,n16,n17,n18,n19,n20,n21,n22,n23,n24,n25,n26,n27 category
+    class n6,n7,n8,n9,n10,n11,n12,n13,n14,n15,n16,n17,n18,n19,n20,n21,n22,n23,n24,n25,n26,n27,n28 category
     class n7 bymodule
 ```
 

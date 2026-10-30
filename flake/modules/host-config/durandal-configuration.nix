@@ -65,6 +65,10 @@
         "shell-apps"
         "terminals"
 
+        # Coding harnesses for testing polymorph; durandal only, so a nixos-class
+        # category rather than elly-home-manager (shared by every host).
+        "test-harnesses-for-polymorph"
+
         # ── user ──────────────────────────────────────────────────────────────
         "elly"          # elly-user: the account, groups, emergency packages
     ];
