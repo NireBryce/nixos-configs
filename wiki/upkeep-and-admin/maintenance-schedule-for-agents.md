@@ -1,6 +1,6 @@
 # Maintenance schedule, for agents
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-10-30_
 
 _Sibling reviewed: 2026-10-20 -- source trimmed of rationale narration (items 10, 12, intro); no item facts changed. Earlier (2026-10-01): source's restic rotation-log link repointed from pending-setup.md to backup-history.md; this page carries no such link_
 
@@ -27,7 +27,7 @@ and dates are not values.
 | 10 | `FLAKE_LOCK_TOKEN` | expires 2027-09-12; custom date ≤366d | fails loudly by construction, see below | 2026-09-13 |
 | 11 | Atuin account key (undeclared `atuin_key` entry in `secrets.yaml`: same key unconfirmed) | none; on suspicion only | — | 2026-09-09 |
 | 12 | `nire-galatea/tskey` (git history only) | dead — rotated 2024; auth keys ≤90d anyway | nothing — history fossil, not a credential | 2026-09-14 |
-| 13 | `cube_claude_rc_github_token` | fine-grained PAT, expires **2027-01-18** (90d from 2026-10-20) | pushes from cube's `claude-rc` sessions get an auth error; nothing else | 2026-10-20 |
+| 13 | `cube_claude_rc_github_token` | fine-grained PAT, expires about **2027-01-27** (90d from 2026-10-29) | pushes from cube's `claude-rc` sessions get an auth error; nothing else | 2026-10-30 |
 
 **Row 12, decided not pended.** Auth key committed 2024-01-29 (`449d158`)
 for the removed `nire-galatea`; left in git history deliberately (rewrite

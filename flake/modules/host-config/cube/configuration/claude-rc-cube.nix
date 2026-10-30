@@ -27,8 +27,9 @@
 # (scopes repo, workflow, read:org, gist).
 #
 # Push access is a separate fine-grained token, sops secret
-# `cube_claude_rc_github_token`: Contents read/write on the four repos in
-# `dirs`, nothing else, 90-day expiry (wiki/upkeep-and-admin/maintenance-schedule.md). Each unit
+# `cube_claude_rc_github_token`: Contents, Pull requests and Issues
+# read/write on the four repos in `dirs`, nothing else, 90-day expiry
+# (wiki/upkeep-and-admin/maintenance-schedule.md). Each unit
 # gets it through LoadCredential, and `credential.https://github.com.helper` is
 # replaced, through GIT_CONFIG_* so ~/.gitconfig's `gh auth git-credential` is
 # reset and not merely preceded, by a helper that prints it. If the token
@@ -38,6 +39,19 @@
 # switch. A sandboxed Bash command may be able to read the credentials
 # directory: the sandbox denyRead in ~/.claude/settings.json (not managed here)
 # names ~/.ssh and ~/.config/gh only.
+#
+# The same token is exported as GH_TOKEN by a start wrapper, so `gh pr
+# create/view/merge` work in a session (the ship flow's steps after the push).
+# That needs the PAT to carry Pull requests and Issues read/write on top of
+# Contents, which it did not when this was added; until it is re-issued with
+# them, `gh` runs but is refused. ~/.config/gh stays unbound.
+#
+# Not changed on purpose: the empty /home (ProtectHome=tmpfs is read-only, so
+# `mkdir ~/tmp` fails), and the private /tmp (PrivateTmp). Files a session
+# should leave for a normal shell go in ~/.cache, which is bound read-write.
+#
+# statix and deadnix are on the unit's PATH so `just lint` doesn't need a nix
+# shell to fetch them.
 #
 # Whether ~/.claude.json survives claude's rewrites of it through a file bind
 # mount is unchecked. bwrap works inside these options.
@@ -61,6 +75,11 @@ in
             printf 'username=x-access-token\npassword=%s\n' \
                 "$(cat "$CREDENTIALS_DIRECTORY/github-token")"
         '';
+        startScript = pkgs.writeShellScript "claude-rc-start" ''
+            GH_TOKEN=$(cat "$CREDENTIALS_DIRECTORY/github-token")
+            export GH_TOKEN
+            exec ${lib.getExe pkgs.claude-code} remote-control
+        '';
     in {
     # Owned by elly: the user units read it, root's sops activation writes it.
     sops.secrets.cube_claude_rc_github_token.owner = "elly";
@@ -69,7 +88,10 @@ in
         lib.nameValuePair "claude-rc-${name}" {
             description = "claude remote-control in ~/${dir}";
             wantedBy    = [ "default.target" ];
-            path        = [ "/etc/profiles/per-user/elly" "/run/current-system/sw" ];
+            path        = [
+                "/etc/profiles/per-user/elly" "/run/current-system/sw"
+                pkgs.statix pkgs.deadnix
+            ];
             unitConfig.ConditionUser = "elly";
             environment = {
                 GIT_CONFIG_COUNT   = "2";
@@ -80,7 +102,7 @@ in
             };
             serviceConfig = {
                 WorkingDirectory = "%h/${dir}";
-                ExecStart        = "${lib.getExe pkgs.claude-code} remote-control";
+                ExecStart        = "${startScript}";
                 Restart          = "always";
                 RestartSec       = 30;
                 NoNewPrivileges  = true;

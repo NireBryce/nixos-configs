@@ -42,6 +42,21 @@ fi
 input=$(cat)
 command=$(jq -r '.tool_input.command // empty' <<<"$input")
 
+# A `cat > file <<'EOF'` heredoc with a quoted delimiter is text being
+# written, not run: nothing in its body is expanded or executed, so a note
+# that merely mentions the secrets directory or `sops -d` shouldn't trip the
+# checks below. Only that exact shape is dropped (any other command reading a
+# heredoc, `bash <<EOF` included, runs its body); the first line, which holds
+# the target path, and anything after the closing delimiter are still scanned.
+heredoc_re="^[[:space:]]*cat[[:space:]]*>>?[[:space:]]*[^[:space:];&|<>\$\`]+[[:space:]]*<<-?[[:space:]]*'([A-Za-z_][A-Za-z0-9_]*)'[[:space:]]*\$"
+first_line=${command%%$'\n'*}
+if [[ $command == *$'\n'* && $first_line =~ $heredoc_re ]]; then
+    after_body=$(awk -v d="${BASH_REMATCH[1]}" \
+        'f { print; next } { l = $0; sub(/^\t+/, "", l) } l == d { f = 1 }' \
+        <<<"${command#*$'\n'}")
+    command=$first_line$'\n'$after_body
+fi
+
 reason=""
 
 # sops decrypt check, per pipeline stage: the decrypt flag, `--extract`, and
