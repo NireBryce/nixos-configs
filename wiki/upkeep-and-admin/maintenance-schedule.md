@@ -336,9 +336,8 @@ protect one row.
   `LoadCredential` and served to git by a credential helper. It exists so
   those sessions can push without the account-wide `gh` token
   (`~/.config/gh`, deliberately not visible to them).
-- **Expiry**: 90 days from the rotation on 2026-10-29, so about **2027-01-27**
-  (the user's count from the day the token was added, not read off GitHub;
-  the token's settings page is authoritative if they differ).
+- **Expiry**: **2027-01-28**, read from the `github-authentication-token-expiration`
+  header on 2026-10-30 (90 days from creation).
 - **Fails how**: pushes from those sessions get an authentication error.
   Nothing else breaks and the units keep running.
 - **Rotation**: create a new fine-grained PAT with the same repos and
@@ -346,8 +345,8 @@ protect one row.
   `secrets.yaml` with `sops` (skill `secrets-hygiene`), switch cube, then
   `systemctl --user restart 'claude-rc-*'`. Add a repo by adding it to the
   token's repository list and to `dirs`.
-- **Last checked**: 2026-10-30 -- rotated with the wider scopes, in sops and pulled to cube; not yet
-  switched there.
+- **Last checked**: 2026-10-30 -- rotated with the wider scopes, switched on cube,
+  units restarted, GitHub accepts the token on all four repos.
 
 ## Adding a new item
 
