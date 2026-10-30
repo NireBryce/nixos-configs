@@ -218,6 +218,26 @@ The [offline checks](glossary.md#offline-checks) have two modes:
 - `preflight` runs the preflight recipe's `python3` steps, except those the
   script lists as needing nix, and names the steps left to CI.
 
+## Running the guards by hand
+
+The hook scripts run only inside Claude Code and ZCode, and only on their
+`Bash` tool. For any other harness, shell or tool,
+`just agent guard-check -- '<command>'` (`.agents/scripts/guard_check.py`)
+builds the same `PreToolUse` payload and pipes it through every hook that
+`.agents/settings.json` attaches to the `Bash` matcher, so a hook added there
+is covered with no edit to the script. It executes nothing itself, and it
+never hands a `settings.json` entry to a shell: an entry must be a bare
+script under `.agents/hooks/`, or it is refused and counts as a hook that
+could not run, because the script may be run in a checkout nobody has vetted.
+Hook output is printed with control characters replaced. Its exit
+status is 0 for no objection, 2 for a deny, 3 for an ask and 4 when a hook
+could not run (a missing `jq` counts, because the command was then not fully
+checked). It is an honor system, and it covers only the pre-call `Bash` hooks:
+the output scan for secrets and the edit and read guards have no manual form.
+The skill `guards-without-hooks` tells an agent when to call it.
+`.agents/scripts/test_guard_check.py` pins the exit-code mapping with fake
+hooks and runs the real hooks against a temporary repo.
+
 ## Static checks
 
 All of these run inside [preflight](glossary.md#preflight). `check_docs.py`

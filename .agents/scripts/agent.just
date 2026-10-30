@@ -22,6 +22,10 @@ _default:
 recurring *args:
     @{{scripts}}/recurring.py {{args}}
 
+# Run a command string through the Bash guard hooks by hand (harnesses without them): guard-check -- '<cmd>'
+guard-check *args:
+    @cd "{{invocation_directory()}}" && "{{scripts}}/guard_check.py" "$@"
+
 # Several files/ranges/dirs in one call, a header each: show [-n] path[:A-B]...
 show *specs:
     @cd "{{invocation_directory()}}" && "{{scripts}}/show.sh" "$@"

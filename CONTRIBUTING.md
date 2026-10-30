@@ -18,7 +18,8 @@ hooks match that tool, and the skills and `just` recipes are written as bash
 commands. Another shell (fish, zsh, nushell, PowerShell) or a tool that is
 not `Bash` runs without those checks. If you are using one, say so. An agent
 should warn the user before it starts, because the user is then the only
-check left. What matches what is in
+check left, and should check each command with `just agent guard-check`
+(skill `guards-without-hooks`). What matches what is in
 [checks, guards and hooks](book/src/agent-checks-and-guards.md).
 
 ## Before you start

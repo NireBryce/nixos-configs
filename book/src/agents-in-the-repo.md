@@ -99,7 +99,9 @@ only the body loads with the skill. The vocabulary is `NEEDS_TAGS` in
 `check_docs.py`, currently just `bash-guards`. The tag means that another
 shell, or a tool other than `Bash`, runs the skill's commands without the git,
 `just`, nix or sops checks, so an agent in that position warns the user
-before it starts. The session-start hook prints the same reminder. The
+before it starts and checks commands by hand with `just agent guard-check`
+(skill `guards-without-hooks`). The session-start hook prints the same
+reminder. The
 checker fails a skill that runs `sops -d`, `nix eval`, `reset --hard` or the
 deployed-secrets path without the tag, and the check has a test that it does.
 

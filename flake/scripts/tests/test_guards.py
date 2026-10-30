@@ -1555,7 +1555,12 @@ class SessionStart(unittest.TestCase):
         self.assertIn("core.hooksPath: .githooks (", self.context(self.repo))
 
     def test_says_what_the_bash_guards_tag_means(self):
-        self.assertIn("Needs: bash-guards", self.context(self.repo))
+        ctx = self.context(self.repo)
+        self.assertIn("Needs: bash-guards", ctx)
+        # The line is a double-quoted bash string: a backtick in it would be
+        # run as a command at every session start and its output pasted in.
+        self.assertIn("just agent guard-check -- '<cmd>'", ctx)
+        self.assertNotIn("hook objected", ctx)
 
     def test_absolute_hooks_path_counts_as_wired(self):
         git(self.repo, "config", "core.hooksPath",
