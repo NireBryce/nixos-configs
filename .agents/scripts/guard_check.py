@@ -11,11 +11,15 @@ when an agent must call it.
   guard_check.py [--cwd DIR] [--session ID] -- '<command string>'
 
 Pass the command as ONE quoted string; several words are joined with
-shlex.join. Nothing is executed: the hooks only read the payload (git-guard
-runs `git status`, the nix guard runs `git ls-files`; none changes anything).
+shlex.join. The command itself is never executed or put through a shell: it
+travels as data in the JSON payload. The hooks only read it (git-guard runs
+`git status`, the nix guard runs `git ls-files`; none changes anything).
 
 The hook list comes from .agents/settings.json, so a hook added there is
-checked here with no edit to this file. Exit status, the worst answer wins:
+checked here with no edit to this file. Each entry must be a bare script
+under .agents/hooks/ (see resolve_hook); this script may be run in a
+checkout nobody has vetted, so settings.json is not trusted to name
+arbitrary commands. Exit status, the worst answer wins:
 
   0  no hook objected (notes and reminders may still print)
   2  at least one hook DENIED (or exited 2): do not run the command; do
@@ -40,6 +44,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 SETTINGS = REPO / ".agents" / "settings.json"
+HOOK_ROOT = REPO / ".agents" / "hooks"
 HOOK_TIMEOUT = 30
 CODES = {"deny": 2, "ask": 3, "error": 4}
 
@@ -56,6 +61,40 @@ def bash_pretooluse_hooks(settings_path=SETTINGS):
         out += [h["command"] for h in group.get("hooks", [])
                 if h.get("type") == "command"]
     return out
+
+
+def resolve_hook(hook, hook_root=HOOK_ROOT):
+    """The script path a settings.json hook command names, or a ValueError.
+
+    settings.json is repo content, and this script may be run in a checkout
+    nobody has vetted. So the command is never handed to a shell: it must be
+    exactly one word, optionally quoted, optionally led by $CLAUDE_PROJECT_DIR
+    (expanded here, not by a shell), and the file it names must resolve to
+    an executable file under .agents/hooks/. Anything else (arguments, a
+    pipeline, `curl ... | sh`, a path elsewhere, a symlink out) is refused,
+    and the refusal counts as a hook that could not run."""
+    words = shlex.split(hook)
+    if len(words) != 1:
+        raise ValueError(f"not a single script path: {hook[:80]!r}")
+    word = words[0].replace("$CLAUDE_PROJECT_DIR", str(REPO), 1)
+    if "$" in word or "`" in word:
+        raise ValueError(f"unexpanded shell syntax in {word[:80]!r}")
+    path = Path(word).resolve()
+    root = Path(hook_root).resolve()
+    if root not in path.parents:
+        raise ValueError(f"{path} is not under {root}")
+    if not (path.is_file() and os.access(path, os.X_OK)):
+        raise ValueError(f"{path} is not an executable file")
+    return path
+
+
+def clean(text, limit=2000):
+    """Printable text only. Hook reasons quote the agent's command and repo
+    paths, so they can carry terminal escape sequences; a log line must not
+    be able to rewrite the screen or hide the verdict."""
+    text = "".join(c if (c.isprintable() or c in "\n\t") else "?"
+                   for c in text)
+    return text[:limit] + (" [truncated]" if len(text) > limit else "")
 
 
 def payload(command, cwd, session):
@@ -97,17 +136,23 @@ def judge(name, proc):
     return ("note", reason) if reason else ("allow", "")
 
 
-def run_hooks(command, cwd, session, hooks=None, env=None):
+def run_hooks(command, cwd, session, hooks=None, env=None,
+              hook_root=HOOK_ROOT):
     """[(hook name, level, text)] for the command, one entry per hook."""
     hooks = bash_pretooluse_hooks() if hooks is None else hooks
     env = {**os.environ, "CLAUDE_PROJECT_DIR": str(REPO), **(env or {})}
     body = payload(command, cwd, session)
     results = []
     for hook in hooks:
-        name = Path(shlex.split(hook)[-1]).name
+        name = hook.strip().strip('"').rsplit("/", 1)[-1][:60]
+        try:
+            script = resolve_hook(hook, hook_root)
+        except ValueError as e:
+            results.append((name, "error", f"refused to run: {e}"))
+            continue
         try:
             proc = subprocess.run(
-                ["bash", "-c", f"exec {hook}"], input=body, text=True,
+                [str(script)], input=body, text=True,
                 capture_output=True, env=env, cwd=str(cwd),
                 timeout=HOOK_TIMEOUT)
         except (OSError, subprocess.TimeoutExpired) as e:
@@ -140,7 +185,7 @@ def main(argv=None):
     results = run_hooks(command, Path(args.cwd), args.session)
     for name, level, text in results:
         if level != "allow":
-            print(f"{level.upper():5} {name}: {text}")
+            print(f"{level.upper():5} {clean(name)}: {clean(text)}")
     code = exit_code(results)
     verdict = {0: "no hook objected", 2: "DENIED -- do not run it",
                3: "ASK -- put the reason to the user first",

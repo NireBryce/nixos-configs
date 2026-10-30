@@ -40,7 +40,8 @@ class Mapping(unittest.TestCase):
         return f'"{p}"'
 
     def code(self, *hooks):
-        results = guard_check.run_hooks("ls", self.dir, "s", hooks=list(hooks))
+        results = guard_check.run_hooks("ls", self.dir, "s", hooks=list(hooks),
+                                        hook_root=self.dir)
         return guard_check.exit_code(results), results
 
     def test_silent_hook_allows(self):
@@ -86,11 +87,84 @@ class Mapping(unittest.TestCase):
         # Re-write to capture stdin instead of discarding it.
         Path(h.strip('"')).write_text(
             f"#!/usr/bin/env bash\ncat > {out}\n")
-        guard_check.run_hooks("git status", self.dir, "sess", hooks=[h])
+        guard_check.run_hooks("git status", self.dir, "sess", hooks=[h],
+                              hook_root=self.dir)
         got = json.loads(out.read_text())
         self.assertEqual(got["tool_name"], "Bash")
         self.assertEqual(got["tool_input"]["command"], "git status")
         self.assertEqual(got["hook_event_name"], "PreToolUse")
+
+
+class Untrusted(unittest.TestCase):
+    """settings.json is repo content and this script may run in a checkout
+    nobody vetted: a hook entry is a bare script under the hooks directory,
+    or it is refused and never executed."""
+
+    def setUp(self):
+        self.dir = Path(tempfile.mkdtemp(prefix="guard-check-"))
+        self.addCleanup(shutil.rmtree, self.dir, ignore_errors=True)
+        self.root = self.dir / "hooks"
+        self.root.mkdir()
+        self.marker = self.dir / "ran"
+
+    def attempt(self, hook):
+        res = guard_check.run_hooks("ls", self.dir, "s", hooks=[hook],
+                                    hook_root=self.root)
+        return guard_check.exit_code(res), res
+
+    def assertRefused(self, hook):
+        code, res = self.attempt(hook)
+        self.assertEqual(code, 4)
+        self.assertIn("refused to run", res[0][2])
+        self.assertFalse(self.marker.exists(), "the command ran")
+
+    def test_shell_pipeline_is_refused_not_run(self):
+        self.assertRefused(f"touch {self.marker}; true")
+
+    def test_arguments_are_refused(self):
+        script = self.root / "h.sh"
+        script.write_text("#!/usr/bin/env bash\ntouch %s\n" % self.marker)
+        script.chmod(0o755)
+        self.assertRefused(f"{script} extra")
+
+    def test_command_substitution_is_refused(self):
+        self.assertRefused(f"$(touch {self.marker})")
+
+    def test_script_outside_the_hooks_dir_is_refused(self):
+        out = self.dir / "outside.sh"
+        out.write_text("#!/usr/bin/env bash\ntouch %s\n" % self.marker)
+        out.chmod(0o755)
+        self.assertRefused(str(out))
+
+    def test_symlink_out_of_the_hooks_dir_is_refused(self):
+        out = self.dir / "outside.sh"
+        out.write_text("#!/usr/bin/env bash\ntouch %s\n" % self.marker)
+        out.chmod(0o755)
+        (self.root / "link.sh").symlink_to(out)
+        self.assertRefused(str(self.root / "link.sh"))
+
+    def test_non_executable_file_is_refused(self):
+        (self.root / "n.sh").write_text("touch %s\n" % self.marker)
+        self.assertRefused(str(self.root / "n.sh"))
+
+    def test_a_bare_script_under_the_dir_runs(self):
+        script = self.root / "ok.sh"
+        script.write_text("#!/usr/bin/env bash\ncat >/dev/null\n")
+        script.chmod(0o755)
+        self.assertEqual(self.attempt(f'"{script}"')[0], 0)
+
+    def test_every_hook_in_the_real_settings_resolves(self):
+        for hook in guard_check.bash_pretooluse_hooks():
+            guard_check.resolve_hook(hook)
+
+    def test_terminal_escapes_are_not_printed(self):
+        out = guard_check.clean("a\x1b[2Jb\x07c\nd")
+        self.assertNotIn("\x1b", out)
+        self.assertNotIn("\x07", out)
+        self.assertIn("\n", out)
+
+    def test_long_output_is_truncated(self):
+        self.assertTrue(guard_check.clean("x" * 5000).endswith("[truncated]"))
 
 
 class Settings(unittest.TestCase):
