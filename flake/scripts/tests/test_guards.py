@@ -993,6 +993,19 @@ class GitGuardPreToolUse(GuardCase):
                 "run it by hand",
                 out["hookSpecificOutput"]["permissionDecisionReason"], cmd)
 
+    def test_ask_capability_overrides_the_sniffing(self):
+        # An adapter exports GUARD_ASK_ENFORCED; it wins over payload
+        # sniffing in both directions.
+        cmd = "git push -f origin main"
+        env = {k: v for k, v in zcode_env().items() if k != "ZCODE_PROJECT_DIR"}
+        for value, want in (("0", "deny"), ("1", "ask")):
+            for payload in (bash_payload(cmd), zcode_payload(bash_payload(cmd))):
+                rc, raw = run_hook_raw(self.script, payload,
+                                       {**env, "GUARD_ASK_ENFORCED": value})
+                self.assertEqual(rc, 0)
+                got = json.loads(raw)["hookSpecificOutput"]["permissionDecision"]
+                self.assertEqual(got, want, f"{value} {payload.keys()}")
+
     def test_zcode_keeps_the_routine_two_as_ask(self):
         # ship's post-merge cleanup and use-a-worktree's teardown have a
         # routine documented flow: under ZCode they stay advisory, the

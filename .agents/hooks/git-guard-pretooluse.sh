@@ -94,6 +94,14 @@ cwd=$(jq -r '.cwd // empty' <<<"$input")
 # input is snake_case only. An inherited ZCODE_PROJECT_DIR (Claude Code
 # started from a ZCode terminal) can't flip this.
 zcode=$(jq -r 'if has("hookEventName") or has("transcriptPath") then "1" else empty end' <<<"$input")
+# An adapter (polymorph) states the harness's capability outright:
+# GUARD_ASK_ENFORCED=0 means an ask is not enforced, =1 means it is. When it
+# is set it overrides the sniffing above; when unset, the sniffing stands.
+case "${GUARD_ASK_ENFORCED:-}" in
+    0) ask_unenforced=1 ;;
+    1) ask_unenforced= ;;
+    *) ask_unenforced=$zcode ;;
+esac
 [ -n "$cwd" ] || cwd="${CLAUDE_PROJECT_DIR:-$PWD}"
 
 # A short-option cluster or long flag carrying -f/--force (e.g. -f, -uf,
@@ -645,11 +653,11 @@ if [ -n "$reason" ]; then
     # allow (#448/#458), so for everything but the two routine steps the
     # decision there is deny -- a deny reaches the model in every mode and
     # stops it, which is what a pause has to be in an unattended session.
-    if [ -n "$zcode" ] && [ -z "$routine_ask" ]; then
+    if [ -n "$ask_unenforced" ] && [ -z "$routine_ask" ]; then
         decision="deny"
         reason="$reason
 
-Denied rather than asked: ZCode treats an ask as allow (#458), so a deny is the only enforced pause. Do not retry around this. Stop and report; if the command is really intended, the user can run it by hand."
+Denied rather than asked: this harness does not enforce an ask (ZCode treats it as allow, #458), so a deny is the only enforced pause. Do not retry around this. Stop and report; if the command is really intended, the user can run it by hand."
     fi
     jq -n --arg reason "$reason" --arg decision "$decision" '{
         systemMessage: ("⚠️  DESTRUCTIVE GIT COMMAND: " + $reason),
