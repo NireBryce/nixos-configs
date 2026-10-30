@@ -7,7 +7,8 @@
 #     once per topic per session, model-only (no systemMessage)
 #   - `just agent lessons [<path>...]`: every topic a path matches, with the
 #     index lines of its lessons; no argument = this branch's changed files
-#   - `check_docs.py lessons`: validates this file against the repo
+#   - `factcheck lessons` (tools/docchecks/lessons.py): validates this file
+#     against the repo
 #
 # One [[topic]] per area. Keys:
 #   id            kebab-case, unique
@@ -121,7 +122,7 @@ remind  = "Tailscale services: a committed ACL or service file records intent, n
 id      = "lessons-index"
 paths   = ["wiki/agent-lessons-learned.md", "wiki/agent-lessons-learned/**", ".agents/lessons-map.toml"]
 see     = "wiki/agent-lessons-learned.md"
-remind  = "Lessons: a new lesson goes in its Home too, and here in .agents/lessons-map.toml when it applies to a path or a command; an entry whose lesson gained a mechanism names it under Enforced. `check_docs.py lessons` checks the shape."
+remind  = "Lessons: a new lesson goes in its Home too, and here in .agents/lessons-map.toml when it applies to a path or a command; an entry whose lesson gained a mechanism names it under Enforced. `factcheck lessons` checks the shape."
 
 # -- commands ---------------------------------------------------------------
 

@@ -60,7 +60,7 @@ a security boundary.
 | pre-commit | `git commit` | [Lint ratchet](glossary.md#lint-ratchet), or the [offline checks](glossary.md#offline-checks) where nix cannot run | Blocks the commit | `.githooks/pre-commit` |
 | commit-msg | `git commit` | Canonical `Co-Authored-By: Claude` trailer | Rewrites the trailer | `.githooks/commit-msg` |
 | pre-push | `git push` | Preflight's offline steps where nix cannot run | Blocks the push | `.githooks/pre-push` |
-| `just wiki-lint` | [Preflight](glossary.md#preflight), CI, by hand | Docs agree with the repo | Fails | `wiki/meta/scripts/check_docs.py` |
+| `just wiki-lint` | [Preflight](glossary.md#preflight), CI, by hand | Docs agree with the repo | Fails | the factcheck flake input (`flake/scripts/factcheck.sh`), with this repo's checkers in `tools/docchecks/` |
 | `just modules` | Preflight, CI, by hand | No untracked `.nix`; static and evaluated module graphs agree | Fails | `flake/scripts/modules.py` |
 | `just lint` | Preflight, CI, pre-commit | statix, deadnix and oversized-file counts never rise | Fails | `flake/scripts/lint.py` |
 | `just check` | Preflight, CI | Every host's toplevel and home evaluate (including `module-orphans` and `module-class-contents`, set to `"eval"` so they fail under `--no-build`) | Fails | `flake/modules/checks.nix` |
@@ -176,7 +176,7 @@ older than 3.11, produces no message.
 
 The hook runs three checks after a write:
 
-- Under `wiki/`: `check_docs.py siblings`, filtered to that page's pair.
+- Under `wiki/`: `factcheck siblings`, filtered to that page's pair.
 - A `.nix` file: `.agents/hooks/nix_shell_interp.py`, which flags
   shell-shaped `${…}` inside a Nix `''` string that cannot be working Nix
   (`${x[1]}`, `${x:-y}`, `${#x}`). A bare `${VAR}` is not flagged, because
@@ -263,9 +263,21 @@ hooks and runs the real hooks against a temporary repo.
 
 ## Static checks
 
-All of these run inside [preflight](glossary.md#preflight). `check_docs.py`
-(`just wiki-lint`) is a set of registered sub-checks, and `check_docs.py
-check` runs them all.
+All of these run inside [preflight](glossary.md#preflight). factcheck
+(`just wiki-lint`) is a set of registered sub-checks, and `factcheck
+check` runs them all; the repo-specific sub-checks and the generated
+regions are this repo's plugins under `tools/docchecks/`.
+
+**factcheck is experimental** (it replaced
+`wiki/meta/scripts/check_docs.py`, and is young upstream). It was
+adopted only after parity verification -- identical findings to the
+checker it replaced, on an untouched tree and with defects injected --
+but it has not yet guarded this repo through real merges, and the
+tool's API will still move. Until
+it has a track record here: read a finding before acting on it, treat an
+unexpected one as a prompt to check the tool before the doc, and if it
+misbehaves, revert or pin the `factcheck` flake input -- the checker is
+upstream, and this PR is the revert for the adoption.
 
 | Sub-check | What it compares |
 |---|---|
@@ -356,6 +368,7 @@ forms itself, and a hook's deny outranks an allow rule.
 - `flake/scripts/tests/test_guards.py`, `flake/scripts/offline_checks.py`,
   `flake/scripts/with-nix-tools.sh`, `flake/scripts/modules.py`,
   `flake/scripts/lint.py`, `flake/scripts/check_trailers.py`
-- `wiki/meta/scripts/check_docs.py`, `wiki/meta/scripts/wiki_gen.py`
+- `tools/docchecks/` (this repo's factcheck plugins),
+  `wiki/meta/scripts/wiki_gen.py`, the factcheck flake input
 - `flake/modules/checks.nix`, `.justfile`, `.github/workflows/check.yml`
 - [agent-lessons-learned.md](../../wiki/agent-lessons-learned.md)

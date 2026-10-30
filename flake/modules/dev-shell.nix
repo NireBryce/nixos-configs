@@ -19,7 +19,7 @@
 #
 # This file sits at the top of modules/ rather than in a category directory,
 # like checks.nix: it is a flake output, not something a host imports.
-{
+{ inputs, ... }: {
     perSystem = { pkgs, inputs', ... }: {
         # `just module-graph` and wiki/config-structure/architecture.md's diagram draw
         # with this (flake/module-graph.toml says where each area goes).
@@ -45,7 +45,14 @@
                 nix-du
                 # fetcher calls from repository URLs
                 nurl
-            ];
+            ]
+            # factcheck (`just wiki-lint`, the edit hook's siblings check).
+            # The input's package puts the CLI on PATH so the wrapper
+            # (flake/scripts/factcheck.sh) execs it directly; the input's
+            # source tree goes with it for the tool's own fixture tests
+            # (`just factcheck-test`, flake/scripts/factcheck-test.sh).
+            ++ [ inputs'.factcheck.packages.default ];
+            env.FACTCHECK_SRC = inputs.factcheck.outPath;
         };
     };
 }

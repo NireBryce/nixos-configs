@@ -1,0 +1,53 @@
+# factcheck configuration. The tool comes from the factcheck flake input;
+# its defaults are this repo's wiki conventions, so most sections only
+# exist to document the binding. The repo-specific checkers live in
+# tools/docchecks/ and register themselves through [plugins] -- they read
+# hosts.nix, .sops.yaml, caddy.nix and the lessons map, which is exactly
+# the fleet knowledge that does not belong in a general tool.
+
+[scopes]
+docs = ["wiki/**/*.md", "AGENTS.md", ".agents/rules/**/*.md"]
+pages = ["wiki/**/*.md"]
+
+[dates]
+line = '_Last modified: {date}_'
+
+[contents]
+exempt = ['^wiki/agent-lessons-learned(\.md|/)', '-for-agents\.md$']
+
+[siblings]
+suffix = "-for-agents"
+required-words = 1000
+budget = 0.5
+fold-heading = "Quick facts"
+exempt = ['^wiki/agent-lessons-learned(\.md|/)', '-history\.md$']
+
+[recipes]
+justfile = ".justfile"
+
+[skills]
+dirs = [".agents/skills"]
+
+[docrefs]
+moved-dirs = { ".claude/hooks" = ".agents/hooks" }
+
+[counts]
+source = "hosts.nix"
+
+[secrets]
+file = "flake/modules/general-config/system/secrets/.sops.yaml"
+name-prefix = "nire-"
+
+[routes]
+sources = ["flake/modules/homelab-config/homelab/reverse-proxy/caddy/caddy.nix",
+           "wiki/config-structure/categories/reverse-proxy-history.md"]
+base-domain = "ts-cube.moose-micro.ts.net"
+
+[plugins]
+load = ["tools/docchecks/tree.py",
+        "tools/docchecks/roster.py",
+        "tools/docchecks/imports_table.py",
+        "tools/docchecks/secrets.py",
+        "tools/docchecks/routes.py",
+        "tools/docchecks/lessons.py",
+        "tools/docchecks/nixos_regions.py"]

@@ -98,6 +98,26 @@
         "type": "github"
       }
     },
+    "factcheck": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793387343,
+        "narHash": "sha256-kvOdVEevMbB7+ec7DJjugOX6PkFHp2ig3Yta8DOHlCQ=",
+        "owner": "NireBryce",
+        "repo": "factcheck",
+        "rev": "92491dd2e7e2786767d3088104f5aa23ee274a97",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NireBryce",
+        "repo": "factcheck",
+        "type": "github"
+      }
+    },
     "flake-module-graph": {
       "inputs": {
         "nixpkgs": [
@@ -456,6 +476,7 @@
         "darwin": "darwin",
         "dirs-as-categories": "dirs-as-categories",
         "disko": "disko",
+        "factcheck": "factcheck",
         "flake-module-graph": "flake-module-graph",
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",

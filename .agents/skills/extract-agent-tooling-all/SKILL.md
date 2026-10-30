@@ -36,7 +36,7 @@ look, not what you'll find.
 | `.agents/skills/` | Skills whose description survives losing "in this repo"; the `.claude/skills` symlink layout itself |
 | `wiki/meta/styleguide.md`, `wiki/00-INDEX.md` | Two-audience page pairs, routing index, `-history.md` companions, date lines |
 | `wiki/agent-lessons-learned.md` + `wiki/agent-lessons-learned/` | § numbering with per-§ articles; individual lessons whose rule outlives the incident |
-| `wiki/meta/scripts/` | Doc linters (`check_docs.py`'s generic checks, `check_restatement.py`, `history_candidates.py`) |
+| `wiki/meta/scripts/` | Doc linters (`check_restatement.py`, `history_candidates.py`; the generic checker was extracted upstream as [factcheck](https://github.com/NireBryce/factcheck), and this repo's checkers are now its plugins) |
 | `flake/scripts/`, `.agents/scripts/` | Non-Nix scripts (`branches.py`, `threads.sh`-style tooling; the `just agent` helpers) |
 | `.agents/hooks/`, `.githooks/` | Git/secret guard hooks, the commit-trailer normalizer |
 | `.agents/settings.json` (symlinked as `.claude/settings.json`) | Permission and hook wiring patterns |

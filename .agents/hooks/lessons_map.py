@@ -7,7 +7,7 @@ matches:
   lesson-reminder-pretooluse.py   the hook: one reminder per topic per
                                   session, before an edit or a command
   .agents/scripts/lessons.py      `just agent lessons [<path>...]`
-  wiki/meta/scripts/check_docs.py      `lessons` check: validate() below
+  tools/docchecks/lessons.py           `lessons` check: validate() below
 
 Globs use Claude Code's `paths:` semantics (`.agents/rules/*.md` frontmatter),
 because a topic that names a rules file must list that file's globs exactly
@@ -112,7 +112,7 @@ def pointers(t):
     return '; '.join(out)
 
 
-# -- validation (check_docs.py lessons) -------------------------------------
+# -- validation (factcheck lessons; tools/docchecks/lessons.py) ---------
 
 def validate(root, tracked, lesson_numbers, rule_globs):
     """Findings for a map that has drifted from the repo. `tracked` is the

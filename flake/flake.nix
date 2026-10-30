@@ -142,6 +142,18 @@
         llm-agents.url                             = "github:numtide/llm-agents.nix";
         llm-agents.inputs.nixpkgs.follows          = "nixpkgs";
 
+        # ── Doc checks ────────────────────────────────────────────────────────────
+        # factcheck (`just wiki-lint`, the edit hook's siblings check) reads the
+        # claims wiki/ and AGENTS.md make against the repo. The repo-specific
+        # checkers and regions live in tools/docchecks/ and register into its
+        # registry through factcheck.toml; `just wiki-gen` still writes the
+        # generated regions, byte-identically (tools/docchecks/nixos_regions.py
+        # carries wiki_gen's marker strings for exactly that).
+        factcheck = {
+            url = "github:NireBryce/factcheck";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
+
     };
 
 

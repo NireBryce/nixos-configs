@@ -40,9 +40,10 @@ A category page's order: **category contents → category-specific mechanism not
 4. `## Contents` — one bullet per `##` heading, **after** the intro, not
    before it.
 
-**Don't hand-derive anchors.** Run `python3 wiki/meta/scripts/check_docs.py
-gen-contents <page>` after adding, renaming, or removing any heading; it's
-idempotent. A hand-derived anchor already got it wrong once.
+**Don't hand-derive anchors.** Run `factcheck fix-contents <page>` after
+adding, renaming, or removing any heading; it's idempotent, and it also
+fixes a broken anchor into the page's own Contents list. A hand-derived
+anchor already got it wrong once.
 
 Exempt from `## Contents`: `agent-lessons-learned.md`, `agent-lessons-learned/`
 articles, and `-for-agents.md` siblings. **Not the same list as the sibling
@@ -74,7 +75,7 @@ the reasoning behind a choice, meta-commentary, see-also sprawl.
 Exempt from needing one: `agent-lessons-learned*`, `*-history.md`. Under 1,000
 words it's allowed but usually a loss.
 
-Checked by `check_docs.py siblings`, which is what makes this the wiki's one
+Checked by `factcheck siblings`, which is what makes this the wiki's one
 deliberate duplication rather than a future stale claim:
 
 - **the sibling's `_Last modified:_` must not predate its source's** — edit
@@ -98,7 +99,7 @@ Link to the real source — a module header, `CLAUDE.md`, a skill — rather
 than copying it in. Exceptions, each on stated terms:
 
 - `agent-lessons-learned.md` and `module-style-guide.md` — nothing to link to.
-- `agent-lessons-learned.md` is an index: one `- **§N**` line per lesson (title linking `agent-lessons-learned/<N>-<slug>.md`, the rule, `Home:`, `Enforced:`), under the group where it applies; the article holds the account. The rule also goes in its Home, and a lesson tied to a path or command gets a topic in `.agents/lessons-map.toml` (the lesson-reminder hook's source). `check_docs.py lessons` enforces the shape and the map.
+- `agent-lessons-learned.md` is an index: one `- **§N**` line per lesson (title linking `agent-lessons-learned/<N>-<slug>.md`, the rule, `Home:`, `Enforced:`), under the group where it applies; the article holds the account. The rule also goes in its Home, and a lesson tied to a path or command gets a topic in `.agents/lessons-map.toml` (the lesson-reminder hook's source). `factcheck lessons` enforces the shape and the map.
 - `flake-parts-port-notes.md` — the branch it indexed is gone.
 - `wiki/homelab/` — the source is often the live service, so synthesized
   content is allowed **if the page says what was verified against the live
@@ -117,7 +118,7 @@ belongs in the linked file's own header.
   page.
 - Each such directory also holds a `README.md` symlink to its
   `00-INDEX.md`, for GitHub's benefit. Edit the target, not the symlink;
-  don't link to `README.md`. `check_docs.py`'s `wiki_md()` skips symlinks,
+  don't link to `README.md`. factcheck's docs walker skips symlinks,
   and every wiki-walking check goes through it.
 - **Name a usage page for the reader's task, not the module.** A plural noun
   reads as a list of the things: `golinks.md` → `creating-golinks.md`,

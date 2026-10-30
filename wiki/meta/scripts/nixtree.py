@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """The tree's modules, categories and hosts as the files say them, for the
-wiki scripts: check_docs.py's checks and wiki_gen.py's generated tables both
+wiki scripts: the factcheck checks (tools/docchecks/) and wiki_gen.py's
+generated tables both
 read the same thing, so it lives here and neither imports the other.
 
 Read from the files rather than evaluated -- wiki-lint runs without nix and
@@ -174,7 +175,8 @@ HOST_LINE = re.compile(r'^\s*(nire-[\w-]+)\s*=\s*(mkHost|mkDarwinHost)\b', re.M)
 def actual_hosts(root):
     """host name (with `nire-` prefix, matching how wiki/fleet/hosts.md writes it)
     -> class ('nixos' or 'darwin'), read straight from hosts.nix. The one
-    roster: check_docs.roster() and wiki_gen.py's hosts.md table both derive
+    roster: tools/docchecks/tree.py's roster() and wiki_gen.py's hosts.md
+table both derive
     from it, so a host added to hosts.nix appears in both with no edit here.
     """
     p = root / 'flake' / 'modules' / 'host-config' / 'hosts.nix'

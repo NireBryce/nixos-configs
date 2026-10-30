@@ -181,7 +181,8 @@ def main():
     # preflight itself quietly lost a check; these must stay in it.
     # Retiring one is a deliberate edit to this set.
     anchors = {
-        "wiki/meta/scripts/check_docs.py",                 # just wiki-lint
+        "flake/scripts/factcheck.sh",                 # just wiki-lint
+        "flake/scripts/factcheck-test.sh",            # just factcheck-test
         "flake/scripts/modules.py",                   # just modules
         "flake/scripts/lint.py",                      # just lint
         "flake/scripts/tests/test_guards.py",         # just guards-test

@@ -17,8 +17,10 @@ the parts that need nix named and left out, never a second checklist.
   .sh .bash, .githooks/*   `bash -n`
   .json, .toml   parses
   .nix           `nix-instantiate --parse` (syntax only; fetches nothing)
-  wiki lint      check_docs.py check, minus the `generated` check, which
-                 evaluates the flake
+  wiki lint      factcheck check -- but factcheck is the factcheck flake
+                 input, which a nix-less environment cannot fetch, so
+                 this step runs only where the tool is already on PATH
+                 (a dev shell) and is left to CI otherwise, said out loud
 It replaces statix/deadnix, not equals them: a lint regression still has to
 be caught by CI.
 
@@ -26,7 +28,9 @@ be caught by CI.
 does and runs every `python3 <script>` step, concurrently. NEEDS_NIX lists
 the steps it must skip and why; a step in neither place is run, so a new
 python step is covered by default and a new nix-dependent one fails loudly
-the first time it runs here, rather than being silently absent.
+the first time it runs here, rather than being silently absent. The
+wiki-lint step is the factcheck wrapper (a .sh, not a python3 line), so it
+lands in NOT_PYTHON_REASONS with its own stated reason.
 
 Exit status: 0 all pass, 1 a check failed.
 """
@@ -52,10 +56,16 @@ NEEDS_NIX = {
 }
 # Steps that are not python: skipped, with the reason shown.
 NOT_PYTHON = "not a python3 step (needs nix, or warn-only)"
-# Run, but with an extra flag appended.
-EXTRA_ARGS = {
-    "wiki/meta/scripts/check_docs.py": ["--skip=generated"],
+# Known non-python steps, with their own stated reason (keyed by the first
+# token of the command line).
+NOT_PYTHON_REASONS = {
+    "flake/scripts/factcheck.sh":
+        "wiki lint via the factcheck flake input -- needs nix; CI runs it",
+    "flake/scripts/factcheck-test.sh":
+        "factcheck's fixture tests live in the flake input's source",
 }
+# Run, but with an extra flag appended.
+EXTRA_ARGS = {}
 
 
 def git(*args, check=True):
@@ -105,9 +115,15 @@ def check_staged_file(path):
 
 
 def run_wiki_lint():
-    r = subprocess.run(
-        [sys.executable, str(REPO / "wiki/meta/scripts/check_docs.py"),
-         "check", "--skip=generated"], capture_output=True, text=True)
+    """The wiki lint, when this environment has the tool. factcheck is the
+    factcheck flake input; a nix-less environment cannot fetch it, so
+    there the step is skipped (None) and the caller says so. Unlike the
+    ancestor checker there is no --skip=generated here: a region needing
+    nix reports a REVIEW finding instead of failing, so a full run is
+    safe wherever the tool exists."""
+    if not shutil.which("factcheck"):
+        return None
+    r = subprocess.run(["factcheck", "check"], capture_output=True, text=True)
     return [] if r.returncode == 0 else (r.stdout + r.stderr).strip().splitlines()
 
 
@@ -116,15 +132,19 @@ def cmd_staged():
     paths = staged_paths()
     for p in paths:
         problems += check_staged_file(p)
-    problems += run_wiki_lint()
+    lint = run_wiki_lint()
+    lint_note = ("and the wiki lint passed" if lint == [] else
+                 "the wiki lint skipped (no factcheck on PATH)")
+    if lint:
+        problems += lint
     if problems:
         print("offline checks failed:", file=sys.stderr)
         for line in problems:
             print(f"  {line}", file=sys.stderr)
         return 1
-    print(f"offline checks: {len(paths)} staged file(s) and the wiki lint "
-          f"(minus `generated`) pass; statix/deadnix and the flake checks "
-          f"did not run here, CI runs them.")
+    print(f"offline checks: {len(paths)} staged file(s) {lint_note}; "
+          f"statix/deadnix and the flake checks did not run here, CI runs "
+          f"them.")
     return 0
 
 
@@ -142,7 +162,9 @@ def classify(lines):
     for line in lines:
         m = re.fullmatch(r"(cd flake && )?python3 (\S+\.py)(?: (.*))?", line)
         if not m:
-            out.append((None, line, NOT_PYTHON))
+            first = line.split()[0] if line.split() else ""
+            out.append((None, line,
+                        NOT_PYTHON_REASONS.get(first, NOT_PYTHON)))
             continue
         # `cd flake && python3 scripts/x.py` and `python3 flake/scripts/x.py`
         # are one script; label it by its repo-relative path.
