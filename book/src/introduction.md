@@ -97,7 +97,8 @@ out of scope; start at [`wiki/homelab/00-INDEX.md`](../../wiki/homelab/00-INDEX.
 ## Two habits that apply everywhere
 
 - Run `git add` before you evaluate. A flake in a git repository ignores
-  untracked files, so a new module does not exist until it is tracked.
+  untracked files, so a new module does not exist until it is tracked. Forgetting this is the
+  most common way to conclude that a correct change does nothing.
 - State how far you verified: evaluated, built, or switched and used. Each
   level finds problems the previous one cannot.
 

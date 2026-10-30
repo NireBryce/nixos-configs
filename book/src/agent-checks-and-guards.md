@@ -65,8 +65,10 @@ a security boundary.
 
 ## The session-start hook
 
-The session-start hook also reports the commits `experimental` is behind the last-fetched
-`origin/experimental`, and the output of `git worktree list`. When
+The session-start hook also reports whether the checkout is a linked worktree
+or the shared checkout, how many commits `experimental` is behind the
+last-fetched `origin/experimental` (only on `experimental`), and the output
+of `git worktree list`. When
 `core.hooksPath` is unset it runs `git config core.hooksPath .githooks`, the
 same command as `just install-hooks`; a different existing value is reported
 and left alone. The hook exits 0 on every path.
@@ -78,7 +80,8 @@ The guard works in two tiers.
 - State-checked tier: `reset --hard`, `checkout .`, `clean -f`, a forced
   `checkout` or `switch`, `checkout` onto paths, and `rm -f`. The guard runs
   `git status --porcelain` in the repository the command targets. A clean tree
-  passes with no message; a dirty tree is denied with the dirty paths listed.
+  passes with no message; a dirty tree is denied with the dirty paths listed and an instruction to ask
+  the user.
   When the guard cannot tell which repository the command acts on (anything
   beyond plain `cd <path>` and `git [-C <path>] <subcommand> <args>`
   segments), it asks.
@@ -254,7 +257,8 @@ The other static checks:
 - `checks.nix` defines the flake checks `just check` evaluates with `nix
   flake check --all-systems --no-build`: every host's toplevel (NixOS and
   darwin), every Home Manager home, `module-orphans`, and unit checks of the
-  `flake.lib` helpers. `module-orphans` fails through a builder, which
+  `flake.lib` helpers. The helper checks fail at evaluation. `module-orphans`
+  fails through a builder, which
   `--no-build` never runs, so `just modules` carries the orphan check
   ([adding a module](adding-a-module.md), Step 5).
 

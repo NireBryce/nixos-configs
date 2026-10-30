@@ -111,7 +111,8 @@ installed by hand with `brew` vanishes, that setting is why; add it to
 
 1. Run `just available <pkg>`. If nixpkgs can't build it on `aarch64-darwin`,
    the filter drops it; see [step 2](adding-a-package.md#can-nixpkgs-build-it-on-darwin-the-repo-handles-this).
-2. If it is `meta.broken` there or option-shaped, guard the module; see the
+2. If it is `meta.broken` there or option-shaped, guard the module with
+   `lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin)`; see the
    [filter's limits](adding-a-package.md#can-nixpkgs-build-it-on-darwin-the-repo-handles-this).
 3. Run `just available --duplicates` and decide whether Homebrew owns it; see
    [the Homebrew question](adding-a-package.md#does-homebrew-already-install-it-you-decide).

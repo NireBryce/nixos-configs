@@ -55,7 +55,7 @@ not a fleet machine, so it has no `nire-` prefix.
   the module, never the whole category.
 - Impermanence? The usual answer is yes. A host that opts out says so in its
   header, as `cube-configuration.nix` does, including how `invariants.nix`
-  (evaluation-time checks on every host) and `WARN-password-required.nix` interact with that choice.
+  (evaluation-time checks on every NixOS host) and `WARN-password-required.nix` interact with that choice.
 - CPU and GPU? AMD hosts include the shared `hardware` category. An Intel
   host skips it and imports the exact `nixos-hardware` module from its own
   hardware file. Never add an `intel` folder under
@@ -107,7 +107,7 @@ bare `boot.nix` would collide with the `boot` category and with every other
 host's copy. dirs-as-categories, the flake input that names modules after
 their files, refuses the collision and names both files.
 
-`system.stateVersion` pins defaults to the release under which the host's
+Copy the reasoning, not the value. `system.stateVersion` pins defaults to the release under which the host's
 data was first created, and is never bumped. A host with no data yet starts
 on the current release:
 

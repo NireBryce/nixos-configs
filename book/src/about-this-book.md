@@ -31,7 +31,8 @@ GitHub URLs at build time ([`book.yml`](../../.github/workflows/book.yml),
 ## Unverified claims
 
 A claim the agents could not confirm from the repo is listed under "Not
-checked" at the end of its chapter. Read those as open questions.
+checked" at the end of its chapter. Read those as open questions. The wiki
+marks the same thing inline, with `UNVERIFIED` or "not confirmed live".
 
 ## Sources
 

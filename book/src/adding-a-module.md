@@ -39,6 +39,9 @@ Example: `virtualization-cube.nix` defines the `forge-runner` VM that only
 the example host cube runs. It lives in `host-config/cube/cube-vm/` so that
 "cube only" follows from the file's location.
 
+Check: name the category the chosen folder falls under and confirm that the
+hosts you intend include it.
+
 ## Step 2: name it
 
 A module's name is its filename. Modules and categories share one namespace
@@ -69,7 +72,8 @@ The first argument is the [module class](glossary.md#module-class): `nixos`,
 `homeManager` or `darwin`. The path is relative to `flake/modules/` and must
 end in `.nix` inside an existing category. The command refuses an unknown
 class, a path outside every category, `default.nix` or `defaults.nix`, and a
-name that a module or category already uses. It writes:
+name that a module or category already uses, before writing anything. It
+writes:
 
 ```nix
 # This is a dirs-as-categories module file, which means its name is its

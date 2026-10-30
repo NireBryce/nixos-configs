@@ -133,7 +133,7 @@ networking or KDE Connect, because none of those modules has a `darwin` key.
 Three smaller cases follow the same rule. A path containing `/_` is skipped
 (`general-config/impermanence/_disko/`). `homelab-config/homelab/` is a
 category containing one nested category per service, and cube includes all of them
-with `"homelab"`. `host-config/cube/` and `users-config/elly/` are categories
+with `"homelab"`, and each nested category can also be included by name. `host-config/cube/` and `users-config/elly/` are categories
 that only their own entry point includes, so a module placed there belongs to
 that host or user by construction.
 

@@ -218,6 +218,6 @@ Source: `flake/modules/general-config/system/home-manager/enable-home-manager.ni
 ## Worktree
 
 A second working directory attached to the same git repository, with its own
-checked-out branch and `HEAD`. Each task that will branch, commit or check out
+checked-out branch and `HEAD` and shared branches and objects. Each task that will branch, commit or check out
 gets its own, so concurrent sessions do not disturb each other.
 Source: `.agents/skills/use-a-worktree/SKILL.md`.

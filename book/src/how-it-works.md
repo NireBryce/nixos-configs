@@ -61,7 +61,9 @@ The library has an opt-in check for the second mistake. This repo sets
 `dirsAsCategories.checkClassContents = "build"`, which adds a flake check
 named `module-class-contents` that fails only when built. `just check` runs
 with `--no-build`, so `just modules` reads `flake.moduleGraph.misplaced` and
-fails on any entry, as it does for orphans.
+fails on any entry, as it does for orphans. The check covers a short list of
+namespaces (for example `home` under `nixos`). A misplaced body outside that
+list still surfaces only when a host is evaluated.
 
 ## A module's name is its filename
 
@@ -103,6 +105,7 @@ in this repo declares an `mkEnableOption` for that purpose. The path from
 ```text
 packages-config/shell-apps/text-tools/ripgrep.nix
         |  sits in the folder text-tools/, below shell-apps/
+        |  (text-tools is itself a category, nested in shell-apps)
         v
 category "shell-apps"   (includes every module beneath the folder)
         |  listed in includes.homeManager
@@ -240,8 +243,8 @@ function asks for `config` or `withSystem`, or when it has no class key.
 `hosts.nix`, `checks.nix`, `invariants.nix`, `dev-shell.nix` and `lib.nix`
 are written that way on purpose, and they carry no dirs-as-categories header
 comment. `defaults.nix` is never a module file and has no module name. Any
-class keys in it (`nixos`, `homeManager`, `darwin`) are added to a host that
-includes any module in the same folder. By convention it is also where
+class keys in it (`nixos`, `homeManager`, `darwin`) apply whenever anything in
+its folder is reached. By convention it is also where
 `folderIsCategory` is set.
 
 A module file cannot read the flake-parts `config`. Files that need the

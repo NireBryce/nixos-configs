@@ -151,18 +151,22 @@ the merge and the branch deletion.
 
 1. Check. `just agent where` fetches and prints the branch, dirty paths,
    commits and diff stat against `origin/experimental`. Then
-   `just agent preflight-brief`.
+   `just agent preflight-brief`, and `just agent preflight-each` for a
+   multi-commit branch.
 2. Open the PR. Commit with `just agent commit`, write the PR body to a file,
    and run `just agent pr <body-file>`. It pushes the branch and runs
    `gh pr create --base experimental`. It refuses on `experimental` or `main`
    and refuses a body missing the [disclosure line](#the-pr-body).
 3. Gate, then ask. `just agent ship-ready <n>` waits for CI, then requires the
    PR to be open, not a draft, `mergeStateStatus` `CLEAN` and based on
-   `experimental`. On READY, show the printed summary and ask the one
+   `experimental`. `mergeable` alone is not enough: it means only "no
+   conflicts". On READY, show the printed summary and ask the one
    question. On NOT READY, fix what the gate names and do not ask.
 4. Land, on yes only. `just agent ship-land <n>` re-runs the gate, merges
-   (rebase for one commit, a merge commit for several), confirms the PR is
-   `MERGED`, updates `experimental`, deletes the local and remote branch and
+   (rebase for one commit, a merge commit for several), pinned to the head
+   commit the gate read, confirms the PR is `MERGED`, updates `experimental`
+   (from a linked worktree it detaches that worktree and leaves the shared
+   checkout alone), deletes the local and remote branch and
    runs `just close-fixed <n>` (closes issues the PR's closing keywords missed). A failed merge deletes nothing.
 
 On a no, the PR stays open and nothing is cleaned up.

@@ -144,10 +144,12 @@ fonts.
 4. If the host was on standalone Home Manager, pin the current generation as
    a GC root first.
 5. After `git add`, run from `flake/`:
-   `nix eval --raw '.#nixosConfigurations.nire-<name>.config.home-manager.users.elly.home.activationPackage.drvPath'`.
+   `nix eval --raw '.#nixosConfigurations.nire-<name>.config.home-manager.users.elly.home.activationPackage.drvPath'`
+   (use `darwinConfigurations.<name>` for a darwin host).
    Evaluating the [`drvPath`](glossary.md#drvpath) forces the whole home
    configuration without building it.
-6. After switching, check that `home-manager-<name>.service` succeeded.
+6. After switching, check that `home-manager-<name>.service` succeeded. The
+   system switch returning is not enough.
 
 Not checked: how the switch command reports a failing
 `home-manager-<name>.service` on a NixOS host; whether darwin's launchd

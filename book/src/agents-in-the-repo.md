@@ -136,7 +136,7 @@ as a host's role). To change a generated fact, change its source and run
   sibling, then bump its date. When the source edit needs nothing in the
   sibling (a reorder, a typo), the agent adds a dated `_Sibling reviewed:
   <date> -- <reason>_` line instead. Bumping the date without reading the
-  sibling is forbidden.
+  sibling is forbidden: it turns a caught omission into one nobody sees.
 - The edit-check hook runs the sibling check on every wiki page an agent
   edits, before [preflight](glossary.md#preflight) would.
 - `just agent book-lint` is the book's mechanical half: dead links and

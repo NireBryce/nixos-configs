@@ -57,10 +57,11 @@ hosts stays an error.
 
 The filter has three limits:
 
-- It reaches only `home.packages`. A module whose body is
-  `programs.foo.enable` or `services.foo.enable` asserts before any package
-  list exists and needs its own guard. `vicinae.nix`, `kde-connect.nix` and
-  `kde-sleepmode.nix` are examples.
+- It reaches only `home.packages`. A module that sets other options, such as
+  `programs.foo.enable` or `services.foo.enable`, asserts before any package
+  list exists. It needs its own `lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin)`
+  guard. `vicinae.nix`, `kde-connect.nix` and `kde-sleepmode.nix` are
+  examples.
 - It does not catch `meta.broken`. `cod` is broken on darwin, so the zsh and
   bash modules that use it guard it by hand.
 - It cannot be replaced by making `imports` conditional on `pkgs`. Under

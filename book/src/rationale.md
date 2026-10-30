@@ -62,7 +62,7 @@ A module belongs to the category of the folder it sits in.
 `flake/doc/dirsAsCategory.md` says this was repaired rather than replaced
 during the port to flake-parts.
 
-An earlier `flake-parts` branch used per-module opt-in, where each module
+A sibling `flake-parts` branch (since deleted) used per-module opt-in, where each module
 declares which [aggregates](glossary.md#aggregate) it joins. Per-module opt-in
 has advantages: directory and membership come apart, a module can join
 several roles, and the result is greppable. The note lists its costs:
