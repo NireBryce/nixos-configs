@@ -247,6 +247,7 @@ preflight:
     @python3 .agents/scripts/test_ship.py
     @python3 .agents/scripts/test_worktree.py
     @python3 .agents/scripts/test_where.py
+    @python3 .agents/scripts/test_guard_check.py
     @python3 .agents/scripts/test_docs.py
     @python3 .agents/scripts/test_move_refs.py
     @python3 .agents/scripts/test_book_lint.py

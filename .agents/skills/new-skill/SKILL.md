@@ -70,9 +70,10 @@ between the H1 and `## Applies to`, instead of a sentence of its own:
 ```
 
 `bash-guards` means the commands here (git, `just`, nix, sops) are checked
-by hooks that match only the harness's `Bash` tool; another shell or tool
-runs them unchecked, and an agent in that position warns the user before
-starting. The tag goes in the body, not the frontmatter: the skill-files
+by hooks that match only the harness's `Bash` tool in Claude Code and
+ZCode; another harness, shell or tool runs them unchecked. An agent in that
+position warns the user before starting and checks commands by hand
+(skill `guards-without-hooks`). The tag goes in the body, not the frontmatter: the skill-files
 check rejects unknown frontmatter keys, and the body is what loads with the
 skill. The check also fails a skill that mentions one of the guarded commands
 without the tag (`NEEDS_BASH_GUARDS_CUE` in `check_docs.py` lists them, and

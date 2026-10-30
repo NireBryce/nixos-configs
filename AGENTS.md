@@ -100,8 +100,9 @@ history: `wiki/meta/history.md`'s "Confirmed-on-hardware facts".
 **Many skills and guards only trigger under the `Bash` tool.** The git,
 `just`, nix and secrets command guards match it, and skills and recipes are
 bash commands. A skill marked `**Needs:** bash-guards` depends on them
-(skill `new-skill`). If you are using another shell or a non-`Bash` tool,
-warn the user, since those protections are off.
+(skill `new-skill`). In another harness, or with another shell or a
+non-`Bash` tool, those protections are off: warn the user, and run
+commands through `just agent guard-check` (skill `guards-without-hooks`).
 
 ## Before you start
 
