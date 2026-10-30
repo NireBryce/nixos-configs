@@ -24,6 +24,8 @@
         # `just module-graph` and wiki/config-structure/architecture.md's diagram draw
         # with this (flake/module-graph.toml says where each area goes).
         packages.module-graph = inputs'.flake-module-graph.packages.default;
+        # `nix run .#polymorph -- generate` rewrites .zcode/config.json from .agents/settings.json
+        packages.polymorph = inputs'.polymorph.packages.default;
 
         devShells.default = pkgs.mkShell {
             packages = with pkgs; [

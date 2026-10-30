@@ -431,6 +431,26 @@
         "type": "github"
       }
     },
+    "polymorph": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793350823,
+        "narHash": "sha256-6WkK7+X6c5vQXaMnphggZ3+Ov2MBa5tClVfvdCPMqbo=",
+        "owner": "NireBryce",
+        "repo": "polymorph",
+        "rev": "65529850106ec93bf0fcc4d6b52987d9cc07605d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NireBryce",
+        "repo": "polymorph",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "darwin": "darwin",
@@ -451,6 +471,7 @@
           "nixpkgs"
         ],
         "plasma-manager": "plasma-manager",
+        "polymorph": "polymorph",
         "sops-nix": "sops-nix"
       }
     },

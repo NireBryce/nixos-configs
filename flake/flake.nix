@@ -70,6 +70,14 @@
             inputs.nixpkgs.follows = "nixpkgs";
         }; 
 
+        # static check and generator for the agent hook configs
+        # (.agents/polymorph/; `nix run .#polymorph`). Experimental and
+        # unvetted upstream; it runs only as a check here, never in a hook.
+        polymorph = {
+            url = "github:NireBryce/polymorph";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
+
         # ── Home Manager ──────────────────────────────────────────────────────────
         home-manager.url                           = "github:nix-community/home-manager/master";
         home-manager.inputs.nixpkgs.follows        = "nixpkgs";

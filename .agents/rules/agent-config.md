@@ -33,9 +33,12 @@ paths:
   a guard's path patterns and its fixtures change together.
 
 - ZCode reads hooks from `.zcode/config.json` (`hooks.events`, with
-  `hooks.enabled: true`), not `.agents/settings.json`. A hook added,
-  removed or re-matched in one goes in the other too;
-  `test_guards.py` fails when they differ. Live-checked on ZCode 3.14.3
+  `hooks.enabled: true`), not `.agents/settings.json`. That file is
+  generated: edit `.agents/settings.json`, then `nix run .#polymorph --
+  generate`; the `polymorph` flake check (`.agents/polymorph/`) fails on
+  drift. ZCode rewrites the file on trust approval, adding `enabled` and
+  `timeout`; the two `timeout: 60` entries live in `.agents/settings.json`
+  so the generated file keeps matching. Live-checked on ZCode 3.14.3
   (2026-10-04, #448): every hook fires; an unattended `ask` resolves to
   allow (so a guard that must hold in ZCode denies); `systemMessage` is
   dropped for PreToolUse. Re-check after a ZCode upgrade changes its hook
