@@ -13,17 +13,18 @@
 { config, lib, ... }:
 {
     # checks.<system>.module-orphans: fails naming any module inside a
-    # category that no `includes`/`enables` reaches (wiki/config-structure/module-files.md)
-    # -- when built ("build"; "eval" would also fail under --no-build). `just
-    # check` runs --no-build, so `just modules` is what gates orphans in
-    # preflight and CI.
-    dirsAsCategories.checkOrphans = "build";
+    # category that no `includes`/`enables` reaches (wiki/config-structure/module-files.md).
+    # "eval" throws while the check is evaluated, so `just check`
+    # (--no-build) fails on it; "build" would fail only when built, which
+    # --no-build never does. The throw comes from the check attribute, not
+    # from flake.moduleGraph, so `modules.py` can still read the graph of a
+    # tree that has an orphan.
+    dirsAsCategories.checkOrphans = "eval";
 
     # checks.<system>.module-class-contents: names a class part that sets a
-    # namespace only another class has (`home` under `nixos`). Same --no-build
-    # gap as orphans, so `just modules` reads flake.moduleGraph.misplaced,
-    # which is published while this is "build" or "eval".
-    dirsAsCategories.checkClassContents = "build";
+    # namespace only another class has (`home` under `nixos`). "eval" for the
+    # same --no-build reason as orphans.
+    dirsAsCategories.checkClassContents = "eval";
 
     perSystem = { system, pkgs, ... }:
     let
@@ -103,9 +104,9 @@
         # lib-helpers therefore throws during evaluation. Orphans -- modules
         # nothing reaches, which evaluate and install nothing -- are
         # dirs-as-categories' own check, `module-orphans`, turned on at the top
-        # of this file; it fails only when built, so `just modules` reads the
-        # same list from flake.moduleGraph at evaluation time and is the gate
-        # that fails, along with untracked files and drift against wiki-lint's
+        # of this file in its "eval" mode, which throws while the check is
+        # evaluated and so fails here too. `just modules` covers what the
+        # library does not: untracked files and drift against wiki-lint's
         # reading.
         checks = hostChecks // homeChecks // {
             lib-helpers =

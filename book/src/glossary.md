@@ -181,9 +181,9 @@ Source: `flake/scripts/offline_checks.py`.
 ## Orphan
 
 A module that no host reaches, because nothing includes its category or names
-it. It evaluates cleanly and installs nothing. `just modules` fails on an
-orphan and names it. The `module-orphans` check in `nix flake check` fails only
-when built, which `just check`'s `--no-build` skips.
+it. It evaluates cleanly and installs nothing. `just check` fails on an
+orphan and names it: the `module-orphans` check is set to `"eval"`, so it
+throws under `--no-build` too.
 Source: `flake/modules/checks.nix`.
 
 ## perSystem

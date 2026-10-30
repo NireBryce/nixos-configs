@@ -58,10 +58,9 @@ Two mistakes are easy to make:
   (`just modules`).
 
 The library has an opt-in check for the second mistake. This repo sets
-`dirsAsCategories.checkClassContents = "build"`, which adds a flake check
-named `module-class-contents` that fails only when built. `just check` runs
-with `--no-build`, so `just modules` reads `flake.moduleGraph.misplaced` and
-fails on any entry, as it does for orphans. The check covers a short list of
+`dirsAsCategories.checkClassContents = "eval"`, which adds a flake check
+named `module-class-contents` that throws while it is evaluated, so `just
+check` fails on it even under `--no-build`. The check covers a short list of
 namespaces (for example `home` under `nixos`). A misplaced body outside that
 list still surfaces only when a host is evaluated.
 
@@ -149,10 +148,9 @@ ordinary module put there reaches no host.
 
 A name in `includes` that doesn't exist stops evaluation. A category that no
 host includes evaluates fine and installs nothing; its modules are
-[orphans](glossary.md#orphan). `just modules` fails on them, reading `orphans`
-from `flake.moduleGraph`. The
-`module-orphans` flake check fails only when built, and `just check` runs with
-`--no-build`, so it does not.
+[orphans](glossary.md#orphan). `just check` fails on them: `checks.nix` sets
+`checkOrphans = "eval"`, so the `module-orphans` check throws while it is
+evaluated, which `--no-build` still does.
 
 ## `includes` and `enables`
 

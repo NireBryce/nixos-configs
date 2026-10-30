@@ -102,9 +102,8 @@ opt-in `dirsAsCategories.checkClassContents = "build"` or `"eval"` (v0.4.0)
 adds a flake check, `module-class-contents`, that names a class part setting a
 namespace only another class has (`home` under `nixos`); it is a heuristic
 over a short list.
-This repo sets it to `"build"`, which fails only when built, and `just check`
-runs `--no-build`; so `just modules` reads `flake.moduleGraph.misplaced` and
-fails on any entry, the way it gates orphans.
+This repo sets it to `"eval"`, so `just check` fails on a misplaced class part
+even under `--no-build`, the way it does for orphans.
 
 ## Raw NixOS modules
 
@@ -130,10 +129,9 @@ Adding/removing/renaming a module in a category with an article under
 `wiki/config-structure/categories/`, or changing which folders are categories: update that
 article and run `just wiki-gen` (regenerates `wiki/config-structure/categories/00-INDEX.md`'s
 tables, the module counts and `wiki/config-structure/architecture.md`'s diagram) in the same
-change. `just modules` fails on an orphan (a module nothing reaches, from
-`flake.moduleGraph.orphans`; the `module-orphans` flake check fails only when
-built, and `just check` is `--no-build`), and checks untracked files and that
-wiki-lint's file-only reading still matches the evaluated graph.
+change. `just check` fails on an orphan (a module nothing reaches; `checkOrphans =
+"eval"`, so `--no-build` fails too), and `just modules` checks untracked files
+and that wiki-lint's file-only reading still matches the evaluated graph.
 
 Further reading: `wiki/config-structure/module-files.md`, `wiki/config-structure/module-style-guide.md`
 (aligned `=` columns deliberate; `nix fmt` deliberately not wired up).

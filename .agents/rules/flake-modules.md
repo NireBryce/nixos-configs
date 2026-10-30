@@ -57,11 +57,11 @@ the full rules.
   declares `mkEnableOption`. `kde-desktop` is the by-name variant, included
   directly while its category (`desktop-env`, which also holds `jovian`) is
   never included whole.
-- Orphans (a module nothing reaches) fail `just modules`, which reads
-  `flake.moduleGraph.orphans`; dirs-as-categories' `module-orphans` flake
-  check fails only when built, and `just check` is `--no-build`. `just
-  modules` also reports untracked files and drift between wiki-lint's
-  file-only reading and the evaluated graph.
+- Orphans (a module nothing reaches) fail `just check`: `checks.nix` sets
+  dirs-as-categories' `checkOrphans = "eval"`, which throws while the
+  `module-orphans` check is evaluated, so `--no-build` fails too. `just
+  modules` reports untracked files and drift between wiki-lint's file-only
+  reading and the evaluated graph.
 
 ## Conventions
 

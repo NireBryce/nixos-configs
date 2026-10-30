@@ -152,10 +152,12 @@ A module inside a category reaches every host that includes that category.
 If no host includes the category, the module is an
 [orphan](glossary.md#orphan): it evaluates and installs nothing.
 
-- `just modules` fails on an orphan and names it. It reads the `orphans`
-  list from `nix eval --json ./flake#moduleGraph`.
-- `just check` does not catch an orphan. The `module-orphans` flake check
-  fails only when built, and `just check` runs with `--no-build`.
+- `just check` fails on an orphan and names it. `checks.nix` sets
+  `checkOrphans = "eval"`, so the `module-orphans` check throws while it is
+  evaluated, which `--no-build` still does.
+- A module you have just scaffolded is an orphan until a host includes it,
+  so `just check` fails until Step 5 is done.
+- `just modules` does not report orphans; it checks untracked files and drift.
 
 If a host should take the module without the rest of its category, name the
 module in an `includes` list directly, as the hosts do with `kde-desktop`.

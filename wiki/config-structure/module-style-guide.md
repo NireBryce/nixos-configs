@@ -307,4 +307,4 @@ Not formatting, but it belongs here because getting it wrong produces no error:
 - A module's filename is its name. A file named like another module or a
   category stops evaluation (it used to merge silently, §34).
 
-`just modules` fails on an orphan (`module-orphans` does not: it fails only when built, and `just check` is `--no-build`), reports untracked files, and checks drift.
+`just check` fails on an orphan (`checkOrphans = "eval"`, so `--no-build` fails too); `just modules` reports untracked files and checks drift.
