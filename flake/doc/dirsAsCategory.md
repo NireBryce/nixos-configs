@@ -53,7 +53,7 @@ resolve to the shared file's own path instead of the caller's. The collector
 derives two things from it: the category's directory (`dirOf`) and **the
 shim's own filename** (`baseNameOf`), which it uses both to skip the shim and
 to recognise a nested category. No shim filename is written down in the
-collector, `modules.py` or `check_wiki.py` (the scripts find shims by their
+collector, `modules.py` or `check_docs.py` (the scripts find shims by their
 `_lib/category-collector.nix` import), so renaming every shim together needs
 no other change. `findModulesRoot`
 walks up to find `modules/` so the shim can reach `_lib/` from any nesting
@@ -431,7 +431,7 @@ above.
 
 **2026-09-28 — the shim names itself; `_` paths skipped.** The collector
 used to hardcode `"dirsAsCategory.nix"` twice (to skip the shim, and to spot
-a nested category), and `modules.py`/`check_wiki.py` hardcoded it again.
+a nested category), and `modules.py`/`check_docs.py` hardcoded it again.
 Now each shim passes its own path (`shimFile`) and the collector takes the
 filename from it; the scripts find shims by their import of
 `_lib/category-collector.nix`. The walk also skips `_`-prefixed entries,

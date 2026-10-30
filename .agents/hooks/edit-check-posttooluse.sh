@@ -5,7 +5,7 @@
 # block: the edit has already happened, and each finding is a to-do for the
 # agent's next step, not a reason to undo it.
 #
-#   wiki/*.md  -> `check_wiki.py siblings`, filtered to this page's pair.
+#   wiki/*.md  -> `check_docs.py siblings`, filtered to this page's pair.
 #                 The whole check is ~0.1s, so no per-page flag was added;
 #                 the filter is by path, and REVIEW (word-budget) lines
 #                 are dropped as edit-time noise. A source edit whose
@@ -49,13 +49,13 @@ notes=()
 
 case "$rel" in
     wiki/*.md)
-        if [ -n "$have_py" ] && [ -f "$root/wiki/meta/scripts/check_wiki.py" ]; then
+        if [ -n "$have_py" ] && [ -f "$root/wiki/meta/scripts/check_docs.py" ]; then
             base=${rel%.md}; base=${base%-for-agents}
-            hits=$(python3 "$root/wiki/meta/scripts/check_wiki.py" siblings "$root" 2>/dev/null \
+            hits=$(python3 "$root/wiki/meta/scripts/check_docs.py" siblings "$root" 2>/dev/null \
                 | grep -F -e "$base.md" -e "$base-for-agents.md" \
                 | grep -v '^REVIEW' || true)
             if [ -n "$hits" ]; then
-                notes+=("check_wiki.py siblings, for this page's pair (fix in the same change; skill wiki-sync step 5):"$'\n'"$hits")
+                notes+=("check_docs.py siblings, for this page's pair (fix in the same change; skill wiki-sync step 5):"$'\n'"$hits")
             fi
         fi
         ;;

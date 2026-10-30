@@ -21,7 +21,7 @@ name in `includes` that doesn't exist (wiki/config-structure/module-files.md). W
               ignore it, so it silently does not exist.
 
   drift       wiki-lint reads categories, modules, includes and enables
-              from the files without evaluating (check_wiki.py's
+              from the files without evaluating (check_docs.py's
               static_document); this compares that reading with the
               evaluated graph, so the two rules cannot drift apart.
 
@@ -48,7 +48,7 @@ import json, pathlib, subprocess, sys
 SEE = {
     'untracked': "AGENTS.md, 'git add before nix eval'",
     'drift':     "wiki/config-structure/module-files.md; fix whichever reading is wrong, "
-                 "check_wiki.py's module_classes/all_categories or the file",
+                 "check_docs.py's module_classes/all_categories or the file",
     'misplaced': "wiki/config-structure/module-files.md; move the body to the class "
                  "that owns the namespace, or split the module file",
     'orphan':    "wiki/config-structure/module-files.md; name the module (or its category) in "
@@ -140,12 +140,12 @@ def misplaced(doc):
 
 
 def static_document(root):
-    """check_wiki.py's file-only reading of the tree. The script is loaded
+    """check_docs.py's file-only reading of the tree. The script is loaded
     from this checkout (wiki/meta/scripts/), the tree read from <modules-dir>,
     which sits at <repo>/flake/modules."""
     import importlib.util
-    script = pathlib.Path(__file__).resolve().parents[2] / 'wiki' / 'meta' / 'scripts' / 'check_wiki.py'
-    spec = importlib.util.spec_from_file_location('check_wiki', script)
+    script = pathlib.Path(__file__).resolve().parents[2] / 'wiki' / 'meta' / 'scripts' / 'check_docs.py'
+    spec = importlib.util.spec_from_file_location('check_docs', script)
     cw = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(cw)
     return cw.static_document(pathlib.Path(root).resolve().parents[1])

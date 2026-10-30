@@ -2,9 +2,9 @@
 """Find backtick-quoted file/path mentions across wiki/ and AGENTS.md that
 don't resolve to any file actually tracked in the repo -- a name that was
 renamed, moved, or removed out from under a doc that still mentions the old
-one, the same failure `check_wiki.py`'s own docstring names as its whole
+one, the same failure `check_docs.py`'s own docstring names as its whole
 motivation ("a doc can say something the repo has stopped agreeing with and
-nothing catches it"). `check_wiki.py links` already covers the reliable
+nothing catches it"). `check_docs.py links` already covers the reliable
 half of this idea -- a real markdown link target either resolves or it
 doesn't, no judgement call needed. This script covers the OTHER half: a
 bare filename mentioned in backticks with no link at all (`elly-user.nix`,
@@ -35,7 +35,7 @@ into directly:
 
 None of that is something a script can reliably tell apart from a genuine
 stale reference -- exactly the "script can't tell historical prose from a
-live claim by itself" limitation `check_wiki.py`'s own docstring names, just
+live claim by itself" limitation `check_docs.py`'s own docstring names, just
 hitting harder here than anywhere that script actually checks. So, same
 shape and same reasoning as `wiki_churn.py`: this is NOT a pass/fail gate.
 It only lists candidates for a human to skim; nothing here fails a build or
@@ -68,7 +68,7 @@ def repo_root(argv):
 
 
 def doc_files(root):
-    """Same scope as check_wiki.py's own `doc_files` -- all of wiki/
+    """Same scope as check_docs.py's own `doc_files` -- all of wiki/
     (recursive) plus AGENTS.md, not re-imported since these two scripts are
     meant to be runnable independently (one Python file each, no shared
     module to keep in sync)."""

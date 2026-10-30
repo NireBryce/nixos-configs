@@ -1,6 +1,6 @@
 # Module files
 
-_Last modified: 2026-10-28_
+_Last modified: 2026-10-30_
 
 A module file under `flake/modules/` never names its module. The
 [dirs-as-categories](https://github.com/NireBryce/dirs-as-categories) flake
@@ -213,6 +213,6 @@ Every NixOS host's toplevel, lysithea's, and every Home Manager generation
 came out with the same drvPath before and after, and the three desktop
 hosts' fingerprints (`flake/scripts/host-fingerprint.nix`) were identical.
 `just modules` now also compares the file-only reading wiki-lint uses
-(`check_wiki.py`'s `static_document`) against `nix eval .#moduleGraph`, so
+(`check_docs.py`'s `static_document`) against `nix eval .#moduleGraph`, so
 the two cannot drift apart. `just module-graph` draws the result (the
 [flake-module-graph](https://github.com/NireBryce/flake-module-graph) input).

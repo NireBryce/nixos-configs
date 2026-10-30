@@ -57,7 +57,7 @@ a security boundary.
 | pre-commit | `git commit` | [Lint ratchet](glossary.md#lint-ratchet), or the [offline checks](glossary.md#offline-checks) where nix cannot run | Blocks the commit | `.githooks/pre-commit` |
 | commit-msg | `git commit` | Canonical `Co-Authored-By: Claude` trailer | Rewrites the trailer | `.githooks/commit-msg` |
 | pre-push | `git push` | Preflight's offline steps where nix cannot run | Blocks the push | `.githooks/pre-push` |
-| `just wiki-lint` | [Preflight](glossary.md#preflight), CI, by hand | Docs agree with the repo | Fails | `wiki/meta/scripts/check_wiki.py` |
+| `just wiki-lint` | [Preflight](glossary.md#preflight), CI, by hand | Docs agree with the repo | Fails | `wiki/meta/scripts/check_docs.py` |
 | `just modules` | Preflight, CI, by hand | No untracked `.nix`; static and evaluated module graphs agree | Fails | `flake/scripts/modules.py` |
 | `just lint` | Preflight, CI, pre-commit | statix, deadnix and oversized-file counts never rise | Fails | `flake/scripts/lint.py` |
 | `just check` | Preflight, CI | Every host's toplevel and home evaluate (`module-orphans` fails only when built, so `--no-build` skips it; `just modules` is the orphan gate) | Fails | `flake/modules/checks.nix` |
@@ -173,7 +173,7 @@ older than 3.11, produces no message.
 
 The hook runs three checks after a write:
 
-- Under `wiki/`: `check_wiki.py siblings`, filtered to that page's pair.
+- Under `wiki/`: `check_docs.py siblings`, filtered to that page's pair.
 - A `.nix` file: `.agents/hooks/nix_shell_interp.py`, which flags
   shell-shaped `${…}` inside a Nix `''` string that cannot be working Nix
   (`${x[1]}`, `${x:-y}`, `${#x}`). A bare `${VAR}` is not flagged, because
@@ -220,8 +220,8 @@ The [offline checks](glossary.md#offline-checks) have two modes:
 
 ## Static checks
 
-All of these run inside [preflight](glossary.md#preflight). `check_wiki.py`
-(`just wiki-lint`) is a set of registered sub-checks, and `check_wiki.py
+All of these run inside [preflight](glossary.md#preflight). `check_docs.py`
+(`just wiki-lint`) is a set of registered sub-checks, and `check_docs.py
 check` runs them all.
 
 | Sub-check | What it compares |
@@ -314,6 +314,6 @@ forms itself, and a hook's deny outranks an allow rule.
 - `flake/scripts/tests/test_guards.py`, `flake/scripts/offline_checks.py`,
   `flake/scripts/with-nix-tools.sh`, `flake/scripts/modules.py`,
   `flake/scripts/lint.py`, `flake/scripts/check_trailers.py`
-- `wiki/meta/scripts/check_wiki.py`, `wiki/meta/scripts/wiki_gen.py`
+- `wiki/meta/scripts/check_docs.py`, `wiki/meta/scripts/wiki_gen.py`
 - `flake/modules/checks.nix`, `.justfile`, `.github/workflows/check.yml`
 - [agent-lessons-learned.md](../../wiki/agent-lessons-learned.md)

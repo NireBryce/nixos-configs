@@ -82,7 +82,7 @@ links all drift silently. Write the pointer (`the modules under X`, the
 file, the command) or name the items; keep a number only when it is the
 rule itself, a dated incident or experiment record, a PR/issue/commit
 reference, or an interface a user types (a port). Skill `fact-hygiene`
-(cat 4); `check_wiki.py docrefs` catches the bare count-of-files shape.
+(cat 4); `check_docs.py docrefs` catches the bare count-of-files shape.
 
 Roster, class, and which hosts wipe `/root`: `host-config/hosts.nix` (check
 it before stating any count) and `wiki/fleet/hosts.md`'s table. First-boot
@@ -350,7 +350,7 @@ The tradeoff, stated so nobody has to rediscover it: this is deliberate
 duplication, against the "index over restatement" rule the rest of the wiki
 runs on, and `wiki/00-INDEX.md` says outright that this repo has been bitten
 repeatedly by one fact living in two places. It is allowed here because it
-is the one duplication with a mechanical guard — **`check_wiki.py siblings`
+is the one duplication with a mechanical guard — **`check_docs.py siblings`
 fails when a sibling's `_Last modified:_` predates its source's** (and when
 a page over 1,000 words has neither a sibling nor a first-section
 `## Quick facts`), so

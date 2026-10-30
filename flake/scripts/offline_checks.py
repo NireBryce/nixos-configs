@@ -17,7 +17,7 @@ the parts that need nix named and left out, never a second checklist.
   .sh .bash, .githooks/*   `bash -n`
   .json, .toml   parses
   .nix           `nix-instantiate --parse` (syntax only; fetches nothing)
-  wiki lint      check_wiki.py check, minus the `generated` check, which
+  wiki lint      check_docs.py check, minus the `generated` check, which
                  evaluates the flake
 It replaces statix/deadnix, not equals them: a lint regression still has to
 be caught by CI.
@@ -54,7 +54,7 @@ NEEDS_NIX = {
 NOT_PYTHON = "not a python3 step (needs nix, or warn-only)"
 # Run, but with an extra flag appended.
 EXTRA_ARGS = {
-    "wiki/meta/scripts/check_wiki.py": ["--skip=generated"],
+    "wiki/meta/scripts/check_docs.py": ["--skip=generated"],
 }
 
 
@@ -106,7 +106,7 @@ def check_staged_file(path):
 
 def run_wiki_lint():
     r = subprocess.run(
-        [sys.executable, str(REPO / "wiki/meta/scripts/check_wiki.py"),
+        [sys.executable, str(REPO / "wiki/meta/scripts/check_docs.py"),
          "check", "--skip=generated"], capture_output=True, text=True)
     return [] if r.returncode == 0 else (r.stdout + r.stderr).strip().splitlines()
 

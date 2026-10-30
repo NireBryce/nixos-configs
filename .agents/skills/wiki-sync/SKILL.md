@@ -44,10 +44,10 @@ Narrower cases with their own instructions (read first):
    - Relative links recomputed for file depth; verify each resolves.
    - kebab-case names; `00-INDEX.md` reserved for a directory's own index.
    - A fix ballooning into prose that argues a fact means the fact belongs in the linked file's own header.
-   - **Bump `_Last modified: YYYY-MM-DD_`** (right after the title) to today on every page you edited, not on pages only read. `check_wiki.py dates` (in `just wiki-lint`) catches only a missing/malformed line, never a stale date left behind.
+   - **Bump `_Last modified: YYYY-MM-DD_`** (right after the title) to today on every page you edited, not on pages only read. `check_docs.py dates` (in `just wiki-lint`) catches only a missing/malformed line, never a stale date left behind.
 5. **Edit the `-for-agents` sibling of every page you touched, same change.** Long narrative pages are pairs (`wiki/meta/styleguide.md` "Two audiences per page"); the sibling is the copy an agent reads, so stale there is the worse half. A page with no sibling that opens with `## Quick facts` is the folded shape: update that section in place if your edit changes a fact it states. A pair whose sibling you find restating the page near-verbatim, or that churns in lockstep, is a fold candidate (styleguide's tests) -- a separate change, not part of this one.
 
-   `check_wiki.py siblings` (in `just wiki-lint`) fails when a sibling's `_Last modified:_` predates its source's. **Don't satisfy it by bumping the sibling's date** (turns a caught omission silent). Edit, then bump.
+   `check_docs.py siblings` (in `just wiki-lint`) fails when a sibling's `_Last modified:_` predates its source's. **Don't satisfy it by bumping the sibling's date** (turns a caught omission silent). Edit, then bump.
 
    If the source edit has nothing to sync (reorder, typo, rewording of a fact the sibling states its own way), say so on the sibling under its `_Last modified:_` line:
 

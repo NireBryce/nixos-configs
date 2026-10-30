@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fixture tests for check_wiki.py's `rules` check (path-scoped
+"""Fixture tests for check_docs.py's `rules` check (path-scoped
 `.agents/rules/*.md`) and the lessons-map half of its `lessons` check
 (`.agents/lessons-map.toml`, validated by .agents/hooks/lessons_map.py). Against the real tree a clean run proves only that
 today's rules are fine, not that a dead glob or an unlisted rule would be
@@ -10,7 +10,7 @@ thing at a time, and asserts the finding. Pure stdlib + git; runs in
 import importlib.util, pathlib, subprocess, sys, tempfile, unittest
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
-import check_wiki  # noqa: E402
+import check_docs  # noqa: E402
 
 GOOD_RULE = '''---
 paths:
@@ -42,7 +42,7 @@ class RulesCheck(unittest.TestCase):
         p.write_text(text)
 
     def findings(self):
-        return check_wiki.check_rules(self.root)
+        return check_docs.check_rules(self.root)
 
     def test_clean(self):
         self.assertEqual(self.findings(), [])
@@ -77,7 +77,7 @@ class RulesCheck(unittest.TestCase):
         self.assertTrue(any("unexpected line" in f for f in self.findings()))
 
     def test_glob_shapes(self):
-        rx = check_wiki.glob_regex
+        rx = check_docs.glob_regex
         self.assertTrue(rx('**/*.nix').match('a.nix'))
         self.assertTrue(rx('**/*.nix').match('x/y/a.nix'))
         self.assertFalse(rx('a/*/hw/**').match('a/b/c/hw/x'))
@@ -120,9 +120,9 @@ class LessonsMapCheck(unittest.TestCase):
 
     def findings(self, map_text, lessons=frozenset({1})):
         (self.root / '.agents' / 'lessons-map.toml').write_text(map_text)
-        return check_wiki.lessons_map.validate(
+        return check_docs.lessons_map.validate(
             self.root, ['src/a/b.nix', 'tools/run.sh'], set(lessons),
-            check_wiki.rule_globs(self.root))
+            check_docs.rule_globs(self.root))
 
     def assertFinds(self, map_text, needle, **kw):
         found = self.findings(map_text, **kw)
@@ -183,11 +183,11 @@ class SummariesCheck(unittest.TestCase):
 
     def test_module_with_a_summary_passes(self):
         self.add(self.PKG, '{\n    # package summary: jq -- JSON processor\n}\n')
-        self.assertEqual(check_wiki.check_summaries(self.root), [])
+        self.assertEqual(check_docs.check_summaries(self.root), [])
 
     def test_module_without_one_is_named(self):
         self.add(self.PKG, '{\n    # summary: jq -- JSON processor\n}\n')
-        f = check_wiki.check_summaries(self.root)
+        f = check_docs.check_summaries(self.root)
         self.assertEqual(len(f), 1)
         self.assertIn('NO PACKAGE SUMMARY', f[0])
         self.assertIn(self.PKG, f[0])
@@ -197,7 +197,7 @@ class SummariesCheck(unittest.TestCase):
                     'flake/modules/packages-config/dev/_lib/x.nix',
                     'flake/modules/general-config/x.nix'):
             self.add(rel, '{ }\n')
-        self.assertEqual(check_wiki.check_summaries(self.root), [])
+        self.assertEqual(check_docs.check_summaries(self.root), [])
 
 
 class DocRefsCheck(unittest.TestCase):
@@ -222,7 +222,7 @@ class DocRefsCheck(unittest.TestCase):
 
     def findings(self, doc):
         self.write('wiki/doc.md', doc)
-        return check_wiki.check_docrefs(self.root)
+        return check_docs.check_docrefs(self.root)
 
     def test_unknown_helper_caught(self):
         f = self.findings('Run `just agent nope`.\n')
@@ -259,7 +259,7 @@ class DocRefsCheck(unittest.TestCase):
 
     def bare(self, doc, rel='wiki/doc.md'):
         self.write(rel, doc)
-        return [x for x in check_wiki.check_docrefs(self.root)
+        return [x for x in check_docs.check_docrefs(self.root)
                 if x.startswith('BARE COUNT')]
 
     def test_bare_count_caught(self):
@@ -299,11 +299,11 @@ class DocRefsCheck(unittest.TestCase):
 class FenceHandling(unittest.TestCase):
     """`_just_mentions_in_skill` reads bare `just <recipe>` only inside a
     fenced code block, so what counts as a fence decides which mentions get
-    checked. check_wiki.py once defined FENCE twice with different patterns;
+    checked. check_docs.py once defined FENCE twice with different patterns;
     the later one silently won for every function above it."""
 
     def mentions(self, text):
-        return check_wiki._just_mentions_in_skill(text)
+        return check_docs._just_mentions_in_skill(text)
 
     def test_indented_fence_in_list_item(self):
         self.assertIn('indented-recipe', self.mentions(
@@ -335,19 +335,19 @@ class CheckRegistry(unittest.TestCase):
     for no other reason -- main() keeps no list of names."""
 
     def test_every_check_function_is_registered(self):
-        registered = {fn.__name__ for _, fn in check_wiki.wikicore.registered()}
-        defined = {name for name, fn in vars(check_wiki).items()
+        registered = {fn.__name__ for _, fn in check_docs.wikicore.registered()}
+        defined = {name for name, fn in vars(check_docs).items()
                    if name.startswith('check_') and callable(fn)}
         self.assertTrue(defined)
         self.assertEqual(defined - registered, set())
 
     def test_generated_check_comes_from_wiki_gen(self):
-        names = [n for n, _ in check_wiki.wikicore.registered()]
+        names = [n for n, _ in check_docs.wikicore.registered()]
         self.assertIn('generated', names)
         self.assertEqual(names.index('generated'), names.index('counts') + 1)
 
     def test_unordered_checks_run_last_in_registration_order(self):
-        wc = check_wiki.wikicore
+        wc = check_docs.wikicore
         saved = dict(wc.CHECKS)
         try:
             def late(root): return []
@@ -368,14 +368,14 @@ class CheckRegistry(unittest.TestCase):
 
     def test_reloading_the_module_replaces_its_checks(self):
         spec = importlib.util.spec_from_file_location(
-            'check_wiki', pathlib.Path(check_wiki.__file__))
+            'check_docs', pathlib.Path(check_docs.__file__))
         again = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(again)   # what flake/scripts/modules.py does
-        self.assertEqual([n for n, _ in check_wiki.wikicore.registered()].count('imports'), 1)
+        self.assertEqual([n for n, _ in check_docs.wikicore.registered()].count('imports'), 1)
 
     def test_unknown_subcommand_exits_2(self):
         r = subprocess.run(
-            [sys.executable, str(pathlib.Path(check_wiki.__file__)), 'nope'],
+            [sys.executable, str(pathlib.Path(check_docs.__file__)), 'nope'],
             capture_output=True, text=True)
         self.assertEqual(r.returncode, 2)
 
@@ -383,7 +383,7 @@ class CheckRegistry(unittest.TestCase):
         # Two fake checks, one failing: `check` fails; skipping it passes and
         # names what it skipped, so a skip is never silent.
         import contextlib, io
-        wc = check_wiki.wikicore
+        wc = check_docs.wikicore
         saved, argv = dict(wc.CHECKS), sys.argv
         try:
             wc.CHECKS.clear()
@@ -391,11 +391,11 @@ class CheckRegistry(unittest.TestCase):
             wc.check('zz-bad', order=2)(lambda root: ['BAD  always'])
 
             def run(*args):
-                sys.argv = ['check_wiki.py', *args]
+                sys.argv = ['check_docs.py', *args]
                 out = io.StringIO()
                 with contextlib.redirect_stdout(out):
                     with self.assertRaises(SystemExit) as e:
-                        check_wiki.main()
+                        check_docs.main()
                 return e.exception.code, out.getvalue()
             code, out = run('check')
             self.assertEqual(code, 1)
@@ -411,7 +411,7 @@ class CheckRegistry(unittest.TestCase):
 
     def test_skip_rejects_an_unknown_check(self):
         r = subprocess.run(
-            [sys.executable, str(pathlib.Path(check_wiki.__file__)),
+            [sys.executable, str(pathlib.Path(check_docs.__file__)),
              'check', '--skip=nope'], capture_output=True, text=True)
         self.assertEqual(r.returncode, 2)
 
@@ -447,7 +447,7 @@ class ImportedByRoster(unittest.TestCase):
     def findings(self, imported_by):
         self.write('wiki/config-structure/categories/sys.md',
                    f'# sys\n\n## Imported by\n\n{imported_by}\n')
-        return check_wiki.check_imports(self.root)
+        return check_docs.check_imports(self.root)
 
     def test_hosts_named_pass(self):
         self.assertEqual(self.findings('aaa and bbb.'), [])

@@ -1,6 +1,6 @@
 # Category reference
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-10-30_
 
 One article per real category (a folder under `flake/modules/` whose
 subfolders hold modules, see [../module-files.md](../module-files.md)),
@@ -93,7 +93,7 @@ config-vs-usage split. "—" means no service exists to write one about yet.
 | virtualization | — (`nire-llm-sandbox` removed 2026-08-28; see the category's own page) |
 
 No per-category file count here on purpose (removed 2026-08-29, with the
-`check_wiki.py` machinery that verified it) — read the category's own
+`check_docs.py` machinery that verified it) — read the category's own
 directory rather than trusting a number here.
 
 `shell-config` is the one category grown into its own directory —
