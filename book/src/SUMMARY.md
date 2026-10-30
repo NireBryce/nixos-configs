@@ -1,6 +1,7 @@
 # Summary
 
 [Introduction](introduction.md)
+[Your first change](first-change.md)
 
 # Understanding the repo
 
@@ -16,12 +17,16 @@
 - [Wiring a user and Home Manager](users-and-home-manager.md)
 - [Darwin edge cases](darwin.md)
 
-# Working with agents
+# Contributing
+
+- [Git and agent workflows](git-and-agent-workflows.md)
+
+# Agent tooling reference
 
 - [How agents work in this repo](agents-in-the-repo.md)
 - [Checks, guards and hooks](agent-checks-and-guards.md)
-- [Git and agent workflows](git-and-agent-workflows.md)
 
 # Reference
 
 - [Glossary](glossary.md)
+- [About this book](about-this-book.md)
