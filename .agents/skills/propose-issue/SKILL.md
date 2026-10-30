@@ -24,6 +24,12 @@ record; none get the bug *worked*. The issue is added to whichever of those
 the bug warrants, not instead. The repo has labels (`bug`, `documentation`,
 `enhancement`, …) but no backlog yet, so an unfiled bug is easily lost.
 
+## State the cause only if you read it
+
+A cause that came from a report, a worker or memory is a hypothesis until you
+have read the code or run the reproduction that shows it (agent-lessons-learned
+§51). Quote what you read; otherwise write "likely" and what would confirm it.
+
 ## Never a third-party repo
 
 Every `gh issue create` here hardcodes `--repo NireBryce/nixos-configs`,

@@ -1,6 +1,6 @@
 # 36. Evaluating the Nix expression and building the artifact it describes are different tests, and only one of them was run
 
-_Last modified: 2026-09-29_
+_Last modified: 2026-10-30_
 
 ## Index entry
 
@@ -41,3 +41,12 @@ dotfiles (`home-manager-dotfiles` skill) and rendered firewall scripts
 rule. Worth generalizing: **when a value is a path, a filename, or anything
 else whose correctness depends on more than its type, build the thing that
 consumes it and read the result — don't stop at the expression type-checking.**
+
+## Addendum (2026-10-30): a check that is a derivation
+
+`just check` is `nix flake check --all-systems --no-build`, so a flake check
+that is a derivation (the `polymorph` check, which runs a program over the
+source) is evaluated and never run: it is green whether or not the thing it
+guards is consistent. It needs its own recipe that builds it, listed in
+`preflight` (skill `new-flake-input`), and it has to be shown to fail once
+before it is trusted.
