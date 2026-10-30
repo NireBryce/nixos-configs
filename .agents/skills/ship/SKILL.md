@@ -98,7 +98,10 @@ Never commit onto `experimental`. `git status -sb` first:
   falls back to `ask` — still a no-op under auto mode — when it can't tell
   which repo the reset acts on: anything beyond plain `cd <path>` and
   `git [-C <path>] <subcommand> <args>` joined by `&&`/`;`. So the
-  `git status --short` read stays yours.
+  `git status --short` read stays yours. To discard edits of your own that
+  are already in the branch (moved from the shared checkout, say) once the
+  user has approved, the guard still denies `checkout --`/`restore`; use
+  `git stash push` then `git stash drop`, skill `use-a-worktree`.
 
 Commit with `just agent commit` (`.agents/scripts/ship.py`, whose header
 has the incidents behind each rule):
@@ -185,7 +188,10 @@ linked worktree whose shared checkout holds `experimental`, it leaves that
 checkout alone and detaches this worktree instead), local branch deleted,
 remote branch deleted if still there, `just close-fixed <n>` (#177: closing
 keywords silently not closing). Any failure stops it and prints what's left;
-a failed merge deletes nothing. Raise that, don't retry silently.
+a failed merge deletes nothing. Raise that, don't retry silently. A
+remote-branch delete that errors with "remote ref does not exist" or "cannot
+lock ref" is already done (the repo deletes merged branches itself); it prints
+`failed, but its goal already holds; going on`.
 
 **Merged outside this flow** (web UI, another session): the branch stays.
 `just branches` classifies local branches by patch-id, which catches rebased
