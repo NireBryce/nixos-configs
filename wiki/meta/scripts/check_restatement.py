@@ -27,7 +27,7 @@ pairs outranked the top genuine hit when the split landed. They are held
 back behind --siblings instead of dropped, because the ONE thing worth
 seeing there is a sibling whose overlap has grown large enough that it is
 turning back into a copy of the page, which is exactly what
-`check_wiki.py siblings`' word budget is watching for from the other side.
+`check_docs.py siblings`' word budget is watching for from the other side.
 
 Usage:
     check_restatement.py [--min-words N] [--top N] [--all] [--siblings]

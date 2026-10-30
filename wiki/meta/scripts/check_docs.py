@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Static checks of wiki/ (and AGENTS.md plus `.agents/rules/*.md`, the files
+"""check_docs.py: static checks of the repo's prose docs. Named check_wiki.py
+until 2026-10-30, when it already covered the skills, rules, AGENTS.md and the
+lessons map as well as wiki/; `just wiki-lint` keeps its name.
+
+Static checks of wiki/ (and AGENTS.md plus `.agents/rules/*.md`, the files
 outside wiki/ that duplicate wiki-shaped claims verbatim -- see `doc_files`)
 against the actual
 module tree, for authoritative claims that silently go stale after a
@@ -255,26 +259,26 @@ structured, extractable facts only:
 
   check     Runs every check listed above.
 
-    check_wiki.py imports       [repo-root]
-    check_wiki.py table         [repo-root]
-    check_wiki.py recipes       [repo-root]
-    check_wiki.py skills        [repo-root]
-    check_wiki.py skill-files   [repo-root]
-    check_wiki.py secrets       [repo-root]
-    check_wiki.py routes        [repo-root]
-    check_wiki.py links         [repo-root]
-    check_wiki.py anchors       [repo-root]
-    check_wiki.py contents      [repo-root]
-    check_wiki.py dates         [repo-root]
-    check_wiki.py counts        [repo-root]
-    check_wiki.py generated     [repo-root]
-    check_wiki.py siblings      [repo-root]
-    check_wiki.py lessons       [repo-root]
-    check_wiki.py rules         [repo-root]
-    check_wiki.py summaries     [repo-root]
-    check_wiki.py docrefs       [repo-root]
-    check_wiki.py check         [repo-root] [--skip=name,name]
-    check_wiki.py gen-contents  <file.md> [file.md ...]
+    check_docs.py imports       [repo-root]
+    check_docs.py table         [repo-root]
+    check_docs.py recipes       [repo-root]
+    check_docs.py skills        [repo-root]
+    check_docs.py skill-files   [repo-root]
+    check_docs.py secrets       [repo-root]
+    check_docs.py routes        [repo-root]
+    check_docs.py links         [repo-root]
+    check_docs.py anchors       [repo-root]
+    check_docs.py contents      [repo-root]
+    check_docs.py dates         [repo-root]
+    check_docs.py counts        [repo-root]
+    check_docs.py generated     [repo-root]
+    check_docs.py siblings      [repo-root]
+    check_docs.py lessons       [repo-root]
+    check_docs.py rules         [repo-root]
+    check_docs.py summaries     [repo-root]
+    check_docs.py docrefs       [repo-root]
+    check_docs.py check         [repo-root] [--skip=name,name]
+    check_docs.py gen-contents  <file.md> [file.md ...]
 
 repo-root defaults to three directories up from this script (wiki/meta/scripts/ ->
 wiki/meta/ -> wiki/ -> repo root). `gen-contents` is different in kind from every command
@@ -301,7 +305,7 @@ from wikicore import (  # noqa: E402
 from wikicore import last_modified as _last_modified  # noqa: E402,F401
 # The tree reading lives in nixtree.py so wiki_gen.py can share it without
 # importing this module; re-exported because the tests and `just modules`
-# reach it as check_wiki.<name>.
+# reach it as check_docs.<name>.
 import nixtree  # noqa: E402
 from nixtree import (  # noqa: E402,F401
     CLASS_KEYS, COMMENT, ENABLES, FLAG, HOST_LINE, INCLUDES, TOP_KEY,
@@ -1923,7 +1927,7 @@ SEE = (
     (('NO PACKAGE SUMMARY',),
      "skill new-package: add the `# package summary:` line above the package list"),
     (('STALE CONTENTS', 'MISSING CONTENTS'),
-     "`python3 wiki/meta/scripts/check_wiki.py gen-contents <page>`"),
+     "`python3 wiki/meta/scripts/check_docs.py gen-contents <page>`"),
     (('BROKEN LINK', 'BROKEN ANCHOR', 'MISSING PATH', 'UNKNOWN RECIPE',
       'UNKNOWN SKILL', 'UNKNOWN ROUTE', 'UNKNOWN HELPER', 'MOVED PATH',
       'UNKNOWN SECTION'),
@@ -1959,7 +1963,7 @@ def see_lines(findings):
 def main():
     if len(sys.argv) > 1 and sys.argv[1] == 'gen-contents':
         if len(sys.argv) < 3:
-            print("usage: check_wiki.py gen-contents <file.md> [file.md ...]")
+            print("usage: check_docs.py gen-contents <file.md> [file.md ...]")
             sys.exit(2)
         for p in sys.argv[2:]:
             regenerate_contents(pathlib.Path(p))

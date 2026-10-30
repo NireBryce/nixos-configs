@@ -88,7 +88,7 @@ class PreflightClassification(unittest.TestCase):
 
     def test_wiki_lint_runs_without_the_generated_check(self):
         lint = [a for a, l, _ in self.steps
-                if l == "wiki/meta/scripts/check_wiki.py"]
+                if l == "wiki/meta/scripts/check_docs.py"]
         self.assertEqual(len(lint), 1)
         self.assertIn("--skip=generated", lint[0])
 

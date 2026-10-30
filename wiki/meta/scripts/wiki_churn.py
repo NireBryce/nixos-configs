@@ -5,10 +5,10 @@ categories/00-INDEX.md's "Members" column and categories/system.md's "Files"
 column already were: a claim that needed a human to remember to touch it on
 every unrelated change nearby, until the toil outweighed what the claim told
 a reader that reading the source directly didn't already (removed
-2026-08-29 -- see check_wiki.py's docstring and this repo's "read the file
+2026-08-29 -- see check_docs.py's docstring and this repo's "read the file
 directly ... rather than trusting a count here" idiom, CLAUDE.md Safety).
 
-This is NOT a `check_wiki.py`-style pass/fail gate -- churn is a heuristic
+This is NOT a `check_docs.py`-style pass/fail gate -- churn is a heuristic
 that needs a human to look at *why* a page keeps changing (an actively
 evolving system legitimately churns; a page hand-tracking a number that
 drifts every time something nearby changes churns for a worse reason, and
@@ -106,7 +106,7 @@ def main():
     ap.add_argument('--min-commits', type=int, default=2)
     # argparse chokes on a positional that looks like a flag; repo_root is
     # resolved separately (same fallback-to-script-location convention
-    # check_wiki.py uses) so --since/--top/--min-commits work with or
+    # check_docs.py uses) so --since/--top/--min-commits work with or
     # without an explicit repo-root argument ahead of them.
     args = ap.parse_args()
 

@@ -1,6 +1,6 @@
 # Wiki style guide
 
-_Last modified: 2026-10-27_
+_Last modified: 2026-10-30_
 
 A page lives in the directory that matches its reader: `config-structure/`
 for how the flake is built (with `config-structure/categories/` for one page per
@@ -63,7 +63,7 @@ Pages go in one of these places:
   article in `wiki/agent-lessons-learned/` (`<n>-<slug>.md`), and
   `agent-lessons-learned.md` is the index: one entry per §, grouped by the
   moment it applies, naming the rule's Home and what Enforced it
-  (`check_wiki.py lessons`). A lesson tied to particular paths or commands
+  (`check_docs.py lessons`). A lesson tied to particular paths or commands
   also gets a topic in `.agents/lessons-map.toml`, which a hook uses to remind
   the next agent at that moment.
 - **`wiki/config-structure/categories/<name>.md`** — one page per real category, i.e. a
@@ -168,7 +168,7 @@ Pages go in one of these places:
 - **Each of those directories also carries a `README.md` symlink to its
   `00-INDEX.md`**, so the name GitHub looks for still exists. Edit the
   `00-INDEX.md`; never write through the symlink, and never link to
-  `README.md` from a page. `check_wiki.py`'s `wiki_md()` skips symlinks so
+  `README.md` from a page. `check_docs.py`'s `wiki_md()` skips symlinks so
   the same bytes aren't scanned twice — every check that walks `wiki/` goes
   through it for that reason.
 
@@ -193,7 +193,7 @@ Pages go in one of these places:
   reader can tell at a glance how stale a page might be without opening
   `git log`. **Whoever edits a page's actual content bumps this line to
   today in the same change**; a purely mechanical touch (a `gen-contents`
-  run, a typo fix) doesn't need to. `wiki/meta/scripts/check_wiki.py dates`
+  run, a typo fix) doesn't need to. `wiki/meta/scripts/check_docs.py dates`
   checks that the line exists and is shaped right (part of `just
   wiki-lint`), but — like every other date claim in this repo — can't check
   that it's still *true*; that's on the editor, the same discipline skill
@@ -209,13 +209,13 @@ Pages go in one of these places:
   character between two spaces leaves a double hyphen), then replace each
   space with a hyphen.
 
-  **Don't hand-derive this.** `wiki/meta/scripts/check_wiki.py` implements the
+  **Don't hand-derive this.** `wiki/meta/scripts/check_docs.py` implements the
   exact algorithm (`github_slug`, reverse-engineered against real rendered
   GitHub output) and two checks that use it: `anchors` (every link with a
   `#fragment` resolves to a real heading on its target page) and `contents`
   (every page's `## Contents` list matches its current headings). Both are
   part of `check` and `just wiki-lint`. After adding, renaming, or removing
-  a heading, run `python3 wiki/meta/scripts/check_wiki.py gen-contents <the page>`
+  a heading, run `python3 wiki/meta/scripts/check_docs.py gen-contents <the page>`
   rather than editing the block by hand; it's idempotent. A hand-derived
   anchor already got it wrong once, in `categories/homelab.md`'s link into
   `virtualization.md`'s `` `VMs/_lib/libvirt-vm.nix` `` heading.
@@ -319,7 +319,7 @@ and drifting. That objection is correct. The split is worth it anyway
 because the two readers want different documents, and because it is the one
 duplication in this wiki with a **mechanical** guard under it:
 
-`check_wiki.py siblings` (part of `just wiki-lint`) checks that
+`check_docs.py siblings` (part of `just wiki-lint`) checks that
 
 - every sibling has a source page, and every page over the line has a
   sibling or opens with `## Quick facts`;
@@ -368,7 +368,7 @@ import list doesn't have to be written twice to stay watched.
   back, every link target pointing at it must be wrapped in angle brackets
   or the markdown won't parse. (The checker's own link regex reads such a
   wrapper as a live link, so it can't be shown inline here.)
-- Verify a link resolves before leaving it. `check_wiki.py anchors` covers
+- Verify a link resolves before leaving it. `check_docs.py anchors` covers
   `#fragment` links; for the path itself, a quick
   `[ -e "$(dirname "$file")/$link" ]` after any move or rename catches what
   proofreading misses.

@@ -22,14 +22,14 @@ Reminders, never decisions:
     a blocked call. Two exceptions stay silent: a state-file error (it
     costs the dedup, not the reminder) and a python3 older than 3.11 (no
     tomllib; a banner on every call would be worse than no reminder --
-    `check_wiki.py lessons` fails loudly there instead).
+    `check_docs.py lessons` fails loudly there instead).
   - a topic counts as shown once it is emitted, even if another guard then
     denies the call.
 
 The map is read from the nearest ancestor of the edited file (or of the
 Bash call's cwd) holding .agents/lessons-map.toml, so a worktree is matched
 against its own map. Matching lives in lessons_map.py beside this file,
-shared with `just agent lessons` and `check_wiki.py lessons`.
+shared with `just agent lessons` and `check_docs.py lessons`.
 """
 import hashlib
 import json

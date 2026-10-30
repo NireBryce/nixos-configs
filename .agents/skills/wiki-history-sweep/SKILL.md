@@ -75,9 +75,9 @@ reading current config does.
 
 ## Traps
 
-- **`gen-contents` after removing a heading:** `python3 wiki/meta/scripts/check_wiki.py gen-contents <page>`, not hand-editing.
+- **`gen-contents` after removing a heading:** `python3 wiki/meta/scripts/check_docs.py gen-contents <page>`, not hand-editing.
 - **Never run `gen-contents` across all pages.** `-for-agents.md` siblings, `agent-lessons-learned.md` and its articles are exempt from Contents blocks and the insert path adds one anyway (hit 2026-09-11, ~20 pages). Pass only pages you changed.
-- **A `-history.md` needs no `-for-agents` sibling but DOES keep `## Contents`.** `SIBLING_EXEMPT` in `check_wiki.py` covers `-history.md`; styleguide's Contents exception covers only `agent-lessons-learned*` and `-for-agents.md`. An earlier version of this skill had it backwards and `reverse-proxy-history.md` lost its block (2026-09-12); `check_contents` now reports **MISSING CONTENTS** for a non-exempt page with headings but no block.
+- **A `-history.md` needs no `-for-agents` sibling but DOES keep `## Contents`.** `SIBLING_EXEMPT` in `check_docs.py` covers `-history.md`; styleguide's Contents exception covers only `agent-lessons-learned*` and `-for-agents.md`. An earlier version of this skill had it backwards and `reverse-proxy-history.md` lost its block (2026-09-12); `check_contents` now reports **MISSING CONTENTS** for a non-exempt page with headings but no block.
 
 ## See also
 

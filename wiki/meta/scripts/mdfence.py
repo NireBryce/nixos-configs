@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """One definition of "inside a fenced code block" for the wiki scripts.
 
-check_wiki.py, check_restatement.py and wiki_gen.py each used to carry their
+check_docs.py, check_restatement.py and wiki_gen.py each used to carry their
 own fence handling -- six of them, with three different ideas of what opens
 a fence (backticks only, backticks or tildes, any leading whitespace) and
 none of them matching CommonMark on when a fence closes. One of them was
-defined twice in check_wiki.py, the later definition silently winning for
+defined twice in check_docs.py, the later definition silently winning for
 code written against the earlier one.
 
 The rules are CommonMark's, for a line-based reading (no container blocks):

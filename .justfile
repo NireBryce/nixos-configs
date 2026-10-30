@@ -141,7 +141,7 @@ branches-test:
 # count surfaced only as a red PR, minutes after an agent reported it green
 # Static check: wiki/ and AGENTS.md claims vs the repo -- in preflight and CI
 wiki-lint:
-    python3 wiki/meta/scripts/check_wiki.py check
+    python3 wiki/meta/scripts/check_docs.py check
 
 # The wiki tables derivable from the repo (hosts.md's, categories/00-INDEX.md's,
 # the module counts) live in `<!-- generated:... -->` regions; this rewrites
@@ -166,7 +166,7 @@ wiki-gen-test:
 wiki-churn *args:
     python3 wiki/meta/scripts/wiki_churn.py {{args}}
 
-# Deliberately not a check_wiki.py subcommand and not in `wiki-lint`: most
+# Deliberately not a check_docs.py subcommand and not in `wiki-lint`: most
 # candidates are a deliberately-kept historical name, an upstream reference,
 # or a styleguide.md example, not an actual bug -- read the script's own
 # docstring before treating any hit as one.
@@ -236,7 +236,7 @@ preflight:
     @flake/scripts/hooks-path-note.sh
     @just wiki-lint
     @just wiki-gen-test
-    @python3 wiki/meta/scripts/test_check_wiki.py
+    @python3 wiki/meta/scripts/test_check_docs.py
     @python3 wiki/meta/scripts/test_mdfence.py
     @just branches-test
     @just keybindings-test

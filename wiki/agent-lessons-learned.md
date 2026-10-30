@@ -1,6 +1,6 @@
 # Lessons learned
 
-_Last modified: 2026-10-27_
+_Last modified: 2026-10-30_
 
 > **Written by Claude Code, for Claude Code**, and largely a record of its own
 > mistakes, so the "I" in the articles is a machine with no memory of having
@@ -25,7 +25,7 @@ mechanically, or `none`. The full account of §N is
   too, so the lesson-reminder hook puts it in front of the next agent at that
   moment. `none` under Enforced is an honest answer and a candidate for a
   check; a reminder is noted as `none (reminded by …)`, because a reminder
-  is not a check. `check_wiki.py lessons` (in `just wiki-lint`) fails on a
+  is not a check. `check_docs.py lessons` (in `just wiki-lint`) fails on a
   number with no entry, no article, or an entry missing either field, and
   on a map that has drifted from the repo.
 - **Look up what applies to a file:** `just agent lessons <path>` (no
@@ -83,7 +83,7 @@ Home for most of this group: [AGENTS.md "Before you start"](../AGENTS.md#before-
 - **§9** [Cache placements](agent-lessons-learned/9-cache-placements.md) — build time, activation, or timer; the built-in default is the expensive one. Home: this page; [manconfig.nix](../flake/modules/general-config/nix/manconfig/manconfig.nix) is the worked case. Enforced: none.
 - **§45** [`systemd.user.services` is global](agent-lessons-learned/45-systemd-user-services-are-global.md) — a NixOS user unit starts in every user's manager (sddm's included); gate it with `ConditionUser`. Home: skill `new-homelab-service` §1. Enforced: none (reminded by the lesson-reminder hook on homelab edits).
 - **§47** [An explicit setting can switch off an implicit one](agent-lessons-learned/47-explicit-setting-disables-implicit-one.md) — auto-detection fires only where nothing is declared; one Caddy `tls` line changed the issuer for every vhost. Home: [caddy.nix](../flake/modules/homelab-config/homelab/reverse-proxy/caddy/caddy.nix); [meta/traps-and-skills.md](meta/traps-and-skills.md). Enforced: none (reminded by the lesson-reminder hook on Caddy edits).
-- **§41** [Per-app proxy prefix handling](agent-lessons-learned/41-per-app-prefix-handling.md) — two apps behind one mechanism can want opposite prefix handling; `curl` the app itself. Home: skill `new-homelab-service` §5. Enforced: `check_wiki.py routes` (wiki claims only; reminded by the lesson-reminder hook on Caddy edits).
+- **§41** [Per-app proxy prefix handling](agent-lessons-learned/41-per-app-prefix-handling.md) — two apps behind one mechanism can want opposite prefix handling; `curl` the app itself. Home: skill `new-homelab-service` §5. Enforced: `check_docs.py routes` (wiki claims only; reminded by the lesson-reminder hook on Caddy edits).
 
 ## Changing or removing behaviour
 

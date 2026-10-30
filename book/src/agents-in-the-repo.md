@@ -49,7 +49,7 @@ matching its globs.
 Other harnesses do not load rules files. For them `AGENTS.md` has a pointer
 next to each trap, and the agent must open the file itself.
 
-`check_wiki.py rules` (part of `just wiki-lint`) checks that each rules file
+`check_docs.py rules` (part of `just wiki-lint`) checks that each rules file
 has only the `paths:` key, that every glob matches at least one tracked file,
 and that `AGENTS.md` names the file.
 
@@ -74,7 +74,7 @@ Nothing may live only in `when_to_use`, because other harnesses ignore it.
 because a bare "push" is the phrase that caused the mistake the skill exists
 to prevent.
 
-The skill `new-skill` is the procedure for writing one. `check_wiki.py
+The skill `new-skill` is the procedure for writing one. `check_docs.py
 skill-files` enforces its mechanical half:
 
 - a one-sentence description with no repo paths or parentheticals;
@@ -108,7 +108,7 @@ applies to particular paths or commands. The loop has four parts:
 
 `just agent lessons <path>` prints every topic a path falls under, with the
 index lines of its lessons. With no argument it covers the files the current
-branch changes. `check_wiki.py lessons` fails on a lesson number with no entry
+branch changes. `check_docs.py lessons` fails on a lesson number with no entry
 or article, an entry missing `Home:` or `Enforced:`, and a lessons map that has
 drifted from the repo (a glob matching no tracked file, a missing skill or
 rules file).
@@ -127,11 +127,11 @@ as a host's role). To change a generated fact, change its source and run
 
 **Lint.**
 
-- `just wiki-lint` runs `check_wiki.py check`, static checks of the wiki,
+- `just wiki-lint` runs `check_docs.py check`, static checks of the wiki,
   `AGENTS.md`, the rules files and the skills against the repo. The
   [checks chapter](agent-checks-and-guards.md#static-checks) lists them. The
   `generated` check is the same test as `just wiki-gen --check`.
-- `check_wiki.py siblings` fails when a `-for-agents.md` sibling's
+- `check_docs.py siblings` fails when a `-for-agents.md` sibling's
   `_Last modified:_` date predates its source page's. The fix is to edit the
   sibling, then bump its date. When the source edit needs nothing in the
   sibling (a reorder, a typo), the agent adds a dated `_Sibling reviewed:
@@ -158,7 +158,7 @@ as a host's role). To change a generated fact, change its source and run
   (Contents blocks, date lines, siblings, anchors, lesson numbers).
 - `fact-hygiene`: state only what was observed this session, qualify the rest
   in the same sentence, and replace a count, version or copied config value
-  with a pointer to the file or command that answers it. `check_wiki.py
+  with a pointer to the file or command that answers it. `check_docs.py
   docrefs` flags the bare count-of-files shape.
 
 ## Recurring work becomes a script
@@ -247,4 +247,4 @@ repo happens only when the repo owner asks.
   `wiki-fact-check`, `book-fact-check`, `trim-docs`, `fact-hygiene`,
   `agent-scripts`, `boyscouting`, `propose-issue`, `extract-agent-tooling`,
   `extract-nix-tooling`, `extract-agent-tooling-all`
-- `wiki/meta/scripts/check_wiki.py`, `wiki/meta/scripts/wiki_gen.py`
+- `wiki/meta/scripts/check_docs.py`, `wiki/meta/scripts/wiki_gen.py`

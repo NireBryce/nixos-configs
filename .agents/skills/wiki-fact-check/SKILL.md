@@ -87,7 +87,7 @@ repo, and this when judgment decides whether a finding is right.
      `fact-hygiene`; do not guess.
 6. **Apply the corrections together**, each traceable to a source line, then
    run `just wiki-lint` (where nix is unavailable,
-   `python3 wiki/meta/scripts/check_wiki.py check --skip=generated`). One
+   `python3 wiki/meta/scripts/check_docs.py check --skip=generated`). One
    commit, one push: CI runs on every push.
 7. **Report** claims checked per agent, corrections made, issues filed,
    what stays unverified, and the rung: the sources were *read*, nothing was

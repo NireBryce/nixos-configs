@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """mdfence.py against CommonMark's fence rules, one rule per test. Pure
-stdlib; runs in `just preflight` beside test_check_wiki.py."""
+stdlib; runs in `just preflight` beside test_check_docs.py."""
 import pathlib, sys, unittest
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))

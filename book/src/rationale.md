@@ -196,7 +196,7 @@ Each of these produced no error, or an error that named the wrong thing:
 
 The repo does not write down switch state, counts of files or hosts, live
 versions, or config values copied from a file the doc already links. Docs
-point at the file or the command instead. `check_wiki.py docrefs` catches the
+point at the file or the command instead. `check_docs.py docrefs` catches the
 bare count-of-files shape.
 
 Such facts go stale without anyone noticing, and a stale fact looks exactly
