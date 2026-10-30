@@ -13,8 +13,11 @@ A [hook](glossary.md#hook-claude-code) is a command the agent harness runs at
 a fixed event. Its JSON reply decides whether the tool call goes ahead.
 Claude Code reads the hook list from `.agents/settings.json` (seen as
 `.claude/settings.json`). ZCode (a second agent harness) reads the same scripts from
-`.zcode/config.json`, and `flake/scripts/tests/test_guards.py` fails when
-the two lists differ. The events used are `SessionStart`, `PreToolUse`
+`.zcode/config.json`, which is generated from `.agents/settings.json` by
+[polymorph](https://github.com/NireBryce/polymorph) (a flake input, experimental
+and unvetted) and kept in step by the `polymorph` flake check, which fails when
+the generated file differs from what `polymorph generate` would write (`nix run
+.#polymorph -- generate` rewrites it). The events used are `SessionStart`, `PreToolUse`
 (before a tool runs, matched by tool name: `Bash`, `Edit|Write|MultiEdit`,
 `Read|Grep|Glob`) and `PostToolUse` (after it runs).
 

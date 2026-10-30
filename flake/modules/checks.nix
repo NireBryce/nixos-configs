@@ -10,7 +10,7 @@
 # A function asking for `config`, so dirs-as-categories loads it as a plain
 # flake-parts module rather than a module file
 # (wiki/config-structure/module-files.md).
-{ config, lib, ... }:
+{ config, lib, self, ... }:
 {
     # checks.<system>.module-orphans: fails naming any module inside a
     # category that no `includes`/`enables` reaches (wiki/config-structure/module-files.md).
@@ -26,7 +26,7 @@
     # same --no-build reason as orphans.
     dirsAsCategories.checkClassContents = "eval";
 
-    perSystem = { system, pkgs, ... }:
+    perSystem = { system, pkgs, inputs', ... }:
     let
         # Both host classes, each filtered to the system it evaluates under.
         # nix-darwin sets nixpkgs.hostPlatform the same way NixOS does, so one
@@ -112,6 +112,17 @@
             lib-helpers =
                 if libTestFailures == [ ] then pkgs.runCommand "lib-helpers" { } "touch $out"
                 else throw "lib-helpers: ${builtins.toJSON libTestFailures}";
+
+            # Static check of the agent hook configs (.agents/polymorph/): the
+            # generated .zcode/config.json matches what the canonical
+            # .agents/settings.json produces, mappings are valid, hooks live
+            # under .agents/hooks/. It runs no hook and no harness, so a clean
+            # result means consistent, not that a guard works. The repo root
+            # is `sourceInfo`, since this flake sits in flake/ and the
+            # config in .agents/ beside it.
+            polymorph = pkgs.runCommand "polymorph-check"
+                { nativeBuildInputs = [ inputs'.polymorph.packages.default ]; }
+                "polymorph check --repo ${self.sourceInfo.outPath} && touch $out";
         };
     };
 }

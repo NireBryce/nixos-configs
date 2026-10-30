@@ -1,0 +1,2 @@
+# Targets `polymorph generate` writes (see wiki/ or the book chapter on checks and guards).
+enabled = ["zcode"]

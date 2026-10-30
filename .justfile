@@ -47,6 +47,12 @@ mod agent '.agents/scripts/agent.just'
 check:
     @{{scripts}}/flake-check.sh {{flake}}
 
+# `check` only evaluates (--no-build), and the polymorph check is a derivation
+# that does its work when built, so it needs its own step: drift between
+# .agents/settings.json and the generated .zcode/config.json fails here.
+polymorph-check:
+    nix build "{{flake}}#checks.$(nix eval --raw --impure --expr builtins.currentSystem).polymorph" --no-link
+
 # Checks the evaluation cannot report: untracked .nix
 # files, and drift between the file-only reading wiki-lint uses and the
 # evaluated graph (flake/scripts/modules.py says why each exists; orphans are `just check`).
@@ -272,6 +278,7 @@ preflight:
     @just preflight-mirror-test
     @python3 flake/scripts/tests/test_offline_checks.py
     @just check
+    @just polymorph-check
     @just modules
     @just lint
 
