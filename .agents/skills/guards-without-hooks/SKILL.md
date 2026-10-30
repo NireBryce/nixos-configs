@@ -14,6 +14,10 @@ Cursor, OpenCode, Pi, and the rest) or through any other shell tool, nothing
 runs them, and the git, `just`, nix and sops protections are simply absent.
 A skill tagged `**Needs:** bash-guards` relies on them.
 
+Which harnesses enforce the hooks, with dates and evidence, is the table in
+the book's [checks, guards and hooks](../../../book/src/agent-checks-and-guards.md#where-the-hooks-are-enforced)
+chapter; a harness not in it is "no".
+
 Not needed when you are in Claude Code or ZCode and using `Bash`: the
 harness already runs them, and running them again only repeats the output.
 Not a replacement for the hooks either (see Limits).
