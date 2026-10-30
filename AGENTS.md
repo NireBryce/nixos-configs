@@ -97,6 +97,11 @@ history: `wiki/meta/history.md`'s "Confirmed-on-hardware facts".
   tenacity's sshd is tailnet-only. `just reach <x>` tries every name. Rule
   and table: `wiki/fleet/hosts.md`; as code: `tailnet-hosts.nix`.
 
+**Many skills and guards only trigger under the `Bash` tool.** The git,
+`just`, nix and secrets command guards match it, and skills and recipes are
+bash commands. If you are using another shell or a non-`Bash` tool, warn the
+user, since those protections are off.
+
 ## Before you start
 
 - **Find the page for the task.** `wiki/00-INDEX-for-agents.md` routes by

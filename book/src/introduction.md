@@ -17,6 +17,18 @@ configuration on a machine you care about can destroy data. Which hosts do
 this is in [wiring a host](wiring-a-host.md#read-this-first-the-root-wipe).
 Borrow the patterns instead.
 
+## Agent safeguards assume bash
+
+Many of the agent [skills](glossary.md#skill) and safeguards here only fire
+when an agent runs its commands through the harness's `Bash` tool. The
+[guard hooks](glossary.md#guard-hook) match that tool, and the skills and
+`just` recipes are written as bash commands. An agent that uses another shell
+(fish, zsh, nushell, PowerShell) or a tool other than `Bash` gets none of the
+git, `just`, nix or secrets command checks. If you run an agent here, check
+which tool it is using. Agents should warn the user when they are on a
+different shell or tool. The full list of what matches what is in
+[checks, guards and hooks](agent-checks-and-guards.md).
+
 ## The core idea
 
 Almost every `.nix` file under `flake/modules/` is a

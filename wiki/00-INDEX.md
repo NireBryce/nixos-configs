@@ -1,6 +1,6 @@
 # Wiki
 
-_Last modified: 2026-10-27_
+_Last modified: 2026-10-30_
 
 This is the wiki's topic index. The `flake/` folder is meant to be browsed by
 its file tree, with documentation next to the code; the heavy modularization
@@ -33,6 +33,14 @@ with a `## Quick facts` section instead. The rule, and the lint check that
 keeps a pair in step, is
 [meta/styleguide.md](meta/styleguide.md)'s
 [Two audiences per page](meta/styleguide.md#two-audiences-per-page).
+
+**Many agent skills and safeguards only trigger under bash.** The guard
+hooks match the harness's `Bash` tool (the secrets read guard matches
+`Read`/`Grep`/`Glob`, the edit hooks `Edit`/`Write`), and the skills and
+recipes are written as bash commands. Another shell, or a tool other than
+`Bash`, bypasses the git, `just`, nix and secrets command checks. An agent
+using one should warn the user. See
+[Checks, guards and hooks](../book/src/agent-checks-and-guards.md).
 
 **Don't know what you're after yet?** Start with [Overview](overview.md).
 If you do, skip to Common tasks below.

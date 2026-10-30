@@ -7,6 +7,16 @@ then cover what "push" means, where issues and PRs may be filed, how to report
 what was verified, and how a session without nix is checked. A worked example
 closes the chapter. The rules apply to human and agent contributors alike.
 
+## Use bash, or warn the user
+
+Many of the skills and safeguards in this chapter and the next only trigger
+when commands run through the `Bash` tool: the git, `just`, nix and secrets
+guards, and the lesson reminders for commands. Another shell, or a tool that
+is not `Bash`, runs without them. A contributor, human or agent, using one
+should say so up front. An agent should warn the user before it starts,
+because the user is then the only check left. See
+[checks, guards and hooks](agent-checks-and-guards.md).
+
 ## One worktree per task
 
 Work that will branch, commit or check out happens in its own
