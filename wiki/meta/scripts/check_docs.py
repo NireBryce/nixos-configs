@@ -99,7 +99,12 @@ structured, extractable facts only:
             when_to_use are findings (a misspelt key is silently ignored),
             and both values must be plain YAML scalars -- a leading quote
             or an embedded ': ' reads fine to these regexes but breaks the
-            harness's YAML parse.
+            harness's YAML parse. A `**Needs:** <tag>` line between the H1
+            and the first `## ` heading names what the skill depends on
+            (vocabulary: NEEDS_TAGS); tags must be known, and a skill that
+            runs a command the Bash-only guards cover (sops, nix eval,
+            reset --hard, the deployed-secrets path) must carry
+            `bash-guards`.
 
   docrefs   Four cross-reference shapes the checks above miss, scanned
             over wiki/, AGENTS.md, `.agents/rules/` AND `.agents/skills/`
@@ -816,6 +821,23 @@ WHEN_MAX_WORDS = 40  # REVIEW only: "short trigger phrases" -- the full
 # line fine while the harness's YAML parser rejects the whole frontmatter.
 YAML_PLAIN_BAD_START = tuple('"\'[]{}>|*&!%@`,?#-')
 YAML_PLAIN_BAD_INNER = (': ', ' #')
+# `**Needs:** <tag>, <tag>` -- a line between a SKILL.md's H1 and its first
+# `## ` heading saying what the skill depends on to be safe. Body, not
+# frontmatter: every harness ignores or rejects frontmatter keys it does not
+# know (FRONTMATTER_KEYS above), and the body is what loads with the skill.
+NEEDS_LINE = re.compile(r'^\*\*Needs:\*\*[ \t]*(.*)$', re.M)
+# The tags, and what each one means to an agent not running it. Adding one
+# is a deliberate edit here and in skill `new-skill`.
+#   bash-guards  the skill's commands are covered by guard hooks that match
+#                only the harness's `Bash` tool (git, just, nix and sops
+#                guards), so another shell or tool runs them unchecked.
+NEEDS_TAGS = {'bash-guards'}
+# A body that runs one of the commands those guards cover must carry the
+# tag. Narrow on purpose: `git` alone appears in nearly every skill.
+NEEDS_BASH_GUARDS_CUE = re.compile(
+    r'\bsops (?:-[deirs]\b|--(?:decrypt|encrypt|extract|rotate|in-place)\b'
+    r'|decrypt|updatekeys|edit)|/run/secrets|reset --hard'
+    r'|\bnix eval\b')
 # Repo-rooted backtick paths worth existing-checking inside skill prose.
 # Prefix-scoped on purpose: bare names (`hosts.nix`, `serve.nix`) are
 # shorthand for paths this repo writes several ways, and checking them
@@ -941,6 +963,47 @@ def check_skill_files(root):
                 f"## Applies to")
         findings += _check_skill_frontmatter_extras(rel, head, desc)
         findings += _check_skill_injection(rel, text)
+        findings += _check_skill_needs(rel, text)
+    return findings
+
+
+def _check_skill_needs(rel, text):
+    """The `**Needs:**` tag line (see NEEDS_TAGS): placed before the first
+    `## ` heading, every value in the vocabulary, and present whenever the
+    body runs a command the Bash-only guards cover -- so one tag, defined
+    once, replaces a "this assumes bash" sentence in each skill."""
+    findings = []
+    body = text.split('---', 2)[2] if text.startswith('---') else text
+    # Tag lines count only as prose: an example inside a fence (skill
+    # `new-skill` shows one) is documentation, not the skill's own tag.
+    seen_h2 = False
+    tags = set()
+    for _n, line, kind in mdfence.scan_lines(body):
+        if kind != mdfence.TEXT:
+            continue
+        if line.startswith('## '):
+            seen_h2 = True
+        m = NEEDS_LINE.match(line)
+        if not m:
+            continue
+        if seen_h2:
+            findings.append(
+                f"NEEDS PLACEMENT  {rel}: the **Needs:** line belongs "
+                f"between the H1 and the first '## ' heading")
+            continue
+        for tag in (t.strip() for t in m.group(1).split(',')):
+            if tag not in NEEDS_TAGS:
+                findings.append(
+                    f"UNKNOWN TAG  {rel}: **Needs:** '{tag}' -- not one of "
+                    f"{sorted(NEEDS_TAGS)}; extend NEEDS_TAGS deliberately")
+            tags.add(tag)
+    if 'bash-guards' not in tags:
+        cue = NEEDS_BASH_GUARDS_CUE.search(body)
+        if cue:
+            findings.append(
+                f"MISSING TAG  {rel}: mentions '{cue.group(0)}', which the "
+                f"Bash-only guards cover -- add `**Needs:** bash-guards` "
+                f"under the H1 (skill `new-skill`)")
     return findings
 
 

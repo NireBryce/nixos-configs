@@ -6,6 +6,8 @@ when_to_use: Before any task that will branch, commit, merge or check out, at th
 
 # Working in your own worktree
 
+**Needs:** bash-guards
+
 ## Applies to
 
 The first time in a session you're about to run a git command that changes

@@ -6,6 +6,8 @@ when_to_use: Asked to compress, trim or shrink the history section at the bottom
 
 # Compressing a module's history section
 
+**Needs:** bash-guards
+
 ## Applies to
 
 A `.nix` module in `flake/modules/` whose bottom-of-file `# ── history ──`

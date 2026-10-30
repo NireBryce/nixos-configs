@@ -6,6 +6,8 @@ when_to_use: A bare push, ship it, land this or merge this, or any ask to get ch
 
 # Landing work on experimental in nixos-configs
 
+**Needs:** bash-guards
+
 ## Applies to
 
 Fires only when the ask is to get changes onto `experimental`: a bare "push",

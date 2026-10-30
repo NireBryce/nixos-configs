@@ -99,8 +99,9 @@ history: `wiki/meta/history.md`'s "Confirmed-on-hardware facts".
 
 **Many skills and guards only trigger under the `Bash` tool.** The git,
 `just`, nix and secrets command guards match it, and skills and recipes are
-bash commands. If you are using another shell or a non-`Bash` tool, warn the
-user, since those protections are off.
+bash commands. A skill marked `**Needs:** bash-guards` depends on them
+(skill `new-skill`). If you are using another shell or a non-`Bash` tool,
+warn the user, since those protections are off.
 
 ## Before you start
 

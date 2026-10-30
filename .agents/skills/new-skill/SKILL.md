@@ -58,6 +58,27 @@ scope, not purpose. Put when it fires in `when_to_use`, in direct words
 (the user asked for this on 2026-10-27, replacing the earlier "How to"
 preference; "Known traps in..." was rejected on 2026-08-22).
 
+## The `**Needs:**` tag
+
+A skill whose commands are covered by guard hooks says so with one line
+between the H1 and `## Applies to`, instead of a sentence of its own:
+
+```md
+# Landing work on experimental in nixos-configs
+
+**Needs:** bash-guards
+```
+
+`bash-guards` means the commands here (git, `just`, nix, sops) are checked
+by hooks that match only the harness's `Bash` tool; another shell or tool
+runs them unchecked, and an agent in that position warns the user before
+starting. The tag goes in the body, not the frontmatter: the skill-files
+check rejects unknown frontmatter keys, and the body is what loads with the
+skill. The check also fails a skill that mentions one of the guarded commands
+without the tag (`NEEDS_BASH_GUARDS_CUE` in `check_docs.py` lists them, and
+this paragraph avoids naming them so it does not trip it). A new tag is a
+deliberate edit to `NEEDS_TAGS` in `check_docs.py` and a line here.
+
 ## Frontmatter this repo doesn't use
 
 Only `name`, `description`, and `when_to_use` (the skill-files check
@@ -79,7 +100,8 @@ backtick.
    body, would a session deciding whether to load this skill understand
    what it's for? If it needs a second clause, that clause
    belongs in `## Applies to`.
-3. **Write `## Applies to` right after the title**: triggers, explicit
+3. **Write `## Applies to` right after the title** (and the `**Needs:**` line
+   above it, when the skill needs one): triggers, explicit
    non-triggers (`ship`'s table is the pattern), example files, exceptions.
    Then decide on `when_to_use` (above): if the triggers include phrases
    the description doesn't carry, lift the short ones into it.

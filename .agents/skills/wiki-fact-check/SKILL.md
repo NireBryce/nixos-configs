@@ -6,6 +6,8 @@ when_to_use: Asked to fact-check, verify or double-check some wiki pages, a sect
 
 # Fact-checking a set of docs
 
+**Needs:** bash-guards
+
 ## Applies to
 
 Asked to check that chosen docs say what the code does: a few wiki pages, a

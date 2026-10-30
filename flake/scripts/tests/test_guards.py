@@ -1554,6 +1554,9 @@ class SessionStart(unittest.TestCase):
         # Idempotent: the second run reports, doesn't re-set.
         self.assertIn("core.hooksPath: .githooks (", self.context(self.repo))
 
+    def test_says_what_the_bash_guards_tag_means(self):
+        self.assertIn("Needs: bash-guards", self.context(self.repo))
+
     def test_absolute_hooks_path_counts_as_wired(self):
         git(self.repo, "config", "core.hooksPath",
             str((self.repo / ".githooks").resolve()))

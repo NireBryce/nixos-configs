@@ -6,6 +6,8 @@ when_to_use: Reviewing a PR, branch or commit, or before saying your own change 
 
 # Reviewing a change in nixos-configs
 
+**Needs:** bash-guards
+
 ## Applies to
 
 Asked to review a PR, branch, or commit (yours or another's) — or about to

@@ -330,6 +330,49 @@ class FenceHandling(unittest.TestCase):
             '```\nx\n```\njust after-recipe\n'))
 
 
+class SkillNeedsTag(unittest.TestCase):
+    """The `**Needs:**` line on a SKILL.md: a known tag, placed before the
+    first `## ` heading, and required when the body runs a command the
+    Bash-only guards cover."""
+
+    FM = '---\nname: s\ndescription: d\n---\n'
+
+    def findings(self, body):
+        return check_docs._check_skill_needs('s/SKILL.md', self.FM + body)
+
+    def test_tagged_skill_passes(self):
+        self.assertEqual(self.findings(
+            '# S\n\n**Needs:** bash-guards\n\n## Applies to\n\n`nix eval x`\n'), [])
+
+    def test_untagged_guarded_command_caught(self):
+        for cmd in ('sops -d f', 'git reset --hard', 'nix eval .#x',
+                    'ls /run/secrets/x'):
+            f = self.findings(f'# S\n\n## Applies to\n\n```sh\n{cmd}\n```\n')
+            self.assertEqual(len(f), 1, cmd)
+            self.assertIn('MISSING TAG', f[0])
+
+    def test_untagged_skill_without_guarded_command_passes(self):
+        self.assertEqual(self.findings(
+            '# S\n\n## Applies to\n\nEdit a file with `git commit`.\n'), [])
+
+    def test_unknown_tag_caught(self):
+        f = self.findings('# S\n\n**Needs:** bash-guard\n\n## A\n')
+        self.assertEqual(len(f), 1)
+        self.assertIn('UNKNOWN TAG', f[0])
+
+    def test_tag_after_first_heading_caught(self):
+        f = self.findings('# S\n\n## A\n\n**Needs:** bash-guards\n')
+        self.assertTrue(any('NEEDS PLACEMENT' in x for x in f))
+
+    def test_example_tag_inside_a_fence_is_documentation(self):
+        self.assertEqual(self.findings(
+            '# S\n\n## A\n\n```md\n**Needs:** bash-guards\n```\n'), [])
+
+    def test_misplaced_tag_does_not_satisfy_the_requirement(self):
+        f = self.findings('# S\n\n## A\n\n**Needs:** bash-guards\n\n`nix eval x`\n')
+        self.assertTrue(any('MISSING TAG' in x for x in f))
+
+
 class CheckRegistry(unittest.TestCase):
     """A check is a subcommand and part of `check` by being registered, and
     for no other reason -- main() keeps no list of names."""

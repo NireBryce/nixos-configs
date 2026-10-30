@@ -6,6 +6,8 @@ when_to_use: Adding, renaming or moving a .nix file under the flake modules tree
 
 # Writing a module in this repo
 
+**Needs:** bash-guards
+
 ## Applies to
 
 A file under `flake/modules/`. Use before adding a new `.nix` file there,
