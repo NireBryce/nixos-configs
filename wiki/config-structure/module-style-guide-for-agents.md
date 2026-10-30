@@ -26,10 +26,10 @@ Never hand-edit. By hand it is
 
 | What | Files |
 |---|---|
-| total `.nix` files under `flake/modules/` | 244 |
-| header comment (`# This is a dirs-as-categories module…`) | 228 |
-| `# summary:` / `# package summary:` comment | 182 |
-| `with pkgs;` package lists | 116 |
+| total `.nix` files under `flake/modules/` | 248 |
+| header comment (`# This is a dirs-as-categories module…`) | 232 |
+| `# summary:` / `# package summary:` comment | 186 |
+| `with pkgs;` package lists | 120 |
 
 <!-- /generated -->
 
