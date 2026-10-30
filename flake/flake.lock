@@ -105,11 +105,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793353382,
-        "narHash": "sha256-ihRWvbvHIxAeVwjSfYyMoXlSv0JLca5XrkaVLJ2NaRU=",
+        "lastModified": 1793387343,
+        "narHash": "sha256-kvOdVEevMbB7+ec7DJjugOX6PkFHp2ig3Yta8DOHlCQ=",
         "owner": "NireBryce",
         "repo": "factcheck",
-        "rev": "0c22bb9474ddb097dc2aef159173d0581c4c67ad",
+        "rev": "92491dd2e7e2786767d3088104f5aa23ee274a97",
         "type": "github"
       },
       "original": {
