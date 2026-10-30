@@ -80,7 +80,28 @@ skill-files` enforces its mechanical half:
 - a one-sentence description with no repo paths or parentheticals;
 - `when_to_use` on one line;
 - no frontmatter keys beyond `name`, `description` and `when_to_use`;
-- no syntax that would let a skill run a command without a prompt.
+- no syntax that would let a skill run a command without a prompt;
+- a `**Needs:** bash-guards` line under the title on any skill that runs a
+  command the `Bash`-only guards cover (see below).
+
+### The Needs tag
+
+Many skills depend on [guard hooks](glossary.md#guard-hook) that match only
+the harness's `Bash` tool. Rather than repeat that in each skill, the skill
+carries one line between its title and `## Applies to`:
+
+```md
+**Needs:** bash-guards
+```
+
+It sits in the body because the checker rejects unknown frontmatter keys and
+only the body loads with the skill. The vocabulary is `NEEDS_TAGS` in
+`check_docs.py`, currently just `bash-guards`. The tag means that another
+shell, or a tool other than `Bash`, runs the skill's commands without the git,
+`just`, nix or sops checks, so an agent in that position warns the user
+before it starts. The session-start hook prints the same reminder. The
+checker fails a skill that runs `sops -d`, `nix eval`, `reset --hard` or the
+deployed-secrets path without the tag, and the check has a test that it does.
 
 ## The lesson loop
 

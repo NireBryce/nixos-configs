@@ -6,6 +6,8 @@ when_to_use: Adding a machine, or a host entry point, host module directory or h
 
 # Adding a new host
 
+**Needs:** bash-guards
+
 ## Applies to
 
 Adding a machine: a `host-config/<name>-configuration.nix` entry point, a

@@ -6,6 +6,8 @@ when_to_use: Adding a service that listens on a port and is reached from another
 
 # Adding a homelab service in this repo
 
+**Needs:** bash-guards
+
 ## Applies to
 
 Adding a service that listens on a port and is reached from another machine

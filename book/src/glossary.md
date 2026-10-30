@@ -154,6 +154,13 @@ returning such a set. dirs-as-categories names it after its filename. A bare
 "module" in a name such as `just modules` means module file.
 Source: [module-files.md](../../wiki/config-structure/module-files.md).
 
+## Needs tag
+
+A `**Needs:** bash-guards` line between a skill's title and its first `##`
+heading. It says the skill's commands are covered by guard hooks that match
+only the harness's `Bash` tool, so another shell or tool runs them unchecked.
+Source: `.agents/skills/new-skill/SKILL.md`.
+
 ## NixOS module
 
 The value under the `nixos` key of a [module file](#module-file): an ordinary

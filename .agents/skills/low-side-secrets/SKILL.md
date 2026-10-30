@@ -6,6 +6,8 @@ when_to_use: Adding a secrets file for an ad hoc secret whose recipient is a per
 
 # A sops file keyed to a user, not a host
 
+**Needs:** bash-guards
+
 ## Applies to
 
 Adding a new `<name>/secrets.yaml` under

@@ -6,6 +6,8 @@ when_to_use: Running any sops command, reading /run/secrets, asking which secret
 
 # Handling sops secrets without leaking them
 
+**Needs:** bash-guards
+
 ## Applies to
 
 Any command touching `flake/modules/general-config/system/secrets/secrets.yaml`

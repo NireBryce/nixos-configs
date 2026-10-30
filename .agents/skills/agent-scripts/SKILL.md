@@ -6,6 +6,8 @@ when_to_use: Periodic sweep for recurring commands, or mid-task when you're asse
 
 # Agent scripts
 
+**Needs:** bash-guards
+
 ## Applies to
 
 An occasional sweep (the user asks, or a scheduled run), or mid-task when

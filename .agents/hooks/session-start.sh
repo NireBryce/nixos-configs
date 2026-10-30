@@ -112,6 +112,11 @@ else
     lines+=("git: $cwd is not inside a git repo")
 fi
 
+# What a `**Needs:** bash-guards` skill tag means (skill new-skill): said
+# once here, not repeated in each skill. Printed outside the git branch
+# because it holds in any directory.
+lines+=("guards: the git, just, nix and sops guard hooks match only the Bash tool; a skill tagged 'Needs: bash-guards' relies on them. Using another shell or tool? Warn the user first.")
+
 text="Session start state (from .agents/hooks/session-start.sh; re-check before acting if time has passed):"
 for l in "${lines[@]}"; do text+=$'\n'"$l"; done
 

@@ -6,6 +6,8 @@ when_to_use: Writing or changing a module, flake script, or Nix-related skill or
 
 # Recording general Nix candidates, as you go
 
+**Needs:** bash-guards
+
 ## Applies to
 
 You are writing or changing a flake-parts module, a `flake/scripts/` tool, a Nix-shaped skill, or a agent-lessons-learned
