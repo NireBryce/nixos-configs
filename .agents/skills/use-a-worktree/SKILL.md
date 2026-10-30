@@ -58,6 +58,23 @@ status -sb`, `pwd`, or `just agent where`, which also shows commits ahead
 of `origin/experimental`) before anything state-changing; the bash tool can
 reset cwd between calls, so re-`cd` or use absolute paths.
 
+**Already edited in the shared checkout?** Move the edits rather than
+committing there. Only when every dirty path is yours: `git status --short`
+first, and if anything else is dirty, stop and ask.
+
+```sh
+git diff > <scratchpad>/x.patch      # tracked edits; `git add -N` a new file first
+just agent worktree new <branch> --root <scratchpad>
+git -C <worktree> apply <scratchpad>/x.patch
+```
+
+Then clear the shared copies. The git guard denies `git checkout -- <paths>`
+and `git restore` on a dirty tree, even once the user has approved the
+discard, because it cannot see that approval. The route it allows, and names
+in its denial, is stashing: `git stash push -m "<what>"`, then `git stash
+drop` (the second is permanent; the patch file and the worktree still hold
+the edits).
+
 **Check a commit without touching a branch pointer** (ship step 0, each
 commit of a multi-commit PR): `--detach` instead of `-b`:
 
