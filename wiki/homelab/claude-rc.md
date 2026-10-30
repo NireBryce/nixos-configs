@@ -1,6 +1,6 @@
 # Claude Remote Control on cube
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-10-29_
 
 `claude remote-control` sessions on `nire-cube`, one per working directory,
 kept running as user services so they come back after a reboot and are
@@ -59,7 +59,27 @@ and `ProtectHome=tmpfs`, so it sees only its project directory, `~/.claude`,
 Claude Code's Bash sandbox is separate: it is set in cube's
 `~/.claude/settings.json`, which this repo does not manage (`sandbox.enabled`,
 `denyRead` on `~/.ssh` and `~/.config/gh`). It covers Bash commands only; the
-file tools run outside it.
+file tools run outside it. As found, that file has no `allowUnixSockets`, so
+`nix eval` and every recipe that calls it fail with "cannot create Unix domain
+socket" until `/nix/var/nix/daemon-socket/socket` is allowed there (plus
+`~/.cache/nix` under `filesystem.allowWrite`); a session can also run nix
+with the sandbox disabled for that call.
+
+Expected inside a session, not faults: `mkdir ~/tmp` fails (read-only
+`ProtectHome=tmpfs`); `/tmp` is private to the unit, so files meant for a
+normal shell go under `~/.cache`; dotfiles such as `.bashrc` in a worktree
+may show as unreadable or untracked, which comes from the Bash sandbox's
+masking and not from anything this module sets.
+
+`gh` gets `GH_TOKEN` from the same credential as git pushes (a start wrapper
+exports it); the PAT needs Pull requests and Issues read/write added for
+`gh pr` and `just close-fixed` to work. `statix` and `deadnix` are on the
+units' PATH.
+
+A session's worktree branches from `origin/HEAD` of the main checkout. On cube
+that pointed at the stale `origin/main`, so worktrees started far behind; fixed
+with `git remote set-head origin -a` (now `experimental`), and `core.hooksPath`
+is the relative `.githooks` so each worktree runs its own hooks.
 
 ## Traps
 

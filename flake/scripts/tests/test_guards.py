@@ -261,6 +261,16 @@ class SecretsGuardPreToolUse(GuardCase):
                     "stat -c '%U %a' /run/secrets/atuin_key"):
             self.assertPass(self.script, cmd)
 
+    def test_quoted_heredoc_note_may_mention_secrets(self):
+        note = "cat > notes.md <<'EOF'\nsee /run/secrets and sops -d\nEOF"
+        self.assertPass(self.script, note)
+        # Only that shape is exempt: the target path, text after the
+        # closing delimiter, and heredocs fed to a command are still scanned.
+        self.assertDeny(self.script, note.replace("notes.md", "/run/secrets/x"))
+        self.assertDeny(self.script, note + "\ncat /run/secrets/x")
+        self.assertDeny(self.script, note.replace("cat > notes.md", "bash"))
+        self.assertDeny(self.script, note.replace("'EOF'", "EOF"))
+
     def test_run_secrets_spelled_with_extra_slashes(self):
         for cmd in ("cat /run//secrets/x", "cat /run/./secrets/x",
                     "cat //run/secrets.d//1/x"):
