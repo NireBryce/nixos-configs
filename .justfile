@@ -47,9 +47,9 @@ mod agent '.agents/scripts/agent.just'
 check:
     @{{scripts}}/flake-check.sh {{flake}}
 
-# Checks the evaluation cannot report: unreachable modules, untracked .nix
+# Checks the evaluation cannot report: untracked .nix
 # files, and drift between the file-only reading wiki-lint uses and the
-# evaluated graph (flake/scripts/modules.py says why each exists).
+# evaluated graph (flake/scripts/modules.py says why each exists; orphans are `just check`).
 modules:
     # Platform independent, so this is the one check that means anything on darwin.
     cd {{flake}} && python3 scripts/modules.py check modules

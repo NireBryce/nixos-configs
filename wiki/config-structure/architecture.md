@@ -29,7 +29,7 @@ The mechanism in one table; the sections below link the reasoning.
 | a category | a folder with a subfolder holding modules (or `folderIsCategory`); includes every module beneath it, nested categories included; hosts `includes` categories by name |
 | the rules | the `dirs-as-categories` input (`flake/flake.nix`); its `doc/convention.md`, and [module-files.md](module-files.md) for this repo |
 | membership as data | `nix eval --json ./flake#moduleGraph` |
-| checks | evaluation refuses repeated names, unknown keys and unknown `includes`; `just modules`: orphans, untracked, drift (`nix flake check`'s `module-orphans` fails only when built) |
+| checks | evaluation refuses repeated names, unknown keys and unknown `includes`; `just check` fails on orphans (`checkOrphans = "eval"`); `just modules`: untracked, drift |
 | diagrams | `just module-graph tree`, `hosts`, `dot`, `html` (`--category`, `--depth`, `--wrap`); the flake-module-graph input |
 | Home Manager | integrated through NixOS, no `homeConfigurations`; `just switch` applies both |
 

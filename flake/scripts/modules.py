@@ -6,16 +6,12 @@ flake/modules/) already refuses what used to fail silently here: two
 modules or a module and a category sharing a name, a mistyped class key, a
 name in `includes` that doesn't exist (wiki/config-structure/module-files.md). What is left:
 
-  orphans     A module inside a category that nothing reaches: it evaluates
-              and installs nothing. dirs-as-categories has a `module-orphans`
-              flake check for this (flake/modules/checks.nix turns it on), but it
-              fails only when built and `just check` runs --no-build, so this
-              reads flake.moduleGraph.orphans at evaluation time instead.
-
-  misplaced   A class part that sets a namespace only another class has
-              (`home` under `nixos`). dirs-as-categories has a
-              `module-class-contents` flake check, built-only like
-              module-orphans, so this reads flake.moduleGraph.misplaced.
+Orphans (a module inside a category that nothing reaches) and misplaced class
+parts (`home` under `nixos`) are dirs-as-categories' own flake checks,
+`module-orphans` and `module-class-contents`; flake/modules/checks.nix sets both
+to "eval", so `just check` fails on them even under --no-build. This script
+does not repeat them; `add` still reads the orphan list to confirm the module
+it just scaffolded is the only one.
 
   untracked   A .nix file git doesn't know about: flakes in a git repo
               ignore it, so it silently does not exist.
@@ -49,8 +45,6 @@ SEE = {
     'untracked': "AGENTS.md, 'git add before nix eval'",
     'drift':     "wiki/config-structure/module-files.md; fix whichever reading is wrong, "
                  "check_docs.py's module_classes/all_categories or the file",
-    'misplaced': "wiki/config-structure/module-files.md; move the body to the class "
-                 "that owns the namespace, or split the module file",
     'orphan':    "wiki/config-structure/module-files.md; name the module (or its category) in "
                  "an `includes`/`enables`, or delete it",
 }
@@ -109,33 +103,16 @@ def orphans(doc, expected=()):
     """Modules inside a category that no `includes` or `enables` reaches.
 
     They evaluate cleanly and install nothing, so nothing else reports them.
-    dirs-as-categories publishes them as flake.moduleGraph.orphans and its
-    `module-orphans` flake check fails on them, but that check fails only when
-    it is BUILT and `just check` runs --no-build, so it never fails there. This
-    reads the same list at evaluation time, which is what makes it a gate
-    (issue 561). `expected` names modules that are orphans on purpose (the one
-    `add` just created).
+    dirs-as-categories publishes them as flake.moduleGraph.orphans, and its
+    `module-orphans` check ("eval" in checks.nix) is what fails `just check`.
+    Used by `add`, not by `check`. `expected` names modules that are orphans
+    on purpose (the one `add` just created).
     """
     hits = [n for n in (doc.get('orphans') or []) if n not in expected]
     for n in hits:
         print(f"ORPHAN     {n!r} is reached by no `includes`/`enables`, so no host gets it")
     if hits:
         see('orphan')
-    return hits
-
-
-def misplaced(doc):
-    """Class parts that set a namespace only another class has.
-
-    Published as flake.moduleGraph.misplaced while checkClassContents is on
-    (flake/modules/checks.nix); the matching flake check fails only when built,
-    so, as with orphans, this reads the list at evaluation time.
-    """
-    hits = doc.get('misplaced') or []
-    for m in hits:
-        print(f"MISPLACED  {m}")
-    if hits:
-        see('misplaced')
     return hits
 
 
@@ -304,7 +281,7 @@ def main(argv=None, run=subprocess.run):
         return 1 if drift(graph(root, run), static_document(root)) else 0
     if cmd == 'check':
         doc = graph(root, run)
-        bad = bool(untracked(root)) | bool(drift(doc, static_document(root))) | bool(orphans(doc)) | bool(misplaced(doc))
+        bad = bool(untracked(root)) | bool(drift(doc, static_document(root)))
         print("no findings" if not bad else "", end="")
         return 1 if bad else 0
     print(__doc__); return 2

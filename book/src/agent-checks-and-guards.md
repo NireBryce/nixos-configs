@@ -60,7 +60,7 @@ a security boundary.
 | `just wiki-lint` | [Preflight](glossary.md#preflight), CI, by hand | Docs agree with the repo | Fails | `wiki/meta/scripts/check_docs.py` |
 | `just modules` | Preflight, CI, by hand | No untracked `.nix`; static and evaluated module graphs agree | Fails | `flake/scripts/modules.py` |
 | `just lint` | Preflight, CI, pre-commit | statix, deadnix and oversized-file counts never rise | Fails | `flake/scripts/lint.py` |
-| `just check` | Preflight, CI | Every host's toplevel and home evaluate (`module-orphans` fails only when built, so `--no-build` skips it; `just modules` is the orphan gate) | Fails | `flake/modules/checks.nix` |
+| `just check` | Preflight, CI | Every host's toplevel and home evaluate (including `module-orphans` and `module-class-contents`, set to `"eval"` so they fail under `--no-build`) | Fails | `flake/modules/checks.nix` |
 | Trailer check | CI, on a PR's commits | No non-canonical Claude trailer | Fails the PR | `flake/scripts/check_trailers.py` |
 
 ## The session-start hook
@@ -276,10 +276,9 @@ The other static checks:
   that never installed the commit-msg hook.
 - `checks.nix` defines the flake checks `just check` evaluates with `nix
   flake check --all-systems --no-build`: every host's toplevel (NixOS and
-  darwin), every Home Manager home, `module-orphans`, and unit checks of the
-  `flake.lib` helpers. The helper checks fail at evaluation. `module-orphans`
-  fails through a builder, which
-  `--no-build` never runs, so `just modules` carries the orphan check
+  darwin), every Home Manager home, `module-orphans`, `module-class-contents`, and unit
+  checks of the `flake.lib` helpers. All of them fail at evaluation, which
+  `--no-build` still performs: the two library checks are set to `"eval"`
   ([adding a module](adding-a-module.md), Step 5).
 
 ## Tests for the guards

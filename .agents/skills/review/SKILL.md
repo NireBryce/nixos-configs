@@ -22,8 +22,8 @@ A diff read is never enough (bugs serialize). In order:
 
 1. `just modules` — untracked files, and drift between wiki-lint's
    file-only reading and the evaluated graph. A module no host reaches
-   (orphan) fails `just modules` (`just check`'s `module-orphans` fails only
-   when built, and `just check` is `--no-build`); a repeated module/category
+   (orphan) fails `just check` (`checkOrphans = "eval"`, so `--no-build`
+   fails too); a repeated module/category
    name or an unknown `includes` name fails evaluation itself
    (dirs-as-categories, `wiki/config-structure/module-files.md`).
 2. `git status --short` — **`git add` before `nix eval`**: an untracked new

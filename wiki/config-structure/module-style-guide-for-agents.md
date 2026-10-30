@@ -128,4 +128,4 @@ option without a reason beyond tidiness.
 - Filename = name. A repeated name, or one shared with a category, stops
   evaluation (was a silent merge, §34).
 
-`just modules` fails on an orphan (`module-orphans` does not: it fails only when built, and `just check` is `--no-build`), reports untracked files, and checks drift.
+`just check` fails on an orphan (`checkOrphans = "eval"`, so `--no-build` fails too); `just modules` reports untracked files and checks drift.
