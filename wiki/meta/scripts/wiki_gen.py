@@ -8,8 +8,8 @@ agent then fixed the row by hand -- the module-counts table alone had its
 rows hand-edited in 24 commits in September 2026, every one a number the
 tree already knew. Since 2026-10-01 the model is generate, then lint that the
 generated output is current: `just wiki-gen` rewrites the regions,
-`just wiki-gen --check` (and `check_docs.py generated`, so `just wiki-lint`
-and preflight) fails when one is stale.
+`just wiki-gen --check` (and factcheck's `generated` check, so `just
+wiki-lint` and preflight) fails when one is stale.
 
 A region is delimited in the markdown by two comment lines:
 
@@ -33,7 +33,7 @@ with the same key. A new row (a host just added to hosts.nix) gets an empty
 hand cell, which `--check` reports as a finding until someone fills it in;
 a row whose key disappears is dropped, and the write run prints the text it
 dropped so nothing vanishes silently. Hand columns are still prose, so
-whatever checked them before (check_docs.py's Imported-by heuristic) still
+whatever checked them before (the Imported-by membership checks) still
 does -- only the derived columns moved here.
 
 Generated regions are a mechanical touch: rewriting one does not bump the
@@ -197,7 +197,7 @@ def category_rows(homelab):
     umbrella and its nested categories when `homelab`, everything else
     otherwise. Ordered by area then name (general-config before
     users-config). Directory notes nested categories; Class(es) is every
-    `flake.modules.<class>` declared under the tree (check_docs's
+    `flake.modules.<class>` declared under the tree (nixtree's
     category_classes, which says why nested trees count)."""
     def rows(root):
         modules = root / 'flake' / 'modules'
@@ -260,7 +260,7 @@ def count_rows(root):
 def module_layout(root):
     """Mermaid of the top of the module tree -- areas and their direct
     categories, no modules (per-category and per-host diagrams are on-demand
-    output of `just module-graph`, not committed). The tree is check_docs's
+    output of `just module-graph`, not committed). The tree is nixtree's
     file-only reading of `root` (static_document; `just modules` keeps it in
     step with the evaluated graph), drawn by the flake-module-graph input
     through this checkout's own flake -- not `root`'s, so a fixture tree
@@ -383,8 +383,8 @@ def run(root, write):
 
 @wikicore.check('generated', order=130)
 def check(root):
-    """For check_docs.py's `generated` subcommand."""
-    return run(root, write=False)[0]
+    """For factcheck's `generated` check (tools/docchecks/nixos_regions.py
+    carries the regions; the engine here renders them)."""
 
 
 def main(argv):

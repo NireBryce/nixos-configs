@@ -42,7 +42,7 @@ class Tree(unittest.TestCase):
 
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
-        self.root = pathlib.Path(self._tmp.name) / 'flake' / 'modules'   # the layout check_docs reads
+        self.root = pathlib.Path(self._tmp.name) / 'flake' / 'modules'   # the layout the doc checks read
         self.cats = {'used': 'area/used', 'sub': 'area/used/sub'}
         self.mods = {'a': 'area/used/a/a.nix', 'b': 'area/used/sub/b/b.nix', 'alpha': 'hosts/alpha.nix'}
         self.includes = {'alpha': {'nixos': ['used']}}
@@ -53,7 +53,7 @@ class Tree(unittest.TestCase):
 
     def write_all(self):
         """Each module file as dirs-as-categories would read it: house style
-        (what check_docs reads), with the same includes/enables the document
+        (what the doc checks read), with the same includes/enables the document
         gets. A file a test wrote itself (ORPHAN-OK) is left alone."""
         for name, p in self.mods.items():
             f = self.root / p

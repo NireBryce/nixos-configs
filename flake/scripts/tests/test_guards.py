@@ -1683,19 +1683,16 @@ class EditCheck(unittest.TestCase):
         git(self.repo, "add", "flake/modules/ok.nix")
         self.assertEqual(self.edit("flake/modules/ok.nix"), "")
 
+    @unittest.skipUnless(shutil.which("factcheck")
+                         or os.environ.get("FACTCHECK_SRC"),
+                         "factcheck not reachable (dev-shell runs cover it)")
     def test_wiki_stale_sibling(self):
-        (self.repo / "wiki/meta/scripts").mkdir(parents=True)
-        shutil.copy(REPO / "wiki/meta/scripts/check_docs.py",
-                    self.repo / "wiki/meta/scripts/check_docs.py")
-        # check_docs.py imports these beside itself.
-        for mod in ("mdfence", "wikicore", "nixtree", "wiki_gen"):
-            shutil.copy(REPO / f"wiki/meta/scripts/{mod}.py",
-                        self.repo / f"wiki/meta/scripts/{mod}.py")
-        # check_docs.py imports glob_regex from here (shared with the
-        # lesson-reminder hook), so the two travel together.
-        (self.repo / ".agents/hooks").mkdir(parents=True)
-        shutil.copy(HOOKS / "lessons_map.py",
-                    self.repo / ".agents/hooks/lessons_map.py")
+        # The hook runs factcheck through flake/scripts/factcheck.sh, which
+        # needs the tool on PATH (dev shell) or FACTCHECK_SRC set; without
+        # either the wrapper exits 75 and the reminder is silent.
+        (self.repo / "flake/scripts").mkdir(parents=True)
+        shutil.copy(REPO / "flake/scripts/factcheck.sh",
+                    self.repo / "flake/scripts/factcheck.sh")
         self.write("wiki/page.md", "# P\n\n_Last modified: 2026-09-29_\n\n"
                    "See [page-for-agents.md](page-for-agents.md).\n")
         self.write("wiki/page-for-agents.md",
@@ -1836,7 +1833,7 @@ class LessonReminder(unittest.TestCase):
     """lesson-reminder-pretooluse.py (#460): .agents/lessons-map.toml topics
     reach the model before the edit or command they apply to, once per
     topic per session. Paths below are real tracked files, so a rename
-    fails here as well as in `check_docs.py lessons`."""
+    fails here as well as in `factcheck lessons`."""
     script = HOOKS / "lesson-reminder-pretooluse.py"
     HM = "flake/modules/general-config/shell-config/bash/bash.nix"
     SECRETS = "flake/modules/general-config/system/secrets/sops.nix"

@@ -17,7 +17,7 @@ it just scaffolded is the only one.
               ignore it, so it silently does not exist.
 
   drift       wiki-lint reads categories, modules, includes and enables
-              from the files without evaluating (check_docs.py's
+              from the files without evaluating (tools/docchecks/tree.py's
               static_document); this compares that reading with the
               evaluated graph, so the two rules cannot drift apart.
 
@@ -44,7 +44,7 @@ import json, pathlib, subprocess, sys
 SEE = {
     'untracked': "AGENTS.md, 'git add before nix eval'",
     'drift':     "wiki/config-structure/module-files.md; fix whichever reading is wrong, "
-                 "check_docs.py's module_classes/all_categories or the file",
+                 "tools/docchecks/tree.py's module_classes/all_categories, or the file",
     'orphan':    "wiki/config-structure/module-files.md; name the module (or its category) in "
                  "an `includes`/`enables`, or delete it",
 }
@@ -117,15 +117,16 @@ def orphans(doc, expected=()):
 
 
 def static_document(root):
-    """check_docs.py's file-only reading of the tree. The script is loaded
-    from this checkout (wiki/meta/scripts/), the tree read from <modules-dir>,
-    which sits at <repo>/flake/modules."""
+    """The file-only reading of the tree, from tools/docchecks/tree.py --
+    the wrapper over wiki/meta/scripts/nixtree.py that the factcheck
+    checks and regions share, so this comparison and the wiki lint read
+    the tree through one reader."""
     import importlib.util
-    script = pathlib.Path(__file__).resolve().parents[2] / 'wiki' / 'meta' / 'scripts' / 'check_docs.py'
-    spec = importlib.util.spec_from_file_location('check_docs', script)
-    cw = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(cw)
-    return cw.static_document(pathlib.Path(root).resolve().parents[1])
+    script = pathlib.Path(__file__).resolve().parents[2] / 'tools' / 'docchecks' / 'tree.py'
+    spec = importlib.util.spec_from_file_location('docchecks_tree', script)
+    dc = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(dc)
+    return dc.static_document(pathlib.Path(root).resolve().parents[1])
 
 
 def drift(doc, static):

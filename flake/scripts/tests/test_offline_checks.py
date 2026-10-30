@@ -86,11 +86,27 @@ class PreflightClassification(unittest.TestCase):
                 self.assertIsNone(reason)
                 self.assertTrue((REPO / label).is_file(), label)
 
-    def test_wiki_lint_runs_without_the_generated_check(self):
-        lint = [a for a, l, _ in self.steps
-                if l == "wiki/meta/scripts/check_docs.py"]
+    def test_wiki_lint_step_is_the_factcheck_wrapper_skipped_offline(self):
+        # factcheck comes from the flake input, so the offline preflight
+        # cannot run the wiki lint: the wrapper is a known non-python step
+        # with its own stated reason, never a silent drop.
+        lint = [(argv, label, reason) for argv, label, reason in self.steps
+                if label.startswith("flake/scripts/factcheck.sh")]
         self.assertEqual(len(lint), 1)
-        self.assertIn("--skip=generated", lint[0])
+        self.assertIsNone(lint[0][0])
+        self.assertIn("flake input", lint[0][2])
+
+    def test_wiki_lint_skips_without_the_tool_and_runs_with_it(self):
+        which = shutil.which
+        try:
+            shutil.which = lambda name: None if name == "factcheck" \
+                else which(name)
+            self.assertIsNone(oc.run_wiki_lint())
+        finally:
+            shutil.which = which
+        if not shutil.which("factcheck"):
+            self.skipTest("factcheck not on PATH -- dev-shell runs cover it")
+        self.assertEqual(oc.run_wiki_lint(), [])
 
     def test_something_actually_runs(self):
         self.assertGreater(sum(1 for a, _, _ in self.steps if a), 5)

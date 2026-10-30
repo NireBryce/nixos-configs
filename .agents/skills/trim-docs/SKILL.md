@@ -20,7 +20,7 @@ findings zero, REVIEW findings not grown.
 
 ## What lint pins in place
 
-Checked mechanically (`wiki/meta/scripts/check_docs.py`); preserve:
+Checked mechanically (`factcheck`, via `just wiki-lint`); preserve:
 
 - **"Imported by" sections and the categories/00-INDEX.md Index table's
   Imported by column** (the table's other columns are generated -- never trim
@@ -32,13 +32,13 @@ Checked mechanically (`wiki/meta/scripts/check_docs.py`); preserve:
   impermanence-and-secrets.md and `.agents/rules/secrets.md`: keep the
   em-dash terminator and the full host list.
 - **`## Contents` blocks** must match the page's headings. After any heading
-  rename/add/remove: `python3 wiki/meta/scripts/check_docs.py gen-contents <page>`.
+  rename/add/remove: `factcheck fix-contents <page>`.
 - **The `_Last modified: YYYY-MM-DD_` line** right after the title. Don't
   delete it; bump it to today on every page whose text you change
   (wiki-sync's rule), and leave it alone on pages you only re-read.
 - **`<page>-for-agents.md` siblings.** A sibling dated earlier than its
   source is a hard finding: check the sibling in the same pass. The
-  back-link between the two (`check_docs.py siblings` requires both
+  back-link between the two (`factcheck siblings` requires both
   directions) is checked, not trimmable cross-reference spray.
 - **Anchors are GitHub slugs of headings.** Renaming a heading breaks every
   inbound `page.md#anchor` link silently: grep `page.md#` across wiki/ and

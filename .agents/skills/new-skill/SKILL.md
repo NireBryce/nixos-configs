@@ -76,9 +76,9 @@ position warns the user before starting and checks commands by hand
 (skill `guards-without-hooks`). The tag goes in the body, not the frontmatter: the skill-files
 check rejects unknown frontmatter keys, and the body is what loads with the
 skill. The check also fails a skill that mentions one of the guarded commands
-without the tag (`NEEDS_BASH_GUARDS_CUE` in `check_docs.py` lists them, and
+without the tag (the guard-command cue in factcheck.toml's `[skill-files]` lists them, and
 this paragraph avoids naming them so it does not trip it). A new tag is a
-deliberate edit to `NEEDS_TAGS` in `check_docs.py` and a line here.
+deliberate edit to `needs-tags` in factcheck.toml and a line here.
 
 ## Frontmatter this repo doesn't use
 

@@ -3,9 +3,12 @@
 page-header date line, rule frontmatter, and the registry every check
 registers itself in (`@check`).
 
-check_docs.py and wiki_gen.py both register checks here, so neither has to
-import the other: wiki_gen used to import check_docs for its parsers while
-check_docs imported wiki_gen (lazily, to dodge the cycle) to run its check.
+wiki_gen.py registers its regions check here (its docstring has the
+history: it and the extracted factcheck tool used to register into one
+registry, so neither had to import the other). factcheck now carries its
+own registry -- factcheck's checks stopped reading this one when the tool
+moved to its own repo -- and wiki_gen keeps this one for its `--check`
+mode.
 """
 import datetime
 import re
@@ -78,15 +81,15 @@ _UNORDERED = 10_000
 
 
 def check(name, order=None):
-    """Registers `fn(root) -> [finding]` as the subcommand `name`; `check_docs.py
-    check` runs every registered check. A check that isn't registered isn't a
+    """Registers `fn(root) -> [finding]` as the subcommand `name`. A check
+    that isn't registered isn't a
     subcommand and isn't in `check`, and a check that is registered can't be
     missing from either -- there is no second list to keep in step.
 
     `order` fixes where its findings print in `check`'s combined output; a
     check without one runs after the ordered ones, in registration order."""
     def register(fn):
-        # flake/scripts/modules.py execs check_docs.py afresh for each call,
+        # a caller may exec a registering module afresh for each call,
         # so the same function arrives again as a new object: that replaces
         # its entry; a different function under a taken name is the bug.
         old = CHECKS.get(name)

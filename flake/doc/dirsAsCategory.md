@@ -53,7 +53,7 @@ resolve to the shared file's own path instead of the caller's. The collector
 derives two things from it: the category's directory (`dirOf`) and **the
 shim's own filename** (`baseNameOf`), which it uses both to skip the shim and
 to recognise a nested category. No shim filename is written down in the
-collector, `modules.py` or `check_docs.py` (the scripts find shims by their
+collector, `modules.py` or `tools/docchecks/tree.py` (the scripts find shims by their
 `_lib/category-collector.nix` import), so renaming every shim together needs
 no other change. `findModulesRoot`
 walks up to find `modules/` so the shim can reach `_lib/` from any nesting
