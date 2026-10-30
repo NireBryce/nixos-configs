@@ -1,6 +1,6 @@
 # Wiki index, for agents
 
-_Last modified: 2026-10-28_
+_Last modified: 2026-10-30_
 
 Condensed from [00-INDEX.md](00-INDEX.md). Routing only.
 
@@ -8,6 +8,12 @@ Condensed from [00-INDEX.md](00-INDEX.md). Routing only.
 is the cold-start read; this page says which file holds the answer. Pages with a
 `-for-agents` sibling are listed by the sibling; load the human page only for the *why*.
 A page without one opens with `## Quick facts` — linked there.
+
+**Guards and skills assume bash.** Guard hooks match the harness `Bash` tool
+(secrets read guard: `Read|Grep|Glob`; edit hooks: `Edit|Write`); skills and
+recipes are bash commands. Another shell or non-`Bash` tool bypasses the git,
+`just`, nix and secrets command checks: warn the user if you use one
+([guards](../book/src/agent-checks-and-guards.md)).
 
 ## Layout
 

@@ -103,6 +103,20 @@ Secrets
 
 Secrets use sops-nix. `secrets.yaml` is encrypted and committed on purpose.
 
+Agent safeguards assume bash
+----------------------------
+
+Many of the agent skills and safeguards here only fire when the agent runs
+its commands through a bash tool: the guard hooks match on the harness's
+`Bash` tool, the skills and `just` recipes are written as bash commands, and
+the hooks pattern-match command strings. An agent that runs commands through
+another shell (fish, zsh, nushell, PowerShell) or through a tool that is not
+`Bash` (an MCP shell, a terminal-in-editor tool, a sandbox exec tool) gets
+none of the git, `just`, nix, or secrets checks. Agents working here should
+tell the user when they are using a different shell or tool, so the user
+knows those protections are off. Details:
+[checks and guards](book/src/agent-checks-and-guards.md).
+
 Using this
 ----------
 
