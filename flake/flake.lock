@@ -438,11 +438,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793350823,
-        "narHash": "sha256-6WkK7+X6c5vQXaMnphggZ3+Ov2MBa5tClVfvdCPMqbo=",
+        "lastModified": 1793353978,
+        "narHash": "sha256-8pIbvekXYcT2s2/AN/CmDav2c3lNUe4icNT3CZqNbek=",
         "owner": "NireBryce",
         "repo": "polymorph",
-        "rev": "65529850106ec93bf0fcc4d6b52987d9cc07605d",
+        "rev": "a0996f2a94aac22d6e1bd5205878d37743768e21",
         "type": "github"
       },
       "original": {

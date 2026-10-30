@@ -221,6 +221,26 @@ The [offline checks](glossary.md#offline-checks) have two modes:
 - `preflight` runs the preflight recipe's `python3` steps, except those the
   script lists as needing nix, and names the steps left to CI.
 
+## Where the hooks are enforced
+
+| Harness | Hooks enforced | Evidence |
+|---|---|---|
+| Claude Code, including through the Claude Agent SDK (t3code) | Yes | Fires for every tool call; a hook added mid-session fires without a restart; `Monitor` fires hooks. Observed in a live t3code session with polymorph's discovery logger (its notes: polymorph's `docs/observed-t3code.md`). |
+| ZCode | Yes, with limits | Live-checked on ZCode 3.14.3 (#448): every hook fires; an `ask` is treated as allow, so the must-hold guards deny there. |
+| Any other harness | No | Nothing runs the hooks. Use `guard-check` (below), an honor system. |
+
+Two behaviours of the post-call scan to know: a background `Bash` command or
+`Monitor` fires its `PostToolUse` when it is launched, not when it finishes, and
+a background task's completion fires no hook. The secrets scan of command
+output therefore sees a background command's launch, not its output.
+
+[polymorph](https://github.com/NireBryce/polymorph) is the tool being built to
+generate hook configs for more harnesses from `.agents/settings.json`. It is
+experimental and unvetted, no mapping other than Claude Code's and ZCode's is
+verified, and none has been shown to deny a command in a live session, so it
+adds no enforcement to the table yet. The open work is
+[polymorph issue 1](https://github.com/NireBryce/polymorph/issues/1).
+
 ## Running the guards by hand
 
 The hook scripts run only inside Claude Code and ZCode, and only on their
