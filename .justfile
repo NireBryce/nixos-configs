@@ -60,6 +60,15 @@ modules:
 modules-test:
     python3 {{scripts}}/tests/test_modules.py
 
+# End to end: `nix flake check --no-build` fails on an orphan (checkOrphans = "eval")
+orphan-gate-test:
+    # Every other test here uses canned graphs or a stub nix, so none could
+    # tell "build" (passes under --no-build) from "eval" (fails). This runs
+    # the real flake check on a copy of the tree with an orphan added, and on
+    # an unmodified copy as control. ~30s; skips without nix; runs in
+    # preflight and CI.
+    python3 {{scripts}}/tests/test_orphan_gate.py
+
 # Comment width, the maintenance pass: pure `#` comment blocks wrap at 80
 # columns plus the line's indent (rule, and what the autofix will not touch:
 # wiki/config-structure/module-style-guide.md "Comment width", skill comment-wrap). No args
@@ -243,6 +252,7 @@ preflight:
     @just cod-desc-test
     @just trailers-test
     @just modules-test
+    @just orphan-gate-test
     @python3 .agents/scripts/test_recurring.py
     @python3 .agents/scripts/test_ship.py
     @python3 .agents/scripts/test_worktree.py
