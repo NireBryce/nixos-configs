@@ -91,6 +91,16 @@
                         unset SSH_ASKPASS
                     fi
 
+                    # Bitwarden's agent socket, when the desktop app has
+                    # brought it up, is the session agent: keys live as
+                    # vault items, so nothing in ~/.ssh needs to exist for
+                    # them. Socket path is Bitwarden's default; if it is
+                    # ever changed in the app's settings, change it here
+                    # too.
+                    if [[ -S "''$HOME/.bitwarden-ssh-agent.sock" ]]; then
+                        export SSH_AUTH_SOCK="''$HOME/.bitwarden-ssh-agent.sock"
+                    fi
+
                     [[ ''$- == *i* ]] && source -- ${pkgs.blesh}/share/blesh/ble.sh --attach=none
                 '')
 
