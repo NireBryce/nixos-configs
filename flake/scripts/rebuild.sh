@@ -34,6 +34,11 @@ case "$action" in
     *) echo "rebuild.sh: unknown action '$action' (want build, boot or switch)" >&2; exit 2 ;;
 esac
 
+# Local hygiene gate before nix does any work: unencrypted private keys in
+# the invoking user's ~/.ssh fail the build. ssh-key-check.sh's header has
+# the mechanism and the per-run suppression variable.
+"$(dirname -- "$0")/ssh-key-check.sh"
+
 # Compare the captured reply, not `| grep -q yes`: grep -q exits on its
 # first match, and if nix is still writing when it does, nix dies of SIGPIPE
 # and pipefail reads the pipeline as failed -- a darwin host classified
