@@ -1,6 +1,6 @@
 # Open threads
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-10-31_
 
 The repo's loose ends (todos left in code, upstream bugs found here,
 undecided design questions) are GitHub issues on this repo, not entries on
@@ -19,6 +19,7 @@ third-party write-ups.
 
 - [Where the threads are](#where-the-threads-are)
 - [Upstream write-ups are not filed upstream](#upstream-write-ups-are-not-filed-upstream)
+- [Polymorph](#polymorph)
 - [Not tracked, on purpose](#not-tracked-on-purpose)
 
 ## Where the threads are
@@ -51,6 +52,23 @@ outside `NireBryce/nixos-configs` happens only when the user says so
 in their own message, for that specific report — not as a
 housekeeping pass over this list or the label. Tracking one here is not
 working it.
+
+## Polymorph
+
+[polymorph](https://github.com/NireBryce/polymorph) (the cross-harness
+hook/skill generator this repo consumes as a flake input) tracks its own
+loose ends as issues on its own repo:
+
+```sh
+gh issue list --repo NireBryce/polymorph
+```
+
+One thing is deliberately not an issue: `polymorph capture --harness
+opencode` (it runs the discovery procedure through OpenCode itself) has only
+ever been run against stubs. A live run spends the user's coding-plan usage,
+so it is the user's to start, after the cost prompt it prints. Until it has
+run once, treat the capture driver, and its OpenCode plugin template, as
+unverified. The Claude driver is blocked in the tool, with its reason.
 
 ## Not tracked, on purpose
 

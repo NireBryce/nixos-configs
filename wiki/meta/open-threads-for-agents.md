@@ -1,6 +1,6 @@
 # Open threads, for agents
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-10-31_
 
 Condensed from [open-threads.md](open-threads.md).
 
@@ -18,6 +18,10 @@ Not a tracker since 2026-10-01; this repo's GitHub issues are.
   are never filed upstream** without the user saying so explicitly, in
   those words, for that specific report. Tracking ≠ working.
 - New loose end → skill `propose-issue`, not a line here.
+- Polymorph (flake input) has its own tracker:
+  `gh issue list --repo NireBryce/polymorph`. `polymorph capture --harness
+  opencode` has only run against stubs; a live run spends the user's plan
+  usage, so the user starts it. Its Claude driver is blocked in the tool.
 - Not tracked on purpose (no done-condition):
   [`../../flake/scripts/script-wishlist.md`](<../../flake/scripts/script-wishlist.md>),
   [`../../flake/doc/notes-and-fixes.md`](<../../flake/doc/notes-and-fixes.md>)'s

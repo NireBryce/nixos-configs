@@ -167,7 +167,7 @@ just agent ship-ready <n>
 It waits for CI (`gh pr checks --watch`, minutes, not optional), then gates:
 PR open and not a draft, `mergeStateStatus` `CLEAN` (not `mergeable`, which only means no
 conflicts: #413), base `experimental`, head in this repo and not a protected
-branch or the base (`land` deletes the head by name). It prints title, URL, stats, the
+branch or the base (`land` deletes the head by name; §52). It prints title, URL, stats, the
 commit list, and the merge method: one commit `--rebase`, more `--merge`
 (their messages carry real reasoning; squashing flattens it). **NOT READY**
 means don't ask: fix what it names. Red check: `gh run view <run>

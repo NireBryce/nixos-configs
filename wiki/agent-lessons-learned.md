@@ -1,6 +1,6 @@
 # Lessons learned
 
-_Last modified: 2026-10-30_
+_Last modified: 2026-10-31_
 
 > **Written by Claude Code, for Claude Code**, and largely a record of its own
 > mistakes, so the "I" in the articles is a machine with no memory of having
@@ -57,6 +57,7 @@ Home for most of this group: [AGENTS.md "Before calling it done"](../AGENTS.md#b
 - **§20** [A pipeline reports its last command's status](agent-lessons-learned/20-pipeline-exit-status.md) — `cmd | tail` exits 0 when `cmd` failed; use `set -o pipefail` or don't pipe, and believe the text over the status. Home: AGENTS.md "Before calling it done". Enforced: none (reminded by the lesson-reminder hook on a check piped into `tail`/`head`/`grep`).
 - **§21** [An environment failure can look like a config failure](agent-lessons-learned/21-environment-failure-as-config-failure.md) — nix puts the innermost cause last; read to the bottom of a trace. Home: AGENTS.md "Before calling it done". Enforced: none (reminded by the lesson-reminder hook on a check piped into `head`).
 - **§51** [A reported cause is a hypothesis](agent-lessons-learned/51-a-reported-cause-is-a-hypothesis.md) — a cause from a report, a worker or your own memory goes into an issue or status as fact only after you read the code or ran the reproduction; otherwise write "likely" and what would confirm it. Home: skill `propose-issue`. Enforced: none.
+- **§53** [A failure only CI shows is an environment difference](agent-lessons-learned/53-a-ci-only-failure-is-an-environment-difference.md) — read the failing job's log for the line that names the cause, remove that difference locally (`env -u TERM`, a `PATH` without the tool, the build sandbox), and watch it fail before fixing. Home: AGENTS.md "Before you start". Enforced: none.
 - **§22** [Name matching fails silently](agent-lessons-learned/22-name-matching-fails-silently.md) — before believing a zero, show the query can return non-zero (spelling differs, already present, `\w` misses `-`). Home: AGENTS.md "Before calling it done"; skill `home-manager-dotfiles`. Enforced: `just dotfiles` (for dotfile names; reminded by the lesson-reminder hook on Home Manager edits).
 - **§31** [Count the thing you mean](agent-lessons-learned/31-count-the-thing-you-mean.md) — know what a count counts, look for the existing cleaner before writing one, and don't set a limit below the observed worst case. Home: AGENTS.md "Before calling it done"; [coredump-limit.nix](../flake/modules/hardware-config/hardware/storage/coredump-limit.nix). Enforced: none.
 - **§23** [When a check fires on new work, fix its model](agent-lessons-learned/23-fix-the-checks-model.md) — "this check is wrong" and "this check is incomplete" look the same; widen the checker before reaching for the escape flag. Home: AGENTS.md "Before calling it done". Enforced: none (`just modules`' orphan findings cited it until 2026-10-16; orphans are now `nix flake check`'s `module-orphans`).
@@ -103,6 +104,7 @@ Home for most of this group: [AGENTS.md "Before you start"](../AGENTS.md#before-
 ## Git, commits, and working with the user
 
 - **§15** [Commit hygiene](agent-lessons-learned/15-commit-hygiene.md) — check what's staged, don't describe state that doesn't exist yet, order commits so each is green. Home: skill `ship`. Enforced: `just agent commit` refuses a commit without a pathspec.
+- **§52** [A step that deletes by name takes the name from verified facts](agent-lessons-learned/52-derive-deletes-from-verified-facts.md) — landing a PR deleted its head branch by name after checking only the base; a head named `main`/`experimental` or from a fork reached the delete. Read `isCrossRepository`/`headRefName`/`headRefOid` from the PR, refuse protected and base-equal heads before merging, `-d` unless the tip is the verified head. Home: skill `ship`. Enforced: `ship.py` gate and `worktree.py prune` refuse (tests in `test_ship.py`, `test_worktree.py`).
 - **§44** [Git in hooks needs `-C`](agent-lessons-learned/44-git-in-hooks-needs-c.md) — a hook running `git` from a non-toplevel cwd uses `git -C "$repo_root"`, not a cleared `GIT_DIR`. Home: skill `use-a-worktree`. Enforced: none (`.githooks/pre-commit` carries the fix; reminded by the lesson-reminder hook on agent-config edits).
 - **§42** [`.claude/settings.local.json` is the user's](agent-lessons-learned/42-settings-local-json.md) — resolve its merge conflicts the simplest way and move on. Home: skill `ship`. Enforced: none.
 - **§14** [Read the repo's conventions before writing into it](agent-lessons-learned/14-read-conventions-first.md) — the style guide exists; grep for it. Home: AGENTS.md "Conventions". Enforced: none.

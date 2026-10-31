@@ -1,6 +1,6 @@
 # 50. A check with the host program stubbed tests your model of the host, not the host
 
-_Last modified: 2026-10-27_
+_Last modified: 2026-10-31_
 
 ## Index entry
 
@@ -57,3 +57,13 @@ What to do instead:
 Fixed in PR #541. The live test is opt-in (it needs an installed ble.sh, cod's
 per-user daemon, carapace and terminal-puppeteer, and takes ~30s), so nothing
 in `just preflight` repeats it.
+
+## Addendum: a synchronous stub hides ordering
+
+polymorph's `capture` command killed the harness's process group the moment
+the harness exited, which also killed the logger processes the OpenCode plugin
+spawns per event, a moment before they wrote. Every test passed because its
+stub harness ran the logger synchronously. The reviewer found it by reading;
+the test that caught it afterwards uses a child that writes late. A stub of
+something asynchronous has to be asynchronous too, or the test cannot see
+races.
