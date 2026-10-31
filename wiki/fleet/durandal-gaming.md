@@ -52,7 +52,9 @@ that leaves out gamemode and gamescope
 ([NixOS wiki](https://wiki.nixos.org/wiki/Heroic_Games_Launcher)). Without
 them in the environment, Heroic's per-game GameMode and gamescope toggles
 find nothing. The module therefore installs
-`heroic.override { extraPkgs = … [ gamescope gamemode ]; }`.
+`heroic.override { extraPkgs = … [ gamescope gamemode ]; }`. (The fleet-wide
+FHS-environment picture — namespaces, `/etc` evidence, config custody — is
+[fhs-environments](fhs-environments.md).)
 
 - Wine and GE-Proton builds come from Heroic's own Wine Manager, not from
   nixpkgs.

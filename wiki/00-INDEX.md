@@ -72,7 +72,8 @@ root holds only entry points.
   and [`categories/`](config-structure/categories/00-INDEX.md), one page per category.
 - [`fleet/`](fleet/) — the machines: [hosts](fleet/hosts.md),
   [disk formatting](fleet/disk-formatting.md),
-  [name resolution](fleet/name-resolution.md), [durandal gaming](fleet/durandal-gaming.md).
+  [name resolution](fleet/name-resolution.md), [durandal gaming](fleet/durandal-gaming.md),
+  [FHS environments](fleet/fhs-environments.md).
 - [`upkeep-and-admin/`](upkeep-and-admin/) — recurring chores:
   [maintenance](upkeep-and-admin/maintenance.md),
   [expiry schedule](upkeep-and-admin/maintenance-schedule.md),
@@ -122,6 +123,9 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
 - [Durandal gaming](fleet/durandal-gaming.md) — what durandal runs games with:
   shared Steam, its own Heroic and GameMode (added for Alan Wake 2), the
   GameMode polkit group, and what's worth adding next.
+- [FHS environments and /etc evidence](fleet/fhs-environments.md) — the bwrap
+  namespaces on this fleet, what an agent shell inherits from them, and the
+  merge-into-mutable-files custody rule their config files follow.
 - [New host disk formatting](fleet/disk-formatting.md) — the LUKS + btrfs +
   impermanence disk layout runbook: what to decide before touching a real
   disk, what depends on disko having run, and how to confirm the
