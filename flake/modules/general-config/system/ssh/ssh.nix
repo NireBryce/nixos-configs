@@ -37,7 +37,6 @@
             # total lockout, not a fallback to password.
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIACfyClu9egyamrth/SspY6wPA78o8sJuSR7jyBX42ex elly@nire-lysithea.local"
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL0sEOPmravXojxuKqN3XwplTbuz2p36UDTxmUthktnX elly@durandal"
-            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII/CCC9LRJdjqLqq5t1a0wN1cbw2fmxs2Yxi1grl/nRw elly@nire-sif"
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJFTe27f8e8B4DpqQYHFK7I7Pg3ZK12W7LqIrdI+ChI1 elly@nire-galatea"
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILqzV9o32OsJdkCfDJhR5X4uSu1nzRzrL/2gBWLp9QyX elly@nire-cube"
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFFfyxNzG07CdeNEZof+l49+fqx+2E79gmYvnRqiGdNp elly@nire-tenacity"
@@ -57,3 +56,9 @@
 # and had no private half on lysithea as of 2026-08-21 (id_ed25519 was the
 # only keypair there, `ssh-add -l` empty). Predated the flake-parts port;
 # nothing ever accounted for it.
+#
+# 2026-10-30 — removed the `elly@nire-sif` key. The host left the fleet
+# earlier (see hosts.nix's removed-host comment); the authorization stayed
+# behind, and a private-half copy still lived in durandal's ~/.ssh. Key
+# files deleted there; the old public half never appeared in a Bitwarden
+# vault import.
