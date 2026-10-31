@@ -113,6 +113,9 @@ commands through `just agent guard-check` (skill `guards-without-hooks`).
   task; `wiki/agent-lessons-learned.md` files every past mistake by the moment it
   applies, and `just agent lessons <path>` prints the ones that apply to a
   file or area. Bare `just` lists every recipe.
+- **A check fails only in CI?** Read the job log for the line that names
+  the cause, remove that difference locally (`env -u TERM`, a `PATH`
+  without the tool) and watch it fail before fixing (§53).
 - **Someone reports a bug?** Skill `investigate-bug` first — `just threads
   "<keywords>"` — before reproducing anything.
 - **Ask "did it work before?" first.** `journalctl --list-boots` plus a

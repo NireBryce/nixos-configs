@@ -153,3 +153,10 @@ paths   = ["flake/modules/general-config/shell-config/bash/**", "flake/scripts/t
 skill   = "cod-completions"
 lessons = [50]
 remind  = "ble.sh/carapace/cod completion code: a check with ble.sh's functions stubbed passed three bugs here that a real Tab press found -- run `just completion-live-test` (or terminal-puppeteer) before saying it works."
+
+[[topic]]
+id      = "delete-by-name"
+paths   = [".agents/scripts/ship.py", ".agents/scripts/worktree.py", ".agents/skills/ship/**"]
+skill   = "ship"
+lessons = [52]
+remind  = "Landing deletes the PR's head branch by name: read isCrossRepository/headRefName/headRefOid from the PR, refuse protected and base-equal heads before merging, `-d` unless the tip is the verified head (§52)."
