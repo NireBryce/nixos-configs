@@ -4,6 +4,7 @@ hook answer maps to an exit status; one integration case runs the real hooks
 against a temp repo (skipped without jq, which the hooks need). Stdlib only.
 """
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -192,9 +193,15 @@ class RealHooks(unittest.TestCase):
         self.repo = Path(tempfile.mkdtemp(prefix="guard-check-repo-"))
         self.addCleanup(shutil.rmtree, self.repo, ignore_errors=True)
         def git(*a):
+            # Isolated from the user's global config: the session's
+            # commit.gpgsign + agent-served signing key must not decide
+            # whether a fixture commit can happen at all.
+            env = dict(os.environ,
+                       GIT_CONFIG_GLOBAL=os.devnull,
+                       GIT_CONFIG_SYSTEM=os.devnull)
             subprocess.run(["git", "-C", str(self.repo), "-c", "user.name=t",
                             "-c", "user.email=t@t", *a], check=True,
-                           capture_output=True)
+                           capture_output=True, env=env)
         git("init", "-q")
         (self.repo / "f").write_text("a\n")
         git("add", "f")

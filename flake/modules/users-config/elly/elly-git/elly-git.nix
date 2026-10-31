@@ -32,7 +32,10 @@
                 maintenance.prefetch.enabled = false;
             };
             signing = {
-                key = "~/.ssh/id_ed25519";
+                # The public half of the auth key: the private half is held
+                # by the session's SSH agent, which ssh-keygen consults when
+                # asked to sign for a public key it serves.
+                key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL0sEOPmravXojxuKqN3XwplTbuz2p36UDTxmUthktnX elly@durandal";
                 # Every commit signs with the SSH auth key, deliberately --
                 # including agent-made ones. git fails a signing commit
                 # loudly if the key is ever absent; the old

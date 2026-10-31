@@ -6,6 +6,7 @@ wiki reorganisation hit, including the two its first pass missed
 
 Pure stdlib + git; runs in preflight and CI.
 """
+import os
 import pathlib
 import subprocess
 import sys
@@ -27,8 +28,14 @@ class Repo(unittest.TestCase):
         self.git("config", "user.name", "t")
 
     def git(self, *a):
+        # Isolated from the user's global config: the session's
+        # commit.gpgsign + agent-served signing key must not decide
+        # whether a fixture commit can happen at all.
+        env = dict(os.environ,
+                   GIT_CONFIG_GLOBAL=os.devnull,
+                   GIT_CONFIG_SYSTEM=os.devnull)
         return subprocess.run(["git", "-C", str(self.root), *a], check=True,
-                              capture_output=True, text=True).stdout
+                              capture_output=True, text=True, env=env).stdout
 
     def write(self, path, text):
         f = self.root / path
