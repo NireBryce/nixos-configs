@@ -32,6 +32,7 @@ polymorph and this repo; the tracking issue is
 | remote branch delete (`git push origin --delete`) | the git proxy answers HTTP 403; the GitHub MCP tools have no delete-branch call | turn on GitHub's auto-delete of head branches |
 | `just` | not installed | setup script: `pip install rust-just` |
 | `nix` | present, cannot fetch flake inputs (AGENTS.md, "Commands") | `nix eval`/`build`/`flake check` rungs are CI's; the git hooks degrade to `offline_checks.py` |
+| pre-push hook (`offline_checks.py preflight`) | fails: `flake/scripts/tests/test_orphan_gate.py` skips only when `nix` is absent, and here `nix` is present but its input downloads get HTTP 403 | push with `--no-verify` after reading the failure; [#617](https://github.com/NireBryce/nixos-configs/issues/617) tracks a fix |
 | `gh` | installed, not logged in | recipes built on `gh` don't run; the agent uses the GitHub MCP tools |
 | repo `.claude/settings.json` (hooks, `attribution.commit`) | likely not loaded when the session starts above the repos | CI trailer check is the layer that holds; setup script wires `core.hooksPath` |
 | repo skills | loaded, scoped by repo (`nixos-configs:ship`) | nothing to do |
@@ -151,6 +152,8 @@ after the merge `git ls-remote --heads origin <branch>` prints nothing.
   `.claude/settings.json` is not loaded then is the likely cause, not
   confirmed.
 - `gh auth status` reported "Failed to log in to github.com using token".
+- The pre-push hook failed on `test_orphan_gate.py` (flake-parts download, HTTP
+  403) on unchanged `experimental` as well as on a docs-only commit.
 
 ## See also
 
