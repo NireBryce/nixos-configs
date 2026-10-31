@@ -116,6 +116,7 @@ class Base(unittest.TestCase):
                  isDraft=False, additions=3, deletions=1, changedFiles=1,
                  mergeable="MERGEABLE", mergeStateStatus="CLEAN",
                  baseRefName="experimental", headRefName=head, headRefOid=oid,
+                 isCrossRepository=False,
                  commits=[dict(oid=f"{i:040d}", messageHeadline=f"c{i}")
                           for i in range(n)])
         d.update(over)
@@ -146,7 +147,7 @@ class Gate(unittest.TestCase):
     def d(self, **over):
         d = dict(state="OPEN", isDraft=False, mergeStateStatus="CLEAN",
                  mergeable="MERGEABLE", baseRefName="experimental",
-                 commits=[{}])
+                 headRefName="feat/x", isCrossRepository=False, commits=[{}])
         d.update(over)
         return d
 
@@ -163,6 +164,22 @@ class Gate(unittest.TestCase):
     def test_base_main_refused(self):
         p = ship.gate_problems(self.d(baseRefName="main"))
         self.assertIn("not experimental", p[0])
+
+    def test_fork_head_refused(self):
+        p = ship.gate_problems(self.d(isCrossRepository=True))
+        self.assertTrue(any("another repository" in x for x in p), p)
+
+    def test_unknown_origin_counts_as_fork(self):
+        d = self.d()
+        del d["isCrossRepository"]
+        self.assertTrue(any("another repository" in x
+                            for x in ship.gate_problems(d)))
+
+    def test_protected_head_refused(self):
+        for name in ("main", "master", "experimental"):
+            p = ship.gate_problems(self.d(headRefName=name))
+            self.assertTrue(any("protected" in x or "same as the base" in x
+                                for x in p), (name, p))
 
     def test_not_open_is_the_only_problem(self):
         p = ship.gate_problems(self.d(state="MERGED", mergeStateStatus="UNKNOWN"))
@@ -334,6 +351,33 @@ class Land(Base):
         self.set_state(self.pr("feat/x", oid, baseRefName="main"))
         self.assertEqual(self.ship("land", "7").returncode, 1)
         self.assertFalse(any("pr merge" in c for c in self.calls()))
+
+    def test_fork_or_protected_head_merges_and_deletes_nothing(self):
+        # a head named like a protected branch must never reach the delete
+        for i, over in enumerate((dict(headRefName="main"),
+                                  dict(headRefName="experimental"),
+                                  dict(isCrossRepository=True))):
+            with self.subTest(over=over):
+                self.log.write_text("")
+                oid = self.feature(self.repo, name=f"feat/x{i}")
+                self.set_state(self.pr("feat/x", oid, **over))
+                r = self.ship("land", "7")
+                self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
+                joined = "\n".join(self.calls())
+                self.assertNotIn("pr merge", joined)
+                self.assertNotIn("--delete", joined)
+                git(self.repo, "switch", "-q", "experimental")
+
+    def test_local_branch_at_another_tip_is_not_force_deleted(self):
+        oid = self.feature(self.repo)
+        git(self.repo, "switch", "-q", "experimental")
+        # local branch has an extra commit the merged PR head lacks
+        git(self.repo, "switch", "-q", "feat/x")
+        commit(self.repo, "extra")
+        git(self.repo, "switch", "-q", "experimental")
+        self.set_state(self.pr("feat/x", oid))
+        self.ship("land", "7")
+        self.assertIn("feat/x", self.branches())  # never -D'd
 
     def test_failed_merge_deletes_nothing(self):
         oid = self.feature(self.repo)
