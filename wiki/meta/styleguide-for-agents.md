@@ -1,6 +1,6 @@
 # Wiki style guide, for agents
 
-_Last modified: 2026-10-30_
+_Last modified: 2026-10-31_
 
 _Sibling reviewed: 2026-10-20 -- source body trimmed of origin-story narration (dates added, who moved what); rules unchanged_
 
@@ -16,6 +16,7 @@ Condensed from [styleguide.md](styleguide.md). Rules only here. The *repo's* sty
 | `wiki/config-structure/` | how the flake is built: architecture, flake-parts, module files / style / placement, conventions, impermanence-and-secrets; holds `categories/` |
 | `wiki/fleet/` | the machines: hosts, disk formatting, name resolution, durandal gaming |
 | `wiki/upkeep-and-admin/` | recurring chores: maintenance, expiry schedule, flake.lock bump, temporary patches |
+| `wiki/llm-aided-dev/` | working with coding agents: cloud-sessions (plan and runbook) |
 | `wiki/meta/` | the wiki's own rules and the repo's memory: styleguide, traps-and-skills, history, open-threads, `scripts/` |
 | `wiki/config-structure/categories/<name>.md` | one page per real category — a folder under `flake/modules/` that is a category ([../config-structure/module-files.md](../config-structure/module-files.md)). Indexed in [../config-structure/categories/00-INDEX.md](../config-structure/categories/00-INDEX.md)'s table. |
 | `wiki/config-structure/categories/<name>/` | escape hatch (`shell-config`). Triggered by one *member* accumulating an investigation, not by length. `00-INDEX.md` becomes the category article; each deep-dive is named after its subject. **No third tier under it.** |
