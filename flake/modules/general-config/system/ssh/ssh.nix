@@ -37,6 +37,21 @@
             # total lockout, not a fallback to password.
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIACfyClu9egyamrth/SspY6wPA78o8sJuSR7jyBX42ex elly@nire-lysithea.local"
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL0sEOPmravXojxuKqN3XwplTbuz2p36UDTxmUthktnX elly@durandal"
+            # The per-machine agent keys: one per host, private halves in
+            # agent-keys/<host>.yaml (sops, encrypted to that host's key),
+            # materialized by agent-keys.nix at /run/secrets/agent-ssh-key,
+            # owned by elly. Unpassphrased by design -- agents cannot answer
+            # a passphrase prompt -- so their scope is bounded here instead:
+            # no pty (command execution only, never an interactive shell),
+            # no agent or X11 forwarding. Port forwarding deliberately stays
+            # allowed for now: the localhost sshd logins in the journal show
+            # local tooling tunneling over the main key, and until that
+            # traffic is confirmed against this key, no-port-forwarding
+            # would be a guess.
+            "no-pty,no-agent-forwarding,no-X11-forwarding,ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDG6HDC7IgZPSwZ7gPX5gihfY/QTcJGwBTMMuMi3XKJC elly@durandal-agent"
+            "no-pty,no-agent-forwarding,no-X11-forwarding,ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK7cAjTkv0oDgj0K5Vo1B5WDnyn1miumOyWgANfBmXMl elly@nire-lysithea-agent"
+            "no-pty,no-agent-forwarding,no-X11-forwarding,ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN1IcbzRw0uTDtXISfyz16OHN9DgHBdoUBVq+NF3KXeu elly@nire-tenacity-agent"
+            "no-pty,no-agent-forwarding,no-X11-forwarding,ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICr5RWh9XrTJyg7IVrpAcJ+m6WeunwbRUJagpBwX60u6 elly@nire-cube-agent"
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJFTe27f8e8B4DpqQYHFK7I7Pg3ZK12W7LqIrdI+ChI1 elly@nire-galatea"
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILqzV9o32OsJdkCfDJhR5X4uSu1nzRzrL/2gBWLp9QyX elly@nire-cube"
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFFfyxNzG07CdeNEZof+l49+fqx+2E79gmYvnRqiGdNp elly@nire-tenacity"

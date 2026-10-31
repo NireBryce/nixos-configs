@@ -131,7 +131,7 @@ flowchart LR
         n9("<b>macos/</b><br/><i>d · 3</i>")
         n10("<b>nix/</b><br/><i>n h d · 2</i>")
         n11("<b>shell-config/</b><br/><i>n h · 4</i>")
-        n12("<b>system/</b><br/><i>n h d · 38</i>")
+        n12("<b>system/</b><br/><i>n h d · 39</i>")
     end
     style g0 fill:#f8fafc,stroke:#cbd5e1,color:#64748b
     style g1 fill:#f8fafc,stroke:#cbd5e1,color:#64748b
