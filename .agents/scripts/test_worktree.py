@@ -213,6 +213,19 @@ class Prune(Base):
             self.assertIn(kept, b)
         self.assertEqual((self.dirty / "base").read_text(), "changed\n")
 
+    def test_never_removes_a_protected_branch(self):
+        # a clean worktree on main/master/experimental that otherwise reads
+        # as fresh or landed must keep its worktree AND its branch
+        for name in ("main", "master"):
+            p = self.root / f"wt-prot-{name}"
+            git(self.repo, "worktree", "add", "-q", str(p), "-b", name,
+                "origin/experimental")
+            r = self.prune("--yes")
+            self.assertTrue(self.line(r.stdout, p).startswith("keep"), r.stdout)
+            self.assertIn("protected", self.line(r.stdout, p))
+            self.assertTrue(p.exists())
+            self.assertIn(name, self.branches())
+
     def test_min_age_protects_a_new_worktree(self):
         r = self.run_("prune", "--root", str(self.root), "--yes")  # default 60m
         self.assertIn("touched 0m ago", self.line(r.stdout, self.fresh))

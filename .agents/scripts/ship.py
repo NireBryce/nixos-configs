@@ -92,7 +92,7 @@ PROTECTED = {"experimental", "main"}
 RETRY_SECONDS = float(os.environ.get("SHIP_RETRY_SECONDS", 3))  # tests: 0
 FIELDS = ("url,title,state,isDraft,additions,deletions,changedFiles,"
           "mergeable,mergeStateStatus,baseRefName,headRefName,headRefOid,"
-          "commits")
+          "isCrossRepository,commits")
 
 # What a non-CLEAN mergeStateStatus means for the next step.
 STATUS_HINT = {
@@ -152,6 +152,17 @@ def gate_problems(d):
         probs.append(f"mergeStateStatus is {st}, not CLEAN"
                      + (f": {hint}" if hint else "")
                      + f" (mergeable={d['mergeable']} only means no conflicts)")
+    # land deletes the PR's head branch by name, so the head has to be this
+    # repo's own topic branch: a fork PR (or a missing field, which reads as
+    # one) or a head named like a protected branch or like the base would
+    # point that delete at a branch that is not the PR's.
+    if d.get("isCrossRepository", True):
+        probs.append("the head is in another repository (or that could not"
+                     " be told); landing it would delete a branch by name")
+    head = d.get("headRefName")
+    if head in PROTECTED or head == "master" or head == d["baseRefName"]:
+        probs.append(f"the head branch {head!r} is protected or the same as"
+                     " the base; refusing to merge and delete it")
     if d["baseRefName"] != BASE:
         probs.append(f"base is {d['baseRefName']}, not {BASE}"
                      " (promotion to main is side-flows.md, not this)")

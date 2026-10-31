@@ -54,6 +54,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "flake" / "scripts"
 import branches  # noqa: E402  patch_id, trunk_patch_ids, pr_merged
 
 BASE = "origin/experimental"
+PROTECTED = {"main", "master", "experimental"}
 
 
 def git(*args, cwd=None, check=True):
@@ -151,6 +152,10 @@ class Landed:
 def verdict(w, landed, min_age):
     """-> (removable, description)."""
     path, b = w["path"], w["branch"]
+    if b in PROTECTED:
+        # prune deletes the branch with -D after removing the worktree, and
+        # "PR merged" is looked up by head name, which promotion PRs share.
+        return False, f"protected branch {b}; never pruned"
     dirty = bool(git("status", "--porcelain", cwd=path))
     ahead = git("rev-list", f"{BASE}..HEAD", cwd=path).split()
     pushed = b is not None and git("rev-parse", "-q", "--verify",
