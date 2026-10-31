@@ -19,6 +19,12 @@ in {
         # key only, so a host materializes and can only read its own.
         # Readable by elly because agent tooling runs as elly; what the key
         # may do is bounded by the authorizedKeys options in ssh.nix.
+        #
+        # NO BACKUP: each sops file is the only copy of its host's private
+        # half outside the materialized runtime file. If a host's activation
+        # fails to render it, the recovery is a fresh keypair -- new value
+        # in agent-keys/<host>.yaml plus a replacement line in ssh.nix --
+        # not a hunt for the old one.
         sops.secrets."agent-ssh-key" = lib.mkIf (builtins.elem config.networking.hostName agentKeyHosts) {
             sopsFile = ./. + "/agent-keys/${config.networking.hostName}.yaml";
             owner = "elly";
