@@ -66,6 +66,11 @@ modules:
 modules-test:
     python3 {{scripts}}/tests/test_modules.py
 
+# Fail if ~/.ssh holds unencrypted private keys (the script header has the
+# mechanism and the per-run suppression variable)
+ssh-key-check *args:
+    @{{scripts}}/ssh-key-check.sh {{args}}
+
 # End to end: `nix flake check --no-build` fails on an orphan (checkOrphans = "eval")
 orphan-gate-test:
     # Every other test here uses canned graphs or a stub nix, so none could
@@ -74,6 +79,13 @@ orphan-gate-test:
     # an unmodified copy as control. ~30s; skips without nix; runs in
     # preflight and CI.
     python3 {{scripts}}/tests/test_orphan_gate.py
+
+# Generates a real unencrypted keypair and a passphrase-protected one in a
+# temp dir, then asserts the gate fails on one, passes the other, honors the
+# suppression variable, and never prints key material. Skips without
+# ssh-keygen; runs in preflight and CI.
+ssh-key-check-test:
+    python3 {{scripts}}/tests/test_ssh_key_check.py
 
 # Comment width, the maintenance pass: pure `#` comment blocks wrap at 80
 # columns plus the line's indent (rule, and what the autofix will not touch:
@@ -271,6 +283,7 @@ preflight:
     @just trailers-test
     @just modules-test
     @just orphan-gate-test
+    @just ssh-key-check-test
     @python3 .agents/scripts/test_recurring.py
     @python3 .agents/scripts/test_ship.py
     @python3 .agents/scripts/test_worktree.py
