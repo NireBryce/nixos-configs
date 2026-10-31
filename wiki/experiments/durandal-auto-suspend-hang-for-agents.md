@@ -57,6 +57,8 @@ too long, RAM and the session are lost.
   (65 mounts vs PID 1's 44) and synthetic `/etc` (`/etc/profile` resolved into
   a VS Code FHS store path; `systemd-analyze cat-config` said every config
   "not found"). Use `/run/current-system/etc/...` and `/proc/1/mountinfo`.
+  The FHS-inventory and config-custody consequences now live in
+  [fleet/fhs-environments.md](../fleet/fhs-environments.md).
 - **Drive power-cycle counts survive across generations** (drive firmware), so
   a probe-less generation can still be tested: note count, boot, suspend,
   return, compare delta against suspend count.
