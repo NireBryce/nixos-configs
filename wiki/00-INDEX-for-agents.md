@@ -1,6 +1,6 @@
 # Wiki index, for agents
 
-_Last modified: 2026-10-30_
+_Last modified: 2026-10-31_
 
 Condensed from [00-INDEX.md](00-INDEX.md). Routing only.
 
@@ -35,6 +35,8 @@ root holds only entry points.
   [expiry schedule](upkeep-and-admin/maintenance-schedule.md),
   [flake.lock bump](upkeep-and-admin/flake-lock-weekly-bump.md),
   [temporary patches](upkeep-and-admin/temporary-patches-and-hacks.md).
+- [`llm-aided-dev/`](llm-aided-dev/) — working with coding agents:
+  [cloud sessions](llm-aided-dev/cloud-sessions.md) (plan and runbook).
 - [`meta/`](meta/) — the wiki's own rules and the repo's memory:
   [style guide](meta/styleguide.md), [traps and skills](meta/traps-and-skills.md),
   [history](meta/history.md), [open threads](meta/open-threads.md), and `scripts/`.
@@ -52,6 +54,7 @@ root holds only entry points.
 | add a package to a user's environment | skill `new-package` |
 | land a change on `experimental` | [config-structure/conventions.md](config-structure/conventions.md), skill `ship` |
 | work without clobbering another session | skill `use-a-worktree` |
+| set a repo up for Claude Code cloud sessions | [llm-aided-dev/cloud-sessions.md](llm-aided-dev/cloud-sessions.md#quick-facts) |
 | script a command pattern agents keep re-typing | skill `agent-scripts` |
 | check whether a bug is already tracked | [meta/open-threads-for-agents.md](meta/open-threads-for-agents.md), skill `investigate-bug` |
 | after a lock bump: can a workaround go? | [temporary-patches-and-hacks.md § Quick facts](upkeep-and-admin/temporary-patches-and-hacks.md#quick-facts) |

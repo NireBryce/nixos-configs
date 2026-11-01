@@ -1,6 +1,6 @@
 # Wiki
 
-_Last modified: 2026-10-30_
+_Last modified: 2026-10-31_
 
 This is the wiki's topic index. The `flake/` folder is meant to be browsed by
 its file tree, with documentation next to the code; the heavy modularization
@@ -79,6 +79,8 @@ root holds only entry points.
   [expiry schedule](upkeep-and-admin/maintenance-schedule.md),
   [flake.lock bump](upkeep-and-admin/flake-lock-weekly-bump.md),
   [temporary patches](upkeep-and-admin/temporary-patches-and-hacks.md).
+- [`llm-aided-dev/`](llm-aided-dev/) — working with coding agents:
+  [cloud sessions](llm-aided-dev/cloud-sessions.md) (plan and runbook).
 - [`meta/`](meta/) — the wiki's own rules and the repo's memory:
   [style guide](meta/styleguide.md), [traps and skills](meta/traps-and-skills.md),
   [history](meta/history.md), [open threads](meta/open-threads.md), and `scripts/`.

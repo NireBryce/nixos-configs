@@ -1,6 +1,6 @@
 # Wiki style guide
 
-_Last modified: 2026-10-30_
+_Last modified: 2026-10-31_
 
 A page lives in the directory that matches its reader: `config-structure/`
 for how the flake is built (with `config-structure/categories/` for one page per
@@ -48,6 +48,8 @@ Pages go in one of these places:
   - **`wiki/upkeep-and-admin/`** — recurring chores: `maintenance.md`,
     `maintenance-schedule.md`, `flake-lock-weekly-bump.md`,
     `temporary-patches-and-hacks.md`.
+  - **`wiki/llm-aided-dev/`** — working with coding agents: `cloud-sessions.md`
+    (plan and runbook for Claude Code cloud sessions).
   - **`wiki/meta/`** — the wiki's own rules and the repo's memory: this file,
     `traps-and-skills.md`, `history.md`, `open-threads.md`, and `scripts/`
     (the wiki's linters and generators).
