@@ -7,6 +7,10 @@ work, why they have their shape, and how to extend them with a package, a
 module, a category, a host or a user. It assumes basic Nix and no knowledge
 of this tree. Terms are defined in the [glossary](glossary.md).
 
+Coding agents drafted this book from the wiki, the code, comments and git
+history, and the repo owner reviewed it. What that means for how much to
+trust a given page is in [about this book](about-this-book.md).
+
 ## Do not install this
 
 The repo configures one person's fleet. It is not a template or a

@@ -1,5 +1,6 @@
 # Summary
 
+[About this book](about-this-book.md)
 [Introduction](introduction.md)
 [Your first change](first-change.md)
 
@@ -29,4 +30,3 @@
 # Reference
 
 - [Glossary](glossary.md)
-- [About this book](about-this-book.md)
