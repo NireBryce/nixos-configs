@@ -6,7 +6,7 @@ evidence instead of a guess: an agent has no memory between sessions, but
 its harness keeps history. Only the Bash command field is read, never tool
 output. Sources (HARNESSES), sessions filtered to this repo:
 
-  claude     ~/.claude/projects/*nixos-configs*/*.jsonl
+  claude     ~/.claude/projects/<this checkout>/*.jsonl
   opencode   ~/.local/share/opencode/opencode*.db   (sqlite, read-only)
   zcode      ~/.zcode/cli/db/db.sqlite               (an OpenCode fork:
              same schema, tool named `Bash` rather than `bash`)
@@ -186,6 +186,32 @@ FIND_OPTS  = {'-maxdepth', '-mindepth', '-type', '-name', '-iname', '-path',
               '-newer', '-mtime', '-size', '-exec', '-print', '-print0',
               '-delete', '-empty', '-prune'}
 REPO = Path(__file__).resolve().parents[2]
+
+
+@lru_cache(maxsize=None)
+def checkout_root():
+    """The main checkout, whatever its directory is called and even when
+    this runs from a linked worktree: git's common dir sits inside it."""
+    p = subprocess.run(['git', '-C', str(REPO), 'rev-parse',
+                        '--path-format=absolute', '--git-common-dir'],
+                       capture_output=True, text=True)
+    return Path(p.stdout.strip()).parent if p.returncode == 0 else REPO
+
+
+def project_dirs():
+    """Claude Code's history directories for this repo. It names one after
+    the session's working directory with every character outside
+    [A-Za-z0-9-] turned into `-`, so `/home/u/nixos` is `-home-u-nixos`.
+    The checkout's own directory and its `-<suffix>` siblings (worktrees
+    made next to it) match, and so does any `*nixos-configs*`, the name
+    other hosts clone it under. Matching only that name left a checkout
+    named anything else at 0 sessions and never exported."""
+    enc = re.sub(r'[^A-Za-z0-9-]', '-', str(checkout_root()))
+    found = {*PROJECTS.glob('*nixos-configs*'), *PROJECTS.glob(enc),
+             *PROJECTS.glob(enc + '-*')}
+    return sorted(d for d in found if d.is_dir())
+
+
 # A longer fragment seen in at least this share of a shorter one's
 # sessions absorbs it.
 ABSORB = 0.8
@@ -274,7 +300,7 @@ def warn(msg):
 def claude_rows():
     """(session, command) from Claude Code's JSONL transcripts."""
     seen = set()
-    for path in sorted(PROJECTS.glob('*nixos-configs*/*.jsonl')):
+    for path in sorted(f for d in project_dirs() for f in d.glob('*.jsonl')):
         for line in path.read_text(errors='replace').splitlines():
             if '"tool_use"' not in line:
                 continue
@@ -304,12 +330,13 @@ def sqlite_rows(path):
         db = sqlite3.connect(f'file:{path}?mode=ro', uri=True)
         rows = db.execute(
             "select p.session_id, p.data from part p join session s"
-            " on s.id = p.session_id where s.directory like '%nixos-configs%'"
+            " on s.id = p.session_id where (s.directory like '%nixos-configs%'"
+            "     or substr(s.directory, 1, length(?1)) = ?1)"
             # json_valid first: one malformed row must not fail the query
             " and case when json_valid(p.data)"
             "     then json_extract(p.data, '$.type') end = 'tool'"
-            " order by p.rowid"        # insertion order: sequences need it
-        ).fetchall()
+            " order by p.rowid",       # insertion order: sequences need it
+            (str(checkout_root()),)).fetchall()
     except sqlite3.Error as e:
         warn(f'{path}: {e}')
         return
