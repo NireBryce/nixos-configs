@@ -1,62 +1,66 @@
 ---
 name: propose-issue
-description: Proposes a GitHub issue for a real bug in this repo's config, code or docs that you found while doing something else.
-when_to_use: Noticing a defect while working on something unrelated, such as a command in a doc that fails, an option that no longer exists, or a claim the machine contradicts.
+description: Proposes a GitHub issue for a bug in this repo's config, code or docs that you found while doing other work.
+when_to_use: Noticing a defect unrelated to the current task, such as a doc command that fails, a removed option, or a claim the machine contradicts.
 ---
 
 # Proposing repo bugs for the issue tracker
 
 ## Applies to
 
-You're doing something else — building, reading a module, checking a host —
-and you notice an actual defect along the way: a command in a doc that
-doesn't work, a config option that no longer exists, a claim in `CLAUDE.md`
-or the wiki that the machine now contradicts, dead code. Not something you
-were asked to look into (fix that directly and say so), and not a style
+Use this skill when you are doing something else (building, reading a module,
+checking a host) and notice a defect: a command in a doc that does not work, a
+config option that no longer exists, a claim in `CLAUDE.md` or the wiki that
+the machine now contradicts, or dead code. Do not use it for something you
+were asked to investigate (fix that directly and say so), or for a style
 opinion (no failure scenario, no issue).
 
 ## Existing records are not a tracker
 
-`AGENTS.md`'s "a bug recorded in a comment stays in the file" (or a
-`history` heading: `boot-durandal.nix`, `WARN-impermanence.nix`,
-`vscode.nix`), `wiki/agent-lessons-learned.md`, and `wiki/meta/open-threads.md` all
-record; none get the bug *worked*. The issue is added to whichever of those
-the bug warrants, not instead. The repo has labels (`bug`, `documentation`,
-`enhancement`, …) but no backlog yet, so an unfiled bug is easily lost.
+These places record a bug but do not get it worked: `AGENTS.md`'s "a bug
+recorded in a comment stays in the file", a `history` heading
+(`boot-durandal.nix`, `WARN-impermanence.nix`, `vscode.nix`),
+`wiki/agent-lessons-learned.md`, and `wiki/meta/open-threads.md`. File the
+issue in addition to whichever of those the bug warrants, not instead of it.
+The repo has labels (`bug`, `documentation`, `enhancement`, ...) but no backlog
+yet, so an unfiled bug is easily lost.
 
 ## State the cause only if you read it
 
 A cause that came from a report, a worker or memory is a hypothesis until you
-have read the code or run the reproduction that shows it (agent-lessons-learned
-§51). Quote what you read; otherwise write "likely" and what would confirm it.
+have read the code or run the reproduction that shows it
+(agent-lessons-learned §51). Quote what you read; otherwise write "likely" and
+say what would confirm it.
 
 ## Never a third-party repo
 
-Every `gh issue create` here hardcodes `--repo NireBryce/nixos-configs`,
-even when the real fix belongs upstream (nixpkgs, ble.sh, carapace, …).
-Filing elsewhere is a separate action with its own `CLAUDE.md` rule: never
-without the user asking for that specific filing in their own message — not
-satisfied by step 3's confirmation or by folding it into another approval.
-For an upstream bug, still track it *here* (`bug` label, or
-`wiki/meta/open-threads.md` / `_loose-ends/bugs-pending-submission/` if a draft
-write-up is what's ready); the upstream filing is a separate ask by name.
+Every `gh issue create` here uses `--repo NireBryce/nixos-configs`, even when
+the real fix belongs upstream (nixpkgs, ble.sh, carapace, ...). Filing
+elsewhere is a separate action under its own `CLAUDE.md` rule: do it only when
+the user asks for that specific filing in their own message. Step 3's
+confirmation does not count, and neither does folding it into another
+approval. For an upstream bug, still track it here (`bug` label, or
+`wiki/meta/open-threads.md` / `_loose-ends/bugs-pending-submission/` if a
+draft write-up is what you have). The upstream filing is a separate ask by
+name.
 
 ## Why propose instead of just filing
 
-Filing is outward-facing once `gh issue create` returns, like `ship`'s merge
-gate, but one confirmation suffices: closing a wrongly-filed issue costs
-nothing.
+Once `gh issue create` returns, the filing is outward-facing, like `ship`'s
+merge gate. One confirmation is enough because closing a wrongly filed issue
+costs nothing.
 
 ## Steps
 
-1. **Verify, don't recall.** Re-open the file or re-run the command ("bugs
-   here serialize" applies to reporting too).
-2. **Check it isn't already tracked.** `just threads "<keywords>"` covers
-   GitHub issues plus `wiki/`, `agent-lessons-learned.md` and `bugs pending
-   submission/` in one shot; also grep `AGENTS.md` itself, which that
-   script doesn't touch. Stop if already covered.
-3. **Ask with real content**: title, short drafted body, and label (`bug`,
-   `documentation`, `enhancement`) — not "should I file something?".
+1. **Verify, don't recall.** Re-open the file or re-run the command. Bugs here
+   serialize, and that applies to reporting too.
+2. **Check that it is not already tracked.** `just threads "<keywords>"`
+   searches GitHub issues plus `wiki/`, `agent-lessons-learned.md` and
+   `bugs pending submission/` in one pass. Also grep `AGENTS.md` itself, which
+   that script does not search. Stop if the bug is already covered.
+3. **Ask with real content**: a title, a short drafted body, and a label
+   (`bug`, `documentation`, `enhancement`). Do not ask "should I file
+   something?".
 4. **On yes:**
 
    ```sh
@@ -65,15 +69,15 @@ nothing.
      --body "..."
    ```
 
-   Body: what's wrong, where (`file:line`), how noticed, fix sketch if
-   obvious. End with `🤖 Generated by an LLM agent` — deliberately not the
-   PR flow's Claude Code badge (an agent can't verify its model; same reason
-   as the agent-name-only commit trailer). Report the issue URL.
-5. **On no:** don't file, say so, and still leave whatever comment or
+   The body gives what is wrong, where (`file:line`), how you noticed, and a
+   fix sketch if one is obvious. End it with `🤖 Generated by an LLM agent`,
+   not the PR flow's Claude Code badge (an agent cannot verify its model; same
+   reason as the agent-name-only commit trailer). Report the issue URL.
+5. **On no:** do not file, say so, and still leave whatever comment or
    `agent-lessons-learned.md` entry the bug warrants.
 
 ## Calibrate
 
-"Homelab, not production; the repo has gone six months between commits."
-Propose only what would bite the next session or boot; mention minor warts
-in your reply.
+This is a homelab, not production, and the repo has gone six months between
+commits. Propose only what would break the next session or boot; mention minor
+warts in your reply.

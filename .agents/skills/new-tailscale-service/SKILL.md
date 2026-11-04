@@ -8,17 +8,17 @@ when_to_use: A running homelab service should be reachable at its own tailnet ho
 
 ## Applies to
 
-A service already running on `nire-cube` (or another homelab host), reachable only via a Caddy path prefix under the host's shared `ts-<host>` name (`new-homelab-service`'s default); this gives it `https://<name>.<tailnet-domain>/`. Assumes the app is built, switched, on a loopback port; writing the service module is `new-homelab-service`.
+Use when a service already runs on `nire-cube` (or another homelab host) and is reachable only through a Caddy path prefix under the host's shared `ts-<host>` name (`new-homelab-service`'s default). This skill gives it `https://<name>.<tailnet-domain>/`. It assumes the app is built, switched, and bound to a loopback port; writing the service module is `new-homelab-service`.
 
-Not Funnel (Tailscale Services stay tailnet-only). Not a Caddy replacement: as of the 2026-09-07 check (Background below; re-check on a newer nixpkgs) `services.tailscale.serve` cannot terminate HTTPS declaratively (step 6), so Caddy does TLS per service name instead of per path.
+This is not Funnel: Tailscale Services stay tailnet-only. It does not replace Caddy either. As of the 2026-09-07 check (Background below; re-check on a newer nixpkgs), `services.tailscale.serve` cannot terminate HTTPS declaratively (step 6), so Caddy terminates TLS per service name instead of per path.
 
 ## Background (2026-09-07)
 
-Grafana and Forgejo moved from `ts-cube.../grafana/` and `.../git/` to `grafana.<tailnet-domain>`/`git.<tailnet-domain>` the day `svc:` opened on this tailnet. Worked example; account in `wiki/config-structure/categories/reverse-proxy.md` and `flake/modules/homelab-config/homelab/reverse-proxy/tailscale-services/`. Read `serve.nix`'s history section for the failed first design (most likely to be re-invented).
+Grafana and Forgejo moved from `ts-cube.../grafana/` and `.../git/` to `grafana.<tailnet-domain>` and `git.<tailnet-domain>` the day `svc:` opened on this tailnet. They are the worked examples. The account is in `wiki/config-structure/categories/reverse-proxy.md` and `flake/modules/homelab-config/homelab/reverse-proxy/tailscale-services/`. Read the history section of `serve.nix` for the failed first design, which is the one most likely to be re-invented.
 
 ## The shape
 
-Three resources, two outside this repo's Nix:
+Three resources, two of them outside this repo's Nix:
 
 | resource | where | changed by |
 |---|---|---|
@@ -28,54 +28,54 @@ Three resources, two outside this repo's Nix:
 
 ## Steps
 
-1. **Confirm the app is loopback-only behind Caddy**; if not, that's `new-homelab-service`.
+1. **Confirm the app is loopback-only behind Caddy.** If it is not, do `new-homelab-service` first.
 
-2. **Tag the host and add the compensating grant in the same change.** A tagged device is owned by the tag and drops out of `autogroup:members` as a grant *destination*: live 2026-09-07, `nire-cube` vanished from peers' `tailscale status` within ~1 minute of tagging. Add:
+2. **Tag the host and add the compensating grant in the same change.** A tagged device is owned by the tag and drops out of `autogroup:members` as a grant *destination*. On 2026-09-07, `nire-cube` vanished from peers' `tailscale status` within about 1 minute of tagging. Add:
    ```json
    {"src": ["autogroup:members"], "dst": ["tag:<host-tag>"], "ip": ["*"]}
    ```
-   Tag on the host: `sudo tailscale up --advertise-tags=tag:<host-tag>` (`tailscale set` has no `--advertise-tags` on this version). Skip if already tagged.
+   Tag the host with `sudo tailscale up --advertise-tags=tag:<host-tag>` (`tailscale set` has no `--advertise-tags` on this version). Skip this step if the host is already tagged.
 
 3. **Add `autoApprovers.services` for the tag**, so advertising a `svc:` needs no manual admin-console click.
 
-4. **Apply the ACL as a diff, never hand-edited live**: edit a local HuJSON under `tailscale-services/` (shape: `acl-diff-applied.hujson`), then
+4. **Apply the ACL as a diff; never edit it live.** Edit a local HuJSON file under `tailscale-services/` (shape: `acl-diff-applied.hujson`), then run:
    ```sh
    just tailscale-acl diff <file>
    just tailscale-acl apply <file>
    ```
-   `apply` refuses an empty diff and confirms before POSTing. Needs `tailscale_api_token` in `secrets.yaml` (script header says how to add it).
-   A committed HuJSON records intent, not what the control plane holds: `acl-diff-applied.hujson` once recorded an autoApprover never POSTed (§48). Done means `just tailscale-acl diff` reports no difference.
+   `apply` refuses an empty diff and asks for confirmation before POSTing. It needs `tailscale_api_token` in `secrets.yaml` (the script header says how to add it). A committed HuJSON records intent, not what the control plane holds: `acl-diff-applied.hujson` once recorded an autoApprover that was never POSTed (§48). The step is done when `just tailscale-acl diff` reports no difference.
 
-5. **Create the Service object**: JSON (name/tags/ports/comment) beside the ACL file, then `just tailscale-acl vip-put <name> <file>`. Endpoint is `/api/v2/tailnet/{tailnet}/vip-services/{name}`, **not** `/vip-services/by-name/{name}` (404s with a bare routing miss, not a "not found" JSON body). Don't put a top-level `"services"` key in the *ACL* file — it belongs to the per-node serve config; the policy endpoint rejects it (`unknown field "services"`).
+5. **Create the Service object.** Put a JSON file (name/tags/ports/comment) beside the ACL file, then run `just tailscale-acl vip-put <name> <file>`. The endpoint is `/api/v2/tailnet/{tailnet}/vip-services/{name}`, **not** `/vip-services/by-name/{name}`, which returns a bare routing 404 rather than a "not found" JSON body. Do not put a top-level `"services"` key in the *ACL* file: it belongs to the per-node serve config, and the policy endpoint rejects it (`unknown field "services"`).
 
-6. **Add the service to the table**, `homelab/_lib/cube-services.nix`: `<name>.port = <app-port>;`. That one entry is the source for everything below: the app reads its `port`/`url`/`fqdn` from it, `serve.nix` forwards a pair for it, and `caddy.nix`'s `mkTsService` builds its vhosts. The old shape was a hand-copied `services.tailscale.serve.services.<name>` block plus a vhost trio, with the port and FQDN repeated in the app module.
+6. **Add the service to the table** in `homelab/_lib/cube-services.nix`: `<name>.port = <app-port>;`. This one entry is the source for everything below: the app reads its `port`/`url`/`fqdn` from it, `serve.nix` forwards a pair for it, and `caddy.nix`'s `mkTsService` builds its vhosts. The old shape was a hand-copied `services.tailscale.serve.services.<name>` block plus a vhost trio, with the port and FQDN repeated in the app module.
 
-   What `serve.nix` generates per entry, and why: `endpoints."tcp:443" = "tcp://127.0.0.1:443";` and `endpoints."tcp:80" = "tcp://127.0.0.1:80";`. List both ports in the Service object's `ports` (re-`vip-put` after editing); 443 alone left the bare-name `http://` redirects unreachable (#272).
-   `tcp://`, **not** `http://`; target is **Caddy's loopback listener**, not the app port. The upstream option-doc form `"http://127.0.0.1:<app-port>"` gives no real HTTPS: `serve set-config`/`get-config` rounds an endpoint's scheme down to `http://` on this version (tailscale/tailscale#18381; the raw-CLI workaround in #18219 doesn't survive `set-config` or reboot). tailscaled forwards untouched TLS bytes (SNI included) to 443; Caddy terminates. `services.<name>` becomes `svc:<name>` (module adds the prefix; don't).
+   `serve.nix` generates, per entry, `endpoints."tcp:443" = "tcp://127.0.0.1:443";` and `endpoints."tcp:80" = "tcp://127.0.0.1:80";`. List both ports in the Service object's `ports` and re-run `vip-put` after editing; 443 alone left the bare-name `http://` redirects unreachable (#272).
 
-7. **Say which guard it gets** in `caddy.nix`'s `guards` (`vmDeny` unless guests need something specific). `mkTsService` then emits the `<name>.<tailnet-domain>` TLS vhost (`reverse_proxy 127.0.0.1:<port>`, no path matcher) and both bare-name redirects; read it as the reference. A table entry with no `guards` line fails evaluation by design. Same `isTailscaleDomain` cert mechanism as the host vhost: Caddy asks tailscaled for a cert by **site address**, not the connecting socket, so loopback arrival is fine.
+   The scheme is `tcp://`, **not** `http://`, and the target is **Caddy's loopback listener**, not the app port. The upstream option-doc form `"http://127.0.0.1:<app-port>"` gives no real HTTPS, because `serve set-config`/`get-config` rounds an endpoint's scheme down to `http://` on this version (tailscale/tailscale#18381; the raw-CLI workaround in #18219 does not survive `set-config` or reboot). With `tcp://`, tailscaled forwards untouched TLS bytes (SNI included) to 443 and Caddy terminates. `services.<name>` becomes `svc:<name>`; the module adds the prefix, so do not.
 
-8. **Point the app at its table entry**: `port = <name>.port`, `root_url`/`ROOT_URL = <name>.url`, as `grafana.nix` and `forgejo.nix` do (`(import ../../_lib/cube-services.nix).services.<name>`), dropping path-prefix settings (`serve_from_sub_path`-style). A leftover prefix causes the generated-link mismatch `new-homelab-service` step 5 warns about, inverted.
+7. **Choose a guard** for the service in `caddy.nix`'s `guards`: `vmDeny`, unless guests need something specific. `mkTsService` then emits the `<name>.<tailnet-domain>` TLS vhost (`reverse_proxy 127.0.0.1:<port>`, no path matcher) and both bare-name redirects; read it as the reference. A table entry with no `guards` line fails evaluation by design. The cert mechanism is the same `isTailscaleDomain` one as the host vhost: Caddy asks tailscaled for a cert by **site address**, not by the connecting socket, so a loopback arrival is fine.
+
+8. **Point the app at its table entry**: `port = <name>.port` and `root_url`/`ROOT_URL = <name>.url`, as `grafana.nix` and `forgejo.nix` do (`(import ../../_lib/cube-services.nix).services.<name>`). Drop path-prefix settings (`serve_from_sub_path`-style). A leftover prefix causes the generated-link mismatch that `new-homelab-service` step 5 warns about, in reverse.
 
 ## Verify
 
-`new-homelab-service`'s ladder (eval, `just modules`, `caddy adapt`, real build on target host), plus:
+Run `new-homelab-service`'s ladder (eval, `just modules`, `caddy adapt`, real build on the target host), plus:
 
-- From another tailnet host: `curl -sso /dev/null -w '%{http_code} %{ssl_verify_result}\n' https://<name>.<tailnet-domain>/` — expect `200 0` (or the app's real root status) with a **validated** cert.
-- Old path-prefixed URL now 404s.
-- Backend port still loopback-only (`ss -ltn` on host).
-- `tailscale serve status` shows `http://<name>...:443`, not `https://` — the #18381 display bug, not evidence HTTPS is off. Trust `curl`.
-- App-generated links use the new hostname (Forgejo `ROOT_URL` mismatch cost a switch once, `wiki/agent-lessons-learned.md` #41).
+- From another tailnet host, run `curl -sso /dev/null -w '%{http_code} %{ssl_verify_result}\n' https://<name>.<tailnet-domain>/`. Expect `200 0` (or the app's real root status) with a **validated** cert.
+- The old path-prefixed URL now returns 404.
+- The backend port is still loopback-only (`ss -ltn` on the host).
+- `tailscale serve status` shows `http://<name>...:443`, not `https://`. That is the #18381 display bug and does not mean HTTPS is off; trust `curl`.
+- App-generated links use the new hostname. A Forgejo `ROOT_URL` mismatch cost a switch once (`wiki/agent-lessons-learned.md` #41).
 
 ## Docs
 
-Run `wiki-sync` incl. step 5 (three pages below have `-for-agents.md` siblings with the same URL map and traps; `just wiki-lint` fails if a date moves without its sibling). Likely stale: `wiki/config-structure/categories/reverse-proxy.md`, `tailscale-services/README.md`, `wiki/homelab/reaching-services.md` URL map, and any open issue this closes (`gh issue list --search "Tailscale Services"`).
+Run `wiki-sync`, including step 5: three pages below have `-for-agents.md` siblings with the same URL map and traps, and `just wiki-lint` fails if a date moves without its sibling. Likely stale: `wiki/config-structure/categories/reverse-proxy.md`, `tailscale-services/README.md`, the URL map in `wiki/homelab/reaching-services.md`, and any open issue this closes (`gh issue list --search "Tailscale Services"`).
 
 ## See also
 
-- `new-homelab-service` — do first if the service isn't already behind Caddy.
-- `flake/modules/homelab-config/homelab/_lib/cube-services.nix` — the table; `caddy.nix`'s `mkTsService` is the vhost reference.
-- `flake/modules/homelab-config/homelab/reverse-proxy/tailscale-services/serve.nix` — failed first design in its history section.
-- `.../tailscale-services/README.md` — ACL/tag/service-object side, tagging incident in full.
-- `wiki/config-structure/categories/reverse-proxy.md` — Caddy's half, cert mechanism, why `permitCertUid` is scoped where it is.
-- `flake/scripts/tailscale-acl.py` — header has endpoint-naming traps (`/acl` not `/policy`, `/vip-services/{name}` not `/by-name/{name}`).
+- `new-homelab-service`: do it first if the service is not already behind Caddy.
+- `flake/modules/homelab-config/homelab/_lib/cube-services.nix`: the table; `caddy.nix`'s `mkTsService` is the vhost reference.
+- `flake/modules/homelab-config/homelab/reverse-proxy/tailscale-services/serve.nix`: failed first design in its history section.
+- `.../tailscale-services/README.md`: ACL/tag/service-object side, tagging incident in full.
+- `wiki/config-structure/categories/reverse-proxy.md`: Caddy's half, cert mechanism, why `permitCertUid` is scoped where it is.
+- `flake/scripts/tailscale-acl.py`: header has endpoint-naming traps (`/acl` not `/policy`, `/vip-services/{name}` not `/by-name/{name}`).

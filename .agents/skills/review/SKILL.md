@@ -10,118 +10,124 @@ when_to_use: Reviewing a PR, branch or commit, or before saying your own change 
 
 ## Applies to
 
-Asked to review a PR, branch, or commit (yours or another's) — or about to
-say "done" on your own change and want the reviewer's gate. Supplements a
-generic code-review pass with failure modes this repo's history already hit
-(issue #223, 2026-09-09). Not for writing a module — the trap skills below
-own that; this file is their review-side compression.
+Use this skill when asked to review a PR, branch, or commit (yours or
+another's), or when you are about to say "done" on your own change and want
+the reviewer's gate. It supplements a generic code-review pass with failure
+modes this repo's history already hit (issue #223, 2026-09-09). It is not for
+writing a module; the trap skills below own that, and this file is their
+review-side summary.
 
 ## Run first — the mechanical checks
 
-A diff read is never enough (bugs serialize). In order:
+Reading the diff is not enough, because bugs serialize. Run these in order:
 
-1. `just modules` — untracked files, and drift between wiki-lint's
+1. `just modules` checks for untracked files and for drift between wiki-lint's
    file-only reading and the evaluated graph. A module no host reaches
-   (orphan) fails `just check` (`checkOrphans = "eval"`, so `--no-build`
-   fails too); a repeated module/category
-   name or an unknown `includes` name fails evaluation itself
-   (dirs-as-categories, `wiki/config-structure/module-files.md`).
-2. `git status --short` — **`git add` before `nix eval`**: an untracked new
-   file doesn't exist to the flake; a passing eval may never have seen it.
-3. `just preflight` — wiki-lint + check + modules + lint (statix/deadnix
-   ratchet) + script fixture tests; exactly what CI runs. Its `just check`
-   forces every host's toplevel and home, darwin included (since
-   2026-09-29) — a cheap attribute proves nothing (`networking.hostName`
-   resolved while four things were broken), which is why no host is skipped.
-4. `just agent lessons` — every `.agents/lessons-map.toml` topic the
-   diff's files fall under, with the lessons behind each: the traps to read
-   this diff for, beyond the list below.
-5. drvPath moved: `just diff <ref>` — permuted `environment.systemPackages`
-   is not a value change; a same-looking hash can hide dead code. (Known gap
-   #242: `diff` fails on cube — fingerprint assumes impermanence's
-   `/persist`; fall back to `nix eval --json` of the specific options on both
-   sides.)
+   (orphan) fails `just check` (`checkOrphans = "eval"`, so `--no-build` fails
+   too). A repeated module or category name, or an unknown `includes` name,
+   fails evaluation itself (dirs-as-categories,
+   `wiki/config-structure/module-files.md`).
+2. `git status --short`. **`git add` before `nix eval`**: an untracked new
+   file does not exist to the flake, so a passing eval may never have seen it.
+3. `just agent preflight-brief` runs wiki-lint, check, modules, lint
+   (statix/deadnix ratchet) and the script fixture tests, one line per step.
+   These are the steps CI runs (`just preflight` prints everything). For a
+   docs-only diff, `just wiki-lint` is enough (skill `ship`, step 0). Its
+   `just check` forces every host's toplevel and home, darwin included (since
+   2026-09-29). No host is skipped because a cheap attribute proves nothing:
+   `networking.hostName` resolved while four things were broken.
+4. `just agent lessons` lists every `.agents/lessons-map.toml` topic the
+   diff's files fall under, with the lessons behind each. Read the diff for
+   those traps in addition to the list below.
+5. If the drvPath moved, run `just diff <ref>`. A permuted
+   `environment.systemPackages` is not a value change, and a same-looking hash
+   can hide dead code. Known gap #242: `diff` fails on cube because the
+   fingerprint assumes impermanence's `/persist`; fall back to `nix eval
+   --json` of the specific options on both sides.
 
 ## Read for — traps a diff can't show
 
-- **Filed in the right directory?** Category = directory; a module outside
-  every category tree is collected by nothing, no error (`new-flake-module`).
-  A first subfolder of modules can turn a plain folder into a category.
-- **Module file shape?** First line the dirs-as-categories comment;
-  keys only classes/`includes`/`enables`/`folderIsCategory`; header only the
-  `lib`/`inputs` it uses.
+- **Filed in the right directory?** Category = directory. A module outside
+  every category tree is collected by nothing, with no error
+  (`new-flake-module`). A first subfolder of modules can turn a plain folder
+  into a category.
+- **Module file shape?** The first line is the dirs-as-categories comment, the
+  keys are only classes, `includes`, `enables` and `folderIsCategory`, and the
+  header takes only the `lib`/`inputs` it uses.
 - **Two files writing the "same" file?** `home.file.<n>.text` and
-  `home.sessionPath` **concatenate** across modules — silent doubling.
-  Reading a generated dotfile back gives false negatives; eval the
+  `home.sessionPath` **concatenate** across modules, which silently doubles
+  content. Reading a generated dotfile back gives false negatives; eval the
   attribute (`home-manager-dotfiles`).
-- **`${…}` inside a `''` string?** Meant as shell text/comment → must be
-  `''${…}`; else Nix interpolation, usually an eval error (or silent).
-- **`flake.modules` inside `perSystem`?** No `<system>` axis; can't work.
-- **Touches impermanence, initrd, `fileSystems`, boot?** Read
+- **`${...}` inside a `''` string?** If it is meant as shell text or a
+  comment, it must be `''${...}`. Otherwise Nix interpolates it, usually as an
+  eval error (sometimes silently).
+- **`flake.modules` inside `perSystem`?** There is no `<system>` axis, so it
+  cannot work.
+- **Touches impermanence, initrd, `fileSystems`, or boot?** Read
   `impermanence-initrd` first (shell mount views mislead; use
-  `/proc/1/mountinfo`, `/dev/disk/by-uuid/`). Check `hosts.nix` for which
-  host wipes `/root`; not all do.
-- **Platform gating?** Support is *derived* off `meta.platforms`; a
+  `/proc/1/mountinfo` and `/dev/disk/by-uuid/`). Check `hosts.nix` for which
+  hosts wipe `/root`; not all do.
+- **Platform gating?** Support is derived from `meta.platforms`; a
   hand-written `lib.mkIf (!pkgs.stdenv.isDarwin)` is a finding. Homebrew
-  overlap is never automatic: `just available --duplicates`
+  overlap is never automatic: run `just available --duplicates`
   (`package-platform-support`).
 - **Existing `programs.*` integration missed?** Flag hand-rolled dotfiles.
-- **Anything that can print a secret?** Bare `sops -d`, `journalctl`/`ps`
-  near a unit with a secret on its command line, a credential outside
-  `secrets.yaml` (`secrets-hygiene`; flagged hit → `triage-flagged-secrets`
-  before rotation talk).
+- **Anything that can print a secret?** Bare `sops -d`, `journalctl` or `ps`
+  near a unit with a secret on its command line, or a credential outside
+  `secrets.yaml` (`secrets-hygiene`). For a flagged hit, run
+  `triage-flagged-secrets` before any rotation talk.
 
 ## Flake input bumps
 
 A lock move is the change most likely to pass CI and still be wrong. Check:
 
-- **The locked rev is the tag the title names**:
+- **The locked rev is the tag the title names.** Compare
   `gh api repos/<owner>/<repo>/git/ref/tags/<tag> --jq .object.sha` against
-  `flake.lock`'s `rev`; and only the intended input moved (`git diff
+  `flake.lock`'s `rev`, and confirm only the intended input moved (`git diff
   flake/flake.lock`).
-- **The upstream changelog's Breaks, read, not inferred** from the one
-  option that visibly broke. Every option the repo sets on that input is
-  re-checked.
-- **Every prose claim about upstream behaviour** (a field exists, a mode
-  fails under `--no-build`) names where it was read (changelog, source) or
-  says it is unverified. "Looked it up" is not a source.
-- **A link dropped from the docs** (an upstream issue) is dropped because the
-  issue is closed: `gh issue view`, not memory.
+- **The upstream changelog's Breaks section, read in full.** Do not infer
+  breakage from the one option that visibly broke. Re-check every option the
+  repo sets on that input.
+- **Every prose claim about upstream behaviour** (a field exists, a mode fails
+  under `--no-build`) names where it was read (changelog, source) or says it
+  is unverified. "Looked it up" is not a source.
+- **A link dropped from the docs** (an upstream issue) is dropped only because
+  the issue is closed. Check with `gh issue view`, not memory.
 
 ## Conventions worth flagging
 
-- **Line width of added prose.** Comments are held to 80 columns by
-  `just comment-wrap`; no checker covers skill or book prose, so scan the
-  diff for added lines far past their neighbours (`git diff -U0 | grep
-  '^+' | awk 'length>81'`) and re-flow them.
+- **Line width of added prose.** `just comment-wrap` holds comments to 80
+  columns, but no checker covers skill or book prose. Scan the diff for added
+  lines far past their neighbours (`git diff -U0 | grep '^+' | awk
+  'length>81'`) and re-flow them.
 - **Trailer** on agent commits: `Co-Authored-By: <agent>`, name only, no
-  model/email. Conventional-Commits prefix on the first line only.
-- **A bug recorded in a comment stays in the file** — deleting a "why"
-  comment needs a reason; a stranded one moves to a `history` heading.
-  Exception: a security weakness. Its shapes and impact go to
-  `elly/infra-notes`; the file says only what is enforced.
+  model or email. The Conventional-Commits prefix goes on the first line only.
+- **A bug recorded in a comment stays in the file.** Deleting a "why" comment
+  needs a reason; a stranded one moves to a `history` heading. Exception: a
+  security weakness. Its shapes and impact go to `elly/infra-notes`, and the
+  file says only what is enforced.
 - **Public text about a security change** (commit message, PR body, code
-  comment, test name/comment, wiki): flag any line saying which inputs got
+  comment, test name or comment, wiki): flag any line saying which inputs got
   past the old version, what they could reach, or which host is exposed
   (AGENTS.md, Working in this repo). Test inputs themselves are fine.
 - **Renamed-away name**: the declaration should say what it was.
-- **Dated "as of" claims**: a date is when someone last checked, not proof
-  (`fact-hygiene`). Present-tense claims about other files are live pointers
-  — will they survive this change?
+- **Dated "as of" claims**: a date records when someone last checked, not
+  proof (`fact-hygiene`). Present-tense claims about other files are live
+  pointers; check whether they survive this change.
 - **Wiki touched?** `wiki-sync` belongs in the same change.
-- **Upstream filings** (nixpkgs, ble.sh, …): never without the user saying
-  so explicitly; even filings *here* can ping upstream via `owner/repo#123`
-  autolinking — grep the draft.
+- **Upstream filings** (nixpkgs, ble.sh, ...): never without the user saying
+  so explicitly. Even filings here can ping upstream through `owner/repo#123`
+  autolinking, so grep the draft.
 
 ## Saying the outcome
 
-An undated "verified" means *evaluates*. Say which: in the tree, or
-switched and checked live (`investigate-bug` step 4). "It works" from an
-eval is the overclaim this repo keeps teaching against.
+An undated "verified" means *evaluates*. State which rung you reached: in the
+tree, or switched and checked live (`investigate-bug` step 4). Reporting "it
+works" from an eval alone overclaims.
 
 ## See also
 
 - Trap skills: `new-flake-module`, `home-manager-dotfiles`,
   `impermanence-initrd`, `package-platform-support`, `secrets-hygiene`.
-- `ship` — pre-PR gate; its step 0 is "Run first" from the author's side.
-- `wiki/agent-lessons-learned.md` — every § earned the hard way.
+- `ship`: the pre-PR gate; its step 0 is "Run first" from the author's side.
+- `wiki/agent-lessons-learned.md`: every § records a past mistake.

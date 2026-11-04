@@ -1,6 +1,6 @@
 ---
 name: extract-nix-tooling-all
-description: Sweeps the repo for Nix patterns, flake machinery, scripts and traps that would work in any flake, and updates the extraction candidates folder.
+description: Sweeps the repo for Nix patterns, scripts and traps that would work in any flake, and updates the extraction candidates folder.
 when_to_use: Asked what Nix patterns here are reusable, or to refresh the Nix extraction candidates.
 ---
 
@@ -8,22 +8,26 @@ when_to_use: Asked what Nix patterns here are reusable, or to refresh the Nix ex
 
 ## Applies to
 
-Asked "what Nix patterns here are reusable", or to refresh
-`_loose-ends/extraction-candidates/nix/` — a deliberate, standalone pass.
-Not: a candidate noticed mid-task (`extract-nix-tooling`); the non-Nix
-sweep (`extract-agent-tooling-all`); creating or pushing to the general
-repo (only when the user asks for it).
+Use when asked "what Nix patterns here are reusable", or to refresh
+`_loose-ends/extraction-candidates/nix/`. This is a standalone pass. It does
+not cover:
+
+- a candidate noticed mid-task (`extract-nix-tooling`);
+- the non-Nix sweep (`extract-agent-tooling-all`);
+- creating or pushing to the general repo, which happens only when the user
+  asks.
 
 ## Relationship to the other three
 
-Procedure is `extract-agent-tooling-all`'s steps (worktree, scope,
-reconcile existing candidates first, survey, rank, report, ship); test is
-`extract-nix-tooling`'s. Read both. Only the surfaces differ.
+The procedure is `extract-agent-tooling-all`'s steps (worktree, scope,
+reconcile existing candidates first, survey, rank, report, ship), and the
+generality test is `extract-nix-tooling`'s. Read both. Only the surfaces to
+survey differ.
 
 ## Where to look
 
-Use `ls`, not this list, for what currently exists in each; the table says
-where to look, not what you'll find.
+Use `ls` to see what currently exists in each surface; the table says where to
+look, not what you will find.
 
 | Surface | Typical candidate shape |
 |---|---|
@@ -36,15 +40,15 @@ where to look, not what you'll find.
 | `wiki/agent-lessons-learned.md` | §s about evaluation vs build vs runtime, freeform options, interpolation |
 | AGENTS.md "Traps" | Nix traps stated inline (`${…}` in `''` strings, freeform settings) |
 
-Host-specific trees (`flake/modules/host-config/`, `flake/modules/homelab-config/`)
-rarely yield a whole candidate; skim them for the *trap* behind a fix, not
-the fix itself.
+Host-specific trees (`flake/modules/host-config/`,
+`flake/modules/homelab-config/`) rarely yield a whole candidate. Skim them for
+the trap behind a fix, not the fix itself.
 
 ## Calibrate
 
-Same as the agent sweep: mechanisms, not topics. "How we do Home Manager"
-is a topic; "HM `home.file.<n>.text` concatenates across modules, so two
-modules writing one file double it silently — and here's how to read the
+Look for mechanisms, not topics, as in the agent sweep. "How we do Home
+Manager" is a topic. "HM `home.file.<n>.text` concatenates across modules, so
+two modules writing one file double it silently; here is how to read the
 generated file back" is a mechanism with evidence.
 
 ## See also
