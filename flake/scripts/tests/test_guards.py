@@ -43,6 +43,13 @@ import tempfile
 import unittest
 from unittest import mock
 
+# The fixtures commit in throwaway repos. Ignore the developer's global and
+# system git config, so a signing setup (commit.gpgsign with an ssh agent that
+# is not running) cannot fail every `git commit` below. Child processes
+# inherit this. Needs git 2.32 or newer for GIT_CONFIG_GLOBAL.
+os.environ["GIT_CONFIG_GLOBAL"] = os.devnull
+os.environ["GIT_CONFIG_NOSYSTEM"] = "1"
+
 REPO = pathlib.Path(__file__).resolve().parents[3]
 HOOKS = REPO / ".agents" / "hooks"
 GIT_HOOKS = REPO / ".githooks"
@@ -1895,6 +1902,34 @@ class LessonReminder(unittest.TestCase):
                                     {"tool_name": "Edit", "tool_input":
                                      {"file_path": str(REPO / sample)}})
                     self.assertTrue(model_context(out))
+
+    def test_validate_lines_split_into_tag_path_message(self):
+        # The `lessons` check hands validate()'s lines to factcheck, whose
+        # runner needs Finding objects; split_finding is that conversion.
+        # Run the real validate() on a map with two defects, so a change to
+        # its line shape fails here and not as a crash in `just wiki-lint`.
+        sys.path.insert(0, str(HOOKS))
+        import lessons_map
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            (root / ".agents").mkdir()
+            (root / ".agents" / "lessons-map.toml").write_text(
+                '[[topic]]\nid = "Bad_Id"\nbogus = 1\n')
+            lines = lessons_map.validate(root, [], set(), {})
+        self.assertGreaterEqual(len(lines), 2)
+        for line in lines:
+            with self.subTest(line=line):
+                tag, path, message = lessons_map.split_finding(line)
+                self.assertEqual(tag, "LESSONS MAP")
+                self.assertTrue(path.startswith(".agents/lessons-map.toml"))
+                self.assertEqual(f"{tag}  {path}: {message}", line)
+        self.assertEqual(
+            lessons_map.split_finding("MISSING LESSONS MAP  "
+                                      ".agents/lessons-map.toml: gone"),
+            ("MISSING LESSONS MAP", ".agents/lessons-map.toml", "gone"))
+        self.assertEqual(lessons_map.split_finding("no shape"),
+                         ("LESSONS MAP", ".agents/lessons-map.toml",
+                          "no shape"))
 
     def test_create_only_topic(self):
         new = REPO / "flake/modules/general-config/system/zz-new-module.nix"

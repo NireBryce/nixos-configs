@@ -114,6 +114,20 @@ def pointers(t):
 
 # -- validation (factcheck lessons; tools/docchecks/lessons.py) ---------
 
+def split_finding(line):
+    """(tag, path, message) of one validate() line, `TAG  path: message`.
+
+    validate() returns strings because this module is stdlib-only and cannot
+    import factcheck's Finding. The factcheck plugin converts each line with
+    this at its boundary: factcheck's runner needs Finding objects. A line
+    that does not have the shape is kept whole under the map's own path."""
+    tag, sep, rest = line.partition('  ')
+    path, colon, message = rest.partition(': ')
+    if not (sep and colon):
+        return 'LESSONS MAP', MAP.as_posix(), line
+    return tag, path, message
+
+
 def validate(root, tracked, lesson_numbers, rule_globs):
     """Findings for a map that has drifted from the repo. `tracked` is the
     repo-relative tracked file list, `lesson_numbers` the §s the index has,

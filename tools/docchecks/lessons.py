@@ -105,6 +105,10 @@ def check_lessons(root, cfg):
             findings.append(Finding(
                 'MISSING ARTICLE', ART_DIR, f"no {n}-*.md for §{n}"))
 
-    findings += lessons_map.validate(root, tracked_files(root),
-                                     set(entries), rule_globs(root))
+    # validate() returns plain strings (its module cannot import factcheck);
+    # the runner needs Finding objects, so convert here.
+    findings += [Finding(*lessons_map.split_finding(line))
+                 for line in lessons_map.validate(
+                     root, tracked_files(root), set(entries),
+                     rule_globs(root))]
     return findings
