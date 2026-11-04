@@ -43,6 +43,13 @@ import tempfile
 import unittest
 from unittest import mock
 
+# The fixtures commit in throwaway repos. Ignore the developer's global and
+# system git config, so a signing setup (commit.gpgsign with an ssh agent that
+# is not running) cannot fail every `git commit` below. Child processes
+# inherit this. Needs git 2.32 or newer for GIT_CONFIG_GLOBAL.
+os.environ["GIT_CONFIG_GLOBAL"] = os.devnull
+os.environ["GIT_CONFIG_NOSYSTEM"] = "1"
+
 REPO = pathlib.Path(__file__).resolve().parents[3]
 HOOKS = REPO / ".agents" / "hooks"
 GIT_HOOKS = REPO / ".githooks"
