@@ -1,6 +1,6 @@
 # Wiki
 
-_Last modified: 2026-10-31_
+_Last modified: 2026-11-03_
 
 This is the wiki's topic index. The `flake/` folder is meant to be browsed by
 its file tree, with documentation next to the code; the heavy modularization
@@ -145,6 +145,8 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   `/root`-wipe-on-boot mechanism, which hosts opt in, sops-nix.
 - [Traps & skills](meta/traps-and-skills.md) — the mistakes that have
   happened here, and the skills that hold the long version of each.
+- [Skills index](meta/skills-index.md) — every skill with what it does and when
+  it fires, generated from their frontmatter.
 - [History & lessons learned](meta/history.md) — the den → flake-parts port, the
   first hardware boots, and what became of the sibling branch. The full log
   itself, [agent-lessons-learned.md](agent-lessons-learned.md) — every numbered lesson

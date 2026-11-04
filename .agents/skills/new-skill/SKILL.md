@@ -97,8 +97,9 @@ backtick.
 
 1. **Pick a name**: kebab-case, matching the directory exactly
    (`.agents/skills/<name>/SKILL.md`). Use one `SKILL.md` per directory.
-   There is no registry to update; discovery is automatic (`wiki-sync`
-   appeared in the live listing the turn after its directory was created).
+   Discovery is automatic (`wiki-sync` appeared in the live listing the turn
+   after its directory was created). The one table that follows the skills is
+   generated: step 7 regenerates it.
 2. **Draft the description first, alone.** Write one sentence. Test it:
    cover the body and ask whether a session deciding to load this skill would
    understand what it is for. A second clause belongs in `## Applies to`.
@@ -114,6 +115,10 @@ backtick.
    you write; correct the description so it neither undersells nor overclaims.
 6. **Compare it with sibling skills.** If it is noticeably longer or more
    parenthetical than its neighbors, it needs the same trimming.
+7. **Regenerate the skills index** with `just wiki-gen` (the table in
+   `wiki/meta/skills-index.md`). `just wiki-lint` reports `STALE GENERATED`
+   until you do, after adding a skill or after editing any `description` or
+   `when_to_use`.
 
 ## A quick before/after
 

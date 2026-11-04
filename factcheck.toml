@@ -50,4 +50,5 @@ load = ["tools/docchecks/tree.py",
         "tools/docchecks/secrets.py",
         "tools/docchecks/routes.py",
         "tools/docchecks/lessons.py",
-        "tools/docchecks/nixos_regions.py"]
+        "tools/docchecks/nixos_regions.py",
+        "tools/docchecks/skills_index.py"]
