@@ -1,8 +1,6 @@
 # Wiki style guide, for agents
 
-_Last modified: 2026-10-31_
-
-_Sibling reviewed: 2026-10-20 -- source body trimmed of origin-story narration (dates added, who moved what); rules unchanged_
+_Last modified: 2026-11-03_
 
 Condensed from [styleguide.md](styleguide.md). Rules only here. The *repo's* style guide is
 [../config-structure/conventions.md](../config-structure/conventions.md); module formatting is
@@ -126,6 +124,7 @@ belongs in the linked file's own header.
   matching `reaching-services.md`. A bare noun is fine when
   the page is about the whole service (`forgejo.md`).
 - **Dates absolute**, never "today" or "last week".
+- **Voice**: plain, direct, instruction first then one-sentence reason; no emphasis words, metaphors or process narration. Rule: `AGENTS.md` "Write plainly".
 - Relative paths, recomputed for actual depth. Moving a page means walking
   every link in it.
 - Link both directions: index down, page back up.

@@ -1,6 +1,6 @@
 # Wiki style guide
 
-_Last modified: 2026-10-31_
+_Last modified: 2026-11-03_
 
 A page lives in the directory that matches its reader: `config-structure/`
 for how the flake is built (with `config-structure/categories/` for one page per
@@ -258,6 +258,9 @@ Pages go in one of these places:
 - **Dates are absolute** ("2026-08-22", never "today" or "last week"). It's
   the only thing that lets a stale page be recognized as stale by its own
   text.
+- **Voice is plain and direct**: the instruction or fact first, then a
+  one-sentence reason; no emphasis words, metaphors or narration of your own
+  process. The full rule is `AGENTS.md` "Write plainly".
 - **See-also sections point two ways**: sideways to sibling pages, and
   outward to the general form of a trap where one exists — a skill, most
   often (e.g. `shell-config` → the `home-manager-dotfiles` skill). The wiki

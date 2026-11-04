@@ -102,6 +102,13 @@ rules   = "agent-config.md"
 lessons = [44]
 remind  = "Agent config: a hook added or re-matched in .agents/settings.json goes in .zcode/config.json too; a guard's patterns and its test_guards.py fixtures change together; what the model must read goes in additionalContext, not only systemMessage."
 
+[[topic]]
+id        = "wiki-pages"
+paths     = ["wiki/**"]
+rules     = "wiki.md"
+skill     = "wiki-sync"
+remind_on = "never"
+
 # -- narrower areas ---------------------------------------------------------
 
 [[topic]]

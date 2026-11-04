@@ -1,8 +1,8 @@
 # Traps & skills
 
-_Last modified: 2026-10-28_
+_Last modified: 2026-11-03_
 
-[`../../CLAUDE.md`](../../CLAUDE.md)'s "Traps, all of which have actually happened here" section has a one-line summary of
+[`../../CLAUDE.md`](../../CLAUDE.md)'s "Traps" section has a one-line summary of
 each trap. The full mechanism, code, and worked examples live in the matching
 skill, which loads only when that task comes up, so it costs no context
 otherwise. Read the skill before the task rather than re-deriving from the
