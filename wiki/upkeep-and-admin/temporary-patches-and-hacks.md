@@ -1,6 +1,6 @@
 # Temporary patches and hacks
 
-_Last modified: 2026-10-26_
+_Last modified: 2026-11-04_
 
 This page lists every workaround in this config that exists only because a
 third-party project has a bug, with what each one works around and when it
@@ -26,7 +26,7 @@ that still needs the user to ask, report by report.
 
 | workaround | file | host | upstream bug | undo when |
 |---|---|---|---|---|
-| sign `acpi_call` with kmodigest | `flake/modules/general-config/desktop-env/jovian/jovian.nix` (`boot.kernelPackages` override) | nire-tenacity | nixpkgs `acpi_call` installs no `.ko.cer`; no issue yet | nixpkgs' package ships the `.cer` itself (the build fails on purpose when it does) |
+| drop `guestfs-tools` and `libguestfs` | `flake/modules/homelab-config/homelab/virtualization/libvirt/virt-tools.nix` | nire-cube | nixpkgs marks `libguestfs` broken; no issue yet | `libguestfs` evaluates again (`nix eval` the cube toplevel with both restored) |
 | re-declare Valve's cmdline minus `amd_iommu=off` | `flake/modules/host-config/tenacity/fixes/iommu-tenacity.nix` | nire-tenacity | [#443](https://github.com/NireBryce/nixos-configs/issues/443) (Jovian) | Jovian stops setting `amd_iommu=off` for non-Deck hardware, or its param list changes (re-diff) |
 | blacklist `tiny_power_button` | `flake/modules/general-config/boot/power-button/no-tiny-power-button.nix` | every host in the `boot` category (durandal, tenacity, cube) | Linux 6.18.57's partial backport of 6.19's ACPI button rework; no issue yet | any kernel bump: eval warns when the kernel is no longer 6.18.57; re-check, then drop |
 | null out avahi's deprecated `publish.{enable,userServices}` | `flake/modules/general-config/system/gaming/sunshine.nix` | every NixOS host | nixpkgs `sunshine.nix` still sets them; no issue yet | nixpkgs' `sunshine.nix` sets `services.avahi.settings.publish` itself |
@@ -37,41 +37,23 @@ section below says what to run first.
 
 ## Live workarounds
 
-### acpi\_call has no module certificate
+### libguestfs is marked broken
 
-Added 2026-10-20, the day the lock bump broke tenacity's build.
+Added 2026-11-04, in the lock bump that picked up the change.
 
-**What breaks without it.** nixpkgs now signs kernel modules with
-`kmodigest` during Kbuild's `modules_install`, which leaves a
-`<module>.ko.cer` next to every module. The aggregator that builds
-`linux-<version>-modules` (`pkgs/os-specific/linux/kmod/aggregator.nix`)
-concatenates the `.cer` of every external module. nixpkgs' `acpi_call`
-package copies its `.ko` into place by hand instead of running
-`modules_install`, so it has no `.cer`, and the toplevel build fails:
+**What breaks without it.** `virt-tools.nix` listed `guestfs-tools`
+(`virt-cat`, `virt-df`, `virt-sysprep`, `virt-customize`) and `libguestfs`
+(`guestfish`, and the library those are built on). nixpkgs now marks
+`libguestfs` broken, so with either listed the `nire-cube` toplevel does not
+evaluate: `Refusing to evaluate package 'libguestfs-...' ... because it has
+problems`.
 
-```
-cat: misc/acpi_call.ko.cer: No such file or directory
-```
+**What it does.** Both packages are left out of
+`environment.systemPackages` on cube, with a comment in place. Nothing else
+in the config uses them; the tools are interactive disk-image helpers.
 
-**What it does.** `jovian.nix` replaces `acpi_call` inside
-`boot.kernelPackages` (`pkgs.linuxPackages.extend`) with a copy whose
-`installPhase` runs `kmodigest` on the installed module, which is what
-`modules_install` would have done. The replacement is in `kernelPackages`,
-not in the `boot.extraModulePackages` line, because nixpkgs' own
-`handheld-daemon` module adds a second `acpi_call` through
-`adjustor.loadAcpiCallModule`.
-
-**Undo when** all of these hold (the code comment carries the same list):
-
-1. nixpkgs' `acpi_call` installs `acpi_call.ko.cer` itself. The override
-   checks for this and fails the build with a pointer to `jovian.nix`, so
-   a lock bump will announce it.
-2. With the override deleted, `just host=nire-tenacity build` succeeds.
-   `just check` alone does not reach the aggregator.
-3. After switching, `modinfo acpi_call` resolves and hhd's TDP control
-   still works.
-
-It also goes if tenacity stops loading `acpi_call` at all.
+**Undo when** `nix eval` of the `nire-cube` toplevel succeeds with both
+packages back in the list. Restore them and delete the comment.
 
 ### Jovian turns the IOMMU off on tenacity
 
@@ -219,7 +201,7 @@ A new workaround for a third-party bug gets, in the same change:
 1. A code comment that says why, starts with `TEMPORARY`, and lists the
    conditions for removal.
 2. Where it can, a check that fails the build once upstream fixes the bug
-   (the `acpi_call` override's `.cer` test, the old hhd overlay's
+   (the old `acpi_call` override's `.cer` test, the old hhd overlay's
    `--replace-fail`), so the fix announces itself instead of the
    workaround outliving it.
 3. A row in Quick facts and a section here.

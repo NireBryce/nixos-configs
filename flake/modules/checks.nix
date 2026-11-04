@@ -113,7 +113,7 @@
                 if libTestFailures == [ ] then pkgs.runCommand "lib-helpers" { } "touch $out"
                 else throw "lib-helpers: ${builtins.toJSON libTestFailures}";
 
-            # Static check of the agent hook configs (.agents/polymorph/): the
+            # Static check of the agent hook configs (.polymorph/basecamp/): the
             # generated .zcode/config.json matches what the canonical
             # .agents/settings.json produces, mappings are valid, hooks live
             # under .agents/hooks/. It runs no hook and no harness, so a clean

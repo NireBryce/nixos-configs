@@ -35,7 +35,7 @@ paths:
 - ZCode reads hooks from `.zcode/config.json` (`hooks.events`, with
   `hooks.enabled: true`), not `.agents/settings.json`. That file is
   generated: edit `.agents/settings.json`, then `nix run .#polymorph --
-  generate`; the `polymorph` flake check (`.agents/polymorph/`) fails on
+  generate`; the `polymorph` flake check (`.polymorph/basecamp/`) fails on
   drift. ZCode rewrites the file on trust approval, adding `enabled` and
   `timeout`; the two `timeout: 60` entries live in `.agents/settings.json`
   so the generated file keeps matching. Live-checked on ZCode 3.14.3
