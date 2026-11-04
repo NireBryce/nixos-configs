@@ -135,3 +135,6 @@ paths:
   warning, or a decision's reason -- also goes in
   `hookSpecificOutput.additionalContext`; `test_guards.py` checks it for
   each warn, ask, and the #458 deny emitters.
+- `.claude/` is a real directory. Its `settings.json`, `skills` and `rules`
+  are symlinks into `.agents/`. Don't replace `.claude` itself with a
+  symlink: Claude Code then refuses to create subagent worktrees.
