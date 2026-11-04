@@ -20,8 +20,13 @@
         environment.systemPackages = with pkgs; [
             virt-viewer     # standalone SPICE/VNC console, no virt-manager needed
             virt-top        # top(1) for domains
-            guestfs-tools   # virt-cat, virt-df, virt-sysprep, virt-customize
-            libguestfs      # guestfish, and the library the above are built on
+            # TEMPORARY -- listed in
+            # wiki/upkeep-and-admin/temporary-patches-and-hacks.md.
+            # guestfs-tools (virt-cat, virt-df, virt-sysprep, virt-customize)
+            # and libguestfs (guestfish, and the library they are built on)
+            # are off while nixpkgs marks libguestfs broken: with them listed,
+            # nire-cube does not evaluate. Restore both, and delete this
+            # comment, once the cube toplevel evaluates with them back.
             quickemu        # throwaway VMs from a one-line spec, outside libvirt
 
             # Windows guest paravirt drivers, as an ISO to attach at install

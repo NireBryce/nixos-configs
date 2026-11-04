@@ -151,8 +151,8 @@
 #
 # - A rollback that stops running looks like a working machine. invariants.nix
 #   catches the structural ways it can stop: restore-root gone, not wanted
-#   by initrd.target, not before sysroot.mount, systemd stage 1 off, btrfs
-#   missing from the initrd. It gates all of these on restore-root
+#   by initrd.target, not before sysroot.mount, btrfs missing from the
+#   initrd. It gates all of these on restore-root
 #   existing, so a host that never imported this is exempt.
 # - Hibernation has a desktop half. With the kernel refusing hibernation,
 #   KDE's PowerDevil asking for hybrid sleep (suspend + hibernation image)
@@ -263,9 +263,9 @@
             # Puts the btrfs tools in the initrd, for the script.
             supportedFilesystems = [ "btrfs" ];
 
+            # No `enable` here: nixpkgs removed scripted initrd (2026-11-04),
+            # so systemd stage 1 is always on and setting it is an error.
             systemd = {
-                enable = true;
-
                 # emergencyAccess is left at its default, false. `true`
                 # would give an *unauthenticated* root shell, reachable
                 # before the LUKS volume is open -- a root shell for
@@ -371,7 +371,9 @@
 # 1) to the systemd unit, forced by the 2026-08-07 nixpkgs bump: it made
 # boot.initrd.systemd.enable default true, deprecated scripted initrd (removal
 # in 26.11), and systemd stage 1 fails an assertion on postResumeCommands, so
-# the switch was atomic. The working note, wiki/impermanence-stage1-
+# the switch was atomic. 2026-11-04: nixpkgs removed scripted initrd and the
+# boot.initrd.systemd.enable option, so the migration can no longer be reverted.
+# The working note, wiki/impermanence-stage1-
 # migration.md, was removed 2026-09-05 (git history). What the old mechanism
 # did that a revert would bring back:
 #

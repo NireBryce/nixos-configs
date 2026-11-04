@@ -71,7 +71,7 @@
         }; 
 
         # static check and generator for the agent hook configs
-        # (.agents/polymorph/; `nix run .#polymorph`). Experimental and
+        # (.polymorph/basecamp/; `nix run .#polymorph`). Experimental and
         # unvetted upstream; it runs only as a check here, never in a hook.
         polymorph = {
             url = "github:NireBryce/polymorph";

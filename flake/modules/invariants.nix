@@ -180,16 +180,11 @@
                 msg = "${name}: restore-root is not ordered before sysroot.mount -- the wipe "
                     + "could run after / is already mounted";
             }
-            {
-                # postResumeCommands (scripted stage 1) and an initrd
-                # systemd unit are mutually exclusive. If this flips
-                # false the unit above stops existing rather than
-                # misbehaving -- this invariant explains the previous
-                # three when they go.
-                ok  = c.boot.initrd.systemd.enable;
-                msg = "${name}: boot.initrd.systemd.enable is false, but the rollback is a "
-                    + "systemd stage-1 unit -- see WARN-impermanence.nix";
-            }
+            # boot.initrd.systemd.enable was asserted true here, since
+            # postResumeCommands (scripted stage 1) and an initrd systemd
+            # unit are mutually exclusive. The 2026-11-04 nixpkgs bump removed
+            # scripted initrd and that option, so systemd stage 1 is the only
+            # kind and reading the option is an error.
             {
                 # supportedFilesystems is `attrsOf bool` now and only
                 # *accepts* the list form WARN-impermanence.nix writes;
