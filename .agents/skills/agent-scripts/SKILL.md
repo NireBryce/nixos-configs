@@ -87,12 +87,14 @@ Each section gets its own verdict:
   the status line, dirty paths, and commits and diff stat against
   `origin/experimental`, plus the PR. Read-only.
 
-Adoption, first JUST run (2026-10-03, nire-tenacity only: 68 Claude Code and
-49 zcode sessions; the other hosts' exports predate format 3 and were
-skipped): `preflight` 69, `wiki-lint` 49, `agent preflight-brief` 5,
-`agent show`/`commit`/`pr`/`worktree`/`preflight-each`/`ship-ready`/
-`ship-land` 1 each. The helpers were days old, against 101 sessions (86%)
-batch-reading by hand. Re-check once exports rebuild.
+Adoption (2026-11-04; exports from nire-cube, nire-durandal and nire-tenacity,
+216 Claude Code and zcode sessions): `preflight` 95, `wiki-lint` 89,
+`agent pr`, `agent ship-ready` and `agent ship-land` 49 each, `agent
+preflight-brief` 47, `agent worktree` 37, `agent commit` 33, `agent where` 24,
+`agent preflight-each` 11. Batch reads by hand still occur in 188 sessions
+(87%), against 86% on 2026-10-03, so the helpers have not displaced them. Many
+of the recent sessions are the ones that wrote these helpers, which inflates
+their counts.
 
 ## Is it worth a script?
 
