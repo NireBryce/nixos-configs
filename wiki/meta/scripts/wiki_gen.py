@@ -284,7 +284,41 @@ def module_layout(root):
     return '```mermaid\n' + r.stdout.rstrip('\n') + '\n```'
 
 
+SKILLS_DIR = '.agents/skills'
+FRONTMATTER = re.compile(r'\A---\n(.*?)\n---\n', re.S)
+
+
+def skill_rows(root):
+    """One row per `.agents/skills/<name>/SKILL.md`, sorted by name, from the
+    frontmatter's `description` and `when_to_use` (plain `key: value` lines,
+    which the skill-files check enforces). Skills sharing a prefix end up
+    adjacent, which is the only grouping the table has: the directory is
+    flat on purpose (wiki/meta/skills-index.md says why). Mirrored by
+    tools/docchecks/skills_index.py, the factcheck plugin that lints it."""
+    skills = sorted((root / SKILLS_DIR).glob('*/SKILL.md'))
+    if not skills:
+        raise GenError(f'no SKILL.md files under {SKILLS_DIR}/')
+    for path in skills:
+        name = path.parent.name
+        m = FRONTMATTER.match(path.read_text())
+        fm = {}
+        for line in (m.group(1).splitlines() if m else []):
+            key, sep, value = line.partition(': ')
+            if sep:
+                fm[key.strip()] = value.strip()
+        if not fm.get('description'):
+            raise GenError(f'{SKILLS_DIR}/{name}/SKILL.md has no description')
+        yield name, {
+            'Skill': f"[`{name}`](../../{SKILLS_DIR}/{name}/SKILL.md)",
+            'Does': fm['description'].replace('|', '\\|'),
+            'Use when': fm.get('when_to_use', '').replace('|', '\\|'),
+        }
+
+
 REGIONS = {r.name: r for r in [
+    Region('skills-index', 'wiki/meta/skills-index.md',
+           f'the frontmatter of each {SKILLS_DIR}/*/SKILL.md',
+           ['Skill', 'Does', 'Use when'], 'Skill', [], skill_rows),
     Region('hosts-table', 'wiki/fleet/hosts.md',
            "flake/modules/host-config/hosts.nix and each host's import list",
            ['Host', 'Class', 'Role', 'Wipes `/root`?', 'Tailnet name'],

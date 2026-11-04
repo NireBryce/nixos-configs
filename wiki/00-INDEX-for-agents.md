@@ -1,6 +1,6 @@
 # Wiki index, for agents
 
-_Last modified: 2026-10-31_
+_Last modified: 2026-11-03_
 
 Condensed from [00-INDEX.md](00-INDEX.md). Routing only.
 
@@ -83,6 +83,7 @@ root holds only entry points.
 - [config-structure/module-files.md](config-structure/module-files.md) — a module file's shape and rules, and why
   (names from filenames, categories from folders).
 - [meta/traps-and-skills.md](meta/traps-and-skills.md) — real past mistakes, and which skill holds each.
+- [meta/skills-index.md](meta/skills-index.md) — every skill: what it does, when it fires (generated).
 - [agent-lessons-learned.md](agent-lessons-learned.md) — every § as one line (rule,
   Home, Enforced), grouped by when it applies: read your task's group. By
   number: `ls wiki/agent-lessons-learned/43-*`. By file or area: `just agent

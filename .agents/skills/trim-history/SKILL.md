@@ -10,30 +10,47 @@ when_to_use: Asked to compress, trim or shrink the history section at the bottom
 
 ## Applies to
 
-A `.nix` module in `flake/modules/` whose bottom-of-file `# ── history ──`
-block (stranded bug records; `just history-line <file>` finds it) is large
-next to the module, and the ask is to compress/trim/shrink it. Not wiki
-pages (`trim-docs`; the wiki has its own `-history.md` pattern), and never
-deleting the section.
+Use this skill when a `.nix` module in `flake/modules/` has a large
+bottom-of-file `# ── history ──` block (stranded bug records;
+`just history-line <file>` finds it) and you are asked to compress, trim or
+shrink it. Do not use it on wiki pages (`trim-docs`; the wiki has its own
+`-history.md` pattern), and never delete the section.
 
 ## Why it exists
 
-The history is a correctness backstop: it stops an agent re-introducing a
-fixed bug ("a bug recorded in a comment stays in the file", AGENTS.md), and
-matters exactly when the file is open. Shorter, never absent; the result
-must stand alone without `git log`.
+The history stops an agent from re-introducing a fixed bug ("a bug recorded in
+a comment stays in the file", AGENTS.md), and it matters when the file is
+open. Make it shorter but never absent. The result must stand alone without
+`git log`.
 
 ## Steps
 
-1. `just history-line <file>`, then read the **whole** module. The body usually absorbed most of the history's facts; that overlap is the cut.
-2. Per entry: does the body above already state it? Cut what it restates.
-3. Keep always: dates and commit hashes; what was wrong and what fixed it (one line each); guidance a body pointer sends readers here for ("see history at the bottom before re-enabling" must still resolve); pointers to full accounts (skill, agent-lessons-learned §); how claims were verified (`just diff`, subvolid, od -c).
-4. Cut always: mechanism the body now carries, incident narration, quoted wrong assessments agent-lessons-learned already holds.
-5. Prove comment-only: every diff hunk at or after the history line, and `cmp` of `head -n $((line-1))` old vs new byte-identical.
-6. `nix eval` the toplevel drvPath of every host importing the module. Comment text moves the drvPath; nothing built changes, so a successful eval is the whole check.
-7. **Show the user old vs compressed section side by side, with what was cut and why, before landing** (part of the ask).
+1. Run `just history-line <file>`, then read the **whole** module. The body
+   usually already states most of the history's facts; that overlap is what to
+   cut.
+2. For each entry, check whether the body above already states it. Cut what it
+   restates.
+3. Always keep:
+   - dates and commit hashes;
+   - what was wrong and what fixed it (one line each);
+   - guidance a body pointer sends readers here for ("see history at the
+     bottom before re-enabling" must still resolve);
+   - pointers to full accounts (a skill, an agent-lessons-learned §);
+   - how claims were verified (`just diff`, subvolid, od -c).
+4. Always cut mechanism the body now carries, incident narration, and quoted
+   wrong assessments that agent-lessons-learned already holds.
+5. Prove the change is comment-only: every diff hunk is at or after the
+   history line, and `cmp` of `head -n $((line-1))` on old and new is
+   byte-identical.
+6. Run `nix eval` on the toplevel drvPath of every host importing the module.
+   Comment text moves the drvPath but nothing built changes, so a successful
+   eval is the whole check.
+7. **Show the user the old and compressed sections side by side, with what was
+   cut and why, before landing.** This is part of the ask.
 8. Land via `ship`.
 
 ## See also
 
-`trim-docs` (same discipline for wiki/skills); `just history-line` (also the cheap partial read when browsing); `WARN-impermanence.nix` (PR #261: 7.2KB to 3.2KB, body byte-identical).
+`trim-docs` (same discipline for wiki/skills); `just history-line` (also a
+cheap partial read when browsing); `WARN-impermanence.nix` (PR #261: 7.2KB to
+3.2KB, body byte-identical).

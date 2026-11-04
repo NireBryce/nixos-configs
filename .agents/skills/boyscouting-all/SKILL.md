@@ -8,7 +8,7 @@ when_to_use: Asked to "boyscout the repo" or "clean up the small stuff everywher
 
 ## Applies to
 
-Asked to "boyscout the repo" or "clean up the small stuff everywhere": a standalone pass over files you weren't editing for another task. Not for:
+Use this when asked to "boyscout the repo" or "clean up the small stuff everywhere": a standalone pass over files you were not editing for another task. Do not use it for:
 
 - a fix noticed mid-task: `boyscouting`, in that task's commit
 - reviewing a diff
@@ -18,23 +18,23 @@ Asked to "boyscout the repo" or "clean up the small stuff everywhere": a standal
 
 ## Relationship to `boyscouting`
 
-Same bar for what's eligible. Read its "What qualifies" and "What doesn't" first. Only the scope differs: this skill is the task, so opening files is expected. Changes must still be behavior-neutral, create no new failure scenario, and skip opinion-only renames. Real bugs go to `propose-issue`.
+The bar for what is eligible is the same. Read `boyscouting`'s "What qualifies" and "What doesn't" first. Only the scope differs: here the sweep is the task, so opening files is expected. Every change must still be behavior-neutral, create no new failure scenario, and avoid opinion-only renames. Real bugs go to `propose-issue`.
 
-The diff won't be small, so the test is that every hunk is independently justifiable and trivially reviewable. Don't include anything that needed its own task.
+The diff will not be small, so each hunk must be independently justifiable and quick to review. Leave out anything that needed its own task.
 
 ## Steps
 
 1. **Use a worktree** (`use-a-worktree`).
-2. **Pin down scope.** Ask whether it's everything, one area (`flake/modules/general-config/`, `wiki/`, one host), or one class of fix (dead imports, stale comments, unused variables). One question beats guessing diff size.
-3. **Search.** Grep for the shapes `boyscouting` lists: unused bindings, TODO/FIXME older than the surrounding code, duplicated small blocks, comments referencing moved code. Search, don't skim. Run `statix` and `deadnix` first (`just preflight` runs them); they catch many Nix cases.
-4. **Check each candidate against the bar.** A real bug goes to `propose-issue`, not this branch.
-5. **One commit per logical cleanup**, so a reviewer can revert one without the others. Group only identical mechanical fixes (e.g. deadnix's suggested removals).
-6. **Run `just preflight`** before shipping.
-7. **`ship`**: one branch, one PR. Describe the scope and the kinds of fix, not just "cleanup".
+2. **Pin down scope.** Ask whether it is everything, one area (`flake/modules/general-config/`, `wiki/`, one host), or one class of fix (dead imports, stale comments, unused variables). One question is cheaper than guessing diff size.
+3. **Search.** Grep for the shapes `boyscouting` lists: unused bindings, TODO/FIXME older than the surrounding code, duplicated small blocks, comments referencing moved code. Run `statix` and `deadnix` first (`just preflight` runs them); they catch many Nix cases.
+4. **Check each candidate against the bar.** Send a real bug to `propose-issue`, not this branch.
+5. **Make one commit per logical cleanup**, so a reviewer can revert one without the others. Group only identical mechanical fixes (for example, deadnix's suggested removals).
+6. **Run `just agent preflight-brief`** before shipping (`just wiki-lint` if the diff is docs-only; skill `ship`, step 0).
+7. **Run `ship`**: one branch, one PR. Describe the scope and the kinds of fix, not just "cleanup".
 
 ## Calibrate
 
-If step 5 gives more than a handful of commits, the sweep found real work. Split it into proposals (`propose-issue` per finding, or one issue listing several) instead of a mega-branch. A full audit isn't a boyscout pass.
+If step 5 gives more than a handful of commits, the sweep found real work. Split it into proposals (`propose-issue` per finding, or one issue listing several) instead of a mega-branch. A full audit is not a boyscout pass.
 
 ## See also
 

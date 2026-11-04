@@ -67,6 +67,19 @@ LAYOUT_MD = '''# Architecture
 <!-- generated:module-layout -->
 <!-- /generated -->
 '''
+SKILLS_MD = '''# Skills index
+
+<!-- generated:skills-index -->
+<!-- /generated -->
+'''
+SKILL = '''---
+name: NAME
+description: Does the thing.
+when_to_use: Asked to do the thing | or its cousin.
+---
+
+# Body
+'''
 
 
 def quiet(fn, *a, **kw):
@@ -101,6 +114,10 @@ class Fixture(unittest.TestCase):
         self.write('wiki/config-structure/categories/00-INDEX.md', INDEX_MD)
         self.write('wiki/config-structure/module-style-guide-for-agents.md', COUNTS_MD)
         self.write('wiki/config-structure/architecture.md', LAYOUT_MD)
+        self.write('wiki/meta/skills-index.md', SKILLS_MD)
+        for name in ('beta-skill', 'alpha-skill'):
+            self.write(f'.agents/skills/{name}/SKILL.md',
+                       SKILL.replace('NAME', name))
 
     def tearDown(self):
         self._tmp.cleanup()
@@ -291,6 +308,37 @@ class Layout(Fixture):
         self.gen()
         self.assertIn('fresh/', self.read('wiki/config-structure/architecture.md'))
         self.assertEqual(self.check(), [])
+
+
+class Skills(Fixture):
+    def test_one_row_per_skill_sorted_with_escaped_pipes(self):
+        self.gen()
+        text = self.read('wiki/meta/skills-index.md')
+        alpha = text.index('`alpha-skill`')
+        self.assertLess(alpha, text.index('`beta-skill`'))
+        self.assertIn('[`alpha-skill`](../../.agents/skills/alpha-skill/SKILL.md)', text)
+        self.assertIn('| Does the thing. | Asked to do the thing \\| or its cousin. |', text)
+
+    def test_a_reworded_description_makes_the_table_stale(self):
+        self.gen()
+        self.fill_hand_cells()
+        self.assertEqual(self.check(), [])
+        p = self.root / '.agents/skills/alpha-skill/SKILL.md'
+        p.write_text(p.read_text().replace('Does the thing.', 'Does another thing.'))
+        findings = [f for f in self.check() if 'skills-index' in f]
+        self.assertEqual(len(findings), 1)
+        self.assertTrue(findings[0].startswith(
+            "STALE GENERATED  wiki/meta/skills-index.md: region 'skills-index'"))
+        self.gen()
+        self.assertIn('Does another thing.', self.read('wiki/meta/skills-index.md'))
+        self.assertEqual(self.check(), [])
+
+    def test_a_skill_without_a_description_is_a_finding_not_a_blank_row(self):
+        self.write('.agents/skills/bare/SKILL.md', '---\nname: bare\n---\n\n# Body\n')
+        findings = [f for f in self.check() if 'skills-index' in f]
+        self.assertEqual(len(findings), 1)
+        self.assertTrue(findings[0].startswith('GEN ERROR  wiki/meta/skills-index.md'))
+        self.assertIn('has no description', findings[0])
 
 
 if __name__ == '__main__':
