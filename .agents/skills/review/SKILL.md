@@ -41,9 +41,7 @@ Reading the diff is not enough, because bugs serialize. Run these in order:
    those traps in addition to the list below.
 5. If the drvPath moved, run `just diff <ref>`. A permuted
    `environment.systemPackages` is not a value change, and a same-looking hash
-   can hide dead code. Known gap #242: `diff` fails on cube because the
-   fingerprint assumes impermanence's `/persist`; fall back to `nix eval
-   --json` of the specific options on both sides.
+   can hide dead code.
 
 ## Read for — traps a diff can't show
 
