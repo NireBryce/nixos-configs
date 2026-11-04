@@ -107,6 +107,15 @@ the blacklist, boot, and check that `/sys/bus/acpi/drivers/tiny-power-button/`
 binds nothing and a power-button press suspends. If it still binds
 `PNP0C0C:00`, keep the blacklist and move `confirmedOn` to the new version.
 
+**Checked 2026-11-04, kernel 6.18.60, from upstream history only.** Stable
+6.18.58 to 6.18.60 carries more of 6.19's rework: `tiny-power-button` is
+converted to a platform driver, and the scan code registers platform devices
+for fixed event buttons. That removes the ACPI-driver binding the bug
+depended on, so the blacklist is probably no longer needed. Not confirmed on
+hardware, so the blacklist stays and `confirmedOn` stays at 6.18.57: the
+eval warning keeps firing until someone boots 6.18.60 without the blacklist
+and runs the check above.
+
 ### sunshine sets avahi options nixpkgs deprecated
 
 Added 2026-10-21.
