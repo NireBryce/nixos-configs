@@ -248,6 +248,39 @@ class Export(unittest.TestCase):
                                {'sessions': 1, 'recipe': 'build'}])
 
 
+class ClaudeReader(unittest.TestCase):
+    """Claude Code names a history directory after the session's working
+    directory, so a checkout called anything but `nixos-configs` was read
+    as 0 sessions."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.projects = Path(self.tmp.name)
+        saved = r.PROJECTS, r.checkout_root
+        self.addCleanup(lambda: setattr(r, 'PROJECTS', saved[0]))
+        self.addCleanup(lambda: setattr(r, 'checkout_root', saved[1]))
+        r.PROJECTS = self.projects
+        r.checkout_root = lambda: Path('/home/u/my.checkout')
+
+    def session(self, directory, cmd, call_id):
+        d = self.projects / directory
+        d.mkdir(exist_ok=True)
+        line = json.dumps({'sessionId': directory, 'message': {'content': [
+            {'type': 'tool_use', 'name': 'Bash', 'id': call_id,
+             'input': {'command': cmd}}]}})
+        (d / 'a.jsonl').write_text(line + '\n')
+
+    def test_reads_this_checkouts_directory_whatever_it_is_called(self):
+        self.session('-home-u-my-checkout', 'git status', 'c1')
+        self.session('-home-u-my-checkout-docs', 'ls', 'c2')   # a worktree
+        self.session('-home-u-projects-nixos-nixos-configs', 'pwd', 'c3')
+        self.session('-home-u-elsewhere', 'other repo', 'c4')
+        self.session('-home-u-my-checkoutish', 'not a sibling', 'c5')
+        self.assertEqual(sorted(cmd for _, cmd in r.claude_rows()),
+                         ['git status', 'ls', 'pwd'])
+
+
 class SqliteReader(unittest.TestCase):
     """OpenCode and zcode: `part` rows, tool bash or Bash, sessions
     filtered to this repo by directory."""
@@ -274,6 +307,29 @@ class SqliteReader(unittest.TestCase):
             db.close()
             self.assertEqual(list(r.sqlite_rows(path)),
                              [('s1', 'git status'), ('s1', 'ls')])
+
+    def test_reads_sessions_by_checkout_directory(self):
+        saved = r.checkout_root
+        self.addCleanup(lambda: setattr(r, 'checkout_root', saved))
+        r.checkout_root = lambda: Path('/home/u/nixos')
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / 'db.sqlite'
+            db = sqlite3.connect(path)
+            db.execute('create table session (id text, directory text)')
+            db.execute('create table part (id text, session_id text, data text)')
+            db.executemany('insert into session values (?, ?)', [
+                ('s1', '/home/u/nixos'), ('s2', '/home/u/nixos-docs'),
+                ('s3', '/home/u/elsewhere')])
+            part = lambda cmd: json.dumps(
+                {'type': 'tool', 'tool': 'bash',
+                 'state': {'input': {'command': cmd}}})
+            db.executemany('insert into part values (?, ?, ?)', [
+                ('p1', 's1', part('main')), ('p2', 's2', part('sibling')),
+                ('p3', 's3', part('other'))])
+            db.commit()
+            db.close()
+            self.assertEqual(list(r.sqlite_rows(path)),
+                             [('s1', 'main'), ('s2', 'sibling')])
 
     def test_unreadable_db_yields_nothing(self):
         with tempfile.TemporaryDirectory() as d:
