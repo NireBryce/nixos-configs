@@ -28,3 +28,11 @@ running service, etc. -->
 ## Deliberately left alone
 
 <!-- Anything that looked related but wasn't touched on purpose, and why. -->
+
+## Risk and impact
+
+<!-- Scale and examples: wiki/llm-aided-dev/risk-and-impact.md. One line of
+reason each. Goes last, before the bottom disclosure line. -->
+
+- **Risk: N/10** --
+- **Impact: N/10** --
