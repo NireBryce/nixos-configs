@@ -50,3 +50,12 @@ body:
     attributes:
       label: "just threads <keywords> result"
       description: Whether this is already a known thread -- the output of `just threads "<keywords>"`, or "nothing found".
+
+  - type: textarea
+    id: risk-impact
+    attributes:
+      label: Risk and impact (optional)
+      description: "How risky the fix looks and how much it matters, each out of 10 with one line of reason, on the scale in wiki/llm-aided-dev/risk-and-impact.md. Leave it empty if unsure: a maintainer fills it in."
+      value: |
+        - **Risk: N/10** --
+        - **Impact: N/10** --
