@@ -191,6 +191,15 @@ keep the inputs they check without narrating what they would do. Merged
 history through #380, and #435's commit messages, predate this rule and are
 not precedent.
 
+**Commits are SSH-signed through the Bitwarden desktop app's SSH agent**
+(`~/.bitwarden-ssh-agent.sock`). The agent's Bash shell is non-interactive
+and may have no `SSH_AUTH_SOCK`, so a commit fails with `Couldn't get agent
+socket?`. Prefix the command with
+`SSH_AUTH_SOCK=$HOME/.bitwarden-ssh-agent.sock`; never disable signing. If
+`ssh-add -l` against that socket fails, the app isn't running: ask the user.
+Detail: `wiki/config-structure/categories/elly.md`, "Commit signing and the
+Bitwarden SSH agent".
+
 **Shape a Bash call to be read in a permission prompt**, which shows the
 command string verbatim and wrapped:
 - One step per line, not an `&&` chain (`set -e` first if a failure should

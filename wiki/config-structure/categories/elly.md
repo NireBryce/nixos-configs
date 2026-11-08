@@ -1,6 +1,6 @@
 # `elly` — `users-config/elly/`
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-11-07_
 
 The one category under `users-config/`, the per-user area (as opposed to
 `general-config/` for shared system or `packages-config/` for packages). Not to
@@ -12,6 +12,7 @@ others; see [../architecture.md](../architecture.md).
 
 - [Category contents](#category-contents)
 - [Imported by](#imported-by)
+- [Commit signing and the Bitwarden SSH agent](#commit-signing-and-the-bitwarden-ssh-agent)
 - [`elly` as the experimental user](#elly-as-the-experimental-user)
 - [See also](#see-also)
 
@@ -20,7 +21,8 @@ others; see [../architecture.md](../architecture.md).
 - **`elly-git/elly-git.nix`** — `homeManager`-only: `programs.git`, a
   `.gitconfig` written from `home.file`, and aliases (`pushall`, `graph`,
   `add-nowhitespace`). Also identity, SSH commit signing on by default
-  (`gpg.format = "ssh"`, key `~/.ssh/id_ed25519`), `init.defaultBranch =
+  (`gpg.format = "ssh"`, the key served by the Bitwarden agent:
+  [Commit signing and the Bitwarden SSH agent](#commit-signing-and-the-bitwarden-ssh-agent)), `init.defaultBranch =
   "main"`, git-lfs, global ignores (`.direnv`, `result`), and `git
   maintenance` for one hardcoded repository path.
 - **`hm-config/hm-config.nix`** — `homeManager`-only, and tiny:
@@ -68,6 +70,35 @@ darwin host lists `elly` in its own per-host imports for the `nixos`/`darwin`-cl
 content (the account, darwin fonts); the `homeManager`-class content
 (`elly-git`, `hm-config`) reaches every host via the shared
 `elly-home-manager` bundle regardless.
+
+## Commit signing and the Bitwarden SSH agent
+
+Every commit is signed (`programs.git.signing.signByDefault = true` in
+`elly-git.nix`). `signing.key` is a public key; the private half is a vault
+item in the Bitwarden desktop app, which serves it from its SSH agent on
+`~/.bitwarden-ssh-agent.sock`. Git signs by asking that agent, so with no
+agent reachable a commit fails:
+
+```
+error: Couldn't get agent socket?
+fatal: failed to write commit object
+```
+
+- The app must be running and unlocked; `bitwarden.nix` autostarts it in
+  graphical sessions only. Its agent is switched on in the app's settings.
+- `bash.nix` and `zsh.nix` export `SSH_AUTH_SOCK` in interactive shells
+  only. Claude Code's Bash tool is non-interactive and had none
+  (`nire-tenacity`, 2026-11-07). Set it per command; don't turn signing
+  off:
+
+  ```sh
+  SSH_AUTH_SOCK=$HOME/.bitwarden-ssh-agent.sock ssh-add -l   # lists keys: agent is up
+  SSH_AUTH_SOCK=$HOME/.bitwarden-ssh-agent.sock git commit ...
+  ```
+
+- A failed signing commit inside `just agent recurring export` left
+  `.git/index.lock` in the command-log repo. Delete it once `pgrep -a git`
+  shows nothing running.
 
 ## `elly` as the experimental user
 
