@@ -79,5 +79,6 @@
 # overrideScope overlay patching kdePackages.kwin. That rebuilt every
 # kdePackages member built against kwin -- most of Plasma, uncached -- on
 # every host importing this, although only tenacity sets the key. Now the
-# patched plugin alone is built out-of-tree and installed on tenacity:
-# host-config/tenacity/configuration/stickykeys-lock-window-tenacity.nix.
+# patched plugin alone was built out-of-tree and installed on tenacity,
+# until kwin 6.8.2 broke the patch and it was shelved (2026-11-07):
+# _loose-ends/shelved/stickykeys-lock-window/.

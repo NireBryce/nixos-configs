@@ -1,0 +1,43 @@
+--- a/src/plugins/stickykeys/stickykeys.cpp
++++ b/src/plugins/stickykeys/stickykeys.cpp
+@@ -75,6 +75,7 @@
+     m_showNotificationForLockedKeys = group.readEntry<bool>("kNotifyModifiers", false);
+     m_disableOnTwoKeys = group.readEntry<bool>("StickyKeysAutoOff", false);
+     m_ringBell = group.readEntry<bool>("StickyKeysBeep", false);
++    m_lockWindowMs = group.readEntry<int>("StickyKeysLockWindow", 0);
+ 
+     bool changed = false;
+     if (!m_lockKeys) {
+@@ -123,8 +124,17 @@
+ 
+             if (*modifierState == KeyState::None) {
+                 *modifierState = KeyState::Latched;
++                m_latchTimestamps[event->key] = event->timestamp;
+                 input()->keyboard()->xkb()->setModifierLatched(keyToModifier(event->key), true);
+                 changed = true;
++            } else if (*modifierState == KeyState::Latched && m_lockKeys
++                       && m_lockWindowMs != 0
++                       && event->timestamp - m_latchTimestamps.value(event->key) > std::chrono::milliseconds(m_lockWindowMs)) {
++                // A latched modifier was tapped again after the lock window
++                // (StickyKeysLockWindow) closed: unlatch instead of locking
++                *modifierState = KeyState::None;
++                input()->keyboard()->xkb()->setModifierLatched(keyToModifier(event->key), false);
++                changed = true;
+             } else if (*modifierState == KeyState::Latched && m_lockKeys) {
+                 *modifierState = KeyState::Locked;
+                 input()->keyboard()->xkb()->setModifierLatched(keyToModifier(event->key), false);
+--- a/src/plugins/stickykeys/stickykeys.h
++++ b/src/plugins/stickykeys/stickykeys.h
+@@ -41,6 +41,12 @@
+     bool m_showNotificationForLockedKeys = false;
+     bool m_disableOnTwoKeys = false;
+     bool m_ringBell = false;
++    // Milliseconds a second tap of a latched modifier may follow the tap
++    // that latched it and still lock it; after the window it unlatches instead.
++    // 0 disables the window (any second tap locks). See StickyKeysLockWindow.
++    int m_lockWindowMs = 0;
++    // Timestamp of the release event that latched each modifier, for the window check.
++    QMap<Qt::Key, std::chrono::microseconds> m_latchTimestamps;
+ };
+ 
+ }

@@ -258,18 +258,14 @@
                 # group; no recorded default to diff either against
                 # (kaccessrc doesn't carry one the way kglobalshortcutsrc does).
                 #
-                # StickyKeysLockWindow is a repo-carried kwin plugin patch
-                # (stickykeys-lock-window-tenacity.nix, which also swaps
-                # the stock plugin out), not an upstream key: milliseconds within
-                # which a second press of a latched modifier counts as a
-                # deliberate double-tap and LOCKS it; a later second press
-                # unlatches instead. Upstream (0) locks on any second press
-                # however late.
+                # The StickyKeysLockWindow patch (double-tap locks, a later
+                # second tap unlatches) is shelved in
+                # _loose-ends/shelved/stickykeys-lock-window/, with how to
+                # restore it.
                 kaccessrc.Keyboard = {
                     AccessXBeep          = false;
                     GestureConfirmation  = true;
                     StickyKeys           = true;
-                    StickyKeysLockWindow = 230;
                 };
 
                 kwinrc = {
@@ -282,6 +278,12 @@
                         # explicit rather than relying on the package's own
                         # default
                         krohnkiteEnabled = false;
+                        # The shelved StickyKeysLockWindow module wrote
+                        # `false` here to swap in its own plugin, and
+                        # plasma-manager leaves keys it stops managing in
+                        # place, so the stock plugin stays off unless this
+                        # turns it back on.
+                        StickyKeysPluginEnabled = true;
 
                         # No zoomEnabled=false here, deliberately (2026-09-09,
                         # issue #228). The three-finger touchpad pinch that
