@@ -6,11 +6,13 @@
 # summary: Sticky keys that tell a deliberate double-tap from a later second
 # press, via a patched kwin plugin built on its own.
 #
-# Upstream kwin locks a latched modifier on any second press, however long
-# after the first (6.7.5 src/plugins/stickykeys/stickykeys.cpp, "A latched
-# modifier was pressed, lock it"). stickykeys-lock-window.patch adds
-# StickyKeysLockWindow to kaccessrc [Keyboard]: milliseconds within which a
-# second press still locks; after the window it unlatches instead. 0 is
+# Upstream kwin locks a latched modifier on any second tap, however long
+# after the first (6.8.2 src/plugins/stickykeys/stickykeys.cpp,
+# StickyKeysFilter::keyboardKey, the `KeyState::Latched && m_lockKeys`
+# branch; since 6.8 a tap latches or locks on its release).
+# stickykeys-lock-window.patch adds StickyKeysLockWindow to kaccessrc
+# [Keyboard]: milliseconds, measured release to release, within which a
+# second tap still locks; after the window it unlatches instead. 0 is
 # upstream behavior. The key itself is set in plasma-tenacity.nix, next to
 # StickyKeys=true.
 #
@@ -30,7 +32,7 @@
 # would always lose to the stock one. Both toggles below must stay together:
 # with the stock plugin still on, two sticky-keys filters see every key.
 #
-# The patch is written against kwin 6.7.5; a kwin bump that moves its hunk
+# The patch is written against kwin 6.8.2; a kwin bump that moves its hunk
 # fails this build loudly rather than silently dropping the feature. The
 # plugin links the stock kwin's libkwin by store path, so a kwin bump
 # rebuilds it (seconds) against the matching headers.

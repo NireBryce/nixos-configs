@@ -115,7 +115,7 @@ flowchart LR
         n16("<b>cube/</b><br/><i>n · 10</i>")
         n17("<b>durandal/</b><br/><i>n · 9</i>")
         n18("<b>lysithea/</b><br/><i>d · 2</i>")
-        n19("<b>tenacity/</b><br/><i>n h · 11</i>")
+        n19("<b>tenacity/</b><br/><i>n h · 10</i>")
     end
     subgraph g3["homelab-config"]
         n15("<b>homelab/</b><br/><i>n · 19</i>")
