@@ -158,7 +158,7 @@ command that touches it, from `.agents/lessons-map.toml`.
 
 **`git add` before `nix eval`.** Flakes in a git repo ignore untracked files,
 so a new module silently does not exist. `just modules` checks for untracked
-files, and `.agents/hooks/nix-untracked-guard-pretooluse.sh` warns at eval
+files (and for `mkOption` outside a `*-options.nix` file), and `.agents/hooks/nix-untracked-guard-pretooluse.sh` warns at eval
 time.
 
 **Read upstream source instead of guessing at options.** It settled

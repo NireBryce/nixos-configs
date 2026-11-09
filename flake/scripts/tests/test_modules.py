@@ -168,6 +168,40 @@ class Drift(Tree):
             self.assertTrue(any(needle in h for h in hits), needle)
 
 
+class Options(Tree):
+    """A module file that declares an option must be named <topic>-options.nix."""
+
+    def put(self, rel, text):
+        f = self.root / rel
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(text)
+        return str(f)
+
+    def test_flags_a_declaration_outside_an_options_file(self):
+        bad = self.put('area/swap.nix', '{ nixos = { options.x = lib.mkOption { }; }; }\n')
+        self.assertEqual(quiet(modules.options, self.root), [bad])
+        self.assertEqual(quiet(modules.main, ['options', str(self.root)]), 1)
+
+    def test_each_declaring_helper_is_caught(self):
+        for helper in ('mkOption', 'mkEnableOption', 'mkPackageOption'):
+            f = self.put(f'area/{helper}.nix', f'{{ nixos = {{ options.x = lib.{helper} {{ }}; }}; }}\n')
+            self.assertIn(f, quiet(modules.options, self.root), helper)
+
+    def test_an_options_file_a_comment_and_an_exempt_file_pass(self):
+        self.put('area/swap-options.nix', '{ nixos = { options.x = lib.mkOption { }; }; }\n')
+        self.put('area/note.nix', '# mkOption is declared in swap-options.nix\n{ }\n')
+        self.put('area/drop-unsupported-packages.nix', 'options.home.packages = lib.mkOption { };\n')
+        self.assertEqual(quiet(modules.options, self.root), [])
+
+    def test_check_fails_on_it(self):
+        self.put('area/swap.nix', 'x = lib.mkOption { };\n')
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            rc = modules.main(['check', str(self.root)], run=FakeNix(self.doc()))
+        self.assertEqual(rc, 1)
+        self.assertIn('OPTIONS', out.getvalue())
+
+
 class Main(Tree):
     def test_check_fails_on_drift_and_passes_when_the_readings_agree(self):
         self.assertEqual(quiet(modules.main, ['check', str(self.root)], run=FakeNix(self.doc())), 0)

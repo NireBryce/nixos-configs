@@ -129,7 +129,7 @@ option without a reason beyond tidiness.
 - Filename = name. A repeated name, or one shared with a category, stops
   evaluation (was a silent merge, §34).
 
-`just check` fails on an orphan (`checkOrphans = "eval"`, so `--no-build` fails too); `just modules` reports untracked files and checks drift.
+`just check` fails on an orphan (`checkOrphans = "eval"`, so `--no-build` fails too); `just modules` reports untracked files, an option declared outside a `*-options.nix` file, and drift.
 
 ## Custom options go in `<topic>-options.nix`
 
@@ -138,6 +138,8 @@ option without a reason beyond tidiness.
   beside the modules that read it, and declares the option and nothing else.
   The module that acts on it is `<topic>.nix`. Live example:
   `memory/swap-policy-options.nix` and `memory/swap-policy.nix`.
-- `grep -rl mkOption flake/modules` should list only `*-options.nix` files.
+- `just modules` fails on `mkOption`, `mkEnableOption` or `mkPackageOption`
+  in any other file (`OPTIONS_EXEMPT` in `flake/scripts/modules.py` lists
+  exceptions).
 - Adding an `apply` to an existing option (`drop-unsupported-packages.nix`)
   is not a custom option; keep its name.

@@ -308,7 +308,7 @@ Not formatting, but it belongs here because getting it wrong produces no error:
 - A module's filename is its name. A file named like another module or a
   category stops evaluation (it used to merge silently, §34).
 
-`just check` fails on an orphan (`checkOrphans = "eval"`, so `--no-build` fails too); `just modules` reports untracked files and checks drift.
+`just check` fails on an orphan (`checkOrphans = "eval"`, so `--no-build` fails too); `just modules` reports untracked files, an option declared outside a `*-options.nix` file, and drift.
 
 ## Custom options live in a `-options.nix` module
 
@@ -318,9 +318,10 @@ A module that declares an option this repo invents (`customOption.*`,
 file declares and documents the option and sets nothing else. The module
 that acts on the option stays in `<topic>.nix`. Example:
 `hardware-config/hardware/memory/swap-policy-options.nix` declares
-`customOption.swap.policy` and `swap-policy.nix` reads it. `grep -rl
-'mkOption' flake/modules` should list only `*-options.nix` files.
+`customOption.swap.policy` and `swap-policy.nix` reads it. `just modules` fails on a
+`mkOption`, `mkEnableOption` or `mkPackageOption` in any other file.
 
 Re-declaring an existing option to add an `apply` (as
 `drop-unsupported-packages.nix` does for `home.packages`) is not a custom
-option and keeps its own name.
+option and keeps its own name; `OPTIONS_EXEMPT` in
+`flake/scripts/modules.py` lists it with the reason.

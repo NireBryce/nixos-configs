@@ -54,7 +54,7 @@ polymorph-check:
     nix build "{{flake}}#checks.$(nix eval --raw --impure --expr builtins.currentSystem).polymorph" --no-link
 
 # Checks the evaluation cannot report: untracked .nix
-# files, and drift between the file-only reading wiki-lint uses and the
+# files, option declarations outside a -options.nix file, and drift between the file-only reading wiki-lint uses and the
 # evaluated graph (flake/scripts/modules.py says why each exists; orphans are `just check`).
 modules:
     # Platform independent, so this is the one check that means anything on darwin.

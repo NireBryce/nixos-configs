@@ -21,7 +21,7 @@ review-side summary.
 
 Reading the diff is not enough, because bugs serialize. Run these in order:
 
-1. `just modules` checks for untracked files and for drift between wiki-lint's
+1. `just modules` checks for untracked files, for `mkOption` outside a `*-options.nix` file, and for drift between wiki-lint's
    file-only reading and the evaluated graph. A module no host reaches
    (orphan) fails `just check` (`checkOrphans = "eval"`, so `--no-build` fails
    too). A repeated module or category name, or an unknown `includes` name,

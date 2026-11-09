@@ -16,6 +16,12 @@ it just scaffolded is the only one.
   untracked   A .nix file git doesn't know about: flakes in a git repo
               ignore it, so it silently does not exist.
 
+  options     A module file that declares an option (`mkOption`,
+              `mkEnableOption`, `mkPackageOption`) but is not named
+              `<topic>-options.nix`. The convention is
+              wiki/config-structure/module-style-guide.md, "Custom options live
+              in a `-options.nix` module".
+
   drift       wiki-lint reads categories, modules, includes and enables
               from the files without evaluating (tools/docchecks/tree.py's
               static_document); this compares that reading with the
@@ -25,8 +31,9 @@ The graph is `nix eval .#moduleGraph`, through a `path:` flake so
 untracked files count.
 
     modules.py untracked  <modules-dir>
+    modules.py options    <modules-dir>
     modules.py drift      <modules-dir>
-    modules.py check      <modules-dir>     # all three; non-zero exit on any finding
+    modules.py check      <modules-dir>     # all of them; non-zero exit on any finding
 
     modules.py add <modules-dir> <class> <category>/<subdir>/<name>.nix [description words...]
                            # scaffold a new module inside a category, in the
@@ -36,18 +43,30 @@ untracked files count.
                            # reported as an orphan on purpose -- nothing
                            # includes it yet.
 """
-import json, pathlib, subprocess, sys
+import json, pathlib, re, subprocess, sys
 
 # Where each finding kind's rule and history live, printed once under that
 # kind's findings (#460): the moment a check fires is the moment its lesson
 # is worth reading.
 SEE = {
     'untracked': "AGENTS.md, 'git add before nix eval'",
+    'options':   "wiki/config-structure/module-style-guide.md, 'Custom options live in a "
+                 "`-options.nix` module'; move the declaration to <topic>-options.nix",
     'drift':     "wiki/config-structure/module-files.md; fix whichever reading is wrong, "
                  "tools/docchecks/tree.py's module_classes/all_categories, or the file",
     'orphan':    "wiki/config-structure/module-files.md; name the module (or its category) in "
                  "an `includes`/`enables`, or delete it",
 }
+
+
+# Files that call mkOption without declaring a custom option, keyed by
+# filename. Each needs its reason here.
+OPTIONS_EXEMPT = {
+    # Re-declares Home Manager's home.packages to add an `apply`; no new name.
+    'drop-unsupported-packages.nix',
+}
+
+DECLARES_OPTION = re.compile(r'\b(mkOption|mkEnableOption|mkPackageOption)\b')
 
 
 def see(kind):
@@ -113,6 +132,26 @@ def orphans(doc, expected=()):
         print(f"ORPHAN     {n!r} is reached by no `includes`/`enables`, so no host gets it")
     if hits:
         see('orphan')
+    return hits
+
+
+def options(root):
+    """A module file that declares an option without being a `-options.nix`.
+
+    Reads the files, not the evaluated graph: the point is that someone
+    grepping for `mkOption` lands only on files named for it. Comment lines
+    don't count.
+    """
+    hits = []
+    for f in sorted(pathlib.Path(root).rglob('*.nix')):
+        if f.name.endswith('-options.nix') or f.name in OPTIONS_EXEMPT:
+            continue
+        code = [ln for ln in f.read_text().splitlines() if not ln.lstrip().startswith('#')]
+        if any(DECLARES_OPTION.search(ln) for ln in code):
+            hits.append(str(f))
+            print(f"OPTIONS    {f} declares an option but is not named <topic>-options.nix")
+    if hits:
+        see('options')
     return hits
 
 
@@ -278,11 +317,13 @@ def main(argv=None, run=subprocess.run):
     root = argv[1]
     if cmd == 'untracked':
         return 1 if untracked(root) else 0
+    if cmd == 'options':
+        return 1 if options(root) else 0
     if cmd == 'drift':
         return 1 if drift(graph(root, run), static_document(root)) else 0
     if cmd == 'check':
         doc = graph(root, run)
-        bad = bool(untracked(root)) | bool(drift(doc, static_document(root)))
+        bad = bool(untracked(root)) | bool(options(root)) | bool(drift(doc, static_document(root)))
         print("no findings" if not bad else "", end="")
         return 1 if bad else 0
     print(__doc__); return 2
