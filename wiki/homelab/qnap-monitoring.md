@@ -33,9 +33,15 @@ is the part still to confirm.
    port 161.
 2. Use SNMPv3: a read-only user, authentication SHA, privacy DES (the only
    privacy protocol this NAS offers). Leave the trap settings empty.
-3. In the NAS's allow list, permit UDP 161 only from cube. cube reaches the NAS
-   as `ts-hive` over the tailnet, so the source is cube's tailnet address.
-4. The same page has a **Download SNMP MIB** button. The file is `NAS.mib`
+3. In the NAS's firewall, allow UDP 161 from cube's tailnet address only. cube
+   reaches the NAS as `ts-hive` over the tailnet.
+4. In the tailnet policy, the grant from `tag:homelab-cube` to `ts-hive` must
+   include `udp:161` (`acl-diff-applied.hujson` in
+   `reverse-proxy/tailscale-services/`). A port missing there is dropped by
+   Tailscale before it reaches the NAS: the poll times out while `tailscale
+   ping ts-hive` still works. Apply an edited file with
+   `flake/scripts/tailscale-acl.py apply <file>`.
+5. The same page has a **Download SNMP MIB** button. The file is `NAS.mib`
    (`QTS-MIB`, enterprise 55062). It is not stored in the repo; the exporter's
    OIDs were copied from it.
 
@@ -68,6 +74,8 @@ curl -s '127.0.0.1:9116/snmp?module=qnap&auth=qnap_v3&target=ts-hive' | grep -c 
 - The exporter should be `active`. If it is not, read its journal: an
   authentication error means the user, hash or passwords differ from the
   NAS's.
+- A timeout with `tailscale ping ts-hive` working is the tailnet policy:
+  check the `udp:161` grant above before anything on the NAS.
 - The count should be at least 1. A reply with `sysUpTime` but no
   `storagepoolStatus` means the NAS answers but not under the `QTS-MIB` tree
   (`1.3.6.1.4.1.55062`). The `QnapMetricsMissing` alert fires after 15
