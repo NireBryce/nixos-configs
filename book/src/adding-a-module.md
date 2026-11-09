@@ -129,7 +129,7 @@ hand, stage it and run the checks:
 
 ```sh
 git add flake/modules/general-config/system/my-thing/my-thing.nix
-just modules     # reports untracked .nix files and graph drift
+just modules     # untracked .nix files, mkOption outside *-options.nix, graph drift
 just check       # evaluates every host (see Step 5: it does not catch orphans)
 ```
 
@@ -157,7 +157,7 @@ If no host includes the category, the module is an
   evaluated, which `--no-build` still does.
 - A module you have just scaffolded is an orphan until a host includes it,
   so `just check` fails until Step 5 is done.
-- `just modules` does not report orphans; it checks untracked files and drift.
+- `just modules` does not report orphans; it checks untracked files, option declarations outside a `*-options.nix` file, and drift.
 
 If a host should take the module without the rest of its category, name the
 module in an `includes` list directly, as the hosts do with `kde-desktop`.

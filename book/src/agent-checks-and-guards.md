@@ -61,7 +61,7 @@ a security boundary.
 | commit-msg | `git commit` | Canonical `Co-Authored-By: Claude` trailer | Rewrites the trailer | `.githooks/commit-msg` |
 | pre-push | `git push` | Preflight's offline steps where nix cannot run | Blocks the push | `.githooks/pre-push` |
 | `just wiki-lint` | [Preflight](glossary.md#preflight), CI, by hand | Docs agree with the repo | Fails | the factcheck flake input (`flake/scripts/factcheck.sh`), with this repo's checkers in `tools/docchecks/` |
-| `just modules` | Preflight, CI, by hand | No untracked `.nix`; static and evaluated module graphs agree | Fails | `flake/scripts/modules.py` |
+| `just modules` | Preflight, CI, by hand | No untracked `.nix`; no `mkOption` outside a `*-options.nix` file; static and evaluated module graphs agree | Fails | `flake/scripts/modules.py` |
 | `just lint` | Preflight, CI, pre-commit | statix, deadnix and oversized-file counts never rise | Fails | `flake/scripts/lint.py` |
 | `just check` | Preflight, CI | Every host's toplevel and home evaluate (including `module-orphans` and `module-class-contents`, set to `"eval"` so they fail under `--no-build`) | Fails | `flake/modules/checks.nix` |
 | Trailer check | CI, on a PR's commits | No non-canonical Claude trailer | Fails the PR | `flake/scripts/check_trailers.py` |
@@ -299,7 +299,8 @@ upstream, and this PR is the revert for the adoption.
 
 The other static checks:
 
-- `modules.py` (`just modules`) reports untracked `.nix` files and drift
+- `modules.py` (`just modules`) reports untracked `.nix` files, option declarations outside a
+  `*-options.nix` file, and drift
   between the module graph wiki-lint reads from the files and the evaluated
   `moduleGraph`.
 - `lint.py` (`just lint`) is the lint ratchet: statix, deadnix and an

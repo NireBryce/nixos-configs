@@ -69,6 +69,9 @@ the full rules.
   formatting (aligned `=` columns, why `nix fmt` isn't wired up) is
   deliberate, not a cleanup target.
 - Check for an existing `programs.*` integration before hand-writing one.
+- A module that declares a custom option (`mkOption` for a name this repo
+  invents) is named `<topic>-options.nix` and declares only that; the module
+  acting on it is `<topic>.nix` (`swap-policy-options.nix`, `swap-policy.nix`).
 - When a rename makes the old name ungreppable, say what it was on the
   declaration (`boot-durandal.nix`, `boot-cube.nix`).
 - A bug recorded in a comment stays in the file; do not trim one because

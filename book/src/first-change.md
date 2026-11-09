@@ -41,6 +41,7 @@ just modules
 ```
 
 `just modules` evaluates the module graph and reports untracked `.nix` files,
+option declarations outside a `*-options.nix` file,
 [orphans](glossary.md#orphan), class bodies that set another class's options,
 and drift between the wiki and the graph. Output without such a finding means
 the file is tracked and reachable.

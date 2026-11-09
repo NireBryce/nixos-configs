@@ -52,7 +52,7 @@ others; see [../architecture.md](../architecture.md).
   `boot.initrd.systemd.services ? restore-root` existing (the unit only
   `WARN-impermanence.nix` creates) rather than on
   `environment.persistence`, because that option is declared for *every*
-  host regardless, via `general-config/system/persistence/declare-persistence-option.nix`
+  host regardless, via `general-config/system/persistence/persistence-options.nix`
   (see [system](system.md)) — so it wouldn't distinguish anything. `nire-cube`
   is additionally excluded by hostname: the module used to fire on cube too,
   but its password hash was created by hand on the real machine before cube
@@ -126,7 +126,7 @@ Users section for the same plan stated for a human reader.
 - [impermanence](impermanence.md) — the category whose *absence* is what
   `WARN-password-required.nix` exists to flag (cube itself is now excluded
   by hostname, since its password was already solved by hand).
-- [system](system.md) — `declare-persistence-option.nix`, referenced above.
+- [system](system.md) — `persistence-options.nix`, referenced above.
 - [../architecture.md](../architecture.md) — `users-config/elly-home-manager.nix`,
   the entry point that assembles this category into the full bundle every
   host's Home Manager uses.
