@@ -88,8 +88,12 @@ credential, so the handle file can be recreated.
    ```
 5. Authorize the key (section 3).
 
-Recover the handle file on another machine with `ssh-keygen -K`, which writes
-`id_ed25519_sk_rk*` into the current directory.
+Recover the handle file on another machine with `just init-ssh-handle`. It
+runs `ssh-keygen -K` in a temp dir (which downloads every resident credential
+from every connected authenticator) and installs only the one whose
+fingerprint matches the YubiKey line in `ssh.nix` as `~/.ssh/id_ed25519_sk`.
+`--force` overwrites an existing handle; `--fingerprint SHA256:...` picks a
+different key.
 
 ## 2. PIV key
 
