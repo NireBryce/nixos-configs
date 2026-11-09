@@ -45,6 +45,9 @@ Pages go in one of these places:
   - **`wiki/fleet/`** — the machines: `hosts.md`, `disk-formatting.md` (the
     one runbook-shaped page here, scoped to a `flake/modules/` mechanism so it
     stays out of `homelab/`), `name-resolution.md`, `durandal-gaming.md`.
+  - **`wiki/ssh/`** — SSH access to the fleet: `minting-yubikey-ssh-keys.md`
+    (runsheet for creating a YubiKey SSH key by the FIDO2 or PIV route and
+    authorizing it in `ssh.nix`).
   - **`wiki/upkeep-and-admin/`** — recurring chores: `maintenance.md`,
     `maintenance-schedule.md`, `flake-lock-weekly-bump.md`,
     `temporary-patches-and-hacks.md`.
