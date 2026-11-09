@@ -25,7 +25,7 @@
                             labels = { area = "qnap"; severity = "warning"; };
                             annotations = {
                                 summary     = "ts-hive does not answer SNMP.";
-                                description = "Check the NAS is up, SNMP is enabled and still allows UDP 161 from nire-cube, and /persist/secrets/snmp-exporter.env on cube holds the current credentials (systemctl status prometheus-snmp-exporter).";
+                                description = "Check the NAS is up, SNMP is enabled and still allows UDP 161 from nire-cube, and the snmp-exporter-env sops secret holds the current credentials (systemctl status prometheus-snmp-exporter).";
                             };
                         }
                         {

@@ -90,8 +90,9 @@ All `nixos`-class:
   thing to fill it. Until 2026-11-08 these were Grafana-evaluated rules.
 - **`snmp-exporter/snmp-exporter.nix`** — polls the `ts-hive` QNAP over
   SNMPv3 (SHA auth, DES privacy, the only privacy protocol the NAS offers).
-  Credentials come from `/persist/secrets/snmp-exporter.env`, not Nix; the
-  unit fails to start until that file exists. Standard MIBs only so far
+  Credentials come from the sops key `snmp-exporter-env` (an env file as
+  a multi-line string), not Nix; cube fails activation until the key is in
+  `secrets.yaml`. Standard MIBs only so far
   (uptime, `hrStorage`, interface counters); QNAP's own disk and volume
   tables need a module generated from the NAS's MIB file.
 - **`qnap-alerts/qnap-alerts.nix`** — Prometheus rules for the NAS:

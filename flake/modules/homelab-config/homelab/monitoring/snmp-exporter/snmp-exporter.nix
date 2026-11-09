@@ -7,15 +7,17 @@
 # prometheus.nix's `qnap` job. Standard MIBs only so far; QNAP's own disk
 # and volume tables wait on the NAS's MIB file (see "Not yet" below).
 #
-# Credentials are not in the Nix store. The unit reads
-# /persist/secrets/snmp-exporter.env (same /persist/secrets home as
-# grafana's secret_key), which must contain, one per line:
-#     QNAP_SNMP_USER=...
-#     QNAP_SNMP_AUTH_PASS=...
-#     QNAP_SNMP_PRIV_PASS=...
-# Until that file exists the unit fails to start; nothing else depends on it.
-# The exporter expands `${VAR}` in the config itself
-# (--config.expand-environment-variables, added by `environmentFile`).
+# Credentials are not in the Nix store. The sops key `snmp-exporter-env`
+# (secrets.yaml) holds an env file as a multi-line string:
+#     snmp-exporter-env: |
+#         QNAP_SNMP_USER=...
+#         QNAP_SNMP_AUTH_PASS=...
+#         QNAP_SNMP_PRIV_PASS=...
+# No quotes around values, and no spaces, `#` or `$` in them (systemd
+# parses the file). The key must exist in secrets.yaml before cube
+# switches, or activation fails. The exporter expands `${VAR}` in the
+# config itself (--config.expand-environment-variables, added by
+# `environmentFile`).
 #
 # Not yet: QNAP's enterprise tables (disk status and temperature, volume
 # status, fans). Their OIDs come from the NAS's own MIB (Control Panel ->
@@ -23,14 +25,17 @@
 # snmp_exporter's generator, add it to `modules` below, and add the disk
 # alerts to qnap-alerts.nix.
 {
-    nixos = {
+    nixos = { config, ... }: {
+        # Root-owned (the default): the unit reads it as root.
+        sops.secrets.snmp-exporter-env = { };
+
         services.prometheus.exporters.snmp = {
             enable = true;
 
             # Loopback, same reasoning as node-exporter.nix.
             listenAddress = "127.0.0.1";
 
-            environmentFile = "/persist/secrets/snmp-exporter.env";
+            environmentFile = config.sops.secrets.snmp-exporter-env.path;
 
             configuration = {
                 auths.qnap_v3 = {
