@@ -1,6 +1,6 @@
 # `impermanence` — `general-config/impermanence/`
 
-_Last modified: 2026-10-27_
+_Last modified: 2026-11-09_
 
 **Read `WARN-impermanence.nix` itself before changing anything here; this
 page is an index, not a substitute.** It covers what lives in the category
@@ -66,8 +66,8 @@ at all: a folder with a subfolder holding modules is one
 
 ## Imported by
 
-`durandal`, `tenacity` — two of the three NixOS hosts, wiping `/root` on
-every boot. `nire-cube` does **not** — its real install is a plain
+`durandal`, `tenacity` — the NixOS hosts that wipe `/root` on every
+boot. `nire-cube` does **not** — its real install is a plain
 persistent root, not LUKS+impermanence (corrected 2026-08-21). That absence
 is why two other things exist:
 [`users-config/elly/user-settings/WARN-password-required.nix`](elly.md), which

@@ -1,6 +1,6 @@
 # Impermanence, initrd & secrets
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-11-09_
 
 ## Contents
 
@@ -112,6 +112,6 @@ that import it.
   sops-nix's own validation has an explicit `builtins.isPath` branch for
   exactly that form, and a path needs no store copy until a derivation
   consumes it. On unfixed revisions the failure hits any host importing
-  `secrets/sops.nix` (all three NixOS hosts, via the shared `system`
+  `secrets/sops.nix` (every NixOS host, via the shared `system`
   category) and clears only once something realises the file (a real
   `just build`/`switch`, or any eval that forces the manifest).

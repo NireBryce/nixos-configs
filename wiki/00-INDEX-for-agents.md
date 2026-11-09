@@ -39,7 +39,8 @@ root holds only entry points.
   [temporary patches](upkeep-and-admin/temporary-patches-and-hacks.md).
 - [`llm-aided-dev/`](llm-aided-dev/) — working with coding agents:
   [cloud sessions](llm-aided-dev/cloud-sessions.md) (plan and runbook),
-  [risk and impact ratings](llm-aided-dev/risk-and-impact.md) (the 1-10 scale for PR bodies and issues).
+  [risk and impact ratings](llm-aided-dev/risk-and-impact.md) (the 1-10 scale for PR bodies and issues),
+  [skill locations](llm-aided-dev/skill-locations.md) (`.agents/skills`, the `.claude/skills` symlink, and loading a skill).
 - [`meta/`](meta/) — the wiki's own rules and the repo's memory:
   [style guide](meta/styleguide.md), [traps and skills](meta/traps-and-skills.md),
   [history](meta/history.md), [open threads](meta/open-threads.md), and `scripts/`.

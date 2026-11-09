@@ -6,13 +6,22 @@
 > point.
 >
 > This file is canonical; `CLAUDE.md` is a symlink to it. Skills named below
-> are plain markdown at `.agents/skills/<name>/SKILL.md`; any agent can read
-> them as files.
+> live at `.agents/skills/<name>/SKILL.md`; `.claude/skills` is a symlink to
+> that directory, so both paths are the same files.
+>
+> **Where a harness has a skill-loading tool, load a named skill with it**
+> (Claude Code: the `Skill` tool, by name), not by reading the file. The tool
+> is what the harness's skill handling keys on, and it reports the skill's
+> base directory for its relative links. Read the file only to inspect a
+> skill without running it, or in a harness with no such tool (the files are
+> plain markdown, so any agent can follow them that way). Detail:
+> `wiki/llm-aided-dev/skill-locations.md`.
 >
 > This file holds what applies to every session. Path-specific detail lives
 > in `.agents/rules/*.md`. Claude Code loads a rule file only when a file
-> matching its `paths:` frontmatter is read; other harnesses load none, so
-> open the rule file pointed to below before working under its paths.
+> matching its `paths:` frontmatter is read; other harnesses load none. Open
+> the rule file pointed to below yourself before working under its paths, and
+> always before creating a file there, since a new file is not read first.
 
 ## Hard rules
 
@@ -23,27 +32,30 @@ reason.
   on boot. (Safety)
 - **Never decrypt sops output into the conversation.** (Safety)
 - **File issues and PRs only in `NireBryce/nixos-configs`**, unless the user
-  asks for a specific filing elsewhere. (Working in this repo)
+  asks for a specific filing elsewhere. Security notes go in the private
+  `elly/infra-notes` repo, never in public text. (Working in this repo)
 - **"push" means skill `ship`, landing on `experimental`**; `main` is
-  promotion-only. (Working)
+  promotion-only. (Working in this repo)
 - **Do work that will branch, commit or check out in its own worktree**,
-  not the shared checkout. (Working)
-- **`git add` before `nix eval`.** (Working)
+  not the shared checkout, unless the user says to use the shared checkout.
+  (Working in this repo)
+- **`git add` before `nix eval`.** (Working in this repo)
 - **Public text says what a guard enforces, not what got past it.**
-  (Working)
+  (Working in this repo)
 - **Say which rung you reached**, never more. (Before calling it done)
 - **A change that makes a wiki page stale fixes it in the same change** —
-  skill `wiki-sync`.
-- **Trailer `Co-Authored-By: Claude`; prose says "the user".** (Conventions)
+  skill `wiki-sync`. (Docs)
+- **Commit trailer `Co-Authored-By: <your agent name>`; prose says "the
+  user".** (Conventions)
 
 ## Safety
 
 `WARN-impermanence.nix` (reached through the `impermanence` category)
 deletes the `/root` btrfs subvolume in initrd on every boot and needs a
-`root-blank` subvolume. **Two of the three NixOS hosts import it and wipe
-`/root` on boot: `nire-durandal`, `nire-tenacity`.** `nire-cube` does not
-(plain persistent root, no LUKS or impermanence). Check the specific host;
-never assume all or none wipe. Read `WARN-impermanence.nix` before changing
+`root-blank` subvolume. **`nire-durandal` and `nire-tenacity` import it and
+wipe `/root` on boot.** `nire-cube` does not (plain persistent root, no LUKS
+or impermanence). Check the specific host in `host-config/hosts.nix`; never
+assume all or none wipe. Read `WARN-impermanence.nix` before changing
 anything near it, and take care with
 `flake/modules/general-config/impermanence/` and `fileSystems`/`boot` in the
 host hardware modules — `.agents/rules/impermanence.md`.
@@ -60,8 +72,9 @@ values twice. Skill `secrets-hygiene`; enrolled hosts:
 
 **Switch/boot state is not recorded in this repo**, because it goes stale.
 Whether a host runs what the tree evaluates to can only be answered on the
-host: `just baseline`, `just diff-deployed`, or a forced toplevel eval
-against `/run/current-system`. Before claiming a change affects a host, find
+host: `just baseline`, `just diff-deployed`, or evaluating
+`system.build.toplevel` (see Commands) and comparing it with
+`/run/current-system`. Before claiming a change affects a host, find
 out what it runs; for a hardware fact, ask (§2). Capture `just baseline`
 before switching: once the old generation is collected it can't be
 re-derived (§24).
@@ -72,8 +85,8 @@ Mesa), config values copied from a linked file. They drift silently. Write
 the pointer (`the modules under X`, the file, the command) or name the items.
 Keep a number only when it is the rule itself, a dated incident or experiment
 record, a PR/issue/commit reference, or an interface a user types (a port).
-Skill `fact-hygiene` (cat 4); `factcheck docrefs` catches the bare
-count-of-files shape. factcheck is young (adopted 2026-10-30): read a
+Skill `fact-hygiene` (category 4); `factcheck docrefs` catches the bare
+count-of-files shape. `factcheck` was adopted 2026-10-30: read a
 finding before acting on it, and pin the `factcheck` flake input if it
 misbehaves.
 
@@ -82,7 +95,8 @@ it before stating any count) and the table in `wiki/fleet/hosts.md`.
 First-boot history: "Confirmed-on-hardware facts" in `wiki/meta/history.md`.
 
 - **Check `hostname` before assuming which machine you're on.** Under Claude
-  Code, `.agents/hooks/session-start.sh` injects hostname, branch, worktree,
+  Code and ZCode (a coding-agent harness; `.zcode/config.json` wires the same
+  hook), `.agents/hooks/session-start.sh` injects hostname, branch, worktree,
   dirty count, `core.hooksPath` and the `just agent` helper names. Elsewhere,
   run `just agent where`.
 - **ssh to another host over the tailnet as `ts-<x>`, never `nire-<x>`.**
@@ -90,24 +104,24 @@ First-boot history: "Confirmed-on-hardware facts" in `wiki/meta/history.md`.
   tenacity's sshd is tailnet-only. `just reach <x>` tries every name. Rule
   and table: `wiki/fleet/hosts.md`; as code: `tailnet-hosts.nix`.
 
-**Many skills and guards only trigger under the `Bash` tool.** The git,
-`just`, nix and secrets guards match it, and skills and recipes are bash
-commands. A skill marked `**Needs:** bash-guards` depends on them (skill
-`new-skill`). Under another harness, shell or tool those protections are
-off: warn the user, and run commands through `just agent guard-check` (skill
-`guards-without-hooks`).
+**Many skills and guards only trigger under the `Bash` tool.** The git, `just`,
+nix and secrets guards match it, and the scripts and recipes that skills tell
+you to run are bash commands. A skill marked `**Needs:** bash-guards` depends
+on them (skill `new-skill`). Under another harness, shell or tool those
+protections are off: warn the user, and run commands through `just agent
+guard-check` (skill `guards-without-hooks`).
 
 ## Before you start
 
-- **Find the page for the task.** `wiki/00-INDEX-for-agents.md` routes by
-  task. `wiki/agent-lessons-learned.md` lists every past mistake by the
-  moment it applies; `just agent lessons <path>` prints the ones for a file
-  or area. Bare `just` lists every recipe.
-- **A check fails only in CI?** Read the job log for the line that names the
-  cause, remove that difference locally (`env -u TERM`, a `PATH` without the
-  tool) and watch it fail before fixing (§53).
-- **Someone reports a bug?** Run skill `investigate-bug` first (`just threads
-  "<keywords>"`), before reproducing anything.
+- **Find the page for the task.** `wiki/00-INDEX-for-agents.md` routes by task.
+  `wiki/agent-lessons-learned.md` lists every past mistake by the moment it
+  applies; `just agent lessons <path>` prints the ones for a file or area. Bare
+  `just` lists every recipe.
+- **When a check fails only in CI:** read the job log for the line that names
+  the cause, remove that difference locally (`env -u TERM`, a `PATH` without
+  the tool) and watch it fail before fixing (§53).
+- **When someone reports a bug:** load skill `investigate-bug` first (its first
+  step is `just threads "<keywords>"`), before reproducing anything.
 - **Ask "did it work before?" first.** `journalctl --list-boots` plus a grep
   settles regression-vs-always-broken faster than arguing about mechanism.
 - **Before hand-building a multi-step pipeline, check `just agent`**, which
@@ -116,10 +130,10 @@ off: warn the user, and run commands through `just agent guard-check` (skill
 
 ## Traps
 
-One line per task. Read the rule (short) or skill (full mechanism) before the
-matching task. Under Claude Code and ZCode, the lesson-reminder hook adds each
-area's one-line reminder to your context on the first edit or command that
-touches it, from `.agents/lessons-map.toml`.
+One line per task. Read the rule (short) or load the skill (full mechanism)
+before the matching task. Under Claude Code and ZCode, the lesson-reminder
+hook adds each area's one-line reminder to your context on the first edit or
+command that touches it, from `.agents/lessons-map.toml`.
 
 - Writing, renaming or browsing a module: its name is its filename, a rename
   renames it, categories come from folders — skill `new-flake-module`,
@@ -164,10 +178,11 @@ worktree`** (skill `use-a-worktree`). Skip it for read-only work, or when the
 user says to work in the shared checkout. If git state doesn't match your own
 last action, check `git reflog` before concluding anything is broken.
 
-**"push" means the `ship` skill, landing on `experimental`** (the default
-branch): branch, PR, one combined ask covering merging and deleting the
-branch afterward. If the user names a branch, push directly there, except
-`main`: it is the promoted known-good and moves only by PR from
+**"push" means the `ship` skill, landing on `experimental`** (GitHub's default
+branch; a local `origin/HEAD` or a harness's "main branch" line may still say
+`main`, which is wrong for PRs): branch, PR, one combined ask covering merging
+and deleting the branch afterward. If the user names a branch, push directly
+there, except `main`: it is the promoted known-good and moves only by PR from
 `experimental` after hardware verification. Don't assume a branch; check `git
 branch --show-current`.
 
@@ -175,12 +190,12 @@ branch --show-current`.
 another project (nixpkgs, ble.sh, carapace, anything else). The one exception
 is the user asking, in their own message, for that specific filing on that
 specific project; approving a list of tasks doesn't count, even if one item is
-an upstream filing. `propose-issue` files here only. Drafts for other
-projects (`_loose-ends/bugs-pending-submission/`,
-`wiki/meta/open-threads.md`) are for the user to file; don't work through
-them. Security notes are the other exception (next paragraph). A filing here
-can still ping another project through GitHub autolinking (`owner/repo#123`
-in a title or body): grep for that pattern before filing.
+an upstream filing. Skill `propose-issue` files here only. Drafts for other
+projects (`_loose-ends/bugs-pending-submission/`, `wiki/meta/open-threads.md`)
+are for the user to file; don't file, edit or close them unless asked. Security
+notes are the other exception (next paragraph). A filing here can still ping
+another project through GitHub autolinking (`owner/repo#123` in a title or
+body): grep for that pattern before filing.
 
 **Security and threat-model analysis goes in the private `elly/infra-notes`
 repo on the forge (tailnet-only), never in anything public: PR bodies, commit
@@ -233,7 +248,7 @@ hash doesn't prove breakage (import order permutes
 after a change you expected to matter, investigate (§4). Compare values with
 `just diff`, including across any module *removal* (removing fish removed the
 man index, §7), and make refactored paths run. Model and evaluate a risky
-mechanism before betting a refactor on it (§12).
+mechanism before a refactor relies on it (§12).
 
 **Read the output, not the status.** `cmd | tail` exits 0 when `cmd` failed;
 use `set -o pipefail` or don't pipe (§20). Nix puts the innermost cause last,
@@ -245,8 +260,9 @@ can return non-zero; before believing a count, know what it counts (§22,
 commit (§1). When an existing check fires on new work, fix its model before
 reaching for its escape flag (§23).
 
-**Then** run `just preflight` (what CI runs) and skill `wiki-sync` for any
-wiki page the change made stale.
+**Then** run the preflight as skill `ship` step 0 describes (`just
+preflight` is what CI runs), and load skill `wiki-sync` for any wiki page the
+change made stale.
 
 ## Conventions
 
@@ -298,36 +314,43 @@ need to act on the text.
 
 ## Commands
 
-`just` recipes live in the root `.justfile` and work from anywhere. Bare
-`just` lists them with a one-line summary each; that list is the source of
-truth. `just preflight` (wiki-lint + branches-test + check + modules + lint +
-the script tests) is what CI runs and is the ship skill's step 0.
-`just hm-collisions`, `just root-drift` and `just home-drift` are read-only
-and only meaningful on the hardware. `.agents/settings.json` pre-approves a
-few read-only recipes; what may join them: `.agents/rules/agent-config.md`.
+`just` recipes live in the root `.justfile` and work from anywhere. Bare `just`
+lists them with a one-line summary each; that list is the source of truth.
+`just preflight` is what CI runs; its steps are the `preflight` recipe in
+`.justfile`. Skill `ship` step 0 gives the faster forms and the docs-only
+exception. `just hm-collisions`, `just root-drift` and `just home-drift` are
+read-only and only meaningful when run on the host they check.
+`.agents/settings.json` pre-approves a few read-only recipes; what may join
+them: `.agents/rules/agent-config.md`.
 
 **With no usable nix** (a Claude Code cloud container has nix but can't fetch
-the flake inputs, and has no `just`), the git hooks run
-`flake/scripts/offline_checks.py` instead of failing, and say what they left
-to CI. `--no-verify` should not be needed. `just preflight-offline` runs the
-same set by hand; details in `book/src/agent-checks-and-guards.md`.
+the flake inputs, and has no `just` until its setup script installs it), the
+git hooks run `flake/scripts/offline_checks.py` instead of failing, and say
+what they left to CI. Run the same set by hand with `python3
+flake/scripts/offline_checks.py preflight` (what `just preflight-offline`
+runs). The pre-push hook still fails in a cloud container until the item for
+this repo in issue #617 is fixed; `wiki/llm-aided-dev/cloud-sessions.md` says
+when `--no-verify` is acceptable. Details in
+`book/src/agent-checks-and-guards.md`.
 
 `host` derives from `hostname`, falling back to `nire-durandal` off-host.
 Put the override **before** the recipe name (`just host=nire-durandal build`);
 after it, just reads it as a second recipe name and errors.
 
-To iterate, evaluate directly from `flake/`. `elly` is literal here: it reads
-an *evaluated* config, where the attribute name is already resolved.
+To iterate, evaluate directly from `flake/`. `elly` is literal in the second
+command because it reads an *evaluated* config, where the attribute name is
+already resolved.
 
 ```sh
 nix eval --raw .#nixosConfigurations.nire-durandal.config.system.build.toplevel.drvPath
 nix eval --raw '.#nixosConfigurations.nire-durandal.config.home-manager.users.elly.home.activationPackage.drvPath'
 ```
 
-`build`/`boot`/`switch` go through `flake/scripts/rebuild.sh`, which picks
-`nh darwin` or `nh os` off the flake. On a real host, `just build`/`switch`
-is a real test, not just evaluation. A NixOS host can't be built from another
-machine (no remote builder, no binfmt); `rebuild.sh` says so.
+`build`/`boot`/`switch` go through `flake/scripts/rebuild.sh`, which picks `nh
+darwin` or `nh os` off the flake. On a real host, `just build`/`switch` is a
+real test, not just evaluation. There is no remote builder and no binfmt, so a
+NixOS host builds only on Linux and a darwin host only on the Mac; `rebuild.sh`
+refuses the wrong OS and says so.
 
 ## Architecture
 
