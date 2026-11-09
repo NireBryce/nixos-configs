@@ -39,7 +39,9 @@ of this repo's sops secret:
     sops -d --extract '["tailscale_api_token"]' <secrets.yaml>
 
 per skill secrets-hygiene: a bare `sops -d` prints the whole file, this
-extracts one key. TAILNET defaults to the tailnet this repo's hosts are
+extracts one key. On hosts whose decryption key is the SSH host key it asks
+for sudo (a prompt on the terminal); from a session with no terminal it
+stops and says so. TAILNET defaults to the tailnet this repo's hosts are
 already on (see wiki/config-structure/categories/reverse-proxy.md) but can be overridden
 with $TAILSCALE_TAILNET for a different one.
 """
@@ -60,11 +62,38 @@ def vip_api(name):
     return f"{BASE}/vip-services/{name}"
 
 
-def get_token():
-    out = subprocess.run(
-        ["sops", "-d", "--extract", '["tailscale_api_token"]', str(SECRETS_FILE)],
+def _sops_extract(prefix):
+    # Captured, so the value goes to this process and nowhere else. sudo's
+    # password prompt is written to the terminal, not to this pipe.
+    return subprocess.run(
+        prefix + ["sops", "-d", "--extract", '["tailscale_api_token"]', str(SECRETS_FILE)],
         capture_output=True, text=True,
     )
+
+
+def get_token():
+    # First try as the invoking user: that decrypts where the user's own
+    # key is enrolled (darwin, a personal key file). On the hosts whose
+    # recipient is the SSH host key (the usual case here) it fails, because
+    # the key is root-only. sops-interactive-key.nix regenerates a root
+    # age key from the host key at every boot, so `sudo sops` needs no
+    # extra environment.
+    out = _sops_extract([])
+    if out.returncode != 0 and os.geteuid() != 0:
+        if not sys.stdin.isatty():
+            sys.exit(
+                "tailscale_api_token needs sudo here (the host key is "
+                "root-only) and there is no terminal to prompt on. Run this "
+                "from an interactive shell."
+            )
+        print("tailscale_api_token needs sudo (the host key is root-only).",
+              file=sys.stderr)
+        # `sudo -v` attached to the terminal shows the prompt and caches the
+        # credential; the captured sops call below then runs with -n so it
+        # can never wait on a hidden prompt.
+        if subprocess.run(["sudo", "-v"]).returncode != 0:
+            sys.exit("sudo was not granted; cannot read tailscale_api_token.")
+        out = _sops_extract(["sudo", "-n"])
     if out.returncode != 0:
         sys.exit(
             "Could not read tailscale_api_token from secrets.yaml -- add it "

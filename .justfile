@@ -300,6 +300,7 @@ preflight:
     @python3 flake/scripts/tests/test_extracted_scripts.py
     @python3 flake/scripts/tests/test_comment_wrap.py
     @python3 flake/scripts/tests/test_init_ssh_handle.py
+    @python3 flake/scripts/tests/test_tailscale_acl_token.py
     @just guards-test
     @just preflight-mirror-test
     @python3 flake/scripts/tests/test_offline_checks.py
@@ -502,6 +503,12 @@ init-ssh-handle *args:
 init-ssh-handle-test:
     python3 {{scripts}}/tests/test_init_ssh_handle.py
 
+# How tailscale-acl.py reads its API token: as the user first, then `sudo sops`
+# with an interactive prompt, never without a terminal. subprocess is mocked;
+# pure stdlib; runs in preflight and CI
+tailscale-acl-token-test:
+    python3 {{scripts}}/tests/test_tailscale_acl_token.py
+
 # Has this already been seen? GitHub issues + wiki/ + agent-lessons-learned.md
 # positional-arguments + "$@": arguments reach the script as-is, never
 # re-parsed by the recipe's shell line.
@@ -563,8 +570,9 @@ issue title desc=title:
 
 # Tailnet policy file via API instead of the admin console: get/diff/apply
 tailscale-acl cmd *args:
-    # Needs tailscale_api_token in secrets.yaml (sops) -- see the script's
-    # own header. `diff`/`apply` take a local HuJSON file to compare against.
+    # Needs tailscale_api_token in secrets.yaml (sops), read with sudo on
+    # hosts whose key is the SSH host key: run it from a terminal. See the
+    # script's own header. `diff`/`apply` take a local HuJSON file to compare against.
     @{{scripts}}/tailscale-acl.py {{cmd}} {{args}}
 
 # Update inputs, then re-check

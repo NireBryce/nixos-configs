@@ -83,9 +83,11 @@ grants fall into these groups:
 4. Run the diff again. "No difference" means the repo and the tailnet agree.
 
 The script extracts the one key `tailscale_api_token` from `secrets.yaml`
-with sops, so it needs a host or session that can decrypt that file. An agent
-session without that key cannot run `diff` or `apply` (seen 2026-11-09); the
-user runs them. Never print the token, and never decrypt the whole file to
+with sops. The decryption key on the hosts is the SSH host key, readable only
+by root, so the script tries sops as you, then asks for sudo with a prompt on
+the terminal. Run `just tailscale-acl` from an interactive shell. From a
+session with no terminal, such as an agent's, it stops and says so (seen
+2026-11-09); the user runs `diff` and `apply`. Never print the token, and never decrypt the whole file to
 look for it (skill `secrets-hygiene`).
 
 `svc:` service objects are a separate resource from the policy file. Use
