@@ -33,6 +33,7 @@ all false by 2026-09-09: the tree had grown from 151 to 263 files.)
 - [When a rename makes the old name ungreppable, say what it was](#when-a-rename-makes-the-old-name-ungreppable-say-what-it-was)
 - [A bug recorded in a comment stays in the file](#a-bug-recorded-in-a-comment-stays-in-the-file)
 - [File placement is load-bearing](#file-placement-is-load-bearing)
+- [Custom options live in a `-options.nix` module](#custom-options-live-in-a--optionsnix-module)
 
 ## Opening brackets go on the same line as whatever causes them
 
@@ -308,3 +309,18 @@ Not formatting, but it belongs here because getting it wrong produces no error:
   category stops evaluation (it used to merge silently, §34).
 
 `just check` fails on an orphan (`checkOrphans = "eval"`, so `--no-build` fails too); `just modules` reports untracked files and checks drift.
+
+## Custom options live in a `-options.nix` module
+
+A module that declares an option this repo invents (`customOption.*`,
+`nire.*`, `environment.persistence`) lives in a file named
+`<topic>-options.nix`, in the folder of the modules that read the option. The
+file declares and documents the option and sets nothing else. The module
+that acts on the option stays in `<topic>.nix`. Example:
+`hardware-config/hardware/memory/swap-policy-options.nix` declares
+`customOption.swap.policy` and `swap-policy.nix` reads it. `grep -rl
+'mkOption' flake/modules` should list only `*-options.nix` files.
+
+Re-declaring an existing option to add an `apply` (as
+`drop-unsupported-packages.nix` does for `home.packages`) is not a custom
+option and keeps its own name.

@@ -15,6 +15,7 @@ Applies to every module under `flake/modules/`, packages included.
 - [`_:` for an inner module lambda that uses no argument](#_-for-an-inner-module-lambda-that-uses-no-argument)
 - [Comments](#comments)
 - [File placement produces no error when wrong](#file-placement-produces-no-error-when-wrong)
+- [Custom options go in `<topic>-options.nix`](#custom-options-go-in-topic-optionsnix)
 
 ## Counts
 
@@ -26,9 +27,9 @@ Never hand-edit. By hand it is
 
 | What | Files |
 |---|---|
-| total `.nix` files under `flake/modules/` | 252 |
-| header comment (`# This is a dirs-as-categories module…`) | 236 |
-| `# summary:` / `# package summary:` comment | 190 |
+| total `.nix` files under `flake/modules/` | 253 |
+| header comment (`# This is a dirs-as-categories module…`) | 237 |
+| `# summary:` / `# package summary:` comment | 191 |
 | `with pkgs;` package lists | 119 |
 
 <!-- /generated -->
@@ -129,3 +130,14 @@ option without a reason beyond tidiness.
   evaluation (was a silent merge, §34).
 
 `just check` fails on an orphan (`checkOrphans = "eval"`, so `--no-build` fails too); `just modules` reports untracked files and checks drift.
+
+## Custom options go in `<topic>-options.nix`
+
+- A module that declares an option this repo invents (`customOption.*`,
+  `nire.*`, `environment.persistence`) is named `<topic>-options.nix`, sits
+  beside the modules that read it, and declares the option and nothing else.
+  The module that acts on it is `<topic>.nix`. Live example:
+  `memory/swap-policy-options.nix` and `memory/swap-policy.nix`.
+- `grep -rl mkOption flake/modules` should list only `*-options.nix` files.
+- Adding an `apply` to an existing option (`drop-unsupported-packages.nix`)
+  is not a custom option; keep its name.

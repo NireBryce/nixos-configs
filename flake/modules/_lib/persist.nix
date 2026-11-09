@@ -19,7 +19,7 @@ rec {
     # `config.fileSystems ? "/persist"` because environment.persistence adds
     # fileSystems entries: testing for one from inside the persistence value is
     # infinite recursion. Set in general-config/system/persistence/
-    # declare-persistence-option.nix (default: usesImpermanence).
+    # persistence-options.nix (default: usesImpermanence).
     hasPersistVolume = config: config.nire.hasPersistVolume;
 
     persistEntries = entries: { environment.persistence."/persist" = entries; };

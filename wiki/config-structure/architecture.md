@@ -121,7 +121,7 @@ flowchart LR
         n15("<b>homelab/</b><br/><i>n · 22</i>")
     end
     subgraph g4["hardware-config"]
-        n13("<b>hardware/</b><br/><i>n · 8</i>")
+        n13("<b>hardware/</b><br/><i>n · 9</i>")
         n14("<b>peripherals/</b><br/><i>n · 2</i>")
     end
     subgraph g5["general-config"]

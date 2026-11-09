@@ -174,7 +174,7 @@ All three rely on `environment.persistence."/persist".directories`/`.files` bein
 same merge behavior as `environment.systemPackages` and the same one that
 makes `home.file.<n>.text` a trap on the Home Manager side (see
 [shell-config](shell-config/00-INDEX.md)). See
-`general-config/system/persistence/declare-persistence-option.nix`'s own header (and
+`general-config/system/persistence/persistence-options.nix`'s own header (and
 [impermanence](impermanence.md)) for why that option has to be declared
 unconditionally even on hosts where nothing populates it.
 
@@ -244,7 +244,7 @@ via `elly-home-manager` rather than through this category import at all.
 ## See also
 
 - [impermanence](impermanence.md) — the "don't confuse the two" note on
-  `persistence/declare-persistence-option.nix`.
+  `persistence/persistence-options.nix`.
 - [virtualization](virtualization.md) and [containers](containers.md) — both
   split out of `system` so hosts could opt out (or, for containers, could in
   principle); easy to confuse the two by history and by name.

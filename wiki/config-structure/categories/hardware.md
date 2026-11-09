@@ -27,10 +27,11 @@ Every file is `nixos`-class:
 - **`storage/`** — `smartd.nix` (S.M.A.R.T. monitoring: smartd with autodetect, a short
   self-test daily and a long one weekly) and
   `coredump-limit.nix` (`systemd.coredump` `MaxUse`/`KeepFree` caps).
-- **`memory/swap-policy.nix`** — declares the option
+- **`memory/swap-policy-options.nix`** declares the option
   `customOption.swap.policy` (`unmanaged` default, `zram`, `zswap`);
-  `zswap` turns zram off and enables `boot.zswap`. Only tenacity sets it
-  (`zswap`, in `hardware-tenacity.nix`).
+  **`memory/swap-policy.nix`** acts on it: `zswap` turns zram off and
+  enables `boot.zswap`. Only tenacity sets it (`zswap`, in
+  `hardware-tenacity.nix`).
 
 `bluetooth/`, `firmware/`, `storage/` and `memory/` were plain folders in
 the [system](system.md) category until 2026-10-15; the hosts that import

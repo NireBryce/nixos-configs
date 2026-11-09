@@ -74,12 +74,12 @@ is why two other things exist:
 warns that a non-impermanence host has no login-password help here (cube
 itself is excluded by hostname as of 2026-09-01 — its password was set by
 hand before it was switched), and
-`general-config/system/persistence/declare-persistence-option.nix` — a **different,
+`general-config/system/persistence/persistence-options.nix` — a **different,
 easily confused file**, next section.
 
 ## The other "impermanence" — don't confuse the two
 
-`general-config/system/persistence/declare-persistence-option.nix` is **not** part of
+`general-config/system/persistence/persistence-options.nix` is **not** part of
 this category. It's a subdirectory of `general-config/system/` (named `impermanence/`
 until 2026-10-27, hence the confusion), collected into the `system` category
 aggregate like everything else under `general-config/system/`, not into this one. It
@@ -110,7 +110,7 @@ not through each host's own per-host imports list.
   what's in the category once it does.
 - [../impermanence-and-secrets.md](../impermanence-and-secrets.md) — the
   cross-cutting topic page.
-- [system](system.md) — for `declare-persistence-option.nix` and the
+- [system](system.md) — for `persistence-options.nix` and the
   `*-persist.nix` sibling-file convention.
 - [virtualization](virtualization.md), [desktop-env](desktop-env.md) — two
   more categories with their own `*-persist.nix` files following the same
