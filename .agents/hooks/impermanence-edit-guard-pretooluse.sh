@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # PreToolUse hook (Edit|Write|MultiEdit matcher). Warns when a file edit
 # lands in one of the two places AGENTS.md's Safety section fences off:
-# the impermanence tree (flake/modules/general-config/impermanence/ -- two
-# of the three NixOS hosts import it and wipe /root on boot, and
+# the impermanence tree (flake/modules/general-config/impermanence/ --
+# nire-durandal and nire-tenacity import it and wipe /root on boot, and
 # WARN-impermanence.nix inside it deletes the /root btrfs subvolume in
 # initrd on every boot) and the host hardware modules
 # (flake/modules/host-config/<host>/hardware/hardware-<host>.nix, where
@@ -55,7 +55,7 @@ reason=""
 case "$file_path" in
     */flake/modules/general-config/impermanence/*|\
     flake/modules/general-config/impermanence/*)
-        reason="This edit is in the impermanence tree. Two of the three NixOS hosts (nire-durandal, nire-tenacity) import it and wipe /root on boot; WARN-impermanence.nix deletes the /root subvolume in initrd every boot and needs root-blank to exist. Read AGENTS.md's Safety section and .agents/skills/impermanence-initrd/SKILL.md before changing anything near it -- and trust /proc/1/mountinfo over lsblk/findmnt when verifying, the shell's view of mounts can look wrong while being correct."
+        reason="This edit is in the impermanence tree. nire-durandal and nire-tenacity import it and wipe /root on boot; WARN-impermanence.nix deletes the /root subvolume in initrd every boot and needs root-blank to exist. Read AGENTS.md's Safety section and .agents/skills/impermanence-initrd/SKILL.md before changing anything near it -- and trust /proc/1/mountinfo over lsblk/findmnt when verifying, the shell's view of mounts can look wrong while being correct."
         ;;
     */flake/modules/host-config/*/hardware/*|\
     flake/modules/host-config/*/hardware/*)

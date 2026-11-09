@@ -12,8 +12,8 @@ before changing anything here.
 - `WARN-impermanence.nix` (reached through the `impermanence` category)
   deletes the `/root` btrfs subvolume in initrd on every boot and needs a
   `root-blank` subvolume to exist. Read it before changing anything near it.
-- Two of the three NixOS hosts import it and wipe `/root` on boot:
-  `nire-durandal`, `nire-tenacity`. `nire-cube` deliberately does not
+- `nire-durandal` and `nire-tenacity` import it and wipe `/root` on boot.
+  `nire-cube` deliberately does not
   (plain persistent root, not LUKS+impermanence). Check the specific host
   in `flake/modules/host-config/hosts.nix`; never assume "every host" or
   "no host".
