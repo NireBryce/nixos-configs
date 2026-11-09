@@ -74,6 +74,8 @@ root holds only entry points.
   [disk formatting](fleet/disk-formatting.md),
   [name resolution](fleet/name-resolution.md), [durandal gaming](fleet/durandal-gaming.md),
   [FHS environments](fleet/fhs-environments.md).
+- [`ssh/`](ssh/) — SSH access to the fleet:
+  [minting a YubiKey SSH key](ssh/minting-yubikey-ssh-keys.md).
 - [`upkeep-and-admin/`](upkeep-and-admin/) — recurring chores:
   [maintenance](upkeep-and-admin/maintenance.md),
   [expiry schedule](upkeep-and-admin/maintenance-schedule.md),
@@ -111,6 +113,7 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
 | check what key/credential expiry is coming due | [upkeep-and-admin/maintenance-schedule.md](upkeep-and-admin/maintenance-schedule.md), skill [`maintenance-schedule`](../.agents/skills/maintenance-schedule/SKILL.md) |
 | run the fleet's periodic upkeep — lock PR, deploys, store hygiene | [upkeep-and-admin/maintenance.md](upkeep-and-admin/maintenance.md), [upkeep-and-admin/flake-lock-weekly-bump.md](upkeep-and-admin/flake-lock-weekly-bump.md) |
 | work out which name or IP answers for what (forward, reverse, `.local`, `svc:`) | [fleet/name-resolution.md](fleet/name-resolution.md) |
+| create a YubiKey SSH key (FIDO2 or PIV) and authorize it on the fleet | [ssh/minting-yubikey-ssh-keys.md](ssh/minting-yubikey-ssh-keys.md) |
 
 ## Pages
 

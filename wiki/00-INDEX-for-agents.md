@@ -30,6 +30,8 @@ root holds only entry points.
 - [`fleet/`](fleet/) — the machines: [hosts](fleet/hosts.md),
   [disk formatting](fleet/disk-formatting.md),
   [name resolution](fleet/name-resolution.md), [durandal gaming](fleet/durandal-gaming.md).
+- [`ssh/`](ssh/) — SSH access to the fleet:
+  [minting a YubiKey SSH key](ssh/minting-yubikey-ssh-keys.md).
 - [`upkeep-and-admin/`](upkeep-and-admin/) — recurring chores:
   [maintenance](upkeep-and-admin/maintenance.md),
   [expiry schedule](upkeep-and-admin/maintenance-schedule.md),
@@ -65,6 +67,7 @@ root holds only entry points.
 | check credential expiry | [upkeep-and-admin/maintenance-schedule-for-agents.md](upkeep-and-admin/maintenance-schedule-for-agents.md), skill `maintenance-schedule` |
 | run the fleet's periodic upkeep | [maintenance.md § Quick facts](upkeep-and-admin/maintenance.md#quick-facts) |
 | work out which name/IP answers for what | [name-resolution.md § Quick facts](fleet/name-resolution.md#quick-facts) |
+| create a YubiKey SSH key and authorize it | [ssh/minting-yubikey-ssh-keys.md § Quick facts](ssh/minting-yubikey-ssh-keys.md#quick-facts) |
 | reach or debug a cube service | [homelab/reaching-services.md § Quick facts](homelab/reaching-services.md#quick-facts) |
 | cube lockout reset, Sunshine web UI, stream | [homelab/common-commands.md § Quick facts](homelab/common-commands.md#quick-facts) |
 | cube's Claude Remote Control units | [homelab/claude-rc.md § Quick facts](homelab/claude-rc.md#quick-facts) |

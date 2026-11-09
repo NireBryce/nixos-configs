@@ -58,6 +58,12 @@
             # deja is the iPad.
             "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFwOpjlybwn/ebH4KKoAcsVQ41wxeqD41CyfIALkV61t8BXV2Wf2pdnrBMxLuHHi9+uq7DlGs2nrW938WtaHvRo= elly@deja"
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMbt2aSZdU5732g4yNXo/pOnl2DZDMKKP4cPPHyAcIkF elly@nire-iona-termius"
+            # The YubiKey's FIDO2 resident key (ed25519-sk, verify-required:
+            # PIN and touch on every use), added 2026-11-08.
+            # SHA256:9Cyu88+1AkLWFE31DAOOfTQiRk4P5fRTd627G9WExvw
+            # Load it with `ssh-add -K`; `ssh-keygen -K` recovers the handle
+            # file on a new machine.
+            "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIPih1Lu64Oi9qIcCTSMrdf2/HduPNYmZa2IJJKEefzosAAAABHNzaDo= yubikey"
             ];
         };
     };
