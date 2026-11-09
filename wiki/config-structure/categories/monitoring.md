@@ -1,6 +1,6 @@
 # `monitoring` — `homelab-config/homelab/monitoring/`
 
-_Last modified: 2026-11-08_
+_Last modified: 2026-11-09_
 
 Prometheus + Alertmanager + Grafana, scraping this host's own resource metrics. Cube-only so
 far (added 2026-08-23; under the `homelab` umbrella since 2026-08-27).
@@ -92,12 +92,15 @@ All `nixos`-class:
   SNMPv3 (SHA auth, DES privacy, the only privacy protocol the NAS offers).
   Credentials come from the sops key `snmp-exporter-env` (an env file as
   a multi-line string), not Nix; cube fails activation until the key is in
-  `secrets.yaml`. Standard MIBs only so far
-  (uptime, `hrStorage`, interface counters); QNAP's own disk and volume
-  tables need a module generated from the NAS's MIB file.
+  `secrets.yaml`. It collects the standard MIBs (uptime, `hrStorage`,
+  interface counters) and QNAP's own disk, RAID, storage-pool, fan, power and
+  temperature objects. Those OIDs come from the NAS's QTS-MIB (enterprise
+  55062, branch `.2`), not the older 24681 tree.
 - **`qnap-alerts/qnap-alerts.nix`** — Prometheus rules for the NAS:
-  unreachable, and a volume over 90% full. The volume rule's
-  `hrStorageDescr` regex is unverified against the NAS.
+  unreachable, QNAP's own metrics missing, a storage pool in an error state or
+  over 90% full, a disk over 55 C, and a power failure. There is no rule on
+  disk or RAID status yet: the MIB gives those as free text with no values, so
+  a rule waits on a real string from the NAS.
 - **`alertmanager/alertmanager.nix`** — receives the alerts from
   `prometheus.nix`. Its `default` receiver has no notification channel yet,
   so alerts show in Grafana (Alertmanager datasource) and go nowhere else.

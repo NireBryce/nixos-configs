@@ -1,6 +1,6 @@
 # Homelab services
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-11-09_
 
 Everything here is reachable over the tailnet and nowhere else. These pages
 are for doing a thing with a running service: no Nix involved, and useful on
@@ -25,6 +25,7 @@ can happen with no commit to this repo at all.
 | *(all of cube's web services)* | `nire-cube` | `https://ts-cube.moose-micro.ts.net/` | [Reaching cube's services](reaching-services.md) |
 | *(commands: lockout reset, Sunshine web UI, deploy)* | `nire-cube` | — | [Common commands](common-commands.md) |
 | *(what's still unfinished)* | `nire-cube` | — | [Pending setup](pending-setup.md) |
+| QNAP SNMP monitoring — disk, RAID, pool and power alerts | `nire-cube` | — | [Monitoring the QNAP](qnap-monitoring.md) |
 | golink — `go/` shortlinks | `nire-cube` | `http://go/` | [Creating go/ links](creating-golinks.md) |
 | Forgejo — self-hosted git forge | `nire-cube` | `https://git.moose-micro.ts.net/` (short: `http://git/`) | [Using the forge](forgejo.md) |
 | practice loop — using the forge + CI like a workplace | `nire-cube` | — | [Practicing a workplace coding environment](practice-environment.md) |

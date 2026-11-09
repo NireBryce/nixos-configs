@@ -211,7 +211,8 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   to check when something doesn't answer),
   [using the forge](homelab/forgejo.md),
   [practicing a workplace coding environment with it](homelab/practice-environment.md),
-  [using Grafana](homelab/grafana.md), and
+  [using Grafana](homelab/grafana.md),
+  [monitoring the QNAP](homelab/qnap-monitoring.md), and
   [creating go/ links](homelab/creating-golinks.md), plus
   [pending setup](homelab/pending-setup.md) — what's running but not
   finished, tracked as `pending-setup`-labelled issues. A different tier from the category pages, and the one place a

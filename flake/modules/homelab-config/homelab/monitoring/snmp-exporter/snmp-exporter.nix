@@ -19,13 +19,48 @@
 # config itself (--config.expand-environment-variables, added by
 # `environmentFile`).
 #
-# Not yet: QNAP's enterprise tables (disk status and temperature, volume
-# status, fans). Their OIDs come from the NAS's own MIB (Control Panel ->
-# SNMP -> download MIB), not from memory. Generate a module from it with
-# snmp_exporter's generator, add it to `modules` below, and add the disk
-# alerts to qnap-alerts.nix.
+# QNAP's own tables come from the NAS's MIB (downloaded from Control Panel
+# -> SNMP, "QTS-MIB" v2.0, enterprise 55062, branch qutshero = .2): the
+# OIDs below are copied from it, not from memory, and the older 24681 tree
+# is not what this MIB describes. Not yet verified against the running
+# NAS; the first thing to check after a switch is that
+# `storagepoolStatus` appears at all (qnap-alerts.nix alerts if it doesn't).
+# Status columns the MIB types as free text (diskStatus, raidStatus) come
+# out as info metrics whose label is the NAS's own string; qnap-alerts.nix
+# has no rule on them until a real value has been seen.
 {
-    nixos = { config, ... }: {
+    nixos = { config, lib, ... }: let
+        # QTS-MIB: enterprises.qnap(55062).qutshero(2); storage = .10,
+        # system = .12.
+        storage = "1.3.6.1.4.1.55062.2.10";
+        system  = "1.3.6.1.4.1.55062.2.12";
+
+        scalar = name: oid: {
+            inherit name oid;
+            type = "gauge";
+            help = "${name} - ${oid}";
+        };
+
+        # One column of a table: `idx` is the index label, `lookup` an
+        # optional { name, oid } text column that becomes a label.
+        column = { idx, lookup ? null }: { name, oid, type ? "gauge" }: {
+            inherit name oid type;
+            help    = "${name} - ${oid}";
+            indexes = [ { labelname = idx; type = "gauge"; } ];
+        } // lib.optionalAttrs (lookup != null) {
+            lookups = [ {
+                labels    = [ idx ];
+                labelname = lookup.name;
+                inherit (lookup) oid;
+                type      = "DisplayString";
+            } ];
+        };
+
+        disk = column { idx = "diskIndex"; lookup = { name = "diskModel"; oid = "${storage}.2.1.4"; }; };
+        raid = column { idx = "raidIndex"; lookup = { name = "raidName";  oid = "${storage}.5.1.3"; }; };
+        pool = column { idx = "storagepoolIndex"; };
+        fan  = column { idx = "sysFanIndex"; lookup = { name = "sysFanDescr"; oid = "${system}.9.1.2"; }; };
+    in {
         # Root-owned (the default): the unit reads it as root.
         sops.secrets.snmp-exporter-env = { };
 
@@ -55,6 +90,14 @@
                         "1.3.6.1.2.1.1.3"          # sysUpTime
                         "1.3.6.1.2.1.25.2.3.1"     # hrStorageTable
                         "1.3.6.1.2.1.31.1.1.1"     # ifXTable
+                        "${storage}.2"             # diskTable
+                        "${storage}.5"             # raidTable
+                        "${storage}.7"             # storagepoolTable
+                        "${system}.9"              # systemFanTable
+                        "${system}.10"             # cpuTemperature
+                        "${system}.11"             # systemTemperature
+                        "${system}.12"             # systemCPU-Usage
+                        "${system}.19"             # sysPowerStatus
                     ];
                     metrics = [
                         {
@@ -94,6 +137,36 @@
                     }) [
                         { name = "ifHCInOctets";  oid = "1.3.6.1.2.1.31.1.1.1.6"; }
                         { name = "ifHCOutOctets"; oid = "1.3.6.1.2.1.31.1.1.1.10"; }
+                    ]
+                    # QTS-MIB, from here down.
+                    ++ map disk [
+                        { name = "diskStatus";      oid = "${storage}.2.1.7"; type = "DisplayString"; }
+                        { name = "diskTemperature"; oid = "${storage}.2.1.8"; }
+                        { name = "diskCapacity";    oid = "${storage}.2.1.9"; }
+                    ]
+                    ++ map raid [
+                        { name = "raidStatus";   oid = "${storage}.5.1.4"; type = "DisplayString"; }
+                        { name = "raidCapacity"; oid = "${storage}.5.1.5"; }
+                        { name = "raidLevel";    oid = "${storage}.5.1.7"; type = "DisplayString"; }
+                    ]
+                    # storagepoolStatus: negative is error, not ready or
+                    # warning; 0 is ready; positive values are working
+                    # states such as scrubbing (the MIB lists both the QuTS
+                    # and QuTS hero meanings).
+                    ++ map pool [
+                        { name = "storagepoolCapacity"; oid = "${storage}.7.1.3"; }
+                        { name = "storagepoolFreeSize"; oid = "${storage}.7.1.4"; }
+                        { name = "storagepoolStatus";   oid = "${storage}.7.1.5"; }
+                    ]
+                    ++ map fan [
+                        { name = "sysFanSpeed"; oid = "${system}.9.1.3"; }
+                    ]
+                    ++ [
+                        (scalar "cpuTemperature"    "${system}.10")
+                        (scalar "systemTemperature" "${system}.11")
+                        (scalar "systemCPUUsage"    "${system}.12")
+                        # failed = -1, ok = 0
+                        (scalar "sysPowerStatus"    "${system}.19")
                     ];
                 };
             };
