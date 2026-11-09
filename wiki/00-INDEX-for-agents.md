@@ -29,7 +29,8 @@ root holds only entry points.
   and [`categories/`](config-structure/categories/00-INDEX.md), one page per category.
 - [`fleet/`](fleet/) — the machines: [hosts](fleet/hosts.md),
   [disk formatting](fleet/disk-formatting.md),
-  [name resolution](fleet/name-resolution.md), [durandal gaming](fleet/durandal-gaming.md).
+  [name resolution](fleet/name-resolution.md), [managing the tailnet](fleet/tailnet.md),
+  [durandal gaming](fleet/durandal-gaming.md).
 - [`ssh/`](ssh/) — SSH access to the fleet:
   [minting a YubiKey SSH key](ssh/minting-yubikey-ssh-keys.md).
 - [`upkeep-and-admin/`](upkeep-and-admin/) — recurring chores:
@@ -67,6 +68,7 @@ root holds only entry points.
 | add a host, or format its disk | [fleet/disk-formatting-for-agents.md](fleet/disk-formatting-for-agents.md), skill `new-host-config` |
 | check credential expiry | [upkeep-and-admin/maintenance-schedule-for-agents.md](upkeep-and-admin/maintenance-schedule-for-agents.md), skill `maintenance-schedule` |
 | run the fleet's periodic upkeep | [maintenance.md § Quick facts](upkeep-and-admin/maintenance.md#quick-facts) |
+| change tailnet access (a port times out, a tag, the policy) | [fleet/tailnet.md § Quick facts](fleet/tailnet.md#quick-facts) |
 | work out which name/IP answers for what | [name-resolution.md § Quick facts](fleet/name-resolution.md#quick-facts) |
 | create a YubiKey SSH key and authorize it | [ssh/minting-yubikey-ssh-keys.md § Quick facts](ssh/minting-yubikey-ssh-keys.md#quick-facts) |
 | reach or debug a cube service | [homelab/reaching-services.md § Quick facts](homelab/reaching-services.md#quick-facts) |

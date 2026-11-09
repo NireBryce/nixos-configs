@@ -7,6 +7,10 @@
 # prometheus.nix's `qnap` job. Standard MIBs only so far; QNAP's own disk
 # and volume tables wait on the NAS's MIB file (see "Not yet" below).
 #
+# Reaching the NAS needs `udp:161` in the tailnet policy's grant from
+# tag:homelab-cube to ts-hive (reverse-proxy/tailscale-services/
+# acl-diff-applied.hujson); without it the poll times out.
+#
 # Credentials are not in the Nix store. The sops key `snmp-exporter-env`
 # (secrets.yaml) holds an env file as a multi-line string:
 #     snmp-exporter-env: |

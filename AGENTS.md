@@ -68,6 +68,31 @@ secret in the file: never run it into the conversation or a pipe, and
 values twice. Skill `secrets-hygiene`; enrolled hosts:
 `.agents/rules/secrets.md`.
 
+## Network
+
+**This fleet is tailnet-first.** Hosts reach each other, the NAS (`ts-hive`)
+and cube's web services over Tailscale (tailnet `moose-micro.ts.net`); the
+LAN is the fallback. Assume the tailnet unless a task says otherwise, and
+check it before the LAN when a connection fails.
+
+- Two layers decide whether a tailnet connection works: the tailnet
+  policy's grants, then the destination's firewall. On NixOS hosts
+  `tailscale0` is a trusted interface, so the grant alone decides which
+  ports a tailnet device can reach.
+- A port with no grant is dropped, not refused: a timeout while `tailscale
+  ping` works means a missing grant. A new service on a tailnet device needs
+  its port in the grant in the same change.
+- The policy lives in Tailscale's control plane. The file in the repo
+  (`acl-diff-applied.hujson`) records what was applied; editing it changes
+  nothing live. Apply it with `just tailscale-acl apply <file>`, which needs
+  the sops key `tailscale_api_token` and may not run in an agent session:
+  say so and let the user run it.
+- Tagged devices (`nire-cube`) are not in `autogroup:members`. A tag and its
+  grants are one change.
+- Name a device `ts-<x>`; `nire-<x>` is only its hostname.
+
+Everything above, with the diagnosis table: `wiki/fleet/tailnet.md`.
+
 ## State
 
 **Switch/boot state is not recorded in this repo**, because it goes stale.
@@ -151,6 +176,8 @@ command that touches it, from `.agents/lessons-map.toml`.
 - Scripts and recipes: no Python buried in bash — `.agents/rules/scripts.md`.
 - Agent settings, guard hooks, `permissions.allow` —
   `.agents/rules/agent-config.md`.
+- Tailnet access, tags, the policy file, a port that times out —
+  `wiki/fleet/tailnet.md`.
 - Wiki pages: pairs, Quick facts, the siblings check —
   `.agents/rules/wiki.md`.
 

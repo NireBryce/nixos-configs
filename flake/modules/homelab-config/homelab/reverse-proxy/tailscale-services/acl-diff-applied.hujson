@@ -124,10 +124,13 @@
 		// autogroup:members grant covers it as a SOURCE (README, the
 		// 2026-09-14 section). Missing from 2026-09-07 (the tag) until
 		// 2026-09-26: every nightly backup failed "connect to host ts-hive".
+		// Plus udp:161: cube's snmp-exporter polls the NAS over SNMP
+		// (monitoring/snmp-exporter). Without it the poll times out while
+		// `tailscale ping` still works.
 		{
 			"src": ["tag:homelab-cube"],
 			"dst": ["ts-hive"],
-			"ip":  ["tcp:22"],
+			"ip":  ["tcp:22", "udp:161"],
 		},
 		{
 			"src": ["autogroup:members"],

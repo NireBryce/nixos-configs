@@ -72,7 +72,8 @@ root holds only entry points.
   and [`categories/`](config-structure/categories/00-INDEX.md), one page per category.
 - [`fleet/`](fleet/) — the machines: [hosts](fleet/hosts.md),
   [disk formatting](fleet/disk-formatting.md),
-  [name resolution](fleet/name-resolution.md), [durandal gaming](fleet/durandal-gaming.md),
+  [name resolution](fleet/name-resolution.md), [managing the tailnet](fleet/tailnet.md),
+  [durandal gaming](fleet/durandal-gaming.md),
   [FHS environments](fleet/fhs-environments.md).
 - [`ssh/`](ssh/) — SSH access to the fleet:
   [minting a YubiKey SSH key](ssh/minting-yubikey-ssh-keys.md).
