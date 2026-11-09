@@ -1,12 +1,12 @@
 # `monitoring`, for agents
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-11-08_
 
-_Sibling reviewed: 2026-10-22 -- source fix was a file-name correction (the `trustedInterfaces` rule is in `networking.nix`); this page names no file for it_
+_Sibling reviewed: 2026-11-08 -- alerts moved from Grafana rules to Prometheus rules + Alertmanager; QNAP SNMP added_
 
 Condensed from [monitoring.md](monitoring.md).
 
-Prometheus + Grafana on `nire-cube`. Added 2026-08-23, nested under
+Prometheus + Alertmanager + Grafana on `nire-cube`. Added 2026-08-23, nested under
 `homelab` 2026-08-27. Reached at `https://grafana.moose-micro.ts.net/`
 since 2026-09-07; the old `.../grafana/` path 404s.
 
@@ -22,7 +22,10 @@ on loopback**:
 | `libvirt-exporter/libvirt-exporter.nix` | libvirt/QEMU guests via `qemu:///system` | **overrides `group` to `libvirtd`** — its default group can't read `/run/libvirt/libvirt-sock` and it then serves an empty metrics page instead of failing |
 | `smartctl-exporter/smartctl-exporter.nix` | per-disk SMART/NVMe wear (health, percentage used, media errors, temperature) | added 2026-09-21; `devices` left `[]` (autodiscover). **No dashboard panel yet** — `smartctl_device_*` metric names weren't confirmed against live `/metrics` before landing this; check that on cube first |
 | `prometheus/prometheus.nix` | the exporters above, over loopback | |
-| `runner-alerts/runner-alerts.nix` | textfile metrics (`/var/lib/node-exporter-textfile`: `forge_runner_egress_dropped_packets_total{reason}`, `forge_runner_dns_refused_5m`, cycle gauges from actions-runner.nix) + systemd collector (unit-include: forge-runner-cycle, vm-egress-dns, libvirt-vm-forge-runner) | provisioned Grafana alert rules: those in folder `forge-runner`, plus `cube-root-disk-low` (folder `cube`, low free space on /); datasource UID looked up from grafana.nix's provisioned datasources; checked by loading the built provisioning into Grafana 13.1.6 locally |
+| `runner-alerts/runner-alerts.nix` | textfile metrics (`/var/lib/node-exporter-textfile`: `forge_runner_egress_dropped_packets_total{reason}`, `forge_runner_dns_refused_5m`, cycle gauges from actions-runner.nix) + systemd collector (unit-include: forge-runner-cycle, vm-egress-dns, libvirt-vm-forge-runner) | Prometheus alert rules (areas `forge-runner`, `cube`; `cube` is low free space on /); were Grafana-provisioned rules until 2026-11-08, ported to PromQL with `absent()` where the old rule alerted on no data. Rules pass promtool in the build; not yet runtime-verified |
+| `snmp-exporter/snmp-exporter.nix` | `ts-hive` QNAP over SNMPv3 (SHA, DES), `qnap` job in prometheus.nix | standard MIBs only; QNAP disk/volume tables need the NAS's MIB. Credentials in sops key `snmp-exporter-env` (multi-line env file); activation fails until the key is in secrets.yaml. Build runs `snmp_exporter --dry-run`; not runtime-verified, the NAS was never queried |
+| `qnap-alerts/qnap-alerts.nix` | — | rules `QnapUnreachable`, `QnapVolumeAlmostFull`; the volume rule's `hrStorageDescr=~"/share/.*"` is a guess |
+| `alertmanager/alertmanager.nix` | — | loopback; `default` receiver has no channel, so nothing is sent yet; Grafana views it via the `alertmanager-cube` datasource |
 | `grafana/grafana.nix` | — | the only off-host-facing piece. Ships provisioned dashboards: `nire-cube-overview.json` and `roundtrip-check.json` (the export-verification artifact) |
 
 `grafana/_dashboards/` is underscore-prefixed because `import-tree` ignores

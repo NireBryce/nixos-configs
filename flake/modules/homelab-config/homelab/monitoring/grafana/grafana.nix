@@ -132,6 +132,17 @@ in {
                         url       = "http://${config.services.prometheus.listenAddress}:${toString config.services.prometheus.port}"; # prometheus.nix, over loopback
                         isDefault = true;
                     }
+                    {
+                        # Alerts come from Prometheus rules through
+                        # Alertmanager (alertmanager.nix); this is the
+                        # view and silence UI, not a rule source.
+                        name   = "Alertmanager";
+                        uid    = "alertmanager-cube";
+                        type   = "alertmanager";
+                        access = "proxy";
+                        url    = "http://${config.services.prometheus.alertmanager.listenAddress}:${toString config.services.prometheus.alertmanager.port}"; # alertmanager.nix, over loopback
+                        jsonData.implementation = "prometheus";
+                    }
                 ];
 
                 dashboards.settings.providers = [

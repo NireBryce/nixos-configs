@@ -118,7 +118,7 @@ flowchart LR
         n19("<b>tenacity/</b><br/><i>n h · 10</i>")
     end
     subgraph g3["homelab-config"]
-        n15("<b>homelab/</b><br/><i>n · 19</i>")
+        n15("<b>homelab/</b><br/><i>n · 22</i>")
     end
     subgraph g4["hardware-config"]
         n13("<b>hardware/</b><br/><i>n · 8</i>")

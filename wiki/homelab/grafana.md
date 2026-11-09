@@ -1,6 +1,6 @@
 # Using Grafana
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-11-08_
 
 Grafana on `nire-cube` shows the metrics
 [monitoring](../config-structure/categories/monitoring.md) collects. This page covers signing
@@ -80,10 +80,15 @@ real UI export**, so expect to correct it the first time someone tries.
 
 ## Alerts
 
-**Alerting → Alert rules** has provisioned rules. Folder `cube` holds
-cube's root filesystem under 10% free. Folder `forge-runner` holds the rules
-about the Forgejo runner VM. All are defined in
-`monitoring/runner-alerts/runner-alerts.nix`:
+Alert rules are Prometheus rules, not Grafana rules. Grafana is the view:
+**Alerting → Active notifications** reads Alertmanager through the
+`Alertmanager` datasource, and silences made there go to Alertmanager. The
+rules are in `monitoring/runner-alerts/runner-alerts.nix` (the Forgejo
+runner VM, and cube's root filesystem under 10% free) and
+`monitoring/qnap-alerts/qnap-alerts.nix` (the `ts-hive` NAS). Change a rule
+in those files; there is nothing to edit in the UI.
+
+The runner rules cover:
 
 - a job connecting outside the egress allowlist;
 - a job connecting to a private or tailnet range;
@@ -92,9 +97,8 @@ about the Forgejo runner VM. All are defined in
 - the runner cycle or its DNS resolver not running.
 
 Each rule's description says where to look next, usually a `journalctl`
-command on cube. Provisioned rules can't be edited in the UI; change them
-in that file. Which contact point receives them is set under
-**Alerting → Contact points**.
+command on cube. Where notifications go is the receiver in
+`monitoring/alertmanager/alertmanager.nix`; it has none yet.
 
 ## What's backed up
 
